@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useContext, useEffect, useCallback, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSwitch } from '@elastic/eui';
 import { JobCreatorContext } from '../../../job_creator_context';
 import { AdvancedJobCreator, CategorizationJobCreator } from '../../../../../common/job_creator';
@@ -25,6 +25,7 @@ export const CategorizationPerPartitionSwitch: FC = () => {
 
   useEffect(() => {
     setEnablePerPartitionCategorization(jobCreator.perPartitionCategorization);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdated]);
 
   useEffect(() => {
@@ -35,6 +36,7 @@ export const CategorizationPerPartitionSwitch: FC = () => {
 
     jobCreator.perPartitionCategorization = enablePerPartitionCategorization;
     jobCreatorUpdate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [enablePerPartitionCategorization]);
 
   return (

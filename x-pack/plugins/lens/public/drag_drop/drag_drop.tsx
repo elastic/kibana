@@ -11,6 +11,7 @@ import type { KeyboardEvent, ReactElement } from 'react';
 import classNames from 'classnames';
 import { keys, EuiScreenReaderOnly, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
+import { trackUiCounterEvents } from '../lens_ui_telemetry';
 import {
   DragDropIdentifier,
   DropIdentifier,
@@ -23,7 +24,6 @@ import {
   announce,
   Ghost,
 } from './providers';
-import { trackUiEvent } from '../lens_ui_telemetry';
 import { DropType } from '../types';
 
 export type DroppableEvent = React.DragEvent<HTMLElement>;
@@ -274,21 +274,37 @@ const DragInner = memo(function DragInner({
   );
   const modifierHandlers = useMemo(() => {
     const onKeyUp = (e: KeyboardEvent<HTMLButtonElement>) => {
-      if ((e.key === 'Shift' || e.key === 'Alt') && activeDropTarget?.id) {
+      e.preventDefault();
+      if (activeDropTarget?.id && ['Shift', 'Alt', 'Control'].includes(e.key)) {
         if (e.altKey) {
           setTargetOfIndex(activeDropTarget.id, 1);
         } else if (e.shiftKey) {
           setTargetOfIndex(activeDropTarget.id, 2);
+        } else if (e.ctrlKey) {
+          // the control option is available either for new or existing cases,
+          // so need to offset based on some flags
+          const offsetIndex =
+            Number(activeDropTarget.humanData.canSwap) +
+            Number(activeDropTarget.humanData.canDuplicate);
+          setTargetOfIndex(activeDropTarget.id, offsetIndex + 1);
         } else {
           setTargetOfIndex(activeDropTarget.id, 0);
         }
       }
     };
     const onKeyDown = (e: KeyboardEvent<HTMLButtonElement>) => {
+      e.preventDefault();
       if (e.key === 'Alt' && activeDropTarget?.id) {
         setTargetOfIndex(activeDropTarget.id, 1);
       } else if (e.key === 'Shift' && activeDropTarget?.id) {
         setTargetOfIndex(activeDropTarget.id, 2);
+      } else if (e.key === 'Control' && activeDropTarget?.id) {
+        // the control option is available either for new or existing cases,
+        // so need to offset based on some flags
+        const offsetIndex =
+          Number(activeDropTarget.humanData.canSwap) +
+          Number(activeDropTarget.humanData.canDuplicate);
+        setTargetOfIndex(activeDropTarget.id, offsetIndex + 1);
       }
     };
     return { onKeyDown, onKeyUp };
@@ -360,6 +376,8 @@ const DragInner = memo(function DragInner({
       setTargetOfIndex(nextTarget.id, 1);
     } else if (e.shiftKey && nextTarget?.id) {
       setTargetOfIndex(nextTarget.id, 2);
+    } else if (e.ctrlKey && nextTarget?.id) {
+      setTargetOfIndex(nextTarget.id, 3);
     } else {
       setTarget(nextTarget, true);
     }
@@ -367,7 +385,7 @@ const DragInner = memo(function DragInner({
 
   const dropToActiveDropTarget = () => {
     if (activeDropTarget) {
-      trackUiEvent('drop_total');
+      trackUiCounterEvents('drop_total');
       const { dropType, humanData, onDrop: onTargetDrop } = activeDropTarget;
       setTimeout(() => setA11yMessage(announce.dropped(value.humanData, humanData, dropType)));
       onTargetDrop(value, dropType);
@@ -394,7 +412,7 @@ const DragInner = memo(function DragInner({
           aria-describedby={ariaDescribedBy || `lnsDragDrop-keyboardInstructions`}
           className="lnsDragDrop__keyboardHandler"
           data-test-subj="lnsDragDrop-keyboardHandler"
-          onBlur={() => {
+          onBlur={(e) => {
             if (activeDraggingProps) {
               dragEnd();
             }
@@ -517,6 +535,8 @@ const DropsInner = memo(function DropsInner(props: DropsInnerProps) {
         return dropTypes[1];
       } else if (e.shiftKey && dropTypes[2]) {
         return dropTypes[2];
+      } else if (e.ctrlKey && (dropTypes.length > 3 ? dropTypes[3] : dropTypes[1])) {
+        return dropTypes.length > 3 ? dropTypes[3] : dropTypes[1];
       }
     }
     return dropType;
@@ -625,11 +645,9 @@ const DropsInner = memo(function DropsInner(props: DropsInnerProps) {
   return (
     <div
       data-test-subj="lnsDragDropContainer"
-      className={
-        isInZone || activeDropTarget?.id === value.id
-          ? 'lnsDragDrop__container lnsDragDrop__container-active'
-          : 'lnsDragDrop__container'
-      }
+      className={classNames('lnsDragDrop__container', {
+        'lnsDragDrop__container-active': isInZone || activeDropTarget?.id === value.id,
+      })}
       onDragEnter={dragEnter}
       ref={mainTargetRef}
     >
@@ -649,11 +667,9 @@ const DropsInner = memo(function DropsInner(props: DropsInnerProps) {
             gutterSize="none"
             direction="column"
             data-test-subj="lnsDragDropExtraDrops"
-            className={
-              isInZone || activeDropTarget?.id === value.id
-                ? 'lnsDragDrop__extraDrops lnsDragDrop__extraDrops-visible'
-                : 'lnsDragDrop__extraDrops'
-            }
+            className={classNames('lnsDragDrop__extraDrops', {
+              'lnsDragDrop__extraDrops-visible': isInZone || activeDropTarget?.id === value.id,
+            })}
           >
             {dropTypes.slice(1).map((dropType) => {
               const dropChildren = getCustomDropTarget?.(dropType);
@@ -703,13 +719,8 @@ const ReorderableDrag = memo(function ReorderableDrag(
     setReorderState,
   } = useContext(ReorderContext);
 
-  const {
-    value,
-    setActiveDropTarget,
-    activeDraggingProps,
-    reorderableGroup,
-    setA11yMessage,
-  } = props;
+  const { value, setActiveDropTarget, activeDraggingProps, reorderableGroup, setA11yMessage } =
+    props;
 
   const keyboardMode = activeDraggingProps?.keyboardMode;
   const activeDropTarget = activeDraggingProps?.activeDropTarget;
@@ -942,7 +953,7 @@ const ReorderableDrop = memo(function ReorderableDrop(
     setKeyboardMode(false);
 
     if (onDrop && dragging) {
-      trackUiEvent('drop_total');
+      trackUiCounterEvents('drop_total');
       onDrop(dragging, 'reorder');
       // setTimeout ensures it will run after dragEnd messaging
       setTimeout(() =>

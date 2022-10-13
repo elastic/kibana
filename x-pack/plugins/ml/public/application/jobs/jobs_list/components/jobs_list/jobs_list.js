@@ -15,23 +15,23 @@ import { toLocaleString } from '../../../../util/string_utils';
 import { ResultLinks, actionsMenuContent } from '../job_actions';
 import { JobDescription } from './job_description';
 import { JobIcon } from '../../../../components/job_message_icon';
-import { JobSpacesList } from '../../../../components/job_spaces_list';
 import { TIME_FORMAT } from '../../../../../../common/constants/time_format';
 
 import {
   EuiBasicTable,
   EuiButtonIcon,
-  EuiScreenReaderOnly,
   EuiIcon,
+  EuiScreenReaderOnly,
   EuiToolTip,
+  EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { AnomalyDetectionJobIdLink } from './job_id_link';
+import { isManagedJob } from '../../../jobs_utils';
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
 
-// 'isManagementTable' bool prop to determine when to configure table for use in Kibana management page
 export class JobsList extends Component {
   constructor(props) {
     super(props);
@@ -102,9 +102,9 @@ export class JobsList extends Component {
   }
 
   render() {
-    const { loading, isManagementTable, spacesApi } = this.props;
+    const { loading } = this.props;
     const selectionControls = {
-      selectable: (job) => job.deleting !== true,
+      selectable: (job) => job.blocked === undefined,
       selectableMessage: (selectable, rowItem) =>
         selectable === false
           ? i18n.translate('xpack.ml.jobsList.cannotSelectRowForJobMessage', {
@@ -137,10 +137,11 @@ export class JobsList extends Component {
             </p>
           </EuiScreenReaderOnly>
         ),
+        'data-test-subj': 'mlJobListColumnExpand',
         render: (item) => (
           <EuiButtonIcon
             onClick={() => this.toggleRow(item)}
-            isDisabled={item.deleting === true}
+            isDisabled={item.blocked !== undefined}
             iconType={this.state.itemIdToExpandedRowMap[item.id] ? 'arrowDown' : 'arrowRight'}
             aria-label={
               this.state.itemIdToExpandedRowMap[item.id]
@@ -169,10 +170,33 @@ export class JobsList extends Component {
         truncateText: false,
         width: '15%',
         scope: 'row',
-        render: isManagementTable ? (id) => this.getJobIdLink(id) : undefined,
+        render: (id, item) => {
+          if (!isManagedJob(item)) return id;
+
+          return (
+            <>
+              <span>
+                {id} &nbsp;
+                <EuiToolTip
+                  content={i18n.translate('xpack.ml.jobsList.managedBadgeTooltip', {
+                    defaultMessage:
+                      'This job is preconfigured and managed by Elastic; other parts of the product might have might have dependencies on its behavior.',
+                  })}
+                >
+                  <EuiBadge color="hollow" data-test-subj="mlJobListRowManagedLabel" size="xs">
+                    {i18n.translate('xpack.ml.jobsList.managedBadgeLabel', {
+                      defaultMessage: 'Managed',
+                    })}
+                  </EuiBadge>
+                </EuiToolTip>
+              </span>
+            </>
+          );
+        },
       },
       {
         field: 'auditMessage',
+        'data-test-subj': 'mlJobListColumnIcons',
         name: (
           <EuiScreenReaderOnly>
             <p>
@@ -187,6 +211,7 @@ export class JobsList extends Component {
       },
       {
         field: 'alertingRules',
+        'data-test-subj': 'mlJobListColumnAlertingRuleIndicator',
         name: (
           <EuiScreenReaderOnly>
             <p>
@@ -224,9 +249,7 @@ export class JobsList extends Component {
         sortable: true,
         field: 'description',
         'data-test-subj': 'mlJobListColumnDescription',
-        render: (description, item) => (
-          <JobDescription job={item} isManagementTable={isManagementTable} />
-        ),
+        render: (description, item) => <JobDescription job={item} />,
         textOnly: true,
         width: '20%',
       },
@@ -273,39 +296,6 @@ export class JobsList extends Component {
         width: '8%',
       },
       {
-        name: i18n.translate('xpack.ml.jobsList.actionsLabel', {
-          defaultMessage: 'Actions',
-        }),
-        render: (item) => <ResultLinks jobs={[item]} />,
-        width: '8%',
-      },
-    ];
-
-    if (isManagementTable === true) {
-      if (spacesApi) {
-        // insert before last column
-        columns.splice(columns.length - 1, 0, {
-          name: i18n.translate('xpack.ml.jobsList.spacesLabel', {
-            defaultMessage: 'Spaces',
-          }),
-          render: (item) => (
-            <JobSpacesList
-              spacesApi={spacesApi}
-              spaceIds={item.spaceIds}
-              jobId={item.id}
-              jobType="anomaly-detector"
-              refresh={this.props.refreshJobs}
-            />
-          ),
-        });
-      }
-      // Remove actions if Ml not enabled in current space
-      if (this.props.isMlEnabledInSpace === false) {
-        columns.pop();
-      }
-    } else {
-      // insert before last column
-      columns.splice(columns.length - 1, 0, {
         name: i18n.translate('xpack.ml.jobsList.latestTimestampLabel', {
           defaultMessage: 'Latest timestamp',
         }),
@@ -322,8 +312,8 @@ export class JobsList extends Component {
         ),
         textOnly: true,
         width: '15%',
-      });
-      columns.push({
+      },
+      {
         name: (
           <EuiScreenReaderOnly>
             <p>
@@ -334,16 +324,27 @@ export class JobsList extends Component {
             </p>
           </EuiScreenReaderOnly>
         ),
+        render: (item) => <ResultLinks jobs={[item]} />,
+        width: '64px',
+      },
+      {
+        name: i18n.translate('xpack.ml.jobsList.actionsLabel', {
+          defaultMessage: 'Actions',
+        }),
         actions: actionsMenuContent(
           this.props.showEditJobFlyout,
+          this.props.showDatafeedChartFlyout,
           this.props.showDeleteJobModal,
+          this.props.showResetJobModal,
           this.props.showStartDatafeedModal,
+          this.props.showCloseJobsConfirmModal,
+          this.props.showStopDatafeedsConfirmModal,
           this.props.refreshJobs,
           this.props.showCreateAlertFlyout
         ),
-        width: '40px',
-      });
-    }
+        width: '5%',
+      },
+    ];
 
     const { pageIndex, pageSize, sortField, sortDirection } = this.props.jobsViewState;
 
@@ -389,7 +390,7 @@ export class JobsList extends Component {
         columns={columns}
         pagination={pagination}
         onChange={this.onTableChange}
-        selection={isManagementTable ? undefined : selectionControls}
+        selection={selectionControls}
         itemIdToExpandedRowMap={this.state.itemIdToExpandedRowMap}
         isExpandable={true}
         sorting={sorting}
@@ -404,15 +405,17 @@ export class JobsList extends Component {
 JobsList.propTypes = {
   jobsSummaryList: PropTypes.array.isRequired,
   fullJobsList: PropTypes.object.isRequired,
-  isManagementTable: PropTypes.bool,
   isMlEnabledInSpace: PropTypes.bool,
   itemIdToExpandedRowMap: PropTypes.object.isRequired,
   toggleRow: PropTypes.func.isRequired,
   selectJobChange: PropTypes.func.isRequired,
   showEditJobFlyout: PropTypes.func,
+  showDatafeedChartFlyout: PropTypes.func,
   showDeleteJobModal: PropTypes.func,
   showStartDatafeedModal: PropTypes.func,
+  showCloseJobsConfirmModal: PropTypes.func,
   showCreateAlertFlyout: PropTypes.func,
+  showStopDatafeedsConfirmModal: PropTypes.func,
   refreshJobs: PropTypes.func,
   selectedJobsCount: PropTypes.number.isRequired,
   loading: PropTypes.bool,
@@ -420,7 +423,6 @@ JobsList.propTypes = {
   onJobsViewStateUpdate: PropTypes.func,
 };
 JobsList.defaultProps = {
-  isManagementTable: false,
   isMlEnabledInSpace: true,
   loading: false,
 };

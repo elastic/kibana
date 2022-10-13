@@ -6,14 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectDecoratorFactory } from '../../../saved_objects/public';
+import { SavedObjectDecoratorFactory } from '@kbn/saved-objects-plugin/public';
 import { InternalTagDecoratedSavedObject } from './types';
 import { decorateConfig } from './decorate_config';
 import { decorateObject } from './decorate_object';
 
 export const decoratorId = 'tag';
 
-export const tagDecoratorFactory: SavedObjectDecoratorFactory<InternalTagDecoratedSavedObject> = () => {
+export const tagDecoratorFactory: SavedObjectDecoratorFactory<
+  InternalTagDecoratedSavedObject
+> = () => {
   return {
     getId: () => decoratorId,
     decorateConfig,

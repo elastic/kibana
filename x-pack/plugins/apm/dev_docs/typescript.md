@@ -4,8 +4,8 @@ Kibana and X-Pack are very large TypeScript projects, and it comes at a cost. Ed
 
 To run the optimization:
 
-`$ node x-pack/plugins/apm/scripts/optimize-tsconfig`
+`$ node x-pack/plugins/apm/scripts/optimize_tsconfig`
 
 To undo the optimization:
 
-`$ node x-pack/plugins/apm/scripts/unoptimize-tsconfig`
+`$ node x-pack/plugins/apm/scripts/unoptimize_tsconfig`

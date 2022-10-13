@@ -6,14 +6,14 @@
  */
 
 import { get } from 'lodash';
-import { ElasticsearchClient } from '../../../../../../../../src/core/server';
-import { readIndex } from '../../index/read_index';
+import { readIndex } from '@kbn/securitysolution-es-utils';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
 export const getIndexVersion = async (
   esClient: ElasticsearchClient,
   index: string
 ): Promise<number> => {
-  const { body: indexAlias } = await esClient.indices.getAlias({
+  const indexAlias = await esClient.indices.getAlias({
     index,
   });
   const writeIndex = Object.keys(indexAlias).find(

@@ -6,12 +6,12 @@
  */
 
 import { flow } from 'fp-ts/lib/function';
-import { addIdToItem, removeIdFromItem } from '../../../../../common/add_remove_id_to_item';
-import {
+import { addIdToItem, removeIdFromItem } from '@kbn/securitysolution-utils';
+import type {
   CreateRulesSchema,
   UpdateRulesSchema,
 } from '../../../../../common/detection_engine/schemas/request';
-import { Rule } from './types';
+import type { Rule } from './types';
 
 // These are a collection of transforms that are UI specific and useful for UI concerns
 // that are inserted between the API and the actual user interface. In some ways these

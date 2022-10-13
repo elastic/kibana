@@ -5,15 +5,16 @@
  * 2.0.
  */
 
+import { transformError } from '@kbn/securitysolution-es-utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
 import { TIMELINE_FAVORITE_URL } from '../../../../../../common/constants';
 
-import { SetupPlugins } from '../../../../../plugin';
+import type { SetupPlugins } from '../../../../../plugin';
 import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
-import { ConfigType } from '../../../../..';
+import type { ConfigType } from '../../../../..';
 
-import { transformError, buildSiemResponse } from '../../../../detection_engine/routes/utils';
+import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../../utils/common';
 import { persistFavorite } from '../../../saved_object/timelines';
@@ -40,12 +41,8 @@ export const persistFavoriteRoute = (
 
       try {
         const frameworkRequest = await buildFrameworkRequest(context, security, request);
-        const {
-          timelineId,
-          templateTimelineId,
-          templateTimelineVersion,
-          timelineType,
-        } = request.body;
+        const { timelineId, templateTimelineId, templateTimelineVersion, timelineType } =
+          request.body;
 
         const timeline = await persistFavorite(
           frameworkRequest,

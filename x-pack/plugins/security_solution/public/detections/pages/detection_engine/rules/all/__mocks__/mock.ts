@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { esFilters } from '../../../../../../../../../../src/plugins/data/public';
-import { Rule, RuleError } from '../../../../../containers/detection_engine/rules';
-import { AboutStepRule, ActionsStepRule, DefineStepRule, ScheduleStepRule } from '../../types';
-import { FieldValueQueryBar } from '../../../../../components/rules/query_bar';
+import { FilterStateStore } from '@kbn/es-query';
+import type { Rule } from '../../../../../containers/detection_engine/rules';
+import type { AboutStepRule, ActionsStepRule, DefineStepRule, ScheduleStepRule } from '../../types';
+import { DataSourceType } from '../../types';
+import type { FieldValueQueryBar } from '../../../../../components/rules/query_bar';
 import { fillEmptySeverityMappings } from '../../helpers';
 import { getThreatMock } from '../../../../../../../common/detection_engine/schemas/types/threat.mock';
 
@@ -20,7 +21,7 @@ export const mockQueryBar: FieldValueQueryBar = {
   filters: [
     {
       $state: {
-        store: esFilters.FilterStateStore.GLOBAL_STATE,
+        store: FilterStateStore.GLOBAL_STATE,
       },
       meta: {
         alias: null,
@@ -70,6 +71,9 @@ export const mockRule = (id: string): Rule => ({
   timeline_id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
   timeline_title: 'Untitled timeline',
   meta: { from: '0m' },
+  related_integrations: [],
+  required_fields: [],
+  setup: '',
   severity: 'low',
   severity_mapping: [],
   updated_by: 'elastic',
@@ -94,7 +98,7 @@ export const mockRuleWithEverything = (id: string): Rule => ({
   filters: [
     {
       $state: {
-        store: esFilters.FilterStateStore.GLOBAL_STATE,
+        store: FilterStateStore.GLOBAL_STATE,
       },
       meta: {
         alias: null,
@@ -133,6 +137,9 @@ export const mockRuleWithEverything = (id: string): Rule => ({
   timeline_id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
   timeline_title: 'Titled timeline',
   meta: { from: '0m' },
+  related_integrations: [],
+  required_fields: [],
+  setup: '',
   severity: 'low',
   severity_mapping: [],
   updated_by: 'elastic',
@@ -152,8 +159,11 @@ export const mockRuleWithEverything = (id: string): Rule => ({
   },
   throttle: 'no_actions',
   timestamp_override: 'event.ingested',
+  timestamp_override_fallback_disabled: false,
   note: '# this is some markdown documentation',
   version: 1,
+  new_terms_fields: ['host.name'],
+  history_window_start: 'now-7d',
 });
 
 // TODO: update types mapping
@@ -187,8 +197,11 @@ export const mockDefineStepRule = (): DefineStepRule => ({
   anomalyThreshold: 50,
   machineLearningJobId: [],
   index: ['filebeat-'],
+  dataViewId: undefined,
   queryBar: mockQueryBar,
   threatQueryBar: mockQueryBar,
+  requiredFields: [],
+  relatedIntegrations: [],
   threatMapping: [],
   timeline: {
     id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
@@ -203,6 +216,11 @@ export const mockDefineStepRule = (): DefineStepRule => ({
       value: '2',
     },
   },
+  eqlOptions: {},
+  dataSourceType: DataSourceType.IndexPatterns,
+  newTermsFields: ['host.ip'],
+  historyWindowSize: '7d',
+  shouldLoadQueryDynamically: false,
 });
 
 export const mockScheduleStepRule = (): ScheduleStepRule => ({
@@ -210,13 +228,3 @@ export const mockScheduleStepRule = (): ScheduleStepRule => ({
   from: '6m',
   to: 'now',
 });
-
-export const mockRuleError = (id: string): RuleError => ({
-  rule_id: id,
-  error: { status_code: 404, message: `id: "${id}" not found` },
-});
-
-export const mockRules: Rule[] = [
-  mockRule('abe6c564-050d-45a5-aaf0-386c37dd1f61'),
-  mockRule('63f06f34-c181-4b2d-af35-f2ace572a1ee'),
-];

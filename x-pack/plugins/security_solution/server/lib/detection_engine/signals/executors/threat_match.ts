@@ -5,76 +5,93 @@
  * 2.0.
  */
 
-import { SavedObject } from 'src/core/types';
-import { Logger } from 'src/core/server';
-import {
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
+import type {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertServices,
-} from '../../../../../../alerting/server';
-import { ListClient } from '../../../../../../lists/server';
-import { ExceptionListItemSchema } from '../../../../../common/shared_imports';
-import { RefreshTypes } from '../../types';
-import { getInputIndex } from '../get_input_output_index';
-import { RuleRangeTuple, AlertAttributes } from '../types';
-import { TelemetryEventsSender } from '../../../telemetry/sender';
-import { BuildRuleMessage } from '../rule_messages';
+  RuleExecutorServices,
+} from '@kbn/alerting-plugin/server';
+import type { ListClient } from '@kbn/lists-plugin/server';
+import type { Filter } from '@kbn/es-query';
+import type { RuleRangeTuple, BulkCreate, WrapHits } from '../types';
+import type { ITelemetryEventsSender } from '../../../telemetry/sender';
 import { createThreatSignals } from '../threat_mapping/create_threat_signals';
-import { ThreatRuleParams } from '../../schemas/rule_schemas';
+import type { CompleteRule, ThreatRuleParams } from '../../schemas/rule_schemas';
+import { withSecuritySpan } from '../../../../utils/with_security_span';
+import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../common/constants';
+import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 
 export const threatMatchExecutor = async ({
-  rule,
-  tuples,
+  inputIndex,
+  runtimeMappings,
+  completeRule,
+  tuple,
   listClient,
-  exceptionItems,
   services,
   version,
   searchAfterSize,
-  logger,
-  refresh,
+  ruleExecutionLogger,
   eventsTelemetry,
-  buildRuleMessage,
+  bulkCreate,
+  wrapHits,
+  primaryTimestamp,
+  secondaryTimestamp,
+  exceptionFilter,
+  unprocessedExceptions,
 }: {
-  rule: SavedObject<AlertAttributes<ThreatRuleParams>>;
-  tuples: RuleRangeTuple[];
+  inputIndex: string[];
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
+  completeRule: CompleteRule<ThreatRuleParams>;
+  tuple: RuleRangeTuple;
   listClient: ListClient;
-  exceptionItems: ExceptionListItemSchema[];
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   version: string;
   searchAfterSize: number;
-  logger: Logger;
-  refresh: RefreshTypes;
-  eventsTelemetry: TelemetryEventsSender | undefined;
-  buildRuleMessage: BuildRuleMessage;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
+  eventsTelemetry: ITelemetryEventsSender | undefined;
+  bulkCreate: BulkCreate;
+  wrapHits: WrapHits;
+  primaryTimestamp: string;
+  secondaryTimestamp?: string;
+  exceptionFilter: Filter | undefined;
+  unprocessedExceptions: ExceptionListItemSchema[];
 }) => {
-  const ruleParams = rule.attributes.params;
-  const inputIndex = await getInputIndex(services, version, ruleParams.index);
-  return createThreatSignals({
-    tuples,
-    threatMapping: ruleParams.threatMapping,
-    query: ruleParams.query,
-    inputIndex,
-    type: ruleParams.type,
-    filters: ruleParams.filters ?? [],
-    language: ruleParams.language,
-    savedId: ruleParams.savedId,
-    services,
-    exceptionItems,
-    listClient,
-    logger,
-    eventsTelemetry,
-    alertId: rule.id,
-    outputIndex: ruleParams.outputIndex,
-    ruleSO: rule,
-    searchAfterSize,
-    refresh,
-    threatFilters: ruleParams.threatFilters ?? [],
-    threatQuery: ruleParams.threatQuery,
-    threatLanguage: ruleParams.threatLanguage,
-    buildRuleMessage,
-    threatIndex: ruleParams.threatIndex,
-    threatIndicatorPath: ruleParams.threatIndicatorPath,
-    concurrentSearches: ruleParams.concurrentSearches ?? 1,
-    itemsPerSearch: ruleParams.itemsPerSearch ?? 9000,
+  const ruleParams = completeRule.ruleParams;
+
+  return withSecuritySpan('threatMatchExecutor', async () => {
+    return createThreatSignals({
+      alertId: completeRule.alertId,
+      bulkCreate,
+      completeRule,
+      concurrentSearches: ruleParams.concurrentSearches ?? 1,
+      eventsTelemetry,
+      filters: ruleParams.filters ?? [],
+      inputIndex,
+      itemsPerSearch: ruleParams.itemsPerSearch ?? 9000,
+      language: ruleParams.language,
+      listClient,
+      outputIndex: ruleParams.outputIndex,
+      query: ruleParams.query,
+      ruleExecutionLogger,
+      savedId: ruleParams.savedId,
+      searchAfterSize,
+      services,
+      threatFilters: ruleParams.threatFilters ?? [],
+      threatIndex: ruleParams.threatIndex,
+      threatIndicatorPath: ruleParams.threatIndicatorPath ?? DEFAULT_INDICATOR_SOURCE_PATH,
+      threatLanguage: ruleParams.threatLanguage,
+      threatMapping: ruleParams.threatMapping,
+      threatQuery: ruleParams.threatQuery,
+      tuple,
+      type: ruleParams.type,
+      wrapHits,
+      runtimeMappings,
+      primaryTimestamp,
+      secondaryTimestamp,
+      exceptionFilter,
+      unprocessedExceptions,
+    });
   });
 };

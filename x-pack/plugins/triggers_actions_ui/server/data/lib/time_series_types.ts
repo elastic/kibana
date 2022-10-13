@@ -11,15 +11,15 @@
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 
-import { parseDuration } from '../../../../alerting/server';
-import { MAX_INTERVALS } from '../index';
+import { parseDuration } from '@kbn/alerting-plugin/server';
+import { MAX_INTERVALS } from '..';
 import { CoreQueryParamsSchemaProperties, validateCoreQueryBody } from './core_query_types';
 import {
   getTooManyIntervalsErrorMessage,
   getDateStartAfterDateEndErrorMessage,
 } from './date_range_info';
 
-export { TimeSeriesResult, TimeSeriesResultRow, MetricResult } from '../../../common/data';
+export type { TimeSeriesResult, TimeSeriesResultRow, MetricResult } from '../../../common/data';
 
 // The parameters here are very similar to the alert parameters.
 // Missing are `comparator` and `threshold`, which aren't needed to generate
@@ -44,6 +44,13 @@ export const TimeSeriesQuerySchema = schema.object(
     validate: validateBody,
   }
 );
+
+export const TimeSeriesConditionSchema = schema.object({
+  resultLimit: schema.number(),
+  conditionScript: schema.string({ minLength: 1 }),
+});
+
+export type TimeSeriesCondition = TypeOf<typeof TimeSeriesConditionSchema>;
 
 // using direct type not allowed, circular reference, so body is typed to unknown
 function validateBody(anyParams: unknown): string | undefined {

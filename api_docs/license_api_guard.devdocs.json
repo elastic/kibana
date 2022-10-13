@@ -1,0 +1,178 @@
+{
+  "id": "licenseApiGuard",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [
+      {
+        "parentPluginId": "licenseApiGuard",
+        "id": "def-server.License",
+        "type": "Class",
+        "tags": [],
+        "label": "License",
+        "description": [],
+        "path": "x-pack/plugins/license_api_guard/server/license.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "licenseApiGuard",
+            "id": "def-server.License.setup",
+            "type": "Function",
+            "tags": [],
+            "label": "setup",
+            "description": [],
+            "signature": [
+              "({ pluginName, logger }: SetupSettings) => void"
+            ],
+            "path": "x-pack/plugins/license_api_guard/server/license.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "licenseApiGuard",
+                "id": "def-server.License.setup.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ pluginName, logger }",
+                "description": [],
+                "signature": [
+                  "SetupSettings"
+                ],
+                "path": "x-pack/plugins/license_api_guard/server/license.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "licenseApiGuard",
+            "id": "def-server.License.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "({ pluginId, minimumLicenseType, licensing }: StartSettings) => void"
+            ],
+            "path": "x-pack/plugins/license_api_guard/server/license.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "licenseApiGuard",
+                "id": "def-server.License.start.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ pluginId, minimumLicenseType, licensing }",
+                "description": [],
+                "signature": [
+                  "StartSettings"
+                ],
+                "path": "x-pack/plugins/license_api_guard/server/license.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "licenseApiGuard",
+            "id": "def-server.License.guardApiRoute",
+            "type": "Function",
+            "tags": [],
+            "label": "guardApiRoute",
+            "description": [],
+            "signature": [
+              "<Context extends ",
+              "RequestHandlerContext",
+              ", Params, Query, Body>(handler: ",
+              {
+                "pluginId": "core",
+                "scope": "server",
+                "docId": "kibCorePluginApi",
+                "section": "def-server.RequestHandler",
+                "text": "RequestHandler"
+              },
+              "<Params, Query, Body, Context, any, ",
+              "KibanaResponseFactory",
+              ">) => (ctx: Context, request: ",
+              "KibanaRequest",
+              "<Params, Query, Body, any>, response: ",
+              "KibanaResponseFactory",
+              ") => ",
+              "IKibanaResponse",
+              "<any> | Promise<",
+              "IKibanaResponse",
+              "<any>>"
+            ],
+            "path": "x-pack/plugins/license_api_guard/server/license.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "licenseApiGuard",
+                "id": "def-server.License.guardApiRoute.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "handler",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "core",
+                    "scope": "server",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-server.RequestHandler",
+                    "text": "RequestHandler"
+                  },
+                  "<Params, Query, Body, Context, any, ",
+                  "KibanaResponseFactory",
+                  ">"
+                ],
+                "path": "x-pack/plugins/license_api_guard/server/license.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "licenseApiGuard",
+            "id": "def-server.License.isEsSecurityEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "isEsSecurityEnabled",
+            "description": [],
+            "path": "x-pack/plugins/license_api_guard/server/license.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

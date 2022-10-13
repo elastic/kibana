@@ -6,26 +6,49 @@
  */
 
 import React from 'react';
-import { EuiCodeEditor, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { FilterAggConfigEditor } from '../types';
 
 export const FilterEditorForm: FilterAggConfigEditor['aggTypeConfig']['FilterAggFormComponent'] = ({
   config,
   onChange,
+  isValid,
 }) => {
   return (
     <>
       <EuiSpacer size="m" />
-      <EuiCodeEditor
-        value={config}
+      <CodeEditor
+        height={300}
+        languageId={'json'}
         onChange={(d) => {
           onChange({ config: d });
         }}
-        mode="json"
-        style={{ width: '100%' }}
-        theme="textmate"
-        height="300px"
+        options={{
+          automaticLayout: true,
+          fontSize: 12,
+          scrollBeyondLastLine: false,
+          quickSuggestions: true,
+          minimap: {
+            enabled: false,
+          },
+          wordWrap: 'on',
+          wrappingIndent: 'indent',
+        }}
+        value={config || ''}
       />
+      {isValid === false ? (
+        <>
+          <EuiSpacer size="m" />
+          <EuiCallOut color="danger" iconType="alert" size="s">
+            <FormattedMessage
+              id="xpack.transform.agg.filterEditorForm.jsonInvalidErrorMessage"
+              defaultMessage="JSON is invalid."
+            />
+          </EuiCallOut>
+        </>
+      ) : null}
     </>
   );
 };

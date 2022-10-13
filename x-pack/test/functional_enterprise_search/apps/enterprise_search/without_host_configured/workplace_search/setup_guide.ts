@@ -12,16 +12,17 @@ export default function enterpriseSearchSetupGuideTests({
   getService,
   getPageObjects,
 }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const retry = getService('retry');
-
+  const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['workplaceSearch']);
 
   describe('Setup Guide', function () {
-    before(async () => await esArchiver.load('empty_kibana'));
+    before(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
+    });
     after(async () => {
-      await esArchiver.unload('empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     describe('when no enterpriseSearch.host is configured', () => {

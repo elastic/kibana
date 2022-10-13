@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockActions } from '../../../../__mocks__/kea.mock';
+import { setMockActions } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -13,9 +13,9 @@ import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiButtonEmpty } from '@elastic/eui';
 
-import { DocumentCreationButtons } from '../';
+import { DocumentCreationButtons } from '..';
 
-import { ShowCreationModes } from './';
+import { ShowCreationModes } from '.';
 
 describe('ShowCreationModes', () => {
   const actions = {

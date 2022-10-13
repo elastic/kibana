@@ -9,13 +9,14 @@ import {
   SavedObjectsClientContract,
   ISavedObjectsRepository,
   SavedObjectsErrorHelpers,
-} from '../../../../../src/core/server';
+} from '@kbn/core/server';
 
 import { partiallyUpdateAlert, PartiallyUpdateableAlertAttributes } from './partially_update_alert';
-import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 const MockSavedObjectsClientContract = savedObjectsClientMock.create();
-const MockISavedObjectsRepository = (MockSavedObjectsClientContract as unknown) as jest.Mocked<ISavedObjectsRepository>;
+const MockISavedObjectsRepository =
+  MockSavedObjectsClientContract as unknown as jest.Mocked<ISavedObjectsRepository>;
 
 describe('partially_update_alert', () => {
   beforeEach(() => {
@@ -32,7 +33,7 @@ describe('partially_update_alert', () => {
       });
 
       test('should work with extraneous attributes ', async () => {
-        const attributes = (InvalidAttributes as unknown) as PartiallyUpdateableAlertAttributes;
+        const attributes = InvalidAttributes as unknown as PartiallyUpdateableAlertAttributes;
         soClient.update.mockResolvedValueOnce(MockUpdateValue);
 
         await partiallyUpdateAlert(soClient, MockAlertId, attributes);

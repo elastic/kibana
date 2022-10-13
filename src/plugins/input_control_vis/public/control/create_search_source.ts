@@ -6,21 +6,22 @@
  * Side Public License, v 1.
  */
 
+import { Filter } from '@kbn/es-query';
 import {
-  SearchSourceFields,
-  PhraseFilter,
-  IndexPattern,
+  SerializedSearchSourceFields,
   TimefilterContract,
   DataPublicPluginStart,
-} from 'src/plugins/data/public';
+} from '@kbn/data-plugin/public';
+
+import { DataView } from '@kbn/data-views-plugin/public';
 
 export async function createSearchSource(
   { create }: DataPublicPluginStart['search']['searchSource'],
-  initialState: SearchSourceFields | null,
-  indexPattern: IndexPattern,
+  initialState: SerializedSearchSourceFields | null,
+  indexPattern: DataView,
   aggs: any,
   useTimeFilter: boolean,
-  filters: PhraseFilter[] = [],
+  filters: Filter[] = [],
   timefilter: TimefilterContract
 ) {
   const searchSource = await create(initialState || {});
@@ -28,7 +29,7 @@ export async function createSearchSource(
   // Do not not inherit from rootSearchSource to avoid picking up time and globals
   searchSource.setParent(undefined);
   searchSource.setField('filter', () => {
-    const activeFilters = [...filters];
+    const activeFilters: Filter[] = [...filters];
     if (useTimeFilter) {
       const filter = timefilter.createFilter(indexPattern);
       if (filter) {

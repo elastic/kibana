@@ -9,7 +9,7 @@
 import { TabbedAggResponseWriter } from './response_writer';
 import { AggConfigs, BUCKET_TYPES, METRIC_TYPES } from '../aggs';
 import { mockAggTypesRegistry } from '../aggs/test_helpers';
-import { TabbedResponseWriterOptions } from './types';
+import type { TabbedResponseWriterOptions } from './types';
 
 describe('TabbedAggResponseWriter class', () => {
   let responseWriter: TabbedAggResponseWriter;
@@ -72,11 +72,14 @@ describe('TabbedAggResponseWriter class', () => {
       getFormatterForField: () => ({ toJSON: () => '' }),
     } as any;
 
-    return new TabbedAggResponseWriter(new AggConfigs(indexPattern, aggs, { typesRegistry }), {
-      metricsAtAllLevels: false,
-      partialRows: false,
-      ...opts,
-    });
+    return new TabbedAggResponseWriter(
+      new AggConfigs(indexPattern, aggs, { typesRegistry }, jest.fn()),
+      {
+        metricsAtAllLevels: false,
+        partialRows: false,
+        ...opts,
+      }
+    );
   };
 
   describe('Constructor', () => {
@@ -166,6 +169,7 @@ describe('TabbedAggResponseWriter class', () => {
           field: 'geo.src',
           source: 'esaggs',
           sourceParams: {
+            hasPrecisionError: false,
             enabled: true,
             id: '1',
             indexPatternId: '1234',
@@ -176,6 +180,8 @@ describe('TabbedAggResponseWriter class', () => {
               order: 'desc',
               otherBucket: false,
               otherBucketLabel: 'Other',
+              includeIsRegex: true,
+              excludeIsRegex: true,
               size: 5,
             },
             type: 'terms',
@@ -193,12 +199,14 @@ describe('TabbedAggResponseWriter class', () => {
           },
           source: 'esaggs',
           sourceParams: {
+            hasPrecisionError: false,
             appliedTimeRange: undefined,
             enabled: true,
             id: '2',
             indexPatternId: '1234',
             params: {
               field: 'machine.os.raw',
+              emptyAsNull: false,
             },
             type: 'cardinality',
           },
@@ -227,6 +235,7 @@ describe('TabbedAggResponseWriter class', () => {
           field: 'geo.src',
           source: 'esaggs',
           sourceParams: {
+            hasPrecisionError: false,
             enabled: true,
             id: '1',
             indexPatternId: '1234',
@@ -238,6 +247,8 @@ describe('TabbedAggResponseWriter class', () => {
               otherBucket: false,
               otherBucketLabel: 'Other',
               size: 5,
+              includeIsRegex: true,
+              excludeIsRegex: true,
             },
             type: 'terms',
           },
@@ -254,12 +265,14 @@ describe('TabbedAggResponseWriter class', () => {
           },
           source: 'esaggs',
           sourceParams: {
+            hasPrecisionError: false,
             appliedTimeRange: undefined,
             enabled: true,
             id: '2',
             indexPatternId: '1234',
             params: {
               field: 'machine.os.raw',
+              emptyAsNull: false,
             },
             type: 'cardinality',
           },

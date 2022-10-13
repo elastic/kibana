@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const { unique } = require('../../src/functions/unique.js');
+const { unique } = require('../../src/functions/unique');
 
 describe('Unique', () => {
   it('numbers', () => {

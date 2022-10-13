@@ -16,6 +16,7 @@ import {
   createStubStats,
   createStubClient,
   createStubIndexRecord,
+  createStubDataStreamRecord,
   createStubLogger,
 } from './__mocks__/stubs';
 
@@ -28,7 +29,7 @@ describe('esArchiver: createDeleteIndexStream()', () => {
 
     await createPromiseFromStreams([
       createListStream([createStubIndexRecord('index1')]),
-      createDeleteIndexStream(client, stats, log, []),
+      createDeleteIndexStream(client, stats, log),
     ]);
 
     sinon.assert.notCalled(stats.deletedIndex as sinon.SinonSpy);
@@ -43,12 +44,33 @@ describe('esArchiver: createDeleteIndexStream()', () => {
 
     await createPromiseFromStreams([
       createListStream([createStubIndexRecord('index1')]),
-      createDeleteIndexStream(client, stats, log, []),
+      createDeleteIndexStream(client, stats, log),
     ]);
 
     sinon.assert.calledOnce(stats.deletedIndex as sinon.SinonSpy);
     sinon.assert.notCalled(client.indices.create as sinon.SinonSpy);
     sinon.assert.calledOnce(client.indices.delete as sinon.SinonSpy);
     sinon.assert.notCalled(client.indices.exists as sinon.SinonSpy);
+  });
+
+  it('deletes data streams', async () => {
+    const stats = createStubStats();
+    const client = createStubClient([]);
+
+    await createPromiseFromStreams([
+      createListStream([createStubDataStreamRecord('foo-datastream', 'foo-template')]),
+      createDeleteIndexStream(client, stats, log),
+    ]);
+
+    sinon.assert.calledOnce(stats.deletedDataStream as sinon.SinonSpy);
+    sinon.assert.notCalled(client.indices.create as sinon.SinonSpy);
+    sinon.assert.calledOnce(client.indices.deleteDataStream as sinon.SinonSpy);
+    sinon.assert.calledWith(client.indices.deleteDataStream as sinon.SinonSpy, {
+      name: 'foo-datastream',
+    });
+    sinon.assert.calledOnce(client.indices.deleteIndexTemplate as sinon.SinonSpy);
+    sinon.assert.calledWith(client.indices.deleteIndexTemplate as sinon.SinonSpy, {
+      name: 'foo-template',
+    });
   });
 });

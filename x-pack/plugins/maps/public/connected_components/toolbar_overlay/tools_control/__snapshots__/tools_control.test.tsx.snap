@@ -16,6 +16,7 @@ exports[`Should render cancel button when drawing 1`] = `
             aria-label="Tools"
             color="text"
             iconType="wrench"
+            isDisabled={false}
             onClick={[Function]}
             size="s"
             title="Tools"
@@ -23,7 +24,8 @@ exports[`Should render cancel button when drawing 1`] = `
         </EuiPanel>
       }
       closePopover={[Function]}
-      display="inlineBlock"
+      data-test-subj="mapToolsControlPopover"
+      display="inline-block"
       hasArrow={true}
       id="toolsControlPopover"
       isOpen={false}
@@ -56,18 +58,7 @@ exports[`Should render cancel button when drawing 1`] = `
               "content": <GeometryFilterForm
                 buttonLabel="Draw shape"
                 className="mapDrawControl__geometryFilterForm"
-                geoFields={
-                  Array [
-                    Object {
-                      "geoFieldName": "location",
-                      "geoFieldType": "geo_point",
-                      "indexPatternId": "1",
-                      "indexPatternTitle": "my_index",
-                    },
-                  ]
-                }
                 intitialGeometryLabel="shape"
-                isFilterGeometryClosed={true}
                 onSubmit={[Function]}
               />,
               "id": 1,
@@ -77,18 +68,7 @@ exports[`Should render cancel button when drawing 1`] = `
               "content": <GeometryFilterForm
                 buttonLabel="Draw bounds"
                 className="mapDrawControl__geometryFilterForm"
-                geoFields={
-                  Array [
-                    Object {
-                      "geoFieldName": "location",
-                      "geoFieldType": "geo_point",
-                      "indexPatternId": "1",
-                      "indexPatternTitle": "my_index",
-                    },
-                  ]
-                }
                 intitialGeometryLabel="bounds"
-                isFilterGeometryClosed={true}
                 onSubmit={[Function]}
               />,
               "id": 2,
@@ -98,16 +78,6 @@ exports[`Should render cancel button when drawing 1`] = `
               "content": <DistanceFilterForm
                 buttonLabel="Draw distance"
                 className="mapDrawControl__geometryFilterForm"
-                geoFields={
-                  Array [
-                    Object {
-                      "geoFieldName": "location",
-                      "geoFieldType": "geo_point",
-                      "indexPatternId": "1",
-                      "indexPatternTitle": "my_index",
-                    },
-                  ]
-                }
                 onSubmit={[Function]}
               />,
               "id": 3,
@@ -147,6 +117,7 @@ exports[`renders 1`] = `
         aria-label="Tools"
         color="text"
         iconType="wrench"
+        isDisabled={false}
         onClick={[Function]}
         size="s"
         title="Tools"
@@ -154,7 +125,8 @@ exports[`renders 1`] = `
     </EuiPanel>
   }
   closePopover={[Function]}
-  display="inlineBlock"
+  data-test-subj="mapToolsControlPopover"
+  display="inline-block"
   hasArrow={true}
   id="toolsControlPopover"
   isOpen={false}
@@ -187,18 +159,7 @@ exports[`renders 1`] = `
           "content": <GeometryFilterForm
             buttonLabel="Draw shape"
             className="mapDrawControl__geometryFilterForm"
-            geoFields={
-              Array [
-                Object {
-                  "geoFieldName": "location",
-                  "geoFieldType": "geo_point",
-                  "indexPatternId": "1",
-                  "indexPatternTitle": "my_index",
-                },
-              ]
-            }
             intitialGeometryLabel="shape"
-            isFilterGeometryClosed={true}
             onSubmit={[Function]}
           />,
           "id": 1,
@@ -208,18 +169,7 @@ exports[`renders 1`] = `
           "content": <GeometryFilterForm
             buttonLabel="Draw bounds"
             className="mapDrawControl__geometryFilterForm"
-            geoFields={
-              Array [
-                Object {
-                  "geoFieldName": "location",
-                  "geoFieldType": "geo_point",
-                  "indexPatternId": "1",
-                  "indexPatternTitle": "my_index",
-                },
-              ]
-            }
             intitialGeometryLabel="bounds"
-            isFilterGeometryClosed={true}
             onSubmit={[Function]}
           />,
           "id": 2,
@@ -229,16 +179,6 @@ exports[`renders 1`] = `
           "content": <DistanceFilterForm
             buttonLabel="Draw distance"
             className="mapDrawControl__geometryFilterForm"
-            geoFields={
-              Array [
-                Object {
-                  "geoFieldName": "location",
-                  "geoFieldType": "geo_point",
-                  "indexPatternId": "1",
-                  "indexPatternTitle": "my_index",
-                },
-              ]
-            }
             onSubmit={[Function]}
           />,
           "id": 3,

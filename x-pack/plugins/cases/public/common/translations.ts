@@ -7,21 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const SAVED_OBJECT_NO_PERMISSIONS_TITLE = i18n.translate(
-  'xpack.cases.caseSavedObjectNoPermissionsTitle',
-  {
-    defaultMessage: 'Kibana feature privileges required',
-  }
-);
-
-export const SAVED_OBJECT_NO_PERMISSIONS_MSG = i18n.translate(
-  'xpack.cases.caseSavedObjectNoPermissionsMessage',
-  {
-    defaultMessage:
-      'To view cases, you must have privileges for the Saved Object Management feature in the Kibana space. For more information, contact your Kibana administrator.',
-  }
-);
-
 export const BACK_TO_ALL = i18n.translate('xpack.cases.caseView.backLabel', {
   defaultMessage: 'Back to cases',
 });
@@ -30,20 +15,18 @@ export const CANCEL = i18n.translate('xpack.cases.caseView.cancel', {
   defaultMessage: 'Cancel',
 });
 
-export const DELETE_CASE = i18n.translate('xpack.cases.confirmDeleteCase.deleteCase', {
-  defaultMessage: 'Delete case',
-});
-
-export const DELETE_CASES = i18n.translate('xpack.cases.confirmDeleteCase.deleteCases', {
-  defaultMessage: 'Delete cases',
-});
+export const DELETE_CASE = (quantity: number = 1) =>
+  i18n.translate('xpack.cases.confirmDeleteCase.deleteCase', {
+    values: { quantity },
+    defaultMessage: `Delete {quantity, plural, =1 {case} other {{quantity} cases}}`,
+  });
 
 export const NAME = i18n.translate('xpack.cases.caseView.name', {
   defaultMessage: 'Name',
 });
 
-export const OPENED_ON = i18n.translate('xpack.cases.caseView.openedOn', {
-  defaultMessage: 'Opened on',
+export const CREATED_ON = i18n.translate('xpack.cases.caseView.createdOn', {
+  defaultMessage: 'Created on',
 });
 
 export const CLOSED_ON = i18n.translate('xpack.cases.caseView.closedOn', {
@@ -58,12 +41,8 @@ export const PARTICIPANTS = i18n.translate('xpack.cases.caseView.particpantsLabe
   defaultMessage: 'Participants',
 });
 
-export const CREATE_BC_TITLE = i18n.translate('xpack.cases.caseView.breadcrumb', {
-  defaultMessage: 'Create',
-});
-
-export const CREATE_TITLE = i18n.translate('xpack.cases.caseView.create', {
-  defaultMessage: 'Create new case',
+export const CREATE_CASE_TITLE = i18n.translate('xpack.cases.caseView.create', {
+  defaultMessage: 'Create case',
 });
 
 export const DESCRIPTION = i18n.translate('xpack.cases.caseView.description', {
@@ -74,6 +53,20 @@ export const DESCRIPTION_REQUIRED = i18n.translate(
   'xpack.cases.createCase.descriptionFieldRequiredError',
   {
     defaultMessage: 'A description is required.',
+  }
+);
+
+export const SOLUTION_REQUIRED = i18n.translate(
+  'xpack.cases.createCase.solutionFieldRequiredError',
+  {
+    defaultMessage: 'A solution is required',
+  }
+);
+
+export const ARIA_KEYPAD_LEGEND = i18n.translate(
+  'xpack.cases.createCase.ariaKeypadSolutionSelection',
+  {
+    defaultMessage: 'Single solution select',
   }
 );
 
@@ -129,6 +122,10 @@ export const TAGS = i18n.translate('xpack.cases.caseView.tags', {
   defaultMessage: 'Tags',
 });
 
+export const SOLUTION = i18n.translate('xpack.cases.caseView.solution', {
+  defaultMessage: 'Solution',
+});
+
 export const ACTIONS = i18n.translate('xpack.cases.allCases.actions', {
   defaultMessage: 'Actions',
 });
@@ -148,6 +145,10 @@ export const COMMENTS = i18n.translate('xpack.cases.allCases.comments', {
 export const TAGS_HELP = i18n.translate('xpack.cases.createCase.fieldTagsHelpText', {
   defaultMessage:
     'Type one or more custom identifying tags for this case. Press enter after each tag to begin a new one.',
+});
+
+export const TAGS_EMPTY_ERROR = i18n.translate('xpack.cases.createCase.fieldTagsEmptyError', {
+  defaultMessage: 'A tag must contain at least one non-space character.',
 });
 
 export const NO_TAGS = i18n.translate('xpack.cases.caseView.noTags', {
@@ -181,16 +182,8 @@ export const SAVE = i18n.translate('xpack.cases.caseView.description.save', {
   defaultMessage: 'Save',
 });
 
-export const GO_TO_DOCUMENTATION = i18n.translate('xpack.cases.caseView.goToDocumentationButton', {
-  defaultMessage: 'View documentation',
-});
-
 export const CONNECTORS = i18n.translate('xpack.cases.caseView.connectors', {
-  defaultMessage: 'External Incident Management System',
-});
-
-export const EDIT_CONNECTOR = i18n.translate('xpack.cases.caseView.editConnector', {
-  defaultMessage: 'Change external incident management system',
+  defaultMessage: 'External incident management system',
 });
 
 export const NO_CONNECTOR = i18n.translate('xpack.cases.common.noConnector', {
@@ -203,6 +196,10 @@ export const UNKNOWN = i18n.translate('xpack.cases.caseView.unknown', {
 
 export const MARKED_CASE_AS = i18n.translate('xpack.cases.caseView.markedCaseAs', {
   defaultMessage: 'marked case as',
+});
+
+export const SET_SEVERITY_TO = i18n.translate('xpack.cases.caseView.setSeverityTo', {
+  defaultMessage: 'set severity to',
 });
 
 export const OPEN_CASES = i18n.translate('xpack.cases.caseTable.openCases', {
@@ -232,8 +229,7 @@ export const SYNC_ALERTS_SWITCH_LABEL_OFF = i18n.translate(
 );
 
 export const SYNC_ALERTS_HELP = i18n.translate('xpack.cases.components.create.syncAlertHelpText', {
-  defaultMessage:
-    'Enabling this option will sync the status of alerts in this case with the case status.',
+  defaultMessage: 'Enabling this option will sync the alert statuses with the case status.',
 });
 
 export const ALERT = i18n.translate('xpack.cases.common.alertLabel', {
@@ -248,12 +244,61 @@ export const ALERT_ADDED_TO_CASE = i18n.translate('xpack.cases.common.alertAdded
   defaultMessage: 'added to case',
 });
 
-export const SELECTABLE_MESSAGE_COLLECTIONS = i18n.translate(
-  'xpack.cases.common.allCases.table.selectableMessageCollections',
-  {
-    defaultMessage: 'Cases with sub-cases cannot be selected',
-  }
-);
 export const SELECT_CASE_TITLE = i18n.translate('xpack.cases.common.allCases.caseModal.title', {
   defaultMessage: 'Select case',
 });
+
+export const MAX_LENGTH_ERROR = (field: string, length: number) =>
+  i18n.translate('xpack.cases.createCase.maxLengthError', {
+    values: { field, length },
+    defaultMessage: 'The length of the {field} is too long. The maximum length is {length}.',
+  });
+
+export const LINK_APPROPRIATE_LICENSE = i18n.translate('xpack.cases.common.appropriateLicense', {
+  defaultMessage: 'appropriate license',
+});
+
+export const CASE_SUCCESS_TOAST = (title: string) =>
+  i18n.translate('xpack.cases.actions.caseSuccessToast', {
+    values: { title },
+    defaultMessage: '{title} has been updated',
+  });
+
+export const CASE_ALERT_SUCCESS_TOAST = (title: string, quantity: number = 1) =>
+  i18n.translate('xpack.cases.actions.caseAlertSuccessToast', {
+    values: { quantity, title },
+    defaultMessage: '{quantity, plural, =1 {An alert was} other {Alerts were}} added to "{title}"',
+  });
+
+export const CASE_ALERT_SUCCESS_SYNC_TEXT = i18n.translate(
+  'xpack.cases.actions.caseAlertSuccessSyncText',
+  {
+    defaultMessage: 'The alert statuses are synched with the case status.',
+  }
+);
+
+export const VIEW_CASE = i18n.translate('xpack.cases.actions.viewCase', {
+  defaultMessage: 'View case',
+});
+
+export const APP_TITLE = i18n.translate('xpack.cases.common.appTitle', {
+  defaultMessage: 'Cases',
+});
+
+export const APP_DESC = i18n.translate('xpack.cases.common.appDescription', {
+  defaultMessage: 'Open and track issues, push information to third party systems.',
+});
+
+export const READ_ACTIONS_PERMISSIONS_ERROR_MSG = i18n.translate(
+  'xpack.cases.configure.readPermissionsErrorDescription',
+  {
+    defaultMessage:
+      'You do not have permission to view connectors. If you would like to view connectors, contact your Kibana administrator.',
+  }
+);
+
+export const DELETED_CASES = (totalCases: number) =>
+  i18n.translate('xpack.cases.containers.deletedCases', {
+    values: { totalCases },
+    defaultMessage: 'Deleted {totalCases, plural, =1 {case} other {{totalCases} cases}}',
+  });

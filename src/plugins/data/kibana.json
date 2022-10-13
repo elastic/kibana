@@ -8,15 +8,19 @@
     "expressions",
     "uiActions",
     "share",
-    "inspector"
+    "inspector",
+    "fieldFormats",
+    "dataViews",
+    "screenshotMode",
+    "management"
   ],
-  "serviceFolders": ["search", "index_patterns", "query", "autocomplete", "ui", "field_formats"],
-  "optionalPlugins": ["usageCollection"],
+  "serviceFolders": ["search", "query", "ui"],
+  "optionalPlugins": ["usageCollection", "taskManager", "security"],
   "extraPublicDirs": ["common"],
-  "requiredBundles": [
-    "usageCollection",
-    "kibanaUtils",
-    "kibanaReact",
-    "inspector"
-  ]
+  "requiredBundles": ["kibanaUtils", "kibanaReact", "inspector"],
+  "owner": {
+    "name": "App Services",
+    "githubTeam": "kibana-app-services"
+  },
+  "description": "Data services are useful for searching and querying data from Elasticsearch. Helpful utilities include: a re-usable react query bar, KQL autocomplete, async search, Data Views (Index Patterns) and field formatters."
 }

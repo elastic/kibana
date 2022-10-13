@@ -10,7 +10,8 @@ import React, { FormEvent, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { useApmServiceContext } from '../../context/apm_service/use_apm_service_context';
-import * as urlHelpers from './Links/url_helpers';
+import { useBreakpoints } from '../../hooks/use_breakpoints';
+import * as urlHelpers from './links/url_helpers';
 
 // The default transaction type (for non-RUM services) is "request". Set the
 // min-width on here to the width when "request" is loaded so it doesn't start
@@ -20,6 +21,7 @@ const EuiSelectWithWidth = styled(EuiSelect)`
 `;
 
 export function TransactionTypeSelect() {
+  const { isSmall } = useBreakpoints();
   const { transactionTypes, transactionType } = useApmServiceContext();
   const history = useHistory();
 
@@ -38,6 +40,8 @@ export function TransactionTypeSelect() {
   return (
     <>
       <EuiSelectWithWidth
+        fullWidth={isSmall}
+        data-test-subj="headerFilterTransactionType"
         onChange={handleChange}
         options={options}
         value={transactionType}

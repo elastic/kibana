@@ -88,7 +88,7 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
       }
       closePopover={[Function]}
       data-test-subj="anomaly-score-popover"
-      display="inlineBlock"
+      display="inline-block"
       hasArrow={true}
       id="anomaly-score-popover"
       isOpen={false}

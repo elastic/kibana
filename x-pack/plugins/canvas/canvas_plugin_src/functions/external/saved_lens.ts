@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
-import { PaletteOutput } from 'src/plugins/charts/common';
-import { TimeRange, Filter as DataFilter } from 'src/plugins/data/public';
-import { EmbeddableInput } from 'src/plugins/embeddable/public';
-import { getQueryFilters } from '../../../public/lib/build_embeddable_filters';
-import { ExpressionValueFilter, TimeRange as TimeRangeArg } from '../../../types';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import type { PaletteOutput } from '@kbn/coloring';
+import { Filter as DataFilter } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
+import { SavedObjectReference } from '@kbn/core/types';
+import { getQueryFilters } from '../../../common/lib/build_embeddable_filters';
+import { ExpressionValueFilter, EmbeddableInput, TimeRange as TimeRangeArg } from '../../../types';
 import {
   EmbeddableTypes,
   EmbeddableExpressionType,
   EmbeddableExpression,
 } from '../../expression_types';
 import { getFunctionHelp } from '../../../i18n';
-import { SavedObjectReference } from '../../../../../../src/core/types';
-
 interface Arguments {
   id: string;
   title: string | null;
@@ -27,7 +26,7 @@ interface Arguments {
 }
 
 export type SavedLensInput = EmbeddableInput & {
-  id: string;
+  savedObjectId: string;
   timeRange?: TimeRange;
   filters: DataFilter[];
   palette?: PaletteOutput;
@@ -73,19 +72,19 @@ export function savedLens(): ExpressionFunctionDefinition<
       },
     },
     type: EmbeddableExpressionType,
-    fn: (input, args) => {
+    fn: (input, { id, timerange, title, palette }) => {
       const filters = input ? input.and : [];
 
       return {
         type: EmbeddableExpressionType,
         input: {
-          id: args.id,
+          id,
+          savedObjectId: id,
           filters: getQueryFilters(filters),
-          timeRange: args.timerange || defaultTimeRange,
-          title: args.title === null ? undefined : args.title,
+          timeRange: timerange || defaultTimeRange,
+          title: title === null ? undefined : title,
           disableTriggers: true,
-          palette: args.palette,
-          renderMode: 'noInteractivity',
+          palette,
         },
         embeddableType: EmbeddableTypes.lens,
         generatedAt: Date.now(),

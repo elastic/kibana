@@ -7,11 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { CoreSetup, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
+import { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 
 import { PLUGIN } from '../common/constants';
 import { Dependencies, LicenseStatus, RouteDependencies } from './types';
-import { ConfigType } from './config';
+import { RemoteClustersConfig, RemoteClustersConfig7x } from './config';
 import {
   registerGetRoute,
   registerAddRoute,
@@ -19,15 +19,18 @@ import {
   registerDeleteRoute,
 } from './routes/api';
 
+import { handleEsError } from './shared_imports';
+
 export interface RemoteClustersPluginSetup {
   isUiEnabled: boolean;
 }
 
 export class RemoteClustersServerPlugin
-  implements Plugin<RemoteClustersPluginSetup, void, any, any> {
+  implements Plugin<RemoteClustersPluginSetup, void, any, any>
+{
   licenseStatus: LicenseStatus;
   log: Logger;
-  config: ConfigType;
+  config: RemoteClustersConfig | RemoteClustersConfig7x;
 
   constructor({ logger, config }: PluginInitializerContext) {
     this.log = logger.get();
@@ -43,6 +46,9 @@ export class RemoteClustersServerPlugin
       getLicenseStatus: () => this.licenseStatus,
       config: {
         isCloudEnabled: Boolean(cloud?.isCloudEnabled),
+      },
+      lib: {
+        handleEsError,
       },
     };
 

@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
-
-import { TimeRange } from 'src/plugins/data/common/query/timefilter/types';
+import { TimeRange } from '@kbn/data-plugin/common/query/timefilter/types';
 import { CombinedJob, Datafeed, Job } from '../../../common/types/anomaly_detection_jobs';
 import { Calendar } from '../../../common/types/calendars';
 
@@ -27,6 +25,7 @@ declare interface JobService {
     start?: number;
     end?: number;
     calendars: Calendar[] | undefined;
+    autoSetTimeRange?: boolean;
   };
   skipTimeRangeStep: boolean;
   saveNewJob(job: Job): Promise<any>;
@@ -41,9 +40,10 @@ declare interface JobService {
   ): Promise<any>;
   createResultsUrl(jobId: string[], start: number, end: number, location: string): string;
   getJobAndGroupIds(): Promise<ExistingJobsAndGroups>;
-  searchPreview(job: CombinedJob): Promise<estypes.SearchResponse<any>>;
   getJob(jobId: string): CombinedJob;
   loadJobsWrapper(): Promise<CombinedJob[]>;
+  customUrlsByJob: Record<string, any[]>;
+  detectorsByJob: Record<string, any>;
 }
 
 export const mlJobService: JobService;

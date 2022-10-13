@@ -5,15 +5,13 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
+import type { ReportingCore } from '../../core';
 import { registerDiagnoseBrowser } from './browser';
-import { registerDiagnoseConfig } from './config';
 import { registerDiagnoseScreenshot } from './screenshot';
-import { LevelLogger as Logger } from '../../lib';
-import { ReportingCore } from '../../core';
 
 export const registerDiagnosticRoutes = (reporting: ReportingCore, logger: Logger) => {
   registerDiagnoseBrowser(reporting, logger);
-  registerDiagnoseConfig(reporting, logger);
   registerDiagnoseScreenshot(reporting, logger);
 };
 

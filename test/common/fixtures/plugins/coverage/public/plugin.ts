@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Plugin } from 'kibana/server';
+import { Plugin } from '@kbn/core/server';
 
 declare global {
   interface Window {

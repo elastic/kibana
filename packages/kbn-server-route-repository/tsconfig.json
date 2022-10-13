@@ -1,13 +1,11 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../../tsconfig.bazel.json",
   "compilerOptions": {
-    "incremental": false,
-    "outDir": "./target",
-    "stripInternal": false,
     "declaration": true,
     "declarationMap": true,
-    "sourceMap": true,
-    "sourceRoot": "../../../../packages/kbn-server-route-repository/src",
+    "emitDeclarationOnly": true,
+    "outDir": "./target_types",
+    "stripInternal": false,
     "types": [
       "jest",
       "node"
@@ -15,6 +13,6 @@
     "noUnusedLocals": false
   },
   "include": [
-    "./src/**/*.ts"
+    "**/*.ts"
   ]
 }

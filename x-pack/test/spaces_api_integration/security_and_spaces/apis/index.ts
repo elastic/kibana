@@ -14,8 +14,6 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
   describe('spaces api with security', function () {
-    this.tags('ciGroup8');
-
     before(async () => {
       await createUsersAndRoles(es, supertest);
     });
@@ -25,9 +23,10 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./get_all'));
+    loadTestFile(require.resolve('./get_shareable_references'));
     loadTestFile(require.resolve('./get'));
-    loadTestFile(require.resolve('./share_add'));
-    loadTestFile(require.resolve('./share_remove'));
     loadTestFile(require.resolve('./update'));
+    loadTestFile(require.resolve('./update_objects_spaces'));
+    loadTestFile(require.resolve('./disable_legacy_url_aliases'));
   });
 }

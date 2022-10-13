@@ -60,10 +60,10 @@ describe('search settings routes', () => {
     jest.clearAllMocks();
   });
 
-  describe('GET /api/app_search/engines/{name}/search_settings/details', () => {
+  describe('GET /internal/app_search/engines/{name}/search_settings/details', () => {
     const mockRouter = new MockRouter({
       method: 'get',
-      path: '/api/app_search/engines/{engineName}/search_settings/details',
+      path: '/internal/app_search/engines/{engineName}/search_settings/details',
     });
 
     beforeEach(() => {
@@ -84,10 +84,10 @@ describe('search settings routes', () => {
     });
   });
 
-  describe('PUT /api/app_search/engines/{name}/search_settings', () => {
+  describe('PUT /internal/app_search/engines/{name}/search_settings', () => {
     const mockRouter = new MockRouter({
       method: 'put',
-      path: '/api/app_search/engines/{engineName}/search_settings',
+      path: '/internal/app_search/engines/{engineName}/search_settings',
     });
 
     beforeEach(() => {
@@ -109,10 +109,10 @@ describe('search settings routes', () => {
     });
   });
 
-  describe('POST /api/app_search/engines/{name}/search_settings/reset', () => {
+  describe('POST /internal/app_search/engines/{name}/search_settings/reset', () => {
     const mockRouter = new MockRouter({
       method: 'post',
-      path: '/api/app_search/engines/{engineName}/search_settings/reset',
+      path: '/internal/app_search/engines/{engineName}/search_settings/reset',
     });
 
     beforeEach(() => {
@@ -129,47 +129,6 @@ describe('search settings routes', () => {
 
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/as/engines/:engineName/search_settings/reset',
-      });
-    });
-  });
-
-  describe('POST /api/app_search/engines/{name}/search_settings_search', () => {
-    const mockRouter = new MockRouter({
-      method: 'post',
-      path: '/api/app_search/engines/{engineName}/search_settings_search',
-    });
-
-    beforeEach(() => {
-      registerSearchSettingsRoutes({
-        ...mockDependencies,
-        router: mockRouter.router,
-      });
-    });
-
-    it('creates a request to enterprise search', () => {
-      mockRouter.callRoute({
-        params: { engineName: 'some-engine' },
-        body: searchSettings,
-      });
-
-      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/as/engines/:engineName/search_settings_search',
-      });
-    });
-
-    describe('validates query', () => {
-      it('correctly', () => {
-        const request = {
-          query: {
-            query: 'foo',
-          },
-        };
-        mockRouter.shouldValidate(request);
-      });
-
-      it('missing required fields', () => {
-        const request = { query: {} };
-        mockRouter.shouldThrow(request);
       });
     });
   });

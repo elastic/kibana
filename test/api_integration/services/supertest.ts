@@ -6,27 +6,32 @@
  * Side Public License, v 1.
  */
 
-import { FtrProviderContext } from 'test/functional/ftr_provider_context';
+import { systemIndicesSuperuser } from '@kbn/test';
+
 import { format as formatUrl } from 'url';
 
-import supertestAsPromised from 'supertest-as-promised';
+import supertest from 'supertest';
+import { FtrProviderContext } from '../../functional/ftr_provider_context';
 
 export function KibanaSupertestProvider({ getService }: FtrProviderContext) {
   const config = getService('config');
   const kibanaServerUrl = formatUrl(config.get('servers.kibana'));
-  return supertestAsPromised(kibanaServerUrl);
+  return supertest(kibanaServerUrl);
 }
 
 export function ElasticsearchSupertestProvider({ getService }: FtrProviderContext) {
   const config = getService('config');
   const esServerConfig = config.get('servers.elasticsearch');
-  const elasticSearchServerUrl = formatUrl(esServerConfig);
+  const elasticSearchServerUrl = formatUrl({
+    ...esServerConfig,
+    // Use system indices user so tests can write to system indices
+    auth: `${systemIndicesSuperuser.username}:${systemIndicesSuperuser.password}`,
+  });
 
   let agentOptions = {};
   if ('certificateAuthorities' in esServerConfig) {
     agentOptions = { ca: esServerConfig!.certificateAuthorities };
   }
 
-  // @ts-ignore - supertestAsPromised doesn't like the agentOptions, but still passes it correctly to supertest
-  return supertestAsPromised.agent(elasticSearchServerUrl, agentOptions);
+  return supertest.agent(elasticSearchServerUrl, agentOptions);
 }

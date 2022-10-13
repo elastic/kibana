@@ -19,7 +19,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('ValidateCardinality', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/ecommerce');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
       await ml.testResources.setKibanaTimeZoneToUTC();
     });
 
@@ -54,12 +54,12 @@ export default ({ getService }: FtrProviderContext) => {
         },
       };
 
-      const { body } = await supertest
+      const { body, status } = await supertest
         .post('/api/ml/validate/cardinality')
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS)
-        .send(requestBody)
-        .expect(200);
+        .send(requestBody);
+      ml.api.assertResponseStatusCode(200, status, body);
 
       expect(body).to.eql([{ id: 'success_cardinality' }]);
     });
@@ -91,12 +91,12 @@ export default ({ getService }: FtrProviderContext) => {
           query: { bool: { must: [{ match_all: {} }], filter: [], must_not: [] } },
         },
       };
-      const { body } = await supertest
+      const { body, status } = await supertest
         .post('/api/ml/validate/cardinality')
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS)
-        .send(requestBody)
-        .expect(200);
+        .send(requestBody);
+      ml.api.assertResponseStatusCode(200, status, body);
 
       const expectedResponse = [
         {
@@ -143,16 +143,16 @@ export default ({ getService }: FtrProviderContext) => {
         },
       };
 
-      const { body } = await supertest
+      const { body, status } = await supertest
         .post('/api/ml/validate/cardinality')
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS)
-        .send(requestBody)
-        .expect(400);
+        .send(requestBody);
+      ml.api.assertResponseStatusCode(400, status, body);
 
       expect(body.error).to.eql('Bad Request');
       expect(body.message).to.eql(
-        '[request body.analysis_config.detectors]: expected value of type [array] but got [undefined]'
+        '[request body.analysis_config.bucket_span]: expected value of type [string] but got [undefined]'
       );
     });
 
@@ -183,12 +183,12 @@ export default ({ getService }: FtrProviderContext) => {
         },
       };
 
-      const { body } = await supertest
+      const { body, status } = await supertest
         .post('/api/ml/validate/cardinality')
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
         .set(COMMON_REQUEST_HEADERS)
-        .send(requestBody)
-        .expect(403);
+        .send(requestBody);
+      ml.api.assertResponseStatusCode(403, status, body);
 
       expect(body.error).to.eql('Forbidden');
       expect(body.message).to.eql('Forbidden');

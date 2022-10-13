@@ -7,8 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
-import { AggExpressionType, AggExpressionFunctionArgs, METRIC_TYPES } from '../';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import { AggExpressionType, AggExpressionFunctionArgs, METRIC_TYPES } from '..';
 
 export const aggCountFnName = 'aggCount';
 
@@ -52,6 +52,20 @@ export const aggCount = (): FunctionDefinition => ({
       types: ['string'],
       help: i18n.translate('data.search.aggs.metrics.count.customLabel.help', {
         defaultMessage: 'Represents a custom label for this aggregation',
+      }),
+    },
+    timeShift: {
+      types: ['string'],
+      help: i18n.translate('data.search.aggs.metrics.timeShift.help', {
+        defaultMessage:
+          'Shift the time range for the metric by a set time, for example 1h or 7d. "previous" will use the closest time range from the date histogram or time range filter.',
+      }),
+    },
+    emptyAsNull: {
+      types: ['boolean'],
+      help: i18n.translate('data.search.aggs.metrics.emptyAsNull.help', {
+        defaultMessage:
+          'If set to true, a missing value is treated as null in the resulting data table. If set to false, a "zero" is filled in',
       }),
     },
   },

@@ -9,6 +9,7 @@ import type { Actions } from './actions';
 import { AlertingActions } from './alerting';
 import { ApiActions } from './api';
 import { AppActions } from './app';
+import { CasesActions } from './cases';
 import { SavedObjectActions } from './saved_object';
 import { SpaceActions } from './space';
 import { UIActions } from './ui';
@@ -19,18 +20,20 @@ jest.mock('./saved_object');
 jest.mock('./space');
 jest.mock('./ui');
 jest.mock('./alerting');
+jest.mock('./cases');
 
 const create = (versionNumber: string) => {
-  const t = ({
+  const t = {
     api: new ApiActions(versionNumber),
     app: new AppActions(versionNumber),
     login: 'login:',
     savedObject: new SavedObjectActions(versionNumber),
     alerting: new AlertingActions(versionNumber),
+    cases: new CasesActions(versionNumber),
     space: new SpaceActions(versionNumber),
     ui: new UIActions(versionNumber),
     version: `version:${versionNumber}`,
-  } as unknown) as jest.Mocked<Actions>;
+  } as unknown as jest.Mocked<Actions>;
   return t;
 };
 

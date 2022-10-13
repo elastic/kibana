@@ -9,8 +9,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Switch, Route, Prompt } from 'react-router-dom';
-import type { AppMountParameters, IBasePath, ApplicationStart } from 'kibana/public';
-import { RedirectAppLinks } from '../../../../../src/plugins/kibana_react/public';
+import type { AppMountParameters, IBasePath, ApplicationStart } from '@kbn/core/public';
+import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
 
 const HomePage = ({
   basePath,

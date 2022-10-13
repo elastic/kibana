@@ -5,27 +5,26 @@
  * 2.0.
  */
 
-import { validate } from '../../../../../common/validate';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
+
+import type { RouteConfig, RequestHandler, Logger } from '@kbn/core/server';
 import { queryRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/query_rules_type_dependents';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
-import {
-  queryRulesBulkSchema,
-  QueryRulesBulkSchemaDecoded,
-} from '../../../../../common/detection_engine/schemas/request/query_rules_bulk_schema';
+import type { QueryRulesBulkSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/query_rules_bulk_schema';
+import { queryRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request/query_rules_bulk_schema';
 import { rulesBulkSchema } from '../../../../../common/detection_engine/schemas/response/rules_bulk_schema';
-import type { RouteConfig, RequestHandler } from '../../../../../../../../src/core/server';
 import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
 } from '../../../../types';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import { DETECTION_ENGINE_RULES_BULK_DELETE } from '../../../../../common/constants';
 import { getIdBulkError } from './utils';
 import { transformValidateBulkError } from './validate';
 import { transformBulkError, buildSiemResponse, createBulkErrorObject } from '../utils';
 import { deleteRules } from '../../rules/delete_rules';
-import { deleteNotifications } from '../../notifications/delete_notifications';
-import { deleteRuleActionsSavedObject } from '../../rule_actions/delete_rule_actions_saved_object';
-import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
+import { readRules } from '../../rules/read_rules';
+import { legacyMigrate } from '../../rules/utils';
+import { getDeprecatedBulkEndpointHeader, logDeprecatedBulkEndpoint } from './utils/deprecation';
 
 type Config = RouteConfig<unknown, unknown, QueryRulesBulkSchemaDecoded, 'delete' | 'post'>;
 type Handler = RequestHandler<
@@ -36,29 +35,31 @@ type Handler = RequestHandler<
   'delete' | 'post'
 >;
 
-export const deleteRulesBulkRoute = (router: SecuritySolutionPluginRouter) => {
+/**
+ * @deprecated since version 8.2.0. Use the detection_engine/rules/_bulk_action API instead
+ */
+export const deleteRulesBulkRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   const config: Config = {
     validate: {
       body: buildRouteValidation<typeof queryRulesBulkSchema, QueryRulesBulkSchemaDecoded>(
         queryRulesBulkSchema
       ),
     },
-    path: `${DETECTION_ENGINE_RULES_URL}/_bulk_delete`,
+    path: DETECTION_ENGINE_RULES_BULK_DELETE,
     options: {
       tags: ['access:securitySolution'],
     },
   };
   const handler: Handler = async (context, request, response) => {
+    logDeprecatedBulkEndpoint(logger, DETECTION_ENGINE_RULES_BULK_DELETE);
+
     const siemResponse = buildSiemResponse(response);
 
-    const alertsClient = context.alerting?.getAlertsClient();
-    const savedObjectsClient = context.core.savedObjects.client;
+    const ctx = await context.resolve(['core', 'securitySolution', 'alerting']);
 
-    if (!alertsClient) {
-      return siemResponse.error({ statusCode: 404 });
-    }
-
-    const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
+    const rulesClient = ctx.alerting.getRulesClient();
+    const ruleExecutionLog = ctx.securitySolution.getRuleExecutionLog();
+    const savedObjectsClient = ctx.core.savedObjects.client;
 
     const rules = await Promise.all(
       request.body.map(async (payloadRule) => {
@@ -74,27 +75,29 @@ export const deleteRulesBulkRoute = (router: SecuritySolutionPluginRouter) => {
         }
 
         try {
-          const rule = await deleteRules({
-            alertsClient,
-            id,
-            ruleId,
+          const rule = await readRules({ rulesClient, id, ruleId });
+          const migratedRule = await legacyMigrate({
+            rulesClient,
+            savedObjectsClient,
+            rule,
           });
-          if (rule != null) {
-            await deleteNotifications({ alertsClient, ruleAlertId: rule.id });
-            await deleteRuleActionsSavedObject({
-              ruleAlertId: rule.id,
-              savedObjectsClient,
-            });
-            const ruleStatuses = await ruleStatusClient.find({
-              perPage: 6,
-              search: rule.id,
-              searchFields: ['alertId'],
-            });
-            ruleStatuses.saved_objects.forEach(async (obj) => ruleStatusClient.delete(obj.id));
-            return transformValidateBulkError(idOrRuleIdOrUnknown, rule, undefined, ruleStatuses);
-          } else {
+          if (!migratedRule) {
             return getIdBulkError({ id, ruleId });
           }
+
+          const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(migratedRule.id);
+
+          await deleteRules({
+            ruleId: migratedRule.id,
+            rulesClient,
+            ruleExecutionLog,
+          });
+
+          return transformValidateBulkError(
+            idOrRuleIdOrUnknown,
+            migratedRule,
+            ruleExecutionSummary
+          );
         } catch (err) {
           return transformBulkError(idOrRuleIdOrUnknown, err);
         }
@@ -102,9 +105,16 @@ export const deleteRulesBulkRoute = (router: SecuritySolutionPluginRouter) => {
     );
     const [validated, errors] = validate(rules, rulesBulkSchema);
     if (errors != null) {
-      return siemResponse.error({ statusCode: 500, body: errors });
+      return siemResponse.error({
+        statusCode: 500,
+        body: errors,
+        headers: getDeprecatedBulkEndpointHeader(DETECTION_ENGINE_RULES_BULK_DELETE),
+      });
     } else {
-      return response.ok({ body: validated ?? {} });
+      return response.ok({
+        body: validated ?? {},
+        headers: getDeprecatedBulkEndpointHeader(DETECTION_ENGINE_RULES_BULK_DELETE),
+      });
     }
   };
 

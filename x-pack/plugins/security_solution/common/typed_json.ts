@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { DslQuery, Filter } from 'src/plugins/data/common';
-
-import { JsonObject } from '../../../../src/plugins/kibana_utils/common';
+import type { BoolQuery } from '@kbn/es-query';
+import type { JsonObject } from '@kbn/utility-types';
 
 export type ESQuery =
   | ESRangeQuery
@@ -49,10 +48,5 @@ export interface ESTermQuery {
 }
 
 export interface ESBoolQuery {
-  bool: {
-    must: DslQuery[];
-    filter: Filter[];
-    should: never[];
-    must_not: Filter[];
-  };
+  bool: BoolQuery;
 }

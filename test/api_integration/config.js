@@ -10,9 +10,10 @@ import { services } from './services';
 
 export default async function ({ readConfigFile }) {
   const commonConfig = await readConfigFile(require.resolve('../common/config'));
-  const functionalConfig = await readConfigFile(require.resolve('../functional/config'));
+  const functionalConfig = await readConfigFile(require.resolve('../functional/config.base.js'));
 
   return {
+    rootTags: ['runOutsideOfCiGroups'],
     testFiles: [require.resolve('./apis')],
     services,
     servers: commonConfig.get('servers'),
@@ -31,6 +32,7 @@ export default async function ({ readConfigFile }) {
         '--server.xsrf.disableProtection=true',
         '--server.compression.referrerWhitelist=["some-host.com"]',
         `--savedObjects.maxImportExportSize=10001`,
+        '--savedObjects.maxImportPayloadBytes=30000000',
         // for testing set buffer duration to 0 to immediately flush counters into saved objects.
         '--usageCollection.usageCounters.bufferDuration=0',
       ],

@@ -8,15 +8,18 @@
 
 import expect from '@kbn/expect';
 import request from 'superagent';
+import { inflateResponse } from '@kbn/bfetch-plugin/public/streaming';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { painlessErrReq } from './painless_err_req';
 import { verifyErrorResponse } from './verify_error';
 
-function parseBfetchResponse(resp: request.Response): Array<Record<string, any>> {
+function parseBfetchResponse(resp: request.Response, compressed: boolean = false) {
   return resp.text
     .trim()
     .split('\n')
-    .map((item) => JSON.parse(item));
+    .map((item) => {
+      return JSON.parse(compressed ? inflateResponse<any>(item) : item);
+    });
 }
 
 export default function ({ getService }: FtrProviderContext) {
@@ -31,32 +34,67 @@ export default function ({ getService }: FtrProviderContext) {
             {
               request: {
                 params: {
+                  index: '.kibana',
                   body: {
                     query: {
                       match_all: {},
                     },
                   },
                 },
+              },
+              options: {
+                strategy: 'es',
               },
             },
           ],
         });
 
-        const jsonBody = JSON.parse(resp.text);
+        const jsonBody = parseBfetchResponse(resp);
 
         expect(resp.status).to.be(200);
-        expect(jsonBody.id).to.be(0);
-        expect(jsonBody.result.isPartial).to.be(false);
-        expect(jsonBody.result.isRunning).to.be(false);
-        expect(jsonBody.result).to.have.property('rawResponse');
+        expect(jsonBody[0].id).to.be(0);
+        expect(jsonBody[0].result.isPartial).to.be(false);
+        expect(jsonBody[0].result.isRunning).to.be(false);
+        expect(jsonBody[0].result).to.have.property('rawResponse');
       });
 
-      it('should return a batch of successful resposes', async () => {
+      it('should return 200 a single response from compressed', async () => {
+        const resp = await supertest.post(`/internal/bsearch?compress=true`).send({
+          batch: [
+            {
+              request: {
+                params: {
+                  index: '.kibana',
+                  body: {
+                    query: {
+                      match_all: {},
+                    },
+                  },
+                },
+              },
+              options: {
+                strategy: 'es',
+              },
+            },
+          ],
+        });
+
+        const jsonBody = parseBfetchResponse(resp, true);
+
+        expect(resp.status).to.be(200);
+        expect(jsonBody[0].id).to.be(0);
+        expect(jsonBody[0].result.isPartial).to.be(false);
+        expect(jsonBody[0].result.isRunning).to.be(false);
+        expect(jsonBody[0].result).to.have.property('rawResponse');
+      });
+
+      it('should return a batch of successful responses', async () => {
         const resp = await supertest.post(`/internal/bsearch`).send({
           batch: [
             {
               request: {
                 params: {
+                  index: '.kibana',
                   body: {
                     query: {
                       match_all: {},
@@ -68,6 +106,7 @@ export default function ({ getService }: FtrProviderContext) {
             {
               request: {
                 params: {
+                  index: '.kibana',
                   body: {
                     query: {
                       match_all: {},
@@ -83,8 +122,8 @@ export default function ({ getService }: FtrProviderContext) {
         const parsedResponse = parseBfetchResponse(resp);
         expect(parsedResponse).to.have.length(2);
         parsedResponse.forEach((responseJson) => {
-          expect(responseJson.result.isPartial).to.be(false);
-          expect(responseJson.result.isRunning).to.be(false);
+          expect(responseJson.result).to.have.property('isPartial');
+          expect(responseJson.result).to.have.property('isRunning');
           expect(responseJson.result).to.have.property('rawResponse');
         });
       });
@@ -95,6 +134,7 @@ export default function ({ getService }: FtrProviderContext) {
             {
               request: {
                 params: {
+                  index: '.kibana',
                   body: {
                     query: {
                       match_all: {},
@@ -121,6 +161,7 @@ export default function ({ getService }: FtrProviderContext) {
           batch: [
             {
               request: {
+                index: '.kibana',
                 indexType: 'baad',
                 params: {
                   body: {
@@ -146,13 +187,11 @@ export default function ({ getService }: FtrProviderContext) {
 
       describe('painless', () => {
         before(async () => {
-          await esArchiver.loadIfNeeded(
-            '../../../functional/fixtures/es_archiver/logstash_functional'
-          );
+          await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
         });
 
         after(async () => {
-          await esArchiver.unload('../../../functional/fixtures/es_archiver/logstash_functional');
+          await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
         });
         it('should return 400 "search_phase_execution_exception" for Painless error in "es" strategy', async () => {
           const resp = await supertest.post(`/internal/bsearch`).send({

@@ -6,87 +6,60 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import moment from 'moment-timezone';
 import React from 'react';
-import * as Rx from 'rxjs';
-import type { IUiSettingsClient, ToastsSetup } from 'src/core/public';
-import { CoreStart } from 'src/core/public';
-import type { SearchSourceFields } from 'src/plugins/data/common';
-import type { ShareContext } from '../../../../../src/plugins/share/public';
-import type { LicensingPluginSetup } from '../../../licensing/public';
+import type { SearchSourceFields } from '@kbn/data-plugin/common';
+import { ShareContext, ShareMenuProvider } from '@kbn/share-plugin/public';
 import { CSV_JOB_TYPE } from '../../common/constants';
-import type { JobParamsCSV } from '../../server/export_types/csv_searchsource/types';
-import { ReportingPanelContent } from '../components/reporting_panel_content_lazy';
 import { checkLicense } from '../lib/license_check';
-import type { ReportingAPIClient } from '../lib/reporting_api_client';
+import { ExportPanelShareOpts } from '.';
+import { ReportingPanelContent } from './reporting_panel_content_lazy';
 
-export const ReportingCsvShareProvider = ({
+export const reportingCsvShareProvider = ({
   apiClient,
   toasts,
-  license$,
-  startServices$,
   uiSettings,
+  application,
+  license,
   usesUiCapabilities,
-}: {
-  apiClient: ReportingAPIClient;
-  toasts: ToastsSetup;
-  license$: LicensingPluginSetup['license$'];
-  startServices$: Rx.Observable<[CoreStart, object, unknown]>;
-  uiSettings: IUiSettingsClient;
-  usesUiCapabilities: boolean;
-}) => {
-  let licenseToolTipContent = '';
-  let licenseHasCsvReporting = false;
-  let licenseDisabled = true;
-  let capabilityHasCsvReporting = false;
-
-  license$.subscribe((license) => {
-    const licenseCheck = checkLicense(license.check('reporting', 'basic'));
-    licenseToolTipContent = licenseCheck.message;
-    licenseHasCsvReporting = licenseCheck.showLinks;
-    licenseDisabled = !licenseCheck.enableLinks;
-  });
-
-  if (usesUiCapabilities) {
-    startServices$.subscribe(([{ application }]) => {
-      // TODO: add abstractions in ExportTypeRegistry to use here?
-      capabilityHasCsvReporting = application.capabilities.discover?.generateCsv === true;
-    });
-  } else {
-    capabilityHasCsvReporting = true; // deprecated
-  }
-
-  // If the TZ is set to the default "Browser", it will not be useful for
-  // server-side export. We need to derive the timezone and pass it as a param
-  // to the export API.
-  // TODO: create a helper utility in Reporting. This is repeated in a few places.
-  const browserTimezone =
-    uiSettings.get('dateFormat:tz') === 'Browser'
-      ? moment.tz.guess()
-      : uiSettings.get('dateFormat:tz');
-
-  const getShareMenuItems = ({
-    objectType,
-    objectId,
-    sharingData,
-    onClose,
-    isDirty,
-  }: ShareContext) => {
+  theme,
+}: ExportPanelShareOpts): ShareMenuProvider => {
+  const getShareMenuItems = ({ objectType, objectId, sharingData, onClose }: ShareContext) => {
     if ('search' !== objectType) {
       return [];
     }
 
-    const jobParams: JobParamsCSV = {
-      browserTimezone,
+    const getSearchSource = sharingData.getSearchSource as (
+      absoluteTime?: boolean
+    ) => SearchSourceFields;
+
+    const jobParams = {
       title: sharingData.title as string,
       objectType,
-      searchSource: sharingData.searchSource as SearchSourceFields,
       columns: sharingData.columns as string[] | undefined,
     };
 
-    const getJobParams = () => jobParams;
+    const getJobParams = (forShareUrl?: boolean) => {
+      const absoluteTime = !forShareUrl;
+      return {
+        ...jobParams,
+        searchSource: getSearchSource(absoluteTime),
+      };
+    };
 
     const shareActions = [];
+
+    const licenseCheck = checkLicense(license.check('reporting', 'basic'));
+    const licenseToolTipContent = licenseCheck.message;
+    const licenseHasCsvReporting = licenseCheck.showLinks;
+    const licenseDisabled = !licenseCheck.enableLinks;
+
+    // TODO: add abstractions in ExportTypeRegistry to use here?
+    let capabilityHasCsvReporting = false;
+    if (usesUiCapabilities) {
+      capabilityHasCsvReporting = application.capabilities.discover?.generateCsv === true;
+    } else {
+      capabilityHasCsvReporting = true; // deprecated
+    }
 
     if (licenseHasCsvReporting && capabilityHasCsvReporting) {
       const panelTitle = i18n.translate('xpack.reporting.shareContextMenu.csvReportsButtonLabel', {
@@ -107,14 +80,16 @@ export const ReportingCsvShareProvider = ({
           title: panelTitle,
           content: (
             <ReportingPanelContent
+              requiresSavedState={false}
               apiClient={apiClient}
               toasts={toasts}
+              uiSettings={uiSettings}
               reportType={CSV_JOB_TYPE}
               layoutId={undefined}
               objectId={objectId}
               getJobParams={getJobParams}
-              isDirty={isDirty}
               onClose={onClose}
+              theme={theme}
             />
           ),
         },

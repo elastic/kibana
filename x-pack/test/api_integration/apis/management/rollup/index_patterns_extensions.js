@@ -8,15 +8,14 @@
 import expect from '@kbn/expect';
 import { stringify } from 'query-string';
 import { registerHelpers } from './rollup.test_helpers';
-import { INDEX_TO_ROLLUP_MAPPINGS, INDEX_PATTERNS_EXTENSION_BASE_PATH } from './constants';
+import { INDEX_PATTERNS_EXTENSION_BASE_PATH } from './constants';
 import { getRandomString } from './lib';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
 
-  const { createIndexWithMappings, getJobPayload, createJob, cleanUp } = registerHelpers(
-    getService
-  );
+  const { createIndexWithMappings, getJobPayload, createJob, cleanUp } =
+    registerHelpers(getService);
 
   describe('index patterns extension', () => {
     describe('Fields for wildcards', () => {
@@ -44,7 +43,7 @@ export default function ({ getService }) {
             { sort: false }
           )}`;
           ({ body } = await supertest.get(uri).expect(404));
-          expect(body.message).to.contain('No indices match pattern "foo"');
+          expect(body.message).to.contain('No indices match "foo"');
         });
       });
 
@@ -65,9 +64,9 @@ export default function ({ getService }) {
         const { body } = await supertest.get(uri).expect(200);
 
         // Verify that the fields for wildcard correspond to our declared mappings
-        const propertiesWithMappings = Object.keys(INDEX_TO_ROLLUP_MAPPINGS.properties);
+        // noting that testTotalField and testTagField are not shown in the field caps results
         const fieldsForWildcard = body.fields.map((field) => field.name);
-        expect(fieldsForWildcard.sort()).eql(propertiesWithMappings.sort());
+        expect(fieldsForWildcard.sort()).eql(['testCreatedField']);
 
         // Cleanup
         await cleanUp();

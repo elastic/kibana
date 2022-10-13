@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getBucketSize } from './index';
+import { getBucketSize } from '.';
 import moment from 'moment';
 
 describe('getBuckets', () => {

@@ -17,8 +17,9 @@ export interface State {
   cacheKey?: unknown;
   moduleCount?: number;
   workUnits?: number;
-  files?: string[];
+  referencedPaths?: string[];
   bundleRefExportIds?: string[];
+  dllRefKeys?: string[];
 }
 
 const DEFAULT_STATE: State = {};
@@ -82,12 +83,16 @@ export class BundleCache {
     return this.get().moduleCount;
   }
 
-  public getReferencedFiles() {
-    return this.get().files;
+  public getReferencedPaths() {
+    return this.get().referencedPaths;
   }
 
   public getBundleRefExportIds() {
     return this.get().bundleRefExportIds;
+  }
+
+  public getDllRefKeys() {
+    return this.get().dllRefKeys;
   }
 
   public getCacheKey() {

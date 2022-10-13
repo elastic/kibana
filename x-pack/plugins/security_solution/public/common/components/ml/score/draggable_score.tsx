@@ -7,11 +7,9 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { DraggableWrapper, DragEffects } from '../../drag_and_drop/draggable_wrapper';
-import { Anomaly } from '../types';
-import {
-  IS_OPERATOR,
-  QueryOperator,
-} from '../../../../timelines/components/timeline/data_providers/data_provider';
+import type { Anomaly } from '../types';
+import type { QueryOperator } from '../../../../timelines/components/timeline/data_providers/data_provider';
+import { IS_OPERATOR } from '../../../../timelines/components/timeline/data_providers/data_provider';
 import { Provider } from '../../../../timelines/components/timeline/data_providers/provider';
 import { Spacer } from '../../page';
 import { getScoreString } from './score_health';
@@ -69,6 +67,8 @@ export const DraggableScoreComponent = ({
       key={`draggable-score-draggable-wrapper-${id}`}
       dataProvider={dataProviderProp}
       render={render}
+      isAggregatable={true}
+      fieldType="keyword"
     />
   );
 };

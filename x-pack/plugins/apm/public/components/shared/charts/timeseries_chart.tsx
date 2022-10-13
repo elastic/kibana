@@ -9,41 +9,50 @@ import {
   AnnotationDomainType,
   AreaSeries,
   Axis,
+  BarSeries,
   Chart,
   CurveType,
   LegendItemListener,
   LineAnnotation,
   LineSeries,
   niceTimeFormatter,
-  Placement,
   Position,
   RectAnnotation,
+  RectAnnotationStyle,
   ScaleType,
+  SeriesIdentifier,
   Settings,
+  XYBrushEvent,
+  XYChartSeriesIdentifier,
   YDomainRange,
 } from '@elastic/charts';
-import { EuiIcon } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { useChartTheme } from '../../../../../observability/public';
+import { useChartTheme } from '@kbn/observability-plugin/public';
+import { isExpectedBoundsComparison } from '../time_comparison/get_comparison_options';
+import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
+import { ServiceAnomalyTimeseries } from '../../../../common/anomaly_detection/service_anomaly_timeseries';
 import { asAbsoluteDateTime } from '../../../../common/utils/formatters';
-import {
-  Coordinate,
-  RectCoordinate,
-  TimeSeries,
-} from '../../../../typings/timeseries';
+import { Coordinate, TimeSeries } from '../../../../typings/timeseries';
+import { useAnnotationsContext } from '../../../context/annotations/use_annotations_context';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { useChartPointerEventContext } from '../../../context/chart_pointer_event/use_chart_pointer_event_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useTheme } from '../../../hooks/use_theme';
-import { useAnnotationsContext } from '../../../context/annotations/use_annotations_context';
-import { useChartPointerEventContext } from '../../../context/chart_pointer_event/use_chart_pointer_event_context';
-import { unit } from '../../../style/variables';
+import { unit } from '../../../utils/style';
 import { ChartContainer } from './chart_container';
-import { onBrushEnd, isTimeseriesEmpty } from './helper/helper';
-import { getLatencyChartSelector } from '../../../selectors/latency_chart_selectors';
-import { APMServiceAlert } from '../../../context/apm_service/apm_service_context';
-import { getAlertAnnotations } from './helper/get_alert_annotations';
+import {
+  expectedBoundsTitle,
+  getChartAnomalyTimeseries,
+} from './helper/get_chart_anomaly_timeseries';
+import { isTimeseriesEmpty, onBrushEnd } from './helper/helper';
+import { getTimeZone } from './helper/timezone';
 
+interface AnomalyTimeseries extends ServiceAnomalyTimeseries {
+  color?: string;
+}
 interface Props {
   id: string;
   fetchStatus: FETCH_STATUS;
@@ -60,12 +69,16 @@ interface Props {
   yTickFormat?: (y: number) => string;
   showAnnotations?: boolean;
   yDomain?: YDomainRange;
-  anomalyTimeseries?: ReturnType<
-    typeof getLatencyChartSelector
-  >['anomalyTimeseries'];
+  anomalyTimeseries?: AnomalyTimeseries;
   customTheme?: Record<string, unknown>;
-  alerts?: APMServiceAlert[];
+  anomalyTimeseriesColor?: string;
 }
+
+const END_ZONE_LABEL = i18n.translate('xpack.apm.timeseries.endzone', {
+  defaultMessage:
+    'The selected time range does not include this entire bucket. It might contain partial data.',
+});
+
 export function TimeseriesChart({
   id,
   height = unit * 16,
@@ -78,43 +91,152 @@ export function TimeseriesChart({
   yDomain,
   anomalyTimeseries,
   customTheme = {},
-  alerts,
 }: Props) {
   const history = useHistory();
+  const { core } = useApmPluginContext();
   const { annotations } = useAnnotationsContext();
-  const { setPointerEvent, chartRef } = useChartPointerEventContext();
+  const { chartRef, updatePointerEvent } = useChartPointerEventContext();
   const theme = useTheme();
   const chartTheme = useChartTheme();
+  const {
+    query: { comparisonEnabled, offset },
+  } = useAnyOfApmParams(
+    '/services',
+    '/dependencies/*',
+    '/services/{serviceName}'
+  );
+
+  const anomalyChartTimeseries = getChartAnomalyTimeseries({
+    anomalyTimeseries,
+    theme,
+    anomalyTimeseriesColor: anomalyTimeseries?.color,
+  });
+
+  const isEmpty = isTimeseriesEmpty(timeseries);
+  const annotationColor = theme.eui.euiColorSuccess;
+
+  const isComparingExpectedBounds =
+    comparisonEnabled && isExpectedBoundsComparison(offset);
+  const allSeries = [
+    ...timeseries,
+    ...(isComparingExpectedBounds
+      ? anomalyChartTimeseries?.boundaries ?? []
+      : []),
+    ...(anomalyChartTimeseries?.scores ?? []),
+  ]
+    // Sorting series so that area type series are before line series
+    // This is a workaround so that the legendSort works correctly
+    // Can be removed when https://github.com/elastic/elastic-charts/issues/1685 is resolved
+    .sort(
+      isComparingExpectedBounds
+        ? (prev, curr) => prev.type.localeCompare(curr.type)
+        : undefined
+    );
 
   const xValues = timeseries.flatMap(({ data }) => data.map(({ x }) => x));
 
-  const min = Math.min(...xValues);
-  const max = Math.max(...xValues);
+  const xValuesExpectedBounds =
+    anomalyChartTimeseries?.boundaries?.flatMap(({ data }) =>
+      data.map(({ x }) => x)
+    ) ?? [];
 
+  const timeZone = getTimeZone(core.uiSettings);
+
+  const min = Math.min(...xValues);
+  const max = Math.max(...xValues, ...xValuesExpectedBounds);
   const xFormatter = niceTimeFormatter([min, max]);
-  const isEmpty = isTimeseriesEmpty(timeseries);
-  const annotationColor = theme.eui.euiColorSecondary;
-  const allSeries = [...timeseries, ...(anomalyTimeseries?.boundaries ?? [])];
+
   const xDomain = isEmpty ? { min: 0, max: 1 } : { min, max };
 
+  // Using custom legendSort here when comparing expected bounds
+  // because by default elastic-charts will show legends for expected bounds first
+  // but for consistency, we are making `Expected bounds` last
+  // See https://github.com/elastic/elastic-charts/issues/1685
+  const legendSort = isComparingExpectedBounds
+    ? (a: SeriesIdentifier, b: SeriesIdentifier) => {
+        if ((a as XYChartSeriesIdentifier)?.specId === expectedBoundsTitle)
+          return -1;
+        if ((b as XYChartSeriesIdentifier)?.specId === expectedBoundsTitle)
+          return -1;
+        return 1;
+      }
+    : undefined;
+
+  const endZoneColor = theme.darkMode
+    ? theme.eui.euiColorLightShade
+    : theme.eui.euiColorDarkShade;
+  const endZoneRectAnnotationStyle: Partial<RectAnnotationStyle> = {
+    stroke: endZoneColor,
+    fill: endZoneColor,
+    strokeWidth: 0,
+    opacity: theme.darkMode ? 0.6 : 0.2,
+  };
+
+  function getChartType(type: string) {
+    switch (type) {
+      case 'area':
+        return AreaSeries;
+      case 'bar':
+        return BarSeries;
+      default:
+        return LineSeries;
+    }
+  }
+
   return (
-    <ChartContainer hasData={!isEmpty} height={height} status={fetchStatus}>
+    <ChartContainer
+      hasData={!isEmpty}
+      height={height}
+      status={fetchStatus}
+      id={id}
+    >
       <Chart ref={chartRef} id={id}>
         <Settings
-          onBrushEnd={({ x }) => onBrushEnd({ x, history })}
-          theme={{
-            ...chartTheme,
-            areaSeriesStyle: {
-              line: { visible: false },
+          tooltip={{
+            stickTo: 'top',
+            showNullValues: false,
+            headerFormatter: ({ value }) => {
+              const formattedValue = xFormatter(value);
+              if (max === value) {
+                return (
+                  <>
+                    <EuiFlexGroup
+                      alignItems="center"
+                      responsive={false}
+                      gutterSize="xs"
+                      style={{ fontWeight: 'normal' }}
+                    >
+                      <EuiFlexItem grow={false}>
+                        <EuiIcon type="iInCircle" />
+                      </EuiFlexItem>
+                      <EuiFlexItem>{END_ZONE_LABEL}</EuiFlexItem>
+                    </EuiFlexGroup>
+                    <EuiSpacer size="xs" />
+                    {formattedValue}
+                  </>
+                );
+              }
+              return formattedValue;
             },
-            ...customTheme,
           }}
-          onPointerUpdate={setPointerEvent}
+          onBrushEnd={(event) =>
+            onBrushEnd({ x: (event as XYBrushEvent).x, history })
+          }
+          theme={[
+            customTheme,
+            {
+              areaSeriesStyle: {
+                line: { visible: false },
+              },
+            },
+            ...chartTheme,
+          ]}
+          onPointerUpdate={updatePointerEvent}
           externalPointerEvents={{
-            tooltip: { visible: true, placement: Placement.Right },
+            tooltip: { visible: true },
           }}
           showLegend
-          showLegendExtra
+          legendSort={legendSort}
           legendPosition={Position.Bottom}
           xDomain={xDomain}
           onLegendItemClick={(legend) => {
@@ -158,17 +280,34 @@ export function TimeseriesChart({
           />
         )}
 
+        <RectAnnotation
+          id="__endzones__"
+          zIndex={2}
+          dataValues={[
+            {
+              coordinates: { x0: xValues[xValues.length - 2] },
+              details: END_ZONE_LABEL,
+            },
+          ]}
+          style={endZoneRectAnnotationStyle}
+        />
+
         {allSeries.map((serie) => {
-          const Series = serie.type === 'area' ? AreaSeries : LineSeries;
+          const Series = getChartType(serie.type);
 
           return (
             <Series
+              timeZone={timeZone}
               key={serie.title}
-              id={serie.title}
+              id={serie.id || serie.title}
+              groupId={serie.groupId}
               xScaleType={ScaleType.Time}
               yScaleType={ScaleType.Linear}
               xAccessor="x"
-              yAccessors={['y']}
+              yAccessors={serie.yAccessors ?? ['y']}
+              y0Accessors={serie.y0Accessors}
+              stackAccessors={serie.stackAccessors ?? undefined}
+              markSizeAccessor={serie.markSizeAccessor}
               data={isEmpty ? [] : serie.data}
               color={serie.color}
               curve={CurveType.CURVE_MONOTONE_X}
@@ -177,28 +316,10 @@ export function TimeseriesChart({
               filterSeriesInTooltip={
                 serie.hideTooltipValue ? () => false : undefined
               }
-              stackAccessors={serie.stackAccessors ?? undefined}
               areaSeriesStyle={serie.areaSeriesStyle}
               lineSeriesStyle={serie.lineSeriesStyle}
             />
           );
-        })}
-
-        {anomalyTimeseries?.scores && (
-          <RectAnnotation
-            key={anomalyTimeseries.scores.title}
-            id="score_anomalies"
-            dataValues={(anomalyTimeseries.scores.data as RectCoordinate[]).map(
-              ({ x0, x: x1 }) => ({
-                coordinates: { x0, x1 },
-              })
-            )}
-            style={{ fill: anomalyTimeseries.scores.color }}
-          />
-        )}
-        {getAlertAnnotations({
-          alerts,
-          theme,
         })}
       </Chart>
     </ChartContainer>

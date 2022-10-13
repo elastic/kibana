@@ -10,6 +10,7 @@ import { Subject, Observable } from 'rxjs';
 import stats from 'stats-lite';
 import sinon from 'sinon';
 import { take, tap, bufferCount, skip, map } from 'rxjs/operators';
+import { mockLogger } from '../test_utils';
 
 import { ConcreteTaskInstance, TaskStatus } from '../task';
 import {
@@ -17,6 +18,8 @@ import {
   asTaskPollingCycleEvent,
   TaskTiming,
   asTaskManagerStatEvent,
+  TaskPersistence,
+  asTaskClaimEvent,
 } from '../task_events';
 import { asOk } from '../lib/result_type';
 import { TaskLifecycleEvent } from '../polling_lifecycle';
@@ -34,9 +37,11 @@ import { configSchema } from '../config';
 
 describe('Task Run Statistics', () => {
   let fakeTimer: sinon.SinonFakeTimers;
+  const logger = mockLogger();
 
   beforeAll(() => {
     fakeTimer = sinon.useFakeTimers();
+    jest.resetAllMocks();
   });
 
   afterAll(() => fakeTimer.restore());
@@ -75,7 +80,7 @@ describe('Task Run Statistics', () => {
           // Use 'summarizeTaskRunStat' to receive summarize stats
           map(({ key, value }: AggregatedStat<TaskRunStat>) => ({
             key,
-            value: summarizeTaskRunStat(value, getTaskManagerConfig()).value,
+            value: summarizeTaskRunStat(logger, value, getTaskManagerConfig()).value,
           })),
           take(runAtDrift.length),
           bufferCount(runAtDrift.length)
@@ -143,7 +148,7 @@ describe('Task Run Statistics', () => {
           // Use 'summarizeTaskRunStat' to receive summarize stats
           map(({ key, value }: AggregatedStat<TaskRunStat>) => ({
             key,
-            value: summarizeTaskRunStat(value, getTaskManagerConfig()).value,
+            value: summarizeTaskRunStat(logger, value, getTaskManagerConfig()).value,
           })),
           take(runDurations.length * 2),
           bufferCount(runDurations.length * 2)
@@ -239,7 +244,7 @@ describe('Task Run Statistics', () => {
           // Use 'summarizeTaskRunStat' to receive summarize stats
           map(({ key, value }: AggregatedStat<TaskRunStat>) => ({
             key,
-            value: summarizeTaskRunStat(value, getTaskManagerConfig()).value,
+            value: summarizeTaskRunStat(logger, value, getTaskManagerConfig()).value,
           })),
           take(10),
           bufferCount(10)
@@ -319,6 +324,7 @@ describe('Task Run Statistics', () => {
           map(({ key, value }: AggregatedStat<TaskRunStat>) => ({
             key,
             value: summarizeTaskRunStat(
+              logger,
               value,
               getTaskManagerConfig({
                 monitored_task_execution_thresholds: {
@@ -356,18 +362,40 @@ describe('Task Run Statistics', () => {
               // Success, Success, Success, Failed
               { Success: 75, RetryScheduled: 0, Failed: 25, status: 'OK' },
               // Success, Success, Success, Failed, Failed
-              { Success: 60, RetryScheduled: 0, Failed: 40, status: 'warn' },
+              { Success: 60, RetryScheduled: 0, Failed: 40, status: 'OK' },
               // Success, Success, Failed, Failed, Failed
-              { Success: 40, RetryScheduled: 0, Failed: 60, status: 'error' },
+              { Success: 40, RetryScheduled: 0, Failed: 60, status: 'OK' },
               // Success, Failed, Failed, Failed, RetryScheduled
-              { Success: 20, RetryScheduled: 20, Failed: 60, status: 'error' },
+              { Success: 20, RetryScheduled: 20, Failed: 60, status: 'OK' },
               // Failed, Failed, Failed, RetryScheduled, RetryScheduled
-              { Success: 0, RetryScheduled: 40, Failed: 60, status: 'error' },
+              { Success: 0, RetryScheduled: 40, Failed: 60, status: 'OK' },
               // Failed, Failed, RetryScheduled, RetryScheduled, Success
-              { Success: 20, RetryScheduled: 40, Failed: 40, status: 'warn' },
+              { Success: 20, RetryScheduled: 40, Failed: 40, status: 'OK' },
               // Failed, RetryScheduled, RetryScheduled, Success, Success
               { Success: 40, RetryScheduled: 40, Failed: 20, status: 'OK' },
             ]);
+
+            expect(logger.debug).toHaveBeenCalledTimes(5);
+            expect(logger.debug).toHaveBeenNthCalledWith(
+              1,
+              'Health Status warn threshold has been exceeded, resultFrequencySummary.Failed (40) is greater than warn_threshold (39)'
+            );
+            expect(logger.debug).toHaveBeenNthCalledWith(
+              2,
+              'Health Status error threshold has been exceeded, resultFrequencySummary.Failed (60) is greater than error_threshold (59)'
+            );
+            expect(logger.debug).toHaveBeenNthCalledWith(
+              3,
+              'Health Status error threshold has been exceeded, resultFrequencySummary.Failed (60) is greater than error_threshold (59)'
+            );
+            expect(logger.debug).toHaveBeenNthCalledWith(
+              4,
+              'Health Status error threshold has been exceeded, resultFrequencySummary.Failed (60) is greater than error_threshold (59)'
+            );
+            expect(logger.debug).toHaveBeenNthCalledWith(
+              5,
+              'Health Status warn threshold has been exceeded, resultFrequencySummary.Failed (40) is greater than warn_threshold (39)'
+            );
             resolve();
           } catch (e) {
             reject(e);
@@ -384,6 +412,302 @@ describe('Task Run Statistics', () => {
       events$.next(mockTaskRunEvent({}, { start: 0, stop: 0 }, TaskRunResult.RetryScheduled));
       events$.next(mockTaskRunEvent({}, { start: 0, stop: 0 }, TaskRunResult.Success));
       events$.next(mockTaskRunEvent({}, { start: 0, stop: 0 }, TaskRunResult.Success));
+    });
+  });
+
+  test('frequency of executed tasks by their persistence', async () => {
+    const events$ = new Subject<TaskLifecycleEvent>();
+
+    const taskPollingLifecycle = taskPollingLifecycleMock.create({
+      events$: events$ as Observable<TaskLifecycleEvent>,
+    });
+
+    const runningAverageWindowSize = 5;
+    const taskRunAggregator = createTaskRunAggregator(
+      taskPollingLifecycle,
+      runningAverageWindowSize
+    );
+
+    const taskEvents = [
+      mockTaskRunEvent({}, { start: 0, stop: 0 }, TaskRunResult.Success),
+      mockTaskRunEvent({}, { start: 0, stop: 0 }, TaskRunResult.Success),
+      mockTaskRunEvent(
+        { schedule: { interval: '3s' } },
+        { start: 0, stop: 0 },
+        TaskRunResult.Success
+      ),
+      mockTaskRunEvent({}, { start: 0, stop: 0 }, TaskRunResult.Failed),
+      mockTaskRunEvent({}, { start: 0, stop: 0 }, TaskRunResult.Failed),
+      mockTaskRunEvent(
+        { schedule: { interval: '3s' } },
+        { start: 0, stop: 0 },
+        TaskRunResult.Failed
+      ),
+      mockTaskRunEvent(
+        { schedule: { interval: '3s' } },
+        { start: 0, stop: 0 },
+        TaskRunResult.RetryScheduled
+      ),
+      mockTaskRunEvent({}, { start: 0, stop: 0 }, TaskRunResult.RetryScheduled),
+      mockTaskRunEvent({}, { start: 0, stop: 0 }, TaskRunResult.Success),
+      mockTaskRunEvent(
+        { schedule: { interval: '3s' } },
+        { start: 0, stop: 0 },
+        TaskRunResult.Success
+      ),
+      mockTaskRunEvent({}, { start: 0, stop: 0 }, TaskRunResult.Success, TaskPersistence.Ephemeral),
+      mockTaskRunEvent({}, { start: 0, stop: 0 }, TaskRunResult.Success, TaskPersistence.Ephemeral),
+      mockTaskRunEvent({}, { start: 0, stop: 0 }, TaskRunResult.Success),
+      mockTaskRunEvent({}, { start: 0, stop: 0 }, TaskRunResult.Success, TaskPersistence.Ephemeral),
+      mockTaskRunEvent(
+        { schedule: { interval: '3s' } },
+        { start: 0, stop: 0 },
+        TaskRunResult.Success
+      ),
+    ];
+
+    return new Promise<void>((resolve, reject) => {
+      taskRunAggregator
+        .pipe(
+          // skip initial stat which is just initialized data which
+          // ensures we don't stall on combineLatest
+          skip(1),
+          // Use 'summarizeTaskRunStat' to receive summarize stats
+          map(({ key, value }: AggregatedStat<TaskRunStat>) => ({
+            key,
+            value: summarizeTaskRunStat(logger, value, getTaskManagerConfig({})).value,
+          })),
+          take(taskEvents.length),
+          bufferCount(taskEvents.length)
+        )
+        .subscribe((taskStats: Array<AggregatedStat<SummarizedTaskRunStat>>) => {
+          try {
+            /**
+             * At any given time we only keep track of the last X Polling Results
+             * In the tests this is ocnfiugured to a window size of 5
+             */
+            expect(taskStats.map((taskStat) => taskStat.value.execution.persistence))
+              .toMatchInlineSnapshot(`
+              Array [
+                Object {
+                  "ephemeral": 0,
+                  "non_recurring": 100,
+                  "recurring": 0,
+                },
+                Object {
+                  "ephemeral": 0,
+                  "non_recurring": 100,
+                  "recurring": 0,
+                },
+                Object {
+                  "ephemeral": 0,
+                  "non_recurring": 67,
+                  "recurring": 33,
+                },
+                Object {
+                  "ephemeral": 0,
+                  "non_recurring": 75,
+                  "recurring": 25,
+                },
+                Object {
+                  "ephemeral": 0,
+                  "non_recurring": 80,
+                  "recurring": 20,
+                },
+                Object {
+                  "ephemeral": 0,
+                  "non_recurring": 60,
+                  "recurring": 40,
+                },
+                Object {
+                  "ephemeral": 0,
+                  "non_recurring": 40,
+                  "recurring": 60,
+                },
+                Object {
+                  "ephemeral": 0,
+                  "non_recurring": 60,
+                  "recurring": 40,
+                },
+                Object {
+                  "ephemeral": 0,
+                  "non_recurring": 60,
+                  "recurring": 40,
+                },
+                Object {
+                  "ephemeral": 0,
+                  "non_recurring": 40,
+                  "recurring": 60,
+                },
+                Object {
+                  "ephemeral": 20,
+                  "non_recurring": 40,
+                  "recurring": 40,
+                },
+                Object {
+                  "ephemeral": 40,
+                  "non_recurring": 40,
+                  "recurring": 20,
+                },
+                Object {
+                  "ephemeral": 40,
+                  "non_recurring": 40,
+                  "recurring": 20,
+                },
+                Object {
+                  "ephemeral": 60,
+                  "non_recurring": 20,
+                  "recurring": 20,
+                },
+                Object {
+                  "ephemeral": 60,
+                  "non_recurring": 20,
+                  "recurring": 20,
+                },
+              ]
+            `);
+            resolve();
+          } catch (e) {
+            reject(e);
+          }
+        });
+
+      taskEvents.forEach((event) => events$.next(event));
+    });
+  });
+
+  test('frequency of polled tasks by their persistence', async () => {
+    const events$ = new Subject<TaskLifecycleEvent>();
+
+    const taskPollingLifecycle = taskPollingLifecycleMock.create({
+      events$: events$ as Observable<TaskLifecycleEvent>,
+    });
+
+    const runningAverageWindowSize = 5;
+    const taskRunAggregator = createTaskRunAggregator(
+      taskPollingLifecycle,
+      runningAverageWindowSize
+    );
+
+    const taskEvents = [
+      mockTaskPollingEvent({}),
+      mockTaskPollingEvent({}),
+      mockTaskPollingEvent({ schedule: { interval: '3s' } }),
+      mockTaskPollingEvent({}),
+      mockTaskPollingEvent({}),
+      mockTaskPollingEvent({ schedule: { interval: '3s' } }),
+      mockTaskPollingEvent({ schedule: { interval: '3s' } }),
+      mockTaskPollingEvent({}),
+      mockTaskPollingEvent({}),
+      mockTaskPollingEvent({ schedule: { interval: '3s' } }),
+      mockTaskPollingEvent({}),
+      mockTaskPollingEvent({}),
+      mockTaskPollingEvent({}),
+      mockTaskPollingEvent({}),
+      mockTaskPollingEvent({ schedule: { interval: '3s' } }),
+    ];
+
+    return new Promise<void>((resolve, reject) => {
+      taskRunAggregator
+        .pipe(
+          // skip initial stat which is just initialized data which
+          // ensures we don't stall on combineLatest
+          skip(1),
+          // Use 'summarizeTaskRunStat' to receive summarize stats
+          map(({ key, value }: AggregatedStat<TaskRunStat>) => ({
+            key,
+            value: summarizeTaskRunStat(logger, value, getTaskManagerConfig({})).value,
+          })),
+          take(taskEvents.length),
+          bufferCount(taskEvents.length)
+        )
+        .subscribe((taskStats: Array<AggregatedStat<SummarizedTaskRunStat>>) => {
+          try {
+            /**
+             * At any given time we only keep track of the last X Polling Results
+             * In the tests this is ocnfiugured to a window size of 5
+             */
+            expect(taskStats.map((taskStat) => taskStat.value.polling.persistence))
+              .toMatchInlineSnapshot(`
+              Array [
+                Object {
+                  "non_recurring": 0,
+                  "recurring": 0,
+                },
+                Object {
+                  "non_recurring": 100,
+                  "recurring": 0,
+                },
+                Object {
+                  "non_recurring": 100,
+                  "recurring": 0,
+                },
+                Object {
+                  "non_recurring": 67,
+                  "recurring": 33,
+                },
+                Object {
+                  "non_recurring": 75,
+                  "recurring": 25,
+                },
+                Object {
+                  "non_recurring": 80,
+                  "recurring": 20,
+                },
+                Object {
+                  "non_recurring": 60,
+                  "recurring": 40,
+                },
+                Object {
+                  "non_recurring": 40,
+                  "recurring": 60,
+                },
+                Object {
+                  "non_recurring": 60,
+                  "recurring": 40,
+                },
+                Object {
+                  "non_recurring": 60,
+                  "recurring": 40,
+                },
+                Object {
+                  "non_recurring": 40,
+                  "recurring": 60,
+                },
+                Object {
+                  "non_recurring": 60,
+                  "recurring": 40,
+                },
+                Object {
+                  "non_recurring": 80,
+                  "recurring": 20,
+                },
+                Object {
+                  "non_recurring": 80,
+                  "recurring": 20,
+                },
+                Object {
+                  "non_recurring": 80,
+                  "recurring": 20,
+                },
+              ]
+            `);
+            resolve();
+          } catch (e) {
+            reject(e);
+          }
+        });
+
+      const timing = {
+        start: 0,
+        stop: 0,
+      };
+      events$.next(
+        asTaskPollingCycleEvent(asOk({ result: FillPoolResult.NoTasksClaimed, timing }))
+      );
+      events$.next(asTaskManagerStatEvent('pollingDelay', asOk(0)));
+      events$.next(asTaskManagerStatEvent('claimDuration', asOk(10)));
+      taskEvents.forEach((event) => events$.next(event));
     });
   });
 
@@ -409,7 +733,7 @@ describe('Task Run Statistics', () => {
           // Use 'summarizeTaskRunStat' to receive summarize stats
           map(({ key, value }: AggregatedStat<TaskRunStat>) => ({
             key,
-            value: summarizeTaskRunStat(value, getTaskManagerConfig()).value,
+            value: summarizeTaskRunStat(logger, value, getTaskManagerConfig()).value,
           })),
           tap(() => {
             expectedTimestamp.push(new Date().toISOString());
@@ -570,10 +894,25 @@ function runAtMillisecondsAgo(ms: number): Date {
 const mockTaskRunEvent = (
   overrides: Partial<ConcreteTaskInstance> = {},
   timing: TaskTiming,
-  result: TaskRunResult = TaskRunResult.Success
+  result: TaskRunResult = TaskRunResult.Success,
+  persistence?: TaskPersistence
 ) => {
   const task = mockTaskInstance(overrides);
-  return asTaskRunEvent(task.id, asOk({ task, result }), timing);
+  return asTaskRunEvent(
+    task.id,
+    asOk({
+      task,
+      persistence:
+        persistence ?? (task.schedule ? TaskPersistence.Recurring : TaskPersistence.NonRecurring),
+      result,
+    }),
+    timing
+  );
+};
+
+const mockTaskPollingEvent = (overrides: Partial<ConcreteTaskInstance> = {}) => {
+  const task = mockTaskInstance(overrides);
+  return asTaskClaimEvent(task.id, asOk(task));
 };
 
 const mockTaskInstance = (overrides: Partial<ConcreteTaskInstance> = {}): ConcreteTaskInstance => ({

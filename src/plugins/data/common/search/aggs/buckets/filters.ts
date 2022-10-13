@@ -8,13 +8,14 @@
 
 import { i18n } from '@kbn/i18n';
 import { size, transform, cloneDeep } from 'lodash';
+import { buildEsQuery, Query } from '@kbn/es-query';
 
+import { QueryFilter, queryFilterToAst } from '../../expressions';
 import { createFilterFilters } from './create_filter/filters';
-import { toAngularJSON } from '../utils';
 import { BucketAggType } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { aggFiltersFnName } from './filters_fn';
-import { getEsQueryConfig, buildEsQuery, Query, UI_SETTINGS } from '../../../../common';
+import { getEsQueryConfig, UI_SETTINGS } from '../../..';
 import { BaseAggParams } from '../types';
 
 const filtersTitle = i18n.translate('data.search.aggs.buckets.filtersTitle', {
@@ -34,10 +35,7 @@ export interface FiltersBucketAggDependencies {
 }
 
 export interface AggParamsFilters extends Omit<BaseAggParams, 'customLabel'> {
-  filters?: Array<{
-    input: Query;
-    label: string;
-  }>;
+  filters?: QueryFilter[];
 }
 
 export const getFiltersBucketAgg = ({ getConfig }: FiltersBucketAggDependencies) =>
@@ -84,7 +82,7 @@ export const getFiltersBucketAgg = ({ getConfig }: FiltersBucketAggDependencies)
                 matchAllLabel ||
                 (typeof filter.input.query === 'string'
                   ? filter.input.query
-                  : toAngularJSON(filter.input.query));
+                  : JSON.stringify(filter.input.query));
               filters[label] = query;
             },
             {}
@@ -95,6 +93,7 @@ export const getFiltersBucketAgg = ({ getConfig }: FiltersBucketAggDependencies)
           const params = output.params || (output.params = {});
           params.filters = outFilters;
         },
+        toExpressionAst: (filters: AggParamsFilters['filters']) => filters?.map(queryFilterToAst),
       },
     ],
   });

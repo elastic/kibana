@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiButton,
   EuiButtonEmpty,
   EuiAccordion,
   EuiHorizontalRule,
@@ -13,12 +14,13 @@ import {
   EuiSpacer,
   EuiFlexGroup,
 } from '@elastic/eui';
-import React, { useCallback, useRef, useState, useMemo } from 'react';
-import { useHistory } from 'react-router-dom';
-import styled, { StyledComponent } from 'styled-components';
+import React, { useCallback, useRef, useState, useMemo, useEffect } from 'react';
+import styled from 'styled-components';
 
+import type { DataViewListItem } from '@kbn/data-views-plugin/common';
+import { isThreatMatchRule } from '../../../../../../common/detection_engine/utils';
 import { useCreateRule } from '../../../../containers/detection_engine/rules';
-import { CreateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
+import type { CreateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
 import { useListsConfig } from '../../../../containers/detection_engine/lists/use_lists_config';
 
 import {
@@ -26,7 +28,7 @@ import {
   getRuleDetailsUrl,
   getRulesUrl,
 } from '../../../../../common/components/link_to/redirect_to_detection_engine';
-import { WrapperPage } from '../../../../../common/components/wrapper_page';
+import { SecuritySolutionPageWrapper } from '../../../../../common/components/page_wrapper';
 import { displaySuccessToast, useStateToaster } from '../../../../../common/components/toasters';
 import { SpyRoute } from '../../../../../common/utils/route/spy_routes';
 import { useUserData } from '../../../../components/user_info';
@@ -35,19 +37,40 @@ import { StepDefineRule } from '../../../../components/rules/step_define_rule';
 import { StepAboutRule } from '../../../../components/rules/step_about_rule';
 import { StepScheduleRule } from '../../../../components/rules/step_schedule_rule';
 import { StepRuleActions } from '../../../../components/rules/step_rule_actions';
-import { DetectionEngineHeaderPage } from '../../../../components/detection_engine_header_page';
 import * as RuleI18n from '../translations';
 import {
   redirectToDetections,
   getActionMessageParams,
-  userHasNoPermissions,
+  userHasPermissions,
   MaxWidthEuiFlexItem,
 } from '../helpers';
-import { RuleStep, RuleStepsFormData, RuleStepsFormHooks } from '../types';
+import type {
+  AboutStepRule,
+  DefineStepRule,
+  ScheduleStepRule,
+  RuleStepsFormData,
+  RuleStepsFormHooks,
+  RuleStepsData,
+} from '../types';
+import { RuleStep } from '../types';
 import { formatRule, stepIsValid } from './helpers';
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../../../app/types';
-import { ruleStepsOrder } from '../utils';
+import {
+  getStepScheduleDefaultValue,
+  ruleStepsOrder,
+  stepAboutDefaultValue,
+  stepDefineDefaultValue,
+} from '../utils';
+import {
+  APP_UI_ID,
+  DEFAULT_INDEX_KEY,
+  DEFAULT_INDICATOR_SOURCE_PATH,
+  DEFAULT_THREAT_INDEX_KEY,
+} from '../../../../../../common/constants';
+import { useKibana, useUiSetting$ } from '../../../../../common/lib/kibana';
+import { HeaderPage } from '../../../../../common/components/header_page';
+import { PreviewFlyout } from '../preview';
 
 const formHookNoop = async (): Promise<undefined> => undefined;
 
@@ -69,22 +92,15 @@ const MyEuiPanel = styled(EuiPanel)<{
       display: none;
     }
   }
+  .euiAccordion__childWrapper {
+    transform: none; /* To circumvent an issue in Eui causing the fullscreen datagrid to break */
+  }
 `;
 
 MyEuiPanel.displayName = 'MyEuiPanel';
 
-const StepDefineRuleAccordion: StyledComponent<
-  typeof EuiAccordion,
-  any, // eslint-disable-line
-  { ref: React.MutableRefObject<EuiAccordion | null> },
-  never
-> = styled(EuiAccordion)`
-  .euiAccordion__childWrapper {
-    overflow: visible;
-  }
-`;
-
-StepDefineRuleAccordion.displayName = 'StepDefineRuleAccordion';
+const isShouldRerenderStep = (step: RuleStep, activeStep: RuleStep) =>
+  activeStep !== step ? '0' : '1';
 
 const CreateRulePageComponent: React.FC = () => {
   const [
@@ -96,19 +112,27 @@ const CreateRulePageComponent: React.FC = () => {
       canUserCRUD,
     },
   ] = useUserData();
-  const {
-    loading: listsConfigLoading,
-    needsConfiguration: needsListsConfiguration,
-  } = useListsConfig();
+  const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
+    useListsConfig();
+  const { navigateToApp } = useKibana().services.application;
+  const { data: dataServices } = useKibana().services;
   const loading = userInfoLoading || listsConfigLoading;
   const [, dispatchToaster] = useStateToaster();
   const [activeStep, setActiveStep] = useState<RuleStep>(RuleStep.defineRule);
   const getNextStep = (step: RuleStep): RuleStep | undefined =>
     ruleStepsOrder[ruleStepsOrder.indexOf(step) + 1];
+  // @ts-expect-error EUI team to resolve: https://github.com/elastic/eui/issues/5985
   const defineRuleRef = useRef<EuiAccordion | null>(null);
+  // @ts-expect-error EUI team to resolve: https://github.com/elastic/eui/issues/5985
   const aboutRuleRef = useRef<EuiAccordion | null>(null);
+  // @ts-expect-error EUI team to resolve: https://github.com/elastic/eui/issues/5985
   const scheduleRuleRef = useRef<EuiAccordion | null>(null);
+  // @ts-expect-error EUI team to resolve: https://github.com/elastic/eui/issues/5985
   const ruleActionsRef = useRef<EuiAccordion | null>(null);
+
+  const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
+  const [threatIndicesConfig] = useUiSetting$<string[]>(DEFAULT_THREAT_INDEX_KEY);
+
   const formHooks = useRef<RuleStepsFormHooks>({
     [RuleStep.defineRule]: formHookNoop,
     [RuleStep.aboutRule]: formHookNoop,
@@ -143,7 +167,60 @@ const CreateRulePageComponent: React.FC = () => {
   const ruleType = stepsData.current[RuleStep.defineRule].data?.ruleType;
   const ruleName = stepsData.current[RuleStep.aboutRule].data?.name;
   const actionMessageParams = useMemo(() => getActionMessageParams(ruleType), [ruleType]);
-  const history = useHistory();
+  const [dataViewOptions, setDataViewOptions] = useState<{ [x: string]: DataViewListItem }>({});
+  const [isPreviewDisabled, setIsPreviewDisabled] = useState(false);
+  const [isRulePreviewVisible, setIsRulePreviewVisible] = useState(false);
+
+  const [defineRuleData, setDefineRuleData] = useState<DefineStepRule>({
+    ...stepDefineDefaultValue,
+    index: indicesConfig,
+    threatIndex: threatIndicesConfig,
+  });
+  const [aboutRuleData, setAboutRuleData] = useState<AboutStepRule>(stepAboutDefaultValue);
+  const [scheduleRuleData, setScheduleRuleData] = useState<ScheduleStepRule>(
+    getStepScheduleDefaultValue(defineRuleData.ruleType)
+  );
+
+  useEffect(() => {
+    const isThreatMatchRuleValue = isThreatMatchRule(defineRuleData.ruleType);
+    if (isThreatMatchRuleValue) {
+      setAboutRuleData({
+        ...stepAboutDefaultValue,
+        threatIndicatorPath: DEFAULT_INDICATOR_SOURCE_PATH,
+      });
+    } else {
+      setAboutRuleData(stepAboutDefaultValue);
+    }
+    setScheduleRuleData(getStepScheduleDefaultValue(defineRuleData.ruleType));
+  }, [defineRuleData.ruleType]);
+
+  const updateCurrentDataState = useCallback(
+    <K extends keyof RuleStepsData>(data: RuleStepsData[K]) => {
+      if (activeStep === RuleStep.defineRule) {
+        setDefineRuleData(data as DefineStepRule);
+      } else if (activeStep === RuleStep.aboutRule) {
+        setAboutRuleData(data as AboutStepRule);
+      } else if (activeStep === RuleStep.scheduleRule) {
+        setScheduleRuleData(data as ScheduleStepRule);
+      }
+    },
+    [activeStep]
+  );
+
+  useEffect(() => {
+    const fetchDataViews = async () => {
+      const dataViewsRefs = await dataServices.dataViews.getIdsWithTitle();
+      const dataViewIdIndexPatternMap = dataViewsRefs.reduce(
+        (acc, item) => ({
+          ...acc,
+          [item.id]: item,
+        }),
+        {}
+      );
+      setDataViewOptions(dataViewIdIndexPatternMap);
+    };
+    fetchDataViews();
+  }, [dataServices.dataViews]);
 
   const handleAccordionToggle = useCallback(
     (step: RuleStep, isOpen: boolean) =>
@@ -190,7 +267,8 @@ const CreateRulePageComponent: React.FC = () => {
     async (step: RuleStep) => {
       const stepData = await formHooks.current[step]();
 
-      if (stepData?.isValid) {
+      if (stepData?.isValid && stepData.data) {
+        updateCurrentDataState(stepData.data);
         setStepData(step, stepData);
         const nextStep = getNextStep(step);
 
@@ -220,7 +298,7 @@ const CreateRulePageComponent: React.FC = () => {
         }
       }
     },
-    [goToStep, setRule]
+    [goToStep, setRule, updateCurrentDataState]
   );
 
   const getAccordionType = useCallback(
@@ -266,7 +344,10 @@ const CreateRulePageComponent: React.FC = () => {
 
   if (ruleName && ruleId) {
     displaySuccessToast(i18n.SUCCESSFULLY_CREATED_RULES(ruleName), dispatchToaster);
-    history.replace(getRuleDetailsUrl(ruleId));
+    navigateToApp(APP_UI_ID, {
+      deepLinkId: SecurityPageName.rules,
+      path: getRuleDetailsUrl(ruleId),
+    });
     return null;
   }
 
@@ -278,30 +359,43 @@ const CreateRulePageComponent: React.FC = () => {
       needsListsConfiguration
     )
   ) {
-    history.replace(getDetectionEngineUrl());
+    navigateToApp(APP_UI_ID, {
+      deepLinkId: SecurityPageName.alerts,
+      path: getDetectionEngineUrl(),
+    });
     return null;
-  } else if (userHasNoPermissions(canUserCRUD)) {
-    history.replace(getRulesUrl());
+  } else if (!userHasPermissions(canUserCRUD)) {
+    navigateToApp(APP_UI_ID, {
+      deepLinkId: SecurityPageName.rules,
+      path: getRulesUrl(),
+    });
     return null;
   }
 
   return (
     <>
-      <WrapperPage>
+      <SecuritySolutionPageWrapper>
         <EuiFlexGroup direction="row" justifyContent="spaceAround">
           <MaxWidthEuiFlexItem>
-            <DetectionEngineHeaderPage
+            <HeaderPage
               backOptions={{
-                href: getRulesUrl(),
+                path: getRulesUrl(),
                 text: i18n.BACK_TO_RULES,
-                pageId: SecurityPageName.detections,
+                pageId: SecurityPageName.rules,
               }}
-              border
               isLoading={isLoading || loading}
               title={i18n.PAGE_TITLE}
-            />
-            <MyEuiPanel zindex={4}>
-              <StepDefineRuleAccordion
+            >
+              <EuiButton
+                data-test-subj="preview-flyout"
+                iconType="visBarVerticalStacked"
+                onClick={() => setIsRulePreviewVisible((isVisible) => !isVisible)}
+              >
+                {i18n.RULE_PREVIEW_TITLE}
+              </EuiButton>
+            </HeaderPage>
+            <MyEuiPanel zindex={4} hasBorder>
+              <EuiAccordion
                 initialIsOpen={true}
                 id={RuleStep.defineRule}
                 buttonContent={defineRuleButton}
@@ -324,17 +418,25 @@ const CreateRulePageComponent: React.FC = () => {
                 <EuiHorizontalRule margin="m" />
                 <StepDefineRule
                   addPadding={true}
-                  defaultValues={stepsData.current[RuleStep.defineRule].data}
+                  defaultValues={defineRuleData}
                   isReadOnlyView={activeStep !== RuleStep.defineRule}
                   isLoading={isLoading || loading}
                   setForm={setFormHook}
                   onSubmit={() => submitStep(RuleStep.defineRule)}
+                  kibanaDataViews={dataViewOptions}
                   descriptionColumns="singleSplit"
+                  // We need a key to make this component remount when edit/view mode is toggled
+                  // https://github.com/elastic/kibana/pull/132834#discussion_r881705566
+                  key={isShouldRerenderStep(RuleStep.defineRule, activeStep)}
+                  indicesConfig={indicesConfig}
+                  threatIndicesConfig={threatIndicesConfig}
+                  onRuleDataChange={updateCurrentDataState}
+                  onPreviewDisabledStateChange={setIsPreviewDisabled}
                 />
-              </StepDefineRuleAccordion>
+              </EuiAccordion>
             </MyEuiPanel>
             <EuiSpacer size="l" />
-            <MyEuiPanel zindex={3}>
+            <MyEuiPanel hasBorder zindex={3}>
               <EuiAccordion
                 initialIsOpen={false}
                 id={RuleStep.aboutRule}
@@ -358,18 +460,22 @@ const CreateRulePageComponent: React.FC = () => {
                 <EuiHorizontalRule margin="m" />
                 <StepAboutRule
                   addPadding={true}
-                  defaultValues={stepsData.current[RuleStep.aboutRule].data}
-                  defineRuleData={stepsData.current[RuleStep.defineRule].data}
+                  defaultValues={aboutRuleData}
+                  defineRuleData={defineRuleData}
                   descriptionColumns="singleSplit"
                   isReadOnlyView={activeStep !== RuleStep.aboutRule}
                   isLoading={isLoading || loading}
                   setForm={setFormHook}
                   onSubmit={() => submitStep(RuleStep.aboutRule)}
+                  // We need a key to make this component remount when edit/view mode is toggled
+                  // https://github.com/elastic/kibana/pull/132834#discussion_r881705566
+                  key={isShouldRerenderStep(RuleStep.aboutRule, activeStep)}
+                  onRuleDataChange={updateCurrentDataState}
                 />
               </EuiAccordion>
             </MyEuiPanel>
             <EuiSpacer size="l" />
-            <MyEuiPanel zindex={2}>
+            <MyEuiPanel hasBorder zindex={2}>
               <EuiAccordion
                 initialIsOpen={false}
                 id={RuleStep.scheduleRule}
@@ -392,17 +498,21 @@ const CreateRulePageComponent: React.FC = () => {
                 <EuiHorizontalRule margin="m" />
                 <StepScheduleRule
                   addPadding={true}
-                  defaultValues={stepsData.current[RuleStep.scheduleRule].data}
+                  defaultValues={scheduleRuleData}
                   descriptionColumns="singleSplit"
                   isReadOnlyView={activeStep !== RuleStep.scheduleRule}
                   isLoading={isLoading || loading}
                   setForm={setFormHook}
                   onSubmit={() => submitStep(RuleStep.scheduleRule)}
+                  // We need a key to make this component remount when edit/view mode is toggled
+                  // https://github.com/elastic/kibana/pull/132834#discussion_r881705566
+                  key={isShouldRerenderStep(RuleStep.scheduleRule, activeStep)}
+                  onRuleDataChange={updateCurrentDataState}
                 />
               </EuiAccordion>
             </MyEuiPanel>
             <EuiSpacer size="l" />
-            <MyEuiPanel zindex={1}>
+            <MyEuiPanel hasBorder zindex={1}>
               <EuiAccordion
                 initialIsOpen={false}
                 id={RuleStep.ruleActions}
@@ -431,14 +541,27 @@ const CreateRulePageComponent: React.FC = () => {
                   setForm={setFormHook}
                   onSubmit={() => submitStep(RuleStep.ruleActions)}
                   actionMessageParams={actionMessageParams}
+                  // We need a key to make this component remount when edit/view mode is toggled
+                  // https://github.com/elastic/kibana/pull/132834#discussion_r881705566
+                  key={isShouldRerenderStep(RuleStep.ruleActions, activeStep)}
+                  ruleType={ruleType}
                 />
               </EuiAccordion>
             </MyEuiPanel>
+            {isRulePreviewVisible && (
+              <PreviewFlyout
+                isDisabled={isPreviewDisabled && activeStep === RuleStep.defineRule}
+                defineStepData={defineRuleData}
+                aboutStepData={aboutRuleData}
+                scheduleStepData={scheduleRuleData}
+                onClose={() => setIsRulePreviewVisible(false)}
+              />
+            )}
           </MaxWidthEuiFlexItem>
         </EuiFlexGroup>
-      </WrapperPage>
+      </SecuritySolutionPageWrapper>
 
-      <SpyRoute pageName={SecurityPageName.detections} />
+      <SpyRoute pageName={SecurityPageName.rulesCreate} />
     </>
   );
 };

@@ -6,8 +6,8 @@
  */
 
 import { RecursiveReadonly } from '@kbn/utility-types';
-import { AppCategory } from 'src/core/types';
-import { LicenseType } from '../../licensing/common/types';
+import { AppCategory } from '@kbn/core/types';
+import { LicenseType } from '@kbn/licensing-plugin/common/types';
 import { FeatureKibanaPrivileges } from './feature_kibana_privileges';
 import { SubFeatureConfig, SubFeature as KibanaSubFeature } from './sub_feature';
 import { ReservedKibanaPrivilege } from './reserved_kibana_privilege';
@@ -99,6 +99,11 @@ export interface KibanaFeatureConfig {
   alerting?: readonly string[];
 
   /**
+   * If your feature grants access to specific case types, you can specify them here to control visibility based on the current space.
+   */
+  cases?: readonly string[];
+
+  /**
    * Feature privilege definition.
    *
    * @example
@@ -181,6 +186,10 @@ export class KibanaFeature {
 
   public get alerting() {
     return this.config.alerting;
+  }
+
+  public get cases() {
+    return this.config.cases;
   }
 
   public get excludeFromBasePrivileges() {

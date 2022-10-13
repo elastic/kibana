@@ -7,9 +7,9 @@
  */
 
 import _ from 'lodash';
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiButton,
@@ -23,27 +23,64 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiSwitch,
+  EuiSuperSelect,
 } from '@elastic/eui';
 
 import { DevToolsSettings } from '../../services';
+import { unregisterCommands } from '../containers/editor/legacy/console_editor/keyboard_shortcuts';
+import type { SenseEditor } from '../models';
 
 export type AutocompleteOptions = 'fields' | 'indices' | 'templates';
 
-interface Props {
+const onceTimeInterval = () =>
+  i18n.translate('console.settingsPage.refreshInterval.onceTimeInterval', {
+    defaultMessage: 'Once, when console loads',
+  });
+
+const everyNMinutesTimeInterval = (value: number) =>
+  i18n.translate('console.settingsPage.refreshInterval.everyNMinutesTimeInterval', {
+    defaultMessage: 'Every {value} {value, plural, one {minute} other {minutes}}',
+    values: { value },
+  });
+
+const everyHourTimeInterval = () =>
+  i18n.translate('console.settingsPage.refreshInterval.everyHourTimeInterval', {
+    defaultMessage: 'Every hour',
+  });
+
+const PRESETS_IN_MINUTES = [0, 1, 10, 20, 60];
+const intervalOptions = PRESETS_IN_MINUTES.map((value) => ({
+  value: (value * 60000).toString(),
+  inputDisplay:
+    value === 0
+      ? onceTimeInterval()
+      : value === 60
+      ? everyHourTimeInterval()
+      : everyNMinutesTimeInterval(value),
+}));
+
+export interface DevToolsSettingsModalProps {
   onSaveSettings: (newSettings: DevToolsSettings) => void;
   onClose: () => void;
   refreshAutocompleteSettings: (selectedSettings: DevToolsSettings['autocomplete']) => void;
   settings: DevToolsSettings;
+  editorInstance: SenseEditor | null;
 }
 
-export function DevToolsSettingsModal(props: Props) {
+export const DevToolsSettingsModal = (props: DevToolsSettingsModalProps) => {
   const [fontSize, setFontSize] = useState(props.settings.fontSize);
   const [wrapMode, setWrapMode] = useState(props.settings.wrapMode);
   const [fields, setFields] = useState(props.settings.autocomplete.fields);
   const [indices, setIndices] = useState(props.settings.autocomplete.indices);
   const [templates, setTemplates] = useState(props.settings.autocomplete.templates);
+  const [dataStreams, setDataStreams] = useState(props.settings.autocomplete.dataStreams);
   const [polling, setPolling] = useState(props.settings.polling);
+  const [pollInterval, setPollInterval] = useState(props.settings.pollInterval);
   const [tripleQuotes, setTripleQuotes] = useState(props.settings.tripleQuotes);
+  const [isHistoryEnabled, setIsHistoryEnabled] = useState(props.settings.isHistoryEnabled);
+  const [isKeyboardShortcutsEnabled, setIsKeyboardShortcutsEnabled] = useState(
+    props.settings.isKeyboardShortcutsEnabled
+  );
 
   const autoCompleteCheckboxes = [
     {
@@ -56,7 +93,7 @@ export function DevToolsSettingsModal(props: Props) {
     {
       id: 'indices',
       label: i18n.translate('console.settingsPage.indicesAndAliasesLabelText', {
-        defaultMessage: 'Indices & Aliases',
+        defaultMessage: 'Indices and aliases',
       }),
       stateSetter: setIndices,
     },
@@ -67,12 +104,20 @@ export function DevToolsSettingsModal(props: Props) {
       }),
       stateSetter: setTemplates,
     },
+    {
+      id: 'dataStreams',
+      label: i18n.translate('console.settingsPage.dataStreamsLabelText', {
+        defaultMessage: 'Data streams',
+      }),
+      stateSetter: setDataStreams,
+    },
   ];
 
   const checkboxIdToSelectedMap = {
     fields,
     indices,
     templates,
+    dataStreams,
   };
 
   const onAutocompleteChange = (optionId: AutocompleteOptions) => {
@@ -90,42 +135,61 @@ export function DevToolsSettingsModal(props: Props) {
         fields,
         indices,
         templates,
+        dataStreams,
       },
       polling,
+      pollInterval,
       tripleQuotes,
+      isHistoryEnabled,
+      isKeyboardShortcutsEnabled,
     });
   }
 
+  const onPollingIntervalChange = useCallback((value: string) => {
+    const sanitizedValue = parseInt(value, 10);
+
+    setPolling(!!sanitizedValue);
+    setPollInterval(sanitizedValue);
+  }, []);
+
+  const toggleKeyboardShortcuts = useCallback(
+    (isEnabled: boolean) => {
+      if (props.editorInstance) {
+        unregisterCommands(props.editorInstance);
+        setIsKeyboardShortcutsEnabled(isEnabled);
+      }
+    },
+    [props.editorInstance]
+  );
+
+  const toggleSavingToHistory = useCallback(
+    (isEnabled: boolean) => setIsHistoryEnabled(isEnabled),
+    []
+  );
+
   // It only makes sense to show polling options if the user needs to fetch any data.
   const pollingFields =
-    fields || indices || templates ? (
+    fields || indices || templates || dataStreams ? (
       <Fragment>
         <EuiFormRow
           label={
             <FormattedMessage
               id="console.settingsPage.refreshingDataLabel"
-              defaultMessage="Refreshing autocomplete suggestions"
+              defaultMessage="Refresh frequency"
             />
           }
           helpText={
             <FormattedMessage
               id="console.settingsPage.refreshingDataDescription"
               defaultMessage="Console refreshes autocomplete suggestions by querying Elasticsearch.
-              Automatic refreshes may be an issue if you have a large cluster or if you have network limitations."
+              Use less frequent refreshes to reduce bandwidth costs."
             />
           }
         >
-          <EuiSwitch
-            checked={polling}
-            data-test-subj="autocompletePolling"
-            id="autocompletePolling"
-            label={
-              <FormattedMessage
-                defaultMessage="Automatically refresh autocomplete suggestions"
-                id="console.settingsPage.pollingLabelText"
-              />
-            }
-            onChange={(e) => setPolling(e.target.checked)}
+          <EuiSuperSelect
+            options={intervalOptions}
+            valueOfSelected={pollInterval.toString()}
+            onChange={onPollingIntervalChange}
           />
         </EuiFormRow>
 
@@ -138,6 +202,7 @@ export function DevToolsSettingsModal(props: Props) {
               fields,
               indices,
               templates,
+              dataStreams,
             });
           }}
         >
@@ -157,14 +222,14 @@ export function DevToolsSettingsModal(props: Props) {
     >
       <EuiModalHeader>
         <EuiModalHeaderTitle>
-          <FormattedMessage id="console.settingsPage.pageTitle" defaultMessage="Console Settings" />
+          <FormattedMessage id="console.settingsPage.pageTitle" defaultMessage="Console settings" />
         </EuiModalHeaderTitle>
       </EuiModalHeader>
 
       <EuiModalBody>
         <EuiFormRow
           label={
-            <FormattedMessage id="console.settingsPage.fontSizeLabel" defaultMessage="Font Size" />
+            <FormattedMessage id="console.settingsPage.fontSizeLabel" defaultMessage="Font size" />
           }
         >
           <EuiFieldNumber
@@ -210,11 +275,48 @@ export function DevToolsSettingsModal(props: Props) {
             id="tripleQuotes"
             label={
               <FormattedMessage
-                defaultMessage="Use triple quotes in output pane"
+                defaultMessage="Use triple quotes in output"
                 id="console.settingsPage.tripleQuotesMessage"
               />
             }
             onChange={(e) => setTripleQuotes(e.target.checked)}
+          />
+        </EuiFormRow>
+
+        <EuiFormRow
+          label={
+            <FormattedMessage id="console.settingsPage.historyLabel" defaultMessage="History" />
+          }
+        >
+          <EuiSwitch
+            checked={isHistoryEnabled}
+            label={
+              <FormattedMessage
+                defaultMessage="Save requests to history"
+                id="console.settingsPage.saveRequestsToHistoryLabel"
+              />
+            }
+            onChange={(e) => toggleSavingToHistory(e.target.checked)}
+          />
+        </EuiFormRow>
+
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="console.settingsPage.keyboardShortcutsLabel"
+              defaultMessage="Keyboard shortcuts"
+            />
+          }
+        >
+          <EuiSwitch
+            checked={isKeyboardShortcutsEnabled}
+            label={
+              <FormattedMessage
+                defaultMessage="Enable keyboard shortcuts"
+                id="console.settingsPage.enableKeyboardShortcutsLabel"
+              />
+            }
+            onChange={(e) => toggleKeyboardShortcuts(e.target.checked)}
           />
         </EuiFormRow>
 
@@ -253,4 +355,4 @@ export function DevToolsSettingsModal(props: Props) {
       </EuiModalFooter>
     </EuiModal>
   );
-}
+};

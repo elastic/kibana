@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { CoreSetup } from 'src/core/server';
-import { coreMock } from 'src/core/server/mocks';
-import { usageCollectionPluginMock } from 'src/plugins/usage_collection/server/mocks';
+import type { CoreSetup } from '@kbn/core/server';
+import { coreMock } from '@kbn/core/server/mocks';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
 
-import { featuresPluginMock } from '../../features/server/mocks';
-import { licensingMock } from '../../licensing/server/mocks';
 import type { PluginsStart } from './plugin';
 import { SpacesPlugin } from './plugin';
 
-describe('Spaces Plugin', () => {
+describe('Spaces plugin', () => {
   describe('#setup', () => {
     it('can setup with all optional plugins disabled, exposing the expected contract', () => {
       const initializerContext = coreMock.createPluginInitializerContext({});

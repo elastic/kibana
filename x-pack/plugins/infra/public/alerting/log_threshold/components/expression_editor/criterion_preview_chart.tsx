@@ -19,8 +19,8 @@ import {
   LineAnnotation,
 } from '@elastic/charts';
 import { EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   ChartContainer,
   LoadingState,
@@ -35,7 +35,7 @@ import {
   NUM_BUCKETS,
 } from '../../../common/criterion_preview_chart/criterion_preview_chart';
 import {
-  PartialAlertParams,
+  PartialRuleParams,
   Threshold,
   Criterion,
   Comparator,
@@ -44,21 +44,22 @@ import { Color, colorTransformer } from '../../../../../common/color_palette';
 import {
   GetLogAlertsChartPreviewDataAlertParamsSubset,
   getLogAlertsChartPreviewDataAlertParamsSubsetRT,
-} from '../../../../../common/http_api/log_alerts/';
+} from '../../../../../common/http_api/log_alerts';
 import { useChartPreviewData } from './hooks/use_chart_preview_data';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
+import { useKibanaTimeZoneSetting } from '../../../../hooks/use_kibana_time_zone_setting';
 
 const GROUP_LIMIT = 5;
 
 interface Props {
-  alertParams: PartialAlertParams;
+  ruleParams: PartialRuleParams;
   chartCriterion: Partial<Criterion>;
   sourceId: string;
   showThreshold: boolean;
 }
 
 export const CriterionPreview: React.FC<Props> = ({
-  alertParams,
+  ruleParams,
   chartCriterion,
   sourceId,
   showThreshold,
@@ -68,9 +69,13 @@ export const CriterionPreview: React.FC<Props> = ({
     const criteria = field && comparator && value ? [{ field, comparator, value }] : [];
     const params = {
       criteria,
-      timeSize: alertParams.timeSize,
-      timeUnit: alertParams.timeUnit,
-      groupBy: alertParams.groupBy,
+      count: {
+        comparator: ruleParams.count.comparator,
+        value: ruleParams.count.value,
+      },
+      timeSize: ruleParams.timeSize,
+      timeUnit: ruleParams.timeUnit,
+      groupBy: ruleParams.groupBy,
     };
 
     try {
@@ -78,7 +83,14 @@ export const CriterionPreview: React.FC<Props> = ({
     } catch (error) {
       return null;
     }
-  }, [alertParams.timeSize, alertParams.timeUnit, alertParams.groupBy, chartCriterion]);
+  }, [
+    ruleParams.timeSize,
+    ruleParams.timeUnit,
+    ruleParams.groupBy,
+    ruleParams.count.comparator,
+    ruleParams.count.value,
+    chartCriterion,
+  ]);
 
   // Check for the existence of properties that are necessary for a meaningful chart.
   if (chartAlertParams === null || chartAlertParams.criteria.length === 0) return null;
@@ -91,7 +103,7 @@ export const CriterionPreview: React.FC<Props> = ({
           : NUM_BUCKETS / 4
       } // Display less data for groups due to space limitations
       sourceId={sourceId}
-      threshold={alertParams.count}
+      threshold={ruleParams.count}
       chartAlertParams={chartAlertParams}
       showThreshold={showThreshold}
     />
@@ -115,6 +127,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
 }) => {
   const { uiSettings } = useKibana().services;
   const isDarkMode = uiSettings?.get('theme:darkMode') || false;
+  const timezone = useKibanaTimeZoneSetting();
 
   const {
     getChartPreviewData,
@@ -123,7 +136,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
     chartPreviewData: series,
   } = useChartPreviewData({
     sourceId,
-    alertParams: chartAlertParams,
+    ruleParams: chartAlertParams,
     buckets,
   });
 
@@ -186,14 +199,11 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
   const hasData = series.length > 0;
   const { yMin, yMax, xMin, xMax } = getDomain(filteredSeries, isStacked);
   const chartDomain = {
-    max:
-      showThreshold && threshold && threshold.value
-        ? Math.max(yMax, threshold.value) * 1.1
-        : yMax * 1.1, // Add 10% headroom.
-    min: showThreshold && threshold && threshold.value ? Math.min(yMin, threshold.value) : yMin,
+    max: showThreshold && threshold ? Math.max(yMax, threshold.value) * 1.1 : yMax * 1.1, // Add 10% headroom.
+    min: showThreshold && threshold ? Math.min(yMin, threshold.value) : yMin,
   };
 
-  if (showThreshold && threshold && threshold.value && chartDomain.min === threshold.value) {
+  if (showThreshold && threshold && chartDomain.min === threshold.value) {
     chartDomain.min = chartDomain.min * 0.9; // Allow some padding so the threshold annotation has better visibility
   }
 
@@ -216,7 +226,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
         <Chart>
           <BarSeries
             id="criterion-preview"
-            xScaleType={ScaleType.Linear}
+            xScaleType={ScaleType.Time}
             yScaleType={ScaleType.Linear}
             xAccessor="timestamp"
             yAccessors={['value']}
@@ -234,8 +244,9 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
               },
             }}
             color={!isGrouped ? colorTransformer(Color.color0) : undefined}
+            timeZone={timezone}
           />
-          {showThreshold && threshold && threshold.value ? (
+          {showThreshold && threshold ? (
             <LineAnnotation
               id={`threshold-line`}
               domainType={AnnotationDomainType.YDomain}
@@ -249,7 +260,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
               }}
             />
           ) : null}
-          {showThreshold && threshold && threshold.value && isBelow ? (
+          {showThreshold && threshold && isBelow ? (
             <RectAnnotation
               id="below-threshold"
               style={{
@@ -268,7 +279,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
               ]}
             />
           ) : null}
-          {showThreshold && threshold && threshold.value && isAbove ? (
+          {showThreshold && threshold && isAbove ? (
             <RectAnnotation
               id="above-threshold"
               style={{

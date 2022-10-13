@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
+import { euiDarkVars } from '@kbn/ui-theme';
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 
@@ -16,7 +16,7 @@ import {
   UtilityBarGroup,
   UtilityBarSection,
   UtilityBarText,
-} from './index';
+} from '.';
 
 describe('UtilityBar', () => {
   test('it renders', () => {
@@ -29,7 +29,11 @@ describe('UtilityBar', () => {
             </UtilityBarGroup>
 
             <UtilityBarGroup>
-              <UtilityBarAction iconType="" popoverContent={() => <p>{'Test popover'}</p>}>
+              <UtilityBarAction
+                dataTestSubj="popover"
+                iconType=""
+                popoverContent={() => <p>{'Test popover'}</p>}
+              >
                 {'Test action'}
               </UtilityBarAction>
             </UtilityBarGroup>
@@ -37,7 +41,9 @@ describe('UtilityBar', () => {
 
           <UtilityBarSection>
             <UtilityBarGroup>
-              <UtilityBarAction iconType="cross">{'Test action'}</UtilityBarAction>
+              <UtilityBarAction dataTestSubj="action" iconType="cross">
+                {'Test action'}
+              </UtilityBarAction>
             </UtilityBarGroup>
           </UtilityBarSection>
         </UtilityBar>
@@ -57,7 +63,11 @@ describe('UtilityBar', () => {
             </UtilityBarGroup>
 
             <UtilityBarGroup>
-              <UtilityBarAction iconType="" popoverContent={() => <p>{'Test popover'}</p>}>
+              <UtilityBarAction
+                dataTestSubj="popover"
+                iconType=""
+                popoverContent={() => <p>{'Test popover'}</p>}
+              >
                 {'Test action'}
               </UtilityBarAction>
             </UtilityBarGroup>
@@ -65,7 +75,9 @@ describe('UtilityBar', () => {
 
           <UtilityBarSection>
             <UtilityBarGroup>
-              <UtilityBarAction iconType="cross">{'Test action'}</UtilityBarAction>
+              <UtilityBarAction dataTestSubj="action" iconType="cross">
+                {'Test action'}
+              </UtilityBarAction>
             </UtilityBarGroup>
           </UtilityBarSection>
         </UtilityBar>
@@ -74,7 +86,7 @@ describe('UtilityBar', () => {
     const siemUtilityBar = wrapper.find('.siemUtilityBar').first();
 
     expect(siemUtilityBar).toHaveStyleRule('border-bottom', euiDarkVars.euiBorderThin);
-    expect(siemUtilityBar).toHaveStyleRule('padding-bottom', euiDarkVars.paddingSizes.s);
+    expect(siemUtilityBar).toHaveStyleRule('padding-bottom', euiDarkVars.euiSizeS);
   });
 
   test('it DOES NOT apply border styles when border is false', () => {
@@ -87,7 +99,11 @@ describe('UtilityBar', () => {
             </UtilityBarGroup>
 
             <UtilityBarGroup>
-              <UtilityBarAction iconType="" popoverContent={() => <p>{'Test popover'}</p>}>
+              <UtilityBarAction
+                dataTestSubj="popover"
+                iconType=""
+                popoverContent={() => <p>{'Test popover'}</p>}
+              >
                 {'Test action'}
               </UtilityBarAction>
             </UtilityBarGroup>
@@ -95,7 +111,9 @@ describe('UtilityBar', () => {
 
           <UtilityBarSection>
             <UtilityBarGroup>
-              <UtilityBarAction iconType="cross">{'Test action'}</UtilityBarAction>
+              <UtilityBarAction dataTestSubj="action" iconType="cross">
+                {'Test action'}
+              </UtilityBarAction>
             </UtilityBarGroup>
           </UtilityBarSection>
         </UtilityBar>
@@ -104,6 +122,6 @@ describe('UtilityBar', () => {
     const siemUtilityBar = wrapper.find('.siemUtilityBar').first();
 
     expect(siemUtilityBar).not.toHaveStyleRule('border-bottom', euiDarkVars.euiBorderThin);
-    expect(siemUtilityBar).not.toHaveStyleRule('padding-bottom', euiDarkVars.paddingSizes.s);
+    expect(siemUtilityBar).not.toHaveStyleRule('padding-bottom', euiDarkVars.euiSizeS);
   });
 });

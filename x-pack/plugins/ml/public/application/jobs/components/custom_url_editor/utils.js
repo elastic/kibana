@@ -10,18 +10,21 @@ import { TIME_RANGE_TYPE, URL_TYPE } from './constants';
 import rison from 'rison-node';
 import url from 'url';
 
-import { DASHBOARD_APP_URL_GENERATOR } from '../../../../../../../../src/plugins/dashboard/public';
-
-import { getPartitioningFieldNames } from '../../../../../common/util/job_utils';
+import {
+  getPartitioningFieldNames,
+  getFiltersForDSLQuery,
+} from '../../../../../common/util/job_utils';
 import { parseInterval } from '../../../../../common/util/parse_interval';
 import { replaceTokensInUrlValue, isValidLabel } from '../../../util/custom_url_utils';
 import { ml } from '../../../services/ml_api_service';
-import { mlJobService } from '../../../services/job_service';
 import { escapeForElasticsearchQuery } from '../../../util/string_utils';
-import { getSavedObjectsClient, getGetUrlGenerator } from '../../../util/dependency_cache';
-import { getProcessedFields } from '../../../components/data_grid';
+import { getSavedObjectsClient, getDashboard } from '../../../util/dependency_cache';
 
-export function getNewCustomUrlDefaults(job, dashboards, indexPatterns) {
+import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
+import { cleanEmptyKeys } from '@kbn/dashboard-plugin/public';
+import { isFilterPinned } from '@kbn/es-query';
+
+export function getNewCustomUrlDefaults(job, dashboards, dataViews) {
   // Returns the settings object in the format used by the custom URL editor
   // for a new custom URL.
   const kibanaSettings = {
@@ -33,30 +36,27 @@ export function getNewCustomUrlDefaults(job, dashboards, indexPatterns) {
   if (dashboards !== undefined && dashboards.length > 0) {
     urlType = URL_TYPE.KIBANA_DASHBOARD;
     kibanaSettings.dashboardId = dashboards[0].id;
-  } else if (indexPatterns !== undefined && indexPatterns.length > 0) {
+  } else if (dataViews !== undefined && dataViews.length > 0) {
     urlType = URL_TYPE.KIBANA_DISCOVER;
   }
 
-  // For the Discover option, set the default index pattern to that
-  // which matches the (first) index configured in the job datafeed.
+  // For the Discover option, set the default data view to that
+  // which matches the indices configured in the job datafeed.
   const datafeedConfig = job.datafeed_config;
   if (
-    indexPatterns !== undefined &&
-    indexPatterns.length > 0 &&
+    dataViews !== undefined &&
+    dataViews.length > 0 &&
     datafeedConfig !== undefined &&
     datafeedConfig.indices !== undefined &&
     datafeedConfig.indices.length > 0
   ) {
-    const datafeedIndex = datafeedConfig.indices[0];
-    let defaultIndexPattern = indexPatterns.find((indexPattern) => {
-      return indexPattern.title === datafeedIndex;
-    });
-
-    if (defaultIndexPattern === undefined) {
-      defaultIndexPattern = indexPatterns[0];
-    }
-
-    kibanaSettings.discoverIndexPatternId = defaultIndexPattern.id;
+    const indicesName = datafeedConfig.indices.join();
+    const defaultDataViewId = dataViews.find((dv) => dv.title === indicesName)?.id;
+    kibanaSettings.discoverIndexPatternId = defaultDataViewId;
+    kibanaSettings.filters =
+      defaultDataViewId === null
+        ? []
+        : getFiltersForDSLQuery(job.datafeed_config.query, defaultDataViewId, job.job_id);
   }
 
   return {
@@ -132,73 +132,80 @@ export function buildCustomUrlFromSettings(settings) {
   }
 }
 
-function buildDashboardUrlFromSettings(settings) {
+async function buildDashboardUrlFromSettings(settings) {
   // Get the complete list of attributes for the selected dashboard (query, filters).
-  return new Promise((resolve, reject) => {
-    const { dashboardId, queryFieldNames } = settings.kibanaSettings;
+  const { dashboardId, queryFieldNames } = settings.kibanaSettings;
 
-    const savedObjectsClient = getSavedObjectsClient();
-    savedObjectsClient
-      .get('dashboard', dashboardId)
-      .then((response) => {
-        // Use the filters from the saved dashboard if there are any.
-        let filters = [];
+  const savedObjectsClient = getSavedObjectsClient();
 
-        // Use the query from the dashboard only if no job entities are selected.
-        let query = undefined;
+  const response = await savedObjectsClient.get('dashboard', dashboardId);
 
-        const searchSourceJSON = response.get('kibanaSavedObjectMeta.searchSourceJSON');
-        if (searchSourceJSON !== undefined) {
-          const searchSourceData = JSON.parse(searchSourceJSON);
-          if (searchSourceData.filter !== undefined) {
-            filters = searchSourceData.filter;
-          }
-          query = searchSourceData.query;
-        }
+  // Query from the datafeed config will be saved as custom filters
+  // Use them if there are set.
+  let filters = settings.kibanaSettings.filters;
 
-        const queryFromEntityFieldNames = buildAppStateQueryParam(queryFieldNames);
-        if (queryFromEntityFieldNames !== undefined) {
-          query = queryFromEntityFieldNames;
-        }
+  // Use the query from the dashboard only if no job entities are selected.
+  let query = undefined;
 
-        const getUrlGenerator = getGetUrlGenerator();
-        const generator = getUrlGenerator(DASHBOARD_APP_URL_GENERATOR);
-        return generator
-          .createUrl({
-            dashboardId,
-            timeRange: {
-              from: '$earliest$',
-              to: '$latest$',
-              mode: 'absolute',
-            },
-            filters,
-            query,
-            // Don't hash the URL since this string will be 1. shown to the user and 2. used as a
-            // template to inject the time parameters.
-            useHash: false,
-          })
-          .then((urlValue) => {
-            const urlToAdd = {
-              url_name: settings.label,
-              url_value: decodeURIComponent(`dashboards${url.parse(urlValue).hash}`),
-              time_range: TIME_RANGE_TYPE.AUTO,
-            };
+  // Override with filters and queries from saved dashboard if they are available.
+  const searchSourceJSON = response.get('kibanaSavedObjectMeta.searchSourceJSON');
+  if (searchSourceJSON !== undefined) {
+    const searchSourceData = JSON.parse(searchSourceJSON);
+    if (Array.isArray(searchSourceData.filter) && searchSourceData.filter.length > 0) {
+      filters = searchSourceData.filter;
+    }
+    query = searchSourceData.query;
+  }
 
-            if (settings.timeRange.type === TIME_RANGE_TYPE.INTERVAL) {
-              urlToAdd.time_range = settings.timeRange.interval;
-            }
+  const queryFromEntityFieldNames = buildAppStateQueryParam(queryFieldNames);
+  if (queryFromEntityFieldNames !== undefined) {
+    query = queryFromEntityFieldNames;
+  }
 
-            resolve(urlToAdd);
-          });
-      })
-      .catch((resp) => {
-        reject(resp);
-      });
+  const dashboard = getDashboard();
+
+  const location = await dashboard.locator.getLocation({
+    dashboardId,
+    timeRange: {
+      from: '$earliest$',
+      to: '$latest$',
+      mode: 'absolute',
+    },
+    filters,
+    query,
+    // Don't hash the URL since this string will be 1. shown to the user and 2. used as a
+    // template to inject the time parameters.
+    useHash: false,
   });
+
+  // Temp workaround
+  const state = location.state;
+  const resultPath = setStateToKbnUrl(
+    '_a',
+    cleanEmptyKeys({
+      query: state.query,
+      filters: state.filters?.filter((f) => !isFilterPinned(f)),
+      savedQuery: state.savedQuery,
+    }),
+    { useHash: false, storeInHashQuery: true },
+    location.path
+  );
+
+  const urlToAdd = {
+    url_name: settings.label,
+    url_value: decodeURIComponent(`dashboards${url.parse(resultPath).hash}`),
+    time_range: TIME_RANGE_TYPE.AUTO,
+  };
+
+  if (settings.timeRange.type === TIME_RANGE_TYPE.INTERVAL) {
+    urlToAdd.time_range = settings.timeRange.interval;
+  }
+
+  return urlToAdd;
 }
 
 function buildDiscoverUrlFromSettings(settings) {
-  const { discoverIndexPatternId, queryFieldNames } = settings.kibanaSettings;
+  const { discoverIndexPatternId, queryFieldNames, filters } = settings.kibanaSettings;
 
   // Add time settings to the global state URL parameter with $earliest$ and
   // $latest$ tokens which get substituted for times around the time of the
@@ -214,6 +221,7 @@ function buildDiscoverUrlFromSettings(settings) {
   // Add the index pattern and query to the appState part of the URL.
   const appState = {
     index: discoverIndexPatternId,
+    filters,
   };
 
   // If partitioning field entities have been configured add tokens
@@ -272,8 +280,7 @@ function buildAppStateQueryParam(queryFieldNames) {
 // Builds the full URL for testing out a custom URL configuration, which
 // may contain dollar delimited partition / influencer entity tokens and
 // drilldown time range settings.
-export function getTestUrl(job, customUrl) {
-  const urlValue = customUrl.url_value;
+export async function getTestUrl(job, customUrl) {
   const bucketSpanSecs = parseInterval(job.analysis_config.bucket_span).asSeconds();
 
   // By default, return configured url_value. Look to substitute any dollar-delimited
@@ -295,64 +302,55 @@ export function getTestUrl(job, customUrl) {
     sort: [{ record_score: { order: 'desc' } }],
   };
 
-  return new Promise((resolve, reject) => {
-    ml.results
-      .anomalySearch(
-        {
-          body,
-        },
-        [job.job_id]
-      )
-      .then((resp) => {
-        if (resp.hits.total.value > 0) {
-          const record = resp.hits.hits[0]._source;
-          testUrl = replaceTokensInUrlValue(customUrl, bucketSpanSecs, record, 'timestamp');
-          resolve(testUrl);
-        } else {
-          // No anomalies yet for this job, so do a preview of the search
-          // configured in the job datafeed to obtain sample docs.
-          mlJobService.searchPreview(job).then((response) => {
-            let testDoc;
-            const docTimeFieldName = job.data_description.time_field;
+  let resp;
+  try {
+    resp = await ml.results.anomalySearch(
+      {
+        body,
+      },
+      [job.job_id]
+    );
+  } catch (error) {
+    // search may fail if the job doesn't already exist
+    // ignore this error as the outer function call will raise a toast
+  }
 
-            // Handle datafeeds which use aggregations or documents.
-            if (response.aggregations) {
-              // Create a dummy object which contains the fields necessary to build the URL.
-              const firstBucket = response.aggregations.buckets.buckets[0];
-              testDoc = {
-                [docTimeFieldName]: firstBucket.key,
-              };
+  if (resp && resp.hits.total.value > 0) {
+    const record = resp.hits.hits[0]._source;
+    testUrl = replaceTokensInUrlValue(customUrl, bucketSpanSecs, record, 'timestamp');
+    return testUrl;
+  } else {
+    // No anomalies yet for this job, so do a preview of the search
+    // configured in the job datafeed to obtain sample docs.
 
-              // Look for bucket aggregations which match the tokens in the URL.
-              urlValue.replace(/\$([^?&$\'"]{1,40})\$/g, (match, name) => {
-                if (name !== 'earliest' && name !== 'latest' && firstBucket[name] !== undefined) {
-                  const tokenBuckets = firstBucket[name];
-                  if (tokenBuckets.buckets) {
-                    testDoc[name] = tokenBuckets.buckets[0].key;
-                  }
-                }
-              });
-            } else {
-              if (response.hits.total.value > 0) {
-                testDoc = getProcessedFields(response.hits.hits[0].fields);
-              }
-            }
+    let { datafeed_config: datafeedConfig, ...jobConfig } = job;
+    try {
+      // attempt load the non-combined job and datafeed so they can be used in the datafeed preview
+      const [{ jobs }, { datafeeds }] = await Promise.all([
+        ml.getJobs({ jobId: job.job_id }),
+        ml.getDatafeeds({ datafeedId: job.datafeed_config.datafeed_id }),
+      ]);
+      datafeedConfig = datafeeds[0];
+      jobConfig = jobs[0];
+    } catch (error) {
+      // jobs may not exist as this might be called from the AD job wizards
+      // ignore this error as the outer function call will raise a toast
+    }
 
-            if (testDoc !== undefined) {
-              testUrl = replaceTokensInUrlValue(
-                customUrl,
-                bucketSpanSecs,
-                testDoc,
-                docTimeFieldName
-              );
-            }
+    if (jobConfig === undefined || datafeedConfig === undefined) {
+      return testUrl;
+    }
 
-            resolve(testUrl);
-          });
-        }
-      })
-      .catch((resp) => {
-        reject(resp);
-      });
-  });
+    const preview = await ml.jobs.datafeedPreview(undefined, jobConfig, datafeedConfig);
+
+    const docTimeFieldName = job.data_description.time_field;
+
+    // Create a dummy object which contains the fields necessary to build the URL.
+    const firstBucket = preview[0];
+    if (firstBucket !== undefined) {
+      testUrl = replaceTokensInUrlValue(customUrl, bucketSpanSecs, firstBucket, docTimeFieldName);
+    }
+
+    return testUrl;
+  }
 }

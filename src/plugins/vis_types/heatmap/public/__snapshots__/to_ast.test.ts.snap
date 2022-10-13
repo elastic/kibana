@@ -1,0 +1,58 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`heatmap vis toExpressionAst function should match basic snapshot 1`] = `
+Object {
+  "addArgument": [Function],
+  "arguments": Object {
+    "gridConfig": Array [
+      Object {
+        "toAst": [Function],
+      },
+    ],
+    "highlightInHover": Array [
+      false,
+    ],
+    "lastRangeIsRightOpen": Array [
+      false,
+    ],
+    "legend": Array [
+      Object {
+        "toAst": [Function],
+      },
+    ],
+    "palette": Array [
+      Object {
+        "toAst": [Function],
+      },
+    ],
+    "percentageMode": Array [
+      false,
+    ],
+    "showTooltip": Array [
+      true,
+    ],
+    "valueAccessor": Array [
+      Object {
+        "toAst": [Function],
+      },
+    ],
+    "xAccessor": Array [
+      Object {
+        "toAst": [Function],
+      },
+    ],
+    "yAccessor": Array [
+      Object {
+        "toAst": [Function],
+      },
+    ],
+  },
+  "getArgument": [Function],
+  "name": "heatmap",
+  "removeArgument": [Function],
+  "replaceArgument": [Function],
+  "toAst": [Function],
+  "toString": [Function],
+  "type": "expression_function_builder",
+}
+`;

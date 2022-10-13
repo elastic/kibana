@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
+// import { get } from 'lodash';
 import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginConfigDescriptor } from 'kibana/server';
+import { PluginConfigDescriptor } from '@kbn/core/server';
 import { isHexColor } from './utils';
 
 const configSchema = schema.object({
@@ -39,17 +39,4 @@ export type BannersConfigType = TypeOf<typeof configSchema>;
 export const config: PluginConfigDescriptor<BannersConfigType> = {
   schema: configSchema,
   exposeToBrowser: {},
-  deprecations: () => [
-    (rootConfig, fromPath, addDeprecation) => {
-      const pluginConfig = get(rootConfig, fromPath);
-      if (pluginConfig?.placement === 'header') {
-        addDeprecation({
-          message: 'The `header` value for xpack.banners.placement has been replaced by `top`',
-        });
-        pluginConfig.placement = 'top';
-      }
-
-      return rootConfig;
-    },
-  ],
 };

@@ -6,22 +6,23 @@
  */
 
 import { get } from 'lodash';
-import { LegacyAPICaller } from 'src/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../common/constants';
 import { getCcsIndexPattern } from '../../../lib/alerts/get_ccs_index_pattern';
 
 export async function fetchLicenseType(
-  callCluster: LegacyAPICaller,
-  availableCcs: string[],
+  client: ElasticsearchClient,
+  availableCcs: boolean,
   clusterUuid: string
 ) {
   let index = INDEX_PATTERN_ELASTICSEARCH;
   if (availableCcs) {
     index = getCcsIndexPattern(index, availableCcs);
   }
-  const params = {
+  const params: estypes.SearchRequest = {
     index,
-    filterPath: ['hits.hits._source.license'],
+    filter_path: ['hits.hits._source.license'],
     body: {
       size: 1,
       sort: [
@@ -54,6 +55,6 @@ export async function fetchLicenseType(
       },
     },
   };
-  const response = await callCluster('search', params);
+  const response = await client.search(params);
   return get(response, 'hits.hits[0]._source.license.type', null);
 }

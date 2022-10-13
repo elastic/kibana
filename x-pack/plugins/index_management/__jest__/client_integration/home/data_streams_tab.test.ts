@@ -22,13 +22,24 @@ import {
 
 const nonBreakingSpace = ' ';
 
-describe('Data Streams tab', () => {
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
-  let testBed: DataStreamsTabTestBed;
+const urlServiceMock = {
+  locators: {
+    get: () => ({
+      getLocation: async () => ({
+        app: '',
+        path: '',
+        state: {},
+      }),
+      getUrl: async ({ policyName }: { policyName: string }) => `/test/${policyName}`,
+      navigate: async () => {},
+      useUrl: () => '',
+    }),
+  },
+};
 
-  afterAll(() => {
-    server.restore();
-  });
+describe('Data Streams tab', () => {
+  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
+  let testBed: DataStreamsTabTestBed;
 
   describe('when there are no data streams', () => {
     beforeEach(async () => {
@@ -38,7 +49,9 @@ describe('Data Streams tab', () => {
     });
 
     test('displays an empty prompt', async () => {
-      testBed = await setup();
+      testBed = await setup(httpSetup, {
+        url: urlServiceMock,
+      });
 
       await act(async () => {
         testBed.actions.goToDataStreamsList();
@@ -52,8 +65,9 @@ describe('Data Streams tab', () => {
     });
 
     test('when Ingest Manager is disabled, goes to index templates tab when "Get started" link is clicked', async () => {
-      testBed = await setup({
+      testBed = await setup(httpSetup, {
         plugins: {},
+        url: urlServiceMock,
       });
 
       await act(async () => {
@@ -71,8 +85,9 @@ describe('Data Streams tab', () => {
     });
 
     test('when Fleet is enabled, links to Fleet', async () => {
-      testBed = await setup({
+      testBed = await setup(httpSetup, {
         plugins: { isFleetEnabled: true },
+        url: urlServiceMock,
       });
 
       await act(async () => {
@@ -93,8 +108,9 @@ describe('Data Streams tab', () => {
       });
       httpRequestsMockHelpers.setLoadDataStreamsResponse([hiddenDataStream]);
 
-      testBed = await setup({
+      testBed = await setup(httpSetup, {
         plugins: {},
+        url: urlServiceMock,
       });
 
       await act(async () => {
@@ -136,13 +152,13 @@ describe('Data Streams tab', () => {
         }),
       ]);
 
-      setLoadDataStreamResponse(dataStreamForDetailPanel);
+      setLoadDataStreamResponse(dataStreamForDetailPanel.name, dataStreamForDetailPanel);
 
       const indexTemplate = fixtures.getTemplate({ name: 'indexTemplate' });
       setLoadTemplatesResponse({ templates: [indexTemplate], legacyTemplates: [] });
-      setLoadTemplateResponse(indexTemplate);
+      setLoadTemplateResponse(indexTemplate.name, indexTemplate);
 
-      testBed = await setup({ history: createMemoryHistory() });
+      testBed = await setup(httpSetup, { history: createMemoryHistory() });
       await act(async () => {
         testBed.actions.goToDataStreamsList();
       });
@@ -161,7 +177,6 @@ describe('Data Streams tab', () => {
 
     test('has a button to reload the data streams', async () => {
       const { exists, actions } = testBed;
-      const totalRequests = server.requests.length;
 
       expect(exists('reloadButton')).toBe(true);
 
@@ -169,13 +184,14 @@ describe('Data Streams tab', () => {
         actions.clickReloadButton();
       });
 
-      expect(server.requests.length).toBe(totalRequests + 1);
-      expect(server.requests[server.requests.length - 1].url).toBe(`${API_BASE_PATH}/data_streams`);
+      expect(httpSetup.get).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/data_streams`,
+        expect.anything()
+      );
     });
 
     test('has a switch that will reload the data streams with additional stats when clicked', async () => {
       const { exists, actions, table, component } = testBed;
-      const totalRequests = server.requests.length;
 
       expect(exists('includeStatsSwitch')).toBe(true);
 
@@ -185,9 +201,10 @@ describe('Data Streams tab', () => {
       });
       component.update();
 
-      // A request is sent, but sinon isn't capturing the query parameters for some reason.
-      expect(server.requests.length).toBe(totalRequests + 1);
-      expect(server.requests[server.requests.length - 1].url).toBe(`${API_BASE_PATH}/data_streams`);
+      expect(httpSetup.get).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/data_streams`,
+        expect.anything()
+      );
 
       // The table renders with the stats columns though.
       const { tableCellsValues } = table.getMetaData('dataStreamTable');
@@ -221,7 +238,7 @@ describe('Data Streams tab', () => {
       const { table, actions } = testBed;
       await actions.clickIndicesAt(0);
       expect(table.getMetaData('indexTable').tableCellsValues).toEqual([
-        ['', '', '', '', '', '', '', 'dataStream1'],
+        ['', 'data-stream-index', '', '', '', '', '', '', 'dataStream1'],
       ]);
     });
 
@@ -259,19 +276,17 @@ describe('Data Streams tab', () => {
 
         await clickConfirmDelete();
 
-        const { method, url, requestBody } = server.requests[server.requests.length - 1];
-
-        expect(method).toBe('POST');
-        expect(url).toBe(`${API_BASE_PATH}/delete_data_streams`);
-        expect(JSON.parse(JSON.parse(requestBody).body)).toEqual({
-          dataStreams: ['dataStream1'],
-        });
+        expect(httpSetup.post).toHaveBeenLastCalledWith(
+          `${API_BASE_PATH}/delete_data_streams`,
+          expect.objectContaining({ body: JSON.stringify({ dataStreams: ['dataStream1'] }) })
+        );
       });
     });
 
     describe('detail panel', () => {
       test('opens when the data stream name in the table is clicked', async () => {
         const { actions, findDetailPanel, findDetailPanelTitle } = testBed;
+        httpRequestsMockHelpers.setLoadDataStreamResponse('dataStream1');
         await actions.clickNameAt(0);
         expect(findDetailPanel().length).toBe(1);
         expect(findDetailPanelTitle()).toBe('dataStream1');
@@ -295,13 +310,10 @@ describe('Data Streams tab', () => {
 
         await clickConfirmDelete();
 
-        const { method, url, requestBody } = server.requests[server.requests.length - 1];
-
-        expect(method).toBe('POST');
-        expect(url).toBe(`${API_BASE_PATH}/delete_data_streams`);
-        expect(JSON.parse(JSON.parse(requestBody).body)).toEqual({
-          dataStreams: ['dataStream1'],
-        });
+        expect(httpSetup.post).toHaveBeenLastCalledWith(
+          `${API_BASE_PATH}/delete_data_streams`,
+          expect.objectContaining({ body: JSON.stringify({ dataStreams: ['dataStream1'] }) })
+        );
       });
 
       test('clicking index template name navigates to the index template details', async () => {
@@ -328,11 +340,8 @@ describe('Data Streams tab', () => {
 
   describe('when there are special characters', () => {
     beforeEach(async () => {
-      const {
-        setLoadIndicesResponse,
-        setLoadDataStreamsResponse,
-        setLoadDataStreamResponse,
-      } = httpRequestsMockHelpers;
+      const { setLoadIndicesResponse, setLoadDataStreamsResponse, setLoadDataStreamResponse } =
+        httpRequestsMockHelpers;
 
       setLoadIndicesResponse([
         createDataStreamBackingIndex('data-stream-index', '%dataStream'),
@@ -341,10 +350,11 @@ describe('Data Streams tab', () => {
 
       const dataStreamPercentSign = createDataStreamPayload({ name: '%dataStream' });
       setLoadDataStreamsResponse([dataStreamPercentSign]);
-      setLoadDataStreamResponse(dataStreamPercentSign);
+      setLoadDataStreamResponse(dataStreamPercentSign.name, dataStreamPercentSign);
 
-      testBed = await setup({
+      testBed = await setup(httpSetup, {
         history: createMemoryHistory(),
+        url: urlServiceMock,
       });
       await act(async () => {
         testBed.actions.goToDataStreamsList();
@@ -364,31 +374,27 @@ describe('Data Streams tab', () => {
         const { table, actions } = testBed;
         await actions.clickIndicesAt(0);
         expect(table.getMetaData('indexTable').tableCellsValues).toEqual([
-          ['', '', '', '', '', '', '', '%dataStream'],
+          ['', 'data-stream-index', '', '', '', '', '', '', '%dataStream'],
         ]);
       });
     });
   });
 
-  describe('url generators', () => {
-    const mockIlmUrlGenerator = {
-      getUrlGenerator: () => ({
-        createUrl: ({ policyName }: { policyName: string }) => `/test/${policyName}`,
-      }),
-    };
-    test('with an ILM url generator and an ILM policy', async () => {
+  describe('url locators', () => {
+    test('with an ILM url locator and an ILM policy', async () => {
       const { setLoadDataStreamsResponse, setLoadDataStreamResponse } = httpRequestsMockHelpers;
 
       const dataStreamForDetailPanel = createDataStreamPayload({
         name: 'dataStream1',
         ilmPolicyName: 'my_ilm_policy',
       });
-      setLoadDataStreamsResponse([dataStreamForDetailPanel]);
-      setLoadDataStreamResponse(dataStreamForDetailPanel);
 
-      testBed = await setup({
+      setLoadDataStreamsResponse([dataStreamForDetailPanel]);
+      setLoadDataStreamResponse(dataStreamForDetailPanel.name, dataStreamForDetailPanel);
+
+      testBed = await setup(httpSetup, {
         history: createMemoryHistory(),
-        urlGenerators: mockIlmUrlGenerator,
+        url: urlServiceMock,
       });
       await act(async () => {
         testBed.actions.goToDataStreamsList();
@@ -400,16 +406,17 @@ describe('Data Streams tab', () => {
       expect(findDetailPanelIlmPolicyLink().prop('href')).toBe('/test/my_ilm_policy');
     });
 
-    test('with an ILM url generator and no ILM policy', async () => {
+    test('with an ILM url locator and no ILM policy', async () => {
       const { setLoadDataStreamsResponse, setLoadDataStreamResponse } = httpRequestsMockHelpers;
 
       const dataStreamForDetailPanel = createDataStreamPayload({ name: 'dataStream1' });
-      setLoadDataStreamsResponse([dataStreamForDetailPanel]);
-      setLoadDataStreamResponse(dataStreamForDetailPanel);
 
-      testBed = await setup({
+      setLoadDataStreamsResponse([dataStreamForDetailPanel]);
+      setLoadDataStreamResponse(dataStreamForDetailPanel.name, dataStreamForDetailPanel);
+
+      testBed = await setup(httpSetup, {
         history: createMemoryHistory(),
-        urlGenerators: mockIlmUrlGenerator,
+        url: urlServiceMock,
       });
       await act(async () => {
         testBed.actions.goToDataStreamsList();
@@ -422,19 +429,24 @@ describe('Data Streams tab', () => {
       expect(findDetailPanelIlmPolicyName().contains('None')).toBeTruthy();
     });
 
-    test('without an ILM url generator and with an ILM policy', async () => {
+    test('without an ILM url locator and with an ILM policy', async () => {
       const { setLoadDataStreamsResponse, setLoadDataStreamResponse } = httpRequestsMockHelpers;
 
       const dataStreamForDetailPanel = createDataStreamPayload({
         name: 'dataStream1',
         ilmPolicyName: 'my_ilm_policy',
       });
-      setLoadDataStreamsResponse([dataStreamForDetailPanel]);
-      setLoadDataStreamResponse(dataStreamForDetailPanel);
 
-      testBed = await setup({
+      setLoadDataStreamsResponse([dataStreamForDetailPanel]);
+      setLoadDataStreamResponse(dataStreamForDetailPanel.name, dataStreamForDetailPanel);
+
+      testBed = await setup(httpSetup, {
         history: createMemoryHistory(),
-        urlGenerators: { getUrlGenerator: () => {} },
+        url: {
+          locators: {
+            get: () => undefined,
+          },
+        },
       });
       await act(async () => {
         testBed.actions.goToDataStreamsList();
@@ -459,10 +471,12 @@ describe('Data Streams tab', () => {
         },
       });
       const nonManagedDataStream = createDataStreamPayload({ name: 'non-managed-data-stream' });
+
       httpRequestsMockHelpers.setLoadDataStreamsResponse([managedDataStream, nonManagedDataStream]);
 
-      testBed = await setup({
+      testBed = await setup(httpSetup, {
         history: createMemoryHistory(),
+        url: urlServiceMock,
       });
       await act(async () => {
         testBed.actions.goToDataStreamsList();
@@ -502,10 +516,12 @@ describe('Data Streams tab', () => {
         name: 'hidden-data-stream',
         hidden: true,
       });
+
       httpRequestsMockHelpers.setLoadDataStreamsResponse([hiddenDataStream]);
 
-      testBed = await setup({
+      testBed = await setup(httpSetup, {
         history: createMemoryHistory(),
+        url: urlServiceMock,
       });
       await act(async () => {
         testBed.actions.goToDataStreamsList();
@@ -542,7 +558,7 @@ describe('Data Streams tab', () => {
       beforeEach(async () => {
         setLoadDataStreamsResponse([dataStreamWithDelete, dataStreamNoDelete]);
 
-        testBed = await setup({ history: createMemoryHistory() });
+        testBed = await setup(httpSetup, { history: createMemoryHistory(), url: urlServiceMock });
         await act(async () => {
           testBed.actions.goToDataStreamsList();
         });
@@ -580,7 +596,7 @@ describe('Data Streams tab', () => {
           actions: { clickNameAt },
           find,
         } = testBed;
-        setLoadDataStreamResponse(dataStreamWithDelete);
+        setLoadDataStreamResponse(dataStreamWithDelete.name, dataStreamWithDelete);
         await clickNameAt(1);
 
         expect(find('deleteDataStreamButton').exists()).toBeTruthy();
@@ -591,7 +607,7 @@ describe('Data Streams tab', () => {
           actions: { clickNameAt },
           find,
         } = testBed;
-        setLoadDataStreamResponse(dataStreamNoDelete);
+        setLoadDataStreamResponse(dataStreamNoDelete.name, dataStreamNoDelete);
         await clickNameAt(0);
 
         expect(find('deleteDataStreamButton').exists()).toBeFalsy();

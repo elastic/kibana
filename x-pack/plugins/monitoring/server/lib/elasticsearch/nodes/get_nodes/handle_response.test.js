@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import clusterDataFixture from './__fixtures__/cluster_data';
+import clusterDataFixture from './__fixtures__/cluster_data.json';
 import { handleResponse } from './handle_response';
 
 const { nodeStats, clusterStats, shardStats, timeOptions } = clusterDataFixture;

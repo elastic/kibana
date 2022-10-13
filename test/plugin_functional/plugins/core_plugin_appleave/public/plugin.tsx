@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { Plugin, CoreSetup } from 'kibana/public';
+import { Plugin, CoreSetup } from '@kbn/core/public';
 
 export class CoreAppLeavePlugin
-  implements Plugin<CoreAppLeavePluginSetup, CoreAppLeavePluginStart> {
+  implements Plugin<CoreAppLeavePluginSetup, CoreAppLeavePluginStart>
+{
   public setup(core: CoreSetup, deps: {}) {
     core.application.register({
       id: 'appleave1',

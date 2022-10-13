@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import { SearchResponse } from 'elasticsearch';
-import { LegacyAPICaller } from 'kibana/server';
-import { ESLicense } from '../../../telemetry_collection_xpack/server';
-import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
+import { ElasticsearchClient } from '@kbn/core/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ESLicense } from '@kbn/telemetry-collection-xpack-plugin/server';
+import { INDEX_PATTERN_ELASTICSEARCH, USAGE_FETCH_INTERVAL } from '../../common/constants';
 
 /**
  * Get statistics for all selected Elasticsearch clusters.
  */
 export async function getLicenses(
   clusterUuids: string[],
-  callCluster: LegacyAPICaller, // TODO: To be changed to the new ES client when the plugin migrates
+  callCluster: ElasticsearchClient,
+  timestamp: number,
   maxBucketSize: number
 ): Promise<{ [clusterUuid: string]: ESLicense | undefined }> {
-  const response = await fetchLicenses(callCluster, clusterUuids, maxBucketSize);
+  const response = await fetchLicenses(callCluster, clusterUuids, timestamp, maxBucketSize);
   return handleLicenses(response);
 }
 
@@ -31,16 +32,17 @@ export async function getLicenses(
  *
  * Returns the response for the aggregations to fetch details for the product.
  */
-export function fetchLicenses(
-  callCluster: LegacyAPICaller,
+export async function fetchLicenses(
+  callCluster: ElasticsearchClient,
   clusterUuids: string[],
+  timestamp: number,
   maxBucketSize: number
 ) {
-  const params = {
+  const params: estypes.SearchRequest = {
     index: INDEX_PATTERN_ELASTICSEARCH,
     size: maxBucketSize,
-    ignoreUnavailable: true,
-    filterPath: ['hits.hits._source.cluster_uuid', 'hits.hits._source.license'],
+    ignore_unavailable: true,
+    filter_path: ['hits.hits._source.cluster_uuid', 'hits.hits._source.license'],
     body: {
       query: {
         bool: {
@@ -51,6 +53,15 @@ export function fetchLicenses(
              */
             { term: { type: 'cluster_stats' } },
             { terms: { cluster_uuid: clusterUuids } },
+            {
+              range: {
+                timestamp: {
+                  format: 'epoch_millis',
+                  gte: timestamp - USAGE_FETCH_INTERVAL,
+                  lte: timestamp,
+                },
+              },
+            },
           ],
         },
       },
@@ -59,7 +70,7 @@ export function fetchLicenses(
     },
   };
 
-  return callCluster('search', params);
+  return await callCluster.search<ESClusterStatsWithLicense>(params);
 }
 
 export interface ESClusterStatsWithLicense {
@@ -71,13 +82,13 @@ export interface ESClusterStatsWithLicense {
 /**
  * Extract the cluster stats for each cluster.
  */
-export function handleLicenses(response: SearchResponse<ESClusterStatsWithLicense>) {
+export function handleLicenses(response: estypes.SearchResponse<ESClusterStatsWithLicense>) {
   const clusters = response.hits?.hits || [];
 
   return clusters.reduce(
     (acc, { _source }) => ({
       ...acc,
-      [_source.cluster_uuid]: _source.license,
+      [_source!.cluster_uuid]: _source!.license,
     }),
     {}
   );

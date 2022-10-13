@@ -7,22 +7,26 @@
  */
 
 import { mapValues } from 'lodash';
-import { AnyExpressionFunctionDefinition } from '../../types';
-import { ExecutionContext } from '../../../execution/types';
-import { Datatable } from '../../../expression_types';
+import type { AnyExpressionFunctionDefinition } from '../../types';
+import type { ExecutionContext } from '../../../execution/types';
+import type { Datatable } from '../../../expression_types';
 
 /**
  * Takes a function spec and passes in default args,
  * overriding with any provided args.
  */
-export const functionWrapper = <ContextType = object | null>(
-  spec: AnyExpressionFunctionDefinition
+export const functionWrapper = <
+  ExpressionFunctionDefinition extends AnyExpressionFunctionDefinition
+>(
+  spec: ExpressionFunctionDefinition
 ) => {
   const defaultArgs = mapValues(spec.args, (argSpec) => argSpec.default);
   return (
-    context: ContextType,
-    args: Record<string, any> = {},
-    handlers: ExecutionContext = {} as ExecutionContext
+    context?: Parameters<ExpressionFunctionDefinition['fn']>[0] | null,
+    args: Parameters<ExpressionFunctionDefinition['fn']>[1] = {},
+    handlers: ExecutionContext = {
+      getExecutionContext: jest.fn(),
+    } as unknown as ExecutionContext
   ) => spec.fn(context, { ...defaultArgs, ...args }, handlers);
 };
 
@@ -37,27 +41,27 @@ const testTable: Datatable = {
   columns: [
     {
       id: 'name',
-      name: 'name',
+      name: 'name label',
       meta: { type: 'string' },
     },
     {
       id: 'time',
-      name: 'time',
+      name: 'time label',
       meta: { type: 'date' },
     },
     {
       id: 'price',
-      name: 'price',
+      name: 'price label',
       meta: { type: 'number' },
     },
     {
       id: 'quantity',
-      name: 'quantity',
+      name: 'quantity label',
       meta: { type: 'number' },
     },
     {
       id: 'in_stock',
-      name: 'in_stock',
+      name: 'in_stock label',
       meta: { type: 'boolean' },
     },
   ],
@@ -224,4 +228,72 @@ const stringTable: Datatable = {
   ],
 };
 
-export { emptyTable, testTable, stringTable };
+const tableWithNulls: Datatable = {
+  type: 'datatable',
+  columns: [
+    {
+      id: 'name',
+      name: 'name label',
+      meta: { type: 'string' },
+    },
+    {
+      id: 'time',
+      name: 'time label',
+      meta: { type: 'date' },
+    },
+    {
+      id: 'price',
+      name: 'price label',
+      meta: { type: 'number' },
+    },
+  ],
+  rows: [
+    {
+      name: 'product1',
+      time: 1517842800950, // 05 Feb 2018 15:00:00 GMT
+      price: null,
+    },
+    {
+      name: 'product1',
+      time: 1517929200950, // 06 Feb 2018 15:00:00 GMT
+      price: null,
+    },
+    {
+      name: 'product1',
+      time: 1518015600950, // 07 Feb 2018 15:00:00 GMT
+      price: 420,
+    },
+    {
+      name: 'product2',
+      time: 1517842800950, // 05 Feb 2018 15:00:00 GMT
+      price: 216,
+    },
+    {
+      name: 'product2',
+      time: 1517929200950, // 06 Feb 2018 15:00:00 GMT
+      price: 200,
+    },
+    {
+      name: 'product2',
+      time: 1518015600950, // 07 Feb 2018 15:00:00 GMT
+      price: 190,
+    },
+    {
+      name: 'product3',
+      time: 1517842800950, // 05 Feb 2018 15:00:00 GMT
+      price: null,
+    },
+    {
+      name: 'product4',
+      time: 1517842800950, // 05 Feb 2018 15:00:00 GMT
+      price: 311,
+    },
+    {
+      name: 'product5',
+      time: 1517842800950, // 05 Feb 2018 15:00:00 GMT
+      price: 288,
+    },
+  ],
+};
+
+export { emptyTable, testTable, stringTable, tableWithNulls };

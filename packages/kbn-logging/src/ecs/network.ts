@@ -14,7 +14,7 @@ interface NestedFields {
 }
 
 /**
- * https://www.elastic.co/guide/en/ecs/1.9/ecs-network.html
+ * https://www.elastic.co/guide/en/ecs/master/ecs-network.html
  *
  * @internal
  */
@@ -22,7 +22,7 @@ export interface EcsNetwork extends NestedFields {
   application?: string;
   bytes?: number;
   community_id?: string;
-  direction?: string;
+  direction?: Direction;
   forwarded_ip?: string;
   iana_number?: string;
   name?: string;
@@ -31,3 +31,12 @@ export interface EcsNetwork extends NestedFields {
   transport?: string;
   type?: string;
 }
+
+type Direction =
+  | 'ingress'
+  | 'egress'
+  | 'inbound'
+  | 'outbound'
+  | 'internal'
+  | 'external'
+  | 'unknown';

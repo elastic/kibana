@@ -9,8 +9,9 @@
 import { i18n } from '@kbn/i18n';
 import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
-import { KBN_FIELD_TYPES } from '../../../../common';
-import { getResponseAggConfigClass, IResponseAggConfig } from './lib/get_response_agg_config_class';
+import { KBN_FIELD_TYPES } from '../../..';
+import { getResponseAggConfigClass } from './lib/get_response_agg_config_class';
+import type { IResponseAggConfig } from './lib/get_response_agg_config_class';
 import { aggPercentilesFnName } from './percentiles_fn';
 import { getPercentileValue } from './percentiles_get_value';
 import { ordinalSuffix } from './lib/ordinal_suffix';

@@ -6,38 +6,101 @@
  */
 
 import React, { Component } from 'react';
-
-import { EuiPopover, EuiContextMenu, EuiIcon } from '@elastic/eui';
+import { EuiContextMenu, EuiIcon, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ILayer } from '../../../../../../classes/layers/layer';
 import { TOCEntryButton } from '../toc_entry_button';
 import {
+  EDIT_FEATURES_LABEL,
+  EDIT_LAYER_SETTINGS_LABEL,
+  FIT_TO_DATA_LABEL,
   getVisibilityToggleIcon,
   getVisibilityToggleLabel,
-  EDIT_LAYER_LABEL,
-  FIT_TO_DATA_LABEL,
 } from '../action_labels';
+import { ESSearchSource } from '../../../../../../classes/sources/es_search_source';
+import { isVectorLayer, IVectorLayer } from '../../../../../../classes/layers/vector_layer';
+import { SCALING_TYPES, VECTOR_SHAPE_TYPE } from '../../../../../../../common/constants';
+import { RemoveLayerConfirmModal } from '../../../../../../components/remove_layer_confirm_modal';
 
 export interface Props {
   cloneLayer: (layerId: string) => void;
+  enableShapeEditing: (layerId: string) => void;
+  enablePointEditing: (layerId: string) => void;
   displayName: string;
-  editLayer: () => void;
+  openLayerSettings: () => void;
   escapedDisplayName: string;
   fitToBounds: (layerId: string) => void;
   isEditButtonDisabled: boolean;
   isReadOnly: boolean;
   layer: ILayer;
   removeLayer: (layerId: string) => void;
+  showThisLayerOnly: (layerId: string) => void;
   supportsFitToBounds: boolean;
   toggleVisible: (layerId: string) => void;
+  numLayers: number;
 }
 
 interface State {
   isPopoverOpen: boolean;
+  showRemoveModal: boolean;
+  supportsFeatureEditing: boolean;
+  isFeatureEditingEnabled: boolean;
 }
 
 export class TOCEntryActionsPopover extends Component<Props, State> {
-  state: State = { isPopoverOpen: false };
+  state: State = {
+    isPopoverOpen: false,
+    showRemoveModal: false,
+    supportsFeatureEditing: false,
+    isFeatureEditingEnabled: false,
+  };
+  private _isMounted = false;
+
+  componentDidMount() {
+    this._isMounted = true;
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
+  componentDidUpdate() {
+    this._loadFeatureEditing();
+  }
+
+  async _loadFeatureEditing() {
+    if (!isVectorLayer(this.props.layer)) {
+      return;
+    }
+    const supportsFeatureEditing = (this.props.layer as IVectorLayer).supportsFeatureEditing();
+    const isFeatureEditingEnabled = await this._getIsFeatureEditingEnabled();
+    if (
+      !this._isMounted ||
+      (supportsFeatureEditing === this.state.supportsFeatureEditing &&
+        isFeatureEditingEnabled === this.state.isFeatureEditingEnabled)
+    ) {
+      return;
+    }
+    this.setState({ supportsFeatureEditing, isFeatureEditingEnabled });
+  }
+
+  async _getIsFeatureEditingEnabled(): Promise<boolean> {
+    const vectorLayer = this.props.layer as IVectorLayer;
+    const source = this.props.layer.getSource();
+    if (!(source instanceof ESSearchSource)) {
+      return false;
+    }
+
+    if (
+      (source as ESSearchSource).getSyncMeta().scalingType === SCALING_TYPES.CLUSTERS ||
+      vectorLayer.isPreviewLayer() ||
+      !vectorLayer.isVisible() ||
+      vectorLayer.hasJoins()
+    ) {
+      return false;
+    }
+    return true;
+  }
 
   _togglePopover = () => {
     this.setState((prevState) => ({
@@ -57,10 +120,6 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
 
   _fitToBounds() {
     this.props.fitToBounds(this.props.layer.getId());
-  }
-
-  _removeLayer() {
-    this.props.removeLayer(this.props.layer.getId());
   }
 
   _toggleVisible() {
@@ -95,19 +154,61 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
         },
       },
     ];
+    if (this.props.numLayers > 2) {
+      actionItems.push({
+        name: i18n.translate('xpack.maps.layerTocActions.showThisLayerOnlyTitle', {
+          defaultMessage: 'Show this layer only',
+        }),
+        icon: <EuiIcon type="eye" size="m" />,
+        'data-test-subj': 'showThisLayerOnlyButton',
+        toolTipContent: null,
+        onClick: () => {
+          this._closePopover();
+          this.props.showThisLayerOnly(this.props.layer.getId());
+        },
+      });
+    }
 
     if (!this.props.isReadOnly) {
       actionItems.push({
         disabled: this.props.isEditButtonDisabled,
-        name: EDIT_LAYER_LABEL,
+        name: EDIT_LAYER_SETTINGS_LABEL,
         icon: <EuiIcon type="pencil" size="m" />,
-        'data-test-subj': 'editLayerButton',
+        'data-test-subj': 'layerSettingsButton',
         toolTipContent: null,
         onClick: () => {
           this._closePopover();
-          this.props.editLayer();
+          this.props.openLayerSettings();
         },
       });
+      if (this.state.supportsFeatureEditing) {
+        actionItems.push({
+          name: EDIT_FEATURES_LABEL,
+          icon: <EuiIcon type="vector" size="m" />,
+          'data-test-subj': 'editLayerButton',
+          toolTipContent: this.state.isFeatureEditingEnabled
+            ? null
+            : i18n.translate('xpack.maps.layerTocActions.editFeaturesTooltip.disabledMessage', {
+                defaultMessage:
+                  'Edit features is only supported for layers without clustering and term joins',
+              }),
+          disabled: !this.state.isFeatureEditingEnabled,
+          onClick: async () => {
+            this._closePopover();
+            const supportedShapeTypes = await (
+              this.props.layer.getSource() as ESSearchSource
+            ).getSupportedShapeTypes();
+            const supportsShapes =
+              supportedShapeTypes.includes(VECTOR_SHAPE_TYPE.POLYGON) &&
+              supportedShapeTypes.includes(VECTOR_SHAPE_TYPE.LINE);
+            if (supportsShapes) {
+              this.props.enableShapeEditing(this.props.layer.getId());
+            } else {
+              this.props.enablePointEditing(this.props.layer.getId());
+            }
+          },
+        });
+      }
       actionItems.push({
         name: i18n.translate('xpack.maps.layerTocActions.cloneLayerTitle', {
           defaultMessage: 'Clone layer',
@@ -128,8 +229,7 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
         toolTipContent: null,
         'data-test-subj': 'removeLayerButton',
         onClick: () => {
-          this._closePopover();
-          this._removeLayer();
+          this.setState({ showRemoveModal: true });
         },
       });
     }
@@ -144,30 +244,46 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
   }
 
   render() {
+    const removeModal = this.state.showRemoveModal ? (
+      <RemoveLayerConfirmModal
+        layer={this.props.layer}
+        onCancel={() => {
+          this.setState({ showRemoveModal: false });
+        }}
+        onConfirm={() => {
+          this.setState({ showRemoveModal: false });
+          this._closePopover();
+          this.props.removeLayer(this.props.layer.getId());
+        }}
+      />
+    ) : null;
     return (
-      <EuiPopover
-        id={this.props.layer.getId()}
-        className="mapLayTocActions"
-        button={
-          <TOCEntryButton
-            layer={this.props.layer}
-            displayName={this.props.displayName}
-            escapedDisplayName={this.props.escapedDisplayName}
-            onClick={this._togglePopover}
+      <>
+        {removeModal}
+        <EuiPopover
+          id={this.props.layer.getId()}
+          className="mapLayTocActions"
+          button={
+            <TOCEntryButton
+              layer={this.props.layer}
+              displayName={this.props.displayName}
+              escapedDisplayName={this.props.escapedDisplayName}
+              onClick={this._togglePopover}
+            />
+          }
+          isOpen={this.state.isPopoverOpen}
+          closePopover={this._closePopover}
+          panelPaddingSize="none"
+          anchorPosition="leftUp"
+          anchorClassName="mapLayTocActions__popoverAnchor"
+        >
+          <EuiContextMenu
+            initialPanelId={0}
+            panels={[this._getActionsPanel()]}
+            data-test-subj={`layerTocActionsPanel${this.props.escapedDisplayName}`}
           />
-        }
-        isOpen={this.state.isPopoverOpen}
-        closePopover={this._closePopover}
-        panelPaddingSize="none"
-        anchorPosition="leftUp"
-        anchorClassName="mapLayTocActions__popoverAnchor"
-      >
-        <EuiContextMenu
-          initialPanelId={0}
-          panels={[this._getActionsPanel()]}
-          data-test-subj={`layerTocActionsPanel${this.props.escapedDisplayName}`}
-        />
-      </EuiPopover>
+        </EuiPopover>
+      </>
     );
   }
 }

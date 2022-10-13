@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { SO_SEARCH_LIMIT } from '../../constants';
 import { agentPolicyService } from '../agent_policy';
 
 /**
- * During the migration from 7.9 to 7.10 we introduce a new agent action POLICY_CHANGE per policy
- * this function ensure that action exist for each policy
- *
- * @param soClient
+ * Ensure a .fleet-policy document exist for each agent policy so Fleet server can retrieve it
  */
-export async function ensureAgentActionPolicyChangeExists(
+export async function ensureFleetServerAgentPoliciesExists(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient
 ) {
@@ -24,16 +21,12 @@ export async function ensureAgentActionPolicyChangeExists(
     perPage: SO_SEARCH_LIMIT,
   });
 
-  await Promise.all(
-    agentPolicies.map(async (agentPolicy) => {
-      const policyChangeActionExist = !!(await agentPolicyService.getLatestFleetPolicy(
-        esClient,
-        agentPolicy.id
-      ));
+  const outdatedAgentPolicyIds = agentPolicies
+    .filter(
+      async (agentPolicy) =>
+        !!(await agentPolicyService.getLatestFleetPolicy(esClient, agentPolicy.id))
+    )
+    .map((agentPolicy) => agentPolicy.id);
 
-      if (!policyChangeActionExist) {
-        return agentPolicyService.createFleetPolicyChangeAction(soClient, agentPolicy.id);
-      }
-    })
-  );
+  await agentPolicyService.deployPolicies(soClient, outdatedAgentPolicyIds);
 }

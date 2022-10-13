@@ -5,4 +5,23 @@
  * 2.0.
  */
 
-export * from './isolation';
+import { registerActionDetailsRoutes } from './details';
+import type { SecuritySolutionPluginRouter } from '../../../types';
+import type { EndpointAppContext } from '../../types';
+import { registerActionStatusRoutes } from './status';
+import { registerActionAuditLogRoutes } from './audit_log';
+import { registerActionListRoutes } from './list';
+import { registerResponseActionRoutes } from './response_actions';
+
+// wrap route registration
+
+export function registerActionRoutes(
+  router: SecuritySolutionPluginRouter,
+  endpointContext: EndpointAppContext
+) {
+  registerActionStatusRoutes(router, endpointContext);
+  registerActionAuditLogRoutes(router, endpointContext);
+  registerActionListRoutes(router, endpointContext);
+  registerActionDetailsRoutes(router, endpointContext);
+  registerResponseActionRoutes(router, endpointContext);
+}

@@ -8,25 +8,59 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
-import { I18nStart, ScopedHistory, ApplicationStart } from 'kibana/public';
-import { UnmountCallback } from 'src/core/public';
+import { Observable } from 'rxjs';
 
+import {
+  UnmountCallback,
+  I18nStart,
+  ScopedHistory,
+  ApplicationStart,
+  DocLinksStart,
+  CoreTheme,
+  ExecutionContextStart,
+} from '@kbn/core/public';
+import { KibanaThemeProvider, useExecutionContext } from '../shared_imports';
 import { init as initBreadcrumbs, SetBreadcrumbs } from './services/breadcrumbs';
 import { init as initDocumentation } from './services/documentation_links';
 import { App } from './app';
 import { ccrStore } from './store';
 
+const AppWithExecutionContext = ({
+  history,
+  executionContext,
+  getUrlForApp,
+}: {
+  history: ScopedHistory;
+  getUrlForApp: ApplicationStart['getUrlForApp'];
+  executionContext: ExecutionContextStart;
+}) => {
+  useExecutionContext(executionContext, {
+    type: 'application',
+    page: 'crossClusterReplication',
+  });
+
+  return <App history={history} getUrlForApp={getUrlForApp} />;
+};
+
 const renderApp = (
   element: Element,
   I18nContext: I18nStart['Context'],
   history: ScopedHistory,
-  getUrlForApp: ApplicationStart['getUrlForApp']
+  getUrlForApp: ApplicationStart['getUrlForApp'],
+  theme$: Observable<CoreTheme>,
+  executionContext: ExecutionContextStart
 ): UnmountCallback => {
   render(
     <I18nContext>
-      <Provider store={ccrStore}>
-        <App history={history} getUrlForApp={getUrlForApp} />
-      </Provider>
+      <KibanaThemeProvider theme$={theme$}>
+        <Provider store={ccrStore}>
+          <AppWithExecutionContext
+            history={history}
+            getUrlForApp={getUrlForApp}
+            executionContext={executionContext}
+          />
+        </Provider>
+      </KibanaThemeProvider>
     </I18nContext>,
     element
   );
@@ -38,23 +72,25 @@ export async function mountApp({
   element,
   setBreadcrumbs,
   I18nContext,
-  ELASTIC_WEBSITE_URL, // eslint-disable-line @typescript-eslint/naming-convention
-  DOC_LINK_VERSION, // eslint-disable-line @typescript-eslint/naming-convention
+  docLinks,
   history,
   getUrlForApp,
+  theme$,
+  executionContext,
 }: {
   element: Element;
   setBreadcrumbs: SetBreadcrumbs;
   I18nContext: I18nStart['Context'];
-  ELASTIC_WEBSITE_URL: string;
-  DOC_LINK_VERSION: string;
+  docLinks: DocLinksStart;
   history: ScopedHistory;
   getUrlForApp: ApplicationStart['getUrlForApp'];
+  theme$: Observable<CoreTheme>;
+  executionContext: ExecutionContextStart;
 }): Promise<UnmountCallback> {
   // Import and initialize additional services here instead of in plugin.ts to reduce the size of the
   // initial bundle as much as possible.
   initBreadcrumbs(setBreadcrumbs);
-  initDocumentation(`${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`);
+  initDocumentation(docLinks);
 
-  return renderApp(element, I18nContext, history, getUrlForApp);
+  return renderApp(element, I18nContext, history, getUrlForApp, theme$, executionContext);
 }

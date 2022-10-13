@@ -7,8 +7,8 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
-import { Rule } from '../../../../../containers/detection_engine/rules';
-import { ExceptionListSchema } from '../../../../../../../../lists/common';
+import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { Rule } from '../../../../../containers/detection_engine/rules';
 import { fetchRules } from '../../../../../containers/detection_engine/rules/api';
 export interface ExceptionListInfo extends ExceptionListSchema {
   rules: Rule[];
@@ -95,7 +95,6 @@ export const useAllExceptionLists = ({
           pagination: {
             page: 1,
             perPage: 10000,
-            total: 0,
           },
           signal: abortCtrl.signal,
         });

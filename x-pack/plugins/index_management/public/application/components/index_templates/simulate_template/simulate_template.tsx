@@ -6,8 +6,7 @@
  */
 
 import React, { useState, useCallback, useEffect } from 'react';
-import uuid from 'uuid';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCodeBlock, EuiCallOut } from '@elastic/eui';
 
 import { serializers } from '../../../../shared_imports';
@@ -36,12 +35,9 @@ export const SimulateTemplate = React.memo(({ template, filters }: Props) => {
       return;
     }
 
-    const indexTemplate = serializeTemplate(stripEmptyFields(template) as TemplateDeserialized);
-
-    // Until ES fixes a bug on their side we will send a random index pattern to the simulate API.
-    // Issue: https://github.com/elastic/elasticsearch/issues/59152
-    indexTemplate.index_patterns = [uuid.v4()];
-
+    const indexTemplate = serializeTemplate(
+      stripEmptyFields(template, { types: ['string'] }) as TemplateDeserialized
+    );
     const { data, error } = await simulateIndexTemplate(indexTemplate);
     let filteredTemplate = data;
 
@@ -96,7 +92,7 @@ export const SimulateTemplate = React.memo(({ template, filters }: Props) => {
   }
 
   return isEmpty ? null : (
-    <EuiCodeBlock lang="json" data-test-subj="simulateTemplatePreview">
+    <EuiCodeBlock language="json" isCopyable={true} data-test-subj="simulateTemplatePreview">
       {templatePreview}
     </EuiCodeBlock>
   );

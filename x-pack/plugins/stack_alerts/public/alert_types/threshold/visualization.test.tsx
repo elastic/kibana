@@ -7,20 +7,20 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { ThresholdVisualization } from './visualization';
-import { DataPublicPluginStart } from 'src/plugins/data/public/types';
-import { chartPluginMock } from 'src/plugins/charts/public/mocks';
-import { dataPluginMock } from 'src/plugins/data/public/mocks';
-import { uiSettingsServiceMock } from 'src/core/public/mocks';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public/types';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import {
   builtInAggregationTypes,
   builtInComparators,
-} from '../../../../triggers_actions_ui/public';
+} from '@kbn/triggers-actions-ui-plugin/public';
 import { Chart, LineAnnotation, LineSeries } from '@elastic/charts';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
-jest.mock('../../../../../../src/plugins/kibana_react/public');
+jest.mock('@kbn/kibana-react-plugin/public');
 jest.mock('./index_threshold_api', () => ({
   getThresholdAlertVisualizationData: jest.fn(() =>
     Promise.resolve({
@@ -36,11 +36,11 @@ const { getThresholdAlertVisualizationData } = jest.requireMock('./index_thresho
 
 const dataMock = dataPluginMock.createStartContract();
 const chartsStartMock = chartPluginMock.createStartContract();
-dataMock.fieldFormats = ({
+dataMock.fieldFormats = {
   getDefaultInstance: jest.fn(() => ({
     convert: jest.fn((s: unknown) => JSON.stringify(s)),
   })),
-} as unknown) as DataPublicPluginStart['fieldFormats'];
+} as unknown as DataPublicPluginStart['fieldFormats'];
 
 describe('ThresholdVisualization', () => {
   beforeAll(() => {
@@ -51,7 +51,7 @@ describe('ThresholdVisualization', () => {
     });
   });
 
-  const alertParams = {
+  const ruleParams = {
     index: 'test-index',
     aggType: 'count',
     thresholdComparator: '>',
@@ -63,7 +63,7 @@ describe('ThresholdVisualization', () => {
   async function setup() {
     const wrapper = mountWithIntl(
       <ThresholdVisualization
-        alertParams={alertParams}
+        ruleParams={ruleParams}
         alertInterval="1m"
         aggregationTypes={builtInAggregationTypes}
         comparators={builtInComparators}
@@ -85,7 +85,7 @@ describe('ThresholdVisualization', () => {
 
     const wrapper = mountWithIntl(
       <ThresholdVisualization
-        alertParams={alertParams}
+        ruleParams={ruleParams}
         alertInterval="1m"
         aggregationTypes={builtInAggregationTypes}
         comparators={builtInComparators}
@@ -114,7 +114,7 @@ describe('ThresholdVisualization', () => {
   test('renders loading message on initial load', async () => {
     const wrapper = mountWithIntl(
       <ThresholdVisualization
-        alertParams={alertParams}
+        ruleParams={ruleParams}
         alertInterval="1m"
         aggregationTypes={builtInAggregationTypes}
         comparators={builtInComparators}
@@ -163,14 +163,38 @@ describe('ThresholdVisualization', () => {
     expect(wrapper.find(LineAnnotation)).toHaveLength(1);
   });
 
-  test('renders error message when getting visualization fails', async () => {
+  test('renders error callout with message when getting visualization fails', async () => {
     const errorMessage = 'oh no';
-    getThresholdAlertVisualizationData.mockImplementation(() => Promise.reject(errorMessage));
+    getThresholdAlertVisualizationData.mockImplementation(() =>
+      Promise.reject(new Error(errorMessage))
+    );
     const wrapper = await setup();
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
 
     expect(wrapper.find('[data-test-subj="errorCallout"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="errorCallout"]').first().text()).toBe(
       `Cannot load alert visualization${errorMessage}`
+    );
+  });
+
+  test('renders error callout even when unable to get message from error', async () => {
+    getThresholdAlertVisualizationData.mockImplementation(() =>
+      Promise.reject(new Error(undefined))
+    );
+    const wrapper = await setup();
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(wrapper.find('[data-test-subj="errorCallout"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="errorCallout"]').first().text()).toBe(
+      `Cannot load alert visualization`
     );
   });
 

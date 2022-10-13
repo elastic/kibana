@@ -5,51 +5,29 @@
  * 2.0.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiTextColor,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiCodeBlock,
-  EuiSpacer,
-  EuiDescriptionList,
-  EuiDescriptionListTitle,
-  EuiDescriptionListDescription,
-} from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useMemo } from 'react';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useCallback, useLayoutEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import styled from 'styled-components';
 
-import { Direction } from '../../../../common/search_strategy';
+import styled from 'styled-components';
+import { AddToCaseWrapper } from '../../../cases/add_to_cases';
 import { useRouterNavigate } from '../../../common/lib/kibana';
 import { WithHeaderLayout } from '../../../components/layouts';
-import { useActionResults } from '../../../action_results/use_action_results';
-import { useActionDetails } from '../../../actions/use_action_details';
-import { ResultTabs } from '../../../queries/edit/tabs';
-import { LiveQueryDetailsActionsMenu } from './actions_menu';
+import { useLiveQueryDetails } from '../../../actions/use_live_query_details';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
-import { BetaBadge, BetaBadgeRowWrapper } from '../../../components/beta_badge';
+import { PackQueriesStatusTable } from '../../../live_queries/form/pack_queries_status_table';
 
-const Divider = styled.div`
-  width: 0;
-  height: 100%;
-  border-left: ${({ theme }) => theme.eui.euiBorderThin};
+const StyledTableWrapper = styled(EuiFlexItem)`
+  padding-left: 10px;
 `;
 
 const LiveQueryDetailsPageComponent = () => {
   const { actionId } = useParams<{ actionId: string }>();
   useBreadcrumbs('live_query_details', { liveQueryId: actionId });
   const liveQueryListProps = useRouterNavigate('live_queries');
-
-  const { data } = useActionDetails({ actionId });
-  const { data: actionResultsData } = useActionResults({
-    actionId,
-    activePage: 0,
-    limit: 0,
-    direction: Direction.asc,
-    sortField: '@timestamp',
-  });
+  const [isLive, setIsLive] = useState(false);
+  const { data } = useLiveQueryDetails({ actionId, isLive });
 
   const LeftColumn = useMemo(
     () => (
@@ -63,81 +41,50 @@ const LiveQueryDetailsPageComponent = () => {
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem>
-          <BetaBadgeRowWrapper>
+          <EuiText>
             <h1>
               <FormattedMessage
                 id="xpack.osquery.liveQueryDetails.pageTitle"
                 defaultMessage="Live query details"
               />
             </h1>
-            <BetaBadge />
-          </BetaBadgeRowWrapper>
+          </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
     [liveQueryListProps]
   );
 
-  const RightColumn = useMemo(
-    () => (
-      <EuiFlexGroup justifyContent="flexEnd" direction="row">
-        <EuiFlexItem grow={false} key="rows_count">
-          <></>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false} key="rows_count_divider">
-          <Divider />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false} key="agents_count">
-          {/* eslint-disable-next-line react-perf/jsx-no-new-object-as-prop */}
-          <EuiDescriptionList compressed textStyle="reverse" style={{ textAlign: 'right' }}>
-            <EuiDescriptionListTitle className="eui-textNoWrap">
-              <FormattedMessage
-                id="xpack.osquery.liveQueryDetails.kpis.agentsQueriedLabelText"
-                defaultMessage="Agents queried"
-              />
-            </EuiDescriptionListTitle>
-            <EuiDescriptionListDescription className="eui-textNoWrap">
-              {data?.actionDetails?.fields?.agents?.length ?? '0'}
-            </EuiDescriptionListDescription>
-          </EuiDescriptionList>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false} key="agents_count_divider">
-          <Divider />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false} key="agents_failed_count">
-          {/* eslint-disable-next-line react-perf/jsx-no-new-object-as-prop */}
-          <EuiDescriptionList compressed textStyle="reverse" style={{ textAlign: 'right' }}>
-            <EuiDescriptionListTitle className="eui-textNoWrap">
-              <FormattedMessage
-                id="xpack.osquery.liveQueryDetails.kpis.agentsFailedCountLabelText"
-                defaultMessage="Agents failed"
-              />
-            </EuiDescriptionListTitle>
-            <EuiDescriptionListDescription className="eui-textNoWrap">
-              <EuiTextColor color={actionResultsData?.aggregations.failed ? 'danger' : 'default'}>
-                {actionResultsData?.aggregations.failed}
-              </EuiTextColor>
-            </EuiDescriptionListDescription>
-          </EuiDescriptionList>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false} key="agents_failed_count_divider">
-          <Divider />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false} key="actions_menu">
-          <LiveQueryDetailsActionsMenu actionId={actionId} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+  useLayoutEffect(() => {
+    setIsLive(() => !(data?.status === 'completed'));
+  }, [data?.status]);
+  const addToCaseButton = useCallback(
+    (payload) => (
+      <AddToCaseWrapper
+        queryId={payload.queryId}
+        actionId={actionId}
+        agentIds={data?.agents}
+        isIcon={payload.isIcon}
+        isDisabled={payload.isDisabled}
+        iconProps={payload.iconProps}
+      />
     ),
-    [actionId, actionResultsData?.aggregations.failed, data?.actionDetails?.fields?.agents?.length]
+    [data?.agents, actionId]
   );
 
   return (
-    <WithHeaderLayout leftColumn={LeftColumn} rightColumn={RightColumn} rightColumnGrow={false}>
-      <EuiCodeBlock language="sql" fontSize="m" paddingSize="m">
-        {data?.actionDetails._source?.data?.query}
-      </EuiCodeBlock>
-      <EuiSpacer />
-      <ResultTabs actionId={actionId} agentIds={data?.actionDetails?.fields?.agents} />
+    <WithHeaderLayout leftColumn={LeftColumn} rightColumnGrow={false}>
+      <StyledTableWrapper>
+        <PackQueriesStatusTable
+          actionId={actionId}
+          data={data?.queries}
+          startDate={data?.['@timestamp']}
+          expirationDate={data?.expiration}
+          agentIds={data?.agents}
+          addToCase={addToCaseButton}
+          showResultsHeader
+        />
+      </StyledTableWrapper>
     </WithHeaderLayout>
   );
 };

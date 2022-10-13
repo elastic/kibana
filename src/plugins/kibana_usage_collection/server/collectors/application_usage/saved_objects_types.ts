@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectAttributes, SavedObjectsServiceSetup } from 'kibana/server';
+import type { SavedObjectsServiceSetup } from '@kbn/core/server';
 
 /**
  * Used for accumulating the totals of all the stats older than 90d
  */
-export interface ApplicationUsageTotal extends SavedObjectAttributes {
+export interface ApplicationUsageTotal {
   appId: string;
   viewId: string;
   minutesOnScreen: number;
@@ -26,9 +26,6 @@ export const SAVED_OBJECTS_TOTAL_TYPE = 'application_usage_totals';
 export interface ApplicationUsageTransactional extends ApplicationUsageTotal {
   timestamp: string;
 }
-
-/** @deprecated transactional type is no longer used, and only preserved for backward compatibility */
-export const SAVED_OBJECTS_TRANSACTIONAL_TYPE = 'application_usage_transactional';
 
 /**
  * Used to aggregate the transactional events into daily summaries so we can purge the granular events
@@ -61,18 +58,6 @@ export function registerMappings(registerType: SavedObjectsServiceSetup['registe
         // This type requires `timestamp` to be indexed so we can use it when rolling up totals (timestamp < now-90d)
         timestamp: { type: 'date' },
       },
-    },
-  });
-
-  // Type for storing ApplicationUsageTransactional (declaring empty mappings because we don't use the internal fields for query/aggregations)
-  // Remark: this type is deprecated and only here for BWC reasons.
-  registerType({
-    name: SAVED_OBJECTS_TRANSACTIONAL_TYPE,
-    hidden: false,
-    namespaceType: 'agnostic',
-    mappings: {
-      dynamic: false,
-      properties: {},
     },
   });
 }

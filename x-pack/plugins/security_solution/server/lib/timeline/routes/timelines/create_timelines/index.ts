@@ -5,15 +5,16 @@
  * 2.0.
  */
 
+import { transformError } from '@kbn/securitysolution-es-utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
 import { TIMELINE_URL } from '../../../../../../common/constants';
 
-import { ConfigType } from '../../../../..';
-import { SetupPlugins } from '../../../../../plugin';
+import type { ConfigType } from '../../../../..';
+import type { SetupPlugins } from '../../../../../plugin';
 import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
 
-import { transformError, buildSiemResponse } from '../../../../detection_engine/routes/utils';
+import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import { createTimelineSchema } from '../../../schemas/timelines';
 import {
@@ -28,7 +29,7 @@ export * from './helpers';
 
 export const createTimelinesRoute = (
   router: SecuritySolutionPluginRouter,
-  config: ConfigType,
+  _: ConfigType,
   security: SetupPlugins['security']
 ) => {
   router.post(
@@ -48,13 +49,8 @@ export const createTimelinesRoute = (
         const frameworkRequest = await buildFrameworkRequest(context, security, request);
 
         const { timelineId, timeline, version } = request.body;
-        const {
-          templateTimelineId,
-          templateTimelineVersion,
-          timelineType,
-          title,
-          status,
-        } = timeline;
+        const { templateTimelineId, templateTimelineVersion, timelineType, title, status } =
+          timeline;
         const compareTimelinesStatus = new CompareTimelinesStatus({
           status,
           title,

@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { RouteDeps } from '../../types';
-import { wrapError } from '../../utils';
-import { CASE_TAGS_URL } from '../../../../../common';
+import { AllTagsFindRequest } from '../../../../../common/api';
+import { CASE_TAGS_URL } from '../../../../../common/constants';
+import { createCaseError } from '../../../../common/error';
+import { createCasesRoute } from '../../create_cases_route';
 
-export function initGetTagsApi({ caseService, router }: RouteDeps) {
-  router.get(
-    {
-      path: CASE_TAGS_URL,
-      validate: {},
-    },
-    async (context, request, response) => {
-      try {
-        const client = context.core.savedObjects.client;
-        const tags = await caseService.getTags({
-          client,
-        });
-        return response.ok({ body: tags });
-      } catch (error) {
-        return response.customError(wrapError(error));
-      }
+export const getTagsRoute = createCasesRoute({
+  method: 'get',
+  path: CASE_TAGS_URL,
+  handler: async ({ context, request, response }) => {
+    try {
+      const caseContext = await context.cases;
+      const client = await caseContext.getCasesClient();
+      const options = request.query as AllTagsFindRequest;
+
+      return response.ok({ body: await client.cases.getTags({ ...options }) });
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to retrieve tags in route: ${error}`,
+        error,
+      });
     }
-  );
-}
+  },
+});

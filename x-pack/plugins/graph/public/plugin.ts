@@ -6,29 +6,30 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, CoreStart } from 'kibana/public';
-import { AppMountParameters, Plugin } from 'src/core/public';
-import { PluginInitializerContext } from 'kibana/public';
-
-import { Storage } from '../../../../src/plugins/kibana_utils/public';
+import { BehaviorSubject } from 'rxjs';
+import { SpacesApi } from '@kbn/spaces-plugin/public';
 import {
-  initAngularBootstrap,
-  KibanaLegacyStart,
-} from '../../../../src/plugins/kibana_legacy/public';
-import { NavigationPublicPluginStart as NavigationStart } from '../../../../src/plugins/navigation/public';
-import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
+  AppNavLinkStatus,
+  AppUpdater,
+  CoreSetup,
+  CoreStart,
+  AppMountParameters,
+  Plugin,
+  PluginInitializerContext,
+  DEFAULT_APP_CATEGORIES,
+} from '@kbn/core/public';
 
-import { toggleNavLink } from './services/toggle_nav_link';
-import { LicensingPluginStart } from '../../licensing/public';
+import { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
 import { checkLicense } from '../common/check_license';
-import {
-  FeatureCatalogueCategory,
-  HomePublicPluginSetup,
-  HomePublicPluginStart,
-} from '../../../../src/plugins/home/public';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { ConfigSchema } from '../config';
-import { SavedObjectsStart } from '../../../../src/plugins/saved_objects/public';
 
 export interface GraphPluginSetupDependencies {
   home?: HomePublicPluginSetup;
@@ -38,13 +39,18 @@ export interface GraphPluginStartDependencies {
   navigation: NavigationStart;
   licensing: LicensingPluginStart;
   data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   savedObjects: SavedObjectsStart;
-  kibanaLegacy: KibanaLegacyStart;
+  inspector: InspectorPublicPluginStart;
   home?: HomePublicPluginStart;
+  spaces?: SpacesApi;
 }
 
 export class GraphPlugin
-  implements Plugin<void, void, GraphPluginSetupDependencies, GraphPluginStartDependencies> {
+  implements Plugin<void, void, GraphPluginSetupDependencies, GraphPluginStartDependencies>
+{
+  private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
+
   constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
   setup(core: CoreSetup<GraphPluginStartDependencies>, { home }: GraphPluginSetupDependencies) {
@@ -61,7 +67,7 @@ export class GraphPlugin
         icon: 'graphApp',
         path: '/app/graph',
         showOnHomePage: false,
-        category: FeatureCatalogueCategory.DATA,
+        category: 'data',
         solutionId: 'kibana',
         order: 600,
       });
@@ -69,7 +75,6 @@ export class GraphPlugin
 
     const config = this.initializerContext.config.get();
 
-    initAngularBootstrap();
     core.application.register({
       id: 'graph',
       title: 'Graph',
@@ -77,6 +82,7 @@ export class GraphPlugin
       appRoute: '/app/graph',
       euiIconType: 'logoKibana',
       category: DEFAULT_APP_CATEGORIES.kibana,
+      updater$: this.appUpdater$,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
         coreStart.chrome.docTitle.change(
@@ -91,19 +97,22 @@ export class GraphPlugin
           coreStart,
           navigation: pluginsStart.navigation,
           data: pluginsStart.data,
-          kibanaLegacy: pluginsStart.kibanaLegacy,
+          unifiedSearch: pluginsStart.unifiedSearch,
           savedObjectsClient: coreStart.savedObjects.client,
           addBasePath: core.http.basePath.prepend,
           getBasePath: core.http.basePath.get,
           canEditDrillDownUrls: config.canEditDrillDownUrls,
           graphSavePolicy: config.savePolicy,
           storage: new Storage(window.localStorage),
-          capabilities: coreStart.application.capabilities.graph,
+          capabilities: coreStart.application.capabilities,
           chrome: coreStart.chrome,
           toastNotifications: coreStart.notifications.toasts,
           indexPatterns: pluginsStart.data!.indexPatterns,
           overlays: coreStart.overlays,
           savedObjects: pluginsStart.savedObjects,
+          uiSettings: core.uiSettings,
+          spaces: pluginsStart.spaces,
+          inspect: pluginsStart.inspector,
         });
       },
     });
@@ -112,7 +121,16 @@ export class GraphPlugin
   start(core: CoreStart, { home, licensing }: GraphPluginStartDependencies) {
     licensing.license$.subscribe((license) => {
       const licenseInformation = checkLicense(license);
-      toggleNavLink(licenseInformation, core.chrome.navLinks);
+
+      this.appUpdater$.next(() => ({
+        navLinkStatus: licenseInformation.showAppLink
+          ? licenseInformation.enableAppLink
+            ? AppNavLinkStatus.visible
+            : AppNavLinkStatus.disabled
+          : AppNavLinkStatus.hidden,
+        tooltip: licenseInformation.showAppLink ? licenseInformation.message : undefined,
+      }));
+
       if (home && !licenseInformation.enableAppLink) {
         home.featureCatalogue.removeFeature('graph');
       }

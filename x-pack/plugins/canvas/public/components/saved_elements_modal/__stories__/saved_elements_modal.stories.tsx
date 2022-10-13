@@ -8,44 +8,48 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
+import { waitFor } from '@kbn/presentation-util-plugin/public/__stories__';
 import { SavedElementsModal } from '../saved_elements_modal.component';
-import { testCustomElements } from './fixtures/test_elements';
+import { getTestCustomElements } from './fixtures/test_elements';
 import { CustomElement } from '../../../../types';
 
 storiesOf('components/SavedElementsModal', module)
   .add('no custom elements', () => (
     <SavedElementsModal
       customElements={[] as CustomElement[]}
-      search=""
-      setSearch={action('setSearch')}
+      onAddCustomElement={action('onAddCustomElement')}
+      onSearch={action('onSearch')}
+      onUpdateCustomElement={action('onUpdateCustomElement')}
+      onRemoveCustomElement={action('onRemoveCustomElement')}
       onClose={action('onClose')}
-      addCustomElement={action('addCustomElement')}
-      findCustomElements={action('findCustomElements')}
-      updateCustomElement={action('updateCustomElement')}
-      removeCustomElement={action('removeCustomElement')}
     />
   ))
-  .add('with custom elements', () => (
-    <SavedElementsModal
-      customElements={testCustomElements}
-      search=""
-      setSearch={action('setSearch')}
-      onClose={action('onClose')}
-      addCustomElement={action('addCustomElement')}
-      findCustomElements={action('findCustomElements')}
-      updateCustomElement={action('updateCustomElement')}
-      removeCustomElement={action('removeCustomElement')}
-    />
-  ))
-  .add('with text filter', () => (
-    <SavedElementsModal
-      customElements={testCustomElements}
-      search="Element 2"
-      onClose={action('onClose')}
-      setSearch={action('setSearch')}
-      addCustomElement={action('addCustomElement')}
-      findCustomElements={action('findCustomElements')}
-      updateCustomElement={action('updateCustomElement')}
-      removeCustomElement={action('removeCustomElement')}
-    />
-  ));
+  .add(
+    'with custom elements',
+    (_, props) => (
+      <SavedElementsModal
+        customElements={props?.testCustomElements}
+        onAddCustomElement={action('onAddCustomElement')}
+        onSearch={action('onSearch')}
+        onUpdateCustomElement={action('onUpdateCustomElement')}
+        onRemoveCustomElement={action('onRemoveCustomElement')}
+        onClose={action('onClose')}
+      />
+    ),
+    { decorators: [waitFor(getTestCustomElements())] }
+  )
+  .add(
+    'with text filter',
+    (_, props) => (
+      <SavedElementsModal
+        customElements={props?.testCustomElements}
+        initialSearch="Element 2"
+        onAddCustomElement={action('onAddCustomElement')}
+        onSearch={action('onSearch')}
+        onUpdateCustomElement={action('onUpdateCustomElement')}
+        onRemoveCustomElement={action('onRemoveCustomElement')}
+        onClose={action('onClose')}
+      />
+    ),
+    { decorators: [waitFor(getTestCustomElements())] }
+  );

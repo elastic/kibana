@@ -8,8 +8,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
-import { ManagementSetup, ManagementStart } from './types';
-import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../home/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import {
   CoreSetup,
   CoreStart,
@@ -20,10 +20,12 @@ import {
   AppUpdater,
   AppStatus,
   AppNavLinkStatus,
-  AppSearchDeepLink,
-} from '../../../core/public';
+  AppDeepLink,
+} from '@kbn/core/public';
+import { ManagementSetup, ManagementStart } from './types';
 
 import { MANAGEMENT_APP_ID } from '../common/contants';
+import { ManagementAppLocatorDefinition } from '../common/locator';
 import {
   ManagementSectionsService,
   getSectionsServiceStartPrivate,
@@ -32,36 +34,48 @@ import { ManagementSection } from './utils';
 
 interface ManagementSetupDependencies {
   home?: HomePublicPluginSetup;
+  share: SharePluginSetup;
 }
 
-export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart> {
+interface ManagementStartDependencies {
+  share: SharePluginStart;
+}
+
+export class ManagementPlugin
+  implements
+    Plugin<
+      ManagementSetup,
+      ManagementStart,
+      ManagementSetupDependencies,
+      ManagementStartDependencies
+    >
+{
   private readonly managementSections = new ManagementSectionsService();
 
   private readonly appUpdater = new BehaviorSubject<AppUpdater>(() => {
-    const deepLinks: AppSearchDeepLink[] = Object.values(
-      this.managementSections.definedSections
-    ).map((section: ManagementSection) => ({
-      id: section.id,
-      title: section.title,
-      searchDeepLinks: section.getAppsEnabled().map((mgmtApp) => ({
-        id: mgmtApp.id,
-        title: mgmtApp.title,
-        path: mgmtApp.basePath,
-        meta: { ...mgmtApp.meta },
-      })),
-    }));
+    const deepLinks: AppDeepLink[] = Object.values(this.managementSections.definedSections).map(
+      (section: ManagementSection) => ({
+        id: section.id,
+        title: section.title,
+        deepLinks: section.getAppsEnabled().map((mgmtApp) => ({
+          id: mgmtApp.id,
+          title: mgmtApp.title,
+          path: mgmtApp.basePath,
+          keywords: mgmtApp.keywords,
+        })),
+      })
+    );
 
-    return {
-      meta: { searchDeepLinks: deepLinks },
-    };
+    return { deepLinks };
   });
 
   private hasAnyEnabledApps = true;
 
   constructor(private initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, { home }: ManagementSetupDependencies) {
+  public setup(core: CoreSetup, { home, share }: ManagementSetupDependencies) {
     const kibanaVersion = this.initializerContext.env.packageInfo.version;
+    const locator = share.url.locators.create(new ManagementAppLocatorDefinition());
 
     if (home) {
       home.featureCatalogue.register({
@@ -75,7 +89,7 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
         icon: 'managementApp',
         path: '/app/management',
         showOnHomePage: false,
-        category: FeatureCatalogueCategory.ADMIN,
+        category: 'admin',
         visible: () => this.hasAnyEnabledApps,
       });
     }
@@ -103,10 +117,11 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
 
     return {
       sections: this.managementSections.setup(),
+      locator,
     };
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart, plugins: ManagementStartDependencies) {
     this.managementSections.start({ capabilities: core.application.capabilities });
     this.hasAnyEnabledApps = getSectionsServiceStartPrivate()
       .getSectionsEnabled()

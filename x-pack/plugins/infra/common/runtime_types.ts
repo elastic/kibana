@@ -9,7 +9,7 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Context, Errors, IntersectionType, Type, UnionType, ValidationError } from 'io-ts';
-import type { RouteValidationFunction } from 'kibana/server';
+import type { RouteValidationFunction } from '@kbn/core/server';
 
 type ErrorFactory = (message: string) => Error;
 
@@ -45,21 +45,25 @@ export const throwErrors = (createError: ErrorFactory) => (errors: Errors) => {
   throw createError(formatErrors(errors));
 };
 
-export const decodeOrThrow = <DecodedValue, EncodedValue, InputValue>(
-  runtimeType: Type<DecodedValue, EncodedValue, InputValue>,
-  createError: ErrorFactory = createPlainError
-) => (inputValue: InputValue) =>
-  pipe(runtimeType.decode(inputValue), fold(throwErrors(createError), identity));
+export const decodeOrThrow =
+  <DecodedValue, EncodedValue, InputValue>(
+    runtimeType: Type<DecodedValue, EncodedValue, InputValue>,
+    createError: ErrorFactory = createPlainError
+  ) =>
+  (inputValue: InputValue) =>
+    pipe(runtimeType.decode(inputValue), fold(throwErrors(createError), identity));
 
 type ValdidationResult<Value> = ReturnType<RouteValidationFunction<Value>>;
 
-export const createValidationFunction = <DecodedValue, EncodedValue, InputValue>(
-  runtimeType: Type<DecodedValue, EncodedValue, InputValue>
-): RouteValidationFunction<DecodedValue> => (inputValue, { badRequest, ok }) =>
-  pipe(
-    runtimeType.decode(inputValue),
-    fold<Errors, DecodedValue, ValdidationResult<DecodedValue>>(
-      (errors: Errors) => badRequest(formatErrors(errors)),
-      (result: DecodedValue) => ok(result)
-    )
-  );
+export const createValidationFunction =
+  <DecodedValue, EncodedValue, InputValue>(
+    runtimeType: Type<DecodedValue, EncodedValue, InputValue>
+  ): RouteValidationFunction<DecodedValue> =>
+  (inputValue, { badRequest, ok }) =>
+    pipe(
+      runtimeType.decode(inputValue),
+      fold<Errors, DecodedValue, ValdidationResult<DecodedValue>>(
+        (errors: Errors) => badRequest(formatErrors(errors)),
+        (result: DecodedValue) => ok(result)
+      )
+    );

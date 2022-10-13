@@ -6,12 +6,12 @@
  */
 
 import React from 'react';
-import { registerTestBed } from '@kbn/test/jest';
+import { registerTestBed } from '@kbn/test-jest-helpers';
 import { rollupJobsStore } from '../../store';
 import { JobList } from './job_list';
 
-import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { coreMock } from '@kbn/core/public/mocks';
 const startMock = coreMock.createStart();
 
 jest.mock('../../services', () => {
@@ -19,6 +19,15 @@ jest.mock('../../services', () => {
   return {
     ...services,
     getRouterLinkProps: (link) => ({ href: link }),
+  };
+});
+
+jest.mock('../../services/documentation_links', () => {
+  const coreMocks = jest.requireActual('@kbn/core/public/mocks');
+
+  return {
+    init: jest.fn(),
+    documentationLinks: coreMocks.docLinksServiceMock.createStartContract().links,
   };
 });
 
@@ -52,14 +61,14 @@ describe('<JobList />', () => {
   it('should display a loading message when loading the jobs', () => {
     const { component, exists } = initTestBed({ isLoading: true });
 
-    expect(exists('jobListLoading')).toBeTruthy();
+    expect(exists('sectionLoading')).toBeTruthy();
     expect(component.find('JobTable').length).toBeFalsy();
   });
 
   it('should display the <JobTable /> when there are jobs', () => {
     const { component, exists } = initTestBed({ hasJobs: true });
 
-    expect(exists('jobListLoading')).toBeFalsy();
+    expect(exists('sectionLoading')).toBeFalsy();
     expect(component.find('JobTable').length).toBeTruthy();
   });
 
@@ -71,21 +80,20 @@ describe('<JobList />', () => {
       },
     });
 
-    it('should display a callout with the status and the message', () => {
+    it('should display an error with the status and the message', () => {
       expect(exists('jobListError')).toBeTruthy();
       expect(find('jobListError').find('EuiText').text()).toEqual('400 Houston we got a problem.');
     });
   });
 
   describe('when the user does not have the permission to access it', () => {
-    const { exists } = initTestBed({ jobLoadError: { status: 403 } });
+    const { exists, find } = initTestBed({ jobLoadError: { status: 403 } });
 
-    it('should render a callout message', () => {
+    it('should render an error message', () => {
       expect(exists('jobListNoPermission')).toBeTruthy();
-    });
-
-    it('should display the page header', () => {
-      expect(exists('jobListPageHeader')).toBeTruthy();
+      expect(find('jobListNoPermission').find('EuiText').text()).toEqual(
+        'You do not have permission to view or add rollup jobs.'
+      );
     });
   });
 });

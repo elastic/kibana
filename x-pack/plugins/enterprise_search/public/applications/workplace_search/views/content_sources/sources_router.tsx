@@ -11,24 +11,28 @@ import { Redirect, Route, Switch, useLocation } from 'react-router-dom';
 import { Location } from 'history';
 import { useActions, useValues } from 'kea';
 
-import { FlashMessages } from '../../../shared/flash_messages';
-import { SetWorkplaceSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
-import { LicensingLogic } from '../../../shared/licensing';
-import { SendWorkplaceSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
 import { AppLogic } from '../../app_logic';
-import { NAV } from '../../constants';
+import {
+  GITHUB_ENTERPRISE_SERVER_VIA_APP_SERVICE_TYPE,
+  GITHUB_VIA_APP_SERVICE_TYPE,
+} from '../../constants';
 import {
   ADD_SOURCE_PATH,
   SOURCE_DETAILS_PATH,
-  PERSONAL_SOURCES_PATH,
+  PRIVATE_SOURCES_PATH,
   SOURCES_PATH,
   getSourcesPath,
+  getAddPath,
 } from '../../routes';
 
-import { AddSource, AddSourceList } from './components/add_source';
+import { AddSource, AddSourceList, GitHubViaApp } from './components/add_source';
+import { AddCustomSource } from './components/add_source/add_custom_source';
+import { ExternalConnectorConfig } from './components/add_source/add_external_connector';
+import { AddSourceBYOIntro } from './components/add_source/add_source_byo_intro';
+import { AddSourceChoice } from './components/add_source/add_source_choice';
+import { AddSourceIntro } from './components/add_source/add_source_intro';
 import { OrganizationSources } from './organization_sources';
 import { PrivateSources } from './private_sources';
-import { staticSourceData } from './source_data';
 import { SourceRouter } from './source_router';
 import { SourcesLogic } from './sources_logic';
 
@@ -36,10 +40,9 @@ import './sources.scss';
 
 export const SourcesRouter: React.FC = () => {
   const { pathname } = useLocation() as Location;
-  const { hasPlatinumLicense } = useValues(LicensingLogic);
   const { resetSourcesState } = useActions(SourcesLogic);
   const {
-    account: { canCreatePersonalSources },
+    account: { canCreatePrivateSources },
     isOrganization,
   } = useValues(AppLogic);
 
@@ -51,72 +54,103 @@ export const SourcesRouter: React.FC = () => {
     resetSourcesState();
   }, [pathname]);
 
+  /**
+   * When opening `workplace_search/p/sources/add` as a bookmark or reloading this page,
+   * Sources router first get rendered *before* it receives the canCreatePrivateSources value.
+   * This results in canCreatePrivateSources always being undefined on the first render,
+   * and user always getting redirected to `workplace_search/p/sources`.
+   * Here we check for this value being present before we render any routes.
+   */
+  if (canCreatePrivateSources === undefined) {
+    return null;
+  }
+
   return (
-    <>
-      <FlashMessages />
-      <Switch>
-        <Route exact path={PERSONAL_SOURCES_PATH}>
-          <SetPageChrome trail={[NAV.SOURCES]} />
-          <SendTelemetry action="viewed" metric="personal_sources" />
-          <PrivateSources />
-        </Route>
-        <Route exact path={SOURCES_PATH}>
-          <SetPageChrome trail={[NAV.SOURCES]} />
-          <SendTelemetry action="viewed" metric="organization_sources" />
-          <OrganizationSources />
-        </Route>
-        {staticSourceData.map(({ addPath, accountContextOnly, name }, i) => (
-          <Route key={i} exact path={getSourcesPath(addPath, isOrganization)}>
-            <SetPageChrome trail={[NAV.SOURCES, NAV.ADD_SOURCE, name]} />
-            {!hasPlatinumLicense && accountContextOnly ? (
-              <Redirect exact from={ADD_SOURCE_PATH} to={SOURCES_PATH} />
-            ) : (
-              <AddSource sourceIndex={i} />
-            )}
-          </Route>
-        ))}
-        {staticSourceData.map(({ addPath, name }, i) => (
-          <Route key={i} exact path={`${getSourcesPath(addPath, isOrganization)}/connect`}>
-            <SetPageChrome trail={[NAV.SOURCES, NAV.ADD_SOURCE, name]} />
-            <AddSource connect sourceIndex={i} />
-          </Route>
-        ))}
-        {staticSourceData.map(({ addPath, name }, i) => (
-          <Route key={i} exact path={`${getSourcesPath(addPath, isOrganization)}/reauthenticate`}>
-            <SetPageChrome trail={[NAV.SOURCES, NAV.ADD_SOURCE, name]} />
-            <AddSource reAuthenticate sourceIndex={i} />
-          </Route>
-        ))}
-        {staticSourceData.map(({ addPath, name, configuration: { needsConfiguration } }, i) => {
-          if (needsConfiguration)
-            return (
-              <Route key={i} exact path={`${getSourcesPath(addPath, isOrganization)}/configure`}>
-                <SetPageChrome trail={[NAV.SOURCES, NAV.ADD_SOURCE, name]} />
-                <AddSource configure sourceIndex={i} />
-              </Route>
-            );
-        })}
-        {canCreatePersonalSources ? (
-          <Route exact path={getSourcesPath(ADD_SOURCE_PATH, false)}>
-            <SetPageChrome trail={[NAV.SOURCES, NAV.ADD_SOURCE]} />
-            <SendTelemetry action="viewed" metric="add_source" />
-            <AddSourceList />
-          </Route>
-        ) : (
-          <Redirect
-            exact
-            from={getSourcesPath(ADD_SOURCE_PATH, false)}
-            to={PERSONAL_SOURCES_PATH}
-          />
-        )}
-        <Route exact path={getSourcesPath(ADD_SOURCE_PATH, true)}>
-          <SetPageChrome trail={[NAV.SOURCES, NAV.ADD_SOURCE]} />
+    <Switch>
+      <Route exact path={PRIVATE_SOURCES_PATH}>
+        <PrivateSources />
+      </Route>
+      <Route exact path={SOURCES_PATH}>
+        <OrganizationSources />
+      </Route>
+      <Route exact path={getAddPath(GITHUB_VIA_APP_SERVICE_TYPE)}>
+        <GitHubViaApp isGithubEnterpriseServer={false} />
+      </Route>
+      <Route exact path={getAddPath(GITHUB_ENTERPRISE_SERVER_VIA_APP_SERVICE_TYPE)}>
+        <GitHubViaApp isGithubEnterpriseServer />
+      </Route>
+      <Route
+        exact
+        path={`${getSourcesPath(getAddPath('external'), isOrganization)}/intro`}
+        data-test-subj="ConnectorBYOIntroRoute"
+      >
+        <AddSourceBYOIntro />
+      </Route>
+      <Route
+        exact
+        path={`${getSourcesPath(getAddPath(':serviceType'), isOrganization)}/intro`}
+        data-test-subj="ConnectorIntroRoute"
+      >
+        <AddSourceIntro />
+      </Route>
+      <Route
+        exact
+        path={`${getSourcesPath(getAddPath(':serviceType'), isOrganization)}/choice`}
+        data-test-subj="ConnectorChoiceRoute"
+      >
+        <AddSourceChoice />
+      </Route>
+      <Route
+        exact
+        path={`${getSourcesPath(getAddPath('external'), isOrganization)}/connector_registration`}
+        data-test-subj="ExternalConnectorConfigRoute"
+      >
+        <ExternalConnectorConfig />
+      </Route>
+      <Route
+        exact
+        path={`${getSourcesPath(
+          getAddPath('external', ':baseServiceType'),
+          isOrganization
+        )}/connector_registration`}
+        data-test-subj="ExternalConnectorConfigRoute"
+      >
+        <ExternalConnectorConfig />
+      </Route>
+      <Route
+        exact
+        path={`${getSourcesPath(getAddPath('custom'), isOrganization)}/`}
+        data-test-subj="AddCustomSourceRoute"
+      >
+        <AddCustomSource />
+      </Route>
+      <Route
+        exact
+        path={`${getSourcesPath(getAddPath('custom', ':baseServiceType'), isOrganization)}/`}
+        data-test-subj="AddCustomSourceRoute"
+      >
+        <AddCustomSource />
+      </Route>
+      <Route
+        exact
+        path={`${getSourcesPath(getAddPath(':serviceType'), isOrganization)}/:initialStep?`}
+        data-test-subj="AddSourceRoute"
+      >
+        <AddSource />
+      </Route>
+      {canCreatePrivateSources ? (
+        <Route exact path={getSourcesPath(ADD_SOURCE_PATH, false)}>
           <AddSourceList />
         </Route>
-        <Route path={getSourcesPath(SOURCE_DETAILS_PATH, isOrganization)}>
-          <SourceRouter />
-        </Route>
-      </Switch>
-    </>
+      ) : (
+        <Redirect exact from={getSourcesPath(ADD_SOURCE_PATH, false)} to={PRIVATE_SOURCES_PATH} />
+      )}
+      <Route exact path={getSourcesPath(ADD_SOURCE_PATH, true)}>
+        <AddSourceList />
+      </Route>
+      <Route path={getSourcesPath(SOURCE_DETAILS_PATH, isOrganization)}>
+        <SourceRouter />
+      </Route>
+    </Switch>
   );
 };

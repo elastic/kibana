@@ -5,15 +5,9 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
-import {
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  PluginInitializerContext,
-} from '../../../../src/core/server';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
+import { firstValueFrom, Observable } from 'rxjs';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { Config } from '../common';
 
 interface SetupDependencies {
@@ -25,7 +19,8 @@ interface StartDependencies {
 }
 
 export class DiscoverEnhancedPlugin
-  implements Plugin<void, void, SetupDependencies, StartDependencies> {
+  implements Plugin<void, void, SetupDependencies, StartDependencies>
+{
   private config$: Observable<Config>;
 
   constructor(protected readonly context: PluginInitializerContext) {
@@ -45,7 +40,7 @@ export class DiscoverEnhancedPlugin
         },
         isReady: () => true,
         fetch: async () => {
-          const config = await this.config$.pipe(take(1)).toPromise();
+          const config = await firstValueFrom(this.config$);
           return {
             exploreDataInChartActionEnabled: config.actions.exploreDataInChart.enabled,
           };

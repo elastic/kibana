@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 
-import type { GetTransformNodesResponseSchema } from '../../../../plugins/transform/common/api_schemas/transforms';
-import { isGetTransformNodesResponseSchema } from '../../../../plugins/transform/common/api_schemas/type_guards';
+import type { GetTransformNodesResponseSchema } from '@kbn/transform-plugin/common/api_schemas/transforms';
+import { isGetTransformNodesResponseSchema } from '@kbn/transform-plugin/common/api_schemas/type_guards';
 import { COMMON_REQUEST_HEADERS } from '../../../functional/services/ml/common_api';
 import { USER } from '../../../functional/services/transform/security_common';
 
@@ -31,18 +31,44 @@ export default ({ getService }: FtrProviderContext) => {
   }
 
   describe('/api/transform/transforms/_nodes', function () {
-    it('should return the number of available transform nodes', async () => {
-      const { body } = await supertest
+    it('should return the number of available transform nodes for a power user', async () => {
+      const { body, status } = await supertest
         .get('/api/transform/transforms/_nodes')
         .auth(
           USER.TRANSFORM_POWERUSER,
           transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
         )
         .set(COMMON_REQUEST_HEADERS)
-        .send()
-        .expect(200);
+        .send();
+      transform.api.assertResponseStatusCode(200, status, body);
 
       assertTransformsNodesResponseBody(body);
+    });
+
+    it('should return the number of available transform nodes for a viewer user', async () => {
+      const { body, status } = await supertest
+        .get('/api/transform/transforms/_nodes')
+        .auth(
+          USER.TRANSFORM_VIEWER,
+          transform.securityCommon.getPasswordForUser(USER.TRANSFORM_VIEWER)
+        )
+        .set(COMMON_REQUEST_HEADERS)
+        .send();
+      transform.api.assertResponseStatusCode(200, status, body);
+
+      assertTransformsNodesResponseBody(body);
+    });
+
+    it('should not return the number of available transform nodes for an unauthorized user', async () => {
+      const { body, status } = await supertest
+        .get('/api/transform/transforms/_nodes')
+        .auth(
+          USER.TRANSFORM_UNAUTHORIZED,
+          transform.securityCommon.getPasswordForUser(USER.TRANSFORM_UNAUTHORIZED)
+        )
+        .set(COMMON_REQUEST_HEADERS)
+        .send();
+      transform.api.assertResponseStatusCode(403, status, body);
     });
   });
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { CombinedJob, Detector } from '../../../common/types/anomaly_detection_jobs';
 import { ModelMemoryEstimateResponse } from '../calculate_model_memory_limit/calculate_model_memory_limit';
 import { validateModelMemoryLimit } from './validate_model_memory_limit';
@@ -82,30 +82,30 @@ describe('ML - validateModelMemoryLimit', () => {
   // - to retrieve field capabilities used in search for split field cardinality
   const getMockMlClusterClient = (): IScopedClusterClient => {
     const callAs = {
-      search: () => Promise.resolve({ body: cardinalitySearchResponse }),
-      fieldCaps: () => Promise.resolve({ body: fieldCapsResponse }),
+      search: () => Promise.resolve(cardinalitySearchResponse),
+      fieldCaps: () => Promise.resolve(fieldCapsResponse),
     };
 
-    return ({
+    return {
       asCurrentUser: callAs,
       asInternalUser: callAs,
-    } as unknown) as IScopedClusterClient;
+    } as unknown as IScopedClusterClient;
   };
 
   const getMockMlClient = ({
     estimateModelMemory: estimateModelMemory,
   }: MockAPICallResponse = {}): MlClient => {
     const callAs = {
-      info: () => Promise.resolve({ body: mlInfoResponse }),
+      info: () => Promise.resolve(mlInfoResponse),
       estimateModelMemory: () =>
-        Promise.resolve({ body: estimateModelMemory || modelMemoryEstimateResponse }),
+        Promise.resolve(estimateModelMemory || modelMemoryEstimateResponse),
     };
 
     return callAs as MlClient;
   };
 
   function getJobConfig(influencers: string[] = [], detectors: Detector[] = []) {
-    return ({
+    return {
       analysis_config: { detectors, influencers },
       data_description: { time_field: '@timestamp' },
       datafeed_config: {
@@ -114,7 +114,7 @@ describe('ML - validateModelMemoryLimit', () => {
       analysis_limits: {
         model_memory_limit: '20mb',
       },
-    } as unknown) as CombinedJob;
+    } as unknown as CombinedJob;
   }
 
   // create a specified number of mock detectors

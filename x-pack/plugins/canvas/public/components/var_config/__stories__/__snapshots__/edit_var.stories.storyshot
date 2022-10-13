@@ -20,7 +20,9 @@ Array [
               "verticalAlign": "top",
             }
           }
-        />
+        >
+          
+        </span>
       </span>
       <span>
         <span
@@ -36,33 +38,32 @@ Array [
   >
     <div>
       <div
-        className="euiCallOut euiCallOut--warning euiCallOut--small"
+        className="euiPanel euiPanel--warning euiPanel--paddingSmall euiCallOut euiCallOut--warning emotion-euiPanel-none-s-warning-euiCallOut"
       >
-        <div
-          className="euiCallOutHeader"
+        <p
+          className="euiTitle euiCallOutHeader__title emotion-euiTitle-xxs-euiCallOutHeader-warning"
         >
           <span
             aria-hidden="true"
-            className="euiCallOutHeader__icon"
+            className="emotion-euiCallOut__icon"
+            color="inherit"
             data-euiicon-type="alert"
             size="m"
-          />
-          <span
-            className="euiCallOutHeader__title"
           >
-            Editing a variable in use may adversely affect your workpad
+            
           </span>
-        </div>
+          Editing a variable in use may adversely affect your workpad
+        </p>
       </div>
       <div
-        className="euiSpacer euiSpacer--m"
+        className="euiSpacer euiSpacer--m emotion-euiSpacer-m"
       />
     </div>
     <form
       className="euiForm"
     >
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
       >
         <div
@@ -71,6 +72,7 @@ Array [
           <label
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Type
           </label>
@@ -79,7 +81,7 @@ Array [
           className="euiFormRow__fieldWrapper"
         >
           <div
-            className="euiPopover euiPopover--anchorDownLeft euiPopover--displayBlock euiInputPopover euiSuperSelect"
+            className="euiPopover euiInputPopover euiSuperSelect emotion-euiPopover-EuiInputPopover"
             onKeyDown={[Function]}
             onMouseDown={[Function]}
             onMouseUp={[Function]}
@@ -87,13 +89,100 @@ Array [
             onTouchStart={[Function]}
           >
             <div
-              className="euiPopover__anchor"
-            />
+              className="euiPopover__anchor css-zih94u-render"
+            >
+              <div>
+                <input
+                  id="generated-id"
+                  type="hidden"
+                  value="boolean"
+                />
+                <div
+                  className="euiFormControlLayout euiFormControlLayout--compressed"
+                >
+                  <div
+                    className="euiFormControlLayout__childrenWrapper"
+                  >
+                    <span
+                      className="emotion-euiScreenReaderOnly"
+                      id="euiSuperSelect__generated-id__screenreaderLabelId"
+                    >
+                      Select an option: 
+                      <div
+                        className="canvasEditVar__typeOption"
+                      >
+                        <span
+                          className="euiToken canvasEditVar__tokenIcon emotion-euiToken-square-light-s-euiColorVis7"
+                          style={Object {}}
+                        >
+                          <span
+                            data-euiicon-type="tokenBoolean"
+                            size="m"
+                          >
+                            
+                          </span>
+                        </span>
+                         
+                        <span>
+                          Boolean
+                        </span>
+                      </div>
+                      , is selected
+                    </span>
+                    <button
+                      aria-haspopup="listbox"
+                      className="euiSuperSelectControl euiFormControlLayout--1icons euiSuperSelectControl--compressed"
+                      onBlur={[Function]}
+                      onClick={[Function]}
+                      onFocus={[Function]}
+                      onKeyDown={[Function]}
+                      type="button"
+                    >
+                      <div
+                        className="canvasEditVar__typeOption"
+                      >
+                        <span
+                          className="euiToken canvasEditVar__tokenIcon emotion-euiToken-square-light-s-euiColorVis7"
+                          style={Object {}}
+                        >
+                          <span
+                            data-euiicon-type="tokenBoolean"
+                            size="m"
+                          >
+                            
+                          </span>
+                        </span>
+                         
+                        <span>
+                          Boolean
+                        </span>
+                      </div>
+                    </button>
+                    <div
+                      className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                    >
+                      <span
+                        className="euiFormControlLayoutCustomIcon"
+                      >
+                        <span
+                          aria-hidden="true"
+                          className="euiFormControlLayoutCustomIcon__icon"
+                          data-euiicon-type="arrowDown"
+                          size="s"
+                        >
+                          
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
       >
         <div
@@ -103,6 +192,7 @@ Array [
             aria-invalid={false}
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Name
           </label>
@@ -117,6 +207,7 @@ Array [
               className="euiFormControlLayout__childrenWrapper"
             >
               <input
+                aria-invalid={false}
                 className="euiFieldText euiFieldText--compressed"
                 id="generated-id"
                 name="name"
@@ -131,7 +222,7 @@ Array [
         </div>
       </div>
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
       >
         <div
@@ -140,6 +231,7 @@ Array [
           <label
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Value
           </label>
@@ -152,7 +244,7 @@ Array [
             disabled={false}
           >
             <legend
-              className="euiScreenReaderOnly"
+              className="emotion-euiScreenReaderOnly"
             >
               Boolean value
             </legend>
@@ -163,7 +255,6 @@ Array [
                 className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isSelected"
                 disabled={false}
                 htmlFor="generated-id"
-                onClick={[Function]}
                 style={
                   Object {
                     "minWidth": undefined,
@@ -194,7 +285,6 @@ Array [
                 className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small"
                 disabled={false}
                 htmlFor="generated-id"
-                onClick={[Function]}
                 style={
                   Object {
                     "minWidth": undefined,
@@ -226,7 +316,7 @@ Array [
         </div>
       </div>
       <div
-        className="euiSpacer euiSpacer--m"
+        className="euiSpacer euiSpacer--m emotion-euiSpacer-m"
       />
       <div
         className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -235,7 +325,7 @@ Array [
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <button
-            className="euiButton euiButton--secondary euiButton--small euiButton--fill"
+            className="euiButton euiButton--success euiButton--small euiButton--fill"
             disabled={false}
             onClick={[Function]}
             style={
@@ -250,9 +340,12 @@ Array [
             >
               <span
                 className="euiButtonContent__icon"
+                color="inherit"
                 data-euiicon-type="save"
                 size="m"
-              />
+              >
+                
+              </span>
               <span
                 className="euiButton__text"
               >
@@ -307,7 +400,9 @@ Array [
               "verticalAlign": "top",
             }
           }
-        />
+        >
+          
+        </span>
       </span>
       <span>
         <span
@@ -323,33 +418,32 @@ Array [
   >
     <div>
       <div
-        className="euiCallOut euiCallOut--warning euiCallOut--small"
+        className="euiPanel euiPanel--warning euiPanel--paddingSmall euiCallOut euiCallOut--warning emotion-euiPanel-none-s-warning-euiCallOut"
       >
-        <div
-          className="euiCallOutHeader"
+        <p
+          className="euiTitle euiCallOutHeader__title emotion-euiTitle-xxs-euiCallOutHeader-warning"
         >
           <span
             aria-hidden="true"
-            className="euiCallOutHeader__icon"
+            className="emotion-euiCallOut__icon"
+            color="inherit"
             data-euiicon-type="alert"
             size="m"
-          />
-          <span
-            className="euiCallOutHeader__title"
           >
-            Editing a variable in use may adversely affect your workpad
+            
           </span>
-        </div>
+          Editing a variable in use may adversely affect your workpad
+        </p>
       </div>
       <div
-        className="euiSpacer euiSpacer--m"
+        className="euiSpacer euiSpacer--m emotion-euiSpacer-m"
       />
     </div>
     <form
       className="euiForm"
     >
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
       >
         <div
@@ -358,6 +452,7 @@ Array [
           <label
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Type
           </label>
@@ -366,7 +461,7 @@ Array [
           className="euiFormRow__fieldWrapper"
         >
           <div
-            className="euiPopover euiPopover--anchorDownLeft euiPopover--displayBlock euiInputPopover euiSuperSelect"
+            className="euiPopover euiInputPopover euiSuperSelect emotion-euiPopover-EuiInputPopover"
             onKeyDown={[Function]}
             onMouseDown={[Function]}
             onMouseUp={[Function]}
@@ -374,13 +469,100 @@ Array [
             onTouchStart={[Function]}
           >
             <div
-              className="euiPopover__anchor"
-            />
+              className="euiPopover__anchor css-zih94u-render"
+            >
+              <div>
+                <input
+                  id="generated-id"
+                  type="hidden"
+                  value="number"
+                />
+                <div
+                  className="euiFormControlLayout euiFormControlLayout--compressed"
+                >
+                  <div
+                    className="euiFormControlLayout__childrenWrapper"
+                  >
+                    <span
+                      className="emotion-euiScreenReaderOnly"
+                      id="euiSuperSelect__generated-id__screenreaderLabelId"
+                    >
+                      Select an option: 
+                      <div
+                        className="canvasEditVar__typeOption"
+                      >
+                        <span
+                          className="euiToken canvasEditVar__tokenIcon emotion-euiToken-square-light-s-euiColorVis0"
+                          style={Object {}}
+                        >
+                          <span
+                            data-euiicon-type="tokenNumber"
+                            size="m"
+                          >
+                            
+                          </span>
+                        </span>
+                         
+                        <span>
+                          Number
+                        </span>
+                      </div>
+                      , is selected
+                    </span>
+                    <button
+                      aria-haspopup="listbox"
+                      className="euiSuperSelectControl euiFormControlLayout--1icons euiSuperSelectControl--compressed"
+                      onBlur={[Function]}
+                      onClick={[Function]}
+                      onFocus={[Function]}
+                      onKeyDown={[Function]}
+                      type="button"
+                    >
+                      <div
+                        className="canvasEditVar__typeOption"
+                      >
+                        <span
+                          className="euiToken canvasEditVar__tokenIcon emotion-euiToken-square-light-s-euiColorVis0"
+                          style={Object {}}
+                        >
+                          <span
+                            data-euiicon-type="tokenNumber"
+                            size="m"
+                          >
+                            
+                          </span>
+                        </span>
+                         
+                        <span>
+                          Number
+                        </span>
+                      </div>
+                    </button>
+                    <div
+                      className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                    >
+                      <span
+                        className="euiFormControlLayoutCustomIcon"
+                      >
+                        <span
+                          aria-hidden="true"
+                          className="euiFormControlLayoutCustomIcon__icon"
+                          data-euiicon-type="arrowDown"
+                          size="s"
+                        >
+                          
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
       >
         <div
@@ -390,6 +572,7 @@ Array [
             aria-invalid={false}
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Name
           </label>
@@ -404,6 +587,7 @@ Array [
               className="euiFormControlLayout__childrenWrapper"
             >
               <input
+                aria-invalid={false}
                 className="euiFieldText euiFieldText--compressed"
                 id="generated-id"
                 name="name"
@@ -418,7 +602,7 @@ Array [
         </div>
       </div>
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
       >
         <div
@@ -427,6 +611,7 @@ Array [
           <label
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Value
           </label>
@@ -452,7 +637,7 @@ Array [
         </div>
       </div>
       <div
-        className="euiSpacer euiSpacer--m"
+        className="euiSpacer euiSpacer--m emotion-euiSpacer-m"
       />
       <div
         className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -461,7 +646,7 @@ Array [
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <button
-            className="euiButton euiButton--secondary euiButton--small euiButton--fill"
+            className="euiButton euiButton--success euiButton--small euiButton--fill"
             disabled={false}
             onClick={[Function]}
             style={
@@ -476,9 +661,12 @@ Array [
             >
               <span
                 className="euiButtonContent__icon"
+                color="inherit"
                 data-euiicon-type="save"
                 size="m"
-              />
+              >
+                
+              </span>
               <span
                 className="euiButton__text"
               >
@@ -533,7 +721,9 @@ Array [
               "verticalAlign": "top",
             }
           }
-        />
+        >
+          
+        </span>
       </span>
       <span>
         <span
@@ -549,33 +739,32 @@ Array [
   >
     <div>
       <div
-        className="euiCallOut euiCallOut--warning euiCallOut--small"
+        className="euiPanel euiPanel--warning euiPanel--paddingSmall euiCallOut euiCallOut--warning emotion-euiPanel-none-s-warning-euiCallOut"
       >
-        <div
-          className="euiCallOutHeader"
+        <p
+          className="euiTitle euiCallOutHeader__title emotion-euiTitle-xxs-euiCallOutHeader-warning"
         >
           <span
             aria-hidden="true"
-            className="euiCallOutHeader__icon"
+            className="emotion-euiCallOut__icon"
+            color="inherit"
             data-euiicon-type="alert"
             size="m"
-          />
-          <span
-            className="euiCallOutHeader__title"
           >
-            Editing a variable in use may adversely affect your workpad
+            
           </span>
-        </div>
+          Editing a variable in use may adversely affect your workpad
+        </p>
       </div>
       <div
-        className="euiSpacer euiSpacer--m"
+        className="euiSpacer euiSpacer--m emotion-euiSpacer-m"
       />
     </div>
     <form
       className="euiForm"
     >
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
       >
         <div
@@ -584,6 +773,7 @@ Array [
           <label
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Type
           </label>
@@ -592,7 +782,7 @@ Array [
           className="euiFormRow__fieldWrapper"
         >
           <div
-            className="euiPopover euiPopover--anchorDownLeft euiPopover--displayBlock euiInputPopover euiSuperSelect"
+            className="euiPopover euiInputPopover euiSuperSelect emotion-euiPopover-EuiInputPopover"
             onKeyDown={[Function]}
             onMouseDown={[Function]}
             onMouseUp={[Function]}
@@ -600,13 +790,100 @@ Array [
             onTouchStart={[Function]}
           >
             <div
-              className="euiPopover__anchor"
-            />
+              className="euiPopover__anchor css-zih94u-render"
+            >
+              <div>
+                <input
+                  id="generated-id"
+                  type="hidden"
+                  value="string"
+                />
+                <div
+                  className="euiFormControlLayout euiFormControlLayout--compressed"
+                >
+                  <div
+                    className="euiFormControlLayout__childrenWrapper"
+                  >
+                    <span
+                      className="emotion-euiScreenReaderOnly"
+                      id="euiSuperSelect__generated-id__screenreaderLabelId"
+                    >
+                      Select an option: 
+                      <div
+                        className="canvasEditVar__typeOption"
+                      >
+                        <span
+                          className="euiToken canvasEditVar__tokenIcon emotion-euiToken-square-light-s-euiColorVis1"
+                          style={Object {}}
+                        >
+                          <span
+                            data-euiicon-type="tokenString"
+                            size="m"
+                          >
+                            
+                          </span>
+                        </span>
+                         
+                        <span>
+                          String
+                        </span>
+                      </div>
+                      , is selected
+                    </span>
+                    <button
+                      aria-haspopup="listbox"
+                      className="euiSuperSelectControl euiFormControlLayout--1icons euiSuperSelectControl--compressed"
+                      onBlur={[Function]}
+                      onClick={[Function]}
+                      onFocus={[Function]}
+                      onKeyDown={[Function]}
+                      type="button"
+                    >
+                      <div
+                        className="canvasEditVar__typeOption"
+                      >
+                        <span
+                          className="euiToken canvasEditVar__tokenIcon emotion-euiToken-square-light-s-euiColorVis1"
+                          style={Object {}}
+                        >
+                          <span
+                            data-euiicon-type="tokenString"
+                            size="m"
+                          >
+                            
+                          </span>
+                        </span>
+                         
+                        <span>
+                          String
+                        </span>
+                      </div>
+                    </button>
+                    <div
+                      className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                    >
+                      <span
+                        className="euiFormControlLayoutCustomIcon"
+                      >
+                        <span
+                          aria-hidden="true"
+                          className="euiFormControlLayoutCustomIcon__icon"
+                          data-euiicon-type="arrowDown"
+                          size="s"
+                        >
+                          
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
       >
         <div
@@ -616,6 +893,7 @@ Array [
             aria-invalid={false}
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Name
           </label>
@@ -630,6 +908,7 @@ Array [
               className="euiFormControlLayout__childrenWrapper"
             >
               <input
+                aria-invalid={false}
                 className="euiFieldText euiFieldText--compressed"
                 id="generated-id"
                 name="name"
@@ -644,7 +923,7 @@ Array [
         </div>
       </div>
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
       >
         <div
@@ -653,6 +932,7 @@ Array [
           <label
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Value
           </label>
@@ -678,7 +958,7 @@ Array [
         </div>
       </div>
       <div
-        className="euiSpacer euiSpacer--m"
+        className="euiSpacer euiSpacer--m emotion-euiSpacer-m"
       />
       <div
         className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -687,7 +967,7 @@ Array [
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <button
-            className="euiButton euiButton--secondary euiButton--small euiButton--fill"
+            className="euiButton euiButton--success euiButton--small euiButton--fill"
             disabled={false}
             onClick={[Function]}
             style={
@@ -702,9 +982,12 @@ Array [
             >
               <span
                 className="euiButtonContent__icon"
+                color="inherit"
                 data-euiicon-type="save"
                 size="m"
-              />
+              >
+                
+              </span>
               <span
                 className="euiButton__text"
               >
@@ -759,7 +1042,9 @@ Array [
               "verticalAlign": "top",
             }
           }
-        />
+        >
+          
+        </span>
       </span>
       <span>
         <span
@@ -777,7 +1062,7 @@ Array [
       className="euiForm"
     >
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
       >
         <div
@@ -786,6 +1071,7 @@ Array [
           <label
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Type
           </label>
@@ -794,7 +1080,7 @@ Array [
           className="euiFormRow__fieldWrapper"
         >
           <div
-            className="euiPopover euiPopover--anchorDownLeft euiPopover--displayBlock euiInputPopover euiSuperSelect"
+            className="euiPopover euiInputPopover euiSuperSelect emotion-euiPopover-EuiInputPopover"
             onKeyDown={[Function]}
             onMouseDown={[Function]}
             onMouseUp={[Function]}
@@ -802,13 +1088,100 @@ Array [
             onTouchStart={[Function]}
           >
             <div
-              className="euiPopover__anchor"
-            />
+              className="euiPopover__anchor css-zih94u-render"
+            >
+              <div>
+                <input
+                  id="generated-id"
+                  type="hidden"
+                  value="string"
+                />
+                <div
+                  className="euiFormControlLayout euiFormControlLayout--compressed"
+                >
+                  <div
+                    className="euiFormControlLayout__childrenWrapper"
+                  >
+                    <span
+                      className="emotion-euiScreenReaderOnly"
+                      id="euiSuperSelect__generated-id__screenreaderLabelId"
+                    >
+                      Select an option: 
+                      <div
+                        className="canvasEditVar__typeOption"
+                      >
+                        <span
+                          className="euiToken canvasEditVar__tokenIcon emotion-euiToken-square-light-s-euiColorVis1"
+                          style={Object {}}
+                        >
+                          <span
+                            data-euiicon-type="tokenString"
+                            size="m"
+                          >
+                            
+                          </span>
+                        </span>
+                         
+                        <span>
+                          String
+                        </span>
+                      </div>
+                      , is selected
+                    </span>
+                    <button
+                      aria-haspopup="listbox"
+                      className="euiSuperSelectControl euiFormControlLayout--1icons euiSuperSelectControl--compressed"
+                      onBlur={[Function]}
+                      onClick={[Function]}
+                      onFocus={[Function]}
+                      onKeyDown={[Function]}
+                      type="button"
+                    >
+                      <div
+                        className="canvasEditVar__typeOption"
+                      >
+                        <span
+                          className="euiToken canvasEditVar__tokenIcon emotion-euiToken-square-light-s-euiColorVis1"
+                          style={Object {}}
+                        >
+                          <span
+                            data-euiicon-type="tokenString"
+                            size="m"
+                          >
+                            
+                          </span>
+                        </span>
+                         
+                        <span>
+                          String
+                        </span>
+                      </div>
+                    </button>
+                    <div
+                      className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                    >
+                      <span
+                        className="euiFormControlLayoutCustomIcon"
+                      >
+                        <span
+                          aria-hidden="true"
+                          className="euiFormControlLayoutCustomIcon__icon"
+                          data-euiicon-type="arrowDown"
+                          size="s"
+                        >
+                          
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
       >
         <div
@@ -818,6 +1191,7 @@ Array [
             aria-invalid={false}
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Name
           </label>
@@ -832,6 +1206,7 @@ Array [
               className="euiFormControlLayout__childrenWrapper"
             >
               <input
+                aria-invalid={false}
                 className="euiFieldText euiFieldText--compressed"
                 id="generated-id"
                 name="name"
@@ -846,7 +1221,7 @@ Array [
         </div>
       </div>
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
       >
         <div
@@ -855,6 +1230,7 @@ Array [
           <label
             className="euiFormLabel euiFormRow__label"
             htmlFor="generated-id"
+            id="generated-id-label"
           >
             Value
           </label>
@@ -880,7 +1256,7 @@ Array [
         </div>
       </div>
       <div
-        className="euiSpacer euiSpacer--m"
+        className="euiSpacer euiSpacer--m emotion-euiSpacer-m"
       />
       <div
         className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -889,7 +1265,7 @@ Array [
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <button
-            className="euiButton euiButton--secondary euiButton--small euiButton--fill euiButton-isDisabled"
+            className="euiButton euiButton--success euiButton--small euiButton--fill euiButton-isDisabled"
             disabled={true}
             onClick={[Function]}
             style={
@@ -904,9 +1280,12 @@ Array [
             >
               <span
                 className="euiButtonContent__icon"
+                color="inherit"
                 data-euiicon-type="save"
                 size="m"
-              />
+              >
+                
+              </span>
               <span
                 className="euiButton__text"
               >

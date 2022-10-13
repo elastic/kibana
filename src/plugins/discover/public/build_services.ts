@@ -7,6 +7,7 @@
  */
 
 import { History } from 'history';
+import { memoize } from 'lodash';
 
 import {
   Capabilities,
@@ -16,92 +17,127 @@ import {
   ToastsStart,
   IUiSettingsClient,
   PluginInitializerContext,
-} from 'kibana/public';
+  HttpStart,
+  NotificationsStart,
+  ApplicationStart,
+} from '@kbn/core/public';
 import {
   FilterManager,
   TimefilterContract,
-  IndexPatternsContract,
+  DataViewsContract,
   DataPublicPluginStart,
-} from 'src/plugins/data/public';
-import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
-import { SharePluginStart } from 'src/plugins/share/public';
-import { ChartsPluginStart } from 'src/plugins/charts/public';
-
+} from '@kbn/data-plugin/public';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/public';
+import { SharePluginStart } from '@kbn/share-plugin/public';
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { UiCounterMetricType } from '@kbn/analytics';
-import { DiscoverStartPlugins } from './plugin';
-import { createSavedSearchesLoader, SavedSearch } from './saved_searches';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+
+import { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
+import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+
+import type { SpacesApi } from '@kbn/spaces-plugin/public';
+import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { DiscoverAppLocator } from './locator';
 import { getHistory } from './kibana_services';
-import { KibanaLegacyStart } from '../../kibana_legacy/public';
-import { UrlForwardingStart } from '../../url_forwarding/public';
-import { NavigationPublicPluginStart } from '../../navigation/public';
-import { IndexPatternFieldEditorStart } from '../../index_pattern_field_editor/public';
+import { DiscoverStartPlugins } from './plugin';
+
+export interface HistoryLocationState {
+  referrer: string;
+}
 
 export interface DiscoverServices {
+  application: ApplicationStart;
   addBasePath: (path: string) => string;
   capabilities: Capabilities;
   chrome: ChromeStart;
   core: CoreStart;
   data: DataPublicPluginStart;
   docLinks: DocLinksStart;
-  history: () => History;
+  embeddable: EmbeddableStart;
+  history: () => History<HistoryLocationState>;
   theme: ChartsPluginStart['theme'];
   filterManager: FilterManager;
-  indexPatterns: IndexPatternsContract;
+  fieldFormats: FieldFormatsStart;
+  dataViews: DataViewsContract;
   inspector: InspectorPublicPluginStart;
   metadata: { branch: string };
   navigation: NavigationPublicPluginStart;
   share?: SharePluginStart;
-  kibanaLegacy: KibanaLegacyStart;
   urlForwarding: UrlForwardingStart;
   timefilter: TimefilterContract;
   toastNotifications: ToastsStart;
-  getSavedSearchById: (id: string) => Promise<SavedSearch>;
-  getSavedSearchUrlById: (id: string) => Promise<string>;
-  getEmbeddableInjector: any;
+  notifications: NotificationsStart;
   uiSettings: IUiSettingsClient;
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
-  indexPatternFieldEditor: IndexPatternFieldEditorStart;
+  dataViewFieldEditor: IndexPatternFieldEditorStart;
+  dataViewEditor: DataViewEditorStart;
+  http: HttpStart;
+  storage: Storage;
+  spaces?: SpacesApi;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  locator: DiscoverAppLocator;
+  expressions: ExpressionsStart;
+  charts: ChartsPluginStart;
+  savedObjectsManagement: SavedObjectsManagementPluginStart;
+  savedObjectsTagging?: SavedObjectsTaggingApi;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
-export async function buildServices(
+export const buildServices = memoize(function (
   core: CoreStart,
   plugins: DiscoverStartPlugins,
   context: PluginInitializerContext,
-  getEmbeddableInjector: any
-): Promise<DiscoverServices> {
-  const services = {
-    savedObjectsClient: core.savedObjects.client,
-    savedObjects: plugins.savedObjects,
-  };
-  const savedObjectService = createSavedSearchesLoader(services);
+  locator: DiscoverAppLocator
+): DiscoverServices {
   const { usageCollection } = plugins;
+  const storage = new Storage(localStorage);
 
   return {
+    application: core.application,
     addBasePath: core.http.basePath.prepend,
     capabilities: core.application.capabilities,
     chrome: core.chrome,
     core,
     data: plugins.data,
     docLinks: core.docLinks,
+    embeddable: plugins.embeddable,
     theme: plugins.charts.theme,
+    fieldFormats: plugins.fieldFormats,
     filterManager: plugins.data.query.filterManager,
-    getEmbeddableInjector,
-    getSavedSearchById: async (id: string) => savedObjectService.get(id),
-    getSavedSearchUrlById: async (id: string) => savedObjectService.urlFor(id),
     history: getHistory,
-    indexPatterns: plugins.data.indexPatterns,
+    dataViews: plugins.data.dataViews,
     inspector: plugins.inspector,
     metadata: {
       branch: context.env.packageInfo.branch,
     },
     navigation: plugins.navigation,
     share: plugins.share,
-    kibanaLegacy: plugins.kibanaLegacy,
     urlForwarding: plugins.urlForwarding,
     timefilter: plugins.data.query.timefilter.timefilter,
     toastNotifications: core.notifications.toasts,
+    notifications: core.notifications,
     uiSettings: core.uiSettings,
+    storage,
     trackUiMetric: usageCollection?.reportUiCounter.bind(usageCollection, 'discover'),
-    indexPatternFieldEditor: plugins.indexPatternFieldEditor,
+    dataViewFieldEditor: plugins.dataViewFieldEditor,
+    http: core.http,
+    spaces: plugins.spaces,
+    dataViewEditor: plugins.dataViewEditor,
+    triggersActionsUi: plugins.triggersActionsUi,
+    locator,
+    expressions: plugins.expressions,
+    charts: plugins.charts,
+    savedObjectsTagging: plugins.savedObjectsTaggingOss?.getTaggingApi(),
+    savedObjectsManagement: plugins.savedObjectsManagement,
+    unifiedSearch: plugins.unifiedSearch,
   };
-}
+});

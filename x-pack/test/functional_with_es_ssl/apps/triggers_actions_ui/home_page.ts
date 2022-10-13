@@ -22,7 +22,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('Home page', function () {
     describe('Loads the app with limited privileges', () => {
       before(async () => {
-        await security.testUser.setRoles(['alerts_and_actions_role'], true);
+        await security.testUser.setRoles(['alerts_and_actions_role']);
       });
       after(async () => {
         await security.testUser.restoreDefaults();
@@ -31,7 +31,22 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('Loads the Alerts page', async () => {
         await pageObjects.common.navigateToApp('triggersActions');
         const headingText = await pageObjects.triggersActionsUI.getSectionHeadingText();
-        expect(headingText).to.be('Rules and Connectors');
+        expect(headingText).to.be('Rules');
+      });
+    });
+
+    describe('Loads the app with actions but not alerting privilege', () => {
+      before(async () => {
+        await security.testUser.setRoles(['only_actions_role']);
+      });
+      after(async () => {
+        await security.testUser.restoreDefaults();
+      });
+
+      it('Loads the Alerts page but with error', async () => {
+        await pageObjects.common.navigateToApp('triggersActions');
+        const exists = await testSubjects.exists('noPermissionPrompt');
+        expect(exists).to.be(true);
       });
     });
 
@@ -45,26 +60,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       it('Loads the Alerts page', async () => {
-        await log.debug('Checking for section heading to say Rules and Connectors.');
+        await log.debug('Checking for section heading to say Rules.');
 
         const headingText = await pageObjects.triggersActionsUI.getSectionHeadingText();
-        expect(headingText).to.be('Rules and Connectors');
-      });
-
-      describe('Connectors tab', () => {
-        it('renders the connectors tab', async () => {
-          // Navigate to the connectors tab
-          await pageObjects.triggersActionsUI.changeTabs('connectorsTab');
-
-          await pageObjects.header.waitUntilLoadingHasFinished();
-
-          // Verify url
-          const url = await browser.getCurrentUrl();
-          expect(url).to.contain(`/connectors`);
-
-          // Verify content
-          await testSubjects.existOrFail('actionsList');
-        });
+        expect(headingText).to.be('Rules');
       });
 
       describe('Alerts tab', () => {
@@ -79,7 +78,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expect(url).to.contain(`/rules`);
 
           // Verify content
-          await testSubjects.existOrFail('alertsList');
+          await testSubjects.existOrFail('rulesList');
         });
 
         it('navigates to an alert details page', async () => {
@@ -103,7 +102,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.header.waitUntilLoadingHasFinished();
 
           // Verify content
-          await testSubjects.existOrFail('alertsList');
+          await testSubjects.existOrFail('rulesList');
 
           // click on first alert
           await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(createdAlert.name);

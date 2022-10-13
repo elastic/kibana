@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import { ReactNode } from 'react';
-import { Threats } from '../../../../../common/detection_engine/schemas/common/schemas';
-
-import {
-  IIndexPattern,
-  Filter,
-  FilterManager,
-} from '../../../../../../../../src/plugins/data/public';
+import type { ReactNode } from 'react';
+import type { Threats } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { DataViewBase, Filter } from '@kbn/es-query';
+import type { FilterManager } from '@kbn/data-plugin/public';
 
 export interface ListItems {
   title: NonNullable<ReactNode>;
@@ -25,8 +21,9 @@ export interface BuildQueryBarDescription {
   filterManager: FilterManager;
   query: string;
   savedId: string;
-  indexPatterns?: IIndexPattern;
+  indexPatterns?: DataViewBase;
   queryLabel?: string;
+  savedQueryName?: string;
 }
 
 export interface BuildThreatDescription {

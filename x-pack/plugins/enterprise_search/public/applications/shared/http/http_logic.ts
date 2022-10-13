@@ -7,20 +7,21 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { HttpSetup, HttpInterceptorResponseError, HttpResponse } from 'src/core/public';
+import { HttpSetup, HttpInterceptorResponseError, HttpResponse } from '@kbn/core/public';
 
-import { READ_ONLY_MODE_HEADER } from '../../../../common/constants';
+import { ERROR_CONNECTING_HEADER, READ_ONLY_MODE_HEADER } from '../../../../common/constants';
 
-interface HttpValues {
+export interface HttpValues {
   http: HttpSetup;
   httpInterceptors: Function[];
-  errorConnecting: boolean;
+  errorConnectingMessage: string;
   readOnlyMode: boolean;
 }
+
 interface HttpActions {
   initializeHttpInterceptors(): void;
+  onConnectionError(errorConnectingMessage: string): { errorConnectingMessage: string };
   setHttpInterceptors(httpInterceptors: Function[]): { httpInterceptors: Function[] };
-  setErrorConnecting(errorConnecting: boolean): { errorConnecting: boolean };
   setReadOnlyMode(readOnlyMode: boolean): { readOnlyMode: boolean };
 }
 
@@ -28,8 +29,8 @@ export const HttpLogic = kea<MakeLogicType<HttpValues, HttpActions>>({
   path: ['enterprise_search', 'http_logic'],
   actions: {
     initializeHttpInterceptors: () => null,
+    onConnectionError: (errorConnectingMessage) => ({ errorConnectingMessage }),
     setHttpInterceptors: (httpInterceptors) => ({ httpInterceptors }),
-    setErrorConnecting: (errorConnecting) => ({ errorConnecting }),
     setReadOnlyMode: (readOnlyMode) => ({ readOnlyMode }),
   },
   reducers: ({ props }) => ({
@@ -40,10 +41,10 @@ export const HttpLogic = kea<MakeLogicType<HttpValues, HttpActions>>({
         setHttpInterceptors: (_, { httpInterceptors }) => httpInterceptors,
       },
     ],
-    errorConnecting: [
-      props.errorConnecting || false,
+    errorConnectingMessage: [
+      props.errorConnectingMessage || '',
       {
-        setErrorConnecting: (_, { errorConnecting }) => errorConnecting,
+        onConnectionError: (_, { errorConnectingMessage }) => errorConnectingMessage,
       },
     ],
     readOnlyMode: [
@@ -60,11 +61,10 @@ export const HttpLogic = kea<MakeLogicType<HttpValues, HttpActions>>({
       const errorConnectingInterceptor = values.http.intercept({
         responseError: async (httpResponse) => {
           if (isEnterpriseSearchApi(httpResponse)) {
-            const { status } = httpResponse.response!;
-            const hasErrorConnecting = status === 502;
-
-            if (hasErrorConnecting) {
-              actions.setErrorConnecting(true);
+            const hasErrorConnecting = httpResponse.response!.headers.get(ERROR_CONNECTING_HEADER);
+            if (hasErrorConnecting === 'true') {
+              const { status, statusText } = httpResponse.response!;
+              actions.onConnectionError(`${status} ${statusText}`);
             }
           }
 
@@ -111,7 +111,7 @@ export const HttpLogic = kea<MakeLogicType<HttpValues, HttpActions>>({
  */
 interface HttpLogicProps {
   http: HttpSetup;
-  errorConnecting?: boolean;
+  errorConnectingMessage?: string;
   readOnlyMode?: boolean;
 }
 export const mountHttpLogic = (props: HttpLogicProps) => {
@@ -124,6 +124,8 @@ export const mountHttpLogic = (props: HttpLogicProps) => {
  * Small helper that checks whether or not an http call is for an Enterprise Search API
  */
 const isEnterpriseSearchApi = (httpResponse: HttpResponse) => {
-  const { url } = httpResponse.response!;
-  return url.includes('/api/app_search/') || url.includes('/api/workplace_search/');
+  if (!httpResponse.response) return false; // Typically this means Kibana has stopped working, in which case we short-circuit early to prevent errors
+
+  const { url } = httpResponse.response;
+  return url.includes('/internal/app_search/') || url.includes('/internal/workplace_search/');
 };

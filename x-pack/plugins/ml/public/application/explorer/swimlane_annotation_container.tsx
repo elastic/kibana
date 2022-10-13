@@ -9,17 +9,15 @@ import React, { FC, useEffect } from 'react';
 import d3 from 'd3';
 import { scaleTime } from 'd3-scale';
 import { i18n } from '@kbn/i18n';
-import { formatHumanReadableDateTimeSeconds } from '../../../common/util/date_utils';
-import { AnnotationsTable } from '../../../common/types/annotations';
+import moment from 'moment';
+import type { Annotation, AnnotationsTable } from '../../../common/types/annotations';
 import { ChartTooltipService } from '../components/chart_tooltip';
+import { useCurrentEuiTheme } from '../components/color_range_legend';
 
 export const Y_AXIS_LABEL_WIDTH = 170;
 export const Y_AXIS_LABEL_PADDING = 8;
-export const Y_AXIS_LABEL_FONT_COLOR = '#6a717d';
 const ANNOTATION_CONTAINER_HEIGHT = 12;
-const ANNOTATION_MARGIN = 2;
-const ANNOTATION_MIN_WIDTH = 5;
-const ANNOTATION_HEIGHT = ANNOTATION_CONTAINER_HEIGHT - 2 * ANNOTATION_MARGIN;
+const ANNOTATION_MIN_WIDTH = 8;
 
 interface SwimlaneAnnotationContainerProps {
   chartWidth: number;
@@ -39,6 +37,8 @@ export const SwimlaneAnnotationContainer: FC<SwimlaneAnnotationContainerProps> =
 }) => {
   const canvasRef = React.useRef<HTMLDivElement | null>(null);
 
+  const { euiTheme } = useCurrentEuiTheme();
+
   useEffect(() => {
     if (canvasRef.current !== null && Array.isArray(annotationsData)) {
       const chartElement = d3.select(canvasRef.current);
@@ -46,8 +46,8 @@ export const SwimlaneAnnotationContainer: FC<SwimlaneAnnotationContainerProps> =
 
       const dimensions = canvasRef.current.getBoundingClientRect();
 
-      const startingXPos = Y_AXIS_LABEL_WIDTH + 2 * Y_AXIS_LABEL_PADDING;
-      const endingXPos = dimensions.width - 2 * Y_AXIS_LABEL_PADDING - 4;
+      const startingXPos = Y_AXIS_LABEL_WIDTH;
+      const endingXPos = dimensions.width;
 
       const svg = chartElement
         .append('svg')
@@ -66,10 +66,11 @@ export const SwimlaneAnnotationContainer: FC<SwimlaneAnnotationContainerProps> =
             defaultMessage: 'Annotations',
           })
         )
-        .attr('x', Y_AXIS_LABEL_WIDTH + Y_AXIS_LABEL_PADDING)
-        .attr('y', ANNOTATION_CONTAINER_HEIGHT)
-        .style('fill', Y_AXIS_LABEL_FONT_COLOR)
-        .style('font-size', '12px');
+        .attr('x', Y_AXIS_LABEL_WIDTH - Y_AXIS_LABEL_PADDING)
+        .attr('y', ANNOTATION_CONTAINER_HEIGHT / 2)
+        .attr('dominant-baseline', 'middle')
+        .style('fill', euiTheme.euiTextSubduedColor)
+        .style('font-size', euiTheme.euiFontSizeXS);
 
       // Add border
       svg
@@ -78,63 +79,138 @@ export const SwimlaneAnnotationContainer: FC<SwimlaneAnnotationContainerProps> =
         .attr('y', 0)
         .attr('height', ANNOTATION_CONTAINER_HEIGHT)
         .attr('width', endingXPos - startingXPos)
-        .style('stroke', '#cccccc')
+        .style('stroke', euiTheme.euiBorderColor)
         .style('fill', 'none')
         .style('stroke-width', 1);
 
-      // Add annotation marker
-      annotationsData.forEach((d) => {
-        const annotationWidth = d.end_timestamp
-          ? xScale(Math.min(d.end_timestamp, domain.max)) -
-            Math.max(xScale(d.timestamp), startingXPos)
-          : 0;
+      // Merging overlapping annotations into bigger blocks
+      let mergedAnnotations: Array<{ start: number; end: number; annotations: Annotation[] }> = [];
+      const sortedAnnotationsData = [...annotationsData].sort((a, b) => a.timestamp - b.timestamp);
 
+      if (sortedAnnotationsData.length > 0) {
+        let lastEndTime =
+          sortedAnnotationsData[0].end_timestamp ?? sortedAnnotationsData[0].timestamp;
+
+        mergedAnnotations = [
+          {
+            start: sortedAnnotationsData[0].timestamp,
+            end: lastEndTime,
+            annotations: [sortedAnnotationsData[0]],
+          },
+        ];
+
+        for (let i = 1; i < sortedAnnotationsData.length; i++) {
+          if (sortedAnnotationsData[i].timestamp < lastEndTime) {
+            const itemToMerge = mergedAnnotations.pop();
+            if (itemToMerge) {
+              const newMergedItem = {
+                ...itemToMerge,
+                end: lastEndTime,
+                annotations: [...itemToMerge.annotations, sortedAnnotationsData[i]],
+              };
+              mergedAnnotations.push(newMergedItem);
+            }
+          } else {
+            lastEndTime =
+              sortedAnnotationsData[i].end_timestamp ?? sortedAnnotationsData[i].timestamp;
+
+            mergedAnnotations.push({
+              start: sortedAnnotationsData[i].timestamp,
+              end: lastEndTime,
+              annotations: [sortedAnnotationsData[i]],
+            });
+          }
+        }
+      }
+
+      // Add annotation marker
+      mergedAnnotations.forEach((d) => {
+        const annotationWidth = Math.max(
+          d.end
+            ? (xScale(Math.min(d.end, domain.max)) as number) -
+                Math.max(xScale(d.start) as number, startingXPos)
+            : 0,
+          ANNOTATION_MIN_WIDTH
+        );
+
+        const xPos = d.start >= domain.min ? (xScale(d.start) as number) : startingXPos;
         svg
           .append('rect')
           .classed('mlAnnotationRect', true)
-          .attr('x', d.timestamp >= domain.min ? xScale(d.timestamp) : startingXPos)
-          .attr('y', ANNOTATION_MARGIN)
-          .attr('height', ANNOTATION_HEIGHT)
-          .attr('width', Math.max(annotationWidth, ANNOTATION_MIN_WIDTH))
-          .attr('rx', ANNOTATION_MARGIN)
-          .attr('ry', ANNOTATION_MARGIN)
+          // If annotation is at the end, prevent overflow by shifting it back
+          .attr('x', xPos + annotationWidth >= endingXPos ? endingXPos - annotationWidth : xPos)
+          .attr('y', 0)
+          .attr('height', ANNOTATION_CONTAINER_HEIGHT)
+          .attr('width', annotationWidth)
           .on('mouseover', function () {
-            const startingTime = formatHumanReadableDateTimeSeconds(d.timestamp);
-            const endingTime =
-              d.end_timestamp !== undefined
-                ? formatHumanReadableDateTimeSeconds(d.end_timestamp)
-                : undefined;
+            const tooltipData: Array<{
+              label: string;
+              seriesIdentifier: { key: string; specId: string } | { key: string; specId: string };
+              valueAccessor: string;
+              skipHeader?: boolean;
+              value?: string;
+            }> = [];
+            if (Array.isArray(d.annotations)) {
+              const hasMergedAnnotations = d.annotations.length > 1;
+              if (hasMergedAnnotations) {
+                // @ts-ignore skipping header so it doesn't have other params
+                tooltipData.push({ skipHeader: true });
+              }
+              d.annotations.forEach((item) => {
+                let timespan = moment(item.timestamp).format('MMMM Do YYYY, HH:mm');
 
-            const timeLabel = endingTime ? `${startingTime} - ${endingTime}` : startingTime;
+                if (typeof item.end_timestamp !== 'undefined') {
+                  timespan += ` - ${moment(item.end_timestamp).format(
+                    hasMergedAnnotations ? 'HH:mm' : 'MMMM Do YYYY, HH:mm'
+                  )}`;
+                }
 
-            const tooltipData = [
-              {
-                label: `${d.annotation}`,
-                seriesIdentifier: {
-                  key: 'anomaly_timeline',
-                  specId: d._id ?? `${d.annotation}-${d.timestamp}-label`,
-                },
-                valueAccessor: 'label',
-              },
-              {
-                label: `${timeLabel}`,
-                seriesIdentifier: {
-                  key: 'anomaly_timeline',
-                  specId: d._id ?? `${d.annotation}-${d.timestamp}-ts`,
-                },
-                valueAccessor: 'time',
-              },
-            ];
-            if (d.partition_field_name !== undefined && d.partition_field_value !== undefined) {
-              tooltipData.push({
-                label: `${d.partition_field_name}: ${d.partition_field_value}`,
-                seriesIdentifier: {
-                  key: 'anomaly_timeline',
-                  specId: d._id
-                    ? `${d._id}-partition`
-                    : `${d.partition_field_name}-${d.partition_field_value}-label`,
-                },
-                valueAccessor: 'partition',
+                if (hasMergedAnnotations) {
+                  tooltipData.push({
+                    label: timespan,
+                    value: `${item.annotation}`,
+                    seriesIdentifier: {
+                      key: 'anomaly_timeline',
+                      specId: item._id ?? `${item.annotation}-${item.timestamp}-label`,
+                    },
+                    valueAccessor: 'annotation',
+                  });
+                } else {
+                  tooltipData.push(
+                    {
+                      label: `${item.annotation}`,
+                      seriesIdentifier: {
+                        key: 'anomaly_timeline',
+                        specId: item._id ?? `${item.annotation}-${item.timestamp}-label`,
+                      },
+                      valueAccessor: 'label',
+                    },
+                    {
+                      label: `${timespan}`,
+                      seriesIdentifier: {
+                        key: 'anomaly_timeline',
+                        specId: item._id ?? `${item.annotation}-${item.timestamp}-ts`,
+                      },
+                      valueAccessor: 'time',
+                    }
+                  );
+                }
+
+                if (
+                  item.partition_field_name !== undefined &&
+                  item.partition_field_value !== undefined
+                ) {
+                  tooltipData.push({
+                    label: `${item.partition_field_name}: ${item.partition_field_value}`,
+                    seriesIdentifier: {
+                      key: 'anomaly_timeline',
+                      specId: item._id
+                        ? `${item._id}-partition`
+                        : `${item.partition_field_name}-${item.partition_field_value}-label`,
+                    },
+                    valueAccessor: 'partition',
+                  });
+                }
               });
             }
             // @ts-ignore we don't need all the fields for tooltip to show
@@ -143,6 +219,7 @@ export const SwimlaneAnnotationContainer: FC<SwimlaneAnnotationContainerProps> =
           .on('mouseout', () => tooltipService.hide());
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chartWidth, domain, annotationsData, tooltipService]);
 
   return <div ref={canvasRef} />;

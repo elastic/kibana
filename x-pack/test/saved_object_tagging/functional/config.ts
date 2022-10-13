@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import path from 'path';
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { services, pageObjects } from './ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaFunctionalConfig = await readConfigFile(
-    require.resolve('../../functional/config.js')
+    require.resolve('../../functional/config.base.js')
   );
 
   return {
@@ -22,10 +21,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     },
     services,
     pageObjects,
-
-    esArchiver: {
-      directory: path.resolve(__dirname, '..', 'common', 'fixtures', 'es_archiver'),
-    },
 
     junit: {
       reportName: 'X-Pack Saved Object Tagging Functional Tests',
@@ -38,7 +33,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
     kbnTestServer: {
       ...kibanaFunctionalConfig.get('kbnTestServer'),
-      serverArgs: [...kibanaFunctionalConfig.get('kbnTestServer.serverArgs')],
+      serverArgs: [
+        ...kibanaFunctionalConfig.get('kbnTestServer.serverArgs'),
+        `--xpack.fleet.registryUrl=http://localhost:12345`, // setting to invalid registry url to prevent installing preconfigured packages
+      ],
     },
   };
 }

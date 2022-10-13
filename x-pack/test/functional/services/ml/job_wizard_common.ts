@@ -11,6 +11,10 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { MlCommonUI } from './common_ui';
 import { MlCustomUrls } from './custom_urls';
 
+export interface SectionOptions {
+  withAdvancedSection: boolean;
+}
+
 export function MachineLearningJobWizardCommonProvider(
   { getService }: FtrProviderContext,
   mlCommonUI: MlCommonUI,
@@ -20,10 +24,6 @@ export function MachineLearningJobWizardCommonProvider(
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
 
-  interface SectionOptions {
-    withAdvancedSection: boolean;
-  }
-
   function advancedSectionSelector(subSelector?: string) {
     const subj = 'mlJobWizardAdvancedSection';
     return !subSelector ? subj : `${subj} > ${subSelector}`;
@@ -32,7 +32,7 @@ export function MachineLearningJobWizardCommonProvider(
   return {
     async clickNextButton() {
       await testSubjects.existOrFail('mlJobWizardNavButtonNext');
-      await testSubjects.clickWhenNotDisabled('mlJobWizardNavButtonNext');
+      await testSubjects.clickWhenNotDisabledWithoutRetry('mlJobWizardNavButtonNext');
     },
 
     async assertTimeRangeSectionExists() {
@@ -329,7 +329,7 @@ export function MachineLearningJobWizardCommonProvider(
         })) === false
       ) {
         await retry.tryForTime(5 * 1000, async () => {
-          await testSubjects.clickWhenNotDisabled(subj);
+          await testSubjects.clickWhenNotDisabledWithoutRetry(subj);
           await this.assertDedicatedIndexSwitchCheckedState(true, {
             withAdvancedSection: sectionOptions.withAdvancedSection,
           });
@@ -362,7 +362,7 @@ export function MachineLearningJobWizardCommonProvider(
       const subj = 'mlJobWizardStartDatafeedCheckbox';
       if ((await this.getStartDatafeedSwitchCheckedState()) !== toggle) {
         await retry.tryForTime(5 * 1000, async () => {
-          await testSubjects.clickWhenNotDisabled(subj);
+          await testSubjects.clickWhenNotDisabledWithoutRetry(subj);
           await this.assertStartDatafeedSwitchCheckedState(toggle);
         });
       }
@@ -492,7 +492,7 @@ export function MachineLearningJobWizardCommonProvider(
     },
 
     async clickUseFullDataButton(expectedStartDate: string, expectedEndDate: string) {
-      await testSubjects.clickWhenNotDisabled('mlButtonUseFullData');
+      await testSubjects.clickWhenNotDisabledWithoutRetry('mlButtonUseFullData');
       await this.assertDateRangeSelection(expectedStartDate, expectedEndDate);
     },
 
@@ -527,7 +527,7 @@ export function MachineLearningJobWizardCommonProvider(
 
       const expectedIndex = existingCustomUrls.length;
 
-      await customUrls.assertCustomUrlItem(expectedIndex, customUrl.label);
+      await customUrls.assertCustomUrlLabel(expectedIndex, customUrl.label);
     },
 
     async ensureAdvancedSectionOpen() {
@@ -540,12 +540,12 @@ export function MachineLearningJobWizardCommonProvider(
     },
 
     async createJobAndWaitForCompletion() {
-      await testSubjects.clickWhenNotDisabled('mlJobWizardButtonCreateJob');
+      await testSubjects.clickWhenNotDisabledWithoutRetry('mlJobWizardButtonCreateJob');
       await testSubjects.existOrFail('mlJobWizardButtonRunInRealTime', { timeout: 2 * 60 * 1000 });
     },
 
     async createJobWithoutDatafeedStart() {
-      await testSubjects.clickWhenNotDisabled('mlJobWizardButtonCreateJob');
+      await testSubjects.clickWhenNotDisabledWithoutRetry('mlJobWizardButtonCreateJob');
       await testSubjects.existOrFail('mlPageJobManagement');
     },
   };

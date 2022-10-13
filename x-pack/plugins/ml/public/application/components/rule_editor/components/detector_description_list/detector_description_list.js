@@ -17,7 +17,7 @@ import { EuiDescriptionList } from '@elastic/eui';
 
 import { formatValue } from '../../../../formatters/format_value';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export function DetectorDescriptionList({ job, detector, anomaly }) {
   const listItems = [

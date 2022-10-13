@@ -5,168 +5,216 @@
  * 2.0.
  */
 
-import { find, some } from 'lodash/fp';
-import {
-  EuiButtonEmpty,
-  EuiFlyoutHeader,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiTitle,
-  EuiText,
-} from '@elastic/eui';
-import React, { useState, useCallback, useMemo } from 'react';
-import styled from 'styled-components';
+import { EuiSpacer, EuiFlyoutBody } from '@elastic/eui';
+import React, { useMemo } from 'react';
+
 import deepEqual from 'fast-deep-equal';
-import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { EntityType } from '@kbn/timelines-plugin/common';
+import type { BrowserFields } from '../../../../common/containers/source';
 import { ExpandableEvent, ExpandableEventTitle } from './expandable_event';
 import { useTimelineEventsDetails } from '../../../containers/details';
-import { TimelineTabs } from '../../../../../common/types/timeline';
+import type { TimelineTabs } from '../../../../../common/types/timeline';
+import { useHostIsolationTools } from './use_host_isolation_tools';
+import { FlyoutBody, FlyoutHeader, FlyoutFooter } from './flyout';
+import { useBasicDataFromDetailsData, getAlertIndexAlias } from './helpers';
+import { useSpaceId } from '../../../../common/hooks/use_space_id';
+import { EndpointIsolateSuccess } from '../../../../common/components/endpoint/host_isolation';
 import { HostIsolationPanel } from '../../../../detections/components/host_isolation';
-import { TakeActionDropdown } from '../../../../detections/components/host_isolation/take_action_dropdown';
-import { ISOLATE_HOST } from '../../../../detections/components/host_isolation/translations';
-import { ALERT_DETAILS } from './translations';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-
-const StyledEuiFlyoutBody = styled(EuiFlyoutBody)`
-  .euiFlyoutBody__overflow {
-    display: flex;
-    flex: 1;
-    overflow: hidden;
-
-    .euiFlyoutBody__overflowContent {
-      flex: 1;
-      overflow: hidden;
-      padding: ${({ theme }) => `${theme.eui.paddingSizes.xs} ${theme.eui.paddingSizes.m} 50px`};
-    }
-  }
-`;
 
 interface EventDetailsPanelProps {
   browserFields: BrowserFields;
-  docValueFields: DocValueFields[];
-  expandedEvent: { eventId: string; indexName: string };
+  entityType?: EntityType;
+  expandedEvent: {
+    eventId: string;
+    indexName: string;
+    refetch?: () => void;
+  };
   handleOnEventClosed: () => void;
+  isDraggable?: boolean;
   isFlyoutView?: boolean;
+  runtimeMappings: MappingRuntimeFields;
   tabType: TimelineTabs;
   timelineId: string;
+  isReadOnly?: boolean;
 }
 
 const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
   browserFields,
-  docValueFields,
+  entityType = 'events', // Default to events so only alerts have to pass entityType in
   expandedEvent,
   handleOnEventClosed,
+  isDraggable,
   isFlyoutView,
+  runtimeMappings,
   tabType,
   timelineId,
+  isReadOnly,
 }) => {
-  const [loading, detailsData] = useTimelineEventsDetails({
-    docValueFields,
-    indexName: expandedEvent.indexName ?? '',
-    eventId: expandedEvent.eventId ?? '',
-    skip: !expandedEvent.eventId,
-  });
-
-  const isHostIsolationEnabled = useIsExperimentalFeatureEnabled('hostIsolationEnabled');
-
-  const [isHostIsolationPanelOpen, setIsHostIsolationPanel] = useState(false);
-
-  const showAlertDetails = useCallback(() => {
-    setIsHostIsolationPanel(false);
-  }, []);
-
-  const showHostIsolationPanel = useCallback((action) => {
-    if (action === 'isolateHost') {
-      setIsHostIsolationPanel(true);
+  const currentSpaceId = useSpaceId();
+  const { indexName } = expandedEvent;
+  const eventIndex = getAlertIndexAlias(indexName, currentSpaceId) ?? indexName;
+  const [loading, detailsData, rawEventData, ecsData, refetchFlyoutData] = useTimelineEventsDetails(
+    {
+      entityType,
+      indexName: eventIndex ?? '',
+      eventId: expandedEvent.eventId ?? '',
+      runtimeMappings,
+      skip: !expandedEvent.eventId,
     }
-  }, []);
+  );
 
-  const isAlert = some({ category: 'signal', field: 'signal.rule.id' }, detailsData);
+  const {
+    isolateAction,
+    isHostIsolationPanelOpen,
+    isIsolateActionSuccessBannerVisible,
+    handleIsolationActionSuccess,
+    showAlertDetails,
+    showHostIsolationPanel,
+  } = useHostIsolationTools();
 
-  const isEndpointAlert = useMemo(() => {
-    const findEndpointAlert = find({ category: 'agent', field: 'agent.type' }, detailsData)?.values;
-    return findEndpointAlert ? findEndpointAlert[0] === 'endpoint' : false;
-  }, [detailsData]);
+  const { alertId, isAlert, hostName, ruleName, timestamp } =
+    useBasicDataFromDetailsData(detailsData);
 
-  const backToAlertDetailsLink = useMemo(() => {
-    return (
-      <>
-        <EuiButtonEmpty
-          iconType="arrowLeft"
-          iconSide="left"
-          flush="left"
-          onClick={() => showAlertDetails()}
-        >
-          <EuiText size="xs">
-            <p>{ALERT_DETAILS}</p>
-          </EuiText>
-        </EuiButtonEmpty>
-        <EuiTitle>
-          <h2>{ISOLATE_HOST}</h2>
-        </EuiTitle>
-      </>
-    );
-  }, [showAlertDetails]);
+  const header = useMemo(
+    () =>
+      isFlyoutView || isHostIsolationPanelOpen ? (
+        <FlyoutHeader
+          isHostIsolationPanelOpen={isHostIsolationPanelOpen}
+          isAlert={isAlert}
+          isolateAction={isolateAction}
+          loading={loading}
+          ruleName={ruleName}
+          showAlertDetails={showAlertDetails}
+          timestamp={timestamp}
+        />
+      ) : (
+        <ExpandableEventTitle
+          isAlert={isAlert}
+          loading={loading}
+          ruleName={ruleName}
+          handleOnEventClosed={handleOnEventClosed}
+        />
+      ),
+    [
+      handleOnEventClosed,
+      isAlert,
+      isFlyoutView,
+      isHostIsolationPanelOpen,
+      isolateAction,
+      loading,
+      ruleName,
+      showAlertDetails,
+      timestamp,
+    ]
+  );
+
+  const body = useMemo(() => {
+    if (isFlyoutView) {
+      return (
+        <FlyoutBody
+          alertId={alertId}
+          browserFields={browserFields}
+          detailsData={detailsData}
+          detailsEcsData={ecsData}
+          event={expandedEvent}
+          hostName={hostName}
+          handleIsolationActionSuccess={handleIsolationActionSuccess}
+          handleOnEventClosed={handleOnEventClosed}
+          isAlert={isAlert}
+          isDraggable={isDraggable}
+          isolateAction={isolateAction}
+          isIsolateActionSuccessBannerVisible={isIsolateActionSuccessBannerVisible}
+          isHostIsolationPanelOpen={isHostIsolationPanelOpen}
+          loading={loading}
+          rawEventData={rawEventData}
+          showAlertDetails={showAlertDetails}
+          timelineId={timelineId}
+          isReadOnly={isReadOnly}
+        />
+      );
+    } else if (isHostIsolationPanelOpen) {
+      return (
+        <>
+          {isIsolateActionSuccessBannerVisible && (
+            <EndpointIsolateSuccess
+              hostName={hostName}
+              alertId={alertId}
+              isolateAction={isolateAction}
+            />
+          )}
+          <EuiFlyoutBody>
+            <HostIsolationPanel
+              details={detailsData}
+              cancelCallback={showAlertDetails}
+              successCallback={handleIsolationActionSuccess}
+              isolateAction={isolateAction}
+            />
+          </EuiFlyoutBody>
+        </>
+      );
+    } else {
+      return (
+        <>
+          <EuiSpacer size="m" />
+          <ExpandableEvent
+            browserFields={browserFields}
+            detailsData={detailsData}
+            detailsEcsData={ecsData}
+            event={expandedEvent}
+            isAlert={isAlert}
+            isDraggable={isDraggable}
+            loading={loading}
+            rawEventData={rawEventData}
+            timelineId={timelineId}
+            timelineTabType={tabType}
+            handleOnEventClosed={handleOnEventClosed}
+          />
+        </>
+      );
+    }
+  }, [
+    alertId,
+    browserFields,
+    detailsData,
+    ecsData,
+    expandedEvent,
+    handleIsolationActionSuccess,
+    handleOnEventClosed,
+    hostName,
+    isAlert,
+    isDraggable,
+    isFlyoutView,
+    isHostIsolationPanelOpen,
+    isIsolateActionSuccessBannerVisible,
+    isReadOnly,
+    isolateAction,
+    loading,
+    rawEventData,
+    showAlertDetails,
+    tabType,
+    timelineId,
+  ]);
 
   if (!expandedEvent?.eventId) {
     return null;
   }
 
-  return isFlyoutView ? (
+  return (
     <>
-      <EuiFlyoutHeader hasBorder>
-        {isHostIsolationPanelOpen ? (
-          backToAlertDetailsLink
-        ) : (
-          <ExpandableEventTitle isAlert={isAlert} loading={loading} />
-        )}
-      </EuiFlyoutHeader>
-      <StyledEuiFlyoutBody>
-        {isHostIsolationPanelOpen ? (
-          <HostIsolationPanel details={detailsData} cancelCallback={showAlertDetails} />
-        ) : (
-          <ExpandableEvent
-            browserFields={browserFields}
-            detailsData={detailsData}
-            event={expandedEvent}
-            isAlert={isAlert}
-            loading={loading}
-            timelineId={timelineId}
-            timelineTabType="flyout"
-          />
-        )}
-      </StyledEuiFlyoutBody>
-      {isHostIsolationEnabled && isEndpointAlert && isHostIsolationPanelOpen === false && (
-        <EuiFlyoutFooter>
-          <EuiFlexGroup justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <TakeActionDropdown onChange={showHostIsolationPanel} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="l" />
-          <EuiSpacer size="l" />
-        </EuiFlyoutFooter>
-      )}
-    </>
-  ) : (
-    <>
-      <ExpandableEventTitle
-        isAlert={isAlert}
-        loading={loading}
-        handleOnEventClosed={handleOnEventClosed}
-      />
-      <EuiSpacer size="m" />
-      <ExpandableEvent
-        browserFields={browserFields}
+      {header}
+      {body}
+      <FlyoutFooter
         detailsData={detailsData}
-        event={expandedEvent}
-        isAlert={isAlert}
-        loading={loading}
+        detailsEcsData={ecsData}
+        expandedEvent={expandedEvent}
+        refetchFlyoutData={refetchFlyoutData}
+        handleOnEventClosed={handleOnEventClosed}
+        isHostIsolationPanelOpen={isHostIsolationPanelOpen}
+        isReadOnly={isReadOnly}
+        loadingEventDetails={loading}
+        onAddIsolationStatusClick={showHostIsolationPanel}
         timelineId={timelineId}
-        timelineTabType={tabType}
       />
     </>
   );
@@ -176,7 +224,7 @@ export const EventDetailsPanel = React.memo(
   EventDetailsPanelComponent,
   (prevProps, nextProps) =>
     deepEqual(prevProps.browserFields, nextProps.browserFields) &&
-    deepEqual(prevProps.docValueFields, nextProps.docValueFields) &&
     deepEqual(prevProps.expandedEvent, nextProps.expandedEvent) &&
-    prevProps.timelineId === nextProps.timelineId
+    prevProps.timelineId === nextProps.timelineId &&
+    prevProps.isDraggable === nextProps.isDraggable
 );

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { set } from '@elastic/safer-lodash-set';
-import { calculateNodeType } from './calculate_node_type.js';
+import { set } from '@kbn/safer-lodash-set';
+import { calculateNodeType } from './calculate_node_type';
 
 const masterNodeId = 'def456';
 

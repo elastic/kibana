@@ -7,17 +7,12 @@
  */
 
 import Fs from 'fs';
-import { basename, join } from 'path';
-import { promisify } from 'util';
+import Fsp from 'fs/promises';
+import Path from 'path';
 
-// @ts-ignore
+import { asyncMap, asyncForEach } from '@kbn/std';
+
 import { assertAbsolute, mkdirp } from './fs';
-
-const statAsync = promisify(Fs.stat);
-const mkdirAsync = promisify(Fs.mkdir);
-const utimesAsync = promisify(Fs.utimes);
-const copyFileAsync = promisify(Fs.copyFile);
-const readdirAsync = promisify(Fs.readdir);
 
 interface Options {
   /**
@@ -32,6 +27,10 @@ interface Options {
    * function that is called with each Record
    */
   filter?: (record: Record) => boolean;
+  /**
+   * define permissions for reach item copied
+   */
+  permissions?: (record: Record) => number | undefined;
   /**
    * Date to use for atime/mtime
    */
@@ -52,48 +51,50 @@ class Record {
  * function or modifying mtime/atime for each file.
  */
 export async function scanCopy(options: Options) {
-  const { source, destination, filter, time } = options;
+  const { source, destination, filter, time, permissions } = options;
 
   assertAbsolute(source);
   assertAbsolute(destination);
 
-  // get filtered Records for files/directories within a directory
-  const getChildRecords = async (parent: Record) => {
-    const names = await readdirAsync(parent.absolute);
-    const records = await Promise.all(
-      names.map(async (name) => {
-        const absolute = join(parent.absolute, name);
-        const stat = await statAsync(absolute);
-        return new Record(stat.isDirectory(), name, absolute, join(parent.absoluteDest, name));
-      })
-    );
-
-    return records.filter((record) => (filter ? filter(record) : true));
-  };
-
   // create or copy each child of a directory
-  const copyChildren = async (record: Record) => {
-    const children = await getChildRecords(record);
-    await Promise.all(children.map(async (child) => await copy(child)));
-  };
+  const copyChildren = async (parent: Record) => {
+    const names = await Fsp.readdir(parent.absolute);
 
-  // create or copy a record and recurse into directories
-  const copy = async (record: Record) => {
-    if (record.isDirectory) {
-      await mkdirAsync(record.absoluteDest);
-    } else {
-      await copyFileAsync(record.absolute, record.absoluteDest, Fs.constants.COPYFILE_EXCL);
-    }
+    const records = await asyncMap(names, async (name) => {
+      const absolute = Path.join(parent.absolute, name);
+      const stat = await Fsp.stat(absolute);
+      return new Record(stat.isDirectory(), name, absolute, Path.join(parent.absoluteDest, name));
+    });
 
-    if (time) {
-      await utimesAsync(record.absoluteDest, time, time);
-    }
+    await asyncForEach(records, async (rec) => {
+      if (filter && !filter(rec)) {
+        return;
+      }
 
-    if (record.isDirectory) {
-      await copyChildren(record);
-    }
+      if (rec.isDirectory) {
+        await Fsp.mkdir(rec.absoluteDest, {
+          mode: permissions ? permissions(rec) : undefined,
+        });
+      } else {
+        await Fsp.copyFile(rec.absolute, rec.absoluteDest, Fs.constants.COPYFILE_EXCL);
+        if (permissions) {
+          const perm = permissions(rec);
+          if (perm !== undefined) {
+            await Fsp.chmod(rec.absoluteDest, perm);
+          }
+        }
+      }
+
+      if (time) {
+        await Fsp.utimes(rec.absoluteDest, time, time);
+      }
+
+      if (rec.isDirectory) {
+        await copyChildren(rec);
+      }
+    });
   };
 
   await mkdirp(destination);
-  await copyChildren(new Record(true, basename(source), source, destination));
+  await copyChildren(new Record(true, Path.basename(source), source, destination));
 }

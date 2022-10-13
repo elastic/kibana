@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { UnwrapPromiseOrReturn } from '@kbn/utility-types';
+import { PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
 import { ArgumentType } from './arguments';
-import { TypeToString } from '../types/common';
+import { TypeToString, TypeString, UnmappedTypeStrings } from '../types/common';
 import { ExecutionContext } from '../execution/types';
 import {
   ExpressionFunctionClog,
@@ -19,9 +19,9 @@ import {
   ExpressionFunctionCumulativeSum,
   ExpressionFunctionDerivative,
   ExpressionFunctionMovingAverage,
+  ExpressionFunctionOverallMetric,
 } from './specs';
 import { ExpressionAstFunction } from '../ast';
-import { PersistableStateDefinition } from '../../../kibana_utils/common';
 
 /**
  * `ExpressionFunctionDefinition` is the interface plugins have to implement to
@@ -30,7 +30,7 @@ import { PersistableStateDefinition } from '../../../kibana_utils/common';
 export interface ExpressionFunctionDefinition<
   Name extends string,
   Input,
-  Arguments extends Record<string, any>,
+  Arguments extends Record<keyof unknown, unknown>,
   Output,
   Context extends ExecutionContext = ExecutionContext
 > extends PersistableStateDefinition<ExpressionAstFunction['arguments']> {
@@ -40,14 +40,21 @@ export interface ExpressionFunctionDefinition<
   name: Name;
 
   /**
+   * The flag to mark the function as deprecated.
+   */
+  deprecated?: boolean;
+
+  /**
    * if set to true function will be disabled (but its migrate function will still be available)
    */
   disabled?: boolean;
 
+  namespace?: string;
+
   /**
    * Name of type of value this function outputs.
    */
-  type?: TypeToString<UnwrapPromiseOrReturn<Output>>;
+  type?: TypeString<Output> | UnmappedTypeStrings;
 
   /**
    * List of allowed type names for input value of this function. If this
@@ -99,12 +106,14 @@ export interface ExpressionFunctionDefinition<
 /**
  * Type to capture every possible expression function definition.
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export type AnyExpressionFunctionDefinition = ExpressionFunctionDefinition<
   string,
   any,
   Record<string, any>,
   any
 >;
+/* eslint-enable @typescript-eslint/no-explicit-any */
 
 /**
  * A mapping of `ExpressionFunctionDefinition`s for functions which the
@@ -120,6 +129,7 @@ export interface ExpressionFunctionDefinitions {
   var: ExpressionFunctionVar;
   theme: ExpressionFunctionTheme;
   cumulative_sum: ExpressionFunctionCumulativeSum;
+  overall_metric: ExpressionFunctionOverallMetric;
   derivative: ExpressionFunctionDerivative;
   moving_average: ExpressionFunctionMovingAverage;
 }

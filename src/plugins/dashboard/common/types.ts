@@ -10,21 +10,51 @@ import {
   EmbeddableInput,
   EmbeddableStateWithType,
   PanelState,
-} from '../../../../src/plugins/embeddable/common/types';
-import { SavedObjectEmbeddableInput } from '../../../../src/plugins/embeddable/common/lib/saved_object_embeddable';
+} from '@kbn/embeddable-plugin/common/types';
+import { Serializable } from '@kbn/utility-types';
 import {
-  RawSavedDashboardPanelTo60,
-  RawSavedDashboardPanel610,
-  RawSavedDashboardPanel620,
-  RawSavedDashboardPanel630,
-  RawSavedDashboardPanel640To720,
-  RawSavedDashboardPanel730ToLatest,
-} from './bwc/types';
+  PersistableControlGroupInput,
+  RawControlGroupAttributes,
+} from '@kbn/controls-plugin/common';
+import { RefreshInterval } from '@kbn/data-plugin/common';
+import { SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/common/lib/saved_object_embeddable';
 
-import { GridData } from './embeddable/types';
-export type PanelId = string;
-export type SavedObjectId = string;
+export interface DashboardCapabilities {
+  showWriteControls: boolean;
+  saveQuery: boolean;
+  createNew: boolean;
+  show: boolean;
+  [key: string]: boolean;
+}
 
+/**
+ * The attributes of the dashboard saved object. This interface should be the
+ * source of truth for the latest dashboard attributes shape after all migrations.
+ */
+export interface DashboardAttributes {
+  controlGroupInput?: RawControlGroupAttributes;
+  refreshInterval?: RefreshInterval;
+  timeRestore: boolean;
+  optionsJSON?: string;
+  useMargins?: boolean;
+  description: string;
+  panelsJSON: string;
+  timeFrom?: string;
+  version: number;
+  timeTo?: string;
+  title: string;
+  kibanaSavedObjectMeta: {
+    searchSourceJSON: string;
+  };
+}
+
+/** --------------------------------------------------------------------
+ * Dashboard panel types
+ -----------------------------------------------------------------------*/
+
+/**
+ * The dashboard panel format expected by the embeddable container.
+ */
 export interface DashboardPanelState<
   TEmbeddableInput extends EmbeddableInput | SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
 > extends PanelState<TEmbeddableInput> {
@@ -33,63 +63,45 @@ export interface DashboardPanelState<
 }
 
 /**
- * This should always represent the latest dashboard panel shape, after all possible migrations.
+ * A saved dashboard panel parsed directly from the Dashboard Attributes panels JSON
  */
-export type SavedDashboardPanel = SavedDashboardPanel730ToLatest;
+export interface SavedDashboardPanel {
+  embeddableConfig: { [key: string]: Serializable }; // parsed into the panel's explicitInput
+  id?: string; // the saved object id for by reference panels
+  type: string; // the embeddable type
+  panelRefName?: string;
+  gridData: GridData;
+  panelIndex: string;
+  version: string;
+  title?: string;
+}
 
-export type SavedDashboardPanel640To720 = Pick<
-  RawSavedDashboardPanel640To720,
-  Exclude<keyof RawSavedDashboardPanel640To720, 'name'>
-> & {
-  readonly id: string;
-  readonly type: string;
-};
+/**
+ * Grid type for React Grid Layout
+ */
+export interface GridData {
+  w: number;
+  h: number;
+  x: number;
+  y: number;
+  i: string;
+}
 
-export type SavedDashboardPanel630 = Pick<
-  RawSavedDashboardPanel630,
-  Exclude<keyof RawSavedDashboardPanel620, 'name'>
-> & {
-  readonly id: string;
-  readonly type: string;
-};
+export interface DashboardPanelMap {
+  [key: string]: DashboardPanelState;
+}
 
-export type SavedDashboardPanel620 = Pick<
-  RawSavedDashboardPanel620,
-  Exclude<keyof RawSavedDashboardPanel620, 'name'>
-> & {
-  readonly id: string;
-  readonly type: string;
-};
+/** --------------------------------------------------------------------
+ * Dashboard container types
+ -----------------------------------------------------------------------*/
 
-export type SavedDashboardPanel610 = Pick<
-  RawSavedDashboardPanel610,
-  Exclude<keyof RawSavedDashboardPanel610, 'name'>
-> & {
-  readonly id: string;
-  readonly type: string;
-};
-
-export type SavedDashboardPanelTo60 = Pick<
-  RawSavedDashboardPanelTo60,
-  Exclude<keyof RawSavedDashboardPanelTo60, 'name'>
-> & {
-  readonly id: string;
-  readonly type: string;
-};
-
-// id becomes optional starting in 7.3.0
-export type SavedDashboardPanel730ToLatest = Pick<
-  RawSavedDashboardPanel730ToLatest,
-  Exclude<keyof RawSavedDashboardPanel730ToLatest, 'name'>
-> & {
-  readonly id?: string;
-  readonly type: string;
-};
-
-// Making this interface because so much of the Container type from embeddable is tied up in public
-// Once that is all available from common, we should be able to move the dashboard_container type to our common as well
+/**
+ * Types below this line are copied here because so many important types are tied up in public. These types should be
+ * moved from public into common.
+ */
 export interface DashboardContainerStateWithType extends EmbeddableStateWithType {
   panels: {
     [panelId: string]: DashboardPanelState<EmbeddableInput & { [k: string]: unknown }>;
   };
+  controlGroupInput?: PersistableControlGroupInput;
 }

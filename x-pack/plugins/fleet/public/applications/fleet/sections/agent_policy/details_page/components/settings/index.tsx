@@ -5,28 +5,40 @@
  * 2.0.
  */
 
-import React, { memo, useState } from 'react';
+import React, { memo, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
-import { EuiBottomBar, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiButton } from '@elastic/eui';
+import { pick } from 'lodash';
+import {
+  EuiBottomBar,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  EuiButton,
+  EuiSpacer,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { AgentPolicy } from '../../../../../types';
 import {
   useLink,
   useStartServices,
-  useCapabilities,
+  useAuthz,
   sendUpdateAgentPolicy,
   useConfig,
   sendGetAgentStatus,
+  useAgentPolicyRefresh,
+  useBreadcrumbs,
 } from '../../../../../hooks';
 import {
   AgentPolicyForm,
   agentPolicyFormValidation,
   ConfirmDeployAgentPolicyModal,
 } from '../../../components';
-import { useAgentPolicyRefresh } from '../../hooks';
+import { DevtoolsRequestFlyoutButton } from '../../../../../components';
+import { ExperimentalFeaturesService } from '../../../../../services';
+import { generateUpdateAgentPolicyDevToolsRequest } from '../../../services';
 
 const FormWrapper = styled.div`
   max-width: 800px;
@@ -36,13 +48,14 @@ const FormWrapper = styled.div`
 
 export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
   ({ agentPolicy: originalAgentPolicy }) => {
+    useBreadcrumbs('policy_details', { policyName: originalAgentPolicy.name });
     const { notifications } = useStartServices();
     const {
       agents: { enabled: isFleetEnabled },
     } = useConfig();
     const history = useHistory();
     const { getPath } = useLink();
-    const hasWriteCapabilites = useCapabilities().write;
+    const hasFleetAllPrivileges = useAuthz().fleet.all;
     const refreshAgentPolicy = useAgentPolicyRefresh();
     const [agentPolicy, setAgentPolicy] = useState<AgentPolicy>({
       ...originalAgentPolicy,
@@ -64,13 +77,30 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
     const submitUpdateAgentPolicy = async () => {
       setIsLoading(true);
       try {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        const { name, description, namespace, monitoring_enabled } = agentPolicy;
+        const {
+          name,
+          description,
+          namespace,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          monitoring_enabled,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          unenroll_timeout,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          data_output_id,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          monitoring_output_id,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          download_source_id,
+        } = agentPolicy;
         const { data, error } = await sendUpdateAgentPolicy(agentPolicy.id, {
           name,
           description,
           namespace,
           monitoring_enabled,
+          unenroll_timeout,
+          data_output_id,
+          monitoring_output_id,
+          download_source_id,
         });
         if (data) {
           notifications.toasts.addSuccess(
@@ -99,6 +129,26 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
       }
       setIsLoading(false);
     };
+
+    const { showDevtoolsRequest } = ExperimentalFeaturesService.get();
+    const devtoolRequest = useMemo(
+      () =>
+        generateUpdateAgentPolicyDevToolsRequest(
+          agentPolicy.id,
+          pick(
+            agentPolicy,
+            'name',
+            'description',
+            'namespace',
+            'monitoring_enabled',
+            'unenroll_timeout',
+            'data_output_id',
+            'monitoring_output_id',
+            'download_source_id'
+          )
+        ),
+      [agentPolicy]
+    );
 
     const onSubmit = async () => {
       // Retrieve agent count if fleet is enabled
@@ -144,58 +194,79 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
         />
 
         {hasChanges ? (
-          <EuiBottomBar>
-            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-              <EuiFlexItem>
-                <FormattedMessage
-                  id="xpack.fleet.editAgentPolicy.unsavedChangesText"
-                  defaultMessage="You have unsaved changes"
-                />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty
-                      color="ghost"
-                      onClick={() => {
-                        setAgentPolicy({ ...originalAgentPolicy });
-                        setHasChanges(false);
-                      }}
-                    >
-                      <FormattedMessage
-                        id="xpack.fleet.editAgentPolicy.cancelButtonText"
-                        defaultMessage="Cancel"
-                      />
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      onClick={onSubmit}
-                      isLoading={isLoading}
-                      isDisabled={
-                        !hasWriteCapabilites || isLoading || Object.keys(validation).length > 0
-                      }
-                      iconType="save"
-                      color="primary"
-                      fill
-                    >
-                      {isLoading ? (
+          <>
+            <EuiSpacer size="xl" />
+            <EuiSpacer size="xl" />
+            <EuiBottomBar>
+              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+                <EuiFlexItem>
+                  <FormattedMessage
+                    id="xpack.fleet.editAgentPolicy.unsavedChangesText"
+                    defaultMessage="You have unsaved changes"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty
+                        color="ghost"
+                        onClick={() => {
+                          setAgentPolicy({ ...originalAgentPolicy });
+                          setHasChanges(false);
+                        }}
+                      >
                         <FormattedMessage
-                          id="xpack.fleet.editAgentPolicy.savingButtonText"
-                          defaultMessage="Saving…"
+                          id="xpack.fleet.editAgentPolicy.cancelButtonText"
+                          defaultMessage="Cancel"
                         />
-                      ) : (
-                        <FormattedMessage
-                          id="xpack.fleet.editAgentPolicy.saveButtonText"
-                          defaultMessage="Save changes"
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                    {showDevtoolsRequest ? (
+                      <EuiFlexItem grow={false}>
+                        <DevtoolsRequestFlyoutButton
+                          isDisabled={isLoading || Object.keys(validation).length > 0}
+                          btnProps={{
+                            color: 'ghost',
+                          }}
+                          description={i18n.translate(
+                            'xpack.fleet.editAgentPolicy.devtoolsRequestDescription',
+                            {
+                              defaultMessage: 'This Kibana request updates an agent policy.',
+                            }
+                          )}
+                          request={devtoolRequest}
                         />
-                      )}
-                    </EuiButton>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiBottomBar>
+                      </EuiFlexItem>
+                    ) : null}
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        onClick={onSubmit}
+                        isLoading={isLoading}
+                        isDisabled={
+                          !hasFleetAllPrivileges || isLoading || Object.keys(validation).length > 0
+                        }
+                        iconType="save"
+                        color="primary"
+                        fill
+                      >
+                        {isLoading ? (
+                          <FormattedMessage
+                            id="xpack.fleet.editAgentPolicy.savingButtonText"
+                            defaultMessage="Saving…"
+                          />
+                        ) : (
+                          <FormattedMessage
+                            id="xpack.fleet.editAgentPolicy.saveButtonText"
+                            defaultMessage="Save changes"
+                          />
+                        )}
+                      </EuiButton>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiBottomBar>
+          </>
         ) : null}
       </FormWrapper>
     );

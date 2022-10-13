@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpStart } from 'src/core/public';
+import { HttpStart } from '@kbn/core/public';
 import { BannerInfoResponse } from '../common';
 
 export const getBannerInfo = async (http: HttpStart): Promise<BannerInfoResponse> => {

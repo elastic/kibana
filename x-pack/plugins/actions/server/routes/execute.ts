@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'kibana/server';
+import { IRouter } from '@kbn/core/server';
 import { ILicenseState } from '../lib';
 
 import { ActionTypeExecutorResult, ActionsRequestHandlerContext } from '../types';
@@ -46,13 +46,14 @@ export const executeActionRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const actionsClient = context.actions.getActionsClient();
+        const actionsClient = (await context.actions).getActionsClient();
         const { params } = req.body;
         const { id } = req.params;
         const body: ActionTypeExecutorResult<unknown> = await actionsClient.execute({
           params,
           actionId: id,
           source: asHttpRequestExecutionSource(req),
+          relatedSavedObjects: [],
         });
         return body
           ? res.ok({

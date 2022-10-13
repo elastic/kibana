@@ -5,21 +5,14 @@
  * 2.0.
  */
 
-import { FindResult } from '../../../../../alerting/server';
-import { SIGNALS_ID } from '../../../../common/constants';
-import { RuleParams } from '../schemas/rule_schemas';
-import { FindRuleOptions } from './types';
+import type { FindResult } from '@kbn/alerting-plugin/server';
+import { enrichFilterWithRuleTypeMapping } from './enrich_filter_with_rule_type_mappings';
 
-export const getFilter = (filter: string | null | undefined) => {
-  if (filter == null) {
-    return `alert.attributes.alertTypeId: ${SIGNALS_ID}`;
-  } else {
-    return `alert.attributes.alertTypeId: ${SIGNALS_ID} AND ${filter}`;
-  }
-};
+import type { RuleParams } from '../schemas/rule_schemas';
+import type { FindRuleOptions } from './types';
 
-export const findRules = async ({
-  alertsClient,
+export const findRules = ({
+  rulesClient,
   perPage,
   page,
   fields,
@@ -27,12 +20,12 @@ export const findRules = async ({
   sortField,
   sortOrder,
 }: FindRuleOptions): Promise<FindResult<RuleParams>> => {
-  return alertsClient.find({
+  return rulesClient.find({
     options: {
       fields,
       page,
       perPage,
-      filter: getFilter(filter),
+      filter: enrichFilterWithRuleTypeMapping(filter),
       sortOrder,
       sortField,
     },

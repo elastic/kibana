@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { CoreSetup, Logger } from 'src/core/server';
-import type { Space } from 'src/plugins/spaces_oss/common';
+import type { CoreSetup, Logger } from '@kbn/core/server';
 
+import type { Space } from '../../../common';
 import { addSpaceIdToPath } from '../../../common';
 import { DEFAULT_SPACE_ID, ENTER_SPACE_PATH } from '../../../common/constants';
 import type { PluginsSetup } from '../../plugin';

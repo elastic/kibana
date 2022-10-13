@@ -37,8 +37,7 @@ export const createLogstashInstructions = () => ({
           {
             defaultMessage: 'First time using Logstash?  See the [Getting Started Guide]({link}).',
             values: {
-              link:
-                '{config.docs.base_url}guide/en/logstash/current/getting-started-with-logstash.html',
+              link: '{config.docs.base_url}guide/en/logstash/current/getting-started-with-logstash.html',
             },
           }
         ),
@@ -61,8 +60,7 @@ export const createLogstashInstructions = () => ({
           {
             defaultMessage: 'Follow the installation instructions [here]({link}).',
             values: {
-              link:
-                'https://docs.oracle.com/javase/8/docs/technotes/guides/install/windows_jre_install.html',
+              link: 'https://docs.oracle.com/javase/8/docs/technotes/guides/install/windows_jre_install.html',
             },
           }
         ),

@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import {
   InfraMetadata,
   InfraMetadataRequest,
-} from '../../../../plugins/infra/common/http_api/metadata_api';
+} from '@kbn/infra-plugin/common/http_api/metadata_api';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 import { DATES } from './constants';
@@ -43,8 +43,8 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('metadata', () => {
     describe('7.0.0', () => {
-      before(() => esArchiver.load('infra/7.0.0/hosts'));
-      after(() => esArchiver.unload('infra/7.0.0/hosts'));
+      before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/7.0.0/hosts'));
+      after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/7.0.0/hosts'));
 
       it('hosts', async () => {
         const metadata = await fetchMetadata({
@@ -63,8 +63,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('6.6.0', () => {
-      before(() => esArchiver.load('infra/6.6.0/docker'));
-      after(() => esArchiver.unload('infra/6.6.0/docker'));
+      before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/6.6.0/docker'));
+      after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/6.6.0/docker'));
 
       it('docker', async () => {
         const metadata = await fetchMetadata({
@@ -84,7 +84,8 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('8.0.0', () => {
       describe('cloud and host information', () => {
-        const archiveName = 'infra/8.0.0/logs_and_metrics_with_aws';
+        const archiveName =
+          'x-pack/test/functional/es_archives/infra/8.0.0/logs_and_metrics_with_aws';
         before(() => esArchiver.load(archiveName));
         after(() => esArchiver.unload(archiveName));
 

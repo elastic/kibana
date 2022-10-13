@@ -6,13 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { run, combineErrors, createFlagError } from '@kbn/dev-utils';
+import SimpleGit from 'simple-git';
+
+import { run } from '@kbn/dev-cli-runner';
+import { createFlagError, combineErrors } from '@kbn/dev-cli-errors';
+import { REPO_ROOT } from '@kbn/utils';
 import * as Eslint from './eslint';
 import * as Stylelint from './stylelint';
 import { getFilesForCommit, checkFileCasing } from './precommit_hook';
 
 run(
   async ({ log, flags }) => {
+    process.env.IS_KIBANA_PRECOMIT_HOOK = 'true';
+
     const files = await getFilesForCommit(flags.ref);
     const errors = [];
 
@@ -43,6 +49,11 @@ run(
           await Linter.lintFiles(log, filesToLint, {
             fix: flags.fix,
           });
+
+          if (flags.fix && flags.stage) {
+            const simpleGit = new SimpleGit(REPO_ROOT);
+            await simpleGit.add(filesToLint);
+          }
         } catch (error) {
           errors.push(error);
         }
@@ -58,16 +69,18 @@ run(
     Run checks on files that are staged for commit by default
   `,
     flags: {
-      boolean: ['fix'],
+      boolean: ['fix', 'stage'],
       string: ['max-files', 'ref'],
       default: {
         fix: false,
+        stage: true,
       },
       help: `
-      --fix              Execute eslint in --fix mode
-      --max-files        Max files number to check against. If exceeded the script will skip the execution
-      --ref              Run checks against any git ref files (example HEAD or <commit_sha>) instead of running against staged ones
-    `,
+        --fix              Execute eslint in --fix mode
+        --max-files        Max files number to check against. If exceeded the script will skip the execution
+        --ref              Run checks against any git ref files (example HEAD or <commit_sha>) instead of running against staged ones
+        --no-stage         By default when using --fix the changes are staged, use --no-stage to disable that behavior
+      `,
     },
   }
 );

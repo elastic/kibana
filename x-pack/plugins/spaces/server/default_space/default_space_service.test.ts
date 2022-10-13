@@ -6,16 +6,15 @@
  */
 
 import * as Rx from 'rxjs';
-import { first } from 'rxjs/operators';
 
-import { nextTick } from '@kbn/test/jest';
+import type { CoreStatus, SavedObjectsRepository, ServiceStatusLevel } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers, ServiceStatusLevels } from '@kbn/core/server';
+import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type { ILicense } from '@kbn/licensing-plugin/server';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { nextTick } from '@kbn/test-jest-helpers';
 import type { Writable } from '@kbn/utility-types';
-import type { CoreStatus, SavedObjectsRepository, ServiceStatusLevel } from 'src/core/server';
-import { SavedObjectsErrorHelpers, ServiceStatusLevels } from 'src/core/server';
-import { coreMock, loggingSystemMock } from 'src/core/server/mocks';
 
-import type { ILicense } from '../../../licensing/server';
-import { licensingMock } from '../../../licensing/server/mocks';
 import { SpacesLicenseService } from '../../common/licensing';
 import {
   DefaultSpaceService,
@@ -40,7 +39,7 @@ interface SetupOpts {
 const setup = ({ elasticsearchStatus, savedObjectsStatus, license }: SetupOpts) => {
   const core = coreMock.createSetup();
   const { status } = core;
-  status.core$ = (new Rx.BehaviorSubject({
+  status.core$ = new Rx.BehaviorSubject({
     elasticsearch: {
       level: elasticsearchStatus,
       summary: '',
@@ -49,7 +48,7 @@ const setup = ({ elasticsearchStatus, savedObjectsStatus, license }: SetupOpts) 
       level: savedObjectsStatus,
       summary: '',
     },
-  }) as unknown) as Rx.Observable<CoreStatus>;
+  }) as unknown as Rx.Observable<CoreStatus>;
 
   const { savedObjects } = coreMock.createStart();
   const repository = savedObjects.createInternalRepository() as jest.Mocked<SavedObjectsRepository>;
@@ -73,7 +72,7 @@ const setup = ({ elasticsearchStatus, savedObjectsStatus, license }: SetupOpts) 
   });
 
   return {
-    coreStatus: (status as unknown) as { core$: Rx.BehaviorSubject<CoreStatus> },
+    coreStatus: status as unknown as { core$: Rx.BehaviorSubject<CoreStatus> },
     serviceStatus$,
     logger,
     license$,
@@ -99,7 +98,7 @@ test(`does not initialize if elasticsearch is unavailable`, async () => {
   expect(repository.get).not.toHaveBeenCalled();
   expect(repository.create).not.toHaveBeenCalled();
 
-  const status = await serviceStatus$.pipe(first()).toPromise();
+  const status = await Rx.firstValueFrom(serviceStatus$);
   expect(status.level).toEqual(ServiceStatusLevels.unavailable);
   expect(status.summary).toMatchInlineSnapshot(`"required core services are not ready"`);
 });
@@ -120,14 +119,14 @@ test(`does not initialize if savedObjects is unavailable`, async () => {
 
   expect(repository.get).not.toHaveBeenCalled();
   expect(repository.create).not.toHaveBeenCalled();
-  const status = await serviceStatus$.pipe(first()).toPromise();
+  const status = await Rx.firstValueFrom(serviceStatus$);
   expect(status.level).toEqual(ServiceStatusLevels.unavailable);
   expect(status.summary).toMatchInlineSnapshot(`"required core services are not ready"`);
 });
 
 test(`does not initialize if the license is unavailable`, async () => {
   const license = licensingMock.createLicense({
-    license: ({ type: ' ', status: ' ' } as unknown) as ILicense,
+    license: { type: ' ', status: ' ' } as unknown as ILicense,
   }) as Writable<ILicense>;
   license.isAvailable = false;
 
@@ -141,7 +140,7 @@ test(`does not initialize if the license is unavailable`, async () => {
 
   expect(repository.get).not.toHaveBeenCalled();
   expect(repository.create).not.toHaveBeenCalled();
-  const status = await serviceStatus$.pipe(first()).toPromise();
+  const status = await Rx.firstValueFrom(serviceStatus$);
   expect(status.level).toEqual(ServiceStatusLevels.unavailable);
   expect(status.summary).toMatchInlineSnapshot(`"missing or invalid license"`);
 });
@@ -163,7 +162,7 @@ test(`initializes once all dependencies are met`, async () => {
   expect(repository.get).not.toHaveBeenCalled();
   expect(repository.create).not.toHaveBeenCalled();
 
-  const status = await serviceStatus$.pipe(first()).toPromise();
+  const status = await Rx.firstValueFrom(serviceStatus$);
   expect(status.level).toEqual(ServiceStatusLevels.unavailable);
   expect(status.summary).toMatchInlineSnapshot(`"required core services are not ready"`);
 
@@ -183,7 +182,7 @@ test(`initializes once all dependencies are met`, async () => {
   expect(repository.get).toHaveBeenCalled();
   expect(repository.create).toHaveBeenCalled();
 
-  const nextStatus = await serviceStatus$.pipe(first()).toPromise();
+  const nextStatus = await Rx.firstValueFrom(serviceStatus$);
   expect(nextStatus.level).toEqual(ServiceStatusLevels.available);
   expect(nextStatus.summary).toMatchInlineSnapshot(`"ready"`);
 });
@@ -207,7 +206,7 @@ test('maintains unavailable status if default space cannot be created', async ()
   expect(repository.get).toHaveBeenCalled();
   expect(repository.create).toHaveBeenCalled();
 
-  const status = await serviceStatus$.pipe(first()).toPromise();
+  const status = await Rx.firstValueFrom(serviceStatus$);
   expect(status.level).toEqual(ServiceStatusLevels.unavailable);
   expect(status.summary).toMatchInlineSnapshot(
     `"Error creating default space: something bad happened"`
@@ -235,7 +234,7 @@ test('retries operation', async () => {
   expect(repository.get).toHaveBeenCalledTimes(1);
   expect(repository.create).toHaveBeenCalledTimes(1);
 
-  let status = await serviceStatus$.pipe(first()).toPromise();
+  let status = await Rx.firstValueFrom(serviceStatus$);
   expect(status.level).toEqual(ServiceStatusLevels.unavailable);
   expect(status.summary).toMatchInlineSnapshot(
     `"Error creating default space: something bad happened"`
@@ -247,7 +246,7 @@ test('retries operation', async () => {
   expect(repository.get).toHaveBeenCalledTimes(2);
   expect(repository.create).toHaveBeenCalledTimes(2);
 
-  status = await serviceStatus$.pipe(first()).toPromise();
+  status = await Rx.firstValueFrom(serviceStatus$);
   expect(status.level).toEqual(ServiceStatusLevels.unavailable);
   expect(status.summary).toMatchInlineSnapshot(
     `"Error creating default space: something bad happened"`
@@ -262,7 +261,7 @@ test('retries operation', async () => {
   expect(repository.get).toHaveBeenCalledTimes(2);
   expect(repository.create).toHaveBeenCalledTimes(2);
 
-  status = await serviceStatus$.pipe(first()).toPromise();
+  status = await Rx.firstValueFrom(serviceStatus$);
   expect(status.level).toEqual(ServiceStatusLevels.unavailable);
   expect(status.summary).toMatchInlineSnapshot(
     `"Error creating default space: something bad happened"`
@@ -274,7 +273,7 @@ test('retries operation', async () => {
   expect(repository.get).toHaveBeenCalledTimes(3);
   expect(repository.create).toHaveBeenCalledTimes(3);
 
-  status = await serviceStatus$.pipe(first()).toPromise();
+  status = await Rx.firstValueFrom(serviceStatus$);
   expect(status.level).toEqual(ServiceStatusLevels.available);
   expect(status.summary).toMatchInlineSnapshot(`"ready"`);
 });

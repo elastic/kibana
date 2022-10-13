@@ -7,9 +7,16 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { ConfigDeprecationWithContext, AddConfigDeprecation } from './types';
+import { set } from '@kbn/safer-lodash-set';
+import type {
+  AddConfigDeprecation,
+  ChangedDeprecatedPaths,
+  ConfigDeprecationWithContext,
+} from './types';
+import { unsetAndCleanEmptyParent } from './unset_and_clean_empty_parent';
 
 const noopAddDeprecationFactory: () => AddConfigDeprecation = () => () => undefined;
+
 /**
  * Applies deprecations on given configuration and passes addDeprecation hook.
  * This hook is used for logging any deprecation warning using provided logger.
@@ -21,10 +28,31 @@ export const applyDeprecations = (
   config: Record<string, any>,
   deprecations: ConfigDeprecationWithContext[],
   createAddDeprecation: (pluginId: string) => AddConfigDeprecation = noopAddDeprecationFactory
-) => {
-  let processed = cloneDeep(config);
-  deprecations.forEach(({ deprecation, path }) => {
-    processed = deprecation(processed, path, createAddDeprecation(path));
+): { config: Record<string, any>; changedPaths: ChangedDeprecatedPaths } => {
+  const result = cloneDeep(config);
+  const changedPaths: ChangedDeprecatedPaths = {
+    set: [],
+    unset: [],
+  };
+  deprecations.forEach(({ deprecation, path, context }) => {
+    const commands = deprecation(result, path, createAddDeprecation(path), context);
+    if (commands) {
+      if (commands.set) {
+        changedPaths.set.push(...commands.set.map((c) => c.path));
+        commands.set.forEach(function ({ path: commandPath, value }) {
+          set(result, commandPath, value);
+        });
+      }
+      if (commands.unset) {
+        changedPaths.unset.push(...commands.unset.map((c) => c.path));
+        commands.unset.forEach(function ({ path: commandPath }) {
+          unsetAndCleanEmptyParent(result, commandPath);
+        });
+      }
+    }
   });
-  return processed;
+  return {
+    config: result,
+    changedPaths,
+  };
 };

@@ -7,7 +7,7 @@
 
 import querystring from 'querystring';
 import React from 'react';
-import { renderToStaticMarkup } from 'react-dom/server';
+import { renderToString } from 'react-dom/server';
 import type { Observable, Subscription } from 'rxjs';
 
 import type {
@@ -17,13 +17,13 @@ import type {
   KibanaRequest,
   Logger,
   LoggerFactory,
-} from 'src/core/server';
-import type { Capabilities as UICapabilities } from 'src/core/types';
-
+} from '@kbn/core/server';
+import type { Capabilities as UICapabilities } from '@kbn/core/types';
 import type {
   PluginSetupContract as FeaturesPluginSetup,
   PluginStartContract as FeaturesPluginStart,
-} from '../../../features/server';
+} from '@kbn/features-plugin/server';
+
 import { APPLICATION_PREFIX } from '../../common/constants';
 import type { SecurityLicense } from '../../common/licensing';
 import type { AuthenticatedUser } from '../../common/model';
@@ -33,7 +33,7 @@ import type { SpacesService } from '../plugin';
 import { Actions } from './actions';
 import { initAPIAuthorization } from './api_authorization';
 import { initAppAuthorization } from './app_authorization';
-import { checkPrivilegesWithRequestFactory } from './check_privileges';
+import { checkPrivilegesFactory } from './check_privileges';
 import type { CheckPrivilegesDynamicallyWithRequest } from './check_privileges_dynamically';
 import { checkPrivilegesDynamicallyWithRequestFactory } from './check_privileges_dynamically';
 import type { CheckSavedObjectsPrivilegesWithRequest } from './check_saved_objects_privileges';
@@ -45,13 +45,12 @@ import type { PrivilegesService } from './privileges';
 import { privilegesFactory } from './privileges';
 import { registerPrivilegesWithCluster } from './register_privileges_with_cluster';
 import { ResetSessionPage } from './reset_session_page';
-import type { CheckPrivilegesWithRequest } from './types';
+import type { CheckPrivilegesWithRequest, CheckUserProfilesPrivileges } from './types';
 import { validateFeaturePrivileges } from './validate_feature_privileges';
 import { validateReservedPrivileges } from './validate_reserved_privileges';
 
 export { Actions } from './actions';
-export { CheckSavedObjectsPrivileges } from './check_saved_objects_privileges';
-export { featurePrivilegeIterator } from './privileges';
+export type { CheckSavedObjectsPrivileges } from './check_saved_objects_privileges';
 
 interface AuthorizationServiceSetupParams {
   packageVersion: string;
@@ -73,14 +72,30 @@ interface AuthorizationServiceStartParams {
   online$: Observable<OnlineStatusRetryScheduler>;
 }
 
-export interface AuthorizationServiceSetup {
+export interface AuthorizationServiceSetupInternal extends AuthorizationServiceSetup {
   actions: Actions;
-  checkPrivilegesWithRequest: CheckPrivilegesWithRequest;
+  checkUserProfilesPrivileges: (userProfileUids: Set<string>) => CheckUserProfilesPrivileges;
   checkPrivilegesDynamicallyWithRequest: CheckPrivilegesDynamicallyWithRequest;
   checkSavedObjectsPrivilegesWithRequest: CheckSavedObjectsPrivilegesWithRequest;
   applicationName: string;
   mode: AuthorizationMode;
   privileges: PrivilegesService;
+}
+
+/**
+ * Authorization services available on the setup contract of the security plugin.
+ */
+export interface AuthorizationServiceSetup {
+  /**
+   * Actions are used to create the "actions" that are associated with Elasticsearch's
+   * application privileges, and are used to perform the authorization checks implemented
+   * by the various `checkPrivilegesWithRequest` derivatives.
+   */
+  actions: Actions;
+  checkPrivilegesWithRequest: CheckPrivilegesWithRequest;
+  checkPrivilegesDynamicallyWithRequest: CheckPrivilegesDynamicallyWithRequest;
+  checkSavedObjectsPrivilegesWithRequest: CheckSavedObjectsPrivilegesWithRequest;
+  mode: AuthorizationMode;
 }
 
 export class AuthorizationService {
@@ -102,7 +117,7 @@ export class AuthorizationService {
     kibanaIndexName,
     getSpacesService,
     getCurrentUser,
-  }: AuthorizationServiceSetupParams): AuthorizationServiceSetup {
+  }: AuthorizationServiceSetupParams): AuthorizationServiceSetupInternal {
     this.logger = loggers.get('authorization');
     this.applicationName = `${APPLICATION_PREFIX}${kibanaIndexName}`;
 
@@ -110,7 +125,7 @@ export class AuthorizationService {
     const actions = new Actions(packageVersion);
     this.privileges = privilegesFactory(actions, features, license);
 
-    const checkPrivilegesWithRequest = checkPrivilegesWithRequestFactory(
+    const { checkPrivilegesWithRequest, checkUserProfilesPrivileges } = checkPrivilegesFactory(
       actions,
       getClusterClient,
       this.applicationName
@@ -122,6 +137,7 @@ export class AuthorizationService {
       mode,
       privileges: this.privileges,
       checkPrivilegesWithRequest,
+      checkUserProfilesPrivileges,
       checkPrivilegesDynamicallyWithRequest: checkPrivilegesDynamicallyWithRequestFactory(
         checkPrivilegesWithRequest,
         getSpacesService
@@ -163,7 +179,7 @@ export class AuthorizationService {
     http.registerOnPreResponse((request, preResponse, toolkit) => {
       if (preResponse.statusCode === 403 && canRedirectRequest(request)) {
         const next = `${http.basePath.get(request)}${request.url.pathname}${request.url.search}`;
-        const body = renderToStaticMarkup(
+        const body = renderToString(
           <ResetSessionPage
             buildNumber={buildNumber}
             basePath={http.basePath}

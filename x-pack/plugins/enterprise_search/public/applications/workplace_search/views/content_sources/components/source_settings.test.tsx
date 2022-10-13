@@ -7,7 +7,7 @@
 
 import '../../../../__mocks__/shallow_useeffect.mock';
 
-import { setMockValues, setMockActions } from '../../../../__mocks__';
+import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
 import { fullContentSources, sourceConfigData } from '../../../__mocks__/content_sources.mock';
 
 import React from 'react';
@@ -18,13 +18,14 @@ import { EuiConfirmModal } from '@elastic/eui';
 
 import { SourceConfigFields } from '../../../components/shared/source_config_fields';
 
+import { DownloadDiagnosticsButton } from './download_diagnostics_button';
 import { SourceSettings } from './source_settings';
 
 describe('SourceSettings', () => {
   const updateContentSource = jest.fn();
   const removeContentSource = jest.fn();
   const getSourceConfigData = jest.fn();
-  const contentSource = fullContentSources[0];
+  const contentSource = fullContentSources[1];
   const buttonLoading = false;
   const isOrganization = true;
 
@@ -36,6 +37,7 @@ describe('SourceSettings', () => {
   };
 
   beforeEach(() => {
+    jest.clearAllMocks();
     setMockValues({ ...mockValues });
     setMockActions({
       updateContentSource,
@@ -48,6 +50,7 @@ describe('SourceSettings', () => {
     const wrapper = shallow(<SourceSettings />);
 
     expect(wrapper.find('form')).toHaveLength(1);
+    expect(wrapper.find(DownloadDiagnosticsButton)).toHaveLength(1);
   });
 
   it('handles form submission', () => {
@@ -61,7 +64,7 @@ describe('SourceSettings', () => {
     wrapper.find('form').simulate('submit', { preventDefault });
 
     expect(preventDefault).toHaveBeenCalled();
-    expect(updateContentSource).toHaveBeenCalledWith(fullContentSources[0].id, { name: TEXT });
+    expect(updateContentSource).toHaveBeenCalledWith(contentSource.id, { name: TEXT });
   });
 
   it('handles confirmModal submission', () => {
@@ -93,7 +96,7 @@ describe('SourceSettings', () => {
     setMockValues({
       ...mockValues,
       contentSource: {
-        ...fullContentSources[0],
+        ...contentSource,
         serviceType: 'confluence_server',
       },
     });
@@ -105,25 +108,58 @@ describe('SourceSettings', () => {
     );
   });
 
-  describe('DownloadDiagnosticsButton', () => {
-    it('renders for org with correct href', () => {
-      const wrapper = shallow(<SourceSettings />);
-
-      expect(wrapper.find('[data-test-subj="DownloadDiagnosticsButton"]').prop('href')).toEqual(
-        '/api/workplace_search/org/sources/123/download_diagnostics'
-      );
+  it('hides source config for github apps', () => {
+    setMockValues({
+      ...mockValues,
+      contentSource: {
+        ...contentSource,
+        serviceType: 'github_via_app',
+        secret: {},
+      },
     });
 
-    it('renders for account with correct href', () => {
-      setMockValues({
-        ...mockValues,
-        isOrganization: false,
-      });
-      const wrapper = shallow(<SourceSettings />);
+    const wrapper = shallow(<SourceSettings />);
 
-      expect(wrapper.find('[data-test-subj="DownloadDiagnosticsButton"]').prop('href')).toEqual(
-        '/api/workplace_search/account/sources/123/download_diagnostics'
-      );
+    expect(wrapper.find(SourceConfigFields)).toHaveLength(0);
+  });
+
+  it('hides source config for github enterprise apps', () => {
+    setMockValues({
+      ...mockValues,
+      contentSource: {
+        ...contentSource,
+        serviceType: 'github_enterprise_server_via_app',
+        secret: {},
+      },
     });
+
+    const wrapper = shallow(<SourceSettings />);
+
+    expect(wrapper.find(SourceConfigFields)).toHaveLength(0);
+  });
+
+  it('hides source config for custom sources', () => {
+    setMockValues({
+      ...mockValues,
+      contentSource: {
+        ...contentSource,
+        serviceType: 'custom',
+      },
+    });
+
+    const wrapper = shallow(<SourceSettings />);
+
+    expect(wrapper.find(SourceConfigFields)).toHaveLength(0);
+  });
+
+  it('hides source config for non-organization sources', () => {
+    setMockValues({
+      ...mockValues,
+      isOrganization: false,
+    });
+
+    const wrapper = shallow(<SourceSettings />);
+
+    expect(wrapper.find(SourceConfigFields)).toHaveLength(0);
   });
 });

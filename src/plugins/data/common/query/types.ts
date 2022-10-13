@@ -6,10 +6,25 @@
  * Side Public License, v 1.
  */
 
-export * from './timefilter/types';
+import type { Query, Filter } from '@kbn/es-query';
+import type { RefreshInterval, TimeRange } from './timefilter/types';
 
-// eslint-disable-next-line
-export type Query = {
-  query: string | { [key: string]: any };
-  language: string;
+export type { RefreshInterval, TimeRange, TimeRangeBounds } from './timefilter/types';
+export type { Query, AggregateQuery } from '@kbn/es-query';
+
+export type SavedQueryTimeFilter = TimeRange & {
+  refreshInterval: RefreshInterval;
 };
+
+export interface SavedQuery {
+  id: string;
+  attributes: SavedQueryAttributes;
+}
+
+export interface SavedQueryAttributes {
+  title: string;
+  description: string;
+  query: Query;
+  filters?: Filter[];
+  timefilter?: SavedQueryTimeFilter;
+}

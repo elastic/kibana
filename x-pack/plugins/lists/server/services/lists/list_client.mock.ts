@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
+import { getFoundAllListItemsSchemaMock } from '../../../common/schemas/response/found_all_list_items_schema.mock';
 import { getFoundListItemSchemaMock } from '../../../common/schemas/response/found_list_item_schema.mock';
 import { getFoundListSchemaMock } from '../../../common/schemas/response/found_list_schema.mock';
 import { getListItemResponseMock } from '../../../common/schemas/response/list_item_schema.mock';
@@ -18,6 +18,7 @@ import {
   LIST_INDEX,
   LIST_ITEM_INDEX,
   MAX_IMPORT_PAYLOAD_BYTES,
+  MAX_IMPORT_SIZE,
 } from '../../../common/constants.mock';
 
 import { ListClient } from './list_client';
@@ -61,16 +62,17 @@ export class ListClientMock extends ListClient {
   public getListItemByValues = jest.fn().mockResolvedValue([getListItemResponseMock()]);
   public findList = jest.fn().mockResolvedValue(getFoundListSchemaMock());
   public findListItem = jest.fn().mockResolvedValue(getFoundListItemSchemaMock());
+  public findAllListItems = jest.fn().mockResolvedValue(getFoundAllListItemsSchemaMock());
 }
 
 export const getListClientMock = (): ListClient => {
   const mock = new ListClientMock({
     config: {
-      enabled: true,
       importBufferSize: IMPORT_BUFFER_SIZE,
       importTimeout: IMPORT_TIMEOUT,
       listIndex: LIST_INDEX,
       listItemIndex: LIST_ITEM_INDEX,
+      maxExceptionsImportSize: MAX_IMPORT_SIZE,
       maxImportPayloadBytes: MAX_IMPORT_PAYLOAD_BYTES,
     },
     esClient: elasticsearchClientMock.createScopedClusterClient().asCurrentUser,

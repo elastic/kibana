@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'graph', 'security', 'error']);
   const testSubjects = getService('testSubjects');
@@ -18,13 +18,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('security', () => {
     before(async () => {
-      await esArchiver.load('empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
       // ensure we're logged out so we can login as the appropriate users
       await PageObjects.security.forceLogout();
     });
 
     after(async () => {
       // logout, so the other tests don't accidentally run as the custom users we're testing below
+      // NOTE: Logout needs to happen before anything else to avoid flaky behavior
       await PageObjects.security.forceLogout();
     });
 
@@ -66,7 +67,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows graph navlink', async () => {
         const navLinks = await appsMenu.readLinks();
-        expect(navLinks.map((link) => link.text)).to.eql(['Overview', 'Graph']);
+        expect(navLinks.map((link) => link.text)).to.eql(['Graph']);
       });
 
       it('landing page shows "Create new graph" button', async () => {
@@ -129,7 +130,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows graph navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Overview', 'Graph']);
+        expect(navLinks).to.eql(['Graph']);
       });
 
       it('does not show a "Create new Workspace" button', async () => {

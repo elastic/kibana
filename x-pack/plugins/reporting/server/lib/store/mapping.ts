@@ -7,15 +7,10 @@
 
 export const mapping = {
   meta: {
-    // We are indexing these properties with both text and keyword fields because that's what will be auto generated
-    // when an index already exists. This schema is only used when a reporting index doesn't exist.  This way existing
-    // reporting indexes and new reporting indexes will look the same and the data can be queried in the same
-    // manner.
+    // We are indexing these properties with both text and keyword fields
+    // because that's what will be auto generated when an index already exists.
     properties: {
-      /**
-       * Type of object that is triggering this report. Should be either search, visualization or dashboard.
-       * Used for job listing and telemetry stats only.
-       */
+      // ID of the app this report: search, visualization or dashboard, etc
       objectType: {
         type: 'text',
         fields: {
@@ -25,10 +20,6 @@ export const mapping = {
           },
         },
       },
-      /**
-       * Can be either preserve_layout, print or none (in the case of csv export).
-       * Used for phone home stats only.
-       */
       layout: {
         type: 'text',
         fields: {
@@ -38,12 +29,15 @@ export const mapping = {
           },
         },
       },
+      isDeprecated: {
+        type: 'boolean',
+      },
     },
   },
-  browser_type: { type: 'keyword' },
+  migration_version: { type: 'keyword' }, // new field (7.14) to distinguish reports that were scheduled with Task Manager
   jobtype: { type: 'keyword' },
   payload: { type: 'object', enabled: false },
-  priority: { type: 'byte' }, // NOTE: this is unused, but older data may have a mapping for this field
+  priority: { type: 'byte' }, // TODO: remove: this is unused
   timeout: { type: 'long' },
   process_expiration: { type: 'date' },
   created_by: { type: 'keyword' }, // `null` if security is disabled
@@ -55,12 +49,45 @@ export const mapping = {
   kibana_name: { type: 'keyword' },
   kibana_id: { type: 'keyword' },
   status: { type: 'keyword' },
+  parent_id: { type: 'keyword' },
   output: {
     type: 'object',
     properties: {
+      error_code: { type: 'keyword' },
+      chunk: { type: 'long' },
       content_type: { type: 'keyword' },
       size: { type: 'long' },
       content: { type: 'object', enabled: false },
     },
   },
-};
+  metrics: {
+    type: 'object',
+    properties: {
+      csv: {
+        type: 'object',
+        properties: {
+          rows: { type: 'long' },
+        },
+      },
+      pdf: {
+        type: 'object',
+        properties: {
+          pages: { type: 'long' },
+          cpu: { type: 'double' },
+          cpuInPercentage: { type: 'double' },
+          memory: { type: 'long' },
+          memoryInMegabytes: { type: 'double' },
+        },
+      },
+      png: {
+        type: 'object',
+        properties: {
+          cpu: { type: 'double' },
+          cpuInPercentage: { type: 'double' },
+          memory: { type: 'long' },
+          memoryInMegabytes: { type: 'double' },
+        },
+      },
+    },
+  },
+} as const;

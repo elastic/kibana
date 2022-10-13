@@ -12,26 +12,37 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
 
   describe('index based actions panel on trial license', function () {
-    this.tags(['mlqa']);
+    this.tags(['ml']);
 
     const indexPatternName = 'ft_farequote';
-    const advancedJobWizardDatafeedQuery = `{
-  "bool": {
-    "must": [
+
+    const advancedJobWizardDatafeedQuery = JSON.stringify(
       {
-        "match_all": {}
-      }
-    ]
-  }
-}`; // Note query is not currently passed to the wizard
+        bool: {
+          must: [
+            {
+              match_all: {},
+            },
+          ],
+        },
+      },
+      null,
+      2
+    );
+    // Note query is not currently passed to the wizard
 
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.createIndexPatternIfNeeded(indexPatternName, '@timestamp');
       await ml.testResources.createSavedSearchFarequoteKueryIfNeeded();
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       await ml.securityUI.loginAsMlPowerUser();
+    });
+
+    after(async () => {
+      await ml.testResources.deleteSavedSearches();
+      await ml.testResources.deleteIndexPatternByTitle(indexPatternName);
     });
 
     describe('create advanced job action', function () {

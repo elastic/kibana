@@ -23,7 +23,7 @@ export const useNavigateToPath = () => {
   const location = useLocation();
 
   return useCallback(
-    async (path: string | undefined, preserveSearch = false) => {
+    async (path: string | undefined, preserveSearch: boolean = false) => {
       if (path === undefined) return;
       const modifiedPath = `${path}${preserveSearch === true ? location.search : ''}`;
       /**
@@ -36,6 +36,7 @@ export const useNavigateToPath = () => {
           });
       await navigateToUrl(url);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [location]
   );
 };

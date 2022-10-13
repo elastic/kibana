@@ -9,7 +9,6 @@ import React from 'react';
 
 import '../../../../../../common/mock/match_media';
 import { TestProviders } from '../../../../../../common/mock';
-import { mockBrowserFields } from '../../../../../../common/containers/source/mock';
 import {
   mockEndgameAdminLogon,
   mockEndgameExplicitUserLogon,
@@ -20,11 +19,12 @@ import { useMountAppended } from '../../../../../../common/utils/use_mount_appen
 
 import { EndgameSecurityEventDetails } from './endgame_security_event_details';
 
+jest.mock('../../../../../../common/lib/kibana');
+
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
     ...original,
-    // eslint-disable-next-line react/display-name
     EuiScreenReaderOnly: () => <></>,
   };
 });
@@ -36,7 +36,6 @@ describe('EndgameSecurityEventDetails', () => {
     const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetails
-          browserFields={mockBrowserFields}
           contextId="test-context"
           data={mockEndgameUserLogon}
           timelineId="timeline-id-test"
@@ -52,7 +51,6 @@ describe('EndgameSecurityEventDetails', () => {
     const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetails
-          browserFields={mockBrowserFields}
           contextId="test-context"
           data={mockEndgameAdminLogon}
           timelineId="timeline-id-test"
@@ -68,7 +66,6 @@ describe('EndgameSecurityEventDetails', () => {
     const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetails
-          browserFields={mockBrowserFields}
           contextId="test-context"
           data={mockEndgameExplicitUserLogon}
           timelineId="timeline-id-test"
@@ -84,7 +81,6 @@ describe('EndgameSecurityEventDetails', () => {
     const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetails
-          browserFields={mockBrowserFields}
           contextId="test-context"
           data={mockEndgameUserLogoff}
           timelineId="timeline-id-test"

@@ -4,8 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { chunk } from 'lodash';
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -21,10 +19,16 @@ export type HistogramCharts = Array<{
 
 export function TransformWizardProvider({ getService, getPageObjects }: FtrProviderContext) {
   const aceEditor = getService('aceEditor');
+  const browser = getService('browser');
   const canvasElement = getService('canvasElement');
+  const log = getService('log');
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
   const retry = getService('retry');
+  const find = getService('find');
+  const ml = getService('ml');
+  const toasts = getService('toasts');
+
   const PageObjects = getPageObjects(['discover', 'timePicker']);
 
   return {
@@ -96,78 +100,11 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       await testSubjects.missingOrFail('transformPivotPreviewHistogramButton');
     },
 
-    async parseEuiDataGrid(tableSubj: string) {
-      const table = await testSubjects.find(`~${tableSubj}`);
-      const $ = await table.parseDomContent();
-
-      // find columns to help determine number of rows
-      const columns = $('.euiDataGridHeaderCell__content')
-        .toArray()
-        .map((cell) => $(cell).text());
-
-      // Get the content of each cell and divide them up into rows
-      const cells = $.findTestSubjects('dataGridRowCell')
-        .find('.euiDataGridRowCell__truncate')
-        .toArray()
-        .map((cell) =>
-          $(cell)
-            .text()
-            .trim()
-            .replace(/Row: \d+, Column: \d+:$/g, '')
-        );
-
-      const rows = chunk(cells, columns.length);
-
-      return rows;
-    },
-
-    async assertEuiDataGridColumnValues(
-      tableSubj: string,
-      column: number,
-      expectedColumnValues: string[]
-    ) {
-      await retry.tryForTime(2000, async () => {
-        // get a 2D array of rows and cell values
-        const rows = await this.parseEuiDataGrid(tableSubj);
-
-        // reduce the rows data to an array of unique values in the specified column
-        const uniqueColumnValues = rows
-          .map((row) => row[column])
-          .flat()
-          .filter((v, i, a) => a.indexOf(v) === i);
-
-        uniqueColumnValues.sort();
-
-        // check if the returned unique value matches the supplied filter value
-        expect(uniqueColumnValues).to.eql(
-          expectedColumnValues,
-          `Unique EuiDataGrid column values should be '${expectedColumnValues.join()}' (got ${uniqueColumnValues.join()})`
-        );
-      });
-    },
-
-    async assertEuiDataGridColumnValuesNotEmpty(tableSubj: string, column: number) {
-      await retry.tryForTime(2000, async () => {
-        // get a 2D array of rows and cell values
-        const rows = await this.parseEuiDataGrid(tableSubj);
-
-        // reduce the rows data to an array of unique values in the specified column
-        const uniqueColumnValues = rows
-          .map((row) => row[column])
-          .flat()
-          .filter((v, i, a) => a.indexOf(v) === i);
-
-        uniqueColumnValues.forEach((value) => {
-          // check if the returned unique value is not empty
-          expect(value).to.not.eql('');
-        });
-      });
-    },
-
     async assertIndexPreview(columns: number, expectedNumberOfRows: number) {
-      await retry.tryForTime(2000, async () => {
+      await retry.tryForTime(20 * 1000, async () => {
         // get a 2D array of rows and cell values
-        const rowsData = await this.parseEuiDataGrid('transformIndexPreview');
+        // only parse the first column as this is sufficient to get assert the row count
+        const rowsData = await ml.commonDataGrid.parseEuiDataGrid('transformIndexPreview', 1);
 
         expect(rowsData).to.length(
           expectedNumberOfRows,
@@ -186,19 +123,33 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async assertIndexPreviewColumnValues(column: number, values: string[]) {
-      await this.assertEuiDataGridColumnValues('transformIndexPreview', column, values);
+      await ml.commonDataGrid.assertEuiDataGridColumnValues(
+        'transformIndexPreview',
+        column,
+        values
+      );
     },
 
     async assertIndexPreviewColumnValuesNotEmpty(column: number) {
-      await this.assertEuiDataGridColumnValuesNotEmpty('transformIndexPreview', column);
+      await ml.commonDataGrid.assertEuiDataGridColumnValuesNotEmpty(
+        'transformIndexPreview',
+        column
+      );
     },
 
     async assertPivotPreviewColumnValues(column: number, values: string[]) {
-      await this.assertEuiDataGridColumnValues('transformPivotPreview', column, values);
+      await ml.commonDataGrid.assertEuiDataGridColumnValues(
+        'transformPivotPreview',
+        column,
+        values
+      );
     },
 
     async assertPivotPreviewColumnValuesNotEmpty(column: number) {
-      await this.assertEuiDataGridColumnValuesNotEmpty('transformPivotPreview', column);
+      await ml.commonDataGrid.assertEuiDataGridColumnValuesNotEmpty(
+        'transformPivotPreview',
+        column
+      );
     },
 
     async assertPivotPreviewLoaded() {
@@ -234,6 +185,11 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async assertIndexPreviewHistogramCharts(expectedHistogramCharts: HistogramCharts) {
+      if (process.env.TEST_CLOUD) {
+        log.warning('Not running color assertions in cloud');
+        return;
+      }
+
       // For each chart, get the content of each header cell and assert
       // the legend text and column id and if the chart should be present or not.
       await retry.tryForTime(5000, async () => {
@@ -262,12 +218,18 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
                 `[data-test-subj="mlDataGridChart-${id}-histogram"] .echCanvasRenderer`,
                 sortedExpectedColorStats,
                 undefined,
-                4
+                10
               );
 
               expect(actualColorStats.length).to.eql(
                 sortedExpectedColorStats.length,
-                `Expected and actual color stats for column '${expected.id}' should have the same amount of elements. Expected: ${sortedExpectedColorStats.length} (got ${actualColorStats.length})`
+                `Expected and actual color stats for column '${
+                  expected.id
+                }' should have the same amount of elements. Expected: ${
+                  sortedExpectedColorStats.length
+                } '${JSON.stringify(sortedExpectedColorStats)}' (got ${
+                  actualColorStats.length
+                } '${JSON.stringify(actualColorStats)}')`
               );
               expect(actualColorStats.every((d) => d.withinTolerance)).to.eql(
                 true,
@@ -372,9 +334,9 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     async assertRuntimeMappingsEditorContent(expectedContent: string[]) {
       await this.assertRuntimeMappingsEditorExists();
 
-      const runtimeMappingsEditorString = await aceEditor.getValue(
-        'transformAdvancedRuntimeMappingsEditor'
-      );
+      const wrapper = await testSubjects.find('transformAdvancedRuntimeMappingsEditor');
+      const editor = await wrapper.findByCssSelector('.monaco-editor .view-lines');
+      const runtimeMappingsEditorString = await editor.getVisibleText();
       // Not all lines may be visible in the editor and thus aceEditor may not return all lines.
       // This means we might not get back valid JSON so we only test against the first few lines
       // and see if the string matches.
@@ -611,7 +573,9 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async assertAdvancedPivotEditorContent(expectedValue: string[]) {
-      const advancedEditorString = await aceEditor.getValue('transformAdvancedPivotEditor');
+      const wrapper = await testSubjects.find('transformAdvancedPivotEditor');
+      const editor = await wrapper.findByCssSelector('.monaco-editor .view-lines');
+      const advancedEditorString = await editor.getVisibleText();
       // Not all lines may be visible in the editor and thus aceEditor may not return all lines.
       // This means we might not get back valid JSON so we only test against the first few lines
       // and see if the string matches.
@@ -659,7 +623,10 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async setTransformId(transformId: string) {
-      await testSubjects.setValue('transformIdInput', transformId, { clearWithKeyboard: true });
+      await ml.commonUI.setValueWithChecks('transformIdInput', transformId, {
+        clearWithKeyboard: true,
+        enforceDataTestSubj: true,
+      });
       await this.assertTransformIdValue(transformId);
     },
 
@@ -679,7 +646,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async setTransformDescription(transformDescription: string) {
-      await testSubjects.setValue('transformDescriptionInput', transformDescription, {
+      await ml.commonUI.setValueWithChecks('transformDescriptionInput', transformDescription, {
         clearWithKeyboard: true,
       });
       await this.assertTransformDescriptionValue(transformDescription);
@@ -701,24 +668,45 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async setDestinationIndex(destinationIndex: string) {
-      await testSubjects.setValue('transformDestinationIndexInput', destinationIndex, {
+      await ml.commonUI.setValueWithChecks('transformDestinationIndexInput', destinationIndex, {
         clearWithKeyboard: true,
       });
       await this.assertDestinationIndexValue(destinationIndex);
     },
 
-    async assertCreateIndexPatternSwitchExists() {
-      await testSubjects.existOrFail(`transformCreateIndexPatternSwitch`, { allowHidden: true });
+    async assertCreateDataViewSwitchExists() {
+      await testSubjects.existOrFail(`transformCreateDataViewSwitch`, { allowHidden: true });
     },
 
-    async assertCreateIndexPatternSwitchCheckState(expectedCheckState: boolean) {
+    async assertCreateDataViewSwitchCheckState(expectedCheckState: boolean) {
       const actualCheckState =
-        (await testSubjects.getAttribute('transformCreateIndexPatternSwitch', 'aria-checked')) ===
+        (await testSubjects.getAttribute('transformCreateDataViewSwitch', 'aria-checked')) ===
         'true';
       expect(actualCheckState).to.eql(
         expectedCheckState,
-        `Create index pattern switch check state should be '${expectedCheckState}' (got '${actualCheckState}')`
+        `Create data view switch check state should be '${expectedCheckState}' (got '${actualCheckState}')`
       );
+    },
+
+    async assertDataViewTimeFieldInputExists() {
+      await testSubjects.existOrFail(`transformDataViewTimeFieldSelect`);
+    },
+
+    async assertDataViewTimeFieldValue(expectedValue: string) {
+      const actualValue = await testSubjects.getAttribute(
+        `transformDataViewTimeFieldSelect`,
+        'value'
+      );
+      expect(actualValue).to.eql(
+        expectedValue,
+        `Data view time field should be ${expectedValue}, got ${actualValue}`
+      );
+    },
+
+    async setDataViewTimeField(fieldName: string) {
+      const selectControl = await testSubjects.find('transformDataViewTimeFieldSelect');
+      await selectControl.type(fieldName);
+      await this.assertDataViewTimeFieldValue(fieldName);
     },
 
     async assertContinuousModeSwitchExists() {
@@ -732,6 +720,57 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       expect(actualCheckState).to.eql(
         expectedCheckState,
         `Continuous mode switch check state should be '${expectedCheckState}' (got '${actualCheckState}')`
+      );
+    },
+
+    async assertRetentionPolicySwitchExists() {
+      await testSubjects.existOrFail(`transformRetentionPolicySwitch`, { allowHidden: true });
+    },
+
+    async assertRetentionPolicySwitchCheckState(expectedCheckState: boolean) {
+      const actualCheckState =
+        (await testSubjects.getAttribute('transformRetentionPolicySwitch', 'aria-checked')) ===
+        'true';
+      expect(actualCheckState).to.eql(
+        expectedCheckState,
+        `Retention policy switch check state should be '${expectedCheckState}' (got '${actualCheckState}')`
+      );
+    },
+
+    async assertRetentionPolicyFieldSelectExists() {
+      await testSubjects.existOrFail(`transformRetentionPolicyDateFieldSelect`, {
+        allowHidden: true,
+      });
+    },
+
+    async assertRetentionPolicyFieldSelectValue(expectedValue: string) {
+      await testSubjects.existOrFail(`transformRetentionPolicyDateFieldSelect`, {
+        timeout: 1000,
+      });
+      const actualValue = await testSubjects.getAttribute(
+        'transformRetentionPolicyDateFieldSelect',
+        'value'
+      );
+      expect(actualValue).to.eql(
+        expectedValue,
+        `Retention policy field option value should be '${expectedValue}' (got '${actualValue}')`
+      );
+    },
+
+    async assertRetentionPolicyMaxAgeInputExists() {
+      await testSubjects.existOrFail(`transformRetentionPolicyMaxAgeInput`, {
+        allowHidden: true,
+      });
+    },
+
+    async assertRetentionsPolicyMaxAgeValue(expectedValue: string) {
+      const actualValue = await testSubjects.getAttribute(
+        'transformRetentionPolicyMaxAgeInput',
+        'value'
+      );
+      expect(actualValue).to.eql(
+        expectedValue,
+        `Transform retention policy max age input text should be '${expectedValue}' (got '${actualValue}')`
       );
     },
 
@@ -763,6 +802,72 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       );
     },
 
+    async assertTransformNumFailureRetriesInputExists() {
+      await testSubjects.existOrFail('transformNumFailureRetriesInput');
+      expect(await testSubjects.isDisplayed('transformNumFailureRetriesInput')).to.eql(
+        true,
+        `Expected 'Number of retries failure' input to be displayed`
+      );
+    },
+
+    async assertNumFailureRetriesValue(expectedValue: string) {
+      await this.assertTransformNumFailureRetriesInputExists();
+      const actualValue = await testSubjects.getAttribute(
+        'transformNumFailureRetriesInput',
+        'value'
+      );
+      expect(actualValue).to.eql(
+        expectedValue,
+        `Transform num failure retries text should be '${expectedValue}' (got '${actualValue}')`
+      );
+    },
+
+    async assertTransformNumFailureRetriesErrorMessageExists(expected: boolean) {
+      const row = await testSubjects.find('transformNumFailureRetriesFormRow');
+      const errorElements = await row.findAllByClassName('euiFormErrorText');
+
+      if (expected) {
+        expect(errorElements.length).greaterThan(
+          0,
+          'Expected Transform num failure retries to display error message'
+        );
+      } else {
+        expect(errorElements.length).eql(
+          0,
+          'Expected Transform num failure retries to not display error message'
+        );
+      }
+    },
+
+    async setTransformNumFailureRetriesValue(value: string, expectedResult: 'error' | string) {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.setValue('transformNumFailureRetriesInput', value);
+        if (expectedResult !== 'error') {
+          await this.assertTransformNumFailureRetriesErrorMessageExists(false);
+          await this.assertNumFailureRetriesValue(expectedResult);
+        } else {
+          await this.assertTransformNumFailureRetriesErrorMessageExists(true);
+        }
+      });
+    },
+
+    async assertTransformNumFailureRetriesSummaryValue(expectedValue: string) {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.existOrFail('transformWizardAdvancedSettingsNumFailureRetriesLabel');
+        const row = await testSubjects.find(
+          'transformWizardAdvancedSettingsNumFailureRetriesLabel'
+        );
+        const actualValue = await (
+          await row.findByClassName('euiFormRow__fieldWrapper')
+        ).getVisibleText();
+
+        expect(actualValue).to.eql(
+          expectedValue,
+          `Transform num failure retries summary value should be '${expectedValue}' (got '${actualValue}')`
+        );
+      });
+    },
+
     async assertTransformMaxPageSearchSizeInputExists() {
       await testSubjects.existOrFail('transformMaxPageSearchSizeInput');
       expect(await testSubjects.isDisplayed('transformMaxPageSearchSizeInput')).to.eql(
@@ -780,6 +885,22 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
         expectedValue,
         `Transform maximum page search size input text should be '${expectedValue}' (got '${actualValue}')`
       );
+    },
+
+    async assertAccordionAdvancedSettingsSummaryAccordionExists() {
+      await testSubjects.existOrFail('transformWizardAccordionAdvancedSettingsSummary');
+    },
+
+    // for now we expect this to be used only for opening the accordion
+    async openTransformAdvancedSettingsSummaryAccordion() {
+      await this.assertAccordionAdvancedSettingsSummaryAccordionExists();
+      await find.clickByCssSelector(
+        '[aria-controls="transformWizardAccordionAdvancedSettingsSummary"]'
+      );
+
+      await testSubjects.existOrFail('transformWizardAdvancedSettingsFrequencyLabel');
+      await testSubjects.existOrFail('transformWizardAdvancedSettingsMaxPageSearchSizeLabel');
+      await testSubjects.existOrFail('transformWizardAdvancedSettingsNumFailureRetriesLabel');
     },
 
     async assertCreateAndStartButtonExists() {
@@ -930,6 +1051,34 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
         await this.assertStartButtonEnabled(false);
         await this.assertProgressbarExists();
       });
+    },
+
+    async assertAggregationEntryEditPopoverValid(aggName: string) {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.click(`transformAggregationEntryEditButton_${aggName}`);
+
+        await testSubjects.existOrFail(`transformAggPopoverForm_${aggName}`);
+        const isApplyAggChangeEnabled = await testSubjects.isEnabled(
+          `~transformAggPopoverForm_${aggName} > ~transformApplyAggChanges`
+        );
+
+        expect(isApplyAggChangeEnabled).to.eql(
+          true,
+          'Expected Transform aggregation entry `Apply` to be enabled'
+        );
+        // escape popover
+        await browser.pressKeys(browser.keys.ESCAPE);
+      });
+    },
+
+    async assertErrorToastsNotExist() {
+      const toastCount = await toasts.getToastCount();
+      // Toast element index starts at 1, not 0
+      for (let toastIdx = 1; toastIdx < toastCount + 1; toastIdx++) {
+        const toast = await toasts.getToastElement(toastIdx);
+        const isErrorToast = await toast.elementHasClass('euiToast--danger');
+        expect(isErrorToast).to.eql(false, `Expected toast message to be successful, got error.`);
+      }
     },
   };
 }

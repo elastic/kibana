@@ -100,7 +100,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('create', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.setKibanaTimeZoneToUTC();
     });
 
@@ -110,12 +110,12 @@ export default ({ getService }: FtrProviderContext) => {
 
     for (const testData of testDataList) {
       it(`${testData.testTitle}`, async () => {
-        const { body } = await supertest
+        const { body, status } = await supertest
           .put(`/api/ml/anomaly_detectors/${testData.jobId}`)
           .auth(testData.user, ml.securityCommon.getPasswordForUser(testData.user))
           .set(COMMON_REQUEST_HEADERS)
-          .send(testData.requestBody)
-          .expect(testData.expected.responseCode);
+          .send(testData.requestBody);
+        ml.api.assertResponseStatusCode(testData.expected.responseCode, status, body);
 
         if (body.error === undefined) {
           // Validate the important parts of the response.

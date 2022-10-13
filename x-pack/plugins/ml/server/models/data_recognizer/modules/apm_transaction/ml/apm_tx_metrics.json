@@ -1,0 +1,54 @@
+{
+  "job_type": "anomaly_detector",
+  "groups": [
+    "apm"
+  ],
+  "description": "Detects anomalies in transaction latency, throughput and error percentage for metric data.",
+  "analysis_config": {
+    "bucket_span": "15m",
+    "summary_count_field_name" : "doc_count",
+    "detectors" : [
+      {
+        "detector_description" : "high latency by transaction type for an APM service",
+        "function" : "high_mean",
+        "field_name" : "transaction_latency",
+        "by_field_name" : "transaction.type",
+        "partition_field_name" : "service.name"
+      },
+      {
+        "detector_description" : "transaction throughput for an APM service",
+        "function" : "mean",
+        "field_name" : "transaction_throughput",
+        "by_field_name" : "transaction.type",
+        "partition_field_name" : "service.name"
+      },
+      {
+        "detector_description" : "failed transaction rate for an APM service",
+        "function" : "high_mean",
+        "field_name" : "failed_transaction_rate",
+        "by_field_name" : "transaction.type",
+        "partition_field_name" : "service.name"
+      }
+    ],
+    "influencers" : [
+      "transaction.type",
+      "service.name"
+    ]
+  },
+  "analysis_limits": {
+    "model_memory_limit": "32mb"
+  },
+  "data_description": {
+    "time_field" : "@timestamp",
+    "time_format" : "epoch_ms"
+  },
+  "model_plot_config": {
+    "enabled" : true,
+    "annotations_enabled" : true
+  },
+  "results_index_name" : "custom-apm",
+  "custom_settings": {
+    "created_by": "ml-module-apm-transaction",
+    "managed": true
+  }
+}

@@ -5,35 +5,24 @@
  * 2.0.
  */
 
-import { cryptoFactory } from '../../../lib';
 import { CreateJobFn, CreateJobFnFactory } from '../../../types';
 import { validateUrls } from '../../common';
-import { JobParamsPDF, TaskPayloadPDF } from '../types';
+import { JobParamsPDFDeprecated, TaskPayloadPDF } from '../types';
 
 export const createJobFnFactory: CreateJobFnFactory<
-  CreateJobFn<JobParamsPDF, TaskPayloadPDF>
-> = function createJobFactoryFn(reporting, logger) {
-  const config = reporting.getConfig();
-  const crypto = cryptoFactory(config.get('encryptionKey'));
-
-  return async function createJob(
-    { title, relativeUrls, browserTimezone, layout, objectType },
-    context,
-    req
+  CreateJobFn<JobParamsPDFDeprecated, TaskPayloadPDF>
+> = function createJobFactoryFn() {
+  return async function createJobFn(
+    { relativeUrls, ...jobParams }: JobParamsPDFDeprecated // relativeUrls does not belong in the payload of PDFV1
   ) {
-    const serializedEncryptedHeaders = await crypto.encrypt(req.headers);
-
     validateUrls(relativeUrls);
 
+    // return the payload
     return {
-      headers: serializedEncryptedHeaders,
-      spaceId: reporting.getSpaceId(req, logger),
-      browserTimezone,
+      ...jobParams,
+      isDeprecated: true,
       forceNow: new Date().toISOString(),
-      layout,
-      relativeUrls,
-      title,
-      objectType,
+      objects: relativeUrls.map((u) => ({ relativeUrl: u })),
     };
   };
 };

@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
+import { IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
 import { Spaces } from '../../scenarios';
 import {
   ESTestIndexTool,
@@ -15,14 +16,11 @@ import {
   getEventLog,
 } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { IValidatedEvent } from '../../../../../plugins/event_log/server';
-
-const NANOS_IN_MILLIS = 1000 * 1000;
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const es = getService('legacyEs');
+  const es: Client = getService('es');
   const retry = getService('retry');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
 
@@ -76,8 +74,9 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response.status).to.eql(200);
       expect(response.body).to.be.an('object');
       const searchResult = await esTestIndexTool.search('action:test.index-record', reference);
-      expect(searchResult.hits.total.value).to.eql(1);
-      const indexedRecord = searchResult.hits.hits[0];
+      // @ts-expect-error doesn't handle total: number
+      expect(searchResult.body.hits.total.value).to.eql(1);
+      const indexedRecord = searchResult.body.hits.hits[0];
       expect(indexedRecord._source).to.eql({
         params: {
           reference,
@@ -97,8 +96,10 @@ export default function ({ getService }: FtrProviderContext) {
       await validateEventLog({
         spaceId: Spaces.space1.id,
         actionId: createdAction.id,
+        actionTypeId: 'test.index-record',
         outcome: 'success',
         message: `action executed: test.index-record:${createdAction.id}: My action`,
+        startMessage: `action started: test.index-record:${createdAction.id}: My action`,
       });
     });
 
@@ -130,7 +131,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response.body).to.eql({
         connector_id: createdAction.id,
         status: 'error',
-        message: 'an error occurred while running the action executor',
+        message: 'an error occurred while running the action',
         service_message: `expected failure for ${ES_TEST_INDEX_NAME} ${reference}`,
         retry: false,
       });
@@ -138,9 +139,10 @@ export default function ({ getService }: FtrProviderContext) {
       await validateEventLog({
         spaceId: Spaces.space1.id,
         actionId: createdAction.id,
+        actionTypeId: 'test.failing',
         outcome: 'failure',
         message: `action execution failure: test.failing:${createdAction.id}: failing action`,
-        errorMessage: `an error occurred while running the action executor: expected failure for .kibana-alerting-test-data actions-failure-1:space1`,
+        errorMessage: `an error occurred while running the action: expected failure for .kibana-alerting-test-data actions-failure-1:space1`,
       });
     });
 
@@ -208,15 +210,19 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(response.status).to.eql(200);
       const searchResult = await esTestIndexTool.search('action:test.authorization', reference);
-      expect(searchResult.hits.total.value).to.eql(1);
-      const indexedRecord = searchResult.hits.hits[0];
+      // @ts-expect-error doesn't handle total: number
+      expect(searchResult.body.hits.total.value).to.eql(1);
+      const indexedRecord = searchResult.body.hits.hits[0];
+      // @ts-expect-error _source is not typed
       expect(indexedRecord._source.state).to.eql({
         callClusterSuccess: true,
         callScopedClusterSuccess: true,
         savedObjectsClientSuccess: false,
         savedObjectsClientError: {
+          // @ts-expect-error _source is not typed
           ...indexedRecord._source.state.savedObjectsClientError,
           output: {
+            // @ts-expect-error _source is not typed
             ...indexedRecord._source.state.savedObjectsClientError.output,
             statusCode: 404,
           },
@@ -319,7 +325,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(response.body).to.eql({
           actionId: createdAction.id,
           status: 'error',
-          message: 'an error occurred while running the action executor',
+          message: 'an error occurred while running the action',
           serviceMessage: `expected failure for ${ES_TEST_INDEX_NAME} ${reference}`,
           retry: false,
         });
@@ -330,13 +336,16 @@ export default function ({ getService }: FtrProviderContext) {
   interface ValidateEventLogParams {
     spaceId: string;
     actionId: string;
+    actionTypeId: string;
     outcome: string;
     message: string;
     errorMessage?: string;
+    startMessage?: string;
   }
 
   async function validateEventLog(params: ValidateEventLogParams): Promise<void> {
-    const { spaceId, actionId, outcome, message, errorMessage } = params;
+    const { spaceId, actionId, actionTypeId, outcome, message, startMessage, errorMessage } =
+      params;
 
     const events: IValidatedEvent[] = await retry.try(async () => {
       return await getEventLog({
@@ -345,45 +354,56 @@ export default function ({ getService }: FtrProviderContext) {
         type: 'action',
         id: actionId,
         provider: 'actions',
-        actions: new Map([['execute', { equal: 1 }]]),
+        actions: new Map([
+          ['execute-start', { equal: 1 }],
+          ['execute', { equal: 1 }],
+        ]),
       });
     });
 
-    const event = events[0];
+    const startExecuteEvent = events[0];
+    const executeEvent = events[1];
 
-    const duration = event?.event?.duration;
-    const eventStart = Date.parse(event?.event?.start || 'undefined');
-    const eventEnd = Date.parse(event?.event?.end || 'undefined');
+    const duration = executeEvent?.event?.duration;
+    const executeEventStart = Date.parse(executeEvent?.event?.start || 'undefined');
+    const startExecuteEventStart = Date.parse(startExecuteEvent?.event?.start || 'undefined');
+    const executeEventEnd = Date.parse(executeEvent?.event?.end || 'undefined');
     const dateNow = Date.now();
 
-    expect(typeof duration).to.be('number');
-    expect(eventStart).to.be.ok();
-    expect(eventEnd).to.be.ok();
+    expect(typeof duration).to.be('string');
+    expect(executeEventStart).to.be.ok();
+    expect(startExecuteEventStart).to.equal(executeEventStart);
+    expect(executeEventEnd).to.be.ok();
 
-    const durationDiff = Math.abs(
-      Math.round(duration! / NANOS_IN_MILLIS) - (eventEnd - eventStart)
-    );
+    const durationDiff = Math.abs(nanosToMillis(duration!) - (executeEventEnd - executeEventStart));
 
     // account for rounding errors
     expect(durationDiff < 1).to.equal(true);
-    expect(eventStart <= eventEnd).to.equal(true);
-    expect(eventEnd <= dateNow).to.equal(true);
+    expect(executeEventStart <= executeEventEnd).to.equal(true);
+    expect(executeEventEnd <= dateNow).to.equal(true);
 
-    expect(event?.event?.outcome).to.equal(outcome);
+    expect(executeEvent?.event?.outcome).to.equal(outcome);
 
-    expect(event?.kibana?.saved_objects).to.eql([
+    expect(executeEvent?.kibana?.saved_objects).to.eql([
       {
         rel: 'primary',
         type: 'action',
         id: actionId,
         namespace: 'space1',
+        type_id: actionTypeId,
       },
     ]);
+    expect(startExecuteEvent?.kibana?.saved_objects).to.eql(executeEvent?.kibana?.saved_objects);
 
-    expect(event?.message).to.eql(message);
+    expect(executeEvent?.message).to.eql(message);
+    if (startMessage) {
+      expect(startExecuteEvent?.message).to.eql(startMessage);
+    }
+
+    expect(executeEvent?.kibana?.task).to.eql(undefined);
 
     if (errorMessage) {
-      expect(event?.error?.message).to.eql(errorMessage);
+      expect(executeEvent?.error?.message).to.eql(errorMessage);
     }
   }
 }

@@ -6,18 +6,19 @@
  * Side Public License, v 1.
  */
 
+import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Assign } from '@kbn/utility-types';
-import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
-import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '../';
-import { getParsedValue } from '../utils/get_parsed_value';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import { ExtendedBoundsOutput } from '../../expressions';
+import { AggExpressionType, AggExpressionFunctionArgs, BUCKET_TYPES } from '..';
 
 export const aggHistogramFnName = 'aggHistogram';
 
 type Input = any;
 type AggArgs = AggExpressionFunctionArgs<typeof BUCKET_TYPES.HISTOGRAM>;
 
-type Arguments = Assign<AggArgs, { extended_bounds?: string }>;
+type Arguments = Assign<AggArgs, { extended_bounds?: ExtendedBoundsOutput }>;
 
 type Output = AggExpressionType;
 type FunctionDefinition = ExpressionFunctionDefinition<
@@ -85,6 +86,13 @@ export const aggHistogram = (): FunctionDefinition => ({
         defaultMessage: 'Calculate interval to get approximately this many bars',
       }),
     },
+    autoExtendBounds: {
+      types: ['boolean'],
+      help: i18n.translate('data.search.aggs.buckets.histogram.autoExtendBounds.help', {
+        defaultMessage:
+          'Set to true to extend bounds to the domain of the data. This makes sure each interval bucket within these bounds will create a separate table row',
+      }),
+    },
     has_extended_bounds: {
       types: ['boolean'],
       help: i18n.translate('data.search.aggs.buckets.histogram.hasExtendedBounds.help', {
@@ -92,7 +100,7 @@ export const aggHistogram = (): FunctionDefinition => ({
       }),
     },
     extended_bounds: {
-      types: ['string'],
+      types: ['extended_bounds'],
       help: i18n.translate('data.search.aggs.buckets.histogram.extendedBounds.help', {
         defaultMessage:
           'With extended_bounds setting, you now can "force" the histogram aggregation to start building buckets on a specific min value and also keep on building buckets up to a max value ',
@@ -111,20 +119,18 @@ export const aggHistogram = (): FunctionDefinition => ({
       }),
     },
   },
-  fn: (input, args) => {
-    const { id, enabled, schema, ...rest } = args;
-
+  fn: (input, { id, enabled, schema, extended_bounds: extendedBounds, ...params }) => {
     return {
       type: 'agg_type',
       value: {
         id,
         enabled,
         schema,
-        type: BUCKET_TYPES.HISTOGRAM,
         params: {
-          ...rest,
-          extended_bounds: getParsedValue(args, 'extended_bounds'),
+          ...params,
+          extended_bounds: extendedBounds && omit(extendedBounds, 'type'),
         },
+        type: BUCKET_TYPES.HISTOGRAM,
       },
     };
   },

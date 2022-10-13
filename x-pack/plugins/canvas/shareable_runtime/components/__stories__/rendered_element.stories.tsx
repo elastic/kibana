@@ -7,9 +7,9 @@
 
 import { storiesOf } from '@storybook/react';
 import React from 'react';
+import { imageFunction } from '@kbn/expression-image-plugin/__fixtures__';
 import { ExampleContext } from '../../test/context_example';
 
-import { image } from '../../../canvas_plugin_src/renderers/image';
 import { sharedWorkpads } from '../../test';
 import { RenderedElement, RenderedElementComponent } from '../rendered_element';
 
@@ -30,7 +30,7 @@ storiesOf('shareables/RenderedElement', module)
     <ExampleContext style={{ height: 100, width: 100 }}>
       <RenderedElementComponent
         index={0}
-        fn={image()}
+        fn={imageFunction()}
         element={{
           id: '123',
           position: {

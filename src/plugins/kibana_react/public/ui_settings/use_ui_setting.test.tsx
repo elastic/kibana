@@ -13,11 +13,11 @@ import { useUiSetting$ } from './use_ui_setting';
 import { createKibanaReactContext } from '../context';
 import { KibanaServices } from '../context/types';
 import { Subject } from 'rxjs';
-import { coreMock } from '../../../../core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import useObservable from 'react-use/lib/useObservable';
 
 jest.mock('react-use/lib/useObservable');
-const useObservableSpy = (useObservable as any) as jest.SpyInstance;
+const useObservableSpy = useObservable as any as jest.SpyInstance;
 useObservableSpy.mockImplementation((observable, def) => def);
 
 const mock = (): [KibanaServices, Subject<any>] => {

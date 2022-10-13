@@ -7,7 +7,7 @@
 
 import React, { FC, useCallback, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlyout,
   EuiFlyoutFooter,
@@ -49,6 +49,7 @@ export const EditModelSnapshotFlyout: FC<Props> = ({ snapshot, job, closeFlyout 
 
   useEffect(() => {
     setIsCurrentSnapshot(snapshot.snapshot_id === job.model_snapshot_id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [snapshot]);
 
   const updateSnapshot = useCallback(async () => {
@@ -65,6 +66,7 @@ export const EditModelSnapshotFlyout: FC<Props> = ({ snapshot, job, closeFlyout 
         }),
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [retain, description, snapshot]);
 
   const deleteSnapshot = useCallback(async () => {
@@ -79,6 +81,7 @@ export const EditModelSnapshotFlyout: FC<Props> = ({ snapshot, job, closeFlyout 
         }),
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [snapshot]);
 
   function closeWithReload() {

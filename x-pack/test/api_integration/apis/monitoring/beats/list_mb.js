@@ -6,25 +6,27 @@
  */
 
 import expect from '@kbn/expect';
+import { getLifecycleMethods } from '../data_stream';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
 
   describe('list mb', () => {
+    const { setup, tearDown } = getLifecycleMethods(getService);
     describe('with restarted beat instance', () => {
-      const archive = 'monitoring/beats_with_restarted_instance_mb';
+      const archive =
+        'x-pack/test/functional/es_archives/monitoring/beats_with_restarted_instance_mb';
       const timeRange = {
         min: '2018-02-09T20:49:00Z',
         max: '2018-02-09T21:50:00Z',
       };
 
-      before('load clusters archive', () => {
-        return esArchiver.load(archive);
+      before('load archive', () => {
+        return setup(archive);
       });
 
-      after('unload clusters archive', () => {
-        return esArchiver.unload(archive);
+      after('unload archive', () => {
+        return tearDown();
       });
 
       it('should load multiple clusters', async () => {

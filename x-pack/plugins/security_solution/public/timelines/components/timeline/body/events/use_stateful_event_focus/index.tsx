@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, useMemo } from 'react';
+import type React from 'react';
+import { useCallback, useState, useMemo } from 'react';
 
+import type { OnColumnFocused } from '@kbn/timelines-plugin/public';
 import {
   isArrowDownOrArrowUp,
   isArrowUp,
   isEscape,
   focusColumn,
-  OnColumnFocused,
-} from '../../../../../../common/components/accessibility/helpers';
+} from '@kbn/timelines-plugin/public';
 
 type FocusOwnership = 'not-owned' | 'owned';
 
@@ -90,12 +91,10 @@ export const useStatefulEventFocus = ({
     ]
   );
 
-  const memoizedReturn = useMemo(() => ({ focusOwnership, onFocus, onOutsideClick, onKeyDown }), [
-    focusOwnership,
-    onFocus,
-    onKeyDown,
-    onOutsideClick,
-  ]);
+  const memoizedReturn = useMemo(
+    () => ({ focusOwnership, onFocus, onOutsideClick, onKeyDown }),
+    [focusOwnership, onFocus, onKeyDown, onOutsideClick]
+  );
 
   return memoizedReturn;
 };

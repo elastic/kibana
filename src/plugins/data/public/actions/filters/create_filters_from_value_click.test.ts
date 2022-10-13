@@ -6,18 +6,12 @@
  * Side Public License, v 1.
  */
 
-import {
-  fieldFormats,
-  FieldFormatsGetConfigFn,
-  esFilters,
-  IndexPatternsContract,
-} from '../../../public';
-import { dataPluginMock } from '../../../public/mocks';
-import { setIndexPatterns, setSearchService } from '../../../public/services';
-import {
-  createFiltersFromValueClickAction,
-  ValueClickDataContext,
-} from './create_filters_from_value_click';
+import { DataViewsContract } from '@kbn/data-views-plugin/common';
+import { dataPluginMock } from '../../mocks';
+import { setIndexPatterns, setSearchService } from '../../services';
+import { createFiltersFromValueClickAction } from './create_filters_from_value_click';
+import { FieldFormatsGetConfigFn, BytesFormat } from '@kbn/field-formats-plugin/common';
+import { RangeFilter } from '@kbn/es-query';
 
 const mockField = {
   name: 'bytes',
@@ -25,7 +19,7 @@ const mockField = {
 };
 
 describe('createFiltersFromValueClick', () => {
-  let dataPoints: ValueClickDataContext['data'];
+  let dataPoints: Parameters<typeof createFiltersFromValueClickAction>[0]['data'];
 
   beforeEach(() => {
     dataPoints = [
@@ -64,7 +58,7 @@ describe('createFiltersFromValueClick', () => {
 
     const dataStart = dataPluginMock.createStartContract();
     setSearchService(dataStart.search);
-    setIndexPatterns(({
+    setIndexPatterns({
       ...dataStart.indexPatterns,
       get: async () => ({
         id: 'logstash-*',
@@ -72,10 +66,9 @@ describe('createFiltersFromValueClick', () => {
           getByName: () => mockField,
           filter: () => [mockField],
         },
-        getFormatterForField: () =>
-          new fieldFormats.BytesFormat({}, (() => {}) as FieldFormatsGetConfigFn),
+        getFormatterForField: () => new BytesFormat({}, (() => {}) as FieldFormatsGetConfigFn),
       }),
-    } as unknown) as IndexPatternsContract);
+    } as unknown as DataViewsContract);
   });
 
   test('ignores event when value for rows is not provided', async () => {
@@ -90,7 +83,7 @@ describe('createFiltersFromValueClick', () => {
     const filters = await createFiltersFromValueClickAction({ data: dataPoints });
 
     expect(filters.length).toEqual(1);
-    expect(filters[0].query.match_phrase.bytes).toEqual('2048');
+    expect(filters[0].query?.match_phrase?.bytes).toEqual('2048');
   });
 
   test('handles an event when aggregations type is not terms', async () => {
@@ -98,11 +91,15 @@ describe('createFiltersFromValueClick', () => {
 
     expect(filters.length).toEqual(1);
 
-    const [rangeFilter] = filters;
+    const [rangeFilter] = filters as RangeFilter[];
+    expect(rangeFilter.query.range.bytes.gte).toEqual(2048);
+    expect(rangeFilter.query.range.bytes.lt).toEqual(2078);
+  });
 
-    if (esFilters.isRangeFilter(rangeFilter)) {
-      expect(rangeFilter.range.bytes.gte).toEqual(2048);
-      expect(rangeFilter.range.bytes.lt).toEqual(2078);
-    }
+  test('handles non-unique filters', async () => {
+    const [point] = dataPoints;
+    const filters = await createFiltersFromValueClickAction({ data: [point, point] });
+
+    expect(filters.length).toEqual(1);
   });
 });

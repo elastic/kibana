@@ -8,38 +8,31 @@
 import { schema } from '@kbn/config-schema';
 
 import { RouteDependencies } from '../../../types';
-import { addBasePath } from '../index';
+import { addBasePath } from '..';
 
 const bodySchema = schema.object({
   indices: schema.arrayOf(schema.string()),
 });
 
-export function registerRefreshRoute({ router, license, lib }: RouteDependencies) {
+export function registerRefreshRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.post(
     { path: addBasePath('/indices/refresh'), validate: { body: bodySchema } },
-    license.guardApiRoute(async (ctx, req, res) => {
-      const body = req.body as typeof bodySchema.type;
-      const { indices = [] } = body;
+    async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const { indices = [] } = request.body as typeof bodySchema.type;
 
       const params = {
-        expandWildcards: 'none',
+        expand_wildcards: 'none' as const,
         format: 'json',
         index: indices,
       };
 
       try {
-        await ctx.core.elasticsearch.legacy.client.callAsCurrentUser('indices.refresh', params);
-        return res.ok();
-      } catch (e) {
-        if (lib.isEsError(e)) {
-          return res.customError({
-            statusCode: e.statusCode,
-            body: e,
-          });
-        }
-        // Case: default
-        throw e;
+        await client.asCurrentUser.indices.refresh(params);
+        return response.ok();
+      } catch (error) {
+        return handleEsError({ error, response });
       }
-    })
+    }
   );
 }

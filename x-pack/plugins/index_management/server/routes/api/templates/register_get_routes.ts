@@ -15,33 +15,38 @@ import {
 } from '../../../../common/lib';
 import { getCloudManagedTemplatePrefix } from '../../../lib/get_managed_templates';
 import { RouteDependencies } from '../../../types';
-import { addBasePath } from '../index';
+import { addBasePath } from '..';
 
-export function registerGetAllRoute({ router, license }: RouteDependencies) {
+export function registerGetAllRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.get(
     { path: addBasePath('/index_templates'), validate: false },
-    license.guardApiRoute(async (ctx, req, res) => {
-      const { callAsCurrentUser } = ctx.dataManagement!.client;
-      const cloudManagedTemplatePrefix = await getCloudManagedTemplatePrefix(callAsCurrentUser);
+    async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
 
-      const legacyTemplatesEs = await callAsCurrentUser('indices.getTemplate');
-      const { index_templates: templatesEs } = await callAsCurrentUser(
-        'dataManagement.getComposableIndexTemplates'
-      );
+      try {
+        const cloudManagedTemplatePrefix = await getCloudManagedTemplatePrefix(client);
 
-      const legacyTemplates = deserializeLegacyTemplateList(
-        legacyTemplatesEs,
-        cloudManagedTemplatePrefix
-      );
-      const templates = deserializeTemplateList(templatesEs, cloudManagedTemplatePrefix);
+        const legacyTemplatesEs = await client.asCurrentUser.indices.getTemplate();
+        const { index_templates: templatesEs } =
+          await client.asCurrentUser.indices.getIndexTemplate();
 
-      const body = {
-        templates,
-        legacyTemplates,
-      };
+        const legacyTemplates = deserializeLegacyTemplateList(
+          legacyTemplatesEs,
+          cloudManagedTemplatePrefix
+        );
+        // @ts-expect-error TemplateSerialized.index_patterns not compatible with IndicesIndexTemplate.index_patterns
+        const templates = deserializeTemplateList(templatesEs, cloudManagedTemplatePrefix);
 
-      return res.ok({ body });
-    })
+        const body = {
+          templates,
+          legacyTemplates,
+        };
+
+        return response.ok({ body });
+      } catch (error) {
+        return handleEsError({ error, response });
+      }
+    }
   );
 }
 
@@ -54,26 +59,27 @@ const querySchema = schema.object({
   legacy: schema.maybe(schema.oneOf([schema.literal('true'), schema.literal('false')])),
 });
 
-export function registerGetOneRoute({ router, license, lib }: RouteDependencies) {
+export function registerGetOneRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.get(
     {
       path: addBasePath('/index_templates/{name}'),
       validate: { params: paramsSchema, query: querySchema },
     },
-    license.guardApiRoute(async (ctx, req, res) => {
-      const { name } = req.params as TypeOf<typeof paramsSchema>;
-      const { callAsCurrentUser } = ctx.dataManagement!.client;
-
-      const isLegacy = (req.query as TypeOf<typeof querySchema>).legacy === 'true';
+    async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const { name } = request.params as TypeOf<typeof paramsSchema>;
+      const isLegacy = (request.query as TypeOf<typeof querySchema>).legacy === 'true';
 
       try {
-        const cloudManagedTemplatePrefix = await getCloudManagedTemplatePrefix(callAsCurrentUser);
+        const cloudManagedTemplatePrefix = await getCloudManagedTemplatePrefix(client);
 
         if (isLegacy) {
-          const indexTemplateByName = await callAsCurrentUser('indices.getTemplate', { name });
+          const indexTemplateByName = await client.asCurrentUser.indices.getTemplate({
+            name,
+          });
 
           if (indexTemplateByName[name]) {
-            return res.ok({
+            return response.ok({
               body: deserializeLegacyTemplate(
                 { ...indexTemplateByName[name], name },
                 cloudManagedTemplatePrefix
@@ -81,13 +87,13 @@ export function registerGetOneRoute({ router, license, lib }: RouteDependencies)
             });
           }
         } else {
-          const {
-            index_templates: indexTemplates,
-          } = await callAsCurrentUser('dataManagement.getComposableIndexTemplate', { name });
+          const { index_templates: indexTemplates } =
+            await client.asCurrentUser.indices.getIndexTemplate({ name });
 
           if (indexTemplates.length > 0) {
-            return res.ok({
+            return response.ok({
               body: deserializeTemplate(
+                // @ts-expect-error TemplateSerialized.index_patterns not compatible with IndicesIndexTemplate.index_patterns
                 { ...indexTemplates[0].index_template, name },
                 cloudManagedTemplatePrefix
               ),
@@ -95,17 +101,10 @@ export function registerGetOneRoute({ router, license, lib }: RouteDependencies)
           }
         }
 
-        return res.notFound();
-      } catch (e) {
-        if (lib.isEsError(e)) {
-          return res.customError({
-            statusCode: e.statusCode,
-            body: e,
-          });
-        }
-        // Case: default
-        throw e;
+        return response.notFound();
+      } catch (error) {
+        return handleEsError({ error, response });
       }
-    })
+    }
   );
 }

@@ -15,7 +15,7 @@ import {
 } from '../embeddables';
 import { PanelState } from '../../../common/types';
 
-export { PanelState };
+export type { PanelState };
 
 export interface ContainerOutput extends EmbeddableOutput {
   embeddableLoaded: { [key: string]: boolean };
@@ -26,6 +26,17 @@ export interface ContainerInput<PanelExplicitInput = {}> extends EmbeddableInput
   panels: {
     [key: string]: PanelState<PanelExplicitInput & EmbeddableInput & { id: string }>;
   };
+}
+
+export interface EmbeddableContainerSettings {
+  /**
+   * If true, the container will wait for each embeddable to load after creation before loading the next embeddable.
+   */
+  initializeSequentially?: boolean;
+  /**
+   * Initialise children in the order specified. If an ID does not match it will be skipped and if a child is not included it will be initialized in the default order after the list of provided IDs.
+   */
+  childIdInitializeOrder?: string[];
 }
 
 export interface IContainer<
@@ -49,7 +60,7 @@ export interface IContainer<
   getInputForChild<EEI extends EmbeddableInput>(id: string): EEI;
 
   /**
-   * Changes the input for a given child. Note, this will override any inherited state taken from
+   * Changes the input for a given child. Note, this will override all inherited state taken from
    * the container itself.
    * @param id
    * @param changes
@@ -61,6 +72,13 @@ export interface IContainer<
    * @param id
    */
   getChild<E extends Embeddable<EmbeddableInput> = Embeddable<EmbeddableInput>>(id: string): E;
+
+  /**
+   * Embeddables which have deferEmbeddableLoad set to true need to manually call setChildLoaded
+   * on their parent container to communicate when they have finished loading.
+   * @param embeddable - the embeddable to set
+   */
+  setChildLoaded<E extends IEmbeddable = IEmbeddable>(embeddable: E): void;
 
   /**
    * Removes the embeddable with the given id.
@@ -80,4 +98,14 @@ export interface IContainer<
     type: string,
     explicitInput: Partial<EEI>
   ): Promise<E | ErrorEmbeddable>;
+
+  replaceEmbeddable<
+    EEI extends EmbeddableInput = EmbeddableInput,
+    EEO extends EmbeddableOutput = EmbeddableOutput,
+    E extends Embeddable<EEI, EEO> = Embeddable<EEI, EEO>
+  >(
+    id: string,
+    newExplicitInput: Partial<EEI>,
+    newType?: string
+  ): void;
 }

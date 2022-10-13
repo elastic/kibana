@@ -24,12 +24,12 @@ export function mongodbLogsSpecProvider(context: TutorialContext): TutorialSchem
   return {
     id: 'mongodbLogs',
     name: i18n.translate('home.tutorials.mongodbLogs.nameTitle', {
-      defaultMessage: 'MongoDB logs',
+      defaultMessage: 'MongoDB Logs',
     }),
     moduleName,
     category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('home.tutorials.mongodbLogs.shortDescription', {
-      defaultMessage: 'Collect MongoDB logs.',
+      defaultMessage: 'Collect and parse logs from MongoDB servers with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.mongodbLogs.longDescription', {
       defaultMessage:
@@ -55,9 +55,10 @@ export function mongodbLogsSpecProvider(context: TutorialContext): TutorialSchem
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/mongodb_logs/screenshot.png',
+    previewImagePath: '/plugins/home/assets/mongodb_logs/screenshot.webp',
     onPrem: onPremInstructions(moduleName, platforms, context),
-    elasticCloud: cloudInstructions(moduleName, platforms),
-    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    elasticCloud: cloudInstructions(moduleName, platforms, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
+    integrationBrowserCategories: ['datastore'],
   };
 }

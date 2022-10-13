@@ -14,8 +14,8 @@ import {
   SearchableSnapshotField,
   IndexPriorityField,
   ReplicasField,
-  FreezeField,
   ReadonlyField,
+  DownsampleField,
 } from '../shared_fields';
 
 import { Phase } from '../phase';
@@ -30,17 +30,24 @@ const i18nTexts = {
 };
 
 export const ColdPhase: FunctionComponent = () => {
-  const { isUsingSearchableSnapshotInHotPhase } = useConfiguration();
+  const {
+    isUsingSearchableSnapshotInHotPhase,
+    isUsingDownsampleInHotPhase,
+    isUsingDownsampleInWarmPhase,
+    isUsingDownsampleInColdPhase,
+  } = useConfiguration();
 
   return (
     <Phase phase="cold" topLevelSettings={<SearchableSnapshotField phase="cold" />}>
       <ReplicasField phase="cold" />
 
-      {/* Freeze section */}
-      {!isUsingSearchableSnapshotInHotPhase && <FreezeField phase="cold" />}
+      {!isUsingSearchableSnapshotInHotPhase && <DownsampleField phase="cold" />}
 
       {/* Readonly section */}
-      {!isUsingSearchableSnapshotInHotPhase && <ReadonlyField phase="cold" />}
+      {!isUsingSearchableSnapshotInHotPhase &&
+        !isUsingDownsampleInHotPhase &&
+        !isUsingDownsampleInWarmPhase &&
+        !isUsingDownsampleInColdPhase && <ReadonlyField phase="cold" />}
 
       {/* Data tier allocation section */}
       <DataTierAllocationField

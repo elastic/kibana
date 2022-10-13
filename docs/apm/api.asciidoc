@@ -10,7 +10,8 @@ Some APM app features are provided via a REST API:
 
 * <<agent-config-api>>
 * <<apm-annotation-api>>
-* <<kibana-api,Kibana API>>
+* <<rum-sourcemap-api>>
+* <<agent-key-api>>
 
 [float]
 [[apm-api-example]]
@@ -70,7 +71,15 @@ curl -X POST \
     }'
 ----
 
+[float]
+[[kibana-api]]
+=== Kibana API
+
+In addition to the APM specific API endpoints, Kibana provides its own <<api,REST API>>
+which you can use to automate certain aspects of configuring and deploying Kibana.
+
 ////
+*******************************************************
 *******************************************************
 ////
 
@@ -202,10 +211,8 @@ DELETE /api/apm/settings/agent-configuration
 *******************************************************
 ////
 
-
 [[apm-list-config]]
 ==== List configuration
-
 
 [[apm-list-config-req]]
 ===== Request
@@ -273,7 +280,6 @@ GET  /api/apm/settings/agent-configuration
 ////
 *******************************************************
 ////
-
 
 [[apm-search-config]]
 ==== Search configuration
@@ -472,84 +478,339 @@ curl -X POST \
 
 ////
 *******************************************************
+*******************************************************
 ////
 
-[[kibana-api]]
-=== Kibana API
+[role="xpack"]
+[[rum-sourcemap-api]]
+=== RUM source map API
 
-In addition to the APM specific API endpoints, Kibana provides its own <<api,REST API>>
-which you can use to automate certain aspects of configuring and deploying Kibana.
-An example is below.
+IMPORTANT: This endpoint is only compatible with the
+{apm-guide-ref}/index.html[APM integration for Elastic Agent].
 
-[[api-create-apm-index-pattern]]
-==== Customize the APM index pattern
+A source map allows minified files to be mapped back to original source code --
+allowing you to maintain the speed advantage of minified code,
+without losing the ability to quickly and easily debug your application.
 
-As an alternative to updating <<apm-settings-in-kibana,`apm_oss.indexPattern`>> in your `kibana.yml` configuration file,
-you can use Kibana's <<saved-objects-api-update,update object API>> to update the default APM index pattern on the fly.
+For best results, uploading source maps should become a part of your deployment procedure,
+and not something you only do when you see unhelpful errors.
+That’s because uploading source maps after errors happen won’t make old errors magically readable --
+errors must occur again for source mapping to occur.
 
-The following example sets the default APM app index pattern to `some-other-pattern-*`:
+The following APIs are available:
 
-[source,sh]
-----
-curl -X PUT "localhost:5601/api/saved_objects/index-pattern/apm_static_index_pattern_id" \ <1>
+* <<rum-sourcemap-post>>
+* <<rum-sourcemap-get>>
+* <<rum-sourcemap-delete>>
+
+[float]
+[[use-sourcemap-api]]
+==== How to use APM APIs
+
+.Expand for required headers, privileges, and usage details
+[%collapsible%closed]
+======
+include::api.asciidoc[tag=using-the-APIs]
+======
+
+////
+*******************************************************
+////
+
+[[rum-sourcemap-post]]
+==== Create or update source map
+
+Create or update a source map for a specific service and version.
+
+[[rum-sourcemap-post-privs]]
+===== Privileges
+
+The user accessing this endpoint requires `All` Kibana privileges for the {beat_kib_app} feature.
+For more information, see <<kibana-privileges>>.
+
+[[apm-sourcemap-post-req]]
+===== Request
+
+`POST /api/apm/sourcemaps`
+
+[role="child_attributes"]
+[[apm-sourcemap-post-req-body]]
+===== Request body
+
+`service_name`::
+(required, string) The name of the service that the service map should apply to.
+
+`service_version`::
+(required, string) The version of the service that the service map should apply to.
+
+`bundle_filepath`::
+(required, string) The absolute path of the final bundle as used in the web application.
+
+`sourcemap`::
+(required, string or file upload) The source map. It must follow the
+https://docs.google.com/document/d/1U1RGAehQwRypUTovF1KRlpiOFze0b-_2gc6fAH0KY0k[source map revision 3 proposal].
+
+[[apm-sourcemap-post-example]]
+===== Examples
+
+The following example uploads a source map for a service named `foo` and a service version of `1.0.0`:
+
+[source,curl]
+--------------------------------------------------
+curl -X POST "http://localhost:5601/api/apm/sourcemaps" \
+-H 'Content-Type: multipart/form-data' \
+-H 'kbn-xsrf: true' \
+-H 'Authorization: ApiKey ${YOUR_API_KEY}' \
+-F 'service_name="foo"' \
+-F 'service_version="1.0.0"' \
+-F 'bundle_filepath="/test/e2e/general-usecase/bundle.js.map"' \
+-F 'sourcemap="{\"version\":3,\"file\":\"static/js/main.chunk.js\",\"sources\":[\"fleet-source-map-client/src/index.css\",\"fleet-source-map-client/src/App.js\",\"webpack:///./src/index.css?bb0a\",\"fleet-source-map-client/src/index.js\",\"fleet-source-map-client/src/reportWebVitals.js\"],\"sourcesContent\":[\"content\"],\"mappings\":\"mapping\",\"sourceRoot\":\"\"}"' <1>
+--------------------------------------------------
+<1> Alternatively, upload the source map as a file with `-F 'sourcemap=@path/to/source_map/bundle.js.map'`
+
+[[apm-sourcemap-post-body]]
+===== Response body
+
+[source,js]
+--------------------------------------------------
+{
+  "type": "sourcemap",
+  "identifier": "foo-1.0.0",
+  "relative_url": "/api/fleet/artifacts/foo-1.0.0/644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456",
+  "body": "eJyFkL1OwzAUhd/Fc+MbYMuCEBIbHRjKgBgc96R16tiWr1OQqr47NwqJxEK3q/PzWccXxchnZ7E1A1SjuhjVZtF2yOxiEPlO17oWox3D3uPFeSRTjmJQARfCPeiAgGx8NTKsYdAc1T3rwaSJGcds8Sp3c1HnhfywUZ3QhMTFFGepZxqMC9oex3CS9tpk1XyozgOlmoVKuJX1DqEQZ0su7PGtLU+V/3JPKc3cL7TJ2FNDRPov4bFta3MDM4f7W69lpJjLO9qdK8bzVPhcJz3HUCQ4LbO/p5hCSC4cZPByrp/wFqOklbpefwAhzpqI",
+  "created": "2021-07-09T20:47:44.812Z",
+  "id": "apm:foo-1.0.0-644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456",
+  "compressionAlgorithm": "zlib",
+  "decodedSha256": "644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456",
+  "decodedSize": 441,
+  "encodedSha256": "024c72749c3e3dd411b103f7040ae62633558608f480bce4b108cf5b2275bd24",
+  "encodedSize": 237,
+  "encryptionAlgorithm": "none",
+  "packageName": "apm"
+}
+--------------------------------------------------
+
+////
+*******************************************************
+////
+
+[[rum-sourcemap-get]]
+==== Get source maps
+
+Returns an array of Fleet artifacts, including source map uploads.
+
+[[rum-sourcemap-get-privs]]
+===== Privileges
+
+The user accessing this endpoint requires `Read` or `All` Kibana privileges for the {beat_kib_app} feature.
+For more information, see <<kibana-privileges>>.
+
+[[apm-sourcemap-get-req]]
+===== Request
+
+`GET /api/apm/sourcemaps`
+
+[[apm-sourcemap-get-example]]
+===== Example
+
+The following example requests all uploaded source maps:
+
+[source,curl]
+--------------------------------------------------
+curl -X GET "http://localhost:5601/api/apm/sourcemaps" \
 -H 'Content-Type: application/json' \
 -H 'kbn-xsrf: true' \
--H 'Authorization: Basic ${YOUR_AUTH_TOKEN}' \
--d' {
-      "attributes": {
-        "title": "some-other-pattern-*", <2>
-      }
-    }'
-----
-<1> `apm_static_index_pattern_id` is the internal, hard-coded ID of the APM index pattern.
-This value should not be changed
-<2> Your custom index pattern matcher.
+-H 'Authorization: ApiKey ${YOUR_API_KEY}'
+--------------------------------------------------
 
-The API returns the following:
+[[apm-sourcemap-get-body]]
+===== Response body
 
-[source,json]
-----
+[source,js]
+--------------------------------------------------
 {
-   "id":"apm_static_index_pattern_id",
-   "type":"index-pattern",
-   "updated_at":"2020-07-06T22:55:59.555Z",
-   "version":"WzYsMV0=",
-   "attributes":{
-      "title":"some-other-pattern-*"
-   }
+  "artifacts": [
+    {
+      "type": "sourcemap",
+      "identifier": "foo-1.0.0",
+      "relative_url": "/api/fleet/artifacts/foo-1.0.0/644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456",
+      "body": {
+        "serviceName": "foo",
+        "serviceVersion": "1.0.0",
+        "bundleFilepath": "/test/e2e/general-usecase/bundle.js.map",
+        "sourceMap": {
+          "version": 3,
+          "file": "static/js/main.chunk.js",
+          "sources": [
+            "fleet-source-map-client/src/index.css",
+            "fleet-source-map-client/src/App.js",
+            "webpack:///./src/index.css?bb0a",
+            "fleet-source-map-client/src/index.js",
+            "fleet-source-map-client/src/reportWebVitals.js"
+          ],
+          "sourcesContent": [
+            "content"
+          ],
+          "mappings": "mapping",
+          "sourceRoot": ""
+        }
+      },
+      "created": "2021-07-09T20:47:44.812Z",
+      "id": "apm:foo-1.0.0-644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456",
+      "compressionAlgorithm": "zlib",
+      "decodedSha256": "644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456",
+      "decodedSize": 441,
+      "encodedSha256": "024c72749c3e3dd411b103f7040ae62633558608f480bce4b108cf5b2275bd24",
+      "encodedSize": 237,
+      "encryptionAlgorithm": "none",
+      "packageName": "apm"
+    }
+  ]
 }
-----
+--------------------------------------------------
 
-To view the new APM app index pattern, use the <<saved-objects-api-get,GET object API>>:
+////
+*******************************************************
+////
 
-[source,sh]
-----
-curl -X GET "localhost:5601/api/saved_objects/index-pattern/apm_static_index_pattern_id" \ <1>
+[[rum-sourcemap-delete]]
+==== Delete source map
+
+Delete a previously uploaded source map.
+
+[[rum-sourcemap-delete-privs]]
+===== Privileges
+
+The user accessing this endpoint requires `All` Kibana privileges for the {beat_kib_app} feature.
+For more information, see <<kibana-privileges>>.
+
+[[apm-sourcemap-delete-req]]
+===== Request
+
+`DELETE /api/apm/sourcemaps/:id`
+
+[[apm-sourcemap-delete-example]]
+===== Example
+
+The following example deletes a source map with an id of `apm:foo-1.0.0-644fd5a9`:
+
+[source,curl]
+--------------------------------------------------
+curl -X DELETE "http://localhost:5601/api/apm/sourcemaps/apm:foo-1.0.0-644fd5a9" \
+-H 'Content-Type: application/json' \
 -H 'kbn-xsrf: true' \
--H 'Authorization: Basic ${YOUR_AUTH_TOKEN}'
-----
-<1> `apm_static_index_pattern_id` is the internal, hard-coded ID of the APM index pattern.
+-H 'Authorization: ApiKey ${YOUR_API_KEY}'
+--------------------------------------------------
 
-The API returns the following:
+[[apm-sourcemap-delete-body]]
+===== Response body
 
-[source,json]
-----
+[source,js]
+--------------------------------------------------
+{}
+--------------------------------------------------
+
+////
+*******************************************************
+*******************************************************
+////
+
+[role="xpack"]
+[[agent-key-api]]
+=== APM agent Key API
+
+The Agent Key API allows you to configure agent keys to authorize requests from APM agents to the APM Server.
+
+The following Agent key APIs are available:
+
+* <<apm-create-agent-key>> to create an agent key
+
+[float]
+[[use-agent-key-api]]
+==== How to use APM APIs
+
+.Expand for required headers, privileges, and usage details
+[%collapsible%closed]
+======
+include::api.asciidoc[tag=using-the-APIs]
+======
+
+////
+*******************************************************
+////
+
+[[apm-create-agent-key]]
+==== Create agent key
+
+Create an APM agent API key. Specify API key privileges in the request body at creation time.
+
+[[apm-create-agent-key-privileges]]
+===== Privileges
+
+The user creating an APM agent API key must have at least the `manage_own_api_key` cluster privilege
+and the APM application-level privileges that it wishes to grant.
+
+====== Example role
+
+The example below uses the Kibana <<role-management-api,role management API>> to create a role named `apm_agent_key_user`.
+Create and assign this role to a user that wishes to create APM agent API keys.
+
+[source,js]
+--------------------------------------------------
+POST /_security/role/apm_agent_key_user
 {
-  "id":"apm_static_index_pattern_id",
-  "type":"index-pattern",
-  "updated_at":"2020-07-06T22:55:59.555Z",
-  "version":"WzYsMV0=",
-  "attributes":{...}
-    "fieldFormatMap":"{...}
-    "fields":"[{...},{...},...]
-    "sourceFilters":"[{\"value\":\"sourcemap.sourcemap\"}]",
-    "timeFieldName":"@timestamp",
-    "title":"some-other-pattern-*"
-   },
-   ...
+  "cluster": ["manage_own_api_key"],
+  "applications": [{
+    "application": "apm",
+    "privileges": ["event:write", "config_agent:read"],
+    "resources": ["*"]
+  }]
 }
-----
+--------------------------------------------------
 
-// More examples will go here
+[[apm-create-agent-key-req]]
+===== Request
 
-More information on Kibana's API is available in <<api,REST API>>.
+`POST /api/apm/agent_keys`
+
+[role="child_attributes"]
+[[apm-create-agent-key-req-body]]
+===== Request body
+
+`name`::
+(required, string) Name of the agent key.
+
+`privileges`::
+(required, array) APM agent key privileges. It can take one or more of the following values:
+
+  - `event:write`. Required for ingesting agent events.
+  - `config_agent:read`. Required for agents to read agent configuration remotely.
+
+[[apm-agent-key-create-example]]
+===== Example
+
+[source,curl]
+--------------------------------------------------
+POST /api/apm/agent_keys
+{
+    "name": "apm-key",
+    "privileges": ["event:write", "config_agent:read"]
+}
+--------------------------------------------------
+
+[[apm-agent-key-create-body]]
+===== Response body
+
+[source,js]
+--------------------------------------------------
+{
+  "agentKey": {
+    "id": "3DCLmn0B3ZMhLUa7WBG9",
+    "name": "apm-key",
+    "api_key": "PjGloCGOTzaZr8ilUPvkjA",
+    "encoded": "M0RDTG1uMEIzWk1oTFVhN1dCRzk6UGpHbG9DR09UemFacjhpbFVQdmtqQQ=="
+  }
+}
+--------------------------------------------------
+
+Once created, you can copy the API key (Base64 encoded) and use it to to authorize requests from APM agents to the APM Server.

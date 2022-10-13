@@ -17,11 +17,12 @@ import { ApmMetric } from '../metrics';
 import { getTimeOfLastEvent } from './_get_time_of_last_event';
 import { LegacyRequest } from '../../types';
 import { ElasticsearchResponse } from '../../../common/types/es';
+import { MonitoringConfig } from '../../config';
 
 export function handleResponse(
   response: ElasticsearchResponse,
   apmUuid: string,
-  config: { get: (key: string) => string | undefined }
+  config: MonitoringConfig
 ) {
   if (!response.hits || response.hits.hits.length === 0) {
     return {};
@@ -66,9 +67,9 @@ export function handleResponse(
     eventsTotal: getDiffCalculation(eventsTotalLast, eventsTotalFirst),
     eventsEmitted: getDiffCalculation(eventsEmittedLast, eventsEmittedFirst),
     eventsDropped: getDiffCalculation(eventsDroppedLast, eventsDroppedFirst),
-    bytesWritten: getDiffCalculation(bytesWrittenLast, bytesWrittenFirst),
+    bytesWritten: getDiffCalculation(Number(bytesWrittenLast), Number(bytesWrittenFirst)),
     config: {
-      container: config.get('monitoring.ui.container.apm.enabled'),
+      container: config.ui.container.apm.enabled,
     },
   };
 }
@@ -84,8 +85,8 @@ export async function getApmInfo(
   }: {
     clusterUuid: string;
     apmUuid: string;
-    start: number;
-    end: number;
+    start?: number;
+    end?: number;
   }
 ) {
   checkParam(apmIndexPattern, 'apmIndexPattern in beats/getBeatSummary');
@@ -97,8 +98,8 @@ export async function getApmInfo(
   const params = {
     index: apmIndexPattern,
     size: 1,
-    ignoreUnavailable: true,
-    filterPath: [
+    ignore_unavailable: true,
+    filter_path: [
       'hits.hits._source.beats_stats.beat.host',
       'hits.hits._source.beats_stats.beat.version',
       'hits.hits._source.beats_stats.beat.name',
@@ -168,7 +169,7 @@ export async function getApmInfo(
     }),
   ]);
 
-  const formattedResponse = handleResponse(response, apmUuid, req.server.config());
+  const formattedResponse = handleResponse(response, apmUuid, req.server.config);
   return {
     ...formattedResponse,
     timeOfLastEvent,

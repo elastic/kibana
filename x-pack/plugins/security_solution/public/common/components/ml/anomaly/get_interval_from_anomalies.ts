@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Anomalies } from '../types';
+import type { Anomalies } from '../types';
 
 export const getIntervalFromAnomalies = (anomalies: Anomalies | null) => {
   if (anomalies == null) {

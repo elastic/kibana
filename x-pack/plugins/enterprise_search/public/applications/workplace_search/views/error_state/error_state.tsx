@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-// TODO: Remove EuiPage & EuiPageBody before exposing full app
-
 import React from 'react';
 
-import { EuiPage, EuiPageBody, EuiPageContent } from '@elastic/eui';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { WORKPLACE_SEARCH_PLUGIN } from '../../../../../common/constants';
 import { ErrorStatePrompt } from '../../../shared/error_state';
@@ -19,16 +17,14 @@ import { ViewContentHeader } from '../../components/shared/view_content_header';
 
 export const ErrorState: React.FC = () => {
   return (
-    <EuiPage restrictWidth>
+    <>
       <SetPageChrome />
       <SendTelemetry action="error" metric="cannot_connect" />
 
-      <EuiPageBody>
+      <KibanaPageTemplate isEmptyState>
         <ViewContentHeader title={WORKPLACE_SEARCH_PLUGIN.NAME} />
-        <EuiPageContent>
-          <ErrorStatePrompt />
-        </EuiPageContent>
-      </EuiPageBody>
-    </EuiPage>
+        <ErrorStatePrompt />
+      </KibanaPageTemplate>
+    </>
   );
 };

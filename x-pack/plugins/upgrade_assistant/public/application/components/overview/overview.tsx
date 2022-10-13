@@ -5,133 +5,127 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import {
-  EuiPageContent,
-  EuiPageContentBody,
+  EuiSteps,
   EuiText,
   EuiPageHeader,
-  EuiPageBody,
   EuiButtonEmpty,
-  EuiFlexItem,
-  EuiFlexGroup,
   EuiSpacer,
   EuiLink,
-  EuiFormRow,
+  EuiPageBody,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { withRouter, RouteComponentProps } from 'react-router-dom';
 
-import { RouteComponentProps } from 'react-router-dom';
 import { useAppContext } from '../../app_context';
-import { LatestMinorBanner } from '../latest_minor_banner';
-import { ESDeprecationStats } from './es_stats';
-import { DeprecationLoggingToggle } from './deprecation_logging_toggle';
+import { uiMetricService, UIM_OVERVIEW_PAGE_LOAD } from '../../lib/ui_metric';
+import { getBackupStep } from './backup_step';
+import { getFixIssuesStep } from './fix_issues_step';
+import { getUpgradeStep } from './upgrade_step';
+import { getMigrateSystemIndicesStep } from './migrate_system_indices';
+import { getLogsStep } from './logs_step';
 
-const i18nTexts = {
-  pageTitle: i18n.translate('xpack.upgradeAssistant.pageTitle', {
-    defaultMessage: 'Upgrade Assistant',
-  }),
-  getPageDescription: (nextMajor: string) =>
-    i18n.translate('xpack.upgradeAssistant.pageDescription', {
-      defaultMessage:
-        'Prepare to upgrade by identifying deprecated settings and updating your configuration. Enable deprecation logging to see if your are using deprecated features that will not be available after you upgrade to Elastic {nextMajor}.',
-      values: {
-        nextMajor,
-      },
-    }),
-  getDeprecationLoggingLabel: (href: string) => (
-    <FormattedMessage
-      id="xpack.upgradeAssistant.deprecationLoggingDescription"
-      defaultMessage="Log deprecated actions. {learnMore}"
-      values={{
-        learnMore: (
-          <EuiLink href={href} target="_blank">
-            {i18n.translate('xpack.upgradeAssistant.deprecationLoggingDescription.learnMoreLink', {
-              defaultMessage: 'Learn more.',
-            })}
-          </EuiLink>
-        ),
-      }}
-    />
-  ),
-  docLink: i18n.translate('xpack.upgradeAssistant.documentationLinkText', {
-    defaultMessage: 'Documentation',
-  }),
-};
+type OverviewStep = 'backup' | 'migrate_system_indices' | 'fix_issues' | 'logs';
 
-interface Props {
-  history: RouteComponentProps['history'];
-}
-
-export const DeprecationsOverview: FunctionComponent<Props> = ({ history }) => {
-  const { kibanaVersionInfo, breadcrumbs, docLinks, api } = useAppContext();
-  const { nextMajor } = kibanaVersionInfo;
+export const Overview = withRouter(({ history }: RouteComponentProps) => {
+  const {
+    services: {
+      breadcrumbs,
+      core: { docLinks },
+    },
+    plugins: { cloud },
+  } = useAppContext();
 
   useEffect(() => {
-    async function sendTelemetryData() {
-      await api.sendTelemetryData({
-        overview: true,
-      });
-    }
-
-    sendTelemetryData();
-  }, [api]);
+    uiMetricService.trackUiMetric(METRIC_TYPE.LOADED, UIM_OVERVIEW_PAGE_LOAD);
+  }, []);
 
   useEffect(() => {
     breadcrumbs.setBreadcrumbs('overview');
   }, [breadcrumbs]);
 
+  const [completedStepsMap, setCompletedStepsMap] = useState({
+    backup: false,
+    migrate_system_indices: false,
+    fix_issues: false,
+    logs: false,
+  });
+
+  const isStepComplete = (step: OverviewStep) => completedStepsMap[step];
+  const setCompletedStep = (step: OverviewStep, isCompleted: boolean) => {
+    setCompletedStepsMap({
+      ...completedStepsMap,
+      [step]: isCompleted,
+    });
+  };
+
   return (
-    <EuiPageBody>
-      <EuiPageContent data-test-subj="overviewPageContent">
+    <EuiPageBody restrictWidth={true} data-test-subj="overview">
+      <EuiPageContentBody color="transparent" paddingSize="none">
         <EuiPageHeader
-          pageTitle={i18nTexts.pageTitle}
+          bottomBorder
+          pageTitle={i18n.translate('xpack.upgradeAssistant.overview.pageTitle', {
+            defaultMessage: 'Upgrade Assistant',
+          })}
+          description={i18n.translate('xpack.upgradeAssistant.overview.pageDescription', {
+            defaultMessage: 'Get ready for the next version of Elastic!',
+          })}
           rightSideItems={[
             <EuiButtonEmpty
-              href={docLinks.links.upgradeAssistant}
+              href={docLinks.links.upgradeAssistant.overview}
               target="_blank"
               iconType="help"
               data-test-subj="documentationLink"
             >
-              {i18nTexts.docLink}
+              <FormattedMessage
+                id="xpack.upgradeAssistant.overview.documentationLinkText"
+                defaultMessage="Documentation"
+              />
             </EuiButtonEmpty>,
           ]}
+        >
+          <EuiText data-test-subj="whatsNewLink">
+            <EuiLink href={docLinks.links.elasticsearch.version8ReleaseHighlights} target="_blank">
+              <FormattedMessage
+                id="xpack.upgradeAssistant.overview.whatsNewLink"
+                defaultMessage="What's new in 8.x?"
+              />
+            </EuiLink>
+          </EuiText>
+        </EuiPageHeader>
+
+        <EuiSpacer size="l" />
+
+        <EuiSteps
+          steps={[
+            getBackupStep({
+              cloud,
+              isComplete: isStepComplete('backup'),
+              setIsComplete: setCompletedStep.bind(null, 'backup'),
+            }),
+            getMigrateSystemIndicesStep({
+              docLinks,
+              isComplete: isStepComplete('migrate_system_indices'),
+              setIsComplete: setCompletedStep.bind(null, 'migrate_system_indices'),
+            }),
+            getFixIssuesStep({
+              isComplete: isStepComplete('fix_issues'),
+              setIsComplete: setCompletedStep.bind(null, 'fix_issues'),
+            }),
+            getLogsStep({
+              isComplete: isStepComplete('logs'),
+              setIsComplete: setCompletedStep.bind(null, 'logs'),
+              navigateToEsDeprecationLogs: () => history.push('/es_deprecation_logs'),
+            }),
+            getUpgradeStep(),
+          ]}
         />
-
-        <EuiPageContentBody>
-          <>
-            <EuiText data-test-subj="overviewDetail" grow={false}>
-              <p>{i18nTexts.getPageDescription(`${nextMajor}.x`)}</p>
-            </EuiText>
-
-            <EuiSpacer />
-
-            {/* Remove this in last minor of the current major (e.g., 7.15) */}
-            <LatestMinorBanner />
-
-            <EuiSpacer size="xl" />
-
-            <EuiFlexGroup>
-              <EuiFlexItem grow={false} style={{ minWidth: 400 }}>
-                <ESDeprecationStats history={history} />
-
-                <EuiSpacer />
-
-                <EuiFormRow
-                  helpText={i18nTexts.getDeprecationLoggingLabel(
-                    docLinks.links.elasticsearch.deprecationLogging
-                  )}
-                  data-test-subj="deprecationLoggingFormRow"
-                >
-                  <DeprecationLoggingToggle />
-                </EuiFormRow>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </>
-        </EuiPageContentBody>
-      </EuiPageContent>
+      </EuiPageContentBody>
     </EuiPageBody>
   );
-};
+});

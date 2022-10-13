@@ -8,7 +8,10 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
+import '@kbn/es-ui-shared-plugin/public/components/code_editor/jest_mock';
+import '../../../../../../test/global_mocks';
 import { setupEnvironment } from './helpers';
+import { API_BASE_PATH } from './helpers/constants';
 import { setup, ComponentTemplateCreateTestBed } from './helpers/component_template_create.helpers';
 
 jest.mock('@elastic/eui', () => {
@@ -26,31 +29,18 @@ jest.mock('@elastic/eui', () => {
         }}
       />
     ),
-    // Mocking EuiCodeEditor, which uses React Ace under the hood
-    EuiCodeEditor: (props: any) => (
-      <input
-        data-test-subj="mockCodeEditor"
-        onChange={(syntheticEvent: any) => {
-          props.onChange(syntheticEvent.jsonString);
-        }}
-      />
-    ),
   };
 });
 
 describe('<ComponentTemplateCreate />', () => {
   let testBed: ComponentTemplateCreateTestBed;
 
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
-
-  afterAll(() => {
-    server.restore();
-  });
+  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   describe('On component mount', () => {
     beforeEach(async () => {
       await act(async () => {
-        testBed = await setup();
+        testBed = await setup(httpSetup);
       });
 
       testBed.component.update();
@@ -74,7 +64,7 @@ describe('<ComponentTemplateCreate />', () => {
 
         // Meta editor should be hidden by default
         // Since the editor itself is mocked, we checked for the mocked element
-        expect(exists('mockCodeEditor')).toBe(false);
+        expect(exists('metaEditor')).toBe(false);
 
         await act(async () => {
           actions.toggleMetaSwitch();
@@ -82,7 +72,7 @@ describe('<ComponentTemplateCreate />', () => {
 
         component.update();
 
-        expect(exists('mockCodeEditor')).toBe(true);
+        expect(exists('metaEditor')).toBe(true);
       });
 
       describe('Validation', () => {
@@ -115,7 +105,7 @@ describe('<ComponentTemplateCreate />', () => {
 
       beforeEach(async () => {
         await act(async () => {
-          testBed = await setup();
+          testBed = await setup(httpSetup);
         });
 
         const { actions, component } = testBed;
@@ -171,37 +161,38 @@ describe('<ComponentTemplateCreate />', () => {
 
         component.update();
 
-        const latestRequest = server.requests[server.requests.length - 1];
-
-        const expected = {
-          name: COMPONENT_TEMPLATE_NAME,
-          template: {
-            settings: SETTINGS,
-            mappings: {
-              properties: {
-                [BOOLEAN_MAPPING_FIELD.name]: {
-                  type: BOOLEAN_MAPPING_FIELD.type,
+        expect(httpSetup.post).toHaveBeenLastCalledWith(
+          `${API_BASE_PATH}/component_templates`,
+          expect.objectContaining({
+            body: JSON.stringify({
+              name: COMPONENT_TEMPLATE_NAME,
+              template: {
+                settings: SETTINGS,
+                mappings: {
+                  properties: {
+                    [BOOLEAN_MAPPING_FIELD.name]: {
+                      type: BOOLEAN_MAPPING_FIELD.type,
+                    },
+                  },
                 },
+                aliases: ALIASES,
               },
-            },
-            aliases: ALIASES,
-          },
-          _kbnMeta: { usedBy: [], isManaged: false },
-        };
-
-        expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expected);
+              _kbnMeta: { usedBy: [], isManaged: false },
+            }),
+          })
+        );
       });
 
       test('should surface API errors if the request is unsuccessful', async () => {
         const { component, actions, find, exists } = testBed;
 
         const error = {
-          status: 409,
+          statusCode: 409,
           error: 'Conflict',
           message: `There is already a template with name '${COMPONENT_TEMPLATE_NAME}'`,
         };
 
-        httpRequestsMockHelpers.setCreateComponentTemplateResponse(undefined, { body: error });
+        httpRequestsMockHelpers.setCreateComponentTemplateResponse(undefined, error);
 
         await act(async () => {
           actions.clickNextButton();

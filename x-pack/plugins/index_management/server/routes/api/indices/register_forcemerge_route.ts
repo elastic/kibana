@@ -8,14 +8,14 @@
 import { schema } from '@kbn/config-schema';
 
 import { RouteDependencies } from '../../../types';
-import { addBasePath } from '../index';
+import { addBasePath } from '..';
 
 const bodySchema = schema.object({
   indices: schema.arrayOf(schema.string()),
   maxNumSegments: schema.maybe(schema.number()),
 });
 
-export function registerForcemergeRoute({ router, license, lib }: RouteDependencies) {
+export function registerForcemergeRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   router.post(
     {
       path: addBasePath('/indices/forcemerge'),
@@ -23,10 +23,11 @@ export function registerForcemergeRoute({ router, license, lib }: RouteDependenc
         body: bodySchema,
       },
     },
-    license.guardApiRoute(async (ctx, req, res) => {
-      const { maxNumSegments, indices = [] } = req.body as typeof bodySchema.type;
+    async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const { maxNumSegments, indices = [] } = request.body as typeof bodySchema.type;
       const params = {
-        expandWildcards: 'none',
+        expand_wildcards: 'none' as const,
         index: indices,
       };
 
@@ -35,18 +36,11 @@ export function registerForcemergeRoute({ router, license, lib }: RouteDependenc
       }
 
       try {
-        await ctx.core.elasticsearch.legacy.client.callAsCurrentUser('indices.forcemerge', params);
-        return res.ok();
-      } catch (e) {
-        if (lib.isEsError(e)) {
-          return res.customError({
-            statusCode: e.statusCode,
-            body: e,
-          });
-        }
-        // Case: default
-        throw e;
+        await client.asCurrentUser.indices.forcemerge(params);
+        return response.ok();
+      } catch (error) {
+        return handleEsError({ error, response });
       }
-    })
+    }
   );
 }

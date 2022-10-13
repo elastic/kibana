@@ -16,6 +16,9 @@ export const getSpacesFeatureDescription = () => {
         'Organize your dashboards and other saved objects into meaningful categories.',
     });
   }
-
   return spacesFeatureDescription;
 };
+
+export const DEFAULT_OBJECT_NOUN = i18n.translate('xpack.spaces.shareToSpace.objectNoun', {
+  defaultMessage: 'object',
+});

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ANNOTATION_TYPE } from '../../../../../plugins/ml/common/constants/annotations';
-import { Annotation } from '../../../../../plugins/ml/common/types/annotations';
+import { ANNOTATION_TYPE } from '@kbn/ml-plugin/common/constants/annotations';
+import { Annotation } from '@kbn/ml-plugin/common/types/annotations';
 
 export const commonJobConfig = {
   description: 'test_job_annotation',

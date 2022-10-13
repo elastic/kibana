@@ -5,21 +5,22 @@
  * 2.0.
  */
 
+import { transformError } from '@kbn/securitysolution-es-utils';
+import type { Logger } from '@kbn/core/server';
 import { queryRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/query_rules_type_dependents';
-import {
-  queryRulesSchema,
-  QueryRulesSchemaDecoded,
-} from '../../../../../common/detection_engine/schemas/request/query_rules_schema';
+import type { QueryRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/query_rules_schema';
+import { queryRulesSchema } from '../../../../../common/detection_engine/schemas/request/query_rules_schema';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { getIdError, transform } from './utils';
-import { transformError, buildSiemResponse } from '../utils';
-import { readRules } from '../../rules/read_rules';
-import { getRuleActionsSavedObject } from '../../rule_actions/get_rule_actions_saved_object';
-import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
+import { buildSiemResponse } from '../utils';
 
-export const readRulesRoute = (router: SecuritySolutionPluginRouter) => {
+import { readRules } from '../../rules/read_rules';
+// eslint-disable-next-line no-restricted-imports
+import { legacyGetRuleActionsSavedObject } from '../../rule_actions/legacy_get_rule_actions_saved_object';
+
+export const readRulesRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   router.get(
     {
       path: DETECTION_ENGINE_RULES_URL,
@@ -41,40 +42,26 @@ export const readRulesRoute = (router: SecuritySolutionPluginRouter) => {
 
       const { id, rule_id: ruleId } = request.query;
 
-      const alertsClient = context.alerting?.getAlertsClient();
-      const savedObjectsClient = context.core.savedObjects.client;
-
       try {
-        if (!alertsClient) {
-          return siemResponse.error({ statusCode: 404 });
-        }
+        const rulesClient = (await context.alerting).getRulesClient();
+        const ruleExecutionLog = (await context.securitySolution).getRuleExecutionLog();
+        const savedObjectsClient = (await context.core).savedObjects.client;
 
-        const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
         const rule = await readRules({
-          alertsClient,
           id,
+          rulesClient,
           ruleId,
         });
         if (rule != null) {
-          const ruleActions = await getRuleActionsSavedObject({
+          const legacyRuleActions = await legacyGetRuleActionsSavedObject({
             savedObjectsClient,
             ruleAlertId: rule.id,
+            logger,
           });
-          const ruleStatuses = await ruleStatusClient.find({
-            perPage: 1,
-            sortField: 'statusDate',
-            sortOrder: 'desc',
-            search: rule.id,
-            searchFields: ['alertId'],
-          });
-          const [currentStatus] = ruleStatuses.saved_objects;
-          if (currentStatus != null && rule.executionStatus.status === 'error') {
-            currentStatus.attributes.lastFailureMessage = `Reason: ${rule.executionStatus.error?.reason} Message: ${rule.executionStatus.error?.message}`;
-            currentStatus.attributes.lastFailureAt = rule.executionStatus.lastExecutionDate.toISOString();
-            currentStatus.attributes.statusDate = rule.executionStatus.lastExecutionDate.toISOString();
-            currentStatus.attributes.status = 'failed';
-          }
-          const transformed = transform(rule, ruleActions, currentStatus);
+
+          const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(rule.id);
+
+          const transformed = transform(rule, ruleExecutionSummary, legacyRuleActions);
           if (transformed == null) {
             return siemResponse.error({ statusCode: 500, body: 'Internal error transforming' });
           } else {

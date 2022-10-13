@@ -6,13 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from '../../../core/public';
+import { PluginInitializerContext } from '@kbn/core/public';
 import { BfetchPublicPlugin } from './plugin';
 
-export { BfetchPublicSetup, BfetchPublicStart, BfetchPublicContract } from './plugin';
+export type { BfetchPublicSetup, BfetchPublicStart, BfetchPublicContract } from './plugin';
 export { split } from './streaming';
 
-export { BatchedFunc } from './batching/types';
+export type { BatchedFunc } from './batching/types';
+
+export { DISABLE_BFETCH } from '../common/constants';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new BfetchPublicPlugin(initializerContext);

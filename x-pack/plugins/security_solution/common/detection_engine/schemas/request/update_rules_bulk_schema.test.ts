@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { updateRulesBulkSchema, UpdateRulesBulkSchema } from './update_rules_bulk_schema';
-import { exactCheck } from '../../../exact_check';
-import { foldLeftRight } from '../../../test_utils';
-import { formatErrors } from '../../../format_errors';
+import type { UpdateRulesBulkSchema } from './update_rules_bulk_schema';
+import { updateRulesBulkSchema } from './update_rules_bulk_schema';
+import { exactCheck, formatErrors, foldLeftRight } from '@kbn/securitysolution-io-ts-utils';
 import { getUpdateRulesSchemaMock } from './rule_schemas.mock';
-import { UpdateRulesSchema } from './rule_schemas';
+import type { UpdateRulesSchema } from './rule_schemas';
 
 // only the basics of testing are here.
 // see: update_rules_schema.test.ts for the bulk of the validation tests
@@ -187,6 +186,18 @@ describe('update_rules_bulk_schema', () => {
     const output = foldLeftRight(checked);
     expect(formatErrors(output.errors)).toEqual(['Invalid value "madeup" supplied to "severity"']);
     expect(output.schema).toEqual({});
+  });
+
+  test('You can set "namespace" to a string', () => {
+    const payload: UpdateRulesBulkSchema = [
+      { ...getUpdateRulesSchemaMock(), namespace: 'a namespace' },
+    ];
+
+    const decoded = updateRulesBulkSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const output = foldLeftRight(checked);
+    expect(formatErrors(output.errors)).toEqual([]);
+    expect(output.schema).toEqual(payload);
   });
 
   test('You can set "note" to a string', () => {

@@ -7,13 +7,13 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { ReactWrapper, mount } from 'enzyme';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { CONTEXT_MENU_TRIGGER } from '../triggers';
-import { Action, UiActionsStart } from '../../../../ui_actions/public';
+import { Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { Trigger, ViewMode } from '../types';
 import { isErrorEmbeddable } from '../embeddables';
 import { EmbeddablePanel } from './embeddable_panel';
@@ -28,10 +28,10 @@ import {
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
 } from '../test_samples/embeddables/contact_card/contact_card_embeddable';
-import { inspectorPluginMock } from '../../../../inspector/public/mocks';
+import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import { EuiBadge } from '@elastic/eui';
 import { embeddablePluginMock } from '../../mocks';
-import { applicationServiceMock } from '../../../../../core/public/mocks';
+import { applicationServiceMock, themeServiceMock } from '@kbn/core/public/mocks';
 
 const actionRegistry = new Map<string, Action>();
 const triggerRegistry = new Map<string, Trigger>();
@@ -44,6 +44,7 @@ const trigger: Trigger = {
 };
 const embeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
 const applicationMock = applicationServiceMock.createStartContract();
+const theme = themeServiceMock.createStartContract();
 
 actionRegistry.set(editModeAction.id, editModeAction);
 triggerRegistry.set(trigger.id, trigger);
@@ -152,6 +153,7 @@ test('HelloWorldContainer in view mode hides edit mode actions', async () => {
         overlays={{} as any}
         inspector={inspector}
         SavedObjectFinder={() => null}
+        theme={theme}
       />
     </I18nProvider>
   );
@@ -161,6 +163,106 @@ test('HelloWorldContainer in view mode hides edit mode actions', async () => {
   await nextTick();
   component.update();
   expect(findTestSubject(component, `embeddablePanelAction-${editModeAction.id}`).length).toBe(0);
+});
+
+describe('HelloWorldContainer in error state', () => {
+  let component: ReactWrapper<unknown>;
+  let embeddable: ContactCardEmbeddable;
+
+  beforeEach(async () => {
+    const inspector = inspectorPluginMock.createStartContract();
+    const container = new HelloWorldContainer({ id: '123', panels: {}, viewMode: ViewMode.VIEW }, {
+      getEmbeddableFactory,
+    } as any);
+
+    embeddable = (await container.addNewEmbeddable<
+      ContactCardEmbeddableInput,
+      ContactCardEmbeddableOutput,
+      ContactCardEmbeddable
+    >(CONTACT_CARD_EMBEDDABLE, {})) as ContactCardEmbeddable;
+
+    component = mount(
+      <I18nProvider>
+        <EmbeddablePanel
+          embeddable={embeddable}
+          getActions={() => Promise.resolve([])}
+          getAllEmbeddableFactories={start.getEmbeddableFactories}
+          getEmbeddableFactory={start.getEmbeddableFactory}
+          notifications={{} as any}
+          application={applicationMock}
+          overlays={{} as any}
+          inspector={inspector}
+          SavedObjectFinder={() => null}
+          theme={theme}
+        />
+      </I18nProvider>
+    );
+
+    jest.spyOn(embeddable, 'renderError');
+  });
+
+  test('renders a custom error', () => {
+    embeddable.triggerError(new Error('something'));
+    component.update();
+
+    const embeddableError = findTestSubject(component, 'embeddableError');
+
+    expect(embeddable.renderError).toHaveBeenCalledWith(
+      expect.any(HTMLElement),
+      new Error('something')
+    );
+    expect(embeddableError).toHaveProperty('length', 1);
+    expect(embeddableError.text()).toBe('something');
+  });
+
+  test('renders a custom fatal error', () => {
+    embeddable.triggerError(new Error('something'), true);
+    component.update();
+    component.mount();
+
+    const embeddableError = findTestSubject(component, 'embeddableError');
+
+    expect(embeddable.renderError).toHaveBeenCalledWith(
+      expect.any(HTMLElement),
+      new Error('something')
+    );
+    expect(embeddableError).toHaveProperty('length', 1);
+    expect(embeddableError.text()).toBe('something');
+  });
+
+  test('destroys previous error', () => {
+    const { renderError } = embeddable as Required<typeof embeddable>;
+    let destroyError: jest.MockedFunction<ReturnType<typeof renderError>>;
+
+    (embeddable.renderError as jest.MockedFunction<typeof renderError>).mockImplementationOnce(
+      (...args) => {
+        destroyError = jest.fn(renderError(...args));
+
+        return destroyError;
+      }
+    );
+    embeddable.triggerError(new Error('something'));
+    component.update();
+    embeddable.triggerError(new Error('another error'));
+    component.update();
+
+    const embeddableError = findTestSubject(component, 'embeddableError');
+
+    expect(embeddableError).toHaveProperty('length', 1);
+    expect(embeddableError.text()).toBe('another error');
+    expect(destroyError!).toHaveBeenCalledTimes(1);
+  });
+
+  test('renders a default error', async () => {
+    embeddable.renderError = undefined;
+    embeddable.triggerError(new Error('something'));
+    component.update();
+
+    const embeddableError = findTestSubject(component, 'embeddableError');
+
+    expect(embeddableError).toHaveProperty('length', 1);
+    expect(embeddableError.children.length).toBeGreaterThan(0);
+  });
 });
 
 const renderInEditModeAndOpenContextMenu = async (
@@ -191,6 +293,7 @@ const renderInEditModeAndOpenContextMenu = async (
         application={applicationMock}
         inspector={inspector}
         SavedObjectFinder={() => null}
+        theme={theme}
       />
     </I18nProvider>
   );
@@ -298,6 +401,7 @@ test('HelloWorldContainer in edit mode shows edit mode actions', async () => {
         application={applicationMock}
         inspector={inspector}
         SavedObjectFinder={() => null}
+        theme={theme}
       />
     </I18nProvider>
   );
@@ -360,6 +464,7 @@ test('Panel title customize link does not exist in view mode', async () => {
       application={applicationMock}
       inspector={inspector}
       SavedObjectFinder={() => null}
+      theme={theme}
     />
   );
 
@@ -395,6 +500,7 @@ test('Runs customize panel action on title click when in edit mode', async () =>
       application={applicationMock}
       inspector={inspector}
       SavedObjectFinder={() => null}
+      theme={theme}
     />
   );
 
@@ -443,6 +549,7 @@ test('Updates when hidePanelTitles is toggled', async () => {
         application={applicationMock}
         inspector={inspector}
         SavedObjectFinder={() => null}
+        theme={theme}
       />
     </I18nProvider>
   );
@@ -465,6 +572,52 @@ test('Updates when hidePanelTitles is toggled', async () => {
 
   title = findTestSubject(component, `embeddablePanelHeading-HelloRobStark`);
   expect(title.length).toBe(1);
+});
+
+test('Respects options from SelfStyledEmbeddable', async () => {
+  const inspector = inspectorPluginMock.createStartContract();
+
+  const container = new HelloWorldContainer(
+    { id: '123', panels: {}, viewMode: ViewMode.VIEW, hidePanelTitles: false },
+    { getEmbeddableFactory } as any
+  );
+
+  const contactCardEmbeddable = await container.addNewEmbeddable<
+    ContactCardEmbeddableInput,
+    ContactCardEmbeddableOutput,
+    ContactCardEmbeddable
+  >(CONTACT_CARD_EMBEDDABLE, {
+    firstName: 'Rob',
+    lastName: 'Stark',
+  });
+
+  const selfStyledEmbeddable = embeddablePluginMock.mockSelfStyledEmbeddable(
+    contactCardEmbeddable,
+    { hideTitle: true }
+  );
+
+  // make sure the title is being hidden because of the self styling, not the container
+  container.updateInput({ hidePanelTitles: false });
+
+  const component = mount(
+    <I18nProvider>
+      <EmbeddablePanel
+        embeddable={selfStyledEmbeddable}
+        getActions={() => Promise.resolve([])}
+        getAllEmbeddableFactories={start.getEmbeddableFactories}
+        getEmbeddableFactory={start.getEmbeddableFactory}
+        notifications={{} as any}
+        overlays={{} as any}
+        application={applicationMock}
+        inspector={inspector}
+        SavedObjectFinder={() => null}
+        theme={theme}
+      />
+    </I18nProvider>
+  );
+
+  const title = findTestSubject(component, `embeddablePanelHeading-HelloRobStark`);
+  expect(title.length).toBe(0);
 });
 
 test('Check when hide header option is false', async () => {
@@ -497,6 +650,7 @@ test('Check when hide header option is false', async () => {
         inspector={inspector}
         SavedObjectFinder={() => null}
         hideHeader={false}
+        theme={theme}
       />
     </I18nProvider>
   );
@@ -535,10 +689,49 @@ test('Check when hide header option is true', async () => {
         inspector={inspector}
         SavedObjectFinder={() => null}
         hideHeader={true}
+        theme={theme}
       />
     </I18nProvider>
   );
 
   const title = findTestSubject(component, `embeddablePanelHeading-HelloAryaStark`);
   expect(title.length).toBe(0);
+});
+
+test('Should work in minimal way rendering only the inspector action', async () => {
+  const inspector = inspectorPluginMock.createStartContract();
+  inspector.isAvailable = jest.fn(() => true);
+
+  const container = new HelloWorldContainer({ id: '123', panels: {}, viewMode: ViewMode.VIEW }, {
+    getEmbeddableFactory,
+  } as any);
+
+  const embeddable = await container.addNewEmbeddable<
+    ContactCardEmbeddableInput,
+    ContactCardEmbeddableOutput,
+    ContactCardEmbeddable
+  >(CONTACT_CARD_EMBEDDABLE, {
+    firstName: 'Arya',
+    lastName: 'Stark',
+  });
+
+  const component = mount(
+    <I18nProvider>
+      <EmbeddablePanel
+        embeddable={embeddable}
+        getActions={() => Promise.resolve([])}
+        inspector={inspector}
+        hideHeader={false}
+        theme={theme}
+      />
+    </I18nProvider>
+  );
+
+  findTestSubject(component, 'embeddablePanelToggleMenuIcon').simulate('click');
+  expect(findTestSubject(component, `embeddablePanelContextMenuOpen`).length).toBe(1);
+  await nextTick();
+  component.update();
+  expect(findTestSubject(component, `embeddablePanelAction-openInspector`).length).toBe(1);
+  const action = findTestSubject(component, `embeddablePanelAction-ACTION_CUSTOMIZE_PANEL`);
+  expect(action.length).toBe(0);
 });

@@ -5,10 +5,16 @@
  * 2.0.
  */
 
-import { transformRuleToAlertAction, transformAlertToRuleAction } from './transform_actions';
+import {
+  transformRuleToAlertAction,
+  transformAlertToRuleAction,
+  transformRuleToAlertResponseAction,
+  transformAlertToRuleResponseAction,
+} from './transform_actions';
+import { RESPONSE_ACTION_TYPES } from './rule_response_actions/schemas';
 
 describe('transform_actions', () => {
-  test('it should transform RuleAlertAction[] to AlertAction[]', () => {
+  test('it should transform RuleAlertAction[] to RuleAction[]', () => {
     const ruleAction = {
       id: 'id',
       group: 'group',
@@ -24,7 +30,7 @@ describe('transform_actions', () => {
     });
   });
 
-  test('it should transform AlertAction[] to RuleAlertAction[]', () => {
+  test('it should transform RuleAction[] to RuleAlertAction[]', () => {
     const alertAction = {
       id: 'id',
       group: 'group',
@@ -37,6 +43,57 @@ describe('transform_actions', () => {
       group: alertAction.group,
       action_type_id: alertAction.actionTypeId,
       params: alertAction.params,
+    });
+  });
+  test('it should transform ResponseAction[] to RuleResponseAction[]', () => {
+    const ruleAction = {
+      action_type_id: RESPONSE_ACTION_TYPES.OSQUERY,
+      params: {
+        id: 'test',
+        ecs_mapping: {},
+        saved_query_id: undefined,
+        pack_id: undefined,
+        query: undefined,
+        queries: undefined,
+      },
+    };
+    const alertAction = transformRuleToAlertResponseAction(ruleAction);
+    expect(alertAction).toEqual({
+      actionTypeId: ruleAction.action_type_id,
+      params: {
+        id: 'test',
+        ecsMapping: {},
+        savedQueryId: undefined,
+        packId: undefined,
+        query: undefined,
+        queries: undefined,
+      },
+    });
+  });
+
+  test('it should transform RuleResponseAction[] to ResponseAction[]', () => {
+    const alertAction = {
+      actionTypeId: RESPONSE_ACTION_TYPES.OSQUERY,
+      params: {
+        id: 'test',
+        ecsMapping: {},
+        savedQueryId: undefined,
+        packId: undefined,
+        query: undefined,
+        queries: undefined,
+      },
+    };
+    const ruleAction = transformAlertToRuleResponseAction(alertAction);
+    expect(ruleAction).toEqual({
+      action_type_id: alertAction.actionTypeId,
+      params: {
+        id: 'test',
+        ecs_mapping: {},
+        saved_query_id: undefined,
+        pack_id: undefined,
+        query: undefined,
+        queries: undefined,
+      },
     });
   });
 });

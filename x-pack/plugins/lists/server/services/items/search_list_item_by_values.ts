@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
+import type { SearchListItemArraySchema, Type } from '@kbn/securitysolution-io-ts-list-types';
 
-import { SearchEsListItemSchema, SearchListItemArraySchema, Type } from '../../../common/schemas';
 import {
   TransformElasticMSearchToListItemOptions,
   getQueryFilterFromTypeValue,
   transformElasticNamedSearchToListItem,
 } from '../utils';
+import { SearchEsListItemSchema } from '../../schemas/elastic_response';
 
 export interface SearchListItemByValuesOptions {
   listId: string;
@@ -29,7 +30,10 @@ export const searchListItemByValues = async ({
   type,
   value,
 }: SearchListItemByValuesOptions): Promise<SearchListItemArraySchema> => {
-  const { body: response } = await esClient.search<SearchEsListItemSchema>({
+  // TODO: Will need to address this when we switch over to
+  // using PIT, don't want it to get lost
+  // https://github.com/elastic/kibana/issues/103944
+  const response = await esClient.search<SearchEsListItemSchema>({
     body: {
       query: {
         bool: {
@@ -41,9 +45,9 @@ export const searchListItemByValues = async ({
     index: listItemIndex,
     size: 10000, // TODO: This has a limit on the number which is 10,000 the default of Elastic but we might want to provide a way to increase that number
   });
-  return transformElasticNamedSearchToListItem(({
+  return transformElasticNamedSearchToListItem({
     response,
     type,
     value,
-  } as unknown) as TransformElasticMSearchToListItemOptions);
+  } as unknown as TransformElasticMSearchToListItemOptions);
 };

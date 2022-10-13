@@ -7,34 +7,53 @@
 
 import React, { FC, useMemo } from 'react';
 
-import { EuiButtonGroup } from '@elastic/eui';
+import { EuiButtonGroup, EuiButtonGroupProps } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
+import type { ExplorerJob } from '../../explorer/explorer_utils';
 import { useUrlState } from '../../util/url_state';
-import { useMlUrlGenerator, useNavigateToPath } from '../../contexts/kibana';
-import { ML_PAGES } from '../../../../common/constants/ml_url_generator';
+import { useMlLocator, useNavigateToPath } from '../../contexts/kibana';
+import { ML_PAGES } from '../../../../common/constants/locator';
 
 interface Props {
   viewId: typeof ML_PAGES.SINGLE_METRIC_VIEWER | typeof ML_PAGES.ANOMALY_EXPLORER;
+  selectedJobs?: ExplorerJob[] | null;
 }
 
-// Component for rendering a set of buttons for switching between the Anomaly Detection results views.
-
-export const AnomalyResultsViewSelector: FC<Props> = ({ viewId }) => {
-  const urlGenerator = useMlUrlGenerator();
+/**
+ * Component for rendering a set of buttons for switching between the Anomaly Detection results views.
+ */
+export const AnomalyResultsViewSelector: FC<Props> = ({ viewId, selectedJobs }) => {
+  const locator = useMlLocator()!;
   const navigateToPath = useNavigateToPath();
 
-  const toggleButtonsIcons = useMemo(
+  const smvJobs = (selectedJobs ?? []).filter((job) => job.isSingleMetricViewerJob);
+  const isSingleMetricViewerDisabled = smvJobs.length === 0;
+
+  const toggleButtonsIcons = useMemo<EuiButtonGroupProps['options']>(
     () => [
       {
         id: 'timeseriesexplorer',
-        label: i18n.translate('xpack.ml.anomalyResultsViewSelector.singleMetricViewerLabel', {
-          defaultMessage: 'View results in the Single Metric Viewer',
-        }),
+        label:
+          viewId === 'explorer' && isSingleMetricViewerDisabled
+            ? i18n.translate(
+                'xpack.ml.anomalyResultsViewSelector.singleMetricViewerDisabledLabel',
+                {
+                  defaultMessage:
+                    'Selected {jobsCount, plural, one {job is} other {jobs are}} not viewable in the Single Metric Viewer',
+                  values: {
+                    jobsCount: selectedJobs?.length ?? 0,
+                  },
+                }
+              )
+            : i18n.translate('xpack.ml.anomalyResultsViewSelector.singleMetricViewerLabel', {
+                defaultMessage: 'View results in the Single Metric Viewer',
+              }),
         iconType: 'visLine',
         value: ML_PAGES.SINGLE_METRIC_VIEWER,
         'data-test-subj': 'mlAnomalyResultsViewSelectorSingleMetricViewer',
+        isDisabled: viewId === 'explorer' && isSingleMetricViewerDisabled,
       },
       {
         id: 'explorer',
@@ -46,13 +65,14 @@ export const AnomalyResultsViewSelector: FC<Props> = ({ viewId }) => {
         'data-test-subj': 'mlAnomalyResultsViewSelectorExplorer',
       },
     ],
-    []
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isSingleMetricViewerDisabled, selectedJobs?.length]
   );
 
   const [globalState] = useUrlState('_g');
 
   const onChangeView = async (newViewId: Props['viewId']) => {
-    const url = await urlGenerator.createUrl({
+    const url = await locator.getUrl({
       page: newViewId,
       pageState: {
         globalState,

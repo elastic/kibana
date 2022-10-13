@@ -5,24 +5,22 @@
  * 2.0.
  */
 
-import React, { PureComponent, Fragment } from 'react';
+import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiButton,
   EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiText,
   EuiSpacer,
 } from '@elastic/eui';
 
-import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
-import { extractQueryParams } from '../../../../shared_imports';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import { extractQueryParams, PageLoading, PageError } from '../../../../shared_imports';
 import { trackUiMetric, METRIC_TYPE } from '../../../services/track_ui_metric';
 import { API_STATUS, UIM_FOLLOWER_INDEX_LIST_LOAD } from '../../../constants';
-import { SectionLoading, SectionError, SectionUnauthorized } from '../../../components';
 import { FollowerIndicesTable, DetailPanel } from './components';
 
 const REFRESH_RATE_MS = 30000;
@@ -94,63 +92,109 @@ export class FollowerIndicesList extends PureComponent {
     clearInterval(this.interval);
   }
 
-  renderHeader() {
-    const { isAuthorized, history } = this.props;
-
+  renderEmpty() {
     return (
-      <Fragment>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart">
-          <EuiFlexItem grow={false}>
-            <EuiText>
-              <p>
-                <FormattedMessage
-                  id="xpack.crossClusterReplication.followerIndexList.followerIndicesDescription"
-                  defaultMessage="A follower index replicates a leader index on a remote cluster."
-                />
-              </p>
-            </EuiText>
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            {isAuthorized && (
-              <EuiButton
-                {...reactRouterNavigate(history, `/follower_indices/add`)}
-                fill
-                iconType="plusInCircle"
-                data-test-subj="createFollowerIndexButton"
-              >
-                <FormattedMessage
-                  id="xpack.crossClusterReplication.followerIndexList.addFollowerButtonLabel"
-                  defaultMessage="Create a follower index"
-                />
-              </EuiButton>
-            )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
-        <EuiSpacer size="m" />
-      </Fragment>
+      <EuiPageContent
+        hasShadow={false}
+        paddingSize="none"
+        verticalPosition="center"
+        horizontalPosition="center"
+      >
+        <EuiEmptyPrompt
+          iconType="managementApp"
+          data-test-subj="emptyPrompt"
+          title={
+            <h1>
+              <FormattedMessage
+                id="xpack.crossClusterReplication.followerIndexList.emptyPromptTitle"
+                defaultMessage="Create your first follower index"
+              />
+            </h1>
+          }
+          body={
+            <p>
+              <FormattedMessage
+                id="xpack.crossClusterReplication.followerIndexList.emptyPromptDescription"
+                defaultMessage="Use a follower index to replicate a leader index on a remote cluster."
+              />
+            </p>
+          }
+          actions={
+            <EuiButton
+              {...reactRouterNavigate(this.props.history, `/follower_indices/add`)}
+              fill
+              iconType="plusInCircle"
+              data-test-subj="createFollowerIndexButton"
+            >
+              <FormattedMessage
+                id="xpack.crossClusterReplication.addFollowerButtonLabel"
+                defaultMessage="Create a follower index"
+              />
+            </EuiButton>
+          }
+        />
+      </EuiPageContent>
     );
   }
 
-  renderContent(isEmpty) {
-    const { apiError, isAuthorized, apiStatus } = this.props;
+  renderLoading() {
+    return (
+      <PageLoading>
+        <FormattedMessage
+          id="xpack.crossClusterReplication.followerIndexList.loadingTitle"
+          defaultMessage="Loading follower indices..."
+        />
+      </PageLoading>
+    );
+  }
+
+  renderList() {
+    const { selectFollowerIndex, followerIndices } = this.props;
+
+    const { isDetailPanelOpen } = this.state;
+
+    return (
+      <>
+        <EuiText>
+          <p>
+            <FormattedMessage
+              id="xpack.crossClusterReplication.followerIndexList.followerIndicesDescription"
+              defaultMessage="A follower index replicates a leader index on a remote cluster."
+            />
+          </p>
+        </EuiText>
+
+        <EuiSpacer size="l" />
+
+        <FollowerIndicesTable followerIndices={followerIndices} />
+
+        {isDetailPanelOpen && <DetailPanel closeDetailPanel={() => selectFollowerIndex(null)} />}
+      </>
+    );
+  }
+
+  render() {
+    const { followerIndices, apiError, isAuthorized, apiStatus } = this.props;
+    const isEmpty = apiStatus === API_STATUS.IDLE && !followerIndices.length;
 
     if (!isAuthorized) {
       return (
-        <SectionUnauthorized
+        <PageError
           title={
             <FormattedMessage
               id="xpack.crossClusterReplication.followerIndexList.permissionErrorTitle"
               defaultMessage="Permission error"
             />
           }
-        >
-          <FormattedMessage
-            id="xpack.crossClusterReplication.followerIndexList.noPermissionText"
-            defaultMessage="You do not have permission to view or add follower indices."
-          />
-        </SectionUnauthorized>
+          error={{
+            error: (
+              <FormattedMessage
+                id="xpack.crossClusterReplication.followerIndexList.noPermissionText"
+                defaultMessage="You do not have permission to view or add follower indices."
+              />
+            ),
+          }}
+        />
       );
     }
 
@@ -162,12 +206,7 @@ export class FollowerIndicesList extends PureComponent {
         }
       );
 
-      return (
-        <Fragment>
-          <SectionError title={title} error={apiError} />
-          <EuiSpacer size="m" />
-        </Fragment>
-      );
+      return <PageError title={title} error={apiError.body} />;
     }
 
     if (isEmpty) {
@@ -179,80 +218,5 @@ export class FollowerIndicesList extends PureComponent {
     }
 
     return this.renderList();
-  }
-
-  renderEmpty() {
-    return (
-      <EuiEmptyPrompt
-        iconType="managementApp"
-        title={
-          <h1>
-            <FormattedMessage
-              id="xpack.crossClusterReplication.followerIndexList.emptyPromptTitle"
-              defaultMessage="Create your first follower index"
-            />
-          </h1>
-        }
-        body={
-          <Fragment>
-            <p>
-              <FormattedMessage
-                id="xpack.crossClusterReplication.followerIndexList.emptyPromptDescription"
-                defaultMessage="Use a follower index to replicate a leader index on a remote cluster."
-              />
-            </p>
-          </Fragment>
-        }
-        actions={
-          <EuiButton
-            {...reactRouterNavigate(this.props.history, `/follower_indices/add`)}
-            fill
-            iconType="plusInCircle"
-            data-test-subj="createFollowerIndexButton"
-          >
-            <FormattedMessage
-              id="xpack.crossClusterReplication.addFollowerButtonLabel"
-              defaultMessage="Create a follower index"
-            />
-          </EuiButton>
-        }
-        data-test-subj="emptyPrompt"
-      />
-    );
-  }
-
-  renderLoading() {
-    return (
-      <SectionLoading dataTestSubj="followerIndexLoading">
-        <FormattedMessage
-          id="xpack.crossClusterReplication.followerIndexList.loadingTitle"
-          defaultMessage="Loading follower indices..."
-        />
-      </SectionLoading>
-    );
-  }
-
-  renderList() {
-    const { selectFollowerIndex, followerIndices } = this.props;
-
-    const { isDetailPanelOpen } = this.state;
-
-    return (
-      <Fragment>
-        <FollowerIndicesTable followerIndices={followerIndices} />
-        {isDetailPanelOpen && <DetailPanel closeDetailPanel={() => selectFollowerIndex(null)} />}
-      </Fragment>
-    );
-  }
-
-  render() {
-    const { followerIndices, apiStatus } = this.props;
-    const isEmpty = apiStatus === API_STATUS.IDLE && !followerIndices.length;
-    return (
-      <Fragment>
-        {!isEmpty && this.renderHeader()}
-        {this.renderContent(isEmpty)}
-      </Fragment>
-    );
   }
 }

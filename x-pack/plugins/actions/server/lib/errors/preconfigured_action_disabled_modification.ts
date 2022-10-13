@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { KibanaResponseFactory } from '../../../../../../src/core/server';
+import { KibanaResponseFactory } from '@kbn/core/server';
 import { ErrorThatHandlesItsOwnResponse } from './types';
 
 export type PreconfiguredActionDisabledFrom = 'update' | 'delete';
 
 export class PreconfiguredActionDisabledModificationError
   extends Error
-  implements ErrorThatHandlesItsOwnResponse {
+  implements ErrorThatHandlesItsOwnResponse
+{
   public readonly disabledFrom: PreconfiguredActionDisabledFrom;
 
   constructor(message: string, disabledFrom: PreconfiguredActionDisabledFrom) {

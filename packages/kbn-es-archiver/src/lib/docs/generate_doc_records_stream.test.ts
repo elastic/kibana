@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { ToolingLog } from '@kbn/tooling-log';
+
 import {
   createListStream,
   createPromiseFromStreams,
   createConcatStream,
   createMapStream,
-  ToolingLog,
-} from '@kbn/dev-utils';
+} from '@kbn/utils';
 
 import { createGenerateDocRecordsStream } from './generate_doc_records_stream';
 import { Progress } from '../progress';
@@ -20,89 +21,121 @@ import { createStats } from '../stats';
 
 const log = new ToolingLog();
 
-it('transforms each input index to a stream of docs using scrollSearch helper', async () => {
-  const responses: any = {
-    foo: [
-      {
-        body: {
-          hits: {
-            total: 5,
-            hits: [
-              { _index: 'foo', _type: '_doc', _id: '0', _source: {} },
-              { _index: 'foo', _type: '_doc', _id: '1', _source: {} },
-              { _index: 'foo', _type: '_doc', _id: '2', _source: {} },
-            ],
-          },
-        },
-      },
-      {
-        body: {
-          hits: {
-            total: 5,
-            hits: [
-              { _index: 'foo', _type: '_doc', _id: '3', _source: {} },
-              { _index: 'foo', _type: '_doc', _id: '4', _source: {} },
-            ],
-          },
-        },
-      },
-    ],
-    bar: [
-      {
-        body: {
-          hits: {
-            total: 2,
-            hits: [
-              { _index: 'bar', _type: '_doc', _id: '0', _source: {} },
-              { _index: 'bar', _type: '_doc', _id: '1', _source: {} },
-            ],
-          },
-        },
-      },
-    ],
-  };
+interface SearchResponses {
+  [key: string]: Array<{
+    body: {
+      hits: {
+        total: number;
+        hits: Array<{
+          _index: string;
+          _id: string;
+          _source: Record<string, unknown>;
+        }>;
+      };
+    };
+  }>;
+}
 
+function createMockClient(responses: SearchResponses, hasDataStreams = false) {
+  // TODO: replace with proper mocked client
   const client: any = {
     helpers: {
       scrollSearch: jest.fn(function* ({ index }) {
+        if (hasDataStreams) {
+          index = `.ds-${index}`;
+        }
+
         while (responses[index] && responses[index].length) {
           yield responses[index].shift()!;
         }
       }),
     },
+    indices: {
+      get: jest.fn(async ({ index }) => {
+        return { [index]: { data_stream: hasDataStreams && index.substring(4) } };
+      }),
+      getDataStream: jest.fn(async ({ name }) => {
+        if (!hasDataStreams) return { data_streams: [] };
+        return { data_streams: [{ name }] };
+      }),
+    },
   };
+  return client;
+}
 
-  const stats = createStats('test', log);
-  const progress = new Progress();
+describe('esArchiver: createGenerateDocRecordsStream()', () => {
+  it('transforms each input index to a stream of docs using scrollSearch helper', async () => {
+    const responses = {
+      foo: [
+        {
+          body: {
+            hits: {
+              total: 5,
+              hits: [
+                { _index: 'foo', _id: '0', _source: {} },
+                { _index: 'foo', _id: '1', _source: {} },
+                { _index: 'foo', _id: '2', _source: {} },
+              ],
+            },
+          },
+        },
+        {
+          body: {
+            hits: {
+              total: 5,
+              hits: [
+                { _index: 'foo', _id: '3', _source: {} },
+                { _index: 'foo', _id: '4', _source: {} },
+              ],
+            },
+          },
+        },
+      ],
+      bar: [
+        {
+          body: {
+            hits: {
+              total: 2,
+              hits: [
+                { _index: 'bar', _id: '0', _source: {} },
+                { _index: 'bar', _id: '1', _source: {} },
+              ],
+            },
+          },
+        },
+      ],
+    };
 
-  const results = await createPromiseFromStreams([
-    createListStream(['bar', 'foo']),
-    createGenerateDocRecordsStream({
-      client,
-      stats,
-      progress,
-    }),
-    createMapStream((record: any) => {
-      expect(record).toHaveProperty('type', 'doc');
-      expect(record.value.source).toEqual({});
-      expect(record.value.type).toBe('_doc');
-      expect(record.value.index).toMatch(/^(foo|bar)$/);
-      expect(record.value.id).toMatch(/^\d+$/);
-      return `${record.value.index}:${record.value.id}`;
-    }),
-    createConcatStream([]),
-  ]);
+    const client = createMockClient(responses);
 
-  expect(client.helpers.scrollSearch).toMatchInlineSnapshot(`
+    const stats = createStats('test', log);
+    const progress = new Progress();
+
+    const results = await createPromiseFromStreams([
+      createListStream(['bar', 'foo']),
+      createGenerateDocRecordsStream({
+        client,
+        stats,
+        progress,
+      }),
+      createMapStream((record: any) => {
+        expect(record).toHaveProperty('type', 'doc');
+        expect(record.value.source).toEqual({});
+        expect(record.value.index).toMatch(/^(foo|bar)$/);
+        expect(record.value.id).toMatch(/^\d+$/);
+        return `${record.value.index}:${record.value.id}`;
+      }),
+      createConcatStream([]),
+    ]);
+
+    expect(client.helpers.scrollSearch).toMatchInlineSnapshot(`
     [MockFunction] {
       "calls": Array [
         Array [
           Object {
-            "_source": "true",
-            "body": Object {
-              "query": undefined,
-            },
+            "_source": true,
             "index": "bar",
+            "query": undefined,
             "rest_total_hits_as_int": true,
             "scroll": "1m",
             "size": 1000,
@@ -115,11 +148,9 @@ it('transforms each input index to a stream of docs using scrollSearch helper', 
         ],
         Array [
           Object {
-            "_source": "true",
-            "body": Object {
-              "query": undefined,
-            },
+            "_source": true,
             "index": "foo",
+            "query": undefined,
             "rest_total_hits_as_int": true,
             "scroll": "1m",
             "size": 1000,
@@ -143,7 +174,7 @@ it('transforms each input index to a stream of docs using scrollSearch helper', 
       ],
     }
   `);
-  expect(results).toMatchInlineSnapshot(`
+    expect(results).toMatchInlineSnapshot(`
     Array [
       "bar:0",
       "bar:1",
@@ -154,14 +185,14 @@ it('transforms each input index to a stream of docs using scrollSearch helper', 
       "foo:4",
     ]
   `);
-  expect(progress).toMatchInlineSnapshot(`
+    expect(progress).toMatchInlineSnapshot(`
     Progress {
       "complete": 7,
       "loggingInterval": undefined,
       "total": 7,
     }
   `);
-  expect(stats).toMatchInlineSnapshot(`
+    expect(stats).toMatchInlineSnapshot(`
     Object {
       "bar": Object {
         "archived": false,
@@ -197,4 +228,109 @@ it('transforms each input index to a stream of docs using scrollSearch helper', 
       },
     }
   `);
+  });
+
+  it('supports data streams', async () => {
+    const hits = [
+      { _index: '.ds-foo-datastream', _id: '0', _source: {} },
+      { _index: '.ds-foo-datastream', _id: '1', _source: {} },
+    ];
+    const responses = {
+      '.ds-foo-datastream': [{ body: { hits: { hits, total: hits.length } } }],
+    };
+    const client = createMockClient(responses, true);
+
+    const stats = createStats('test', log);
+    const progress = new Progress();
+
+    const results = await createPromiseFromStreams([
+      createListStream(['foo-datastream']),
+      createGenerateDocRecordsStream({
+        client,
+        stats,
+        progress,
+      }),
+      createMapStream((record: any) => {
+        return `${record.value.data_stream}:${record.value.id}`;
+      }),
+      createConcatStream([]),
+    ]);
+
+    expect(results).toEqual(['foo-datastream:0', 'foo-datastream:1']);
+  });
+
+  describe('keepIndexNames', () => {
+    it('changes .kibana* index names if keepIndexNames is not enabled', async () => {
+      const hits = [{ _index: '.kibana_7.16.0_001', _id: '0', _source: {} }];
+      const responses = {
+        ['.kibana_7.16.0_001']: [{ body: { hits: { hits, total: hits.length } } }],
+      };
+      const client = createMockClient(responses);
+      const stats = createStats('test', log);
+      const progress = new Progress();
+
+      const results = await createPromiseFromStreams([
+        createListStream(['.kibana_7.16.0_001']),
+        createGenerateDocRecordsStream({
+          client,
+          stats,
+          progress,
+        }),
+        createMapStream((record: { value: { index: string; id: string } }) => {
+          return `${record.value.index}:${record.value.id}`;
+        }),
+        createConcatStream([]),
+      ]);
+      expect(results).toEqual(['.kibana_1:0']);
+    });
+
+    it('does not change non-.kibana* index names if keepIndexNames is not enabled', async () => {
+      const hits = [{ _index: '.foo', _id: '0', _source: {} }];
+      const responses = {
+        ['.foo']: [{ body: { hits: { hits, total: hits.length } } }],
+      };
+      const client = createMockClient(responses);
+      const stats = createStats('test', log);
+      const progress = new Progress();
+
+      const results = await createPromiseFromStreams([
+        createListStream(['.foo']),
+        createGenerateDocRecordsStream({
+          client,
+          stats,
+          progress,
+        }),
+        createMapStream((record: { value: { index: string; id: string } }) => {
+          return `${record.value.index}:${record.value.id}`;
+        }),
+        createConcatStream([]),
+      ]);
+      expect(results).toEqual(['.foo:0']);
+    });
+
+    it('does not change .kibana* index names if keepIndexNames is enabled', async () => {
+      const hits = [{ _index: '.kibana_7.16.0_001', _id: '0', _source: {} }];
+      const responses = {
+        ['.kibana_7.16.0_001']: [{ body: { hits: { hits, total: hits.length } } }],
+      };
+      const client = createMockClient(responses);
+      const stats = createStats('test', log);
+      const progress = new Progress();
+
+      const results = await createPromiseFromStreams([
+        createListStream(['.kibana_7.16.0_001']),
+        createGenerateDocRecordsStream({
+          client,
+          stats,
+          progress,
+          keepIndexNames: true,
+        }),
+        createMapStream((record: { value: { index: string; id: string } }) => {
+          return `${record.value.index}:${record.value.id}`;
+        }),
+        createConcatStream([]),
+      ]);
+      expect(results).toEqual(['.kibana_7.16.0_001:0']);
+    });
+  });
 });

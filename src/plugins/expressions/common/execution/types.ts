@@ -6,12 +6,14 @@
  * Side Public License, v 1.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import type { KibanaRequest } from 'src/core/server';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaExecutionContext } from '@kbn/core/public';
 
-import { ExpressionType, SerializableState } from '../expression_types';
-import { Adapters, RequestAdapter } from '../../../inspector/common';
+import { Adapters, RequestAdapter } from '@kbn/inspector-plugin/common';
+import { Datatable, ExpressionType } from '../expression_types';
 import { TablesAdapter } from '../util/tables_adapter';
+import { ExpressionsInspectorAdapter } from '../util';
 
 /**
  * `ExecutionContext` is an object available to all functions during a single execution;
@@ -19,7 +21,7 @@ import { TablesAdapter } from '../util/tables_adapter';
  */
 export interface ExecutionContext<
   InspectorAdapters extends Adapters = Adapters,
-  ExecutionContextSearch extends SerializableState = SerializableState
+  ExecutionContextSearch extends SerializableRecord = SerializableRecord
 > {
   /**
    * Get search context of the expression.
@@ -62,12 +64,28 @@ export interface ExecutionContext<
    * Returns the state (true|false) of the sync colors across panels switch.
    */
   isSyncColorsEnabled?: () => boolean;
+
+  /**
+   * Returns the state (true|false) of the sync tooltips across panels switch.
+   */
+  isSyncTooltipsEnabled?: () => boolean;
+
+  /**
+   * Contains the meta-data about the source of the expression.
+   */
+  getExecutionContext: () => KibanaExecutionContext | undefined;
+
+  /**
+   * Logs datatable.
+   */
+  logDatatable?(name: string, datatable: Datatable): void;
 }
 
 /**
  * Default inspector adapters created if inspector adapters are not set explicitly.
  */
-export interface DefaultInspectorAdapters extends Adapters {
+export interface DefaultInspectorAdapters {
   requests: RequestAdapter;
   tables: TablesAdapter;
+  expression: ExpressionsInspectorAdapter;
 }

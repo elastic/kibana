@@ -6,7 +6,7 @@
  */
 
 import { get, keyBy, map, groupBy } from 'lodash';
-import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
+import type { PaletteRegistry, PaletteOutput } from '@kbn/coloring';
 import { getLegendConfig } from '../../common/lib/get_legend_config';
 import { getFunctionHelp } from '../../i18n';
 import {
@@ -134,17 +134,8 @@ export function pieFunctionFactory(
         },
       },
       fn: (input, args) => {
-        const {
-          tilt,
-          radius,
-          labelRadius,
-          labels,
-          hole,
-          legend,
-          palette,
-          font,
-          seriesStyle,
-        } = args;
+        const { tilt, radius, labelRadius, labels, hole, legend, palette, font, seriesStyle } =
+          args;
         const seriesStyles = keyBy(seriesStyle || [], 'label') || {};
 
         const data: PieData[] = map(groupBy(input.rows, 'color'), (series, label = '') => {
@@ -173,7 +164,7 @@ export function pieFunctionFactory(
               canvas: false,
               colors: paletteService
                 .get(palette.name || 'custom')
-                .getColors(data.length, palette.params),
+                .getCategoricalColors(data.length, palette.params),
               legend: getLegendConfig(legend, data.length),
               grid: {
                 show: false,

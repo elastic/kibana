@@ -1,3 +1,4 @@
+TODO: update with additional extension points (Integration app, add agent flyout etc.)
 # Fleet UI Extensions
 
 Fleet's Kibana UI supports two types of UI extensions:
@@ -34,9 +35,27 @@ export class Plugin {
 
     registerExtension({
       package: 'endpoint',
+      view: 'package-policy-create-multi-step',
+      component: LazyEndpointPolicyCreateMultiStepExtension,
+    });
+
+    registerExtension({
+      package: 'endpoint',
       view: 'package-detail-custom',
       component: getLazyEndpointPackageCustomExtension(core, plugins),
     });
+
+    registerExtension({
+        package: 'endpoint',
+        view: 'package-policy-response',
+        Component: getLazyEndpointPolicyResponseExtension(core, plugins),
+      });
+
+    registerExtension({
+        package: 'endpoint',
+        view: 'package-generic-errors-list',
+        Component: getLazyEndpointGenericErrorsListExtension(core, plugins),
+      });
   }
   //...
 }
@@ -44,7 +63,7 @@ export class Plugin {
 
 > The code above lives in `x-pack/plugins/security_solution/public/plugin.tsx`
 
-For a list of supported Fleet UI extensions, see the `UIExtensionPoint` and associated Union types defined here: `x-pack/plugins/fleet/public/applications/fleet/types/ui_extensions.ts`.
+For a list of supported Fleet UI extensions, see the `UIExtensionPoint` and associated Union types defined here: `x-pack/plugins/fleet/public/types/ui_extensions.ts`.
 
 
 
@@ -81,4 +100,4 @@ const LinkToAgentEnroll = () => {
 }
 ```
 
-For a list of supported Fleet pages, see the type `AnyIntraAppRouteState` and its associated Union types in `x-pack/plugins/fleet/public/applications/fleet/types/intra_app_route_state.ts`
+For a list of supported Fleet pages, see the type `AnyIntraAppRouteState` and its associated Union types in `x-pack/plugins/fleet/public/types/intra_app_route_state.ts`

@@ -5,33 +5,46 @@
  * 2.0.
  */
 
+export type {
+  FieldHook,
+  FieldValidateResponse,
+  FormConfig,
+  FormData,
+  FormHook,
+  FormSchema,
+  ValidationConfig,
+  ValidationError,
+  ValidationFunc,
+  ValidationFuncArg,
+  ArrayItem,
+  FormArrayField,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 export {
   getUseField,
   getFieldValidityAndErrorMessage,
-  FieldHook,
-  FieldValidateResponse,
   FIELD_TYPES,
   Form,
-  FormData,
   FormDataProvider,
-  FormHook,
-  FormSchema,
   UseArray,
   UseField,
   UseMultiFields,
   useForm,
   useFormContext,
   useFormData,
-  ValidationError,
-  ValidationFunc,
   VALIDATION_TYPES,
-} from '../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 export {
   Field,
   ComboBoxField,
   ToggleField,
   SelectField,
-} from '../../../../src/plugins/es_ui_shared/static/forms/components';
-export { fieldValidators } from '../../../../src/plugins/es_ui_shared/static/forms/helpers';
-export { ERROR_CODE } from '../../../../src/plugins/es_ui_shared/static/forms/helpers/field_validators/types';
+  JsonEditorField,
+  SuperSelectField,
+} from '@kbn/es-ui-shared-plugin/static/forms/components';
+export { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+export type { ERROR_CODE } from '@kbn/es-ui-shared-plugin/static/forms/helpers/field_validators/types';
+
+export { EuiCodeEditor } from '@kbn/es-ui-shared-plugin/public';
+export type { EuiCodeEditorProps } from '@kbn/es-ui-shared-plugin/public';
+export { useUiSetting$, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';

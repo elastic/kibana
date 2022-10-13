@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   NetworkKpiUniquePrivateIpsRequestOptions,
   UniquePrivateAttributeQuery,
 } from '../../../../../../../common/search_strategy/security_solution/network';
@@ -84,9 +84,9 @@ export const buildUniquePrivateIpsQuery = ({
   ];
 
   const dslQuery = {
-    allowNoIndices: true,
+    allow_no_indices: true,
     index: defaultIndex,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     track_total_hits: false,
     body: {
       aggregations: {

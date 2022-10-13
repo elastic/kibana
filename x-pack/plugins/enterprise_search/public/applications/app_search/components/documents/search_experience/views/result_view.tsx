@@ -7,12 +7,13 @@
 
 import React from 'react';
 
-import { Schema } from '../../../../../shared/types';
+import type { SearchResult } from '@elastic/search-ui';
+
+import { Schema } from '../../../../../shared/schema/types';
 import { Result } from '../../../result/result';
-import { Result as ResultType } from '../../../result/types';
 
 export interface Props {
-  result: ResultType;
+  result: SearchResult;
   schemaForTypeHighlights?: Schema;
   isMetaEngine: boolean;
 }

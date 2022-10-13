@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import * as t from 'io-ts';
 
@@ -1077,5 +1077,19 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
       formatters: [toInt],
     },
     schema: t.union([t.literal(2), t.literal(3), t.literal(4)]),
+  },
+  time_series_metric: {
+    fieldConfig: {
+      defaultValue: null,
+      type: FIELD_TYPES.SELECT,
+    },
+    schema: t.union([t.literal('gauge'), t.literal('counter'), t.null]),
+  },
+  time_series_dimension: {
+    fieldConfig: {
+      type: FIELD_TYPES.CHECKBOX,
+      defaultValue: false,
+    },
+    schema: t.boolean,
   },
 };

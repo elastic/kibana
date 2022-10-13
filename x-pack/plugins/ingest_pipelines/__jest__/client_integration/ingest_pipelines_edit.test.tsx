@@ -9,6 +9,7 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 
 import { setupEnvironment, pageHelpers } from './helpers';
+import { API_BASE_PATH } from '../../common/constants';
 import { PIPELINE_TO_EDIT, PipelinesEditTestBed } from './helpers/pipelines_edit.helpers';
 
 const { setup } = pageHelpers.pipelinesEdit;
@@ -33,17 +34,13 @@ jest.mock('@elastic/eui', () => {
 describe('<PipelinesEdit />', () => {
   let testBed: PipelinesEditTestBed;
 
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
-
-  afterAll(() => {
-    server.restore();
-  });
-
-  httpRequestsMockHelpers.setLoadPipelineResponse(PIPELINE_TO_EDIT);
+  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeEach(async () => {
+    httpRequestsMockHelpers.setLoadPipelineResponse(PIPELINE_TO_EDIT.name, PIPELINE_TO_EDIT);
+
     await act(async () => {
-      testBed = await setup();
+      testBed = await setup(httpSetup);
     });
 
     testBed.component.update();
@@ -78,16 +75,16 @@ describe('<PipelinesEdit />', () => {
 
       await actions.clickSubmitButton();
 
-      const latestRequest = server.requests[server.requests.length - 1];
-
       const { name, ...pipelineDefinition } = PIPELINE_TO_EDIT;
-
-      const expected = {
-        ...pipelineDefinition,
-        description: UPDATED_DESCRIPTION,
-      };
-
-      expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expected);
+      expect(httpSetup.put).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/${name}`,
+        expect.objectContaining({
+          body: JSON.stringify({
+            ...pipelineDefinition,
+            description: UPDATED_DESCRIPTION,
+          }),
+        })
+      );
     });
   });
 });

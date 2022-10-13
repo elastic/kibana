@@ -1,0 +1,16 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./target/types",
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": true
+  },
+  "include": [
+    "server/**/*.ts",
+  ],
+  "exclude": [],
+  "references": [
+    { "path": "../../../../src/core/tsconfig.json" },
+  ],
+}

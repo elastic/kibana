@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { IndexPatternMapping } from '../types';
-import { IndexPatternSavedObject } from '../../../../common/hooks/types';
+import type { IndexPatternMapping } from '../types';
+import type { IndexPatternSavedObject } from '../../../../common/hooks/types';
+import { LAYER_TYPE } from '@kbn/maps-plugin/common';
 
 export const mockIndexPatternIds: IndexPatternMapping[] = [
   { title: 'filebeat-*', id: '8c7323ac-97ad-4b53-ac0a-40f8f691a918' },
@@ -14,6 +15,7 @@ export const mockIndexPatternIds: IndexPatternMapping[] = [
 
 export const mockAPMIndexPatternIds: IndexPatternMapping[] = [
   { title: 'apm-*', id: '8c7323ac-97ad-4b53-ac0a-40f8f691a918' },
+  { title: 'traces-apm*,logs-apm*,metrics-apm*,apm-*', id: '8c7323ac-97ad-4b53-ac0a-40f8f691a918' },
 ];
 
 export const mockSourceLayer = {
@@ -67,7 +69,7 @@ export const mockSourceLayer = {
   maxZoom: 24,
   alpha: 1,
   visible: true,
-  type: 'VECTOR',
+  type: LAYER_TYPE.GEOJSON_VECTOR,
   query: { query: '', language: 'kuery' },
   joins: [],
 };
@@ -90,6 +92,7 @@ export const mockDestinationLayer = {
     topHitsTimeField: '@timestamp',
     topHitsSize: 1,
     indexPatternId: '8c7323ac-97ad-4b53-ac0a-40f8f691a918',
+    scalingType: 'LIMIT',
   },
   style: {
     type: 'VECTOR',
@@ -123,7 +126,7 @@ export const mockDestinationLayer = {
   maxZoom: 24,
   alpha: 1,
   visible: true,
-  type: 'VECTOR',
+  type: LAYER_TYPE.GEOJSON_VECTOR,
   query: { query: '', language: 'kuery' },
 };
 
@@ -178,9 +181,14 @@ export const mockClientLayer = {
   maxZoom: 24,
   alpha: 1,
   visible: true,
-  type: 'VECTOR',
+  type: LAYER_TYPE.GEOJSON_VECTOR,
   query: { query: '', language: 'kuery' },
   joins: [],
+};
+
+const mockApmDataStreamClientLayer = {
+  ...mockClientLayer,
+  label: 'traces-apm*,logs-apm*,metrics-apm*,apm-* | Client Point',
 };
 
 export const mockServerLayer = {
@@ -201,6 +209,7 @@ export const mockServerLayer = {
     topHitsTimeField: '@timestamp',
     topHitsSize: 1,
     indexPatternId: '8c7323ac-97ad-4b53-ac0a-40f8f691a918',
+    scalingType: 'LIMIT',
   },
   style: {
     type: 'VECTOR',
@@ -234,8 +243,13 @@ export const mockServerLayer = {
   maxZoom: 24,
   alpha: 1,
   visible: true,
-  type: 'VECTOR',
+  type: LAYER_TYPE.GEOJSON_VECTOR,
   query: { query: '', language: 'kuery' },
+};
+
+const mockApmDataStreamServerLayer = {
+  ...mockServerLayer,
+  label: 'traces-apm*,logs-apm*,metrics-apm*,apm-* | Server Point',
 };
 
 export const mockLineLayer = {
@@ -298,7 +312,7 @@ export const mockLineLayer = {
   maxZoom: 24,
   alpha: 0.5,
   visible: true,
-  type: 'VECTOR',
+  type: LAYER_TYPE.GEOJSON_VECTOR,
   query: { query: '', language: 'kuery' },
 };
 
@@ -362,8 +376,12 @@ export const mockClientServerLineLayer = {
   maxZoom: 24,
   alpha: 0.5,
   visible: true,
-  type: 'VECTOR',
+  type: LAYER_TYPE.GEOJSON_VECTOR,
   query: { query: '', language: 'kuery' },
+};
+const mockApmDataStreamClientServerLineLayer = {
+  ...mockClientServerLineLayer,
+  label: 'traces-apm*,logs-apm*,metrics-apm*,apm-* | Line',
 };
 
 export const mockLayerList = [
@@ -376,7 +394,7 @@ export const mockLayerList = [
     alpha: 1,
     visible: true,
     style: null,
-    type: 'VECTOR_TILE',
+    type: LAYER_TYPE.EMS_VECTOR_TILE,
   },
   mockLineLayer,
   mockDestinationLayer,
@@ -393,7 +411,7 @@ export const mockLayerListDouble = [
     alpha: 1,
     visible: true,
     style: null,
-    type: 'VECTOR_TILE',
+    type: LAYER_TYPE.EMS_VECTOR_TILE,
   },
   mockLineLayer,
   mockDestinationLayer,
@@ -413,7 +431,7 @@ export const mockLayerListMixed = [
     alpha: 1,
     visible: true,
     style: null,
-    type: 'VECTOR_TILE',
+    type: LAYER_TYPE.EMS_VECTOR_TILE,
   },
   mockLineLayer,
   mockDestinationLayer,
@@ -421,6 +439,9 @@ export const mockLayerListMixed = [
   mockClientServerLineLayer,
   mockServerLayer,
   mockClientLayer,
+  mockApmDataStreamClientServerLineLayer,
+  mockApmDataStreamServerLayer,
+  mockApmDataStreamClientLayer,
 ];
 
 export const mockAPMIndexPattern: IndexPatternSavedObject = {
@@ -465,6 +486,15 @@ export const mockAPMTransactionIndexPattern: IndexPatternSavedObject = {
   _version: 'abc',
   attributes: {
     title: 'apm-*-transaction*',
+  },
+};
+
+export const mockAPMTracesDataStreamIndexPattern: IndexPatternSavedObject = {
+  id: 'traces-apm*',
+  type: 'index-pattern',
+  _version: 'abc',
+  attributes: {
+    title: 'traces-apm*',
   },
 };
 

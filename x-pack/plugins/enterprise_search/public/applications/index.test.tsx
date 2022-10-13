@@ -7,26 +7,29 @@
 
 import React from 'react';
 
+import { act } from '@testing-library/react';
 import { getContext } from 'kea';
 
-import { coreMock } from '../../../../../src/core/public/mocks';
-import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
-import { licensingMock } from '../../../licensing/public/mocks';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import { securityMock } from '@kbn/security-plugin/public/mocks';
 
 import { AppSearch } from './app_search';
-import { EnterpriseSearch } from './enterprise_search';
+import { EnterpriseSearchOverview } from './enterprise_search_overview';
 import { KibanaLogic } from './shared/kibana';
 import { WorkplaceSearch } from './workplace_search';
 
-import { renderApp, renderHeaderActions } from './';
+import { renderApp, renderHeaderActions } from '.';
 
 describe('renderApp', () => {
   const kibanaDeps = {
-    params: coreMock.createAppMountParamters(),
+    params: coreMock.createAppMountParameters(),
     core: coreMock.createStart(),
     plugins: {
       licensing: licensingMock.createStart(),
       charts: chartPluginMock.createStartContract(),
+      security: securityMock.createStart(),
     },
   } as any;
   const pluginData = {
@@ -45,7 +48,7 @@ describe('renderApp', () => {
     const unmount = renderApp(MockApp, kibanaDeps, pluginData);
     expect(mockContainer.querySelector('.hello-world')).not.toBeNull();
 
-    unmount();
+    act(() => unmount());
     expect(mockContainer.innerHTML).toEqual('');
   });
 
@@ -58,20 +61,30 @@ describe('renderApp', () => {
   };
 
   describe('Enterprise Search apps', () => {
-    afterEach(() => unmount());
+    afterEach(() => {
+      act(() => {
+        unmount();
+      });
+    });
 
-    it('renders EnterpriseSearch', () => {
-      mount(EnterpriseSearch);
-      expect(mockContainer.querySelector('.enterpriseSearchOverview')).not.toBeNull();
+    it('renders EnterpriseSearchOverview', () => {
+      act(() => {
+        mount(EnterpriseSearchOverview);
+      });
+      expect(mockContainer.querySelector('.kbnPageTemplate')).not.toBeNull();
     });
 
     it('renders AppSearch', () => {
-      mount(AppSearch);
+      act(() => {
+        mount(AppSearch);
+      });
       expect(mockContainer.querySelector('.setupGuide')).not.toBeNull();
     });
 
     it('renders WorkplaceSearch', () => {
-      mount(WorkplaceSearch);
+      act(() => {
+        mount(WorkplaceSearch);
+      });
       expect(mockContainer.querySelector('.setupGuide')).not.toBeNull();
     });
   });

@@ -13,6 +13,10 @@ export const WhitePageWrapper = styled.div`
   flex: 1 1 auto;
 `;
 
+export const WhitePageWrapperNoBorder = styled.div`
+  background-color: ${({ theme }) => theme.eui.euiColorEmptyShade};
+  flex: 1 1 auto;
+`;
 export const SectionWrapper = styled.div`
   box-sizing: content-box;
   margin: 0 auto;
@@ -20,7 +24,15 @@ export const SectionWrapper = styled.div`
   width: 100%;
 `;
 
-export const HeaderWrapper = styled.div`
-  padding: ${({ theme }) =>
-    `${theme.eui.paddingSizes.l} ${theme.eui.paddingSizes.l} 0 ${theme.eui.paddingSizes.l}`};
+const gutterTimeline = '70px'; // seems to be a timeline reference from the original file
+export const ContentWrapper = styled.div`
+  ${({ theme }) =>
+    `
+      padding: ${theme.eui.euiSizeL} 0 ${gutterTimeline} 0;
+    `};
+`;
+
+export const Wrapper = styled.div`
+  display: flex;
+  flex-direction: column;
 `;

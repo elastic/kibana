@@ -14,8 +14,10 @@ import { AnomalyScoreComponent } from './anomaly_score';
 import { mockAnomalies } from '../mock';
 import { TestProviders } from '../../../mock/test_providers';
 import { useMountAppended } from '../../../utils/use_mount_appended';
-import { Anomalies } from '../types';
+import type { Anomalies } from '../types';
 import { waitFor } from '@testing-library/dom';
+
+jest.mock('../../../lib/kibana');
 
 const startDate: string = '2020-07-07T08:20:18.966Z';
 const endDate: string = '3000-01-01T00:00:00.000Z';

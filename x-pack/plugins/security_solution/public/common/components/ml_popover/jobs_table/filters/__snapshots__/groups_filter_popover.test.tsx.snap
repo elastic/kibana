@@ -10,13 +10,14 @@ exports[`GroupsFilterPopover renders correctly against snapshot 1`] = `
       iconType="arrowDown"
       isSelected={false}
       numActiveFilters={0}
+      numFilters={3}
       onClick={[Function]}
     >
       Groups
     </EuiFilterButton>
   }
   closePopover={[Function]}
-  display="inlineBlock"
+  display="inline-block"
   hasArrow={true}
   isOpen={false}
   ownFocus={true}

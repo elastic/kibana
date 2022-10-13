@@ -80,6 +80,7 @@ export const useDataGrid = (
 
   useEffect(() => {
     setVisibleColumns(defaultVisibleColumns);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [defaultVisibleColumns.join()]);
 
   const [invalidSortingColumnns, setInvalidSortingColumnns] = useState<string[]>([]);
@@ -87,15 +88,15 @@ export const useDataGrid = (
   const onSort: OnSort = useCallback(
     (sc) => {
       // Check if an unsupported column type for sorting was selected.
-      const updatedInvalidSortingColumnns = sc.reduce<string[]>((arr, current) => {
+      const updatedInvalidSortingColumns = sc.reduce<string[]>((arr, current) => {
         const columnType = columns.find((dgc) => dgc.id === current.id);
         if (columnType?.schema === 'json') {
           arr.push(current.id);
         }
         return arr;
       }, []);
-      setInvalidSortingColumnns(updatedInvalidSortingColumnns);
-      if (updatedInvalidSortingColumnns.length === 0) {
+      setInvalidSortingColumnns(updatedInvalidSortingColumns);
+      if (updatedInvalidSortingColumns.length === 0) {
         setSortingColumns(sc);
       }
     },
@@ -137,6 +138,7 @@ export const useDataGrid = (
       // If both columns are visible sort by their visible sorting order.
       return visibleColumns.indexOf(a.id) - visibleColumns.indexOf(b.id);
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [columns, columnCharts, chartsVisible, JSON.stringify(visibleColumns)]);
 
   // Initialize the mini histogram charts toggle button.

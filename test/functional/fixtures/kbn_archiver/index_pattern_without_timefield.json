@@ -1,0 +1,30 @@
+{
+  "attributes": {
+    "fields": "[]",
+    "timeFieldName": "@timestamp",
+    "title": "with-timefield"
+  },
+  "coreMigrationVersion": "7.17.1",
+  "id": "with-timefield",
+  "migrationVersion": {
+    "index-pattern": "7.11.0"
+  },
+  "references": [],
+  "type": "index-pattern",
+  "version": "WzEzLDJd"
+}
+
+{
+  "attributes": {
+    "fields": "[]",
+    "title": "without-timefield"
+  },
+  "coreMigrationVersion": "7.17.1",
+  "id": "without-timefield",
+  "migrationVersion": {
+    "index-pattern": "7.11.0"
+  },
+  "references": [],
+  "type": "index-pattern",
+  "version": "WzEyLDJd"
+}

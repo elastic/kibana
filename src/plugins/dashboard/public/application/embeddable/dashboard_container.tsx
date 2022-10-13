@@ -7,67 +7,50 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
 import uuid from 'uuid';
-import { CoreStart, IUiSettingsClient } from 'src/core/public';
-import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
+import ReactDOM from 'react-dom';
 
-import { UiActionsStart } from '../../services/ui_actions';
-import { RefreshInterval, TimeRange, Query, Filter } from '../../services/data';
+import { I18nProvider } from '@kbn/i18n-react';
+import { Subscription } from 'rxjs';
+import type { KibanaExecutionContext } from '@kbn/core/public';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
+import type { Filter, TimeRange } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   ViewMode,
   Container,
-  PanelState,
-  IEmbeddable,
-  ContainerInput,
-  EmbeddableInput,
-  EmbeddableStart,
-  EmbeddableOutput,
-  EmbeddableFactory,
-} from '../../services/embeddable';
-import { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
+  type PanelState,
+  type IEmbeddable,
+  type EmbeddableInput,
+  type EmbeddableOutput,
+  type EmbeddableFactory,
+  ErrorEmbeddable,
+  isErrorEmbeddable,
+} from '@kbn/embeddable-plugin/public';
+import type { Query } from '@kbn/es-query';
+import type { RefreshInterval } from '@kbn/data-plugin/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+
+import { DASHBOARD_CONTAINER_TYPE } from '../../dashboard_constants';
 import { createPanelState } from './panel';
 import { DashboardPanelState } from './types';
 import { DashboardViewport } from './viewport/dashboard_viewport';
-import {
-  KibanaContextProvider,
-  KibanaReactContext,
-  KibanaReactContextValue,
-} from '../../services/kibana_react';
 import { PLACEHOLDER_EMBEDDABLE } from './placeholder';
+import { DASHBOARD_LOADED_EVENT } from '../../events';
+import { DashboardContainerInput } from '../../types';
 import { PanelPlacementMethod, IPanelPlacementArgs } from './panel/dashboard_panel_placement';
-import { DashboardCapabilities } from '../types';
+import {
+  combineDashboardFiltersWithControlGroupFilters,
+  syncDashboardControlGroup,
+} from '../lib/dashboard_control_group';
+import { pluginServices } from '../../services/plugin_services';
 
-export interface DashboardContainerInput extends ContainerInput {
-  dashboardCapabilities?: DashboardCapabilities;
-  refreshConfig?: RefreshInterval;
-  isEmbeddedExternally?: boolean;
-  isFullScreenMode: boolean;
-  expandedPanelId?: string;
-  timeRange: TimeRange;
-  description?: string;
-  useMargins: boolean;
-  syncColors?: boolean;
-  viewMode: ViewMode;
-  filters: Filter[];
-  title: string;
-  query: Query;
-  panels: {
-    [panelId: string]: DashboardPanelState<EmbeddableInput & { [k: string]: unknown }>;
-  };
-}
-export interface DashboardContainerServices {
-  ExitFullScreenButton: React.ComponentType<any>;
-  SavedObjectFinder: React.ComponentType<any>;
-  notifications: CoreStart['notifications'];
-  application: CoreStart['application'];
-  inspector: InspectorStartContract;
-  overlays: CoreStart['overlays'];
-  uiSettings: IUiSettingsClient;
-  embeddable: EmbeddableStart;
-  uiActions: UiActionsStart;
-  http: CoreStart['http'];
+export interface DashboardLoadedInfo {
+  timeToData: number;
+  timeToDone: number;
+  numOfPanels: number;
+  status: string;
 }
 
 interface IndexSignature {
@@ -78,50 +61,137 @@ export interface InheritedChildInput extends IndexSignature {
   filters: Filter[];
   query: Query;
   timeRange: TimeRange;
+  timeslice?: [number, number];
   refreshConfig?: RefreshInterval;
   viewMode: ViewMode;
   hidePanelTitles?: boolean;
   id: string;
   searchSessionId?: string;
   syncColors?: boolean;
+  syncTooltips?: boolean;
+  executionContext?: KibanaExecutionContext;
 }
-
-export type DashboardReactContextValue = KibanaReactContextValue<DashboardContainerServices>;
-export type DashboardReactContext = KibanaReactContext<DashboardContainerServices>;
-
-const defaultCapabilities: DashboardCapabilities = {
-  show: false,
-  createNew: false,
-  saveQuery: false,
-  createShortUrl: false,
-  hideWriteControls: true,
-  mapsCapabilities: { save: false },
-  visualizeCapabilities: { save: false },
-  storeSearchSession: true,
-};
 
 export class DashboardContainer extends Container<InheritedChildInput, DashboardContainerInput> {
   public readonly type = DASHBOARD_CONTAINER_TYPE;
-  public switchViewMode?: (newViewMode: ViewMode) => void;
+
+  private onDestroyControlGroup?: () => void;
+  private subscriptions: Subscription = new Subscription();
+
+  public controlGroup?: ControlGroupContainer;
+  private domNode?: HTMLElement;
+
+  private allDataViews: DataView[] = [];
+
+  /** Services that are used in the Dashboard container code */
+  private analyticsService;
+  private theme$;
+
+  /**
+   * Gets all the dataviews that are actively being used in the dashboard
+   * @returns An array of dataviews
+   */
+  public getAllDataViews = () => {
+    return this.allDataViews;
+  };
+
+  /**
+   * Use this to set the dataviews that are used in the dashboard when they change/update
+   * @param newDataViews The new array of dataviews that will overwrite the old dataviews array
+   */
+  public setAllDataViews = (newDataViews: DataView[]) => {
+    this.allDataViews = newDataViews;
+  };
 
   public getPanelCount = () => {
     return Object.keys(this.getInput().panels).length;
   };
 
+  public async getPanelTitles(): Promise<string[]> {
+    const titles: string[] = [];
+    const ids: string[] = Object.keys(this.getInput().panels);
+    for (const panelId of ids) {
+      await this.untilEmbeddableLoaded(panelId);
+      const child: IEmbeddable<EmbeddableInput, EmbeddableOutput> = this.getChild(panelId);
+      const title = child.getTitle();
+      if (title) {
+        titles.push(title);
+      }
+    }
+    return titles;
+  }
+
   constructor(
     initialInput: DashboardContainerInput,
-    private readonly services: DashboardContainerServices,
-    parent?: Container
+    parent?: Container,
+    controlGroup?: ControlGroupContainer | ErrorEmbeddable
   ) {
+    const {
+      embeddable: { getEmbeddableFactory },
+      settings: { isProjectEnabledInLabs },
+    } = pluginServices.getServices();
+
     super(
       {
-        dashboardCapabilities: defaultCapabilities,
         ...initialInput,
       },
       { embeddableLoaded: {} },
-      services.embeddable.getEmbeddableFactory,
+      getEmbeddableFactory,
       parent
     );
+
+    ({
+      analytics: this.analyticsService,
+      settings: {
+        theme: { theme$: this.theme$ },
+      },
+    } = pluginServices.getServices());
+
+    if (
+      controlGroup &&
+      !isErrorEmbeddable(controlGroup) &&
+      isProjectEnabledInLabs('labs:dashboard:dashboardControls')
+    ) {
+      this.controlGroup = controlGroup;
+      syncDashboardControlGroup({
+        dashboardContainer: this,
+        controlGroup: this.controlGroup,
+      }).then((result) => {
+        if (!result) return;
+        const { onDestroyControlGroup } = result;
+        this.onDestroyControlGroup = onDestroyControlGroup;
+      });
+    }
+
+    this.subscriptions.add(
+      this.getAnyChildOutputChange$().subscribe(() => {
+        if (!this.controlGroup) {
+          return;
+        }
+
+        for (const child of Object.values(this.children)) {
+          const isLoading = child.getOutput().loading;
+          if (isLoading) {
+            this.controlGroup.anyControlOutputConsumerLoading$.next(true);
+            return;
+          }
+        }
+        this.controlGroup.anyControlOutputConsumerLoading$.next(false);
+      })
+    );
+  }
+
+  private onDataLoaded(data: DashboardLoadedInfo) {
+    if (this.analyticsService) {
+      reportPerformanceMetricEvent(this.analyticsService, {
+        eventName: DASHBOARD_LOADED_EVENT,
+        duration: data.timeToDone,
+        key1: 'time_to_data',
+        value1: data.timeToData,
+        key2: 'num_of_panels',
+        value2: data.numOfPanels,
+      });
+    }
   }
 
   protected createNewPanelState<
@@ -132,7 +202,8 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     partial: Partial<TEmbeddableInput> = {}
   ): DashboardPanelState<TEmbeddableInput> {
     const panelState = super.createNewPanelState(factory, partial);
-    return createPanelState(panelState, this.input.panels);
+    const { newPanel } = createPanelState(panelState, this.input.panels);
+    return newPanel;
   }
 
   public showPlaceholderUntil<TPlacementMethodArgs extends IPanelPlacementArgs>(
@@ -153,7 +224,8 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
         ],
       },
     } as PanelState<EmbeddableInput>;
-    const placeholderPanelState = createPanelState(
+
+    const { otherPanels, newPanel: placeholderPanelState } = createPanelState(
       originalPanelState,
       this.input.panels,
       placementMethod,
@@ -162,7 +234,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
     this.updateInput({
       panels: {
-        ...this.input.panels,
+        ...otherPanels,
         [placeholderPanelState.explicitInput.id]: placeholderPanelState,
       },
     });
@@ -242,14 +314,30 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   }
 
   public render(dom: HTMLElement) {
+    if (this.domNode) {
+      ReactDOM.unmountComponentAtNode(this.domNode);
+    }
+    this.domNode = dom;
+
     ReactDOM.render(
       <I18nProvider>
-        <KibanaContextProvider services={this.services}>
-          <DashboardViewport container={this} switchViewMode={this.switchViewMode} />
-        </KibanaContextProvider>
+        <KibanaThemeProvider theme$={this.theme$}>
+          <DashboardViewport
+            container={this}
+            controlGroup={this.controlGroup}
+            onDataLoaded={this.onDataLoaded.bind(this)}
+          />
+        </KibanaThemeProvider>
       </I18nProvider>,
       dom
     );
+  }
+
+  public destroy() {
+    super.destroy();
+    this.subscriptions.unsubscribe();
+    this.onDestroyControlGroup?.();
+    if (this.domNode) ReactDOM.unmountComponentAtNode(this.domNode);
   }
 
   protected getInheritedInput(id: string): InheritedChildInput {
@@ -257,22 +345,33 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       viewMode,
       refreshConfig,
       timeRange,
+      timeslice,
       query,
       hidePanelTitles,
       filters,
       searchSessionId,
       syncColors,
+      syncTooltips,
+      executionContext,
     } = this.input;
+
+    let combinedFilters = filters;
+    if (this.controlGroup) {
+      combinedFilters = combineDashboardFiltersWithControlGroupFilters(filters, this.controlGroup);
+    }
     return {
-      filters,
+      filters: combinedFilters,
       hidePanelTitles,
       query,
       timeRange,
+      timeslice,
       refreshConfig,
       viewMode,
       id,
       searchSessionId,
       syncColors,
+      syncTooltips,
+      executionContext,
     };
   }
 }

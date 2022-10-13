@@ -5,14 +5,15 @@
  * 2.0.
  */
 
+import { validate } from '@kbn/securitysolution-io-ts-utils';
+import { transformError } from '@kbn/securitysolution-es-utils';
+import { findListSchema, foundListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { LIST_URL } from '@kbn/securitysolution-list-constants';
+
 import type { ListsPluginRouter } from '../types';
-import { LIST_URL } from '../../common/constants';
-import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
-import { validate } from '../../common/shared_imports';
-import { findListSchema, foundListSchema } from '../../common/schemas';
 import { decodeCursor } from '../services/utils';
 
-import { getListClient } from './utils';
+import { buildRouteValidation, buildSiemResponse, getListClient } from './utils';
 
 export const findListRoute = (router: ListsPluginRouter): void => {
   router.get(
@@ -28,7 +29,7 @@ export const findListRoute = (router: ListsPluginRouter): void => {
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        const lists = getListClient(context);
+        const lists = await getListClient(context);
         const {
           cursor,
           filter: filterOrUndefined,
@@ -62,6 +63,7 @@ export const findListRoute = (router: ListsPluginRouter): void => {
             filter,
             page,
             perPage,
+            runtimeMappings: undefined,
             searchAfter,
             sortField,
             sortOrder,

@@ -2,6 +2,9 @@
 = Developer guide
 
 --
+
+NOTE: This is our legacy developer guide, and while we strive to keep it accurate, new content is added inside the {kib-repo}blob/{branch}/dev_docs[Kibana repo]. The rendered https://docs.elastic.dev/kibana-dev-docs/getting-started/welcome[guide] can only be accessed internally at the moment, though the raw content is public in our {kib-repo}blob/{branch}/dev_docs[public repository].
+
 Contributing to {kib} can be daunting at first, but it doesn't have to be. The following sections should get you up and
 running in no time. If you have any problems, file an issue in the https://github.com/elastic/kibana/issues[Kibana repo].
 

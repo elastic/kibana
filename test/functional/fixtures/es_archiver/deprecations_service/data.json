@@ -1,14 +1,18 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana",
     "id": "test-deprecations-plugin:ff3733a0-9fty-11e7-ahb3-3dcb94193fab",
+    "index": ".kibana",
     "source": {
-      "type": "test-deprecations-plugin",
-      "updated_at": "2021-02-11T18:51:23.794Z",
+      "coreMigrationVersion": "7.14.0",
+      "references": [
+      ],
       "test-deprecations-plugin": {
         "title": "Test saved object"
-      }
-    }
+      },
+      "type": "test-deprecations-plugin",
+      "updated_at": "2021-02-11T18:51:23.794Z"
+    },
+    "type": "_doc"
   }
 }

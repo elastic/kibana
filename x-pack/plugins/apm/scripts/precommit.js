@@ -40,8 +40,8 @@ const tasks = new Listr(
             resolve(
               __dirname,
               useOptimizedTsConfig
-                ? './optimize-tsconfig.js'
-                : './unoptimize-tsconfig.js'
+                ? './optimize_tsconfig.js'
+                : './unoptimize_tsconfig.js'
             ),
           ],
           execaOpts
@@ -66,17 +66,25 @@ const tasks = new Listr(
         execa(
           'node',
           [
-            resolve(__dirname, './jest.js'),
+            resolve(__dirname, '../../../../scripts/jest.js'),
+            '--config',
+            resolve(__dirname, '../jest.config.js'),
             '--reporters',
             resolve(__dirname, '../../../../node_modules/jest-silent-reporter'),
             '--collect-coverage',
             'false',
+            '--maxWorkers',
+            4,
           ],
           execaOpts
         ),
     },
   ],
-  { exitOnError: true, concurrent: false }
+  {
+    exitOnError: true,
+    concurrent: false,
+    renderer: process.env.CI ? 'verbose' : 'default',
+  }
 );
 
 tasks.run().catch((error) => {

@@ -6,21 +6,28 @@
  */
 
 import Boom from '@hapi/boom';
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { TypeOf } from '@kbn/config-schema';
-import { AnalysisConfig, Datafeed } from '../../common/types/anomaly_detection_jobs';
+import type { AnalysisConfig, Datafeed } from '../../common/types/anomaly_detection_jobs';
 import { wrapError } from '../client/error_wrapper';
-import { RouteInitialization } from '../types';
+import type { RouteInitialization } from '../types';
 import {
   estimateBucketSpanSchema,
   modelMemoryLimitSchema,
   validateCardinalitySchema,
   validateJobSchema,
+  validateDatafeedPreviewSchema,
 } from './schemas/job_validation_schema';
 import { estimateBucketSpanFactory } from '../models/bucket_span_estimator';
 import { calculateModelMemoryLimitProvider } from '../models/calculate_model_memory_limit';
-import { validateJob, validateCardinality } from '../models/job_validation';
+import {
+  validateJob,
+  validateCardinality,
+  validateDatafeedPreview,
+} from '../models/job_validation';
+import { getAuthorizationHeader } from '../lib/request_authorization';
 import type { MlClient } from '../lib/ml_client';
+import { CombinedJob } from '../../common/types/anomaly_detection_jobs';
 
 type CalculateModelMemoryLimitPayload = TypeOf<typeof modelMemoryLimitSchema>;
 
@@ -80,8 +87,7 @@ export function jobValidationRoutes({ router, mlLicense, routeGuard }: RouteInit
         const resp = await estimateBucketSpanFactory(client)(request.body)
           // this catch gets triggered when the estimation code runs without error
           // but isn't able to come up with a bucket span estimation.
-          // this doesn't return a HTTP error but an object with an error message
-          // which the client is then handling. triggering a HTTP error would be
+          // this doesn't return a HTTP error but an object with an error message a HTTP error would be
           // too severe for this case.
           .catch((error: any) => {
             errorResp = {
@@ -156,6 +162,7 @@ export function jobValidationRoutes({ router, mlLicense, routeGuard }: RouteInit
     },
     routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
+        // @ts-expect-error datafeed config is incorrect
         const resp = await validateCardinality(client, request.body);
 
         return response.ok({
@@ -192,7 +199,50 @@ export function jobValidationRoutes({ router, mlLicense, routeGuard }: RouteInit
           client,
           mlClient,
           request.body,
+          getAuthorizationHeader(request),
           mlLicense.isSecurityEnabled() === false
+        );
+
+        return response.ok({
+          body: resp,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup DataFeedPreviewValidation
+   *
+   * @api {post} /api/ml/validate/datafeed_preview Validates datafeed preview
+   * @apiName ValidateDataFeedPreview
+   * @apiDescription Validates that the datafeed preview runs successfully and produces results
+   *
+   * @apiSchema (body) validateDatafeedPreviewSchema
+   */
+  router.post(
+    {
+      path: '/api/ml/validate/datafeed_preview',
+      validate: {
+        body: validateDatafeedPreviewSchema,
+      },
+      options: {
+        tags: ['access:ml:canCreateJob'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
+      try {
+        const {
+          body: { job, start, end },
+        } = request;
+
+        const resp = await validateDatafeedPreview(
+          mlClient,
+          getAuthorizationHeader(request),
+          job as CombinedJob,
+          start,
+          end
         );
 
         return response.ok({

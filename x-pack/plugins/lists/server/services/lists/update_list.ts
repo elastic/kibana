@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
-
-import { decodeVersion } from '../utils/decode_version';
-import { encodeHitVersion } from '../utils/encode_hit_version';
-import {
+import { ElasticsearchClient } from '@kbn/core/server';
+import type {
   DescriptionOrUndefined,
   Id,
   ListSchema,
   MetaOrUndefined,
   NameOrUndefined,
-  UpdateEsListSchema,
-  VersionOrUndefined,
   _VersionOrUndefined,
-} from '../../../common/schemas';
+} from '@kbn/securitysolution-io-ts-list-types';
+import { VersionOrUndefined } from '@kbn/securitysolution-io-ts-types';
+import { decodeVersion, encodeHitVersion } from '@kbn/securitysolution-es-utils';
+
+import { UpdateEsListSchema } from '../../schemas/elastic_query';
 
 import { getList } from '.';
 
@@ -60,7 +59,7 @@ export const updateList = async ({
       updated_at: updatedAt,
       updated_by: user,
     };
-    const { body: response } = await esClient.update({
+    const response = await esClient.update({
       ...decodeVersion(_version),
       body: { doc },
       id,

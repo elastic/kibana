@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import { ml } from './ml_api_service';
 
-import { getToastNotificationService } from '../services/toast_notification_service';
+import { getToastNotificationService } from './toast_notification_service';
 import { isWebUrl } from '../util/url_utils';
 import { TIME_FORMAT } from '../../../common/constants/time_format';
 import { parseInterval } from '../../../common/util/parse_interval';
@@ -35,6 +35,7 @@ class JobService {
       start: undefined,
       end: undefined,
       calendars: undefined,
+      autoSetTimeRange: false,
     };
 
     this.jobs = [];
@@ -87,26 +88,6 @@ class JobService {
         }),
         value: 0,
         show: true,
-      },
-    };
-  }
-
-  getBlankJob() {
-    return {
-      job_id: '',
-      description: '',
-      groups: [],
-      analysis_config: {
-        bucket_span: '15m',
-        influencers: [],
-        detectors: [],
-      },
-      data_description: {
-        time_field: '',
-        time_format: '', // 'epoch',
-        field_delimiter: '',
-        quote_character: '"',
-        format: 'delimited',
       },
     };
   }
@@ -347,11 +328,6 @@ class JobService {
     return job;
   }
 
-  searchPreview(combinedJob) {
-    const { datafeed_config: datafeed, ...job } = combinedJob;
-    return ml.jobs.datafeedPreview(job, datafeed);
-  }
-
   openJob(jobId) {
     return ml.openJob({ jobId });
   }
@@ -411,6 +387,10 @@ class JobService {
     return ml.jobs.closeJobs(jIds);
   }
 
+  resetJobs(jIds) {
+    return ml.jobs.resetJobs(jIds);
+  }
+
   validateDetector(detector) {
     return new Promise((resolve, reject) => {
       if (detector) {
@@ -433,10 +413,6 @@ class JobService {
       datafeedId = `datafeed-${jobId}`;
     }
     return datafeedId;
-  }
-
-  getDatafeedPreview(datafeedId) {
-    return ml.datafeedPreview({ datafeedId });
   }
 
   // get the list of job group ids as well as how many jobs are in each group

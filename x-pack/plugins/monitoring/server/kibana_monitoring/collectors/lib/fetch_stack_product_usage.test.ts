@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ElasticsearchClient } from '@kbn/core/server';
 import { fetchStackProductUsage } from './fetch_stack_product_usage';
 
 describe('fetchStackProductUsage', () => {
@@ -16,33 +17,7 @@ describe('fetchStackProductUsage', () => {
   };
 
   it('should use appropiate query parameters', async () => {
-    const callCluster = jest.fn();
-    await fetchStackProductUsage(
-      config,
-      callCluster,
-      clusterUuid,
-      '.monitoring-kibana-*',
-      'kibana_stats',
-      'kibana_stats.kibana.uuid',
-      [
-        {
-          term: {
-            type: {
-              value: 'foo',
-            },
-          },
-        },
-      ]
-    );
-    const params = callCluster.mock.calls[0][1];
-    expect(params.body.query.bool.must[0].term.type.value).toBe('kibana_stats');
-    expect(params.body.query.bool.must[1].term.cluster_uuid.value).toBe(clusterUuid);
-    expect(params.body.query.bool.must[2].range.timestamp.gte).toBe('now-1h');
-    expect(params.body.query.bool.must[3].term.type.value).toBe('foo');
-  });
-
-  it('should get the usage data', async () => {
-    const callCluster = jest.fn().mockImplementation(() => ({
+    const searchMock = jest.fn().mockImplementation(() => ({
       aggregations: {
         uuids: {
           buckets: [
@@ -60,6 +35,52 @@ describe('fetchStackProductUsage', () => {
         },
       },
     }));
+    const callCluster = { search: searchMock } as unknown as ElasticsearchClient;
+    await fetchStackProductUsage(
+      config,
+      callCluster,
+      clusterUuid,
+      '.monitoring-kibana-*',
+      'kibana_stats',
+      'kibana_stats.kibana.uuid',
+      [
+        {
+          term: {
+            type: {
+              value: 'foo',
+            },
+          },
+        },
+      ]
+    );
+    const params = searchMock.mock.calls[0][0];
+    expect(params.body.query.bool.must[0].term.type.value).toBe('kibana_stats');
+    expect(params.body.query.bool.must[1].term.cluster_uuid.value).toBe(clusterUuid);
+    expect(params.body.query.bool.must[2].range.timestamp.gte).toBe('now-1h');
+    expect(params.body.query.bool.must[3].term.type.value).toBe('foo');
+  });
+
+  it('should get the usage data', async () => {
+    const callCluster = {
+      search: jest.fn().mockImplementation(() => ({
+        aggregations: {
+          uuids: {
+            buckets: [
+              {
+                key: 'sadfsdf',
+                indices: {
+                  buckets: [
+                    {
+                      key: '.monitoring-kibana-8',
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      })),
+    } as unknown as ElasticsearchClient;
 
     const result = await fetchStackProductUsage(
       config,
@@ -78,27 +99,29 @@ describe('fetchStackProductUsage', () => {
   });
 
   it('should handle both collection types', async () => {
-    const callCluster = jest.fn().mockImplementation(() => ({
-      aggregations: {
-        uuids: {
-          buckets: [
-            {
-              key: 'sadfsdf',
-              indices: {
-                buckets: [
-                  {
-                    key: '.monitoring-kibana-8',
-                  },
-                  {
-                    key: '.monitoring-kibana-mb-8',
-                  },
-                ],
+    const callCluster = {
+      search: jest.fn().mockImplementation(() => ({
+        aggregations: {
+          uuids: {
+            buckets: [
+              {
+                key: 'sadfsdf',
+                indices: {
+                  buckets: [
+                    {
+                      key: '.monitoring-kibana-8',
+                    },
+                    {
+                      key: '.monitoring-kibana-mb-8',
+                    },
+                  ],
+                },
               },
-            },
-          ],
+            ],
+          },
         },
-      },
-    }));
+      })),
+    } as unknown as ElasticsearchClient;
 
     const result = await fetchStackProductUsage(
       config,

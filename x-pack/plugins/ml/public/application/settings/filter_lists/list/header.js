@@ -11,11 +11,10 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiSpacer,
-  EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
@@ -24,25 +23,23 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 
-import { withKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
+import { MlPageHeader } from '../../../components/page_header';
 
 function FilterListsHeaderUI({ totalCount, refreshFilterLists, kibana }) {
   const docsUrl = kibana.services.docLinks.links.ml.customRules;
   return (
     <React.Fragment>
+      <MlPageHeader>
+        <FormattedMessage
+          id="xpack.ml.settings.filterLists.listHeader.filterListsTitle"
+          defaultMessage="Filter Lists"
+        />
+      </MlPageHeader>
+
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="baseline" gutterSize="m" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiTitle>
-                <h1>
-                  <FormattedMessage
-                    id="xpack.ml.settings.filterLists.listHeader.filterListsTitle"
-                    defaultMessage="Filter Lists"
-                  />
-                </h1>
-              </EuiTitle>
-            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiTextColor color="subdued">
                 <p>

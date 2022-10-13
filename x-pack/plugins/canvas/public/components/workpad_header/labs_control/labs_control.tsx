@@ -7,15 +7,18 @@
 
 import React, { useState } from 'react';
 import { EuiButtonEmpty, EuiNotificationBadge } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
-import {
-  LazyLabsFlyout,
-  withSuspense,
-} from '../../../../../../../src/plugins/presentation_util/public';
+import { LazyLabsFlyout, withSuspense } from '@kbn/presentation-util-plugin/public';
 
-import { ComponentStrings } from '../../../../i18n';
 import { useLabsService } from '../../../services';
-const { LabsControl: strings } = ComponentStrings;
+
+const strings = {
+  getLabsButtonLabel: () =>
+    i18n.translate('xpack.canvas.workpadHeaderLabsControlSettings.labsButtonLabel', {
+      defaultMessage: 'Labs',
+    }),
+};
 
 const Flyout = withSuspense(LazyLabsFlyout, null);
 
@@ -28,8 +31,9 @@ export const LabsControl = () => {
   }
 
   const projects = getProjects(['canvas']);
-  const overrideCount = Object.values(projects).filter((project) => project.status.isOverride)
-    .length;
+  const overrideCount = Object.values(projects).filter(
+    (project) => project.status.isOverride
+  ).length;
 
   return (
     <>

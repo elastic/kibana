@@ -15,8 +15,8 @@
  *  - update can fail due to multiple reasons and also needs to be communicated to the user
  */
 
-import { Immutable } from '../../../common/endpoint/types';
-import { ServerApiError } from '../../common/types';
+import type { Immutable } from '../../../common/endpoint/types';
+import type { ServerApiError } from '../../common/types';
 
 /**
  * Data type to represent uninitialised state of asynchronous resource.
@@ -38,7 +38,7 @@ export interface UninitialisedResourceState {
  */
 export interface LoadingResourceState<Data = null, Error = ServerApiError> {
   type: 'LoadingResourceState';
-  previousState: StaleResourceState<Data, Error>;
+  previousState?: StaleResourceState<Data, Error>;
 }
 
 /**
@@ -121,7 +121,7 @@ export const getLastLoadedResourceState = <Data, Error>(
 ): Immutable<LoadedResourceState<Data>> | undefined => {
   if (isLoadedResourceState(state)) {
     return state;
-  } else if (isLoadingResourceState(state)) {
+  } else if (isLoadingResourceState(state) && state.previousState !== undefined) {
     return getLastLoadedResourceState(state.previousState);
   } else if (isFailedResourceState(state)) {
     return state.lastLoadedState;

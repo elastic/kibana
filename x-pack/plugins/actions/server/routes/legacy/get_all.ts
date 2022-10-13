@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import { IRouter } from 'kibana/server';
+import { IRouter } from '@kbn/core/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { ILicenseState, verifyApiAccess } from '../../lib';
 import { BASE_ACTION_API_PATH } from '../../../common';
 import { ActionsRequestHandlerContext } from '../../types';
+import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 
 export const getAllActionRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
-  licenseState: ILicenseState
+  licenseState: ILicenseState,
+  usageCounter?: UsageCounter
 ) => {
   router.get(
     {
@@ -24,8 +27,9 @@ export const getAllActionRoute = (
       if (!context.actions) {
         return res.badRequest({ body: 'RouteHandlerContext is not registered for actions' });
       }
-      const actionsClient = context.actions.getActionsClient();
+      const actionsClient = (await context.actions).getActionsClient();
       const result = await actionsClient.getAll();
+      trackLegacyRouteUsage('getAll', usageCounter);
       return res.ok({
         body: result,
       });

@@ -79,7 +79,6 @@
           "spaces-usage-stats": "3d1b76c39bfb2cc8296b024d73854724",
           "tag": "83d55da58f6530f7055415717ec06474",
           "telemetry": "36a616f7026dfa617d6655df850fe16d",
-          "timelion-sheet": "9a2a2748877c7a7b582fef201ab1d4cf",
           "type": "2f4316de49999235636386fe51dc06c1",
           "ui-counter": "0d409297dc5ebe1e3a1da691c6ee32e3",
           "ui-metric": "0d409297dc5ebe1e3a1da691c6ee32e3",
@@ -255,27 +254,23 @@
         },
         "apm-indices": {
           "properties": {
-            "apm_oss": {
-              "properties": {
-                "errorIndices": {
-                  "type": "keyword"
-                },
-                "metricsIndices": {
-                  "type": "keyword"
-                },
-                "onboardingIndices": {
-                  "type": "keyword"
-                },
-                "sourcemapIndices": {
-                  "type": "keyword"
-                },
-                "spanIndices": {
-                  "type": "keyword"
-                },
-                "transactionIndices": {
-                  "type": "keyword"
-                }
-              }
+            "error": {
+              "type": "keyword"
+            },
+            "metric": {
+              "type": "keyword"
+            },
+            "onboarding": {
+              "type": "keyword"
+            },
+            "sourcemap": {
+              "type": "keyword"
+            },
+            "span": {
+              "type": "keyword"
+            },
+            "transaction": {
+              "type": "keyword"
             }
           }
         },
@@ -2420,47 +2415,6 @@
             },
             "userHasSeenNotice": {
               "type": "boolean"
-            }
-          }
-        },
-        "timelion-sheet": {
-          "properties": {
-            "description": {
-              "type": "text"
-            },
-            "hits": {
-              "type": "integer"
-            },
-            "kibanaSavedObjectMeta": {
-              "properties": {
-                "searchSourceJSON": {
-                  "type": "text"
-                }
-              }
-            },
-            "timelion_chart_height": {
-              "type": "integer"
-            },
-            "timelion_columns": {
-              "type": "integer"
-            },
-            "timelion_interval": {
-              "type": "keyword"
-            },
-            "timelion_other_interval": {
-              "type": "keyword"
-            },
-            "timelion_rows": {
-              "type": "integer"
-            },
-            "timelion_sheet": {
-              "type": "text"
-            },
-            "title": {
-              "type": "text"
-            },
-            "version": {
-              "type": "integer"
             }
           }
         },

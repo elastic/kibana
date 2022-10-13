@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializer } from 'src/core/public';
+import { PluginInitializer } from '@kbn/core/public';
 import {
   GlobalSearchTestPlugin,
   GlobalSearchTestPluginSetup,
@@ -21,7 +21,7 @@ export const plugin: PluginInitializer<
   GlobalSearchTestPluginStartDeps
 > = () => new GlobalSearchTestPlugin();
 
-export {
+export type {
   GlobalSearchTestPluginSetup,
   GlobalSearchTestPluginStart,
   GlobalSearchTestPluginSetupDeps,

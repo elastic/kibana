@@ -20,7 +20,6 @@ import {
   isEqual,
 } from 'lodash';
 import * as path from 'path';
-import glob from 'glob';
 import { readFile, writeFile } from 'fs';
 import { promisify } from 'util';
 import normalize from 'normalize-path';
@@ -28,7 +27,6 @@ import { Optional } from '@kbn/utility-types';
 
 export const readFileAsync = promisify(readFile);
 export const writeFileAsync = promisify(writeFile);
-export const globAsync = promisify(glob);
 
 export function isPropertyWithKey(property: ts.Node, identifierName: string) {
   if (ts.isPropertyAssignment(property) || ts.isMethodDeclaration(property)) {
@@ -154,6 +152,12 @@ export function getResolvedModuleSourceFile(
   importedModuleName: string
 ) {
   const resolvedModule = (originalSource as any).resolvedModules.get(importedModuleName);
+  if (!resolvedModule) {
+    throw new Error(
+      `Import for [${importedModuleName}] in [${originalSource.fileName}] could not be resolved by TypeScript`
+    );
+  }
+
   const resolvedModuleSourceFile = program.getSourceFile(resolvedModule.resolvedFileName);
   if (!resolvedModuleSourceFile) {
     throw new Error(`Unable to find resolved module ${importedModuleName}`);

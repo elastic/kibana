@@ -7,11 +7,10 @@
 
 import './space_card.scss';
 
-import { EuiCard, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiCard, EuiLoadingSpinner, EuiTextColor } from '@elastic/eui';
 import React, { lazy, Suspense } from 'react';
 
-import type { Space } from 'src/plugins/spaces_oss/common';
-
+import type { Space } from '../../../common';
 import { addSpaceIdToPath, ENTER_SPACE_PATH } from '../../../common';
 import { getSpaceAvatarComponent } from '../../space_avatar';
 
@@ -43,7 +42,7 @@ function renderSpaceAvatar(space: Space) {
   // not announcing space name here because the title of the EuiCard that the SpaceAvatar lives in is already
   // announcing it. See https://github.com/elastic/kibana/issues/27748
   return (
-    <Suspense fallback={<EuiLoadingSpinner />}>
+    <Suspense fallback={<EuiLoadingSpinner size="xxl" />}>
       <LazySpaceAvatar space={space} size={'l'} announceSpaceName={false} />
     </Suspense>
   );
@@ -57,8 +56,8 @@ function renderSpaceDescription(space: Space) {
   }
 
   return (
-    <span title={description} className="eui-textBreakWord euiTextColor--subdued">
+    <EuiTextColor color="subdued" title={description} className="eui-textBreakWord">
       {description}
-    </span>
+    </EuiTextColor>
   );
 }

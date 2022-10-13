@@ -9,19 +9,19 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
+import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import { MarkdownVisParams } from './types';
 import { MarkdownOptions } from './markdown_options';
 
 describe('MarkdownOptions', () => {
-  const props = ({
+  const props = {
     stateParams: {
       fontSize: 12,
       markdown: 'hello from 2020 🥳',
       openLinksInNewTab: false,
     },
     setValue: jest.fn(),
-  } as unknown) as VisEditorOptionsProps<MarkdownVisParams>;
+  } as unknown as VisEditorOptionsProps<MarkdownVisParams>;
 
   it('should match snapshot', () => {
     const comp = shallow(<MarkdownOptions {...props} />);

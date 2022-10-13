@@ -5,40 +5,65 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { get } from 'lodash';
+import { CCS_REMOTE_PATTERN } from '../../../common/constants';
 import { CCRReadExceptionsStats } from '../../../common/types/alerts';
+import { getIndexPatterns, getElasticsearchDataset } from '../cluster/get_index_patterns';
+import { createDatasetFilter } from './create_dataset_query_filter';
+import { Globals } from '../../static_globals';
 
 export async function fetchCCRReadExceptions(
   esClient: ElasticsearchClient,
-  index: string,
   startMs: number,
   endMs: number,
-  size: number
+  size: number,
+  filterQuery?: string
 ): Promise<CCRReadExceptionsStats[]> {
+  const indexPatterns = getIndexPatterns({
+    config: Globals.app.config,
+    moduleType: 'elasticsearch',
+    dataset: 'ccr',
+    ccs: CCS_REMOTE_PATTERN,
+  });
   const params = {
-    index,
-    filterPath: ['aggregations.remote_clusters.buckets'],
+    index: indexPatterns,
+    filter_path: ['aggregations.remote_clusters.buckets'],
     body: {
       size: 0,
       query: {
         bool: {
           filter: [
             {
-              nested: {
-                path: 'ccr_stats.read_exceptions',
-                query: {
-                  exists: {
-                    field: 'ccr_stats.read_exceptions.exception',
+              bool: {
+                should: [
+                  {
+                    nested: {
+                      ignore_unmapped: true,
+                      path: 'ccr_stats.read_exceptions',
+                      query: {
+                        exists: {
+                          field: 'ccr_stats.read_exceptions.exception',
+                        },
+                      },
+                    },
                   },
-                },
+                  {
+                    nested: {
+                      ignore_unmapped: true,
+                      path: 'elasticsearch.ccr.read_exceptions',
+                      query: {
+                        exists: {
+                          field: 'elasticsearch.ccr.read_exceptions.exception',
+                        },
+                      },
+                    },
+                  },
+                ],
+                minimum_should_match: 1,
               },
             },
-            {
-              term: {
-                type: 'ccr_stats',
-              },
-            },
+            createDatasetFilter('ccr_stats', 'ccr', getElasticsearchDataset('ccr')),
             {
               range: {
                 timestamp: {
@@ -77,9 +102,13 @@ export async function fetchCCRReadExceptions(
                     _source: {
                       includes: [
                         'cluster_uuid',
+                        'elasticsearch.cluster.id',
                         'ccr_stats.read_exceptions',
+                        'elasticsearch.ccr.read_exceptions',
                         'ccr_stats.shard_id',
+                        'elasticsearch.ccr.shard_id',
                         'ccr_stats.leader_index',
+                        'elasticsearch.ccr.leader.index',
                       ],
                     },
                     size: 1,
@@ -93,12 +122,26 @@ export async function fetchCCRReadExceptions(
     },
   };
 
-  const { body: response } = await esClient.search(params);
+  try {
+    if (filterQuery) {
+      const filterQueryObject = JSON.parse(filterQuery);
+      params.body.query.bool.filter.push(filterQueryObject);
+    }
+  } catch (e) {
+    // meh
+  }
+
+  const response = await esClient.search(params);
   const stats: CCRReadExceptionsStats[] = [];
-  // @ts-expect-error @elastic/elasticsearch Aggregate does not specify buckets
+
+  if (!response.aggregations) {
+    return stats;
+  }
+
+  // @ts-expect-error declare aggegations type explicitly
   const { buckets: remoteClusterBuckets = [] } = response.aggregations.remote_clusters;
 
-  if (!remoteClusterBuckets.length) {
+  if (!remoteClusterBuckets?.length) {
     return stats;
   }
 
@@ -108,15 +151,19 @@ export async function fetchCCRReadExceptions(
 
     for (const followerIndexBucket of followerIndicesBuckets) {
       const followerIndex = followerIndexBucket.key;
-      const {
-        _index: monitoringIndexName,
-        _source: { ccr_stats: ccrStats, cluster_uuid: clusterUuid },
-      } = get(followerIndexBucket, 'hits.hits.hits[0]');
-      const {
-        read_exceptions: readExceptions,
-        leader_index: leaderIndex,
-        shard_id: shardId,
-      } = ccrStats;
+      const clusterUuid =
+        get(followerIndexBucket, 'hits.hits.hits[0]._source.cluster_uuid') ||
+        get(followerIndexBucket, 'hits.hits.hits[0]_source.elasticsearch.cluster.id');
+
+      const monitoringIndexName = get(followerIndexBucket, 'hits.hits.hits[0]._index');
+      const ccrStats =
+        get(followerIndexBucket, 'hits.hits.hits[0]._source.ccr_stats') ||
+        get(followerIndexBucket, 'hits.hits.hits[0]._source.elasticsearch.ccr');
+
+      const { read_exceptions: readExceptions, shard_id: shardId } = ccrStats;
+
+      const leaderIndex = ccrStats.leaderIndex || ccrStats.leader.index;
+
       const { exception: lastReadException } = readExceptions[readExceptions.length - 1];
 
       stats.push({

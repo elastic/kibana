@@ -9,12 +9,13 @@ import { kea, MakeLogicType } from 'kea';
 
 import { InitialAppData } from '../../../common/types';
 
+import { LicensingLogic } from '../shared/licensing';
+
 import { ConfiguredLimits, Account, Role } from './types';
 
 import { getRoleAbilities } from './utils/role';
 
 interface AppValues {
-  ilmEnabled: boolean;
   configuredLimits: ConfiguredLimits;
   account: Account;
   myRole: Role;
@@ -39,11 +40,10 @@ export const AppLogic = kea<MakeLogicType<AppValues, AppActions, Required<Initia
       },
     ],
     configuredLimits: [props.configuredLimits.appSearch, {}],
-    ilmEnabled: [props.ilmEnabled, {}],
   }),
   selectors: {
     myRole: [
-      (selectors) => [selectors.account],
+      (selectors) => [selectors.account, LicensingLogic.selectors.hasPlatinumLicense],
       ({ role }) => (role ? getRoleAbilities(role) : {}),
     ],
   },

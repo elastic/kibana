@@ -4,29 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { DashboardUrlGeneratorState } from '../../../../../../../src/plugins/dashboard/public';
-import {
-  ApplyGlobalFilterActionContext,
-  APPLY_FILTER_TRIGGER,
-  esFilters,
-  Filter,
-  isFilters,
-  isQuery,
-  isTimeRange,
-  Query,
-  TimeRange,
-} from '../../../../../../../src/plugins/data/public';
-import { IEmbeddable, EmbeddableInput } from '../../../../../../../src/plugins/embeddable/public';
+import { type Filter, isFilterPinned, Query, TimeRange } from '@kbn/es-query';
+import type { KibanaLocation } from '@kbn/share-plugin/public';
+import { DashboardAppLocatorParams, cleanEmptyKeys } from '@kbn/dashboard-plugin/public';
+import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
+import { APPLY_FILTER_TRIGGER, isQuery, isTimeRange } from '@kbn/data-plugin/public';
+import { extractTimeRange } from '@kbn/es-query';
+import { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
+import { IEmbeddable, EmbeddableInput } from '@kbn/embeddable-plugin/public';
+import { EnhancedEmbeddableContext } from '@kbn/embeddable-enhanced-plugin/public';
 import {
   AbstractDashboardDrilldown,
   AbstractDashboardDrilldownParams,
   AbstractDashboardDrilldownConfig as Config,
 } from '../abstract_dashboard_drilldown';
-import { KibanaURL } from '../../../../../../../src/plugins/share/public';
 import { EMBEDDABLE_TO_DASHBOARD_DRILLDOWN } from './constants';
 import { createExtract, createInject } from '../../../../common';
-import { EnhancedEmbeddableContext } from '../../../../../embeddable_enhanced/public';
 
 interface EmbeddableQueryInput extends EmbeddableInput {
   query?: Query;
@@ -49,47 +42,66 @@ export class EmbeddableToDashboardDrilldown extends AbstractDashboardDrilldown<C
 
   public readonly supportedTriggers = () => [APPLY_FILTER_TRIGGER];
 
-  protected async getURL(config: Config, context: Context): Promise<KibanaURL> {
-    const state: DashboardUrlGeneratorState = {
+  protected async getLocation(
+    config: Config,
+    context: Context,
+    useUrlForState: boolean
+  ): Promise<KibanaLocation> {
+    const params: DashboardAppLocatorParams = {
       dashboardId: config.dashboardId,
     };
 
     if (context.embeddable) {
       const embeddable = context.embeddable as IEmbeddable<EmbeddableQueryInput>;
       const input = embeddable.getInput();
-      if (isQuery(input.query) && config.useCurrentFilters) state.query = input.query;
+      if (isQuery(input.query) && config.useCurrentFilters) params.query = input.query;
 
       // if useCurrentDashboardDataRange is enabled, then preserve current time range
       // if undefined is passed, then destination dashboard will figure out time range itself
       // for brush event this time range would be overwritten
       if (isTimeRange(input.timeRange) && config.useCurrentDateRange)
-        state.timeRange = input.timeRange;
+        params.timeRange = input.timeRange;
 
-      // if useCurrentDashboardFilters enabled, then preserve all the filters (pinned and unpinned)
+      // if useCurrentDashboardFilters enabled, then preserve all the filters (pinned, unpinned, and from controls)
       // otherwise preserve only pinned
-      if (isFilters(input.filters))
-        state.filters = config.useCurrentFilters
-          ? input.filters
-          : input.filters?.filter((f) => esFilters.isFilterPinned(f));
+      params.filters = config.useCurrentFilters
+        ? input.filters
+        : input.filters?.filter((f) => isFilterPinned(f));
     }
 
-    const {
-      restOfFilters: filtersFromEvent,
-      timeRange: timeRangeFromEvent,
-    } = esFilters.extractTimeRange(context.filters, context.timeFieldName);
+    const { restOfFilters: filtersFromEvent, timeRange: timeRangeFromEvent } = extractTimeRange(
+      context.filters,
+      context.timeFieldName
+    );
 
     if (filtersFromEvent) {
-      state.filters = [...(state.filters ?? []), ...filtersFromEvent];
+      params.filters = [...(params.filters ?? []), ...filtersFromEvent];
     }
 
     if (timeRangeFromEvent) {
-      state.timeRange = timeRangeFromEvent;
+      params.timeRange = timeRangeFromEvent;
     }
 
-    const path = await this.urlGenerator.createUrl(state);
-    const url = new KibanaURL(path);
+    const location = await this.locator.getLocation(params);
+    if (useUrlForState) {
+      this.useUrlForState(location);
+    }
 
-    return url;
+    return location;
+  }
+
+  private useUrlForState(location: KibanaLocation<DashboardAppLocatorParams>) {
+    const state = location.state;
+    location.path = setStateToKbnUrl(
+      '_a',
+      cleanEmptyKeys({
+        query: state.query,
+        filters: state.filters?.filter((f) => !isFilterPinned(f)),
+        savedQuery: state.savedQuery,
+      }),
+      { useHash: false, storeInHashQuery: true },
+      location.path
+    );
   }
 
   public readonly inject = createInject({ drilldownId: this.id });

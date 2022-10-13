@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockValues } from '../../../../__mocks__';
+import { setMockValues } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -13,7 +13,7 @@ import { shallow } from 'enzyme';
 
 import { AnalyticsTable } from '../components';
 
-import { TopQueriesNoClicks } from './';
+import { TopQueriesNoClicks } from '.';
 
 describe('TopQueriesNoClicks', () => {
   it('renders', () => {

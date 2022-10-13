@@ -6,13 +6,13 @@
  */
 
 import { act, renderHook } from '@testing-library/react-hooks';
+import { useExportList } from '@kbn/securitysolution-list-hooks';
+import * as Api from '@kbn/securitysolution-list-api';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 
-import * as Api from '../api';
-import { httpServiceMock } from '../../../../../../src/core/public/mocks';
+jest.mock('@kbn/securitysolution-list-api');
 
-import { useExportList } from './use_export_list';
-
-jest.mock('../api');
+// TODO: Move this test to the kbn package: packages/kbn-securitysolution-list-hooks/src/use_export_list/index.ts once Mocks are ported from Kibana
 
 describe('useExportList', () => {
   let httpMock: ReturnType<typeof httpServiceMock.createStartContract>;

@@ -7,18 +7,17 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { Action } from '../../../../../../../../src/plugins/ui_actions/public';
-import { toMountPoint } from '../../../../../../../../src/plugins/kibana_react/public';
-import {
-  CONTEXT_MENU_TRIGGER,
-  EmbeddableContext,
-} from '../../../../../../../../src/plugins/embeddable/public';
+import { distinctUntilChanged, filter, map, skip, take, takeUntil } from 'rxjs/operators';
+import { Subject } from 'rxjs';
+import { Action } from '@kbn/ui-actions-plugin/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { CONTEXT_MENU_TRIGGER, EmbeddableContext, ViewMode } from '@kbn/embeddable-plugin/public';
 import {
   isEnhancedEmbeddable,
   embeddableEnhancedDrilldownGrouping,
-} from '../../../../../../embeddable_enhanced/public';
+} from '@kbn/embeddable-enhanced-plugin/public';
+import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { StartDependencies } from '../../../../plugin';
-import { StartServicesGetter } from '../../../../../../../../src/plugins/kibana_utils/public';
 import { ensureNestedTriggers, createDrilldownTemplatesFromSiblings } from '../drilldown_shared';
 
 export const OPEN_FLYOUT_ADD_DRILLDOWN = 'OPEN_FLYOUT_ADD_DRILLDOWN';
@@ -45,11 +44,13 @@ export class FlyoutCreateDrilldownAction implements Action<EmbeddableContext> {
     return 'plusInCircle';
   }
 
-  private isEmbeddableCompatible(context: EmbeddableContext) {
+  private isEmbeddableCompatible(context: EmbeddableContext): boolean {
     if (!isEnhancedEmbeddable(context.embeddable)) return false;
-    const supportedTriggers = context.embeddable.supportedTriggers();
-    if (!supportedTriggers || !supportedTriggers.length) return false;
     if (context.embeddable.getRoot().type !== 'dashboard') return false;
+    const supportedTriggers = [
+      CONTEXT_MENU_TRIGGER,
+      ...(context.embeddable.supportedTriggers() || []),
+    ];
 
     /**
      * Check if there is an intersection between all registered drilldowns possible triggers that they could be attached to
@@ -58,7 +59,7 @@ export class FlyoutCreateDrilldownAction implements Action<EmbeddableContext> {
     const allPossibleTriggers = this.params
       .start()
       .plugins.uiActionsEnhanced.getActionFactories()
-      .map((factory) => factory.supportedTriggers())
+      .map((factory) => (factory.isCompatibleLicense() ? factory.supportedTriggers() : []))
       .reduce((res, next) => res.concat(next), []);
 
     return ensureNestedTriggers(supportedTriggers).some((trigger) =>
@@ -82,17 +83,29 @@ export class FlyoutCreateDrilldownAction implements Action<EmbeddableContext> {
     }
 
     const templates = createDrilldownTemplatesFromSiblings(embeddable);
+    const closed$ = new Subject<true>();
+    const close = () => {
+      closed$.next(true);
+      handle.close();
+    };
+    const closeFlyout = () => {
+      close();
+    };
 
+    const triggers = [
+      ...ensureNestedTriggers(embeddable.supportedTriggers()),
+      CONTEXT_MENU_TRIGGER,
+    ];
     const handle = core.overlays.openFlyout(
       toMountPoint(
         <plugins.uiActionsEnhanced.DrilldownManager
           closeAfterCreate
           initialRoute={'/new'}
           dynamicActionManager={embeddable.enhancements.dynamicActions}
-          triggers={[...ensureNestedTriggers(embeddable.supportedTriggers()), CONTEXT_MENU_TRIGGER]}
+          triggers={triggers}
           placeContext={{ embeddable }}
           templates={templates}
-          onClose={() => handle.close()}
+          onClose={close}
         />
       ),
       {
@@ -100,5 +113,22 @@ export class FlyoutCreateDrilldownAction implements Action<EmbeddableContext> {
         'data-test-subj': 'createDrilldownFlyout',
       }
     );
+
+    // Close flyout on application change.
+    core.application.currentAppId$
+      .pipe(takeUntil(closed$), skip(1), take(1))
+      .subscribe(closeFlyout);
+
+    // Close flyout on dashboard switch to "view" mode or on embeddable destroy.
+    embeddable
+      .getInput$()
+      .pipe(
+        takeUntil(closed$),
+        map((input) => input.viewMode),
+        distinctUntilChanged(),
+        filter((mode) => mode !== ViewMode.EDIT),
+        take(1)
+      )
+      .subscribe({ next: closeFlyout, complete: closeFlyout });
   }
 }

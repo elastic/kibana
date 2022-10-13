@@ -5,33 +5,54 @@
  * 2.0.
  */
 
-import type { Logger } from 'kibana/server';
-
 import type {
-  CaseConfigureServiceSetup,
-  CaseServiceSetup,
-  CaseUserActionServiceSetup,
-  ConnectorMappingsServiceSetup,
-} from '../../services';
+  Logger,
+  PluginInitializerContext,
+  KibanaRequest,
+  IKibanaResponse,
+  KibanaResponseFactory,
+  RouteValidatorConfig,
+} from '@kbn/core/server';
 
-import type { CasesRouter } from '../../types';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { CasesRequestHandlerContext, CasesRouter } from '../../types';
 
-export interface RouteDeps {
-  caseConfigureService: CaseConfigureServiceSetup;
-  caseService: CaseServiceSetup;
-  connectorMappingsService: ConnectorMappingsServiceSetup;
+type TelemetryUsageCounter = ReturnType<UsageCollectionSetup['createUsageCounter']>;
+
+export interface RegisterRoutesDeps {
   router: CasesRouter;
-  userActionService: CaseUserActionServiceSetup;
+  routes: CaseRoute[];
   logger: Logger;
-}
-
-export enum SortFieldCase {
-  closedAt = 'closed_at',
-  createdAt = 'created_at',
-  status = 'status',
+  kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
+  telemetryUsageCounter?: TelemetryUsageCounter;
 }
 
 export interface TotalCommentByCase {
   caseId: string;
   totalComments: number;
+}
+
+interface CaseRouteHandlerArguments<P, Q, B> {
+  request: KibanaRequest<P, Q, B>;
+  context: CasesRequestHandlerContext;
+  response: KibanaResponseFactory;
+  logger: Logger;
+  kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
+}
+
+type CaseRouteTags = 'access:casesSuggestUserProfiles';
+
+export interface CaseRoute<P = unknown, Q = unknown, B = unknown> {
+  method: 'get' | 'post' | 'put' | 'delete' | 'patch';
+  path: string;
+  params?: RouteValidatorConfig<P, Q, B>;
+  /**
+   * These options control pre-route execution behavior
+   */
+  options?: { deprecated?: boolean };
+  /**
+   * These options are passed to the router's options field
+   */
+  routerOptions?: { tags: CaseRouteTags[] };
+  handler: (args: CaseRouteHandlerArguments<P, Q, B>) => Promise<IKibanaResponse>;
 }

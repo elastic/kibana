@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { shallowWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 
 import { ConfirmAlterActiveSpaceModal } from './confirm_alter_active_space_modal';
 

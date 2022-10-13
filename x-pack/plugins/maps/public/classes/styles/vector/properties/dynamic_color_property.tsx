@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Map as MbMap } from 'mapbox-gl';
+import type { Map as MbMap } from '@kbn/mapbox-gl';
 import React from 'react';
 import { EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DynamicStyleProperty } from './dynamic_style_property';
+import { DynamicStyleProperty, OTHER_CATEGORY_KEY } from './dynamic_style_property';
 import { makeMbClampedNumberExpression, dynamicRound } from '../style_util';
 import {
   getOrdinalMbColorRampStops,
@@ -22,11 +22,9 @@ import {
   FieldFormatter,
   VECTOR_STYLES,
 } from '../../../../../common/constants';
-import {
-  isCategoricalStopsInvalid,
-  getOtherCategoryLabel,
-  // @ts-expect-error
-} from '../components/color/color_stops_utils';
+// @ts-expect-error
+import { isCategoricalStopsInvalid } from '../components/color/color_stops_utils';
+import { OTHER_CATEGORY_LABEL, OTHER_CATEGORY_DEFAULT_COLOR } from '../style_util';
 import { Break, BreakedLegend } from '../components/legend/breaked_legend';
 import { ColorDynamicOptions, OrdinalColorStop } from '../../../../../common/descriptor_types';
 import { LegendProps } from './style_property';
@@ -37,7 +35,6 @@ import { IVectorLayer } from '../../../layers/vector_layer/vector_layer';
 const UP_TO = i18n.translate('xpack.maps.legend.upto', {
   defaultMessage: 'up to',
 });
-const EMPTY_STOPS = { stops: [], defaultColor: null };
 const RGBA_0000 = 'rgba(0,0,0,0)';
 
 export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptions> {
@@ -101,7 +98,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
   }
 
   supportsFieldMeta() {
-    if (!this.isComplete() || !this._field || !this._field.supportsFieldMeta()) {
+    if (!this.isComplete() || !this._field || !this._field.supportsFieldMetaFromEs()) {
       return false;
     }
 
@@ -135,7 +132,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
   }
 
   _getMbColor() {
-    if (!this.getFieldName()) {
+    if (!this.getMbFieldName()) {
       return null;
     }
 
@@ -145,7 +142,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
   }
 
   _getOrdinalColorMbExpression() {
-    const targetName = this.getFieldName();
+    const targetName = this.getMbFieldName();
     if (this._options.useCustomColorRamp) {
       if (!this._options.customColorRamp || !this._options.customColorRamp.length) {
         // custom color ramp config is not complete
@@ -242,89 +239,117 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
       : [];
   }
 
+  _getOtherCategoryColor() {
+    if (this._chartsPaletteServiceGetColor) {
+      return this._chartsPaletteServiceGetColor('__other__');
+    }
+
+    return this._options.otherCategoryColor
+      ? this._options.otherCategoryColor
+      : OTHER_CATEGORY_DEFAULT_COLOR;
+  }
+
   _getColorPaletteStops() {
     if (this._options.useCustomColorPalette && this._options.customColorPalette) {
       if (isCategoricalStopsInvalid(this._options.customColorPalette)) {
-        return EMPTY_STOPS;
+        return [];
       }
 
       const stops = [];
-      for (let i = 1; i < this._options.customColorPalette.length; i++) {
+      for (let i = 0; i < this._options.customColorPalette.length; i++) {
         const config = this._options.customColorPalette[i];
         stops.push({
           stop: config.stop,
           color: config.color,
+          isOtherCategory: false,
         });
       }
 
-      return {
-        defaultColor: this._options.customColorPalette[0].color,
-        stops,
-      };
+      // Custom color palette does not support field meta so there is no way of knowing whether "others" category is used
+      // Because of this limitation, "others" categor will always be displayed in legend
+      return [
+        ...stops,
+        {
+          stop: OTHER_CATEGORY_KEY,
+          color: this._getOtherCategoryColor(),
+          isOtherCategory: true,
+        },
+      ];
     }
 
-    const fieldMeta = this.getCategoryFieldMeta();
-    if (!fieldMeta || !fieldMeta.categories) {
-      return EMPTY_STOPS;
-    }
-
+    const categories = this.getCategoryFieldMeta();
     const colors = this._options.colorCategory
       ? getColorPalette(this._options.colorCategory)
       : null;
-    if (!colors) {
-      return EMPTY_STOPS;
+    if (categories.length === 0 || !colors) {
+      return [];
     }
 
-    const maxLength = Math.min(colors.length, fieldMeta.categories.length + 1);
+    const othersCategoryIndex = categories.findIndex((category) => {
+      return category.key === OTHER_CATEGORY_KEY;
+    });
+    // Do not include "others" category when assigning colors
+    // "real" means category is from data value and not a virtual category (like "others")
+    const realCategories =
+      othersCategoryIndex > 0
+        ? [
+            ...categories.slice(0, othersCategoryIndex),
+            ...categories.slice(othersCategoryIndex + 1),
+          ]
+        : [...categories];
+    const maxLength = Math.min(colors.length, realCategories.length);
     const stops = [];
-
-    for (let i = 0; i < maxLength - 1; i++) {
+    for (let i = 0; i < maxLength; i++) {
       stops.push({
-        stop: fieldMeta.categories[i].key,
+        stop: realCategories[i].key,
         color: this._chartsPaletteServiceGetColor
-          ? this._chartsPaletteServiceGetColor(fieldMeta.categories[i].key)
+          ? this._chartsPaletteServiceGetColor(realCategories[i].key)
           : colors[i],
+        isOtherCategory: false,
       });
     }
-    return {
-      stops,
-      defaultColor: this._chartsPaletteServiceGetColor
-        ? this._chartsPaletteServiceGetColor('__other__')
-        : colors[maxLength - 1],
-    };
+
+    return othersCategoryIndex > 0
+      ? [
+          ...stops,
+          {
+            stop: OTHER_CATEGORY_KEY,
+            color: this._getOtherCategoryColor(),
+            isOtherCategory: true,
+          },
+        ]
+      : stops;
   }
 
   _getCategoricalColorMbExpression() {
+    const otherCategoryColor = this._getOtherCategoryColor();
     if (
       this._options.useCustomColorPalette &&
       (!this._options.customColorPalette || !this._options.customColorPalette.length)
     ) {
-      return null;
+      return otherCategoryColor;
     }
 
-    const { stops, defaultColor } = this._getColorPaletteStops();
+    const stops = this._getColorPaletteStops();
     if (stops.length < 1) {
       // occurs when no data
-      return null;
-    }
-
-    if (!defaultColor) {
-      return null;
+      return otherCategoryColor;
     }
 
     const mbStops = [];
     for (let i = 0; i < stops.length; i++) {
       const stop = stops[i];
-      const branch = `${stop.stop}`;
-      mbStops.push(branch);
-      mbStops.push(stop.color);
+      if (!stop.isOtherCategory) {
+        mbStops.push(`${stop.stop}`);
+        mbStops.push(stop.color);
+      }
     }
 
-    mbStops.push(defaultColor); // last color is default color
-    return ['match', ['to-string', ['get', this.getFieldName()]], ...mbStops];
+    mbStops.push(otherCategoryColor); // color for unmatched values
+    return ['match', ['to-string', ['get', this.getMbFieldName()]], ...mbStops];
   }
 
-  _getOrdinalBreaks(symbolId?: string): Break[] {
+  _getOrdinalBreaks(symbolId?: string, svg?: string): Break[] {
     let colorStops: Array<number | string> | null = null;
     let getValuePrefix: ((i: number, isNext: boolean) => string) | null = null;
     if (this._options.useCustomColorRamp) {
@@ -361,6 +386,7 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
             color: colors[colors.length - 1],
             label: this.formatField(dynamicRound(rangeFieldMeta.max)),
             symbolId,
+            svg,
           },
         ];
       }
@@ -405,39 +431,48 @@ export class DynamicColorProperty extends DynamicStyleProperty<ColorDynamicOptio
         color,
         label,
         symbolId,
+        svg,
       });
     }
     return breaks;
   }
 
-  _getCategoricalBreaks(symbolId?: string): Break[] {
+  _getCategoricalBreaks(symbolId?: string, svg?: string): Break[] {
     const breaks: Break[] = [];
-    const { stops, defaultColor } = this._getColorPaletteStops();
-    stops.forEach(({ stop, color }: { stop: string | number | null; color: string | null }) => {
-      if (stop !== null && color != null) {
-        breaks.push({
-          color,
-          symbolId,
-          label: this.formatField(stop),
-        });
+    const stops = this._getColorPaletteStops();
+    stops.forEach(
+      ({
+        stop,
+        color,
+        isOtherCategory,
+      }: {
+        stop: string | number | null;
+        color: string | null;
+        isOtherCategory: boolean;
+      }) => {
+        if (stop !== null && color != null) {
+          breaks.push({
+            color,
+            svg,
+            symbolId,
+            label: isOtherCategory ? (
+              <EuiTextColor color="subdued">{OTHER_CATEGORY_LABEL}</EuiTextColor>
+            ) : (
+              this.formatField(stop)
+            ),
+          });
+        }
       }
-    });
-    if (defaultColor) {
-      breaks.push({
-        color: defaultColor,
-        label: <EuiTextColor color="secondary">{getOtherCategoryLabel()}</EuiTextColor>,
-        symbolId,
-      });
-    }
+    );
     return breaks;
   }
 
-  renderLegendDetailRow({ isPointsOnly, isLinesOnly, symbolId }: LegendProps) {
+  renderLegendDetailRow({ isPointsOnly, isLinesOnly, symbolId, svg }: LegendProps) {
     let breaks: Break[] = [];
     if (this.isOrdinal()) {
-      breaks = this._getOrdinalBreaks(symbolId);
+      breaks = this._getOrdinalBreaks(symbolId, svg);
     } else if (this.isCategorical()) {
-      breaks = this._getCategoricalBreaks(symbolId);
+      breaks = this._getCategoricalBreaks(symbolId, svg);
     }
     return (
       <BreakedLegend

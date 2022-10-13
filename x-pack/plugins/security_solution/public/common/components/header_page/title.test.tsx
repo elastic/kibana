@@ -13,6 +13,8 @@ import { TestProviders } from '../../mock';
 import { Title } from './title';
 import { useMountAppended } from '../../utils/use_mount_appended';
 
+jest.mock('../../lib/kibana');
+
 describe('Title', () => {
   const mount = useMountAppended();
 

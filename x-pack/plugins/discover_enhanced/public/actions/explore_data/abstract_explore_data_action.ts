@@ -6,27 +6,22 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { DiscoverStart } from '../../../../../../src/plugins/discover/public';
-import { ViewMode, IEmbeddable } from '../../../../../../src/plugins/embeddable/public';
-import { StartServicesGetter } from '../../../../../../src/plugins/kibana_utils/public';
-import { KibanaLegacyStart } from '../../../../../../src/plugins/kibana_legacy/public';
-import { CoreStart } from '../../../../../../src/core/public';
-import { KibanaURL } from '../../../../../../src/plugins/share/public';
+import { DiscoverStart } from '@kbn/discover-plugin/public';
+import { ViewMode, IEmbeddable } from '@kbn/embeddable-plugin/public';
+import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import { CoreStart } from '@kbn/core/public';
+import { KibanaLocation } from '@kbn/share-plugin/public';
+import { DOC_TYPE as LENS_DOC_TYPE } from '@kbn/lens-plugin/common/constants';
 import * as shared from './shared';
 
 export const ACTION_EXPLORE_DATA = 'ACTION_EXPLORE_DATA';
 
 export interface PluginDeps {
-  discover: Pick<DiscoverStart, 'urlGenerator'>;
-  kibanaLegacy?: {
-    dashboardConfig: {
-      getHideWriteControls: KibanaLegacyStart['dashboardConfig']['getHideWriteControls'];
-    };
-  };
+  discover: Pick<DiscoverStart, 'locator'>;
 }
 
 export interface CoreDeps {
-  application: Pick<CoreStart['application'], 'navigateToApp'>;
+  application: Pick<CoreStart['application'], 'navigateToApp' | 'getUrlForApp'>;
 }
 
 export interface Params {
@@ -43,21 +38,17 @@ export abstract class AbstractExploreDataAction<Context extends { embeddable?: I
 
   constructor(protected readonly params: Params) {}
 
-  protected abstract getUrl(context: Context): Promise<KibanaURL>;
+  protected abstract getLocation(context: Context): Promise<KibanaLocation>;
 
   public async isCompatible({ embeddable }: Context): Promise<boolean> {
     if (!embeddable) return false;
+    if (embeddable.type === LENS_DOC_TYPE) return false;
 
     const { core, plugins } = this.params.start();
     const { capabilities } = core.application;
 
     if (capabilities.discover && !capabilities.discover.show) return false;
-    if (!plugins.discover.urlGenerator) return false;
-    const isDashboardOnlyMode = !!this.params
-      .start()
-      .plugins.kibanaLegacy?.dashboardConfig.getHideWriteControls();
-    if (isDashboardOnlyMode) return false;
-
+    if (!plugins.discover.locator) return false;
     if (!shared.hasExactlyOneIndexPattern(embeddable)) return false;
     if (embeddable.getInput().viewMode !== ViewMode.VIEW) return false;
 
@@ -68,10 +59,10 @@ export abstract class AbstractExploreDataAction<Context extends { embeddable?: I
     if (!shared.hasExactlyOneIndexPattern(context.embeddable)) return;
 
     const { core } = this.params.start();
-    const { appName, appPath } = await this.getUrl(context);
+    const { app, path } = await this.getLocation(context);
 
-    await core.application.navigateToApp(appName, {
-      path: appPath,
+    await core.application.navigateToApp(app, {
+      path,
     });
   }
 
@@ -82,8 +73,10 @@ export abstract class AbstractExploreDataAction<Context extends { embeddable?: I
       throw new Error(`Embeddable not supported for "${this.getDisplayName(context)}" action.`);
     }
 
-    const { path } = await this.getUrl(context);
+    const { core } = this.params.start();
+    const { app, path } = await this.getLocation(context);
+    const url = await core.application.getUrlForApp(app, { path, absolute: false });
 
-    return path;
+    return url;
   }
 }

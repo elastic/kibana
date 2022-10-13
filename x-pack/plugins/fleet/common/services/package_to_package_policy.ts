@@ -7,8 +7,8 @@
 
 import type {
   PackageInfo,
-  RegistryPolicyTemplate,
   RegistryVarsEntry,
+  RegistryInput,
   RegistryStream,
   PackagePolicyConfigRecord,
   NewPackagePolicyInput,
@@ -17,13 +17,29 @@ import type {
   PackagePolicyConfigRecordEntry,
 } from '../types';
 
-const getStreamsForInputType = (
-  inputType: string,
-  packageInfo: PackageInfo
-): Array<RegistryStream & { data_stream: { type: string; dataset: string } }> => {
-  const streams: Array<RegistryStream & { data_stream: { type: string; dataset: string } }> = [];
+import { doesPackageHaveIntegrations } from '.';
+import {
+  getNormalizedDataStreams,
+  getNormalizedInputs,
+  isIntegrationPolicyTemplate,
+} from './policy_template';
 
-  (packageInfo.data_streams || []).forEach((dataStream) => {
+type PackagePolicyStream = RegistryStream & { release?: 'beta' | 'experimental' | 'ga' } & {
+  data_stream: { type: string; dataset: string };
+};
+
+export const getStreamsForInputType = (
+  inputType: string,
+  packageInfo: PackageInfo,
+  dataStreamPaths: string[] = []
+): PackagePolicyStream[] => {
+  const streams: PackagePolicyStream[] = [];
+  const dataStreams = getNormalizedDataStreams(packageInfo);
+  const dataStreamsToSearch = dataStreamPaths.length
+    ? dataStreams.filter((dataStream) => dataStreamPaths.includes(dataStream.path))
+    : dataStreams;
+
+  dataStreamsToSearch.forEach((dataStream) => {
     (dataStream.streams || []).forEach((stream) => {
       if (stream.input === inputType) {
         streams.push({
@@ -32,6 +48,7 @@ const getStreamsForInputType = (
             type: dataStream.type,
             dataset: dataStream.dataset,
           },
+          release: dataStream.release,
         });
       }
     });
@@ -40,67 +57,108 @@ const getStreamsForInputType = (
   return streams;
 };
 
+// Reduces registry var def into config object entry
+const varsReducer = (
+  configObject: PackagePolicyConfigRecord,
+  registryVar: RegistryVarsEntry
+): PackagePolicyConfigRecord => {
+  const configEntry: PackagePolicyConfigRecordEntry = {
+    value: !registryVar.default && registryVar.multi ? [] : registryVar.default,
+  };
+  if (registryVar.type) {
+    configEntry.type = registryVar.type;
+  }
+  configObject![registryVar.name] = configEntry;
+  return configObject;
+};
+
 /*
  * This service creates a package policy inputs definition from defaults provided in package info
  */
 export const packageToPackagePolicyInputs = (
-  packageInfo: PackageInfo
-): NewPackagePolicy['inputs'] => {
-  const inputs: NewPackagePolicy['inputs'] = [];
+  packageInfo: PackageInfo,
+  integrationToEnable?: string
+): NewPackagePolicyInput[] => {
+  const hasIntegrations = doesPackageHaveIntegrations(packageInfo);
+  const inputs: NewPackagePolicyInput[] = [];
+  const packageInputsByPolicyTemplateAndType: {
+    [key: string]: RegistryInput & { data_streams?: string[]; policy_template: string };
+  } = {};
 
-  // Assume package will only ever ship one package policy template for now
-  const packagePolicyTemplate: RegistryPolicyTemplate | null =
-    packageInfo.policy_templates && packageInfo.policy_templates[0]
-      ? packageInfo.policy_templates[0]
-      : null;
-
-  // Create package policy input property
-  if (packagePolicyTemplate?.inputs?.length) {
-    // Map each package package policy input to agent policy package policy input
-    packagePolicyTemplate.inputs.forEach((packageInput) => {
-      // Reduces registry var def into config object entry
-      const varsReducer = (
-        configObject: PackagePolicyConfigRecord,
-        registryVar: RegistryVarsEntry
-      ): PackagePolicyConfigRecord => {
-        const configEntry: PackagePolicyConfigRecordEntry = {
-          value: !registryVar.default && registryVar.multi ? [] : registryVar.default,
-        };
-        if (registryVar.type) {
-          configEntry.type = registryVar.type;
-        }
-        configObject![registryVar.name] = configEntry;
-        return configObject;
+  packageInfo.policy_templates?.forEach((packagePolicyTemplate) => {
+    const normalizedInputs = getNormalizedInputs(packagePolicyTemplate);
+    normalizedInputs?.forEach((packageInput) => {
+      const inputKey = `${packagePolicyTemplate.name}-${packageInput.type}`;
+      const input = {
+        ...packageInput,
+        ...(isIntegrationPolicyTemplate(packagePolicyTemplate) && packagePolicyTemplate.data_streams
+          ? { data_streams: packagePolicyTemplate.data_streams }
+          : {}),
+        policy_template: packagePolicyTemplate.name,
       };
-
-      // Map each package input stream into package policy input stream
-      const streams: NewPackagePolicyInputStream[] = getStreamsForInputType(
-        packageInput.type,
-        packageInfo
-      ).map((packageStream) => {
-        const stream: NewPackagePolicyInputStream = {
-          enabled: packageStream.enabled === false ? false : true,
-          data_stream: packageStream.data_stream,
-        };
-        if (packageStream.vars && packageStream.vars.length) {
-          stream.vars = packageStream.vars.reduce(varsReducer, {});
-        }
-        return stream;
-      });
-
-      const input: NewPackagePolicyInput = {
-        type: packageInput.type,
-        enabled: streams.length ? !!streams.find((stream) => stream.enabled) : true,
-        streams,
-      };
-
-      if (packageInput.vars && packageInput.vars.length) {
-        input.vars = packageInput.vars.reduce(varsReducer, {});
-      }
-
-      inputs.push(input);
+      packageInputsByPolicyTemplateAndType[inputKey] = input;
     });
-  }
+  });
+
+  Object.values(packageInputsByPolicyTemplateAndType).forEach((packageInput) => {
+    const streamsForInput: NewPackagePolicyInputStream[] = [];
+    let varsForInput: PackagePolicyConfigRecord = {};
+
+    // Map each package input stream into package policy input stream
+    const streams = getStreamsForInputType(
+      packageInput.type,
+      packageInfo,
+      packageInput.data_streams
+    ).map((packageStream) => {
+      const stream: NewPackagePolicyInputStream = {
+        enabled: packageStream.enabled === false ? false : true,
+        data_stream: packageStream.data_stream,
+        release: packageStream.release,
+      };
+      if (packageStream.vars && packageStream.vars.length) {
+        stream.vars = packageStream.vars.reduce(varsReducer, {});
+      }
+      return stream;
+    });
+
+    // If non-integration package, collect input-level vars, otherwise skip them,
+    // we do not support input-level vars for packages with integrations yet)
+    if (packageInput.vars?.length && !hasIntegrations) {
+      varsForInput = packageInput.vars.reduce(varsReducer, {});
+    }
+
+    streamsForInput.push(...streams);
+
+    // Check if we should enable this input by the streams below it
+    // Enable it if at least one of its streams is enabled
+    let enableInput = streamsForInput.length
+      ? !!streamsForInput.find((stream) => stream.enabled)
+      : true;
+
+    // If we are wanting to enabling this input, check if we only want
+    // to enable specific integrations (aka `policy_template`s)
+    if (
+      enableInput &&
+      hasIntegrations &&
+      integrationToEnable &&
+      integrationToEnable !== packageInput.policy_template
+    ) {
+      enableInput = false;
+    }
+
+    const input: NewPackagePolicyInput = {
+      type: packageInput.type,
+      policy_template: packageInput.policy_template,
+      enabled: enableInput,
+      streams: streamsForInput,
+    };
+
+    if (Object.keys(varsForInput).length) {
+      input.vars = varsForInput;
+    }
+
+    inputs.push(input);
+  });
 
   return inputs;
 };
@@ -116,12 +174,12 @@ export const packageToPackagePolicyInputs = (
 export const packageToPackagePolicy = (
   packageInfo: PackageInfo,
   agentPolicyId: string,
-  outputId: string,
   namespace: string = '',
   packagePolicyName?: string,
-  description?: string
+  description?: string,
+  integrationToEnable?: string
 ): NewPackagePolicy => {
-  return {
+  const packagePolicy: NewPackagePolicy = {
     name: packagePolicyName || `${packageInfo.name}-1`,
     namespace,
     description,
@@ -132,7 +190,13 @@ export const packageToPackagePolicy = (
     },
     enabled: true,
     policy_id: agentPolicyId,
-    output_id: outputId,
-    inputs: packageToPackagePolicyInputs(packageInfo),
+    inputs: packageToPackagePolicyInputs(packageInfo, integrationToEnable),
+    vars: undefined,
   };
+
+  if (packageInfo.vars?.length) {
+    packagePolicy.vars = packageInfo.vars.reduce(varsReducer, {});
+  }
+
+  return packagePolicy;
 };

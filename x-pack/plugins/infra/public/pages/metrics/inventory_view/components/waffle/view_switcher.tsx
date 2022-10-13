@@ -21,7 +21,7 @@ export const ViewSwitcher = ({ view, onChange }: Props) => {
       label: i18n.translate('xpack.infra.viewSwitcher.mapViewLabel', {
         defaultMessage: 'Map view',
       }),
-      iconType: 'apps',
+      iconType: 'grid',
     },
     {
       id: 'table',
@@ -38,7 +38,7 @@ export const ViewSwitcher = ({ view, onChange }: Props) => {
       })}
       options={buttons}
       color="text"
-      buttonSize="m"
+      buttonSize="s"
       idSelected={view}
       onChange={onChange}
       isIconOnly

@@ -6,3 +6,5 @@
  */
 
 export const GLOBAL_SETTINGS_SAVED_OBJECT_TYPE = 'ingest_manager_settings';
+
+export const GLOBAL_SETTINGS_ID = 'fleet-default-settings';

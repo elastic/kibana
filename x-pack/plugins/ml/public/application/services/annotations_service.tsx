@@ -17,7 +17,7 @@ export type AnnotationState = Annotation | null;
 /*
   This observable offers a way to share state between components
   that don't have a direct parent -> * -> child relationship.
-  It's also useful in mixed angularjs/React environments.
+  It's also useful in mixed React environments.
 
   For example, we want to trigger the flyout for editing annotations from both
   the timeseries_chart and the annotations_table. Since we don't want two flyout instances,
@@ -75,8 +75,7 @@ export const annotation$ = new BehaviorSubject<AnnotationState>(null);
 
 /*
   This observable provides a way to trigger a reload of annotations based on a given event.
-  Instead of passing around callbacks or deeply nested props, it can be imported for both
-  angularjs controllers/directives and React components.
+  Instead of passing around callbacks or deeply nested props, it can be imported in React components.
 */
 export const annotationsRefresh$ = new BehaviorSubject(Date.now());
 export const annotationsRefreshed = () => annotationsRefresh$.next(Date.now());

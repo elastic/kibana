@@ -32,6 +32,8 @@ import { shape } from './shape';
 import { table } from './table';
 // @ts-expect-error untyped local
 import { timefilterControl } from './timefilterControl';
+import { heatmap } from './heatmap';
+import { pieVis } from './pie_vis';
 
 import { SetupInitializer } from '../../plugin';
 
@@ -49,6 +51,8 @@ export const viewSpecs = [
   shape,
   table,
   timefilterControl,
+  heatmap,
+  pieVis,
 ];
 
 export const viewInitializers = [metricInitializer];

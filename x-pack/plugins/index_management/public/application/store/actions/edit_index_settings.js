@@ -10,27 +10,29 @@ import { loadIndexSettings as request } from '../../services';
 import { notificationService } from '../../services/notification';
 import { loadIndexDataSuccess } from './load_index_data';
 
-export const editIndexSettings = ({ indexName }) => async (dispatch) => {
-  let indexSettings;
-  try {
-    indexSettings = await request(indexName);
-  } catch (error) {
-    return notificationService.showDangerToast(error.message);
-  }
-  notificationService.showSuccessToast(
-    i18n.translate(
-      'xpack.idxMgmt.editIndexSettingsAction.successfullySavedSettingsForIndicesMessage',
-      {
-        defaultMessage: 'Successfully saved settings for {indexName}',
-        values: { indexName },
-      }
-    )
-  );
-  dispatch(
-    loadIndexDataSuccess({
-      data: indexSettings,
-      panelType: 'editIndexSettings',
-      indexName,
-    })
-  );
-};
+export const editIndexSettings =
+  ({ indexName }) =>
+  async (dispatch) => {
+    let indexSettings;
+    try {
+      indexSettings = await request(indexName);
+    } catch (error) {
+      return notificationService.showDangerToast(error.message);
+    }
+    notificationService.showSuccessToast(
+      i18n.translate(
+        'xpack.idxMgmt.editIndexSettingsAction.successfullySavedSettingsForIndicesMessage',
+        {
+          defaultMessage: 'Successfully saved settings for {indexName}',
+          values: { indexName },
+        }
+      )
+    );
+    dispatch(
+      loadIndexDataSuccess({
+        data: indexSettings,
+        panelType: 'editIndexSettings',
+        indexName,
+      })
+    );
+  };

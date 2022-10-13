@@ -9,12 +9,13 @@ import './_time_range_selector.scss';
 import PropTypes from 'prop-types';
 import React, { Component, useState, useEffect } from 'react';
 
-import { EuiDatePicker, EuiFieldText } from '@elastic/eui';
+import { EuiDatePicker, EuiFieldText, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { TIME_FORMAT } from '../../../../../../../common/constants/time_format';
+import { ManagedJobsWarningCallout } from '../../confirm_modals/managed_jobs_warning_callout';
 
 export class TimeRangeSelector extends Component {
   constructor(props) {
@@ -162,30 +163,52 @@ export class TimeRangeSelector extends Component {
     const { startItems, endItems } = this.getTabItems();
     return (
       <div className="time-range-selector">
-        <div className="time-range-section-container">
-          <TabStack
-            title={
-              <FormattedMessage
-                id="xpack.ml.jobsList.startDatafeedModal.searchStartTimeTitle"
-                defaultMessage="Search start time"
-              />
-            }
-            items={startItems}
-            switchState={this.state.startTab}
-            switchFunc={this.setStartTab}
-          />
-          <TabStack
-            title={
-              <FormattedMessage
-                id="xpack.ml.jobsList.startDatafeedModal.searchEndTimeTitle"
-                defaultMessage="Search end time"
-              />
-            }
-            items={endItems}
-            switchState={this.state.endTab}
-            switchFunc={this.setEndTab}
-          />
-        </div>
+        {this.props.hasManagedJob === true && this.state.endTab !== 0 ? (
+          <>
+            <ManagedJobsWarningCallout
+              jobsCount={this.props.jobsCount}
+              message={i18n.translate(
+                'xpack.ml.jobsList.startDatafeedsModal.startManagedDatafeedsDescription',
+                {
+                  defaultMessage:
+                    '{jobsCount, plural, one {This job} other {At least one of these jobs}} is preconfigured by Elastic; starting {jobsCount, plural, one {it} other {them}} with a specific end time might impact other parts of the product.',
+                  values: {
+                    jobsCount: this.props.jobsCount,
+                  },
+                }
+              )}
+            />
+            <EuiSpacer />
+          </>
+        ) : null}
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem>
+            <TabStack
+              title={
+                <FormattedMessage
+                  id="xpack.ml.jobsList.startDatafeedModal.searchStartTimeTitle"
+                  defaultMessage="Search start time"
+                />
+              }
+              items={startItems}
+              switchState={this.state.startTab}
+              switchFunc={this.setStartTab}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <TabStack
+              title={
+                <FormattedMessage
+                  id="xpack.ml.jobsList.startDatafeedModal.searchEndTimeTitle"
+                  defaultMessage="Search end time"
+                />
+              }
+              items={endItems}
+              switchState={this.state.endTab}
+              switchFunc={this.setEndTab}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </div>
     );
   }
@@ -229,6 +252,7 @@ const DatePickerWithInput = ({ date, onChange, minDate, setIsValid, tab }) => {
       setDateString(date.format(TIME_FORMAT));
       setCurrentTab(tab);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tab]);
 
   function onTextChange(e) {

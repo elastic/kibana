@@ -9,8 +9,8 @@
 import Path from 'path';
 
 import { REPO_ROOT } from '@kbn/utils';
-import { lastValueFrom } from '@kbn/std';
-import { CiStatsMetric } from '@kbn/dev-utils';
+import { lastValueFrom } from 'rxjs';
+import { CiStatsMetric } from '@kbn/ci-stats-reporter';
 import {
   runOptimizer,
   OptimizerConfig,
@@ -27,11 +27,11 @@ export const BuildKibanaPlatformPlugins: Task = {
       repoRoot: REPO_ROOT,
       outputRoot: build.resolvePath(),
       cache: false,
-      oss: build.isOss(),
       examples: false,
       watch: false,
       dist: true,
       includeCoreBundle: true,
+      inspectWorkers: false,
       limitsPath: Path.resolve(REPO_ROOT, 'packages/kbn-optimizer/limits.yml'),
     });
 

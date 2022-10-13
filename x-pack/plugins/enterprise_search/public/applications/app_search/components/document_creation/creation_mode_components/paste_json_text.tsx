@@ -10,12 +10,8 @@ import React from 'react';
 import { useValues, useActions } from 'kea';
 
 import {
-  EuiFlyoutHeader,
-  EuiTitle,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiFlexGroup,
   EuiFlexItem,
+  EuiFlexGroup,
   EuiButton,
   EuiButtonEmpty,
   EuiTextArea,
@@ -24,38 +20,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { DocumentCreationLogic } from '..';
 import { CANCEL_BUTTON_LABEL, CONTINUE_BUTTON_LABEL } from '../../../../shared/constants';
 import { AppLogic } from '../../../app_logic';
 
-import { FLYOUT_ARIA_LABEL_ID } from '../constants';
-import { Errors } from '../creation_response_components';
-import { DocumentCreationLogic } from '../index';
-
 import './paste_json_text.scss';
 
-export const PasteJsonText: React.FC = () => (
-  <>
-    <FlyoutHeader />
-    <FlyoutBody />
-    <FlyoutFooter />
-  </>
-);
-
-export const FlyoutHeader: React.FC = () => {
-  return (
-    <EuiFlyoutHeader hasBorder>
-      <EuiTitle size="m">
-        <h2 id={FLYOUT_ARIA_LABEL_ID}>
-          {i18n.translate('xpack.enterpriseSearch.appSearch.documentCreation.pasteJsonText.title', {
-            defaultMessage: 'Create documents',
-          })}
-        </h2>
-      </EuiTitle>
-    </EuiFlyoutHeader>
-  );
-};
-
-export const FlyoutBody: React.FC = () => {
+export const PasteJsonTextTabContent: React.FC = () => {
   const {
     configuredLimits: {
       engine: { maxDocumentByteSize },
@@ -66,7 +37,7 @@ export const FlyoutBody: React.FC = () => {
   const { setTextInput } = useActions(DocumentCreationLogic);
 
   return (
-    <EuiFlyoutBody banner={<Errors />}>
+    <>
       <EuiText color="subdued">
         <p>
           {i18n.translate(
@@ -92,26 +63,24 @@ export const FlyoutBody: React.FC = () => {
         fullWidth
         rows={12}
       />
-    </EuiFlyoutBody>
+    </>
   );
 };
 
-export const FlyoutFooter: React.FC = () => {
+export const PasteJsonTextFooterContent: React.FC = () => {
   const { textInput, isUploading } = useValues(DocumentCreationLogic);
   const { onSubmitJson, closeDocumentCreation } = useActions(DocumentCreationLogic);
 
   return (
-    <EuiFlyoutFooter>
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={closeDocumentCreation}>{CANCEL_BUTTON_LABEL}</EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton fill onClick={onSubmitJson} isLoading={isUploading} isDisabled={!textInput}>
-            {CONTINUE_BUTTON_LABEL}
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlyoutFooter>
+    <EuiFlexGroup justifyContent="spaceBetween">
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty onClick={closeDocumentCreation}>{CANCEL_BUTTON_LABEL}</EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButton fill onClick={onSubmitJson} isLoading={isUploading} isDisabled={!textInput}>
+          {CONTINUE_BUTTON_LABEL}
+        </EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

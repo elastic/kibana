@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 
-import { MAX_GROUPS } from '../index';
+import { MAX_GROUPS } from '..';
 
 export const CoreQueryParamsSchemaProperties = {
   // name of the indices to search
@@ -44,13 +44,8 @@ export type CoreQueryParams = TypeOf<typeof CoreQueryParamsSchema>;
 // above.
 // Using direct type not allowed, circular reference, so body is typed to unknown.
 export function validateCoreQueryBody(anyParams: unknown): string | undefined {
-  const {
-    aggType,
-    aggField,
-    groupBy,
-    termField,
-    termSize,
-  }: CoreQueryParams = anyParams as CoreQueryParams;
+  const { aggType, aggField, groupBy, termField, termSize }: CoreQueryParams =
+    anyParams as CoreQueryParams;
   if (aggType !== 'count' && !aggField) {
     return i18n.translate(
       'xpack.triggersActionsUI.data.coreQueryParams.aggTypeRequiredErrorMessage',

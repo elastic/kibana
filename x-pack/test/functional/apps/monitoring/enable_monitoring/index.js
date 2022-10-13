@@ -11,7 +11,6 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['monitoring', 'common', 'header']);
   const esSupertest = getService('esSupertest');
   const noData = getService('monitoringNoData');
-  const testSubjects = getService('testSubjects');
   const clusterOverview = getService('monitoringClusterOverview');
   const retry = getService('retry');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
@@ -22,7 +21,7 @@ export default function ({ getService, getPageObjects }) {
     before(async () => {
       const browser = getService('browser');
       await browser.setWindowSize(1600, 1000);
-      await PageObjects.monitoring.navigateTo(true);
+      await PageObjects.common.navigateToApp('monitoring');
       await noData.isOnNoDataPage();
     });
 
@@ -41,7 +40,7 @@ export default function ({ getService, getPageObjects }) {
       };
 
       await esSupertest.put('/_cluster/settings').send(disableCollection).expect(200);
-      await esDeleteAllIndices('/.monitoring-*');
+      await esDeleteAllIndices('.monitoring-*');
     });
 
     it('Monitoring enabled', async function () {
@@ -53,8 +52,7 @@ export default function ({ getService, getPageObjects }) {
       // Here we are checking that once Monitoring is enabled,
       // it moves on to the cluster overview page.
       await retry.tryForTime(20000, async () => {
-        // Click the refresh button
-        await testSubjects.click('querySubmitButton');
+        await clusterOverview.closeAlertsModal();
         expect(await clusterOverview.isOnClusterOverview()).to.be(true);
       });
     });

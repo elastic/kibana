@@ -14,7 +14,7 @@ import {
   createPromiseFromStreams,
   createListStream,
   createMapStream,
-} from './index';
+} from '.';
 
 async function concatToString(streams: [Readable, ...Writable[]]) {
   return await createPromiseFromStreams([

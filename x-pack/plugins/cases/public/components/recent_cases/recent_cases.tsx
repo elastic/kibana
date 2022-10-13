@@ -6,19 +6,20 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
-import React, { useEffect, useMemo, useRef } from 'react';
-import { isEqual } from 'lodash/fp';
+import React from 'react';
 import styled from 'styled-components';
 
 import { IconWithCount } from './icon_with_count';
 import * as i18n from './translations';
-import { useGetCases } from '../../containers/use_get_cases';
-import { CaseDetailsHrefSchema, CaseDetailsLink, CasesNavigation } from '../links';
+import { CaseDetailsLink } from '../links';
 import { LoadingPlaceholders } from './loading_placeholders';
 import { NoCases } from './no_cases';
-import { isSubCase } from '../all_cases/helpers';
 import { MarkdownRenderer } from '../markdown_editor';
 import { FilterOptions } from '../../containers/types';
+import { TruncatedText } from '../truncated_text';
+import { initialData as initialGetCasesData, useGetCases } from '../../containers/use_get_cases';
+import { useAvailableCasesOwners } from '../app/use_available_owners';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
 const MarkdownContainer = styled.div`
   max-height: 150px;
@@ -28,54 +29,31 @@ const MarkdownContainer = styled.div`
 
 export interface RecentCasesProps {
   filterOptions: Partial<FilterOptions>;
-  caseDetailsNavigation: CasesNavigation<CaseDetailsHrefSchema, 'configurable'>;
-  createCaseNavigation: CasesNavigation;
   maxCasesToShow: number;
 }
-const usePrevious = (value: Partial<FilterOptions>) => {
-  const ref = useRef();
-  useEffect(() => {
-    (ref.current as unknown) = value;
+
+export const RecentCasesComp = ({ filterOptions, maxCasesToShow }: RecentCasesProps) => {
+  const { owner } = useCasesContext();
+  const availableSolutions = useAvailableCasesOwners(['read']);
+  const hasOwner = !!owner.length;
+
+  const { data = initialGetCasesData, isLoading: isLoadingCases } = useGetCases({
+    queryParams: { perPage: maxCasesToShow },
+    filterOptions: { ...filterOptions, owner: hasOwner ? owner : availableSolutions },
   });
-  return ref.current;
-};
-export const RecentCasesComp = ({
-  caseDetailsNavigation,
-  createCaseNavigation,
-  filterOptions,
-  maxCasesToShow,
-}: RecentCasesProps) => {
-  const previousFilterOptions = usePrevious(filterOptions);
-  const { data, loading, setFilters } = useGetCases({ perPage: maxCasesToShow });
-
-  useEffect(() => {
-    if (previousFilterOptions !== undefined && !isEqual(previousFilterOptions, filterOptions)) {
-      setFilters(filterOptions);
-    }
-  }, [previousFilterOptions, filterOptions, setFilters]);
-
-  const isLoadingCases = useMemo(
-    () => loading.indexOf('cases') > -1 || loading.indexOf('caseUpdate') > -1,
-    [loading]
-  );
 
   return isLoadingCases ? (
     <LoadingPlaceholders lines={2} placeholders={3} />
   ) : !isLoadingCases && data.cases.length === 0 ? (
-    <NoCases createCaseHref={createCaseNavigation.href} />
+    <NoCases />
   ) : (
     <>
       {data.cases.map((c, i) => (
         <EuiFlexGroup key={c.id} gutterSize="none" justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiText size="s">
-              <CaseDetailsLink
-                caseDetailsNavigation={caseDetailsNavigation}
-                detailName={isSubCase(c) ? c.caseParentId : c.id}
-                title={c.title}
-                subCaseId={isSubCase(c) ? c.id : undefined}
-              >
-                {c.title}
+              <CaseDetailsLink detailName={c.id} title={c.title}>
+                <TruncatedText text={c.title} />
               </CaseDetailsLink>
             </EuiText>
 
@@ -94,3 +72,4 @@ export const RecentCasesComp = ({
     </>
   );
 };
+RecentCasesComp.displayName = 'RecentCasesComp';

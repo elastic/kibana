@@ -13,6 +13,7 @@ export const CLOUD_MACHINE_TYPE = 'cloud.machine.type';
 export const CLOUD_ACCOUNT_ID = 'cloud.account.id';
 export const CLOUD_INSTANCE_ID = 'cloud.instance.id';
 export const CLOUD_INSTANCE_NAME = 'cloud.instance.name';
+export const CLOUD_SERVICE_NAME = 'cloud.service.name';
 
 export const SERVICE = 'service';
 export const SERVICE_NAME = 'service.name';
@@ -40,19 +41,20 @@ export const USER_AGENT_NAME = 'user_agent.name';
 export const DESTINATION_ADDRESS = 'destination.address';
 
 export const OBSERVER_HOSTNAME = 'observer.hostname';
-export const OBSERVER_VERSION_MAJOR = 'observer.version_major';
 export const OBSERVER_LISTENING = 'observer.listening';
 export const PROCESSOR_EVENT = 'processor.event';
 
 export const TRANSACTION_DURATION = 'transaction.duration.us';
 export const TRANSACTION_DURATION_HISTOGRAM = 'transaction.duration.histogram';
+export const TRANSACTION_DURATION_SUMMARY = 'transaction.duration.summary';
 export const TRANSACTION_TYPE = 'transaction.type';
 export const TRANSACTION_RESULT = 'transaction.result';
 export const TRANSACTION_NAME = 'transaction.name';
 export const TRANSACTION_ID = 'transaction.id';
 export const TRANSACTION_SAMPLED = 'transaction.sampled';
-export const TRANSACTION_BREAKDOWN_COUNT = 'transaction.breakdown.count';
 export const TRANSACTION_PAGE_URL = 'transaction.page.url';
+export const TRANSACTION_FAILURE_COUNT = 'transaction.failure_count';
+export const TRANSACTION_SUCCESS_COUNT = 'transaction.success_count';
 // for transaction metrics
 export const TRANSACTION_ROOT = 'transaction.root';
 
@@ -75,9 +77,14 @@ export const SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT =
 export const SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM =
   'span.destination.service.response_time.sum.us';
 
+export const SPAN_LINKS = 'span.links';
+export const SPAN_LINKS_TRACE_ID = 'span.links.trace.id';
+export const SPAN_LINKS_SPAN_ID = 'span.links.span.id';
+
 // Parent ID for a transaction or span
 export const PARENT_ID = 'parent.id';
 
+export const ERROR_ID = 'error.id';
 export const ERROR_GROUP_ID = 'error.grouping_key';
 export const ERROR_CULPRIT = 'error.culprit';
 export const ERROR_LOG_LEVEL = 'error.log.level';
@@ -108,44 +115,44 @@ export const METRIC_JAVA_THREAD_COUNT = 'jvm.thread.count';
 export const METRIC_JAVA_GC_COUNT = 'jvm.gc.count';
 export const METRIC_JAVA_GC_TIME = 'jvm.gc.time';
 
+export const METRICSET_NAME = 'metricset.name';
+
 export const LABEL_NAME = 'labels.name';
 
 export const HOST = 'host';
-export const HOST_NAME = 'host.hostname';
+export const HOST_HOSTNAME = 'host.hostname'; // Do not use. Please use `HOST_NAME` instead.
+export const HOST_NAME = 'host.name';
 export const HOST_OS_PLATFORM = 'host.os.platform';
 export const CONTAINER_ID = 'container.id';
+export const CONTAINER = 'container';
+export const CONTAINER_IMAGE = 'container.image.name';
+
+// Kubernetes
 export const KUBERNETES = 'kubernetes';
-export const POD_NAME = 'kubernetes.pod.name';
+export const KUBERNETES_CONTAINER_NAME = 'kubernetes.container.name';
+export const KUBERNETES_DEPLOYMENT = 'kubernetes.deployment';
+export const KUBERNETES_DEPLOYMENT_NAME = 'kubernetes.deployment.name';
+export const KUBERNETES_NAMESPACE_NAME = 'kubernetes.namespace.name';
+export const KUBERNETES_NAMESPACE = 'kubernetes.namespace';
+export const KUBERNETES_POD_NAME = 'kubernetes.pod.name';
+export const KUBERNETES_POD_UID = 'kubernetes.pod.uid';
+export const KUBERNETES_REPLICASET = 'kubernetes.replicaset';
+export const KUBERNETES_REPLICASET_NAME = 'kubernetes.replicaset.name';
 
 export const CLIENT_GEO_COUNTRY_ISO_CODE = 'client.geo.country_iso_code';
 
 // RUM Labels
 export const TRANSACTION_URL = 'url.full';
-export const CLIENT_GEO = 'client.geo';
 export const USER_AGENT_DEVICE = 'user_agent.device.name';
 export const USER_AGENT_OS = 'user_agent.os.name';
 
-export const TRANSACTION_TIME_TO_FIRST_BYTE =
-  'transaction.marks.agent.timeToFirstByte';
-export const TRANSACTION_DOM_INTERACTIVE =
-  'transaction.marks.agent.domInteractive';
+export const FAAS_ID = 'faas.id';
+export const FAAS_COLDSTART = 'faas.coldstart';
+export const FAAS_TRIGGER_TYPE = 'faas.trigger.type';
+export const FAAS_DURATION = 'faas.duration';
+export const FAAS_COLDSTART_DURATION = 'faas.coldstart_duration';
+export const FAAS_BILLED_DURATION = 'faas.billed_duration';
 
-export const FCP_FIELD = 'transaction.marks.agent.firstContentfulPaint';
-export const LCP_FIELD = 'transaction.marks.agent.largestContentfulPaint';
-export const TBT_FIELD = 'transaction.experience.tbt';
-export const FID_FIELD = 'transaction.experience.fid';
-export const CLS_FIELD = 'transaction.experience.cls';
-
-export const PROFILE_ID = 'profile.id';
-export const PROFILE_DURATION = 'profile.duration';
-export const PROFILE_TOP_ID = 'profile.top.id';
-export const PROFILE_STACK = 'profile.stack';
-
-export const PROFILE_SAMPLES_COUNT = 'profile.samples.count';
-export const PROFILE_CPU_NS = 'profile.cpu.ns';
-export const PROFILE_WALL_US = 'profile.wall.us';
-
-export const PROFILE_ALLOC_OBJECTS = 'profile.alloc_objects.count';
-export const PROFILE_ALLOC_SPACE = 'profile.alloc_space.bytes';
-export const PROFILE_INUSE_OBJECTS = 'profile.inuse_objects.count';
-export const PROFILE_INUSE_SPACE = 'profile.inuse_space.bytes';
+// Metadata
+export const TIER = '_tier';
+export const INDEX = '_index';

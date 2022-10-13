@@ -7,7 +7,7 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment-timezone';
 
 import {
@@ -25,10 +25,10 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { search } from '../../../../../../../../src/plugins/data/public';
+import { search } from '@kbn/data-plugin/public';
 const { parseEsInterval } = search.aggs;
 
-import { getDateHistogramDetailsUrl, getDateHistogramAggregationUrl } from '../../../services';
+import { documentationLinks } from '../../../services/documentation_links';
 
 import { StepError } from './components';
 
@@ -194,7 +194,7 @@ export class StepDateHistogram extends Component {
             <EuiButtonEmpty
               size="s"
               flush="right"
-              href={getDateHistogramDetailsUrl()}
+              href={documentationLinks.apis.createRollupJobsRequest}
               target="_blank"
               iconType="help"
               data-test-subj="rollupJobCreateDateHistogramDocsButton"
@@ -220,7 +220,7 @@ export class StepDateHistogram extends Component {
                     defaultMessage="Define how {link} will operate on your rollup data."
                     values={{
                       link: (
-                        <EuiLink href={getDateHistogramAggregationUrl()} target="_blank">
+                        <EuiLink href={documentationLinks.aggs.date_histogram} target="_blank">
                           <FormattedMessage
                             id="xpack.rollupJobs.create.stepDateHistogramDescription.aggregationsLinkLabel"
                             defaultMessage="date histogram aggregations"

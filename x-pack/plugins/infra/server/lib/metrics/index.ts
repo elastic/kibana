@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
+import { TIMESTAMP_FIELD } from '../../../common/constants';
 import { MetricsAPIRequest, MetricsAPIResponse, afterKeyObjectRT } from '../../../common/http_api';
 import {
   ESSearchClient,
@@ -36,7 +37,7 @@ export const query = async (
   const filter: Array<Record<string, any>> = [
     {
       range: {
-        [options.timerange.field]: {
+        [TIMESTAMP_FIELD]: {
           gte: options.timerange.from,
           lte: options.timerange.to,
           format: 'epoch_millis',
@@ -47,8 +48,8 @@ export const query = async (
   ];
 
   const params = {
-    allowNoIndices: true,
-    ignoreUnavailable: true,
+    allow_no_indices: true,
+    ignore_unavailable: true,
     index: options.indexPattern,
     body: {
       size: 0,
@@ -91,7 +92,14 @@ export const query = async (
     return {
       series: groupings.buckets.map((bucket) => {
         const keys = Object.values(bucket.key);
-        return convertHistogramBucketsToTimeseries(keys, options, bucket.histogram.buckets);
+        const metricsetNames = bucket.metricsets.buckets.map((m) => m.key);
+        const timeseries = convertHistogramBucketsToTimeseries(
+          keys,
+          options,
+          bucket.histogram.buckets,
+          bucketSize * 1000
+        );
+        return { ...timeseries, metricsets: metricsetNames };
       }),
       info: {
         afterKey: returnAfterKey ? afterKey : null,
@@ -108,7 +116,8 @@ export const query = async (
         convertHistogramBucketsToTimeseries(
           ['*'],
           options,
-          response.aggregations.histogram.buckets
+          response.aggregations.histogram.buckets,
+          bucketSize * 1000
         ),
       ],
       info: {

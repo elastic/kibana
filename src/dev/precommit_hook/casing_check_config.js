@@ -23,11 +23,10 @@ export const IGNORE_FILE_GLOBS = [
   '**/+([A-Z_]).asciidoc',
   '**/LICENSE',
   '**/*.txt',
-  '**/Gruntfile.js',
-  'tasks/config/**/*',
   '**/{Dockerfile,docker-compose.yml}',
   'x-pack/plugins/canvas/tasks/**/*',
   'x-pack/plugins/canvas/canvas_plugin_src/**/*',
+  'x-pack/plugins/cases/docs/**/*',
   'x-pack/plugins/monitoring/public/lib/jquery_flot/**/*',
   '**/.*',
   '**/__mocks__/**/*',
@@ -40,6 +39,12 @@ export const IGNORE_FILE_GLOBS = [
   'vars/*',
   '.ci/pipeline-library/**/*',
   'packages/kbn-test/jest-preset.js',
+  'packages/kbn-test/*/jest-preset.js',
+  'test/package/Vagrantfile',
+  '**/test/**/fixtures/**/*',
+
+  // Required to match the name in the docs.elastic.dev repo.
+  'nav-kibana-dev.docnav.json',
 
   // filename must match language code which requires capital letters
   '**/translations/*.json',
@@ -48,24 +53,26 @@ export const IGNORE_FILE_GLOBS = [
   '**/preview-body.html',
   '**/preview-head.html',
 
-  // filename required by api-extractor
-  'api-documenter.json',
-
   // filename must match upstream filenames from lodash
-  'packages/elastic-safer-lodash-set/**/*',
+  'packages/kbn-safer-lodash-set/**/*',
 
-  // TODO fix file names in APM to remove these
-  'x-pack/plugins/apm/public/**/*',
-  'x-pack/plugins/apm/scripts/**/*',
-  'x-pack/plugins/apm/e2e/**/*',
+  // filename must match upstream filenames from handlebars
+  'packages/kbn-handlebars/src/upstream/**/*',
+  'packages/kbn-handlebars/.patches/**/*',
 
   'x-pack/plugins/maps/server/fonts/**/*',
-  // packages for the ingest manager's api integration tests could be valid semver which has dashes
-  'x-pack/test/fleet_api_integration/apis/fixtures/test_packages/**/*',
+
+  'x-pack/plugins/profiling/Makefile',
 
   // Bazel default files
   '**/WORKSPACE.bazel',
   '**/BUILD.bazel',
+
+  // Buildkite
+  '.buildkite/**/*',
+
+  // generator templates use weird filenames based on the requirements for the files they're generating
+  'packages/kbn-generate/templates/**/*',
 ];
 
 /**
@@ -94,11 +101,11 @@ export const IGNORE_DIRECTORY_GLOBS = [
   ...KEBAB_CASE_DIRECTORY_GLOBS,
   'src/babel-*',
   'packages/*',
-  'src/legacy/ui/public/flot-charts',
-  'test/functional/fixtures/es_archiver/visualize_source-filters',
+  'packages/core/*/*',
   'packages/kbn-pm/src/utils/__fixtures__/*',
   'x-pack/dev-tools',
   'packages/kbn-optimizer/src/__fixtures__/mock_repo/x-pack',
+  'typings/*',
 ];
 
 /**
@@ -143,10 +150,10 @@ export const TEMPORARILY_IGNORED_PATHS = [
   'x-pack/plugins/monitoring/public/icons/health-green.svg',
   'x-pack/plugins/monitoring/public/icons/health-red.svg',
   'x-pack/plugins/monitoring/public/icons/health-yellow.svg',
-  'x-pack/plugins/reporting/server/export_types/common/assets/fonts/noto/NotoSansCJKtc-Medium.ttf',
-  'x-pack/plugins/reporting/server/export_types/common/assets/fonts/noto/NotoSansCJKtc-Regular.ttf',
-  'x-pack/plugins/reporting/server/export_types/common/assets/fonts/roboto/Roboto-Italic.ttf',
-  'x-pack/plugins/reporting/server/export_types/common/assets/fonts/roboto/Roboto-Medium.ttf',
-  'x-pack/plugins/reporting/server/export_types/common/assets/fonts/roboto/Roboto-Regular.ttf',
-  'x-pack/plugins/reporting/server/export_types/common/assets/img/logo-grey.png',
+  'x-pack/plugins/screenshotting/server/assets/fonts/noto/NotoSansCJKtc-Medium.ttf',
+  'x-pack/plugins/screenshotting/server/assets/fonts/noto/NotoSansCJKtc-Regular.ttf',
+  'x-pack/plugins/screenshotting/server/assets/fonts/roboto/Roboto-Italic.ttf',
+  'x-pack/plugins/screenshotting/server/assets/fonts/roboto/Roboto-Medium.ttf',
+  'x-pack/plugins/screenshotting/server/assets/fonts/roboto/Roboto-Regular.ttf',
+  'x-pack/plugins/screenshotting/server/assets/img/logo-grey.png',
 ];

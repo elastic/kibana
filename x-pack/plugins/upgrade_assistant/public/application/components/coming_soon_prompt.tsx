@@ -6,17 +6,23 @@
  */
 
 import React from 'react';
-import { EuiEmptyPrompt, EuiPageContent, EuiLink } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiEmptyPrompt, EuiPageContent_Deprecated as EuiPageContent, EuiLink } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useAppContext } from '../app_context';
 
 export const ComingSoonPrompt: React.FunctionComponent = () => {
-  const { kibanaVersionInfo, docLinks } = useAppContext();
+  const {
+    kibanaVersionInfo,
+    services: {
+      core: { docLinks },
+    },
+  } = useAppContext();
+
   const { nextMajor, currentMajor } = kibanaVersionInfo;
   const { ELASTIC_WEBSITE_URL } = docLinks;
 
   return (
-    <EuiPageContent>
+    <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
       <EuiEmptyPrompt
         iconType="wrench"
         data-test-subj="comingSoonPrompt"

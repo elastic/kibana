@@ -7,16 +7,10 @@ Get started building your own plugins, or contributing directly to the {kib} rep
 [[developing-on-windows]]
 === Developing on Windows
 
-In order to support Windows development we currently require you to use one of the following:
-
-- https://git-scm.com/download/win[Git bash] (other bash emulators like https://cmder.net/[Cmder] could work but we did not test them)
-- https://docs.microsoft.com/en-us/windows/wsl/about[WSL]
-
-As well as installing https://www.microsoft.com/en-us/download/details.aspx?id=48145[Visual C++ Redistributable for Visual Studio 2015].
-
-Before running the steps listed below, please make sure you have installed everything 
-that we require and listed above and that you are running the mentioned commands 
-through Git bash or WSL.
+We do not support Windows native development anymore and in order to develop Kibana on Windows please https://docs.microsoft.com/en-us/windows/wsl/setup/environment[setup a WSL environment] which will 
+give you a much better experience.
+In addition to that you will also benefit from https://docs.microsoft.com/en-us/windows/wsl/tutorials/gui-apps[run GUI apps on WSL] like Chrome for test and debug purposes.
+Once completed, follow the rest of this guide inside the WSL.
 
 [discrete]
 [[get-kibana-code]]
@@ -35,8 +29,7 @@ cd kibana
 
 Install the version of Node.js listed in the `.node-version` file. This
 can be automated with tools such as
-https://github.com/nvm-sh/nvm[nvm],
-https://github.com/coreybutler/nvm-windows[nvm-windows] or
+https://github.com/nvm-sh/nvm[nvm] or
 https://github.com/wbyoung/avn[avn]. As we also include a `.nvmrc` file
 you can switch to the correct version when using nvm by running:
 
@@ -91,6 +84,10 @@ may need to run:
 ----
 yarn kbn clean
 ----
+
+NOTE: Running this command is only necessary in rare circumstance where you need to recover
+a consistent state when problems arise. If you need to run this command often, complete
+this form to provide feedback: https://ela.st/yarn-kbn-clean
 
 If you have failures during `yarn kbn bootstrap` you may have some
 corrupted packages in your yarn cache which you can clean with:

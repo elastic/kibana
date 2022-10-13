@@ -7,12 +7,16 @@
 
 import React from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
-import { mockAppIndexPattern, mockIndexPattern, render } from '../rtl_helpers';
-import { buildFilterLabel, FilterLabel } from './filter_label';
+import { mockAppDataView, mockDataView, mockUxSeries, render } from '../rtl_helpers';
+import { FilterLabel } from './filter_label';
 import * as useSeriesHook from '../hooks/use_series_filters';
+import { buildFilterLabel } from '../../filter_value_label/filter_value_label';
+import 'jest-canvas-mock';
+
+jest.setTimeout(10 * 1000);
 
 describe('FilterLabel', function () {
-  mockAppIndexPattern();
+  mockAppDataView();
 
   const invertFilter = jest.fn();
   jest.spyOn(useSeriesHook, 'useSeriesFilters').mockReturnValue({
@@ -26,22 +30,22 @@ describe('FilterLabel', function () {
         value={'elastic-co'}
         label={'Web Application'}
         negate={false}
-        seriesId={'kpi-trends'}
+        seriesId={0}
         removeFilter={jest.fn()}
+        dataView={mockDataView}
+        series={mockUxSeries}
       />
     );
 
-    await waitFor(() => {
-      screen.getByText('elastic-co');
-      screen.getByText(/web application:/i);
-      screen.getByTitle('Delete Web Application: elastic-co');
-      screen.getByRole('button', {
-        name: /delete web application: elastic-co/i,
-      });
+    await waitFor(async () => {
+      expect(await screen.findByText('elastic-co')).toBeInTheDocument();
+      expect(await screen.findByText('elastic-co')).toBeInTheDocument();
+      expect(await screen.findByText(/web application:/i)).toBeInTheDocument();
+      expect(await screen.findByTitle('Delete Web Application: elastic-co')).toBeInTheDocument();
     });
   });
 
-  it.skip('should delete filter', async function () {
+  it('should delete filter', async function () {
     const removeFilter = jest.fn();
     render(
       <FilterLabel
@@ -49,21 +53,21 @@ describe('FilterLabel', function () {
         value={'elastic-co'}
         label={'Web Application'}
         negate={false}
-        seriesId={'kpi-trends'}
+        seriesId={0}
         removeFilter={removeFilter}
+        dataView={mockDataView}
+        series={mockUxSeries}
       />
     );
 
-    await waitFor(() => {
-      fireEvent.click(screen.getByLabelText('Filter actions'));
-    });
+    fireEvent.click(await screen.findByLabelText('Filter actions'));
 
-    fireEvent.click(screen.getByTestId('deleteFilter'));
+    fireEvent.click(await screen.findByTestId('deleteFilter'));
     expect(removeFilter).toHaveBeenCalledTimes(1);
     expect(removeFilter).toHaveBeenCalledWith('service.name', 'elastic-co', false);
   });
 
-  it.skip('should invert filter', async function () {
+  it('should invert filter', async function () {
     const removeFilter = jest.fn();
     render(
       <FilterLabel
@@ -71,16 +75,16 @@ describe('FilterLabel', function () {
         value={'elastic-co'}
         label={'Web Application'}
         negate={false}
-        seriesId={'kpi-trends'}
+        seriesId={0}
         removeFilter={removeFilter}
+        dataView={mockDataView}
+        series={mockUxSeries}
       />
     );
 
-    await waitFor(() => {
-      fireEvent.click(screen.getByLabelText('Filter actions'));
-    });
+    fireEvent.click(await screen.findByLabelText('Filter actions'));
 
-    fireEvent.click(screen.getByTestId('negateFilter'));
+    fireEvent.click(await screen.findByTestId('negateFilter'));
     expect(invertFilter).toHaveBeenCalledTimes(1);
     expect(invertFilter).toHaveBeenCalledWith({
       field: 'service.name',
@@ -96,19 +100,21 @@ describe('FilterLabel', function () {
         value={'elastic-co'}
         label={'Web Application'}
         negate={true}
-        seriesId={'kpi-trends'}
+        seriesId={0}
         removeFilter={jest.fn()}
+        dataView={mockDataView}
+        series={mockUxSeries}
       />
     );
 
-    await waitFor(() => {
-      screen.getByText('elastic-co');
-      screen.getByText(/web application:/i);
-      screen.getByTitle('Delete NOT Web Application: elastic-co');
-      screen.getByRole('button', {
+    expect(await screen.findByText('elastic-co')).toBeInTheDocument();
+    expect(await screen.findByText(/web application:/i)).toBeInTheDocument();
+    expect(await screen.findByTitle('Delete NOT Web Application: elastic-co')).toBeInTheDocument();
+    expect(
+      await screen.findByRole('button', {
         name: /delete not web application: elastic-co/i,
-      });
-    });
+      })
+    ).toBeInTheDocument();
   });
 
   it('should build filter meta', function () {
@@ -116,7 +122,7 @@ describe('FilterLabel', function () {
       buildFilterLabel({
         field: 'user_agent.name',
         label: 'Browser family',
-        indexPattern: mockIndexPattern,
+        dataView: mockDataView,
         value: 'Firefox',
         negate: false,
       })

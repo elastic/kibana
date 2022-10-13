@@ -42,7 +42,8 @@ describe('AggTypeMetricSinglePercentileProvider class', () => {
       ],
       {
         typesRegistry,
-      }
+      },
+      jest.fn()
     );
   });
 
@@ -71,6 +72,11 @@ describe('AggTypeMetricSinglePercentileProvider class', () => {
         },
       })
     ).toEqual(123);
+  });
+
+  it('should not throw error for empty buckets', () => {
+    const agg = aggConfigs.getResponseAggs()[0];
+    expect(agg.getValue({})).toEqual(NaN);
   });
 
   it('produces the expected expression ast', () => {
@@ -137,7 +143,8 @@ describe('AggTypeMetricSinglePercentileProvider class', () => {
       ],
       {
         typesRegistry,
-      }
+      },
+      jest.fn()
     );
 
     expect(aggConfigs.toDsl()).toMatchSnapshot();

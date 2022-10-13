@@ -10,7 +10,7 @@ import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks_
 import { registerEnginesRoutes } from './engines';
 
 describe('engine routes', () => {
-  describe('GET /api/app_search/engines', () => {
+  describe('GET /internal/app_search/engines', () => {
     const mockRequest = {
       query: {
         type: 'indexed',
@@ -25,7 +25,7 @@ describe('engine routes', () => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/app_search/engines',
+        path: '/internal/app_search/engines',
       });
 
       registerEnginesRoutes({
@@ -98,14 +98,14 @@ describe('engine routes', () => {
     });
   });
 
-  describe('POST /api/app_search/engines', () => {
+  describe('POST /internal/app_search/engines', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'post',
-        path: '/api/app_search/engines',
+        path: '/internal/app_search/engines',
       });
 
       registerEnginesRoutes({
@@ -176,14 +176,76 @@ describe('engine routes', () => {
     });
   });
 
-  describe('GET /api/app_search/engines/{name}', () => {
+  describe('POST /internal/app_search/elasticsearch/engines', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'post',
+        path: '/internal/app_search/elasticsearch/engines',
+      });
+
+      registerEnginesRoutes({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request handler', () => {
+      mockRouter.callRoute({
+        body: {
+          name: 'some-elasticindexed-engine',
+          search_index: { type: 'elasticsearch', index_name: 'search-elastic-index' },
+        },
+      });
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/api/as/v0/engines',
+      });
+    });
+
+    describe('validates', () => {
+      describe('indexed engines', () => {
+        it('correctly', () => {
+          const request = {
+            body: {
+              name: 'some-engine',
+              search_index: { type: 'elasticsearch', index_name: 'search-elastic-index' },
+            },
+          };
+          mockRouter.shouldValidate(request);
+        });
+
+        it('missing name', () => {
+          const request = {
+            body: {
+              search_index: { type: 'elasticsearch', index_name: 'search-elastic-index' },
+            },
+          };
+          mockRouter.shouldThrow(request);
+        });
+
+        it('missing index_name', () => {
+          const request = {
+            name: 'some-engine',
+            body: {
+              search_index: { type: 'elasticsearch' },
+            },
+          };
+          mockRouter.shouldThrow(request);
+        });
+      });
+    });
+  });
+
+  describe('GET /internal/app_search/engines/{name}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/app_search/engines/{name}',
+        path: '/internal/app_search/engines/{name}',
       });
 
       registerEnginesRoutes({
@@ -199,14 +261,14 @@ describe('engine routes', () => {
     });
   });
 
-  describe('DELETE /api/app_search/engines/{name}', () => {
+  describe('DELETE /internal/app_search/engines/{name}', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'delete',
-        path: '/api/app_search/engines/{name}',
+        path: '/internal/app_search/engines/{name}',
       });
 
       registerEnginesRoutes({
@@ -237,14 +299,14 @@ describe('engine routes', () => {
     });
   });
 
-  describe('GET /api/app_search/engines/{name}/overview', () => {
+  describe('GET /internal/app_search/engines/{name}/overview', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/app_search/engines/{name}/overview',
+        path: '/internal/app_search/engines/{name}/overview',
       });
 
       registerEnginesRoutes({
@@ -256,49 +318,6 @@ describe('engine routes', () => {
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/as/engines/:name/overview_metrics',
-      });
-    });
-  });
-
-  describe('GET /api/app_search/engines/{name}/source_engines', () => {
-    let mockRouter: MockRouter;
-
-    beforeEach(() => {
-      jest.clearAllMocks();
-      mockRouter = new MockRouter({
-        method: 'get',
-        path: '/api/app_search/engines/{name}/source_engines',
-      });
-
-      registerEnginesRoutes({
-        ...mockDependencies,
-        router: mockRouter.router,
-      });
-    });
-
-    it('validates correctly with name', () => {
-      const request = { params: { name: 'test-engine' } };
-      mockRouter.shouldValidate(request);
-    });
-
-    it('fails validation without name', () => {
-      const request = { params: {} };
-      mockRouter.shouldThrow(request);
-    });
-
-    it('fails validation with a non-string name', () => {
-      const request = { params: { name: 1 } };
-      mockRouter.shouldThrow(request);
-    });
-
-    it('fails validation with missing query params', () => {
-      const request = { query: {} };
-      mockRouter.shouldThrow(request);
-    });
-
-    it('creates a request to enterprise search', () => {
-      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/as/engines/:name/source_engines',
       });
     });
   });

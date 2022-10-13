@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Embeddable, EmbeddableInput, IContainer } from '../../../../src/plugins/embeddable/public';
+import { Embeddable, EmbeddableInput, IContainer } from '@kbn/embeddable-plugin/public';
 
 export const HELLO_WORLD_EMBEDDABLE = 'HELLO_WORLD_EMBEDDABLE';
 
@@ -33,7 +33,8 @@ export class HelloWorldEmbeddable extends Embeddable {
    * @param node
    */
   public render(node: HTMLElement) {
-    node.innerHTML = '<div data-test-subj="helloWorldEmbeddable">HELLO WORLD!</div>';
+    node.innerHTML =
+      '<div data-test-subj="helloWorldEmbeddable" data-render-complete="true">HELLO WORLD!</div>';
   }
 
   /**

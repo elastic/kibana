@@ -1,0 +1,41 @@
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+    },
+    "index": "foo",
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "group": {
+          "ignore_above": 256,
+          "type": "keyword"
+        },
+        "randomInt": {
+          "type": "integer"
+        },
+        "geo": {
+          "properties": {
+            "country_code": {
+              "type": "keyword"
+            },
+            "country_name": {
+              "type": "keyword"
+            },
+            "point": {
+              "type": "geo_point"
+            }
+          }
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

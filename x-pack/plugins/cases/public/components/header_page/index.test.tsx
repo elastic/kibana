@@ -5,52 +5,44 @@
  * 2.0.
  */
 
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
-import { shallow } from 'enzyme';
+import { euiDarkVars } from '@kbn/ui-theme';
 import React from 'react';
 
 import '../../common/mock/match_media';
-import { TestProviders } from '../../common/mock';
-import { HeaderPage } from './index';
+import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../common/mock';
+import { HeaderPage } from '.';
 import { useMountAppended } from '../../utils/use_mount_appended';
 
-jest.mock('react-router-dom', () => {
-  const original = jest.requireActual('react-router-dom');
-
-  return {
-    ...original,
-    useHistory: () => ({
-      useHistory: jest.fn(),
-    }),
-  };
-});
+jest.mock('../../common/navigation/hooks');
 
 describe('HeaderPage', () => {
   const mount = useMountAppended();
+  let appMock: AppMockRenderer;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    appMock = createAppMockRenderer();
+  });
 
   test('it renders', () => {
-    const wrapper = shallow(
-      <HeaderPage
-        badgeOptions={{ beta: true, text: 'Beta', tooltip: 'Test tooltip' }}
-        border
-        subtitle="Test subtitle"
-        subtitle2="Test subtitle 2"
-        title="Test title"
-      >
-        <p>{'Test supplement'}</p>
-      </HeaderPage>
+    const result = appMock.render(
+      <TestProviders>
+        <HeaderPage border subtitle="Test subtitle" subtitle2="Test subtitle 2" title="Test title">
+          <p>{'Test supplement'}</p>
+        </HeaderPage>
+      </TestProviders>
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect(result.getByText('Test subtitle')).toBeInTheDocument();
+    expect(result.getByText('Test subtitle 2')).toBeInTheDocument();
+    expect(result.getByText('Test title')).toBeInTheDocument();
+    expect(result.getByText('Test supplement')).toBeInTheDocument();
   });
 
   test('it renders the back link when provided', () => {
     const wrapper = mount(
       <TestProviders>
-        <HeaderPage
-          backOptions={{ href: '#', text: 'Test link', onClick: jest.fn() }}
-          title="Test title"
-        />
+        <HeaderPage showBackButton title="Test title" />
       </TestProviders>
     );
 
@@ -140,7 +132,7 @@ describe('HeaderPage', () => {
     const casesHeaderPage = wrapper.find('.casesHeaderPage').first();
 
     expect(casesHeaderPage).toHaveStyleRule('border-bottom', euiDarkVars.euiBorderThin);
-    expect(casesHeaderPage).toHaveStyleRule('padding-bottom', euiDarkVars.paddingSizes.l);
+    expect(casesHeaderPage).toHaveStyleRule('padding-bottom', euiDarkVars.euiSizeL);
   });
 
   test('it DOES NOT apply border styles when border is false', () => {
@@ -152,6 +144,32 @@ describe('HeaderPage', () => {
     const casesHeaderPage = wrapper.find('.casesHeaderPage').first();
 
     expect(casesHeaderPage).not.toHaveStyleRule('border-bottom', euiDarkVars.euiBorderThin);
-    expect(casesHeaderPage).not.toHaveStyleRule('padding-bottom', euiDarkVars.paddingSizes.l);
+    expect(casesHeaderPage).not.toHaveStyleRule('padding-bottom', euiDarkVars.euiSizeL);
+  });
+
+  describe('Badges', () => {
+    it('does not render the badge if the release is ga', () => {
+      const renderResult = appMock.render(<HeaderPage title="Test title" />);
+
+      expect(renderResult.getByText('Test title')).toBeInTheDocument();
+      expect(renderResult.queryByText('Beta')).toBeFalsy();
+      expect(renderResult.queryByText('Technical preview')).toBeFalsy();
+    });
+
+    it('does render the beta badge', () => {
+      appMock = createAppMockRenderer({ releasePhase: 'beta' });
+      const renderResult = appMock.render(<HeaderPage title="Test title" />);
+
+      expect(renderResult.getByText('Test title')).toBeInTheDocument();
+      expect(renderResult.getByText('Beta')).toBeInTheDocument();
+    });
+
+    it('does render the experimental badge', () => {
+      appMock = createAppMockRenderer({ releasePhase: 'experimental' });
+      const renderResult = appMock.render(<HeaderPage title="Test title" />);
+
+      expect(renderResult.getByText('Test title')).toBeInTheDocument();
+      expect(renderResult.getByText('Technical preview')).toBeInTheDocument();
+    });
   });
 });

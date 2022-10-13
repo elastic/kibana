@@ -6,7 +6,7 @@
  */
 
 import React, { Fragment, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -51,7 +51,7 @@ export const PolicyRetentionSchedule: React.FunctionComponent<Props> = ({
 
   const renderRetentionPanel = (cronSchedule: string) => (
     <>
-      <EuiPanel>
+      <EuiPanel hasBorder>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiText>

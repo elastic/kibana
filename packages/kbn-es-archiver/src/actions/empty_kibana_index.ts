@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
-import { ToolingLog } from '@kbn/dev-utils';
+import type { Client } from '@elastic/elasticsearch';
+import { ToolingLog } from '@kbn/tooling-log';
 import { KbnClient } from '@kbn/test';
 
 import { migrateKibanaIndex, createStats, cleanKibanaIndices } from '../lib';
@@ -17,14 +17,13 @@ export async function emptyKibanaIndexAction({
   log,
   kbnClient,
 }: {
-  client: KibanaClient;
+  client: Client;
   log: ToolingLog;
   kbnClient: KbnClient;
 }) {
   const stats = createStats('emptyKibanaIndex', log);
-  const kibanaPluginIds = await kbnClient.plugins.getEnabledIds();
 
-  await cleanKibanaIndices({ client, stats, log, kibanaPluginIds });
+  await cleanKibanaIndices({ client, stats, log });
   await migrateKibanaIndex(kbnClient);
   stats.createdIndex('.kibana');
   return stats.toJSON();

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'src/core/server';
-import { savedObjectsClientMock } from 'src/core/server/mocks';
+import { KibanaRequest } from '@kbn/core/server';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import { EventLogClientService } from './event_log_start_service';
 import { contextMock } from './es/context.mock';
@@ -44,7 +44,7 @@ describe('EventLogClientService', () => {
 
 function fakeRequest(): KibanaRequest {
   const savedObjectsClient = savedObjectsClientMock.create();
-  return ({
+  return {
     headers: {},
     getBasePath: () => '',
     path: '/',
@@ -58,5 +58,5 @@ function fakeRequest(): KibanaRequest {
       },
     },
     getSavedObjectsClient: () => savedObjectsClient,
-  } as unknown) as KibanaRequest;
+  } as unknown as KibanaRequest;
 }

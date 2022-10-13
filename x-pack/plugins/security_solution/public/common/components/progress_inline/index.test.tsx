@@ -8,7 +8,7 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { ProgressInline } from './index';
+import { ProgressInline } from '.';
 
 describe('ProgressInline', () => {
   test('it renders', () => {

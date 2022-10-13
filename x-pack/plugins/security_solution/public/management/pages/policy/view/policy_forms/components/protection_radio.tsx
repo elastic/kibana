@@ -9,15 +9,12 @@ import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { cloneDeep } from 'lodash';
 import { htmlIdGenerator, EuiRadio } from '@elastic/eui';
-import {
-  ImmutableArray,
-  ProtectionModes,
-  UIPolicyConfig,
-} from '../../../../../../../common/endpoint/types';
-import { MacPolicyProtection, PolicyProtection } from '../../../types';
+import type { ImmutableArray, UIPolicyConfig } from '../../../../../../../common/endpoint/types';
+import { ProtectionModes } from '../../../../../../../common/endpoint/types';
+import type { MacPolicyProtection, LinuxPolicyProtection, PolicyProtection } from '../../../types';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
 import { policyConfig } from '../../../store/policy_details/selectors';
-import { AppAction } from '../../../../../../common/store/actions';
+import type { AppAction } from '../../../../../../common/store/actions';
 import { useLicense } from '../../../../../../common/hooks/use_license';
 
 export const ProtectionRadio = React.memo(
@@ -46,6 +43,8 @@ export const ProtectionRadio = React.memo(
             newPayload[os][protection].mode = protectionMode;
           } else if (os === 'mac') {
             newPayload[os][protection as MacPolicyProtection].mode = protectionMode;
+          } else if (os === 'linux') {
+            newPayload[os][protection as LinuxPolicyProtection].mode = protectionMode;
           }
           if (isPlatinumPlus) {
             if (os === 'windows') {
@@ -59,6 +58,12 @@ export const ProtectionRadio = React.memo(
                 newPayload[os].popup[protection as MacPolicyProtection].enabled = true;
               } else {
                 newPayload[os].popup[protection as MacPolicyProtection].enabled = false;
+              }
+            } else if (os === 'linux') {
+              if (protectionMode === ProtectionModes.prevent) {
+                newPayload[os].popup[protection as LinuxPolicyProtection].enabled = true;
+              } else {
+                newPayload[os].popup[protection as LinuxPolicyProtection].enabled = false;
               }
             }
           }

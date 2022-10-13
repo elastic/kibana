@@ -8,16 +8,13 @@
 import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
 import { getFlattenedObject } from '@kbn/std';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import { EmbeddableInput, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
+import type { UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
 import { txtValue } from './i18n';
-import type { Filter, Query, TimeRange } from '../../../../../../../src/plugins/data/public';
-import {
-  EmbeddableInput,
-  EmbeddableOutput,
-} from '../../../../../../../src/plugins/embeddable/public';
 import type { EmbeddableWithQueryInput } from '../url_drilldown';
 import { deleteUndefinedKeys } from './util';
 import type { ActionFactoryContext } from '../url_drilldown';
-import type { UrlTemplateEditorVariable } from '../../../../../../../src/plugins/kibana_react/public';
 
 /**
  * Part of context scope extracted from an embeddable
@@ -54,7 +51,7 @@ export interface ContextValues {
   panel: PanelValues;
 }
 
-function hasSavedObjectId(obj: Record<string, any>): obj is { savedObjectId: string } {
+function hasSavedObjectId(obj: Record<string, unknown>): obj is { savedObjectId: string } {
   return 'savedObjectId' in obj && typeof obj.savedObjectId === 'string';
 }
 
@@ -64,12 +61,13 @@ function hasSavedObjectId(obj: Record<string, any>): obj is { savedObjectId: str
  */
 function getIndexPatternIds(output: EmbeddableOutput): string[] {
   function hasIndexPatterns(
-    _output: Record<string, any>
+    _output: unknown
   ): _output is { indexPatterns: Array<{ id?: string }> } {
     return (
-      'indexPatterns' in _output &&
-      Array.isArray(_output.indexPatterns) &&
-      _output.indexPatterns.length > 0
+      typeof _output === 'object' &&
+      !!_output &&
+      Array.isArray((_output as { indexPatterns: unknown[] }).indexPatterns) &&
+      (_output as { indexPatterns: Array<{ id?: string }> }).indexPatterns.length > 0
     );
   }
   return hasIndexPatterns(output)

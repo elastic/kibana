@@ -5,9 +5,7 @@
   "description": "Identifies modifications to the registered Subject Interface Package (SIP) providers. SIP providers are used by the Windows cryptographic system to validate file signatures on the system. This may be an attempt to bypass signature validation checks or inject code into critical processes.",
   "from": "now-9m",
   "index": [
-    "winlogbeat-*",
-    "logs-endpoint.events.*",
-    "logs-windows.*"
+    "logs-endpoint.events.*"
   ],
   "language": "eql",
   "license": "Elastic License v2",
@@ -15,6 +13,23 @@
   "query": "registry where event.type:\"change\" and\n  registry.path: (\n    \"HKLM\\\\SOFTWARE\\\\Microsoft\\\\Cryptography\\\\OID\\\\EncodingType 0\\\\CryptSIPDllPutSignedDataMsg\\\\{*}\\\\Dll\",\n    \"HKLM\\\\SOFTWARE\\\\WOW6432Node\\\\Microsoft\\\\Cryptography\\\\OID\\\\EncodingType 0\\\\CryptSIPDllPutSignedDataMsg\\\\{*}\\\\Dll\",\n    \"HKLM\\\\SOFTWARE\\\\Microsoft\\\\Cryptography\\\\Providers\\\\Trust\\\\FinalPolicy\\\\{*}\\\\$Dll\",\n    \"HKLM\\\\SOFTWARE\\\\WOW6432Node\\\\Microsoft\\\\Cryptography\\\\Providers\\\\Trust\\\\FinalPolicy\\\\{*}\\\\$Dll\"\n    ) and\n  registry.data.strings:\"*.dll\"\n",
   "references": [
     "https://github.com/mattifestation/PoCSubjectInterfacePackage"
+  ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "registry.data.strings",
+      "type": "wildcard"
+    },
+    {
+      "ecs": true,
+      "name": "registry.path",
+      "type": "keyword"
+    }
   ],
   "risk_score": 47,
   "rule_id": "f2c7b914-eda3-40c2-96ac-d23ef91776ca",
@@ -52,5 +67,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 100
 }

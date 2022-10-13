@@ -11,7 +11,6 @@ import { createMetricsAggregations } from './create_metrics_aggregations';
 
 const options: MetricsAPIRequest = {
   timerange: {
-    field: '@timestamp',
     from: moment('2020-01-01T00:00:00Z').valueOf(),
     to: moment('2020-01-01T01:00:00Z').valueOf(),
     interval: '>=1m',
@@ -23,7 +22,7 @@ const options: MetricsAPIRequest = {
     {
       id: 'metric_1',
       aggregations: {
-        metric_1_max: { max: { field: 'system.network.in.bytes' } },
+        metric_1_max: { max: { field: 'test.field.that.is.a.counter' } },
         metric_1: { derivative: { buckets_path: 'metric_1_max', gap_policy: 'skip', unit: '1s' } },
       },
     },

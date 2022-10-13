@@ -6,11 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { Observable, Subscriber } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { Execution } from './execution';
 import { parseExpression } from '../ast';
 import { createUnitTestExecutor } from '../test_helpers';
 import { ExecutionContract } from './execution_contract';
+import { ExpressionFunctionDefinition } from '../expression_functions';
 
 const createExecution = (
   expression: string = 'foo bar=123',
@@ -66,26 +68,23 @@ describe('ExecutionContract', () => {
     });
   });
 
-  test('can get error result of the expression execution', async () => {
+  test('can get error result of the expression execution', () => {
     const execution = createExecution('foo bar=123');
     const contract = new ExecutionContract(execution);
     execution.start();
 
-    const result = await contract.getData();
-
-    expect(result).toMatchObject({
-      type: 'error',
-    });
+    expect(contract.getData().toPromise()).resolves.toHaveProperty(
+      'result',
+      expect.objectContaining({ type: 'error' })
+    );
   });
 
-  test('can get result of the expression execution', async () => {
+  test('can get result of the expression execution', () => {
     const execution = createExecution('var_set name="foo" value="bar" | var name="foo"');
     const contract = new ExecutionContract(execution);
     execution.start();
 
-    const result = await contract.getData();
-
-    expect(result).toBe('bar');
+    expect(contract.getData().toPromise()).resolves.toHaveProperty('result', 'bar');
   });
 
   describe('isPending', () => {
@@ -120,11 +119,40 @@ describe('ExecutionContract', () => {
       const contract = new ExecutionContract(execution);
 
       execution.start();
-      await execution.result.pipe(first()).toPromise();
       execution.state.get().state = 'error';
 
       expect(contract.isPending).toBe(false);
       expect(execution.state.get().state).toBe('error');
+    });
+
+    test('is true when execution is in progress but got partial result, is false once we get final result', async () => {
+      let mySubscriber: Subscriber<number>;
+      const arg = new Observable((subscriber) => {
+        mySubscriber = subscriber;
+        subscriber.next(1);
+      });
+
+      const observable: ExpressionFunctionDefinition<'observable', unknown, {}, unknown> = {
+        name: 'observable',
+        args: {},
+        help: '',
+        fn: () => arg,
+      };
+      const executor = createUnitTestExecutor();
+      executor.registerFunction(observable);
+
+      const execution = executor.createExecution('observable');
+      execution.start(null);
+      await execution.result.pipe(first()).toPromise();
+
+      expect(execution.contract.isPending).toBe(true);
+      expect(execution.state.get().state).toBe('result');
+
+      mySubscriber!.next(2);
+      mySubscriber!.complete();
+
+      expect(execution.contract.isPending).toBe(false);
+      expect(execution.state.get().state).toBe('result');
     });
   });
 });

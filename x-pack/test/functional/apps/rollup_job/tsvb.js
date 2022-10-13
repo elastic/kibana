@@ -10,8 +10,9 @@ import mockRolledUpData from './hybrid_index_helper';
 
 export default function ({ getService, getPageObjects }) {
   const es = getService('es');
-  const esArchiver = getService('esArchiver');
   const retry = getService('retry');
+  const security = getService('security');
+  const kibanaServer = getService('kibanaServer');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const PageObjects = getPageObjects([
     'common',
@@ -20,13 +21,15 @@ export default function ({ getService, getPageObjects }) {
     'visualBuilder',
     'timePicker',
   ]);
+  const fromTime = 'Oct 15, 2019 @ 00:00:01.000';
+  const toTime = 'Oct 15, 2019 @ 19:31:44.000';
 
   describe('tsvb integration', function () {
     //Since rollups can only be created once with the same name (even if you delete it),
     //we add the Date.now() to avoid name collision if you run the tests locally back to back.
     const rollupJobName = `tsvb-test-rollup-job-${Date.now()}`;
     const rollupSourceIndexName = 'rollup-source-data';
-    const rollupTargetIndexName = `rollup-target-data`;
+    const rollupTargetIndexName = 'rollup-target-data';
     const pastDates = [
       new Date('October 15, 2019 05:35:32'),
       new Date('October 15, 2019 05:34:32'),
@@ -35,7 +38,15 @@ export default function ({ getService, getPageObjects }) {
 
     before(async () => {
       // load visualize to have an index pattern ready, otherwise visualize will redirect
-      await esArchiver.load('visualize/default');
+      await security.testUser.setRoles(['global_visualize_all', 'test_rollup_reader']);
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/rollup/rollup.json'
+      );
+      await kibanaServer.uiSettings.update({
+        defaultIndex: 'rollup',
+        'metrics:allowStringIndices': true,
+        'timepicker:timeDefaults': `{ "from": "${fromTime}", "to": "${toTime}"}`,
+      });
     });
 
     it('create rollup tsvb', async () => {
@@ -77,10 +88,6 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualBuilder.checkVisualBuilderIsPresent();
       await PageObjects.visualBuilder.clickMetric();
       await PageObjects.visualBuilder.checkMetricTabIsPresent();
-      await PageObjects.timePicker.setAbsoluteRange(
-        'Oct 15, 2019 @ 00:00:01.000',
-        'Oct 15, 2019 @ 19:31:44.000'
-      );
       await PageObjects.visualBuilder.clickPanelOptions('metric');
       await PageObjects.visualBuilder.setIndexPatternValue(rollupTargetIndexName, false);
       await PageObjects.visualBuilder.selectIndexPatternTimeField('@timestamp');
@@ -100,7 +107,12 @@ export default function ({ getService, getPageObjects }) {
       });
 
       await esDeleteAllIndices([rollupTargetIndexName, rollupSourceIndexName]);
-      await esArchiver.load('empty_kibana');
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/rollup/rollup.json'
+      );
+      await kibanaServer.uiSettings.update({ 'metrics:allowStringIndices': false });
+      await kibanaServer.uiSettings.replace({});
+      await security.testUser.restoreDefaults();
     });
   });
 }

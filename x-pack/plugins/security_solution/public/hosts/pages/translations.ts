@@ -7,10 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const KQL_PLACEHOLDER = i18n.translate('xpack.securitySolution.hosts.kqlPlaceholder', {
-  defaultMessage: 'e.g. host.name: "foo"',
-});
-
 export const PAGE_TITLE = i18n.translate('xpack.securitySolution.hosts.pageTitle', {
   defaultMessage: 'Hosts',
 });
@@ -50,17 +46,17 @@ export const NAVIGATION_EVENTS_TITLE = i18n.translate(
   }
 );
 
-export const NAVIGATION_ALERTS_TITLE = i18n.translate(
-  'xpack.securitySolution.hosts.navigation.alertsTitle',
+export const NAVIGATION_HOST_RISK_TITLE = i18n.translate(
+  'xpack.securitySolution.hosts.navigation.hostRiskTitle',
   {
-    defaultMessage: 'External alerts',
+    defaultMessage: 'Host risk',
   }
 );
 
-export const ERROR_FETCHING_AUTHENTICATIONS_DATA = i18n.translate(
-  'xpack.securitySolution.hosts.navigaton.matrixHistogram.errorFetchingAuthenticationsData',
+export const NAVIGATION_SESSIONS_TITLE = i18n.translate(
+  'xpack.securitySolution.hosts.navigation.sessionsTitle',
   {
-    defaultMessage: 'Failed to query authentications data',
+    defaultMessage: 'Sessions',
   }
 );
 
@@ -68,5 +64,19 @@ export const ERROR_FETCHING_EVENTS_DATA = i18n.translate(
   'xpack.securitySolution.hosts.navigaton.matrixHistogram.errorFetchingEventsData',
   {
     defaultMessage: 'Failed to query events data',
+  }
+);
+
+export const VIEW_DASHBOARD_BUTTON = i18n.translate(
+  'xpack.securitySolution.hosts.navigaton.hostRisk.viewDashboardButtonLabel',
+  {
+    defaultMessage: 'View source dashboard',
+  }
+);
+
+export const HOST_RISK_SCORE_OVER_TIME = i18n.translate(
+  'xpack.securitySolution.hosts.navigaton.hostScoreOverTimeTitle',
+  {
+    defaultMessage: 'Host risk score over time',
   }
 );

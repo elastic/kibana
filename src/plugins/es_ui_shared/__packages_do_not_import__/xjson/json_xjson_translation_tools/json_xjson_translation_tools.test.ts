@@ -12,7 +12,7 @@ import collapsingTests from './__fixtures__/utils_string_collapsing.txt';
 // @ts-ignore
 import expandingTests from './__fixtures__/utils_string_expanding.txt';
 
-import * as utils from './index';
+import * as utils from '.';
 import { extractJSONStringValues } from './parser';
 
 describe('JSON to XJSON conversion tools', () => {

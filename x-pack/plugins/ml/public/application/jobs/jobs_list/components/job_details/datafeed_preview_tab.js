@@ -10,11 +10,11 @@ import React, { Component } from 'react';
 
 import { EuiSpacer, EuiCallOut, EuiLoadingSpinner } from '@elastic/eui';
 
-import { mlJobService } from '../../../../services/job_service';
+import { ml } from '../../../../services/ml_api_service';
 import { checkPermission } from '../../../../capabilities/check_capabilities';
 import { ML_DATA_PREVIEW_COUNT } from '../../../../../../common/util/job_utils';
 import { MLJobEditor } from '../ml_job_editor';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export class DatafeedPreviewPane extends Component {
   constructor(props) {
@@ -88,8 +88,8 @@ DatafeedPreviewPane.propTypes = {
 function updateDatafeedPreview(job, canPreviewDatafeed) {
   return new Promise((resolve, reject) => {
     if (canPreviewDatafeed) {
-      mlJobService
-        .getDatafeedPreview(job.datafeed_config.datafeed_id)
+      ml.jobs
+        .datafeedPreview(job.datafeed_config.datafeed_id)
         .then((resp) => {
           if (Array.isArray(resp)) {
             resolve(JSON.stringify(resp.slice(0, ML_DATA_PREVIEW_COUNT), null, 2));

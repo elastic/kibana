@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
-import { LicensingPluginStart } from '../../licensing/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { LicenseChecker, ILicenseChecker } from '../common/license_checker';
 import { GlobalSearchPluginSetup, GlobalSearchPluginStart } from './types';
 import { GlobalSearchClientConfigType } from './config';
@@ -25,7 +25,8 @@ export class GlobalSearchPlugin
       GlobalSearchPluginStart,
       GlobalSearchPluginSetupDeps,
       GlobalSearchPluginStartDeps
-    > {
+    >
+{
   private readonly config: GlobalSearchClientConfigType;
   private licenseChecker?: ILicenseChecker;
   private readonly searchService = new SearchService();

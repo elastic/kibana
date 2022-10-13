@@ -9,17 +9,27 @@ import React, { FunctionComponent, useEffect, useRef } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
-import { IErrorObject } from '../../../../../../triggers_actions_ui/public';
+import { DataViewField } from '@kbn/data-views-plugin/public';
+import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { SingleFieldSelect } from '../util_components/single_field_select';
 import { ExpressionWithPopover } from '../util_components/expression_with_popover';
-import { IFieldType } from '../../../../../../../../src/plugins/data/common/index_patterns/fields';
 
 interface Props {
   errors: IErrorObject;
   entity: string;
   setAlertParamsEntity: (entity: string) => void;
-  indexFields: IFieldType[];
+  indexFields: DataViewField[];
   isInvalid: boolean;
+}
+
+const ENTITY_TYPES = ['string', 'number', 'ip'];
+export function getValidIndexPatternFields(fields: DataViewField[]): DataViewField[] {
+  return fields.filter((field) => {
+    const isSpecifiedSupportedField = ENTITY_TYPES.includes(field.type);
+    const hasLeadingUnderscore = field.name.startsWith('_');
+    const isAggregatable = !!field.aggregatable;
+    return isSpecifiedSupportedField && isAggregatable && !hasLeadingUnderscore;
+  });
 }
 
 export const EntityByExpression: FunctionComponent<Props> = ({
@@ -29,9 +39,6 @@ export const EntityByExpression: FunctionComponent<Props> = ({
   indexFields,
   isInvalid,
 }) => {
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const ENTITY_TYPES = ['string', 'number', 'ip'];
-
   const usePrevious = <T extends unknown>(value: T): T | undefined => {
     const ref = useRef<T>();
     useEffect(() => {
@@ -42,20 +49,18 @@ export const EntityByExpression: FunctionComponent<Props> = ({
 
   const oldIndexFields = usePrevious(indexFields);
   const fields = useRef<{
-    indexFields: IFieldType[];
+    indexFields: DataViewField[];
   }>({
     indexFields: [],
   });
   useEffect(() => {
     if (!_.isEqual(oldIndexFields, indexFields)) {
-      fields.current.indexFields = indexFields.filter(
-        (field: IFieldType) => ENTITY_TYPES.includes(field.type) && !field.name.startsWith('_')
-      );
+      fields.current.indexFields = getValidIndexPatternFields(indexFields);
       if (!entity && fields.current.indexFields.length) {
         setAlertParamsEntity(fields.current.indexFields[0].name);
       }
     }
-  }, [ENTITY_TYPES, indexFields, oldIndexFields, setAlertParamsEntity, entity]);
+  }, [indexFields, oldIndexFields, setAlertParamsEntity, entity]);
 
   const indexPopover = (
     <EuiFormRow id="entitySelect" fullWidth error={errors.index}>

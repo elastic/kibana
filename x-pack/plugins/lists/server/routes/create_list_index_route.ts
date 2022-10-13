@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import { validate } from '@kbn/securitysolution-io-ts-utils';
+import { transformError } from '@kbn/securitysolution-es-utils';
+import { acknowledgeSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { LIST_INDEX } from '@kbn/securitysolution-list-constants';
+
 import type { ListsPluginRouter } from '../types';
-import { buildSiemResponse, transformError } from '../siem_server_deps';
-import { validate } from '../../common/shared_imports';
-import { LIST_INDEX } from '../../common/constants';
-import { acknowledgeSchema } from '../../common/schemas';
+
+import { buildSiemResponse } from './utils';
 
 import { getListClient } from '.';
 
@@ -26,9 +29,46 @@ export const createListIndexRoute = (router: ListsPluginRouter): void => {
       const siemResponse = buildSiemResponse(response);
 
       try {
-        const lists = getListClient(context);
+        const lists = await getListClient(context);
         const listIndexExists = await lists.getListIndexExists();
         const listItemIndexExists = await lists.getListItemIndexExists();
+
+        const policyExists = await lists.getListPolicyExists();
+        const policyListItemExists = await lists.getListItemPolicyExists();
+
+        if (!policyExists) {
+          await lists.setListPolicy();
+        }
+        if (!policyListItemExists) {
+          await lists.setListItemPolicy();
+        }
+
+        const templateExists = await lists.getListTemplateExists();
+        const templateListItemsExists = await lists.getListItemTemplateExists();
+        const legacyTemplateExists = await lists.getLegacyListTemplateExists();
+        const legacyTemplateListItemsExists = await lists.getLegacyListItemTemplateExists();
+
+        if (!templateExists) {
+          await lists.setListTemplate();
+        }
+
+        if (!templateListItemsExists) {
+          await lists.setListItemTemplate();
+        }
+
+        try {
+          // Check if the old legacy lists and items template exists and remove it
+          if (legacyTemplateExists) {
+            await lists.deleteLegacyListTemplate();
+          }
+          if (legacyTemplateListItemsExists) {
+            await lists.deleteLegacyListItemTemplate();
+          }
+        } catch (err) {
+          if (err.statusCode !== 404) {
+            throw err;
+          }
+        }
 
         if (listIndexExists && listItemIndexExists) {
           return siemResponse.error({
@@ -36,27 +76,6 @@ export const createListIndexRoute = (router: ListsPluginRouter): void => {
             statusCode: 409,
           });
         } else {
-          const policyExists = await lists.getListPolicyExists();
-          const policyListItemExists = await lists.getListItemPolicyExists();
-
-          if (!policyExists) {
-            await lists.setListPolicy();
-          }
-          if (!policyListItemExists) {
-            await lists.setListItemPolicy();
-          }
-
-          const templateExists = await lists.getListTemplateExists();
-          const templateListItemsExists = await lists.getListItemTemplateExists();
-
-          if (!templateExists) {
-            await lists.setListTemplate();
-          }
-
-          if (!templateListItemsExists) {
-            await lists.setListItemTemplate();
-          }
-
           if (!listIndexExists) {
             await lists.createListBootStrapIndex();
           }

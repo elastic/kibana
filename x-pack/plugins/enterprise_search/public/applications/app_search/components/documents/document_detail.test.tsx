@@ -5,25 +5,27 @@
  * 2.0.
  */
 
-import { setMockValues, setMockActions } from '../../../__mocks__/kea.mock';
+import { setMockValues, setMockActions } from '../../../__mocks__/kea_logic';
+import { mockUseParams } from '../../../__mocks__/react_router';
 import { unmountHandler } from '../../../__mocks__/shallow_useeffect.mock';
-import '../../../__mocks__/react_router_history.mock';
 import '../../__mocks__/engine_logic.mock';
 
 import React from 'react';
-import { useParams } from 'react-router-dom';
 
 import { shallow } from 'enzyme';
 
-import { EuiPageHeader, EuiPageContent, EuiBasicTable } from '@elastic/eui';
+import { EuiPanel, EuiBasicTable } from '@elastic/eui';
 
-import { Loading } from '../../../shared/loading';
+import { getPageHeaderActions } from '../../../test_helpers';
+
 import { ResultFieldValue } from '../result';
 
 import { DocumentDetail } from '.';
 
 describe('DocumentDetail', () => {
   const values = {
+    isMetaEngine: false,
+    isElasticsearchEngine: false,
     dataLoading: false,
     fields: [],
   };
@@ -39,14 +41,14 @@ describe('DocumentDetail', () => {
     setMockValues(values);
     setMockActions(actions);
 
-    (useParams as jest.Mock).mockImplementationOnce(() => ({
+    mockUseParams.mockImplementationOnce(() => ({
       documentId: '1',
     }));
   });
 
   it('renders', () => {
     const wrapper = shallow(<DocumentDetail />);
-    expect(wrapper.find(EuiPageContent).length).toBe(1);
+    expect(wrapper.find(EuiPanel).length).toBe(1);
   });
 
   it('initializes data on mount', () => {
@@ -58,17 +60,6 @@ describe('DocumentDetail', () => {
     shallow(<DocumentDetail />);
     unmountHandler();
     expect(actions.setFields).toHaveBeenCalledWith([]);
-  });
-
-  it('will show a loader while data is loading', () => {
-    setMockValues({
-      ...values,
-      dataLoading: true,
-    });
-
-    const wrapper = shallow(<DocumentDetail />);
-
-    expect(wrapper.find(Loading).length).toBe(1);
   });
 
   describe('field values list', () => {
@@ -103,11 +94,28 @@ describe('DocumentDetail', () => {
 
   it('will delete the document when the delete button is pressed', () => {
     const wrapper = shallow(<DocumentDetail />);
-    const header = wrapper.find(EuiPageHeader).dive().children().dive();
-    const button = header.find('[data-test-subj="DeleteDocumentButton"]');
+    const button = getPageHeaderActions(wrapper).find('[data-test-subj="DeleteDocumentButton"]');
 
     button.simulate('click');
 
     expect(actions.deleteDocument).toHaveBeenCalledWith('1');
+  });
+
+  it('hides delete button when the document is a part of a meta engine', () => {
+    setMockValues({ ...values, isMetaEngine: true });
+    const wrapper = shallow(<DocumentDetail />);
+
+    expect(
+      getPageHeaderActions(wrapper).find('[data-test-subj="DeleteDocumentButton"]')
+    ).toHaveLength(0);
+  });
+
+  it('hides delete button when the document is a part of an elasticsearch-indexed engine', () => {
+    setMockValues({ ...values, isElasticsearchEngine: true });
+    const wrapper = shallow(<DocumentDetail />);
+
+    expect(
+      getPageHeaderActions(wrapper).find('[data-test-subj="DeleteDocumentButton"]')
+    ).toHaveLength(0);
   });
 });

@@ -7,7 +7,12 @@
  */
 
 import _ from 'lodash';
-import { XJson } from '../../../../es_ui_shared/public';
+import { XJson } from '@kbn/es-ui-shared-plugin/public';
+import type {
+  RequestArgs,
+  RequestResult,
+} from '../../application/hooks/use_send_current_request/send_request';
+import type { DevToolsVariable } from '../../application/components';
 
 const { collapseLiteralStrings, expandLiteralStrings } = XJson;
 
@@ -48,9 +53,16 @@ export function formatRequestBodyDoc(data: string[], indent: boolean) {
   };
 }
 
+export function hasComments(data: string) {
+  // matches single line and multiline comments
+  const re = /(\/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+\/)|(\/\/.*)|(#.*)/;
+  return re.test(data);
+}
+
 export function extractWarningMessages(warnings: string) {
   // pattern for valid warning header
-  const re = /\d{3} [0-9a-zA-Z!#$%&'*+-.^_`|~]+ \"((?:\t| |!|[\x23-\x5b]|[\x5d-\x7e]|[\x80-\xff]|\\\\|\\")*)\"(?: \"[^"]*\")?/;
+  const re =
+    /\d{3} [0-9a-zA-Z!#$%&'*+-.^_`|~]+ \"((?:\t| |!|[\x23-\x5b]|[\x5d-\x7e]|[\x80-\xff]|\\\\|\\")*)\"(?: \"[^"]*\")?/;
   // split on any comma that is followed by an even number of quotes
   return _.map(splitOnUnquotedCommaSpace(warnings), (warning) => {
     const match = re.exec(warning);
@@ -87,3 +99,79 @@ export function splitOnUnquotedCommaSpace(s: string) {
   arr.push(buffer);
   return arr;
 }
+
+/**
+ *  Sorts the request data by statusCode in increasing order and
+ *  returns the last one which will be rendered in network request status bar
+ */
+export const getResponseWithMostSevereStatusCode = (requestData: RequestResult[] | null) => {
+  if (requestData) {
+    return requestData
+      .slice()
+      .sort((a, b) => a.response.statusCode - b.response.statusCode)
+      .pop();
+  }
+};
+
+export const replaceVariables = (
+  requests: RequestArgs['requests'],
+  variables: DevToolsVariable[]
+) => {
+  const urlRegex = /(\${\w+})/g;
+  const bodyRegex = /("\${\w+}")/g;
+  return requests.map((req) => {
+    if (urlRegex.test(req.url)) {
+      req.url = req.url.replaceAll(urlRegex, (match) => {
+        // Sanitize variable name
+        const key = match.replace('${', '').replace('}', '');
+        const variable = variables.find(({ name }) => name === key);
+
+        return variable?.value ?? match;
+      });
+    }
+
+    if (req.data && req.data.length) {
+      if (bodyRegex.test(req.data[0])) {
+        const data = req.data[0].replaceAll(bodyRegex, (match) => {
+          // Sanitize variable name
+          const key = match.replace('"${', '').replace('}"', '');
+          const variable = variables.find(({ name }) => name === key);
+
+          if (variable) {
+            // All values must be stringified to send a successful request to ES.
+            const { value } = variable;
+
+            const isStringifiedObject = value.startsWith('{') && value.endsWith('}');
+            if (isStringifiedObject) {
+              return value;
+            }
+
+            const isStringifiedNumber = !isNaN(parseFloat(value));
+            if (isStringifiedNumber) {
+              return value;
+            }
+
+            const isStringifiedArray = value.startsWith('[') && value.endsWith(']');
+            if (isStringifiedArray) {
+              return value;
+            }
+
+            const isStringifiedBool = value === 'true' || value === 'false';
+            if (isStringifiedBool) {
+              return value;
+            }
+
+            // At this point the value must be an unstringified string, so we have to stringify it.
+            // Example: 'stringValue' -> '"stringValue"'
+            return JSON.stringify(value);
+          }
+
+          return match;
+        });
+        req.data = [data];
+      }
+    }
+
+    return req;
+  });
+};

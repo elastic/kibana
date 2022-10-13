@@ -6,12 +6,12 @@
  */
 
 import { assertUnreachable } from '../../../../../../common/utility_types';
-import {
+import type {
   Direction,
   SortField,
   NetworkUsersRequestOptions,
-  NetworkUsersFields,
 } from '../../../../../../common/search_strategy';
+import { NetworkUsersFields } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 
 export const buildUsersQuery = ({
@@ -34,9 +34,9 @@ export const buildUsersQuery = ({
   ];
 
   const dslQuery = {
-    allowNoIndices: true,
+    allow_no_indices: true,
     index: defaultIndex,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     track_total_hits: false,
     body: {
       aggs: {

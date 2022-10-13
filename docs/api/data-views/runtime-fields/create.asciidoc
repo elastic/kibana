@@ -1,0 +1,61 @@
+[[data-views-runtime-field-api-create]]
+=== Create runtime field API
+++++
+<titleabbrev>Create runtime field</titleabbrev>
+++++
+
+experimental[] Create a runtime field
+
+[[data-views-runtime-field-create-request]]
+==== Request
+
+`POST <kibana host>:<port>/api/data_views/data_view/<data_view_id>/runtime_field`
+
+`POST <kibana host>:<port>/s/<space_id>/api/data_views/data_view/<data_view_id>/runtime_field`
+
+[[data-views-runtime-field-create-params]]
+==== Path parameters
+
+`space_id`::
+(Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+
+`data_view_id`::
+(Required, string) The ID of the data view.
+
+[[data-views-runtime-field-create-body]]
+==== Request body
+
+`name`:: (Required, string) The name for a runtime field.
+
+`runtimeField`:: (Required, object) The runtime field definition object.
+
+
+[[data-views-runtime-field-create-example]]
+==== Examples
+
+Create a runtime field on a data view:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X POST api/data_views/data_view/<data_view_id>/runtime_field
+{
+  "name": "runtimeFoo",
+  "runtimeField": {
+     "type": "long",
+     "script": {
+        "source": "emit(doc["foo"].value)"
+      }
+  }
+}
+--------------------------------------------------
+// KIBANA
+
+The API returns created runtime field object array and updated data view object:
+
+[source,sh]
+--------------------------------------------------
+{
+    "data_view": {...},
+    "fields": [...]
+}
+--------------------------------------------------

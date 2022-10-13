@@ -5,196 +5,171 @@
  * 2.0.
  */
 
-import { getOr, omit } from 'lodash/fp';
+import { last, omit } from 'lodash/fp';
 
-import { ChromeBreadcrumb } from '../../../../../../../../src/core/public';
-import { APP_NAME, APP_ID } from '../../../../../common/constants';
-import { StartServices } from '../../../../types';
-import { getBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../../hosts/pages/details/utils';
-import { getBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../../network/pages/details';
-import { getBreadcrumbs as getCaseDetailsBreadcrumbs } from '../../../../cases/pages/utils';
-import { getBreadcrumbs as getDetectionRulesBreadcrumbs } from '../../../../detections/pages/detection_engine/rules/utils';
-import { getBreadcrumbs as getTimelinesBreadcrumbs } from '../../../../timelines/pages';
-import { getBreadcrumbs as getAdminBreadcrumbs } from '../../../../management/pages';
+import { useDispatch } from 'react-redux';
+import type { ChromeBreadcrumb } from '@kbn/core/public';
+import type { StartServices } from '../../../../types';
+import { getTrailingBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../../hosts/pages/details/utils';
+import { getTrailingBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../../network/pages/details';
+import { getTrailingBreadcrumbs as getDetectionRulesBreadcrumbs } from '../../../../detections/pages/detection_engine/rules/utils';
+import { getTrailingBreadcrumbs as getUsersBreadcrumbs } from '../../../../users/pages/details/utils';
+import { getTrailingBreadcrumbs as getKubernetesBreadcrumbs } from '../../../../kubernetes/pages/utils/breadcrumbs';
 import { SecurityPageName } from '../../../../app/types';
-import {
+import type {
   RouteSpyState,
   HostRouteSpyState,
   NetworkRouteSpyState,
-  TimelineRouteSpyState,
   AdministrationRouteSpyState,
+  UsersRouteSpyState,
 } from '../../../utils/route/types';
-import { getAppOverviewUrl } from '../../link_to';
+import { timelineActions } from '../../../../timelines/store/timeline';
+import { TimelineId } from '../../../../../common/types/timeline';
+import type { GenericNavRecord, NavigateToUrl } from '../types';
+import { getLeadingBreadcrumbsForSecurityPage } from './get_breadcrumbs_for_page';
+import type { GetSecuritySolutionUrl } from '../../link_to';
+import { useGetSecuritySolutionUrl } from '../../link_to';
+import { useIsGroupedNavigationEnabled } from '../helpers';
 
-import { TabNavigationProps } from '../tab_navigation/types';
-import { getSearch } from '../helpers';
-import { GetUrlForApp, SearchNavTab } from '../types';
+export interface ObjectWithNavTabs {
+  navTabs: GenericNavRecord;
+}
 
-export const setBreadcrumbs = (
-  spyState: RouteSpyState & TabNavigationProps,
-  chrome: StartServices['chrome'],
-  getUrlForApp: GetUrlForApp
-) => {
-  const breadcrumbs = getBreadcrumbsForRoute(spyState, getUrlForApp);
-  if (breadcrumbs) {
-    chrome.setBreadcrumbs(breadcrumbs);
+export const useSetBreadcrumbs = () => {
+  const dispatch = useDispatch();
+  const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
+  const isGroupedNavigationEnabled = useIsGroupedNavigationEnabled();
+
+  return (
+    spyState: RouteSpyState & ObjectWithNavTabs,
+    chrome: StartServices['chrome'],
+    navigateToUrl: NavigateToUrl
+  ) => {
+    const breadcrumbs = getBreadcrumbsForRoute(
+      spyState,
+      getSecuritySolutionUrl,
+      isGroupedNavigationEnabled
+    );
+    if (breadcrumbs) {
+      chrome.setBreadcrumbs(
+        breadcrumbs.map((breadcrumb) => ({
+          ...breadcrumb,
+          ...(breadcrumb.href && !breadcrumb.onClick
+            ? {
+                onClick: (ev) => {
+                  ev.preventDefault();
+
+                  dispatch(timelineActions.showTimeline({ id: TimelineId.active, show: false }));
+
+                  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                  navigateToUrl(breadcrumb.href!);
+                },
+              }
+            : {}),
+        }))
+      );
+    }
+  };
+};
+
+export const getBreadcrumbsForRoute = (
+  object: RouteSpyState & ObjectWithNavTabs,
+  getSecuritySolutionUrl: GetSecuritySolutionUrl,
+  isGroupedNavigationEnabled: boolean
+): ChromeBreadcrumb[] | null => {
+  const spyState: RouteSpyState = omit('navTabs', object);
+
+  if (
+    !spyState ||
+    !object.navTabs ||
+    !spyState.pageName ||
+    isCaseRoutes(spyState) ||
+    isCloudSecurityPostureManagedRoutes(spyState)
+  ) {
+    return null;
   }
+
+  const newMenuLeadingBreadcrumbs = getLeadingBreadcrumbsForSecurityPage(
+    spyState.pageName,
+    getSecuritySolutionUrl,
+    object.navTabs,
+    isGroupedNavigationEnabled
+  );
+
+  // last newMenuLeadingBreadcrumbs is the current page
+  const pageBreadcrumb = newMenuLeadingBreadcrumbs[newMenuLeadingBreadcrumbs.length - 1];
+  const siemRootBreadcrumb = newMenuLeadingBreadcrumbs[0];
+
+  const leadingBreadcrumbs = isGroupedNavigationEnabled
+    ? newMenuLeadingBreadcrumbs
+    : [siemRootBreadcrumb, pageBreadcrumb];
+
+  return emptyLastBreadcrumbUrl([
+    ...leadingBreadcrumbs,
+    ...getTrailingBreadcrumbsForRoutes(spyState, getSecuritySolutionUrl),
+  ]);
+};
+
+const getTrailingBreadcrumbsForRoutes = (
+  spyState: RouteSpyState,
+  getSecuritySolutionUrl: GetSecuritySolutionUrl
+): ChromeBreadcrumb[] => {
+  if (isHostsRoutes(spyState)) {
+    return getHostDetailsBreadcrumbs(spyState, getSecuritySolutionUrl);
+  }
+  if (isNetworkRoutes(spyState)) {
+    return getIPDetailsBreadcrumbs(spyState, getSecuritySolutionUrl);
+  }
+
+  if (isUsersRoutes(spyState)) {
+    return getUsersBreadcrumbs(spyState, getSecuritySolutionUrl);
+  }
+
+  if (isRulesRoutes(spyState)) {
+    return getDetectionRulesBreadcrumbs(spyState, getSecuritySolutionUrl);
+  }
+
+  if (isKubernetesRoutes(spyState)) {
+    return getKubernetesBreadcrumbs(spyState, getSecuritySolutionUrl);
+  }
+
+  return [];
 };
 
 const isNetworkRoutes = (spyState: RouteSpyState): spyState is NetworkRouteSpyState =>
-  spyState != null && spyState.pageName === SecurityPageName.network;
+  spyState.pageName === SecurityPageName.network;
 
 const isHostsRoutes = (spyState: RouteSpyState): spyState is HostRouteSpyState =>
-  spyState != null && spyState.pageName === SecurityPageName.hosts;
+  spyState.pageName === SecurityPageName.hosts;
 
-const isTimelinesRoutes = (spyState: RouteSpyState): spyState is TimelineRouteSpyState =>
-  spyState != null && spyState.pageName === SecurityPageName.timelines;
+const isUsersRoutes = (spyState: RouteSpyState): spyState is UsersRouteSpyState =>
+  spyState.pageName === SecurityPageName.users;
 
-const isCaseRoutes = (spyState: RouteSpyState): spyState is RouteSpyState =>
-  spyState != null && spyState.pageName === SecurityPageName.case;
+const isCaseRoutes = (spyState: RouteSpyState) => spyState.pageName === SecurityPageName.case;
 
-const isAlertsRoutes = (spyState: RouteSpyState) =>
-  spyState != null && spyState.pageName === SecurityPageName.detections;
+const isKubernetesRoutes = (spyState: RouteSpyState) =>
+  spyState.pageName === SecurityPageName.kubernetes;
 
-const isAdminRoutes = (spyState: RouteSpyState): spyState is AdministrationRouteSpyState =>
-  spyState != null && spyState.pageName === SecurityPageName.administration;
+const isRulesRoutes = (spyState: RouteSpyState): spyState is AdministrationRouteSpyState =>
+  spyState.pageName === SecurityPageName.rules ||
+  spyState.pageName === SecurityPageName.rulesCreate;
 
-// eslint-disable-next-line complexity
-export const getBreadcrumbsForRoute = (
-  object: RouteSpyState & TabNavigationProps,
-  getUrlForApp: GetUrlForApp
-): ChromeBreadcrumb[] | null => {
-  const spyState: RouteSpyState = omit('navTabs', object);
-  const overviewPath = getUrlForApp(APP_ID, { path: SecurityPageName.overview });
-  const siemRootBreadcrumb: ChromeBreadcrumb = {
-    text: APP_NAME,
-    href: getAppOverviewUrl(overviewPath),
-  };
-  if (isHostsRoutes(spyState) && object.navTabs) {
-    const tempNav: SearchNavTab = { urlKey: 'host', isDetailPage: false };
-    let urlStateKeys = [getOr(tempNav, spyState.pageName, object.navTabs)];
-    if (spyState.tabName != null) {
-      urlStateKeys = [...urlStateKeys, getOr(tempNav, spyState.tabName, object.navTabs)];
-    }
+const isCloudSecurityPostureManagedRoutes = (spyState: RouteSpyState) =>
+  spyState.pageName === SecurityPageName.cloudSecurityPostureRules;
+
+const emptyLastBreadcrumbUrl = (breadcrumbs: ChromeBreadcrumb[]) => {
+  const leadingBreadCrumbs = breadcrumbs.slice(0, -1);
+  const lastBreadcrumb = last(breadcrumbs);
+
+  if (lastBreadcrumb) {
     return [
-      siemRootBreadcrumb,
-      ...getHostDetailsBreadcrumbs(
-        spyState,
-        urlStateKeys.reduce(
-          (acc: string[], item: SearchNavTab) => [...acc, getSearch(item, object)],
-          []
-        ),
-        getUrlForApp
-      ),
-    ];
-  }
-  if (isNetworkRoutes(spyState) && object.navTabs) {
-    const tempNav: SearchNavTab = { urlKey: 'network', isDetailPage: false };
-    let urlStateKeys = [getOr(tempNav, spyState.pageName, object.navTabs)];
-    if (spyState.tabName != null) {
-      urlStateKeys = [...urlStateKeys, getOr(tempNav, spyState.tabName, object.navTabs)];
-    }
-    return [
-      siemRootBreadcrumb,
-      ...getIPDetailsBreadcrumbs(
-        spyState,
-        urlStateKeys.reduce(
-          (acc: string[], item: SearchNavTab) => [...acc, getSearch(item, object)],
-          []
-        ),
-        getUrlForApp
-      ),
-    ];
-  }
-  if (isAlertsRoutes(spyState) && object.navTabs) {
-    const tempNav: SearchNavTab = { urlKey: 'detections', isDetailPage: false };
-    let urlStateKeys = [getOr(tempNav, spyState.pageName, object.navTabs)];
-    if (spyState.tabName != null) {
-      urlStateKeys = [...urlStateKeys, getOr(tempNav, spyState.tabName, object.navTabs)];
-    }
-
-    return [
-      siemRootBreadcrumb,
-      ...getDetectionRulesBreadcrumbs(
-        spyState,
-        urlStateKeys.reduce(
-          (acc: string[], item: SearchNavTab) => [...acc, getSearch(item, object)],
-          []
-        ),
-        getUrlForApp
-      ),
-    ];
-  }
-  if (isCaseRoutes(spyState) && object.navTabs) {
-    const tempNav: SearchNavTab = { urlKey: 'case', isDetailPage: false };
-    let urlStateKeys = [getOr(tempNav, spyState.pageName, object.navTabs)];
-    if (spyState.tabName != null) {
-      urlStateKeys = [...urlStateKeys, getOr(tempNav, spyState.tabName, object.navTabs)];
-    }
-
-    return [
-      siemRootBreadcrumb,
-      ...getCaseDetailsBreadcrumbs(
-        spyState,
-        urlStateKeys.reduce(
-          (acc: string[], item: SearchNavTab) => [...acc, getSearch(item, object)],
-          []
-        ),
-        getUrlForApp
-      ),
-    ];
-  }
-  if (isTimelinesRoutes(spyState) && object.navTabs) {
-    const tempNav: SearchNavTab = { urlKey: 'timeline', isDetailPage: false };
-    const urlStateKeys = [getOr(tempNav, spyState.pageName, object.navTabs)];
-
-    return [
-      siemRootBreadcrumb,
-      ...getTimelinesBreadcrumbs(
-        spyState,
-        urlStateKeys.reduce(
-          (acc: string[], item: SearchNavTab) => [...acc, getSearch(item, object)],
-          []
-        ),
-        getUrlForApp
-      ),
-    ];
-  }
-
-  if (isAdminRoutes(spyState) && object.navTabs) {
-    const tempNav: SearchNavTab = { urlKey: 'administration', isDetailPage: false };
-    let urlStateKeys = [getOr(tempNav, spyState.pageName, object.navTabs)];
-    if (spyState.tabName != null) {
-      urlStateKeys = [...urlStateKeys, getOr(tempNav, spyState.tabName, object.navTabs)];
-    }
-
-    return [
-      siemRootBreadcrumb,
-      ...getAdminBreadcrumbs(
-        spyState,
-        urlStateKeys.reduce(
-          (acc: string[], item: SearchNavTab) => [...acc, getSearch(item, object)],
-          []
-        ),
-        getUrlForApp
-      ),
-    ];
-  }
-
-  if (
-    spyState != null &&
-    object.navTabs &&
-    spyState.pageName &&
-    object.navTabs[spyState.pageName]
-  ) {
-    return [
-      siemRootBreadcrumb,
+      ...leadingBreadCrumbs,
       {
-        text: object.navTabs[spyState.pageName].name,
+        ...lastBreadcrumb,
         href: '',
       },
     ];
   }
 
-  return null;
+  return breadcrumbs;
 };

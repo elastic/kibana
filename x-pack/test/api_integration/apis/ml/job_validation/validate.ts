@@ -10,7 +10,7 @@ import {
   basicValidJobMessages,
   basicInvalidJobMessages,
   nonBasicIssuesMessages,
-} from '../../../../../../x-pack/plugins/ml/common/constants/messages.test.mock';
+} from '@kbn/ml-plugin/common/constants/messages.test.mock';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
@@ -22,7 +22,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('Validate job', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/ecommerce');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
       await ml.testResources.setKibanaTimeZoneToUTC();
     });
 
@@ -32,7 +32,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it(`should recognize a valid job configuration`, async () => {
       const requestBody = {
-        duration: { start: 1586995459000, end: 1589672736000 },
+        duration: { start: 1560297859000, end: 1562975136000 },
         job: {
           job_id: 'test',
           description: '',
@@ -70,19 +70,19 @@ export default ({ getService }: FtrProviderContext) => {
         },
       };
 
-      const { body } = await supertest
+      const { body, status } = await supertest
         .post('/api/ml/validate/job')
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS)
-        .send(requestBody)
-        .expect(200);
+        .send(requestBody);
+      ml.api.assertResponseStatusCode(200, status, body);
 
       expect(body).to.eql(basicValidJobMessages);
     });
 
     it('should recognize a basic invalid job configuration and skip advanced checks', async () => {
       const requestBody = {
-        duration: { start: 1586995459000, end: 1589672736000 },
+        duration: { start: 1560297859000, end: 1562975136000 },
         job: {
           job_id: '-(*&^',
           description: '',
@@ -114,19 +114,19 @@ export default ({ getService }: FtrProviderContext) => {
         },
       };
 
-      const { body } = await supertest
+      const { body, status } = await supertest
         .post('/api/ml/validate/job')
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS)
-        .send(requestBody)
-        .expect(200);
+        .send(requestBody);
+      ml.api.assertResponseStatusCode(200, status, body);
 
       expect(body).to.eql(basicInvalidJobMessages);
     });
 
     it('should recognize non-basic issues in job configuration', async () => {
       const requestBody = {
-        duration: { start: 1586995459000, end: 1589672736000 },
+        duration: { start: 1560297859000, end: 1562975136000 },
         job: {
           job_id: 'test',
           description: '',
@@ -164,12 +164,12 @@ export default ({ getService }: FtrProviderContext) => {
         },
       };
 
-      const { body } = await supertest
+      const { body, status } = await supertest
         .post('/api/ml/validate/job')
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS)
-        .send(requestBody)
-        .expect(200);
+        .send(requestBody);
+      ml.api.assertResponseStatusCode(200, status, body);
 
       // The existance and value of maxModelMemoryLimit depends on ES settings
       // and may vary between test environments, e.g. cloud vs non-cloud,
@@ -184,7 +184,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       expect(body.length).to.eql(
         expectedResponse.length,
-        `Response body should have ${expectedResponse.length} entries (got ${body})`
+        `Response body should have ${expectedResponse.length} entries (got ${JSON.stringify(body)})`
       );
       for (const entry of expectedResponse) {
         const responseEntry = body.find((obj: any) => obj.id === entry.id);
@@ -204,7 +204,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should not validate configuration in case request payload is invalid', async () => {
       const requestBody = {
-        duration: { start: 1586995459000, end: 1589672736000 },
+        duration: { start: 1560297859000, end: 1562975136000 },
         job: {
           job_id: 'test',
           description: '',
@@ -231,16 +231,16 @@ export default ({ getService }: FtrProviderContext) => {
         },
       };
 
-      const { body } = await supertest
+      const { body, status } = await supertest
         .post('/api/ml/validate/job')
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS)
-        .send(requestBody)
-        .expect(400);
+        .send(requestBody);
+      ml.api.assertResponseStatusCode(400, status, body);
 
       expect(body.error).to.eql('Bad Request');
       expect(body.message).to.eql(
-        '[request body.job.analysis_config.detectors]: expected value of type [array] but got [undefined]'
+        '[request body.job.analysis_config.bucket_span]: expected value of type [string] but got [undefined]'
       );
     });
 
@@ -277,12 +277,12 @@ export default ({ getService }: FtrProviderContext) => {
         },
       };
 
-      const { body } = await supertest
+      const { body, status } = await supertest
         .post('/api/ml/validate/job')
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
         .set(COMMON_REQUEST_HEADERS)
-        .send(requestBody)
-        .expect(403);
+        .send(requestBody);
+      ml.api.assertResponseStatusCode(403, status, body);
 
       expect(body.error).to.eql('Forbidden');
       expect(body.message).to.eql('Forbidden');

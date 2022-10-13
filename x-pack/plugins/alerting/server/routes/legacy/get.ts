@@ -6,16 +6,22 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { ILicenseState } from '../../lib/license_state';
 import { verifyApiAccess } from '../../lib/license_api_access';
 import { LEGACY_BASE_ALERT_API_PATH } from '../../../common';
 import type { AlertingRouter } from '../../types';
+import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 
 const paramSchema = schema.object({
   id: schema.string(),
 });
 
-export const getAlertRoute = (router: AlertingRouter, licenseState: ILicenseState) => {
+export const getAlertRoute = (
+  router: AlertingRouter,
+  licenseState: ILicenseState,
+  usageCounter?: UsageCounter
+) => {
   router.get(
     {
       path: `${LEGACY_BASE_ALERT_API_PATH}/alert/{id}`,
@@ -28,10 +34,11 @@ export const getAlertRoute = (router: AlertingRouter, licenseState: ILicenseStat
       if (!context.alerting) {
         return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
       }
-      const alertsClient = context.alerting.getAlertsClient();
+      trackLegacyRouteUsage('get', usageCounter);
+      const rulesClient = (await context.alerting).getRulesClient();
       const { id } = req.params;
       return res.ok({
-        body: await alertsClient.get({ id }),
+        body: await rulesClient.get({ id, excludeFromPublicApi: true }),
       });
     })
   );

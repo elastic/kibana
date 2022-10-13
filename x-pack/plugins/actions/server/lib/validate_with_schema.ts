@@ -6,15 +6,25 @@
  */
 
 import Boom from '@hapi/boom';
-import { ActionType, ActionTypeConfig, ActionTypeSecrets, ActionTypeParams } from '../types';
+import {
+  ActionType,
+  ActionTypeConfig,
+  ActionTypeSecrets,
+  ActionTypeParams,
+  ValidatorServices,
+} from '../types';
 
 export function validateParams<
   Config extends ActionTypeConfig = ActionTypeConfig,
   Secrets extends ActionTypeSecrets = ActionTypeSecrets,
   Params extends ActionTypeParams = ActionTypeParams,
   ExecutorResultData = void
->(actionType: ActionType<Config, Secrets, Params, ExecutorResultData>, value: unknown) {
-  return validateWithSchema(actionType, 'params', value);
+>(
+  actionType: ActionType<Config, Secrets, Params, ExecutorResultData>,
+  value: unknown,
+  validatorServices: ValidatorServices
+) {
+  return validateWithSchema(actionType, 'params', value, validatorServices);
 }
 
 export function validateConfig<
@@ -22,8 +32,12 @@ export function validateConfig<
   Secrets extends ActionTypeSecrets = ActionTypeSecrets,
   Params extends ActionTypeParams = ActionTypeParams,
   ExecutorResultData = void
->(actionType: ActionType<Config, Secrets, Params, ExecutorResultData>, value: unknown) {
-  return validateWithSchema(actionType, 'config', value);
+>(
+  actionType: ActionType<Config, Secrets, Params, ExecutorResultData>,
+  value: unknown,
+  validatorServices: ValidatorServices
+) {
+  return validateWithSchema(actionType, 'config', value, validatorServices);
 }
 
 export function validateSecrets<
@@ -31,8 +45,40 @@ export function validateSecrets<
   Secrets extends ActionTypeSecrets = ActionTypeSecrets,
   Params extends ActionTypeParams = ActionTypeParams,
   ExecutorResultData = void
+>(
+  actionType: ActionType<Config, Secrets, Params, ExecutorResultData>,
+  value: unknown,
+  validatorServices: ValidatorServices
+) {
+  return validateWithSchema(actionType, 'secrets', value, validatorServices);
+}
+
+export function validateConnector<
+  Config extends ActionTypeConfig = ActionTypeConfig,
+  Secrets extends ActionTypeSecrets = ActionTypeSecrets,
+  Params extends ActionTypeParams = ActionTypeParams,
+  ExecutorResultData = void
 >(actionType: ActionType<Config, Secrets, Params, ExecutorResultData>, value: unknown) {
-  return validateWithSchema(actionType, 'secrets', value);
+  if (actionType.validate && actionType.validate.connector) {
+    try {
+      const connectorValue = value as { config: Config; secrets: Secrets };
+
+      // Connector config and secrets should be defined
+      if (connectorValue.config == null) {
+        throw new Error(`config must be defined`);
+      }
+      if (connectorValue.secrets == null) {
+        throw new Error(`secrets must be defined`);
+      }
+      const result = actionType.validate.connector(connectorValue.config, connectorValue.secrets);
+      if (result !== null) {
+        throw new Error(result);
+      }
+    } catch (err) {
+      throw Boom.badRequest(`error validating action type connector: ${err.message}`);
+    }
+  }
+  return null;
 }
 
 type ValidKeys = 'params' | 'config' | 'secrets';
@@ -45,7 +91,8 @@ function validateWithSchema<
 >(
   actionType: ActionType<Config, Secrets, Params, ExecutorResultData>,
   key: ValidKeys,
-  value: unknown
+  value: unknown | { config: unknown; secrets: unknown },
+  validatorServices: ValidatorServices
 ): Record<string, unknown> {
   if (actionType.validate) {
     let name;
@@ -54,20 +101,44 @@ function validateWithSchema<
         case 'params':
           name = 'action params';
           if (actionType.validate.params) {
-            return actionType.validate.params.validate(value);
+            const validatedValue = actionType.validate.params.schema.validate(value);
+
+            if (actionType.validate.params.customValidator) {
+              actionType.validate.params.customValidator(
+                validatedValue as Params,
+                validatorServices
+              );
+            }
+            return validatedValue;
           }
           break;
         case 'config':
           name = 'action type config';
           if (actionType.validate.config) {
-            return actionType.validate.config.validate(value);
+            const validatedValue = actionType.validate.config.schema.validate(value);
+
+            if (actionType.validate.config.customValidator) {
+              actionType.validate.config.customValidator(
+                validatedValue as Config,
+                validatorServices
+              );
+            }
+            return validatedValue;
           }
 
           break;
         case 'secrets':
           name = 'action type secrets';
           if (actionType.validate.secrets) {
-            return actionType.validate.secrets.validate(value);
+            const validatedValue = actionType.validate.secrets.schema.validate(value);
+
+            if (actionType.validate.secrets.customValidator) {
+              actionType.validate.secrets.customValidator(
+                validatedValue as Secrets,
+                validatorServices
+              );
+            }
+            return validatedValue;
           }
           break;
         default:

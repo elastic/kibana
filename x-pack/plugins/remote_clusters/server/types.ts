@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import { IRouter } from 'kibana/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import { LicensingPluginSetup } from '../../licensing/server';
-import { CloudSetup } from '../../cloud/server';
+import { IRouter } from '@kbn/core/server';
+
+import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import { CloudSetup } from '@kbn/cloud-plugin/server';
+
+import { handleEsError } from './shared_imports';
 
 export interface Dependencies {
   licensing: LicensingPluginSetup;
@@ -21,6 +24,9 @@ export interface RouteDependencies {
   getLicenseStatus: () => LicenseStatus;
   config: {
     isCloudEnabled: boolean;
+  };
+  lib: {
+    handleEsError: typeof handleEsError;
   };
 }
 

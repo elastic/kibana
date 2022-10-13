@@ -5,48 +5,27 @@
  * 2.0.
  */
 
-import { SavedObject, SavedObjectsFindResponse } from 'kibana/server';
+import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 
-import {
-  FullResponseSchema,
-  fullResponseSchema,
-} from '../../../../../common/detection_engine/schemas/request';
-import { validateNonExact } from '../../../../../common/validate';
-import {
-  RulesSchema,
-  rulesSchema,
-} from '../../../../../common/detection_engine/schemas/response/rules_schema';
-import { PartialAlert } from '../../../../../../alerting/server';
-import {
-  isAlertType,
-  IRuleSavedAttributesSavedObjectAttributes,
-  isRuleStatusFindType,
-  IRuleStatusSOAttributes,
-} from '../../rules/types';
-import { createBulkErrorObject, BulkError } from '../utils';
-import { transform, transformAlertToRule } from './utils';
-import { RuleActions } from '../../rule_actions/types';
-import { RuleParams } from '../../schemas/rule_schemas';
+import type { PartialRule } from '@kbn/alerting-plugin/server';
+import type { RuleExecutionSummary } from '../../../../../common/detection_engine/rule_monitoring';
+import type { FullResponseSchema } from '../../../../../common/detection_engine/schemas/request';
+import { fullResponseSchema } from '../../../../../common/detection_engine/schemas/request';
+import { isAlertType } from '../../rules/types';
+import type { BulkError } from '../utils';
+import { createBulkErrorObject } from '../utils';
+import { transform } from './utils';
+import type { RuleParams } from '../../schemas/rule_schemas';
+// eslint-disable-next-line no-restricted-imports
+import type { LegacyRulesActionsSavedObject } from '../../rule_actions/legacy_get_rule_actions_saved_object';
+import { internalRuleToAPIResponse } from '../../schemas/rule_converters';
 
 export const transformValidate = (
-  alert: PartialAlert<RuleParams>,
-  ruleActions?: RuleActions | null,
-  ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
-): [RulesSchema | null, string | null] => {
-  const transformed = transform(alert, ruleActions, ruleStatus);
-  if (transformed == null) {
-    return [null, 'Internal error transforming'];
-  } else {
-    return validateNonExact(transformed, rulesSchema);
-  }
-};
-
-export const newTransformValidate = (
-  alert: PartialAlert<RuleParams>,
-  ruleActions?: RuleActions | null,
-  ruleStatus?: SavedObject<IRuleSavedAttributesSavedObjectAttributes>
+  rule: PartialRule<RuleParams>,
+  ruleExecutionSummary: RuleExecutionSummary | null,
+  legacyRuleActions?: LegacyRulesActionsSavedObject | null
 ): [FullResponseSchema | null, string | null] => {
-  const transformed = transform(alert, ruleActions, ruleStatus);
+  const transformed = transform(rule, ruleExecutionSummary, legacyRuleActions);
   if (transformed == null) {
     return [null, 'Internal error transforming'];
   } else {
@@ -56,39 +35,20 @@ export const newTransformValidate = (
 
 export const transformValidateBulkError = (
   ruleId: string,
-  alert: PartialAlert<RuleParams>,
-  ruleActions?: RuleActions | null,
-  ruleStatus?: SavedObjectsFindResponse<IRuleStatusSOAttributes>
-): RulesSchema | BulkError => {
-  if (isAlertType(alert)) {
-    if (isRuleStatusFindType(ruleStatus) && ruleStatus?.saved_objects.length > 0) {
-      const transformed = transformAlertToRule(
-        alert,
-        ruleActions,
-        ruleStatus?.saved_objects[0] ?? ruleStatus
-      );
-      const [validated, errors] = validateNonExact(transformed, rulesSchema);
-      if (errors != null || validated == null) {
-        return createBulkErrorObject({
-          ruleId,
-          statusCode: 500,
-          message: errors ?? 'Internal error transforming',
-        });
-      } else {
-        return validated;
-      }
+  rule: PartialRule<RuleParams>,
+  ruleExecutionSummary: RuleExecutionSummary | null
+): FullResponseSchema | BulkError => {
+  if (isAlertType(rule)) {
+    const transformed = internalRuleToAPIResponse(rule, ruleExecutionSummary);
+    const [validated, errors] = validateNonExact(transformed, fullResponseSchema);
+    if (errors != null || validated == null) {
+      return createBulkErrorObject({
+        ruleId,
+        statusCode: 500,
+        message: errors ?? 'Internal error transforming',
+      });
     } else {
-      const transformed = transformAlertToRule(alert);
-      const [validated, errors] = validateNonExact(transformed, rulesSchema);
-      if (errors != null || validated == null) {
-        return createBulkErrorObject({
-          ruleId,
-          statusCode: 500,
-          message: errors ?? 'Internal error transforming',
-        });
-      } else {
-        return validated;
-      }
+      return validated;
     }
   } else {
     return createBulkErrorObject({

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const { sqrt } = require('../../src/functions/sqrt.js');
+const { sqrt } = require('../../src/functions/sqrt');
 
 describe('Sqrt', () => {
   it('numbers', () => {

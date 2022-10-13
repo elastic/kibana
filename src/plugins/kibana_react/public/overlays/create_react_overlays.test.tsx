@@ -8,7 +8,7 @@
 
 import * as React from 'react';
 import { createReactOverlays } from './create_react_overlays';
-import { overlayServiceMock } from '../../../../core/public/mocks';
+import { overlayServiceMock } from '@kbn/core/public/mocks';
 
 test('throws if no overlays service provided', () => {
   const overlays = createReactOverlays({});

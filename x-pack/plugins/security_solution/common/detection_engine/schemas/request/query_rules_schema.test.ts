@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { queryRulesSchema, QueryRulesSchema } from './query_rules_schema';
-import { exactCheck } from '../../../exact_check';
+import type { QueryRulesSchema } from './query_rules_schema';
+import { queryRulesSchema } from './query_rules_schema';
+import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { foldLeftRight, getPaths } from '../../../test_utils';
 import { left } from 'fp-ts/lib/Either';
 
 describe('query_rules_schema', () => {

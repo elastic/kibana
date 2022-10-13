@@ -38,7 +38,6 @@ export class Watcher {
 
   private readonly watchpack = new Watchpack({
     aggregateTimeout: 0,
-    ignored: /node_modules\/([^\/]+[\/])*(?!package.json)([^\/]+)$/,
   });
 
   private readonly change$ = Rx.fromEvent<[string]>(this.watchpack, 'change').pipe(share());
@@ -64,7 +63,7 @@ export class Watcher {
           (changes): Changes => ({
             type: 'changes',
             bundles: bundles.filter((bundle) => {
-              const referencedFiles = bundle.cache.getReferencedFiles();
+              const referencedFiles = bundle.cache.getReferencedPaths();
               return changes.some((change) => referencedFiles?.includes(change));
             }),
           })
@@ -74,15 +73,15 @@ export class Watcher {
 
       // call watchpack.watch after listerners are setup
       Rx.defer(() => {
-        const watchPaths: string[] = [];
+        const watchPaths = new Set<string>();
 
         for (const bundle of bundles) {
-          for (const path of bundle.cache.getReferencedFiles() || []) {
-            watchPaths.push(path);
+          for (const path of bundle.cache.getReferencedPaths() || []) {
+            watchPaths.add(path);
           }
         }
 
-        this.watchpack.watch(watchPaths, [], startTime);
+        this.watchpack.watch(Array.from(watchPaths), [], startTime);
         return Rx.EMPTY;
       })
     );

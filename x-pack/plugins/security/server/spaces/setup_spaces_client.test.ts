@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { coreMock, httpServerMock } from 'src/core/server/mocks';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 
-import { spacesMock } from '../../../spaces/server/mocks';
-import { auditServiceMock } from '../audit/index.mock';
+import { auditServiceMock } from '../audit/mocks';
 import { authorizationMock } from '../authorization/index.mock';
 import { setupSpacesClient } from './setup_spaces_client';
 
@@ -18,8 +18,6 @@ describe('setupSpacesClient', () => {
     const audit = auditServiceMock.create();
 
     setupSpacesClient({ authz, audit });
-
-    expect(audit.getLogger).not.toHaveBeenCalled();
   });
 
   it('configures the repository factory, wrapper, and audit logger', () => {
@@ -31,7 +29,6 @@ describe('setupSpacesClient', () => {
 
     expect(spaces.spacesClient.registerClientWrapper).toHaveBeenCalledTimes(1);
     expect(spaces.spacesClient.setClientRepositoryFactory).toHaveBeenCalledTimes(1);
-    expect(audit.getLogger).toHaveBeenCalledTimes(1);
   });
 
   it('creates a factory that creates an internal repository when RBAC is used for the request', () => {

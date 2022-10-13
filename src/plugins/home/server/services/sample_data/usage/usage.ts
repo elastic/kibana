@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Logger, SavedObjectsServiceStart } from 'kibana/server';
+import { Logger, SavedObjectsServiceStart } from '@kbn/core/server';
 
 const SAVED_OBJECT_ID = 'sample-data-telemetry';
 

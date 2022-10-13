@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ViewMode } from './services/embeddable';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 
 /**
  * @param title {string} the current title of the dashboard
@@ -92,7 +92,7 @@ export const dashboardCopyToDashboardAction = {
     }),
   getDescription: () =>
     i18n.translate('dashboard.panel.copyToDashboard.description', {
-      defaultMessage: "Select where to copy the panel. You're navigated to destination dashboard.",
+      defaultMessage: 'Choose the destination dashboard.',
     }),
 };
 
@@ -165,7 +165,7 @@ export const dashboardLibraryNotification = {
   getTooltip: () =>
     i18n.translate('dashboard.panel.libraryNotification.toolTip', {
       defaultMessage:
-        'Editing this panel might affect other dashboards. To change to this panel only, unlink it from the library.',
+        'Editing this panel might affect other dashboards. To change this panel only, unlink it from the library.',
     }),
   getPopoverAriaLabel: () =>
     i18n.translate('dashboard.panel.libraryNotification.ariaLabel', {
@@ -191,6 +191,29 @@ export const dashboardReplacePanelAction = {
     }),
 };
 
+export const dashboardFilterNotificationBadge = {
+  getDisplayName: () =>
+    i18n.translate('dashboard.panel.filters', {
+      defaultMessage: 'Panel filters',
+    }),
+  getEditButtonTitle: () =>
+    i18n.translate('dashboard.panel.filters.modal.editButton', {
+      defaultMessage: 'Edit filters',
+    }),
+  getCloseButtonTitle: () =>
+    i18n.translate('dashboard.panel.filters.modal.closeButton', {
+      defaultMessage: 'Close',
+    }),
+  getQueryTitle: () =>
+    i18n.translate('dashboard.panel.filters.modal.queryTitle', {
+      defaultMessage: 'Query',
+    }),
+  getFiltersTitle: () =>
+    i18n.translate('dashboard.panel.filters.modal.filtersTitle', {
+      defaultMessage: 'Filters',
+    }),
+};
+
 /*
   Dashboard Editor
 */
@@ -212,6 +235,22 @@ export const dashboardReadonlyBadge = {
   getTooltip: () =>
     i18n.translate('dashboard.badge.readOnly.tooltip', {
       defaultMessage: 'Unable to save dashboards',
+    }),
+};
+
+export const dashboardSaveToastStrings = {
+  getSuccessString: (dashTitle: string) =>
+    i18n.translate('dashboard.dashboardWasSavedSuccessMessage', {
+      defaultMessage: `Dashboard '{dashTitle}' was saved`,
+      values: { dashTitle },
+    }),
+  getFailureString: (dashTitle: string, errorMessage: string) =>
+    i18n.translate('dashboard.dashboardWasNotSavedDangerMessage', {
+      defaultMessage: `Dashboard '{dashTitle}' was not saved. Error: {errorMessage}`,
+      values: {
+        dashTitle,
+        errorMessage,
+      },
     }),
 };
 
@@ -305,7 +344,7 @@ export const createConfirmStrings = {
     }),
   getCreateSubtitle: () =>
     i18n.translate('dashboard.createConfirmModal.unsavedChangesSubtitle', {
-      defaultMessage: 'You can continue editing or start with a blank dashboard.',
+      defaultMessage: 'Continue editing or start over with a blank dashboard.',
     }),
   getStartOverButtonText: () =>
     i18n.translate('dashboard.createConfirmModal.confirmButtonLabel', {
@@ -343,6 +382,27 @@ export const panelStorageErrorStrings = {
     }),
 };
 
+export const dashboardSavedObjectErrorStrings = {
+  getDashboardLoadError: (message: string) =>
+    i18n.translate('dashboard.loadingError.errorMessage', {
+      defaultMessage: 'Error encountered while loading saved dashboard: {message}',
+      values: { message },
+    }),
+  getDashboardGridError: (message: string) =>
+    i18n.translate('dashboard.loadingError.dashboardGridErrorMessage', {
+      defaultMessage: 'Unable to load dashboard: {message}',
+      values: { message },
+    }),
+  getErrorDeletingDashboardToast: () =>
+    i18n.translate('dashboard.deleteError.toastDescription', {
+      defaultMessage: 'Error encountered while deleting dashboard',
+    }),
+  getPanelTooOldError: () =>
+    i18n.translate('dashboard.loadURLError.PanelTooOld', {
+      defaultMessage: 'Cannot load panels from a URL created in a version older than 7.3',
+    }),
+};
+
 /*
   Empty Screen
 */
@@ -359,17 +419,9 @@ export const emptyScreenStrings = {
     i18n.translate('dashboard.fillDashboardTitle', {
       defaultMessage: 'This dashboard is empty. Let\u2019s fill it up!',
     }),
-  getHowToStartWorkingOnNewDashboardDescription1: () =>
-    i18n.translate('dashboard.howToStartWorkingOnNewDashboardDescription1', {
-      defaultMessage: 'Click',
-    }),
-  getHowToStartWorkingOnNewDashboardDescription2: () =>
-    i18n.translate('dashboard.howToStartWorkingOnNewDashboardDescription2', {
-      defaultMessage: 'in the menu bar above to start adding panels.',
-    }),
-  getHowToStartWorkingOnNewDashboardEditLinkText: () =>
-    i18n.translate('dashboard.howToStartWorkingOnNewDashboardEditLinkText', {
-      defaultMessage: 'Edit',
+  getHowToStartWorkingOnNewDashboardDescription: () =>
+    i18n.translate('dashboard.howToStartWorkingOnNewDashboardDescription', {
+      defaultMessage: 'Click edit in the menu bar above to start adding panels.',
     }),
   getHowToStartWorkingOnNewDashboardEditLinkAriaLabel: () =>
     i18n.translate('dashboard.howToStartWorkingOnNewDashboardEditLinkAriaLabel', {
@@ -388,7 +440,7 @@ export const emptyScreenStrings = {
 /*
   Dashboard Listing Page
 */
-export const dashboardListingTable = {
+export const dashboardListingTableStrings = {
   getEntityName: () =>
     i18n.translate('dashboard.listing.table.entityName', {
       defaultMessage: 'dashboard',
@@ -398,25 +450,16 @@ export const dashboardListingTable = {
       defaultMessage: 'dashboards',
     }),
   getTableListTitle: () => getDashboardPageTitle(),
-  getTableCaption: () => getDashboardPageTitle(),
-  getTitleColumnName: () =>
-    i18n.translate('dashboard.listing.table.titleColumnName', {
-      defaultMessage: 'Title',
-    }),
-  getDescriptionColumnName: () =>
-    i18n.translate('dashboard.listing.table.descriptionColumnName', {
-      defaultMessage: 'Description',
-    }),
 };
 
 export const dashboardUnsavedListingStrings = {
   getUnsavedChangesTitle: (plural = false) =>
     i18n.translate('dashboard.listing.unsaved.unsavedChangesTitle', {
-      defaultMessage: 'You have unsaved changes in the following {dash}.',
+      defaultMessage: 'You have unsaved changes in the following {dash}:',
       values: {
         dash: plural
-          ? dashboardListingTable.getEntityNamePlural()
-          : dashboardListingTable.getEntityName(),
+          ? dashboardListingTableStrings.getEntityNamePlural()
+          : dashboardListingTableStrings.getEntityName(),
       },
     }),
   getLoadingTitle: () =>
@@ -440,5 +483,42 @@ export const dashboardUnsavedListingStrings = {
   getDiscardTitle: () =>
     i18n.translate('dashboard.listing.unsaved.discardTitle', {
       defaultMessage: 'Discard changes',
+    }),
+};
+
+export const getCreateVisualizationButtonTitle = () =>
+  i18n.translate('dashboard.solutionToolbar.addPanelButtonLabel', {
+    defaultMessage: 'Create visualization',
+  });
+
+export const noItemsStrings = {
+  getReadonlyTitle: () =>
+    i18n.translate('dashboard.listing.readonlyNoItemsTitle', {
+      defaultMessage: 'No dashboards to view',
+    }),
+  getReadonlyBody: () =>
+    i18n.translate('dashboard.listing.readonlyNoItemsBody', {
+      defaultMessage: `There are no available dashboards. To change your permissions to view the dashboards in this space, contact your administrator.`,
+    }),
+  getReadEditTitle: () =>
+    i18n.translate('dashboard.listing.createNewDashboard.title', {
+      defaultMessage: 'Create your first dashboard',
+    }),
+  getReadEditInProgressTitle: () =>
+    i18n.translate('dashboard.listing.createNewDashboard.inProgressTitle', {
+      defaultMessage: 'Dashboard in progress',
+    }),
+  getReadEditDashboardDescription: () =>
+    i18n.translate('dashboard.listing.createNewDashboard.combineDataViewFromKibanaAppDescription', {
+      defaultMessage:
+        'Analyze all of your Elastic data in one place by creating a dashboard and adding visualizations.',
+    }),
+  getSampleDataLinkText: () =>
+    i18n.translate('dashboard.listing.createNewDashboard.sampleDataInstallLinkText', {
+      defaultMessage: `Add some sample data`,
+    }),
+  getCreateNewDashboardText: () =>
+    i18n.translate('dashboard.listing.createNewDashboard.createButtonLabel', {
+      defaultMessage: `Create a dashboard`,
     }),
 };

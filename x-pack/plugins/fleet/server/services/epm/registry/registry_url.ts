@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { appContextService, licenseService } from '../../';
+import { appContextService } from '../..';
 
 // from https://github.com/elastic/package-registry#docker (maybe from OpenAPI one day)
 // the unused variables cause a TS warning about unused values
@@ -21,7 +21,8 @@ const SNAPSHOT_REGISTRY_URL_CDN = 'https://epr-snapshot.elastic.co';
 
 const getDefaultRegistryUrl = (): string => {
   const branch = appContextService.getKibanaBranch();
-  if (branch === 'master') {
+  const isProduction = appContextService.getIsProductionMode();
+  if (!isProduction || branch === 'main') {
     return SNAPSHOT_REGISTRY_URL_CDN;
   } else if (appContextService.getKibanaVersion().includes('-SNAPSHOT')) {
     return STAGING_REGISTRY_URL_CDN;
@@ -32,19 +33,9 @@ const getDefaultRegistryUrl = (): string => {
 
 export const getRegistryUrl = (): string => {
   const customUrl = appContextService.getConfig()?.registryUrl;
-  const isEnterprise = licenseService.isEnterprise();
-
-  if (customUrl && isEnterprise) {
-    appContextService
-      .getLogger()
-      .info('Custom registry url is an experimental feature and is unsupported.');
-    return customUrl;
-  }
 
   if (customUrl) {
-    appContextService
-      .getLogger()
-      .warn('Enterprise license is required to use a custom registry url.');
+    return customUrl;
   }
 
   return getDefaultRegistryUrl();

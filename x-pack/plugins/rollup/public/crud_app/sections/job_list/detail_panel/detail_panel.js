@@ -8,7 +8,7 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiErrorBoundary,
@@ -195,7 +195,7 @@ export class DetailPanel extends Component {
                 <EuiTextColor color="subdued">
                   <FormattedMessage
                     id="xpack.rollupJobs.detailPanel.loadingLabel"
-                    defaultMessage="Loading rollup job..."
+                    defaultMessage="Loading rollup job…"
                   />
                 </EuiTextColor>
               </EuiText>

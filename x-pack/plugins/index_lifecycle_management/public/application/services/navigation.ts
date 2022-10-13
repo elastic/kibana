@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { ApplicationStart } from '@kbn/core/public';
+import { getIndexListUri } from '@kbn/index-management-plugin/public';
+
 export const ROUTES = {
   list: '/policies',
   edit: '/policies/edit/:policyName?',
@@ -22,3 +25,11 @@ export const getPolicyCreatePath = () => {
 export const getPoliciesListPath = () => {
   return ROUTES.list;
 };
+
+export const getIndicesListPath = (
+  policyName: string,
+  getUrlForApp: ApplicationStart['getUrlForApp']
+) =>
+  getUrlForApp('management', {
+    path: `/data/index_management${getIndexListUri(`ilm.policy="${policyName}"`, true)}`,
+  });

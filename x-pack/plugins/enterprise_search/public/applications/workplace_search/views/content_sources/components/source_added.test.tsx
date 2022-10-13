@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import '../../../../__mocks__/react_router';
 import '../../../../__mocks__/shallow_useeffect.mock';
-
-import { setMockActions, setMockValues } from '../../../../__mocks__';
+import { setMockActions, setMockValues } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 import { useLocation } from 'react-router-dom';
@@ -28,7 +28,8 @@ describe('SourceAdded', () => {
   });
 
   it('renders', () => {
-    const search = '?name=foo&serviceType=custom&indexPermissions=false';
+    const search =
+      '?code=1234&state=%7B%22action%22%3A%22create%22%2C%22context%22%3A%22account%22%2C%22service_type%22%3A%22github%22%2C%22csrf_token%22%3A%22TOKEN123%3D%3D%22%2C%22index_permissions%22%3Afalse%7D';
     (useLocation as jest.Mock).mockImplementationOnce(() => ({ search }));
     const wrapper = shallow(<SourceAdded />);
 

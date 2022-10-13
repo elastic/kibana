@@ -14,7 +14,8 @@ import chalk from 'chalk';
 import { first, tap } from 'rxjs/operators';
 import dedent from 'dedent';
 
-import { run, createFlagError } from '@kbn/dev-utils';
+import { run } from '@kbn/dev-cli-runner';
+import { createFlagError } from '@kbn/dev-cli-errors';
 import { getLine$ } from './helpers';
 import { Pr } from './pr';
 import { GithubApi } from './github_api';
@@ -148,12 +149,9 @@ run(
     await init();
     for (const pr of prs) {
       log.info('pr #%s', pr.number);
-      log.indent(4);
-      try {
+      await log.indent(4, async () => {
         await updatePr(pr);
-      } finally {
-        log.indent(-4);
-      }
+      });
     }
   },
   {

@@ -15,7 +15,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('regression creation', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/egs_regression');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/egs_regression');
       await ml.testResources.createIndexPatternIfNeeded('ft_egs_regression', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
@@ -24,6 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.api.cleanMlIndices();
+      await ml.testResources.deleteIndexPatternByTitle('ft_egs_regression');
     });
 
     const jobId = `egs_1_${Date.now()}`;
@@ -53,12 +54,13 @@ export default function ({ getService }: FtrProviderContext) {
             { color: '#61AFA3', percentage: 2 },
             { color: '#D1E5E0', percentage: 2 },
             // tick/grid/axis
-            { color: '#6A717D', percentage: 10 },
-            { color: '#F5F7FA', percentage: 10 },
+            { color: '#6A717D', percentage: 5 },
+            { color: '#F5F7FA', percentage: 5 },
             { color: '#D3DAE6', percentage: 3 },
           ],
           runtimeFieldsEditorContent: ['{', '  "uppercase_stab": {', '    "type": "keyword",'],
           row: {
+            memoryStatus: 'ok',
             type: 'regression',
             status: 'stopped',
             progress: '100',
@@ -77,14 +79,6 @@ export default function ({ getService }: FtrProviderContext) {
                 },
               },
               { section: 'progress', expectedEntries: { Phase: '8/8' } },
-            ],
-            jobStats: [
-              {
-                section: 'stats',
-                expectedEntries: {
-                  version: '8.0.0',
-                },
-              },
             ],
           } as AnalyticsTableRowDetails,
         },
@@ -196,12 +190,6 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.assertDestIndexInputExists();
           await ml.dataFrameAnalyticsCreation.setDestIndex(testData.destinationIndex);
 
-          await ml.testExecution.logTestStep('sets the create index pattern switch');
-          await ml.dataFrameAnalyticsCreation.assertCreateIndexPatternSwitchExists();
-          await ml.dataFrameAnalyticsCreation.setCreateIndexPatternSwitchState(
-            testData.createIndexPattern
-          );
-
           await ml.testExecution.logTestStep('continues to the validation step');
           await ml.dataFrameAnalyticsCreation.continueToValidationStep();
 
@@ -211,6 +199,12 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('continues to the create step');
           await ml.dataFrameAnalyticsCreation.continueToCreateStep();
+
+          await ml.testExecution.logTestStep('sets the create data view switch');
+          await ml.dataFrameAnalyticsCreation.assertCreateIndexPatternSwitchExists();
+          await ml.dataFrameAnalyticsCreation.setCreateIndexPatternSwitchState(
+            testData.createIndexPattern
+          );
         });
 
         it('runs the analytics job and displays it correctly in the job list', async () => {
@@ -239,6 +233,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsTable.assertAnalyticsRowFields(testData.jobId, {
             id: testData.jobId,
             description: testData.jobDescription,
+            memoryStatus: testData.expected.row.memoryStatus,
             sourceIndex: testData.source,
             destinationIndex: testData.destinationIndex,
             type: testData.expected.row.type,
@@ -276,6 +271,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsTable.assertAnalyticsRowFields(testData.jobId, {
             id: testData.jobId,
             description: editedDescription,
+            memoryStatus: testData.expected.row.memoryStatus,
             sourceIndex: testData.source,
             destinationIndex: testData.destinationIndex,
             type: testData.expected.row.type,

@@ -3,7 +3,7 @@
 ## Overview
 
 The purpose of this plugin is to provide a way to encrypt/decrypt attributes on the custom Saved Objects that works with
-security and spaces filtering as well as performing audit logging.
+security and spaces filtering.
 
 [RFC #2: Encrypted Saved Objects Attributes](../../../rfcs/text/0002_encrypted_attributes.md).
 
@@ -99,6 +99,21 @@ const savedObjectWithDecryptedContent =  await esoClient.getDecryptedAsInternalU
 one would pass to `SavedObjectsClient.get`. These argument allows to specify `namespace` property that, for example, is
 required if Saved Object was created within a non-default space.
 
+Alternative option is using `createPointInTimeFinderDecryptedAsInternalUser` API method, that can be used to help page through large sets of saved objects.
+Its interface matches interface of the corresponding Saved Objects API `createPointInTimeFinder` method:
+
+```typescript
+const finder = await this.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser({
+  filter,
+  type: 'my-saved-object-type',
+  perPage: 1000,
+});
+
+for await (const response of finder.find()) {
+  // process response
+}
+```
+
 ### Defining migrations
 EncryptedSavedObjects rely on standard SavedObject migrations, but due to the additional complexity introduced by the need to decrypt and reencrypt the migrated document, there are some caveats to how we support this.
 The good news is, most of this complexity is abstracted away by the plugin and all you need to do is leverage our api.
@@ -111,6 +126,7 @@ The `createMigration` function takes four arguments:
 |---|---|---|
 |isMigrationNeededPredicate|A predicate which is called for each document, prior to being decrypted, which confirms whether a document requires migration or not. This predicate is important as the decryption step is costly and we would rather not decrypt and re-encrypt a document if we can avoid it.|function| 
 |migration|A migration function which will migrate each decrypted document from the old shape to the new one.|function| 
+|shouldMigrateIfDecryptionFails|Optional. A boolean flag which indicates whether to proceed with migration if a document fails to decrypt. If this is not set or if it is set to `false`, decryption errors will be thrown. If set to `true`, a warning will be logged and the migration function will be applied to the original encrypted document. Set this to `true` if you don't want decryption failures to block Kibana upgrades. |boolean| 
 |inputType|Optional. An `EncryptedSavedObjectTypeRegistration` which describes the ESOType of the input (the document prior to migration). If this type isn't provided, we'll assume the input doc follows the registered type. |object| 
 |migratedType| Optional. An `EncryptedSavedObjectTypeRegistration` which describes the ESOType of the output (the document after migration). If this type isn't provided, we'll assume the migrated doc follows the registered type.|object| 
 
@@ -123,11 +139,11 @@ encryptedSavedObjects.registerType({
   attributesToExcludeFromAAD: new Set(['mutedInstanceIds', 'updatedBy']),
 });
 
-const migration790 = encryptedSavedObjects.createMigration<RawAlert, RawAlert>(
-  function shouldBeMigrated(doc): doc is SavedObjectUnsanitizedDoc<RawAlert> {
+const migration790 = encryptedSavedObjects.createMigration<RawAlert, RawAlert>({
+  isMigrationNeededPredicate: function shouldBeMigrated(doc): doc is SavedObjectUnsanitizedDoc<RawAlert> {
     return doc.consumer === 'alerting' || doc.consumer === undefined;
   },
-  (doc: SavedObjectUnsanitizedDoc<RawAlert>): SavedObjectUnsanitizedDoc<RawAlert> => {
+  migration: (doc: SavedObjectUnsanitizedDoc<RawAlert>): SavedObjectUnsanitizedDoc<RawAlert> => {
     const {
       attributes: { consumer },
     } = doc;
@@ -139,7 +155,7 @@ const migration790 = encryptedSavedObjects.createMigration<RawAlert, RawAlert>(
       },
     };
   }
-);
+});
 ```
 
 In the above example you can see thwe following:
@@ -174,11 +190,11 @@ encryptedSavedObjects.registerType({
   attributesToExcludeFromAAD: new Set(['mutedInstanceIds', 'updatedBy']),
 });
 
-const migration790 = encryptedSavedObjects.createMigration<RawAlert, RawAlert>(
-  function shouldBeMigrated(doc): doc is SavedObjectUnsanitizedDoc<RawAlert> {
+const migration790 = encryptedSavedObjects.createMigration<RawAlert, RawAlert>({
+  isMigrationNeededPredicate: function shouldBeMigrated(doc): doc is SavedObjectUnsanitizedDoc<RawAlert> {
     return doc.consumer === 'alerting' || doc.consumer === undefined;
   },
-  (doc: SavedObjectUnsanitizedDoc<RawAlert>): SavedObjectUnsanitizedDoc<RawAlert> => {
+  migration: (doc: SavedObjectUnsanitizedDoc<RawAlert>): SavedObjectUnsanitizedDoc<RawAlert> => {
     const {
       attributes: { legacyEncryptedField, ...attributes },
     } = doc;
@@ -189,12 +205,12 @@ const migration790 = encryptedSavedObjects.createMigration<RawAlert, RawAlert>(
       },
     };
   },
-  {
+  inputType: {
     type: 'alert',
     attributesToEncrypt: new Set(['apiKey', 'legacyEncryptedField']),
     attributesToExcludeFromAAD: new Set(['mutedInstanceIds', 'updatedBy']),
   }
-);
+});
 ```
 
 As you can see in this example we provide a legacy type which describes the _input_ which needs to be decrypted.
@@ -209,26 +225,26 @@ encryptedSavedObjects.registerType({
   attributesToExcludeFromAAD: new Set(['mutedInstanceIds', 'updatedBy']),
 });
 
-const migration780 = encryptedSavedObjects.createMigration<RawAlert, RawAlert>(
-  function shouldBeMigrated(doc): doc is SavedObjectUnsanitizedDoc<RawAlert> {
+const migration780 = encryptedSavedObjects.createMigration<RawAlert, RawAlert>({
+  isMigrationNeededPredicate: function shouldBeMigrated(doc): doc is SavedObjectUnsanitizedDoc<RawAlert> {
     // ...
   },
-  (doc: SavedObjectUnsanitizedDoc<RawAlert>): SavedObjectUnsanitizedDoc<RawAlert> => {
+  migration: (doc: SavedObjectUnsanitizedDoc<RawAlert>): SavedObjectUnsanitizedDoc<RawAlert> => {
     // ...
   },
   // legacy input type
-  {
+  inputType: {
     type: 'alert',
     attributesToEncrypt: new Set(['apiKey', 'legacyEncryptedField']),
     attributesToExcludeFromAAD: new Set(['mutedInstanceIds', 'updatedBy']),
   },
   // legacy migration type
-  {
+  migratedType: {
     type: 'alert',
     attributesToEncrypt: new Set(['apiKey', 'legacyEncryptedField']),
     attributesToExcludeFromAAD: new Set(['mutedInstanceIds', 'updatedBy', 'legacyEncryptedField']),
   }
-);
+});
 ```
 
 ## Testing

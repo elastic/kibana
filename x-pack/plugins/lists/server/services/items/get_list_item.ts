@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
+import type { Id, ListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-import { Id, ListItemSchema, SearchEsListItemSchema } from '../../../common/schemas';
 import { transformElasticToListItem } from '../utils';
 import { findSourceType } from '../utils/find_source_type';
+import { SearchEsListItemSchema } from '../../schemas/elastic_response';
 
 interface GetListItemOptions {
   id: Id;
@@ -25,7 +26,7 @@ export const getListItem = async ({
   // Note: This typing of response = await esClient<SearchResponse<SearchEsListSchema>>
   // is because when you pass in seq_no_primary_term: true it does a "fall through" type and you have
   // to explicitly define the type <T>.
-  const { body: listItemES } = await esClient.search<SearchEsListItemSchema>({
+  const listItemES = await esClient.search<SearchEsListItemSchema>({
     body: {
       query: {
         term: {

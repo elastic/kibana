@@ -3,10 +3,5 @@
   "version": "1.0.0",
   "private": true,
   "license": "SSPL-1.0 OR Elastic License 2.0",
-  "main": "target/index.js",
-  "types": "target/index.d.ts",
-  "scripts": {
-    "kbn:bootstrap": "node scripts/build",
-    "kbn:watch": "node scripts/build --watch"
-  }
+  "main": "target_node/index.js"
 }

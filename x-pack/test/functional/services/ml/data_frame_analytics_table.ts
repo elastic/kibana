@@ -6,8 +6,9 @@
  */
 
 import expect from '@kbn/expect';
+import { ProvidedType } from '@kbn/test';
 
-import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrapper';
+import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 type ExpectedSectionTableEntries = Record<string, string>;
@@ -16,14 +17,23 @@ export interface ExpectedSectionTable {
   expectedEntries: ExpectedSectionTableEntries;
 }
 
-export type AnalyticsTableRowDetails = Record<'jobDetails' | 'jobStats', ExpectedSectionTable[]>;
-export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: FtrProviderContext) {
+export type AnalyticsTableRowDetails = Record<'jobDetails', ExpectedSectionTable[]>;
+
+export type MlDFAJobTable = ProvidedType<typeof MachineLearningDataFrameAnalyticsTableProvider>;
+
+export function MachineLearningDataFrameAnalyticsTableProvider({
+  getPageObject,
+  getService,
+}: FtrProviderContext) {
+  const headerPage = getPageObject('header');
   const find = getService('find');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
 
   return new (class AnalyticsTable {
-    public async parseAnalyticsTable() {
+    public async parseAnalyticsTable(
+      tableEnvironment: 'mlDataFrameAnalytics' | 'stackMgmtJobList' = 'mlDataFrameAnalytics'
+    ) {
       const table = await testSubjects.find('~mlAnalyticsTable');
       const $ = await table.parseDomContent();
       const rows = [];
@@ -31,7 +41,17 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
       for (const tr of $.findTestSubjects('~mlAnalyticsTableRow').toArray()) {
         const $tr = $(tr);
 
-        rows.push({
+        const rowObject: {
+          id: string;
+          description: string;
+          memoryStatus: string;
+          sourceIndex: string;
+          destinationIndex: string;
+          type: string;
+          status: string;
+          progress: string;
+          spaces?: string[];
+        } = {
           id: $tr
             .findTestSubject('mlAnalyticsTableColumnId')
             .find('.euiTableCellContent')
@@ -39,6 +59,11 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
             .trim(),
           description: $tr
             .findTestSubject('mlAnalyticsTableColumnJobDescription')
+            .find('.euiTableCellContent')
+            .text()
+            .trim(),
+          memoryStatus: $tr
+            .findTestSubject('mlAnalyticsTableColumnJobMemoryStatus')
             .find('.euiTableCellContent')
             .text()
             .trim(),
@@ -66,7 +91,23 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
             .findTestSubject('mlAnalyticsTableColumnProgress')
             .findTestSubject('mlAnalyticsTableProgress')
             .attr('value'),
-        });
+        };
+
+        if (tableEnvironment === 'stackMgmtJobList') {
+          const $spaces = $tr
+            .findTestSubject('mlAnalyticsTableColumnSpaces')
+            .find('.euiTableCellContent')
+            .find('.euiAvatar--space');
+          const spaces = [];
+          for (const el of $spaces.toArray()) {
+            // extract the space id from data-test-subj and add to list
+            spaces.push($(el).attr('data-test-subj').replace('space-avatar-', ''));
+          }
+
+          rowObject.spaces = spaces;
+        }
+
+        rows.push(rowObject);
       }
 
       return rows;
@@ -77,15 +118,21 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
       return !subSelector ? row : `${row} > ${subSelector}`;
     }
 
-    public async waitForRefreshButtonLoaded() {
-      await testSubjects.existOrFail('~mlAnalyticsRefreshListButton', { timeout: 10 * 1000 });
-      await testSubjects.existOrFail('mlAnalyticsRefreshListButton loaded', { timeout: 30 * 1000 });
+    public async waitForRefreshButtonLoaded(buttonTestSubj: string) {
+      await testSubjects.existOrFail(`~${buttonTestSubj}`, { timeout: 10 * 1000 });
+      await testSubjects.existOrFail(`${buttonTestSubj} loaded`, { timeout: 30 * 1000 });
     }
 
-    public async refreshAnalyticsTable() {
-      await this.waitForRefreshButtonLoaded();
-      await testSubjects.click('~mlAnalyticsRefreshListButton');
-      await this.waitForRefreshButtonLoaded();
+    public async refreshAnalyticsTable(
+      tableEnvironment: 'mlDataFrameAnalytics' | 'stackMgmtJobList' = 'mlDataFrameAnalytics'
+    ) {
+      const testSubjStr =
+        tableEnvironment === 'mlDataFrameAnalytics'
+          ? 'mlRefreshPageButton'
+          : 'mlAnalyticsRefreshListButton';
+      await this.waitForRefreshButtonLoaded(testSubjStr);
+      await testSubjects.click(`~${testSubjStr}`);
+      await this.waitForRefreshButtonLoaded(testSubjStr);
       await this.waitForAnalyticsToLoad();
     }
 
@@ -120,15 +167,22 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
     }
 
     public async openResultsView(analyticsId: string) {
-      await this.assertJobRowViewButtonExists(analyticsId);
-      await testSubjects.click(this.rowSelector(analyticsId, 'mlAnalyticsJobViewButton'));
-      await testSubjects.existOrFail('mlPageDataFrameAnalyticsExploration', { timeout: 20 * 1000 });
+      await retry.tryForTime(20 * 1000, async () => {
+        await this.assertJobRowViewButtonExists(analyticsId);
+        await testSubjects.click(this.rowSelector(analyticsId, 'mlAnalyticsJobViewButton'));
+        await testSubjects.existOrFail('mlPageDataFrameAnalyticsExploration', {
+          timeout: 5 * 1000,
+        });
+      });
+      await headerPage.waitUntilLoadingHasFinished();
     }
 
     public async openMapView(analyticsId: string) {
-      await this.assertJobRowMapButtonExists(analyticsId);
-      await testSubjects.click(this.rowSelector(analyticsId, 'mlAnalyticsJobMapButton'));
-      await testSubjects.existOrFail('mlPageDataFrameAnalyticsMap', { timeout: 20 * 1000 });
+      await retry.tryForTime(20 * 1000, async () => {
+        await this.assertJobRowMapButtonExists(analyticsId);
+        await testSubjects.click(this.rowSelector(analyticsId, 'mlAnalyticsJobMapButton'));
+        await testSubjects.existOrFail('mlPageDataFrameAnalyticsMap', { timeout: 5 * 1000 });
+      });
     }
 
     public async assertAnalyticsSearchInputValue(expectedSearchValue: string) {
@@ -153,6 +207,27 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
         expectedRowCount,
         `Filtered DFA job table should have ${expectedRowCount} row(s) for filter '${filter}' (got matching items '${filteredRows}')`
       );
+    }
+
+    public async assertAnalyticsJobDisplayedInTable(
+      analyticsId: string,
+      shouldBeDisplayed: boolean,
+      refreshButtonTestSubj = 'mlRefreshPageButton'
+    ) {
+      await this.waitForRefreshButtonLoaded(refreshButtonTestSubj);
+      await testSubjects.click(`~${refreshButtonTestSubj}`);
+      await this.waitForRefreshButtonLoaded(refreshButtonTestSubj);
+      await testSubjects.existOrFail('mlAnalyticsJobList', { timeout: 30 * 1000 });
+
+      if (shouldBeDisplayed) {
+        await this.filterWithSearchString(analyticsId, 1);
+      } else {
+        if (await testSubjects.exists('mlNoDataFrameAnalyticsFound', { timeout: 1000 })) {
+          // no jobs at all, no other assertion needed
+          return;
+        }
+        await this.filterWithSearchString(analyticsId, 0);
+      }
     }
 
     public async assertAnalyticsRowFields(analyticsId: string, expectedRow: object) {
@@ -395,14 +470,11 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
       }
     }
 
-    public async assertJobStatsTabContent(jobId: string, sections: ExpectedSectionTable[]) {
+    public async assertJobStatsTabContent(jobId: string) {
       const tabSubject = 'job-stats';
       await this.ensureDetailsTabOpen(jobId, tabSubject);
       await this.assertDetailsSectionExists(jobId, 'stats');
-
-      for (const { section, expectedEntries } of sections) {
-        await this.assertRowDetailsSectionContent(jobId, section, expectedEntries);
-      }
+      await this.assertDetailsSectionExists(jobId, 'analysisStats');
     }
 
     public async assertJsonTabContent(jobId: string) {
@@ -431,7 +503,7 @@ export function MachineLearningDataFrameAnalyticsTableProvider({ getService }: F
           'job-messages',
         ]);
         await this.assertJobDetailsTabContent(jobId, expectedRowDetails.jobDetails);
-        await this.assertJobStatsTabContent(jobId, expectedRowDetails.jobStats);
+        await this.assertJobStatsTabContent(jobId);
         await this.assertJsonTabContent(jobId);
         await this.assertJobMessagesTabContent(jobId);
       });

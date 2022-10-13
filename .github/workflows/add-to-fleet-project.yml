@@ -1,0 +1,36 @@
+name: Add to Fleet:Quality project
+on:
+  issues:
+    types:
+      - labeled
+jobs:
+  add_to_project:
+    runs-on: ubuntu-latest
+    if: |
+      contains(github.event.issue.labels.*.name, 'Team:Fleet') && (
+        contains(github.event.issue.labels.*.name, 'technical debt') ||
+        contains(github.event.issue.labels.*.name, 'bug') ||
+        contains(github.event.issue.labels.*.name, 'performance') ||
+        contains(github.event.issue.labels.*.name, 'failed-test') || 
+        contains(github.event.issue.labels.*.name, 'chore')
+      )
+    steps:
+      - uses: octokit/graphql-action@v2.x
+        id: add_to_project
+        with:
+          headers: '{"GraphQL-Features": "projects_next_graphql"}'
+          query: |
+            mutation add_to_project($projectid: ID!, $contentid: ID!) {
+              addProjectNextItem(input:{projectId:$projectid contentId:$contentid}) {
+                projectNextItem {
+                  id
+                }
+              }
+            }
+          projectid: ${{ env.PROJECT_ID }}
+          contentid: ${{ github.event.issue.node_id }}
+        env:
+          # https://github.com/orgs/elastic/projects/763
+          PROJECT_ID: "PN_kwDOAGc3Zs4AAsH6"
+          # Token with `write:org` access
+          GITHUB_TOKEN: ${{ secrets.FLEET_TECH_KIBANA_USER_TOKEN }}

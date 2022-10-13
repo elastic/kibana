@@ -5,41 +5,37 @@
  * 2.0.
  */
 
-import React, { FC, memo, useCallback, useEffect } from 'react';
-
-import {
-  RuleStep,
-  RuleStepProps,
-  ScheduleStepRule,
-} from '../../../pages/detection_engine/rules/types';
+import type { FC } from 'react';
+import styled from 'styled-components';
+import React, { memo, useCallback, useEffect } from 'react';
+import type { RuleStepProps, ScheduleStepRule } from '../../../pages/detection_engine/rules/types';
+import { RuleStep } from '../../../pages/detection_engine/rules/types';
 import { StepRuleDescription } from '../description_step';
 import { ScheduleItem } from '../schedule_item_form';
-import { Form, UseField, useForm } from '../../../../shared_imports';
+import { Form, UseField, useForm, useFormData } from '../../../../shared_imports';
 import { StepContentWrapper } from '../step_content_wrapper';
 import { NextStep } from '../next_step';
 import { schema } from './schema';
 
+const StyledForm = styled(Form)`
+  max-width: 235px !important;
+`;
 interface StepScheduleRuleProps extends RuleStepProps {
-  defaultValues?: ScheduleStepRule | null;
+  defaultValues: ScheduleStepRule;
+  onRuleDataChange?: (data: ScheduleStepRule) => void;
 }
-
-const stepScheduleDefaultValue: ScheduleStepRule = {
-  interval: '5m',
-  from: '1m',
-};
 
 const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
   addPadding = false,
-  defaultValues,
+  defaultValues: initialState,
   descriptionColumns = 'singleSplit',
   isReadOnlyView,
   isLoading,
   isUpdateView = false,
   onSubmit,
   setForm,
+  onRuleDataChange,
 }) => {
-  const initialState = defaultValues ?? stepScheduleDefaultValue;
-
   const { form } = useForm<ScheduleStepRule>({
     defaultValue: initialState,
     options: { stripEmptyFields: false },
@@ -47,6 +43,16 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
   });
 
   const { getFormData, submit } = form;
+
+  useFormData<ScheduleStepRule>({
+    form,
+    watch: ['from', 'interval'],
+    onChange: (data: ScheduleStepRule) => {
+      if (onRuleDataChange) {
+        onRuleDataChange(data);
+      }
+    },
+  });
 
   const handleSubmit = useCallback(() => {
     if (onSubmit) {
@@ -81,7 +87,7 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
   ) : (
     <>
       <StepContentWrapper addPadding={!isUpdateView}>
-        <Form form={form} data-test-subj="stepScheduleRule">
+        <StyledForm form={form} data-test-subj="stepScheduleRule">
           <UseField
             path="interval"
             component={ScheduleItem}
@@ -89,6 +95,7 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
               idAria: 'detectionEngineStepScheduleRuleInterval',
               isDisabled: isLoading,
               dataTestSubj: 'detectionEngineStepScheduleRuleInterval',
+              minimumValue: 1,
             }}
           />
           <UseField
@@ -101,7 +108,7 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
               minimumValue: 1,
             }}
           />
-        </Form>
+        </StyledForm>
       </StepContentWrapper>
 
       {!isUpdateView && (

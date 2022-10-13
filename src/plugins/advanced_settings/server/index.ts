@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from 'kibana/server';
+import { PluginInitializerContext } from '@kbn/core/server';
 import { AdvancedSettingsServerPlugin } from './plugin';
 
 export const plugin = (initContext: PluginInitializerContext) =>

@@ -10,55 +10,53 @@ import { mount } from 'enzyme';
 import { waitFor, act } from '@testing-library/react';
 import { noop } from 'lodash/fp';
 
-import { TestProviders } from '../../common/mock';
-import { Router, routeData, mockHistory, mockLocation } from '../__mock__/router';
+import { noCreateCasesPermissions, TestProviders } from '../../common/mock';
 
-import { CommentRequest, CommentType } from '../../../common';
-import { usePostComment } from '../../containers/use_post_comment';
-import { AddComment, AddCommentRefObject } from '.';
+import { CommentType } from '../../../common/api';
+import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import { useCreateAttachments } from '../../containers/use_create_attachments';
+import { AddComment, AddCommentProps, AddCommentRefObject } from '.';
 import { CasesTimelineIntegrationProvider } from '../timeline_context';
 import { timelineIntegrationMock } from '../__mock__/timeline';
+import { CaseAttachmentWithoutOwner } from '../../types';
 
-jest.mock('../../containers/use_post_comment');
+jest.mock('../../containers/use_create_attachments');
 
-const usePostCommentMock = usePostComment as jest.Mock;
+const useCreateAttachmentsMock = useCreateAttachments as jest.Mock;
 const onCommentSaving = jest.fn();
 const onCommentPosted = jest.fn();
-const postComment = jest.fn();
+const createAttachments = jest.fn();
 
-const addCommentProps = {
+const addCommentProps: AddCommentProps = {
+  id: 'newComment',
   caseId: '1234',
-  disabled: false,
-  insertQuote: null,
   onCommentSaving,
   onCommentPosted,
   showLoading: false,
+  statusActionButton: null,
 };
 
-const defaultPostComment = {
+const defaultResponse = {
   isLoading: false,
   isError: false,
-  postComment,
+  createAttachments,
 };
 
-const sampleData: CommentRequest = {
+const sampleData: CaseAttachmentWithoutOwner = {
   comment: 'what a cool comment',
-  type: CommentType.user,
+  type: CommentType.user as const,
 };
 
 describe('AddComment ', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    usePostCommentMock.mockImplementation(() => defaultPostComment);
-    jest.spyOn(routeData, 'useLocation').mockReturnValue(mockLocation);
+    useCreateAttachmentsMock.mockImplementation(() => defaultResponse);
   });
 
   it('should post comment on submit click', async () => {
     const wrapper = mount(
       <TestProviders>
-        <Router history={mockHistory}>
-          <AddComment {...addCommentProps} />
-        </Router>
+        <AddComment {...addCommentProps} />
       </TestProviders>
     );
 
@@ -73,10 +71,10 @@ describe('AddComment ', () => {
     wrapper.find(`[data-test-subj="submit-comment"]`).first().simulate('click');
     await waitFor(() => {
       expect(onCommentSaving).toBeCalled();
-      expect(postComment).toBeCalledWith({
+      expect(createAttachments).toBeCalledWith({
         caseId: addCommentProps.caseId,
-        data: sampleData,
-        subCaseId: undefined,
+        caseOwner: SECURITY_SOLUTION_OWNER,
+        data: [sampleData],
         updateCase: onCommentPosted,
       });
       expect(wrapper.find(`[data-test-subj="add-comment"] textarea`).text()).toBe('');
@@ -84,12 +82,13 @@ describe('AddComment ', () => {
   });
 
   it('should render spinner and disable submit when loading', () => {
-    usePostCommentMock.mockImplementation(() => ({ ...defaultPostComment, isLoading: true }));
+    useCreateAttachmentsMock.mockImplementation(() => ({
+      ...defaultResponse,
+      isLoading: true,
+    }));
     const wrapper = mount(
       <TestProviders>
-        <Router history={mockHistory}>
-          <AddComment {...{ ...addCommentProps, showLoading: true }} />
-        </Router>
+        <AddComment {...{ ...addCommentProps, showLoading: true }} />
       </TestProviders>
     );
 
@@ -99,13 +98,14 @@ describe('AddComment ', () => {
     ).toBeTruthy();
   });
 
-  it('should disable submit button when disabled prop passed', () => {
-    usePostCommentMock.mockImplementation(() => ({ ...defaultPostComment, isLoading: true }));
+  it('should disable submit button when isLoading is true', () => {
+    useCreateAttachmentsMock.mockImplementation(() => ({
+      ...defaultResponse,
+      isLoading: true,
+    }));
     const wrapper = mount(
       <TestProviders>
-        <Router history={mockHistory}>
-          <AddComment {...{ ...addCommentProps, disabled: true }} />
-        </Router>
+        <AddComment {...addCommentProps} />
       </TestProviders>
     );
 
@@ -114,14 +114,26 @@ describe('AddComment ', () => {
     ).toBeTruthy();
   });
 
+  it('should hide the component when the user does not have create permissions', () => {
+    useCreateAttachmentsMock.mockImplementation(() => ({
+      ...defaultResponse,
+      isLoading: true,
+    }));
+    const wrapper = mount(
+      <TestProviders permissions={noCreateCasesPermissions()}>
+        <AddComment {...{ ...addCommentProps }} />
+      </TestProviders>
+    );
+
+    expect(wrapper.find(`[data-test-subj="add-comment"]`).exists()).toBeFalsy();
+  });
+
   it('should insert a quote', async () => {
-    const sampleQuote = 'what a cool quote';
+    const sampleQuote = 'what a cool quote \n with new lines';
     const ref = React.createRef<AddCommentRefObject>();
     const wrapper = mount(
       <TestProviders>
-        <Router history={mockHistory}>
-          <AddComment {...{ ...addCommentProps }} ref={ref} />
-        </Router>
+        <AddComment {...addCommentProps} ref={ref} />
       </TestProviders>
     );
 
@@ -135,8 +147,38 @@ describe('AddComment ', () => {
     });
 
     expect(wrapper.find(`[data-test-subj="add-comment"] textarea`).text()).toBe(
-      `${sampleData.comment}\n\n${sampleQuote}`
+      `${sampleData.comment}\n\n> what a cool quote \n>  with new lines \n\n`
     );
+  });
+
+  it('should call onFocus when adding a quote', async () => {
+    const ref = React.createRef<AddCommentRefObject>();
+
+    mount(
+      <TestProviders>
+        <AddComment {...addCommentProps} ref={ref} />
+      </TestProviders>
+    );
+
+    ref.current!.editor!.textarea!.focus = jest.fn();
+    await act(async () => {
+      ref.current!.addQuote('a comment');
+    });
+
+    expect(ref.current!.editor!.textarea!.focus).toHaveBeenCalled();
+  });
+
+  it('should NOT call onFocus on mount', async () => {
+    const ref = React.createRef<AddCommentRefObject>();
+
+    mount(
+      <TestProviders>
+        <AddComment {...addCommentProps} ref={ref} />
+      </TestProviders>
+    );
+
+    ref.current!.editor!.textarea!.focus = jest.fn();
+    expect(ref.current!.editor!.textarea!.focus).not.toHaveBeenCalled();
   });
 
   it('it should insert a timeline', async () => {
@@ -152,9 +194,7 @@ describe('AddComment ', () => {
     const wrapper = mount(
       <TestProviders>
         <CasesTimelineIntegrationProvider timelineIntegration={mockTimelineIntegration}>
-          <Router history={mockHistory}>
-            <AddComment {...{ ...addCommentProps }} />
-          </Router>
+          <AddComment {...addCommentProps} />
         </CasesTimelineIntegrationProvider>
       </TestProviders>
     );

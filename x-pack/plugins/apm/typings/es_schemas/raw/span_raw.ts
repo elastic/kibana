@@ -6,8 +6,12 @@
  */
 
 import { APMBaseDoc } from './apm_base_doc';
+import { EventOutcome } from './fields/event_outcome';
+import { Http } from './fields/http';
+import { SpanLink } from './fields/span_links';
 import { Stackframe } from './fields/stackframe';
 import { TimestampUs } from './fields/timestamp_us';
+import { Url } from './fields/url';
 
 interface Processor {
   name: 'transaction';
@@ -17,6 +21,7 @@ interface Processor {
 export interface SpanRaw extends APMBaseDoc {
   processor: Processor;
   trace: { id: string }; // trace is required
+  event?: { outcome?: EventOutcome };
   service: {
     name: string;
     environment?: string;
@@ -54,10 +59,18 @@ export interface SpanRaw extends APMBaseDoc {
       body?: string;
       headers?: Record<string, unknown>;
     };
+    composite?: {
+      count: number;
+      sum: { us: number };
+      compression_strategy: string;
+    };
+    links?: SpanLink[];
   };
   timestamp: TimestampUs;
   transaction?: {
     id: string;
   };
   child?: { id: string[] };
+  http?: Http;
+  url?: Url;
 }

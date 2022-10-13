@@ -8,16 +8,17 @@
 import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { inputsModel } from '../../../common/store';
+import type { InputsModelId } from '../../../common/store/inputs/constants';
+import type { inputsModel } from '../../../common/store';
 import { inputsActions } from '../../../common/store/actions';
-import { InputsModelId } from '../../../common/store/inputs/constants';
 
 export interface TimelineRefetchProps {
   id: string;
-  inputId: InputsModelId;
+  inputId: InputsModelId.global | InputsModelId.timeline;
   inspect: inputsModel.InspectQuery | null;
   loading: boolean;
   refetch: inputsModel.Refetch;
+  skip?: boolean;
 }
 
 const TimelineRefetchComponent: React.FC<TimelineRefetchProps> = ({
@@ -26,12 +27,15 @@ const TimelineRefetchComponent: React.FC<TimelineRefetchProps> = ({
   inspect,
   loading,
   refetch,
+  skip,
 }) => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(inputsActions.setQuery({ id, inputId, inspect, loading, refetch }));
-  }, [dispatch, id, inputId, loading, refetch, inspect]);
+    if (!skip) {
+      dispatch(inputsActions.setQuery({ id, inputId, inspect, loading, refetch }));
+    }
+  }, [dispatch, id, inputId, loading, refetch, inspect, skip]);
 
   return null;
 };

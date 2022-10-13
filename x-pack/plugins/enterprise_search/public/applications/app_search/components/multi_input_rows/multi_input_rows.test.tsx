@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { setMockActions, setMockValues, rerender } from '../../../__mocks__';
+import { setMockActions, setMockValues } from '../../../__mocks__/kea_logic';
 import '../../../__mocks__/shallow_useeffect.mock';
 
 import React from 'react';
 
-import { shallow } from 'enzyme';
+import { shallow, ShallowWrapper } from 'enzyme';
+
+import { rerender } from '../../../test_helpers';
 
 import { InputRow } from './input_row';
 
@@ -19,7 +21,7 @@ jest.mock('./multi_input_rows_logic', () => ({
 }));
 import { MultiInputRowsLogic } from './multi_input_rows_logic';
 
-import { MultiInputRows } from './';
+import { MultiInputRows } from '.';
 
 describe('MultiInputRows', () => {
   const props = {
@@ -160,10 +162,18 @@ describe('MultiInputRows', () => {
   });
 
   describe('onChange', () => {
+    let wrapper: ShallowWrapper;
     const onChange = jest.fn();
 
+    beforeEach(() => {
+      wrapper = shallow(<MultiInputRows {...props} onChange={onChange} />);
+    });
+
+    it('does not call on change on mount', () => {
+      expect(onChange).not.toHaveBeenCalled();
+    });
+
     it('returns the current values dynamically on change', () => {
-      const wrapper = shallow(<MultiInputRows {...props} onChange={onChange} />);
       setMockValues({ ...values, values: ['updated'] });
       rerender(wrapper);
 

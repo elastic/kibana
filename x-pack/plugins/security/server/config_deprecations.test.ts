@@ -8,21 +8,31 @@
 import { cloneDeep } from 'lodash';
 
 import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
+import { configDeprecationsMock } from '@kbn/core/server/mocks';
 
 import { securityConfigDeprecationProvider } from './config_deprecations';
+
+const deprecationContext = configDeprecationsMock.createContext();
 
 const applyConfigDeprecations = (settings: Record<string, any> = {}) => {
   const deprecations = securityConfigDeprecationProvider(configDeprecationFactory);
   const deprecationMessages: string[] = [];
-  const migrated = applyDeprecations(
+  const configPaths: string[] = [];
+  const { config: migrated } = applyDeprecations(
     settings,
     deprecations.map((deprecation) => ({
       deprecation,
       path: 'xpack.security',
+      context: deprecationContext,
     })),
-    () => ({ message }) => deprecationMessages.push(message)
+    () =>
+      ({ message, configPath }) => {
+        deprecationMessages.push(message);
+        configPaths.push(configPath);
+      }
   );
   return {
+    configPaths,
     messages: deprecationMessages,
     migrated,
   };
@@ -49,7 +59,7 @@ describe('Config Deprecations', () => {
     expect(migrated.xpack.security.session.idleTimeout).toEqual(123);
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "\\"xpack.security.sessionTimeout\\" is deprecated and has been replaced by \\"xpack.security.session.idleTimeout\\"",
+        "Setting \\"xpack.security.sessionTimeout\\" has been replaced by \\"xpack.security.session.idleTimeout\\"",
       ]
     `);
   });
@@ -71,7 +81,7 @@ describe('Config Deprecations', () => {
     expect(migrated.xpack.security.audit.appender.type).toEqual('console');
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "\\"xpack.security.audit.appender.kind\\" is deprecated and has been replaced by \\"xpack.security.audit.appender.type\\"",
+        "Setting \\"xpack.security.audit.appender.kind\\" has been replaced by \\"xpack.security.audit.appender.type\\"",
       ]
     `);
   });
@@ -93,7 +103,7 @@ describe('Config Deprecations', () => {
     expect(migrated.xpack.security.audit.appender.layout.type).toEqual('pattern');
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "\\"xpack.security.audit.appender.layout.kind\\" is deprecated and has been replaced by \\"xpack.security.audit.appender.layout.type\\"",
+        "Setting \\"xpack.security.audit.appender.layout.kind\\" has been replaced by \\"xpack.security.audit.appender.layout.type\\"",
       ]
     `);
   });
@@ -115,7 +125,7 @@ describe('Config Deprecations', () => {
     expect(migrated.xpack.security.audit.appender.policy.type).toEqual('time-interval');
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "\\"xpack.security.audit.appender.policy.kind\\" is deprecated and has been replaced by \\"xpack.security.audit.appender.policy.type\\"",
+        "Setting \\"xpack.security.audit.appender.policy.kind\\" has been replaced by \\"xpack.security.audit.appender.policy.type\\"",
       ]
     `);
   });
@@ -137,7 +147,7 @@ describe('Config Deprecations', () => {
     expect(migrated.xpack.security.audit.appender.strategy.type).toEqual('numeric');
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "\\"xpack.security.audit.appender.strategy.kind\\" is deprecated and has been replaced by \\"xpack.security.audit.appender.strategy.type\\"",
+        "Setting \\"xpack.security.audit.appender.strategy.kind\\" has been replaced by \\"xpack.security.audit.appender.strategy.type\\"",
       ]
     `);
   });
@@ -160,7 +170,23 @@ describe('Config Deprecations', () => {
     expect(migrated.xpack.security.audit.appender.fileName).toEqual('./audit.log');
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "\\"xpack.security.audit.appender.path\\" is deprecated and has been replaced by \\"xpack.security.audit.appender.fileName\\"",
+        "Setting \\"xpack.security.audit.appender.path\\" has been replaced by \\"xpack.security.audit.appender.fileName\\"",
+      ]
+    `);
+  });
+
+  it('renames security.showInsecureClusterWarning to xpack.security.showInsecureClusterWarning', () => {
+    const config = {
+      security: {
+        showInsecureClusterWarning: false,
+      },
+    };
+    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
+    expect(migrated.security?.showInsecureClusterWarning).not.toBeDefined();
+    expect(migrated.xpack.security.showInsecureClusterWarning).toEqual(false);
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "Setting \\"security.showInsecureClusterWarning\\" has been replaced by \\"xpack.security.showInsecureClusterWarning\\"",
       ]
     `);
   });
@@ -180,7 +206,7 @@ describe('Config Deprecations', () => {
     const { messages } = applyConfigDeprecations(cloneDeep(config));
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "xpack.security.authorization.legacyFallback.enabled is deprecated and is no longer used",
+        "You no longer need to configure \\"xpack.security.authorization.legacyFallback.enabled\\".",
       ]
     `);
   });
@@ -200,7 +226,7 @@ describe('Config Deprecations', () => {
     const { messages } = applyConfigDeprecations(cloneDeep(config));
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "xpack.security.authc.saml.maxRedirectURLSize is deprecated and is no longer used",
+        "You no longer need to configure \\"xpack.security.authc.saml.maxRedirectURLSize\\".",
       ]
     `);
   });
@@ -221,12 +247,14 @@ describe('Config Deprecations', () => {
         },
       },
     };
-    const { messages } = applyConfigDeprecations(cloneDeep(config));
+    const { messages, configPaths } = applyConfigDeprecations(cloneDeep(config));
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "\`xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize\` is deprecated and is no longer used",
+        "This setting is no longer used.",
       ]
     `);
+
+    expect(configPaths).toEqual(['xpack.security.authc.providers.saml.saml1.maxRedirectURLSize']);
   });
 
   it(`warns when 'xpack.security.authc.providers' is an array of strings`, () => {
@@ -243,7 +271,7 @@ describe('Config Deprecations', () => {
     expect(migrated).toEqual(config);
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Defining \`xpack.security.authc.providers\` as an array of provider types is deprecated. Use extended \`object\` format instead.",
+        "Use the new object format instead of an array of provider types.",
       ]
     `);
   });
@@ -262,39 +290,97 @@ describe('Config Deprecations', () => {
     expect(migrated).toEqual(config);
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Defining \`xpack.security.authc.providers\` as an array of provider types is deprecated. Use extended \`object\` format instead.",
-        "Enabling both \`basic\` and \`token\` authentication providers in \`xpack.security.authc.providers\` is deprecated. Login page will only use \`token\` provider.",
+        "Use the new object format instead of an array of provider types.",
+        "Use only one of these providers. When both providers are set, Kibana only uses the \\"token\\" provider.",
       ]
     `);
   });
 
-  it('warns when the security plugin is disabled', () => {
+  it(`warns that 'xpack.security.authc.providers.anonymous.<provider-name>.credentials.apiKey' is deprecated`, () => {
     const config = {
       xpack: {
         security: {
-          enabled: false,
+          authc: {
+            providers: {
+              anonymous: {
+                anonymous1: {
+                  credentials: {
+                    apiKey: 'VnVhQ2ZHY0JDZGJrUW0tZTVhT3g6dWkybHAyYXhUTm1zeWFrdzl0dk5udw==',
+                  },
+                },
+              },
+            },
+          },
         },
       },
     };
-    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
-    expect(migrated).toEqual(config);
+    const { messages, configPaths } = applyConfigDeprecations(cloneDeep(config));
     expect(messages).toMatchInlineSnapshot(`
-        Array [
-          "Disabling the security plugin (\`xpack.security.enabled\`) will not be supported in the next major version (8.0). To turn off security features, disable them in Elasticsearch instead.",
-        ]
+      Array [
+        "Support for apiKey is being removed from the 'anonymous' authentication provider. Use username and password credentials.",
+      ]
     `);
+
+    expect(configPaths).toEqual([
+      'xpack.security.authc.providers.anonymous.anonymous1.credentials.apiKey',
+    ]);
   });
 
-  it('does not warn when the security plugin is enabled', () => {
+  it(`warns that 'xpack.security.authc.providers.anonymous.<provider-name>.credentials.apiKey' with id and key is deprecated`, () => {
     const config = {
       xpack: {
         security: {
-          enabled: true,
+          authc: {
+            providers: {
+              anonymous: {
+                anonymous1: {
+                  credentials: {
+                    apiKey: { id: 'VuaCfGcBCdbkQm-e5aOx', key: 'ui2lp2axTNmsyakw9tvNnw' },
+                  },
+                },
+              },
+            },
+          },
         },
       },
     };
-    const { messages, migrated } = applyConfigDeprecations(cloneDeep(config));
-    expect(migrated).toEqual(config);
-    expect(messages).toHaveLength(0);
+    const { messages, configPaths } = applyConfigDeprecations(cloneDeep(config));
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "Support for apiKey is being removed from the 'anonymous' authentication provider. Use username and password credentials.",
+      ]
+    `);
+
+    expect(configPaths).toEqual([
+      'xpack.security.authc.providers.anonymous.anonymous1.credentials.apiKey',
+    ]);
+  });
+
+  it(`warns that 'xpack.security.authc.providers.anonymous.<provider-name>.credentials' of 'elasticsearch_anonymous_user' is deprecated`, () => {
+    const config = {
+      xpack: {
+        security: {
+          authc: {
+            providers: {
+              anonymous: {
+                anonymous1: {
+                  credentials: 'elasticsearch_anonymous_user',
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+    const { messages, configPaths } = applyConfigDeprecations(cloneDeep(config));
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "Support for 'elasticsearch_anonymous_user' is being removed from the 'anonymous' authentication provider. Use username and password credentials.",
+      ]
+    `);
+
+    expect(configPaths).toEqual([
+      'xpack.security.authc.providers.anonymous.anonymous1.credentials',
+    ]);
   });
 });

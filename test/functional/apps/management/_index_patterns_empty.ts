@@ -15,24 +15,24 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'settings']);
   const testSubjects = getService('testSubjects');
   const globalNav = getService('globalNav');
-  const es = getService('legacyEs');
+  const es = getService('es');
 
   describe('index pattern empty view', () => {
     before(async () => {
       await esArchiver.emptyKibanaIndex();
-      await esArchiver.unload('logstash_functional');
-      await esArchiver.unload('makelogs');
+      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.unload('test/functional/fixtures/es_archiver/makelogs');
       await kibanaServer.uiSettings.replace({});
       await PageObjects.settings.navigateTo();
     });
 
     after(async () => {
-      await esArchiver.loadIfNeeded('makelogs');
-      // @ts-expect-error
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/makelogs');
       await es.transport.request({
         path: '/logstash-a',
         method: 'DELETE',
       });
+      await kibanaServer.savedObjects.clean({ types: ['index-pattern'] });
     });
 
     // create index pattern and return to verify list
@@ -42,21 +42,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         `\n\nNOTE: If this test fails make sure there aren't any non-system indices in the _cat/indices output (use esArchiver.unload on them)`
       );
       log.debug(
-        // @ts-expect-error
         await es.transport.request({
           path: '/_cat/indices',
           method: 'GET',
         })
       );
       await testSubjects.existOrFail('createAnyway');
-      // @ts-expect-error
+
       await es.transport.request({
         path: '/logstash-a/_doc',
         method: 'POST',
         body: { user: 'matt', message: 20 },
       });
       await testSubjects.click('refreshIndicesButton');
-      await testSubjects.existOrFail('createIndexPatternButton', { timeout: 5000 });
+      await testSubjects.existOrFail('createDataViewButton', { timeout: 5000 });
       await PageObjects.settings.createIndexPattern('logstash-*', '');
     });
 

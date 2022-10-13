@@ -24,7 +24,7 @@ export default async function ({ readConfigFile }) {
 
   // read the {kib} config file so that we can utilize some of
   // its services and PageObjects
-  const kibanaConfig = await readConfigFile(resolve(REPO_ROOT, 'test/functional/config.js'));
+  const kibanaConfig = await readConfigFile(resolve(REPO_ROOT, 'test/functional/config.base.js'));
 
   return {
     // list paths to the files that contain your plugins tests
@@ -56,11 +56,6 @@ export default async function ({ readConfigFile }) {
       myApp: {
         pathname: '/app/my_app',
       }
-    },
-
-    // choose where esArchiver should load archives from
-    esArchiver: {
-      directory: resolve(__dirname, './es_archives'),
     },
 
     // choose where screenshots should be saved

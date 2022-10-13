@@ -10,7 +10,7 @@ import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
 import '../../../../../common/mock/match_media';
-import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
+import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import { mockTimelineData } from '../../../../../common/mock';
 import { TestProviders } from '../../../../../common/mock/test_providers';
 import { getEmptyValue } from '../../../../../common/components/empty_value';
@@ -21,11 +21,12 @@ import { getColumnRenderer } from './get_column_renderer';
 import { getValues, findItem, deleteItemIdx } from './helpers';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
 
+jest.mock('../../../../../common/lib/kibana');
+
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
     ...original,
-    // eslint-disable-next-line react/display-name
     EuiScreenReaderOnly: () => <></>,
   };
 });

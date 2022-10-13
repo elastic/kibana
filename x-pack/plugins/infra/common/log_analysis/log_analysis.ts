@@ -12,6 +12,7 @@ export type JobStatus =
   | 'initializing'
   | 'stopped'
   | 'started'
+  | 'starting'
   | 'finished'
   | 'failed';
 
@@ -35,10 +36,10 @@ export type SetupStatus =
  * before this state was reached.
  */
 export const isJobStatusWithResults = (jobStatus: JobStatus) =>
-  ['started', 'finished', 'stopped', 'failed'].includes(jobStatus);
+  ['started', 'starting', 'finished', 'stopped', 'failed'].includes(jobStatus);
 
 export const isHealthyJobStatus = (jobStatus: JobStatus) =>
-  ['started', 'finished'].includes(jobStatus);
+  ['started', 'starting', 'finished'].includes(jobStatus);
 
 /**
  * Maps a setup status to the possibility that results have already been

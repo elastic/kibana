@@ -8,10 +8,14 @@
 // the types have to match the names of the saved object mappings
 // in /x-pack/plugins/apm/mappings.json
 
-// APM indices
-export const APM_INDICES_SAVED_OBJECT_TYPE = 'apm-indices';
-export const APM_INDICES_SAVED_OBJECT_ID = 'apm-indices';
+// APM index settings
+export const APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE = 'apm-indices';
+export const APM_INDEX_SETTINGS_SAVED_OBJECT_ID = 'apm-indices';
 
 // APM telemetry
 export const APM_TELEMETRY_SAVED_OBJECT_TYPE = 'apm-telemetry';
 export const APM_TELEMETRY_SAVED_OBJECT_ID = 'apm-telemetry';
+
+// APM Server schema
+export const APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE = 'apm-server-schema';
+export const APM_SERVER_SCHEMA_SAVED_OBJECT_ID = 'apm-server-schema';

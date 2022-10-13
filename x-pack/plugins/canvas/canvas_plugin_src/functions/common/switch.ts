@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
-import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { Observable, defaultIfEmpty, defer, of, switchMap } from 'rxjs';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { Case } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
 
@@ -16,7 +15,12 @@ interface Arguments {
   default?(): Observable<any>;
 }
 
-export function switchFn(): ExpressionFunctionDefinition<'switch', unknown, Arguments, unknown> {
+export function switchFn(): ExpressionFunctionDefinition<
+  'switch',
+  unknown,
+  Arguments,
+  Observable<unknown>
+> {
   const { help, args: argHelp } = getFunctionHelp().switch;
 
   return {
@@ -29,7 +33,7 @@ export function switchFn(): ExpressionFunctionDefinition<'switch', unknown, Argu
         resolve: false,
         multi: true,
         required: true,
-        help: argHelp.case,
+        help: argHelp.case!,
       },
       default: {
         aliases: ['finally'],
@@ -37,18 +41,21 @@ export function switchFn(): ExpressionFunctionDefinition<'switch', unknown, Argu
         help: argHelp.default!,
       },
     },
-    fn: async (input, args) => {
-      const cases = args.case || [];
-
-      for (let i = 0; i < cases.length; i++) {
-        const { matches, result } = await cases[i]().pipe(take(1)).toPromise();
-
-        if (matches) {
-          return result;
+    fn: function fn(input, args): Observable<unknown> {
+      return defer(() => {
+        if (!args.case.length) {
+          return args.default?.() ?? of(input);
         }
-      }
 
-      return args.default?.().pipe(take(1)).toPromise() ?? input;
+        const [head$, ...tail$] = args.case;
+
+        return head$().pipe(
+          defaultIfEmpty(undefined),
+          switchMap((value) =>
+            value?.matches ? of(value.result) : fn(input, { ...args, case: tail$ })
+          )
+        );
+      });
     },
   };
 }

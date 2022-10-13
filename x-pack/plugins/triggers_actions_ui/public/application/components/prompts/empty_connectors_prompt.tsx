@@ -5,16 +5,30 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n/react';
-import React, { Fragment } from 'react';
-import { EuiButton, EuiEmptyPrompt, EuiIcon, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiPageTemplate,
+  EuiIcon,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
+import { DocLinksStart } from '@kbn/core-doc-links-browser';
 import './empty_connectors_prompt.scss';
 
-export const EmptyConnectorsPrompt = ({ onCTAClicked }: { onCTAClicked: () => void }) => (
-  <EuiEmptyPrompt
+export const EmptyConnectorsPrompt = ({
+  onCTAClicked,
+  docLinks,
+}: {
+  onCTAClicked: () => void;
+  docLinks: DocLinksStart;
+}) => (
+  <EuiPageTemplate.EmptyPrompt
     data-test-subj="createFirstConnectorEmptyPrompt"
     title={
-      <Fragment>
+      <>
         <EuiIcon type="logoSlack" size="xl" className="actEmptyConnectorsPrompt__logo" />
         <EuiIcon type="logoGmail" size="xl" className="actEmptyConnectorsPrompt__logo" />
         <EuiIcon type="logoWebhook" size="xl" className="actEmptyConnectorsPrompt__logo" />
@@ -27,30 +41,45 @@ export const EmptyConnectorsPrompt = ({ onCTAClicked }: { onCTAClicked: () => vo
             />
           </h2>
         </EuiTitle>
-      </Fragment>
+      </>
     }
     body={
       <p>
         <FormattedMessage
           id="xpack.triggersActionsUI.components.emptyConnectorsPrompt.addConnectorEmptyBody"
-          defaultMessage="Configure email, Slack, Elasticsearch, and third-party services that Kibana runs."
+          defaultMessage="Configure various third-party services to Kibana."
         />
       </p>
     }
     actions={
-      <EuiButton
-        data-test-subj="createFirstActionButton"
-        key="create-action"
-        fill
-        iconType="plusInCircle"
-        iconSide="left"
-        onClick={onCTAClicked}
-      >
-        <FormattedMessage
-          id="xpack.triggersActionsUI.components.emptyConnectorsPrompt.addConnectorButtonLabel"
-          defaultMessage="Create connector"
-        />
-      </EuiButton>
+      <>
+        <EuiButton
+          data-test-subj="createFirstActionButton"
+          key="create-action"
+          fill
+          iconType="plusInCircle"
+          iconSide="left"
+          onClick={onCTAClicked}
+        >
+          <FormattedMessage
+            id="xpack.triggersActionsUI.components.emptyConnectorsPrompt.addConnectorButtonLabel"
+            defaultMessage="Create connector"
+          />
+        </EuiButton>
+        <br />
+        <EuiButtonEmpty
+          data-test-subj="documentationButton"
+          key="documentation-button"
+          target="_blank"
+          href={docLinks.links.alerting.connectors}
+          iconType="help"
+        >
+          <FormattedMessage
+            id="xpack.triggersActionsUI.sections.actionsConnectorsList.documentationButtonLabel"
+            defaultMessage="Documentation"
+          />
+        </EuiButtonEmpty>
+      </>
     }
   />
 );

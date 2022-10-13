@@ -7,12 +7,12 @@
  */
 
 import moment from 'moment';
-import dateMath, { Unit } from '@elastic/datemath';
+import dateMath, { Unit } from '@kbn/datemath';
 
 import { parseEsInterval } from '../../../utils';
 
 const unitsDesc = dateMath.unitsDesc;
-const largeMax = unitsDesc.indexOf('M');
+const largeMax = unitsDesc.indexOf('w');
 
 export interface EsInterval {
   expression: string;

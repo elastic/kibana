@@ -6,6 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './es_query';
-export * from './filters';
-export * from './kuery';
+export { getEsQueryConfig } from './get_es_query_config';

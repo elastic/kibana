@@ -1,0 +1,26 @@
+{
+  "attributes": {
+    "created_at": "2022-02-03T08:22:26.355Z",
+    "created_by": "elastic",
+    "description": "",
+    "ecs_mapping": [
+      {
+        "key": "client.geo.continent_name",
+        "value": {
+          "field": "seconds"
+        }
+      }
+    ],
+    "id": "ONE_MAPPING_CHANGED",
+    "interval": 3600,
+    "query": "select * from uptime;",
+    "updated_at": "2022-02-03T08:24:52.429Z",
+    "updated_by": "elastic"
+  },
+  "coreMigrationVersion": "8.1.0",
+  "id": "6b819f40-84ca-11ec-991b-07bb2d53cda5",
+  "references": [],
+  "type": "osquery-saved-query",
+  "updated_at": "2022-02-03T08:24:52.436Z",
+  "version": "WzE3OTAwLDFd"
+}

@@ -10,10 +10,10 @@ import {
   Collector,
   createUsageCollectionSetupMock,
   createCollectorFetchContextMock,
-} from '../../../../usage_collection/server/mocks';
+} from '@kbn/usage-collection-plugin/server/mocks';
 import { registerConfigUsageCollector } from './register_config_usage_collector';
-import { coreUsageDataServiceMock, loggingSystemMock } from '../../../../../core/server/mocks';
-import type { ConfigUsageData } from '../../../../../core/server';
+import { coreUsageDataServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type { ConfigUsageData } from '@kbn/core/server';
 
 const logger = loggingSystemMock.createLogger();
 
@@ -28,7 +28,7 @@ describe('kibana_config_usage', () => {
 
   const collectorFetchContext = createCollectorFetchContextMock();
   const coreUsageDataStart = coreUsageDataServiceMock.createStartContract();
-  const mockConfigUsage = (Symbol('config usage telemetry') as unknown) as ConfigUsageData;
+  const mockConfigUsage = Symbol('config usage telemetry') as unknown as ConfigUsageData;
   coreUsageDataStart.getConfigsUsageData.mockResolvedValue(mockConfigUsage);
 
   beforeAll(() => registerConfigUsageCollector(usageCollectionMock, () => coreUsageDataStart));

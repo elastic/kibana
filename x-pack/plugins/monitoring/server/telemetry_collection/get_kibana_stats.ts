@@ -7,8 +7,8 @@
 
 import moment from 'moment';
 import { isEmpty } from 'lodash';
-import { SearchResponse } from 'elasticsearch';
-import { LegacyAPICaller } from 'kibana/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { KIBANA_SYSTEM_ID, TELEMETRY_COLLECTION_INTERVAL } from '../../common/constants';
 import {
   fetchHighLevelStats,
@@ -49,7 +49,6 @@ export interface ClusterUsageStats {
   search?: { total: number };
   index_pattern?: { total: number };
   graph_workspace?: { total: number };
-  timelion_sheet?: { total: number };
   indices: number;
   plugins?: {
     xpack?: unknown;
@@ -70,14 +69,14 @@ export interface KibanaStats {
 /*
  * @param {Object} rawStats
  */
-export function getUsageStats(rawStats: SearchResponse<KibanaUsageStats>) {
+export function getUsageStats(rawStats: estypes.SearchResponse<KibanaUsageStats>) {
   const clusterIndexCache = new Set();
   const rawStatsHits = rawStats.hits?.hits || [];
 
   // get usage stats per cluster / .kibana index
   return rawStatsHits.reduce((accum, currInstance) => {
-    const clusterUuid = currInstance._source.cluster_uuid;
-    const currUsage = currInstance._source.kibana_stats?.usage || {};
+    const clusterUuid = currInstance._source!.cluster_uuid;
+    const currUsage = currInstance._source!.kibana_stats?.usage || {};
     const clusterIndexCombination = clusterUuid + currUsage.index;
 
     // return early if usage data is empty or if this cluster/index has already been processed
@@ -95,7 +94,6 @@ export function getUsageStats(rawStats: SearchResponse<KibanaUsageStats>) {
       search: rollUpTotals(rolledUpStats, currUsage, 'search'),
       index_pattern: rollUpTotals(rolledUpStats, currUsage, 'index_pattern'),
       graph_workspace: rollUpTotals(rolledUpStats, currUsage, 'graph_workspace'),
-      timelion_sheet: rollUpTotals(rolledUpStats, currUsage, 'timelion_sheet'),
       indices: rollUpIndices(rolledUpStats),
     };
 
@@ -108,7 +106,6 @@ export function getUsageStats(rawStats: SearchResponse<KibanaUsageStats>) {
       /* eslint-disable @typescript-eslint/naming-convention */
       index_pattern,
       graph_workspace,
-      timelion_sheet,
       /* eslint-enable @typescript-eslint/naming-convention */
       xpack,
       ...pluginsTop
@@ -183,7 +180,7 @@ export function ensureTimeSpan(
  * specialized usage data that comes with kibana stats (kibana_stats.usage).
  */
 export async function getKibanaStats(
-  callCluster: LegacyAPICaller,
+  callCluster: ElasticsearchClient,
   clusterUuids: string[],
   start: string,
   end: string,

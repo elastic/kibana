@@ -14,7 +14,7 @@ import { RouteDependencies } from '../../../types';
 export const registerPermissionsRoute = ({
   router,
   license,
-  lib: { isEsError, formatEsError },
+  lib: { handleEsError },
 }: RouteDependencies) => {
   router.get(
     {
@@ -22,6 +22,8 @@ export const registerPermissionsRoute = ({
       validate: false,
     },
     license.guardApiRoute(async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+
       if (!license.isEsSecurityEnabled) {
         // If security has been disabled in elasticsearch.yml. we'll just let the user use CCR
         // because permissions are irrelevant.
@@ -34,14 +36,12 @@ export const registerPermissionsRoute = ({
       }
 
       try {
-        const {
-          has_all_requested: hasPermission,
-          cluster,
-        } = await context.crossClusterReplication!.client.callAsCurrentUser('ccr.permissions', {
-          body: {
-            cluster: ['manage', 'manage_ccr'],
-          },
-        });
+        const { has_all_requested: hasPermission, cluster } =
+          await client.asCurrentUser.security.hasPrivileges({
+            body: {
+              cluster: ['manage', 'manage_ccr'],
+            },
+          });
 
         const missingClusterPrivileges = Object.keys(cluster).reduce(
           (permissions: string[], permissionName: string) => {
@@ -59,12 +59,8 @@ export const registerPermissionsRoute = ({
             missingClusterPrivileges,
           },
         });
-      } catch (err) {
-        if (isEsError(err)) {
-          return response.customError(formatEsError(err));
-        }
-        // Case: default
-        throw err;
+      } catch (error) {
+        return handleEsError({ error, response });
       }
     })
   );

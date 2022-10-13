@@ -10,34 +10,45 @@ export interface UsageStats {
   /**
    * sensitive settings
    */
-  'timelion:quandl.key': string;
   'securitySolution:defaultIndex': string;
+  'securitySolution:defaultThreatIndex': string;
   'securitySolution:newsFeedUrl': string;
   'xpackReporting:customPdfLogo': string;
   'notifications:banner': string;
-  'timelion:graphite.url': string;
   'xpackDashboardMode:roles': string;
   'securitySolution:ipReputationLinks': string;
   'banners:textContent': string;
+  'observability:apmDefaultServiceEnvironment': string;
   /**
    * non-sensitive settings
    */
+  'bfetch:disable': boolean;
+  'bfetch:disableCompression': boolean;
   'autocomplete:useTimeRange': boolean;
+  'autocomplete:valueSuggestionMethod': string;
   'search:timeout': number;
-  'visualization:visualize:legacyChartsLibrary': boolean;
+  'visualization:visualize:legacyPieChartsLibrary': boolean;
+  'visualization:visualize:legacyHeatmapChartsLibrary': boolean;
   'doc_table:legacy': boolean;
   'discover:modifyColumnsOnSwitch': boolean;
   'discover:searchFieldsFromSource': boolean;
+  'discover:showFieldStatistics': boolean;
+  'discover:showMultiFields': boolean;
+  'discover:enableSql': boolean;
   'discover:maxDocFieldsDisplayed': number;
   'securitySolution:rulesTableRefresh': string;
-  'apm:enableSignificantTerms': boolean;
-  'apm:enableServiceOverview': boolean;
   'observability:enableInspectEsQueries': boolean;
+  'observability:enableNewSyntheticsView': boolean;
+  'observability:maxSuggestions': number;
+  'observability:enableComparisonByDefault': boolean;
+  'observability:enableServiceGroups': boolean;
+  'observability:apmEnableServiceMetrics': boolean;
+  'observability:enableInfrastructureHostsView': boolean;
   'visualize:enableLabs': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:colorMapping': string;
+  'visualization:useLegacyTimeAxis': boolean;
   'visualization:regionmap:showWarnings': boolean;
-  'visualization:dimmingOpacity': number;
   'visualization:tileMap:maxPrecision': number;
   'csv:separator': string;
   'visualization:tileMap:WMSdefaults': string;
@@ -45,17 +56,14 @@ export interface UsageStats {
   'timelion:max_buckets': number;
   'timelion:es.timefield': string;
   'timelion:min_interval': string;
-  'timelion:default_rows': number;
-  'timelion:default_columns': number;
   'timelion:es.default_index': string;
-  'timelion:showTutorial': boolean;
   'securitySolution:timeDefaults': string;
   'securitySolution:defaultAnomalyScore': number;
   'securitySolution:refreshIntervalDefaults': string;
   'securitySolution:enableNewsFeed': boolean;
+  'securitySolution:enableCcsWarning': boolean;
   'search:includeFrozen': boolean;
   'courier:maxConcurrentShardRequests': number;
-  'courier:batchSearches': boolean;
   'courier:setRequestPreference': string;
   'courier:customRequestPreference': string;
   'courier:ignoreFilterIfFieldNotInIndex': boolean;
@@ -66,9 +74,10 @@ export interface UsageStats {
   'notifications:lifetime:error': number;
   'doc_table:highlight': boolean;
   'discover:searchOnPageLoad': boolean;
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   'doc_table:hideTimeColumn': boolean;
   'discover:sampleSize': number;
+  'discover:sampleRowsPerPage': number;
+  'discover:showLegacyFieldTopValues': boolean;
   defaultColumns: string[];
   'context:defaultSize': number;
   'context:tieBreakerFields': string[];
@@ -92,6 +101,7 @@ export interface UsageStats {
   'savedObjects:listingLimit': number;
   'query:queryString:options': string;
   'metrics:max_buckets': number;
+  'metrics:allowStringIndices': boolean;
   'query:allowLeadingWildcards': boolean;
   metaFields: string[];
   'indexPattern:placeholder': string;
@@ -119,5 +129,26 @@ export interface UsageStats {
   'banners:textColor': string;
   'banners:backgroundColor': string;
   'labs:canvas:enable_ui': boolean;
+  'labs:canvas:byValueEmbeddable': boolean;
+  'labs:canvas:useDataService': boolean;
   'labs:presentation:timeToPresent': boolean;
+  'labs:dashboard:enable_ui': boolean;
+  'labs:dashboard:deferBelowFold': boolean;
+  'labs:dashboard:dashboardControls': boolean;
+  'discover:rowHeightOption': number;
+  hideAnnouncements: boolean;
+  isDefaultIndexMigrated: boolean;
+  'lens:useFieldExistenceSampling': boolean;
+  'metrics:allowCheckingForFailedShards': boolean;
+  'observability:apmOperationsTab': boolean;
+  'observability:apmLabsButton': boolean;
+  'observability:enableAwsLambdaMetrics': boolean;
+  'observability:apmProgressiveLoading': string;
+  'observability:apmServiceGroupMaxNumberOfServices': number;
+  'observability:apmServiceInventoryOptimizedSorting': boolean;
+  'observability:apmTraceExplorerTab': boolean;
+  'securitySolution:enableGroupedNav': boolean;
+  'securitySolution:showRelatedIntegrations': boolean;
+  'visualization:visualize:legacyGaugeChartsLibrary': boolean;
+  'enterpriseSearch:enableBehavioralAnalyticsSection': boolean;
 }

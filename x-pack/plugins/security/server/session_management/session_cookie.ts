@@ -10,7 +10,7 @@ import type {
   KibanaRequest,
   Logger,
   SessionStorageFactory,
-} from 'src/core/server';
+} from '@kbn/core/server';
 
 import type { ConfigType } from '../config';
 
@@ -89,9 +89,8 @@ export class SessionCookie {
       sameSite: config.sameSiteCookies,
       validate: (sessionValue: SessionCookieValue | SessionCookieValue[]) => {
         // ensure that this cookie was created with the current Kibana configuration
-        const invalidSessionValue = (Array.isArray(sessionValue)
-          ? sessionValue
-          : [sessionValue]
+        const invalidSessionValue = (
+          Array.isArray(sessionValue) ? sessionValue : [sessionValue]
         ).find((sess) => sess.path !== undefined && sess.path !== serverBasePath);
 
         if (invalidSessionValue) {

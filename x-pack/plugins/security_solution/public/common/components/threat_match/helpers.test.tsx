@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import {
-  fields,
-  getField,
-} from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
-import { Entry, EmptyEntry, ThreatMapEntries, FormattedEntry } from './types';
-import { IndexPattern } from '../../../../../../../src/plugins/data/common';
+import { fields, getField } from '@kbn/data-plugin/common/mocks';
+import type { Entry, EmptyEntry, ThreatMapEntries, FormattedEntry } from './types';
+import type { FieldSpec } from '@kbn/data-plugin/common';
+import type { DataViewBase } from '@kbn/es-query';
 import moment from 'moment-timezone';
 
 import {
@@ -19,19 +17,20 @@ import {
   getFormattedEntries,
   getFormattedEntry,
   getUpdatedEntriesOnDelete,
+  customValidators,
 } from './helpers';
-import { ThreatMapEntry } from '../../../../common/detection_engine/schemas/types';
+import type { ThreatMapEntry } from '@kbn/securitysolution-io-ts-alerting-types';
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('123'),
 }));
 
-const getMockIndexPattern = (): IndexPattern =>
+const getMockIndexPattern = (): DataViewBase =>
   ({
     id: '1234',
     title: 'logstash-*',
     fields,
-  } as IndexPattern);
+  } as DataViewBase);
 
 const getMockEntry = (): FormattedEntry => ({
   id: '123',
@@ -53,7 +52,7 @@ describe('Helpers', () => {
 
   describe('#getFormattedEntry', () => {
     test('it returns entry with a value when "item.field" is of type "text" and matching keyword field exists', () => {
-      const payloadIndexPattern: IndexPattern = {
+      const payloadIndexPattern: DataViewBase = {
         ...getMockIndexPattern(),
         fields: [
           ...fields,
@@ -68,7 +67,7 @@ describe('Helpers', () => {
             readFromDocValues: true,
           },
         ],
-      } as IndexPattern;
+      } as DataViewBase;
       const payloadItem: Entry = {
         field: 'machine.os.raw.text',
         type: 'mapping',
@@ -87,7 +86,7 @@ describe('Helpers', () => {
           searchable: false,
           aggregatable: false,
           readFromDocValues: true,
-        },
+        } as FieldSpec,
         type: 'mapping',
         value: undefined,
       };
@@ -129,7 +128,7 @@ describe('Helpers', () => {
             searchable: true,
             aggregatable: true,
             readFromDocValues: false,
-          },
+          } as FieldSpec,
           value: undefined,
           type: 'mapping',
         },
@@ -155,7 +154,7 @@ describe('Helpers', () => {
             searchable: true,
             aggregatable: true,
             readFromDocValues: false,
-          },
+          } as FieldSpec,
           value: {
             name: 'machine.os',
             type: 'string',
@@ -165,7 +164,7 @@ describe('Helpers', () => {
             searchable: true,
             aggregatable: true,
             readFromDocValues: false,
-          },
+          } as FieldSpec,
           type: 'mapping',
         },
       ];
@@ -173,7 +172,7 @@ describe('Helpers', () => {
     });
 
     test('it returns formatted entries', () => {
-      const payloadIndexPattern: IndexPattern = getMockIndexPattern();
+      const payloadIndexPattern: DataViewBase = getMockIndexPattern();
       const payloadItems: Entry[] = [
         { field: 'machine.os', type: 'mapping', value: 'machine.os' },
         { field: 'ip', type: 'mapping', value: 'ip' },
@@ -191,7 +190,7 @@ describe('Helpers', () => {
             searchable: true,
             aggregatable: true,
             readFromDocValues: false,
-          },
+          } as FieldSpec,
           type: 'mapping',
           value: {
             name: 'machine.os',
@@ -202,7 +201,7 @@ describe('Helpers', () => {
             searchable: true,
             aggregatable: true,
             readFromDocValues: false,
-          },
+          } as FieldSpec,
           entryIndex: 0,
         },
         {
@@ -292,6 +291,21 @@ describe('Helpers', () => {
         },
       ]);
       expect(items).toEqual([{ entries: [entry] }]);
+    });
+  });
+
+  describe('customValidators.forbiddenField', () => {
+    const FORBIDDEN = '*';
+
+    test('it returns expected value when a forbidden value is passed in', () => {
+      expect(customValidators.forbiddenField('*', FORBIDDEN)).toEqual({
+        code: 'ERR_FIELD_FORMAT',
+        message: 'The index pattern cannot be *. Please choose a more specific index pattern.',
+      });
+    });
+
+    test('it returns undefined when a non-forbidden value is passed in', () => {
+      expect(customValidators.forbiddenField('.test-index', FORBIDDEN)).not.toBeDefined();
     });
   });
 });

@@ -7,8 +7,8 @@
 
 import { from, of } from 'rxjs';
 import { take, map, takeUntil, mergeMap, shareReplay } from 'rxjs/operators';
-import { ApplicationStart } from 'src/core/public';
-import { GlobalSearchResultProvider } from '../../../global_search/public';
+import { ApplicationStart } from '@kbn/core/public';
+import { GlobalSearchResultProvider } from '@kbn/global-search-plugin/public';
 import { getAppResults } from './get_app_results';
 
 const applicationType = 'application';
@@ -20,8 +20,8 @@ export const createApplicationResultProvider = (
     mergeMap((application) => application.applications$),
     map((apps) =>
       [...apps.values()].filter(
-        // only include non-chromeless enabled apps with visible navLinks
-        (app) => app.status === 0 && app.navLinkStatus === 1 && app.chromeless !== true
+        // only include non-chromeless enabled apps
+        (app) => app.status === 0 && app.chromeless !== true
       )
     ),
     shareReplay(1)

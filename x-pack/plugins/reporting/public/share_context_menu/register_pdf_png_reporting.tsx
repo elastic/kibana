@@ -6,127 +6,92 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import moment from 'moment-timezone';
 import React from 'react';
-import * as Rx from 'rxjs';
-import type { IUiSettingsClient, ToastsSetup } from 'src/core/public';
-import { CoreStart } from 'src/core/public';
-import type { ShareContext } from '../../../../../src/plugins/share/public';
-import type { LicensingPluginSetup } from '../../../licensing/public';
-import type { LayoutParams } from '../../common/types';
-import type { JobParamsPNG } from '../../server/export_types/png/types';
-import type { JobParamsPDF } from '../../server/export_types/printable_pdf/types';
-import { ScreenCapturePanelContent } from '../components/screen_capture_panel_content_lazy';
+import { ShareContext, ShareMenuProvider } from '@kbn/share-plugin/public';
+import { isJobV2Params } from '../../common/job_utils';
 import { checkLicense } from '../lib/license_check';
-import type { ReportingAPIClient } from '../lib/reporting_api_client';
+import { ReportingAPIClient } from '../lib/reporting_api_client';
+import { ExportPanelShareOpts, JobParamsProviderOptions, ReportingSharingData } from '.';
+import { ScreenCapturePanelContent } from './screen_capture_panel_content_lazy';
 
-interface JobParamsProviderOptions {
-  shareableUrl: string;
-  apiClient: ReportingAPIClient;
-  objectType: string;
-  browserTimezone: string;
-  sharingData: Record<string, unknown>;
-}
+const getJobParams =
+  (
+    apiClient: ReportingAPIClient,
+    opts: JobParamsProviderOptions,
+    type: 'png' | 'pngV2' | 'printablePdf' | 'printablePdfV2'
+  ) =>
+  () => {
+    const {
+      objectType,
+      sharingData: { title, layout, locatorParams },
+    } = opts;
 
-const jobParamsProvider = ({
-  objectType,
-  browserTimezone,
-  sharingData,
-}: JobParamsProviderOptions) => {
-  return {
-    objectType,
-    browserTimezone,
-    layout: sharingData.layout as LayoutParams,
-    title: sharingData.title as string,
+    const baseParams = {
+      objectType,
+      layout,
+      title,
+    };
+
+    if (type === 'printablePdfV2') {
+      // multi locator for PDF V2
+      return { ...baseParams, locatorParams: [locatorParams] };
+    } else if (type === 'pngV2') {
+      // single locator for PNG V2
+      return { ...baseParams, locatorParams };
+    }
+
+    // Relative URL must have URL prefix (Spaces ID prefix), but not server basePath
+    // Replace hashes with original RISON values.
+    const relativeUrl = opts.shareableUrl.replace(
+      window.location.origin + apiClient.getServerBasePath(),
+      ''
+    );
+
+    if (type === 'printablePdf') {
+      // multi URL for PDF
+      return { ...baseParams, relativeUrls: [relativeUrl] };
+    }
+
+    // single URL for PNG
+    return { ...baseParams, relativeUrl };
   };
-};
-
-const getPdfJobParams = (opts: JobParamsProviderOptions) => (): JobParamsPDF => {
-  // Relative URL must have URL prefix (Spaces ID prefix), but not server basePath
-  // Replace hashes with original RISON values.
-  const relativeUrl = opts.shareableUrl.replace(
-    window.location.origin + opts.apiClient.getServerBasePath(),
-    ''
-  );
-
-  return {
-    ...jobParamsProvider(opts),
-    relativeUrls: [relativeUrl], // multi URL for PDF
-  };
-};
-
-const getPngJobParams = (opts: JobParamsProviderOptions) => (): JobParamsPNG => {
-  // Replace hashes with original RISON values.
-  const relativeUrl = opts.shareableUrl.replace(
-    window.location.origin + opts.apiClient.getServerBasePath(),
-    ''
-  );
-
-  return {
-    ...jobParamsProvider(opts),
-    relativeUrl, // single URL for PNG
-  };
-};
 
 export const reportingScreenshotShareProvider = ({
   apiClient,
   toasts,
-  license$,
-  startServices$,
   uiSettings,
+  license,
+  application,
   usesUiCapabilities,
-}: {
-  apiClient: ReportingAPIClient;
-  toasts: ToastsSetup;
-  license$: LicensingPluginSetup['license$'];
-  startServices$: Rx.Observable<[CoreStart, object, unknown]>;
-  uiSettings: IUiSettingsClient;
-  usesUiCapabilities: boolean;
-}) => {
-  let licenseToolTipContent = '';
-  let licenseDisabled = true;
-  let licenseHasScreenshotReporting = false;
-  let capabilityHasDashboardScreenshotReporting = false;
-  let capabilityHasVisualizeScreenshotReporting = false;
-
-  license$.subscribe((license) => {
+  theme,
+}: ExportPanelShareOpts): ShareMenuProvider => {
+  const getShareMenuItems = ({
+    objectType,
+    objectId,
+    isDirty,
+    onClose,
+    shareableUrl,
+    ...shareOpts
+  }: ShareContext) => {
     const { enableLinks, showLinks, message } = checkLicense(license.check('reporting', 'gold'));
-    licenseToolTipContent = message;
-    licenseHasScreenshotReporting = showLinks;
-    licenseDisabled = !enableLinks;
-  });
+    const licenseToolTipContent = message;
+    const licenseHasScreenshotReporting = showLinks;
+    const licenseDisabled = !enableLinks;
 
-  if (usesUiCapabilities) {
-    startServices$.subscribe(([{ application }]) => {
+    let capabilityHasDashboardScreenshotReporting = false;
+    let capabilityHasVisualizeScreenshotReporting = false;
+    if (usesUiCapabilities) {
       // TODO: add abstractions in ExportTypeRegistry to use here?
       capabilityHasDashboardScreenshotReporting =
         application.capabilities.dashboard?.generateScreenshot === true;
       capabilityHasVisualizeScreenshotReporting =
         application.capabilities.visualize?.generateScreenshot === true;
-    });
-  } else {
-    // deprecated
-    capabilityHasDashboardScreenshotReporting = true;
-    capabilityHasVisualizeScreenshotReporting = true;
-  }
+    } else {
+      // deprecated
+      capabilityHasDashboardScreenshotReporting = true;
+      capabilityHasVisualizeScreenshotReporting = true;
+    }
 
-  // If the TZ is set to the default "Browser", it will not be useful for
-  // server-side export. We need to derive the timezone and pass it as a param
-  // to the export API.
-  // TODO: create a helper utility in Reporting. This is repeated in a few places.
-  const browserTimezone =
-    uiSettings.get('dateFormat:tz') === 'Browser'
-      ? moment.tz.guess()
-      : uiSettings.get('dateFormat:tz');
-
-  const getShareMenuItems = ({
-    objectType,
-    objectId,
-    sharingData,
-    isDirty,
-    onClose,
-    shareableUrl,
-  }: ShareContext) => {
     if (!licenseHasScreenshotReporting) {
       return [];
     }
@@ -143,11 +108,23 @@ export const reportingScreenshotShareProvider = ({
       return [];
     }
 
+    const { sharingData } = shareOpts as unknown as { sharingData: ReportingSharingData };
     const shareActions = [];
 
     const pngPanelTitle = i18n.translate('xpack.reporting.shareContextMenu.pngReportsButtonLabel', {
       defaultMessage: 'PNG Reports',
     });
+
+    const jobProviderOptions: JobParamsProviderOptions = {
+      shareableUrl,
+      objectType,
+      sharingData,
+    };
+
+    const isV2Job = isJobV2Params(jobProviderOptions);
+    const requiresSavedState = !isV2Job;
+
+    const pngReportType = isV2Job ? 'pngV2' : 'png';
 
     const panelPng = {
       shareMenuItem: {
@@ -165,17 +142,14 @@ export const reportingScreenshotShareProvider = ({
           <ScreenCapturePanelContent
             apiClient={apiClient}
             toasts={toasts}
-            reportType="png"
+            uiSettings={uiSettings}
+            reportType={pngReportType}
             objectId={objectId}
-            getJobParams={getPngJobParams({
-              shareableUrl,
-              apiClient,
-              objectType,
-              browserTimezone,
-              sharingData,
-            })}
+            requiresSavedState={requiresSavedState}
+            getJobParams={getJobParams(apiClient, jobProviderOptions, pngReportType)}
             isDirty={isDirty}
             onClose={onClose}
+            theme={theme}
           />
         ),
       },
@@ -184,6 +158,8 @@ export const reportingScreenshotShareProvider = ({
     const pdfPanelTitle = i18n.translate('xpack.reporting.shareContextMenu.pdfReportsButtonLabel', {
       defaultMessage: 'PDF Reports',
     });
+
+    const pdfReportType = isV2Job ? 'printablePdfV2' : 'printablePdf';
 
     const panelPdf = {
       shareMenuItem: {
@@ -201,17 +177,15 @@ export const reportingScreenshotShareProvider = ({
           <ScreenCapturePanelContent
             apiClient={apiClient}
             toasts={toasts}
-            reportType="printablePdf"
+            uiSettings={uiSettings}
+            reportType={pdfReportType}
             objectId={objectId}
-            getJobParams={getPdfJobParams({
-              shareableUrl,
-              apiClient,
-              objectType,
-              browserTimezone,
-              sharingData,
-            })}
+            requiresSavedState={requiresSavedState}
+            layoutOption={objectType === 'dashboard' ? 'print' : undefined}
+            getJobParams={getJobParams(apiClient, jobProviderOptions, pdfReportType)}
             isDirty={isDirty}
             onClose={onClose}
+            theme={theme}
           />
         ),
       },
@@ -222,5 +196,8 @@ export const reportingScreenshotShareProvider = ({
     return shareActions;
   };
 
-  return { id: 'screenCaptureReports', getShareMenuItems };
+  return {
+    id: 'screenCaptureReports',
+    getShareMenuItems,
+  };
 };

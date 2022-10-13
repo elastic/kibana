@@ -7,25 +7,33 @@
  */
 
 import React, { useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiCallOut } from '@elastic/eui';
-
 import { RouteComponentProps } from 'react-router-dom';
-import { useKibana, toMountPoint } from '../../services/kibana_react';
-import { DashboardAppServices } from '../types';
+
+import { i18n } from '@kbn/i18n';
+import { EuiCallOut } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+
 import { DashboardConstants } from '../..';
+import { pluginServices } from '../../services/plugin_services';
+import { useDashboardMountContext } from '../hooks/dashboard_mount_context';
 
 let bannerId: string | undefined;
 
 export const DashboardNoMatch = ({ history }: { history: RouteComponentProps['history'] }) => {
-  const { services } = useKibana<DashboardAppServices>();
+  const { restorePreviousUrl } = useDashboardMountContext();
+  const {
+    settings: {
+      theme: { theme$ },
+    },
+    overlays: { banners },
+    urlForwarding: { navigateToLegacyKibanaUrl },
+  } = pluginServices.getServices();
 
   useEffect(() => {
-    services.restorePreviousUrl();
-
-    const { navigated } = services.urlForwarding.navigateToLegacyKibanaUrl(
-      history.location.pathname
+    restorePreviousUrl();
+    const { navigated } = navigateToLegacyKibanaUrl(
+      history.location.pathname + history.location.search
     );
 
     if (!navigated) {
@@ -33,7 +41,7 @@ export const DashboardNoMatch = ({ history }: { history: RouteComponentProps['hi
         defaultMessage: 'Page not found',
       });
 
-      bannerId = services.core.overlays.banners.replace(
+      bannerId = banners.replace(
         bannerId,
         toMountPoint(
           <EuiCallOut color="warning" iconType="iInCircle" title={bannerMessage}>
@@ -46,20 +54,21 @@ export const DashboardNoMatch = ({ history }: { history: RouteComponentProps['hi
                 }}
               />
             </p>
-          </EuiCallOut>
+          </EuiCallOut>,
+          { theme$ }
         )
       );
 
       // hide the message after the user has had a chance to acknowledge it -- so it doesn't permanently stick around
       setTimeout(() => {
         if (bannerId) {
-          services.core.overlays.banners.remove(bannerId);
+          banners.remove(bannerId);
         }
       }, 15000);
 
       history.replace(DashboardConstants.LANDING_PAGE_PATH);
     }
-  }, [services, history]);
+  }, [restorePreviousUrl, navigateToLegacyKibanaUrl, banners, theme$, history]);
 
   return null;
 };

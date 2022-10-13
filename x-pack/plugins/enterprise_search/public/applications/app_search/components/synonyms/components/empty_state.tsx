@@ -7,16 +7,16 @@
 
 import React from 'react';
 
-import { EuiPanel, EuiEmptyPrompt, EuiButton } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { DOCS_PREFIX } from '../../../routes';
+import { SYNONYMS_DOCS_URL } from '../../../routes';
 
-import { SynonymIcon } from './';
+import { SynonymModal, SynonymIcon } from '.';
 
 export const EmptyState: React.FC = () => {
   return (
-    <EuiPanel color="subdued">
+    <>
       <EuiEmptyPrompt
         iconType={SynonymIcon}
         title={
@@ -35,18 +35,14 @@ export const EmptyState: React.FC = () => {
           </p>
         }
         actions={
-          <EuiButton
-            size="s"
-            target="_blank"
-            iconType="popout"
-            href={`${DOCS_PREFIX}/synonyms-guide.html`}
-          >
+          <EuiButton size="s" target="_blank" iconType="popout" href={SYNONYMS_DOCS_URL}>
             {i18n.translate('xpack.enterpriseSearch.appSearch.engine.synonyms.empty.buttonLabel', {
               defaultMessage: 'Read the synonyms guide',
             })}
           </EuiButton>
         }
       />
-    </EuiPanel>
+      <SynonymModal />
+    </>
   );
 };

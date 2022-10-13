@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
@@ -36,7 +36,8 @@ export function registerRetryRoute({ router, license, lib: { handleEsError } }: 
       const { indexNames } = body;
 
       try {
-        await retryLifecycle(context.core.elasticsearch.client.asCurrentUser, indexNames);
+        const esClient = (await context.core).elasticsearch.client;
+        await retryLifecycle(esClient.asCurrentUser, indexNames);
         return response.ok();
       } catch (error) {
         return handleEsError({ error, response });

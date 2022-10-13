@@ -8,8 +8,8 @@
 import { useCallback } from 'react';
 import { combineLatest, Observable, ReplaySubject } from 'rxjs';
 import { last, map, startWith, switchMap } from 'rxjs/operators';
-import { LogSourceColumnConfiguration } from '../../../../common/log_sources';
 import { LogEntryCursor } from '../../../../common/log_entry';
+import { LogViewColumnConfiguration } from '../../../../common/log_views';
 import { LogEntriesSearchRequestQuery } from '../../../../common/search_strategies/log_entries/log_entries';
 import { flattenDataSearchResponseDescriptor } from '../../../utils/data_search';
 import { useObservable, useObservableState } from '../../../utils/use_observable';
@@ -24,7 +24,7 @@ export const useFetchLogEntriesAround = ({
   sourceId,
   startTimestamp,
 }: {
-  columnOverrides?: LogSourceColumnConfiguration[];
+  columnOverrides?: LogViewColumnConfiguration[];
   endTimestamp: number;
   highlightPhrase?: string;
   query?: LogEntriesSearchRequestQuery;

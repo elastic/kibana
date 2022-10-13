@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { HttpResources, IBasePath, Logger } from 'src/core/server';
+import type { HttpResources, IBasePath, Logger } from '@kbn/core/server';
 
 import { ENTER_SPACE_PATH } from '../../../common';
 import { wrapError } from '../../lib/errors';
@@ -26,7 +26,8 @@ export function initSpacesViewsRoutes(deps: ViewRouteDeps) {
     { path: ENTER_SPACE_PATH, validate: false },
     async (context, request, response) => {
       try {
-        const defaultRoute = await context.core.uiSettings.client.get<string>('defaultRoute');
+        const { uiSettings } = await context.core;
+        const defaultRoute = await uiSettings.client.get<string>('defaultRoute');
 
         const basePath = deps.basePath.get(request);
         const url = `${basePath}${defaultRoute}`;

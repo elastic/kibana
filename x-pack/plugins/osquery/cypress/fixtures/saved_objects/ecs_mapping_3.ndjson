@@ -1,0 +1,37 @@
+{
+  "attributes": {
+    "created_at": "2022-02-03T08:22:54.372Z",
+    "created_by": "elastic",
+    "ecs_mapping": [
+      {
+        "key": "labels",
+        "value": {
+          "field": "days"
+        }
+      },
+      {
+        "key": "tags",
+        "value": {
+          "field": "seconds"
+        }
+      },
+      {
+        "key": "client.address",
+        "value": {
+          "field": "total_seconds"
+        }
+      }
+    ],
+    "id": "MULTIPLE_MAPPINGS",
+    "interval": "3600",
+    "query": "select * from uptime; ",
+    "updated_at": "2022-02-03T08:22:54.372Z",
+    "updated_by": "elastic"
+  },
+  "coreMigrationVersion": "8.1.0",
+  "id": "7c348640-84ca-11ec-991b-07bb2d53cda5",
+  "references": [],
+  "type": "osquery-saved-query",
+  "updated_at": "2022-02-03T08:22:54.375Z",
+  "version": "WzE3OTAxLDFd"
+}

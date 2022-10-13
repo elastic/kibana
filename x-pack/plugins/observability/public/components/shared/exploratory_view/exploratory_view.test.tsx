@@ -6,68 +6,76 @@
  */
 
 import React from 'react';
-import { screen, waitFor } from '@testing-library/dom';
-import { render, mockUrlStorage, mockCore, mockAppIndexPattern } from './rtl_helpers';
+import { screen } from '@testing-library/dom';
+import { render, mockAppDataView } from './rtl_helpers';
 import { ExploratoryView } from './exploratory_view';
-import { getStubIndexPattern } from '../../../../../../../src/plugins/data/public/test_utils';
-import * as obsvInd from './utils/observability_index_patterns';
+import * as obsvDataViews from '../../../utils/observability_data_views/observability_data_views';
+import * as pluginHook from '../../../hooks/use_plugin_context';
+import { createStubIndexPattern } from '@kbn/data-plugin/common/stubs';
+import { noCasesPermissions as mockUseGetCasesPermissions } from '../../../utils/cases_permissions';
+
+jest.spyOn(pluginHook, 'usePluginContext').mockReturnValue({
+  appMountParameters: {
+    setHeaderActionMenu: jest.fn(),
+  },
+} as any);
+
+jest.mock('../../../hooks/use_get_user_cases_permissions', () => ({
+  useGetUserCasesPermissions: jest.fn(() => mockUseGetCasesPermissions()),
+}));
 
 describe('ExploratoryView', () => {
-  mockAppIndexPattern();
+  mockAppDataView();
 
   beforeEach(() => {
-    const indexPattern = getStubIndexPattern(
-      'apm-*',
-      () => {},
-      '@timestamp',
-      [
-        {
-          name: '@timestamp',
-          type: 'date',
-          esTypes: ['date'],
-          searchable: true,
-          aggregatable: true,
-          readFromDocValues: true,
-        },
-      ],
-      mockCore() as any
-    );
-
-    jest.spyOn(obsvInd, 'ObservabilityIndexPatterns').mockReturnValue({
-      getIndexPattern: jest.fn().mockReturnValue(indexPattern),
-    } as any);
-  });
-
-  it('renders exploratory view', async () => {
-    render(<ExploratoryView />);
-
-    await waitFor(() => {
-      screen.getByText(/open in lens/i);
-      screen.getByRole('heading', { name: /exploratory view/i });
-    });
-  });
-
-  it('renders lens component when there is series', async () => {
-    mockUrlStorage({
-      data: {
-        'ux-series': {
-          dataType: 'ux',
-          reportType: 'pld',
-          breakdown: 'user_agent.name',
-          reportDefinitions: { 'service.name': ['elastic-co'] },
-          time: { from: 'now-15m', to: 'now' },
+    const indexPattern = createStubIndexPattern({
+      spec: {
+        id: 'apm-*',
+        title: 'apm-*',
+        timeFieldName: '@timestamp',
+        fields: {
+          '@timestamp': {
+            name: '@timestamp',
+            type: 'date',
+            esTypes: ['date'],
+            searchable: true,
+            aggregatable: true,
+            readFromDocValues: true,
+          },
         },
       },
     });
 
+    jest.spyOn(obsvDataViews, 'ObservabilityDataViews').mockReturnValue({
+      getDataView: jest.fn().mockReturnValue(indexPattern),
+    } as any);
+  });
+
+  it('renders exploratory view', async () => {
+    render(<ExploratoryView />, { initSeries: { data: [] } });
+
+    expect(await screen.findByText(/No series found. Please add a series./i)).toBeInTheDocument();
+    expect(await screen.findByText(/Hide chart/i)).toBeInTheDocument();
+  });
+
+  it('renders lens component when there is series', async () => {
     render(<ExploratoryView />);
 
-    expect(await screen.findByText(/open in lens/i)).toBeInTheDocument();
-    expect(await screen.findByText('Performance Distribution')).toBeInTheDocument();
+    expect((await screen.findAllByText('Performance distribution'))[0]).toBeInTheDocument();
     expect(await screen.findByText(/Lens Embeddable Component/i)).toBeInTheDocument();
 
-    await waitFor(() => {
-      screen.getByRole('table', { name: /this table contains 1 rows\./i });
-    });
+    expect(screen.getByTestId('exploratoryViewSeriesPanel0')).toBeInTheDocument();
+  });
+
+  it('shows/hides the chart', async () => {
+    render(<ExploratoryView />);
+
+    const toggleButton = await screen.findByText('Hide chart');
+    expect(toggleButton).toBeInTheDocument();
+
+    toggleButton.click();
+
+    expect(toggleButton.textContent).toBe('Show chart');
+    expect(screen.queryByText('Refresh')).toBeNull();
   });
 });

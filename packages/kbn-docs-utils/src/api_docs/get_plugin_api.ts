@@ -7,26 +7,27 @@
  */
 
 import Path from 'path';
-import { Node, Project, Type } from 'ts-morph';
-import { ToolingLog, KibanaPlatformPlugin } from '@kbn/dev-utils';
-import { ApiScope, Lifecycle } from './types';
+import { Node, Project } from 'ts-morph';
+import { ToolingLog } from '@kbn/tooling-log';
+import { ApiScope, Lifecycle, PluginOrPackage } from './types';
 import { ApiDeclaration, PluginApi } from './types';
-import { buildApiDeclaration } from './build_api_declarations/build_api_declaration';
+import { buildApiDeclarationTopNode } from './build_api_declarations/build_api_declaration';
 import { getDeclarationNodesForPluginScope } from './get_declaration_nodes_for_plugin';
 import { getSourceFileMatching } from './tsmorph_utils';
 
 /**
- * Collects all the information neccessary to generate this plugins mdx api file(s).
+ * Collects all the information necessary to generate this plugins mdx api file(s).
  */
 export function getPluginApi(
   project: Project,
-  plugin: KibanaPlatformPlugin,
-  plugins: KibanaPlatformPlugin[],
-  log: ToolingLog
+  plugin: PluginOrPackage,
+  plugins: PluginOrPackage[],
+  log: ToolingLog,
+  captureReferences: boolean
 ): PluginApi {
-  const client = getDeclarations(project, plugin, ApiScope.CLIENT, plugins, log);
-  const server = getDeclarations(project, plugin, ApiScope.SERVER, plugins, log);
-  const common = getDeclarations(project, plugin, ApiScope.COMMON, plugins, log);
+  const client = getDeclarations(project, plugin, ApiScope.CLIENT, plugins, log, captureReferences);
+  const server = getDeclarations(project, plugin, ApiScope.SERVER, plugins, log, captureReferences);
+  const common = getDeclarations(project, plugin, ApiScope.COMMON, plugins, log, captureReferences);
   return {
     id: plugin.manifest.id,
     client,
@@ -43,17 +44,24 @@ export function getPluginApi(
  */
 function getDeclarations(
   project: Project,
-  plugin: KibanaPlatformPlugin,
+  plugin: PluginOrPackage,
   scope: ApiScope,
-  plugins: KibanaPlatformPlugin[],
-  log: ToolingLog
+  plugins: PluginOrPackage[],
+  log: ToolingLog,
+  captureReferences: boolean
 ): ApiDeclaration[] {
   const nodes = getDeclarationNodesForPluginScope(project, plugin, scope, log);
 
   const contractTypes = getContractTypes(project, plugin, scope);
 
   const declarations = nodes.reduce<ApiDeclaration[]>((acc, node) => {
-    const apiDec = buildApiDeclaration(node, plugins, log, plugin.manifest.id, scope);
+    const apiDec = buildApiDeclarationTopNode(node, {
+      plugins,
+      log,
+      currentPluginId: plugin.manifest.id,
+      scope,
+      captureReferences,
+    });
     // Filter out apis with the @internal flag on them.
     if (!apiDec.tags || apiDec.tags.indexOf('internal') < 0) {
       // buildApiDeclaration doesn't set the lifecycle, so we set it here.
@@ -81,15 +89,15 @@ function getDeclarations(
  */
 function getLifecycle(
   node: Node,
-  contractTypeNames: { start?: Type; setup?: Type }
+  contractTypeNames: { start?: string; setup?: string }
 ): Lifecycle | undefined {
   // Note this logic is not tested if a plugin uses "as",
   // like export { Setup as MyPluginSetup } from ..."
-  if (contractTypeNames.start && node.getType() === contractTypeNames.start) {
+  if (contractTypeNames.start && node.getType().getText() === contractTypeNames.start) {
     return Lifecycle.START;
   }
 
-  if (contractTypeNames.setup && node.getType() === contractTypeNames.setup) {
+  if (contractTypeNames.setup && node.getType().getText() === contractTypeNames.setup) {
     return Lifecycle.SETUP;
   }
 }
@@ -105,10 +113,10 @@ function getLifecycle(
  */
 function getContractTypes(
   project: Project,
-  plugin: KibanaPlatformPlugin,
+  plugin: PluginOrPackage,
   scope: ApiScope
-): { setup?: Type; start?: Type } {
-  const contractTypes: { setup?: Type; start?: Type } = {};
+): { setup?: string; start?: string } {
+  const contractTypes: { setup?: string; start?: string } = {};
   const file = getSourceFileMatching(
     project,
     Path.join(`${plugin.directory}`, scope.toString(), 'plugin.ts')
@@ -122,9 +130,9 @@ function getContractTypes(
           .forEach((arg) => {
             // Setup type comes first
             if (index === 0) {
-              contractTypes.setup = arg;
+              contractTypes.setup = arg.getText();
             } else if (index === 1) {
-              contractTypes.start = arg;
+              contractTypes.start = arg.getText();
             }
             index++;
           });

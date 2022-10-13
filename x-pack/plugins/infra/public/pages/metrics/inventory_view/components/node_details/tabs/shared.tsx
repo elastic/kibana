@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { InventoryItemType } from '../../../../../../../common/inventory_models/types';
 import { InfraWaffleMapOptions, InfraWaffleMapNode } from '../../../../../../lib/lib';
-import { euiStyled } from '../../../../../../../../../../src/plugins/kibana_react/common';
 
 export interface TabProps {
   options: InfraWaffleMapOptions;
@@ -20,7 +20,7 @@ export interface TabProps {
 export const OVERLAY_Y_START = 266;
 export const OVERLAY_BOTTOM_MARGIN = 16;
 export const TabContent = euiStyled.div`
-  padding: ${(props) => props.theme.eui.paddingSizes.m};
+  padding: ${(props) => props.theme.eui.euiSizeM};
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;

@@ -5,20 +5,25 @@
  * 2.0.
  */
 
-import { LogicMounter, mockHttpValues, mockFlashMessageHelpers } from '../../../__mocks__';
+import {
+  LogicMounter,
+  mockHttpValues,
+  mockFlashMessageHelpers,
+} from '../../../__mocks__/kea_logic';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 import { DEFAULT_META } from '../../../shared/constants';
 
+import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 import { EngineDetails, EngineTypes } from '../engine/types';
 
-import { EnginesLogic } from './';
+import { EnginesLogic } from '.';
 
 describe('EnginesLogic', () => {
   const { mount } = new LogicMounter(EnginesLogic);
   const { http } = mockHttpValues;
-  const { flashAPIErrors, setSuccessMessage } = mockFlashMessageHelpers;
+  const { flashAPIErrors, flashSuccessToast } = mockFlashMessageHelpers;
 
   const DEFAULT_VALUES = {
     dataLoading: true,
@@ -133,7 +138,7 @@ describe('EnginesLogic', () => {
         EnginesLogic.actions.deleteEngine(MOCK_ENGINE);
         await nextTick();
 
-        expect(http.delete).toHaveBeenCalledWith('/api/app_search/engines/hello-world');
+        expect(http.delete).toHaveBeenCalledWith('/internal/app_search/engines/hello-world');
         expect(EnginesLogic.actions.onDeleteEngineSuccess).toHaveBeenCalledWith(MOCK_ENGINE);
       });
 
@@ -157,7 +162,7 @@ describe('EnginesLogic', () => {
         EnginesLogic.actions.loadEngines();
         await nextTick();
 
-        expect(http.get).toHaveBeenCalledWith('/api/app_search/engines', {
+        expect(http.get).toHaveBeenCalledWith('/internal/app_search/engines', {
           query: {
             type: 'indexed',
             'page[current]': 1,
@@ -165,6 +170,11 @@ describe('EnginesLogic', () => {
           },
         });
         expect(EnginesLogic.actions.onEnginesLoad).toHaveBeenCalledWith(MOCK_ENGINES_API_RESPONSE);
+      });
+
+      itShowsServerErrorAsFlashMessage(http.get, () => {
+        mount();
+        EnginesLogic.actions.loadEngines();
       });
     });
 
@@ -177,7 +187,7 @@ describe('EnginesLogic', () => {
         EnginesLogic.actions.loadMetaEngines();
         await nextTick();
 
-        expect(http.get).toHaveBeenCalledWith('/api/app_search/engines', {
+        expect(http.get).toHaveBeenCalledWith('/internal/app_search/engines', {
           query: {
             type: 'meta',
             'page[current]': 1,
@@ -188,6 +198,11 @@ describe('EnginesLogic', () => {
           MOCK_ENGINES_API_RESPONSE
         );
       });
+
+      itShowsServerErrorAsFlashMessage(http.get, () => {
+        mount();
+        EnginesLogic.actions.loadMetaEngines();
+      });
     });
 
     describe('onDeleteEngineSuccess', () => {
@@ -195,10 +210,10 @@ describe('EnginesLogic', () => {
         mount();
       });
 
-      it('should call setSuccessMessage', () => {
+      it('should call flashSuccessToast', () => {
         EnginesLogic.actions.onDeleteEngineSuccess(MOCK_ENGINE);
 
-        expect(setSuccessMessage).toHaveBeenCalled();
+        expect(flashSuccessToast).toHaveBeenCalled();
       });
 
       it('should call loadEngines if engine.type === default', () => {
@@ -207,6 +222,17 @@ describe('EnginesLogic', () => {
         EnginesLogic.actions.onDeleteEngineSuccess({
           ...MOCK_ENGINE,
           type: 'default' as EngineTypes.default,
+        });
+
+        expect(EnginesLogic.actions.loadEngines).toHaveBeenCalled();
+      });
+
+      it('should call loadEngines if engine.type === elasticsearch', () => {
+        jest.spyOn(EnginesLogic.actions, 'loadEngines');
+
+        EnginesLogic.actions.onDeleteEngineSuccess({
+          ...MOCK_ENGINE,
+          type: 'elasticsearch' as EngineTypes.elasticsearch,
         });
 
         expect(EnginesLogic.actions.loadEngines).toHaveBeenCalled();

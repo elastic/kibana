@@ -22,6 +22,15 @@ const isBogusUrl = (url: string) => {
 };
 
 export const validateUrls = (urls: string[]): void => {
+  if (!Array.isArray(urls)) {
+    throw new Error('Invalid relativeUrls. String[] is expected.');
+  }
+  urls.forEach((url) => {
+    if (typeof url !== 'string') {
+      throw new Error('Invalid Relative URL in relativeUrls. String is expected.');
+    }
+  });
+
   const badUrls = filter(urls, (url) => isBogusUrl(url));
 
   if (badUrls.length) {

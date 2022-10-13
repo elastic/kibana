@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-export interface EventFiltersListPageUrlSearchParams {
+export interface EventFiltersPageLocation {
   page_index: number;
   page_size: number;
+  show?: 'create' | 'edit';
+  /** Used for editing. The ID of the selected event filter */
+  id?: string;
+  filter: string;
+  included_policies: string;
 }

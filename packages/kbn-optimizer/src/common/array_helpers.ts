@@ -22,28 +22,30 @@ type Comparator<T> = (a: T, b: T) => number;
  * - If the values for a getter are equal the next getter is
  *    used to compare the items.
  */
-export const ascending = <T>(...getters: Array<SortPropGetter<T>>): Comparator<T> => (a, b) => {
-  for (const getter of getters) {
-    const valA = getter(a);
-    const valB = getter(b);
+export const ascending =
+  <T>(...getters: Array<SortPropGetter<T>>): Comparator<T> =>
+  (a, b) => {
+    for (const getter of getters) {
+      const valA = getter(a);
+      const valB = getter(b);
 
-    if (valA === valB) {
-      continue;
-    }
-    if (valA === undefined) {
-      return -1;
-    }
-    if (valB === undefined) {
-      return 1;
+      if (valA === valB) {
+        continue;
+      }
+      if (valA === undefined) {
+        return -1;
+      }
+      if (valB === undefined) {
+        return 1;
+      }
+
+      return typeof valA === 'string' || typeof valB === 'string'
+        ? String(valA).localeCompare(String(valB))
+        : valA - valB;
     }
 
-    return typeof valA === 'string' || typeof valB === 'string'
-      ? String(valA).localeCompare(String(valB))
-      : valA - valB;
-  }
-
-  return 0;
-};
+    return 0;
+  };
 
 /**
  * create a sort comparator that sorts values in descending
@@ -60,14 +62,3 @@ export const descending = <T>(...getters: Array<SortPropGetter<T>>): Comparator<
  * Alternate Array#includes() implementation with sane types, functions as a type guard
  */
 export const includes = <T>(array: T[], value: any): value is T => array.includes(value);
-
-/**
- * Ponyfill for Object.fromEntries()
- */
-export const entriesToObject = <T>(entries: Array<readonly [string, T]>): Record<string, T> => {
-  const object: Record<string, T> = {};
-  for (const [key, value] of entries) {
-    object[key] = value;
-  }
-  return object;
-};

@@ -10,59 +10,14 @@ import { calculateTextWidth } from './string_utils';
 import { MULTI_BUCKET_IMPACT } from '../../../common/constants/multi_bucket_impact';
 import moment from 'moment';
 import { CHART_TYPE } from '../explorer/explorer_constants';
-import { ML_PAGES } from '../../../common/constants/ml_url_generator';
+import { ML_PAGES } from '../../../common/constants/locator';
 
 export const LINE_CHART_ANOMALY_RADIUS = 7;
-export const MULTI_BUCKET_SYMBOL_SIZE = 100; // In square pixels for use with d3 symbol.size
 export const SCHEDULED_EVENT_SYMBOL_HEIGHT = 5;
 export const ANNOTATION_SYMBOL_HEIGHT = 10;
+export const MULTI_BUCKET_SYMBOL_SIZE = 100; // In square pixels for use with d3 symbol.size
 
 const MAX_LABEL_WIDTH = 100;
-
-export function chartLimits(data = []) {
-  const domain = d3.extent(data, (d) => {
-    let metricValue = d.value;
-    if (metricValue === null && d.anomalyScore !== undefined && d.actual !== undefined) {
-      // If an anomaly coincides with a gap in the data, use the anomaly actual value.
-      metricValue = Array.isArray(d.actual) ? d.actual[0] : d.actual;
-    }
-    return metricValue;
-  });
-  const limits = { max: domain[1], min: domain[0] };
-
-  if (limits.max === limits.min) {
-    limits.max = d3.max(data, (d) => {
-      if (d.typical) {
-        return Math.max(d.value, d.typical);
-      } else {
-        // If analysis with by and over field, and more than one cause,
-        // there will be no actual and typical value.
-        // TODO - produce a better visual for population analyses.
-        return d.value;
-      }
-    });
-    limits.min = d3.min(data, (d) => {
-      if (d.typical) {
-        return Math.min(d.value, d.typical);
-      } else {
-        // If analysis with by and over field, and more than one cause,
-        // there will be no actual and typical value.
-        // TODO - produce a better visual for population analyses.
-        return d.value;
-      }
-    });
-  }
-
-  // add padding of 5% of the difference between max and min
-  // if we ended up with the same value for both of them
-  if (limits.max === limits.min) {
-    const padding = limits.max * 0.05;
-    limits.max += padding;
-    limits.min -= padding;
-  }
-
-  return limits;
-}
 
 export function chartExtendedLimits(data = [], functionDescription) {
   let _min = Infinity;
@@ -144,7 +99,7 @@ export function drawLineChartDots(data, lineChartGroup, lineChartValuesLine, rad
 }
 
 // this replicates Kibana's filterAxisLabels() behavior
-// which can be found in src/plugins/vis_type_vislib/public/vislib/lib/axis/axis_labels.js
+// which can be found in src/plugins/vis_types/vislib/public/vislib/lib/axis/axis_labels.js
 // axis labels which overflow the chart's boundaries will be removed
 export function filterAxisLabels(selection, chartWidth) {
   if (selection === undefined || selection.selectAll === undefined) {
@@ -219,12 +174,9 @@ export function getChartType(config) {
   return chartType;
 }
 
-export async function getExploreSeriesLink(mlUrlGenerator, series, timefilter) {
+export async function getExploreSeriesLink(mlLocator, series, timeRange) {
   // Open the Single Metric dashboard over the same overall bounds and
   // zoomed in to the same time as the current chart.
-  const bounds = timefilter.getActiveBounds();
-  const from = bounds.min.toISOString(); // e.g. 2016-02-08T16:00:00.000Z
-  const to = bounds.max.toISOString();
 
   const zoomFrom = moment(series.plotEarliest).toISOString();
   const zoomTo = moment(series.plotLatest).toISOString();
@@ -241,35 +193,33 @@ export async function getExploreSeriesLink(mlUrlGenerator, series, timefilter) {
     });
   }
 
-  const url = await mlUrlGenerator.createUrl({
-    page: ML_PAGES.SINGLE_METRIC_VIEWER,
-    pageState: {
-      jobIds: [series.jobId],
-      refreshInterval: {
-        display: 'Off',
-        pause: true,
-        value: 0,
-      },
-      timeRange: {
-        from: from,
-        to: to,
-        mode: 'absolute',
-      },
-      zoom: {
-        from: zoomFrom,
-        to: zoomTo,
-      },
-      detectorIndex: series.detectorIndex,
-      entities: entityCondition,
-      query: {
-        query_string: {
-          analyze_wildcard: true,
-          query: '*',
+  const url = await mlLocator.getUrl(
+    {
+      page: ML_PAGES.SINGLE_METRIC_VIEWER,
+      pageState: {
+        jobIds: [series.jobId],
+        refreshInterval: {
+          display: 'Off',
+          pause: true,
+          value: 0,
+        },
+        timeRange,
+        zoom: {
+          from: zoomFrom,
+          to: zoomTo,
+        },
+        detectorIndex: series.detectorIndex,
+        entities: entityCondition,
+        query: {
+          query_string: {
+            analyze_wildcard: true,
+            query: '*',
+          },
         },
       },
     },
-    excludeBasePath: true,
-  });
+    { absolute: true }
+  );
   return url;
 }
 

@@ -8,7 +8,7 @@
 import React, { Component } from 'react';
 import { EuiFormRow, EuiSuperSelect, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
+import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
 import { isUrlDrilldown } from '../trigger_actions/trigger_utils';
 
 interface Props {

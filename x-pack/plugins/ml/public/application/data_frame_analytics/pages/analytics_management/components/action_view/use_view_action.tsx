@@ -8,22 +8,22 @@
 import React, { useCallback, useMemo } from 'react';
 
 import { getAnalysisType } from '../../../../common/analytics';
-import { useMlUrlGenerator, useNavigateToPath } from '../../../../../contexts/kibana';
+import { useMlLocator, useNavigateToPath } from '../../../../../contexts/kibana';
 
 import { DataFrameAnalyticsListAction, DataFrameAnalyticsListRow } from '../analytics_list/common';
 
 import { getViewLinkStatus } from './get_view_link_status';
 import { viewActionButtonText, ViewButton } from './view_button';
 import { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
-import { ML_PAGES } from '../../../../../../../common/constants/ml_url_generator';
+import { ML_PAGES } from '../../../../../../../common/constants/locator';
 
 export type ViewAction = ReturnType<typeof useViewAction>;
 export const useViewAction = () => {
-  const mlUrlGenerator = useMlUrlGenerator();
+  const mlLocator = useMlLocator()!;
   const navigateToPath = useNavigateToPath();
 
   const redirectToTab = async (jobId: string, analysisType: DataFrameAnalysisConfigType) => {
-    const path = await mlUrlGenerator.createUrl({
+    const path = await mlLocator.getUrl({
       page: ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION,
       pageState: { jobId, analysisType },
     });
@@ -34,6 +34,7 @@ export const useViewAction = () => {
   const clickHandler = useCallback((item: DataFrameAnalyticsListRow) => {
     const analysisType = getAnalysisType(item.config.analysis) as DataFrameAnalysisConfigType;
     redirectToTab(item.id, analysisType);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const action: DataFrameAnalyticsListAction = useMemo(

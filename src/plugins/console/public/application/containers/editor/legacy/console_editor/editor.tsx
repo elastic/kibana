@@ -6,19 +6,25 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiScreenReaderOnly, EuiToolTip } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLink,
+  EuiScreenReaderOnly,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
+import { decompressFromEncodedURIComponent } from 'lz-string';
 import { parse } from 'query-string';
 import React, { CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
-import { ace } from '../../../../../../../es_ui_shared/public';
-// @ts-ignore
-import { retrieveAutoCompleteInfo, clearSubscriptions } from '../../../../../lib/mappings/mappings';
+import { ace } from '@kbn/es-ui-shared-plugin/public';
 import { ConsoleMenu } from '../../../../components';
 import { useEditorReadContext, useServicesContext } from '../../../../contexts';
 import {
   useSaveCurrentTextObject,
-  useSendCurrentRequestToES,
+  useSendCurrentRequest,
   useSetInputEditor,
 } from '../../../../hooks';
 import * as senseEditor from '../../../../models/sense_editor';
@@ -26,11 +32,14 @@ import { autoIndent, getDocumentation } from '../console_menu_actions';
 import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
 import { applyCurrentSettings } from './apply_editor_settings';
 import { registerCommands } from './keyboard_shortcuts';
+import type { SenseEditor } from '../../../../models/sense_editor';
+import { StorageKeys } from '../../../../../services';
 
 const { useUIAceKeyboardMode } = ace;
 
 export interface EditorProps {
   initialTextValue: string;
+  setEditorInstance: (instance: SenseEditor) => void;
 }
 
 interface QueryParams {
@@ -45,24 +54,33 @@ const abs: CSSProperties = {
   right: '0',
 };
 
-const DEFAULT_INPUT_VALUE = `GET _search
+const DEFAULT_INPUT_VALUE = `# Click the Variables button, above, to create your own variables.
+GET \${exampleVariable1} // _search
 {
   "query": {
-    "match_all": {}
+    "\${exampleVariable2}": {} // match_all
   }
 }`;
 
 const inputId = 'ConAppInputTextarea';
 
-function EditorUI({ initialTextValue }: EditorProps) {
+function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
   const {
-    services: { history, notifications, settings: settingsService, esHostService },
+    services: {
+      history,
+      notifications,
+      settings: settingsService,
+      esHostService,
+      http,
+      autocompleteInfo,
+      storage,
+    },
     docLinkVersion,
   } = useServicesContext();
 
   const { settings } = useEditorReadContext();
   const setInputEditor = useSetInputEditor();
-  const sendCurrentRequestToES = useSendCurrentRequestToES();
+  const sendCurrentRequest = useSendCurrentRequest();
   const saveCurrentTextObject = useSaveCurrentTextObject();
 
   const editorRef = useRef<HTMLDivElement | null>(null);
@@ -96,6 +114,7 @@ function EditorUI({ initialTextValue }: EditorProps) {
     };
 
     const loadBufferFromRemote = (url: string) => {
+      const coreEditor = editor.getCoreEditor();
       if (/^https?:\/\//.test(url)) {
         const loadFrom: Record<string, any> = {
           url,
@@ -111,13 +130,35 @@ function EditorUI({ initialTextValue }: EditorProps) {
 
         // Fire and forget.
         $.ajax(loadFrom).done(async (data) => {
-          const coreEditor = editor.getCoreEditor();
-          await editor.update(data, true);
+          // when we load data from another Api we also must pass history
+          await editor.update(`${initialTextValue}\n ${data}`, true);
           editor.moveToNextRequestEdge(false);
           coreEditor.clearSelection();
           editor.highlightCurrentRequestsAndUpdateActionBar();
           coreEditor.getContainer().focus();
         });
+      }
+
+      // If we have a data URI instead of HTTP, LZ-decode it. This enables
+      // opening requests in Console from anywhere in Kibana.
+      if (/^data:/.test(url)) {
+        const data = decompressFromEncodedURIComponent(url.replace(/^data:text\/plain,/, ''));
+
+        // Show a toast if we have a failure
+        if (data === null || data === '') {
+          notifications.toasts.addWarning(
+            i18n.translate('console.loadFromDataUriErrorMessage', {
+              defaultMessage: 'Unable to load data from the load_from query parameter in the URL',
+            })
+          );
+          return;
+        }
+
+        editor.update(data, true);
+        editor.moveToNextRequestEdge(false);
+        coreEditor.clearSelection();
+        editor.highlightCurrentRequestsAndUpdateActionBar();
+        coreEditor.getContainer().focus();
       }
     };
 
@@ -160,23 +201,55 @@ function EditorUI({ initialTextValue }: EditorProps) {
       }
     }
 
+    function restoreFolds() {
+      if (editor) {
+        const foldRanges = storage.get(StorageKeys.FOLDS, []);
+        editor.getCoreEditor().addFoldsAtRanges(foldRanges);
+      }
+    }
+
+    restoreFolds();
+
+    function saveFoldsOnChange() {
+      if (editor) {
+        editor.getCoreEditor().on('changeFold', () => {
+          const foldRanges = editor.getCoreEditor().getAllFoldRanges();
+          storage.set(StorageKeys.FOLDS, foldRanges);
+        });
+      }
+    }
+
+    saveFoldsOnChange();
+
     setInputEditor(editor);
     setTextArea(editorRef.current!.querySelector('textarea'));
 
-    retrieveAutoCompleteInfo(settingsService, settingsService.getAutocomplete());
+    autocompleteInfo.retrieve(settingsService, settingsService.getAutocomplete());
 
     const unsubscribeResizer = subscribeResizeChecker(editorRef.current!, editor);
     setupAutosave();
 
     return () => {
       unsubscribeResizer();
-      clearSubscriptions();
+      autocompleteInfo.clearSubscriptions();
       window.removeEventListener('hashchange', onHashChange);
       if (editorInstanceRef.current) {
+        // Close autocomplete popup on unmount
+        editorInstanceRef.current?.getCoreEditor().detachCompleter();
         editorInstanceRef.current.getCoreEditor().destroy();
       }
     };
-  }, [saveCurrentTextObject, initialTextValue, history, setInputEditor, settingsService]);
+  }, [
+    notifications.toasts,
+    saveCurrentTextObject,
+    initialTextValue,
+    history,
+    setInputEditor,
+    settingsService,
+    http,
+    autocompleteInfo,
+    storage,
+  ]);
 
   useEffect(() => {
     const { current: editor } = editorInstanceRef;
@@ -186,12 +259,22 @@ function EditorUI({ initialTextValue }: EditorProps) {
   }, [settings]);
 
   useEffect(() => {
-    registerCommands({
-      senseEditor: editorInstanceRef.current!,
-      sendCurrentRequestToES,
-      openDocumentation,
-    });
-  }, [sendCurrentRequestToES, openDocumentation]);
+    const { isKeyboardShortcutsEnabled } = settings;
+    if (isKeyboardShortcutsEnabled) {
+      registerCommands({
+        senseEditor: editorInstanceRef.current!,
+        sendCurrentRequest,
+        openDocumentation,
+      });
+    }
+  }, [openDocumentation, settings, sendCurrentRequest]);
+
+  useEffect(() => {
+    const { current: editor } = editorInstanceRef;
+    if (editor) {
+      setEditorInstance(editor);
+    }
+  }, [setEditorInstance]);
 
   return (
     <div style={abs} data-test-subj="console-application" className="conApp">
@@ -209,16 +292,16 @@ function EditorUI({ initialTextValue }: EditorProps) {
                 defaultMessage: 'Click to send request',
               })}
             >
-              <button
-                onClick={sendCurrentRequestToES}
+              <EuiLink
+                color="success"
+                onClick={sendCurrentRequest}
                 data-test-subj="sendRequestButton"
                 aria-label={i18n.translate('console.sendRequestButtonTooltip', {
                   defaultMessage: 'Click to send request',
                 })}
-                className="conApp__editorActionButton conApp__editorActionButton--success"
               >
-                <EuiIcon type="play" />
-              </button>
+                <EuiIcon type="playFilled" />
+              </EuiLink>
             </EuiToolTip>
           </EuiFlexItem>
           <EuiFlexItem>

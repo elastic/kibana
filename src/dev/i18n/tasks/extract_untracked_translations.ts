@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { createFailError } from '@kbn/dev-utils';
+import { createFailError } from '@kbn/dev-cli-errors';
 import {
   I18nConfig,
   matchEntriesWithExctractors,
@@ -36,8 +36,8 @@ export async function extractUntrackedMessagesTask({
     '**/build/**',
     '**/__fixtures__/**',
     '**/packages/kbn-i18n/**',
+    '**/packages/kbn-i18n-react/**',
     '**/packages/kbn-plugin-generator/template/**',
-    '**/target/**',
     '**/test/**',
     '**/scripts/**',
     '**/src/dev/**',

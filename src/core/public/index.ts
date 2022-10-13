@@ -26,9 +26,20 @@
 
 import './index.scss';
 
-import {
+export type { DocLinksStart } from '@kbn/core-doc-links-browser';
+export type { HttpSetup, HttpStart } from '@kbn/core-http-browser';
+export type { I18nStart } from '@kbn/core-i18n-browser';
+export type {
+  FatalErrorsSetup,
+  FatalErrorsStart,
+  FatalErrorInfo,
+} from '@kbn/core-fatal-errors-browser';
+export type { UiSettingsState, IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+export type { Capabilities } from '@kbn/core-capabilities-common';
+export type { SavedObjectsStart } from '@kbn/core-saved-objects-browser';
+export type { NotificationsSetup, NotificationsStart } from '@kbn/core-notifications-browser';
+export type {
   ChromeBadge,
-  ChromeBrand,
   ChromeBreadcrumb,
   ChromeHelpExtension,
   ChromeHelpExtensionMenuLink,
@@ -41,52 +52,51 @@ import {
   ChromeNavControls,
   ChromeNavLink,
   ChromeNavLinks,
-  ChromeNavLinkUpdateableFields,
   ChromeDocTitle,
   ChromeStart,
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
   ChromeUserBanner,
-  NavType,
-} from './chrome';
-import { FatalErrorsSetup, FatalErrorsStart, FatalErrorInfo } from './fatal_errors';
-import { HttpSetup, HttpStart } from './http';
-import { I18nStart } from './i18n';
-import { NotificationsSetup, NotificationsStart } from './notifications';
-import { OverlayStart } from './overlays';
-import {
+  ChromeHelpMenuActions,
+} from '@kbn/core-chrome-browser';
+export type {
   Plugin,
-  AsyncPlugin,
   PluginInitializer,
   PluginInitializerContext,
-  PluginOpaqueId,
-} from './plugins';
-import { UiSettingsState, IUiSettingsClient } from './ui_settings';
-import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
-import { DocLinksStart } from './doc_links';
-import { SavedObjectsStart } from './saved_objects';
-import { DeprecationsServiceStart } from './deprecations';
+} from '@kbn/core-plugins-browser';
+export type { PluginOpaqueId } from '@kbn/core-base-common';
 
+export type { PackageInfo, EnvironmentMode } from '@kbn/config';
+export type { DomainDeprecationDetails } from '@kbn/core-deprecations-common';
+export type { CoreContext } from '@kbn/core-base-browser-internal';
+export {
+  DEFAULT_APP_CATEGORIES,
+  APP_WRAPPER_CLASS,
+  type AppCategory,
+} from '@kbn/core-application-common';
 export type {
-  PackageInfo,
-  EnvironmentMode,
-  IExternalUrlPolicy,
-  DomainDeprecationDetails,
-} from '../server/types';
-export type { CoreContext, CoreSystem } from './core_system';
-export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '../utils';
-export type {
-  AppCategory,
   UiSettingsParams,
+  PublicUiSettingsParams,
   UserProvidedValues,
   UiSettingsType,
-  ImageValidation,
-  StringValidation,
-  StringValidationRegex,
-  StringValidationRegexString,
-} from '../types';
+} from '@kbn/core-ui-settings-common';
 
-export { AppNavLinkStatus, AppStatus, ScopedHistory } from './application';
+export type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+export type {
+  AnalyticsClient,
+  Event,
+  EventContext,
+  EventType,
+  EventTypeOpts,
+  IShipper,
+  ShipperClassConstructor,
+  OptInConfig,
+  ContextProviderOpts,
+  TelemetryCounter,
+  TelemetryCounterType,
+} from '@kbn/analytics-client';
+
+export { AppNavLinkStatus, AppStatus } from '@kbn/core-application-browser';
 export type {
   ApplicationSetup,
   ApplicationStart,
@@ -99,38 +109,44 @@ export type {
   AppLeaveAction,
   AppLeaveDefaultAction,
   AppLeaveConfirmAction,
-  AppMeta,
   AppUpdatableFields,
   AppUpdater,
-  AppSearchDeepLink,
+  AppNavOptions,
+  AppDeepLink,
   PublicAppInfo,
-  PublicAppMetaInfo,
-  PublicAppSearchDeepLinkInfo,
+  PublicAppDeepLinkInfo,
   NavigateToAppOptions,
-} from './application';
+  NavigateToUrlOptions,
+  ScopedHistory,
+} from '@kbn/core-application-browser';
+export { CoreScopedHistory } from '@kbn/core-application-browser-internal';
 
-export { SimpleSavedObject } from './saved_objects';
 export type {
-  SavedObjectsBatchResponse,
-  SavedObjectsBulkCreateObject,
-  SavedObjectsBulkCreateOptions,
-  SavedObjectsBulkUpdateObject,
-  SavedObjectsBulkUpdateOptions,
+  SavedObjectsClientContract,
+  SimpleSavedObject,
   SavedObjectsCreateOptions,
-  SavedObjectsFindResponsePublic,
+  SavedObjectsDeleteOptions,
+  SavedObjectsBatchResponse,
+  SavedObjectsFindOptions,
+  SavedObjectsFindOptionsReference,
   SavedObjectsUpdateOptions,
+  ResolvedSimpleSavedObject,
+  SavedObjectsBulkUpdateObject,
+  SavedObjectsFindResponse,
+  SavedObjectsBulkCreateOptions,
+  SavedObjectsBulkUpdateOptions,
+  SavedObjectsBulkResolveResponse,
+  SavedObjectsBulkCreateObject,
+} from '@kbn/core-saved-objects-api-browser';
+export type {
   SavedObject,
+  SavedObjectTypeIdTuple,
   SavedObjectAttribute,
   SavedObjectAttributes,
   SavedObjectAttributeSingle,
   SavedObjectError,
   SavedObjectReference,
-  SavedObjectsBaseOptions,
-  SavedObjectsFindOptions,
-  SavedObjectsFindOptionsReference,
   SavedObjectsMigrationVersion,
-  SavedObjectsClientContract,
-  SavedObjectsClient,
   SavedObjectsImportResponse,
   SavedObjectsImportSuccess,
   SavedObjectsImportConflictError,
@@ -144,9 +160,7 @@ export type {
   SavedObjectsImportSimpleWarning,
   SavedObjectsImportActionRequiredWarning,
   SavedObjectsImportWarning,
-} from './saved_objects';
-
-export { HttpFetchError } from './http';
+} from '@kbn/core-saved-objects-common';
 
 export type {
   HttpHeadersInit,
@@ -163,172 +177,55 @@ export type {
   IAnonymousPaths,
   IExternalUrl,
   IHttpInterceptController,
-  IHttpFetchError,
+  ResponseErrorBody,
   IHttpResponseInterceptorOverrides,
-} from './http';
+} from '@kbn/core-http-browser';
+
+export type { IHttpFetchError } from '@kbn/core-http-browser';
 
 export type {
   OverlayStart,
   OverlayBannersStart,
-  OverlayRef,
   OverlayFlyoutStart,
   OverlayFlyoutOpenOptions,
   OverlayModalOpenOptions,
   OverlayModalConfirmOptions,
   OverlayModalStart,
-} from './overlays';
+} from '@kbn/core-overlays-browser';
 
 export type {
   Toast,
   ToastInput,
   IToasts,
-  ToastsApi,
   ToastInputFields,
   ToastsSetup,
   ToastsStart,
   ToastOptions,
   ErrorToastOptions,
-} from './notifications';
+} from '@kbn/core-notifications-browser';
 
-export type { DeprecationsServiceStart, ResolveDeprecationResponse } from './deprecations';
+export type { ToastsApi } from '@kbn/core-notifications-browser-internal';
 
-export type { MountPoint, UnmountCallback, PublicUiSettingsParams } from './types';
-
-export { URL_MAX_LENGTH } from './core_app';
-
-/**
- * Core services exposed to the `Plugin` setup lifecycle
- *
- * @typeParam TPluginsStart - the type of the consuming plugin's start dependencies. Should be the same
- *                            as the consuming {@link Plugin}'s `TPluginsStart` type. Used by `getStartServices`.
- * @typeParam TStart - the type of the consuming plugin's start contract. Should be the same as the
- *                     consuming {@link Plugin}'s `TStart` type. Used by `getStartServices`.
- *
- * @public
- *
- * @internalRemarks We document the properties with \@link tags to improve
- * navigation in the generated docs until there's a fix for
- * https://github.com/Microsoft/web-build-tools/issues/1237
- */
-export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
-  /** {@link ApplicationSetup} */
-  application: ApplicationSetup;
-  /** {@link FatalErrorsSetup} */
-  fatalErrors: FatalErrorsSetup;
-  /** {@link HttpSetup} */
-  http: HttpSetup;
-  /** {@link NotificationsSetup} */
-  notifications: NotificationsSetup;
-  /** {@link IUiSettingsClient} */
-  uiSettings: IUiSettingsClient;
-  /**
-   * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
-   * use *only* to retrieve config values. There is no way to set injected values
-   * in the new platform.
-   * @deprecated
-   * */
-  injectedMetadata: {
-    getInjectedVar: (name: string, defaultValue?: any) => unknown;
-  };
-  /** {@link StartServicesAccessor} */
-  getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
-}
-
-/**
- * Allows plugins to get access to APIs available in start inside async
- * handlers, such as {@link App.mount}. Promise will not resolve until Core
- * and plugin dependencies have completed `start`.
- *
- * @public
- */
-export type StartServicesAccessor<
-  TPluginsStart extends object = object,
-  TStart = unknown
-> = () => Promise<[CoreStart, TPluginsStart, TStart]>;
-
-/**
- * Core services exposed to the `Plugin` start lifecycle
- *
- * @public
- *
- * @internalRemarks We document the properties with \@link tags to improve
- * navigation in the generated docs until there's a fix for
- * https://github.com/Microsoft/web-build-tools/issues/1237
- */
-export interface CoreStart {
-  /** {@link ApplicationStart} */
-  application: ApplicationStart;
-  /** {@link ChromeStart} */
-  chrome: ChromeStart;
-  /** {@link DocLinksStart} */
-  docLinks: DocLinksStart;
-  /** {@link HttpStart} */
-  http: HttpStart;
-  /** {@link SavedObjectsStart} */
-  savedObjects: SavedObjectsStart;
-  /** {@link I18nStart} */
-  i18n: I18nStart;
-  /** {@link NotificationsStart} */
-  notifications: NotificationsStart;
-  /** {@link OverlayStart} */
-  overlays: OverlayStart;
-  /** {@link IUiSettingsClient} */
-  uiSettings: IUiSettingsClient;
-  /** {@link FatalErrorsStart} */
-  fatalErrors: FatalErrorsStart;
-  /** {@link DeprecationsServiceStart} */
-  deprecations: DeprecationsServiceStart;
-  /**
-   * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
-   * use *only* to retrieve config values. There is no way to set injected values
-   * in the new platform.
-   * @deprecated
-   * */
-  injectedMetadata: {
-    getInjectedVar: (name: string, defaultValue?: any) => unknown;
-  };
-}
+export type { ThemeServiceSetup, ThemeServiceStart, CoreTheme } from '@kbn/core-theme-browser';
 
 export type {
-  Capabilities,
-  ChromeBadge,
-  ChromeBrand,
-  ChromeBreadcrumb,
-  ChromeHelpExtension,
-  ChromeHelpExtensionMenuLink,
-  ChromeHelpExtensionLinkBase,
-  ChromeHelpExtensionMenuCustomLink,
-  ChromeHelpExtensionMenuDiscussLink,
-  ChromeHelpExtensionMenuDocumentationLink,
-  ChromeHelpExtensionMenuGitHubLink,
-  ChromeNavControl,
-  ChromeNavControls,
-  ChromeNavLink,
-  ChromeNavLinks,
-  ChromeNavLinkUpdateableFields,
-  ChromeDocTitle,
-  ChromeRecentlyAccessed,
-  ChromeRecentlyAccessedHistoryItem,
-  ChromeUserBanner,
-  ChromeStart,
-  DocLinksStart,
-  FatalErrorInfo,
-  FatalErrorsSetup,
-  FatalErrorsStart,
-  HttpSetup,
-  HttpStart,
-  I18nStart,
-  NotificationsSetup,
-  NotificationsStart,
-  Plugin,
-  AsyncPlugin,
-  PluginInitializer,
-  PluginInitializerContext,
-  SavedObjectsStart,
-  PluginOpaqueId,
-  IUiSettingsClient,
-  UiSettingsState,
-  NavType,
-};
+  DeprecationsServiceStart,
+  ResolveDeprecationResponse,
+} from '@kbn/core-deprecations-browser';
 
-export { __kbnBootstrap__ } from './kbn_bootstrap';
+export type { MountPoint, UnmountCallback, OverlayRef } from '@kbn/core-mount-utils-browser';
+
+export { URL_MAX_LENGTH } from '@kbn/core-apps-browser-internal';
+
+export type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
+
+export type {
+  ExecutionContextSetup,
+  ExecutionContextStart,
+} from '@kbn/core-execution-context-browser';
+
+export type { CoreSetup, CoreStart, StartServicesAccessor } from '@kbn/core-lifecycle-browser';
+
+export type { CoreSystem } from '@kbn/core-root-browser-internal';
+
+export { __kbnBootstrap__ } from '@kbn/core-root-browser-internal';

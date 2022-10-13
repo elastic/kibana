@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
-
-import { Id, ListSchema } from '../../../common/schemas';
+import { ElasticsearchClient } from '@kbn/core/server';
+import type { Id, ListSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import { getList } from './get_list';
 
@@ -43,7 +42,7 @@ export const deleteList = async ({
     await esClient.delete({
       id,
       index: listIndex,
-      refresh: false,
+      refresh: 'wait_for',
     });
     return list;
   }

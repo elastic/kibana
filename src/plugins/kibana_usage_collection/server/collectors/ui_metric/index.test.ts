@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { loggingSystemMock, savedObjectsRepositoryMock } from '../../../../../core/server/mocks';
+import { loggingSystemMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import {
   Collector,
   createUsageCollectionSetupMock,
   createCollectorFetchContextMock,
-} from '../../../../usage_collection/server/mocks';
+} from '@kbn/usage-collection-plugin/server/mocks';
 
-import { registerUiMetricUsageCollector } from './';
+import { registerUiMetricUsageCollector } from '.';
 
 const logger = loggingSystemMock.createLogger();
 
@@ -79,8 +79,7 @@ describe('telemetry_ui_metric', () => {
         },
         {
           ...commonSavedObjectsAttributes,
-          id:
-            'kibana-user_agent:Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:80.0) Gecko/20100101 Firefox/80.0',
+          id: 'kibana-user_agent:Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:80.0) Gecko/20100101 Firefox/80.0',
           attributes: { count: 1 },
         },
       ],

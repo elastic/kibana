@@ -7,67 +7,53 @@
 
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
-import { catchError, map, mergeMap, takeUntil } from 'rxjs/operators';
-import { PNG_JOB_TYPE } from '../../../../common/constants';
+import { finalize, map, mergeMap, takeUntil, tap } from 'rxjs/operators';
+import { REPORTING_TRANSACTION_TYPE } from '../../../../common/constants';
 import { TaskRunResult } from '../../../lib/tasks';
 import { RunTaskFn, RunTaskFnFactory } from '../../../types';
-import {
-  decryptJobHeaders,
-  getConditionalHeaders,
-  getFullUrls,
-  omitBlockedHeaders,
-} from '../../common';
-import { generatePngObservableFactory } from '../lib/generate_png';
+import { decryptJobHeaders, generatePngObservable, getFullUrls } from '../../common';
 import { TaskPayloadPNG } from '../types';
 
-export const runTaskFnFactory: RunTaskFnFactory<
-  RunTaskFn<TaskPayloadPNG>
-> = function executeJobFactoryFn(reporting, parentLogger) {
-  const config = reporting.getConfig();
-  const encryptionKey = config.get('encryptionKey');
+export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPNG>> =
+  function executeJobFactoryFn(reporting, parentLogger) {
+    const config = reporting.getConfig();
+    const encryptionKey = config.get('encryptionKey');
 
-  return async function runTask(jobId, job, cancellationToken) {
-    const apmTrans = apm.startTransaction('reporting execute_job png', 'reporting');
-    const apmGetAssets = apmTrans?.startSpan('get_assets', 'setup');
-    let apmGeneratePng: { end: () => void } | null | undefined;
+    return function runTask(jobId, job, cancellationToken, stream) {
+      const apmTrans = apm.startTransaction('execute-job-png', REPORTING_TRANSACTION_TYPE);
+      const apmGetAssets = apmTrans?.startSpan('get-assets', 'setup');
+      let apmGeneratePng: { end: () => void } | null | undefined;
 
-    const generatePngObservable = await generatePngObservableFactory(reporting);
-    const jobLogger = parentLogger.clone([PNG_JOB_TYPE, 'execute', jobId]);
-    const process$: Rx.Observable<TaskRunResult> = Rx.of(1).pipe(
-      mergeMap(() => decryptJobHeaders(encryptionKey, job.headers, jobLogger)),
-      map((decryptedHeaders) => omitBlockedHeaders(decryptedHeaders)),
-      map((filteredHeaders) => getConditionalHeaders(config, filteredHeaders)),
-      mergeMap((conditionalHeaders) => {
-        const urls = getFullUrls(config, job);
-        const hashUrl = urls[0];
-        if (apmGetAssets) apmGetAssets.end();
+      const jobLogger = parentLogger.get(`execute:${jobId}`);
+      const process$: Rx.Observable<TaskRunResult> = Rx.of(1).pipe(
+        mergeMap(() => decryptJobHeaders(encryptionKey, job.headers, jobLogger)),
+        mergeMap((headers) => {
+          const [url] = getFullUrls(config, job);
 
-        apmGeneratePng = apmTrans?.startSpan('generate_png_pipeline', 'execute');
-        return generatePngObservable(
-          jobLogger,
-          hashUrl,
-          job.browserTimezone,
-          conditionalHeaders,
-          job.layout
-        );
-      }),
-      map(({ base64, warnings }) => {
-        if (apmGeneratePng) apmGeneratePng.end();
+          apmGetAssets?.end();
+          apmGeneratePng = apmTrans?.startSpan('generate-png-pipeline', 'execute');
 
-        return {
+          return generatePngObservable(reporting, jobLogger, {
+            headers,
+            urls: [url],
+            browserTimezone: job.browserTimezone,
+            layout: {
+              ...job.layout,
+              id: 'preserve_layout',
+            },
+          });
+        }),
+        tap(({ buffer }) => stream.write(buffer)),
+        map(({ metrics, warnings }) => ({
           content_type: 'image/png',
-          content: base64,
-          size: (base64 && base64.length) || 0,
+          metrics: { png: metrics },
           warnings,
-        };
-      }),
-      catchError((err) => {
-        jobLogger.error(err);
-        return Rx.throwError(err);
-      })
-    );
+        })),
+        tap({ error: (error) => jobLogger.error(error) }),
+        finalize(() => apmGeneratePng?.end())
+      );
 
-    const stop$ = Rx.fromEventPattern(cancellationToken.on);
-    return process$.pipe(takeUntil(stop$)).toPromise();
+      const stop$ = Rx.fromEventPattern(cancellationToken.on);
+      return Rx.lastValueFrom(process$.pipe(takeUntil(stop$)));
+    };
   };
-};

@@ -5,24 +5,22 @@
  * 2.0.
  */
 
-import { UpdateRulesOptions } from './types';
-import { alertsClientMock } from '../../../../../alerting/server/mocks';
-import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
+import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import {
-  getUpdateRulesSchemaMock,
   getUpdateMachineLearningSchemaMock,
+  getUpdateRulesSchemaMock,
 } from '../../../../common/detection_engine/schemas/request/rule_schemas.mock';
+import { getRuleMock } from '../routes/__mocks__/request_responses';
+import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
 
-export const getUpdateRulesOptionsMock = (): UpdateRulesOptions => ({
-  alertsClient: alertsClientMock.create(),
-  savedObjectsClient: savedObjectsClientMock.create(),
-  defaultOutputIndex: '.siem-signals-default',
+export const getUpdateRulesOptionsMock = () => ({
+  rulesClient: rulesClientMock.create(),
+  existingRule: getRuleMock(getQueryRuleParams()),
   ruleUpdate: getUpdateRulesSchemaMock(),
 });
 
-export const getUpdateMlRulesOptionsMock = (): UpdateRulesOptions => ({
-  alertsClient: alertsClientMock.create(),
-  savedObjectsClient: savedObjectsClientMock.create(),
-  defaultOutputIndex: '.siem-signals-default',
+export const getUpdateMlRulesOptionsMock = () => ({
+  rulesClient: rulesClientMock.create(),
+  existingRule: getRuleMock(getQueryRuleParams()),
   ruleUpdate: getUpdateMachineLearningSchemaMock(),
 });

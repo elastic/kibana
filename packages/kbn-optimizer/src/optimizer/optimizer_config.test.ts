@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-jest.mock('./assign_bundles_to_workers.ts');
-jest.mock('./kibana_platform_plugins.ts');
-jest.mock('./get_plugin_bundles.ts');
-jest.mock('../common/theme_tags.ts');
-jest.mock('./filter_by_id.ts');
+jest.mock('./assign_bundles_to_workers');
+jest.mock('./kibana_platform_plugins');
+jest.mock('./get_plugin_bundles');
+jest.mock('../common/theme_tags');
+jest.mock('./filter_by_id');
 jest.mock('./focus_bundles');
-jest.mock('../limits.ts');
+jest.mock('../limits');
 
 jest.mock('os', () => {
   const realOs = jest.requireActual('os');
@@ -24,7 +24,7 @@ jest.mock('os', () => {
 
 import Path from 'path';
 import { REPO_ROOT } from '@kbn/utils';
-import { createAbsolutePathSerializer } from '@kbn/dev-utils';
+import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
 
 import { OptimizerConfig, ParsedOptions } from './optimizer_config';
 import { parseThemeTags } from '../common';
@@ -380,14 +380,16 @@ describe('OptimizerConfig::parseOptions()', () => {
  * and just making sure that the arguments are coming from where we expect
  */
 describe('OptimizerConfig::create()', () => {
-  const assignBundlesToWorkers: jest.Mock = jest.requireMock('./assign_bundles_to_workers.ts')
-    .assignBundlesToWorkers;
-  const findKibanaPlatformPlugins: jest.Mock = jest.requireMock('./kibana_platform_plugins.ts')
-    .findKibanaPlatformPlugins;
-  const getPluginBundles: jest.Mock = jest.requireMock('./get_plugin_bundles.ts').getPluginBundles;
-  const filterById: jest.Mock = jest.requireMock('./filter_by_id.ts').filterById;
+  const assignBundlesToWorkers: jest.Mock = jest.requireMock(
+    './assign_bundles_to_workers'
+  ).assignBundlesToWorkers;
+  const findKibanaPlatformPlugins: jest.Mock = jest.requireMock(
+    './kibana_platform_plugins'
+  ).findKibanaPlatformPlugins;
+  const getPluginBundles: jest.Mock = jest.requireMock('./get_plugin_bundles').getPluginBundles;
+  const filterById: jest.Mock = jest.requireMock('./filter_by_id').filterById;
   const focusBundles: jest.Mock = jest.requireMock('./focus_bundles').focusBundles;
-  const readLimits: jest.Mock = jest.requireMock('../limits.ts').readLimits;
+  const readLimits: jest.Mock = jest.requireMock('../limits').readLimits;
 
   beforeEach(() => {
     if ('mock' in OptimizerConfig.parseOptions) {
@@ -404,24 +406,26 @@ describe('OptimizerConfig::create()', () => {
     focusBundles.mockReturnValue(Symbol('focused bundles'));
     readLimits.mockReturnValue(Symbol('limits'));
 
-    jest.spyOn(OptimizerConfig, 'parseOptions').mockImplementation((): {
-      [key in keyof ParsedOptions]: any;
-    } => ({
-      cache: Symbol('parsed cache'),
-      dist: Symbol('parsed dist'),
-      maxWorkerCount: Symbol('parsed max worker count'),
-      pluginPaths: Symbol('parsed plugin paths'),
-      pluginScanDirs: Symbol('parsed plugin scan dirs'),
-      repoRoot: Symbol('parsed repo root'),
-      outputRoot: Symbol('parsed output root'),
-      watch: Symbol('parsed watch'),
-      themeTags: Symbol('theme tags'),
-      inspectWorkers: Symbol('parsed inspect workers'),
-      profileWebpack: Symbol('parsed profile webpack'),
-      filters: [],
-      focus: [],
-      includeCoreBundle: false,
-    }));
+    jest.spyOn(OptimizerConfig, 'parseOptions').mockImplementation(
+      (): {
+        [key in keyof ParsedOptions]: any;
+      } => ({
+        cache: Symbol('parsed cache'),
+        dist: Symbol('parsed dist'),
+        maxWorkerCount: Symbol('parsed max worker count'),
+        pluginPaths: Symbol('parsed plugin paths'),
+        pluginScanDirs: Symbol('parsed plugin scan dirs'),
+        repoRoot: Symbol('parsed repo root'),
+        outputRoot: Symbol('parsed output root'),
+        watch: Symbol('parsed watch'),
+        themeTags: Symbol('theme tags'),
+        inspectWorkers: Symbol('parsed inspect workers'),
+        profileWebpack: Symbol('parsed profile webpack'),
+        filters: [],
+        focus: [],
+        includeCoreBundle: false,
+      })
+    );
   });
 
   it('passes parsed options to findKibanaPlatformPlugins, getBundles, and assignBundlesToWorkers', () => {
@@ -432,9 +436,10 @@ describe('OptimizerConfig::create()', () => {
 
     expect(config).toMatchInlineSnapshot(`
       OptimizerConfig {
-        "bundles": Symbol(filtered bundles),
+        "bundles": Symbol(focused bundles),
         "cache": Symbol(parsed cache),
         "dist": Symbol(parsed dist),
+        "filteredBundles": Symbol(filtered bundles),
         "inspectWorkers": Symbol(parsed inspect workers),
         "maxWorkerCount": Symbol(parsed max worker count),
         "plugins": Symbol(new platform plugins),
@@ -445,78 +450,33 @@ describe('OptimizerConfig::create()', () => {
       }
     `);
 
-    expect(findKibanaPlatformPlugins.mock).toMatchInlineSnapshot(`
-      Object {
-        "calls": Array [
-          Array [
-            Symbol(parsed plugin scan dirs),
-            Symbol(parsed plugin paths),
-          ],
+    expect(findKibanaPlatformPlugins.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Symbol(parsed plugin scan dirs),
+          Symbol(parsed plugin paths),
         ],
-        "instances": Array [
-          [Window],
-        ],
-        "invocationCallOrder": Array [
-          25,
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": Symbol(new platform plugins),
-          },
-        ],
-      }
+      ]
     `);
 
-    expect(filterById.mock).toMatchInlineSnapshot(`
-      Object {
-        "calls": Array [
-          Array [
-            Array [],
-            Symbol(focused bundles),
-          ],
+    expect(filterById.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Array [],
+          Symbol(focused bundles),
         ],
-        "instances": Array [
-          [Window],
-        ],
-        "invocationCallOrder": Array [
-          28,
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": Symbol(filtered bundles),
-          },
-        ],
-      }
+      ]
     `);
 
-    expect(getPluginBundles.mock).toMatchInlineSnapshot(`
-      Object {
-        "calls": Array [
-          Array [
-            Symbol(new platform plugins),
-            Symbol(parsed repo root),
-            Symbol(parsed output root),
-            Symbol(limits),
-          ],
+    expect(getPluginBundles.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Symbol(new platform plugins),
+          Symbol(parsed repo root),
+          Symbol(parsed output root),
+          Symbol(limits),
         ],
-        "instances": Array [
-          [Window],
-        ],
-        "invocationCallOrder": Array [
-          26,
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": Array [
-              Symbol(bundle1),
-              Symbol(bundle2),
-            ],
-          },
-        ],
-      }
+      ]
     `);
   });
 });

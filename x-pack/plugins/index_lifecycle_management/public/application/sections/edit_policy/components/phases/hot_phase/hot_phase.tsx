@@ -7,11 +7,11 @@
 
 import React, { FunctionComponent } from 'react';
 import { get } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiCallOut, EuiTextColor, EuiSwitch, EuiText } from '@elastic/eui';
 
-import { useFormData } from '../../../../../../shared_imports';
+import { useFormData, useKibana } from '../../../../../../shared_imports';
 
 import { i18nTexts } from '../../../i18n_texts';
 
@@ -21,7 +21,7 @@ import { useEditPolicyContext } from '../../../edit_policy_context';
 
 import { ROLLOVER_FORM_PATHS, isUsingDefaultRolloverPath } from '../../../constants';
 
-import { LearnMoreLink, DescribedFormRow } from '../../';
+import { LearnMoreLink, DescribedFormRow } from '../..';
 
 import {
   ForcemergeField,
@@ -29,12 +29,14 @@ import {
   SearchableSnapshotField,
   ReadonlyField,
   ShrinkField,
+  DownsampleField,
 } from '../shared_fields';
 import { Phase } from '../phase';
 
 import { useRolloverValueRequiredValidation } from './use_rollover_value_required_validation';
 import {
   MaxPrimaryShardSizeField,
+  MaxPrimaryShardDocsField,
   MaxAgeField,
   MaxDocumentCountField,
   MaxIndexSizeField,
@@ -47,10 +49,12 @@ export const HotPhase: FunctionComponent = () => {
   const [formData] = useFormData({
     watch: [isUsingDefaultRolloverPath, ...rolloverFieldPaths],
   });
-  const { isUsingRollover } = useConfiguration();
+  const { isUsingRollover, isUsingDownsampleInHotPhase } = useConfiguration();
   const isUsingDefaultRollover: boolean = get(formData, isUsingDefaultRolloverPath);
 
   const showEmptyRolloverFieldsError = useRolloverValueRequiredValidation();
+
+  const { docLinks } = useKibana().services;
 
   return (
     <Phase phase="hot">
@@ -89,7 +93,7 @@ export const HotPhase: FunctionComponent = () => {
                       defaultMessage="Learn more"
                     />
                   }
-                  docPath="ilm-rollover.html"
+                  docPath={docLinks.links.elasticsearch.ilmRollover}
                 />
               </p>
             </EuiTextColor>
@@ -135,6 +139,7 @@ export const HotPhase: FunctionComponent = () => {
                 {showEmptyRolloverFieldsError && (
                   <>
                     <EuiCallOut
+                      size="s"
                       title={i18nTexts.editPolicy.errors.rollOverConfigurationCallout.title}
                       data-test-subj="rolloverSettingsRequired"
                       color="danger"
@@ -146,6 +151,9 @@ export const HotPhase: FunctionComponent = () => {
                 )}
 
                 <MaxPrimaryShardSizeField />
+                <EuiSpacer />
+
+                <MaxPrimaryShardDocsField />
                 <EuiSpacer />
 
                 <MaxAgeField />
@@ -167,8 +175,9 @@ export const HotPhase: FunctionComponent = () => {
         <>
           {<ForcemergeField phase={'hot'} />}
           <ShrinkField phase={'hot'} />
-          {license.canUseSearchableSnapshot() && <SearchableSnapshotField phase={'hot'} />}
-          <ReadonlyField phase={'hot'} />
+          {license.canUseSearchableSnapshot() && <SearchableSnapshotField phase="hot" />}
+          <DownsampleField phase="hot" />
+          {!isUsingDownsampleInHotPhase && <ReadonlyField phase={'hot'} />}
         </>
       )}
       <IndexPriorityField phase={'hot'} />

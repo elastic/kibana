@@ -6,7 +6,7 @@
  */
 
 import { RefObject } from 'react';
-import { SavedObject, SavedObjectAttributes } from 'src/core/public';
+import { SavedObject, SavedObjectAttributes } from '@kbn/core/public';
 
 import { ElementPosition, CanvasPage, CanvasWorkpad, RendererSpec } from '../types';
 
@@ -24,15 +24,14 @@ export interface CanvasRenderedElement {
  * Represents a Page within a Canvas Workpad that is made up of ready-to-
  * render Elements.
  */
-export interface CanvasRenderedPage extends Omit<Omit<CanvasPage, 'elements'>, 'groups'> {
+export interface CanvasRenderedPage extends Omit<CanvasPage, 'elements'> {
   elements: CanvasRenderedElement[];
-  groups: CanvasRenderedElement[][];
 }
 
 /**
  * A Canvas Workpad made up of ready-to-render Elements.
  */
-export interface CanvasRenderedWorkpad extends Omit<CanvasWorkpad, 'pages'> {
+export interface CanvasRenderedWorkpad extends Omit<CanvasWorkpad, 'pages' | 'variables'> {
   pages: CanvasRenderedPage[];
 }
 

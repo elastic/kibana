@@ -6,26 +6,28 @@
  */
 
 import expect from '@kbn/expect';
-import indexDetailFixture from './fixtures/index_detail';
-import indexDetailAdvancedFixture from './fixtures/index_detail_advanced';
+import indexDetailFixture from './fixtures/index_detail.json';
+import indexDetailAdvancedFixture from './fixtures/index_detail_advanced.json';
+import { getLifecycleMethods } from '../data_stream';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
+  const { setup, tearDown } = getLifecycleMethods(getService);
 
   describe('index detail mb', () => {
-    const archive = 'monitoring/singlecluster_three_nodes_shard_relocation_mb';
+    const archive =
+      'x-pack/test/functional/es_archives/monitoring/singlecluster_three_nodes_shard_relocation_mb';
     const timeRange = {
       min: '2017-10-05T20:31:48.000Z',
       max: '2017-10-05T20:35:12.000Z',
     };
 
     before('load archive', () => {
-      return esArchiver.load(archive);
+      return setup(archive);
     });
 
     after('unload archive', () => {
-      return esArchiver.unload(archive);
+      return tearDown();
     });
 
     it('should summarize index with chart metrics data for the non-advanced view', async () => {

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { INDICATOR_MATCHED_FIELD } from '../../../../../../../common/cti/constants';
 import { DraggableBadge } from '../../../../../../common/components/draggables';
@@ -16,6 +16,7 @@ import { HorizontalSpacer } from './helpers';
 interface MatchDetailsProps {
   contextId: string;
   eventId: string;
+  isDraggable?: boolean;
   sourceField: string;
   sourceValue: string;
 }
@@ -23,6 +24,7 @@ interface MatchDetailsProps {
 export const MatchDetails: React.FC<MatchDetailsProps> = ({
   contextId,
   eventId,
+  isDraggable,
   sourceField,
   sourceValue,
 }) => (
@@ -40,7 +42,10 @@ export const MatchDetails: React.FC<MatchDetailsProps> = ({
         data-test-subj="threat-match-details-source-field"
         eventId={eventId}
         field={INDICATOR_MATCHED_FIELD}
+        isDraggable={isDraggable}
         value={sourceField}
+        isAggregatable={true}
+        fieldType={'keyword'}
       />
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
@@ -57,7 +62,10 @@ export const MatchDetails: React.FC<MatchDetailsProps> = ({
         data-test-subj="threat-match-details-source-value"
         eventId={eventId}
         field={sourceField}
+        isDraggable={isDraggable}
         value={sourceValue}
+        isAggregatable={true}
+        fieldType={'keyword'}
       />
     </EuiFlexItem>
   </EuiFlexGroup>

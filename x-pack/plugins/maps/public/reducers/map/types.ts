@@ -7,63 +7,48 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
+import type { Query } from '@kbn/data-plugin/common';
+import { Filter } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
 import {
   DrawState,
+  EditState,
   Goto,
   LayerDescriptor,
   MapCenter,
   MapExtent,
-  MapQuery,
-  MapRefreshConfig,
+  MapSettings,
+  Timeslice,
   TooltipState,
 } from '../../../common/descriptor_types';
-import { INITIAL_LOCATION } from '../../../common/constants';
-import { Filter, TimeRange } from '../../../../../../src/plugins/data/public';
 
-export type MapContext = {
-  zoom?: number;
-  center?: MapCenter;
-  scrollZoom: boolean;
-  buffer?: MapExtent;
-  extent?: MapExtent;
+export interface MapExtentState {
+  zoom: number;
+  extent: MapExtent;
+  center: MapCenter;
+}
+
+export type MapViewContext = MapExtentState & {
+  buffer: MapExtent;
+};
+
+export type MapContext = Partial<MapViewContext> & {
   mouseCoordinates?: {
     lat: number;
     lon: number;
   };
   timeFilters?: TimeRange;
-  query?: MapQuery;
+  timeslice?: Timeslice;
+  query?: Query;
   filters: Filter[];
-  refreshConfig?: MapRefreshConfig;
-  refreshTimerLastTriggeredAt?: string;
+  embeddableSearchContext?: {
+    query?: Query;
+    filters: Filter[];
+  };
   drawState?: DrawState;
+  editState?: EditState;
   searchSessionId?: string;
   searchSessionMapBuffer?: MapExtent;
-};
-
-export type MapSettings = {
-  autoFitToDataBounds: boolean;
-  backgroundColor: string;
-  disableInteractive: boolean;
-  disableTooltipControl: boolean;
-  hideToolbarOverlay: boolean;
-  hideLayerControl: boolean;
-  hideViewControl: boolean;
-  initialLocation: INITIAL_LOCATION;
-  fixedLocation: {
-    lat: number;
-    lon: number;
-    zoom: number;
-  };
-  browserLocation: {
-    zoom: number;
-  };
-  maxZoom: number;
-  minZoom: number;
-  showScaleControl: boolean;
-  showSpatialFilters: boolean;
-  spatialFiltersAlpa: number;
-  spatialFiltersFillColor: string;
-  spatialFiltersLineColor: string;
 };
 
 export type MapState = {

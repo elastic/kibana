@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { estypes } from '@elastic/elasticsearch';
-import type { HttpHandler } from 'src/core/public';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { HttpHandler } from '@kbn/core/public';
 import {
   bucketSpan,
   DatasetFilter,
@@ -116,6 +116,7 @@ const setUpModule = async (
       jobOverrides,
       datafeedOverrides,
       query,
+      useDedicatedIndex: true,
     },
     fetch
   );
@@ -128,7 +129,7 @@ const cleanUpModule = async (spaceId: string, sourceId: string, fetch: HttpHandl
 const validateSetupIndices = async (
   indices: string[],
   timestampField: string,
-  runtimeMappings: estypes.RuntimeFields,
+  runtimeMappings: estypes.MappingRuntimeFields,
   fetch: HttpHandler
 ) => {
   return await callValidateIndicesAPI(
@@ -155,7 +156,7 @@ const validateSetupDatasets = async (
   timestampField: string,
   startTime: number,
   endTime: number,
-  runtimeMappings: estypes.RuntimeFields,
+  runtimeMappings: estypes.MappingRuntimeFields,
   fetch: HttpHandler
 ) => {
   return await callValidateDatasetsAPI(

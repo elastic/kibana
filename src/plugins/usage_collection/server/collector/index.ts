@@ -7,14 +7,16 @@
  */
 
 export { CollectorSet } from './collector_set';
-export { Collector } from './collector';
 export type {
   AllowedSchemaTypes,
   AllowedSchemaNumberTypes,
-  SchemaField,
+  AllowedSchemaBooleanTypes,
+  AllowedSchemaStringTypes,
+  RecursiveMakeSchemaFrom,
   MakeSchemaFrom,
   CollectorOptions,
   CollectorFetchContext,
-} from './collector';
-export { UsageCollector } from './usage_collector';
+  CollectorFetchMethod,
+  ICollector as Collector,
+} from './types';
 export type { UsageCollectorOptions } from './usage_collector';

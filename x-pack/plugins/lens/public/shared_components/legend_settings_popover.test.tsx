@@ -6,9 +6,12 @@
  */
 
 import React from 'react';
-import { Position } from '@elastic/charts';
-import { shallowWithIntl as shallow } from '@kbn/test/jest';
-import { LegendSettingsPopover, LegendSettingsPopoverProps } from './legend_settings_popover';
+import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
+import {
+  LegendSettingsPopover,
+  LegendSettingsPopoverProps,
+  MaxLinesInput,
+} from './legend_settings_popover';
 
 describe('Legend Settings', () => {
   const legendOptions: Array<{ id: string; value: 'auto' | 'show' | 'hide'; label: string }> = [
@@ -33,8 +36,10 @@ describe('Legend Settings', () => {
     props = {
       legendOptions,
       mode: 'auto',
+      showAutoLegendSizeOption: true,
       onDisplayChange: jest.fn(),
       onPositionChange: jest.fn(),
+      onLegendSizeChange: jest.fn(),
     };
   });
 
@@ -51,24 +56,39 @@ describe('Legend Settings', () => {
     expect(props.onDisplayChange).toHaveBeenCalled();
   });
 
-  it('should have default the Position to right when no position is given', () => {
-    const component = shallow(<LegendSettingsPopover {...props} />);
-    expect(
-      component.find('[data-test-subj="lens-legend-position-btn"]').prop('idSelected')
-    ).toEqual(Position.Right);
+  it('should have default the max lines input to 1 when no value is given', () => {
+    const component = shallow(<LegendSettingsPopover {...props} shouldTruncate />);
+    expect(component.find(MaxLinesInput).prop('value')).toEqual(1);
   });
 
-  it('should have called the onPositionChange function on ButtonGroup change', () => {
+  it('should have the `Truncate legend text` switch enabled by default', () => {
     const component = shallow(<LegendSettingsPopover {...props} />);
-    component.find('[data-test-subj="lens-legend-position-btn"]').simulate('change');
-    expect(props.onPositionChange).toHaveBeenCalled();
-  });
-
-  it('should disable the position button group on hide mode', () => {
-    const component = shallow(<LegendSettingsPopover {...props} mode="hide" />);
     expect(
-      component.find('[data-test-subj="lens-legend-position-btn"]').prop('isDisabled')
+      component.find('[data-test-subj="lens-legend-truncate-switch"]').prop('checked')
     ).toEqual(true);
+  });
+
+  it('should set the truncate switch state when truncate prop value is false', () => {
+    const component = shallow(<LegendSettingsPopover {...props} shouldTruncate={false} />);
+    expect(
+      component.find('[data-test-subj="lens-legend-truncate-switch"]').prop('checked')
+    ).toEqual(false);
+  });
+
+  it('should hide the max lines input when truncate is set to false', () => {
+    const component = shallow(<LegendSettingsPopover {...props} shouldTruncate={false} />);
+    expect(component.exists(MaxLinesInput)).toEqual(false);
+  });
+
+  it('should have called the onTruncateLegendChange function on truncate switch change', () => {
+    const nestedProps = {
+      ...props,
+      shouldTruncate: true,
+      onTruncateLegendChange: jest.fn(),
+    };
+    const component = shallow(<LegendSettingsPopover {...nestedProps} />);
+    component.find('[data-test-subj="lens-legend-truncate-switch"]').simulate('change');
+    expect(nestedProps.onTruncateLegendChange).toHaveBeenCalled();
   });
 
   it('should enable the Nested Legend Switch when renderNestedLegendSwitch prop is true', () => {
@@ -96,12 +116,10 @@ describe('Legend Settings', () => {
     expect(nestedProps.onNestedLegendChange).toHaveBeenCalled();
   });
 
-  it('should disable switch group on hide mode', () => {
+  it('should hide switch group on hide mode', () => {
     const component = shallow(
       <LegendSettingsPopover {...props} mode="hide" renderNestedLegendSwitch />
     );
-    expect(component.find('[data-test-subj="lens-legend-nested-switch"]').prop('disabled')).toEqual(
-      true
-    );
+    expect(component.exists('[data-test-subj="lens-legend-nested-switch"]')).toEqual(false);
   });
 });

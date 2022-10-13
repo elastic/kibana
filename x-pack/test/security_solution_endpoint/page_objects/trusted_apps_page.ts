@@ -24,7 +24,11 @@ export function TrustedAppsPageProvider({ getService, getPageObjects }: FtrProvi
      * ensures that the Policy Page is the currently display view
      */
     async ensureIsOnTrustedAppsListPage() {
-      await testSubjects.existOrFail('trustedAppsListPage');
+      await testSubjects.existOrFail('trustedAppsListPage-list');
+    },
+
+    async ensureIsOnTrustedAppsEmptyPage() {
+      await testSubjects.existOrFail('trustedAppsListPage-emptyState');
     },
 
     /**
@@ -34,6 +38,14 @@ export function TrustedAppsPageProvider({ getService, getPageObjects }: FtrProvi
     async findTrustedAppsListPageBackButton() {
       await this.ensureIsOnTrustedAppsListPage();
       return testSubjects.find('backToOrigin');
+    },
+
+    /**
+     * Clicks on the actions menu icon in the (only one) truated app card to show the popup with list of actions
+     */
+    async clickCardActionMenu() {
+      await this.ensureIsOnTrustedAppsListPage();
+      await testSubjects.click('trustedAppsListPage-card-header-actions-button');
     },
   };
 }

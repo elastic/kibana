@@ -6,8 +6,11 @@
  */
 import { act } from 'react-dom/test-utils';
 
+import { API_BASE_PATH } from '../../common';
 import { pageHelpers, setupEnvironment } from './helpers';
 import { RestoreSnapshotTestBed } from './helpers/restore_snapshot.helpers';
+import { REPOSITORY_NAME, SNAPSHOT_NAME } from './helpers/constant';
+import { FEATURE_STATES_NONE_OPTION } from '../../common/constants';
 import * as fixtures from '../../test/fixtures';
 
 const {
@@ -15,19 +18,19 @@ const {
 } = pageHelpers;
 
 describe('<RestoreSnapshot />', () => {
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
+  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: RestoreSnapshotTestBed;
-
-  afterAll(() => {
-    server.restore();
-  });
 
   describe('wizard navigation', () => {
     beforeEach(async () => {
-      httpRequestsMockHelpers.setGetSnapshotResponse(fixtures.getSnapshot());
+      httpRequestsMockHelpers.setGetSnapshotResponse(
+        REPOSITORY_NAME,
+        SNAPSHOT_NAME,
+        fixtures.getSnapshot()
+      );
 
       await act(async () => {
-        testBed = await setup();
+        testBed = await setup(httpSetup);
       });
 
       testBed.component.update();
@@ -44,10 +47,14 @@ describe('<RestoreSnapshot />', () => {
 
   describe('with data streams', () => {
     beforeEach(async () => {
-      httpRequestsMockHelpers.setGetSnapshotResponse(fixtures.getSnapshot());
+      httpRequestsMockHelpers.setGetSnapshotResponse(
+        REPOSITORY_NAME,
+        SNAPSHOT_NAME,
+        fixtures.getSnapshot()
+      );
 
       await act(async () => {
-        testBed = await setup();
+        testBed = await setup(httpSetup);
       });
 
       testBed.component.update();
@@ -61,9 +68,13 @@ describe('<RestoreSnapshot />', () => {
 
   describe('without data streams', () => {
     beforeEach(async () => {
-      httpRequestsMockHelpers.setGetSnapshotResponse(fixtures.getSnapshot({ totalDataStreams: 0 }));
+      httpRequestsMockHelpers.setGetSnapshotResponse(
+        REPOSITORY_NAME,
+        SNAPSHOT_NAME,
+        fixtures.getSnapshot({ totalDataStreams: 0 })
+      );
       await act(async () => {
-        testBed = await setup();
+        testBed = await setup(httpSetup);
       });
 
       testBed.component.update();
@@ -75,22 +86,45 @@ describe('<RestoreSnapshot />', () => {
     });
   });
 
-  describe('global state', () => {
-    beforeEach(async () => {
-      httpRequestsMockHelpers.setGetSnapshotResponse(fixtures.getSnapshot());
+  describe('feature states', () => {
+    test('when no feature states hide dropdown and show no features callout', async () => {
+      httpRequestsMockHelpers.setGetSnapshotResponse(
+        REPOSITORY_NAME,
+        SNAPSHOT_NAME,
+        fixtures.getSnapshot({ featureStates: [] })
+      );
+
       await act(async () => {
-        testBed = await setup();
+        testBed = await setup(httpSetup);
+      });
+      testBed.component.update();
+
+      const { exists, actions } = testBed;
+
+      actions.toggleGlobalState();
+      expect(exists('systemIndicesInfoCallOut')).toBe(false);
+      expect(exists('featureStatesDropdown')).toBe(false);
+      expect(exists('noFeatureStatesCallout')).toBe(true);
+    });
+
+    test('shows an extra info callout when includeFeatureState is enabled and we have featureStates present in snapshot', async () => {
+      httpRequestsMockHelpers.setGetSnapshotResponse(
+        REPOSITORY_NAME,
+        SNAPSHOT_NAME,
+        fixtures.getSnapshot({ featureStates: ['kibana'] })
+      );
+
+      await act(async () => {
+        testBed = await setup(httpSetup);
       });
 
       testBed.component.update();
-    });
 
-    test('shows an info callout when include_global_state is enabled', () => {
       const { exists, actions } = testBed;
 
       expect(exists('systemIndicesInfoCallOut')).toBe(false);
 
-      actions.toggleGlobalState();
+      await actions.toggleFeatureState();
 
       expect(exists('systemIndicesInfoCallOut')).toBe(true);
     });
@@ -100,11 +134,14 @@ describe('<RestoreSnapshot />', () => {
   // the form controls and asserting that the correct payload is sent to the API.
   describe('include aliases', () => {
     beforeEach(async () => {
-      httpRequestsMockHelpers.setGetSnapshotResponse(fixtures.getSnapshot());
-      httpRequestsMockHelpers.setRestoreSnapshotResponse({});
+      httpRequestsMockHelpers.setGetSnapshotResponse(
+        REPOSITORY_NAME,
+        SNAPSHOT_NAME,
+        fixtures.getSnapshot()
+      );
 
       await act(async () => {
-        testBed = await setup();
+        testBed = await setup(httpSetup);
       });
 
       testBed.component.update();
@@ -116,9 +153,15 @@ describe('<RestoreSnapshot />', () => {
       actions.goToStep(3);
       await actions.clickRestore();
 
-      const expectedPayload = { includeAliases: false };
-      const latestRequest = server.requests[server.requests.length - 1];
-      expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expectedPayload);
+      expect(httpSetup.post).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}restore/${REPOSITORY_NAME}/${SNAPSHOT_NAME}`,
+        expect.objectContaining({
+          body: JSON.stringify({
+            featureStates: [FEATURE_STATES_NONE_OPTION],
+            includeAliases: false,
+          }),
+        })
+      );
     });
   });
 });

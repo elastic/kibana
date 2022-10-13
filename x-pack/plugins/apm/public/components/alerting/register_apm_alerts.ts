@@ -7,57 +7,46 @@
 
 import { i18n } from '@kbn/i18n';
 import { lazy } from 'react';
-import { stringify } from 'querystring';
-import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
+import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
+import {
+  getAlertUrlErrorCount,
+  getAlertUrlTransaction,
+} from '../../../common/utils/formatters';
 import { AlertType } from '../../../common/alert_types';
-import type { ApmRuleRegistry } from '../../plugin';
 
-const format = ({
-  pathname,
-  query,
-}: {
-  pathname: string;
-  query: Record<string, any>;
-}): string => {
-  return `${pathname}?${stringify(query)}`;
-};
+// copied from elasticsearch_fieldnames.ts to limit page load bundle size
+const SERVICE_ENVIRONMENT = 'service.environment';
+const SERVICE_NAME = 'service.name';
+const TRANSACTION_TYPE = 'transaction.type';
 
-export function registerApmAlerts(apmRuleRegistry: ApmRuleRegistry) {
-  apmRuleRegistry.registerType({
+export function registerApmAlerts(
+  observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry
+) {
+  observabilityRuleTypeRegistry.register({
     id: AlertType.ErrorCount,
     description: i18n.translate('xpack.apm.alertTypes.errorCount.description', {
       defaultMessage:
         'Alert when the number of errors in a service exceeds a defined threshold.',
     }),
-    format: ({ alert }) => {
+    format: ({ fields }) => {
       return {
-        reason: i18n.translate('xpack.apm.alertTypes.errorCount.reason', {
-          defaultMessage: `Error count is greater than {threshold} (current value is {measured}) for {serviceName}`,
-          values: {
-            threshold: alert['kibana.observability.evaluation.threshold'],
-            measured: alert['kibana.observability.evaluation.value'],
-            serviceName: alert['service.name']!,
-          },
-        }),
-        link: format({
-          pathname: `/app/apm/services/${alert['service.name']!}/errors`,
-          query: {
-            ...(alert['service.environment']
-              ? { environment: alert['service.environment'] }
-              : { environment: ENVIRONMENT_ALL.value }),
-          },
-        }),
+        reason: fields[ALERT_REASON]!,
+        link: getAlertUrlErrorCount(
+          String(fields[SERVICE_NAME][0]!),
+          fields[SERVICE_ENVIRONMENT] && String(fields[SERVICE_ENVIRONMENT][0])
+        ),
       };
     },
     iconClass: 'bell',
     documentationUrl(docLinks) {
-      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/apm-alerts.html`;
+      return `${docLinks.links.alerting.apmRules}`;
     },
-    alertParamsExpression: lazy(() => import('./error_count_alert_trigger')),
+    ruleParamsExpression: lazy(() => import('./error_count_alert_trigger')),
     validate: () => ({
       errors: [],
     }),
-    requiresAppContext: true,
+    requiresAppContext: false,
     defaultActionMessage: i18n.translate(
       'xpack.apm.alertTypes.errorCount.defaultActionMessage',
       {
@@ -71,7 +60,7 @@ export function registerApmAlerts(apmRuleRegistry: ApmRuleRegistry) {
     ),
   });
 
-  apmRuleRegistry.registerType({
+  observabilityRuleTypeRegistry.register({
     id: AlertType.TransactionDuration,
     description: i18n.translate(
       'xpack.apm.alertTypes.transactionDuration.description',
@@ -80,43 +69,27 @@ export function registerApmAlerts(apmRuleRegistry: ApmRuleRegistry) {
           'Alert when the latency of a specific transaction type in a service exceeds a defined threshold.',
       }
     ),
-    format: ({ alert, formatters: { asDuration } }) => ({
-      reason: i18n.translate(
-        'xpack.apm.alertTypes.transactionDuration.reason',
-        {
-          defaultMessage: `Latency is above {threshold} (current value is {measured}) for {serviceName}`,
-          values: {
-            threshold: asDuration(
-              alert['kibana.observability.evaluation.threshold']
-            ),
-            measured: asDuration(
-              alert['kibana.observability.evaluation.value']
-            ),
-            serviceName: alert['service.name']!,
-          },
-        }
-      ),
-      link: format({
-        pathname: `/app/apm/services/${alert['service.name']!}`,
-        query: {
-          transactionType: alert['transaction.type']!,
-          ...(alert['service.environment']
-            ? { environment: alert['service.environment'] }
-            : { environment: ENVIRONMENT_ALL.value }),
-        },
-      }),
-    }),
+    format: ({ fields, formatters: { asDuration } }) => {
+      return {
+        reason: fields[ALERT_REASON]!,
+        link: getAlertUrlTransaction(
+          String(fields[SERVICE_NAME][0]!),
+          fields[SERVICE_ENVIRONMENT] && String(fields[SERVICE_ENVIRONMENT][0]),
+          String(fields[TRANSACTION_TYPE][0]!)
+        ),
+      };
+    },
     iconClass: 'bell',
     documentationUrl(docLinks) {
-      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/apm-alerts.html`;
+      return `${docLinks.links.alerting.apmRules}`;
     },
-    alertParamsExpression: lazy(
+    ruleParamsExpression: lazy(
       () => import('./transaction_duration_alert_trigger')
     ),
     validate: () => ({
       errors: [],
     }),
-    requiresAppContext: true,
+    requiresAppContext: false,
     defaultActionMessage: i18n.translate(
       'xpack.apm.alertTypes.transactionDuration.defaultActionMessage',
       {
@@ -131,7 +104,7 @@ export function registerApmAlerts(apmRuleRegistry: ApmRuleRegistry) {
     ),
   });
 
-  apmRuleRegistry.registerType({
+  observabilityRuleTypeRegistry.register({
     id: AlertType.TransactionErrorRate,
     description: i18n.translate(
       'xpack.apm.alertTypes.transactionErrorRate.description',
@@ -140,45 +113,25 @@ export function registerApmAlerts(apmRuleRegistry: ApmRuleRegistry) {
           'Alert when the rate of transaction errors in a service exceeds a defined threshold.',
       }
     ),
-    format: ({ alert, formatters: { asPercent } }) => ({
-      reason: i18n.translate(
-        'xpack.apm.alertTypes.transactionErrorRate.reason',
-        {
-          defaultMessage: `Transaction error rate is greater than {threshold} (current value is {measured}) for {serviceName}`,
-          values: {
-            threshold: asPercent(
-              alert['kibana.observability.evaluation.threshold'],
-              100
-            ),
-            measured: asPercent(
-              alert['kibana.observability.evaluation.value'],
-              100
-            ),
-            serviceName: alert['service.name']!,
-          },
-        }
+    format: ({ fields, formatters: { asPercent } }) => ({
+      reason: fields[ALERT_REASON]!,
+      link: getAlertUrlTransaction(
+        String(fields[SERVICE_NAME][0]!),
+        fields[SERVICE_ENVIRONMENT] && String(fields[SERVICE_ENVIRONMENT][0]),
+        String(fields[TRANSACTION_TYPE][0]!)
       ),
-      link: format({
-        pathname: `/app/apm/services/${alert['service.name']!}`,
-        query: {
-          transactionType: alert['transaction.type']!,
-          ...(alert['service.environment']
-            ? { environment: alert['service.environment'] }
-            : { environment: ENVIRONMENT_ALL.value }),
-        },
-      }),
     }),
     iconClass: 'bell',
     documentationUrl(docLinks) {
-      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/apm-alerts.html`;
+      return `${docLinks.links.alerting.apmRules}`;
     },
-    alertParamsExpression: lazy(
+    ruleParamsExpression: lazy(
       () => import('./transaction_error_rate_alert_trigger')
     ),
     validate: () => ({
       errors: [],
     }),
-    requiresAppContext: true,
+    requiresAppContext: false,
     defaultActionMessage: i18n.translate(
       'xpack.apm.alertTypes.transactionErrorRate.defaultActionMessage',
       {
@@ -193,47 +146,31 @@ export function registerApmAlerts(apmRuleRegistry: ApmRuleRegistry) {
     ),
   });
 
-  apmRuleRegistry.registerType({
-    id: AlertType.TransactionDurationAnomaly,
-    description: i18n.translate(
-      'xpack.apm.alertTypes.transactionDurationAnomaly.description',
-      {
-        defaultMessage: 'Alert when the latency of a service is abnormal.',
-      }
-    ),
-    format: ({ alert }) => ({
-      reason: i18n.translate(
-        'xpack.apm.alertTypes.transactionDurationAnomaly.reason',
-        {
-          defaultMessage: `{severityLevel} anomaly detected for {serviceName} (score was {measured})`,
-          values: {
-            serviceName: alert['service.name'],
-            severityLevel: alert['kibana.rac.alert.severity.level'],
-            measured: alert['kibana.observability.evaluation.value'],
-          },
-        }
+  observabilityRuleTypeRegistry.register({
+    id: AlertType.Anomaly,
+    description: i18n.translate('xpack.apm.alertTypes.anomaly.description', {
+      defaultMessage:
+        'Alert when either the latency, throughput, or failed transaction rate of a service is anomalous.',
+    }),
+    format: ({ fields }) => ({
+      reason: fields[ALERT_REASON]!,
+      link: getAlertUrlTransaction(
+        String(fields[SERVICE_NAME][0]!),
+        fields[SERVICE_ENVIRONMENT] && String(fields[SERVICE_ENVIRONMENT][0]),
+        String(fields[TRANSACTION_TYPE][0]!)
       ),
-      link: format({
-        pathname: `/app/apm/services/${alert['service.name']!}`,
-        query: {
-          transactionType: alert['transaction.type']!,
-          ...(alert['service.environment']
-            ? { environment: alert['service.environment'] }
-            : { environment: ENVIRONMENT_ALL.value }),
-        },
-      }),
     }),
     iconClass: 'bell',
     documentationUrl(docLinks) {
-      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/apm-alerts.html`;
+      return `${docLinks.links.alerting.apmRules}`;
     },
-    alertParamsExpression: lazy(
+    ruleParamsExpression: lazy(
       () => import('./transaction_duration_anomaly_alert_trigger')
     ),
     validate: () => ({
       errors: [],
     }),
-    requiresAppContext: true,
+    requiresAppContext: false,
     defaultActionMessage: i18n.translate(
       'xpack.apm.alertTypes.transactionDurationAnomaly.defaultActionMessage',
       {

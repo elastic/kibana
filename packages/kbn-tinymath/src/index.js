@@ -7,11 +7,9 @@
  */
 
 const { get } = require('lodash');
-// eslint-disable-next-line import/no-unresolved
-const { parse: parseFn } = require('../grammar');
+const memoizeOne = require('memoize-one');
 const { functions: includedFunctions } = require('./functions');
-
-module.exports = { parse, evaluate, interpret };
+const { parse: parseFn } = require('../grammar/built_grammar.js');
 
 function parse(input, options) {
   if (input == null) {
@@ -29,13 +27,15 @@ function parse(input, options) {
   }
 }
 
+const memoizedParse = memoizeOne(parse);
+
 function evaluate(expression, scope = {}, injectedFunctions = {}) {
   scope = scope || {};
-  return interpret(parse(expression), scope, injectedFunctions);
+  return interpret(memoizedParse(expression), scope, injectedFunctions);
 }
 
 function interpret(node, scope, injectedFunctions) {
-  const functions = Object.assign({}, includedFunctions, injectedFunctions); // eslint-disable-line
+  const functions = Object.assign({}, includedFunctions, injectedFunctions); // eslint-disable-line prefer-object-spread/prefer-object-spread
   return exec(node);
 
   function exec(node) {
@@ -79,3 +79,5 @@ function isOperable(args) {
     return typeof arg === 'number' && !isNaN(arg);
   });
 }
+
+module.exports = { parse: memoizedParse, evaluate, interpret };

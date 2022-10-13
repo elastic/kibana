@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import {
   AppMountParameters,
   CoreStart,
@@ -13,40 +15,48 @@ import {
   Plugin,
   PluginInitializerContext,
   DEFAULT_APP_CATEGORIES,
-} from '../../../../src/core/public';
-import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
-import {
-  FeatureCatalogueCategory,
-  HomePublicPluginSetup,
-} from '../../../../src/plugins/home/public';
-import { CloudSetup } from '../../cloud/public';
-import { LicensingPluginStart } from '../../licensing/public';
+  AppNavLinkStatus,
+} from '@kbn/core/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 
 import {
+  ANALYTICS_PLUGIN,
   APP_SEARCH_PLUGIN,
-  ENTERPRISE_SEARCH_PLUGIN,
+  ELASTICSEARCH_PLUGIN,
+  ENTERPRISE_SEARCH_CONTENT_PLUGIN,
+  ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
 } from '../common/constants';
 import { InitialAppData } from '../common/types';
+
+import { enableBehavioralAnalyticsSection } from '../common/ui_settings_keys';
 
 import { docLinks } from './applications/shared/doc_links';
 
 export interface ClientConfigType {
   host?: string;
 }
+
 export interface ClientData extends InitialAppData {
   publicUrl?: string;
-  errorConnecting?: boolean;
+  errorConnectingMessage?: string;
 }
 
 interface PluginsSetup {
   cloud?: CloudSetup;
   home?: HomePublicPluginSetup;
+  security: SecurityPluginSetup;
 }
+
 export interface PluginsStart {
-  cloud?: CloudSetup;
+  cloud?: CloudSetup & CloudStart;
   licensing: LicensingPluginStart;
   charts: ChartsPluginStart;
+  data: DataPublicPluginStart;
+  security: SecurityPluginStart;
 }
 
 export class EnterpriseSearchPlugin implements Plugin {
@@ -61,31 +71,107 @@ export class EnterpriseSearchPlugin implements Plugin {
   public setup(core: CoreSetup, plugins: PluginsSetup) {
     const { cloud } = plugins;
 
+    const bahavioralAnalyticsEnabled = core.uiSettings?.get<boolean>(
+      enableBehavioralAnalyticsSection,
+      false
+    );
+
     core.application.register({
-      id: ENTERPRISE_SEARCH_PLUGIN.ID,
-      title: ENTERPRISE_SEARCH_PLUGIN.NAV_TITLE,
-      euiIconType: ENTERPRISE_SEARCH_PLUGIN.LOGO,
-      appRoute: ENTERPRISE_SEARCH_PLUGIN.URL,
+      id: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
+      title: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.NAV_TITLE,
+      euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
+      appRoute: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       mount: async (params: AppMountParameters) => {
         const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
         const { chrome, http } = kibanaDeps.core;
-        chrome.docTitle.change(ENTERPRISE_SEARCH_PLUGIN.NAME);
+        chrome.docTitle.change(ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.NAME);
 
         await this.getInitialData(http);
         const pluginData = this.getPluginData();
 
         const { renderApp } = await import('./applications');
-        const { EnterpriseSearch } = await import('./applications/enterprise_search');
+        const { EnterpriseSearchOverview } = await import(
+          './applications/enterprise_search_overview'
+        );
 
-        return renderApp(EnterpriseSearch, kibanaDeps, pluginData);
+        return renderApp(EnterpriseSearchOverview, kibanaDeps, pluginData);
+      },
+    });
+
+    core.application.register({
+      id: ENTERPRISE_SEARCH_CONTENT_PLUGIN.ID,
+      title: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAV_TITLE,
+      euiIconType: ENTERPRISE_SEARCH_CONTENT_PLUGIN.LOGO,
+      appRoute: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL,
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      mount: async (params: AppMountParameters) => {
+        const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
+        const { chrome, http } = kibanaDeps.core;
+        chrome.docTitle.change(ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAME);
+
+        await this.getInitialData(http);
+        const pluginData = this.getPluginData();
+
+        const { renderApp } = await import('./applications');
+        const { EnterpriseSearchContent } = await import(
+          './applications/enterprise_search_content'
+        );
+
+        return renderApp(EnterpriseSearchContent, kibanaDeps, pluginData);
+      },
+    });
+
+    core.application.register({
+      id: ANALYTICS_PLUGIN.ID,
+      title: ANALYTICS_PLUGIN.NAME,
+      euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
+      searchable: bahavioralAnalyticsEnabled,
+      navLinkStatus: bahavioralAnalyticsEnabled
+        ? AppNavLinkStatus.default
+        : AppNavLinkStatus.hidden,
+      appRoute: ANALYTICS_PLUGIN.URL,
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      mount: async (params: AppMountParameters) => {
+        const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
+        const { chrome, http } = kibanaDeps.core;
+        chrome.docTitle.change(ANALYTICS_PLUGIN.NAME);
+
+        await this.getInitialData(http);
+        const pluginData = this.getPluginData();
+
+        const { renderApp } = await import('./applications');
+        const { Analytics } = await import('./applications/analytics');
+
+        return renderApp(Analytics, kibanaDeps, pluginData);
+      },
+    });
+
+    core.application.register({
+      id: ELASTICSEARCH_PLUGIN.ID,
+      title: ELASTICSEARCH_PLUGIN.NAME,
+      euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
+      appRoute: ELASTICSEARCH_PLUGIN.URL,
+      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      mount: async (params: AppMountParameters) => {
+        const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
+        const { chrome, http } = kibanaDeps.core;
+        chrome.docTitle.change(ELASTICSEARCH_PLUGIN.NAME);
+
+        await this.getInitialData(http);
+        const pluginData = this.getPluginData();
+
+        const { renderApp } = await import('./applications');
+        const { Elasticsearch } = await import('./applications/elasticsearch');
+
+        return renderApp(Elasticsearch, kibanaDeps, pluginData);
       },
     });
 
     core.application.register({
       id: APP_SEARCH_PLUGIN.ID,
       title: APP_SEARCH_PLUGIN.NAME,
-      euiIconType: ENTERPRISE_SEARCH_PLUGIN.LOGO,
+      euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
       appRoute: APP_SEARCH_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       mount: async (params: AppMountParameters) => {
@@ -106,7 +192,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     core.application.register({
       id: WORKPLACE_SEARCH_PLUGIN.ID,
       title: WORKPLACE_SEARCH_PLUGIN.NAME,
-      euiIconType: ENTERPRISE_SEARCH_PLUGIN.LOGO,
+      euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
       appRoute: WORKPLACE_SEARCH_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       mount: async (params: AppMountParameters) => {
@@ -129,14 +215,25 @@ export class EnterpriseSearchPlugin implements Plugin {
 
     if (plugins.home) {
       plugins.home.featureCatalogue.registerSolution({
-        id: ENTERPRISE_SEARCH_PLUGIN.ID,
-        title: ENTERPRISE_SEARCH_PLUGIN.NAME,
-        subtitle: ENTERPRISE_SEARCH_PLUGIN.SUBTITLE,
+        id: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
+        title: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.NAME,
         icon: 'logoEnterpriseSearch',
-        description: ENTERPRISE_SEARCH_PLUGIN.DESCRIPTION,
-        appDescriptions: ENTERPRISE_SEARCH_PLUGIN.APP_DESCRIPTIONS,
-        path: ENTERPRISE_SEARCH_PLUGIN.URL,
+        description: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.DESCRIPTION,
+        path: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
+        order: 100,
       });
+
+      if (bahavioralAnalyticsEnabled) {
+        plugins.home.featureCatalogue.register({
+          id: ANALYTICS_PLUGIN.ID,
+          title: ANALYTICS_PLUGIN.NAME,
+          icon: 'appAnalytics',
+          description: ANALYTICS_PLUGIN.DESCRIPTION,
+          path: ANALYTICS_PLUGIN.URL,
+          category: 'data',
+          showOnHomePage: false,
+        });
+      }
 
       plugins.home.featureCatalogue.register({
         id: APP_SEARCH_PLUGIN.ID,
@@ -144,7 +241,17 @@ export class EnterpriseSearchPlugin implements Plugin {
         icon: 'appSearchApp',
         description: APP_SEARCH_PLUGIN.DESCRIPTION,
         path: APP_SEARCH_PLUGIN.URL,
-        category: FeatureCatalogueCategory.DATA,
+        category: 'data',
+        showOnHomePage: false,
+      });
+
+      plugins.home.featureCatalogue.register({
+        id: ELASTICSEARCH_PLUGIN.ID,
+        title: ELASTICSEARCH_PLUGIN.NAME,
+        icon: 'appElasticsearch',
+        description: ELASTICSEARCH_PLUGIN.DESCRIPTION,
+        path: ELASTICSEARCH_PLUGIN.URL,
+        category: 'data',
         showOnHomePage: false,
       });
 
@@ -154,7 +261,7 @@ export class EnterpriseSearchPlugin implements Plugin {
         icon: 'workplaceSearchApp',
         description: WORKPLACE_SEARCH_PLUGIN.DESCRIPTION,
         path: WORKPLACE_SEARCH_PLUGIN.URL,
-        category: FeatureCatalogueCategory.DATA,
+        category: 'data',
         showOnHomePage: false,
       });
     }
@@ -168,10 +275,18 @@ export class EnterpriseSearchPlugin implements Plugin {
 
   public stop() {}
 
-  private async getKibanaDeps(core: CoreSetup, params: AppMountParameters, cloud?: CloudSetup) {
+  private async getKibanaDeps(
+    core: CoreSetup,
+    params: AppMountParameters,
+    cloudSetup?: CloudSetup
+  ) {
     // Helper for using start dependencies on mount (instead of setup dependencies)
     // and for grouping Kibana-related args together (vs. plugin-specific args)
     const [coreStart, pluginsStart] = await core.getStartServices();
+    const cloud =
+      cloudSetup && (pluginsStart as PluginsStart).cloud
+        ? { ...cloudSetup, ...(pluginsStart as PluginsStart).cloud }
+        : undefined;
     const plugins = { ...pluginsStart, cloud } as PluginsStart;
 
     return { params, core: coreStart, plugins };
@@ -187,10 +302,10 @@ export class EnterpriseSearchPlugin implements Plugin {
     if (this.hasInitialized) return; // We've already made an initial call
 
     try {
-      this.data = await http.get('/api/enterprise_search/config_data');
+      this.data = await http.get('/internal/enterprise_search/config_data');
       this.hasInitialized = true;
-    } catch {
-      this.data.errorConnecting = true;
+    } catch (e) {
+      this.data.errorConnectingMessage = `${e.res.status} ${e.message}`;
     }
   }
 }

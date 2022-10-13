@@ -20,14 +20,17 @@ const FormDataProviderComp = function <I extends FormData = FormData>({
   children,
   pathsToWatch,
 }: Props<I>) {
-  const { 0: formData, 2: isReady } = useFormData<I>({ watch: pathsToWatch });
+  const { 0: formData, 2: haveFieldsMounted } = useFormData<I>({ watch: pathsToWatch });
 
-  if (!isReady) {
-    // No field has mounted yet, don't render anything
+  if (!haveFieldsMounted) {
     return null;
   }
 
   return children(formData);
 };
 
+/**
+ * Context provider to access the form data.
+ * @deprecated Use the "useFormData()" hook instead
+ */
 export const FormDataProvider = React.memo(FormDataProviderComp) as typeof FormDataProviderComp;

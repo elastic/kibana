@@ -12,14 +12,14 @@ import {
   EuiLoadingSpinner,
   EuiOutsideClickDetector,
 } from '@elastic/eui';
-import { FeatureGeometry, MapToolTipProps } from '../types';
+import type { Geometry } from 'geojson';
+import type { ITooltipProperty } from '@kbn/maps-plugin/public/classes/tooltips/tooltip_property';
+import type { MapToolTipProps } from '../types';
 import { ToolTipFooter } from './tooltip_footer';
 import { LineToolTipContent } from './line_tool_tip_content';
 import { PointToolTipContent } from './point_tool_tip_content';
 import { Loader } from '../../../../common/components/loader';
 import * as i18n from '../translations';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ITooltipProperty } from '../../../../../../maps/public/classes/tooltips/tooltip_property';
 
 export const MapToolTipComponent = ({
   closeTooltip,
@@ -33,7 +33,7 @@ export const MapToolTipComponent = ({
   const [isError, setIsError] = useState<boolean>(false);
   const [featureIndex, setFeatureIndex] = useState<number>(0);
   const [featureProps, setFeatureProps] = useState<ITooltipProperty[]>([]);
-  const [featureGeometry, setFeatureGeometry] = useState<FeatureGeometry | null>(null);
+  const [featureGeometry, setFeatureGeometry] = useState<Geometry | null>(null);
   const [, setLayerName] = useState<string>('');
 
   const handleCloseTooltip = useCallback(() => {
@@ -133,13 +133,15 @@ export const MapToolTipComponent = ({
         try {
           const featureGeo = loadFeatureGeometry({ layerId, featureId });
           const [featureProperties, layerNameString] = await Promise.all([
-            loadFeatureProperties({ layerId, featureId }),
+            loadFeatureProperties({ layerId, properties: features[featureIndex].mbProperties }),
             getLayerName(layerId),
           ]);
 
           setFeatureProps(featureProperties);
           setFeatureGeometry(featureGeo);
-          setLayerName(layerNameString);
+          if (layerNameString) {
+            setLayerName(layerNameString);
+          }
         } catch (e) {
           setIsError(true);
         } finally {

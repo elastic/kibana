@@ -5,35 +5,122 @@
  * 2.0.
  */
 
-import { PluginInitializerContext, Plugin, CoreSetup } from 'src/core/server';
+import { i18n } from '@kbn/i18n';
+import {
+  PluginInitializerContext,
+  Plugin,
+  CoreSetup,
+  DEFAULT_APP_CATEGORIES,
+} from '@kbn/core/server';
+import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
+import { PluginSetupContract as FeaturesSetup } from '@kbn/features-plugin/server';
+import { createUICapabilities } from '@kbn/cases-plugin/common';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { ObservabilityConfig } from '.';
 import {
   bootstrapAnnotations,
   ScopedAnnotationsClientFactory,
   AnnotationsAPI,
 } from './lib/annotations/bootstrap_annotations';
-import type { RuleRegistryPluginSetupContract } from '../../rule_registry/server';
 import { uiSettings } from './ui_settings';
 import { registerRoutes } from './routes/register_routes';
 import { getGlobalObservabilityServerRouteRepository } from './routes/get_global_observability_server_route_repository';
-import { observabilityRuleRegistrySettings } from '../common/rules/observability_rule_registry_settings';
-import { observabilityRuleFieldMap } from '../common/rules/observability_rule_field_map';
+import { casesFeatureId, observabilityFeatureId } from '../common';
+import { slo } from './saved_objects';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
-export type ObservabilityRuleRegistry = ObservabilityPluginSetup['ruleRegistry'];
+
+interface PluginSetup {
+  features: FeaturesSetup;
+  ruleRegistry: RuleRegistryPluginSetupContract;
+  spaces: SpacesPluginStart;
+}
 
 export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
   }
 
-  public setup(
-    core: CoreSetup,
-    plugins: {
-      ruleRegistry: RuleRegistryPluginSetupContract;
-    }
-  ) {
+  public setup(core: CoreSetup, plugins: PluginSetup) {
     const config = this.initContext.config.get<ObservabilityConfig>();
+
+    const casesCapabilities = createUICapabilities();
+
+    plugins.features.registerKibanaFeature({
+      id: casesFeatureId,
+      name: i18n.translate('xpack.observability.featureRegistry.linkObservabilityTitle', {
+        defaultMessage: 'Cases',
+      }),
+      order: 1100,
+      category: DEFAULT_APP_CATEGORIES.observability,
+      app: [casesFeatureId, 'kibana'],
+      catalogue: [observabilityFeatureId],
+      cases: [observabilityFeatureId],
+      privileges: {
+        all: {
+          api: ['casesSuggestUserProfiles', 'bulkGetUserProfiles'],
+          app: [casesFeatureId, 'kibana'],
+          catalogue: [observabilityFeatureId],
+          cases: {
+            create: [observabilityFeatureId],
+            read: [observabilityFeatureId],
+            update: [observabilityFeatureId],
+            push: [observabilityFeatureId],
+          },
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: casesCapabilities.all,
+        },
+        read: {
+          api: ['casesSuggestUserProfiles', 'bulkGetUserProfiles'],
+          app: [casesFeatureId, 'kibana'],
+          catalogue: [observabilityFeatureId],
+          cases: {
+            read: [observabilityFeatureId],
+          },
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: casesCapabilities.read,
+        },
+      },
+      subFeatures: [
+        {
+          name: i18n.translate('xpack.observability.featureRegistry.deleteSubFeatureName', {
+            defaultMessage: 'Delete',
+          }),
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  api: [],
+                  id: 'cases_delete',
+                  name: i18n.translate(
+                    'xpack.observability.featureRegistry.deleteSubFeatureDetails',
+                    {
+                      defaultMessage: 'Delete cases and comments',
+                    }
+                  ),
+                  includeIn: 'all',
+                  savedObject: {
+                    all: [],
+                    read: [],
+                  },
+                  cases: {
+                    delete: [observabilityFeatureId],
+                  },
+                  ui: casesCapabilities.delete,
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    });
 
     let annotationsApiPromise: Promise<AnnotationsAPI> | undefined;
 
@@ -51,19 +138,22 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
       });
     }
 
-    const observabilityRuleRegistry = plugins.ruleRegistry.create({
-      ...observabilityRuleRegistrySettings,
-      fieldMap: observabilityRuleFieldMap,
-    });
+    if (config.unsafe.slo.enabled) {
+      core.savedObjects.registerType(slo);
+    }
+
+    const start = () => core.getStartServices().then(([coreStart]) => coreStart);
+
+    const { ruleDataService } = plugins.ruleRegistry;
 
     registerRoutes({
       core: {
         setup: core,
-        start: () => core.getStartServices().then(([coreStart]) => coreStart),
+        start,
       },
-      ruleRegistry: observabilityRuleRegistry,
       logger: this.initContext.logger.get(),
-      repository: getGlobalObservabilityServerRouteRepository(),
+      repository: getGlobalObservabilityServerRouteRepository(config),
+      ruleDataService,
     });
 
     return {
@@ -71,7 +161,6 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
         const api = await annotationsApiPromise;
         return api?.getScopedAnnotationsClient(...args);
       },
-      ruleRegistry: observabilityRuleRegistry,
     };
   }
 

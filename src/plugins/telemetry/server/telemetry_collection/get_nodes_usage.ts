@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import type { ElasticsearchClient } from 'src/core/server';
-import type { estypes } from '@elastic/elasticsearch';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { TIMEOUT } from './constants';
 
 /**
  * Data returned by GET /_nodes/usage, but flattened as an array of {@link estypes.NodeUsageInformation}
  * with the node ID set in the field `node_id`.
  */
-export interface NodeUsage extends estypes.NodeUsageInformation {
+export interface NodeUsage extends estypes.NodesUsageNodeUsage {
   /**
    * The Node ID as reported by ES
    */
@@ -32,10 +32,9 @@ export type NodesUsageGetter = (esClient: ElasticsearchClient) => Promise<{ node
 export async function fetchNodesUsage(
   esClient: ElasticsearchClient
 ): Promise<estypes.NodesUsageResponse> {
-  const { body } = await esClient.nodes.usage({
+  return await esClient.nodes.usage({
     timeout: TIMEOUT,
   });
-  return body;
 }
 
 /**

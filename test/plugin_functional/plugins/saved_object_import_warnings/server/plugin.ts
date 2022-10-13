@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { Plugin, CoreSetup } from 'kibana/server';
+import { Plugin, CoreSetup } from '@kbn/core/server';
 
 export class SavedObjectImportWarningsPlugin implements Plugin {
   public setup({ savedObjects }: CoreSetup, deps: {}) {
-    savedObjects.registerType({
+    savedObjects.registerType<{ title: string }>({
       name: 'test_import_warning_1',
       hidden: false,
       namespaceType: 'single',
@@ -31,7 +31,7 @@ export class SavedObjectImportWarningsPlugin implements Plugin {
       },
     });
 
-    savedObjects.registerType({
+    savedObjects.registerType<{ title: string }>({
       name: 'test_import_warning_2',
       hidden: false,
       namespaceType: 'single',

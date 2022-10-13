@@ -25,9 +25,9 @@ import React, { useEffect } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { CodeEditorField, useKibana } from '@kbn/kibana-react-plugin/public';
 
-import { CodeEditorField, useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import type { ApiKeyRoleDescriptors } from '../../../../common/model';
 import { DocLink } from '../../../components/doc_link';
 import type { FormFlyoutProps } from '../../../components/form_flyout';
@@ -45,7 +45,9 @@ export interface ApiKeyFormValues {
   expiration: string;
   customExpiration: boolean;
   customPrivileges: boolean;
+  includeMetadata: boolean;
   role_descriptors: string;
+  metadata: string;
 }
 
 export interface CreateApiKeyFlyoutProps {
@@ -59,30 +61,9 @@ const defaultDefaultValues: ApiKeyFormValues = {
   expiration: '',
   customExpiration: false,
   customPrivileges: false,
-  role_descriptors: JSON.stringify(
-    {
-      'role-a': {
-        cluster: ['all'],
-        indices: [
-          {
-            names: ['index-a*'],
-            privileges: ['read'],
-          },
-        ],
-      },
-      'role-b': {
-        cluster: ['all'],
-        indices: [
-          {
-            names: ['index-b*'],
-            privileges: ['all'],
-          },
-        ],
-      },
-    },
-    null,
-    2
-  ),
+  includeMetadata: false,
+  role_descriptors: '{}',
+  metadata: '{}',
 };
 
 export const CreateApiKeyFlyout: FunctionComponent<CreateApiKeyFlyoutProps> = ({
@@ -221,13 +202,13 @@ export const CreateApiKeyFlyout: FunctionComponent<CreateApiKeyFlyoutProps> = ({
               isInvalid={form.touched.name && !!form.errors.name}
               inputRef={firstFieldRef}
               fullWidth
+              data-test-subj="apiKeyNameInput"
             />
           </EuiFormRow>
 
           <EuiSpacer />
           <EuiFormFieldset>
             <EuiSwitch
-              id="apiKeyCustom"
               label={i18n.translate(
                 'xpack.security.accountManagement.createApiKey.customPrivilegesLabel',
                 {
@@ -270,7 +251,6 @@ export const CreateApiKeyFlyout: FunctionComponent<CreateApiKeyFlyoutProps> = ({
           <EuiSpacer />
           <EuiFormFieldset>
             <EuiSwitch
-              name="customExpiration"
               label={i18n.translate(
                 'xpack.security.accountManagement.createApiKey.customExpirationLabel',
                 {
@@ -279,6 +259,7 @@ export const CreateApiKeyFlyout: FunctionComponent<CreateApiKeyFlyoutProps> = ({
               )}
               checked={!!form.values.customExpiration}
               onChange={(e) => form.setValue('customExpiration', e.target.checked)}
+              data-test-subj="apiKeyCustomExpirationSwitch"
             />
             {form.values.customExpiration && (
               <>
@@ -305,6 +286,49 @@ export const CreateApiKeyFlyout: FunctionComponent<CreateApiKeyFlyoutProps> = ({
                     defaultValue={form.values.expiration}
                     isInvalid={form.touched.expiration && !!form.errors.expiration}
                     fullWidth
+                    data-test-subj="apiKeyCustomExpirationInput"
+                  />
+                </EuiFormRow>
+                <EuiSpacer size="s" />
+              </>
+            )}
+          </EuiFormFieldset>
+
+          <EuiSpacer />
+          <EuiFormFieldset>
+            <EuiSwitch
+              label={i18n.translate(
+                'xpack.security.accountManagement.createApiKey.includeMetadataLabel',
+                {
+                  defaultMessage: 'Include metadata',
+                }
+              )}
+              checked={!!form.values.includeMetadata}
+              onChange={(e) => form.setValue('includeMetadata', e.target.checked)}
+            />
+            {form.values.includeMetadata && (
+              <>
+                <EuiSpacer size="m" />
+                <EuiFormRow
+                  helpText={
+                    <DocLink
+                      app="elasticsearch"
+                      doc="security-api-create-api-key.html#security-api-create-api-key-request-body"
+                    >
+                      <FormattedMessage
+                        id="xpack.security.accountManagement.createApiKey.metadataHelpText"
+                        defaultMessage="Learn how to structure metadata."
+                      />
+                    </DocLink>
+                  }
+                  error={form.errors.metadata}
+                  isInvalid={form.touched.metadata && !!form.errors.metadata}
+                >
+                  <CodeEditorField
+                    value={form.values.metadata!}
+                    onChange={(value) => form.setValue('metadata', value)}
+                    languageId="xjson"
+                    height={200}
                   />
                 </EuiFormRow>
                 <EuiSpacer size="s" />
@@ -363,6 +387,28 @@ export function validate(values: ApiKeyFormValues) {
     }
   }
 
+  if (values.includeMetadata) {
+    if (!values.metadata) {
+      errors.metadata = i18n.translate(
+        'xpack.security.management.apiKeys.createApiKey.metadataRequired',
+        {
+          defaultMessage: 'Enter metadata or disable this option.',
+        }
+      );
+    } else {
+      try {
+        JSON.parse(values.metadata);
+      } catch (e) {
+        errors.metadata = i18n.translate(
+          'xpack.security.management.apiKeys.createApiKey.invalidJsonError',
+          {
+            defaultMessage: 'Enter valid JSON.',
+          }
+        );
+      }
+    }
+  }
+
   return errors;
 }
 
@@ -374,5 +420,6 @@ export function mapValues(values: ApiKeyFormValues): CreateApiKeyRequest {
       values.customPrivileges && values.role_descriptors
         ? JSON.parse(values.role_descriptors)
         : undefined,
+    metadata: values.includeMetadata && values.metadata ? JSON.parse(values.metadata) : undefined,
   };
 }

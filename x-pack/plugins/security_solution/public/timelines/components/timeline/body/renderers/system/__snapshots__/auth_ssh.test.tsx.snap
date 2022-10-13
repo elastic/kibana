@@ -10,7 +10,9 @@ exports[`AuthSsh rendering it renders against shallow snapshot 1`] = `
       contextId="[context-123]"
       eventId="[event-123]"
       field="system.audit.package.name"
+      fieldType="keyword"
       iconType="document"
+      isAggregatable={true}
       value="[ssh-signature]"
     />
   </TokensFlexItem>
@@ -22,7 +24,9 @@ exports[`AuthSsh rendering it renders against shallow snapshot 1`] = `
       contextId="[context-123]"
       eventId="[event-123]"
       field="system.audit.package.version"
+      fieldType="keyword"
       iconType="document"
+      isAggregatable={true}
       value="[ssh-method]"
     />
   </TokensFlexItem>

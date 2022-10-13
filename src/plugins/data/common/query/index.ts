@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
-export * from './filter_manager';
 export * from './timefilter';
 export * from './types';
 export * from './is_query';
+export * from './query_state';
+export { textBasedQueryStateToAstWithValidation } from './text_based_query_state_to_ast_with_validation';
+export { textBasedQueryStateToExpressionAst } from './text_based_query_state_to_ast';

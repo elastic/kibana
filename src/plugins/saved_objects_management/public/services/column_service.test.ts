@@ -6,14 +6,18 @@
  * Side Public License, v 1.
  */
 
+import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
+import { ShareToSpaceSavedObjectsManagementColumn } from './columns';
 import {
   SavedObjectsManagementColumnService,
   SavedObjectsManagementColumnServiceSetup,
 } from './column_service';
 import { SavedObjectsManagementColumn } from './types';
 
-class DummyColumn implements SavedObjectsManagementColumn<unknown> {
-  constructor(public id: string) {}
+class DummyColumn extends SavedObjectsManagementColumn {
+  constructor(public id: string) {
+    super();
+  }
 
   public euiColumn = {
     field: 'id',
@@ -27,7 +31,7 @@ describe('SavedObjectsManagementColumnRegistry', () => {
   let service: SavedObjectsManagementColumnService;
   let setup: SavedObjectsManagementColumnServiceSetup;
 
-  const createColumn = (id: string): SavedObjectsManagementColumn<unknown> => {
+  const createColumn = (id: string): SavedObjectsManagementColumn => {
     return new DummyColumn(id);
   };
 
@@ -40,8 +44,11 @@ describe('SavedObjectsManagementColumnRegistry', () => {
     it('allows columns to be registered and retrieved', () => {
       const column = createColumn('foo');
       setup.register(column);
-      const start = service.start();
-      expect(start.getAll()).toContain(column);
+      const start = service.start(spacesPluginMock.createStartContract());
+      expect(start.getAll()).toEqual([
+        column,
+        expect.any(ShareToSpaceSavedObjectsManagementColumn),
+      ]);
     });
 
     it('does not allow columns with duplicate ids to be registered', () => {

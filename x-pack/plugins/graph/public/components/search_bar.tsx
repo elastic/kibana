@@ -5,34 +5,34 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiToolTip } from '@elastic/eui';
 import React, { useState, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { connect } from 'react-redux';
-import { IndexPatternSavedObject, IndexPatternProvider } from '../types';
+import { toElasticsearchQuery, fromKueryExpression, Query } from '@kbn/es-query';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { QueryStringInput } from '@kbn/unified-search-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { IUnifiedSearchPluginServices } from '@kbn/unified-search-plugin/public/types';
+import { IndexPatternSavedObject, IndexPatternProvider, WorkspaceField } from '../types';
 import { openSourceModal } from '../services/source_modal';
 import {
   GraphState,
   datasourceSelector,
   requestDatasource,
   IndexpatternDatasource,
+  submitSearch,
+  selectedFieldsSelector,
 } from '../state_management';
 
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import {
-  IndexPattern,
-  QueryStringInput,
-  IDataPluginServices,
-  Query,
-  esKuery,
-} from '../../../../../src/plugins/data/public';
+import { TooltipWrapper } from './tooltip_wrapper';
 
-export interface OuterSearchBarProps {
+export interface SearchBarProps {
   isLoading: boolean;
-  initialQuery?: string;
-  onQuerySubmit: (query: string) => void;
-
+  urlQuery: string | null;
+  currentIndexPattern?: DataView;
+  onIndexPatternChange: (indexPattern?: DataView) => void;
   confirmWipeWorkspace: (
     onConfirm: () => void,
     text?: string,
@@ -41,17 +41,16 @@ export interface OuterSearchBarProps {
   indexPatternProvider: IndexPatternProvider;
 }
 
-export interface SearchBarProps extends OuterSearchBarProps {
+export interface SearchBarStateProps {
   currentDatasource?: IndexpatternDatasource;
+  selectedFields: WorkspaceField[];
   onIndexPatternSelected: (indexPattern: IndexPatternSavedObject) => void;
+  submit: (searchTerm: string) => void;
 }
 
-function queryToString(query: Query, indexPattern: IndexPattern) {
+function queryToString(query: Query, indexPattern: DataView) {
   if (query.language === 'kuery' && typeof query.query === 'string') {
-    const dsl = esKuery.toElasticsearchQuery(
-      esKuery.fromKueryExpression(query.query as string),
-      indexPattern
-    );
+    const dsl = toElasticsearchQuery(fromKueryExpression(query.query as string), indexPattern);
     // JSON representation of query will be handled by existing logic.
     // TODO clean this up and handle it in the data fetch layer once
     // it moved to typescript.
@@ -65,35 +64,50 @@ function queryToString(query: Query, indexPattern: IndexPattern) {
   return JSON.stringify(query.query);
 }
 
-export function SearchBarComponent(props: SearchBarProps) {
+export function SearchBarComponent(props: SearchBarStateProps & SearchBarProps) {
   const {
-    currentDatasource,
-    onQuerySubmit,
     isLoading,
-    onIndexPatternSelected,
-    initialQuery,
+    urlQuery,
+    currentIndexPattern,
+    currentDatasource,
     indexPatternProvider,
+    selectedFields,
+    submit,
+    onIndexPatternSelected,
     confirmWipeWorkspace,
+    onIndexPatternChange,
   } = props;
-  const [query, setQuery] = useState<Query>({ language: 'kuery', query: initialQuery || '' });
-  const [currentIndexPattern, setCurrentIndexPattern] = useState<IndexPattern | undefined>(
-    undefined
+  const [query, setQuery] = useState<Query>({ language: 'kuery', query: urlQuery || '' });
+
+  useEffect(
+    () => setQuery((prev) => ({ language: prev.language, query: urlQuery || '' })),
+    [urlQuery]
   );
 
   useEffect(() => {
     async function fetchPattern() {
       if (currentDatasource) {
-        setCurrentIndexPattern(await indexPatternProvider.get(currentDatasource.id));
+        onIndexPatternChange(await indexPatternProvider.get(currentDatasource.id));
       } else {
-        setCurrentIndexPattern(undefined);
+        onIndexPatternChange(undefined);
       }
     }
     fetchPattern();
-  }, [currentDatasource, indexPatternProvider]);
+  }, [currentDatasource, indexPatternProvider, onIndexPatternChange]);
 
-  const kibana = useKibana<IDataPluginServices>();
+  const kibana = useKibana<IUnifiedSearchPluginServices>();
   const { services, overlays } = kibana;
-  const { savedObjects, uiSettings } = services;
+  const {
+    savedObjects,
+    uiSettings,
+    appName,
+    unifiedSearch,
+    data,
+    storage,
+    notifications,
+    http,
+    docLinks,
+  } = services;
   if (!overlays) return null;
 
   return (
@@ -101,13 +115,55 @@ export function SearchBarComponent(props: SearchBarProps) {
       onSubmit={(e) => {
         e.preventDefault();
         if (!isLoading && currentIndexPattern) {
-          onQuerySubmit(queryToString(query, currentIndexPattern));
+          submit(queryToString(query, currentIndexPattern));
         }
       }}
     >
       <EuiFlexGroup gutterSize="m">
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            content={i18n.translate('xpack.graph.bar.pickSourceTooltip', {
+              defaultMessage: 'Select a data source to begin graphing relationships.',
+            })}
+          >
+            <EuiButton
+              className="gphSearchBar__datasourceButton"
+              data-test-subj="graphDatasourceButton"
+              onClick={() => {
+                confirmWipeWorkspace(
+                  () =>
+                    openSourceModal({ overlays, savedObjects, uiSettings }, onIndexPatternSelected),
+                  i18n.translate('xpack.graph.clearWorkspace.confirmText', {
+                    defaultMessage:
+                      'If you change data sources, your current fields and vertices will be reset.',
+                  }),
+                  {
+                    confirmButtonText: i18n.translate(
+                      'xpack.graph.clearWorkspace.confirmButtonLabel',
+                      {
+                        defaultMessage: 'Change data source',
+                      }
+                    ),
+                    title: i18n.translate('xpack.graph.clearWorkspace.modalTitle', {
+                      defaultMessage: 'Unsaved changes',
+                    }),
+                  }
+                );
+              }}
+            >
+              {currentIndexPattern
+                ? currentIndexPattern.getName()
+                : // This branch will be shown if the user exits the
+                  // initial picker modal
+                  i18n.translate('xpack.graph.bar.pickSourceLabel', {
+                    defaultMessage: 'Select a data source',
+                  })}
+            </EuiButton>
+          </EuiToolTip>
+        </EuiFlexItem>
         <EuiFlexItem>
           <QueryStringInput
+            timeRangeForSuggestionsOverride={false} // to don't filter suggestions by the global time range
             disableAutoFocus
             bubbleSubmitEvent
             indexPatterns={currentIndexPattern ? [currentIndexPattern] : []}
@@ -115,63 +171,41 @@ export function SearchBarComponent(props: SearchBarProps) {
               defaultMessage: 'Search your data and add to graph',
             })}
             query={query}
-            prepend={
-              <EuiToolTip
-                content={i18n.translate('xpack.graph.bar.pickSourceTooltip', {
-                  defaultMessage: 'Select a data source to begin graphing relationships.',
-                })}
-              >
-                <EuiButtonEmpty
-                  size="xs"
-                  className="gphSearchBar__datasourceButton"
-                  data-test-subj="graphDatasourceButton"
-                  onClick={() => {
-                    confirmWipeWorkspace(
-                      () =>
-                        openSourceModal(
-                          { overlays, savedObjects, uiSettings },
-                          onIndexPatternSelected
-                        ),
-                      i18n.translate('xpack.graph.clearWorkspace.confirmText', {
-                        defaultMessage:
-                          'If you change data sources, your current fields and vertices will be reset.',
-                      }),
-                      {
-                        confirmButtonText: i18n.translate(
-                          'xpack.graph.clearWorkspace.confirmButtonLabel',
-                          {
-                            defaultMessage: 'Change data source',
-                          }
-                        ),
-                        title: i18n.translate('xpack.graph.clearWorkspace.modalTitle', {
-                          defaultMessage: 'Unsaved changes',
-                        }),
-                      }
-                    );
-                  }}
-                >
-                  {currentIndexPattern
-                    ? currentIndexPattern.title
-                    : // This branch will be shown if the user exits the
-                      // initial picker modal
-                      i18n.translate('xpack.graph.bar.pickSourceLabel', {
-                        defaultMessage: 'Select a data source',
-                      })}
-                </EuiButtonEmpty>
-              </EuiToolTip>
-            }
             onChange={setQuery}
+            appName={appName}
+            deps={{
+              unifiedSearch,
+              data,
+              storage,
+              notifications,
+              http,
+              docLinks,
+              uiSettings,
+            }}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton
-            fill
-            type="submit"
-            disabled={isLoading || !currentIndexPattern}
-            data-test-subj="graph-explore-button"
+          <TooltipWrapper
+            condition={!currentIndexPattern || !selectedFields.length}
+            tooltipContent={
+              !currentIndexPattern
+                ? i18n.translate('xpack.graph.bar.exploreLabelNoIndexPattern', {
+                    defaultMessage: 'Select a data source',
+                  })
+                : i18n.translate('xpack.graph.bar.exploreLabelNoFields', {
+                    defaultMessage: 'Select at least one field',
+                  })
+            }
           >
-            {i18n.translate('xpack.graph.bar.exploreLabel', { defaultMessage: 'Graph' })}
-          </EuiButton>
+            <EuiButton
+              fill
+              type="submit"
+              disabled={isLoading || !currentIndexPattern || !selectedFields.length}
+              data-test-subj="graph-explore-button"
+            >
+              {i18n.translate('xpack.graph.bar.exploreLabel', { defaultMessage: 'Graph' })}
+            </EuiButton>
+          </TooltipWrapper>
         </EuiFlexItem>
       </EuiFlexGroup>
     </form>
@@ -184,6 +218,7 @@ export const SearchBar = connect(
     return {
       currentDatasource:
         datasource.current.type === 'indexpattern' ? datasource.current : undefined,
+      selectedFields: selectedFieldsSelector(state),
     };
   },
   (dispatch) => ({
@@ -195,6 +230,9 @@ export const SearchBar = connect(
           title: indexPattern.attributes.title,
         })
       );
+    },
+    submit: (searchTerm: string) => {
+      dispatch(submitSearch(searchTerm));
     },
   })
 )(SearchBarComponent);

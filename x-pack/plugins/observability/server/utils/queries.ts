@@ -4,11 +4,45 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { reject } from 'lodash';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 
-import { QueryContainer } from '@elastic/elasticsearch/api/types';
-import { esKuery } from '../../../../../src/plugins/data/server';
+function isUndefinedOrNull(value: any): value is undefined | null {
+  return value === undefined || value === null;
+}
 
-export function rangeQuery(start: number, end: number, field = '@timestamp'): QueryContainer[] {
+export function termQuery<T extends string>(
+  field: T,
+  value: string | boolean | number | undefined | null
+): QueryDslQueryContainer[] {
+  if (isUndefinedOrNull(value)) {
+    return [];
+  }
+
+  return [{ term: { [field]: value } }];
+}
+
+export function termsQuery(
+  field: string,
+  ...values: Array<string | boolean | undefined | number | null>
+): QueryDslQueryContainer[] {
+  const filtered = reject(values, isUndefinedOrNull);
+
+  if (!filtered.length) {
+    return [];
+  }
+
+  // @ts-expect-error undefined and null aren't assignable
+  return [{ terms: { [field]: filtered } }];
+}
+
+export function rangeQuery(
+  start?: number,
+  end?: number,
+  field = '@timestamp'
+): estypes.QueryDslQueryContainer[] {
   return [
     {
       range: {
@@ -22,11 +56,11 @@ export function rangeQuery(start: number, end: number, field = '@timestamp'): Qu
   ];
 }
 
-export function kqlQuery(kql?: string): QueryContainer[] {
+export function kqlQuery(kql: string): estypes.QueryDslQueryContainer[] {
   if (!kql) {
     return [];
   }
 
-  const ast = esKuery.fromKueryExpression(kql);
-  return [esKuery.toElasticsearchQuery(ast)];
+  const ast = fromKueryExpression(kql);
+  return [toElasticsearchQuery(ast)];
 }

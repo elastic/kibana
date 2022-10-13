@@ -58,8 +58,8 @@
  *    `appSearchSource`.
  */
 
-import { setWith } from '@elastic/safer-lodash-set';
-import { uniqueId, keyBy, pick, difference, isFunction, isEqual, uniqWith, isObject } from 'lodash';
+import { setWith } from '@kbn/safer-lodash-set';
+import { difference, isEqual, isFunction, isObject, keyBy, pick, uniqueId, uniqWith } from 'lodash';
 import {
   catchError,
   finalize,
@@ -70,37 +70,54 @@ import {
   switchMap,
   tap,
 } from 'rxjs/operators';
-import { defer, EMPTY, from, Observable } from 'rxjs';
-import { estypes } from '@elastic/elasticsearch';
+import { defer, EMPTY, from, lastValueFrom, Observable } from 'rxjs';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { buildEsQuery, Filter, isOfQueryType } from '@kbn/es-query';
+import { fieldWildcardFilter } from '@kbn/kibana-utils-plugin/common';
+import { getHighlightRequest } from '@kbn/field-formats-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import {
+  ExpressionAstExpression,
+  buildExpression,
+  buildExpressionFunction,
+} from '@kbn/expressions-plugin/common';
+import _ from 'lodash';
 import { normalizeSortRequest } from './normalize_sort_request';
-import { fieldWildcardFilter } from '../../../../kibana_utils/common';
-import { IIndexPattern, IndexPattern, IndexPatternField } from '../../index_patterns';
-import { AggConfigs, ES_SEARCH_STRATEGY, ISearchGeneric, ISearchOptions } from '../..';
+
+import { AggConfigSerialized, DataViewField, SerializedSearchSourceFields } from '../..';
+
+import { AggConfigs, EsQuerySortValue, IEsSearchResponse, ISearchGeneric } from '../..';
 import type {
   ISearchSource,
   SearchFieldValue,
-  SearchSourceOptions,
   SearchSourceFields,
+  SearchSourceOptions,
+  SearchSourceSearchOptions,
 } from './types';
-import { FetchHandlers, RequestFailure, getSearchParamsFromRequest, SearchRequest } from './fetch';
+import { getSearchParamsFromRequest, RequestFailure } from './fetch';
+import type { FetchHandlers, SearchRequest } from './fetch';
 import { getRequestInspectorStats, getResponseInspectorStats } from './inspect';
 
 import {
   getEsQueryConfig,
-  buildEsQuery,
-  Filter,
-  UI_SETTINGS,
+  IKibanaSearchResponse,
   isErrorResponse,
   isPartialResponse,
-  IKibanaSearchResponse,
-} from '../../../common';
-import { getHighlightRequest } from '../../../common/field_formats';
+  isCompleteResponse,
+  UI_SETTINGS,
+} from '../..';
+import { AggsStart } from '../aggs';
 import { extractReferences } from './extract_references';
+import {
+  EsdslExpressionFunctionDefinition,
+  ExpressionFunctionKibanaContext,
+  filtersToAst,
+  queryToAst,
+} from '../expressions';
 
 /** @internal */
 export const searchSourceRequiredUiSettings = [
   'dateFormat:tz',
-  UI_SETTINGS.COURIER_BATCH_SEARCHES,
   UI_SETTINGS.COURIER_CUSTOM_REQUEST_PREFERENCE,
   UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX,
   UI_SETTINGS.COURIER_MAX_CONCURRENT_SHARD_REQUESTS,
@@ -114,16 +131,27 @@ export const searchSourceRequiredUiSettings = [
 ];
 
 export interface SearchSourceDependencies extends FetchHandlers {
+  aggs: AggsStart;
   search: ISearchGeneric;
+}
+
+interface ExpressionAstOptions {
+  /**
+   * When truthy, it will include either `esaggs` or `esdsl` function to the expression chain.
+   * In this case, the expression will perform a search and return the `datatable` structure.
+   * @default true
+   */
+  asDatatable?: boolean;
 }
 
 /** @public **/
 export class SearchSource {
   private id: string = uniqueId('data_source');
-  private searchStrategyId?: string;
+  private shouldOverwriteDataViewType: boolean = false;
+  private overwriteDataViewType?: string;
   private parent?: SearchSource;
   private requestStartHandlers: Array<
-    (searchSource: SearchSource, options?: ISearchOptions) => Promise<unknown>
+    (searchSource: SearchSource, options?: SearchSourceSearchOptions) => Promise<unknown>
   > = [];
   private inheritOptions: SearchSourceOptions = {};
   public history: SearchRequest[] = [];
@@ -145,11 +173,22 @@ export class SearchSource {
    *****/
 
   /**
-   * internal, dont use
-   * @param searchStrategyId
+   * Used to make the search source overwrite the actual data view type for the
+   * specific requests done. This should only be needed very rarely, since it means
+   * e.g. we'd be treating a rollup index pattern as a regular one. Be very sure
+   * you understand the consequences of using this method before using it.
+   *
+   * @param overwriteType If `false` is passed in it will disable the overwrite, otherwise
+   *    the passed in value will be used as the data view type for this search source.
    */
-  setPreferredSearchStrategyId(searchStrategyId: string) {
-    this.searchStrategyId = searchStrategyId;
+  setOverwriteDataViewType(overwriteType: string | undefined | false) {
+    if (overwriteType === false) {
+      this.shouldOverwriteDataViewType = false;
+      this.overwriteDataViewType = undefined;
+    } else {
+      this.shouldOverwriteDataViewType = true;
+      this.overwriteDataViewType = overwriteType;
+    }
   }
 
   /**
@@ -210,6 +249,48 @@ export class SearchSource {
     return parent && parent.getField(field);
   }
 
+  getActiveIndexFilter() {
+    const { filter: originalFilters, query } = this.getFields();
+
+    let filters: Filter[] = [];
+    if (originalFilters) {
+      filters = this.getFilters(originalFilters);
+    }
+
+    const queryString = Array.isArray(query)
+      ? query.map((q) => q.query)
+      : isOfQueryType(query)
+      ? query?.query
+      : undefined;
+
+    const indexPatternFromQuery =
+      typeof queryString === 'string'
+        ? this.parseActiveIndexPatternFromQueryString(queryString)
+        : queryString?.reduce((acc: string[], currStr: string) => {
+            return acc.concat(this.parseActiveIndexPatternFromQueryString(currStr));
+          }, []) ?? [];
+
+    const activeIndexPattern: string[] = filters?.reduce<string[]>((acc, f) => {
+      if (f.meta.key === '_index' && f.meta.disabled === false) {
+        if (f.meta.negate === false) {
+          return _.concat(acc, f.meta.params.query ?? f.meta.params);
+        } else {
+          if (Array.isArray(f.meta.params)) {
+            return _.difference(acc, f.meta.params);
+          } else {
+            return _.difference(acc, [f.meta.params.query]);
+          }
+        }
+      } else {
+        return acc;
+      }
+    }, indexPatternFromQuery);
+
+    const dedupActiveIndexPattern = new Set([...activeIndexPattern]);
+
+    return [...dedupActiveIndexPattern];
+  }
+
   /**
    * Get the field from our own fields, don't traverse up the chain
    */
@@ -251,9 +332,8 @@ export class SearchSource {
    * Set a searchSource that this source should inherit from
    * @param  {SearchSource} parent - the parent searchSource
    * @param  {SearchSourceOptions} options - the inherit options
-   * @return {this} - chainable
    */
-  setParent(parent?: ISearchSource, options: SearchSourceOptions = {}) {
+  setParent(parent?: ISearchSource, options: SearchSourceOptions = {}): this {
     this.parent = parent as SearchSource;
     this.inheritOptions = options;
     return this;
@@ -261,9 +341,8 @@ export class SearchSource {
 
   /**
    * Get the parent of this SearchSource
-   * @return {undefined|searchSource}
    */
-  getParent() {
+  getParent(): SearchSource | undefined {
     return this.parent;
   }
 
@@ -271,18 +350,9 @@ export class SearchSource {
    * Fetch this source from Elasticsearch, returning an observable over the response(s)
    * @param options
    */
-  fetch$(
-    options: ISearchOptions = {}
-  ): Observable<IKibanaSearchResponse<estypes.SearchResponse<any>>> {
-    const { getConfig } = this.dependencies;
-    const syncSearchByDefault = getConfig(UI_SETTINGS.COURIER_BATCH_SEARCHES);
-
-    // Use the sync search strategy if legacy search is enabled.
-    // This still uses bfetch for batching.
-    if (!options?.strategy && syncSearchByDefault) {
-      options.strategy = ES_SEARCH_STRATEGY;
-    }
-
+  fetch$<T = {}>(
+    options: SearchSourceSearchOptions = {}
+  ): Observable<IKibanaSearchResponse<estypes.SearchResponse<T>>> {
     const s$ = defer(() => this.requestIsStarting(options)).pipe(
       switchMap(() => {
         const searchRequest = this.flatten();
@@ -295,36 +365,36 @@ export class SearchSource {
       }),
       tap((response) => {
         // TODO: Remove casting when https://github.com/elastic/elasticsearch-js/issues/1287 is resolved
-        if (!response || (response as any).error) {
+        if (!response || (response as unknown as { error: string }).error) {
           throw new RequestFailure(null, response);
         }
       }),
       shareReplay()
     );
 
-    return this.inspectSearch(s$, options);
+    return this.inspectSearch(s$, options) as Observable<
+      IKibanaSearchResponse<estypes.SearchResponse<T>>
+    >;
   }
 
   /**
    * Fetch this source and reject the returned Promise on error
-   * @deprecated Use fetch$ instead
+   * @deprecated Use the `fetch$` method instead
    */
-  fetch(options: ISearchOptions = {}) {
-    return this.fetch$(options)
-      .toPromise()
-      .then((r) => {
-        return r.rawResponse as estypes.SearchResponse<any>;
-      });
+  async fetch(
+    options: SearchSourceSearchOptions = {}
+  ): Promise<estypes.SearchResponse<unknown, Record<string, estypes.AggregationsAggregate>>> {
+    const r = await lastValueFrom(this.fetch$(options));
+    return r.rawResponse as estypes.SearchResponse<unknown>;
   }
 
   /**
    *  Add a handler that will be notified whenever requests start
    *  @param  {Function} handler
-   *  @return {undefined}
    */
   onRequestStart(
-    handler: (searchSource: SearchSource, options?: ISearchOptions) => Promise<unknown>
-  ) {
+    handler: (searchSource: SearchSource, options?: SearchSourceSearchOptions) => Promise<unknown>
+  ): void {
     this.requestStartHandlers.push(handler);
   }
 
@@ -337,9 +407,8 @@ export class SearchSource {
 
   /**
    * Completely destroy the SearchSource.
-   * @return {undefined}
    */
-  destroy() {
+  destroy(): void {
     this.requestStartHandlers.length = 0;
   }
 
@@ -347,7 +416,10 @@ export class SearchSource {
    * PRIVATE APIS
    ******/
 
-  private inspectSearch(s$: Observable<IKibanaSearchResponse<any>>, options: ISearchOptions) {
+  private inspectSearch(
+    s$: Observable<IKibanaSearchResponse<unknown>>,
+    options: SearchSourceSearchOptions
+  ) {
     const { id, title, description, adapter } = options.inspector || { title: '' };
 
     const requestResponder = adapter?.start(title, {
@@ -390,7 +462,8 @@ export class SearchSource {
         last(undefined, null),
         tap((finalResponse) => {
           if (finalResponse) {
-            requestResponder?.stats(getResponseInspectorStats(finalResponse.rawResponse, this));
+            const resp = finalResponse.rawResponse as estypes.SearchResponse<unknown>;
+            requestResponder?.stats(getResponseInspectorStats(resp, this));
             requestResponder?.ok({ json: finalResponse });
           }
         }),
@@ -414,7 +487,19 @@ export class SearchSource {
     }
   }
 
-  private async fetchOthers(response: estypes.SearchResponse<any>, options: ISearchOptions) {
+  private postFlightTransform(response: IEsSearchResponse<unknown>) {
+    const aggs = this.getField('aggs');
+    if (aggs instanceof AggConfigs) {
+      return aggs.postFlightTransform(response);
+    } else {
+      return response;
+    }
+  }
+
+  private async fetchOthers(
+    response: estypes.SearchResponse<unknown>,
+    options: SearchSourceSearchOptions
+  ) {
     const aggs = this.getField('aggs');
     if (aggs instanceof AggConfigs) {
       for (const agg of aggs.aggs) {
@@ -426,7 +511,8 @@ export class SearchSource {
             this,
             options.inspector?.adapter,
             options.abortSignal,
-            options.sessionId
+            options.sessionId,
+            options.disableShardFailureWarning
           );
         }
       }
@@ -436,9 +522,11 @@ export class SearchSource {
 
   /**
    * Run a search using the search service
-   * @return {Observable<SearchResponse<any>>}
    */
-  private fetchSearch$(searchRequest: SearchRequest, options: ISearchOptions) {
+  private fetchSearch$(
+    searchRequest: SearchRequest,
+    options: SearchSourceSearchOptions
+  ): Observable<IKibanaSearchResponse<unknown>> {
     const { search, getConfig, onResponse } = this.dependencies;
 
     const params = getSearchParamsFromRequest(searchRequest, {
@@ -447,28 +535,30 @@ export class SearchSource {
 
     return search({ params, indexType: searchRequest.indexType }, options).pipe(
       switchMap((response) => {
-        return new Observable<IKibanaSearchResponse<any>>((obs) => {
+        return new Observable<IKibanaSearchResponse<unknown>>((obs) => {
           if (isErrorResponse(response)) {
             obs.error(response);
           } else if (isPartialResponse(response)) {
-            obs.next(response);
+            obs.next(this.postFlightTransform(response));
           } else {
             if (!this.hasPostFlightRequests()) {
-              obs.next(response);
+              obs.next(this.postFlightTransform(response));
               obs.complete();
             } else {
               // Treat the complete response as partial, then run the postFlightRequests.
               obs.next({
-                ...response,
+                ...this.postFlightTransform(response),
                 isPartial: true,
                 isRunning: true,
               });
               const sub = from(this.fetchOthers(response.rawResponse, options)).subscribe({
                 next: (responseWithOther) => {
-                  obs.next({
-                    ...response,
-                    rawResponse: responseWithOther,
-                  });
+                  obs.next(
+                    this.postFlightTransform({
+                      ...response,
+                      rawResponse: responseWithOther!,
+                    })
+                  );
                 },
                 error: (e) => {
                   obs.error(e);
@@ -483,16 +573,20 @@ export class SearchSource {
           }
         });
       }),
-      map((response) => onResponse(searchRequest, response))
+      map((response) => {
+        if (!isCompleteResponse(response)) {
+          return response;
+        }
+        return onResponse(searchRequest, response, options);
+      })
     );
   }
 
   /**
    *  Called by requests of this search source when they are started
    *  @param options
-   *  @return {Promise<undefined>}
    */
-  private requestIsStarting(options: ISearchOptions = {}) {
+  private requestIsStarting(options: SearchSourceSearchOptions = {}): Promise<unknown[]> {
     const handlers = [...this.requestStartHandlers];
     // If callParentStartHandlers has been set to true, we also call all
     // handlers of parent search sources.
@@ -514,13 +608,12 @@ export class SearchSource {
    * @param  {object} data - the current merged data
    * @param  {*} val - the value at `key`
    * @param  {*} key - The key of `val`
-   * @return {undefined}
    */
   private mergeProp<K extends keyof SearchSourceFields>(
     data: SearchRequest,
     val: SearchSourceFields[K],
     key: K
-  ) {
+  ): false | void {
     val = typeof val === 'function' ? val(this) : val;
     if (val == null || !key) return;
 
@@ -575,7 +668,7 @@ export class SearchSource {
         );
         return addToBody(key, sort);
       case 'aggs':
-        if ((val as any) instanceof AggConfigs) {
+        if ((val as unknown) instanceof AggConfigs) {
           return addToBody('aggs', val.toDsl());
         } else {
           return addToBody('aggs', val);
@@ -588,10 +681,9 @@ export class SearchSource {
   /**
    * Walk the inheritance chain of a source and return its
    * flat representation (taking into account merging rules)
-   * @returns {Promise}
    * @resolved {Object|null} - the flat data of the SearchSource
    */
-  private mergeProps(root = this, searchRequest: SearchRequest = { body: {} }) {
+  private mergeProps(root = this, searchRequest: SearchRequest = { body: {} }): SearchRequest {
     Object.entries(this.fields).forEach(([key, value]) => {
       this.mergeProp(searchRequest, value, key as keyof SearchSourceFields);
     });
@@ -601,19 +693,15 @@ export class SearchSource {
     return searchRequest;
   }
 
-  private getIndexType(index?: IIndexPattern) {
-    if (this.searchStrategyId) {
-      return this.searchStrategyId === 'default' ? undefined : this.searchStrategyId;
-    } else {
-      return index?.type;
-    }
+  private getIndexType(index?: DataView) {
+    return this.shouldOverwriteDataViewType ? this.overwriteDataViewType : index?.type;
   }
 
-  private readonly getFieldName = (fld: string | Record<string, any>): string =>
-    typeof fld === 'string' ? fld : fld.field;
+  private readonly getFieldName = (fld: SearchFieldValue): string =>
+    typeof fld === 'string' ? fld : (fld.field as string);
 
   private getFieldsWithoutSourceFilters(
-    index: IndexPattern | undefined,
+    index: DataView | undefined,
     bodyFields: SearchFieldValue[]
   ) {
     if (!index) {
@@ -641,14 +729,14 @@ export class SearchSource {
     }
     // we need to get the list of fields from an index pattern
     return fields
-      .filter((fld: IndexPatternField) => filterSourceFields(fld.name))
-      .map((fld: IndexPatternField) => ({ field: fld.name }));
+      .filter((fld: DataViewField) => filterSourceFields(fld.name))
+      .map((fld: DataViewField) => ({ field: fld.name }));
   }
 
   private getFieldFromDocValueFieldsOrIndexPattern(
     docvaluesIndex: Record<string, object>,
     fld: SearchFieldValue,
-    index?: IndexPattern
+    index?: DataView
   ) {
     if (typeof fld === 'string') {
       return fld;
@@ -682,6 +770,7 @@ export class SearchSource {
     searchRequest.body = searchRequest.body || {};
     const { body, index, query, filters, highlightAll } = searchRequest;
     searchRequest.indexType = this.getIndexType(index);
+    const metaFields = getConfig(UI_SETTINGS.META_FIELDS) ?? [];
 
     // get some special field types from the index pattern
     const { docvalueFields, scriptFields, storedFields, runtimeFields } = index
@@ -712,7 +801,7 @@ export class SearchSource {
         body._source = sourceFilters;
       }
 
-      const filter = fieldWildcardFilter(body._source.excludes, getConfig(UI_SETTINGS.META_FIELDS));
+      const filter = fieldWildcardFilter(body._source.excludes, metaFields);
       // also apply filters to provided fields & default docvalueFields
       body.fields = body.fields.filter((fld: SearchFieldValue) => filter(this.getFieldName(fld)));
       fieldsFromSource = fieldsFromSource.filter((fld: SearchFieldValue) =>
@@ -725,9 +814,7 @@ export class SearchSource {
 
     // specific fields were provided, so we need to exclude any others
     if (fieldListProvided || fieldsFromSource.length) {
-      const bodyFieldNames = body.fields.map((field: string | Record<string, any>) =>
-        this.getFieldName(field)
-      );
+      const bodyFieldNames = body.fields.map((field: SearchFieldValue) => this.getFieldName(field));
       const uniqFieldNames = [...new Set([...bodyFieldNames, ...fieldsFromSource])];
 
       if (!uniqFieldNames.includes('*')) {
@@ -735,10 +822,6 @@ export class SearchSource {
         body.script_fields = pick(
           body.script_fields,
           Object.keys(body.script_fields).filter((f) => uniqFieldNames.includes(f))
-        );
-        body.runtime_mappings = pick(
-          body.runtime_mappings,
-          Object.keys(body.runtime_mappings).filter((f) => uniqFieldNames.includes(f))
         );
       }
 
@@ -770,7 +853,7 @@ export class SearchSource {
             return (
               fieldsFromSource.includes(this.getFieldName(fld)) &&
               !(body.docvalue_fields || [])
-                .map((d: string | Record<string, any>) => this.getFieldName(d))
+                .map((d: string | Record<string, SearchFieldValue>) => this.getFieldName(d))
                 .includes(this.getFieldName(fld))
             );
           }),
@@ -793,27 +876,38 @@ export class SearchSource {
             const field2Name = this.getFieldName(fld2);
             return field1Name === field2Name;
           }
-        ).map((fld: SearchFieldValue) => {
-          const fieldName = this.getFieldName(fld);
-          if (Object.keys(docvaluesIndex).includes(fieldName)) {
-            // either provide the field object from computed docvalues,
-            // or merge the user-provided field with the one in docvalues
-            return typeof fld === 'string'
-              ? docvaluesIndex[fld]
-              : this.getFieldFromDocValueFieldsOrIndexPattern(docvaluesIndex, fld, index);
-          }
-          return fld;
-        });
+        )
+          .filter((fld: SearchFieldValue) => {
+            return !metaFields.includes(this.getFieldName(fld));
+          })
+          .map((fld: SearchFieldValue) => {
+            const fieldName = this.getFieldName(fld);
+            if (Object.keys(docvaluesIndex).includes(fieldName)) {
+              // either provide the field object from computed docvalues,
+              // or merge the user-provided field with the one in docvalues
+              return typeof fld === 'string'
+                ? docvaluesIndex[fld]
+                : this.getFieldFromDocValueFieldsOrIndexPattern(docvaluesIndex, fld, index);
+            }
+            return fld;
+          });
       }
     } else {
       body.fields = filteredDocvalueFields;
     }
 
-    const esQueryConfigs = getEsQueryConfig({ get: getConfig });
+    // If sorting by _score, build queries in the "must" clause instead of "filter" clause to enable scoring
+    const filtersInMustClause = (body.sort ?? []).some((sort: EsQuerySortValue[]) =>
+      sort.hasOwnProperty('_score')
+    );
+    const esQueryConfigs = {
+      ...getEsQueryConfig({ get: getConfig }),
+      filtersInMustClause,
+    };
     body.query = buildEsQuery(index, query, filters, esQueryConfigs);
 
     if (highlightAll && body.query) {
-      body.highlight = getHighlightRequest(body.query, getConfig(UI_SETTINGS.DOC_HIGHLIGHT));
+      body.highlight = getHighlightRequest(getConfig(UI_SETTINGS.DOC_HIGHLIGHT));
       delete searchRequest.highlightAll;
     }
 
@@ -823,18 +917,43 @@ export class SearchSource {
   /**
    * serializes search source fields (which can later be passed to {@link ISearchStartSearchSource})
    */
-  public getSerializedFields(recurse = false) {
-    const { filter: originalFilters, size: omit, ...searchSourceFields } = this.getFields();
-    let serializedSearchSourceFields: SearchSourceFields = {
+  public getSerializedFields(recurse = false): SerializedSearchSourceFields {
+    const {
+      filter: originalFilters,
+      aggs: searchSourceAggs,
+      parent,
+      size: omit,
+      sort,
+      index,
+      ...searchSourceFields
+    } = this.getFields();
+
+    let serializedSearchSourceFields: SerializedSearchSourceFields = {
       ...searchSourceFields,
-      index: (searchSourceFields.index ? searchSourceFields.index.id : undefined) as any,
     };
+    if (index) {
+      serializedSearchSourceFields.index = index.isPersisted() ? index.id : index.toSpec();
+    }
+    if (sort) {
+      serializedSearchSourceFields.sort = !Array.isArray(sort) ? [sort] : sort;
+    }
     if (originalFilters) {
       const filters = this.getFilters(originalFilters);
       serializedSearchSourceFields = {
         ...serializedSearchSourceFields,
         filter: filters,
       };
+    }
+    if (searchSourceAggs) {
+      let aggs = searchSourceAggs;
+      if (typeof aggs === 'function') {
+        aggs = (searchSourceAggs as Function)();
+      }
+      if (aggs instanceof AggConfigs) {
+        serializedSearchSourceFields.aggs = aggs.getAll().map((agg) => agg.serialize());
+      } else {
+        serializedSearchSourceFields.aggs = aggs as AggConfigSerialized[];
+      }
     }
     if (recurse && this.getParent()) {
       serializedSearchSourceFields.parent = this.getParent()!.getSerializedFields(recurse);
@@ -871,5 +990,75 @@ export class SearchSource {
     }
 
     return [filterField];
+  }
+
+  /**
+   * Generates an expression abstract syntax tree using the fields set in the current search source and its ancestors.
+   * The produced expression from the returned AST will return the `datatable` structure.
+   * If the `asDatatable` option is truthy or omitted, the generator will use the `esdsl` function to perform the search.
+   * When the `aggs` field is present, it will use the `esaggs` function instead.
+   */
+  toExpressionAst({ asDatatable = true }: ExpressionAstOptions = {}): ExpressionAstExpression {
+    const searchRequest = this.mergeProps();
+    const { body, index, query } = searchRequest;
+
+    const filters = (
+      typeof searchRequest.filters === 'function' ? searchRequest.filters() : searchRequest.filters
+    ) as Filter[] | Filter | undefined;
+    const ast = buildExpression([
+      buildExpressionFunction<ExpressionFunctionKibanaContext>('kibana_context', {
+        q: query?.map(queryToAst),
+        filters: filters && filtersToAst(filters),
+      }),
+    ]).toAst();
+
+    if (!asDatatable) {
+      return ast;
+    }
+
+    const aggsField = this.getField('aggs');
+    const aggs = (typeof aggsField === 'function' ? aggsField() : aggsField) as
+      | AggConfigs
+      | AggConfigSerialized[]
+      | undefined;
+    const aggConfigs =
+      aggs instanceof AggConfigs
+        ? aggs
+        : index && aggs && this.dependencies.aggs.createAggConfigs(index, aggs);
+
+    if (aggConfigs) {
+      ast.chain.push(...aggConfigs.toExpressionAst().chain);
+    } else {
+      ast.chain.push(
+        buildExpressionFunction<EsdslExpressionFunctionDefinition>('esdsl', {
+          size: body?.size,
+          dsl: JSON.stringify({}),
+          index: index?.id,
+        }).toAst()
+      );
+    }
+
+    return ast;
+  }
+
+  parseActiveIndexPatternFromQueryString(queryString: string): string[] {
+    let m;
+    const indexPatternSet: Set<string> = new Set();
+    const regex = /\s?(_index)\s?:\s?[\'\"]?(\w+\-?\*?)[\'\"]?\s?(\w+)?/g;
+
+    while ((m = regex.exec(queryString)) !== null) {
+      // This is necessary to avoid infinite loops with zero-width matches
+      if (m.index === regex.lastIndex) {
+        regex.lastIndex++;
+      }
+
+      m.forEach((match, groupIndex) => {
+        if (groupIndex === 2) {
+          indexPatternSet.add(match);
+        }
+      });
+    }
+
+    return [...indexPatternSet];
   }
 }

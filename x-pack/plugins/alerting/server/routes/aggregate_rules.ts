@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { IRouter } from 'kibana/server';
+import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { ILicenseState } from '../lib';
-import { AggregateResult, AggregateOptions } from '../alerts_client';
+import { AggregateResult, AggregateOptions } from '../rules_client';
 import { RewriteResponseCase, RewriteRequestCase, verifyAccessAndContext } from './lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
+import { trackLegacyTerminology } from './lib/track_legacy_terminology';
 
 // config definition
 const querySchema = schema.object({
@@ -45,15 +47,24 @@ const rewriteQueryReq: RewriteRequestCase<AggregateOptions> = ({
 });
 const rewriteBodyRes: RewriteResponseCase<AggregateResult> = ({
   alertExecutionStatus,
+  ruleEnabledStatus,
+  ruleMutedStatus,
+  ruleSnoozedStatus,
+  ruleTags,
   ...rest
 }) => ({
   ...rest,
   rule_execution_status: alertExecutionStatus,
+  rule_enabled_status: ruleEnabledStatus,
+  rule_muted_status: ruleMutedStatus,
+  rule_snoozed_status: ruleSnoozedStatus,
+  rule_tags: ruleTags,
 });
 
 export const aggregateRulesRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
-  licenseState: ILicenseState
+  licenseState: ILicenseState,
+  usageCounter?: UsageCounter
 ) => {
   router.get(
     {
@@ -64,12 +75,16 @@ export const aggregateRulesRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const alertsClient = context.alerting.getAlertsClient();
+        const rulesClient = (await context.alerting).getRulesClient();
         const options = rewriteQueryReq({
           ...req.query,
           has_reference: req.query.has_reference || undefined,
         });
-        const aggregateResult = await alertsClient.aggregate({ options });
+        trackLegacyTerminology(
+          [req.query.search, req.query.search_fields].filter(Boolean) as string[],
+          usageCounter
+        );
+        const aggregateResult = await rulesClient.aggregate({ options });
         return res.ok({
           body: rewriteBodyRes(aggregateResult),
         });

@@ -5,18 +5,21 @@
  * 2.0.
  */
 
-export { initialLoadingState, LoadingState } from './loading_state';
+export type { LoadingState } from './loading_state';
+export { initialLoadingState } from './loading_state';
 
-export { isManualLoadingPolicy, isIntervalLoadingPolicy, LoadingPolicy } from './loading_policy';
+export type { LoadingPolicy } from './loading_policy';
+export { isManualLoadingPolicy, isIntervalLoadingPolicy } from './loading_policy';
 
+export type { LoadingProgress } from './loading_progress';
 export {
   createRunningProgressReducer,
   createIdleProgressReducer,
   isIdleLoadingProgress,
   isRunningLoadingProgress,
-  LoadingProgress,
 } from './loading_progress';
 
+export type { LoadingResult } from './loading_result';
 export {
   createFailureResult,
   createFailureResultReducer,
@@ -27,5 +30,4 @@ export {
   isFailureLoadingResult,
   isSuccessLoadingResult,
   isUninitializedLoadingResult,
-  LoadingResult,
 } from './loading_result';

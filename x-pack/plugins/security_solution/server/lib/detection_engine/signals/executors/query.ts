@@ -5,76 +5,118 @@
  * 2.0.
  */
 
-import { SavedObject } from 'src/core/types';
-import { Logger } from 'src/core/server';
-import {
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertServices,
-} from '../../../../../../alerting/server';
-import { ListClient } from '../../../../../../lists/server';
-import { ExceptionListItemSchema } from '../../../../../common/shared_imports';
-import { RefreshTypes } from '../../types';
+  RuleExecutorServices,
+} from '@kbn/alerting-plugin/server';
+import type { ListClient } from '@kbn/lists-plugin/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
+import { firstValueFrom } from 'rxjs';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { Filter } from '@kbn/es-query';
 import { getFilter } from '../get_filter';
-import { getInputIndex } from '../get_input_output_index';
 import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
-import { AlertAttributes, RuleRangeTuple } from '../types';
-import { TelemetryEventsSender } from '../../../telemetry/sender';
-import { BuildRuleMessage } from '../rule_messages';
-import { QueryRuleParams } from '../../schemas/rule_schemas';
+import type { RuleRangeTuple, BulkCreate, WrapHits } from '../types';
+import type { ITelemetryEventsSender } from '../../../telemetry/sender';
+import type { CompleteRule, UnifiedQueryRuleParams } from '../../schemas/rule_schemas';
+import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
+import { buildReasonMessageForQueryAlert } from '../reason_formatters';
+import { withSecuritySpan } from '../../../../utils/with_security_span';
+import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
+import { scheduleNotificationResponseActions } from '../../rule_response_actions/schedule_notification_response_actions';
+import type { SetupPlugins } from '../../../../plugin_contract';
 
 export const queryExecutor = async ({
-  rule,
-  tuples,
+  inputIndex,
+  runtimeMappings,
+  completeRule,
+  tuple,
   listClient,
-  exceptionItems,
+  experimentalFeatures,
+  ruleExecutionLogger,
+  eventsTelemetry,
   services,
   version,
   searchAfterSize,
-  logger,
-  refresh,
-  eventsTelemetry,
-  buildRuleMessage,
+  bulkCreate,
+  wrapHits,
+  primaryTimestamp,
+  secondaryTimestamp,
+  unprocessedExceptions,
+  exceptionFilter,
+  osqueryCreateAction,
+  licensing,
 }: {
-  rule: SavedObject<AlertAttributes<QueryRuleParams>>;
-  tuples: RuleRangeTuple[];
+  inputIndex: string[];
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
+  completeRule: CompleteRule<UnifiedQueryRuleParams>;
+  tuple: RuleRangeTuple;
   listClient: ListClient;
-  exceptionItems: ExceptionListItemSchema[];
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  experimentalFeatures: ExperimentalFeatures;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
+  eventsTelemetry: ITelemetryEventsSender | undefined;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   version: string;
   searchAfterSize: number;
-  logger: Logger;
-  refresh: RefreshTypes;
-  eventsTelemetry: TelemetryEventsSender | undefined;
-  buildRuleMessage: BuildRuleMessage;
+  bulkCreate: BulkCreate;
+  wrapHits: WrapHits;
+  primaryTimestamp: string;
+  secondaryTimestamp?: string;
+  unprocessedExceptions: ExceptionListItemSchema[];
+  exceptionFilter: Filter | undefined;
+  osqueryCreateAction: SetupPlugins['osquery']['osqueryCreateAction'];
+  licensing: LicensingPluginSetup;
 }) => {
-  const ruleParams = rule.attributes.params;
-  const inputIndex = await getInputIndex(services, version, ruleParams.index);
-  const esFilter = await getFilter({
-    type: ruleParams.type,
-    filters: ruleParams.filters,
-    language: ruleParams.language,
-    query: ruleParams.query,
-    savedId: ruleParams.savedId,
-    services,
-    index: inputIndex,
-    lists: exceptionItems,
-  });
+  const ruleParams = completeRule.ruleParams;
 
-  return searchAfterAndBulkCreate({
-    tuples,
-    listClient,
-    exceptionsList: exceptionItems,
-    ruleSO: rule,
-    services,
-    logger,
-    eventsTelemetry,
-    id: rule.id,
-    inputIndexPattern: inputIndex,
-    signalsIndex: ruleParams.outputIndex,
-    filter: esFilter,
-    pageSize: searchAfterSize,
-    refresh,
-    buildRuleMessage,
+  return withSecuritySpan('queryExecutor', async () => {
+    const esFilter = await getFilter({
+      type: ruleParams.type,
+      filters: ruleParams.filters,
+      language: ruleParams.language,
+      query: ruleParams.query,
+      savedId: ruleParams.savedId,
+      services,
+      index: inputIndex,
+      exceptionFilter,
+    });
+
+    const result = await searchAfterAndBulkCreate({
+      tuple,
+      exceptionsList: unprocessedExceptions,
+      services,
+      listClient,
+      ruleExecutionLogger,
+      eventsTelemetry,
+      inputIndexPattern: inputIndex,
+      pageSize: searchAfterSize,
+      filter: esFilter,
+      buildReasonMessage: buildReasonMessageForQueryAlert,
+      bulkCreate,
+      wrapHits,
+      runtimeMappings,
+      primaryTimestamp,
+      secondaryTimestamp,
+    });
+
+    const license = await firstValueFrom(licensing.license$);
+    const hasGoldLicense = license.hasAtLeast('gold');
+
+    if (hasGoldLicense) {
+      if (completeRule.ruleParams.responseActions?.length && result.createdSignalsCount) {
+        scheduleNotificationResponseActions(
+          {
+            signals: result.createdSignals,
+            responseActions: completeRule.ruleParams.responseActions,
+          },
+          osqueryCreateAction
+        );
+      }
+    }
+
+    return result;
   });
 };

@@ -7,26 +7,26 @@
  */
 
 import React from 'react';
-import { I18nStart } from 'kibana/public';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { I18nProvider } from '@kbn/i18n-react';
+import { AggregateQuery, Query } from '@kbn/es-query';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { TopNavMenuProps, TopNavMenu } from './top_nav_menu';
 import { RegisteredTopNavMenuData } from './top_nav_menu_data';
 
 export function createTopNav(
-  data: DataPublicPluginStart,
-  extraConfig: RegisteredTopNavMenuData[],
-  i18n: I18nStart
+  unifiedSearch: UnifiedSearchPublicPluginStart,
+  extraConfig: RegisteredTopNavMenuData[]
 ) {
-  return (props: TopNavMenuProps) => {
+  return <QT extends AggregateQuery | Query = Query>(props: TopNavMenuProps<QT>) => {
     const relevantConfig = extraConfig.filter(
       (dataItem) => dataItem.appName === undefined || dataItem.appName === props.appName
     );
     const config = (props.config || []).concat(relevantConfig);
 
     return (
-      <i18n.Context>
-        <TopNavMenu {...props} data={data} config={config} />
-      </i18n.Context>
+      <I18nProvider>
+        <TopNavMenu {...props} unifiedSearch={unifiedSearch} config={config} />
+      </I18nProvider>
     );
   };
 }

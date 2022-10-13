@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const { min } = require('../../src/functions/min.js');
+const { min } = require('../../src/functions/min');
 
 describe('Min', () => {
   it('numbers', () => {

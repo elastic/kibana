@@ -5,11 +5,18 @@
  * 2.0.
  */
 
+import { validate } from '@kbn/securitysolution-io-ts-utils';
+import { transformError } from '@kbn/securitysolution-es-utils';
+import {
+  deleteListItemSchema,
+  listItemArraySchema,
+  listItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+import { LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
+
 import type { ListsPluginRouter } from '../types';
-import { LIST_ITEM_URL } from '../../common/constants';
-import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
-import { validate } from '../../common/shared_imports';
-import { deleteListItemSchema, listItemArraySchema, listItemSchema } from '../../common/schemas';
+
+import { buildRouteValidation, buildSiemResponse } from './utils';
 
 import { getListClient } from '.';
 
@@ -28,7 +35,7 @@ export const deleteListItemRoute = (router: ListsPluginRouter): void => {
       const siemResponse = buildSiemResponse(response);
       try {
         const { id, list_id: listId, value } = request.query;
-        const lists = getListClient(context);
+        const lists = await getListClient(context);
         if (id != null) {
           const deleted = await lists.deleteListItem({ id });
           if (deleted == null) {

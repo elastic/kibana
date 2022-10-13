@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import { mount } from 'enzyme';
@@ -28,11 +26,8 @@ import { NotePreviews } from './note_previews';
 import { OPEN_TIMELINE_CLASS_NAME, queryTimelineById } from './helpers';
 import { StatefulOpenTimeline } from '.';
 import { TimelineTabsStyle } from './types';
-import {
-  useTimelineTypes,
-  UseTimelineTypesArgs,
-  UseTimelineTypesResult,
-} from './use_timeline_types';
+import type { UseTimelineTypesArgs, UseTimelineTypesResult } from './use_timeline_types';
+import { useTimelineTypes } from './use_timeline_types';
 import { deleteTimelinesByIds } from '../../containers/api';
 
 jest.mock('react-router-dom', () => {
@@ -95,14 +90,14 @@ describe('StatefulOpenTimeline', () => {
     });
     mockHistory = [];
     (useHistory as jest.Mock).mockReturnValue(mockHistory);
-    ((useGetAllTimeline as unknown) as jest.Mock).mockReturnValue({
+    (useGetAllTimeline as unknown as jest.Mock).mockReturnValue({
       fetchAllTimeline: jest.fn(),
       timelines: getAllTimeline('', mockOpenTimelineQueryResults.timeline ?? []),
       loading: false,
       totalCount: mockOpenTimelineQueryResults.totalCount,
       refetch: jest.fn(),
     });
-    ((useTimelineStatus as unknown) as jest.Mock).mockReturnValue({
+    (useTimelineStatus as unknown as jest.Mock).mockReturnValue({
       timelineStatus: null,
       templateTimelineType: null,
       templateTimelineFilter: <div />,
@@ -320,7 +315,7 @@ describe('StatefulOpenTimeline', () => {
       await waitFor(() => {
         expect(
           wrapper.find(`.${OPEN_TIMELINE_CLASS_NAME} input`).first().getDOMNode().id ===
-            document.activeElement!.id
+            document.activeElement?.id
         ).toBe(true);
       });
     });
@@ -629,7 +624,7 @@ describe('StatefulOpenTimeline', () => {
     await waitFor(() => {
       wrapper
         .find(`[data-test-subj="title-${mockOpenTimelineQueryResults.timeline[0].savedObjectId}"]`)
-        .first()
+        .last()
         .simulate('click');
 
       expect((queryTimelineById as jest.Mock).mock.calls[0][0].timelineId).toEqual(

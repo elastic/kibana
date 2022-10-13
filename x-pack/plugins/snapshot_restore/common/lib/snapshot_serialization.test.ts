@@ -12,13 +12,13 @@ describe('Snapshot serialization and deserialization', () => {
     test('deserializes a snapshot', () => {
       expect(
         deserializeSnapshotDetails(
-          'repositoryName',
           {
             snapshot: 'snapshot name',
             uuid: 'UUID',
+            repository: 'repositoryName',
             version_id: 5,
             version: 'version',
-            indices: ['index2', 'index3', 'index1'],
+            indices: ['index2', 'index3', 'index1', '.kibana'],
             include_global_state: false,
             state: 'SUCCESS',
             start_time: '0',
@@ -31,6 +31,12 @@ describe('Snapshot serialization and deserialization', () => {
               failed: 1,
               successful: 2,
             },
+            feature_states: [
+              {
+                feature_name: 'kibana',
+                indices: ['.kibana'],
+              },
+            ],
             failures: [
               {
                 index: 'z',
@@ -55,6 +61,7 @@ describe('Snapshot serialization and deserialization', () => {
             {
               snapshot: 'last_successful_snapshot',
               uuid: 'last_successful_snapshot_UUID',
+              repository: 'repositoryName',
               version_id: 5,
               version: 'version',
               indices: ['index2', 'index3', 'index1'],
@@ -70,6 +77,12 @@ describe('Snapshot serialization and deserialization', () => {
                 failed: 1,
                 successful: 2,
               },
+              feature_states: [
+                {
+                  feature_name: 'kibana',
+                  indices: ['.kibana'],
+                },
+              ],
               failures: [
                 {
                   index: 'z',
@@ -97,10 +110,11 @@ describe('Snapshot serialization and deserialization', () => {
         uuid: 'UUID',
         versionId: 5,
         version: 'version',
-        // Indices are sorted.
+        // Indices are sorted and dont include any of the system indices listed in feature_state
         indices: ['index1', 'index2', 'index3'],
         dataStreams: [],
         includeGlobalState: false,
+        featureStates: ['kibana'],
         // Failures are grouped and sorted by index, and the failures themselves are sorted by shard.
         indexFailures: [
           {

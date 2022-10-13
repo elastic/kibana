@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from 'src/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 
 import { getErrorStatusCode } from '../../errors';
 import { AuthenticationResult } from '../authentication_result';
@@ -136,9 +136,8 @@ export class AnonymousAuthenticationProvider extends BaseAuthenticationProvider 
       this.logger.debug('Anonymous requests will be authenticated via username and password.');
     }
 
-    this.httpAuthorizationHeader = AnonymousAuthenticationProvider.createHTTPAuthorizationHeader(
-      credentials
-    );
+    this.httpAuthorizationHeader =
+      AnonymousAuthenticationProvider.createHTTPAuthorizationHeader(credentials);
   }
 
   /**

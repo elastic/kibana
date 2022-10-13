@@ -30,7 +30,7 @@ export const getValue = <Result = any>(path: Path, source: any) => {
   for (const key of path) {
     current = (current as any)[key];
   }
-  return (current as unknown) as Result;
+  return current as unknown as Result;
 };
 
 const ARRAY_TYPE = Object.prototype.toString.call([]);
@@ -39,7 +39,7 @@ const OBJECT_TYPE = Object.prototype.toString.call({});
 const dumbCopy = <R>(value: R): R => {
   const objectType = Object.prototype.toString.call(value);
   if (objectType === ARRAY_TYPE) {
-    return ([...(value as any)] as unknown) as R;
+    return [...(value as any)] as unknown as R;
   } else if (objectType === OBJECT_TYPE) {
     return { ...(value as any) } as R;
   }
@@ -101,4 +101,21 @@ export const setValue = <Target = any, Value = any>(
 export const checkIfSamePath = (pathA: ProcessorSelector, pathB: ProcessorSelector) => {
   if (pathA.length !== pathB.length) return false;
   return pathA.join('.') === pathB.join('.');
+};
+
+/*
+ * Given a string it checks if it contains a valid mustache template snippet.
+ *
+ * Note: This allows strings with spaces such as: {{{hello world}}}. I figured we
+ * should use .+ instead of \S (disallow all whitespaces) because the backend seems
+ * to allow spaces inside the template snippet anyway.
+ *
+ * See: https://www.elastic.co/guide/en/elasticsearch/reference/master/ingest.html#template-snippets
+ */
+export const hasTemplateSnippet = (str: string = '') => {
+  // Matches when:
+  //  * contains a {{{
+  //  * Followed by all strings of length >= 1
+  //  * And followed by }}}
+  return /{{{.+}}}/.test(str);
 };

@@ -12,14 +12,14 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
 
   describe('index based actions panel on basic license', function () {
-    this.tags(['mlqa']);
+    this.tags(['ml']);
 
     const indexPatternName = 'ft_farequote';
     const savedSearch = 'ft_farequote_kuery';
     const expectedQuery = 'airline: A* and responsetime > 5';
 
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.createIndexPatternIfNeeded(indexPatternName, '@timestamp');
       await ml.testResources.createSavedSearchFarequoteKueryIfNeeded();
       await ml.testResources.setKibanaTimeZoneToUTC();

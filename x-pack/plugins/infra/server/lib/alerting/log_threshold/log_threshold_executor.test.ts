@@ -14,24 +14,23 @@ import {
   getGroupedESQuery,
   processUngroupedResults,
   processGroupByResults,
+  LogThresholdAlertFactory,
+  LogThresholdAlertLimit,
 } from './log_threshold_executor';
 import {
   Comparator,
-  AlertStates,
-  AlertParams,
+  RuleParams,
   Criterion,
   UngroupedSearchQueryResponse,
   GroupedSearchQueryResponse,
-} from '../../../../common/alerting/logs/log_threshold/types';
-import { alertsMock } from '../../../../../alerting/server/mocks';
-import { estypes } from '@elastic/elasticsearch';
+} from '../../../../common/alerting/logs/log_threshold';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 // Mocks //
 const numericField = {
   field: 'numericField',
   value: 10,
 };
-
 const keywordField = {
   field: 'keywordField',
   value: 'error',
@@ -58,7 +57,75 @@ const negativeCriteria: Criterion[] = [
   { ...textField, comparator: Comparator.NOT_MATCH_PHRASE },
 ];
 
-const baseAlertParams: Pick<AlertParams, 'count' | 'timeSize' | 'timeUnit'> = {
+const expectedPositiveFilterClauses = [
+  {
+    range: {
+      numericField: {
+        gt: 10,
+      },
+    },
+  },
+  {
+    range: {
+      numericField: {
+        gte: 10,
+      },
+    },
+  },
+  {
+    range: {
+      numericField: {
+        lt: 10,
+      },
+    },
+  },
+  {
+    range: {
+      numericField: {
+        lte: 10,
+      },
+    },
+  },
+  {
+    term: {
+      keywordField: {
+        value: 'error',
+      },
+    },
+  },
+  {
+    match: {
+      textField: 'Something went wrong',
+    },
+  },
+  {
+    match_phrase: {
+      textField: 'Something went wrong',
+    },
+  },
+];
+
+const expectedNegativeFilterClauses = [
+  {
+    term: {
+      keywordField: {
+        value: 'error',
+      },
+    },
+  },
+  {
+    match: {
+      textField: 'Something went wrong',
+    },
+  },
+  {
+    match_phrase: {
+      textField: 'Something went wrong',
+    },
+  },
+];
+
+const baseRuleParams: Pick<RuleParams, 'count' | 'timeSize' | 'timeUnit'> = {
   count: {
     comparator: Comparator.GT,
     value: 5,
@@ -69,8 +136,9 @@ const baseAlertParams: Pick<AlertParams, 'count' | 'timeSize' | 'timeUnit'> = {
 
 const TIMESTAMP_FIELD = '@timestamp';
 const FILEBEAT_INDEX = 'filebeat-*';
+const EXECUTION_TIMESTAMP = new Date('2022-01-01T00:00:00.000Z').valueOf();
 
-const runtimeMappings: estypes.RuntimeFields = {
+const runtimeMappings: estypes.MappingRuntimeFields = {
   runtime_field: {
     type: 'keyword',
     script: {
@@ -97,91 +165,27 @@ describe('Log threshold executor', () => {
   });
   describe('Criteria filter building', () => {
     test('Handles positive criteria', () => {
-      const alertParams: AlertParams = {
-        ...baseAlertParams,
+      const ruleParams: RuleParams = {
+        ...baseRuleParams,
         criteria: positiveCriteria,
       };
-      const filters = buildFiltersFromCriteria(alertParams, TIMESTAMP_FIELD);
-      expect(filters.mustFilters).toEqual([
-        {
-          range: {
-            numericField: {
-              gt: 10,
-            },
-          },
-        },
-        {
-          range: {
-            numericField: {
-              gte: 10,
-            },
-          },
-        },
-        {
-          range: {
-            numericField: {
-              lt: 10,
-            },
-          },
-        },
-        {
-          range: {
-            numericField: {
-              lte: 10,
-            },
-          },
-        },
-        {
-          term: {
-            keywordField: {
-              value: 'error',
-            },
-          },
-        },
-        {
-          match: {
-            textField: 'Something went wrong',
-          },
-        },
-        {
-          match_phrase: {
-            textField: 'Something went wrong',
-          },
-        },
-      ]);
+      const filters = buildFiltersFromCriteria(ruleParams, TIMESTAMP_FIELD, EXECUTION_TIMESTAMP);
+      expect(filters.mustFilters).toEqual(expectedPositiveFilterClauses);
     });
 
     test('Handles negative criteria', () => {
-      const alertParams: AlertParams = {
-        ...baseAlertParams,
+      const ruleParams: RuleParams = {
+        ...baseRuleParams,
         criteria: negativeCriteria,
       };
-      const filters = buildFiltersFromCriteria(alertParams, TIMESTAMP_FIELD);
+      const filters = buildFiltersFromCriteria(ruleParams, TIMESTAMP_FIELD, EXECUTION_TIMESTAMP);
 
-      expect(filters.mustNotFilters).toEqual([
-        {
-          term: {
-            keywordField: {
-              value: 'error',
-            },
-          },
-        },
-        {
-          match: {
-            textField: 'Something went wrong',
-          },
-        },
-        {
-          match_phrase: {
-            textField: 'Something went wrong',
-          },
-        },
-      ]);
+      expect(filters.mustNotFilters).toEqual(expectedNegativeFilterClauses);
     });
 
     test('Handles time range', () => {
-      const alertParams: AlertParams = { ...baseAlertParams, criteria: [] };
-      const filters = buildFiltersFromCriteria(alertParams, TIMESTAMP_FIELD);
+      const ruleParams: RuleParams = { ...baseRuleParams, criteria: [] };
+      const filters = buildFiltersFromCriteria(ruleParams, TIMESTAMP_FIELD, EXECUTION_TIMESTAMP);
       expect(typeof filters.rangeFilter.range[TIMESTAMP_FIELD].gte).toBe('number');
       expect(typeof filters.rangeFilter.range[TIMESTAMP_FIELD].lte).toBe('number');
       expect(filters.rangeFilter.range[TIMESTAMP_FIELD].format).toBe('epoch_millis');
@@ -194,16 +198,17 @@ describe('Log threshold executor', () => {
 
   describe('ES queries', () => {
     describe('Query generation', () => {
-      test('Correctly generates ungrouped queries', () => {
-        const alertParams: AlertParams = {
-          ...baseAlertParams,
+      it('Correctly generates ungrouped queries', () => {
+        const ruleParams: RuleParams = {
+          ...baseRuleParams,
           criteria: [...positiveCriteria, ...negativeCriteria],
         };
         const query = getUngroupedESQuery(
-          alertParams,
+          ruleParams,
           TIMESTAMP_FIELD,
           FILEBEAT_INDEX,
-          runtimeMappings
+          runtimeMappings,
+          EXECUTION_TIMESTAMP
         );
         expect(query).toEqual({
           index: 'filebeat-*',
@@ -223,71 +228,9 @@ describe('Log threshold executor', () => {
                       },
                     },
                   },
-                  {
-                    range: {
-                      numericField: {
-                        gt: 10,
-                      },
-                    },
-                  },
-                  {
-                    range: {
-                      numericField: {
-                        gte: 10,
-                      },
-                    },
-                  },
-                  {
-                    range: {
-                      numericField: {
-                        lt: 10,
-                      },
-                    },
-                  },
-                  {
-                    range: {
-                      numericField: {
-                        lte: 10,
-                      },
-                    },
-                  },
-                  {
-                    term: {
-                      keywordField: {
-                        value: 'error',
-                      },
-                    },
-                  },
-                  {
-                    match: {
-                      textField: 'Something went wrong',
-                    },
-                  },
-                  {
-                    match_phrase: {
-                      textField: 'Something went wrong',
-                    },
-                  },
+                  ...expectedPositiveFilterClauses,
                 ],
-                must_not: [
-                  {
-                    term: {
-                      keywordField: {
-                        value: 'error',
-                      },
-                    },
-                  },
-                  {
-                    match: {
-                      textField: 'Something went wrong',
-                    },
-                  },
-                  {
-                    match_phrase: {
-                      textField: 'Something went wrong',
-                    },
-                  },
-                ],
+                must_not: [...expectedNegativeFilterClauses],
               },
             },
             runtime_mappings: {
@@ -304,159 +247,177 @@ describe('Log threshold executor', () => {
         });
       });
 
-      test('Correctly generates grouped queries', () => {
-        const alertParams: AlertParams = {
-          ...baseAlertParams,
-          groupBy: ['host.name'],
-          criteria: [...positiveCriteria, ...negativeCriteria],
-        };
-        const query = getGroupedESQuery(
-          alertParams,
-          TIMESTAMP_FIELD,
-          FILEBEAT_INDEX,
-          runtimeMappings
-        );
-        expect(query).toEqual({
-          index: 'filebeat-*',
-          allow_no_indices: true,
-          ignore_unavailable: true,
-          body: {
-            query: {
-              bool: {
-                filter: [
-                  {
-                    range: {
-                      '@timestamp': {
-                        gte: expect.any(Number),
-                        lte: expect.any(Number),
-                        format: 'epoch_millis',
+      describe('Correctly generates grouped queries', () => {
+        it('When using an optimizable threshold comparator', () => {
+          const ruleParams: RuleParams = {
+            ...baseRuleParams,
+            groupBy: ['host.name'],
+            criteria: [...positiveCriteria, ...negativeCriteria],
+          };
+          const query = getGroupedESQuery(
+            ruleParams,
+            TIMESTAMP_FIELD,
+            FILEBEAT_INDEX,
+            runtimeMappings,
+            EXECUTION_TIMESTAMP
+          );
+
+          expect(query).toEqual({
+            index: 'filebeat-*',
+            allow_no_indices: true,
+            ignore_unavailable: true,
+            body: {
+              query: {
+                bool: {
+                  filter: [
+                    {
+                      range: {
+                        '@timestamp': {
+                          gte: expect.any(Number),
+                          lte: expect.any(Number),
+                          format: 'epoch_millis',
+                        },
                       },
                     },
-                  },
-                ],
+                    ...expectedPositiveFilterClauses,
+                  ],
+                  must_not: [...expectedNegativeFilterClauses],
+                },
               },
+              aggregations: {
+                groups: {
+                  composite: {
+                    size: 2000,
+                    sources: [
+                      {
+                        'group-0-host.name': {
+                          terms: {
+                            field: 'host.name',
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+              runtime_mappings: {
+                runtime_field: {
+                  type: 'keyword',
+                  script: {
+                    lang: 'painless',
+                    source: 'emit("a runtime value")',
+                  },
+                },
+              },
+              size: 0,
             },
-            aggregations: {
-              groups: {
-                composite: {
-                  size: 40,
-                  sources: [
+          });
+        });
+
+        it('When not using an optimizable threshold comparator', () => {
+          const ruleParams: RuleParams = {
+            ...baseRuleParams,
+            count: {
+              ...baseRuleParams.count,
+              comparator: Comparator.LT,
+            },
+            groupBy: ['host.name'],
+            criteria: [...positiveCriteria, ...negativeCriteria],
+          };
+
+          const query = getGroupedESQuery(
+            ruleParams,
+            TIMESTAMP_FIELD,
+            FILEBEAT_INDEX,
+            runtimeMappings,
+            EXECUTION_TIMESTAMP
+          );
+
+          expect(query).toEqual({
+            index: 'filebeat-*',
+            allow_no_indices: true,
+            ignore_unavailable: true,
+            body: {
+              query: {
+                bool: {
+                  filter: [
                     {
-                      'group-0-host.name': {
-                        terms: {
-                          field: 'host.name',
+                      range: {
+                        '@timestamp': {
+                          gte: expect.any(Number),
+                          lte: expect.any(Number),
+                          format: 'epoch_millis',
                         },
                       },
                     },
                   ],
                 },
-                aggregations: {
-                  filtered_results: {
-                    filter: {
-                      bool: {
-                        filter: [
-                          {
-                            range: {
-                              '@timestamp': {
-                                gte: expect.any(Number),
-                                lte: expect.any(Number),
-                                format: 'epoch_millis',
+              },
+              aggregations: {
+                groups: {
+                  composite: {
+                    size: 2000,
+                    sources: [
+                      {
+                        'group-0-host.name': {
+                          terms: {
+                            field: 'host.name',
+                          },
+                        },
+                      },
+                    ],
+                  },
+                  aggregations: {
+                    filtered_results: {
+                      filter: {
+                        bool: {
+                          filter: [
+                            {
+                              range: {
+                                '@timestamp': {
+                                  gte: expect.any(Number),
+                                  lte: expect.any(Number),
+                                  format: 'epoch_millis',
+                                },
                               },
                             },
-                          },
-                          {
-                            range: {
-                              numericField: {
-                                gt: 10,
-                              },
-                            },
-                          },
-                          {
-                            range: {
-                              numericField: {
-                                gte: 10,
-                              },
-                            },
-                          },
-                          {
-                            range: {
-                              numericField: {
-                                lt: 10,
-                              },
-                            },
-                          },
-                          {
-                            range: {
-                              numericField: {
-                                lte: 10,
-                              },
-                            },
-                          },
-                          {
-                            term: {
-                              keywordField: {
-                                value: 'error',
-                              },
-                            },
-                          },
-                          {
-                            match: {
-                              textField: 'Something went wrong',
-                            },
-                          },
-                          {
-                            match_phrase: {
-                              textField: 'Something went wrong',
-                            },
-                          },
-                        ],
-                        must_not: [
-                          {
-                            term: {
-                              keywordField: {
-                                value: 'error',
-                              },
-                            },
-                          },
-                          {
-                            match: {
-                              textField: 'Something went wrong',
-                            },
-                          },
-                          {
-                            match_phrase: {
-                              textField: 'Something went wrong',
-                            },
-                          },
-                        ],
+                            ...expectedPositiveFilterClauses,
+                          ],
+                          must_not: [...expectedNegativeFilterClauses],
+                        },
                       },
                     },
                   },
                 },
               },
-            },
-            runtime_mappings: {
-              runtime_field: {
-                type: 'keyword',
-                script: {
-                  lang: 'painless',
-                  source: 'emit("a runtime value")',
+              runtime_mappings: {
+                runtime_field: {
+                  type: 'keyword',
+                  script: {
+                    lang: 'painless',
+                    source: 'emit("a runtime value")',
+                  },
                 },
               },
+              size: 0,
             },
-            size: 0,
-          },
+          });
         });
       });
     });
   });
 
   describe('Results processors', () => {
-    describe('Can process ungrouped results', () => {
-      test('It handles the ALERT state correctly', () => {
-        const alertInstanceUpdaterMock = jest.fn();
-        const alertParams = {
-          ...baseAlertParams,
+    describe('for ungrouped results', () => {
+      it('handles the ALERT state correctly', () => {
+        const alertFactoryMock: jest.MockedFunction<LogThresholdAlertFactory> = jest.fn();
+        const alertLimitMock: jest.Mocked<LogThresholdAlertLimit> = {
+          getValue: jest.fn().mockReturnValue(10),
+          setLimitReached: jest.fn(),
+        };
+
+        const ruleParams = {
+          ...baseRuleParams,
           criteria: [positiveCriteria[0]],
         };
         const results = {
@@ -466,34 +427,110 @@ describe('Log threshold executor', () => {
             },
           },
         } as UngroupedSearchQueryResponse;
-        processUngroupedResults(
-          results,
-          alertParams,
-          alertsMock.createAlertInstanceFactory,
-          alertInstanceUpdaterMock
-        );
-        // First call, second argument
-        expect(alertInstanceUpdaterMock.mock.calls[0][1]).toBe(AlertStates.ALERT);
-        // First call, third argument
-        expect(alertInstanceUpdaterMock.mock.calls[0][2]).toEqual([
+
+        processUngroupedResults(results, ruleParams, alertFactoryMock, alertLimitMock);
+
+        // first call, fifth argument
+        expect(alertFactoryMock.mock.calls[0][4]).toEqual([
           {
             actionGroup: 'logs.threshold.fired',
             context: {
-              conditions: ' numericField more than 10',
+              conditions: 'numericField more than 10',
               group: null,
               matchingDocuments: 10,
               isRatio: false,
+              reason: '10 log entries in the last 5 mins. Alert when > 5.',
             },
           },
         ]);
       });
+
+      it('reports reaching a low limit when alerting', () => {
+        const alertFactoryMock: jest.MockedFunction<LogThresholdAlertFactory> = jest.fn();
+        const alertLimitMock: jest.Mocked<LogThresholdAlertLimit> = {
+          getValue: jest.fn().mockReturnValue(1),
+          setLimitReached: jest.fn(),
+        };
+
+        const ruleParams = {
+          ...baseRuleParams,
+          criteria: [positiveCriteria[0]],
+        };
+        const results = {
+          hits: {
+            total: {
+              value: 10,
+            },
+          },
+        } as UngroupedSearchQueryResponse;
+
+        processUngroupedResults(results, ruleParams, alertFactoryMock, alertLimitMock);
+
+        expect(alertFactoryMock).toBeCalledTimes(1);
+        expect(alertLimitMock.setLimitReached).toHaveBeenCalledWith(true);
+      });
+
+      it('reports not reaching a higher limit when alerting', () => {
+        const alertFactoryMock: jest.MockedFunction<LogThresholdAlertFactory> = jest.fn();
+        const alertLimitMock: jest.Mocked<LogThresholdAlertLimit> = {
+          getValue: jest.fn().mockReturnValue(10),
+          setLimitReached: jest.fn(),
+        };
+
+        const ruleParams = {
+          ...baseRuleParams,
+          criteria: [positiveCriteria[0]],
+        };
+        const results = {
+          hits: {
+            total: {
+              value: 10,
+            },
+          },
+        } as UngroupedSearchQueryResponse;
+
+        processUngroupedResults(results, ruleParams, alertFactoryMock, alertLimitMock);
+
+        expect(alertFactoryMock).toBeCalledTimes(1);
+        expect(alertLimitMock.setLimitReached).toHaveBeenCalledWith(false);
+      });
+
+      it('reports not reaching the limit without any alerts', () => {
+        const alertFactoryMock: jest.MockedFunction<LogThresholdAlertFactory> = jest.fn();
+        const alertLimitMock: jest.Mocked<LogThresholdAlertLimit> = {
+          getValue: jest.fn().mockReturnValue(0),
+          setLimitReached: jest.fn(),
+        };
+
+        const ruleParams = {
+          ...baseRuleParams,
+          criteria: [positiveCriteria[0]],
+        };
+        const results = {
+          hits: {
+            total: {
+              value: 0,
+            },
+          },
+        } as UngroupedSearchQueryResponse;
+
+        processUngroupedResults(results, ruleParams, alertFactoryMock, alertLimitMock);
+
+        expect(alertFactoryMock).not.toHaveBeenCalled();
+        expect(alertLimitMock.setLimitReached).toHaveBeenCalledWith(false);
+      });
     });
 
-    describe('Can process grouped results', () => {
-      test('It handles the ALERT state correctly', () => {
-        const alertInstanceUpdaterMock = jest.fn();
-        const alertParams = {
-          ...baseAlertParams,
+    describe('for grouped results', () => {
+      it('handles the ALERT state correctly', () => {
+        const alertFactoryMock: jest.MockedFunction<LogThresholdAlertFactory> = jest.fn();
+        const alertLimitMock: jest.Mocked<LogThresholdAlertLimit> = {
+          getValue: jest.fn().mockReturnValue(2),
+          setLimitReached: jest.fn(),
+        };
+
+        const ruleParams = {
+          ...baseRuleParams,
           criteria: [positiveCriteria[0]],
           groupBy: ['host.name', 'event.dataset'],
         };
@@ -530,42 +567,143 @@ describe('Log threshold executor', () => {
             },
           },
         ] as GroupedSearchQueryResponse['aggregations']['groups']['buckets'];
-        processGroupByResults(
-          results,
-          alertParams,
-          alertsMock.createAlertInstanceFactory,
-          alertInstanceUpdaterMock
-        );
-        expect(alertInstanceUpdaterMock.mock.calls.length).toBe(2);
-        // First call, second argument
-        expect(alertInstanceUpdaterMock.mock.calls[0][1]).toBe(AlertStates.ALERT);
-        // First call, third argument
-        expect(alertInstanceUpdaterMock.mock.calls[0][2]).toEqual([
+
+        processGroupByResults(results, ruleParams, alertFactoryMock, alertLimitMock);
+        expect(alertFactoryMock.mock.calls.length).toBe(2);
+
+        // First call, fifth argument
+        expect(alertFactoryMock.mock.calls[0][4]).toEqual([
           {
             actionGroup: 'logs.threshold.fired',
             context: {
-              conditions: ' numericField more than 10',
+              conditions: 'numericField more than 10',
               group: 'i-am-a-host-name-1, i-am-a-dataset-1',
               matchingDocuments: 10,
               isRatio: false,
+              reason:
+                '10 log entries in the last 5 mins for i-am-a-host-name-1, i-am-a-dataset-1. Alert when > 5.',
             },
           },
         ]);
 
-        // Second call, second argument
-        expect(alertInstanceUpdaterMock.mock.calls[1][1]).toBe(AlertStates.ALERT);
-        // Second call, third argument
-        expect(alertInstanceUpdaterMock.mock.calls[1][2]).toEqual([
+        // Second call, fifth argument
+        expect(alertFactoryMock.mock.calls[1][4]).toEqual([
           {
             actionGroup: 'logs.threshold.fired',
             context: {
-              conditions: ' numericField more than 10',
+              conditions: 'numericField more than 10',
               group: 'i-am-a-host-name-3, i-am-a-dataset-3',
               matchingDocuments: 20,
               isRatio: false,
+              reason:
+                '20 log entries in the last 5 mins for i-am-a-host-name-3, i-am-a-dataset-3. Alert when > 5.',
             },
           },
         ]);
+      });
+
+      it('respects and reports reaching a low limit when alerting', () => {
+        const alertFactoryMock: jest.MockedFunction<LogThresholdAlertFactory> = jest.fn();
+        const alertLimitMock: jest.Mocked<LogThresholdAlertLimit> = {
+          getValue: jest.fn().mockReturnValue(1),
+          setLimitReached: jest.fn(),
+        };
+
+        const ruleParams = {
+          ...baseRuleParams,
+          criteria: [positiveCriteria[0]],
+          groupBy: ['host.name', 'event.dataset'],
+        };
+        // Two groups should fire, one shouldn't
+        const results = [
+          {
+            key: {
+              'host.name': 'i-am-a-host-name-1',
+              'event.dataset': 'i-am-a-dataset-1',
+            },
+            doc_count: 100,
+            filtered_results: {
+              doc_count: 10,
+            },
+          },
+          {
+            key: {
+              'host.name': 'i-am-a-host-name-2',
+              'event.dataset': 'i-am-a-dataset-2',
+            },
+            doc_count: 100,
+            filtered_results: {
+              doc_count: 2,
+            },
+          },
+          {
+            key: {
+              'host.name': 'i-am-a-host-name-3',
+              'event.dataset': 'i-am-a-dataset-3',
+            },
+            doc_count: 100,
+            filtered_results: {
+              doc_count: 20,
+            },
+          },
+        ] as GroupedSearchQueryResponse['aggregations']['groups']['buckets'];
+
+        processGroupByResults(results, ruleParams, alertFactoryMock, alertLimitMock);
+
+        expect(alertFactoryMock).toHaveBeenCalledTimes(1);
+        expect(alertLimitMock.setLimitReached).toHaveBeenCalledWith(true);
+      });
+
+      it('reports not reaching a higher limit when alerting', () => {
+        const alertFactoryMock: jest.MockedFunction<LogThresholdAlertFactory> = jest.fn();
+        const alertLimitMock: jest.Mocked<LogThresholdAlertLimit> = {
+          getValue: jest.fn().mockReturnValue(10),
+          setLimitReached: jest.fn(),
+        };
+
+        const ruleParams = {
+          ...baseRuleParams,
+          criteria: [positiveCriteria[0]],
+          groupBy: ['host.name', 'event.dataset'],
+        };
+        // Two groups should fire, one shouldn't
+        const results = [
+          {
+            key: {
+              'host.name': 'i-am-a-host-name-1',
+              'event.dataset': 'i-am-a-dataset-1',
+            },
+            doc_count: 100,
+            filtered_results: {
+              doc_count: 10,
+            },
+          },
+          {
+            key: {
+              'host.name': 'i-am-a-host-name-2',
+              'event.dataset': 'i-am-a-dataset-2',
+            },
+            doc_count: 100,
+            filtered_results: {
+              doc_count: 2,
+            },
+          },
+          {
+            key: {
+              'host.name': 'i-am-a-host-name-3',
+              'event.dataset': 'i-am-a-dataset-3',
+            },
+            doc_count: 100,
+            filtered_results: {
+              doc_count: 20,
+            },
+          },
+        ] as GroupedSearchQueryResponse['aggregations']['groups']['buckets'];
+
+        processGroupByResults(results, ruleParams, alertFactoryMock, alertLimitMock);
+
+        expect(alertFactoryMock).toHaveBeenCalledTimes(2);
+        expect(alertLimitMock.setLimitReached).toHaveBeenCalledWith(false);
       });
     });
   });

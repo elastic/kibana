@@ -10,10 +10,10 @@ import {
   httpServerMock,
   httpServiceMock,
   loggingSystemMock,
-} from 'src/core/server/mocks';
+} from '@kbn/core/server/mocks';
+import type { PluginSetupContract as FeaturesSetupContract } from '@kbn/features-plugin/server';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
-import type { PluginSetupContract as FeaturesSetupContract } from '../../../features/server';
-import { featuresPluginMock } from '../../../features/server/mocks';
 import { initAppAuthorization } from './app_authorization';
 import { authorizationMock } from './index.mock';
 

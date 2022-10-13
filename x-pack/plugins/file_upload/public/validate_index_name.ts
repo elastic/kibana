@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { getIndexPatternService } from './kibana_services';
+import { getDataViewsService } from './kibana_services';
 import { checkIndexExists } from './api';
 
 export function checkIndexPatternValid(name: string) {
@@ -23,16 +23,22 @@ export function checkIndexPatternValid(name: string) {
 }
 
 export const validateIndexName = async (indexName: string) => {
+  if (!indexName) {
+    return i18n.translate('xpack.fileUpload.indexNameRequired', {
+      defaultMessage: 'Index name required',
+    });
+  }
+
   if (!checkIndexPatternValid(indexName)) {
     return i18n.translate('xpack.fileUpload.indexNameContainsIllegalCharactersErrorMessage', {
       defaultMessage: 'Index name contains illegal characters.',
     });
   }
 
-  const indexPatternNames = await getIndexPatternService().getTitles();
-  if (indexPatternNames.includes(indexName)) {
-    return i18n.translate('xpack.fileUpload.indexPatternAlreadyExistsErrorMessage', {
-      defaultMessage: 'Index pattern already exists.',
+  const dataViewNames = await getDataViewsService().getTitles();
+  if (dataViewNames.includes(indexName)) {
+    return i18n.translate('xpack.fileUpload.dataViewAlreadyExistsErrorMessage', {
+      defaultMessage: 'Data view already exists.',
     });
   }
 

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '../../../../src/core/public';
+import { PluginInitializerContext } from '@kbn/core/public';
 import { CloudPlugin } from './plugin';
 
-export { CloudSetup, CloudConfigType } from './plugin';
+export type { CloudSetup, CloudConfigType, CloudStart } from './plugin';
+
 export function plugin(initializerContext: PluginInitializerContext) {
   return new CloudPlugin(initializerContext);
 }

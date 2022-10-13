@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { HostsTableType } from '../../../hosts/store/model';
-
+import type { HostsTableType } from '../../../hosts/store/model';
+import { HOSTS_PATH } from '../../../../common/constants';
 import { appendSearch } from './helpers';
 
-export const getHostsUrl = (search?: string) => `${appendSearch(search)}`;
+export const getHostsUrl = (search?: string) => `${HOSTS_PATH}${appendSearch(search)}`;
 
 export const getTabsOnHostsUrl = (tabName: HostsTableType, search?: string) =>
   `/${tabName}${appendSearch(search)}`;
 
 export const getHostDetailsUrl = (detailName: string, search?: string) =>
-  `/${detailName}${appendSearch(search)}`;
+  `/name/${detailName}${appendSearch(search)}`;
 
 export const getTabsOnHostDetailsUrl = (
   detailName: string,
   tabName: HostsTableType,
   search?: string
-) => `/${detailName}/${tabName}${appendSearch(search)}`;
+) => `/name/${detailName}/${tabName}${appendSearch(search)}`;

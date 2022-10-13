@@ -28,14 +28,8 @@ export default ({ getService }: FtrProviderContext) => {
       expected: {
         responseCode: 200,
         responseBody: {
-          start: {
-            epoch: 1560297859000,
-            string: '2019-06-12T00:04:19.000Z',
-          },
-          end: {
-            epoch: 1562975136000,
-            string: '2019-07-12T23:45:36.000Z',
-          },
+          start: 1560297859000,
+          end: 1562975136000,
           success: true,
         },
       },
@@ -57,14 +51,8 @@ export default ({ getService }: FtrProviderContext) => {
       expected: {
         responseCode: 200,
         responseBody: {
-          start: {
-            epoch: 1560298982000,
-            string: '2019-06-12T00:23:02.000Z',
-          },
-          end: {
-            epoch: 1562973754000,
-            string: '2019-07-12T23:22:34.000Z',
-          },
+          start: 1560298982000,
+          end: 1562973754000,
           success: true,
         },
       },
@@ -90,18 +78,18 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('time_field_range', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/ecommerce');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
       await ml.testResources.setKibanaTimeZoneToUTC();
     });
 
     for (const testData of testDataList) {
       it(`${testData.testTitle}`, async () => {
-        const { body } = await supertest
+        const { body, status } = await supertest
           .post('/api/ml/fields_service/time_field_range')
           .auth(testData.user, ml.securityCommon.getPasswordForUser(testData.user))
           .set(COMMON_REQUEST_HEADERS)
-          .send(testData.requestBody)
-          .expect(testData.expected.responseCode);
+          .send(testData.requestBody);
+        ml.api.assertResponseStatusCode(testData.expected.responseCode, status, body);
 
         if (body.error === undefined) {
           expect(body).to.eql(testData.expected.responseBody);

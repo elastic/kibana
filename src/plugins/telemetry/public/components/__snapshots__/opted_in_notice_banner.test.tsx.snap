@@ -20,7 +20,7 @@ exports[`OptInDetailsComponent renders as expected 1`] = `
           />
         </EuiLink>,
         "privacyStatementLink": <EuiLink
-          href="https://www.elastic.co/legal/privacy-statement"
+          href="https://some-host/some-url"
           onClick={[Function]}
           rel="noopener"
           target="_blank"

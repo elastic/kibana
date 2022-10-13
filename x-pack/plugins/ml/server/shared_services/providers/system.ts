@@ -5,17 +5,20 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
+import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { MlInfoResponse } from '../../../common/types/ml_server_info';
+import type {
+  MlCapabilitiesResponse,
+  ResolveMlCapabilities,
+} from '../../../common/types/capabilities';
+import type { GetGuards } from '../shared_services';
 import { MlLicense } from '../../../common/license';
-import { CloudSetup } from '../../../../cloud/server';
 import { spacesUtilsProvider } from '../../lib/spaces_utils';
-import { SpacesPluginStart } from '../../../../spaces/server';
 import { capabilitiesProvider } from '../../lib/capabilities';
-import { MlInfoResponse } from '../../../common/types/ml_server_info';
-import { MlCapabilitiesResponse, ResolveMlCapabilities } from '../../../common/types/capabilities';
-import { GetGuards } from '../shared_services';
 
 export interface MlSystemProvider {
   mlSystemProvider(
@@ -62,7 +65,7 @@ export function getMlSystemProvider(
           return await getGuards(request, savedObjectsClient)
             .isMinimumLicense()
             .ok(async ({ mlClient }) => {
-              const { body: info } = await mlClient.info<MlInfoResponse>();
+              const info = await mlClient.info();
               const cloudId = cloud && cloud.cloudId;
               return {
                 ...info,
@@ -78,8 +81,7 @@ export function getMlSystemProvider(
             .isFullLicense()
             .hasMlCapabilities(['canAccessML'])
             .ok(async ({ mlClient }) => {
-              const { body } = await mlClient.anomalySearch<T>(searchParams, jobIds);
-              return body;
+              return await mlClient.anomalySearch<T>(searchParams, jobIds);
             });
         },
       };

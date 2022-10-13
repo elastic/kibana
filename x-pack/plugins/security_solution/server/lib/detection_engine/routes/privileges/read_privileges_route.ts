@@ -7,10 +7,10 @@
 
 import { merge } from 'lodash/fp';
 
+import { readPrivileges, transformError } from '@kbn/securitysolution-es-utils';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_PRIVILEGES_URL } from '../../../../../common/constants';
-import { buildSiemResponse, transformError } from '../utils';
-import { readPrivileges } from '../../privileges/read_privileges';
+import { buildSiemResponse } from '../utils';
 
 export const readPrivilegesRoute = (
   router: SecuritySolutionPluginRouter,
@@ -28,15 +28,20 @@ export const readPrivilegesRoute = (
       const siemResponse = buildSiemResponse(response);
 
       try {
-        const clusterClient = context.core.elasticsearch.legacy.client;
-        const siemClient = context.securitySolution?.getAppClient();
+        const core = await context.core;
+        const securitySolution = await context.securitySolution;
+        const esClient = core.elasticsearch.client.asCurrentUser;
+        const siemClient = securitySolution?.getAppClient();
 
         if (!siemClient) {
           return siemResponse.error({ statusCode: 404 });
         }
 
-        const index = siemClient.getSignalsIndex();
-        const clusterPrivileges = await readPrivileges(clusterClient.callAsCurrentUser, index);
+        const spaceId = securitySolution.getSpaceId();
+        const index = securitySolution
+          .getRuleDataService()
+          .getResourceName(`security.alerts-${spaceId}`);
+        const clusterPrivileges = await readPrivileges(esClient, index);
         const privileges = merge(clusterPrivileges, {
           is_authenticated: request.auth.isAuthenticated ?? false,
           has_encryption_key: hasEncryptionKey,

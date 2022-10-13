@@ -6,6 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { isEsError } from './is_es_error';
 export { handleEsError } from './handle_es_error';
 export { parseEsError } from './es_error_parser';

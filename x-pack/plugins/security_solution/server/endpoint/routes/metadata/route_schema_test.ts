@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { endpointFilters } from './index';
+import { endpointFilters } from '.';
 
 describe('Filters Schema Test', () => {
   it('accepts a single host status', () => {

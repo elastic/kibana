@@ -6,6 +6,7 @@
  */
 
 export interface ElasticsearchResponse {
+  timed_out?: boolean;
   hits?: {
     hits: ElasticsearchResponseHit[];
     total: {
@@ -41,6 +42,7 @@ export interface ElasticsearchSourceKibanaStats {
     };
     transport_address?: string;
     host?: string;
+    version?: string;
   };
   os?: {
     memory?: {
@@ -141,6 +143,14 @@ export interface ElasticsearchIndexStats {
   };
 }
 
+export interface ElasticsearchLogstashStatePipeline {
+  representation?: {
+    graph?: {
+      vertices?: ElasticsearchSourceLogstashPipelineVertex[];
+    };
+  };
+}
+
 export interface ElasticsearchLegacySource {
   timestamp: string;
   cluster_uuid: string;
@@ -156,7 +166,7 @@ export interface ElasticsearchLegacySource {
           heap_max_in_bytes?: number;
         };
       };
-      fs: {
+      fs?: {
         available_in_bytes?: number;
         total_in_bytes?: number;
       };
@@ -203,13 +213,7 @@ export interface ElasticsearchLegacySource {
     expiry_date_in_millis?: number;
   };
   logstash_state?: {
-    pipeline?: {
-      representation?: {
-        graph?: {
-          vertices?: ElasticsearchSourceLogstashPipelineVertex[];
-        };
-      };
-    };
+    pipeline?: ElasticsearchLogstashStatePipeline;
   };
   logstash_stats?: {
     timestamp?: string;
@@ -228,6 +232,7 @@ export interface ElasticsearchLegacySource {
     };
     queue?: {
       type?: string;
+      events?: number;
     };
     jvm?: {
       uptime_in_millis?: number;
@@ -249,6 +254,8 @@ export interface ElasticsearchLegacySource {
     };
     events?: {
       out?: number;
+      in?: number;
+      filtered?: number;
     };
     reloads?: {
       failures?: number;
@@ -266,6 +273,19 @@ export interface ElasticsearchLegacySource {
     };
     metrics?: {
       beat?: {
+        cgroup?: {
+          memory: {
+            id: string;
+            mem: {
+              limit: {
+                bytes: number;
+              };
+              usage: {
+                bytes: number;
+              };
+            };
+          };
+        };
         memstats?: {
           memory_alloc?: number;
         };
@@ -395,12 +415,15 @@ export interface ElasticsearchIndexRecoveryShard {
 export interface ElasticsearchMetricbeatNode {
   name?: string;
   stats?: ElasticsearchNodeStats;
+  master: boolean;
 }
 
 export interface ElasticsearchMetricbeatSource {
   '@timestamp'?: string;
   service?: {
+    id?: string;
     address?: string;
+    version?: string;
   };
   elasticsearch?: {
     node?: ElasticsearchLegacySource['source_node'] & ElasticsearchMetricbeatNode;
@@ -481,7 +504,7 @@ export interface ElasticsearchMetricbeatSource {
         };
         nodes?: {
           versions?: string[];
-          count?: number;
+          count?: number | {};
           jvm?: {
             max_uptime?: {
               ms?: number;
@@ -518,15 +541,16 @@ export interface ElasticsearchMetricbeatSource {
     };
   };
   kibana?: {
-    kibana?: {
-      transport_address?: string;
-      name?: string;
-      host?: string;
-      uuid?: string;
-      status?: string;
-    };
     stats?: {
+      name?: string;
+      index?: string;
+      status?: string;
+      transport_address?: string;
       concurrent_connections?: number;
+      snapshot?: boolean;
+      host?: {
+        name?: string;
+      };
       process?: {
         uptime?: {
           ms?: number;
@@ -566,6 +590,17 @@ export interface ElasticsearchMetricbeatSource {
   };
   logstash?: {
     node?: {
+      state?: {
+        pipeline?: {
+          id: string;
+          name: string;
+          representation?: {
+            graph?: {
+              vertices: ElasticsearchSourceLogstashPipelineVertex[];
+            };
+          };
+        };
+      };
       stats?: {
         timestamp?: string;
         logstash?: {
@@ -660,6 +695,9 @@ export interface ElasticsearchMetricbeatSource {
         };
       };
     };
+  };
+  enterprisesearch?: {
+    cluster_uuid?: string;
   };
 }
 

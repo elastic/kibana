@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { QuerySignalsSchema, querySignalsSchema } from './query_signals_index_schema';
-import { exactCheck } from '../../../exact_check';
+import type { QuerySignalsSchema } from './query_signals_index_schema';
+import { querySignalsSchema } from './query_signals_index_schema';
+import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { foldLeftRight, getPaths } from '../../../test_utils';
 import { left } from 'fp-ts/lib/Either';
 
 describe('query, aggs, size, _source and track_total_hits on signals index', () => {
@@ -76,9 +76,59 @@ describe('query, aggs, size, _source and track_total_hits on signals index', () 
     expect(message.schema).toEqual(payload);
   });
 
-  test('_source only', () => {
+  test('_source only (as string)', () => {
+    const payload: QuerySignalsSchema = {
+      _source: 'field',
+    };
+
+    const decoded = querySignalsSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
+  });
+
+  test('_source only (as string[])', () => {
     const payload: QuerySignalsSchema = {
       _source: ['field'],
+    };
+
+    const decoded = querySignalsSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
+  });
+
+  test('_source only (as boolean)', () => {
+    const payload: QuerySignalsSchema = {
+      _source: false,
+    };
+
+    const decoded = querySignalsSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
+  });
+
+  test('fields only', () => {
+    const payload: QuerySignalsSchema = {
+      fields: ['test*'],
+    };
+
+    const decoded = querySignalsSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
+  });
+
+  test('sort only', () => {
+    const payload: QuerySignalsSchema = {
+      sort: {
+        '@payload': 'desc',
+      },
     };
 
     const decoded = querySignalsSchema.decode(payload);

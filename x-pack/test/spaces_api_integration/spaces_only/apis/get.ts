@@ -14,12 +14,8 @@ export default function getSpaceTestSuite({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
 
-  const {
-    getTest,
-    createExpectResults,
-    createExpectNotFoundResult,
-    nonExistantSpaceId,
-  } = getTestSuiteFactory(esArchiver, supertestWithoutAuth);
+  const { getTest, createExpectResults, createExpectNotFoundResult, nonExistantSpaceId } =
+    getTestSuiteFactory(esArchiver, supertestWithoutAuth);
 
   describe('get', () => {
     // valid spaces

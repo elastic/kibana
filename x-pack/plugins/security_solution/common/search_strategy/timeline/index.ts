@@ -5,72 +5,20 @@
  * 2.0.
  */
 
-import { IEsSearchRequest } from '../../../../../../src/plugins/data/common';
-import { ESQuery } from '../../typed_json';
-import {
-  TimelineEventsQueries,
-  TimelineEventsAllRequestOptions,
-  TimelineEventsAllStrategyResponse,
-  TimelineEventsDetailsRequestOptions,
-  TimelineEventsDetailsStrategyResponse,
-  TimelineEventsLastEventTimeRequestOptions,
-  TimelineEventsLastEventTimeStrategyResponse,
-  TimelineKpiStrategyResponse,
-} from './events';
-import {
-  DocValueFields,
-  PaginationInputPaginated,
-  TimerangeInput,
-  SortField,
-  Maybe,
-} from '../common';
-import { DataProviderType, TimelineType, TimelineStatus } from '../../types/timeline';
+import type { SortField, Maybe } from '../common';
+import type {
+  DataProviderType,
+  TimelineType,
+  TimelineStatus,
+  RowRendererId,
+} from '../../types/timeline';
 
 export * from './events';
 
-export type TimelineFactoryQueryTypes = TimelineEventsQueries;
-
-export interface TimelineRequestBasicOptions extends IEsSearchRequest {
-  timerange: TimerangeInput;
-  filterQuery: ESQuery | string | undefined;
-  defaultIndex: string[];
-  docValueFields?: DocValueFields[];
-  factoryQueryType?: TimelineFactoryQueryTypes;
-}
-
 export interface TimelineRequestSortField<Field = string> extends SortField<Field> {
   type: string;
+  esTypes: string[];
 }
-
-export interface TimelineRequestOptionsPaginated<Field = string>
-  extends TimelineRequestBasicOptions {
-  pagination: Pick<PaginationInputPaginated, 'activePage' | 'querySize'>;
-  sort: Array<TimelineRequestSortField<Field>>;
-}
-
-export type TimelineStrategyResponseType<
-  T extends TimelineFactoryQueryTypes
-> = T extends TimelineEventsQueries.all
-  ? TimelineEventsAllStrategyResponse
-  : T extends TimelineEventsQueries.details
-  ? TimelineEventsDetailsStrategyResponse
-  : T extends TimelineEventsQueries.kpi
-  ? TimelineKpiStrategyResponse
-  : T extends TimelineEventsQueries.lastEventTime
-  ? TimelineEventsLastEventTimeStrategyResponse
-  : never;
-
-export type TimelineStrategyRequestType<
-  T extends TimelineFactoryQueryTypes
-> = T extends TimelineEventsQueries.all
-  ? TimelineEventsAllRequestOptions
-  : T extends TimelineEventsQueries.details
-  ? TimelineEventsDetailsRequestOptions
-  : T extends TimelineEventsQueries.kpi
-  ? TimelineRequestBasicOptions
-  : T extends TimelineEventsQueries.lastEventTime
-  ? TimelineEventsLastEventTimeRequestOptions
-  : never;
 
 export interface ColumnHeaderInput {
   aggregatable?: Maybe<boolean>;
@@ -165,28 +113,10 @@ export interface SortTimelineInput {
   sortDirection?: Maybe<string>;
 }
 
-export enum RowRendererId {
-  alerts = 'alerts',
-  auditd = 'auditd',
-  auditd_file = 'auditd_file',
-  library = 'library',
-  netflow = 'netflow',
-  plain = 'plain',
-  registry = 'registry',
-  suricata = 'suricata',
-  system = 'system',
-  system_dns = 'system_dns',
-  system_endgame_process = 'system_endgame_process',
-  system_file = 'system_file',
-  system_fim = 'system_fim',
-  system_security_event = 'system_security_event',
-  system_socket = 'system_socket',
-  zeek = 'zeek',
-}
-
 export interface TimelineInput {
   columns?: Maybe<ColumnHeaderInput[]>;
   dataProviders?: Maybe<DataProviderInput[]>;
+  dataViewId?: Maybe<string>;
   description?: Maybe<string>;
   eqlOptions?: Maybe<EqlOptionsInput>;
   eventType?: Maybe<string>;

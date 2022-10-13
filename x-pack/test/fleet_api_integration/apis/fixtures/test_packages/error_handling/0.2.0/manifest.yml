@@ -1,7 +1,7 @@
 format_version: 1.0.0
-name: error_handling 
+name: error_handling
 title: Error handling
-description: tests error handling and rollback 
+description: tests error handling and rollback
 version: 0.2.0
 categories: []
 release: beta
@@ -17,3 +17,4 @@ requirement:
 icons:
   - src: '/img/logo_overrides_64_color.svg'
     size: '16x16'
+    type: 'image/svg+xml'

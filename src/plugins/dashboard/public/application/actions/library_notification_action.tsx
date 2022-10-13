@@ -8,18 +8,19 @@
 
 import React from 'react';
 
-import { Action, IncompatibleActionError } from '../../services/ui_actions';
-import { reactToUiComponent } from '../../services/kibana_react';
 import {
-  IEmbeddable,
   ViewMode,
-  isReferenceOrValueEmbeddable,
+  type IEmbeddable,
   isErrorEmbeddable,
-} from '../../services/embeddable';
+  isReferenceOrValueEmbeddable,
+} from '@kbn/embeddable-plugin/public';
+import { KibanaThemeProvider, reactToUiComponent } from '@kbn/kibana-react-plugin/public';
+import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
-import { UnlinkFromLibraryAction } from '.';
-import { LibraryNotificationPopover } from './library_notification_popover';
+import { pluginServices } from '../../services/plugin_services';
+import { UnlinkFromLibraryAction } from './unlink_from_library_action';
 import { dashboardLibraryNotification } from '../../dashboard_strings';
+import { LibraryNotificationPopover } from './library_notification_popover';
 
 export const ACTION_LIBRARY_NOTIFICATION = 'ACTION_LIBRARY_NOTIFICATION';
 
@@ -32,7 +33,15 @@ export class LibraryNotificationAction implements Action<LibraryNotificationActi
   public readonly type = ACTION_LIBRARY_NOTIFICATION;
   public readonly order = 1;
 
-  constructor(private unlinkAction: UnlinkFromLibraryAction) {}
+  private theme$;
+
+  constructor(private unlinkAction: UnlinkFromLibraryAction) {
+    ({
+      settings: {
+        theme: { theme$: this.theme$ },
+      },
+    } = pluginServices.getServices());
+  }
 
   private displayName = dashboardLibraryNotification.getDisplayName();
 
@@ -45,13 +54,15 @@ export class LibraryNotificationAction implements Action<LibraryNotificationActi
   }) => {
     const { embeddable } = context;
     return (
-      <LibraryNotificationPopover
-        unlinkAction={this.unlinkAction}
-        displayName={this.displayName}
-        context={context}
-        icon={this.getIconType({ embeddable })}
-        id={this.id}
-      />
+      <KibanaThemeProvider theme$={this.theme$}>
+        <LibraryNotificationPopover
+          unlinkAction={this.unlinkAction}
+          displayName={this.displayName}
+          context={context}
+          icon={this.getIconType({ embeddable })}
+          id={this.id}
+        />
+      </KibanaThemeProvider>
     );
   };
 

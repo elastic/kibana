@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const { pow } = require('./pow.js');
+const { pow } = require('./pow');
 
 /**
  * Calculates the square of a number. For arrays, the function will be applied index-wise to each element.
@@ -18,8 +18,7 @@ const { pow } = require('./pow.js');
  * square([3, 4, 5]) // returns [9, 16, 25]
  */
 
-module.exports = { square };
-
 function square(a) {
   return pow(a, 2);
 }
+module.exports = { square };

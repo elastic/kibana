@@ -7,7 +7,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'src/core/server';
+import { IRouter } from '@kbn/core/server';
 
 export const registerHitsStatusRoute = (router: IRouter) => {
   router.post(
@@ -22,10 +22,10 @@ export const registerHitsStatusRoute = (router: IRouter) => {
     },
     router.handleLegacyErrors(async (context, req, res) => {
       const { index, query } = req.body;
-      const client = context.core.elasticsearch.client;
+      const client = (await context.core).elasticsearch.client;
 
       try {
-        const { body } = await client.asCurrentUser.search({
+        const body = await client.asCurrentUser.search({
           index,
           size: 1,
           body: {

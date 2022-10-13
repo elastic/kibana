@@ -7,57 +7,37 @@
  */
 
 import React from 'react';
-import { DashboardContainer } from '..';
-import { mountWithIntl } from '@kbn/test/jest';
-import { embeddablePluginMock } from '../../../../embeddable/public/mocks';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+
+import { DashboardContainer } from '../embeddable/dashboard_container';
 import { getSampleDashboardInput } from '../test_helpers';
 import {
   LibraryNotificationPopover,
   LibraryNotificationProps,
 } from './library_notification_popover';
-import { CoreStart } from '../../../../../core/public';
-import { coreMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { EuiPopover } from '@elastic/eui';
-import { isErrorEmbeddable } from '../../services/embeddable';
+import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import {
-  CONTACT_CARD_EMBEDDABLE,
+  ContactCardEmbeddable,
   ContactCardEmbeddableFactory,
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
-  ContactCardEmbeddable,
-} from '../../services/embeddable_test_samples';
+  CONTACT_CARD_EMBEDDABLE,
+} from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
+import { pluginServices } from '../../services/plugin_services';
 
 describe('LibraryNotificationPopover', () => {
-  const { setup, doStart } = embeddablePluginMock.createInstance();
-  setup.registerEmbeddableFactory(
-    CONTACT_CARD_EMBEDDABLE,
-    new ContactCardEmbeddableFactory((() => null) as any, {} as any)
-  );
-  const start = doStart();
+  const mockEmbeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
+  pluginServices.getServices().embeddable.getEmbeddableFactory = jest
+    .fn()
+    .mockReturnValue(mockEmbeddableFactory);
 
   let container: DashboardContainer;
   let defaultProps: LibraryNotificationProps;
-  let coreStart: CoreStart;
 
   beforeEach(async () => {
-    coreStart = coreMock.createStart();
-
-    const containerOptions = {
-      ExitFullScreenButton: () => null,
-      SavedObjectFinder: () => null,
-      application: {} as any,
-      embeddable: start,
-      inspector: {} as any,
-      notifications: {} as any,
-      overlays: coreStart.overlays,
-      savedObjectMetaData: {} as any,
-      uiActions: {} as any,
-      uiSettings: uiSettingsServiceMock.createStartContract(),
-      http: coreStart.http,
-    };
-
-    container = new DashboardContainer(getSampleDashboardInput(), containerOptions);
+    container = new DashboardContainer(getSampleDashboardInput());
     const contactCardEmbeddable = await container.addNewEmbeddable<
       ContactCardEmbeddableInput,
       ContactCardEmbeddableOutput,
@@ -71,10 +51,10 @@ describe('LibraryNotificationPopover', () => {
     }
 
     defaultProps = {
-      unlinkAction: ({
+      unlinkAction: {
         execute: jest.fn(),
         getDisplayName: () => 'test unlink',
-      } as unknown) as LibraryNotificationProps['unlinkAction'],
+      } as unknown as LibraryNotificationProps['unlinkAction'],
       displayName: 'test display',
       context: { embeddable: contactCardEmbeddable },
       icon: 'testIcon',

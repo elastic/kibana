@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { IIndexPattern } from '../../../../../../src/plugins/data/common/index_patterns';
+import type { SecuritySolutionDataViewBase } from '../types';
 
-export const mockIndexPattern: IIndexPattern = {
+export const mockIndexPattern: SecuritySolutionDataViewBase = {
   fields: [
     {
       name: '@timestamp',

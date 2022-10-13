@@ -14,26 +14,34 @@ import {
   supportsGeoTileAgg,
 } from './index_pattern_util';
 import { ES_GEO_FIELD_TYPE } from '../common/constants';
+import { DataViewField } from '@kbn/data-views-plugin/public';
 
 describe('getSourceFields', () => {
   test('Should remove multi fields from field list', () => {
-    const fields = [
-      {
-        name: 'agent',
-        type: 'string',
-      },
-      {
-        name: 'agent.keyword',
-        subType: {
-          multi: {
-            parent: 'agent',
-          },
+    const agent = new DataViewField({
+      name: 'agent',
+      searchable: true,
+      aggregatable: true,
+      type: 'string',
+    });
+
+    const agentKeyword = new DataViewField({
+      name: 'agent.keyword',
+      subType: {
+        multi: {
+          parent: 'agent',
         },
-        type: 'string',
       },
-    ];
+      searchable: true,
+      aggregatable: true,
+      type: 'string',
+    });
+
+    const fields = [agent, agentKeyword];
     const sourceFields = getSourceFields(fields);
-    expect(sourceFields).toEqual([{ name: 'agent', type: 'string' }]);
+    expect(sourceFields.length).toEqual(1);
+    expect(sourceFields[0].name).toEqual('agent');
+    expect(sourceFields[0].type).toEqual('string');
   });
 });
 
@@ -44,7 +52,7 @@ describe('Gold+ licensing', () => {
         name: 'location',
         type: 'geo_point',
         aggregatable: true,
-      },
+      } as DataViewField,
       supportedInBasic: true,
       supportedInGold: true,
     },
@@ -53,7 +61,7 @@ describe('Gold+ licensing', () => {
         name: 'location',
         type: 'geo_shape',
         aggregatable: false,
-      },
+      } as DataViewField,
       supportedInBasic: false,
       supportedInGold: false,
     },
@@ -62,7 +70,7 @@ describe('Gold+ licensing', () => {
         name: 'location',
         type: 'geo_shape',
         aggregatable: true,
-      },
+      } as DataViewField,
       supportedInBasic: false,
       supportedInGold: true,
     },

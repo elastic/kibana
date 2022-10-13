@@ -10,10 +10,12 @@ import {
   mockFlashMessageHelpers,
   mockHttpValues,
   mockKibanaValues,
-} from '../../../../../__mocks__';
+} from '../../../../../__mocks__/kea_logic';
 import { exampleResult } from '../../../../__mocks__/content_sources.mock';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
+
+import { itShowsServerErrorAsFlashMessage } from '../../../../../test_helpers';
 
 const contentSource = { id: 'source123' };
 jest.mock('../../source_logic', () => ({
@@ -31,7 +33,7 @@ import { DisplaySettingsLogic, defaultSearchResultConfig } from './display_setti
 describe('DisplaySettingsLogic', () => {
   const { http } = mockHttpValues;
   const { navigateToUrl } = mockKibanaValues;
-  const { clearFlashMessages, flashAPIErrors, setSuccessMessage } = mockFlashMessageHelpers;
+  const { clearFlashMessages, flashSuccessToast } = mockFlashMessageHelpers;
   const { mount } = new LogicMounter(DisplaySettingsLogic);
 
   const { searchResultConfig, exampleDocuments } = exampleResult;
@@ -52,6 +54,10 @@ describe('DisplaySettingsLogic', () => {
     urlFieldHover: false,
     subtitleFieldHover: false,
     descriptionFieldHover: false,
+    typeFieldHover: false,
+    mediaTypeFieldHover: false,
+    createdByFieldHover: false,
+    updatedByFieldHover: false,
     fieldOptions: [],
     optionalFieldOptions: [
       {
@@ -106,7 +112,7 @@ describe('DisplaySettingsLogic', () => {
         serverProps.searchResultConfig
       );
 
-      expect(setSuccessMessage).toHaveBeenCalled();
+      expect(flashSuccessToast).toHaveBeenCalled();
     });
 
     it('handles empty color', () => {
@@ -179,6 +185,50 @@ describe('DisplaySettingsLogic', () => {
       expect(DisplaySettingsLogic.values.searchResultConfig).toEqual({
         ...searchResultConfig,
         color: HEX,
+      });
+    });
+
+    it('setTypeField', () => {
+      const TYPE = 'new type';
+      DisplaySettingsLogic.actions.setServerResponseData(serverProps);
+      DisplaySettingsLogic.actions.setTypeField(TYPE);
+
+      expect(DisplaySettingsLogic.values.searchResultConfig).toEqual({
+        ...searchResultConfig,
+        typeField: TYPE,
+      });
+    });
+
+    it('setMediaTypeField', () => {
+      const MEDIA_TYPE = 'new media type';
+      DisplaySettingsLogic.actions.setServerResponseData(serverProps);
+      DisplaySettingsLogic.actions.setMediaTypeField(MEDIA_TYPE);
+
+      expect(DisplaySettingsLogic.values.searchResultConfig).toEqual({
+        ...searchResultConfig,
+        mediaTypeField: MEDIA_TYPE,
+      });
+    });
+
+    it('setCreatedByField', () => {
+      const CREATED_BY = 'new created by';
+      DisplaySettingsLogic.actions.setServerResponseData(serverProps);
+      DisplaySettingsLogic.actions.setCreatedByField(CREATED_BY);
+
+      expect(DisplaySettingsLogic.values.searchResultConfig).toEqual({
+        ...searchResultConfig,
+        createdByField: CREATED_BY,
+      });
+    });
+
+    it('setUpdatedByField', () => {
+      const UPDATED_BY = 'new updated by';
+      DisplaySettingsLogic.actions.setServerResponseData(serverProps);
+      DisplaySettingsLogic.actions.setUpdatedByField(UPDATED_BY);
+
+      expect(DisplaySettingsLogic.values.searchResultConfig).toEqual({
+        ...searchResultConfig,
+        updatedByField: UPDATED_BY,
       });
     });
 
@@ -286,6 +336,36 @@ describe('DisplaySettingsLogic', () => {
 
       expect(DisplaySettingsLogic.values.urlFieldHover).toEqual(!defaultValues.urlFieldHover);
     });
+
+    it('toggleTypeFieldHover', () => {
+      DisplaySettingsLogic.actions.toggleTypeFieldHover();
+
+      expect(DisplaySettingsLogic.values.typeFieldHover).toEqual(!defaultValues.typeFieldHover);
+    });
+
+    it('toggleMediaTypeFieldHover', () => {
+      DisplaySettingsLogic.actions.toggleMediaTypeFieldHover();
+
+      expect(DisplaySettingsLogic.values.mediaTypeFieldHover).toEqual(
+        !defaultValues.mediaTypeFieldHover
+      );
+    });
+
+    it('toggleCreatedByFieldHover', () => {
+      DisplaySettingsLogic.actions.toggleCreatedByFieldHover();
+
+      expect(DisplaySettingsLogic.values.createdByFieldHover).toEqual(
+        !defaultValues.createdByFieldHover
+      );
+    });
+
+    it('toggleUpdatedByFieldHover', () => {
+      DisplaySettingsLogic.actions.toggleUpdatedByFieldHover();
+
+      expect(DisplaySettingsLogic.values.updatedByFieldHover).toEqual(
+        !defaultValues.updatedByFieldHover
+      );
+    });
   });
 
   describe('listeners', () => {
@@ -299,7 +379,7 @@ describe('DisplaySettingsLogic', () => {
         DisplaySettingsLogic.actions.initializeDisplaySettings();
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/workplace_search/org/sources/source123/display_settings/config'
+          '/internal/workplace_search/org/sources/source123/display_settings/config'
         );
         await nextTick();
         expect(onInitializeDisplaySettingsSpy).toHaveBeenCalledWith({
@@ -319,7 +399,7 @@ describe('DisplaySettingsLogic', () => {
         DisplaySettingsLogic.actions.initializeDisplaySettings();
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/workplace_search/account/sources/source123/display_settings/config'
+          '/internal/workplace_search/account/sources/source123/display_settings/config'
         );
         await nextTick();
         expect(onInitializeDisplaySettingsSpy).toHaveBeenCalledWith({
@@ -328,12 +408,8 @@ describe('DisplaySettingsLogic', () => {
         });
       });
 
-      it('handles error', async () => {
-        http.get.mockReturnValue(Promise.reject('this is an error'));
+      itShowsServerErrorAsFlashMessage(http.get, () => {
         DisplaySettingsLogic.actions.initializeDisplaySettings();
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
     });
 
@@ -356,12 +432,8 @@ describe('DisplaySettingsLogic', () => {
         });
       });
 
-      it('handles error', async () => {
-        http.post.mockReturnValue(Promise.reject('this is an error'));
+      itShowsServerErrorAsFlashMessage(http.post, () => {
         DisplaySettingsLogic.actions.setServerData();
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('this is an error');
       });
     });
 

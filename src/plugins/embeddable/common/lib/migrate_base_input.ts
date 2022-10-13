@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectReference } from '../../../../core/types';
+import { SavedObjectReference } from '@kbn/core/types';
+import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { EmbeddableStateWithType } from '../types';
-import { MigrateFunctionsObject } from '../../../kibana_utils/common';
 
 export const telemetryBaseEmbeddableInput = (
   state: EmbeddableStateWithType,
-  telemetryData: Record<string, any>
+  telemetryData: Record<string, string | number | boolean>
 ) => {
   return telemetryData;
 };

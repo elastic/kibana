@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { KibanaFeature } from '../../../../../features/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { featuresPluginMock } from '../../../../../features/server/mocks';
+import type { KibanaFeature } from '@kbn/features-plugin/public';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
+import type { LicenseType } from '@kbn/licensing-plugin/server';
+
 import type { SecurityLicenseFeatures } from '../../../../common/licensing';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Actions } from '../../../../server/authorization';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { privilegesFactory } from '../../../../server/authorization/privileges';
 import { KibanaPrivileges } from '../model';
 
@@ -25,6 +24,7 @@ export const createRawKibanaPrivileges = (
   const licensingService = {
     getFeatures: () => ({ allowSubFeaturePrivileges } as SecurityLicenseFeatures),
     getType: () => 'basic' as const,
+    hasAtLeast: (licenseType: LicenseType) => licenseType === 'basic',
   };
 
   return privilegesFactory(

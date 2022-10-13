@@ -7,15 +7,15 @@
 
 import { get, getOr } from 'lodash/fp';
 
-import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
-import {
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type {
   NetworkQueries,
   NetworkOverviewStrategyResponse,
   NetworkOverviewRequestOptions,
   OverviewNetworkHit,
 } from '../../../../../../common/search_strategy/security_solution/network';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
-import { SecuritySolutionFactory } from '../../types';
+import type { SecuritySolutionFactory } from '../../types';
 import { buildOverviewNetworkQuery } from './query.overview_network.dsl';
 
 export const networkOverview: SecuritySolutionFactory<NetworkQueries.overview> = {
@@ -24,7 +24,7 @@ export const networkOverview: SecuritySolutionFactory<NetworkQueries.overview> =
     options: NetworkOverviewRequestOptions,
     response: IEsSearchResponse<OverviewNetworkHit>
   ): Promise<NetworkOverviewStrategyResponse> => {
-    // @ts-expect-error @elastic/elasticsearch no way to declare type for aggregations
+    // @ts-expect-error specify aggregations type explicitly
     const aggregations: OverviewNetworkHit = get('aggregations', response.rawResponse) || {};
     const inspect = {
       dsl: [inspectStringifyObject(buildOverviewNetworkQuery(options))],

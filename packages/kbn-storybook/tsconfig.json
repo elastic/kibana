@@ -1,19 +1,20 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../../tsconfig.bazel.json",
   "compilerOptions": {
-    "incremental": false,
-    "outDir": "target",
-    "skipLibCheck": true,
     "declaration": true,
     "declarationMap": true,
-    "sourceMap": true,
-    "sourceRoot": "../../../../packages/kbn-storybook",
+    "emitDeclarationOnly": true,
+    "incremental": false,
+    "outDir": "target_types",
+    "skipLibCheck": true,
+    "target": "es2015",
     "types": [
-      "node"
+      "node",
+      "@kbn/ambient-storybook-types"
     ]
   },
   "include": [
-    "*.ts",
-    "lib/*.ts"
+    "**/*.ts",
+    "**/*.tsx"
   ]
 }

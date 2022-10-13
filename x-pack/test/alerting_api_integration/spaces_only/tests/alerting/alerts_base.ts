@@ -6,15 +6,19 @@
  */
 
 import expect from '@kbn/expect';
+import { omit } from 'lodash';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Response as SupertestResponse } from 'supertest';
-import { RecoveredActionGroup } from '../../../../../plugins/alerting/common';
+import { RecoveredActionGroup } from '@kbn/alerting-plugin/common';
+import { TaskRunning, TaskRunningStage } from '@kbn/task-manager-plugin/server/task_running';
+import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { Space } from '../../../common/types';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
   ESTestIndexTool,
   ES_TEST_INDEX_NAME,
   getUrlPrefix,
-  getTestAlertData,
+  getTestRuleData,
   ObjectRemover,
   AlertUtils,
   ensureDatetimeIsWithinRange,
@@ -23,7 +27,7 @@ import {
 
 export function alertTests({ getService }: FtrProviderContext, space: Space) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const es = getService('legacyEs');
+  const es = getService('es');
   const retry = getService('retry');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
   const taskManagerUtils = new TaskManagerUtils(es, retry);
@@ -95,18 +99,48 @@ export function alertTests({ getService }: FtrProviderContext, space: Space) {
         },
         alertInfo: {
           alertId,
+          consumer: 'alertsFixture',
           spaceId: space.id,
           namespace: space.namespace,
           name: 'abc',
+          enabled: true,
+          notifyWhen: 'onActiveAlert',
+          schedule: {
+            interval: '1m',
+          },
           tags: ['tag-A', 'tag-B'],
+          throttle: '1m',
           createdBy: null,
           updatedBy: null,
+          actions: response.body.actions.map((action: any) => {
+            /* eslint-disable @typescript-eslint/naming-convention */
+            const { connector_type_id, group, id, params } = action;
+            return {
+              actionTypeId: connector_type_id,
+              group,
+              id,
+              params,
+            };
+          }),
+          producer: 'alertsFixture',
+          ruleTypeId: 'test.always-firing',
+          ruleTypeName: 'Test: Always Firing',
         },
       };
       if (expected.alertInfo.namespace === undefined) {
         delete expected.alertInfo.namespace;
       }
-      expect(alertTestRecord._source).to.eql(expected);
+      const alertTestRecordWithoutDates = omit(alertTestRecord._source, [
+        'alertInfo.createdAt',
+        'alertInfo.updatedAt',
+      ]);
+      expect(alertTestRecordWithoutDates).to.eql(expected);
+      expect(alertTestRecord._source.alertInfo.createdAt).to.match(
+        /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/
+      );
+      expect(alertTestRecord._source.alertInfo.updatedAt).to.match(
+        /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/
+      );
       const actionTestRecord = (
         await esTestIndexTool.waitForDocs('action:test.index-record', reference)
       )[0];
@@ -161,7 +195,7 @@ instanceStateValue: true
         .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
-          getTestAlertData({
+          getTestRuleData({
             rule_type_id: 'test.patternFiring',
             schedule: { interval: '1s' },
             throttle: null,
@@ -222,7 +256,7 @@ instanceStateValue: true
         .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
-          getTestAlertData({
+          getTestRuleData({
             rule_type_id: 'test.patternFiring',
             schedule: { interval: '1s' },
             enabled: false,
@@ -261,7 +295,8 @@ instanceStateValue: true
       await taskManagerUtils.waitForActionTaskParamsToBeCleanedUp(testStart);
 
       const actionTestRecord = await esTestIndexTool.search('action:test.index-record', reference);
-      expect(actionTestRecord.hits.total.value).to.eql(0);
+      // @ts-expect-error doesnt handle total: number
+      expect(actionTestRecord.body.hits.total.value).to.eql(0);
       objectRemover.add(space.id, alertId, 'rule', 'alerting');
     });
 
@@ -296,7 +331,7 @@ instanceStateValue: true
 
     it('should handle custom retry logic', async () => {
       // We'll use this start time to query tasks created after this point
-      const testStart = new Date();
+      const testStart = new Date().toISOString();
       // We have to provide the test.rate-limit the next runAt, for testing purposes
       const retryDate = new Date(Date.now() + 60000);
 
@@ -316,7 +351,7 @@ instanceStateValue: true
         .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
-          getTestAlertData({
+          getTestRuleData({
             schedule: { interval: '1m' },
             rule_type_id: 'test.always-firing',
             params: {
@@ -339,8 +374,12 @@ instanceStateValue: true
 
       expect(response.statusCode).to.eql(200);
       objectRemover.add(space.id, response.body.id, 'rule', 'alerting');
-      const scheduledActionTask = await retry.try(async () => {
-        const searchResult = await es.search({
+      const scheduledActionTask: estypes.SearchHit<
+        TaskRunning<TaskRunningStage.RAN, ConcreteTaskInstance>
+      > = await retry.try(async () => {
+        const searchResult = await es.search<
+          TaskRunning<TaskRunningStage.RAN, ConcreteTaskInstance>
+        >({
           index: '.kibana_task_manager',
           body: {
             query: {
@@ -373,10 +412,10 @@ instanceStateValue: true
             },
           },
         });
-        expect(searchResult.hits.total.value).to.eql(1);
+        expect((searchResult.hits.total as estypes.SearchTotalHits).value).to.eql(1);
         return searchResult.hits.hits[0];
       });
-      expect(scheduledActionTask._source.task.runAt).to.eql(retryDate.toISOString());
+      expect(scheduledActionTask._source!.task.runAt).to.eql(retryDate.toISOString());
     });
 
     it('should have proper callCluster and savedObjectsClient authorization for alert type executor', async () => {
@@ -385,7 +424,7 @@ instanceStateValue: true
         .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
-          getTestAlertData({
+          getTestRuleData({
             rule_type_id: 'test.authorization',
             params: {
               callClusterAuthorizationIndex: authorizationIndex,
@@ -431,7 +470,7 @@ instanceStateValue: true
         .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
-          getTestAlertData({
+          getTestRuleData({
             rule_type_id: 'test.always-firing',
             params: {
               index: ES_TEST_INDEX_NAME,

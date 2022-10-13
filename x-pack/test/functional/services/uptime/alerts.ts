@@ -9,39 +9,40 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function UptimeAlertsProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
-  const find = getService('find');
   const browser = getService('browser');
 
   return {
     async openFlyout(alertType: 'monitorStatus' | 'tls') {
-      await testSubjects.click('xpack.uptime.alertsPopover.toggleButton', 5000);
-      await testSubjects.click('xpack.uptime.openAlertContextPanel', 5000);
+      await testSubjects.click('xpack.synthetics.alertsPopover.toggleButton');
+      await testSubjects.click('xpack.synthetics.openAlertContextPanel');
       if (alertType === 'monitorStatus') {
-        await testSubjects.click('xpack.uptime.toggleAlertFlyout', 5000);
+        await testSubjects.click('xpack.synthetics.toggleAlertFlyout');
       } else if (alertType === 'tls') {
-        await testSubjects.click('xpack.uptime.toggleTlsAlertFlyout');
+        await testSubjects.click('xpack.synthetics.toggleTlsAlertFlyout');
       }
+      // ensure the flyout has opened
+      await testSubjects.exists('ruleNameInput');
     },
     async openMonitorStatusAlertType(alertType: string) {
-      return testSubjects.click(`xpack.uptime.alerts.${alertType}-SelectOption`, 5000);
+      await testSubjects.click(`xpack.synthetics.alerts.${alertType}-SelectOption`);
     },
     async setAlertTags(tags: string[]) {
       for (let i = 0; i < tags.length; i += 1) {
-        await testSubjects.click('comboBoxSearchInput', 5000);
+        await testSubjects.click('comboBoxSearchInput');
         await testSubjects.setValue('comboBoxInput', tags[i]);
         await browser.pressKeys(browser.keys.ENTER);
       }
     },
     async setAlertName(name: string) {
-      return testSubjects.setValue('alertNameInput', name);
+      await testSubjects.setValue('ruleNameInput', name);
     },
     async setAlertInterval(value: string) {
-      return testSubjects.setValue('intervalInput', value);
+      await testSubjects.setValue('intervalInput', value);
     },
     async setAlertThrottleInterval(value: string) {
       await testSubjects.click('notifyWhenSelect');
       await testSubjects.click('onThrottleInterval');
-      return testSubjects.setValue('throttleInput', value);
+      await testSubjects.setValue('throttleInput', value);
     },
     async setAlertExpressionValue(
       expressionAttribute: string,
@@ -50,19 +51,19 @@ export function UptimeAlertsProvider({ getService }: FtrProviderContext) {
     ) {
       await testSubjects.click(expressionAttribute);
       await testSubjects.setValue(fieldAttribute, value);
-      return await testSubjects.click(expressionAttribute);
+      await testSubjects.click(expressionAttribute);
     },
     async setAlertStatusNumTimes(value: string) {
-      return this.setAlertExpressionValue(
-        'xpack.uptime.alerts.monitorStatus.numTimesExpression',
-        'xpack.uptime.alerts.monitorStatus.numTimesField',
+      await this.setAlertExpressionValue(
+        'xpack.synthetics.alerts.monitorStatus.numTimesExpression',
+        'xpack.synthetics.alerts.monitorStatus.numTimesField',
         value
       );
     },
     async setAlertTimerangeSelection(value: string) {
-      return this.setAlertExpressionValue(
-        'xpack.uptime.alerts.monitorStatus.timerangeValueExpression',
-        'xpack.uptime.alerts.monitorStatus.timerangeValueField',
+      await this.setAlertExpressionValue(
+        'xpack.synthetics.alerts.monitorStatus.timerangeValueExpression',
+        'xpack.synthetics.alerts.monitorStatus.timerangeValueField',
         value
       );
     },
@@ -71,18 +72,18 @@ export function UptimeAlertsProvider({ getService }: FtrProviderContext) {
       selectableAttribute: string,
       optionAttributes: string[]
     ) {
-      await testSubjects.click(expressionAttribute, 5000);
-      await testSubjects.click(selectableAttribute, 5000);
+      await testSubjects.click(expressionAttribute);
+      await testSubjects.click(selectableAttribute);
       for (let i = 0; i < optionAttributes.length; i += 1) {
-        await testSubjects.click(optionAttributes[i], 5000);
+        await testSubjects.click(optionAttributes[i]);
       }
-      return testSubjects.click(expressionAttribute, 5000);
+      await testSubjects.click(expressionAttribute);
     },
     async setMonitorStatusSelectableToHours() {
-      return this.setAlertExpressionSelectable(
-        'xpack.uptime.alerts.monitorStatus.timerangeUnitExpression',
-        'xpack.uptime.alerts.monitorStatus.timerangeUnitSelectable',
-        ['xpack.uptime.alerts.monitorStatus.timerangeUnitSelectable.hoursOption']
+      await this.setAlertExpressionSelectable(
+        'xpack.synthetics.alerts.monitorStatus.timerangeUnitExpression',
+        'xpack.synthetics.alerts.monitorStatus.timerangeUnitSelectable',
+        ['xpack.synthetics.alerts.monitorStatus.timerangeUnitSelectable.hoursOption']
       );
     },
     async clickAddFilter() {
@@ -91,35 +92,28 @@ export function UptimeAlertsProvider({ getService }: FtrProviderContext) {
     async clickAddFilterLocation() {
       await this.clickAddFilter();
       await testSubjects.click('uptimeAlertAddFilter.observer.geo.name');
+      await testSubjects.click('uptimeCreateStatusAlert.filter_location');
     },
     async clickAddFilterPort() {
       await this.clickAddFilter();
       await testSubjects.click('uptimeAlertAddFilter.url.port');
+      await testSubjects.click('uptimeCreateStatusAlert.filter_port');
     },
     async clickAddFilterType() {
       await this.clickAddFilter();
       await testSubjects.click('uptimeAlertAddFilter.monitor.type');
-    },
-    async clickLocationExpression(filter: string) {
-      await testSubjects.click('uptimeCreateStatusAlert.filter_location');
-      await testSubjects.click(`filter-popover-item_${filter}`);
-      return find.clickByCssSelector('body');
-    },
-    async clickPortExpression(filter: string) {
-      await testSubjects.click('uptimeCreateStatusAlert.filter_port');
-      await testSubjects.click(`filter-popover-item_${filter}`);
-      return find.clickByCssSelector('body');
-    },
-    async clickTypeExpression(filter: string) {
       await testSubjects.click('uptimeCreateStatusAlert.filter_scheme');
-      await testSubjects.click(`filter-popover-item_${filter}`);
-      return find.clickByCssSelector('body');
     },
-    async clickSaveAlertButton() {
-      return testSubjects.click('saveAlertButton');
+    async clickSaveRuleButton(name: string) {
+      /* The most common cause of flakiness in this test is the absence of value for the name field,
+       * While this field is set in previous step, it is possible that component rerendering could be
+       * clearing out the value after it's filled in. To prevent this particular issue with flakiness,
+       * we should attempt to set the name again before saving the alert */
+      await testSubjects.setValue('ruleNameInput', name);
+      await testSubjects.click('saveRuleButton');
     },
     async clickSaveAlertsConfirmButton() {
-      return testSubjects.click('confirmAlertSaveModal > confirmModalConfirmButton');
+      await testSubjects.click('confirmRuleSaveModal > confirmModalConfirmButton', 20000);
     },
   };
 }

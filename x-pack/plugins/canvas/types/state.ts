@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import { KibanaContext } from 'src/plugins/data/common';
+import { KibanaContext } from '@kbn/data-plugin/common';
 import {
+  AnyExpressionFunctionDefinition,
   Datatable,
   ExpressionValueFilter,
   ExpressionImage,
-  ExpressionFunction,
   PointSeries,
   Render,
   Style,
   Range,
-} from 'src/plugins/expressions';
+} from '@kbn/expressions-plugin/common';
+import type { Datasource, Model, Transform, View } from '../public/expression_types';
 import { AssetType } from './assets';
-import { CanvasWorkpad } from './canvas';
+import { CanvasWorkpad, Sidebar, Flyouts } from './canvas';
 
 export enum AppStateKeys {
   FULLSCREEN = '__fullscreen',
@@ -33,7 +34,7 @@ export interface AppState {
 
 interface StoreAppState {
   basePath: string;
-  serverFunctions: ExpressionFunction[];
+  serverFunctions: AnyExpressionFunctionDefinition[];
   ready: boolean;
 }
 
@@ -51,7 +52,11 @@ type ExpressionType =
   | KibanaContext
   | PointSeries
   | Style
-  | Range;
+  | Range
+  | View
+  | Model
+  | Datasource
+  | Transform;
 
 export interface ExpressionRenderable {
   state: 'ready' | 'pending';
@@ -60,9 +65,9 @@ export interface ExpressionRenderable {
 }
 
 export interface ExpressionContext {
-  state: 'ready' | 'pending';
+  state: 'ready' | 'pending' | 'error';
   value: ExpressionType;
-  error: null;
+  error: null | string;
 }
 
 export interface ResolvedArgType {
@@ -70,7 +75,7 @@ export interface ResolvedArgType {
   expressionContext: ExpressionContext;
 }
 
-interface TransientState {
+export interface TransientState {
   canUserWrite: boolean;
   zoomScale: number;
   elementStats: ElementStatsType;
@@ -85,6 +90,8 @@ interface TransientState {
     interval: number;
   };
   inFlight: boolean;
+  sidebar: Sidebar;
+  flyouts: Flyouts;
 }
 
 interface PersistentState {
@@ -94,7 +101,7 @@ interface PersistentState {
 
 export interface State {
   app: StoreAppState;
-  assets: { [assetKey: string]: AssetType | undefined };
+  assets: { [assetKey: string]: AssetType };
   transient: TransientState;
   persistent: PersistentState;
 }

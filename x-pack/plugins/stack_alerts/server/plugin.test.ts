@@ -6,9 +6,9 @@
  */
 
 import { AlertingBuiltinsPlugin } from './plugin';
-import { coreMock } from '../../../../src/core/server/mocks';
-import { alertsMock } from '../../alerting/server/mocks';
-import { featuresPluginMock } from '../../features/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { BUILT_IN_ALERTS_FEATURE } from './feature';
 
 describe('AlertingBuiltins Plugin', () => {
@@ -21,12 +21,18 @@ describe('AlertingBuiltins Plugin', () => {
       context = coreMock.createPluginInitializerContext();
       plugin = new AlertingBuiltinsPlugin(context);
       coreSetup = coreMock.createSetup();
+      coreSetup.getStartServices = jest.fn().mockResolvedValue([
+        {
+          application: {},
+        },
+        { triggersActionsUi: {} },
+      ]);
     });
 
-    it('should register built-in alert types', async () => {
+    it('should register built-in alert types', () => {
       const alertingSetup = alertsMock.createSetup();
       const featuresSetup = featuresPluginMock.createSetup();
-      await plugin.setup(coreSetup, { alerting: alertingSetup, features: featuresSetup });
+      plugin.setup(coreSetup, { alerting: alertingSetup, features: featuresSetup });
 
       expect(alertingSetup.registerType).toHaveBeenCalledTimes(3);
 

@@ -5,20 +5,18 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
-import { mount, ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 
+import type { StatItemsProps, StatItems } from '.';
 import {
   StatItemsComponent,
-  StatItemsProps,
   addValueToFields,
   addValueToAreaChart,
   addValueToBarChart,
   useKpiMatrixStatus,
-  StatItems,
 } from '.';
 import { BarChart } from '../charts/barchart';
 import { AreaChart } from '../charts/areachart';
@@ -28,7 +26,7 @@ import {
   mockData,
   mockEnableChartsData,
   mockNoChartMappings,
-  mockNarrowDateRange,
+  mockUpdateDateRange,
 } from '../../../network/components/kpi_network/mock';
 import {
   createSecuritySolutionStorageMock,
@@ -36,13 +34,15 @@ import {
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
 } from '../../mock';
-import { State, createStore } from '../../store';
+import type { State } from '../../store';
+import { createStore } from '../../store';
 import { Provider as ReduxStoreProvider } from 'react-redux';
-import {
+import type {
   HostsKpiStrategyResponse,
   NetworkKpiStrategyResponse,
 } from '../../../../common/search_strategy';
 import { getMockTheme } from '../../lib/kibana/kibana_react.mock';
+import * as module from '../../containers/query_toggle';
 
 const from = '2019-06-15T06:00:00.000Z';
 const to = '2019-06-18T06:00:00.000Z';
@@ -55,26 +55,37 @@ jest.mock('../charts/barchart', () => {
   return { BarChart: () => <div className="barchart" /> };
 });
 
+const mockSetToggle = jest.fn();
+
+jest
+  .spyOn(module, 'useQueryToggle')
+  .mockImplementation(() => ({ toggleStatus: true, setToggleStatus: mockSetToggle }));
+const mockSetQuerySkip = jest.fn();
 describe('Stat Items Component', () => {
   const mockTheme = getMockTheme({ eui: { euiColorMediumShade: '#ece' } });
   const state: State = mockGlobalState;
   const { storage } = createSecuritySolutionStorageMock();
   const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
-
+  const testProps = {
+    description: 'HOSTS',
+    fields: [{ key: 'hosts', value: null, color: '#6092C0', icon: 'cross' }],
+    from,
+    id: 'statItems',
+    key: 'mock-keys',
+    loading: false,
+    setQuerySkip: mockSetQuerySkip,
+    to,
+    updateDateRange: mockUpdateDateRange,
+  };
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
   describe.each([
     [
       mount(
         <ThemeProvider theme={mockTheme}>
           <ReduxStoreProvider store={store}>
-            <StatItemsComponent
-              description="HOSTS"
-              fields={[{ key: 'hosts', value: null, color: '#6092C0', icon: 'cross' }]}
-              from={from}
-              id="statItems"
-              key="mock-keys"
-              to={to}
-              narrowDateRange={mockNarrowDateRange}
-            />
+            <StatItemsComponent {...testProps} />
           </ReduxStoreProvider>
         </ThemeProvider>
       ),
@@ -83,17 +94,7 @@ describe('Stat Items Component', () => {
       mount(
         <ThemeProvider theme={mockTheme}>
           <ReduxStoreProvider store={store}>
-            <StatItemsComponent
-              areaChart={[]}
-              barChart={[]}
-              description="HOSTS"
-              fields={[{ key: 'hosts', value: null, color: '#6092C0', icon: 'cross' }]}
-              from={from}
-              id="statItems"
-              key="mock-keys"
-              to={to}
-              narrowDateRange={mockNarrowDateRange}
-            />
+            <StatItemsComponent areaChart={[]} barChart={[]} {...testProps} />
           </ReduxStoreProvider>
         </ThemeProvider>
       ),
@@ -120,62 +121,59 @@ describe('Stat Items Component', () => {
     });
   });
 
+  const mockStatItemsData: StatItemsProps = {
+    ...testProps,
+    areaChart: [
+      {
+        key: 'uniqueSourceIpsHistogram',
+        value: [
+          { x: new Date('2019-05-03T13:00:00.000Z').toISOString(), y: 565975 },
+          { x: new Date('2019-05-04T01:00:00.000Z').toISOString(), y: 1084366 },
+          { x: new Date('2019-05-04T13:00:00.000Z').toISOString(), y: 12280 },
+        ],
+        color: '#D36086',
+      },
+      {
+        key: 'uniqueDestinationIpsHistogram',
+        value: [
+          { x: new Date('2019-05-03T13:00:00.000Z').toISOString(), y: 565975 },
+          { x: new Date('2019-05-04T01:00:00.000Z').toISOString(), y: 1084366 },
+          { x: new Date('2019-05-04T13:00:00.000Z').toISOString(), y: 12280 },
+        ],
+        color: '#9170B8',
+      },
+    ],
+    barChart: [
+      { key: 'uniqueSourceIps', value: [{ x: 'uniqueSourceIps', y: '1714' }], color: '#D36086' },
+      {
+        key: 'uniqueDestinationIps',
+        value: [{ x: 'uniqueDestinationIps', y: 2354 }],
+        color: '#9170B8',
+      },
+    ],
+    description: 'UNIQUE_PRIVATE_IPS',
+    enableAreaChart: true,
+    enableBarChart: true,
+    fields: [
+      {
+        key: 'uniqueSourceIps',
+        description: 'Source',
+        value: 1714,
+        color: '#D36086',
+        icon: 'cross',
+      },
+      {
+        key: 'uniqueDestinationIps',
+        description: 'Dest.',
+        value: 2359,
+        color: '#9170B8',
+        icon: 'cross',
+      },
+    ],
+  };
+
+  let wrapper: ReactWrapper;
   describe('rendering kpis with charts', () => {
-    const mockStatItemsData: StatItemsProps = {
-      areaChart: [
-        {
-          key: 'uniqueSourceIpsHistogram',
-          value: [
-            { x: new Date('2019-05-03T13:00:00.000Z').toISOString(), y: 565975 },
-            { x: new Date('2019-05-04T01:00:00.000Z').toISOString(), y: 1084366 },
-            { x: new Date('2019-05-04T13:00:00.000Z').toISOString(), y: 12280 },
-          ],
-          color: '#D36086',
-        },
-        {
-          key: 'uniqueDestinationIpsHistogram',
-          value: [
-            { x: new Date('2019-05-03T13:00:00.000Z').toISOString(), y: 565975 },
-            { x: new Date('2019-05-04T01:00:00.000Z').toISOString(), y: 1084366 },
-            { x: new Date('2019-05-04T13:00:00.000Z').toISOString(), y: 12280 },
-          ],
-          color: '#9170B8',
-        },
-      ],
-      barChart: [
-        { key: 'uniqueSourceIps', value: [{ x: 'uniqueSourceIps', y: '1714' }], color: '#D36086' },
-        {
-          key: 'uniqueDestinationIps',
-          value: [{ x: 'uniqueDestinationIps', y: 2354 }],
-          color: '#9170B8',
-        },
-      ],
-      description: 'UNIQUE_PRIVATE_IPS',
-      enableAreaChart: true,
-      enableBarChart: true,
-      fields: [
-        {
-          key: 'uniqueSourceIps',
-          description: 'Source',
-          value: 1714,
-          color: '#D36086',
-          icon: 'cross',
-        },
-        {
-          key: 'uniqueDestinationIps',
-          description: 'Dest.',
-          value: 2359,
-          color: '#9170B8',
-          icon: 'cross',
-        },
-      ],
-      from,
-      id: 'statItems',
-      key: 'mock-keys',
-      to,
-      narrowDateRange: mockNarrowDateRange,
-    };
-    let wrapper: ReactWrapper;
     beforeAll(() => {
       wrapper = mount(
         <ReduxStoreProvider store={store}>
@@ -185,7 +183,7 @@ describe('Stat Items Component', () => {
     });
 
     test('should handle multiple titles', () => {
-      expect(wrapper.find('[data-test-subj="stat-title"]')).toHaveLength(2);
+      expect(wrapper.find('[data-test-subj="stat-title"]').find('p')).toHaveLength(2);
     });
 
     test('should render kpi icons', () => {
@@ -202,6 +200,43 @@ describe('Stat Items Component', () => {
 
     test('should render separator', () => {
       expect(wrapper.find(EuiHorizontalRule)).toHaveLength(1);
+    });
+  });
+  describe('Toggle query', () => {
+    test('toggleQuery updates toggleStatus', () => {
+      wrapper = mount(
+        <ReduxStoreProvider store={store}>
+          <StatItemsComponent {...mockStatItemsData} />
+        </ReduxStoreProvider>
+      );
+      wrapper.find('[data-test-subj="query-toggle-stat"]').first().simulate('click');
+      expect(mockSetToggle).toBeCalledWith(false);
+      expect(mockSetQuerySkip).toBeCalledWith(true);
+    });
+    test('toggleStatus=true, render all', () => {
+      wrapper = mount(
+        <ReduxStoreProvider store={store}>
+          <StatItemsComponent {...mockStatItemsData} />
+        </ReduxStoreProvider>
+      );
+
+      expect(wrapper.find('[data-test-subj="inspect-icon-button"]').first().exists()).toEqual(true);
+      expect(wrapper.find('[data-test-subj="stat-title"]').first().exists()).toEqual(true);
+    });
+    test('toggleStatus=false, render none', () => {
+      jest
+        .spyOn(module, 'useQueryToggle')
+        .mockImplementation(() => ({ toggleStatus: false, setToggleStatus: mockSetToggle }));
+      wrapper = mount(
+        <ReduxStoreProvider store={store}>
+          <StatItemsComponent {...mockStatItemsData} />
+        </ReduxStoreProvider>
+      );
+
+      expect(wrapper.find('[data-test-subj="inspect-icon-button"]').first().exists()).toEqual(
+        false
+      );
+      expect(wrapper.find('[data-test-subj="stat-title"]').first().exists()).toEqual(false);
     });
   });
 });
@@ -246,7 +281,9 @@ describe('useKpiMatrixStatus', () => {
       'statItem',
       from,
       to,
-      mockNarrowDateRange
+      mockUpdateDateRange,
+      mockSetQuerySkip,
+      false
     );
 
     return (
@@ -264,8 +301,10 @@ describe('useKpiMatrixStatus', () => {
         <MockHookWrapperComponent fieldsMapping={mockNetworkMappings} data={mockData} />
       </>
     );
-
-    expect(wrapper.find('MockChildComponent').get(0).props).toEqual(mockEnableChartsData);
+    const result = { ...wrapper.find('MockChildComponent').get(0).props };
+    const { setQuerySkip, ...restResult } = result;
+    const { setQuerySkip: a, ...restExpect } = mockEnableChartsData;
+    expect(restResult).toEqual(restExpect);
   });
 
   test('it should not append areaChart if enableAreaChart is off', () => {

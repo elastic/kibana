@@ -7,13 +7,16 @@
 
 import {
   hasEqlSequenceQuery,
-  hasLargeValueList,
   hasNestedEntry,
   isThreatMatchRule,
   normalizeMachineLearningJobIds,
   normalizeThresholdField,
+  isMlRule,
 } from './utils';
-import { EntriesArray } from '../shared_imports';
+
+import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
+
+import type { EntriesArray } from '@kbn/securitysolution-io-ts-list-types';
 
 describe('#hasLargeValueList', () => {
   test('it returns false if empty array', () => {
@@ -119,6 +122,16 @@ describe('#hasNestedEntry', () => {
     test('it returns false if not a threat match rule', () => {
       expect(isThreatMatchRule('query')).toEqual(false);
     });
+  });
+});
+
+describe('isMlRule', () => {
+  test('it returns true if a ML rule', () => {
+    expect(isMlRule('machine_learning')).toEqual(true);
+  });
+
+  test('it returns false if not a Ml rule', () => {
+    expect(isMlRule('query')).toEqual(false);
   });
 });
 

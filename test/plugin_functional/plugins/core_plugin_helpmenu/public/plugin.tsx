@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { Plugin, CoreSetup } from 'kibana/public';
+import { Plugin, CoreSetup } from '@kbn/core/public';
 
 export class CoreHelpMenuPlugin
-  implements Plugin<CoreHelpMenuPluginSetup, CoreHelpMenuPluginStart> {
+  implements Plugin<CoreHelpMenuPluginSetup, CoreHelpMenuPluginStart>
+{
   public setup(core: CoreSetup, deps: {}) {
     core.application.register({
       id: 'core_help_menu',

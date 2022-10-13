@@ -10,17 +10,17 @@ import {
   elasticsearchServiceMock,
   loggingSystemMock,
   savedObjectsServiceMock,
-} from 'src/core/server/mocks';
-import { LicenseService } from '../../../../common/license/license';
-import { createPackagePolicyServiceMock } from '../../../../../fleet/server/mocks';
+} from '@kbn/core/server/mocks';
+import { LicenseService } from '../../../../common/license';
+import { createPackagePolicyServiceMock } from '@kbn/fleet-plugin/server/mocks';
 import { PolicyWatcher } from './license_watch';
-import { ILicense } from '../../../../../licensing/common/types';
-import { licenseMock } from '../../../../../licensing/common/licensing.mock';
-import { PackagePolicyServiceInterface } from '../../../../../fleet/server';
-import { PackagePolicy } from '../../../../../fleet/common';
-import { createPackagePolicyMock } from '../../../../../fleet/common/mocks';
+import type { ILicense } from '@kbn/licensing-plugin/common/types';
+import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
+import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import { policyFactory } from '../../../../common/endpoint/models/policy_config';
-import { PolicyConfig } from '../../../../common/endpoint/types';
+import type { PolicyConfig } from '../../../../common/endpoint/types';
 
 const MockPPWithEndpointPolicy = (cb?: (p: PolicyConfig) => PolicyConfig): PackagePolicy => {
   const packagePolicy = createPackagePolicyMock();
@@ -37,7 +37,7 @@ describe('Policy-Changing license watcher', () => {
   const logger = loggingSystemMock.create().get('license_watch.test');
   const soStartMock = savedObjectsServiceMock.createStartContract();
   const esStartMock = elasticsearchServiceMock.createStart();
-  let packagePolicySvcMock: jest.Mocked<PackagePolicyServiceInterface>;
+  let packagePolicySvcMock: jest.Mocked<PackagePolicyClient>;
 
   const Platinum = licenseMock.createLicense({ license: { type: 'platinum', mode: 'platinum' } });
   const Gold = licenseMock.createLicense({ license: { type: 'gold', mode: 'gold' } });
@@ -113,12 +113,10 @@ describe('Policy-Changing license watcher', () => {
     // mock a Policy with a higher-tiered feature enabled
     packagePolicySvcMock.list.mockResolvedValueOnce({
       items: [
-        MockPPWithEndpointPolicy(
-          (pc: PolicyConfig): PolicyConfig => {
-            pc.windows.popup.malware.message = CustomMessage;
-            return pc;
-          }
-        ),
+        MockPPWithEndpointPolicy((pc: PolicyConfig): PolicyConfig => {
+          pc.windows.popup.malware.message = CustomMessage;
+          return pc;
+        }),
       ],
       total: 1,
       page: 1,
@@ -132,7 +130,7 @@ describe('Policy-Changing license watcher', () => {
 
     expect(packagePolicySvcMock.update).toHaveBeenCalled();
     expect(
-      packagePolicySvcMock.update.mock.calls[0][3].inputs[0].config!.policy.value.windows.popup
+      packagePolicySvcMock.update.mock.calls[0][3].inputs[0].config?.policy.value.windows.popup
         .malware.message
     ).not.toEqual(CustomMessage);
   });

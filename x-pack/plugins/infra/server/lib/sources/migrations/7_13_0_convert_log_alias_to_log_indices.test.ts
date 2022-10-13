@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { migrationMocks } from 'src/core/server/mocks';
+import { migrationMocks } from '@kbn/core/server/mocks';
 import { convertLogAliasToLogIndices } from './7_13_0_convert_log_alias_to_log_indices';
 import { infraSourceConfigurationSavedObjectName } from '../saved_object_type';
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ISavedObjectsRepository } from 'src/core/server';
-import { AlertsHealth, HealthStatus, RawAlert, AlertExecutionStatusErrorReasons } from '../types';
+import { ISavedObjectsRepository, SavedObjectsServiceStart } from '@kbn/core/server';
+import { AlertsHealth, HealthStatus, RawRule, RuleExecutionStatusErrorReasons } from '../types';
 
 export const getHealth = async (
   internalSavedObjectsRepository: ISavedObjectsRepository
@@ -26,14 +26,15 @@ export const getHealth = async (
     },
   };
 
-  const { saved_objects: decryptErrorData } = await internalSavedObjectsRepository.find<RawAlert>({
-    filter: `alert.attributes.executionStatus.status:error and alert.attributes.executionStatus.error.reason:${AlertExecutionStatusErrorReasons.Decrypt}`,
+  const { saved_objects: decryptErrorData } = await internalSavedObjectsRepository.find<RawRule>({
+    filter: `alert.attributes.executionStatus.status:error and alert.attributes.executionStatus.error.reason:${RuleExecutionStatusErrorReasons.Decrypt}`,
     fields: ['executionStatus'],
     type: 'alert',
     sortField: 'executionStatus.lastExecutionDate',
     sortOrder: 'desc',
     page: 1,
     perPage: 1,
+    namespaces: ['*'],
   });
 
   if (decryptErrorData.length > 0) {
@@ -43,14 +44,15 @@ export const getHealth = async (
     };
   }
 
-  const { saved_objects: executeErrorData } = await internalSavedObjectsRepository.find<RawAlert>({
-    filter: `alert.attributes.executionStatus.status:error and alert.attributes.executionStatus.error.reason:${AlertExecutionStatusErrorReasons.Execute}`,
+  const { saved_objects: executeErrorData } = await internalSavedObjectsRepository.find<RawRule>({
+    filter: `alert.attributes.executionStatus.status:error and alert.attributes.executionStatus.error.reason:${RuleExecutionStatusErrorReasons.Execute}`,
     fields: ['executionStatus'],
     type: 'alert',
     sortField: 'executionStatus.lastExecutionDate',
     sortOrder: 'desc',
     page: 1,
     perPage: 1,
+    namespaces: ['*'],
   });
 
   if (executeErrorData.length > 0) {
@@ -60,14 +62,15 @@ export const getHealth = async (
     };
   }
 
-  const { saved_objects: readErrorData } = await internalSavedObjectsRepository.find<RawAlert>({
-    filter: `alert.attributes.executionStatus.status:error and alert.attributes.executionStatus.error.reason:${AlertExecutionStatusErrorReasons.Read}`,
+  const { saved_objects: readErrorData } = await internalSavedObjectsRepository.find<RawRule>({
+    filter: `alert.attributes.executionStatus.status:error and alert.attributes.executionStatus.error.reason:${RuleExecutionStatusErrorReasons.Read}`,
     fields: ['executionStatus'],
     type: 'alert',
     sortField: 'executionStatus.lastExecutionDate',
     sortOrder: 'desc',
     page: 1,
     perPage: 1,
+    namespaces: ['*'],
   });
 
   if (readErrorData.length > 0) {
@@ -77,12 +80,13 @@ export const getHealth = async (
     };
   }
 
-  const { saved_objects: noErrorData } = await internalSavedObjectsRepository.find<RawAlert>({
+  const { saved_objects: noErrorData } = await internalSavedObjectsRepository.find<RawRule>({
     filter: 'not alert.attributes.executionStatus.status:error',
     fields: ['executionStatus'],
     type: 'alert',
     sortField: 'executionStatus.lastExecutionDate',
     sortOrder: 'desc',
+    namespaces: ['*'],
   });
   const lastExecutionDate =
     noErrorData.length > 0
@@ -96,4 +100,17 @@ export const getHealth = async (
   }
 
   return healthStatuses;
+};
+
+export const getAlertingHealthStatus = async (
+  savedObjects: SavedObjectsServiceStart,
+  stateRuns?: number
+) => {
+  const alertingHealthStatus = await getHealth(savedObjects.createInternalRepository(['alert']));
+  return {
+    state: {
+      runs: (stateRuns || 0) + 1,
+      health_status: alertingHealthStatus.decryptionHealth.status,
+    },
+  };
 };

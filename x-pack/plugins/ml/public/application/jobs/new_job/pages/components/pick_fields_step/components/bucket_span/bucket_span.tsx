@@ -19,13 +19,8 @@ interface Props {
 }
 
 export const BucketSpan: FC<Props> = ({ setIsValid, hideEstimateButton = false }) => {
-  const {
-    jobCreator,
-    jobCreatorUpdate,
-    jobCreatorUpdated,
-    jobValidator,
-    jobValidatorUpdated,
-  } = useContext(JobCreatorContext);
+  const { jobCreator, jobCreatorUpdate, jobCreatorUpdated, jobValidator, jobValidatorUpdated } =
+    useContext(JobCreatorContext);
   const [bucketSpan, setBucketSpan] = useState(jobCreator.bucketSpan);
   const [validation, setValidation] = useState(jobValidator.bucketSpan);
   const [estimating, setEstimating] = useState(false);
@@ -33,18 +28,22 @@ export const BucketSpan: FC<Props> = ({ setIsValid, hideEstimateButton = false }
   useEffect(() => {
     jobCreator.bucketSpan = bucketSpan;
     jobCreatorUpdate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bucketSpan]);
 
   useEffect(() => {
     setBucketSpan(jobCreator.bucketSpan);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdated]);
 
   useEffect(() => {
     setValidation(jobValidator.bucketSpan);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobValidatorUpdated]);
 
   useEffect(() => {
     setIsValid(estimating === false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [estimating]);
 
   return (

@@ -17,9 +17,12 @@ import { getToastNotificationService } from '../../../../../../../services/toast
 const DTR_IDX = 0;
 
 export const SingleMetricDetectorsSummary: FC = () => {
-  const { jobCreator: jc, chartLoader, resultsLoader, chartInterval } = useContext(
-    JobCreatorContext
-  );
+  const {
+    jobCreator: jc,
+    chartLoader,
+    resultsLoader,
+    chartInterval,
+  } = useContext(JobCreatorContext);
   const jobCreator = jc as SingleMetricJobCreator;
 
   const [lineChartsData, setLineChartData] = useState<LineChartData>({});
@@ -45,6 +48,7 @@ export const SingleMetricDetectorsSummary: FC = () => {
     return () => {
       subscription.unsubscribe();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function loadChart() {
@@ -60,7 +64,6 @@ export const SingleMetricDetectorsSummary: FC = () => {
           null,
           cs.intervalMs,
           jobCreator.runtimeMappings,
-          // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
           jobCreator.datafeedConfig.indices_options
         );
         if (resp[DTR_IDX] !== undefined) {

@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Executor .inject .getAllMigrations returns list of all registered migrations 1`] = `
+Object {
+  "7.10.0": [Function],
+  "7.10.1": [Function],
+  "8.1.0": [Function],
+}
+`;

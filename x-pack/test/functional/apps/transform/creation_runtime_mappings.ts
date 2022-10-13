@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TRANSFORM_STATE } from '../../../../plugins/transform/common/constants';
+import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -17,7 +17,7 @@ import {
   isPivotTransformTestData,
   LatestTransformTestData,
   PivotTransformTestData,
-} from './index';
+} from '.';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -33,9 +33,10 @@ export default function ({ getService }: FtrProviderContext) {
       script: "emit(doc['responsetime'].value * 2.0)",
     },
   };
+
   describe('creation with runtime mappings', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await transform.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
       await transform.testResources.setKibanaTimeZoneToUTC();
 
@@ -44,6 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await transform.api.cleanTransformIndices();
+      await transform.testResources.deleteIndexPatternByTitle('ft_farequote');
     });
 
     const histogramCharts: HistogramCharts = [
@@ -53,21 +55,30 @@ export default function ({ getService }: FtrProviderContext) {
         chartAvailable: true,
         id: '@timestamp',
       },
-      { chartAvailable: false, id: '@version', legend: 'Chart not supported.' },
+      {
+        chartAvailable: true,
+        id: '@version',
+        legend: '1 category',
+        colorStats: [
+          { color: '#000000', percentage: 10 },
+          { color: '#54B399', percentage: 90 },
+        ],
+      },
       {
         chartAvailable: true,
         id: 'airline',
         legend: '19 categories',
         colorStats: [
           { color: '#000000', percentage: 49 },
-          { color: '#54B399', percentage: 41 },
+          { color: '#54B399', percentage: 50 },
         ],
       },
       {
         chartAvailable: true,
         id: 'responsetime',
         colorStats: [
-          { color: '#54B399', percentage: 5 },
+          // below 10% threshold
+          // { color: '#54B399', percentage: 5 },
           { color: '#000000', percentage: 95 },
         ],
       },
@@ -77,18 +88,27 @@ export default function ({ getService }: FtrProviderContext) {
         legend: '19 categories',
         colorStats: [
           { color: '#000000', percentage: 49 },
-          { color: '#54B399', percentage: 41 },
+          { color: '#54B399', percentage: 50 },
         ],
       },
       {
         chartAvailable: true,
         id: 'rt_responsetime_x_2',
         colorStats: [
-          { color: '#54B399', percentage: 5 },
+          // below 10% threshold
+          // { color: '#54B399', percentage: 5 },
           { color: '#000000', percentage: 95 },
         ],
       },
-      { chartAvailable: false, id: 'type', legend: 'Chart not supported.' },
+      {
+        chartAvailable: true,
+        id: 'type',
+        legend: '1 category',
+        colorStats: [
+          { color: '#000000', percentage: 10 },
+          { color: '#54B399', percentage: 90 },
+        ],
+      },
     ];
 
     const testDataList: Array<PivotTransformTestData | LatestTransformTestData> = [
@@ -380,9 +400,9 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.wizard.assertDestinationIndexValue('');
           await transform.wizard.setDestinationIndex(testData.destinationIndex);
 
-          await transform.testExecution.logTestStep('displays the create index pattern switch');
-          await transform.wizard.assertCreateIndexPatternSwitchExists();
-          await transform.wizard.assertCreateIndexPatternSwitchCheckState(true);
+          await transform.testExecution.logTestStep('displays the create data view switch');
+          await transform.wizard.assertCreateDataViewSwitchExists();
+          await transform.wizard.assertCreateDataViewSwitchCheckState(true);
 
           await transform.testExecution.logTestStep('displays the continuous mode switch');
           await transform.wizard.assertContinuousModeSwitchExists();
@@ -410,6 +430,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           await transform.testExecution.logTestStep('starts the transform and finishes processing');
           await transform.wizard.startTransform();
+          await transform.wizard.assertErrorToastsNotExist();
           await transform.wizard.waitForProgressBarComplete();
 
           await transform.testExecution.logTestStep('redirects to Discover page');

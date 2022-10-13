@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionFunctionDefinition, Render } from 'src/plugins/expressions/public';
-import { KibanaContext } from 'src/plugins/data/public';
+import { ExpressionFunctionDefinition, Render } from '@kbn/expressions-plugin/public';
+import { KibanaContext } from '@kbn/data-plugin/public';
 
 export interface SelfChangingVisParams {
   counter: number;
@@ -32,8 +32,7 @@ export const selfChangingVisFn: SelfChangingVisExpressionFunctionDefinition = {
   name: 'self_changing_vis',
   type: 'render',
   inputTypes: ['kibana_context'],
-  help:
-    'The expression function definition should be registered for a custom visualization to be rendered',
+  help: 'The expression function definition should be registered for a custom visualization to be rendered',
   args: {
     counter: {
       types: ['number'],

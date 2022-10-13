@@ -6,15 +6,15 @@
  */
 
 import { isEmpty, isInteger } from 'lodash/fp';
-import {
+import type {
   TimelineTypeLiteralWithNull,
-  TimelineType,
-  TimelineStatus,
   TimelineTypeLiteral,
 } from '../../../../common/types/timeline';
-import { FrameworkRequest } from '../../framework';
+import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
+import type { FrameworkRequest } from '../../framework';
 
-import { TimelineStatusActions, TimelineStatusAction } from './common';
+import type { TimelineStatusAction } from './common';
+import { TimelineStatusActions } from './common';
 import { TimelineObject } from './timeline_object';
 import {
   checkIsCreateFailureCases,
@@ -212,8 +212,8 @@ export class CompareTimelinesStatus {
 
   private get isTemplateVersionConflict() {
     const templateTimelineVersion = this.templateTimelineObject?.getVersion;
-    const existingTemplateTimelineVersion = this.templateTimelineObject?.data
-      ?.templateTimelineVersion;
+    const existingTemplateTimelineVersion =
+      this.templateTimelineObject?.data?.templateTimelineVersion;
     if (
       templateTimelineVersion != null &&
       this.templateTimelineObject.isExists &&

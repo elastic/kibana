@@ -11,21 +11,21 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { inputsModel } from '../../../../common/store';
+import type { inputsModel } from '../../../../common/store';
 import { createFilter } from '../../../../common/containers/helpers';
 import { useKibana } from '../../../../common/lib/kibana';
-import {
-  HostsKpiQueries,
+import type {
   HostsKpiHostsRequestOptions,
   HostsKpiHostsStrategyResponse,
 } from '../../../../../common/search_strategy';
-import { ESTermQuery } from '../../../../../common/typed_json';
+import { HostsKpiQueries } from '../../../../../common/search_strategy';
+import type { ESTermQuery } from '../../../../../common/typed_json';
 
 import * as i18n from './translations';
 import { getInspectResponse } from '../../../../helpers';
-import { InspectResponse } from '../../../../types';
+import type { InspectResponse } from '../../../../types';
 
-const ID = 'hostsKpiHostsQuery';
+export const ID = 'hostsKpiHostsQuery';
 
 export interface HostsKpiHostsArgs extends Omit<HostsKpiHostsStrategyResponse, 'rawResponse'> {
   id: string;
@@ -54,10 +54,8 @@ export const useHostsKpiHosts = ({
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
-  const [
-    hostsKpiHostsRequest,
-    setHostsKpiHostsRequest,
-  ] = useState<HostsKpiHostsRequestOptions | null>(null);
+  const [hostsKpiHostsRequest, setHostsKpiHostsRequest] =
+    useState<HostsKpiHostsRequestOptions | null>(null);
 
   const [hostsKpiHostsResponse, setHostsKpiHostsResponse] = useState<HostsKpiHostsArgs>({
     hosts: 0,
@@ -148,6 +146,14 @@ export const useHostsKpiHosts = ({
       abortCtrl.current.abort();
     };
   }, [hostsKpiHostsRequest, hostsKpiHostsSearch]);
+
+  useEffect(() => {
+    if (skip) {
+      setLoading(false);
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+    }
+  }, [skip]);
 
   return [loading, hostsKpiHostsResponse];
 };

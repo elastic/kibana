@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockValues, setMockActions, rerender } from '../../../__mocks__';
+import { setMockValues, setMockActions } from '../../../__mocks__/kea_logic';
 import '../../../__mocks__/shallow_useeffect.mock';
 import '../../__mocks__/engine_logic.mock';
 
@@ -13,13 +13,13 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiPageHeader, EuiButton, EuiPagination } from '@elastic/eui';
+import { EuiButton, EuiPagination } from '@elastic/eui';
 
-import { Loading } from '../../../shared/loading';
+import { rerender, getPageHeaderActions } from '../../../test_helpers';
 
-import { SynonymCard, SynonymModal, EmptyState } from './components';
+import { SynonymCard, SynonymModal } from './components';
 
-import { Synonyms } from './';
+import { Synonyms } from '.';
 
 describe('Synonyms', () => {
   const MOCK_SYNONYM_SET = {
@@ -52,21 +52,9 @@ describe('Synonyms', () => {
   });
 
   it('renders a create action button', () => {
-    const wrapper = shallow(<Synonyms />)
-      .find(EuiPageHeader)
-      .dive()
-      .children()
-      .dive();
-
-    wrapper.find(EuiButton).simulate('click');
-    expect(actions.openModal).toHaveBeenCalled();
-  });
-
-  it('renders an empty state if no synonyms exist', () => {
-    setMockValues({ ...values, synonymSets: [] });
     const wrapper = shallow(<Synonyms />);
-
-    expect(wrapper.find(EmptyState)).toHaveLength(1);
+    getPageHeaderActions(wrapper).find(EuiButton).simulate('click');
+    expect(actions.openModal).toHaveBeenCalled();
   });
 
   describe('loading', () => {
@@ -74,14 +62,14 @@ describe('Synonyms', () => {
       setMockValues({ ...values, synonymSets: [], dataLoading: true });
       const wrapper = shallow(<Synonyms />);
 
-      expect(wrapper.find(Loading)).toHaveLength(1);
+      expect(wrapper.prop('isLoading')).toEqual(true);
     });
 
     it('does not render a full loading state after initial page load', () => {
       setMockValues({ ...values, synonymSets: [MOCK_SYNONYM_SET], dataLoading: true });
       const wrapper = shallow(<Synonyms />);
 
-      expect(wrapper.find(Loading)).toHaveLength(0);
+      expect(wrapper.prop('isLoading')).toEqual(false);
     });
   });
 
@@ -107,7 +95,7 @@ describe('Synonyms', () => {
       const wrapper = shallow(<Synonyms />);
 
       expect(actions.onPaginate).not.toHaveBeenCalled();
-      expect(wrapper.find(EmptyState)).toHaveLength(1);
+      expect(wrapper.prop('isEmptyState')).toEqual(true);
     });
 
     it('handles off-by-one shenanigans between EuiPagination and our API', () => {

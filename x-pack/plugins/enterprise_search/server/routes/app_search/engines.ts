@@ -20,7 +20,7 @@ export function registerEnginesRoutes({
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/app_search/engines',
+      path: '/internal/app_search/engines',
       validate: {
         query: schema.object({
           type: schema.oneOf([schema.literal('indexed'), schema.literal('meta')]),
@@ -40,7 +40,7 @@ export function registerEnginesRoutes({
 
   router.post(
     {
-      path: '/api/app_search/engines',
+      path: '/internal/app_search/engines',
       validate: {
         body: schema.object({
           name: schema.string(),
@@ -55,10 +55,29 @@ export function registerEnginesRoutes({
     })
   );
 
+  router.post(
+    {
+      path: '/internal/app_search/elasticsearch/engines',
+      validate: {
+        body: schema.object({
+          name: schema.string(),
+          search_index: schema.object({
+            type: schema.string(),
+            index_name: schema.string(),
+            alias_name: schema.maybe(schema.string()),
+          }),
+        }),
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/api/as/v0/engines',
+    })
+  );
+
   // Single engine endpoints
   router.get(
     {
-      path: '/api/app_search/engines/{name}',
+      path: '/internal/app_search/engines/{name}',
       validate: {
         params: schema.object({
           name: schema.string(),
@@ -71,7 +90,7 @@ export function registerEnginesRoutes({
   );
   router.delete(
     {
-      path: '/api/app_search/engines/{name}',
+      path: '/internal/app_search/engines/{name}',
       validate: {
         params: schema.object({
           name: schema.string(),
@@ -84,7 +103,7 @@ export function registerEnginesRoutes({
   );
   router.get(
     {
-      path: '/api/app_search/engines/{name}/overview',
+      path: '/internal/app_search/engines/{name}/overview',
       validate: {
         params: schema.object({
           name: schema.string(),
@@ -93,23 +112,6 @@ export function registerEnginesRoutes({
     },
     enterpriseSearchRequestHandler.createRequest({
       path: '/as/engines/:name/overview_metrics',
-    })
-  );
-  router.get(
-    {
-      path: '/api/app_search/engines/{name}/source_engines',
-      validate: {
-        params: schema.object({
-          name: schema.string(),
-        }),
-        query: schema.object({
-          'page[current]': schema.number(),
-          'page[size]': schema.number(),
-        }),
-      },
-    },
-    enterpriseSearchRequestHandler.createRequest({
-      path: '/as/engines/:name/source_engines',
     })
   );
 }

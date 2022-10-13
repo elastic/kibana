@@ -6,15 +6,19 @@
  */
 
 import expect from '@kbn/expect';
-import multiclusterFixture from './fixtures/multicluster';
+import multiclusterFixture from './fixtures/multicluster.json';
+import { getLifecycleMethods } from '../data_stream';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
+  const { setup, tearDown } = getLifecycleMethods(getService);
 
-  describe('list mb', () => {
+  describe('list mb', function () {
+    // Archive contains non-cgroup data which collides with the in-cgroup services present by default on cloud deployments
+    this.tags(['skipCloud']);
+
     describe('with trial license clusters', () => {
-      const archive = 'monitoring/multicluster_mb';
+      const archive = 'x-pack/test/functional/es_archives/monitoring/multicluster_mb';
       const timeRange = {
         min: '2017-08-15T21:00:00Z',
         max: '2017-08-16T00:00:00Z',
@@ -22,11 +26,11 @@ export default function ({ getService }) {
       const codePaths = ['all'];
 
       before('load clusters archive', () => {
-        return esArchiver.load(archive);
+        return setup(archive);
       });
 
       after('unload clusters archive', () => {
-        return esArchiver.unload(archive);
+        return tearDown();
       });
 
       it('should load multiple clusters', async () => {

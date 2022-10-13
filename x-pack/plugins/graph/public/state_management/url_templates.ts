@@ -10,7 +10,7 @@ import { reducerWithInitialState } from 'typescript-fsa-reducers/dist';
 import { i18n } from '@kbn/i18n';
 import { modifyUrl } from '@kbn/std';
 import rison from 'rison-node';
-import { takeEvery, select } from 'redux-saga/effects';
+import { takeEvery } from 'redux-saga/effects';
 import { format, parse } from 'url';
 import { GraphState, GraphStoreDependencies } from './store';
 import { UrlTemplate } from '../types';
@@ -82,7 +82,19 @@ export const urlTemplatesReducer = (addBasePath: (url: string) => string) =>
       const customTemplates = templates.filter((template) => !template.isDefault);
       return [...customTemplates, generateDefaultTemplate(datasource, addBasePath)];
     })
-    .case(loadTemplates, (_currentTemplates, newTemplates) => newTemplates)
+    .case(loadTemplates, (_currentTemplates, newTemplates) => {
+      return newTemplates.map((template) =>
+        template.isDefault && template.url?.startsWith('/app/discover') // as in saved objects of sample data sets
+          ? {
+              ...template,
+              url: addBasePath(template.url).replace(
+                encodeURIComponent(urlTemplatePlaceholder),
+                urlTemplatePlaceholder
+              ),
+            }
+          : template
+      );
+    })
     .case(saveTemplate, (templates, { index: indexToUpdate, template: updatedTemplate }) => {
       // set default flag to false as soon as template is overwritten.
       const newTemplate = { ...updatedTemplate, isDefault: false };
@@ -102,11 +114,9 @@ export const templatesSelector = (state: GraphState) => state.urlTemplates;
  *
  * Won't be necessary once the side bar is moved to redux
  */
-export const syncTemplatesSaga = ({ setUrlTemplates, notifyAngular }: GraphStoreDependencies) => {
+export const syncTemplatesSaga = ({ notifyReact }: GraphStoreDependencies) => {
   function* syncTemplates() {
-    const templates = templatesSelector(yield select());
-    setUrlTemplates(templates);
-    notifyAngular();
+    notifyReact();
   }
 
   return function* () {

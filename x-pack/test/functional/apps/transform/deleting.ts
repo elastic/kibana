@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { TRANSFORM_STATE } from '../../../../plugins/transform/common/constants';
+import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { getLatestTransformConfig, getPivotTransformConfig } from './index';
+import { getLatestTransformConfig, getPivotTransformConfig } from '.';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -24,6 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
         expected: {
           row: {
             status: TRANSFORM_STATE.STOPPED,
+            type: 'pivot',
             mode: 'batch',
             progress: 100,
           },
@@ -35,6 +36,7 @@ export default function ({ getService }: FtrProviderContext) {
         expected: {
           row: {
             status: TRANSFORM_STATE.STOPPED,
+            type: 'pivot',
             mode: 'continuous',
             progress: undefined,
           },
@@ -50,6 +52,7 @@ export default function ({ getService }: FtrProviderContext) {
           messageText: 'updated transform.',
           row: {
             status: TRANSFORM_STATE.STOPPED,
+            type: 'latest',
             mode: 'batch',
             progress: 100,
           },
@@ -58,7 +61,7 @@ export default function ({ getService }: FtrProviderContext) {
     ];
 
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/ecommerce');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
       await transform.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
 
       for (const testData of testDataList) {
@@ -78,6 +81,7 @@ export default function ({ getService }: FtrProviderContext) {
         await transform.api.deleteIndices(testData.originalConfig.dest.index);
       }
       await transform.api.cleanTransformIndices();
+      await transform.testResources.deleteIndexPatternByTitle('ft_ecommerce');
     });
 
     for (const testData of testDataList) {
@@ -99,13 +103,14 @@ export default function ({ getService }: FtrProviderContext) {
             );
 
             await transform.testExecution.logTestStep('should stop the transform');
-            await transform.table.clickTransformRowAction('Stop');
+            await transform.table.clickTransformRowAction(testData.originalConfig.id, 'Stop');
           }
 
           await transform.testExecution.logTestStep('should display the stopped transform');
           await transform.table.assertTransformRowFields(testData.originalConfig.id, {
             id: testData.originalConfig.id,
             description: testData.originalConfig.description,
+            type: testData.expected.row.type,
             status: testData.expected.row.status,
             mode: testData.expected.row.mode,
             progress: testData.expected.row.progress,
@@ -117,7 +122,7 @@ export default function ({ getService }: FtrProviderContext) {
             'Delete',
             true
           );
-          await transform.table.clickTransformRowAction('Delete');
+          await transform.table.clickTransformRowAction(testData.originalConfig.id, 'Delete');
           await transform.table.assertTransformDeleteModalExists();
 
           await transform.testExecution.logTestStep('should delete the transform');

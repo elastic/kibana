@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { resolve } from 'path';
+import { resolve, relative } from 'path';
 import { createWriteStream, mkdirSync } from 'fs';
 import { Readable, Writable } from 'stream';
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
-import { ToolingLog } from '@kbn/dev-utils';
-import { createListStream, createPromiseFromStreams } from '@kbn/utils';
+import type { Client } from '@elastic/elasticsearch';
+import { ToolingLog } from '@kbn/tooling-log';
+import { createListStream, createPromiseFromStreams, REPO_ROOT } from '@kbn/utils';
 
 import {
   createStats,
@@ -22,23 +22,23 @@ import {
 } from '../lib';
 
 export async function saveAction({
-  name,
+  outputDir,
   indices,
   client,
-  dataDir,
   log,
   raw,
+  keepIndexNames,
   query,
 }: {
-  name: string;
+  outputDir: string;
   indices: string | string[];
-  client: KibanaClient;
-  dataDir: string;
+  client: Client;
   log: ToolingLog;
   raw: boolean;
+  keepIndexNames?: boolean;
   query?: Record<string, any>;
 }) {
-  const outputDir = resolve(dataDir, name);
+  const name = relative(REPO_ROOT, outputDir);
   const stats = createStats(name, log);
 
   log.info('[%s] Creating archive of %j', name, indices);
@@ -52,7 +52,7 @@ export async function saveAction({
     // export and save the matching indices to mappings.json
     createPromiseFromStreams([
       createListStream(indices),
-      createGenerateIndexRecordsStream(client, stats),
+      createGenerateIndexRecordsStream({ client, stats, keepIndexNames, log }),
       ...createFormatArchiveStreams(),
       createWriteStream(resolve(outputDir, 'mappings.json')),
     ] as [Readable, ...Writable[]]),
@@ -60,7 +60,7 @@ export async function saveAction({
     // export all documents from matching indexes into data.json.gz
     createPromiseFromStreams([
       createListStream(indices),
-      createGenerateDocRecordsStream({ client, stats, progress, query }),
+      createGenerateDocRecordsStream({ client, stats, progress, keepIndexNames, query }),
       ...createFormatArchiveStreams({ gzip: !raw }),
       createWriteStream(resolve(outputDir, `data.json${raw ? '' : '.gz'}`)),
     ] as [Readable, ...Writable[]]),

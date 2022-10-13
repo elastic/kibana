@@ -8,7 +8,7 @@
 
 import { expressionsPluginMock } from './mocks';
 import { add } from '../common/test_helpers/expression_functions/add';
-import { ExpressionsService } from '../common';
+import { ExpressionsServiceFork } from '../common/service/expressions_fork';
 
 describe('ExpressionsPublicPlugin', () => {
   test('can instantiate from mocks', async () => {
@@ -19,9 +19,9 @@ describe('ExpressionsPublicPlugin', () => {
   describe('setup contract', () => {
     test('.fork() method returns ExpressionsService', async () => {
       const { setup } = await expressionsPluginMock.createPlugin();
-      const fork = setup.fork();
+      const fork = setup.fork('test');
 
-      expect(fork).toBeInstanceOf(ExpressionsService);
+      expect(fork).toBeInstanceOf(ExpressionsServiceFork);
     });
 
     describe('.registerFunction()', () => {
@@ -30,14 +30,6 @@ describe('ExpressionsPublicPlugin', () => {
         expect(setup.getFunctions().add).toBe(undefined);
         setup.registerFunction(add);
         expect(setup.getFunctions().add.name).toBe('add');
-      });
-    });
-
-    describe('.run()', () => {
-      test('can execute simple expression', async () => {
-        const { setup } = await expressionsPluginMock.createPlugin();
-        const bar = await setup.run('var_set name="foo" value="bar" | var name="foo"', null);
-        expect(bar).toBe('bar');
       });
     });
   });

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from 'src/core/public';
+import { PluginInitializerContext } from '@kbn/core/public';
 import {
   NewsfeedPublicPluginSetup,
   NewsfeedPublicPluginStart,
@@ -15,13 +15,8 @@ import {
 import { FetchResult, NewsfeedItem } from './types';
 import { NewsfeedApiEndpoint } from './lib/api';
 
-export {
-  NewsfeedPublicPluginSetup,
-  NewsfeedPublicPluginStart,
-  FetchResult,
-  NewsfeedItem,
-  NewsfeedApiEndpoint,
-};
+export type { NewsfeedPublicPluginSetup, NewsfeedPublicPluginStart, FetchResult, NewsfeedItem };
+export { NewsfeedApiEndpoint };
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new NewsfeedPublicPlugin(initializerContext);

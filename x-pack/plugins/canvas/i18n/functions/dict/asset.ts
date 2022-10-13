@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { asset } from '../../../public/functions/asset';
+import type { asset } from '../../../public/functions/asset';
 import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 

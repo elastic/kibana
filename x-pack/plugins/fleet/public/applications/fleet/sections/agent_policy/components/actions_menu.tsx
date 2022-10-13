@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import React, { memo, useState, useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import React, { memo, useState, useMemo, useCallback } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiContextMenuItem, EuiPortal } from '@elastic/eui';
 
 import type { AgentPolicy } from '../../../types';
-import { useCapabilities } from '../../../hooks';
-import { ContextMenuActions } from '../../../components';
-import { AgentEnrollmentFlyout } from '../../agents/components';
+import { useAuthz } from '../../../hooks';
+import { AgentEnrollmentFlyout, ContextMenuActions } from '../../../components';
 
 import { AgentPolicyYamlFlyout } from './agent_policy_yaml_flyout';
 import { AgentPolicyCopyProvider } from './agent_policy_copy_provider';
@@ -31,10 +30,19 @@ export const AgentPolicyActionMenu = memo<{
     enrollmentFlyoutOpenByDefault = false,
     onCancelEnrollment,
   }) => {
-    const hasWriteCapabilities = useCapabilities().write;
+    const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
     const [isYamlFlyoutOpen, setIsYamlFlyoutOpen] = useState<boolean>(false);
     const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState<boolean>(
       enrollmentFlyoutOpenByDefault
+    );
+
+    const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
+
+    const onContextMenuChange = useCallback(
+      (open: boolean) => {
+        setIsContextMenuOpen(open);
+      },
+      [setIsContextMenuOpen]
     );
 
     const onClose = useMemo(() => {
@@ -51,7 +59,10 @@ export const AgentPolicyActionMenu = memo<{
           const viewPolicyItem = (
             <EuiContextMenuItem
               icon="inspect"
-              onClick={() => setIsYamlFlyoutOpen(!isYamlFlyoutOpen)}
+              onClick={() => {
+                setIsContextMenuOpen(false);
+                setIsYamlFlyoutOpen(!isYamlFlyoutOpen);
+              }}
               key="viewPolicy"
             >
               <FormattedMessage
@@ -65,9 +76,11 @@ export const AgentPolicyActionMenu = memo<{
             ? [viewPolicyItem]
             : [
                 <EuiContextMenuItem
-                  disabled={!hasWriteCapabilities}
                   icon="plusInCircle"
-                  onClick={() => setIsEnrollmentFlyoutOpen(true)}
+                  onClick={() => {
+                    setIsContextMenuOpen(false);
+                    setIsEnrollmentFlyoutOpen(true);
+                  }}
                   key="enrollAgents"
                 >
                   <FormattedMessage
@@ -77,16 +90,17 @@ export const AgentPolicyActionMenu = memo<{
                 </EuiContextMenuItem>,
                 viewPolicyItem,
                 <EuiContextMenuItem
-                  disabled={!hasWriteCapabilities}
+                  disabled={!canWriteIntegrationPolicies}
                   icon="copy"
                   onClick={() => {
+                    setIsContextMenuOpen(false);
                     copyAgentPolicyPrompt(agentPolicy, onCopySuccess);
                   }}
                   key="copyPolicy"
                 >
                   <FormattedMessage
                     id="xpack.fleet.agentPolicyActionMenu.copyPolicyActionText"
-                    defaultMessage="Copy policy"
+                    defaultMessage="Duplicate policy"
                   />
                 </EuiContextMenuItem>,
               ];
@@ -102,10 +116,12 @@ export const AgentPolicyActionMenu = memo<{
               ) : null}
               {isEnrollmentFlyoutOpen && (
                 <EuiPortal>
-                  <AgentEnrollmentFlyout agentPolicies={[agentPolicy]} onClose={onClose} />
+                  <AgentEnrollmentFlyout agentPolicy={agentPolicy} onClose={onClose} />
                 </EuiPortal>
               )}
               <ContextMenuActions
+                isOpen={isContextMenuOpen}
+                onChange={onContextMenuChange}
                 button={
                   fullButton
                     ? {

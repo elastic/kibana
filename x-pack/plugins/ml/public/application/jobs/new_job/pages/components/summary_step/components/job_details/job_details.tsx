@@ -8,7 +8,7 @@
 import React, { FC, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiDescriptionList } from '@elastic/eui';
 import { JobCreatorContext } from '../../../job_creator_context';
 import {
@@ -111,10 +111,10 @@ export const JobDetails: FC = () => {
         defaultMessage: 'Population field',
       }),
       description:
-        isPopulationJobCreator(jobCreator) && jobCreator.splitField !== null ? (
-          jobCreator.splitField.name
+        isPopulationJobCreator(jobCreator) && jobCreator.populationField !== null ? (
+          jobCreator.populationField.name
         ) : (
-          <span style={{ fontStyle: jobCreator.splitField !== null ? 'inherit' : 'italic' }}>
+          <span style={{ fontStyle: jobCreator.populationField !== null ? 'inherit' : 'italic' }}>
             <FormattedMessage
               id="xpack.ml.newJob.wizard.summaryStep.jobDetails.populationField.placeholder"
               defaultMessage="No population field selected"

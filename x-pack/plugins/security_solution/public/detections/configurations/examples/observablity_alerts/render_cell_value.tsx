@@ -4,16 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { EuiDataGridCellValueElementProps, EuiLink } from '@elastic/eui';
 import { random } from 'lodash/fp';
 import moment from 'moment';
 import React from 'react';
 
+import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
+import { ALERT_DURATION, ALERT_REASON, ALERT_SEVERITY, ALERT_STATUS } from '@kbn/rule-data-utils';
+
 import { TruncatableText } from '../../../../common/components/truncatable_text';
 import { Severity } from '../../../components/severity';
-import { getMappedNonEcsValue } from '../../../../timelines/components/timeline/body/data_driven_columns';
-import { CellValueElementProps } from '../../../../timelines/components/timeline/cell_rendering';
+import { useGetMappedNonEcsValue } from '../../../../timelines/components/timeline/body/data_driven_columns';
+import type { CellValueElementProps } from '../../../../timelines/components/timeline/cell_rendering';
 import { DefaultCellRenderer } from '../../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 import { Status } from '../../../components/status';
 
@@ -33,28 +35,33 @@ export const RenderCellValue: React.FC<
   eventId,
   header,
   isDetails,
+  isDraggable,
   isExpandable,
   isExpanded,
   linkValues,
   rowIndex,
+  colIndex,
   setCellProps,
   timelineId,
 }) => {
   const value =
-    getMappedNonEcsValue({
+    useGetMappedNonEcsValue({
       data,
       fieldName: columnId,
     })?.reduce((x) => x[0]) ?? '';
 
   switch (columnId) {
-    case 'kibana.rac.alert.status':
+    case ALERT_STATUS:
       return (
         <Status data-test-subj="alert-status" status={random(0, 1) ? 'recovered' : 'active'} />
       );
-    case 'kibana.rac.alert.duration.us':
+    case ALERT_DURATION:
+    case 'signal.duration.us':
       return <span data-test-subj="alert-duration">{moment().fromNow(true)}</span>;
+    case ALERT_SEVERITY:
     case 'signal.rule.severity':
       return <Severity data-test-subj="rule-severity" severity={value} />;
+    case ALERT_REASON:
     case 'signal.reason':
       return (
         <EuiLink data-test-subj="reason">
@@ -71,10 +78,12 @@ export const RenderCellValue: React.FC<
           eventId={eventId}
           header={header}
           isDetails={isDetails}
+          isDraggable={isDraggable}
           isExpandable={isExpandable}
           isExpanded={isExpanded}
           linkValues={linkValues}
           rowIndex={rowIndex}
+          colIndex={colIndex}
           setCellProps={setCellProps}
           timelineId={timelineId}
         />

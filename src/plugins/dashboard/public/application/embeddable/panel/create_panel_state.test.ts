@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { EmbeddableInput } from '../../../services/embeddable';
-import { CONTACT_CARD_EMBEDDABLE } from '../../../../../embeddable/public/lib/test_samples';
-import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../dashboard_constants';
+import { EmbeddableInput } from '@kbn/embeddable-plugin/public';
+import { CONTACT_CARD_EMBEDDABLE } from '@kbn/embeddable-plugin/public/lib/test_samples';
+import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../../dashboard_constants';
 import { DashboardPanelState } from '../types';
 import { createPanelState } from './create_panel_state';
 
@@ -18,7 +18,7 @@ interface TestInput extends EmbeddableInput {
 const panels: { [key: string]: DashboardPanelState } = {};
 
 test('createPanelState adds a new panel state in 0,0 position', () => {
-  const panelState = createPanelState<TestInput>(
+  const { newPanel: panelState } = createPanelState<TestInput>(
     {
       type: CONTACT_CARD_EMBEDDABLE,
       explicitInput: { test: 'hi', id: '123' },
@@ -37,7 +37,7 @@ test('createPanelState adds a new panel state in 0,0 position', () => {
 });
 
 test('createPanelState adds a second new panel state', () => {
-  const panelState = createPanelState<TestInput>(
+  const { newPanel: panelState } = createPanelState<TestInput>(
     { type: CONTACT_CARD_EMBEDDABLE, explicitInput: { test: 'bye', id: '456' } },
     panels
   );
@@ -51,7 +51,7 @@ test('createPanelState adds a second new panel state', () => {
 });
 
 test('createPanelState adds a third new panel state', () => {
-  const panelState = createPanelState<TestInput>(
+  const { newPanel: panelState } = createPanelState<TestInput>(
     {
       type: CONTACT_CARD_EMBEDDABLE,
       explicitInput: { test: 'bye', id: '789' },
@@ -68,7 +68,7 @@ test('createPanelState adds a third new panel state', () => {
 
 test('createPanelState adds a new panel state in the top most position', () => {
   delete panels['456'];
-  const panelState = createPanelState<TestInput>(
+  const { newPanel: panelState } = createPanelState<TestInput>(
     {
       type: CONTACT_CARD_EMBEDDABLE,
       explicitInput: { test: 'bye', id: '987' },

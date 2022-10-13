@@ -9,7 +9,7 @@ import { act } from '@testing-library/react';
 import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 
-import { findTestSubject, mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test/jest';
+import { findTestSubject, mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test-jest-helpers';
 
 import type { SummarizedCopyToSpaceResult } from '../lib';
 import type { ImportRetry } from '../types';
@@ -17,7 +17,7 @@ import type { ResolveAllConflictsProps } from './resolve_all_conflicts';
 import { ResolveAllConflicts } from './resolve_all_conflicts';
 
 describe('ResolveAllConflicts', () => {
-  const summarizedCopyResult = ({
+  const summarizedCopyResult = {
     objects: [
       // these objects have minimal attributes to exercise test scenarios; these are not fully realistic results
       { type: 'type-1', id: 'id-1', conflict: undefined }, // not a conflict
@@ -51,7 +51,7 @@ describe('ResolveAllConflicts', () => {
         },
       },
     ],
-  } as unknown) as SummarizedCopyToSpaceResult;
+  } as unknown as SummarizedCopyToSpaceResult;
   const retries: ImportRetry[] = [
     { type: 'type-1', id: 'id-1', overwrite: false },
     { type: 'type-5', id: 'id-5', overwrite: true, destinationId: 'dest-5b' },
@@ -101,7 +101,7 @@ describe('ResolveAllConflicts', () => {
           </EuiLink>
         }
         closePopover={[Function]}
-        display="inlineBlock"
+        display="inline-block"
         hasArrow={true}
         id="resolveAllConflictsVisibilityPopover"
         isOpen={false}
@@ -109,7 +109,6 @@ describe('ResolveAllConflicts', () => {
         panelPaddingSize="none"
       >
         <EuiContextMenuPanel
-          hasFocus={true}
           items={
             Array [
               <EuiContextMenuItem

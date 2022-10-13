@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import { advancedFilter } from './advanced_filter';
-import { dropdownFilter } from './dropdown_filter';
+import { advancedFilterFactory } from './advanced_filter';
+import { dropdownFilterFactory } from './dropdown_filter';
 import { timeFilterFactory } from './time_filter';
 
-export const renderFunctions = [advancedFilter, dropdownFilter];
-export const renderFunctionFactories = [timeFilterFactory];
+export const renderFunctions = [];
+export const renderFunctionFactories = [
+  timeFilterFactory,
+  dropdownFilterFactory,
+  advancedFilterFactory,
+];

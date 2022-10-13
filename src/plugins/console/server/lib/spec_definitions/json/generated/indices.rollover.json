@@ -1,7 +1,6 @@
 {
   "indices.rollover": {
     "url_params": {
-      "include_type_name": "__flag__",
       "timeout": "",
       "dry_run": "__flag__",
       "master_timeout": "",

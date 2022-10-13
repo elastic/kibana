@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import { AbstractTMSSource } from '../tms_source';
+import { AbstractSource } from '../source';
 import { getKibanaTileMap } from '../../../util';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import _ from 'lodash';
 import { SOURCE_TYPES } from '../../../../common/constants';
 import { registerSource } from '../source_registry';
+import { extractAttributions } from './extract_attributions';
 
 export const sourceTitle = i18n.translate('xpack.maps.source.kbnTMSTitle', {
   defaultMessage: 'Configured Tile Map Service',
 });
 
-export class KibanaTilemapSource extends AbstractTMSSource {
+export class KibanaTilemapSource extends AbstractSource {
   static type = SOURCE_TYPES.KIBANA_TILEMAP;
 
   static createDescriptor() {
@@ -41,6 +42,17 @@ export class KibanaTilemapSource extends AbstractTMSSource {
     ];
   }
 
+  isSourceStale(mbSource, sourceData) {
+    if (!sourceData.url) {
+      return false;
+    }
+    return mbSource.tiles?.[0] !== sourceData.url;
+  }
+
+  async canSkipSourceUpdate() {
+    return false;
+  }
+
   async getUrlTemplate() {
     const tilemap = getKibanaTileMap();
     if (!tilemap.url) {
@@ -53,11 +65,12 @@ export class KibanaTilemapSource extends AbstractTMSSource {
     return tilemap.url;
   }
 
-  async getAttributions() {
-    const tilemap = getKibanaTileMap();
-    const markdown = _.get(tilemap, 'options.attribution', '');
-    const objArr = this.convertMarkdownLinkToObjectArr(markdown);
-    return objArr;
+  getAttributionProvider() {
+    return async () => {
+      const tilemap = getKibanaTileMap();
+      const markdown = _.get(tilemap, 'options.attribution', '');
+      return extractAttributions(markdown);
+    };
   }
 
   async getDisplayName() {

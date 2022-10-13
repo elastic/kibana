@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockValues, setMockActions } from '../../../../../__mocks__';
+import { setMockValues, setMockActions } from '../../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -15,7 +15,7 @@ import { EuiButton, EuiModal } from '@elastic/eui';
 
 import { MultiInputRows } from '../../../multi_input_rows';
 
-import { ManageQueriesModal } from './';
+import { ManageQueriesModal } from '.';
 
 describe('ManageQueriesModal', () => {
   const values = {

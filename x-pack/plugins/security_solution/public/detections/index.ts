@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { Storage } from '../../../../../src/plugins/kibana_utils/public';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { getTimelinesInStorageByIds } from '../timelines/containers/local_storage';
-import { TimelineIdLiteral, TimelineId } from '../../common/types/timeline';
-import { AlertsRoutes } from './routes';
-import { SecuritySubPlugin } from '../app/types';
+import type { TimelineIdLiteral } from '../../common/types/timeline';
+import { TimelineId } from '../../common/types/timeline';
+import { routes } from './routes';
+import type { SecuritySubPlugin } from '../app/types';
 
-const DETECTIONS_TIMELINE_IDS: TimelineIdLiteral[] = [
+export const DETECTIONS_TIMELINE_IDS: TimelineIdLiteral[] = [
   TimelineId.detectionsRulesDetailsPage,
   TimelineId.detectionsPage,
 ];
@@ -21,10 +22,10 @@ export class Detections {
 
   public start(storage: Storage): SecuritySubPlugin {
     return {
-      SubPluginRoutes: AlertsRoutes,
       storageTimelines: {
         timelineById: getTimelinesInStorageByIds(storage, DETECTIONS_TIMELINE_IDS),
       },
+      routes,
     };
   }
 }

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const { sum } = require('../../src/functions/sum.js');
+const { sum } = require('../../src/functions/sum');
 
 describe('Sum', () => {
   it('numbers', () => {

@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`parseDirPath() parses / 1`] = `
-Object {
+ParsedPath {
   "dirs": Array [],
   "filename": undefined,
   "query": undefined,
@@ -10,7 +10,7 @@ Object {
 `;
 
 exports[`parseDirPath() parses /foo 1`] = `
-Object {
+ParsedPath {
   "dirs": Array [
     "foo",
   ],
@@ -21,7 +21,7 @@ Object {
 `;
 
 exports[`parseDirPath() parses /foo/bar/baz 1`] = `
-Object {
+ParsedPath {
   "dirs": Array [
     "foo",
     "bar",
@@ -34,7 +34,7 @@ Object {
 `;
 
 exports[`parseDirPath() parses /foo/bar/baz/ 1`] = `
-Object {
+ParsedPath {
   "dirs": Array [
     "foo",
     "bar",
@@ -47,7 +47,7 @@ Object {
 `;
 
 exports[`parseDirPath() parses c:\\ 1`] = `
-Object {
+ParsedPath {
   "dirs": Array [],
   "filename": undefined,
   "query": undefined,
@@ -56,7 +56,7 @@ Object {
 `;
 
 exports[`parseDirPath() parses c:\\foo 1`] = `
-Object {
+ParsedPath {
   "dirs": Array [
     "foo",
   ],
@@ -67,7 +67,7 @@ Object {
 `;
 
 exports[`parseDirPath() parses c:\\foo\\bar\\baz 1`] = `
-Object {
+ParsedPath {
   "dirs": Array [
     "foo",
     "bar",
@@ -80,7 +80,7 @@ Object {
 `;
 
 exports[`parseDirPath() parses c:\\foo\\bar\\baz\\ 1`] = `
-Object {
+ParsedPath {
   "dirs": Array [
     "foo",
     "bar",
@@ -93,7 +93,7 @@ Object {
 `;
 
 exports[`parseFilePath() parses /foo 1`] = `
-Object {
+ParsedPath {
   "dirs": Array [],
   "filename": "foo",
   "query": undefined,
@@ -102,7 +102,7 @@ Object {
 `;
 
 exports[`parseFilePath() parses /foo/bar/baz 1`] = `
-Object {
+ParsedPath {
   "dirs": Array [
     "foo",
     "bar",
@@ -114,7 +114,7 @@ Object {
 `;
 
 exports[`parseFilePath() parses /foo/bar/baz.json 1`] = `
-Object {
+ParsedPath {
   "dirs": Array [
     "foo",
     "bar",
@@ -126,7 +126,7 @@ Object {
 `;
 
 exports[`parseFilePath() parses /foo/bar/baz.json?light 1`] = `
-Object {
+ParsedPath {
   "dirs": Array [
     "foo",
     "bar",
@@ -140,7 +140,7 @@ Object {
 `;
 
 exports[`parseFilePath() parses /foo/bar/baz.json?light=true&dark=false 1`] = `
-Object {
+ParsedPath {
   "dirs": Array [
     "foo",
     "bar",
@@ -155,7 +155,7 @@ Object {
 `;
 
 exports[`parseFilePath() parses c:/foo/bar/baz.json 1`] = `
-Object {
+ParsedPath {
   "dirs": Array [
     "foo",
     "bar",
@@ -167,7 +167,7 @@ Object {
 `;
 
 exports[`parseFilePath() parses c:\\foo 1`] = `
-Object {
+ParsedPath {
   "dirs": Array [],
   "filename": "foo",
   "query": undefined,
@@ -176,7 +176,7 @@ Object {
 `;
 
 exports[`parseFilePath() parses c:\\foo\\bar\\baz 1`] = `
-Object {
+ParsedPath {
   "dirs": Array [
     "foo",
     "bar",
@@ -188,7 +188,7 @@ Object {
 `;
 
 exports[`parseFilePath() parses c:\\foo\\bar\\baz.json 1`] = `
-Object {
+ParsedPath {
   "dirs": Array [
     "foo",
     "bar",
@@ -200,7 +200,7 @@ Object {
 `;
 
 exports[`parseFilePath() parses c:\\foo\\bar\\baz.json?dark 1`] = `
-Object {
+ParsedPath {
   "dirs": Array [
     "foo",
     "bar",
@@ -214,7 +214,7 @@ Object {
 `;
 
 exports[`parseFilePath() parses c:\\foo\\bar\\baz.json?dark=true&light=false 1`] = `
-Object {
+ParsedPath {
   "dirs": Array [
     "foo",
     "bar",

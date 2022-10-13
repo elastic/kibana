@@ -5,46 +5,43 @@ exports[`CheckerErrors should render nothing if errors is empty 1`] = `null`;
 exports[`CheckerErrors should render typical boom errors from api response 1`] = `
 Array [
   <div
-    class="euiSpacer euiSpacer--l"
+    class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
   />,
   <div
-    class="euiCallOut euiCallOut--danger eui-textLeft"
+    class="euiPanel euiPanel--danger euiPanel--paddingMedium euiCallOut euiCallOut--danger eui-textLeft emotion-euiPanel-none-m-danger-euiCallOut"
   >
-    <div
-      class="euiCallOutHeader"
+    <p
+      class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-danger"
     >
-      <span
-        class="euiCallOutHeader__title"
-      >
-        Errors found
-      </span>
-    </div>
+      Errors found
+    </p>
     <div
-      class="euiText euiText--small"
+      class="euiText emotion-euiText-s-euiTextColor-default-euiCallOut__description"
     >
       <p>
         There were some errors encountered in trying to check Elasticsearch settings. You need administrator rights to check the settings and, if needed, to enable the monitoring collection setting.
       </p>
       <dl
-        class="euiDescriptionList euiDescriptionList--row"
+        class="euiDescriptionList emotion-euiDescriptionList-row-left"
+        data-type="row"
       >
         <dt
-          class="euiDescriptionList__title"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal"
         >
           403 Forbidden
         </dt>
         <dd
-          class="euiDescriptionList__description"
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
         >
           no access for you
         </dd>
         <dt
-          class="euiDescriptionList__title"
+          class="euiDescriptionList__title emotion-euiDescriptionList__title-row-normal"
         >
           500 Internal Server Error
         </dt>
         <dd
-          class="euiDescriptionList__description"
+          class="euiDescriptionList__description emotion-euiDescriptionList__description-row-normal"
         >
           An internal server error occurred
         </dd>

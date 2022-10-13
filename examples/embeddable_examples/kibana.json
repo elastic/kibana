@@ -1,10 +1,15 @@
 {
   "id": "embeddableExamples",
-  "version": "0.0.1",
   "kibanaVersion": "kibana",
+  "version": "0.0.1",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["embeddable", "uiActions", "savedObjects", "dashboard"],
+  "owner": {
+    "name": "App Services",
+    "githubTeam": "kibana-app-services"
+  },
+  "description": "Example app that shows how to register custom embeddables",
+  "requiredPlugins": ["embeddable", "uiActions", "savedObjects", "dashboard", "kibanaUtils"],
   "optionalPlugins": [],
   "extraPublicDirs": ["public/todo", "public/hello_world", "public/todo/todo_ref_embeddable"],
   "requiredBundles": ["kibanaReact"]

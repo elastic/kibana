@@ -5,38 +5,36 @@
  * 2.0.
  */
 
-import { getOr, omit, uniq, isEmpty, isEqualWith, union } from 'lodash/fp';
+import { getOr, omit, uniq, isEmpty, isEqualWith, cloneDeep } from 'lodash/fp';
 
 import uuid from 'uuid';
-import { ToggleDetailPanel } from './actions';
-import { Filter } from '../../../../../../../src/plugins/data/public';
 
-import { Sort } from '../../../timelines/components/timeline/body/sort';
-import {
+import type { Filter } from '@kbn/es-query';
+
+import type { Sort } from '../../components/timeline/body/sort';
+import type {
   DataProvider,
   QueryOperator,
   QueryMatch,
+} from '../../components/timeline/data_providers/data_provider';
+import {
   DataProviderType,
   IS_OPERATOR,
   EXISTS_OPERATOR,
-} from '../../../timelines/components/timeline/data_providers/data_provider';
-import { SerializedFilterQuery } from '../../../common/store/model';
-import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
-import {
+} from '../../components/timeline/data_providers/data_provider';
+import type {
+  ColumnHeaderOptions,
   TimelineEventsType,
-  TimelineExpandedDetail,
   TimelineTypeLiteral,
-  TimelineType,
   RowRendererId,
-  TimelineStatus,
-  TimelineId,
-  TimelineTabs,
+  SerializedFilterQuery,
+  TimelinePersistInput,
 } from '../../../../common/types/timeline';
-import { normalizeTimeRange } from '../../../common/components/url_state/normalize_time_range';
-
+import { TimelineType, TimelineStatus, TimelineId } from '../../../../common/types/timeline';
+import { normalizeTimeRange } from '../../../common/utils/normalize_time_range';
 import { timelineDefaults } from './defaults';
-import { ColumnHeaderOptions, KqlMode, TimelineModel } from './model';
-import { TimelineById } from './types';
+import type { KqlMode, TimelineModel } from './model';
+import type { TimelineById } from './types';
 import {
   DEFAULT_FROM_MOMENT,
   DEFAULT_TO_MOMENT,
@@ -46,7 +44,8 @@ import {
   RESIZED_COLUMN_MIN_WITH,
 } from '../../components/timeline/body/constants';
 import { activeTimeline } from '../../containers/active_timeline_context';
-
+import type { ResolveTimelineConfig } from '../../components/open_timeline/types';
+import type { SessionViewConfig } from '../../components/timeline/session_tab_content/use_session_view';
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
 
 interface AddTimelineHistoryParams {
@@ -123,6 +122,7 @@ export const addTimelineNoteToEvent = ({
 
 interface AddTimelineParams {
   id: string;
+  resolveTimelineConfig?: ResolveTimelineConfig;
   timeline: TimelineModel;
   timelineById: TimelineById;
 }
@@ -144,6 +144,7 @@ export const shouldResetActiveTimelineContext = (
  */
 export const addTimelineToStore = ({
   id,
+  resolveTimelineConfig,
   timeline,
   timelineById,
 }: AddTimelineParams): TimelineById => {
@@ -155,7 +156,10 @@ export const addTimelineToStore = ({
     ...timelineById,
     [id]: {
       ...timeline,
+      filterManager: timelineById[id].filterManager,
       isLoading: timelineById[id].isLoading,
+      initialized: timelineById[id].initialized,
+      resolveTimelineConfig,
       dateRange:
         timeline.status === TimelineStatus.immutable &&
         timeline.timelineType === TimelineType.template
@@ -168,47 +172,20 @@ export const addTimelineToStore = ({
   };
 };
 
-interface AddNewTimelineParams {
-  columns: ColumnHeaderOptions[];
-  dataProviders?: DataProvider[];
-  dateRange?: {
-    start: string;
-    end: string;
-  };
-  excludedRowRendererIds?: RowRendererId[];
-  expandedDetail?: TimelineExpandedDetail;
-  filters?: Filter[];
-  id: string;
-  itemsPerPage?: number;
-  indexNames: string[];
-  kqlQuery?: {
-    filterQuery: SerializedFilterQuery | null;
-  };
-  show?: boolean;
-  sort?: Sort[];
-  showCheckboxes?: boolean;
+interface AddNewTimelineParams extends TimelinePersistInput {
   timelineById: TimelineById;
   timelineType: TimelineTypeLiteral;
 }
 
 /** Adds a new `Timeline` to the provided collection of `TimelineById` */
 export const addNewTimeline = ({
-  columns,
-  dataProviders = [],
-  dateRange: maybeDateRange,
-  excludedRowRendererIds = [],
-  expandedDetail = {},
-  filters = timelineDefaults.filters,
   id,
-  itemsPerPage = timelineDefaults.itemsPerPage,
-  indexNames,
-  kqlQuery = { filterQuery: null },
-  sort = timelineDefaults.sort,
-  show = false,
-  showCheckboxes = false,
   timelineById,
   timelineType,
+  dateRange: maybeDateRange,
+  ...timelineProps
 }: AddNewTimelineParams): TimelineById => {
+  const timeline = timelineById[id];
   const { from: startDateRange, to: endDateRange } = normalizeTimeRange({ from: '', to: '' });
   const dateRange = maybeDateRange ?? { start: startDateRange, end: endDateRange };
   const templateTimelineInfo =
@@ -222,23 +199,14 @@ export const addNewTimeline = ({
     ...timelineById,
     [id]: {
       id,
+      ...(timeline ? timeline : {}),
       ...timelineDefaults,
-      columns,
-      dataProviders,
+      ...timelineProps,
       dateRange,
-      expandedDetail,
-      excludedRowRendererIds,
-      filters,
-      itemsPerPage,
-      indexNames,
-      kqlQuery,
-      sort,
-      show,
       savedObjectId: null,
       version: null,
       isSaving: false,
       isLoading: false,
-      showCheckboxes,
       timelineType,
       ...templateTimelineInfo,
     },
@@ -315,6 +283,26 @@ export const updateGraphEventId = ({
   };
 };
 
+export const updateSessionViewConfig = ({
+  id,
+  sessionViewConfig,
+  timelineById,
+}: {
+  id: string;
+  sessionViewConfig: SessionViewConfig | null;
+  timelineById: TimelineById;
+}): TimelineById => {
+  const timeline = timelineById[id];
+
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      sessionViewConfig,
+    },
+  };
+};
+
 const queryMatchCustomizer = (dp1: QueryMatch, dp2: QueryMatch) => {
   if (dp1.field === dp2.field && dp1.value === dp2.value && dp1.operator === dp2.operator) {
     return true;
@@ -322,82 +310,92 @@ const queryMatchCustomizer = (dp1: QueryMatch, dp2: QueryMatch) => {
   return false;
 };
 
-const addAndToProviderInTimeline = (
+const addAndToProvidersInTimeline = (
   id: string,
-  provider: DataProvider,
+  providers: DataProvider[],
   timeline: TimelineModel,
   timelineById: TimelineById
 ): TimelineById => {
-  const alreadyExistsProviderIndex = timeline.dataProviders.findIndex(
-    (p) => p.id === timeline.highlightedDropAndProviderId
-  );
-  const newProvider = timeline.dataProviders[alreadyExistsProviderIndex];
-  const alreadyExistsAndProviderIndex = newProvider.and.findIndex((p) => p.id === provider.id);
-  const { and, ...andProvider } = provider;
+  if (providers.length === 0) return timelineById;
+  let localDataProviders: DataProvider[] = cloneDeep(timeline.dataProviders);
 
-  if (
-    isEqualWith(queryMatchCustomizer, newProvider.queryMatch, andProvider.queryMatch) ||
-    (alreadyExistsAndProviderIndex === -1 &&
-      newProvider.and.filter((itemAndProvider) =>
-        isEqualWith(queryMatchCustomizer, itemAndProvider.queryMatch, andProvider.queryMatch)
-      ).length > 0)
-  ) {
-    return timelineById;
-  }
+  providers.forEach((provider) => {
+    const alreadyExistsProviderIndex = localDataProviders.findIndex(
+      (p) => p.id === timeline.highlightedDropAndProviderId
+    );
+    const newProvider = localDataProviders[alreadyExistsProviderIndex];
+    const alreadyExistsAndProviderIndex = newProvider.and.findIndex((p) => p.id === provider.id);
+    const { and, ...andProvider } = provider;
 
-  const dataProviders = [
-    ...timeline.dataProviders.slice(0, alreadyExistsProviderIndex),
-    {
-      ...timeline.dataProviders[alreadyExistsProviderIndex],
-      and:
-        alreadyExistsAndProviderIndex > -1
-          ? [
-              ...newProvider.and.slice(0, alreadyExistsAndProviderIndex),
-              andProvider,
-              ...newProvider.and.slice(alreadyExistsAndProviderIndex + 1),
-            ]
-          : [...newProvider.and, andProvider],
-    },
-    ...timeline.dataProviders.slice(alreadyExistsProviderIndex + 1),
-  ];
+    if (
+      isEqualWith(queryMatchCustomizer, newProvider.queryMatch, andProvider.queryMatch) ||
+      (alreadyExistsAndProviderIndex === -1 &&
+        newProvider.and.filter((itemAndProvider) =>
+          isEqualWith(queryMatchCustomizer, itemAndProvider.queryMatch, andProvider.queryMatch)
+        ).length > 0)
+    ) {
+      return timelineById;
+    }
 
+    localDataProviders = [
+      ...localDataProviders.slice(0, alreadyExistsProviderIndex),
+      {
+        ...localDataProviders[alreadyExistsProviderIndex],
+        and:
+          alreadyExistsAndProviderIndex > -1
+            ? [
+                ...newProvider.and.slice(0, alreadyExistsAndProviderIndex),
+                andProvider,
+                ...newProvider.and.slice(alreadyExistsAndProviderIndex + 1),
+              ]
+            : [...newProvider.and, andProvider],
+      },
+      ...localDataProviders.slice(alreadyExistsProviderIndex + 1),
+    ];
+  });
   return {
     ...timelineById,
     [id]: {
       ...timeline,
-      dataProviders,
+      dataProviders: localDataProviders,
     },
   };
 };
 
-const addProviderToTimeline = (
+const addProvidersToTimeline = (
   id: string,
-  provider: DataProvider,
+  providers: DataProvider[],
   timeline: TimelineModel,
   timelineById: TimelineById
 ): TimelineById => {
-  const alreadyExistsAtIndex = timeline.dataProviders.findIndex((p) => p.id === provider.id);
+  if (providers.length === 0) return timelineById;
 
-  if (alreadyExistsAtIndex > -1 && !isEmpty(timeline.dataProviders[alreadyExistsAtIndex].and)) {
-    provider.id = `${provider.id}-${
-      timeline.dataProviders.filter((p) => p.id === provider.id).length
-    }`;
-  }
+  let localDataProviders: DataProvider[] = cloneDeep(timeline.dataProviders);
 
-  const dataProviders =
-    alreadyExistsAtIndex > -1 && isEmpty(timeline.dataProviders[alreadyExistsAtIndex].and)
-      ? [
-          ...timeline.dataProviders.slice(0, alreadyExistsAtIndex),
-          provider,
-          ...timeline.dataProviders.slice(alreadyExistsAtIndex + 1),
-        ]
-      : [...timeline.dataProviders, provider];
+  providers.forEach((provider) => {
+    const alreadyExistsAtIndex = localDataProviders.findIndex((p) => p.id === provider.id);
+
+    if (alreadyExistsAtIndex > -1 && !isEmpty(localDataProviders[alreadyExistsAtIndex].and)) {
+      provider.id = `${provider.id}-${
+        localDataProviders.filter((p) => p.id === provider.id).length
+      }`;
+    }
+
+    localDataProviders =
+      alreadyExistsAtIndex > -1 && isEmpty(localDataProviders[alreadyExistsAtIndex].and)
+        ? [
+            ...localDataProviders.slice(0, alreadyExistsAtIndex),
+            provider,
+            ...localDataProviders.slice(alreadyExistsAtIndex + 1),
+          ]
+        : [...localDataProviders, provider];
+  });
 
   return {
     ...timelineById,
     [id]: {
       ...timeline,
-      dataProviders,
+      dataProviders: localDataProviders,
     },
   };
 };
@@ -525,21 +523,20 @@ export const applyDeltaToTimelineColumnWidth = ({
 
 interface AddTimelineProviderParams {
   id: string;
-  provider: DataProvider;
+  providers: DataProvider[];
   timelineById: TimelineById;
 }
 
-export const addTimelineProvider = ({
+export const addTimelineProviders = ({
   id,
-  provider,
+  providers,
   timelineById,
 }: AddTimelineProviderParams): TimelineById => {
   const timeline = timelineById[id];
-
   if (timeline.highlightedDropAndProviderId !== '') {
-    return addAndToProviderInTimeline(id, provider, timeline, timelineById);
+    return addAndToProvidersInTimeline(id, providers, timeline, timelineById);
   } else {
-    return addProviderToTimeline(id, provider, timeline, timelineById);
+    return addProvidersToTimeline(id, providers, timeline, timelineById);
   }
 };
 
@@ -1238,104 +1235,6 @@ export const removeTimelineProvider = ({
   };
 };
 
-interface SetDeletedTimelineEventsParams {
-  id: string;
-  eventIds: string[];
-  isDeleted: boolean;
-  timelineById: TimelineById;
-}
-
-export const setDeletedTimelineEvents = ({
-  id,
-  eventIds,
-  isDeleted,
-  timelineById,
-}: SetDeletedTimelineEventsParams): TimelineById => {
-  const timeline = timelineById[id];
-
-  const deletedEventIds = isDeleted
-    ? union(timeline.deletedEventIds, eventIds)
-    : timeline.deletedEventIds.filter((currentEventId) => !eventIds.includes(currentEventId));
-
-  const selectedEventIds = Object.fromEntries(
-    Object.entries(timeline.selectedEventIds).filter(
-      ([selectedEventId]) => !deletedEventIds.includes(selectedEventId)
-    )
-  );
-
-  const isSelectAllChecked =
-    Object.keys(selectedEventIds).length > 0 ? timeline.isSelectAllChecked : false;
-
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      deletedEventIds,
-      selectedEventIds,
-      isSelectAllChecked,
-    },
-  };
-};
-
-interface SetLoadingTimelineEventsParams {
-  id: string;
-  eventIds: string[];
-  isLoading: boolean;
-  timelineById: TimelineById;
-}
-
-export const setLoadingTimelineEvents = ({
-  id,
-  eventIds,
-  isLoading,
-  timelineById,
-}: SetLoadingTimelineEventsParams): TimelineById => {
-  const timeline = timelineById[id];
-
-  const loadingEventIds = isLoading
-    ? union(timeline.loadingEventIds, eventIds)
-    : timeline.loadingEventIds.filter((currentEventId) => !eventIds.includes(currentEventId));
-
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      loadingEventIds,
-    },
-  };
-};
-
-interface SetSelectedTimelineEventsParams {
-  id: string;
-  eventIds: Record<string, TimelineNonEcsData[]>;
-  isSelectAllChecked: boolean;
-  isSelected: boolean;
-  timelineById: TimelineById;
-}
-
-export const setSelectedTimelineEvents = ({
-  id,
-  eventIds,
-  isSelectAllChecked = false,
-  isSelected,
-  timelineById,
-}: SetSelectedTimelineEventsParams): TimelineById => {
-  const timeline = timelineById[id];
-
-  const selectedEventIds = isSelected
-    ? { ...timeline.selectedEventIds, ...eventIds }
-    : omit(Object.keys(eventIds), timeline.selectedEventIds);
-
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      selectedEventIds,
-      isSelectAllChecked,
-    },
-  };
-};
-
 interface UnPinTimelineEventParams {
   id: string;
   eventId: string;
@@ -1353,28 +1252,6 @@ export const unPinTimelineEvent = ({
     [id]: {
       ...timeline,
       pinnedEventIds: omit(eventId, timeline.pinnedEventIds),
-    },
-  };
-};
-
-interface UpdateHighlightedDropAndProviderIdParams {
-  id: string;
-  providerId: string;
-  timelineById: TimelineById;
-}
-
-export const updateHighlightedDropAndProvider = ({
-  id,
-  providerId,
-  timelineById,
-}: UpdateHighlightedDropAndProviderIdParams): TimelineById => {
-  const timeline = timelineById[id];
-
-  return {
-    ...timelineById,
-    [id]: {
-      ...timeline,
-      highlightedDropAndProviderId: providerId,
     },
   };
 };
@@ -1439,22 +1316,4 @@ export const updateExcludedRowRenderersIds = ({
       excludedRowRendererIds,
     },
   };
-};
-
-export const updateTimelineDetailsPanel = (action: ToggleDetailPanel) => {
-  const { tabType } = action;
-
-  const panelViewOptions = new Set(['eventDetail', 'hostDetail', 'networkDetail']);
-  const expandedTabType = tabType ?? TimelineTabs.query;
-
-  return action.panelView && panelViewOptions.has(action.panelView)
-    ? {
-        [expandedTabType]: {
-          params: action.params ? { ...action.params } : {},
-          panelView: action.panelView,
-        },
-      }
-    : {
-        [expandedTabType]: {},
-      };
 };

@@ -5,27 +5,35 @@
  * 2.0.
  */
 
-import { deepFreeze } from '@kbn/std';
-import type { EcsEventOutcome } from 'src/core/server';
-import { SavedObjectsErrorHelpers } from 'src/core/server';
-import { httpServerMock } from 'src/core/server/mocks';
+import { mockEnsureAuthorized } from './secure_spaces_client_wrapper.test.mocks';
 
-import type { GetAllSpacesPurpose, Space } from '../../../spaces/server';
-import { spacesClientMock } from '../../../spaces/server/mocks';
+import type { EcsEventOutcome, SavedObjectsFindResponse } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { httpServerMock } from '@kbn/core/server/mocks';
+import type { GetAllSpacesPurpose, LegacyUrlAliasTarget, Space } from '@kbn/spaces-plugin/server';
+import { spacesClientMock } from '@kbn/spaces-plugin/server/mocks';
+import { deepFreeze } from '@kbn/std';
+
 import type { AuditEvent, AuditLogger } from '../audit';
-import { SpaceAuditAction } from '../audit';
-import { auditServiceMock } from '../audit/index.mock';
-import type { AuthorizationServiceSetup } from '../authorization';
+import { SavedObjectAction, SpaceAuditAction } from '../audit';
+import { auditLoggerMock } from '../audit/mocks';
+import type {
+  AuthorizationServiceSetup,
+  AuthorizationServiceSetupInternal,
+} from '../authorization';
 import { authorizationMock } from '../authorization/index.mock';
 import type { CheckPrivilegesResponse } from '../authorization/types';
-import type { LegacySpacesAuditLogger } from './legacy_audit_logger';
-import { SecureSpacesClientWrapper } from './secure_spaces_client_wrapper';
+import {
+  getAliasId,
+  LEGACY_URL_ALIAS_TYPE,
+  SecureSpacesClientWrapper,
+} from './secure_spaces_client_wrapper';
 
 interface Opts {
   securityEnabled?: boolean;
 }
 
-const spaces = (deepFreeze([
+const spaces = deepFreeze([
   {
     id: 'default',
     name: 'Default Space',
@@ -41,7 +49,7 @@ const spaces = (deepFreeze([
     name: 'Sales Space',
     disabledFeatures: [],
   },
-]) as unknown) as Space[];
+]) as unknown as Space[];
 
 const setup = ({ securityEnabled = false }: Opts = {}) => {
   const baseClient = spacesClientMock.create();
@@ -55,25 +63,53 @@ const setup = ({ securityEnabled = false }: Opts = {}) => {
     return space;
   });
 
+  baseClient.createSavedObjectFinder.mockImplementation(() => ({
+    async *find() {
+      yield {
+        saved_objects: [
+          {
+            namespaces: ['*'],
+            type: 'dashboard',
+            id: '1',
+          },
+          {
+            namespaces: ['existing_space'],
+            type: 'dashboard',
+            id: '2',
+          },
+          {
+            namespaces: ['default', 'existing_space'],
+            type: 'dashboard',
+            id: '3',
+          },
+        ],
+      } as SavedObjectsFindResponse<unknown, unknown>;
+    },
+    async close() {},
+  }));
+
   const authorization = authorizationMock.create({
     version: 'unit-test',
     applicationName: 'kibana',
   });
   authorization.mode.useRbacForRequest.mockReturnValue(securityEnabled);
 
-  const legacyAuditLogger = ({
-    spacesAuthorizationFailure: jest.fn(),
-    spacesAuthorizationSuccess: jest.fn(),
-  } as unknown) as jest.Mocked<LegacySpacesAuditLogger>;
-  const auditLogger = auditServiceMock.create().asScoped(httpServerMock.createKibanaRequest());
+  const auditLogger = auditLoggerMock.create();
 
   const request = httpServerMock.createKibanaRequest();
+
+  const forbiddenError = new Error('Mock ForbiddenError');
+  const errors = {
+    decorateForbiddenError: jest.fn().mockReturnValue(forbiddenError),
+    // other errors exist but are not needed for these test cases
+  } as unknown as jest.Mocked<typeof SavedObjectsErrorHelpers>;
+
   const wrapper = new SecureSpacesClientWrapper(
     baseClient,
     request,
     authorization,
     auditLogger,
-    legacyAuditLogger
+    errors
   );
   return {
     authorization,
@@ -81,57 +117,16 @@ const setup = ({ securityEnabled = false }: Opts = {}) => {
     request,
     baseClient,
     auditLogger,
-    legacyAuditLogger,
+    forbiddenError,
   };
 };
 
-const expectNoAuthorizationCheck = (authorization: jest.Mocked<AuthorizationServiceSetup>) => {
+const expectNoAuthorizationCheck = (
+  authorization: jest.Mocked<AuthorizationServiceSetupInternal>
+) => {
   expect(authorization.checkPrivilegesDynamicallyWithRequest).not.toHaveBeenCalled();
   expect(authorization.checkPrivilegesWithRequest).not.toHaveBeenCalled();
   expect(authorization.checkSavedObjectsPrivilegesWithRequest).not.toHaveBeenCalled();
-};
-
-const expectNoAuditLogging = (auditLogger: jest.Mocked<LegacySpacesAuditLogger>) => {
-  expect(auditLogger.spacesAuthorizationFailure).not.toHaveBeenCalled();
-  expect(auditLogger.spacesAuthorizationSuccess).not.toHaveBeenCalled();
-};
-
-const expectForbiddenAuditLogging = (
-  auditLogger: jest.Mocked<LegacySpacesAuditLogger>,
-  username: string,
-  operation: string,
-  spaceId?: string
-) => {
-  expect(auditLogger.spacesAuthorizationFailure).toHaveBeenCalledTimes(1);
-  if (spaceId) {
-    expect(auditLogger.spacesAuthorizationFailure).toHaveBeenCalledWith(username, operation, [
-      spaceId,
-    ]);
-  } else {
-    expect(auditLogger.spacesAuthorizationFailure).toHaveBeenCalledWith(username, operation);
-  }
-
-  expect(auditLogger.spacesAuthorizationSuccess).not.toHaveBeenCalled();
-};
-
-const expectSuccessAuditLogging = (
-  auditLogger: jest.Mocked<LegacySpacesAuditLogger>,
-  username: string,
-  operation: string,
-  spaceIds?: string[]
-) => {
-  expect(auditLogger.spacesAuthorizationSuccess).toHaveBeenCalledTimes(1);
-  if (spaceIds) {
-    expect(auditLogger.spacesAuthorizationSuccess).toHaveBeenCalledWith(
-      username,
-      operation,
-      spaceIds
-    );
-  } else {
-    expect(auditLogger.spacesAuthorizationSuccess).toHaveBeenCalledWith(username, operation);
-  }
-
-  expect(auditLogger.spacesAuthorizationFailure).not.toHaveBeenCalled();
 };
 
 const expectAuditEvent = (
@@ -154,6 +149,10 @@ const expectAuditEvent = (
     })
   );
 };
+
+beforeEach(() => {
+  mockEnsureAuthorized.mockReset();
+});
 
 describe('SecureSpacesClientWrapper', () => {
   describe('#getAll', () => {
@@ -185,7 +184,7 @@ describe('SecureSpacesClientWrapper', () => {
     ];
 
     it('delegates to base client when security is not enabled', async () => {
-      const { wrapper, baseClient, authorization, auditLogger, legacyAuditLogger } = setup({
+      const { wrapper, baseClient, authorization, auditLogger } = setup({
         securityEnabled: false,
       });
 
@@ -194,7 +193,6 @@ describe('SecureSpacesClientWrapper', () => {
       expect(baseClient.getAll).toHaveBeenCalledWith({ purpose: 'any' });
       expect(response).toEqual(spaces);
       expectNoAuthorizationCheck(authorization);
-      expectNoAuditLogging(legacyAuditLogger);
       expectAuditEvent(auditLogger, SpaceAuditAction.FIND, 'success', {
         type: 'space',
         id: spaces[0].id,
@@ -245,14 +243,7 @@ describe('SecureSpacesClientWrapper', () => {
       describe(`with purpose='${scenario.purpose}'`, () => {
         test(`throws Boom.forbidden when user isn't authorized for any spaces`, async () => {
           const username = 'some-user';
-          const {
-            authorization,
-            wrapper,
-            baseClient,
-            request,
-            auditLogger,
-            legacyAuditLogger,
-          } = setup({
+          const { authorization, wrapper, baseClient, request, auditLogger } = setup({
             securityEnabled: true,
           });
 
@@ -285,20 +276,12 @@ describe('SecureSpacesClientWrapper', () => {
             { kibana: privileges }
           );
 
-          expectForbiddenAuditLogging(legacyAuditLogger, username, 'getAll');
           expectAuditEvent(auditLogger, SpaceAuditAction.FIND, 'failure');
         });
 
         test(`returns spaces that the user is authorized for`, async () => {
           const username = 'some-user';
-          const {
-            authorization,
-            wrapper,
-            baseClient,
-            request,
-            auditLogger,
-            legacyAuditLogger,
-          } = setup({
+          const { authorization, wrapper, baseClient, request, auditLogger } = setup({
             securityEnabled: true,
           });
 
@@ -330,7 +313,6 @@ describe('SecureSpacesClientWrapper', () => {
             { kibana: privileges }
           );
 
-          expectSuccessAuditLogging(legacyAuditLogger, username, 'getAll', [spaces[0].id]);
           expectAuditEvent(auditLogger, SpaceAuditAction.FIND, 'success', {
             type: 'space',
             id: spaces[0].id,
@@ -342,7 +324,7 @@ describe('SecureSpacesClientWrapper', () => {
 
   describe('#get', () => {
     it('delegates to base client when security is not enabled', async () => {
-      const { wrapper, baseClient, authorization, auditLogger, legacyAuditLogger } = setup({
+      const { wrapper, baseClient, authorization, auditLogger } = setup({
         securityEnabled: false,
       });
 
@@ -351,7 +333,6 @@ describe('SecureSpacesClientWrapper', () => {
       expect(baseClient.get).toHaveBeenCalledWith('default');
       expect(response).toEqual(spaces[0]);
       expectNoAuthorizationCheck(authorization);
-      expectNoAuditLogging(legacyAuditLogger);
       expectAuditEvent(auditLogger, SpaceAuditAction.GET, 'success', {
         type: 'space',
         id: spaces[0].id,
@@ -362,11 +343,9 @@ describe('SecureSpacesClientWrapper', () => {
       const username = 'some_user';
       const spaceId = 'default';
 
-      const { wrapper, baseClient, authorization, auditLogger, legacyAuditLogger, request } = setup(
-        {
-          securityEnabled: true,
-        }
-      );
+      const { wrapper, baseClient, authorization, auditLogger, request } = setup({
+        securityEnabled: true,
+      });
 
       const checkPrivileges = jest.fn().mockResolvedValue({
         username,
@@ -392,7 +371,6 @@ describe('SecureSpacesClientWrapper', () => {
         kibana: authorization.actions.login,
       });
 
-      expectForbiddenAuditLogging(legacyAuditLogger, username, 'get', spaceId);
       expectAuditEvent(auditLogger, SpaceAuditAction.GET, 'failure', {
         type: 'space',
         id: spaces[0].id,
@@ -403,11 +381,9 @@ describe('SecureSpacesClientWrapper', () => {
       const username = 'some_user';
       const spaceId = 'default';
 
-      const { wrapper, baseClient, authorization, auditLogger, legacyAuditLogger, request } = setup(
-        {
-          securityEnabled: true,
-        }
-      );
+      const { wrapper, baseClient, authorization, auditLogger, request } = setup({
+        securityEnabled: true,
+      });
 
       const checkPrivileges = jest.fn().mockResolvedValue({
         username,
@@ -432,7 +408,6 @@ describe('SecureSpacesClientWrapper', () => {
         kibana: authorization.actions.login,
       });
 
-      expectSuccessAuditLogging(legacyAuditLogger, username, 'get', [spaceId]);
       expectAuditEvent(auditLogger, SpaceAuditAction.GET, 'success', {
         type: 'space',
         id: spaceId,
@@ -448,7 +423,7 @@ describe('SecureSpacesClientWrapper', () => {
     });
 
     it('delegates to base client when security is not enabled', async () => {
-      const { wrapper, baseClient, authorization, auditLogger, legacyAuditLogger } = setup({
+      const { wrapper, baseClient, authorization, auditLogger } = setup({
         securityEnabled: false,
       });
 
@@ -457,7 +432,6 @@ describe('SecureSpacesClientWrapper', () => {
       expect(baseClient.create).toHaveBeenCalledWith(space);
       expect(response).toEqual(space);
       expectNoAuthorizationCheck(authorization);
-      expectNoAuditLogging(legacyAuditLogger);
       expectAuditEvent(auditLogger, SpaceAuditAction.CREATE, 'unknown', {
         type: 'space',
         id: space.id,
@@ -467,11 +441,9 @@ describe('SecureSpacesClientWrapper', () => {
     test(`throws a forbidden error when unauthorized`, async () => {
       const username = 'some_user';
 
-      const { wrapper, baseClient, authorization, auditLogger, legacyAuditLogger, request } = setup(
-        {
-          securityEnabled: true,
-        }
-      );
+      const { wrapper, baseClient, authorization, auditLogger, request } = setup({
+        securityEnabled: true,
+      });
 
       const checkPrivileges = jest.fn().mockResolvedValue({
         username,
@@ -495,7 +467,6 @@ describe('SecureSpacesClientWrapper', () => {
         kibana: authorization.actions.space.manage,
       });
 
-      expectForbiddenAuditLogging(legacyAuditLogger, username, 'create');
       expectAuditEvent(auditLogger, SpaceAuditAction.CREATE, 'failure', {
         type: 'space',
         id: space.id,
@@ -505,11 +476,9 @@ describe('SecureSpacesClientWrapper', () => {
     it('creates the space when authorized', async () => {
       const username = 'some_user';
 
-      const { wrapper, baseClient, authorization, auditLogger, legacyAuditLogger, request } = setup(
-        {
-          securityEnabled: true,
-        }
-      );
+      const { wrapper, baseClient, authorization, auditLogger, request } = setup({
+        securityEnabled: true,
+      });
 
       const checkPrivileges = jest.fn().mockResolvedValue({
         username,
@@ -534,7 +503,6 @@ describe('SecureSpacesClientWrapper', () => {
         kibana: authorization.actions.space.manage,
       });
 
-      expectSuccessAuditLogging(legacyAuditLogger, username, 'create');
       expectAuditEvent(auditLogger, SpaceAuditAction.CREATE, 'unknown', {
         type: 'space',
         id: space.id,
@@ -550,7 +518,7 @@ describe('SecureSpacesClientWrapper', () => {
     });
 
     it('delegates to base client when security is not enabled', async () => {
-      const { wrapper, baseClient, authorization, auditLogger, legacyAuditLogger } = setup({
+      const { wrapper, baseClient, authorization, auditLogger } = setup({
         securityEnabled: false,
       });
 
@@ -559,7 +527,6 @@ describe('SecureSpacesClientWrapper', () => {
       expect(baseClient.update).toHaveBeenCalledWith(space.id, space);
       expect(response).toEqual(space.id);
       expectNoAuthorizationCheck(authorization);
-      expectNoAuditLogging(legacyAuditLogger);
       expectAuditEvent(auditLogger, SpaceAuditAction.UPDATE, 'unknown', {
         type: 'space',
         id: space.id,
@@ -569,11 +536,9 @@ describe('SecureSpacesClientWrapper', () => {
     test(`throws a forbidden error when unauthorized`, async () => {
       const username = 'some_user';
 
-      const { wrapper, baseClient, authorization, auditLogger, legacyAuditLogger, request } = setup(
-        {
-          securityEnabled: true,
-        }
-      );
+      const { wrapper, baseClient, authorization, auditLogger, request } = setup({
+        securityEnabled: true,
+      });
 
       const checkPrivileges = jest.fn().mockResolvedValue({
         username,
@@ -597,7 +562,6 @@ describe('SecureSpacesClientWrapper', () => {
         kibana: authorization.actions.space.manage,
       });
 
-      expectForbiddenAuditLogging(legacyAuditLogger, username, 'update');
       expectAuditEvent(auditLogger, SpaceAuditAction.UPDATE, 'failure', {
         type: 'space',
         id: space.id,
@@ -607,11 +571,9 @@ describe('SecureSpacesClientWrapper', () => {
     it('updates the space when authorized', async () => {
       const username = 'some_user';
 
-      const { wrapper, baseClient, authorization, auditLogger, legacyAuditLogger, request } = setup(
-        {
-          securityEnabled: true,
-        }
-      );
+      const { wrapper, baseClient, authorization, auditLogger, request } = setup({
+        securityEnabled: true,
+      });
 
       const checkPrivileges = jest.fn().mockResolvedValue({
         username,
@@ -636,7 +598,6 @@ describe('SecureSpacesClientWrapper', () => {
         kibana: authorization.actions.space.manage,
       });
 
-      expectSuccessAuditLogging(legacyAuditLogger, username, 'update');
       expectAuditEvent(auditLogger, SpaceAuditAction.UPDATE, 'unknown', {
         type: 'space',
         id: space.id,
@@ -652,7 +613,7 @@ describe('SecureSpacesClientWrapper', () => {
     });
 
     it('delegates to base client when security is not enabled', async () => {
-      const { wrapper, baseClient, authorization, auditLogger, legacyAuditLogger } = setup({
+      const { wrapper, baseClient, authorization, auditLogger } = setup({
         securityEnabled: false,
       });
 
@@ -660,21 +621,18 @@ describe('SecureSpacesClientWrapper', () => {
       expect(baseClient.delete).toHaveBeenCalledTimes(1);
       expect(baseClient.delete).toHaveBeenCalledWith(space.id);
       expectNoAuthorizationCheck(authorization);
-      expectNoAuditLogging(legacyAuditLogger);
       expectAuditEvent(auditLogger, SpaceAuditAction.DELETE, 'unknown', {
         type: 'space',
         id: space.id,
       });
     });
 
-    test(`throws a forbidden error when unauthorized`, async () => {
+    it(`throws a forbidden error when unauthorized`, async () => {
       const username = 'some_user';
 
-      const { wrapper, baseClient, authorization, auditLogger, legacyAuditLogger, request } = setup(
-        {
-          securityEnabled: true,
-        }
-      );
+      const { wrapper, baseClient, authorization, auditLogger, request } = setup({
+        securityEnabled: true,
+      });
 
       const checkPrivileges = jest.fn().mockResolvedValue({
         username,
@@ -698,21 +656,18 @@ describe('SecureSpacesClientWrapper', () => {
         kibana: authorization.actions.space.manage,
       });
 
-      expectForbiddenAuditLogging(legacyAuditLogger, username, 'delete');
       expectAuditEvent(auditLogger, SpaceAuditAction.DELETE, 'failure', {
         type: 'space',
         id: space.id,
       });
     });
 
-    it('deletes the space when authorized', async () => {
+    it('deletes the space with all saved objects when authorized', async () => {
       const username = 'some_user';
 
-      const { wrapper, baseClient, authorization, auditLogger, legacyAuditLogger, request } = setup(
-        {
-          securityEnabled: true,
-        }
-      );
+      const { wrapper, baseClient, authorization, auditLogger, request } = setup({
+        securityEnabled: true,
+      });
 
       const checkPrivileges = jest.fn().mockResolvedValue({
         username,
@@ -735,10 +690,112 @@ describe('SecureSpacesClientWrapper', () => {
         kibana: authorization.actions.space.manage,
       });
 
-      expectSuccessAuditLogging(legacyAuditLogger, username, 'delete');
       expectAuditEvent(auditLogger, SpaceAuditAction.DELETE, 'unknown', {
         type: 'space',
         id: space.id,
+      });
+      expectAuditEvent(auditLogger, SavedObjectAction.DELETE, 'unknown', {
+        type: 'dashboard',
+        id: '2',
+      });
+      expectAuditEvent(auditLogger, SavedObjectAction.UPDATE_OBJECTS_SPACES, 'unknown', {
+        type: 'dashboard',
+        id: '3',
+      });
+    });
+  });
+
+  describe('#disableLegacyUrlAliases', () => {
+    const alias1 = { targetSpace: 'space-1', targetType: 'type-1', sourceId: 'id' };
+    const alias2 = { targetSpace: 'space-2', targetType: 'type-2', sourceId: 'id' };
+
+    function expectAuditEvents(
+      auditLogger: AuditLogger,
+      aliases: LegacyUrlAliasTarget[],
+      action: EcsEventOutcome
+    ) {
+      aliases.forEach((alias) => {
+        expectAuditEvent(auditLogger, SavedObjectAction.UPDATE, action, {
+          type: LEGACY_URL_ALIAS_TYPE,
+          id: getAliasId(alias),
+        });
+      });
+    }
+
+    function expectAuthorizationCheck(targetTypes: string[], targetSpaces: string[]) {
+      expect(mockEnsureAuthorized).toHaveBeenCalledTimes(1);
+      expect(mockEnsureAuthorized).toHaveBeenCalledWith(
+        expect.any(Object), // dependencies
+        targetTypes, // unique types of the alias targets
+        ['bulk_update'], // actions
+        targetSpaces, // unique spaces of the alias targets
+        { requireFullAuthorization: false }
+      );
+    }
+
+    describe('when security is not enabled', () => {
+      const securityEnabled = false;
+
+      it('delegates to base client without checking authorization', async () => {
+        const { wrapper, baseClient, auditLogger } = setup({ securityEnabled });
+        const aliases = [alias1];
+        await wrapper.disableLegacyUrlAliases(aliases);
+
+        expect(mockEnsureAuthorized).not.toHaveBeenCalled();
+        expectAuditEvents(auditLogger, aliases, 'unknown');
+        expect(baseClient.disableLegacyUrlAliases).toHaveBeenCalledTimes(1);
+        expect(baseClient.disableLegacyUrlAliases).toHaveBeenCalledWith(aliases);
+      });
+    });
+
+    describe('when security is enabled', () => {
+      const securityEnabled = true;
+
+      it('re-throws the error if the authorization check fails', async () => {
+        const error = new Error('Oh no!');
+        mockEnsureAuthorized.mockRejectedValue(error);
+        const { wrapper, baseClient, auditLogger } = setup({ securityEnabled });
+        const aliases = [alias1, alias2];
+        await expect(() => wrapper.disableLegacyUrlAliases(aliases)).rejects.toThrow(error);
+
+        expectAuthorizationCheck(['type-1', 'type-2'], ['space-1', 'space-2']);
+        expectAuditEvents(auditLogger, aliases, 'failure');
+        expect(baseClient.disableLegacyUrlAliases).not.toHaveBeenCalled();
+      });
+
+      it('throws a forbidden error when unauthorized', async () => {
+        mockEnsureAuthorized.mockResolvedValue({
+          status: 'partially_authorized',
+          typeActionMap: new Map()
+            .set('type-1', { bulk_update: { authorizedSpaces: ['space-1'] } })
+            .set('type-2', { bulk_update: { authorizedSpaces: ['space-1'] } }), // the user is not authorized to bulkUpdate type-2 in space-2, so this will throw a forbidden error
+        });
+        const { wrapper, baseClient, auditLogger, forbiddenError } = setup({ securityEnabled });
+        const aliases = [alias1, alias2];
+        await expect(() => wrapper.disableLegacyUrlAliases(aliases)).rejects.toThrow(
+          forbiddenError
+        );
+
+        expectAuthorizationCheck(['type-1', 'type-2'], ['space-1', 'space-2']);
+        expectAuditEvents(auditLogger, aliases, 'failure');
+        expect(baseClient.disableLegacyUrlAliases).not.toHaveBeenCalled();
+      });
+
+      it('updates the legacy URL aliases when authorized', async () => {
+        mockEnsureAuthorized.mockResolvedValue({
+          status: 'partially_authorized',
+          typeActionMap: new Map()
+            .set('type-1', { bulk_update: { authorizedSpaces: ['space-1'] } })
+            .set('type-2', { bulk_update: { authorizedSpaces: ['space-2'] } }),
+        });
+        const { wrapper, baseClient, auditLogger } = setup({ securityEnabled });
+        const aliases = [alias1, alias2];
+        await wrapper.disableLegacyUrlAliases(aliases);
+
+        expectAuthorizationCheck(['type-1', 'type-2'], ['space-1', 'space-2']);
+        expectAuditEvents(auditLogger, aliases, 'unknown');
+        expect(baseClient.disableLegacyUrlAliases).toHaveBeenCalledTimes(1);
+        expect(baseClient.disableLegacyUrlAliases).toHaveBeenCalledWith(aliases);
       });
     });
   });

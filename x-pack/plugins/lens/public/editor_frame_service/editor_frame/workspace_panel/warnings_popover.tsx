@@ -31,16 +31,22 @@ export const WarningsPopover = ({
       panelPaddingSize="none"
       button={
         <EuiButtonEmpty
+          color="warning"
           onClick={onButtonClick}
           iconType="alert"
           className="lnsWorkspaceWarning__button"
+          data-test-subj="lens-editor-warning-button"
         >
-          {i18n.translate('xpack.lens.chartWarnings.number', {
-            defaultMessage: `{warningsCount} {warningsCount, plural, one {warning} other {warnings}}`,
-            values: {
-              warningsCount,
-            },
-          })}
+          {warningsCount}
+          <span className="lnsWorkspaceWarning__buttonText">
+            {' '}
+            {i18n.translate('xpack.lens.chartWarnings.number', {
+              defaultMessage: `{warningsCount, plural, one {warning} other {warnings}}`,
+              values: {
+                warningsCount,
+              },
+            })}
+          </span>
         </EuiButtonEmpty>
       }
       isOpen={isPopoverOpen}
@@ -48,7 +54,11 @@ export const WarningsPopover = ({
     >
       <ul className="lnsWorkspaceWarningList">
         {React.Children.map(children, (child, index) => (
-          <li key={index} className="lnsWorkspaceWarningList__item">
+          <li
+            key={index}
+            className="lnsWorkspaceWarningList__item"
+            data-test-subj="lens-editor-warning"
+          >
             <EuiText size="s">{child}</EuiText>
           </li>
         ))}

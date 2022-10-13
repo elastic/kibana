@@ -7,16 +7,22 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { HostStatus, MetadataQueryStrategyVersions } from '../../../../common/endpoint/types';
-import { EndpointAppContext } from '../../types';
-import { getLogger, getMetadataListRequestHandler, getMetadataRequestHandler } from './handlers';
+import { HostStatus } from '../../../../common/endpoint/types';
+import type { EndpointAppContext } from '../../types';
+import {
+  getLogger,
+  getMetadataRequestHandler,
+  getMetadataListRequestHandler,
+  getMetadataTransformStatsHandler,
+} from './handlers';
 import type { SecuritySolutionPluginRouter } from '../../../types';
-
-export const BASE_ENDPOINT_ROUTE = '/api/endpoint';
-export const METADATA_REQUEST_V1_ROUTE = `${BASE_ENDPOINT_ROUTE}/v1/metadata`;
-export const GET_METADATA_REQUEST_V1_ROUTE = `${METADATA_REQUEST_V1_ROUTE}/{id}`;
-export const METADATA_REQUEST_ROUTE = `${BASE_ENDPOINT_ROUTE}/metadata`;
-export const GET_METADATA_REQUEST_ROUTE = `${METADATA_REQUEST_ROUTE}/{id}`;
+import {
+  HOST_METADATA_GET_ROUTE,
+  HOST_METADATA_LIST_ROUTE,
+  METADATA_TRANSFORMS_STATUS_ROUTE,
+} from '../../../../common/endpoint/constants';
+import { GetMetadataListRequestSchema } from '../../../../common/endpoint/schema/metadata';
+import { withEndpointAuthz } from '../with_endpoint_authz';
 
 /* Filters that can be applied to the endpoint fetch route */
 export const endpointFilters = schema.object({
@@ -38,72 +44,48 @@ export const GetMetadataRequestSchema = {
   params: schema.object({ id: schema.string() }),
 };
 
-export const GetMetadataListRequestSchema = {
-  body: schema.nullable(
-    schema.object({
-      paging_properties: schema.nullable(
-        schema.arrayOf(
-          schema.oneOf([
-            /**
-             * the number of results to return for this request per page
-             */
-            schema.object({
-              page_size: schema.number({ defaultValue: 10, min: 1, max: 10000 }),
-            }),
-            /**
-             * the zero based page index of the the total number of pages of page size
-             */
-            schema.object({ page_index: schema.number({ defaultValue: 0, min: 0 }) }),
-          ])
-        )
-      ),
-      filters: endpointFilters,
-    })
-  ),
-};
-
 export function registerEndpointRoutes(
   router: SecuritySolutionPluginRouter,
   endpointAppContext: EndpointAppContext
 ) {
   const logger = getLogger(endpointAppContext);
-  router.post(
+
+  router.get(
     {
-      path: `${METADATA_REQUEST_V1_ROUTE}`,
+      path: HOST_METADATA_LIST_ROUTE,
       validate: GetMetadataListRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
-    getMetadataListRequestHandler(
-      endpointAppContext,
+    withEndpointAuthz(
+      { all: ['canReadSecuritySolution'] },
       logger,
-      MetadataQueryStrategyVersions.VERSION_1
+      getMetadataListRequestHandler(endpointAppContext, logger)
     )
   );
 
-  router.post(
+  router.get(
     {
-      path: `${METADATA_REQUEST_ROUTE}`,
-      validate: GetMetadataListRequestSchema,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
+      path: HOST_METADATA_GET_ROUTE,
+      validate: GetMetadataRequestSchema,
+      options: { authRequired: true },
     },
-    getMetadataListRequestHandler(endpointAppContext, logger)
+    withEndpointAuthz(
+      { any: ['canReadSecuritySolution', 'canAccessFleet'] },
+      logger,
+      getMetadataRequestHandler(endpointAppContext, logger)
+    )
   );
 
   router.get(
     {
-      path: `${GET_METADATA_REQUEST_V1_ROUTE}`,
-      validate: GetMetadataRequestSchema,
+      path: METADATA_TRANSFORMS_STATUS_ROUTE,
+      validate: false,
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
-    getMetadataRequestHandler(endpointAppContext, logger, MetadataQueryStrategyVersions.VERSION_1)
-  );
-
-  router.get(
-    {
-      path: `${GET_METADATA_REQUEST_ROUTE}`,
-      validate: GetMetadataRequestSchema,
-      options: { authRequired: true, tags: ['access:securitySolution'] },
-    },
-    getMetadataRequestHandler(endpointAppContext, logger)
+    withEndpointAuthz(
+      { all: ['canReadSecuritySolution'] },
+      logger,
+      getMetadataTransformStatsHandler(logger)
+    )
   );
 }

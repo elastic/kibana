@@ -9,9 +9,10 @@
 import { join } from 'path';
 import { PackageInfo } from '@kbn/config';
 import { fromRoot } from '@kbn/utils';
-import { distDir as uiSharedDepsDistDir } from '@kbn/ui-shared-deps';
-import { IRouter } from '../../http';
-import { UiPlugins } from '../../plugins';
+import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
+import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
+import type { IRouter } from '@kbn/core-http-server';
+import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import { FileHashCache } from './file_hash_cache';
 import { registerRouteForBundle } from './bundles_route';
 
@@ -43,9 +44,16 @@ export function registerBundleRoutes({
   const fileHashCache = new FileHashCache();
 
   registerRouteForBundle(router, {
-    publicPath: `${serverBasePath}/${buildNum}/bundles/kbn-ui-shared-deps/`,
-    routePath: `/${buildNum}/bundles/kbn-ui-shared-deps/`,
-    bundlesPath: uiSharedDepsDistDir,
+    publicPath: `${serverBasePath}/${buildNum}/bundles/kbn-ui-shared-deps-npm/`,
+    routePath: `/${buildNum}/bundles/kbn-ui-shared-deps-npm/`,
+    bundlesPath: UiSharedDepsNpm.distDir,
+    fileHashCache,
+    isDist,
+  });
+  registerRouteForBundle(router, {
+    publicPath: `${serverBasePath}/${buildNum}/bundles/kbn-ui-shared-deps-src/`,
+    routePath: `/${buildNum}/bundles/kbn-ui-shared-deps-src/`,
+    bundlesPath: UiSharedDepsSrc.distDir,
     fileHashCache,
     isDist,
   });

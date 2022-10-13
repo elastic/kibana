@@ -5,31 +5,35 @@
  * 2.0.
  */
 
-import { EuiButton, EuiToolTip } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
-import { Case } from '../../containers/types';
-import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
-import { CaseCallOut } from '../callout';
-import { getLicenseError, getKibanaConfigError } from './helpers';
+import { CaseCallOut } from './callout';
+import {
+  getLicenseError,
+  getKibanaConfigError,
+  getConnectorMissingInfo,
+  getDeletedConnectorError,
+  getCaseClosedInfo,
+} from './helpers';
 import * as i18n from './translations';
-import { CaseConnector, ActionConnector, CaseStatuses } from '../../../common';
+import { CaseConnector, ActionConnector, CaseStatuses } from '../../../common/api';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
-import { CasesNavigation, LinkAnchor } from '../links';
-import { ErrorMessage } from '../callout/types';
+import { ErrorMessage } from './callout/types';
+import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
+import { useGetActionLicense } from '../../containers/use_get_action_license';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
 export interface UsePushToService {
   caseId: string;
-  caseStatus: string;
-  configureCasesNavigation: CasesNavigation;
-  connector: CaseConnector;
   caseServices: CaseServices;
+  caseStatus: string;
+  connector: CaseConnector;
   connectors: ActionConnector[];
-  updateCase: (newCase: Case) => void;
-  userCanCrud: boolean;
+  hasDataToPush: boolean;
   isValidConnector: boolean;
+  onEditClick: () => void;
 }
 
 export interface ReturnUsePushToService {
@@ -38,19 +42,21 @@ export interface ReturnUsePushToService {
 }
 
 export const usePushToService = ({
-  configureCasesNavigation: { onClick, href },
-  connector,
   caseId,
   caseServices,
   caseStatus,
+  connector,
   connectors,
-  updateCase,
-  userCanCrud,
+  hasDataToPush,
   isValidConnector,
+  onEditClick,
 }: UsePushToService): ReturnUsePushToService => {
+  const { permissions } = useCasesContext();
   const { isLoading, pushCaseToExternalService } = usePostPushToService();
 
-  const { isLoading: loadingLicense, actionLicense } = useGetActionLicense();
+  const { isLoading: loadingLicense, data: actionLicense = null } = useGetActionLicense();
+  const hasLicenseError = actionLicense != null && !actionLicense.enabledInLicense;
+  const refreshCaseViewPage = useRefreshCaseViewPage();
 
   const handlePushToService = useCallback(async () => {
     if (connector.id != null && connector.id !== 'none') {
@@ -60,138 +66,126 @@ export const usePushToService = ({
       });
 
       if (theCase != null) {
-        updateCase(theCase);
+        refreshCaseViewPage();
       }
     }
-  }, [caseId, connector, pushCaseToExternalService, updateCase]);
+  }, [caseId, connector, pushCaseToExternalService, refreshCaseViewPage]);
 
   const errorsMsg = useMemo(() => {
-    let errors: ErrorMessage[] = [];
-    if (actionLicense != null && !actionLicense.enabledInLicense) {
-      errors = [...errors, getLicenseError()];
+    const errors: ErrorMessage[] = [];
+
+    // these message require that the user do some sort of write action as a result of the message, readonly users won't
+    // be able to perform such an action so let's not display the error to the user in that situation
+    if (!permissions.update) {
+      return errors;
     }
-    if (connectors.length === 0 && connector.id === 'none' && !loadingLicense) {
-      errors = [
-        ...errors,
-        {
-          id: 'connector-missing-error',
-          title: i18n.PUSH_DISABLE_BY_NO_CONFIG_TITLE,
-          description: (
-            <FormattedMessage
-              defaultMessage="To open and update cases in external systems, you must configure a {link}."
-              id="xpack.cases.caseView.pushToServiceDisableByNoConnectors"
-              values={{
-                link: (
-                  <LinkAnchor onClick={onClick} href={href} target="_blank">
-                    {i18n.LINK_CONNECTOR_CONFIGURE}
-                  </LinkAnchor>
-                ),
-              }}
-            />
-          ),
-        },
-      ];
-    } else if (connector.id === 'none' && !loadingLicense) {
-      errors = [
-        ...errors,
-        {
-          id: 'connector-not-selected-error',
-          title: i18n.PUSH_DISABLE_BY_NO_CASE_CONFIG_TITLE,
-          description: (
-            <FormattedMessage
-              defaultMessage="To open and update cases in external systems, you must select an external incident management system for this case."
-              id="xpack.cases.caseView.pushToServiceDisableByNoCaseConfigDescription"
-            />
-          ),
-        },
-      ];
-    } else if (!isValidConnector && !loadingLicense) {
-      errors = [
-        ...errors,
-        {
-          id: 'connector-deleted-error',
-          title: i18n.PUSH_DISABLE_BY_NO_CASE_CONFIG_TITLE,
-          description: (
-            <FormattedMessage
-              defaultMessage="The connector used to send updates to external service has been deleted. To update cases in external systems, select a different connector or create a new one."
-              id="xpack.cases.caseView.pushToServiceDisableByInvalidConnector"
-            />
-          ),
-          errorType: 'danger',
-        },
-      ];
+
+    /**
+     * We show only one message to the user depending the scenario. The messages have a priority of importance.
+     * Messages with higher priority are being shown first. The priority is defined by the order each message is returned.
+     *
+     * By priority of importance:
+     * 1. Show license error.
+     * 2. Show configuration error.
+     * 3. Show connector configuration error if the connector is set to none or no connectors have been created.
+     * 4. Show an error message if the connector has been deleted or the user does not have access to it.
+     * 5. Show case closed message.
+     */
+
+    if (hasLicenseError) {
+      return [getLicenseError()];
     }
-    if (caseStatus === CaseStatuses.closed) {
-      errors = [
-        ...errors,
-        {
-          id: 'closed-case-push-error',
-          title: i18n.PUSH_DISABLE_BECAUSE_CASE_CLOSED_TITLE,
-          description: (
-            <FormattedMessage
-              defaultMessage="Closed cases cannot be sent to external systems. Reopen the case if you want to open or update it in an external system."
-              id="xpack.cases.caseView.pushToServiceDisableBecauseCaseClosedDescription"
-            />
-          ),
-        },
-      ];
-    }
+
     if (actionLicense != null && !actionLicense.enabledInConfig) {
-      errors = [...errors, getKibanaConfigError()];
+      return [getKibanaConfigError()];
     }
+
+    if (connector.id === 'none' && !loadingLicense && !hasLicenseError) {
+      return [getConnectorMissingInfo()];
+    }
+
+    if (!isValidConnector && !loadingLicense && !hasLicenseError) {
+      return [getDeletedConnectorError()];
+    }
+
+    if (caseStatus === CaseStatuses.closed) {
+      return [getCaseClosedInfo()];
+    }
+
     return errors;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [actionLicense, caseStatus, connectors.length, connector, loadingLicense]);
+  }, [actionLicense, caseStatus, connectors.length, connector, loadingLicense, permissions.update]);
 
-  const pushToServiceButton = useMemo(() => {
-    return (
-      <EuiButton
+  const pushToServiceButton = useMemo(
+    () => (
+      <EuiButtonEmpty
         data-test-subj="push-to-external-service"
-        fill
         iconType="importAction"
         onClick={handlePushToService}
         disabled={
-          isLoading || loadingLicense || errorsMsg.length > 0 || !userCanCrud || !isValidConnector
+          isLoading ||
+          loadingLicense ||
+          errorsMsg.length > 0 ||
+          !permissions.push ||
+          !isValidConnector ||
+          !hasDataToPush
         }
         isLoading={isLoading}
       >
         {caseServices[connector.id]
           ? i18n.UPDATE_THIRD(connector.name)
           : i18n.PUSH_THIRD(connector.name)}
-      </EuiButton>
-    );
+      </EuiButtonEmpty>
+    ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    connector,
-    connectors,
-    errorsMsg,
-    handlePushToService,
-    isLoading,
-    loadingLicense,
-    userCanCrud,
-    isValidConnector,
-  ]);
+    [
+      connector,
+      connectors,
+      errorsMsg,
+      handlePushToService,
+      hasDataToPush,
+      isLoading,
+      loadingLicense,
+      permissions.push,
+      isValidConnector,
+    ]
+  );
 
   const objToReturn = useMemo(() => {
+    const hidePushButton = errorsMsg.length > 0 || !hasDataToPush || !permissions.push;
+
     return {
-      pushButton:
-        errorsMsg.length > 0 ? (
-          <EuiToolTip
-            position="top"
-            title={errorsMsg[0].title}
-            content={<p>{errorsMsg[0].description}</p>}
-          >
-            {pushToServiceButton}
-          </EuiToolTip>
-        ) : (
-          <>{pushToServiceButton}</>
-        ),
+      pushButton: hidePushButton ? (
+        <EuiToolTip
+          position="top"
+          title={errorsMsg.length > 0 ? errorsMsg[0].title : i18n.PUSH_LOCKED_TITLE(connector.name)}
+          content={<p>{errorsMsg.length > 0 ? errorsMsg[0].description : i18n.PUSH_LOCKED_DESC}</p>}
+        >
+          {pushToServiceButton}
+        </EuiToolTip>
+      ) : (
+        <>{pushToServiceButton}</>
+      ),
       pushCallouts:
         errorsMsg.length > 0 ? (
-          <CaseCallOut title={i18n.ERROR_PUSH_SERVICE_CALLOUT_TITLE} messages={errorsMsg} />
+          <CaseCallOut
+            hasConnectors={connectors.length > 0}
+            hasLicenseError={hasLicenseError}
+            messages={errorsMsg}
+            onEditClick={onEditClick}
+          />
         ) : null,
     };
-  }, [errorsMsg, pushToServiceButton]);
+  }, [
+    connector.name,
+    connectors.length,
+    errorsMsg,
+    hasDataToPush,
+    hasLicenseError,
+    onEditClick,
+    pushToServiceButton,
+    permissions.push,
+  ]);
 
   return objToReturn;
 };

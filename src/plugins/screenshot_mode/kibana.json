@@ -1,0 +1,13 @@
+{
+  "id": "screenshotMode",
+  "owner": {
+    "name": "App Services",
+    "githubTeam": "kibana-app-services"
+  },
+  "version": "1.0.0",
+  "kibanaVersion": "kibana",
+  "ui": true,
+  "server": true,
+  "requiredPlugins": [],
+  "optionalPlugins": []
+}

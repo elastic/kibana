@@ -7,12 +7,12 @@
  */
 
 import { access, link, unlink, chmod } from 'fs';
-import { resolve } from 'path';
+import { resolve, basename } from 'path';
 import { promisify } from 'util';
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
+import { kibanaPackageJson } from '@kbn/utils';
 
-import { branch } from '../../../../../../package.json';
 import { write, copyAll, mkdirp, exec, Config, Build } from '../../../lib';
 import * as dockerTemplates from './templates';
 import { TemplateContext } from './template_context';
@@ -29,59 +29,79 @@ export async function runDockerGenerator(
   build: Build,
   flags: {
     architecture?: string;
+    baseImage: 'none' | 'ubi9' | 'ubi8' | 'ubuntu';
     context: boolean;
     image: boolean;
-    ubi?: boolean;
     ironbank?: boolean;
+    cloud?: boolean;
     dockerBuildDate?: string;
   }
 ) {
-  // UBI var config
-  const baseOSImage = flags.ubi ? 'docker.elastic.co/ubi8/ubi-minimal:latest' : 'centos:8';
-  const ubiVersionTag = 'ubi8';
+  let baseImageName = '';
+  if (flags.baseImage === 'ubuntu') baseImageName = 'ubuntu:20.04';
+  if (flags.baseImage === 'ubi8') baseImageName = 'docker.elastic.co/ubi8/ubi-minimal:latest';
+  if (flags.baseImage === 'ubi9') baseImageName = 'docker.elastic.co/ubi9/ubi-minimal:latest';
 
   let imageFlavor = '';
-  if (flags.ubi) imageFlavor += `-${ubiVersionTag}`;
+  if (flags.baseImage === 'ubi8') imageFlavor += `-ubi8`;
+  if (flags.baseImage === 'ubi9') imageFlavor += `-ubi9`;
   if (flags.ironbank) imageFlavor += '-ironbank';
-  if (build.isOss()) imageFlavor += '-oss';
+  if (flags.cloud) imageFlavor += '-cloud';
 
   // General docker var config
-  const license = build.isOss() ? 'ASL 2.0' : 'Elastic License';
-  const imageTag = 'docker.elastic.co/kibana/kibana';
+  const license = 'Elastic License';
+  const imageTag = `docker.elastic.co/kibana${flags.cloud ? '-ci' : ''}/kibana`;
   const version = config.getBuildVersion();
   const artifactArchitecture = flags.architecture === 'aarch64' ? 'aarch64' : 'x86_64';
-  const artifactFlavor = build.isOss() ? '-oss' : '';
-  const artifactPrefix = `kibana${artifactFlavor}-${version}-linux`;
+  const artifactPrefix = `kibana-${version}-linux`;
   const artifactTarball = `${artifactPrefix}-${artifactArchitecture}.tar.gz`;
+  const beatsArchitecture = flags.architecture === 'aarch64' ? 'arm64' : 'x86_64';
+  const metricbeatTarball = `metricbeat-${version}-linux-${beatsArchitecture}.tar.gz`;
+  const filebeatTarball = `filebeat-${version}-linux-${beatsArchitecture}.tar.gz`;
   const artifactsDir = config.resolveFromTarget('.');
+  const beatsDir = config.resolveFromRepo('.beats');
   const dockerBuildDate = flags.dockerBuildDate || new Date().toISOString();
-  // That would produce oss, default and default-ubi7
-  const dockerBuildDir = config.resolveFromRepo(
-    'build',
-    'kibana-docker',
-    build.isOss() ? `oss` : `default${imageFlavor}`
-  );
+  const dockerBuildDir = config.resolveFromRepo('build', 'kibana-docker', `default${imageFlavor}`);
   const imageArchitecture = flags.architecture === 'aarch64' ? '-aarch64' : '';
   const dockerTargetFilename = config.resolveFromTarget(
     `kibana${imageFlavor}-${version}-docker-image${imageArchitecture}.tar.gz`
   );
+  const dependencies = [
+    resolve(artifactsDir, artifactTarball),
+    ...(flags.cloud
+      ? [resolve(beatsDir, metricbeatTarball), resolve(beatsDir, filebeatTarball)]
+      : []),
+  ];
+
+  const dockerPush = config.getDockerPush();
+  const dockerTagQualifier = config.getDockerTagQualfiier();
+  const dockerCrossCompile = config.getDockerCrossCompile();
+  const publicArtifactSubdomain = config.isRelease ? 'artifacts' : 'snapshots-no-kpi';
+
   const scope: TemplateContext = {
     artifactPrefix,
     artifactTarball,
     imageFlavor,
     version,
-    branch,
+    branch: kibanaPackageJson.branch,
     license,
     artifactsDir,
     imageTag,
     dockerBuildDir,
     dockerTargetFilename,
-    baseOSImage,
+    dockerPush,
+    dockerTagQualifier,
+    dockerCrossCompile,
+    baseImageName,
     dockerBuildDate,
-    ubi: flags.ubi,
+    baseImage: flags.baseImage,
+    cloud: flags.cloud,
+    metricbeatTarball,
+    filebeatTarball,
     ironbank: flags.ironbank,
     architecture: flags.architecture,
     revision: config.getBuildSha(),
+    publicArtifactSubdomain,
   };
 
   type HostArchitectureToDocker = Record<string, string>;
@@ -90,30 +110,12 @@ export async function runDockerGenerator(
     arm64: 'aarch64',
   };
   const buildArchitectureSupported = hostTarget[process.arch] === flags.architecture;
-  if (flags.architecture && !buildArchitectureSupported) {
+  if (flags.architecture && !buildArchitectureSupported && !dockerCrossCompile) {
     return;
   }
 
-  // Verify if we have the needed kibana target in order
-  // to build the kibana docker image.
-  // Also create the docker build target folder
-  // and  delete the current linked target into the
-  // kibana docker build folder if we have one.
-  try {
-    await accessAsync(resolve(artifactsDir, artifactTarball));
-    await mkdirp(dockerBuildDir);
-    await unlinkAsync(resolve(dockerBuildDir, artifactTarball));
-  } catch (e) {
-    if (e && e.code === 'ENOENT' && e.syscall === 'access') {
-      throw new Error(
-        `Kibana linux target (${artifactTarball}) is needed in order to build ${''}the docker image. None was found at ${artifactsDir}`
-      );
-    }
-  }
-
-  // Create the kibana linux target inside the
-  // Kibana docker build
-  await linkAsync(resolve(artifactsDir, artifactTarball), resolve(dockerBuildDir, artifactTarball));
+  // Create the docker build target folder
+  await mkdirp(dockerBuildDir);
 
   // Write all the needed docker config files
   // into kibana-docker folder
@@ -129,13 +131,6 @@ export async function runDockerGenerator(
     dockerBuildDir
   );
 
-  if (flags.ironbank) {
-    await copyAll(
-      config.resolveFromRepo('src/dev/build/tasks/os_packages/docker_generator/resources/ironbank'),
-      dockerBuildDir
-    );
-  }
-
   // Build docker image into the target folder
   // In order to do this we just call the file we
   // created from the templates/build_docker_sh.template.js
@@ -144,6 +139,21 @@ export async function runDockerGenerator(
 
   // Only build images on native targets
   if (flags.image) {
+    // Link dependencies
+    for (const src of dependencies) {
+      const file = basename(src);
+      const dest = resolve(dockerBuildDir, file);
+      try {
+        await accessAsync(src);
+        await unlinkAsync(dest);
+      } catch (e) {
+        if (e && e.code === 'ENOENT' && e.syscall === 'access') {
+          throw new Error(`${src} is needed in order to build the docker image.`);
+        }
+      }
+      await linkAsync(src, dest);
+    }
+
     await exec(log, `./build_docker.sh`, [], {
       cwd: dockerBuildDir,
       level: 'info',

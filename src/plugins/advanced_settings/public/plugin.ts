@@ -7,8 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, Plugin } from 'kibana/public';
-import { FeatureCatalogueCategory } from '../../home/public';
+import { CoreSetup, Plugin } from '@kbn/core/public';
 import { ComponentRegistry } from './component_registry';
 import { AdvancedSettingsSetup, AdvancedSettingsStart, AdvancedSettingsPluginSetup } from './types';
 
@@ -19,7 +18,8 @@ const title = i18n.translate('advancedSettings.advancedSettingsLabel', {
 });
 
 export class AdvancedSettingsPlugin
-  implements Plugin<AdvancedSettingsSetup, AdvancedSettingsStart, AdvancedSettingsPluginSetup> {
+  implements Plugin<AdvancedSettingsSetup, AdvancedSettingsStart, AdvancedSettingsPluginSetup>
+{
   public setup(
     core: CoreSetup,
     { management, home, usageCollection }: AdvancedSettingsPluginSetup
@@ -54,7 +54,7 @@ export class AdvancedSettingsPlugin
         icon: 'gear',
         path: '/app/management/kibana/settings',
         showOnHomePage: false,
-        category: FeatureCatalogueCategory.ADMIN,
+        category: 'admin',
       });
     }
 

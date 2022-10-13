@@ -12,9 +12,8 @@ import { JobCreatorContext } from '../../../job_creator_context';
 import { Description } from './description';
 
 export const ScrollSizeInput: FC = () => {
-  const { jobCreator, jobCreatorUpdate, jobValidator, jobValidatorUpdated } = useContext(
-    JobCreatorContext
-  );
+  const { jobCreator, jobCreatorUpdate, jobValidator, jobValidatorUpdated } =
+    useContext(JobCreatorContext);
   const [validation, setValidation] = useState(jobValidator.scrollSize);
   const [scrollSizeString, setScrollSize] = useState(
     jobCreator.scrollSize === null ? '' : `${jobCreator.scrollSize}`
@@ -26,14 +25,17 @@ export const ScrollSizeInput: FC = () => {
   useEffect(() => {
     jobCreator.scrollSize = scrollSizeString === '' ? null : +scrollSizeString;
     jobCreatorUpdate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scrollSizeString]);
 
   useEffect(() => {
     setScrollSize(jobCreator.scrollSize === null ? '' : `${jobCreator.scrollSize}`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdate]);
 
   useEffect(() => {
     setValidation(jobValidator.scrollSize);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobValidatorUpdated]);
 
   return (

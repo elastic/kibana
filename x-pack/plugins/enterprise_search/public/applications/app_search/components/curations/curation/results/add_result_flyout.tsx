@@ -19,11 +19,14 @@ import {
   EuiSpacer,
   EuiFieldSearch,
   EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { FlashMessages } from '../../../../../shared/flash_messages';
 
+import { SearchLogic } from '../../../search';
 import {
   RESULT_ACTIONS_DIRECTIONS,
   PROMOTE_DOCUMENT_ACTION,
@@ -33,16 +36,17 @@ import {
 } from '../../constants';
 import { CurationLogic } from '../curation_logic';
 
-import { AddResultLogic, CurationResult } from './';
+import { AddResultLogic, CurationResult } from '.';
 
 export const AddResultFlyout: React.FC = () => {
-  const { searchQuery, searchResults, dataLoading } = useValues(AddResultLogic);
-  const { search, closeFlyout } = useActions(AddResultLogic);
+  const searchLogic = SearchLogic({ id: 'add-results-flyout' });
+  const { searchQuery, searchResults, searchDataLoading } = useValues(searchLogic);
+  const { closeFlyout } = useActions(AddResultLogic);
+  const { search } = useActions(searchLogic);
 
   const { promotedIds, hiddenIds } = useValues(CurationLogic);
-  const { addPromotedId, removePromotedId, addHiddenId, removeHiddenId } = useActions(
-    CurationLogic
-  );
+  const { addPromotedId, removePromotedId, addHiddenId, removeHiddenId } =
+    useActions(CurationLogic);
 
   return (
     <EuiPortal>
@@ -63,7 +67,7 @@ export const AddResultFlyout: React.FC = () => {
           <EuiFieldSearch
             value={searchQuery}
             onChange={(e) => search(e.target.value)}
-            isLoading={dataLoading}
+            isLoading={searchDataLoading}
             placeholder={i18n.translate(
               'xpack.enterpriseSearch.appSearch.engine.curations.addResult.searchPlaceholder',
               { defaultMessage: 'Search engine documents' }
@@ -74,38 +78,41 @@ export const AddResultFlyout: React.FC = () => {
           <EuiSpacer />
 
           {searchResults.length > 0 ? (
-            searchResults.map((result) => {
-              const id = result.id.raw;
-              const isPromoted = promotedIds.includes(id);
-              const isHidden = hiddenIds.includes(id);
+            <EuiFlexGroup direction="column" gutterSize="s">
+              {searchResults.map((result, index) => {
+                const id = result.id.raw;
+                const isPromoted = promotedIds.includes(id);
+                const isHidden = hiddenIds.includes(id);
 
-              return (
-                <CurationResult
-                  key={id}
-                  result={result}
-                  actions={[
-                    isHidden
-                      ? {
-                          ...SHOW_DOCUMENT_ACTION,
-                          onClick: () => removeHiddenId(id),
-                        }
-                      : {
-                          ...HIDE_DOCUMENT_ACTION,
-                          onClick: () => addHiddenId(id),
-                        },
-                    isPromoted
-                      ? {
-                          ...DEMOTE_DOCUMENT_ACTION,
-                          onClick: () => removePromotedId(id),
-                        }
-                      : {
-                          ...PROMOTE_DOCUMENT_ACTION,
-                          onClick: () => addPromotedId(id),
-                        },
-                  ]}
-                />
-              );
-            })
+                return (
+                  <EuiFlexItem key={index}>
+                    <CurationResult
+                      result={result}
+                      actions={[
+                        isHidden
+                          ? {
+                              ...SHOW_DOCUMENT_ACTION,
+                              onClick: () => removeHiddenId(id),
+                            }
+                          : {
+                              ...HIDE_DOCUMENT_ACTION,
+                              onClick: () => addHiddenId(id),
+                            },
+                        isPromoted
+                          ? {
+                              ...DEMOTE_DOCUMENT_ACTION,
+                              onClick: () => removePromotedId(id),
+                            }
+                          : {
+                              ...PROMOTE_DOCUMENT_ACTION,
+                              onClick: () => addPromotedId(id),
+                            },
+                      ]}
+                    />
+                  </EuiFlexItem>
+                );
+              })}
+            </EuiFlexGroup>
           ) : (
             <EuiEmptyPrompt
               body={i18n.translate(

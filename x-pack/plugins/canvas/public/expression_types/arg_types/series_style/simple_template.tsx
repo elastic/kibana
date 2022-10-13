@@ -10,6 +10,7 @@ import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiButtonIcon, EuiText } from '@elastic/eui';
 import immutable from 'object-path-immutable';
 import { get } from 'lodash';
+import { ResolvedArgProps, ResolvedLabels } from '../../arg';
 import { ColorPickerPopover } from '../../../components/color_picker_popover';
 import { TooltipIcon, IconType } from '../../../components/tooltip_icon';
 import { ExpressionAstExpression, CanvasWorkpad } from '../../../../types';
@@ -23,18 +24,23 @@ interface Arguments {
 }
 type Argument = keyof Arguments;
 
-interface Props {
+type Props = {
   argValue: ExpressionAstExpression;
-  labels?: string[];
   onValueChange: (argValue: ExpressionAstExpression) => void;
   typeInstance: {
     name: string;
   };
   workpad: CanvasWorkpad;
-}
+} & ResolvedArgProps<ResolvedLabels>;
 
 export const SimpleTemplate: FunctionComponent<Props> = (props) => {
-  const { typeInstance, argValue, onValueChange, labels, workpad } = props;
+  const {
+    typeInstance,
+    argValue,
+    onValueChange,
+    resolved: { labels },
+    workpad,
+  } = props;
   const { name } = typeInstance;
   const chain = get(argValue, 'chain.0', {});
   const chainArgs = get(chain, 'arguments', {});
@@ -107,7 +113,9 @@ SimpleTemplate.displayName = 'SeriesStyleArgSimpleInput';
 
 SimpleTemplate.propTypes = {
   argValue: PropTypes.any.isRequired,
-  labels: PropTypes.array,
+  resolved: PropTypes.shape({
+    labels: PropTypes.array.isRequired,
+  }).isRequired,
   onValueChange: PropTypes.func.isRequired,
   workpad: PropTypes.shape({
     colors: PropTypes.array.isRequired,

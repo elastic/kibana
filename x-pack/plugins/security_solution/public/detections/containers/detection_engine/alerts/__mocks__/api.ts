@@ -5,8 +5,15 @@
  * 2.0.
  */
 
-import { QueryAlerts, AlertSearchResponse, BasicSignals, AlertsIndex, Privilege } from '../types';
-import { alertsMock, mockSignalIndex, mockUserPrivilege } from '../mock';
+import type {
+  QueryAlerts,
+  AlertSearchResponse,
+  BasicSignals,
+  AlertsIndex,
+  Privilege,
+  CasesFromAlertsResponse,
+} from '../types';
+import { alertsMock, mockSignalIndex, mockUserPrivilege, mockCaseIdsFromAlertId } from '../mock';
 
 export const fetchQueryAlerts = async <Hit, Aggregations>({
   query,
@@ -22,3 +29,10 @@ export const getUserPrivilege = async ({ signal }: BasicSignals): Promise<Privil
 
 export const createSignalIndex = async ({ signal }: BasicSignals): Promise<AlertsIndex> =>
   Promise.resolve(mockSignalIndex);
+
+// do not delete
+export const getCaseIdsFromAlertId = async ({
+  alertId,
+}: {
+  alertId: string;
+}): Promise<CasesFromAlertsResponse> => Promise.resolve(mockCaseIdsFromAlertId);

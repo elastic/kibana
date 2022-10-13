@@ -1,43 +1,46 @@
 ---
+####
+#### This document is auto-generated and is meant to be viewed inside our experimental, new docs system.
+#### Reach out in #docs-engineering for more info.
+####
 id: kibReportingPluginApi
-slug: /kibana-dev-docs/reportingPluginApi
-title: reporting
+slug: /kibana-dev-docs/api/reporting
+title: "reporting"
 image: https://source.unsplash.com/400x175/?github
-summary: API docs for the reporting plugin
-date: 2020-11-16
+description: API docs for the reporting plugin
+date: 2022-10-13
 tags: ['contributor', 'dev', 'apidocs', 'kibana', 'reporting']
-warning: This document is auto-generated and is meant to be viewed inside our experimental, new docs system. Reach out in #docs-engineering for more info.
 ---
+import reportingObj from './reporting.devdocs.json';
 
-import reportingObj from './reporting.json';
+Reporting Services enables applications to feature reports that the user can automate with Watcher and download later.
+
+Contact [Kibana Reporting Services](https://github.com/orgs/elastic/teams/kibana-reporting-services) for questions regarding this plugin.
+
+**Code health stats**
+
+| Public API count  | Any count | Items lacking comments | Missing exports |
+|-------------------|-----------|------------------------|-----------------|
+| 36 | 0 | 16 | 0 |
 
 ## Client
 
 ### Start
 <DocDefinitionList data={[reportingObj.client.start]}/>
 
-### Functions
-<DocDefinitionList data={reportingObj.client.functions}/>
-
-### Classes
-<DocDefinitionList data={reportingObj.client.classes}/>
+### Interfaces
+<DocDefinitionList data={reportingObj.client.interfaces}/>
 
 ## Server
 
-### Classes
-<DocDefinitionList data={reportingObj.server.classes}/>
-
-### Interfaces
-<DocDefinitionList data={reportingObj.server.interfaces}/>
+### Start
+<DocDefinitionList data={[reportingObj.server.start]}/>
 
 ## Common
 
-### Objects
-<DocDefinitionList data={reportingObj.common.objects}/>
+### Interfaces
+<DocDefinitionList data={reportingObj.common.interfaces}/>
 
-### Functions
-<DocDefinitionList data={reportingObj.common.functions}/>
-
-### Classes
-<DocDefinitionList data={reportingObj.common.classes}/>
+### Consts, variables and types
+<DocDefinitionList data={reportingObj.common.misc}/>
 

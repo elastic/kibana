@@ -7,7 +7,7 @@
 
 import _ from 'lodash';
 import { SOURCE_TYPES } from '../constants';
-import { SortDirection } from '../../../../../src/plugins/data/common/search';
+import { SortDirection } from '@kbn/data-plugin/common/search';
 
 function isEsDocumentSource(layerDescriptor) {
   const sourceType = _.get(layerDescriptor, 'sourceDescriptor.type');
@@ -19,7 +19,13 @@ export function topHitsTimeToSort({ attributes }) {
     return attributes;
   }
 
-  const layerList = JSON.parse(attributes.layerListJSON);
+  let layerList = [];
+  try {
+    layerList = JSON.parse(attributes.layerListJSON);
+  } catch (e) {
+    throw new Error('Unable to parse attribute layerListJSON');
+  }
+
   layerList.forEach((layerDescriptor) => {
     if (isEsDocumentSource(layerDescriptor)) {
       if (_.has(layerDescriptor, 'sourceDescriptor.topHitsTimeField')) {

@@ -70,6 +70,7 @@ We are unable to evaluate or maintain the known plugins, so care should be taken
 * https://github.com/PhaedrusTheGreek/transform_vis[Transform Visualization] (PhaedrusTheGreek)
 * https://github.com/nyurik/kibana-vega-vis[Vega-based visualizations] (nyurik) - Support for user-defined graphs, external data sources, maps, images, and user-defined interactivity.
 * https://github.com/Camichan/kbn_aframe[VR Graph Visualizations] (Camichan)
+* https://github.com/uniberg/kbn_sankey_vis[Sankey-Visualization] (uniberg)
 
 [float]
 === Other
@@ -144,21 +145,6 @@ $ bin/kibana-plugin remove x-pack
 You can also remove a plugin manually by deleting the plugin's subdirectory under the `plugins/` directory.
 
 NOTE: Removing a plugin will result in an "optimize" run which will delay the next start of {kib}.
-
-[float]
-[[disable-plugin]]
-== Disable plugins
-
-Use the following command to disable a plugin:
-
-[source,shell]
------------
-./bin/kibana --<plugin ID>.enabled=false <1>
------------
-
-NOTE: Disabling or enabling a plugin will result in an "optimize" run which will delay the start of {kib}.
-
-<1> You can find a plugin's plugin ID as the value of the `name` property in the plugin's `package.json` file.
 
 [float]
 [[configure-plugin-manager]]

@@ -7,8 +7,8 @@
 
 import { EuiToolTip } from '@elastic/eui';
 import React from 'react';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
-import { truncate } from '../../../style/variables';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { truncate } from '../../../utils/style';
 
 const tooltipAnchorClassname = '_apm_truncate_tooltip_anchor_';
 
@@ -27,13 +27,14 @@ const ContentWrapper = euiStyled.div`
 interface Props {
   text: string;
   content?: React.ReactNode;
+  'data-test-subj'?: string;
 }
 
 export function TruncateWithTooltip(props: Props) {
-  const { text, content } = props;
+  const { text, content, ...rest } = props;
 
   return (
-    <TooltipWrapper>
+    <TooltipWrapper {...rest}>
       <EuiToolTip
         delay="long"
         content={text}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SEARCH_SESSIONS_TABLE_ID } from '../../../../src/plugins/data/common';
+import { SEARCH_SESSIONS_TABLE_ID } from '@kbn/data-plugin/common';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function SearchSessionsPageProvider({ getService, getPageObjects }: FtrProviderContext) {
@@ -32,12 +32,15 @@ export function SearchSessionsPageProvider({ getService, getPageObjects }: FtrPr
           const $ = await row.parseDomContent();
           const viewCell = await row.findByTestSubject('sessionManagementNameCol');
           const actionsCell = await row.findByTestSubject('sessionManagementActionsCol');
+
           return {
-            name: $.findTestSubject('sessionManagementNameCol').text(),
+            id: (await row.getAttribute('data-test-search-session-id')).split('id-')[1],
+            name: $.findTestSubject('sessionManagementNameCol').text().trim(),
             status: $.findTestSubject('sessionManagementStatusLabel').attr('data-test-status'),
             mainUrl: $.findTestSubject('sessionManagementNameCol').text(),
             created: $.findTestSubject('sessionManagementCreatedCol').text(),
             expires: $.findTestSubject('sessionManagementExpiresCol').text(),
+            searchesCount: Number($.findTestSubject('sessionManagementNumSearchesCol').text()),
             app: $.findTestSubject('sessionManagementAppIcon').attr('data-test-app-id'),
             view: async () => {
               log.debug('management ui: view the session');
@@ -53,6 +56,14 @@ export function SearchSessionsPageProvider({ getService, getPageObjects }: FtrPr
               await actionsCell.click();
               await find.clickByCssSelector(
                 '[data-test-subj="sessionManagementPopoverAction-delete"]'
+              );
+              await PageObjects.common.clickConfirmOnModal();
+            },
+            extend: async () => {
+              log.debug('management ui: extend the session');
+              await actionsCell.click();
+              await find.clickByCssSelector(
+                '[data-test-subj="sessionManagementPopoverAction-extend"]'
               );
               await PageObjects.common.clickConfirmOnModal();
             },

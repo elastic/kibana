@@ -12,9 +12,9 @@ import type {
   CoreStart,
   Plugin,
   Logger,
-} from 'src/core/server';
+} from '@kbn/core/server';
 
-import type { DataRequestHandlerContext } from 'src/plugins/data/server';
+import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 
 import {
   SearchExamplesPluginSetup,
@@ -24,6 +24,7 @@ import {
 } from './types';
 import { mySearchStrategyProvider } from './my_strategy';
 import { registerRoutes } from './routes';
+import { fibonacciStrategyProvider } from './fibonacci_strategy';
 
 export class SearchExamplesPlugin
   implements
@@ -32,7 +33,8 @@ export class SearchExamplesPlugin
       SearchExamplesPluginStart,
       SearchExamplesPluginSetupDeps,
       SearchExamplesPluginStartDeps
-    > {
+    >
+{
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -48,7 +50,9 @@ export class SearchExamplesPlugin
 
     core.getStartServices().then(([_, depsStart]) => {
       const myStrategy = mySearchStrategyProvider(depsStart.data);
+      const fibonacciStrategy = fibonacciStrategyProvider();
       deps.data.search.registerSearchStrategy('myStrategy', myStrategy);
+      deps.data.search.registerSearchStrategy('fibonacciStrategy', fibonacciStrategy);
       registerRoutes(router);
     });
 

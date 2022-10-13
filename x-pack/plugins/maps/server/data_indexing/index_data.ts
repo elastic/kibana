@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ElasticsearchClient } from 'kibana/server';
-import { WriteSettings } from '../../common';
+import { ElasticsearchClient } from '@kbn/core/server';
+import { WriteSettings } from '../../common/types';
 
 export async function writeDataToIndex(
   index: string,
@@ -15,7 +15,7 @@ export async function writeDataToIndex(
   asCurrentUser: ElasticsearchClient
 ) {
   try {
-    const { body: indexExists } = await asCurrentUser.indices.exists({ index });
+    const indexExists = await asCurrentUser.indices.exists({ index });
     if (!indexExists) {
       throw new Error(
         i18n.translate('xpack.maps.indexData.indexExists', {
@@ -26,8 +26,9 @@ export async function writeDataToIndex(
         })
       );
     }
-    const settings: WriteSettings = { index, body: data };
-    const { body: resp } = await asCurrentUser.index(settings);
+    const settings: WriteSettings = { index, body: data, refresh: true };
+    const resp = await asCurrentUser.index(settings);
+    // @ts-expect-error always false
     if (resp.result === 'Error') {
       throw resp;
     } else {

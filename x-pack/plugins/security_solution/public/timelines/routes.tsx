@@ -6,20 +6,25 @@
  */
 
 import React from 'react';
-import { Route, Switch } from 'react-router-dom';
-
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { Timelines } from './pages';
-import { NotFoundPage } from '../app/404';
+import { TIMELINES_PATH } from '../../common/constants';
 
-const TimelinesRoutesComponent = () => (
-  <Switch>
-    <Route path="/">
+import type { SecuritySubPluginRoutes } from '../app/types';
+import { SecurityPageName } from '../app/types';
+import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
+
+const TimelinesRoutes = () => (
+  <PluginTemplateWrapper>
+    <TrackApplicationView viewId={SecurityPageName.timelines}>
       <Timelines />
-    </Route>
-    <Route>
-      <NotFoundPage />
-    </Route>
-  </Switch>
+    </TrackApplicationView>
+  </PluginTemplateWrapper>
 );
 
-export const TimelinesRoutes = React.memo(TimelinesRoutesComponent);
+export const routes: SecuritySubPluginRoutes = [
+  {
+    path: TIMELINES_PATH,
+    component: TimelinesRoutes,
+  },
+];

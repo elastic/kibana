@@ -15,9 +15,10 @@ import {
 } from './workplace_search';
 
 export interface InitialAppData {
+  enterpriseSearchVersion?: string;
+  kibanaVersion?: string;
   readOnlyMode?: boolean;
-  ilmEnabled?: boolean;
-  isFederatedAuth?: boolean;
+  searchOAuth?: SearchOAuth;
   configuredLimits?: ConfiguredLimits;
   access?: ProductAccess;
   appSearch?: AppSearchAccount;
@@ -34,6 +35,11 @@ export interface ProductAccess {
   hasWorkplaceSearchAccess: boolean;
 }
 
+export interface SearchOAuth {
+  clientId: string;
+  redirectUrl: string;
+}
+
 export interface MetaPage {
   current: number;
   size: number;
@@ -44,3 +50,5 @@ export interface MetaPage {
 export interface Meta {
   page: MetaPage;
 }
+
+export type { ElasticsearchIndexWithPrivileges } from './indices';

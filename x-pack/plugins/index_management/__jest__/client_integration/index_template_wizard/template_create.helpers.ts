@@ -5,23 +5,30 @@
  * 2.0.
  */
 
-import { registerTestBed, TestBedConfig } from '@kbn/test/jest';
+import { registerTestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
+import { HttpSetup } from '@kbn/core/public';
 import { TemplateCreate } from '../../../public/application/sections/template_create';
 import { WithAppDependencies } from '../helpers';
 
 import { formSetup, TestSubjects } from './template_form.helpers';
 
-const testBedConfig: TestBedConfig = {
-  memoryRouter: {
-    initialEntries: [`/create_template`],
-    componentRoutePath: `/create_template`,
-  },
-  doMountAsync: true,
+export const setup = async (httpSetup: HttpSetup, isLegacy: boolean = false) => {
+  const route = isLegacy
+    ? { pathname: '/create_template', search: '?legacy=true' }
+    : { pathname: '/create_template' };
+
+  const testBedConfig: AsyncTestBedConfig = {
+    memoryRouter: {
+      initialEntries: [route],
+      componentRoutePath: route,
+    },
+    doMountAsync: true,
+  };
+
+  const initTestBed = registerTestBed<TestSubjects>(
+    WithAppDependencies(TemplateCreate, httpSetup),
+    testBedConfig
+  );
+
+  return formSetup(initTestBed);
 };
-
-const initTestBed = registerTestBed<TestSubjects>(
-  WithAppDependencies(TemplateCreate),
-  testBedConfig
-);
-
-export const setup: any = formSetup.bind(null, initTestBed);

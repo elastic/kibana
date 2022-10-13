@@ -5,20 +5,30 @@
  * 2.0.
  */
 
-import {
-  IEsSearchResponse,
-  ISearchRequestParams,
-} from '../../../../../../../src/plugins/data/common';
-import {
+import type {
+  IScopedClusterClient,
+  KibanaRequest,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
+import type { IEsSearchResponse, ISearchRequestParams } from '@kbn/data-plugin/common';
+import type {
   FactoryQueryTypes,
   StrategyRequestType,
   StrategyResponseType,
 } from '../../../../common/search_strategy/security_solution';
+import type { EndpointAppContext } from '../../../endpoint/types';
 
 export interface SecuritySolutionFactory<T extends FactoryQueryTypes> {
   buildDsl: (options: StrategyRequestType<T>) => ISearchRequestParams;
   parse: (
     options: StrategyRequestType<T>,
-    response: IEsSearchResponse
+    response: IEsSearchResponse,
+    deps?: {
+      esClient: IScopedClusterClient;
+      savedObjectsClient: SavedObjectsClientContract;
+      endpointContext: EndpointAppContext;
+      request: KibanaRequest;
+      spaceId?: string;
+    }
   ) => Promise<StrategyResponseType<T>>;
 }

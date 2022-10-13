@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useReducer, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import React, { ReactNode, useCallback, useEffect, useRef, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiModal,
   EuiButton,
@@ -19,114 +19,118 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiFlexGroup,
+  EuiBetaBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ActionConnectorForm, getConnectorErrors } from './action_connector_form';
-import { createConnectorReducer, InitialConnector, ConnectorReducer } from './connector_reducer';
-import { createActionConnector } from '../../lib/action_connector_api';
 import './connector_add_modal.scss';
+import { betaBadgeProps } from './beta_badge_props';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
-import {
-  ActionType,
-  ActionConnector,
-  ActionTypeRegistryContract,
-  UserConfiguredActionConnector,
-} from '../../../types';
+import { ActionType, ActionConnector, ActionTypeRegistryContract } from '../../../types';
 import { useKibana } from '../../../common/lib/kibana';
-import { getConnectorWithInvalidatedFields } from '../../lib/value_validators';
+import { useCreateConnector } from '../../hooks/use_create_connector';
+import { ConnectorForm, ConnectorFormState } from './connector_form';
+import { ConnectorFormSchema } from './types';
 
-interface ConnectorAddModalProps {
+export interface ConnectorAddModalProps {
   actionType: ActionType;
   onClose: () => void;
   postSaveEventHandler?: (savedAction: ActionConnector) => void;
-  consumer?: string;
   actionTypeRegistry: ActionTypeRegistryContract;
 }
 
-export const ConnectorAddModal = ({
+const ConnectorAddModal = ({
   actionType,
   onClose,
   postSaveEventHandler,
-  consumer,
   actionTypeRegistry,
 }: ConnectorAddModalProps) => {
   const {
-    http,
-    notifications: { toasts },
     application: { capabilities },
   } = useKibana().services;
-  let hasErrors = false;
-  const initialConnector: InitialConnector<
-    Record<string, unknown>,
-    Record<string, unknown>
-  > = useMemo(
-    () => ({
-      actionTypeId: actionType.id,
-      config: {},
-      secrets: {},
-    }),
-    [actionType.id]
-  );
-  const [isSaving, setIsSaving] = useState<boolean>(false);
-  const canSave = hasSaveActionsCapability(capabilities);
 
-  const reducer: ConnectorReducer<
-    Record<string, unknown>,
-    Record<string, unknown>
-  > = createConnectorReducer<Record<string, unknown>, Record<string, unknown>>();
-  const [{ connector }, dispatch] = useReducer(reducer, {
-    connector: initialConnector as UserConfiguredActionConnector<
-      Record<string, unknown>,
-      Record<string, unknown>
-    >,
-  });
-  const setConnector = (value: any) => {
-    dispatch({ command: { type: 'setConnector' }, payload: { key: 'connector', value } });
+  const { isLoading: isSavingConnector, createConnector } = useCreateConnector();
+  const isMounted = useRef(false);
+  const initialConnector = {
+    actionTypeId: actionType.id,
+    isDeprecated: false,
+    isMissingSecrets: false,
+    config: {},
+    secrets: {},
   };
-  const [serverError, setServerError] = useState<
-    | {
-        body: { message: string; error: string };
+
+  const canSave = hasSaveActionsCapability(capabilities);
+  const actionTypeModel = actionTypeRegistry.get(actionType.id);
+
+  const [preSubmitValidationErrorMessage, setPreSubmitValidationErrorMessage] =
+    useState<ReactNode>(null);
+
+  const [formState, setFormState] = useState<ConnectorFormState>({
+    isSubmitted: false,
+    isSubmitting: false,
+    isValid: undefined,
+    submit: async () => ({ isValid: false, data: {} as ConnectorFormSchema }),
+    preSubmitValidator: null,
+  });
+
+  const { preSubmitValidator, submit, isValid: isFormValid, isSubmitting } = formState;
+  const hasErrors = isFormValid === false;
+  const isSaving = isSavingConnector || isSubmitting;
+
+  const validateAndCreateConnector = useCallback(async () => {
+    setPreSubmitValidationErrorMessage(null);
+
+    const { isValid, data } = await submit();
+
+    if (!isMounted.current) {
+      // User has closed the modal meanwhile submitting the form
+      return;
+    }
+
+    if (isValid) {
+      if (preSubmitValidator) {
+        const validatorRes = await preSubmitValidator();
+
+        if (validatorRes) {
+          setPreSubmitValidationErrorMessage(validatorRes.message);
+          return;
+        }
       }
-    | undefined
-  >(undefined);
+
+      /**
+       * At this point the form is valid
+       * and there are no pre submit error messages.
+       */
+
+      const { actionTypeId, name, config, secrets } = data;
+      const validConnector = { actionTypeId, name: name ?? '', config, secrets };
+
+      const createdConnector = await createConnector(validConnector);
+      return createdConnector;
+    }
+  }, [submit, preSubmitValidator, createConnector]);
 
   const closeModal = useCallback(() => {
-    setConnector(initialConnector);
-    setServerError(undefined);
     onClose();
-  }, [initialConnector, onClose]);
+  }, [onClose]);
 
-  const actionTypeModel = actionTypeRegistry.get(actionType.id);
-  const { configErrors, connectorBaseErrors, connectorErrors, secretsErrors } = getConnectorErrors(
-    connector,
-    actionTypeModel
-  );
-  hasErrors = !!Object.keys(connectorErrors).find(
-    (errorKey) => connectorErrors[errorKey].length >= 1
-  );
+  const onSubmit = useCallback(async () => {
+    const createdConnector = await validateAndCreateConnector();
+    if (createdConnector) {
+      closeModal();
 
-  const onActionConnectorSave = async (): Promise<ActionConnector | undefined> =>
-    await createActionConnector({ http, connector })
-      .then((savedConnector) => {
-        if (toasts) {
-          toasts.addSuccess(
-            i18n.translate(
-              'xpack.triggersActionsUI.sections.addModalConnectorForm.updateSuccessNotificationText',
-              {
-                defaultMessage: "Created '{connectorName}'",
-                values: {
-                  connectorName: savedConnector.name,
-                },
-              }
-            )
-          );
-        }
-        return savedConnector;
-      })
-      .catch((errorRes) => {
-        setServerError(errorRes);
-        return undefined;
-      });
+      if (postSaveEventHandler) {
+        postSaveEventHandler(createdConnector);
+      }
+    }
+  }, [validateAndCreateConnector, closeModal, postSaveEventHandler]);
+
+  useEffect(() => {
+    isMounted.current = true;
+
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   return (
     <EuiModal className="actConnectorModal" data-test-subj="connectorAddModal" onClose={closeModal}>
@@ -138,36 +142,46 @@ export const ConnectorAddModal = ({
                 <EuiIcon type={actionTypeModel.iconClass} size="xl" />
               </EuiFlexItem>
             ) : null}
-            <EuiFlexItem>
-              <EuiTitle size="s">
-                <h3 id="flyoutTitle">
-                  <FormattedMessage
-                    defaultMessage="{actionTypeName} connector"
-                    id="xpack.triggersActionsUI.sections.addModalConnectorForm.flyoutTitle"
-                    values={{
-                      actionTypeName: actionType.name,
-                    }}
-                  />
-                </h3>
-              </EuiTitle>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="s" justifyContent="center" alignItems="center">
+                <EuiFlexItem>
+                  <EuiTitle size="s">
+                    <h3 id="flyoutTitle">
+                      <FormattedMessage
+                        defaultMessage="{actionTypeName} connector"
+                        id="xpack.triggersActionsUI.sections.addModalConnectorForm.flyoutTitle"
+                        values={{
+                          actionTypeName: actionType.name,
+                        }}
+                      />
+                    </h3>
+                  </EuiTitle>
+                </EuiFlexItem>
+                {actionTypeModel && actionTypeModel.isExperimental && (
+                  <EuiFlexItem className="betaBadgeFlexItem" grow={false}>
+                    <EuiBetaBadge
+                      label={betaBadgeProps.label}
+                      tooltipContent={betaBadgeProps.tooltipContent}
+                    />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiModalHeaderTitle>
       </EuiModalHeader>
 
       <EuiModalBody>
-        <ActionConnectorForm
-          connector={connector}
-          actionTypeName={actionType.name}
-          dispatch={dispatch}
-          serverError={serverError}
-          errors={connectorErrors}
-          actionTypeRegistry={actionTypeRegistry}
-          consumer={consumer}
+        <ConnectorForm
+          actionTypeModel={actionTypeModel}
+          connector={initialConnector}
+          isEdit={false}
+          onChange={setFormState}
         />
+        {preSubmitValidationErrorMessage}
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={closeModal}>
+        <EuiButtonEmpty onClick={closeModal} isLoading={isSaving}>
           {i18n.translate(
             'xpack.triggersActionsUI.sections.addModalConnectorForm.cancelButtonLabel',
             {
@@ -178,33 +192,13 @@ export const ConnectorAddModal = ({
         {canSave ? (
           <EuiButton
             fill
-            color="secondary"
+            color="success"
             data-test-subj="saveActionButtonModal"
             type="submit"
             iconType="check"
             isLoading={isSaving}
-            onClick={async () => {
-              if (hasErrors) {
-                setConnector(
-                  getConnectorWithInvalidatedFields(
-                    connector,
-                    configErrors,
-                    secretsErrors,
-                    connectorBaseErrors
-                  )
-                );
-                return;
-              }
-              setIsSaving(true);
-              const savedAction = await onActionConnectorSave();
-              setIsSaving(false);
-              if (savedAction) {
-                if (postSaveEventHandler) {
-                  postSaveEventHandler(savedAction);
-                }
-                closeModal();
-              }
-            }}
+            disabled={hasErrors}
+            onClick={onSubmit}
           >
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.addModalConnectorForm.saveButtonLabel"
@@ -216,3 +210,6 @@ export const ConnectorAddModal = ({
     </EuiModal>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export { ConnectorAddModal as default };

@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import { shallowWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 
 import { FilterLists } from './filter_lists';
-
-jest.mock('../../../components/navigation_menu', () => ({
-  NavigationMenu: () => <div id="mockNavigationMenu" />,
-}));
 
 jest.mock('../../../components/help_menu', () => ({
   HelpMenu: () => <div id="mockHelpMenu" />,
@@ -30,7 +26,7 @@ jest.mock('../../../capabilities/check_capabilities', () => ({
   checkPermission: () => true,
 }));
 
-jest.mock('../../../../../../../../src/plugins/kibana_react/public', () => ({
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
   withKibana: (node) => {
     return node;
   },

@@ -8,21 +8,20 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 import { htmlIdGenerator } from '@elastic/eui';
-import { LayerDescriptor } from '../../../../../maps/common/descriptor_types';
-import { INITIAL_LOCATION } from '../../../../../maps/common/constants';
-import {
+import { INITIAL_LOCATION, LayerDescriptor, MAP_SAVED_OBJECT_TYPE } from '@kbn/maps-plugin/common';
+import type {
   MapEmbeddable,
   MapEmbeddableInput,
   MapEmbeddableOutput,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../maps/public/embeddable';
-import { MAP_SAVED_OBJECT_TYPE, RenderTooltipContentParams } from '../../../../../maps/public';
+  RenderTooltipContentParams,
+} from '@kbn/maps-plugin/public';
+
 import {
   EmbeddableFactory,
   ErrorEmbeddable,
   isErrorEmbeddable,
   ViewMode,
-} from '../../../../../../../src/plugins/embeddable/public';
+} from '@kbn/embeddable-plugin/public';
 import { useMlKibana } from '../../contexts/kibana';
 
 export function MlEmbeddedMapComponent({
@@ -76,10 +75,6 @@ export function MlEmbeddedMapComponent({
         attributes: { title: '' },
         filters: [],
         hidePanelTitles: true,
-        refreshConfig: {
-          value: 0,
-          pause: false,
-        },
         viewMode: ViewMode.VIEW,
         isLayerTOCOpen: false,
         hideFilterActions: true,
@@ -112,6 +107,7 @@ export function MlEmbeddedMapComponent({
 
     setupEmbeddable();
     // we want this effect to execute exactly once after the component mounts
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

@@ -11,7 +11,7 @@ import { shallow } from 'enzyme';
 
 import { EuiCopy, EuiButtonIcon, EuiFieldText } from '@elastic/eui';
 
-import { CredentialItem } from './';
+import { CredentialItem } from '.';
 
 const label = 'Credential';
 const testSubj = 'CredentialItemTest';
@@ -20,18 +20,6 @@ const value = 'foo';
 const props = { label, testSubj, value };
 
 describe('CredentialItem', () => {
-  const setState = jest.fn();
-  const useStateMock: any = (initState: any) => [initState, setState];
-
-  beforeEach(() => {
-    jest.spyOn(React, 'useState').mockImplementation(useStateMock);
-    setState(false);
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
   it('renders', () => {
     const wrapper = shallow(<CredentialItem {...props} />);
 
@@ -57,7 +45,6 @@ describe('CredentialItem', () => {
     const button = wrapper.find(EuiButtonIcon).dive().find('button');
     button.simulate('click');
 
-    expect(setState).toHaveBeenCalled();
     expect(wrapper.find(EuiFieldText)).toHaveLength(1);
   });
 

@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React from 'react';
-
-import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
+import { PageTemplate } from '../page_template';
 
 interface NoIndicesProps {
   message: string;
@@ -17,15 +16,16 @@ interface NoIndicesProps {
   'data-test-subj'?: string;
 }
 
-export const NoIndices: React.FC<NoIndicesProps> = ({ actions, message, title, ...rest }) => (
-  <CenteredEmptyPrompt
-    title={<h2>{title}</h2>}
-    body={<p>{message}</p>}
-    actions={actions}
-    {...rest}
-  />
-);
-
-const CenteredEmptyPrompt = euiStyled(EuiEmptyPrompt)`
-  align-self: center;
-`;
+// Represents a fully constructed page, including page template.
+export const NoIndices: React.FC<NoIndicesProps> = ({ actions, message, title, ...rest }) => {
+  return (
+    <PageTemplate isEmptyState={true}>
+      <KibanaPageTemplate.EmptyPrompt
+        title={<h2>{title}</h2>}
+        body={<p>{message}</p>}
+        actions={actions}
+        {...rest}
+      />
+    </PageTemplate>
+  );
+};

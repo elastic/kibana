@@ -1,0 +1,23 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import { GenericFtrProviderContext } from '@kbn/test';
+import { services as commonServices } from '../../common/services';
+import { services as functionalServices } from '../../functional/services';
+import { pageObjects } from '../../functional/page_objects';
+
+import { KibanaEBTServerProvider, KibanaEBTUIProvider } from './kibana_ebt';
+
+export const services = {
+  ...commonServices,
+  ...functionalServices,
+  kibana_ebt_server: KibanaEBTServerProvider,
+  kibana_ebt_ui: KibanaEBTUIProvider,
+};
+
+export type FtrProviderContext = GenericFtrProviderContext<typeof services, typeof pageObjects>;

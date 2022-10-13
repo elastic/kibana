@@ -6,11 +6,11 @@
  */
 
 import type { ObjectType } from '@kbn/config-schema';
+import type { RequestHandler, RouteConfig } from '@kbn/core/server';
+import { kibanaResponseFactory } from '@kbn/core/server';
+import { httpServerMock } from '@kbn/core/server/mocks';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import type { RequestHandler, RouteConfig } from '../../../../../../src/core/server';
-import { kibanaResponseFactory } from '../../../../../../src/core/server';
-import { httpServerMock } from '../../../../../../src/core/server/mocks';
 import type { Session } from '../../session_management';
 import { sessionMock } from '../../session_management/session.mock';
 import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
@@ -115,7 +115,7 @@ describe('Invalidate sessions routes', () => {
       });
       await expect(
         routeHandler(
-          ({} as unknown) as SecurityRequestHandlerContext,
+          {} as unknown as SecurityRequestHandlerContext,
           mockRequest,
           kibanaResponseFactory
         )
@@ -138,7 +138,7 @@ describe('Invalidate sessions routes', () => {
       const mockRequest = httpServerMock.createKibanaRequest({ body: { match: 'all' } });
       await expect(
         routeHandler(
-          ({} as unknown) as SecurityRequestHandlerContext,
+          {} as unknown as SecurityRequestHandlerContext,
           mockRequest,
           kibanaResponseFactory
         )

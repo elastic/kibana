@@ -8,9 +8,9 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiFlyoutBody } from '@elastic/eui';
-import { CoreStart } from 'src/core/public';
+import { CoreStart } from '@kbn/core/public';
+import { toMountPoint, reactToUiComponent } from '@kbn/kibana-react-plugin/public';
 import { createAction, Action } from '../../actions';
-import { toMountPoint, reactToUiComponent } from '../../../../kibana_react/public';
 
 const ReactMenuItem: React.FC = () => {
   return (

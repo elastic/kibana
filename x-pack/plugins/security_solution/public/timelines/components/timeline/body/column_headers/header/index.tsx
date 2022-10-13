@@ -8,17 +8,20 @@
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
+import { isDataViewFieldSubtypeNested } from '@kbn/es-query';
 
-import { useShallowEqualSelector } from '../../../../../../common/hooks/use_selector';
-import { timelineActions } from '../../../../../store/timeline';
-import { ColumnHeaderOptions } from '../../../../../../timelines/store/timeline/model';
-import { OnFilterChange } from '../../../events';
-import { Sort } from '../../sort';
+import type { ColumnHeaderOptions } from '../../../../../../../common/types';
+import {
+  useDeepEqualSelector,
+  useShallowEqualSelector,
+} from '../../../../../../common/hooks/use_selector';
+import { timelineActions, timelineSelectors } from '../../../../../store/timeline';
+import type { OnFilterChange } from '../../../events';
+import type { Sort } from '../../sort';
 import { Actions } from '../actions';
 import { Filter } from '../filter';
 import { getNewSortDirectionOnClick } from './helpers';
 import { HeaderContent } from './header_content';
-import { useManageTimeline } from '../../../../manage_timeline';
 import { isEqlOnSelector } from './selectors';
 
 interface Props {
@@ -40,7 +43,8 @@ export const HeaderComponent: React.FC<Props> = ({
 
   const onColumnSort = useCallback(() => {
     const columnId = header.id;
-    const columnType = header.type ?? 'text';
+    const columnType = header.type ?? '';
+    const esTypes = header.esTypes ?? [];
     const sortDirection = getNewSortDirectionOnClick({
       clickedHeader: header,
       currentSort: sort,
@@ -53,6 +57,7 @@ export const HeaderComponent: React.FC<Props> = ({
         {
           columnId,
           columnType,
+          esTypes,
           sortDirection,
         },
       ];
@@ -62,6 +67,7 @@ export const HeaderComponent: React.FC<Props> = ({
         {
           columnId,
           columnType,
+          esTypes,
           sortDirection,
         },
         ...sort.slice(headerIndex + 1),
@@ -80,13 +86,11 @@ export const HeaderComponent: React.FC<Props> = ({
     [dispatch, timelineId]
   );
 
-  const { getManageTimelineById } = useManageTimeline();
-
-  const isLoading = useMemo(() => getManageTimelineById(timelineId).isLoading, [
-    getManageTimelineById,
-    timelineId,
-  ]);
-  const showSortingCapability = !isEqlOn && !(header.subType && header.subType.nested);
+  const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
+  const { isLoading } = useDeepEqualSelector(
+    (state) => getManageTimeline(state, timelineId) || { isLoading: false }
+  );
+  const showSortingCapability = !isEqlOn && !isDataViewFieldSubtypeNested(header);
 
   return (
     <>

@@ -5,32 +5,19 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
 import { i18n } from '@kbn/i18n';
-import {
-  EuiLink,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiCard,
-  EuiTextColor,
-  EuiSpacer,
-  EuiDescriptionList,
-  EuiInMemoryTable,
-  EuiCodeBlock,
-} from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import { EuiInMemoryTable, EuiCodeBlock } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { pagePathGetters } from '../../../fleet/public';
+import { AgentIdToName } from '../agents/agent_id_to_name';
 import { useActionResults } from './use_action_results';
-import { useAllResults } from '../results/use_all_results';
 import { Direction } from '../../common/search_strategy';
-import { useKibana } from '../common/lib/kibana';
+import { useActionResultsPrivileges } from './use_action_privileges';
 
 interface ActionResultsSummaryProps {
   actionId: string;
+  expirationDate?: string;
   agentIds?: string[];
-  isLive?: boolean;
 }
 
 const renderErrorMessage = (error: string) => (
@@ -41,14 +28,17 @@ const renderErrorMessage = (error: string) => (
 
 const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
   actionId,
+  expirationDate,
   agentIds,
-  isLive,
 }) => {
-  const getUrlForApp = useKibana().services.application.getUrlForApp;
-  // @ts-expect-error update types
-  const [pageIndex, setPageIndex] = useState(0);
-  // @ts-expect-error update types
-  const [pageSize, setPageSize] = useState(50);
+  const [pageIndex] = useState(0);
+  const [pageSize] = useState(50);
+  const expired = useMemo(
+    () => (!expirationDate ? false : new Date(expirationDate) < new Date()),
+    [expirationDate]
+  );
+  const [isLive, setIsLive] = useState(true);
+  const { data: hasActionResultsPrivileges } = useActionResultsPrivileges();
   const {
     // @ts-expect-error update types
     data: { aggregations, edges },
@@ -60,110 +50,46 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     direction: Direction.asc,
     sortField: '@timestamp',
     isLive,
+    skip: !hasActionResultsPrivileges,
   });
-
-  const { data: logsResults } = useAllResults({
-    actionId,
-    activePage: pageIndex,
-    limit: pageSize,
-    direction: Direction.asc,
-    sortField: '@timestamp',
-    isLive,
-  });
-
-  const notRespondedCount = useMemo(() => {
-    if (!agentIds || !aggregations.totalResponded) {
-      return '-';
-    }
-
-    return agentIds.length - aggregations.totalResponded;
-  }, [aggregations.totalResponded, agentIds]);
-
-  const listItems = useMemo(
-    () => [
-      {
-        title: i18n.translate(
-          'xpack.osquery.liveQueryActionResults.summary.agentsQueriedLabelText',
-          {
-            defaultMessage: 'Agents queried',
-          }
-        ),
-        description: agentIds?.length,
-      },
-      {
-        title: i18n.translate('xpack.osquery.liveQueryActionResults.summary.successfulLabelText', {
-          defaultMessage: 'Successful',
-        }),
-        description: aggregations.successful,
-      },
-      {
-        title: i18n.translate('xpack.osquery.liveQueryActionResults.summary.pendingLabelText', {
-          defaultMessage: 'Not yet responded',
-        }),
-        description: notRespondedCount,
-      },
-      {
-        title: i18n.translate('xpack.osquery.liveQueryActionResults.summary.failedLabelText', {
-          defaultMessage: 'Failed',
-        }),
-        description: (
-          <EuiTextColor color={aggregations.failed ? 'danger' : 'default'}>
-            {aggregations.failed}
-          </EuiTextColor>
-        ),
-      },
-    ],
-    [agentIds, aggregations.failed, aggregations.successful, notRespondedCount]
-  );
-
-  const renderAgentIdColumn = useCallback(
-    (agentId) => (
-      <EuiLink
-        className="eui-textTruncate"
-        href={getUrlForApp('fleet', {
-          path: `#` + pagePathGetters.fleet_agent_details({ agentId }),
-        })}
-        target="_blank"
-      >
-        {agentId}
-      </EuiLink>
-    ),
-    [getUrlForApp]
-  );
-
-  const renderRowsColumn = useCallback(
-    (_, item) => {
-      if (!logsResults) return '-';
-      const agentId = item.fields.agent_id[0];
-
-      return (
-        // @ts-expect-error update types
-        logsResults?.rawResponse?.aggregations?.count_by_agent_id?.buckets?.find(
-          // @ts-expect-error update types
-          (bucket) => bucket.key === agentId
-        )?.doc_count ?? '-'
-      );
-    },
-    [logsResults]
-  );
-
-  const renderStatusColumn = useCallback((_, item) => {
-    if (!item.fields.completed_at) {
-      return i18n.translate('xpack.osquery.liveQueryActionResults.table.pendingStatusText', {
-        defaultMessage: 'pending',
-      });
-    }
-
-    if (item.fields['error.keyword']) {
-      return i18n.translate('xpack.osquery.liveQueryActionResults.table.errorStatusText', {
-        defaultMessage: 'error',
-      });
-    }
-
-    return i18n.translate('xpack.osquery.liveQueryActionResults.table.successStatusText', {
-      defaultMessage: 'success',
+  if (expired) {
+    edges.forEach((edge) => {
+      if (!edge.fields?.completed_at && edge.fields) {
+        edge.fields['error.keyword'] = edge.fields.error = [
+          i18n.translate('xpack.osquery.liveQueryActionResults.table.expiredErrorText', {
+            defaultMessage: 'The action request timed out.',
+          }),
+        ];
+      }
     });
-  }, []);
+  }
+
+  const renderAgentIdColumn = useCallback((agentId) => <AgentIdToName agentId={agentId} />, []);
+  const renderRowsColumn = useCallback((rowsCount) => rowsCount ?? '-', []);
+  const renderStatusColumn = useCallback(
+    (_, item) => {
+      if (!item.fields.completed_at) {
+        return expired
+          ? i18n.translate('xpack.osquery.liveQueryActionResults.table.expiredStatusText', {
+              defaultMessage: 'expired',
+            })
+          : i18n.translate('xpack.osquery.liveQueryActionResults.table.pendingStatusText', {
+              defaultMessage: 'pending',
+            });
+      }
+
+      if (item.fields['error.keyword']) {
+        return i18n.translate('xpack.osquery.liveQueryActionResults.table.errorStatusText', {
+          defaultMessage: 'error',
+        });
+      }
+
+      return i18n.translate('xpack.osquery.liveQueryActionResults.table.successStatusText', {
+        defaultMessage: 'success',
+      });
+    },
+    [expired]
+  );
 
   const columns = useMemo(
     () => [
@@ -183,7 +109,7 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
         render: renderAgentIdColumn,
       },
       {
-        field: 'fields.rows[0]',
+        field: '_source.action_response.osquery.count',
         name: i18n.translate(
           'xpack.osquery.liveQueryActionResults.table.resultRowsNumberColumnTitle',
           {
@@ -211,29 +137,17 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
     []
   );
 
-  return (
-    <>
-      <EuiFlexGroup>
-        <EuiFlexItem grow={false}>
-          <EuiCard title="" description="" textAlign="left">
-            <EuiDescriptionList
-              compressed
-              textStyle="reverse"
-              type="responsiveColumn"
-              listItems={listItems}
-            />
-          </EuiCard>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+  useEffect(() => {
+    setIsLive(() => {
+      if (!agentIds?.length || expired) return false;
 
-      {edges.length ? (
-        <>
-          <EuiSpacer />
-          <EuiInMemoryTable items={edges} columns={columns} pagination={pagination} />
-        </>
-      ) : null}
-    </>
-  );
+      return !!(aggregations.totalResponded !== agentIds?.length);
+    });
+  }, [agentIds?.length, aggregations.totalResponded, expired]);
+
+  return edges.length ? (
+    <EuiInMemoryTable loading={isLive} items={edges} columns={columns} pagination={pagination} />
+  ) : null;
 };
 
 export const ActionResultsSummary = React.memo(ActionResultsSummaryComponent);

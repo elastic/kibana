@@ -5,41 +5,36 @@
  * 2.0.
  */
 
-import sinon from 'sinon';
-import { savedObjectsClientMock, httpServerMock } from 'src/core/server/mocks';
-import { CANVAS_TYPE } from '../../../common/lib/constants';
+import { AwaitedProperties } from '@kbn/utility-types';
+import { savedObjectsClientMock, httpServerMock, coreMock } from '@kbn/core/server/mocks';
+import { workpadRouteContextMock, MockWorkpadRouteContext } from '../../mocks';
 import { initializeCreateWorkpadRoute } from './create';
-import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from 'src/core/server';
+import { kibanaResponseFactory, RequestHandler, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { getMockedRouterDeps } from '../test_helpers';
 
-let mockRouteContext = ({
+let mockRouteContext = {
   core: {
     savedObjects: {
       client: savedObjectsClientMock.create(),
     },
   },
-} as unknown) as RequestHandlerContext;
-
-const mockedUUID = '123abc';
-const now = new Date();
-const nowIso = now.toISOString();
+  canvas: workpadRouteContextMock.create(),
+} as unknown as AwaitedProperties<MockWorkpadRouteContext>;
 
 jest.mock('uuid/v4', () => jest.fn().mockReturnValue('123abc'));
 
 describe('POST workpad', () => {
   let routeHandler: RequestHandler<any, any, any>;
-  let clock: sinon.SinonFakeTimers;
 
   beforeEach(() => {
-    mockRouteContext = ({
+    mockRouteContext = {
       core: {
         savedObjects: {
           client: savedObjectsClientMock.create(),
         },
       },
-    } as unknown) as RequestHandlerContext;
-
-    clock = sinon.useFakeTimers(now);
+      canvas: workpadRouteContextMock.create(),
+    } as unknown as AwaitedProperties<MockWorkpadRouteContext>;
 
     const routerDeps = getMockedRouterDeps();
     initializeCreateWorkpadRoute(routerDeps);
@@ -47,11 +42,12 @@ describe('POST workpad', () => {
     routeHandler = routerDeps.router.post.mock.calls[0][1];
   });
 
-  afterEach(() => {
-    clock.restore();
-  });
-
   it(`returns 200 when the workpad is created`, async () => {
+    const id = 'my-id';
+    mockRouteContext.canvas.workpad.create.mockResolvedValue({
+      id,
+    });
+
     const mockWorkpad = {
       pages: [],
     };
@@ -62,21 +58,15 @@ describe('POST workpad', () => {
       body: mockWorkpad,
     });
 
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+    const response = await routeHandler(
+      coreMock.createCustomRequestHandlerContext(mockRouteContext),
+      request,
+      kibanaResponseFactory
+    );
 
     expect(response.status).toBe(200);
-    expect(response.payload).toEqual({ ok: true, id: `workpad-${mockedUUID}` });
-    expect(mockRouteContext.core.savedObjects.client.create).toBeCalledWith(
-      CANVAS_TYPE,
-      {
-        ...mockWorkpad,
-        '@timestamp': nowIso,
-        '@created': nowIso,
-      },
-      {
-        id: `workpad-${mockedUUID}`,
-      }
-    );
+    expect(response.payload).toEqual({ ok: true, id });
+    expect(mockRouteContext.canvas.workpad.create).toBeCalledWith(mockWorkpad);
   });
 
   it(`returns bad request if create is unsuccessful`, async () => {
@@ -86,11 +76,15 @@ describe('POST workpad', () => {
       body: {},
     });
 
-    (mockRouteContext.core.savedObjects.client.create as jest.Mock).mockImplementation(() => {
-      throw mockRouteContext.core.savedObjects.client.errors.createBadRequestError('bad request');
+    mockRouteContext.canvas.workpad.create.mockImplementation(() => {
+      throw SavedObjectsErrorHelpers.createBadRequestError('bad request');
     });
 
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+    const response = await routeHandler(
+      coreMock.createCustomRequestHandlerContext(mockRouteContext),
+      request,
+      kibanaResponseFactory
+    );
 
     expect(response.status).toBe(400);
   });
@@ -109,6 +103,11 @@ describe('POST workpad', () => {
       },
     };
 
+    const id = 'my-id';
+    mockRouteContext.canvas.workpad.create.mockResolvedValue({
+      id,
+    });
+
     (mockRouteContext.core.savedObjects.client.get as jest.Mock).mockResolvedValue(
       mockTemplateResponse
     );
@@ -119,20 +118,16 @@ describe('POST workpad', () => {
       body: cloneFromTemplateBody,
     });
 
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+    const response = await routeHandler(
+      coreMock.createCustomRequestHandlerContext(mockRouteContext),
+      request,
+      kibanaResponseFactory
+    );
 
     expect(response.status).toBe(200);
-    expect(response.payload).toEqual({ ok: true, id: `workpad-${mockedUUID}` });
-    expect(mockRouteContext.core.savedObjects.client.create).toBeCalledWith(
-      CANVAS_TYPE,
-      {
-        ...mockTemplateResponse.attributes.template,
-        '@timestamp': nowIso,
-        '@created': nowIso,
-      },
-      {
-        id: `workpad-${mockedUUID}`,
-      }
+    expect(response.payload).toEqual({ ok: true, id });
+    expect(mockRouteContext.canvas.workpad.create).toBeCalledWith(
+      mockTemplateResponse.attributes.template
     );
   });
 });

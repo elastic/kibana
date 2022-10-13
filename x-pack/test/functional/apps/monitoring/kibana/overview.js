@@ -17,10 +17,12 @@ export default function ({ getService, getPageObjects }) {
     const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
     before(async () => {
-      await setup('monitoring/singlecluster_yellow_platinum', {
+      await setup('x-pack/test/functional/es_archives/monitoring/singlecluster_yellow_platinum', {
         from: 'Aug 29, 2017 @ 17:24:14.254',
         to: 'Aug 29, 2017 @ 17:25:44.142',
       });
+
+      await clusterOverview.closeAlertsModal();
 
       // go to kibana overview
       await clusterOverview.clickKibanaOverview();
@@ -38,7 +40,7 @@ export default function ({ getService, getPageObjects }) {
         requests: 'Requests\n174',
         connections: 'Connections\n174',
         maxResponseTime: 'Max. Response Time\n2203 ms',
-        health: 'Health: green',
+        health: 'Status\nStale\nView all instances',
       });
     });
   });

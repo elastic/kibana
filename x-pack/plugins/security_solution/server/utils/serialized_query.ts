@@ -7,7 +7,7 @@
 
 import { isEmpty, isPlainObject, isString } from 'lodash/fp';
 
-import { JsonObject } from '../../../../../src/plugins/kibana_utils/common';
+import type { JsonObject } from '@kbn/utility-types';
 
 export const parseFilterQuery = (filterQuery: string): JsonObject => {
   try {

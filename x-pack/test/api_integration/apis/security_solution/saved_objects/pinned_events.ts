@@ -10,12 +10,12 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const supertest = getService('supertest');
 
   describe('Pinned Events - Saved Objects', () => {
-    beforeEach(() => esArchiver.load('empty_kibana'));
-    afterEach(() => esArchiver.unload('empty_kibana'));
+    before(() => kibanaServer.savedObjects.cleanStandardList());
+    after(() => kibanaServer.savedObjects.cleanStandardList());
 
     describe('Pinned an event', () => {
       it('return a timelineId, timelineVersion, pinnedEventId and version', async () => {

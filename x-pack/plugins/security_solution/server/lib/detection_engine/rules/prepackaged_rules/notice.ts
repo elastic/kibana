@@ -2,17 +2,17 @@
 
 /* @notice
  * Detection Rules
- * Copyright 2020 Elasticsearch B.V.
+ * Copyright 2021 Elasticsearch B.V.
  *
  * ---
  * This product bundles rules based on https://github.com/BlueTeamLabs/sentinel-attack
- * which is available under a "MIT" license. The files based on this license are:
+ * which is available under a "MIT" license. The rules based on this license are:
  *
- * - defense_evasion_via_filter_manager
- * - discovery_process_discovery_via_tasklist_command
- * - persistence_priv_escalation_via_accessibility_features
- * - persistence_via_application_shimming
- * - defense_evasion_execution_via_trusted_developer_utilities
+ * - "Potential Evasion via Filter Manager" (06dceabf-adca-48af-ac79-ffdf4c3b1e9a)
+ * - "Process Discovery via Tasklist" (cc16f774-59f9-462d-8b98-d27ccd4519ec)
+ * - "Potential Modification of Accessibility Binaries" (7405ddf1-6c8e-41ce-818f-48bea6bcaed8)
+ * - "Potential Application Shimming via Sdbinst" (fd4a992d-6130-4802-9ff8-829b89ae801f)
+ * - "Trusted Developer Application Usage" (9d110cb3-5f4b-4c9a-b9f5-53f0a1707ae1)
  *
  * MIT License
  *
@@ -38,9 +38,9 @@
  *
  * ---
  * This product bundles rules based on https://github.com/FSecureLABS/leonidas
- * which is available under a "MIT" license. The files based on this license are:
+ * which is available under a "MIT" license. The rules based on this license are:
  *
- * - credential_access_secretsmanager_getsecretvalue.toml
+ * - "AWS Access Secret in Secrets Manager" (a00681e3-9ed6-447c-ab2c-be648821c622)
  *
  * MIT License
  *

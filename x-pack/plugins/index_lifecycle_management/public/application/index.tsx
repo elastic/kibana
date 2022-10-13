@@ -7,37 +7,59 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { I18nStart, ScopedHistory, ApplicationStart } from 'kibana/public';
-import { UnmountCallback } from 'src/core/public';
-import { CloudSetup } from '../../../cloud/public';
-import { ILicense } from '../../../licensing/public';
+import { Observable } from 'rxjs';
+import {
+  I18nStart,
+  ScopedHistory,
+  ApplicationStart,
+  UnmountCallback,
+  CoreTheme,
+} from '@kbn/core/public';
+import { DocLinksStart, ExecutionContextStart } from '@kbn/core/public';
 
-import { KibanaContextProvider } from '../shared_imports';
-
-import { AppWithRouter } from './app';
-
+import {
+  CloudSetup,
+  ILicense,
+  KibanaContextProvider,
+  APP_WRAPPER_CLASS,
+  RedirectAppLinks,
+  KibanaThemeProvider,
+} from '../shared_imports';
+import { App } from './app';
 import { BreadcrumbService } from './services/breadcrumbs';
 
 export const renderApp = (
   element: Element,
   I18nContext: I18nStart['Context'],
   history: ScopedHistory,
-  navigateToApp: ApplicationStart['navigateToApp'],
-  getUrlForApp: ApplicationStart['getUrlForApp'],
+  application: ApplicationStart,
   breadcrumbService: BreadcrumbService,
   license: ILicense,
+  theme$: Observable<CoreTheme>,
+  docLinks: DocLinksStart,
+  executionContext: ExecutionContextStart,
   cloud?: CloudSetup
 ): UnmountCallback => {
+  const { getUrlForApp } = application;
   render(
-    <I18nContext>
-      <KibanaContextProvider services={{ cloud, breadcrumbService, license }}>
-        <AppWithRouter
-          history={history}
-          navigateToApp={navigateToApp}
-          getUrlForApp={getUrlForApp}
-        />
-      </KibanaContextProvider>
-    </I18nContext>,
+    <RedirectAppLinks application={application} className={APP_WRAPPER_CLASS}>
+      <I18nContext>
+        <KibanaThemeProvider theme$={theme$}>
+          <KibanaContextProvider
+            services={{
+              cloud,
+              breadcrumbService,
+              license,
+              getUrlForApp,
+              docLinks,
+              executionContext,
+            }}
+          >
+            <App history={history} />
+          </KibanaContextProvider>
+        </KibanaThemeProvider>
+      </I18nContext>
+    </RedirectAppLinks>,
     element
   );
 

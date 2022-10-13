@@ -6,17 +6,30 @@
  * Side Public License, v 1.
  */
 
-import { BytesFormat, FieldFormatsGetConfigFn } from '../../../../../common/field_formats';
+import { BytesFormat, FieldFormatsGetConfigFn } from '@kbn/field-formats-plugin/common';
 import { AggConfigs } from '../../agg_configs';
 import { mockAggTypesRegistry, mockGetFieldFormatsStart } from '../../test_helpers';
 import { BUCKET_TYPES } from '../bucket_agg_types';
 import { IBucketAggConfig } from '../bucket_agg_type';
 import { createFilterHistogram } from './histogram';
+import { RangeFilter } from '@kbn/es-query';
+
+function validateFilter(filter: RangeFilter) {
+  expect(mockGetFieldFormatsStart().deserialize).toHaveBeenCalledTimes(1);
+  expect(filter).toHaveProperty('meta');
+  expect(filter.meta).toHaveProperty('index', '1234');
+  expect(filter.query).toHaveProperty('range');
+  expect(filter.query.range).toHaveProperty('bytes');
+  expect(filter.query.range.bytes).toHaveProperty('gte', 2048);
+  expect(filter.query.range.bytes).toHaveProperty('lt', 3072);
+  expect(filter.meta).toHaveProperty('formattedValue');
+}
 
 describe('AggConfig Filters', () => {
   describe('histogram', () => {
     const getConfig = (() => {}) as FieldFormatsGetConfigFn;
     const getAggConfigs = () => {
+      jest.clearAllMocks();
       const field = {
         name: 'bytes',
         format: new BytesFormat({}, getConfig),
@@ -45,7 +58,8 @@ describe('AggConfig Filters', () => {
             },
           },
         ],
-        { typesRegistry: mockAggTypesRegistry() }
+        { typesRegistry: mockAggTypesRegistry() },
+        jest.fn()
       );
     };
 
@@ -54,16 +68,22 @@ describe('AggConfig Filters', () => {
       const filter = createFilterHistogram(mockGetFieldFormatsStart)(
         aggConfigs.aggs[0] as IBucketAggConfig,
         '2048'
-      );
+      ) as RangeFilter;
 
-      expect(mockGetFieldFormatsStart().deserialize).toHaveBeenCalledTimes(1);
-      expect(filter).toHaveProperty('meta');
-      expect(filter.meta).toHaveProperty('index', '1234');
-      expect(filter).toHaveProperty('range');
-      expect(filter.range).toHaveProperty('bytes');
-      expect(filter.range.bytes).toHaveProperty('gte', 2048);
-      expect(filter.range.bytes).toHaveProperty('lt', 3072);
-      expect(filter.meta).toHaveProperty('formattedValue');
+      validateFilter(filter);
+    });
+
+    test('should work for auto histograms', () => {
+      const aggConfigs = getAggConfigs();
+      const histogramAggConfig = aggConfigs.aggs[0];
+      histogramAggConfig.params.interval = 'auto';
+      histogramAggConfig.params.used_interval = 1024;
+
+      const filter = createFilterHistogram(mockGetFieldFormatsStart)(
+        histogramAggConfig as IBucketAggConfig,
+        '2048'
+      ) as RangeFilter;
+      validateFilter(filter);
     });
   });
 });

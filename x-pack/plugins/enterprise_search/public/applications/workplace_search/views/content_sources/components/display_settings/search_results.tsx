@@ -11,7 +11,7 @@ import { useActions, useValues } from 'kea';
 
 import {
   EuiColorPicker,
-  EuiFlexGrid,
+  EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
@@ -28,6 +28,14 @@ import {
   SEARCH_RESULTS_TITLE,
   SEARCH_RESULTS_ROW_HELP_TEXT,
   PREVIEW_TITLE,
+  TITLE_LABEL,
+  URL_LABEL,
+  COLOR_LABEL,
+  TYPE_LABEL,
+  MEDIA_TYPE_LABEL,
+  CREATED_BY_LABEL,
+  UPDATED_BY_LABEL,
+  OPTIONAL_AREA_TEXT,
   FEATURED_RESULTS_TITLE,
   FEATURED_RESULTS_DESCRIPTION,
   STANDARD_RESULTS_TITLE,
@@ -42,15 +50,33 @@ export const SearchResults: React.FC = () => {
     toggleTitleFieldHover,
     toggleSubtitleFieldHover,
     toggleDescriptionFieldHover,
+    toggleTypeFieldHover,
+    toggleMediaTypeFieldHover,
+    toggleCreatedByFieldHover,
+    toggleUpdatedByFieldHover,
     setTitleField,
     setSubtitleField,
     setDescriptionField,
+    setTypeField,
+    setMediaTypeField,
+    setCreatedByField,
+    setUpdatedByField,
     setUrlField,
     setColorField,
   } = useActions(DisplaySettingsLogic);
 
   const {
-    searchResultConfig: { titleField, descriptionField, subtitleField, urlField, color },
+    searchResultConfig: {
+      titleField,
+      descriptionField,
+      subtitleField,
+      typeField,
+      mediaTypeField,
+      createdByField,
+      updatedByField,
+      urlField,
+      color,
+    },
     fieldOptions,
     optionalFieldOptions,
   } = useValues(DisplaySettingsLogic);
@@ -58,7 +84,7 @@ export const SearchResults: React.FC = () => {
   return (
     <>
       <EuiSpacer />
-      <EuiFlexGrid columns={2}>
+      <EuiFlexGroup>
         <EuiFlexItem>
           <EuiSpacer size="m" />
           <EuiTitle size="s">
@@ -67,7 +93,7 @@ export const SearchResults: React.FC = () => {
           <EuiSpacer size="s" />
           <EuiForm>
             <EuiFormRow
-              label="Title"
+              label={TITLE_LABEL}
               onMouseOver={toggleTitleFieldHover}
               onMouseOut={toggleTitleFieldHover}
               onFocus={toggleTitleFieldHover}
@@ -84,7 +110,7 @@ export const SearchResults: React.FC = () => {
                 onChange={(e) => setTitleField(e.target.value)}
               />
             </EuiFormRow>
-            <EuiFormRow label="URL">
+            <EuiFormRow label={URL_LABEL}>
               <EuiSelect
                 options={fieldOptions}
                 required
@@ -95,7 +121,7 @@ export const SearchResults: React.FC = () => {
                 onChange={(e) => setUrlField(e.target.value)}
               />
             </EuiFormRow>
-            <EuiFormRow label="Color">
+            <EuiFormRow label={COLOR_LABEL}>
               <EuiColorPicker color={color} onChange={setColorField} />
             </EuiFormRow>
             <EuiFormRow
@@ -136,6 +162,82 @@ export const SearchResults: React.FC = () => {
                 }
               />
             </EuiFormRow>
+            <EuiFormRow
+              label={TYPE_LABEL}
+              helpText={OPTIONAL_AREA_TEXT}
+              onMouseOver={toggleTypeFieldHover}
+              onFocus={toggleTypeFieldHover}
+              onMouseOut={toggleTypeFieldHover}
+              onBlur={toggleTypeFieldHover}
+            >
+              <EuiSelect
+                options={optionalFieldOptions}
+                className="field-selector"
+                hasNoInitialSelection
+                data-test-subj="TypeFieldSelect"
+                value={typeField || LEAVE_UNASSIGNED_FIELD}
+                onChange={({ target: { value } }) =>
+                  setTypeField(value === LEAVE_UNASSIGNED_FIELD ? null : value)
+                }
+              />
+            </EuiFormRow>
+            <EuiFormRow
+              label={MEDIA_TYPE_LABEL}
+              helpText={OPTIONAL_AREA_TEXT}
+              onMouseOver={toggleMediaTypeFieldHover}
+              onFocus={toggleMediaTypeFieldHover}
+              onMouseOut={toggleMediaTypeFieldHover}
+              onBlur={toggleMediaTypeFieldHover}
+            >
+              <EuiSelect
+                options={optionalFieldOptions}
+                className="field-selector"
+                hasNoInitialSelection
+                data-test-subj="MediaTypeFieldSelect"
+                value={mediaTypeField || LEAVE_UNASSIGNED_FIELD}
+                onChange={({ target: { value } }) =>
+                  setMediaTypeField(value === LEAVE_UNASSIGNED_FIELD ? null : value)
+                }
+              />
+            </EuiFormRow>
+            <EuiFormRow
+              label={CREATED_BY_LABEL}
+              helpText={OPTIONAL_AREA_TEXT}
+              onMouseOver={toggleCreatedByFieldHover}
+              onFocus={toggleCreatedByFieldHover}
+              onMouseOut={toggleCreatedByFieldHover}
+              onBlur={toggleCreatedByFieldHover}
+            >
+              <EuiSelect
+                options={optionalFieldOptions}
+                className="field-selector"
+                hasNoInitialSelection
+                data-test-subj="CreatedByFieldSelect"
+                value={createdByField || LEAVE_UNASSIGNED_FIELD}
+                onChange={({ target: { value } }) =>
+                  setCreatedByField(value === LEAVE_UNASSIGNED_FIELD ? null : value)
+                }
+              />
+            </EuiFormRow>
+            <EuiFormRow
+              label={UPDATED_BY_LABEL}
+              helpText={OPTIONAL_AREA_TEXT}
+              onMouseOver={toggleUpdatedByFieldHover}
+              onFocus={toggleUpdatedByFieldHover}
+              onMouseOut={toggleUpdatedByFieldHover}
+              onBlur={toggleUpdatedByFieldHover}
+            >
+              <EuiSelect
+                options={optionalFieldOptions}
+                className="field-selector"
+                hasNoInitialSelection
+                data-test-subj="UpdatedByFieldSelect"
+                value={updatedByField || LEAVE_UNASSIGNED_FIELD}
+                onChange={({ target: { value } }) =>
+                  setUpdatedByField(value === LEAVE_UNASSIGNED_FIELD ? null : value)
+                }
+              />
+            </EuiFormRow>
           </EuiForm>
         </EuiFlexItem>
         <EuiFlexItem>
@@ -163,7 +265,7 @@ export const SearchResults: React.FC = () => {
             <ExampleSearchResultGroup />
           </EuiPanel>
         </EuiFlexItem>
-      </EuiFlexGrid>
+      </EuiFlexGroup>
     </>
   );
 };

@@ -4,12 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { flatten, merge, sortBy, sum, pickBy } from 'lodash';
-import { CompositeAggregationSource } from '@elastic/elasticsearch/api/types';
+import { fromKueryExpression } from '@kbn/es-query';
+import { flatten, merge, sortBy, sum, pickBy, uniq } from 'lodash';
+import { createHash } from 'crypto';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
-import { ProcessorEvent } from '../../../../common/processor_event';
 import { TelemetryTask } from '.';
 import { AGENT_NAMES, RUM_AGENT_NAMES } from '../../../../common/agent_name';
+import {
+  SavedServiceGroup,
+  APM_SERVICE_GROUP_SAVED_OBJECT_TYPE,
+  MAX_NUMBER_OF_SERVICE_GROUPS,
+} from '../../../../common/service_groups';
+import { getKueryFields } from '../../helpers/get_kuery_fields';
 import {
   AGENT_NAME,
   AGENT_VERSION,
@@ -19,10 +27,12 @@ import {
   CLOUD_REGION,
   CONTAINER_ID,
   ERROR_GROUP_ID,
+  FAAS_TRIGGER_TYPE,
   HOST_NAME,
+  HOST_OS_PLATFORM,
   OBSERVER_HOSTNAME,
   PARENT_ID,
-  POD_NAME,
+  KUBERNETES_POD_NAME,
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
   SERVICE_FRAMEWORK_NAME,
@@ -42,8 +52,7 @@ import { APMError } from '../../../../typings/es_schemas/ui/apm_error';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { Span } from '../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
-import { APMTelemetry } from '../types';
-
+import { APMTelemetry, APMPerService } from '../types';
 const TIME_RANGES = ['1d', 'all'] as const;
 type TimeRange = typeof TIME_RANGES[number];
 
@@ -59,7 +68,7 @@ export const tasks: TelemetryTask[] = [
     // the transaction count for that time range.
     executor: async ({ indices, search }) => {
       async function getBucketCountFromPaginatedQuery(
-        sources: CompositeAggregationSource[],
+        sources: estypes.AggregationsCompositeAggregationSource[],
         prevResult?: {
           transaction_count: number;
           expected_metric_document_count: number;
@@ -77,7 +86,7 @@ export const tasks: TelemetryTask[] = [
         };
 
         const params = {
-          index: [indices['apm_oss.transactionIndices']],
+          index: [indices.transaction],
           body: {
             size: 0,
             timeout,
@@ -137,7 +146,7 @@ export const tasks: TelemetryTask[] = [
       // fixed date range for reliable results
       const lastTransaction = (
         await search({
-          index: indices['apm_oss.transactionIndices'],
+          index: indices.transaction,
           body: {
             query: {
               bool: {
@@ -173,7 +182,7 @@ export const tasks: TelemetryTask[] = [
         SERVICE_VERSION,
         HOST_NAME,
         CONTAINER_ID,
-        POD_NAME,
+        KUBERNETES_POD_NAME,
       ].map((field) => ({ terms: { field, missing_bucket: true } }));
 
       const observerHostname = {
@@ -252,10 +261,10 @@ export const tasks: TelemetryTask[] = [
 
       const response = await search({
         index: [
-          indices['apm_oss.errorIndices'],
-          indices['apm_oss.metricsIndices'],
-          indices['apm_oss.spanIndices'],
-          indices['apm_oss.transactionIndices'],
+          indices.error,
+          indices.metric,
+          indices.span,
+          indices.transaction,
         ],
         body: {
           size: 0,
@@ -294,10 +303,57 @@ export const tasks: TelemetryTask[] = [
     },
   },
   {
+    name: 'host',
+    executor: async ({ indices, search }) => {
+      function getBucketKeys({
+        buckets,
+      }: {
+        buckets: Array<{
+          doc_count: number;
+          key: string | number;
+        }>;
+      }) {
+        return buckets.map((bucket) => bucket.key as string);
+      }
+
+      const response = await search({
+        index: [
+          indices.error,
+          indices.metric,
+          indices.span,
+          indices.transaction,
+        ],
+        body: {
+          size: 0,
+          timeout,
+          aggs: {
+            platform: {
+              terms: {
+                field: HOST_OS_PLATFORM,
+              },
+            },
+          },
+        },
+      });
+
+      const { aggregations } = response;
+
+      if (!aggregations) {
+        return { host: { os: { platform: [] } } };
+      }
+      const host = {
+        os: {
+          platform: getBucketKeys(aggregations.platform),
+        },
+      };
+      return { host };
+    },
+  },
+  {
     name: 'environments',
     executor: async ({ indices, search }) => {
       const response = await search({
-        index: [indices['apm_oss.transactionIndices']],
+        index: [indices.transaction],
         body: {
           query: {
             bool: {
@@ -378,12 +434,12 @@ export const tasks: TelemetryTask[] = [
     name: 'processor_events',
     executor: async ({ indices, search }) => {
       const indicesByProcessorEvent = {
-        error: indices['apm_oss.errorIndices'],
-        metric: indices['apm_oss.metricsIndices'],
-        span: indices['apm_oss.spanIndices'],
-        transaction: indices['apm_oss.transactionIndices'],
-        onboarding: indices['apm_oss.onboardingIndices'],
-        sourcemap: indices['apm_oss.sourcemapIndices'],
+        error: indices.error,
+        metric: indices.metric,
+        span: indices.span,
+        transaction: indices.transaction,
+        onboarding: indices.onboarding,
+        sourcemap: indices.sourcemap,
       };
 
       type ProcessorEvent = keyof typeof indicesByProcessorEvent;
@@ -501,10 +557,10 @@ export const tasks: TelemetryTask[] = [
           return prevJob.then(async (data) => {
             const response = await search({
               index: [
-                indices['apm_oss.errorIndices'],
-                indices['apm_oss.spanIndices'],
-                indices['apm_oss.metricsIndices'],
-                indices['apm_oss.transactionIndices'],
+                indices.error,
+                indices.span,
+                indices.metric,
+                indices.transaction,
               ],
               body: {
                 size: 0,
@@ -550,12 +606,8 @@ export const tasks: TelemetryTask[] = [
     name: 'versions',
     executor: async ({ search, indices }) => {
       const response = await search({
-        index: [
-          indices['apm_oss.transactionIndices'],
-          indices['apm_oss.spanIndices'],
-          indices['apm_oss.errorIndices'],
-        ],
-        terminateAfter: 1,
+        index: [indices.transaction, indices.span, indices.error],
+        terminate_after: 1,
         body: {
           query: {
             exists: {
@@ -599,7 +651,7 @@ export const tasks: TelemetryTask[] = [
     executor: async ({ search, indices }) => {
       const errorGroupsCount = (
         await search({
-          index: indices['apm_oss.errorIndices'],
+          index: indices.error,
           body: {
             size: 0,
             timeout,
@@ -635,7 +687,7 @@ export const tasks: TelemetryTask[] = [
 
       const transactionGroupsCount = (
         await search({
-          index: indices['apm_oss.transactionIndices'],
+          index: indices.transaction,
           body: {
             size: 0,
             timeout,
@@ -671,7 +723,7 @@ export const tasks: TelemetryTask[] = [
 
       const tracesPerDayCount = (
         await search({
-          index: indices['apm_oss.transactionIndices'],
+          index: indices.transaction,
           body: {
             query: {
               bool: {
@@ -693,11 +745,7 @@ export const tasks: TelemetryTask[] = [
 
       const servicesCount = (
         await search({
-          index: [
-            indices['apm_oss.transactionIndices'],
-            indices['apm_oss.errorIndices'],
-            indices['apm_oss.metricsIndices'],
-          ],
+          index: [indices.transaction, indices.error, indices.metric],
           body: {
             size: 0,
             timeout,
@@ -763,11 +811,7 @@ export const tasks: TelemetryTask[] = [
         const data = await prevJob;
 
         const response = await search({
-          index: [
-            indices['apm_oss.errorIndices'],
-            indices['apm_oss.metricsIndices'],
-            indices['apm_oss.transactionIndices'],
-          ],
+          index: [indices.error, indices.metric, indices.transaction],
           body: {
             size: 0,
             timeout,
@@ -958,12 +1002,12 @@ export const tasks: TelemetryTask[] = [
       const response = await indicesStats({
         index: [
           indices.apmAgentConfigurationIndex,
-          indices['apm_oss.errorIndices'],
-          indices['apm_oss.metricsIndices'],
-          indices['apm_oss.onboardingIndices'],
-          indices['apm_oss.sourcemapIndices'],
-          indices['apm_oss.spanIndices'],
-          indices['apm_oss.transactionIndices'],
+          indices.error,
+          indices.metric,
+          indices.onboarding,
+          indices.sourcemap,
+          indices.span,
+          indices.transaction,
         ],
       });
 
@@ -1046,10 +1090,9 @@ export const tasks: TelemetryTask[] = [
             geo: {
               country_iso_code: {
                 rum: {
-                  '1d':
-                    rumAgentCardinalityResponse.aggregations?.[
-                      CLIENT_GEO_COUNTRY_ISO_CODE
-                    ].value,
+                  '1d': rumAgentCardinalityResponse.aggregations?.[
+                    CLIENT_GEO_COUNTRY_ISO_CODE
+                  ].value,
                 },
               },
             },
@@ -1057,34 +1100,245 @@ export const tasks: TelemetryTask[] = [
           transaction: {
             name: {
               all_agents: {
-                '1d':
-                  allAgentsCardinalityResponse.aggregations?.[TRANSACTION_NAME]
-                    .value,
+                '1d': allAgentsCardinalityResponse.aggregations?.[
+                  TRANSACTION_NAME
+                ].value,
               },
               rum: {
-                '1d':
-                  rumAgentCardinalityResponse.aggregations?.[TRANSACTION_NAME]
-                    .value,
+                '1d': rumAgentCardinalityResponse.aggregations?.[
+                  TRANSACTION_NAME
+                ].value,
               },
             },
           },
           user_agent: {
             original: {
               all_agents: {
-                '1d':
-                  allAgentsCardinalityResponse.aggregations?.[
-                    USER_AGENT_ORIGINAL
-                  ].value,
+                '1d': allAgentsCardinalityResponse.aggregations?.[
+                  USER_AGENT_ORIGINAL
+                ].value,
               },
               rum: {
-                '1d':
-                  rumAgentCardinalityResponse.aggregations?.[
-                    USER_AGENT_ORIGINAL
-                  ].value,
+                '1d': rumAgentCardinalityResponse.aggregations?.[
+                  USER_AGENT_ORIGINAL
+                ].value,
               },
             },
           },
         },
+      };
+    },
+  },
+  {
+    name: 'service_groups',
+    executor: async ({ savedObjectsClient }) => {
+      const response = await savedObjectsClient.find<SavedServiceGroup>({
+        type: APM_SERVICE_GROUP_SAVED_OBJECT_TYPE,
+        page: 1,
+        perPage: MAX_NUMBER_OF_SERVICE_GROUPS,
+        sortField: 'updated_at',
+        sortOrder: 'desc',
+        namespaces: ['*'],
+      });
+
+      const kueryNodes = response.saved_objects.map(
+        ({ attributes: { kuery } }) => fromKueryExpression(kuery)
+      );
+
+      const kueryFields = getKueryFields(kueryNodes);
+
+      return {
+        service_groups: {
+          kuery_fields: uniq(kueryFields),
+          total: response.total ?? 0,
+        },
+      };
+    },
+  },
+  {
+    name: 'per_service',
+    executor: async ({ indices, search }) => {
+      const response = await search({
+        index: [indices.transaction],
+        body: {
+          size: 0,
+          timeout,
+          query: {
+            bool: {
+              filter: [
+                { range: { '@timestamp': { gte: 'now-1h' } } },
+                { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
+              ],
+            },
+          },
+          aggs: {
+            environments: {
+              terms: {
+                field: SERVICE_ENVIRONMENT,
+                size: 1000,
+              },
+              aggs: {
+                service_names: {
+                  terms: {
+                    field: SERVICE_NAME,
+                    size: 1000,
+                  },
+                  aggs: {
+                    top_metrics: {
+                      top_metrics: {
+                        sort: '_score',
+                        metrics: [
+                          {
+                            field: AGENT_NAME,
+                          },
+                          {
+                            field: AGENT_VERSION,
+                          },
+                          {
+                            field: SERVICE_LANGUAGE_NAME,
+                          },
+                          {
+                            field: SERVICE_LANGUAGE_VERSION,
+                          },
+                          {
+                            field: SERVICE_FRAMEWORK_NAME,
+                          },
+                          {
+                            field: SERVICE_FRAMEWORK_VERSION,
+                          },
+                          {
+                            field: SERVICE_RUNTIME_NAME,
+                          },
+                          {
+                            field: SERVICE_RUNTIME_VERSION,
+                          },
+                          {
+                            field: KUBERNETES_POD_NAME,
+                          },
+                          {
+                            field: CONTAINER_ID,
+                          },
+                        ],
+                      },
+                    },
+                    [CLOUD_REGION]: {
+                      terms: {
+                        field: CLOUD_REGION,
+                        size: 5,
+                      },
+                    },
+                    [CLOUD_PROVIDER]: {
+                      terms: {
+                        field: CLOUD_PROVIDER,
+                        size: 3,
+                      },
+                    },
+                    [CLOUD_AVAILABILITY_ZONE]: {
+                      terms: {
+                        field: CLOUD_AVAILABILITY_ZONE,
+                        size: 5,
+                      },
+                    },
+                    [FAAS_TRIGGER_TYPE]: {
+                      terms: {
+                        field: FAAS_TRIGGER_TYPE,
+                        size: 5,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
+      const envBuckets = response.aggregations?.environments.buckets ?? [];
+      const data: APMPerService[] = envBuckets.flatMap((envBucket) => {
+        const envHash = createHash('sha256')
+          .update(envBucket.key as string)
+          .digest('hex');
+        const serviceBuckets = envBucket.service_names?.buckets ?? [];
+        return serviceBuckets.map((serviceBucket) => {
+          const nameHash = createHash('sha256')
+            .update(serviceBucket.key as string)
+            .digest('hex');
+          const fullServiceName = `${nameHash}~${envHash}`;
+          return {
+            service_id: fullServiceName,
+            timed_out: response.timed_out,
+            cloud: {
+              availability_zones:
+                serviceBucket[CLOUD_AVAILABILITY_ZONE]?.buckets.map(
+                  (inner) => inner.key as string
+                ) ?? [],
+              regions:
+                serviceBucket[CLOUD_REGION]?.buckets.map(
+                  (inner) => inner.key as string
+                ) ?? [],
+              providers:
+                serviceBucket[CLOUD_PROVIDER]?.buckets.map(
+                  (inner) => inner.key as string
+                ) ?? [],
+            },
+            faas: {
+              trigger: {
+                type:
+                  serviceBucket[FAAS_TRIGGER_TYPE]?.buckets.map(
+                    (inner) => inner.key as string
+                  ) ?? [],
+              },
+            },
+            agent: {
+              name: serviceBucket.top_metrics?.top[0].metrics[
+                AGENT_NAME
+              ] as string,
+              version: serviceBucket.top_metrics?.top[0].metrics[
+                AGENT_VERSION
+              ] as string,
+            },
+            service: {
+              language: {
+                name: serviceBucket.top_metrics?.top[0].metrics[
+                  SERVICE_LANGUAGE_NAME
+                ] as string,
+                version: serviceBucket.top_metrics?.top[0].metrics[
+                  SERVICE_LANGUAGE_VERSION
+                ] as string,
+              },
+              framework: {
+                name: serviceBucket.top_metrics?.top[0].metrics[
+                  SERVICE_FRAMEWORK_NAME
+                ] as string,
+                version: serviceBucket.top_metrics?.top[0].metrics[
+                  SERVICE_FRAMEWORK_VERSION
+                ] as string,
+              },
+              runtime: {
+                name: serviceBucket.top_metrics?.top[0].metrics[
+                  SERVICE_RUNTIME_NAME
+                ] as string,
+                version: serviceBucket.top_metrics?.top[0].metrics[
+                  SERVICE_RUNTIME_VERSION
+                ] as string,
+              },
+            },
+            kubernetes: {
+              pod: {
+                name: serviceBucket.top_metrics?.top[0].metrics[
+                  KUBERNETES_POD_NAME
+                ] as string,
+              },
+            },
+            container: {
+              id: serviceBucket.top_metrics?.top[0].metrics[
+                CONTAINER_ID
+              ] as string,
+            },
+          };
+        });
+      });
+      return {
+        per_service: data,
       };
     },
   },

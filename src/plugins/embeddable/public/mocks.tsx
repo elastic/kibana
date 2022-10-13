@@ -7,6 +7,15 @@
  */
 
 import React from 'react';
+import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
+import { CoreStart } from '@kbn/core/public';
+import { Start as InspectorStart } from '@kbn/inspector-plugin/public';
+import { type AggregateQuery, type Filter, type Query } from '@kbn/es-query';
+
+import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
+import { UiActionsService } from './lib/ui_actions';
+import { EmbeddablePublicPlugin } from './plugin';
 import {
   EmbeddableStart,
   EmbeddableSetup,
@@ -18,15 +27,10 @@ import {
   EmbeddableInput,
   SavedObjectEmbeddableInput,
   ReferenceOrValueEmbeddable,
+  SelfStyledEmbeddable,
+  FilterableEmbeddable,
 } from '.';
-import { EmbeddablePublicPlugin } from './plugin';
-import { coreMock } from '../../../core/public/mocks';
-import { UiActionsService } from './lib/ui_actions';
-import { CoreStart } from '../../../core/public';
-import { Start as InspectorStart } from '../../inspector/public';
-
-import { inspectorPluginMock } from '../../inspector/public/mocks';
-import { uiActionsPluginMock } from '../../ui_actions/public/mocks';
+import { SelfStyledOptions } from './lib/self_styled_embeddable/types';
 
 export { mockAttributeService } from './lib/attribute_service/attribute_service.mock';
 export type Setup = jest.Mocked<EmbeddableSetup>;
@@ -42,6 +46,8 @@ interface CreateEmbeddablePanelMockArgs {
   inspector: InspectorStart;
   SavedObjectFinder: React.ComponentType<any>;
 }
+
+const theme = themeServiceMock.createStartContract();
 
 export const createEmbeddablePanelMock = ({
   getActions,
@@ -64,6 +70,7 @@ export const createEmbeddablePanelMock = ({
       overlays={overlays || ({} as any)}
       inspector={inspector || ({} as any)}
       SavedObjectFinder={SavedObjectFinder || (() => null)}
+      theme={theme}
     />
   );
 };
@@ -89,13 +96,36 @@ export const mockRefOrValEmbeddable = <
     mockedByValueInput: ValTypeInput;
   }
 ): OriginalEmbeddableType & ReferenceOrValueEmbeddable => {
-  const newEmbeddable: ReferenceOrValueEmbeddable = (embeddable as unknown) as ReferenceOrValueEmbeddable;
+  const newEmbeddable: ReferenceOrValueEmbeddable =
+    embeddable as unknown as ReferenceOrValueEmbeddable;
   newEmbeddable.inputIsRefType = (input: unknown): input is RefTypeInput =>
     !!(input as RefTypeInput).savedObjectId;
   newEmbeddable.getInputAsRefType = () => Promise.resolve(options.mockedByReferenceInput);
   newEmbeddable.getInputAsValueType = () => Promise.resolve(options.mockedByValueInput);
   return newEmbeddable as OriginalEmbeddableType & ReferenceOrValueEmbeddable;
 };
+
+export function mockSelfStyledEmbeddable<OriginalEmbeddableType>(
+  embeddable: OriginalEmbeddableType,
+  selfStyledOptions: SelfStyledOptions
+): OriginalEmbeddableType & SelfStyledEmbeddable {
+  const newEmbeddable: SelfStyledEmbeddable = embeddable as unknown as SelfStyledEmbeddable;
+  newEmbeddable.getSelfStyledOptions = () => selfStyledOptions;
+  return newEmbeddable as OriginalEmbeddableType & SelfStyledEmbeddable;
+}
+
+export function mockFilterableEmbeddable<OriginalEmbeddableType>(
+  embeddable: OriginalEmbeddableType,
+  options: {
+    getFilters: () => Promise<Filter[]>;
+    getQuery: () => Promise<Query | AggregateQuery | undefined>;
+  }
+): OriginalEmbeddableType & FilterableEmbeddable {
+  const newEmbeddable: FilterableEmbeddable = embeddable as unknown as FilterableEmbeddable;
+  newEmbeddable.getFilters = () => options.getFilters();
+  newEmbeddable.getQuery = () => options.getQuery();
+  return newEmbeddable as OriginalEmbeddableType & FilterableEmbeddable;
+}
 
 const createSetupContract = (): Setup => {
   const setupContract: Setup = {
@@ -113,7 +143,7 @@ const createStartContract = (): Start => {
     telemetry: jest.fn(),
     extract: jest.fn(),
     inject: jest.fn(),
-    migrate: jest.fn(),
+    getAllMigrations: jest.fn(),
     EmbeddablePanel: jest.fn(),
     getStateTransfer: jest.fn(() => createEmbeddableStateTransferMock() as EmbeddableStateTransfer),
     getAttributeService: jest.fn(),
@@ -143,4 +173,6 @@ export const embeddablePluginMock = {
   createStartContract,
   createInstance,
   mockRefOrValEmbeddable,
+  mockSelfStyledEmbeddable,
+  mockFilterableEmbeddable,
 };

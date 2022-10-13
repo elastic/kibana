@@ -5,51 +5,35 @@
  * 2.0.
  */
 
-import { Action } from '../state_management';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { IndexPatternServiceAPI } from '../../../data_views_service/service';
+
 import {
   Visualization,
   FramePublicAPI,
-  Datasource,
   DatasourceDimensionEditorProps,
   VisualizationDimensionGroupConfig,
+  DatasourceMap,
+  VisualizationMap,
 } from '../../../types';
 export interface ConfigPanelWrapperProps {
-  activeDatasourceId: string;
-  visualizationState: unknown;
-  visualizationMap: Record<string, Visualization>;
-  activeVisualizationId: string | null;
-  dispatch: (action: Action) => void;
   framePublicAPI: FramePublicAPI;
-  datasourceMap: Record<string, Datasource>;
-  datasourceStates: Record<
-    string,
-    {
-      isLoading: boolean;
-      state: unknown;
-    }
-  >;
+  datasourceMap: DatasourceMap;
+  visualizationMap: VisualizationMap;
   core: DatasourceDimensionEditorProps['core'];
+  indexPatternService: IndexPatternServiceAPI;
+  uiActions: UiActionsStart;
 }
 
 export interface LayerPanelProps {
-  activeDatasourceId: string;
   visualizationState: unknown;
-  datasourceMap: Record<string, Datasource>;
+  datasourceMap: DatasourceMap;
   activeVisualization: Visualization;
-  dispatch: (action: Action) => void;
   framePublicAPI: FramePublicAPI;
-  datasourceStates: Record<
-    string,
-    {
-      isLoading: boolean;
-      state: unknown;
-    }
-  >;
   core: DatasourceDimensionEditorProps['core'];
 }
 
 export interface LayerDatasourceDropProps {
-  layerId: string;
   state: unknown;
   setState: (newState: unknown) => void;
 }

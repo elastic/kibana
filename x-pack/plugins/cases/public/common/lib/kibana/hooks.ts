@@ -7,12 +7,19 @@
 
 import moment from 'moment-timezone';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_FORMAT_TZ } from '../../../../common/constants';
-import { AuthenticatedUser } from '../../../../../security/common/model';
-import { convertToCamelCase } from '../../../containers/utils';
+import { AuthenticatedUser } from '@kbn/security-plugin/common/model';
+import { NavigateToAppOptions } from '@kbn/core/public';
+import { getUICapabilities } from '../../../client/helpers/capabilities';
+import { convertToCamelCase } from '../../../api/utils';
+import {
+  FEATURE_ID,
+  DEFAULT_DATE_FORMAT,
+  DEFAULT_DATE_FORMAT_TZ,
+} from '../../../../common/constants';
+import { CasesPermissions } from '../../../../common';
 import { StartServices } from '../../../types';
 import { useUiSetting, useKibana } from './kibana_react';
 
@@ -105,28 +112,107 @@ export const useCurrentUser = (): AuthenticatedElasticUser | null => {
   return user;
 };
 
-export interface UseGetUserSavedObjectPermissions {
+/**
+ * Returns a full URL to the provided page path by using
+ * kibana's `getUrlForApp()`
+ */
+export const useAppUrl = (appId: string) => {
+  const { getUrlForApp } = useKibana().services.application;
+
+  const getAppUrl = useCallback(
+    (options?: { deepLinkId?: string; path?: string; absolute?: boolean }) =>
+      getUrlForApp(appId, options),
+    [appId, getUrlForApp]
+  );
+  return { getAppUrl };
+};
+
+/**
+ * Navigate to any app using kibana's `navigateToApp()`
+ * or by url using `navigateToUrl()`
+ */
+export const useNavigateTo = (appId: string) => {
+  const { navigateToApp, navigateToUrl } = useKibana().services.application;
+
+  const navigateTo = useCallback(
+    ({
+      url,
+      ...options
+    }: {
+      url?: string;
+    } & NavigateToAppOptions) => {
+      if (url) {
+        navigateToUrl(url);
+      } else {
+        navigateToApp(appId, options);
+      }
+    },
+    [appId, navigateToApp, navigateToUrl]
+  );
+  return { navigateTo };
+};
+
+/**
+ * Returns navigateTo and getAppUrl navigation hooks
+ *
+ */
+export const useNavigation = (appId: string) => {
+  const { navigateTo } = useNavigateTo(appId);
+  const { getAppUrl } = useAppUrl(appId);
+  return { navigateTo, getAppUrl };
+};
+
+interface Capabilities {
   crud: boolean;
   read: boolean;
 }
+interface UseApplicationCapabilities {
+  actions: Capabilities;
+  generalCases: CasesPermissions;
+  visualize: Capabilities;
+  dashboard: Capabilities;
+}
 
-export const useGetUserSavedObjectPermissions = () => {
-  const [
-    savedObjectsPermissions,
-    setSavedObjectsPermissions,
-  ] = useState<UseGetUserSavedObjectPermissions | null>(null);
-  const uiCapabilities = useKibana().services.application.capabilities;
+/**
+ * Returns the capabilities of various applications
+ *
+ */
 
-  useEffect(() => {
-    const capabilitiesCanUserCRUD: boolean =
-      typeof uiCapabilities.siem.crud === 'boolean' ? uiCapabilities.siem.crud : false;
-    const capabilitiesCanUserRead: boolean =
-      typeof uiCapabilities.siem.show === 'boolean' ? uiCapabilities.siem.show : false;
-    setSavedObjectsPermissions({
-      crud: capabilitiesCanUserCRUD,
-      read: capabilitiesCanUserRead,
-    });
-  }, [uiCapabilities]);
+export const useApplicationCapabilities = (): UseApplicationCapabilities => {
+  const capabilities = useKibana().services?.application?.capabilities;
+  const casesCapabilities = capabilities[FEATURE_ID];
+  const permissions = getUICapabilities(casesCapabilities);
 
-  return savedObjectsPermissions;
+  return useMemo(
+    () => ({
+      actions: { crud: !!capabilities.actions?.save, read: !!capabilities.actions?.show },
+      generalCases: {
+        all: permissions.all,
+        create: permissions.create,
+        read: permissions.read,
+        update: permissions.update,
+        delete: permissions.delete,
+        push: permissions.push,
+      },
+      visualize: { crud: !!capabilities.visualize?.save, read: !!capabilities.visualize?.show },
+      dashboard: {
+        crud: !!capabilities.dashboard?.createNew,
+        read: !!capabilities.dashboard?.show,
+      },
+    }),
+    [
+      capabilities.actions?.save,
+      capabilities.actions?.show,
+      capabilities.dashboard?.createNew,
+      capabilities.dashboard?.show,
+      capabilities.visualize?.save,
+      capabilities.visualize?.show,
+      permissions.all,
+      permissions.create,
+      permissions.read,
+      permissions.update,
+      permissions.delete,
+      permissions.push,
+    ]
+  );
 };

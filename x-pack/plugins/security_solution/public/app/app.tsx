@@ -5,57 +5,89 @@
  * 2.0.
  */
 
-import { History } from 'history';
-import React, { memo, FC } from 'react';
-import { Store, Action } from 'redux';
+import type { History } from 'history';
+import type { FC } from 'react';
+import React, { memo } from 'react';
+import type { Store, Action } from 'redux';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { EuiErrorBoundary } from '@elastic/eui';
-import { AppLeaveHandler } from '../../../../../src/core/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import type { AppLeaveHandler, AppMountParameters } from '@kbn/core/public';
 
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { ManageUserInfo } from '../detections/components/user_info';
-import { DEFAULT_DARK_MODE, APP_NAME } from '../../common/constants';
+import { DEFAULT_DARK_MODE, APP_NAME, APP_ID } from '../../common/constants';
 import { ErrorToastDispatcher } from '../common/components/error_toast_dispatcher';
 import { MlCapabilitiesProvider } from '../common/components/ml/permissions/ml_capabilities_provider';
 import { GlobalToaster, ManageGlobalToaster } from '../common/components/toasters';
-import { KibanaContextProvider, useKibana, useUiSetting$ } from '../common/lib/kibana';
-import { State } from '../common/store';
+import {
+  KibanaContextProvider,
+  useGetUserCasesPermissions,
+  useKibana,
+  useUiSetting$,
+} from '../common/lib/kibana';
+import type { State } from '../common/store';
 
-import { ManageGlobalTimeline } from '../timelines/components/manage_timeline';
-import { StartServices } from '../types';
+import type { StartServices } from '../types';
 import { PageRouter } from './routes';
-import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
+import { UserPrivilegesProvider } from '../common/components/user_privileges/user_privileges_context';
+import { ReactQueryClientProvider } from '../common/containers/query_client/query_client_provider';
 
 interface StartAppComponent {
   children: React.ReactNode;
   history: History;
   onAppLeave: (handler: AppLeaveHandler) => void;
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   store: Store<State, Action>;
+  theme$: AppMountParameters['theme$'];
 }
 
-const StartAppComponent: FC<StartAppComponent> = ({ children, history, onAppLeave, store }) => {
-  const { i18n } = useKibana().services;
+const StartAppComponent: FC<StartAppComponent> = ({
+  children,
+  history,
+  setHeaderActionMenu,
+  onAppLeave,
+  store,
+  theme$,
+}) => {
+  const {
+    i18n,
+    application: { capabilities },
+    cases,
+  } = useKibana().services;
   const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
-
+  const userCasesPermissions = useGetUserCasesPermissions();
+  const CasesContext = cases.ui.getCasesContext();
   return (
     <EuiErrorBoundary>
       <i18n.Context>
         <ManageGlobalToaster>
-          <ManageGlobalTimeline>
-            <ReduxStoreProvider store={store}>
+          <ReduxStoreProvider store={store}>
+            <KibanaThemeProvider theme$={theme$}>
               <EuiThemeProvider darkMode={darkMode}>
                 <MlCapabilitiesProvider>
-                  <ManageUserInfo>
-                    <PageRouter history={history} onAppLeave={onAppLeave}>
-                      {children}
-                    </PageRouter>
-                  </ManageUserInfo>
+                  <UserPrivilegesProvider kibanaCapabilities={capabilities}>
+                    <ManageUserInfo>
+                      <ReactQueryClientProvider>
+                        <CasesContext owner={[APP_ID]} permissions={userCasesPermissions}>
+                          <PageRouter
+                            history={history}
+                            onAppLeave={onAppLeave}
+                            setHeaderActionMenu={setHeaderActionMenu}
+                          >
+                            {children}
+                          </PageRouter>
+                        </CasesContext>
+                      </ReactQueryClientProvider>
+                    </ManageUserInfo>
+                  </UserPrivilegesProvider>
                 </MlCapabilitiesProvider>
               </EuiThemeProvider>
-              <ErrorToastDispatcher />
-              <GlobalToaster />
-            </ReduxStoreProvider>
-          </ManageGlobalTimeline>
+            </KibanaThemeProvider>
+            <ErrorToastDispatcher />
+            <GlobalToaster />
+          </ReduxStoreProvider>
         </ManageGlobalToaster>
       </i18n.Context>
     </EuiErrorBoundary>
@@ -69,7 +101,9 @@ interface SecurityAppComponentProps {
   history: History;
   onAppLeave: (handler: AppLeaveHandler) => void;
   services: StartServices;
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   store: Store<State, Action>;
+  theme$: AppMountParameters['theme$'];
 }
 
 const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
@@ -77,7 +111,9 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
   history,
   onAppLeave,
   services,
+  setHeaderActionMenu,
   store,
+  theme$,
 }) => (
   <KibanaContextProvider
     services={{
@@ -85,7 +121,13 @@ const SecurityAppComponent: React.FC<SecurityAppComponentProps> = ({
       ...services,
     }}
   >
-    <StartApp history={history} onAppLeave={onAppLeave} store={store}>
+    <StartApp
+      history={history}
+      onAppLeave={onAppLeave}
+      setHeaderActionMenu={setHeaderActionMenu}
+      store={store}
+      theme$={theme$}
+    >
       {children}
     </StartApp>
   </KibanaContextProvider>

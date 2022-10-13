@@ -1,0 +1,192 @@
+{
+  "id": "@kbn/crypto-browser",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/crypto-browser",
+        "id": "def-common.Sha256",
+        "type": "Class",
+        "tags": [],
+        "label": "Sha256",
+        "description": [],
+        "path": "packages/kbn-crypto-browser/src/sha256.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/crypto-browser",
+            "id": "def-common.Sha256.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-crypto-browser/src/sha256.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/crypto-browser",
+            "id": "def-common.Sha256.update",
+            "type": "Function",
+            "tags": [],
+            "label": "update",
+            "description": [],
+            "signature": [
+              "(data: string | Buffer, encoding?: BufferEncoding | undefined) => ",
+              {
+                "pluginId": "@kbn/crypto-browser",
+                "scope": "common",
+                "docId": "kibKbnCryptoBrowserPluginApi",
+                "section": "def-common.Sha256",
+                "text": "Sha256"
+              }
+            ],
+            "path": "packages/kbn-crypto-browser/src/sha256.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/crypto-browser",
+                "id": "def-common.Sha256.update.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "data",
+                "description": [],
+                "signature": [
+                  "string | Buffer"
+                ],
+                "path": "packages/kbn-crypto-browser/src/sha256.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/crypto-browser",
+                "id": "def-common.Sha256.update.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "encoding",
+                "description": [],
+                "signature": [
+                  "BufferEncoding | undefined"
+                ],
+                "path": "packages/kbn-crypto-browser/src/sha256.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/crypto-browser",
+            "id": "def-common.Sha256.digest",
+            "type": "Function",
+            "tags": [],
+            "label": "digest",
+            "description": [],
+            "signature": [
+              "(encoding: BufferEncoding) => string"
+            ],
+            "path": "packages/kbn-crypto-browser/src/sha256.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/crypto-browser",
+                "id": "def-common.Sha256.digest.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "encoding",
+                "description": [],
+                "signature": [
+                  "BufferEncoding"
+                ],
+                "path": "packages/kbn-crypto-browser/src/sha256.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/crypto-browser",
+            "id": "def-common.Sha256._update",
+            "type": "Function",
+            "tags": [],
+            "label": "_update",
+            "description": [],
+            "signature": [
+              "(M: Buffer) => void"
+            ],
+            "path": "packages/kbn-crypto-browser/src/sha256.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/crypto-browser",
+                "id": "def-common.Sha256._update.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "M",
+                "description": [],
+                "signature": [
+                  "Buffer"
+                ],
+                "path": "packages/kbn-crypto-browser/src/sha256.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/crypto-browser",
+            "id": "def-common.Sha256._hash",
+            "type": "Function",
+            "tags": [],
+            "label": "_hash",
+            "description": [],
+            "signature": [
+              "() => Buffer"
+            ],
+            "path": "packages/kbn-crypto-browser/src/sha256.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

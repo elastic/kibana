@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { PolicyConfig, ProtectionModes } from '../types';
+import type { PolicyConfig } from '../types';
+import { ProtectionModes } from '../types';
 
 /**
  * Return a new default `PolicyConfig` for platinum and above licenses
@@ -24,9 +25,19 @@ export const policyFactory = (): PolicyConfig => {
       },
       malware: {
         mode: ProtectionModes.prevent,
+        blocklist: true,
       },
       ransomware: {
         mode: ProtectionModes.prevent,
+        supported: true,
+      },
+      memory_protection: {
+        mode: ProtectionModes.prevent,
+        supported: true,
+      },
+      behavior_protection: {
+        mode: ProtectionModes.prevent,
+        supported: true,
       },
       popup: {
         malware: {
@@ -37,12 +48,25 @@ export const policyFactory = (): PolicyConfig => {
           message: '',
           enabled: true,
         },
+        memory_protection: {
+          message: '',
+          enabled: true,
+        },
+        behavior_protection: {
+          message: '',
+          enabled: true,
+        },
       },
       logging: {
         file: 'info',
       },
       antivirus_registration: {
         enabled: false,
+      },
+      attack_surface_reduction: {
+        credential_hardening: {
+          enabled: true,
+        },
       },
     },
     mac: {
@@ -53,9 +77,26 @@ export const policyFactory = (): PolicyConfig => {
       },
       malware: {
         mode: ProtectionModes.prevent,
+        blocklist: true,
+      },
+      behavior_protection: {
+        mode: ProtectionModes.prevent,
+        supported: true,
+      },
+      memory_protection: {
+        mode: ProtectionModes.prevent,
+        supported: true,
       },
       popup: {
         malware: {
+          message: '',
+          enabled: true,
+        },
+        behavior_protection: {
+          message: '',
+          enabled: true,
+        },
+        memory_protection: {
           message: '',
           enabled: true,
         },
@@ -69,6 +110,34 @@ export const policyFactory = (): PolicyConfig => {
         process: true,
         file: true,
         network: true,
+        session_data: false,
+        tty_io: false,
+      },
+      malware: {
+        mode: ProtectionModes.prevent,
+        blocklist: true,
+      },
+      behavior_protection: {
+        mode: ProtectionModes.prevent,
+        supported: true,
+      },
+      memory_protection: {
+        mode: ProtectionModes.prevent,
+        supported: true,
+      },
+      popup: {
+        malware: {
+          message: '',
+          enabled: true,
+        },
+        behavior_protection: {
+          message: '',
+          enabled: true,
+        },
+        memory_protection: {
+          message: '',
+          enabled: true,
+        },
       },
       logging: {
         file: 'info',
@@ -83,12 +152,49 @@ export const policyFactory = (): PolicyConfig => {
 export const policyFactoryWithoutPaidFeatures = (
   policy: PolicyConfig = policyFactory()
 ): PolicyConfig => {
+  const rollbackConfig = {
+    rollback: {
+      self_healing: {
+        enabled: false,
+      },
+    },
+  };
+
   return {
     ...policy,
     windows: {
       ...policy.windows,
+      advanced:
+        policy.windows.advanced === undefined
+          ? undefined
+          : {
+              ...policy.windows.advanced,
+              alerts:
+                policy.windows.advanced.alerts === undefined
+                  ? {
+                      ...rollbackConfig,
+                    }
+                  : {
+                      ...policy.windows.advanced.alerts,
+                      ...rollbackConfig,
+                    },
+            },
       ransomware: {
         mode: ProtectionModes.off,
+        supported: false,
+      },
+      memory_protection: {
+        mode: ProtectionModes.off,
+        supported: false,
+      },
+      behavior_protection: {
+        mode: ProtectionModes.off,
+        supported: false,
+      },
+      attack_surface_reduction: {
+        credential_hardening: {
+          enabled: false,
+        },
       },
       popup: {
         ...policy.windows.popup,
@@ -100,16 +206,114 @@ export const policyFactoryWithoutPaidFeatures = (
           message: '',
           enabled: false,
         },
+        memory_protection: {
+          message: '',
+          enabled: false,
+        },
+        behavior_protection: {
+          message: '',
+          enabled: false,
+        },
       },
     },
     mac: {
       ...policy.mac,
+      behavior_protection: {
+        mode: ProtectionModes.off,
+        supported: false,
+      },
+      memory_protection: {
+        mode: ProtectionModes.off,
+        supported: false,
+      },
       popup: {
         ...policy.mac.popup,
         malware: {
           message: '',
           enabled: true,
         },
+        memory_protection: {
+          message: '',
+          enabled: false,
+        },
+        behavior_protection: {
+          message: '',
+          enabled: false,
+        },
+      },
+    },
+    linux: {
+      ...policy.linux,
+      behavior_protection: {
+        mode: ProtectionModes.off,
+        supported: false,
+      },
+      memory_protection: {
+        mode: ProtectionModes.off,
+        supported: false,
+      },
+      popup: {
+        ...policy.linux.popup,
+        malware: {
+          message: '',
+          enabled: true,
+        },
+        memory_protection: {
+          message: '',
+          enabled: false,
+        },
+        behavior_protection: {
+          message: '',
+          enabled: false,
+        },
+      },
+    },
+  };
+};
+
+/**
+ * Strips paid features from an existing or new `PolicyConfig` for gold and below license
+ */
+export const policyFactoryWithSupportedFeatures = (
+  policy: PolicyConfig = policyFactory()
+): PolicyConfig => {
+  return {
+    ...policy,
+    windows: {
+      ...policy.windows,
+      ransomware: {
+        ...policy.windows.ransomware,
+        supported: true,
+      },
+      memory_protection: {
+        ...policy.windows.memory_protection,
+        supported: true,
+      },
+      behavior_protection: {
+        ...policy.windows.behavior_protection,
+        supported: true,
+      },
+    },
+    mac: {
+      ...policy.mac,
+      behavior_protection: {
+        ...policy.windows.behavior_protection,
+        supported: true,
+      },
+      memory_protection: {
+        ...policy.mac.memory_protection,
+        supported: true,
+      },
+    },
+    linux: {
+      ...policy.linux,
+      behavior_protection: {
+        ...policy.windows.behavior_protection,
+        supported: true,
+      },
+      memory_protection: {
+        ...policy.linux.memory_protection,
+        supported: true,
       },
     },
   };
@@ -118,4 +322,5 @@ export const policyFactoryWithoutPaidFeatures = (
 /**
  * Reflects what string the Endpoint will use when message field is default/empty
  */
-export const DefaultMalwareMessage = 'Elastic Security {action} {filename}';
+export const DefaultPolicyNotificationMessage = 'Elastic Security {action} {filename}';
+export const DefaultPolicyRuleNotificationMessage = 'Elastic Security {action} {rule}';

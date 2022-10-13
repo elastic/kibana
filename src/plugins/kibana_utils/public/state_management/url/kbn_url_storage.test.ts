@@ -21,7 +21,7 @@ import {
   setStateToKbnUrl,
   getStateFromKbnUrl,
 } from './kbn_url_storage';
-import { ScopedHistory } from '../../../../../core/public';
+import { CoreScopedHistory } from '@kbn/core/public';
 
 describe('kbn_url_storage', () => {
   describe('getStateFromUrl & setStateToUrl', () => {
@@ -242,7 +242,7 @@ describe('kbn_url_storage', () => {
     beforeEach(() => {
       const parentHistory = createBrowserHistory();
       parentHistory.replace('/app/kibana/');
-      history = new ScopedHistory(parentHistory, '/app/kibana/');
+      history = new CoreScopedHistory(parentHistory, '/app/kibana/');
       urlControls = createKbnUrlControls(history);
     });
 

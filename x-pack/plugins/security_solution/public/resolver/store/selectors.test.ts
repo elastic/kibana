@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { ResolverState } from '../types';
+import type { ResolverState } from '../types';
 import { createStore } from 'redux';
-import { ResolverAction } from './actions';
+import type { ResolverAction } from './actions';
 import { resolverReducer } from './reducer';
 import * as selectors from './selectors';
 import {
   mockTreeWith2AncestorsAndNoChildren,
   mockTreeWithNoAncestorsAnd2Children,
 } from '../mocks/resolver_tree';
-import { ResolverNode } from '../../../common/endpoint/types';
+import type { ResolverNode } from '../../../common/endpoint/types';
 import { mockTreeFetcherParameters } from '../mocks/tree_fetcher_parameters';
-import { endpointSourceSchema } from './../mocks/tree_schema';
+import { endpointSourceSchema } from '../mocks/tree_schema';
 
 describe('resolver selectors', () => {
   const actions: ResolverAction[] = [];
@@ -145,7 +145,7 @@ describe('resolver selectors', () => {
           });
         });
         it('the origin should be in view', () => {
-          const origin = selectors.graphNodeForID(state())(originID)!;
+          const origin = selectors.graphNodeForID(state())(originID);
           expect(
             selectors
               .visibleNodesAndEdgeLines(state())(0)
@@ -153,7 +153,7 @@ describe('resolver selectors', () => {
           ).toBe(true);
         });
         it('the first child should be in view', () => {
-          const firstChild = selectors.graphNodeForID(state())(firstChildID)!;
+          const firstChild = selectors.graphNodeForID(state())(firstChildID);
           expect(
             selectors
               .visibleNodesAndEdgeLines(state())(0)
@@ -161,7 +161,7 @@ describe('resolver selectors', () => {
           ).toBe(true);
         });
         it('the second child should not be in view', () => {
-          const secondChild = selectors.graphNodeForID(state())(secondChildID)!;
+          const secondChild = selectors.graphNodeForID(state())(secondChildID);
           expect(
             selectors
               .visibleNodesAndEdgeLines(state())(0)

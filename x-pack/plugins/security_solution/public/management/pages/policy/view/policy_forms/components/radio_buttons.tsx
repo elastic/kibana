@@ -7,16 +7,16 @@
 
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
 import { EuiSpacer, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
-import {
+import type {
   Immutable,
   ImmutableArray,
-  ProtectionModes,
   UIPolicyConfig,
 } from '../../../../../../../common/endpoint/types';
-import { PolicyProtection } from '../../../types';
+import { ProtectionModes } from '../../../../../../../common/endpoint/types';
+import type { PolicyProtection } from '../../../types';
 import { ConfigFormHeading } from '../../components/config_form';
 import { ProtectionRadio } from './protection_radio';
 
@@ -25,7 +25,7 @@ export const RadioFlexGroup = styled(EuiFlexGroup)`
     margin-right: 0;
   }
   .no-horizontal-margin-radio {
-    margin: ${(props) => props.theme.eui.ruleMargins.marginSmall} 0;
+    margin: ${(props) => props.theme.eui.euiSizeM} 0;
   }
 `;
 
@@ -64,12 +64,12 @@ export const RadioButtons = React.memo(
         <ConfigFormHeading>
           <FormattedMessage
             id="xpack.securitySolution.endpoint.policyDetailsConfig.protectionLevel"
-            defaultMessage="Protection Level"
+            defaultMessage="Protection level"
           />
         </ConfigFormHeading>
         <EuiSpacer size="xs" />
         <RadioFlexGroup>
-          <EuiFlexItem className="no-right-margin-radio" grow={2}>
+          <EuiFlexItem className="no-right-margin-radio" grow={1}>
             <ProtectionRadio
               protection={protection}
               protectionMode={radios[0].id}

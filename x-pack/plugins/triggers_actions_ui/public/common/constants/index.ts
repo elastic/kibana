@@ -10,7 +10,6 @@ export { AGGREGATION_TYPES, builtInAggregationTypes } from './aggregation_types'
 export { builtInGroupByTypes } from './group_by_types';
 
 export const VIEW_LICENSE_OPTIONS_LINK = 'https://www.elastic.co/subscriptions';
-// TODO: Remove when cases connector is available across Kibana. Issue: https://github.com/elastic/kibana/issues/82502.
-export const DEFAULT_HIDDEN_ACTION_TYPES = ['.case'];
-// Action types included in this array will be hidden only from the alert's action type node list
-export const DEFAULT_HIDDEN_ONLY_ON_ALERTS_ACTION_TYPES = ['.servicenow-sir'];
+
+export const PLUGIN_ID = 'triggersActions';
+export const CONNECTORS_PLUGIN_ID = 'triggersActionsConnectors';

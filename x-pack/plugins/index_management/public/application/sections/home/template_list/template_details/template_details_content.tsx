@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
@@ -33,8 +33,8 @@ import {
   UIM_TEMPLATE_DETAIL_PANEL_ALIASES_TAB,
   UIM_TEMPLATE_DETAIL_PANEL_PREVIEW_TAB,
 } from '../../../../../../common/constants';
-import { UseRequestResponse } from '../../../../../shared_imports';
-import { TemplateDeleteModal, SectionLoading, SectionError, Error } from '../../../../components';
+import { SectionLoading, UseRequestResponse } from '../../../../../shared_imports';
+import { TemplateDeleteModal, SectionError, Error } from '../../../../components';
 import { useLoadIndexTemplate } from '../../../../services/api';
 import { useServices } from '../../../../app_context';
 import { TabAliases, TabMappings, TabSettings } from '../../../../components/shared';

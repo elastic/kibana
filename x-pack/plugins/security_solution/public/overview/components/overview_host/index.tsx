@@ -6,23 +6,23 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import { EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useMemo, useCallback } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useMemo, useCallback, useState, useEffect } from 'react';
 
-import { DEFAULT_NUMBER_FORMAT, APP_ID } from '../../../../common/constants';
-import { ESQuery } from '../../../../common/typed_json';
+import { DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';
+import type { ESQuery } from '../../../../common/typed_json';
 import { ID as OverviewHostQueryId, useHostOverview } from '../../containers/overview_host';
 import { HeaderSection } from '../../../common/components/header_section';
-import { useUiSetting$, useKibana } from '../../../common/lib/kibana';
-import { getHostsUrl, useFormatUrl } from '../../../common/components/link_to';
+import { useUiSetting$ } from '../../../common/lib/kibana';
 import { getOverviewHostStats, OverviewHostStats } from '../overview_host_stats';
 import { manageQuery } from '../../../common/components/page/manage_query';
 import { InspectButtonContainer } from '../../../common/components/inspect';
-import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
+import { SecuritySolutionLinkButton } from '../../../common/components/links';
+import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import { SecurityPageName } from '../../../app/types';
-import { LinkButton } from '../../../common/components/links';
+import { useQueryToggle } from '../../../common/containers/query_toggle';
 
 export interface OwnProps {
   startDate: GlobalTimeArgs['from'];
@@ -42,26 +42,29 @@ const OverviewHostComponent: React.FC<OverviewHostProps> = ({
   startDate,
   setQuery,
 }) => {
-  const { formatUrl, search: urlSearch } = useFormatUrl(SecurityPageName.hosts);
-  const { navigateToApp } = useKibana().services.application;
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
+
+  const { toggleStatus, setToggleStatus } = useQueryToggle(OverviewHostQueryId);
+  const [querySkip, setQuerySkip] = useState(filterQuery === undefined || !toggleStatus);
+  useEffect(() => {
+    setQuerySkip(filterQuery === undefined || !toggleStatus);
+  }, [filterQuery, toggleStatus]);
+  const toggleQuery = useCallback(
+    (status: boolean) => {
+      setToggleStatus(status);
+      // toggle on = skipQuery false
+      setQuerySkip(!status);
+    },
+    [setQuerySkip, setToggleStatus]
+  );
 
   const [loading, { overviewHost, id, inspect, refetch }] = useHostOverview({
     endDate,
     filterQuery,
     indexNames,
     startDate,
+    skip: querySkip,
   });
-
-  const goToHost = useCallback(
-    (ev) => {
-      ev.preventDefault();
-      navigateToApp(`${APP_ID}:${SecurityPageName.hosts}`, {
-        path: getHostsUrl(urlSearch),
-      });
-    },
-    [navigateToApp, urlSearch]
-  );
 
   const hostEventsCount = useMemo(
     () => getOverviewHostStats(overviewHost).reduce((total, stat) => total + stat.count, 0),
@@ -71,18 +74,6 @@ const OverviewHostComponent: React.FC<OverviewHostProps> = ({
   const formattedHostEventsCount = useMemo(
     () => numeral(hostEventsCount).format(defaultNumberFormat),
     [defaultNumberFormat, hostEventsCount]
-  );
-
-  const hostPageButton = useMemo(
-    () => (
-      <LinkButton onClick={goToHost} href={formatUrl(getHostsUrl())}>
-        <FormattedMessage
-          id="xpack.securitySolution.overview.hostsAction"
-          defaultMessage="View hosts"
-        />
-      </LinkButton>
-    ),
-    [goToHost, formatUrl]
   );
 
   const title = useMemo(
@@ -113,13 +104,24 @@ const OverviewHostComponent: React.FC<OverviewHostProps> = ({
   );
 
   return (
-    <EuiFlexItem>
-      <InspectButtonContainer>
-        <EuiPanel>
-          <HeaderSection id={OverviewHostQueryId} subtitle={subtitle} title={title}>
-            <>{hostPageButton}</>
-          </HeaderSection>
-
+    <InspectButtonContainer show={toggleStatus}>
+      <EuiPanel hasBorder>
+        <HeaderSection
+          id={OverviewHostQueryId}
+          subtitle={subtitle}
+          toggleStatus={toggleStatus}
+          toggleQuery={toggleQuery}
+          title={title}
+          isInspectDisabled={filterQuery === undefined}
+        >
+          <SecuritySolutionLinkButton deepLinkId={SecurityPageName.hosts}>
+            <FormattedMessage
+              id="xpack.securitySolution.overview.hostsAction"
+              defaultMessage="View hosts"
+            />
+          </SecuritySolutionLinkButton>
+        </HeaderSection>
+        {toggleStatus && (
           <OverviewHostStatsManage
             loading={loading}
             data={overviewHost}
@@ -128,9 +130,9 @@ const OverviewHostComponent: React.FC<OverviewHostProps> = ({
             inspect={inspect}
             refetch={refetch}
           />
-        </EuiPanel>
-      </InspectButtonContainer>
-    </EuiFlexItem>
+        )}
+      </EuiPanel>
+    </InspectButtonContainer>
   );
 };
 

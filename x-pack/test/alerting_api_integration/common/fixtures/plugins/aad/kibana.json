@@ -1,8 +1,11 @@
 {
   "id": "aadFixtures",
+  "owner": {
+    "name": "Response Ops",
+    "githubTeam": "response-ops"
+  },
   "version": "1.0.0",
   "kibanaVersion": "kibana",
-  "configPath": ["xpack"],
   "requiredPlugins": ["taskManager", "encryptedSavedObjects"],
   "optionalPlugins": ["spaces"],
   "server": true,

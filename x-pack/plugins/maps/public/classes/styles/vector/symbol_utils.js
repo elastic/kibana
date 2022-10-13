@@ -6,46 +6,81 @@
  */
 
 import React from 'react';
-import maki from '@elastic/maki';
 import xml2js from 'xml2js';
+import uuid from 'uuid/v4';
+import { Canvg } from 'canvg';
+import calcSDF from 'bitmap-sdf';
+import {
+  CUSTOM_ICON_SIZE,
+  CUSTOM_ICON_PREFIX_SDF,
+  MAKI_ICON_SIZE,
+} from '../../../../common/constants';
 import { parseXmlString } from '../../../../common/parse_xml_string';
 import { SymbolIcon } from './components/legend/symbol_icon';
 import { getIsDarkMode } from '../../../kibana_services';
+import { MAKI_ICONS } from './maki_icons';
 
-export const LARGE_MAKI_ICON_SIZE = 15;
-const LARGE_MAKI_ICON_SIZE_AS_STRING = LARGE_MAKI_ICON_SIZE.toString();
-export const SMALL_MAKI_ICON_SIZE = 11;
-export const HALF_LARGE_MAKI_ICON_SIZE = Math.ceil(LARGE_MAKI_ICON_SIZE);
+export const CUSTOM_ICON_PIXEL_RATIO = Math.floor(
+  window.devicePixelRatio * (CUSTOM_ICON_SIZE / MAKI_ICON_SIZE) * 0.75
+);
 
-export const SYMBOLS = {};
-maki.svgArray.forEach((svgString) => {
-  const ID_FRAG = 'id="';
-  const index = svgString.indexOf(ID_FRAG);
-  if (index !== -1) {
-    const idStartIndex = index + ID_FRAG.length;
-    const idEndIndex = svgString.substring(idStartIndex).indexOf('"') + idStartIndex;
-    const fullSymbolId = svgString.substring(idStartIndex, idEndIndex);
-    const symbolId = fullSymbolId.substring(0, fullSymbolId.length - 3); // remove '-15' or '-11' from id
-    const symbolSize = fullSymbolId.substring(fullSymbolId.length - 2); // grab last 2 chars from id
-    // only show large icons, small/large icon selection will based on configured size style
-    if (symbolSize === LARGE_MAKI_ICON_SIZE_AS_STRING) {
-      SYMBOLS[symbolId] = svgString;
-    }
-  }
-});
-
-export const SYMBOL_OPTIONS = Object.keys(SYMBOLS).map((symbolId) => {
+export const SYMBOL_OPTIONS = Object.entries(MAKI_ICONS).map(([value, { svg, label }]) => {
   return {
-    value: symbolId,
-    label: symbolId,
+    value,
+    label,
+    svg,
   };
 });
 
-export function getMakiSymbolSvg(symbolId) {
-  if (!SYMBOLS[symbolId]) {
-    throw new Error(`Unable to find symbol: ${symbolId}`);
+/**
+ * Converts a SVG icon to a PNG image using a signed distance function (SDF).
+ *
+ * @param {string} svgString - SVG icon as string
+ * @param {number} [renderSize=64] - size of the output PNG (higher provides better resolution but requires more processing)
+ * @param {number} [cutoff=0.25] - balance between SDF inside 1 and outside 0 of icon
+ * @param {number} [radius=0.25] - size of SDF around the cutoff as percent of output icon size
+ * @return {ImageData} image that can be added to a MapLibre map with option `{ sdf: true }`
+ */
+export async function createSdfIcon({ svg, renderSize = 64, cutoff = 0.25, radius = 0.25 }) {
+  const buffer = 3;
+  const size = renderSize + buffer * 4;
+  const svgCanvas = document.createElement('canvas');
+  svgCanvas.width = size;
+  svgCanvas.height = size;
+  const svgCtx = svgCanvas.getContext('2d');
+  const v = Canvg.fromString(svgCtx, svg, {
+    ignoreDimensions: true,
+    offsetX: buffer / 2,
+    offsetY: buffer / 2,
+  });
+  v.resize(size - buffer, size - buffer);
+  await v.render();
+
+  const distances = calcSDF(svgCtx, {
+    channel: 3,
+    cutoff,
+    radius: radius * size,
+  });
+
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d');
+
+  const imageData = ctx.createImageData(size, size);
+  for (let i = 0; i < size; i++) {
+    for (let j = 0; j < size; j++) {
+      imageData.data[j * size * 4 + i * 4 + 0] = 0;
+      imageData.data[j * size * 4 + i * 4 + 1] = 0;
+      imageData.data[j * size * 4 + i * 4 + 2] = 0;
+      imageData.data[j * size * 4 + i * 4 + 3] = distances[j * size + i] * 255;
+    }
   }
-  return SYMBOLS[symbolId];
+  return imageData;
+}
+
+export function getMakiSymbol(symbolId) {
+  return MAKI_ICONS?.[symbolId];
 }
 
 export function getMakiSymbolAnchor(symbolId) {
@@ -59,10 +94,8 @@ export function getMakiSymbolAnchor(symbolId) {
   }
 }
 
-// Style descriptor stores symbolId, for example 'aircraft'
-// Icons are registered in Mapbox with full maki ids, for example 'aircraft-11'
-export function getMakiIconId(symbolId, iconPixelSize) {
-  return `${symbolId}-${iconPixelSize}`;
+export function getCustomIconId() {
+  return `${CUSTOM_ICON_PREFIX_SDF}${uuid()}`;
 }
 
 export function buildSrcUrl(svgString) {
@@ -73,15 +106,17 @@ export function buildSrcUrl(svgString) {
 
 export async function styleSvg(svgString, fill, stroke) {
   const svgXml = await parseXmlString(svgString);
-  let style = '';
-  if (fill) {
-    style += `fill:${fill};`;
-  }
-  if (stroke) {
-    style += `stroke:${stroke};`;
-    style += `stroke-width:1;`;
-  }
-  if (style) svgXml.svg.$.style = style;
+
+  // Elements nested under svg root may define style attribute
+  // Wildcard descendent selector provides more specificity to ensure root svg style attribute is applied instead of children style attributes
+  svgXml.svg.style = `
+    svg * {
+      ${fill ? `fill: ${fill}` : '#000'} !important;
+      ${stroke ? `stroke: ${stroke}` : '#000'} !important;
+      stroke-width: 1 !important;
+      vector-effect: non-scaling-stroke !important;
+    }
+  `;
   const builder = new xml2js.Builder();
   return builder.buildObject(svgXml);
 }
@@ -106,9 +141,9 @@ const ICON_PALETTES = [
 // PREFERRED_ICONS is used to provide less random default icon values for forms that need default icon values
 export const PREFERRED_ICONS = [];
 ICON_PALETTES.forEach((iconPalette) => {
-  iconPalette.icons.forEach((iconId) => {
-    if (!PREFERRED_ICONS.includes(iconId)) {
-      PREFERRED_ICONS.push(iconId);
+  iconPalette.icons.forEach((icon) => {
+    if (!PREFERRED_ICONS.includes(icon)) {
+      PREFERRED_ICONS.push(icon);
     }
   });
 });
@@ -130,6 +165,7 @@ export function getIconPaletteOptions() {
             className="mapIcon"
             symbolId={iconId}
             fill={isDarkMode ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}
+            svg={getMakiSymbol(iconId).svg}
           />
         </div>
       );

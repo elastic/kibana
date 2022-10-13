@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import { AppMountParameters } from '@kbn/core/public';
 import { createContext } from 'react';
-import { AppMountParameters, CoreStart } from 'kibana/public';
-import { ObservabilityPublicPluginsStart, ObservabilityRuleRegistry } from '../plugin';
-import { ConfigSchema } from '..';
+import { ObservabilityRuleTypeRegistry } from '../rules/create_observability_rule_type_registry';
+import type { LazyObservabilityPageTemplateProps } from '../components/shared/page_template/lazy_page_template';
+import { ConfigSchema } from '../plugin';
 
 export interface PluginContextValue {
-  appMountParameters: AppMountParameters;
   config: ConfigSchema;
-  core: CoreStart;
-  plugins: ObservabilityPublicPluginsStart;
-  observabilityRuleRegistry: ObservabilityRuleRegistry;
+  appMountParameters: AppMountParameters;
+  observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
+  ObservabilityPageTemplate: React.ComponentType<LazyObservabilityPageTemplateProps>;
 }
 
 export const PluginContext = createContext({} as PluginContextValue);

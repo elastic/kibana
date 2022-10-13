@@ -5,17 +5,23 @@
  * 2.0.
  */
 
+import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { getAlertRoute } from './get';
-import { httpServiceMock } from 'src/core/server/mocks';
+import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../lib/license_state.mock';
 import { verifyApiAccess } from '../../lib/license_api_access';
-import { mockHandlerArguments } from './../_mock_handler_arguments';
-import { alertsClientMock } from '../../alerts_client.mock';
-import { Alert } from '../../../common';
+import { mockHandlerArguments } from '../_mock_handler_arguments';
+import { rulesClientMock } from '../../rules_client.mock';
+import { Rule } from '../../../common';
+import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 
-const alertsClient = alertsClientMock.create();
-jest.mock('../../lib/license_api_access.ts', () => ({
+const rulesClient = rulesClientMock.create();
+jest.mock('../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
+}));
+
+jest.mock('../../lib/track_legacy_route_usage', () => ({
+  trackLegacyRouteUsage: jest.fn(),
 }));
 
 beforeEach(() => {
@@ -23,7 +29,7 @@ beforeEach(() => {
 });
 
 describe('getAlertRoute', () => {
-  const mockedAlert: Alert<{
+  const mockedAlert: Rule<{
     bar: true;
   }> = {
     id: '1',
@@ -71,10 +77,10 @@ describe('getAlertRoute', () => {
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}"`);
 
-    alertsClient.get.mockResolvedValueOnce(mockedAlert);
+    rulesClient.get.mockResolvedValueOnce(mockedAlert);
 
     const [context, req, res] = mockHandlerArguments(
-      { alertsClient },
+      { rulesClient },
       {
         params: { id: '1' },
       },
@@ -82,8 +88,8 @@ describe('getAlertRoute', () => {
     );
     await handler(context, req, res);
 
-    expect(alertsClient.get).toHaveBeenCalledTimes(1);
-    expect(alertsClient.get.mock.calls[0][0].id).toEqual('1');
+    expect(rulesClient.get).toHaveBeenCalledTimes(1);
+    expect(rulesClient.get.mock.calls[0][0].id).toEqual('1');
 
     expect(res.ok).toHaveBeenCalledWith({
       body: mockedAlert,
@@ -98,10 +104,10 @@ describe('getAlertRoute', () => {
 
     const [, handler] = router.get.mock.calls[0];
 
-    alertsClient.get.mockResolvedValueOnce(mockedAlert);
+    rulesClient.get.mockResolvedValueOnce(mockedAlert);
 
     const [context, req, res] = mockHandlerArguments(
-      { alertsClient },
+      { rulesClient },
       {
         params: { id: '1' },
       },
@@ -125,10 +131,10 @@ describe('getAlertRoute', () => {
 
     const [, handler] = router.get.mock.calls[0];
 
-    alertsClient.get.mockResolvedValueOnce(mockedAlert);
+    rulesClient.get.mockResolvedValueOnce(mockedAlert);
 
     const [context, req, res] = mockHandlerArguments(
-      { alertsClient },
+      { rulesClient },
       {
         params: { id: '1' },
       },
@@ -138,5 +144,20 @@ describe('getAlertRoute', () => {
     expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
 
     expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
+  });
+
+  it('should track every call', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
+    const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
+
+    getAlertRoute(router, licenseState, mockUsageCounter);
+    const [, handler] = router.get.mock.calls[0];
+    const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: { id: '1' } }, [
+      'ok',
+    ]);
+    await handler(context, req, res);
+    expect(trackLegacyRouteUsage).toHaveBeenCalledWith('get', mockUsageCounter);
   });
 });

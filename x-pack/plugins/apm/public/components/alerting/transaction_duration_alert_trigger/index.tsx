@@ -7,16 +7,15 @@
 
 import { EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { map } from 'lodash';
-import React from 'react';
-import { useParams } from 'react-router-dom';
-import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
+import { defaults, map, omit } from 'lodash';
+import React, { useEffect } from 'react';
+import { CoreStart } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ForLastExpression } from '@kbn/triggers-actions-ui-plugin/public';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { getDurationFormatter } from '../../../../common/utils/formatters';
-import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
-import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher';
 import { useFetcher } from '../../../hooks/use_fetcher';
+import { createCallApmApi } from '../../../services/rest/create_call_apm_api';
 import {
   getMaxY,
   getResponseTimeTickFormatter,
@@ -28,18 +27,18 @@ import {
   ServiceField,
   TransactionTypeField,
 } from '../fields';
-import { getAbsoluteTimeRange } from '../helper';
+import { AlertMetadata, getIntervalAndTimeRange, TimeUnit } from '../helper';
 import { ServiceAlertTrigger } from '../service_alert_trigger';
 import { PopoverExpression } from '../service_alert_trigger/popover_expression';
 
-interface AlertParams {
+export interface RuleParams {
+  aggregationType: 'avg' | '95th' | '99th';
+  environment: string;
+  serviceName: string;
+  threshold: number;
+  transactionType: string;
   windowSize: number;
   windowUnit: string;
-  threshold: number;
-  aggregationType: 'avg' | '95th' | '99th';
-  serviceName: string;
-  transactionType: string;
-  environment: string;
 }
 
 const TRANSACTION_ALERT_AGGREGATION_TYPES = {
@@ -64,54 +63,66 @@ const TRANSACTION_ALERT_AGGREGATION_TYPES = {
 };
 
 interface Props {
-  alertParams: AlertParams;
-  setAlertParams: (key: string, value: any) => void;
-  setAlertProperty: (key: string, value: any) => void;
+  ruleParams: RuleParams;
+  metadata?: AlertMetadata;
+  setRuleParams: (key: string, value: any) => void;
+  setRuleProperty: (key: string, value: any) => void;
 }
 
 export function TransactionDurationAlertTrigger(props: Props) {
-  const { setAlertParams, alertParams, setAlertProperty } = props;
-  const { urlParams } = useUrlParams();
-  const { transactionTypes, transactionType } = useApmServiceContext();
-  const { serviceName } = useParams<{ serviceName?: string }>();
-  const { start, end } = urlParams;
-  const { environmentOptions } = useEnvironmentsFetcher({
-    serviceName,
-    start,
-    end,
-  });
-  const {
-    aggregationType,
-    environment,
-    threshold,
-    windowSize,
-    windowUnit,
-  } = alertParams;
+  const { services } = useKibana();
+  const { ruleParams, metadata, setRuleParams, setRuleProperty } = props;
+
+  useEffect(() => {
+    createCallApmApi(services as CoreStart);
+  }, [services]);
+
+  const params = defaults(
+    {
+      ...omit(metadata, ['start', 'end']),
+      ...ruleParams,
+    },
+    {
+      aggregationType: 'avg',
+      threshold: 1500,
+      windowSize: 5,
+      windowUnit: 'm',
+      environment: ENVIRONMENT_ALL.value,
+    }
+  );
 
   const { data } = useFetcher(
     (callApmApi) => {
-      if (windowSize && windowUnit) {
-        return callApmApi({
-          endpoint: 'GET /api/apm/alerts/chart_preview/transaction_duration',
-          params: {
-            query: {
-              ...getAbsoluteTimeRange(windowSize, windowUnit),
-              aggregationType,
-              environment,
-              serviceName,
-              transactionType: alertParams.transactionType,
+      const { interval, start, end } = getIntervalAndTimeRange({
+        windowSize: params.windowSize,
+        windowUnit: params.windowUnit as TimeUnit,
+      });
+      if (interval && start && end) {
+        return callApmApi(
+          'GET /internal/apm/alerts/chart_preview/transaction_duration',
+          {
+            params: {
+              query: {
+                aggregationType: params.aggregationType,
+                environment: params.environment,
+                serviceName: params.serviceName,
+                transactionType: params.transactionType,
+                interval,
+                start,
+                end,
+              },
             },
-          },
-        });
+          }
+        );
       }
     },
     [
-      aggregationType,
-      environment,
-      serviceName,
-      alertParams.transactionType,
-      windowSize,
-      windowUnit,
+      params.aggregationType,
+      params.environment,
+      params.serviceName,
+      params.transactionType,
+      params.windowSize,
+      params.windowUnit,
     ]
   );
 
@@ -122,45 +133,30 @@ export function TransactionDurationAlertTrigger(props: Props) {
   const yTickFormat = getResponseTimeTickFormatter(formatter);
 
   // The threshold from the form is in ms. Convert to µs.
-  const thresholdMs = threshold * 1000;
+  const thresholdMs = params.threshold * 1000;
 
   const chartPreview = (
     <ChartPreview
       data={latencyChartPreview}
       threshold={thresholdMs}
       yTickFormat={yTickFormat}
+      uiSettings={services.uiSettings}
     />
   );
 
-  if (!transactionTypes.length || !serviceName) {
-    return null;
-  }
-
-  const defaults = {
-    threshold: 1500,
-    aggregationType: 'avg',
-    windowSize: 5,
-    windowUnit: 'm',
-    transactionType,
-    environment: urlParams.environment || ENVIRONMENT_ALL.value,
-  };
-
-  const params = {
-    ...defaults,
-    ...alertParams,
-  };
-
   const fields = [
-    <ServiceField value={serviceName} />,
+    <ServiceField
+      allowAll={false}
+      currentValue={params.serviceName}
+      onChange={(value) => setRuleParams('serviceName', value)}
+    />,
     <TransactionTypeField
       currentValue={params.transactionType}
-      options={transactionTypes.map((key) => ({ text: key, value: key }))}
-      onChange={(e) => setAlertParams('transactionType', e.target.value)}
+      onChange={(value) => setRuleParams('transactionType', value)}
     />,
     <EnvironmentField
       currentValue={params.environment}
-      options={environmentOptions}
-      onChange={(e) => setAlertParams('environment', e.target.value)}
+      onChange={(value) => setRuleParams('environment', value)}
     />,
     <PopoverExpression
       value={params.aggregationType}
@@ -176,7 +172,7 @@ export function TransactionDurationAlertTrigger(props: Props) {
             value: key,
           };
         })}
-        onChange={(e) => setAlertParams('aggregationType', e.target.value)}
+        onChange={(e) => setRuleParams('aggregationType', e.target.value)}
         compressed
       />
     </PopoverExpression>,
@@ -185,14 +181,14 @@ export function TransactionDurationAlertTrigger(props: Props) {
       unit={i18n.translate('xpack.apm.transactionDurationAlertTrigger.ms', {
         defaultMessage: 'ms',
       })}
-      onChange={(value) => setAlertParams('threshold', value || 0)}
+      onChange={(value) => setRuleParams('threshold', value || 0)}
     />,
     <ForLastExpression
       onChangeWindowSize={(timeWindowSize) =>
-        setAlertParams('windowSize', timeWindowSize || '')
+        setRuleParams('windowSize', timeWindowSize || '')
       }
       onChangeWindowUnit={(timeWindowUnit) =>
-        setAlertParams('windowUnit', timeWindowUnit)
+        setRuleParams('windowUnit', timeWindowUnit)
       }
       timeWindowSize={params.windowSize}
       timeWindowUnit={params.windowUnit}
@@ -206,10 +202,10 @@ export function TransactionDurationAlertTrigger(props: Props) {
   return (
     <ServiceAlertTrigger
       chartPreview={chartPreview}
-      defaults={defaults}
+      defaults={params}
       fields={fields}
-      setAlertParams={setAlertParams}
-      setAlertProperty={setAlertProperty}
+      setRuleParams={setRuleParams}
+      setRuleProperty={setRuleProperty}
     />
   );
 }

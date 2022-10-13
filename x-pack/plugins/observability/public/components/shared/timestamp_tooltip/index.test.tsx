@@ -8,7 +8,7 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 import moment from 'moment-timezone';
-import { TimestampTooltip } from './index';
+import { TimestampTooltip } from '.';
 
 function mockNow(date: string | number | Date) {
   const fakeNow = new Date(date).getTime();
@@ -27,14 +27,15 @@ describe('TimestampTooltip', () => {
 
   afterAll(() => moment.tz.setDefault(''));
 
-  it('should render component with relative time in body and absolute time in tooltip', () => {
+  it('should render component with absolute time in body and absolute time in tooltip', () => {
     expect(shallow(<TimestampTooltip time={timestamp} />)).toMatchInlineSnapshot(`
       <EuiToolTip
         content="Oct 10, 2019, 08:06:40.123 (UTC-7)"
         delay="regular"
+        display="inlineBlock"
         position="top"
       >
-        5 hours ago
+        Oct 10, 2019, 08:06:40.123 (UTC-7)
       </EuiToolTip>
     `);
   });

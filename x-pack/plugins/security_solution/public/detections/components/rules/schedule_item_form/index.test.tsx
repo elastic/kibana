@@ -8,7 +8,7 @@
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 
-import { ScheduleItem } from './index';
+import { ScheduleItem } from '.';
 import { TestProviders, useFormFieldMock } from '../../../../common/mock';
 
 describe('ScheduleItem', () => {

@@ -1,0 +1,41 @@
+# For collecting metrics from Elasticearch and Kibana launched from a kibana clone on the docker host
+
+http.enabled: true
+http.host: "0.0.0.0"
+
+metricbeat.modules:
+  - module: elasticsearch
+    xpack.enabled: true
+    period: 10s
+    hosts:
+      - "host.docker.internal:9200"
+    username: "elastic"
+    password: "changeme"
+
+  - module: kibana
+    xpack.enabled: true
+    basepath: "/ftw"
+    period: 10s
+    hosts: [ "host.docker.internal:5601" ]
+    username: "elastic"
+    password: "changeme"
+
+  - module: beat
+    xpack.enabled: true
+    period: 10s
+    hosts:
+      # metricbeat
+      - "http://host.docker.internal:5066"
+      # filebeat
+      - "http://host.docker.internal:5067"
+
+  - module: logstash
+    xpack.enabled: true
+    period: 10s
+    hosts:
+      - "host.docker.internal:9600"
+
+output.elasticsearch:
+  hosts: [ "host.docker.internal:9200" ]
+  username: "elastic"
+  password: "changeme"

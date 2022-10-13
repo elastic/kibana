@@ -6,7 +6,7 @@
  */
 
 import '../../../../__mocks__/shallow_useeffect.mock';
-import { setMockValues, setMockActions, mountWithIntl } from '../../../../__mocks__';
+import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -14,9 +14,10 @@ import { shallow } from 'enzyme';
 
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 
-import { LogRetentionOptions } from '../';
+import { LogRetentionOptions } from '..';
+import { mountWithIntl } from '../../../../test_helpers';
 
-import { LogRetentionCallout } from './';
+import { LogRetentionCallout } from '.';
 
 describe('LogRetentionCallout', () => {
   const actions = { fetchLogRetention: jest.fn() };
@@ -36,11 +37,13 @@ describe('LogRetentionCallout', () => {
     const wrapper = mountWithIntl(<LogRetentionCallout type={LogRetentionOptions.Analytics} />);
 
     expect(wrapper.find(EuiCallOut)).toHaveLength(1);
-    expect(wrapper.find('.euiCallOutHeader__title').text()).toEqual(
+    expect(wrapper.find('.euiCallOutHeader__title').last().text()).toEqual(
       'Analytics have been disabled since January 1, 1970.'
     );
     expect(wrapper.find(EuiLink)).toHaveLength(1);
-    expect(wrapper.find('p').text()).toEqual('To manage analytics & logging, visit your settings.');
+    expect(wrapper.find('p').last().text()).toEqual(
+      'To manage analytics & logging, visit your settings.'
+    );
   });
 
   it('renders an API callout', () => {
@@ -48,11 +51,13 @@ describe('LogRetentionCallout', () => {
     const wrapper = mountWithIntl(<LogRetentionCallout type={LogRetentionOptions.API} />);
 
     expect(wrapper.find(EuiCallOut)).toHaveLength(1);
-    expect(wrapper.find('.euiCallOutHeader__title').text()).toEqual(
+    expect(wrapper.find('.euiCallOutHeader__title').last().text()).toEqual(
       'API Logs have been disabled since January 1, 1970.'
     );
     expect(wrapper.find(EuiLink)).toHaveLength(1);
-    expect(wrapper.find('p').text()).toEqual('To manage analytics & logging, visit your settings.');
+    expect(wrapper.find('p').last().text()).toEqual(
+      'To manage analytics & logging, visit your settings.'
+    );
   });
 
   it('renders a generic title if no disabled date is present', () => {
@@ -60,7 +65,9 @@ describe('LogRetentionCallout', () => {
     const wrapper = mountWithIntl(<LogRetentionCallout type={LogRetentionOptions.API} />);
 
     expect(wrapper.find(EuiCallOut)).toHaveLength(1);
-    expect(wrapper.find('.euiCallOutHeader__title').text()).toEqual('API Logs have been disabled.');
+    expect(wrapper.find('.euiCallOutHeader__title').last().text()).toEqual(
+      'API Logs have been disabled.'
+    );
   });
 
   it('does not render if log retention is enabled', () => {

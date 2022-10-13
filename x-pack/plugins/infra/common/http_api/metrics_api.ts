@@ -10,7 +10,6 @@ import { MetricsUIAggregationRT } from '../inventory_models/types';
 import { afterKeyObjectRT } from './metrics_explorer';
 
 export const MetricsAPITimerangeRT = rt.type({
-  field: rt.string,
   from: rt.number,
   to: rt.number,
   interval: rt.string,
@@ -35,7 +34,7 @@ export const MetricsAPIRequestRT = rt.intersection([
     afterKey: rt.union([rt.null, afterKeyObjectRT]),
     limit: rt.union([rt.number, rt.null, rt.undefined]),
     filters: rt.array(rt.object),
-    dropLastBucket: rt.boolean,
+    dropPartialBuckets: rt.boolean,
     alignDataToEnd: rt.boolean,
   }),
 ]);
@@ -78,7 +77,9 @@ export const MetricsAPISeriesRT = rt.intersection([
 ]);
 
 export const MetricsAPIResponseRT = rt.type({
-  series: rt.array(MetricsAPISeriesRT),
+  series: rt.array(
+    rt.intersection([MetricsAPISeriesRT, rt.partial({ metricsets: rt.array(rt.string) })])
+  ),
   info: MetricsAPIPageInfoRT,
 });
 

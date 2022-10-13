@@ -9,7 +9,7 @@ import { EuiText, EuiLink } from '@elastic/eui';
 import React, { useCallback } from 'react';
 
 import { isUntitled } from '../../../../timelines/components/open_timeline/helpers';
-import {
+import type {
   OnOpenTimeline,
   OpenTimelineResult,
 } from '../../../../timelines/components/open_timeline/types';

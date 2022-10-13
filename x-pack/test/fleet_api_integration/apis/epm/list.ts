@@ -9,10 +9,12 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
+import { testUsers } from '../test_users';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
 
   // use function () {} and not () => {} here
@@ -22,11 +24,11 @@ export default function (providerContext: FtrProviderContext) {
   describe('EPM - list', async function () {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
-      await esArchiver.load('fleet/empty_fleet_server');
+      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
     setupFleetAndAgents(providerContext);
     after(async () => {
-      await esArchiver.unload('fleet/empty_fleet_server');
+      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
 
     describe('list api tests', async () => {
@@ -39,7 +41,7 @@ export default function (providerContext: FtrProviderContext) {
           return response.body;
         };
         const listResponse = await fetchPackageList();
-        expect(listResponse.response.length).not.to.be(0);
+        expect(listResponse.items.length).not.to.be(0);
       });
 
       it('lists all limited packages from the registry', async function () {
@@ -52,7 +54,32 @@ export default function (providerContext: FtrProviderContext) {
         };
         const listResponse = await fetchLimitedPackageList();
 
-        expect(listResponse.response).to.eql(['endpoint']);
+        expect(listResponse.items.sort()).to.eql(['endpoint'].sort());
+      });
+
+      it('allows user with only fleet permission to access', async () => {
+        await supertestWithoutAuth
+          .get('/api/fleet/epm/packages')
+          .auth(testUsers.fleet_all_only.username, testUsers.fleet_all_only.password)
+          .expect(200);
+      });
+      it('allows user with only integrations permission to access', async () => {
+        await supertestWithoutAuth
+          .get('/api/fleet/epm/packages')
+          .auth(testUsers.integr_all_only.username, testUsers.integr_all_only.password)
+          .expect(200);
+      });
+      it('allows user with integrations read permission to access', async () => {
+        await supertestWithoutAuth
+          .get('/api/fleet/epm/packages')
+          .auth(testUsers.fleet_all_int_read.username, testUsers.fleet_all_int_read.password)
+          .expect(200);
+      });
+      it('does not allow user with the correct permissions', async () => {
+        await supertestWithoutAuth
+          .get('/api/fleet/epm/packages')
+          .auth(testUsers.fleet_no_access.username, testUsers.fleet_no_access.password)
+          .expect(403);
       });
     });
   });

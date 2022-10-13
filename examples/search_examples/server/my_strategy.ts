@@ -7,8 +7,8 @@
  */
 
 import { map } from 'rxjs/operators';
-import { ISearchStrategy, PluginStart } from '../../../src/plugins/data/server';
-import { IMyStrategyResponse, IMyStrategyRequest } from '../common';
+import { ISearchStrategy, PluginStart } from '@kbn/data-plugin/server';
+import { IMyStrategyRequest, IMyStrategyResponse } from '../common/types';
 
 export const mySearchStrategyProvider = (
   data: PluginStart

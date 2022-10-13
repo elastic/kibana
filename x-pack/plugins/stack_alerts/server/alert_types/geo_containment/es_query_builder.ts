@@ -5,24 +5,29 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
-import { Logger } from 'src/core/server';
-import type { ApiResponse, estypes } from '@elastic/elasticsearch';
+import { ElasticsearchClient } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
-  Query,
-  IIndexPattern,
   fromKueryExpression,
   toElasticsearchQuery,
   luceneStringToDsl,
-} from '../../../../../../src/plugins/data/common';
+  DataViewBase,
+  Query,
+} from '@kbn/es-query';
 
 export const OTHER_CATEGORY = 'other';
 // Consider dynamically obtaining from config?
-const MAX_TOP_LEVEL_QUERY_SIZE = 0;
 const MAX_SHAPES_QUERY_SIZE = 10000;
 const MAX_BUCKETS_LIMIT = 65535;
 
-export const getEsFormattedQuery = (query: Query, indexPattern?: IIndexPattern) => {
+interface BoundaryHit {
+  _index: string;
+  _id: string;
+  fields?: Record<string, unknown[]>;
+}
+
+export const getEsFormattedQuery = (query: Query, indexPattern?: DataViewBase) => {
   let esFormattedQuery;
 
   const queryLanguage = query.language;
@@ -48,35 +53,40 @@ export async function getShapesFilters(
   const filters: Record<string, unknown> = {};
   const shapesIdsNamesMap: Record<string, unknown> = {};
   // Get all shapes in index
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { body: boundaryData }: ApiResponse<Record<string, any>> = await esClient.search({
+  const boundaryData = await esClient.search<Record<string, BoundaryHit>>({
     index: boundaryIndexTitle,
     body: {
       size: MAX_SHAPES_QUERY_SIZE,
+      _source: false,
+      fields: boundaryNameField ? [boundaryNameField] : [],
       ...(boundaryIndexQuery ? { query: getEsFormattedQuery(boundaryIndexQuery) } : {}),
     },
   });
 
-  boundaryData.hits.hits.forEach(({ _index, _id }: { _index: string; _id: string }) => {
-    filters[_id] = {
+  for (let i = 0; i < boundaryData.hits.hits.length; i++) {
+    const boundaryHit: BoundaryHit = boundaryData.hits.hits[i];
+    filters[boundaryHit._id] = {
       geo_shape: {
         [geoField]: {
           indexed_shape: {
-            index: _index,
-            id: _id,
+            index: boundaryHit._index,
+            id: boundaryHit._id,
             path: boundaryGeoField,
           },
         },
       },
     };
-  });
-  if (boundaryNameField) {
-    boundaryData.hits.hits.forEach(
-      ({ _source, _id }: { _source: Record<string, unknown>; _id: string }) => {
-        shapesIdsNamesMap[_id] = _source[boundaryNameField];
-      }
-    );
+    if (
+      boundaryNameField &&
+      boundaryHit.fields &&
+      boundaryHit.fields[boundaryNameField] &&
+      boundaryHit.fields[boundaryNameField].length
+    ) {
+      // fields API always returns an array, grab first value
+      shapesIdsNamesMap[boundaryHit._id] = boundaryHit.fields[boundaryNameField][0];
+    }
   }
+
   return {
     shapesFilters: filters,
     shapesIdsNamesMap,
@@ -127,7 +137,7 @@ export async function executeEsQueryFactory(
     const esQuery: Record<string, any> = {
       index,
       body: {
-        size: MAX_TOP_LEVEL_QUERY_SIZE,
+        size: 0, // do not fetch hits
         aggs: {
           shapes: {
             filters: {
@@ -151,7 +161,14 @@ export async function executeEsQueryFactory(
                           },
                         },
                       ],
-                      docvalue_fields: [entity, dateField, geoField],
+                      docvalue_fields: [
+                        entity,
+                        {
+                          field: dateField,
+                          format: 'strict_date_optional_time',
+                        },
+                        geoField,
+                      ],
                       _source: false,
                     },
                   },
@@ -195,7 +212,7 @@ export async function executeEsQueryFactory(
 
     let esResult: estypes.SearchResponse<unknown> | undefined;
     try {
-      ({ body: esResult } = await esClient.search(esQuery));
+      esResult = await esClient.search(esQuery);
     } catch (err) {
       log.warn(`${err.message}`);
     }

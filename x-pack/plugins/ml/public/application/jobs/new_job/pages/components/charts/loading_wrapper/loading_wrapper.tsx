@@ -26,7 +26,7 @@ export const LoadingWrapper: FC<Props> = ({ hasData, loading = false, height, ch
           transition: 'opacity 0.2s',
         }}
       >
-        {children}
+        {loading && !hasData ? null : children}
       </div>
       {loading === true && (
         <EuiFlexGroup

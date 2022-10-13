@@ -6,7 +6,8 @@
  */
 
 import '../../__mocks__/shallow_useeffect.mock';
-import { setMockValues, mockKibanaValues, mockHistory } from '../../__mocks__';
+import { setMockValues, mockKibanaValues } from '../../__mocks__/kea_logic';
+import { mockHistory } from '../../__mocks__/react_router';
 
 import React from 'react';
 
@@ -31,7 +32,7 @@ jest.mock('./generate_title', () => ({
 }));
 import { enterpriseSearchTitle, appSearchTitle, workplaceSearchTitle } from './generate_title';
 
-import { SetEnterpriseSearchChrome, SetAppSearchChrome, SetWorkplaceSearchChrome } from './';
+import { SetEnterpriseSearchChrome, SetAppSearchChrome, SetWorkplaceSearchChrome } from '.';
 
 describe('Set Kibana Chrome helpers', () => {
   const mockCurrentPath = (pathname: string) =>

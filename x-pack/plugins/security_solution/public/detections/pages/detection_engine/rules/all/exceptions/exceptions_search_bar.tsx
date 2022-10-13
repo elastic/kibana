@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiSearchBar, EuiSearchBarProps } from '@elastic/eui';
+import type { EuiSearchBarProps } from '@elastic/eui';
+import { EuiSearchBar } from '@elastic/eui';
 
 import * as i18n from './translations';
 
@@ -42,6 +43,7 @@ export const ExceptionsSearchBar = React.memo<ExceptionListsTableSearchProps>(({
       aria-label={i18n.EXCEPTIONS_LISTS_SEARCH_PLACEHOLDER}
       onChange={onSearch}
       box={{
+        [`data-test-subj`]: 'exceptionsHeaderSearchInput',
         placeholder: i18n.EXCEPTION_LIST_SEARCH_PLACEHOLDER,
         incremental: false,
         schema: EXCEPTIONS_SEARCH_SCHEMA,

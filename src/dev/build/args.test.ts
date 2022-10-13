@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ToolingLog, createAnyInstanceSerializer } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
+import { createAnyInstanceSerializer } from '@kbn/jest-serializers';
 
 import { readCliArgs } from './args';
 
@@ -26,17 +27,24 @@ it('build default and oss dist for current platform, without packages, by defaul
   expect(readCliArgs(['node', 'scripts/build'])).toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
-        "buildDefaultDist": true,
-        "buildOssDist": true,
+        "buildCanvasShareableRuntime": true,
+        "buildExamplePlugins": false,
         "createArchives": true,
         "createDebPackage": false,
-        "createDockerCentOS": false,
+        "createDockerCloud": false,
         "createDockerContexts": true,
         "createDockerUBI": false,
+        "createDockerUbuntu": false,
         "createGenericFolders": true,
         "createPlatformFolders": true,
         "createRpmPackage": false,
+        "dockerContextUseLocalArtifact": null,
+        "dockerCrossCompile": false,
+        "dockerPush": false,
+        "dockerTagQualifier": null,
+        "downloadCloudDependencies": true,
         "downloadFreshNode": true,
+        "eprRegistry": "snapshot",
         "initialize": true,
         "isRelease": false,
         "targetAllPlatforms": false,
@@ -53,17 +61,24 @@ it('builds packages if --all-platforms is passed', () => {
   expect(readCliArgs(['node', 'scripts/build', '--all-platforms'])).toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
-        "buildDefaultDist": true,
-        "buildOssDist": true,
+        "buildCanvasShareableRuntime": true,
+        "buildExamplePlugins": false,
         "createArchives": true,
         "createDebPackage": true,
-        "createDockerCentOS": true,
+        "createDockerCloud": true,
         "createDockerContexts": true,
         "createDockerUBI": true,
+        "createDockerUbuntu": true,
         "createGenericFolders": true,
         "createPlatformFolders": true,
         "createRpmPackage": true,
+        "dockerContextUseLocalArtifact": null,
+        "dockerCrossCompile": false,
+        "dockerPush": false,
+        "dockerTagQualifier": null,
+        "downloadCloudDependencies": true,
         "downloadFreshNode": true,
+        "eprRegistry": "snapshot",
         "initialize": true,
         "isRelease": false,
         "targetAllPlatforms": true,
@@ -80,17 +95,24 @@ it('limits packages if --rpm passed with --all-platforms', () => {
   expect(readCliArgs(['node', 'scripts/build', '--all-platforms', '--rpm'])).toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
-        "buildDefaultDist": true,
-        "buildOssDist": true,
+        "buildCanvasShareableRuntime": true,
+        "buildExamplePlugins": false,
         "createArchives": true,
         "createDebPackage": false,
-        "createDockerCentOS": false,
+        "createDockerCloud": false,
         "createDockerContexts": true,
         "createDockerUBI": false,
+        "createDockerUbuntu": false,
         "createGenericFolders": true,
         "createPlatformFolders": true,
         "createRpmPackage": true,
+        "dockerContextUseLocalArtifact": null,
+        "dockerCrossCompile": false,
+        "dockerPush": false,
+        "dockerTagQualifier": null,
+        "downloadCloudDependencies": true,
         "downloadFreshNode": true,
+        "eprRegistry": "snapshot",
         "initialize": true,
         "isRelease": false,
         "targetAllPlatforms": true,
@@ -107,17 +129,24 @@ it('limits packages if --deb passed with --all-platforms', () => {
   expect(readCliArgs(['node', 'scripts/build', '--all-platforms', '--deb'])).toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
-        "buildDefaultDist": true,
-        "buildOssDist": true,
+        "buildCanvasShareableRuntime": true,
+        "buildExamplePlugins": false,
         "createArchives": true,
         "createDebPackage": true,
-        "createDockerCentOS": false,
+        "createDockerCloud": false,
         "createDockerContexts": true,
         "createDockerUBI": false,
+        "createDockerUbuntu": false,
         "createGenericFolders": true,
         "createPlatformFolders": true,
         "createRpmPackage": false,
+        "dockerContextUseLocalArtifact": null,
+        "dockerCrossCompile": false,
+        "dockerPush": false,
+        "dockerTagQualifier": null,
+        "downloadCloudDependencies": true,
         "downloadFreshNode": true,
+        "eprRegistry": "snapshot",
         "initialize": true,
         "isRelease": false,
         "targetAllPlatforms": true,
@@ -135,17 +164,24 @@ it('limits packages if --docker passed with --all-platforms', () => {
     .toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
-        "buildDefaultDist": true,
-        "buildOssDist": true,
+        "buildCanvasShareableRuntime": true,
+        "buildExamplePlugins": false,
         "createArchives": true,
         "createDebPackage": false,
-        "createDockerCentOS": true,
+        "createDockerCloud": true,
         "createDockerContexts": true,
         "createDockerUBI": true,
+        "createDockerUbuntu": true,
         "createGenericFolders": true,
         "createPlatformFolders": true,
         "createRpmPackage": false,
+        "dockerContextUseLocalArtifact": null,
+        "dockerCrossCompile": false,
+        "dockerPush": false,
+        "dockerTagQualifier": null,
+        "downloadCloudDependencies": true,
         "downloadFreshNode": true,
+        "eprRegistry": "snapshot",
         "initialize": true,
         "isRelease": false,
         "targetAllPlatforms": true,
@@ -170,17 +206,24 @@ it('limits packages if --docker passed with --skip-docker-ubi and --all-platform
   ).toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
-        "buildDefaultDist": true,
-        "buildOssDist": true,
+        "buildCanvasShareableRuntime": true,
+        "buildExamplePlugins": false,
         "createArchives": true,
         "createDebPackage": false,
-        "createDockerCentOS": true,
+        "createDockerCloud": true,
         "createDockerContexts": true,
         "createDockerUBI": false,
+        "createDockerUbuntu": true,
         "createGenericFolders": true,
         "createPlatformFolders": true,
         "createRpmPackage": false,
+        "dockerContextUseLocalArtifact": null,
+        "dockerCrossCompile": false,
+        "dockerPush": false,
+        "dockerTagQualifier": null,
+        "downloadCloudDependencies": true,
         "downloadFreshNode": true,
+        "eprRegistry": "snapshot",
         "initialize": true,
         "isRelease": false,
         "targetAllPlatforms": true,
@@ -193,22 +236,29 @@ it('limits packages if --docker passed with --skip-docker-ubi and --all-platform
   `);
 });
 
-it('limits packages if --all-platforms passed with --skip-docker-centos', () => {
-  expect(readCliArgs(['node', 'scripts/build', '--all-platforms', '--skip-docker-centos']))
+it('limits packages if --all-platforms passed with --skip-docker-ubuntu', () => {
+  expect(readCliArgs(['node', 'scripts/build', '--all-platforms', '--skip-docker-ubuntu']))
     .toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
-        "buildDefaultDist": true,
-        "buildOssDist": true,
+        "buildCanvasShareableRuntime": true,
+        "buildExamplePlugins": false,
         "createArchives": true,
         "createDebPackage": true,
-        "createDockerCentOS": false,
+        "createDockerCloud": true,
         "createDockerContexts": true,
         "createDockerUBI": true,
+        "createDockerUbuntu": false,
         "createGenericFolders": true,
         "createPlatformFolders": true,
         "createRpmPackage": true,
+        "dockerContextUseLocalArtifact": null,
+        "dockerCrossCompile": false,
+        "dockerPush": false,
+        "dockerTagQualifier": null,
+        "downloadCloudDependencies": true,
         "downloadFreshNode": true,
+        "eprRegistry": "snapshot",
         "initialize": true,
         "isRelease": false,
         "targetAllPlatforms": true,

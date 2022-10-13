@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SavedObjectReference } from '@kbn/core/public';
 import { AdvancedSettings, UrlTemplate, WorkspaceField } from './app_state';
 import { WorkspaceNode, WorkspaceEdge } from './workspace_state';
 
@@ -32,6 +33,8 @@ export interface GraphWorkspaceSavedObject {
   // Only set for legacy saved objects.
   legacyIndexPatternRef?: string;
   _source: Record<string, unknown>;
+  updatedAt?: string;
+  references: SavedObjectReference[];
 }
 
 export interface SerializedWorkspaceState {
@@ -53,15 +56,15 @@ export interface SerializedField extends Omit<WorkspaceField, 'icon' | 'type' | 
   iconClass: string;
 }
 
-export interface SerializedNode
-  extends Omit<WorkspaceNode, 'icon' | 'data' | 'parent' | 'scaledSize'> {
+export interface SerializedNode extends Pick<WorkspaceNode, 'x' | 'y' | 'label' | 'color'> {
   field: string;
   term: string;
   parent: number | null;
   size: number;
 }
 
-export interface SerializedEdge extends Omit<WorkspaceEdge, 'source' | 'target'> {
+export interface SerializedEdge
+  extends Omit<WorkspaceEdge, 'source' | 'target' | 'topTarget' | 'topSrc'> {
   source: number;
   target: number;
 }

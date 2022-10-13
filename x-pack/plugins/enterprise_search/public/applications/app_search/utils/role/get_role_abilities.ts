@@ -49,7 +49,7 @@ export const getRoleAbilities = (role: Account['role']): Role => {
     canViewSettings: myRole.can('view', 'account_settings'),
     canViewRoleMappings: myRole.can('view', 'role_mappings'),
     canManageEngines: myRole.can('manage', 'account_engines'),
-    canManageMetaEngines: myRole.can('manage', 'account_meta_engines'),
+    canManageMetaEngines: myRole.can('manage', 'account_engines'),
     canManageLogSettings: myRole.can('manage', 'account_log_settings'),
     canManageSettings: myRole.can('manage', 'account_settings'),
     canManageEngineCrawler: myRole.can('manage', 'engine_crawler'),

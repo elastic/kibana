@@ -8,19 +8,27 @@
 import expect from '@kbn/expect';
 import { USERS, User, ExpectedResponse } from '../../../common/lib';
 import { FtrProviderContext } from '../services';
+import { createTags, createTestSpaces, deleteTags, deleteTestSpaces } from './test_utils';
 
 // eslint-disable-next-line import/no-default-export
-export default function ({ getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
-  const supertest = getService('supertestWithoutAuth');
+export default function (ftrContext: FtrProviderContext) {
+  const supertest = ftrContext.getService('supertestWithoutAuth');
 
   describe('GET /internal/saved_objects_tagging/tags/_find', () => {
     before(async () => {
-      await esArchiver.load('rbac_tags');
+      await createTestSpaces(ftrContext);
     });
 
     after(async () => {
-      await esArchiver.unload('rbac_tags');
+      await deleteTestSpaces(ftrContext);
+    });
+
+    beforeEach(async () => {
+      await createTags(ftrContext);
+    });
+
+    afterEach(async () => {
+      await deleteTags(ftrContext);
     });
 
     const responses: Record<string, ExpectedResponse> = {
@@ -41,7 +49,7 @@ export default function ({ getService }: FtrProviderContext) {
           });
         },
       },
-      unauthorized: {
+      noResults: {
         httpCode: 200,
         expectResponse: ({ body }) => {
           expect(body).to.eql({
@@ -50,8 +58,17 @@ export default function ({ getService }: FtrProviderContext) {
           });
         },
       },
+      unauthorized: {
+        httpCode: 403,
+        expectResponse: ({ body }) => {
+          expect(body).to.eql({
+            error: 'Forbidden',
+            message: 'unauthorized',
+            statusCode: 403,
+          });
+        },
+      },
     };
-
     const expectedResults: Record<string, User[]> = {
       authorized: [
         USERS.SUPERUSER,
@@ -63,7 +80,8 @@ export default function ({ getService }: FtrProviderContext) {
         USERS.DEFAULT_SPACE_VISUALIZE_READ_USER,
         USERS.DEFAULT_SPACE_MAPS_READ_USER,
       ],
-      unauthorized: [USERS.NOT_A_KIBANA_USER, USERS.DEFAULT_SPACE_ADVANCED_SETTINGS_READ_USER],
+      noResults: [USERS.DEFAULT_SPACE_ADVANCED_SETTINGS_READ_USER],
+      unauthorized: [USERS.NOT_A_KIBANA_USER],
     };
 
     const createUserTest = (

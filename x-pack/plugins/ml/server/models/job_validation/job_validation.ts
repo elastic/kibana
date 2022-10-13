@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { IScopedClusterClient } from 'kibana/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import { TypeOf } from '@kbn/config-schema';
 import { fieldsServiceProvider } from '../fields_service';
 import { getMessages, MessageId, JobValidationMessage } from '../../../common/constants/messages';
@@ -17,12 +17,14 @@ import { basicJobValidation, uniqWithIsEqual } from '../../../common/util/job_ut
 import { validateBucketSpan } from './validate_bucket_span';
 import { validateCardinality } from './validate_cardinality';
 import { validateInfluencers } from './validate_influencers';
+import { validateDatafeedPreviewWithMessages } from './validate_datafeed_preview';
 import { validateModelMemoryLimit } from './validate_model_memory_limit';
 import { validateTimeRange, isValidTimeField } from './validate_time_range';
 import { validateJobSchema } from '../../routes/schemas/job_validation_schema';
-import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
+import type { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import type { MlClient } from '../../lib/ml_client';
 import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
+import type { AuthorizationHeader } from '../../lib/request_authorization';
 
 export type ValidateJobPayload = TypeOf<typeof validateJobSchema>;
 
@@ -34,6 +36,7 @@ export async function validateJob(
   client: IScopedClusterClient,
   mlClient: MlClient,
   payload: ValidateJobPayload,
+  authHeader: AuthorizationHeader,
   isSecurityDisabled?: boolean
 ) {
   const messages = getMessages();
@@ -63,20 +66,14 @@ export async function validateJob(
       if (typeof duration === 'undefined' && (await isValidTimeField(client, job))) {
         const fs = fieldsServiceProvider(client);
         const index = job.datafeed_config.indices.join(',');
-        const timeField = job.data_description.time_field;
-        const timeRange = await fs.getTimeFieldRange(
+        const timeField = job.data_description.time_field!;
+        duration = await fs.getTimeFieldRange(
           index,
           timeField,
           job.datafeed_config.query,
           job.datafeed_config.runtime_mappings,
-          // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
           job.datafeed_config.indices_options
         );
-
-        duration = {
-          start: timeRange.start.epoch,
-          end: timeRange.end.epoch,
-        };
       }
 
       validationMessages = filteredBasicValidationMessages;
@@ -108,6 +105,16 @@ export async function validateJob(
       if (datafeedAggregations !== undefined && !job.analysis_config?.summary_count_field_name) {
         validationMessages.push({ id: 'missing_summary_count_field_name' });
       }
+
+      validationMessages.push(
+        ...(await validateDatafeedPreviewWithMessages(
+          mlClient,
+          authHeader,
+          job,
+          duration?.start,
+          duration?.end
+        ))
+      );
     } else {
       validationMessages = basicValidation.messages;
       validationMessages.push({ id: 'skipped_extended_tests' });

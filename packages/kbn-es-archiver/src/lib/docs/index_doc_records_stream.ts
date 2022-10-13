@@ -6,21 +6,26 @@
  * Side Public License, v 1.
  */
 
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import type { Client } from '@elastic/elasticsearch';
 import AggregateError from 'aggregate-error';
 import { Writable } from 'stream';
 import { Stats } from '../stats';
 import { Progress } from '../progress';
 import { ES_CLIENT_HEADERS } from '../../client_headers';
 
+enum BulkOperation {
+  Create = 'create',
+  Index = 'index',
+}
+
 export function createIndexDocRecordsStream(
-  client: KibanaClient,
+  client: Client,
   stats: Stats,
   progress: Progress,
   useCreate: boolean = false
 ) {
   async function indexDocs(docs: any[]) {
-    const operation = useCreate === true ? 'create' : 'index';
+    const operation = useCreate === true ? BulkOperation.Create : BulkOperation.Index;
     const ops = new WeakMap<any, any>();
     const errors: string[] = [];
 
@@ -29,9 +34,11 @@ export function createIndexDocRecordsStream(
         retries: 5,
         datasource: docs.map((doc) => {
           const body = doc.source;
+          const op = doc.data_stream ? BulkOperation.Create : operation;
+          const index = doc.data_stream || doc.index;
           ops.set(body, {
-            [operation]: {
-              _index: doc.index,
+            [op]: {
+              _index: index,
               _id: doc.id,
             },
           });
@@ -56,7 +63,7 @@ export function createIndexDocRecordsStream(
     }
 
     for (const doc of docs) {
-      stats.indexedDoc(doc.index);
+      stats.indexedDoc(doc.data_stream || doc.index);
     }
   }
 

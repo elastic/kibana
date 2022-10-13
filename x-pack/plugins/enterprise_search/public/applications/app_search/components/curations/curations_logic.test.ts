@@ -10,20 +10,22 @@ import {
   mockHttpValues,
   mockKibanaValues,
   mockFlashMessageHelpers,
-} from '../../../__mocks__';
+} from '../../../__mocks__/kea_logic';
 import '../../__mocks__/engine_logic.mock';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 import { DEFAULT_META } from '../../../shared/constants';
 
-import { CurationsLogic } from './';
+import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
+
+import { CurationsLogic } from '.';
 
 describe('CurationsLogic', () => {
   const { mount } = new LogicMounter(CurationsLogic);
   const { http } = mockHttpValues;
   const { navigateToUrl } = mockKibanaValues;
-  const { clearFlashMessages, setSuccessMessage, flashAPIErrors } = mockFlashMessageHelpers;
+  const { clearFlashMessages, flashSuccessToast, flashAPIErrors } = mockFlashMessageHelpers;
 
   const MOCK_CURATIONS_RESPONSE = {
     meta: {
@@ -50,6 +52,7 @@ describe('CurationsLogic', () => {
     dataLoading: true,
     curations: [],
     meta: DEFAULT_META,
+    selectedPageTab: 'overview',
   };
 
   beforeEach(() => {
@@ -89,21 +92,24 @@ describe('CurationsLogic', () => {
         });
       });
     });
+
+    describe('onSelectPageTab', () => {
+      it('should set the selected page tab and clear flash messages', () => {
+        mount();
+
+        CurationsLogic.actions.onSelectPageTab('settings');
+
+        expect(CurationsLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          selectedPageTab: 'settings',
+        });
+        expect(clearFlashMessages).toHaveBeenCalled();
+      });
+    });
   });
 
   describe('listeners', () => {
     describe('loadCurations', () => {
-      it('should set dataLoading state', () => {
-        mount({ dataLoading: false });
-
-        CurationsLogic.actions.loadCurations();
-
-        expect(CurationsLogic.values).toEqual({
-          ...DEFAULT_VALUES,
-          dataLoading: true,
-        });
-      });
-
       it('should make an API call and set curations & meta state', async () => {
         http.get.mockReturnValueOnce(Promise.resolve(MOCK_CURATIONS_RESPONSE));
         mount();
@@ -112,25 +118,23 @@ describe('CurationsLogic', () => {
         CurationsLogic.actions.loadCurations();
         await nextTick();
 
-        expect(http.get).toHaveBeenCalledWith('/api/app_search/engines/some-engine/curations', {
-          query: {
-            'page[current]': 1,
-            'page[size]': 10,
-          },
-        });
+        expect(http.get).toHaveBeenCalledWith(
+          '/internal/app_search/engines/some-engine/curations',
+          {
+            query: {
+              'page[current]': 1,
+              'page[size]': 10,
+            },
+          }
+        );
         expect(CurationsLogic.actions.onCurationsLoad).toHaveBeenCalledWith(
           MOCK_CURATIONS_RESPONSE
         );
       });
 
-      it('handles errors', async () => {
-        http.get.mockReturnValueOnce(Promise.reject('error'));
+      itShowsServerErrorAsFlashMessage(http.get, () => {
         mount();
-
         CurationsLogic.actions.loadCurations();
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('error');
       });
     });
 
@@ -151,10 +155,10 @@ describe('CurationsLogic', () => {
         await nextTick();
 
         expect(http.delete).toHaveBeenCalledWith(
-          '/api/app_search/engines/some-engine/curations/some-curation-id'
+          '/internal/app_search/engines/some-engine/curations/some-curation-id'
         );
         expect(CurationsLogic.actions.loadCurations).toHaveBeenCalled();
-        expect(setSuccessMessage).toHaveBeenCalledWith('Successfully removed curation.');
+        expect(flashSuccessToast).toHaveBeenCalledWith('Your curation was deleted');
       });
 
       it('handles errors', async () => {
@@ -189,9 +193,12 @@ describe('CurationsLogic', () => {
         expect(clearFlashMessages).toHaveBeenCalled();
         await nextTick();
 
-        expect(http.post).toHaveBeenCalledWith('/api/app_search/engines/some-engine/curations', {
-          body: '{"queries":["some query"]}',
-        });
+        expect(http.post).toHaveBeenCalledWith(
+          '/internal/app_search/engines/some-engine/curations',
+          {
+            body: '{"queries":["some query"]}',
+          }
+        );
         expect(navigateToUrl).toHaveBeenCalledWith('/engines/some-engine/curations/some-cur-id');
       });
 

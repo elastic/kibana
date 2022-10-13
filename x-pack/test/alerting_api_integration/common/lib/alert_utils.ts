@@ -9,7 +9,7 @@ import { Space, User } from '../types';
 import { ObjectRemover } from './object_remover';
 import { getUrlPrefix } from './space_test_utils';
 import { ES_TEST_INDEX_NAME } from './es_test_index_tool';
-import { getTestAlertData } from './get_test_alert_data';
+import { getTestRuleData } from './get_test_rule_data';
 
 export interface AlertUtilsOpts {
   user?: User;
@@ -76,10 +76,42 @@ export class AlertUtils {
     return request;
   }
 
+  public getAPIKeyRequest(ruleId: string) {
+    const request = this.supertestWithoutAuth.get(
+      `${getUrlPrefix(this.space.id)}/api/alerts_fixture/rule/${ruleId}/_get_api_key`
+    );
+    if (this.user) {
+      return request.auth(this.user.username, this.user.password);
+    }
+    return request;
+  }
+
   public getDisableRequest(alertId: string) {
     const request = this.supertestWithoutAuth
       .post(`${getUrlPrefix(this.space.id)}/api/alerting/rule/${alertId}/_disable`)
       .set('kbn-xsrf', 'foo');
+    if (this.user) {
+      return request.auth(this.user.username, this.user.password);
+    }
+    return request;
+  }
+
+  public getSnoozeRequest(alertId: string) {
+    const request = this.supertestWithoutAuth
+      .post(`${getUrlPrefix(this.space.id)}/internal/alerting/rule/${alertId}/_snooze`)
+      .set('kbn-xsrf', 'foo')
+      .set('content-type', 'application/json');
+    if (this.user) {
+      return request.auth(this.user.username, this.user.password);
+    }
+    return request;
+  }
+
+  public getUnsnoozeRequest(alertId: string) {
+    const request = this.supertestWithoutAuth
+      .post(`${getUrlPrefix(this.space.id)}/internal/alerting/rule/${alertId}/_unsnooze`)
+      .set('kbn-xsrf', 'foo')
+      .set('content-type', 'application/json');
     if (this.user) {
       return request.auth(this.user.username, this.user.password);
     }
@@ -293,7 +325,7 @@ export class AlertUtils {
       request = request.auth(this.user.username, this.user.password);
     }
     const response = await request.send({
-      ...getTestAlertData(),
+      ...getTestRuleData(),
       ...overwrites,
     });
     if (response.statusCode === 200) {
@@ -308,7 +340,7 @@ export function getConsumerUnauthorizedErrorMessage(
   alertType: string,
   consumer: string
 ) {
-  return `Unauthorized to ${operation} a "${alertType}" alert for "${consumer}"`;
+  return `Unauthorized to ${operation} a "${alertType}" rule for "${consumer}"`;
 }
 
 export function getProducerUnauthorizedErrorMessage(
@@ -316,7 +348,7 @@ export function getProducerUnauthorizedErrorMessage(
   alertType: string,
   producer: string
 ) {
-  return `Unauthorized to ${operation} a "${alertType}" alert by "${producer}"`;
+  return `Unauthorized to ${operation} a "${alertType}" rule by "${producer}"`;
 }
 
 function getDefaultAlwaysFiringAlertData(reference: string, actionId: string) {

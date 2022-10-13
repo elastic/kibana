@@ -10,9 +10,9 @@ import { ExpressionFunctionDefinition } from '../../expression_functions';
 
 export const introspectContext: ExpressionFunctionDefinition<
   'introspectContext',
-  any,
+  unknown,
   { key: string },
-  any
+  unknown
 > = {
   name: 'introspectContext',
   args: {
@@ -25,7 +25,7 @@ export const introspectContext: ExpressionFunctionDefinition<
   fn: (input, args, context) => {
     return {
       type: 'any',
-      result: (context as any)[args.key],
+      result: context[args.key as keyof typeof context],
     };
   },
 };

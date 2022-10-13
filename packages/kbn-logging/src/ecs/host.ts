@@ -8,22 +8,20 @@
 
 import { EcsGeo } from './geo';
 import { EcsOs } from './os';
-import { EcsNestedUser } from './user';
 
 interface NestedFields {
   geo?: EcsGeo;
   os?: EcsOs;
-  /** @deprecated */
-  user?: EcsNestedUser;
 }
 
 /**
- * https://www.elastic.co/guide/en/ecs/1.9/ecs-host.html
+ * https://www.elastic.co/guide/en/ecs/master/ecs-host.html
  *
  * @internal
  */
 export interface EcsHost extends NestedFields {
   architecture?: string;
+  boot?: { id: string };
   cpu?: { usage: number };
   disk?: Disk;
   domain?: string;
@@ -33,6 +31,7 @@ export interface EcsHost extends NestedFields {
   mac?: string[];
   name?: string;
   network?: Network;
+  pid_ns_ino?: string;
   type?: string;
   uptime?: number;
 }

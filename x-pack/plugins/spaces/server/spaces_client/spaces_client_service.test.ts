@@ -7,7 +7,7 @@
 
 import * as Rx from 'rxjs';
 
-import { coreMock, httpServerMock } from 'src/core/server/mocks';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 
 import type { ConfigType } from '../config';
 import { spacesConfig } from '../lib/__fixtures__';
@@ -101,7 +101,7 @@ describe('SpacesClientService', () => {
       const service = new SpacesClientService(debugLogger);
       const setup = service.setup({ config$: Rx.of(spacesConfig) });
 
-      const wrapper = (Symbol() as unknown) as ISpacesClient;
+      const wrapper = Symbol() as unknown as ISpacesClient;
 
       const clientWrapper = jest.fn().mockReturnValue(wrapper);
       setup.registerClientWrapper(clientWrapper);
@@ -129,7 +129,7 @@ describe('SpacesClientService', () => {
       const customRepositoryFactory = jest.fn();
       setup.setClientRepositoryFactory(customRepositoryFactory);
 
-      const wrapper = (Symbol() as unknown) as ISpacesClient;
+      const wrapper = Symbol() as unknown as ISpacesClient;
 
       const clientWrapper = jest.fn().mockReturnValue(wrapper);
       setup.registerClientWrapper(clientWrapper);

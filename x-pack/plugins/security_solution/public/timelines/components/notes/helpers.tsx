@@ -11,7 +11,7 @@ import React from 'react';
 import styled from 'styled-components';
 import uuid from 'uuid';
 
-import { Note } from '../../../common/lib/note';
+import type { Note } from '../../../common/lib/note';
 
 import * as i18n from './translations';
 import { CountBadge } from '../../../common/components/page';
@@ -20,12 +20,8 @@ import { CountBadge } from '../../../common/components/page';
 export type UpdateNote = (note: Note) => void;
 /** Performs IO to associate a note with something (e.g. a timeline, an event, etc). (The "something" is opaque to the caller) */
 export type AssociateNote = (noteId: string) => void;
-/** Performs IO to get a new note ID */
-export type GetNewNoteId = () => string;
 /** Updates the local state containing a new note being edited by the user */
 export type UpdateInternalNewNote = (newNote: string) => void;
-/** Closes the notes popover */
-export type OnClosePopover = () => void;
 
 /**
  * Defines the behavior of the search input that appears above the table of data
@@ -79,7 +75,7 @@ export const createNote = ({ newNote }: { newNote: string }): Note => ({
   created: moment.utc().toDate(),
   id: uuid.v4(),
   lastEdit: null,
-  note: newNote.trim(),
+  note: newNote,
   saveObjectId: null,
   user: 'elastic', // TODO: get the logged-in Kibana user
   version: null,

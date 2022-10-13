@@ -6,76 +6,190 @@
  */
 
 import React from 'react';
-import { configure, render } from '@testing-library/react';
+import { configure, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import RecentCases from '.';
-import { TestProviders } from '../../common/mock';
-import { useGetCases } from '../../containers/use_get_cases';
+import RecentCases, { RecentCasesProps } from '.';
+import {
+  AppMockRenderer,
+  createAppMockRenderer,
+  noCasesCapabilities,
+  TestProviders,
+} from '../../common/mock';
 import { useGetCasesMockState } from '../../containers/mock';
+import { useCurrentUser } from '../../common/lib/kibana/hooks';
+import { useGetCases } from '../../containers/use_get_cases';
+import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
+import { userProfiles } from '../../containers/user_profiles/api.mock';
+
+jest.mock('../../containers/user_profiles/use_get_current_user_profile');
 jest.mock('../../containers/use_get_cases');
+jest.mock('../../common/lib/kibana/hooks');
+jest.mock('../../common/navigation/hooks');
+
 configure({ testIdAttribute: 'data-test-subj' });
-const defaultProps = {
-  allCasesNavigation: {
-    href: 'all-cases-href',
-    onClick: jest.fn(),
-  },
-  caseDetailsNavigation: {
-    href: () => 'case-details-href',
-    onClick: jest.fn(),
-  },
-  createCaseNavigation: {
-    href: 'create-details-href',
-    onClick: jest.fn(),
-  },
+const defaultProps: RecentCasesProps = {
   maxCasesToShow: 10,
 };
-const setFilters = jest.fn();
+
 const mockData = {
   ...useGetCasesMockState,
-  setFilters,
 };
+
+const useGetCurrentUserProfileMock = useGetCurrentUserProfile as jest.Mock;
 const useGetCasesMock = useGetCases as jest.Mock;
+const useCurrentUserMock = useCurrentUser as jest.Mock;
+
 describe('RecentCases', () => {
+  let appMockRender: AppMockRenderer;
   beforeEach(() => {
     jest.clearAllMocks();
+    useGetCurrentUserProfileMock.mockReturnValue({
+      data: userProfiles[0],
+      isLoading: false,
+    });
     useGetCasesMock.mockImplementation(() => mockData);
+    useCurrentUserMock.mockReturnValue({
+      email: 'elastic@elastic.co',
+      fullName: 'Elastic',
+      username: 'elastic',
+    });
+
+    appMockRender = createAppMockRenderer();
   });
-  it('is good at loading', () => {
+
+  it('shows a loading status', () => {
     useGetCasesMock.mockImplementation(() => ({
       ...mockData,
-      loading: 'cases',
+      isLoading: true,
     }));
-    const { getAllByTestId } = render(
+
+    const { getAllByTestId } = appMockRender.render(
       <TestProviders>
         <RecentCases {...defaultProps} />
       </TestProviders>
     );
     expect(getAllByTestId('loadingPlaceholders')).toHaveLength(3);
   });
-  it('is good at rendering cases', () => {
-    const { getAllByTestId } = render(
+
+  it('render cases', () => {
+    const { getAllByTestId } = appMockRender.render(
       <TestProviders>
         <RecentCases {...defaultProps} />
       </TestProviders>
     );
-    expect(getAllByTestId('case-details-link')).toHaveLength(5);
+    expect(getAllByTestId('case-details-link')).toHaveLength(8);
   });
-  it('is good at rendering max cases', () => {
-    render(
+
+  it('render max cases correctly', () => {
+    appMockRender.render(
       <TestProviders>
         <RecentCases {...{ ...defaultProps, maxCasesToShow: 2 }} />
       </TestProviders>
     );
-    expect(useGetCasesMock).toBeCalledWith({ perPage: 2 });
+    expect(useGetCasesMock).toHaveBeenCalledWith({
+      filterOptions: { reporters: [], owner: ['securitySolution'] },
+      queryParams: { perPage: 2 },
+    });
   });
-  it('updates filters', () => {
-    const { getByTestId } = render(
+
+  it('sets the reporter filters correctly', async () => {
+    const { getByTestId } = appMockRender.render(
       <TestProviders>
         <RecentCases {...defaultProps} />
       </TestProviders>
     );
-    const yo = getByTestId('myRecentlyReported');
-    userEvent.click(yo);
-    expect(setFilters).toHaveBeenCalled();
+
+    expect(useGetCasesMock).toHaveBeenCalledWith({
+      filterOptions: { reporters: [], owner: ['securitySolution'] },
+      queryParams: { perPage: 10 },
+    });
+
+    // apply the filter
+    await waitFor(() => {
+      const myRecentCasesElement = getByTestId('myRecentlyReported');
+      userEvent.click(myRecentCasesElement);
+    });
+
+    expect(useGetCasesMock).toHaveBeenLastCalledWith({
+      filterOptions: {
+        reporters: [
+          {
+            email: 'damaged_raccoon@elastic.co',
+            full_name: 'Damaged Raccoon',
+            profile_uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
+            username: 'damaged_raccoon',
+          },
+        ],
+        owner: ['securitySolution'],
+      },
+      queryParams: { perPage: 10 },
+    });
+
+    // remove the filter
+    const recentCasesElement = getByTestId('recentlyCreated');
+    userEvent.click(recentCasesElement);
+
+    expect(useGetCasesMock).toHaveBeenLastCalledWith({
+      filterOptions: {
+        reporters: [],
+        owner: ['securitySolution'],
+      },
+      queryParams: { perPage: 10 },
+    });
+  });
+
+  it('sets the reporter filters to the user info without the profile uid when it cannot find the current user profile', async () => {
+    useGetCurrentUserProfileMock.mockReturnValue({ data: undefined, isLoading: false });
+
+    const { getByTestId } = appMockRender.render(
+      <TestProviders>
+        <RecentCases {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(useGetCasesMock).toHaveBeenCalledWith({
+      filterOptions: { reporters: [], owner: ['securitySolution'] },
+      queryParams: { perPage: 10 },
+    });
+
+    // apply the filter
+    await waitFor(() => {
+      const myRecentCasesElement = getByTestId('myRecentlyReported');
+      userEvent.click(myRecentCasesElement);
+    });
+
+    expect(useGetCasesMock).toHaveBeenLastCalledWith({
+      filterOptions: {
+        reporters: [
+          {
+            email: 'elastic@elastic.co',
+            full_name: 'Elastic',
+            username: 'elastic',
+          },
+        ],
+        owner: ['securitySolution'],
+      },
+      queryParams: { perPage: 10 },
+    });
+  });
+
+  it('sets all available solutions correctly', () => {
+    appMockRender = createAppMockRenderer({ owner: [] });
+    /**
+     * We set securitySolutionCases capability to not have
+     * any access to cases. This tests that we get the owners
+     * that have at least read access.
+     */
+    appMockRender.coreStart.application.capabilities = {
+      ...appMockRender.coreStart.application.capabilities,
+      securitySolutionCases: noCasesCapabilities(),
+    };
+
+    appMockRender.render(<RecentCases {...{ ...defaultProps, maxCasesToShow: 2 }} />);
+
+    expect(useGetCasesMock).toHaveBeenCalledWith({
+      filterOptions: { reporters: [], owner: ['cases'] },
+      queryParams: { perPage: 2 },
+    });
   });
 });

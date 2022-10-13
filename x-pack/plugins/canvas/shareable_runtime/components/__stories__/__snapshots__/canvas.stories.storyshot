@@ -1319,7 +1319,7 @@ exports[`Storyshots shareables/Canvas component 1`] = `
                 }
               >
                 <a
-                  className="euiLink euiLink--primary"
+                  className="euiLink emotion-euiLink-primary"
                   href="https://www.elastic.co"
                   rel=""
                   title="Powered by Elastic.co"
@@ -1327,7 +1327,9 @@ exports[`Storyshots shareables/Canvas component 1`] = `
                   <span
                     data-euiicon-type="logoElastic"
                     size="l"
-                  />
+                  >
+                    
+                  </span>
                 </a>
               </div>
               <div
@@ -1340,16 +1342,13 @@ exports[`Storyshots shareables/Canvas component 1`] = `
                 }
               >
                 <div
-                  className="euiText euiText--small"
+                  className="euiText emotion-euiText-s-euiTextColor-ghost"
+                  style={Object {}}
                 >
                   <div
-                    className="euiTextColor euiTextColor--ghost"
+                    className="eui-textTruncate"
                   >
-                    <div
-                      className="eui-textTruncate"
-                    >
-                      Elastic{ON} - Austin from Clint Andrew Hall with a title that just goes and goes and goes
-                    </div>
+                    Elastic{ON} - Austin from Clint Andrew Hall with a title that just goes and goes and goes
                   </div>
                 </div>
               </div>
@@ -1374,7 +1373,7 @@ exports[`Storyshots shareables/Canvas component 1`] = `
                 >
                   <button
                     aria-label="Previous Page"
-                    className="euiButtonIcon euiButtonIcon--ghost euiButtonIcon--empty euiButtonIcon--xSmall"
+                    className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--ghost euiButtonIcon--empty euiButtonIcon--xSmall"
                     data-test-subj="pageControlsPrevPage"
                     disabled={true}
                     onClick={[Function]}
@@ -1383,9 +1382,12 @@ exports[`Storyshots shareables/Canvas component 1`] = `
                     <span
                       aria-hidden="true"
                       className="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="arrowLeft"
                       size="m"
-                    />
+                    >
+                      
+                    </span>
                   </button>
                 </div>
                 <div
@@ -1405,15 +1407,12 @@ exports[`Storyshots shareables/Canvas component 1`] = `
                         className="euiButtonEmpty__text"
                       >
                         <div
-                          className="euiText euiText--small"
+                          className="euiText emotion-euiText-s-euiTextColor-ghost"
+                          style={Object {}}
                         >
-                          <div
-                            className="euiTextColor euiTextColor--ghost"
-                          >
-                            Page 
-                            1
-                             of 28
-                          </div>
+                          Page 
+                          1
+                           of 28
                         </div>
                       </span>
                     </span>
@@ -1426,16 +1425,18 @@ exports[`Storyshots shareables/Canvas component 1`] = `
                     aria-label="Next Page"
                     className="euiButtonIcon euiButtonIcon--ghost euiButtonIcon--empty euiButtonIcon--xSmall"
                     data-test-subj="pageControlsNextPage"
-                    disabled={false}
                     onClick={[Function]}
                     type="button"
                   >
                     <span
                       aria-hidden="true"
                       className="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="arrowRight"
                       size="m"
-                    />
+                    >
+                      
+                    </span>
                   </button>
                 </div>
               </div>
@@ -1446,25 +1447,27 @@ exports[`Storyshots shareables/Canvas component 1`] = `
                   className="euiFlexItem euiFlexItem--flexGrowZero"
                 >
                   <div
-                    className="euiPopover euiPopover--anchorUpRight"
+                    className="euiPopover emotion-euiPopover"
                     id="settings"
                   >
                     <div
-                      className="euiPopover__anchor"
+                      className="euiPopover__anchor css-16vtueo-render"
                     >
                       <button
                         aria-label="Settings"
                         className="euiButtonIcon euiButtonIcon--ghost euiButtonIcon--empty euiButtonIcon--xSmall"
-                        disabled={false}
                         onClick={[Function]}
                         type="button"
                       >
                         <span
                           aria-hidden="true"
                           className="euiButtonIcon__icon"
+                          color="inherit"
                           data-euiicon-type="gear"
                           size="m"
-                        />
+                        >
+                          
+                        </span>
                       </button>
                     </div>
                   </div>
@@ -2798,7 +2801,7 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
                 }
               >
                 <a
-                  className="euiLink euiLink--primary"
+                  className="euiLink emotion-euiLink-primary"
                   href="https://www.elastic.co"
                   rel=""
                   title="Powered by Elastic.co"
@@ -2806,7 +2809,9 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
                   <span
                     data-euiicon-type="logoElastic"
                     size="l"
-                  />
+                  >
+                    
+                  </span>
                 </a>
               </div>
               <div
@@ -2819,16 +2824,13 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
                 }
               >
                 <div
-                  className="euiText euiText--small"
+                  className="euiText emotion-euiText-s-euiTextColor-ghost"
+                  style={Object {}}
                 >
                   <div
-                    className="euiTextColor euiTextColor--ghost"
+                    className="eui-textTruncate"
                   >
-                    <div
-                      className="eui-textTruncate"
-                    >
-                      Elastic{ON} - Austin from Clint Andrew Hall with a title that just goes and goes and goes
-                    </div>
+                    Elastic{ON} - Austin from Clint Andrew Hall with a title that just goes and goes and goes
                   </div>
                 </div>
               </div>
@@ -2853,7 +2855,7 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
                 >
                   <button
                     aria-label="Previous Page"
-                    className="euiButtonIcon euiButtonIcon--ghost euiButtonIcon--empty euiButtonIcon--xSmall"
+                    className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--ghost euiButtonIcon--empty euiButtonIcon--xSmall"
                     data-test-subj="pageControlsPrevPage"
                     disabled={true}
                     onClick={[Function]}
@@ -2862,9 +2864,12 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
                     <span
                       aria-hidden="true"
                       className="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="arrowLeft"
                       size="m"
-                    />
+                    >
+                      
+                    </span>
                   </button>
                 </div>
                 <div
@@ -2884,15 +2889,12 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
                         className="euiButtonEmpty__text"
                       >
                         <div
-                          className="euiText euiText--small"
+                          className="euiText emotion-euiText-s-euiTextColor-ghost"
+                          style={Object {}}
                         >
-                          <div
-                            className="euiTextColor euiTextColor--ghost"
-                          >
-                            Page 
-                            1
-                             of 28
-                          </div>
+                          Page 
+                          1
+                           of 28
                         </div>
                       </span>
                     </span>
@@ -2905,16 +2907,18 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
                     aria-label="Next Page"
                     className="euiButtonIcon euiButtonIcon--ghost euiButtonIcon--empty euiButtonIcon--xSmall"
                     data-test-subj="pageControlsNextPage"
-                    disabled={false}
                     onClick={[Function]}
                     type="button"
                   >
                     <span
                       aria-hidden="true"
                       className="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="arrowRight"
                       size="m"
-                    />
+                    >
+                      
+                    </span>
                   </button>
                 </div>
               </div>
@@ -2925,25 +2929,27 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
                   className="euiFlexItem euiFlexItem--flexGrowZero"
                 >
                   <div
-                    className="euiPopover euiPopover--anchorUpRight"
+                    className="euiPopover emotion-euiPopover"
                     id="settings"
                   >
                     <div
-                      className="euiPopover__anchor"
+                      className="euiPopover__anchor css-16vtueo-render"
                     >
                       <button
                         aria-label="Settings"
                         className="euiButtonIcon euiButtonIcon--ghost euiButtonIcon--empty euiButtonIcon--xSmall"
-                        disabled={false}
                         onClick={[Function]}
                         type="button"
                       >
                         <span
                           aria-hidden="true"
                           className="euiButtonIcon__icon"
+                          color="inherit"
                           data-euiicon-type="gear"
                           size="m"
-                        />
+                        >
+                          
+                        </span>
                       </button>
                     </div>
                   </div>
@@ -3093,7 +3099,7 @@ exports[`Storyshots shareables/Canvas contextual: hello 1`] = `
                 }
               >
                 <a
-                  className="euiLink euiLink--primary"
+                  className="euiLink emotion-euiLink-primary"
                   href="https://www.elastic.co"
                   rel=""
                   title="Powered by Elastic.co"
@@ -3101,7 +3107,9 @@ exports[`Storyshots shareables/Canvas contextual: hello 1`] = `
                   <span
                     data-euiicon-type="logoElastic"
                     size="l"
-                  />
+                  >
+                    
+                  </span>
                 </a>
               </div>
               <div
@@ -3114,16 +3122,13 @@ exports[`Storyshots shareables/Canvas contextual: hello 1`] = `
                 }
               >
                 <div
-                  className="euiText euiText--small"
+                  className="euiText emotion-euiText-s-euiTextColor-ghost"
+                  style={Object {}}
                 >
                   <div
-                    className="euiTextColor euiTextColor--ghost"
+                    className="eui-textTruncate"
                   >
-                    <div
-                      className="eui-textTruncate"
-                    >
-                      My Canvas Workpad
-                    </div>
+                    My Canvas Workpad
                   </div>
                 </div>
               </div>
@@ -3148,7 +3153,7 @@ exports[`Storyshots shareables/Canvas contextual: hello 1`] = `
                 >
                   <button
                     aria-label="Previous Page"
-                    className="euiButtonIcon euiButtonIcon--ghost euiButtonIcon--empty euiButtonIcon--xSmall"
+                    className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--ghost euiButtonIcon--empty euiButtonIcon--xSmall"
                     data-test-subj="pageControlsPrevPage"
                     disabled={true}
                     onClick={[Function]}
@@ -3157,9 +3162,12 @@ exports[`Storyshots shareables/Canvas contextual: hello 1`] = `
                     <span
                       aria-hidden="true"
                       className="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="arrowLeft"
                       size="m"
-                    />
+                    >
+                      
+                    </span>
                   </button>
                 </div>
                 <div
@@ -3179,14 +3187,11 @@ exports[`Storyshots shareables/Canvas contextual: hello 1`] = `
                         className="euiButtonEmpty__text"
                       >
                         <div
-                          className="euiText euiText--small"
+                          className="euiText emotion-euiText-s-euiTextColor-ghost"
+                          style={Object {}}
                         >
-                          <div
-                            className="euiTextColor euiTextColor--ghost"
-                          >
-                            Page 
-                            1
-                          </div>
+                          Page 
+                          1
                         </div>
                       </span>
                     </span>
@@ -3197,7 +3202,7 @@ exports[`Storyshots shareables/Canvas contextual: hello 1`] = `
                 >
                   <button
                     aria-label="Next Page"
-                    className="euiButtonIcon euiButtonIcon--ghost euiButtonIcon--empty euiButtonIcon--xSmall"
+                    className="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--ghost euiButtonIcon--empty euiButtonIcon--xSmall"
                     data-test-subj="pageControlsNextPage"
                     disabled={true}
                     onClick={[Function]}
@@ -3206,9 +3211,12 @@ exports[`Storyshots shareables/Canvas contextual: hello 1`] = `
                     <span
                       aria-hidden="true"
                       className="euiButtonIcon__icon"
+                      color="inherit"
                       data-euiicon-type="arrowRight"
                       size="m"
-                    />
+                    >
+                      
+                    </span>
                   </button>
                 </div>
               </div>
@@ -3219,25 +3227,27 @@ exports[`Storyshots shareables/Canvas contextual: hello 1`] = `
                   className="euiFlexItem euiFlexItem--flexGrowZero"
                 >
                   <div
-                    className="euiPopover euiPopover--anchorUpRight"
+                    className="euiPopover emotion-euiPopover"
                     id="settings"
                   >
                     <div
-                      className="euiPopover__anchor"
+                      className="euiPopover__anchor css-16vtueo-render"
                     >
                       <button
                         aria-label="Settings"
                         className="euiButtonIcon euiButtonIcon--ghost euiButtonIcon--empty euiButtonIcon--xSmall"
-                        disabled={false}
                         onClick={[Function]}
                         type="button"
                       >
                         <span
                           aria-hidden="true"
                           className="euiButtonIcon__icon"
+                          color="inherit"
                           data-euiicon-type="gear"
                           size="m"
-                        />
+                        >
+                          
+                        </span>
                       </button>
                     </div>
                   </div>

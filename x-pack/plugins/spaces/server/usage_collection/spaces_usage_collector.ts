@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import type { Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
 
-import type { ElasticsearchClient } from 'src/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type {
   CollectorFetchContext,
   UsageCollectionSetup,
-} from 'src/plugins/usage_collection/server';
+} from '@kbn/usage-collection-plugin/server';
 
 import type { PluginsSetup } from '../plugin';
 import type { UsageStats, UsageStatsServiceSetup } from '../usage_stats';
@@ -30,7 +29,7 @@ interface SpacesAggregationResponse {
 
 /**
  *
- * @param {CallCluster} callCluster
+ * @param {ElasticsearchClient} esClient
  * @param {string} kibanaIndex
  * @param {PluginsSetup['features']} features
  * @param {boolean} spacesAvailable
@@ -47,42 +46,31 @@ async function getSpacesUsage(
   }
 
   const knownFeatureIds = features.getKibanaFeatures().map((feature) => feature.id);
-
-  let resp: SpacesAggregationResponse | undefined;
-  try {
-    // @ts-expect-error `SearchResponse['hits']['total']` incorrectly expects `number` type instead of `{ value: number }`.
-    ({ body: resp } = await esClient.search({
-      index: kibanaIndex,
-      body: {
-        track_total_hits: true,
-        query: {
-          term: {
-            type: {
-              value: 'space',
-            },
+  const resp = (await esClient.search({
+    index: kibanaIndex,
+    body: {
+      track_total_hits: true,
+      query: {
+        term: {
+          type: {
+            value: 'space',
           },
         },
-        aggs: {
-          disabledFeatures: {
-            terms: {
-              field: 'space.disabledFeatures',
-              include: knownFeatureIds,
-              size: knownFeatureIds.length,
-            },
-          },
-        },
-        size: 0,
       },
-    }));
-  } catch (err) {
-    if (err.status === 404) {
-      return null;
-    }
+      aggs: {
+        disabledFeatures: {
+          terms: {
+            field: 'space.disabledFeatures',
+            include: knownFeatureIds,
+            size: knownFeatureIds.length,
+          },
+        },
+      },
+      size: 0,
+    },
+  })) as SpacesAggregationResponse;
 
-    throw err;
-  }
-
-  const { hits, aggregations } = resp!;
+  const { hits, aggregations } = resp;
 
   const count = hits?.total?.value ?? 0;
   const disabledFeatureBuckets = aggregations?.disabledFeatures?.buckets ?? [];
@@ -149,7 +137,6 @@ export interface UsageData extends UsageStats {
     graph?: number;
     uptime?: number;
     savedObjectsManagement?: number;
-    timelion?: number;
     dev_tools?: number;
     advancedSettings?: number;
     infrastructure?: number;
@@ -162,7 +149,7 @@ export interface UsageData extends UsageStats {
 }
 
 interface CollectorDeps {
-  kibanaIndexConfig$: Observable<{ kibana: { index: string } }>;
+  kibanaIndex: string;
   features: PluginsSetup['features'];
   licensing: PluginsSetup['licensing'];
   usageStatsServicePromise: Promise<UsageStatsServiceSetup>;
@@ -280,12 +267,6 @@ export function getSpacesUsageCollector(
             description: 'The number of spaces which have this feature disabled.',
           },
         },
-        timelion: {
-          type: 'long',
-          _meta: {
-            description: 'The number of spaces which have this feature disabled.',
-          },
-        },
         dev_tools: {
           type: 'long',
           _meta: {
@@ -338,13 +319,13 @@ export function getSpacesUsageCollector(
       available: {
         type: 'boolean',
         _meta: {
-          description: 'Indicates if the spaces feature is available in this installation.',
+          description: 'Indicates if the Spaces feature is available in this installation.',
         },
       },
       enabled: {
         type: 'boolean',
         _meta: {
-          description: 'Indicates if the spaces feature is enabled in this installation.',
+          description: 'Indicates if the Spaces feature is enabled in this installation.',
         },
       },
       count: {
@@ -436,13 +417,17 @@ export function getSpacesUsageCollector(
             'The number of times the "Resolve Copy Saved Objects Errors" API has been called with "createNewCopies" set to false.',
         },
       },
+      'apiCalls.disableLegacyUrlAliases.total': {
+        type: 'long',
+        _meta: {
+          description: 'The number of times the "Disable Legacy URL Aliases" API has been called.',
+        },
+      },
     },
     fetch: async ({ esClient }: CollectorFetchContext) => {
-      const { licensing, kibanaIndexConfig$, features, usageStatsServicePromise } = deps;
-      const license = await licensing.license$.pipe(take(1)).toPromise();
+      const { licensing, kibanaIndex, features, usageStatsServicePromise } = deps;
+      const license = await firstValueFrom(licensing.license$);
       const available = license.isAvailable; // some form of spaces is available for all valid licenses
-
-      const kibanaIndex = (await kibanaIndexConfig$.pipe(take(1)).toPromise()).kibana.index;
 
       const usageData = await getSpacesUsage(esClient, kibanaIndex, features, available);
       const usageStats = await getUsageStats(usageStatsServicePromise, available);

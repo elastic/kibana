@@ -7,16 +7,16 @@
 
 import React, { FC, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { Cytoscape, Controls, JobMapLegend } from './components';
-import { useMlKibana, useMlUrlGenerator } from '../../../contexts/kibana';
+import { useMlKibana, useMlLocator } from '../../../contexts/kibana';
 import { JOB_MAP_NODE_TYPES } from '../../../../../common/constants/data_frame_analytics';
-import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
+import { ML_PAGES } from '../../../../../common/constants/locator';
 import { useCurrentEuiTheme, EuiThemeType } from '../../../components/color_range_legend';
+import { useRefresh } from '../../../routing/use_refresh';
 import { useRefDimensions } from './components/use_ref_dimensions';
 import { useFetchAnalyticsMapData } from './use_fetch_analytics_map_data';
-import { JobMapTitle } from './job_map_title';
 
 const getCytoscapeDivStyle = (theme: EuiThemeType) => ({
   background: `linear-gradient(
@@ -41,9 +41,10 @@ ${theme.euiColorLightShade}`,
 interface Props {
   analyticsId?: string;
   modelId?: string;
+  forceRefresh?: boolean;
 }
 
-export const JobMap: FC<Props> = ({ analyticsId, modelId }) => {
+export const JobMap: FC<Props> = ({ analyticsId, modelId, forceRefresh }) => {
   // itemsDeleted will reset to false when Controls component calls updateElements to remove nodes deleted from map
   const [itemsDeleted, setItemsDeleted] = useState<boolean>(false);
   const [resetCyToggle, setResetCyToggle] = useState<boolean>(false);
@@ -51,7 +52,6 @@ export const JobMap: FC<Props> = ({ analyticsId, modelId }) => {
     elements,
     error,
     fetchAndSetElementsWrapper,
-    isLoading,
     message,
     nodeDetails,
     setElements,
@@ -64,11 +64,12 @@ export const JobMap: FC<Props> = ({ analyticsId, modelId }) => {
       application: { navigateToUrl },
     },
   } = useMlKibana();
-  const urlGenerator = useMlUrlGenerator();
+  const locator = useMlLocator()!;
   const { euiTheme } = useCurrentEuiTheme();
+  const refresh = useRefresh();
 
   const redirectToAnalyticsManagementPage = async () => {
-    const url = await urlGenerator.createUrl({ page: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE });
+    const url = await locator.getUrl({ page: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE });
     await navigateToUrl(url);
   };
 
@@ -109,13 +110,31 @@ export const JobMap: FC<Props> = ({ analyticsId, modelId }) => {
 
   useEffect(() => {
     fetchAndSetElementsWrapper({ analyticsId, modelId });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [analyticsId, modelId]);
+
+  useEffect(() => {
+    if (forceRefresh === true) {
+      fetchAndSetElementsWrapper({ analyticsId, modelId });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [forceRefresh]);
 
   useEffect(() => {
     if (message !== undefined) {
       notifications.toasts.add(message);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [message]);
+
+  useEffect(
+    function updateOnTimerRefresh() {
+      if (!refresh) return;
+      fetchAndSetElementsWrapper({ analyticsId, modelId });
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [refresh]
+  );
 
   if (error !== undefined) {
     notifications.toasts.addDanger(
@@ -134,46 +153,22 @@ export const JobMap: FC<Props> = ({ analyticsId, modelId }) => {
   return (
     <div data-test-subj="mlPageDataFrameAnalyticsMap">
       <EuiSpacer size="m" />
-      <EuiFlexGroup direction="column" gutterSize="none" justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <JobMapTitle analyticsId={analyticsId} modelId={modelId} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <JobMapLegend theme={euiTheme} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+      <EuiFlexGroup direction="row" gutterSize="none" justifyContent="spaceBetween">
+        <EuiFlexItem>
+          <JobMapLegend theme={euiTheme} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="xs" component="span">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="xs"
-                data-test-subj={`mlAnalyticsRefreshMapButton${isLoading ? ' loading' : ' loaded'}`}
-                onClick={refreshCallback}
-                isLoading={isLoading}
-              >
-                <FormattedMessage
-                  id="xpack.ml.dataframe.analyticsList.refreshMapButtonLabel"
-                  defaultMessage="Refresh"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="xs"
-                data-test-subj="mlAnalyticsResetGraphButton"
-                // trigger reset on value change
-                onClick={() => setResetCyToggle(!resetCyToggle)}
-              >
-                <FormattedMessage
-                  id="xpack.ml.dataframe.analyticsList.resetMapButtonLabel"
-                  defaultMessage="Reset"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiButtonEmpty
+            size="xs"
+            data-test-subj="mlAnalyticsResetGraphButton"
+            // trigger reset on value change
+            onClick={() => setResetCyToggle(!resetCyToggle)}
+          >
+            <FormattedMessage
+              id="xpack.ml.dataframe.analyticsList.resetMapButtonLabel"
+              defaultMessage="Reset"
+            />
+          </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
       <div

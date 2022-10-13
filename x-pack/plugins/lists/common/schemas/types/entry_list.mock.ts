@@ -5,13 +5,20 @@
  * 2.0.
  */
 
-import { FIELD, LIST, LIST_ID, OPERATOR, TYPE } from '../../constants.mock';
+import type { EntryList } from '@kbn/securitysolution-io-ts-list-types';
 
-import { EntryList } from './entry_list';
+import { FIELD, LIST, LIST_ID, OPERATOR, TYPE } from '../../constants.mock';
 
 export const getEntryListMock = (): EntryList => ({
   field: FIELD,
   list: { id: LIST_ID, type: TYPE },
   operator: OPERATOR,
+  type: LIST,
+});
+
+export const getEntryListExcludedMock = (): EntryList => ({
+  field: FIELD,
+  list: { id: LIST_ID, type: TYPE },
+  operator: 'excluded',
   type: LIST,
 });

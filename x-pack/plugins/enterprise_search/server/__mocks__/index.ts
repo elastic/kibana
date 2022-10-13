@@ -12,3 +12,5 @@ export {
   mockRequestHandler,
   mockDependencies,
 } from './routerDependencies.mock';
+
+export { mockHttpAgent } from './http_agent.mock';

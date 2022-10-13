@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCodeBlock, EuiCallOut } from '@elastic/eui';
 
 import { Aliases } from '../../../../../../common';
@@ -19,7 +19,9 @@ export const TabAliases: React.FunctionComponent<Props> = ({ aliases }) => {
   if (aliases && Object.keys(aliases).length) {
     return (
       <div data-test-subj="aliasesTabContent">
-        <EuiCodeBlock lang="json">{JSON.stringify(aliases, null, 2)}</EuiCodeBlock>
+        <EuiCodeBlock isCopyable={true} language="json">
+          {JSON.stringify(aliases, null, 2)}
+        </EuiCodeBlock>
       </div>
     );
   }

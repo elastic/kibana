@@ -5,10 +5,9 @@
  * 2.0.
  */
 
+import type { FeatureCatalogueEntry } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
-import type { FeatureCatalogueEntry } from 'src/plugins/home/public';
 
-import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 import { getSpacesFeatureDescription } from './constants';
 
 export const createSpacesFeatureCatalogueEntry = (): FeatureCatalogueEntry => {
@@ -21,6 +20,6 @@ export const createSpacesFeatureCatalogueEntry = (): FeatureCatalogueEntry => {
     icon: 'spacesApp',
     path: '/app/management/kibana/spaces',
     showOnHomePage: false,
-    category: FeatureCatalogueCategory.ADMIN,
+    category: 'admin',
   };
 };

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'src/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { findMigrationSavedObjects } from './find_migration_saved_objects';
 
-import { SignalsMigrationSO } from './saved_objects_schema';
+import type { SignalsMigrationSO } from './saved_objects_schema';
 
 export interface MigrationsByIndex {
   [indexName: string]: SignalsMigrationSO[] | undefined;

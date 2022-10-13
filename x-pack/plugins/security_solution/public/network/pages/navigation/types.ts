@@ -5,68 +5,49 @@
  * 2.0.
  */
 
-import { ESTermQuery } from '../../../../common/typed_json';
-import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
+import type { DataViewBase } from '@kbn/es-query';
+import type { Optional } from 'utility-types';
 
-import { NavTab } from '../../../common/components/navigation/types';
-import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
-import { networkModel } from '../../store';
-import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
+import type { ESTermQuery } from '../../../../common/typed_json';
 
-import { SetAbsoluteRangeDatePicker } from '../types';
-import { NarrowDateRange } from '../../../common/components/ml/types';
-import { DocValueFields } from '../../../common/containers/source';
+import type { NavTab } from '../../../common/components/navigation/types';
+import type { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
+import type { networkModel } from '../../store';
+import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 
-interface QueryTabBodyProps extends Pick<GlobalTimeArgs, 'setQuery' | 'deleteQuery'> {
-  skip: boolean;
-  type: networkModel.NetworkType;
-  startDate: string;
+export interface QueryTabBodyProps extends Pick<GlobalTimeArgs, 'setQuery' | 'deleteQuery'> {
   endDate: string;
   filterQuery?: string | ESTermQuery;
-  narrowDateRange?: NarrowDateRange;
   indexNames: string[];
+  ip?: string;
+  skip: boolean;
+  startDate: string;
+  type: networkModel.NetworkType;
 }
 
-export type NetworkComponentQueryProps = QueryTabBodyProps & {
-  docValueFields?: DocValueFields[];
-};
+export type NetworkComponentQueryProps = QueryTabBodyProps;
 
 export type IPsQueryTabBodyProps = QueryTabBodyProps & {
-  indexPattern: IIndexPattern;
+  flowTarget: FlowTargetSourceDest;
+  indexPattern: DataViewBase;
+};
+
+export type FTQueryTabBodyProps = QueryTabBodyProps & {
   flowTarget: FlowTargetSourceDest;
 };
 
-export type TlsQueryTabBodyProps = QueryTabBodyProps & {
-  flowTarget: FlowTargetSourceDest;
-  ip?: string;
+export type IPQueryTabBodyProps = FTQueryTabBodyProps & {
+  ip: string;
 };
 
-export type HttpQueryTabBodyProps = QueryTabBodyProps & {
-  ip?: string;
-};
+export type HttpQueryTabBodyProps = QueryTabBodyProps;
 
 export type NetworkRoutesProps = GlobalTimeArgs & {
-  docValueFields: DocValueFields[];
-  networkPagePath: string;
   type: networkModel.NetworkType;
   filterQuery?: string | ESTermQuery;
-  indexPattern: IIndexPattern;
+  indexPattern: DataViewBase;
   indexNames: string[];
-  setAbsoluteRangeDatePicker: SetAbsoluteRangeDatePicker;
 };
-
-export type KeyNetworkNavTabWithoutMlPermission = NetworkRouteType.dns &
-  NetworkRouteType.flows &
-  NetworkRouteType.http &
-  NetworkRouteType.tls &
-  NetworkRouteType.alerts;
-
-type KeyNetworkNavTabWithMlPermission = KeyNetworkNavTabWithoutMlPermission &
-  NetworkRouteType.anomalies;
-
-type KeyNetworkNavTab = KeyNetworkNavTabWithoutMlPermission | KeyNetworkNavTabWithMlPermission;
-
-export type NetworkNavTab = Record<KeyNetworkNavTab, NavTab>;
 
 export enum NetworkRouteType {
   flows = 'flows',
@@ -74,8 +55,10 @@ export enum NetworkRouteType {
   anomalies = 'anomalies',
   tls = 'tls',
   http = 'http',
-  alerts = 'external-alerts',
+  events = 'events',
 }
+
+export type NetworkNavTab = Optional<Record<`${NetworkRouteType}`, NavTab>, 'anomalies'>;
 
 export type GetNetworkRoutePath = (
   capabilitiesFetched: boolean,

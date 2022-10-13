@@ -23,10 +23,10 @@ import {
   Vis,
   PersistedState,
   VisualizeEmbeddableContract,
-} from 'src/plugins/visualizations/public';
-import type { Schema } from 'src/plugins/visualizations/public';
-import { TimeRange } from 'src/plugins/data/public';
-import { SavedObject } from 'src/plugins/saved_objects/public';
+} from '@kbn/visualizations-plugin/public';
+import type { Schema } from '@kbn/visualizations-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
+import { SavedSearch } from '@kbn/discover-plugin/public';
 import { DefaultEditorNavBar } from './navbar';
 import { DefaultEditorControls } from './controls';
 import { setStateParamValue, useEditorReducer, useEditorFormState, discardChanges } from './state';
@@ -42,7 +42,7 @@ interface DefaultEditorSideBarProps {
   vis: Vis;
   isLinkedSearch: boolean;
   eventEmitter: EventEmitter;
-  savedSearch?: SavedObject;
+  savedSearch?: SavedSearch;
   timeRange: TimeRange;
 }
 
@@ -62,17 +62,19 @@ function DefaultEditorSideBarComponent({
   const { formState, setTouched, setValidity, resetValidity } = useEditorFormState();
   const [optionTabs, setSelectedTab] = useOptionTabs(vis);
 
-  const responseAggs = useMemo(() => (state.data.aggs ? state.data.aggs.getResponseAggs() : []), [
-    state.data.aggs,
-  ]);
+  const responseAggs = useMemo(
+    () => (state.data.aggs ? state.data.aggs.getResponseAggs() : []),
+    [state.data.aggs]
+  );
   const metricSchemas = (vis.type.schemas.metrics || []).map((s: Schema) => s.name);
   const metricAggs = useMemo(
     () => responseAggs.filter((agg) => agg.schema && metricSchemas.includes(agg.schema)),
     [responseAggs, metricSchemas]
   );
-  const hasHistogramAgg = useMemo(() => responseAggs.some((agg) => agg.type.name === 'histogram'), [
-    responseAggs,
-  ]);
+  const hasHistogramAgg = useMemo(
+    () => responseAggs.some((agg) => agg.type.name === 'histogram'),
+    [responseAggs]
+  );
 
   const setStateValidity = useCallback(
     (value: boolean) => {
@@ -102,7 +104,7 @@ function DefaultEditorSideBarComponent({
       ...vis.serialize(),
       params: state.params,
       data: {
-        aggs: state.data.aggs ? (state.data.aggs.aggs.map((agg) => agg.toJSON()) as any) : [],
+        aggs: state.data.aggs ? (state.data.aggs.aggs.map((agg) => agg.serialize()) as any) : [],
       },
     });
     embeddableHandler.reload();

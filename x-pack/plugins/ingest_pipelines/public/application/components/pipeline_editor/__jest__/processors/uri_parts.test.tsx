@@ -6,14 +6,12 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { setup, SetupResult, getProcessorValue } from './processor.helpers';
+import { setup, SetupResult, getProcessorValue, setupEnvironment } from './processor.helpers';
 
 // Default parameter values automatically added to the URI parts processor when saved
 const defaultUriPartsParameters = {
   keep_original: undefined,
   remove_if_successful: undefined,
-  ignore_failure: undefined,
-  description: undefined,
 };
 
 const URI_PARTS_TYPE = 'uri_parts';
@@ -21,6 +19,7 @@ const URI_PARTS_TYPE = 'uri_parts';
 describe('Processor: URI parts', () => {
   let onUpdate: jest.Mock;
   let testBed: SetupResult;
+  const { httpSetup } = setupEnvironment();
 
   beforeAll(() => {
     jest.useFakeTimers();
@@ -34,7 +33,7 @@ describe('Processor: URI parts', () => {
     onUpdate = jest.fn();
 
     await act(async () => {
-      testBed = await setup({
+      testBed = await setup(httpSetup, {
         value: {
           processors: [],
         },
@@ -43,19 +42,22 @@ describe('Processor: URI parts', () => {
       });
     });
     testBed.component.update();
-  });
 
-  test('prevents form submission if required fields are not provided', async () => {
     const {
-      actions: { addProcessor, saveNewProcessor, addProcessorType },
-      form,
+      actions: { addProcessor, addProcessorType },
     } = testBed;
-
-    // Open flyout to add new processor
+    // Open the processor flyout
     addProcessor();
 
     // Add type (the other fields are not visible until a type is selected)
     await addProcessorType(URI_PARTS_TYPE);
+  });
+
+  test('prevents form submission if required fields are not provided', async () => {
+    const {
+      actions: { saveNewProcessor },
+      form,
+    } = testBed;
 
     // Click submit button with only the type defined
     await saveNewProcessor();
@@ -64,16 +66,12 @@ describe('Processor: URI parts', () => {
     expect(form.getErrorsMessages()).toEqual(['A field value is required.']);
   });
 
-  test('saves with default parameter values', async () => {
+  test('saves with required parameter values', async () => {
     const {
-      actions: { addProcessor, saveNewProcessor, addProcessorType },
+      actions: { saveNewProcessor },
       form,
     } = testBed;
 
-    // Open flyout to add new processor
-    addProcessor();
-    // Add type (the other fields are not visible until a type is selected)
-    await addProcessorType(URI_PARTS_TYPE);
     // Add "field" value (required)
     form.setInputValue('fieldNameField.input', 'field_1');
     // Save the field
@@ -88,14 +86,10 @@ describe('Processor: URI parts', () => {
 
   test('allows optional parameters to be set', async () => {
     const {
-      actions: { addProcessor, addProcessorType, saveNewProcessor },
+      actions: { saveNewProcessor },
       form,
     } = testBed;
 
-    // Open flyout to add new processor
-    addProcessor();
-    // Add type (the other fields are not visible until a type is selected)
-    await addProcessorType(URI_PARTS_TYPE);
     // Add "field" value (required)
     form.setInputValue('fieldNameField.input', 'field_1');
 
@@ -109,9 +103,7 @@ describe('Processor: URI parts', () => {
 
     const processors = getProcessorValue(onUpdate, URI_PARTS_TYPE);
     expect(processors[0].uri_parts).toEqual({
-      description: undefined,
       field: 'field_1',
-      ignore_failure: undefined,
       keep_original: false,
       remove_if_successful: true,
       target_field: 'target_field',

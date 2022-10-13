@@ -22,7 +22,7 @@ import {
   getDefaultExplorationPageUrlState,
   useExplorationUrlState,
 } from '../../hooks/use_exploration_url_state';
-import { ExpandablePanels } from '../../../../../../../common/types/ml_url_generator';
+import { ExpandablePanels } from '../../../../../../../common/types/locator';
 
 interface HeaderItem {
   // id is used as the React key and to construct a data-test-subj
@@ -75,16 +75,21 @@ export const ExpandableSection: FC<ExpandableSectionProps> = ({
   }, [isExpanded, setPageUrlState, urlStateKey]);
 
   return (
-    <EuiPanel paddingSize="none" data-test-subj={`mlDFExpandableSection-${dataTestId}`}>
+    <EuiPanel
+      paddingSize="none"
+      data-test-subj={`mlDFExpandableSection-${dataTestId}`}
+      hasShadow={false}
+      hasBorder
+    >
       <div className="mlExpandableSection">
         <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               onClick={toggleExpanded}
               iconType={isExpanded ? 'arrowUp' : 'arrowDown'}
-              size="l"
               iconSide="right"
               flush="left"
+              data-test-subj={`mlDFExpandableSection-${dataTestId}-toggle-button`}
             >
               {title}
             </EuiButtonEmpty>
@@ -127,7 +132,12 @@ export const ExpandableSection: FC<ExpandableSectionProps> = ({
         )}
       </div>
       {isExpanded && (
-        <div className={contentPadding ? 'mlExpandableSection-contentPadding' : ''}>{content}</div>
+        <div
+          className={contentPadding ? 'mlExpandableSection-contentPadding' : ''}
+          data-test-subj={`mlDFExpandableSection-${dataTestId}-content`}
+        >
+          {content}
+        </div>
       )}
     </EuiPanel>
   );

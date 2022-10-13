@@ -10,7 +10,7 @@ import React from 'react';
 import styled, { css } from 'styled-components';
 
 import { RoundedBadge } from './rounded_badge';
-import { AndOr } from '.';
+import type { AndOr } from '.';
 
 const antennaStyles = css`
   background: ${({ theme }) => theme.eui.euiColorLightShade};

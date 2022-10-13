@@ -1,0 +1,30 @@
+title: Data stream
+type: object
+properties:
+  index:
+    type: string
+  dataset:
+    type: string
+  namespace:
+    type: string
+  type:
+    type: string
+  package:
+    type: string
+  package_version:
+    type: string
+  last_activity_ms:
+    type: number
+  size_in_bytes:
+    type: number
+  size_in_bytes_formatted:
+    type: string
+  dashboard:
+    type: array
+    items:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string

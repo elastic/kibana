@@ -11,17 +11,10 @@ exports[`Storyshots components/ToolTipShortcut with alt 1`] = `
   }
 >
   <div
-    className="euiText euiText--extraSmall"
+    className="euiText emotion-euiText-xs-euiTextColor-ghost-euiTextAlign-center"
+    style={Object {}}
   >
-    <div
-      className="euiTextAlign euiTextAlign--center"
-    >
-      <div
-        className="euiTextColor euiTextColor--ghost"
-      >
-        ⌥  +  P
-      </div>
-    </div>
+    ⌥  +  P
   </div>
 </div>
 `;
@@ -37,17 +30,10 @@ exports[`Storyshots components/ToolTipShortcut with cmd 1`] = `
   }
 >
   <div
-    className="euiText euiText--extraSmall"
+    className="euiText emotion-euiText-xs-euiTextColor-ghost-euiTextAlign-center"
+    style={Object {}}
   >
-    <div
-      className="euiTextAlign euiTextAlign--center"
-    >
-      <div
-        className="euiTextColor euiTextColor--ghost"
-      >
-        ⌘  +  D
-      </div>
-    </div>
+    ⌘  +  D
   </div>
 </div>
 `;
@@ -63,17 +49,10 @@ exports[`Storyshots components/ToolTipShortcut with down arrow 1`] = `
   }
 >
   <div
-    className="euiText euiText--extraSmall"
+    className="euiText emotion-euiText-xs-euiTextColor-ghost-euiTextAlign-center"
+    style={Object {}}
   >
-    <div
-      className="euiTextAlign euiTextAlign--center"
-    >
-      <div
-        className="euiTextColor euiTextColor--ghost"
-      >
-        ⌘  +  SHIFT  +  ↓
-      </div>
-    </div>
+    ⌘  +  SHIFT  +  ↓
   </div>
 </div>
 `;
@@ -89,17 +68,10 @@ exports[`Storyshots components/ToolTipShortcut with left arrow 1`] = `
   }
 >
   <div
-    className="euiText euiText--extraSmall"
+    className="euiText emotion-euiText-xs-euiTextColor-ghost-euiTextAlign-center"
+    style={Object {}}
   >
-    <div
-      className="euiTextAlign euiTextAlign--center"
-    >
-      <div
-        className="euiTextColor euiTextColor--ghost"
-      >
-        ←
-      </div>
-    </div>
+    ←
   </div>
 </div>
 `;
@@ -115,17 +87,10 @@ exports[`Storyshots components/ToolTipShortcut with right arrow 1`] = `
   }
 >
   <div
-    className="euiText euiText--extraSmall"
+    className="euiText emotion-euiText-xs-euiTextColor-ghost-euiTextAlign-center"
+    style={Object {}}
   >
-    <div
-      className="euiTextAlign euiTextAlign--center"
-    >
-      <div
-        className="euiTextColor euiTextColor--ghost"
-      >
-        →
-      </div>
-    </div>
+    →
   </div>
 </div>
 `;
@@ -141,17 +106,10 @@ exports[`Storyshots components/ToolTipShortcut with shortcut 1`] = `
   }
 >
   <div
-    className="euiText euiText--extraSmall"
+    className="euiText emotion-euiText-xs-euiTextColor-ghost-euiTextAlign-center"
+    style={Object {}}
   >
-    <div
-      className="euiTextAlign euiTextAlign--center"
-    >
-      <div
-        className="euiTextColor euiTextColor--ghost"
-      >
-        G
-      </div>
-    </div>
+    G
   </div>
 </div>
 `;
@@ -167,17 +125,10 @@ exports[`Storyshots components/ToolTipShortcut with up arrow 1`] = `
   }
 >
   <div
-    className="euiText euiText--extraSmall"
+    className="euiText emotion-euiText-xs-euiTextColor-ghost-euiTextAlign-center"
+    style={Object {}}
   >
-    <div
-      className="euiTextAlign euiTextAlign--center"
-    >
-      <div
-        className="euiTextColor euiTextColor--ghost"
-      >
-        ⌘  +  SHIFT  +  ↑
-      </div>
-    </div>
+    ⌘  +  SHIFT  +  ↑
   </div>
 </div>
 `;

@@ -20,11 +20,18 @@ const createStartMock = () => {
   const mock: jest.Mocked<TaskManagerStartContract> = {
     fetch: jest.fn(),
     get: jest.fn(),
+    aggregate: jest.fn(),
     remove: jest.fn(),
     schedule: jest.fn(),
-    runNow: jest.fn(),
+    runSoon: jest.fn(),
+    ephemeralRunNow: jest.fn(),
     ensureScheduled: jest.fn(),
     removeIfExists: jest.fn(),
+    supportsEphemeralTasks: jest.fn(),
+    bulkUpdateSchedules: jest.fn(),
+    bulkSchedule: jest.fn(),
+    bulkDisable: jest.fn(),
+    bulkEnable: jest.fn(),
   };
   return mock;
 };

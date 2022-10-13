@@ -5,188 +5,359 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
 import React from 'react';
-import { waitFor } from '@testing-library/react';
+import { render, act } from '@testing-library/react';
+import type { UseFieldBrowserOptionsProps, UseFieldBrowserOptions, FieldEditorActionsRef } from '.';
+import { useFieldBrowserOptions } from '.';
+import type { Start } from '@kbn/data-view-field-editor-plugin/public/mocks';
+import { indexPatternFieldEditorPluginMock } from '@kbn/data-view-field-editor-plugin/public/mocks';
 
-import '../../../common/mock/match_media';
-import '../../../common/mock/react_beautiful_dnd';
-import { mockBrowserFields } from '../../../common/containers/source/mock';
 import { TestProviders } from '../../../common/mock';
+import { useKibana } from '../../../common/lib/kibana';
+import type { DataView, DataViewField } from '@kbn/data-plugin/common';
+import { TimelineId } from '../../../../common/types';
+import type { RenderHookResult } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react-hooks';
+import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import { removeColumn, upsertColumn } from '../../store/timeline/actions';
+import { defaultColumnHeaderType } from '../timeline/body/column_headers/default_headers';
+import { DEFAULT_COLUMN_MIN_WIDTH } from '../timeline/body/constants';
+import type { BrowserFieldItem } from '@kbn/timelines-plugin/common/types';
+import { EuiInMemoryTable } from '@elastic/eui';
 
-import { FIELD_BROWSER_HEIGHT, FIELD_BROWSER_WIDTH } from './helpers';
+let mockIndexPatternFieldEditor: Start;
+jest.mock('../../../common/lib/kibana');
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
-import { StatefulFieldsBrowserComponent } from '.';
+const defaultDataviewState: {
+  missingPatterns: string[];
+  selectedDataViewId: string | null;
+} = {
+  missingPatterns: [],
+  selectedDataViewId: 'security-solution',
+};
+const mockScopeIdSelector = jest.fn(() => defaultDataviewState);
+jest.mock('../../../common/store', () => {
+  const original = jest.requireActual('../../../common/store');
+  return {
+    ...original,
+    sourcererSelectors: { scopeIdSelector: () => mockScopeIdSelector },
+  };
+});
 
-describe('StatefulFieldsBrowser', () => {
-  const timelineId = 'test';
+const mockIndexFieldsSearch = jest.fn();
+jest.mock('../../../common/containers/source/use_data_view', () => ({
+  useDataView: () => ({
+    indexFieldsSearch: mockIndexFieldsSearch,
+  }),
+}));
 
+const mockDispatch = jest.fn();
+jest.mock('react-redux', () => {
+  const original = jest.requireActual('react-redux');
+  return {
+    ...original,
+    useDispatch: () => mockDispatch,
+  };
+});
+const mockOnHide = jest.fn();
+
+const runAllPromises = () => new Promise(setImmediate);
+
+// helper function to render the hook
+const renderUseFieldBrowserOptions = (props: Partial<UseFieldBrowserOptionsProps> = {}) =>
+  renderHook<UseFieldBrowserOptionsProps, ReturnType<UseFieldBrowserOptions>>(
+    () =>
+      useFieldBrowserOptions({
+        sourcererScope: SourcererScopeName.default,
+        timelineId: TimelineId.test,
+        ...props,
+      }),
+    {
+      wrapper: TestProviders,
+    }
+  );
+
+// helper function to render the hook and wait for the first update
+const renderUpdatedUseFieldBrowserOptions = async (
+  props: Partial<UseFieldBrowserOptionsProps> = {}
+) => {
+  let renderHookResult: RenderHookResult<
+    UseFieldBrowserOptionsProps,
+    ReturnType<UseFieldBrowserOptions>
+  > | null = null;
+  await act(async () => {
+    renderHookResult = renderUseFieldBrowserOptions(props);
+    await renderHookResult.waitForNextUpdate();
+  });
+  return renderHookResult!;
+};
+
+const fieldItem: BrowserFieldItem = {
+  name: 'field1',
+  isRuntime: true,
+  category: 'test',
+  selected: false,
+};
+
+describe('useFieldBrowserOptions', () => {
   beforeEach(() => {
-    window.HTMLElement.prototype.scrollIntoView = jest.fn();
+    mockIndexPatternFieldEditor = indexPatternFieldEditorPluginMock.createStartContract();
+    mockIndexPatternFieldEditor.userPermissions.editIndexPattern = () => true;
+    useKibanaMock().services.dataViewFieldEditor = mockIndexPatternFieldEditor;
+    useKibanaMock().services.data.dataViews.get = () => new Promise(() => undefined);
+
+    useKibanaMock().services.application.capabilities = {
+      ...useKibanaMock().services.application.capabilities,
+      indexPatterns: { save: true },
+    };
+    mockScopeIdSelector.mockReturnValue(defaultDataviewState);
+    jest.clearAllMocks();
   });
 
-  test('it renders the Fields button, which displays the fields browser on click', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <StatefulFieldsBrowserComponent
-          browserFields={mockBrowserFields}
-          columnHeaders={[]}
-          height={FIELD_BROWSER_HEIGHT}
-          timelineId={timelineId}
-          width={FIELD_BROWSER_WIDTH}
-        />
-      </TestProviders>
+  // refactor below tests once resolved: https://github.com/elastic/kibana/issues/122462
+  it('should return the button and action column when user has edit permissions', async () => {
+    const { result } = renderUseFieldBrowserOptions();
+
+    expect(result.current.createFieldButton).toBeDefined();
+    expect(result.current.getFieldTableColumns({ highlight: '', onHide: mockOnHide })).toHaveLength(
+      5
     );
-
-    expect(wrapper.find('[data-test-subj="show-field-browser"]').exists()).toBe(true);
   });
 
-  describe('toggleShow', () => {
-    test('it does NOT render the fields browser until the Fields button is clicked', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <StatefulFieldsBrowserComponent
-            browserFields={mockBrowserFields}
-            columnHeaders={[]}
-            height={FIELD_BROWSER_HEIGHT}
-            timelineId={timelineId}
-            width={FIELD_BROWSER_WIDTH}
-          />
-        </TestProviders>
-      );
+  it("should not return the button and action column when user doesn't have read permissions", () => {
+    mockIndexPatternFieldEditor.userPermissions.editIndexPattern = () => false;
+    const { result } = renderUseFieldBrowserOptions();
 
-      expect(wrapper.find('[data-test-subj="fields-browser-container"]').exists()).toBe(false);
-    });
-
-    test('it renders the fields browser when the Fields button is clicked', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <StatefulFieldsBrowserComponent
-            browserFields={mockBrowserFields}
-            columnHeaders={[]}
-            height={FIELD_BROWSER_HEIGHT}
-            timelineId={timelineId}
-            width={FIELD_BROWSER_WIDTH}
-          />
-        </TestProviders>
-      );
-
-      wrapper.find('[data-test-subj="show-field-browser"]').first().simulate('click');
-
-      expect(wrapper.find('[data-test-subj="fields-browser-container"]').exists()).toBe(true);
-    });
-  });
-
-  describe('updateSelectedCategoryId', () => {
-    beforeEach(() => {
-      jest.useFakeTimers();
-    });
-    test('it updates the selectedCategoryId state, which makes the category bold, when the user clicks a category name in the left hand side of the field browser', async () => {
-      const wrapper = mount(
-        <TestProviders>
-          <StatefulFieldsBrowserComponent
-            browserFields={mockBrowserFields}
-            columnHeaders={[]}
-            height={FIELD_BROWSER_HEIGHT}
-            timelineId={timelineId}
-            width={FIELD_BROWSER_WIDTH}
-          />
-        </TestProviders>
-      );
-
-      wrapper.find('[data-test-subj="show-field-browser"]').first().simulate('click');
-
-      wrapper.find(`.field-browser-category-pane-auditd-${timelineId}`).first().simulate('click');
-      await waitFor(() => {
-        wrapper.update();
-        expect(
-          wrapper
-            .find(`.field-browser-category-pane-auditd-${timelineId}`)
-            .find('[data-test-subj="categoryName"]')
-            .at(1)
-        ).toHaveStyleRule('font-weight', 'bold', { modifier: '.euiText' });
-      });
-    });
-
-    test('it updates the selectedCategoryId state according to most fields returned', async () => {
-      const wrapper = mount(
-        <TestProviders>
-          <StatefulFieldsBrowserComponent
-            browserFields={mockBrowserFields}
-            columnHeaders={[]}
-            height={FIELD_BROWSER_HEIGHT}
-            timelineId={timelineId}
-            width={FIELD_BROWSER_WIDTH}
-          />
-        </TestProviders>
-      );
-
-      await waitFor(() => {
-        wrapper.find('[data-test-subj="show-field-browser"]').first().simulate('click');
-        jest.runOnlyPendingTimers();
-        wrapper.update();
-
-        expect(
-          wrapper
-            .find(`.field-browser-category-pane-cloud-${timelineId}`)
-            .find('[data-test-subj="categoryName"]')
-            .at(1)
-        ).toHaveStyleRule('font-weight', 'normal', { modifier: '.euiText' });
-      });
-
-      await waitFor(() => {
-        wrapper
-          .find('[data-test-subj="field-search"]')
-          .last()
-          .simulate('change', { target: { value: 'cloud' } });
-
-        jest.runOnlyPendingTimers();
-        wrapper.update();
-        expect(
-          wrapper
-            .find(`.field-browser-category-pane-cloud-${timelineId}`)
-            .find('[data-test-subj="categoryName"]')
-            .at(1)
-        ).toHaveStyleRule('font-weight', 'bold', { modifier: '.euiText' });
-      });
-    });
-  });
-
-  test('it renders the Fields Browser button as a settings gear when the isEventViewer prop is true', () => {
-    const isEventViewer = true;
-
-    const wrapper = mount(
-      <TestProviders>
-        <StatefulFieldsBrowserComponent
-          browserFields={mockBrowserFields}
-          columnHeaders={[]}
-          height={FIELD_BROWSER_HEIGHT}
-          isEventViewer={isEventViewer}
-          timelineId={timelineId}
-          width={FIELD_BROWSER_WIDTH}
-        />
-      </TestProviders>
+    expect(result.current.createFieldButton).toBeUndefined();
+    expect(result.current.getFieldTableColumns({ highlight: '', onHide: mockOnHide })).toHaveLength(
+      4
     );
-
-    expect(wrapper.find('[data-test-subj="show-field-browser"]').first().exists()).toBe(true);
   });
 
-  test('it renders the Fields Browser button as a settings gear when the isEventViewer prop is false', () => {
-    const isEventViewer = true;
+  it('should return the button when a dataView is present', async () => {
+    const { result } = renderUseFieldBrowserOptions();
 
-    const wrapper = mount(
-      <TestProviders>
-        <StatefulFieldsBrowserComponent
-          browserFields={mockBrowserFields}
-          columnHeaders={[]}
-          height={FIELD_BROWSER_HEIGHT}
-          isEventViewer={isEventViewer}
-          timelineId={timelineId}
-          width={FIELD_BROWSER_WIDTH}
-        />
-      </TestProviders>
+    expect(result.current.createFieldButton).toBeDefined();
+    expect(result.current.getFieldTableColumns({ highlight: '', onHide: mockOnHide })).toHaveLength(
+      5
     );
+  });
 
-    expect(wrapper.find('[data-test-subj="show-field-browser"]').first().exists()).toBe(true);
+  it('should not return the button when a dataView is not present', () => {
+    mockScopeIdSelector.mockReturnValue({ missingPatterns: [], selectedDataViewId: null });
+    const { result } = renderUseFieldBrowserOptions();
+
+    expect(result.current.createFieldButton).toBeUndefined();
+  });
+
+  it('should call onHide when button is pressed', async () => {
+    useKibanaMock().services.data.dataViews.get = () => Promise.resolve({} as DataView);
+    const { result } = await renderUpdatedUseFieldBrowserOptions();
+
+    const CreateFieldButton = result!.current.createFieldButton!;
+    const { getByRole } = render(<CreateFieldButton onHide={mockOnHide} />, {
+      wrapper: TestProviders,
+    });
+
+    expect(getByRole('button')).toBeInTheDocument();
+    getByRole('button').click();
+    expect(mockOnHide).toHaveBeenCalled();
+  });
+
+  it('should call onHide when the column action buttons are pressed', async () => {
+    useKibanaMock().services.data.dataViews.get = () => Promise.resolve({} as DataView);
+    const { result } = await renderUpdatedUseFieldBrowserOptions();
+
+    const columns = result.current.getFieldTableColumns({
+      highlight: '',
+      onHide: mockOnHide,
+    });
+
+    const { getByTestId } = render(<EuiInMemoryTable items={[fieldItem]} columns={columns} />, {
+      wrapper: TestProviders,
+    });
+
+    getByTestId('actionEditRuntimeField').click();
+    expect(mockOnHide).toHaveBeenCalledTimes(1);
+    getByTestId('actionDeleteRuntimeField').click();
+    expect(mockOnHide).toHaveBeenCalledTimes(2);
+  });
+
+  it('should dispatch the proper action when a new field is saved', async () => {
+    let onSave: ((field: DataViewField[]) => void) | undefined;
+    useKibanaMock().services.data.dataViews.get = () => Promise.resolve({} as DataView);
+    useKibanaMock().services.dataViewFieldEditor.openEditor = (options) => {
+      onSave = options.onSave;
+      return () => {};
+    };
+
+    const { result } = await renderUpdatedUseFieldBrowserOptions();
+
+    const CreateFieldButton = result.current.createFieldButton!;
+    const { getByRole } = render(<CreateFieldButton onHide={mockOnHide} />, {
+      wrapper: TestProviders,
+    });
+
+    getByRole('button').click();
+    expect(onSave).toBeDefined();
+
+    const savedField = [{ name: 'newField' }] as DataViewField[];
+    onSave!(savedField);
+    await runAllPromises();
+
+    expect(mockIndexFieldsSearch).toHaveBeenCalled();
+    expect(mockDispatch).toHaveBeenCalledTimes(1);
+    expect(mockDispatch).toHaveBeenCalledWith(
+      upsertColumn({
+        id: TimelineId.test,
+        column: {
+          columnHeaderType: defaultColumnHeaderType,
+          id: savedField[0].name,
+          initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
+        },
+        index: 0,
+      })
+    );
+  });
+
+  it('should dispatch the proper actions when a field is edited', async () => {
+    let onSave: ((field: DataViewField[]) => void) | undefined;
+    useKibanaMock().services.data.dataViews.get = () => Promise.resolve({} as DataView);
+    useKibanaMock().services.dataViewFieldEditor.openEditor = (options) => {
+      onSave = options.onSave;
+      return () => {};
+    };
+
+    const { result } = await renderUpdatedUseFieldBrowserOptions();
+
+    const columns = result.current.getFieldTableColumns({
+      highlight: '',
+      onHide: mockOnHide,
+    });
+
+    const { getByTestId } = render(<EuiInMemoryTable items={[fieldItem]} columns={columns} />, {
+      wrapper: TestProviders,
+    });
+
+    getByTestId('actionEditRuntimeField').click();
+    expect(onSave).toBeDefined();
+
+    const savedField = [{ name: `new ${fieldItem.name}` }] as DataViewField[];
+    onSave!(savedField);
+    await runAllPromises();
+
+    expect(mockIndexFieldsSearch).toHaveBeenCalled();
+    expect(mockDispatch).toHaveBeenCalledTimes(2);
+    expect(mockDispatch).toHaveBeenCalledWith(
+      removeColumn({
+        id: TimelineId.test,
+        columnId: fieldItem.name,
+      })
+    );
+    expect(mockDispatch).toHaveBeenCalledWith(
+      upsertColumn({
+        id: TimelineId.test,
+        column: {
+          columnHeaderType: defaultColumnHeaderType,
+          id: savedField[0].name,
+          initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
+        },
+        index: 0,
+      })
+    );
+  });
+
+  it('should dispatch the proper actions when a field is removed', async () => {
+    let onDelete: ((fields: string[]) => void) | undefined;
+    useKibanaMock().services.data.dataViews.get = () => Promise.resolve({} as DataView);
+    useKibanaMock().services.dataViewFieldEditor.openDeleteModal = (options) => {
+      onDelete = options.onDelete;
+      return () => {};
+    };
+
+    const { result } = await renderUpdatedUseFieldBrowserOptions();
+
+    const columns = result.current.getFieldTableColumns({
+      highlight: '',
+      onHide: mockOnHide,
+    });
+
+    const { getByTestId } = render(<EuiInMemoryTable items={[fieldItem]} columns={columns} />, {
+      wrapper: TestProviders,
+    });
+
+    getByTestId('actionDeleteRuntimeField').click();
+    expect(onDelete).toBeDefined();
+
+    onDelete!([fieldItem.name]);
+    await runAllPromises();
+
+    expect(mockIndexFieldsSearch).toHaveBeenCalled();
+    expect(mockDispatch).toHaveBeenCalledTimes(1);
+    expect(mockDispatch).toHaveBeenCalledWith(
+      removeColumn({
+        id: TimelineId.test,
+        columnId: fieldItem.name,
+      })
+    );
+  });
+
+  it("should store 'closeEditor' in the actions ref when editor is open by create button", async () => {
+    const mockCloseEditor = jest.fn();
+    useKibanaMock().services.data.dataViews.get = () => Promise.resolve({} as DataView);
+    useKibanaMock().services.dataViewFieldEditor.openEditor = () => mockCloseEditor;
+
+    const editorActionsRef: FieldEditorActionsRef = React.createRef();
+
+    const { result } = await renderUpdatedUseFieldBrowserOptions({ editorActionsRef });
+
+    const CreateFieldButton = result!.current.createFieldButton!;
+    const { getByRole } = render(<CreateFieldButton onHide={mockOnHide} />, {
+      wrapper: TestProviders,
+    });
+
+    expect(editorActionsRef?.current).toBeNull();
+
+    getByRole('button').click();
+
+    expect(mockCloseEditor).not.toHaveBeenCalled();
+    expect(editorActionsRef?.current?.closeEditor).toBeDefined();
+
+    editorActionsRef!.current!.closeEditor();
+
+    expect(mockCloseEditor).toHaveBeenCalled();
+    expect(editorActionsRef!.current).toBeNull();
+  });
+
+  it("should store 'closeEditor' in the actions ref when editor is open by edit button", async () => {
+    const mockCloseEditor = jest.fn();
+    useKibanaMock().services.data.dataViews.get = () => Promise.resolve({} as DataView);
+    useKibanaMock().services.dataViewFieldEditor.openEditor = () => mockCloseEditor;
+
+    const editorActionsRef: FieldEditorActionsRef = React.createRef();
+
+    const { result } = await renderUpdatedUseFieldBrowserOptions({ editorActionsRef });
+
+    const columns = result.current.getFieldTableColumns({
+      highlight: '',
+      onHide: mockOnHide,
+    });
+
+    const { getByTestId } = render(<EuiInMemoryTable items={[fieldItem]} columns={columns} />, {
+      wrapper: TestProviders,
+    });
+
+    expect(editorActionsRef?.current).toBeNull();
+
+    getByTestId('actionEditRuntimeField').click();
+
+    expect(mockCloseEditor).not.toHaveBeenCalled();
+    expect(editorActionsRef?.current?.closeEditor).toBeDefined();
+
+    editorActionsRef!.current!.closeEditor();
+
+    expect(mockCloseEditor).toHaveBeenCalled();
+    expect(editorActionsRef!.current).toBeNull();
   });
 });

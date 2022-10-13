@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ToastInput, ToastOptions, ToastsStart } from 'kibana/public';
+import { ToastInput, ToastOptions, ToastsStart } from '@kbn/core/public';
 import { useMemo } from 'react';
 import { getToastNotifications } from '../../util/dependency_cache';
 import { useNotifications } from '../../contexts/kibana';
@@ -56,5 +56,6 @@ export function getToastNotificationService() {
  */
 export function useToastNotificationService(): ToastNotificationService {
   const { toasts } = useNotifications();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   return useMemo(() => toastNotificationServiceProvider(toasts), []);
 }

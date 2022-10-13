@@ -5,30 +5,52 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { SourceErrorPage } from '../../../components/source_error_page';
+import { APP_WRAPPER_CLASS } from '@kbn/core/public';
+import { LogSourceErrorPage } from '../../../components/logging/log_source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
+import { useLogViewContext } from '../../../hooks/use_log_view';
+import { LogsPageTemplate } from '../page_template';
 import { LogsPageLogsContent } from './page_logs_content';
-import { LogsPageNoIndicesContent } from './page_no_indices_content';
-import { useLogSourceContext } from '../../../containers/logs/log_source';
+import { fullHeightContentStyles } from '../../../page_template.styles';
+
+const streamTitle = i18n.translate('xpack.infra.logs.streamPageTitle', {
+  defaultMessage: 'Stream',
+});
 
 export const StreamPageContent: React.FunctionComponent = () => {
   const {
-    hasFailedLoadingSource,
+    hasFailedLoading,
     isLoading,
     isUninitialized,
-    loadSource,
-    loadSourceFailureMessage,
-    sourceStatus,
-  } = useLogSourceContext();
+    latestLoadLogViewFailures,
+    load,
+    logViewStatus,
+  } = useLogViewContext();
 
   if (isLoading || isUninitialized) {
     return <SourceLoadingPage />;
-  } else if (hasFailedLoadingSource) {
-    return <SourceErrorPage errorMessage={loadSourceFailureMessage ?? ''} retry={loadSource} />;
-  } else if (sourceStatus?.logIndexStatus !== 'missing') {
-    return <LogsPageLogsContent />;
+  } else if (hasFailedLoading) {
+    return <LogSourceErrorPage errors={latestLoadLogViewFailures} onRetry={load} />;
   } else {
-    return <LogsPageNoIndicesContent />;
+    return (
+      <div className={APP_WRAPPER_CLASS}>
+        <LogsPageTemplate
+          hasData={logViewStatus?.index !== 'missing'}
+          isDataLoading={isLoading}
+          pageHeader={{
+            pageTitle: streamTitle,
+          }}
+          pageSectionProps={{
+            contentProps: {
+              css: fullHeightContentStyles,
+            },
+          }}
+        >
+          <LogsPageLogsContent />
+        </LogsPageTemplate>
+      </div>
+    );
   }
 };

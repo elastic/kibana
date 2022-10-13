@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { UI_SETTINGS } from '../../../../../src/plugins/data/common';
 
 export default function ({
   getPageObjects,
@@ -16,9 +16,11 @@ export default function ({
   updateBaselines,
 }: FtrProviderContext & { updateBaselines: boolean }) {
   const PageObjects = getPageObjects(['common', 'maps', 'header', 'home', 'timePicker']);
+  const mapsHelper = getService('mapsHelper');
   const screenshot = getService('screenshots');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
+  const browser = getService('browser');
   const SAMPLE_DATA_RANGE = `[
     {
       "from": "now-30d",
@@ -80,28 +82,35 @@ export default function ({
   // Only update the baseline images from Jenkins session images after comparing them
   // These tests might fail locally because of scaling factors and resolution.
 
-  describe('maps smoke tests', function describeIndexTests() {
+  describe('upgrade maps smoke tests', function describeIndexTests() {
     const spaces = [
       { space: 'default', basePath: '' },
       { space: 'automation', basePath: 's/automation' },
     ];
 
     before(async () => {
-      await kibanaServer.uiSettings.update({
-        [UI_SETTINGS.TIMEPICKER_QUICK_RANGES]: SAMPLE_DATA_RANGE,
-      });
+      await kibanaServer.uiSettings.update(
+        { [UI_SETTINGS.TIMEPICKER_QUICK_RANGES]: SAMPLE_DATA_RANGE },
+        { space: 'default' }
+      );
+      await kibanaServer.uiSettings.update(
+        { [UI_SETTINGS.TIMEPICKER_QUICK_RANGES]: SAMPLE_DATA_RANGE },
+        { space: 'automation' }
+      );
+      await browser.refresh();
     });
 
     spaces.forEach(({ space, basePath }) => {
-      describe('space ' + space + ' ecommerce', () => {
+      describe('space: ' + space + ', name: ecommerce', () => {
         before(async () => {
           await PageObjects.common.navigateToActualUrl('home', '/tutorial_directory/sampleData', {
             basePath,
           });
           await PageObjects.header.waitUntilLoadingHasFinished();
-          await PageObjects.home.addSampleDataSet('ecommerce');
-          await PageObjects.maps.loadSavedMap('[eCommerce] Orders by Country');
-          await PageObjects.maps.toggleLayerVisibility('Road map');
+          await PageObjects.home.launchSampleMap('ecommerce');
+          await PageObjects.header.waitUntilLoadingHasFinished();
+          await PageObjects.maps.waitForLayersToLoad();
+          await PageObjects.maps.toggleEmsBasemapLayerVisibility();
           await PageObjects.maps.toggleLayerVisibility('United Kingdom');
           await PageObjects.maps.toggleLayerVisibility('France');
           await PageObjects.maps.toggleLayerVisibility('United States');
@@ -114,22 +123,22 @@ export default function ({
         });
         it('should load layers', async () => {
           const percentDifference = await screenshot.compareAgainstBaseline(
-            'ecommerce_map',
+            'upgrade_ecommerce_map',
             updateBaselines
           );
-          expect(percentDifference).to.be.lessThan(0.02);
+          expect(percentDifference.toFixed(3)).to.be.lessThan(0.05);
         });
       });
-
-      describe('space ' + space + ' flights', () => {
+      describe('space: ' + space + ', name: flights', () => {
         before(async () => {
           await PageObjects.common.navigateToActualUrl('home', '/tutorial_directory/sampleData', {
             basePath,
           });
           await PageObjects.header.waitUntilLoadingHasFinished();
-          await PageObjects.home.addSampleDataSet('flights');
-          await PageObjects.maps.loadSavedMap('[Flights] Origin and Destination Flight Time');
-          await PageObjects.maps.toggleLayerVisibility('Road map');
+          await PageObjects.home.launchSampleMap('flights');
+          await PageObjects.header.waitUntilLoadingHasFinished();
+          await PageObjects.maps.waitForLayersToLoad();
+          await PageObjects.maps.toggleEmsBasemapLayerVisibility();
           await PageObjects.timePicker.setCommonlyUsedTime('sample_data range');
           await PageObjects.maps.enterFullScreen();
           await PageObjects.maps.closeLegend();
@@ -138,23 +147,23 @@ export default function ({
         });
         it('should load saved object and display layers', async () => {
           const percentDifference = await screenshot.compareAgainstBaseline(
-            'flights_map',
+            'upgrade_flights_map',
             updateBaselines
           );
-          expect(percentDifference).to.be.lessThan(0.02);
+          expect(percentDifference.toFixed(3)).to.be.lessThan(0.05);
         });
       });
-
-      describe('space ' + space + ' web logs', () => {
+      describe('space: ' + space + ', name: web logs', () => {
         before(async () => {
           await PageObjects.common.navigateToActualUrl('home', '/tutorial_directory/sampleData', {
             basePath,
           });
           await PageObjects.header.waitUntilLoadingHasFinished();
-          await PageObjects.home.addSampleDataSet('logs');
-          await PageObjects.maps.loadSavedMap('[Logs] Total Requests and Bytes');
-          await PageObjects.maps.toggleLayerVisibility('Road map');
-          await PageObjects.maps.toggleLayerVisibility('Total Requests by Country');
+          await PageObjects.home.launchSampleMap('logs');
+          await PageObjects.header.waitUntilLoadingHasFinished();
+          await PageObjects.maps.waitForLayersToLoad();
+          await PageObjects.maps.toggleEmsBasemapLayerVisibility();
+          await mapsHelper.toggleLayerVisibilityTotalRequests();
           await PageObjects.timePicker.setCommonlyUsedTime('sample_data range');
           await PageObjects.maps.enterFullScreen();
           await PageObjects.maps.closeLegend();
@@ -163,10 +172,10 @@ export default function ({
         });
         it('should load saved object and display layers', async () => {
           const percentDifference = await screenshot.compareAgainstBaseline(
-            'web_logs_map',
+            'upgrade_web_logs_map',
             updateBaselines
           );
-          expect(percentDifference).to.be.lessThan(0.02);
+          expect(percentDifference.toFixed(3)).to.be.lessThan(0.05);
         });
       });
     });

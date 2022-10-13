@@ -1,0 +1,69 @@
+[[data-views-api-get]]
+=== Get data view API
+++++
+<titleabbrev>Get data view</titleabbrev>
+++++
+
+experimental[] Retrieve a single data view by ID.
+
+
+[[data-views-api-get-request]]
+==== Request
+
+`GET <kibana host>:<port>/api/data_views/data_view/<id>`
+
+`GET <kibana host>:<port>/s/<space_id>/api/data_views/data_view/<id>`
+
+
+[[data-views-api-get-params]]
+==== Path parameters
+
+`space_id`::
+(Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+
+`id`::
+(Required, string) The ID of the data view you want to retrieve.
+
+
+[[data-views-api-get-codes]]
+==== Response code
+
+`200`::
+Indicates a successful call.
+
+`404`::
+The specified data view and ID doesn't exist.
+
+
+[[data-views-api-get-example]]
+==== Example
+
+Retrieve the data view object with the `my-view` ID:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X GET api/data_views/data_view/my-view
+--------------------------------------------------
+// KIBANA
+
+The API returns a data view object:
+
+[source,sh]
+--------------------------------------------------
+{
+    "data_view": {
+        "id": "my-view",
+        "version": "...",
+        "title": "...",
+        "type": "...",
+        "timeFieldName": "...",
+        "sourceFilters": [],
+        "fields": {},
+        "typeMeta": {},
+        "fieldFormats": {},
+        "fieldAttrs": {},
+        "runtimeFieldMap" {},
+        "allowNoIndex: "..."
+    }
+}
+--------------------------------------------------

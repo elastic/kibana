@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type {
   ApplicationSetup,
   AppMountParameters,
   HttpSetup,
   StartServicesAccessor,
-} from 'src/core/public';
+} from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 
 interface CreateDeps {
   application: ApplicationSetup;
@@ -28,12 +28,16 @@ export const loggedOutApp = Object.freeze({
       title: i18n.translate('xpack.security.loggedOutAppTitle', { defaultMessage: 'Logged out' }),
       chromeless: true,
       appRoute: '/security/logged_out',
-      async mount({ element }: AppMountParameters) {
+      async mount({ element, theme$ }: AppMountParameters) {
         const [[coreStart], { renderLoggedOutPage }] = await Promise.all([
           getStartServices(),
           import('./logged_out_page'),
         ]);
-        return renderLoggedOutPage(coreStart.i18n, element, { basePath: coreStart.http.basePath });
+        return renderLoggedOutPage(
+          coreStart.i18n,
+          { element, theme$ },
+          { basePath: coreStart.http.basePath }
+        );
       },
     });
   },

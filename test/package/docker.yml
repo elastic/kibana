@@ -1,0 +1,7 @@
+- name: test kibana docker package
+  hosts: docker
+  roles:
+    - install_docker
+    - install_kibana_docker
+    - assert_kibana_listening
+    - assert_kibana_available

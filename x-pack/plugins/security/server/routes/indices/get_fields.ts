@@ -7,8 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 
+import type { RouteDefinitionParams } from '..';
 import { wrapIntoCustomErrorResponse } from '../../errors';
-import type { RouteDefinitionParams } from '../index';
 
 export function defineGetFieldsRoutes({ router }: RouteDefinitionParams) {
   router.get(
@@ -18,13 +18,13 @@ export function defineGetFieldsRoutes({ router }: RouteDefinitionParams) {
     },
     async (context, request, response) => {
       try {
-        const {
-          body: indexMappings,
-        } = await context.core.elasticsearch.client.asCurrentUser.indices.getFieldMapping({
+        const esClient = (await context.core).elasticsearch.client;
+        const indexMappings = await esClient.asCurrentUser.indices.getFieldMapping({
           index: request.params.query,
           fields: '*',
           allow_no_indices: false,
           include_defaults: true,
+          filter_path: '*.mappings.*.mapping.*.type',
         });
 
         // The flow is the following (see response format at https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-get-field-mapping.html):
@@ -39,9 +39,7 @@ export function defineGetFieldsRoutes({ router }: RouteDefinitionParams) {
                 const mappingValues = Object.values(
                   // `FieldMapping` type from `TypeFieldMappings` --> `GetFieldMappingResponse` is not correct and
                   // doesn't have any properties.
-                  (indexMapping.mappings[fieldName] as {
-                    mapping: Record<string, { type: string }>;
-                  }).mapping
+                  indexMapping.mappings[fieldName]?.mapping as Record<string, { type: string }>
                 );
                 const hasMapping = mappingValues.length > 0;
 
@@ -62,7 +60,17 @@ export function defineGetFieldsRoutes({ router }: RouteDefinitionParams) {
           body: fields,
         });
       } catch (error) {
-        return response.customError(wrapIntoCustomErrorResponse(error));
+        const customResponse = wrapIntoCustomErrorResponse(error);
+
+        // Elasticsearch returns a 404 response if the provided pattern does not match any indices.
+        // In this scenario, we want to instead treat this as an empty response.
+        if (customResponse.statusCode === 404) {
+          return response.ok({
+            body: [],
+          });
+        }
+
+        return response.customError(customResponse);
       }
     }
   );

@@ -8,9 +8,10 @@
 import { get } from 'lodash/fp';
 import { createSelector } from 'reselect';
 
-import { State } from '../../common/store/types';
+import type { State } from '../../common/store/types';
 
-import { GenericHostsModel, HostsType, HostsTableType } from './model';
+import type { GenericHostsModel, HostsType } from './model';
+import { HostsTableType } from './model';
 
 const selectHosts = (state: State, hostsType: HostsType): GenericHostsModel =>
   get(hostsType, state.hosts);
@@ -21,10 +22,17 @@ export const authenticationsSelector = () =>
 export const hostsSelector = () =>
   createSelector(selectHosts, (hosts) => hosts.queries[HostsTableType.hosts]);
 
-export const eventsSelector = () => createSelector(selectHosts, (hosts) => hosts.queries.events);
+export const hostRiskScoreSelector = () =>
+  createSelector(selectHosts, (hosts) => hosts.queries[HostsTableType.risk]);
+
+export const hostRiskScoreSeverityFilterSelector = () =>
+  createSelector(selectHosts, (hosts) => hosts.queries[HostsTableType.risk].severitySelection);
 
 export const uncommonProcessesSelector = () =>
   createSelector(selectHosts, (hosts) => hosts.queries.uncommonProcesses);
 
-export const alertsSelector = () =>
-  createSelector(selectHosts, (hosts) => hosts.queries[HostsTableType.alerts]);
+export const hostsAnomaliesJobIdFilterSelector = () =>
+  createSelector(selectHosts, (hosts) => hosts.queries[HostsTableType.anomalies].jobIdSelection);
+
+export const hostsAnomaliesIntervalSelector = () =>
+  createSelector(selectHosts, (hosts) => hosts.queries[HostsTableType.anomalies].intervalSelection);

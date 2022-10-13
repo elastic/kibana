@@ -7,18 +7,14 @@
 
 import path, { join, resolve } from 'path';
 import * as rt from 'io-ts';
-import {
-  TimelineSavedToReturnObjectRuntimeType,
-  TimelineSavedObject,
-} from '../../../../common/types/timeline';
+import type { TimelineSavedObject } from '../../../../common/types/timeline';
+import { TimelineSavedToReturnObjectRuntimeType } from '../../../../common/types/timeline';
 
-import {
-  ImportTimelinesSchema,
-  ImportTimelinesSchemaRt,
-} from '../schemas/timelines/import_timelines_schema';
+import type { ImportTimelinesSchema } from '../schemas/timelines/import_timelines_schema';
+import { ImportTimelinesSchemaRt } from '../schemas/timelines/import_timelines_schema';
 import { unionWithNullType } from '../../../../common/utility_types';
 
-import { FrameworkRequest } from '../../framework';
+import type { FrameworkRequest } from '../../framework';
 
 import { getExistingPrepackagedTimelines } from '../saved_object/timelines';
 
@@ -40,6 +36,7 @@ export const getTimelinesToUpdate = (
     installedTimelines.some((installedTimeline) => {
       return (
         timeline.templateTimelineId === installedTimeline.templateTimelineId &&
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         timeline.templateTimelineVersion! > installedTimeline.templateTimelineVersion!
       );
     })

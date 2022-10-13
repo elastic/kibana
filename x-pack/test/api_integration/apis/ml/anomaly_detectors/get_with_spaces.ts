@@ -22,15 +22,23 @@ export default ({ getService }: FtrProviderContext) => {
   const idSpace1 = 'space1';
   const idSpace2 = 'space2';
 
-  async function runRequest(jobOrGroup: string, expectedStatusCode: number, space?: string) {
-    const { body } = await supertest
-      .get(`${space ? `/s/${space}` : ''}/api/ml/anomaly_detectors/${jobOrGroup}`)
+  async function getJobById(
+    jobOrGroup: string | undefined,
+    expectedStatusCode: number,
+    space?: string
+  ) {
+    const { body, status } = await supertest
+      .get(
+        `${space ? `/s/${space}` : ''}/api/ml/anomaly_detectors${
+          jobOrGroup ? `/${jobOrGroup}` : ''
+        }`
+      )
       .auth(
         USER.ML_VIEWER_ALL_SPACES,
         ml.securityCommon.getPasswordForUser(USER.ML_VIEWER_ALL_SPACES)
       )
-      .set(COMMON_REQUEST_HEADERS)
-      .expect(expectedStatusCode);
+      .set(COMMON_REQUEST_HEADERS);
+    ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
 
     return body;
   }
@@ -54,11 +62,11 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should fail with non-existing job', async () => {
-      await runRequest('non-existing-job', 404);
+      await getJobById('non-existing-job', 404);
     });
 
     it('should return empty list with non-existing job wildcard', async () => {
-      const body = await runRequest('non-existing-job*', 200);
+      const body = await getJobById('non-existing-job*', 200);
 
       expect(body.count).to.eql(0, `response count should be 0 (got ${body.count})`);
       expect(body.jobs.length).to.eql(
@@ -68,11 +76,51 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should fail with job from different space', async () => {
-      await runRequest(jobIdSpace1, 404, idSpace2);
+      await getJobById(jobIdSpace1, 404, idSpace2);
+    });
+
+    it('should return all jobs when not specifying id', async () => {
+      const body = await getJobById(undefined, 200, idSpace1);
+
+      expect(body.count).to.eql(1, `response count should be 1 (got ${body.count})`);
+      expect(body.jobs.length).to.eql(
+        1,
+        `response jobs list should contain correct job (got ${JSON.stringify(body.jobs)})`
+      );
+    });
+
+    it('should return empty list when not specifying id in difference space', async () => {
+      const body = await getJobById(undefined, 200, idSpace2);
+
+      expect(body.count).to.eql(0, `response count should be 0 (got ${body.count})`);
+      expect(body.jobs.length).to.eql(
+        0,
+        `response jobs list should be empty (got ${JSON.stringify(body.jobs)})`
+      );
+    });
+
+    it('should return job with job id from correct space', async () => {
+      const body = await getJobById(jobIdSpace1, 200, idSpace1);
+
+      expect(body.count).to.eql(1, `response count should be 1 (got ${body.count})`);
+      expect(body.jobs.length).to.eql(
+        1,
+        `response jobs list should contain correct job (got ${JSON.stringify(body.jobs)})`
+      );
+    });
+
+    it('should return job with job wildcard from correct space', async () => {
+      const body = await getJobById(jobIdWildcardSpace1, 200, idSpace1);
+
+      expect(body.count).to.eql(1, `response count should be 1 (got ${body.count})`);
+      expect(body.jobs.length).to.eql(
+        1,
+        `response jobs list should contain correct job (got ${JSON.stringify(body.jobs)})`
+      );
     });
 
     it('should return empty list with job wildcard from different space', async () => {
-      const body = await runRequest(jobIdWildcardSpace1, 200, idSpace2);
+      const body = await getJobById(jobIdWildcardSpace1, 200, idSpace2);
 
       expect(body.count).to.eql(0, `response count should be 0 (got ${body.count})`);
       expect(body.jobs.length).to.eql(
@@ -82,7 +130,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should return job by group from same space', async () => {
-      const body = await runRequest(jobGroupSpace1, 200, idSpace1);
+      const body = await getJobById(jobGroupSpace1, 200, idSpace1);
 
       expect(body.count).to.eql(1, `response count should be 1 (got ${body.count})`);
       expect(body.jobs.length).to.eql(
@@ -96,7 +144,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should return job by group wildcard from same space', async () => {
-      const body = await runRequest(jobGroupWildcardSpace1, 200, idSpace1);
+      const body = await getJobById(jobGroupWildcardSpace1, 200, idSpace1);
 
       expect(body.count).to.eql(1, `response count should be 1 (got ${body.count})`);
       expect(body.jobs.length).to.eql(
@@ -110,11 +158,11 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should fail with group from different space', async () => {
-      await runRequest(jobGroupSpace1, 404, idSpace2);
+      await getJobById(jobGroupSpace1, 404, idSpace2);
     });
 
     it('should return empty list with group wildcard from different space', async () => {
-      const body = await runRequest(jobGroupWildcardSpace1, 200, idSpace2);
+      const body = await getJobById(jobGroupWildcardSpace1, 200, idSpace2);
 
       expect(body.count).to.eql(0, `response count should be 0 (got ${body.count})`);
       expect(body.jobs.length).to.eql(

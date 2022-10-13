@@ -8,15 +8,15 @@
 import _ from 'lodash';
 
 import { schema } from '@kbn/config-schema';
-import type { SavedObject } from 'src/core/server';
+import type { SavedObject } from '@kbn/core/server';
 
+import type { ExternalRouteDeps } from '.';
 import {
   copySavedObjectsToSpacesFactory,
   resolveCopySavedObjectsToSpacesConflictsFactory,
 } from '../../../lib/copy_to_spaces';
 import { SPACE_ID_REGEX } from '../../../lib/space_schema';
 import { createLicensedRouteHandler } from '../../lib';
-import type { ExternalRouteDeps } from './';
 
 type SavedObjectIdentifier = Pick<SavedObject, 'id' | 'type'>;
 
@@ -163,10 +163,8 @@ export function initCopyToSpacesApi(deps: ExternalRouteDeps) {
         usageStatsClient.incrementResolveCopySavedObjectsErrors({ headers, createNewCopies })
       );
 
-      const resolveCopySavedObjectsToSpacesConflicts = resolveCopySavedObjectsToSpacesConflictsFactory(
-        startServices.savedObjects,
-        request
-      );
+      const resolveCopySavedObjectsToSpacesConflicts =
+        resolveCopySavedObjectsToSpacesConflictsFactory(startServices.savedObjects, request);
       const sourceSpaceId = getSpacesService().getSpaceId(request);
       const resolveConflictsResponse = await resolveCopySavedObjectsToSpacesConflicts(
         sourceSpaceId,

@@ -1,12 +1,8 @@
 {
   "name": "@kbn/config",
-  "main": "./target/index.js",
-  "types": "./target/index.d.ts",
+  "main": "./target_node/index.js",
   "version": "1.0.0",
+  "author": "Kibana Core",
   "license": "SSPL-1.0 OR Elastic License 2.0",
-  "private": true,
-  "scripts": {
-    "build": "../../node_modules/.bin/tsc",
-    "kbn:bootstrap": "yarn build"
-  }
+  "private": true
 }

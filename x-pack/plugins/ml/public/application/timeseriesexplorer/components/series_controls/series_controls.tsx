@@ -6,9 +6,10 @@
  */
 
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, EuiSelectProps } from '@elastic/eui';
 import { debounce } from 'lodash';
+import { lastValueFrom } from 'rxjs';
 import { EntityControl } from '../entity_control';
 import { mlJobService } from '../../../services/job_service';
 import { Detector, JobId } from '../../../../../common/types/anomaly_detection_jobs';
@@ -25,7 +26,7 @@ import {
   PartitionFieldConfig,
   PartitionFieldsConfig,
 } from '../../../../../common/types/storage';
-import { useStorage } from '../../../contexts/ml/use_storage';
+import { useStorage } from '../../../contexts/storage';
 import { EntityFieldType } from '../../../../../common/types/anomalies';
 import { FieldDefinition } from '../../../services/results_service/result_service_rx';
 import { getViewableDetectors } from '../../timeseriesexplorer_utils/get_viewable_detectors';
@@ -112,9 +113,7 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
     return getControlsForDetector(selectedDetectorIndex, selectedEntities, selectedJobId);
   }, [selectedDetectorIndex, selectedEntities, selectedJobId]);
 
-  const [storageFieldsConfig, setStorageFieldsConfig] = useStorage<PartitionFieldsConfig>(
-    ML_ENTITY_FIELDS_CONFIG
-  );
+  const [storageFieldsConfig, setStorageFieldsConfig] = useStorage(ML_ENTITY_FIELDS_CONFIG);
 
   // Merge the default config with the one from the local storage
   const resultFieldsConfig = useMemo(() => {
@@ -155,8 +154,8 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
       partition_field: partitionField,
       over_field: overField,
       by_field: byField,
-    } = await mlResultsService
-      .fetchPartitionFieldsValues(
+    } = await lastValueFrom(
+      mlResultsService.fetchPartitionFieldsValues(
         selectedJob.job_id,
         searchTerm,
         [
@@ -169,7 +168,7 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
         bounds.max.valueOf(),
         fieldsConfig
       )
-      .toPromise();
+    );
 
     const entityValuesUpdate: Record<string, any> = {};
     entityControls.forEach((entity) => {
@@ -193,6 +192,7 @@ export const SeriesControls: FC<SeriesControlsProps> = ({
 
   useEffect(() => {
     loadEntityValues();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedJobId, selectedDetectorIndex, JSON.stringify(selectedEntities), resultFieldsConfig]);
 
   const entityFieldSearchChanged = debounce(async (entity, queryTerm) => {

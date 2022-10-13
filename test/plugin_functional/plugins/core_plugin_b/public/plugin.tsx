@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'kibana/public';
-import { CorePluginAPluginSetup } from '../../core_plugin_a/public/plugin';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { CorePluginAPluginSetup } from '@kbn/core-plugin-a-plugin/public/plugin';
 
 declare global {
   interface Window {
@@ -20,7 +20,8 @@ export interface CorePluginBDeps {
 }
 
 export class CorePluginBPlugin
-  implements Plugin<CorePluginBPluginSetup, CorePluginBPluginStart, CorePluginBDeps> {
+  implements Plugin<CorePluginBPluginSetup, CorePluginBPluginStart, CorePluginBDeps>
+{
   constructor(pluginContext: PluginInitializerContext) {
     window.env = pluginContext.env;
   }

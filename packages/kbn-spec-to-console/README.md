@@ -18,15 +18,10 @@ git pull --depth=1 origin master
 
 ### Usage
 
-You need to run the command twice: once for the **OSS** specs and once for the **X-Pack** specs  
 At the root of the Kibana repository, run the following commands:
 
 ```sh
-# OSS
 yarn spec_to_console -g "<ELASTICSEARCH-REPO-FOLDER>/rest-api-spec/src/main/resources/rest-api-spec/api/*" -d "src/plugins/console/server/lib/spec_definitions/json/generated"
-
-# X-pack
-yarn spec_to_console -g "<ELASTICSEARCH-REPO-FOLDER>/x-pack/plugin/src/test/resources/rest-api-spec/api/*" -d "x-pack/plugins/console_extensions/server/lib/spec_definitions/json/generated"
 ```
 
 ### Information used in Console that is not available in the REST spec
@@ -34,3 +29,8 @@ yarn spec_to_console -g "<ELASTICSEARCH-REPO-FOLDER>/x-pack/plugin/src/test/reso
 * Request bodies
 * Data fetched at runtime: indices, fields, snapshots, etc
 * Ad hoc additions
+
+### Updating the script
+When converting query params defined in the REST API specs to console autocompletion definitions, the script relies on a set of known conversion rules specified in [lib/convert/params.js](https://github.com/elastic/kibana/blob/main/packages/kbn-spec-to-console/lib/convert/params.js).
+For example, `"keep_on_completion":{"type":"boolean"}` from REST API specs is converted to `"keep_on_completion": "__flag__"` in console autocomplete definitions.
+When an unknown parameter type is encountered in REST API specs, the script will throw an `Unexpected type error` and the file [lib/convert/params.js](https://github.com/elastic/kibana/blob/main/packages/kbn-spec-to-console/lib/convert/params.js) needs to be updated by adding a new conversion rule. 

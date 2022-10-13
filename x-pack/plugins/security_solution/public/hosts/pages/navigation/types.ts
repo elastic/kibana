@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import { ESTermQuery } from '../../../../common/typed_json';
-import { Filter } from '../../../../../../../src/plugins/data/public';
-import { NarrowDateRange } from '../../../common/components/ml/types';
-import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
-import { HostsTableType, HostsType } from '../../store/model';
-import { NavTab } from '../../../common/components/navigation/types';
-import { UpdateDateRange } from '../../../common/components/charts/common';
-import { DocValueFields } from '../../../common/containers/source';
+import type { Filter } from '@kbn/es-query';
+import type { ESTermQuery } from '../../../../common/typed_json';
+
+import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';
+import type { HostsTableType, HostsType } from '../../store/model';
+import type { NavTab } from '../../../common/components/navigation/types';
 
 export type KeyHostsNavTabWithoutMlPermission = HostsTableType.hosts &
   HostsTableType.authentications &
@@ -34,18 +32,13 @@ export interface QueryTabBodyProps {
 
 export type HostsComponentsQueryProps = QueryTabBodyProps & {
   deleteQuery?: GlobalTimeArgs['deleteQuery'];
-  docValueFields?: DocValueFields[];
   indexNames: string[];
   pageFilters?: Filter[];
   skip: boolean;
   setQuery: GlobalTimeArgs['setQuery'];
-  updateDateRange?: UpdateDateRange;
-  narrowDateRange?: NarrowDateRange;
 };
 
 export type AlertsComponentQueryProps = HostsComponentsQueryProps & {
-  filterQuery: string;
+  filterQuery?: string;
   pageFilters?: Filter[];
 };
-
-export type CommonChildren = (args: HostsComponentsQueryProps) => JSX.Element;

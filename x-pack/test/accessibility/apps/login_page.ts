@@ -8,24 +8,25 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const a11y = getService('a11y');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'security']);
+  const kibanaServer = getService('kibanaServer');
 
-  describe('Security', () => {
+  describe('Security Accessibility', () => {
     describe('Login Page', () => {
       before(async () => {
-        await esArchiver.load('empty_kibana');
+        await kibanaServer.savedObjects.cleanStandardList();
         await PageObjects.security.forceLogout();
       });
 
       after(async () => {
-        await esArchiver.unload('empty_kibana');
+        await kibanaServer.savedObjects.cleanStandardList();
       });
 
       afterEach(async () => {
+        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
         await PageObjects.security.forceLogout();
       });
 

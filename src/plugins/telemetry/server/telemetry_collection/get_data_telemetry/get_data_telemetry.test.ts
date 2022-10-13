@@ -8,7 +8,7 @@
 
 import { buildDataTelemetryPayload, getDataTelemetry } from './get_data_telemetry';
 import { DATA_DATASETS_INDEX_PATTERNS, DATA_DATASETS_INDEX_PATTERNS_UNIQUE } from './constants';
-import { elasticsearchServiceMock } from '../../../../../../src/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 describe('get_data_telemetry', () => {
   describe('DATA_DATASETS_INDEX_PATTERNS', () => {
@@ -72,6 +72,12 @@ describe('get_data_telemetry', () => {
           { name: 'metricbeat-1234', docCount: 100, sizeInBytes: 10, isECS: false },
           { name: '.app-search-1234', docCount: 0 },
           { name: 'logs-endpoint.1234', docCount: 0 }, // Matching pattern with a dot in the name
+          { name: 'ml_host_risk_score_latest_default', docCount: 0 },
+          { name: 'ml_host_risk_score_latest', docCount: 0 }, // This should not match,
+          { name: 'ml_host_risk_score', docCount: 0 }, // This should not match
+          { name: 'ml_user_risk_score_latest_default', docCount: 0 },
+          { name: 'ml_user_risk_score_latest', docCount: 0 }, // This should not match,
+          { name: 'ml_user_risk_score', docCount: 0 }, // This should not match
           // New Indexing strategy: everything can be inferred from the constant_keyword values
           {
             name: '.ds-logs-nginx.access-default-000001',
@@ -162,6 +168,16 @@ describe('get_data_telemetry', () => {
         {
           pattern_name: 'logs-endpoint',
           shipper: 'endpoint',
+          index_count: 1,
+          doc_count: 0,
+        },
+        {
+          pattern_name: 'host_risk_score',
+          index_count: 1,
+          doc_count: 0,
+        },
+        {
+          pattern_name: 'user_risk_score',
           index_count: 1,
           doc_count: 0,
         },
@@ -301,11 +317,11 @@ function mockEsClient(
         },
       ])
     );
-    return { body };
+    return body;
   });
   // @ts-expect-error
   esClient.indices.stats.mockImplementationOnce(async () => {
-    return { body: indexStats };
+    return indexStats;
   });
   return esClient;
 }

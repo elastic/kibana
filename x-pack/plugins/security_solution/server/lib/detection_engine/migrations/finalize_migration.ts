@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
-import { getIndexCount } from '../index/get_index_count';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import { getIndexCount } from '@kbn/securitysolution-es-utils';
 import { isMigrationPending } from './helpers';
 import { applyMigrationCleanupPolicy } from './migration_cleanup';
 import { replaceSignalsIndexAlias } from './replace_signals_index_alias';
-import { SignalsMigrationSO } from './saved_objects_schema';
+import type { SignalsMigrationSO } from './saved_objects_schema';
 import { updateMigrationSavedObject } from './update_migration_saved_object';
 
 /**
@@ -48,7 +48,7 @@ export const finalizeMigration = async ({
 
   const { destinationIndex, sourceIndex, taskId } = migration.attributes;
 
-  const { body: task } = await esClient.tasks.get<{ completed: boolean }>({ task_id: taskId });
+  const task = await esClient.tasks.get({ task_id: taskId });
   if (!task.completed) {
     return migration;
   }

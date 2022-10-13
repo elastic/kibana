@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { RouteValidationResultFactory } from 'src/core/server';
+import type { RouteValidationResultFactory } from '@kbn/core/server';
 
 import { buildRouteValidation, buildRouteValidationWithExcess } from './route_validation';
 

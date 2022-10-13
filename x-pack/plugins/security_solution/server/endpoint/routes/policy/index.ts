@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IRouter } from 'kibana/server';
-import { EndpointAppContext } from '../../types';
+import type { IRouter } from '@kbn/core/server';
+import type { EndpointAppContext } from '../../types';
 import {
   GetPolicyResponseSchema,
   GetAgentPolicySummaryRequestSchema,
@@ -16,17 +16,24 @@ import {
   AGENT_POLICY_SUMMARY_ROUTE,
   BASE_POLICY_RESPONSE_ROUTE,
 } from '../../../../common/endpoint/constants';
+import { withEndpointAuthz } from '../with_endpoint_authz';
 
 export const INITIAL_POLICY_ID = '00000000-0000-0000-0000-000000000000';
 
 export function registerPolicyRoutes(router: IRouter, endpointAppContext: EndpointAppContext) {
+  const logger = endpointAppContext.logFactory.get('endpointPolicy');
+
   router.get(
     {
       path: BASE_POLICY_RESPONSE_ROUTE,
       validate: GetPolicyResponseSchema,
       options: { authRequired: true },
     },
-    getHostPolicyResponseHandler()
+    withEndpointAuthz(
+      { any: ['canReadSecuritySolution', 'canAccessFleet'] },
+      logger,
+      getHostPolicyResponseHandler()
+    )
   );
 
   router.get(
@@ -35,6 +42,10 @@ export function registerPolicyRoutes(router: IRouter, endpointAppContext: Endpoi
       validate: GetAgentPolicySummaryRequestSchema,
       options: { authRequired: true },
     },
-    getAgentPolicySummaryHandler(endpointAppContext)
+    withEndpointAuthz(
+      { all: ['canAccessEndpointManagement'] },
+      logger,
+      getAgentPolicySummaryHandler(endpointAppContext)
+    )
   );
 }

@@ -8,4 +8,4 @@
 
 export { SavedObjectsManagementAction } from './action';
 export { SavedObjectsManagementColumn } from './column';
-export { SavedObjectsManagementRecord } from './record';
+export type { SavedObjectsManagementRecord } from './record';

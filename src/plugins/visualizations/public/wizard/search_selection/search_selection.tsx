@@ -8,11 +8,12 @@
 
 import { EuiModalBody, EuiModalHeader, EuiModalHeaderTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { SimpleSavedObject, SavedObjectAttributes } from '@kbn/core/public';
 import React from 'react';
-import { IUiSettingsClient, SavedObjectsStart } from '../../../../../core/public';
+import { IUiSettingsClient, SavedObjectsStart } from '@kbn/core/public';
 
-import { SavedObjectFinderUi } from '../../../../../plugins/saved_objects/public';
+import { SavedObjectFinderUi } from '@kbn/saved-objects-plugin/public';
 import type { BaseVisType } from '../../vis_types';
 import { DialogNavigation } from '../dialog_navigation';
 
@@ -22,6 +23,9 @@ interface SearchSelectionProps {
   uiSettings: IUiSettingsClient;
   savedObjects: SavedObjectsStart;
   goBack: () => void;
+}
+interface SavedSearchesAttributes extends SavedObjectAttributes {
+  isTextBasedQuery: boolean;
 }
 
 export class SearchSelection extends React.Component<SearchSelectionProps> {
@@ -66,16 +70,23 @@ export class SearchSelection extends React.Component<SearchSelectionProps> {
                     defaultMessage: 'Saved search',
                   }
                 ),
+                // ignore the saved searches that have text-based languages queries
+                includeFields: ['isTextBasedQuery'],
+                showSavedObject: (savedObject) => {
+                  const so = savedObject as unknown as SimpleSavedObject<SavedSearchesAttributes>;
+                  return !so.attributes.isTextBasedQuery;
+                },
               },
               {
                 type: 'index-pattern',
                 getIconForSavedObject: () => 'indexPatternApp',
                 name: i18n.translate(
-                  'visualizations.newVisWizard.searchSelection.savedObjectType.indexPattern',
+                  'visualizations.newVisWizard.searchSelection.savedObjectType.dataView',
                   {
-                    defaultMessage: 'Index pattern',
+                    defaultMessage: 'Data view',
                   }
                 ),
+                defaultSearchField: 'name',
               },
             ]}
             fixedPageSize={this.fixedPageSize}

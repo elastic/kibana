@@ -11,9 +11,7 @@ import { Response } from 'supertest';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
-  const esDeleteAllIndices = getService('esDeleteAllIndices');
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
 
   describe('find', () => {
@@ -26,8 +24,16 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('with kibana index', () => {
-      before(() => esArchiver.load('saved_objects/basic'));
-      after(() => esArchiver.unload('saved_objects/basic'));
+      before(async () => {
+        await kibanaServer.importExport.load(
+          'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
+        );
+      });
+      after(async () => {
+        await kibanaServer.importExport.unload(
+          'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
+        );
+      });
 
       it('should return 200 with individual responses', async () =>
         await supertest
@@ -86,8 +92,16 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       describe('`hasReference` and `hasReferenceOperator` parameters', () => {
-        before(() => esArchiver.load('saved_objects/references'));
-        after(() => esArchiver.unload('saved_objects/references'));
+        before(async () => {
+          await kibanaServer.importExport.load(
+            'test/api_integration/fixtures/kbn_archiver/saved_objects/references.json'
+          );
+        });
+        after(async () => {
+          await kibanaServer.importExport.unload(
+            'test/api_integration/fixtures/kbn_archiver/saved_objects/references.json'
+          );
+        });
 
         it('search for a reference', async () => {
           await supertest
@@ -119,8 +133,8 @@ export default function ({ getService }: FtrProviderContext) {
               const objects = resp.body.saved_objects;
               expect(objects.map((obj: any) => obj.id)).to.eql([
                 'only-ref-1',
-                'ref-1-and-ref-2',
                 'only-ref-2',
+                'ref-1-and-ref-2',
               ]);
             });
         });
@@ -143,93 +157,54 @@ export default function ({ getService }: FtrProviderContext) {
             });
         });
       });
-    });
 
-    describe('without kibana index', () => {
-      before(
-        async () =>
-          // just in case the kibana server has recreated it
-          await esDeleteAllIndices('.kibana*')
-      );
-
-      it('should return 200 with empty response', async () =>
-        await supertest
-          .get('/api/kibana/management/saved_objects/_find?type=visualization')
-          .expect(200)
-          .then((resp: Response) => {
-            expect(resp.body).to.eql({
-              page: 1,
-              per_page: 20,
-              total: 0,
-              saved_objects: [],
-            });
-          }));
-
-      describe('unknown type', () => {
-        it('should return 200 with empty response', async () =>
-          await supertest
-            .get('/api/kibana/management/saved_objects/_find?type=wigwags')
-            .expect(200)
-            .then((resp: Response) => {
-              expect(resp.body).to.eql({
-                page: 1,
-                per_page: 20,
-                total: 0,
-                saved_objects: [],
-              });
-            }));
-      });
-
-      describe('missing type', () => {
-        it('should return 400', async () =>
+      describe('`sortField` and `sortOrder` parameters', () => {
+        it('sort objects by "type" in "asc" order', async () => {
           await supertest
             .get('/api/kibana/management/saved_objects/_find')
-            .expect(400)
-            .then((resp: Response) => {
-              expect(resp.body).to.eql({
-                error: 'Bad Request',
-                message:
-                  '[request query.type]: expected at least one defined value but got [undefined]',
-                statusCode: 400,
-              });
-            }));
-      });
-
-      describe('page beyond total', () => {
-        it('should return 200 with empty response', async () =>
-          await supertest
-            .get(
-              '/api/kibana/management/saved_objects/_find?type=visualization&page=100&perPage=100'
-            )
+            .query({
+              type: ['visualization', 'dashboard'],
+              sortField: 'type',
+              sortOrder: 'asc',
+            })
             .expect(200)
-            .then((resp: Response) => {
-              expect(resp.body).to.eql({
-                page: 100,
-                per_page: 100,
-                total: 0,
-                saved_objects: [],
-              });
-            }));
-      });
+            .then((resp) => {
+              const objects = resp.body.saved_objects;
+              expect(objects.length).be.greaterThan(1); // Need more than 1 result for our test
+              expect(objects[0].type).to.be('dashboard');
+            });
+        });
 
-      describe('unknown search field', () => {
-        it('should return 400 when using searchFields', async () =>
+        it('sort objects by "type" in "desc" order', async () => {
           await supertest
-            .get('/api/kibana/management/saved_objects/_find?type=url&searchFields=a')
-            .expect(400)
-            .then((resp: Response) => {
-              expect(resp.body).to.eql({
-                statusCode: 400,
-                error: 'Bad Request',
-                message: '[request query.searchFields]: definition for this key is missing',
-              });
-            }));
+            .get('/api/kibana/management/saved_objects/_find')
+            .query({
+              type: ['visualization', 'dashboard'],
+              sortField: 'type',
+              sortOrder: 'desc',
+            })
+            .expect(200)
+            .then((resp) => {
+              const objects = resp.body.saved_objects;
+              expect(objects[0].type).to.be('visualization');
+            });
+        });
       });
     });
 
     describe('meta attributes injected properly', () => {
-      before(() => esArchiver.load('management/saved_objects/search'));
-      after(() => esArchiver.unload('management/saved_objects/search'));
+      before(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
+        await kibanaServer.importExport.load(
+          'test/api_integration/fixtures/kbn_archiver/saved_objects/search.json'
+        );
+      });
+      after(async () => {
+        await kibanaServer.importExport.unload(
+          'test/api_integration/fixtures/kbn_archiver/saved_objects/search.json'
+        );
+        await kibanaServer.savedObjects.cleanStandardList();
+      });
 
       it('should inject meta attributes for searches', async () =>
         await supertest
@@ -241,13 +216,11 @@ export default function ({ getService }: FtrProviderContext) {
               icon: 'discoverApp',
               title: 'OneRecord',
               hiddenType: false,
-              editUrl:
-                '/management/kibana/objects/savedSearches/960372e0-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
                 path: '/app/discover#/view/960372e0-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'discover.show',
               },
-              namespaceType: 'single',
+              namespaceType: 'multiple-isolated',
             });
           }));
 
@@ -261,13 +234,11 @@ export default function ({ getService }: FtrProviderContext) {
               icon: 'dashboardApp',
               title: 'Dashboard',
               hiddenType: false,
-              editUrl:
-                '/management/kibana/objects/savedDashboards/b70c7ae0-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
                 path: '/app/dashboards#/view/b70c7ae0-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'dashboard.show',
               },
-              namespaceType: 'single',
+              namespaceType: 'multiple-isolated',
             });
           }));
 
@@ -281,25 +252,21 @@ export default function ({ getService }: FtrProviderContext) {
               icon: 'visualizeApp',
               title: 'VisualizationFromSavedSearch',
               hiddenType: false,
-              editUrl:
-                '/management/kibana/objects/savedVisualizations/a42c0580-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
                 path: '/app/visualize#/edit/a42c0580-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'visualize.show',
               },
-              namespaceType: 'single',
+              namespaceType: 'multiple-isolated',
             });
             expect(resp.body.saved_objects[1].meta).to.eql({
               icon: 'visualizeApp',
               title: 'Visualization',
               hiddenType: false,
-              editUrl:
-                '/management/kibana/objects/savedVisualizations/add810b0-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
                 path: '/app/visualize#/edit/add810b0-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'visualize.show',
               },
-              namespaceType: 'single',
+              namespaceType: 'multiple-isolated',
             });
           }));
 
@@ -313,14 +280,12 @@ export default function ({ getService }: FtrProviderContext) {
               icon: 'indexPatternApp',
               title: 'saved_objects*',
               hiddenType: false,
-              editUrl:
-                '/management/kibana/indexPatterns/patterns/8963ca30-3224-11e8-a572-ffca06da1357',
+              editUrl: '/management/kibana/dataViews/dataView/8963ca30-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
-                path:
-                  '/app/management/kibana/indexPatterns/patterns/8963ca30-3224-11e8-a572-ffca06da1357',
+                path: '/app/management/kibana/dataViews/dataView/8963ca30-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'management.kibana.indexPatterns',
               },
-              namespaceType: 'single',
+              namespaceType: 'multiple',
             });
           }));
     });

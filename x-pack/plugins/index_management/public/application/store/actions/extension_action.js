@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { reloadIndices } from '../actions';
+import { reloadIndices } from '.';
 import { notificationService } from '../../services/notification';
 import { httpService } from '../../services/http';
 
-export const performExtensionAction = ({ requestMethod, indexNames, successMessage }) => async (
-  dispatch
-) => {
-  try {
-    await requestMethod(indexNames, httpService.httpClient);
-  } catch (error) {
-    notificationService.showDangerToast(error.message);
-    return;
-  }
-  dispatch(reloadIndices(indexNames));
-  notificationService.showSuccessToast(successMessage);
-};
+export const performExtensionAction =
+  ({ requestMethod, indexNames, successMessage }) =>
+  async (dispatch) => {
+    try {
+      await requestMethod(indexNames, httpService.httpClient);
+    } catch (error) {
+      notificationService.showDangerToast(error.message);
+      return;
+    }
+    dispatch(reloadIndices(indexNames));
+    notificationService.showSuccessToast(successMessage);
+  };

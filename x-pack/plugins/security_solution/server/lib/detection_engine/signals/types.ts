@@ -5,51 +5,38 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
-import { DslQuery, Filter } from 'src/plugins/data/common';
-import moment, { Moment } from 'moment';
-import { Status } from '../../../../common/detection_engine/schemas/common/schemas';
-import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
-import {
-  AlertType,
-  AlertTypeState,
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type moment from 'moment';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext,
-  AlertExecutorOptions,
-  AlertServices,
-} from '../../../../../alerting/server';
-import { BaseSearchResponse, SearchHit, TermAggregationBucket } from '../../types';
-import {
-  EqlSearchResponse,
+  RuleExecutorOptions as AlertingRuleExecutorOptions,
+  RuleExecutorServices,
+} from '@kbn/alerting-plugin/server';
+import type { ListClient } from '@kbn/lists-plugin/server';
+import type { EcsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
+import type { TypeOfFieldMap } from '@kbn/rule-registry-plugin/common/field_map';
+import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
+import type {
   BaseHit,
   RuleAlertAction,
   SearchTypes,
+  EqlSequence,
 } from '../../../../common/detection_engine/types';
-import { RefreshTypes } from '../types';
-import { ListClient } from '../../../../../lists/server';
-import { Logger, SavedObject } from '../../../../../../../src/core/server';
-import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
-import { BuildRuleMessage } from './rule_messages';
-import { TelemetryEventsSender } from '../../telemetry/sender';
-import { RuleParams } from '../schemas/rule_schemas';
-
-// used for gap detection code
-// eslint-disable-next-line @typescript-eslint/naming-convention
-export type unitType = 's' | 'm' | 'h';
-export const isValidUnit = (unitParam: string): unitParam is unitType =>
-  ['s', 'm', 'h'].includes(unitParam);
-
-export interface SignalsParams {
-  signalIds: string[] | undefined | null;
-  query: object | undefined | null;
-  status: Status;
-}
-
-export interface SignalsStatusParams {
-  signalIds: string[] | undefined | null;
-  query: object | undefined | null;
-  status: Status;
-}
+import type { ITelemetryEventsSender } from '../../telemetry/sender';
+import type { RuleParams } from '../schemas/rule_schemas';
+import type { GenericBulkCreateResponse } from '../rule_types/factories';
+import type { BuildReasonMessage } from './reason_formatters';
+import type {
+  BaseFieldsLatest,
+  DetectionAlert,
+  WrappedFieldsLatest,
+} from '../../../../common/detection_engine/schemas/alerts';
+import type { IRuleExecutionLogForExecutors } from '../rule_monitoring';
+import type { FullResponseSchema } from '../../../../common/detection_engine/schemas/request';
+import type { EnrichEvents } from './enrichments/types';
 
 export interface ThresholdResult {
   terms?: Array<{
@@ -82,14 +69,25 @@ export interface RuleRangeTuple {
   maxSignals: number;
 }
 
+/**
+ * SignalSource is being used as both a type for documents that match detection engine queries as well as
+ * for queries that could be on top of signals. In cases where it is matched against detection engine queries,
+ * '@timestamp' might not be there since it is not required and we have timestamp override capabilities. Also
+ * the signal addition object, "signal?: {" will not be there unless it's a conflicting field when we are running
+ * queries on events.
+ *
+ * For cases where we are running queries against signals (signals on signals) "@timestamp" should always be there
+ * and the "signal?: {" sub-object should always be there.
+ */
 export interface SignalSource {
   [key: string]: SearchTypes;
-  // TODO: SignalSource is being used as the type for documents matching detection engine queries, but they may not
-  // actually have @timestamp if a timestamp override is used
-  '@timestamp': string;
+  '@timestamp'?: string;
   signal?: {
-    // parent is deprecated: new signals should populate parents instead
-    // both are optional until all signals with parent are gone and we can safely remove it
+    /**
+     * "parent" is deprecated: new signals should populate "parents" instead. Both are optional
+     * until all signals with parent are gone and we can safely remove it.
+     * @deprecated Use parents instead
+     */
     parent?: Ancestor;
     parents?: Ancestor[];
     ancestors: Ancestor[];
@@ -99,12 +97,19 @@ export interface SignalSource {
     };
     rule: {
       id: string;
+      description?: string;
+      false_positives?: string[];
+      immutable?: boolean;
     };
-    // signal.depth doesn't exist on pre-7.10 signals
+    /** signal.depth was introduced in 7.10 and pre-7.10 signals do not have it. */
     depth?: number;
     original_time?: string;
+    /** signal.reason was introduced in 7.15 and pre-7.15 signals do not have it. */
+    reason?: string;
+    status?: string;
     threshold_result?: ThresholdResult;
   };
+  kibana?: SearchTypes;
 }
 
 export interface BulkItem {
@@ -138,9 +143,6 @@ export interface BulkResponse {
   items: BulkItem[];
 }
 
-export interface MGetResponse {
-  docs: GetResponse[];
-}
 export interface GetResponse {
   _index: string;
   _type: string;
@@ -152,40 +154,25 @@ export interface GetResponse {
   _source: SearchTypes;
 }
 
-export type SignalSearchResponse = estypes.SearchResponse<SignalSource>;
-export type SignalSourceHit = estypes.Hit<SignalSource>;
+export type EventHit = Exclude<TypeOfFieldMap<EcsFieldMap>, '@timestamp'> & {
+  '@timestamp': string;
+  [key: string]: SearchTypes;
+};
+export type WrappedEventHit = BaseHit<EventHit>;
+
+export type SignalSearchResponse<
+  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>
+> = estypes.SearchResponse<SignalSource, TAggregations>;
+export type SignalSourceHit = estypes.SearchHit<SignalSource>;
+export type AlertSourceHit = estypes.SearchHit<DetectionAlert>;
 export type WrappedSignalHit = BaseHit<SignalHit>;
-export type BaseSignalHit = estypes.Hit<SignalSource>;
+export type BaseSignalHit = estypes.SearchHit<SignalSource>;
 
-export type EqlSignalSearchResponse = EqlSearchResponse<SignalSource>;
-
-export type RuleExecutorOptions = AlertExecutorOptions<
+export type RuleExecutorOptions = AlertingRuleExecutorOptions<
   RuleParams,
-  AlertTypeState,
+  RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext
->;
-
-// This returns true because by default a RuleAlertTypeDefinition is an AlertType
-// since we are only increasing the strictness of params.
-export const isAlertExecutor = (
-  obj: SignalRuleAlertTypeDefinition
-): obj is AlertType<
-  RuleParams,
-  AlertTypeState,
-  AlertInstanceState,
-  AlertInstanceContext,
-  'default'
-> => {
-  return true;
-};
-
-export type SignalRuleAlertTypeDefinition = AlertType<
-  RuleParams,
-  AlertTypeState,
-  AlertInstanceState,
-  AlertInstanceContext,
-  'default'
 >;
 
 export interface Ancestor {
@@ -200,8 +187,10 @@ export interface Signal {
   _meta?: {
     version: number;
   };
-  rule: RulesSchema;
-  // DEPRECATED: use parents instead of parent
+  rule: FullResponseSchema;
+  /**
+   * @deprecated Use "parents" instead of "parent"
+   */
   parent?: Ancestor;
   parents: Ancestor[];
   ancestors: Ancestor[];
@@ -211,6 +200,7 @@ export interface Signal {
   };
   original_time?: string;
   original_event?: SearchTypes;
+  reason?: string;
   status: Status;
   threshold_result?: ThresholdResult;
   original_signal?: SearchTypes;
@@ -226,6 +216,7 @@ export interface SignalHit {
 
 export interface AlertAttributes<T extends RuleParams = RuleParams> {
   actions: RuleAlertAction[];
+  alertTypeId: string;
   enabled: boolean;
   name: string;
   tags: string[];
@@ -241,63 +232,67 @@ export interface AlertAttributes<T extends RuleParams = RuleParams> {
 
 export type BulkResponseErrorAggregation = Record<string, { count: number; statusCode: number }>;
 
-/**
- * TODO: Remove this if/when the return filter has its own type exposed
- */
-export interface QueryFilter {
-  bool: {
-    must: DslQuery[];
-    filter: Filter[];
-    should: unknown[];
-    must_not: Filter[];
-  };
-}
+export type SignalsEnrichment = (signals: SignalSourceHit[]) => Promise<SignalSourceHit[]>;
 
-export type SignalsEnrichment = (signals: SignalSearchResponse) => Promise<SignalSearchResponse>;
+export type BulkCreate = <T extends BaseFieldsLatest>(
+  docs: Array<WrappedFieldsLatest<T>>,
+  maxAlerts?: number,
+  enrichEvents?: EnrichEvents
+) => Promise<GenericBulkCreateResponse<T>>;
 
+export type SimpleHit = BaseHit<{ '@timestamp'?: string }>;
+
+export type WrapHits = (
+  hits: Array<estypes.SearchHit<SignalSource>>,
+  buildReasonMessage: BuildReasonMessage
+) => Array<WrappedFieldsLatest<BaseFieldsLatest>>;
+
+export type WrapSequences = (
+  sequences: Array<EqlSequence<SignalSource>>,
+  buildReasonMessage: BuildReasonMessage
+) => Array<WrappedFieldsLatest<BaseFieldsLatest>>;
+
+export type RuleServices = RuleExecutorServices<
+  AlertInstanceState,
+  AlertInstanceContext,
+  'default'
+>;
 export interface SearchAfterAndBulkCreateParams {
-  tuples: Array<{
+  tuple: {
     to: moment.Moment;
     from: moment.Moment;
     maxSignals: number;
-  }>;
-  ruleSO: SavedObject<AlertAttributes>;
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  };
+  services: RuleServices;
   listClient: ListClient;
   exceptionsList: ExceptionListItemSchema[];
-  logger: Logger;
-  eventsTelemetry: TelemetryEventsSender | undefined;
-  id: string;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
+  eventsTelemetry: ITelemetryEventsSender | undefined;
   inputIndexPattern: string[];
-  signalsIndex: string;
   pageSize: number;
-  filter: unknown;
-  refresh: RefreshTypes;
-  buildRuleMessage: BuildRuleMessage;
+  filter: estypes.QueryDslQueryContainer;
+  buildReasonMessage: BuildReasonMessage;
   enrichment?: SignalsEnrichment;
+  bulkCreate: BulkCreate;
+  wrapHits: WrapHits;
+  trackTotalHits?: boolean;
+  sortOrder?: estypes.SortOrder;
+  runtimeMappings: estypes.MappingRuntimeFields | undefined;
+  primaryTimestamp: string;
+  secondaryTimestamp?: string;
 }
 
 export interface SearchAfterAndBulkCreateReturnType {
   success: boolean;
   warning: boolean;
   searchAfterTimes: string[];
+  enrichmentTimes: string[];
   bulkCreateTimes: string[];
   lastLookBackDate: Date | null | undefined;
   createdSignalsCount: number;
-  createdSignals: SignalHit[];
+  createdSignals: unknown[];
   errors: string[];
-  totalToFromTuples?: Array<{
-    to: Moment | undefined;
-    from: Moment | undefined;
-    maxSignals: number;
-  }>;
-}
-
-export interface ThresholdAggregationBucket extends TermAggregationBucket {
-  top_threshold_hits: BaseSearchResponse<SignalSource>;
-  cardinality_count: {
-    value: number;
-  };
+  warningMessages: string[];
 }
 
 export interface MultiAggBucket {
@@ -310,17 +305,11 @@ export interface MultiAggBucket {
     value: string;
   }>;
   docCount: number;
-  topThresholdHits?:
-    | {
-        hits: {
-          hits: SearchHit[];
-        };
-      }
-    | undefined;
+  maxTimestamp: string;
+  minTimestamp: string;
 }
 
-export interface ThresholdQueryBucket extends TermAggregationBucket {
-  lastSignalTimestamp: {
-    value_as_string: string;
-  };
+export interface ThresholdAlertState extends RuleTypeState {
+  initialized: boolean;
+  signalHistory: ThresholdSignalHistory;
 }

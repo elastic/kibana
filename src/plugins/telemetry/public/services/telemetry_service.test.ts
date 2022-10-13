@@ -18,17 +18,20 @@ describe('TelemetryService', () => {
 
       await telemetryService.fetchTelemetry();
       expect(telemetryService['http'].post).toBeCalledWith('/api/telemetry/v2/clusters/_stats', {
-        body: JSON.stringify({ unencrypted: false }),
+        body: JSON.stringify({ unencrypted: false, refreshCache: false }),
       });
     });
   });
 
   describe('fetchExample', () => {
-    it('calls fetchTelemetry with unencrupted: true', async () => {
+    it('calls fetchTelemetry with unencrypted: true, refreshCache: true', async () => {
       const telemetryService = mockTelemetryService();
       telemetryService.fetchTelemetry = jest.fn();
       await telemetryService.fetchExample();
-      expect(telemetryService.fetchTelemetry).toBeCalledWith({ unencrypted: true });
+      expect(telemetryService.fetchTelemetry).toBeCalledWith({
+        unencrypted: true,
+        refreshCache: true,
+      });
     });
   });
 
@@ -137,13 +140,46 @@ describe('TelemetryService', () => {
   });
 
   describe('getTelemetryUrl', () => {
-    it('should return the config.url parameter', async () => {
-      const url = 'http://test.com';
+    it('should return staging endpoint when sendUsageTo is set to staging', async () => {
       const telemetryService = mockTelemetryService({
-        config: { url },
+        config: { sendUsageTo: 'staging' },
       });
 
-      expect(telemetryService.getTelemetryUrl()).toBe(url);
+      expect(telemetryService.getTelemetryUrl()).toMatchInlineSnapshot(
+        `"https://telemetry-staging.elastic.co/xpack/v2/send"`
+      );
+    });
+
+    it('should return prod endpoint when sendUsageTo is set to prod', async () => {
+      const telemetryService = mockTelemetryService({
+        config: { sendUsageTo: 'prod' },
+      });
+
+      expect(telemetryService.getTelemetryUrl()).toMatchInlineSnapshot(
+        `"https://telemetry.elastic.co/xpack/v2/send"`
+      );
+    });
+  });
+
+  describe('getOptInStatusUrl', () => {
+    it('should return staging endpoint when sendUsageTo is set to staging', async () => {
+      const telemetryService = mockTelemetryService({
+        config: { sendUsageTo: 'staging' },
+      });
+
+      expect(telemetryService.getOptInStatusUrl()).toMatchInlineSnapshot(
+        `"https://telemetry-staging.elastic.co/opt_in_status/v2/send"`
+      );
+    });
+
+    it('should return prod endpoint when sendUsageTo is set to prod', async () => {
+      const telemetryService = mockTelemetryService({
+        config: { sendUsageTo: 'prod' },
+      });
+
+      expect(telemetryService.getOptInStatusUrl()).toMatchInlineSnapshot(
+        `"https://telemetry.elastic.co/opt_in_status/v2/send"`
+      );
     });
   });
 
@@ -183,6 +219,19 @@ describe('TelemetryService', () => {
   });
 
   describe('getUserShouldSeeOptInNotice', () => {
+    it('should return false if the telemetry notice is hidden by config', () => {
+      const telemetryService = mockTelemetryService({
+        config: {
+          userCanChangeSettings: true,
+          telemetryNotifyUserAboutOptInDefault: true,
+          hidePrivacyStatement: true,
+        },
+      });
+      expect(telemetryService.config.userCanChangeSettings).toBe(true);
+      expect(telemetryService.userCanChangeSettings).toBe(true);
+      expect(telemetryService.getUserShouldSeeOptInNotice()).toBe(false);
+    });
+
     it('returns whether the user can update the telemetry config (has SavedObjects access)', () => {
       const telemetryService = mockTelemetryService({
         config: { userCanChangeSettings: undefined },
@@ -218,7 +267,7 @@ describe('TelemetryService', () => {
       const telemetryService = mockTelemetryService({
         config: { userCanChangeSettings: undefined },
       });
-      const mockPayload = ['mock_hashed_opt_in_status_payload'];
+      const mockPayload = [{ clusterUuid: 'mk_uuid', stats: 'mock_hashed_opt_in_status_payload' }];
       const mockUrl = 'mock_telemetry_optin_status_url';
 
       const mockGetOptInStatusUrl = jest.fn().mockReturnValue(mockUrl);
@@ -228,21 +277,28 @@ describe('TelemetryService', () => {
       expect(mockGetOptInStatusUrl).toBeCalledTimes(1);
       expect(mockFetch).toBeCalledTimes(1);
 
-      expect(mockFetch).toBeCalledWith(mockUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Elastic-Stack-Version': 'mockKibanaVersion',
-        },
-        body: JSON.stringify(mockPayload),
-      });
+      expect(mockFetch.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          "mock_telemetry_optin_status_url",
+          Object {
+            "body": "mock_hashed_opt_in_status_payload",
+            "headers": Object {
+              "Content-Type": "application/json",
+              "X-Elastic-Cluster-ID": "mk_uuid",
+              "X-Elastic-Content-Encoding": "aes256gcm",
+              "X-Elastic-Stack-Version": "mockKibanaVersion",
+            },
+            "method": "POST",
+          },
+        ]
+      `);
     });
 
     it('swallows errors if fetch fails', async () => {
       const telemetryService = mockTelemetryService({
         config: { userCanChangeSettings: undefined },
       });
-      const mockPayload = ['mock_hashed_opt_in_status_payload'];
+      const mockPayload = [{ clusterUuid: 'mk_uuid', stats: 'mock_hashed_opt_in_status_payload' }];
       const mockUrl = 'mock_telemetry_optin_status_url';
 
       const mockGetOptInStatusUrl = jest.fn().mockReturnValue(mockUrl);
@@ -254,6 +310,26 @@ describe('TelemetryService', () => {
       const result = await telemetryService['reportOptInStatus'](mockPayload);
       expect(result).toBeUndefined();
       expect(mockFetch).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('canSendTelemetry', () => {
+    it('does not send telemetry if screenshotMode is true', () => {
+      const telemetryService = mockTelemetryService({
+        isScreenshotMode: true,
+        config: { optIn: true },
+      });
+
+      expect(telemetryService.canSendTelemetry()).toBe(false);
+    });
+
+    it('does send telemetry if screenshotMode is false and we are opted in', () => {
+      const telemetryService = mockTelemetryService({
+        isScreenshotMode: false,
+        config: { optIn: true },
+      });
+
+      expect(telemetryService.canSendTelemetry()).toBe(true);
     });
   });
 });

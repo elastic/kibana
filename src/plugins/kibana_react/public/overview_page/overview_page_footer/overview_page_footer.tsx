@@ -7,10 +7,10 @@
  */
 
 import React, { FC, MouseEvent } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiPageTemplate, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
 import { RedirectAppLinks } from '../../app_links';
 import { useKibana } from '../../context';
 import { useUiSetting$ } from '../../ui_settings';
@@ -48,9 +48,11 @@ export const OverviewPageFooter: FC<Props> = ({
         className="kbnOverviewPageFooter__button"
         flush="both"
         iconType="home"
-        size="xs"
+        size="s"
         onClick={(event: MouseEvent) => {
-          application.navigateToUrl(addBasePath('/app/management/kibana/settings#defaultRoute'));
+          application.navigateToUrl(
+            addBasePath('/app/management/kibana/settings?query=default+route')
+          );
           if (onChangeDefaultRoute) {
             onChangeDefaultRoute(event);
           }
@@ -78,7 +80,7 @@ export const OverviewPageFooter: FC<Props> = ({
           onSetDefaultRoute(event);
         }
       }}
-      size="xs"
+      size="s"
     >
       <FormattedMessage
         id="kibana-react.pageFooter.makeDefaultRouteLink"
@@ -88,12 +90,13 @@ export const OverviewPageFooter: FC<Props> = ({
   );
 
   return (
-    <footer className="kbnOverviewPageFooter">
+    // Note: Using KibanaPageTemplate.Section instead of EuiPageTemplate causes Jest failures and bundle size issues
+    <EuiPageTemplate.Section component="footer" className="kbnOverviewPageFooter">
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <div>{defaultRouteButton}</div>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </footer>
+    </EuiPageTemplate.Section>
   );
 };

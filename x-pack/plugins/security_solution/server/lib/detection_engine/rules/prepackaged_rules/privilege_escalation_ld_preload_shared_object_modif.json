@@ -11,9 +11,26 @@
   "language": "kuery",
   "license": "Elastic License v2",
   "name": "Modification of Dynamic Linker Preload Shared Object",
-  "query": "event.category:file and not event.type:deletion and file.path:/etc/ld.so.preload",
+  "query": "event.category:file and not event.type:deletion and file.path:/etc/ld.so.preload\n",
   "references": [
     "https://www.anomali.com/blog/rocke-evolves-its-arsenal-with-a-new-malware-family-written-in-golang"
+  ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.category",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "file.path",
+      "type": "keyword"
+    }
   ],
   "risk_score": 47,
   "rule_id": "717f82c2-7741-4f9b-85b8-d06aeb853f4f",
@@ -41,7 +58,7 @@
           "subtechnique": [
             {
               "id": "T1574.006",
-              "name": "LD_PRELOAD",
+              "name": "Dynamic Linker Hijacking",
               "reference": "https://attack.mitre.org/techniques/T1574/006/"
             }
           ]
@@ -51,5 +68,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 1
+  "version": 100
 }

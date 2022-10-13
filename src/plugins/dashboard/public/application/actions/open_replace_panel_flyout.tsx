@@ -7,34 +7,33 @@
  */
 
 import React from 'react';
-import { CoreStart } from 'src/core/public';
-import { toMountPoint } from '../../services/kibana_react';
-import { ReplacePanelFlyout } from './replace_panel_flyout';
-import {
+
+import type {
   IContainer,
   IEmbeddable,
-  EmbeddableStart,
   EmbeddableInput,
   EmbeddableOutput,
-} from '../../services/embeddable';
+} from '@kbn/embeddable-plugin/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+
+import { ReplacePanelFlyout } from './replace_panel_flyout';
+import { pluginServices } from '../../services/plugin_services';
 
 export async function openReplacePanelFlyout(options: {
   embeddable: IContainer;
-  core: CoreStart;
   savedObjectFinder: React.ComponentType<any>;
-  notifications: CoreStart['notifications'];
   panelToRemove: IEmbeddable<EmbeddableInput, EmbeddableOutput>;
-  getEmbeddableFactories: EmbeddableStart['getEmbeddableFactories'];
 }) {
+  const { embeddable, panelToRemove, savedObjectFinder } = options;
+
   const {
-    embeddable,
-    core,
-    panelToRemove,
-    savedObjectFinder,
-    notifications,
-    getEmbeddableFactories,
-  } = options;
-  const flyoutSession = core.overlays.openFlyout(
+    settings: {
+      theme: { theme$ },
+    },
+    overlays: { openFlyout },
+  } = pluginServices.getServices();
+
+  const flyoutSession = openFlyout(
     toMountPoint(
       <ReplacePanelFlyout
         container={embeddable}
@@ -45,9 +44,8 @@ export async function openReplacePanelFlyout(options: {
         }}
         panelToRemove={panelToRemove}
         savedObjectsFinder={savedObjectFinder}
-        notifications={notifications}
-        getEmbeddableFactories={getEmbeddableFactories}
-      />
+      />,
+      { theme$ }
     ),
     {
       'data-test-subj': 'dashboardReplacePanel',

@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'kibana/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import { PLUGIN_ID } from '../constants/app';
-import { ML_SAVED_OBJECT_TYPE } from './saved_objects';
+import {
+  ML_JOB_SAVED_OBJECT_TYPE,
+  ML_MODULE_SAVED_OBJECT_TYPE,
+  ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
+} from './saved_objects';
 import { ML_ALERT_TYPES } from '../constants/alerts';
 
 export const apmUserMlCapabilities = {
@@ -32,6 +36,9 @@ export const userMlCapabilities = {
   canDeleteAnnotation: false,
   // Alerts
   canUseMlAlerts: false,
+  // Trained models
+  canGetTrainedModels: false,
+  canTestTrainedModels: false,
 };
 
 export const adminMlCapabilities = {
@@ -40,6 +47,7 @@ export const adminMlCapabilities = {
   canDeleteJob: false,
   canOpenJob: false,
   canCloseJob: false,
+  canResetJob: false,
   canUpdateJob: false,
   canForecastJob: false,
   canCreateDatafeed: false,
@@ -62,6 +70,12 @@ export const adminMlCapabilities = {
   // Alerts
   canCreateMlAlerts: false,
   canUseMlAlerts: false,
+  // Model management
+  canViewMlNodes: false,
+  // Trained models
+  canCreateTrainedModels: false,
+  canDeleteTrainedModels: false,
+  canStartStopTrainedModels: false,
 };
 
 export type UserMlCapabilities = typeof userMlCapabilities;
@@ -85,17 +99,19 @@ export function getPluginPrivileges() {
   const userMlCapabilitiesKeys = Object.keys(userMlCapabilities);
   const adminMlCapabilitiesKeys = Object.keys(adminMlCapabilities);
   const allMlCapabilitiesKeys = [...adminMlCapabilitiesKeys, ...userMlCapabilitiesKeys];
-  // TODO: include ML in base privileges for the `8.0` release: https://github.com/elastic/kibana/issues/71422
+
   const savedObjects = [
     'index-pattern',
     'dashboard',
     'search',
     'visualization',
-    ML_SAVED_OBJECT_TYPE,
+    ML_JOB_SAVED_OBJECT_TYPE,
+    ML_MODULE_SAVED_OBJECT_TYPE,
+    ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,
   ];
   const privilege = {
     app: [PLUGIN_ID, 'kibana'],
-    excludeFromBasePrivileges: true,
+    excludeFromBasePrivileges: false,
     management: {
       insightsAndAlerting: ['jobsListLink'],
     },
@@ -105,11 +121,7 @@ export function getPluginPrivileges() {
   return {
     admin: {
       ...privilege,
-      api: [
-        'fileUpload:import',
-        'fileUpload:analyzeFile',
-        ...allMlCapabilitiesKeys.map((k) => `ml:${k}`),
-      ],
+      api: ['fileUpload:analyzeFile', ...allMlCapabilitiesKeys.map((k) => `ml:${k}`)],
       catalogue: [PLUGIN_ID, `${PLUGIN_ID}_file_data_visualizer`],
       ui: allMlCapabilitiesKeys,
       savedObject: {
@@ -117,8 +129,12 @@ export function getPluginPrivileges() {
         read: savedObjects,
       },
       alerting: {
-        all: Object.values(ML_ALERT_TYPES),
-        read: [],
+        rule: {
+          all: Object.values(ML_ALERT_TYPES),
+        },
+        alert: {
+          all: Object.values(ML_ALERT_TYPES),
+        },
       },
     },
     user: {
@@ -132,8 +148,12 @@ export function getPluginPrivileges() {
         read: savedObjects,
       },
       alerting: {
-        all: [],
-        read: Object.values(ML_ALERT_TYPES),
+        rule: {
+          read: Object.values(ML_ALERT_TYPES),
+        },
+        alert: {
+          read: Object.values(ML_ALERT_TYPES),
+        },
       },
     },
     apmUser: {
@@ -142,7 +162,7 @@ export function getPluginPrivileges() {
       catalogue: [],
       savedObject: {
         all: [],
-        read: [ML_SAVED_OBJECT_TYPE],
+        read: [ML_JOB_SAVED_OBJECT_TYPE],
       },
       api: apmUserMlCapabilitiesKeys.map((k) => `ml:${k}`),
       ui: apmUserMlCapabilitiesKeys,

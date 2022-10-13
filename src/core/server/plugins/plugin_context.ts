@@ -7,15 +7,22 @@
  */
 
 import { shareReplay } from 'rxjs/operators';
-import type { RequestHandlerContext } from 'src/core/server';
-import { CoreContext } from '../core_context';
+import type { CoreContext } from '@kbn/core-base-server-internal';
+import type { PluginOpaqueId } from '@kbn/core-base-common';
+import type { NodeInfo } from '@kbn/core-node-server';
+import type { IRouter, IContextProvider } from '@kbn/core-http-server';
+import type { RequestHandlerContext } from '..';
 import { PluginWrapper } from './plugin';
-import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
-import { PluginInitializerContext, PluginManifest, PluginOpaqueId } from './types';
-import { IRouter, RequestHandlerContextProvider } from '../http';
+import {
+  PluginsServicePrebootSetupDeps,
+  PluginsServiceSetupDeps,
+  PluginsServiceStartDeps,
+} from './plugins_service';
+import { PluginInitializerContext, PluginManifest } from './types';
 import { getGlobalConfig, getGlobalConfig$ } from './legacy_config';
-import { CoreSetup, CoreStart } from '..';
+import { CorePreboot, CoreSetup, CoreStart } from '..';
 
+/** @internal */
 export interface InstanceInfo {
   uuid: string;
 }
@@ -30,15 +37,26 @@ export interface InstanceInfo {
  * We should aim to be restrictive and specific in the APIs that we expose.
  *
  * @param coreContext Kibana core context
- * @param pluginManifest The manifest of the plugin we're building these values for.
+ * @param opaqueId The opaque id created for this particular plugin.
+ * @param manifest The manifest of the plugin we're building these values for.
+ * @param instanceInfo Info about the instance Kibana is running on.
+ * @param nodeInfo Info about how the Kibana process has been configured.
+ *
  * @internal
  */
-export function createPluginInitializerContext(
-  coreContext: CoreContext,
-  opaqueId: PluginOpaqueId,
-  pluginManifest: PluginManifest,
-  instanceInfo: InstanceInfo
-): PluginInitializerContext {
+export function createPluginInitializerContext({
+  coreContext,
+  opaqueId,
+  manifest,
+  instanceInfo,
+  nodeInfo,
+}: {
+  coreContext: CoreContext;
+  opaqueId: PluginOpaqueId;
+  manifest: PluginManifest;
+  instanceInfo: InstanceInfo;
+  nodeInfo: NodeInfo;
+}): PluginInitializerContext {
   return {
     opaqueId,
 
@@ -49,6 +67,18 @@ export function createPluginInitializerContext(
       mode: coreContext.env.mode,
       packageInfo: coreContext.env.packageInfo,
       instanceUuid: instanceInfo.uuid,
+      configs: coreContext.env.configs,
+    },
+
+    /**
+     * Access the configuration for this particular Kibana node.
+     * Can be used to determine which `roles` the current process was started with.
+     */
+    node: {
+      roles: {
+        backgroundTasks: nodeInfo.roles.backgroundTasks,
+        ui: nodeInfo.roles.ui,
+      },
     },
 
     /**
@@ -56,7 +86,7 @@ export function createPluginInitializerContext(
      */
     logger: {
       get(...contextParts) {
-        return coreContext.logger.get('plugins', pluginManifest.id, ...contextParts);
+        return coreContext.logger.get('plugins', manifest.id, ...contextParts);
       },
     },
 
@@ -74,11 +104,57 @@ export function createPluginInitializerContext(
        * manifest.
        */
       create<T>() {
-        return coreContext.configService.atPath<T>(pluginManifest.configPath).pipe(shareReplay(1));
+        return coreContext.configService.atPath<T>(manifest.configPath).pipe(shareReplay(1));
       },
       get<T>() {
-        return coreContext.configService.atPathSync<T>(pluginManifest.configPath);
+        return coreContext.configService.atPathSync<T>(manifest.configPath);
       },
+    },
+  };
+}
+
+/**
+ * Provides `CorePreboot` contract that will be exposed to the `preboot` plugin `setup` method.
+ * This contract should be safe to use only within `setup` itself.
+ *
+ * This is called for each `preboot` plugin when it's set up, so each plugin gets its own
+ * version of these values.
+ *
+ * We should aim to be restrictive and specific in the APIs that we expose.
+ *
+ * @param coreContext Kibana core context
+ * @param deps Dependencies that Plugins services gets during setup.
+ * @param plugin The plugin we're building these values for.
+ * @internal
+ */
+export function createPluginPrebootSetupContext(
+  coreContext: CoreContext,
+  deps: PluginsServicePrebootSetupDeps,
+  plugin: PluginWrapper
+): CorePreboot {
+  return {
+    analytics: {
+      optIn: deps.analytics.optIn,
+      registerContextProvider: deps.analytics.registerContextProvider,
+      removeContextProvider: deps.analytics.removeContextProvider,
+      registerEventType: deps.analytics.registerEventType,
+      registerShipper: deps.analytics.registerShipper,
+      reportEvent: deps.analytics.reportEvent,
+      telemetryCounter$: deps.analytics.telemetryCounter$,
+    },
+    elasticsearch: {
+      config: deps.elasticsearch.config,
+      createClient: deps.elasticsearch.createClient,
+    },
+    http: {
+      registerRoutes: deps.http.registerRoutes,
+      basePath: deps.http.basePath,
+      getServerInfo: deps.http.getServerInfo,
+    },
+    preboot: {
+      isSetupOnHold: deps.preboot.isSetupOnHold,
+      holdSetupUntilResolved: (reason, promise) =>
+        deps.preboot.holdSetupUntilResolved(plugin.name, reason, promise),
     },
   };
 }
@@ -105,24 +181,36 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
   const router = deps.http.createRouter('', plugin.opaqueId);
 
   return {
+    analytics: {
+      optIn: deps.analytics.optIn,
+      registerContextProvider: deps.analytics.registerContextProvider,
+      removeContextProvider: deps.analytics.removeContextProvider,
+      registerEventType: deps.analytics.registerEventType,
+      registerShipper: deps.analytics.registerShipper,
+      reportEvent: deps.analytics.reportEvent,
+      telemetryCounter$: deps.analytics.telemetryCounter$,
+    },
     capabilities: {
       registerProvider: deps.capabilities.registerProvider,
       registerSwitcher: deps.capabilities.registerSwitcher,
     },
-    context: {
-      createContextContainer: deps.context.createContextContainer,
-    },
+    docLinks: deps.docLinks,
     elasticsearch: {
       legacy: deps.elasticsearch.legacy,
+      setUnauthorizedErrorHandler: deps.elasticsearch.setUnauthorizedErrorHandler,
+    },
+    executionContext: {
+      withContext: deps.executionContext.withContext,
+      getAsLabels: deps.executionContext.getAsLabels,
     },
     http: {
       createCookieSessionStorageFactory: deps.http.createCookieSessionStorageFactory,
       registerRouteHandlerContext: <
         Context extends RequestHandlerContext,
-        ContextName extends keyof Context
+        ContextName extends keyof Omit<Context, 'resolve'>
       >(
         contextName: ContextName,
-        provider: RequestHandlerContextProvider<Context, ContextName>
+        provider: IContextProvider<Context, ContextName>
       ) => deps.http.registerRouteHandlerContext(plugin.opaqueId, contextName, provider),
       createRouter: <Context extends RequestHandlerContext = RequestHandlerContext>() =>
         router as IRouter<Context>,
@@ -133,10 +221,6 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       registerOnPostAuth: deps.http.registerOnPostAuth,
       registerOnPreResponse: deps.http.registerOnPreResponse,
       basePath: deps.http.basePath,
-      auth: {
-        get: deps.http.auth.get,
-        isAuthenticated: deps.http.auth.isAuthenticated,
-      },
       csp: deps.http.csp,
       getServerInfo: deps.http.getServerInfo,
     },
@@ -152,6 +236,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       setClientFactoryProvider: deps.savedObjects.setClientFactoryProvider,
       addClientWrapper: deps.savedObjects.addClientWrapper,
       registerType: deps.savedObjects.registerType,
+      getKibanaIndex: deps.savedObjects.getKibanaIndex,
     },
     status: {
       core$: deps.status.core$,
@@ -166,6 +251,9 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     },
     getStartServices: () => plugin.startDependencies,
     deprecations: deps.deprecations.getRegistry(plugin.name),
+    coreUsageData: {
+      registerUsageCounter: deps.coreUsageData.registerUsageCounter,
+    },
   };
 }
 
@@ -187,14 +275,20 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
   plugin: PluginWrapper<TPlugin, TPluginDependencies>
 ): CoreStart {
   return {
+    analytics: {
+      optIn: deps.analytics.optIn,
+      reportEvent: deps.analytics.reportEvent,
+      telemetryCounter$: deps.analytics.telemetryCounter$,
+    },
     capabilities: {
       resolveCapabilities: deps.capabilities.resolveCapabilities,
     },
+    docLinks: deps.docLinks,
     elasticsearch: {
       client: deps.elasticsearch.client,
       createClient: deps.elasticsearch.createClient,
-      legacy: deps.elasticsearch.legacy,
     },
+    executionContext: deps.executionContext,
     http: {
       auth: deps.http.auth,
       basePath: deps.http.basePath,

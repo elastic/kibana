@@ -6,13 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import { skipIfNoDockerRegistry } from '../../helpers';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { setupFleetAndAgents } from '../agents/services';
 import {
   AGENT_POLICY_INDEX,
   AGENT_UPDATE_LAST_CHECKIN_INTERVAL_MS,
-} from '../../../../plugins/fleet/common';
+} from '@kbn/fleet-plugin/common';
+import { skipIfNoDockerRegistry } from '../../helpers';
+import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -21,15 +21,15 @@ export default function (providerContext: FtrProviderContext) {
   const esClient = getService('es');
 
   async function getEnrollmentKeyForPolicyId(policyId: string) {
-    const listRes = await supertest.get(`/api/fleet/enrollment-api-keys`).expect(200);
+    const listRes = await supertest.get(`/api/fleet/enrollment_api_keys`).expect(200);
 
-    const key = listRes.body.list.find(
+    const key = listRes.body.items.find(
       (item: { policy_id: string; id: string }) => item.policy_id === policyId
     );
 
     expect(key).not.empty();
 
-    const res = await supertest.get(`/api/fleet/enrollment-api-keys/${key.id}`).expect(200);
+    const res = await supertest.get(`/api/fleet/enrollment_api_keys/${key.id}`).expect(200);
 
     return res.body.item;
   }
@@ -50,7 +50,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     // @ts-expect-error TotalHit
-    return res.body.hits.total.value !== 0;
+    return res.hits.total.value !== 0;
   }
 
   // Test all the side effect that should occurs when we create|update an agent policy
@@ -58,20 +58,20 @@ export default function (providerContext: FtrProviderContext) {
     skipIfNoDockerRegistry(providerContext);
 
     before(async () => {
-      await esArchiver.loadIfNeeded('fleet/agents');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/fleet/agents');
     });
     after(async () => {
       // Wait before agent status is updated
       return new Promise((resolve) => setTimeout(resolve, AGENT_UPDATE_LAST_CHECKIN_INTERVAL_MS));
     });
     after(async () => {
-      await esArchiver.unload('fleet/agents');
+      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
     });
 
     setupFleetAndAgents(providerContext);
 
     describe('POST /api/fleet/agent_policies', () => {
-      it('should create an enrollment key and an agent action `POLICY_CHANGE` for the policy', async () => {
+      it('should create an enrollment key for the policy', async () => {
         const name = `test-${Date.now()}`;
 
         const res = await supertest
@@ -94,7 +94,7 @@ export default function (providerContext: FtrProviderContext) {
     describe('POST /api/fleet/agent_policies/copy', () => {
       const TEST_POLICY_ID = `policy1`;
 
-      it('should create an enrollment key and an agent action `POLICY_CHANGE` for the policy', async () => {
+      it('should create an enrollment key for the policy', async () => {
         const name = `test-${Date.now()}`;
 
         const res = await supertest

@@ -1,0 +1,439 @@
+{
+  "id": "@kbn/core-http-router-server-internal",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/core-http-router-server-internal",
+        "id": "def-server.HapiResponseAdapter",
+        "type": "Class",
+        "tags": [],
+        "label": "HapiResponseAdapter",
+        "description": [],
+        "path": "packages/core/http/core-http-router-server-internal/src/response_adapter.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-router-server-internal",
+            "id": "def-server.HapiResponseAdapter.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/core/http/core-http-router-server-internal/src/response_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-router-server-internal",
+                "id": "def-server.HapiResponseAdapter.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "responseToolkit",
+                "description": [],
+                "signature": [
+                  "ResponseToolkit"
+                ],
+                "path": "packages/core/http/core-http-router-server-internal/src/response_adapter.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-router-server-internal",
+            "id": "def-server.HapiResponseAdapter.toBadRequest",
+            "type": "Function",
+            "tags": [],
+            "label": "toBadRequest",
+            "description": [],
+            "signature": [
+              "(message: string) => ",
+              "Boom",
+              "<unknown>"
+            ],
+            "path": "packages/core/http/core-http-router-server-internal/src/response_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-router-server-internal",
+                "id": "def-server.HapiResponseAdapter.toBadRequest.$1",
+                "type": "string",
+                "tags": [],
+                "label": "message",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/http/core-http-router-server-internal/src/response_adapter.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-router-server-internal",
+            "id": "def-server.HapiResponseAdapter.toInternalError",
+            "type": "Function",
+            "tags": [],
+            "label": "toInternalError",
+            "description": [],
+            "signature": [
+              "() => ",
+              "Boom",
+              "<any>"
+            ],
+            "path": "packages/core/http/core-http-router-server-internal/src/response_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-router-server-internal",
+            "id": "def-server.HapiResponseAdapter.handle",
+            "type": "Function",
+            "tags": [],
+            "label": "handle",
+            "description": [],
+            "signature": [
+              "(kibanaResponse: ",
+              "KibanaResponse",
+              "<any>) => ",
+              "Boom",
+              "<any> | ",
+              "ResponseObject"
+            ],
+            "path": "packages/core/http/core-http-router-server-internal/src/response_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-router-server-internal",
+                "id": "def-server.HapiResponseAdapter.handle.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "kibanaResponse",
+                "description": [],
+                "signature": [
+                  "KibanaResponse",
+                  "<any>"
+                ],
+                "path": "packages/core/http/core-http-router-server-internal/src/response_adapter.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-http-router-server-internal",
+        "id": "def-server.filterHeaders",
+        "type": "Function",
+        "tags": [],
+        "label": "filterHeaders",
+        "description": [],
+        "signature": [
+          "(headers: ",
+          "Headers",
+          ", fieldsToKeep: string[], fieldsToExclude: string[]) => ",
+          "Headers"
+        ],
+        "path": "packages/core/http/core-http-router-server-internal/src/headers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-router-server-internal",
+            "id": "def-server.filterHeaders.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "headers",
+            "description": [],
+            "signature": [
+              "Headers"
+            ],
+            "path": "packages/core/http/core-http-router-server-internal/src/headers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-http-router-server-internal",
+            "id": "def-server.filterHeaders.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "fieldsToKeep",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/core/http/core-http-router-server-internal/src/headers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-http-router-server-internal",
+            "id": "def-server.filterHeaders.$3",
+            "type": "Array",
+            "tags": [],
+            "label": "fieldsToExclude",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/core/http/core-http-router-server-internal/src/headers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-router-server-internal",
+        "id": "def-server.isKibanaResponse",
+        "type": "Function",
+        "tags": [],
+        "label": "isKibanaResponse",
+        "description": [],
+        "signature": [
+          "(response: Record<string, any>) => boolean"
+        ],
+        "path": "packages/core/http/core-http-router-server-internal/src/response.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-router-server-internal",
+            "id": "def-server.isKibanaResponse.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "response",
+            "description": [],
+            "signature": [
+              "Record<string, any>"
+            ],
+            "path": "packages/core/http/core-http-router-server-internal/src/response.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-router-server-internal",
+        "id": "def-server.isSafeMethod",
+        "type": "Function",
+        "tags": [],
+        "label": "isSafeMethod",
+        "description": [],
+        "signature": [
+          "(method: ",
+          "RouteMethod",
+          ") => boolean"
+        ],
+        "path": "packages/core/http/core-http-router-server-internal/src/route.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-router-server-internal",
+            "id": "def-server.isSafeMethod.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "method",
+            "description": [],
+            "signature": [
+              "RouteMethod"
+            ],
+            "path": "packages/core/http/core-http-router-server-internal/src/route.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-http-router-server-internal",
+        "id": "def-server.kibanaResponseFactory",
+        "type": "Object",
+        "tags": [],
+        "label": "kibanaResponseFactory",
+        "description": [],
+        "path": "packages/core/http/core-http-router-server-internal/src/response.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-router-server-internal",
+            "id": "def-server.kibanaResponseFactory.Unnamed",
+            "type": "Any",
+            "tags": [],
+            "label": "Unnamed",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/core/http/core-http-router-server-internal/src/response.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-router-server-internal",
+            "id": "def-server.kibanaResponseFactory.Unnamed",
+            "type": "Any",
+            "tags": [],
+            "label": "Unnamed",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/core/http/core-http-router-server-internal/src/response.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-router-server-internal",
+            "id": "def-server.kibanaResponseFactory.Unnamed",
+            "type": "Any",
+            "tags": [],
+            "label": "Unnamed",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/core/http/core-http-router-server-internal/src/response.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-router-server-internal",
+            "id": "def-server.kibanaResponseFactory.custom",
+            "type": "Function",
+            "tags": [],
+            "label": "custom",
+            "description": [],
+            "signature": [
+              "<T extends string | Record<string, any> | Error | ",
+              "Stream",
+              " | Buffer | { message: string | Error; attributes?: ",
+              "ResponseErrorAttributes",
+              " | undefined; } | undefined>(options: ",
+              "CustomHttpResponseOptions",
+              "<T>) => ",
+              "KibanaResponse",
+              "<T>"
+            ],
+            "path": "packages/core/http/core-http-router-server-internal/src/response.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-router-server-internal",
+                "id": "def-server.kibanaResponseFactory.custom.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "CustomHttpResponseOptions",
+                  "<T>"
+                ],
+                "path": "packages/core/http/core-http-router-server-internal/src/response.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-router-server-internal",
+        "id": "def-server.lifecycleResponseFactory",
+        "type": "Object",
+        "tags": [],
+        "label": "lifecycleResponseFactory",
+        "description": [],
+        "path": "packages/core/http/core-http-router-server-internal/src/response.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-router-server-internal",
+            "id": "def-server.lifecycleResponseFactory.Unnamed",
+            "type": "Any",
+            "tags": [],
+            "label": "Unnamed",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/core/http/core-http-router-server-internal/src/response.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-router-server-internal",
+            "id": "def-server.lifecycleResponseFactory.Unnamed",
+            "type": "Any",
+            "tags": [],
+            "label": "Unnamed",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/core/http/core-http-router-server-internal/src/response.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

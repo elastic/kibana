@@ -6,18 +6,24 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { AlertingRouter } from '../../types';
 import { ILicenseState } from '../../lib/license_state';
 import { verifyApiAccess } from '../../lib/license_api_access';
 import { LEGACY_BASE_ALERT_API_PATH } from '../../../common';
-import { AlertTypeDisabledError } from '../../lib/errors/alert_type_disabled';
+import { RuleTypeDisabledError } from '../../lib/errors/rule_type_disabled';
+import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 
 const paramSchema = schema.object({
   alertId: schema.string(),
   alertInstanceId: schema.string(),
 });
 
-export const unmuteAlertInstanceRoute = (router: AlertingRouter, licenseState: ILicenseState) => {
+export const unmuteAlertInstanceRoute = (
+  router: AlertingRouter,
+  licenseState: ILicenseState,
+  usageCounter?: UsageCounter
+) => {
   router.post(
     {
       path: `${LEGACY_BASE_ALERT_API_PATH}/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute`,
@@ -30,13 +36,14 @@ export const unmuteAlertInstanceRoute = (router: AlertingRouter, licenseState: I
       if (!context.alerting) {
         return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
       }
-      const alertsClient = context.alerting.getAlertsClient();
+      trackLegacyRouteUsage('unmuteInstance', usageCounter);
+      const rulesClient = (await context.alerting).getRulesClient();
       const { alertId, alertInstanceId } = req.params;
       try {
-        await alertsClient.unmuteInstance({ alertId, alertInstanceId });
+        await rulesClient.unmuteInstance({ alertId, alertInstanceId });
         return res.noContent();
       } catch (e) {
-        if (e instanceof AlertTypeDisabledError) {
+        if (e instanceof RuleTypeDisabledError) {
           return e.sendResponse(res);
         }
         throw e;

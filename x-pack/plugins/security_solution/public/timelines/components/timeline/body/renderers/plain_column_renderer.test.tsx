@@ -10,7 +10,7 @@ import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
 import '../../../../../common/mock/match_media';
-import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
+import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import { defaultHeaders, mockTimelineData, TestProviders } from '../../../../../common/mock';
 import { getEmptyValue } from '../../../../../common/components/empty_value';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
@@ -18,11 +18,12 @@ import { useMountAppended } from '../../../../../common/utils/use_mount_appended
 import { plainColumnRenderer } from './plain_column_renderer';
 import { getValues, deleteItemIdx, findItem } from './helpers';
 
+jest.mock('../../../../../common/lib/kibana');
+
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
     ...original,
-    // eslint-disable-next-line react/display-name
     EuiScreenReaderOnly: () => <></>,
   };
 });
@@ -227,6 +228,43 @@ describe('plain_column_renderer', () => {
         </TestProviders>
       );
 
+      expect(wrapper.find('[data-test-subj="draggableWrapperDiv"]').first().exists()).toBe(true);
+    });
+
+    test('should join multiple values with a comma [not draggable]', () => {
+      const data = mockTimelineData[19].data;
+      const column = plainColumnRenderer.renderColumn({
+        columnName: 'process.args',
+        eventId: _id,
+        values: getValues('process.args', data),
+        field: defaultHeaders.find((h) => h.id === 'message')!,
+        timelineId: 'test',
+        isDraggable: false,
+      });
+      const wrapper = mount(
+        <TestProviders>
+          <span>{column}</span>
+        </TestProviders>
+      );
+      const values = getValues('process.args', data);
+      expect(wrapper.text()).toEqual(values?.join(', '));
+    });
+
+    test('should NOT join multiple values with a comma [draggable]', () => {
+      const data = mockTimelineData[19].data;
+      const column = plainColumnRenderer.renderColumn({
+        columnName: 'process.args',
+        eventId: _id,
+        values: getValues('process.args', data),
+        field: defaultHeaders.find((h) => h.id === 'message')!,
+        timelineId: 'test',
+        isDraggable: true,
+      });
+      const wrapper = mount(
+        <TestProviders>
+          <span>{column}</span>
+        </TestProviders>
+      );
       expect(wrapper.find('[data-test-subj="draggableWrapperDiv"]').first().exists()).toBe(true);
     });
   });

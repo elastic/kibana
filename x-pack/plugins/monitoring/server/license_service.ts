@@ -6,16 +6,16 @@
  */
 
 import { Subscription } from 'rxjs';
-import { ILegacyCustomClusterClient } from 'kibana/server';
-import { ILicense, LicenseFeature } from '../../licensing/common/types';
-import { LicensingPluginStart } from '../../licensing/server';
+import { ICustomClusterClient } from '@kbn/core/server';
+import { ILicense, LicenseFeature } from '@kbn/licensing-plugin/common/types';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import { Logger } from '@kbn/core/server';
 import { MonitoringConfig } from './config';
-import { Logger } from '../../../../src/core/server';
 import { MonitoringLicenseService } from './types';
 
 interface SetupDeps {
   licensing: LicensingPluginStart;
-  monitoringClient: ILegacyCustomClusterClient;
+  monitoringClient: ICustomClusterClient;
   config: MonitoringConfig;
   log: Logger;
 }

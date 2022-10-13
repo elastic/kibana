@@ -7,26 +7,26 @@
 
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
-import { IndexPattern, IFieldType } from '../../../../../src/plugins/data/common';
+import type { DataView, DataViewField } from '@kbn/data-plugin/common';
 import { AGG_TYPE, JOIN_FIELD_NAME_PREFIX, TOP_TERM_PERCENTAGE_SUFFIX } from '../constants';
 
 export type BucketProperties = Record<string | number, unknown>;
 export type PropertiesMap = Map<string, BucketProperties>;
 
-export function getField(indexPattern: IndexPattern, fieldName: string): IFieldType {
+export function getField(indexPattern: DataView, fieldName: string): DataViewField {
   const field = indexPattern.fields.getByName(fieldName);
   if (!field) {
     throw new Error(
       i18n.translate('xpack.maps.source.esSearch.fieldNotFoundMsg', {
-        defaultMessage: `Unable to find '{fieldName}' in index-pattern '{indexPatternTitle}'.`,
-        values: { fieldName, indexPatternTitle: indexPattern.title },
+        defaultMessage: `Unable to find '{fieldName}' in index-pattern '{indexPatternName}'.`,
+        values: { fieldName, indexPatternName: indexPattern.getName() },
       })
     );
   }
   return field;
 }
 
-export function addFieldToDSL(dsl: object, field: IFieldType) {
+export function addFieldToDSL(dsl: object, field: DataViewField) {
   return !field.scripted
     ? { ...dsl, field: field.name }
     : {

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ISavedObjectsRepository, SavedObjectAttributes } from 'kibana/server';
-import { SavedDashboardPanel730ToLatest } from '../../common';
+import { ISavedObjectsRepository, SavedObjectAttributes } from '@kbn/core/server';
+import type { SavedDashboardPanel } from '../../common';
 
 export const findByValueEmbeddables = async (
   savedObjectClient: Pick<ISavedObjectsRepository, 'find'>,
@@ -20,9 +20,9 @@ export const findByValueEmbeddables = async (
   return dashboards.saved_objects
     .map((dashboard) => {
       try {
-        return (JSON.parse(
+        return JSON.parse(
           dashboard.attributes.panelsJSON as string
-        ) as unknown) as SavedDashboardPanel730ToLatest[];
+        ) as unknown as SavedDashboardPanel[];
       } catch (exception) {
         return [];
       }

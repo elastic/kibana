@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-export { TimeSeriesQuery } from './time_series_query';
+export type { TimeSeriesQuery } from './time_series_query';
+export { TIME_SERIES_BUCKET_SELECTOR_FIELD } from './time_series_query';
+export type { CoreQueryParams } from './core_query_types';
 export {
-  CoreQueryParams,
   CoreQueryParamsSchemaProperties,
   validateCoreQueryBody,
   validateTimeWindowUnits,

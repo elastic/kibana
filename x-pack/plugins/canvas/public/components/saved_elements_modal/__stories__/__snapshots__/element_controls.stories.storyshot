@@ -16,7 +16,6 @@ exports[`Storyshots components/SavedElementsModal/ElementControls has two button
     >
       <span
         className="euiToolTipAnchor"
-        onKeyUp={[Function]}
         onMouseOut={[Function]}
         onMouseOver={[Function]}
       >
@@ -24,7 +23,6 @@ exports[`Storyshots components/SavedElementsModal/ElementControls has two button
           aria-label="Edit element"
           className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
           data-test-subj="canvasElementCard__editButton"
-          disabled={false}
           onBlur={[Function]}
           onClick={[Function]}
           onFocus={[Function]}
@@ -33,9 +31,12 @@ exports[`Storyshots components/SavedElementsModal/ElementControls has two button
           <span
             aria-hidden="true"
             className="euiButtonIcon__icon"
+            color="inherit"
             data-euiicon-type="pencil"
             size="m"
-          />
+          >
+            
+          </span>
         </button>
       </span>
     </div>
@@ -44,7 +45,6 @@ exports[`Storyshots components/SavedElementsModal/ElementControls has two button
     >
       <span
         className="euiToolTipAnchor"
-        onKeyUp={[Function]}
         onMouseOut={[Function]}
         onMouseOver={[Function]}
       >
@@ -52,7 +52,6 @@ exports[`Storyshots components/SavedElementsModal/ElementControls has two button
           aria-label="Delete element"
           className="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall"
           data-test-subj="canvasElementCard__deleteButton"
-          disabled={false}
           onBlur={[Function]}
           onClick={[Function]}
           onFocus={[Function]}
@@ -61,9 +60,12 @@ exports[`Storyshots components/SavedElementsModal/ElementControls has two button
           <span
             aria-hidden="true"
             className="euiButtonIcon__icon"
+            color="inherit"
             data-euiicon-type="trash"
             size="m"
-          />
+          >
+            
+          </span>
         </button>
       </span>
     </div>

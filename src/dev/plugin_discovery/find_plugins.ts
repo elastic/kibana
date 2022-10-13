@@ -7,12 +7,10 @@
  */
 
 import Path from 'path';
-import { getPluginSearchPaths } from '@kbn/config';
-import {
-  KibanaPlatformPlugin,
-  REPO_ROOT,
-  simpleKibanaPlatformPluginDiscovery,
-} from '@kbn/dev-utils';
+import { getPluginSearchPaths } from '@kbn/plugin-discovery';
+import { KibanaPlatformPlugin, simpleKibanaPlatformPluginDiscovery } from '@kbn/plugin-discovery';
+
+import { REPO_ROOT } from '@kbn/utils';
 
 export interface SearchOptions {
   oss: boolean;

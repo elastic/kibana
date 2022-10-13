@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import type { Plugin, CoreSetup, RequestHandlerContext } from 'kibana/server';
+import type { Plugin, CoreSetup, CustomRequestHandlerContext } from '@kbn/core/server';
 
 export interface PluginAApiRequestContext {
   ping: () => Promise<string>;
 }
 
-interface PluginARequstHandlerContext extends RequestHandlerContext {
+type PluginARequstHandlerContext = CustomRequestHandlerContext<{
   pluginA: PluginAApiRequestContext;
-}
+}>;
 
 export class CorePluginAPlugin implements Plugin {
   public setup(core: CoreSetup, deps: {}) {
@@ -22,8 +22,11 @@ export class CorePluginAPlugin implements Plugin {
       'pluginA',
       (context) => {
         return {
-          ping: () =>
-            context.core.elasticsearch.legacy.client.callAsInternalUser('ping') as Promise<string>,
+          ping: async () => {
+            const esClient = (await context.core).elasticsearch.client;
+            const body = await esClient.asInternalUser.ping();
+            return String(body);
+          },
         };
       }
     );

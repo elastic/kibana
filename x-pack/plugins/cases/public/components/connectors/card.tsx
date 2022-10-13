@@ -6,11 +6,12 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiCard, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { connectorsConfiguration } from '.';
-import { ConnectorTypes } from '../../../common';
+import { ConnectorTypes } from '../../../common/api';
+import { useKibana } from '../../common/lib/kibana';
+import { getConnectorIcon } from '../utils';
 
 interface ConnectorCardProps {
   connectorType: ConnectorTypes;
@@ -31,6 +32,8 @@ const ConnectorCardDisplay: React.FC<ConnectorCardProps> = ({
   listItems,
   isLoading,
 }) => {
+  const { triggersActionsUi } = useKibana().services;
+
   const description = useMemo(
     () => (
       <StyledText>
@@ -45,27 +48,35 @@ const ConnectorCardDisplay: React.FC<ConnectorCardProps> = ({
     ),
     [listItems]
   );
+
   const icon = useMemo(
-    () => <EuiIcon size="xl" type={connectorsConfiguration[`${connectorType}`]?.logo ?? ''} />,
+    () => <EuiIcon size="xl" type={getConnectorIcon(triggersActionsUi, connectorType)} />,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [connectorType]
   );
+
   return (
     <>
       {isLoading && <EuiLoadingSpinner data-test-subj="connector-card-loading" />}
       {!isLoading && (
-        <EuiCard
-          data-test-subj={`connector-card`}
-          description={description}
-          display="plain"
-          icon={icon}
-          layout="horizontal"
-          paddingSize="none"
-          title={title}
-          titleSize="xs"
-        />
+        <EuiFlexGroup direction="row">
+          <EuiFlexItem>
+            <EuiCard
+              data-test-subj={`connector-card`}
+              description={description}
+              display="plain"
+              layout="horizontal"
+              paddingSize="none"
+              title={title}
+              titleSize="xs"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
+        </EuiFlexGroup>
       )}
     </>
   );
 };
+ConnectorCardDisplay.displayName = 'ConnectorCardDisplay';
 
 export const ConnectorCard = memo(ConnectorCardDisplay);

@@ -7,12 +7,13 @@
 
 import { isPlainObject, isString, ary, sortBy, assign } from 'lodash';
 import moment from 'moment';
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 
 import { timeBucketsCalcAutoIntervalProvider } from './calc_auto_interval';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { getFieldFormats, getUiSettings } from './dependency_cache';
-import { FIELD_FORMAT_IDS, UI_SETTINGS } from '../../../../../../src/plugins/data/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 
 const unitsDesc = dateMath.unitsDesc;
 

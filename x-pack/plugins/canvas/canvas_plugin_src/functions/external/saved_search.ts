@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
-import { SearchInput } from 'src/plugins/discover/public';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import type { SearchInput } from '@kbn/discover-plugin/public';
+import { SavedObjectReference } from '@kbn/core/types';
 import {
   EmbeddableTypes,
   EmbeddableExpressionType,
   EmbeddableExpression,
 } from '../../expression_types';
 
-import { buildEmbeddableFilters } from '../../../public/lib/build_embeddable_filters';
+import { buildEmbeddableFilters } from '../../../common/lib/build_embeddable_filters';
 import { ExpressionValueFilter } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';
-import { SavedObjectReference } from '../../../../../../src/core/types';
 
 interface Arguments {
   id: string;

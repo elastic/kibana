@@ -10,8 +10,8 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import createContainer from 'constate';
-import { HttpHandler } from 'src/core/public';
-import { ToastInput } from 'src/core/public';
+import { HttpHandler } from '@kbn/core/public';
+import { ToastInput } from '@kbn/core/public';
 import {
   metricsSourceConfigurationResponseRT,
   MetricsSourceConfigurationResponse,
@@ -47,19 +47,15 @@ export const useSourceViaHttp = ({ sourceId = 'default', fetch, toastWarning }: 
     );
   };
 
-  const {
-    error,
-    loading,
-    response,
-    makeRequest,
-  } = useHTTPRequest<MetricsSourceConfigurationResponse>(
-    `/api/metrics/source/${sourceId}`,
-    'GET',
-    null,
-    decodeResponse,
-    fetch,
-    toastWarning
-  );
+  const { error, loading, response, makeRequest } =
+    useHTTPRequest<MetricsSourceConfigurationResponse>(
+      `/api/metrics/source/${sourceId}`,
+      'GET',
+      null,
+      decodeResponse,
+      fetch,
+      toastWarning
+    );
 
   useEffect(() => {
     (async () => {

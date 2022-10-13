@@ -6,9 +6,10 @@
  */
 
 import actionCreatorFactory from 'typescript-fsa';
-import { HostsSortField } from '../../../common/search_strategy/security_solution/hosts';
+import type { RiskScoreSortField, RiskSeverity } from '../../../common/search_strategy';
+import type { HostsSortField } from '../../../common/search_strategy/security_solution/hosts';
 
-import { HostsTableType, HostsType } from './model';
+import type { HostsTableType, HostsType } from './model';
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/hosts');
 
 export const updateTableActivePage = actionCreator<{
@@ -33,3 +34,23 @@ export const updateHostsSort = actionCreator<{
   sort: HostsSortField;
   hostsType: HostsType;
 }>('UPDATE_HOSTS_SORT');
+
+export const updateHostRiskScoreSort = actionCreator<{
+  sort: RiskScoreSortField;
+  hostsType: HostsType;
+}>('UPDATE_HOST_RISK_SCORE_SORT');
+
+export const updateHostRiskScoreSeverityFilter = actionCreator<{
+  severitySelection: RiskSeverity[];
+  hostsType: HostsType;
+}>('UPDATE_HOST_RISK_SCORE_SEVERITY');
+
+export const updateHostsAnomaliesJobIdFilter = actionCreator<{
+  jobIds: string[];
+  hostsType: HostsType;
+}>('UPDATE_HOSTS_ANOMALIES_JOB_ID_FILTER');
+
+export const updateHostsAnomaliesInterval = actionCreator<{
+  interval: string;
+  hostsType: HostsType;
+}>('UPDATE_HOSTS_ANOMALIES_INTERVAL');

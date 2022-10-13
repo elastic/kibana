@@ -6,12 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { ScopedHistory, Capabilities } from 'kibana/public';
+import { Observable } from 'rxjs';
+import { ScopedHistory, Capabilities } from '@kbn/core/public';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
+import { ChromeBreadcrumb, CoreTheme } from '@kbn/core/public';
 import { ManagementSection, RegisterManagementSectionArgs } from './utils';
-import { ChromeBreadcrumb } from '../../../core/public/';
+import type { ManagementAppLocatorParams } from '../common/locator';
 
 export interface ManagementSetup {
   sections: SectionsServiceSetup;
+  locator: LocatorPublic<ManagementAppLocatorParams>;
 }
 
 export interface DefinedSections {
@@ -60,6 +64,7 @@ export interface ManagementAppMountParams {
   element: HTMLElement; // element the section should render into
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   history: ScopedHistory;
+  theme$: Observable<CoreTheme>;
 }
 
 export interface CreateManagementItemArgs {
@@ -69,4 +74,6 @@ export interface CreateManagementItemArgs {
   order?: number;
   euiIconType?: string; // takes precedence over `icon` property.
   icon?: string; // URL to image file; fallback if no `euiIconType`
+  capabilitiesId?: string; // overrides app id
+  redirectFrom?: string; // redirects from an old app id to the current app id
 }

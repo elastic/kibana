@@ -7,23 +7,26 @@
 
 import { getOr } from 'lodash/fp';
 
-import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
-import {
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type {
   FactoryQueryTypes,
   MatrixHistogramRequestOptions,
   MatrixHistogramStrategyResponse,
-  MatrixHistogramQuery,
-  MatrixHistogramType,
   MatrixHistogramDataConfig,
 } from '../../../../../common/search_strategy/security_solution';
+import {
+  MatrixHistogramQuery,
+  MatrixHistogramType,
+} from '../../../../../common/search_strategy/security_solution';
 import { inspectStringifyObject } from '../../../../utils/build_query';
-import { SecuritySolutionFactory } from '../types';
+import type { SecuritySolutionFactory } from '../types';
 import { getGenericData } from './helpers';
 import { alertsMatrixHistogramConfig } from './alerts';
 import { anomaliesMatrixHistogramConfig } from './anomalies';
 import { authenticationsMatrixHistogramConfig } from './authentications';
 import { dnsMatrixHistogramConfig } from './dns';
 import { eventsMatrixHistogramConfig } from './events';
+import { previewMatrixHistogramConfig } from './preview';
 
 const matrixHistogramConfig: MatrixHistogramDataConfig = {
   [MatrixHistogramType.alerts]: alertsMatrixHistogramConfig,
@@ -31,6 +34,7 @@ const matrixHistogramConfig: MatrixHistogramDataConfig = {
   [MatrixHistogramType.authentications]: authenticationsMatrixHistogramConfig,
   [MatrixHistogramType.dns]: dnsMatrixHistogramConfig,
   [MatrixHistogramType.events]: eventsMatrixHistogramConfig,
+  [MatrixHistogramType.preview]: previewMatrixHistogramConfig,
 };
 
 export const matrixHistogram: SecuritySolutionFactory<typeof MatrixHistogramQuery> = {

@@ -9,27 +9,27 @@ jest.mock('./generate_csv/generate_csv', () => ({
   CsvGenerator: class CsvGeneratorMock {
     generateData() {
       return {
-        content: 'test\n123',
+        size: 123,
+        content_type: 'text/csv',
       };
     }
   },
 }));
 
 import nodeCrypto from '@elastic/node-crypto';
-import { ReportingCore } from '../../';
-import { CancellationToken } from '../../../common';
-import {
-  createMockConfigSchema,
-  createMockLevelLogger,
-  createMockReportingCore,
-} from '../../test_helpers';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { Writable } from 'stream';
+import { ReportingCore } from '../..';
+import { CancellationToken } from '../../../common/cancellation_token';
+import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
 import { runTaskFnFactory } from './execute_job';
 
-const logger = createMockLevelLogger();
+const logger = loggingSystemMock.createLogger();
 const encryptionKey = 'tetkey';
 const headers = { sid: 'cooltestheaders' };
 let encryptedHeaders: string;
 let reportingCore: ReportingCore;
+let stream: jest.Mocked<Writable>;
 
 beforeAll(async () => {
   const crypto = nodeCrypto({ encryptionKey });
@@ -48,6 +48,10 @@ beforeAll(async () => {
   );
 });
 
+beforeEach(() => {
+  stream = {} as typeof stream;
+});
+
 test('gets the csv content from job parameters', async () => {
   const runTask = runTaskFnFactory(reportingCore, logger);
 
@@ -59,14 +63,16 @@ test('gets the csv content from job parameters', async () => {
       searchSource: {},
       objectType: 'search',
       title: 'Test Search',
+      version: '7.13.0',
     },
-    new CancellationToken()
+    new CancellationToken(),
+    stream
   );
 
   expect(payload).toMatchInlineSnapshot(`
     Object {
-      "content": "test
-    123",
+      "content_type": "text/csv",
+      "size": 123,
     }
   `);
 });

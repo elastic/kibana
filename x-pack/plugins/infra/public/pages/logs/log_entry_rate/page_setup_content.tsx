@@ -6,15 +6,10 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiText, EuiButton, EuiSpacer } from '@elastic/eui';
-
-import {
-  LogAnalysisSetupPage,
-  LogAnalysisSetupPageContent,
-  LogAnalysisSetupPageHeader,
-} from '../../../components/logging/log_analysis_setup';
-import { useTrackPageview } from '../../../../../observability/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { EuiText, EuiButton } from '@elastic/eui';
+import { useTrackPageview } from '@kbn/observability-plugin/public';
 
 interface LogEntryRateSetupContentProps {
   onOpenSetup: () => void;
@@ -27,14 +22,17 @@ export const LogEntryRateSetupContent: React.FunctionComponent<LogEntryRateSetup
   useTrackPageview({ app: 'infra_logs', path: 'log_entry_rate_setup', delay: 15000 });
 
   return (
-    <LogAnalysisSetupPage data-test-subj="logEntryRateSetupPage">
-      <LogAnalysisSetupPageHeader>
-        <FormattedMessage
-          id="xpack.infra.logs.logEntryRate.setupTitle"
-          defaultMessage="Set up log anomaly analysis"
-        />
-      </LogAnalysisSetupPageHeader>
-      <LogAnalysisSetupPageContent>
+    <KibanaPageTemplate.EmptyPrompt
+      data-test-subj="logEntryRateSetupPage"
+      title={
+        <h2>
+          <FormattedMessage
+            id="xpack.infra.logs.logEntryRate.setupTitle"
+            defaultMessage="Set up log anomaly analysis"
+          />
+        </h2>
+      }
+      body={
         <EuiText size="s">
           <p>
             <FormattedMessage
@@ -43,14 +41,15 @@ export const LogEntryRateSetupContent: React.FunctionComponent<LogEntryRateSetup
             />
           </p>
         </EuiText>
-        <EuiSpacer />
+      }
+      actions={
         <EuiButton fill onClick={onOpenSetup}>
           <FormattedMessage
             id="xpack.infra.logs.logEntryRate.showAnalysisSetupButtonLabel"
             defaultMessage="ML Setup"
           />
         </EuiButton>
-      </LogAnalysisSetupPageContent>
-    </LogAnalysisSetupPage>
+      }
+    />
   );
 };

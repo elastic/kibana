@@ -6,11 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { KbnFieldType } from './kbn_field_type';
+// NOTE: trick to mark exports as deprecated (only for constants and types, but not for interfaces, classes or enums)
+import { KbnFieldType } from '@kbn/field-types';
 
-export {
-  castEsToKbnFieldTypeName,
-  getKbnFieldType,
-  getKbnTypeNames,
-  getFilterableKbnTypeNames,
-} from './kbn_field_types';
+export { KbnFieldType };

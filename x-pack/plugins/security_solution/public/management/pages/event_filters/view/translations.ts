@@ -5,23 +5,20 @@
  * 2.0.
  */
 
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
+import type { ArtifactFormComponentProps } from '../../../components/artifact_list_page';
 
-import { ExceptionListItemSchema, CreateExceptionListItemSchema } from '../../../../shared_imports';
-import { ServerApiError } from '../../../../common/types';
-
-export const getCreationSuccessMessage = (
-  entry: CreateExceptionListItemSchema | ExceptionListItemSchema | undefined
-) => {
-  return i18n.translate('xpack.securitySolution.eventFilter.form.successToastTitle', {
-    defaultMessage: '"{name}" has been added to the event exceptions list.',
-    values: { name: entry?.name },
+export const getCreationSuccessMessage = (item: ArtifactFormComponentProps['item']) => {
+  return i18n.translate('xpack.securitySolution.eventFilter.flyoutForm.creationSuccessToastTitle', {
+    defaultMessage: '"{name}" has been added to the event filters list.',
+    values: { name: item?.name },
   });
 };
 
-export const getCreationErrorMessage = (creationError: ServerApiError) => {
-  return i18n.translate('xpack.securitySolution.eventFilter.form.failedToastTitle', {
-    defaultMessage: 'There was an error creating the new exception: "{error}"',
-    values: { error: creationError.message },
-  });
+export const getCreationErrorMessage = (creationError: IHttpFetchError) => {
+  return {
+    title: 'There was an error creating the new event filter: "{error}"',
+    message: { error: creationError.message },
+  };
 };

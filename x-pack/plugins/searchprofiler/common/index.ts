@@ -7,4 +7,4 @@
 
 export { PLUGIN } from './constants';
 
-export { LicenseStatus } from './types';
+export type { LicenseStatus } from './types';

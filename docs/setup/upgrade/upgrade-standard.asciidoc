@@ -1,8 +1,8 @@
 [[upgrade-standard]]
 === Standard upgrade
 
-NOTE: 6.7 includes an https://www.elastic.co/guide/en/kibana/6.7/upgrade-assistant.html[Upgrade Assistant]
-to help you prepare for your upgrade to 7.0. To access the assistant, go to *Management > 7.0 Upgrade Assistant*.
+NOTE: 7.17 includes an https://www.elastic.co/guide/en/kibana/7.17/upgrade-assistant.html[Upgrade Assistant]
+to help you prepare for your upgrade to 8.0. To access the assistant, go to *Stack Management > Upgrade Assistant*.
 
 [IMPORTANT]
 ===========================================
@@ -29,15 +29,9 @@ Different versions of {kib} running against the same {es} index, such as during 
 . Use `rpm` or `dpkg` to install the new package. All files should be placed in
   their proper locations and config files should not be overwritten.
 +
-[NOTE]
---
-{kib} 4.x used a different config location than 5.0+, so if you're upgrading
-from 4.x, you will need to copy the configurations from your old config
-(`/opt/kibana/config/kibana.yml`) to your new config
-(`/etc/kibana/kibana.yml`).
 
 Make sure you remove or update any configurations
-that are indicated in the <<breaking-changes,breaking changes>> documentation
+that are indicated in the <<breaking-changes-8.0.0,breaking changes>> documentation
 otherwise {kib} will fail to start.
 --
 . Upgrade any plugins by removing the existing plugin and reinstalling the
@@ -58,7 +52,7 @@ and becomes a new instance in the monitoring data.
 --
 . Copy the files from the `config` directory from your old installation to your
   new installation. Make sure you remove or update any configurations that are
-  indicated in the <<breaking-changes,breaking changes>> documentation
+  indicated in the <<breaking-changes-8.0.0,breaking changes>> documentation
   otherwise {kib} will fail to start.
 . Copy the files from the `data` directory from your old installation to your
   new installation.

@@ -6,7 +6,10 @@
  */
 
 import { transformActionParams } from './transform_action_params';
-import { actionsMock, renderActionParameterTemplatesDefault } from '../../../actions/server/mocks';
+import {
+  actionsMock,
+  renderActionParameterTemplatesDefault,
+} from '@kbn/actions-plugin/server/mocks';
 
 const actionsPlugin = actionsMock.createStart();
 const actionTypeId = 'test-actionTypeId';
@@ -414,7 +417,6 @@ test('rule variables are passed to templates', () => {
     alertInstanceId: '2',
     alertActionGroup: 'action-group',
     alertActionGroupName: 'Action Group',
-    alertActionSubgroup: 'subgroup',
     alertParams: {},
   });
   expect(result).toMatchInlineSnapshot(`
@@ -426,8 +428,7 @@ test('rule variables are passed to templates', () => {
 
 test('rule alert variables are passed to templates', () => {
   const actionParams = {
-    message:
-      'Value "{{alert.id}}", "{{alert.actionGroup}}", "{{alert.actionGroupName}}" and "{{alert.actionSubgroup}}" exist',
+    message: 'Value "{{alert.id}}", "{{alert.actionGroup}}" and "{{alert.actionGroupName}}" exist',
   };
   const result = transformActionParams({
     actionsPlugin,
@@ -444,12 +445,11 @@ test('rule alert variables are passed to templates', () => {
     alertInstanceId: '2',
     alertActionGroup: 'action-group',
     alertActionGroupName: 'Action Group',
-    alertActionSubgroup: 'subgroup',
     alertParams: {},
   });
   expect(result).toMatchInlineSnapshot(`
     Object {
-      "message": "Value \\"2\\", \\"action-group\\", \\"Action Group\\" and \\"subgroup\\" exist",
+      "message": "Value \\"2\\", \\"action-group\\" and \\"Action Group\\" exist",
     }
   `);
 });

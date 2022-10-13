@@ -6,7 +6,7 @@
  */
 
 import { executeActionRoute } from './execute';
-import { httpServiceMock } from 'src/core/server/mocks';
+import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { mockHandlerArguments } from './legacy/_mock_handler_arguments';
 import { asHttpRequestExecutionSource } from '../lib';
@@ -14,7 +14,7 @@ import { actionsClientMock } from '../actions_client.mock';
 import { ActionTypeExecutorResult } from '../types';
 import { verifyAccessAndContext } from './verify_access_and_context';
 
-jest.mock('./verify_access_and_context.ts', () => ({
+jest.mock('./verify_access_and_context', () => ({
   verifyAccessAndContext: jest.fn(),
 }));
 
@@ -65,6 +65,7 @@ describe('executeActionRoute', () => {
         someData: 'data',
       },
       source: asHttpRequestExecutionSource(req),
+      relatedSavedObjects: [],
     });
 
     expect(res.ok).toHaveBeenCalled();
@@ -75,9 +76,7 @@ describe('executeActionRoute', () => {
     const router = httpServiceMock.createRouter();
 
     const actionsClient = actionsClientMock.create();
-    actionsClient.execute.mockResolvedValueOnce(
-      (null as unknown) as ActionTypeExecutorResult<void>
-    );
+    actionsClient.execute.mockResolvedValueOnce(null as unknown as ActionTypeExecutorResult<void>);
 
     const [context, req, res] = mockHandlerArguments(
       { actionsClient },
@@ -101,6 +100,7 @@ describe('executeActionRoute', () => {
     expect(actionsClient.execute).toHaveBeenCalledWith({
       actionId: '1',
       params: {},
+      relatedSavedObjects: [],
       source: asHttpRequestExecutionSource(req),
     });
 

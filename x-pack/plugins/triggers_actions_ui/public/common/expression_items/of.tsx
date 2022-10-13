@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiExpression,
   EuiPopover,
@@ -105,7 +105,7 @@ export const OfExpression = ({
       closePopover={() => {
         setAggFieldPopoverOpen(false);
       }}
-      display={display === 'fullWidth' ? 'block' : 'inlineBlock'}
+      display={display === 'fullWidth' ? 'block' : 'inline-block'}
       anchorPosition={popupPosition ?? 'downRight'}
       zIndex={8000}
       repositionOnScroll

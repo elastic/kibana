@@ -17,13 +17,13 @@ import type { ReactNode } from 'react';
 import React, { lazy, Suspense, useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import type { SpaceListProps } from 'src/plugins/spaces_oss/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../common/constants';
 import { getSpaceAvatarComponent } from '../space_avatar';
 import { useSpaces } from '../spaces_context';
-import type { ShareToSpacesData, ShareToSpaceTarget } from '../types';
+import type { SpacesData, SpacesDataEntry } from '../types';
+import type { SpaceListProps } from './types';
 
 // No need to wrap LazySpaceAvatar in an error boundary, because it is one of the first chunks loaded when opening Kibana.
 const LazySpaceAvatar = lazy(() =>
@@ -31,6 +31,7 @@ const LazySpaceAvatar = lazy(() =>
 );
 
 const DEFAULT_DISPLAY_LIMIT = 5;
+type SpaceTarget = Omit<SpacesDataEntry, 'isAuthorizedForPurpose'>;
 
 /**
  * Displays a corresponding list of spaces for a given list of saved object namespaces. It shows up to five spaces (and an indicator for any
@@ -42,26 +43,29 @@ export const SpaceListInternal = ({
   namespaces,
   displayLimit = DEFAULT_DISPLAY_LIMIT,
   behaviorContext,
+  listOnClick = () => {},
+  cursorStyle,
 }: SpaceListProps) => {
-  const { shareToSpacesDataPromise } = useSpaces();
+  const { spacesDataPromise } = useSpaces();
 
   const [isExpanded, setIsExpanded] = useState(false);
-  const [shareToSpacesData, setShareToSpacesData] = useState<ShareToSpacesData>();
+  const [shareToSpacesData, setShareToSpacesData] = useState<SpacesData>();
 
   useEffect(() => {
-    shareToSpacesDataPromise.then((x) => {
+    spacesDataPromise.then((x) => {
       setShareToSpacesData(x);
     });
-  }, [shareToSpacesDataPromise]);
+  }, [spacesDataPromise]);
 
   if (!shareToSpacesData) {
     return null;
   }
 
   const isSharedToAllSpaces = namespaces.includes(ALL_SPACES_ID);
-  const unauthorizedSpacesCount = namespaces.filter((namespace) => namespace === UNKNOWN_SPACE)
-    .length;
-  let displayedSpaces: ShareToSpaceTarget[];
+  const unauthorizedSpacesCount = namespaces.filter(
+    (namespace) => namespace === UNKNOWN_SPACE
+  ).length;
+  let displayedSpaces: SpaceTarget[];
   let button: ReactNode = null;
 
   if (isSharedToAllSpaces) {
@@ -77,8 +81,8 @@ export const SpaceListInternal = ({
     ];
   } else {
     const authorized = namespaces.filter((namespace) => namespace !== UNKNOWN_SPACE);
-    const enabledSpaceTargets: ShareToSpaceTarget[] = [];
-    const disabledSpaceTargets: ShareToSpaceTarget[] = [];
+    const enabledSpaceTargets: SpaceTarget[] = [];
+    const disabledSpaceTargets: SpaceTarget[] = [];
     authorized.forEach((namespace) => {
       const spaceTarget = shareToSpacesData.spacesMap.get(namespace);
       if (spaceTarget === undefined) {
@@ -101,14 +105,22 @@ export const SpaceListInternal = ({
 
     if (displayLimit && authorizedSpaceTargets.length > displayLimit) {
       button = isExpanded ? (
-        <EuiButtonEmpty size="xs" onClick={() => setIsExpanded(false)}>
+        <EuiButtonEmpty
+          size="xs"
+          onClick={() => setIsExpanded(false)}
+          style={{ alignSelf: 'center' }}
+        >
           <FormattedMessage
             id="xpack.spaces.spaceList.showLessSpacesLink"
             defaultMessage="show less"
           />
         </EuiButtonEmpty>
       ) : (
-        <EuiButtonEmpty size="xs" onClick={() => setIsExpanded(true)}>
+        <EuiButtonEmpty
+          size="xs"
+          onClick={() => setIsExpanded(true)}
+          style={{ alignSelf: 'center' }}
+        >
           <FormattedMessage
             id="xpack.spaces.spaceList.showMoreSpacesLink"
             defaultMessage="+{count} more"
@@ -137,16 +149,25 @@ export const SpaceListInternal = ({
         </EuiToolTip>
       </EuiFlexItem>
     ) : null;
+  const styleProps = {
+    style: cursorStyle ? { cursor: cursorStyle } : undefined,
+  };
 
   return (
     <Suspense fallback={<EuiLoadingSpinner />}>
       <EuiFlexGroup wrap responsive={false} gutterSize="xs">
         {displayedSpaces.map((space) => {
-          // color may be undefined, which is intentional; SpacesAvatar calls the getSpaceColor function before rendering
-          const color = space.isFeatureDisabled ? 'hollow' : space.color;
+          const isDisabled = space.isFeatureDisabled;
           return (
             <EuiFlexItem grow={false} key={space.id}>
-              <LazySpaceAvatar space={{ ...space, color }} size={'s'} />
+              <LazySpaceAvatar
+                space={space}
+                isDisabled={isDisabled}
+                size={'s'}
+                onClick={listOnClick}
+                onKeyPress={listOnClick}
+                {...styleProps}
+              />
             </EuiFlexItem>
           );
         })}

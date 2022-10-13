@@ -7,10 +7,10 @@
 
 /* eslint-disable react/display-name */
 
-import React, { useContext, useCallback, useMemo } from 'react';
+import React, { useContext, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useResolverQueryParamCleaner } from './use_resolver_query_params_cleaner';
 import * as selectors from '../store/selectors';
 import { EdgeLine } from './edge_line';
@@ -22,11 +22,12 @@ import { useStateSyncingActions } from './use_state_syncing_actions';
 import { StyledMapContainer, GraphContainer } from './styles';
 import * as nodeModel from '../../../common/endpoint/models/node';
 import { SideEffectContext } from './side_effect_context';
-import { ResolverProps, ResolverState } from '../types';
+import type { ResolverProps, ResolverState } from '../types';
 import { PanelRouter } from './panels';
 import { useColors } from './use_colors';
 import { useSyncSelectedNode } from './use_sync_selected_node';
 import { ResolverNoProcessEvents } from './resolver_no_process_events';
+import { useAutotuneTimerange } from './use_autotune_timerange';
 
 /**
  * The highest level connected Resolver component. Needs a `Provider` in its ancestry to work.
@@ -58,7 +59,7 @@ export const ResolverWithoutProviders = React.memo(
       shouldUpdate,
       filters,
     });
-
+    useAutotuneTimerange();
     /**
      * This will keep the selectedNode in the view in sync with the nodeID specified in the url
      */
@@ -69,11 +70,8 @@ export const ResolverWithoutProviders = React.memo(
     // use this for the entire render in order to keep things in sync
     const timeAtRender = timestamp();
 
-    const {
-      processNodePositions,
-      connectingEdgeLineSegments,
-    } = useSelector((state: ResolverState) =>
-      selectors.visibleNodesAndEdgeLines(state)(timeAtRender)
+    const { processNodePositions, connectingEdgeLineSegments } = useSelector(
+      (state: ResolverState) => selectors.visibleNodesAndEdgeLines(state)(timeAtRender)
     );
 
     const { projectionMatrix, ref: cameraRef, onMouseDown } = useCamera();
@@ -95,11 +93,8 @@ export const ResolverWithoutProviders = React.memo(
     const isLoading = useSelector(selectors.isTreeLoading);
     const hasError = useSelector(selectors.hadErrorLoadingTree);
     const activeDescendantId = useSelector(selectors.ariaActiveDescendant);
+    const resolverTreeHasNodes = useSelector(selectors.resolverTreeHasNodes);
     const colorMap = useColors();
-
-    const noProcessEventsFound = useMemo(() => processNodePositions.size < 1, [
-      processNodePositions,
-    ]);
 
     return (
       <StyledMapContainer className={className} backgroundColor={colorMap.resolverBackground}>
@@ -117,9 +112,7 @@ export const ResolverWithoutProviders = React.memo(
               />
             </div>
           </div>
-        ) : noProcessEventsFound ? (
-          <ResolverNoProcessEvents />
-        ) : (
+        ) : resolverTreeHasNodes ? (
           <>
             <GraphContainer
               data-test-subj="resolver:graph"
@@ -160,6 +153,8 @@ export const ResolverWithoutProviders = React.memo(
             </GraphContainer>
             <PanelRouter />
           </>
+        ) : (
+          <ResolverNoProcessEvents />
         )}
         <GraphControls />
         <SymbolDefinitions />

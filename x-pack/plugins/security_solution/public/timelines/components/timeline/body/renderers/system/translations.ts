@@ -18,20 +18,9 @@ import { i18n } from '@kbn/i18n';
 // Example with user name, hostname, but no result
 // Session 20 frank@server-1 started process curl
 
-export const SESSION = i18n.translate('xpack.securitySolution.system.systemDescription', {
-  defaultMessage: 'System',
-});
-
 export const WITH_RESULT = i18n.translate('xpack.securitySolution.system.withResultDescription', {
   defaultMessage: 'with result',
 });
-
-export const WAS_AUTHORIZED_TO_USE = i18n.translate(
-  'xpack.securitySolution.system.wasAuthorizedToUseDescription',
-  {
-    defaultMessage: 'was authorized to use',
-  }
-);
 
 export const ACCEPTED_A_CONNECTION_VIA = i18n.translate(
   'xpack.securitySolution.system.acceptedAConnectionViaDescription',

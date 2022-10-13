@@ -5,21 +5,38 @@
  * 2.0.
  */
 
-import { EventEcs } from '../event';
+import type { EventEcs } from '../event';
+import type { UrlEcs } from '../url';
 
 interface ThreatMatchEcs {
   atomic?: string[];
   field?: string[];
+  id?: string[];
+  index?: string[];
   type?: string[];
 }
 
-export interface ThreatIndicatorEcs {
+export interface LegacyThreatIndicatorEcs {
+  domain?: string[];
   matched?: ThreatMatchEcs;
   event?: EventEcs & { reference?: string[] };
   provider?: string[];
   type?: string[];
 }
 
+export interface ThreatIndicatorEcs {
+  url?: UrlEcs;
+  provider?: string[];
+  reference?: string[];
+  type?: string[];
+}
+
+export interface ThreatEnrichmentEcs {
+  indicator?: ThreatIndicatorEcs;
+  matched?: ThreatMatchEcs;
+}
+
 export interface ThreatEcs {
-  indicator: ThreatIndicatorEcs[];
+  indicator?: LegacyThreatIndicatorEcs[];
+  enrichments?: ThreatEnrichmentEcs[];
 }

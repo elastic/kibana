@@ -17,12 +17,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('pre_calculated_histogram', function () {
     before(async function () {
       log.debug('Starting pre_calculated_histogram before method');
-      await esArchiver.load('pre_calculated_histogram');
+      await esArchiver.load('x-pack/test/functional/es_archives/pre_calculated_histogram');
       await kibanaServer.uiSettings.replace({ defaultIndex: 'test-histogram' });
     });
 
     after(function () {
-      return esArchiver.unload('pre_calculated_histogram');
+      return esArchiver.unload('x-pack/test/functional/es_archives/pre_calculated_histogram');
     });
 
     it('appears correctly in discover', async function () {

@@ -11,7 +11,7 @@ import styled from 'styled-components';
 
 import { Network } from './network';
 import { SourceDestinationWithArrows } from './source_destination_with_arrows';
-import { SourceDestinationProps } from './types';
+import type { SourceDestinationProps } from './types';
 
 const EuiFlexItemMarginTop = styled(EuiFlexItem)`
   margin-top: 3px;
@@ -36,6 +36,7 @@ export const SourceDestination = React.memo<SourceDestinationProps>(
     destinationPackets,
     destinationPort,
     eventId,
+    isDraggable,
     networkBytes,
     networkCommunityId,
     networkDirection,
@@ -59,8 +60,9 @@ export const SourceDestination = React.memo<SourceDestinationProps>(
           packets={networkPackets}
           communityId={networkCommunityId}
           contextId={contextId}
-          eventId={eventId}
           direction={networkDirection}
+          eventId={eventId}
+          isDraggable={isDraggable}
           protocol={networkProtocol}
           transport={transport}
         />
@@ -79,6 +81,7 @@ export const SourceDestination = React.memo<SourceDestinationProps>(
           destinationPackets={destinationPackets}
           destinationPort={destinationPort}
           eventId={eventId}
+          isDraggable={isDraggable}
           sourceBytes={sourceBytes}
           sourceGeoContinentName={sourceGeoContinentName}
           sourceGeoCountryName={sourceGeoCountryName}

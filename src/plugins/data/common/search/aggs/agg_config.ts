@@ -6,38 +6,32 @@
  * Side Public License, v 1.
  */
 
+import moment from 'moment';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { Assign, Ensure } from '@kbn/utility-types';
 
-import { ISearchOptions, ISearchSource } from 'src/plugins/data/public';
-import {
-  ExpressionAstExpression,
-  ExpressionAstArgument,
-  SerializedFieldFormat,
-} from 'src/plugins/expressions/common';
+import { ExpressionAstExpression, ExpressionAstArgument } from '@kbn/expressions-plugin/common';
+import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import { FieldFormatParams } from '@kbn/field-formats-plugin/common';
+import type { ISearchOptions, ISearchSource } from '../../../public';
 
 import { IAggType } from './agg_type';
 import { writeParams } from './agg_params';
 import { IAggConfigs } from './agg_configs';
+import { parseTimeShift } from './utils';
 
-type State = string | number | boolean | null | undefined | SerializableState;
-
-/** @internal **/
-export interface SerializableState {
-  [key: string]: State | State[];
-}
-
-/** @internal **/
+/** @public **/
 export type AggConfigSerialized = Ensure<
   {
     type: string;
     enabled?: boolean;
     id?: string;
-    params?: {} | SerializableState;
+    params?: {} | SerializableRecord;
     schema?: string;
   },
-  SerializableState
+  SerializableRecord
 >;
 
 export type AggConfigOptions = Assign<AggConfigSerialized, { type: IAggType }>;
@@ -157,7 +151,7 @@ export class AggConfig {
         const isDeserialized = isType || isObject;
 
         if (!isDeserialized) {
-          val = aggParam.deserialize(val, this);
+          val = aggParam.deserialize(_.cloneDeep(val), this);
         }
 
         to[aggParam.name] = val;
@@ -170,6 +164,32 @@ export class AggConfig {
 
   getParam(key: string): any {
     return _.get(this.params, key);
+  }
+
+  hasTimeShift(): boolean {
+    return Boolean(this.getParam('timeShift'));
+  }
+
+  getTimeShift(): undefined | moment.Duration {
+    const rawTimeShift = this.getParam('timeShift');
+    if (!rawTimeShift) return undefined;
+    const parsedTimeShift = parseTimeShift(rawTimeShift);
+    if (parsedTimeShift === 'invalid') {
+      throw new Error(`could not parse time shift ${rawTimeShift}`);
+    }
+    if (parsedTimeShift === 'previous') {
+      const timeShiftInterval = this.aggConfigs.getTimeShiftInterval();
+      if (timeShiftInterval) {
+        return timeShiftInterval;
+      } else if (!this.aggConfigs.timeRange) {
+        return;
+      }
+      const resolvedBounds = this.aggConfigs.getResolvedTimeRange()!;
+      return moment.duration(
+        moment.tz(resolvedBounds.max, this.aggConfigs.timeZone).diff(resolvedBounds.min)
+      );
+    }
+    return parsedTimeShift;
   }
 
   write(aggs?: IAggConfigs) {
@@ -285,13 +305,14 @@ export class AggConfig {
       id: this.id,
       enabled: this.enabled,
       type: this.type && this.type.name,
-      params: outParams as SerializableState,
+      params: outParams as SerializableRecord,
       ...(this.schema && { schema: this.schema }),
     };
   }
 
   /**
-   * @deprecated - Use serialize() instead.
+   * @deprecated Use serialize() instead.
+   * @removeBy 8.1
    */
   toJSON(): AggConfigSerialized {
     return this.serialize();
@@ -304,9 +325,7 @@ export class AggConfig {
    *
    * @public
    */
-  toSerializedFieldFormat():
-    | {}
-    | Ensure<SerializedFieldFormat<SerializableState>, SerializableState> {
+  toSerializedFieldFormat<T extends FieldFormatParams>(): SerializedFieldFormat<T> {
     return this.type ? this.type.getSerializedFormat(this) : {};
   }
 
@@ -329,7 +348,7 @@ export class AggConfig {
         // If the param provides `toExpressionAst`, we call it with the value
         const paramExpressionAst = deserializedParam.toExpressionAst(this.getParam(key));
         if (paramExpressionAst) {
-          acc[key] = [paramExpressionAst];
+          acc[key] = Array.isArray(paramExpressionAst) ? paramExpressionAst : [paramExpressionAst];
         }
       } else if (value && Array.isArray(value)) {
         // For array params which don't provide `toExpressionAst`, we stringify
@@ -382,6 +401,10 @@ export class AggConfig {
 
   getValue(bucket: any) {
     return this.type.getValue(this, bucket);
+  }
+
+  getResponseId() {
+    return this.type.getResponseId(this);
   }
 
   getKey(bucket: any, key?: string) {

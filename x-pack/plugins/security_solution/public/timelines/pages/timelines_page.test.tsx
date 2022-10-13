@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { shallow, ShallowWrapper } from 'enzyme';
+import type { ShallowWrapper } from 'enzyme';
+import { shallow } from 'enzyme';
 import React from 'react';
 
 import { useKibana } from '../../common/lib/kibana';
@@ -27,7 +28,7 @@ jest.mock('../../common/containers/sourcerer', () => {
 
   return {
     ...originalModule,
-    useSourcererScope: jest.fn().mockReturnValue({
+    useSourcererDataView: jest.fn().mockReturnValue({
       indicesExist: true,
     }),
   };
@@ -46,7 +47,7 @@ describe('TimelinesPageComponent', () => {
 
   describe('If the user is authorized', () => {
     beforeAll(() => {
-      ((useKibana as unknown) as jest.Mock).mockReturnValue({
+      (useKibana as unknown as jest.Mock).mockReturnValue({
         services: {
           application: {
             capabilities: {
@@ -61,7 +62,7 @@ describe('TimelinesPageComponent', () => {
     });
 
     afterAll(() => {
-      ((useKibana as unknown) as jest.Mock).mockReset();
+      (useKibana as unknown as jest.Mock).mockReset();
     });
 
     test('should not show the import timeline modal by default', () => {
@@ -92,7 +93,7 @@ describe('TimelinesPageComponent', () => {
 
   describe('If the user is not authorized', () => {
     beforeAll(() => {
-      ((useKibana as unknown) as jest.Mock).mockReturnValue({
+      (useKibana as unknown as jest.Mock).mockReturnValue({
         services: {
           application: {
             capabilities: {
@@ -107,7 +108,7 @@ describe('TimelinesPageComponent', () => {
     });
 
     afterAll(() => {
-      ((useKibana as unknown) as jest.Mock).mockReset();
+      (useKibana as unknown as jest.Mock).mockReset();
     });
     test('should not show the import timeline modal by default', () => {
       expect(

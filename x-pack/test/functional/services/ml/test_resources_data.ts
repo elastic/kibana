@@ -7,7 +7,6 @@
 
 export const savedSearches = {
   farequoteFilter: {
-    indexPatternTitle: 'ft_farequote',
     requestBody: {
       attributes: {
         title: 'ft_farequote_filter',
@@ -66,7 +65,6 @@ export const savedSearches = {
     },
   },
   farequoteLucene: {
-    indexPatternTitle: 'ft_farequote',
     requestBody: {
       attributes: {
         title: 'ft_farequote_lucene',
@@ -98,7 +96,6 @@ export const savedSearches = {
     },
   },
   farequoteKuery: {
-    indexPatternTitle: 'ft_farequote',
     requestBody: {
       attributes: {
         title: 'ft_farequote_kuery',
@@ -130,7 +127,6 @@ export const savedSearches = {
     },
   },
   farequoteFilterAndLucene: {
-    indexPatternTitle: 'ft_farequote',
     requestBody: {
       attributes: {
         title: 'ft_farequote_filter_and_lucene',
@@ -189,7 +185,6 @@ export const savedSearches = {
     },
   },
   farequoteFilterAndKuery: {
-    indexPatternTitle: 'ft_farequote',
     requestBody: {
       attributes: {
         title: 'ft_farequote_filter_and_kuery',
@@ -227,6 +222,132 @@ export const savedSearches = {
                       query: 'ASA',
                       type: 'phrase',
                     },
+                  },
+                },
+                $state: {
+                  store: 'appState',
+                },
+              },
+            ],
+            indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+          },
+        },
+      },
+      references: [
+        {
+          name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+          type: 'index-pattern',
+          id: 'INDEX_PATTERN_ID_PLACEHOLDER',
+        },
+      ],
+    },
+  },
+  farequoteFilterTwoAndLucene: {
+    requestBody: {
+      attributes: {
+        title: 'ft_farequote_filter_two_and_lucene',
+        description: '',
+        hits: 0,
+        columns: ['_source'],
+        sort: ['@timestamp', 'desc'],
+        version: 1,
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: {
+            highlightAll: true,
+            version: true,
+            query: {
+              query: 'responsetime:>50',
+              language: 'lucene',
+            },
+            filter: [
+              {
+                meta: {
+                  index: 'INDEX_PATTERN_ID_PLACEHOLDER',
+                  negate: false,
+                  disabled: false,
+                  alias: null,
+                  type: 'phrases',
+                  key: 'airline',
+                  params: ['ASA', 'AAL'],
+                },
+                query: {
+                  bool: {
+                    should: [
+                      {
+                        match_phrase: {
+                          airline: 'ASA',
+                        },
+                      },
+                      {
+                        match_phrase: {
+                          airline: 'AAL',
+                        },
+                      },
+                    ],
+                    minimum_should_match: 1,
+                  },
+                },
+                $state: {
+                  store: 'appState',
+                },
+              },
+            ],
+            indexRefName: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+          },
+        },
+      },
+      references: [
+        {
+          name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+          type: 'index-pattern',
+          id: 'INDEX_PATTERN_ID_PLACEHOLDER',
+        },
+      ],
+    },
+  },
+  farequoteFilterTwoAndKuery: {
+    requestBody: {
+      attributes: {
+        title: 'ft_farequote_filter_two_and_kuery',
+        description: '',
+        hits: 0,
+        columns: ['_source'],
+        sort: ['@timestamp', 'desc'],
+        version: 1,
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: {
+            highlightAll: true,
+            version: true,
+            query: {
+              query: 'responsetime > 49',
+              language: 'kuery',
+            },
+            filter: [
+              {
+                meta: {
+                  index: 'INDEX_PATTERN_ID_PLACEHOLDER',
+                  negate: false,
+                  disabled: false,
+                  alias: null,
+                  type: 'phrases',
+                  key: 'airline',
+                  params: ['ASA', 'FFT'],
+                },
+                query: {
+                  bool: {
+                    should: [
+                      {
+                        match_phrase: {
+                          airline: 'ASA',
+                        },
+                      },
+                      {
+                        match_phrase: {
+                          airline: 'FFT',
+                        },
+                      },
+                    ],
+                    minimum_should_match: 1,
                   },
                 },
                 $state: {

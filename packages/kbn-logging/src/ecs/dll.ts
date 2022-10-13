@@ -8,16 +8,14 @@
 
 import { EcsCodeSignature } from './code_signature';
 import { EcsHash } from './hash';
-import { EcsPe } from './pe';
 
 interface NestedFields {
   code_signature?: EcsCodeSignature;
   hash?: EcsHash;
-  pe?: EcsPe;
 }
 
 /**
- * https://www.elastic.co/guide/en/ecs/1.9/ecs-dll.html
+ * https://www.elastic.co/guide/en/ecs/master/ecs-dll.html
  *
  * @internal
  */

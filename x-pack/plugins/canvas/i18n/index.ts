@@ -6,7 +6,6 @@
  */
 
 export * from './capabilities';
-export * from './components';
 export * from './constants';
 export * from './errors';
 export * from './expression_types';

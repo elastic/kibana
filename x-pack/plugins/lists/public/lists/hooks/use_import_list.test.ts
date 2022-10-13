@@ -6,14 +6,15 @@
  */
 
 import { act, renderHook } from '@testing-library/react-hooks';
+import { useImportList } from '@kbn/securitysolution-list-hooks';
+import * as Api from '@kbn/securitysolution-list-api';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 
-import { httpServiceMock } from '../../../../../../src/core/public/mocks';
 import { getListResponseMock } from '../../../common/schemas/response/list_schema.mock';
-import * as Api from '../api';
 
-import { useImportList } from './use_import_list';
+jest.mock('@kbn/securitysolution-list-api');
 
-jest.mock('../api');
+// TODO: Port this test over to: packages/kbn-securitysolution-list-hooks/src/use_import_list/index.ts once mocks are moved to packages
 
 describe('useImportList', () => {
   let httpMock: ReturnType<typeof httpServiceMock.createStartContract>;
@@ -29,7 +30,7 @@ describe('useImportList', () => {
   });
 
   it('invokes Api.importList', async () => {
-    const fileMock = ('my file' as unknown) as File;
+    const fileMock = 'my file' as unknown as File;
 
     const { result, waitForNextUpdate } = renderHook(() => useImportList());
 
@@ -53,7 +54,7 @@ describe('useImportList', () => {
   });
 
   it('populates result with the response of Api.importList', async () => {
-    const fileMock = ('my file' as unknown) as File;
+    const fileMock = 'my file' as unknown as File;
 
     const { result, waitForNextUpdate } = renderHook(() => useImportList());
 
@@ -71,7 +72,7 @@ describe('useImportList', () => {
   });
 
   it('error is populated if importList rejects', async () => {
-    const fileMock = ('my file' as unknown) as File;
+    const fileMock = 'my file' as unknown as File;
     (Api.importList as jest.Mock).mockRejectedValue(new Error('whoops'));
     const { result, waitForNextUpdate } = renderHook(() => useImportList());
 

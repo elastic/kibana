@@ -15,7 +15,7 @@ import {
   FilterableEmbeddable,
   ContactCardEmbeddable,
 } from '../../../test_samples';
-import { inspectorPluginMock } from '../../../../../../../plugins/inspector/public/mocks';
+import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import { EmbeddableOutput, isErrorEmbeddable, ErrorEmbeddable } from '../../../embeddables';
 import { of } from '../../../../tests/helpers';
 import { embeddablePluginMock } from '../../../../mocks';
@@ -126,7 +126,7 @@ test('Execute throws an error when inspector adapters are not available', async 
   );
 
   expect(error).toBeInstanceOf(Error);
-  expect(error.message).toMatchInlineSnapshot(`"Action not compatible with context"`);
+  expect((error as Error).message).toMatchInlineSnapshot(`"Action not compatible with context"`);
 });
 
 test('Returns title', async () => {

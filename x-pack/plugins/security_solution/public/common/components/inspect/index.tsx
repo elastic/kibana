@@ -6,102 +6,76 @@
  */
 
 import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
-import { getOr, omit } from 'lodash/fp';
-import React, { useCallback } from 'react';
-import { connect, ConnectedProps } from 'react-redux';
-import styled, { css } from 'styled-components';
+import React from 'react';
 
-import { inputsSelectors, State } from '../../store';
 import { InputsModelId } from '../../store/inputs/constants';
-import { inputsActions } from '../../store/inputs';
+import { HoverVisibilityContainer } from '../hover_visibility_container';
 
 import { ModalInspectQuery } from './modal';
+import { useInspect } from './use_inspect';
 import * as i18n from './translations';
 
 export const BUTTON_CLASS = 'inspectButtonComponent';
 
-export const InspectButtonContainer = styled.div<{ show?: boolean }>`
-  width: 100%;
-  display: flex;
-  flex-grow: 1;
+interface InspectButtonContainerProps {
+  show?: boolean;
+  children: React.ReactNode;
+}
 
-  > * {
-    max-width: 100%;
-  }
+export const InspectButtonContainer: React.FC<InspectButtonContainerProps> = ({
+  children,
+  show = true,
+}) => (
+  <HoverVisibilityContainer show={show} targetClassNames={[BUTTON_CLASS]}>
+    {children}
+  </HoverVisibilityContainer>
+);
 
-  .${BUTTON_CLASS} {
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity ${(props) => getOr(250, 'theme.eui.euiAnimSpeedNormal', props)} ease;
-  }
-
-  ${({ show }) =>
-    show &&
-    css`
-      &:hover .${BUTTON_CLASS} {
-        pointer-events: auto;
-        opacity: 1;
-      }
-    `}
-`;
-
-InspectButtonContainer.displayName = 'InspectButtonContainer';
-
-InspectButtonContainer.defaultProps = {
-  show: true,
-};
-
-interface OwnProps {
+interface InspectButtonProps {
   compact?: boolean;
-  queryId: string;
-  inputId?: InputsModelId;
+  inputId?: InputsModelId.global | InputsModelId.timeline;
   inspectIndex?: number;
   isDisabled?: boolean;
+  multiple?: boolean;
   onCloseInspect?: () => void;
+  queryId: string;
+  showInspectButton?: boolean;
   title: string | React.ReactElement | React.ReactNode;
 }
 
-type InspectButtonProps = OwnProps & PropsFromRedux;
-
 const InspectButtonComponent: React.FC<InspectButtonProps> = ({
   compact = false,
-  inputId = 'global',
-  inspect,
-  isDisabled,
-  isInspected,
-  loading,
+  inputId = InputsModelId.global,
   inspectIndex = 0,
+  isDisabled,
+  multiple = false, // If multiple = true we ignore the inspectIndex and pass all requests and responses to the inspect modal
   onCloseInspect,
   queryId = '',
-  selectedInspectIndex,
-  setIsInspected,
+  showInspectButton = true,
   title = '',
 }) => {
-  const isShowingModal = !loading && selectedInspectIndex === inspectIndex && isInspected;
-  const handleClick = useCallback(() => {
-    setIsInspected({
-      id: queryId,
-      inputId,
-      isInspected: true,
-      selectedInspectIndex: inspectIndex,
-    });
-  }, [setIsInspected, queryId, inputId, inspectIndex]);
-
-  const handleCloseModal = useCallback(() => {
-    if (onCloseInspect != null) {
-      onCloseInspect();
-    }
-    setIsInspected({
-      id: queryId,
-      inputId,
-      isInspected: false,
-      selectedInspectIndex: inspectIndex,
-    });
-  }, [onCloseInspect, setIsInspected, queryId, inputId, inspectIndex]);
+  const {
+    additionalRequests,
+    additionalResponses,
+    handleClick,
+    handleCloseModal,
+    isButtonDisabled,
+    isShowingModal,
+    loading,
+    request,
+    response,
+  } = useInspect({
+    inputId,
+    inspectIndex,
+    isDisabled,
+    multiple,
+    onCloseInspect,
+    queryId,
+  });
 
   return (
     <>
-      {inputId === 'timeline' && !compact && (
+      {inputId === InputsModelId.timeline && !compact && showInspectButton && (
         <EuiButtonEmpty
           className={BUTTON_CLASS}
           aria-label={i18n.INSPECT}
@@ -109,58 +83,40 @@ const InspectButtonComponent: React.FC<InspectButtonProps> = ({
           color="text"
           iconSide="left"
           iconType="inspect"
-          isDisabled={loading || isDisabled}
+          isDisabled={isButtonDisabled}
           isLoading={loading}
           onClick={handleClick}
         >
           {i18n.INSPECT}
         </EuiButtonEmpty>
       )}
-      {(inputId === 'global' || compact) && (
+      {(inputId === InputsModelId.global || compact) && showInspectButton && (
         <EuiButtonIcon
           className={BUTTON_CLASS}
           aria-label={i18n.INSPECT}
           data-test-subj="inspect-icon-button"
           iconSize="m"
           iconType="inspect"
-          isDisabled={loading || isDisabled}
+          isDisabled={isButtonDisabled}
           title={i18n.INSPECT}
           onClick={handleClick}
         />
       )}
-      <ModalInspectQuery
-        closeModal={handleCloseModal}
-        isShowing={isShowingModal}
-        request={inspect != null && inspect.dsl.length > 0 ? inspect.dsl[inspectIndex] : null}
-        response={
-          inspect != null && inspect.response.length > 0 ? inspect.response[inspectIndex] : null
-        }
-        title={title}
-        data-test-subj="inspect-modal"
-      />
+      {isShowingModal && request !== null && response !== null && (
+        <ModalInspectQuery
+          additionalRequests={additionalRequests}
+          additionalResponses={additionalResponses}
+          closeModal={handleCloseModal}
+          data-test-subj="inspect-modal"
+          inputId={inputId}
+          request={request}
+          response={response}
+          title={title}
+        />
+      )}
     </>
   );
 };
 
-const makeMapStateToProps = () => {
-  const getGlobalQuery = inputsSelectors.globalQueryByIdSelector();
-  const getTimelineQuery = inputsSelectors.timelineQueryByIdSelector();
-  const mapStateToProps = (state: State, { inputId = 'global', queryId }: OwnProps) => {
-    const props =
-      inputId === 'global' ? getGlobalQuery(state, queryId) : getTimelineQuery(state, queryId);
-    // refetch caused unnecessary component rerender and it was even not used
-    const propsWithoutRefetch = omit('refetch', props);
-    return propsWithoutRefetch;
-  };
-  return mapStateToProps;
-};
-
-const mapDispatchToProps = {
-  setIsInspected: inputsActions.setInspectionParameter,
-};
-
-const connector = connect(makeMapStateToProps, mapDispatchToProps);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export const InspectButton = connector(React.memo(InspectButtonComponent));
+InspectButtonComponent.displayName = 'InspectButtonComponent';
+export const InspectButton = React.memo(InspectButtonComponent);

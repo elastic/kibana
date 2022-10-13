@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import path from 'path';
-
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 import { USER } from '../../../services/ml/security_common';
@@ -14,6 +12,7 @@ import { USER } from '../../../services/ml/security_common';
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
+  const browser = getService('browser');
 
   const testUsers = [
     { user: USER.ML_POWERUSER, discoverAvailable: true },
@@ -21,7 +20,7 @@ export default function ({ getService }: FtrProviderContext) {
   ];
 
   describe('for user with full ML access', function () {
-    this.tags(['skipFirefox', 'mlqa']);
+    this.tags(['skipFirefox', 'ml']);
 
     describe('with no data loaded', function () {
       for (const testUser of testUsers) {
@@ -32,15 +31,8 @@ export default function ({ getService }: FtrProviderContext) {
           });
 
           after(async () => {
+            // NOTE: Logout needs to happen before anything else to avoid flaky behavior
             await ml.securityUI.logout();
-          });
-
-          it('should display the ML file data vis link on the Kibana home page', async () => {
-            await ml.testExecution.logTestStep('should load the Kibana home page');
-            await ml.navigation.navigateToKibanaHome();
-
-            await ml.testExecution.logTestStep('should display the ML file data vis link');
-            await ml.commonUI.assertKibanaHomeFileDataVisLinkExists();
           });
 
           it('should display the ML entry in Kibana app menu', async () => {
@@ -51,41 +43,71 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.navigation.assertKibanaNavMLEntryExists();
           });
 
-          it('should display tabs in the ML app correctly', async () => {
+          it('should display side nav in the ML app correctly', async () => {
             await ml.testExecution.logTestStep('should load the ML app');
             await ml.navigation.navigateToMl();
 
             await ml.testExecution.logTestStep('should display the enabled "Overview" tab');
             await ml.navigation.assertOverviewTabEnabled(true);
 
-            await ml.testExecution.logTestStep(
-              'should display the enabled "Anomaly Detection" tab'
-            );
-            await ml.navigation.assertAnomalyDetectionTabEnabled(true);
+            await ml.testExecution.logTestStep('should display the enabled "Notifications" tab');
+            await ml.navigation.assertNotificationsTabEnabled(true);
 
             await ml.testExecution.logTestStep(
-              'should display the enabled "Data Frame Analytics" tab'
+              'should display the enabled "Anomaly Detection" section correctly'
+            );
+            await ml.navigation.assertAnomalyDetectionTabEnabled(true);
+            await ml.navigation.assertAnomalyExplorerNavItemEnabled(true);
+            await ml.navigation.assertSingleMetricViewerNavItemEnabled(true);
+            await ml.navigation.assertSettingsTabEnabled(true);
+
+            await ml.testExecution.logTestStep(
+              'should display the enabled "Data Frame Analytics" section'
             );
             await ml.navigation.assertDataFrameAnalyticsTabEnabled(true);
 
-            await ml.testExecution.logTestStep('should display the enabled "Data Visualizer" tab');
-            await ml.navigation.assertDataVisualizerTabEnabled(true);
+            await ml.testExecution.logTestStep(
+              'should display the enabled "Model Management" section'
+            );
+            await ml.navigation.assertTrainedModelsNavItemEnabled(true);
+            await ml.navigation.assertNodesNavItemEnabled(true);
 
-            await ml.testExecution.logTestStep('should display the enabled "Settings" tab');
-            await ml.navigation.assertSettingsTabEnabled(true);
+            await ml.testExecution.logTestStep(
+              'should display the enabled "Data Visualizer" section'
+            );
+            await ml.navigation.assertDataVisualizerTabEnabled(true);
+            await ml.navigation.assertFileDataVisualizerNavItemEnabled(true);
+            await ml.navigation.assertIndexDataVisualizerNavItemEnabled(true);
           });
 
           it('should display elements on ML Overview page correctly', async () => {
             await ml.testExecution.logTestStep('should load the ML overview page');
             await ml.navigation.navigateToOverview();
 
-            await ml.testExecution.logTestStep('should display enabled AD create job button');
+            await ml.commonUI.waitForDatePickerIndicatorLoaded();
+
+            await ml.testExecution.logTestStep('should display a welcome callout');
+            await ml.overviewPage.assertGettingStartedCalloutVisible(true);
+            await ml.overviewPage.dismissGettingStartedCallout();
+
+            await ml.testExecution.logTestStep('should display ML Nodes panel');
+            await ml.mlNodesPanel.assertNodeOverviewPanel();
+
+            await ml.testExecution.logTestStep('should display Anomaly Detection empty state');
+            await ml.overviewPage.assertADEmptyStateExists();
             await ml.overviewPage.assertADCreateJobButtonExists();
             await ml.overviewPage.assertADCreateJobButtonEnabled(true);
 
-            await ml.testExecution.logTestStep('should display enabled DFA create job button');
+            await ml.testExecution.logTestStep('should display DFA empty state');
+            await ml.overviewPage.assertDFAEmptyStateExists();
             await ml.overviewPage.assertDFACreateJobButtonExists();
             await ml.overviewPage.assertDFACreateJobButtonEnabled(true);
+
+            await ml.testExecution.logTestStep(
+              'should persist the getting started callout state after refresh'
+            );
+            await browser.refresh();
+            await ml.overviewPage.assertGettingStartedCalloutVisible(false);
           });
         });
       }
@@ -101,21 +123,18 @@ export default function ({ getService }: FtrProviderContext) {
 
       const ecIndexPattern = 'ft_module_sample_ecommerce';
       const ecExpectedTotalCount = '287';
-      const ecExpectedModuleId = 'sample_data_ecommerce';
 
-      const uploadFilePath = path.join(
-        __dirname,
-        '..',
-        'data_visualizer',
-        'files_to_import',
-        'artificial_server_log'
+      const uploadFilePath = require.resolve(
+        '../data_visualizer/files_to_import/artificial_server_log'
       );
       const expectedUploadFileTitle = 'artificial_server_log';
 
       before(async () => {
-        await esArchiver.loadIfNeeded('ml/farequote');
-        await esArchiver.loadIfNeeded('ml/ihp_outlier');
-        await esArchiver.loadIfNeeded('ml/module_sample_ecommerce');
+        await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
+        await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ihp_outlier');
+        await esArchiver.loadIfNeeded(
+          'x-pack/test/functional/es_archives/ml/module_sample_ecommerce'
+        );
         await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
         await ml.testResources.createIndexPatternIfNeeded('ft_ihp_outlier', '@timestamp');
         await ml.testResources.createIndexPatternIfNeeded(ecIndexPattern, 'order_date');
@@ -136,7 +155,6 @@ export default function ({ getService }: FtrProviderContext) {
           description: 'Test calendar',
         });
         await ml.api.createCalendarEvents(calendarId, [
-          // @ts-expect-error not full interface
           {
             description: eventDescription,
             start_time: '1513641600000',
@@ -151,10 +169,13 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        await ml.api.cleanMlIndices();
         await ml.api.deleteIndices(`user-${dfaJobId}`);
         await ml.api.deleteCalendar(calendarId);
         await ml.api.deleteFilter(filterId);
+        await ml.api.cleanMlIndices();
+        await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
+        await ml.testResources.deleteIndexPatternByTitle('ft_ihp_outlier');
+        await ml.testResources.deleteIndexPatternByTitle(ecIndexPattern);
       });
 
       for (const testUser of testUsers) {
@@ -164,7 +185,25 @@ export default function ({ getService }: FtrProviderContext) {
           });
 
           after(async () => {
+            // NOTE: Logout needs to happen before anything else to avoid flaky behavior
             await ml.securityUI.logout();
+          });
+
+          it('should display elements on ML Overview page correctly', async () => {
+            await ml.testExecution.logTestStep('should load the Overview page');
+            await ml.navigation.navigateToMl();
+            await ml.navigation.navigateToOverview();
+
+            await ml.commonUI.waitForDatePickerIndicatorLoaded();
+
+            await ml.testExecution.logTestStep('should display ML Nodes panel');
+            await ml.mlNodesPanel.assertNodeOverviewPanel();
+
+            await ml.testExecution.logTestStep('should display Anomaly Detection panel');
+            await ml.overviewPage.assertAdJobsOverviewPanelExist();
+
+            await ml.testExecution.logTestStep('should display DFA panel');
+            await ml.overviewPage.assertDFAJobsOverviewPanelExist();
           });
 
           it('should display elements on Anomaly Detection page correctly', async () => {
@@ -190,7 +229,9 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.testExecution.logTestStep('should display enabled AD job row action buttons');
             await ml.jobTable.assertJobActionsMenuButtonEnabled(adJobId, true);
             await ml.jobTable.assertJobActionStartDatafeedButtonEnabled(adJobId, true);
+            await ml.jobTable.assertJobActionResetJobButtonEnabled(adJobId, true);
             await ml.jobTable.assertJobActionCloneJobButtonEnabled(adJobId, true);
+            await ml.jobTable.assertJobActionViewDatafeedCountsButtonEnabled(adJobId, true);
             await ml.jobTable.assertJobActionEditJobButtonEnabled(adJobId, true);
             await ml.jobTable.assertJobActionDeleteJobButtonEnabled(adJobId, true);
 
@@ -245,11 +286,11 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.testExecution.logTestStep(
               'should display the forecast modal with enabled run button'
             );
-            await ml.singleMetricViewer.assertForecastButtonExists();
-            await ml.singleMetricViewer.assertForecastButtonEnabled(true);
-            await ml.singleMetricViewer.openForecastModal();
-            await ml.singleMetricViewer.assertForecastModalRunButtonEnabled(true);
-            await ml.singleMetricViewer.closeForecastModal();
+            await ml.forecast.assertForecastButtonExists();
+            await ml.forecast.assertForecastButtonEnabled(true);
+            await ml.forecast.openForecastModal();
+            await ml.forecast.assertForecastModalRunButtonEnabled(true);
+            await ml.forecast.closeForecastModal();
           });
 
           it('should display elements on Anomaly Explorer page correctly', async () => {
@@ -339,7 +380,7 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.dataVisualizer.assertUploadFileButtonEnabled(true);
 
             await ml.testExecution.logTestStep(
-              'should display the "select index pattern" card with enabled button'
+              'should display the "select data view" card with enabled button'
             );
             await ml.dataVisualizer.assertDataVisualizerIndexDataCardExists();
             await ml.dataVisualizer.assertSelectIndexButtonEnabled(true);
@@ -366,12 +407,13 @@ export default function ({ getService }: FtrProviderContext) {
                 testUser.discoverAvailable ? 'with' : 'without'
               } Discover card`
             );
-            await ml.dataVisualizerIndexBased.assertActionsPanelExists();
+            if (testUser.discoverAvailable) {
+              await ml.dataVisualizerIndexBased.assertActionsPanelExists();
+            }
             await ml.dataVisualizerIndexBased.assertViewInDiscoverCard(testUser.discoverAvailable);
 
             await ml.testExecution.logTestStep('should display job cards');
             await ml.dataVisualizerIndexBased.assertCreateAdvancedJobCardExists();
-            await ml.dataVisualizerIndexBased.assertRecognizerCardExists(ecExpectedModuleId);
             await ml.dataVisualizerIndexBased.assertCreateDataFrameAnalyticsCardExists();
           });
 
@@ -498,15 +540,22 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.navigation.navigateToStackManagementJobsListPage();
 
             await ml.testExecution.logTestStep('should display the AD job in the list');
-            await ml.jobTable.filterWithSearchString(adJobId, 1);
+            await ml.stackManagementJobs.filterTableWithSearchString(
+              'anomaly-detector',
+              adJobId,
+              1
+            );
 
             await ml.testExecution.logTestStep(
               'should load the analytics jobs list page in stack management'
             );
             await ml.navigation.navigateToStackManagementJobsListPageAnalyticsTab();
-
             await ml.testExecution.logTestStep('should display the DFA job in the list');
-            await ml.dataFrameAnalyticsTable.filterWithSearchString(dfaJobId, 1);
+            await ml.stackManagementJobs.filterTableWithSearchString(
+              'data-frame-analytics',
+              dfaJobId,
+              1
+            );
           });
         });
       }

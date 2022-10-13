@@ -1,14 +1,16 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../../tsconfig.bazel.json",
   "compilerOptions": {
-    "incremental": false,
-    "outDir": "./target",
     "declaration": true,
     "declarationMap": true,
-    "sourceMap": true,
-    "sourceRoot": "../../../../packages/kbn-server-http-tools/src"
+    "emitDeclarationOnly": true,
+    "outDir": "./target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
   },
   "include": [
-    "src/**/*"
+    "**/*.ts"
   ]
 }

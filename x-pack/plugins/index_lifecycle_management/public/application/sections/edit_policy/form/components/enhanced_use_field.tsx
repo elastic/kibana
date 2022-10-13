@@ -9,7 +9,7 @@ import React, { useEffect, useRef, useMemo, useCallback } from 'react';
 
 // We wrap this component for edit policy so we do not export it from the "shared_imports" dir to avoid
 // accidentally using the non-enhanced version.
-import { UseField } from '../../../../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
+import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 import { Phases } from '../../../../../../common/types';
 
@@ -17,8 +17,10 @@ import { UseFieldProps, FormData } from '../../../../../shared_imports';
 
 import { useFormErrorsContext } from '../form_errors_context';
 
-const isXPhaseField = (phase: keyof Phases) => (fieldPath: string): boolean =>
-  fieldPath.startsWith(`phases.${phase}`) || fieldPath.startsWith(`_meta.${phase}`);
+const isXPhaseField =
+  (phase: keyof Phases) =>
+  (fieldPath: string): boolean =>
+    fieldPath.startsWith(`phases.${phase}`) || fieldPath.startsWith(`_meta.${phase}`);
 
 const isHotPhaseField = isXPhaseField('hot');
 const isWarmPhaseField = isXPhaseField('warm');

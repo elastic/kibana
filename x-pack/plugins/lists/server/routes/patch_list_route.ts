@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import { validate } from '@kbn/securitysolution-io-ts-utils';
+import { transformError } from '@kbn/securitysolution-es-utils';
+import { listSchema, patchListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { LIST_URL } from '@kbn/securitysolution-list-constants';
+
 import type { ListsPluginRouter } from '../types';
-import { LIST_URL } from '../../common/constants';
-import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
-import { validate } from '../../common/shared_imports';
-import { listSchema, patchListSchema } from '../../common/schemas';
+
+import { buildRouteValidation, buildSiemResponse } from './utils';
 
 import { getListClient } from '.';
 
@@ -28,7 +31,7 @@ export const patchListRoute = (router: ListsPluginRouter): void => {
       const siemResponse = buildSiemResponse(response);
       try {
         const { name, description, id, meta, _version, version } = request.body;
-        const lists = getListClient(context);
+        const lists = await getListClient(context);
         const list = await lists.updateList({ _version, description, id, meta, name, version });
         if (list == null) {
           return siemResponse.error({

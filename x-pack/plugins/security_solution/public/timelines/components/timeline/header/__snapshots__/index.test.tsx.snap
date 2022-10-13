@@ -8,15 +8,19 @@ exports[`Header rendering renders correctly against snapshot 1`] = `
   <Connect(StatefulSearchOrFilterComponent)
     filterManager={
       FilterManager {
+        "extract": [Function],
         "fetch$": Subject {
-          "_isScalar": false,
           "closed": false,
+          "currentObservers": null,
           "hasError": false,
           "isStopped": false,
           "observers": Array [],
           "thrownError": null,
         },
         "filters": Array [],
+        "getAllMigrations": [Function],
+        "inject": [Function],
+        "telemetry": [Function],
         "uiSettings": Object {
           "get": [MockFunction],
           "get$": [MockFunction],
@@ -31,8 +35,8 @@ exports[`Header rendering renders correctly against snapshot 1`] = `
           "set": [MockFunction],
         },
         "updated$": Subject {
-          "_isScalar": false,
           "closed": false,
+          "currentObservers": null,
           "hasError": false,
           "isStopped": false,
           "observers": Array [],

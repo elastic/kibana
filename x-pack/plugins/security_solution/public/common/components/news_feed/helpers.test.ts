@@ -15,61 +15,54 @@ import {
   getLocale,
   getNewsFeedUrl,
   getNewsItemsFromApiResponse,
-  removeSnapshotFromVersion,
+  removeSuffixFromVersion,
   showNewsItem,
 } from './helpers';
-import { NewsItem, RawNewsApiResponse } from './types';
+import type { NewsItem, RawNewsApiResponse } from './types';
 
 jest.mock('../../lib/kibana');
 
 describe('helpers', () => {
-  describe('removeSnapshotFromVersion', () => {
+  describe('removeSuffixFromVersion', () => {
+    test('removes entire suffix after version number', () => {
+      const version = '8.0.0-SNAPSHOT-rc1';
+
+      expect(removeSuffixFromVersion(version)).toEqual('8.0.0');
+    });
     test('it should remove an all-caps `-SNAPSHOT`', () => {
       const version = '8.0.0-SNAPSHOT';
 
-      expect(removeSnapshotFromVersion(version)).toEqual('8.0.0');
+      expect(removeSuffixFromVersion(version)).toEqual('8.0.0');
     });
 
     test('it should remove a mixed-case `-SnApShoT`', () => {
       const version = '8.0.0-SnApShoT';
 
-      expect(removeSnapshotFromVersion(version)).toEqual('8.0.0');
-    });
-
-    test('it should remove all occurrences of `-SNAPSHOT`, regardless of where they appear in the version', () => {
-      const version = '-SNAPSHOT8.0.0-SNAPSHOT';
-
-      expect(removeSnapshotFromVersion(version)).toEqual('8.0.0');
+      expect(removeSuffixFromVersion(version)).toEqual('8.0.0');
     });
 
     test('it should NOT transform a version when it does not contain a `-SNAPSHOT`', () => {
       const version = '8.0.0';
 
-      expect(removeSnapshotFromVersion(version)).toEqual('8.0.0');
+      expect(removeSuffixFromVersion(version)).toEqual('8.0.0');
     });
 
-    test('it should NOT transform a version if it omits the dash in `SNAPSHOT`', () => {
+    test('it should transform a version if it omits the dash in `SNAPSHOT`', () => {
       const version = '8.0.0SNAPSHOT';
 
-      expect(removeSnapshotFromVersion(version)).toEqual('8.0.0SNAPSHOT');
-    });
-
-    test('it should NOT transform a version if has only a partial `-SNAPSHOT`', () => {
-      const version = '8.0.0-SNAP';
-
-      expect(removeSnapshotFromVersion(version)).toEqual('8.0.0-SNAP');
+      expect(removeSuffixFromVersion(version)).toEqual('8.0.0');
     });
 
     test('it should NOT transform an undefined version', () => {
       const version = undefined;
 
-      expect(removeSnapshotFromVersion(version)).toBeUndefined();
+      expect(removeSuffixFromVersion(version)).toBeUndefined();
     });
 
     test('it should NOT transform an empty version', () => {
       const version = '';
 
-      expect(removeSnapshotFromVersion(version)).toEqual('');
+      expect(removeSuffixFromVersion(version)).toEqual('');
     });
   });
 
@@ -279,8 +272,7 @@ describe('helpers', () => {
           {
             title: { en: 'Got SIEM Questions?', ja: translatedTitle },
             description: {
-              en:
-                "There's an awesome community of Elastic SIEM users out there. Join the discussion about configuring, learning, and using the Elastic SIEM app, and detecting threats!",
+              en: "There's an awesome community of Elastic SIEM users out there. Join the discussion about configuring, learning, and using the Elastic SIEM app, and detecting threats!",
               ja: translatedDescription,
             },
             link_text: null,
@@ -291,8 +283,7 @@ describe('helpers', () => {
             languages: null,
             badge: { en: '7.6' },
             image_url: {
-              en:
-                'https://aws1.discourse-cdn.com/elastic/original/3X/f/8/f8c3d0b9971cfcd0be349d973aa5799f71d280cc.png?blade=securitysolutionfeed',
+              en: 'https://aws1.discourse-cdn.com/elastic/original/3X/f/8/f8c3d0b9971cfcd0be349d973aa5799f71d280cc.png?blade=securitysolutionfeed',
               ja: translatedImageUrl,
             },
             publish_on: new Date('2020-01-01T00:00:00'),

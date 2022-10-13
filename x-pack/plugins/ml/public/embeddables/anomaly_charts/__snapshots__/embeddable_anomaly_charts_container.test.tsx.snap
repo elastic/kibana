@@ -9,8 +9,9 @@ Object {
     "timeFieldName": "@timestamp",
     "tooManyBuckets": false,
   },
+  "chartsService": undefined,
   "id": "test-explorer-charts-embeddable",
-  "mlUrlGenerator": undefined,
+  "mlLocator": undefined,
   "onSelectEntity": [Function],
   "setSeverity": [Function],
   "severity": Object {
@@ -19,6 +20,7 @@ Object {
     "val": 75,
   },
   "showCharts": true,
+  "showSelectedInterval": false,
   "timeBuckets": TimeBuckets {
     "_timeBucketsConfig": Object {
       "dateFormat": undefined,
@@ -29,9 +31,11 @@ Object {
     "barTarget": undefined,
     "maxBars": undefined,
   },
+  "timeRange": undefined,
   "timefilter": Object {
     "calculateBounds": [MockFunction],
     "createFilter": [MockFunction],
+    "createRelativeFilter": [MockFunction],
     "disableAutoRefreshSelector": [MockFunction],
     "disableTimeRangeSelector": [MockFunction],
     "enableAutoRefreshSelector": [MockFunction],
@@ -49,6 +53,7 @@ Object {
     "getTimeDefaults": [MockFunction],
     "getTimeUpdate$": [MockFunction],
     "isAutoRefreshSelectorEnabled": [MockFunction],
+    "isRefreshIntervalTouched": [MockFunction],
     "isTimeRangeSelectorEnabled": [MockFunction],
     "isTimeTouched": [MockFunction],
     "setRefreshInterval": [MockFunction],

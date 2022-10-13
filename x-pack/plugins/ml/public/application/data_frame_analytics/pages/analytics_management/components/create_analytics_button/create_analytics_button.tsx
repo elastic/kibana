@@ -12,12 +12,12 @@ import { createPermissionFailureMessage } from '../../../../../capabilities/chec
 
 interface Props {
   isDisabled: boolean;
-  setIsSourceIndexModalVisible: React.Dispatch<React.SetStateAction<any>>;
+  navigateToSourceSelection: () => void;
 }
 
-export const CreateAnalyticsButton: FC<Props> = ({ isDisabled, setIsSourceIndexModalVisible }) => {
+export const CreateAnalyticsButton: FC<Props> = ({ isDisabled, navigateToSourceSelection }) => {
   const handleClick = () => {
-    setIsSourceIndexModalVisible(true);
+    navigateToSourceSelection();
   };
 
   const button = (

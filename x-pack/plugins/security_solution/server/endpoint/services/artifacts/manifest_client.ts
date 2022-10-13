@@ -5,18 +5,16 @@
  * 2.0.
  */
 
-import {
+import type {
   SavedObject,
   SavedObjectsClientContract,
   SavedObjectsUpdateResponse,
-} from 'src/core/server';
-import {
-  manifestSchemaVersion,
-  ManifestSchemaVersion,
-} from '../../../../common/endpoint/schema/common';
-import { validate } from '../../../../common/validate';
+} from '@kbn/core/server';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
+import type { ManifestSchemaVersion } from '../../../../common/endpoint/schema/common';
+import { manifestSchemaVersion } from '../../../../common/endpoint/schema/common';
 import { ManifestConstants } from '../../lib/artifacts';
-import { InternalManifestSchema, InternalManifestCreateSchema } from '../../schemas/artifacts';
+import type { InternalManifestSchema, InternalManifestCreateSchema } from '../../schemas/artifacts';
 
 interface UpdateManifestOpts {
   version: string;
@@ -32,10 +30,7 @@ export class ManifestClient {
   ) {
     this.savedObjectsClient = savedObjectsClient;
 
-    const [validated, errors] = validate(
-      (schemaVersion as unknown) as object,
-      manifestSchemaVersion
-    );
+    const [validated, errors] = validate(schemaVersion as unknown as object, manifestSchemaVersion);
 
     if (errors != null || validated === null) {
       throw new Error(`Invalid manifest version: ${schemaVersion}`);

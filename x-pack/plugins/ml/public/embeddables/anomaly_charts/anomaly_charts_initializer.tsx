@@ -19,7 +19,7 @@ import {
   EuiFieldText,
   EuiModal,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { AnomalyChartsEmbeddableInput } from '..';
 import { DEFAULT_MAX_SERIES_TO_PLOT } from '../../application/services/anomaly_explorer_charts_service';
 

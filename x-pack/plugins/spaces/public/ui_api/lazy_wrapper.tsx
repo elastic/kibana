@@ -9,7 +9,7 @@ import type { FC, PropsWithChildren, PropsWithRef, ReactElement } from 'react';
 import React, { lazy, useMemo } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 
-import type { StartServicesAccessor } from 'src/core/public';
+import type { StartServicesAccessor } from '@kbn/core/public';
 
 import type { PluginsStart } from '../plugin';
 import { SuspenseErrorBoundary } from '../suspense_error_boundary';
@@ -17,12 +17,14 @@ import { SuspenseErrorBoundary } from '../suspense_error_boundary';
 interface InternalProps<T> {
   fn: () => Promise<FC<T>>;
   getStartServices: StartServicesAccessor<PluginsStart>;
+  showLoadingSpinner?: boolean;
   props: JSX.IntrinsicAttributes & PropsWithRef<PropsWithChildren<T>>;
 }
 
 export const LazyWrapper: <T>(props: InternalProps<T>) => ReactElement | null = ({
   fn,
   getStartServices,
+  showLoadingSpinner,
   props,
 }) => {
   const { value: startServices = [{ notifications: undefined }] } = useAsync(getStartServices);
@@ -35,7 +37,7 @@ export const LazyWrapper: <T>(props: InternalProps<T>) => ReactElement | null = 
   }
 
   return (
-    <SuspenseErrorBoundary notifications={notifications}>
+    <SuspenseErrorBoundary notifications={notifications} showLoadingSpinner={showLoadingSpinner}>
       <LazyComponent {...props} />
     </SuspenseErrorBoundary>
   );

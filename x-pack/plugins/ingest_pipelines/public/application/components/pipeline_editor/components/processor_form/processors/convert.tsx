@@ -58,6 +58,7 @@ export const Convert: FunctionComponent = () => {
       <UseField
         componentProps={{
           euiFieldProps: {
+            'data-test-subj': 'typeSelectorField',
             options: [
               {
                 value: 'integer',
@@ -100,6 +101,12 @@ export const Convert: FunctionComponent = () => {
                   'xpack.ingestPipelines.pipelineEditor.convertForm.booleanOption',
                   { defaultMessage: 'Boolean' }
                 ),
+              },
+              {
+                value: 'ip',
+                text: i18n.translate('xpack.ingestPipelines.pipelineEditor.convertForm.ipOption', {
+                  defaultMessage: 'IP',
+                }),
               },
               {
                 value: 'auto',

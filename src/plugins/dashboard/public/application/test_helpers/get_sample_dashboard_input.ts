@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { ViewMode, EmbeddableInput } from '../../services/embeddable';
-import { DashboardContainerInput, DashboardPanelState } from '../embeddable';
+import { ViewMode, EmbeddableInput } from '@kbn/embeddable-plugin/public';
+import { DashboardContainerInput } from '../..';
+import { DashboardPanelState } from '../embeddable';
 
 export function getSampleDashboardInput(
   overrides?: Partial<DashboardContainerInput>
@@ -27,6 +28,7 @@ export function getSampleDashboardInput(
       to: 'now',
       from: 'now-15m',
     },
+    timeRestore: false,
     viewMode: ViewMode.VIEW,
     panels: {},
     ...overrides,

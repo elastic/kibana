@@ -8,31 +8,37 @@
 import React, { FC, useState, useEffect } from 'react';
 import { EuiCode, EuiInputPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  Query,
-  esKuery,
-  esQuery,
-  QueryStringInput,
-} from '../../../../../../../../src/plugins/data/public';
-import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
+import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
+import type { Query } from '@kbn/es-query';
+import { QueryStringInput } from '@kbn/unified-search-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { SEARCH_QUERY_LANGUAGE, ErrorMessage } from '../../../../../common/constants/search';
-import { explorerService } from '../../explorer_dashboard_service';
 import { InfluencersFilterQuery } from '../../../../../common/types/es_client';
+import { useAnomalyExplorerContext } from '../../anomaly_explorer_context';
+import { useMlKibana } from '../../../contexts/kibana';
 
 export const DEFAULT_QUERY_LANG = SEARCH_QUERY_LANGUAGE.KUERY;
+
+export interface KQLFilterSettings {
+  filterQuery: InfluencersFilterQuery;
+  queryString: string;
+  tableQueryString: string;
+  isAndOperator: boolean;
+  filteredFields: string[];
+}
 
 export function getKqlQueryValues({
   inputString,
   queryLanguage,
   indexPattern,
 }: {
-  inputString: string | { [key: string]: any };
+  inputString: string | { [key: string]: unknown };
   queryLanguage: string;
-  indexPattern: IIndexPattern;
-}): { clearSettings: boolean; settings: any } {
+  indexPattern: DataView;
+}): { clearSettings: boolean; settings: KQLFilterSettings } {
   let influencersFilterQuery: InfluencersFilterQuery = {};
   const filteredFields: string[] = [];
-  const ast = esKuery.fromKueryExpression(inputString);
+  const ast = fromKueryExpression(inputString);
   const isAndOperator = ast && ast.function === 'and';
   // if ast.type == 'function' then layout of ast.arguments:
   // [{ arguments: [ { type: 'literal', value: 'AAL' } ] },{ arguments: [ { type: 'literal', value: 'AAL' } ] }]
@@ -50,23 +56,20 @@ export function getKqlQueryValues({
     });
   }
   if (queryLanguage === SEARCH_QUERY_LANGUAGE.KUERY) {
-    influencersFilterQuery = esKuery.toElasticsearchQuery(
-      esKuery.fromKueryExpression(inputString),
-      indexPattern
-    );
+    influencersFilterQuery = toElasticsearchQuery(fromKueryExpression(inputString), indexPattern);
   } else if (queryLanguage === SEARCH_QUERY_LANGUAGE.LUCENE) {
-    influencersFilterQuery = esQuery.luceneStringToDsl(inputString);
+    influencersFilterQuery = luceneStringToDsl(inputString);
   }
 
-  const clearSettings =
-    influencersFilterQuery?.match_all && Object.keys(influencersFilterQuery.match_all).length === 0;
-
+  const clearSettings = Boolean(
+    influencersFilterQuery?.match_all && Object.keys(influencersFilterQuery.match_all).length === 0
+  );
   return {
     clearSettings,
     settings: {
       filterQuery: influencersFilterQuery,
-      queryString: inputString,
-      tableQueryString: inputString,
+      queryString: inputString as string,
+      tableQueryString: inputString as string,
       isAndOperator,
       filteredFields,
     },
@@ -95,35 +98,36 @@ function getInitSearchInputState({
 
 interface ExplorerQueryBarProps {
   filterActive: boolean;
-  filterIconTriggeredQuery: string;
-  filterPlaceHolder: string;
-  indexPattern: IIndexPattern;
+  filterPlaceHolder?: string;
+  indexPattern: DataView;
   queryString?: string;
   updateLanguage: (language: string) => void;
 }
 
 export const ExplorerQueryBar: FC<ExplorerQueryBarProps> = ({
   filterActive,
-  filterIconTriggeredQuery,
   filterPlaceHolder,
   indexPattern,
   queryString,
   updateLanguage,
 }) => {
+  const { anomalyExplorerCommonStateService } = useAnomalyExplorerContext();
+  const { services } = useMlKibana();
+  const { unifiedSearch, data, storage, appName, notifications, http, docLinks, uiSettings } =
+    services;
+
   // The internal state of the input query bar updated on every key stroke.
   const [searchInput, setSearchInput] = useState<Query>(
     getInitSearchInputState({ filterActive, queryString })
   );
   const [errorMessage, setErrorMessage] = useState<ErrorMessage | undefined>(undefined);
 
-  useEffect(() => {
-    if (filterIconTriggeredQuery !== undefined) {
-      setSearchInput({
-        language: searchInput.language,
-        query: filterIconTriggeredQuery,
-      });
-    }
-  }, [filterIconTriggeredQuery]);
+  useEffect(
+    function updateSearchInputFromFilter() {
+      setSearchInput(getInitSearchInputState({ filterActive, queryString }));
+    },
+    [filterActive, queryString]
+  );
 
   const searchChangeHandler = (query: Query) => {
     if (searchInput.language !== query.language) {
@@ -131,6 +135,7 @@ export const ExplorerQueryBar: FC<ExplorerQueryBarProps> = ({
     }
     setSearchInput(query);
   };
+
   const applyInfluencersFilterQuery = (query: Query) => {
     try {
       const { clearSettings, settings } = getKqlQueryValues({
@@ -140,9 +145,9 @@ export const ExplorerQueryBar: FC<ExplorerQueryBarProps> = ({
       });
 
       if (clearSettings === true) {
-        explorerService.clearInfluencerFilterSettings();
+        anomalyExplorerCommonStateService.clearFilterSettings();
       } else {
-        explorerService.setInfluencerFilterSettings(settings);
+        anomalyExplorerCommonStateService.setFilterSettings(settings);
       }
     } catch (e) {
       console.log('Invalid query syntax in search bar', e); // eslint-disable-line no-console
@@ -152,8 +157,8 @@ export const ExplorerQueryBar: FC<ExplorerQueryBarProps> = ({
 
   return (
     <EuiInputPopover
-      style={{ maxWidth: '100%' }}
-      closePopover={() => setErrorMessage(undefined)}
+      css={{ 'max-width': '100%' }}
+      closePopover={setErrorMessage.bind(null, undefined)}
       input={
         <QueryStringInput
           bubbleSubmitEvent={false}
@@ -165,6 +170,8 @@ export const ExplorerQueryBar: FC<ExplorerQueryBarProps> = ({
           disableAutoFocus
           dataTestSubj="explorerQueryInput"
           languageSwitcherPopoverAnchorPosition="rightDown"
+          appName={appName}
+          deps={{ unifiedSearch, notifications, http, docLinks, uiSettings, data, storage }}
         />
       }
       isOpen={errorMessage?.query === searchInput.query && errorMessage?.message !== ''}

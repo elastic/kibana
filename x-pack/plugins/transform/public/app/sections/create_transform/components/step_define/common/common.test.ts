@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import { getPivotDropdownOptions } from '../common';
-import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
+import { getPivotDropdownOptions } from '.';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { FilterAggForm } from './filter_agg/components';
-import type { RuntimeField } from '../../../../../../../../../../src/plugins/data/common/index_patterns';
+import type { RuntimeField } from '@kbn/data-views-plugin/common';
+import { PercentilesAggForm } from './percentiles_agg/percentiles_form_component';
 
 describe('Transform: Define Pivot Common', () => {
   test('getPivotDropdownOptions()', () => {
-    // The field name includes the characters []> as well as a leading and ending space charcter
+    // The field name includes the characters []> as well as a leading and ending space character
     // which cannot be used for aggregation names. The test results verifies that the characters
     // should still be present in field and dropDownName values, but should be stripped for aggName values.
-    const indexPattern = {
-      id: 'the-index-pattern-id',
-      title: 'the-index-pattern-title',
+    const dataView = {
+      id: 'the-data-view-id',
+      title: 'the-data-view-title',
       fields: [
         {
           name: ' the-f[i]e>ld ',
@@ -27,9 +28,9 @@ describe('Transform: Define Pivot Common', () => {
           searchable: true,
         },
       ],
-    } as IndexPattern;
+    } as DataView;
 
-    const options = getPivotDropdownOptions(indexPattern);
+    const options = getPivotDropdownOptions(dataView);
 
     expect(options).toMatchObject({
       aggOptions: [
@@ -44,6 +45,7 @@ describe('Transform: Define Pivot Common', () => {
             { label: 'sum( the-f[i]e>ld )' },
             { label: 'value_count( the-f[i]e>ld )' },
             { label: 'filter( the-f[i]e>ld )' },
+            { label: 'top_metrics( the-f[i]e>ld )' },
           ],
         },
       ],
@@ -77,7 +79,8 @@ describe('Transform: Define Pivot Common', () => {
           field: ' the-f[i]e>ld ',
           aggName: 'the-field.percentiles',
           dropDownName: 'percentiles( the-f[i]e>ld )',
-          percents: [1, 5, 25, 50, 75, 95, 99],
+          AggFormComponent: PercentilesAggForm,
+          aggConfig: { percents: '1,5,25,50,75,95,99' },
         },
         'filter( the-f[i]e>ld )': {
           agg: 'filter',
@@ -119,7 +122,7 @@ describe('Transform: Define Pivot Common', () => {
         },
       } as RuntimeField,
     };
-    const optionsWithRuntimeFields = getPivotDropdownOptions(indexPattern, runtimeMappings);
+    const optionsWithRuntimeFields = getPivotDropdownOptions(dataView, runtimeMappings);
     expect(optionsWithRuntimeFields).toMatchObject({
       aggOptions: [
         {
@@ -133,6 +136,7 @@ describe('Transform: Define Pivot Common', () => {
             { label: 'sum( the-f[i]e>ld )' },
             { label: 'value_count( the-f[i]e>ld )' },
             { label: 'filter( the-f[i]e>ld )' },
+            { label: 'top_metrics( the-f[i]e>ld )' },
           ],
         },
         {
@@ -146,6 +150,7 @@ describe('Transform: Define Pivot Common', () => {
             { label: 'sum(rt_bytes_bigger)' },
             { label: 'value_count(rt_bytes_bigger)' },
             { label: 'filter(rt_bytes_bigger)' },
+            { label: 'top_metrics(rt_bytes_bigger)' },
           ],
         },
       ],
@@ -179,7 +184,8 @@ describe('Transform: Define Pivot Common', () => {
           aggName: 'the-field.percentiles',
           dropDownName: 'percentiles( the-f[i]e>ld )',
           field: ' the-f[i]e>ld ',
-          percents: [1, 5, 25, 50, 75, 95, 99],
+          AggFormComponent: PercentilesAggForm,
+          aggConfig: { percents: '1,5,25,50,75,95,99' },
         },
         'sum( the-f[i]e>ld )': {
           agg: 'sum',
@@ -230,7 +236,8 @@ describe('Transform: Define Pivot Common', () => {
           aggName: 'rt_bytes_bigger.percentiles',
           dropDownName: 'percentiles(rt_bytes_bigger)',
           field: 'rt_bytes_bigger',
-          percents: [1, 5, 25, 50, 75, 95, 99],
+          AggFormComponent: PercentilesAggForm,
+          aggConfig: { percents: '1,5,25,50,75,95,99' },
         },
         'sum(rt_bytes_bigger)': {
           agg: 'sum',

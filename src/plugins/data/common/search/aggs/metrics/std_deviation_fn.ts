@@ -7,8 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
-import { AggExpressionType, AggExpressionFunctionArgs, METRIC_TYPES } from '../';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import { AggExpressionType, AggExpressionFunctionArgs, METRIC_TYPES } from '..';
 
 export const aggStdDeviationFnName = 'aggStdDeviation';
 
@@ -48,6 +48,14 @@ export const aggStdDeviation = (): FunctionDefinition => ({
         defaultMessage: 'Schema to use for this aggregation',
       }),
     },
+    showBounds: {
+      types: ['boolean'],
+      default: true,
+      help: i18n.translate('data.search.aggs.metrics.std_deviation.showBounds.help', {
+        defaultMessage:
+          'Specifies whether this aggregation should return upper and lower bound or the standard deviation itself',
+      }),
+    },
     field: {
       types: ['string'],
       required: true,
@@ -65,6 +73,13 @@ export const aggStdDeviation = (): FunctionDefinition => ({
       types: ['string'],
       help: i18n.translate('data.search.aggs.metrics.std_deviation.customLabel.help', {
         defaultMessage: 'Represents a custom label for this aggregation',
+      }),
+    },
+    timeShift: {
+      types: ['string'],
+      help: i18n.translate('data.search.aggs.metrics.timeShift.help', {
+        defaultMessage:
+          'Shift the time range for the metric by a set time, for example 1h or 7d. "previous" will use the closest time range from the date histogram or time range filter.',
       }),
     },
   },

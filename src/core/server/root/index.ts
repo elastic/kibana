@@ -8,9 +8,9 @@
 
 import { ConnectableObservable, Subscription } from 'rxjs';
 import { first, publishReplay, switchMap, concatMap, tap } from 'rxjs/operators';
-
-import { Env, RawConfigurationProvider } from '../config';
-import { Logger, LoggerFactory, LoggingConfigType, LoggingSystem } from '../logging';
+import type { Logger, LoggerFactory } from '@kbn/logging';
+import { Env, RawConfigurationProvider } from '@kbn/config';
+import { LoggingConfigType, LoggingSystem } from '@kbn/core-logging-server-internal';
 import { Server } from '../server';
 
 /**
@@ -34,10 +34,20 @@ export class Root {
     this.server = new Server(rawConfigProvider, env, this.loggingSystem);
   }
 
-  public async setup() {
+  public async preboot() {
     try {
       this.server.setupCoreConfig();
       await this.setupLogging();
+      this.log.debug('prebooting root');
+      return await this.server.preboot();
+    } catch (e) {
+      await this.shutdown(e);
+      throw e;
+    }
+  }
+
+  public async setup() {
+    try {
       this.log.debug('setting up root');
       return await this.server.setup();
     } catch (e) {

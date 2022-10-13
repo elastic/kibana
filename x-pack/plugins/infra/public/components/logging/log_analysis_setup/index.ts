@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export * from './setup_page';
-
 export * from './initial_configuration_step';
 export * from './process_step';
 

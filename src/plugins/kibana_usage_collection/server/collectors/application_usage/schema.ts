@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
+import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
 import { ApplicationUsageTelemetryReport } from './types';
 
 const commonSchema: MakeSchemaFrom<ApplicationUsageTelemetryReport[string]> = {
@@ -124,17 +124,19 @@ export const applicationUsageSchema = {
   kibana: commonSchema, // It's a forward app so we'll likely never report it
   management: commonSchema,
   short_url_redirect: commonSchema, // It's a forward app so we'll likely never report it
-  timelion: commonSchema,
   visualize: commonSchema,
   error: commonSchema,
   status: commonSchema,
   kibanaOverview: commonSchema,
+  r: commonSchema,
 
   // X-Pack
   apm: commonSchema,
   canvas: commonSchema,
-  dashboard_mode: commonSchema, // It's a forward app so we'll likely never report it
   enterpriseSearch: commonSchema,
+  enterpriseSearchContent: commonSchema,
+  enterpriseSearchAnalytics: commonSchema,
+  elasticsearch: commonSchema,
   appSearch: commonSchema,
   workplaceSearch: commonSchema,
   graph: commonSchema,
@@ -142,6 +144,7 @@ export const applicationUsageSchema = {
   metrics: commonSchema,
   infra: commonSchema, // It's a forward app so we'll likely never report it
   fleet: commonSchema,
+  integrations: commonSchema,
   ingestManager: commonSchema,
   lens: commonSchema,
   maps: commonSchema,
@@ -149,23 +152,23 @@ export const applicationUsageSchema = {
   monitoring: commonSchema,
   'observability-overview': commonSchema,
   osquery: commonSchema,
+  profiling: commonSchema,
   security_account: commonSchema,
+  reportingRedirect: commonSchema,
   security_access_agreement: commonSchema,
   security_capture_url: commonSchema, // It's a forward app so we'll likely never report it
   security_logged_out: commonSchema,
   security_login: commonSchema,
   security_logout: commonSchema,
   security_overwritten_session: commonSchema,
-  securitySolution: commonSchema, // It's a forward app so we'll likely never report it
-  'securitySolution:overview': commonSchema,
-  'securitySolution:detections': commonSchema,
-  'securitySolution:hosts': commonSchema,
-  'securitySolution:network': commonSchema,
-  'securitySolution:timelines': commonSchema,
-  'securitySolution:case': commonSchema,
-  'securitySolution:administration': commonSchema,
+  securitySolutionUI: commonSchema,
+  /**
+   * @deprecated legacy key for users that still have bookmarks to the old siem name. "securitySolutionUI" key is the replacement
+   * @removeBy 9.0.0
+   */
   siem: commonSchema,
   space_selector: commonSchema,
   uptime: commonSchema,
+  synthetics: commonSchema,
   ux: commonSchema,
 };

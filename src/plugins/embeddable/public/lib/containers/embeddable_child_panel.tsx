@@ -11,19 +11,31 @@ import React from 'react';
 
 import { EuiLoadingChart } from '@elastic/eui';
 import { Subscription } from 'rxjs';
+import { distinct, map } from 'rxjs/operators';
+import { isNil } from 'lodash';
 import { ErrorEmbeddable, IEmbeddable } from '../embeddables';
 import { IContainer } from './i_container';
 import { EmbeddableStart } from '../../plugin';
+import { EmbeddableError, EmbeddableOutput } from '../embeddables/i_embeddable';
+
+export type EmbeddablePhase = 'loading' | 'loaded' | 'rendered' | 'error';
+export interface EmbeddablePhaseEvent {
+  id: string;
+  status: EmbeddablePhase;
+  error?: EmbeddableError;
+  timeToEvent: number;
+}
 
 export interface EmbeddableChildPanelProps {
   embeddableId: string;
+  index?: number;
   className?: string;
   container: IContainer;
   PanelComponent: EmbeddableStart['EmbeddablePanel'];
+  onPanelStatusChange?: (info: EmbeddablePhaseEvent) => void;
 }
-
 interface State {
-  loading: boolean;
+  firstTimeLoading: boolean;
 }
 
 /**
@@ -35,15 +47,27 @@ export class EmbeddableChildPanel extends React.Component<EmbeddableChildPanelPr
   [panel: string]: any;
   public mounted: boolean;
   public embeddable!: IEmbeddable | ErrorEmbeddable;
-  private subscription?: Subscription;
+  private subscription: Subscription = new Subscription();
 
   constructor(props: EmbeddableChildPanelProps) {
     super(props);
     this.state = {
-      loading: true,
+      firstTimeLoading: true,
     };
 
     this.mounted = false;
+  }
+
+  private getEventStatus(output: EmbeddableOutput): EmbeddablePhase {
+    if (!isNil(output.error)) {
+      return 'error';
+    } else if (output.rendered === true) {
+      return 'rendered';
+    } else if (output.loading === false) {
+      return 'loaded';
+    } else {
+      return 'loading';
+    }
   }
 
   public async componentDidMount() {
@@ -51,8 +75,42 @@ export class EmbeddableChildPanel extends React.Component<EmbeddableChildPanelPr
     const { container } = this.props;
 
     this.embeddable = await container.untilEmbeddableLoaded(this.props.embeddableId);
+
     if (this.mounted) {
-      this.setState({ loading: false });
+      let loadingStartTime = 0;
+      this.subscription?.add(
+        this.embeddable
+          .getOutput$()
+          .pipe(
+            // Map loaded event properties
+            map((output) => {
+              if (output.loading === true) {
+                loadingStartTime = performance.now();
+              }
+              return {
+                id: this.embeddable.id,
+                status: this.getEventStatus(output),
+                error: output.error,
+              };
+            }),
+            // Dedupe
+            distinct((output) => loadingStartTime + output.id + output.status + !!output.error),
+            // Map loaded event properties
+            map((output): EmbeddablePhaseEvent => {
+              return {
+                ...output,
+                timeToEvent: performance.now() - loadingStartTime,
+              };
+            })
+          )
+          .subscribe((statusOutput) => {
+            if (this.props.onPanelStatusChange) {
+              this.props.onPanelStatusChange(statusOutput);
+            }
+          })
+      );
+
+      this.setState({ firstTimeLoading: false });
     }
   }
 
@@ -64,17 +122,17 @@ export class EmbeddableChildPanel extends React.Component<EmbeddableChildPanelPr
   }
 
   public render() {
-    const { PanelComponent } = this.props;
+    const { PanelComponent, index } = this.props;
     const classes = classNames('embPanel', {
-      'embPanel-isLoading': this.state.loading,
+      'embPanel-isLoading': this.state.firstTimeLoading,
     });
 
     return (
       <div className={classes}>
-        {this.state.loading || !this.embeddable ? (
+        {this.state.firstTimeLoading || !this.embeddable ? (
           <EuiLoadingChart size="l" mono />
         ) : (
-          <PanelComponent embeddable={this.embeddable} />
+          <PanelComponent embeddable={this.embeddable} index={index} />
         )}
       </div>
     );

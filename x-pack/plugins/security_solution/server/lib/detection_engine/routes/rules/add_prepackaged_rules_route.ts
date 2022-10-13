@@ -6,45 +6,34 @@
  */
 
 import moment from 'moment';
+import { transformError } from '@kbn/securitysolution-es-utils';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type {
-  AppClient,
+  SecuritySolutionApiRequestHandlerContext,
   SecuritySolutionPluginRouter,
-  SecuritySolutionRequestHandlerContext,
 } from '../../../../types';
 
-import { validate } from '../../../../../common/validate';
-import {
-  PrePackagedRulesAndTimelinesSchema,
-  prePackagedRulesAndTimelinesSchema,
-} from '../../../../../common/detection_engine/schemas/response/prepackaged_rules_schema';
+import type { PrePackagedRulesAndTimelinesSchema } from '../../../../../common/detection_engine/schemas/response/prepackaged_rules_schema';
+import { prePackagedRulesAndTimelinesSchema } from '../../../../../common/detection_engine/schemas/response/prepackaged_rules_schema';
 import { importTimelineResultSchema } from '../../../../../common/types/timeline';
 import { DETECTION_ENGINE_PREPACKAGED_URL } from '../../../../../common/constants';
 
-import { ConfigType } from '../../../../config';
-import { SetupPlugins } from '../../../../plugin';
-import { buildFrameworkRequest } from '../../../timeline/utils/common';
-
-import { getIndexExists } from '../../index/get_index_exists';
 import { getLatestPrepackagedRules } from '../../rules/get_prepackaged_rules';
 import { installPrepackagedRules } from '../../rules/install_prepacked_rules';
 import { updatePrepackagedRules } from '../../rules/update_prepacked_rules';
 import { getRulesToInstall } from '../../rules/get_rules_to_install';
 import { getRulesToUpdate } from '../../rules/get_rules_to_update';
 import { getExistingPrepackagedRules } from '../../rules/get_existing_prepackaged_rules';
-import { ruleAssetSavedObjectsClientFactory } from '../../rules/rule_asset_saved_objects_client';
+import { ruleAssetSavedObjectsClientFactory } from '../../rules/rule_asset/rule_asset_saved_objects_client';
 
-import { transformError, buildSiemResponse } from '../utils';
-import { AlertsClient } from '../../../../../../alerting/server';
-import { FrameworkRequest } from '../../../framework';
+import { buildSiemResponse } from '../utils';
 
-import { ExceptionListClient } from '../../../../../../lists/server';
 import { installPrepackagedTimelines } from '../../../timeline/routes/prepackaged_timelines/install_prepackaged_timelines';
+import { rulesToMap } from '../../rules/utils';
 
-export const addPrepackedRulesRoute = (
-  router: SecuritySolutionPluginRouter,
-  config: ConfigType,
-  security: SetupPlugins['security']
-) => {
+export const addPrepackedRulesRoute = (router: SecuritySolutionPluginRouter) => {
   router.put(
     {
       path: DETECTION_ENGINE_PREPACKAGED_URL,
@@ -62,22 +51,14 @@ export const addPrepackedRulesRoute = (
     },
     async (context, _, response) => {
       const siemResponse = buildSiemResponse(response);
-      const frameworkRequest = await buildFrameworkRequest(context, security, _);
 
       try {
-        const alertsClient = context.alerting?.getAlertsClient();
-        const siemClient = context.securitySolution?.getAppClient();
-
-        if (!siemClient || !alertsClient) {
-          return siemResponse.error({ statusCode: 404 });
-        }
+        const rulesClient = (await context.alerting).getRulesClient();
 
         const validated = await createPrepackagedRules(
-          context,
-          siemClient,
-          alertsClient,
-          frameworkRequest,
-          config.maxTimelineImportExportSize
+          await context.securitySolution,
+          rulesClient,
+          undefined
         );
         return response.ok({ body: validated ?? {} });
       } catch (err) {
@@ -91,7 +72,7 @@ export const addPrepackedRulesRoute = (
   );
 };
 
-class PrepackagedRulesError extends Error {
+export class PrepackagedRulesError extends Error {
   public readonly statusCode: number;
   constructor(message: string, statusCode: number) {
     super(message);
@@ -100,19 +81,24 @@ class PrepackagedRulesError extends Error {
 }
 
 export const createPrepackagedRules = async (
-  context: SecuritySolutionRequestHandlerContext,
-  siemClient: AppClient,
-  alertsClient: AlertsClient,
-  frameworkRequest: FrameworkRequest,
-  maxTimelineImportExportSize: number,
+  context: SecuritySolutionApiRequestHandlerContext,
+  rulesClient: RulesClient,
   exceptionsClient?: ExceptionListClient
 ): Promise<PrePackagedRulesAndTimelinesSchema | null> => {
-  const esClient = context.core.elasticsearch.client;
+  const config = context.getConfig();
+  const frameworkRequest = context.getFrameworkRequest();
   const savedObjectsClient = context.core.savedObjects.client;
-  const exceptionsListClient =
-    context.lists != null ? context.lists.getExceptionListClient() : exceptionsClient;
+  const siemClient = context.getAppClient();
+  const exceptionsListClient = context.getExceptionListClient() ?? exceptionsClient;
   const ruleAssetsClient = ruleAssetSavedObjectsClientFactory(savedObjectsClient);
-  if (!siemClient || !alertsClient) {
+
+  const {
+    maxTimelineImportExportSize,
+    prebuiltRulesFromFileSystem,
+    prebuiltRulesFromSavedObjects,
+  } = config;
+
+  if (!siemClient || !rulesClient) {
     throw new PrepackagedRulesError('', 404);
   }
 
@@ -121,22 +107,16 @@ export const createPrepackagedRules = async (
     await exceptionsListClient.createEndpointList();
   }
 
-  const latestPrepackagedRules = await getLatestPrepackagedRules(ruleAssetsClient);
-  const prepackagedRules = await getExistingPrepackagedRules({ alertsClient });
-  const rulesToInstall = getRulesToInstall(latestPrepackagedRules, prepackagedRules);
-  const rulesToUpdate = getRulesToUpdate(latestPrepackagedRules, prepackagedRules);
-  const signalsIndex = siemClient.getSignalsIndex();
-  if (rulesToInstall.length !== 0 || rulesToUpdate.length !== 0) {
-    const signalsIndexExists = await getIndexExists(esClient.asCurrentUser, signalsIndex);
-    if (!signalsIndexExists) {
-      throw new PrepackagedRulesError(
-        `Pre-packaged rules cannot be installed until the signals index is created: ${signalsIndex}`,
-        400
-      );
-    }
-  }
+  const latestPrepackagedRulesMap = await getLatestPrepackagedRules(
+    ruleAssetsClient,
+    prebuiltRulesFromFileSystem,
+    prebuiltRulesFromSavedObjects
+  );
+  const installedPrePackagedRules = rulesToMap(await getExistingPrepackagedRules({ rulesClient }));
+  const rulesToInstall = getRulesToInstall(latestPrepackagedRulesMap, installedPrePackagedRules);
+  const rulesToUpdate = getRulesToUpdate(latestPrepackagedRulesMap, installedPrePackagedRules);
 
-  await Promise.all(installPrepackagedRules(alertsClient, rulesToInstall, signalsIndex));
+  await installPrepackagedRules(rulesClient, rulesToInstall);
   const timeline = await installPrepackagedTimelines(
     maxTimelineImportExportSize,
     frameworkRequest,
@@ -146,7 +126,12 @@ export const createPrepackagedRules = async (
     timeline,
     importTimelineResultSchema
   );
-  await updatePrepackagedRules(alertsClient, savedObjectsClient, rulesToUpdate, signalsIndex);
+  await updatePrepackagedRules(
+    rulesClient,
+    savedObjectsClient,
+    rulesToUpdate,
+    context.getRuleExecutionLog()
+  );
 
   const prepackagedRulesOutput: PrePackagedRulesAndTimelinesSchema = {
     rules_installed: rulesToInstall.length,

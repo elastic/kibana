@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export * from './status';
+export * from './status_popover_button';
 export * from './config';
-export * from './stats';
+export * from './status_stats';
 export * from './types';

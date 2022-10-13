@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
+import type { UiCounterMetricType } from '@kbn/analytics';
+import { METRIC_TYPE } from '@kbn/analytics';
 
-import { SetupPlugins } from '../../../types';
+import type { SetupPlugins } from '../../../types';
 export { telemetryMiddleware } from './middleware';
 
 export { METRIC_TYPE };
@@ -27,14 +28,9 @@ export const track: TrackFn = (type, event, count) => {
 };
 
 export const initTelemetry = (
-  {
-    usageCollection,
-    telemetryManagementSection,
-  }: Pick<SetupPlugins, 'usageCollection' | 'telemetryManagementSection'>,
+  { usageCollection }: Pick<SetupPlugins, 'usageCollection'>,
   appId: string
 ) => {
-  telemetryManagementSection?.toggleSecuritySolutionExample(true);
-
   _track = usageCollection?.reportUiCounter?.bind(null, appId) ?? noop;
 };
 

@@ -6,32 +6,38 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ILegacyScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { get } from 'lodash';
 
 import { RouteDependencies } from '../../../types';
 // @ts-ignore
-import { ExecuteDetails } from '../../../models/execute_details/index';
+import { ExecuteDetails } from '../../../models/execute_details';
 // @ts-ignore
-import { Watch } from '../../../models/watch/index';
+import { Watch } from '../../../models/watch';
 // @ts-ignore
-import { WatchHistoryItem } from '../../../models/watch_history_item/index';
+import { WatchHistoryItem } from '../../../models/watch_history_item';
 
 const bodySchema = schema.object({
   executeDetails: schema.object({}, { unknowns: 'allow' }),
   watch: schema.object({}, { unknowns: 'allow' }),
 });
 
-function executeWatch(dataClient: ILegacyScopedClusterClient, executeDetails: any, watchJson: any) {
+function executeWatch(dataClient: IScopedClusterClient, executeDetails: any, watchJson: any) {
   const body = executeDetails;
   body.watch = watchJson;
 
-  return dataClient.callAsCurrentUser('watcher.executeWatch', {
-    body,
-  });
+  return dataClient.asCurrentUser.watcher
+    .executeWatch({
+      body,
+    })
+    .then((returnValue) => returnValue);
 }
 
-export function registerExecuteRoute({ router, license, lib: { isEsError } }: RouteDependencies) {
+export function registerExecuteRoute({
+  router,
+  license,
+  lib: { handleEsError },
+}: RouteDependencies) {
   router.put(
     {
       path: '/api/watcher/watch/execute',
@@ -44,11 +50,8 @@ export function registerExecuteRoute({ router, license, lib: { isEsError } }: Ro
       const watch = Watch.fromDownstreamJson(request.body.watch);
 
       try {
-        const hit = await executeWatch(
-          ctx.watcher!.client,
-          executeDetails.upstreamJson,
-          watch.watchJson
-        );
+        const esClient = (await ctx.core).elasticsearch.client;
+        const hit = await executeWatch(esClient, executeDetails.upstreamJson, watch.watchJson);
         const id = get(hit, '_id');
         const watchHistoryItemJson = get(hit, 'watch_record');
         const watchId = get(hit, 'watch_record.watch_id');
@@ -66,13 +69,7 @@ export function registerExecuteRoute({ router, license, lib: { isEsError } }: Ro
           },
         });
       } catch (e) {
-        // Case: Error from Elasticsearch JS client
-        if (isEsError(e)) {
-          return response.customError({ statusCode: e.statusCode, body: e });
-        }
-
-        // Case: default
-        throw e;
+        return handleEsError({ error: e, response });
       }
     })
   );

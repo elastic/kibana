@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FunctionComponent, useEffect, useState } from 'react';
 import {
   EuiButton,
@@ -196,6 +196,11 @@ export const EditProcessorForm: FunctionComponent<Props> = ({
             {tabs.map((tab) => (
               <EuiTab
                 onClick={async () => {
+                  // No need to do anything if user clicks the already active tab
+                  if (tab.id === activeTab) {
+                    return;
+                  }
+
                   if (tab.id === 'output') {
                     await handleSubmit(false);
                   } else {

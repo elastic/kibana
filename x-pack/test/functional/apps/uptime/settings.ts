@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
+import { DynamicSettings } from '@kbn/synthetics-plugin/common/runtime_types';
+import { DYNAMIC_SETTINGS_DEFAULTS } from '@kbn/synthetics-plugin/common/constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { DynamicSettings } from '../../../../plugins/uptime/common/runtime_types';
-import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../plugins/uptime/common/constants';
 import { makeChecks } from '../../../api_integration/apis/uptime/rest/helper/make_checks';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -50,7 +50,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(await settings.applyButtonIsDisabled()).to.eql(true);
     });
 
-    // Failing: https://github.com/elastic/kibana/issues/60863
     it('changing index pattern setting is reflected elsewhere in UI', async () => {
       const settings = uptimeService.settings;
 

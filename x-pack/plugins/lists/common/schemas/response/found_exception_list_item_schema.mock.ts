@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import { getExceptionListItemSchemaMock } from './exception_list_item_schema.mock';
-import { FoundExceptionListItemSchema } from './found_exception_list_item_schema';
+import type { FoundExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-export const getFoundExceptionListItemSchemaMock = (): FoundExceptionListItemSchema => ({
-  data: [getExceptionListItemSchemaMock()],
+import { getExceptionListItemSchemaMock } from './exception_list_item_schema.mock';
+
+export const getFoundExceptionListItemSchemaMock = (
+  count: number = 1
+): FoundExceptionListItemSchema => ({
+  data: Array.from({ length: count }, getExceptionListItemSchemaMock),
   page: 1,
   per_page: 1,
-  total: 1,
+  total: count,
 });

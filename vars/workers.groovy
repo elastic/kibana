@@ -9,6 +9,8 @@ def label(size) {
       return 'docker && linux && immutable'
     case 's-highmem':
       return 'docker && tests-s'
+    case 'm':
+      return 'docker && linux && immutable && gobld/machineType:n2-standard-8'
     case 'm-highmem':
       return 'docker && linux && immutable && gobld/machineType:n1-highmem-8'
     case 'l':
@@ -18,7 +20,7 @@ def label(size) {
     case 'xl-highmem':
       return 'docker && tests-xl-highmem'
     case 'xxl':
-      return 'docker && tests-xxl && gobld/machineType:custom-64-270336'
+      return 'docker && tests-xxl && gobld/machineType:custom-64-327680'
     case 'n2-standard-16':
       return 'docker && linux && immutable && gobld/machineType:n2-standard-16'
   }
@@ -77,10 +79,12 @@ def base(Map params, Closure closure) {
       dir("kibana") {
         checkoutInfo = getCheckoutInfo()
 
-        // use `checkoutInfo` as a flag to indicate that we've already reported the pending commit status
-        if (buildState.get('shouldSetCommitStatus') && !buildState.has('checkoutInfo')) {
+        if (!buildState.has('checkoutInfo')) {
           buildState.set('checkoutInfo', checkoutInfo)
-          githubCommitStatus.onStart()
+
+          if (buildState.get('shouldSetCommitStatus')) {
+            githubCommitStatus.onStart()
+          }
         }
       }
 
@@ -95,10 +99,13 @@ def base(Map params, Closure closure) {
     withEnv([
       "CI=true",
       "HOME=${env.JENKINS_HOME}",
+      "PR_NUMBER=${env.ghprbPullId ?: ''}",
       "PR_SOURCE_BRANCH=${env.ghprbSourceBranch ?: ''}",
       "PR_TARGET_BRANCH=${env.ghprbTargetBranch ?: ''}",
+      "PR_MERGE_BASE=${checkoutInfo.mergeBase ?: ''}",
       "PR_AUTHOR=${env.ghprbPullAuthorLogin ?: ''}",
       "TEST_BROWSER_HEADLESS=1",
+      "GIT_COMMIT=${checkoutInfo.commit}",
       "GIT_BRANCH=${checkoutInfo.branch}",
       "TMPDIR=${env.WORKSPACE}/tmp", // For Chrome and anything else that respects it
       "BUILD_TS_REFS_DISABLE=true", // no need to build ts refs in bootstrap

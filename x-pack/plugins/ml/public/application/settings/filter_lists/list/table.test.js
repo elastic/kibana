@@ -12,7 +12,7 @@ jest.mock('../../../capabilities/check_capabilities', () => ({
 }));
 jest.mock('../../../services/ml_api_service', () => 'ml');
 
-import { shallowWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 
 import { FilterListsTable } from './table';

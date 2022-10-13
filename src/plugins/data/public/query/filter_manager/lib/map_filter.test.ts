@@ -7,63 +7,49 @@
  */
 
 import { mapFilter } from './map_filter';
-import { Filter } from '../../../../common';
+import type { Filter, PhraseFilter } from '@kbn/es-query';
+import { getDisplayValueFromFilter } from '../../..';
 
 describe('filter manager utilities', () => {
-  function getDisplayName(filter: Filter) {
-    return typeof filter.meta.value === 'function'
-      ? (filter.meta.value as any)()
-      : filter.meta.value;
-  }
-
   describe('mapFilter()', () => {
     test('should map query filters', async () => {
       const before = {
         meta: { index: 'logstash-*' },
         query: { match: { _type: { query: 'apache', type: 'phrase' } } },
       };
-      const after = mapFilter(before as Filter);
+      const after = mapFilter(before as Filter) as PhraseFilter;
 
       expect(after).toHaveProperty('meta');
       expect(after.meta).toHaveProperty('key', '_type');
       expect(after.meta).toHaveProperty('value');
-      expect(getDisplayName(after)).toBe('apache');
+      expect(getDisplayValueFromFilter(after, [])).toBe('apache');
       expect(after.meta).toHaveProperty('disabled', false);
       expect(after.meta).toHaveProperty('negate', false);
     });
 
     test('should map exists filters', async () => {
-      const before: any = { meta: { index: 'logstash-*' }, exists: { field: '@timestamp' } };
+      const before: any = {
+        meta: { index: 'logstash-*' },
+        query: { exists: { field: '@timestamp' } },
+      };
       const after = mapFilter(before as Filter);
 
       expect(after).toHaveProperty('meta');
       expect(after.meta).toHaveProperty('key', '@timestamp');
       expect(after.meta).toHaveProperty('value');
-      expect(getDisplayName(after)).toBe('exists');
-      expect(after.meta).toHaveProperty('disabled', false);
-      expect(after.meta).toHaveProperty('negate', false);
-    });
-
-    test('should map missing filters', async () => {
-      const before: any = { meta: { index: 'logstash-*' }, missing: { field: '@timestamp' } };
-      const after = mapFilter(before as Filter);
-
-      expect(after).toHaveProperty('meta');
-      expect(after.meta).toHaveProperty('key', '@timestamp');
-      expect(after.meta).toHaveProperty('value');
-      expect(getDisplayName(after)).toBe('missing');
+      expect(getDisplayValueFromFilter(after, [])).toBe('exists');
       expect(after.meta).toHaveProperty('disabled', false);
       expect(after.meta).toHaveProperty('negate', false);
     });
 
     test('should map json filter', async () => {
-      const before: any = { meta: { index: 'logstash-*' }, query: { match_all: {} } };
+      const before: any = { meta: { index: 'logstash-*' }, query: { test: {} } };
       const after = mapFilter(before as Filter);
 
       expect(after).toHaveProperty('meta');
       expect(after.meta).toHaveProperty('key', 'query');
       expect(after.meta).toHaveProperty('value');
-      expect(getDisplayName(after)).toBe('{"match_all":{}}');
+      expect(getDisplayValueFromFilter(after, [])).toBe('{"test":{}}');
       expect(after.meta).toHaveProperty('disabled', false);
       expect(after.meta).toHaveProperty('negate', false);
     });

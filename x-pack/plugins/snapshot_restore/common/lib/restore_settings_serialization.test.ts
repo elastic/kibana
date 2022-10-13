@@ -28,7 +28,6 @@ describe('restore_settings_serialization()', () => {
   });
 
   it('should serialize partial restore settings with index pattern', () => {
-    expect(serializeRestoreSettings({})).toEqual({});
     expect(
       serializeRestoreSettings({
         indices: 'foo*,bar',
@@ -39,6 +38,18 @@ describe('restore_settings_serialization()', () => {
       indices: 'foo*,bar',
       ignore_index_settings: ['setting1'],
       partial: true,
+    });
+  });
+
+  it('should serialize feature_states', () => {
+    expect(
+      serializeRestoreSettings({
+        indices: ['foo'],
+        featureStates: ['kibana', 'machinelearning'],
+      })
+    ).toEqual({
+      indices: ['foo'],
+      feature_states: ['kibana', 'machinelearning'],
     });
   });
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mountHook } from '@kbn/test/jest';
+import { mountHook } from '@kbn/test-jest-helpers';
 
 import { useLogViewConfiguration } from './log_view_configuration';
 

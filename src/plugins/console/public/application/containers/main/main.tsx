@@ -8,10 +8,16 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiPageContent } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
+  EuiPageContent_Deprecated as EuiPageContent,
+} from '@elastic/eui';
 import { ConsoleHistory } from '../console_history';
 import { Editor } from '../editor';
 import { Settings } from '../settings';
+import { Variables } from '../variables';
 
 import {
   TopNavMenu,
@@ -25,6 +31,8 @@ import { useServicesContext, useEditorReadContext, useRequestReadContext } from 
 import { useDataInit } from '../../hooks';
 
 import { getTopNavConfig } from './get_top_nav';
+import type { SenseEditor } from '../../models/sense_editor';
+import { getResponseWithMostSevereStatusCode } from '../../../lib/utils';
 
 export function Main() {
   const {
@@ -45,6 +53,9 @@ export function Main() {
   const [showingHistory, setShowHistory] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+  const [showVariables, setShowVariables] = useState(false);
+
+  const [editorInstance, setEditorInstance] = useState<SenseEditor | null>(null);
 
   const renderConsoleHistory = () => {
     return editorsReady ? <ConsoleHistory close={() => setShowHistory(false)} /> : null;
@@ -59,7 +70,7 @@ export function Main() {
     );
   }
 
-  const lastDatum = requestData?.[requestData.length - 1] ?? requestError;
+  const data = getResponseWithMostSevereStatusCode(requestData) ?? requestError;
 
   return (
     <div id="consoleRoot">
@@ -85,6 +96,7 @@ export function Main() {
                   onClickHistory: () => setShowHistory(!showingHistory),
                   onClickSettings: () => setShowSettings(true),
                   onClickHelp: () => setShowHelp(!showHelp),
+                  onClickVariables: () => setShowVariables(!showVariables),
                 })}
               />
             </EuiFlexItem>
@@ -92,13 +104,13 @@ export function Main() {
               <NetworkRequestStatusBar
                 requestInProgress={requestInProgress}
                 requestResult={
-                  lastDatum
+                  data
                     ? {
-                        method: lastDatum.request.method.toUpperCase(),
-                        endpoint: lastDatum.request.path,
-                        statusCode: lastDatum.response.statusCode,
-                        statusText: lastDatum.response.statusText,
-                        timeElapsedMs: lastDatum.response.timeMs,
+                        method: data.request.method.toUpperCase(),
+                        endpoint: data.request.path,
+                        statusCode: data.response.statusCode,
+                        statusText: data.response.statusText,
+                        timeElapsedMs: data.response.timeMs,
                       }
                     : undefined
                 }
@@ -108,7 +120,7 @@ export function Main() {
         </EuiFlexItem>
         {showingHistory ? <EuiFlexItem grow={false}>{renderConsoleHistory()}</EuiFlexItem> : null}
         <EuiFlexItem>
-          <Editor loading={!done} />
+          <Editor loading={!done} setEditorInstance={setEditorInstance} />
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -121,7 +133,11 @@ export function Main() {
         />
       ) : null}
 
-      {showSettings ? <Settings onClose={() => setShowSettings(false)} /> : null}
+      {showSettings ? (
+        <Settings onClose={() => setShowSettings(false)} editorInstance={editorInstance} />
+      ) : null}
+
+      {showVariables ? <Variables onClose={() => setShowVariables(false)} /> : null}
 
       {showHelp ? <HelpPanel onClose={() => setShowHelp(false)} /> : null}
     </div>

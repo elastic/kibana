@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { EuiDataGridColumn } from '@elastic/eui';
+import type { EuiDataGridColumn } from '@elastic/eui';
+import { ALERT_DURATION, ALERT_REASON, ALERT_STATUS } from '@kbn/rule-data-utils';
 
+import type { ColumnHeaderOptions } from '../../../../../common/types';
 import { defaultColumnHeaderType } from '../../../../timelines/components/timeline/body/column_headers/default_headers';
 import { DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../../../../timelines/components/timeline/body/constants';
-import { ColumnHeaderOptions } from '../../../../timelines/store/timeline/model';
 
 import * as i18n from '../../../components/alerts_table/translations';
 
@@ -23,7 +24,7 @@ export const columns: Array<
   {
     columnHeaderType: defaultColumnHeaderType,
     displayAsText: i18n.STATUS,
-    id: 'kibana.rac.alert.status',
+    id: ALERT_STATUS,
     initialWidth: 74,
   },
   {
@@ -35,7 +36,7 @@ export const columns: Array<
   {
     columnHeaderType: defaultColumnHeaderType,
     displayAsText: i18n.ALERT_DURATION,
-    id: 'kibana.rac.alert.duration.us',
+    id: ALERT_DURATION,
     initialWidth: 116,
   },
   {
@@ -47,7 +48,6 @@ export const columns: Array<
   {
     columnHeaderType: defaultColumnHeaderType,
     displayAsText: i18n.ALERTS_HEADERS_REASON,
-    id: 'signal.reason',
-    initialWidth: 644,
+    id: ALERT_REASON,
   },
 ];

@@ -10,7 +10,7 @@ import React from 'react';
 
 import { Fingerprints } from './fingerprints';
 import { NetflowColumns } from './netflow_columns';
-import { NetflowProps } from './types';
+import type { NetflowProps } from './types';
 
 /**
  * Renders a visual representation of network traffic between hosts,
@@ -37,6 +37,7 @@ export const Netflow = React.memo<NetflowProps>(
     eventId,
     eventEnd,
     eventStart,
+    isDraggable,
     networkBytes,
     networkCommunityId,
     networkDirection,
@@ -82,6 +83,7 @@ export const Netflow = React.memo<NetflowProps>(
           eventId={eventId}
           eventEnd={eventEnd}
           eventStart={eventStart}
+          isDraggable={isDraggable}
           networkBytes={networkBytes}
           networkCommunityId={networkCommunityId}
           networkDirection={networkDirection}
@@ -105,6 +107,7 @@ export const Netflow = React.memo<NetflowProps>(
         <Fingerprints
           contextId={contextId}
           eventId={eventId}
+          isDraggable={isDraggable}
           tlsClientCertificateFingerprintSha1={tlsClientCertificateFingerprintSha1}
           tlsFingerprintsJa3Hash={tlsFingerprintsJa3Hash}
           tlsServerCertificateFingerprintSha1={tlsServerCertificateFingerprintSha1}

@@ -6,18 +6,25 @@
  * Side Public License, v 1.
  */
 
+import { coreMock } from '@kbn/core/server/mocks';
+import {
+  createFieldFormatsSetupMock,
+  createFieldFormatsStartMock,
+} from '@kbn/field-formats-plugin/server/mocks';
 import {
   createSearchSetupMock,
   createSearchStartMock,
   createSearchRequestHandlerContext,
 } from './search/mocks';
-import { createFieldFormatsSetupMock, createFieldFormatsStartMock } from './field_formats/mocks';
-import { createIndexPatternsStartMock } from './index_patterns/mocks';
-import { DataRequestHandlerContext } from './search';
+import { createIndexPatternsStartMock } from './data_views/mocks';
+import { createDatatableUtilitiesMock } from './datatable_utilities/mock';
 
 function createSetupContract() {
   return {
     search: createSearchSetupMock(),
+    /**
+     * @deprecated - use directly from "fieldFormats" plugin instead
+     */
     fieldFormats: createFieldFormatsSetupMock(),
   };
 }
@@ -25,15 +32,20 @@ function createSetupContract() {
 function createStartContract() {
   return {
     search: createSearchStartMock(),
+    /**
+     * @deprecated - use directly from "fieldFormats" plugin instead
+     */
     fieldFormats: createFieldFormatsStartMock(),
     indexPatterns: createIndexPatternsStartMock(),
+    datatableUtilities: createDatatableUtilitiesMock(),
   };
 }
 
 function createRequestHandlerContext() {
-  return ({
+  return {
+    core: coreMock.createRequestHandlerContext(),
     search: createSearchRequestHandlerContext(),
-  } as unknown) as jest.Mocked<DataRequestHandlerContext>;
+  };
 }
 
 export const dataPluginMock = {

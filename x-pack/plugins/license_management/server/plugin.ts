@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup } from 'kibana/server';
+import { Plugin, CoreSetup } from '@kbn/core/server';
 
 import { ApiRoutes } from './routes';
 import { handleEsError } from './shared_imports';
 import { SetupDependencies, StartDependencies } from './types';
 
 export class LicenseManagementServerPlugin
-  implements Plugin<void, void, SetupDependencies, StartDependencies> {
+  implements Plugin<void, void, SetupDependencies, StartDependencies>
+{
   private readonly apiRoutes = new ApiRoutes();
 
   setup(

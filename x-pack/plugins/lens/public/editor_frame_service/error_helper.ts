@@ -7,9 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { isEqual, uniqWith } from 'lodash';
-import { ExpressionRenderError } from '../../../../../src/plugins/expressions/public';
-import { isEsError } from '../../../../../src/plugins/data/public';
-import type { IEsError, Reason } from '../../../../../src/plugins/data/public';
+import { ExpressionRenderError } from '@kbn/expressions-plugin/public';
+import { isEsError } from '@kbn/data-plugin/public';
+import type { IEsError, Reason } from '@kbn/data-plugin/public';
 
 type ErrorCause = Required<IEsError>['attributes'];
 
@@ -27,6 +27,10 @@ interface EsAggError {
   message: string;
   stack: string;
 }
+
+const isNetworkError = (e: Error): boolean => {
+  return e.message === 'Batch request failed with status 0'; // Note: 0 here means Network error
+};
 
 const isRequestError = (e: Error | RequestError): e is RequestError => {
   if ('body' in e) {
@@ -101,7 +105,15 @@ export function getOriginalRequestErrorMessages(error?: ExpressionRenderError | 
   const errorMessages = [];
   if (error && 'original' in error && error.original) {
     if (isEsAggError(error.original)) {
-      errorMessages.push(error.message);
+      if (isNetworkError(error.original)) {
+        errorMessages.push(
+          i18n.translate('xpack.lens.editorFrame.networkErrorMessage', {
+            defaultMessage: 'Network error, try again later or contact your administrator.',
+          })
+        );
+      } else {
+        errorMessages.push(error.message);
+      }
     } else {
       const rootErrors = uniqWith(getErrorSources(error.original), isEqual);
       for (const rootError of rootErrors) {
@@ -131,6 +143,8 @@ export function getOriginalRequestErrorMessages(error?: ExpressionRenderError | 
         }
       }
     }
+  } else if (error?.message) {
+    errorMessages.push(error?.message);
   }
   return errorMessages;
 }
@@ -148,9 +162,22 @@ export function getMissingCurrentDatasource() {
 }
 
 export function getMissingIndexPatterns(indexPatternIds: string[]) {
-  return i18n.translate('xpack.lens.editorFrame.expressionMissingIndexPattern', {
-    defaultMessage:
-      'Could not find the {count, plural, one {index pattern} other {index pattern}}: {ids}',
+  return i18n.translate('xpack.lens.editorFrame.expressionMissingDataView', {
+    defaultMessage: 'Could not find the {count, plural, one {data view} other {data views}}: {ids}',
     values: { count: indexPatternIds.length, ids: indexPatternIds.join(', ') },
   });
+}
+
+export function getUnknownVisualizationTypeError(visType: string) {
+  return {
+    shortMessage: i18n.translate('xpack.lens.unknownVisType.shortMessage', {
+      defaultMessage: `Unknown visualization type`,
+    }),
+    longMessage: i18n.translate('xpack.lens.unknownVisType.longMessage', {
+      defaultMessage: `The visualization type {visType} could not be resolved.`,
+      values: {
+        visType,
+      },
+    }),
+  };
 }

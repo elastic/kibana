@@ -1,0 +1,21 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "1",
+    "index": "newline-test",
+    "source": {
+      "message" : "no new line"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "2",
+    "index": "newline-test",
+    "source": {
+      "message" : "two\nnew\nlines"
+    }
+  }
+}

@@ -30,21 +30,19 @@ export const ArgLabel = (props) => {
           <div className="canvasSidebar__accordionContent">{children}</div>
         </EuiAccordion>
       ) : (
-        simpleArg && (
-          <EuiFormRow
-            display="columnCompressed"
-            label={
-              <EuiToolTip content={help}>
-                <span>
-                  {label} <EuiIcon type="iInCircle" color="subdued" />
-                </span>
-              </EuiToolTip>
-            }
-            id={argId}
-          >
-            {simpleArg}
-          </EuiFormRow>
-        )
+        <EuiFormRow
+          display="columnCompressed"
+          label={
+            <EuiToolTip content={help}>
+              <span>
+                {label} <EuiIcon type="iInCircle" color="subdued" />
+              </span>
+            </EuiToolTip>
+          }
+          id={argId}
+        >
+          {simpleArg || children}
+        </EuiFormRow>
       )}
     </div>
   );

@@ -1,0 +1,49 @@
+.fieldEditor__flyoutPanels {
+  height: 100%;
+
+  &__column {
+    height: 100%;
+    overflow: hidden;
+  }
+}
+
+.fieldEditor__flyoutPanel {
+  height: 100%;
+  overflow-y: auto;
+  padding: $euiSizeL;
+
+  &--pageBackground {
+    background-color: $euiPageBackgroundColor;
+  }
+  &--emptyShade {
+    background-color: $euiColorEmptyShade;
+  }
+  &--leftBorder {
+    border-left: $euiBorderThin;
+  }
+  &--rightBorder {
+    border-right: $euiBorderThin;
+  }
+  &--withContent {
+    padding: 0;
+    overflow-y: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__header {
+    padding: 0 !important;
+    @include euiTextBreakWord;
+  }
+
+  &__content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: $euiSizeL;
+  }
+
+  &__footer {
+    flex: 0;
+  }
+}

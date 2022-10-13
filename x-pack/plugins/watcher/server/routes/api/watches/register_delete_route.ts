@@ -5,28 +5,34 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
-import { ILegacyScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { RouteDependencies } from '../../../types';
 
 const bodySchema = schema.object({
   watchIds: schema.arrayOf(schema.string()),
 });
 
-function deleteWatches(dataClient: ILegacyScopedClusterClient, watchIds: string[]) {
-  const deletePromises = watchIds.map((watchId) => {
-    return dataClient
-      .callAsCurrentUser('watcher.deleteWatch', {
+type DeleteWatchPromiseArray = Promise<{
+  success?: estypes.WatcherDeleteWatchResponse;
+  error?: any;
+}>;
+
+function deleteWatches(dataClient: IScopedClusterClient, watchIds: string[]) {
+  const deletePromises = watchIds.map<DeleteWatchPromiseArray>((watchId) => {
+    return dataClient.asCurrentUser.watcher
+      .deleteWatch({
         id: watchId,
       })
-      .then((success: Array<{ _id: string }>) => ({ success }))
-      .catch((error: Array<{ _id: string }>) => ({ error }));
+      .then((success) => ({ success }))
+      .catch((error) => ({ error }));
   });
 
   return Promise.all(deletePromises).then((results) => {
     const errors: Error[] = [];
-    const successes: boolean[] = [];
-    results.forEach(({ success, error }: { success?: any; error?: any }) => {
+    const successes: string[] = [];
+    results.forEach(({ success, error }) => {
       if (success) {
         successes.push(success._id);
       } else if (error) {
@@ -50,7 +56,8 @@ export function registerDeleteRoute({ router, license }: RouteDependencies) {
       },
     },
     license.guardApiRoute(async (ctx, request, response) => {
-      const results = await deleteWatches(ctx.watcher!.client, request.body.watchIds);
+      const esClient = (await ctx.core).elasticsearch.client;
+      const results = await deleteWatches(esClient, request.body.watchIds);
       return response.ok({ body: { results } });
     })
   );

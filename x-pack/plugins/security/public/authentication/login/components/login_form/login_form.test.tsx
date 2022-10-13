@@ -11,8 +11,8 @@ import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 
-import { findTestSubject, mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test/jest';
-import { coreMock } from 'src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
+import { findTestSubject, mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test-jest-helpers';
 
 import { LoginForm, MessageType, PageMode } from './login_form';
 
@@ -183,7 +183,9 @@ describe('LoginForm', () => {
       wrapper.update();
     });
 
-    expect(wrapper.find(EuiCallOut).props().title).toEqual(`Oops! Error. Try again.`);
+    expect(wrapper.find(EuiCallOut).props().title).toEqual(
+      `We couldn't log you in. Please try again.`
+    );
   });
 
   it('properly redirects after successful login', async () => {

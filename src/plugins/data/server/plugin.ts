@@ -6,49 +6,64 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from 'src/core/server';
-import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
-import { BfetchServerSetup } from 'src/plugins/bfetch/server';
+import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
+import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
+import { PluginStart as DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/server';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { ConfigSchema } from '../config';
-import { IndexPatternsServiceProvider, IndexPatternsServiceStart } from './index_patterns';
-import { ISearchSetup, ISearchStart, SearchEnhancements } from './search';
+import type { ISearchSetup, ISearchStart } from './search';
+import { DatatableUtilitiesService } from './datatable_utilities';
 import { SearchService } from './search/search_service';
 import { QueryService } from './query/query_service';
 import { ScriptsService } from './scripts';
 import { KqlTelemetryService } from './kql_telemetry';
-import { UsageCollectionSetup } from '../../usage_collection/server';
-import { AutocompleteService } from './autocomplete';
-import { FieldFormatsService, FieldFormatsSetup, FieldFormatsStart } from './field_formats';
 import { getUiSettings } from './ui_settings';
-
-export interface DataEnhancements {
-  search: SearchEnhancements;
-}
+import { QuerySetup } from './query';
 
 export interface DataPluginSetup {
   search: ISearchSetup;
-  fieldFormats: FieldFormatsSetup;
+  query: QuerySetup;
   /**
-   * @internal
+   * @deprecated - use "fieldFormats" plugin directly instead
    */
-  __enhance: (enhancements: DataEnhancements) => void;
+  fieldFormats: FieldFormatsSetup;
 }
 
 export interface DataPluginStart {
   search: ISearchStart;
+  /**
+   * @deprecated - use "fieldFormats" plugin directly instead
+   */
   fieldFormats: FieldFormatsStart;
-  indexPatterns: IndexPatternsServiceStart;
+  indexPatterns: DataViewsServerPluginStart;
+
+  /**
+   * Datatable type utility functions.
+   */
+  datatableUtilities: DatatableUtilitiesService;
 }
 
 export interface DataPluginSetupDependencies {
   bfetch: BfetchServerSetup;
   expressions: ExpressionsServerSetup;
   usageCollection?: UsageCollectionSetup;
+  fieldFormats: FieldFormatsSetup;
+  taskManager?: TaskManagerSetupContract;
+  security?: SecurityPluginSetup;
 }
 
 export interface DataPluginStartDependencies {
   fieldFormats: FieldFormatsStart;
   logger: Logger;
+  dataViews: DataViewsServerPluginStart;
+  taskManager?: TaskManagerStartContract;
 }
 
 export class DataServerPlugin
@@ -58,13 +73,11 @@ export class DataServerPlugin
       DataPluginStart,
       DataPluginSetupDependencies,
       DataPluginStartDependencies
-    > {
+    >
+{
   private readonly searchService: SearchService;
   private readonly scriptsService: ScriptsService;
   private readonly kqlTelemetryService: KqlTelemetryService;
-  private readonly autocompleteService: AutocompleteService;
-  private readonly indexPatterns = new IndexPatternsServiceProvider();
-  private readonly fieldFormats = new FieldFormatsService();
   private readonly queryService = new QueryService();
   private readonly logger: Logger;
 
@@ -73,51 +86,61 @@ export class DataServerPlugin
     this.searchService = new SearchService(initializerContext, this.logger);
     this.scriptsService = new ScriptsService();
     this.kqlTelemetryService = new KqlTelemetryService(initializerContext);
-    this.autocompleteService = new AutocompleteService(initializerContext);
   }
 
   public setup(
     core: CoreSetup<DataPluginStartDependencies, DataPluginStart>,
-    { bfetch, expressions, usageCollection }: DataPluginSetupDependencies
+    {
+      bfetch,
+      expressions,
+      usageCollection,
+      fieldFormats,
+      taskManager,
+      security,
+    }: DataPluginSetupDependencies
   ) {
     this.scriptsService.setup(core);
-    this.queryService.setup(core);
-    this.autocompleteService.setup(core);
+    const querySetup = this.queryService.setup(core);
     this.kqlTelemetryService.setup(core, { usageCollection });
-    this.indexPatterns.setup(core, {
-      expressions,
-      logger: this.logger.get('indexPatterns'),
-      usageCollection,
-    });
 
-    core.uiSettings.register(getUiSettings());
+    core.uiSettings.register(getUiSettings(core.docLinks));
 
     const searchSetup = this.searchService.setup(core, {
       bfetch,
       expressions,
       usageCollection,
+      security,
+      taskManager,
     });
 
     return {
-      __enhance: (enhancements: DataEnhancements) => {
-        searchSetup.__enhance(enhancements.search);
-      },
       search: searchSetup,
-      fieldFormats: this.fieldFormats.setup(),
+      query: querySetup,
+      fieldFormats,
     };
   }
 
-  public start(core: CoreStart) {
-    const fieldFormats = this.fieldFormats.start();
-    const indexPatterns = this.indexPatterns.start(core, {
+  public start(
+    core: CoreStart,
+    { fieldFormats, dataViews, taskManager }: DataPluginStartDependencies
+  ) {
+    const search = this.searchService.start(core, {
       fieldFormats,
-      logger: this.logger.get('indexPatterns'),
+      indexPatterns: dataViews,
+      taskManager,
     });
+    const datatableUtilities = new DatatableUtilitiesService(
+      search.aggs,
+      dataViews,
+      fieldFormats,
+      core.uiSettings
+    );
 
     return {
+      datatableUtilities,
+      search,
       fieldFormats,
-      indexPatterns,
-      search: this.searchService.start(core, { fieldFormats, indexPatterns }),
+      indexPatterns: dataViews,
     };
   }
 

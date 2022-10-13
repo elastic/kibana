@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { StartServicesAccessor } from 'src/core/server';
+import { StartServicesAccessor } from '@kbn/core/server';
+import { SavedObjectsClientCommon } from '@kbn/data-views-plugin/server';
 import { getKibanaContextFn } from '../../../common/search/expressions';
 import { DataPluginStart, DataPluginStartDependencies } from '../../plugin';
-import { SavedObjectsClientCommon } from '../../../common/index_patterns';
 
 /**
  * This is some glue code that takes in `core.getStartServices`, extracts the dependencies
@@ -38,9 +38,7 @@ export function getKibanaContext({
 
     const [{ savedObjects }] = await getStartServices();
     return {
-      savedObjectsClient: (savedObjects.getScopedClient(
-        request
-      ) as any) as SavedObjectsClientCommon,
+      savedObjectsClient: savedObjects.getScopedClient(request) as any as SavedObjectsClientCommon,
     };
   });
 }

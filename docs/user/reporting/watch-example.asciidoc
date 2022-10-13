@@ -1,10 +1,4 @@
-To automatically generate reports with a watch, you need to configure
-{watcher} to trust the {kib} server’s certificate. For more information,
-see {kibana-ref}/secure-reporting.html[Securing Reporting].
-
-To configure a watch to email reports, you use the `reporting` attachment type
-in an `email` action. For more information, see
-{ref}/actions-email.html#configuring-email[Configuring email accounts].
+To configure a watch to email reports, use the `reporting` attachment type in an `email` action. For more information, refer to {ref}/actions-email.html#configuring-email[Configuring email accounts].
 
 For example, the following watch generates a PDF report and emails the report every hour:
 
@@ -44,28 +38,18 @@ PUT _watcher/watch/error_report
 ---------------------------------------------------------
 // CONSOLE
 
-<1> You must configure at least one email account to enable Watcher to send email.
-For more information, see
-{ref}/actions-email.html#configuring-email[Configuring email accounts].
-<2> This is an example POST URL. You can copy and paste the URL for any
-report from the Kibana UI.
-<3> Optional, default is 40
-<4> Optional, default is 15s
-<5> Provide user credentials for a user with permission to access Kibana and
-the {report-features}.
-//For more information, see <<secure-reporting>>.
-//<<reporting-app-users, Setting up a Reporting Role>>.
+<1> Configure at least one email account to enable Watcher to send email. For more information, refer to {ref}/actions-email.html#configuring-email[Configuring email accounts].
+<2> An example POST URL. You can copy and paste the URL for any report.
+<3> Optional, default is `40`.
+<4> Optional, default is `15s`.
+<5> User credentials for a user with permission to access {kib} and the {report-features}. For more information, refer to <<secure-reporting>>.
 
 [NOTE]
 ====
-Reporting is integrated with Watcher only as an email attachment type.
+*Reporting* is integrated with Watcher only as an email attachment type.
 
-The report Generation URL might contain date-math expressions
-that cause the watch to fail with a `parse_exception`.
-Remove curly braces `{`  `}` from date-math expressions and
-URL-encode characters to avoid this.
-For example: `...(range:(%27@timestamp%27:(gte:now-15m%2Fd,lte:now%2Fd))))...`
+The report generation URL might contain date-math expressions that cause the watch to fail with a `parse_exception`. To avoid a failed watch, remove curly braces `{`  `}` from date-math expressions and URL-encode characters.
+For example, `...(range:(%27@timestamp%27:(gte:now-15m%2Fd,lte:now%2Fd))))...`
 
-For more information about configuring watches, see
-{ref}/how-watcher-works.html[How Watcher works].
+For more information about configuring watches, refer to {ref}/how-watcher-works.html[How Watcher works].
 ====

@@ -6,18 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { KibanaPlatformPlugin, ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import Path from 'path';
 import { Project } from 'ts-morph';
 import { findPlugins } from './find_plugins';
 import { getPluginApi } from './get_plugin_api';
-import { getKibanaPlatformPlugin } from './tests/kibana_platform_plugin_mock';
-import { PluginApi } from './types';
-import { getPluginForPath, getServiceForPath, removeBrokenLinks } from './utils';
+import { getKibanaPlatformPlugin } from './integration_tests/kibana_platform_plugin_mock';
+import { PluginApi, PluginOrPackage } from './types';
+import { getPluginForPath, getServiceForPath, removeBrokenLinks, getFileName } from './utils';
 
 const log = new ToolingLog({
   level: 'debug',
   writeTo: process.stdout,
+});
+
+it('getFileName', () => {
+  expect(getFileName('@kbn/datemath')).toBe('kbn_datemath');
 });
 
 it('test getPluginForPath', () => {
@@ -49,14 +53,17 @@ it('test getServiceForPath', () => {
 
   expect(
     getServiceForPath(
-      '/var/lib/jenkins/workspace/elastic+kibana+pipeline-pull-request/kibana/packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a/public/foo/index',
-      '/var/lib/jenkins/workspace/elastic+kibana+pipeline-pull-request/kibana/packages/kbn-docs-utils/src/api_docs/tests/__fixtures__/src/plugin_a'
+      '/var/lib/jenkins/workspace/elastic+kibana+pipeline-pull-request/kibana/packages/kbn-docs-utils/src/api_docs/integration_tests/__fixtures__/src/plugin_a/public/foo/index',
+      '/var/lib/jenkins/workspace/elastic+kibana+pipeline-pull-request/kibana/packages/kbn-docs-utils/src/api_docs/integration_tests/__fixtures__/src/plugin_a'
     )
   ).toBe('foo');
 });
 
 it('test removeBrokenLinks', () => {
-  const tsConfigFilePath = Path.resolve(__dirname, 'tests/__fixtures__/src/tsconfig.json');
+  const tsConfigFilePath = Path.resolve(
+    __dirname,
+    'integration_tests/__fixtures__/src/tsconfig.json'
+  );
   const project = new Project({
     tsConfigFilePath,
   });
@@ -65,11 +72,11 @@ it('test removeBrokenLinks', () => {
 
   const pluginA = getKibanaPlatformPlugin('pluginA');
   pluginA.manifest.serviceFolders = ['foo'];
-  const plugins: KibanaPlatformPlugin[] = [pluginA];
+  const plugins: PluginOrPackage[] = [pluginA];
 
   const pluginApiMap: { [key: string]: PluginApi } = {};
   plugins.map((plugin) => {
-    pluginApiMap[plugin.manifest.id] = getPluginApi(project, plugin, plugins, log);
+    pluginApiMap[plugin.manifest.id] = getPluginApi(project, plugin, plugins, log, false);
   });
 
   const missingApiItems: { [key: string]: { [key: string]: string[] } } = {};

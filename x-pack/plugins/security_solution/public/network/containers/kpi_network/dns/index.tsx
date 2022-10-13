@@ -10,26 +10,23 @@ import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
+import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { inputsModel } from '../../../../common/store';
+import type { inputsModel } from '../../../../common/store';
 import { createFilter } from '../../../../common/containers/helpers';
 import { useKibana } from '../../../../common/lib/kibana';
-import {
-  NetworkKpiQueries,
+import type {
   NetworkKpiDnsRequestOptions,
   NetworkKpiDnsStrategyResponse,
 } from '../../../../../common/search_strategy';
-import { ESTermQuery } from '../../../../../common/typed_json';
+import { NetworkKpiQueries } from '../../../../../common/search_strategy';
+import type { ESTermQuery } from '../../../../../common/typed_json';
 
 import * as i18n from './translations';
-import {
-  isCompleteResponse,
-  isErrorResponse,
-} from '../../../../../../../../src/plugins/data/common';
 import { getInspectResponse } from '../../../../helpers';
-import { InspectResponse } from '../../../../types';
+import type { InspectResponse } from '../../../../types';
 
-const ID = 'networkKpiDnsQuery';
+export const ID = 'networkKpiDnsQuery';
 
 export interface NetworkKpiDnsArgs {
   dnsQueries: number;
@@ -59,10 +56,8 @@ export const useNetworkKpiDns = ({
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
-  const [
-    networkKpiDnsRequest,
-    setNetworkKpiDnsRequest,
-  ] = useState<NetworkKpiDnsRequestOptions | null>(null);
+  const [networkKpiDnsRequest, setNetworkKpiDnsRequest] =
+    useState<NetworkKpiDnsRequestOptions | null>(null);
 
   const [networkKpiDnsResponse, setNetworkKpiDnsResponse] = useState<NetworkKpiDnsArgs>({
     dnsQueries: 0,
@@ -152,6 +147,14 @@ export const useNetworkKpiDns = ({
       abortCtrl.current.abort();
     };
   }, [networkKpiDnsRequest, networkKpiDnsSearch]);
+
+  useEffect(() => {
+    if (skip) {
+      setLoading(false);
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+    }
+  }, [skip]);
 
   return [loading, networkKpiDnsResponse];
 };

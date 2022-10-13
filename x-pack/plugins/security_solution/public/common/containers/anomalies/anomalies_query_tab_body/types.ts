@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import { ESTermQuery } from '../../../../../common/typed_json';
-import { NarrowDateRange } from '../../../components/ml/types';
-import { UpdateDateRange } from '../../../components/charts/common';
-import { GlobalTimeArgs } from '../../use_global_time';
-import { HostsType } from '../../../../hosts/store/model';
-import { NetworkType } from '../../../../network/store//model';
-import { FlowTarget } from '../../../../../common/search_strategy';
+import type { ESTermQuery } from '../../../../../common/typed_json';
+import type { GlobalTimeArgs } from '../../use_global_time';
+import type { HostsType } from '../../../../hosts/store/model';
+import type { NetworkType } from '../../../../network/store/model';
+import type { FlowTargetSourceDest } from '../../../../../common/search_strategy';
+import type { UsersType } from '../../../../users/store/model';
 
 interface QueryTabBodyProps {
-  type: HostsType | NetworkType;
+  type: HostsType | NetworkType | UsersType;
   filterQuery?: string | ESTermQuery;
 }
 
@@ -24,14 +23,13 @@ export type AnomaliesQueryTabBodyProps = QueryTabBodyProps & {
   AnomaliesTableComponent: React.NamedExoticComponent<any>;
   deleteQuery?: ({ id }: { id: string }) => void;
   endDate: GlobalTimeArgs['to'];
-  flowTarget?: FlowTarget;
+  flowTarget?: FlowTargetSourceDest;
   indexNames: string[];
-  narrowDateRange: NarrowDateRange;
   setQuery: GlobalTimeArgs['setQuery'];
   startDate: GlobalTimeArgs['from'];
   skip: boolean;
-  updateDateRange?: UpdateDateRange;
   hideHistogramIfEmpty?: boolean;
   ip?: string;
   hostName?: string;
+  userName?: string;
 };

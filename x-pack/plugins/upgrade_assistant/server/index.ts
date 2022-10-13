@@ -5,17 +5,11 @@
  * 2.0.
  */
 
-import { PluginInitializerContext, PluginConfigDescriptor } from 'src/core/server';
+import { PluginInitializerContext } from '@kbn/core/server';
 import { UpgradeAssistantServerPlugin } from './plugin';
-import { configSchema } from '../common/config';
+
+export { config } from './config';
 
 export const plugin = (ctx: PluginInitializerContext) => {
   return new UpgradeAssistantServerPlugin(ctx);
-};
-
-export const config: PluginConfigDescriptor = {
-  schema: configSchema,
-  exposeToBrowser: {
-    enabled: true,
-  },
 };

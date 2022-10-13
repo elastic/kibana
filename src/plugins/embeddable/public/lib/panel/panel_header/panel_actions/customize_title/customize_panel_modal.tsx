@@ -21,9 +21,9 @@ import {
   EuiFocusTrap,
   EuiOutsideClickDetector,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { IEmbeddable } from '../../../../';
+import { IEmbeddable } from '../../../..';
 
 interface CustomizePanelProps {
   embeddable: IEmbeddable;

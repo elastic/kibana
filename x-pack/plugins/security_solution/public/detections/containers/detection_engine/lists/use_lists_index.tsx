@@ -6,12 +6,12 @@
  */
 
 import { useEffect, useState, useCallback } from 'react';
-
-import { useReadListIndex, useCreateListIndex } from '../../../../shared_imports';
+import { isSecurityAppError } from '@kbn/securitysolution-t-grid';
+import { useReadListIndex, useCreateListIndex } from '@kbn/securitysolution-list-hooks';
 import { useHttp, useKibana } from '../../../../common/lib/kibana';
-import { isSecurityAppError } from '../../../../common/utils/api';
 import * as i18n from './translations';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { useListsPrivileges } from './use_lists_privileges';
 
 export interface UseListsIndexReturn {
   createIndex: () => void;
@@ -26,6 +26,7 @@ export const useListsIndex = (): UseListsIndexReturn => {
   const { lists } = useKibana().services;
   const http = useHttp();
   const { addError } = useAppToasts();
+  const { canReadIndex, canManageIndex, canWriteIndex } = useListsPrivileges();
   const { loading: readLoading, start: readListIndex, ...readListIndexState } = useReadListIndex();
   const {
     loading: createLoading,
@@ -34,17 +35,19 @@ export const useListsIndex = (): UseListsIndexReturn => {
   } = useCreateListIndex();
   const loading = readLoading || createLoading;
 
+  // read route utilizes `esClient.indices.getAlias` which requires
+  // management privileges
   const readIndex = useCallback(() => {
-    if (lists) {
+    if (lists && canReadIndex && canManageIndex) {
       readListIndex({ http });
     }
-  }, [http, lists, readListIndex]);
+  }, [http, lists, readListIndex, canReadIndex, canManageIndex]);
 
   const createIndex = useCallback(() => {
-    if (lists) {
+    if (lists && canManageIndex && canWriteIndex) {
       createListIndex({ http });
     }
-  }, [createListIndex, http, lists]);
+  }, [createListIndex, http, lists, canManageIndex, canWriteIndex]);
 
   // initial read list
   useEffect(() => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter } from 'kibana/server';
+import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { ILicenseState } from '../lib';
 import { verifyAccessAndContext } from './lib';
@@ -28,9 +28,9 @@ export const deleteRuleRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const alertsClient = context.alerting.getAlertsClient();
+        const rulesClient = (await context.alerting).getRulesClient();
         const { id } = req.params;
-        await alertsClient.delete({ id });
+        await rulesClient.delete({ id });
         return res.noContent();
       })
     )

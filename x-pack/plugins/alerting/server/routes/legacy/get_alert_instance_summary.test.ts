@@ -4,18 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { getAlertInstanceSummaryRoute } from './get_alert_instance_summary';
-import { httpServiceMock } from 'src/core/server/mocks';
+import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../lib/license_state.mock';
-import { mockHandlerArguments } from './../_mock_handler_arguments';
-import { SavedObjectsErrorHelpers } from 'src/core/server';
-import { alertsClientMock } from '../../alerts_client.mock';
-import { AlertInstanceSummary } from '../../types';
+import { mockHandlerArguments } from '../_mock_handler_arguments';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { rulesClientMock } from '../../rules_client.mock';
+import { AlertSummary } from '../../types';
+import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 
-const alertsClient = alertsClientMock.create();
-jest.mock('../../lib/license_api_access.ts', () => ({
+const rulesClient = rulesClientMock.create();
+jest.mock('../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
+}));
+
+jest.mock('../../lib/track_legacy_route_usage', () => ({
+  trackLegacyRouteUsage: jest.fn(),
 }));
 
 beforeEach(() => {
@@ -24,11 +29,11 @@ beforeEach(() => {
 
 describe('getAlertInstanceSummaryRoute', () => {
   const dateString = new Date().toISOString();
-  const mockedAlertInstanceSummary: AlertInstanceSummary = {
+  const mockedAlertInstanceSummary: AlertSummary = {
     id: '',
     name: '',
     tags: [],
-    alertTypeId: '',
+    ruleTypeId: '',
     consumer: '',
     muteAll: false,
     throttle: null,
@@ -37,7 +42,11 @@ describe('getAlertInstanceSummaryRoute', () => {
     statusEndDate: dateString,
     status: 'OK',
     errorMessages: [],
-    instances: {},
+    alerts: {},
+    executionDuration: {
+      average: 0,
+      valuesWithTimestamp: {},
+    },
   };
 
   it('gets alert instance summary', async () => {
@@ -50,10 +59,10 @@ describe('getAlertInstanceSummaryRoute', () => {
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}/_instance_summary"`);
 
-    alertsClient.getAlertInstanceSummary.mockResolvedValueOnce(mockedAlertInstanceSummary);
+    rulesClient.getAlertSummary.mockResolvedValueOnce(mockedAlertInstanceSummary);
 
     const [context, req, res] = mockHandlerArguments(
-      { alertsClient },
+      { rulesClient },
       {
         params: {
           id: '1',
@@ -65,8 +74,8 @@ describe('getAlertInstanceSummaryRoute', () => {
 
     await handler(context, req, res);
 
-    expect(alertsClient.getAlertInstanceSummary).toHaveBeenCalledTimes(1);
-    expect(alertsClient.getAlertInstanceSummary.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(rulesClient.getAlertSummary).toHaveBeenCalledTimes(1);
+    expect(rulesClient.getAlertSummary.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "dateStart": undefined,
@@ -86,12 +95,12 @@ describe('getAlertInstanceSummaryRoute', () => {
 
     const [, handler] = router.get.mock.calls[0];
 
-    alertsClient.getAlertInstanceSummary = jest
+    rulesClient.getAlertSummary = jest
       .fn()
       .mockResolvedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError('alert', '1'));
 
     const [context, req, res] = mockHandlerArguments(
-      { alertsClient },
+      { rulesClient },
       {
         params: {
           id: '1',
@@ -102,5 +111,24 @@ describe('getAlertInstanceSummaryRoute', () => {
     );
 
     expect(await handler(context, req, res)).toEqual(undefined);
+  });
+
+  it('should track every call', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
+    const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
+
+    getAlertInstanceSummaryRoute(router, licenseState, mockUsageCounter);
+    const [, handler] = router.get.mock.calls[0];
+
+    rulesClient.getAlertSummary.mockResolvedValueOnce(mockedAlertInstanceSummary);
+    const [context, req, res] = mockHandlerArguments(
+      { rulesClient },
+      { params: { id: '1' }, query: {} },
+      ['ok']
+    );
+    await handler(context, req, res);
+    expect(trackLegacyRouteUsage).toHaveBeenCalledWith('instanceSummary', mockUsageCounter);
   });
 });

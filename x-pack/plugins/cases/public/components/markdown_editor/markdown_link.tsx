@@ -31,5 +31,6 @@ const MarkdownLinkComponent: React.FC<MarkdownLinkProps> = ({
     </EuiLink>
   </EuiToolTip>
 );
+MarkdownLinkComponent.displayName = 'MarkdownLink';
 
 export const MarkdownLink = memo(MarkdownLinkComponent);

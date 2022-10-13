@@ -8,7 +8,7 @@
 
 import { inspect } from 'util';
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import { tap } from 'rxjs/operators';
 
 import { OptimizerConfig } from './optimizer';
@@ -82,14 +82,11 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
             continue;
           }
 
+          bundleStates.set(id, type);
+
           if (type === 'running') {
             bundlesThatWereBuilt.add(id);
           }
-
-          bundleStates.set(id, type);
-          log.debug(
-            `[${id}] state = "${type}"${type !== 'running' ? ` after ${state.durSec} sec` : ''}`
-          );
         }
 
         if (state.phase === 'running' || state.phase === 'initializing') {
@@ -98,16 +95,16 @@ export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {
 
         if (state.phase === 'issue') {
           log.error(`webpack compile errors`);
-          log.indent(4);
-          for (const b of state.compilerStates) {
-            if (b.type === 'compiler issue') {
-              log.error(`[${b.bundleId}] build`);
-              log.indent(4);
-              log.error(b.failure);
-              log.indent(-4);
+          log.indent(4, () => {
+            for (const b of state.compilerStates) {
+              if (b.type === 'compiler issue') {
+                log.error(`[${b.bundleId}] build`);
+                log.indent(4, () => {
+                  log.error(b.failure);
+                });
+              }
             }
-          }
-          log.indent(-4);
+          });
           return;
         }
 

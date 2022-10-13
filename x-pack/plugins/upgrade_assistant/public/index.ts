@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import './index.scss';
-import { PluginInitializerContext } from 'src/core/public';
+import { PluginInitializerContext } from '@kbn/core/public';
 import { UpgradeAssistantUIPlugin } from './plugin';
 
 export const plugin = (ctx: PluginInitializerContext) => {

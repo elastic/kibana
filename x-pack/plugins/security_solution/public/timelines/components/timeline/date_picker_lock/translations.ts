@@ -11,7 +11,7 @@ export const LOCK_SYNC_MAIN_DATE_PICKER_TOOL_TIP = i18n.translate(
   'xpack.securitySolution.timeline.properties.lockDatePickerTooltip',
   {
     defaultMessage:
-      'Disable syncing of date/time range bteween the currently viewed page and your timeline',
+      'Disable syncing of date/time range between the currently viewed page and your timeline',
   }
 );
 
@@ -20,20 +20,6 @@ export const UNLOCK_SYNC_MAIN_DATE_PICKER_TOOL_TIP = i18n.translate(
   {
     defaultMessage:
       'Enable syncing of date/time range between the currently viewed page and your timeline',
-  }
-);
-
-export const LOCK_SYNC_MAIN_DATE_PICKER_LABEL = i18n.translate(
-  'xpack.securitySolution.timeline.properties.lockedDatePickerLabel',
-  {
-    defaultMessage: 'Global date picker is locked to timeline date picker',
-  }
-);
-
-export const UNLOCK_SYNC_MAIN_DATE_PICKER_LABEL = i18n.translate(
-  'xpack.securitySolution.timeline.properties.unlockedDatePickerLabel',
-  {
-    defaultMessage: 'Global date picker NOT locked to timeline date picker',
   }
 );
 

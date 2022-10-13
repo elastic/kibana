@@ -1,9 +1,0 @@
-{
-  "id": "indexPatternFieldEditor",
-  "version": "kibana",
-  "server": false,
-  "ui": true,
-  "requiredPlugins": ["data"],
-  "optionalPlugins": ["usageCollection"],
-  "requiredBundles": ["kibanaReact", "esUiShared", "usageCollection"]
-}

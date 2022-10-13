@@ -24,9 +24,10 @@ const FieldMappingRowComponent: React.FC<RowProps> = ({
   selectedActionType,
   selectedThirdParty,
 }) => {
-  const selectedActionTypeCapitalized = useMemo(() => capitalize(selectedActionType), [
-    selectedActionType,
-  ]);
+  const selectedActionTypeCapitalized = useMemo(
+    () => capitalize(selectedActionType),
+    [selectedActionType]
+  );
   return (
     <EuiFlexGroup data-test-subj="static-mappings" alignItems="center" responsive={false}>
       <EuiFlexItem>
@@ -56,5 +57,6 @@ const FieldMappingRowComponent: React.FC<RowProps> = ({
     </EuiFlexGroup>
   );
 };
+FieldMappingRowComponent.displayName = 'FieldMappingRow';
 
 export const FieldMappingRowStatic = React.memo(FieldMappingRowComponent);

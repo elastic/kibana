@@ -8,7 +8,8 @@
 import expect from '@kbn/expect';
 import { isLeft } from 'fp-ts/lib/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
-import { PingsResponseType } from '../../../../../plugins/uptime/common/runtime_types';
+import { PingsResponseType } from '@kbn/synthetics-plugin/common/runtime_types';
+import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 function decodePingsResponseData(response: any) {
@@ -22,14 +23,22 @@ function decodePingsResponseData(response: any) {
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   describe('pingList query', () => {
-    before('load heartbeat data', () => getService('esArchiver').load('uptime/full_heartbeat'));
-    after('unload heartbeat index', () => getService('esArchiver').unload('uptime/full_heartbeat'));
+    before('load heartbeat data', () =>
+      getService('esArchiver').load('x-pack/test/functional/es_archives/uptime/full_heartbeat')
+    );
+    after('unload heartbeat index', () =>
+      getService('esArchiver').unload('x-pack/test/functional/es_archives/uptime/full_heartbeat')
+    );
 
     it('returns a list of pings for the given date range and default size', async () => {
       const from = '2019-01-28T17:40:08.078Z';
       const to = '2025-01-28T19:00:16.078Z';
 
-      const apiResponse = await supertest.get(`/api/uptime/pings?from=${from}&to=${to}&size=10`);
+      const apiResponse = await supertest.get(API_URLS.PINGS).query({
+        from,
+        to,
+        size: 10,
+      });
 
       const { total, pings } = decodePingsResponseData(apiResponse.body);
 
@@ -54,9 +63,11 @@ export default function ({ getService }: FtrProviderContext) {
       const to = '2025-01-28T19:00:16.078Z';
       const size = 50;
 
-      const apiResponse = await supertest.get(
-        `/api/uptime/pings?from=${from}&to=${to}&size=${size}`
-      );
+      const apiResponse = await supertest.get(API_URLS.PINGS).query({
+        from,
+        to,
+        size,
+      });
 
       const { total, pings } = decodePingsResponseData(apiResponse.body);
 
@@ -122,9 +133,12 @@ export default function ({ getService }: FtrProviderContext) {
       const monitorId = '0001-up';
       const size = 15;
 
-      const apiResponse = await supertest.get(
-        `/api/uptime/pings?from=${from}&to=${to}&monitorId=${monitorId}&size=${size}`
-      );
+      const apiResponse = await supertest.get(API_URLS.PINGS).query({
+        from,
+        to,
+        monitorId,
+        size,
+      });
 
       const { total, pings } = decodePingsResponseData(apiResponse.body);
 
@@ -156,9 +170,13 @@ export default function ({ getService }: FtrProviderContext) {
       const size = 5;
       const sort = 'asc';
 
-      const apiResponse = await supertest.get(
-        `/api/uptime/pings?from=${from}&to=${to}&monitorId=${monitorId}&size=${size}&sort=${sort}`
-      );
+      const apiResponse = await supertest.get(API_URLS.PINGS).query({
+        from,
+        to,
+        monitorId,
+        size,
+        sort,
+      });
 
       const { total, pings } = decodePingsResponseData(apiResponse.body);
 

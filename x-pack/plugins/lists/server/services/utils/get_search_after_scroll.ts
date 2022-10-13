@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
+import type {
+  Filter,
+  SortFieldOrUndefined,
+  SortOrderOrUndefined,
+} from '@kbn/securitysolution-io-ts-list-types';
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 
-import { Filter, SortFieldOrUndefined, SortOrderOrUndefined } from '../../../common/schemas';
 import { Scroll } from '../lists/types';
 
 import { getQueryFilter } from './get_query_filter';
@@ -24,6 +29,7 @@ interface GetSearchAfterOptions {
   index: string;
   sortField: SortFieldOrUndefined;
   sortOrder: SortOrderOrUndefined;
+  runtimeMappings: MappingRuntimeFields | undefined;
 }
 
 export const getSearchAfterScroll = async <T>({
@@ -35,15 +41,16 @@ export const getSearchAfterScroll = async <T>({
   sortField,
   sortOrder,
   index,
+  runtimeMappings,
 }: GetSearchAfterOptions): Promise<Scroll> => {
   const query = getQueryFilter({ filter });
   let newSearchAfter = searchAfter;
   for (let i = 0; i < hops; ++i) {
-    const { body: response } = await esClient.search<TieBreaker<T>>({
+    const response = await esClient.search<TieBreaker<T>>({
       body: {
         _source: getSourceWithTieBreaker({ sortField }),
-        // @ts-expect-error Filter is not assignale to QueryContainer
         query,
+        runtime_mappings: runtimeMappings,
         search_after: newSearchAfter,
         sort: getSortWithTieBreaker({ sortField, sortOrder }),
       },

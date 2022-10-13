@@ -6,9 +6,22 @@
 }
 
 .lnsChartSwitch__summaryIcon {
-  margin-right: $euiSizeS;
   transform: translateY(-1px);
   color: $euiTextSubduedColor;
+
+  @include euiBreakpoint('xl') {
+    margin-right: $euiSizeS;
+  }
+}
+
+.lnsChartSwitch__summaryText {
+  @include euiBreakpoint('xs', 's', 'm', 'l') {
+    @include euiScreenReaderOnly;
+  }
+}
+
+.lnsChartSwitch__append {
+  display: inline-flex;
 }
 
 // Targeting img as this won't target normal EuiIcon's only the custom svgs's
@@ -18,5 +31,5 @@ img.lnsChartSwitch__chartIcon { // stylelint-disable-line selector-no-qualifying
 }
 
 .lnsChartSwitch__search {
-  width: 7 * $euiSizeXXL;
+  width: 10 * $euiSizeXXL;
 }

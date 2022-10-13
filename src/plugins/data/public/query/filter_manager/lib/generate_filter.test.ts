@@ -11,21 +11,22 @@ import { FilterManager } from '../filter_manager';
 
 import {
   Filter,
-  IFieldType,
-  IIndexPattern,
+  DataViewFieldBase,
+  DataViewBase,
   isExistsFilter,
   buildExistsFilter,
-  PhraseFilter,
   isPhraseFilter,
-  RangeFilter,
   isRangeFilter,
-} from '../../../../common';
+  RangeFilter,
+  PhraseFilter,
+} from '@kbn/es-query';
 
 const INDEX_NAME = 'my-index';
+const MOCKED_INDEX = { id: INDEX_NAME } as unknown as DataViewBase;
 const EXISTS_FIELD_NAME = '_exists_';
 const FIELD = {
   name: 'my-field',
-} as IFieldType;
+} as DataViewFieldBase;
 const PHRASE_VALUE = 'my-value';
 
 describe('Generate filters', () => {
@@ -47,7 +48,7 @@ describe('Generate filters', () => {
       EXISTS_FIELD_NAME,
       FIELD.name,
       '',
-      INDEX_NAME
+      MOCKED_INDEX
     );
     expect(filters).toHaveLength(1);
     expect(filters[0].meta.index === INDEX_NAME);
@@ -61,7 +62,7 @@ describe('Generate filters', () => {
       EXISTS_FIELD_NAME,
       FIELD.name,
       '-',
-      INDEX_NAME
+      MOCKED_INDEX
     );
     expect(filters).toHaveLength(1);
     expect(filters[0].meta.index === INDEX_NAME);
@@ -70,11 +71,11 @@ describe('Generate filters', () => {
   });
 
   it('should update and re-enable EXISTING exists filter', () => {
-    const filter = buildExistsFilter(FIELD, { id: INDEX_NAME } as IIndexPattern);
+    const filter = buildExistsFilter(FIELD, { id: INDEX_NAME } as DataViewBase);
     filter.meta.disabled = true;
     filtersArray.push(filter);
 
-    const filters = generateFilters(mockFilterManager, '_exists_', FIELD.name, '-', INDEX_NAME);
+    const filters = generateFilters(mockFilterManager, '_exists_', FIELD.name, '-', MOCKED_INDEX);
     expect(filters).toHaveLength(1);
     expect(filters[0].meta.index === INDEX_NAME);
     expect(filters[0].meta.negate).toBeTruthy();
@@ -83,23 +84,26 @@ describe('Generate filters', () => {
   });
 
   it('should create phrase filter', () => {
-    const filters = generateFilters(mockFilterManager, FIELD, PHRASE_VALUE, '', INDEX_NAME);
+    const filters = generateFilters(mockFilterManager, FIELD, PHRASE_VALUE, '', MOCKED_INDEX);
     expect(filters).toHaveLength(1);
-    expect(filters[0].meta.index === INDEX_NAME);
-    expect(filters[0].meta.negate).toBeFalsy();
-    expect(isPhraseFilter(filters[0])).toBeTruthy();
-    expect((filters[0] as PhraseFilter).query.match_phrase).toEqual({
+
+    const [filter] = filters as PhraseFilter[];
+    expect(filter.meta.index === INDEX_NAME);
+    expect(filter.meta.negate).toBeFalsy();
+    expect(isPhraseFilter(filter)).toBeTruthy();
+    expect(filter.query.match_phrase).toEqual({
       [FIELD.name]: PHRASE_VALUE,
     });
   });
 
   it('should create negated phrase filter', () => {
-    const filters = generateFilters(mockFilterManager, FIELD, PHRASE_VALUE, '-', INDEX_NAME);
+    const filters = generateFilters(mockFilterManager, FIELD, PHRASE_VALUE, '-', MOCKED_INDEX);
     expect(filters).toHaveLength(1);
-    expect(filters[0].meta.index === INDEX_NAME);
-    expect(filters[0].meta.negate).toBeTruthy();
-    expect(isPhraseFilter(filters[0])).toBeTruthy();
-    expect((filters[0] as PhraseFilter).query.match_phrase).toEqual({
+    const [filter] = filters as PhraseFilter[];
+    expect(filter.meta.index === INDEX_NAME);
+    expect(filter.meta.negate).toBeTruthy();
+    expect(isPhraseFilter(filter)).toBeTruthy();
+    expect(filter.query.match_phrase).toEqual({
       [FIELD.name]: PHRASE_VALUE,
     });
   });
@@ -110,19 +114,20 @@ describe('Generate filters', () => {
       {
         name: 'my-field',
         type: 'ip_range',
-      } as IFieldType,
+      } as DataViewFieldBase,
       {
         gt: '192.168.0.0',
         lte: '192.168.255.255',
       },
       '+',
-      INDEX_NAME
-    );
+      MOCKED_INDEX
+    ) as RangeFilter[];
     expect(filters).toHaveLength(1);
-    expect(filters[0].meta.index === INDEX_NAME);
-    expect(filters[0].meta.negate).toBeFalsy();
-    expect(isRangeFilter(filters[0])).toBeTruthy();
-    expect((filters[0] as RangeFilter).range).toEqual({
+    const [filter] = filters;
+    expect(filter.meta.index === INDEX_NAME);
+    expect(filter.meta.negate).toBeFalsy();
+    expect(isRangeFilter(filter)).toBeTruthy();
+    expect(filter.query.range).toEqual({
       [FIELD.name]: {
         gt: '192.168.0.0',
         lte: '192.168.255.255',
@@ -136,17 +141,19 @@ describe('Generate filters', () => {
       {
         name: 'my-field',
         type: 'number_range',
-      } as IFieldType,
+      } as DataViewFieldBase,
       10000,
       '+',
-      INDEX_NAME
+      MOCKED_INDEX
     );
 
     expect(filters).toHaveLength(1);
-    expect(filters[0].meta.index === INDEX_NAME);
-    expect(filters[0].meta.negate).toBeFalsy();
-    expect(isPhraseFilter(filters[0])).toBeTruthy();
-    expect((filters[0] as PhraseFilter).query.match_phrase).toEqual({
+    const [filter] = filters;
+    expect(filter.meta.index === INDEX_NAME);
+    expect(filter.meta.negate).toBeFalsy();
+    expect(isPhraseFilter(filter)).toBeTruthy();
+
+    expect(filter.query?.match_phrase).toEqual({
       [FIELD.name]: 10000,
     });
   });
@@ -158,7 +165,7 @@ describe('Generate filters', () => {
       FIELD,
       [PHRASE_VALUE, ANOTHER_PHRASE],
       '',
-      INDEX_NAME
+      MOCKED_INDEX
     );
     expect(filters).toHaveLength(2);
     expect(filters[0].meta.index === INDEX_NAME);
@@ -167,11 +174,81 @@ describe('Generate filters', () => {
     expect(filters[1].meta.negate).toBeFalsy();
     expect(isPhraseFilter(filters[0])).toBeTruthy();
     expect(isPhraseFilter(filters[1])).toBeTruthy();
-    expect((filters[0] as PhraseFilter).query.match_phrase).toEqual({
+    expect(filters[0].query?.match_phrase).toEqual({
       [FIELD.name]: PHRASE_VALUE,
     });
-    expect((filters[1] as PhraseFilter).query.match_phrase).toEqual({
+    expect(filters[1].query?.match_phrase).toEqual({
       [FIELD.name]: ANOTHER_PHRASE,
     });
+  });
+
+  it('should use only distinct values', () => {
+    const ANOTHER_PHRASE = 'another-value';
+    const filters = generateFilters(
+      mockFilterManager,
+      FIELD,
+      [PHRASE_VALUE, ANOTHER_PHRASE, PHRASE_VALUE, ANOTHER_PHRASE],
+      '',
+      MOCKED_INDEX
+    );
+    expect(filters).toHaveLength(2);
+    expect(filters[0].query?.match_phrase).toEqual({
+      [FIELD.name]: PHRASE_VALUE,
+    });
+    expect(filters[1].query?.match_phrase).toEqual({
+      [FIELD.name]: ANOTHER_PHRASE,
+    });
+  });
+
+  it('should genereate a range filter when date type field is provided', () => {
+    const filters = generateFilters(
+      mockFilterManager,
+      {
+        ...FIELD,
+        type: 'date',
+      } as DataViewFieldBase,
+      '2022-08-01',
+      '+',
+      MOCKED_INDEX
+    ) as RangeFilter[];
+    expect(filters).toHaveLength(1);
+    const [filter] = filters;
+    expect(filter.meta.index === INDEX_NAME);
+    expect(filter.meta.negate).toBeFalsy();
+    expect(isRangeFilter(filter)).toBeTruthy();
+    expect(filter.query.range).toEqual({
+      [FIELD.name]: {
+        format: 'date_time',
+        gte: expect.stringContaining('2022-08-01T00:00:00'),
+        lte: expect.stringContaining('2022-08-01T00:00:00'),
+      },
+    });
+  });
+
+  it('should update an existing date range filter', () => {
+    const [filter] = generateFilters(
+      mockFilterManager,
+      {
+        ...FIELD,
+        type: 'date',
+      } as DataViewFieldBase,
+      '2022-08-01',
+      '+',
+      MOCKED_INDEX
+    ) as RangeFilter[];
+    filtersArray.push(filter);
+
+    generateFilters(
+      mockFilterManager,
+      {
+        ...FIELD,
+        type: 'date',
+      } as DataViewFieldBase,
+      '2022-08-01',
+      '-',
+      MOCKED_INDEX
+    ) as RangeFilter[];
+
+    expect(filter).toHaveProperty('meta.negate', true);
   });
 });

@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import datemath from '@elastic/datemath';
-import { compact, pickBy } from 'lodash';
-import moment from 'moment';
-import { IUrlParams } from './types';
+import datemath from '@kbn/datemath';
+import { pickBy } from 'lodash';
+import { UrlParams } from './types';
 
 function getParsedDate(rawDate?: string, options = {}) {
   if (rawDate) {
@@ -20,33 +19,35 @@ function getParsedDate(rawDate?: string, options = {}) {
 }
 
 export function getDateRange({
-  state,
+  state = {},
   rangeFrom,
   rangeTo,
 }: {
-  state: IUrlParams;
+  state?: Pick<UrlParams, 'rangeFrom' | 'rangeTo' | 'start' | 'end'>;
   rangeFrom?: string;
   rangeTo?: string;
 }) {
   // If the previous state had the same range, just return that instead of calculating a new range.
   if (state.rangeFrom === rangeFrom && state.rangeTo === rangeTo) {
-    return { start: state.start, end: state.end };
+    return {
+      start: state.start,
+      end: state.end,
+    };
   }
-
   const start = getParsedDate(rangeFrom);
   const end = getParsedDate(rangeTo, { roundUp: true });
 
   // `getParsedDate` will return undefined for invalid or empty dates. We return
   // the previous state if either date is undefined.
   if (!start || !end) {
-    return { start: state.start, end: state.end };
+    return {
+      start: state.start,
+      end: state.end,
+    };
   }
 
-  // rounds down start to minute
-  const roundedStart = moment(start).startOf('minute');
-
   return {
-    start: roundedStart.toISOString(),
+    start: start.toISOString(),
     end: end.toISOString(),
   };
 }
@@ -66,10 +67,6 @@ export function toString(value?: string) {
 
 export function toBoolean(value?: string) {
   return value === 'true';
-}
-
-export function getPathAsArray(pathname: string = '') {
-  return compact(pathname.split('/'));
 }
 
 export function removeUndefinedProps<T extends object>(obj: T): Partial<T> {

@@ -44,3 +44,24 @@ export interface EventEcs {
 
   type?: string[];
 }
+
+export enum EventCode {
+  // Malware Protection alert
+  MALICIOUS_FILE = 'malicious_file',
+  // Ransomware Protection alert
+  RANSOMWARE = 'ransomware',
+  // Memory Protection alert
+  MEMORY_SIGNATURE = 'memory_signature',
+  // Memory Protection alert
+  SHELLCODE_THREAD = 'shellcode_thread',
+  // behavior
+  BEHAVIOR = 'behavior',
+}
+
+export enum EventCategory {
+  PROCESS = 'process',
+  FILE = 'file',
+  NETWORK = 'network',
+  REGISTRY = 'registry',
+  MALWARE = 'malware',
+}

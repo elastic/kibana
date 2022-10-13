@@ -1,13 +1,13 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "composite": true,
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
     "declarationMap": true
   },
   "include": [
+    ".storybook/**/*",
     "server/**/*",
     "public/**/*",
     "common/**/*",
@@ -18,12 +18,16 @@
     { "path": "../../../src/core/tsconfig.json" },
     { "path": "../alerting/tsconfig.json" },
     { "path": "../features/tsconfig.json" },
+    { "path": "../rule_registry/tsconfig.json" },
     { "path": "../../../src/plugins/data/tsconfig.json" },
+    { "path": "../../../src/plugins/data_view_editor/tsconfig.json" },
     { "path": "../../../src/plugins/saved_objects/tsconfig.json" },
     { "path": "../../../src/plugins/home/tsconfig.json" },
     { "path": "../../../src/plugins/charts/tsconfig.json" },
     { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
     { "path": "../../../src/plugins/kibana_utils/tsconfig.json" },
     { "path": "../../../src/plugins/management/tsconfig.json" },
+    { "path": "../spaces/tsconfig.json" },
+    { "path": "../../../src/plugins/unified_search/tsconfig.json" }
   ]
 }

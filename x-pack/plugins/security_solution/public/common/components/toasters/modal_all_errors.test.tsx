@@ -10,7 +10,7 @@ import { shallow } from 'enzyme';
 import React from 'react';
 
 import { ModalAllErrors } from './modal_all_errors';
-import { AppToast } from '.';
+import type { AppToast } from '.';
 import { cloneDeep } from 'lodash/fp';
 
 const mockToast: AppToast = {
@@ -58,7 +58,7 @@ describe('Modal all errors', () => {
     // This test exists to ensure that errors will work if it is a non-array which can happen in rare corner cases.
     test('it doesnt cause errors when errors is not an array which can be the rare case in corner cases', () => {
       const mockToastWithTwoError = cloneDeep(mockToast);
-      mockToastWithTwoError.errors = ('' as unknown) as string[];
+      mockToastWithTwoError.errors = '' as unknown as string[];
       const wrapper = shallow(
         <ModalAllErrors isShowing={true} toast={mockToastWithTwoError} toggle={toggle} />
       );

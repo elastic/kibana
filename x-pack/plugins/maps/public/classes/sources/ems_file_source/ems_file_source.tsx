@@ -8,9 +8,8 @@
 import React, { ReactElement } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Feature } from 'geojson';
-import { Adapters } from 'src/plugins/inspector/public';
 import { FileLayer } from '@elastic/ems-client';
-import { Attribution, ImmutableSourceProperty, SourceEditorArgs } from '../source';
+import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import { AbstractVectorSource, GeoJsonWithMeta, IVectorSource } from '../vector_source';
 import { SOURCE_TYPES, FIELD_ORIGIN, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import { getEmsFileLayers } from '../../../util';
@@ -64,8 +63,8 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
   private readonly _tooltipFields: IField[];
   readonly _descriptor: EMSFileSourceDescriptor;
 
-  constructor(descriptor: Partial<EMSFileSourceDescriptor>, inspectorAdapters?: Adapters) {
-    super(EMSFileSource.createDescriptor(descriptor), inspectorAdapters);
+  constructor(descriptor: Partial<EMSFileSourceDescriptor>) {
+    super(EMSFileSource.createDescriptor(descriptor));
     this._descriptor = EMSFileSource.createDescriptor(descriptor);
     this._tooltipFields = this._descriptor.tooltipProperties.map((propertyKey) =>
       this.createField({ fieldName: propertyKey })
@@ -135,7 +134,7 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
         meta: {},
       };
     } catch (error) {
-      throw new Error(`${getErrorInfo(this._descriptor.id)} - ${error.message}`);
+      throw new Error(getErrorInfo(this._descriptor.id));
     }
   }
 
@@ -183,9 +182,11 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
     }
   }
 
-  async getAttributions(): Promise<Attribution[]> {
-    const emsFileLayer = await this.getEMSFileLayer();
-    return emsFileLayer.getAttributions();
+  getAttributionProvider() {
+    return async () => {
+      const emsFileLayer = await this.getEMSFileLayer();
+      return emsFileLayer.getAttributions();
+    };
   }
 
   async getLeftJoinFields() {
@@ -194,7 +195,7 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
     return fields.map((f) => this.createField({ fieldName: f.name }));
   }
 
-  canFormatFeatureProperties() {
+  hasTooltipProperties() {
     return this._tooltipFields.length > 0;
   }
 

@@ -19,7 +19,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { DEFAULT_SIGMA } from '../../vector_style_defaults';
 import { DataMappingPopover } from './data_mapping_popover';
 import { FieldMetaOptions } from '../../../../../../common/descriptor_types';
@@ -46,7 +46,7 @@ const DATA_MAPPING_OPTIONS = [
       <Fragment>
         <strong>{interpolateTitle}</strong>
         <EuiText size="s" color="subdued">
-          <p className="euiTextColor--subdued">
+          <p>
             <FormattedMessage
               id="xpack.maps.styles.ordinalDataMapping.interpolateDescription"
               defaultMessage="Interpolate values from the data domain to the style on a linear scale"
@@ -63,7 +63,7 @@ const DATA_MAPPING_OPTIONS = [
       <Fragment>
         <strong>{percentilesTitle}</strong>
         <EuiText size="s" color="subdued">
-          <p className="euiTextColor--subdued">
+          <p>
             <FormattedMessage
               id="xpack.maps.styles.ordinalDataMapping.percentilesDescription"
               defaultMessage="Divide style into bands that map to values"
@@ -79,9 +79,9 @@ interface Props<DynamicOptions> {
   fieldMetaOptions: FieldMetaOptions;
   styleName: VECTOR_STYLES;
   onChange: (updatedOptions: DynamicOptions) => void;
-  switchDisabled: boolean;
   dataMappingFunction: DATA_MAPPING_FUNCTION;
   supportedDataMappingFunctions: DATA_MAPPING_FUNCTION[];
+  supportsFieldMetaFromLocalData: boolean;
 }
 
 export function OrdinalDataMappingPopover<DynamicOptions>(props: Props<DynamicOptions>) {
@@ -168,8 +168,8 @@ export function OrdinalDataMappingPopover<DynamicOptions>(props: Props<DynamicOp
               })}
               checked={props.fieldMetaOptions.isEnabled}
               onChange={onIsEnabledChange}
+              disabled={!props.supportsFieldMetaFromLocalData}
               compressed
-              disabled={props.switchDisabled}
             />{' '}
             <EuiToolTip
               content={

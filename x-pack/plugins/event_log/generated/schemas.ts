@@ -13,6 +13,7 @@
 // the event log
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import semver from 'semver';
 
 type DeepWriteable<T> = { -readonly [P in keyof T]: DeepWriteable<T[P]> };
 type DeepPartial<T> = {
@@ -51,7 +52,7 @@ export const EventSchema = schema.maybe(
         code: ecsString(),
         created: ecsDate(),
         dataset: ecsString(),
-        duration: ecsNumber(),
+        duration: ecsStringOrNumber(),
         end: ecsDate(),
         hash: ecsString(),
         id: ecsString(),
@@ -65,8 +66,8 @@ export const EventSchema = schema.maybe(
         reference: ecsString(),
         risk_score: ecsNumber(),
         risk_score_norm: ecsNumber(),
-        sequence: ecsNumber(),
-        severity: ecsNumber(),
+        sequence: ecsStringOrNumber(),
+        severity: ecsStringOrNumber(),
         start: ecsDate(),
         timezone: ecsString(),
         type: ecsStringMulti(),
@@ -101,12 +102,63 @@ export const EventSchema = schema.maybe(
     kibana: schema.maybe(
       schema.object({
         server_uuid: ecsString(),
+        task: schema.maybe(
+          schema.object({
+            id: ecsString(),
+            scheduled: ecsDate(),
+            schedule_delay: ecsStringOrNumber(),
+          })
+        ),
         alerting: schema.maybe(
           schema.object({
             instance_id: ecsString(),
             action_group_id: ecsString(),
             action_subgroup: ecsString(),
             status: ecsString(),
+            outcome: ecsString(),
+          })
+        ),
+        alert: schema.maybe(
+          schema.object({
+            rule: schema.maybe(
+              schema.object({
+                consumer: ecsString(),
+                execution: schema.maybe(
+                  schema.object({
+                    uuid: ecsString(),
+                    status: ecsString(),
+                    status_order: ecsStringOrNumber(),
+                    metrics: schema.maybe(
+                      schema.object({
+                        number_of_triggered_actions: ecsStringOrNumber(),
+                        number_of_generated_actions: ecsStringOrNumber(),
+                        alert_counts: schema.maybe(
+                          schema.object({
+                            active: ecsStringOrNumber(),
+                            new: ecsStringOrNumber(),
+                            recovered: ecsStringOrNumber(),
+                          })
+                        ),
+                        number_of_searches: ecsStringOrNumber(),
+                        total_indexing_duration_ms: ecsStringOrNumber(),
+                        es_search_duration_ms: ecsStringOrNumber(),
+                        total_search_duration_ms: ecsStringOrNumber(),
+                        execution_gap_duration_s: ecsStringOrNumber(),
+                        rule_type_run_duration_ms: ecsStringOrNumber(),
+                        process_alerts_duration_ms: ecsStringOrNumber(),
+                        trigger_actions_duration_ms: ecsStringOrNumber(),
+                        process_rule_duration_ms: ecsStringOrNumber(),
+                        claim_to_start_duration_ms: ecsStringOrNumber(),
+                        prepare_rule_duration_ms: ecsStringOrNumber(),
+                        total_run_duration_ms: ecsStringOrNumber(),
+                        total_enrichment_duration_ms: ecsStringOrNumber(),
+                      })
+                    ),
+                  })
+                ),
+                rule_type_id: ecsString(),
+              })
+            ),
           })
         ),
         saved_objects: schema.maybe(
@@ -116,9 +168,12 @@ export const EventSchema = schema.maybe(
               namespace: ecsString(),
               id: ecsString(),
               type: ecsString(),
+              type_id: ecsString(),
             })
           )
         ),
+        space_ids: ecsStringMulti(),
+        version: ecsVersion(),
       })
     ),
   })
@@ -136,6 +191,10 @@ function ecsNumber() {
   return schema.maybe(schema.number());
 }
 
+function ecsStringOrNumber() {
+  return schema.maybe(schema.oneOf([schema.string(), schema.number()]));
+}
+
 function ecsDate() {
   return schema.maybe(schema.string({ validate: validateDate }));
 }
@@ -145,4 +204,13 @@ const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 function validateDate(isoDate: string) {
   if (ISO_DATE_PATTERN.test(isoDate)) return;
   return 'string is not a valid ISO date: ' + isoDate;
+}
+
+function ecsVersion() {
+  return schema.maybe(schema.string({ validate: validateVersion }));
+}
+
+function validateVersion(version: string) {
+  if (semver.valid(version)) return;
+  return 'string is not a valid version: ' + version;
 }

@@ -11,6 +11,8 @@ import React from 'react';
 import { EuiContextMenu, EuiContextMenuPanelDescriptor, EuiPopover } from '@elastic/eui';
 import { EventEmitter } from 'events';
 import ReactDOM from 'react-dom';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { getTheme } from '../services';
 
 let activeSession: ContextMenuSession | null = null;
 
@@ -124,7 +126,7 @@ function getOrCreateContainerElement() {
 class ContextMenuSession extends EventEmitter {
   /**
    * Closes the opened flyout as long as it's still the open one.
-   * If this is not the active session anymore, this method won't do anything.
+   * If this is not the active session, this method will do nothing.
    * If this session was still active and a flyout was closed, the 'closed'
    * event will be emitted on this FlyoutSession instance.
    */
@@ -168,20 +170,22 @@ export function openContextMenu(
   };
 
   ReactDOM.render(
-    <EuiPopover
-      className="embPanel__optionsMenuPopover"
-      button={container}
-      isOpen={true}
-      closePopover={onClose}
-      panelPaddingSize="none"
-      anchorPosition="downRight"
-    >
-      <EuiContextMenu
-        initialPanelId="mainMenu"
-        panels={panels}
-        data-test-subj={props['data-test-subj']}
-      />
-    </EuiPopover>,
+    <KibanaThemeProvider theme$={getTheme().theme$}>
+      <EuiPopover
+        className="embPanel__optionsMenuPopover"
+        button={container}
+        isOpen={true}
+        closePopover={onClose}
+        panelPaddingSize="none"
+        anchorPosition="downRight"
+      >
+        <EuiContextMenu
+          initialPanelId="mainMenu"
+          panels={panels}
+          data-test-subj={props['data-test-subj']}
+        />
+      </EuiPopover>
+    </KibanaThemeProvider>,
     container
   );
 

@@ -7,13 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type { StartServicesAccessor } from 'kibana/public';
+import type { StartServicesAccessor } from '@kbn/core/public';
 
+import type { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
 import { PLUGIN_ICON, PLUGIN_ID, ML_APP_NAME } from '../../../common/constants/app';
-import type {
-  EmbeddableFactoryDefinition,
-  IContainer,
-} from '../../../../../../src/plugins/embeddable/public';
 import { HttpService } from '../../application/services/http_service';
 import type { MlPluginStart, MlStartDependencies } from '../../plugin';
 import type { MlDependencies } from '../../application/app';
@@ -25,7 +22,8 @@ import {
 import { AnomalyExplorerChartsService } from '../../application/services/anomaly_explorer_charts_service';
 
 export class AnomalyChartsEmbeddableFactory
-  implements EmbeddableFactoryDefinition<AnomalyChartsEmbeddableInput> {
+  implements EmbeddableFactoryDefinition<AnomalyChartsEmbeddableInput>
+{
   public readonly type = ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE;
 
   public readonly grouping = [

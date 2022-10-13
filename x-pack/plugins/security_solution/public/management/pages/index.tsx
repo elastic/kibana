@@ -5,123 +5,114 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash/fp';
 import React, { memo } from 'react';
-import { useHistory, Route, Switch } from 'react-router-dom';
-
-import { ChromeBreadcrumb } from 'kibana/public';
-import { EuiText, EuiEmptyPrompt } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { Switch, Redirect } from 'react-router-dom';
+import { Route } from '@kbn/kibana-react-plugin/public';
+import { EuiLoadingSpinner } from '@elastic/eui';
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import {
   MANAGEMENT_ROUTING_ENDPOINTS_PATH,
   MANAGEMENT_ROUTING_EVENT_FILTERS_PATH,
+  MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH,
   MANAGEMENT_ROUTING_POLICIES_PATH,
-  MANAGEMENT_ROUTING_ROOT_PATH,
   MANAGEMENT_ROUTING_TRUSTED_APPS_PATH,
+  MANAGEMENT_ROUTING_BLOCKLIST_PATH,
+  MANAGEMENT_ROUTING_RESPONSE_ACTIONS_HISTORY_PATH,
 } from '../common/constants';
 import { NotFoundPage } from '../../app/404';
 import { EndpointsContainer } from './endpoint_hosts';
 import { PolicyContainer } from './policy';
 import { TrustedAppsContainer } from './trusted_apps';
-import { getEndpointListPath } from '../common/routing';
-import { APP_ID, SecurityPageName } from '../../../common/constants';
-import { GetUrlForApp } from '../../common/components/navigation/types';
-import { AdministrationRouteSpyState } from '../../common/utils/route/types';
-import { ADMINISTRATION } from '../../app/home/translations';
-import { AdministrationSubTab } from '../types';
-import {
-  ENDPOINTS_TAB,
-  EVENT_FILTERS_TAB,
-  POLICIES_TAB,
-  TRUSTED_APPS_TAB,
-} from '../common/translations';
+import { MANAGEMENT_PATH, SecurityPageName } from '../../../common/constants';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { useIngestEnabledCheck } from '../../common/hooks/endpoint/ingest_enabled';
 import { EventFiltersContainer } from './event_filters';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { getEndpointListPath } from '../common/routing';
+import { useUserPrivileges } from '../../common/components/user_privileges';
+import { HostIsolationExceptionsContainer } from './host_isolation_exceptions';
+import { BlocklistContainer } from './blocklist';
+import { NoPermissions } from '../components/no_permissons';
+import { ResponseActionsContainer } from './response_actions';
 
-const TabNameMappedToI18nKey: Record<AdministrationSubTab, string> = {
-  [AdministrationSubTab.endpoints]: ENDPOINTS_TAB,
-  [AdministrationSubTab.policies]: POLICIES_TAB,
-  [AdministrationSubTab.trustedApps]: TRUSTED_APPS_TAB,
-  [AdministrationSubTab.eventFilters]: EVENT_FILTERS_TAB,
-};
+const EndpointTelemetry = () => (
+  <TrackApplicationView viewId={SecurityPageName.endpoints}>
+    <EndpointsContainer />
+    <SpyRoute pageName={SecurityPageName.endpoints} />
+  </TrackApplicationView>
+);
 
-export function getBreadcrumbs(
-  params: AdministrationRouteSpyState,
-  search: string[],
-  getUrlForApp: GetUrlForApp
-): ChromeBreadcrumb[] {
-  return [
-    {
-      text: ADMINISTRATION,
-      href: getUrlForApp(`${APP_ID}:${SecurityPageName.administration}`, {
-        path: !isEmpty(search[0]) ? search[0] : '',
-      }),
-    },
-    ...(params?.tabName ? [params?.tabName] : []).map((tabName) => ({
-      text: TabNameMappedToI18nKey[tabName],
-      href: '',
-    })),
-  ];
-}
+const PolicyTelemetry = () => (
+  <TrackApplicationView viewId={SecurityPageName.policies}>
+    <PolicyContainer />
+    <SpyRoute pageName={SecurityPageName.policies} />
+  </TrackApplicationView>
+);
 
-const NoPermissions = memo(() => {
-  return (
-    <>
-      <EuiEmptyPrompt
-        iconType="alert"
-        iconColor="danger"
-        titleSize="l"
-        data-test-subj="noIngestPermissions"
-        title={
-          <FormattedMessage
-            id="xpack.securitySolution.endpointManagemnet.noPermissionsText"
-            defaultMessage="You do not have the required Kibana permissions to use Elastic Security Administration"
-          />
-        }
-        body={
-          <EuiText color="subdued">
-            <FormattedMessage
-              id="xpack.securitySolution.endpointManagement.noPermissionsSubText"
-              defaultMessage="It looks like Fleet is disabled. Fleet must be enabled to use this feature. If you do not have permissions to enable Fleet, contact your Kibana administrator."
-            />
-          </EuiText>
-        }
-      />
-      <SpyRoute pageName={SecurityPageName.administration} />
-    </>
-  );
-});
-NoPermissions.displayName = 'NoPermissions';
+const TrustedAppTelemetry = () => (
+  <TrackApplicationView viewId={SecurityPageName.trustedApps}>
+    <TrustedAppsContainer />
+    <SpyRoute pageName={SecurityPageName.trustedApps} />
+  </TrackApplicationView>
+);
+
+const EventFilterTelemetry = () => (
+  <TrackApplicationView viewId={SecurityPageName.eventFilters}>
+    <EventFiltersContainer />
+    <SpyRoute pageName={SecurityPageName.eventFilters} />
+  </TrackApplicationView>
+);
+
+const HostIsolationExceptionsTelemetry = () => (
+  <TrackApplicationView viewId={SecurityPageName.hostIsolationExceptions}>
+    <HostIsolationExceptionsContainer />
+    <SpyRoute pageName={SecurityPageName.hostIsolationExceptions} />
+  </TrackApplicationView>
+);
+
+const ResponseActionsTelemetry = () => (
+  <TrackApplicationView viewId={SecurityPageName.responseActionsHistory}>
+    <ResponseActionsContainer />
+    <SpyRoute pageName={SecurityPageName.responseActionsHistory} />
+  </TrackApplicationView>
+);
 
 export const ManagementContainer = memo(() => {
-  const history = useHistory();
-  const isEventFilteringEnabled = useIsExperimentalFeatureEnabled('eventFilteringEnabled');
-  const { allEnabled: isIngestEnabled } = useIngestEnabledCheck();
+  const { loading, canAccessEndpointManagement, canReadActionsLogManagement } =
+    useUserPrivileges().endpointPrivileges;
 
-  if (!isIngestEnabled) {
-    return <Route path="*" component={NoPermissions} />;
+  // Lets wait until we can verify permissions
+  if (loading) {
+    return <EuiLoadingSpinner />;
+  }
+
+  if (!canAccessEndpointManagement) {
+    return (
+      <>
+        <Route path="*" component={NoPermissions} />
+        <SpyRoute pageName={SecurityPageName.administration} />
+      </>
+    );
   }
 
   return (
     <Switch>
-      <Route path={MANAGEMENT_ROUTING_ENDPOINTS_PATH} component={EndpointsContainer} />
-      <Route path={MANAGEMENT_ROUTING_POLICIES_PATH} component={PolicyContainer} />
-      <Route path={MANAGEMENT_ROUTING_TRUSTED_APPS_PATH} component={TrustedAppsContainer} />
-
-      {isEventFilteringEnabled && (
-        <Route path={MANAGEMENT_ROUTING_EVENT_FILTERS_PATH} component={EventFiltersContainer} />
-      )}
-
+      <Route path={MANAGEMENT_ROUTING_ENDPOINTS_PATH} component={EndpointTelemetry} />
+      <Route path={MANAGEMENT_ROUTING_POLICIES_PATH} component={PolicyTelemetry} />
+      <Route path={MANAGEMENT_ROUTING_TRUSTED_APPS_PATH} component={TrustedAppTelemetry} />
+      <Route path={MANAGEMENT_ROUTING_EVENT_FILTERS_PATH} component={EventFilterTelemetry} />
       <Route
-        path={MANAGEMENT_ROUTING_ROOT_PATH}
-        exact
-        render={() => {
-          history.replace(getEndpointListPath({ name: 'endpointList' }));
-          return null;
-        }}
+        path={MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH}
+        component={HostIsolationExceptionsTelemetry}
       />
+      <Route path={MANAGEMENT_ROUTING_BLOCKLIST_PATH} component={BlocklistContainer} />
+      {canReadActionsLogManagement && (
+        <Route
+          path={MANAGEMENT_ROUTING_RESPONSE_ACTIONS_HISTORY_PATH}
+          component={ResponseActionsTelemetry}
+        />
+      )}
+      <Route path={MANAGEMENT_PATH} exact>
+        <Redirect to={getEndpointListPath({ name: 'endpointList' })} />
+      </Route>
       <Route path="*" component={NotFoundPage} />
     </Switch>
   );

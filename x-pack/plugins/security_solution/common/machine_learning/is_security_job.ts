@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import type { LEGACY_ML_GROUP_ID, ML_GROUP_ID } from '../constants';
 import { ML_GROUP_IDS } from '../constants';
 
 export const isSecurityJob = (job: { groups: string[] }): boolean =>
-  job.groups.some((group) => ML_GROUP_IDS.includes(group));
+  job.groups.some((group) =>
+    ML_GROUP_IDS.includes(group as typeof ML_GROUP_ID | typeof LEGACY_ML_GROUP_ID)
+  );

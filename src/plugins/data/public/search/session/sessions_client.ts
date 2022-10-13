@@ -7,13 +7,17 @@
  */
 
 import { PublicContract } from '@kbn/utility-types';
-import { HttpSetup, SavedObjectsFindOptions } from 'kibana/public';
+import { HttpSetup } from '@kbn/core/public';
 import type {
   SavedObject,
   SavedObjectsFindResponse,
   SavedObjectsUpdateResponse,
-} from 'kibana/server';
-import type { SearchSessionSavedObjectAttributes } from '../../../common';
+  SavedObjectsFindOptions,
+} from '@kbn/core/server';
+import type {
+  SearchSessionSavedObjectAttributes,
+  SearchSessionsFindResponse,
+} from '../../../common';
 export type SearchSessionSavedObject = SavedObject<SearchSessionSavedObjectAttributes>;
 export type ISessionsClient = PublicContract<SessionsClient>;
 export interface SessionsClientDeps {
@@ -37,31 +41,31 @@ export class SessionsClient {
   public create({
     name,
     appId,
-    urlGeneratorId,
+    locatorId,
     initialState,
     restoreState,
     sessionId,
   }: {
     name: string;
     appId: string;
+    locatorId: string;
     initialState: Record<string, unknown>;
     restoreState: Record<string, unknown>;
-    urlGeneratorId: string;
     sessionId: string;
   }): Promise<SearchSessionSavedObject> {
     return this.http.post(`/internal/session`, {
       body: JSON.stringify({
         name,
+        appId,
+        locatorId,
         initialState,
         restoreState,
         sessionId,
-        appId,
-        urlGeneratorId,
       }),
     });
   }
 
-  public find(options: Omit<SavedObjectsFindOptions, 'type'>): Promise<SavedObjectsFindResponse> {
+  public find(options: Omit<SavedObjectsFindOptions, 'type'>): Promise<SearchSessionsFindResponse> {
     return this.http!.post(`/internal/session/_find`, {
       body: JSON.stringify(options),
     });

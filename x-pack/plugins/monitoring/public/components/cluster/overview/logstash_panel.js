@@ -15,7 +15,7 @@ import {
 import {
   LOGSTASH,
   LOGSTASH_SYSTEM_ID,
-  ALERT_LOGSTASH_VERSION_MISMATCH,
+  RULE_LOGSTASH_VERSION_MISMATCH,
 } from '../../../../common/constants';
 
 import {
@@ -29,9 +29,8 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
   EuiHorizontalRule,
-  EuiIconTip,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { SetupModeTooltip } from '../../setup_mode/tooltip';
@@ -42,7 +41,7 @@ import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
 import { SetupModeFeature } from '../../../../common/enums';
 import { SetupModeContext } from '../../setup_mode/setup_mode_context';
 
-const NODES_PANEL_ALERTS = [ALERT_LOGSTASH_VERSION_MISMATCH];
+const NODES_PANEL_RULES = [RULE_LOGSTASH_VERSION_MISMATCH];
 
 export function LogstashPanel(props) {
   const { setupMode } = props;
@@ -72,8 +71,8 @@ export function LogstashPanel(props) {
   ) : null;
 
   let nodesAlertStatus = null;
-  if (shouldShowAlertBadge(alerts, NODES_PANEL_ALERTS, setupModeContext)) {
-    const alertsList = NODES_PANEL_ALERTS.map((alertType) => alerts[alertType]);
+  if (shouldShowAlertBadge(alerts, NODES_PANEL_RULES, setupModeContext)) {
+    const alertsList = NODES_PANEL_RULES.map((alertType) => alerts[alertType]);
     nodesAlertStatus = (
       <EuiFlexItem grow={false}>
         <AlertsBadge alerts={alertsList} />
@@ -98,6 +97,7 @@ export function LogstashPanel(props) {
                   setupModeEnabled={setupMode.enabled}
                   setupModeData={setupModeData}
                   href={goToLogstash()}
+                  data-test-subj="lsOverview"
                   aria-label={i18n.translate(
                     'xpack.monitoring.cluster.overview.logstashPanel.overviewLinkAriaLabel',
                     {
@@ -215,7 +215,7 @@ export function LogstashPanel(props) {
                       aria-label={i18n.translate(
                         'xpack.monitoring.cluster.overview.logstashPanel.pipelineCountLinkAriaLabel',
                         {
-                          defaultMessage: 'Logstash Pipelines (beta feature): {pipelineCount}',
+                          defaultMessage: 'Logstash Pipelines: {pipelineCount}',
                           values: { pipelineCount: props.pipeline_count },
                         }
                       )}
@@ -234,19 +234,6 @@ export function LogstashPanel(props) {
                     </DisabledIfNoDataAndInSetupModeLink>
                   </h3>
                 </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiIconTip
-                  content={i18n.translate(
-                    'xpack.monitoring.cluster.overview.logstashPanel.betaFeatureTooltip',
-                    {
-                      defaultMessage: 'Beta feature',
-                    }
-                  )}
-                  position="bottom"
-                  type="beaker"
-                  aria-label="Beta feature"
-                />
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiHorizontalRule margin="m" />

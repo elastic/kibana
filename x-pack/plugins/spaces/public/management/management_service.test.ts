@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { CoreSetup } from 'src/core/public';
-import { coreMock } from 'src/core/public/mocks';
-import type { ManagementSection } from 'src/plugins/management/public';
-import { managementPluginMock } from 'src/plugins/management/public/mocks';
+import type { CoreSetup } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import type { ManagementSection } from '@kbn/management-plugin/public';
+import { managementPluginMock } from '@kbn/management-plugin/public/mocks';
 
 import type { PluginsStart } from '../plugin';
 import { spacesManagerMock } from '../spaces_manager/mocks';
@@ -17,9 +17,9 @@ import { ManagementService } from './management_service';
 describe('ManagementService', () => {
   describe('#setup', () => {
     it('registers the spaces management page under the kibana section', () => {
-      const mockKibanaSection = ({
+      const mockKibanaSection = {
         registerApp: jest.fn(),
-      } as unknown) as ManagementSection;
+      } as unknown as ManagementSection;
       const managementMockSetup = managementPluginMock.createSetupContract();
       managementMockSetup.sections.section.kibana = mockKibanaSection;
       const deps = {
@@ -57,9 +57,9 @@ describe('ManagementService', () => {
   describe('#stop', () => {
     it('disables the spaces management page', () => {
       const mockSpacesManagementPage = { disable: jest.fn() };
-      const mockKibanaSection = ({
+      const mockKibanaSection = {
         registerApp: jest.fn().mockReturnValue(mockSpacesManagementPage),
-      } as unknown) as ManagementSection;
+      } as unknown as ManagementSection;
       const managementMockSetup = managementPluginMock.createSetupContract();
       managementMockSetup.sections.section.kibana = mockKibanaSection;
 

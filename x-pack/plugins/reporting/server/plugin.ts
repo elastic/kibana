@@ -5,12 +5,18 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/server';
+import type {
+  CoreSetup,
+  CoreStart,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/server';
+import { ReportingCore } from '.';
 import { PLUGIN_ID } from '../common/constants';
-import { ReportingCore } from './';
-import { initializeBrowserDriverFactory } from './browsers';
 import { buildConfig, registerUiSettings, ReportingConfigType } from './config';
-import { LevelLogger, ReportingStore } from './lib';
+import { registerDeprecations } from './deprecations';
+import { ReportingStore } from './lib';
 import { registerRoutes } from './routes';
 import { setFieldFormats } from './services';
 import type {
@@ -22,49 +28,52 @@ import type {
 } from './types';
 import { registerReportingUsageCollector } from './usage';
 
+/*
+ * @internal
+ */
 export class ReportingPlugin
-  implements Plugin<ReportingSetup, ReportingStart, ReportingSetupDeps, ReportingStartDeps> {
-  private logger: LevelLogger;
+  implements Plugin<ReportingSetup, ReportingStart, ReportingSetupDeps, ReportingStartDeps>
+{
+  private logger: Logger;
   private reportingCore?: ReportingCore;
 
   constructor(private initContext: PluginInitializerContext<ReportingConfigType>) {
-    this.logger = new LevelLogger(initContext.logger.get());
+    this.logger = initContext.logger.get();
   }
 
   public setup(core: CoreSetup, plugins: ReportingSetupDeps) {
+    const { http, status } = core;
     const reportingCore = new ReportingCore(this.logger, this.initContext);
 
     // prevent throwing errors in route handlers about async deps not being initialized
     // @ts-expect-error null is not assignable to object. use a boolean property to ensure reporting API is enabled.
-    core.http.registerRouteHandlerContext(PLUGIN_ID, () => {
+    http.registerRouteHandlerContext(PLUGIN_ID, () => {
       if (reportingCore.pluginIsStarted()) {
-        return reportingCore.getStartContract();
+        return reportingCore.getContract();
       } else {
         this.logger.error(`Reporting features are not yet ready`);
         return null;
       }
     });
 
-    registerUiSettings(core);
-
-    const { http } = core;
-    const { features, licensing, security, spaces, taskManager } = plugins;
-
-    const router = http.createRouter<ReportingRequestHandlerContext>();
-    const basePath = http.basePath;
+    // Usage counter for reporting telemetry
+    const usageCounter = plugins.usageCollection?.createUsageCounter(PLUGIN_ID);
 
     reportingCore.pluginSetup({
-      features,
-      licensing,
-      basePath,
-      router,
-      security,
-      spaces,
-      taskManager,
       logger: this.logger,
+      status,
+      basePath: http.basePath,
+      router: http.createRouter<ReportingRequestHandlerContext>(),
+      usageCounter,
+      docLinks: core.docLinks,
+      ...plugins,
     });
 
-    registerReportingUsageCollector(reportingCore, plugins);
+    registerUiSettings(core);
+    registerDeprecations({ core, reportingCore });
+    registerReportingUsageCollector(reportingCore, plugins.usageCollection);
+
+    // Routes
     registerRoutes(reportingCore, this.logger);
 
     // async background setup
@@ -80,32 +89,34 @@ export class ReportingPlugin
     });
 
     this.reportingCore = reportingCore;
-    return reportingCore.getStartContract();
+    return reportingCore.getContract();
   }
 
   public start(core: CoreStart, plugins: ReportingStartDeps) {
-    // use data plugin for csv formats
-    setFieldFormats(plugins.data.fieldFormats);
+    const { elasticsearch, savedObjects, uiSettings } = core;
+
+    // use fieldFormats plugin for csv formats
+    setFieldFormats(plugins.fieldFormats);
     const reportingCore = this.reportingCore!;
 
     // async background start
     (async () => {
       await reportingCore.pluginSetsUp();
-      const config = reportingCore.getConfig();
 
-      const browserDriverFactory = await initializeBrowserDriverFactory(config, this.logger);
-      const store = new ReportingStore(reportingCore, this.logger);
+      const logger = this.logger;
+      const store = new ReportingStore(reportingCore, logger);
 
       await reportingCore.pluginStart({
-        browserDriverFactory,
-        savedObjects: core.savedObjects,
-        uiSettings: core.uiSettings,
+        logger,
+        esClient: elasticsearch.client,
+        savedObjects,
+        uiSettings,
         store,
-        esClient: core.elasticsearch.client,
-        data: plugins.data,
-        taskManager: plugins.taskManager,
-        logger: this.logger,
+        ...plugins,
       });
+
+      // Note: this must be called after ReportingCore.pluginStart
+      await store.start();
 
       this.logger.debug('Start complete');
     })().catch((e) => {
@@ -113,6 +124,10 @@ export class ReportingPlugin
       this.logger.error(e);
     });
 
-    return reportingCore.getStartContract();
+    return reportingCore.getContract();
+  }
+
+  stop() {
+    this.reportingCore?.pluginStop();
   }
 }

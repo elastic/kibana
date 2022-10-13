@@ -9,28 +9,36 @@ import React, { Fragment } from 'react';
 import { shallow } from 'enzyme';
 import { ELASTICSEARCH_SYSTEM_ID } from '../../../common/constants';
 
+const kibanaMock = {
+  services: {
+    http: jest.fn(),
+  },
+};
+
+const onHttpErrorMock = jest.fn();
+
 describe('SetupModeRenderer', () => {
   beforeEach(() => jest.resetModules());
 
   it('should render with setup mode disabled', () => {
     jest.doMock('../../lib/setup_mode', () => ({
       getSetupModeState: () => ({
+        supported: true,
         enabled: false,
       }),
       initSetupModeState: () => {},
       updateSetupModeData: () => {},
-      setSetupModeMenuItem: () => {},
+      markSetupModeSupported: () => {},
+      markSetupModeUnsupported: () => {},
     }));
-    const SetupModeRenderer = require('./setup_mode').SetupModeRenderer;
+    const SetupModeRenderer = require('./setup_mode').WrappedSetupModeRenderer;
 
     const ChildComponent = () => <h1>Hi</h1>;
-    const scope = {};
-    const injector = {};
     const component = shallow(
       <SetupModeRenderer
-        scope={scope}
-        injector={injector}
         productName={ELASTICSEARCH_SYSTEM_ID}
+        kibana={kibanaMock}
+        onHttpError={onHttpErrorMock}
         render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
           <Fragment>
             {flyoutComponent}
@@ -47,6 +55,7 @@ describe('SetupModeRenderer', () => {
   it('should render with setup mode enabled', () => {
     jest.doMock('../../lib/setup_mode', () => ({
       getSetupModeState: () => ({
+        supported: true,
         enabled: true,
         data: {
           elasticsearch: {},
@@ -55,18 +64,17 @@ describe('SetupModeRenderer', () => {
       }),
       initSetupModeState: () => {},
       updateSetupModeData: () => {},
-      setSetupModeMenuItem: () => {},
+      markSetupModeSupported: () => {},
+      markSetupModeUnsupported: () => {},
     }));
-    const SetupModeRenderer = require('./setup_mode').SetupModeRenderer;
+    const SetupModeRenderer = require('./setup_mode').WrappedSetupModeRenderer;
 
     const ChildComponent = () => <h1>Hi</h1>;
-    const scope = {};
-    const injector = {};
     const component = shallow(
       <SetupModeRenderer
-        scope={scope}
-        injector={injector}
         productName={ELASTICSEARCH_SYSTEM_ID}
+        kibana={kibanaMock}
+        onHttpError={onHttpErrorMock}
         render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
           <Fragment>
             {flyoutComponent}
@@ -83,6 +91,7 @@ describe('SetupModeRenderer', () => {
   it('should render the flyout open', () => {
     jest.doMock('../../lib/setup_mode', () => ({
       getSetupModeState: () => ({
+        supported: true,
         enabled: true,
         data: {
           elasticsearch: {
@@ -93,18 +102,17 @@ describe('SetupModeRenderer', () => {
       }),
       initSetupModeState: () => {},
       updateSetupModeData: () => {},
-      setSetupModeMenuItem: () => {},
+      markSetupModeSupported: () => {},
+      markSetupModeUnsupported: () => {},
     }));
-    const SetupModeRenderer = require('./setup_mode').SetupModeRenderer;
+    const SetupModeRenderer = require('./setup_mode').WrappedSetupModeRenderer;
 
     const ChildComponent = () => <h1>Hi</h1>;
-    const scope = {};
-    const injector = {};
     const component = shallow(
       <SetupModeRenderer
-        scope={scope}
-        injector={injector}
         productName={ELASTICSEARCH_SYSTEM_ID}
+        kibana={kibanaMock}
+        onHttpError={onHttpErrorMock}
         render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
           <Fragment>
             {flyoutComponent}
@@ -123,6 +131,7 @@ describe('SetupModeRenderer', () => {
   it('should handle a new node/instance scenario', () => {
     jest.doMock('../../lib/setup_mode', () => ({
       getSetupModeState: () => ({
+        supported: true,
         enabled: true,
         data: {
           elasticsearch: {
@@ -133,18 +142,17 @@ describe('SetupModeRenderer', () => {
       }),
       initSetupModeState: () => {},
       updateSetupModeData: () => {},
-      setSetupModeMenuItem: () => {},
+      markSetupModeSupported: () => {},
+      markSetupModeUnsupported: () => {},
     }));
-    const SetupModeRenderer = require('./setup_mode').SetupModeRenderer;
+    const SetupModeRenderer = require('./setup_mode').WrappedSetupModeRenderer;
 
     const ChildComponent = () => <h1>Hi</h1>;
-    const scope = {};
-    const injector = {};
     const component = shallow(
       <SetupModeRenderer
-        scope={scope}
-        injector={injector}
         productName={ELASTICSEARCH_SYSTEM_ID}
+        kibana={kibanaMock}
+        onHttpError={onHttpErrorMock}
         render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
           <Fragment>
             {flyoutComponent}
@@ -166,6 +174,7 @@ describe('SetupModeRenderer', () => {
     jest.useFakeTimers();
     jest.doMock('../../lib/setup_mode', () => ({
       getSetupModeState: () => ({
+        supported: true,
         enabled: true,
         data: {
           elasticsearch: {
@@ -176,7 +185,7 @@ describe('SetupModeRenderer', () => {
           _meta: {},
         },
       }),
-      initSetupModeState: (_scope, _injectir, cb) => {
+      initSetupModeState: (_globalState, _httpService, _onError, cb) => {
         setTimeout(() => {
           cb({
             elasticsearch: {
@@ -188,18 +197,17 @@ describe('SetupModeRenderer', () => {
         }, 500);
       },
       updateSetupModeData: () => {},
-      setSetupModeMenuItem: () => {},
+      markSetupModeSupported: () => {},
+      markSetupModeUnsupported: () => {},
     }));
-    const SetupModeRenderer = require('./setup_mode').SetupModeRenderer;
+    const SetupModeRenderer = require('./setup_mode').WrappedSetupModeRenderer;
 
     const ChildComponent = () => <h1>Hi</h1>;
-    const scope = {};
-    const injector = {};
     const component = shallow(
       <SetupModeRenderer
-        scope={scope}
-        injector={injector}
         productName={ELASTICSEARCH_SYSTEM_ID}
+        kibana={kibanaMock}
+        onHttpError={onHttpErrorMock}
         render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
           <Fragment>
             {flyoutComponent}
@@ -222,9 +230,9 @@ describe('SetupModeRenderer', () => {
   it('should set the top menu items', () => {
     const newProduct = { id: 1 };
 
-    const setSetupModeMenuItem = jest.fn();
     jest.doMock('../../lib/setup_mode', () => ({
       getSetupModeState: () => ({
+        supported: true,
         enabled: true,
         data: {
           elasticsearch: {
@@ -235,7 +243,7 @@ describe('SetupModeRenderer', () => {
           _meta: {},
         },
       }),
-      initSetupModeState: (_scope, _injectir, cb) => {
+      initSetupModeState: (_globalState, _httpService, _onError, cb) => {
         setTimeout(() => {
           cb({
             elasticsearch: {
@@ -247,18 +255,17 @@ describe('SetupModeRenderer', () => {
         }, 500);
       },
       updateSetupModeData: () => {},
-      setSetupModeMenuItem,
+      markSetupModeSupported: () => {},
+      markSetupModeUnsupported: () => {},
     }));
-    const SetupModeRenderer = require('./setup_mode').SetupModeRenderer;
+    const SetupModeRenderer = require('./setup_mode').WrappedSetupModeRenderer;
 
     const ChildComponent = () => <h1>Hi</h1>;
-    const scope = {};
-    const injector = {};
     const component = shallow(
       <SetupModeRenderer
-        scope={scope}
-        injector={injector}
         productName={ELASTICSEARCH_SYSTEM_ID}
+        kibana={kibanaMock}
+        onHttpError={onHttpErrorMock}
         render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
           <Fragment>
             {flyoutComponent}
@@ -271,6 +278,5 @@ describe('SetupModeRenderer', () => {
 
     component.setState({ isFlyoutOpen: true });
     component.update();
-    expect(setSetupModeMenuItem).toHaveBeenCalled();
   });
 });

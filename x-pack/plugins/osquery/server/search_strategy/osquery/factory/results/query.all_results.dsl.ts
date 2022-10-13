@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { ISearchRequestParams } from '@kbn/data-plugin/common';
 import { OSQUERY_INTEGRATION_NAME } from '../../../../../common';
-import { ISearchRequestParams } from '../../../../../../../../src/plugins/data/common';
-import { ResultsRequestOptions } from '../../../../../common/search_strategy';
+import type { ResultsRequestOptions } from '../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../common/utils/build_query';
 
 export const buildResultsQuery = ({
@@ -36,15 +36,20 @@ export const buildResultsQuery = ({
   ];
 
   const dslQuery = {
-    allowNoIndices: true,
+    allow_no_indices: true,
     index: `logs-${OSQUERY_INTEGRATION_NAME}.result*`,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
       aggs: {
         count_by_agent_id: {
           terms: {
-            field: 'agent.id',
+            field: 'elastic_agent.id',
             size: 10000,
+          },
+        },
+        unique_agents: {
+          cardinality: {
+            field: 'elastic_agent.id',
           },
         },
       },
@@ -52,14 +57,13 @@ export const buildResultsQuery = ({
       from: activePage * querySize,
       size: querySize,
       track_total_hits: true,
-      fields: agentId ? ['osquery.*'] : ['agent.*', 'osquery.*'],
-      sort: [
-        {
-          [sort.field]: {
-            order: sort.direction,
+      fields: ['elastic_agent.*', 'agent.*', 'osquery.*'],
+      sort:
+        sort?.map((sortConfig) => ({
+          [sortConfig.field]: {
+            order: sortConfig.direction,
           },
-        },
-      ],
+        })) ?? [],
     },
   };
 

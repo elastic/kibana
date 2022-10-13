@@ -49,7 +49,6 @@ export const TRANSACTION_RESULT = 'transaction.result';
 export const TRANSACTION_NAME = 'transaction.name';
 export const TRANSACTION_ID = 'transaction.id';
 export const TRANSACTION_SAMPLED = 'transaction.sampled';
-export const TRANSACTION_BREAKDOWN_COUNT = 'transaction.breakdown.count';
 export const TRANSACTION_PAGE_URL = 'transaction.page.url';
 // for transaction metrics
 export const TRANSACTION_ROOT = 'transaction.root';
@@ -86,6 +85,8 @@ export const ERROR_PAGE_URL = 'error.page.url';
 
 // METRICS
 export const METRIC_SYSTEM_FREE_MEMORY = 'system.memory.actual.free';
+export const METRIC_SYSTEM_MEMORY_USAGE = 'system.memory.usage';
+export const METRIC_SYSTEM_CPU_USAGE = 'system.cpu.usage';
 export const METRIC_SYSTEM_TOTAL_MEMORY = 'system.memory.total';
 export const METRIC_SYSTEM_CPU_PERCENT = 'system.cpu.total.norm.pct';
 export const METRIC_PROCESS_CPU_PERCENT = 'system.process.cpu.total.norm.pct';
@@ -105,7 +106,7 @@ export const METRIC_JAVA_GC_TIME = 'jvm.gc.time';
 export const LABEL_NAME = 'labels.name';
 
 export const HOST = 'host';
-export const HOST_NAME = 'host.hostname';
+export const HOST_HOSTNAME = 'host.hostname';
 export const HOST_OS_PLATFORM = 'host.os.platform';
 export const CONTAINER_ID = 'container.id';
 export const KUBERNETES = 'kubernetes';
@@ -119,6 +120,7 @@ export const TRANSACTION_URL = 'url.full';
 export const CLIENT_GEO = 'client.geo';
 export const USER_AGENT_DEVICE = 'user_agent.device.name';
 export const USER_AGENT_OS = 'user_agent.os.name';
+export const USER_AGENT_OS_VERSION = 'user_agent.os.version';
 
 export const TRANSACTION_TIME_TO_FIRST_BYTE = 'transaction.marks.agent.timeToFirstByte';
 export const TRANSACTION_DOM_INTERACTIVE = 'transaction.marks.agent.domInteractive';

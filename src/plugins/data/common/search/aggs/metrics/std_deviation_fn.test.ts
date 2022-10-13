@@ -27,6 +27,8 @@ describe('agg_expression_functions', () => {
               "customLabel": undefined,
               "field": "machine.os.keyword",
               "json": undefined,
+              "showBounds": true,
+              "timeShift": undefined,
             },
             "schema": undefined,
             "type": "std_dev",

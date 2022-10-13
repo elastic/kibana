@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import uuid from 'uuid';
 
 export function createServiceDependencyDocs({
@@ -48,9 +49,6 @@ export function createServiceDependencyDocs({
       processor: {
         event: 'metric' as const,
       },
-      observer: {
-        version_major: 7,
-      },
       '@timestamp': new Date(time).toISOString(),
       service,
       agent: {
@@ -77,9 +75,6 @@ export function createServiceDependencyDocs({
       processor: {
         event: 'span' as const,
       },
-      observer: {
-        version_major: 7,
-      },
       '@timestamp': new Date(time).toISOString(),
       service,
       agent: {
@@ -105,9 +100,6 @@ export function createServiceDependencyDocs({
             processor: {
               event: 'transaction' as const,
             },
-            observer: {
-              version_major: 7,
-            },
             '@timestamp': new Date(time + 1).toISOString(),
             event: {
               outcome: 'unknown',
@@ -125,7 +117,7 @@ export function createServiceDependencyDocs({
   ];
 }
 
-export const apmDependenciesMapping = {
+export const apmDependenciesMapping: MappingTypeMapping = {
   properties: {
     '@timestamp': {
       type: 'date',

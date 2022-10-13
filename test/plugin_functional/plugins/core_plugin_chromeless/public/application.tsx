@@ -12,16 +12,16 @@ import { BrowserRouter as Router, Route } from 'react-router-dom';
 import {
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
-  EuiPageContentBody,
-  EuiPageContentHeader,
-  EuiPageContentHeaderSection,
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
+  EuiPageContentHeaderSection_Deprecated as EuiPageContentHeaderSection,
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiTitle,
 } from '@elastic/eui';
 
-import { AppMountParameters } from 'kibana/public';
+import { AppMountParameters } from '@kbn/core/public';
 
 const Home = () => (
   <EuiPageBody data-test-subj="chromelessAppHome">

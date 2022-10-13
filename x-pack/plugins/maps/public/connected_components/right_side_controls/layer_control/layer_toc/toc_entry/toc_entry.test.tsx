@@ -21,7 +21,7 @@ import { TOCEntry } from './toc_entry';
 
 const LAYER_ID = '1';
 
-const mockLayer = ({
+const mockLayer = {
   getId: () => {
     return LAYER_ID;
   },
@@ -46,9 +46,13 @@ const mockLayer = ({
   hasLegendDetails: () => {
     return true;
   },
-} as unknown) as ILayer;
+  supportsFitToBounds: () => {
+    return true;
+  },
+} as unknown as ILayer;
 
 const defaultProps = {
+  depth: 0,
   layer: mockLayer,
   selectedLayer: undefined,
   openLayerPanel: async () => {},
@@ -62,6 +66,8 @@ const defaultProps = {
   isEditButtonDisabled: false,
   hideTOCDetails: () => {},
   showTOCDetails: () => {},
+  isFeatureEditorOpenForLayer: false,
+  cancelEditing: () => {},
 };
 
 describe('TOCEntry', () => {
@@ -79,6 +85,17 @@ describe('TOCEntry', () => {
   describe('props', () => {
     test('isReadOnly', async () => {
       const component = shallow(<TOCEntry {...defaultProps} isReadOnly={true} />);
+
+      // Ensure all promises resolve
+      await new Promise((resolve) => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      expect(component).toMatchSnapshot();
+    });
+
+    test('Should indent child layer', async () => {
+      const component = shallow(<TOCEntry {...defaultProps} depth={2} />);
 
       // Ensure all promises resolve
       await new Promise((resolve) => process.nextTick(resolve));
@@ -111,7 +128,7 @@ describe('TOCEntry', () => {
     });
 
     test('Should shade background when not selected layer', async () => {
-      const differentLayer = (Object.create(mockLayer) as unknown) as ILayer;
+      const differentLayer = Object.create(mockLayer) as unknown as ILayer;
       differentLayer.getId = () => {
         return 'foobar';
       };

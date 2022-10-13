@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'error', 'timePicker', 'security']);
   const testSubjects = getService('testSubjects');
@@ -18,13 +18,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('security', () => {
     before(async () => {
-      await esArchiver.load('empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
       // ensure we're logged out so we can login as the appropriate users
       await PageObjects.security.forceLogout();
     });
 
     after(async () => {
       // logout, so the other tests don't accidentally run as the custom users we're testing below
+      // NOTE: Logout needs to happen before anything else to avoid flaky behavior
       await PageObjects.security.forceLogout();
     });
 
@@ -68,7 +69,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const navLinks = await appsMenu.readLinks();
         expect(navLinks.map((link) => link.text)).to.eql([
           'Overview',
+          'Alerts',
           'Uptime',
+          'Synthetics',
           'Stack Management',
         ]);
       });
@@ -121,7 +124,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows uptime navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Overview', 'Uptime', 'Stack Management']);
+        expect(navLinks).to.eql(['Overview', 'Alerts', 'Uptime', 'Synthetics', 'Stack Management']);
       });
 
       it('can navigate to Uptime app', async () => {

@@ -14,7 +14,7 @@ import {
   teamAssignment,
   last,
 } from '../transforms';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 
 describe(`Transform fns`, () => {
   describe(`ciRunUrl`, () => {
@@ -32,13 +32,13 @@ describe(`Transform fns`, () => {
       it(`should remove the jenkins workspace path`, () => {
         const obj = {
           staticSiteUrl:
-            '/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/x-pack/plugins/reporting/server/browsers/extract/unzip.js',
+            '/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana/x-pack/plugins/reporting/server/browsers/extract/unzip.ts',
           COVERAGE_INGESTION_KIBANA_ROOT:
             '/var/lib/jenkins/workspace/elastic+kibana+code-coverage/kibana',
         };
         expect(coveredFilePath(obj)).toHaveProperty(
           'coveredFilePath',
-          'x-pack/plugins/reporting/server/browsers/extract/unzip.js'
+          'x-pack/plugins/reporting/server/browsers/extract/unzip.ts'
         );
       });
     });
@@ -46,13 +46,13 @@ describe(`Transform fns`, () => {
       it(`should remove the jenkins workspace path`, () => {
         const obj = {
           staticSiteUrl:
-            '/var/lib/jenkins/workspace/elastic+kibana+qa-research/kibana/x-pack/plugins/reporting/server/browsers/extract/unzip.js',
+            '/var/lib/jenkins/workspace/elastic+kibana+qa-research/kibana/x-pack/plugins/reporting/server/browsers/extract/unzip.ts',
           COVERAGE_INGESTION_KIBANA_ROOT:
             '/var/lib/jenkins/workspace/elastic+kibana+qa-research/kibana',
         };
         expect(coveredFilePath(obj)).toHaveProperty(
           'coveredFilePath',
-          'x-pack/plugins/reporting/server/browsers/extract/unzip.js'
+          'x-pack/plugins/reporting/server/browsers/extract/unzip.ts'
         );
       });
     });
@@ -82,7 +82,7 @@ describe(`Transform fns`, () => {
   describe(`teamAssignment`, () => {
     const teamAssignmentsPathMOCK =
       'src/dev/code_coverage/ingest_coverage/__tests__/mocks/team_assign_mock.txt';
-    const coveredFilePath = 'x-pack/plugins/reporting/server/browsers/extract/unzip.js';
+    const coveredFilePath = 'x-pack/plugins/reporting/server/browsers/extract/unzip.ts';
     const obj = { coveredFilePath };
     const log = new ToolingLog({
       level: 'info',
@@ -98,7 +98,7 @@ describe(`Transform fns`, () => {
       });
     });
 
-    describe(`with a coveredFilePath of src/plugins/charts/public/static/color_maps/color_maps.ts`, () => {
+    describe(`with a coveredFilePath of src/plugins/charts/common/static/color_maps/color_maps.ts`, () => {
       const expected = 'kibana-reporting';
       it(`should resolve to ${expected}`, async () => {
         const actual = await teamAssignment(teamAssignmentsPathMOCK)(log)(obj);
@@ -110,25 +110,25 @@ describe(`Transform fns`, () => {
     describe(`last fn`, () => {
       describe(`applied to n results`, () => {
         it(`should pick the last one`, () => {
-          const nteams = `src/plugins/charts/public/static/color_maps/color_maps.ts kibana-app
-src/plugins/charts/public/static/color_maps/color_maps.ts kibana-app-arch`;
+          const nteams = `src/plugins/charts/common/static/color_maps/color_maps.ts kibana-app
+src/plugins/charts/common/static/color_maps/color_maps.ts kibana-app-arch`;
 
           const actual = last(nteams);
 
           expect(actual).toBe(
-            'src/plugins/charts/public/static/color_maps/color_maps.ts kibana-app-arch'
+            'src/plugins/charts/common/static/color_maps/color_maps.ts kibana-app-arch'
           );
         });
       });
       describe(`applied to 1 result`, () => {
         it(`should pick that 1 result`, () => {
           const nteams =
-            'src/plugins/charts/public/static/color_maps/color_maps.ts kibana-app-arch';
+            'src/plugins/charts/common/static/color_maps/color_maps.ts kibana-app-arch';
 
           const actual = last(nteams);
 
           expect(actual).toBe(
-            'src/plugins/charts/public/static/color_maps/color_maps.ts kibana-app-arch'
+            'src/plugins/charts/common/static/color_maps/color_maps.ts kibana-app-arch'
           );
         });
       });

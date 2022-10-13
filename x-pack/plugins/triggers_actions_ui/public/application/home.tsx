@@ -5,32 +5,24 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
-import { Route, RouteComponentProps, Switch } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n/react';
-import {
-  EuiPageBody,
-  EuiPageContent,
-  EuiSpacer,
-  EuiTab,
-  EuiTabs,
-  EuiTitle,
-  EuiText,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import React, { lazy, useEffect } from 'react';
+import { Route, RouteComponentProps, Switch, Redirect } from 'react-router-dom';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiSpacer, EuiButtonEmpty, EuiPageHeader } from '@elastic/eui';
 
-import { Section, routeToConnectors, routeToRules } from './constants';
+import { getIsExperimentalFeatureEnabled } from '../common/get_experimental_features';
+import { Section, routeToRules, routeToInternalAlerts, routeToLogs } from './constants';
 import { getAlertingSectionBreadcrumb } from './lib/breadcrumb';
 import { getCurrentDocTitle } from './lib/doc_title';
-import { hasShowActionsCapability } from './lib/capabilities';
 
-import { ActionsConnectorsList } from './sections/actions_connectors_list/components/actions_connectors_list';
-import { AlertsList } from './sections/alerts_list/components/alerts_list';
 import { HealthCheck } from './components/health_check';
 import { HealthContextProvider } from './context/health_context';
 import { useKibana } from '../common/lib/kibana';
+import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
+
+const RulesList = lazy(() => import('./sections/rules_list/components/rules_list'));
+const LogsList = lazy(() => import('./sections/logs_list/components/logs_list'));
+const AlertsPage = lazy(() => import('./sections/alerts_table/alerts_page'));
 
 export interface MatchParams {
   section: Section;
@@ -42,14 +34,9 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
   },
   history,
 }) => {
-  const {
-    chrome,
-    application: { capabilities },
-    setBreadcrumbs,
-    docLinks,
-  } = useKibana().services;
+  const { chrome, setBreadcrumbs, docLinks } = useKibana().services;
+  const isInternalAlertsTableEnabled = getIsExperimentalFeatureEnabled('internalAlertsTable');
 
-  const canShowActions = hasShowActionsCapability(capabilities);
   const tabs: Array<{
     id: Section;
     name: React.ReactNode;
@@ -62,13 +49,18 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
     ),
   });
 
-  if (canShowActions) {
+  tabs.push({
+    id: 'logs',
+    name: <FormattedMessage id="xpack.triggersActionsUI.home.logsTabTitle" defaultMessage="Logs" />,
+  });
+
+  if (isInternalAlertsTableEnabled) {
     tabs.push({
-      id: 'connectors',
+      id: 'alerts',
       name: (
         <FormattedMessage
-          id="xpack.triggersActionsUI.home.connectorsTabTitle"
-          defaultMessage="Connectors"
+          id="xpack.triggersActionsUI.home.TabTitle"
+          defaultMessage="Alerts (Internal use only)"
         />
       ),
     });
@@ -85,86 +77,70 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
   }, [section, chrome, setBreadcrumbs]);
 
   return (
-    <EuiPageBody>
-      <EuiPageContent>
-        <EuiTitle size="m">
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <h1 data-test-subj="appTitle">
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.home.appTitle"
-                  defaultMessage="Rules and Connectors"
-                />
-              </h1>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                href={docLinks.links.alerting.guide}
-                target="_blank"
-                iconType="help"
-                data-test-subj="documentationLink"
-              >
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.home.docsLinkText"
-                  defaultMessage="Documentation"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiText>
-          <p>
+    <>
+      <EuiPageHeader
+        bottomBorder
+        pageTitle={
+          <span data-test-subj="appTitle">
+            <FormattedMessage id="xpack.triggersActionsUI.home.appTitle" defaultMessage="Rules" />
+          </span>
+        }
+        rightSideItems={[
+          <EuiButtonEmpty
+            href={docLinks.links.alerting.guide}
+            target="_blank"
+            iconType="help"
+            data-test-subj="documentationLink"
+          >
             <FormattedMessage
-              id="xpack.triggersActionsUI.home.sectionDescription"
-              defaultMessage="Detect conditions using rules, and take actions using connectors."
+              id="xpack.triggersActionsUI.home.docsLinkText"
+              defaultMessage="Documentation"
             />
-          </p>
-        </EuiText>
+          </EuiButtonEmpty>,
+        ]}
+        description={
+          <FormattedMessage
+            id="xpack.triggersActionsUI.home.sectionDescription"
+            defaultMessage="Detect conditions using rules."
+          />
+        }
+        tabs={tabs.map((tab) => ({
+          label: tab.name,
+          onClick: () => onSectionChange(tab.id),
+          isSelected: tab.id === section,
+          key: tab.id,
+          'data-test-subj': `${tab.id}Tab`,
+        }))}
+      />
 
-        <EuiTabs>
-          {tabs.map((tab) => (
-            <EuiTab
-              onClick={() => onSectionChange(tab.id)}
-              isSelected={tab.id === section}
-              key={tab.id}
-              data-test-subj={`${tab.id}Tab`}
-            >
-              {tab.name}
-            </EuiTab>
-          ))}
-        </EuiTabs>
+      <EuiSpacer size="l" />
 
-        <EuiSpacer size="s" />
-
-        <Switch>
-          {canShowActions && (
+      <HealthContextProvider>
+        <HealthCheck waitForCheck={true}>
+          <Switch>
             <Route
               exact
-              path={routeToConnectors}
-              component={() => (
-                <HealthContextProvider>
-                  <HealthCheck waitForCheck={true}>
-                    <ActionsConnectorsList />
-                  </HealthCheck>
-                </HealthContextProvider>
-              )}
+              path={routeToLogs}
+              component={suspendedComponentWithProps(LogsList, 'xl')}
             />
-          )}
-          <Route
-            exact
-            path={routeToRules}
-            component={() => (
-              <HealthContextProvider>
-                <HealthCheck inFlyout={true} waitForCheck={true}>
-                  <AlertsList />
-                </HealthCheck>
-              </HealthContextProvider>
+            <Route
+              exact
+              path={routeToRules}
+              component={suspendedComponentWithProps(RulesList, 'xl')}
+            />
+            {isInternalAlertsTableEnabled ? (
+              <Route
+                exact
+                path={routeToInternalAlerts}
+                component={suspendedComponentWithProps(AlertsPage, 'xl')}
+              />
+            ) : (
+              <Redirect to={routeToRules} />
             )}
-          />
-        </Switch>
-      </EuiPageContent>
-    </EuiPageBody>
+          </Switch>
+        </HealthCheck>
+      </HealthContextProvider>
+    </>
   );
 };
 

@@ -8,12 +8,11 @@
 import React, { memo, useCallback, useMemo } from 'react';
 import { EuiButton } from '@elastic/eui';
 
-import { CaseStatuses, caseStatuses } from '../../../common';
+import { CaseStatuses, caseStatuses } from '../../../common/api';
 import { statuses } from './config';
 
 interface Props {
   status: CaseStatuses;
-  disabled: boolean;
   isLoading: boolean;
   onStatusChanged: (status: CaseStatuses) => void;
 }
@@ -21,12 +20,7 @@ interface Props {
 // Rotate over the statuses. open -> in-progress -> closes -> open...
 const getNextItem = (item: number) => (item + 1) % caseStatuses.length;
 
-const StatusActionButtonComponent: React.FC<Props> = ({
-  status,
-  onStatusChanged,
-  disabled,
-  isLoading,
-}) => {
+const StatusActionButtonComponent: React.FC<Props> = ({ status, onStatusChanged, isLoading }) => {
   const indexOfCurrentStatus = useMemo(
     () => caseStatuses.findIndex((caseStatus) => caseStatus === status),
     [status]
@@ -41,7 +35,6 @@ const StatusActionButtonComponent: React.FC<Props> = ({
     <EuiButton
       data-test-subj="case-view-status-action-button"
       iconType={statuses[caseStatuses[nextStatusIndex]].icon}
-      isDisabled={disabled}
       isLoading={isLoading}
       onClick={onClick}
     >
@@ -49,4 +42,5 @@ const StatusActionButtonComponent: React.FC<Props> = ({
     </EuiButton>
   );
 };
+StatusActionButtonComponent.displayName = 'StatusActionButton';
 export const StatusActionButton = memo(StatusActionButtonComponent);

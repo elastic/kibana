@@ -7,12 +7,12 @@
 
 import { useMemo } from 'react';
 
-import type { IndexPattern } from '../../../../../../../src/plugins/data/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 import { ML__INCREMENTAL_ID } from '../../data_frame_analytics/common/fields';
 
 export const useScatterplotFieldOptions = (
-  indexPattern?: IndexPattern,
+  indexPattern?: DataView,
   includes?: string[],
   excludes?: string[],
   resultsField = ''
@@ -47,5 +47,6 @@ export const useScatterplotFieldOptions = (
     return Array.isArray(excludes) && excludes.length > 0
       ? fields.filter((f) => !excludes.includes(f))
       : fields;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [indexPattern, includes, excludes]);
 };

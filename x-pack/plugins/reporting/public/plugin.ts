@@ -8,36 +8,40 @@
 import { i18n } from '@kbn/i18n';
 import * as Rx from 'rxjs';
 import { catchError, filter, map, mergeMap, takeUntil } from 'rxjs/operators';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
   CoreSetup,
   CoreStart,
+  HttpSetup,
+  IUiSettingsClient,
   NotificationsSetup,
   Plugin,
   PluginInitializerContext,
-} from 'src/core/public';
-import { UiActionsSetup, UiActionsStart } from 'src/plugins/ui_actions/public';
-import { CONTEXT_MENU_TRIGGER } from '../../../../src/plugins/embeddable/public';
-import {
-  FeatureCatalogueCategory,
-  HomePublicPluginSetup,
-  HomePublicPluginStart,
-} from '../../../../src/plugins/home/public';
-import { ManagementSetup, ManagementStart } from '../../../../src/plugins/management/public';
-import { SharePluginSetup, SharePluginStart } from '../../../../src/plugins/share/public';
-import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/public';
-import { constants, getDefaultLayoutSelectors } from '../common';
+  ThemeServiceStart,
+} from '@kbn/core/public';
+import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
+import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
+import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
+import { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { durationToNumber } from '../common/schema_utils';
 import { JobId, JobSummarySet } from '../common/types';
-import { ReportingSetup, ReportingStart } from './';
-import {
-  getGeneralErrorToast,
-  ScreenCapturePanelContent as ScreenCapturePanel,
-} from './components';
+import { ReportingSetup, ReportingStart } from '.';
 import { ReportingAPIClient } from './lib/reporting_api_client';
 import { ReportingNotifierStreamHandler as StreamHandler } from './lib/stream_handler';
+import { getGeneralErrorToast } from './notifier';
 import { ReportingCsvPanelAction } from './panel_actions/get_csv_panel_action';
-import { ReportingCsvShareProvider } from './share_context_menu/register_csv_reporting';
+import { getSharedComponents } from './shared';
+import type {
+  SharePluginSetup,
+  SharePluginStart,
+  UiActionsSetup,
+  UiActionsStart,
+} from './shared_imports';
+import { AppNavLinkStatus } from './shared_imports';
+import { reportingCsvShareProvider } from './share_context_menu/register_csv_reporting';
 import { reportingScreenshotShareProvider } from './share_context_menu/register_pdf_png_reporting';
+import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY } from '../common/constants';
 
 export interface ClientConfigType {
   poll: { jobsRefresh: { interval: number; intervalErrorMultiplier: number } };
@@ -45,17 +49,22 @@ export interface ClientConfigType {
 }
 
 function getStored(): JobId[] {
-  const sessionValue = sessionStorage.getItem(constants.JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY);
+  const sessionValue = sessionStorage.getItem(JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY);
   return sessionValue ? JSON.parse(sessionValue) : [];
 }
 
-function handleError(notifications: NotificationsSetup, err: Error): Rx.Observable<JobSummarySet> {
+function handleError(
+  notifications: NotificationsSetup,
+  err: Error,
+  theme: ThemeServiceStart
+): Rx.Observable<JobSummarySet> {
   notifications.toasts.addDanger(
     getGeneralErrorToast(
       i18n.translate('xpack.reporting.publicNotifier.pollingErrorMessage', {
         defaultMessage: 'Reporting notifier error!',
       }),
-      err
+      err,
+      theme
     )
   );
   window.console.error(err);
@@ -65,19 +74,24 @@ function handleError(notifications: NotificationsSetup, err: Error): Rx.Observab
 export interface ReportingPublicPluginSetupDendencies {
   home: HomePublicPluginSetup;
   management: ManagementSetup;
-  licensing: LicensingPluginSetup;
   uiActions: UiActionsSetup;
+  screenshotMode: ScreenshotModePluginSetup;
   share: SharePluginSetup;
 }
 
 export interface ReportingPublicPluginStartDendencies {
   home: HomePublicPluginStart;
+  data: DataPublicPluginStart;
   management: ManagementStart;
   licensing: LicensingPluginStart;
   uiActions: UiActionsStart;
   share: SharePluginStart;
 }
 
+/**
+ * @internal
+ * @implements Plugin
+ */
 export class ReportingPublicPlugin
   implements
     Plugin<
@@ -85,9 +99,11 @@ export class ReportingPublicPlugin
       ReportingStart,
       ReportingPublicPluginSetupDendencies,
       ReportingPublicPluginStartDendencies
-    > {
-  private readonly contract: ReportingStart;
-  private readonly stop$ = new Rx.ReplaySubject(1);
+    >
+{
+  private kibanaVersion: string;
+  private apiClient?: ReportingAPIClient;
+  private readonly stop$ = new Rx.ReplaySubject<void>(1);
   private readonly title = i18n.translate('xpack.reporting.management.reportingTitle', {
     defaultMessage: 'Reporting',
   });
@@ -95,33 +111,49 @@ export class ReportingPublicPlugin
     defaultMessage: 'Reporting',
   });
   private config: ClientConfigType;
+  private contract?: ReportingSetup;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ClientConfigType>();
-
-    this.contract = {
-      ReportingAPIClient,
-      components: { ScreenCapturePanel },
-      getDefaultLayoutSelectors,
-      usesUiCapabilities: () => this.config.roles?.enabled === false,
-    };
+    this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
-  public setup(core: CoreSetup, setupDeps: ReportingPublicPluginSetupDendencies) {
-    const { http, notifications, getStartServices, uiSettings } = core;
-    const { toasts } = notifications;
-    const {
-      home,
-      management,
-      licensing: { license$ },
-      share,
-      uiActions,
-    } = setupDeps;
+  /*
+   * Use a single instance of ReportingAPIClient for all the reporting code
+   */
+  private getApiClient(http: HttpSetup, uiSettings: IUiSettingsClient) {
+    if (!this.apiClient) {
+      this.apiClient = new ReportingAPIClient(http, uiSettings, this.kibanaVersion);
+    }
+    return this.apiClient;
+  }
+
+  private getContract(core?: CoreSetup) {
+    if (core) {
+      this.contract = {
+        usesUiCapabilities: () => this.config.roles?.enabled === false,
+        components: getSharedComponents(core, this.getApiClient(core.http, core.uiSettings)),
+      };
+    }
+
+    if (!this.contract) {
+      throw new Error(`Setup error in Reporting plugin!`);
+    }
+
+    return this.contract;
+  }
+
+  public setup(
+    core: CoreSetup<ReportingPublicPluginStartDendencies>,
+    setupDeps: ReportingPublicPluginSetupDendencies
+  ) {
+    const { getStartServices, uiSettings } = core;
+    const { home, management, screenshotMode, share, uiActions } = setupDeps;
 
     const startServices$ = Rx.from(getStartServices());
     const usesUiCapabilities = !this.config.roles.enabled;
 
-    const apiClient = new ReportingAPIClient(http);
+    const apiClient = this.getApiClient(core.http, core.uiSettings);
 
     home.featureCatalogue.register({
       id: 'reporting',
@@ -134,63 +166,97 @@ export class ReportingPublicPlugin
       icon: 'reportingApp',
       path: '/app/management/insightsAndAlerting/reporting',
       showOnHomePage: false,
-      category: FeatureCatalogueCategory.ADMIN,
+      category: 'admin',
     });
 
     management.sections.section.insightsAndAlerting.registerApp({
       id: 'reporting',
       title: this.title,
-      order: 1,
+      order: 3,
       mount: async (params) => {
         params.setBreadcrumbs([{ text: this.breadcrumbText }]);
-        const [[start], { mountManagementSection }] = await Promise.all([
+        const [[start, startDeps], { mountManagementSection }] = await Promise.all([
           getStartServices(),
-          import('./mount_management_section'),
+          import('./management/mount_management_section'),
         ]);
-        return await mountManagementSection(
+
+        const { docTitle } = start.chrome;
+        docTitle.change(this.title);
+
+        const { license$ } = startDeps.licensing;
+        const umountAppCallback = await mountManagementSection(
           core,
           start,
           license$,
           this.config.poll,
           apiClient,
+          share.url,
           params
         );
+
+        return () => {
+          docTitle.reset();
+          umountAppCallback();
+        };
       },
+    });
+
+    core.application.register({
+      id: 'reportingRedirect',
+      mount: async (params) => {
+        const { mountRedirectApp } = await import('./redirect');
+        return mountRedirectApp({ ...params, apiClient, screenshotMode, share });
+      },
+      title: 'Reporting redirect app',
+      searchable: false,
+      chromeless: true,
+      exactRoute: true,
+      navLinkStatus: AppNavLinkStatus.hidden,
     });
 
     uiActions.addTriggerAction(
       CONTEXT_MENU_TRIGGER,
-      new ReportingCsvPanelAction({ core, startServices$, license$, usesUiCapabilities })
+      new ReportingCsvPanelAction({ core, apiClient, startServices$, usesUiCapabilities })
     );
 
-    share.register(
-      ReportingCsvShareProvider({
-        apiClient,
-        toasts,
-        license$,
-        startServices$,
-        uiSettings,
-        usesUiCapabilities,
-      })
-    );
-    share.register(
-      reportingScreenshotShareProvider({
-        apiClient,
-        toasts,
-        license$,
-        startServices$,
-        uiSettings,
-        usesUiCapabilities,
-      })
-    );
+    const reportingStart = this.getContract(core);
+    const { toasts } = core.notifications;
 
-    return this.contract;
+    startServices$.subscribe(([{ application }, { licensing }]) => {
+      licensing.license$.subscribe((license) => {
+        share.register(
+          reportingCsvShareProvider({
+            apiClient,
+            toasts,
+            uiSettings,
+            license,
+            application,
+            usesUiCapabilities,
+            theme: core.theme,
+          })
+        );
+
+        share.register(
+          reportingScreenshotShareProvider({
+            apiClient,
+            toasts,
+            uiSettings,
+            license,
+            application,
+            usesUiCapabilities,
+            theme: core.theme,
+          })
+        );
+      });
+    });
+
+    return reportingStart;
   }
 
   public start(core: CoreStart) {
-    const { http, notifications } = core;
-    const apiClient = new ReportingAPIClient(http);
-    const streamHandler = new StreamHandler(notifications, apiClient);
+    const { notifications, docLinks } = core;
+    const apiClient = this.getApiClient(core.http, core.uiSettings);
+    const streamHandler = new StreamHandler(notifications, apiClient, core.theme, docLinks);
     const interval = durationToNumber(this.config.poll.jobsRefresh.interval);
     Rx.timer(0, interval)
       .pipe(
@@ -199,11 +265,11 @@ export class ReportingPublicPlugin
         filter((storedJobs) => storedJobs.length > 0), // stop the pipeline here if there are none pending
         mergeMap((storedJobs) => streamHandler.findChangedStatusJobs(storedJobs)), // look up the latest status of all pending jobs on the server
         mergeMap(({ completed, failed }) => streamHandler.showNotifications({ completed, failed })),
-        catchError((err) => handleError(notifications, err))
+        catchError((err) => handleError(notifications, err, core.theme))
       )
       .subscribe();
 
-    return this.contract;
+    return this.getContract();
   }
 
   public stop() {

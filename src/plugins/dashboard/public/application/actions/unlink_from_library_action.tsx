@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
-import { Action, IncompatibleActionError } from '../../services/ui_actions';
 import {
   ViewMode,
-  PanelState,
-  IEmbeddable,
-  PanelNotFoundError,
-  EmbeddableInput,
-  isReferenceOrValueEmbeddable,
+  type PanelState,
+  type IEmbeddable,
   isErrorEmbeddable,
-} from '../../services/embeddable';
-import { NotificationsStart } from '../../../../../core/public';
+  PanelNotFoundError,
+  type EmbeddableInput,
+  isReferenceOrValueEmbeddable,
+} from '@kbn/embeddable-plugin/public';
+import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { dashboardUnlinkFromLibraryAction } from '../../dashboard_strings';
-import { DashboardPanelState, DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '..';
+import { type DashboardPanelState, type DashboardContainer } from '..';
+import { pluginServices } from '../../services/plugin_services';
+import { DASHBOARD_CONTAINER_TYPE } from '../../dashboard_constants';
 
 export const ACTION_UNLINK_FROM_LIBRARY = 'unlinkFromLibrary';
 
@@ -32,7 +32,13 @@ export class UnlinkFromLibraryAction implements Action<UnlinkFromLibraryActionCo
   public readonly id = ACTION_UNLINK_FROM_LIBRARY;
   public order = 15;
 
-  constructor(private deps: { toasts: NotificationsStart['toasts'] }) {}
+  private toastsService;
+
+  constructor() {
+    ({
+      notifications: { toasts: this.toastsService },
+    } = pluginServices.getServices());
+  }
 
   public getDisplayName({ embeddable }: UnlinkFromLibraryActionContext) {
     if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
@@ -70,20 +76,22 @@ export class UnlinkFromLibraryAction implements Action<UnlinkFromLibraryActionCo
 
     const dashboard = embeddable.getRoot() as DashboardContainer;
     const panelToReplace = dashboard.getInput().panels[embeddable.id] as DashboardPanelState;
+
     if (!panelToReplace) {
       throw new PanelNotFoundError();
     }
 
     const newPanel: PanelState<EmbeddableInput> = {
       type: embeddable.type,
-      explicitInput: { ...newInput },
+      explicitInput: { ...newInput, title: embeddable.getTitle() },
     };
     dashboard.replacePanel(panelToReplace, newPanel, true);
 
     const title = dashboardUnlinkFromLibraryAction.getSuccessMessage(
       embeddable.getTitle() ? `'${embeddable.getTitle()}'` : ''
     );
-    this.deps.toasts.addSuccess({
+
+    this.toastsService.addSuccess({
       title,
       'data-test-subj': 'unlinkPanelSuccess',
     });

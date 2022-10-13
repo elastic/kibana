@@ -6,14 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { buildExpressionFunction } from '../../../../expressions/common';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import { TimeRange } from '../../query';
 import { ExpressionFunctionKibanaTimerange } from './timerange';
 
 export const timerangeToAst = (timerange: TimeRange) => {
-  return buildExpressionFunction<ExpressionFunctionKibanaTimerange>('timerange', {
-    from: timerange.from,
-    to: timerange.to,
-    mode: timerange.mode,
-  });
+  return buildExpression([
+    buildExpressionFunction<ExpressionFunctionKibanaTimerange>('timerange', timerange),
+  ]).toAst();
 };

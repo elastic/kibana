@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { StatsGetter } from 'src/plugins/telemetry_collection_manager/server';
-import { TelemetryLocalStats, getLocalStats } from '../../../../../src/plugins/telemetry/server';
+import { StatsGetter } from '@kbn/telemetry-collection-manager-plugin/server';
+import { TelemetryLocalStats, getLocalStats } from '@kbn/telemetry-plugin/server';
 import { getXPackUsage } from './get_xpack';
 import { ESLicense, getLicenseFromLocalOrMaster } from './get_license';
 import { isClusterOptedIn } from './is_cluster_opted_in';

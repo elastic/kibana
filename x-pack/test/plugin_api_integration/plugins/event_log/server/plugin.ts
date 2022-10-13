@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup, Logger, PluginInitializerContext } from 'kibana/server';
-import { IEventLogService, IEventLogClientService } from '../../../../../plugins/event_log/server';
+import { Plugin, CoreSetup, Logger, PluginInitializerContext } from '@kbn/core/server';
+import { IEventLogService, IEventLogClientService } from '@kbn/event-log-plugin/server';
 import {
   logEventRoute,
   registerProviderActionsRoute,
@@ -26,7 +26,8 @@ export interface EventLogFixtureStartDeps {
 }
 
 export class EventLogFixturePlugin
-  implements Plugin<void, void, EventLogFixtureSetupDeps, EventLogFixtureStartDeps> {
+  implements Plugin<void, void, EventLogFixtureSetupDeps, EventLogFixtureStartDeps>
+{
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {

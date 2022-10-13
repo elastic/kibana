@@ -18,7 +18,7 @@ exports[`Sparkline component shows tooltip on hover 1`] = `
     style={
       Object {
         "left": 210,
-        "top": 27,
+        "top": 17,
       }
     }
   >
@@ -35,7 +35,7 @@ exports[`Sparkline component shows tooltip on hover 1`] = `
       className="monSparklineTooltip"
       style={
         Object {
-          "height": 36,
+          "height": 56,
           "width": 220,
         }
       }

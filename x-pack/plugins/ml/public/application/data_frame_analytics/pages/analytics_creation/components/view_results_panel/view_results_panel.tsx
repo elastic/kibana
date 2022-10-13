@@ -9,7 +9,7 @@ import React, { FC, Fragment } from 'react';
 import { EuiCard, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useMlLink } from '../../../../../contexts/kibana';
-import { ML_PAGES } from '../../../../../../../common/constants/ml_url_generator';
+import { ML_PAGES } from '../../../../../../../common/constants/locator';
 import { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
 interface Props {
   jobId: string;

@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
 import { mount } from 'enzyme';
 import React from 'react';
 
 import { TestProviders } from '../../../../../common/mock';
-import { DEFAULT_ACTIONS_COLUMN_WIDTH } from '../constants';
 import * as i18n from '../translations';
 
 import { EventColumnView } from './event_column_view';
@@ -18,28 +16,67 @@ import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer'
 import { TimelineTabs, TimelineType, TimelineId } from '../../../../../../common/types/timeline';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { getDefaultControlColumn } from '../control_columns';
+import { testLeadingControlColumn } from '../../../../../common/mock/mock_timeline_control_columns';
+import { mockTimelines } from '../../../../../common/mock/mock_timelines_plugin';
+import { getActionsColumnWidth } from '@kbn/timelines-plugin/public';
+import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 
 jest.mock('../../../../../common/hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
-
-jest.mock('../../../../../common/hooks/use_selector');
-
-jest.mock('../../../../../cases/components/timeline_actions/add_to_case_action', () => {
+jest.mock('../../../../../common/hooks/use_selector', () => ({
+  useShallowEqualSelector: jest.fn(),
+  useDeepEqualSelector: jest.fn(),
+}));
+jest.mock('../../../../../common/components/user_privileges', () => {
   return {
-    AddToCaseAction: () => {
-      return <div data-test-subj="add-to-case-action">{'Add to case'}</div>;
-    },
+    useUserPrivileges: () => ({
+      listPrivileges: { loading: false, error: undefined, result: undefined },
+      detectionEnginePrivileges: { loading: false, error: undefined, result: undefined },
+      endpointPrivileges: {},
+      kibanaSecuritySolutionsPrivileges: { crud: true, read: true },
+    }),
+  };
+});
+
+jest.mock('../../../../../common/lib/kibana', () => {
+  const originalModule = jest.requireActual('../../../../../common/lib/kibana');
+
+  return {
+    useKibana: () => ({
+      services: {
+        timelines: { ...mockTimelines },
+        data: {
+          search: jest.fn(),
+          query: jest.fn(),
+        },
+        application: {
+          capabilities: {
+            siem: { crud_alerts: true, read_alerts: true },
+          },
+        },
+        cases: mockCasesContract(),
+      },
+    }),
+    useToasts: jest.fn().mockReturnValue({
+      addError: jest.fn(),
+      addSuccess: jest.fn(),
+      addWarning: jest.fn(),
+    }),
+    useGetUserCasesPermissions: originalModule.useGetUserCasesPermissions,
   };
 });
 
 describe('EventColumnView', () => {
   useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
   (useShallowEqualSelector as jest.Mock).mockReturnValue(TimelineType.default);
+  const ACTION_BUTTON_COUNT = 4;
+  const leadingControlColumns = getDefaultControlColumn(ACTION_BUTTON_COUNT);
 
   const props = {
     ariaRowindex: 2,
     id: 'event-id',
-    actionsColumnWidth: DEFAULT_ACTIONS_COLUMN_WIDTH,
+    actionsColumnWidth: getActionsColumnWidth(ACTION_BUTTON_COUNT),
     associateNote: jest.fn(),
     columnHeaders: [],
     columnRenderers: [],
@@ -58,9 +95,7 @@ describe('EventColumnView', () => {
     loadingEventIds: [],
     notesCount: 0,
     onEventDetailsPanelOpened: jest.fn(),
-    onPinEvent: jest.fn(),
     onRowSelected: jest.fn(),
-    onUnPinEvent: jest.fn(),
     refetch: jest.fn(),
     renderCellValue: DefaultCellRenderer,
     selectedEventIds: {},
@@ -71,6 +106,10 @@ describe('EventColumnView', () => {
     toggleShowNotes: jest.fn(),
     updateNote: jest.fn(),
     isEventPinned: false,
+    leadingControlColumns,
+    trailingControlColumns: [],
+    setEventsLoading: jest.fn(),
+    setEventsDeleted: jest.fn(),
   };
 
   test('it does NOT render a notes button when isEventsViewer is true', () => {
@@ -116,48 +155,18 @@ describe('EventColumnView', () => {
     expect(wrapper.find('[data-test-subj="pin"]').exists()).toBe(false);
   });
 
-  test('it invokes onPinClicked when the button for pinning events is clicked', () => {
-    const wrapper = mount(<EventColumnView {...props} />, { wrappingComponent: TestProviders });
-
-    expect(props.onPinEvent).not.toHaveBeenCalled();
-
-    wrapper.find('[data-test-subj="pin"]').first().simulate('click');
-
-    expect(props.onPinEvent).toHaveBeenCalled();
-  });
-
-  test('it render AddToCaseAction if timelineId === TimelineId.detectionsPage', () => {
-    const wrapper = mount(<EventColumnView {...props} timelineId={TimelineId.detectionsPage} />, {
-      wrappingComponent: TestProviders,
-    });
-
-    expect(wrapper.find('[data-test-subj="add-to-case-action"]').exists()).toBeTruthy();
-  });
-
-  test('it render AddToCaseAction if timelineId === TimelineId.detectionsRulesDetailsPage', () => {
+  test('it renders a custom control column in addition to the default control column', () => {
     const wrapper = mount(
-      <EventColumnView {...props} timelineId={TimelineId.detectionsRulesDetailsPage} />,
+      <EventColumnView
+        {...props}
+        leadingControlColumns={[testLeadingControlColumn, ...leadingControlColumns]}
+      />,
       {
         wrappingComponent: TestProviders,
       }
     );
 
-    expect(wrapper.find('[data-test-subj="add-to-case-action"]').exists()).toBeTruthy();
-  });
-
-  test('it render AddToCaseAction if timelineId === TimelineId.active', () => {
-    const wrapper = mount(<EventColumnView {...props} timelineId={TimelineId.active} />, {
-      wrappingComponent: TestProviders,
-    });
-
-    expect(wrapper.find('[data-test-subj="add-to-case-action"]').exists()).toBeTruthy();
-  });
-
-  test('it does NOT render AddToCaseAction when timelineId is not in the allowed list', () => {
-    const wrapper = mount(<EventColumnView {...props} timelineId="timeline-test" />, {
-      wrappingComponent: TestProviders,
-    });
-
-    expect(wrapper.find('[data-test-subj="add-to-case-action"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="expand-event"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="test-body-control-column-cell"]').exists()).toBeTruthy();
   });
 });

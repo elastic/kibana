@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../../common/mock/endpoint';
-import { PaginatedContentProps, PaginatedContent } from './paginated_content';
+import type { FC } from 'react';
+import React from 'react';
+import type { AppContextTestRender } from '../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
+import type { PaginatedContentProps } from './paginated_content';
+import { PaginatedContent } from './paginated_content';
 import { act, fireEvent } from '@testing-library/react';
 
 describe('when using PaginatedContent', () => {
@@ -138,6 +141,22 @@ describe('when using PaginatedContent', () => {
       pageIndex: 0,
       pageSize: 10,
     });
+  });
+
+  it('should call onChange when page is empty', () => {
+    render({
+      pagination: {
+        pageIndex: 1,
+        pageSizeOptions: [5, 10, 20],
+        pageSize: 10,
+        totalItemCount: 10,
+      },
+    });
+    expect(onChangeHandler).toHaveBeenCalledWith({
+      pageIndex: 0,
+      pageSize: 10,
+    });
+    expect(onChangeHandler).toHaveBeenCalledTimes(1);
   });
 
   it('should ignore items, error, noItemsMessage when `children` is used', () => {

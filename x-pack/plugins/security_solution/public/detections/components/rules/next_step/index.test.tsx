@@ -7,7 +7,7 @@
 
 import { shallow } from 'enzyme';
 import React from 'react';
-import { NextStep } from './index';
+import { NextStep } from '.';
 
 describe('NextStep', () => {
   test('renders correctly against snapshot', () => {

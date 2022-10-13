@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { formatRequest } from '@kbn/server-route-repository/target/format_request';
-import type { HttpSetup } from 'kibana/public';
+import { formatRequest } from '@kbn/server-route-repository';
+import type { HttpSetup } from '@kbn/core/public';
 import type { AbstractObservabilityClient, ObservabilityClient } from './types';
 
 export let callObservabilityApi: ObservabilityClient = () => {
@@ -14,8 +14,8 @@ export let callObservabilityApi: ObservabilityClient = () => {
 };
 
 export function createCallObservabilityApi(http: HttpSetup) {
-  const client: AbstractObservabilityClient = (options) => {
-    const { params: { path, body, query } = {}, endpoint, ...rest } = options;
+  const client: AbstractObservabilityClient = (endpoint, options) => {
+    const { params: { path, body, query } = {}, ...rest } = options;
 
     const { method, pathname } = formatRequest(endpoint, path);
 

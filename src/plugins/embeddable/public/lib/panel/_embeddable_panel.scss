@@ -19,12 +19,22 @@
     flex: 1 1 100%;
     z-index: 1;
     min-height: 0; // Absolute must for Firefox to scroll contents
+
+    &[data-error] {
+      display: none;
+    }
   }
 
-  // SASSTODO: Pretty sure this doesn't do anything since the flex-basis 100%,
-  // but it MIGHT be fixing IE
+  // SASSTODO: this MIGHT be fixing IE
   .embPanel__content--fullWidth {
     width: 100%;
+  }
+
+  .embPanel__content--error {
+    &:hover {
+      box-shadow: none;
+      transform: none;
+    }
   }
 }
 
@@ -82,7 +92,9 @@
   right: 0;
   top: 0;
   left: 0;
-  z-index: $euiZLevel1;
+  * {
+    z-index: $euiZLevel1; // apply high z-index to all children
+  }
 }
 
 // OPTIONS MENU

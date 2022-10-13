@@ -6,7 +6,11 @@
  */
 
 import { FieldFormat } from '../../types';
-import { TRANSACTION_DURATION } from '../constants/elasticsearch_fieldnames';
+import {
+  METRIC_SYSTEM_CPU_USAGE,
+  METRIC_SYSTEM_MEMORY_USAGE,
+  TRANSACTION_DURATION,
+} from '../constants/elasticsearch_fieldnames';
 
 export const apmFieldFormats: FieldFormat[] = [
   {
@@ -18,7 +22,16 @@ export const apmFieldFormats: FieldFormat[] = [
         outputFormat: 'asMilliseconds',
         outputPrecision: 0,
         showSuffix: true,
+        useShortSuffix: true,
       },
     },
+  },
+  {
+    field: METRIC_SYSTEM_MEMORY_USAGE,
+    format: { id: 'bytes', params: {} },
+  },
+  {
+    field: METRIC_SYSTEM_CPU_USAGE,
+    format: { id: 'percent', params: {} },
   },
 ];

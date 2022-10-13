@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -21,18 +21,20 @@ import {
   EuiText,
   EuiFormRow,
   EuiButtonEmpty,
-  EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiIconTip,
+  EuiBetaBadge,
 } from '@elastic/eui';
-import { AlertAction, ActionTypeIndex, ActionConnector } from '../../../types';
+import { betaBadgeProps } from './beta_badge_props';
+import { RuleAction, ActionTypeIndex, ActionConnector } from '../../../types';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { ActionAccordionFormProps } from './action_form';
 import { useKibana } from '../../../common/lib/kibana';
+import { getValidConnectors } from '../common/connectors';
+import { ConnectorsSelection } from './connectors_selection';
 
 type AddConnectorInFormProps = {
   actionTypesIndex: ActionTypeIndex;
-  actionItem: AlertAction;
+  actionItem: RuleAction;
   connectors: ActionConnector[];
   index: number;
   onAddConnector: () => void;
@@ -56,19 +58,21 @@ export const AddConnectorInline = ({
     application: { capabilities },
   } = useKibana().services;
   const canSave = hasSaveActionsCapability(capabilities);
-  const [connectorOptionsList, setConnectorOptionsList] = useState<EuiComboBoxOptionOption[]>([]);
+  const [hasConnectors, setHasConnectors] = useState<boolean>(false);
   const [isEmptyActionId, setIsEmptyActionId] = useState<boolean>(false);
-  const [errors, setErrors] = useState<string[]>([]);
 
   const actionTypeName = actionTypesIndex
     ? actionTypesIndex[actionItem.actionTypeId].name
     : actionItem.actionTypeId;
-  const actionType = actionTypesIndex[actionItem.actionTypeId];
   const actionTypeRegistered = actionTypeRegistry.get(actionItem.actionTypeId);
+  const connectorDropdownErrors = useMemo(
+    () => [`Unable to load ${actionTypeRegistered.actionTypeTitle} connector`],
+    [actionTypeRegistered.actionTypeTitle]
+  );
 
   const noConnectorsLabel = (
     <FormattedMessage
-      id="xpack.triggersActionsUI.sections.alertForm.emptyConnectorsLabel"
+      id="xpack.triggersActionsUI.sections.connectorAddInline.emptyConnectorsLabel"
       defaultMessage="No {actionTypeName} connectors"
       values={{
         actionTypeName,
@@ -79,31 +83,17 @@ export const AddConnectorInline = ({
   const unableToLoadConnectorLabel = (
     <EuiText color="danger">
       <FormattedMessage
-        id="xpack.triggersActionsUI.sections.alertForm.unableToLoadConnectorTitle"
-        defaultMessage="Unable to load connector."
+        id="xpack.triggersActionsUI.sections.connectorAddInline.unableToLoadConnectorTitle"
+        defaultMessage="Unable to load connector"
       />
     </EuiText>
   );
 
   useEffect(() => {
-    if (connectors) {
-      const altConnectorOptions = connectors
-        .filter(
-          (connector) =>
-            connector.actionTypeId === actionItem.actionTypeId &&
-            // include only enabled by config connectors or preconfigured
-            (actionType?.enabledInConfig || connector.isPreconfigured)
-        )
-        .map(({ name, id, isPreconfigured }) => ({
-          label: `${name} ${isPreconfigured ? '(preconfigured)' : ''}`,
-          key: id,
-          id,
-        }));
-      setConnectorOptionsList(altConnectorOptions);
+    const filteredConnectors = getValidConnectors(connectors, actionItem, actionTypesIndex);
 
-      if (altConnectorOptions.length > 0) {
-        setErrors([`Unable to load ${actionTypeRegistered.actionTypeTitle} connector`]);
-      }
+    if (filteredConnectors.length > 0) {
+      setHasConnectors(true);
     }
 
     setIsEmptyActionId(!!emptyActionsIds.find((emptyId: string) => actionItem.id === emptyId));
@@ -111,59 +101,47 @@ export const AddConnectorInline = ({
   }, []);
 
   const connectorsDropdown = (
-    <EuiFlexGroup component="div">
-      <EuiFlexItem>
-        <EuiFormRow
-          fullWidth
-          label={
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.alertForm.connectorAddInline.actionIdLabel"
-              defaultMessage="Use another {connectorInstance} connector"
-              values={{
-                connectorInstance: actionTypeName,
-              }}
-            />
-          }
-          labelAppend={
-            <EuiButtonEmpty
-              size="xs"
-              data-test-subj={`addNewActionConnectorButton-${actionItem.actionTypeId}`}
-              onClick={onAddConnector}
-            >
-              <FormattedMessage
-                defaultMessage="Add connector"
-                id="xpack.triggersActionsUI.sections.alertForm.connectorAddInline.addNewConnectorEmptyButton"
-              />
-            </EuiButtonEmpty>
-          }
-          error={errors}
-          isInvalid={errors.length > 0}
+    <EuiFormRow
+      fullWidth
+      label={
+        <FormattedMessage
+          id="xpack.triggersActionsUI.sections.connectorAddInline.connectorAddInline.actionIdLabel"
+          defaultMessage="Use another {connectorInstance} connector"
+          values={{
+            connectorInstance: actionTypeName,
+          }}
+        />
+      }
+      labelAppend={
+        <EuiButtonEmpty
+          size="xs"
+          data-test-subj={`addNewActionConnectorButton-${actionItem.actionTypeId}`}
+          onClick={onAddConnector}
         >
-          <EuiComboBox
-            fullWidth
-            singleSelection={{ asPlainText: true }}
-            options={connectorOptionsList}
-            id={`selectActionConnector-${actionItem.id}-${index}`}
-            data-test-subj={`selectActionConnector-${actionItem.actionTypeId}-${index}`}
-            onChange={(selectedOptions) => {
-              // On selecting a option from this combo box, this component will
-              // be removed but the EuiComboBox performs some additional updates on
-              // closing the dropdown. Wrapping in a `setTimeout` to avoid `React state
-              // update on an unmounted component` warnings.
-              setTimeout(() => {
-                onSelectConnector(selectedOptions[0].id ?? '');
-              });
-            }}
-            isClearable={false}
+          <FormattedMessage
+            defaultMessage="Add connector"
+            id="xpack.triggersActionsUI.sections.connectorAddInline.connectorAddInline.addNewConnectorEmptyButton"
           />
-        </EuiFormRow>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+        </EuiButtonEmpty>
+      }
+      error={connectorDropdownErrors}
+      isInvalid
+    >
+      <ConnectorsSelection
+        actionItem={actionItem}
+        accordionIndex={index}
+        actionTypesIndex={actionTypesIndex}
+        actionTypeRegistered={actionTypeRegistered}
+        connectors={connectors}
+        onConnectorSelected={onSelectConnector}
+      />
+    </EuiFormRow>
   );
 
   return (
-    <Fragment key={index}>
+    <>
       <EuiAccordion
+        key={index}
         initialIsOpen={true}
         id={index.toString()}
         className="actAccordionActionForm"
@@ -179,7 +157,7 @@ export const AddConnectorInline = ({
                 <div>
                   <FormattedMessage
                     defaultMessage="{actionConnectorName}"
-                    id="xpack.triggersActionsUI.sections.alertForm.newAlertActionTypeEditTitle"
+                    id="xpack.triggersActionsUI.sections.connectorAddInline.newRuleActionTypeEditTitle"
                     values={{
                       actionConnectorName: actionTypeRegistered.actionTypeTitle,
                     }}
@@ -196,10 +174,18 @@ export const AddConnectorInline = ({
                   data-test-subj={`alertActionAccordionErrorTooltip`}
                   content={
                     <FormattedMessage
-                      defaultMessage="Unable to load connector."
-                      id="xpack.triggersActionsUI.sections.alertForm.unableToLoadConnectorTitle'"
+                      defaultMessage="Unable to load connector"
+                      id="xpack.triggersActionsUI.sections.connectorAddInline.unableToLoadConnectorTitle'"
                     />
                   }
+                />
+              </EuiFlexItem>
+            )}
+            {actionTypeRegistered && actionTypeRegistered.isExperimental && (
+              <EuiFlexItem grow={false}>
+                <EuiBetaBadge
+                  label={betaBadgeProps.label}
+                  tooltipContent={betaBadgeProps.tooltipContent}
                 />
               </EuiFlexItem>
             )}
@@ -211,7 +197,7 @@ export const AddConnectorInline = ({
             color="danger"
             className="actAccordionActionForm__extraAction"
             aria-label={i18n.translate(
-              'xpack.triggersActionsUI.sections.alertForm.accordion.deleteIconAriaLabel',
+              'xpack.triggersActionsUI.sections.connectorAddInline.accordion.deleteIconAriaLabel',
               {
                 defaultMessage: 'Delete',
               }
@@ -222,7 +208,7 @@ export const AddConnectorInline = ({
         paddingSize="l"
       >
         {canSave ? (
-          connectorOptionsList.length > 0 ? (
+          hasConnectors ? (
             connectorsDropdown
           ) : (
             <EuiEmptyPrompt
@@ -236,7 +222,7 @@ export const AddConnectorInline = ({
                   onClick={onAddConnector}
                 >
                   <FormattedMessage
-                    id="xpack.triggersActionsUI.sections.alertForm.addConnectorButtonLabel"
+                    id="xpack.triggersActionsUI.sections.connectorAddInline.addConnectorButtonLabel"
                     defaultMessage="Create a connector"
                   />
                 </EuiButton>
@@ -247,7 +233,7 @@ export const AddConnectorInline = ({
           <EuiCallOut title={noConnectorsLabel}>
             <p>
               <FormattedMessage
-                id="xpack.triggersActionsUI.sections.alertForm.unauthorizedToCreateForEmptyConnectors"
+                id="xpack.triggersActionsUI.sections.connectorAddInline.unauthorizedToCreateForEmptyConnectors"
                 defaultMessage="Only authorized users can configure a connector. Contact your administrator."
               />
             </p>
@@ -255,6 +241,9 @@ export const AddConnectorInline = ({
         )}
       </EuiAccordion>
       <EuiSpacer size="xs" />
-    </Fragment>
+    </>
   );
 };
+
+// eslint-disable-next-line import/no-default-export
+export { AddConnectorInline as default };

@@ -7,7 +7,7 @@
  */
 
 import { ReactNode } from 'react';
-import { Capabilities } from 'src/core/public';
+import type { Capabilities } from '@kbn/core/public';
 import { SavedObjectsManagementRecord } from '.';
 
 interface ActionContext {
@@ -27,7 +27,7 @@ export abstract class SavedObjectsManagementAction {
     onClick?: (item: SavedObjectsManagementRecord) => void;
     render?: (item: SavedObjectsManagementRecord) => any;
   };
-  public refreshOnFinish?: () => boolean;
+  public refreshOnFinish?: () => Array<{ type: string; id: string }>;
 
   private callbacks: Function[] = [];
 

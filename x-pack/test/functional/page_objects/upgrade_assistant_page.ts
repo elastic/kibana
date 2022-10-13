@@ -5,76 +5,100 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import { FtrService } from '../ftr_provider_context';
 
-export function UpgradeAssistantPageProvider({ getPageObjects, getService }: FtrProviderContext) {
-  const retry = getService('retry');
-  const log = getService('log');
-  const browser = getService('browser');
-  const find = getService('find');
-  const testSubjects = getService('testSubjects');
-  const { common } = getPageObjects(['common']);
+export class UpgradeAssistantPageObject extends FtrService {
+  private readonly retry = this.ctx.getService('retry');
+  private readonly log = this.ctx.getService('log');
+  private readonly browser = this.ctx.getService('browser');
+  private readonly testSubjects = this.ctx.getService('testSubjects');
+  private readonly common = this.ctx.getPageObject('common');
 
-  class UpgradeAssistant {
-    async initTests() {
-      log.debug('UpgradeAssistant:initTests');
-    }
+  async initTests() {
+    this.log.debug('UpgradeAssistant:initTests');
+  }
 
-    async navigateToPage() {
-      return await retry.try(async () => {
-        await common.navigateToApp('settings');
-        await testSubjects.click('upgrade_assistant');
-        await retry.waitFor('url to contain /upgrade_assistant', async () => {
-          const url = await browser.getCurrentUrl();
-          return url.includes('/upgrade_assistant');
-        });
+  async navigateToPage() {
+    return await this.retry.try(async () => {
+      await this.common.navigateToApp('settings');
+      await this.testSubjects.click('upgrade_assistant');
+      await this.retry.waitFor('url to contain /upgrade_assistant', async () => {
+        const url = await this.browser.getCurrentUrl();
+        return url.includes('/upgrade_assistant');
       });
-    }
+    });
+  }
 
-    async toggleDeprecationLogging() {
-      log.debug('toggleDeprecationLogging()');
-      await testSubjects.click('upgradeAssistantDeprecationToggle');
-    }
-
-    async isDeprecationLoggingEnabled() {
-      const isDeprecationEnabled = await testSubjects.getAttribute(
-        'upgradeAssistantDeprecationToggle',
-        'aria-checked'
+  async navigateToEsDeprecationLogs() {
+    return await this.retry.try(async () => {
+      await this.common.navigateToUrl('management', 'stack/upgrade_assistant/es_deprecation_logs', {
+        shouldUseHashForSubUrl: false,
+      });
+      await this.retry.waitFor(
+        'url to contain /upgrade_assistant/es_deprecation_logs',
+        async () => {
+          const url = await this.browser.getCurrentUrl();
+          return url.includes('/es_deprecation_logs');
+        }
       );
-      log.debug(`Deprecation enabled == ${isDeprecationEnabled}`);
-      return isDeprecationEnabled === 'true';
-    }
+    });
+  }
 
-    async deprecationLoggingEnabledLabel() {
-      const loggingEnabledLabel = await find.byCssSelector(
-        '[data-test-subj="upgradeAssistantDeprecationToggle"] ~ span'
-      );
-      return await loggingEnabledLabel.getVisibleText();
-    }
+  async clickEsDeprecationsPanel() {
+    return await this.retry.try(async () => {
+      await this.testSubjects.click('esStatsPanel');
+    });
+  }
 
-    async clickTab(tabId: string) {
-      return await retry.try(async () => {
-        log.debug('clickTab()');
-        await find.clickByCssSelector(`.euiTabs .euiTab#${tabId}`);
-      });
-    }
+  async clickDeprecationLoggingToggle() {
+    return await this.retry.try(async () => {
+      await this.testSubjects.click('deprecationLoggingToggle');
+    });
+  }
 
-    async waitForTelemetryHidden() {
-      const self = this;
-      await retry.waitFor('Telemetry to disappear.', async () => {
-        return (await self.isTelemetryExists()) === false;
-      });
-    }
+  async isDeprecationLoggingEnabled(): Promise<boolean> {
+    return await this.testSubjects.exists('externalLinksTitle');
+  }
 
-    async issueSummaryText() {
-      log.debug('expectIssueSummary()');
-      return await testSubjects.getVisibleText('upgradeAssistantIssueSummary');
-    }
+  async clickResetLastCheckpointButton() {
+    return await this.retry.try(async () => {
+      await this.testSubjects.click('resetLastStoredDate');
+    });
+  }
 
-    async isTelemetryExists() {
-      return await testSubjects.exists('upgradeAssistantTelemetryRunning');
+  async clickKibanaDeprecationsPanel() {
+    return await this.retry.try(async () => {
+      await this.testSubjects.click('kibanaStatsPanel');
+    });
+  }
+
+  async clickKibanaDeprecation(selectedIssue: string) {
+    const table = await this.testSubjects.find('kibanaDeprecationsTable');
+    const rows = await table.findAllByTestSubject('row');
+
+    const selectedRow = rows.find(async (row) => {
+      const issue = await (await row.findByTestSubject('issueCell')).getVisibleText();
+      return issue === selectedIssue;
+    });
+
+    if (selectedRow) {
+      const issueLink = await selectedRow.findByTestSubject('deprecationDetailsLink');
+      await issueLink.click();
+    } else {
+      this.log.debug('Unable to find selected deprecation row');
     }
   }
 
-  return new UpgradeAssistant();
+  async clickEsDeprecation(deprecationType: 'indexSettings' | 'default' | 'reindex' | 'ml') {
+    const table = await this.testSubjects.find('esDeprecationsTable');
+    const deprecationIssueLink = await (
+      await table.findByTestSubject(`${deprecationType}TableCell-message`)
+    ).findByCssSelector('button');
+
+    if (deprecationIssueLink) {
+      await deprecationIssueLink.click();
+    } else {
+      this.log.debug('Unable to find selected deprecation');
+    }
+  }
 }

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { LogicMounter, mockHttpValues } from '../../../__mocks__';
+import { LogicMounter, mockHttpValues } from '../../../__mocks__/kea_logic';
 
 import dedent from 'dedent';
 
-import { nextTick } from '@kbn/test/jest';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 jest.mock('../engine', () => ({
   EngineLogic: { values: { engineName: 'test-engine' } },
@@ -23,7 +23,7 @@ jest.mock('./utils', () => ({
 }));
 import { readUploadedFileAsText } from './utils';
 
-import { DocumentCreationLogic } from './';
+import { DocumentCreationLogic } from '.';
 
 describe('DocumentCreationLogic', () => {
   const { mount } = new LogicMounter(DocumentCreationLogic);
@@ -31,7 +31,8 @@ describe('DocumentCreationLogic', () => {
 
   const DEFAULT_VALUES = {
     isDocumentCreationOpen: false,
-    creationMode: 'text',
+    creationMode: 'api',
+    activeJsonTab: 'uploadTab',
     creationStep: DocumentCreationStep.AddDocuments,
     textInput: dedent(DOCUMENTS_API_JSON_EXAMPLE),
     fileInput: null,
@@ -120,6 +121,24 @@ describe('DocumentCreationLogic', () => {
             ...EXPECTED_VALUES,
             creationMode: 'api',
           });
+        });
+      });
+    });
+
+    describe('setActiveJsonTab', () => {
+      beforeAll(() => {
+        mount();
+        DocumentCreationLogic.actions.setActiveJsonTab('pasteTab');
+      });
+
+      const EXPECTED_VALUES = {
+        ...DEFAULT_VALUES,
+        activeJsonTab: 'pasteTab',
+      };
+
+      describe('isDocumentCreationOpen', () => {
+        it('should be set to "pasteTab"', () => {
+          expect(DocumentCreationLogic.values).toEqual(EXPECTED_VALUES);
         });
       });
     });
@@ -493,7 +512,7 @@ describe('DocumentCreationLogic', () => {
           await nextTick();
 
           expect(DocumentCreationLogic.actions.setErrors).toHaveBeenCalledWith(
-            "Cannot read property 'total' of undefined"
+            "Cannot read properties of undefined (reading 'total')"
           );
         });
 
@@ -516,7 +535,7 @@ describe('DocumentCreationLogic', () => {
 
       describe('chunks large uploads', () => {
         // Using an array of #s for speed, it doesn't really matter what the contents of the documents are for this test
-        const largeDocumentsArray = ([...Array(200).keys()] as unknown) as object[];
+        const largeDocumentsArray = [...Array(200).keys()] as unknown as object[];
 
         const mockFirstResponse = {
           validDocuments: { total: 99, examples: largeDocumentsArray.slice(0, 98) },

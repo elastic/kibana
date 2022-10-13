@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { safeLoad } from 'js-yaml';
+
 import type { PackagePolicyConfigRecord, RegistryVarsEntry } from '../../../../types';
 
-import { validatePackagePolicyConfig } from './';
+import { validatePackagePolicyConfig } from '.';
 
 export const hasInvalidButRequiredVar = (
   registryVars?: RegistryVarsEntry[],
@@ -22,7 +24,12 @@ export const hasInvalidButRequiredVar = (
             registryVar.required &&
             (!packagePolicyVars ||
               !packagePolicyVars[registryVar.name] ||
-              validatePackagePolicyConfig(packagePolicyVars[registryVar.name], registryVar)?.length)
+              validatePackagePolicyConfig(
+                packagePolicyVars[registryVar.name],
+                registryVar,
+                registryVar.name,
+                safeLoad
+              )?.length)
         )
     )
   );

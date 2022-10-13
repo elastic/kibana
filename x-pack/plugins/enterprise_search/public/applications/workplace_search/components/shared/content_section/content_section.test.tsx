@@ -13,7 +13,7 @@ import { EuiSpacer } from '@elastic/eui';
 
 import { ViewContentHeader } from '../view_content_header';
 
-import { ContentSection } from './';
+import { ContentSection } from '.';
 
 const props = {
   children: <div className="children" />,
@@ -31,10 +31,20 @@ describe('ContentSection', () => {
 
   it('displays title and description', () => {
     const wrapper = shallow(<ContentSection {...props} title="foo" description="bar" />);
+    const header = wrapper.find(ViewContentHeader);
 
-    expect(wrapper.find(ViewContentHeader)).toHaveLength(1);
-    expect(wrapper.find(ViewContentHeader).prop('title')).toEqual('foo');
-    expect(wrapper.find(ViewContentHeader).prop('description')).toEqual('bar');
+    expect(header.prop('title')).toEqual('foo');
+    expect(header.prop('description')).toEqual('bar');
+    expect(header.prop('headingLevel')).toEqual(3);
+  });
+
+  it('sets heading level for personal dashboard', () => {
+    const wrapper = shallow(
+      <ContentSection {...props} isOrganization={false} title="foo" description="bar" />
+    );
+    const header = wrapper.find(ViewContentHeader);
+
+    expect(header.prop('headingLevel')).toEqual(2);
   });
 
   it('displays header content', () => {

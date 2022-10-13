@@ -244,20 +244,6 @@ describe('copyAll()', () => {
     expect(Math.abs(fooDir.atimeMs - time.getTime())).toBeLessThan(oneDay);
     expect(Math.abs(barTxt.mtimeMs - time.getTime())).toBeLessThan(oneDay);
   });
-
-  it('defaults atime and mtime to now', async () => {
-    const destination = resolve(TMP, 'a/b/c/d/e/f');
-    await copyAll(FIXTURES, destination);
-    const barTxt = statSync(resolve(destination, 'foo_dir/bar.txt'));
-    const fooDir = statSync(resolve(destination, 'foo_dir'));
-
-    // precision is platform specific
-    const now = new Date();
-    const oneDay = 86400000;
-    expect(Math.abs(barTxt.atimeMs - now.getTime())).toBeLessThan(oneDay);
-    expect(Math.abs(fooDir.atimeMs - now.getTime())).toBeLessThan(oneDay);
-    expect(Math.abs(barTxt.mtimeMs - now.getTime())).toBeLessThan(oneDay);
-  });
 });
 
 describe('getFileHash()', () => {

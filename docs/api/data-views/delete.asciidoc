@@ -1,0 +1,45 @@
+[[data-views-api-delete]]
+=== Delete data view API
+++++
+<titleabbrev>Delete data view</titleabbrev>
+++++
+
+experimental[] Delete data views.
+
+WARNING: Once you delete a data view, _it cannot be recovered_.
+
+
+[[data-views-api-delete-request]]
+==== Request
+
+`DELETE <kibana host>:<port>/api/data_views/data_view/<id>`
+
+`DELETE <kibana host>:<port>/s/<space_id>/api/data_views/data_view/<id>`
+
+
+[[data-views-api-delete-path-params]]
+==== Path parameters
+
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+
+`id`::
+  (Required, string) The ID of the data view you want to delete.
+
+
+[[data-views-api-delete-response-codes]]
+==== Response code
+
+`200`::
+  Indicates that data view is deleted. Returns an empty response body. 
+
+
+==== Example
+
+Delete a data view object with the `my-view` ID:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X DELETE api/data_views/data_view/my-view
+--------------------------------------------------
+// KIBANA

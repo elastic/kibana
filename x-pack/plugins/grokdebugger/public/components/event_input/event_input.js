@@ -6,9 +6,11 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiCodeEditor } from '@elastic/eui';
+import { EuiFormRow } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+
 import { EDITOR } from '../../../common/constants';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiCodeEditor } from '../../shared_imports';
 
 export function EventInput({ value, onChange }) {
   return (

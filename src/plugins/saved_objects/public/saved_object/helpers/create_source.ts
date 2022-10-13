@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
+import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { SavedObjectAttributes } from 'kibana/public';
+import { SavedObjectAttributes } from '@kbn/core/public';
 import { SavedObject, SavedObjectKibanaServices } from '../../types';
 import { OVERWRITE_REJECTED } from '../../constants';
 import { confirmModalPromise } from './confirm_modal_promise';
@@ -40,7 +40,7 @@ export async function createSource(
     return await savedObjectsClient.create(esType, source, options);
   } catch (err) {
     // record exists, confirm overwriting
-    if (_.get(err, 'res.status') === 409) {
+    if (get(err, 'res.status') === 409) {
       const confirmMessage = i18n.translate(
         'savedObjects.confirmModal.overwriteConfirmationMessage',
         {

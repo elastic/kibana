@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
-
-import {
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import { ElasticsearchClient } from '@kbn/core/server';
+import type {
   Filter,
   FoundListItemSchema,
   ListId,
   Page,
   PerPage,
-  SearchEsListItemSchema,
   SortFieldOrUndefined,
   SortOrderOrUndefined,
-} from '../../../common/schemas';
+} from '@kbn/securitysolution-io-ts-list-types';
+
+import { SearchEsListItemSchema } from '../../schemas/elastic_response';
 import { getList } from '../lists';
 import {
   encodeCursor,
@@ -26,6 +27,13 @@ import {
   scrollToStartPage,
   transformElasticToListItem,
 } from '../utils';
+
+export const getTotalHitsValue = (totalHits: number | { value: number } | undefined): number =>
+  typeof totalHits === 'undefined'
+    ? -1
+    : typeof totalHits === 'number'
+    ? totalHits
+    : totalHits.value;
 
 export interface FindListItemOptions {
   listId: ListId;
@@ -39,6 +47,7 @@ export interface FindListItemOptions {
   esClient: ElasticsearchClient;
   listIndex: string;
   listItemIndex: string;
+  runtimeMappings: MappingRuntimeFields | undefined;
 }
 
 export const findListItem = async ({
@@ -53,6 +62,7 @@ export const findListItem = async ({
   listIndex,
   listItemIndex,
   sortOrder,
+  runtimeMappings,
 }: FindListItemOptions): Promise<FoundListItemSchema | null> => {
   const list = await getList({ esClient, id: listId, listIndex });
   if (list == null) {
@@ -69,27 +79,29 @@ export const findListItem = async ({
       index: listItemIndex,
       page,
       perPage,
+      runtimeMappings,
       searchAfter,
       sortField,
       sortOrder,
     });
 
-    const { body: respose } = await esClient.count({
+    const respose = await esClient.search({
       body: {
-        // @ts-expect-error GetQueryFilterReturn is not assignable to QueryContainer
         query,
+        runtime_mappings: runtimeMappings,
       },
       ignore_unavailable: true,
       index: listItemIndex,
+      size: 0,
+      track_total_hits: true,
     });
 
     if (scroll.validSearchAfterFound) {
       // Note: This typing of response = await esClient<SearchResponse<SearchEsListSchema>>
       // is because when you pass in seq_no_primary_term: true it does a "fall through" type and you have
       // to explicitly define the type <T>.
-      const { body: response } = await esClient.search<SearchEsListItemSchema>({
+      const response = await esClient.search<SearchEsListItemSchema>({
         body: {
-          // @ts-expect-error GetQueryFilterReturn is not assignable to QueryContainer
           query,
           search_after: scroll.searchAfter,
           sort: getSortWithTieBreaker({ sortField, sortOrder }),
@@ -108,7 +120,7 @@ export const findListItem = async ({
         data: transformElasticToListItem({ response, type: list.type }),
         page,
         per_page: perPage,
-        total: respose.count,
+        total: getTotalHitsValue(respose.hits.total),
       };
     } else {
       return {
@@ -116,7 +128,7 @@ export const findListItem = async ({
         data: [],
         page,
         per_page: perPage,
-        total: respose.count,
+        total: getTotalHitsValue(respose.hits.total),
       };
     }
   }

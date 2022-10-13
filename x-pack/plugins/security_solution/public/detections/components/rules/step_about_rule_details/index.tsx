@@ -5,24 +5,27 @@
  * 2.0.
  */
 
+import type { EuiButtonGroupOptionProps } from '@elastic/eui';
 import {
   EuiPanel,
   EuiProgress,
   EuiButtonGroup,
-  EuiButtonGroupOptionProps,
   EuiSpacer,
   EuiFlexItem,
   EuiText,
   EuiFlexGroup,
   EuiResizeObserver,
 } from '@elastic/eui';
-import React, { memo, useCallback, useState } from 'react';
+import { isEmpty } from 'lodash';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { isEmpty } from 'lodash/fp';
 
 import { HeaderSection } from '../../../../common/components/header_section';
 import { MarkdownRenderer } from '../../../../common/components/markdown_editor';
-import { AboutStepRule, AboutStepRuleDetails } from '../../../pages/detection_engine/rules/types';
+import type {
+  AboutStepRule,
+  AboutStepRuleDetails,
+} from '../../../pages/detection_engine/rules/types';
 import * as i18n from './translations';
 import { StepAboutRule } from '../step_about_rule';
 
@@ -37,6 +40,7 @@ const FlexGroupFullHeight = styled(EuiFlexGroup)`
 const VerticalOverflowContainer = styled.div((props: { maxHeight: number }) => ({
   'max-height': `${props.maxHeight}px`,
   'overflow-y': 'hidden',
+  'word-break': 'break-word',
 }));
 
 const VerticalOverflowContent = styled.div((props: { maxHeight: number }) => ({
@@ -47,18 +51,21 @@ const AboutContent = styled.div`
   height: 100%;
 `;
 
-const toggleOptions: EuiButtonGroupOptionProps[] = [
-  {
-    id: 'details',
-    label: i18n.ABOUT_PANEL_DETAILS_TAB,
-    'data-test-subj': 'stepAboutDetailsToggle-details',
-  },
-  {
-    id: 'notes',
-    label: i18n.ABOUT_PANEL_NOTES_TAB,
-    'data-test-subj': 'stepAboutDetailsToggle-notes',
-  },
-];
+const detailsOption: EuiButtonGroupOptionProps = {
+  id: 'details',
+  label: i18n.ABOUT_PANEL_DETAILS_TAB,
+  'data-test-subj': 'stepAboutDetailsToggle-details',
+};
+const notesOption: EuiButtonGroupOptionProps = {
+  id: 'notes',
+  label: i18n.ABOUT_PANEL_NOTES_TAB,
+  'data-test-subj': 'stepAboutDetailsToggle-notes',
+};
+const setupOption: EuiButtonGroupOptionProps = {
+  id: 'setup',
+  label: i18n.ABOUT_PANEL_SETUP_TAB,
+  'data-test-subj': 'stepAboutDetailsToggle-setup',
+};
 
 interface StepPanelProps {
   stepData: AboutStepRule | null;
@@ -81,8 +88,18 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
     [setAboutPanelHeight]
   );
 
+  const toggleOptions: EuiButtonGroupOptionProps[] = useMemo(() => {
+    const notesExist = !isEmpty(stepDataDetails?.note) && stepDataDetails?.note.trim() !== '';
+    const setupExists = !isEmpty(stepDataDetails?.setup) && stepDataDetails?.setup.trim() !== '';
+    return [
+      ...(notesExist || setupExists ? [detailsOption] : []),
+      ...(notesExist ? [notesOption] : []),
+      ...(setupExists ? [setupOption] : []),
+    ];
+  }, [stepDataDetails]);
+
   return (
-    <MyPanel>
+    <MyPanel hasBorder>
       {loading && (
         <>
           <EuiProgress size="xs" color="accent" position="absolute" />
@@ -93,7 +110,7 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
         <FlexGroupFullHeight gutterSize="xs" direction="column">
           <EuiFlexItem grow={false} key="header">
             <HeaderSection title={i18n.ABOUT_TEXT}>
-              {!isEmpty(stepDataDetails.note) && stepDataDetails.note.trim() !== '' && (
+              {toggleOptions.length > 0 && (
                 <EuiButtonGroup
                   options={toggleOptions}
                   idSelected={selectedToggleOption}
@@ -107,7 +124,7 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
             </HeaderSection>
           </EuiFlexItem>
           <EuiFlexItem key="details">
-            {selectedToggleOption === 'details' ? (
+            {selectedToggleOption === 'details' && (
               <EuiResizeObserver data-test-subj="stepAboutDetailsContent" onResize={onResize}>
                 {(resizeRef) => (
                   <AboutContent ref={resizeRef}>
@@ -131,7 +148,8 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
                   </AboutContent>
                 )}
               </EuiResizeObserver>
-            ) : (
+            )}
+            {selectedToggleOption === 'notes' && (
               <VerticalOverflowContainer
                 data-test-subj="stepAboutDetailsNoteContent"
                 maxHeight={aboutPanelHeight}
@@ -141,6 +159,19 @@ const StepAboutRuleToggleDetailsComponent: React.FC<StepPanelProps> = ({
                   className="eui-yScrollWithShadows"
                 >
                   <MarkdownRenderer>{stepDataDetails.note}</MarkdownRenderer>
+                </VerticalOverflowContent>
+              </VerticalOverflowContainer>
+            )}
+            {selectedToggleOption === 'setup' && (
+              <VerticalOverflowContainer
+                data-test-subj="stepAboutDetailsSetupContent"
+                maxHeight={aboutPanelHeight}
+              >
+                <VerticalOverflowContent
+                  maxHeight={aboutPanelHeight}
+                  className="eui-yScrollWithShadows"
+                >
+                  <MarkdownRenderer>{stepDataDetails.setup}</MarkdownRenderer>
                 </VerticalOverflowContent>
               </VerticalOverflowContainer>
             )}

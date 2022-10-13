@@ -7,16 +7,23 @@
 
 import moment from 'moment';
 // @ts-ignore
-import { checkParam } from '../error_missing_required';
-// @ts-ignore
 import { ElasticsearchMetric } from '../metrics';
 // @ts-ignore
 import { createQuery } from '../create_query';
 import { ElasticsearchResponse } from '../../../common/types/es';
 import { LegacyRequest } from '../../types';
+import { getIndexPatterns, getElasticsearchDataset } from '../cluster/get_index_patterns';
+import { Globals } from '../../static_globals';
 
-export async function checkCcrEnabled(req: LegacyRequest, esIndexPattern: string) {
-  checkParam(esIndexPattern, 'esIndexPattern in checkCcrEnabled');
+export async function checkCcrEnabled(req: LegacyRequest, ccs: string) {
+  const dataset = 'cluster_stats';
+  const moduleType = 'elasticsearch';
+  const indexPatterns = getIndexPatterns({
+    config: Globals.app.config,
+    moduleType,
+    dataset,
+    ccs,
+  });
 
   const start = moment.utc(req.payload.timeRange.min).valueOf();
   const end = moment.utc(req.payload.timeRange.max).valueOf();
@@ -25,12 +32,14 @@ export async function checkCcrEnabled(req: LegacyRequest, esIndexPattern: string
   const metricFields = ElasticsearchMetric.getMetricFields();
 
   const params = {
-    index: esIndexPattern,
+    index: indexPatterns,
     size: 1,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
       query: createQuery({
-        type: 'cluster_stats',
+        type: dataset,
+        dsDataset: getElasticsearchDataset(dataset),
+        metricset: dataset,
         start,
         end,
         clusterUuid,
@@ -38,7 +47,7 @@ export async function checkCcrEnabled(req: LegacyRequest, esIndexPattern: string
       }),
       sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
     },
-    filterPath: [
+    filter_path: [
       'hits.hits._source.stack_stats.xpack.ccr',
       'hits.hits._source.elasticsearch.cluster.stats.stack.xpack.ccr',
     ],
@@ -50,5 +59,5 @@ export async function checkCcrEnabled(req: LegacyRequest, esIndexPattern: string
   const mbCcr = response.hits?.hits[0]?._source?.elasticsearch?.cluster?.stats?.stack?.xpack?.ccr;
   const isEnabled = legacyCcr?.enabled ?? mbCcr?.enabled;
   const isAvailable = legacyCcr?.available ?? mbCcr?.available;
-  return isEnabled && isAvailable;
+  return Boolean(isEnabled && isAvailable);
 }

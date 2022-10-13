@@ -6,9 +6,17 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
-import type { SnapshotRepositorySettings } from '@elastic/elasticsearch/api/types';
+import type {
+  SnapshotGetRepositoryResponse,
+  SnapshotRepositorySettings,
+  PluginStats,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { DEFAULT_REPOSITORY_TYPES, REPOSITORY_PLUGINS_MAP } from '../../../common/constants';
+import {
+  ON_PREM_REPOSITORY_TYPES,
+  REPOSITORY_PLUGINS_MAP,
+  MODULE_REPOSITORY_TYPES,
+} from '../../../common';
 import { Repository, RepositoryType } from '../../../common/types';
 import { RouteDependencies } from '../../types';
 import { addBasePath } from '../helpers';
@@ -35,7 +43,7 @@ export function registerRepositoriesRoutes({
   router.get(
     { path: addBasePath('repositories'), validate: false },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { client: clusterClient } = ctx.core.elasticsearch;
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
       const managedRepositoryName = await getManagedRepositoryName(clusterClient.asCurrentUser);
 
       let repositoryNames: string[] | undefined;
@@ -43,10 +51,8 @@ export function registerRepositoriesRoutes({
       let managedRepository: ManagedRepository;
 
       try {
-        const {
-          body: repositoriesByName,
-        } = await clusterClient.asCurrentUser.snapshot.getRepository({
-          repository: '_all',
+        const repositoriesByName = await clusterClient.asCurrentUser.snapshot.getRepository({
+          name: '_all',
         });
         repositoryNames = Object.keys(repositoriesByName);
         repositories = repositoryNames.map((name) => {
@@ -68,7 +74,7 @@ export function registerRepositoriesRoutes({
       // If a managed repository, we also need to check if a policy is associated to it
       if (managedRepositoryName) {
         try {
-          const { body: policiesByName } = await clusterClient.asCurrentUser.slm.getLifecycle({
+          const policiesByName = await clusterClient.asCurrentUser.slm.getLifecycle({
             human: true,
           });
 
@@ -96,28 +102,29 @@ export function registerRepositoriesRoutes({
   router.get(
     { path: addBasePath('repositories/{name}'), validate: { params: nameParameterSchema } },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { client: clusterClient } = ctx.core.elasticsearch;
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
       const { name } = req.params as TypeOf<typeof nameParameterSchema>;
 
       const managedRepository = await getManagedRepositoryName(clusterClient.asCurrentUser);
 
-      let repositoryByName: any;
+      let repositoryByName: SnapshotGetRepositoryResponse;
 
       try {
-        ({ body: repositoryByName } = await clusterClient.asCurrentUser.snapshot.getRepository({
-          repository: name,
-        }));
+        repositoryByName = await clusterClient.asCurrentUser.snapshot.getRepository({
+          name,
+        });
       } catch (e) {
         return handleEsError({ error: e, response: res });
       }
 
-      const response = await clusterClient.asCurrentUser.snapshot.get({
-        repository: name,
-        snapshot: '_all',
-      });
-
-      // @ts-expect-error @elastic/elasticsearch remove this "as unknown" workaround when the types for this endpoint are correct. Track progress at https://github.com/elastic/elastic-client-generator/issues/250.
-      const { responses: snapshotResponses } = response.body;
+      const { snapshots: snapshotList } = await clusterClient.asCurrentUser.snapshot
+        .get({
+          repository: name,
+          snapshot: '_all',
+        })
+        .catch((e) => ({
+          snapshots: null,
+        }));
 
       if (repositoryByName[name]) {
         const { type = '', settings = {} } = repositoryByName[name];
@@ -131,10 +138,7 @@ export function registerRepositoriesRoutes({
             },
             isManagedRepository: managedRepository === name,
             snapshots: {
-              count:
-                snapshotResponses && snapshotResponses[0] && snapshotResponses[0].snapshots
-                  ? snapshotResponses[0].snapshots.length
-                  : null,
+              count: snapshotList ? snapshotList.length : null,
             },
           },
         });
@@ -153,26 +157,33 @@ export function registerRepositoriesRoutes({
   router.get(
     { path: addBasePath('repository_types'), validate: false },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { client: clusterClient } = ctx.core.elasticsearch;
-      // In ECE/ESS, do not enable the default types
-      const types: RepositoryType[] = isCloudEnabled ? [] : [...DEFAULT_REPOSITORY_TYPES];
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
+      // module repo types are available everywhere out of the box
+      // on-prem repo types are not available on Cloud
+      const types: RepositoryType[] = isCloudEnabled
+        ? [...MODULE_REPOSITORY_TYPES]
+        : [...MODULE_REPOSITORY_TYPES, ...ON_PREM_REPOSITORY_TYPES];
 
       try {
-        // Call with internal user so that the requesting user does not need `monitoring` cluster
-        // privilege just to see list of available repository types
-        const { body: plugins } = await clusterClient.asCurrentUser.cat.plugins({ format: 'json' });
+        const { nodes } = await clusterClient.asCurrentUser.nodes.info({
+          node_id: '_all',
+          metric: 'plugins',
+        });
+        const pluginNamesAllNodes = Object.keys(nodes).map((key: string) => {
+          // extract plugin names
+          return (nodes[key].plugins ?? []).map((plugin: PluginStats) => plugin.name);
+        });
 
         // Filter list of plugins to repository-related ones
-        if (plugins && plugins.length) {
-          const pluginNames: string[] = [
-            ...new Set(plugins.map((plugin) => plugin.component ?? '')),
-          ];
-          pluginNames.forEach((pluginName) => {
-            if (REPOSITORY_PLUGINS_MAP[pluginName]) {
-              types.push(REPOSITORY_PLUGINS_MAP[pluginName]);
-            }
-          });
-        }
+        Object.keys(REPOSITORY_PLUGINS_MAP).forEach((repoTypeName: string) => {
+          if (
+            // check if this repository plugin is installed on every node
+            pluginNamesAllNodes.every((pluginNames: string[]) => pluginNames.includes(repoTypeName))
+          ) {
+            types.push(REPOSITORY_PLUGINS_MAP[repoTypeName]);
+          }
+        });
+
         return res.ok({ body: types });
       } catch (e) {
         return handleEsError({ error: e, response: res });
@@ -187,19 +198,15 @@ export function registerRepositoriesRoutes({
       validate: { params: nameParameterSchema },
     },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { client: clusterClient } = ctx.core.elasticsearch;
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
       const { name } = req.params as TypeOf<typeof nameParameterSchema>;
 
       try {
-        const { body: verificationResults } = await clusterClient.asCurrentUser.snapshot
-          .verifyRepository({
-            repository: name,
-          })
+        const verificationResults = await clusterClient.asCurrentUser.snapshot
+          .verifyRepository({ name })
           .catch((e) => ({
-            body: {
-              valid: false,
-              error: e.response ? JSON.parse(e.response) : e,
-            },
+            valid: false,
+            error: e.response ? JSON.parse(e.response) : e,
           }));
 
         return res.ok({
@@ -225,20 +232,27 @@ export function registerRepositoriesRoutes({
       validate: { params: nameParameterSchema },
     },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { client: clusterClient } = ctx.core.elasticsearch;
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
       const { name } = req.params as TypeOf<typeof nameParameterSchema>;
 
       try {
-        const { body: cleanupResults } = await clusterClient.asCurrentUser.snapshot
-          .cleanupRepository({
-            repository: name,
-          })
-          .catch((e) => ({
-            body: {
-              cleaned: false,
-              error: e.response ? JSON.parse(e.response) : e,
-            },
-          }));
+        const cleanupResults = await clusterClient.asCurrentUser.snapshot
+          .cleanupRepository({ name })
+          .catch((e) => {
+            // This API returns errors in a non-standard format, which we'll need to
+            // munge to be compatible with wrapEsError.
+            const normalizedError = {
+              statusCode: e.meta.body.status,
+              response: e.meta.body,
+            };
+
+            return {
+              body: {
+                cleaned: false,
+                error: wrapEsError(normalizedError),
+              },
+            };
+          });
 
         return res.ok({
           body: {
@@ -260,16 +274,12 @@ export function registerRepositoriesRoutes({
   router.put(
     { path: addBasePath('repositories'), validate: { body: repositorySchema } },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { client: clusterClient } = ctx.core.elasticsearch;
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
       const { name = '', type = '', settings = {} } = req.body as TypeOf<typeof repositorySchema>;
 
       // Check that repository with the same name doesn't already exist
       try {
-        const { body: repositoryByName } = await clusterClient.asCurrentUser.snapshot.getRepository(
-          {
-            repository: name,
-          }
-        );
+        const repositoryByName = await clusterClient.asCurrentUser.snapshot.getRepository({ name });
         if (repositoryByName[name]) {
           return res.conflict({ body: 'There is already a repository with that name.' });
         }
@@ -280,7 +290,7 @@ export function registerRepositoriesRoutes({
       // Otherwise create new repository
       try {
         const response = await clusterClient.asCurrentUser.snapshot.createRepository({
-          repository: name,
+          name,
           body: {
             type,
             // TODO: Bring {@link RepositorySettings} in line with {@link SnapshotRepositorySettings}
@@ -289,7 +299,7 @@ export function registerRepositoriesRoutes({
           verify: false,
         });
 
-        return res.ok({ body: response.body });
+        return res.ok({ body: response });
       } catch (e) {
         return handleEsError({ error: e, response: res });
       }
@@ -303,18 +313,18 @@ export function registerRepositoriesRoutes({
       validate: { body: repositorySchema, params: nameParameterSchema },
     },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { client: clusterClient } = ctx.core.elasticsearch;
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
       const { name } = req.params as TypeOf<typeof nameParameterSchema>;
       const { type = '', settings = {} } = req.body as TypeOf<typeof repositorySchema>;
 
       try {
         // Check that repository with the given name exists
         // If it doesn't exist, 404 will be thrown by ES and will be returned
-        await clusterClient.asCurrentUser.snapshot.getRepository({ repository: name });
+        await clusterClient.asCurrentUser.snapshot.getRepository({ name });
 
         // Otherwise update repository
         const response = await clusterClient.asCurrentUser.snapshot.createRepository({
-          repository: name,
+          name,
           body: {
             type,
             settings: serializeRepositorySettings(settings) as SnapshotRepositorySettings,
@@ -323,7 +333,7 @@ export function registerRepositoriesRoutes({
         });
 
         return res.ok({
-          body: response.body,
+          body: response,
         });
       } catch (e) {
         return handleEsError({ error: e, response: res });
@@ -335,7 +345,7 @@ export function registerRepositoriesRoutes({
   router.delete(
     { path: addBasePath('repositories/{name}'), validate: { params: nameParameterSchema } },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { client: clusterClient } = ctx.core.elasticsearch;
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
       const { name } = req.params as TypeOf<typeof nameParameterSchema>;
       const repositoryNames = name.split(',');
 
@@ -348,7 +358,7 @@ export function registerRepositoriesRoutes({
         await Promise.all(
           repositoryNames.map((repoName) => {
             return clusterClient.asCurrentUser.snapshot
-              .deleteRepository({ repository: repoName })
+              .deleteRepository({ name: repoName })
               .then(() => response.itemsDeleted.push(repoName))
               .catch((e) =>
                 response.errors.push({

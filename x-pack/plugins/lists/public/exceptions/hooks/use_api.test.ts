@@ -6,30 +6,33 @@
  */
 
 import { act, renderHook } from '@testing-library/react-hooks';
-
-import { ENTRIES_WITH_IDS } from '../../../common/constants.mock';
-import { getUpdateExceptionListItemSchemaMock } from '../../../common/schemas/request/update_exception_list_item_schema.mock';
-import { coreMock } from '../../../../../../src/core/public/mocks';
-import * as api from '../api';
-import { getExceptionListSchemaMock } from '../../../common/schemas/response/exception_list_schema.mock';
-import { getFoundExceptionListItemSchemaMock } from '../../../common/schemas/response/found_exception_list_item_schema.mock';
-import { getExceptionListItemSchemaMock } from '../../../common/schemas/response/exception_list_item_schema.mock';
-import { getCreateExceptionListItemSchemaMock } from '../../../common/schemas/request/create_exception_list_item_schema.mock';
-import { HttpStart } from '../../../../../../src/core/public';
-import {
+import * as api from '@kbn/securitysolution-list-api';
+import { ExceptionsApi, useApi } from '@kbn/securitysolution-list-hooks';
+import type {
   AddExceptionListItemProps,
   ApiCallByIdProps,
   ApiCallByListIdProps,
   UpdateExceptionListItemProps,
-} from '../types';
+} from '@kbn/securitysolution-io-ts-list-types';
+import { coreMock } from '@kbn/core/public/mocks';
+import { HttpStart } from '@kbn/core/public';
 
-import { ExceptionsApi, useApi } from './use_api';
+import { ENTRIES_WITH_IDS } from '../../../common/constants.mock';
+import { getUpdateExceptionListItemSchemaMock } from '../../../common/schemas/request/update_exception_list_item_schema.mock';
+import { getExceptionListSchemaMock } from '../../../common/schemas/response/exception_list_schema.mock';
+import { getFoundExceptionListItemSchemaMock } from '../../../common/schemas/response/found_exception_list_item_schema.mock';
+import { getExceptionListItemSchemaMock } from '../../../common/schemas/response/exception_list_item_schema.mock';
+import { getCreateExceptionListItemSchemaMock } from '../../../common/schemas/request/create_exception_list_item_schema.mock';
+
+jest.mock('@kbn/securitysolution-list-api');
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('123'),
 }));
 
 const mockKibanaHttpService = coreMock.createStart().http;
+
+// TODO: Once the mocks are figured out and the types are moved into kbn core this test should be moved next to the file: packages/kbn-securitysolution-list-hooks/src/use_api/index.test.ts
 
 describe('useApi', () => {
   const onErrorMock = jest.fn();
@@ -294,7 +297,6 @@ describe('useApi', () => {
         await waitForNextUpdate();
 
         await result.current.getExceptionListsItems({
-          filterOptions: [],
           lists: [
             { id: 'myListId', listId: 'list_id', namespaceType: 'single', type: 'detection' },
           ],
@@ -310,7 +312,6 @@ describe('useApi', () => {
         });
 
         const expected: ApiCallByListIdProps = {
-          filterOptions: [],
           http: mockKibanaHttpService,
           listIds: ['list_id'],
           namespaceTypes: ['single'],
@@ -348,7 +349,6 @@ describe('useApi', () => {
         await waitForNextUpdate();
 
         await result.current.getExceptionListsItems({
-          filterOptions: [],
           lists: [
             { id: 'myListId', listId: 'list_id', namespaceType: 'single', type: 'detection' },
           ],
@@ -386,7 +386,6 @@ describe('useApi', () => {
         await waitForNextUpdate();
 
         await result.current.getExceptionListsItems({
-          filterOptions: [],
           lists: [
             { id: 'myListId', listId: 'list_id', namespaceType: 'single', type: 'detection' },
           ],

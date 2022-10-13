@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import {
   NavigationPublicPluginSetup,
   NavigationPublicPluginStart,
@@ -15,8 +15,10 @@ import {
 import { TopNavMenuExtensionsRegistry, createTopNav } from './top_nav_menu';
 
 export class NavigationPublicPlugin
-  implements Plugin<NavigationPublicPluginSetup, NavigationPublicPluginStart> {
-  private readonly topNavMenuExtensionsRegistry: TopNavMenuExtensionsRegistry = new TopNavMenuExtensionsRegistry();
+  implements Plugin<NavigationPublicPluginSetup, NavigationPublicPluginStart>
+{
+  private readonly topNavMenuExtensionsRegistry: TopNavMenuExtensionsRegistry =
+    new TopNavMenuExtensionsRegistry();
 
   constructor(initializerContext: PluginInitializerContext) {}
 
@@ -29,14 +31,15 @@ export class NavigationPublicPlugin
   }
 
   public start(
-    { i18n }: CoreStart,
-    { data }: NavigationPluginStartDependencies
+    core: CoreStart,
+    { unifiedSearch }: NavigationPluginStartDependencies
   ): NavigationPublicPluginStart {
     const extensions = this.topNavMenuExtensionsRegistry.getAll();
 
     return {
       ui: {
-        TopNavMenu: createTopNav(data, extensions, i18n),
+        TopNavMenu: createTopNav(unifiedSearch, extensions),
+        AggregateQueryTopNavMenu: createTopNav(unifiedSearch, extensions),
       },
     };
   }

@@ -18,16 +18,15 @@ import {
   EuiFormRow,
   EuiFlexItem,
   EuiFieldText,
-  EuiPageContent,
-  EuiPageHeader,
+  EuiPanel,
   EuiSpacer,
   EuiTitle,
   EuiButton,
 } from '@elastic/eui';
 
-import { FlashMessages } from '../../../shared/flash_messages';
-import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { AppLogic } from '../../app_logic';
+import { ENGINES_TITLE } from '../engines';
+import { AppSearchPageTemplate } from '../layout';
 
 import {
   ALLOWED_CHARS_NOTE,
@@ -58,36 +57,32 @@ export const MetaEngineCreation: React.FC = () => {
     },
   } = useValues(AppLogic);
 
-  const {
-    fetchIndexedEngineNames,
-    setRawName,
-    setSelectedIndexedEngineNames,
-    submitEngine,
-  } = useActions(MetaEngineCreationLogic);
+  const { fetchIndexedEngineNames, setRawName, setSelectedIndexedEngineNames, submitEngine } =
+    useActions(MetaEngineCreationLogic);
 
-  const { rawName, name, indexedEngineNames, selectedIndexedEngineNames } = useValues(
-    MetaEngineCreationLogic
-  );
+  const { rawName, name, indexedEngineNames, selectedIndexedEngineNames, isLoading } =
+    useValues(MetaEngineCreationLogic);
 
   useEffect(() => {
     fetchIndexedEngineNames();
   }, []);
 
   return (
-    <div data-test-subj="MetaEngineCreation">
-      <SetPageChrome trail={[META_ENGINE_CREATION_TITLE]} />
-      <EuiPageHeader
-        pageTitle={META_ENGINE_CREATION_TITLE}
-        description={
+    <AppSearchPageTemplate
+      pageChrome={[ENGINES_TITLE, META_ENGINE_CREATION_TITLE]}
+      pageHeader={{
+        pageTitle: META_ENGINE_CREATION_TITLE,
+        description: (
           <>
             {META_ENGINE_CREATION_FORM_META_ENGINE_DESCRIPTION}
             <br />
             {META_ENGINE_CREATION_FORM_DOCUMENTATION_DESCRIPTION}
           </>
-        }
-      />
-      <FlashMessages />
-      <EuiPageContent hasBorder>
+        ),
+      }}
+      data-test-subj="MetaEngineCreation"
+    >
+      <EuiPanel hasBorder>
         <EuiForm
           component="form"
           data-test-subj="MetaEngineCreationForm"
@@ -157,15 +152,16 @@ export const MetaEngineCreation: React.FC = () => {
               selectedIndexedEngineNames.length === 0 ||
               selectedIndexedEngineNames.length > maxEnginesPerMetaEngine
             }
+            isLoading={isLoading}
             type="submit"
             data-test-subj="NewMetaEngineSubmitButton"
+            color="success"
             fill
-            color="secondary"
           >
             {META_ENGINE_CREATION_FORM_SUBMIT_BUTTON_LABEL}
           </EuiButton>
         </EuiForm>
-      </EuiPageContent>
-    </div>
+      </EuiPanel>
+    </AppSearchPageTemplate>
   );
 };

@@ -6,16 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
+import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
 import { UsageStats } from './types';
 
 export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
-  // sensitive
-  'timelion:quandl.key': {
+  'securitySolution:defaultIndex': {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
   },
-  'securitySolution:defaultIndex': {
+  'securitySolution:defaultThreatIndex': {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
   },
@@ -30,10 +29,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'notifications:banner': {
     type: 'keyword',
     _meta: { description: 'Default value of the setting was changed.' },
-  },
-  'timelion:graphite.url': {
-    type: 'keyword',
-    _meta: { description: 'Default value of the setting changed.' },
   },
   'xpackDashboardMode:roles': {
     type: 'keyword',
@@ -60,12 +55,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'text',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'visualization:regionmap:showWarnings': {
+  'visualization:useLegacyTimeAxis': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'visualization:dimmingOpacity': {
-    type: 'float',
+  'visualization:regionmap:showWarnings': {
+    type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
   'visualization:tileMap:maxPrecision': {
@@ -96,20 +91,8 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'timelion:default_rows': {
-    type: 'long',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'timelion:default_columns': {
-    type: 'long',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'timelion:es.default_index': {
     type: 'keyword',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'timelion:showTutorial': {
-    type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
   'securitySolution:timeDefaults': {
@@ -128,16 +111,16 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'securitySolution:enableCcsWarning': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'search:includeFrozen': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
   'courier:maxConcurrentShardRequests': {
     type: 'long',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'courier:batchSearches': {
-    type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
   'courier:setRequestPreference': {
@@ -180,12 +163,19 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   'doc_table:hideTimeColumn': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'discover:showLegacyFieldTopValues': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'discover:sampleSize': {
+    type: 'long',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'discover:sampleRowsPerPage': {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -288,6 +278,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'metrics:allowStringIndices': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'query:allowLeadingWildcards': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -384,11 +378,27 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'autocomplete:valueSuggestionMethod': {
+    type: 'keyword',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'search:timeout': {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'visualization:visualize:legacyChartsLibrary': {
+  'bfetch:disableCompression': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'bfetch:disable': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'visualization:visualize:legacyPieChartsLibrary': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'visualization:visualize:legacyHeatmapChartsLibrary': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -408,15 +418,27 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'text',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'apm:enableSignificantTerms': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'apm:enableServiceOverview': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'observability:enableInspectEsQueries': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:enableNewSyntheticsView': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:maxSuggestions': {
+    type: 'integer',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:enableComparisonByDefault': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:enableServiceGroups': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:apmEnableServiceMetrics': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
@@ -437,6 +459,110 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     _meta: { description: 'Non-default value of setting.' },
   },
   'labs:canvas:enable_ui': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'labs:canvas:byValueEmbeddable': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'labs:canvas:useDataService': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'labs:dashboard:enable_ui': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'labs:dashboard:deferBelowFold': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'labs:dashboard:dashboardControls': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'discover:showFieldStatistics': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'discover:showMultiFields': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'discover:enableSql': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'discover:rowHeightOption': {
+    type: 'integer',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  hideAnnouncements: {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  isDefaultIndexMigrated: {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'lens:useFieldExistenceSampling': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'metrics:allowCheckingForFailedShards': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:apmDefaultServiceEnvironment': {
+    type: 'keyword',
+    _meta: { description: 'Default value of the setting was changed.' },
+  },
+  'observability:apmOperationsTab': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:apmLabsButton': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:enableAwsLambdaMetrics': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:apmProgressiveLoading': {
+    type: 'keyword',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:apmServiceGroupMaxNumberOfServices': {
+    type: 'long',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:apmServiceInventoryOptimizedSorting': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:apmTraceExplorerTab': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'observability:enableInfrastructureHostsView': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'securitySolution:enableGroupedNav': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'securitySolution:showRelatedIntegrations': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'visualization:visualize:legacyGaugeChartsLibrary': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'enterpriseSearch:enableBehavioralAnalyticsSection': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },

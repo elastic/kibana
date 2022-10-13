@@ -8,7 +8,7 @@
 import { EuiLink, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 
-import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { InfraWaffleMapGroup, InfraWaffleMapOptions } from '../../../../../lib/lib';
 
 interface Props {
@@ -29,7 +29,11 @@ export class GroupName extends React.PureComponent<Props, {}> {
         <Inner isChild={isChild}>
           <Name>
             <EuiToolTip position="top" content={group.name}>
-              <EuiLink style={linkStyle} onClickCapture={this.handleClick}>
+              <EuiLink
+                style={linkStyle}
+                onClickCapture={this.handleClick}
+                data-test-subj="groupNameLink"
+              >
                 {group.name}
               </EuiLink>
             </EuiToolTip>

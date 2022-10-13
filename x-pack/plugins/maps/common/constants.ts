@@ -8,24 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import { FeatureCollection } from 'geojson';
 
-export const EMS_APP_NAME = 'kibana';
-export const EMS_CATALOGUE_PATH = 'ems/catalogue';
-
-export const EMS_FILES_CATALOGUE_PATH = 'ems/files';
-export const EMS_FILES_API_PATH = 'ems/files';
-export const EMS_FILES_DEFAULT_JSON_PATH = 'file';
-export const EMS_GLYPHS_PATH = 'fonts';
-export const EMS_SPRITES_PATH = 'sprites';
-
-export const EMS_TILES_CATALOGUE_PATH = 'ems/tiles';
-export const EMS_TILES_API_PATH = 'ems/tiles';
-export const EMS_TILES_RASTER_STYLE_PATH = 'raster/style';
-export const EMS_TILES_RASTER_TILE_PATH = 'raster/tile';
-
-export const EMS_TILES_VECTOR_STYLE_PATH = 'vector/style';
-export const EMS_TILES_VECTOR_SOURCE_PATH = 'vector/source';
-export const EMS_TILES_VECTOR_TILE_PATH = 'vector/tile';
-
 export const MAP_SAVED_OBJECT_TYPE = 'map';
 export const APP_ID = 'maps';
 export const APP_ICON = 'gisApp';
@@ -42,38 +24,36 @@ export const INDEX_SETTINGS_API_PATH = `${GIS_API_PATH}/indexSettings`;
 export const FONTS_API_PATH = `${GIS_API_PATH}/fonts`;
 export const INDEX_SOURCE_API_PATH = `${GIS_API_PATH}/docSource`;
 export const API_ROOT_PATH = `/${GIS_API_PATH}`;
+export const INDEX_FEATURE_PATH = `/${GIS_API_PATH}/feature`;
+export const GET_MATCHING_INDEXES_PATH = `/${GIS_API_PATH}/getMatchingIndexes`;
+export const CHECK_IS_DRAWING_INDEX = `/${GIS_API_PATH}/checkIsDrawingIndex`;
 
 export const MVT_GETTILE_API_PATH = 'mvt/getTile';
 export const MVT_GETGRIDTILE_API_PATH = 'mvt/getGridTile';
-export const MVT_SOURCE_LAYER_NAME = 'source_layer';
-// Identifies vector tile "too many features" feature.
-// "too many features" feature is a box showing area that contains too many features for single ES search response
-export const KBN_TOO_MANY_FEATURES_PROPERTY = '__kbn_too_many_features__';
-export const KBN_TOO_MANY_FEATURES_IMAGE_ID = '__kbn_too_many_features_image_id__';
+export const OPEN_LAYER_WIZARD = 'openLayerWizard';
+
 // Identifies centroid feature.
 // Centroids are a single point for representing lines, multiLines, polygons, and multiPolygons
 export const KBN_IS_CENTROID_FEATURE = '__kbn_is_centroid_feature__';
 
-export const MVT_TOKEN_PARAM_NAME = 'token';
-
-const MAP_BASE_URL = `/${MAPS_APP_PATH}/${MAP_PATH}`;
 export function getNewMapPath() {
-  return MAP_BASE_URL;
+  return `/${MAPS_APP_PATH}/${MAP_PATH}`;
 }
-export function getExistingMapPath(id: string) {
-  return `${MAP_BASE_URL}/${id}`;
+export function getFullPath(id: string | undefined) {
+  return `/${MAPS_APP_PATH}${getEditPath(id)}`;
 }
-export function getEditPath(id: string) {
-  return `/${MAP_PATH}/${id}`;
+export function getEditPath(id: string | undefined) {
+  return id ? `/${MAP_PATH}/${id}` : `/${MAP_PATH}`;
 }
 
 export enum LAYER_TYPE {
-  TILE = 'TILE',
-  VECTOR = 'VECTOR',
-  VECTOR_TILE = 'VECTOR_TILE', // for static display of mvt vector tiles with a mapbox stylesheet. Does not support any ad-hoc configurations. Used for consuming EMS vector tiles.
+  RASTER_TILE = 'RASTER_TILE',
+  GEOJSON_VECTOR = 'GEOJSON_VECTOR',
+  EMS_VECTOR_TILE = 'EMS_VECTOR_TILE',
   HEATMAP = 'HEATMAP',
   BLENDED_VECTOR = 'BLENDED_VECTOR',
-  TILED_VECTOR = 'TILED_VECTOR', // similar to a regular vector-layer, but it consumes the data as .mvt tilea iso GeoJson. It supports similar ad-hoc configurations like a regular vector layer (E.g. using IVectorStyle), although there is some loss of functionality  e.g. does not support term joining
+  MVT_VECTOR = 'MVT_VECTOR',
+  LAYER_GROUP = 'LAYER_GROUP',
 }
 
 export enum SOURCE_TYPES {
@@ -84,10 +64,10 @@ export enum SOURCE_TYPES {
   ES_SEARCH = 'ES_SEARCH',
   ES_PEW_PEW = 'ES_PEW_PEW',
   ES_TERM_SOURCE = 'ES_TERM_SOURCE',
+  ES_ML_ANOMALIES = 'ML_ANOMALIES',
   EMS_XYZ = 'EMS_XYZ', // identifies a custom TMS source. EMS-prefix in the name is a little unfortunate :(
   WMS = 'WMS',
   KIBANA_TILEMAP = 'KIBANA_TILEMAP',
-  REGIONMAP_FILE = 'REGIONMAP_FILE',
   GEOJSON_FILE = 'GEOJSON_FILE',
   MVT_SINGLE_LAYER = 'MVT_SINGLE_LAYER',
   TABLE_SOURCE = 'TABLE_SOURCE',
@@ -115,7 +95,6 @@ export const DEFAULT_MAX_RESULT_WINDOW = 10000;
 export const DEFAULT_MAX_INNER_RESULT_WINDOW = 100;
 export const DEFAULT_MAX_BUCKETS_LIMIT = 65535;
 
-export const FEATURE_ID_PROPERTY_NAME = '__kbn__feature_id__';
 export const FEATURE_VISIBLE_PROPERTY_NAME = '__kbn_isvisibleduetojoin__';
 
 export const MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER = '_';
@@ -125,7 +104,7 @@ export enum ES_GEO_FIELD_TYPE {
   GEO_SHAPE = 'geo_shape',
 }
 
-// Using strings instead of ES_GEO_FIELD_TYPE enum to avoid typeing errors where IFieldType.type is compared to value
+// Using strings instead of ES_GEO_FIELD_TYPE enum to avoid typeing errors where IndexPatternField.type is compared to value
 export const ES_GEO_FIELD_TYPES = ['geo_point', 'geo_shape'];
 
 export enum ES_SPATIAL_RELATIONS {
@@ -153,10 +132,22 @@ export const EMPTY_FEATURE_COLLECTION: FeatureCollection = {
   features: [],
 };
 
-export enum DRAW_TYPE {
+export enum DRAW_MODE {
+  DRAW_SHAPES = 'DRAW_SHAPES',
+  DRAW_POINTS = 'DRAW_POINTS',
+  DRAW_FILTERS = 'DRAW_FILTERS',
+  NONE = 'NONE',
+}
+
+export enum DRAW_SHAPE {
   BOUNDS = 'BOUNDS',
   DISTANCE = 'DISTANCE',
   POLYGON = 'POLYGON',
+  POINT = 'POINT',
+  LINE = 'LINE',
+  SIMPLE_SELECT = 'SIMPLE_SELECT',
+  DELETE = 'DELETE',
+  WAIT = 'WAIT',
 }
 
 export const AGG_DELIMITER = '_of_';
@@ -175,6 +166,7 @@ export enum RENDER_AS {
   HEATMAP = 'heatmap',
   POINT = 'point',
   GRID = 'grid',
+  HEX = 'hex',
 }
 
 export enum GRID_RESOLUTION {
@@ -184,7 +176,6 @@ export enum GRID_RESOLUTION {
   SUPER_FINE = 'SUPER_FINE',
 }
 
-export const SUPER_FINE_ZOOM_DELTA = 7; // (2 ^ SUPER_FINE_ZOOM_DELTA) ^ 2 =  number of cells in a given tile
 export const GEOTILE_GRID_AGG_NAME = 'gridSplit';
 export const GEOCENTROID_AGG_NAME = 'gridCentroid';
 
@@ -206,6 +197,7 @@ export enum LAYER_STYLE_TYPE {
   VECTOR = 'VECTOR',
   HEATMAP = 'HEATMAP',
   TILE = 'TILE',
+  EMS_VECTOR_TILE = 'EMS_VECTOR_TILE',
 }
 
 export enum COLOR_MAP_TYPE {
@@ -229,6 +221,17 @@ export enum LABEL_BORDER_SIZES {
 }
 
 export const DEFAULT_ICON = 'marker';
+export const DEFAULT_CUSTOM_ICON_CUTOFF = 0.25;
+export const DEFAULT_CUSTOM_ICON_RADIUS = 0.25;
+export const CUSTOM_ICON_SIZE = 64;
+export const CUSTOM_ICON_PREFIX_SDF = '__kbn__custom_icon_sdf__';
+export const MAKI_ICON_SIZE = 16;
+export const HALF_MAKI_ICON_SIZE = MAKI_ICON_SIZE / 2;
+
+export enum ICON_SOURCE {
+  CUSTOM = 'CUSTOM',
+  MAKI = 'MAKI',
+}
 
 export enum VECTOR_STYLES {
   SYMBOLIZE_AS = 'symbolizeAs',
@@ -239,6 +242,7 @@ export enum VECTOR_STYLES {
   ICON_SIZE = 'iconSize',
   ICON_ORIENTATION = 'iconOrientation',
   LABEL_TEXT = 'labelText',
+  LABEL_ZOOM_RANGE = 'labelZoomRange',
   LABEL_COLOR = 'labelColor',
   LABEL_SIZE = 'labelSize',
   LABEL_BORDER_COLOR = 'labelBorderColor',
@@ -250,11 +254,6 @@ export enum SCALING_TYPES {
   CLUSTERS = 'CLUSTERS',
   TOP_HITS = 'TOP_HITS',
   MVT = 'MVT',
-}
-
-export enum FORMAT_TYPE {
-  GEOJSON = 'geojson',
-  TOPOJSON = 'topojson',
 }
 
 export enum MVT_FIELD_TYPE {
@@ -293,16 +292,37 @@ export enum DATA_MAPPING_FUNCTION {
   INTERPOLATE = 'INTERPOLATE',
   PERCENTILES = 'PERCENTILES',
 }
+
 export const DEFAULT_PERCENTILES = [50, 75, 90, 95, 99];
 
 export type RawValue = string | string[] | number | boolean | undefined | null;
 
 export type FieldFormatter = (value: RawValue) => string | number;
 
-export const INDEX_META_DATA_CREATED_BY = 'maps-drawing-data-ingest';
+export const MAPS_NEW_VECTOR_LAYER_META_CREATED_BY = 'maps-new-vector-layer';
 
 export const MAX_DRAWING_SIZE_BYTES = 10485760; // 10MB
 
+export const NO_EMS_LOCALE = 'none';
+export const AUTOSELECT_EMS_LOCALE = 'autoselect';
 export const emsWorldLayerId = 'world_countries';
-export const emsRegionLayerId = 'administrative_regions_lvl2';
-export const emsUsaZipLayerId = 'usa_zip_codes';
+
+export enum WIZARD_ID {
+  CHOROPLETH = 'choropleth',
+  GEO_FILE = 'uploadGeoFile',
+  NEW_VECTOR = 'newVectorLayer',
+  OBSERVABILITY = 'observabilityLayer',
+  SECURITY = 'securityLayer',
+  EMS_BOUNDARIES = 'emsBoundaries',
+  EMS_BASEMAP = 'emsBaseMap',
+  CLUSTERS = 'clusters',
+  HEATMAP = 'heatmap',
+  GEO_LINE = 'geoLine',
+  POINT_2_POINT = 'point2Point',
+  ES_DOCUMENT = 'esDocument',
+  ES_TOP_HITS = 'esTopHits',
+  KIBANA_BASEMAP = 'kibanaBasemap',
+  MVT_VECTOR = 'mvtVector',
+  WMS_LAYER = 'wmsLayer',
+  TMS_LAYER = 'tmsLayer',
+}

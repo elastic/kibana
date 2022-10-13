@@ -5,34 +5,37 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
-import { Logger, ElasticsearchClient } from 'kibana/server';
-import { getEsErrorMessage } from '../../../../alerting/server';
-import { DEFAULT_GROUPS } from '../index';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { Logger } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import { getEsErrorMessage } from '@kbn/alerting-plugin/server';
+import { DEFAULT_GROUPS } from '..';
 import { getDateRangeInfo } from './date_range_info';
 
-import { TimeSeriesQuery, TimeSeriesResult, TimeSeriesResultRow } from './time_series_types';
-export { TimeSeriesQuery, TimeSeriesResult } from './time_series_types';
+import {
+  TimeSeriesQuery,
+  TimeSeriesResult,
+  TimeSeriesResultRow,
+  TimeSeriesCondition,
+} from './time_series_types';
+export type { TimeSeriesQuery, TimeSeriesResult } from './time_series_types';
+
+export const TIME_SERIES_BUCKET_SELECTOR_PATH_NAME = 'compareValue';
+export const TIME_SERIES_BUCKET_SELECTOR_FIELD = `params.${TIME_SERIES_BUCKET_SELECTOR_PATH_NAME}`;
 
 export interface TimeSeriesQueryParameters {
   logger: Logger;
   esClient: ElasticsearchClient;
   query: TimeSeriesQuery;
+  condition?: TimeSeriesCondition;
 }
 
 export async function timeSeriesQuery(
   params: TimeSeriesQueryParameters
 ): Promise<TimeSeriesResult> {
-  const { logger, esClient, query: queryParams } = params;
-  const {
-    index,
-    timeWindowSize,
-    timeWindowUnit,
-    interval,
-    timeField,
-    dateStart,
-    dateEnd,
-  } = queryParams;
+  const { logger, esClient, query: queryParams, condition: conditionParams } = params;
+  const { index, timeWindowSize, timeWindowUnit, interval, timeField, dateStart, dateEnd } =
+    queryParams;
 
   const window = `${timeWindowSize}${timeWindowUnit}`;
   const dateRangeInfo = getDateRangeInfo({ dateStart, dateEnd, window, interval });
@@ -68,6 +71,22 @@ export async function timeSeriesQuery(
 
   const isCountAgg = aggType === 'count';
   const isGroupAgg = !!termField;
+  const includeConditionInQuery = !!conditionParams;
+
+  // Cap the maximum number of terms returned to the resultLimit if defined
+  // Use resultLimit + 1 because we're using the bucket selector aggregation
+  // to apply the threshold condition to the ES query. We don't seem to be
+  // able to get the true cardinality from the bucket selector (i.e., get
+  // the number of buckets that matched the selector condition without actually
+  // retrieving the bucket data). By using resultLimit + 1, we can count the number
+  // of buckets returned and if the value is greater than resultLimit, we know that
+  // there is additional alert data that we're not returning.
+  let terms = termSize || DEFAULT_GROUPS;
+  terms = includeConditionInQuery
+    ? terms > conditionParams.resultLimit
+      ? conditionParams.resultLimit + 1
+      : terms
+    : terms;
 
   let aggParent = esQuery.body;
 
@@ -77,9 +96,18 @@ export async function timeSeriesQuery(
       groupAgg: {
         terms: {
           field: termField,
-          size: termSize || DEFAULT_GROUPS,
+          size: terms,
         },
       },
+      ...(includeConditionInQuery
+        ? {
+            groupAggCount: {
+              stats_bucket: {
+                buckets_path: 'groupAgg._count',
+              },
+            },
+          }
+        : {}),
     };
 
     // if not count add an order
@@ -88,6 +116,17 @@ export async function timeSeriesQuery(
       aggParent.aggs.groupAgg.terms.order = {
         sortValueAgg: sortOrder,
       };
+    } else if (includeConditionInQuery) {
+      aggParent.aggs.groupAgg.aggs = {
+        conditionSelector: {
+          bucket_selector: {
+            buckets_path: {
+              [TIME_SERIES_BUCKET_SELECTOR_PATH_NAME]: '_count',
+            },
+            script: conditionParams.conditionScript,
+          },
+        },
+      };
     }
 
     aggParent = aggParent.aggs.groupAgg;
@@ -95,6 +134,7 @@ export async function timeSeriesQuery(
 
   // next, add the time window aggregation
   aggParent.aggs = {
+    ...aggParent.aggs,
     dateAgg: {
       date_range: {
         field: timeField,
@@ -111,6 +151,17 @@ export async function timeSeriesQuery(
         field: aggField,
       },
     };
+
+    if (isGroupAgg && includeConditionInQuery) {
+      aggParent.aggs.conditionSelector = {
+        bucket_selector: {
+          buckets_path: {
+            [TIME_SERIES_BUCKET_SELECTOR_PATH_NAME]: 'sortValueAgg',
+          },
+          script: conditionParams.conditionScript,
+        },
+      };
+    }
   }
 
   aggParent = aggParent.aggs.dateAgg;
@@ -135,23 +186,39 @@ export async function timeSeriesQuery(
 
   // console.log('time_series_query.ts request\n', JSON.stringify(esQuery, null, 4));
   try {
-    esResult = (await esClient.search(esQuery, { ignore: [404] })).body;
+    esResult = (await esClient.search(esQuery, { ignore: [404], meta: true })).body;
   } catch (err) {
     // console.log('time_series_query.ts error\n', JSON.stringify(err, null, 4));
     logger.warn(`${logPrefix} error: ${getEsErrorMessage(err)}`);
-    return { results: [] };
+    return { results: [], truncated: false };
   }
 
   // console.log('time_series_query.ts response\n', JSON.stringify(esResult, null, 4));
   logger.debug(`${logPrefix} result: ${JSON.stringify(esResult)}`);
-  return getResultFromEs(isCountAgg, isGroupAgg, esResult);
+  return getResultFromEs({
+    isCountAgg,
+    isGroupAgg,
+    isConditionInQuery: includeConditionInQuery,
+    esResult,
+    resultLimit: conditionParams?.resultLimit,
+  });
 }
 
-export function getResultFromEs(
-  isCountAgg: boolean,
-  isGroupAgg: boolean,
-  esResult: estypes.SearchResponse<unknown>
-): TimeSeriesResult {
+interface GetResultFromEsParams {
+  isCountAgg: boolean;
+  isGroupAgg: boolean;
+  isConditionInQuery: boolean;
+  esResult: estypes.SearchResponse<unknown>;
+  resultLimit?: number;
+}
+
+export function getResultFromEs({
+  isCountAgg,
+  isGroupAgg,
+  isConditionInQuery,
+  esResult,
+  resultLimit,
+}: GetResultFromEsParams): TimeSeriesResult {
   const aggregations = esResult?.aggregations || {};
 
   // add a fake 'all documents' group aggregation, if a group aggregation wasn't used
@@ -165,13 +232,18 @@ export function getResultFromEs(
     delete aggregations.dateAgg;
   }
 
-  // @ts-expect-error @elastic/elasticsearch Aggregate does not specify buckets
+  // @ts-expect-error specify aggregations type explicitly
   const groupBuckets = aggregations.groupAgg?.buckets || [];
+  // @ts-expect-error specify aggregations type explicitly
+  const numGroupsTotal = aggregations.groupAggCount?.count ?? 0;
   const result: TimeSeriesResult = {
     results: [],
+    truncated: isConditionInQuery && resultLimit ? numGroupsTotal > resultLimit : false,
   };
 
   for (const groupBucket of groupBuckets) {
+    if (resultLimit && result.results.length === resultLimit) break;
+
     const groupName: string = `${groupBucket?.key}`;
     const dateBuckets = groupBucket?.dateAgg?.buckets || [];
     const groupResult: TimeSeriesResultRow = {

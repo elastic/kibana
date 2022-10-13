@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import SemVer from 'semver/classes/semver';
 
 import { NormalizedField, Field as FieldType } from '../../../../types';
 import { getFieldConfig } from '../../../../lib';
@@ -36,9 +37,10 @@ const getDefaultToggleValue = (param: string, field: FieldType) => {
 
 interface Props {
   field: NormalizedField;
+  kibanaVersion: SemVer;
 }
 
-export const IpType = ({ field }: Props) => {
+export const IpType = ({ field, kibanaVersion }: Props) => {
   return (
     <>
       <BasicParametersSection>
@@ -54,7 +56,10 @@ export const IpType = ({ field }: Props) => {
 
         <StoreParameter />
 
-        <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
+        {/* The "boost" parameter is deprecated since 8.x */}
+        {kibanaVersion.major < 8 && (
+          <BoostParameter defaultToggleValue={getDefaultToggleValue('boost', field.source)} />
+        )}
       </AdvancedParametersSection>
     </>
   );

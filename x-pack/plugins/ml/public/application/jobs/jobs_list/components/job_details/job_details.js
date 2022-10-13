@@ -7,26 +7,32 @@
 
 import PropTypes from 'prop-types';
 import React, { Component, Fragment } from 'react';
-
-import { EuiTabbedContent, EuiLoadingSpinner } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import { EuiButtonEmpty, EuiTabbedContent, EuiLoadingSpinner } from '@elastic/eui';
 
 import { extractJobDetails } from './extract_job_details';
 import { JsonPane } from './json_tab';
 import { DatafeedPreviewPane } from './datafeed_preview_tab';
 import { AnnotationsTable } from '../../../../components/annotations/annotations_table';
+import { DatafeedChartFlyout } from '../datafeed_chart_flyout';
 import { AnnotationFlyout } from '../../../../components/annotations/annotation_flyout';
+import { RevertModelSnapshotFlyout } from '../../../../components/model_snapshots/revert_model_snapshot_flyout';
 import { ModelSnapshotTable } from '../../../../components/model_snapshots';
 import { ForecastsTable } from './forecasts_table';
 import { JobDetailsPane } from './job_details_pane';
 import { JobMessagesPane } from './job_messages_pane';
-import { i18n } from '@kbn/i18n';
-import { withKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
 
 export class JobDetailsUI extends Component {
   constructor(props) {
     super(props);
 
-    this.state = {};
+    this.state = {
+      datafeedChartFlyoutVisible: false,
+      modelSnapshot: null,
+      revertSnapshotFlyoutVisible: false,
+    };
     if (this.props.addYourself) {
       this.props.addYourself(props.jobId, (j) => this.updateJob(j));
     }
@@ -41,7 +47,7 @@ export class JobDetailsUI extends Component {
   }
 
   render() {
-    const { job } = this.state;
+    const job = this.state.job ?? this.props.job;
     const {
       services: {
         http: { basePath },
@@ -55,7 +61,7 @@ export class JobDetailsUI extends Component {
         </div>
       );
     } else {
-      const { showFullDetails, refreshJobList } = this.props;
+      const { refreshJobList, showClearButton } = this.props;
 
       const {
         general,
@@ -67,6 +73,8 @@ export class JobDetailsUI extends Component {
         analysisConfig,
         analysisLimits,
         dataDescription,
+        customSettings,
+        jobTags,
         datafeed,
         counts,
         modelSizeStats,
@@ -74,6 +82,23 @@ export class JobDetailsUI extends Component {
         datafeedTimingStats,
         alertRules,
       } = extractJobDetails(job, basePath, refreshJobList);
+
+      datafeed.titleAction = (
+        <EuiButtonEmpty
+          onClick={() =>
+            this.setState({
+              datafeedChartFlyoutVisible: true,
+            })
+          }
+          iconType="visAreaStacked"
+          size="s"
+        >
+          <FormattedMessage
+            id="xpack.ml.jobDetails.tabs.datafeed.viewCountsButtonText"
+            defaultMessage="View datafeed counts"
+          />
+        </EuiButtonEmpty>
+      );
 
       const tabs = [
         {
@@ -85,7 +110,7 @@ export class JobDetailsUI extends Component {
           content: (
             <JobDetailsPane
               data-test-subj="mlJobDetails-job-settings"
-              sections={[general, customUrl, node, calendars, alertRules]}
+              sections={[general, customSettings, customUrl, jobTags, node, calendars, alertRules]}
             />
           ),
           time: job.open_time,
@@ -101,6 +126,53 @@ export class JobDetailsUI extends Component {
               data-test-subj="mlJobDetails-job-config"
               sections={[detectors, influencers, analysisConfig, analysisLimits, dataDescription]}
             />
+          ),
+        },
+        {
+          id: 'datafeed',
+          'data-test-subj': 'mlJobListTab-datafeed',
+          name: i18n.translate('xpack.ml.jobsList.jobDetails.tabs.datafeedLabel', {
+            defaultMessage: 'Datafeed',
+          }),
+          content: (
+            <>
+              <JobDetailsPane
+                data-test-subj="mlJobDetails-datafeed"
+                sections={[datafeed, datafeedTimingStats]}
+              />
+              {this.props.jobId && this.state.datafeedChartFlyoutVisible ? (
+                <DatafeedChartFlyout
+                  onClose={() => {
+                    this.setState({
+                      datafeedChartFlyoutVisible: false,
+                    });
+                  }}
+                  onModelSnapshotAnnotationClick={(modelSnapshot) => {
+                    this.setState({
+                      modelSnapshot,
+                      revertSnapshotFlyoutVisible: true,
+                      datafeedChartFlyoutVisible: false,
+                    });
+                  }}
+                  end={job.data_counts.latest_bucket_timestamp}
+                  jobId={this.props.jobId}
+                />
+              ) : null}
+              {this.state.revertSnapshotFlyoutVisible === true &&
+              this.state.modelSnapshot !== null ? (
+                <RevertModelSnapshotFlyout
+                  snapshot={this.state.modelSnapshot}
+                  snapshots={[this.state.modelSnapshot]}
+                  job={job}
+                  closeFlyout={() => {
+                    this.setState({
+                      revertSnapshotFlyoutVisible: false,
+                    });
+                  }}
+                  refresh={refreshJobList}
+                />
+              ) : null}
+            </>
           ),
         },
         {
@@ -130,26 +202,17 @@ export class JobDetailsUI extends Component {
           name: i18n.translate('xpack.ml.jobsList.jobDetails.tabs.jobMessagesLabel', {
             defaultMessage: 'Job messages',
           }),
-          content: <JobMessagesPane jobId={job.job_id} />,
+          content: (
+            <JobMessagesPane
+              jobId={job.job_id}
+              refreshJobList={refreshJobList}
+              showClearButton={showClearButton}
+            />
+          ),
         },
       ];
 
-      if (showFullDetails && datafeed.items.length) {
-        // Datafeed should be at index 2 in tabs array for full details
-        tabs.splice(2, 0, {
-          id: 'datafeed',
-          'data-test-subj': 'mlJobListTab-datafeed',
-          name: i18n.translate('xpack.ml.jobsList.jobDetails.tabs.datafeedLabel', {
-            defaultMessage: 'Datafeed',
-          }),
-          content: (
-            <JobDetailsPane
-              data-test-subj="mlJobDetails-datafeed"
-              sections={[datafeed, datafeedTimingStats]}
-            />
-          ),
-        });
-
+      if (datafeed.items.length) {
         tabs.push(
           {
             id: 'datafeed-preview',
@@ -170,34 +233,32 @@ export class JobDetailsUI extends Component {
         );
       }
 
-      if (showFullDetails) {
-        tabs.push({
-          id: 'annotations',
-          'data-test-subj': 'mlJobListTab-annotations',
-          name: i18n.translate('xpack.ml.jobsList.jobDetails.tabs.annotationsLabel', {
-            defaultMessage: 'Annotations',
-          }),
-          content: (
-            <Fragment>
-              <AnnotationsTable jobs={[job]} drillDown={true} />
-              <AnnotationFlyout />
-            </Fragment>
-          ),
-        });
+      tabs.push({
+        id: 'annotations',
+        'data-test-subj': 'mlJobListTab-annotations',
+        name: i18n.translate('xpack.ml.jobsList.jobDetails.tabs.annotationsLabel', {
+          defaultMessage: 'Annotations',
+        }),
+        content: (
+          <Fragment>
+            <AnnotationsTable jobs={[job]} refreshJobList={refreshJobList} />
+            <AnnotationFlyout />
+          </Fragment>
+        ),
+      });
 
-        tabs.push({
-          id: 'modelSnapshots',
-          'data-test-subj': 'mlJobListTab-modelSnapshots',
-          name: i18n.translate('xpack.ml.jobsList.jobDetails.tabs.modelSnapshotsLabel', {
-            defaultMessage: 'Model snapshots',
-          }),
-          content: (
-            <Fragment>
-              <ModelSnapshotTable job={job} refreshJobList={refreshJobList} />
-            </Fragment>
-          ),
-        });
-      }
+      tabs.push({
+        id: 'modelSnapshots',
+        'data-test-subj': 'mlJobListTab-modelSnapshots',
+        name: i18n.translate('xpack.ml.jobsList.jobDetails.tabs.modelSnapshotsLabel', {
+          defaultMessage: 'Model snapshots',
+        }),
+        content: (
+          <Fragment>
+            <ModelSnapshotTable job={job} refreshJobList={refreshJobList} />
+          </Fragment>
+        ),
+      });
 
       return (
         <div className="tab-contents" data-test-subj={`mlJobListRowDetails details-${job.job_id}`}>
@@ -212,7 +273,6 @@ JobDetailsUI.propTypes = {
   job: PropTypes.object,
   addYourself: PropTypes.func.isRequired,
   removeYourself: PropTypes.func.isRequired,
-  showFullDetails: PropTypes.bool,
   refreshJobList: PropTypes.func,
 };
 

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+export type { Authorization } from './authorization_provider';
 export {
   AuthorizationProvider,
   AuthorizationContext,
@@ -16,4 +17,6 @@ export { WithPrivileges } from './with_privileges';
 
 export { NotAuthorizedSection } from './not_authorized_section';
 
-export { Error, SectionError } from './section_error';
+export { SectionError } from './section_error';
+
+export { PageError } from './page_error';

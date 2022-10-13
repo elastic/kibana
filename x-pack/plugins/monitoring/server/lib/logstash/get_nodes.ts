@@ -6,16 +6,13 @@
  */
 
 import moment from 'moment';
-// @ts-ignore
-import { checkParam } from '../error_missing_required';
-// @ts-ignore
 import { createQuery } from '../create_query';
-// @ts-ignore
 import { calculateAvailability } from '../calculate_availability';
-// @ts-ignore
 import { LogstashMetric } from '../metrics';
 import { LegacyRequest } from '../../types';
 import { ElasticsearchResponse } from '../../../common/types/es';
+import { getIndexPatterns, getLogstashDataset } from '../cluster/get_index_patterns';
+import { Globals } from '../../static_globals';
 
 interface Logstash {
   jvm?: {
@@ -68,28 +65,38 @@ interface Logstash {
  *  - events
  *  - config reloads
  */
-export async function getNodes(
-  req: LegacyRequest,
-  lsIndexPattern: string,
-  { clusterUuid }: { clusterUuid: string }
-) {
-  checkParam(lsIndexPattern, 'lsIndexPattern in getNodes');
+export async function getNodes(req: LegacyRequest, { clusterUuid }: { clusterUuid: string }) {
+  const dataset = 'node_stats';
+  const type = 'logstash_stats';
+  const moduleType = 'logstash';
 
-  const config = req.server.config();
+  const indexPatterns = getIndexPatterns({
+    config: Globals.app.config,
+    ccs: req.payload.ccs,
+    moduleType,
+    dataset,
+  });
+
+  const config = req.server.config;
   const start = moment.utc(req.payload.timeRange.min).valueOf();
   const end = moment.utc(req.payload.timeRange.max).valueOf();
 
+  const filters = [{ exists: { field: 'logstash_stats.logstash.uuid' } }];
+
   const params = {
-    index: lsIndexPattern,
-    size: config.get('monitoring.ui.max_bucket_size'), // FIXME
-    ignoreUnavailable: true,
+    index: indexPatterns,
+    size: config.ui.max_bucket_size,
+    ignore_unavailable: true,
     body: {
       query: createQuery({
+        type,
+        dsDataset: getLogstashDataset(dataset),
+        metricset: dataset,
+        filters,
         start,
         end,
         clusterUuid,
         metric: LogstashMetric.getMetricFields(),
-        types: ['stats', 'logstash_stats'],
       }),
       collapse: {
         field: 'logstash_stats.logstash.uuid',

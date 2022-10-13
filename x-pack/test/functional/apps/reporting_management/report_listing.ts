@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { REPORT_TABLE_ID } from '@kbn/reporting-plugin/common/constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -13,47 +14,41 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const log = getService('log');
   const retry = getService('retry');
   const security = getService('security');
-
+  const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
 
   describe('Listing of Reports', function () {
     before(async () => {
-      await security.role.create('test_reporting_user', {
-        elasticsearch: { cluster: [], indices: [], run_as: [] },
-        kibana: [
-          {
-            spaces: ['*'],
-            base: [],
-            feature: { canvas: ['minimal_read', 'generate_report'] },
-          },
-        ],
-      });
-      await security.testUser.setRoles(['kibana_admin', 'test_reporting_user']);
-      await esArchiver.load('empty_kibana');
+      await security.testUser.setRoles([
+        'kibana_admin', // to access stack management
+        'reporting_user', // NOTE: the built-in role granting full reporting access is deprecated. See xpack.reporting.roles.enabled
+      ]);
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     beforeEach(async () => {
       // to reset the data after deletion testing
-      await esArchiver.load('reporting/archived_reports');
+      await esArchiver.load('x-pack/test/functional/es_archives/reporting/archived_reports');
       await pageObjects.common.navigateToApp('reporting');
-      await testSubjects.existOrFail('reportJobListing', { timeout: 200000 });
+      await testSubjects.existOrFail(REPORT_TABLE_ID, { timeout: 200000 });
     });
 
     after(async () => {
-      await esArchiver.unload('empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
       await security.testUser.restoreDefaults();
     });
 
     afterEach(async () => {
-      await esArchiver.unload('reporting/archived_reports');
+      await esArchiver.unload('x-pack/test/functional/es_archives/reporting/archived_reports');
     });
 
     it('Confirm single report deletion works', async () => {
       log.debug('Checking for reports.');
       await retry.try(async () => {
-        await testSubjects.click('checkboxSelectRow-k9a9xlwl0gpe1457b10rraq3');
+        await testSubjects.click('checkboxSelectRow-krazcyw4156m0763b503j7f9');
       });
+
       const deleteButton = await testSubjects.find('deleteReportButton');
       await retry.waitFor('delete button to become enabled', async () => {
         return await deleteButton.isEnabled();
@@ -62,7 +57,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.exists('confirmModalBodyText');
       await testSubjects.click('confirmModalConfirmButton');
       await retry.try(async () => {
-        await testSubjects.waitForDeleted('checkboxSelectRow-k9a9xlwl0gpe1457b10rraq3');
+        await testSubjects.waitForDeleted('checkboxSelectRow-krazcyw4156m0763b503j7f9');
       });
     });
 
@@ -71,16 +66,81 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const previousButton = await testSubjects.find('pagination-button-previous');
       expect(await previousButton.getAttribute('disabled')).to.be('true');
 
-      await testSubjects.find('checkboxSelectRow-k9a9xlwl0gpe1457b10rraq3'); // find first row of page 1
+      await testSubjects.find('checkboxSelectRow-krazcyw4156m0763b503j7f9'); // find first row of page 1
 
       await testSubjects.click('pagination-button-1'); // click page 2
-      await testSubjects.find('checkboxSelectRow-k9a9uc4x0gpe1457b16wthc8'); // wait for first row of page 2
-
-      await testSubjects.click('pagination-button-2'); // click page 3
-      await testSubjects.find('checkboxSelectRow-k9a9p1840gpe1457b1ghfxw5'); // wait for first row of page 3
+      await testSubjects.find('checkboxSelectRow-k9a9xj3i0gpe1457b16qaduc'); // wait for first row of page 2
 
       // previous CAN be clicked
       expect(await previousButton.getAttribute('disabled')).to.be(null);
+    });
+
+    it('Displays types of report jobs', async () => {
+      const list = await pageObjects.reporting.getManagementList();
+      expectSnapshot(list).toMatchInline(`
+        Array [
+          Object {
+            "actions": "",
+            "createdAt": "2021-07-19 @ 06:47 PM",
+            "report": "Discover search [2021-07-19T11:47:35.995-07:00]",
+            "status": "Done",
+          },
+          Object {
+            "actions": "",
+            "createdAt": "2021-07-19 @ 06:46 PM",
+            "report": "Discover search [2021-07-19T11:46:00.132-07:00]",
+            "status": "Done, warnings detected",
+          },
+          Object {
+            "actions": "",
+            "createdAt": "2021-07-19 @ 06:44 PM",
+            "report": "Discover search [2021-07-19T11:44:48.670-07:00]",
+            "status": "Done, warnings detected",
+          },
+          Object {
+            "actions": "",
+            "createdAt": "2021-07-19 @ 06:41 PM",
+            "report": "[Flights] Global Flight Dashboard",
+            "status": "Pending",
+          },
+          Object {
+            "actions": "",
+            "createdAt": "2021-07-19 @ 06:41 PM",
+            "report": "[Flights] Global Flight Dashboard",
+            "status": "Failed",
+          },
+          Object {
+            "actions": "",
+            "createdAt": "2021-07-19 @ 06:41 PM",
+            "report": "[Flights] Global Flight Dashboard",
+            "status": "Done, warnings detected",
+          },
+          Object {
+            "actions": "",
+            "createdAt": "2021-07-19 @ 06:38 PM",
+            "report": "[Flights] Global Flight Dashboard",
+            "status": "Done, warnings detected",
+          },
+          Object {
+            "actions": "",
+            "createdAt": "2021-07-19 @ 06:38 PM",
+            "report": "[Flights] Global Flight Dashboard",
+            "status": "Done",
+          },
+          Object {
+            "actions": "",
+            "createdAt": "2021-07-19 @ 06:38 PM",
+            "report": "[Flights] Global Flight Dashboard",
+            "status": "Done",
+          },
+          Object {
+            "actions": "",
+            "createdAt": "2021-07-19 @ 02:41 PM",
+            "report": "[Flights] Global Flight Dashboard",
+            "status": "Failed",
+          },
+        ]
+      `);
     });
   });
 };

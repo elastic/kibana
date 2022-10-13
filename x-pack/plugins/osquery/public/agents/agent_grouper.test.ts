@@ -6,7 +6,8 @@
  */
 
 import { AgentGrouper } from './agent_grouper';
-import { AGENT_GROUP_KEY, Group, GroupedAgent, GroupOptionValue } from './types';
+import type { Group, GroupedAgent, GroupOptionValue } from './types';
+import { AGENT_GROUP_KEY } from './types';
 import uuid from 'uuid';
 import { ALL_AGENTS_LABEL } from './translations';
 
@@ -40,6 +41,7 @@ export function genAgent(policyId: string, hostname: string, id: string): Groupe
     },
   };
 }
+
 export const groupData: GroupData = {
   [AGENT_GROUP_KEY.Platform]: new Array(3).fill('test platform ').map((el, i) => genGroup(el + i)),
   [AGENT_GROUP_KEY.Policy]: new Array(3).fill('test policy ').map((el, i) => genGroup(el + i)),
@@ -109,6 +111,7 @@ describe('AgentGrouper', () => {
         });
       };
     }
+
     it('should generate policy options', genGroupTest(AGENT_GROUP_KEY.Policy, 'policy'));
     it('should generate platform options', genGroupTest(AGENT_GROUP_KEY.Platform, 'platform'));
   });

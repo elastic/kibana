@@ -10,25 +10,29 @@ import expect from '@kbn/expect';
 import { Spaces } from '../../../../scenarios';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { ESTestIndexTool, ES_TEST_INDEX_NAME, getUrlPrefix } from '../../../../../common/lib';
-import { createEsDocuments } from './create_test_data';
+import { createEsDocumentsWithGroups } from '../lib/create_test_data';
+import { createDataStream, deleteDataStream } from '../lib/create_test_data';
 
-const API_URI = 'api/triggers_actions_ui/data/_indices';
+const API_URI = 'internal/triggers_actions_ui/data/_indices';
 
 // eslint-disable-next-line import/no-default-export
 export default function indicesEndpointTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const retry = getService('retry');
-  const es = getService('legacyEs');
+  const es = getService('es');
   const esTestIndexTool = new ESTestIndexTool(es, retry);
+  const ES_TEST_DATA_STREAM_NAME = 'test-data-stream';
 
   describe('indices endpoint', () => {
     before(async () => {
       await esTestIndexTool.destroy();
       await esTestIndexTool.setup();
-      await createEsDocuments(es, esTestIndexTool);
+      await createEsDocumentsWithGroups({ es, esTestIndexTool });
+      await createDataStream(es, ES_TEST_DATA_STREAM_NAME);
     });
 
     after(async () => {
+      await deleteDataStream(es, ES_TEST_DATA_STREAM_NAME);
       await esTestIndexTool.destroy();
     });
 
@@ -111,6 +115,12 @@ export default function indicesEndpointTests({ getService }: FtrProviderContext)
     it('should handle no_such_remote_cluster', async () => {
       const result = await runQueryExpect({ pattern: '*a:b,c:d*' }, 200);
       expect(result.indices.length).to.be(0);
+    });
+
+    it('should handle data streams', async () => {
+      const result = await runQueryExpect({ pattern: ES_TEST_DATA_STREAM_NAME }, 200);
+      expect(result.indices).to.be.an('array');
+      expect(result.indices.includes(ES_TEST_DATA_STREAM_NAME)).to.be(true);
     });
   });
 

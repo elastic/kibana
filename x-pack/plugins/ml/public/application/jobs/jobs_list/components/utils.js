@@ -13,13 +13,17 @@ import {
   getToastNotificationService,
   toastNotificationServiceProvider,
 } from '../../../services/toast_notification_service';
-import { getToastNotifications } from '../../../util/dependency_cache';
+import { getApplication, getToastNotifications } from '../../../util/dependency_cache';
 import { ml } from '../../../services/ml_api_service';
 import { stringMatch } from '../../../util/string_utils';
+import { getDataViewNames } from '../../../util/index_utils';
 import { JOB_STATE, DATAFEED_STATE } from '../../../../../common/constants/states';
+import { JOB_ACTION } from '../../../../../common/constants/job_actions';
 import { parseInterval } from '../../../../../common/util/parse_interval';
 import { mlCalendarService } from '../../../services/calendar_service';
-import { isPopulatedObject } from '../../../../../common/util/object_utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { ML_PAGES } from '../../../../../common/constants/locator';
+import { PLUGIN_ID } from '../../../../../common/constants/app';
 
 export function loadFullJob(jobId) {
   return new Promise((resolve, reject) => {
@@ -73,6 +77,12 @@ export function isClosable(jobs) {
       j.datafeedState === DATAFEED_STATE.STOPPED &&
       j.jobState !== JOB_STATE.CLOSED &&
       j.jobState !== JOB_STATE.CLOSING
+  );
+}
+
+export function isResettable(jobs) {
+  return jobs.some(
+    (j) => j.jobState === JOB_STATE.CLOSED || j.blocked?.reason === JOB_ACTION.RESET
   );
 }
 
@@ -165,6 +175,13 @@ function showResults(resp, action) {
     actionTextPT = i18n.translate('xpack.ml.jobsList.closedActionStatusText', {
       defaultMessage: 'closed',
     });
+  } else if (action === JOB_ACTION.RESET) {
+    actionText = i18n.translate('xpack.ml.jobsList.resetActionStatusText', {
+      defaultMessage: 'reset',
+    });
+    actionTextPT = i18n.translate('xpack.ml.jobsList.resetActionStatusText', {
+      defaultMessage: 'reset',
+    });
   }
 
   const toastNotifications = getToastNotifications();
@@ -203,6 +220,26 @@ export async function cloneJob(jobId) {
       loadJobForCloning(jobId),
       loadFullJob(jobId, false),
     ]);
+
+    const dataViewNames = await getDataViewNames();
+    const dataViewTitle = datafeed.indices.join(',');
+    const jobIndicesAvailable = dataViewNames.includes(dataViewTitle);
+
+    if (jobIndicesAvailable === false) {
+      const warningText = i18n.translate(
+        'xpack.ml.jobsList.managementActions.noSourceDataViewForClone',
+        {
+          defaultMessage:
+            'Unable to clone the anomaly detection job {jobId}. No data view exists for index {dataViewTitle}.',
+          values: { jobId, dataViewTitle },
+        }
+      );
+      getToastNotificationService().displayDangerToast(warningText, {
+        'data-test-subj': 'mlCloneJobNoDataViewExistsWarningToast',
+      });
+      return;
+    }
+
     if (cloneableJob !== undefined && originalJob?.custom_settings?.created_by !== undefined) {
       // if the job is from a wizards, i.e. contains a created_by property
       // use tempJobCloningObjects to temporarily store the job
@@ -252,7 +289,7 @@ export async function cloneJob(jobId) {
       );
     }
 
-    window.location.href = '#/jobs/new_job';
+    getApplication().navigateToApp(PLUGIN_ID, { path: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB });
   } catch (error) {
     getToastNotificationService().displayErrorToast(
       error,
@@ -277,6 +314,24 @@ export function closeJobs(jobs, finish = () => {}) {
         error,
         i18n.translate('xpack.ml.jobsList.closeJobErrorMessage', {
           defaultMessage: 'Jobs failed to close',
+        })
+      );
+      finish();
+    });
+}
+
+export function resetJobs(jobIds, finish = () => {}) {
+  mlJobService
+    .resetJobs(jobIds)
+    .then((resp) => {
+      showResults(resp, JOB_ACTION.RESET);
+      finish();
+    })
+    .catch((error) => {
+      getToastNotificationService().displayErrorToast(
+        error,
+        i18n.translate('xpack.ml.jobsList.resetJobErrorMessage', {
+          defaultMessage: 'Jobs failed to reset',
         })
       );
       finish();
@@ -347,12 +402,18 @@ export function filterJobs(jobs, clauses) {
         // if it's an array of job ids
         if (c.field === 'id') {
           js = jobs.filter((job) => c.value.indexOf(jobProperty(job, c.field)) >= 0);
-        } else {
+        } else if (c.field === 'groups') {
           // the groups value is an array of group ids
           js = jobs.filter((job) => jobProperty(job, c.field).some((g) => c.value.indexOf(g) >= 0));
+        } else if (c.field === 'job_tags') {
+          js = jobTagFilter(jobs, c.value);
         }
       } else {
-        js = jobs.filter((job) => jobProperty(job, c.field) === c.value);
+        if (c.field === 'job_tags') {
+          js = js = jobTagFilter(jobs, [c.value]);
+        } else {
+          js = jobs.filter((job) => jobProperty(job, c.field) === c.value);
+        }
       }
     }
 
@@ -369,6 +430,25 @@ export function filterJobs(jobs, clauses) {
   return filteredJobs;
 }
 
+function jobProperty(job, prop) {
+  const propMap = {
+    job_state: 'jobState',
+    datafeed_state: 'datafeedState',
+    groups: 'groups',
+    id: 'id',
+    job_tags: 'jobTags',
+  };
+  return job[propMap[prop]];
+}
+
+function jobTagFilter(jobs, value) {
+  return jobs.filter((job) => {
+    const tags = jobProperty(job, 'job_tags');
+    return Object.entries(tags)
+      .map((t) => t.join(':'))
+      .find((t) => value.some((t1) => t1 === t));
+  });
+}
 // check to see if a job has been stored in mlJobService.tempJobCloningObjects
 // if it has, return an object with the minimum properties needed for the
 // start datafeed modal.
@@ -389,14 +469,4 @@ export function checkForAutoStartDatafeed() {
       datafeedId,
     };
   }
-}
-
-function jobProperty(job, prop) {
-  const propMap = {
-    job_state: 'jobState',
-    datafeed_state: 'datafeedState',
-    groups: 'groups',
-    id: 'id',
-  };
-  return job[propMap[prop]];
 }

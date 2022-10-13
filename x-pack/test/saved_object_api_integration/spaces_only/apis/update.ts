@@ -15,7 +15,7 @@ const {
   SPACE_1: { spaceId: SPACE_1_ID },
   SPACE_2: { spaceId: SPACE_2_ID },
 } = SPACES;
-const { fail404 } = testCaseFailures;
+const { fail404, fail409 } = testCaseFailures;
 
 const createTestCases = (spaceId: string) => [
   // for each outcome, if failure !== undefined then we expect to receive
@@ -37,6 +37,8 @@ const createTestCases = (spaceId: string) => [
   { ...CASES.MULTI_NAMESPACE_ISOLATED_ONLY_SPACE_1, ...fail404(spaceId !== SPACE_1_ID) },
   CASES.NAMESPACE_AGNOSTIC,
   { ...CASES.HIDDEN, ...fail404() },
+  { ...CASES.ALIAS_CONFLICT_OBJ, upsert: false, ...fail404() },
+  { ...CASES.ALIAS_CONFLICT_OBJ, upsert: true, ...fail409(spaceId !== SPACE_2_ID) }, // upsert fails if this is the default space or space_1, because an alias exists in those spaces
   { ...CASES.DOES_NOT_EXIST, ...fail404() },
 ];
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreStart } from 'src/core/public';
+import { CoreStart } from '@kbn/core/public';
 import { TagsCapabilities } from '../../../common';
 import { ITagInternalClient, ITagAssignmentService, ITagsCache } from '../../services';
 import { TagBulkAction } from '../types';
@@ -25,7 +25,7 @@ interface GetBulkActionOptions {
 }
 
 export const getBulkActions = ({
-  core: { notifications, overlays },
+  core: { notifications, overlays, theme },
   capabilities,
   tagClient,
   tagCache,
@@ -41,6 +41,7 @@ export const getBulkActions = ({
       getBulkAssignAction({
         notifications,
         overlays,
+        theme,
         tagCache,
         assignmentService,
         assignableTypes,

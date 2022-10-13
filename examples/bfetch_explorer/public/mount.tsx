@@ -8,8 +8,8 @@
 
 import * as React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { CoreSetup, CoreStart, AppMountParameters } from 'kibana/public';
-import { KibanaContextProvider } from '../../../src/plugins/kibana_react/public';
+import { CoreSetup, CoreStart, AppMountParameters } from '@kbn/core/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { BfetchExplorerStartPlugins, ExplorerService } from './plugin';
 import { App } from './containers/app';
 
@@ -20,17 +20,16 @@ export interface BfetchDeps {
   explorer: ExplorerService;
 }
 
-export const mount = (
-  coreSetup: CoreSetup<BfetchExplorerStartPlugins>,
-  explorer: ExplorerService
-) => async ({ appBasePath, element }: AppMountParameters) => {
-  const [core, plugins] = await coreSetup.getStartServices();
-  const deps: BfetchDeps = { appBasePath, core, plugins, explorer };
-  const reactElement = (
-    <KibanaContextProvider services={deps}>
-      <App />
-    </KibanaContextProvider>
-  );
-  render(reactElement, element);
-  return () => unmountComponentAtNode(element);
-};
+export const mount =
+  (coreSetup: CoreSetup<BfetchExplorerStartPlugins>, explorer: ExplorerService) =>
+  async ({ appBasePath, element }: AppMountParameters) => {
+    const [core, plugins] = await coreSetup.getStartServices();
+    const deps: BfetchDeps = { appBasePath, core, plugins, explorer };
+    const reactElement = (
+      <KibanaContextProvider services={deps}>
+        <App />
+      </KibanaContextProvider>
+    );
+    render(reactElement, element);
+    return () => unmountComponentAtNode(element);
+  };

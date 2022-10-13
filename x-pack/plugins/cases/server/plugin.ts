@@ -5,187 +5,235 @@
  * 2.0.
  */
 
-import { IContextProvider, KibanaRequest, Logger, PluginInitializerContext } from 'kibana/server';
-import { CoreSetup, CoreStart } from 'src/core/server';
-
-import { SecurityPluginSetup } from '../../security/server';
-import { PluginSetupContract as ActionsPluginSetup } from '../../actions/server';
-import { APP_ID, ENABLE_CASE_CONNECTOR } from '../common';
-
-import { ConfigType } from './config';
-import { initCaseApi } from './routes/api';
 import {
-  caseCommentSavedObjectType,
+  IContextProvider,
+  KibanaRequest,
+  Logger,
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+} from '@kbn/core/server';
+
+import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import {
+  PluginSetupContract as ActionsPluginSetup,
+  PluginStartContract as ActionsPluginStart,
+} from '@kbn/actions-plugin/server';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import {
+  PluginStartContract as FeaturesPluginStart,
+  PluginSetupContract as FeaturesPluginSetup,
+} from '@kbn/features-plugin/server';
+import { LensServerPluginSetup } from '@kbn/lens-plugin/server';
+import {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import { APP_ID } from '../common/constants';
+
+import {
+  createCaseCommentSavedObjectType,
   caseConfigureSavedObjectType,
   caseConnectorMappingsSavedObjectType,
-  caseSavedObjectType,
-  caseUserActionSavedObjectType,
-  subCaseSavedObjectType,
+  createCaseSavedObjectType,
+  createCaseUserActionSavedObjectType,
+  casesTelemetrySavedObjectType,
 } from './saved_object_types';
-import {
-  CaseConfigureService,
-  CaseConfigureServiceSetup,
-  CaseService,
-  CaseServiceSetup,
-  CaseUserActionService,
-  CaseUserActionServiceSetup,
-  ConnectorMappingsService,
-  ConnectorMappingsServiceSetup,
-  AlertService,
-  AlertServiceContract,
-} from './services';
-import { CasesClientHandler, createExternalCasesClient } from './client';
-import { registerConnectors } from './connectors';
-import type { CasesRequestHandlerContext } from './types';
 
-function createConfig(context: PluginInitializerContext) {
-  return context.config.get<ConfigType>();
-}
+import { CasesClient } from './client';
+import type { CasesRequestHandlerContext, PluginSetupContract, PluginStartContract } from './types';
+import { CasesClientFactory } from './client/factory';
+import { getCasesKibanaFeature } from './features';
+import { registerRoutes } from './routes/api/register_routes';
+import { getExternalRoutes } from './routes/api/get_external_routes';
+import { createCasesTelemetry, scheduleCasesTelemetryTask } from './telemetry';
+import { getInternalRoutes } from './routes/api/get_internal_routes';
+import { PersistableStateAttachmentTypeRegistry } from './attachment_framework/persistable_state_registry';
+import { ExternalReferenceAttachmentTypeRegistry } from './attachment_framework/external_reference_registry';
+import { UserProfileService } from './services';
+import { LICENSING_CASE_ASSIGNMENT_FEATURE } from './common/constants';
 
 export interface PluginsSetup {
-  security: SecurityPluginSetup;
   actions: ActionsPluginSetup;
+  lens: LensServerPluginSetup;
+  features: FeaturesPluginSetup;
+  security: SecurityPluginSetup;
+  licensing: LicensingPluginSetup;
+  taskManager?: TaskManagerSetupContract;
+  usageCollection?: UsageCollectionSetup;
+}
+
+export interface PluginsStart {
+  actions: ActionsPluginStart;
+  features: FeaturesPluginStart;
+  licensing: LicensingPluginStart;
+  taskManager?: TaskManagerStartContract;
+  security: SecurityPluginStart;
+  spaces: SpacesPluginStart;
 }
 
 export class CasePlugin {
-  private readonly log: Logger;
-  private caseConfigureService?: CaseConfigureServiceSetup;
-  private caseService?: CaseServiceSetup;
-  private connectorMappingsService?: ConnectorMappingsServiceSetup;
-  private userActionService?: CaseUserActionServiceSetup;
-  private alertsService?: AlertService;
+  private readonly logger: Logger;
+  private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
+  private clientFactory: CasesClientFactory;
+  private securityPluginSetup?: SecurityPluginSetup;
+  private lensEmbeddableFactory?: LensServerPluginSetup['lensEmbeddableFactory'];
+  private persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
+  private externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
+  private userProfileService: UserProfileService;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
-    this.log = this.initializerContext.logger.get();
+    this.kibanaVersion = initializerContext.env.packageInfo.version;
+    this.logger = this.initializerContext.logger.get();
+    this.clientFactory = new CasesClientFactory(this.logger);
+    this.persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
+    this.externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
+    this.userProfileService = new UserProfileService(this.logger);
   }
 
-  public async setup(core: CoreSetup, plugins: PluginsSetup) {
-    const config = createConfig(this.initializerContext);
-
-    if (!config.enabled) {
-      return;
-    }
-
-    core.savedObjects.registerType(caseCommentSavedObjectType);
-    core.savedObjects.registerType(caseConfigureSavedObjectType);
-    core.savedObjects.registerType(caseConnectorMappingsSavedObjectType);
-    core.savedObjects.registerType(caseSavedObjectType);
-    core.savedObjects.registerType(caseUserActionSavedObjectType);
-
-    this.log.debug(
+  public setup(core: CoreSetup, plugins: PluginsSetup): PluginSetupContract {
+    this.logger.debug(
       `Setting up Case Workflow with core contract [${Object.keys(
         core
       )}] and plugins [${Object.keys(plugins)}]`
     );
 
-    this.caseService = new CaseService(
-      this.log,
-      plugins.security != null ? plugins.security.authc : undefined
+    this.securityPluginSetup = plugins.security;
+    this.lensEmbeddableFactory = plugins.lens.lensEmbeddableFactory;
+
+    plugins.features.registerKibanaFeature(getCasesKibanaFeature());
+
+    core.savedObjects.registerType(
+      createCaseCommentSavedObjectType({
+        migrationDeps: {
+          persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
+          lensEmbeddableFactory: this.lensEmbeddableFactory,
+        },
+      })
     );
-    this.caseConfigureService = await new CaseConfigureService(this.log).setup();
-    this.connectorMappingsService = await new ConnectorMappingsService(this.log).setup();
-    this.userActionService = await new CaseUserActionService(this.log).setup();
-    this.alertsService = new AlertService();
+    core.savedObjects.registerType(caseConfigureSavedObjectType);
+    core.savedObjects.registerType(caseConnectorMappingsSavedObjectType);
+    core.savedObjects.registerType(createCaseSavedObjectType(core, this.logger));
+    core.savedObjects.registerType(
+      createCaseUserActionSavedObjectType({
+        persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
+      })
+    );
+    core.savedObjects.registerType(casesTelemetrySavedObjectType);
 
     core.http.registerRouteHandlerContext<CasesRequestHandlerContext, 'cases'>(
       APP_ID,
       this.createRouteHandlerContext({
         core,
-        caseService: this.caseService,
-        caseConfigureService: this.caseConfigureService,
-        connectorMappingsService: this.connectorMappingsService,
-        userActionService: this.userActionService,
-        alertsService: this.alertsService,
-        logger: this.log,
       })
     );
 
-    const router = core.http.createRouter<CasesRequestHandlerContext>();
-    initCaseApi({
-      logger: this.log,
-      caseService: this.caseService,
-      caseConfigureService: this.caseConfigureService,
-      connectorMappingsService: this.connectorMappingsService,
-      userActionService: this.userActionService,
-      router,
-    });
-
-    if (ENABLE_CASE_CONNECTOR) {
-      core.savedObjects.registerType(subCaseSavedObjectType);
-      registerConnectors({
-        actionsRegisterType: plugins.actions.registerType,
-        logger: this.log,
-        caseService: this.caseService,
-        caseConfigureService: this.caseConfigureService,
-        connectorMappingsService: this.connectorMappingsService,
-        userActionService: this.userActionService,
-        alertsService: this.alertsService,
+    if (plugins.taskManager && plugins.usageCollection) {
+      createCasesTelemetry({
+        core,
+        taskManager: plugins.taskManager,
+        usageCollection: plugins.usageCollection,
+        logger: this.logger,
+        kibanaVersion: this.kibanaVersion,
       });
     }
+
+    const router = core.http.createRouter<CasesRequestHandlerContext>();
+    const telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
+
+    registerRoutes({
+      router,
+      routes: [...getExternalRoutes(), ...getInternalRoutes(this.userProfileService)],
+      logger: this.logger,
+      kibanaVersion: this.kibanaVersion,
+      telemetryUsageCounter,
+    });
+
+    plugins.licensing.featureUsage.register(LICENSING_CASE_ASSIGNMENT_FEATURE, 'platinum');
+
+    return {
+      attachmentFramework: {
+        registerExternalReference: (externalReferenceAttachmentType) => {
+          this.externalReferenceAttachmentTypeRegistry.register(externalReferenceAttachmentType);
+        },
+        registerPersistableState: (persistableStateAttachmentType) => {
+          this.persistableStateAttachmentTypeRegistry.register(persistableStateAttachmentType);
+        },
+      },
+    };
   }
 
-  public start(core: CoreStart) {
-    this.log.debug(`Starting Case Workflow`);
+  public start(core: CoreStart, plugins: PluginsStart): PluginStartContract {
+    this.logger.debug(`Starting Case Workflow`);
 
-    const getCasesClientWithRequestAndContext = async (
-      context: CasesRequestHandlerContext,
-      request: KibanaRequest
-    ) => {
-      const user = await this.caseService!.getUser({ request });
-      return createExternalCasesClient({
-        scopedClusterClient: context.core.elasticsearch.client.asCurrentUser,
-        savedObjectsClient: core.savedObjects.getScopedClient(request),
-        user,
-        caseService: this.caseService!,
-        caseConfigureService: this.caseConfigureService!,
-        connectorMappingsService: this.connectorMappingsService!,
-        userActionService: this.userActionService!,
-        alertsService: this.alertsService!,
-        logger: this.log,
+    if (plugins.taskManager) {
+      scheduleCasesTelemetryTask(plugins.taskManager, this.logger);
+    }
+
+    this.userProfileService.initialize({
+      spaces: plugins.spaces,
+      // securityPluginSetup will be set to a defined value in the setup() function
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      securityPluginSetup: this.securityPluginSetup!,
+      securityPluginStart: plugins.security,
+      licensingPluginStart: plugins.licensing,
+    });
+
+    this.clientFactory.initialize({
+      // securityPluginSetup will be set to a defined value in the setup() function
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      securityPluginSetup: this.securityPluginSetup!,
+      securityPluginStart: plugins.security,
+      spacesPluginStart: plugins.spaces,
+      featuresPluginStart: plugins.features,
+      actionsPluginStart: plugins.actions,
+      licensingPluginStart: plugins.licensing,
+      /**
+       * Lens will be always defined as
+       * it is declared as required plugin in kibana.json
+       */
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      lensEmbeddableFactory: this.lensEmbeddableFactory!,
+      persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
+      externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
+    });
+
+    const client = core.elasticsearch.client;
+
+    const getCasesClientWithRequest = async (request: KibanaRequest): Promise<CasesClient> => {
+      return this.clientFactory.create({
+        request,
+        scopedClusterClient: client.asScoped(request).asCurrentUser,
+        savedObjectsService: core.savedObjects,
       });
     };
 
     return {
-      getCasesClientWithRequestAndContext,
+      getCasesClientWithRequest,
     };
   }
 
   public stop() {
-    this.log.debug(`Stopping Case Workflow`);
+    this.logger.debug(`Stopping Case Workflow`);
   }
 
   private createRouteHandlerContext = ({
     core,
-    caseService,
-    caseConfigureService,
-    connectorMappingsService,
-    userActionService,
-    alertsService,
-    logger,
   }: {
     core: CoreSetup;
-    caseService: CaseServiceSetup;
-    caseConfigureService: CaseConfigureServiceSetup;
-    connectorMappingsService: ConnectorMappingsServiceSetup;
-    userActionService: CaseUserActionServiceSetup;
-    alertsService: AlertServiceContract;
-    logger: Logger;
   }): IContextProvider<CasesRequestHandlerContext, 'cases'> => {
     return async (context, request, response) => {
-      const [{ savedObjects }] = await core.getStartServices();
-      const user = await caseService.getUser({ request });
       return {
-        getCasesClient: () => {
-          return new CasesClientHandler({
-            scopedClusterClient: context.core.elasticsearch.client.asCurrentUser,
-            savedObjectsClient: savedObjects.getScopedClient(request),
-            caseService,
-            caseConfigureService,
-            connectorMappingsService,
-            userActionService,
-            alertsService,
-            user,
-            logger,
+        getCasesClient: async () => {
+          const [{ savedObjects }] = await core.getStartServices();
+          const coreContext = await context.core;
+
+          return this.clientFactory.create({
+            request,
+            scopedClusterClient: coreContext.elasticsearch.client.asCurrentUser,
+            savedObjectsService: savedObjects,
           });
         },
       };

@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import type { ListsPluginRouter } from '../types';
-import { EXCEPTION_LIST_URL } from '../../common/constants';
-import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
-import { validate } from '../../common/shared_imports';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
+import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   FindExceptionListSchemaDecoded,
   findExceptionListSchema,
   foundExceptionListSchema,
-} from '../../common/schemas';
+} from '@kbn/securitysolution-io-ts-list-types';
+import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 
-import { getExceptionListClient } from './utils';
+import type { ListsPluginRouter } from '../types';
+
+import { buildRouteValidation, buildSiemResponse, getExceptionListClient } from './utils';
 
 export const findExceptionListRoute = (router: ListsPluginRouter): void => {
   router.get(
@@ -33,7 +34,7 @@ export const findExceptionListRoute = (router: ListsPluginRouter): void => {
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        const exceptionLists = getExceptionListClient(context);
+        const exceptionLists = await getExceptionListClient(context);
         const {
           filter,
           page,
@@ -47,6 +48,8 @@ export const findExceptionListRoute = (router: ListsPluginRouter): void => {
           namespaceType,
           page,
           perPage,
+          pit: undefined,
+          searchAfter: undefined,
           sortField,
           sortOrder,
         });

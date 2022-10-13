@@ -5,71 +5,28 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { HashRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
+import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { Router, Route, Switch, useHistory } from 'react-router-dom';
+import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { PAGE_ROUTING_PATHS } from '../../constants';
+import { FLEET_ROUTING_PATHS } from '../../constants';
 import { Loading, Error } from '../../components';
-import {
-  useConfig,
-  useFleetStatus,
-  useBreadcrumbs,
-  useCapabilities,
-  useGetSettings,
-} from '../../hooks';
-import { WithoutHeaderLayout } from '../../layouts';
+import { useConfig, useFleetStatus, useBreadcrumbs, useAuthz, useFlyoutContext } from '../../hooks';
+import { DefaultLayout, WithoutHeaderLayout } from '../../layouts';
 
 import { AgentListPage } from './agent_list_page';
 import { FleetServerRequirementPage, MissingESRequirementsPage } from './agent_requirements_page';
 import { AgentDetailsPage } from './agent_details_page';
 import { NoAccessPage } from './error_pages/no_access';
-import { EnrollmentTokenListPage } from './enrollment_token_list_page';
-import { ListLayout } from './components/list_layout';
-import { FleetServerUpgradeModal } from './components/fleet_server_upgrade_modal';
 
-const REFRESH_INTERVAL_MS = 30000;
-
-export const FleetApp: React.FunctionComponent = () => {
-  useBreadcrumbs('fleet');
-
+export const AgentsApp: React.FunctionComponent = () => {
+  useBreadcrumbs('agent_list');
+  const history = useHistory();
   const { agents } = useConfig();
-  const capabilities = useCapabilities();
-
+  const hasFleetAllPrivileges = useAuthz().fleet.all;
   const fleetStatus = useFleetStatus();
-
-  const settings = useGetSettings();
-
-  const [fleetServerModalVisible, setFleetServerModalVisible] = useState(false);
-  const onCloseFleetServerModal = useCallback(() => {
-    setFleetServerModalVisible(false);
-  }, [setFleetServerModalVisible]);
-
-  useEffect(() => {
-    // if it's undefined do not show the modal
-    if (settings.data && settings.data?.item.has_seen_fleet_migration_notice === false) {
-      setFleetServerModalVisible(true);
-    }
-  }, [settings.data]);
-
-  useEffect(() => {
-    if (
-      !agents.enabled ||
-      fleetStatus.isLoading ||
-      !fleetStatus.missingRequirements ||
-      !fleetStatus.missingRequirements.includes('fleet_server')
-    ) {
-      return;
-    }
-
-    const interval = setInterval(() => {
-      fleetStatus.refresh();
-    }, REFRESH_INTERVAL_MS);
-
-    return () => {
-      clearInterval(interval);
-    };
-  }, [fleetStatus, agents.enabled]);
+  const flyoutContext = useFlyoutContext();
 
   if (!agents.enabled) return null;
   if (!fleetStatus.missingRequirements && fleetStatus.isLoading) {
@@ -96,6 +53,9 @@ export const FleetApp: React.FunctionComponent = () => {
     fleetStatus?.missingRequirements?.length === 1 &&
     fleetStatus.missingRequirements[0] === 'fleet_server';
 
+  const displayInstructions =
+    fleetStatus.forceDisplayInstructions || hasOnlyFleetServerMissingRequirement;
+
   if (
     !hasOnlyFleetServerMissingRequirement &&
     fleetStatus.missingRequirements &&
@@ -103,37 +63,41 @@ export const FleetApp: React.FunctionComponent = () => {
   ) {
     return <MissingESRequirementsPage missingRequirements={fleetStatus.missingRequirements} />;
   }
-  if (!capabilities.read) {
+  if (!hasFleetAllPrivileges) {
     return <NoAccessPage />;
   }
 
+  const rightColumn = displayInstructions ? (
+    <>
+      <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            fill
+            iconType="plusInCircle"
+            onClick={() => flyoutContext.openEnrollmentFlyout()}
+            data-test-subj="addAgentBtnTop"
+          >
+            <FormattedMessage id="xpack.fleet.addAgentButton" defaultMessage="Add Agent" />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
+  ) : undefined;
+
   return (
-    <Router>
+    <Router history={history}>
       <Switch>
-        <Route
-          path={PAGE_ROUTING_PATHS.fleet}
-          exact={true}
-          render={() => <Redirect to={PAGE_ROUTING_PATHS.fleet_agent_list} />}
-        />
-        <Route path={PAGE_ROUTING_PATHS.fleet_agent_details}>
+        <Route path={FLEET_ROUTING_PATHS.agent_details}>
           <AgentDetailsPage />
         </Route>
-        <Route path={PAGE_ROUTING_PATHS.fleet_agent_list}>
-          <ListLayout>
-            {fleetServerModalVisible && (
-              <FleetServerUpgradeModal onClose={onCloseFleetServerModal} />
-            )}
-            {hasOnlyFleetServerMissingRequirement ? (
-              <FleetServerRequirementPage />
+        <Route path={FLEET_ROUTING_PATHS.agents}>
+          <DefaultLayout section="agents" rightColumn={rightColumn}>
+            {displayInstructions ? (
+              <FleetServerRequirementPage showEnrollmentRecommendation={false} />
             ) : (
               <AgentListPage />
             )}
-          </ListLayout>
-        </Route>
-        <Route path={PAGE_ROUTING_PATHS.fleet_enrollment_tokens}>
-          <ListLayout>
-            <EnrollmentTokenListPage />
-          </ListLayout>
+          </DefaultLayout>
         </Route>
       </Switch>
     </Router>

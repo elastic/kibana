@@ -23,7 +23,7 @@ const productToTelemetryMap = {
 export function registerTelemetryRoute({ router, getSavedObjectsService }: RouteDependencies) {
   router.put(
     {
-      path: '/api/enterprise_search/stats',
+      path: '/internal/enterprise_search/stats',
       validate: {
         body: schema.object({
           product: schema.oneOf([

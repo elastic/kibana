@@ -5,30 +5,34 @@
  * 2.0.
  */
 
-import {
+import type { FullResponseSchema } from '../../../../../../common/detection_engine/schemas/request';
+import type { GetInstalledIntegrationsResponse } from '../../../../../../common/detection_engine/schemas/response';
+
+import { getRulesSchemaMock } from '../../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
+import { savedRuleMock, rulesMock } from '../mock';
+
+import type {
   PatchRuleProps,
   CreateRulesProps,
   UpdateRulesProps,
   PrePackagedRulesStatusResponse,
   BasicFetchProps,
-  RuleStatusResponse,
   Rule,
   FetchRuleProps,
   FetchRulesResponse,
   FetchRulesProps,
 } from '../types';
-import { savedRuleMock, rulesMock } from '../mock';
-import { getRulesSchemaMock } from '../../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
-import { RulesSchema } from '../../../../../../common/detection_engine/schemas/response';
 
-export const updateRule = async ({ rule, signal }: UpdateRulesProps): Promise<RulesSchema> =>
+export const updateRule = async ({ rule, signal }: UpdateRulesProps): Promise<FullResponseSchema> =>
   Promise.resolve(getRulesSchemaMock());
 
-export const createRule = async ({ rule, signal }: CreateRulesProps): Promise<RulesSchema> =>
+export const createRule = async ({ rule, signal }: CreateRulesProps): Promise<FullResponseSchema> =>
   Promise.resolve(getRulesSchemaMock());
 
-export const patchRule = async ({ ruleProperties, signal }: PatchRuleProps): Promise<RulesSchema> =>
-  Promise.resolve(getRulesSchemaMock());
+export const patchRule = async ({
+  ruleProperties,
+  signal,
+}: PatchRuleProps): Promise<FullResponseSchema> => Promise.resolve(getRulesSchemaMock());
 
 export const getPrePackagedRulesStatus = async ({
   signal,
@@ -48,77 +52,40 @@ export const getPrePackagedRulesStatus = async ({
 export const createPrepackagedRules = async ({ signal }: BasicFetchProps): Promise<boolean> =>
   Promise.resolve(true);
 
-export const getRuleStatusById = async ({
-  id,
-  signal,
-}: {
-  id: string;
-  signal: AbortSignal;
-}): Promise<RuleStatusResponse> =>
-  Promise.resolve({
-    myOwnRuleID: {
-      current_status: {
-        alert_id: 'alertId',
-        status_date: 'mm/dd/yyyyTHH:MM:sssz',
-        status: 'succeeded',
-        last_failure_at: null,
-        last_success_at: 'mm/dd/yyyyTHH:MM:sssz',
-        last_failure_message: null,
-        last_success_message: 'it is a success',
-        gap: null,
-        bulk_create_time_durations: ['2235.01'],
-        search_after_time_durations: ['616.97'],
-        last_look_back_date: '2020-03-19T00:32:07.996Z',
-      },
-      failures: [],
-    },
-  });
+export const fetchRuleById = jest.fn(
+  async ({ id, signal }: FetchRuleProps): Promise<Rule> => savedRuleMock
+);
 
-export const getRulesStatusByIds = async ({
-  ids,
-  signal,
-}: {
-  ids: string[];
-  signal: AbortSignal;
-}): Promise<RuleStatusResponse> =>
-  Promise.resolve({
-    '12345678987654321': {
-      current_status: {
-        alert_id: 'alertId',
-        status_date: 'mm/dd/yyyyTHH:MM:sssz',
-        status: 'succeeded',
-        last_failure_at: null,
-        last_success_at: 'mm/dd/yyyyTHH:MM:sssz',
-        last_failure_message: null,
-        last_success_message: 'it is a success',
-        gap: null,
-        bulk_create_time_durations: ['2235.01'],
-        search_after_time_durations: ['616.97'],
-        last_look_back_date: '2020-03-19T00:32:07.996Z',
-      },
-      failures: [],
-    },
-  });
-
-export const fetchRuleById = async ({ id, signal }: FetchRuleProps): Promise<Rule> =>
-  Promise.resolve(savedRuleMock);
-
-export const fetchRules = async ({
-  filterOptions = {
-    filter: '',
-    sortField: 'enabled',
-    sortOrder: 'desc',
-    showCustomRules: false,
-    showElasticRules: false,
-    tags: [],
-  },
-  pagination = {
-    page: 1,
-    perPage: 20,
-    total: 0,
-  },
-  signal,
-}: FetchRulesProps): Promise<FetchRulesResponse> => Promise.resolve(rulesMock);
+export const fetchRules = async (_: FetchRulesProps): Promise<FetchRulesResponse> =>
+  Promise.resolve(rulesMock);
 
 export const fetchTags = async ({ signal }: { signal: AbortSignal }): Promise<string[]> =>
   Promise.resolve(['elastic', 'love', 'quality', 'code']);
+
+// do not delete
+export const fetchInstalledIntegrations = async ({
+  packages,
+  signal,
+}: {
+  packages?: string[];
+  signal?: AbortSignal;
+}): Promise<GetInstalledIntegrationsResponse> => {
+  return Promise.resolve({
+    installed_integrations: [
+      {
+        package_name: 'atlassian_bitbucket',
+        package_title: 'Atlassian Bitbucket',
+        package_version: '1.0.1',
+        integration_name: 'audit',
+        integration_title: 'Audit Logs',
+        is_enabled: true,
+      },
+      {
+        package_name: 'system',
+        package_title: 'System',
+        package_version: '1.6.4',
+        is_enabled: true,
+      },
+    ],
+  });
+};

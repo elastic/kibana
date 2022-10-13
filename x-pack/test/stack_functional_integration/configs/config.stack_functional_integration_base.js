@@ -7,7 +7,8 @@
 
 import { resolve } from 'path';
 import consumeState from './consume_state';
-import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
+import { REPO_ROOT } from '@kbn/utils';
 import chalk from 'chalk';
 import { esTestConfig, kbnTestConfig } from '@kbn/test';
 import { TriggersActionsPageProvider } from '../../functional_with_es_ssl/page_objects/triggers_actions_ui_page';
@@ -23,8 +24,12 @@ const testsFolder = '../apps';
 const prepend = (testFile) => require.resolve(`${testsFolder}/${testFile}`);
 
 export default async ({ readConfigFile }) => {
-  const xpackFunctionalConfig = await readConfigFile(require.resolve('../../functional/config'));
-  const externalConf = consumeState(resolve(__dirname, stateFilePath));
+  const xpackFunctionalConfig = await readConfigFile(
+    require.resolve('../../functional/config.base.js')
+  );
+  const externalConf = consumeState(resolve(__dirname, stateFilePath)) ?? {
+    TESTS_LIST: 'alerts',
+  };
   process.env.stack_functional_integration = true;
   logAll(log);
 
@@ -48,6 +53,9 @@ export default async ({ readConfigFile }) => {
       ...xpackFunctionalConfig.get('kbnTestServer'),
       serverArgs: [...xpackFunctionalConfig.get('kbnTestServer.serverArgs')],
     },
+    esArchiver: {
+      baseDirectory: INTEGRATION_TEST_ROOT,
+    },
     testFiles: tests(externalConf.TESTS_LIST).map(prepend).map(logTest),
     // testFiles: ['alerts'].map(prepend).map(logTest),
     // If we need to do things like disable animations, we can do it in configure_start_kibana.sh, in the provisioner...which lives in the integration-test private repo
@@ -56,10 +64,6 @@ export default async ({ readConfigFile }) => {
     // choose where screenshots should be saved
     screenshots: {
       directory: resolve(INTEGRATION_TEST_ROOT, 'test/screenshots'),
-    },
-    // choose where esArchiver should load archives from
-    esArchiver: {
-      directory: resolve(INTEGRATION_TEST_ROOT, 'test/es_archives'),
     },
   };
   return settings;

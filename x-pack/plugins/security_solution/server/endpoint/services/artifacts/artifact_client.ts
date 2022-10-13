@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { inflate as _inflate } from 'zlib';
-import { promisify } from 'util';
-import { InternalArtifactCompleteSchema } from '../../schemas/artifacts';
-import { Artifact, ArtifactsClientInterface } from '../../../../../fleet/server';
-
-const inflateAsync = promisify(_inflate);
+import type {
+  Artifact,
+  ArtifactsClientInterface,
+  ListArtifactsProps,
+} from '@kbn/fleet-plugin/server';
+import type { ListResult } from '@kbn/fleet-plugin/common';
+import type { InternalArtifactCompleteSchema } from '../../schemas/artifacts';
 
 export interface EndpointArtifactClientInterface {
   getArtifact(id: string): Promise<InternalArtifactCompleteSchema | undefined>;
@@ -18,6 +19,8 @@ export interface EndpointArtifactClientInterface {
   createArtifact(artifact: InternalArtifactCompleteSchema): Promise<InternalArtifactCompleteSchema>;
 
   deleteArtifact(id: string): Promise<void>;
+
+  listArtifacts(options?: ListArtifactsProps): Promise<ListResult<Artifact>>;
 }
 
 /**
@@ -34,6 +37,7 @@ export class EndpointArtifactClient implements EndpointArtifactClientInterface {
 
     return {
       type: idPieces[1],
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       decodedSha256: idPieces.pop()!,
       identifier: idPieces.join('-'),
     };
@@ -53,15 +57,15 @@ export class EndpointArtifactClient implements EndpointArtifactClientInterface {
     return artifacts.items[0];
   }
 
+  async listArtifacts(options?: ListArtifactsProps): Promise<ListResult<Artifact>> {
+    return this.fleetArtifacts.listArtifacts(options);
+  }
+
   async createArtifact(
     artifact: InternalArtifactCompleteSchema
   ): Promise<InternalArtifactCompleteSchema> {
-    // FIXME:PT refactor to make this more efficient by passing through the uncompressed artifact content
-    // Artifact `.body` is compressed/encoded. We need it decoded and as a string
-    const artifactContent = await inflateAsync(Buffer.from(artifact.body, 'base64'));
-
     const createdArtifact = await this.fleetArtifacts.createArtifact({
-      content: artifactContent.toString(),
+      content: Buffer.from(artifact.body, 'base64').toString(),
       identifier: artifact.identifier,
       type: this.parseArtifactId(artifact.identifier).type,
     });
@@ -71,7 +75,7 @@ export class EndpointArtifactClient implements EndpointArtifactClientInterface {
 
   async deleteArtifact(id: string) {
     // Ignoring the `id` not being in the type until we can refactor the types in endpoint.
-    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const artifactId = (await this.getArtifact(id))?.id!;
     return this.fleetArtifacts.deleteArtifact(artifactId);
   }

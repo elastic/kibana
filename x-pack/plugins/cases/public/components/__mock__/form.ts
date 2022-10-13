@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { useForm } from '../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form';
-import { useFormData } from '../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form_data';
+import { useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib/hooks/use_form';
+import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib/hooks/use_form_data';
 
-jest.mock('../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form');
-jest.mock(
-  '../../../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib/hooks/use_form_data'
-);
+jest.mock('@kbn/es-ui-shared-plugin/static/forms/hook_form_lib/hooks/use_form');
+jest.mock('@kbn/es-ui-shared-plugin/static/forms/hook_form_lib/hooks/use_form_data');
 
 export const mockFormHook = {
   isSubmitted: false,
@@ -23,6 +21,7 @@ export const mockFormHook = {
   setFieldErrors: jest.fn(),
   getFields: jest.fn(),
   getFormData: jest.fn(),
+  getFieldDefaultValue: jest.fn(),
   /* Returns a list of all errors in the form */
   getErrors: jest.fn(),
   reset: jest.fn(),
@@ -33,10 +32,9 @@ export const mockFormHook = {
   __validateFields: jest.fn(),
   __updateFormDataAt: jest.fn(),
   __readFieldConfigFromSchema: jest.fn(),
-  __getFieldDefaultValue: jest.fn(),
 };
 
-export const getFormMock = (sampleData: any) => ({
+export const getFormMock = (sampleData: unknown) => ({
   ...mockFormHook,
   submit: () =>
     Promise.resolve({

@@ -7,22 +7,21 @@
 
 import { isEmpty } from 'lodash';
 
-import {
-  CreateExceptionListItemSchema,
+import type {
   EntriesArray,
+  CreateExceptionListItemSchema,
   ExceptionListItemSchema,
-} from '../shared_imports';
-import { Type, JobStatus, Threshold, ThresholdNormalized } from './schemas/common/schemas';
+} from '@kbn/securitysolution-io-ts-list-types';
+
+import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
+
+import type { Threshold, ThresholdNormalized } from './schemas/common';
 
 export const hasLargeValueItem = (
   exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
 ) => {
   return exceptionItems.some((exceptionItem) => hasLargeValueList(exceptionItem.entries));
-};
-
-export const hasLargeValueList = (entries: EntriesArray): boolean => {
-  const found = entries.filter(({ type }) => type === 'list');
-  return found.length > 0;
 };
 
 export const hasNestedEntry = (entries: EntriesArray): boolean => {
@@ -38,12 +37,15 @@ export const hasEqlSequenceQuery = (ruleQuery: string | undefined): boolean => {
   return false;
 };
 
+// these functions should be typeguards and accept an entire rule.
 export const isEqlRule = (ruleType: Type | undefined): boolean => ruleType === 'eql';
 export const isThresholdRule = (ruleType: Type | undefined): boolean => ruleType === 'threshold';
 export const isQueryRule = (ruleType: Type | undefined): boolean =>
   ruleType === 'query' || ruleType === 'saved_query';
 export const isThreatMatchRule = (ruleType: Type | undefined): boolean =>
   ruleType === 'threat_match';
+export const isMlRule = (ruleType: Type | undefined): boolean => ruleType === 'machine_learning';
+export const isNewTermsRule = (ruleType: Type | undefined): boolean => ruleType === 'new_terms';
 
 export const normalizeThresholdField = (
   thresholdField: string | string[] | null | undefined
@@ -52,7 +54,8 @@ export const normalizeThresholdField = (
     ? thresholdField
     : isEmpty(thresholdField)
     ? []
-    : [thresholdField!];
+    : // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      [thresholdField!];
 };
 
 export const normalizeThresholdObject = (threshold: Threshold): ThresholdNormalized => {
@@ -64,6 +67,3 @@ export const normalizeThresholdObject = (threshold: Threshold): ThresholdNormali
 
 export const normalizeMachineLearningJobIds = (value: string | string[]): string[] =>
   Array.isArray(value) ? value : [value];
-
-export const getRuleStatusText = (value: JobStatus | null | undefined): JobStatus | null =>
-  value === 'partial failure' ? 'warning' : value != null ? value : null;

@@ -5,28 +5,26 @@
  * 2.0.
  */
 
-import { UsersRt } from '../../../../../common';
-import { RouteDeps } from '../../types';
-import { wrapError } from '../../utils';
-import { CASE_REPORTERS_URL } from '../../../../../common';
+import { AllReportersFindRequest } from '../../../../../common/api';
+import { CASE_REPORTERS_URL } from '../../../../../common/constants';
+import { createCaseError } from '../../../../common/error';
+import { createCasesRoute } from '../../create_cases_route';
 
-export function initGetReportersApi({ caseService, router, logger }: RouteDeps) {
-  router.get(
-    {
-      path: CASE_REPORTERS_URL,
-      validate: {},
-    },
-    async (context, request, response) => {
-      try {
-        const client = context.core.savedObjects.client;
-        const reporters = await caseService.getReporters({
-          client,
-        });
-        return response.ok({ body: UsersRt.encode(reporters) });
-      } catch (error) {
-        logger.error(`Failed to get reporters in route: ${error}`);
-        return response.customError(wrapError(error));
-      }
+export const getReportersRoute = createCasesRoute({
+  method: 'get',
+  path: CASE_REPORTERS_URL,
+  handler: async ({ context, request, response }) => {
+    try {
+      const caseContext = await context.cases;
+      const client = await caseContext.getCasesClient();
+      const options = request.query as AllReportersFindRequest;
+
+      return response.ok({ body: await client.cases.getReporters({ ...options }) });
+    } catch (error) {
+      throw createCaseError({
+        message: `Failed to find cases in route: ${error}`,
+        error,
+      });
     }
-  );
-}
+  },
+});

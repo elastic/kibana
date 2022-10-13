@@ -18,35 +18,50 @@ import {
   CLOUD_PROVIDER,
   CONTAINER_ID,
   HOST_NAME,
-  POD_NAME,
   SERVICE_NODE_NAME,
   SERVICE_RUNTIME_NAME,
   SERVICE_RUNTIME_VERSION,
   SERVICE_VERSION,
+  KUBERNETES_CONTAINER_NAME,
+  KUBERNETES_NAMESPACE,
+  KUBERNETES_POD_NAME,
+  KUBERNETES_POD_UID,
+  KUBERNETES_REPLICASET_NAME,
+  KUBERNETES_DEPLOYMENT_NAME,
 } from '../../../../../common/elasticsearch_fieldnames';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
+
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
-import { APIReturnType } from '../../../../services/rest/createCallApmApi';
-import { pct } from '../../../../style/variables';
-import { getAgentIcon } from '../../../shared/AgentIcon/get_agent_icon';
+import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import { getAgentIcon } from '../../../shared/agent_icon/get_agent_icon';
 import { KeyValueFilterList } from '../../../shared/key_value_filter_list';
-import { pushNewItemToKueryBar } from '../../../shared/KueryBar/utils';
-import {
-  getCloudIcon,
-  getContainerIcon,
-} from '../../service_details/service_icons';
+import { pushNewItemToKueryBar } from '../../../shared/kuery_bar/utils';
+import { getCloudIcon, getContainerIcon } from '../../../shared/service_icons';
 import { useInstanceDetailsFetcher } from './use_instance_details_fetcher';
 
-type ServiceInstanceDetails = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}'>;
+type ServiceInstanceDetails =
+  APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}'>;
 
 interface Props {
   serviceName: string;
   serviceNodeName: string;
+  kuery: string;
 }
 
-function toKeyValuePairs(keys: string[], data: ServiceInstanceDetails) {
-  return keys.map((key) => ({ key, value: get(data, key) }));
+function toKeyValuePairs({
+  keys,
+  data,
+  isFilterable = true,
+}: {
+  keys: string[];
+  data: ServiceInstanceDetails;
+  isFilterable?: boolean;
+}) {
+  return keys.map((key) => ({
+    key,
+    value: get(data, key),
+    isFilterable,
+  }));
 }
 
 const serviceDetailsKeys = [
@@ -55,7 +70,18 @@ const serviceDetailsKeys = [
   SERVICE_RUNTIME_NAME,
   SERVICE_RUNTIME_VERSION,
 ];
-const containerDetailsKeys = [CONTAINER_ID, HOST_NAME, POD_NAME];
+const containerDetailsKeys = [
+  CONTAINER_ID,
+  HOST_NAME,
+  KUBERNETES_POD_UID,
+  KUBERNETES_POD_NAME,
+];
+const metricsKubernetesDetailsKeys = [
+  KUBERNETES_CONTAINER_NAME,
+  KUBERNETES_NAMESPACE,
+  KUBERNETES_REPLICASET_NAME,
+  KUBERNETES_DEPLOYMENT_NAME,
+];
 const cloudDetailsKeys = [
   CLOUD_AVAILABILITY_ZONE,
   CLOUD_INSTANCE_ID,
@@ -64,12 +90,13 @@ const cloudDetailsKeys = [
   CLOUD_PROVIDER,
 ];
 
-export function InstanceDetails({ serviceName, serviceNodeName }: Props) {
+export function InstanceDetails({
+  serviceName,
+  serviceNodeName,
+  kuery,
+}: Props) {
   const theme = useTheme();
   const history = useHistory();
-  const {
-    urlParams: { kuery },
-  } = useUrlParams();
 
   const { data, status } = useInstanceDetailsFetcher({
     serviceName,
@@ -81,7 +108,7 @@ export function InstanceDetails({ serviceName, serviceNodeName }: Props) {
     status === FETCH_STATUS.NOT_INITIATED
   ) {
     return (
-      <div style={{ width: pct(50) }}>
+      <div style={{ width: '50%' }}>
         <EuiLoadingContent data-test-subj="loadingSpinner" />
       </div>
     );
@@ -95,12 +122,23 @@ export function InstanceDetails({ serviceName, serviceNodeName }: Props) {
     pushNewItemToKueryBar({ kuery, history, key, value });
   };
 
-  const serviceDetailsKeyValuePairs = toKeyValuePairs(serviceDetailsKeys, data);
-  const containerDetailsKeyValuePairs = toKeyValuePairs(
-    containerDetailsKeys,
-    data
-  );
-  const cloudDetailsKeyValuePairs = toKeyValuePairs(cloudDetailsKeys, data);
+  const serviceDetailsKeyValuePairs = toKeyValuePairs({
+    keys: serviceDetailsKeys,
+    data,
+  });
+  const containerDetailsKeyValuePairs = toKeyValuePairs({
+    keys: containerDetailsKeys,
+    data,
+  });
+  const metricsKubernetesKeyValuePairs = toKeyValuePairs({
+    keys: metricsKubernetesDetailsKeys,
+    data,
+    isFilterable: false,
+  });
+  const cloudDetailsKeyValuePairs = toKeyValuePairs({
+    keys: cloudDetailsKeys,
+    data,
+  });
 
   const containerType = data.kubernetes?.pod?.name ? 'Kubernetes' : 'Docker';
   return (
@@ -124,7 +162,10 @@ export function InstanceDetails({ serviceName, serviceNodeName }: Props) {
             { defaultMessage: 'Container' }
           )}
           icon={getContainerIcon(containerType)}
-          keyValueList={containerDetailsKeyValuePairs}
+          keyValueList={[
+            ...containerDetailsKeyValuePairs,
+            ...metricsKubernetesKeyValuePairs,
+          ]}
           onClickFilter={addKueryBarFilter}
         />
       </EuiFlexItem>

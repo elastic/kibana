@@ -1,14 +1,14 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../../tsconfig.bazel.json",
   "compilerOptions": {
-    "incremental": false,
-    "outDir": "./target",
     "declaration": true,
     "declarationMap": true,
-    "sourceMap": true,
-    "sourceRoot": "../../../../packages/kbn-crypto/src"
+    "emitDeclarationOnly": true,
+    "outDir": "./target_types",
+    "types": [
+      "jest",
+      "node"
+    ]
   },
-  "include": [
-    "src/**/*"
-  ]
+  "include": ["**/*.ts"]
 }

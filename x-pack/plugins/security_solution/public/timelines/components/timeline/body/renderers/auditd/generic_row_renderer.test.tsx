@@ -9,22 +9,21 @@ import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
-import { BrowserFields } from '../../../../../../common/containers/source';
-import { mockBrowserFields } from '../../../../../../common/containers/source/mock';
-import { Ecs } from '../../../../../../../common/ecs';
+import type { RowRenderer } from '../../../../../../../common/types';
+import type { Ecs } from '../../../../../../../common/ecs';
 import { mockTimelineData, TestProviders } from '../../../../../../common/mock';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
-import { RowRenderer } from '../row_renderer';
 import {
   createGenericAuditRowRenderer,
   createGenericFileRowRenderer,
 } from './generic_row_renderer';
 
+jest.mock('../../../../../../common/lib/kibana');
+
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
     ...original,
-    // eslint-disable-next-line react/display-name
     EuiScreenReaderOnly: () => <></>,
   };
 });
@@ -48,11 +47,9 @@ describe('GenericRowRenderer', () => {
       });
     });
     test('renders correctly against snapshot', () => {
-      // I cannot and do not want to use BrowserFields mocks for the snapshot tests as they are too heavy
-      const browserFields: BrowserFields = {};
       const children = connectedToRenderer.renderRow({
-        browserFields,
         data: auditd,
+        isDraggable: true,
         timelineId: 'test',
       });
 
@@ -80,8 +77,8 @@ describe('GenericRowRenderer', () => {
 
     test('should render a auditd row', () => {
       const children = connectedToRenderer.renderRow({
-        browserFields: mockBrowserFields,
         data: auditd,
+        isDraggable: true,
         timelineId: 'test',
       });
       const wrapper = mount(
@@ -110,11 +107,9 @@ describe('GenericRowRenderer', () => {
     });
 
     test('renders correctly against snapshot', () => {
-      // I cannot and do not want to use BrowserFields mocks for the snapshot tests as they are too heavy
-      const browserFields: BrowserFields = {};
       const children = fileToRenderer.renderRow({
-        browserFields,
         data: auditdFile,
+        isDraggable: true,
         timelineId: 'test',
       });
 
@@ -142,8 +137,8 @@ describe('GenericRowRenderer', () => {
 
     test('should render a auditd row', () => {
       const children = fileToRenderer.renderRow({
-        browserFields: mockBrowserFields,
         data: auditdFile,
+        isDraggable: true,
         timelineId: 'test',
       });
       const wrapper = mount(

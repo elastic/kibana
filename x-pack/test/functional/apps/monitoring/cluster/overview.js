@@ -10,16 +10,23 @@ import { getLifecycleMethods } from '../_get_lifecycle_methods';
 
 export default function ({ getService, getPageObjects }) {
   const overview = getService('monitoringClusterOverview');
+  const testSubjects = getService('testSubjects');
+  const PageObjects = getPageObjects(['monitoring', 'common', 'timePicker']);
+  const alertsService = getService('monitoringAlerts');
+  const browser = getService('browser');
+  const setupMode = getService('monitoringSetupMode');
 
   describe('Cluster overview', () => {
     describe('for Green cluster with Gold license', () => {
       const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
       before(async () => {
-        await setup('monitoring/singlecluster_green_gold', {
+        await setup('x-pack/test/functional/es_archives/monitoring/singlecluster_green_gold', {
           from: 'Aug 23, 2017 @ 21:29:35.267',
           to: 'Aug 23, 2017 @ 21:47:25.556',
         });
+
+        await overview.closeAlertsModal();
       });
 
       after(async () => {
@@ -67,10 +74,12 @@ export default function ({ getService, getPageObjects }) {
       const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
       before(async () => {
-        await setup('monitoring/singlecluster_yellow_platinum', {
+        await setup('x-pack/test/functional/es_archives/monitoring/singlecluster_yellow_platinum', {
           from: 'Aug 29, 2017 @ 17:23:47.528',
           to: 'Aug 29, 2017 @ 17:25:50.701',
         });
+
+        await overview.closeAlertsModal();
       });
 
       after(async () => {
@@ -96,27 +105,25 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('shows kibana panel', async () => {
-        expect(await overview.getKbnStatus()).to.be('Healthy');
+        expect(await overview.getKbnStatus()).to.be('Stale');
         expect(await overview.getKbnRequests()).to.be('174');
         expect(await overview.getKbnMaxResponseTime()).to.be('2203 ms');
         expect(await overview.getKbnInstances()).to.be('Instances: 1');
         expect(await overview.getKbnConnections()).to.be('174');
         expect(await overview.getKbnMemoryUsage()).to.be('15.33%\n219.6 MB / 1.4 GB');
       });
-
-      it('does not show logstash panel', async () => {
-        expect(await overview.doesLsPanelExist()).to.be(false);
-      });
     });
 
-    describe('for Yellow cluster with Basic license and no Kibana and Logstash', () => {
+    describe('for Yellow cluster with Basic license and no other stack components', () => {
       const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
       before(async () => {
-        await setup('monitoring/singlecluster_yellow_basic', {
+        await setup('x-pack/test/functional/es_archives/monitoring/singlecluster_yellow_basic', {
           from: 'Aug 29, 2017 @ 17:55:43.879',
           to: 'Aug 29, 2017 @ 18:01:34.958',
         });
+
+        await overview.closeAlertsModal();
       });
 
       after(async () => {
@@ -145,12 +152,44 @@ export default function ({ getService, getPageObjects }) {
         expect(await overview.getEsReplicaShards()).to.be('0');
       });
 
-      it('shows kibana panel', async () => {
-        expect(await overview.doesKbnPanelExist()).to.be(false);
+      it('shows only elasticsearch panel', async () => {
+        expect(await overview.getPresentPanels()).to.eql(['Elasticsearch']);
+      });
+    });
+
+    describe('Alerts', () => {
+      const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
+
+      before(async () => {
+        await setup('x-pack/test/functional/es_archives/monitoring/singlecluster_green_gold', {
+          from: 'Aug 23, 2017 @ 21:29:35.267',
+          to: 'Aug 23, 2017 @ 21:47:25.556',
+        });
       });
 
-      it('does not show logstash panel', async () => {
-        expect(await overview.doesLsPanelExist()).to.be(false);
+      after(async () => {
+        await tearDown();
+        await alertsService.deleteAlerts();
+        await browser.clearLocalStorage();
+      });
+
+      describe('when create alerts options is selected in the alerts modal', () => {
+        before(async () => {
+          await overview.acceptAlertsModal();
+        });
+
+        it('should show a toast when alerts are created successfully', async () => {
+          expect(await testSubjects.exists('alertsCreatedToast', { timeout: 10000 })).to.be(true);
+        });
+
+        it('should show badges when entering setup mode', async () => {
+          await setupMode.clickSetupModeBtn();
+          await PageObjects.timePicker.startAutoRefresh(1);
+
+          expect(await testSubjects.exists('alertsBadge')).to.be(true);
+          await PageObjects.timePicker.pauseAutoRefresh();
+          await setupMode.clickExitSetupModeBtn();
+        });
       });
     });
   });

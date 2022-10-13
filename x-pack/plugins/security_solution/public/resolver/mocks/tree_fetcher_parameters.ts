@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TreeFetcherParameters } from '../types';
+import type { TreeFetcherParameters } from '../types';
 
 /**
  * A factory for the most basic `TreeFetcherParameters`. Many tests need to provide this even when the values aren't relevant to the test.

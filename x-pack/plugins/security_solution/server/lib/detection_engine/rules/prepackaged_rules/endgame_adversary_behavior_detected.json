@@ -10,8 +10,31 @@
   "interval": "10m",
   "language": "kuery",
   "license": "Elastic License v2",
+  "max_signals": 10000,
   "name": "Adversary Behavior - Detected - Elastic Endgame",
-  "query": "event.kind:alert and event.module:endgame and (event.action:rules_engine_event or endgame.event_subtype_full:rules_engine_event)",
+  "query": "event.kind:alert and event.module:endgame and (event.action:rules_engine_event or endgame.event_subtype_full:rules_engine_event)\n",
+  "required_fields": [
+    {
+      "ecs": false,
+      "name": "endgame.event_subtype_full",
+      "type": "unknown"
+    },
+    {
+      "ecs": true,
+      "name": "event.action",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.kind",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "event.module",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 47,
   "rule_id": "77a3c3df-8ec4-4da4-b758-878f551dee69",
   "severity": "medium",
@@ -20,5 +43,5 @@
     "Elastic Endgame"
   ],
   "type": "query",
-  "version": 6
+  "version": 100
 }

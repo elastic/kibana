@@ -6,17 +6,11 @@
  */
 
 import React, { FC, Fragment } from 'react';
-
-import { EuiPage, EuiPageBody, EuiPageHeader, EuiPageHeaderSection, EuiTitle } from '@elastic/eui';
-
-import { FormattedMessage } from '@kbn/i18n/react';
-
+import { FormattedMessage } from '@kbn/i18n-react';
 import { AnomalyDetectionSettings } from './anomaly_detection_settings';
-
-import { NavigationMenu } from '../components/navigation_menu';
-
 import { HelpMenu } from '../components/help_menu';
 import { useMlKibana } from '../contexts/kibana';
+import { MlPageHeader } from '../components/page_header';
 
 export const Settings: FC = () => {
   const {
@@ -25,21 +19,12 @@ export const Settings: FC = () => {
   const helpLink = docLinks.links.ml.guide;
   return (
     <Fragment>
-      <NavigationMenu tabId="settings" />
-      <EuiPage className="mlSettingsPage" data-test-subj="mlPageSettings">
-        <EuiPageBody>
-          <EuiPageHeader className="mlSettingsPage__header">
-            <EuiPageHeaderSection>
-              <EuiTitle>
-                <h1>
-                  <FormattedMessage id="xpack.ml.settings.title" defaultMessage="Settings" />
-                </h1>
-              </EuiTitle>
-            </EuiPageHeaderSection>
-          </EuiPageHeader>
-          <AnomalyDetectionSettings />
-        </EuiPageBody>
-      </EuiPage>
+      <div data-test-subj="mlPageSettings">
+        <MlPageHeader>
+          <FormattedMessage id="xpack.ml.settings.title" defaultMessage="Settings" />
+        </MlPageHeader>
+        <AnomalyDetectionSettings />
+      </div>
       <HelpMenu docLink={helpLink} />
     </Fragment>
   );

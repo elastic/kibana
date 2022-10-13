@@ -6,7 +6,7 @@
  */
 
 import { useReducer, useCallback, useRef, useEffect } from 'react';
-import { CaseConnector } from '../../common';
+import { CaseConnector } from '../../common/api';
 
 import { pushCase } from './api';
 import * as i18n from './translations';
@@ -97,12 +97,13 @@ export const usePostPushToService = (): UsePostPushToService => {
     []
   );
 
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       abortCtrlRef.current.abort();
       cancel.current = true;
-    };
-  }, []);
+    },
+    []
+  );
 
   return { ...state, pushCaseToExternalService };
 };

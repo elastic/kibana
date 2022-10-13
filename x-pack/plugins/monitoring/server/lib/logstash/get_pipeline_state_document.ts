@@ -5,22 +5,33 @@
  * 2.0.
  */
 
-// @ts-ignore
 import { createQuery } from '../create_query';
-// @ts-ignore
 import { LogstashMetric } from '../metrics';
-import { LegacyRequest } from '../../types';
+import { LegacyRequest, PipelineVersion } from '../../types';
 import { ElasticsearchResponse } from '../../../common/types/es';
+import { getIndexPatterns, getLogstashDataset } from '../cluster/get_index_patterns';
+import { Globals } from '../../static_globals';
 
-export async function getPipelineStateDocument(
-  req: LegacyRequest,
-  logstashIndexPattern: string,
-  {
-    clusterUuid,
-    pipelineId,
-    version,
-  }: { clusterUuid: string; pipelineId: string; version: { hash: string } }
-) {
+export async function getPipelineStateDocument({
+  req,
+  clusterUuid,
+  pipelineId,
+  version,
+}: {
+  req: LegacyRequest;
+  clusterUuid: string;
+  pipelineId: string;
+  version: PipelineVersion;
+}) {
+  const dataset = 'node';
+  const type = 'logstash_state';
+  const moduleType = 'logstash';
+  const indexPatterns = getIndexPatterns({
+    config: Globals.app.config,
+    ccs: req.payload.ccs,
+    moduleType,
+    dataset,
+  });
   const { callWithRequest } = req.server.plugins?.elasticsearch.getCluster('monitoring');
   const filters = [
     { term: { 'logstash_state.pipeline.id': pipelineId } },
@@ -33,16 +44,18 @@ export async function getPipelineStateDocument(
     // This is important because a user may pick a very narrow time picker window. If we were to use a start/end value
     // that could result in us being unable to render the graph
     // Use the logstash_stats documents to determine whether the instance is up/down
-    type: 'logstash_state',
+    type,
+    dsDataset: getLogstashDataset(dataset),
+    metricset: dataset,
     metric: LogstashMetric.getMetricFields(),
     clusterUuid,
     filters,
   });
 
   const params = {
-    index: logstashIndexPattern,
+    index: indexPatterns,
     size: 1,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
       _source: { excludes: 'logstash_state.pipeline.representation.plugins' },
       sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
@@ -52,7 +65,6 @@ export async function getPipelineStateDocument(
   };
 
   const resp = (await callWithRequest(req, 'search', params)) as ElasticsearchResponse;
-
   // Return null if doc not found
   return resp.hits?.hits[0]?._source ?? null;
 }

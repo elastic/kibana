@@ -7,28 +7,26 @@
 
 import {
   CoreSetup,
-  RequestHandlerContext,
+  CustomRequestHandlerContext,
   Logger,
   KibanaRequest,
   CoreStart,
-} from 'src/core/server';
-import { AlertingApiRequestHandlerContext } from '../../../alerting/server';
-import { LicensingApiRequestHandlerContext } from '../../../licensing/server';
+} from '@kbn/core/server';
+import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
+import type { RacApiRequestHandlerContext } from '@kbn/rule-registry-plugin/server';
+import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { APMConfig } from '..';
-import { APMPluginDependencies } from '../types';
-import { APMRuleRegistry } from '../plugin';
+import {
+  APMPluginSetupDependencies,
+  APMPluginStartDependencies,
+} from '../types';
 
-export interface ApmPluginRequestHandlerContext extends RequestHandlerContext {
+export type ApmPluginRequestHandlerContext = CustomRequestHandlerContext<{
   licensing: LicensingApiRequestHandlerContext;
   alerting: AlertingApiRequestHandlerContext;
-}
-
-export type InspectResponse = Array<{
-  response: any;
-  duration: number;
-  requestType: string;
-  requestParams: Record<string, unknown>;
-  esError: Error;
+  rac: RacApiRequestHandlerContext;
 }>;
 
 export interface APMRouteCreateOptions {
@@ -38,8 +36,20 @@ export interface APMRouteCreateOptions {
       | 'access:apm_write'
       | 'access:ml:canGetJobs'
       | 'access:ml:canCreateJob'
+      | 'access:ml:canCloseJob'
     >;
+    body?: { accepts: Array<'application/json' | 'multipart/form-data'> };
+    disableTelemetry?: boolean;
   };
+}
+
+export type TelemetryUsageCounter = ReturnType<
+  UsageCollectionSetup['createUsageCounter']
+>;
+
+export interface APMCore {
+  setup: CoreSetup;
+  start: () => Promise<CoreStart>;
 }
 
 export interface APMRouteHandlerResources {
@@ -48,19 +58,20 @@ export interface APMRouteHandlerResources {
   params: {
     query: {
       _inspect: boolean;
+      start?: number;
+      end?: number;
     };
   };
   config: APMConfig;
   logger: Logger;
-  core: {
-    setup: CoreSetup;
-    start: () => Promise<CoreStart>;
-  };
+  core: APMCore;
   plugins: {
-    [key in keyof APMPluginDependencies]: {
-      setup: Required<APMPluginDependencies>[key]['setup'];
-      start: () => Promise<Required<APMPluginDependencies>[key]['start']>;
+    [key in keyof APMPluginSetupDependencies]: {
+      setup: Required<APMPluginSetupDependencies>[key];
+      start: () => Promise<Required<APMPluginStartDependencies>[key]>;
     };
   };
-  apmRuleRegistry: APMRuleRegistry;
+  ruleDataClient: IRuleDataClient;
+  telemetryUsageCounter?: TelemetryUsageCounter;
+  kibanaVersion: string;
 }

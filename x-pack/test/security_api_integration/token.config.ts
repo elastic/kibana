@@ -5,11 +5,19 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@kbn/test';
+import { resolve } from 'path';
 import { services } from './services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
+
+  const testEndpointsPlugin = resolve(
+    __dirname,
+    '../security_functional/fixtures/common/test_endpoints'
+  );
+
+  const auditLogPath = resolve(__dirname, './fixtures/audit/token.log');
 
   return {
     testFiles: [require.resolve('./tests/token')],
@@ -33,7 +41,16 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...xPackAPITestsConfig.get('kbnTestServer'),
       serverArgs: [
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
+        `--plugin-path=${testEndpointsPlugin}`,
         '--xpack.security.authc.providers=["token"]',
+        '--xpack.security.audit.enabled=true',
+        '--xpack.security.audit.appender.type=file',
+        `--xpack.security.audit.appender.fileName=${auditLogPath}`,
+        '--xpack.security.audit.appender.layout.type=json',
+        `--xpack.security.audit.ignore_filters=${JSON.stringify([
+          { actions: ['http_request'] },
+          { categories: ['database'] },
+        ])}`,
       ],
     },
   };

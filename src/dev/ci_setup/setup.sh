@@ -11,17 +11,6 @@ echo " -- KIBANA_PKG_BRANCH='$KIBANA_PKG_BRANCH'"
 echo " -- TEST_ES_SNAPSHOT_VERSION='$TEST_ES_SNAPSHOT_VERSION'"
 
 ###
-### copy .bazelrc-ci into $HOME/.bazelrc
-###
-cp "src/dev/ci_setup/.bazelrc-ci" "$HOME/.bazelrc";
-
-###
-### append auth token to buildbuddy into "$HOME/.bazelrc";
-###
-echo "# Appended by src/dev/ci_setup/setup.sh" >> "$HOME/.bazelrc"
-echo "build --remote_header=x-buildbuddy-api-key=$KIBANA_BUILDBUDDY_CI_API_KEY" >> "$HOME/.bazelrc"
-
-###
 ### install dependencies
 ###
 echo " -- installing node.js dependencies"

@@ -17,9 +17,10 @@ export const CreateAlert = ({
 }: Pick<AlertingExampleComponentParams, 'triggersActionsUi'>) => {
   const [alertFlyoutVisible, setAlertFlyoutVisibility] = useState<boolean>(false);
 
-  const onCloseAlertFlyout = useCallback(() => setAlertFlyoutVisibility(false), [
-    setAlertFlyoutVisibility,
-  ]);
+  const onCloseAlertFlyout = useCallback(
+    () => setAlertFlyoutVisibility(false),
+    [setAlertFlyoutVisibility]
+  );
 
   const AddAlertFlyout = useMemo(
     () =>

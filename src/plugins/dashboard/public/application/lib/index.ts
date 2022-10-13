@@ -6,11 +6,24 @@
  * Side Public License, v 1.
  */
 
-export { saveDashboard } from './save_dashboard';
-export { getAppStateDefaults } from './get_app_state_defaults';
-export { migrateAppState } from './migrate_app_state';
-export { getDashboardIdFromUrl } from './url';
-export { createSessionRestorationDataProvider } from './session_restoration';
+export {
+  areTimesEqual,
+  convertTimeToUTCString,
+  cleanFiltersForSerialize,
+  cleanFiltersForComparison,
+} from './filter_utils';
+export {
+  createSessionRestorationDataProvider,
+  enableDashboardSearchSessions,
+  getSearchSessionIdFromURL,
+  getSessionURLObservable,
+} from './dashboard_session_restoration';
 export { addHelpMenuToAppChrome } from './help_menu_util';
-export { attemptLoadDashboardByTitle } from './load_dashboard_by_title';
-export { DashboardPanelStorage } from './dashboard_panel_storage';
+export { diffDashboardState } from './diff_dashboard_state';
+export { syncDashboardUrlState } from './sync_dashboard_url_state';
+export { syncDashboardDataViews } from './sync_dashboard_data_views';
+export { syncDashboardFilterState } from './sync_dashboard_filter_state';
+export { stateToDashboardContainerInput } from './convert_dashboard_state';
+export { syncDashboardContainerInput } from './sync_dashboard_container_input';
+export { loadDashboardHistoryLocationState } from './load_dashboard_history_location_state';
+export { buildDashboardContainer, tryDestroyDashboardContainer } from './build_dashboard_container';

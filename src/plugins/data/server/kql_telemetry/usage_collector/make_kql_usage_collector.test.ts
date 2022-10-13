@@ -7,16 +7,16 @@
  */
 
 import { makeKQLUsageCollector } from './make_kql_usage_collector';
-import { UsageCollectionSetup } from '../../../../usage_collection/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 describe('makeKQLUsageCollector', () => {
   let usageCollectionMock: jest.Mocked<UsageCollectionSetup>;
 
   beforeEach(() => {
-    usageCollectionMock = ({
+    usageCollectionMock = {
       makeUsageCollector: jest.fn(),
       registerCollector: jest.fn(),
-    } as unknown) as jest.Mocked<UsageCollectionSetup>;
+    } as unknown as jest.Mocked<UsageCollectionSetup>;
   });
 
   it('should call registerCollector', () => {

@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { TIMELINE_IMPORT_URL } from '../../../../plugins/security_solution/common/constants';
+import { TIMELINE_IMPORT_URL } from '@kbn/security-solution-plugin/common/constants';
 
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { deleteAllTimelines } from '../../utils';

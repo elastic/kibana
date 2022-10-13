@@ -15,10 +15,10 @@ export const InsertTimeline = ({ fieldName }: { fieldName: InsertFields }) => {
   const { setFieldValue, getFormData } = useFormContext();
   const timelineHooks = useTimelineContext()?.hooks;
   const formData = getFormData();
-  const onTimelineAttached = useCallback((newValue: string) => setFieldValue(fieldName, newValue), [
-    fieldName,
-    setFieldValue,
-  ]);
+  const onTimelineAttached = useCallback(
+    (newValue: string) => setFieldValue(fieldName, newValue),
+    [fieldName, setFieldValue]
+  );
   timelineHooks?.useInsertTimeline(formData[fieldName] ?? '', onTimelineAttached);
   return null;
 };

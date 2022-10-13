@@ -6,14 +6,15 @@
  */
 
 import { transformValidate, transformValidateBulkError } from './validate';
-import { BulkError } from '../utils';
-import { RulesSchema } from '../../../../../common/detection_engine/schemas/response';
-import { getAlertMock, getFindResultStatus } from '../__mocks__/request_responses';
+import type { BulkError } from '../utils';
+import { getRuleMock } from '../__mocks__/request_responses';
+import { ruleExecutionSummaryMock } from '../../../../../common/detection_engine/rule_monitoring/mocks';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
+import type { FullResponseSchema } from '../../../../../common/detection_engine/schemas/request';
 
-export const ruleOutput = (): RulesSchema => ({
+export const ruleOutput = (): FullResponseSchema => ({
   actions: [],
   author: ['Elastic'],
   building_block_type: 'default',
@@ -63,22 +64,35 @@ export const ruleOutput = (): RulesSchema => ({
   note: '# Investigative notes',
   timeline_title: 'some-timeline-title',
   timeline_id: 'some-timeline-id',
+  related_integrations: [],
+  required_fields: [],
+  response_actions: undefined,
+  setup: '',
+  outcome: undefined,
+  alias_target_id: undefined,
+  alias_purpose: undefined,
+  rule_name_override: undefined,
+  timestamp_override: undefined,
+  timestamp_override_fallback_disabled: undefined,
+  namespace: undefined,
+  data_view_id: undefined,
+  saved_id: undefined,
 });
 
 describe('validate', () => {
   describe('transformValidate', () => {
     test('it should do a validation correctly of a partial alert', () => {
-      const ruleAlert = getAlertMock(getQueryRuleParams());
-      const [validated, errors] = transformValidate(ruleAlert);
+      const ruleAlert = getRuleMock(getQueryRuleParams());
+      const [validated, errors] = transformValidate(ruleAlert, null);
       expect(validated).toEqual(ruleOutput());
       expect(errors).toEqual(null);
     });
 
     test('it should do an in-validation correctly of a partial alert', () => {
-      const ruleAlert = getAlertMock(getQueryRuleParams());
+      const ruleAlert = getRuleMock(getQueryRuleParams());
       // @ts-expect-error
       delete ruleAlert.name;
-      const [validated, errors] = transformValidate(ruleAlert);
+      const [validated, errors] = transformValidate(ruleAlert, null);
       expect(validated).toEqual(null);
       expect(errors).toEqual('Invalid value "undefined" supplied to "name"');
     });
@@ -86,16 +100,16 @@ describe('validate', () => {
 
   describe('transformValidateBulkError', () => {
     test('it should do a validation correctly of a rule id', () => {
-      const ruleAlert = getAlertMock(getQueryRuleParams());
-      const validatedOrError = transformValidateBulkError('rule-1', ruleAlert);
+      const ruleAlert = getRuleMock(getQueryRuleParams());
+      const validatedOrError = transformValidateBulkError('rule-1', ruleAlert, null);
       expect(validatedOrError).toEqual(ruleOutput());
     });
 
     test('it should do an in-validation correctly of a rule id', () => {
-      const ruleAlert = getAlertMock(getQueryRuleParams());
+      const ruleAlert = getRuleMock(getQueryRuleParams());
       // @ts-expect-error
       delete ruleAlert.name;
-      const validatedOrError = transformValidateBulkError('rule-1', ruleAlert);
+      const validatedOrError = transformValidateBulkError('rule-1', ruleAlert, null);
       const expected: BulkError = {
         error: {
           message: 'Invalid value "undefined" supplied to "name"',
@@ -106,25 +120,22 @@ describe('validate', () => {
       expect(validatedOrError).toEqual(expected);
     });
 
-    test('it should do a validation correctly of a rule id with ruleStatus passed in', () => {
-      const ruleStatus = getFindResultStatus();
-      const ruleAlert = getAlertMock(getQueryRuleParams());
-      const validatedOrError = transformValidateBulkError('rule-1', ruleAlert, null, ruleStatus);
-      const expected: RulesSchema = {
+    test('it should do a validation correctly of a rule id with rule execution summary passed in', () => {
+      const rule = getRuleMock(getQueryRuleParams());
+      const ruleExecutionSumary = ruleExecutionSummaryMock.getSummarySucceeded();
+      const validatedOrError = transformValidateBulkError('rule-1', rule, ruleExecutionSumary);
+      const expected: FullResponseSchema = {
         ...ruleOutput(),
-        status: 'succeeded',
-        status_date: '2020-02-18T15:26:49.783Z',
-        last_success_at: '2020-02-18T15:26:49.783Z',
-        last_success_message: 'succeeded',
+        execution_summary: ruleExecutionSumary,
       };
       expect(validatedOrError).toEqual(expected);
     });
 
     test('it should return error object if "alert" is not expected alert type', () => {
-      const ruleAlert = getAlertMock(getQueryRuleParams());
+      const ruleAlert = getRuleMock(getQueryRuleParams());
       // @ts-expect-error
       delete ruleAlert.alertTypeId;
-      const validatedOrError = transformValidateBulkError('rule-1', ruleAlert);
+      const validatedOrError = transformValidateBulkError('rule-1', ruleAlert, null);
       const expected: BulkError = {
         error: {
           message: 'Internal error transforming',

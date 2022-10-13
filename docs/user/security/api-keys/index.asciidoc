@@ -17,21 +17,7 @@ remote sources, without a live user interaction.
 To manage API keys, open the main menu, then click *Stack Management > API Keys*.
 
 [role="screenshot"]
-image:user/security/api-keys/images/api-keys.png["API Keys UI"]
-
-[float]
-[[api-keys-service]]
-=== {es} API key service
-
-The {es} API key service is automatically enabled when you configure
-{ref}/configuring-tls.html#tls-http[TLS on the HTTP interface].
-This ensures that clients are unable to send API keys in clear-text.
-
-When HTTPS connections are not enabled between {kib} and {es},
-you cannot create or manage API keys, and you get an error message.
-For more information, see the
-{ref}/security-api-create-api-key.html[{es} API key documentation],
-or contact your system administrator.
+image:images/api-keys.png["API Keys UI"]
 
 [float]
 [[api-keys-security-privileges]]
@@ -49,7 +35,7 @@ cluster privileges to use API keys in {kib}. To manage roles, open the main menu
 To create an API key, open the main menu, then click *Stack Management > API Keys > Create API key*.
 
 [role="screenshot"]
-image:user/security/api-keys/images/create-api-key.png["Create API Key UI"]
+image:images/create-api-key.png["Create API Key UI"]
 
 Once created, you can copy the API key (Base64 encoded) and use it to send requests to {es} on your behalf. For example:
 
@@ -58,6 +44,11 @@ curl --location --request GET 'http://localhost:5601/api/security/role' \
 --header 'Content-Type: application/json;charset=UTF-8' \
 --header 'kbn-xsrf: true' \
 --header 'Authorization: ApiKey aVZlLUMzSUJuYndxdDJvN0k1bU46aGxlYUpNS2lTa2FKeVZua1FnY1VEdw==' \
+
+[IMPORTANT]
+============================================================================
+API keys are intended for programmatic access to {kib} and {es}. Do not use API keys to authenticate access via a web browser.
+============================================================================
 
 [float]
 [[view-api-keys]]

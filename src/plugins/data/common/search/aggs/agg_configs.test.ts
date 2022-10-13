@@ -7,20 +7,20 @@
  */
 
 import { keyBy } from 'lodash';
+import { ExpressionAstExpression, buildExpression } from '@kbn/expressions-plugin/common';
 import { AggConfig } from './agg_config';
 import { AggConfigs } from './agg_configs';
 import { AggTypesRegistryStart } from './agg_types_registry';
 import { mockAggTypesRegistry } from './test_helpers';
-import type { IndexPatternField } from '../../index_patterns';
-import { IndexPattern } from '../../index_patterns/index_patterns/index_pattern';
-import { stubIndexPattern, stubIndexPatternWithFields } from '../../../common/stubs';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { stubIndexPattern } from '../../stubs';
+import { IEsSearchResponse } from '..';
 
 describe('AggConfigs', () => {
-  let indexPattern: IndexPattern;
+  const indexPattern: DataView = stubIndexPattern;
   let typesRegistry: AggTypesRegistryStart;
 
   beforeEach(() => {
-    indexPattern = stubIndexPatternWithFields as IndexPattern;
     typesRegistry = mockAggTypesRegistry();
   });
 
@@ -34,7 +34,7 @@ describe('AggConfigs', () => {
         },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
       expect(ac.aggs).toHaveLength(1);
     });
 
@@ -59,7 +59,7 @@ describe('AggConfigs', () => {
       ];
 
       const spy = jest.spyOn(AggConfig, 'ensureIds');
-      new AggConfigs(indexPattern, configStates, { typesRegistry });
+      new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
       expect(spy).toHaveBeenCalledTimes(1);
       expect(spy.mock.calls[0]).toEqual([configStates]);
       spy.mockRestore();
@@ -81,7 +81,7 @@ describe('AggConfigs', () => {
         },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
       expect(ac.aggs).toHaveLength(2);
 
       ac.createAggConfig(
@@ -104,7 +104,7 @@ describe('AggConfigs', () => {
         },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
       expect(ac.aggs).toHaveLength(1);
 
       ac.createAggConfig({
@@ -125,7 +125,7 @@ describe('AggConfigs', () => {
         },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
       expect(ac.aggs).toHaveLength(1);
 
       ac.createAggConfig(
@@ -149,7 +149,7 @@ describe('AggConfigs', () => {
         },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
       expect(() =>
         ac.createAggConfig({
           enabled: true,
@@ -174,7 +174,7 @@ describe('AggConfigs', () => {
         { type: 'percentiles', enabled: true, params: {}, schema: 'metric' },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
       const sorted = ac.getRequestAggs();
       const aggs = keyBy(ac.aggs, (agg) => agg.type.name);
 
@@ -197,7 +197,7 @@ describe('AggConfigs', () => {
         { type: 'count', enabled: true, params: {}, schema: 'metric' },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
       const sorted = ac.getResponseAggs();
       const aggs = keyBy(ac.aggs, (agg) => agg.type.name);
 
@@ -214,7 +214,7 @@ describe('AggConfigs', () => {
         { type: 'percentiles', enabled: true, params: { percents: [1, 2, 3] }, schema: 'metric' },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
       const sorted = ac.getResponseAggs();
       const aggs = keyBy(ac.aggs, (agg) => agg.type.name);
 
@@ -227,15 +227,46 @@ describe('AggConfigs', () => {
     });
   });
 
-  describe('#toDsl', () => {
-    beforeEach(() => {
-      indexPattern = stubIndexPattern as IndexPattern;
-      indexPattern.fields.getByName = (name) => (({ name } as unknown) as IndexPatternField);
+  describe('#getResponseAggById', () => {
+    it('returns aggs by matching id without confusing prefixes', () => {
+      const configStates = [
+        { id: '1', type: 'terms', enabled: true, params: {}, schema: 'split' },
+        { id: '10', type: 'date_histogram', enabled: true, params: {}, schema: 'segment' },
+        { id: '101', type: 'count', enabled: true, params: {}, schema: 'metric' },
+      ];
+
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
+      expect(ac.getResponseAggById('1')?.type.name).toEqual('terms');
+      expect(ac.getResponseAggById('10')?.type.name).toEqual('date_histogram');
+      expect(ac.getResponseAggById('101')?.type.name).toEqual('count');
     });
 
+    it('returns right agg for id within a multi-value agg', () => {
+      const configStates = [
+        { id: '1', type: 'terms', enabled: true, params: {}, schema: 'split' },
+        { id: '10', type: 'date_histogram', enabled: true, params: {}, schema: 'segment' },
+        {
+          id: '101',
+          type: 'percentiles',
+          enabled: true,
+          params: { percents: [1, 10, 3.33] },
+          schema: 'metric',
+        },
+      ];
+
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
+      expect(ac.getResponseAggById('1')?.type.name).toEqual('terms');
+      expect(ac.getResponseAggById('10')?.type.name).toEqual('date_histogram');
+      expect(ac.getResponseAggById('101.1')?.type.name).toEqual('percentiles');
+      expect(ac.getResponseAggById('101.10')?.type.name).toEqual('percentiles');
+      expect(ac.getResponseAggById("101['3.33']")?.type.name).toEqual('percentiles');
+    });
+  });
+
+  describe('#toDsl', () => {
     it('uses the sorted aggs', () => {
       const configStates = [{ enabled: true, type: 'avg', params: { field: 'bytes' } }];
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
       const spy = jest.spyOn(AggConfigs.prototype, 'getRequestAggs');
       ac.toDsl();
       expect(spy).toHaveBeenCalledTimes(1);
@@ -249,7 +280,7 @@ describe('AggConfigs', () => {
         { enabled: true, type: 'count', params: {} },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
 
       const aggInfos = ac.aggs.map((aggConfig) => {
         const football = {};
@@ -292,7 +323,7 @@ describe('AggConfigs', () => {
         },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
       const dsl = ac.toDsl();
       const histo = ac.byName('date_histogram')[0];
       const count = ac.byName('count')[0];
@@ -317,7 +348,7 @@ describe('AggConfigs', () => {
         { enabled: true, type: 'max', schema: 'metric', params: { field: 'bytes' } },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
       const dsl = ac.toDsl();
       const histo = ac.byName('date_histogram')[0];
       const metrics = ac.bySchemaName('metrics');
@@ -332,6 +363,103 @@ describe('AggConfigs', () => {
       });
     });
 
+    it('inserts a time split filters agg if there are multiple time shifts', () => {
+      const configStates = [
+        {
+          enabled: true,
+          type: 'terms',
+          schema: 'segment',
+          params: { field: 'clientip', size: 10 },
+        },
+        { enabled: true, type: 'avg', schema: 'metric', params: { field: 'bytes' } },
+        {
+          enabled: true,
+          type: 'sum',
+          schema: 'metric',
+          params: { field: 'bytes', timeShift: '1d' },
+        },
+      ];
+
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
+      ac.timeFields = ['@timestamp'];
+      ac.timeRange = {
+        from: '2021-05-05T00:00:00.000Z',
+        to: '2021-05-10T00:00:00.000Z',
+      };
+      const dsl = ac.toDsl();
+
+      const terms = ac.byName('terms')[0];
+      const avg = ac.byName('avg')[0];
+      const sum = ac.byName('sum')[0];
+
+      expect(dsl[terms.id].aggs.time_offset_split.filters.filters).toMatchInlineSnapshot(`
+        Object {
+          "0": Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "strict_date_optional_time",
+                "gte": "2021-05-05T00:00:00.000Z",
+                "lte": "2021-05-10T00:00:00.000Z",
+              },
+            },
+          },
+          "86400000": Object {
+            "range": Object {
+              "@timestamp": Object {
+                "format": "strict_date_optional_time",
+                "gte": "2021-05-04T00:00:00.000Z",
+                "lte": "2021-05-09T00:00:00.000Z",
+              },
+            },
+          },
+        }
+      `);
+      expect(dsl[terms.id].aggs.time_offset_split.aggs).toHaveProperty(avg.id);
+      expect(dsl[terms.id].aggs.time_offset_split.aggs).toHaveProperty(sum.id);
+    });
+
+    it('does not insert a time split if there is a single time shift', () => {
+      const configStates = [
+        {
+          enabled: true,
+          type: 'terms',
+          schema: 'segment',
+          params: { field: 'clientip', size: 10 },
+        },
+        {
+          enabled: true,
+          type: 'avg',
+          schema: 'metric',
+          params: {
+            field: 'bytes',
+            timeShift: '1d',
+          },
+        },
+        {
+          enabled: true,
+          type: 'sum',
+          schema: 'metric',
+          params: { field: 'bytes', timeShift: '1d' },
+        },
+      ];
+
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
+      ac.timeFields = ['timestamp'];
+      ac.timeRange = {
+        from: '2021-05-05T00:00:00.000Z',
+        to: '2021-05-10T00:00:00.000Z',
+      };
+      const dsl = ac.toDsl();
+
+      const terms = ac.byName('terms')[0];
+      const avg = ac.byName('avg')[0];
+      const sum = ac.byName('sum')[0];
+
+      expect(dsl[terms.id].aggs).not.toHaveProperty('time_offset_split');
+      expect(dsl[terms.id].aggs).toHaveProperty(avg.id);
+      expect(dsl[terms.id].aggs).toHaveProperty(sum.id);
+    });
+
     it('writes multiple metric aggregations at every level if the vis is hierarchical', () => {
       const configStates = [
         { enabled: true, type: 'terms', schema: 'segment', params: { field: 'bytes', orderBy: 1 } },
@@ -342,7 +470,12 @@ describe('AggConfigs', () => {
         { enabled: true, type: 'max', schema: 'metric', params: { field: 'bytes' } },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry, hierarchical: true });
+      const ac = new AggConfigs(
+        indexPattern,
+        configStates,
+        { typesRegistry, hierarchical: true },
+        jest.fn()
+      );
       const topLevelDsl = ac.toDsl();
       const buckets = ac.bySchemaName('buckets');
       const metrics = ac.bySchemaName('metrics');
@@ -412,7 +545,12 @@ describe('AggConfigs', () => {
         },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry, hierarchical: true });
+      const ac = new AggConfigs(
+        indexPattern,
+        configStates,
+        { typesRegistry, hierarchical: true },
+        jest.fn()
+      );
       const topLevelDsl = ac.toDsl()['2'];
 
       expect(Object.keys(topLevelDsl.aggs)).toContain('1');
@@ -424,6 +562,296 @@ describe('AggConfigs', () => {
         'buckets_path',
         '1-bucket>_count'
       );
+    });
+  });
+
+  describe('#postFlightTransform', () => {
+    it('merges together splitted responses for multiple shifts', () => {
+      const configStates = [
+        {
+          enabled: true,
+          type: 'terms',
+          schema: 'segment',
+          params: { field: 'clientip', size: 10 },
+        },
+        {
+          enabled: true,
+          type: 'date_histogram',
+          schema: 'segment',
+          params: { field: '@timestamp', interval: '1d' },
+        },
+        {
+          enabled: true,
+          type: 'avg',
+          schema: 'metric',
+          params: {
+            field: 'bytes',
+            timeShift: '1d',
+          },
+        },
+        {
+          enabled: true,
+          type: 'sum',
+          schema: 'metric',
+          params: { field: 'bytes' },
+        },
+      ];
+
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
+      ac.timeFields = ['@timestamp'];
+      ac.timeRange = {
+        from: '2021-05-05T00:00:00.000Z',
+        to: '2021-05-10T00:00:00.000Z',
+      };
+      // 1 terms bucket (A), with 2 date buckets (7th and 8th of May)
+      // the bucket keys of the shifted time range will be shifted forward
+      const response = {
+        rawResponse: {
+          aggregations: {
+            '1': {
+              buckets: [
+                {
+                  key: 'A',
+                  time_offset_split: {
+                    buckets: {
+                      '0': {
+                        2: {
+                          buckets: [
+                            {
+                              // 2021-05-07
+                              key: 1620345600000,
+                              3: {
+                                value: 1.1,
+                              },
+                              4: {
+                                value: 2.2,
+                              },
+                            },
+                            {
+                              // 2021-05-08
+                              key: 1620432000000,
+                              doc_count: 26,
+                              3: {
+                                value: 3.3,
+                              },
+                              4: {
+                                value: 4.4,
+                              },
+                            },
+                          ],
+                        },
+                      },
+                      '86400000': {
+                        2: {
+                          buckets: [
+                            {
+                              // 2021-05-07
+                              key: 1620345600000,
+                              doc_count: 13,
+                              3: {
+                                value: 5.5,
+                              },
+                              4: {
+                                value: 6.6,
+                              },
+                            },
+                            {
+                              // 2021-05-08
+                              key: 1620432000000,
+                              3: {
+                                value: 7.7,
+                              },
+                              4: {
+                                value: 8.8,
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        },
+      };
+      const mergedResponse = ac.postFlightTransform(response as unknown as IEsSearchResponse<any>);
+      expect(mergedResponse.rawResponse).toEqual({
+        aggregations: {
+          '1': {
+            buckets: [
+              {
+                '2': {
+                  buckets: [
+                    {
+                      '4': {
+                        value: 2.2,
+                      },
+                      // 2021-05-07
+                      key: 1620345600000,
+                    },
+                    {
+                      '3': {
+                        value: 5.5,
+                      },
+                      '4': {
+                        value: 4.4,
+                      },
+                      doc_count: 26,
+                      doc_count_86400000: 13,
+                      // 2021-05-08
+                      key: 1620432000000,
+                    },
+                    {
+                      '3': {
+                        value: 7.7,
+                      },
+                      // 2021-05-09
+                      key: 1620518400000,
+                    },
+                  ],
+                },
+                key: 'A',
+              },
+            ],
+          },
+        },
+      });
+    });
+
+    it('shifts date histogram keys and renames doc_count properties for single shift', () => {
+      const configStates = [
+        {
+          enabled: true,
+          type: 'date_histogram',
+          schema: 'segment',
+          params: { field: '@timestamp', interval: '1d' },
+        },
+        {
+          enabled: true,
+          type: 'avg',
+          schema: 'metric',
+          params: {
+            field: 'bytes',
+            timeShift: '1d',
+          },
+        },
+      ];
+
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
+      ac.timeFields = ['@timestamp'];
+      ac.timeRange = {
+        from: '2021-05-05T00:00:00.000Z',
+        to: '2021-05-10T00:00:00.000Z',
+      };
+      const response = {
+        rawResponse: {
+          aggregations: {
+            '1': {
+              buckets: [
+                {
+                  // 2021-05-07
+                  key: 1620345600000,
+                  doc_count: 26,
+                  2: {
+                    value: 1.1,
+                  },
+                },
+                {
+                  // 2021-05-08
+                  key: 1620432000000,
+                  doc_count: 27,
+                  2: {
+                    value: 2.2,
+                  },
+                },
+              ],
+            },
+          },
+        },
+      };
+      const mergedResponse = ac.postFlightTransform(response as unknown as IEsSearchResponse<any>);
+      expect(mergedResponse.rawResponse).toEqual({
+        aggregations: {
+          '1': {
+            buckets: [
+              {
+                '2': {
+                  value: 1.1,
+                },
+                doc_count_86400000: 26,
+                // 2021-05-08
+                key: 1620432000000,
+              },
+              {
+                '2': {
+                  value: 2.2,
+                },
+                doc_count_86400000: 27,
+                // 2021-05-09
+                key: 1620518400000,
+              },
+            ],
+          },
+        },
+      });
+    });
+  });
+
+  describe('#toExpressionAst', () => {
+    function toString(ast: ExpressionAstExpression) {
+      return buildExpression(ast).toString();
+    }
+
+    it('should generate the `index` argument', () => {
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry }, jest.fn());
+
+      expect(toString(ac.toExpressionAst())).toMatchInlineSnapshot(
+        `"esaggs index={indexPatternLoad id=\\"logstash-*\\"} metricsAtAllLevels=false partialRows=false"`
+      );
+    });
+
+    it('should generate the `metricsAtAllLevels` if hierarchical', () => {
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry, hierarchical: true }, jest.fn());
+
+      expect(toString(ac.toExpressionAst())).toMatchInlineSnapshot(
+        `"esaggs index={indexPatternLoad id=\\"logstash-*\\"} metricsAtAllLevels=true partialRows=false"`
+      );
+    });
+
+    it('should generate the `partialRows` argument', () => {
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry, partialRows: true }, jest.fn());
+
+      expect(toString(ac.toExpressionAst())).toMatchInlineSnapshot(
+        `"esaggs index={indexPatternLoad id=\\"logstash-*\\"} metricsAtAllLevels=false partialRows=true"`
+      );
+    });
+
+    it('should generate the `aggs` argument', () => {
+      const configStates = [
+        {
+          enabled: true,
+          type: 'date_histogram',
+          schema: 'segment',
+          params: { field: '@timestamp', interval: '10s' },
+        },
+        { enabled: true, type: 'avg', schema: 'metric', params: { field: 'bytes' } },
+        { enabled: true, type: 'sum', schema: 'metric', params: { field: 'bytes' } },
+        { enabled: true, type: 'min', schema: 'metric', params: { field: 'bytes' } },
+        { enabled: true, type: 'max', schema: 'metric', params: { field: 'bytes' } },
+      ];
+
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
+
+      expect(toString(ac.toExpressionAst())).toMatchInlineSnapshot(`
+        "esaggs index={indexPatternLoad id=\\"logstash-*\\"} metricsAtAllLevels=false partialRows=false 
+          aggs={aggDateHistogram field=\\"@timestamp\\" useNormalizedEsInterval=true extendToTimeRange=false scaleMetricValues=false interval=\\"10s\\" drop_partials=false min_doc_count=1 extended_bounds={extendedBounds} id=\\"1\\" enabled=true schema=\\"segment\\"}
+          aggs={aggAvg field=\\"bytes\\" id=\\"2\\" enabled=true schema=\\"metric\\"}
+          aggs={aggSum field=\\"bytes\\" emptyAsNull=false id=\\"3\\" enabled=true schema=\\"metric\\"}
+          aggs={aggMin field=\\"bytes\\" id=\\"4\\" enabled=true schema=\\"metric\\"}
+          aggs={aggMax field=\\"bytes\\" id=\\"5\\" enabled=true schema=\\"metric\\"}"
+      `);
     });
   });
 });

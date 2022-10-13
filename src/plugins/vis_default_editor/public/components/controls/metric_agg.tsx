@@ -13,7 +13,14 @@ import { i18n } from '@kbn/i18n';
 import { useAvailableOptions, useFallbackMetric, useValidation } from './utils';
 import { AggParamEditorProps } from '../agg_param_props';
 
-const aggFilter = ['!top_hits', '!percentiles', '!percentile_ranks', '!median', '!std_dev'];
+const aggFilter = [
+  '!top_hits',
+  '!top_metrics',
+  '!percentiles',
+  '!percentile_ranks',
+  '!median',
+  '!std_dev',
+];
 const EMPTY_VALUE = 'EMPTY_VALUE';
 const DEFAULT_OPTIONS = [{ text: '', value: EMPTY_VALUE, hidden: true }];
 

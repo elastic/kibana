@@ -5,18 +5,9 @@
  * 2.0.
  */
 
-import { RouteComponentProps } from 'react-router-dom';
-import { ActionCreator } from 'typescript-fsa';
-import { InputsModelId } from '../../common/store/inputs/constants';
-
-export type SetAbsoluteRangeDatePicker = ActionCreator<{
-  id: InputsModelId;
-  from: string;
-  to: string;
-}>;
+import type { RouteComponentProps } from 'react-router-dom';
 
 export type NetworkComponentProps = Partial<RouteComponentProps<{}>> & {
-  networkPagePath: string;
   hasMlUserPermissions: boolean;
   capabilitiesFetched: boolean;
 };

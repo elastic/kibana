@@ -22,20 +22,14 @@ import {
   EuiFocusTrap,
   EuiOutsideClickDetector,
 } from '@elastic/eui';
-import { DashboardCopyToCapabilities } from './copy_to_dashboard_action';
-import { LazyDashboardPicker, withSuspense } from '../../services/presentation_util';
+import { IEmbeddable, PanelNotFoundError } from '@kbn/embeddable-plugin/public';
+import { LazyDashboardPicker, withSuspense } from '@kbn/presentation-util-plugin/public';
 import { dashboardCopyToDashboardAction } from '../../dashboard_strings';
-import {
-  EmbeddableStateTransfer,
-  IEmbeddable,
-  PanelNotFoundError,
-} from '../../services/embeddable';
-import { createDashboardEditUrl, DashboardConstants, DashboardContainer } from '../..';
-import { DashboardPanelState } from '..';
+import { createDashboardEditUrl, DashboardConstants } from '../..';
+import { type DashboardContainer, DashboardPanelState } from '..';
+import { pluginServices } from '../../services/plugin_services';
 
 interface CopyToDashboardModalProps {
-  capabilities: DashboardCopyToCapabilities;
-  stateTransfer: EmbeddableStateTransfer;
   PresentationUtilContext: React.FC;
   embeddable: IEmbeddable;
   dashboardId?: string;
@@ -46,12 +40,16 @@ const DashboardPicker = withSuspense(LazyDashboardPicker);
 
 export function CopyToDashboardModal({
   PresentationUtilContext,
-  stateTransfer,
-  capabilities,
   dashboardId,
   embeddable,
   closeModal,
 }: CopyToDashboardModalProps) {
+  const {
+    embeddable: { getStateTransfer },
+    dashboardCapabilities: { createNew: canCreateNew, showWriteControls: canEditExisting },
+  } = pluginServices.getServices();
+  const stateTransfer = getStateTransfer();
+
   const [dashboardOption, setDashboardOption] = useState<'new' | 'existing'>('existing');
   const [selectedDashboard, setSelectedDashboard] = useState<{ id: string; name: string } | null>(
     null
@@ -63,6 +61,7 @@ export function CopyToDashboardModal({
     if (!panelToCopy) {
       throw new PanelNotFoundError();
     }
+
     const state = {
       type: embeddable.type,
       input: {
@@ -114,7 +113,7 @@ export function CopyToDashboardModal({
                     data-test-subj="add-to-dashboard-options"
                   >
                     <div>
-                      {capabilities.canEditExisting && (
+                      {canEditExisting && (
                         <>
                           <EuiRadio
                             checked={dashboardOption === 'existing'}
@@ -134,7 +133,7 @@ export function CopyToDashboardModal({
                           <EuiSpacer size="s" />
                         </>
                       )}
-                      {capabilities.canCreateNew && (
+                      {canCreateNew && (
                         <>
                           <EuiRadio
                             checked={dashboardOption === 'new'}

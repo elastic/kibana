@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectConfig } from '../../../saved_objects/public';
+import { SavedObjectConfig } from '@kbn/saved-objects-plugin/public';
 import { InternalTagDecoratedSavedObject } from './types';
 
 /**
@@ -18,7 +18,7 @@ export const injectTagReferences: Required<SavedObjectConfig>['injectReferences'
   object,
   references = []
 ) => {
-  ((object as unknown) as InternalTagDecoratedSavedObject).__tags = references
+  (object as unknown as InternalTagDecoratedSavedObject).__tags = references
     .filter(({ type }) => type === 'tag')
     .map(({ id }) => id);
 };

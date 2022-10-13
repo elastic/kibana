@@ -12,6 +12,7 @@ import {
   mockStatusAlertQuery,
   mockSignalIndex,
   mockUserPrivilege,
+  mockHostIsolation,
 } from './mock';
 import {
   fetchQueryAlerts,
@@ -19,14 +20,17 @@ import {
   getSignalIndex,
   getUserPrivilege,
   createSignalIndex,
+  createHostIsolation,
 } from './api';
+import { coreMock } from '@kbn/core/public/mocks';
 
 const abortCtrl = new AbortController();
 const mockKibanaServices = KibanaServices.get as jest.Mock;
 jest.mock('../../../../common/lib/kibana');
 
-const fetchMock = jest.fn();
-mockKibanaServices.mockReturnValue({ http: { fetch: fetchMock } });
+const coreStartMock = coreMock.createStart({ basePath: '/mock' });
+mockKibanaServices.mockReturnValue(coreStartMock);
+const fetchMock = coreStartMock.http.fetch;
 
 describe('Detections Alerts API', () => {
   describe('fetchQueryAlerts', () => {
@@ -38,8 +42,7 @@ describe('Detections Alerts API', () => {
     test('check parameter url, body', async () => {
       await fetchQueryAlerts({ query: mockAlertsQuery, signal: abortCtrl.signal });
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/signals/search', {
-        body:
-          '{"aggs":{"alertsByGrouping":{"terms":{"field":"signal.rule.risk_score","missing":"All others","order":{"_count":"desc"},"size":10},"aggs":{"alerts":{"date_histogram":{"field":"@timestamp","fixed_interval":"81000000ms","min_doc_count":0,"extended_bounds":{"min":1579644343954,"max":1582236343955}}}}}},"query":{"bool":{"filter":[{"bool":{"must":[],"filter":[{"match_all":{}}],"should":[],"must_not":[]}},{"range":{"@timestamp":{"gte":1579644343954,"lte":1582236343955}}}]}}}',
+        body: '{"aggs":{"alertsByGrouping":{"terms":{"field":"signal.rule.risk_score","missing":"All others","order":{"_count":"desc"},"size":10},"aggs":{"alerts":{"date_histogram":{"field":"@timestamp","fixed_interval":"81000000ms","min_doc_count":0,"extended_bounds":{"min":1579644343954,"max":1582236343955}}}}}},"query":{"bool":{"filter":[{"bool":{"must":[],"filter":[{"match_all":{}}],"should":[],"must_not":[]}},{"range":{"@timestamp":{"gte":1579644343954,"lte":1582236343955}}}]}}}',
         method: 'POST',
         signal: abortCtrl.signal,
       });
@@ -67,8 +70,7 @@ describe('Detections Alerts API', () => {
         status: 'closed',
       });
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/signals/status', {
-        body:
-          '{"conflicts":"proceed","status":"closed","bool":{"filter":{"terms":{"_id":["b4ee5c32e3a321057edcc953ca17228c6fdfe5ba43fdbbdaffa8cefa11605cc5"]}}}}',
+        body: '{"conflicts":"proceed","status":"closed","bool":{"filter":{"terms":{"_id":["b4ee5c32e3a321057edcc953ca17228c6fdfe5ba43fdbbdaffa8cefa11605cc5"]}}}}',
         method: 'POST',
         signal: abortCtrl.signal,
       });
@@ -81,8 +83,7 @@ describe('Detections Alerts API', () => {
         status: 'open',
       });
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/signals/status', {
-        body:
-          '{"conflicts":"proceed","status":"open","bool":{"filter":{"terms":{"_id":["b4ee5c32e3a321057edcc953ca17228c6fdfe5ba43fdbbdaffa8cefa11605cc5"]}}}}',
+        body: '{"conflicts":"proceed","status":"open","bool":{"filter":{"terms":{"_id":["b4ee5c32e3a321057edcc953ca17228c6fdfe5ba43fdbbdaffa8cefa11605cc5"]}}}}',
         method: 'POST',
         signal: abortCtrl.signal,
       });
@@ -161,6 +162,35 @@ describe('Detections Alerts API', () => {
         signal: abortCtrl.signal,
       });
       expect(alertsResp).toEqual(mockSignalIndex);
+    });
+  });
+
+  describe('createHostIsolation', () => {
+    const postMock = coreStartMock.http.post;
+
+    beforeEach(() => {
+      postMock.mockClear();
+      postMock.mockResolvedValue(mockHostIsolation);
+    });
+
+    test('check parameter url', async () => {
+      await createHostIsolation({
+        endpointId: 'fd8a122b-4c54-4c05-b295-e5f8381fc59d',
+        comment: 'commento',
+        caseIds: ['88c04a90-b19c-11eb-b838-bf3c7840b969'],
+      });
+      expect(postMock).toHaveBeenCalledWith('/api/endpoint/isolate', {
+        body: '{"endpoint_ids":["fd8a122b-4c54-4c05-b295-e5f8381fc59d"],"comment":"commento","case_ids":["88c04a90-b19c-11eb-b838-bf3c7840b969"]}',
+      });
+    });
+
+    test('happy path', async () => {
+      const hostIsolationResponse = await createHostIsolation({
+        endpointId: 'fd8a122b-4c54-4c05-b295-e5f8381fc59d',
+        comment: 'commento',
+        caseIds: ['88c04a90-b19c-11eb-b838-bf3c7840b969'],
+      });
+      expect(hostIsolationResponse).toEqual(mockHostIsolation);
     });
   });
 });

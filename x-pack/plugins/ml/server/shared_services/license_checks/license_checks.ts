@@ -10,9 +10,10 @@ import { InsufficientFullLicenseError, InsufficientBasicLicenseError } from './e
 
 export type LicenseCheck = () => void;
 
-export function licenseChecks(
-  mlLicense: MlLicense
-): { isFullLicense: LicenseCheck; isMinimumLicense: LicenseCheck } {
+export function licenseChecks(mlLicense: MlLicense): {
+  isFullLicense: LicenseCheck;
+  isMinimumLicense: LicenseCheck;
+} {
   return {
     isFullLicense() {
       if (mlLicense.isFullLicense() === false) {

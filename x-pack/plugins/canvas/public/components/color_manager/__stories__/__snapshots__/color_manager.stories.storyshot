@@ -39,6 +39,7 @@ Array [
           className="euiFormControlLayout__childrenWrapper"
         >
           <input
+            aria-invalid={false}
             className="euiFieldText"
             onChange={[Function]}
             placeholder="Color code"
@@ -86,6 +87,7 @@ Array [
           className="euiFormControlLayout__childrenWrapper"
         >
           <input
+            aria-invalid={false}
             className="euiFieldText"
             onChange={[Function]}
             placeholder="Color code"
@@ -133,6 +135,7 @@ Array [
           className="euiFormControlLayout__childrenWrapper"
         >
           <input
+            aria-invalid={false}
             className="euiFieldText"
             onChange={[Function]}
             placeholder="Color code"
@@ -180,6 +183,7 @@ Array [
           className="euiFormControlLayout__childrenWrapper"
         >
           <input
+            aria-invalid={false}
             className="euiFieldText"
             onChange={[Function]}
             placeholder="Color code"
@@ -227,6 +231,7 @@ Array [
           className="euiFormControlLayout__childrenWrapper"
         >
           <input
+            aria-invalid={false}
             className="euiFieldText"
             onChange={[Function]}
             placeholder="Color code"
@@ -274,6 +279,7 @@ Array [
           className="euiFormControlLayout__childrenWrapper"
         >
           <input
+            aria-invalid={false}
             className="euiFieldText"
             onChange={[Function]}
             placeholder="Color code"
@@ -321,6 +327,7 @@ Array [
           className="euiFormControlLayout__childrenWrapper"
         >
           <input
+            aria-invalid={false}
             className="euiFieldText"
             onChange={[Function]}
             placeholder="Color code"
@@ -369,6 +376,7 @@ exports[`Storyshots components/Color/ColorManager interactive 1`] = `
           className="euiFormControlLayout__childrenWrapper"
         >
           <input
+            aria-invalid={false}
             className="euiFieldText"
             onChange={[Function]}
             placeholder="Color code"
@@ -391,9 +399,12 @@ exports[`Storyshots components/Color/ColorManager interactive 1`] = `
         <span
           aria-hidden="true"
           className="euiButtonIcon__icon"
+          color="inherit"
           data-euiicon-type="plusInCircle"
           size="m"
-        />
+        >
+          
+        </span>
       </button>
       <button
         aria-label="Remove Color"
@@ -405,9 +416,12 @@ exports[`Storyshots components/Color/ColorManager interactive 1`] = `
         <span
           aria-hidden="true"
           className="euiButtonIcon__icon"
+          color="inherit"
           data-euiicon-type="minusInCircle"
           size="m"
-        />
+        >
+          
+        </span>
       </button>
     </div>
   </div>
@@ -469,12 +483,24 @@ Array [
           className="euiFormControlLayout__childrenWrapper"
         >
           <input
-            className="euiFieldText"
+            aria-invalid={true}
+            className="euiFieldText euiFormControlLayout--1icons"
             onChange={[Function]}
             placeholder="Color code"
             type="text"
             value="elastic"
           />
+          <div
+            className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+          >
+            <span
+              color="danger"
+              data-euiicon-type="alert"
+              size="m"
+            >
+              
+            </span>
+          </div>
         </div>
       </div>
     </div>
@@ -512,12 +538,24 @@ Array [
           className="euiFormControlLayout__childrenWrapper"
         >
           <input
-            className="euiFieldText"
+            aria-invalid={true}
+            className="euiFieldText euiFormControlLayout--1icons"
             onChange={[Function]}
             placeholder="Color code"
             type="text"
             value="#xyz"
           />
+          <div
+            className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+          >
+            <span
+              color="danger"
+              data-euiicon-type="alert"
+              size="m"
+            >
+              
+            </span>
+          </div>
         </div>
       </div>
     </div>
@@ -555,12 +593,24 @@ Array [
           className="euiFormControlLayout__childrenWrapper"
         >
           <input
-            className="euiFieldText"
+            aria-invalid={true}
+            className="euiFieldText euiFormControlLayout--1icons"
             onChange={[Function]}
             placeholder="Color code"
             type="text"
             value="#ghij"
           />
+          <div
+            className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+          >
+            <span
+              color="danger"
+              data-euiicon-type="alert"
+              size="m"
+            >
+              
+            </span>
+          </div>
         </div>
       </div>
     </div>
@@ -598,12 +648,24 @@ Array [
           className="euiFormControlLayout__childrenWrapper"
         >
           <input
-            className="euiFieldText"
+            aria-invalid={true}
+            className="euiFieldText euiFormControlLayout--1icons"
             onChange={[Function]}
             placeholder="Color code"
             type="text"
             value="#canvas"
           />
+          <div
+            className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+          >
+            <span
+              color="danger"
+              data-euiicon-type="alert"
+              size="m"
+            >
+              
+            </span>
+          </div>
         </div>
       </div>
     </div>
@@ -641,12 +703,24 @@ Array [
           className="euiFormControlLayout__childrenWrapper"
         >
           <input
-            className="euiFieldText"
+            aria-invalid={true}
+            className="euiFieldText euiFormControlLayout--1icons"
             onChange={[Function]}
             placeholder="Color code"
             type="text"
             value="#12345xyz"
           />
+          <div
+            className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+          >
+            <span
+              color="danger"
+              data-euiicon-type="alert"
+              size="m"
+            >
+              
+            </span>
+          </div>
         </div>
       </div>
     </div>
@@ -684,12 +758,24 @@ Array [
           className="euiFormControlLayout__childrenWrapper"
         >
           <input
-            className="euiFieldText"
+            aria-invalid={true}
+            className="euiFieldText euiFormControlLayout--1icons"
             onChange={[Function]}
             placeholder="Color code"
             type="text"
             value="rgb(a,b,c)"
           />
+          <div
+            className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+          >
+            <span
+              color="danger"
+              data-euiicon-type="alert"
+              size="m"
+            >
+              
+            </span>
+          </div>
         </div>
       </div>
     </div>
@@ -727,12 +813,24 @@ Array [
           className="euiFormControlLayout__childrenWrapper"
         >
           <input
-            className="euiFieldText"
+            aria-invalid={true}
+            className="euiFieldText euiFormControlLayout--1icons"
             onChange={[Function]}
             placeholder="Color code"
             type="text"
             value="rgba(w,x,y,z)"
           />
+          <div
+            className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+          >
+            <span
+              color="danger"
+              data-euiicon-type="alert"
+              size="m"
+            >
+              
+            </span>
+          </div>
         </div>
       </div>
     </div>
@@ -779,6 +877,7 @@ Array [
           className="euiFormControlLayout__childrenWrapper"
         >
           <input
+            aria-invalid={false}
             className="euiFieldText"
             onChange={[Function]}
             placeholder="Color code"
@@ -794,16 +893,18 @@ Array [
       <button
         aria-label="Add Color"
         className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-        disabled={false}
         onClick={[Function]}
         type="button"
       >
         <span
           aria-hidden="true"
           className="euiButtonIcon__icon"
+          color="inherit"
           data-euiicon-type="plusInCircle"
           size="m"
-        />
+        >
+          
+        </span>
       </button>
       <button
         aria-label="Remove Color"
@@ -815,9 +916,12 @@ Array [
         <span
           aria-hidden="true"
           className="euiButtonIcon__icon"
+          color="inherit"
           data-euiicon-type="minusInCircle"
           size="m"
-        />
+        >
+          
+        </span>
       </button>
     </div>
   </div>,
@@ -858,6 +962,7 @@ Array [
           className="euiFormControlLayout__childrenWrapper"
         >
           <input
+            aria-invalid={false}
             className="euiFieldText"
             onChange={[Function]}
             placeholder="Color code"
@@ -880,23 +985,28 @@ Array [
         <span
           aria-hidden="true"
           className="euiButtonIcon__icon"
+          color="inherit"
           data-euiicon-type="plusInCircle"
           size="m"
-        />
+        >
+          
+        </span>
       </button>
       <button
         aria-label="Remove Color"
         className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-        disabled={false}
         onClick={[Function]}
         type="button"
       >
         <span
           aria-hidden="true"
           className="euiButtonIcon__icon"
+          color="inherit"
           data-euiicon-type="minusInCircle"
           size="m"
-        />
+        >
+          
+        </span>
       </button>
     </div>
   </div>,
@@ -937,6 +1047,7 @@ Array [
           className="euiFormControlLayout__childrenWrapper"
         >
           <input
+            aria-invalid={false}
             className="euiFieldText"
             onChange={[Function]}
             placeholder="Color code"
@@ -952,30 +1063,34 @@ Array [
       <button
         aria-label="Add Color"
         className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-        disabled={false}
         onClick={[Function]}
         type="button"
       >
         <span
           aria-hidden="true"
           className="euiButtonIcon__icon"
+          color="inherit"
           data-euiicon-type="plusInCircle"
           size="m"
-        />
+        >
+          
+        </span>
       </button>
       <button
         aria-label="Remove Color"
         className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-        disabled={false}
         onClick={[Function]}
         type="button"
       >
         <span
           aria-hidden="true"
           className="euiButtonIcon__icon"
+          color="inherit"
           data-euiicon-type="minusInCircle"
           size="m"
-        />
+        >
+          
+        </span>
       </button>
     </div>
   </div>,

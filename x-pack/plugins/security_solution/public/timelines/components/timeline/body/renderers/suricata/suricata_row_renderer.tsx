@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import { get } from 'lodash/fp';
 import React from 'react';
 
+import type { RowRenderer } from '../../../../../../../common/types/timeline';
 import { RowRendererId } from '../../../../../../../common/types/timeline';
 
-import { RowRenderer, RowRendererContainer } from '../row_renderer';
+import { RowRendererContainer } from '../row_renderer';
 import { SuricataDetails } from './suricata_details';
 
 export const suricataRowRenderer: RowRenderer = {
@@ -21,9 +20,9 @@ export const suricataRowRenderer: RowRenderer = {
     const module: string | null | undefined = get('event.module[0]', ecs);
     return module != null && module.toLowerCase() === 'suricata';
   },
-  renderRow: ({ browserFields, data, timelineId }) => (
+  renderRow: ({ data, isDraggable, timelineId }) => (
     <RowRendererContainer>
-      <SuricataDetails data={data} browserFields={browserFields} timelineId={timelineId} />
+      <SuricataDetails data={data} isDraggable={isDraggable} timelineId={timelineId} />
     </RowRendererContainer>
   ),
 };

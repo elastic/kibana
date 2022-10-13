@@ -7,10 +7,10 @@
 
 import { stringify } from 'query-string';
 import url from 'url';
-import { delay } from 'bluebird';
+import { resolve } from 'path';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import expect from '@kbn/expect';
-import request, { Cookie } from 'request';
-// @ts-expect-error https://github.com/elastic/kibana/issues/95679
+import { parse as parseCookie, Cookie } from 'tough-cookie';
 import { adminTestUser } from '@kbn/test';
 import {
   getLogoutRequest,
@@ -18,11 +18,13 @@ import {
   getSAMLResponse,
 } from '../../fixtures/saml/saml_tools';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { FileWrapper } from '../audit/file_wrapper';
 
 export default function ({ getService }: FtrProviderContext) {
   const randomness = getService('randomness');
   const supertest = getService('supertestWithoutAuth');
   const config = getService('config');
+  const retry = getService('retry');
 
   const kibanaServerConfig = config.get('servers.kibana');
 
@@ -53,7 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
       .set('Cookie', sessionCookie.cookieString())
       .expect(200);
 
-    expect(apiResponse.body).to.only.have.keys([
+    expect(apiResponse.body).to.have.keys([
       'username',
       'full_name',
       'email',
@@ -64,6 +66,7 @@ export default function ({ getService }: FtrProviderContext) {
       'lookup_realm',
       'authentication_provider',
       'authentication_type',
+      'elastic_cloud_user',
     ]);
 
     expect(apiResponse.body.username).to.be(username);
@@ -98,13 +101,13 @@ export default function ({ getService }: FtrProviderContext) {
       const { body: user } = await supertest
         .get('/internal/security/me')
         .set('kbn-xsrf', 'xxx')
-        .set('Cookie', request.cookie(cookies[0])!.cookieString())
+        .set('Cookie', parseCookie(cookies[0])!.cookieString())
         .expect(200);
 
       expect(user.username).to.eql(adminTestUser.username);
       expect(user.authentication_provider).to.eql({ type: 'basic', name: 'basic' });
       expect(user.authentication_type).to.be('realm');
-      // Do not assert on the `authentication_realm`, as the value differes for on-prem vs cloud
+      // Do not assert on the `authentication_realm`, as the value differs for on-prem vs cloud
     });
 
     describe('initiating handshake', () => {
@@ -129,7 +132,7 @@ export default function ({ getService }: FtrProviderContext) {
         const cookies = handshakeResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
-        const handshakeCookie = request.cookie(cookies[0])!;
+        const handshakeCookie = parseCookie(cookies[0])!;
         expect(handshakeCookie.key).to.be('sid');
         expect(handshakeCookie.value).to.not.be.empty();
         expect(handshakeCookie.path).to.be('/');
@@ -150,7 +153,7 @@ export default function ({ getService }: FtrProviderContext) {
           )
           .expect(302);
 
-        const handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0])!;
+        const handshakeCookie = parseCookie(handshakeResponse.headers['set-cookie'][0])!;
         await supertest
           .get('/internal/security/me')
           .set('kbn-xsrf', 'xxx')
@@ -179,7 +182,7 @@ export default function ({ getService }: FtrProviderContext) {
           )
           .expect(302);
 
-        handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0])!;
+        handshakeCookie = parseCookie(handshakeResponse.headers['set-cookie'][0])!;
         samlRequestId = await getSAMLRequestId(handshakeResponse.headers.location);
       });
 
@@ -189,9 +192,7 @@ export default function ({ getService }: FtrProviderContext) {
           .send({ SAMLResponse: await createSAMLResponse({ inResponseTo: samlRequestId }) })
           .expect(401);
 
-        expect(unauthenticatedResponse.headers['content-security-policy']).to.be(
-          `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
-        );
+        expect(unauthenticatedResponse.headers['content-security-policy']).to.be.a('string');
         expect(unauthenticatedResponse.text).to.contain('We couldn&#x27;t log you in');
       });
 
@@ -210,7 +211,7 @@ export default function ({ getService }: FtrProviderContext) {
         const cookies = samlAuthenticationResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
-        await checkSessionCookie(request.cookie(cookies[0])!);
+        await checkSessionCookie(parseCookie(cookies[0])!);
       });
 
       it('should succeed in case of IdP initiated login', async () => {
@@ -226,7 +227,7 @@ export default function ({ getService }: FtrProviderContext) {
         const cookies = samlAuthenticationResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
-        await checkSessionCookie(request.cookie(cookies[0])!);
+        await checkSessionCookie(parseCookie(cookies[0])!);
       });
 
       it('should fail if SAML response is not valid', async () => {
@@ -238,9 +239,7 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .expect(401);
 
-        expect(unauthenticatedResponse.headers['content-security-policy']).to.be(
-          `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
-        );
+        expect(unauthenticatedResponse.headers['content-security-policy']).to.be.a('string');
         expect(unauthenticatedResponse.text).to.contain('We couldn&#x27;t log you in');
       });
     });
@@ -255,7 +254,7 @@ export default function ({ getService }: FtrProviderContext) {
           .send({ SAMLResponse: await createSAMLResponse() })
           .expect(302);
 
-        sessionCookie = request.cookie(samlAuthenticationResponse.headers['set-cookie'][0])!;
+        sessionCookie = parseCookie(samlAuthenticationResponse.headers['set-cookie'][0])!;
       });
 
       it('should extend cookie on every successful non-system API call', async () => {
@@ -266,7 +265,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         expect(apiResponseOne.headers['set-cookie']).to.not.be(undefined);
-        const sessionCookieOne = request.cookie(apiResponseOne.headers['set-cookie'][0])!;
+        const sessionCookieOne = parseCookie(apiResponseOne.headers['set-cookie'][0])!;
 
         expect(sessionCookieOne.value).to.not.be.empty();
         expect(sessionCookieOne.value).to.not.equal(sessionCookie.value);
@@ -278,7 +277,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
 
         expect(apiResponseTwo.headers['set-cookie']).to.not.be(undefined);
-        const sessionCookieTwo = request.cookie(apiResponseTwo.headers['set-cookie'][0])!;
+        const sessionCookieTwo = parseCookie(apiResponseTwo.headers['set-cookie'][0])!;
 
         expect(sessionCookieTwo.value).to.not.be.empty();
         expect(sessionCookieTwo.value).to.not.equal(sessionCookieOne.value);
@@ -318,7 +317,7 @@ export default function ({ getService }: FtrProviderContext) {
           )
           .expect(302);
 
-        const handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0])!;
+        const handshakeCookie = parseCookie(handshakeResponse.headers['set-cookie'][0])!;
         const samlRequestId = await getSAMLRequestId(handshakeResponse.headers.location);
 
         idpSessionIndex = String(randomness.naturalNumber());
@@ -333,7 +332,7 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .expect(302);
 
-        sessionCookie = request.cookie(samlAuthenticationResponse.headers['set-cookie'][0])!;
+        sessionCookie = parseCookie(samlAuthenticationResponse.headers['set-cookie'][0])!;
       });
 
       it('should redirect to IdP with SAML request to complete logout', async () => {
@@ -345,7 +344,7 @@ export default function ({ getService }: FtrProviderContext) {
         const cookies = logoutResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
-        const logoutCookie = request.cookie(cookies[0])!;
+        const logoutCookie = parseCookie(cookies[0])!;
         expect(logoutCookie.key).to.be('sid');
         expect(logoutCookie.value).to.be.empty();
         expect(logoutCookie.path).to.be('/');
@@ -396,7 +395,7 @@ export default function ({ getService }: FtrProviderContext) {
         const cookies = logoutResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
-        const logoutCookie = request.cookie(cookies[0])!;
+        const logoutCookie = parseCookie(cookies[0])!;
         expect(logoutCookie.key).to.be('sid');
         expect(logoutCookie.value).to.be.empty();
         expect(logoutCookie.path).to.be('/');
@@ -448,15 +447,13 @@ export default function ({ getService }: FtrProviderContext) {
       let sessionCookie: Cookie;
 
       beforeEach(async function () {
-        this.timeout(40000);
-
         const handshakeResponse = await supertest
           .get(
             '/abc/xyz/handshake?one=two three&auth_provider_hint=saml&auth_url_hash=%23%2Fworkpad'
           )
           .expect(302);
 
-        const handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0])!;
+        const handshakeCookie = parseCookie(handshakeResponse.headers['set-cookie'][0])!;
         const samlRequestId = await getSAMLRequestId(handshakeResponse.headers.location);
 
         const samlAuthenticationResponse = await supertest
@@ -465,11 +462,7 @@ export default function ({ getService }: FtrProviderContext) {
           .send({ SAMLResponse: await createSAMLResponse({ inResponseTo: samlRequestId }) })
           .expect(302);
 
-        sessionCookie = request.cookie(samlAuthenticationResponse.headers['set-cookie'][0])!;
-
-        // Access token expiration is set to 15s for API integration tests.
-        // Let's wait for 20s to make sure token expires.
-        await delay(20000);
+        sessionCookie = parseCookie(samlAuthenticationResponse.headers['set-cookie'][0])!;
       });
 
       const expectNewSessionCookie = (cookie: Cookie) => {
@@ -480,7 +473,13 @@ export default function ({ getService }: FtrProviderContext) {
         expect(cookie.value).to.not.be(sessionCookie.value);
       };
 
-      it('expired access token should be automatically refreshed', async () => {
+      it('expired access token should be automatically refreshed', async function () {
+        this.timeout(60000);
+
+        // Access token expiration is set to 15s for API integration tests.
+        // Let's wait for 20s to make sure token expires.
+        await setTimeoutAsync(20000);
+
         // This api call should succeed and automatically refresh token. Returned cookie will contain
         // the new access and refresh token pair.
         const firstResponse = await supertest
@@ -492,7 +491,7 @@ export default function ({ getService }: FtrProviderContext) {
         const firstResponseCookies = firstResponse.headers['set-cookie'];
         expect(firstResponseCookies).to.have.length(1);
 
-        const firstNewCookie = request.cookie(firstResponseCookies[0])!;
+        const firstNewCookie = parseCookie(firstResponseCookies[0])!;
         expectNewSessionCookie(firstNewCookie);
 
         // Request with old cookie should reuse the same refresh token if within 60 seconds.
@@ -506,7 +505,7 @@ export default function ({ getService }: FtrProviderContext) {
         const secondResponseCookies = secondResponse.headers['set-cookie'];
         expect(secondResponseCookies).to.have.length(1);
 
-        const secondNewCookie = request.cookie(secondResponseCookies[0])!;
+        const secondNewCookie = parseCookie(secondResponseCookies[0])!;
         expectNewSessionCookie(secondNewCookie);
 
         expect(firstNewCookie.value).not.to.eql(secondNewCookie.value);
@@ -526,7 +525,13 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
       });
 
-      it('should refresh access token even if multiple concurrent requests try to refresh it', async () => {
+      it('should refresh access token even if multiple concurrent requests try to refresh it', async function () {
+        this.timeout(60000);
+
+        // Access token expiration is set to 15s for API integration tests.
+        // Let's wait for 20s to make sure token expires.
+        await setTimeoutAsync(20000);
+
         // Send 5 concurrent requests with a cookie that contains an expired access token.
         await Promise.all(
           Array.from({ length: 5 }).map((value, index) =>
@@ -537,6 +542,54 @@ export default function ({ getService }: FtrProviderContext) {
               .expect(200)
           )
         );
+      });
+
+      describe('post-authentication stage', () => {
+        for (const client of ['start-contract', 'request-context', 'custom']) {
+          it(`expired access token should be automatically refreshed by the ${client} client`, async function () {
+            this.timeout(60000);
+
+            // Access token expiration is set to 15s for API integration tests.
+            // Let's tell test endpoint to wait 30s after authentication and try to make a request to Elasticsearch
+            // triggering token refresh logic.
+            const response = await supertest
+              .post('/authentication/slow/me')
+              .set('kbn-xsrf', 'xxx')
+              .set('Cookie', sessionCookie.cookieString())
+              .send({ duration: '30s', client })
+              .expect(200);
+
+            const newSessionCookies = response.headers['set-cookie'];
+            expect(newSessionCookies).to.have.length(1);
+
+            const newSessionCookie = parseCookie(newSessionCookies[0])!;
+            expectNewSessionCookie(newSessionCookie);
+            await checkSessionCookie(newSessionCookie);
+
+            // The second new cookie with fresh pair of access and refresh tokens should work.
+            await supertest
+              .get('/internal/security/me')
+              .set('kbn-xsrf', 'xxx')
+              .set('Cookie', newSessionCookie.cookieString())
+              .expect(200);
+          });
+
+          it(`expired access token should be automatically refreshed by the ${client} client even for multiple concurrent requests`, async function () {
+            this.timeout(60000);
+
+            // Send 5 concurrent requests with a cookie that contains an expired access token.
+            await Promise.all(
+              Array.from({ length: 5 }).map((value, index) =>
+                supertest
+                  .post(`/authentication/slow/me?a=${index}`)
+                  .set('kbn-xsrf', 'xxx')
+                  .set('Cookie', sessionCookie.cookieString())
+                  .send({ duration: '30s', client })
+                  .expect(200)
+              )
+            );
+          });
+        }
       });
     });
 
@@ -550,7 +603,7 @@ export default function ({ getService }: FtrProviderContext) {
           )
           .expect(302);
 
-        const handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0])!;
+        const handshakeCookie = parseCookie(handshakeResponse.headers['set-cookie'][0])!;
         const samlRequestId = await getSAMLRequestId(handshakeResponse.headers.location);
 
         const samlAuthenticationResponse = await supertest
@@ -559,7 +612,7 @@ export default function ({ getService }: FtrProviderContext) {
           .send({ SAMLResponse: await createSAMLResponse({ inResponseTo: samlRequestId }) })
           .expect(302);
 
-        sessionCookie = request.cookie(samlAuthenticationResponse.headers['set-cookie'][0])!;
+        sessionCookie = parseCookie(samlAuthenticationResponse.headers['set-cookie'][0])!;
 
         // Let's delete tokens from `.security` index directly to simulate the case when
         // Elasticsearch automatically removes access/refresh token document from the index
@@ -569,7 +622,7 @@ export default function ({ getService }: FtrProviderContext) {
           body: { query: { match: { doc_type: 'token' } } },
           refresh: true,
         });
-        expect(esResponse.body).to.have.property('deleted').greaterThan(0);
+        expect(esResponse).to.have.property('deleted').greaterThan(0);
       });
 
       it('should redirect user to a page that would capture URL fragment', async () => {
@@ -581,7 +634,7 @@ export default function ({ getService }: FtrProviderContext) {
         const cookies = handshakeResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
-        const handshakeCookie = request.cookie(cookies[0])!;
+        const handshakeCookie = parseCookie(cookies[0])!;
         expect(handshakeCookie.key).to.be('sid');
         expect(handshakeCookie.value).to.be.empty();
         expect(handshakeCookie.path).to.be('/');
@@ -603,7 +656,7 @@ export default function ({ getService }: FtrProviderContext) {
         const cookies = handshakeResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
-        const handshakeCookie = request.cookie(cookies[0])!;
+        const handshakeCookie = parseCookie(cookies[0])!;
         expect(handshakeCookie.key).to.be('sid');
         expect(handshakeCookie.value).to.not.be.empty();
         expect(handshakeCookie.path).to.be('/');
@@ -640,7 +693,7 @@ export default function ({ getService }: FtrProviderContext) {
         ['when access token is valid', async () => {}],
         // Scenario when active cookie has an expired access token. Access token expiration is set
         // to 15s for API integration tests so we need to wait for 20s to make sure token expires.
-        ['when access token is expired', async () => await delay(20000)],
+        ['when access token is expired', async () => await setTimeoutAsync(20000)],
         // Scenario when active cookie references to access/refresh token pair that were already
         // removed from Elasticsearch (to simulate 24h when expired tokens are removed).
         [
@@ -651,7 +704,7 @@ export default function ({ getService }: FtrProviderContext) {
               body: { query: { match: { doc_type: 'token' } } },
               refresh: true,
             });
-            expect(esResponse.body).to.have.property('deleted').greaterThan(0);
+            expect(esResponse).to.have.property('deleted').greaterThan(0);
           },
         ],
       ];
@@ -663,7 +716,7 @@ export default function ({ getService }: FtrProviderContext) {
           )
           .expect(302);
 
-        const handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0])!;
+        const handshakeCookie = parseCookie(handshakeResponse.headers['set-cookie'][0])!;
         const samlRequestId = await getSAMLRequestId(handshakeResponse.headers.location);
 
         const samlAuthenticationResponse = await supertest
@@ -677,9 +730,7 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .expect(302);
 
-        existingSessionCookie = request.cookie(
-          samlAuthenticationResponse.headers['set-cookie'][0]
-        )!;
+        existingSessionCookie = parseCookie(samlAuthenticationResponse.headers['set-cookie'][0])!;
       });
 
       for (const [description, setup] of testScenarios) {
@@ -694,7 +745,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           expect(samlAuthenticationResponse.headers.location).to.be('/');
 
-          const newSessionCookie = request.cookie(
+          const newSessionCookie = parseCookie(
             samlAuthenticationResponse.headers['set-cookie'][0]
           )!;
           expect(newSessionCookie.value).to.not.be.empty();
@@ -725,7 +776,7 @@ export default function ({ getService }: FtrProviderContext) {
             '/security/overwritten_session?next=%2F'
           );
 
-          const newSessionCookie = request.cookie(
+          const newSessionCookie = parseCookie(
             samlAuthenticationResponse.headers['set-cookie'][0]
           )!;
           expect(newSessionCookie.value).to.not.be.empty();
@@ -742,6 +793,98 @@ export default function ({ getService }: FtrProviderContext) {
           await checkSessionCookie(newSessionCookie, newUsername);
         });
       }
+    });
+
+    describe('Audit Log', function () {
+      const logFilePath = resolve(__dirname, '../../fixtures/audit/saml.log');
+      const logFile = new FileWrapper(logFilePath, retry);
+
+      beforeEach(async () => {
+        await logFile.reset();
+      });
+
+      it('should log a single `user_login` and `user_logout` event per session', async () => {
+        // Initiating handshake
+        const handshakeResponse = await supertest
+          .get(
+            '/abc/xyz/handshake?one=two three&auth_provider_hint=saml&auth_url_hash=%23%2Fworkpad'
+          )
+          .expect(302);
+
+        const handshakeCookie = parseCookie(handshakeResponse.headers['set-cookie'][0])!;
+        const samlRequestId = await getSAMLRequestId(handshakeResponse.headers.location);
+
+        // Signing in should create a `user_login` event.
+        const samlAuthenticationResponse = await supertest
+          .post('/api/security/saml/callback')
+          .set('Cookie', handshakeCookie.cookieString())
+          .send({ SAMLResponse: await createSAMLResponse({ inResponseTo: samlRequestId }) })
+          .expect(302);
+
+        const cookies = samlAuthenticationResponse.headers['set-cookie'];
+        expect(cookies).to.have.length(1);
+        const sessionCookie = parseCookie(cookies[0])!;
+
+        // Accessing Kibana again using the same session should not create another `user_login` event.
+        await supertest
+          .get('/security/account')
+          .set('Cookie', sessionCookie.cookieString())
+          .expect(200);
+
+        // Clearing the session should create a `user_logout` event.
+        await supertest
+          .get('/api/security/logout')
+          .set('Cookie', sessionCookie.cookieString())
+          .expect(302);
+
+        await retry.waitFor('audit events in dest file', () => logFile.isNotEmpty());
+        const auditEvents = await logFile.readJSON();
+
+        expect(auditEvents).to.have.length(2);
+
+        expect(auditEvents[0]).to.be.ok();
+        expect(auditEvents[0].event.action).to.be('user_login');
+        expect(auditEvents[0].event.outcome).to.be('success');
+        expect(auditEvents[0].trace.id).to.be.ok();
+        expect(auditEvents[0].user.name).to.be('a@b.c');
+        expect(auditEvents[0].kibana.authentication_provider).to.be('saml');
+
+        expect(auditEvents[1]).to.be.ok();
+        expect(auditEvents[1].event.action).to.be('user_logout');
+        expect(auditEvents[1].event.outcome).to.be('unknown');
+        expect(auditEvents[1].trace.id).to.be.ok();
+        expect(auditEvents[1].user.name).to.be('a@b.c');
+        expect(auditEvents[1].kibana.authentication_provider).to.be('saml');
+      });
+
+      it('should log authentication failure correctly', async () => {
+        // Initiating handshake
+        const handshakeResponse = await supertest
+          .get(
+            '/abc/xyz/handshake?one=two three&auth_provider_hint=saml&auth_url_hash=%23%2Fworkpad'
+          )
+          .expect(302);
+
+        const handshakeCookie = parseCookie(handshakeResponse.headers['set-cookie'][0])!;
+
+        await supertest
+          .post('/api/security/saml/callback')
+          .set('Cookie', handshakeCookie.cookieString())
+          .send({
+            SAMLResponse: await createSAMLResponse({ inResponseTo: 'some-invalid-request-id' }),
+          })
+          .expect(401);
+
+        await retry.waitFor('audit events in dest file', () => logFile.isNotEmpty());
+        const auditEvents = await logFile.readJSON();
+
+        expect(auditEvents).to.have.length(1);
+        expect(auditEvents[0]).to.be.ok();
+        expect(auditEvents[0].event.action).to.be('user_login');
+        expect(auditEvents[0].event.outcome).to.be('failure');
+        expect(auditEvents[0].trace.id).to.be.ok();
+        expect(auditEvents[0].kibana.authentication_provider).to.be('saml');
+      });
     });
   });
 }

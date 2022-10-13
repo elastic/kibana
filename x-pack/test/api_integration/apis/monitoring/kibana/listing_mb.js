@@ -6,25 +6,27 @@
  */
 
 import expect from '@kbn/expect';
-import listingFixture from './fixtures/listing';
+import listingFixture from './fixtures/listing.json';
+import { getLifecycleMethods } from '../data_stream';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
+  const { setup, tearDown } = getLifecycleMethods(getService);
 
   describe('listing mb', () => {
-    const archive = 'monitoring/singlecluster_yellow_platinum_mb';
+    const archive =
+      'x-pack/test/functional/es_archives/monitoring/singlecluster_yellow_platinum_mb';
     const timeRange = {
       min: '2017-08-29T17:24:17.000Z',
       max: '2017-08-29T17:26:08.000Z',
     };
 
     before('load archive', () => {
-      return esArchiver.load(archive);
+      return setup(archive);
     });
 
     after('unload archive', () => {
-      return esArchiver.unload(archive);
+      return tearDown();
     });
 
     it('should summarize list of kibana instances with stats', async () => {
@@ -34,7 +36,13 @@ export default function ({ getService }) {
         .send({ timeRange })
         .expect(200);
 
+      // Fixture is shared between internal and Metricbeat collection tests
+      // But timestamps of documents differ by a few miliseconds
+      const lastSeenTimestamp = body.kibanas[0].lastSeenTimestamp;
+      delete body.kibanas[0].lastSeenTimestamp;
+
       expect(body).to.eql(listingFixture);
+      expect(lastSeenTimestamp).to.eql('2017-08-29T17:25:43.192Z');
     });
   });
 }

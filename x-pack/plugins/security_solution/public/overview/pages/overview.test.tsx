@@ -8,19 +8,46 @@
 import { mount } from 'enzyme';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
+import { merge } from 'lodash';
 
 import '../../common/mock/match_media';
 import { TestProviders } from '../../common/mock';
-import {
-  useMessagesStorage,
-  UseMessagesStorage,
-} from '../../common/containers/local_storage/use_messages_storage';
-import { Overview } from './index';
-import { useIngestEnabledCheck } from '../../common/hooks/endpoint/ingest_enabled';
-import { useSourcererScope } from '../../common/containers/sourcerer';
+import type { UseMessagesStorage } from '../../common/containers/local_storage/use_messages_storage';
+import { useMessagesStorage } from '../../common/containers/local_storage/use_messages_storage';
+import { Overview } from '.';
+import { useUserPrivileges } from '../../common/components/user_privileges';
+import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { useFetchIndex } from '../../common/containers/source';
+import { useAllTiDataSources } from '../containers/overview_cti_links/use_all_ti_data_sources';
+import { mockCtiLinksResponse, mockTiDataSources } from '../components/overview_cti_links/mock';
+import { useCtiDashboardLinks } from '../containers/overview_cti_links';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { initialUserPrivilegesState } from '../../common/components/user_privileges/user_privileges_context';
+import type { EndpointPrivileges } from '../../../common/endpoint/types';
+import { useRiskScore } from '../../risk_score/containers';
+import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
+import { LandingPageComponent } from '../../common/components/landing_page';
 
-jest.mock('../../common/lib/kibana');
+const mockNavigateToApp = jest.fn();
+jest.mock('../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../common/lib/kibana');
+
+  return {
+    ...original,
+    useKibana: () => ({
+      services: {
+        ...original.useKibana().services,
+        application: {
+          ...original.useKibana().services.application,
+          navigateToApp: mockNavigateToApp,
+        },
+        cases: {
+          ...mockCasesContract(),
+        },
+      },
+    }),
+  };
+});
 jest.mock('../../common/containers/source');
 jest.mock('../../common/containers/sourcerer');
 jest.mock('../../common/containers/use_global_time', () => ({
@@ -40,8 +67,44 @@ jest.mock('../../common/components/search_bar', () => ({
 jest.mock('../../common/components/query_bar', () => ({
   QueryBar: () => null,
 }));
-jest.mock('../../common/hooks/endpoint/ingest_enabled');
+jest.mock('../../common/components/user_privileges', () => {
+  return {
+    ...jest.requireActual('../../common/components/user_privileges'),
+    useUserPrivileges: jest.fn(() => {
+      return {
+        listPrivileges: { loading: false, error: undefined, result: undefined },
+        detectionEnginePrivileges: { loading: false, error: undefined, result: undefined },
+        endpointPrivileges: {
+          loading: false,
+          canAccessEndpointManagement: true,
+          canAccessFleet: true,
+        },
+      };
+    }),
+  };
+});
 jest.mock('../../common/containers/local_storage/use_messages_storage');
+
+jest.mock('../containers/overview_cti_links');
+
+jest.mock('../../common/components/visualization_actions', () => ({
+  VisualizationActions: jest.fn(() => <div data-test-subj="mock-viz-actions" />),
+}));
+
+const useCtiDashboardLinksMock = useCtiDashboardLinks as jest.Mock;
+useCtiDashboardLinksMock.mockReturnValue(mockCtiLinksResponse);
+
+jest.mock('../containers/overview_cti_links/use_all_ti_data_sources');
+const useAllTiDataSourcesMock = useAllTiDataSources as jest.Mock;
+useAllTiDataSourcesMock.mockReturnValue(mockTiDataSources);
+
+jest.mock('../../risk_score/containers');
+const useRiskScoreMock = useRiskScore as jest.Mock;
+useRiskScoreMock.mockReturnValue({ loading: false, data: [], isModuleEnabled: false });
+
+jest.mock('../../common/hooks/use_experimental_features');
+const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
+useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
 
 const endpointNoticeMessage = (hasMessageValue: boolean) => {
   return {
@@ -52,12 +115,26 @@ const endpointNoticeMessage = (hasMessageValue: boolean) => {
     clearAllMessages: () => undefined,
   };
 };
-const mockUseSourcererScope = useSourcererScope as jest.Mock;
-const mockUseIngestEnabledCheck = useIngestEnabledCheck as jest.Mock;
+const mockUseSourcererDataView = useSourcererDataView as jest.Mock;
+const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
 const mockUseFetchIndex = useFetchIndex as jest.Mock;
 const mockUseMessagesStorage: jest.Mock = useMessagesStorage as jest.Mock<UseMessagesStorage>;
+
 describe('Overview', () => {
+  const loadedUserPrivilegesState = (
+    endpointOverrides: Partial<EndpointPrivileges> = {}
+  ): ReturnType<typeof initialUserPrivilegesState> =>
+    merge(initialUserPrivilegesState(), {
+      endpointPrivileges: {
+        loading: false,
+        canAccessFleet: true,
+        canAccessEndpointManagement: true,
+        ...endpointOverrides,
+      },
+    });
+
   beforeEach(() => {
+    mockUseUserPrivileges.mockReturnValue(loadedUserPrivilegesState());
     mockUseFetchIndex.mockReturnValue([
       false,
       {
@@ -65,16 +142,23 @@ describe('Overview', () => {
       },
     ]);
   });
+
+  afterAll(() => {
+    mockUseUserPrivileges.mockReset();
+  });
+
   describe('rendering', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
     test('it DOES NOT render the Getting started text when an index is available', () => {
-      mockUseSourcererScope.mockReturnValue({
+      mockUseSourcererDataView.mockReturnValue({
         selectedPatterns: [],
         indicesExist: true,
         indexPattern: {},
       });
 
       mockUseMessagesStorage.mockImplementation(() => endpointNoticeMessage(false));
-      mockUseIngestEnabledCheck.mockReturnValue({ allEnabled: true });
 
       const wrapper = mount(
         <TestProviders>
@@ -84,7 +168,7 @@ describe('Overview', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="empty-page"]').exists()).toBe(false);
+      expect(mockNavigateToApp).not.toHaveBeenCalled();
       wrapper.unmount();
     });
 
@@ -95,14 +179,13 @@ describe('Overview', () => {
           indexExists: false,
         },
       ]);
-      mockUseSourcererScope.mockReturnValue({
+      mockUseSourcererDataView.mockReturnValue({
         selectedPatterns: [],
         indicesExist: true,
         indexPattern: {},
       });
 
       mockUseMessagesStorage.mockImplementation(() => endpointNoticeMessage(false));
-      mockUseIngestEnabledCheck.mockReturnValue({ allEnabled: true });
 
       const wrapper = mount(
         <TestProviders>
@@ -123,14 +206,13 @@ describe('Overview', () => {
           indexExists: false,
         },
       ]);
-      mockUseSourcererScope.mockReturnValueOnce({
+      mockUseSourcererDataView.mockReturnValueOnce({
         selectedPatterns: [],
         indicesExist: true,
         indexPattern: {},
       });
 
       mockUseMessagesStorage.mockImplementation(() => endpointNoticeMessage(true));
-      mockUseIngestEnabledCheck.mockReturnValue({ allEnabled: true });
 
       const wrapper = mount(
         <TestProviders>
@@ -145,14 +227,13 @@ describe('Overview', () => {
     });
 
     test('it does NOT render the Endpoint banner when the endpoint index is available AND storage is set', () => {
-      mockUseSourcererScope.mockReturnValue({
+      mockUseSourcererDataView.mockReturnValue({
         selectedPatterns: [],
         indexExists: true,
         indexPattern: {},
       });
 
       mockUseMessagesStorage.mockImplementation(() => endpointNoticeMessage(true));
-      mockUseIngestEnabledCheck.mockReturnValue({ allEnabled: true });
 
       const wrapper = mount(
         <TestProviders>
@@ -167,14 +248,13 @@ describe('Overview', () => {
     });
 
     test('it does NOT render the Endpoint banner when an index IS available but storage is NOT set', () => {
-      mockUseSourcererScope.mockReturnValue({
+      mockUseSourcererDataView.mockReturnValue({
         selectedPatterns: [],
         indicesExist: true,
         indexPattern: {},
       });
 
       mockUseMessagesStorage.mockImplementation(() => endpointNoticeMessage(false));
-      mockUseIngestEnabledCheck.mockReturnValue({ allEnabled: true });
 
       const wrapper = mount(
         <TestProviders>
@@ -189,14 +269,14 @@ describe('Overview', () => {
     });
 
     test('it does NOT render the Endpoint banner when Ingest is NOT available', () => {
-      mockUseSourcererScope.mockReturnValue({
+      mockUseSourcererDataView.mockReturnValue({
         selectedPatterns: [],
         indicesExist: true,
         indexPattern: {},
       });
 
       mockUseMessagesStorage.mockImplementation(() => endpointNoticeMessage(true));
-      mockUseIngestEnabledCheck.mockReturnValue({ allEnabled: false });
+      mockUseUserPrivileges.mockReturnValue(loadedUserPrivilegesState({ canAccessFleet: false }));
 
       const wrapper = mount(
         <TestProviders>
@@ -212,15 +292,15 @@ describe('Overview', () => {
 
     describe('when no index is available', () => {
       beforeEach(() => {
-        mockUseSourcererScope.mockReturnValue({
+        mockUseSourcererDataView.mockReturnValue({
           selectedPatterns: [],
           indicesExist: false,
         });
-        mockUseIngestEnabledCheck.mockReturnValue({ allEnabled: false });
+        mockUseUserPrivileges.mockReturnValue(loadedUserPrivilegesState({ canAccessFleet: false }));
         mockUseMessagesStorage.mockImplementation(() => endpointNoticeMessage(false));
       });
 
-      it('renders the Setup Instructions text', () => {
+      it('renders getting started page', () => {
         const wrapper = mount(
           <TestProviders>
             <MemoryRouter>
@@ -228,31 +308,23 @@ describe('Overview', () => {
             </MemoryRouter>
           </TestProviders>
         );
-        expect(wrapper.find('[data-test-subj="empty-page"]').exists()).toBe(true);
-      });
 
-      it('does not show Endpoint get ready button when ingest is not enabled', () => {
-        const wrapper = mount(
-          <TestProviders>
-            <MemoryRouter>
-              <Overview />
-            </MemoryRouter>
-          </TestProviders>
-        );
-        expect(wrapper.find('[data-test-subj="empty-page-endpoint-action"]').exists()).toBe(false);
+        expect(wrapper.find(LandingPageComponent).exists()).toBe(true);
       });
+    });
+  });
 
-      it('shows Endpoint get ready button when ingest is enabled', () => {
-        mockUseIngestEnabledCheck.mockReturnValue({ allEnabled: true });
-        const wrapper = mount(
-          <TestProviders>
-            <MemoryRouter>
-              <Overview />
-            </MemoryRouter>
-          </TestProviders>
-        );
-        expect(wrapper.find('[data-test-subj="empty-page-endpoint-action"]').exists()).toBe(true);
-      });
+  describe('Threat Intel Dashboard Links', () => {
+    it('invokes useAllTiDataSourcesMock hook only once', () => {
+      useAllTiDataSourcesMock.mockClear();
+      mount(
+        <TestProviders>
+          <MemoryRouter>
+            <Overview />
+          </MemoryRouter>
+        </TestProviders>
+      );
+      expect(useAllTiDataSourcesMock).toHaveBeenCalledTimes(1);
     });
   });
 });

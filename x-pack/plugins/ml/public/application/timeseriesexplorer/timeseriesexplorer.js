@@ -18,7 +18,7 @@ import PropTypes from 'prop-types';
 import React, { createRef, Fragment } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiCallOut,
@@ -26,15 +26,15 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiIcon,
   EuiSpacer,
   EuiPanel,
   EuiTitle,
-  EuiToolTip,
   EuiAccordion,
   EuiBadge,
+  EuiTextColor,
 } from '@elastic/eui';
-import { ResizeChecker } from '../../../../../../src/plugins/kibana_utils/public';
+import { ResizeChecker } from '@kbn/kibana-utils-plugin/public';
+import { TimeSeriesExplorerHelpPopover } from './timeseriesexplorer_help_popover';
 
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
 import {
@@ -86,6 +86,8 @@ import { aggregationTypeTransform } from '../../../common/util/anomaly_utils';
 import { isMetricDetector } from './get_function_description';
 import { getViewableDetectors } from './timeseriesexplorer_utils/get_viewable_detectors';
 import { TimeseriesexplorerChartDataError } from './components/timeseriesexplorer_chart_data_error';
+import { ExplorerNoJobsSelected } from '../explorer/components';
+import { getSourceIndicesWithGeoFields } from '../explorer/explorer_utils';
 
 // Used to indicate the chart is being plotted across
 // all partition field values, where the cardinality of the field cannot be
@@ -105,7 +107,6 @@ function getTimeseriesexplorerDefaultState() {
     entitiesLoading: false,
     entityValues: {},
     focusAnnotationData: [],
-    focusAggregations: {},
     focusAggregationInterval: {},
     focusChartData: undefined,
     focusForecastData: undefined,
@@ -131,6 +132,7 @@ function getTimeseriesexplorerDefaultState() {
     zoomFromFocusLoaded: undefined,
     zoomToFocusLoaded: undefined,
     chartDataError: undefined,
+    sourceIndicesWithGeoFields: {},
   };
 }
 
@@ -152,6 +154,7 @@ export class TimeSeriesExplorer extends React.Component {
     tableSeverity: PropTypes.number,
     zoom: PropTypes.object,
     toastNotificationService: PropTypes.object,
+    dataViewsService: PropTypes.object,
   };
 
   state = getTimeseriesexplorerDefaultState();
@@ -265,12 +268,8 @@ export class TimeSeriesExplorer extends React.Component {
    * Gets focus data for the current component state/
    */
   getFocusData(selection) {
-    const {
-      selectedJobId,
-      selectedForecastId,
-      selectedDetectorIndex,
-      functionDescription,
-    } = this.props;
+    const { selectedJobId, selectedForecastId, selectedDetectorIndex, functionDescription } =
+      this.props;
     const { modelPlotEnabled } = this.state;
     const selectedJob = mlJobService.getJob(selectedJobId);
     if (isMetricDetector(selectedJob, selectedDetectorIndex) && functionDescription === undefined) {
@@ -726,9 +725,7 @@ export class TimeSeriesExplorer extends React.Component {
       appStateHandler(APP_STATE_ACTION.SET_DETECTOR_INDEX, detectorId);
     }
     // Populate the map of jobs / detectors / field formatters for the selected IDs and refresh.
-    mlFieldFormatService.populateFormats([jobId]).catch((err) => {
-      console.log('Error populating field formats:', err);
-    });
+    mlFieldFormatService.populateFormats([jobId]);
   }
 
   componentDidMount() {
@@ -850,10 +847,22 @@ export class TimeSeriesExplorer extends React.Component {
 
   componentDidUpdate(previousProps) {
     if (previousProps === undefined || previousProps.selectedJobId !== this.props.selectedJobId) {
+      const selectedJob = mlJobService.getJob(this.props.selectedJobId);
       this.contextChartSelectedInitCallDone = false;
-      this.setState({ fullRefresh: false, loading: true }, () => {
-        this.loadForJobId(this.props.selectedJobId);
-      });
+      getSourceIndicesWithGeoFields([selectedJob], this.props.dataViewsService)
+        .then((getSourceIndicesWithGeoFieldsResp) =>
+          this.setState(
+            {
+              fullRefresh: false,
+              loading: true,
+              sourceIndicesWithGeoFields: getSourceIndicesWithGeoFieldsResp,
+            },
+            () => {
+              this.loadForJobId(this.props.selectedJobId);
+            }
+          )
+        )
+        .catch(console.error); // eslint-disable-line no-console
     }
 
     if (
@@ -940,7 +949,6 @@ export class TimeSeriesExplorer extends React.Component {
       focusAggregationInterval,
       focusAnnotationError,
       focusAnnotationData,
-      focusAggregations,
       focusChartData,
       focusForecastData,
       fullRefresh,
@@ -961,6 +969,7 @@ export class TimeSeriesExplorer extends React.Component {
       zoomFromFocusLoaded,
       zoomToFocusLoaded,
       chartDataError,
+      sourceIndicesWithGeoFields,
     } = this.state;
     const chartProps = {
       modelPlotEnabled,
@@ -983,7 +992,11 @@ export class TimeSeriesExplorer extends React.Component {
     const jobs = createTimeSeriesJobData(mlJobService.jobs);
 
     if (selectedDetectorIndex === undefined || mlJobService.getJob(selectedJobId) === undefined) {
-      return <TimeSeriesExplorerPage dateFormatTz={dateFormatTz} resizeRef={this.resizeRef} />;
+      return (
+        <TimeSeriesExplorerPage dateFormatTz={dateFormatTz} resizeRef={this.resizeRef}>
+          <ExplorerNoJobsSelected />
+        </TimeSeriesExplorerPage>
+      );
     }
 
     const selectedJob = mlJobService.getJob(selectedJobId);
@@ -1084,148 +1097,161 @@ export class TimeSeriesExplorer extends React.Component {
           (fullRefresh === false || loading === false) &&
           hasResults === true && (
             <div>
-              <div className="results-container">
-                <EuiTitle className="panel-title">
-                  <h2 style={{ display: 'inline' }}>
-                    <span>
-                      {i18n.translate('xpack.ml.timeSeriesExplorer.singleTimeSeriesAnalysisTitle', {
-                        defaultMessage: 'Single time series analysis of {functionLabel}',
-                        values: { functionLabel: chartDetails.functionLabel },
-                      })}
-                    </span>
-                    &nbsp;
-                    {chartDetails.entityData.count === 1 && (
-                      <span className="entity-count-text">
-                        {chartDetails.entityData.entities.length > 0 && '('}
-                        {chartDetails.entityData.entities
-                          .map((entity) => {
-                            return `${entity.fieldName}: ${entity.fieldValue}`;
-                          })
-                          .join(', ')}
-                        {chartDetails.entityData.entities.length > 0 && ')'}
-                      </span>
-                    )}
-                    {chartDetails.entityData.count !== 1 && (
-                      <span className="entity-count-text">
-                        {chartDetails.entityData.entities.map((countData, i) => {
-                          return (
-                            <Fragment key={countData.fieldName}>
-                              {i18n.translate(
-                                'xpack.ml.timeSeriesExplorer.countDataInChartDetailsDescription',
-                                {
-                                  defaultMessage:
-                                    '{openBrace}{cardinalityValue} distinct {fieldName} {cardinality, plural, one {} other { values}}{closeBrace}',
-                                  values: {
-                                    openBrace: i === 0 ? '(' : '',
-                                    closeBrace:
-                                      i === chartDetails.entityData.entities.length - 1 ? ')' : '',
-                                    cardinalityValue:
-                                      countData.cardinality === 0
-                                        ? allValuesLabel
-                                        : countData.cardinality,
-                                    cardinality: countData.cardinality,
-                                    fieldName: countData.fieldName,
-                                  },
-                                }
-                              )}
-                              {i !== chartDetails.entityData.entities.length - 1 ? ', ' : ''}
-                            </Fragment>
-                          );
-                        })}
-                      </span>
-                    )}
-                  </h2>
-                </EuiTitle>
-
-                <EuiFlexGroup style={{ float: 'right' }}>
-                  {showModelBoundsCheckbox && (
-                    <EuiFlexItem grow={false}>
-                      <EuiCheckbox
-                        id="toggleModelBoundsCheckbox"
-                        label={i18n.translate('xpack.ml.timeSeriesExplorer.showModelBoundsLabel', {
-                          defaultMessage: 'show model bounds',
-                        })}
-                        checked={showModelBounds}
-                        onChange={this.toggleShowModelBoundsHandler}
-                      />
-                    </EuiFlexItem>
-                  )}
-
-                  {showAnnotationsCheckbox && (
-                    <EuiFlexItem grow={false}>
-                      <EuiCheckbox
-                        id="toggleAnnotationsCheckbox"
-                        label={i18n.translate('xpack.ml.timeSeriesExplorer.annotationsLabel', {
-                          defaultMessage: 'annotations',
-                        })}
-                        checked={showAnnotations}
-                        onChange={this.toggleShowAnnotationsHandler}
-                      />
-                    </EuiFlexItem>
-                  )}
-
-                  {showForecastCheckbox && (
-                    <EuiFlexItem grow={false}>
-                      <EuiCheckbox
-                        id="toggleShowForecastCheckbox"
-                        label={i18n.translate('xpack.ml.timeSeriesExplorer.showForecastLabel', {
-                          defaultMessage: 'show forecast',
-                        })}
-                        checked={showForecast}
-                        onChange={this.toggleShowForecastHandler}
-                      />
-                    </EuiFlexItem>
-                  )}
-                </EuiFlexGroup>
-
-                <TimeSeriesChartWithTooltips
-                  chartProps={chartProps}
-                  contextAggregationInterval={contextAggregationInterval}
-                  bounds={bounds}
-                  detectorIndex={selectedDetectorIndex}
-                  renderFocusChartOnly={renderFocusChartOnly}
-                  selectedJob={selectedJob}
-                  selectedEntities={this.props.selectedEntities}
-                  showAnnotations={showAnnotations}
-                  showForecast={showForecast}
-                  showModelBounds={showModelBounds}
-                  lastRefresh={lastRefresh}
-                />
-                {focusAnnotationError !== undefined && (
-                  <>
-                    <EuiTitle
-                      className="panel-title"
-                      data-test-subj="mlAnomalyExplorerAnnotations error"
-                    >
-                      <h2>
-                        <FormattedMessage
-                          id="xpack.ml.timeSeriesExplorer.annotationsErrorTitle"
-                          defaultMessage="Annotations"
-                        />
-                      </h2>
-                    </EuiTitle>
-                    <EuiPanel>
-                      <EuiCallOut
-                        title={i18n.translate(
-                          'xpack.ml.timeSeriesExplorer.annotationsErrorCallOutTitle',
+              <EuiFlexGroup gutterSize="xs" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size={'xs'}>
+                    <h2>
+                      <span>
+                        {i18n.translate(
+                          'xpack.ml.timeSeriesExplorer.singleTimeSeriesAnalysisTitle',
                           {
-                            defaultMessage: 'An error occurred loading annotations:',
+                            defaultMessage: 'Single time series analysis of {functionLabel}',
+                            values: { functionLabel: chartDetails.functionLabel },
                           }
                         )}
-                        color="danger"
-                        iconType="alert"
-                      >
-                        <p>{focusAnnotationError}</p>
-                      </EuiCallOut>
-                    </EuiPanel>
-                    <EuiSpacer size="m" />
-                  </>
+                      </span>
+                      &nbsp;
+                      {chartDetails.entityData.count === 1 && (
+                        <EuiTextColor color={'success'} size={'s'} component={'span'}>
+                          {chartDetails.entityData.entities.length > 0 && '('}
+                          {chartDetails.entityData.entities
+                            .map((entity) => {
+                              return `${entity.fieldName}: ${entity.fieldValue}`;
+                            })
+                            .join(', ')}
+                          {chartDetails.entityData.entities.length > 0 && ')'}
+                        </EuiTextColor>
+                      )}
+                      {chartDetails.entityData.count !== 1 && (
+                        <EuiTextColor color={'success'} size={'s'} component={'span'}>
+                          {chartDetails.entityData.entities.map((countData, i) => {
+                            return (
+                              <Fragment key={countData.fieldName}>
+                                {i18n.translate(
+                                  'xpack.ml.timeSeriesExplorer.countDataInChartDetailsDescription',
+                                  {
+                                    defaultMessage:
+                                      '{openBrace}{cardinalityValue} distinct {fieldName} {cardinality, plural, one {} other { values}}{closeBrace}',
+                                    values: {
+                                      openBrace: i === 0 ? '(' : '',
+                                      closeBrace:
+                                        i === chartDetails.entityData.entities.length - 1
+                                          ? ')'
+                                          : '',
+                                      cardinalityValue:
+                                        countData.cardinality === 0
+                                          ? allValuesLabel
+                                          : countData.cardinality,
+                                      cardinality: countData.cardinality,
+                                      fieldName: countData.fieldName,
+                                    },
+                                  }
+                                )}
+                                {i !== chartDetails.entityData.entities.length - 1 ? ', ' : ''}
+                              </Fragment>
+                            );
+                          })}
+                        </EuiTextColor>
+                      )}
+                    </h2>
+                  </EuiTitle>
+                </EuiFlexItem>
+
+                <EuiFlexItem grow={false}>
+                  <TimeSeriesExplorerHelpPopover />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiFlexGroup style={{ float: 'right' }}>
+                {showModelBoundsCheckbox && (
+                  <EuiFlexItem grow={false}>
+                    <EuiCheckbox
+                      id="toggleModelBoundsCheckbox"
+                      label={i18n.translate('xpack.ml.timeSeriesExplorer.showModelBoundsLabel', {
+                        defaultMessage: 'show model bounds',
+                      })}
+                      checked={showModelBounds}
+                      onChange={this.toggleShowModelBoundsHandler}
+                    />
+                  </EuiFlexItem>
                 )}
-                {focusAnnotationData && focusAnnotationData.length > 0 && (
+
+                {showAnnotationsCheckbox && (
+                  <EuiFlexItem grow={false}>
+                    <EuiCheckbox
+                      id="toggleAnnotationsCheckbox"
+                      label={i18n.translate('xpack.ml.timeSeriesExplorer.annotationsLabel', {
+                        defaultMessage: 'annotations',
+                      })}
+                      checked={showAnnotations}
+                      onChange={this.toggleShowAnnotationsHandler}
+                    />
+                  </EuiFlexItem>
+                )}
+
+                {showForecastCheckbox && (
+                  <EuiFlexItem grow={false}>
+                    <EuiCheckbox
+                      id="toggleShowForecastCheckbox"
+                      label={
+                        <span data-test-subj={'mlForecastCheckbox'}>
+                          {i18n.translate('xpack.ml.timeSeriesExplorer.showForecastLabel', {
+                            defaultMessage: 'show forecast',
+                          })}
+                        </span>
+                      }
+                      checked={showForecast}
+                      onChange={this.toggleShowForecastHandler}
+                    />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+
+              <TimeSeriesChartWithTooltips
+                chartProps={chartProps}
+                contextAggregationInterval={contextAggregationInterval}
+                bounds={bounds}
+                detectorIndex={selectedDetectorIndex}
+                renderFocusChartOnly={renderFocusChartOnly}
+                selectedJob={selectedJob}
+                selectedEntities={this.props.selectedEntities}
+                showAnnotations={showAnnotations}
+                showForecast={showForecast}
+                showModelBounds={showModelBounds}
+                lastRefresh={lastRefresh}
+              />
+              {focusAnnotationError !== undefined && (
+                <>
+                  <EuiTitle data-test-subj="mlAnomalyExplorerAnnotations error" size={'xs'}>
+                    <h2>
+                      <FormattedMessage
+                        id="xpack.ml.timeSeriesExplorer.annotationsErrorTitle"
+                        defaultMessage="Annotations"
+                      />
+                    </h2>
+                  </EuiTitle>
+                  <EuiPanel>
+                    <EuiCallOut
+                      title={i18n.translate(
+                        'xpack.ml.timeSeriesExplorer.annotationsErrorCallOutTitle',
+                        {
+                          defaultMessage: 'An error occurred loading annotations:',
+                        }
+                      )}
+                      color="danger"
+                      iconType="alert"
+                    >
+                      <p>{focusAnnotationError}</p>
+                    </EuiCallOut>
+                  </EuiPanel>
+                  <EuiSpacer size="m" />
+                </>
+              )}
+              {focusAnnotationData && focusAnnotationData.length > 0 && (
+                <>
                   <EuiAccordion
-                    id={'EuiAccordion-blah'}
+                    id={'mlAnnotationsAccordion'}
                     buttonContent={
-                      <EuiTitle className="panel-title">
+                      <EuiTitle size={'xs'}>
                         <h2>
                           <FormattedMessage
                             id="xpack.ml.timeSeriesExplorer.annotationsTitle"
@@ -1253,69 +1279,45 @@ export class TimeSeriesExplorer extends React.Component {
                       detectors={detectors}
                       jobIds={[this.props.selectedJobId]}
                       annotations={focusAnnotationData}
-                      aggregations={focusAggregations}
                       isSingleMetricViewerLinkVisible={false}
                       isNumberBadgeVisible={true}
                     />
-                    <EuiSpacer size="l" />
                   </EuiAccordion>
-                )}
-                <AnnotationFlyout
-                  chartDetails={chartDetails}
-                  detectorIndex={selectedDetectorIndex}
-                  detectors={detectors}
-                />
-                <EuiTitle className="panel-title">
-                  <h2>
-                    <FormattedMessage
-                      id="xpack.ml.timeSeriesExplorer.anomaliesTitle"
-                      defaultMessage="Anomalies"
-                    />
-                  </h2>
-                </EuiTitle>
-                <EuiFlexGroup
-                  direction="row"
-                  gutterSize="l"
-                  responsive={true}
-                  className="ml-anomalies-controls"
-                >
-                  <EuiFlexItem grow={false} style={{ width: '170px' }}>
-                    <EuiFormRow
-                      label={i18n.translate('xpack.ml.timeSeriesExplorer.severityThresholdLabel', {
-                        defaultMessage: 'Severity threshold',
-                      })}
-                    >
-                      <SelectSeverity />
-                    </EuiFormRow>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false} style={{ width: '170px' }}>
-                    <EuiFormRow
-                      label={
-                        <EuiToolTip
-                          content={i18n.translate('xpack.ml.timeSeriesExplorer.intervalTooltip', {
-                            defaultMessage:
-                              'Show only the highest severity anomaly for each interval (such as hour or day) or show all anomalies in the selected time period.',
-                          })}
-                        >
-                          <span>
-                            {i18n.translate('xpack.ml.timeSeriesExplorer.intervalLabel', {
-                              defaultMessage: 'Interval',
-                            })}
-                            <EuiIcon type="questionInCircle" color="subdued" />
-                          </span>
-                        </EuiToolTip>
-                      }
-                    >
-                      <SelectInterval />
-                    </EuiFormRow>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-                <EuiSpacer size="m" />
-              </div>
+                  <EuiSpacer size="m" />
+                </>
+              )}
+              <AnnotationFlyout
+                chartDetails={chartDetails}
+                detectorIndex={selectedDetectorIndex}
+                detectors={detectors}
+              />
+              <EuiTitle size={'xs'}>
+                <h2>
+                  <FormattedMessage
+                    id="xpack.ml.timeSeriesExplorer.anomaliesTitle"
+                    defaultMessage="Anomalies"
+                  />
+                </h2>
+              </EuiTitle>
+              <EuiSpacer size="s" />
+              <EuiFlexGroup direction="row" gutterSize="l" responsive={true}>
+                <EuiFlexItem grow={false}>
+                  <SelectSeverity />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <SelectInterval />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiSpacer size="m" />
             </div>
           )}
         {arePartitioningFieldsProvided && jobs.length > 0 && hasResults === true && (
-          <AnomaliesTable bounds={bounds} tableData={tableData} filter={this.tableFilter} />
+          <AnomaliesTable
+            bounds={bounds}
+            tableData={tableData}
+            filter={this.tableFilter}
+            sourceIndicesWithGeoFields={sourceIndicesWithGeoFields}
+          />
         )}
       </TimeSeriesExplorerPage>
     );

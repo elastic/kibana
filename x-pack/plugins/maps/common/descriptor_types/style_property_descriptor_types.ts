@@ -10,6 +10,7 @@
 import {
   COLOR_MAP_TYPE,
   FIELD_ORIGIN,
+  ICON_SOURCE,
   LABEL_BORDER_SIZES,
   SYMBOLIZE_AS_TYPES,
   VECTOR_STYLES,
@@ -32,6 +33,14 @@ export type LabelBorderSizeOptions = {
 
 export type LabelBorderSizeStylePropertyDescriptor = {
   options: LabelBorderSizeOptions;
+};
+
+export type LabelZoomRangeStylePropertyDescriptor = {
+  options: {
+    useLayerZoomRange: boolean;
+    minZoom: number;
+    maxZoom: number;
+  };
 };
 
 // Static/dynamic options
@@ -60,6 +69,7 @@ export type CategoryColorStop = {
 export type IconStop = {
   stop: string | null;
   icon: string;
+  iconSource?: ICON_SOURCE;
 };
 
 export type ColorDynamicOptions = {
@@ -73,6 +83,7 @@ export type ColorDynamicOptions = {
   colorCategory?: string; // TODO move color category palettes to constants and make ENUM type
   customColorPalette?: CategoryColorStop[];
   useCustomColorPalette?: boolean;
+  otherCategoryColor?: string;
 
   field?: StylePropertyField;
   fieldMetaOptions: FieldMetaOptions;
@@ -108,6 +119,9 @@ export type IconDynamicOptions = {
 
 export type IconStaticOptions = {
   value: string; // icon id
+  label?: string;
+  svg?: string;
+  iconSource?: ICON_SOURCE;
 };
 
 export type IconStylePropertyDescriptor =
@@ -178,6 +192,14 @@ export type SizeStylePropertyDescriptor =
       options: SizeDynamicOptions;
     };
 
+export type CustomIcon = {
+  symbolId: string;
+  svg: string; // svg string
+  label: string; // user given label
+  cutoff: number;
+  radius: number;
+};
+
 export type VectorStylePropertiesDescriptor = {
   [VECTOR_STYLES.SYMBOLIZE_AS]: SymbolizeAsStylePropertyDescriptor;
   [VECTOR_STYLES.FILL_COLOR]: ColorStylePropertyDescriptor;
@@ -187,6 +209,7 @@ export type VectorStylePropertiesDescriptor = {
   [VECTOR_STYLES.ICON_SIZE]: SizeStylePropertyDescriptor;
   [VECTOR_STYLES.ICON_ORIENTATION]: OrientationStylePropertyDescriptor;
   [VECTOR_STYLES.LABEL_TEXT]: LabelStylePropertyDescriptor;
+  [VECTOR_STYLES.LABEL_ZOOM_RANGE]: LabelZoomRangeStylePropertyDescriptor;
   [VECTOR_STYLES.LABEL_COLOR]: ColorStylePropertyDescriptor;
   [VECTOR_STYLES.LABEL_SIZE]: SizeStylePropertyDescriptor;
   [VECTOR_STYLES.LABEL_BORDER_COLOR]: ColorStylePropertyDescriptor;
@@ -215,24 +238,22 @@ export type Category = {
   count: number;
 };
 
-export type CategoryFieldMeta = {
-  categories: Category[];
-};
-
 export type GeometryTypes = {
   isPointsOnly: boolean;
   isLinesOnly: boolean;
   isPolygonsOnly: boolean;
 };
 
+export type FieldMeta = {
+  [key: string]: {
+    range?: RangeFieldMeta;
+    categories: Category[];
+  };
+};
+
 export type StyleMetaDescriptor = {
   geometryTypes?: GeometryTypes;
-  fieldMeta: {
-    [key: string]: {
-      range?: RangeFieldMeta;
-      categories?: CategoryFieldMeta;
-    };
-  };
+  fieldMeta: FieldMeta;
 };
 
 export type VectorStyleDescriptor = StyleDescriptor & {
@@ -245,8 +266,13 @@ export type HeatmapStyleDescriptor = StyleDescriptor & {
   colorRampName: string;
 };
 
+export type EMSVectorTileStyleDescriptor = StyleDescriptor & {
+  color: string;
+};
+
 export type StylePropertyOptions =
   | LabelBorderSizeOptions
+  | LabelZoomRangeStylePropertyDescriptor['options']
   | SymbolizeAsOptions
   | DynamicStylePropertyOptions
   | StaticStylePropertyOptions;

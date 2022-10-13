@@ -18,33 +18,37 @@ import {
   EuiFormRow,
   EuiSpacer,
   EuiText,
-  EuiTitle,
   EuiSwitch,
 } from '@elastic/eui';
 
 import { EventsTable } from '../events_table';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { ML_PAGES } from '../../../../../../common/constants/ml_url_generator';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { ML_PAGES } from '../../../../../../common/constants/locator';
 import { useCreateAndNavigateToMlLink } from '../../../../contexts/kibana/use_create_url';
+import { MlPageHeader } from '../../../../components/page_header';
 
 function EditHeader({ calendarId, description }) {
   return (
     <Fragment>
-      <EuiTitle data-test-subj="mlCalendarTitle">
-        <h1>
+      <MlPageHeader>
+        <span data-test-subj={'mlCalendarTitle'}>
           <FormattedMessage
             id="xpack.ml.calendarsEdit.calendarForm.calendarTitle"
             defaultMessage="Calendar {calendarId}"
             values={{ calendarId }}
           />
-        </h1>
-      </EuiTitle>
-      <EuiText data-test-subj={'mlCalendarDescriptionText'}>
-        <p>{description}</p>
-      </EuiText>
-      <EuiSpacer size="l" />
+        </span>
+      </MlPageHeader>
+      {description ? (
+        <>
+          <EuiText data-test-subj={'mlCalendarDescriptionText'}>
+            <p>{description}</p>
+          </EuiText>
+          <EuiSpacer size="l" />
+        </>
+      ) : null}
     </Fragment>
   );
 }
@@ -69,6 +73,7 @@ export const CalendarForm = ({
   showImportModal,
   onJobSelection,
   saving,
+  loading,
   selectedGroupOptions,
   selectedJobOptions,
   showNewEventModal,
@@ -83,7 +88,11 @@ export const CalendarForm = ({
   const helpText = isNewCalendarIdValid === true && !isEdit ? msg : undefined;
   const error = isNewCalendarIdValid === false && !isEdit ? [msg] : undefined;
   const saveButtonDisabled =
-    canCreateCalendar === false || saving || !isNewCalendarIdValid || calendarId === '';
+    canCreateCalendar === false ||
+    saving ||
+    !isNewCalendarIdValid ||
+    calendarId === '' ||
+    loading === true;
   const redirectToCalendarsManagementPage = useCreateAndNavigateToMlLink(ML_PAGES.CALENDARS_MANAGE);
 
   return (
@@ -92,15 +101,12 @@ export const CalendarForm = ({
         <EditHeader calendarId={calendarId} description={description} />
       ) : (
         <Fragment>
-          <EuiTitle>
-            <h1>
-              <FormattedMessage
-                id="xpack.ml.calendarsEdit.calendarForm.createCalendarTitle"
-                defaultMessage="Create new calendar"
-              />
-            </h1>
-          </EuiTitle>
-          <EuiSpacer size="m" />
+          <MlPageHeader>
+            <FormattedMessage
+              id="xpack.ml.calendarsEdit.calendarForm.createCalendarTitle"
+              defaultMessage="Create new calendar"
+            />
+          </MlPageHeader>
           <EuiFormRow
             label={
               <FormattedMessage
@@ -116,7 +122,7 @@ export const CalendarForm = ({
               name="calendarId"
               value={calendarId}
               onChange={onCalendarIdChange}
-              disabled={isEdit === true || saving === true}
+              disabled={isEdit === true || saving === true || loading === true}
               data-test-subj="mlCalendarIdInput"
             />
           </EuiFormRow>
@@ -133,14 +139,14 @@ export const CalendarForm = ({
               name="description"
               value={description}
               onChange={onDescriptionChange}
-              disabled={isEdit === true || saving === true}
+              disabled={isEdit === true || saving === true || loading === true}
               data-test-subj="mlCalendarDescriptionInput"
             />
           </EuiFormRow>
+
+          <EuiSpacer size="m" />
         </Fragment>
       )}
-
-      <EuiSpacer size="xl" />
 
       <EuiSwitch
         name="switch"
@@ -152,7 +158,7 @@ export const CalendarForm = ({
         }
         checked={isGlobalCalendar}
         onChange={onGlobalCalendarChange}
-        disabled={saving === true || canCreateCalendar === false}
+        disabled={saving === true || canCreateCalendar === false || loading === true}
         data-test-subj="mlCalendarApplyToAllJobsSwitch"
       />
 
@@ -172,7 +178,7 @@ export const CalendarForm = ({
               options={jobIds}
               selectedOptions={selectedJobOptions}
               onChange={onJobSelection}
-              isDisabled={saving === true || canCreateCalendar === false}
+              isDisabled={saving === true || canCreateCalendar === false || loading === true}
               data-test-subj="mlCalendarJobSelection"
             />
           </EuiFormRow>
@@ -190,7 +196,7 @@ export const CalendarForm = ({
               options={groupIds}
               selectedOptions={selectedGroupOptions}
               onChange={onGroupSelection}
-              isDisabled={saving === true || canCreateCalendar === false}
+              isDisabled={saving === true || canCreateCalendar === false || loading === true}
               data-test-subj="mlCalendarJobGroupSelection"
             />
           </EuiFormRow>
@@ -215,6 +221,8 @@ export const CalendarForm = ({
           onDeleteClick={onEventDelete}
           showImportModal={showImportModal}
           showNewEventModal={showNewEventModal}
+          loading={loading}
+          saving={saving}
           showSearchBar
         />
       </EuiFormRow>
@@ -272,6 +280,7 @@ CalendarForm.propTypes = {
   showImportModal: PropTypes.func.isRequired,
   onJobSelection: PropTypes.func.isRequired,
   saving: PropTypes.bool.isRequired,
+  loading: PropTypes.bool.isRequired,
   selectedGroupOptions: PropTypes.array.isRequired,
   selectedJobOptions: PropTypes.array.isRequired,
   showNewEventModal: PropTypes.func.isRequired,

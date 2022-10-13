@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { AggGroupNames, BUCKET_TYPES, METRIC_TYPES, search } from '@kbn/data-plugin/public';
 import * as controls from './controls';
-import { AggGroupNames, BUCKET_TYPES, METRIC_TYPES, search } from '../../../data/public';
 import { wrapWithInlineComp } from './controls/utils';
 
 const { siblingPipelineType, parentPipelineType } = search.aggs;
@@ -64,6 +64,11 @@ const metrics = {
     field: controls.TopFieldParamEditor,
     aggregate: wrapWithInlineComp(controls.TopAggregateParamEditor),
     size: wrapWithInlineComp(controls.TopSizeParamEditor),
+    sortField: controls.TopSortFieldParamEditor,
+    sortOrder: controls.OrderParamEditor,
+  },
+  [METRIC_TYPES.TOP_METRICS]: {
+    field: controls.FieldParamEditor,
     sortField: controls.TopSortFieldParamEditor,
     sortOrder: controls.OrderParamEditor,
   },

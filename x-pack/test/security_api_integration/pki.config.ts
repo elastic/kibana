@@ -6,12 +6,17 @@
  */
 
 import { resolve } from 'path';
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import { services } from './services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
+
+  const testEndpointsPlugin = resolve(
+    __dirname,
+    '../security_functional/fixtures/common/test_endpoints'
+  );
 
   const servers = {
     ...xPackAPITestsConfig.get('servers'),
@@ -24,6 +29,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       protocol: 'https',
     },
   };
+
+  const auditLogPath = resolve(__dirname, './fixtures/audit/pki.log');
 
   return {
     testFiles: [require.resolve('./tests/pki')],
@@ -54,6 +61,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...xPackAPITestsConfig.get('kbnTestServer'),
       serverArgs: [
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
+        `--plugin-path=${testEndpointsPlugin}`,
         '--server.ssl.enabled=true',
         `--server.ssl.key=${KBN_KEY_PATH}`,
         `--server.ssl.certificate=${KBN_CERT_PATH}`,
@@ -65,6 +73,14 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--elasticsearch.hosts=${servers.elasticsearch.protocol}://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
         `--xpack.security.authc.providers=${JSON.stringify(['pki', 'basic'])}`,
+        '--xpack.security.audit.enabled=true',
+        '--xpack.security.audit.appender.type=file',
+        `--xpack.security.audit.appender.fileName=${auditLogPath}`,
+        '--xpack.security.audit.appender.layout.type=json',
+        `--xpack.security.audit.ignore_filters=${JSON.stringify([
+          { actions: ['http_request'] },
+          { categories: ['database'] },
+        ])}`,
       ],
     },
   };

@@ -7,7 +7,7 @@
  */
 
 /**
- * https://www.elastic.co/guide/en/ecs/1.9/ecs-log.html
+ * https://www.elastic.co/guide/en/ecs/master/ecs-log.html
  *
  * @internal
  */
@@ -16,7 +16,6 @@ export interface EcsLog {
   level?: string;
   logger?: string;
   origin?: Origin;
-  original?: string;
   syslog?: Syslog;
 }
 
@@ -26,7 +25,13 @@ interface Origin {
 }
 
 interface Syslog {
+  appname?: string;
   facility?: { code?: number; name?: string };
+  hostname?: string;
+  msgid?: string;
   priority?: number;
+  procid?: string;
   severity?: { code?: number; name?: string };
+  structured_data?: Record<string, string>;
+  version?: string;
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 /**
  * This model deals with a cluster object from ES and converts it to Kibana downstream
@@ -24,7 +24,7 @@ export class Cluster {
   }
 
   // generate Pipeline object from elasticsearch response
-  static fromUpstreamJSON(upstreamCluster: estypes.RootNodeInfoResponse) {
+  static fromUpstreamJSON(upstreamCluster: estypes.InfoResponse) {
     const uuid = upstreamCluster.cluster_uuid;
     return new Cluster({ uuid });
   }

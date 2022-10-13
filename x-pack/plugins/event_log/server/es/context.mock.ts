@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from 'src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { EsContext } from './context';
 import { namesMock } from './names.mock';
 import { IClusterClientAdapter } from './cluster_client_adapter';
 import { clusterClientAdapterMock } from './cluster_client_adapter.mock';
+
+export const MOCK_RETRY_DELAY = 20;
 
 const createContextMock = () => {
   const mock: jest.Mocked<EsContext> & {
@@ -23,6 +25,7 @@ const createContextMock = () => {
     waitTillReady: jest.fn(async () => true),
     esAdapter: clusterClientAdapterMock.create(),
     initialized: true,
+    retryDelay: MOCK_RETRY_DELAY,
   };
   return mock;
 };

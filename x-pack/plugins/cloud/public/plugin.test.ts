@@ -5,18 +5,82 @@
  * 2.0.
  */
 
-import { nextTick } from '@kbn/test/jest';
-import { coreMock } from 'src/core/public/mocks';
-import { homePluginMock } from 'src/plugins/home/public/mocks';
-import { securityMock } from '../../security/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { CloudPlugin } from './plugin';
 
+const baseConfig = {
+  base_url: 'https://cloud.elastic.co',
+  deployment_url: '/abc123',
+  profile_url: '/user/settings/',
+  organization_url: '/account/',
+};
+
 describe('Cloud Plugin', () => {
+  describe('#setup', () => {
+    describe('interface', () => {
+      const setupPlugin = () => {
+        const initContext = coreMock.createPluginInitializerContext({
+          ...baseConfig,
+          id: 'cloudId',
+          cname: 'cloud.elastic.co',
+        });
+        const plugin = new CloudPlugin(initContext);
+
+        const coreSetup = coreMock.createSetup();
+        const setup = plugin.setup(coreSetup);
+
+        return { setup };
+      };
+
+      it('exposes isCloudEnabled', () => {
+        const { setup } = setupPlugin();
+        expect(setup.isCloudEnabled).toBe(true);
+      });
+
+      it('exposes cloudId', () => {
+        const { setup } = setupPlugin();
+        expect(setup.cloudId).toBe('cloudId');
+      });
+
+      it('exposes baseUrl', () => {
+        const { setup } = setupPlugin();
+        expect(setup.baseUrl).toBe('https://cloud.elastic.co');
+      });
+
+      it('exposes deploymentUrl', () => {
+        const { setup } = setupPlugin();
+        expect(setup.deploymentUrl).toBe('https://cloud.elastic.co/abc123');
+      });
+
+      it('exposes snapshotsUrl', () => {
+        const { setup } = setupPlugin();
+        expect(setup.snapshotsUrl).toBe('https://cloud.elastic.co/abc123/elasticsearch/snapshots/');
+      });
+
+      it('exposes profileUrl', () => {
+        const { setup } = setupPlugin();
+        expect(setup.profileUrl).toBe('https://cloud.elastic.co/user/settings/');
+      });
+
+      it('exposes organizationUrl', () => {
+        const { setup } = setupPlugin();
+        expect(setup.organizationUrl).toBe('https://cloud.elastic.co/account/');
+      });
+
+      it('exposes cname', () => {
+        const { setup } = setupPlugin();
+        expect(setup.cname).toBe('cloud.elastic.co');
+      });
+
+      it('exposes registerCloudService', () => {
+        const { setup } = setupPlugin();
+        expect(setup.registerCloudService).toBeDefined();
+      });
+    });
+  });
+
   describe('#start', () => {
-    function setupPlugin({
-      roles = [],
-      simulateUserError = false,
-    }: { roles?: string[]; simulateUserError?: boolean } = {}) {
+    const startPlugin = () => {
       const plugin = new CloudPlugin(
         coreMock.createPluginInitializerContext({
           id: 'cloudId',
@@ -24,167 +88,33 @@ describe('Cloud Plugin', () => {
           deployment_url: '/abc123',
           profile_url: '/profile/alice',
           organization_url: '/org/myOrg',
+          full_story: {
+            enabled: false,
+          },
+          chat: {
+            enabled: false,
+          },
         })
       );
       const coreSetup = coreMock.createSetup();
-      const homeSetup = homePluginMock.createSetupContract();
-      const securitySetup = securityMock.createSetup();
-      if (simulateUserError) {
-        securitySetup.authc.getCurrentUser.mockRejectedValue(new Error('Something happened'));
-      } else {
-        securitySetup.authc.getCurrentUser.mockResolvedValue(
-          securityMock.createMockAuthenticatedUser({
-            roles,
-          })
-        );
-      }
 
-      plugin.setup(coreSetup, { home: homeSetup, security: securitySetup });
+      plugin.setup(coreSetup);
 
-      return { coreSetup, securitySetup, plugin };
-    }
+      return { coreSetup, plugin };
+    };
 
     it('registers help support URL', async () => {
-      const { plugin } = setupPlugin();
+      const { plugin } = startPlugin();
 
       const coreStart = coreMock.createStart();
-      const securityStart = securityMock.createStart();
-      plugin.start(coreStart, { security: securityStart });
+      plugin.start(coreStart);
 
       expect(coreStart.chrome.setHelpSupportUrl).toHaveBeenCalledTimes(1);
       expect(coreStart.chrome.setHelpSupportUrl.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
-          "https://support.elastic.co/",
+          "https://cloud.elastic.co/support",
         ]
       `);
-    });
-
-    it('registers a custom nav link for superusers', async () => {
-      const { plugin } = setupPlugin({ roles: ['superuser'] });
-
-      const coreStart = coreMock.createStart();
-      const securityStart = securityMock.createStart();
-      plugin.start(coreStart, { security: securityStart });
-
-      await nextTick();
-
-      expect(coreStart.chrome.setCustomNavLink).toHaveBeenCalledTimes(1);
-      expect(coreStart.chrome.setCustomNavLink.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "euiIconType": "arrowLeft",
-            "href": "https://cloud.elastic.co/abc123",
-            "title": "Manage this deployment",
-          },
-        ]
-      `);
-    });
-
-    it('registers a custom nav link when there is an error retrieving the current user', async () => {
-      const { plugin } = setupPlugin({ simulateUserError: true });
-
-      const coreStart = coreMock.createStart();
-      const securityStart = securityMock.createStart();
-      plugin.start(coreStart, { security: securityStart });
-
-      await nextTick();
-
-      expect(coreStart.chrome.setCustomNavLink).toHaveBeenCalledTimes(1);
-      expect(coreStart.chrome.setCustomNavLink.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "euiIconType": "arrowLeft",
-            "href": "https://cloud.elastic.co/abc123",
-            "title": "Manage this deployment",
-          },
-        ]
-      `);
-    });
-
-    it('does not register a custom nav link for non-superusers', async () => {
-      const { plugin } = setupPlugin({ roles: ['not-a-superuser'] });
-
-      const coreStart = coreMock.createStart();
-      const securityStart = securityMock.createStart();
-      plugin.start(coreStart, { security: securityStart });
-
-      await nextTick();
-
-      expect(coreStart.chrome.setCustomNavLink).not.toHaveBeenCalled();
-    });
-
-    it('registers user profile links for superusers', async () => {
-      const { plugin } = setupPlugin({ roles: ['superuser'] });
-
-      const coreStart = coreMock.createStart();
-      const securityStart = securityMock.createStart();
-      plugin.start(coreStart, { security: securityStart });
-
-      await nextTick();
-
-      expect(securityStart.navControlService.addUserMenuLinks).toHaveBeenCalledTimes(1);
-      expect(securityStart.navControlService.addUserMenuLinks.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Array [
-            Object {
-              "href": "https://cloud.elastic.co/profile/alice",
-              "iconType": "user",
-              "label": "Profile",
-              "order": 100,
-              "setAsProfile": true,
-            },
-            Object {
-              "href": "https://cloud.elastic.co/org/myOrg",
-              "iconType": "gear",
-              "label": "Account & Billing",
-              "order": 200,
-            },
-          ],
-        ]
-      `);
-    });
-
-    it('registers profile links when there is an error retrieving the current user', async () => {
-      const { plugin } = setupPlugin({ simulateUserError: true });
-
-      const coreStart = coreMock.createStart();
-      const securityStart = securityMock.createStart();
-      plugin.start(coreStart, { security: securityStart });
-
-      await nextTick();
-
-      expect(securityStart.navControlService.addUserMenuLinks).toHaveBeenCalledTimes(1);
-      expect(securityStart.navControlService.addUserMenuLinks.mock.calls[0]).toMatchInlineSnapshot(`
-        Array [
-          Array [
-            Object {
-              "href": "https://cloud.elastic.co/profile/alice",
-              "iconType": "user",
-              "label": "Profile",
-              "order": 100,
-              "setAsProfile": true,
-            },
-            Object {
-              "href": "https://cloud.elastic.co/org/myOrg",
-              "iconType": "gear",
-              "label": "Account & Billing",
-              "order": 200,
-            },
-          ],
-        ]
-      `);
-    });
-
-    it('does not register profile links for non-superusers', async () => {
-      const { plugin } = setupPlugin({ roles: ['not-a-superuser'] });
-
-      const coreStart = coreMock.createStart();
-      const securityStart = securityMock.createStart();
-      plugin.start(coreStart, { security: securityStart });
-
-      await nextTick();
-
-      expect(securityStart.navControlService.addUserMenuLinks).not.toHaveBeenCalled();
     });
   });
 });

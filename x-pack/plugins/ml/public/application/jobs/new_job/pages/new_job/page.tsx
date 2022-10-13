@@ -5,18 +5,13 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, Fragment } from 'react';
+import React, { FC, useEffect, Fragment, useMemo } from 'react';
 import {
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent,
-  EuiPageContentHeader,
-  EuiPageContentHeaderSection,
-  EuiTitle,
-  EuiPageContentBody,
+  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
+  EuiPageContentHeaderSection_Deprecated as EuiPageContentHeaderSection,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { Wizard } from './wizard';
 import { WIZARD_STEPS } from '../components/step_types';
 import { getJobCreatorTitle } from '../../common/job_creator/util/general';
@@ -24,6 +19,7 @@ import {
   jobCreatorFactory,
   isAdvancedJobCreator,
   isCategorizationJobCreator,
+  isRareJobCreator,
 } from '../../common/job_creator';
 import {
   JOB_TYPE,
@@ -41,6 +37,7 @@ import { newJobCapsService } from '../../../../services/new_job_capabilities/new
 import { EVENT_RATE_FIELD_ID } from '../../../../../../common/types/fields';
 import { getNewJobDefaults } from '../../../../services/ml_server_info';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
+import { MlPageHeader } from '../../../../components/page_header';
 
 const PAGE_WIDTH = 1200; // document.querySelector('.single-metric-job-container').width();
 const BAR_TARGET = PAGE_WIDTH > 2000 ? 1000 : PAGE_WIDTH / 2;
@@ -53,11 +50,17 @@ export interface PageProps {
 
 export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   const mlContext = useMlContext();
-  const jobCreator = jobCreatorFactory(jobType)(
-    mlContext.currentIndexPattern,
-    mlContext.currentSavedSearch,
-    mlContext.combinedQuery
+  const jobCreator = useMemo(
+    () =>
+      jobCreatorFactory(jobType)(
+        mlContext.currentDataView,
+        mlContext.currentSavedSearch,
+        mlContext.combinedQuery
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [jobType]
   );
+
   const { displayErrorToast } = useToastNotificationService();
 
   const { from, to } = getTimeFilterRange();
@@ -68,7 +71,8 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
       ? WIZARD_STEPS.ADVANCED_CONFIGURE_DATAFEED
       : WIZARD_STEPS.TIME_RANGE;
 
-  let autoSetTimeRange = false;
+  let autoSetTimeRange = mlJobService.tempJobCloningObjects.autoSetTimeRange;
+  mlJobService.tempJobCloningObjects.autoSetTimeRange = false;
 
   if (
     mlJobService.tempJobCloningObjects.job !== undefined &&
@@ -107,7 +111,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
     } else {
       // if not start and end times are set and this is an advanced job,
       // auto set the time range based on the index
-      autoSetTimeRange = isAdvancedJobCreator(jobCreator);
+      autoSetTimeRange = autoSetTimeRange || isAdvancedJobCreator(jobCreator);
     }
 
     if (mlJobService.tempJobCloningObjects.calendars) {
@@ -149,7 +153,7 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
     }
   }
 
-  if (autoSetTimeRange && isAdvancedJobCreator(jobCreator)) {
+  if (autoSetTimeRange) {
     // for advanced jobs, load the full time range start and end times
     // so they can be used for job validation and bucket span estimation
     jobCreator.autoSetTimeRange().catch((error) => {
@@ -171,6 +175,10 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
 
       const { anomaly_detectors: anomalyDetectors } = getNewJobDefaults();
       jobCreator.categorizationAnalyzer = anomalyDetectors.categorization_analyzer!;
+    } else if (isRareJobCreator(jobCreator)) {
+      const rare = newJobCapsService.getAggById('rare');
+      const freqRare = newJobCapsService.getAggById('freq_rare');
+      jobCreator.setDefaultDetectorProperties(rare, freqRare);
     }
   }
 
@@ -179,11 +187,19 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   chartInterval.setMaxBars(MAX_BARS);
   chartInterval.setInterval('auto');
 
-  const chartLoader = new ChartLoader(mlContext.currentIndexPattern, mlContext.combinedQuery);
+  const chartLoader = useMemo(
+    () => new ChartLoader(mlContext.currentDataView, jobCreator.query),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
 
-  const jobValidator = new JobValidator(jobCreator);
+  const jobValidator = useMemo(() => new JobValidator(jobCreator), [jobCreator]);
 
-  const resultsLoader = new ResultsLoader(jobCreator, chartInterval, chartLoader);
+  const resultsLoader = useMemo(
+    () => new ResultsLoader(jobCreator, chartInterval, chartLoader),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
 
   useEffect(() => {
     return () => {
@@ -195,43 +211,32 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
 
   return (
     <Fragment>
-      <EuiPage style={{ backgroundColor: 'inherit' }} data-test-subj={`mlPageJobWizard ${jobType}`}>
-        <EuiPageBody>
-          <EuiPageContent>
-            <EuiPageContentHeader>
-              <EuiPageContentHeaderSection>
-                <EuiTitle>
-                  <h1>
-                    <FormattedMessage
-                      id="xpack.ml.newJob.page.createJob"
-                      defaultMessage="Create job"
-                    />
-                    : {jobCreatorTitle}
-                  </h1>
-                </EuiTitle>
+      <MlPageHeader>
+        <FormattedMessage id="xpack.ml.newJob.page.createJob" defaultMessage="Create job" />:{' '}
+        {jobCreatorTitle}
+      </MlPageHeader>
 
-                <FormattedMessage
-                  id="xpack.ml.newJob.page.createJob.indexPatternTitle"
-                  defaultMessage="Using index pattern {index}"
-                  values={{ index: jobCreator.indexPatternTitle }}
-                />
-              </EuiPageContentHeaderSection>
-            </EuiPageContentHeader>
+      <div style={{ backgroundColor: 'inherit' }} data-test-subj={`mlPageJobWizard ${jobType}`}>
+        <EuiPageContentHeader>
+          <EuiPageContentHeaderSection>
+            <FormattedMessage
+              id="xpack.ml.newJob.page.createJob.dataViewName"
+              defaultMessage="Using data view {dataViewName}"
+              values={{ dataViewName: jobCreator.indexPatternDisplayName }}
+            />
+          </EuiPageContentHeaderSection>
+        </EuiPageContentHeader>
 
-            <EuiPageContentBody>
-              <Wizard
-                jobCreator={jobCreator}
-                chartLoader={chartLoader}
-                resultsLoader={resultsLoader}
-                chartInterval={chartInterval}
-                jobValidator={jobValidator}
-                existingJobsAndGroups={existingJobsAndGroups}
-                firstWizardStep={firstWizardStep}
-              />
-            </EuiPageContentBody>
-          </EuiPageContent>
-        </EuiPageBody>
-      </EuiPage>
+        <Wizard
+          jobCreator={jobCreator}
+          chartLoader={chartLoader}
+          resultsLoader={resultsLoader}
+          chartInterval={chartInterval}
+          jobValidator={jobValidator}
+          existingJobsAndGroups={existingJobsAndGroups}
+          firstWizardStep={firstWizardStep}
+        />
+      </div>
     </Fragment>
   );
 };

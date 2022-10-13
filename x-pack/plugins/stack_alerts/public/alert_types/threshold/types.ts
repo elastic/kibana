@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AlertTypeParams } from '../../../../alerting/common';
+import { RuleTypeParams } from '@kbn/alerting-plugin/common';
 
 export interface Comparator {
   text: string;
@@ -27,7 +27,7 @@ export interface GroupByType {
   validNormalizedTypes: string[];
 }
 
-export interface IndexThresholdAlertParams extends AlertTypeParams {
+export interface IndexThresholdAlertParams extends RuleTypeParams {
   index: string | string[];
   timeField?: string;
   aggType: string;

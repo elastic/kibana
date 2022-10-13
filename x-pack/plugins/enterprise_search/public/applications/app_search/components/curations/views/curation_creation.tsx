@@ -9,10 +9,11 @@ import React from 'react';
 
 import { useActions } from 'kea';
 
-import { EuiPageHeader, EuiPageContent, EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
+import { EuiPanel, EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { FlashMessages } from '../../../../shared/flash_messages';
+import { CurationsLogic } from '..';
+import { AppSearchPageTemplate } from '../../layout';
 import { MultiInputRows } from '../../multi_input_rows';
 
 import {
@@ -20,16 +21,17 @@ import {
   QUERY_INPUTS_BUTTON,
   QUERY_INPUTS_PLACEHOLDER,
 } from '../constants';
-import { CurationsLogic } from '../index';
+import { getCurationsBreadcrumbs } from '../utils';
 
 export const CurationCreation: React.FC = () => {
   const { createCuration } = useActions(CurationsLogic);
 
   return (
-    <>
-      <EuiPageHeader pageTitle={CREATE_NEW_CURATION_TITLE} />
-      <FlashMessages />
-      <EuiPageContent hasBorder>
+    <AppSearchPageTemplate
+      pageChrome={getCurationsBreadcrumbs([CREATE_NEW_CURATION_TITLE])}
+      pageHeader={{ pageTitle: CREATE_NEW_CURATION_TITLE }}
+    >
+      <EuiPanel hasBorder>
         <EuiTitle>
           <h2>
             {i18n.translate(
@@ -56,7 +58,7 @@ export const CurationCreation: React.FC = () => {
           inputPlaceholder={QUERY_INPUTS_PLACEHOLDER}
           onSubmit={(queries) => createCuration(queries)}
         />
-      </EuiPageContent>
-    </>
+      </EuiPanel>
+    </AppSearchPageTemplate>
   );
 };

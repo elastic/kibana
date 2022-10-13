@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { KibanaPlatformPlugin, ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import { getApiSectionId, getPluginApiDocId, getPluginForPath } from '../utils';
-import { ApiScope, TextWithLinks } from '../types';
+import { ApiScope, PluginOrPackage, TextWithLinks } from '../types';
 import { getRelativePath, pathsOutsideScopes } from './utils';
 
 /**
@@ -27,17 +27,12 @@ import { getRelativePath, pathsOutsideScopes } from './utils';
  */
 export function extractImportReferences(
   text: string,
-  plugins: KibanaPlatformPlugin[],
+  plugins: PluginOrPackage[],
   log: ToolingLog
 ): TextWithLinks {
   const texts: TextWithLinks = [];
-  let pos = 0;
   let textSegment: string | undefined = text;
-  const max = 5;
   while (textSegment) {
-    pos++;
-    if (pos > max) break;
-
     const ref = extractImportRef(textSegment);
     if (ref) {
       const { name, path, index, length } = ref;
@@ -45,7 +40,6 @@ export function extractImportReferences(
         texts.push(textSegment.substr(0, index));
       }
       const plugin = getPluginForPath(path, plugins);
-
       if (!plugin) {
         if (path.indexOf('plugin') >= 0) {
           log.warning('WARN: no plugin found for reference path ' + path);
@@ -61,14 +55,13 @@ export function extractImportReferences(
         }
       } else {
         const section = getApiSectionId({
-          pluginName: plugin.manifest.id,
           scope: getScopeFromPath(path, plugin, log),
-          apiName: name,
+          id: name,
         });
         texts.push({
           pluginId: plugin.manifest.id,
           scope: getScopeFromPath(path, plugin, log),
-          docId: getPluginApiDocId(plugin.manifest.id, log, {
+          docId: getPluginApiDocId(plugin.manifest.id, {
             serviceFolders: plugin.manifest.serviceFolders,
             apiPath: path,
             directory: plugin.directory,
@@ -107,13 +100,15 @@ function extractImportRef(
  *
  * @param path An absolute path to a file inside a plugin directory.
  */
-function getScopeFromPath(path: string, plugin: KibanaPlatformPlugin, log: ToolingLog): ApiScope {
+function getScopeFromPath(path: string, plugin: PluginOrPackage, log: ToolingLog): ApiScope {
   if (path.startsWith(`${plugin.directory}/public/`)) {
     return ApiScope.CLIENT;
   } else if (path.startsWith(`${plugin.directory}/server/`)) {
     return ApiScope.SERVER;
   } else if (path.startsWith(`${plugin.directory}/common/`)) {
     return ApiScope.COMMON;
+  } else if (!plugin.isPlugin) {
+    return plugin.scope ?? ApiScope.COMMON;
   } else {
     pathsOutsideScopes[path] = plugin.directory;
     return ApiScope.COMMON;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiListGroup, EuiTitle } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexItem, EuiListGroup, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
@@ -20,14 +20,21 @@ const resources = [
   {
     iconType: 'editorComment',
     label: i18n.translate('xpack.observability.resources.forum', {
-      defaultMessage: 'Discuss forum',
+      defaultMessage: 'Discuss Forum',
     }),
     href: 'https://ela.st/observability-discuss',
   },
   {
+    iconType: 'play',
+    label: i18n.translate('xpack.observability.resources.quick_start', {
+      defaultMessage: 'Quick Start Videos',
+    }),
+    href: 'https://ela.st/observability-quick-starts',
+  },
+  {
     iconType: 'training',
     label: i18n.translate('xpack.observability.resources.training', {
-      defaultMessage: 'Observability fundamentals',
+      defaultMessage: 'Free Observability Course',
     }),
     href: 'https://ela.st/observability-training',
   },
@@ -35,7 +42,7 @@ const resources = [
 
 export function Resources() {
   return (
-    <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="xs">
+    <EuiFlexGrid direction="column">
       <EuiFlexItem grow={false}>
         <EuiTitle size="xs">
           <h4>
@@ -45,7 +52,7 @@ export function Resources() {
           </h4>
         </EuiTitle>
       </EuiFlexItem>
-      <EuiListGroup flush listItems={resources} data-test-subj="list-group" />
-    </EuiFlexGroup>
+      <EuiListGroup flush listItems={resources} data-test-subj="listGroup" size="s" />
+    </EuiFlexGrid>
   );
 }

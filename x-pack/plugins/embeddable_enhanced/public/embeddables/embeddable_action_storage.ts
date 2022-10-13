@@ -5,22 +5,18 @@
  * 2.0.
  */
 
+import type { SerializableRecord } from '@kbn/utility-types';
 import {
   DynamicActionsState,
   UiActionsEnhancedAbstractActionStorage as AbstractActionStorage,
   UiActionsEnhancedSerializedEvent as SerializedEvent,
-} from '../../../ui_actions_enhanced/public';
-import {
-  EmbeddableInput,
-  EmbeddableOutput,
-  IEmbeddable,
-} from '../../../../../src/plugins/embeddable/public';
-import { SerializableState } from '../../../../../src/plugins/kibana_utils/common';
+} from '@kbn/ui-actions-enhanced-plugin/public';
+import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from '@kbn/embeddable-plugin/public';
 
 export interface EmbeddableWithDynamicActionsInput extends EmbeddableInput {
   enhancements?: {
     dynamicActions: DynamicActionsState;
-    [key: string]: SerializableState;
+    [key: string]: SerializableRecord;
   };
 }
 

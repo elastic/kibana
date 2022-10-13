@@ -10,16 +10,20 @@ import { FtrProviderContext } from '../services';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const supertest = getService('supertest');
 
   describe('POST /api/saved_objects_tagging/assignments/update_by_tags', () => {
     beforeEach(async () => {
-      await esArchiver.load('bulk_assign');
+      await kibanaServer.importExport.load(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/bulk_assign/data.json'
+      );
     });
 
     afterEach(async () => {
-      await esArchiver.unload('bulk_assign');
+      await kibanaServer.importExport.unload(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/bulk_assign/data.json'
+      );
     });
 
     it('allows to update tag assignments', async () => {

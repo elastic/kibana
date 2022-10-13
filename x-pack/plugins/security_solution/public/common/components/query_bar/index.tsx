@@ -8,25 +8,20 @@
 import React, { memo, useMemo, useCallback } from 'react';
 import deepEqual from 'fast-deep-equal';
 
-import {
-  Filter,
-  IIndexPattern,
-  FilterManager,
-  Query,
-  TimeHistory,
-  TimeRange,
-  SavedQuery,
-  SearchBar,
-  SavedQueryTimeFilter,
-} from '../../../../../../../src/plugins/data/public';
-import { Storage } from '../../../../../../../src/plugins/kibana_utils/public';
+import type { DataViewBase, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { FilterManager, SavedQuery, SavedQueryTimeFilter } from '@kbn/data-plugin/public';
+import { TimeHistory } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { SearchBarProps } from '@kbn/unified-search-plugin/public';
+import { SearchBar } from '@kbn/unified-search-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 export interface QueryBarComponentProps {
   dataTestSubj?: string;
   dateRangeFrom?: string;
   dateRangeTo?: string;
   hideSavedQuery?: boolean;
-  indexPattern: IIndexPattern;
+  indexPattern: DataViewBase;
   isLoading?: boolean;
   isRefreshPaused?: boolean;
   filterQuery: Query;
@@ -37,6 +32,8 @@ export interface QueryBarComponentProps {
   refreshInterval?: number;
   savedQuery?: SavedQuery;
   onSavedQuery: (savedQuery: SavedQuery | undefined) => void;
+  displayStyle?: SearchBarProps['displayStyle'];
+  isDisabled?: boolean;
 }
 
 export const QueryBar = memo<QueryBarComponentProps>(
@@ -56,6 +53,8 @@ export const QueryBar = memo<QueryBarComponentProps>(
     savedQuery,
     onSavedQuery,
     dataTestSubj,
+    displayStyle,
+    isDisabled,
   }) => {
     const onQuerySubmit = useCallback(
       (payload: { dateRange: TimeRange; query?: Query }) => {
@@ -103,16 +102,16 @@ export const QueryBar = memo<QueryBarComponentProps>(
       [filterManager]
     );
 
-    const CustomButton = <>{null}</>;
     const indexPatterns = useMemo(() => [indexPattern], [indexPattern]);
+    const timeHistory = useMemo(() => new TimeHistory(new Storage(localStorage)), []);
 
     return (
       <SearchBar
-        customSubmitButton={CustomButton}
+        showSubmitButton={false}
         dateRangeFrom={dateRangeFrom}
         dateRangeTo={dateRangeTo}
         filters={filters}
-        indexPatterns={indexPatterns}
+        indexPatterns={indexPatterns as DataView[]}
         isLoading={isLoading}
         isRefreshPaused={isRefreshPaused}
         query={filterQuery}
@@ -129,9 +128,11 @@ export const QueryBar = memo<QueryBarComponentProps>(
         showQueryBar={true}
         showQueryInput={true}
         showSaveQuery={true}
-        timeHistory={new TimeHistory(new Storage(localStorage))}
+        timeHistory={timeHistory}
         dataTestSubj={dataTestSubj}
         savedQuery={savedQuery}
+        displayStyle={displayStyle}
+        isDisabled={isDisabled}
       />
     );
   }

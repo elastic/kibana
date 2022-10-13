@@ -9,6 +9,7 @@
 import { dirname, resolve } from 'path';
 
 import Joi from 'joi';
+import type { CustomHelpers } from 'joi';
 
 // valid pattern for ID
 // enforced camel-case identifiers for consistency
@@ -16,19 +17,33 @@ const ID_PATTERN = /^[a-zA-Z0-9_]+$/;
 // it will search both --inspect and --inspect-brk
 const INSPECTING = !!process.execArgv.find((arg) => arg.includes('--inspect'));
 
-const urlPartsSchema = () =>
+const maybeRequireKeys = (keys: string[], schemas: Record<string, Joi.Schema>) => {
+  if (!keys.length) {
+    return schemas;
+  }
+
+  const withRequires: Record<string, Joi.Schema> = {};
+  for (const [key, schema] of Object.entries(schemas)) {
+    withRequires[key] = keys.includes(key) ? schema.required() : schema;
+  }
+  return withRequires;
+};
+
+const urlPartsSchema = ({ requiredKeys }: { requiredKeys?: string[] } = {}) =>
   Joi.object()
-    .keys({
-      protocol: Joi.string().valid('http', 'https').default('http'),
-      hostname: Joi.string().hostname().default('localhost'),
-      port: Joi.number(),
-      auth: Joi.string().regex(/^[^:]+:.+$/, 'username and password separated by a colon'),
-      username: Joi.string(),
-      password: Joi.string(),
-      pathname: Joi.string().regex(/^\//, 'start with a /'),
-      hash: Joi.string().regex(/^\//, 'start with a /'),
-      certificateAuthorities: Joi.array().items(Joi.binary()).optional(),
-    })
+    .keys(
+      maybeRequireKeys(requiredKeys ?? [], {
+        protocol: Joi.string().valid('http', 'https').default('http'),
+        hostname: Joi.string().hostname().default('localhost'),
+        port: Joi.number(),
+        auth: Joi.string().regex(/^[^:]+:.+$/, 'username and password separated by a colon'),
+        username: Joi.string(),
+        password: Joi.string(),
+        pathname: Joi.string().regex(/^\//, 'start with a /'),
+        hash: Joi.string().regex(/^\//, 'start with a /'),
+        certificateAuthorities: Joi.array().items(Joi.binary()).optional(),
+      })
+    )
     .default();
 
 const appUrlPartsSchema = () =>
@@ -54,20 +69,24 @@ const dockerServerSchema = () =>
       image: requiredWhenEnabled(Joi.string()),
       port: requiredWhenEnabled(Joi.number()),
       portInContainer: requiredWhenEnabled(Joi.number()),
-      waitForLogLine: Joi.alternatives(Joi.object().type(RegExp), Joi.string()).optional(),
+      waitForLogLine: Joi.alternatives(Joi.object().instance(RegExp), Joi.string()).optional(),
+      waitForLogLineTimeoutMs: Joi.number().integer().optional(),
       waitFor: Joi.func().optional(),
       args: Joi.array().items(Joi.string()).optional(),
     })
     .default();
 
 const defaultRelativeToConfigPath = (path: string) => {
-  const makeDefault: any = (_: any, options: any) => resolve(dirname(options.context.path), path);
-  makeDefault.description = `<config.js directory>/${path}`;
+  const makeDefault = (parent: any, helpers: CustomHelpers) => {
+    helpers.schema.description(`<config.js directory>/${path}`);
+    return resolve(dirname(helpers.prefs.context!.path), path);
+  };
   return makeDefault;
 };
 
 export const schema = Joi.object()
   .keys({
+    rootTags: Joi.array().items(Joi.string()),
     testFiles: Joi.array().items(Joi.string()),
     testRunner: Joi.func(),
 
@@ -85,6 +104,7 @@ export const schema = Joi.object()
       })
       .default(),
 
+    servicesRequiredForTestAnalysis: Joi.array().items(Joi.string()).default([]),
     services: Joi.object().pattern(ID_PATTERN, Joi.func().required()).default(),
 
     pageObjects: Joi.object().pattern(ID_PATTERN, Joi.func().required()).default(),
@@ -95,6 +115,7 @@ export const schema = Joi.object()
         try: Joi.number().default(120000),
         waitFor: Joi.number().default(20000),
         esRequestTimeout: Joi.number().default(30000),
+        kibanaReportCompletion: Joi.number().default(60_000),
         kibanaStabilize: Joi.number().default(15000),
         navigateStatusPageCheck: Joi.number().default(250),
 
@@ -118,6 +139,7 @@ export const schema = Joi.object()
     mochaOpts: Joi.object()
       .keys({
         bail: Joi.boolean().default(false),
+        dryRun: Joi.boolean().default(false),
         grep: Joi.string(),
         invert: Joi.boolean().default(false),
         slow: Joi.number().default(30000),
@@ -141,12 +163,16 @@ export const schema = Joi.object()
       .keys({
         enabled: Joi.boolean().default(!!process.env.CI && !process.env.DISABLE_JUNIT_REPORTER),
         reportName: Joi.string(),
+        metadata: Joi.object().unknown(true).default(),
       })
       .default(),
 
     mochaReporter: Joi.object()
       .keys({
-        captureLogOutput: Joi.boolean().default(!!process.env.CI),
+        captureLogOutput: Joi.boolean().default(
+          !!process.env.CI && !process.env.DISABLE_CI_LOG_OUTPUT_CAPTURE
+        ),
+        sendToCiStats: Joi.boolean().default(!!process.env.CI),
       })
       .default(),
 
@@ -163,18 +189,25 @@ export const schema = Joi.object()
     servers: Joi.object()
       .keys({
         kibana: urlPartsSchema(),
-        elasticsearch: urlPartsSchema(),
+        elasticsearch: urlPartsSchema({
+          requiredKeys: ['port'],
+        }),
       })
       .default(),
 
     esTestCluster: Joi.object()
       .keys({
-        license: Joi.string().default('basic'),
+        license: Joi.valid('basic', 'trial', 'gold').default('basic'),
         from: Joi.string().default('snapshot'),
-        serverArgs: Joi.array(),
-        serverEnvVars: Joi.object(),
+        serverArgs: Joi.array().items(Joi.string()),
+        esJavaOpts: Joi.string(),
         dataArchive: Joi.string(),
         ssl: Joi.boolean().default(false),
+        ccs: Joi.object().keys({
+          remoteClusterUrl: Joi.string().uri({
+            scheme: /https?/,
+          }),
+        }),
       })
       .default(),
 
@@ -184,6 +217,27 @@ export const schema = Joi.object()
         sourceArgs: Joi.array(),
         serverArgs: Joi.array(),
         installDir: Joi.string(),
+        useDedicatedTaskRunner: Joi.boolean().default(false),
+        /** Options for how FTR should execute and interact with Kibana */
+        runOptions: Joi.object()
+          .keys({
+            /**
+             * Log message to wait for before initiating tests, defaults to waiting for Kibana status to be `available`.
+             * Note that this log message must not be filtered out by the current logging config, for example by the
+             * log level. If needed, you can adjust the logging level via `kbnTestServer.serverArgs`.
+             */
+            wait: Joi.object()
+              .regex()
+              .default(/Kibana is now available/),
+
+            /**
+             * Does this test config only work when run against source?
+             */
+            alwaysUseSource: Joi.boolean().default(false),
+          })
+          .default(),
+        env: Joi.object().unknown().default(),
+        delayShutdown: Joi.number(),
       })
       .default(),
 
@@ -206,10 +260,10 @@ export const schema = Joi.object()
     // definition of apps that work with `common.navigateToApp()`
     apps: Joi.object().pattern(ID_PATTERN, appUrlPartsSchema()).default(),
 
-    // settings for the esArchiver module
+    // settings for the saved objects svc
     esArchiver: Joi.object()
       .keys({
-        directory: Joi.string().default(defaultRelativeToConfigPath('fixtures/es_archiver')),
+        baseDirectory: Joi.string().optional(),
       })
       .default(),
 
@@ -259,6 +313,7 @@ export const schema = Joi.object()
     security: Joi.object()
       .keys({
         roles: Joi.object().default(),
+        remoteEsRoles: Joi.object(),
         defaultRoles: Joi.array()
           .items(Joi.string())
           .when('$primary', {

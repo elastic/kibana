@@ -6,37 +6,85 @@
  * Side Public License, v 1.
  */
 
-import { Type } from '@kbn/config-schema';
-
-import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
-import { ConfigDeprecationProvider } from './config';
-import { ContextSetup } from './context';
+import type { DocLinksServiceStart, DocLinksServiceSetup } from '@kbn/core-doc-links-server';
 import {
+  InternalLoggingServicePreboot,
+  InternalLoggingServiceSetup,
+} from '@kbn/core-logging-server-internal';
+import type {
+  AnalyticsServicePreboot,
+  AnalyticsServiceSetup,
+  AnalyticsServiceStart,
+} from '@kbn/core-analytics-server';
+import type { InternalEnvironmentServiceSetup } from '@kbn/core-environment-server-internal';
+import type {
+  InternalExecutionContextSetup,
+  InternalExecutionContextStart,
+} from '@kbn/core-execution-context-server-internal';
+import type { InternalPrebootServicePreboot } from '@kbn/core-preboot-server-internal';
+import type {
+  InternalContextPreboot,
+  InternalContextSetup,
+} from '@kbn/core-http-context-server-internal';
+import type {
+  InternalHttpServicePreboot,
+  InternalHttpServiceSetup,
+  InternalHttpServiceStart,
+} from '@kbn/core-http-server-internal';
+import type {
+  InternalMetricsServiceSetup,
+  InternalMetricsServiceStart,
+} from '@kbn/core-metrics-server-internal';
+import {
+  InternalElasticsearchServicePreboot,
   InternalElasticsearchServiceSetup,
   InternalElasticsearchServiceStart,
-} from './elasticsearch';
-import { InternalHttpServiceSetup, InternalHttpServiceStart } from './http';
+} from '@kbn/core-elasticsearch-server-internal';
+import type { CapabilitiesSetup, CapabilitiesStart } from '@kbn/core-capabilities-server';
 import {
   InternalSavedObjectsServiceSetup,
   InternalSavedObjectsServiceStart,
-} from './saved_objects';
-import { InternalUiSettingsServiceSetup, InternalUiSettingsServiceStart } from './ui_settings';
-import { InternalEnvironmentServiceSetup } from './environment';
-import { InternalMetricsServiceSetup, InternalMetricsServiceStart } from './metrics';
-import { InternalRenderingServiceSetup } from './rendering';
-import { InternalHttpResourcesSetup } from './http_resources';
-import { InternalStatusServiceSetup } from './status';
-import { InternalLoggingServiceSetup } from './logging';
-import { CoreUsageDataStart } from './core_usage_data';
-import { I18nServiceSetup } from './i18n';
-import { InternalDeprecationsServiceSetup } from './deprecations';
+} from '@kbn/core-saved-objects-server-internal';
+import {
+  InternalDeprecationsServiceSetup,
+  InternalDeprecationsServiceStart,
+} from '@kbn/core-deprecations-server-internal';
+import type { CoreUsageDataStart } from '@kbn/core-usage-data-server';
+import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
+import type { I18nServiceSetup } from '@kbn/core-i18n-server';
+import type { InternalStatusServiceSetup } from '@kbn/core-status-server-internal';
+import type {
+  InternalUiSettingsServicePreboot,
+  InternalUiSettingsServiceSetup,
+  InternalUiSettingsServiceStart,
+} from '@kbn/core-ui-settings-server-internal';
+import type { InternalRenderingServiceSetup } from '@kbn/core-rendering-server-internal';
+import type {
+  InternalHttpResourcesPreboot,
+  InternalHttpResourcesSetup,
+} from '@kbn/core-http-resources-server-internal';
+
+/** @internal */
+export interface InternalCorePreboot {
+  analytics: AnalyticsServicePreboot;
+  context: InternalContextPreboot;
+  http: InternalHttpServicePreboot;
+  elasticsearch: InternalElasticsearchServicePreboot;
+  uiSettings: InternalUiSettingsServicePreboot;
+  httpResources: InternalHttpResourcesPreboot;
+  logging: InternalLoggingServicePreboot;
+  preboot: InternalPrebootServicePreboot;
+}
 
 /** @internal */
 export interface InternalCoreSetup {
+  analytics: AnalyticsServiceSetup;
   capabilities: CapabilitiesSetup;
-  context: ContextSetup;
+  context: InternalContextSetup;
+  docLinks: DocLinksServiceSetup;
   http: InternalHttpServiceSetup;
   elasticsearch: InternalElasticsearchServiceSetup;
+  executionContext: InternalExecutionContextSetup;
   i18n: I18nServiceSetup;
   savedObjects: InternalSavedObjectsServiceSetup;
   status: InternalStatusServiceSetup;
@@ -47,32 +95,22 @@ export interface InternalCoreSetup {
   logging: InternalLoggingServiceSetup;
   metrics: InternalMetricsServiceSetup;
   deprecations: InternalDeprecationsServiceSetup;
+  coreUsageData: InternalCoreUsageDataSetup;
 }
 
 /**
  * @internal
  */
 export interface InternalCoreStart {
+  analytics: AnalyticsServiceStart;
   capabilities: CapabilitiesStart;
   elasticsearch: InternalElasticsearchServiceStart;
+  docLinks: DocLinksServiceStart;
   http: InternalHttpServiceStart;
   metrics: InternalMetricsServiceStart;
   savedObjects: InternalSavedObjectsServiceStart;
   uiSettings: InternalUiSettingsServiceStart;
   coreUsageData: CoreUsageDataStart;
-}
-
-/**
- * @internal
- */
-export interface ServiceConfigDescriptor<T = any> {
-  path: string;
-  /**
-   * Schema to use to validate the configuration.
-   */
-  schema: Type<T>;
-  /**
-   * Provider for the {@link ConfigDeprecation} to apply to the plugin configuration.
-   */
-  deprecations?: ConfigDeprecationProvider;
+  executionContext: InternalExecutionContextStart;
+  deprecations: InternalDeprecationsServiceStart;
 }

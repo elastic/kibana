@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import styled, { css } from 'styled-components';
 
-import { LinkIcon, LinkIconProps } from '../link_icon';
+import { useAllCasesNavigation } from '../../common/navigation';
+import { LinkIcon } from '../link_icon';
 import { Subtitle, SubtitleProps } from '../subtitle';
 import { Title } from './title';
-import { BadgeOptions, TitleProp } from './types';
+import * as i18n from './translations';
+import { useCasesContext } from '../cases_context/use_cases_context';
+
 interface HeaderProps {
   border?: boolean;
   isLoading?: boolean;
@@ -27,9 +30,9 @@ const Header = styled.header.attrs({
     ${border &&
     css`
       border-bottom: ${theme.eui.euiBorderThin};
-      padding-bottom: ${theme.eui.paddingSizes.l};
+      padding-bottom: ${theme.eui.euiSizeL};
       .euiProgress {
-        top: ${theme.eui.paddingSizes.l};
+        top: ${theme.eui.euiSizeL};
       }
     `}
   `}
@@ -52,34 +55,18 @@ const LinkBack = styled.div.attrs({
 `;
 LinkBack.displayName = 'LinkBack';
 
-const Badge = (styled(EuiBadge)`
-  letter-spacing: 0;
-` as unknown) as typeof EuiBadge;
-Badge.displayName = 'Badge';
-
-interface BackOptions {
-  href: LinkIconProps['href'];
-  onClick?: (ev: MouseEvent) => void;
-  text: LinkIconProps['children'];
-  dataTestSubj?: string;
-}
-
 export interface HeaderPageProps extends HeaderProps {
-  backOptions?: BackOptions;
-  /** A component to be displayed as the back button. Used only if `backOption` is not defined */
-  backComponent?: React.ReactNode;
-  badgeOptions?: BadgeOptions;
+  showBackButton?: boolean;
   children?: React.ReactNode;
   subtitle?: SubtitleProps['items'];
   subtitle2?: SubtitleProps['items'];
-  title: TitleProp;
+  title: string | React.ReactNode;
   titleNode?: React.ReactElement;
+  'data-test-subj'?: string;
 }
 
 const HeaderPageComponent: React.FC<HeaderPageProps> = ({
-  backOptions,
-  backComponent,
-  badgeOptions,
+  showBackButton = false,
   border,
   children,
   isLoading,
@@ -87,28 +74,39 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
   subtitle2,
   title,
   titleNode,
-  ...rest
+  'data-test-subj': dataTestSubj,
 }) => {
+  const { releasePhase } = useCasesContext();
+  const { getAllCasesUrl, navigateToAllCases } = useAllCasesNavigation();
+
+  const navigateToAllCasesClick = useCallback(
+    (e) => {
+      if (e) {
+        e.preventDefault();
+      }
+      navigateToAllCases();
+    },
+    [navigateToAllCases]
+  );
+
   return (
-    <Header border={border} {...rest}>
+    <Header border={border} data-test-subj={dataTestSubj}>
       <EuiFlexGroup alignItems="center">
         <FlexItem>
-          {backOptions && (
+          {showBackButton && (
             <LinkBack>
               <LinkIcon
-                dataTestSubj={backOptions.dataTestSubj}
-                onClick={backOptions.onClick}
-                href={backOptions.href}
+                dataTestSubj="backToCases"
+                onClick={navigateToAllCasesClick}
+                href={getAllCasesUrl()}
                 iconType="arrowLeft"
               >
-                {backOptions.text}
+                {i18n.BACK_TO_ALL}
               </LinkIcon>
             </LinkBack>
           )}
 
-          {!backOptions && backComponent && <>{backComponent}</>}
-
-          {titleNode || <Title title={title} badgeOptions={badgeOptions} />}
+          {titleNode || <Title title={title} releasePhase={releasePhase} />}
 
           {subtitle && <Subtitle data-test-subj="header-page-subtitle" items={subtitle} />}
           {subtitle2 && <Subtitle data-test-subj="header-page-subtitle-2" items={subtitle2} />}
@@ -124,5 +122,6 @@ const HeaderPageComponent: React.FC<HeaderPageProps> = ({
     </Header>
   );
 };
+HeaderPageComponent.displayName = 'HeaderPage';
 
 export const HeaderPage = React.memo(HeaderPageComponent);

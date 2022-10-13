@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Vector2 } from '../../types';
+import type { Vector2 } from '../../types';
 
 /**
  * Used to assert that two Vector2s are close to each other (accounting for round-off errors.)

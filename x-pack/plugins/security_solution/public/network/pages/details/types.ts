@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import { IIndexPattern } from 'src/plugins/data/public';
+import type { Optional } from '@kbn/utility-types';
 
-import { ESTermQuery } from '../../../../common/typed_json';
+import type { ESTermQuery } from '../../../../common/typed_json';
+import type { NavTab } from '../../../common/components/navigation/types';
+import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import { NetworkType } from '../../store/model';
-import {
-  FlowTarget,
-  FlowTargetSourceDest,
-} from '../../../../common/search_strategy/security_solution';
-import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 
 export const type = NetworkType.details;
 
@@ -21,22 +18,23 @@ export interface OwnProps {
   type: NetworkType;
   startDate: string;
   endDate: string;
-  filterQuery: string | ESTermQuery;
+  filterQuery?: string | ESTermQuery;
   ip: string;
   indexNames: string[];
   skip: boolean;
   setQuery: GlobalTimeArgs['setQuery'];
 }
 
-export type NetworkComponentsQueryProps = OwnProps & {
-  flowTarget: FlowTarget;
-};
+export enum NetworkDetailsRouteType {
+  anomalies = 'anomalies',
+  flows = 'flows',
+  tls = 'tls',
+  http = 'http',
+  events = 'events',
+  users = 'users',
+}
 
-export type TlsQueryTableComponentProps = OwnProps & {
-  flowTarget: FlowTargetSourceDest;
-};
-
-export type NetworkWithIndexComponentsQueryTableProps = OwnProps & {
-  flowTarget: FlowTargetSourceDest;
-  indexPattern: IIndexPattern;
-};
+export type NetworkDetailsNavTabs = Optional<
+  Record<`${NetworkDetailsRouteType}`, NavTab>,
+  'anomalies'
+>;

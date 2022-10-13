@@ -5,15 +5,16 @@
  * 2.0.
  */
 
+import { Subject } from 'rxjs';
 import {
   FlyoutCreateDrilldownAction,
   OpenFlyoutAddDrilldownParams,
 } from './flyout_create_drilldown';
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
-import { ViewMode } from '../../../../../../../../src/plugins/embeddable/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { MockEmbeddable, enhanceEmbeddable } from '../test_helpers';
-import { uiActionsEnhancedPluginMock } from '../../../../../../ui_actions_enhanced/public/mocks';
-import { UiActionsEnhancedActionFactory } from '../../../../../../ui_actions_enhanced/public/';
+import { uiActionsEnhancedPluginMock } from '@kbn/ui-actions-enhanced-plugin/public/mocks';
+import { UiActionsEnhancedActionFactory } from '@kbn/ui-actions-enhanced-plugin/public';
 
 const overlays = coreMock.createStart().overlays;
 const uiActionsEnhanced = uiActionsEnhancedPluginMock.createStartContract();
@@ -22,6 +23,9 @@ const actionParams: OpenFlyoutAddDrilldownParams = {
   start: () => ({
     core: {
       overlays,
+      application: {
+        currentAppId$: new Subject(),
+      },
     } as any,
     plugins: {
       uiActionsEnhanced,
@@ -68,9 +72,10 @@ describe('isCompatible', () => {
     expectedResult: boolean = true
   ): Promise<void> {
     uiActionsEnhanced.getActionFactories.mockImplementation(() => [
-      ({
+      {
         supportedTriggers: () => actionFactoriesTriggers,
-      } as unknown) as UiActionsEnhancedActionFactory,
+        isCompatibleLicense: () => true,
+      } as unknown as UiActionsEnhancedActionFactory,
     ]);
 
     let embeddable = new MockEmbeddable(

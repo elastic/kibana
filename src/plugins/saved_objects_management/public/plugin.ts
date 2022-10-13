@@ -7,15 +7,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { ManagementSetup } from '../../management/public';
-import { DataPublicPluginStart } from '../../data/public';
-import { DashboardStart } from '../../dashboard/public';
-import { DiscoverStart } from '../../discover/public';
-import { HomePublicPluginSetup, FeatureCatalogueCategory } from '../../home/public';
-import { VisualizationsStart } from '../../visualizations/public';
-import { SavedObjectTaggingOssPluginStart } from '../../saved_objects_tagging_oss/public';
-import type { SpacesOssPluginStart } from '../../spaces_oss/public';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { ManagementSetup } from '@kbn/management-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import {
   SavedObjectsManagementActionService,
   SavedObjectsManagementActionServiceSetup,
@@ -23,20 +21,36 @@ import {
   SavedObjectsManagementColumnService,
   SavedObjectsManagementColumnServiceSetup,
   SavedObjectsManagementColumnServiceStart,
-  SavedObjectsManagementServiceRegistry,
-  ISavedObjectsManagementServiceRegistry,
 } from './services';
-import { registerServices } from './register_services';
+
+import { SavedObjectManagementTypeInfo, SavedObjectGetRelationshipsResponse } from './types';
+import {
+  getAllowedTypes,
+  getRelationships,
+  getSavedObjectLabel,
+  getDefaultTitle,
+  parseQuery,
+  getTagFindReferences,
+} from './lib';
 
 export interface SavedObjectsManagementPluginSetup {
   actions: SavedObjectsManagementActionServiceSetup;
   columns: SavedObjectsManagementColumnServiceSetup;
-  serviceRegistry: ISavedObjectsManagementServiceRegistry;
 }
 
 export interface SavedObjectsManagementPluginStart {
   actions: SavedObjectsManagementActionServiceStart;
   columns: SavedObjectsManagementColumnServiceStart;
+  getAllowedTypes: () => Promise<SavedObjectManagementTypeInfo[]>;
+  getRelationships: (
+    type: string,
+    id: string,
+    savedObjectTypes: string[]
+  ) => Promise<SavedObjectGetRelationshipsResponse>;
+  getSavedObjectLabel: typeof getSavedObjectLabel;
+  getDefaultTitle: typeof getDefaultTitle;
+  parseQuery: typeof parseQuery;
+  getTagFindReferences: typeof getTagFindReferences;
 }
 
 export interface SetupDependencies {
@@ -46,11 +60,9 @@ export interface SetupDependencies {
 
 export interface StartDependencies {
   data: DataPublicPluginStart;
-  dashboard?: DashboardStart;
-  visualizations?: VisualizationsStart;
-  discover?: DiscoverStart;
+  dataViews: DataViewsPublicPluginStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
-  spacesOss?: SpacesOssPluginStart;
+  spaces?: SpacesPluginStart;
 }
 
 export class SavedObjectsManagementPlugin
@@ -60,10 +72,10 @@ export class SavedObjectsManagementPlugin
       SavedObjectsManagementPluginStart,
       SetupDependencies,
       StartDependencies
-    > {
+    >
+{
   private actionService = new SavedObjectsManagementActionService();
   private columnService = new SavedObjectsManagementColumnService();
-  private serviceRegistry = new SavedObjectsManagementServiceRegistry();
 
   public setup(
     core: CoreSetup<StartDependencies, SavedObjectsManagementPluginStart>,
@@ -79,13 +91,12 @@ export class SavedObjectsManagementPlugin
           defaultMessage: 'Saved Objects',
         }),
         description: i18n.translate('savedObjectsManagement.objects.savedObjectsDescription', {
-          defaultMessage:
-            'Import, export, and manage your saved searches, visualizations, and dashboards.',
+          defaultMessage: 'Import, export, and manage your saved objects.',
         }),
         icon: 'savedObjectsApp',
         path: '/app/management/kibana/objects',
         showOnHomePage: false,
-        category: FeatureCatalogueCategory.ADMIN,
+        category: 'admin',
       });
     }
 
@@ -100,29 +111,31 @@ export class SavedObjectsManagementPlugin
         const { mountManagementSection } = await import('./management_section');
         return mountManagementSection({
           core,
-          serviceRegistry: this.serviceRegistry,
           mountParams,
         });
       },
     });
 
-    // depends on `getStartServices`, should not be awaited
-    registerServices(this.serviceRegistry, core.getStartServices);
-
     return {
       actions: actionSetup,
       columns: columnSetup,
-      serviceRegistry: this.serviceRegistry,
     };
   }
 
-  public start(core: CoreStart, { data }: StartDependencies) {
-    const actionStart = this.actionService.start();
-    const columnStart = this.columnService.start();
+  public start(_core: CoreStart, { spaces: spacesApi }: StartDependencies) {
+    const actionStart = this.actionService.start(spacesApi);
+    const columnStart = this.columnService.start(spacesApi);
 
     return {
       actions: actionStart,
       columns: columnStart,
+      getAllowedTypes: () => getAllowedTypes(_core.http),
+      getRelationships: (type: string, id: string, savedObjectTypes: string[]) =>
+        getRelationships(_core.http, type, id, savedObjectTypes),
+      getSavedObjectLabel,
+      getDefaultTitle,
+      parseQuery,
+      getTagFindReferences,
     };
   }
 }

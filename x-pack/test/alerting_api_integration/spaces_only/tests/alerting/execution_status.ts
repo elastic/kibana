@@ -10,7 +10,7 @@ import { Spaces } from '../../scenarios';
 import {
   checkAAD,
   getUrlPrefix,
-  getTestAlertData,
+  getTestRuleData,
   ObjectRemover,
   ensureDatetimesAreOrdered,
 } from '../../../common/lib';
@@ -30,7 +30,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
       const response = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData());
+        .send(getTestRuleData());
       const dateEnd = Date.now();
       expect(response.status).to.eql(200);
       objectRemover.add(Spaces.space1.id, response.body.id, 'rule', 'alerting');
@@ -61,7 +61,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
-          getTestAlertData({
+          getTestRuleData({
             rule_type_id: 'test.noop',
             schedule: { interval: '1s' },
           })
@@ -94,7 +94,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
-          getTestAlertData({
+          getTestRuleData({
             rule_type_id: 'test.patternFiring',
             schedule: { interval: '1s' },
             params: {
@@ -130,7 +130,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
-          getTestAlertData({
+          getTestRuleData({
             rule_type_id: 'test.throw',
             schedule: { interval: '1s' },
           })
@@ -166,7 +166,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
-          getTestAlertData({
+          getTestRuleData({
             rule_type_id: 'test.throw',
             schedule: { interval: '1s' },
           })
@@ -183,12 +183,12 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
       await ensureAlertUpdatedAtHasNotChanged(alertId, alertUpdatedAt);
     });
 
-    it('should eventually have error reason "unknown" when appropriate', async () => {
+    it('should eventually have error reason "validate" when appropriate', async () => {
       const response = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
-          getTestAlertData({
+          getTestRuleData({
             rule_type_id: 'test.validation',
             schedule: { interval: '1s' },
             params: { param1: 'valid now, but will change to a number soon!' },
@@ -214,7 +214,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
 
       executionStatus = await waitForStatus(alertId, new Set(['error']));
       expect(executionStatus.error).to.be.ok();
-      expect(executionStatus.error.reason).to.be('unknown');
+      expect(executionStatus.error.reason).to.be('validate');
       await ensureAlertUpdatedAtHasNotChanged(alertId, alertUpdatedAt);
 
       const message = 'params invalid: [param1]: expected value of type [string] but got [number]';
@@ -227,7 +227,7 @@ export default function executionStatusAlertTests({ getService }: FtrProviderCon
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(
-          getTestAlertData({
+          getTestRuleData({
             rule_type_id: 'test.throw',
             schedule: { interval: '1s' },
           })

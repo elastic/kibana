@@ -10,7 +10,7 @@ import { Router, useParams } from 'react-router-dom';
 
 import '../../../common/mock/match_media';
 
-import { useSourcererScope } from '../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import {
   mockGlobalState,
   TestProviders,
@@ -19,15 +19,33 @@ import {
   createSecuritySolutionStorageMock,
 } from '../../../common/mock';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
-import { createStore, State } from '../../../common/store';
-import { NetworkDetails } from './index';
-import { FlowTarget } from '../../../../common/search_strategy';
+import type { State } from '../../../common/store';
+import { createStore } from '../../../common/store';
+import { NetworkDetails } from '.';
+import { FlowTargetSourceDest } from '../../../../common/search_strategy';
+
+jest.mock('../../../common/containers/use_search_strategy', () => ({
+  useSearchStrategy: jest.fn().mockReturnValue({
+    loading: false,
+    result: {
+      edges: [],
+      pageInfo: {
+        activePage: 0,
+        fakeTotalCount: 0,
+        showMorePagesIndicator: false,
+      },
+      totalCount: -1,
+    },
+    search: jest.fn(),
+    refetch: jest.fn(),
+    inspect: {},
+  }),
+}));
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
     ...original,
-    // eslint-disable-next-line react/display-name
     EuiScreenReaderOnly: () => <></>,
   };
 });
@@ -46,7 +64,6 @@ jest.mock('react-router-dom', () => {
 jest.mock('../../containers/details', () => ({
   useNetworkDetails: jest.fn().mockReturnValue([true, { networkDetails: {} }]),
 }));
-jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/containers/sourcerer');
 jest.mock('../../../common/containers/use_global_time', () => ({
   useGlobalTime: jest.fn().mockReturnValue({
@@ -56,6 +73,27 @@ jest.mock('../../../common/containers/use_global_time', () => ({
     setQuery: jest.fn(),
   }),
 }));
+
+jest.mock('../../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../../common/lib/kibana');
+  return {
+    ...original,
+    useNavigation: () => ({
+      getAppUrl: jest.fn,
+    }),
+    useKibana: () => ({
+      services: {
+        ...original.useKibana().services,
+        timelines: {
+          getUseDraggableKeyboardWrapper: () => () => ({
+            onBlur: jest.fn,
+            onKeyDown: jest.fn,
+          }),
+        },
+      },
+    }),
+  };
+});
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
@@ -88,7 +126,7 @@ const getMockHistory = (ip: string) => ({
 describe('Network Details', () => {
   const mount = useMountAppended();
   beforeAll(() => {
-    (useSourcererScope as jest.Mock).mockReturnValue({
+    (useSourcererDataView as jest.Mock).mockReturnValue({
       indicesExist: false,
       indexPattern: {},
     });
@@ -118,7 +156,7 @@ describe('Network Details', () => {
     const ip = '123.456.78.90';
     (useParams as jest.Mock).mockReturnValue({
       detailName: ip,
-      flowTarget: FlowTarget.source,
+      flowTarget: FlowTargetSourceDest.source,
     });
     const wrapper = mount(
       <TestProviders store={store}>
@@ -132,13 +170,13 @@ describe('Network Details', () => {
 
   test('it renders ipv6 headline', async () => {
     const ip = 'fe80--24ce-f7ff-fede-a571';
-    (useSourcererScope as jest.Mock).mockReturnValue({
+    (useSourcererDataView as jest.Mock).mockReturnValue({
       indicesExist: true,
       indexPattern: {},
     });
     (useParams as jest.Mock).mockReturnValue({
       detailName: ip,
-      flowTarget: FlowTarget.source,
+      flowTarget: FlowTargetSourceDest.source,
     });
     const wrapper = mount(
       <TestProviders store={store}>
@@ -149,7 +187,7 @@ describe('Network Details', () => {
     );
     expect(
       wrapper
-        .find('[data-test-subj="network-details-headline"] [data-test-subj="header-page-title"]')
+        .find('[data-test-subj="network-details-headline"] h1[data-test-subj="header-page-title"]')
         .text()
     ).toEqual('fe80::24ce:f7ff:fede:a571');
   });

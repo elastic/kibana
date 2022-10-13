@@ -7,33 +7,38 @@
 
 import { renderHook, act } from '@testing-library/react-hooks';
 
-import { useUpdateRule, ReturnUpdateRule } from './use_update_rule';
+import type { ReturnUpdateRule } from './use_update_rule';
+import { useUpdateRule } from './use_update_rule';
 import { getUpdateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { TestProviders } from '../../../../common/mock';
 
 jest.mock('./api');
 jest.mock('../../../../common/hooks/use_app_toasts');
 
 describe('useUpdateRule', () => {
-  let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
+  (useAppToasts as jest.Mock).mockReturnValue(useAppToastsMock.create());
 
   beforeEach(() => {
-    jest.resetAllMocks();
-    appToastsMock = useAppToastsMock.create();
-    (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
+    jest.clearAllMocks();
   });
 
   test('init', async () => {
-    const { result } = renderHook<unknown, ReturnUpdateRule>(() => useUpdateRule());
+    const { result } = renderHook<unknown, ReturnUpdateRule>(() => useUpdateRule(), {
+      wrapper: TestProviders,
+    });
 
     expect(result.current).toEqual([{ isLoading: false, isSaved: false }, result.current[1]]);
   });
 
   test('saving rule with isLoading === true', async () => {
     await act(async () => {
-      const { result, rerender, waitForNextUpdate } = renderHook<void, ReturnUpdateRule>(() =>
-        useUpdateRule()
+      const { result, rerender, waitForNextUpdate } = renderHook<void, ReturnUpdateRule>(
+        () => useUpdateRule(),
+        {
+          wrapper: TestProviders,
+        }
       );
       await waitForNextUpdate();
       result.current[1](getUpdateRulesSchemaMock());
@@ -44,8 +49,11 @@ describe('useUpdateRule', () => {
 
   test('saved rule with isSaved === true', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<void, ReturnUpdateRule>(() =>
-        useUpdateRule()
+      const { result, waitForNextUpdate } = renderHook<void, ReturnUpdateRule>(
+        () => useUpdateRule(),
+        {
+          wrapper: TestProviders,
+        }
       );
       await waitForNextUpdate();
       result.current[1](getUpdateRulesSchemaMock());

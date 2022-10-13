@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'kibana/server';
+import { KibanaRequest } from '@kbn/core/server';
 
-export function getAuthorizationHeader(request: KibanaRequest) {
+export interface AuthorizationHeader {
+  headers?: { 'es-secondary-authorization': string | string[] };
+}
+
+export function getAuthorizationHeader(request: KibanaRequest): AuthorizationHeader {
   return request.headers.authorization === undefined
     ? {}
     : {

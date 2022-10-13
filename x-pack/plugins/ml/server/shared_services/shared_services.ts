@@ -5,43 +5,67 @@
  * 2.0.
  */
 
-import { IClusterClient, IScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
-import { SpacesPluginStart } from '../../../spaces/server';
-import { KibanaRequest } from '../../.././../../src/core/server';
+import type {
+  IClusterClient,
+  IScopedClusterClient,
+  SavedObjectsClientContract,
+  UiSettingsServiceStart,
+} from '@kbn/core/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { CoreKibanaRequest, KibanaRequest } from '@kbn/core/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import { MlLicense } from '../../common/license';
 
-import type { CloudSetup } from '../../../cloud/server';
-import type { SecurityPluginSetup } from '../../../security/server';
 import { licenseChecks } from './license_checks';
 import { MlSystemProvider, getMlSystemProvider } from './providers/system';
 import { JobServiceProvider, getJobServiceProvider } from './providers/job_service';
 import { ModulesProvider, getModulesProvider } from './providers/modules';
 import { ResultsServiceProvider, getResultsServiceProvider } from './providers/results_service';
+import { TrainedModelsProvider, getTrainedModelsProvider } from './providers/trained_models';
 import {
   AnomalyDetectorsProvider,
   getAnomalyDetectorsProvider,
 } from './providers/anomaly_detectors';
-import { ResolveMlCapabilities, MlCapabilitiesKey } from '../../common/types/capabilities';
+import type { ResolveMlCapabilities, MlCapabilitiesKey } from '../../common/types/capabilities';
 import { hasMlCapabilitiesProvider, HasMlCapabilities } from '../lib/capabilities';
-import { MLClusterClientUninitialized } from './errors';
+import {
+  MLClusterClientUninitialized,
+  MLFieldFormatRegistryUninitialized,
+  MLUISettingsClientUninitialized,
+} from './errors';
 import { MlClient, getMlClient } from '../lib/ml_client';
-import { jobSavedObjectServiceFactory, JobSavedObjectService } from '../saved_objects';
+import { mlSavedObjectServiceFactory, MLSavedObjectService } from '../saved_objects';
 import {
   getAlertingServiceProvider,
   MlAlertingServiceProvider,
 } from './providers/alerting_service';
+import {
+  getJobsHealthServiceProvider,
+  JobsHealthServiceProvider,
+} from '../lib/alerts/jobs_health_service';
+import type { FieldFormatsRegistryProvider } from '../../common/types/kibana';
+import { getDataViewsServiceFactory, GetDataViewsService } from '../lib/data_views_utils';
 
 export type SharedServices = JobServiceProvider &
   AnomalyDetectorsProvider &
   MlSystemProvider &
   ModulesProvider &
   ResultsServiceProvider &
-  MlAlertingServiceProvider;
+  MlAlertingServiceProvider &
+  TrainedModelsProvider;
+
+export type MlServicesProviders = JobsHealthServiceProvider;
 
 interface Guards {
   isMinimumLicense(): Guards;
+
   isFullLicense(): Guards;
+
   hasMlCapabilities: (caps: MlCapabilitiesKey[]) => Guards;
+
   ok(callback: OkCallback): any;
 }
 
@@ -57,7 +81,9 @@ export interface SharedServicesChecks {
 interface OkParams {
   scopedClient: IScopedClusterClient;
   mlClient: MlClient;
-  jobSavedObjectService: JobSavedObjectService;
+  mlSavedObjectService: MLSavedObjectService;
+  getFieldsFormatRegistry: FieldFormatsRegistryProvider;
+  getDataViewsService: GetDataViewsService;
 }
 
 type OkCallback = (okParams: OkParams) => any;
@@ -70,14 +96,22 @@ export function createSharedServices(
   resolveMlCapabilities: ResolveMlCapabilities,
   getClusterClient: () => IClusterClient | null,
   getInternalSavedObjectsClient: () => SavedObjectsClientContract | null,
+  getUiSettings: () => UiSettingsServiceStart | null,
+  getFieldsFormat: () => FieldFormatsStart | null,
+  getDataViews: () => DataViewsPluginStart,
   isMlReady: () => Promise<void>
-): SharedServices {
+): {
+  sharedServicesProviders: SharedServices;
+  internalServicesProviders: MlServicesProviders;
+} {
   const { isFullLicense, isMinimumLicense } = licenseChecks(mlLicense);
+
   function getGuards(
     request: KibanaRequest,
     savedObjectsClient: SavedObjectsClientContract
   ): Guards {
     const internalSavedObjectsClient = getInternalSavedObjectsClient();
+
     if (internalSavedObjectsClient === null) {
       throw new Error('Internal saved object client not initialized');
     }
@@ -88,12 +122,20 @@ export function createSharedServices(
       internalSavedObjectsClient,
       authorization,
       getSpaces !== undefined,
-      isMlReady
+      isMlReady,
+      getUiSettings,
+      getFieldsFormat,
+      getDataViews
     );
 
-    const { hasMlCapabilities, scopedClient, mlClient, jobSavedObjectService } = getRequestItems(
-      request
-    );
+    const {
+      hasMlCapabilities,
+      scopedClient,
+      mlClient,
+      mlSavedObjectService,
+      getFieldsFormatRegistry,
+      getDataViewsService,
+    } = getRequestItems(request);
     const asyncGuards: Array<Promise<void>> = [];
 
     const guards: Guards = {
@@ -111,19 +153,37 @@ export function createSharedServices(
       },
       async ok(callback: OkCallback) {
         await Promise.all(asyncGuards);
-        return callback({ scopedClient, mlClient, jobSavedObjectService });
+        return callback({
+          scopedClient,
+          mlClient,
+          mlSavedObjectService,
+          getFieldsFormatRegistry,
+          getDataViewsService,
+        });
       },
     };
     return guards;
   }
 
   return {
-    ...getJobServiceProvider(getGuards),
-    ...getAnomalyDetectorsProvider(getGuards),
-    ...getModulesProvider(getGuards),
-    ...getResultsServiceProvider(getGuards),
-    ...getMlSystemProvider(getGuards, mlLicense, getSpaces, cloud, resolveMlCapabilities),
-    ...getAlertingServiceProvider(getGuards),
+    /**
+     * Exposed providers for shared services used by other plugins
+     */
+    sharedServicesProviders: {
+      ...getJobServiceProvider(getGuards),
+      ...getAnomalyDetectorsProvider(getGuards),
+      ...getModulesProvider(getGuards, getDataViews),
+      ...getResultsServiceProvider(getGuards),
+      ...getMlSystemProvider(getGuards, mlLicense, getSpaces, cloud, resolveMlCapabilities),
+      ...getAlertingServiceProvider(getGuards),
+      ...getTrainedModelsProvider(getGuards),
+    },
+    /**
+     * Services providers for ML internal usage
+     */
+    internalServicesProviders: {
+      ...getJobsHealthServiceProvider(getGuards),
+    },
   };
 }
 
@@ -134,7 +194,10 @@ function getRequestItemsProvider(
   internalSavedObjectsClient: SavedObjectsClientContract,
   authorization: SecurityPluginSetup['authz'] | undefined,
   spaceEnabled: boolean,
-  isMlReady: () => Promise<void>
+  isMlReady: () => Promise<void>,
+  getUiSettings: () => UiSettingsServiceStart | null,
+  getFieldsFormat: () => FieldFormatsStart | null,
+  getDataViews: () => DataViewsPluginStart
 ) {
   return (request: KibanaRequest) => {
     const getHasMlCapabilities = hasMlCapabilitiesProvider(resolveMlCapabilities);
@@ -145,22 +208,49 @@ function getRequestItemsProvider(
     // will not receive a real request object when being called from an alert.
     // instead a dummy request object will be supplied
     const clusterClient = getClusterClient();
-    const jobSavedObjectService = jobSavedObjectServiceFactory(
-      savedObjectsClient,
-      internalSavedObjectsClient,
-      spaceEnabled,
-      authorization,
-      isMlReady
-    );
+    const getSobSavedObjectService = (client: IScopedClusterClient) => {
+      return mlSavedObjectServiceFactory(
+        savedObjectsClient,
+        internalSavedObjectsClient,
+        spaceEnabled,
+        authorization,
+        client,
+        isMlReady
+      );
+    };
 
     if (clusterClient === null) {
       throw new MLClusterClientUninitialized(`ML's cluster client has not been initialized`);
     }
 
-    if (request instanceof KibanaRequest) {
+    const uiSettingsClient = getUiSettings()?.asScopedToClient(savedObjectsClient);
+    if (!uiSettingsClient) {
+      throw new MLUISettingsClientUninitialized(`ML's UI settings client has not been initialized`);
+    }
+
+    const getFieldsFormatRegistry = async () => {
+      let fieldFormatRegistry;
+      try {
+        fieldFormatRegistry = await getFieldsFormat()!.fieldFormatServiceFactory(uiSettingsClient!);
+      } catch (e) {
+        // throw an custom error during the fieldFormatRegistry check
+      }
+
+      if (!fieldFormatRegistry) {
+        throw new MLFieldFormatRegistryUninitialized(
+          `ML's field format registry has not been initialized`
+        );
+      }
+
+      return fieldFormatRegistry;
+    };
+
+    let mlSavedObjectService;
+    if (request instanceof CoreKibanaRequest) {
       hasMlCapabilities = getHasMlCapabilities(request);
       scopedClient = clusterClient.asScoped(request);
-      mlClient = getMlClient(scopedClient, jobSavedObjectService);
+      mlSavedObjectService = getSobSavedObjectService(scopedClient);
+      mlClient = getMlClient(scopedClient, mlSavedObjectService);
     } else {
       hasMlCapabilities = () => Promise.resolve();
       const { asInternalUser } = clusterClient;
@@ -168,8 +258,24 @@ function getRequestItemsProvider(
         asInternalUser,
         asCurrentUser: asInternalUser,
       };
-      mlClient = getMlClient(scopedClient, jobSavedObjectService);
+      mlSavedObjectService = getSobSavedObjectService(scopedClient);
+      mlClient = getMlClient(scopedClient, mlSavedObjectService);
     }
-    return { hasMlCapabilities, scopedClient, mlClient, jobSavedObjectService };
+
+    const getDataViewsService = getDataViewsServiceFactory(
+      getDataViews,
+      savedObjectsClient,
+      scopedClient,
+      request
+    );
+
+    return {
+      hasMlCapabilities,
+      scopedClient,
+      mlClient,
+      mlSavedObjectService,
+      getFieldsFormatRegistry,
+      getDataViewsService,
+    };
   };
 }

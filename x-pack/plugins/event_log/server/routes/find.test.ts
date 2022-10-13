@@ -6,10 +6,10 @@
  */
 
 import { findRoute } from './find';
-import { httpServiceMock } from 'src/core/server/mocks';
+import { httpServiceMock } from '@kbn/core/server/mocks';
 import { mockHandlerArguments, fakeEvent } from './_mock_handler_arguments';
 import { eventLogClientMock } from '../event_log_client.mock';
-import { loggingSystemMock } from 'src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 const eventLogClient = eventLogClientMock.create();
 const systemLogger = loggingSystemMock.createLogger();
@@ -26,7 +26,7 @@ describe('find', () => {
 
     const [config, handler] = router.get.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/event_log/{type}/{id}/_find"`);
+    expect(config.path).toMatchInlineSnapshot(`"/internal/event_log/{type}/{id}/_find"`);
 
     const events = [fakeEvent(), fakeEvent()];
     const result = {

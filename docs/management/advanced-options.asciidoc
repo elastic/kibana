@@ -1,51 +1,48 @@
 [[advanced-options]]
 == Advanced Settings
 
-The *Advanced Settings* UI enables you to edit settings that control the
-behavior of Kibana. For example, you can change the format used to display dates,
-specify the default index pattern, and set the precision for displayed decimal
-values.
+*Advanced Settings* control the behavior of {kib}. For example, you can change the format used to display dates,
+specify the default data view, and set the precision for displayed decimal values.
 
 . Open the main menu, then click *Stack Management > Advanced Settings*.
-. Scroll or search for the setting you want to modify.
-. Enter a new value for the setting.
-. Click *Save changes*.
+. Scroll or search for the setting.
+. Make your change, then click *Save changes*.
 
 [float]
 === Required permissions
 
 The `Advanced Settings` {kib} privilege is required to access *Advanced Settings*.
 
-To add the privilege, open the menu, then click *Stack Management > Roles*.
-
-
-[float]
-[[settings-read-only-access]]
-=== [xpack]#Read only access#
-When you have insufficient privileges to edit advanced settings, the following
-indicator in Kibana will be displayed. The buttons to edit settings won't be
-visible. For more information on granting access to Kibana, see
-<<xpack-security-authorization>>.
+When you have insufficient privileges to edit advanced settings, the edit options are not visible, and the following
+indicator is displayed:
 
 [role="screenshot"]
 image::images/settings-read-only-badge.png[Example of Advanced Settings Management's read only access indicator in Kibana's header]
 
+To add the privilege, open the main menu, then click *Stack Management > Roles*.
+
+For more information on granting access to {kib}, refer to <<xpack-security-authorization>>.
+
 [float]
 [[kibana-settings-reference]]
-=== Kibana settings reference
+=== {kib} settings reference
 
-WARNING: Modifying a setting can affect {kib} performance and cause problems
+WARNING: Changing a setting can affect {kib} performance and cause problems
 that are difficult to diagnose. Setting a property value to a blank field
 reverts to the default behavior, which might not be compatible with other
-configuration settings. Deleting a custom setting removes it from {kib}
-permanently.
-
+configuration settings. Deleting a custom setting permanently removes it from {kib}.
 
 [float]
 [[kibana-general-settings]]
 ==== General
 
 [horizontal]
+[[auto-complete-use-time-tange]]`autocomplete:useTimeRange`::
+When disabled, autocompletes the suggestions from your data set instead of the time range.
+
+[[bfetch-disable-compression]]`bfetch:disableCompression`::
+When disabled, allows you to debug individual requests, but increases the response size.
+
 [[csv-quotevalues]]`csv:quoteValues`::
 Set this property to `true` to quote exported values.
 
@@ -88,8 +85,17 @@ Sets the file size limit when importing files. The default
 value is `100MB`. The highest supported value for this setting is `1GB`.
 
 [[filtereditor-suggestvalues]]`filterEditor:suggestValues`::
-Set this property to `false` to prevent the filter editor from suggesting values
-for fields.
+Set this property to `false` to prevent the filter editor and KQL autocomplete
+from suggesting values for fields.
+
+[[autocomplete-valuesuggestionmethod]]`autocomplete:valueSuggestionMethod`::
+When set to `terms_enum`, autocomplete uses the terms enum API for value suggestions. Kibana returns results faster, but suggestions are approximate, sorted alphabetically, and can be outside the selected time range. (Note that this API is incompatible with {ref}/document-level-security.html[Document-Level-Security].)
+When set to `terms_agg`, Kibana uses a terms aggregation for value suggestions, which is
+slower, but suggestions include all values that optionally match your time range and are sorted by popularity.
+
+[[autocomplete-usetimerange]]`autocomplete:useTimeRange`::
+Disable this property to get autocomplete suggestions from
+your full dataset, rather than from the current time range.
 
 [[filters-pinnedbydefault]]`filters:pinnedByDefault`::
 Set this property to `true` to make filters have a global state (be pinned) by
@@ -129,13 +135,12 @@ value by the maximum number of aggregations in each visualization.
 [[history-limit]]`history:limit`::
 In fields that have history, such as query inputs, show this many recent values.
 
-[[indexpattern-placeholder]]`indexPattern:placeholder`::
-The default placeholder value to use in
-*Management > Index Patterns > Create Index Pattern*.
-
 [[metafields]]`metaFields`::
 Fields that exist outside of `_source`. Kibana merges these fields into the
 document when displaying it.
+
+[[metrics:allowStringIndices]]`metrics:allowStringIndices`::
+Enables you to use {es} indices in *TSVB* visualizations.
 
 [[metrics-maxbuckets]]`metrics:max_buckets`::
 Affects the *TSVB* histogram density. Must be set higher than `histogram:maxBars`.
@@ -180,6 +185,9 @@ short.
 Set to `true` to enable a dark mode for the {kib} UI. You must refresh the page
 to apply the setting.
 
+[[theme-version]]`theme:version`::
+Kibana only ships with the v8 theme now, so this setting can no longer be edited.
+
 [[timepicker-quickranges]]`timepicker:quickRanges`::
 The list of ranges to show in the Quick section of the time filter. This should
 be an array of objects, with each object containing `from`, `to` (see
@@ -197,10 +205,20 @@ The default selection in the time filter.
 The maximum height that a cell occupies in a table. Set to 0 to disable
 truncation.
 
-[[xpack-defaultadminemail]]`xPack:defaultAdminEmail`::
-Email address for {xpack} admin operations, such as cluster alert notifications
-from *{stack-monitor-app}*.
+[float]
+[[presentation-labs]]
+==== Presentation Labs
 
+[horizontal]
+[[labs-canvas-enable-ui]]`labs:canvas:enable_ui`::
+When enabled, provides access to the experimental *Labs* features for *Canvas*.
+
+[[labs-dashboard-defer-below-fold]]`labs:dashboard:deferBelowFold`::
+When enabled, the panels that appear below the fold are loaded when they become visible on the dashboard.
+_Below the fold_ refers to panels that are not immediately visible when you open a dashboard, but become visible as you scroll. For additional information, refer to <<dashboard-troubleshooting,Improve dashboard loading time>>.
+
+[[labs-dashboard-enable-ui]]`labs:dashboard:enable_ui`::
+When enabled, provides access to the experimental *Labs* features for *Dashboard*.
 
 [float]
 [[kibana-accessibility-settings]]
@@ -222,7 +240,7 @@ Banners are a https://www.elastic.co/subscriptions[subscription feature].
 
 [horizontal]
 [[banners-placement]]`banners:placement`::
-Set to `Top` to display a banner above the Elastic header for this space. Defaults to the value of 
+Set to `Top` to display a banner above the Elastic header for this space. Defaults to the value of
 the `xpack.banners.placement` configuration property.
 
 [[banners-textcontent]]`banners:textContent`::
@@ -262,21 +280,51 @@ value is 5.
 [[context-tiebreakerfields]]`context:tieBreakerFields`::
 A comma-separated list of fields to use for breaking a tie between documents
 that have the same timestamp value. The first field that is present and sortable
-in the current index pattern is used.
+in the current data view is used.
 
 [[defaultcolumns]]`defaultColumns`::
 The columns that appear by default on the *Discover* page. The default is
 `_source`.
 
-[[discover-samplesize]]`discover:sampleSize`::
-The number of rows to show in the *Discover* table.
+[[discover:enableSql]]`discover:enableSql`::
+experimental[] Allows SQL queries for search.
 
-[[discover-sort-defaultorder]]`discover:sort:defaultOrder`::
-The default sort direction for time-based index patterns.
+[[discover-max-doc-fields-displayed]]`discover:maxDocFieldsDisplayed`::
+Specifies the maximum number of fields to show in the document column of the *Discover* table.
+
+[[discover-modify-columns-on-switch]]`discover:modifyColumnsOnSwitch`::
+When enabled, removes the columns that are not in the new data view.
+
+[[discover-row-height-option]]`discover:rowHeightOption`::
+The number of lines to allow in a row. A value of -1 automatically adjusts the row height to fit the contents. A value of 0 displays the content in a single line.
+
+[[discover-sampleRowsPerPage]]`discover:sampleRowsPerPage`::
+Limits the number of rows per page in the document table.
+
+[[discover-sample-size]]`discover:sampleSize`::
+Sets the maximum number of rows for the entire document table. This is the maximum number of documents fetched from {es}.
+
+[[discover-searchFieldsFromSource]]`discover:searchFieldsFromSource`::
+Load fields from the original JSON {ref}/mapping-source-field.html[`_source`].
+When disabled, *Discover* loads fields using the {es} search API's
+{ref}/search-fields.html#search-fields-param[`fields`] parameter.
 
 [[discover-searchonpageload]]`discover:searchOnPageLoad`::
 Controls whether a search is executed when *Discover* first loads. This setting
 does not have an effect when loading a saved search.
+
+[[discover:showFieldStatistics]]`discover:showFieldStatistics`::
+beta[] Enables the Field statistics view. Examine details such as
+the minimum and maximum values of a numeric field or a map of a geo field.
+
+[[discover:showMultiFields]]`discover:showMultiFields`::
+Controls the display of multi-fields in the expanded document view.
+
+[[discover:showLegacyFieldTopValues]]`discover:showLegacyFieldTopValues`::
+To calculate the top values for a field in the sidebar using 500 instead of 5,000 records per shard, turn on this option.
+
+[[discover-sort-defaultorder]]`discover:sort:defaultOrder`::
+The default sort direction for time-based data views.
 
 [[doctable-hidetimecolumn]]`doc_table:hideTimeColumn`::
 Hides the "Time" column in *Discover* and in all saved searches on dashboards.
@@ -286,16 +334,17 @@ Highlights results in *Discover* and saved searches on dashboards. Highlighting
 slows requests when working on big documents.
 
 [[doctable-legacy]]`doc_table:legacy`::
-Controls the way the document table looks and works. Set this property to `true` to revert to the legacy implementation.
+Controls the way the document table looks and works.
+To use the new *Document Explorer* instead of the classic view, turn off this option.
+The *Document Explorer* offers better data sorting, resizable columns, and a full screen view.
 
-[[discover-searchFieldsFromSource]]`discover:searchFieldsFromSource`::
-Load fields from the original JSON {ref}/mapping-source-field.html[`_source`].
-When disabled, *Discover* loads fields using the {es} search API's
-{ref}/search-fields.html#search-fields-param[`fields`] parameter.
+[[truncate-max-height]]`truncate:maxHeight`::
+The maximum height that a cell in a table can occupy. To disable truncation, set to 0.
+
 
 [float]
 [[kibana-ml-settings]]
-==== Machine learning
+==== Machine Learning
 
 [horizontal]
 [[ml-anomalydetection-results-enabletimedefaults]]`ml:anomalyDetection:results:enableTimeDefaults`::
@@ -309,7 +358,6 @@ must contain `from` and `to` values (see
 {ref}/common-options.html#date-math[accepted formats]). It is ignored unless
 `ml:anomalyDetection:results:enableTimeDefaults` is enabled.
 
-
 [float]
 [[kibana-notification-settings]]
 ==== Notifications
@@ -317,7 +365,7 @@ must contain `from` and `to` values (see
 [horizontal]
 [[notifications-banner]]`notifications:banner`::
 A custom banner intended for temporary notices to all users. Supports
-https://help.github.com/en/articles/basic-writing-and-formatting-syntax[Markdown].
+https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax[Markdown].
 
 [[notifications-lifetime-banner]]`notifications:lifetime:banner`::
 The duration, in milliseconds, for banner notification displays. The default
@@ -335,6 +383,28 @@ default value is 5000.
 The duration, in milliseconds, for warning notification displays. The default
 value is 10000.
 
+[float]
+[[observability-advanced-settings]]
+==== Observability
+
+[horizontal]
+[[apm-enable-service-overview]]`apm:enableServiceOverview`::
+When enabled, displays the *Overview* tab for services in *APM*.
+
+[[observability-apm-optimized-sort]]`observability:apmServiceInventoryOptimizedSorting`::
+preview:[] Sorts services without anomaly detection rules on the APM Service inventory page by service name.
+
+[[observability-apm-enable-comparison]]`observability:enableComparisonByDefault`::
+Enables the comparison feature in the APM app.
+
+[[observability-apm-enable-infra-view]]`observability:enableInfrastructureView`::
+Enables the Infrastructure view in the APM app.
+
+[[observability-enable-inspect-es-queries]]`observability:enableInspectEsQueries`::
+When enabled, allows you to inspect {es} queries in API responses.
+
+[[observability-apm-enable-service-groups]]`observability:enableServiceGroups`::
+preview:[] When enabled, allows users to create Service Groups from the APM Service Inventory page.
 
 [float]
 [[kibana-reporting-settings]]
@@ -344,14 +414,13 @@ value is 10000.
 [[xpackreporting-custompdflogo]]`xpackReporting:customPdfLogo`::
 A custom image to use in the footer of the PDF.
 
-
 [float]
 [[kibana-rollups-settings]]
 ==== Rollup
 
 [horizontal]
 [[rollups-enableindexpatterns]]`rollups:enableIndexPatterns`::
-Enables the creation of index patterns that capture rollup indices, which in
+Enables the creation of data views that capture rollup indices, which in
 turn enables visualizations based on rollup data. Refresh the page to apply the
 changes.
 
@@ -360,14 +429,6 @@ changes.
 [[kibana-search-settings]]
 ==== Search
 
-[horizontal]
-[[courier-batchsearches]]`courier:batchSearches`::
-**Deprecated in 7.6. Starting in 8.0, this setting will be optimized internally.**
-When disabled, dashboard panels will load individually, and search requests will
-terminate when users navigate away or update the query. When enabled, dashboard
-panels will load together when all of the data is loaded, and searches will not
-terminate.
-
 [[courier-customrequestpreference]]`courier:customRequestPreference`::
 {ref}/search-request-body.html#request-body-search-preference[Request preference]
 to use when `courier:setRequestPreference` is set to "custom".
@@ -375,7 +436,7 @@ to use when `courier:setRequestPreference` is set to "custom".
 [[courier-ignorefilteriffieldnotinindex]]`courier:ignoreFilterIfFieldNotInIndex`::
 Skips filters that apply to fields that don't exist in the index for a
 visualization. Useful when dashboards consist of visualizations from multiple
-index patterns.
+data views.
 
 [[courier-maxconcurrentshardrequests]]`courier:maxConcurrentShardRequests`::
 Controls the {ref}/search-multi-search.html[max_concurrent_shard_requests]
@@ -393,17 +454,17 @@ because requests can be spread across all shard copies. However, results might
 be inconsistent because different shards might be in different refresh states.
 
 [[search-includefrozen]]`search:includeFrozen`::
+**This setting is deprecated and will not be supported as of 9.0.**
 Includes {ref}/frozen-indices.html[frozen indices] in results. Searching through
 frozen indices might increase the search time. This setting is off by default.
 Users must opt-in to include frozen indices.
 
-[[search-timeout]]`search:timeout`:: Change the maximum timeout for a search
-session or set to 0 to disable the timeout and allow queries to run to
-completion.
+[[search-timeout]]`search:timeout`:: Change the maximum timeout, in milliseconds (ms), for a search
+session. To disable the timeout and allow queries to run to completion, set to 0. The default is 600,000 ms, or 10 minutes.
 
 [float]
 [[kibana-siem-settings]]
-==== Security solution
+==== Security Solution
 
 [horizontal]
 [[securitysolution-defaultanomalyscore]]`securitySolution:defaultAnomalyScore`::
@@ -413,19 +474,31 @@ The threshold above which {ml} job anomalies are displayed in the {security-app}
 A comma-delimited list of {es} indices from which the {security-app} collects
 events.
 
+[[securitysolution-threatindices]]`securitySolution:defaultThreatIndex`::
+A comma-delimited list of Threat Intelligence indices from which the {security-app} collects indicators.
+
+[[securitysolution-enableCcsWarning]]`securitySolution:enableCcsWarning`:: Enables
+privilege check warnings in rules for CCS indices.
+
+[[securitysolution-enablenewsfeed]]`securitySolution:enableNewsFeed`:: Enables
+the security news feed on the Security *Overview* page.
+
 [[securitysolution-ipreputationlinks]]`securitySolution:ipReputationLinks`::
 A JSON array containing links for verifying the reputation of an IP address. The
 links are displayed on {security-guide}/network-page-overview.html[IP detail]
 pages.
-
-[[securitysolution-enablenewsfeed]]`securitySolution:enableNewsFeed`:: Enables
-the security news feed on the Security *Overview* page.
 
 [[securitysolution-newsfeedurl]]`securitySolution:newsFeedUrl`::
 The URL from which the security news feed content is retrieved.
 
 [[securitysolution-refreshintervaldefaults]]`securitySolution:refreshIntervalDefaults`::
 The default refresh interval for the Security time filter, in milliseconds.
+
+[[security-solution-rules-table-refresh]]`securitySolution:rulesTableRefresh`::
+Enables auto refresh on the rules and monitoring tables, in milliseconds.
+
+[[securitySolution-showRelatedIntegrations]]`securitySolution:showRelatedIntegrations`::
+Shows related integrations on the rules and monitoring tables.
 
 [[securitysolution-timedefaults]]`securitySolution:timeDefaults`::
 The default period of time in the Security time filter.
@@ -434,25 +507,11 @@ The default period of time in the Security time filter.
 [[kibana-timelion-settings]]
 ==== Timelion
 
-[horizontal]
-[[timelion-defaultcolumns]]`timelion:default_columns`::
-The default number of columns to use on a Timelion sheet.
-
-[[timelion-defaultrows]]`timelion:default_rows`::
-The default number of rows to use on a Timelion sheet.
-
 [[timelion-esdefaultindex]]`timelion:es.default_index`::
 The default index when using the `.es()` query.
 
 [[timelion-estimefield]]`timelion:es.timefield`::
 The default field containing a timestamp when using the `.es()` query.
-
-[[timelion-graphite-url]]`timelion:graphite.url`::
-experimental:[]
-Used with graphite queries, this is the URL of your graphite host
-in the form https://www.hostedgraphite.com/UID/ACCESS_KEY/graphite. This URL can
-be selected from an allow-list configured in the `kibana.yml` under
-`timelion.graphiteUrls`.
 
 [[timelion-maxbuckets]]`timelion:max_buckets`::
 The maximum number of buckets a single data source can return. This value is
@@ -460,14 +519,6 @@ used for calculating automatic intervals in visualizations.
 
 [[timelion-mininterval]]`timelion:min_interval`::
 The smallest interval to calculate when using "auto".
-
-[[timelion-quandlkey]]`timelion:quandl.key`::
-experimental:[]
-Used with quandl queries, this is your API key from
-https://www.quandl.com/[www.quandl.com].
-
-[[timelion-showtutorial]]`timelion:showTutorial`::
-Shows the Timelion tutorial to users when they first open the Timelion app.
 
 [[timelion-targetbuckets]]`timelion:target_buckets`::
 Used for calculating automatic intervals in visualizations, this is the number
@@ -479,39 +530,36 @@ of buckets to try to represent.
 ==== Visualization
 
 [horizontal]
-[[visualization-visualize-chartslibrary]]`visualization:visualize:legacyChartsLibrary`::
-Enables the legacy charts library for aggregation-based area, line, and bar charts in *Visualize*.
-
 [[visualization-colormapping]]`visualization:colorMapping`::
-**This setting is deprecated and will not be supported as of 8.0.**
+**This setting is deprecated and will not be supported in a future version.**
 Maps values to specific colors in charts using the *Compatibility* palette.
 
-[[visualization-dimmingopacity]]`visualization:dimmingOpacity`::
-The opacity of the chart items that are dimmed when highlighting another element
-of the chart. Use numbers between 0 and 1. The lower the number, the more the highlighted element stands out.
+[[visualization-uselegacytimeaxis]]`visualization:useLegacyTimeAxis`::
+Enables the legacy time axis for charts in Lens, Discover, Visualize and TSVB
 
 [[visualization-heatmap-maxbuckets]]`visualization:heatmap:maxBuckets`::
 The maximum number of buckets a datasource can return. High numbers can have a negative impact on your browser rendering performance.
 
-[[visualization-regionmap-showwarnings]]`visualization:regionmap:showWarnings`::
-Shows a warning in a region map when terms cannot be joined to a shape.
+[[visualization-visualize-pieChartslibrary]]`visualization:visualize:legacyPieChartsLibrary`::
+**The legacy pie charts are deprecated and will not be supported in a future version.**
+The visualize editor uses new pie charts with improved performance, color palettes, label positioning, and more. Enable this option if you prefer to use the legacy charts library.
 
-[[visualization-tilemap-wmsdefaults]]`visualization:tileMap:WMSdefaults`::
-The default properties for the WMS map server supported in the coordinate map.
-
-[[visualization-tilemap-maxprecision]]`visualization:tileMap:maxPrecision`::
-The maximum geoHash precision displayed in tile maps. 7 is high, 10 is very high,
-and 12 is the maximum. For more information, refer to
-{ref}/search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator[Cell dimensions at the equator].
+[[visualization-visualize-heatmapChartslibrary]]`visualization:visualize:legacyHeatmapChartsLibrary`::
+Disable this option if you prefer to use the new heatmap charts with improved performance, legend settings, and more..
 
 [[visualize-enablelabs]]`visualize:enableLabs`::
 Enables users to create, view, and edit experimental visualizations. When disabled,
 only production-ready visualizations are available to users.
 
+[[lens-sampling]]`lens:useFieldExistenceSampling`::
+**This setting is deprecated and will not be supported as of 8.6.**
+If enabled, document sampling is used to determine field existence (available or empty) for the Lens field list instead of relying on index mappings.
 
 [float]
 [[kibana-telemetry-settings]]
-==== Usage data
+==== Usage Data
 
-Helps improve the Elastic Stack by providing usage statistics for
+[horizontal]
+[[telemetry-enabled-advanced-setting]]`telemetry:enabled`::
+When enabled, helps improve the Elastic Stack by providing usage statistics for
 basic features. This data will not be shared outside of Elastic.

@@ -6,12 +6,12 @@
  */
 
 import { Type } from '@kbn/config-schema';
-import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import type { RequestHandler, RouteConfig } from 'src/core/server';
-import { httpServerMock } from 'src/core/server/mocks';
+import type { RequestHandler, RouteConfig } from '@kbn/core/server';
+import { httpServerMock } from '@kbn/core/server/mocks';
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
-import type { AuthenticationServiceStart } from '../../authentication';
+import type { InternalAuthenticationServiceStart } from '../../authentication';
 import { AuthenticationResult, SAMLLogin } from '../../authentication';
 import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
 import type { SecurityRouter } from '../../types';
@@ -21,7 +21,7 @@ import { defineSAMLRoutes } from './saml';
 
 describe('SAML authentication routes', () => {
   let router: jest.Mocked<SecurityRouter>;
-  let authc: DeeplyMockedKeys<AuthenticationServiceStart>;
+  let authc: DeeplyMockedKeys<InternalAuthenticationServiceStart>;
   beforeEach(() => {
     const routeParamsMock = routeDefinitionParamsMock.create();
     router = routeParamsMock.router;
@@ -41,6 +41,15 @@ describe('SAML authentication routes', () => {
 
       routeConfig = acsRouteConfig;
       routeHandler = acsRouteHandler;
+    });
+
+    it('additionally registers BWC route', () => {
+      expect(
+        router.post.mock.calls.find(([{ path }]) => path === '/api/security/saml/callback')
+      ).toBeDefined();
+      expect(
+        router.post.mock.calls.find(([{ path }]) => path === '/api/security/v1/saml')
+      ).toBeDefined();
     });
 
     it('correctly defines route.', () => {

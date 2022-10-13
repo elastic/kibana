@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import type { MockedKeys } from '@kbn/utility-types/jest';
-import { CoreSetup, CoreStart } from '../../../../../core/public';
-import { coreMock } from '../../../../../core/public/mocks';
+import type { MockedKeys } from '@kbn/utility-types-jest';
+import { CoreSetup, CoreStart } from '@kbn/core/public';
+import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { IEsSearchRequest } from '../../../common/search';
 import { SearchInterceptor } from './search_interceptor';
-import { AbortError } from '../../../../kibana_utils/public';
+import { AbortError } from '@kbn/kibana-utils-plugin/public';
 import { SearchTimeoutError, PainlessError, TimeoutErrorMode, EsError } from '../errors';
-import { ISessionService, SearchSessionState } from '../';
-import { bfetchPluginMock } from '../../../../bfetch/public/mocks';
-import { BfetchPublicSetup } from 'src/plugins/bfetch/public';
+import { ISessionService, SearchSessionState } from '..';
+import { bfetchPluginMock } from '@kbn/bfetch-plugin/public/mocks';
+import { BfetchPublicSetup } from '@kbn/bfetch-plugin/public';
 
 import * as searchPhaseException from '../../../common/search/test_data/search_phase_execution_exception.json';
 import * as resourceNotFoundException from '../../../common/search/test_data/resource_not_found_exception.json';
@@ -28,6 +28,12 @@ jest.mock('./utils', () => ({
     return Promise.resolve(JSON.stringify(input));
   }),
 }));
+
+jest.mock('../errors/search_session_incomplete_warning', () => ({
+  SearchSessionIncompleteWarning: jest.fn(),
+}));
+
+import { SearchSessionIncompleteWarning } from '../errors/search_session_incomplete_warning';
 
 let searchInterceptor: SearchInterceptor;
 let mockCoreSetup: MockedKeys<CoreSetup>;
@@ -49,17 +55,24 @@ const complete = jest.fn();
 
 function mockFetchImplementation(responses: any[]) {
   let i = 0;
-  fetchMock.mockImplementation((r) => {
+  fetchMock.mockImplementation((r, abortSignal) => {
     if (!r.request.id) i = 0;
     const { time = 0, value = {}, isError = false } = responses[i++];
     value.meta = {
       size: 10,
     };
-    return new Promise((resolve, reject) =>
+    return new Promise((resolve, reject) => {
       setTimeout(() => {
         return (isError ? reject : resolve)(value);
-      }, time)
-    );
+      }, time);
+
+      if (abortSignal) {
+        if (abortSignal.aborted) reject(new AbortError());
+        abortSignal.addEventListener('abort', () => {
+          reject(new AbortError());
+        });
+      }
+    });
   });
 }
 
@@ -106,7 +119,9 @@ describe('SearchInterceptor', () => {
       }),
       uiSettings: mockCoreSetup.uiSettings,
       http: mockCoreSetup.http,
+      executionContext: mockCoreSetup.executionContext,
       session: sessionService,
+      theme: themeServiceMock.createSetupContract(),
     });
   });
 
@@ -487,12 +502,12 @@ describe('SearchInterceptor', () => {
         opts: {
           isRestore?: boolean;
           isStored?: boolean;
-          sessionId: string;
+          sessionId?: string;
         } | null
       ) => {
         const sessionServiceMock = sessionService as jest.Mocked<ISessionService>;
         sessionServiceMock.getSearchOptions.mockImplementation(() =>
-          opts
+          opts && opts.sessionId
             ? {
                 sessionId: opts.sessionId,
                 isRestore: opts.isRestore ?? false,
@@ -500,6 +515,8 @@ describe('SearchInterceptor', () => {
               }
             : null
         );
+        sessionServiceMock.isRestore.mockReturnValue(!!opts?.isRestore);
+        sessionServiceMock.getSessionId.mockImplementation(() => opts?.sessionId);
         fetchMock.mockResolvedValue({ result: 200 });
       };
 
@@ -527,7 +544,13 @@ describe('SearchInterceptor', () => {
           .catch(() => {});
         expect(fetchMock.mock.calls[0][0]).toEqual(
           expect.objectContaining({
-            options: { sessionId, isStored: true, isRestore: true, strategy: 'ese' },
+            options: {
+              sessionId,
+              isStored: true,
+              isRestore: true,
+              isSearchStored: false,
+              strategy: 'ese',
+            },
           })
         );
 
@@ -553,6 +576,127 @@ describe('SearchInterceptor', () => {
         expect(
           (sessionService as jest.Mocked<ISessionService>).getSearchOptions
         ).toHaveBeenCalledWith(sessionId);
+      });
+
+      test('should not show warning if a search is available during restore', async () => {
+        setup({
+          isRestore: true,
+          isStored: true,
+          sessionId: '123',
+        });
+
+        const responses = [
+          {
+            time: 10,
+            value: {
+              isPartial: false,
+              isRunning: false,
+              isRestored: true,
+              id: 1,
+              rawResponse: {
+                took: 1,
+              },
+            },
+          },
+        ];
+        mockFetchImplementation(responses);
+
+        const response = searchInterceptor.search(
+          {},
+          {
+            sessionId: '123',
+          }
+        );
+        response.subscribe({ next, error, complete });
+
+        await timeTravel(10);
+
+        expect(SearchSessionIncompleteWarning).toBeCalledTimes(0);
+      });
+
+      test('should not show warning if a search outside of session is running', async () => {
+        setup({
+          isRestore: false,
+          isStored: false,
+        });
+
+        const responses = [
+          {
+            time: 10,
+            value: {
+              isPartial: false,
+              isRunning: false,
+              isRestored: false,
+              id: 1,
+              rawResponse: {
+                took: 1,
+              },
+            },
+          },
+        ];
+        mockFetchImplementation(responses);
+
+        const response = searchInterceptor.search(
+          {},
+          {
+            sessionId: undefined,
+          }
+        );
+        response.subscribe({ next, error, complete });
+
+        await timeTravel(10);
+
+        expect(SearchSessionIncompleteWarning).toBeCalledTimes(0);
+      });
+
+      test('should show warning once if a search is not available during restore', async () => {
+        setup({
+          isRestore: true,
+          isStored: true,
+          sessionId: '123',
+        });
+
+        const responses = [
+          {
+            time: 10,
+            value: {
+              isPartial: false,
+              isRunning: false,
+              isRestored: false,
+              id: 1,
+              rawResponse: {
+                took: 1,
+              },
+            },
+          },
+        ];
+        mockFetchImplementation(responses);
+
+        searchInterceptor
+          .search(
+            {},
+            {
+              sessionId: '123',
+            }
+          )
+          .subscribe({ next, error, complete });
+
+        await timeTravel(10);
+
+        expect(SearchSessionIncompleteWarning).toBeCalledTimes(1);
+
+        searchInterceptor
+          .search(
+            {},
+            {
+              sessionId: '123',
+            }
+          )
+          .subscribe({ next, error, complete });
+
+        await timeTravel(10);
+
+        expect(SearchSessionIncompleteWarning).toBeCalledTimes(1);
       });
     });
 
@@ -589,17 +733,21 @@ describe('SearchInterceptor', () => {
         );
         sessionService.getSessionId.mockImplementation(() => sessionId);
 
-        const untrack = jest.fn();
-        sessionService.trackSearch.mockImplementation(() => untrack);
+        const trackSearchComplete = jest.fn();
+        sessionService.trackSearch.mockImplementation(() => ({
+          complete: trackSearchComplete,
+          error: () => {},
+          beforePoll: () => [{ isSearchStored: false }, () => {}],
+        }));
 
         const response = searchInterceptor.search({}, { pollInterval: 0, sessionId });
         response.subscribe({ next, error });
         await timeTravel(10);
         expect(sessionService.trackSearch).toBeCalledTimes(1);
-        expect(untrack).not.toBeCalled();
+        expect(trackSearchComplete).not.toBeCalled();
         await timeTravel(300);
         expect(sessionService.trackSearch).toBeCalledTimes(1);
-        expect(untrack).toBeCalledTimes(1);
+        expect(trackSearchComplete).toBeCalledTimes(1);
       });
 
       test('session service should be able to cancel search', async () => {
@@ -608,9 +756,6 @@ describe('SearchInterceptor', () => {
           (_sessionId) => _sessionId === sessionId
         );
         sessionService.getSessionId.mockImplementation(() => sessionId);
-
-        const untrack = jest.fn();
-        sessionService.trackSearch.mockImplementation(() => untrack);
 
         const response = searchInterceptor.search({}, { pollInterval: 0, sessionId });
         response.subscribe({ next, error });
@@ -635,9 +780,6 @@ describe('SearchInterceptor', () => {
         );
         sessionService.getSessionId.mockImplementation(() => sessionId);
 
-        const untrack = jest.fn();
-        sessionService.trackSearch.mockImplementation(() => untrack);
-
         const response1 = searchInterceptor.search(
           {},
           { pollInterval: 0, sessionId: 'something different' }
@@ -654,9 +796,6 @@ describe('SearchInterceptor', () => {
       test("don't track if no current session", async () => {
         sessionService.getSessionId.mockImplementation(() => undefined);
         sessionService.isCurrentSession.mockImplementation((_sessionId) => false);
-
-        const untrack = jest.fn();
-        sessionService.trackSearch.mockImplementation(() => untrack);
 
         const response1 = searchInterceptor.search(
           {},
@@ -768,15 +907,22 @@ describe('SearchInterceptor', () => {
         expect(fetchMock).toBeCalledTimes(2);
       });
 
-      test('should track searches that come from cache', async () => {
+      test('should not track searches that come from cache', async () => {
         mockFetchImplementation(partialCompleteResponse);
         sessionService.isCurrentSession.mockImplementation(
           (_sessionId) => _sessionId === sessionId
         );
         sessionService.getSessionId.mockImplementation(() => sessionId);
 
-        const untrack = jest.fn();
-        sessionService.trackSearch.mockImplementation(() => untrack);
+        const completeSearch = jest.fn();
+
+        sessionService.trackSearch.mockImplementation((params) => ({
+          complete: completeSearch,
+          error: jest.fn(),
+          beforePoll: jest.fn(() => {
+            return [{ isSearchStored: false }, () => {}];
+          }),
+        }));
 
         const req = {
           params: {
@@ -789,14 +935,15 @@ describe('SearchInterceptor', () => {
         response.subscribe({ next, error, complete });
         response2.subscribe({ next, error, complete });
         await timeTravel(10);
+
         expect(fetchMock).toBeCalledTimes(1);
-        expect(sessionService.trackSearch).toBeCalledTimes(2);
-        expect(untrack).not.toBeCalled();
+        expect(sessionService.trackSearch).toBeCalledTimes(1);
+        expect(completeSearch).not.toBeCalled();
         await timeTravel(300);
         // Should be called only 2 times (once per partial response)
         expect(fetchMock).toBeCalledTimes(2);
-        expect(sessionService.trackSearch).toBeCalledTimes(2);
-        expect(untrack).toBeCalledTimes(2);
+        expect(sessionService.trackSearch).toBeCalledTimes(1);
+        expect(completeSearch).toBeCalledTimes(1);
 
         expect(next).toBeCalledTimes(4);
         expect(error).toBeCalledTimes(0);
@@ -982,8 +1129,15 @@ describe('SearchInterceptor', () => {
         );
         sessionService.getSessionId.mockImplementation(() => sessionId);
 
-        const untrack = jest.fn();
-        sessionService.trackSearch.mockImplementation(() => untrack);
+        const completeSearch = jest.fn();
+
+        sessionService.trackSearch.mockImplementation((params) => ({
+          complete: completeSearch,
+          error: jest.fn(),
+          beforePoll: jest.fn(() => {
+            return [{ isSearchStored: false }, () => {}];
+          }),
+        }));
 
         const req = {
           params: {
@@ -1006,7 +1160,6 @@ describe('SearchInterceptor', () => {
         expect(error).toBeCalledTimes(0);
         expect(complete).toBeCalledTimes(0);
         expect(sessionService.trackSearch).toBeCalledTimes(1);
-        expect(untrack).not.toBeCalled();
 
         const next2 = jest.fn();
         const error2 = jest.fn();
@@ -1018,9 +1171,9 @@ describe('SearchInterceptor', () => {
         abortController.abort();
 
         await timeTravel(300);
-        // Both searches should be tracked and untracked
-        expect(sessionService.trackSearch).toBeCalledTimes(2);
-        expect(untrack).toBeCalledTimes(2);
+        // Only first searches should be tracked and untracked
+        expect(sessionService.trackSearch).toBeCalledTimes(1);
+        expect(completeSearch).toBeCalledTimes(1);
 
         // First search should error
         expect(next).toBeCalledTimes(1);
@@ -1043,8 +1196,15 @@ describe('SearchInterceptor', () => {
         );
         sessionService.getSessionId.mockImplementation(() => sessionId);
 
-        const untrack = jest.fn();
-        sessionService.trackSearch.mockImplementation(() => untrack);
+        const completeSearch = jest.fn();
+
+        sessionService.trackSearch.mockImplementation((params) => ({
+          complete: completeSearch,
+          error: jest.fn(),
+          beforePoll: jest.fn(() => {
+            return [{ isSearchStored: false }, () => {}];
+          }),
+        }));
 
         const req = {
           params: {
@@ -1063,7 +1223,7 @@ describe('SearchInterceptor', () => {
         expect(error).toBeCalledTimes(0);
         expect(complete).toBeCalledTimes(0);
         expect(sessionService.trackSearch).toBeCalledTimes(1);
-        expect(untrack).not.toBeCalled();
+        expect(completeSearch).not.toBeCalled();
 
         const next2 = jest.fn();
         const error2 = jest.fn();
@@ -1079,8 +1239,8 @@ describe('SearchInterceptor', () => {
         abortController.abort();
 
         await timeTravel(300);
-        expect(sessionService.trackSearch).toBeCalledTimes(2);
-        expect(untrack).toBeCalledTimes(2);
+        expect(sessionService.trackSearch).toBeCalledTimes(1);
+        expect(completeSearch).toBeCalledTimes(1);
 
         expect(next).toBeCalledTimes(2);
         expect(error).toBeCalledTimes(0);
@@ -1100,7 +1260,6 @@ describe('SearchInterceptor', () => {
           (_sessionId) => _sessionId === sessionId
         );
         sessionService.getSessionId.mockImplementation(() => sessionId);
-        sessionService.trackSearch.mockImplementation(() => jest.fn());
 
         const req = {
           params: {
@@ -1139,8 +1298,15 @@ describe('SearchInterceptor', () => {
         );
         sessionService.getSessionId.mockImplementation(() => sessionId);
 
-        const untrack = jest.fn();
-        sessionService.trackSearch.mockImplementation(() => untrack);
+        const completeSearch = jest.fn();
+
+        sessionService.trackSearch.mockImplementation((params) => ({
+          complete: completeSearch,
+          error: jest.fn(),
+          beforePoll: jest.fn(() => {
+            return [{ isSearchStored: false }, () => {}];
+          }),
+        }));
 
         const req = {
           params: {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RouteDefinitionParams } from '../';
+import type { RouteDefinitionParams } from '..';
 import { definePrivilegesRoutes } from './privileges';
 import { resetSessionPageRoutes } from './reset_session_page';
 import { defineRolesRoutes } from './roles';

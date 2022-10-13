@@ -5,31 +5,121 @@
  * 2.0.
  */
 
-import React, { FC, Fragment, useState, useEffect } from 'react';
-
+import React, { FC, Fragment, useState, useEffect, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type {
+  FileDataVisualizerSpec,
+  GetAdditionalLinksParams,
+  GetAdditionalLinks,
+} from '@kbn/data-visualizer-plugin/public';
 import { useTimefilter } from '../../contexts/kibana';
-import { NavigationMenu } from '../../components/navigation_menu';
 import { HelpMenu } from '../../components/help_menu';
-import { useMlKibana } from '../../contexts/kibana';
+import { useMlKibana, useMlLocator } from '../../contexts/kibana';
+
+import { ML_PAGES } from '../../../../common/constants/locator';
+import { isFullLicense } from '../../license';
+import { mlNodesAvailable, getMlNodeCount } from '../../ml_nodes_check/check_ml_nodes';
+import { checkPermission } from '../../capabilities/check_capabilities';
+import { MlPageHeader } from '../../components/page_header';
 
 export const FileDataVisualizerPage: FC = () => {
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
   const {
-    services: { docLinks, fileDataVisualizer },
+    services: {
+      docLinks,
+      dataVisualizer,
+      data: {
+        dataViews: { get: getDataView },
+      },
+    },
   } = useMlKibana();
-  const [FileDataVisualizer, setFileDataVisualizer] = useState<FC<{}> | null>(null);
+  const mlLocator = useMlLocator()!;
+  getMlNodeCount();
+
+  const [FileDataVisualizer, setFileDataVisualizer] = useState<FileDataVisualizerSpec | null>(null);
+
+  const getAdditionalLinks: GetAdditionalLinks = useMemo(
+    () => [
+      async ({ dataViewId, globalState }: GetAdditionalLinksParams) => [
+        {
+          id: 'create_ml_job',
+          title: i18n.translate('xpack.ml.fileDatavisualizer.actionsPanel.anomalyDetectionTitle', {
+            defaultMessage: 'Create ML job',
+          }),
+          description: '',
+          icon: 'machineLearningApp',
+          type: 'file',
+          getUrl: async () => {
+            return await mlLocator.getUrl({
+              page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE,
+              pageState: {
+                index: dataViewId,
+                globalState,
+              },
+            });
+          },
+          canDisplay: async () => {
+            try {
+              const { timeFieldName } = await getDataView(dataViewId);
+              return (
+                isFullLicense() &&
+                timeFieldName !== undefined &&
+                checkPermission('canCreateJob') &&
+                mlNodesAvailable()
+              );
+            } catch (error) {
+              return false;
+            }
+          },
+        },
+        {
+          id: 'open_in_data_viz',
+          title: i18n.translate('xpack.ml.fileDatavisualizer.actionsPanel.dataframeTitle', {
+            defaultMessage: 'Open in Data Visualizer',
+          }),
+          description: '',
+          icon: 'dataVisualizer',
+          type: 'file',
+          getUrl: async () => {
+            return await mlLocator.getUrl({
+              page: ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER,
+              pageState: {
+                index: dataViewId,
+                globalState,
+              },
+            });
+          },
+          canDisplay: async () => dataViewId !== '',
+        },
+      ],
+    ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [mlLocator]
+  );
 
   useEffect(() => {
-    if (fileDataVisualizer !== undefined) {
-      const { getFileDataVisualizerComponent } = fileDataVisualizer;
+    if (dataVisualizer !== undefined) {
+      getMlNodeCount();
+      const { getFileDataVisualizerComponent } = dataVisualizer;
       getFileDataVisualizerComponent().then(setFileDataVisualizer);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <Fragment>
-      <NavigationMenu tabId="datavisualizer" />
-      {FileDataVisualizer}
+      {FileDataVisualizer !== null ? (
+        <>
+          <MlPageHeader>
+            <FormattedMessage
+              id="xpack.ml.dataVisualizer.pageHeader"
+              defaultMessage="Data Visualizer"
+            />
+          </MlPageHeader>
+          <FileDataVisualizer getAdditionalLinks={getAdditionalLinks} />
+        </>
+      ) : null}
       <HelpMenu docLink={docLinks.links.ml.guide} />
     </Fragment>
   );

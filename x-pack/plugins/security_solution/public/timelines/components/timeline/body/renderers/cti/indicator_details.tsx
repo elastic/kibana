@@ -7,12 +7,11 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
-  INDICATOR_DATASET,
   INDICATOR_MATCHED_TYPE,
-  INDICATOR_PROVIDER,
+  FEED_NAME,
   INDICATOR_REFERENCE,
 } from '../../../../../../../common/cti/constants';
 import { DraggableBadge } from '../../../../../../common/components/draggables';
@@ -22,19 +21,19 @@ import { HorizontalSpacer } from './helpers';
 interface IndicatorDetailsProps {
   contextId: string;
   eventId: string;
-  indicatorDataset: string | undefined;
-  indicatorProvider: string | undefined;
+  feedName: string | undefined;
   indicatorReference: string | undefined;
   indicatorType: string | undefined;
+  isDraggable?: boolean;
 }
 
 export const IndicatorDetails: React.FC<IndicatorDetailsProps> = ({
   contextId,
   eventId,
-  indicatorDataset,
-  indicatorProvider,
+  feedName,
   indicatorReference,
   indicatorType,
+  isDraggable,
 }) => (
   <EuiFlexGroup
     alignItems="flexStart"
@@ -51,32 +50,14 @@ export const IndicatorDetails: React.FC<IndicatorDetailsProps> = ({
           data-test-subj="threat-match-indicator-details-indicator-type"
           eventId={eventId}
           field={INDICATOR_MATCHED_TYPE}
+          isDraggable={isDraggable}
           value={indicatorType}
+          isAggregatable={true}
+          fieldType={'keyword'}
         />
       </EuiFlexItem>
     )}
-    {indicatorDataset && (
-      <>
-        <EuiFlexItem grow={false}>
-          <HorizontalSpacer>
-            <FormattedMessage
-              defaultMessage="from"
-              id="xpack.securitySolution.alerts.rowRenderers.cti.threatMatch.datasetPreposition"
-            />
-          </HorizontalSpacer>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <DraggableBadge
-            contextId={contextId}
-            data-test-subj="threat-match-indicator-details-indicator-dataset"
-            eventId={eventId}
-            field={INDICATOR_DATASET}
-            value={indicatorDataset}
-          />
-        </EuiFlexItem>
-      </>
-    )}
-    {indicatorProvider && (
+    {feedName && (
       <>
         <EuiFlexItem grow={false} component="span">
           <HorizontalSpacer>
@@ -89,10 +70,13 @@ export const IndicatorDetails: React.FC<IndicatorDetailsProps> = ({
         <EuiFlexItem grow={false}>
           <DraggableBadge
             contextId={contextId}
-            data-test-subj="threat-match-indicator-details-indicator-provider"
+            data-test-subj="threat-match-indicator-details-indicator-feedName"
             eventId={eventId}
-            field={INDICATOR_PROVIDER}
-            value={indicatorProvider}
+            field={FEED_NAME}
+            isDraggable={isDraggable}
+            value={feedName}
+            isAggregatable={true}
+            fieldType={'keyword'}
           />
         </EuiFlexItem>
       </>
@@ -108,7 +92,10 @@ export const IndicatorDetails: React.FC<IndicatorDetailsProps> = ({
             data-test-subj="threat-match-indicator-details-indicator-reference"
             eventId={eventId}
             fieldName={INDICATOR_REFERENCE}
+            isDraggable={isDraggable}
             value={indicatorReference}
+            isAggregatable={true}
+            fieldType={'keyword'}
           />
         </EuiFlexItem>
       </>

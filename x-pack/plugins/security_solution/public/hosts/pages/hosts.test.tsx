@@ -9,7 +9,7 @@ import { mount } from 'enzyme';
 import React from 'react';
 import { Router } from 'react-router-dom';
 
-import { Filter } from '../../../../../../src/plugins/data/common/es_query';
+import type { Filter } from '@kbn/es-query';
 import '../../common/mock/match_media';
 import {
   TestProviders,
@@ -18,12 +18,16 @@ import {
   kibanaObservable,
   createSecuritySolutionStorageMock,
 } from '../../common/mock';
-import { SiemNavigation } from '../../common/components/navigation';
+import { SecuritySolutionTabNavigation } from '../../common/components/navigation';
 import { inputsActions } from '../../common/store/inputs';
-import { State, createStore } from '../../common/store';
+import type { State } from '../../common/store';
+import { createStore } from '../../common/store';
 import { Hosts } from './hosts';
 import { HostsTabs } from './hosts_tabs';
-import { useSourcererScope } from '../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../common/containers/sourcerer';
+import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
+import { LandingPageComponent } from '../../common/components/landing_page';
+import { InputsModelId } from '../../common/store/inputs/constants';
 
 jest.mock('../../common/containers/sourcerer');
 
@@ -35,6 +39,29 @@ jest.mock('../../common/components/search_bar', () => ({
 jest.mock('../../common/components/query_bar', () => ({
   QueryBar: () => null,
 }));
+jest.mock('../../common/components/visualization_actions', () => ({
+  VisualizationActions: jest.fn(() => <div data-test-subj="mock-viz-actions" />),
+}));
+const mockNavigateToApp = jest.fn();
+jest.mock('../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../common/lib/kibana');
+
+  return {
+    ...original,
+    useKibana: () => ({
+      services: {
+        ...original.useKibana().services,
+        application: {
+          ...original.useKibana().services.application,
+          navigateToApp: mockNavigateToApp,
+        },
+        cases: {
+          ...mockCasesContract(),
+        },
+      },
+    }),
+  };
+});
 
 type Action = 'PUSH' | 'POP' | 'REPLACE';
 const pop: Action = 'POP';
@@ -57,10 +84,13 @@ const mockHistory = {
   createHref: jest.fn(),
   listen: jest.fn(),
 };
-const mockUseSourcererScope = useSourcererScope as jest.Mock;
+const mockUseSourcererDataView = useSourcererDataView as jest.Mock;
 describe('Hosts - rendering', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
   test('it renders the Setup Instructions text when no index is available', async () => {
-    mockUseSourcererScope.mockReturnValue({
+    mockUseSourcererDataView.mockReturnValue({
       indicesExist: false,
     });
 
@@ -71,26 +101,27 @@ describe('Hosts - rendering', () => {
         </Router>
       </TestProviders>
     );
-    expect(wrapper.find('[data-test-subj="empty-page"]').exists()).toBe(true);
+
+    expect(wrapper.find(LandingPageComponent).exists()).toBe(true);
   });
 
   test('it DOES NOT render the Setup Instructions text when an index is available', async () => {
-    mockUseSourcererScope.mockReturnValue({
+    mockUseSourcererDataView.mockReturnValue({
       indicesExist: true,
       indexPattern: {},
     });
-    const wrapper = mount(
+    mount(
       <TestProviders>
         <Router history={mockHistory}>
           <Hosts />
         </Router>
       </TestProviders>
     );
-    expect(wrapper.find('[data-test-subj="empty-page"]').exists()).toBe(false);
+    expect(mockNavigateToApp).not.toHaveBeenCalled();
   });
 
   test('it should render tab navigation', async () => {
-    mockUseSourcererScope.mockReturnValue({
+    mockUseSourcererDataView.mockReturnValue({
       indicesExist: true,
       indexPattern: {},
     });
@@ -102,7 +133,7 @@ describe('Hosts - rendering', () => {
         </Router>
       </TestProviders>
     );
-    expect(wrapper.find(SiemNavigation).exists()).toBe(true);
+    expect(wrapper.find(SecuritySolutionTabNavigation).exists()).toBe(true);
   });
 
   test('it should add the new filters after init', async () => {
@@ -137,7 +168,7 @@ describe('Hosts - rendering', () => {
         },
       },
     ];
-    mockUseSourcererScope.mockReturnValue({
+    mockUseSourcererDataView.mockReturnValue({
       indicesExist: true,
       indexPattern: { fields: [], title: 'title' },
     });
@@ -152,10 +183,12 @@ describe('Hosts - rendering', () => {
       </TestProviders>
     );
     wrapper.update();
-    myStore.dispatch(inputsActions.setSearchBarFilter({ id: 'global', filters: newFilters }));
+    myStore.dispatch(
+      inputsActions.setSearchBarFilter({ id: InputsModelId.global, filters: newFilters })
+    );
     wrapper.update();
     expect(wrapper.find(HostsTabs).props().filterQuery).toEqual(
-      '{"bool":{"must":[],"filter":[{"match_all":{}},{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"host.name":"ItRocks"}}],"minimum_should_match":1}}]}}],"should":[],"must_not":[]}}'
+      '{"bool":{"must":[],"filter":[{"bool":{"filter":[{"bool":{"should":[{"match_phrase":{"host.name":"ItRocks"}}],"minimum_should_match":1}}]}}],"should":[],"must_not":[]}}'
     );
   });
 });

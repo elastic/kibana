@@ -8,10 +8,9 @@
 import expect from '@kbn/expect';
 import { isEmpty, sortBy } from 'lodash';
 
+import { JOB_STATE, DATAFEED_STATE } from '@kbn/ml-plugin/common/constants/states';
+import { Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-
-import { JOB_STATE, DATAFEED_STATE } from '../../../../../plugins/ml/common/constants/states';
-import { Job } from '../../../../../plugins/ml/common/types/anomaly_detection_jobs';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
 
@@ -24,7 +23,7 @@ export default ({ getService }: FtrProviderContext) => {
     {
       testTitleSuffix:
         'for sample_data_weblogs with prefix, startDatafeed false and estimateModelMemory false',
-      sourceDataArchive: 'ml/module_sample_logs',
+      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_sample_logs',
       indexPattern: { name: 'ft_module_sample_logs', timeField: '@timestamp' },
       module: 'sample_data_weblogs',
       user: USER.ML_POWERUSER,
@@ -41,19 +40,16 @@ export default ({ getService }: FtrProviderContext) => {
             jobId: 'pf1_low_request_rate',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '10mb',
           },
           {
             jobId: 'pf1_response_code_rates',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '10mb',
           },
           {
             jobId: 'pf1_url_scanning',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '10mb',
           },
         ],
         searches: [] as string[],
@@ -64,7 +60,7 @@ export default ({ getService }: FtrProviderContext) => {
     {
       testTitleSuffix:
         'for sample_data_weblogs with prefix, startDatafeed true and estimateModelMemory true',
-      sourceDataArchive: 'ml/module_sample_logs',
+      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_sample_logs',
       indexPattern: { name: 'ft_module_sample_logs', timeField: '@timestamp' },
       module: 'sample_data_weblogs',
       user: USER.ML_POWERUSER,
@@ -72,7 +68,7 @@ export default ({ getService }: FtrProviderContext) => {
         prefix: 'pf2_',
         indexPatternName: 'ft_module_sample_logs',
         startDatafeed: true,
-        end: Date.now(),
+        end: 1585576710000,
       },
       expected: {
         responseCode: 200,
@@ -81,19 +77,16 @@ export default ({ getService }: FtrProviderContext) => {
             jobId: 'pf2_low_request_rate',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
           {
             jobId: 'pf2_response_code_rates',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
           {
             jobId: 'pf2_url_scanning',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '16mb',
           },
         ],
         searches: [] as string[],
@@ -104,7 +97,7 @@ export default ({ getService }: FtrProviderContext) => {
     {
       testTitleSuffix:
         'for apache_ecs with prefix, startDatafeed true and estimateModelMemory true',
-      sourceDataArchive: 'ml/module_apache',
+      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_apache',
       indexPattern: { name: 'ft_module_apache', timeField: '@timestamp' },
       module: 'apache_ecs',
       user: USER.ML_POWERUSER,
@@ -112,7 +105,7 @@ export default ({ getService }: FtrProviderContext) => {
         prefix: 'pf3_',
         indexPatternName: 'ft_module_apache',
         startDatafeed: true,
-        end: Date.now(),
+        end: 1536933580000,
       },
       expected: {
         responseCode: 200,
@@ -121,31 +114,26 @@ export default ({ getService }: FtrProviderContext) => {
             jobId: 'pf3_low_request_rate_ecs',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
           {
             jobId: 'pf3_source_ip_request_rate_ecs',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
           {
             jobId: 'pf3_source_ip_url_count_ecs',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '16mb',
           },
           {
             jobId: 'pf3_status_code_rate_ecs',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
           {
             jobId: 'pf3_visitor_rate_ecs',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
         ],
         searches: ['ml_http_access_filebeat_ecs'] as string[],
@@ -163,65 +151,24 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       testTitleSuffix:
-        'for apm_nodejs with prefix, startDatafeed true and estimateModelMemory true',
-      sourceDataArchive: 'ml/module_apm',
-      indexPattern: { name: 'ft_module_apm', timeField: '@timestamp' },
-      module: 'apm_nodejs',
-      user: USER.ML_POWERUSER,
-      requestBody: {
-        prefix: 'pf4_',
-        indexPatternName: 'ft_module_apm',
-        startDatafeed: true,
-        end: Date.now(),
-      },
-      expected: {
-        responseCode: 200,
-        jobs: [
-          {
-            jobId: 'pf4_abnormal_span_durations_nodejs',
-            jobState: JOB_STATE.CLOSED,
-            datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
-          },
-          {
-            jobId: 'pf4_abnormal_trace_durations_nodejs',
-            jobState: JOB_STATE.CLOSED,
-            datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
-          },
-          {
-            jobId: 'pf4_decreased_throughput_nodejs',
-            jobState: JOB_STATE.CLOSED,
-            datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
-          },
-        ],
-        searches: [] as string[],
-        visualizations: [] as string[],
-        dashboards: [] as string[],
-      },
-    },
-    {
-      testTitleSuffix:
         'for apm_transaction with prefix, startDatafeed true and estimateModelMemory true',
-      sourceDataArchive: 'ml/module_apm',
-      indexPattern: { name: 'ft_module_apm', timeField: '@timestamp' },
+      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_apm_transaction',
+      indexPattern: { name: 'ft_module_apm_transaction', timeField: '@timestamp' },
       module: 'apm_transaction',
       user: USER.ML_POWERUSER,
       requestBody: {
         prefix: 'pf5_',
-        indexPatternName: 'ft_module_apm',
+        indexPatternName: 'ft_module_apm_transaction',
         startDatafeed: true,
-        end: Date.now(),
+        end: 1632925220000,
       },
       expected: {
         responseCode: 200,
         jobs: [
           {
-            jobId: 'pf5_high_mean_transaction_duration',
+            jobId: 'pf5_apm_tx_metrics',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
         ],
         searches: [] as string[],
@@ -232,7 +179,7 @@ export default ({ getService }: FtrProviderContext) => {
     {
       testTitleSuffix:
         'for logs_ui_analysis with prefix, startDatafeed true and estimateModelMemory true',
-      sourceDataArchive: 'ml/module_logs',
+      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_logs',
       indexPattern: { name: 'ft_module_logs', timeField: '@timestamp' },
       module: 'logs_ui_analysis',
       user: USER.ML_POWERUSER,
@@ -240,7 +187,7 @@ export default ({ getService }: FtrProviderContext) => {
         prefix: 'pf6_',
         indexPatternName: 'ft_module_logs',
         startDatafeed: true,
-        end: Date.now(),
+        end: 1556570920000,
       },
       expected: {
         responseCode: 200,
@@ -249,7 +196,6 @@ export default ({ getService }: FtrProviderContext) => {
             jobId: 'pf6_log-entry-rate',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
         ],
         searches: [] as string[],
@@ -260,7 +206,7 @@ export default ({ getService }: FtrProviderContext) => {
     {
       testTitleSuffix:
         'for logs_ui_categories with prefix, startDatafeed true and estimateModelMemory true',
-      sourceDataArchive: 'ml/module_logs',
+      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_logs',
       indexPattern: { name: 'ft_module_logs', timeField: '@timestamp' },
       module: 'logs_ui_categories',
       user: USER.ML_POWERUSER,
@@ -268,7 +214,7 @@ export default ({ getService }: FtrProviderContext) => {
         prefix: 'pf7_',
         indexPatternName: 'ft_module_logs',
         startDatafeed: true,
-        end: Date.now(),
+        end: 1556570920000,
       },
       expected: {
         responseCode: 200,
@@ -277,7 +223,6 @@ export default ({ getService }: FtrProviderContext) => {
             jobId: 'pf7_log-entry-categories-count',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '41mb',
           },
         ],
         searches: [] as string[],
@@ -287,7 +232,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       testTitleSuffix: 'for nginx_ecs with prefix, startDatafeed true and estimateModelMemory true',
-      sourceDataArchive: 'ml/module_nginx',
+      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_nginx',
       indexPattern: { name: 'ft_module_nginx', timeField: '@timestamp' },
       module: 'nginx_ecs',
       user: USER.ML_POWERUSER,
@@ -295,7 +240,7 @@ export default ({ getService }: FtrProviderContext) => {
         prefix: 'pf8_',
         indexPatternName: 'ft_module_nginx',
         startDatafeed: true,
-        end: Date.now(),
+        end: 1542372260000,
       },
       expected: {
         responseCode: 200,
@@ -304,31 +249,26 @@ export default ({ getService }: FtrProviderContext) => {
             jobId: 'pf8_visitor_rate_ecs',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
           {
             jobId: 'pf8_status_code_rate_ecs',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
           {
             jobId: 'pf8_source_ip_url_count_ecs',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '16mb',
           },
           {
             jobId: 'pf8_source_ip_request_rate_ecs',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
           {
             jobId: 'pf8_low_request_rate_ecs',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
         ],
         searches: ['ml_http_access_filebeat_ecs'] as string[],
@@ -347,7 +287,7 @@ export default ({ getService }: FtrProviderContext) => {
     {
       testTitleSuffix:
         'for sample_data_ecommerce with prefix, startDatafeed true and estimateModelMemory true',
-      sourceDataArchive: 'ml/module_sample_ecommerce',
+      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_sample_ecommerce',
       indexPattern: { name: 'ft_module_sample_ecommerce', timeField: 'order_date' },
       module: 'sample_data_ecommerce',
       user: USER.ML_POWERUSER,
@@ -355,7 +295,7 @@ export default ({ getService }: FtrProviderContext) => {
         prefix: 'pf9_',
         indexPatternName: 'ft_module_sample_ecommerce',
         startDatafeed: true,
-        end: Date.now(),
+        end: 1585260210000,
       },
       expected: {
         responseCode: 200,
@@ -364,35 +304,6 @@ export default ({ getService }: FtrProviderContext) => {
             jobId: 'pf9_high_sum_total_sales',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
-          },
-        ],
-        searches: [] as string[],
-        visualizations: [] as string[],
-        dashboards: [] as string[],
-      },
-    },
-    {
-      testTitleSuffix:
-        'for siem_auditbeat_auth with prefix, startDatafeed true and estimateModelMemory true',
-      sourceDataArchive: 'ml/module_siem_auditbeat',
-      indexPattern: { name: 'ft_module_siem_auditbeat', timeField: '@timestamp' },
-      module: 'siem_auditbeat_auth',
-      user: USER.ML_POWERUSER,
-      requestBody: {
-        prefix: 'pf11_',
-        indexPatternName: 'ft_module_siem_auditbeat',
-        startDatafeed: true,
-        end: Date.now(),
-      },
-      expected: {
-        responseCode: 200,
-        jobs: [
-          {
-            jobId: 'pf11_suspicious_login_activity_ecs',
-            jobState: JOB_STATE.CLOSED,
-            datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
         ],
         searches: [] as string[],
@@ -403,7 +314,7 @@ export default ({ getService }: FtrProviderContext) => {
     {
       testTitleSuffix:
         'for siem_packetbeat with prefix, startDatafeed true and estimateModelMemory true',
-      sourceDataArchive: 'ml/module_siem_packetbeat',
+      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_siem_packetbeat',
       indexPattern: { name: 'ft_module_siem_packetbeat', timeField: '@timestamp' },
       module: 'siem_packetbeat',
       user: USER.ML_POWERUSER,
@@ -411,7 +322,7 @@ export default ({ getService }: FtrProviderContext) => {
         prefix: 'pf12_',
         indexPatternName: 'ft_module_siem_packetbeat',
         startDatafeed: true,
-        end: Date.now(),
+        end: 1588688580000,
       },
       expected: {
         responseCode: 200,
@@ -420,31 +331,26 @@ export default ({ getService }: FtrProviderContext) => {
             jobId: 'pf12_packetbeat_dns_tunneling',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '16mb',
           },
           {
             jobId: 'pf12_packetbeat_rare_dns_question',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
           {
             jobId: 'pf12_packetbeat_rare_server_domain',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
           {
             jobId: 'pf12_packetbeat_rare_urls',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
           {
             jobId: 'pf12_packetbeat_rare_user_agent',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
         ],
         searches: [] as string[],
@@ -455,7 +361,7 @@ export default ({ getService }: FtrProviderContext) => {
     {
       testTitleSuffix:
         'for uptime_heartbeat with prefix, startDatafeed true and estimateModelMemory true',
-      sourceDataArchive: 'ml/module_heartbeat',
+      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_heartbeat',
       indexPattern: { name: 'ft_module_heartbeat', timeField: '@timestamp' },
       module: 'uptime_heartbeat',
       user: USER.ML_POWERUSER,
@@ -463,7 +369,7 @@ export default ({ getService }: FtrProviderContext) => {
         prefix: 'pf13_',
         indexPatternName: 'ft_module_heartbeat',
         startDatafeed: true,
-        end: Date.now(),
+        end: 1584117860000,
       },
       expected: {
         responseCode: 200,
@@ -472,7 +378,6 @@ export default ({ getService }: FtrProviderContext) => {
             jobId: 'pf13_high_latency_by_geo',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
         ],
         searches: [] as string[],
@@ -482,96 +387,34 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       testTitleSuffix:
-        'for auditbeat_process_hosts_ecs with prefix, startDatafeed true and estimateModelMemory true',
-      sourceDataArchive: 'ml/module_auditbeat',
-      indexPattern: { name: 'ft_module_auditbeat', timeField: '@timestamp' },
-      module: 'auditbeat_process_hosts_ecs',
+        'for metricbeat_system_ecs with prefix, startDatafeed true and estimateModelMemory true',
+      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_metricbeat',
+      indexPattern: { name: 'ft_module_metricbeat', timeField: '@timestamp' },
+      module: 'metricbeat_system_ecs',
       user: USER.ML_POWERUSER,
       requestBody: {
-        prefix: 'pf14_',
-        indexPatternName: 'ft_module_auditbeat',
+        prefix: 'pf17_',
+        indexPatternName: 'ft_module_metricbeat',
         startDatafeed: true,
-        end: Date.now(),
+        end: 1554501720000,
       },
       expected: {
         responseCode: 200,
         jobs: [
           {
-            jobId: 'pf14_hosts_high_count_process_events_ecs',
+            jobId: 'pf17_max_disk_utilization_ecs',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
           {
-            jobId: 'pf14_hosts_rare_process_activity_ecs',
+            jobId: 'pf17_metricbeat_outages_ecs',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
-          },
-        ],
-        searches: ['ml_auditbeat_hosts_process_events_ecs'] as string[],
-        visualizations: [
-          'ml_auditbeat_hosts_process_event_rate_by_process_ecs',
-          'ml_auditbeat_hosts_process_event_rate_vis_ecs',
-          'ml_auditbeat_hosts_process_occurrence_ecs',
-        ] as string[],
-        dashboards: [
-          'ml_auditbeat_hosts_process_event_rate_ecs',
-          'ml_auditbeat_hosts_process_explorer_ecs',
-        ] as string[],
-      },
-    },
-    {
-      testTitleSuffix:
-        'for security_linux with prefix, startDatafeed true and estimateModelMemory true',
-      sourceDataArchive: 'ml/module_security_endpoint',
-      indexPattern: { name: 'ft_logs-endpoint.events.*', timeField: '@timestamp' },
-      module: 'security_linux',
-      user: USER.ML_POWERUSER,
-      requestBody: {
-        prefix: 'pf15_',
-        indexPatternName: 'ft_logs-endpoint.events.*',
-        startDatafeed: true,
-        end: Date.now(),
-      },
-      expected: {
-        responseCode: 200,
-        jobs: [
-          {
-            jobId: 'pf15_v2_rare_process_by_host_linux_ecs',
-            jobState: JOB_STATE.CLOSED,
-            datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
           {
-            jobId: 'pf15_v2_linux_rare_metadata_user',
+            jobId: 'pf17_high_mean_cpu_iowait_ecs',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
-          },
-          {
-            jobId: 'pf15_v2_linux_rare_metadata_process',
-            jobState: JOB_STATE.CLOSED,
-            datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
-          },
-          {
-            jobId: 'pf15_v2_linux_anomalous_user_name_ecs',
-            jobState: JOB_STATE.CLOSED,
-            datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
-          },
-          {
-            jobId: 'pf15_v2_linux_anomalous_process_all_hosts_ecs',
-            jobState: JOB_STATE.CLOSED,
-            datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
-          },
-          {
-            jobId: 'pf15_v2_linux_anomalous_network_port_activity_ecs',
-            jobState: JOB_STATE.CLOSED,
-            datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
         ],
         searches: [] as string[],
@@ -581,67 +424,212 @@ export default ({ getService }: FtrProviderContext) => {
     },
     {
       testTitleSuffix:
-        'for security_windows with prefix, startDatafeed true and estimateModelMemory true',
-      sourceDataArchive: 'ml/module_security_endpoint',
-      indexPattern: { name: 'ft_logs-endpoint.events.*', timeField: '@timestamp' },
-      module: 'security_windows',
+        'for metrics_ui_hosts with prefix, startDatafeed true and estimateModelMemory true',
+      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_metrics_ui',
+      indexPattern: { name: 'ft_module_metrics_ui', timeField: '@timestamp' },
+      module: 'metrics_ui_hosts',
       user: USER.ML_POWERUSER,
       requestBody: {
-        prefix: 'pf16_',
-        indexPatternName: 'ft_logs-endpoint.events.*',
+        prefix: 'pf18_',
+        indexPatternName: 'ft_module_metrics_ui',
         startDatafeed: true,
-        end: Date.now(),
+        end: 1599762970000,
       },
       expected: {
         responseCode: 200,
         jobs: [
           {
-            jobId: 'pf16_v2_rare_process_by_host_windows_ecs',
+            jobId: 'pf18_hosts_memory_usage',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
           {
-            jobId: 'pf16_v2_windows_anomalous_network_activity_ecs',
+            jobId: 'pf18_hosts_network_in',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
           {
-            jobId: 'pf16_v2_windows_anomalous_path_activity_ecs',
+            jobId: 'pf18_hosts_network_out',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '10mb',
+          },
+        ],
+        searches: [] as string[],
+        visualizations: [] as string[],
+        dashboards: [] as string[],
+      },
+    },
+    {
+      testTitleSuffix:
+        'for metrics_ui_k8s with prefix, startDatafeed true and estimateModelMemory true',
+      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_metrics_ui',
+      indexPattern: { name: 'ft_module_metrics_ui', timeField: '@timestamp' },
+      module: 'metrics_ui_k8s',
+      user: USER.ML_POWERUSER,
+      requestBody: {
+        prefix: 'pf19_',
+        indexPatternName: 'ft_module_metrics_ui',
+        startDatafeed: true,
+        end: 1599763000000,
+      },
+      expected: {
+        responseCode: 200,
+        jobs: [
+          {
+            jobId: 'pf19_k8s_memory_usage',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
           },
           {
-            jobId: 'pf16_v2_windows_anomalous_process_all_hosts_ecs',
+            jobId: 'pf19_k8s_network_in',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
           {
-            jobId: 'pf16_v2_windows_anomalous_process_creation',
+            jobId: 'pf19_k8s_network_out',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
+          },
+        ],
+        searches: [] as string[],
+        visualizations: [] as string[],
+        dashboards: [] as string[],
+      },
+    },
+    {
+      testTitleSuffix:
+        'for siem_cloudtrail with prefix, startDatafeed true and estimateModelMemory true',
+      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_siem_cloudtrail',
+      indexPattern: { name: 'ft_module_siem_cloudtrail', timeField: '@timestamp' },
+      module: 'siem_cloudtrail',
+      user: USER.ML_POWERUSER,
+      requestBody: {
+        prefix: 'pf20_',
+        indexPatternName: 'ft_module_siem_cloudtrail',
+        startDatafeed: true,
+        end: 1594231870000,
+      },
+      expected: {
+        responseCode: 200,
+        jobs: [
+          {
+            jobId: 'pf20_rare_method_for_a_city',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
           },
           {
-            jobId: 'pf16_v2_windows_anomalous_user_name_ecs',
+            jobId: 'pf20_rare_method_for_a_country',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
           {
-            jobId: 'pf16_v2_windows_rare_metadata_process',
+            jobId: 'pf20_rare_method_for_a_username',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
           },
           {
-            jobId: 'pf16_v2_windows_rare_metadata_user',
+            jobId: 'pf20_high_distinct_count_error_message',
             jobState: JOB_STATE.CLOSED,
             datafeedState: DATAFEED_STATE.STOPPED,
-            modelMemoryLimit: '11mb',
+          },
+          {
+            jobId: 'pf20_rare_error_code',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+          },
+        ],
+        searches: [] as string[],
+        visualizations: [] as string[],
+        dashboards: [] as string[],
+      },
+    },
+    {
+      testTitleSuffix:
+        'for apache_data_stream with prefix, startDatafeed true and estimateModelMemory true',
+      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_apache_data_stream',
+      indexPattern: { name: 'ft_module_apache_data_stream', timeField: '@timestamp' },
+      module: 'apache_data_stream',
+      user: USER.ML_POWERUSER,
+      requestBody: {
+        prefix: 'pf23_',
+        indexPatternName: 'ft_module_apache_data_stream',
+        startDatafeed: true,
+        end: 1536933580000,
+      },
+      expected: {
+        responseCode: 200,
+        jobs: [
+          {
+            jobId: 'pf23_visitor_rate_apache',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+          },
+          {
+            jobId: 'pf23_status_code_rate_apache',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+          },
+          {
+            jobId: 'pf23_source_ip_url_count_apache',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+          },
+          {
+            jobId: 'pf23_source_ip_request_rate_apache',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+          },
+          {
+            jobId: 'pf23_low_request_rate_apache',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+          },
+        ],
+        searches: [] as string[],
+        visualizations: [] as string[],
+        dashboards: [] as string[],
+      },
+    },
+    {
+      testTitleSuffix:
+        'for nginx_data_stream with prefix, startDatafeed true and estimateModelMemory true',
+      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_nginx_data_stream',
+      indexPattern: { name: 'ft_module_nginx_data_stream', timeField: '@timestamp' },
+      module: 'nginx_data_stream',
+      user: USER.ML_POWERUSER,
+      requestBody: {
+        prefix: 'pf24_',
+        indexPatternName: 'ft_module_nginx_data_stream',
+        startDatafeed: true,
+        end: 1542372260000,
+      },
+      expected: {
+        responseCode: 200,
+        jobs: [
+          {
+            jobId: 'pf24_visitor_rate_nginx',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+          },
+          {
+            jobId: 'pf24_status_code_rate_nginx',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+          },
+          {
+            jobId: 'pf24_source_ip_url_count_nginx',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+          },
+          {
+            jobId: 'pf24_source_ip_request_rate_nginx',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
+          },
+          {
+            jobId: 'pf24_low_request_rate_nginx',
+            jobState: JOB_STATE.CLOSED,
+            datafeedState: DATAFEED_STATE.STOPPED,
           },
         ],
         searches: [] as string[],
@@ -653,23 +641,23 @@ export default ({ getService }: FtrProviderContext) => {
 
   const testDataListNegative = [
     {
-      testTitleSuffix: 'for non existent index pattern',
+      testTitleSuffix: 'for non existent data view',
       module: 'sample_data_weblogs',
       user: USER.ML_POWERUSER,
       requestBody: {
-        indexPatternName: 'non-existent-index-pattern',
+        indexPatternName: 'non-existent-data-view',
         startDatafeed: false,
       },
       expected: {
         responseCode: 400,
         error: 'Bad Request',
         message:
-          "Module's jobs contain custom URLs which require a kibana index pattern (non-existent-index-pattern) which cannot be found.",
+          "Module's jobs contain custom URLs which require a Kibana data view (non-existent-data-view) which cannot be found.",
       },
     },
     {
       testTitleSuffix: 'for unauthorized user',
-      sourceDataArchive: 'ml/module_sample_logs',
+      sourceDataArchive: 'x-pack/test/functional/es_archives/ml/module_sample_logs',
       indexPattern: { name: 'ft_module_sample_logs', timeField: '@timestamp' },
       module: 'sample_data_weblogs',
       user: USER.ML_UNAUTHORIZED,
@@ -692,12 +680,12 @@ export default ({ getService }: FtrProviderContext) => {
     rqBody: object,
     rspCode: number
   ) {
-    const { body } = await supertest
+    const { body, status } = await supertest
       .post(`/api/ml/modules/setup/${module}`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
       .set(COMMON_REQUEST_HEADERS)
-      .send(rqBody)
-      .expect(rspCode);
+      .send(rqBody);
+    ml.api.assertResponseStatusCode(rspCode, status, body);
 
     return body;
   }
@@ -738,7 +726,11 @@ export default ({ getService }: FtrProviderContext) => {
           for (const dashboard of testData.expected.dashboards) {
             await ml.testResources.deleteDashboardById(dashboard);
           }
+          for (const job of testData.expected.jobs) {
+            await ml.api.deleteAnomalyDetectionJobES(job.jobId);
+          }
           await ml.api.cleanMlIndices();
+          await ml.testResources.deleteIndexPatternByTitle(testData.indexPattern.name);
         });
 
         it(testData.testTitleSuffix, async () => {
@@ -828,7 +820,7 @@ export default ({ getService }: FtrProviderContext) => {
             );
           }
 
-          // verify job and datafeed creation + states
+          // verify job + datafeed creation + states and model memory limit
           for (const job of testData.expected.jobs) {
             const datafeedId = `datafeed-${job.jobId}`;
             await ml.api.waitForAnomalyDetectionJobToExist(job.jobId);
@@ -836,43 +828,20 @@ export default ({ getService }: FtrProviderContext) => {
             if (testData.requestBody.startDatafeed === true) {
               await ml.api.waitForADJobRecordCountToBePositive(job.jobId);
             }
-            await ml.api.waitForJobState(job.jobId, job.jobState);
-            await ml.api.waitForDatafeedState(datafeedId, job.datafeedState);
+            await ml.api.waitForDatafeedState(datafeedId, job.datafeedState, 4 * 60 * 1000);
+            await ml.api.waitForJobState(job.jobId, job.jobState, 4 * 60 * 1000);
+
+            // model memory limit should be <= 99mb
+            const {
+              body: jobsDetails,
+            }: {
+              body: {
+                jobs: Job[];
+              };
+            } = await ml.api.getAnomalyDetectionJob(job.jobId);
+            const actualModelMemoryLimit = jobsDetails.jobs[0].analysis_limits?.model_memory_limit;
+            expect(actualModelMemoryLimit).to.match(/\d{1,2}mb/);
           }
-
-          // compare model memory limits for created jobs
-          const expectedModelMemoryLimits = sortBy(
-            testData.expected.jobs.map((j) => ({
-              id: j.jobId,
-              modelMemoryLimit: j.modelMemoryLimit,
-            })),
-            'id'
-          );
-
-          const {
-            body: { jobs },
-          }: {
-            body: {
-              jobs: Job[];
-            };
-          } = await ml.api.getAnomalyDetectionJob(
-            testData.expected.jobs.map((j) => j.jobId).join()
-          );
-
-          const actualModelMemoryLimits = sortBy(
-            jobs.map((j) => ({
-              id: j.job_id,
-              modelMemoryLimit: j.analysis_limits!.model_memory_limit,
-            })),
-            'id'
-          );
-
-          expect(actualModelMemoryLimits).to.eql(
-            expectedModelMemoryLimits,
-            `Expected job model memory limits '${JSON.stringify(
-              expectedModelMemoryLimits
-            )}' (got '${JSON.stringify(actualModelMemoryLimits)}')`
-          );
 
           // verify saved objects creation
           for (const search of testData.expected.searches) {
@@ -904,6 +873,9 @@ export default ({ getService }: FtrProviderContext) => {
 
         after(async () => {
           await ml.api.cleanMlIndices();
+          if (testData.hasOwnProperty('indexPattern')) {
+            await ml.testResources.deleteIndexPatternByTitle(testData.indexPattern!.name);
+          }
         });
 
         it(testData.testTitleSuffix, async () => {

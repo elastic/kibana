@@ -13,8 +13,8 @@ export default function ipToHostNameTest({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
 
   describe('Ip to Host API', () => {
-    before(() => esArchiver.load('infra/metrics_and_logs'));
-    after(() => esArchiver.unload('infra/metrics_and_logs'));
+    before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
+    after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
 
     it('should basically work', async () => {
       const postBody = {

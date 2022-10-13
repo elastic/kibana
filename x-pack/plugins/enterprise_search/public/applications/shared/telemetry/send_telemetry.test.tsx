@@ -6,7 +6,7 @@
  */
 
 import '../../__mocks__/shallow_useeffect.mock';
-import { mockTelemetryActions } from '../../__mocks__';
+import { mockTelemetryActions } from '../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -16,7 +16,7 @@ import {
   SendEnterpriseSearchTelemetry,
   SendAppSearchTelemetry,
   SendWorkplaceSearchTelemetry,
-} from './';
+} from '.';
 
 describe('Telemetry component helpers', () => {
   beforeEach(() => {

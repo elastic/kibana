@@ -14,12 +14,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const es = getService('es');
   const searchSessions = getService('searchSessions');
+  const comboBox = getService('comboBox');
 
   describe('Search session example', () => {
     const appId = 'searchExamples';
 
     before(async function () {
-      const { body } = await es.info();
+      const body = await es.info();
       if (!body.version.number.includes('SNAPSHOT')) {
         log.debug('Skipping because this build does not have the required shard_delay agg');
         this.skip();
@@ -35,7 +36,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should start search, save session, restore session using "restore" button', async () => {
-      await testSubjects.clickWhenNotDisabled('startSearch');
+      await comboBox.setCustom('dataViewSelector', 'logstash-*');
+      await comboBox.setCustom('searchMetricField', 'bytes');
+      await testSubjects.clickWhenNotDisabledWithoutRetry('startSearch');
       await testSubjects.find('searchResults-1');
       await searchSessions.expectState('completed');
       await searchSessions.save();

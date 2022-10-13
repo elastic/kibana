@@ -6,19 +6,31 @@
  */
 
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../constants';
-import {
+import type {
   MachineLearningCreateSchema,
   MachineLearningUpdateSchema,
   QueryCreateSchema,
   QueryUpdateSchema,
   SavedQueryCreateSchema,
-  SavedQueryUpdateSchema,
   ThreatMatchCreateSchema,
-  ThreatMatchUpdateSchema,
   ThresholdCreateSchema,
+  NewTermsCreateSchema,
+  NewTermsUpdateSchema,
 } from './rule_schemas';
 
 export const getCreateRulesSchemaMock = (ruleId = 'rule-1'): QueryCreateSchema => ({
+  description: 'Detecting root and admin users',
+  name: 'Query with a rule id',
+  query: 'user.name: root or user.name: admin',
+  severity: 'high',
+  type: 'query',
+  risk_score: 55,
+  language: 'kuery',
+  rule_id: ruleId,
+});
+
+export const getCreateRulesSchemaMockWithDataView = (ruleId = 'rule-1'): QueryCreateSchema => ({
+  data_view_id: 'logs-*',
   description: 'Detecting root and admin users',
   name: 'Query with a rule id',
   query: 'user.name: root or user.name: admin',
@@ -56,8 +68,10 @@ export const getCreateThreatMatchRulesSchemaMock = (
   language: 'kuery',
   rule_id: ruleId,
   threat_query: '*:*',
-  threat_index: ['list-index'],
+  threat_index: ['auditbeat-*'],
   threat_indicator_path: DEFAULT_INDICATOR_SOURCE_PATH,
+  interval: '5m',
+  from: 'now-6m',
   threat_mapping: [
     {
       entries: [
@@ -116,6 +130,26 @@ export const getCreateThresholdRulesSchemaMock = (ruleId = 'rule-1'): ThresholdC
   },
 });
 
+export const getCreateNewTermsRulesSchemaMock = (
+  ruleId = 'rule-1',
+  enabled = false
+): NewTermsCreateSchema => ({
+  description: 'Detecting root and admin users',
+  enabled,
+  index: ['auditbeat-*'],
+  name: 'Query with a rule id',
+  query: '*',
+  severity: 'high',
+  type: 'new_terms',
+  risk_score: 55,
+  language: 'kuery',
+  rule_id: ruleId,
+  interval: '5m',
+  from: 'now-6m',
+  new_terms_fields: ['user.name'],
+  history_window_start: 'now-7d',
+});
+
 export const getUpdateRulesSchemaMock = (
   id = '04128c15-0d1b-4716-a4c5-46997ac7f3bd'
 ): QueryUpdateSchema => ({
@@ -129,64 +163,6 @@ export const getUpdateRulesSchemaMock = (
   id,
 });
 
-export const getUpdateSavedQuerySchemaMock = (
-  id = '04128c15-0d1b-4716-a4c5-46997ac7f3bd'
-): SavedQueryUpdateSchema => ({
-  description: 'Detecting root and admin users',
-  name: 'Query with a rule id',
-  query: 'user.name: root or user.name: admin',
-  severity: 'high',
-  type: 'saved_query',
-  saved_id: 'some id',
-  risk_score: 55,
-  language: 'kuery',
-  id,
-});
-
-export const getUpdateThreatMatchSchemaMock = (
-  id = '04128c15-0d1b-4716-a4c5-46997ac7f3bd'
-): ThreatMatchUpdateSchema => ({
-  description: 'Detecting root and admin users',
-  name: 'Query with a rule id',
-  query: 'user.name: root or user.name: admin',
-  severity: 'high',
-  type: 'threat_match',
-  risk_score: 55,
-  language: 'kuery',
-  id,
-  threat_query: '*:*',
-  threat_index: ['list-index'],
-  threat_mapping: [
-    {
-      entries: [
-        {
-          field: 'host.name',
-          value: 'host.name',
-          type: 'mapping',
-        },
-      ],
-    },
-  ],
-  threat_filters: [
-    {
-      bool: {
-        must: [
-          {
-            query_string: {
-              query: 'host.name: linux',
-              analyze_wildcard: true,
-              time_zone: 'Zulu',
-            },
-          },
-        ],
-        filter: [],
-        should: [],
-        must_not: [],
-      },
-    },
-  ],
-});
-
 export const getUpdateMachineLearningSchemaMock = (
   id = '04128c15-0d1b-4716-a4c5-46997ac7f3bd'
 ): MachineLearningUpdateSchema => ({
@@ -198,4 +174,22 @@ export const getUpdateMachineLearningSchemaMock = (
   type: 'machine_learning',
   anomaly_threshold: 58,
   machine_learning_job_id: 'typical-ml-job-id',
+});
+
+export const getUpdateNewTermsSchemaMock = (
+  id = '04128c15-0d1b-4716-a4c5-46997ac7f3bd'
+): NewTermsUpdateSchema => ({
+  description: 'Detecting root and admin users',
+  index: ['auditbeat-*'],
+  name: 'Query with a rule id',
+  query: '*',
+  severity: 'high',
+  type: 'new_terms',
+  risk_score: 55,
+  language: 'kuery',
+  id,
+  interval: '5m',
+  from: 'now-6m',
+  new_terms_fields: ['user.name'],
+  history_window_start: 'now-7d',
 });

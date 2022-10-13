@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import { withProcRunner } from '@kbn/dev-utils';
+import { withProcRunner } from '@kbn/dev-proc-runner';
 import { resolve } from 'path';
 import { REPO_ROOT } from '@kbn/utils';
 import Fs from 'fs';
-import { createFlagError } from '@kbn/dev-utils';
-import { delay } from 'bluebird';
-import { FtrProviderContext } from './../functional/ftr_provider_context';
+import { createFlagError } from '@kbn/dev-cli-errors';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
+import { FtrProviderContext } from '../functional/ftr_provider_context';
 
 const baseSimulationPath = 'src/test/scala/org/kibanaLoadTest/simulation';
 const simulationPackage = 'org.kibanaLoadTest.simulation';
 const simulationFIleExtension = '.scala';
 const gatlingProjectRootPath: string =
   process.env.GATLING_PROJECT_PATH || resolve(REPO_ROOT, '../kibana-load-testing');
-const simulationEntry: string = process.env.GATLING_SIMULATIONS || 'DemoJourney';
+const puppeteerProjectRootPath: string = resolve(gatlingProjectRootPath, 'puppeteer');
+const simulationEntry: string = process.env.GATLING_SIMULATIONS || 'branch.DemoJourney';
 
 if (!Fs.existsSync(gatlingProjectRootPath)) {
   throw createFlagError(
@@ -27,7 +28,11 @@ if (!Fs.existsSync(gatlingProjectRootPath)) {
   );
 }
 
-const dropEmptyLines = (s: string) => s.split(',').filter((i) => i.length > 0);
+const dropEmptyLines = (s: string) =>
+  s
+    .split(',')
+    .filter((i) => i.length > 0)
+    .map((i) => (i.includes('.') ? i : `branch.${i}`));
 const simulationClasses = dropEmptyLines(simulationEntry);
 const simulationsRootPath = resolve(gatlingProjectRootPath, baseSimulationPath);
 
@@ -53,6 +58,19 @@ export async function GatlingTestRunner({ getService }: FtrProviderContext) {
 
   await withProcRunner(log, async (procs) => {
     for (let i = 0; i < simulationClasses.length; i++) {
+      await procs.run('node build/index.js', {
+        cmd: 'node',
+        args: [
+          'build/index.js',
+          `--simulation='${simulationClasses[i]}'`,
+          `--config='./config.json'`,
+        ],
+        cwd: puppeteerProjectRootPath,
+        env: {
+          ...process.env,
+        },
+        wait: true,
+      });
       await procs.run('gatling: test', {
         cmd: 'mvn',
         args: [
@@ -68,7 +86,7 @@ export async function GatlingTestRunner({ getService }: FtrProviderContext) {
       });
       // wait a minute between simulations, skip for the last one
       if (i < simulationClasses.length - 1) {
-        await delay(60 * 1000);
+        await setTimeoutAsync(60 * 1000);
       }
     }
   });

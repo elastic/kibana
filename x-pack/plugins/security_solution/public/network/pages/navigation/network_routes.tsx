@@ -5,66 +5,32 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import { Route, Switch } from 'react-router-dom';
+import React from 'react';
+import { Switch } from 'react-router-dom';
+import { Route } from '@kbn/kibana-react-plugin/public';
 import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
-import { scoreIntervalToDateTime } from '../../../common/components/ml/score/score_interval_to_datetime';
 
-import { IPsQueryTabBody } from './ips_query_tab_body';
-import { CountriesQueryTabBody } from './countries_query_tab_body';
-import { HttpQueryTabBody } from './http_query_tab_body';
-import { AnomaliesQueryTabBody } from '../../../common/containers/anomalies/anomalies_query_tab_body';
+import {
+  CountriesQueryTabBody,
+  DnsQueryTabBody,
+  HttpQueryTabBody,
+  IPsQueryTabBody,
+  TlsQueryTabBody,
+} from '.';
+import { EventsQueryTabBody } from '../../../common/components/events_tab';
 import { AnomaliesNetworkTable } from '../../../common/components/ml/tables/anomalies_network_table';
-import { DnsQueryTabBody } from './dns_query_tab_body';
+import { filterNetworkExternalAlertData } from '../../../common/components/visualization_actions/utils';
+import { AnomaliesQueryTabBody } from '../../../common/containers/anomalies/anomalies_query_tab_body';
+import { TimelineId } from '../../../../common/types';
 import { ConditionalFlexGroup } from './conditional_flex_group';
-import { NetworkRoutesProps, NetworkRouteType } from './types';
-import { TlsQueryTabBody } from './tls_query_tab_body';
-import { Anomaly } from '../../../common/components/ml/types';
-import { NetworkAlertsQueryTabBody } from './alerts_query_tab_body';
-import { UpdateDateRange } from '../../../common/components/charts/common';
+import type { NetworkRoutesProps } from './types';
+import { NetworkRouteType } from './types';
+import { NETWORK_PATH } from '../../../../common/constants';
 
 export const NetworkRoutes = React.memo<NetworkRoutesProps>(
-  ({
-    networkPagePath,
-    docValueFields,
-    type,
-    to,
-    filterQuery,
-    isInitializing,
-    from,
-    indexPattern,
-    indexNames,
-    setQuery,
-    setAbsoluteRangeDatePicker,
-  }) => {
-    const narrowDateRange = useCallback(
-      (score: Anomaly, interval: string) => {
-        const fromTo = scoreIntervalToDateTime(score, interval);
-        setAbsoluteRangeDatePicker({
-          id: 'global',
-          from: fromTo.from,
-          to: fromTo.to,
-        });
-      },
-      [setAbsoluteRangeDatePicker]
-    );
-    const updateDateRange = useCallback<UpdateDateRange>(
-      ({ x }) => {
-        if (!x) {
-          return;
-        }
-        const [min, max] = x;
-        setAbsoluteRangeDatePicker({
-          id: 'global',
-          from: new Date(min).toISOString(),
-          to: new Date(max).toISOString(),
-        });
-      },
-      [setAbsoluteRangeDatePicker]
-    );
-
+  ({ type, to, filterQuery, isInitializing, from, indexPattern, indexNames, setQuery }) => {
     const networkAnomaliesFilterQuery = {
       bool: {
         should: [
@@ -89,7 +55,6 @@ export const NetworkRoutes = React.memo<NetworkRoutesProps>(
       indexNames,
       skip: isInitializing,
       type,
-      narrowDateRange,
       setQuery,
       filterQuery,
     };
@@ -97,7 +62,6 @@ export const NetworkRoutes = React.memo<NetworkRoutesProps>(
     const tabProps = {
       ...commonProps,
       indexPattern,
-      updateDateRange,
     };
 
     const anomaliesProps = {
@@ -108,10 +72,10 @@ export const NetworkRoutes = React.memo<NetworkRoutesProps>(
 
     return (
       <Switch>
-        <Route path={`/:tabName(${NetworkRouteType.dns})`}>
-          <DnsQueryTabBody {...tabProps} docValueFields={docValueFields} />
+        <Route path={`${NETWORK_PATH}/:tabName(${NetworkRouteType.dns})`}>
+          <DnsQueryTabBody {...tabProps} />
         </Route>
-        <Route path={`/:tabName(${NetworkRouteType.flows})`}>
+        <Route path={`${NETWORK_PATH}/:tabName(${NetworkRouteType.flows})`}>
           <>
             <ConditionalFlexGroup direction="column">
               <EuiFlexItem>
@@ -137,20 +101,24 @@ export const NetworkRoutes = React.memo<NetworkRoutesProps>(
             </ConditionalFlexGroup>
           </>
         </Route>
-        <Route path={`/:tabName(${NetworkRouteType.http})`}>
+        <Route path={`${NETWORK_PATH}/:tabName(${NetworkRouteType.http})`}>
           <HttpQueryTabBody {...tabProps} />
         </Route>
-        <Route path={`/:tabName(${NetworkRouteType.tls})`}>
+        <Route path={`${NETWORK_PATH}/:tabName(${NetworkRouteType.tls})`}>
           <TlsQueryTabBody {...tabProps} flowTarget={FlowTargetSourceDest.source} />
         </Route>
-        <Route path={`/:tabName(${NetworkRouteType.anomalies})`}>
+        <Route path={`${NETWORK_PATH}/:tabName(${NetworkRouteType.anomalies})`}>
           <AnomaliesQueryTabBody
             {...anomaliesProps}
             AnomaliesTableComponent={AnomaliesNetworkTable}
           />
         </Route>
-        <Route path={`/:tabName(${NetworkRouteType.alerts})`}>
-          <NetworkAlertsQueryTabBody {...tabProps} />
+        <Route path={`${NETWORK_PATH}/:tabName(${NetworkRouteType.events})`}>
+          <EventsQueryTabBody
+            pageFilters={filterNetworkExternalAlertData}
+            timelineId={TimelineId.networkPageEvents}
+            {...tabProps}
+          />
         </Route>
       </Switch>
     );

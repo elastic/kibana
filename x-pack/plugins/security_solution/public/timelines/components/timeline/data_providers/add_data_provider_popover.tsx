@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import styled from 'styled-components';
 import { pick } from 'lodash/fp';
 import React, { useCallback, useMemo, useState } from 'react';
+import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -14,12 +16,11 @@ import {
   EuiText,
   EuiPopover,
   EuiIcon,
-  EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
 import uuid from 'uuid';
 import { useDispatch } from 'react-redux';
 
-import { BrowserFields } from '../../../../common/containers/source';
+import type { BrowserFields } from '../../../../common/containers/source';
 import { TimelineType } from '../../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { StatefulEditDataProvider } from '../../edit_data_provider';
@@ -33,6 +34,10 @@ interface AddDataProviderPopoverProps {
   timelineId: string;
 }
 
+const AddFieldPopoverContainer = styled.div`
+  min-width: 350px;
+`;
+
 const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = ({
   browserFields,
   timelineId,
@@ -44,13 +49,15 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
     pick(['dataProviders', 'timelineType'], getTimeline(state, timelineId))
   );
 
-  const handleOpenPopover = useCallback(() => setIsAddFilterPopoverOpen(true), [
-    setIsAddFilterPopoverOpen,
-  ]);
+  const togglePopoverState = useCallback(
+    () => setIsAddFilterPopoverOpen(!isAddFilterPopoverOpen),
+    [setIsAddFilterPopoverOpen, isAddFilterPopoverOpen]
+  );
 
-  const handleClosePopover = useCallback(() => setIsAddFilterPopoverOpen(false), [
-    setIsAddFilterPopoverOpen,
-  ]);
+  const handleClosePopover = useCallback(
+    () => setIsAddFilterPopoverOpen(false),
+    [setIsAddFilterPopoverOpen]
+  );
 
   const handleDataProviderEdited = useCallback(
     ({ andProviderId, excluded, field, id, operator, providerId, value, type }) => {
@@ -111,7 +118,7 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
         width: 400,
         content: (
           <StatefulEditDataProvider
-            browserFields={browserFields!}
+            browserFields={browserFields}
             field=""
             isExcluded={false}
             onDataProviderEdited={handleDataProviderEdited}
@@ -129,7 +136,7 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
         width: 400,
         content: (
           <StatefulEditDataProvider
-            browserFields={browserFields!}
+            browserFields={browserFields}
             field=""
             isExcluded={false}
             onDataProviderEdited={handleDataProviderEdited}
@@ -150,7 +157,7 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
       return (
         <EuiButton
           size="s"
-          onClick={handleOpenPopover}
+          onClick={togglePopoverState}
           data-test-subj="addField"
           iconType="arrowDown"
           fill
@@ -164,14 +171,14 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
     return (
       <EuiButtonEmpty
         size="s"
-        onClick={handleOpenPopover}
+        onClick={togglePopoverState}
         data-test-subj="addField"
         iconSide="right"
       >
         <EuiText size="s">{`+ ${ADD_FIELD_LABEL}`}</EuiText>
       </EuiButtonEmpty>
     );
-  }, [handleOpenPopover, timelineType]);
+  }, [togglePopoverState, timelineType]);
 
   const content = useMemo(() => {
     if (timelineType === TimelineType.template) {
@@ -180,7 +187,7 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
 
     return (
       <StatefulEditDataProvider
-        browserFields={browserFields!}
+        browserFields={browserFields}
         field=""
         isExcluded={false}
         onDataProviderEdited={handleDataProviderEdited}
@@ -201,10 +208,9 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
       closePopover={handleClosePopover}
       anchorPosition="downLeft"
       panelPaddingSize="none"
-      ownFocus={true}
       repositionOnScroll
     >
-      {content}
+      <AddFieldPopoverContainer>{content}</AddFieldPopoverContainer>
     </EuiPopover>
   );
 };

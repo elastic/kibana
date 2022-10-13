@@ -17,7 +17,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { isDefined } from '../../../../../../common/types/common';
 import { StepDefineFormHook } from '../step_define';
 import { AdvancedRuntimeMappingsEditor } from '../advanced_runtime_mappings_editor/advanced_runtime_mappings_editor';
 import { AdvancedRuntimeMappingsEditorSwitch } from '../advanced_runtime_mappings_editor_switch';
@@ -46,7 +47,7 @@ export const AdvancedRuntimeMappingsSettings: FC<StepDefineFormHook> = (props) =
     },
   } = props.runtimeMappingsEditor;
   const {
-    actions: { deleteAggregation, deleteGroupBy },
+    actions: { deleteAggregation, deleteGroupBy, updateAggregation },
     state: { groupByList, aggList },
   } = props.pivotConfig;
 
@@ -54,6 +55,9 @@ export const AdvancedRuntimeMappingsSettings: FC<StepDefineFormHook> = (props) =
     const nextConfig =
       advancedRuntimeMappingsConfig === '' ? {} : JSON.parse(advancedRuntimeMappingsConfig);
     const previousConfig = runtimeMappings;
+
+    const isFieldDeleted = (field: string) =>
+      previousConfig?.hasOwnProperty(field) && !nextConfig.hasOwnProperty(field);
 
     applyRuntimeMappingsEditorChanges();
 
@@ -71,13 +75,16 @@ export const AdvancedRuntimeMappingsSettings: FC<StepDefineFormHook> = (props) =
     });
     Object.keys(aggList).forEach((aggName) => {
       const agg = aggList[aggName] as PivotAggsConfigWithUiSupport;
-      if (
-        isPivotAggConfigWithUiSupport(agg) &&
-        agg.field !== undefined &&
-        previousConfig?.hasOwnProperty(agg.field) &&
-        !nextConfig.hasOwnProperty(agg.field)
-      ) {
-        deleteAggregation(aggName);
+
+      if (isPivotAggConfigWithUiSupport(agg)) {
+        if (Array.isArray(agg.field)) {
+          const newFields = agg.field.filter((f) => !isFieldDeleted(f));
+          updateAggregation(aggName, { ...agg, field: newFields });
+        } else {
+          if (isDefined(agg.field) && isFieldDeleted(agg.field)) {
+            deleteAggregation(aggName);
+          }
+        }
       }
     });
   };

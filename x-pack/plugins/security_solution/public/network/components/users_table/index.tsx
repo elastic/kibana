@@ -12,19 +12,19 @@ import deepEqual from 'fast-deep-equal';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { assertUnreachable } from '../../../../common/utility_types';
 import { networkActions, networkModel, networkSelectors } from '../../store';
-import {
+import type {
   Direction,
-  FlowTarget,
+  FlowTargetSourceDest,
   NetworkUsersEdges,
-  NetworkUsersFields,
   SortField,
 } from '../../../../common/search_strategy';
-import {
+import { NetworkUsersFields } from '../../../../common/search_strategy';
+import type {
   Criteria,
   ItemsPerRow,
-  PaginatedTable,
   SortingBasicTable,
 } from '../../../common/components/paginated_table';
+import { PaginatedTable } from '../../../common/components/paginated_table';
 
 import { getUsersColumns } from './columns';
 import * as i18n from './translations';
@@ -32,12 +32,13 @@ const tableType = networkModel.NetworkDetailsTableType.users;
 
 interface UsersTableProps {
   data: NetworkUsersEdges[];
-  flowTarget: FlowTarget;
+  flowTarget: FlowTargetSourceDest;
   fakeTotalCount: number;
   id: string;
   isInspect: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
+  setQuerySkip: (skip: boolean) => void;
   showMorePagesIndicator: boolean;
   totalCount: number;
   type: networkModel.NetworkType;
@@ -64,6 +65,7 @@ const UsersTableComponent: React.FC<UsersTableProps> = ({
   isInspect,
   loading,
   loadPage,
+  setQuerySkip,
   showMorePagesIndicator,
   totalCount,
   type,
@@ -118,11 +120,11 @@ const UsersTableComponent: React.FC<UsersTableProps> = ({
     [dispatch, sort, type]
   );
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const columns = useMemo(() => getUsersColumns(flowTarget, usersTableId), [
-    flowTarget,
-    usersTableId,
-  ]);
+  const columns = useMemo(
+    () => getUsersColumns(flowTarget, usersTableId),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [flowTarget, usersTableId]
+  );
 
   return (
     <PaginatedTable
@@ -141,6 +143,7 @@ const UsersTableComponent: React.FC<UsersTableProps> = ({
       loadPage={loadPage}
       onChange={onChange}
       pageOfItems={data}
+      setQuerySkip={setQuerySkip}
       sorting={getSortField(sort)}
       totalCount={fakeTotalCount}
       updateActivePage={updateActivePage}

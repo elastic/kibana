@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type { ChromeRecentlyAccessed } from 'kibana/public';
+import type { ChromeRecentlyAccessed } from '@kbn/core/public';
 import { getRecentlyAccessed } from './dependency_cache';
 
 export function addItemToRecentlyAccessed(
@@ -44,7 +44,6 @@ export function addItemToRecentlyAccessed(
       return;
   }
 
-  url = url.startsWith('/') ? `/app/ml${url}` : `/app/ml/${page}/${url}`;
   const recentlyAccessed = recentlyAccessedService ?? getRecentlyAccessed();
   recentlyAccessed.add(url, `ML - ${itemId} - ${pageLabel}`, id);
 }

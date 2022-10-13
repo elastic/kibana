@@ -11,13 +11,14 @@ import {
   MetricsSourceConfigurationResponse,
   PartialMetricsSourceConfigurationProperties,
   metricsSourceConfigurationResponseRT,
-} from '../../../../plugins/infra/common/metrics_sources';
+} from '@kbn/infra-plugin/common/metrics_sources';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   const SOURCE_API_URL = '/api/metrics/source/default';
+  const kibanaServer = getService('kibanaServer');
   const patchRequest = async (
     body: PartialMetricsSourceConfigurationProperties
   ): Promise<MetricsSourceConfigurationResponse | undefined> => {
@@ -30,10 +31,10 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   describe('sources', () => {
-    before(() => esArchiver.load('infra/metrics_and_logs'));
-    after(() => esArchiver.unload('infra/metrics_and_logs'));
-    beforeEach(() => esArchiver.load('empty_kibana'));
-    afterEach(() => esArchiver.unload('empty_kibana'));
+    before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
+    after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'));
+    before(() => kibanaServer.savedObjects.cleanStandardList());
+    after(() => kibanaServer.savedObjects.cleanStandardList());
 
     describe('patch request', () => {
       it('applies all top-level field updates to an existing source', async () => {
@@ -66,11 +67,6 @@ export default function ({ getService }: FtrProviderContext) {
         expect(configuration?.name).to.be('UPDATED_NAME');
         expect(configuration?.description).to.be('UPDATED_DESCRIPTION');
         expect(configuration?.metricAlias).to.be('metricbeat-**');
-        expect(configuration?.fields.host).to.be('host.name');
-        expect(configuration?.fields.pod).to.be('kubernetes.pod.uid');
-        expect(configuration?.fields.tiebreaker).to.be('_doc');
-        expect(configuration?.fields.timestamp).to.be('@timestamp');
-        expect(configuration?.fields.container).to.be('container.id');
         expect(configuration?.anomalyThreshold).to.be(50);
         expect(status?.metricIndicesExist).to.be(true);
       });
@@ -102,40 +98,6 @@ export default function ({ getService }: FtrProviderContext) {
         expect(updatedAt).to.be.greaterThan(createdAt || 0);
         expect(configuration?.metricAlias).to.be('metricbeat-**');
         expect(status?.metricIndicesExist).to.be(true);
-      });
-
-      it('applies a single nested field update to an existing source', async () => {
-        const creationResponse = await patchRequest({
-          name: 'NAME',
-          fields: {
-            host: 'HOST',
-          },
-        });
-
-        const initialVersion = creationResponse?.source.version;
-        const createdAt = creationResponse?.source.updatedAt;
-
-        expect(initialVersion).to.be.a('string');
-        expect(createdAt).to.be.greaterThan(0);
-
-        const updateResponse = await patchRequest({
-          fields: {
-            container: 'UPDATED_CONTAINER',
-          },
-        });
-
-        const version = updateResponse?.source.version;
-        const updatedAt = updateResponse?.source.updatedAt;
-        const configuration = updateResponse?.source.configuration;
-
-        expect(version).to.be.a('string');
-        expect(version).to.not.be(initialVersion);
-        expect(updatedAt).to.be.greaterThan(createdAt || 0);
-        expect(configuration?.fields.container).to.be('UPDATED_CONTAINER');
-        expect(configuration?.fields.host).to.be('HOST');
-        expect(configuration?.fields.pod).to.be('kubernetes.pod.uid');
-        expect(configuration?.fields.tiebreaker).to.be('_doc');
-        expect(configuration?.fields.timestamp).to.be('@timestamp');
       });
 
       it('validates anomalyThreshold is between range 1-100', async () => {

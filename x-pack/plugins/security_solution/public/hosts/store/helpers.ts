@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import { RiskScoreEntity, RiskScoreFields } from '../../../common/search_strategy';
+import type { RiskSeverity } from '../../../common/search_strategy';
 import { DEFAULT_TABLE_ACTIVE_PAGE } from '../../common/store/constants';
 
-import { HostsModel, HostsTableType, Queries, HostsType } from './model';
+import type { HostsModel, Queries } from './model';
+import { HostsTableType, HostsType } from './model';
 
 export const setHostPageQueriesActivePageToZero = (state: HostsModel): Queries => ({
   ...state.page.queries,
@@ -25,10 +28,6 @@ export const setHostPageQueriesActivePageToZero = (state: HostsModel): Queries =
   },
   [HostsTableType.uncommonProcesses]: {
     ...state.page.queries[HostsTableType.uncommonProcesses],
-    activePage: DEFAULT_TABLE_ACTIVE_PAGE,
-  },
-  [HostsTableType.alerts]: {
-    ...state.page.queries[HostsTableType.alerts],
     activePage: DEFAULT_TABLE_ACTIVE_PAGE,
   },
 });
@@ -51,10 +50,6 @@ export const setHostDetailsQueriesActivePageToZero = (state: HostsModel): Querie
     ...state.details.queries[HostsTableType.uncommonProcesses],
     activePage: DEFAULT_TABLE_ACTIVE_PAGE,
   },
-  [HostsTableType.alerts]: {
-    ...state.page.queries[HostsTableType.alerts],
-    activePage: DEFAULT_TABLE_ACTIVE_PAGE,
-  },
 });
 
 export const setHostsQueriesActivePageToZero = (state: HostsModel, type: HostsType): Queries => {
@@ -65,3 +60,32 @@ export const setHostsQueriesActivePageToZero = (state: HostsModel, type: HostsTy
   }
   throw new Error(`HostsType ${type} is unknown`);
 };
+
+export const generateSeverityFilter = (
+  severitySelection: RiskSeverity[],
+  entity: RiskScoreEntity
+) =>
+  severitySelection.length > 0
+    ? [
+        {
+          query: {
+            bool: {
+              should: severitySelection.map((query) => ({
+                match_phrase: {
+                  [entity === RiskScoreEntity.user
+                    ? RiskScoreFields.userRisk
+                    : RiskScoreFields.hostRisk]: {
+                    query,
+                  },
+                },
+              })),
+            },
+          },
+          meta: {
+            alias: null,
+            disabled: false,
+            negate: false,
+          },
+        },
+      ]
+    : [];

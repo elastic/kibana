@@ -6,24 +6,24 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IScopedClusterClient } from 'kibana/server';
-import { CoreSetup, Logger } from 'src/core/server';
-import {
-  MAX_FILE_SIZE_BYTES,
-  IngestPipelineWrapper,
-  InputData,
-  Mappings,
-  Settings,
-} from '../common';
+import { IScopedClusterClient } from '@kbn/core/server';
+import { CoreSetup, Logger } from '@kbn/core/server';
+import { MAX_FILE_SIZE_BYTES } from '../common/constants';
+import type { IngestPipelineWrapper, InputData, Mappings, Settings } from '../common/types';
 import { wrapError } from './error_wrapper';
 import { importDataProvider } from './import_data';
 import { getTimeFieldRange } from './get_time_field_range';
 import { analyzeFile } from './analyze_file';
 
 import { updateTelemetry } from './telemetry';
-import { importFileBodySchema, importFileQuerySchema, analyzeFileQuerySchema } from './schemas';
-import { CheckPrivilegesPayload } from '../../security/server';
+import {
+  importFileBodySchema,
+  importFileQuerySchema,
+  analyzeFileQuerySchema,
+  runtimeMappingsSchema,
+} from './schemas';
 import { StartDeps } from './types';
+import { checkFileUploadPrivileges } from './check_privileges';
 
 function importData(
   client: IScopedClusterClient,
@@ -50,7 +50,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
       validate: {
         query: schema.object({
           indexName: schema.maybe(schema.string()),
-          checkCreateIndexPattern: schema.boolean(),
+          checkCreateDataView: schema.boolean(),
           checkHasManagePipeline: schema.boolean(),
         }),
       },
@@ -58,31 +58,17 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
     async (context, request, response) => {
       try {
         const [, pluginsStart] = await coreSetup.getStartServices();
-        const { indexName, checkCreateIndexPattern, checkHasManagePipeline } = request.query;
+        const { indexName, checkCreateDataView, checkHasManagePipeline } = request.query;
 
-        const authorizationService = pluginsStart.security?.authz;
-        const requiresAuthz = authorizationService?.mode.useRbacForRequest(request) ?? false;
+        const { hasImportPermission } = await checkFileUploadPrivileges({
+          authorization: pluginsStart.security?.authz,
+          request,
+          indexName,
+          checkCreateDataView,
+          checkHasManagePipeline,
+        });
 
-        if (!authorizationService || !requiresAuthz) {
-          return response.ok({ body: { hasImportPermission: true } });
-        }
-
-        const checkPrivilegesPayload: CheckPrivilegesPayload = {
-          elasticsearch: {
-            cluster: checkHasManagePipeline ? ['manage_pipeline'] : [],
-            index: indexName ? { [indexName]: ['create', 'create_index'] } : {},
-          },
-        };
-        if (checkCreateIndexPattern) {
-          checkPrivilegesPayload.kibana = [
-            authorizationService.actions.savedObject.get('index-pattern', 'create'),
-          ];
-        }
-
-        const checkPrivileges = authorizationService.checkPrivilegesDynamicallyWithRequest(request);
-        const checkPrivilegesResp = await checkPrivileges(checkPrivilegesPayload);
-
-        return response.ok({ body: { hasImportPermission: checkPrivilegesResp.hasAllRequested } });
+        return response.ok({ body: { hasImportPermission } });
       } catch (e) {
         logger.warn(`Unable to check import permission, error: ${e.message}`);
         return response.ok({ body: { hasImportPermission: false } });
@@ -116,11 +102,8 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
     },
     async (context, request, response) => {
       try {
-        const result = await analyzeFile(
-          context.core.elasticsearch.client,
-          request.body,
-          request.query
-        );
+        const esClient = (await context.core).elasticsearch.client;
+        const result = await analyzeFile(esClient, request.body, request.query);
         return response.ok({ body: result });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -150,13 +133,13 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
           accepts: ['application/json'],
           maxBytes: MAX_FILE_SIZE_BYTES,
         },
-        tags: ['access:fileUpload:import'],
       },
     },
     async (context, request, response) => {
       try {
         const { id } = request.query;
         const { index, data, settings, mappings, ingestPipeline } = request.body;
+        const esClient = (await context.core).elasticsearch.client;
 
         // `id` being `undefined` tells us that this is a new import due to create a new index.
         // follow-up import calls to just add additional data will include the `id` of the created
@@ -166,7 +149,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
         }
 
         const result = await importData(
-          context.core.elasticsearch.client,
+          esClient,
           id,
           index,
           settings,
@@ -185,7 +168,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
   /**
    * @apiGroup FileDataVisualizer
    *
-   * @api {post} /internal/file_upload/index_exists ES Field caps wrapper checks if index exists
+   * @api {post} /internal/file_upload/index_exists ES indices exists wrapper checks if index exists
    * @apiName IndexExists
    */
   router.post(
@@ -194,26 +177,12 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
       validate: {
         body: schema.object({ index: schema.string() }),
       },
-      options: {
-        tags: ['access:fileUpload:import'],
-      },
     },
     async (context, request, response) => {
       try {
-        const { index } = request.body;
-
-        const options = {
-          index: [index],
-          fields: ['*'],
-          ignore_unavailable: true,
-          allow_no_indices: true,
-        };
-
-        const { body } = await context.core.elasticsearch.client.asCurrentUser.fieldCaps(options);
-        const exists = Array.isArray(body.indices) && body.indices.length !== 0;
-        return response.ok({
-          body: { exists },
-        });
+        const esClient = (await context.core).elasticsearch.client;
+        const indexExists = await esClient.asCurrentUser.indices.exists(request.body);
+        return response.ok({ body: { exists: indexExists } });
       } catch (e) {
         return response.customError(wrapError(e));
       }
@@ -243,6 +212,7 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
           timeFieldName: schema.string(),
           /** Query to match documents in the index(es). */
           query: schema.maybe(schema.any()),
+          runtimeMappings: schema.maybe(runtimeMappingsSchema),
         }),
       },
       options: {
@@ -251,12 +221,14 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
     },
     async (context, request, response) => {
       try {
-        const { index, timeFieldName, query } = request.body;
+        const { index, timeFieldName, query, runtimeMappings } = request.body;
+        const esClient = (await context.core).elasticsearch.client;
         const resp = await getTimeFieldRange(
-          context.core.elasticsearch.client,
+          esClient,
           index,
           timeFieldName,
-          query
+          query,
+          runtimeMappings
         );
 
         return response.ok({

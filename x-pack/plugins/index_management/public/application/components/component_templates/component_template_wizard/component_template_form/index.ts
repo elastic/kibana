@@ -6,3 +6,4 @@
  */
 
 export { ComponentTemplateForm } from './component_template_form';
+export type { WizardSection } from './component_template_form';

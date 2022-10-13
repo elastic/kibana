@@ -7,10 +7,10 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { TypesStart, BaseVisType, VisGroups } from '../../vis_types';
 import { GroupSelection } from './group_selection';
-import { DocLinksStart } from '../../../../../core/public';
+import { DocLinksStart } from '@kbn/core/public';
 
 describe('GroupSelection', () => {
   const defaultVisTypeParams = {
@@ -58,17 +58,17 @@ describe('GroupSelection', () => {
   const visTypesRegistry = (visTypes: BaseVisType[]): TypesStart => {
     return {
       get<T>(id: string): BaseVisType<T> {
-        return (visTypes.find((vis) => vis.name === id) as unknown) as BaseVisType<T>;
+        return visTypes.find((vis) => vis.name === id) as unknown as BaseVisType<T>;
       },
       all: () => {
-        return (visTypes as unknown) as BaseVisType[];
+        return visTypes as unknown as BaseVisType[];
       },
       getAliases: () => [],
       unRegisterAlias: () => [],
       getByGroup: (group: VisGroups) => {
-        return (visTypes.filter((type) => {
+        return visTypes.filter((type) => {
           return type.group === group;
-        }) as unknown) as BaseVisType[];
+        }) as unknown as BaseVisType[];
       },
     };
   };
@@ -192,7 +192,7 @@ describe('GroupSelection', () => {
         showExperimental={true}
       />
     );
-    const aggBasedGroupCard = wrapper.find('[data-test-subj="visGroupAggBasedExploreLink"]').at(0);
+    const aggBasedGroupCard = wrapper.find('[data-test-subj="visGroupAggBasedExploreLink"]').last();
     aggBasedGroupCard.simulate('click');
     expect(toggleGroups).toHaveBeenCalled();
   });

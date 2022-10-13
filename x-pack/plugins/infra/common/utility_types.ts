@@ -12,10 +12,9 @@ export type Pick3<T, K1 extends keyof T, K2 extends keyof T[K1], K3 extends keyo
   [P1 in K1]: { [P2 in K2]: { [P3 in K3]: T[K1][K2][P3] } };
 };
 
-export type MandatoryProperty<T, Prop extends keyof T> = T &
-  {
-    [prop in Prop]-?: NonNullable<T[Prop]>;
-  };
+export type MandatoryProperty<T, Prop extends keyof T> = T & {
+  [prop in Prop]-?: NonNullable<T[Prop]>;
+};
 
 /**
  * Portions of below code are derived from https://github.com/tycho01/typical
@@ -49,3 +48,5 @@ export type ObjectValues<T> = Array<T[keyof T]>;
 
 export type ObjectEntry<T> = [keyof T, T[keyof T]];
 export type ObjectEntries<T> = Array<ObjectEntry<T>>;
+
+export type UnwrapPromise<T extends Promise<any>> = T extends Promise<infer Value> ? Value : never;

@@ -13,7 +13,7 @@ import { map, takeUntil, take } from 'rxjs/operators';
 
 export async function createStdoutSocket() {
   const chunk$ = new Rx.Subject<Buffer>();
-  const cleanup$ = new Rx.ReplaySubject(1);
+  const cleanup$ = new Rx.ReplaySubject<void>(1);
 
   const server = Net.createServer();
   server.on('connection', (socket) => {

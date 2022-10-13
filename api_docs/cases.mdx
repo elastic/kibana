@@ -1,18 +1,67 @@
 ---
+####
+#### This document is auto-generated and is meant to be viewed inside our experimental, new docs system.
+#### Reach out in #docs-engineering for more info.
+####
 id: kibCasesPluginApi
-slug: /kibana-dev-docs/casesPluginApi
-title: cases
+slug: /kibana-dev-docs/api/cases
+title: "cases"
 image: https://source.unsplash.com/400x175/?github
-summary: API docs for the cases plugin
-date: 2020-11-16
+description: API docs for the cases plugin
+date: 2022-10-13
 tags: ['contributor', 'dev', 'apidocs', 'kibana', 'cases']
-warning: This document is auto-generated and is meant to be viewed inside our experimental, new docs system. Reach out in #docs-engineering for more info.
 ---
+import casesObj from './cases.devdocs.json';
 
-import casesObj from './cases.json';
+The Case management system in Kibana
+
+Contact [ResponseOps](https://github.com/orgs/elastic/teams/response-ops) for questions regarding this plugin.
+
+**Code health stats**
+
+| Public API count  | Any count | Items lacking comments | Missing exports |
+|-------------------|-----------|------------------------|-----------------|
+| 87 | 0 | 70 | 28 |
+
+## Client
+
+### Start
+<DocDefinitionList data={[casesObj.client.start]}/>
+
+### Objects
+<DocDefinitionList data={casesObj.client.objects}/>
+
+### Functions
+<DocDefinitionList data={casesObj.client.functions}/>
+
+### Classes
+<DocDefinitionList data={casesObj.client.classes}/>
+
+### Interfaces
+<DocDefinitionList data={casesObj.client.interfaces}/>
+
+### Consts, variables and types
+<DocDefinitionList data={casesObj.client.misc}/>
 
 ## Server
 
+### Classes
+<DocDefinitionList data={casesObj.server.classes}/>
+
 ### Interfaces
 <DocDefinitionList data={casesObj.server.interfaces}/>
+
+## Common
+
+### Functions
+<DocDefinitionList data={casesObj.common.functions}/>
+
+### Interfaces
+<DocDefinitionList data={casesObj.common.interfaces}/>
+
+### Enums
+<DocDefinitionList data={casesObj.common.enums}/>
+
+### Consts, variables and types
+<DocDefinitionList data={casesObj.common.misc}/>
 

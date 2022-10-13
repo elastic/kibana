@@ -5,34 +5,12 @@
  * 2.0.
  */
 
-import { debug } from './debug';
-import { error } from './error';
-import { image } from './image';
-import { markdown } from './markdown';
-import { metric } from './metric';
+import { markdownFactory } from './markdown';
 import { pie } from './pie';
 import { plot } from './plot';
-import { progress } from './progress';
-import { repeatImage } from './repeat_image';
-import { revealImage } from './reveal_image';
-import { shape } from './shape';
-import { table } from './table';
-import { text } from './text';
+import { textFactory } from './text';
+import { tableFactory } from './table';
 
-export const renderFunctions = [
-  debug,
-  error,
-  image,
-  markdown,
-  metric,
-  pie,
-  plot,
-  progress,
-  repeatImage,
-  revealImage,
-  shape,
-  table,
-  text,
-];
+export const renderFunctions = [pie, plot];
 
-export const renderFunctionFactories = [];
+export const renderFunctionFactories = [markdownFactory, tableFactory, textFactory];

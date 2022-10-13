@@ -18,7 +18,7 @@ exports[`Should remove selected fields from selectable 1`] = `
     </EuiButtonEmpty>
   }
   closePopover={[Function]}
-  display="inlineBlock"
+  display="inline-block"
   hasArrow={true}
   id="addTooltipFieldPopover"
   isOpen={false}
@@ -54,7 +54,9 @@ exports[`Should remove selected fields from selectable 1`] = `
   <EuiSpacer
     size="xs"
   />
-  <EuiPopoverFooter>
+  <EuiPopoverFooter
+    paddingSize="s"
+  >
     <EuiTextAlign
       textAlign="right"
     >
@@ -89,7 +91,7 @@ exports[`Should render 1`] = `
     </EuiButtonEmpty>
   }
   closePopover={[Function]}
-  display="inlineBlock"
+  display="inline-block"
   hasArrow={true}
   id="addTooltipFieldPopover"
   isOpen={false}
@@ -143,7 +145,9 @@ exports[`Should render 1`] = `
   <EuiSpacer
     size="xs"
   />
-  <EuiPopoverFooter>
+  <EuiPopoverFooter
+    paddingSize="s"
+  >
     <EuiTextAlign
       textAlign="right"
     >

@@ -8,7 +8,7 @@
 import Fs from 'fs';
 import { resolve, join } from 'path';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { pageObjects } from './page_objects';
 
 // .server-log is specifically not enabled
@@ -16,7 +16,11 @@ const enabledActionTypes = [
   '.email',
   '.index',
   '.pagerduty',
+  '.swimlane',
+  '.jira',
+  '.resilient',
   '.servicenow',
+  '.servicenow-sir',
   '.slack',
   '.webhook',
   'test.authorization',
@@ -27,7 +31,9 @@ const enabledActionTypes = [
 ];
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const xpackFunctionalConfig = await readConfigFile(require.resolve('../functional/config.js'));
+  const xpackFunctionalConfig = await readConfigFile(
+    require.resolve('../functional/config.base.js')
+  );
 
   const servers = {
     ...xpackFunctionalConfig.get('servers'),
@@ -45,13 +51,18 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     // list paths to the files that contain your plugins tests
     testFiles: [
       resolve(__dirname, './apps/triggers_actions_ui'),
+      resolve(__dirname, './apps/discover'),
       resolve(__dirname, './apps/uptime'),
       resolve(__dirname, './apps/ml'),
+      resolve(__dirname, './apps/cases'),
     ],
     apps: {
       ...xpackFunctionalConfig.get('apps'),
       triggersActions: {
         pathname: '/app/management/insightsAndAlerting/triggersActions',
+      },
+      triggersActionsConnectors: {
+        pathname: '/app/management/insightsAndAlerting/triggersActionsConnectors',
       },
     },
     esTestCluster: {
@@ -65,6 +76,22 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--elasticsearch.hosts=https://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
         `--plugin-path=${join(__dirname, 'fixtures', 'plugins', 'alerts')}`,
+        `--plugin-path=${join(__dirname, 'fixtures', 'plugins', 'cases')}`,
+        `--plugin-path=${join(
+          __dirname,
+          '..',
+          'alerting_api_integration',
+          'common',
+          'fixtures',
+          'plugins',
+          'actions_simulators'
+        )}`,
+        `--xpack.trigger_actions_ui.enableExperimental=${JSON.stringify([
+          'internalAlertsTable',
+          'ruleTagFilter',
+          'ruleStatusFilter',
+        ])}`,
+        `--xpack.alerting.rules.minimumScheduleInterval.value="2s"`,
         `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
         `--xpack.actions.preconfiguredAlertHistoryEsIndex=false`,
         `--xpack.actions.preconfigured=${JSON.stringify({
@@ -103,6 +130,41 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
               spaces: ['*'],
             },
           ],
+        },
+        only_actions_role: {
+          kibana: [
+            {
+              feature: {
+                actions: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+        discover_alert: {
+          kibana: [
+            {
+              feature: {
+                actions: ['all'],
+                stackAlerts: ['all'],
+                discover: ['all'],
+                advancedSettings: ['all'],
+                indexPatterns: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+          elasticsearch: {
+            cluster: [],
+            indices: [
+              {
+                names: ['search-source-alert', 'search-source-alert-output'],
+                privileges: ['read', 'view_index_metadata', 'manage', 'create_index', 'index'],
+                field_security: { grant: ['*'], except: [] },
+              },
+            ],
+            run_as: [],
+          },
         },
       },
       defaultRoles: ['superuser'],

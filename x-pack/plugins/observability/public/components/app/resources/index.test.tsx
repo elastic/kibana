@@ -7,13 +7,14 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import { Resources } from './';
+import { Resources } from '.';
 
 describe('Resources', () => {
   it('renders resources with all elements', () => {
     const { getByText } = render(<Resources />);
     expect(getByText('Documentation')).toBeInTheDocument();
-    expect(getByText('Discuss forum')).toBeInTheDocument();
-    expect(getByText('Observability fundamentals')).toBeInTheDocument();
+    expect(getByText('Discuss Forum')).toBeInTheDocument();
+    expect(getByText('Quick Start Videos')).toBeInTheDocument();
+    expect(getByText('Free Observability Course')).toBeInTheDocument();
   });
 });

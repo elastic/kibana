@@ -22,7 +22,8 @@ import {
   takeUntil,
 } from 'rxjs/operators';
 import { CliArgs } from '@kbn/config';
-import { REPO_ROOT, CiStatsReporter } from '@kbn/dev-utils';
+import { CiStatsReporter } from '@kbn/ci-stats-reporter';
+import { REPO_ROOT } from '@kbn/utils';
 
 import { Log, CliLog } from './log';
 import { Optimizer } from './optimizer';
@@ -48,7 +49,6 @@ const GRACEFUL_TIMEOUT = 30000;
 
 export type SomeCliArgs = Pick<
   CliArgs,
-  | 'quiet'
   | 'silent'
   | 'verbose'
   | 'disableOptimizer'
@@ -77,8 +77,11 @@ export interface CliDevModeOptions {
   cache: boolean;
 }
 
-const firstAllTrue = (...sources: Array<Rx.Observable<boolean>>) =>
-  Rx.combineLatest(sources).pipe(
+const getValue$ = <T>(source: Rx.BehaviorSubject<T>): Rx.Observable<T> =>
+  source.isStopped ? Rx.of(source.getValue()) : source;
+
+const firstAllTrue = (...sources: Array<Rx.BehaviorSubject<boolean>>) =>
+  Rx.combineLatest(sources.map(getValue$)).pipe(
     filter((values) => values.every((v) => v === true)),
     take(1),
     mapTo(undefined)
@@ -105,7 +108,7 @@ export class CliDevMode {
   private subscription?: Rx.Subscription;
 
   constructor({ cliArgs, config, log }: { cliArgs: SomeCliArgs; config: CliDevConfig; log?: Log }) {
-    this.log = log || new CliLog(!!cliArgs.quiet, !!cliArgs.silent);
+    this.log = log || new CliLog(!!cliArgs.silent);
 
     if (cliArgs.basePath) {
       this.basePathProxy = new BasePathProxyServer(this.log, config.http, config.dev);
@@ -160,7 +163,7 @@ export class CliDevMode {
       runExamples: cliArgs.runExamples,
       cache: cliArgs.cache,
       dist: cliArgs.dist,
-      quiet: !!cliArgs.quiet,
+      quiet: false,
       silent: !!cliArgs.silent,
       verbose: !!cliArgs.verbose,
       watch: cliArgs.watch,
@@ -198,11 +201,24 @@ export class CliDevMode {
                 ? Rx.EMPTY
                 : Rx.timer(1000).pipe(
                     tap(() => {
-                      this.log.warn(
-                        'please hold',
-                        !optimizerReady$.getValue()
-                          ? 'optimizer is still bundling so requests have been paused'
-                          : 'server is not ready so requests have been paused'
+                      if (!optimizerReady$.getValue()) {
+                        this.log.warn(
+                          'please hold',
+                          'optimizer is still bundling so requests have been paused'
+                        );
+                        return;
+                      }
+
+                      if (!serverReady$.getValue()) {
+                        this.log.warn(
+                          'please hold',
+                          'Kibana server is not ready so requests have been paused'
+                        );
+                        return;
+                      }
+
+                      throw new Error(
+                        'user is waiting for over 1 second and neither serverReady$ or optimizerReady$ is false'
                       );
                     })
                   )
@@ -273,8 +289,8 @@ export class CliDevMode {
             await reporter.timings({
               timings: [
                 {
-                  group: 'yarn start',
-                  id: 'started',
+                  group: 'scripts/kibana',
+                  id: 'dev server started',
                   ms: Date.now() - this.startTime!,
                   meta: { success },
                 },
@@ -297,7 +313,7 @@ export class CliDevMode {
             await reporter.timings({
               timings: [
                 {
-                  group: 'yarn start',
+                  group: 'scripts/kibana',
                   id: 'dev server restart',
                   ms,
                   meta: {

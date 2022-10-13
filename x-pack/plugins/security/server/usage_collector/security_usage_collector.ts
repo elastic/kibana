@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 import type { SecurityLicense } from '../../common/licensing';
 import type { ConfigType } from '../config';
@@ -17,6 +17,10 @@ interface Usage {
   authProviderCount: number;
   enabledAuthProviders: string[];
   httpAuthSchemes: string[];
+  sessionIdleTimeoutInMinutes: number;
+  sessionLifespanInMinutes: number;
+  sessionCleanupInMinutes: number;
+  anonymousCredentialType: string | undefined;
 }
 
 interface Deps {
@@ -98,14 +102,37 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
           },
         },
       },
+      sessionIdleTimeoutInMinutes: {
+        type: 'long',
+        _meta: {
+          description:
+            'The global session idle timeout expiration that is configured, in minutes (0 if disabled).',
+        },
+      },
+      sessionLifespanInMinutes: {
+        type: 'long',
+        _meta: {
+          description:
+            'The global session lifespan expiration that is configured, in minutes (0 if disabled).',
+        },
+      },
+      sessionCleanupInMinutes: {
+        type: 'long',
+        _meta: {
+          description:
+            'The session cleanup interval that is configured, in minutes (0 if disabled).',
+        },
+      },
+      anonymousCredentialType: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'The credential type that is configured for the anonymous authentication provider.',
+        },
+      },
     },
     fetch: () => {
-      const {
-        allowRbac,
-        allowAccessAgreement,
-        allowAuditLogging,
-        allowLegacyAuditLogging,
-      } = license.getFeatures();
+      const { allowRbac, allowAccessAgreement, allowAuditLogging } = license.getFeatures();
       if (!allowRbac) {
         return {
           auditLoggingEnabled: false,
@@ -114,13 +141,14 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
           authProviderCount: 0,
           enabledAuthProviders: [],
           httpAuthSchemes: [],
+          sessionIdleTimeoutInMinutes: 0,
+          sessionLifespanInMinutes: 0,
+          sessionCleanupInMinutes: 0,
+          anonymousCredentialType: undefined,
         };
       }
 
-      const legacyAuditLoggingEnabled = allowLegacyAuditLogging && config.audit.enabled;
-      const auditLoggingEnabled =
-        allowAuditLogging && config.audit.enabled && config.audit.appender != null;
-
+      const auditLoggingEnabled = allowAuditLogging && config.audit.enabled;
       const loginSelectorEnabled = config.authc.selector.enabled;
       const authProviderCount = config.authc.sortedProviders.length;
       const enabledAuthProviders = [
@@ -133,19 +161,47 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
       ];
       const accessAgreementEnabled =
         allowAccessAgreement &&
-        config.authc.sortedProviders.some((provider) => provider.hasAccessAgreement);
+        (!!config.accessAgreement?.message ||
+          config.authc.sortedProviders.some((provider) => provider.hasAccessAgreement));
 
       const httpAuthSchemes = config.authc.http.schemes.filter((scheme) =>
         WELL_KNOWN_AUTH_SCHEMES.includes(scheme.toLowerCase())
       );
 
+      const sessionExpirations = config.session.getExpirationTimeouts(undefined); // use `undefined` to get global expiration values
+      const sessionIdleTimeoutInMinutes = sessionExpirations.idleTimeout?.asMinutes() ?? 0;
+      const sessionLifespanInMinutes = sessionExpirations.lifespan?.asMinutes() ?? 0;
+      const sessionCleanupInMinutes = config.session.cleanupInterval?.asMinutes() ?? 0;
+
+      const anonProviders = config.authc.providers.anonymous ?? ({} as Record<string, any>);
+      const foundProvider = Object.entries(anonProviders).find(
+        ([_, provider]) => !!provider.credentials && provider.enabled
+      );
+
+      const credElasticAnonUser = 'elasticsearch_anonymous_user';
+      const credApiKey = 'api_key';
+      const credUsernamePassword = 'username_password';
+
+      let anonymousCredentialType;
+      if (foundProvider) {
+        if (!!foundProvider[1].credentials.apiKey) anonymousCredentialType = credApiKey;
+        else if (foundProvider[1].credentials === credElasticAnonUser)
+          anonymousCredentialType = credElasticAnonUser;
+        else if (!!foundProvider[1].credentials.username && !!foundProvider[1].credentials.password)
+          anonymousCredentialType = credUsernamePassword;
+      }
+
       return {
-        auditLoggingEnabled: legacyAuditLoggingEnabled || auditLoggingEnabled,
+        auditLoggingEnabled,
         loginSelectorEnabled,
         accessAgreementEnabled,
         authProviderCount,
         enabledAuthProviders,
         httpAuthSchemes,
+        sessionIdleTimeoutInMinutes,
+        sessionLifespanInMinutes,
+        sessionCleanupInMinutes,
+        anonymousCredentialType,
       };
     },
   });

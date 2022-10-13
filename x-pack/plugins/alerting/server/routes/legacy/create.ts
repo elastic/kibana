@@ -6,19 +6,20 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { AlertingRouter } from '../../types';
-import { ILicenseState } from '../../lib/license_state';
 import { verifyApiAccess } from '../../lib/license_api_access';
 import { validateDurationSchema } from '../../lib';
-import { handleDisabledApiKeysError } from './../lib/error_handler';
+import { handleDisabledApiKeysError } from '../lib/error_handler';
 import {
-  SanitizedAlert,
-  AlertNotifyWhenType,
-  AlertTypeParams,
+  SanitizedRule,
+  RuleNotifyWhenType,
+  RuleTypeParams,
   LEGACY_BASE_ALERT_API_PATH,
   validateNotifyWhenType,
 } from '../../types';
-import { AlertTypeDisabledError } from '../../lib/errors/alert_type_disabled';
+import { RuleTypeDisabledError } from '../../lib/errors/rule_type_disabled';
+import { RouteOptions } from '..';
+import { countUsageOfPredefinedIds } from '../lib';
+import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 
 export const bodySchema = schema.object({
   name: schema.string(),
@@ -43,7 +44,7 @@ export const bodySchema = schema.object({
   notifyWhen: schema.nullable(schema.string({ validate: validateNotifyWhenType })),
 });
 
-export const createAlertRoute = (router: AlertingRouter, licenseState: ILicenseState) => {
+export const createAlertRoute = ({ router, licenseState, usageCounter }: RouteOptions) => {
   router.post(
     {
       path: `${LEGACY_BASE_ALERT_API_PATH}/alert/{id?}`,
@@ -63,22 +64,29 @@ export const createAlertRoute = (router: AlertingRouter, licenseState: ILicenseS
         if (!context.alerting) {
           return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
         }
-        const alertsClient = context.alerting.getAlertsClient();
+        const rulesClient = (await context.alerting).getRulesClient();
         const alert = req.body;
         const params = req.params;
-        const notifyWhen = alert?.notifyWhen ? (alert.notifyWhen as AlertNotifyWhenType) : null;
+        const notifyWhen = alert?.notifyWhen ? (alert.notifyWhen as RuleNotifyWhenType) : null;
+
+        trackLegacyRouteUsage('create', usageCounter);
+
+        countUsageOfPredefinedIds({
+          predefinedId: params?.id,
+          spaceId: rulesClient.getSpaceId(),
+          usageCounter,
+        });
+
         try {
-          const alertRes: SanitizedAlert<AlertTypeParams> = await alertsClient.create<AlertTypeParams>(
-            {
-              data: { ...alert, notifyWhen },
-              options: { id: params?.id },
-            }
-          );
+          const alertRes: SanitizedRule<RuleTypeParams> = await rulesClient.create<RuleTypeParams>({
+            data: { ...alert, notifyWhen },
+            options: { id: params?.id },
+          });
           return res.ok({
             body: alertRes,
           });
         } catch (e) {
-          if (e instanceof AlertTypeDisabledError) {
+          if (e instanceof RuleTypeDisabledError) {
             return e.sendResponse(res);
           }
           throw e;

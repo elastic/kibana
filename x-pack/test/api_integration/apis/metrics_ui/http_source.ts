@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { SourceResponse } from '../../../../plugins/infra/server/lib/sources';
+import { SourceResponse } from '@kbn/infra-plugin/server/lib/sources';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -30,21 +30,18 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Source API via HTTP', () => {
     describe('8.0.0', () => {
-      before(() => esArchiver.load('infra/8.0.0/logs_and_metrics'));
-      after(() => esArchiver.unload('infra/8.0.0/logs_and_metrics'));
+      before(() =>
+        esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/logs_and_metrics')
+      );
+      after(() =>
+        esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/logs_and_metrics')
+      );
       describe('/api/metrics/source/default', () => {
         it('should just work', async () => {
           const resp = fetchSource();
           return resp.then((data) => {
             expect(data).to.have.property('source');
             expect(data?.source.configuration.metricAlias).to.equal('metrics-*,metricbeat-*');
-            expect(data?.source.configuration.fields).to.eql({
-              container: 'container.id',
-              host: 'host.name',
-              pod: 'kubernetes.pod.uid',
-              tiebreaker: '_doc',
-              timestamp: '@timestamp',
-            });
             expect(data?.source).to.have.property('status');
             expect(data?.source.status?.metricIndicesExist).to.equal(true);
           });

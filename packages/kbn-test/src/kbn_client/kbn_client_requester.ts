@@ -11,7 +11,9 @@ import Https from 'https';
 import Qs from 'querystring';
 
 import Axios, { AxiosResponse, ResponseType } from 'axios';
-import { ToolingLog, isAxiosRequestError, isAxiosResponseError } from '@kbn/dev-utils';
+import { isAxiosRequestError, isAxiosResponseError } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
+import { KbnClientRequesterError } from './kbn_client_requester_error';
 
 const isConcliftOnGetError = (error: any) => {
   return (
@@ -21,6 +23,19 @@ const isConcliftOnGetError = (error: any) => {
 
 const isIgnorableError = (error: any, ignorableErrors: number[] = []) => {
   return isAxiosResponseError(error) && ignorableErrors.includes(error.response.status);
+};
+
+/**
+ * Creates a template literal tag which will uriencode the variables in a template literal
+ * as well as prefix the path with a specific space if one is defined
+ */
+export const pathWithSpace = (space?: string) => {
+  const prefix = !space || space === 'default' ? '' : uriencode`/s/${space}`;
+
+  return (strings: TemplateStringsArray, ...args: Array<string | number>) => {
+    const path = uriencode(strings, ...args);
+    return path.startsWith('/') || path === '' ? `${prefix}${path}` : `${prefix}/${path}`;
+  };
 };
 
 export const uriencode = (
@@ -121,6 +136,8 @@ export class KbnClientRequester {
           responseType: options.responseType,
           // work around https://github.com/axios/axios/issues/2791
           transformResponse: options.responseType === 'text' ? [(x) => x] : undefined,
+          maxContentLength: 30000000,
+          maxBodyLength: 30000000,
           paramsSerializer: (params) => Qs.stringify(params),
         });
 
@@ -150,7 +167,7 @@ export class KbnClientRequester {
           continue;
         }
 
-        throw new Error(`${errorMessage} -- and ran out of retries`);
+        throw new KbnClientRequesterError(`${errorMessage} -- and ran out of retries`, error);
       }
     }
   }

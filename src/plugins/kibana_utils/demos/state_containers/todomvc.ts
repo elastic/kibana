@@ -76,6 +76,6 @@ container.transitions.add({
 container.transitions.complete(0);
 container.transitions.complete(1);
 
-console.log(container.selectors.todos()); // eslint-disable-line
+console.log(container.selectors.todos()); // eslint-disable-line no-console
 
 export const result = container.selectors.todos();

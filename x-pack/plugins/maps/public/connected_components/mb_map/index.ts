@@ -8,40 +8,46 @@
 import { AnyAction } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
-import { MBMap } from './mb_map';
+import { MbMap } from './mb_map';
 import {
+  clearGoto,
+  clearMouseCoordinates,
+  mapDestroyed,
   mapExtentChanged,
   mapReady,
-  mapDestroyed,
-  setMouseCoordinates,
-  clearMouseCoordinates,
-  clearGoto,
   setMapInitError,
-  MapExtentState,
-  setAreTilesLoaded,
+  setMouseCoordinates,
 } from '../../actions';
 import {
+  getCustomIcons,
+  getGoto,
   getLayerList,
   getMapReady,
-  getGoto,
-  getScrollZoom,
-  getSpatialFiltersLayer,
   getMapSettings,
+  getSpatialFiltersLayer,
+  getTimeslice,
 } from '../../selectors/map_selectors';
-import { getIsFullScreen } from '../../selectors/ui_selectors';
-import { getInspectorAdapters } from '../../reducers/non_serializable_instances';
+import { getDrawMode, getIsFullScreen } from '../../selectors/ui_selectors';
+import { getInspectorAdapters, getOnMapMove } from '../../reducers/non_serializable_instances';
 import { MapStoreState } from '../../reducers/store';
+import { DRAW_MODE } from '../../../common/constants';
+import type { MapExtentState } from '../../reducers/map/types';
 
 function mapStateToProps(state: MapStoreState) {
   return {
     isMapReady: getMapReady(state),
     settings: getMapSettings(state),
+    customIcons: getCustomIcons(state),
     layerList: getLayerList(state),
     spatialFiltersLayer: getSpatialFiltersLayer(state),
     goto: getGoto(state),
     inspectorAdapters: getInspectorAdapters(state),
-    scrollZoom: getScrollZoom(state),
     isFullScreen: getIsFullScreen(state),
+    timeslice: getTimeslice(state),
+    featureModeActive:
+      getDrawMode(state) === DRAW_MODE.DRAW_SHAPES || getDrawMode(state) === DRAW_MODE.DRAW_POINTS,
+    filterModeActive: getDrawMode(state) === DRAW_MODE.DRAW_FILTERS,
+    onMapMove: getOnMapMove(state),
   };
 }
 
@@ -70,11 +76,8 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
     setMapInitError(errorMessage: string) {
       dispatch(setMapInitError(errorMessage));
     },
-    setAreTilesLoaded(layerId: string, areTilesLoaded: boolean) {
-      dispatch(setAreTilesLoaded(layerId, areTilesLoaded));
-    },
   };
 }
 
-const connected = connect(mapStateToProps, mapDispatchToProps)(MBMap);
+const connected = connect(mapStateToProps, mapDispatchToProps)(MbMap);
 export { connected as MBMap };

@@ -6,14 +6,28 @@
  * Side Public License, v 1.
  */
 
-import { Filter, isPhrasesFilter } from '../../../../../common';
+import { Filter, PhrasesFilter, isPhrasesFilter } from '@kbn/es-query';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
+
+export function getPhrasesDisplayValue(filter: PhrasesFilter, formatter?: FieldFormat) {
+  return filter.meta.params
+    .map((v: string) => {
+      return formatter?.convert(v) ?? v;
+    })
+    .join(', ');
+}
 
 export const mapPhrases = (filter: Filter) => {
   if (!isPhrasesFilter(filter)) {
     throw filter;
   }
 
-  const { type, key, value, params } = filter.meta;
+  const { type, key, params } = filter.meta;
 
-  return { type, key, value, params };
+  return {
+    type,
+    key,
+    value: params,
+    params,
+  };
 };

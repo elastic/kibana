@@ -6,51 +6,42 @@
  */
 
 import './app.scss';
-
-import _ from 'lodash';
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import { Toast } from 'kibana/public';
-import { VisualizeFieldContext } from 'src/plugins/ui_actions/public';
-import { Datatable } from 'src/plugins/expressions/public';
-import { EuiBreadcrumb } from '@elastic/eui';
-import { delay, finalize, switchMap, tap } from 'rxjs/operators';
-import { downloadMultipleAs } from '../../../../../src/plugins/share/public';
-import {
-  createKbnUrlStateStorage,
-  withNotifyOnErrors,
-} from '../../../../../src/plugins/kibana_utils/public';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
-import {
-  OnSaveProps,
-  checkForDuplicateTitle,
-} from '../../../../../src/plugins/saved_objects/public';
-import { injectFilterReferences } from '../persistence';
-import { NativeRenderer } from '../native_renderer';
-import { trackUiEvent } from '../lens_ui_telemetry';
-import {
-  DataPublicPluginStart,
-  esFilters,
-  exporters,
-  Filter,
-  IndexPattern as IndexPatternInstance,
-  IndexPatternsContract,
-  Query,
-  SavedQuery,
-  syncQueryStateWithUrl,
-  waitUntilNextSessionCompletes$,
-} from '../../../../../src/plugins/data/public';
-import { LENS_EMBEDDABLE_TYPE, getFullPath, APP_ID } from '../../common';
-import { LensAppProps, LensAppServices, LensAppState } from './types';
-import { getLensTopNavConfig } from './lens_top_nav';
-import { Document } from '../persistence';
-import { SaveModal } from './save_modal';
-import {
-  LensByReferenceInput,
-  LensEmbeddableInput,
-} from '../editor_frame_service/embeddable/embeddable';
-import { useTimeRange } from './time_range';
+import { EuiBreadcrumb, EuiConfirmModal } from '@elastic/eui';
+import { useExecutionContext, useKibana } from '@kbn/kibana-react-plugin/public';
+import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import { LensAppProps, LensAppServices } from './types';
+import { LensTopNavMenu } from './lens_top_nav';
+import { LensByReferenceInput } from '../embeddable';
 import { EditorFrameInstance } from '../types';
+import { Document } from '../persistence/saved_object_store';
+
+import {
+  setState,
+  applyChanges,
+  useLensSelector,
+  useLensDispatch,
+  LensAppState,
+  DispatchSetState,
+  selectSavedObjectFormat,
+  updateIndexPatterns,
+} from '../state_management';
+import { SaveModalContainer, runSaveLensVisualization } from './save_modal_container';
+import { LensInspector } from '../lens_inspector_service';
+import { getEditPath } from '../../common';
+import { isLensEqual } from './lens_document_equality';
+import { IndexPatternServiceAPI, createIndexPatternService } from '../data_views_service/service';
+import { replaceIndexpattern } from '../state_management/lens_slice';
+
+export type SaveProps = Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
+  returnToOrigin: boolean;
+  dashboardId?: string | null;
+  onTitleDuplicate?: OnSaveProps['onTitleDuplicate'];
+  newDescription?: string;
+  newTags?: string[];
+};
 
 export function App({
   history,
@@ -60,211 +51,117 @@ export function App({
   initialInput,
   incomingState,
   redirectToOrigin,
-  redirectToDashboard,
   setHeaderActionMenu,
+  datasourceMap,
+  visualizationMap,
+  contextOriginatingApp,
+  topNavMenuEntryGenerators,
   initialContext,
+  theme$,
 }: LensAppProps) {
+  const lensAppServices = useKibana<LensAppServices>().services;
+
   const {
     data,
-    chrome,
-    overlays,
-    navigation,
+    dataViews,
+    uiActions,
     uiSettings,
+    chrome,
+    inspector: lensInspector,
     application,
-    stateTransfer,
-    notifications,
-    attributeService,
-    savedObjectsClient,
     savedObjectsTagging,
     getOriginatingAppName,
-
+    spaces,
+    http,
+    notifications,
+    executionContext,
     // Temporarily required until the 'by value' paradigm is default.
     dashboardFeatureFlag,
-  } = useKibana<LensAppServices>().services;
+  } = lensAppServices;
 
-  const startSession = useCallback(() => data.search.session.start(), [data]);
+  const saveAndExit = useRef<() => void>();
 
-  const [state, setState] = useState<LensAppState>(() => {
-    return {
-      query: data.query.queryString.getQuery(),
-      // Do not use app-specific filters from previous app,
-      // only if Lens was opened with the intention to visualize a field (e.g. coming from Discover)
-      filters: !initialContext
-        ? data.query.filterManager.getGlobalFilters()
-        : data.query.filterManager.getFilters(),
-      isLoading: Boolean(initialInput),
-      indexPatternsForTopNav: [],
-      isLinkedToOriginatingApp: Boolean(incomingState?.originatingApp),
-      isSaveModalVisible: false,
-      indicateNoData: false,
-      isSaveable: false,
-      searchSessionId: startSession(),
-    };
-  });
+  const dispatch = useLensDispatch();
+  const dispatchSetState: DispatchSetState = useCallback(
+    (state: Partial<LensAppState>) => dispatch(setState(state)),
+    [dispatch]
+  );
 
-  const { lastKnownDoc } = state;
+  const {
+    persistedDoc,
+    sharingSavedObjectProps,
+    isLinkedToOriginatingApp,
+    searchSessionId,
+    isLoading,
+    isSaveable,
+  } = useLensSelector((state) => state.lens);
 
-  const showNoDataPopover = useCallback(() => {
-    setState((prevState) => ({ ...prevState, indicateNoData: true }));
-  }, [setState]);
+  const selectorDependencies = useMemo(
+    () => ({
+      datasourceMap,
+      visualizationMap,
+      extractFilterReferences: data.query.filterManager.extract.bind(data.query.filterManager),
+    }),
+    [datasourceMap, visualizationMap, data.query.filterManager]
+  );
+
+  const currentDoc = useLensSelector((state) =>
+    selectSavedObjectFormat(state, selectorDependencies)
+  );
+
+  // Used to show a popover that guides the user towards changing the date range when no data is available.
+  const [indicateNoData, setIndicateNoData] = useState(false);
+  const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
+  const [lastKnownDoc, setLastKnownDoc] = useState<Document | undefined>(undefined);
+  const [initialDocFromContext, setInitialDocFromContext] = useState<Document | undefined>(
+    undefined
+  );
+  const [isGoBackToVizEditorModalVisible, setIsGoBackToVizEditorModalVisible] = useState(false);
+  const [shouldCloseAndSaveTextBasedQuery, setShouldCloseAndSaveTextBasedQuery] = useState(false);
+  const savedObjectId = (initialInput as LensByReferenceInput)?.savedObjectId;
 
   useEffect(() => {
-    if (state.indicateNoData) {
-      setState((prevState) => ({ ...prevState, indicateNoData: false }));
+    if (currentDoc) {
+      setLastKnownDoc(currentDoc);
     }
-  }, [
-    setState,
-    state.indicateNoData,
-    state.query,
-    state.filters,
-    state.indexPatternsForTopNav,
-    state.searchSessionId,
-  ]);
+  }, [currentDoc]);
 
-  const { resolvedDateRange, from: fromDate, to: toDate } = useTimeRange(
-    data,
-    state.lastKnownDoc,
-    setState,
-    state.searchSessionId
-  );
+  const showNoDataPopover = useCallback(() => {
+    setIndicateNoData(true);
+  }, [setIndicateNoData]);
 
-  const onError = useCallback(
-    (e: { message: string }) =>
-      notifications.toasts.addDanger({
-        title: e.message,
-      }),
-    [notifications.toasts]
-  );
+  useExecutionContext(executionContext, {
+    type: 'application',
+    id: savedObjectId || 'new',
+    page: 'editor',
+  });
 
-  const getLastKnownDocWithoutPinnedFilters = useCallback(
-    function () {
-      if (!lastKnownDoc) return undefined;
-      const [pinnedFilters, appFilters] = _.partition(
-        injectFilterReferences(lastKnownDoc.state?.filters || [], lastKnownDoc.references),
-        esFilters.isFilterPinned
-      );
-      return pinnedFilters?.length
-        ? {
-            ...lastKnownDoc,
-            state: {
-              ...lastKnownDoc.state,
-              filters: appFilters,
-            },
-          }
-        : lastKnownDoc;
-    },
-    [lastKnownDoc]
-  );
+  useEffect(() => {
+    if (indicateNoData) {
+      setIndicateNoData(false);
+    }
+  }, [setIndicateNoData, indicateNoData, searchSessionId]);
 
   const getIsByValueMode = useCallback(
     () =>
       Boolean(
         // Temporarily required until the 'by value' paradigm is default.
-        dashboardFeatureFlag.allowByValueEmbeddables &&
-          state.isLinkedToOriginatingApp &&
-          !(initialInput as LensByReferenceInput)?.savedObjectId
+        dashboardFeatureFlag.allowByValueEmbeddables && isLinkedToOriginatingApp && !savedObjectId
       ),
-    [dashboardFeatureFlag.allowByValueEmbeddables, state.isLinkedToOriginatingApp, initialInput]
+    [dashboardFeatureFlag.allowByValueEmbeddables, isLinkedToOriginatingApp, savedObjectId]
   );
 
   useEffect(() => {
-    // Clear app-specific filters when navigating to Lens. Necessary because Lens
-    // can be loaded without a full page refresh. If the user navigates to Lens from Discover
-    // we keep the filters
-    if (!initialContext) {
-      data.query.filterManager.setAppFilters([]);
-    }
-
-    const filterSubscription = data.query.filterManager.getUpdates$().subscribe({
-      next: () => {
-        setState((s) => ({
-          ...s,
-          filters: data.query.filterManager.getFilters(),
-          searchSessionId: startSession(),
-        }));
-        trackUiEvent('app_filters_updated');
-      },
-    });
-
-    const timeSubscription = data.query.timefilter.timefilter.getTimeUpdate$().subscribe({
-      next: () => {
-        setState((s) => ({
-          ...s,
-          searchSessionId: startSession(),
-        }));
-      },
-    });
-
-    const autoRefreshSubscription = data.query.timefilter.timefilter
-      .getAutoRefreshFetch$()
-      .pipe(
-        tap(() => {
-          setState((s) => ({
-            ...s,
-            searchSessionId: startSession(),
-          }));
-        }),
-        switchMap((done) =>
-          // best way in lens to estimate that all panels are updated is to rely on search session service state
-          waitUntilNextSessionCompletes$(data.search.session).pipe(finalize(done))
-        )
-      )
-      .subscribe();
-
-    const kbnUrlStateStorage = createKbnUrlStateStorage({
-      history,
-      useHash: uiSettings.get('state:storeInSessionStorage'),
-      ...withNotifyOnErrors(notifications.toasts),
-    });
-    const { stop: stopSyncingQueryServiceStateWithUrl } = syncQueryStateWithUrl(
-      data.query,
-      kbnUrlStateStorage
-    );
-
-    const sessionSubscription = data.search.session
-      .getSession$()
-      // wait for a tick to filter/timerange subscribers the chance to update the session id in the state
-      .pipe(delay(0))
-      // then update if it didn't get updated yet
-      .subscribe((newSessionId) => {
-        if (newSessionId) {
-          setState((prevState) => {
-            if (prevState.searchSessionId !== newSessionId) {
-              return { ...prevState, searchSessionId: newSessionId };
-            } else {
-              return prevState;
-            }
-          });
-        }
-      });
-
-    return () => {
-      stopSyncingQueryServiceStateWithUrl();
-      filterSubscription.unsubscribe();
-      timeSubscription.unsubscribe();
-      autoRefreshSubscription.unsubscribe();
-      sessionSubscription.unsubscribe();
-    };
-  }, [
-    data.query.filterManager,
-    data.query.timefilter.timefilter,
-    data.search.session,
-    notifications.toasts,
-    uiSettings,
-    data.query,
-    history,
-    initialContext,
-    startSession,
-  ]);
-
-  useEffect(() => {
     onAppLeave((actions) => {
-      // Confirm when the user has made any changes to an existing doc
-      // or when the user has configured something without saving
       if (
         application.capabilities.visualize.save &&
-        !_.isEqual(state.persistedDoc?.state, getLastKnownDocWithoutPinnedFilters()?.state) &&
-        (state.isSaveable || state.persistedDoc)
+        !isLensEqual(
+          persistedDoc,
+          lastKnownDoc,
+          data.query.filterManager.inject.bind(data.query.filterManager),
+          datasourceMap
+        ) &&
+        (isSaveable || persistedDoc)
       ) {
         return actions.confirm(
           i18n.translate('xpack.lens.app.unsavedWorkMessage', {
@@ -272,7 +169,12 @@ export function App({
           }),
           i18n.translate('xpack.lens.app.unsavedWorkTitle', {
             defaultMessage: 'Unsaved changes',
-          })
+          }),
+          undefined,
+          i18n.translate('xpack.lens.app.unsavedWorkConfirmBtn', {
+            defaultMessage: 'Discard changes',
+          }),
+          'danger'
         );
       } else {
         return actions.default();
@@ -281,17 +183,46 @@ export function App({
   }, [
     onAppLeave,
     lastKnownDoc,
-    state.isSaveable,
-    state.persistedDoc,
-    getLastKnownDocWithoutPinnedFilters,
+    isSaveable,
+    persistedDoc,
     application.capabilities.visualize.save,
+    data.query.filterManager,
+    datasourceMap,
   ]);
+
+  const getLegacyUrlConflictCallout = useCallback(() => {
+    // This function returns a callout component *if* we have encountered a "legacy URL conflict" scenario
+    if (spaces && sharingSavedObjectProps?.outcome === 'conflict' && persistedDoc?.savedObjectId) {
+      // We have resolved to one object, but another object has a legacy URL alias associated with this ID/page. We should display a
+      // callout with a warning for the user, and provide a way for them to navigate to the other object.
+      const currentObjectId = persistedDoc.savedObjectId;
+      const otherObjectId = sharingSavedObjectProps?.aliasTargetId!; // This is always defined if outcome === 'conflict'
+      const otherObjectPath = http.basePath.prepend(
+        `${getEditPath(otherObjectId)}${history.location.search}`
+      );
+      return spaces.ui.components.getLegacyUrlConflict({
+        objectNoun: i18n.translate('xpack.lens.appName', {
+          defaultMessage: 'Lens visualization',
+        }),
+        currentObjectId,
+        otherObjectId,
+        otherObjectPath,
+      });
+    }
+    return null;
+  }, [persistedDoc, sharingSavedObjectProps, spaces, http, history]);
 
   // Sync Kibana breadcrumbs any time the saved document's title changes
   useEffect(() => {
     const isByValueMode = getIsByValueMode();
+    const comesFromVizEditorDashboard =
+      initialContext && 'originatingApp' in initialContext && initialContext.originatingApp;
     const breadcrumbs: EuiBreadcrumb[] = [];
-    if (state.isLinkedToOriginatingApp && getOriginatingAppName() && redirectToOrigin) {
+    if (
+      (isLinkedToOriginatingApp || comesFromVizEditorDashboard) &&
+      getOriginatingAppName() &&
+      redirectToOrigin
+    ) {
       breadcrumbs.push({
         onClick: () => {
           redirectToOrigin();
@@ -314,540 +245,281 @@ export function App({
     let currentDocTitle = i18n.translate('xpack.lens.breadcrumbsCreate', {
       defaultMessage: 'Create',
     });
-    if (state.persistedDoc) {
+    if (persistedDoc) {
       currentDocTitle = isByValueMode
         ? i18n.translate('xpack.lens.breadcrumbsByValue', { defaultMessage: 'Edit visualization' })
-        : state.persistedDoc.title;
+        : persistedDoc.title;
     }
     breadcrumbs.push({ text: currentDocTitle });
     chrome.setBreadcrumbs(breadcrumbs);
   }, [
     dashboardFeatureFlag.allowByValueEmbeddables,
-    state.isLinkedToOriginatingApp,
     getOriginatingAppName,
-    state.persistedDoc,
     redirectToOrigin,
     getIsByValueMode,
-    initialInput,
     application,
     chrome,
+    isLinkedToOriginatingApp,
+    persistedDoc,
+    initialContext,
   ]);
 
-  useEffect(() => {
-    if (
-      !initialInput ||
-      (attributeService.inputIsRefType(initialInput) &&
-        initialInput.savedObjectId === state.persistedDoc?.savedObjectId)
-    ) {
-      return;
+  const switchDatasource = useCallback(() => {
+    if (saveAndExit && saveAndExit.current) {
+      saveAndExit.current();
     }
+  }, []);
 
-    setState((s) => ({ ...s, isLoading: true }));
-    attributeService
-      .unwrapAttributes(initialInput)
-      .then((attributes) => {
-        if (!initialInput) {
-          return;
-        }
-        const doc = {
-          ...initialInput,
-          ...attributes,
-          type: LENS_EMBEDDABLE_TYPE,
-        };
-
-        if (attributeService.inputIsRefType(initialInput)) {
-          chrome.recentlyAccessed.add(
-            getFullPath(initialInput.savedObjectId),
-            attributes.title,
-            initialInput.savedObjectId
-          );
-        }
-        const indexPatternIds = _.uniq(
-          doc.references.filter(({ type }) => type === 'index-pattern').map(({ id }) => id)
-        );
-        getAllIndexPatterns(indexPatternIds, data.indexPatterns)
-          .then(({ indexPatterns }) => {
-            // Don't overwrite any pinned filters
-            data.query.filterManager.setAppFilters(
-              injectFilterReferences(doc.state.filters, doc.references)
-            );
-            setState((s) => ({
-              ...s,
-              isLoading: false,
-              persistedDoc: doc,
-              lastKnownDoc: doc,
-              query: doc.state.query,
-              indexPatternsForTopNav: indexPatterns,
-            }));
-          })
-          .catch((e) => {
-            setState((s) => ({ ...s, isLoading: false }));
-            redirectTo();
-          });
-      })
-      .catch((e) => {
-        setState((s) => ({ ...s, isLoading: false }));
-        notifications.toasts.addDanger(
-          i18n.translate('xpack.lens.app.docLoadingError', {
-            defaultMessage: 'Error loading saved document',
-          })
-        );
-
-        redirectTo();
-      });
-  }, [
-    notifications,
-    data.indexPatterns,
-    data.query.filterManager,
-    initialInput,
-    attributeService,
-    redirectTo,
-    chrome.recentlyAccessed,
-    state.persistedDoc?.savedObjectId,
-    state.persistedDoc?.state,
-  ]);
-
-  const tagsIds =
-    state.persistedDoc && savedObjectsTagging
-      ? savedObjectsTagging.ui.getTagIdsFromReferences(state.persistedDoc.references)
-      : [];
-
-  const runSave = async (
-    saveProps: Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
-      returnToOrigin: boolean;
-      dashboardId?: string | null;
-      onTitleDuplicate?: OnSaveProps['onTitleDuplicate'];
-      newDescription?: string;
-      newTags?: string[];
-    },
-    options: { saveToLibrary: boolean }
-  ) => {
-    if (!lastKnownDoc) {
-      return;
-    }
-
-    let references = lastKnownDoc.references;
-    if (savedObjectsTagging) {
-      references = savedObjectsTagging.ui.updateTagsReferences(
-        references,
-        saveProps.newTags || tagsIds
-      );
-    }
-
-    const docToSave = {
-      ...getLastKnownDocWithoutPinnedFilters()!,
-      description: saveProps.newDescription,
-      title: saveProps.newTitle,
-      references,
-    };
-
-    // Required to serialize filters in by value mode until
-    // https://github.com/elastic/kibana/issues/77588 is fixed
-    if (getIsByValueMode()) {
-      docToSave.state.filters.forEach((filter) => {
-        if (typeof filter.meta.value === 'function') {
-          delete filter.meta.value;
-        }
-      });
-    }
-
-    const originalInput = saveProps.newCopyOnSave ? undefined : initialInput;
-    const originalSavedObjectId = (originalInput as LensByReferenceInput)?.savedObjectId;
-    if (options.saveToLibrary) {
-      try {
-        await checkForDuplicateTitle(
-          {
-            id: originalSavedObjectId,
-            title: docToSave.title,
-            copyOnSave: saveProps.newCopyOnSave,
-            lastSavedTitle: lastKnownDoc.title,
-            getEsType: () => 'lens',
-            getDisplayName: () =>
-              i18n.translate('xpack.lens.app.saveModalType', {
-                defaultMessage: 'Lens visualization',
-              }),
-          },
-          saveProps.isTitleDuplicateConfirmed,
-          saveProps.onTitleDuplicate,
-          {
-            savedObjectsClient,
-            overlays,
+  const runSave = useCallback(
+    (saveProps: SaveProps, options: { saveToLibrary: boolean }) => {
+      dispatch(applyChanges());
+      return runSaveLensVisualization(
+        {
+          lastKnownDoc,
+          getIsByValueMode,
+          savedObjectsTagging,
+          initialInput,
+          redirectToOrigin,
+          persistedDoc,
+          onAppLeave,
+          redirectTo,
+          switchDatasource,
+          originatingApp: incomingState?.originatingApp,
+          textBasedLanguageSave: shouldCloseAndSaveTextBasedQuery,
+          ...lensAppServices,
+        },
+        saveProps,
+        options
+      ).then(
+        (newState) => {
+          if (newState) {
+            dispatchSetState(newState);
+            setIsSaveModalVisible(false);
+            setShouldCloseAndSaveTextBasedQuery(false);
           }
-        );
-      } catch (e) {
-        // ignore duplicate title failure, user notified in save modal
-        return;
-      }
-    }
-    try {
-      const newInput = (await attributeService.wrapAttributes(
-        docToSave,
-        options.saveToLibrary,
-        originalInput
-      )) as LensEmbeddableInput;
-
-      if (saveProps.returnToOrigin && redirectToOrigin) {
-        // disabling the validation on app leave because the document has been saved.
-        onAppLeave((actions) => {
-          return actions.default();
-        });
-        redirectToOrigin({ input: newInput, isCopied: saveProps.newCopyOnSave });
-        return;
-      } else if (saveProps.dashboardId && redirectToDashboard) {
-        // disabling the validation on app leave because the document has been saved.
-        onAppLeave((actions) => {
-          return actions.default();
-        });
-        redirectToDashboard(newInput, saveProps.dashboardId);
-        return;
-      }
-
-      notifications.toasts.addSuccess(
-        i18n.translate('xpack.lens.app.saveVisualization.successNotificationText', {
-          defaultMessage: `Saved '{visTitle}'`,
-          values: {
-            visTitle: docToSave.title,
-          },
-        })
+        },
+        () => {
+          // error is handled inside the modal
+          // so ignoring it here
+        }
       );
-
-      if (
-        attributeService.inputIsRefType(newInput) &&
-        newInput.savedObjectId !== originalSavedObjectId
-      ) {
-        chrome.recentlyAccessed.add(
-          getFullPath(newInput.savedObjectId),
-          docToSave.title,
-          newInput.savedObjectId
-        );
-        setState((s) => ({
-          ...s,
-          isSaveModalVisible: false,
-          isLinkedToOriginatingApp: false,
-        }));
-        // remove editor state so the connection is still broken after reload
-        stateTransfer.clearEditorState(APP_ID);
-
-        redirectTo(newInput.savedObjectId);
-        return;
-      }
-
-      const newDoc = {
-        ...docToSave,
-        ...newInput,
-      };
-      setState((s) => ({
-        ...s,
-        persistedDoc: newDoc,
-        lastKnownDoc: newDoc,
-        isSaveModalVisible: false,
-        isLinkedToOriginatingApp: false,
-      }));
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.dir(e);
-      trackUiEvent('save_failed');
-      setState((s) => ({ ...s, isSaveModalVisible: false }));
-    }
-  };
-
-  const lastKnownDocRef = useRef(state.lastKnownDoc);
-  lastKnownDocRef.current = state.lastKnownDoc;
-
-  const activeDataRef = useRef(state.activeData);
-  activeDataRef.current = state.activeData;
-
-  const { TopNavMenu } = navigation.ui;
-
-  const savingToLibraryPermitted = Boolean(
-    state.isSaveable && application.capabilities.visualize.save
-  );
-  const savingToDashboardPermitted = Boolean(
-    state.isSaveable && application.capabilities.dashboard?.showWriteControls
-  );
-
-  const unsavedTitle = i18n.translate('xpack.lens.app.unsavedFilename', {
-    defaultMessage: 'unsaved',
-  });
-  const topNavConfig = getLensTopNavConfig({
-    showSaveAndReturn: Boolean(
-      state.isLinkedToOriginatingApp &&
-        // Temporarily required until the 'by value' paradigm is default.
-        (dashboardFeatureFlag.allowByValueEmbeddables || Boolean(initialInput))
-    ),
-    enableExportToCSV: Boolean(
-      state.isSaveable && state.activeData && Object.keys(state.activeData).length
-    ),
-    isByValueMode: getIsByValueMode(),
-    allowByValue: dashboardFeatureFlag.allowByValueEmbeddables,
-    showCancel: Boolean(state.isLinkedToOriginatingApp),
-    savingToLibraryPermitted,
-    savingToDashboardPermitted,
-    actions: {
-      exportToCSV: () => {
-        if (!state.activeData) {
-          return;
-        }
-        const datatables = Object.values(state.activeData);
-        const content = datatables.reduce<Record<string, { content: string; type: string }>>(
-          (memo, datatable, i) => {
-            // skip empty datatables
-            if (datatable) {
-              const postFix = datatables.length > 1 ? `-${i + 1}` : '';
-
-              memo[`${lastKnownDoc?.title || unsavedTitle}${postFix}.csv`] = {
-                content: exporters.datatableToCSV(datatable, {
-                  csvSeparator: uiSettings.get('csv:separator', ','),
-                  quoteValues: uiSettings.get('csv:quoteValues', true),
-                  formatFactory: data.fieldFormats.deserialize,
-                }),
-                type: exporters.CSV_MIME_TYPE,
-              };
-            }
-            return memo;
-          },
-          {}
-        );
-        if (content) {
-          downloadMultipleAs(content);
-        }
-      },
-      saveAndReturn: () => {
-        if (savingToDashboardPermitted && lastKnownDoc) {
-          // disabling the validation on app leave because the document has been saved.
-          onAppLeave((actions) => {
-            return actions.default();
-          });
-          runSave(
-            {
-              newTitle: lastKnownDoc.title,
-              newCopyOnSave: false,
-              isTitleDuplicateConfirmed: false,
-              returnToOrigin: true,
-            },
-            {
-              saveToLibrary:
-                (initialInput && attributeService.inputIsRefType(initialInput)) ?? false,
-            }
-          );
-        }
-      },
-      showSaveModal: () => {
-        if (savingToDashboardPermitted || savingToLibraryPermitted) {
-          setState((s) => ({ ...s, isSaveModalVisible: true }));
-        }
-      },
-      cancel: () => {
-        if (redirectToOrigin) {
-          redirectToOrigin();
-        }
-      },
     },
-  });
+    [
+      dispatch,
+      lastKnownDoc,
+      getIsByValueMode,
+      savedObjectsTagging,
+      initialInput,
+      redirectToOrigin,
+      persistedDoc,
+      onAppLeave,
+      redirectTo,
+      switchDatasource,
+      incomingState?.originatingApp,
+      shouldCloseAndSaveTextBasedQuery,
+      lensAppServices,
+      dispatchSetState,
+    ]
+  );
+
+  // keeping the initial doc state created by the context
+  useEffect(() => {
+    if (lastKnownDoc && !initialDocFromContext) {
+      setInitialDocFromContext(lastKnownDoc);
+    }
+  }, [lastKnownDoc, initialDocFromContext]);
+
+  // if users comes to Lens from the Viz editor, they should have the option to navigate back
+  const goBackToOriginatingApp = useCallback(() => {
+    if (
+      initialContext &&
+      'vizEditorOriginatingAppUrl' in initialContext &&
+      initialContext.vizEditorOriginatingAppUrl
+    ) {
+      const initialDocFromContextHasChanged = !isLensEqual(
+        initialDocFromContext,
+        lastKnownDoc,
+        data.query.filterManager.inject,
+        datasourceMap
+      );
+      if (!initialDocFromContextHasChanged) {
+        onAppLeave((actions) => {
+          return actions.default();
+        });
+        application.navigateToApp('visualize', { path: initialContext.vizEditorOriginatingAppUrl });
+      } else {
+        setIsGoBackToVizEditorModalVisible(true);
+      }
+    }
+  }, [
+    application,
+    data.query.filterManager.inject,
+    datasourceMap,
+    initialContext,
+    initialDocFromContext,
+    lastKnownDoc,
+    onAppLeave,
+  ]);
+
+  const navigateToVizEditor = useCallback(() => {
+    setIsGoBackToVizEditorModalVisible(false);
+    if (
+      initialContext &&
+      'vizEditorOriginatingAppUrl' in initialContext &&
+      initialContext.vizEditorOriginatingAppUrl
+    ) {
+      onAppLeave((actions) => {
+        return actions.default();
+      });
+      application.navigateToApp('visualize', { path: initialContext.vizEditorOriginatingAppUrl });
+    }
+  }, [application, initialContext, onAppLeave]);
+
+  const initialContextIsEmbedded = useMemo(() => {
+    return Boolean(
+      initialContext && 'originatingApp' in initialContext && initialContext.originatingApp
+    );
+  }, [initialContext]);
+
+  const indexPatternService = useMemo(
+    () =>
+      createIndexPatternService({
+        dataViews,
+        uiActions,
+        core: { http, notifications, uiSettings },
+        data,
+        contextDataViewSpec: (initialContext as VisualizeFieldContext | undefined)?.dataViewSpec,
+        updateIndexPatterns: (newIndexPatternsState, options) => {
+          dispatch(updateIndexPatterns(newIndexPatternsState));
+          if (options?.applyImmediately) {
+            dispatch(applyChanges());
+          }
+        },
+        replaceIndexPattern: (newIndexPattern, oldId, options) => {
+          dispatch(replaceIndexpattern({ newIndexPattern, oldId }));
+          if (options?.applyImmediately) {
+            dispatch(applyChanges());
+          }
+        },
+      }),
+    [dataViews, uiActions, http, notifications, uiSettings, data, initialContext, dispatch]
+  );
+
+  const onTextBasedSavedAndExit = useCallback(async ({ onSave, onCancel }) => {
+    setIsSaveModalVisible(true);
+    setShouldCloseAndSaveTextBasedQuery(true);
+    saveAndExit.current = () => {
+      onSave();
+    };
+  }, []);
 
   return (
     <>
-      <div className="lnsApp">
-        <TopNavMenu
-          setMenuMountPoint={setHeaderActionMenu}
-          config={topNavConfig}
-          showSearchBar={true}
-          showDatePicker={true}
-          showQueryBar={true}
-          showFilterBar={true}
-          indexPatterns={state.indexPatternsForTopNav}
-          showSaveQuery={Boolean(application.capabilities.visualize.saveQuery)}
-          savedQuery={state.savedQuery}
-          data-test-subj="lnsApp_topNav"
-          screenTitle={'lens'}
-          appName={'lens'}
-          onQuerySubmit={(payload) => {
-            const { dateRange, query } = payload;
-            const currentRange = data.query.timefilter.timefilter.getTime();
-            if (dateRange.from !== currentRange.from || dateRange.to !== currentRange.to) {
-              data.query.timefilter.timefilter.setTime(dateRange);
-              trackUiEvent('app_date_change');
-            } else {
-              // Query has changed, renew the session id.
-              // Time change will be picked up by the time subscription
-              setState((s) => ({
-                ...s,
-                searchSessionId: startSession(),
-              }));
-              trackUiEvent('app_query_change');
-            }
-            setState((s) => ({
-              ...s,
-              query: query || s.query,
-            }));
-          }}
-          onSaved={(savedQuery) => {
-            setState((s) => ({ ...s, savedQuery }));
-          }}
-          onSavedQueryUpdated={(savedQuery) => {
-            const savedQueryFilters = savedQuery.attributes.filters || [];
-            const globalFilters = data.query.filterManager.getGlobalFilters();
-            data.query.filterManager.setFilters([...globalFilters, ...savedQueryFilters]);
-            setState((s) => ({
-              ...s,
-              savedQuery: { ...savedQuery }, // Shallow query for reference issues
-              query: savedQuery.attributes.query,
-            }));
-          }}
-          onClearSavedQuery={() => {
-            data.query.filterManager.setFilters(data.query.filterManager.getGlobalFilters());
-            setState((s) => ({
-              ...s,
-              savedQuery: undefined,
-              filters: data.query.filterManager.getGlobalFilters(),
-              query: data.query.queryString.getDefaultQuery(),
-            }));
-          }}
-          query={state.query}
-          dateRangeFrom={fromDate}
-          dateRangeTo={toDate}
-          indicateNoData={state.indicateNoData}
+      <div className="lnsApp" data-test-subj="lnsApp">
+        <LensTopNavMenu
+          initialInput={initialInput}
+          redirectToOrigin={redirectToOrigin}
+          getIsByValueMode={getIsByValueMode}
+          onAppLeave={onAppLeave}
+          runSave={runSave}
+          setIsSaveModalVisible={setIsSaveModalVisible}
+          setHeaderActionMenu={setHeaderActionMenu}
+          indicateNoData={indicateNoData}
+          datasourceMap={datasourceMap}
+          visualizationMap={visualizationMap}
+          title={persistedDoc?.title}
+          lensInspector={lensInspector}
+          currentDoc={currentDoc}
+          goBackToOriginatingApp={goBackToOriginatingApp}
+          contextOriginatingApp={contextOriginatingApp}
+          initialContextIsEmbedded={initialContextIsEmbedded}
+          topNavMenuEntryGenerators={topNavMenuEntryGenerators}
+          initialContext={initialContext}
+          theme$={theme$}
+          indexPatternService={indexPatternService}
+          onTextBasedSavedAndExit={onTextBasedSavedAndExit}
         />
-        {(!state.isLoading || state.persistedDoc) && (
+        {getLegacyUrlConflictCallout()}
+        {(!isLoading || persistedDoc) && (
           <MemoizedEditorFrameWrapper
             editorFrame={editorFrame}
-            resolvedDateRange={resolvedDateRange}
-            onError={onError}
             showNoDataPopover={showNoDataPopover}
-            initialContext={initialContext}
-            setState={setState}
-            data={data}
-            query={state.query}
-            filters={state.filters}
-            searchSessionId={state.searchSessionId}
-            isSaveable={state.isSaveable}
-            savedQuery={state.savedQuery}
-            persistedDoc={state.persistedDoc}
-            indexPatterns={state.indexPatternsForTopNav}
-            activeData={activeDataRef}
-            lastKnownDoc={lastKnownDocRef}
+            lensInspector={lensInspector}
+            indexPatternService={indexPatternService}
           />
         )}
       </div>
-      <SaveModal
-        isVisible={state.isSaveModalVisible}
-        originatingApp={state.isLinkedToOriginatingApp ? incomingState?.originatingApp : undefined}
-        savingToLibraryPermitted={savingToLibraryPermitted}
-        allowByValueEmbeddables={dashboardFeatureFlag.allowByValueEmbeddables}
-        savedObjectsTagging={savedObjectsTagging}
-        tagsIds={tagsIds}
-        onSave={runSave}
-        onClose={() => {
-          setState((s) => ({ ...s, isSaveModalVisible: false }));
-        }}
-        getAppNameFromId={() => getOriginatingAppName()}
-        lastKnownDoc={lastKnownDoc}
-        returnToOriginSwitchLabel={
-          getIsByValueMode() && initialInput
-            ? i18n.translate('xpack.lens.app.updatePanel', {
-                defaultMessage: 'Update panel on {originatingAppName}',
-                values: { originatingAppName: getOriginatingAppName() },
-              })
-            : undefined
-        }
-      />
+      {isSaveModalVisible && (
+        <SaveModalContainer
+          lensServices={lensAppServices}
+          originatingApp={isLinkedToOriginatingApp ? incomingState?.originatingApp : undefined}
+          isSaveable={isSaveable}
+          runSave={runSave}
+          onClose={() => {
+            setIsSaveModalVisible(false);
+          }}
+          getAppNameFromId={() => getOriginatingAppName()}
+          lastKnownDoc={lastKnownDoc}
+          onAppLeave={onAppLeave}
+          persistedDoc={persistedDoc}
+          initialInput={initialInput}
+          redirectTo={redirectTo}
+          redirectToOrigin={redirectToOrigin}
+          returnToOriginSwitchLabel={
+            getIsByValueMode() && initialInput
+              ? i18n.translate('xpack.lens.app.updatePanel', {
+                  defaultMessage: 'Update panel on {originatingAppName}',
+                  values: { originatingAppName: getOriginatingAppName() },
+                })
+              : undefined
+          }
+        />
+      )}
+      {isGoBackToVizEditorModalVisible && (
+        <EuiConfirmModal
+          maxWidth={600}
+          title={i18n.translate('xpack.lens.app.goBackModalTitle', {
+            defaultMessage: 'Discard changes?',
+          })}
+          onCancel={() => setIsGoBackToVizEditorModalVisible(false)}
+          onConfirm={navigateToVizEditor}
+          cancelButtonText={i18n.translate('xpack.lens.app.goBackModalCancelBtn', {
+            defaultMessage: 'Cancel',
+          })}
+          confirmButtonText={i18n.translate('xpack.lens.app.goBackModalTitle', {
+            defaultMessage: 'Discard changes?',
+          })}
+          buttonColor="danger"
+          defaultFocusedButton="confirm"
+        >
+          {i18n.translate('xpack.lens.app.goBackModalMessage', {
+            defaultMessage:
+              'The changes you have made here are not backwards compatible with your original {contextOriginatingApp} visualization. Are you sure you want to discard these unsaved changes and return to {contextOriginatingApp}?',
+            values: { contextOriginatingApp },
+          })}
+        </EuiConfirmModal>
+      )}
     </>
   );
 }
 
 const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
   editorFrame,
-  query,
-  filters,
-  searchSessionId,
-  isSaveable: oldIsSaveable,
-  savedQuery,
-  persistedDoc,
-  indexPatterns: indexPatternsForTopNav,
-  resolvedDateRange,
-  onError,
   showNoDataPopover,
-  initialContext,
-  setState,
-  data,
-  lastKnownDoc,
-  activeData: activeDataRef,
+  lensInspector,
+  indexPatternService,
 }: {
   editorFrame: EditorFrameInstance;
-  searchSessionId: string;
-  query: Query;
-  filters: Filter[];
-  isSaveable: boolean;
-  savedQuery?: SavedQuery;
-  persistedDoc?: Document | undefined;
-  indexPatterns: IndexPatternInstance[];
-  resolvedDateRange: { fromDate: string; toDate: string };
-  onError: (e: { message: string }) => Toast;
+  lensInspector: LensInspector;
   showNoDataPopover: () => void;
-  initialContext: VisualizeFieldContext | undefined;
-  setState: React.Dispatch<React.SetStateAction<LensAppState>>;
-  data: DataPublicPluginStart;
-  lastKnownDoc: React.MutableRefObject<Document | undefined>;
-  activeData: React.MutableRefObject<Record<string, Datatable> | undefined>;
+  indexPatternService: IndexPatternServiceAPI;
 }) {
+  const { EditorFrameContainer } = editorFrame;
   return (
-    <NativeRenderer
-      className="lnsApp__frame"
-      render={editorFrame.mount}
-      nativeProps={{
-        searchSessionId,
-        dateRange: resolvedDateRange,
-        query,
-        filters,
-        savedQuery,
-        doc: persistedDoc,
-        onError,
-        showNoDataPopover,
-        initialContext,
-        onChange: ({ filterableIndexPatterns, doc, isSaveable, activeData }) => {
-          if (isSaveable !== oldIsSaveable) {
-            setState((s) => ({ ...s, isSaveable }));
-          }
-          if (!_.isEqual(persistedDoc, doc) && !_.isEqual(lastKnownDoc.current, doc)) {
-            setState((s) => ({ ...s, lastKnownDoc: doc }));
-          }
-          if (!_.isEqual(activeDataRef.current, activeData)) {
-            setState((s) => ({ ...s, activeData }));
-          }
-
-          // Update the cached index patterns if the user made a change to any of them
-          if (
-            indexPatternsForTopNav.length !== filterableIndexPatterns.length ||
-            filterableIndexPatterns.some(
-              (id) => !indexPatternsForTopNav.find((indexPattern) => indexPattern.id === id)
-            )
-          ) {
-            getAllIndexPatterns(filterableIndexPatterns, data.indexPatterns).then(
-              ({ indexPatterns }) => {
-                if (indexPatterns) {
-                  setState((s) => ({ ...s, indexPatternsForTopNav: indexPatterns }));
-                }
-              }
-            );
-          }
-        },
-      }}
+    <EditorFrameContainer
+      showNoDataPopover={showNoDataPopover}
+      lensInspector={lensInspector}
+      indexPatternService={indexPatternService}
     />
   );
 });
-
-export async function getAllIndexPatterns(
-  ids: string[],
-  indexPatternsService: IndexPatternsContract
-): Promise<{ indexPatterns: IndexPatternInstance[]; rejectedIds: string[] }> {
-  const responses = await Promise.allSettled(ids.map((id) => indexPatternsService.get(id)));
-  const fullfilled = responses.filter(
-    (response): response is PromiseFulfilledResult<IndexPatternInstance> =>
-      response.status === 'fulfilled'
-  );
-  const rejectedIds = responses
-    .map((_response, i) => ids[i])
-    .filter((id, i) => responses[i].status === 'rejected');
-  // return also the rejected ids in case we want to show something later on
-  return { indexPatterns: fullfilled.map((response) => response.value), rejectedIds };
-}

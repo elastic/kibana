@@ -42,10 +42,8 @@ export const initMetadataRoute = (libs: InfraBackendLibs) => {
         fold(throwErrors(Boom.badRequest), identity)
       );
 
-      const { configuration } = await libs.sources.getSourceConfiguration(
-        requestContext.core.savedObjects.client,
-        sourceId
-      );
+      const soClient = (await requestContext.core).savedObjects.client;
+      const { configuration } = await libs.sources.getSourceConfiguration(soClient, sourceId);
       const metricsMetadata = await getMetricMetadata(
         framework,
         requestContext,
@@ -92,7 +90,9 @@ export const initMetadataRoute = (libs: InfraBackendLibs) => {
   );
 };
 
-const nameToFeature = (source: string) => (name: string): InfraMetadataFeature => ({
-  name,
-  source,
-});
+const nameToFeature =
+  (source: string) =>
+  (name: string): InfraMetadataFeature => ({
+    name,
+    source,
+  });

@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import apmInstanceFixture from './fixtures/instance';
+import apmInstanceFixture from './fixtures/instance.json';
 
 export default function ({ getService }) {
   // Skipping for now since failure is unclear
@@ -15,7 +15,7 @@ export default function ({ getService }) {
   const esArchiver = getService('esArchiver');
 
   describe('instance detail', () => {
-    const archive = 'monitoring/apm';
+    const archive = 'x-pack/test/functional/es_archives/monitoring/apm';
     const timeRange = {
       min: '2018-08-31T12:59:49.104Z',
       max: '2018-08-31T13:59:49.104Z',

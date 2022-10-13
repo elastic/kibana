@@ -20,52 +20,58 @@ import { isFunction, defaults, cloneDeep } from 'lodash';
 import { Assign } from '@kbn/utility-types';
 import { i18n } from '@kbn/i18n';
 
-import { PersistedState } from './persisted_state';
-import { getTypes, getAggs, getSearch, getSavedSearchLoader } from './services';
+import { IAggConfigs, ISearchSource, AggConfigSerialized } from '@kbn/data-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 import {
-  IAggConfigs,
-  IndexPattern,
-  ISearchSource,
-  AggConfigOptions,
-  SearchSourceFields,
-} from '../../../plugins/data/public';
+  getSavedSearch,
+  SavedSearch,
+  throwErrorOnSavedSearchUrlConflict,
+} from '@kbn/saved-search-plugin/public';
+import { PersistedState } from './persisted_state';
+import {
+  getTypes,
+  getAggs,
+  getSearch,
+  getSavedObjects,
+  getSpaces,
+  getFieldsFormats,
+  getSavedObjectTagging,
+} from './services';
 import { BaseVisType } from './vis_types';
-import { VisParams } from '../common/types';
+import { SerializedVis, SerializedVisData, VisParams } from '../common/types';
 
-export interface SerializedVisData {
-  expression?: string;
-  aggs: AggConfigOptions[];
-  searchSource: SearchSourceFields;
-  savedSearchId?: string;
-}
-
-export interface SerializedVis<T = VisParams> {
-  id?: string;
-  title: string;
-  description?: string;
-  type: string;
-  params: T;
-  uiState?: any;
-  data: SerializedVisData;
-}
+export type { SerializedVis, SerializedVisData };
 
 export interface VisData {
   ast?: string;
   aggs?: IAggConfigs;
-  indexPattern?: IndexPattern;
+  indexPattern?: DataView;
   searchSource?: ISearchSource;
   savedSearchId?: string;
 }
 
 const getSearchSource = async (inputSearchSource: ISearchSource, savedSearchId?: string) => {
-  const searchSource = inputSearchSource.createCopy();
   if (savedSearchId) {
-    const savedSearch = await getSavedSearchLoader().get(savedSearchId);
+    let savedSearch: SavedSearch;
 
-    searchSource.setParent(savedSearch.searchSource);
+    try {
+      savedSearch = await getSavedSearch(savedSearchId, {
+        search: getSearch(),
+        savedObjectsClient: getSavedObjects().client,
+        spaces: getSpaces(),
+        savedObjectsTagging: getSavedObjectTagging()?.getTaggingApi(),
+      });
+    } catch (e) {
+      return inputSearchSource;
+    }
+
+    await throwErrorOnSavedSearchUrlConflict(savedSearch);
+
+    if (savedSearch?.searchSource) {
+      inputSearchSource.setParent(savedSearch.searchSource);
+    }
   }
-  searchSource.setField('size', 0);
-  return searchSource;
+  return inputSearchSource;
 };
 
 type PartialVisState = Assign<SerializedVis, { data: Partial<SerializedVisData> }>;
@@ -105,7 +111,19 @@ export class Vis<TVisParams = VisParams> {
     return defaults({}, cloneDeep(params ?? {}), cloneDeep(this.type.visConfig?.defaults ?? {}));
   }
 
-  async setState(state: PartialVisState) {
+  async setState(inState: PartialVisState) {
+    let state = inState;
+
+    const { updateVisTypeOnParamsChange } = this.type;
+    const newType = updateVisTypeOnParamsChange && updateVisTypeOnParamsChange(state.params);
+    if (newType) {
+      state = {
+        ...inState,
+        type: newType,
+        params: { ...inState.params, type: newType },
+      };
+    }
+
     let typeChanged = false;
     if (state.type && this.type.name !== state.type) {
       // @ts-ignore
@@ -121,36 +139,53 @@ export class Vis<TVisParams = VisParams> {
     if (state.params || typeChanged) {
       this.params = this.getParams(state.params);
     }
-    if (state.data && state.data.searchSource) {
-      this.data.searchSource = await getSearch().searchSource.create(state.data.searchSource!);
-      this.data.indexPattern = this.data.searchSource.getField('index');
-    }
-    if (state.data && state.data.savedSearchId) {
-      this.data.savedSearchId = state.data.savedSearchId;
-      if (this.data.searchSource) {
-        this.data.searchSource = await getSearchSource(
-          this.data.searchSource,
-          this.data.savedSearchId
-        );
+
+    try {
+      if (state.data && state.data.searchSource) {
+        this.data.searchSource = await getSearch().searchSource.create(state.data.searchSource!);
         this.data.indexPattern = this.data.searchSource.getField('index');
       }
+    } catch (e) {
+      // nothing to be here
     }
+
+    try {
+      if (state.data && state.data.savedSearchId) {
+        if (this.data.searchSource) {
+          this.data.searchSource = await getSearchSource(
+            this.data.searchSource,
+            state.data.savedSearchId
+          );
+          this.data.indexPattern = this.data.searchSource.getField('index');
+        }
+        this.data.savedSearchId = state.data.savedSearchId;
+      }
+    } catch (e) {
+      // nothing to be here
+    }
+
     if (state.data && (state.data.aggs || !this.data.aggs)) {
       const aggs = state.data.aggs ? cloneDeep(state.data.aggs) : [];
       const configStates = this.initializeDefaultsFromSchemas(aggs, this.type.schemas.all || []);
-      if (!this.data.indexPattern) {
-        if (aggs.length) {
-          const errorMessage = i18n.translate(
-            'visualizations.initializeWithoutIndexPatternErrorMessage',
-            {
-              defaultMessage: 'Trying to initialize aggs without index pattern',
-            }
-          );
-          throw new Error(errorMessage);
-        }
-        return;
+
+      if (!this.data.indexPattern && aggs.length) {
+        const dataViewId =
+          typeof state.data.searchSource?.index === 'string'
+            ? state.data.searchSource?.index
+            : state.data.searchSource?.index?.id;
+        this.data.indexPattern = new DataView({
+          spec: {
+            id: state.data.savedSearchId ?? dataViewId,
+          },
+          fieldFormats: getFieldsFormats(),
+        });
+        this.data.searchSource = await getSearch().searchSource.createEmpty();
+        this.data.searchSource?.setField('index', this.data.indexPattern);
       }
-      this.data.aggs = getAggs().createAggConfigs(this.data.indexPattern, configStates);
+
+      if (this.data.indexPattern) {
+        this.data.aggs = getAggs().createAggConfigs(this.data.indexPattern, configStates);
+      }
     }
   }
 
@@ -169,7 +204,7 @@ export class Vis<TVisParams = VisParams> {
   }
 
   serialize(): SerializedVis {
-    const aggs = this.data.aggs ? this.data.aggs.aggs.map((agg) => agg.toJSON()) : [];
+    const aggs = this.data.aggs ? this.data.aggs.aggs.map((agg) => agg.serialize()) : [];
     return {
       id: this.id,
       title: this.title,
@@ -180,7 +215,7 @@ export class Vis<TVisParams = VisParams> {
       data: {
         aggs: aggs as any,
         searchSource: this.data.searchSource ? this.data.searchSource.getSerializedFields() : {},
-        savedSearchId: this.data.savedSearchId,
+        ...(this.data.savedSearchId ? { savedSearchId: this.data.savedSearchId } : {}),
       },
     };
   }
@@ -194,7 +229,7 @@ export class Vis<TVisParams = VisParams> {
     }
   }
 
-  private initializeDefaultsFromSchemas(configStates: AggConfigOptions[], schemas: any) {
+  private initializeDefaultsFromSchemas(configStates: AggConfigSerialized[], schemas: any) {
     // Set the defaults for any schema which has them. If the defaults
     // for some reason has more then the max only set the max number
     // of defaults (not sure why a someone define more...
@@ -213,3 +248,6 @@ export class Vis<TVisParams = VisParams> {
     return newConfigs;
   }
 }
+
+// eslint-disable-next-line import/no-default-export
+export default Vis;

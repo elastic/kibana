@@ -7,9 +7,9 @@
 
 import React, { useEffect, useState } from 'react';
 import { EuiLink } from '@elastic/eui';
-import { useMlUrlGenerator } from '../../../../contexts/kibana';
-import { ML_PAGES } from '../../../../../../common/constants/ml_url_generator';
-import { AnomalyDetectionQueryState } from '../../../../../../common/types/ml_url_generator';
+import { useMlLocator } from '../../../../contexts/kibana';
+import { ML_PAGES } from '../../../../../../common/constants/locator';
+import { AnomalyDetectionQueryState } from '../../../../../../common/types/locator';
 // @ts-ignore
 import { JobGroup } from '../job_group';
 
@@ -28,7 +28,7 @@ function isGroupIdLink(props: JobIdLink | GroupIdLink): props is GroupIdLink {
   return (props as GroupIdLink).groupId !== undefined;
 }
 export const AnomalyDetectionJobIdLink = (props: AnomalyDetectionJobIdLinkProps) => {
-  const mlUrlGenerator = useMlUrlGenerator();
+  const mlLocator = useMlLocator();
   const [href, setHref] = useState<string>('');
 
   useEffect(() => {
@@ -40,30 +40,37 @@ export const AnomalyDetectionJobIdLink = (props: AnomalyDetectionJobIdLinkProps)
       } else {
         pageState.jobId = props.id;
       }
-      const url = await mlUrlGenerator.createUrl({
-        page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
-        pageState,
-      });
-      if (!isCancelled) {
-        setHref(url);
+      if (mlLocator) {
+        const url = await mlLocator.getUrl({
+          page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
+          // TODO: Fix this any.
+          pageState: pageState as any,
+        });
+        if (!isCancelled) {
+          setHref(url);
+        }
       }
     };
     generateLink();
     return () => {
       isCancelled = true;
     };
-  }, [props, mlUrlGenerator]);
+  }, [props, mlLocator]);
 
   if (isGroupIdLink(props)) {
     return (
-      // Set margin-left to match EuiBadge (in JobGroup) built-in left margin for consistent badge spacing in management and plugin jobs list
-      <EuiLink style={{ marginLeft: '4px' }} key={props.groupId} href={href}>
+      <EuiLink key={props.groupId} href={href}>
         <JobGroup name={props.groupId} />
       </EuiLink>
     );
   } else {
     return (
-      <EuiLink key={props.id} href={href}>
+      <EuiLink
+        key={props.id}
+        href={href}
+        css={{ overflow: 'hidden', 'text-overflow': 'ellipsis' }}
+        title={props.id}
+      >
         {props.id}
       </EuiLink>
     );

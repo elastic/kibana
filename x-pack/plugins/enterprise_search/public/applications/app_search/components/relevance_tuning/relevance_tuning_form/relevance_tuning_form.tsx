@@ -42,7 +42,6 @@ export const RelevanceTuningForm: React.FC = () => {
   return (
     <section className="relevanceTuningForm">
       <form>
-        <EuiSpacer size="s" />
         <EuiTitle size="m">
           <h2>
             {i18n.translate(
@@ -82,7 +81,7 @@ export const RelevanceTuningForm: React.FC = () => {
               buttonContent={
                 <RelevanceTuningItem
                   name={fieldName}
-                  type={schema[fieldName]}
+                  type={schema[fieldName].type}
                   boosts={searchSettings.boosts && searchSettings.boosts[fieldName]}
                   field={searchSettings.search_fields[fieldName]}
                 />
@@ -91,7 +90,7 @@ export const RelevanceTuningForm: React.FC = () => {
             >
               <RelevanceTuningItemContent
                 name={fieldName}
-                type={schema[fieldName]}
+                type={schema[fieldName].type}
                 boosts={searchSettings.boosts && searchSettings.boosts[fieldName]}
                 field={searchSettings.search_fields[fieldName]}
               />

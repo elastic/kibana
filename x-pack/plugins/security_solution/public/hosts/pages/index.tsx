@@ -6,80 +6,94 @@
  */
 
 import React from 'react';
-import { Route, Switch, RouteComponentProps, useHistory } from 'react-router-dom';
-
+import { Switch, Redirect } from 'react-router-dom';
+import { Route } from '@kbn/kibana-react-plugin/public';
+import { HOSTS_PATH } from '../../../common/constants';
 import { HostDetails } from './details';
 import { HostsTableType } from '../store/model';
 
 import { MlHostConditionalContainer } from '../../common/components/ml/conditional_links/ml_host_conditional_container';
 import { Hosts } from './hosts';
-import { hostsPagePath, hostDetailsPagePath } from './types';
+import { hostDetailsPagePath } from './types';
 
 const getHostsTabPath = () =>
-  `/:tabName(` +
+  `${HOSTS_PATH}/:tabName(` +
   `${HostsTableType.hosts}|` +
-  `${HostsTableType.authentications}|` +
   `${HostsTableType.uncommonProcesses}|` +
   `${HostsTableType.anomalies}|` +
   `${HostsTableType.events}|` +
-  `${HostsTableType.alerts})`;
+  `${HostsTableType.risk}|` +
+  `${HostsTableType.sessions})`;
 
-const getHostDetailsTabPath = (pagePath: string) =>
+const getHostDetailsTabPath = () =>
   `${hostDetailsPagePath}/:tabName(` +
   `${HostsTableType.authentications}|` +
   `${HostsTableType.uncommonProcesses}|` +
   `${HostsTableType.anomalies}|` +
   `${HostsTableType.events}|` +
-  `${HostsTableType.alerts})`;
+  `${HostsTableType.risk}|` +
+  `${HostsTableType.sessions})`;
 
-type Props = Partial<RouteComponentProps<{}>> & { url: string };
-
-export const HostsContainer = React.memo<Props>(({ url }) => {
-  const history = useHistory();
-
-  return (
-    <Switch>
-      <Route
-        path="/ml-hosts"
-        render={({ location, match }) => (
-          <MlHostConditionalContainer location={location} url={match.url} />
-        )}
-      />
-      <Route path={getHostsTabPath()}>
-        <Hosts />
-      </Route>
-      <Route
-        path={getHostDetailsTabPath(hostsPagePath)}
-        render={({
-          match: {
-            params: { detailName },
-          },
-        }) => <HostDetails hostDetailsPagePath={hostDetailsPagePath} detailName={detailName} />}
-      />
-      <Route
-        path={hostDetailsPagePath}
-        render={({
-          match: {
-            params: { detailName },
-          },
-          location: { search = '' },
-        }) => {
-          history.replace(`${detailName}/${HostsTableType.authentications}${search}`);
-          return null;
-        }}
-      />
-
-      <Route
-        exact
-        strict
-        path=""
-        render={({ location: { search = '' } }) => {
-          history.replace(`${HostsTableType.hosts}${search}`);
-          return null;
-        }}
-      />
-    </Switch>
-  );
-});
+export const HostsContainer = React.memo(() => (
+  <Switch>
+    <Route path={`${HOSTS_PATH}/ml-hosts`}>
+      <MlHostConditionalContainer />
+    </Route>
+    <Route path={getHostsTabPath()}>
+      <Hosts />
+    </Route>
+    <Route
+      path={getHostDetailsTabPath()}
+      render={({
+        match: {
+          params: { detailName },
+        },
+      }) => (
+        <HostDetails
+          hostDetailsPagePath={hostDetailsPagePath}
+          detailName={decodeURIComponent(detailName)}
+        />
+      )}
+    />
+    <Route // Redirect to the first tab when tabName is not present.
+      path={hostDetailsPagePath}
+      render={({
+        match: {
+          params: { detailName },
+        },
+        location: { search = '' },
+      }) => (
+        <Redirect
+          to={{
+            pathname: `${HOSTS_PATH}/name/${detailName}/${HostsTableType.authentications}`,
+            search,
+          }}
+        />
+      )}
+    />
+    <Route // Compatibility redirect for the old user detail path.
+      path={`${HOSTS_PATH}/:detailName/:tabName?`}
+      render={({
+        match: {
+          params: { detailName, tabName = HostsTableType.authentications },
+        },
+        location: { search = '' },
+      }) => (
+        <Redirect
+          to={{
+            pathname: `${HOSTS_PATH}/name/${detailName}/${tabName}`,
+            search,
+          }}
+        />
+      )}
+    />
+    <Route // Redirect to the first tab when tabName is not present.
+      path={HOSTS_PATH}
+      render={({ location: { search = '' } }) => (
+        <Redirect to={{ pathname: `${HOSTS_PATH}/${HostsTableType.hosts}`, search }} />
+      )}
+    />
+  </Switch>
+));
 
 HostsContainer.displayName = 'HostsContainer';

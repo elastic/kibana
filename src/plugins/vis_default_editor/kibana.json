@@ -2,6 +2,20 @@
   "id": "visDefaultEditor",
   "version": "kibana",
   "ui": true,
-  "optionalPlugins": ["visualize"],
-  "requiredBundles": ["kibanaUtils", "kibanaReact", "data"]
+  "optionalPlugins": ["visualizations"],
+  "requiredBundles": [
+    "unifiedSearch",
+    "kibanaUtils",
+    "kibanaReact",
+    "data",
+    "fieldFormats",
+    "discover",
+    "esUiShared",
+    "visualizations"
+  ],
+  "owner": {
+    "name": "Vis Editors",
+    "githubTeam": "kibana-vis-editors"
+  },
+  "description": "The default editor used in most aggregation-based visualizations."
 }

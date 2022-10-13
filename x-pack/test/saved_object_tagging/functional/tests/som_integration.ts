@@ -10,7 +10,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const PageObjects = getPageObjects(['settings', 'tagManagement', 'savedObjects', 'common']);
@@ -21,10 +21,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
    */
   const selectTagsInFilter = async (...tagNames: string[]) => {
     // open the filter dropdown
-    // the first class selector before the id is of course useless. Only here to help cleaning that once we got
-    // testSubjects in EUI filters.
+    // This CSS selector should be cleaned up once we have testSubjects in EUI filters.
     const filterButton = await find.byCssSelector(
-      '.euiFilterGroup #field_value_selection_1 .euiFilterButton'
+      '.euiFilterGroup > *:last-child .euiFilterButton'
     );
     await filterButton.click();
     // select the tags
@@ -39,10 +38,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('saved objects management integration', () => {
     before(async () => {
-      await esArchiver.load('so_management');
+      await kibanaServer.importExport.load(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/so_management/data.json'
+      );
     });
     after(async () => {
-      await esArchiver.unload('so_management');
+      await kibanaServer.importExport.unload(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/so_management/data.json'
+      );
     });
 
     describe('navigating from the tag section', () => {

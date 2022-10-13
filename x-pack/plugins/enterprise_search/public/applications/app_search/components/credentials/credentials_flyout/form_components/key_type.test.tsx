@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockValues, setMockActions } from '../../../../../__mocks__/kea.mock';
+import { setMockValues, setMockActions } from '../../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -15,7 +15,7 @@ import { EuiSelect } from '@elastic/eui';
 
 import { ApiTokenTypes, TOKEN_TYPE_INFO } from '../../constants';
 
-import { FormKeyType } from './';
+import { FormKeyType } from '.';
 
 describe('FormKeyType', () => {
   const values = {

@@ -5,26 +5,18 @@
  * 2.0.
  */
 
-import { ActionCreator } from 'typescript-fsa';
+import type { Filter } from '@kbn/es-query';
+import type { hostsModel } from '../store';
+import type { GlobalTimeArgs } from '../../common/containers/use_global_time';
+import { HOSTS_PATH } from '../../../common/constants';
 
-import { hostsModel } from '../store';
-import { GlobalTimeArgs } from '../../common/containers/use_global_time';
-import { InputsModelId } from '../../common/store/inputs/constants';
-import { DocValueFields } from '../../common/containers/source';
-
-export const hostsPagePath = '/';
-export const hostDetailsPagePath = `/:detailName`;
+export const hostDetailsPagePath = `${HOSTS_PATH}/name/:detailName`;
 
 export type HostsTabsProps = GlobalTimeArgs & {
-  docValueFields: DocValueFields[];
   filterQuery: string;
+  pageFilters?: Filter[];
   indexNames: string[];
   type: hostsModel.HostsType;
-  setAbsoluteRangeDatePicker: ActionCreator<{
-    id: InputsModelId;
-    from: string;
-    to: string;
-  }>;
 };
 
 export type HostsQueryProps = GlobalTimeArgs;

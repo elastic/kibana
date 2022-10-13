@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndexPattern } from 'src/plugins/data/common/index_patterns/index_patterns';
+import { DataView } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { AGG_TYPE } from '../../../../common/constants';
 import { IESAggField, CountAggFieldParams } from './agg_field_types';
@@ -31,8 +31,20 @@ export class PercentileAggField extends AggField implements IESAggField {
     this._percentile = params.percentile;
   }
 
-  supportsFieldMeta(): boolean {
+  supportsFieldMetaFromEs(): boolean {
     return true;
+  }
+
+  supportsFieldMetaFromLocalData(): boolean {
+    // Elasticsearch vector tile search API returns meta tiles for aggregation metrics
+    return true;
+  }
+
+  getMbFieldName(): string {
+    return this._source.isMvt()
+      ? this.getName() +
+          `.values.${this._percentile}${Number.isInteger(this._percentile) ? '.0' : ''}`
+      : this.getName();
   }
 
   canValueBeFormatted(): boolean {
@@ -52,7 +64,7 @@ export class PercentileAggField extends AggField implements IESAggField {
     }
 
     const suffix = getOrdinalSuffix(this._percentile);
-    return `${this._percentile}${suffix} ${this._source.getAggLabel(
+    return `${this._percentile}${suffix} ${await this._source.getAggLabel(
       this._getAggType(),
       this.getRootName()
     )}`;
@@ -62,7 +74,7 @@ export class PercentileAggField extends AggField implements IESAggField {
     return `${super.getName()}_${this._percentile}`;
   }
 
-  getValueAggDsl(indexPattern: IndexPattern): unknown {
+  getValueAggDsl(indexPattern: DataView): unknown {
     const field = getField(indexPattern, this.getRootName());
     const dsl: Record<string, unknown> = addFieldToDSL({}, field);
     dsl.percents = [this._percentile];

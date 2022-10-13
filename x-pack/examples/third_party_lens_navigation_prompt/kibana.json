@@ -1,0 +1,22 @@
+{
+  "id": "thirdPartyLensNavigationPrompt",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "configPath": ["third_party_lens_navigation_prompt"],
+  "server": false,
+  "ui": true,
+  "requiredPlugins": [
+    "lens",
+    "data",
+    "dataViews",
+    "embeddable",
+    "developerExamples"
+  ],
+  "optionalPlugins": [],
+  "requiredBundles": [
+  ],
+  "owner": {
+    "name": "Vis Editors",
+    "githubTeam": "kibana-vis-editors"
+  }
+}

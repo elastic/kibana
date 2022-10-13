@@ -5,9 +5,13 @@
  * 2.0.
  */
 
+import { applicationServiceMock } from '@kbn/core/public/mocks';
+
+import { LogoutReason } from '../../common/types';
 import { SessionExpired } from './session_expired';
 
 describe('#logout', () => {
+  const application = applicationServiceMock.createStartContract();
   const mockGetItem = jest.fn().mockReturnValue(null);
   const CURRENT_URL = '/foo/bar?baz=quz#quuz';
   const LOGOUT_URL = '/logout';
@@ -25,13 +29,13 @@ describe('#logout', () => {
   beforeEach(() => {
     Object.defineProperty(window, 'location', {
       value: {
-        assign: jest.fn(),
         pathname: CURRENT_URL,
         search: '',
         hash: '',
       },
       configurable: true,
     });
+    application.navigateToUrl.mockClear();
     mockGetItem.mockReset();
   });
 
@@ -40,12 +44,24 @@ describe('#logout', () => {
   });
 
   it(`redirects user to the logout URL with 'msg' and 'next' parameters`, async () => {
-    const sessionExpired = new SessionExpired(LOGOUT_URL, TENANT);
-    sessionExpired.logout();
+    const sessionExpired = new SessionExpired(application, LOGOUT_URL, TENANT);
+    sessionExpired.logout(LogoutReason.SESSION_EXPIRED);
 
     const next = `&next=${encodeURIComponent(CURRENT_URL)}`;
-    await expect(window.location.assign).toHaveBeenCalledWith(
-      `${LOGOUT_URL}?msg=SESSION_EXPIRED${next}`
+    await expect(application.navigateToUrl).toHaveBeenCalledWith(
+      `${LOGOUT_URL}?msg=SESSION_EXPIRED${next}`,
+      { forceRedirect: true, skipAppLeave: true }
+    );
+  });
+
+  it(`redirects user to the logout URL with custom reason 'msg'`, async () => {
+    const sessionExpired = new SessionExpired(application, LOGOUT_URL, TENANT);
+    sessionExpired.logout(LogoutReason.AUTHENTICATION_ERROR);
+
+    const next = `&next=${encodeURIComponent(CURRENT_URL)}`;
+    await expect(application.navigateToUrl).toHaveBeenCalledWith(
+      `${LOGOUT_URL}?msg=AUTHENTICATION_ERROR${next}`,
+      { forceRedirect: true, skipAppLeave: true }
     );
   });
 
@@ -53,16 +69,17 @@ describe('#logout', () => {
     const providerName = 'basic';
     mockGetItem.mockReturnValueOnce(providerName);
 
-    const sessionExpired = new SessionExpired(LOGOUT_URL, TENANT);
-    sessionExpired.logout();
+    const sessionExpired = new SessionExpired(application, LOGOUT_URL, TENANT);
+    sessionExpired.logout(LogoutReason.SESSION_EXPIRED);
 
     expect(mockGetItem).toHaveBeenCalledTimes(1);
     expect(mockGetItem).toHaveBeenCalledWith(`${TENANT}/session_provider`);
 
     const next = `&next=${encodeURIComponent(CURRENT_URL)}`;
     const provider = `&provider=${providerName}`;
-    await expect(window.location.assign).toBeCalledWith(
-      `${LOGOUT_URL}?msg=SESSION_EXPIRED${next}${provider}`
+    await expect(application.navigateToUrl).toBeCalledWith(
+      `${LOGOUT_URL}?msg=SESSION_EXPIRED${next}${provider}`,
+      { forceRedirect: true, skipAppLeave: true }
     );
   });
 });

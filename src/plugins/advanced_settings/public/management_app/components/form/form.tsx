@@ -11,23 +11,23 @@ import React, { PureComponent, Fragment } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiForm,
+  EuiSplitPanel,
   EuiLink,
-  EuiPanel,
+  EuiCallOut,
   EuiSpacer,
-  EuiText,
   EuiTextColor,
   EuiBottomBar,
   EuiButton,
   EuiToolTip,
   EuiButtonEmpty,
+  EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { UiCounterMetricType } from '@kbn/analytics';
-import { toMountPoint } from '../../../../../kibana_react/public';
-import { DocLinksStart, ToastsStart } from '../../../../../../core/public';
+import { KibanaThemeProvider, toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { DocLinksStart, ThemeServiceStart, ToastsStart } from '@kbn/core/public';
 
 import { getCategoryName } from '../../lib';
 import { Field, getEditableValue } from '../field';
@@ -44,9 +44,11 @@ interface FormProps {
   save: (changes: SettingsChanges) => Promise<boolean[]>;
   showNoResultsMessage: boolean;
   enableSaving: boolean;
-  dockLinks: DocLinksStart['links'];
+  docLinks: DocLinksStart['links'];
   toasts: ToastsStart;
+  theme: ThemeServiceStart['theme$'];
   trackUiMetric?: (metricType: UiCounterMetricType, eventName: string | string[]) => void;
+  queryText?: string;
 }
 
 interface FormState {
@@ -190,7 +192,7 @@ export class Form extends PureComponent<FormProps> {
         defaultMessage: 'One or more settings require you to reload the page to take effect.',
       }),
       text: toMountPoint(
-        <>
+        <KibanaThemeProvider theme$={this.props.theme}>
           <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
             <EuiFlexItem grow={false}>
               <EuiButton size="s" onClick={() => window.location.reload()}>
@@ -200,7 +202,7 @@ export class Form extends PureComponent<FormProps> {
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </>
+        </KibanaThemeProvider>
       ),
       color: 'success',
     });
@@ -241,17 +243,18 @@ export class Form extends PureComponent<FormProps> {
   renderCategory(category: Category, settings: FieldSetting[], totalSettings: number) {
     return (
       <Fragment key={category}>
-        <EuiPanel paddingSize="l">
-          <EuiForm>
-            <EuiText>
-              <EuiFlexGroup alignItems="baseline">
-                <EuiFlexItem grow={false}>
+        <EuiSplitPanel.Outer hasBorder>
+          <EuiSplitPanel.Inner color="subdued">
+            <EuiFlexGroup alignItems="baseline">
+              <EuiFlexItem grow={false}>
+                <EuiTitle>
                   <h2>{getCategoryName(category)}</h2>
-                </EuiFlexItem>
-                {this.renderClearQueryLink(totalSettings, settings.length)}
-              </EuiFlexGroup>
-            </EuiText>
-            <EuiSpacer size="m" />
+                </EuiTitle>
+              </EuiFlexItem>
+              {this.renderClearQueryLink(totalSettings, settings.length)}
+            </EuiFlexGroup>
+          </EuiSplitPanel.Inner>
+          <EuiSplitPanel.Inner>
             {settings.map((setting) => {
               return (
                 <Field
@@ -261,13 +264,13 @@ export class Form extends PureComponent<FormProps> {
                   unsavedChanges={this.state.unsavedChanges[setting.name]}
                   clearChange={this.clearChange}
                   enableSaving={this.props.enableSaving}
-                  dockLinks={this.props.dockLinks}
+                  docLinks={this.props.docLinks}
                   toasts={this.props.toasts}
                 />
               );
             })}
-          </EuiForm>
-        </EuiPanel>
+          </EuiSplitPanel.Inner>
+        </EuiSplitPanel.Outer>
         <EuiSpacer size="l" />
       </Fragment>
     );
@@ -276,22 +279,28 @@ export class Form extends PureComponent<FormProps> {
   maybeRenderNoSettings(clearQuery: FormProps['clearQuery']) {
     if (this.props.showNoResultsMessage) {
       return (
-        <EuiPanel paddingSize="l">
-          <FormattedMessage
-            id="advancedSettings.form.noSearchResultText"
-            defaultMessage="No settings found {clearSearch}"
-            values={{
-              clearSearch: (
-                <EuiLink onClick={clearQuery}>
-                  <FormattedMessage
-                    id="advancedSettings.form.clearNoSearchResultText"
-                    defaultMessage="(clear search)"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
-        </EuiPanel>
+        <EuiCallOut
+          color="danger"
+          title={
+            <>
+              <FormattedMessage
+                id="advancedSettings.form.noSearchResultText"
+                defaultMessage="No settings found for {queryText} {clearSearch}"
+                values={{
+                  clearSearch: (
+                    <EuiLink onClick={clearQuery}>
+                      <FormattedMessage
+                        id="advancedSettings.form.clearNoSearchResultText"
+                        defaultMessage="(clear search)"
+                      />
+                    </EuiLink>
+                  ),
+                  queryText: <strong>{this.props.queryText}</strong>,
+                }}
+              />
+            </>
+          }
+        />
       );
     }
     return null;
@@ -360,7 +369,7 @@ export class Form extends PureComponent<FormProps> {
               <EuiButton
                 className="mgtAdvancedSettingsForm__button"
                 disabled={areChangesInvalid}
-                color="secondary"
+                color="success"
                 fill
                 size="s"
                 iconType="check"

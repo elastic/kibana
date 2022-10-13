@@ -5,102 +5,114 @@
  * 2.0.
  */
 
-import { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
-import { TimestampOverrideOrUndefined } from '../../../../../common/detection_engine/schemas/common/schemas';
-import {
-  AlertInstanceContext,
-  AlertInstanceState,
-  AlertServices,
-} from '../../../../../../alerting/server';
-import { Logger } from '../../../../../../../../src/core/server';
-import { ThresholdSignalHistory } from '../types';
-import { BuildRuleMessage } from '../rule_messages';
-import { findPreviousThresholdSignals } from './find_previous_threshold_signals';
-import { getThresholdTermsHash } from '../utils';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { IRuleDataReader } from '@kbn/rule-registry-plugin/server';
+import type { ThresholdSignalHistory } from '../types';
+import { buildThresholdSignalHistory } from './build_signal_history';
+import { createErrorsFromShard } from '../utils';
 
 interface GetThresholdSignalHistoryParams {
   from: string;
   to: string;
-  indexPattern: string[];
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
-  logger: Logger;
   ruleId: string;
   bucketByFields: string[];
-  timestampOverride: TimestampOverrideOrUndefined;
-  buildRuleMessage: BuildRuleMessage;
+  ruleDataReader: IRuleDataReader;
 }
 
 export const getThresholdSignalHistory = async ({
   from,
   to,
-  indexPattern,
-  services,
-  logger,
   ruleId,
   bucketByFields,
-  timestampOverride,
-  buildRuleMessage,
+  ruleDataReader,
 }: GetThresholdSignalHistoryParams): Promise<{
-  thresholdSignalHistory: ThresholdSignalHistory;
+  signalHistory: ThresholdSignalHistory;
   searchErrors: string[];
 }> => {
-  const { searchResult, searchErrors } = await findPreviousThresholdSignals({
-    indexPattern,
+  const request = buildPreviousThresholdAlertRequest({
     from,
     to,
-    services,
-    logger,
     ruleId,
     bucketByFields,
-    timestampOverride,
-    buildRuleMessage,
   });
 
-  const thresholdSignalHistory = searchResult.hits.hits.reduce<ThresholdSignalHistory>(
-    (acc, hit) => {
-      if (!hit._source) {
-        return acc;
-      }
-
-      const terms =
-        hit._source.signal?.threshold_result?.terms != null
-          ? hit._source.signal.threshold_result.terms
-          : [
-              // Pre-7.12 signals
-              {
-                field:
-                  (((hit._source.signal?.rule as RulesSchema).threshold as unknown) as {
-                    field: string;
-                  }).field ?? '',
-                value: ((hit._source.signal?.threshold_result as unknown) as { value: string })
-                  .value,
-              },
-            ];
-
-      const hash = getThresholdTermsHash(terms);
-      const existing = acc[hash];
-      const originalTime =
-        hit._source.signal?.original_time != null
-          ? new Date(hit._source.signal?.original_time).getTime()
-          : undefined;
-
-      if (existing != null) {
-        if (originalTime && originalTime > existing.lastSignalTimestamp) {
-          acc[hash].lastSignalTimestamp = originalTime;
-        }
-      } else if (originalTime) {
-        acc[hash] = {
-          terms,
-          lastSignalTimestamp: originalTime,
-        };
-      }
-      return acc;
-    },
-    {}
-  );
-
+  const response = await ruleDataReader.search(request);
   return {
-    thresholdSignalHistory,
-    searchErrors,
+    signalHistory: buildThresholdSignalHistory({ alerts: response.hits.hits }),
+    searchErrors: createErrorsFromShard({
+      errors: response._shards.failures ?? [],
+    }),
+  };
+};
+
+export const buildPreviousThresholdAlertRequest = ({
+  from,
+  to,
+  ruleId,
+  bucketByFields,
+}: {
+  from: string;
+  to: string;
+  ruleId: string;
+  bucketByFields: string[];
+}): estypes.SearchRequest => {
+  return {
+    size: 10000,
+    // We should switch over to @elastic/elasticsearch/lib/api/types instead of typesWithBodyKey where possible,
+    // but api/types doesn't have a complete type for `sort`
+    body: {
+      sort: [
+        {
+          '@timestamp': 'desc',
+        },
+      ],
+      query: {
+        bool: {
+          must: [
+            {
+              range: {
+                '@timestamp': {
+                  lte: to,
+                  gte: from,
+                  format: 'strict_date_optional_time',
+                },
+              },
+            },
+            {
+              term: {
+                'signal.rule.rule_id': ruleId,
+              },
+            },
+            // We might find a signal that was generated on the interval for old data... make sure to exclude those.
+            {
+              range: {
+                'signal.original_time': {
+                  gte: from,
+                },
+              },
+            },
+            ...bucketByFields.map((field) => {
+              return {
+                bool: {
+                  should: [
+                    {
+                      term: {
+                        'signal.rule.threshold.field': field,
+                      },
+                    },
+                    {
+                      term: {
+                        'kibana.alert.rule.parameters.threshold.field': field,
+                      },
+                    },
+                  ],
+                  minimum_should_match: 1,
+                },
+              };
+            }),
+          ],
+        },
+      },
+    },
   };
 };

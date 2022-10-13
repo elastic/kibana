@@ -7,13 +7,13 @@
 
 import expect from '@kbn/expect';
 import { Spaces } from '../../scenarios';
-import { getUrlPrefix, getTestAlertData, ObjectRemover } from '../../../common/lib';
+import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function createDeleteTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const es = getService('legacyEs');
+  const es = getService('es');
 
   describe('delete', () => {
     const objectRemover = new ObjectRemover(supertest);
@@ -31,7 +31,7 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
       const { body: createdAlert } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData())
+        .send(getTestRuleData())
         .expect(200);
 
       await supertest
@@ -43,7 +43,7 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
         await getScheduledTask(createdAlert.scheduledTaskId);
         throw new Error('Should have removed scheduled task');
       } catch (e) {
-        expect(e.status).to.eql(404);
+        expect(e.meta.statusCode).to.eql(404);
       }
     });
 
@@ -51,7 +51,7 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
       const { body: createdAlert } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData())
+        .send(getTestRuleData())
         .expect(200);
 
       await supertest
@@ -69,7 +69,7 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
         const { body: createdAlert } = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
           .set('kbn-xsrf', 'foo')
-          .send(getTestAlertData())
+          .send(getTestRuleData())
           .expect(200);
 
         await supertest
@@ -81,7 +81,7 @@ export default function createDeleteTests({ getService }: FtrProviderContext) {
           await getScheduledTask(createdAlert.scheduledTaskId);
           throw new Error('Should have removed scheduled task');
         } catch (e) {
-          expect(e.status).to.eql(404);
+          expect(e.meta.statusCode).to.eql(404);
         }
       });
     });

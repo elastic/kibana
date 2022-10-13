@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RuleEcs } from '../rule';
+import type { RuleEcs } from '../rule';
 
 export interface SignalEcs {
   rule?: RuleEcs;
@@ -16,3 +16,10 @@ export interface SignalEcs {
   };
   threshold_result?: unknown;
 }
+
+export type SignalEcsAAD = Exclude<SignalEcs, 'rule' | 'status'> & {
+  rule?: Exclude<RuleEcs, 'id'> & { parameters: Record<string, unknown>; uuid: string[] };
+  severity?: string[];
+  building_block_type?: string[];
+  workflow_status?: string[];
+};

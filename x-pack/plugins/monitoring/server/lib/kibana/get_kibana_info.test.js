@@ -8,6 +8,22 @@
 import moment from 'moment';
 import { handleResponse } from './get_kibana_info';
 
+jest.mock('../../static_globals', () => ({
+  Globals: {
+    app: {
+      config: {
+        ui: {
+          kibana: {
+            reporting: {
+              stale_status_threshold_seconds: 120,
+            },
+          },
+        },
+      },
+    },
+  },
+}));
+
 describe('get_kibana_info', () => {
   // TODO: test was not running before and is not up to date
   it.skip('return undefined for empty response', () => {
@@ -16,13 +32,14 @@ describe('get_kibana_info', () => {
   });
 
   it('return mapped data for result with hits, availability = true', () => {
+    const timestamp = moment().format();
     const result = handleResponse({
       hits: {
         hits: [
           {
             _source: {
               kibana_stats: {
-                timestamp: moment().format(),
+                timestamp,
                 kibana: {
                   data: 123,
                 },
@@ -31,6 +48,9 @@ describe('get_kibana_info', () => {
                     free_in_bytes: 123000,
                   },
                 },
+                process: {
+                  uptime_in_millis: 3000,
+                },
               },
             },
           },
@@ -38,20 +58,23 @@ describe('get_kibana_info', () => {
       },
     });
     expect(result).toEqual({
-      availability: true,
+      lastSeenTimestamp: timestamp,
+      statusIsStale: false,
       data: 123,
       os_memory_free: 123000,
+      uptime: 3000,
     });
   });
 
   it('return mapped data for result with hits, availability = false', () => {
+    const timestamp = moment().subtract(11, 'minutes').format();
     const result = handleResponse({
       hits: {
         hits: [
           {
             _source: {
               kibana_stats: {
-                timestamp: moment().subtract(11, 'minutes').format(),
+                timestamp,
                 kibana: {
                   data: 123,
                 },
@@ -60,6 +83,9 @@ describe('get_kibana_info', () => {
                     free_in_bytes: 123000,
                   },
                 },
+                process: {
+                  uptime_in_millis: 3000,
+                },
               },
             },
           },
@@ -67,9 +93,11 @@ describe('get_kibana_info', () => {
       },
     });
     expect(result).toEqual({
-      availability: false,
+      lastSeenTimestamp: timestamp,
+      statusIsStale: true,
       data: 123,
       os_memory_free: 123000,
+      uptime: 3000,
     });
   });
 });

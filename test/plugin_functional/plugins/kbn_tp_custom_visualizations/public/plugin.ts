@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, Plugin } from 'kibana/public';
-import { VisualizationsSetup } from 'src/plugins/visualizations/public';
-import { Plugin as ExpressionsPlugin } from '../../../../../src/plugins/expressions/public';
+import { CoreSetup, Plugin } from '@kbn/core/public';
+import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
+import { Plugin as ExpressionsPlugin } from '@kbn/expressions-plugin/public';
 
 import { SelfChangingEditor } from './self_changing_vis/self_changing_editor';
 import { selfChangingVisFn, SelfChangingVisParams } from './self_changing_vis_fn';
@@ -21,7 +21,8 @@ export interface SetupDependencies {
 }
 
 export class CustomVisualizationsPublicPlugin
-  implements Plugin<CustomVisualizationsSetup, CustomVisualizationsStart> {
+  implements Plugin<CustomVisualizationsSetup, CustomVisualizationsStart>
+{
   public setup(core: CoreSetup, { expressions, visualizations }: SetupDependencies) {
     /**
      * Register an expression function with type "render" for your visualization

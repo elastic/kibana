@@ -5,21 +5,58 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiPageBody, EuiPageContent, EuiTitle, EuiSpacer, EuiCallOut } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import {
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageHeader,
+  EuiSpacer,
+} from '@elastic/eui';
+import { History } from 'history';
 
 import { useComponentTemplatesContext } from '../../component_templates_context';
 import {
   ComponentTemplateDeserialized,
-  SectionLoading,
+  PageLoading,
+  PageError,
   attemptToURIDecode,
+  Error,
 } from '../../shared_imports';
 import { ComponentTemplateForm } from '../component_template_form';
+import type { WizardSection } from '../component_template_form';
+import { useRedirectPath } from '../../../../hooks/redirect_path';
+import { MANAGED_BY_FLEET } from '../../constants';
+
+import { MappingsDatastreamRolloverModal } from './mappings_datastreams_rollover_modal';
 
 interface MatchParams {
   name: string;
+}
+
+export function useStepFromQueryString(history: History) {
+  const activeStep = useMemo(() => {
+    const params = new URLSearchParams(history.location.search);
+    if (params.has('step')) {
+      return params.get('step') as WizardSection;
+    }
+  }, [history.location.search]);
+
+  const updateStep = useCallback(
+    (stepId: string) => {
+      const params = new URLSearchParams(history.location.search);
+      if (params.has('step')) {
+        params.set('step', stepId);
+        history.push({
+          search: params.toString(),
+        });
+      }
+    },
+    [history]
+  );
+
+  return { activeStep, updateStep };
 }
 
 export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
@@ -28,7 +65,9 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
   },
   history,
 }) => {
-  const { api, breadcrumbs } = useComponentTemplatesContext();
+  const { api, breadcrumbs, overlays } = useComponentTemplatesContext();
+  const { activeStep: defaultActiveStep, updateStep } = useStepFromQueryString(history);
+  const redirectTo = useRedirectPath(history);
 
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
@@ -36,6 +75,8 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
   const decodedName = attemptToURIDecode(name)!;
 
   const { error, data: componentTemplate, isLoading } = api.useLoadComponentTemplate(decodedName);
+  const { data: dataStreamResponse } = api.useLoadComponentTemplatesDatastream(decodedName);
+  const dataStreams = useMemo(() => dataStreamResponse?.data_streams ?? [], [dataStreamResponse]);
 
   useEffect(() => {
     breadcrumbs.setEditBreadcrumbs();
@@ -54,7 +95,39 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
       return;
     }
 
-    history.push({
+    if (updatedComponentTemplate._meta?.managed_by === MANAGED_BY_FLEET && dataStreams.length) {
+      const dataStreamsToRollover: string[] = [];
+      for (const dataStream of dataStreams) {
+        try {
+          const { error: applyMappingError } = await api.postDataStreamMappingsFromTemplate(
+            dataStream
+          );
+          if (applyMappingError) {
+            throw applyMappingError;
+          }
+        } catch (err) {
+          dataStreamsToRollover.push(dataStream);
+        }
+      }
+
+      if (dataStreamsToRollover.length) {
+        const ref = overlays.openModal(
+          toMountPoint(
+            <MappingsDatastreamRolloverModal
+              componentTemplatename={updatedComponentTemplate.name}
+              dataStreams={dataStreamsToRollover}
+              api={api}
+              onClose={() => {
+                ref.close();
+              }}
+            />
+          )
+        );
+
+        await ref.onClose;
+      }
+    }
+    redirectTo({
       pathname: encodeURI(
         `/component_templates/${encodeURIComponent(updatedComponentTemplate.name)}`
       ),
@@ -65,64 +138,60 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
     setSaveError(null);
   };
 
-  let content;
-
   if (isLoading) {
-    content = (
-      <SectionLoading>
+    return (
+      <PageLoading>
         <FormattedMessage
           id="xpack.idxMgmt.componentTemplateEdit.loadingDescription"
           defaultMessage="Loading component template…"
         />
-      </SectionLoading>
+      </PageLoading>
     );
-  } else if (error) {
-    content = (
-      <>
-        <EuiCallOut
-          title={
+  }
+
+  if (error) {
+    return (
+      <PageError
+        title={
+          <FormattedMessage
+            id="xpack.idxMgmt.componentTemplateEdit.loadComponentTemplateError"
+            defaultMessage="Error loading component template"
+          />
+        }
+        error={error as Error}
+        data-test-subj="loadComponentTemplateError"
+      />
+    );
+  }
+
+  return (
+    <EuiPageContentBody restrictWidth style={{ width: '100%' }}>
+      <EuiPageHeader
+        pageTitle={
+          <span data-test-subj="pageTitle">
             <FormattedMessage
-              id="xpack.idxMgmt.componentTemplateEdit.loadComponentTemplateError"
-              defaultMessage="Error loading component template"
+              id="xpack.idxMgmt.componentTemplateEdit.editPageTitle"
+              defaultMessage="Edit component template '{name}'"
+              values={{ name: decodedName }}
             />
-          }
-          color="danger"
-          iconType="alert"
-          data-test-subj="loadComponentTemplateError"
-        >
-          <div>{error.message}</div>
-        </EuiCallOut>
-        <EuiSpacer size="m" />
-      </>
-    );
-  } else if (componentTemplate) {
-    content = (
+          </span>
+        }
+        bottomBorder
+      />
+
+      <EuiSpacer size="l" />
+
       <ComponentTemplateForm
-        defaultValue={componentTemplate}
+        defaultValue={componentTemplate!}
+        dataStreams={dataStreams}
+        defaultActiveWizardSection={defaultActiveStep}
+        onStepChange={updateStep}
         onSave={onSave}
         isSaving={isSaving}
         saveError={saveError}
         clearSaveError={clearSaveError}
         isEditing={true}
       />
-    );
-  }
-
-  return (
-    <EuiPageBody>
-      <EuiPageContent>
-        <EuiTitle size="l">
-          <h1 data-test-subj="pageTitle">
-            <FormattedMessage
-              id="xpack.idxMgmt.componentTemplateEdit.editPageTitle"
-              defaultMessage="Edit component template '{name}'"
-              values={{ name: decodedName }}
-            />
-          </h1>
-        </EuiTitle>
-        <EuiSpacer size="l" />
-        {content}
-      </EuiPageContent>
-    </EuiPageBody>
+    </EuiPageContentBody>
   );
 };

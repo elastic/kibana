@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { parseQueryParams } from './';
+import { parseQueryParams } from '.';
 
 describe('parseQueryParams', () => {
   it('parse query strings', () => {

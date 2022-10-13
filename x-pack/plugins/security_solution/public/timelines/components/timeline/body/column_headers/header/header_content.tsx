@@ -8,11 +8,11 @@
 import { EuiToolTip } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React from 'react';
+import type { ColumnHeaderOptions } from '../../../../../../../common/types/timeline';
 
-import { ColumnHeaderOptions } from '../../../../../../timelines/store/timeline/model';
 import { TruncatableText } from '../../../../../../common/components/truncatable_text';
 import { EventsHeading, EventsHeadingTitleButton, EventsHeadingTitleSpan } from '../../../styles';
-import { Sort } from '../../sort';
+import type { Sort } from '../../sort';
 import { SortIndicator } from '../../sort/sort_indicator';
 import { HeaderToolTipContent } from '../header_tooltip_content';
 import { getSortDirection, getSortIndex } from './helpers';

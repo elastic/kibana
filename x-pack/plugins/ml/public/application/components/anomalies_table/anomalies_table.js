@@ -16,7 +16,7 @@ import React, { Component } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiText } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { getColumns } from './anomalies_table_columns';
 
@@ -198,7 +198,8 @@ export class AnomaliesTableInternal extends Component {
       this.state.itemIdToExpandedRowMap,
       this.toggleRow,
       filter,
-      influencerFilter
+      influencerFilter,
+      this.props.sourceIndicesWithGeoFields
     );
 
     const sorting = {
@@ -230,7 +231,7 @@ export class AnomaliesTableInternal extends Component {
           unsetShowFunction={this.unsetShowRuleEditorFlyoutFunction}
         />
         <EuiInMemoryTable
-          className="ml-anomalies-table eui-textOverflowWrap"
+          className="ml-anomalies-table eui-textBreakWord"
           items={tableData.anomalies}
           columns={columns}
           pagination={pagination}
@@ -275,4 +276,5 @@ AnomaliesTableInternal.propTypes = {
   influencerFilter: PropTypes.func,
   tableState: PropTypes.object.isRequired,
   updateTableState: PropTypes.func.isRequired,
+  sourceIndicesWithGeoFields: PropTypes.object.isRequired,
 };

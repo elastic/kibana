@@ -16,12 +16,13 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { FlyoutBody } from './flyout_body';
 import { LayerDescriptor } from '../../../common/descriptor_types';
-import { LayerWizard } from '../../classes/layers/layer_wizard_registry';
+import { LayerWizard } from '../../classes/layers';
+import { getWizardById } from '../../classes/layers/wizards/layer_wizard_registry';
 
-const ADD_LAYER_STEP_ID = 'ADD_LAYER_STEP_ID';
+export const ADD_LAYER_STEP_ID = 'ADD_LAYER_STEP_ID';
 const ADD_LAYER_STEP_LABEL = i18n.translate('xpack.maps.addLayerPanel.addLayer', {
   defaultMessage: 'Add layer',
 });
@@ -33,6 +34,9 @@ export interface Props {
   hasPreviewLayers: boolean;
   isLoadingPreviewLayers: boolean;
   promotePreviewLayers: () => void;
+  enableEditMode: () => void;
+  autoOpenLayerWizardId: string;
+  clearAutoOpenLayerWizardId: () => void;
 }
 
 interface State {
@@ -57,6 +61,20 @@ export class AddLayerPanel extends Component<Props, State> {
   state = {
     ...INITIAL_STATE,
   };
+
+  componentDidMount() {
+    if (this.props.autoOpenLayerWizardId) {
+      this._openWizard();
+    }
+  }
+
+  _openWizard() {
+    const selectedWizard = getWizardById(this.props.autoOpenLayerWizardId);
+    if (selectedWizard) {
+      this._onWizardSelect(selectedWizard);
+    }
+    this.props.clearAutoOpenLayerWizardId();
+  }
 
   _previewLayers = (layerDescriptors: LayerDescriptor[]) => {
     this.props.addPreviewLayers(layerDescriptors);
@@ -91,6 +109,9 @@ export class AddLayerPanel extends Component<Props, State> {
     if (this.state.layerSteps.length - 1 === this.state.currentStepIndex) {
       // last step
       this.props.promotePreviewLayers();
+      if (this.state.layerWizard?.showFeatureEditTools) {
+        this.props.enableEditMode();
+      }
     } else {
       this.setState((prevState) => {
         const nextIndex = prevState.currentStepIndex + 1;

@@ -68,19 +68,19 @@ export default ({ getService }: FtrProviderContext) => {
     requestBody: object,
     expectedResponsecode: number
   ): Promise<any> {
-    const { body } = await supertest
+    const { body, status } = await supertest
       .post('/api/ml/jobs/delete_jobs')
       .auth(user, ml.securityCommon.getPasswordForUser(user))
       .set(COMMON_REQUEST_HEADERS)
-      .send(requestBody)
-      .expect(expectedResponsecode);
+      .send(requestBody);
+    ml.api.assertResponseStatusCode(expectedResponsecode, status, body);
 
     return body;
   }
 
   describe('delete_jobs', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.setKibanaTimeZoneToUTC();
     });
 

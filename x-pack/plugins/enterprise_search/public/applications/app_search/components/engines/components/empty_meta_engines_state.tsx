@@ -10,17 +10,18 @@ import React from 'react';
 import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { DOCS_PREFIX } from '../../../routes';
+import { META_ENGINES_DOCS_URL } from '../../../routes';
 
 export const EmptyMetaEnginesState: React.FC = () => (
   <EuiEmptyPrompt
     title={
-      <h2>
+      <h3>
         {i18n.translate('xpack.enterpriseSearch.appSearch.engines.metaEngines.emptyPromptTitle', {
           defaultMessage: 'Create your first meta engine',
         })}
-      </h2>
+      </h3>
     }
+    titleSize="s"
     body={
       <p>
         {i18n.translate(
@@ -33,12 +34,7 @@ export const EmptyMetaEnginesState: React.FC = () => (
       </p>
     }
     actions={
-      <EuiButton
-        size="s"
-        target="_blank"
-        iconType="popout"
-        href={`${DOCS_PREFIX}/meta-engines-guide.html`}
-      >
+      <EuiButton size="s" target="_blank" iconType="popout" href={META_ENGINES_DOCS_URL}>
         {i18n.translate(
           'xpack.enterpriseSearch.appSearch.engines.metaEngines.emptyPromptButtonLabel',
           { defaultMessage: 'Learn more about meta engines' }

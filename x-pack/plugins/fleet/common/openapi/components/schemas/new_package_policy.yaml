@@ -1,4 +1,4 @@
-title: NewPackagePolicy
+title: New package policy
 type: object
 description: ''
 properties:
@@ -16,11 +16,11 @@ properties:
     required:
       - name
       - version
-      - title
   namespace:
     type: string
   output_id:
     type: string
+    deprecated: true
   inputs:
     type: array
     items:
@@ -44,7 +44,6 @@ properties:
       required:
         - type
         - enabled
-        - streams
   policy_id:
     type: string
   name:
@@ -52,7 +51,5 @@ properties:
   description:
     type: string
 required:
-  - output_id
   - inputs
-  - policy_id
   - name

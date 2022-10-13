@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import sinon from 'sinon';
 import { Observable, of, Subject } from 'rxjs';
 
@@ -20,7 +19,9 @@ import type { TaskClaiming as TaskClaimingClass } from './queries/task_claiming'
 import { asOk, Err, isErr, isOk, Result } from './lib/result_type';
 import { FillPoolResult } from './lib/fill_pool';
 import { ElasticsearchResponseError } from './lib/identify_es_error';
+import { executionContextServiceMock } from '@kbn/core/server/mocks';
 
+const executionContext = executionContextServiceMock.createSetupContract();
 let mockTaskClaiming = taskClaimingMock.create({});
 jest.mock('./queries/task_claiming', () => {
   return {
@@ -45,6 +46,10 @@ describe('TaskPollingLifecycle', () => {
       max_poll_inactivity_cycles: 10,
       request_capacity: 1000,
       monitored_aggregated_stats_refresh_rate: 5000,
+      monitored_stats_health_verbose_log: {
+        enabled: false,
+        warn_delayed_task_start_in_seconds: 60,
+      },
       monitored_stats_required_freshness: 5000,
       monitored_stats_running_average_window: 50,
       monitored_task_execution_thresholds: {
@@ -54,13 +59,26 @@ describe('TaskPollingLifecycle', () => {
         },
         custom: {},
       },
+      ephemeral_tasks: {
+        enabled: true,
+        request_capacity: 10,
+      },
+      unsafe: {
+        exclude_task_types: [],
+      },
+      event_loop_delay: {
+        monitor: true,
+        warn_threshold: 5000,
+      },
     },
     taskStore: mockTaskStore,
     logger: taskManagerLogger,
+    unusedTypes: [],
     definitions: new TaskTypeDictionary(taskManagerLogger),
     middleware: createInitialMiddleware(),
     maxWorkersConfiguration$: of(100),
     pollIntervalConfiguration$: of(100),
+    executionContext,
   };
 
   beforeEach(() => {

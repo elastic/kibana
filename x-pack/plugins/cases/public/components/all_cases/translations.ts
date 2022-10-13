@@ -8,18 +8,22 @@
 import { i18n } from '@kbn/i18n';
 
 export * from '../../common/translations';
+export * from '../user_profiles/translations';
 
 export const NO_CASES = i18n.translate('xpack.cases.caseTable.noCases.title', {
-  defaultMessage: 'No Cases',
-});
-export const NO_CASES_BODY = i18n.translate('xpack.cases.caseTable.noCases.body', {
-  defaultMessage:
-    'There are no cases to display. Please create a new case or change your filter settings above.',
+  defaultMessage: 'No cases to display',
 });
 
-export const ADD_NEW_CASE = i18n.translate('xpack.cases.caseTable.addNewCase', {
-  defaultMessage: 'Add New Case',
+export const NO_CASES_BODY = i18n.translate('xpack.cases.caseTable.noCases.body', {
+  defaultMessage: 'Create a case or edit your filters.',
 });
+
+export const NO_CASES_BODY_READ_ONLY = i18n.translate(
+  'xpack.cases.caseTable.noCases.readonly.body',
+  {
+    defaultMessage: 'Edit your filter settings.',
+  }
+);
 
 export const SHOWING_SELECTED_CASES = (totalRules: number) =>
   i18n.translate('xpack.cases.caseTable.selectedCasesTitle', {
@@ -51,6 +55,10 @@ export const EXTERNAL_INCIDENT = i18n.translate('xpack.cases.caseTable.snInciden
   defaultMessage: 'External Incident',
 });
 
+export const SEVERITY = i18n.translate('xpack.cases.caseTable.severity', {
+  defaultMessage: 'Severity',
+});
+
 export const INCIDENT_MANAGEMENT_SYSTEM = i18n.translate('xpack.cases.caseTable.incidentSystem', {
   defaultMessage: 'Incident Management System',
 });
@@ -63,8 +71,8 @@ export const CLOSED = i18n.translate('xpack.cases.caseTable.closed', {
   defaultMessage: 'Closed',
 });
 
-export const DELETE = i18n.translate('xpack.cases.caseTable.delete', {
-  defaultMessage: 'Delete',
+export const SELECT = i18n.translate('xpack.cases.caseTable.select', {
+  defaultMessage: 'Select',
 });
 
 export const REQUIRES_UPDATE = i18n.translate('xpack.cases.caseTable.requiresUpdate', {
@@ -82,10 +90,43 @@ export const REFRESH = i18n.translate('xpack.cases.caseTable.refreshTitle', {
   defaultMessage: 'Refresh',
 });
 
-export const SERVICENOW_LINK_ARIA = i18n.translate('xpack.cases.caseTable.serviceNowLinkAria', {
-  defaultMessage: 'click to view the incident on servicenow',
-});
-
+export const PUSH_LINK_ARIA = (thirdPartyName: string): string =>
+  i18n.translate('xpack.cases.caseTable.pushLinkAria', {
+    values: { thirdPartyName },
+    defaultMessage: 'click to view the incident on { thirdPartyName }.',
+  });
 export const STATUS = i18n.translate('xpack.cases.caseTable.status', {
   defaultMessage: 'Status',
 });
+
+export const CHANGE_STATUS = i18n.translate('xpack.cases.caseTable.changeStatus', {
+  defaultMessage: 'Change status',
+});
+
+export const ATTC_STAT = i18n.translate('xpack.cases.casesStats.mttr', {
+  defaultMessage: 'Average time to close',
+});
+
+export const ATTC_DESCRIPTION = i18n.translate('xpack.cases.casesStats.mttrDescription', {
+  defaultMessage: 'The average duration (from creation to closure) for your current cases',
+});
+
+export const FILTER_ASSIGNEES_ARIA_LABEL = i18n.translate(
+  'xpack.cases.allCasesView.filterAssigneesAriaLabel',
+  {
+    defaultMessage: 'click to filter assignees',
+  }
+);
+
+export const CLEAR_FILTERS = i18n.translate(
+  'xpack.cases.allCasesView.filterAssignees.clearFilters',
+  {
+    defaultMessage: 'Clear filters',
+  }
+);
+
+export const TOTAL_ASSIGNEES_FILTERED = (total: number) =>
+  i18n.translate('xpack.cases.allCasesView.totalFilteredUsers', {
+    defaultMessage: '{total, plural, one {# assignee} other {# assignees}} filtered',
+    values: { total },
+  });

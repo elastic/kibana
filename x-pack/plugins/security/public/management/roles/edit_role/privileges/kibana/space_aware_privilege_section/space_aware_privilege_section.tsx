@@ -17,12 +17,11 @@ import {
 import _ from 'lodash';
 import React, { Component, Fragment } from 'react';
 
+import type { Capabilities } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import type { Capabilities } from 'src/core/public';
-import type { SpacesApiUi } from 'src/plugins/spaces_oss/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { Space, SpacesApiUi } from '@kbn/spaces-plugin/public';
 
-import type { Space } from '../../../../../../../../spaces/public';
 import type { Role } from '../../../../../../../common/model';
 import { isRoleReserved } from '../../../../../../../common/model';
 import type { KibanaPrivileges } from '../../../../model';
@@ -199,7 +198,7 @@ export class SpaceAwarePrivilegeSection extends Component<Props, State> {
       <EuiButton
         color="primary"
         onClick={this.addSpacePrivilege}
-        iconType={'plusInCircleFilled'}
+        iconType={'plusInCircle'}
         data-test-subj={'addSpacePrivilegeButton'}
         isDisabled={!hasAvailableSpaces || !this.props.editable}
       >

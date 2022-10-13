@@ -11,7 +11,7 @@ import { throttle } from 'lodash';
 import React from 'react';
 import { Route, RouteProps } from 'react-router-dom';
 import { decode, encode, RisonValue } from 'rison-node';
-import { url } from '../../../../../src/plugins/kibana_utils/public';
+import { url } from '@kbn/kibana-utils-plugin/public';
 
 interface UrlStateContainerProps<UrlState> {
   urlState: UrlState | undefined;
@@ -152,20 +152,19 @@ export const getParamFromQueryString = (queryString: string, key: string): strin
   return Array.isArray(queryParam) ? queryParam[0] : queryParam;
 };
 
-export const replaceStateKeyInQueryString = <UrlState extends any>(
-  stateKey: string,
-  urlState: UrlState | undefined
-) => (queryString: string) => {
-  const previousQueryValues = parse(queryString, { sort: false });
-  const newValue =
-    typeof urlState === 'undefined'
-      ? previousQueryValues
-      : {
-          ...previousQueryValues,
-          [stateKey]: encodeRisonUrlState(urlState),
-        };
-  return stringify(url.encodeQuery(newValue), { sort: false, encode: false });
-};
+export const replaceStateKeyInQueryString =
+  <UrlState extends any>(stateKey: string, urlState: UrlState | undefined) =>
+  (queryString: string) => {
+    const previousQueryValues = parse(queryString, { sort: false });
+    const newValue =
+      typeof urlState === 'undefined'
+        ? previousQueryValues
+        : {
+            ...previousQueryValues,
+            [stateKey]: encodeRisonUrlState(urlState),
+          };
+    return stringify(url.encodeQuery(newValue), { sort: false, encode: false });
+  };
 
 const replaceQueryStringInLocation = (location: Location, queryString: string): Location => {
   if (queryString === getQueryStringFromLocation(location)) {

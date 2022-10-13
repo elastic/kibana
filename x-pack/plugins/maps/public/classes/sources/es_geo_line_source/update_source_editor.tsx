@@ -7,18 +7,15 @@
 
 import React, { Fragment, Component } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
-import {
-  IFieldType,
-  IndexPattern,
-  indexPatterns,
-} from '../../../../../../../src/plugins/data/public';
+import type { DataViewField, DataView } from '@kbn/data-plugin/common';
+import { indexPatterns } from '@kbn/data-plugin/public';
 import { MetricsEditor } from '../../../components/metrics_editor';
 import { getIndexPatternService } from '../../../kibana_services';
 import { GeoLineForm } from './geo_line_form';
 import { AggDescriptor } from '../../../../common/descriptor_types';
-import { OnSourceChangeArgs } from '../../../connected_components/layer_panel/view';
+import { OnSourceChangeArgs } from '../source';
 
 interface Props {
   indexPatternId: string;
@@ -29,8 +26,8 @@ interface Props {
 }
 
 interface State {
-  indexPattern: IndexPattern | null;
-  fields: IFieldType[];
+  indexPattern: DataView | null;
+  fields: DataViewField[];
 }
 
 export class UpdateSourceEditor extends Component<Props, State> {

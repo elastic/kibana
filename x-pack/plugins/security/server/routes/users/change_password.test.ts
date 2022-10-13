@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import { errors } from 'elasticsearch';
+import { errors } from '@elastic/elasticsearch';
 
 import type { ObjectType } from '@kbn/config-schema';
+import type { Headers, RequestHandler, RouteConfig } from '@kbn/core/server';
+import { kibanaResponseFactory } from '@kbn/core/server';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import type { Headers, RequestHandler, RouteConfig } from 'src/core/server';
-import { kibanaResponseFactory } from 'src/core/server';
-import { coreMock, httpServerMock } from 'src/core/server/mocks';
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
-import type { AuthenticationServiceStart } from '../../authentication';
 import { AuthenticationResult } from '../../authentication';
+import type { InternalAuthenticationServiceStart } from '../../authentication';
 import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
+import { securityMock } from '../../mocks';
 import type { Session } from '../../session_management';
 import { sessionMock } from '../../session_management/session.mock';
 import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
@@ -26,18 +27,19 @@ import { defineChangeUserPasswordRoutes } from './change_password';
 
 describe('Change password', () => {
   let router: jest.Mocked<SecurityRouter>;
-  let authc: DeeplyMockedKeys<AuthenticationServiceStart>;
+  let authc: DeeplyMockedKeys<InternalAuthenticationServiceStart>;
   let session: jest.Mocked<PublicMethodsOf<Session>>;
   let routeHandler: RequestHandler<any, any, any, SecurityRequestHandlerContext>;
   let routeConfig: RouteConfig<any, any, any, any>;
   let mockContext: DeeplyMockedKeys<SecurityRequestHandlerContext>;
+  let mockCoreContext: ReturnType<typeof coreMock.createRequestHandlerContext>;
 
   function checkPasswordChangeAPICall(username: string, headers?: Headers) {
     expect(
-      mockContext.core.elasticsearch.client.asCurrentUser.security.changePassword
+      mockCoreContext.elasticsearch.client.asCurrentUser.security.changePassword
     ).toHaveBeenCalledTimes(1);
     expect(
-      mockContext.core.elasticsearch.client.asCurrentUser.security.changePassword
+      mockCoreContext.elasticsearch.client.asCurrentUser.security.changePassword
     ).toHaveBeenCalledWith(
       { username, body: { password: 'new-password' } },
       headers && { headers }
@@ -58,10 +60,11 @@ describe('Change password', () => {
     authc.login.mockResolvedValue(AuthenticationResult.succeeded(mockAuthenticatedUser()));
     session.get.mockResolvedValue(sessionMock.createValue());
 
-    mockContext = {
-      core: coreMock.createRequestHandlerContext(),
+    mockCoreContext = coreMock.createRequestHandlerContext();
+    mockContext = coreMock.createCustomRequestHandlerContext({
+      core: mockCoreContext,
       licensing: { license: { check: jest.fn().mockReturnValue({ state: 'valid' }) } },
-    } as any;
+    }) as any;
 
     defineChangeUserPasswordRoutes(routeParamsMock);
 
@@ -109,10 +112,10 @@ describe('Change password', () => {
     });
 
     it('returns 403 if old password is wrong.', async () => {
-      const changePasswordFailure = new (errors.AuthenticationException as any)('Unauthorized', {
-        body: { error: { header: { 'WWW-Authenticate': 'Negotiate' } } },
-      });
-      mockContext.core.elasticsearch.client.asCurrentUser.security.changePassword.mockRejectedValue(
+      const changePasswordFailure = new errors.ResponseError(
+        securityMock.createApiResponse({ statusCode: 401, body: {} })
+      );
+      mockCoreContext.elasticsearch.client.asCurrentUser.security.changePassword.mockRejectedValue(
         changePasswordFailure
       );
 
@@ -149,7 +152,7 @@ describe('Change password', () => {
 
     it('returns 500 if password update request fails with non-401 error.', async () => {
       const failureReason = new Error('Request failed.');
-      mockContext.core.elasticsearch.client.asCurrentUser.security.changePassword.mockRejectedValue(
+      mockCoreContext.elasticsearch.client.asCurrentUser.security.changePassword.mockRejectedValue(
         failureReason
       );
 
@@ -231,7 +234,7 @@ describe('Change password', () => {
 
     it('returns 500 if password update request fails.', async () => {
       const failureReason = new Error('Request failed.');
-      mockContext.core.elasticsearch.client.asCurrentUser.security.changePassword.mockRejectedValue(
+      mockCoreContext.elasticsearch.client.asCurrentUser.security.changePassword.mockRejectedValue(
         failureReason
       );
 

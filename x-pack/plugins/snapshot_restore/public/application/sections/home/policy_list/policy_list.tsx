@@ -6,27 +6,34 @@
  */
 
 import React, { Fragment, useEffect } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps } from 'react-router-dom';
-import { EuiEmptyPrompt, EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import {
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiEmptyPrompt,
+  EuiButton,
+  EuiCallOut,
+  EuiSpacer,
+} from '@elastic/eui';
 
-import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
 import {
-  SectionError,
+  PageLoading,
+  PageError,
   Error,
   WithPrivileges,
   NotAuthorizedSection,
+  useExecutionContext,
 } from '../../../../shared_imports';
 
 import { SlmPolicy } from '../../../../../common/types';
 import { APP_SLM_CLUSTER_PRIVILEGES } from '../../../../../common';
-import { SectionLoading } from '../../../components';
 import { BASE_PATH, UIM_POLICY_LIST_LOAD } from '../../../constants';
 import { useDecodedParams } from '../../../lib';
 import { useLoadPolicies, useLoadRetentionSettings } from '../../../services/http';
 import { linkToAddPolicy, linkToPolicy } from '../../../services/navigation';
-import { useServices } from '../../../app_context';
+import { useAppContext, useServices } from '../../../app_context';
 
 import { PolicyDetails } from './policy_details';
 import { PolicyTable } from './policy_table';
@@ -50,6 +57,7 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
   } = useLoadPolicies();
 
   const { uiMetricService } = useServices();
+  const { core } = useAppContext();
 
   // Load retention cluster settings
   const {
@@ -85,20 +93,25 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
     uiMetricService.trackUiMetric(UIM_POLICY_LIST_LOAD);
   }, [uiMetricService]);
 
+  useExecutionContext(core.executionContext, {
+    type: 'application',
+    page: 'snapshotRestorePolicyTab',
+  });
+
   let content: JSX.Element;
 
   if (isLoading) {
     content = (
-      <SectionLoading>
+      <PageLoading>
         <FormattedMessage
           id="xpack.snapshotRestore.policyList.loadingPoliciesDescription"
           defaultMessage="Loading policies…"
         />
-      </SectionLoading>
+      </PageLoading>
     );
   } else if (error) {
     content = (
-      <SectionError
+      <PageError
         title={
           <FormattedMessage
             id="xpack.snapshotRestore.policyList.LoadingPoliciesErrorMessage"
@@ -110,41 +123,48 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
     );
   } else if (policies && policies.length === 0) {
     content = (
-      <EuiEmptyPrompt
-        iconType="managementApp"
-        title={
-          <h1>
-            <FormattedMessage
-              id="xpack.snapshotRestore.policyList.emptyPromptTitle"
-              defaultMessage="Create your first snapshot policy"
-            />
-          </h1>
-        }
-        body={
-          <Fragment>
-            <p>
+      <EuiPageContent
+        hasShadow={false}
+        paddingSize="none"
+        verticalPosition="center"
+        horizontalPosition="center"
+      >
+        <EuiEmptyPrompt
+          iconType="managementApp"
+          title={
+            <h1>
               <FormattedMessage
-                id="xpack.snapshotRestore.policyList.emptyPromptDescription"
-                defaultMessage="A policy automates the creation and deletion of snapshots."
+                id="xpack.snapshotRestore.policyList.emptyPromptTitle"
+                defaultMessage="Create your first snapshot policy"
               />
-            </p>
-          </Fragment>
-        }
-        actions={
-          <EuiButton
-            {...reactRouterNavigate(history, linkToAddPolicy())}
-            fill
-            iconType="plusInCircle"
-            data-test-subj="createPolicyButton"
-          >
-            <FormattedMessage
-              id="xpack.snapshotRestore.createPolicyButton"
-              defaultMessage="Create a policy"
-            />
-          </EuiButton>
-        }
-        data-test-subj="emptyPrompt"
-      />
+            </h1>
+          }
+          body={
+            <Fragment>
+              <p>
+                <FormattedMessage
+                  id="xpack.snapshotRestore.policyList.emptyPromptDescription"
+                  defaultMessage="A policy automates the creation and deletion of snapshots."
+                />
+              </p>
+            </Fragment>
+          }
+          actions={
+            <EuiButton
+              {...reactRouterNavigate(history, linkToAddPolicy())}
+              fill
+              iconType="plusInCircle"
+              data-test-subj="createPolicyButton"
+            >
+              <FormattedMessage
+                id="xpack.snapshotRestore.createPolicyButton"
+                defaultMessage="Create a policy"
+              />
+            </EuiButton>
+          }
+          data-test-subj="emptyPrompt"
+        />
+      </EuiPageContent>
     );
   } else {
     const policySchedules = policies.map((policy: SlmPolicy) => policy.schedule);
@@ -152,7 +172,7 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
     const hasRetention = Boolean(policies.find((policy: SlmPolicy) => policy.retention));
 
     content = (
-      <Fragment>
+      <section data-test-subj="policyList">
         {hasDuplicateSchedules ? (
           <Fragment>
             <EuiCallOut
@@ -190,7 +210,7 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
           onPolicyDeleted={onPolicyDeleted}
           onPolicyExecuted={onPolicyExecuted}
         />
-      </Fragment>
+      </section>
     );
   }
 
@@ -198,7 +218,7 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
     <WithPrivileges privileges={APP_SLM_CLUSTER_PRIVILEGES.map((name) => `cluster.${name}`)}>
       {({ hasPrivileges, privilegesMissing }) =>
         hasPrivileges ? (
-          <section data-test-subj="policyList">
+          <>
             {policyName ? (
               <PolicyDetails
                 policyName={policyName}
@@ -208,7 +228,7 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
               />
             ) : null}
             {content}
-          </section>
+          </>
         ) : (
           <NotAuthorizedSection
             title={

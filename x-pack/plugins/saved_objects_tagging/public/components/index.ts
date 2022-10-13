@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-export {
-  TagSelector,
+export type {
   TagSelectorProps,
-  TagList,
   TagListProps,
-  TagBadge,
   TagBadgeProps,
-  TagSearchBarOption,
   TagSearchBarOptionProps,
 } from './base';
+export { TagSelector, TagList, TagBadge, TagSearchBarOption } from './base';

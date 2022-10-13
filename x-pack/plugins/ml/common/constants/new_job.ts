@@ -11,6 +11,7 @@ export enum JOB_TYPE {
   POPULATION = 'population',
   ADVANCED = 'advanced',
   CATEGORIZATION = 'categorization',
+  RARE = 'rare',
 }
 
 export enum CREATED_BY_LABEL {
@@ -18,7 +19,10 @@ export enum CREATED_BY_LABEL {
   MULTI_METRIC = 'multi-metric-wizard',
   POPULATION = 'population-wizard',
   CATEGORIZATION = 'categorization-wizard',
+  RARE = 'rare-wizard',
   APM_TRANSACTION = 'ml-module-apm-transaction',
+  SINGLE_METRIC_FROM_LENS = 'single-metric-wizard-from-lens',
+  MULTI_METRIC_FROM_LENS = 'multi-metric-wizard-from-lens',
 }
 
 export const DEFAULT_MODEL_MEMORY_LIMIT = '10MB';

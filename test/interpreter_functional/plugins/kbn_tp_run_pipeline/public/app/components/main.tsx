@@ -5,17 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import './main.scss';
 
 import React from 'react';
-import { EuiPage, EuiPageBody, EuiPageContent, EuiPageContentHeader } from '@elastic/eui';
-import { first } from 'rxjs/operators';
 import {
-  IInterpreterRenderHandlers,
-  ExpressionValue,
-  TablesAdapter,
-} from '../../../../../../../src/plugins/expressions/public';
-import { RequestAdapter } from '../../../../../../../src/plugins/inspector/public';
-import { Adapters, ExpressionRenderHandler } from '../../types';
+  EuiPage,
+  EuiPageBody,
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
+} from '@elastic/eui';
+import { first, pluck } from 'rxjs/operators';
+import { IInterpreterRenderHandlers, ExpressionValue } from '@kbn/expressions-plugin/public';
+import { ExpressionRenderHandler } from '../../types';
 import { getExpressions } from '../../services';
 
 declare global {
@@ -49,16 +50,14 @@ class Main extends React.Component<{}, State> {
       initialContext: ExpressionValue = {}
     ) => {
       this.setState({ expression });
-      const adapters: Adapters = {
-        requests: new RequestAdapter(),
-        tables: new TablesAdapter(),
-      };
+
       return getExpressions()
         .execute(expression, context || { type: 'null' }, {
-          inspectorAdapters: adapters,
           searchContext: initialContext as any,
         })
-        .getData();
+        .getData()
+        .pipe(pluck('result'))
+        .toPromise();
     };
 
     let lastRenderHandler: ExpressionRenderHandler;
@@ -67,7 +66,7 @@ class Main extends React.Component<{}, State> {
         lastRenderHandler.destroy();
       }
 
-      lastRenderHandler = getExpressions().render(this.chartRef.current!, context, {
+      lastRenderHandler = await getExpressions().render(this.chartRef.current!, context, {
         onRenderError: (el: HTMLElement, error: unknown, handler: IInterpreterRenderHandlers) => {
           this.setState({
             expression: 'Render error!\n\n' + JSON.stringify(error),

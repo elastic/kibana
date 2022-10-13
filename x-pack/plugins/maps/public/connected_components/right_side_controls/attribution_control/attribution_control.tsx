@@ -9,8 +9,9 @@ import React, { Component, Fragment } from 'react';
 import _ from 'lodash';
 import { EuiText, EuiLink } from '@elastic/eui';
 import classNames from 'classnames';
-import { Attribution } from '../../../classes/sources/source';
+import { Attribution } from '../../../../common/descriptor_types';
 import { ILayer } from '../../../classes/layers/layer';
+import { isScreenshotMode } from '../../../kibana_services';
 
 export interface Props {
   isFullScreen: boolean;
@@ -53,7 +54,7 @@ export class AttributionControl extends Component<Props, State> {
       return;
     }
 
-    const uniqueAttributions = [];
+    const uniqueAttributions: Attribution[] = [];
     for (let i = 0; i < attributions.length; i++) {
       for (let j = 0; j < attributions[i].length; j++) {
         const testAttr = attributions[i][j];
@@ -65,6 +66,7 @@ export class AttributionControl extends Component<Props, State> {
         }
       }
     }
+
     // Reflect top-to-bottom layer order as left-to-right in attribs
     uniqueAttributions.reverse();
     if (!_.isEqual(this.state.uniqueAttributions, uniqueAttributions)) {
@@ -73,11 +75,9 @@ export class AttributionControl extends Component<Props, State> {
   };
 
   _renderAttribution({ url, label }: Attribution) {
-    if (!url) {
-      return label;
-    }
-
-    return (
+    return !url || isScreenshotMode() ? (
+      label
+    ) : (
       <EuiLink color="text" href={url} target="_blank">
         {label}
       </EuiLink>
@@ -107,9 +107,7 @@ export class AttributionControl extends Component<Props, State> {
         })}
       >
         <EuiText size="xs">
-          <small>
-            <strong>{this._renderAttributions()}</strong>
-          </small>
+          <small>{this._renderAttributions()}</small>
         </EuiText>
       </div>
     );

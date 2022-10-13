@@ -7,7 +7,7 @@
  */
 
 import { find, keys, get } from 'lodash';
-import { Filter, FILTERS } from '../../../../../common';
+import { Filter, FILTERS } from '@kbn/es-query';
 
 export const mapDefault = (filter: Filter) => {
   const metaProperty = /(^\$|meta)/;

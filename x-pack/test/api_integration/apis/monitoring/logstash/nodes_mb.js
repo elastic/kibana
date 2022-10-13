@@ -6,25 +6,26 @@
  */
 
 import expect from '@kbn/expect';
-import nodesFixture from './fixtures/nodes';
+import nodesFixture from './fixtures/nodes.json';
+import { getLifecycleMethods } from '../data_stream';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
+  const { setup, tearDown } = getLifecycleMethods(getService);
 
   describe('node listing mb', () => {
-    const archive = 'monitoring/logstash_pipelines_mb';
+    const archive = 'x-pack/test/functional/es_archives/monitoring/logstash_pipelines_mb';
     const timeRange = {
       min: '2018-01-22T09:33:13.000Z',
       max: '2018-01-22T09:41:04.000Z',
     };
 
     before('load archive', () => {
-      return esArchiver.load(archive);
+      return setup(archive);
     });
 
     after('unload archive', () => {
-      return esArchiver.unload(archive);
+      return tearDown();
     });
 
     it('should summarize the Logstash nodes with stats', async () => {

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ListItemSchema } from '../../../common/schemas';
+import type { ListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+
 import {
   DATE_NOW,
   ELASTIC_USER,
@@ -16,7 +17,7 @@ import {
   TYPE,
   USER,
   VALUE,
-} from '../../../common/constants.mock';
+} from '../../constants.mock';
 
 export const getListItemResponseMock = (): ListItemSchema => ({
   _version: undefined,

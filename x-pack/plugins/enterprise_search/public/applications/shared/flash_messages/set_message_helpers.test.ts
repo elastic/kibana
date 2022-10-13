@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import '../../__mocks__/kibana_logic.mock';
+import '../../__mocks__/kea_logic/kibana_logic.mock';
 
 import { FlashMessagesLogic } from './flash_messages_logic';
 import {

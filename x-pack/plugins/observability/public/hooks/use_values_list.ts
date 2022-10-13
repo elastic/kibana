@@ -5,38 +5,46 @@
  * 2.0.
  */
 
-import { capitalize, union } from 'lodash';
+import { capitalize, uniqBy } from 'lodash';
 import { useEffect, useState } from 'react';
-import { useDebounce } from 'react-use';
-import { IndexPattern } from '../../../../../src/plugins/data/common';
-import { ESFilter } from '../../../../../typings/elasticsearch';
+import useDebounce from 'react-use/lib/useDebounce';
+import type { ESFilter } from '@kbn/es-types';
+import { IInspectorInfo } from '@kbn/data-plugin/common';
 import { createEsParams, useEsSearch } from './use_es_search';
+import { TRANSACTION_URL } from '../components/shared/exploratory_view/configurations/constants/elasticsearch_fieldnames';
 
 export interface Props {
   sourceField: string;
+  label: string;
   query?: string;
-  indexPattern: IndexPattern;
+  dataViewTitle?: string;
   filters?: ESFilter[];
   time?: { from: string; to: string };
   keepHistory?: boolean;
+  cardinalityField?: string;
+  inspector?: IInspectorInfo;
 }
 
-export const useValuesList = ({
-  sourceField,
-  indexPattern,
-  query = '',
-  filters,
-  time,
-  keepHistory,
-}: Props): { values: string[]; loading?: boolean } => {
-  const [debouncedQuery, setDebounceQuery] = useState<string>(query);
-  const [values, setValues] = useState<string[]>([]);
+export interface ListItem {
+  label: string;
+  count: number;
+}
 
-  const { from, to } = time ?? {};
+const uniqueValues = (values: ListItem[], prevValues: ListItem[]) => {
+  return uniqBy([...values, ...prevValues], 'label');
+};
+
+const getIncludeClause = (sourceField: string, query?: string) => {
+  if (!query) {
+    return '';
+  }
 
   let includeClause = '';
 
-  if (query) {
+  if (sourceField === TRANSACTION_URL) {
+    // for the url we also match leading text
+    includeClause = `*.${query.toLowerCase()}.*`;
+  } else {
     if (query[0].toLowerCase() === query[0]) {
       // if first letter is lowercase we also add the capitalize option
       includeClause = `(${query}|${capitalize(query)}).*`;
@@ -46,6 +54,24 @@ export const useValuesList = ({
     }
   }
 
+  return includeClause;
+};
+
+export const useValuesList = ({
+  sourceField,
+  dataViewTitle,
+  query = '',
+  filters,
+  time,
+  label,
+  keepHistory,
+  cardinalityField,
+}: Props): { values: ListItem[]; loading?: boolean } => {
+  const [debouncedQuery, setDebounceQuery] = useState<string>(query);
+  const [values, setValues] = useState<ListItem[]>([]);
+
+  const { from, to } = time ?? {};
+
   useDebounce(
     () => {
       setDebounceQuery(query);
@@ -54,9 +80,18 @@ export const useValuesList = ({
     [query]
   );
 
+  useEffect(() => {
+    if (!query) {
+      // in case query is cleared, we don't wait for debounce
+      setDebounceQuery(query);
+    }
+  }, [query]);
+
+  const includeClause = getIncludeClause(sourceField, query);
+
   const { data, loading } = useEsSearch(
     createEsParams({
-      index: indexPattern.title,
+      index: dataViewTitle!,
       body: {
         query: {
           bool: {
@@ -82,23 +117,47 @@ export const useValuesList = ({
           values: {
             terms: {
               field: sourceField,
-              size: 100,
+              size: 50,
               ...(query ? { include: includeClause } : {}),
             },
+            ...(cardinalityField
+              ? {
+                  aggs: {
+                    count: {
+                      cardinality: {
+                        field: cardinalityField,
+                      },
+                    },
+                  },
+                }
+              : {}),
           },
         },
       },
     }),
-    [debouncedQuery, from, to, JSON.stringify(filters)]
+    [debouncedQuery, from, to, JSON.stringify(filters), dataViewTitle, sourceField],
+    { name: `get${label.replace(/\s/g, '')}ValuesList` }
   );
 
   useEffect(() => {
+    const valueBuckets = data?.aggregations?.values.buckets;
     const newValues =
-      data?.aggregations?.values.buckets.map(({ key: value }) => value as string) ?? [];
+      valueBuckets?.map(({ key: value, doc_count: count, count: aggsCount }) => {
+        if (aggsCount) {
+          return {
+            count: aggsCount.value,
+            label: String(value),
+          };
+        }
+        return {
+          count,
+          label: String(value),
+        };
+      }) ?? [];
 
-    if (keepHistory && query) {
+    if (keepHistory) {
       setValues((prevState) => {
-        return union(newValues, prevState);
+        return uniqueValues(newValues, prevState);
       });
     } else {
       setValues(newValues);

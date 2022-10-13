@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from 'src/core/server';
-
-export const CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT = 'cases-connector-mappings';
+import { SavedObjectsType } from '@kbn/core/server';
+import { CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT } from '../../common/constants';
+import { connectorMappingsMigrations } from './migrations';
 
 export const caseConnectorMappingsSavedObjectType: SavedObjectsType = {
   name: CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT,
-  hidden: false,
-  namespaceType: 'single',
+  hidden: true,
+  namespaceType: 'multiple-isolated',
+  convertToMultiNamespaceTypeVersion: '8.0.0',
   mappings: {
     properties: {
       mappings: {
@@ -28,6 +29,10 @@ export const caseConnectorMappingsSavedObjectType: SavedObjectsType = {
           },
         },
       },
+      owner: {
+        type: 'keyword',
+      },
     },
   },
+  migrations: connectorMappingsMigrations,
 };

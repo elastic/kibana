@@ -12,11 +12,13 @@ import {
   EmbeddableFactoryDefinition,
   EmbeddableInput,
   IContainer,
-} from '../../../services/embeddable';
-import { PlaceholderEmbeddable, PLACEHOLDER_EMBEDDABLE } from './placeholder_embeddable';
+} from '@kbn/embeddable-plugin/public';
+import { PLACEHOLDER_EMBEDDABLE } from '.';
 
 export class PlaceholderEmbeddableFactory implements EmbeddableFactoryDefinition {
   public readonly type = PLACEHOLDER_EMBEDDABLE;
+
+  constructor() {}
 
   public async isEditable() {
     return false;
@@ -27,6 +29,7 @@ export class PlaceholderEmbeddableFactory implements EmbeddableFactoryDefinition
   }
 
   public async create(initialInput: EmbeddableInput, parent?: IContainer) {
+    const { PlaceholderEmbeddable } = await import('./placeholder_embeddable');
     return new PlaceholderEmbeddable(initialInput, parent);
   }
 

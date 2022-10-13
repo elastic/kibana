@@ -5,27 +5,44 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from 'src/core/public';
-import { getDefaultLayoutSelectors } from '../common';
-import { ScreenCapturePanelContent } from './components/screen_capture_panel_content';
-import * as jobCompletionNotifications from './lib/job_completion_notifications';
-import { ReportingAPIClient } from './lib/reporting_api_client';
+import type { PluginInitializerContext } from '@kbn/core/public';
 import { ReportingPublicPlugin } from './plugin';
+import type { ReportingPublicComponents } from './shared/get_shared_components';
 
+/**
+ * Setup contract for the Reporting plugin.
+ */
 export interface ReportingSetup {
-  components: {
-    ScreenCapturePanel: typeof ScreenCapturePanelContent;
-  };
-  getDefaultLayoutSelectors: typeof getDefaultLayoutSelectors;
-  ReportingAPIClient: typeof ReportingAPIClient;
+  /**
+   * Used to inform plugins if Reporting config is compatible with UI Capabilities / Application Sub-Feature Controls
+   *
+   * @returns boolean
+   */
   usesUiCapabilities: () => boolean;
+
+  /**
+   * A set of React components for displaying a Reporting share menu in an application
+   */
+  components: ReportingPublicComponents;
 }
 
+/**
+ * Start contract for the Reporting plugin.
+ */
 export type ReportingStart = ReportingSetup;
 
-export { constants, getDefaultLayoutSelectors } from '../common';
-export { ReportingAPIClient, ReportingPublicPlugin as Plugin, jobCompletionNotifications };
+/**
+ * Public interface needed for shared components
+ */
+export type { ApplicationProps } from './shared';
+export type { ReportingPublicComponents };
 
-export function plugin(initializerContext: PluginInitializerContext) {
+/**
+ * @internal
+ *
+ * @param {PluginInitializerContext} initializerContext
+ * @returns {ReportingPublicPlugin}
+ */
+export function plugin(initializerContext: PluginInitializerContext): ReportingPublicPlugin {
   return new ReportingPublicPlugin(initializerContext);
 }

@@ -5,226 +5,47 @@
  * 2.0.
  */
 
-import { defaults } from 'lodash/fp';
-import { validate } from '../../../../common/validate';
-import { PartialAlert } from '../../../../../alerting/server';
-import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
-import { PatchRulesOptions } from './types';
-import { addTags } from './add_tags';
-import { calculateVersion, calculateName, calculateInterval, removeUndefined } from './utils';
-import { ruleStatusSavedObjectsClientFactory } from '../signals/rule_status_saved_objects_client';
-import { internalRuleUpdate, RuleParams } from '../schemas/rule_schemas';
-import {
-  normalizeMachineLearningJobIds,
-  normalizeThresholdObject,
-} from '../../../../common/detection_engine/utils';
-
-class PatchError extends Error {
-  public readonly statusCode: number;
-  constructor(message: string, statusCode: number) {
-    super(message);
-    this.statusCode = statusCode;
-  }
-}
+import type { PartialRule } from '@kbn/alerting-plugin/server';
+import type { RuleParams } from '../schemas/rule_schemas';
+import type { PatchRulesOptions } from './types';
+import { maybeMute } from './utils';
+import { convertPatchAPIToInternalSchema } from '../schemas/rule_converters';
 
 export const patchRules = async ({
-  alertsClient,
-  author,
-  buildingBlockType,
-  savedObjectsClient,
-  description,
-  eventCategoryOverride,
-  falsePositives,
-  enabled,
-  query,
-  language,
-  license,
-  outputIndex,
-  savedId,
-  timelineId,
-  timelineTitle,
-  meta,
-  filters,
-  from,
-  index,
-  interval,
-  maxSignals,
-  riskScore,
-  riskScoreMapping,
-  ruleNameOverride,
-  rule,
-  name,
-  severity,
-  severityMapping,
-  tags,
-  threat,
-  threshold,
-  threatFilters,
-  threatIndex,
-  threatQuery,
-  threatMapping,
-  threatLanguage,
-  concurrentSearches,
-  itemsPerSearch,
-  timestampOverride,
-  to,
-  type,
-  references,
-  note,
-  version,
-  exceptionsList,
-  anomalyThreshold,
-  machineLearningJobId,
-  actions,
-}: PatchRulesOptions): Promise<PartialAlert<RuleParams> | null> => {
-  if (rule == null) {
+  rulesClient,
+  existingRule,
+  nextParams,
+}: PatchRulesOptions): Promise<PartialRule<RuleParams> | null> => {
+  if (existingRule == null) {
     return null;
   }
 
-  const calculatedVersion = calculateVersion(rule.params.immutable, rule.params.version, {
-    author,
-    buildingBlockType,
-    description,
-    eventCategoryOverride,
-    falsePositives,
-    query,
-    language,
-    license,
-    outputIndex,
-    savedId,
-    timelineId,
-    timelineTitle,
-    meta,
-    filters,
-    from,
-    index,
-    interval,
-    maxSignals,
-    riskScore,
-    riskScoreMapping,
-    ruleNameOverride,
-    name,
-    severity,
-    severityMapping,
-    tags,
-    threat,
-    threshold,
-    threatFilters,
-    threatIndex,
-    threatQuery,
-    threatMapping,
-    threatLanguage,
-    concurrentSearches,
-    itemsPerSearch,
-    timestampOverride,
-    to,
-    type,
-    references,
-    version,
-    note,
-    exceptionsList,
-    anomalyThreshold,
-    machineLearningJobId,
+  const patchedRule = convertPatchAPIToInternalSchema(nextParams, existingRule);
+
+  const update = await rulesClient.update({
+    id: existingRule.id,
+    data: patchedRule,
   });
 
-  const nextParams = defaults(
-    {
-      ...rule.params,
-    },
-    {
-      author,
-      buildingBlockType,
-      description,
-      falsePositives,
-      from,
-      query,
-      language,
-      license,
-      outputIndex,
-      savedId,
-      timelineId,
-      timelineTitle,
-      meta,
-      filters,
-      index,
-      maxSignals,
-      riskScore,
-      riskScoreMapping,
-      ruleNameOverride,
-      severity,
-      severityMapping,
-      threat,
-      threshold: threshold ? normalizeThresholdObject(threshold) : undefined,
-      threatFilters,
-      threatIndex,
-      threatQuery,
-      threatMapping,
-      threatLanguage,
-      concurrentSearches,
-      itemsPerSearch,
-      timestampOverride,
-      to,
-      type,
-      references,
-      note,
-      version: calculatedVersion,
-      exceptionsList,
-      anomalyThreshold,
-      machineLearningJobId: machineLearningJobId
-        ? normalizeMachineLearningJobIds(machineLearningJobId)
-        : undefined,
-    }
-  );
-
-  const newRule = {
-    tags: addTags(tags ?? rule.tags, rule.params.ruleId, rule.params.immutable),
-    throttle: null,
-    notifyWhen: null,
-    name: calculateName({ updatedName: name, originalName: rule.name }),
-    schedule: {
-      interval: calculateInterval(interval, rule.schedule.interval),
-    },
-    actions: actions?.map(transformRuleToAlertAction) ?? rule.actions,
-    params: removeUndefined(nextParams),
-  };
-  const [validated, errors] = validate(newRule, internalRuleUpdate);
-  if (errors != null || validated === null) {
-    throw new PatchError(`Applying patch would create invalid rule: ${errors}`, 400);
+  if (nextParams.throttle !== undefined) {
+    await maybeMute({
+      rulesClient,
+      muteAll: existingRule.muteAll,
+      throttle: nextParams.throttle,
+      id: update.id,
+    });
   }
 
-  const update = await alertsClient.update({
-    id: rule.id,
-    data: validated,
-  });
-
-  if (rule.enabled && enabled === false) {
-    await alertsClient.disable({ id: rule.id });
-  } else if (!rule.enabled && enabled === true) {
-    await alertsClient.enable({ id: rule.id });
-
-    const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
-    const ruleCurrentStatus = await ruleStatusClient.find({
-      perPage: 1,
-      sortField: 'statusDate',
-      sortOrder: 'desc',
-      search: rule.id,
-      searchFields: ['alertId'],
-    });
-
-    // set current status for this rule to be 'going to run'
-    if (ruleCurrentStatus && ruleCurrentStatus.saved_objects.length > 0) {
-      const currentStatusToDisable = ruleCurrentStatus.saved_objects[0];
-      await ruleStatusClient.update(currentStatusToDisable.id, {
-        ...currentStatusToDisable.attributes,
-        status: 'going to run',
-      });
-    }
+  if (existingRule.enabled && nextParams.enabled === false) {
+    await rulesClient.disable({ id: existingRule.id });
+  } else if (!existingRule.enabled && nextParams.enabled === true) {
+    await rulesClient.enable({ id: existingRule.id });
   } else {
     // enabled is null or undefined and we do not touch the rule
   }
 
-  if (enabled != null) {
-    return { ...update, enabled };
+  if (nextParams.enabled != null) {
+    return { ...update, enabled: nextParams.enabled };
   } else {
     return update;
   }

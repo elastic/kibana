@@ -20,7 +20,9 @@ Array [
               "verticalAlign": "top",
             }
           }
-        />
+        >
+          
+        </span>
       </span>
       <span>
         <span
@@ -42,18 +44,15 @@ Array [
           className="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
-            className="euiText euiText--small"
+            className="euiText emotion-euiText-s-euiTextColor-subdued"
+            style={Object {}}
           >
-            <div
-              className="euiTextColor euiTextColor--subdued"
-            >
-              Deleting this variable may adversely affect the workpad. Are you sure you wish to continue?
-            </div>
+            Deleting this variable may adversely affect the workpad. Are you sure you wish to continue?
           </div>
         </div>
       </div>
       <div
-        className="euiSpacer euiSpacer--m"
+        className="euiSpacer euiSpacer--m emotion-euiSpacer-m"
       />
       <div
         className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -77,9 +76,12 @@ Array [
             >
               <span
                 className="euiButtonContent__icon"
+                color="inherit"
                 data-euiicon-type="trash"
                 size="m"
-              />
+              >
+                
+              </span>
               <span
                 className="euiButton__text"
               >

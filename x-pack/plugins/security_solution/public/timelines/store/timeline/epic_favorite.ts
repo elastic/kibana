@@ -6,9 +6,10 @@
  */
 
 import { get } from 'lodash/fp';
-import { Action } from 'redux';
-import { Epic } from 'redux-observable';
-import { from, Observable, empty } from 'rxjs';
+import type { Action } from 'redux';
+import type { Epic } from 'redux-observable';
+import type { Observable } from 'rxjs';
+import { from, empty } from 'rxjs';
 import { filter, mergeMap, withLatestFrom, startWith, takeUntil } from 'rxjs/operators';
 
 import { addError } from '../../../common/store/app/actions';
@@ -21,9 +22,10 @@ import {
 } from './actions';
 import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persistence_queue';
 import { myEpicTimelineId } from './my_epic_timeline_id';
-import { ActionTimeline, TimelineById } from './types';
-import { inputsModel } from '../../../common/store/inputs';
-import { ResponseFavoriteTimeline, TimelineType } from '../../../../common/types/timeline';
+import type { ActionTimeline, TimelineById } from './types';
+import type { inputsModel } from '../../../common/store/inputs';
+import type { ResponseFavoriteTimeline } from '../../../../common/types/timeline';
+import { TimelineType } from '../../../../common/types/timeline';
 import { persistFavorite } from '../../containers/api';
 
 export const timelineFavoriteActionsType = [updateIsFavorite.type];
@@ -102,12 +104,14 @@ export const epicPersistTimelineFavorite = (
     )
   );
 
-export const createTimelineFavoriteEpic = <State>(): Epic<Action, Action, State> => (action$) => {
-  return action$.pipe(
-    filter((action) => timelineFavoriteActionsType.includes(action.type)),
-    mergeMap((action) => {
-      dispatcherTimelinePersistQueue.next({ action });
-      return empty();
-    })
-  );
-};
+export const createTimelineFavoriteEpic =
+  <State>(): Epic<Action, Action, State> =>
+  (action$) => {
+    return action$.pipe(
+      filter((action) => timelineFavoriteActionsType.includes(action.type)),
+      mergeMap((action) => {
+        dispatcherTimelinePersistQueue.next({ action });
+        return empty();
+      })
+    );
+  };

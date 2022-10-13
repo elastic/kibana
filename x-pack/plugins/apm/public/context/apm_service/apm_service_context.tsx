@@ -6,72 +6,101 @@
  */
 
 import React, { createContext, ReactNode } from 'react';
-import { ValuesType } from 'utility-types';
+import { useHistory } from 'react-router-dom';
+import { History } from 'history';
 import { isRumAgentName } from '../../../common/agent_name';
 import {
   TRANSACTION_PAGE_LOAD,
   TRANSACTION_REQUEST,
 } from '../../../common/transaction_types';
 import { useServiceTransactionTypesFetcher } from './use_service_transaction_types_fetcher';
-import { useUrlParams } from '../url_params_context/use_url_params';
-import { useServiceAgentNameFetcher } from './use_service_agent_name_fetcher';
-import { IUrlParams } from '../url_params_context/types';
-import { APIReturnType } from '../../services/rest/createCallApmApi';
-import { useServiceAlertsFetcher } from './use_service_alerts_fetcher';
+import { useServiceAgentFetcher } from './use_service_agent_fetcher';
+import { useApmParams } from '../../hooks/use_apm_params';
+import { useTimeRange } from '../../hooks/use_time_range';
+import { useFallbackToTransactionsFetcher } from '../../hooks/use_fallback_to_transactions_fetcher';
+import { replace } from '../../components/shared/links/url_helpers';
 
-export type APMServiceAlert = ValuesType<
-  APIReturnType<'GET /api/apm/services/{serviceName}/alerts'>['alerts']
->;
-
-export const APMServiceContext = createContext<{
+export interface APMServiceContextValue {
+  serviceName: string;
   agentName?: string;
   transactionType?: string;
   transactionTypes: string[];
-  alerts: APMServiceAlert[];
-}>({ transactionTypes: [], alerts: [] });
+  runtimeName?: string;
+  fallbackToTransactions: boolean;
+}
+
+export const APMServiceContext = createContext<APMServiceContextValue>({
+  serviceName: '',
+  transactionTypes: [],
+  fallbackToTransactions: false,
+});
 
 export function ApmServiceContextProvider({
   children,
 }: {
   children: ReactNode;
 }) {
-  const { urlParams } = useUrlParams();
-  const { agentName } = useServiceAgentNameFetcher();
+  const history = useHistory();
 
-  const transactionTypes = useServiceTransactionTypesFetcher();
+  const {
+    path: { serviceName },
+    query,
+    query: { kuery, rangeFrom, rangeTo },
+  } = useApmParams('/services/{serviceName}');
 
-  const transactionType = getTransactionType({
-    urlParams,
-    transactionTypes,
-    agentName,
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
+  const { agentName, runtimeName } = useServiceAgentFetcher({
+    serviceName,
+    start,
+    end,
   });
 
-  const { alerts } = useServiceAlertsFetcher(transactionType);
+  const transactionTypes = useServiceTransactionTypesFetcher({
+    serviceName,
+    start,
+    end,
+  });
+
+  const transactionType = getOrRedirectToTransactionType({
+    transactionType: query.transactionType,
+    transactionTypes,
+    agentName,
+    history,
+  });
+
+  const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
+    kuery,
+  });
 
   return (
     <APMServiceContext.Provider
       value={{
+        serviceName,
         agentName,
         transactionType,
         transactionTypes,
-        alerts,
+        runtimeName,
+        fallbackToTransactions,
       }}
       children={children}
     />
   );
 }
 
-export function getTransactionType({
-  urlParams,
+export function getOrRedirectToTransactionType({
+  transactionType,
   transactionTypes,
   agentName,
+  history,
 }: {
-  urlParams: IUrlParams;
+  transactionType?: string;
   transactionTypes: string[];
   agentName?: string;
+  history: History;
 }) {
-  if (urlParams.transactionType) {
-    return urlParams.transactionType;
+  if (transactionType && transactionTypes.includes(transactionType)) {
+    return transactionType;
   }
 
   if (!agentName || transactionTypes.length === 0) {
@@ -84,7 +113,13 @@ export function getTransactionType({
     : TRANSACTION_REQUEST;
 
   // If the default transaction type is not in transactionTypes the first in the list is returned
-  return transactionTypes.includes(defaultTransactionType)
+  const currentTransactionType = transactionTypes.includes(
+    defaultTransactionType
+  )
     ? defaultTransactionType
     : transactionTypes[0];
+
+  // Replace transactionType in the URL in case it is not one of the types returned by the API
+  replace(history, { query: { transactionType: currentTransactionType } });
+  return currentTransactionType;
 }

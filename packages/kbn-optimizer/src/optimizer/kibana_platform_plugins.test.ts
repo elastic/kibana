@@ -8,7 +8,7 @@
 
 import Path from 'path';
 
-import { createAbsolutePathSerializer } from '@kbn/dev-utils';
+import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
 
 import { findKibanaPlatformPlugins } from './kibana_platform_plugins';
 

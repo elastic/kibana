@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { HttpHandler } from 'src/core/public';
-import { estypes } from '@elastic/elasticsearch';
+import type { HttpHandler } from '@kbn/core/public';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import {
   LOG_ANALYSIS_VALIDATE_INDICES_PATH,
@@ -20,7 +20,7 @@ import { decodeOrThrow } from '../../../../../common/runtime_types';
 interface RequestArgs {
   indices: string[];
   fields: ValidationIndicesFieldSpecification[];
-  runtimeMappings: estypes.RuntimeFields;
+  runtimeMappings: estypes.MappingRuntimeFields;
 }
 
 export const callValidateIndicesAPI = async (requestArgs: RequestArgs, fetch: HttpHandler) => {

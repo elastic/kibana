@@ -5,22 +5,27 @@
  * 2.0.
  */
 
-import type { RequestHandler } from 'src/core/server';
-
 import { appContextService } from '../../services';
-import type { GetFleetStatusResponse, PostIngestSetupResponse } from '../../../common';
-import { setupIngestManager } from '../../services/setup';
+import type { GetFleetStatusResponse, PostFleetSetupResponse } from '../../../common/types';
+import { formatNonFatalErrors, setupFleet } from '../../services/setup';
 import { hasFleetServers } from '../../services/fleet_server';
-import { defaultIngestErrorHandler } from '../../errors';
+import { defaultFleetErrorHandler } from '../../errors';
+import type { FleetRequestHandler } from '../../types';
+import { getGpgKeyIdOrUndefined } from '../../services/epm/packages/package_verification';
 
-export const getFleetStatusHandler: RequestHandler = async (context, request, response) => {
+export const getFleetStatusHandler: FleetRequestHandler = async (context, request, response) => {
   try {
     const isApiKeysEnabled = await appContextService
       .getSecurity()
       .authc.apiKeys.areAPIKeysEnabled();
-    const isFleetServerSetup = await hasFleetServers(appContextService.getInternalUserESClient());
+    const coreContext = await context.core;
+    const isFleetServerSetup = await hasFleetServers(
+      coreContext.elasticsearch.client.asInternalUser
+    );
 
     const missingRequirements: GetFleetStatusResponse['missing_requirements'] = [];
+    const missingOptionalFeatures: GetFleetStatusResponse['missing_optional_features'] = [];
+
     if (!isApiKeysEnabled) {
       missingRequirements.push('api_keys');
     }
@@ -29,39 +34,41 @@ export const getFleetStatusHandler: RequestHandler = async (context, request, re
       missingRequirements.push('fleet_server');
     }
 
+    if (!appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
+      missingOptionalFeatures.push('encrypted_saved_object_encryption_key_required');
+    }
+
     const body: GetFleetStatusResponse = {
       isReady: missingRequirements.length === 0,
       missing_requirements: missingRequirements,
+      missing_optional_features: missingOptionalFeatures,
     };
+
+    const packageVerificationKeyId = await getGpgKeyIdOrUndefined();
+
+    if (packageVerificationKeyId) {
+      body.package_verification_key_id = packageVerificationKeyId;
+    }
 
     return response.ok({
       body,
     });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
-export const fleetSetupHandler: RequestHandler = async (context, request, response) => {
+export const fleetSetupHandler: FleetRequestHandler = async (context, request, response) => {
   try {
-    const soClient = context.core.savedObjects.client;
-    const esClient = context.core.elasticsearch.client.asCurrentUser;
-    const body: PostIngestSetupResponse = await setupIngestManager(soClient, esClient);
-
-    return response.ok({
-      body: {
-        ...body,
-        nonFatalErrors: body.nonFatalErrors?.map((e) => {
-          // JSONify the error object so it can be displayed properly in the UI
-          const error = e.error ?? e;
-          return {
-            name: error.name,
-            message: error.message,
-          };
-        }),
-      },
-    });
+    const soClient = (await context.fleet).epm.internalSoClient;
+    const esClient = (await context.core).elasticsearch.client.asInternalUser;
+    const setupStatus = await setupFleet(soClient, esClient);
+    const body: PostFleetSetupResponse = {
+      ...setupStatus,
+      nonFatalErrors: formatNonFatalErrors(setupStatus.nonFatalErrors),
+    };
+    return response.ok({ body });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };

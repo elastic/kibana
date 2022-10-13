@@ -9,13 +9,11 @@ import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { EuiLoadingSpinner } from '@elastic/eui';
 
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
-import {
-  esFilters,
-  FilterManager,
-  UI_SETTINGS,
-  IndexPattern,
-} from '../../../../../../../../src/plugins/data/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import { FilterManager, UI_SETTINGS } from '@kbn/data-plugin/public';
+import { FilterLabel } from '@kbn/unified-search-plugin/public';
+import type { DataViewBase } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
 import { SeverityBadge } from '../severity_badge';
 
 import * as i18n from './translations';
@@ -30,7 +28,7 @@ import {
   buildNoteDescription,
   buildRuleTypeDescription,
 } from './helpers';
-import { ListItems } from './types';
+import type { ListItems } from './types';
 
 const setupMock = coreMock.createSetup();
 const uiSettingsMock = (pinnedByDefault: boolean) => (key: string) => {
@@ -49,7 +47,7 @@ const mockQueryBar = {
   filters: [
     {
       $state: {
-        store: esFilters.FilterStateStore.GLOBAL_STATE,
+        store: FilterStateStore.GLOBAL_STATE,
       },
       meta: {
         alias: null,
@@ -142,14 +140,14 @@ describe('helpers', () => {
         filterManager: mockFilterManager,
         query: mockQueryBarWithFilters.query,
         savedId: mockQueryBarWithFilters.saved_id,
-        indexPatterns: ({
+        indexPatterns: {
           fields: [{ name: 'event.category', type: 'test type' }],
           title: 'test title',
           getFormatterForField: () => ({ convert: (val: unknown) => val }),
-        } as unknown) as IndexPattern,
+        } as unknown as DataViewBase,
       });
       const wrapper = shallow<React.ReactElement>(result[0].description as React.ReactElement);
-      const filterLabelComponent = wrapper.find(esFilters.FilterLabel).at(0);
+      const filterLabelComponent = wrapper.find(FilterLabel).at(0);
 
       expect(result[0].title).toEqual(<>{i18n.FILTERS_LABEL} </>);
       expect(filterLabelComponent.prop('valueLabel')).toEqual('file');
@@ -181,6 +179,7 @@ describe('helpers', () => {
         ...mockQueryBar,
         query: '',
         filters: [],
+        title: 'test title',
       };
       const result: ListItems[] = buildQueryBarDescription({
         field: 'queryBar',
@@ -188,9 +187,10 @@ describe('helpers', () => {
         filterManager: mockFilterManager,
         query: mockQueryBarWithSavedId.query,
         savedId: mockQueryBarWithSavedId.saved_id,
+        savedQueryName: mockQueryBarWithSavedId.title,
       });
-      expect(result[0].title).toEqual(<>{i18n.SAVED_ID_LABEL} </>);
-      expect(result[0].description).toEqual(<>{mockQueryBarWithSavedId.saved_id} </>);
+      expect(result[0].title).toEqual(<>{i18n.SAVED_QUERY_NAME_LABEL} </>);
+      expect(result[0].description).toEqual(<>{mockQueryBarWithSavedId.title} </>);
     });
   });
 

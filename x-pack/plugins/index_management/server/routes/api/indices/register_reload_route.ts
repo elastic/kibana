@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 
 import { RouteDependencies } from '../../../types';
 import { fetchIndices } from '../../../lib/fetch_indices';
-import { addBasePath } from '../index';
+import { addBasePath } from '..';
 
 const bodySchema = schema.maybe(
   schema.object({
@@ -19,32 +19,21 @@ const bodySchema = schema.maybe(
 
 export function registerReloadRoute({
   router,
-  license,
   indexDataEnricher,
-  lib,
+  lib: { handleEsError },
 }: RouteDependencies) {
   router.post(
     { path: addBasePath('/indices/reload'), validate: { body: bodySchema } },
-    license.guardApiRoute(async (ctx, req, res) => {
-      const { indexNames = [] } = (req.body as typeof bodySchema.type) ?? {};
+    async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const { indexNames = [] } = (request.body as typeof bodySchema.type) ?? {};
 
       try {
-        const indices = await fetchIndices(
-          ctx.core.elasticsearch.legacy.client.callAsCurrentUser,
-          indexDataEnricher,
-          indexNames
-        );
-        return res.ok({ body: indices });
-      } catch (e) {
-        if (lib.isEsError(e)) {
-          return res.customError({
-            statusCode: e.statusCode,
-            body: e,
-          });
-        }
-        // Case: default
-        throw e;
+        const indices = await fetchIndices(client, indexDataEnricher, indexNames);
+        return response.ok({ body: indices });
+      } catch (error) {
+        return handleEsError({ error, response });
       }
-    })
+    }
   );
 }

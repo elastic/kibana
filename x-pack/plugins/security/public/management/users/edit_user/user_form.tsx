@@ -24,9 +24,9 @@ import React, { useCallback, useEffect } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { MAX_NAME_LENGTH, NAME_REGEX } from '../../../../common/constants';
 import type { Role, User } from '../../../../common/model';
 import { isRoleDeprecated } from '../../../../common/model';
@@ -41,8 +41,9 @@ export const THROTTLE_USERS_WAIT = 10000;
 
 export interface UserFormValues {
   username?: string;
-  full_name: string;
-  email: string;
+  full_name?: string;
+  email?: string;
+  current_password?: string;
   password?: string;
   confirm_password?: string;
   roles: readonly string[];
@@ -75,9 +76,10 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
 }) => {
   const { services } = useKibana();
 
-  const [rolesState, getRoles] = useAsyncFn(() => new RolesAPIClient(services.http!).getRoles(), [
-    services.http,
-  ]);
+  const [rolesState, getRoles] = useAsyncFn(
+    () => new RolesAPIClient(services.http!).getRoles(),
+    [services.http]
+  );
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const getUsersThrottled = useCallback(
@@ -157,7 +159,7 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
         } else {
           try {
             const users = await getUsersThrottled();
-            if (users.some((user) => user.username === values.username)) {
+            if (users?.some((user) => user.username === values.username)) {
               errors.username = i18n.translate(
                 'xpack.security.management.users.userForm.usernameTakenError',
                 {
@@ -253,7 +255,7 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
             !isNewUser && !isReservedUser
               ? i18n.translate(
                   'xpack.security.management.users.userForm.changingUserNameAfterCreationDescription',
-                  { defaultMessage: `Username can't be changed once created.` }
+                  { defaultMessage: 'User name cannot be changed after account creation.' }
                 )
               : undefined
           }

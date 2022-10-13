@@ -5,16 +5,20 @@
  * 2.0.
  */
 
-import React from 'react';
 import * as t from 'io-ts';
-import { i18n } from '@kbn/i18n';
-import { HomePage } from '../pages/home';
-import { LandingPage } from '../pages/landing';
+import React from 'react';
+import { useHistory } from 'react-router-dom';
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
+import { casesPath } from '../../common';
+import { CasesPage } from '../pages/cases';
+import { AlertsPage } from '../pages/alerts/containers/alerts_page';
 import { OverviewPage } from '../pages/overview';
 import { jsonRt } from './json_rt';
-import { AlertsPage } from '../pages/alerts';
-import { CasesPage } from '../pages/cases';
-import { ExploratoryViewPage } from '../components/shared/exploratory_view';
+import { ObservabilityExploratoryView } from '../components/shared/exploratory_view/obsv_exploratory_view';
+import { RulesPage } from '../pages/rules';
+import { RuleDetailsPage } from '../pages/rule_details';
+import { AlertingPages } from '../config';
+import { AlertDetails } from '../pages/alert_details';
 
 export type RouteParams<T extends keyof typeof routes> = DecodeParams<typeof routes[T]['params']>;
 
@@ -22,104 +26,68 @@ type DecodeParams<TParams extends Params | undefined> = {
   [key in keyof TParams]: TParams[key] extends t.Any ? t.TypeOf<TParams[key]> : never;
 };
 
-export type Breadcrumbs = Array<{ text: string }>;
-
 export interface Params {
   query?: t.HasProps;
   path?: t.HasProps;
 }
 
+// Note: React Router DOM <Redirect> component was not working here
+// so I've recreated this simple version for this purpose.
+function SimpleRedirect({ to }: { to: string }) {
+  const history = useHistory();
+  history.replace(to);
+  return null;
+}
+
 export const routes = {
   '/': {
     handler: () => {
-      return <HomePage />;
+      return <SimpleRedirect to="/overview" />;
     },
     params: {},
-    breadcrumb: [
-      {
-        text: i18n.translate('xpack.observability.home.breadcrumb', {
-          defaultMessage: 'Overview',
-        }),
-      },
-    ],
+    exact: true,
   },
   '/landing': {
     handler: () => {
-      return <LandingPage />;
+      return <SimpleRedirect to="/overview" />;
     },
     params: {},
-    breadcrumb: [
-      {
-        text: i18n.translate('xpack.observability.landing.breadcrumb', {
-          defaultMessage: 'Getting started',
-        }),
-      },
-    ],
+    exact: true,
   },
   '/overview': {
     handler: ({ query }: any) => {
-      return <OverviewPage routeParams={{ query }} />;
+      return <OverviewPage />;
     },
-    params: {
-      query: t.partial({
-        rangeFrom: t.string,
-        rangeTo: t.string,
-        refreshPaused: jsonRt.pipe(t.boolean),
-        refreshInterval: jsonRt.pipe(t.number),
-      }),
-    },
-    breadcrumb: [
-      {
-        text: i18n.translate('xpack.observability.overview.breadcrumb', {
-          defaultMessage: 'Overview',
-        }),
-      },
-    ],
+    params: {},
+    exact: true,
   },
-  '/cases': {
-    handler: (routeParams: any) => {
-      return <CasesPage routeParams={routeParams} />;
+  [casesPath]: {
+    handler: () => {
+      return (
+        <TrackApplicationView viewId={AlertingPages.cases}>
+          <CasesPage />
+        </TrackApplicationView>
+      );
     },
-    params: {
-      query: t.partial({
-        rangeFrom: t.string,
-        rangeTo: t.string,
-        refreshPaused: jsonRt.pipe(t.boolean),
-        refreshInterval: jsonRt.pipe(t.number),
-      }),
-    },
-    breadcrumb: [
-      {
-        text: i18n.translate('xpack.observability.cases.breadcrumb', {
-          defaultMessage: 'Cases',
-        }),
-      },
-    ],
+    params: {},
+    exact: false,
   },
   '/alerts': {
-    handler: (routeParams: any) => {
-      return <AlertsPage routeParams={routeParams} />;
-    },
-    params: {
-      query: t.partial({
-        rangeFrom: t.string,
-        rangeTo: t.string,
-        kuery: t.string,
-        refreshPaused: jsonRt.pipe(t.boolean),
-        refreshInterval: jsonRt.pipe(t.number),
-      }),
-    },
-    breadcrumb: [
-      {
-        text: i18n.translate('xpack.observability.alerts.breadcrumb', {
-          defaultMessage: 'Alerts',
-        }),
-      },
-    ],
-  },
-  '/exploratory-view': {
     handler: () => {
-      return <ExploratoryViewPage />;
+      return (
+        <TrackApplicationView viewId={AlertingPages.alerts}>
+          <AlertsPage />
+        </TrackApplicationView>
+      );
+    },
+    params: {
+      // Technically gets a '_a' param by using Kibana URL state sync helpers
+    },
+    exact: true,
+  },
+  '/exploratory-view/': {
+    handler: () => {
+      return <ObservabilityExploratoryView />;
     },
     params: {
       query: t.partial({
@@ -129,12 +97,31 @@ export const routes = {
         refreshInterval: jsonRt.pipe(t.number),
       }),
     },
-    breadcrumb: [
-      {
-        text: i18n.translate('xpack.observability.overview.exploratoryView', {
-          defaultMessage: 'Exploratory view',
-        }),
-      },
-    ],
+    exact: true,
+  },
+  '/alerts/rules': {
+    handler: () => {
+      return (
+        <TrackApplicationView viewId={AlertingPages.rules}>
+          <RulesPage />
+        </TrackApplicationView>
+      );
+    },
+    params: {},
+    exact: true,
+  },
+  '/alerts/rules/:ruleId': {
+    handler: () => {
+      return <RuleDetailsPage />;
+    },
+    params: {},
+    exact: true,
+  },
+  '/alerts/:alertId': {
+    handler: () => {
+      return <AlertDetails />;
+    },
+    params: {},
+    exact: true,
   },
 };

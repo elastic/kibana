@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SecurityPluginSetup } from '../../../../../../../security/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 
 import {
   serverMock,
@@ -35,24 +35,24 @@ describe('get all timelines', () => {
     server = serverMock.create();
     context = requestContextMock.createTools().context;
 
-    securitySetup = ({
+    securitySetup = {
       authc: {
         getCurrentUser: jest.fn().mockReturnValue(mockGetCurrentUser),
       },
       authz: {},
-    } as unknown) as SecurityPluginSetup;
+    } as unknown as SecurityPluginSetup;
 
     getTimelinesRoute(server.router, createMockConfig(), securitySetup);
   });
 
   test('should get the total count', async () => {
-    await server.inject(getTimelineRequest(), context);
+    await server.inject(getTimelineRequest(), requestContextMock.convertContext(context));
     expect((getAllTimeline as jest.Mock).mock.calls[0][2]).toEqual({ pageSize: 1, pageIndex: 1 });
   });
 
   test('should get all timelines with total count', async () => {
     (getAllTimeline as jest.Mock).mockResolvedValue({ totalCount: 100 });
-    await server.inject(getTimelineRequest(), context);
+    await server.inject(getTimelineRequest(), requestContextMock.convertContext(context));
     expect((getAllTimeline as jest.Mock).mock.calls[1][2]).toEqual({ pageSize: 100, pageIndex: 1 });
   });
 });

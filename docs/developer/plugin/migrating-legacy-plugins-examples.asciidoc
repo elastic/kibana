@@ -60,7 +60,7 @@ in the _constructor_ of the plugin:
 *plugins/my_plugin/(public|server)/index.ts*
 [source,typescript]
 ----
-import type { PluginInitializerContext } from 'kibana/server';
+import type { PluginInitializerContext } from '@kbn/core/server';
 import { MyPlugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
@@ -71,7 +71,7 @@ export function plugin(initializerContext: PluginInitializerContext) {
 *plugins/my_plugin/(public|server)/plugin.ts*
 [source,typescript]
 ----
-import { CoreSetup, Logger, Plugin, PluginInitializerContext, PluginName } from 'kibana/server';
+import { CoreSetup, Logger, Plugin, PluginInitializerContext, PluginName } from '@kbn/core/server';
 import type { MyPluginConfig } from './config';
 
 export class MyPlugin implements Plugin {
@@ -118,13 +118,13 @@ same name in `plugins/demoplugin` with the following files:
 [source,typescript]
 ----
 import { schema, TypeOf } from '@kbn/config-schema';
-import type { PluginInitializerContext } from 'kibana/server';
+import type { PluginInitializerContext } from '@kbn/core/server';
 import { DemoPlugin } from './plugin';
 
 export const config = {
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
-  });
+  }),
 }
 
 export const plugin = (initContext: PluginInitializerContext) => new DemoPlugin(initContext);
@@ -136,7 +136,7 @@ export { DemoPluginSetup } from './plugin';
 *plugins/demoplugin/server/plugin.ts*
 [source,typescript]
 ----
-import type { PluginInitializerContext, Plugin, CoreSetup } from 'kibana/server';
+import type { PluginInitializerContext, Plugin, CoreSetup } from '@kbn/core/server';
 import type { DemoPluginConfig } from '.';
 export interface DemoPluginSetup {};
 
@@ -205,7 +205,7 @@ to the {kib} platform format:
 [source,typescript]
 ----
 import { schema } from '@kbn/config-schema';
-import type { CoreSetup } from 'kibana/server';
+import type { CoreSetup } from '@kbn/core/server';
 
 export class DemoPlugin {
   public setup(core: CoreSetup) {
@@ -239,7 +239,7 @@ migration is complete:
 [source,typescript]
 ----
 import { schema } from '@kbn/config-schema';
-import { CoreSetup } from 'kibana/server';
+import { CoreSetup } from '@kbn/core/server';
 import Boom from '@hapi/boom';
 
 export class DemoPlugin {
@@ -486,7 +486,7 @@ to change the application or the navlink state at runtime.
 
 [source,typescript]
 ----
-// my_plugin has a required dependencie to the `licensing` plugin
+// my_plugin has a required dependency to the `licensing` plugin
 interface MyPluginSetupDeps {
   licensing: LicensingPluginSetup;
 }
@@ -522,7 +522,7 @@ platform, these were referred to as `hidden` applications and were set
 via the `hidden` property in a {kib} plugin. Chromeless applications
 are also not displayed in the left navbar.
 
-To mark an application as chromeless, specify `chromeless: false` when
+To mark an application as chromeless, specify `chromeless: true` when
 registering your application to hide the chrome UI when the application
 is mounted:
 
@@ -706,7 +706,7 @@ First type:
 *plugins/demoplugin/server/saved_objects/first_type.ts*
 [source,typescript]
 ----
-import type { SavedObjectsType } from 'kibana/server';
+import type { SavedObjectsType } from '@kbn/core/server';
 
 export const firstType: SavedObjectsType = {
   name: 'first-type',
@@ -744,7 +744,7 @@ Second type:
 *plugins/demoplugin/server/saved_objects/second_type.ts*
 [source,typescript]
 ----
-import type { SavedObjectsType } from 'kibana/server';
+import type { SavedObjectsType } from '@kbn/core/server';
 
 export const secondType: SavedObjectsType = {
   name: 'second-type',
@@ -813,7 +813,7 @@ been renamed: `SavedObjectsType.management.importableAndExportable`.
 ----
 `(doc: SavedObjectUnsanitizedDoc, log: SavedObjectsMigrationLogger) => SavedObjectUnsanitizedDoc;`
 ----
-In {kib} Platform, it is 
+In {kib} Platform, it is
 [source,typescript]
 ----
 `(doc: SavedObjectUnsanitizedDoc, context: SavedObjectMigrationContext) => SavedObjectUnsanitizedDoc;`
@@ -979,7 +979,7 @@ Legacy Elasticsearch library until the additional announcements.
 [source,typescript]
 ----
 // Kibana provides a few typings for internal purposes
-import type { SearchResponse } from 'kibana/server';
+import type { SearchResponse } from '@kbn/core/server';
 type SearchSource = {...};
 type SearchBody = SearchResponse<SearchSource>;
 const { body } = await client.search<SearchBody>(...);
@@ -1092,7 +1092,7 @@ the current user.
 
 [source,typescript]
 ----
-const request = client.asCurrentUser.ping({}, { 
+const request = client.asCurrentUser.ping({}, {
   headers: {
     authorization: 'foo',
     custom: 'bar',
@@ -1143,9 +1143,9 @@ router.get(
 
 ==== Accessing the client from a collector's `fetch` method
 
-At the moment, the `fetch` method's context receives preconfigured 
-<<scoped-services, scoped clients>> for Elasticsearch and SavedObjects. 
-To help in the transition, both, the legacy (`callCluster`) and new clients are provided, 
+At the moment, the `fetch` method's context receives preconfigured
+<<scoped-services, scoped clients>> for Elasticsearch and SavedObjects.
+To help in the transition, both, the legacy (`callCluster`) and new clients are provided,
 but we strongly discourage using the deprecated legacy ones for any new implementation.
 
 [source,typescript]
@@ -1156,19 +1156,19 @@ usageCollection.makeUsageCollector<MyUsage>({
   schema: {...},
   async fetch(context) {
     const { callCluster, esClient, soClient } = context;
-    
+
     // Before:
     const result = callCluster('search', options)
 
     // After:
     const { body: result } = esClient.search(options);
-    
+
     return result;
   }
 });
 ----
 
-Regarding the `soClient`, it is encouraged to use it instead of the plugin's owned SavedObject's repository 
+Regarding the `soClient`, it is encouraged to use it instead of the plugin's owned SavedObject's repository
 as we used to do in the past.
 
 Before:
@@ -1176,7 +1176,7 @@ Before:
 [source,typescript]
 ----
 function getUsageCollector(
-  usageCollection: UsageCollectionSetup, 
+  usageCollection: UsageCollectionSetup,
   getSavedObjectsRepository: () => ISavedObjectsRepository | undefined
 ) {
   usageCollection.makeUsageCollector<MyUsage>({
@@ -1185,12 +1185,12 @@ function getUsageCollector(
     schema: {...},
     async fetch() {
       const savedObjectsRepository = getSavedObjectsRepository();
-      
+
       const { attributes: result } = await savedObjectsRepository.get('my-so-type', 'my-so-id');
-      
+
       return result;
     }
-  });  
+  });
 }
 ----
 
@@ -1205,10 +1205,10 @@ function getUsageCollector(usageCollection: UsageCollectionSetup) {
     schema: {...},
     async fetch({ soClient }) {
       const { attributes: result } = await soClient.get('my-so-type', 'my-so-id');
-      
+
       return result;
     }
-  });  
+  });
 }
 ----
 

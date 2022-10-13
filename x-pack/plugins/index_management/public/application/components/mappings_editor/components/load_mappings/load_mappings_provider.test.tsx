@@ -7,23 +7,7 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-
-jest.mock('@elastic/eui', () => {
-  const original = jest.requireActual('@elastic/eui');
-
-  return {
-    ...original,
-    // Mocking EuiCodeEditor, which uses React Ace under the hood
-    EuiCodeEditor: (props: any) => (
-      <input
-        data-test-subj="mockCodeEditor"
-        onChange={(syntheticEvent: any) => {
-          props.onChange(syntheticEvent.jsonString);
-        }}
-      />
-    ),
-  };
-});
+import '@kbn/es-ui-shared-plugin/public/components/code_editor/jest_mock';
 
 jest.mock('lodash', () => {
   const original = jest.requireActual('lodash');
@@ -34,11 +18,11 @@ jest.mock('lodash', () => {
   };
 });
 
-import { registerTestBed, TestBed } from '@kbn/test/jest';
+import { registerTestBed, TestBed } from '@kbn/test-jest-helpers';
 import { LoadMappingsProvider } from './load_mappings_provider';
 
 const ComponentToTest = ({ onJson }: { onJson: () => void }) => (
-  <LoadMappingsProvider onJson={onJson}>
+  <LoadMappingsProvider onJson={onJson} esNodesPlugins={[]}>
     {(openModal) => (
       <button onClick={openModal} data-test-subj="load-json-button">
         Load JSON
@@ -53,20 +37,22 @@ const setup = (props: any) =>
     defaultProps: props,
   })();
 
-const openModalWithJsonContent = ({ component, find }: TestBed) => (json: any) => {
-  act(() => {
-    find('load-json-button').simulate('click');
-  });
-
-  component.update();
-
-  act(() => {
-    // Set the mappings to load
-    find('mockCodeEditor').simulate('change', {
-      jsonString: JSON.stringify(json),
+const openModalWithJsonContent =
+  ({ component, find }: TestBed) =>
+  (json: any) => {
+    act(() => {
+      find('load-json-button').simulate('click');
     });
-  });
-};
+
+    component.update();
+
+    act(() => {
+      // Set the mappings to load
+      find('mockCodeEditor').simulate('change', {
+        jsonString: JSON.stringify(json),
+      });
+    });
+  };
 
 describe('<LoadMappingsProvider />', () => {
   test('it should forward valid mapping definition', () => {

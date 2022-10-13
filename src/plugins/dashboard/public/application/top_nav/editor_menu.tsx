@@ -6,22 +6,29 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiContextMenu,
   EuiContextMenuPanelItemDescriptor,
   EuiContextMenuItemIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiBadge,
 } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
-import { BaseVisType, VisGroups, VisTypeAlias } from '../../../../visualizations/public';
-import { SolutionToolbarPopover } from '../../../../presentation_util/public';
-import { EmbeddableFactoryDefinition, EmbeddableInput } from '../../services/embeddable';
-import { useKibana } from '../../services/kibana_react';
-import { DashboardAppServices } from '../types';
+import { type BaseVisType, VisGroups, type VisTypeAlias } from '@kbn/visualizations-plugin/public';
+import { SolutionToolbarPopover } from '@kbn/presentation-util-plugin/public';
+import type {
+  EmbeddableFactory,
+  EmbeddableFactoryDefinition,
+  EmbeddableInput,
+} from '@kbn/embeddable-plugin/public';
+
 import { DashboardContainer } from '..';
 import { DashboardConstants } from '../../dashboard_constants';
 import { dashboardReplacePanelAction } from '../../dashboard_strings';
+import { pluginServices } from '../../services/plugin_services';
 
 interface Props {
   /** Dashboard container */
@@ -38,36 +45,63 @@ interface FactoryGroup {
   factories: EmbeddableFactoryDefinition[];
 }
 
+interface UnwrappedEmbeddableFactory {
+  factory: EmbeddableFactory;
+  isEditable: boolean;
+}
+
 export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
   const {
-    core,
     embeddable,
-    visualizations,
+    notifications: { toasts },
+    settings: { uiSettings },
     usageCollection,
-    uiSettings,
-  } = useKibana<DashboardAppServices>().services;
+    visualizations: {
+      getAliases: getVisTypeAliases,
+      getByGroup: getVisTypesByGroup,
+      showNewVisModal,
+    },
+  } = pluginServices.getServices();
 
-  const IS_DARK_THEME = uiSettings.get('theme:darkMode');
+  const embeddableFactories = useMemo(
+    () => Array.from(embeddable.getEmbeddableFactories()),
+    [embeddable]
+  );
+  const [unwrappedEmbeddableFactories, setUnwrappedEmbeddableFactories] = useState<
+    UnwrappedEmbeddableFactory[]
+  >([]);
 
-  const trackUiMetric = usageCollection?.reportUiCounter.bind(
+  useEffect(() => {
+    Promise.all(
+      embeddableFactories.map<Promise<UnwrappedEmbeddableFactory>>(async (factory) => ({
+        factory,
+        isEditable: await factory.isEditable(),
+      }))
+    ).then((factories) => {
+      setUnwrappedEmbeddableFactories(factories);
+    });
+  }, [embeddableFactories]);
+
+  const LABS_ENABLED = uiSettings.get('visualize:enableLabs');
+
+  const trackUiMetric = usageCollection.reportUiCounter?.bind(
     usageCollection,
-    DashboardConstants.DASHBOARDS_ID
+    DashboardConstants.DASHBOARD_ID
   );
 
   const createNewAggsBasedVis = useCallback(
     (visType?: BaseVisType) => () =>
-      visualizations.showNewVisModal({
+      showNewVisModal({
         originatingApp: DashboardConstants.DASHBOARDS_ID,
         outsideVisualizeApp: true,
         showAggsSelection: true,
         selectedVisType: visType,
       }),
-    [visualizations]
+    [showNewVisModal]
   );
 
-  const getVisTypesByGroup = (group: VisGroups) =>
-    visualizations
-      .getByGroup(group)
+  const getSortedVisTypesByGroup = (group: VisGroups) =>
+    getVisTypesByGroup(group)
       .sort(({ name: a }: BaseVisType | VisTypeAlias, { name: b }: BaseVisType | VisTypeAlias) => {
         if (a < b) {
           return -1;
@@ -77,23 +111,22 @@ export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
         }
         return 0;
       })
-      .filter(({ hidden }: BaseVisType) => !hidden);
+      .filter(
+        ({ hidden, stage }: BaseVisType) => !(hidden || (!LABS_ENABLED && stage === 'experimental'))
+      );
 
-  const promotedVisTypes = getVisTypesByGroup(VisGroups.PROMOTED);
-  const aggsBasedVisTypes = getVisTypesByGroup(VisGroups.AGGBASED);
-  const toolVisTypes = getVisTypesByGroup(VisGroups.TOOLS);
-  const visTypeAliases = visualizations
-    .getAliases()
-    .sort(({ promotion: a = false }: VisTypeAlias, { promotion: b = false }: VisTypeAlias) =>
+  const promotedVisTypes = getSortedVisTypesByGroup(VisGroups.PROMOTED);
+  const aggsBasedVisTypes = getSortedVisTypesByGroup(VisGroups.AGGBASED);
+  const toolVisTypes = getSortedVisTypesByGroup(VisGroups.TOOLS);
+  const visTypeAliases = getVisTypeAliases().sort(
+    ({ promotion: a = false }: VisTypeAlias, { promotion: b = false }: VisTypeAlias) =>
       a === b ? 0 : a ? -1 : 1
-    );
+  );
 
-  const factories = embeddable
-    ? Array.from(embeddable.getEmbeddableFactories()).filter(
-        ({ type, isEditable, canCreateNew, isContainerType }) =>
-          isEditable() && !isContainerType && canCreateNew() && type !== 'visualization'
-      )
-    : [];
+  const factories = unwrappedEmbeddableFactories.filter(
+    ({ isEditable, factory: { type, canCreateNew, isContainerType } }) =>
+      isEditable && !isContainerType && canCreateNew() && type !== 'visualization'
+  );
 
   const factoryGroupMap: Record<string, FactoryGroup> = {};
   const ungroupedFactories: EmbeddableFactoryDefinition[] = [];
@@ -101,7 +134,7 @@ export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
 
   let panelCount = 1 + aggBasedPanelID;
 
-  factories.forEach((factory: EmbeddableFactoryDefinition, index) => {
+  factories.forEach(({ factory }) => {
     const { grouping } = factory;
 
     if (grouping) {
@@ -128,12 +161,36 @@ export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
   });
 
   const getVisTypeMenuItem = (visType: BaseVisType): EuiContextMenuPanelItemDescriptor => {
-    const { name, title, titleInWizard, description, icon = 'empty', group } = visType;
+    const {
+      name,
+      title,
+      titleInWizard,
+      description,
+      icon = 'empty',
+      group,
+      isDeprecated,
+    } = visType;
     return {
-      name: titleInWizard || title,
+      name: !isDeprecated ? (
+        titleInWizard || title
+      ) : (
+        <EuiFlexGroup wrap responsive={false} gutterSize="s">
+          <EuiFlexItem grow={false}>{titleInWizard || title}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="warning">
+              {i18n.translate('dashboard.editorMenu.deprecatedTag', {
+                defaultMessage: 'Deprecated',
+              })}
+            </EuiBadge>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ),
       icon: icon as string,
       onClick:
-        group === VisGroups.AGGBASED ? createNewAggsBasedVis(visType) : createNewVisType(visType),
+        // not all the agg-based visualizations need to be created via the wizard
+        group === VisGroups.AGGBASED && visType.options.showIndexSelection
+          ? createNewAggsBasedVis(visType)
+          : createNewVisType(visType),
       'data-test-subj': `visType-${name}`,
       toolTipContent: description,
     };
@@ -154,7 +211,8 @@ export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
   };
 
   const getEmbeddableFactoryMenuItem = (
-    factory: EmbeddableFactoryDefinition
+    factory: EmbeddableFactoryDefinition,
+    closePopover: () => void
   ): EuiContextMenuPanelItemDescriptor => {
     const icon = factory?.getIconType ? factory.getIconType() : 'empty';
 
@@ -165,6 +223,7 @@ export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
       icon,
       toolTipContent,
       onClick: async () => {
+        closePopover();
         if (trackUiMetric) {
           trackUiMetric(METRIC_TYPE.CLICK, factory.type);
         }
@@ -177,7 +236,7 @@ export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
         }
 
         if (newEmbeddable) {
-          core.notifications.toasts.addSuccess({
+          toasts.addSuccess({
             title: dashboardReplacePanelAction.getSuccessMessage(
               `'${newEmbeddable.getInput().title}'` || ''
             ),
@@ -193,63 +252,66 @@ export const EditorMenu = ({ dashboardContainer, createNewVisType }: Props) => {
     defaultMessage: 'Aggregation based',
   });
 
-  const editorMenuPanels = [
-    {
-      id: 0,
-      items: [
-        ...visTypeAliases.map(getVisTypeAliasMenuItem),
-        ...Object.values(factoryGroupMap).map(({ id, appName, icon, panelId }) => ({
-          name: appName,
-          icon,
-          panel: panelId,
-          'data-test-subj': `dashboardEditorMenu-${id}Group`,
-        })),
-        ...ungroupedFactories.map(getEmbeddableFactoryMenuItem),
-        ...promotedVisTypes.map(getVisTypeMenuItem),
-        {
-          name: aggsPanelTitle,
-          icon: 'visualizeApp',
-          panel: aggBasedPanelID,
-          'data-test-subj': `dashboardEditorAggBasedMenuItem`,
-        },
-        ...toolVisTypes.map(getVisTypeMenuItem),
-      ],
-    },
-    {
-      id: aggBasedPanelID,
-      title: aggsPanelTitle,
-      items: aggsBasedVisTypes.map(getVisTypeMenuItem),
-    },
-    ...Object.values(factoryGroupMap).map(
-      ({ appName, panelId, factories: groupFactories }: FactoryGroup) => ({
-        id: panelId,
-        title: appName,
-        items: groupFactories.map(getEmbeddableFactoryMenuItem),
-      })
-    ),
-  ];
-
+  const getEditorMenuPanels = (closePopover: () => void) => {
+    return [
+      {
+        id: 0,
+        items: [
+          ...visTypeAliases.map(getVisTypeAliasMenuItem),
+          ...Object.values(factoryGroupMap).map(({ id, appName, icon, panelId }) => ({
+            name: appName,
+            icon,
+            panel: panelId,
+            'data-test-subj': `dashboardEditorMenu-${id}Group`,
+          })),
+          ...ungroupedFactories.map((factory) => {
+            return getEmbeddableFactoryMenuItem(factory, closePopover);
+          }),
+          ...promotedVisTypes.map(getVisTypeMenuItem),
+          {
+            name: aggsPanelTitle,
+            icon: 'visualizeApp',
+            panel: aggBasedPanelID,
+            'data-test-subj': `dashboardEditorAggBasedMenuItem`,
+          },
+          ...toolVisTypes.map(getVisTypeMenuItem),
+        ],
+      },
+      {
+        id: aggBasedPanelID,
+        title: aggsPanelTitle,
+        items: aggsBasedVisTypes.map(getVisTypeMenuItem),
+      },
+      ...Object.values(factoryGroupMap).map(
+        ({ appName, panelId, factories: groupFactories }: FactoryGroup) => ({
+          id: panelId,
+          title: appName,
+          items: groupFactories.map((factory) => {
+            return getEmbeddableFactoryMenuItem(factory, closePopover);
+          }),
+        })
+      ),
+    ];
+  };
   return (
     <SolutionToolbarPopover
       ownFocus
       label={i18n.translate('dashboard.solutionToolbar.editorMenuButtonLabel', {
-        defaultMessage: 'All types',
+        defaultMessage: 'Select type',
       })}
       iconType="arrowDown"
       iconSide="right"
       panelPaddingSize="none"
       data-test-subj="dashboardEditorMenuButton"
     >
-      <EuiContextMenu
-        initialPanelId={0}
-        panels={editorMenuPanels}
-        className={`dshSolutionToolbar__editorContextMenu ${
-          IS_DARK_THEME
-            ? 'dshSolutionToolbar__editorContextMenu--dark'
-            : 'dshSolutionToolbar__editorContextMenu--light'
-        }`}
-        data-test-subj="dashboardEditorContextMenu"
-      />
+      {({ closePopover }: { closePopover: () => void }) => (
+        <EuiContextMenu
+          initialPanelId={0}
+          panels={getEditorMenuPanels(closePopover)}
+          className={`dshSolutionToolbar__editorContextMenu`}
+          data-test-subj="dashboardEditorContextMenu"
+        />
+      )}
     </SolutionToolbarPopover>
   );
 };

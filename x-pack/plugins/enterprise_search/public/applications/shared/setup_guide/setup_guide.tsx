@@ -11,7 +11,7 @@ import { useValues } from 'kea';
 
 import {
   EuiPage,
-  EuiPageSideBar,
+  EuiPageSideBar_Deprecated as EuiPageSideBar,
   EuiPageBody,
   EuiSpacer,
   EuiFlexGroup,
@@ -37,23 +37,15 @@ interface Props {
   children: React.ReactNode;
   productName: string;
   productEuiIcon: 'logoAppSearch' | 'logoWorkplaceSearch' | 'logoEnterpriseSearch';
-  standardAuthLink?: string;
-  elasticsearchNativeAuthLink?: string;
 }
 
-export const SetupGuideLayout: React.FC<Props> = ({
-  children,
-  productName,
-  productEuiIcon,
-  standardAuthLink,
-  elasticsearchNativeAuthLink,
-}) => {
+export const SetupGuideLayout: React.FC<Props> = ({ children, productName, productEuiIcon }) => {
   const { cloud } = useValues(KibanaLogic);
   const isCloudEnabled = Boolean(cloud.isCloudEnabled);
   const cloudDeploymentLink = cloud.deploymentUrl || '';
 
   return (
-    <EuiPage className="setupGuide">
+    <EuiPage className="setupGuide" data-test-subj="setupGuide">
       <EuiPageSideBar className="setupGuide__sidebar">
         <EuiText color="subdued" size="s">
           <strong>{SETUP_GUIDE_TITLE}</strong>
@@ -81,11 +73,7 @@ export const SetupGuideLayout: React.FC<Props> = ({
             cloudDeploymentLink={cloudDeploymentLink}
           />
         ) : (
-          <SetupInstructions
-            productName={productName}
-            standardAuthLink={standardAuthLink}
-            elasticsearchNativeAuthLink={elasticsearchNativeAuthLink}
-          />
+          <SetupInstructions productName={productName} />
         )}
       </EuiPageBody>
     </EuiPage>

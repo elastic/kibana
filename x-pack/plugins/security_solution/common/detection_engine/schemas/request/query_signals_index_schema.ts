@@ -6,15 +6,18 @@
  */
 
 import * as t from 'io-ts';
-import { PositiveIntegerGreaterThanZero } from '../types/positive_integer_greater_than_zero';
+import { PositiveInteger } from '@kbn/securitysolution-io-ts-types';
 
 export const querySignalsSchema = t.exact(
   t.partial({
     query: t.object,
     aggs: t.object,
-    size: PositiveIntegerGreaterThanZero,
+    size: PositiveInteger,
     track_total_hits: t.boolean,
-    _source: t.array(t.string),
+    _source: t.union([t.boolean, t.string, t.array(t.string)]),
+    fields: t.array(t.string),
+    runtime_mappings: t.unknown,
+    sort: t.object,
   })
 );
 

@@ -6,15 +6,17 @@
  */
 
 import expect from '@kbn/expect';
-import request, { Cookie } from 'request';
-// @ts-expect-error https://github.com/elastic/kibana/issues/95679
+import { parse as parseCookie, Cookie } from 'tough-cookie';
 import { adminTestUser } from '@kbn/test';
+import { resolve } from 'path';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { FileWrapper } from '../audit/file_wrapper';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   const config = getService('config');
   const security = getService('security');
+  const retry = getService('retry');
 
   function checkCookieIsSet(cookie: Cookie) {
     expect(cookie.value).to.not.be.empty();
@@ -34,9 +36,9 @@ export default function ({ getService }: FtrProviderContext) {
     expect(cookie.maxAge).to.be(0);
   }
 
-  const isElasticsearchAnonymousAccessEnabled = (config.get(
-    'esTestCluster.serverArgs'
-  ) as string[]).some((setting) => setting.startsWith('xpack.security.authc.anonymous'));
+  const isElasticsearchAnonymousAccessEnabled = (
+    config.get('esTestCluster.serverArgs') as string[]
+  ).some((setting) => setting.startsWith('xpack.security.authc.anonymous'));
 
   describe('Anonymous authentication', () => {
     if (!isElasticsearchAnonymousAccessEnabled) {
@@ -72,7 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
       const cookies = response.headers['set-cookie'];
       expect(cookies).to.have.length(1);
 
-      const cookie = request.cookie(cookies[0])!;
+      const cookie = parseCookie(cookies[0])!;
       checkCookieIsSet(cookie);
 
       const { body: user } = await supertest
@@ -94,7 +96,7 @@ export default function ({ getService }: FtrProviderContext) {
         const cookies = response.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
-        const sessionCookie = request.cookie(cookies[0])!;
+        const sessionCookie = parseCookie(cookies[0])!;
         checkCookieIsSet(sessionCookie);
 
         const { body: user } = await supertest
@@ -118,9 +120,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(401);
 
         expect(unauthenticatedResponse.headers['set-cookie']).to.be(undefined);
-        expect(unauthenticatedResponse.headers['content-security-policy']).to.be(
-          `script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'`
-        );
+        expect(unauthenticatedResponse.headers['content-security-policy']).to.be.a('string');
         expect(unauthenticatedResponse.text).to.contain('We couldn&#x27;t log you in');
       });
     });
@@ -134,7 +134,7 @@ export default function ({ getService }: FtrProviderContext) {
         const cookies = response.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
-        sessionCookie = request.cookie(cookies[0])!;
+        sessionCookie = parseCookie(cookies[0])!;
         checkCookieIsSet(sessionCookie);
       });
 
@@ -163,12 +163,13 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'xxx')
           .set('Authorization', 'Basic ZHVtbXlfaGFja2VyOnBhc3M=')
           .set('Cookie', sessionCookie.cookieString())
-          .expect(401, {
-            statusCode: 401,
-            error: 'Unauthorized',
-            message:
-              '[security_exception]: unable to authenticate user [dummy_hacker] for REST request [/_security/_authenticate]',
-          });
+          .expect(401);
+
+        expect(apiResponse.body.statusCode).to.be(401);
+        expect(apiResponse.body.error).to.be('Unauthorized');
+        expect(apiResponse.body.message).to.include.string(
+          '[security_exception] Reason: unable to authenticate user [dummy_hacker] for REST request [/_security/_authenticate]'
+        );
 
         expect(apiResponse.headers['set-cookie']).to.be(undefined);
       });
@@ -181,7 +182,7 @@ export default function ({ getService }: FtrProviderContext) {
         let cookies = response.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
-        const sessionCookie = request.cookie(cookies[0])!;
+        const sessionCookie = parseCookie(cookies[0])!;
         checkCookieIsSet(sessionCookie);
 
         // And then log user out.
@@ -192,7 +193,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         cookies = logoutResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
-        checkCookieIsCleared(request.cookie(cookies[0])!);
+        checkCookieIsCleared(parseCookie(cookies[0])!);
 
         expect(logoutResponse.headers.location).to.be('/security/logged_out?msg=LOGGED_OUT');
 
@@ -206,7 +207,7 @@ export default function ({ getService }: FtrProviderContext) {
         // If Kibana detects cookie with invalid token it tries to clear it.
         cookies = apiResponse.headers['set-cookie'];
         expect(cookies).to.have.length(1);
-        checkCookieIsCleared(request.cookie(cookies[0])!);
+        checkCookieIsCleared(parseCookie(cookies[0])!);
       });
 
       it('should redirect to home page if session cookie is not provided', async () => {
@@ -214,6 +215,55 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(logoutResponse.headers['set-cookie']).to.be(undefined);
         expect(logoutResponse.headers.location).to.be('/security/logged_out?msg=LOGGED_OUT');
+      });
+    });
+
+    describe('Audit Log', function () {
+      const logFilePath = resolve(__dirname, '../../fixtures/audit/anonymous.log');
+      const logFile = new FileWrapper(logFilePath, retry);
+
+      beforeEach(async () => {
+        await logFile.reset();
+      });
+
+      it('should log a single `user_login` and `user_logout` event per session', async () => {
+        // Accessing Kibana without an existing session should create a `user_login` event.
+        const response = await supertest.get('/security/account').expect(200);
+
+        const cookies = response.headers['set-cookie'];
+        expect(cookies).to.have.length(1);
+        const sessionCookie = parseCookie(cookies[0])!;
+
+        // Accessing Kibana again using the same session should not create another `user_login` event.
+        await supertest
+          .get('/security/account')
+          .set('Cookie', sessionCookie.cookieString())
+          .expect(200);
+
+        // Clearing the session should create a `user_logout` event.
+        await supertest
+          .get('/api/security/logout')
+          .set('Cookie', sessionCookie.cookieString())
+          .expect(302);
+
+        await retry.waitFor('audit events in dest file', () => logFile.isNotEmpty());
+        const auditEvents = await logFile.readJSON();
+
+        expect(auditEvents).to.have.length(2);
+
+        expect(auditEvents[0]).to.be.ok();
+        expect(auditEvents[0].event.action).to.be('user_login');
+        expect(auditEvents[0].event.outcome).to.be('success');
+        expect(auditEvents[0].trace.id).to.be.ok();
+        expect(auditEvents[0].user.name).to.be('anonymous_user');
+        expect(auditEvents[0].kibana.authentication_provider).to.be('anonymous1');
+
+        expect(auditEvents[1]).to.be.ok();
+        expect(auditEvents[1].event.action).to.be('user_logout');
+        expect(auditEvents[1].event.outcome).to.be('unknown');
+        expect(auditEvents[1].trace.id).to.be.ok();
+        expect(auditEvents[1].user.name).to.be('anonymous_user');
+        expect(auditEvents[1].kibana.authentication_provider).to.be('anonymous1');
       });
     });
   });

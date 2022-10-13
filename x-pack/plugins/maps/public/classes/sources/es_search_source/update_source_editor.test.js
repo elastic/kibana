@@ -7,7 +7,7 @@
 
 jest.mock('../../../kibana_services', () => ({}));
 
-jest.mock('./load_index_settings', () => ({
+jest.mock('./util/load_index_settings', () => ({
   loadIndexSettings: async () => {
     return { maxInnerResultWindow: 100 };
   },
@@ -26,6 +26,7 @@ const defaultProps = {
   tooltipFields: [],
   sortOrder: 'DESC',
   scalingType: SCALING_TYPES.LIMIT,
+  numberOfJoins: 0,
 };
 
 test('should render update source editor', async () => {

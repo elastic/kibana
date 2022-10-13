@@ -7,7 +7,7 @@
 
 import { readFileSync } from 'fs';
 import { cloneDeep } from 'lodash';
-import { Logger } from '../../../../../src/core/server';
+import { Logger } from '@kbn/core/server';
 import { ActionsConfig, CustomHostSettings } from '../config';
 
 type DeepWriteable<T> = { -readonly [P in keyof T]: DeepWriteable<T[P]> };
@@ -86,8 +86,8 @@ export function resolveCustomHosts(logger: Logger, config: ActionsConfig): Actio
     }
 
     // read the specified ca files, add their content to certificateAuthoritiesData
-    if (customHostSetting.tls) {
-      let files = customHostSetting.tls?.certificateAuthoritiesFiles || [];
+    if (customHostSetting.ssl) {
+      let files = customHostSetting.ssl?.certificateAuthoritiesFiles || [];
       if (typeof files === 'string') {
         files = [files];
       }
@@ -134,12 +134,12 @@ export function resolveCustomHosts(logger: Logger, config: ActionsConfig): Actio
 }
 
 function appendToCertificateAuthoritiesData(customHost: CustomHostSettingsWriteable, cert: string) {
-  const tls = customHost.tls;
-  if (tls) {
-    if (!tls.certificateAuthoritiesData) {
-      tls.certificateAuthoritiesData = cert;
+  const ssl = customHost.ssl;
+  if (ssl) {
+    if (!ssl.certificateAuthoritiesData) {
+      ssl.certificateAuthoritiesData = cert;
     } else {
-      tls.certificateAuthoritiesData += '\n' + cert;
+      ssl.certificateAuthoritiesData += '\n' + cert;
     }
   }
 }

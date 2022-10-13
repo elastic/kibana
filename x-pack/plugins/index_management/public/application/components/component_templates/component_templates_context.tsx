@@ -8,8 +8,14 @@
 import React, { createContext, useContext } from 'react';
 import { UiCounterMetricType } from '@kbn/analytics';
 
-import { HttpSetup, DocLinksStart, NotificationsSetup, CoreStart } from 'src/core/public';
-import { ManagementAppMountParams } from 'src/plugins/management/public';
+import {
+  HttpSetup,
+  DocLinksStart,
+  NotificationsSetup,
+  CoreStart,
+  ExecutionContextStart,
+} from '@kbn/core/public';
+import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { getApi, getUseRequest, getSendRequest, getDocumentation, getBreadcrumbs } from './lib';
 
 const ComponentTemplatesContext = createContext<Context | undefined>(undefined);
@@ -22,6 +28,8 @@ interface Props {
   toasts: NotificationsSetup['toasts'];
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
   getUrlForApp: CoreStart['application']['getUrlForApp'];
+  executionContext: ExecutionContextStart;
+  overlays: CoreStart['overlays'];
 }
 
 interface Context {
@@ -32,7 +40,9 @@ interface Context {
   breadcrumbs: ReturnType<typeof getBreadcrumbs>;
   trackMetric: (type: UiCounterMetricType, eventName: string) => void;
   toasts: NotificationsSetup['toasts'];
+  overlays: CoreStart['overlays'];
   getUrlForApp: CoreStart['application']['getUrlForApp'];
+  executionContext: ExecutionContextStart;
 }
 
 export const ComponentTemplatesProvider = ({
@@ -43,6 +53,7 @@ export const ComponentTemplatesProvider = ({
   children: React.ReactNode;
 }) => {
   const {
+    overlays,
     httpClient,
     apiBasePath,
     trackMetric,
@@ -50,6 +61,7 @@ export const ComponentTemplatesProvider = ({
     toasts,
     setBreadcrumbs,
     getUrlForApp,
+    executionContext,
   } = value;
 
   const useRequest = getUseRequest(httpClient);
@@ -62,6 +74,7 @@ export const ComponentTemplatesProvider = ({
   return (
     <ComponentTemplatesContext.Provider
       value={{
+        overlays,
         api,
         documentation,
         trackMetric,
@@ -70,6 +83,7 @@ export const ComponentTemplatesProvider = ({
         apiBasePath,
         breadcrumbs,
         getUrlForApp,
+        executionContext,
       }}
     >
       {children}

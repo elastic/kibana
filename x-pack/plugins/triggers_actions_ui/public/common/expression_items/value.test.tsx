@@ -9,7 +9,7 @@ import * as React from 'react';
 import { shallow } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { ValueExpression } from './value';
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 
 describe('value expression', () => {
   it('renders description and value', () => {
@@ -102,7 +102,7 @@ describe('value expression', () => {
     expect(wrapper.find('[data-test-subj="valueFieldTitle"]').exists()).toBeFalsy();
     expect(wrapper.find('[data-test-subj="valueFieldNumber"]').exists()).toBeFalsy();
 
-    wrapper.find('[data-test-subj="valueExpression"]').first().simulate('click');
+    wrapper.find('[data-test-subj="valueExpression"]').last().simulate('click');
     await act(async () => {
       await nextTick();
       wrapper.update();
@@ -123,7 +123,7 @@ describe('value expression', () => {
       />
     );
 
-    wrapper.find('[data-test-subj="valueExpression"]').first().simulate('click');
+    wrapper.find('[data-test-subj="valueExpression"]').last().simulate('click');
     await act(async () => {
       await nextTick();
       wrapper.update();

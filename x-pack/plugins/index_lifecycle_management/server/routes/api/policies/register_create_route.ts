@@ -6,22 +6,22 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
 
-async function createPolicy(client: ElasticsearchClient, name: string, phases: any): Promise<any> {
-  const body = {
-    policy: {
-      phases,
-    },
-  };
+async function createPolicy(
+  client: ElasticsearchClient,
+  name: string,
+  policy: Omit<typeof bodySchema.type, 'name'>
+): Promise<any> {
+  const body = { policy };
   const options = {
     ignore: [404],
   };
 
-  return client.ilm.putLifecycle({ policy: name, body }, options);
+  return client.ilm.putLifecycle({ name, body }, options);
 }
 
 /**
@@ -40,6 +40,7 @@ const bodySchema = schema.object({
     frozen: schema.maybe(schema.any()),
     delete: schema.maybe(schema.any()),
   }),
+  _meta: schema.maybe(schema.any()),
 });
 
 export function registerCreateRoute({
@@ -51,10 +52,11 @@ export function registerCreateRoute({
     { path: addBasePath('/policies'), validate: { body: bodySchema } },
     license.guardApiRoute(async (context, request, response) => {
       const body = request.body as typeof bodySchema.type;
-      const { name, phases } = body;
+      const { name, ...rest } = body;
 
       try {
-        await createPolicy(context.core.elasticsearch.client.asCurrentUser, name, phases);
+        const esClient = (await context.core).elasticsearch.client;
+        await createPolicy(esClient.asCurrentUser, name, rest);
         return response.ok();
       } catch (error) {
         return handleEsError({ error, response });

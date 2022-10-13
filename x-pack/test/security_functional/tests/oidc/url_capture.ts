@@ -10,7 +10,6 @@ import { parse } from 'url';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
   const find = getService('find');
   const browser = getService('browser');
   const deployment = getService('deployment');
@@ -25,12 +24,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         .post('/_security/role_mapping/oidc1')
         .send({ roles: ['superuser'], enabled: true, rules: { field: { 'realm.name': 'oidc1' } } })
         .expect(200);
-
-      await esArchiver.load('../../functional/es_archives/empty_kibana');
-    });
-
-    after(async () => {
-      await esArchiver.unload('../../functional/es_archives/empty_kibana');
     });
 
     afterEach(async () => {
@@ -43,10 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         deployment.getHostPort() + '/app/management/security/users#some=hash-value'
       );
 
-      await find.byCssSelector(
-        '[data-test-subj="kibanaChrome"] .kbnAppWrapper:not(.kbnAppWrapper--hiddenChrome)',
-        20000
-      );
+      await find.byCssSelector('[data-test-subj="userMenuButton"]', 20000);
 
       // We need to make sure that both path and hash are respected.
       const currentURL = parse(await browser.getCurrentUrl());

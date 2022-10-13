@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { registerTestBed } from '@kbn/test/jest';
+import { registerTestBed } from '@kbn/test-jest-helpers';
 import { HighlightDetailsFlyout, Props } from '.';
 
 describe('Highlight Details Flyout', () => {

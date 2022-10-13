@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Embeddable, EmbeddableInput, IContainer } from '../../';
+import { Embeddable, EmbeddableInput, IContainer } from '../..';
 
 export const HELLO_WORLD_EMBEDDABLE = 'HELLO_WORLD_EMBEDDABLE';
 
@@ -16,15 +16,7 @@ export class HelloWorldEmbeddable extends Embeddable {
   public readonly type = HELLO_WORLD_EMBEDDABLE;
 
   constructor(initialInput: EmbeddableInput, parent?: IContainer) {
-    super(
-      // Input state is irrelevant to this embeddable, just pass it along.
-      initialInput,
-      // Initial output state - this embeddable does not do anything with output, so just
-      // pass along an empty object.
-      {},
-      // Optional parent component, this embeddable can optionally be rendered inside a container.
-      parent
-    );
+    super(initialInput, {}, parent);
   }
 
   /**

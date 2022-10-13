@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { ISessionsClient } from './sessions_client';
 import { ISessionService } from './session_service';
-import { SearchSessionState, SessionMeta } from './search_session_state';
+import { SearchSessionState } from './search_session_state';
+import type { SessionMeta } from './search_session_state';
 
 export function getSessionsClientMock(): jest.Mocked<ISessionsClient> {
   return {
@@ -33,9 +34,17 @@ export function getSessionServiceMock(): jest.Mocked<ISessionService> {
     state$: new BehaviorSubject<SearchSessionState>(SearchSessionState.None).asObservable(),
     sessionMeta$: new BehaviorSubject<SessionMeta>({
       state: SearchSessionState.None,
+      isContinued: false,
     }).asObservable(),
+    disableSaveAfterSearchesExpire$: of(false),
     renameCurrentSession: jest.fn(),
-    trackSearch: jest.fn((searchDescriptor) => () => {}),
+    trackSearch: jest.fn((searchDescriptor) => ({
+      complete: jest.fn(),
+      error: jest.fn(),
+      beforePoll: jest.fn(() => {
+        return [{ isSearchStored: false }, () => {}];
+      }),
+    })),
     destroy: jest.fn(),
     cancel: jest.fn(),
     isStored: jest.fn(),
@@ -47,5 +56,6 @@ export function getSessionServiceMock(): jest.Mocked<ISessionService> {
     isSessionStorageReady: jest.fn(() => true),
     getSearchSessionIndicatorUiConfig: jest.fn(() => ({ isDisabled: () => ({ disabled: false }) })),
     hasAccess: jest.fn(() => true),
+    continue: jest.fn(),
   };
 }

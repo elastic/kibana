@@ -11,11 +11,18 @@ import { useCallback, useEffect, useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { camelCase, isArray, isObject } from 'lodash';
-import { set } from '@elastic/safer-lodash-set';
-import { DEFAULT_DATE_FORMAT, DEFAULT_DATE_FORMAT_TZ } from '../../../../common/constants';
+import { set } from '@kbn/safer-lodash-set';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
+import type { Capabilities, NavigateToAppOptions } from '@kbn/core/public';
+import type { CasesPermissions } from '@kbn/cases-plugin/common/ui';
+import {
+  APP_UI_ID,
+  CASES_FEATURE_ID,
+  DEFAULT_DATE_FORMAT,
+  DEFAULT_DATE_FORMAT_TZ,
+} from '../../../../common/constants';
 import { errorToToaster, useStateToaster } from '../../components/toasters';
-import { AuthenticatedUser } from '../../../../../security/common/model';
-import { StartServices } from '../../../types';
+import type { StartServices } from '../../../types';
 import { useUiSetting, useKibana } from './kibana_react';
 
 export const useDateFormat = (): string => useUiSetting<string>(DEFAULT_DATE_FORMAT);
@@ -61,6 +68,7 @@ export const convertArrayToCamelCase = (arrayOfSnakes: unknown[]): unknown[] =>
       return [...acc, value];
     }
   }, []);
+
 export const convertToCamelCase = <T, U extends {}>(snakeCase: T): U =>
   Object.entries(snakeCase).reduce((acc, [key, value]) => {
     if (isArray(value)) {
@@ -72,6 +80,7 @@ export const convertToCamelCase = <T, U extends {}>(snakeCase: T): U =>
     }
     return acc;
   }, {} as U);
+
 export const useCurrentUser = (): AuthenticatedElasticUser | null => {
   const isMounted = useRef(false);
   const [user, setUser] = useState<AuthenticatedElasticUser | null>(null);
@@ -138,28 +147,109 @@ export const useCurrentUser = (): AuthenticatedElasticUser | null => {
   return user;
 };
 
-export interface UseGetUserSavedObjectPermissions {
-  crud: boolean;
-  read: boolean;
-}
-
-export const useGetUserSavedObjectPermissions = () => {
-  const [
-    savedObjectsPermissions,
-    setSavedObjectsPermissions,
-  ] = useState<UseGetUserSavedObjectPermissions | null>(null);
+export const useGetUserCasesPermissions = () => {
+  const [casesPermissions, setCasesPermissions] = useState<CasesPermissions>({
+    all: false,
+    create: false,
+    read: false,
+    update: false,
+    delete: false,
+    push: false,
+  });
   const uiCapabilities = useKibana().services.application.capabilities;
+  const casesCapabilities = useKibana().services.cases.helpers.getUICapabilities(
+    uiCapabilities[CASES_FEATURE_ID]
+  );
 
   useEffect(() => {
-    const capabilitiesCanUserCRUD: boolean =
-      typeof uiCapabilities.siem.crud === 'boolean' ? uiCapabilities.siem.crud : false;
-    const capabilitiesCanUserRead: boolean =
-      typeof uiCapabilities.siem.show === 'boolean' ? uiCapabilities.siem.show : false;
-    setSavedObjectsPermissions({
-      crud: capabilitiesCanUserCRUD,
-      read: capabilitiesCanUserRead,
+    setCasesPermissions({
+      all: casesCapabilities.all,
+      create: casesCapabilities.create,
+      read: casesCapabilities.read,
+      update: casesCapabilities.update,
+      delete: casesCapabilities.delete,
+      push: casesCapabilities.push,
     });
-  }, [uiCapabilities]);
+  }, [
+    casesCapabilities.all,
+    casesCapabilities.create,
+    casesCapabilities.read,
+    casesCapabilities.update,
+    casesCapabilities.delete,
+    casesCapabilities.push,
+  ]);
 
-  return savedObjectsPermissions;
+  return casesPermissions;
+};
+
+export type GetAppUrl = (param: {
+  appId?: string;
+  deepLinkId?: string;
+  path?: string;
+  absolute?: boolean;
+}) => string;
+/**
+ * The `getAppUrl` function returns a full URL to the provided page path by using
+ * kibana's `getUrlForApp()`
+ */
+export const useAppUrl = () => {
+  const { getUrlForApp } = useKibana().services.application;
+
+  const getAppUrl = useCallback<GetAppUrl>(
+    ({ appId = APP_UI_ID, ...options }) => getUrlForApp(appId, options),
+    [getUrlForApp]
+  );
+  return { getAppUrl };
+};
+
+export type NavigateTo = (
+  param: {
+    url?: string;
+    appId?: string;
+  } & NavigateToAppOptions
+) => void;
+/**
+ * The `navigateTo` function navigates to any app using kibana's `navigateToApp()`.
+ * When the `{ url: string }` parameter is passed it will navigate using `navigateToUrl()`.
+ */
+export const useNavigateTo = () => {
+  const { navigateToApp, navigateToUrl } = useKibana().services.application;
+
+  const navigateTo = useCallback<NavigateTo>(
+    ({ url, appId = APP_UI_ID, ...options }) => {
+      if (url) {
+        navigateToUrl(url);
+      } else {
+        navigateToApp(appId, options);
+      }
+    },
+    [navigateToApp, navigateToUrl]
+  );
+  return { navigateTo };
+};
+
+/**
+ * Returns `navigateTo` and `getAppUrl` navigation hooks
+ */
+export const useNavigation = () => {
+  const { navigateTo } = useNavigateTo();
+  const { getAppUrl } = useAppUrl();
+  return { navigateTo, getAppUrl };
+};
+
+// Get the type for any feature capability
+export type FeatureCapability = Capabilities[string];
+interface UseCapabilities {
+  (): Capabilities;
+  <T extends FeatureCapability = FeatureCapability>(featureId: string): T;
+}
+/**
+ * Returns the feature capability when the `featureId` parameter is defined,
+ * or the entire kibana `Capabilities` object when the parameter is omitted.
+ */
+export const useCapabilities: UseCapabilities = <T extends FeatureCapability = FeatureCapability>(
+  featureId?: string
+) => {
+  const { capabilities } = useKibana().services.application;
+  return featureId ? (capabilities[featureId] as T) : capabilities;
 };

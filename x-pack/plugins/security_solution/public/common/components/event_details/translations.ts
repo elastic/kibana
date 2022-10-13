@@ -7,45 +7,54 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const SUMMARY = i18n.translate('xpack.securitySolution.alertDetails.summary', {
-  defaultMessage: 'Summary',
-});
-
-export const ALERT_SUMMARY = i18n.translate('xpack.securitySolution.alertDetails.alertSummary', {
-  defaultMessage: 'Alert Summary',
-});
-
 export const THREAT_INTEL = i18n.translate('xpack.securitySolution.alertDetails.threatIntel', {
   defaultMessage: 'Threat Intel',
 });
 
-export const THREAT_SUMMARY = i18n.translate('xpack.securitySolution.alertDetails.threatSummary', {
-  defaultMessage: 'Threat Summary',
-});
-
-export const NO_ENRICHMENT_FOUND = i18n.translate(
-  'xpack.securitySolution.alertDetails.noEnrichmentFound',
-  {
-    defaultMessage: 'No Threat Intel Enrichment Found',
-  }
-);
-
-export const IF_CTI_NOT_ENABLED = i18n.translate(
-  'xpack.securitySolution.alertDetails.ifCtiNotEnabled',
-  {
-    defaultMessage:
-      "If you haven't enabled any threat intelligence sources and want to learn more about this capability, ",
-  }
-);
-
-export const CHECK_DOCS = i18n.translate('xpack.securitySolution.alertDetails.checkDocs', {
-  defaultMessage: 'please check out our documentation.',
-});
-
 export const INVESTIGATION_GUIDE = i18n.translate(
-  'xpack.securitySolution.alertDetails.summary.investigationGuide',
+  'xpack.securitySolution.alertDetails.overview.investigationGuide',
   {
     defaultMessage: 'Investigation guide',
+  }
+);
+
+export const OVERVIEW = i18n.translate('xpack.securitySolution.alertDetails.overview', {
+  defaultMessage: 'Overview',
+});
+
+export const HIGHLIGHTED_FIELDS = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.highlightedFields',
+  {
+    defaultMessage: 'Highlighted fields',
+  }
+);
+
+export const HIGHLIGHTED_FIELDS_FIELD = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.highlightedFields.field',
+  {
+    defaultMessage: 'Field',
+  }
+);
+
+export const HIGHLIGHTED_FIELDS_VALUE = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.highlightedFields.value',
+  {
+    defaultMessage: 'Value',
+  }
+);
+
+export const HIGHLIGHTED_FIELDS_ALERT_PREVALENCE = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.highlightedFields.alertPrevalence',
+  {
+    defaultMessage: 'Alert prevalence',
+  }
+);
+
+export const HIGHLIGHTED_FIELDS_ALERT_PREVALENCE_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.highlightedFields.alertPrevalenceTooltip',
+  {
+    defaultMessage:
+      'The total count of alerts with the same value within the currently selected timerange. This value is not affected by additional filters.',
   }
 );
 
@@ -54,7 +63,11 @@ export const TABLE = i18n.translate('xpack.securitySolution.eventDetails.table',
 });
 
 export const JSON_VIEW = i18n.translate('xpack.securitySolution.eventDetails.jsonView', {
-  defaultMessage: 'JSON View',
+  defaultMessage: 'JSON',
+});
+
+export const OSQUERY_VIEW = i18n.translate('xpack.securitySolution.eventDetails.osqueryView', {
+  defaultMessage: 'Osquery Results',
 });
 
 export const FIELD = i18n.translate('xpack.securitySolution.eventDetails.field', {
@@ -69,21 +82,10 @@ export const DESCRIPTION = i18n.translate('xpack.securitySolution.eventDetails.d
   defaultMessage: 'Description',
 });
 
-export const BLANK = i18n.translate('xpack.securitySolution.eventDetails.blank', {
-  defaultMessage: ' ',
-});
-
 export const PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.eventDetails.filter.placeholder',
   {
     defaultMessage: 'Filter by Field, Value, or Description...',
-  }
-);
-
-export const COPY_TO_CLIPBOARD = i18n.translate(
-  'xpack.securitySolution.eventDetails.copyToClipboard',
-  {
-    defaultMessage: 'Copy to Clipboard',
   }
 );
 
@@ -99,3 +101,37 @@ export const NESTED_COLUMN = (field: string) =>
     defaultMessage:
       'The {field} field is an object, and is broken down into nested fields which can be added as column',
   });
+
+export const AGENT_STATUS = i18n.translate('xpack.securitySolution.detections.alerts.agentStatus', {
+  defaultMessage: 'Agent status',
+});
+
+export const RULE_TYPE = i18n.translate('xpack.securitySolution.detections.alerts.ruleType', {
+  defaultMessage: 'Rule type',
+});
+
+export const MULTI_FIELD_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.eventDetails.multiFieldTooltipContent',
+  {
+    defaultMessage: 'Multi-fields can have multiple values per field',
+  }
+);
+
+export const MULTI_FIELD_BADGE = i18n.translate(
+  'xpack.securitySolution.eventDetails.multiFieldBadge',
+  {
+    defaultMessage: 'multi-field',
+  }
+);
+
+export const ACTIONS = i18n.translate('xpack.securitySolution.eventDetails.table.actions', {
+  defaultMessage: 'Actions',
+});
+
+export const REASON = i18n.translate('xpack.securitySolution.eventDetails.reason', {
+  defaultMessage: 'Reason',
+});
+
+export const VIEW_ALL_FIELDS = i18n.translate('xpack.securitySolution.eventDetails.viewAllFields', {
+  defaultMessage: 'View all fields in table',
+});

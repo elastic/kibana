@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { Action } from 'redux';
+import type { Action } from 'redux';
 import { map, filter, ignoreElements, tap, withLatestFrom, delay } from 'rxjs/operators';
-import { Epic } from 'redux-observable';
+import type { Epic } from 'redux-observable';
 import { get } from 'lodash/fp';
 
-import { TimelineIdLiteral } from '../../../../common/types/timeline';
+import type { TimelineIdLiteral } from '../../../../common/types/timeline';
 import { addTimelineInStorage } from '../../containers/local_storage';
 
 import {
@@ -19,10 +19,12 @@ import {
   applyDeltaToColumnWidth,
   setExcludedRowRendererIds,
   updateColumns,
+  updateColumnOrder,
+  updateColumnWidth,
   updateItemsPerPage,
   updateSort,
 } from './actions';
-import { TimelineEpicDependencies } from './types';
+import type { TimelineEpicDependencies } from './types';
 import { isNotNull } from './helpers';
 
 const timelineActionTypes = [
@@ -30,6 +32,8 @@ const timelineActionTypes = [
   upsertColumn.type,
   applyDeltaToColumnWidth.type,
   updateColumns.type,
+  updateColumnOrder.type,
+  updateColumnWidth.type,
   updateItemsPerPage.type,
   updateSort.type,
   setExcludedRowRendererIds.type,
@@ -39,25 +43,22 @@ export const isPageTimeline = (timelineId: string | undefined): boolean =>
   // Is not a flyout timeline
   !(timelineId && timelineId.toLowerCase().startsWith('timeline'));
 
-export const createTimelineLocalStorageEpic = <State>(): Epic<
-  Action,
-  Action,
-  State,
-  TimelineEpicDependencies<State>
-> => (action$, state$, { timelineByIdSelector, storage }) => {
-  const timeline$ = state$.pipe(map(timelineByIdSelector), filter(isNotNull));
-  return action$.pipe(
-    delay(500),
-    withLatestFrom(timeline$),
-    filter(([action]) => isPageTimeline(get('payload.id', action))),
-    tap(([action, timelineById]) => {
-      if (timelineActionTypes.includes(action.type)) {
-        if (storage) {
-          const timelineId: TimelineIdLiteral = get('payload.id', action);
-          addTimelineInStorage(storage, timelineId, timelineById[timelineId]);
+export const createTimelineLocalStorageEpic =
+  <State>(): Epic<Action, Action, State, TimelineEpicDependencies<State>> =>
+  (action$, state$, { timelineByIdSelector, storage }) => {
+    const timeline$ = state$.pipe(map(timelineByIdSelector), filter(isNotNull));
+    return action$.pipe(
+      delay(500),
+      withLatestFrom(timeline$),
+      filter(([action]) => isPageTimeline(get('payload.id', action))),
+      tap(([action, timelineById]) => {
+        if (timelineActionTypes.includes(action.type)) {
+          if (storage) {
+            const timelineId: TimelineIdLiteral = get('payload.id', action);
+            addTimelineInStorage(storage, timelineId, timelineById[timelineId]);
+          }
         }
-      }
-    }),
-    ignoreElements()
-  );
-};
+      }),
+      ignoreElements()
+    );
+  };

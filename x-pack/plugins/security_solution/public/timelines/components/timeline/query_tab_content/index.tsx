@@ -14,51 +14,57 @@ import {
   EuiBadge,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useMemo, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
-import { Dispatch } from 'redux';
-import { connect, ConnectedProps } from 'react-redux';
+import type { Dispatch } from 'redux';
+import type { ConnectedProps } from 'react-redux';
+import { connect, useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import { InPortal } from 'react-reverse-portal';
 
+import { FilterManager } from '@kbn/data-plugin/public';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { InputsModelId } from '../../../../common/store/inputs/constants';
+import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
-import { RowRenderer } from '../body/renderers/row_renderer';
-import { CellValueElementProps } from '../cell_rendering';
-import { Direction, TimelineItem } from '../../../../../common/search_strategy';
-import { useTimelineEvents } from '../../../containers/index';
+import type { CellValueElementProps } from '../cell_rendering';
+import type { Direction, TimelineItem } from '../../../../../common/search_strategy';
+import { useTimelineEvents } from '../../../containers';
 import { useKibana } from '../../../../common/lib/kibana';
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { StatefulBody } from '../body';
 import { Footer, footerHeight } from '../footer';
 import { TimelineHeader } from '../header';
-import { calculateTotalPages, combineQueries } from '../helpers';
+import { calculateTotalPages } from '../helpers';
+import { combineQueries } from '../../../../common/lib/kuery';
 import { TimelineRefetch } from '../refetch_timeline';
-import { esQuery, FilterManager } from '../../../../../../../../src/plugins/data/public';
-import { useManageTimeline } from '../../manage_timeline';
-import { TimelineEventsType, TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
+import type {
+  ControlColumnProps,
+  KueryFilterQueryKind,
+  RowRenderer,
+  ToggleDetailPanel,
+} from '../../../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import { requiredFieldsForActions } from '../../../../detections/components/alerts_table/default_config';
 import { SuperDatePicker } from '../../../../common/components/super_date_picker';
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
-import { PickEventType } from '../search_or_filter/pick_events';
-import {
-  inputsModel,
-  inputsSelectors,
-  KueryFilterQueryKind,
-  State,
-} from '../../../../common/store';
-import { sourcererActions } from '../../../../common/store/sourcerer';
+import type { inputsModel, State } from '../../../../common/store';
+import { inputsSelectors } from '../../../../common/store';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
-import { useSourcererScope } from '../../../../common/containers/sourcerer';
+import { timelineDefaults } from '../../../store/timeline/defaults';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { useTimelineEventsCountPortal } from '../../../../common/hooks/use_timeline_events_count';
-import { TimelineModel } from '../../../../timelines/store/timeline/model';
+import type { TimelineModel } from '../../../store/timeline/model';
 import { TimelineDatePickerLock } from '../date_picker_lock';
 import { useTimelineFullScreen } from '../../../../common/containers/use_full_screen';
 import { activeTimeline } from '../../../containers/active_timeline_context';
-import { ToggleDetailPanel } from '../../../store/timeline/actions';
 import { DetailsPanel } from '../../side_panel';
 import { ExitFullScreen } from '../../../../common/components/exit_full_screen';
-
+import { HeaderActions } from '../body/actions/header_actions';
+import { getDefaultControlColumn } from '../body/control_columns';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import { Sourcerer } from '../../../../common/components/sourcerer';
+import { useLicense } from '../../../../common/hooks/use_license';
 const TimelineHeaderContainer = styled.div`
   margin-top: 6px;
   width: 100%;
@@ -118,8 +124,13 @@ const DatePicker = styled(EuiFlexItem)`
     width: auto;
   }
 `;
-
 DatePicker.displayName = 'DatePicker';
+
+const SourcererFlex = styled(EuiFlexItem)`
+  align-items: flex-end;
+`;
+
+SourcererFlex.displayName = 'SourcererFlex';
 
 const VerticalRule = styled.div`
   width: 2px;
@@ -130,7 +141,7 @@ const VerticalRule = styled.div`
 VerticalRule.displayName = 'VerticalRule';
 
 const EventsCountBadge = styled(EuiBadge)`
-  margin-left: ${({ theme }) => theme.eui.paddingSizes.s};
+  margin-left: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
 const isTimerangeSame = (prevProps: Props, nextProps: Props) =>
@@ -153,12 +164,13 @@ const EMPTY_EVENTS: TimelineItem[] = [];
 
 export type Props = OwnProps & PropsFromRedux;
 
+const trailingControlColumns: ControlColumnProps[] = []; // stable reference
+
 export const QueryTabContentComponent: React.FC<Props> = ({
   activeTab,
   columns,
   dataProviders,
   end,
-  eventType,
   expandedDetail,
   filters,
   timelineId,
@@ -167,6 +179,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   itemsPerPageOptions,
   kqlMode,
   kqlQueryExpression,
+  kqlQueryLanguage,
   onEventClosed,
   renderCellValue,
   rowRenderers,
@@ -177,25 +190,43 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   status,
   sort,
   timerangeKind,
-  updateEventTypeAndIndexesName,
 }) => {
+  const dispatch = useDispatch();
   const { portalNode: timelineEventsCountPortalNode } = useTimelineEventsCountPortal();
   const { setTimelineFullScreen, timelineFullScreen } = useTimelineFullScreen();
   const {
     browserFields,
-    docValueFields,
+    dataViewId,
     loading: loadingSourcerer,
     indexPattern,
+    runtimeMappings,
+    // important to get selectedPatterns from useSourcererDataView
+    // in order to include the exclude filters in the search that are not stored in the timeline
     selectedPatterns,
-  } = useSourcererScope(SourcererScopeName.timeline);
+  } = useSourcererDataView(SourcererScopeName.timeline);
 
   const { uiSettings } = useKibana().services;
-  const [filterManager] = useState<FilterManager>(new FilterManager(uiSettings));
-  const esQueryConfig = useMemo(() => esQuery.getEsQueryConfig(uiSettings), [uiSettings]);
+  const isEnterprisePlus = useLicense().isEnterprise();
+  const ACTION_BUTTON_COUNT = isEnterprisePlus ? 6 : 5;
+
+  const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
+  const { filterManager: activeFilterManager } = useDeepEqualSelector((state) =>
+    getManageTimeline(state, timelineId ?? '')
+  );
+
+  const filterManager = useMemo(
+    () => activeFilterManager ?? new FilterManager(uiSettings),
+    [activeFilterManager, uiSettings]
+  );
+
+  const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
   const kqlQuery: {
     query: string;
     language: KueryFilterQueryKind;
-  } = { query: kqlQueryExpression, language: 'kuery' };
+  } = useMemo(
+    () => ({ query: kqlQueryExpression.trim(), language: kqlQueryLanguage }),
+    [kqlQueryExpression, kqlQueryLanguage]
+  );
 
   const combinedQueries = combineQueries({
     config: esQueryConfig,
@@ -207,15 +238,31 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     kqlMode,
   });
 
-  const isBlankTimeline: boolean =
-    isEmpty(dataProviders) && isEmpty(filters) && isEmpty(kqlQuery.query);
+  useInvalidFilterQuery({
+    id: timelineId,
+    filterQuery: combinedQueries?.filterQuery,
+    kqlError: combinedQueries?.kqlError,
+    query: kqlQuery,
+    startDate: start,
+    endDate: end,
+  });
 
-  const canQueryTimeline = () =>
-    combinedQueries != null &&
-    loadingSourcerer != null &&
-    !loadingSourcerer &&
-    !isEmpty(start) &&
-    !isEmpty(end);
+  const isBlankTimeline: boolean =
+    isEmpty(dataProviders) &&
+    isEmpty(filters) &&
+    isEmpty(kqlQuery.query) &&
+    combinedQueries?.filterQuery === undefined;
+
+  const canQueryTimeline = useMemo(
+    () =>
+      combinedQueries != null &&
+      loadingSourcerer != null &&
+      !loadingSourcerer &&
+      !isEmpty(start) &&
+      !isEmpty(end) &&
+      combinedQueries?.filterQuery !== undefined,
+    [combinedQueries, end, loadingSourcerer, start]
+  );
 
   const getTimelineQueryFields = () => {
     const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
@@ -224,37 +271,38 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     return [...columnFields, ...requiredFieldsForActions];
   };
 
-  const timelineQuerySortField = sort.map(({ columnId, columnType, sortDirection }) => ({
+  const timelineQuerySortField = sort.map(({ columnId, columnType, esTypes, sortDirection }) => ({
     field: columnId,
     direction: sortDirection as Direction,
+    esTypes: esTypes ?? [],
     type: columnType,
   }));
 
-  const { initializeTimeline, setIsTimelineLoading } = useManageTimeline();
   useEffect(() => {
-    initializeTimeline({
-      filterManager,
-      id: timelineId,
-    });
-  }, [initializeTimeline, filterManager, timelineId]);
+    dispatch(
+      timelineActions.initializeTGridSettings({
+        filterManager,
+        id: timelineId,
+      })
+    );
+  }, [activeFilterManager, dispatch, filterManager, timelineId, uiSettings]);
 
-  const [
-    isQueryLoading,
-    { events, inspect, totalCount, pageInfo, loadPage, updatedAt, refetch },
-  ] = useTimelineEvents({
-    docValueFields,
-    endDate: end,
-    id: timelineId,
-    indexNames: selectedPatterns,
-    fields: getTimelineQueryFields(),
-    language: kqlQuery.language,
-    limit: itemsPerPage,
-    filterQuery: combinedQueries?.filterQuery ?? '',
-    startDate: start,
-    skip: !canQueryTimeline(),
-    sort: timelineQuerySortField,
-    timerangeKind,
-  });
+  const [isQueryLoading, { events, inspect, totalCount, pageInfo, loadPage, updatedAt, refetch }] =
+    useTimelineEvents({
+      dataViewId,
+      endDate: end,
+      fields: getTimelineQueryFields(),
+      filterQuery: combinedQueries?.filterQuery,
+      id: timelineId,
+      indexNames: selectedPatterns,
+      language: kqlQuery.language,
+      limit: itemsPerPage,
+      runtimeMappings,
+      skip: !canQueryTimeline,
+      sort: timelineQuerySortField,
+      startDate: start,
+      timerangeKind,
+    });
 
   const handleOnPanelClosed = useCallback(() => {
     onEventClosed({ tabType: TimelineTabs.query, timelineId });
@@ -269,8 +317,26 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   }, [onEventClosed, timelineId, expandedDetail, showExpandedDetails]);
 
   useEffect(() => {
-    setIsTimelineLoading({ id: timelineId, isLoading: isQueryLoading || loadingSourcerer });
-  }, [loadingSourcerer, timelineId, isQueryLoading, setIsTimelineLoading]);
+    dispatch(
+      timelineActions.updateIsLoading({
+        id: timelineId,
+        isLoading: isQueryLoading || loadingSourcerer,
+      })
+    );
+  }, [loadingSourcerer, timelineId, isQueryLoading, dispatch]);
+
+  const isDatePickerDisabled = useMemo(() => {
+    return (combinedQueries && combinedQueries.kqlError != null) || false;
+  }, [combinedQueries]);
+
+  const leadingControlColumns = useMemo(
+    () =>
+      getDefaultControlColumn(ACTION_BUTTON_COUNT).map((x) => ({
+        ...x,
+        headerCellRender: HeaderActions,
+      })),
+    [ACTION_BUTTON_COUNT]
+  );
 
   return (
     <>
@@ -279,10 +345,11 @@ export const QueryTabContentComponent: React.FC<Props> = ({
       </InPortal>
       <TimelineRefetch
         id={`${timelineId}-${TimelineTabs.query}`}
-        inputId="timeline"
+        inputId={InputsModelId.timeline}
         inspect={inspect}
         loading={isQueryLoading}
         refetch={refetch}
+        skip={!canQueryTimeline}
       />
       <FullWidthFlexGroup gutterSize="none">
         <ScrollableFlexItem grow={2}>
@@ -301,18 +368,21 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                   setFullScreen={setTimelineFullScreen}
                 />
               )}
-              <DatePicker grow={1}>
-                <SuperDatePicker id="timeline" timelineId={timelineId} />
+              <DatePicker grow={10}>
+                <SuperDatePicker
+                  id={InputsModelId.timeline}
+                  timelineId={timelineId}
+                  disabled={isDatePickerDisabled}
+                />
               </DatePicker>
               <EuiFlexItem grow={false}>
                 <TimelineDatePickerLock />
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <PickEventType
-                  eventType={eventType}
-                  onChangeEventTypeAndIndexesName={updateEventTypeAndIndexesName}
-                />
-              </EuiFlexItem>
+              <SourcererFlex grow={1}>
+                {activeTab === TimelineTabs.query && (
+                  <Sourcerer scope={SourcererScopeName.timeline} />
+                )}
+              </SourcererFlex>
             </EuiFlexGroup>
             <TimelineHeaderContainer data-test-subj="timelineHeader">
               <TimelineHeader
@@ -344,6 +414,8 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                   itemsCount: totalCount,
                   itemsPerPage,
                 })}
+                leadingControlColumns={leadingControlColumns}
+                trailingControlColumns={trailingControlColumns}
               />
             </StyledEuiFlyoutBody>
 
@@ -376,8 +448,8 @@ export const QueryTabContentComponent: React.FC<Props> = ({
             <ScrollableFlexItem grow={1}>
               <DetailsPanel
                 browserFields={browserFields}
-                docValueFields={docValueFields}
                 handleOnPanelClosed={handleOnPanelClosed}
+                runtimeMappings={runtimeMappings}
                 tabType={TimelineTabs.query}
                 timelineId={timelineId}
               />
@@ -401,7 +473,6 @@ const makeMapStateToProps = () => {
       activeTab,
       columns,
       dataProviders,
-      eventType,
       expandedDetail,
       filters,
       itemsPerPage,
@@ -412,7 +483,7 @@ const makeMapStateToProps = () => {
       status,
       timelineType,
     } = timeline;
-    const kqlQueryTimeline = getKqlQueryTimeline(state, timelineId)!;
+    const kqlQueryTimeline = getKqlQueryTimeline(state, timelineId);
     const timelineFilter = kqlMode === 'filter' ? filters || [] : [];
 
     // return events on empty search
@@ -423,11 +494,15 @@ const makeMapStateToProps = () => {
         ? ' '
         : kqlQueryTimeline?.expression ?? '';
 
+    const kqlQueryLanguage =
+      isEmpty(dataProviders) && timelineType === 'template'
+        ? 'kuery'
+        : kqlQueryTimeline?.kind ?? 'kuery';
+
     return {
       activeTab,
       columns,
       dataProviders,
-      eventType: eventType ?? 'raw',
       end: input.timerange.to,
       expandedDetail,
       filters: timelineFilter,
@@ -437,6 +512,7 @@ const makeMapStateToProps = () => {
       itemsPerPageOptions,
       kqlMode,
       kqlQueryExpression,
+      kqlQueryLanguage,
       showCallOutUnauthorizedMsg: getShowCallOutUnauthorizedMsg(state),
       show,
       showExpandedDetails:
@@ -451,16 +527,6 @@ const makeMapStateToProps = () => {
 };
 
 const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
-  updateEventTypeAndIndexesName: (newEventType: TimelineEventsType, newIndexNames: string[]) => {
-    dispatch(timelineActions.updateEventType({ id: timelineId, eventType: newEventType }));
-    dispatch(timelineActions.updateIndexNames({ id: timelineId, indexNames: newIndexNames }));
-    dispatch(
-      sourcererActions.setSelectedIndexPatterns({
-        id: SourcererScopeName.timeline,
-        selectedPatterns: newIndexNames,
-      })
-    );
-  },
   onEventClosed: (args: ToggleDetailPanel) => {
     dispatch(timelineActions.toggleDetailPanel(args));
   },
@@ -477,7 +543,6 @@ const QueryTabContent = connector(
       compareQueryProps(prevProps, nextProps) &&
       prevProps.activeTab === nextProps.activeTab &&
       isTimerangeSame(prevProps, nextProps) &&
-      prevProps.eventType === nextProps.eventType &&
       prevProps.isLive === nextProps.isLive &&
       prevProps.itemsPerPage === nextProps.itemsPerPage &&
       prevProps.onEventClosed === nextProps.onEventClosed &&
@@ -486,7 +551,6 @@ const QueryTabContent = connector(
       prevProps.showExpandedDetails === nextProps.showExpandedDetails &&
       prevProps.status === nextProps.status &&
       prevProps.timelineId === nextProps.timelineId &&
-      prevProps.updateEventTypeAndIndexesName === nextProps.updateEventTypeAndIndexesName &&
       deepEqual(prevProps.columns, nextProps.columns) &&
       deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&
       deepEqual(prevProps.itemsPerPageOptions, nextProps.itemsPerPageOptions) &&

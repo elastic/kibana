@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { SecuritySubPlugin } from '../app/types';
-import { CasesRoutes } from './routes';
+import type { SecuritySubPlugin } from '../app/types';
+import { routes } from './routes';
 
 export class Cases {
   public setup() {}
 
   public start(): SecuritySubPlugin {
     return {
-      SubPluginRoutes: CasesRoutes,
+      routes,
     };
   }
 }

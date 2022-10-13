@@ -7,7 +7,7 @@
  */
 
 import { groupAndSortBy } from './utils';
-import { AggGroupNames } from 'src/plugins/data/public';
+import { AggGroupNames } from '@kbn/data-plugin/public';
 
 const aggs = [
   {

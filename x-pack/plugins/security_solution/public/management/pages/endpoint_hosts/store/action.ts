@@ -5,104 +5,105 @@
  * 2.0.
  */
 
-import {
-  HostResultList,
+import type { Action } from 'redux';
+import type { DataViewBase } from '@kbn/es-query';
+import type {
   HostInfo,
   GetHostPolicyResponse,
+  HostIsolationRequestBody,
+  ISOLATION_ACTIONS,
+  MetadataListResponse,
 } from '../../../../../common/endpoint/types';
-import { ServerApiError } from '../../../../common/types';
-import { GetPolicyListResponse } from '../../policy/types';
-import { GetPackagesResponse } from '../../../../../../fleet/common';
-import { EndpointState } from '../types';
-import { IIndexPattern } from '../../../../../../../../src/plugins/data/public';
+import type { ServerApiError } from '../../../../common/types';
+import type { GetPolicyListResponse } from '../../policy/types';
+import type { EndpointState } from '../types';
 
-interface ServerReturnedEndpointList {
+export interface ServerReturnedEndpointList {
   type: 'serverReturnedEndpointList';
-  payload: HostResultList;
+  payload: MetadataListResponse;
 }
 
-interface ServerFailedToReturnEndpointList {
+export interface ServerFailedToReturnEndpointList {
   type: 'serverFailedToReturnEndpointList';
   payload: ServerApiError;
 }
 
-interface ServerReturnedEndpointDetails {
+export interface ServerReturnedEndpointDetails {
   type: 'serverReturnedEndpointDetails';
   payload: HostInfo;
 }
 
-interface ServerFailedToReturnEndpointDetails {
+export interface ServerFailedToReturnEndpointDetails {
   type: 'serverFailedToReturnEndpointDetails';
   payload: ServerApiError;
 }
-
-interface ServerReturnedEndpointPolicyResponse {
+export interface ServerReturnedEndpointPolicyResponse {
   type: 'serverReturnedEndpointPolicyResponse';
   payload: GetHostPolicyResponse;
 }
 
-interface ServerFailedToReturnEndpointPolicyResponse {
+export interface ServerFailedToReturnEndpointPolicyResponse {
   type: 'serverFailedToReturnEndpointPolicyResponse';
   payload: ServerApiError;
 }
 
-interface ServerReturnedPoliciesForOnboarding {
+export interface ServerReturnedPoliciesForOnboarding {
   type: 'serverReturnedPoliciesForOnboarding';
   payload: {
     policyItems: GetPolicyListResponse['items'];
   };
 }
 
-interface ServerFailedToReturnPoliciesForOnboarding {
+export interface ServerFailedToReturnPoliciesForOnboarding {
   type: 'serverFailedToReturnPoliciesForOnboarding';
   payload: ServerApiError;
 }
 
-interface UserSelectedEndpointPolicy {
+export interface UserSelectedEndpointPolicy {
   type: 'userSelectedEndpointPolicy';
   payload: {
     selectedPolicyId: string;
   };
 }
 
-interface ServerCancelledEndpointListLoading {
+export interface ServerCancelledEndpointListLoading {
   type: 'serverCancelledEndpointListLoading';
 }
 
-interface ServerCancelledPolicyItemsLoading {
+export interface ServerCancelledPolicyItemsLoading {
   type: 'serverCancelledPolicyItemsLoading';
 }
 
-interface ServerReturnedEndpointPackageInfo {
-  type: 'serverReturnedEndpointPackageInfo';
-  payload: GetPackagesResponse['response'][0];
-}
+export type EndpointPackageInfoStateChanged = Action<'endpointPackageInfoStateChanged'> & {
+  payload: EndpointState['endpointPackageInfo'];
+};
 
-interface ServerReturnedEndpointNonExistingPolicies {
+export interface ServerReturnedEndpointNonExistingPolicies {
   type: 'serverReturnedEndpointNonExistingPolicies';
   payload: EndpointState['nonExistingPolicies'];
 }
 
-interface ServerReturnedEndpointAgentPolicies {
+export interface ServerReturnedEndpointAgentPolicies {
   type: 'serverReturnedEndpointAgentPolicies';
   payload: EndpointState['agentPolicies'];
 }
 
-interface ServerReturnedEndpointExistValue {
+export interface ServerReturnedEndpointExistValue {
   type: 'serverReturnedEndpointExistValue';
   payload: boolean;
 }
 
-interface ServerReturnedMetadataPatterns {
+export interface ServerReturnedMetadataPatterns {
   type: 'serverReturnedMetadataPatterns';
-  payload: IIndexPattern[];
+  payload: DataViewBase[];
 }
 
-interface ServerFailedToReturnMetadataPatterns {
+export interface ServerFailedToReturnMetadataPatterns {
   type: 'serverFailedToReturnMetadataPatterns';
   payload: ServerApiError;
 }
-interface UserUpdatedEndpointListRefreshOptions {
+
+export interface UserUpdatedEndpointListRefreshOptions {
   type: 'userUpdatedEndpointListRefreshOptions';
   payload: {
     isAutoRefreshEnabled?: boolean;
@@ -110,35 +111,64 @@ interface UserUpdatedEndpointListRefreshOptions {
   };
 }
 
-interface AppRequestedEndpointList {
+export interface AppRequestedEndpointList {
   type: 'appRequestedEndpointList';
 }
 
-interface ServerReturnedAgenstWithEndpointsTotal {
+export interface ServerReturnedAgenstWithEndpointsTotal {
   type: 'serverReturnedAgenstWithEndpointsTotal';
   payload: number;
 }
 
-interface ServerFailedToReturnAgenstWithEndpointsTotal {
+export interface ServerFailedToReturnAgenstWithEndpointsTotal {
   type: 'serverFailedToReturnAgenstWithEndpointsTotal';
   payload: ServerApiError;
 }
 
-interface ServerReturnedEndpointsTotal {
+export interface ServerReturnedEndpointsTotal {
   type: 'serverReturnedEndpointsTotal';
   payload: number;
 }
 
-interface ServerFailedToReturnEndpointsTotal {
+export interface ServerFailedToReturnEndpointsTotal {
   type: 'serverFailedToReturnEndpointsTotal';
   payload: ServerApiError;
 }
+
+export type EndpointIsolationRequest = Action<'endpointIsolationRequest'> & {
+  payload: {
+    type: ISOLATION_ACTIONS;
+    data: HostIsolationRequestBody;
+  };
+};
+
+export type EndpointIsolationRequestStateChange = Action<'endpointIsolationRequestStateChange'> & {
+  payload: EndpointState['isolationRequestState'];
+};
+
+export type EndpointPendingActionsStateChanged = Action<'endpointPendingActionsStateChanged'> & {
+  payload: EndpointState['endpointPendingActions'];
+};
+
+export interface EndpointDetailsLoad {
+  type: 'endpointDetailsLoad';
+  payload: {
+    endpointId: string;
+  };
+}
+
+export type LoadMetadataTransformStats = Action<'loadMetadataTransformStats'>;
+
+export type MetadataTransformStatsChanged = Action<'metadataTransformStatsChanged'> & {
+  payload: EndpointState['metadataTransformStats'];
+};
 
 export type EndpointAction =
   | ServerReturnedEndpointList
   | ServerFailedToReturnEndpointList
   | ServerReturnedEndpointDetails
   | ServerFailedToReturnEndpointDetails
+  | EndpointDetailsLoad
   | ServerReturnedEndpointPolicyResponse
   | ServerFailedToReturnEndpointPolicyResponse
   | ServerReturnedPoliciesForOnboarding
@@ -147,7 +177,7 @@ export type EndpointAction =
   | ServerCancelledEndpointListLoading
   | ServerReturnedEndpointExistValue
   | ServerCancelledPolicyItemsLoading
-  | ServerReturnedEndpointPackageInfo
+  | EndpointPackageInfoStateChanged
   | ServerReturnedMetadataPatterns
   | ServerFailedToReturnMetadataPatterns
   | AppRequestedEndpointList
@@ -157,4 +187,9 @@ export type EndpointAction =
   | UserUpdatedEndpointListRefreshOptions
   | ServerReturnedEndpointsTotal
   | ServerFailedToReturnAgenstWithEndpointsTotal
-  | ServerFailedToReturnEndpointsTotal;
+  | ServerFailedToReturnEndpointsTotal
+  | EndpointIsolationRequest
+  | EndpointIsolationRequestStateChange
+  | EndpointPendingActionsStateChanged
+  | LoadMetadataTransformStats
+  | MetadataTransformStatsChanged;

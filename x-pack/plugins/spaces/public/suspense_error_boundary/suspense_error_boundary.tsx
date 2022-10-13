@@ -9,11 +9,17 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import type { PropsWithChildren } from 'react';
 import React, { Component, Suspense } from 'react';
 
+import type { NotificationsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import type { NotificationsStart } from 'src/core/public';
 
 interface Props {
   notifications: NotificationsStart;
+  /**
+   * Whether or not to show a loading spinner while waiting for the child components to load.
+   *
+   * Default is true.
+   */
+  showLoadingSpinner?: boolean;
 }
 
 interface State {
@@ -44,11 +50,12 @@ export class SuspenseErrorBoundary extends Component<PropsWithChildren<Props>, S
   }
 
   render() {
-    const { children, notifications } = this.props;
+    const { children, notifications, showLoadingSpinner = true } = this.props;
     const { error } = this.state;
     if (!notifications || error) {
       return null;
     }
-    return <Suspense fallback={<EuiLoadingSpinner />}>{children}</Suspense>;
+    const fallback = showLoadingSpinner ? <EuiLoadingSpinner /> : null;
+    return <Suspense fallback={fallback}>{children}</Suspense>;
   }
 }

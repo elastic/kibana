@@ -7,23 +7,25 @@
  */
 
 import {
+  mockCreatePluginPrebootSetupContext,
   mockCreatePluginSetupContext,
   mockCreatePluginStartContext,
 } from './plugins_system.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';
 
-import { REPO_ROOT } from '@kbn/dev-utils';
-import { Env } from '../config';
-import { configServiceMock, getEnvOptions } from '../config/mocks';
-import { CoreContext } from '../core_context';
-import { loggingSystemMock } from '../logging/logging_system.mock';
+import { REPO_ROOT } from '@kbn/utils';
+import type { PluginName } from '@kbn/core-base-common';
+import type { CoreContext } from '@kbn/core-base-server-internal';
+import { Logger } from '@kbn/logging';
+import { Env } from '@kbn/config';
+import { configServiceMock, getEnvOptions } from '@kbn/config-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import { PluginWrapper } from './plugin';
-import { PluginName } from './types';
+import { PluginType } from './types';
 import { PluginsSystem } from './plugins_system';
 import { coreMock } from '../mocks';
-import { Logger } from '../logging';
 
 function createPlugin(
   id: string,
@@ -32,7 +34,14 @@ function createPlugin(
     optional = [],
     server = true,
     ui = true,
-  }: { required?: string[]; optional?: string[]; server?: boolean; ui?: boolean } = {}
+    type = PluginType.standard,
+  }: {
+    required?: string[];
+    optional?: string[];
+    server?: boolean;
+    ui?: boolean;
+    type?: PluginType;
+  } = {}
 ): PluginWrapper<any, any> {
   return new PluginWrapper<any, any>({
     path: 'some-path',
@@ -41,21 +50,24 @@ function createPlugin(
       version: 'some-version',
       configPath: 'path',
       kibanaVersion: '7.0.0',
+      type,
       requiredPlugins: required,
       optionalPlugins: optional,
       requiredBundles: [],
       server,
       ui,
+      owner: { name: 'foo' },
     },
     opaqueId: Symbol(id),
     initializerContext: { logger } as any,
   });
 }
 
+const prebootDeps = coreMock.createInternalPreboot();
 const setupDeps = coreMock.createInternalSetup();
 const startDeps = coreMock.createInternalStart();
 
-let pluginsSystem: PluginsSystem;
+let pluginsSystem: PluginsSystem<PluginType.standard>;
 let configService: ReturnType<typeof configServiceMock.create>;
 let logger: ReturnType<typeof loggingSystemMock.create>;
 let env: Env;
@@ -70,7 +82,7 @@ beforeEach(() => {
 
   coreContext = { coreId: Symbol(), env, logger, configService: configService as any };
 
-  pluginsSystem = new PluginsSystem(coreContext);
+  pluginsSystem = new PluginsSystem(coreContext, PluginType.standard);
 });
 
 test('can be setup even without plugins', async () => {
@@ -78,6 +90,26 @@ test('can be setup even without plugins', async () => {
 
   expect(pluginsSetup).toBeInstanceOf(Map);
   expect(pluginsSetup.size).toBe(0);
+});
+
+test('throws if adding plugin with incompatible type', () => {
+  const prebootPlugin = createPlugin('plugin-preboot', { type: PluginType.preboot });
+  const standardPlugin = createPlugin('plugin-standard');
+
+  const prebootPluginSystem = new PluginsSystem(coreContext, PluginType.preboot);
+  const standardPluginSystem = new PluginsSystem(coreContext, PluginType.standard);
+
+  prebootPluginSystem.addPlugin(prebootPlugin);
+  expect(() => prebootPluginSystem.addPlugin(standardPlugin)).toThrowErrorMatchingInlineSnapshot(
+    `"Cannot add plugin with type \\"standard\\" to plugin system with type \\"preboot\\"."`
+  );
+  expect(prebootPluginSystem.getPlugins()).toEqual([prebootPlugin]);
+
+  standardPluginSystem.addPlugin(standardPlugin);
+  expect(() => standardPluginSystem.addPlugin(prebootPlugin)).toThrowErrorMatchingInlineSnapshot(
+    `"Cannot add plugin with type \\"preboot\\" to plugin system with type \\"standard\\"."`
+  );
+  expect(standardPluginSystem.getPlugins()).toEqual([standardPlugin]);
 });
 
 test('getPlugins returns the list of plugins', () => {
@@ -293,6 +325,83 @@ test('correctly orders plugins and returns exposed values for "setup" and "start
   }
 });
 
+test('correctly orders preboot plugins and returns exposed values for "setup"', async () => {
+  const prebootPluginSystem = new PluginsSystem(coreContext, PluginType.preboot);
+  const plugins = new Map([
+    [
+      createPlugin('order-4', { type: PluginType.preboot, required: ['order-2'] }),
+      { 'order-2': 'added-as-2' },
+    ],
+    [createPlugin('order-0', { type: PluginType.preboot }), {}],
+    [
+      createPlugin('order-2', {
+        type: PluginType.preboot,
+        required: ['order-1'],
+        optional: ['order-0'],
+      }),
+      { 'order-1': 'added-as-3', 'order-0': 'added-as-1' },
+    ],
+    [
+      createPlugin('order-1', { type: PluginType.preboot, required: ['order-0'] }),
+      { 'order-0': 'added-as-1' },
+    ],
+    [
+      createPlugin('order-3', {
+        type: PluginType.preboot,
+        required: ['order-2'],
+        optional: ['missing-dep'],
+      }),
+      { 'order-2': 'added-as-2' },
+    ],
+  ] as Array<[PluginWrapper<any, any>, Record<PluginName, unknown>]>);
+
+  const setupContextMap = new Map();
+  [...plugins.keys()].forEach((plugin, index) => {
+    jest.spyOn(plugin, 'setup').mockResolvedValue(`added-as-${index}`);
+    setupContextMap.set(plugin.name, `setup-for-${plugin.name}`);
+    prebootPluginSystem.addPlugin(plugin);
+  });
+
+  mockCreatePluginPrebootSetupContext.mockImplementation((context, deps, plugin) =>
+    setupContextMap.get(plugin.name)
+  );
+
+  expect([...(await prebootPluginSystem.setupPlugins(prebootDeps))]).toMatchInlineSnapshot(`
+    Array [
+      Array [
+        "order-0",
+        "added-as-1",
+      ],
+      Array [
+        "order-1",
+        "added-as-3",
+      ],
+      Array [
+        "order-2",
+        "added-as-2",
+      ],
+      Array [
+        "order-3",
+        "added-as-4",
+      ],
+      Array [
+        "order-4",
+        "added-as-0",
+      ],
+    ]
+  `);
+
+  for (const [plugin, deps] of plugins) {
+    expect(mockCreatePluginPrebootSetupContext).toHaveBeenCalledWith(
+      coreContext,
+      prebootDeps,
+      plugin
+    );
+    expect(plugin.setup).toHaveBeenCalledTimes(1);
+    expect(plugin.setup).toHaveBeenCalledWith(setupContextMap.get(plugin.name), deps);
+  }
+});
+
 test('`setupPlugins` only setups plugins that have server side', async () => {
   const firstPluginToRun = createPlugin('order-0');
   const secondPluginNotToRun = createPlugin('order-not-run', { server: false });
@@ -397,6 +506,21 @@ test('can start without plugins', async () => {
 
   expect(pluginsStart).toBeInstanceOf(Map);
   expect(pluginsStart.size).toBe(0);
+});
+
+test('cannot start preboot plugins', async () => {
+  const prebootPlugin = createPlugin('order-0', { type: PluginType.preboot });
+  jest.spyOn(prebootPlugin, 'setup').mockResolvedValue({});
+  jest.spyOn(prebootPlugin, 'start').mockResolvedValue({});
+
+  const prebootPluginSystem = new PluginsSystem(coreContext, PluginType.preboot);
+  prebootPluginSystem.addPlugin(prebootPlugin);
+  await prebootPluginSystem.setupPlugins(prebootDeps);
+
+  await expect(
+    prebootPluginSystem.startPlugins(startDeps)
+  ).rejects.toThrowErrorMatchingInlineSnapshot(`"Preboot plugins cannot be started."`);
+  expect(prebootPlugin.start).not.toHaveBeenCalled();
 });
 
 test('`startPlugins` only starts plugins that were setup', async () => {
@@ -525,7 +649,7 @@ describe('asynchronous plugins', () => {
       })
     );
     coreContext = { coreId: Symbol(), env, logger, configService: configService as any };
-    pluginsSystem = new PluginsSystem(coreContext);
+    pluginsSystem = new PluginsSystem(coreContext, PluginType.standard);
 
     const syncPlugin = createPlugin('sync-plugin');
     jest.spyOn(syncPlugin, 'setup').mockReturnValue('setup-sync');

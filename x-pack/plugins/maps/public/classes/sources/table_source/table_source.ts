@@ -6,29 +6,28 @@
  */
 
 import uuid from 'uuid';
+import { GeoJsonProperties } from 'geojson';
+import type { Query } from '@kbn/data-plugin/common';
 import { FIELD_ORIGIN, SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import {
   MapExtent,
-  MapFilters,
-  MapQuery,
   TableSourceDescriptor,
   VectorJoinSourceRequestMeta,
-  VectorSourceSyncMeta,
+  VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
-import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { ITermJoinSource } from '../term_join_source';
 import { BucketProperties, PropertiesMap } from '../../../../common/elasticsearch_util';
 import { IField } from '../../fields/field';
-import { Query } from '../../../../../../../src/plugins/data/common/query';
 import {
   AbstractVectorSource,
-  BoundsFilters,
+  BoundsRequestMeta,
   GeoJsonWithMeta,
   IVectorSource,
-  SourceTooltipConfig,
+  SourceStatus,
 } from '../vector_source';
 import { DataRequest } from '../../util/data_request';
 import { InlineField } from '../../fields/inline_field';
+import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
 
 export class TableSource extends AbstractVectorSource implements ITermJoinSource, IVectorSource {
   static type = SOURCE_TYPES.TABLE_SOURCE;
@@ -45,9 +44,9 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
 
   readonly _descriptor: TableSourceDescriptor;
 
-  constructor(descriptor: Partial<TableSourceDescriptor>, inspectorAdapters?: Adapters) {
+  constructor(descriptor: Partial<TableSourceDescriptor>) {
     const sourceDescriptor = TableSource.createDescriptor(descriptor);
-    super(sourceDescriptor, inspectorAdapters);
+    super(sourceDescriptor);
     this._descriptor = sourceDescriptor;
   }
 
@@ -56,7 +55,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
     return `table source ${uuid()}`;
   }
 
-  getSyncMeta(): VectorSourceSyncMeta | null {
+  getSyncMeta(): null {
     return null;
   }
 
@@ -108,6 +107,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
 
     return new InlineField<TableSource>({
       fieldName: column.name,
+      label: column.label,
       source: this,
       origin: FIELD_ORIGIN.JOIN,
       dataType: column.type,
@@ -130,6 +130,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
     return this._descriptor.__columns.map((column) => {
       return new InlineField<TableSource>({
         fieldName: column.name,
+        label: column.label,
         source: this,
         origin: FIELD_ORIGIN.JOIN,
         dataType: column.type,
@@ -143,7 +144,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
     });
   }
 
-  canFormatFeatureProperties(): boolean {
+  hasTooltipProperties(): boolean {
     return false;
   }
 
@@ -156,7 +157,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
   }
 
   async getBoundsForFilters(
-    boundsFilters: BoundsFilters,
+    boundsFilters: BoundsRequestMeta,
     registerCancelCallback: (callback: () => void) => void
   ): Promise<MapExtent | null> {
     return null;
@@ -173,6 +174,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
 
     return new InlineField<TableSource>({
       fieldName: column.name,
+      label: column.label,
       source: this,
       origin: FIELD_ORIGIN.JOIN,
       dataType: column.type,
@@ -187,14 +189,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
   // Could be useful to implement, e.g. to preview raw csv data
   async getGeoJsonWithMeta(
     layerName: string,
-    searchFilters: MapFilters & {
-      applyGlobalQuery: boolean;
-      applyGlobalTime: boolean;
-      fieldNames: string[];
-      geogridPrecision?: number;
-      sourceQuery?: MapQuery;
-      sourceMeta: VectorSourceSyncMeta;
-    },
+    searchFilters: VectorSourceRequestMeta,
     registerCancelCallback: (callback: () => void) => void,
     isRequestStillActive: () => boolean
   ): Promise<GeoJsonWithMeta> {
@@ -205,7 +200,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
     throw new Error('TableSource cannot be used as a left-layer in a term join');
   }
 
-  getSourceTooltipContent(sourceDataRequest?: DataRequest): SourceTooltipConfig {
+  getSourceStatus(sourceDataRequest?: DataRequest): SourceStatus {
     throw new Error('must add tooltip content');
   }
 
@@ -215,5 +210,18 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
 
   isBoundsAware(): boolean {
     return false;
+  }
+
+  async getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]> {
+    const tooltipProperties: ITooltipProperty[] = [];
+    for (const key in properties) {
+      if (properties.hasOwnProperty(key)) {
+        const field = this.getFieldByName(key);
+        if (field) {
+          tooltipProperties.push(new TooltipProperty(key, await field.getLabel(), properties[key]));
+        }
+      }
+    }
+    return tooltipProperties;
   }
 }

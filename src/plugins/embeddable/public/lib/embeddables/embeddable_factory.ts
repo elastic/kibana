@@ -6,15 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectAttributes } from 'src/core/public';
-import { SavedObjectMetaData } from '../../../../saved_objects/public';
+import { SavedObjectMetaData } from '@kbn/saved-objects-plugin/public';
+import { PersistableState } from '@kbn/kibana-utils-plugin/common';
+import { UiActionsPresentableGrouping } from '@kbn/ui-actions-plugin/public';
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
 import { ErrorEmbeddable } from './error_embeddable';
 import { IContainer } from '../containers/i_container';
 import { PropertySpec } from '../types';
-import { PersistableState } from '../../../../kibana_utils/common';
 import { EmbeddableStateWithType } from '../../../common/types';
-import { UiActionsPresentableGrouping } from '../../../../ui_actions/public';
 
 export interface EmbeddableInstanceConfiguration {
   id: string;
@@ -35,7 +34,7 @@ export interface EmbeddableFactory<
     TEmbeddableInput,
     TEmbeddableOutput
   >,
-  TSavedObjectAttributes extends SavedObjectAttributes = SavedObjectAttributes
+  TSavedObjectAttributes = unknown
 > extends PersistableState<EmbeddableStateWithType> {
   // A unique identified for this factory, which will be used to map an embeddable spec to
   // a factory that can generate an instance of it.
@@ -86,8 +85,8 @@ export interface EmbeddableFactory<
   canCreateNew(): boolean;
 
   /**
-   * Can be used to get any default input, to be passed in to during the creation process. Default
-   * input will not be stored in a parent container, so any inherited input from a container will trump
+   * Can be used to get the default input, to be passed in to during the creation process. Default
+   * input will not be stored in a parent container, so all inherited input from a container will trump
    * default input parameters.
    * @param partial
    */
@@ -95,7 +94,7 @@ export interface EmbeddableFactory<
 
   /**
    * Can be used to request explicit input from the user, to be passed in to `EmbeddableFactory:create`.
-   * Explicit input is stored on the parent container for this embeddable. It overrides any inherited
+   * Explicit input is stored on the parent container for this embeddable. It overrides all inherited
    * input passed down from the parent container.
    */
   getExplicitInput(): Promise<Partial<TEmbeddableInput>>;

@@ -7,14 +7,14 @@
 
 import {
   GetTrustedAppsRequestSchema,
+  GetTrustedAppsSummaryRequestSchema,
   PostTrustedAppCreateRequestSchema,
   PutTrustedAppUpdateRequestSchema,
 } from './trusted_apps';
-import {
-  ConditionEntry,
-  ConditionEntryField,
+import { ConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
+import type {
+  TrustedAppConditionEntry,
   NewTrustedApp,
-  OperatingSystem,
   PutTrustedAppsRequestParams,
 } from '../types';
 
@@ -81,8 +81,24 @@ describe('When invoking Trusted Apps Schema', () => {
     });
   });
 
+  describe('for GET Summary', () => {
+    const getListQueryParams = (kuery?: string) => ({ kuery });
+    const query = GetTrustedAppsSummaryRequestSchema.query;
+
+    describe('query param validation', () => {
+      it('should return query params if valid without kuery', () => {
+        expect(query.validate(getListQueryParams())).toEqual({});
+      });
+
+      it('should return query params if valid with kuery', () => {
+        const kuery = `exception-list-agnostic.attributes.tags:"policy:caf1a334-53f3-4be9-814d-a32245f43d34" OR exception-list-agnostic.attributes.tags:"policy:all"`;
+        expect(query.validate(getListQueryParams(kuery))).toEqual({ kuery });
+      });
+    });
+  });
+
   describe('for POST Create', () => {
-    const createConditionEntry = <T>(data?: T): ConditionEntry => ({
+    const createConditionEntry = <T>(data?: T): TrustedAppConditionEntry => ({
       field: ConditionEntryField.PATH,
       type: 'match',
       operator: 'included',
@@ -366,7 +382,7 @@ describe('When invoking Trusted Apps Schema', () => {
   });
 
   describe('for PUT Update', () => {
-    const createConditionEntry = <T>(data?: T): ConditionEntry => ({
+    const createConditionEntry = <T>(data?: T): TrustedAppConditionEntry => ({
       field: ConditionEntryField.PATH,
       type: 'match',
       operator: 'included',

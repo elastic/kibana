@@ -8,7 +8,7 @@
 import React, { FC } from 'react';
 import classNames from 'classnames';
 
-import { BarSeries, Chart, Settings } from '@elastic/charts';
+import { BarSeries, Chart, Settings, ScaleType } from '@elastic/charts';
 import { EuiDataGridColumn } from '@elastic/eui';
 
 import './column_chart.scss';
@@ -48,19 +48,22 @@ export const ColumnChart: FC<Props> = ({
   hideLabel,
   maxChartColumns,
 }) => {
-  const { data, legendText, xScaleType } = useColumnChart(chartData, columnType, maxChartColumns);
+  const { data, legendText } = useColumnChart(chartData, columnType, maxChartColumns);
 
   return (
     <div data-test-subj={dataTestSubj}>
       {!isUnsupportedChartData(chartData) && data.length > 0 && (
         <div className="mlDataGridChart__histogram" data-test-subj={`${dataTestSubj}-histogram`}>
           <Chart>
-            <Settings theme={columnChartTheme} />
+            <Settings
+              // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
+              theme={columnChartTheme}
+            />
             <BarSeries
               id="histogram"
               name="count"
-              xScaleType={xScaleType}
-              yScaleType="linear"
+              xScaleType={ScaleType.Ordinal}
+              yScaleType={ScaleType.Linear}
               xAccessor={'key_as_string'}
               yAccessors={['doc_count']}
               styleAccessor={(d) => d.datum.color}
@@ -71,7 +74,6 @@ export const ColumnChart: FC<Props> = ({
       )}
       <div
         className={classNames('mlDataGridChart__legend', {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'mlDataGridChart__legend--numeric': columnType.schema === 'number',
         })}
         data-test-subj={`${dataTestSubj}-legend`}

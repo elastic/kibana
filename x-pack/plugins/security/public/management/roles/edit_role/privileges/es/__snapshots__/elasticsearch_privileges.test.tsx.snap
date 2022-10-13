@@ -179,11 +179,10 @@ exports[`it renders without crashing 1`] = `
     license={
       Object {
         "features$": Observable {
-          "_isScalar": false,
           "_subscribe": [Function],
         },
         "getFeatures": [MockFunction],
-        "getType": [MockFunction],
+        "hasAtLeast": [MockFunction],
         "isEnabled": [MockFunction],
         "isLicenseAvailable": [MockFunction],
       }
@@ -208,7 +207,7 @@ exports[`it renders without crashing 1`] = `
   />
   <EuiHorizontalRule />
   <EuiButton
-    iconType="plusInCircleFilled"
+    iconType="plusInCircle"
     onClick={[Function]}
   >
     <FormattedMessage

@@ -9,7 +9,7 @@ import path from 'path';
 import getPort from 'get-port';
 import fs from 'fs';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { services } from './services';
 import { getAllExternalServiceSimulatorPaths } from './fixtures/plugins/actions_simulators/server/plugin';
 import { getTlsWebhookServerUrls } from './lib/get_tls_webhook_servers';
@@ -19,29 +19,45 @@ interface CreateTestConfigOptions {
   disabledPlugins?: string[];
   ssl?: boolean;
   enableActionsProxy: boolean;
-  rejectUnauthorized?: boolean;
+  verificationMode?: 'full' | 'none' | 'certificate';
   publicBaseUrl?: boolean;
   preconfiguredAlertHistoryEsIndex?: boolean;
-  customizeLocalHostTls?: boolean;
+  customizeLocalHostSsl?: boolean;
+  rejectUnauthorized?: boolean; // legacy
+  emailDomainsAllowed?: string[];
+  testFiles?: string[];
+  useDedicatedTaskRunner: boolean;
 }
 
 // test.not-enabled is specifically not enabled
 const enabledActionTypes = [
+  '.cases-webhook',
   '.email',
   '.index',
+  '.opsgenie',
   '.pagerduty',
+  '.swimlane',
   '.server-log',
   '.servicenow',
+  '.servicenow-sir',
+  '.servicenow-itom',
   '.jira',
   '.resilient',
   '.slack',
   '.webhook',
+  '.xmatters',
+  '.test-sub-action-connector',
+  '.test-sub-action-connector-without-sub-actions',
   'test.authorization',
   'test.failing',
   'test.index-record',
   'test.noop',
+  'test.delayed',
   'test.rate-limit',
+  'test.no-attempts-rate-limit',
   'test.throw',
+  'test.excluded',
+  'test.capped',
 ];
 
 export function createTestConfig(name: string, options: CreateTestConfigOptions) {
@@ -49,9 +65,13 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     license = 'trial',
     disabledPlugins = [],
     ssl = false,
-    rejectUnauthorized = true,
+    verificationMode = 'full',
     preconfiguredAlertHistoryEsIndex = false,
-    customizeLocalHostTls = false,
+    customizeLocalHostSsl = false,
+    rejectUnauthorized = true, // legacy
+    emailDomainsAllowed = undefined,
+    testFiles = undefined,
+    useDedicatedTaskRunner,
   } = options;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
@@ -100,36 +120,39 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     const customHostSettingsValue = [
       {
         url: tlsWebhookServers.rejectUnauthorizedFalse,
-        tls: {
-          rejectUnauthorized: false,
+        ssl: {
+          verificationMode: 'none',
         },
       },
       {
         url: tlsWebhookServers.rejectUnauthorizedTrue,
-        tls: {
-          rejectUnauthorized: true,
+        ssl: {
+          verificationMode: 'full',
         },
       },
       {
         url: tlsWebhookServers.caFile,
-        tls: {
-          rejectUnauthorized: true,
+        ssl: {
+          verificationMode: 'certificate',
           certificateAuthoritiesFiles: [CA_CERT_PATH],
         },
       },
     ];
-    const customHostSettings = customizeLocalHostTls
+    const customHostSettings = customizeLocalHostSsl
       ? [`--xpack.actions.customHostSettings=${JSON.stringify(customHostSettingsValue)}`]
       : [];
 
+    const emailSettings = emailDomainsAllowed
+      ? [`--xpack.actions.email.domain_allowlist=${JSON.stringify(emailDomainsAllowed)}`]
+      : [];
+
     return {
-      testFiles: [require.resolve(`../${name}/tests/`)],
+      testFiles: testFiles ? testFiles : [require.resolve(`../${name}/tests/`)],
       servers,
       services,
       junit: {
         reportName: 'X-Pack Alerting API Integration Tests',
       },
-      esArchiver: xPackApiIntegrationTestsConfig.get('esArchiver'),
       esTestCluster: {
         ...xPackApiIntegrationTestsConfig.get('esTestCluster'),
         license,
@@ -143,17 +166,35 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       },
       kbnTestServer: {
         ...xPackApiIntegrationTestsConfig.get('kbnTestServer'),
+        useDedicatedTaskRunner,
         serverArgs: [
           ...xPackApiIntegrationTestsConfig.get('kbnTestServer.serverArgs'),
           ...(options.publicBaseUrl ? ['--server.publicBaseUrl=https://localhost:5601'] : []),
-          `--xpack.actions.allowedHosts=${JSON.stringify(['localhost', 'some.non.existent.com'])}`,
+          `--xpack.actions.allowedHosts=${JSON.stringify([
+            'localhost',
+            'some.non.existent.com',
+            'smtp.live.com',
+          ])}`,
           '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
           '--xpack.alerting.invalidateApiKeysTask.interval="15s"',
+          '--xpack.alerting.healthCheck.interval="1s"',
+          '--xpack.alerting.rules.minimumScheduleInterval.value="1s"',
+          '--xpack.alerting.rules.run.alerts.max=20',
+          `--xpack.alerting.rules.run.actions.connectorTypeOverrides=${JSON.stringify([
+            { id: 'test.capped', max: '1' },
+          ])}`,
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
           `--xpack.actions.rejectUnauthorized=${rejectUnauthorized}`,
+          `--xpack.actions.microsoftGraphApiUrl=${servers.kibana.protocol}://${servers.kibana.hostname}:${servers.kibana.port}/api/_actions-FTS-external-service-simulators/exchange/users/test@/sendMail`,
+          `--xpack.actions.ssl.verificationMode=${verificationMode}`,
           ...actionsProxyUrl,
           ...customHostSettings,
+          ...emailSettings,
           '--xpack.eventLog.logEntries=true',
+          '--xpack.task_manager.ephemeral_tasks.enabled=false',
+          `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify([
+            'actions:test.excluded',
+          ])}`,
           `--xpack.actions.preconfiguredAlertHistoryEsIndex=${preconfiguredAlertHistoryEsIndex}`,
           `--xpack.actions.preconfigured=${JSON.stringify({
             'my-slack1': {
@@ -161,6 +202,29 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
               name: 'Slack#xyz',
               secrets: {
                 webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
+              },
+            },
+            'my-deprecated-servicenow': {
+              actionTypeId: '.servicenow',
+              name: 'ServiceNow#xyz',
+              config: {
+                apiUrl: 'https://ven04334.service-now.com',
+                usesTableApi: true,
+              },
+              secrets: {
+                username: 'elastic_integration',
+                password: 'somepassword',
+              },
+            },
+            'my-deprecated-servicenow-default': {
+              actionTypeId: '.servicenow',
+              name: 'ServiceNow#xyz',
+              config: {
+                apiUrl: 'https://ven04334.service-now.com',
+              },
+              secrets: {
+                username: 'elastic_integration',
+                password: 'somepassword',
               },
             },
             'custom-system-abc-connector': {
@@ -195,28 +259,28 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
                 encrypted: 'this-is-also-ignored-and-also-required',
               },
             },
-            'custom.tls.noCustom': {
+            'custom.ssl.noCustom': {
               actionTypeId: '.webhook',
               name: `${tlsWebhookServers.noCustom}`,
               config: {
                 url: tlsWebhookServers.noCustom,
               },
             },
-            'custom.tls.rejectUnauthorizedFalse': {
+            'custom.ssl.rejectUnauthorizedFalse': {
               actionTypeId: '.webhook',
               name: `${tlsWebhookServers.rejectUnauthorizedFalse}`,
               config: {
                 url: tlsWebhookServers.rejectUnauthorizedFalse,
               },
             },
-            'custom.tls.rejectUnauthorizedTrue': {
+            'custom.ssl.rejectUnauthorizedTrue': {
               actionTypeId: '.webhook',
               name: `${tlsWebhookServers.rejectUnauthorizedTrue}`,
               config: {
                 url: tlsWebhookServers.rejectUnauthorizedTrue,
               },
             },
-            'custom.tls.caFile': {
+            'custom.ssl.caFile': {
               actionTypeId: '.webhook',
               name: `${tlsWebhookServers.caFile}`,
               config: {
@@ -224,7 +288,9 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
               },
             },
           })}`,
-          ...disabledPlugins.map((key) => `--xpack.${key}.enabled=false`),
+          ...disabledPlugins
+            .filter((k) => k !== 'security')
+            .map((key) => `--xpack.${key}.enabled=false`),
           ...plugins.map(
             (pluginDir) =>
               `--plugin-path=${path.resolve(__dirname, 'fixtures', 'plugins', pluginDir)}`

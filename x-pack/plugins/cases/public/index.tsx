@@ -5,13 +5,34 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
+import { PluginInitializerContext } from '@kbn/core/public';
 import { CasesUiPlugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new CasesUiPlugin(initializerContext);
 }
 
-export { CasesUiPlugin };
-export * from './plugin';
-export * from './types';
+export { DRAFT_COMMENT_STORAGE_ID } from './components/markdown_editor/plugins/lens/constants';
+
+export type { CasesUiPlugin };
+export type { CasesUiStart, CasesUiSetup } from './types';
+export type { GetCasesProps } from './client/ui/get_cases';
+export type { GetCreateCaseFlyoutProps } from './client/ui/get_create_case_flyout';
+export type { GetAllCasesSelectorModalProps } from './client/ui/get_all_cases_selector_modal';
+export type { GetRecentCasesProps } from './client/ui/get_recent_cases';
+
+export type {
+  CaseAttachments,
+  SupportedCaseAttachment,
+  CaseAttachmentsWithoutOwner,
+} from './types';
+
+export type { ICasesDeepLinkId } from './common/navigation';
+export {
+  getCasesDeepLinks,
+  CasesDeepLinkId,
+  generateCaseViewPath,
+  getCreateCasePath,
+  getCaseViewPath,
+  getCasesConfigurePath,
+} from './common/navigation';

@@ -7,10 +7,8 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { flashAPIErrors } from '../../../../../shared/flash_messages';
-import { HttpLogic } from '../../../../../shared/http';
+import { recursivelyFetchEngines } from '../../../../utils/recursively_fetch_engines';
 import { EngineDetails } from '../../../engine/types';
-import { EnginesAPIResponse } from '../../types';
 
 interface MetaEnginesTableValues {
   expandedRows: { [id: string]: boolean };
@@ -19,9 +17,9 @@ interface MetaEnginesTableValues {
 }
 
 interface MetaEnginesTableActions {
-  addSourceEngines(
-    sourceEngines: MetaEnginesTableValues['sourceEngines']
-  ): { sourceEngines: MetaEnginesTableValues['sourceEngines'] };
+  addSourceEngines(sourceEngines: MetaEnginesTableValues['sourceEngines']): {
+    sourceEngines: MetaEnginesTableValues['sourceEngines'];
+  };
   displayRow(itemId: string): { itemId: string };
   fetchOrDisplayRow(itemId: string): { itemId: string };
   fetchSourceEngines(engineName: string): { engineName: string };
@@ -85,36 +83,13 @@ export const MetaEnginesTableLogic = kea<
       }
     },
     fetchSourceEngines: ({ engineName }) => {
-      const { http } = HttpLogic.values;
-
-      let enginesAccumulator: EngineDetails[] = [];
-
-      const recursiveFetchSourceEngines = async (page = 1) => {
-        try {
-          const { meta, results }: EnginesAPIResponse = await http.get(
-            `/api/app_search/engines/${engineName}/source_engines`,
-            {
-              query: {
-                'page[current]': page,
-                'page[size]': 25,
-              },
-            }
-          );
-
-          enginesAccumulator = [...enginesAccumulator, ...results];
-
-          if (page >= meta.page.total_pages) {
-            actions.addSourceEngines({ [engineName]: enginesAccumulator });
-            actions.displayRow(engineName);
-          } else {
-            recursiveFetchSourceEngines(page + 1);
-          }
-        } catch (e) {
-          flashAPIErrors(e);
-        }
-      };
-
-      recursiveFetchSourceEngines();
+      recursivelyFetchEngines({
+        endpoint: `/internal/app_search/engines/${engineName}/source_engines`,
+        onComplete: (sourceEngines) => {
+          actions.addSourceEngines({ [engineName]: sourceEngines });
+          actions.displayRow(engineName);
+        },
+      });
     },
   }),
 });

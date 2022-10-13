@@ -8,7 +8,7 @@
 
 import sinon from 'sinon';
 
-import { installCommand } from './index';
+import { installCommand } from '.';
 
 describe('kibana cli', function () {
   describe('plugin installer', function () {

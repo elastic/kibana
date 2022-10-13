@@ -12,11 +12,8 @@ import styled from 'styled-components';
 import { SourceDestination } from '../../../../network/components/source_destination';
 
 import { DurationEventStartEnd } from './duration_event_start_end';
-import { NetflowColumnsProps } from './types';
+import type { NetflowColumnsProps } from './types';
 import { UserProcess } from './user_process';
-
-export const EVENT_START = 'event.start';
-export const EVENT_END = 'event.end';
 
 const EuiFlexItemMarginRight = styled(EuiFlexItem)`
   margin-right: 10px;
@@ -48,6 +45,7 @@ export const NetflowColumns = React.memo<NetflowColumnsProps>(
     eventId,
     eventEnd,
     eventStart,
+    isDraggable,
     networkBytes,
     networkCommunityId,
     networkDirection,
@@ -76,6 +74,7 @@ export const NetflowColumns = React.memo<NetflowColumnsProps>(
         <UserProcess
           contextId={contextId}
           eventId={eventId}
+          isDraggable={isDraggable}
           processName={processName}
           userName={userName}
         />
@@ -88,6 +87,7 @@ export const NetflowColumns = React.memo<NetflowColumnsProps>(
           eventId={eventId}
           eventEnd={eventEnd}
           eventStart={eventStart}
+          isDraggable={isDraggable}
         />
       </EuiFlexItemMarginRight>
 
@@ -104,6 +104,7 @@ export const NetflowColumns = React.memo<NetflowColumnsProps>(
           destinationPackets={destinationPackets}
           destinationPort={destinationPort}
           eventId={eventId}
+          isDraggable={isDraggable}
           networkBytes={networkBytes}
           networkCommunityId={networkCommunityId}
           networkDirection={networkDirection}

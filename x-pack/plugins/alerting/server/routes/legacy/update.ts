@@ -6,14 +6,16 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { AlertingRouter } from '../../types';
 import { ILicenseState } from '../../lib/license_state';
 import { verifyApiAccess } from '../../lib/license_api_access';
 import { validateDurationSchema } from '../../lib';
-import { handleDisabledApiKeysError } from './../lib/error_handler';
-import { AlertTypeDisabledError } from '../../lib/errors/alert_type_disabled';
+import { handleDisabledApiKeysError } from '../lib/error_handler';
+import { RuleTypeDisabledError } from '../../lib/errors/rule_type_disabled';
+import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 import {
-  AlertNotifyWhenType,
+  RuleNotifyWhenType,
   LEGACY_BASE_ALERT_API_PATH,
   validateNotifyWhenType,
 } from '../../../common';
@@ -42,7 +44,11 @@ const bodySchema = schema.object({
   notifyWhen: schema.nullable(schema.string({ validate: validateNotifyWhenType })),
 });
 
-export const updateAlertRoute = (router: AlertingRouter, licenseState: ILicenseState) => {
+export const updateAlertRoute = (
+  router: AlertingRouter,
+  licenseState: ILicenseState,
+  usageCounter?: UsageCounter
+) => {
   router.put(
     {
       path: `${LEGACY_BASE_ALERT_API_PATH}/alert/{id}`,
@@ -57,11 +63,12 @@ export const updateAlertRoute = (router: AlertingRouter, licenseState: ILicenseS
         if (!context.alerting) {
           return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
         }
-        const alertsClient = context.alerting.getAlertsClient();
+        trackLegacyRouteUsage('update', usageCounter);
+        const rulesClient = (await context.alerting).getRulesClient();
         const { id } = req.params;
         const { name, actions, params, schedule, tags, throttle, notifyWhen } = req.body;
         try {
-          const alertRes = await alertsClient.update({
+          const alertRes = await rulesClient.update({
             id,
             data: {
               name,
@@ -70,14 +77,14 @@ export const updateAlertRoute = (router: AlertingRouter, licenseState: ILicenseS
               schedule,
               tags,
               throttle,
-              notifyWhen: notifyWhen as AlertNotifyWhenType,
+              notifyWhen: notifyWhen as RuleNotifyWhenType,
             },
           });
           return res.ok({
             body: alertRes,
           });
         } catch (e) {
-          if (e instanceof AlertTypeDisabledError) {
+          if (e instanceof RuleTypeDisabledError) {
             return e.sendResponse(res);
           }
           throw e;

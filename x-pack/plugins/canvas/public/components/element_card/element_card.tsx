@@ -8,7 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiCard, EuiIcon } from '@elastic/eui';
-import { TagList } from '../tag_list/';
+import { TagList } from '../tag_list';
 
 export interface Props {
   /**

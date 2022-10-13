@@ -5,99 +5,89 @@
  * 2.0.
  */
 
-import React, { FC, memo } from 'react';
-import { EuiPanel, EuiSpacer, CommonProps } from '@elastic/eui';
-import styled from 'styled-components';
-import { SecurityPageName } from '../../../common/constants';
-import { WrapperPage } from '../../common/components/wrapper_page';
-import { HeaderPage } from '../../common/components/header_page';
-import { SiemNavigation } from '../../common/components/navigation';
-import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { AdministrationSubTab } from '../types';
+import type { FC } from 'react';
+import React, { memo, useMemo } from 'react';
+import type { CommonProps } from '@elastic/eui';
 import {
-  ENDPOINTS_TAB,
-  TRUSTED_APPS_TAB,
-  BETA_BADGE_LABEL,
-  EVENT_FILTERS_TAB,
-} from '../common/translations';
-import {
-  getEndpointListPath,
-  getEventFiltersListPath,
-  getTrustedAppsListPath,
-} from '../common/routing';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
-
-/** Ensure that all flyouts z-index in Administation area show the flyout header */
-const EuiPanelStyled = styled(EuiPanel)`
-  .euiFlyout {
-    z-index: ${({ theme }) => theme.eui.euiZNavigation + 1};
-  }
-`;
+  EuiPageHeader,
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
+  EuiSpacer,
+} from '@elastic/eui';
+import { useTestIdGenerator } from '../hooks/use_test_id_generator';
 
 interface AdministrationListPageProps {
-  beta: boolean;
   title: React.ReactNode;
-  subtitle: React.ReactNode;
+  subtitle?: React.ReactNode;
   actions?: React.ReactNode;
+  restrictWidth?: boolean | number;
+  hasBottomBorder?: boolean;
+  hideHeader?: boolean;
   headerBackComponent?: React.ReactNode;
 }
 
 export const AdministrationListPage: FC<AdministrationListPageProps & CommonProps> = memo(
-  ({ beta, title, subtitle, actions, children, headerBackComponent, ...otherProps }) => {
-    const isEventFilteringEnabled = useIsExperimentalFeatureEnabled('eventFilteringEnabled');
-    const badgeOptions = !beta ? undefined : { beta: true, text: BETA_BADGE_LABEL };
+  ({
+    title,
+    subtitle,
+    actions,
+    children,
+    restrictWidth = false,
+    hasBottomBorder = true,
+    hideHeader = false,
+    headerBackComponent,
+    ...otherProps
+  }) => {
+    const header = useMemo(() => {
+      return (
+        <EuiFlexGroup direction="column" gutterSize="none" alignItems="flexStart">
+          <EuiFlexItem grow={false}>
+            {headerBackComponent && <>{headerBackComponent}</>}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="l">
+              <span data-test-subj="header-page-title">{title}</span>
+            </EuiTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }, [headerBackComponent, title]);
+
+    const description = useMemo(() => {
+      return subtitle ? <span data-test-subj="header-panel-subtitle">{subtitle}</span> : undefined;
+    }, [subtitle]);
+
+    const getTestId = useTestIdGenerator(otherProps['data-test-subj']);
 
     return (
-      <WrapperPage noTimeline {...otherProps}>
-        <HeaderPage
-          hideSourcerer={true}
-          title={title}
-          subtitle={subtitle}
-          backComponent={headerBackComponent}
-          badgeOptions={badgeOptions}
+      <div {...otherProps}>
+        {!hideHeader && (
+          <>
+            <EuiPageHeader
+              pageTitle={header}
+              description={description}
+              bottomBorder={hasBottomBorder}
+              rightSideItems={actions ? [actions] : undefined}
+              restrictWidth={restrictWidth}
+              data-test-subj={getTestId('header')}
+            />
+            <EuiSpacer size="l" />
+          </>
+        )}
+
+        <EuiPageContent
+          hasBorder={false}
+          hasShadow={false}
+          paddingSize="none"
+          color="transparent"
+          borderRadius="none"
         >
-          {actions}
-        </HeaderPage>
-
-        <SiemNavigation
-          navTabs={{
-            [AdministrationSubTab.endpoints]: {
-              name: ENDPOINTS_TAB,
-              id: AdministrationSubTab.endpoints,
-              href: getEndpointListPath({ name: 'endpointList' }),
-              urlKey: 'administration',
-              pageId: SecurityPageName.administration,
-              disabled: false,
-            },
-            [AdministrationSubTab.trustedApps]: {
-              name: TRUSTED_APPS_TAB,
-              id: AdministrationSubTab.trustedApps,
-              href: getTrustedAppsListPath(),
-              urlKey: 'administration',
-              pageId: SecurityPageName.administration,
-              disabled: false,
-            },
-            ...(isEventFilteringEnabled
-              ? {
-                  [AdministrationSubTab.eventFilters]: {
-                    name: EVENT_FILTERS_TAB,
-                    id: AdministrationSubTab.eventFilters,
-                    href: getEventFiltersListPath(),
-                    urlKey: 'administration',
-                    pageId: SecurityPageName.administration,
-                    disabled: false,
-                  },
-                }
-              : {}),
-          }}
-        />
-
-        <EuiSpacer />
-
-        <EuiPanelStyled>{children}</EuiPanelStyled>
-
-        <SpyRoute pageName={SecurityPageName.administration} />
-      </WrapperPage>
+          <EuiPageContentBody restrictWidth={restrictWidth}>{children}</EuiPageContentBody>
+        </EuiPageContent>
+      </div>
     );
   }
 );

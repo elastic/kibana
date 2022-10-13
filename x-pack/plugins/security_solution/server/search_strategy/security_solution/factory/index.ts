@@ -5,18 +5,26 @@
  * 2.0.
  */
 
-import { FactoryQueryTypes } from '../../../../common/search_strategy/security_solution';
+import type { FactoryQueryTypes } from '../../../../common/search_strategy/security_solution';
+import type { SecuritySolutionFactory } from './types';
 
 import { hostsFactory } from './hosts';
 import { matrixHistogramFactory } from './matrix_histogram';
 import { networkFactory } from './network';
-import { SecuritySolutionFactory } from './types';
+import { ctiFactoryTypes } from './cti';
+import { riskScoreFactory } from './risk_score';
+import { usersFactory } from './users';
+import { firstLastSeenFactory } from './last_first_seen';
 
 export const securitySolutionFactory: Record<
   FactoryQueryTypes,
   SecuritySolutionFactory<FactoryQueryTypes>
 > = {
   ...hostsFactory,
+  ...usersFactory,
   ...matrixHistogramFactory,
   ...networkFactory,
+  ...ctiFactoryTypes,
+  ...riskScoreFactory,
+  ...firstLastSeenFactory,
 };

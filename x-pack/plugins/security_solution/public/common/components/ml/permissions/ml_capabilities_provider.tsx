@@ -7,14 +7,14 @@
 
 import React, { useState, useEffect } from 'react';
 
-import { MlCapabilitiesResponse } from '../../../../../../ml/public';
+import type { MlCapabilitiesResponse } from '@kbn/ml-plugin/public';
 import { emptyMlCapabilities } from '../../../../../common/machine_learning/empty_ml_capabilities';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useHttp } from '../../../lib/kibana';
 import { useGetMlCapabilities } from '../hooks/use_get_ml_capabilities';
 import * as i18n from './translations';
 
-interface MlCapabilitiesProvider extends MlCapabilitiesResponse {
+export interface MlCapabilitiesProvider extends MlCapabilitiesResponse {
   capabilitiesFetched: boolean;
 }
 

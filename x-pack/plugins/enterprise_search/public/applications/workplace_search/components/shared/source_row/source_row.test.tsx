@@ -15,7 +15,7 @@ import { EuiTableRow, EuiSwitch, EuiIcon } from '@elastic/eui';
 
 import { SourceIcon } from '../source_icon';
 
-import { SourceRow } from './';
+import { SourceRow } from '.';
 
 const onToggle = jest.fn();
 
@@ -35,15 +35,23 @@ describe('SourceRow', () => {
     expect(onToggle).toHaveBeenCalled();
   });
 
-  it('renders "Fix" link', () => {
+  it('renders "Re-authenticate" link', () => {
     const source = {
       ...contentSources[0],
       status: 'error',
       errorReason: 'OAuth access token could not be refreshed',
+      activities: [
+        {
+          status: 'error',
+          details: [],
+          event: '',
+          time: '',
+        },
+      ],
     };
     const wrapper = shallow(<SourceRow isOrganization source={source} />);
 
-    expect(wrapper.contains('Fix')).toBeTruthy();
+    expect(wrapper.contains('Re-authenticate')).toBeTruthy();
   });
 
   it('renders loading icon when indexing', () => {

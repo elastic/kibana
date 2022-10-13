@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectReference } from 'kibana/public';
+import type { SavedObjectReference } from '@kbn/core/public';
+import type { Serializable } from '@kbn/utility-types';
 
-import { GridData } from '../';
+import { GridData } from '..';
 
 interface SavedObjectAttributes {
   kibanaSavedObjectMeta: {
@@ -110,7 +111,7 @@ export type RawSavedDashboardPanel630 = RawSavedDashboardPanel620;
 // In 6.2 we added an inplace migration, moving uiState into each panel's new embeddableConfig property.
 // Source: https://github.com/elastic/kibana/pull/14949
 export type RawSavedDashboardPanel620 = RawSavedDashboardPanel610 & {
-  embeddableConfig: { [key: string]: unknown };
+  embeddableConfig: { [key: string]: Serializable };
   version: string;
 };
 

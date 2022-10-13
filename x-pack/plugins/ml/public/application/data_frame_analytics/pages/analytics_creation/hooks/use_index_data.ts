@@ -7,11 +7,11 @@
 
 import { useEffect, useMemo, useState } from 'react';
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { EuiDataGridColumn } from '@elastic/eui';
-import { CoreSetup } from 'src/core/public';
+import { CoreSetup } from '@kbn/core/public';
 
-import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { isRuntimeMappings } from '../../../../../../common/util/runtime_field_utils';
 import { RuntimeMappings } from '../../../../../../common/types/fields';
 import { DEFAULT_SAMPLER_SHARD_SIZE } from '../../../../../../common/constants/field_histograms';
@@ -44,19 +44,25 @@ interface MLEuiDataGridColumn extends EuiDataGridColumn {
 
 function getRuntimeFieldColumns(runtimeMappings: RuntimeMappings) {
   return Object.keys(runtimeMappings).map((id) => {
-    const field = runtimeMappings[id];
-    const schema = getDataGridSchemaFromESFieldType(field.type as estypes.RuntimeField['type']);
+    let field = runtimeMappings[id];
+    if (Array.isArray(field)) {
+      field = field[0];
+    }
+    const schema = getDataGridSchemaFromESFieldType(
+      field.type as estypes.MappingRuntimeField['type']
+    );
     return { id, schema, isExpandable: schema !== 'boolean', isRuntimeFieldColumn: true };
   });
 }
 
-function getIndexPatternColumns(indexPattern: IndexPattern, fieldsFilter: string[]) {
+function getIndexPatternColumns(indexPattern: DataView, fieldsFilter: string[]) {
   const { fields } = newJobCapsServiceAnalytics;
 
   return fields
     .filter((field) => fieldsFilter.includes(field.name))
     .map((field) => {
       const schema =
+        // @ts-expect-error field is not DataViewField
         getDataGridSchemaFromESFieldType(field.type) || getDataGridSchemaFromKibanaFieldType(field);
 
       return {
@@ -69,7 +75,7 @@ function getIndexPatternColumns(indexPattern: IndexPattern, fieldsFilter: string
 }
 
 export const useIndexData = (
-  indexPattern: IndexPattern,
+  indexPattern: DataView,
   query: Record<string, any> | undefined,
   toastNotifications: CoreSetup['notifications']['toasts'],
   runtimeMappings?: RuntimeMappings
@@ -119,6 +125,7 @@ export const useIndexData = (
     }
 
     fetchDataGridSampleDocuments();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // To be used for data grid column selection
@@ -156,6 +163,7 @@ export const useIndexData = (
   useEffect(() => {
     resetPagination();
     // custom comparison
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(query)]);
 
   useEffect(() => {
@@ -191,11 +199,11 @@ export const useIndexData = (
         const resp: IndexSearchResponse = await ml.esSearch(esSearchRequest);
         const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));
 
-        setRowCount(typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits.total.value);
+        setRowCount(typeof resp.hits.total === 'number' ? resp.hits.total : resp.hits.total!.value);
         setRowCountRelation(
           typeof resp.hits.total === 'number'
-            ? ('eq' as estypes.TotalHitsRelation)
-            : resp.hits.total.relation
+            ? ('eq' as estypes.SearchTotalHitsRelation)
+            : resp.hits.total!.relation
         );
         setTableItems(docs);
         setStatus(INDEX_STATUS.LOADED);
@@ -209,15 +217,19 @@ export const useIndexData = (
       fetchIndexData();
     }
     // custom comparison
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     indexPattern.title,
     indexPatternFields,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     JSON.stringify([query, pagination, sortingColumns, combinedRuntimeMappings]),
   ]);
 
-  const dataLoader = useMemo(() => new DataLoader(indexPattern, toastNotifications), [
-    indexPattern,
-  ]);
+  const dataLoader = useMemo(
+    () => new DataLoader(indexPattern, toastNotifications),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [indexPattern]
+  );
 
   useEffect(() => {
     async function fetchColumnChartsData(fieldHistogramsQuery: Record<string, any>) {
@@ -243,9 +255,11 @@ export const useIndexData = (
       fetchColumnChartsData(query);
     }
     // custom comparison
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     dataGrid.chartsVisible,
     indexPattern.title,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     JSON.stringify([query, dataGrid.visibleColumns, runtimeMappings]),
   ]);
 
@@ -253,6 +267,7 @@ export const useIndexData = (
 
   return {
     ...dataGrid,
+    indexPatternFields,
     renderCellValue,
   };
 };

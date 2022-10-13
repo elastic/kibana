@@ -1,0 +1,16 @@
+{
+  "dangling_indices.import_dangling_index": {
+    "url_params": {
+      "accept_data_loss": "__flag__",
+      "timeout": "",
+      "master_timeout": ""
+    },
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_dangling/{index_uuid}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-gateway-dangling-indices.html"
+  }
+}

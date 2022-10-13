@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { XYBrushArea } from '@elastic/charts';
+import { XYBrushEvent } from '@elastic/charts';
 import { History } from 'history';
 import { fromQuery, toQuery } from '../../../utils/url';
 
-export const onBrushEnd = ({ x, history }: { x: XYBrushArea['x']; history: History }) => {
+export const onBrushEnd = ({ x, history }: { x: XYBrushEvent['x']; history: History }) => {
   if (x) {
     const start = x[0];
     const end = x[1];

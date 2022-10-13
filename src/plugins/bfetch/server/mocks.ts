@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { coreMock } from '@kbn/core/server/mocks';
 import { BfetchServerSetup, BfetchServerStart } from '.';
 import { plugin as pluginInitializer } from '.';
-import { coreMock } from '../../../core/server/mocks';
 
 export type Setup = jest.Mocked<BfetchServerSetup>;
 export type Start = jest.Mocked<BfetchServerStart>;
@@ -17,7 +17,6 @@ const createSetupContract = (): Setup => {
   const setupContract: Setup = {
     addBatchProcessingRoute: jest.fn(),
     addStreamingResponseRoute: jest.fn(),
-    createStreamingRequestHandler: jest.fn(),
   };
   return setupContract;
 };

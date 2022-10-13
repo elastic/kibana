@@ -5,23 +5,19 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
+import { BadRequestError } from '@kbn/securitysolution-es-utils';
+import { exactCheck, formatErrors } from '@kbn/securitysolution-io-ts-utils';
 import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { formatErrors } from '../../../../common/format_errors';
-import { exactCheck } from '../../../../common/exact_check';
-import {
-  addPrepackagedRulesSchema,
-  AddPrepackagedRulesSchema,
-  AddPrepackagedRulesSchemaDecoded,
-} from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
-import { BadRequestError } from '../errors/bad_request_error';
-
+import type * as t from 'io-ts';
+import type { AddPrepackagedRulesSchema } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
+import { addPrepackagedRulesSchema } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
+import type { ConfigType } from '../../../config';
+import { withSecuritySpan } from '../../../utils/with_security_span';
 // TODO: convert rules files to TS and add explicit type definitions
 import { rawRules } from './prepackaged_rules';
-import { RuleAssetSavedObjectsClient } from './rule_asset_saved_objects_client';
-import { IRuleAssetSOAttributes } from './types';
-import { SavedObjectAttributes } from '../../../../../../../src/core/types';
+import type { RuleAssetSavedObjectsClient } from './rule_asset/rule_asset_saved_objects_client';
+import type { IRuleAssetSOAttributes } from './types';
 
 /**
  * Validate the rules from the file system and throw any errors indicating to the developer
@@ -30,12 +26,12 @@ import { SavedObjectAttributes } from '../../../../../../../src/core/types';
  */
 export const validateAllPrepackagedRules = (
   rules: AddPrepackagedRulesSchema[]
-): AddPrepackagedRulesSchemaDecoded[] => {
+): AddPrepackagedRulesSchema[] => {
   return rules.map((rule) => {
     const decoded = addPrepackagedRulesSchema.decode(rule);
     const checked = exactCheck(rule, decoded);
 
-    const onLeft = (errors: t.Errors): AddPrepackagedRulesSchemaDecoded => {
+    const onLeft = (errors: t.Errors): AddPrepackagedRulesSchema => {
       const ruleName = rule.name ? rule.name : '(rule name unknown)';
       const ruleId = rule.rule_id ? rule.rule_id : '(rule rule_id unknown)';
       throw new BadRequestError(
@@ -48,8 +44,8 @@ export const validateAllPrepackagedRules = (
       );
     };
 
-    const onRight = (schema: AddPrepackagedRulesSchema): AddPrepackagedRulesSchemaDecoded => {
-      return schema as AddPrepackagedRulesSchemaDecoded;
+    const onRight = (schema: AddPrepackagedRulesSchema): AddPrepackagedRulesSchema => {
+      return schema as AddPrepackagedRulesSchema;
     };
     return pipe(checked, fold(onLeft, onRight));
   });
@@ -59,13 +55,13 @@ export const validateAllPrepackagedRules = (
  * Validate the rules from Saved Objects created by Fleet.
  */
 export const validateAllRuleSavedObjects = (
-  rules: Array<IRuleAssetSOAttributes & SavedObjectAttributes>
-): AddPrepackagedRulesSchemaDecoded[] => {
+  rules: IRuleAssetSOAttributes[]
+): AddPrepackagedRulesSchema[] => {
   return rules.map((rule) => {
     const decoded = addPrepackagedRulesSchema.decode(rule);
     const checked = exactCheck(rule, decoded);
 
-    const onLeft = (errors: t.Errors): AddPrepackagedRulesSchemaDecoded => {
+    const onLeft = (errors: t.Errors): AddPrepackagedRulesSchema => {
       const ruleName = rule.name ? rule.name : '(rule name unknown)';
       const ruleId = rule.rule_id ? rule.rule_id : '(rule rule_id unknown)';
       throw new BadRequestError(
@@ -78,8 +74,8 @@ export const validateAllRuleSavedObjects = (
       );
     };
 
-    const onRight = (schema: AddPrepackagedRulesSchema): AddPrepackagedRulesSchemaDecoded => {
-      return schema as AddPrepackagedRulesSchemaDecoded;
+    const onRight = (schema: AddPrepackagedRulesSchema): AddPrepackagedRulesSchema => {
+      return schema as AddPrepackagedRulesSchema;
     };
     return pipe(checked, fold(onLeft, onRight));
   });
@@ -90,7 +86,7 @@ export const validateAllRuleSavedObjects = (
  */
 export const getFleetInstalledRules = async (
   client: RuleAssetSavedObjectsClient
-): Promise<AddPrepackagedRulesSchemaDecoded[]> => {
+): Promise<AddPrepackagedRulesSchema[]> => {
   const fleetResponse = await client.all();
   const fleetRules = fleetResponse.map((so) => so.attributes);
   return validateAllRuleSavedObjects(fleetRules);
@@ -99,26 +95,32 @@ export const getFleetInstalledRules = async (
 export const getPrepackagedRules = (
   // @ts-expect-error mock data is too loosely typed
   rules: AddPrepackagedRulesSchema[] = rawRules
-): AddPrepackagedRulesSchemaDecoded[] => {
+): AddPrepackagedRulesSchema[] => {
   return validateAllPrepackagedRules(rules);
 };
 
 export const getLatestPrepackagedRules = async (
-  client: RuleAssetSavedObjectsClient
-): Promise<AddPrepackagedRulesSchemaDecoded[]> => {
-  // build a map of the most recent version of each rule
-  const prepackaged = getPrepackagedRules();
-  const ruleMap = new Map(prepackaged.map((r) => [r.rule_id, r]));
+  client: RuleAssetSavedObjectsClient,
+  prebuiltRulesFromFileSystem: ConfigType['prebuiltRulesFromFileSystem'],
+  prebuiltRulesFromSavedObjects: ConfigType['prebuiltRulesFromSavedObjects']
+): Promise<Map<string, AddPrepackagedRulesSchema>> =>
+  withSecuritySpan('getLatestPrepackagedRules', async () => {
+    // build a map of the most recent version of each rule
+    const prepackaged = prebuiltRulesFromFileSystem ? getPrepackagedRules() : [];
+    const ruleMap = new Map(prepackaged.map((r) => [r.rule_id, r]));
 
-  // check the rules installed via fleet and create/update if the version is newer
-  const fleetRules = await getFleetInstalledRules(client);
-  const fleetUpdates = fleetRules.filter((r) => {
-    const rule = ruleMap.get(r.rule_id);
-    return rule == null || rule.version < r.version;
+    // check the rules installed via fleet and create/update if the version is newer
+    if (prebuiltRulesFromSavedObjects) {
+      const fleetRules = await getFleetInstalledRules(client);
+      fleetRules.forEach((fleetRule) => {
+        const fsRule = ruleMap.get(fleetRule.rule_id);
+
+        if (fsRule == null || fsRule.version < fleetRule.version) {
+          // add the new or updated rules to the map
+          ruleMap.set(fleetRule.rule_id, fleetRule);
+        }
+      });
+    }
+
+    return ruleMap;
   });
-
-  // add the new or updated rules to the map
-  fleetUpdates.forEach((r) => ruleMap.set(r.rule_id, r));
-
-  return Array.from(ruleMap.values());
-};

@@ -1,5 +1,5 @@
 post:
-  summary: Fleet - Agent - Bulk Upgrade
+  summary: Agents - Bulk Upgrade
   tags: []
   responses:
     '200':
@@ -7,14 +7,17 @@ post:
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/bulk_upgrade_agents.yaml
+              type: object
+              properties:
+                actionId: 
+                  type: string
     '400':
       description: BAD REQUEST
       content:
         application/json:
           schema:
             $ref: ../components/schemas/upgrade_agent.yaml
-  operationId: post-fleet-agents-bulk-upgrade
+  operationId: bulk-upgrade-agents
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
   requestBody:
@@ -23,3 +26,9 @@ post:
       application/json:
         schema:
           $ref: ../components/schemas/bulk_upgrade_agents.yaml
+        example:
+          version: 8.4.0
+          source_uri: https://artifacts.elastic.co/downloads/beats/elastic-agent
+          rollout_duration_seconds: 3600
+          agents: [agent1, agent2]
+          start_time: 2022-08-03T14:00:00.000Z

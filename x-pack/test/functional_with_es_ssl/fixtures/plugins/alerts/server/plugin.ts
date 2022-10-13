@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup } from 'kibana/server';
-import {
-  PluginSetupContract as AlertingSetup,
-  AlertType,
-} from '../../../../../../plugins/alerting/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../plugins/features/server';
+import { Plugin, CoreSetup } from '@kbn/core/server';
+import { PluginSetupContract as AlertingSetup, RuleType } from '@kbn/alerting-plugin/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 
 // this plugin's dependendencies
 export interface AlertingExampleDeps {
@@ -18,18 +15,20 @@ export interface AlertingExampleDeps {
   features: FeaturesPluginSetup;
 }
 
-export const noopAlertType: AlertType<{}, {}, {}, {}, 'default'> = {
+export const noopAlertType: RuleType<{}, {}, {}, {}, {}, 'default'> = {
   id: 'test.noop',
   name: 'Test: Noop',
   actionGroups: [{ id: 'default', name: 'Default' }],
   defaultActionGroupId: 'default',
   minimumLicenseRequired: 'basic',
+  isExportable: true,
   async executor() {},
   producer: 'alerts',
 };
 
-export const alwaysFiringAlertType: AlertType<
+export const alwaysFiringAlertType: RuleType<
   { instances: Array<{ id: string; state: any }> },
+  never, // Only use if defining useSavedObjectReferences hook
   {
     globalStateValue: boolean;
     groupInSeriesIndex: number;
@@ -47,12 +46,13 @@ export const alwaysFiringAlertType: AlertType<
   defaultActionGroupId: 'default',
   producer: 'alerts',
   minimumLicenseRequired: 'basic',
+  isExportable: true,
   async executor(alertExecutorOptions) {
     const { services, state, params } = alertExecutorOptions;
 
     (params.instances || []).forEach((instance: { id: string; state: any }) => {
-      services
-        .alertInstanceFactory(instance.id)
+      services.alertFactory
+        .create(instance.id)
         .replaceState({ instanceStateValue: true, ...(instance.state || {}) })
         .scheduleActions('default');
     });
@@ -64,7 +64,7 @@ export const alwaysFiringAlertType: AlertType<
   },
 };
 
-export const failingAlertType: AlertType<never, never, never, never, 'default' | 'other'> = {
+export const failingAlertType: RuleType<never, never, never, never, never, 'default' | 'other'> = {
   id: 'test.failing',
   name: 'Test: Failing',
   actionGroups: [
@@ -76,6 +76,7 @@ export const failingAlertType: AlertType<never, never, never, never, 'default' |
   producer: 'alerts',
   defaultActionGroupId: 'default',
   minimumLicenseRequired: 'basic',
+  isExportable: true,
   async executor() {
     throw new Error('Failed to execute alert type');
   },
@@ -95,7 +96,9 @@ export class AlertingFixturePlugin implements Plugin<void, void, AlertingExample
       privileges: {
         all: {
           alerting: {
-            all: ['test.always-firing', 'test.noop', 'test.failing'],
+            rule: {
+              all: ['test.always-firing', 'test.noop', 'test.failing'],
+            },
           },
           savedObject: {
             all: [],
@@ -105,7 +108,9 @@ export class AlertingFixturePlugin implements Plugin<void, void, AlertingExample
         },
         read: {
           alerting: {
-            all: ['test.always-firing', 'test.noop', 'test.failing'],
+            rule: {
+              all: ['test.always-firing', 'test.noop', 'test.failing'],
+            },
           },
           savedObject: {
             all: [],

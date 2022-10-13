@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { App, AppMountParameters, CoreSetup } from 'kibana/public';
-import { AppNavLinkStatus } from '../../../../core/public';
+import { App, AppMountParameters, CoreSetup } from '@kbn/core/public';
+import { AppNavLinkStatus } from '@kbn/core/public';
 import { navigateToLegacyKibanaUrl } from './navigate_to_legacy_kibana_url';
 import { ForwardDefinition, UrlForwardingStart } from '../plugin';
 
@@ -23,23 +23,18 @@ export const createLegacyUrlForwardApp = (
   async mount(params: AppMountParameters) {
     const hash = params.history.location.hash.substr(1);
 
-    if (!hash) {
-      const [, , kibanaLegacyStart] = await core.getStartServices();
-      kibanaLegacyStart.navigateToDefaultApp();
-    }
-
     const [
       {
         application,
+        uiSettings,
         http: { basePath },
       },
     ] = await core.getStartServices();
 
-    const result = await navigateToLegacyKibanaUrl(hash, forwards, basePath, application);
-
-    if (!result.navigated) {
-      const [, , kibanaLegacyStart] = await core.getStartServices();
-      kibanaLegacyStart.navigateToDefaultApp();
+    const { navigated } = navigateToLegacyKibanaUrl(hash, forwards, basePath, application);
+    if (!navigated) {
+      const defaultRoute = uiSettings.get<string>('defaultRoute');
+      application.navigateToUrl(basePath.prepend(defaultRoute));
     }
 
     return () => {};

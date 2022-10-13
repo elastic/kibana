@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { mockKibanaValues } from '../../../__mocks__';
+import { mockKibanaValues } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
 import { DraggableProvidedDragHandleProps } from 'react-beautiful-dnd';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
-import { EuiPanel } from '@elastic/eui';
+import { EuiBadge, EuiPanel } from '@elastic/eui';
 
-import { SchemaTypes } from '../../../shared/types';
+import { SchemaType } from '../../../shared/schema/types';
+import { mountWithIntl } from '../../../test_helpers';
 
 import { Result } from './result';
 import { ResultField } from './result_field';
@@ -45,9 +46,9 @@ describe('Result', () => {
   };
 
   const schema = {
-    title: 'text' as SchemaTypes,
-    description: 'text' as SchemaTypes,
-    length: 'number' as SchemaTypes,
+    title: SchemaType.Text,
+    description: SchemaType.Text,
+    length: SchemaType.Number,
   };
 
   it('renders', () => {
@@ -87,6 +88,12 @@ describe('Result', () => {
 
       expect(header.prop('documentLink')).toBe('/engines/my-engine/documents/1');
     });
+
+    it('contains the result position if one is passed', () => {
+      const wrapper = mountWithIntl(<Result {...props} resultPosition={4} />);
+      const header = wrapper.find(ResultHeader);
+      expect(header.find(EuiBadge).text()).toContain('#4');
+    });
   });
 
   describe('actions', () => {
@@ -124,9 +131,9 @@ describe('Result', () => {
 
   describe('dragging', () => {
     // In the real world, the drag library sets data attributes, role, tabIndex, etc.
-    const mockDragHandleProps = ({
+    const mockDragHandleProps = {
       someMockProp: true,
-    } as unknown) as DraggableProvidedDragHandleProps;
+    } as unknown as DraggableProvidedDragHandleProps;
 
     it('will render a drag handle with the passed props', () => {
       const wrapper = shallow(<Result {...props} dragHandleProps={mockDragHandleProps} />);

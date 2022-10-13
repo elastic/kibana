@@ -42,12 +42,9 @@ jest.mock('../../../details/get_metrics', () => ({
 describe('getPaginatedNodes', () => {
   const req = {
     server: {
-      config: () => ({
-        get: () => 10,
-      }),
+      config: { ui: { max_bucket_size: 10000 } },
     },
   };
-  const esIndexPattern = '.monitoring-es-*';
   const clusterUuid = '1abc';
   const metricSet = ['foo', 'bar'];
   const pagination = { index: 0, size: 10 };
@@ -74,7 +71,6 @@ describe('getPaginatedNodes', () => {
   it('should return a subset based on the pagination parameters', async () => {
     const nodes = await getPaginatedNodes(
       req,
-      esIndexPattern,
       { clusterUuid },
       metricSet,
       pagination,
@@ -94,7 +90,6 @@ describe('getPaginatedNodes', () => {
   it('should return a sorted subset', async () => {
     const nodes = await getPaginatedNodes(
       req,
-      esIndexPattern,
       { clusterUuid },
       metricSet,
       pagination,
@@ -111,17 +106,11 @@ describe('getPaginatedNodes', () => {
     });
   });
 
-  it('should return a filterd subset', async () => {
-    const nodes = await getPaginatedNodes(
-      req,
-      esIndexPattern,
-      { clusterUuid },
-      metricSet,
-      pagination,
-      sort,
-      'tw',
-      { clusterStats, nodesShardCount }
-    );
+  it('should return a filtered subset', async () => {
+    const nodes = await getPaginatedNodes(req, { clusterUuid }, metricSet, pagination, sort, 'tw', {
+      clusterStats,
+      nodesShardCount,
+    });
     expect(nodes).toEqual({
       pageOfNodes: [{ name: 'two', uuid: 2, isOnline: false, shardCount: 5, foo: 12 }],
       totalNodeCount: 1,

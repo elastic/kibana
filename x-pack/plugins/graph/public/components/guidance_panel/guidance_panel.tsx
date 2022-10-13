@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useEffect, useState } from 'react';
 import {
   EuiPanel,
   EuiFlexGroup,
@@ -18,9 +18,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { connect } from 'react-redux';
-import { IDataPluginServices } from 'src/plugins/data/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { IUnifiedSearchPluginServices } from '@kbn/unified-search-plugin/public/types';
 import {
   GraphState,
   hasDatasourceSelector,
@@ -31,15 +32,12 @@ import {
 import { IndexPatternSavedObject } from '../../types';
 import { openSourceModal } from '../../services/source_modal';
 
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-
 export interface GuidancePanelProps {
   onFillWorkspace: () => void;
   onOpenFieldPicker: () => void;
   hasDatasource: boolean;
   hasFields: boolean;
   onIndexPatternSelected: (indexPattern: IndexPatternSavedObject) => void;
-  noIndexPatterns: boolean;
 }
 
 function ListItem({
@@ -50,9 +48,9 @@ function ListItem({
   children: ReactNode;
 }) {
   return (
+    // eslint-disable-next-line jsx-a11y/role-supports-aria-props
     <li
       className={classNames('gphGuidancePanel__item', {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         'gphGuidancePanel__item--disabled': state === 'disabled',
       })}
       aria-disabled={state === 'disabled'}
@@ -61,7 +59,6 @@ function ListItem({
       {state !== 'disabled' && (
         <span
           className={classNames('gphGuidancePanel__itemIcon', {
-            // eslint-disable-next-line @typescript-eslint/naming-convention
             'gphGuidancePanel__itemIcon--done': state === 'done',
           })}
           aria-hidden={true}
@@ -75,19 +72,22 @@ function ListItem({
 }
 
 function GuidancePanelComponent(props: GuidancePanelProps) {
-  const {
-    onFillWorkspace,
-    onOpenFieldPicker,
-    onIndexPatternSelected,
-    hasDatasource,
-    hasFields,
-    noIndexPatterns,
-  } = props;
+  const { onFillWorkspace, onOpenFieldPicker, onIndexPatternSelected, hasDatasource, hasFields } =
+    props;
 
-  const kibana = useKibana<IDataPluginServices>();
+  const kibana = useKibana<IUnifiedSearchPluginServices>();
   const { services, overlays } = kibana;
-  const { savedObjects, uiSettings, chrome, application } = services;
-  if (!overlays || !chrome || !application) return null;
+  const { savedObjects, uiSettings, application, data } = services;
+  const [hasDataViews, setHasDataViews] = useState<boolean>(true);
+
+  useEffect(() => {
+    const checkIfDataViewsExist = async () => {
+      setHasDataViews(await data.dataViews.hasData.hasUserDataView());
+    };
+    checkIfDataViewsExist();
+  }, [setHasDataViews, data.dataViews]);
+
+  if (!overlays || !application) return null;
 
   const onOpenDatasourcePicker = () => {
     openSourceModal({ overlays, savedObjects, uiSettings }, onIndexPatternSelected);
@@ -148,9 +148,10 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
     </EuiPanel>
   );
 
-  if (noIndexPatterns) {
-    const managementUrl = chrome.navLinks.get('kibana:stack_management')!.url;
-    const indexPatternUrl = `${managementUrl}/kibana/indexPatterns`;
+  if (!hasDataViews) {
+    const dataViewManagementUrl = application.getUrlForApp('management', {
+      path: '/kibana/dataViews',
+    });
     const sampleDataUrl = `${application.getUrlForApp('home')}#/tutorial_directory/sampleData`;
     content = (
       <EuiPanel paddingSize="none">
@@ -172,13 +173,13 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
           <p>
             <FormattedMessage
               id="xpack.graph.noDataSourceNotificationMessageText"
-              defaultMessage="No data sources found. Go to {managementIndexPatternsLink} and create an index pattern for your Elasticsearch indices."
+              defaultMessage="No data sources found. Go to {managementIndexPatternsLink} and create a data view for your Elasticsearch indices."
               values={{
                 managementIndexPatternsLink: (
-                  <a href={indexPatternUrl}>
+                  <a href={dataViewManagementUrl}>
                     <FormattedMessage
-                      id="xpack.graph.noDataSourceNotificationMessageText.managementIndexPatternLinkText"
-                      defaultMessage="Management &gt; Index Patterns"
+                      id="xpack.graph.noDataSourceNotificationMessageText.managementDataViewLinkText"
+                      defaultMessage="Management &gt; Data views"
                     />
                   </a>
                 ),

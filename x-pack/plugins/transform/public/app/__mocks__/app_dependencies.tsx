@@ -7,14 +7,16 @@
 
 import { useContext } from 'react';
 
-import type { ScopedHistory } from 'kibana/public';
+import type { ScopedHistory } from '@kbn/core/public';
 
-import { coreMock } from '../../../../../../src/core/public/mocks';
-import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
-import { savedObjectsPluginMock } from '../../../../../../src/plugins/saved_objects/public/mocks';
-import { SharePluginStart } from '../../../../../../src/plugins/share/public';
+import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { savedObjectsPluginMock } from '@kbn/saved-objects-plugin/public/mocks';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 
-import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
 import type { AppDependencies } from '../app_dependencies';
 import { MlSharedContext } from './shared_context';
@@ -36,13 +38,16 @@ const appDependencies: AppDependencies = {
   notifications: coreSetup.notifications,
   uiSettings: coreStart.uiSettings,
   savedObjects: coreStart.savedObjects,
-  storage: ({ get: jest.fn() } as unknown) as Storage,
+  storage: { get: jest.fn() } as unknown as Storage,
   overlays: coreStart.overlays,
+  theme: themeServiceMock.createStartContract(),
   http: coreSetup.http,
   history: {} as ScopedHistory,
   savedObjectsPlugin: savedObjectsPluginMock.createStartContract(),
-  share: ({ urlGenerators: { getUrlGenerator: jest.fn() } } as unknown) as SharePluginStart,
+  share: { urlGenerators: { getUrlGenerator: jest.fn() } } as unknown as SharePluginStart,
   ml: {} as GetMlSharedImportsReturnType,
+  triggersActionsUi: {} as jest.Mocked<TriggersAndActionsUIPublicPluginStart>,
+  unifiedSearch: {} as jest.Mocked<UnifiedSearchPublicPluginStart>,
 };
 
 export const useAppDependencies = () => {

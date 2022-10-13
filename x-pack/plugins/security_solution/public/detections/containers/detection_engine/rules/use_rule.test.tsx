@@ -6,7 +6,8 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { useRule, ReturnRule } from './use_rule';
+import type { ReturnRule } from './use_rule';
+import { useRule } from './use_rule';
 import * as api from './api';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
@@ -15,12 +16,10 @@ jest.mock('./api');
 jest.mock('../../../../common/hooks/use_app_toasts');
 
 describe('useRule', () => {
-  let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
+  (useAppToasts as jest.Mock).mockReturnValue(useAppToastsMock.create());
 
   beforeEach(() => {
-    jest.resetAllMocks();
-    appToastsMock = useAppToastsMock.create();
-    (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
+    jest.clearAllMocks();
   });
 
   test('init', async () => {
@@ -56,6 +55,7 @@ describe('useRule', () => {
           immutable: false,
           index: [
             'apm-*-transaction*',
+            'traces-apm*',
             'auditbeat-*',
             'endgame-*',
             'filebeat-*',
@@ -68,9 +68,12 @@ describe('useRule', () => {
           max_signals: 100,
           query: "user.email: 'root@elastic.co'",
           references: [],
+          related_integrations: [],
+          required_fields: [],
           risk_score: 75,
           risk_score_mapping: [],
           rule_id: 'bbd3106e-b4b5-4d7c-a1a2-47531d6a2baf',
+          setup: '',
           severity: 'high',
           severity_mapping: [],
           tags: ['APM'],

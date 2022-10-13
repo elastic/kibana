@@ -9,7 +9,6 @@ import React from 'react';
 
 import {
   EuiBadge,
-  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -18,8 +17,11 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
+
+import { EuiButtonTo } from '../../../../../shared/react_router_helpers';
 
 import connectionIllustration from '../../../../assets/connection_illustration.svg';
 
@@ -28,6 +30,7 @@ import {
   CONFIG_INTRO_STEPS_TEXT,
   CONFIG_INTRO_STEP1_HEADING,
   CONFIG_INTRO_STEP1_TEXT,
+  CONFIG_INTRO_STEP1_BADGE,
   CONFIG_INTRO_STEP2_HEADING,
   CONFIG_INTRO_STEP2_TITLE,
   CONFIG_INTRO_STEP2_TEXT,
@@ -36,12 +39,12 @@ import {
 interface ConfigurationIntroProps {
   header: React.ReactNode;
   name: string;
-  advanceStep(): void;
+  advanceStepTo: string;
 }
 
 export const ConfigurationIntro: React.FC<ConfigurationIntroProps> = ({
   name,
-  advanceStep,
+  advanceStepTo,
   header,
 }) => (
   <>
@@ -96,9 +99,9 @@ export const ConfigurationIntro: React.FC<ConfigurationIntroProps> = ({
                   >
                     <EuiFlexItem grow={false}>
                       <div className="adding-a-source__intro-step">
-                        <EuiText>
-                          <h4>{CONFIG_INTRO_STEP1_HEADING}</h4>
-                        </EuiText>
+                        <EuiTitle size="xs">
+                          <h3>{CONFIG_INTRO_STEP1_HEADING}</h3>
+                        </EuiTitle>
                       </div>
                     </EuiFlexItem>
                     <EuiFlexItem>
@@ -108,7 +111,9 @@ export const ConfigurationIntro: React.FC<ConfigurationIntroProps> = ({
                             id="xpack.enterpriseSearch.workplaceSearch.contentSource.configIntro.step1.title"
                             defaultMessage="Configure an OAuth application {badge}"
                             values={{
-                              badge: <EuiBadge color="#6DCCB1">One-Time Action</EuiBadge>,
+                              badge: (
+                                <EuiBadge color="#6DCCB1">{CONFIG_INTRO_STEP1_BADGE}</EuiBadge>
+                              ),
                             }}
                           />
                         </h4>
@@ -125,9 +130,9 @@ export const ConfigurationIntro: React.FC<ConfigurationIntroProps> = ({
                   >
                     <EuiFlexItem grow={false}>
                       <div className="adding-a-source__intro-step">
-                        <EuiText>
+                        <EuiTitle size="xs">
                           <h4>{CONFIG_INTRO_STEP2_HEADING}</h4>
-                        </EuiText>
+                        </EuiTitle>
                       </div>
                     </EuiFlexItem>
                     <EuiFlexItem>
@@ -141,11 +146,11 @@ export const ConfigurationIntro: React.FC<ConfigurationIntroProps> = ({
                 <EuiFlexItem>
                   <EuiSpacer size="l" />
                   <EuiFormRow>
-                    <EuiButton
+                    <EuiButtonTo
                       color="primary"
                       data-test-subj="ConfigureStepButton"
                       fill
-                      onClick={advanceStep}
+                      to={advanceStepTo}
                     >
                       {i18n.translate(
                         'xpack.enterpriseSearch.workplaceSearch.contentSource.configIntro.configure.button',
@@ -154,7 +159,7 @@ export const ConfigurationIntro: React.FC<ConfigurationIntroProps> = ({
                           values: { name },
                         }
                       )}
-                    </EuiButton>
+                    </EuiButtonTo>
                   </EuiFormRow>
                   <EuiSpacer size="xl" />
                 </EuiFlexItem>

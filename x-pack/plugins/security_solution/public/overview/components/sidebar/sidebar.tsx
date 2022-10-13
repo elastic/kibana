@@ -7,21 +7,17 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import styled from 'styled-components';
 
 import { ENABLE_NEWS_FEED_SETTING, NEWS_FEED_URL_SETTING } from '../../../../common/constants';
 import { Filters as RecentTimelinesFilters } from '../recent_timelines/filters';
 import { StatefulRecentTimelines } from '../recent_timelines';
 import { StatefulNewsFeed } from '../../../common/components/news_feed';
-import { FilterMode as RecentTimelinesFilterMode } from '../recent_timelines/types';
+import type { FilterMode as RecentTimelinesFilterMode } from '../recent_timelines/types';
 import { SidebarHeader } from '../../../common/components/sidebar_header';
 
 import * as i18n from '../../pages/translations';
 import { RecentCases } from '../recent_cases';
-
-const SidebarFlexGroup = styled(EuiFlexGroup)`
-  width: 305px;
-`;
+import { useGetUserCasesPermissions } from '../../../common/lib/kibana';
 
 const SidebarSpacerComponent = () => (
   <EuiFlexItem grow={false}>
@@ -30,8 +26,6 @@ const SidebarSpacerComponent = () => (
 );
 
 SidebarSpacerComponent.displayName = 'SidebarSpacerComponent';
-const Spacer = React.memo(SidebarSpacerComponent);
-
 export const Sidebar = React.memo<{
   recentTimelinesFilterBy: RecentTimelinesFilterMode;
   setRecentTimelinesFilterBy: (filterBy: RecentTimelinesFilterMode) => void;
@@ -46,20 +40,21 @@ export const Sidebar = React.memo<{
     [recentTimelinesFilterBy, setRecentTimelinesFilterBy]
   );
 
-  return (
-    <SidebarFlexGroup direction="column" gutterSize="none">
-      <EuiFlexItem grow={false}>
-        <RecentCases />
-      </EuiFlexItem>
+  // only render the recently created cases view if the user has at least read permissions
+  const hasCasesReadPermissions = useGetUserCasesPermissions().read;
 
-      <Spacer />
+  return (
+    <EuiFlexGroup direction="column" responsive={false} gutterSize="l">
+      {hasCasesReadPermissions && (
+        <EuiFlexItem grow={false}>
+          <RecentCases />
+        </EuiFlexItem>
+      )}
 
       <EuiFlexItem grow={false}>
         <SidebarHeader title={i18n.RECENT_TIMELINES}>{recentTimelinesFilters}</SidebarHeader>
         <StatefulRecentTimelines filterBy={recentTimelinesFilterBy} />
       </EuiFlexItem>
-
-      <Spacer />
 
       <EuiFlexItem grow={false}>
         <StatefulNewsFeed
@@ -67,7 +62,7 @@ export const Sidebar = React.memo<{
           newsFeedSetting={NEWS_FEED_URL_SETTING}
         />
       </EuiFlexItem>
-    </SidebarFlexGroup>
+    </EuiFlexGroup>
   );
 });
 

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { GLOBAL_CALENDAR } from '../../../common/constants/calendars';
 import type { MlClient } from '../../lib/ml_client';
 
-type ScheduledEvent = estypes.ScheduledEvent;
+type ScheduledEvent = estypes.MlCalendarEvent;
 
 export class EventManager {
   private _mlClient: MlClient;
@@ -18,15 +18,14 @@ export class EventManager {
   }
 
   async getCalendarEvents(calendarId: string) {
-    const { body } = await this._mlClient.getCalendarEvents({ calendar_id: calendarId });
-
+    const body = await this._mlClient.getCalendarEvents({ calendar_id: calendarId });
     return body.events;
   }
 
   // jobId is optional
   async getAllEvents(jobId?: string) {
     const calendarId = GLOBAL_CALENDAR;
-    const { body } = await this._mlClient.getCalendarEvents({
+    const body = await this._mlClient.getCalendarEvents({
       calendar_id: calendarId,
       job_id: jobId,
     });

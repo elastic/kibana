@@ -1,0 +1,20 @@
+{
+  "elasticsearch": {
+    "indices": [
+      {
+        "names": ["logs-osquery_manager*"],
+        "privileges": ["read"]
+      }
+    ]
+  },
+  "kibana": [
+    {
+      "feature": {
+        "fleet": ["all"],
+        "osquery": ["all"]
+      },
+      "spaces": ["*"]
+    }
+  ]
+}
+

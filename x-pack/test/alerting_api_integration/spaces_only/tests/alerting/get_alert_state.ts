@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { Spaces } from '../../scenarios';
-import { getUrlPrefix, ObjectRemover, getTestAlertData } from '../../../common/lib';
+import { getUrlPrefix, ObjectRemover, getTestRuleData } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -24,7 +24,7 @@ export default function createGetAlertStateTests({ getService }: FtrProviderCont
       const { body: createdAlert } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestAlertData())
+        .send(getTestRuleData())
         .expect(200);
       objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
 
@@ -76,7 +76,9 @@ export default function createGetAlertStateTests({ getService }: FtrProviderCont
       expect(alertInstances.length).to.eql(response.body.rule_type_state.runCount);
       alertInstances.forEach(([key, value], index) => {
         expect(key).to.eql(`instance-${index}`);
-        expect(value.state).to.eql({ instanceStateValue: true });
+        expect(value.state.instanceStateValue).to.be(true);
+        expect(value.state.start).not.to.be(undefined);
+        expect(value.state.duration).not.to.be(undefined);
       });
     });
 
@@ -131,7 +133,9 @@ export default function createGetAlertStateTests({ getService }: FtrProviderCont
         expect(alertInstances.length).to.eql(response.body.rule_type_state.runCount);
         alertInstances.forEach(([key, value], index) => {
           expect(key).to.eql(`instance-${index}`);
-          expect(value.state).to.eql({ instanceStateValue: true });
+          expect(value.state.instanceStateValue).to.be(true);
+          expect(value.state.start).not.to.be(undefined);
+          expect(value.state.duration).not.to.be(undefined);
         });
       });
     });

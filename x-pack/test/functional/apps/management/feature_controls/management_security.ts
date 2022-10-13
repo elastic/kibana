@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'settings', 'security']);
   const appsMenu = getService('appsMenu');
@@ -18,17 +18,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('security', () => {
     before(async () => {
-      await esArchiver.load('empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
       await PageObjects.common.navigateToApp('home');
     });
 
     after(async () => {
-      await esArchiver.unload('empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     describe('no management privileges', () => {
       before(async () => {
-        await security.testUser.setRoles(['global_dashboard_read'], true);
+        await security.testUser.setRoles(['global_dashboard_read']);
       });
       after(async () => {
         await security.testUser.restoreDefaults();
@@ -36,7 +36,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('should not show the Stack Management nav link', async () => {
         const links = await appsMenu.readLinks();
-        expect(links.map((link) => link.text)).to.eql(['Overview', 'Dashboard']);
+        expect(links.map((link) => link.text)).to.eql(['Dashboard']);
       });
 
       it('should render the "application not found" view when navigating to management directly', async () => {
@@ -47,7 +47,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('global all privileges (aka kibana_admin)', () => {
       before(async () => {
-        await security.testUser.setRoles(['kibana_admin'], true);
+        await security.testUser.setRoles(['kibana_admin']);
       });
       after(async () => {
         await security.testUser.restoreDefaults();
@@ -64,18 +64,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(sections).to.have.length(2);
         expect(sections[0]).to.eql({
           sectionId: 'insightsAndAlerting',
-          sectionLinks: ['triggersActions', 'reporting'],
+          sectionLinks: ['triggersActions', 'cases', 'triggersActionsConnectors', 'jobsListLink'],
         });
         expect(sections[1]).to.eql({
           sectionId: 'kibana',
-          sectionLinks: [
-            'indexPatterns',
-            'objects',
-            'tags',
-            'search_sessions',
-            'spaces',
-            'settings',
-          ],
+          sectionLinks: ['dataViews', 'objects', 'tags', 'search_sessions', 'spaces', 'settings'],
         });
       });
     });

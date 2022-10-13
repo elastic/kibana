@@ -9,8 +9,6 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Enterprise Search', function () {
-    this.tags('ciGroup10');
-
     loadTestFile(require.resolve('./app_search/setup_guide'));
     loadTestFile(require.resolve('./workplace_search/setup_guide'));
   });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockValues, setMockActions } from '../../../../__mocks__';
+import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -15,7 +15,7 @@ import { EuiModal } from '@elastic/eui';
 
 import { MultiInputRows } from '../../multi_input_rows';
 
-import { SynonymModal } from './';
+import { SynonymModal } from '.';
 
 describe('SynonymModal', () => {
   const MOCK_SYNONYM_SET = {

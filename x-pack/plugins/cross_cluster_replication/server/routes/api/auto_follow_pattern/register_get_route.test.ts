@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { httpServiceMock, httpServerMock } from 'src/core/server/mocks';
-import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
+import { httpServiceMock, httpServerMock } from '@kbn/core/server/mocks';
+import { kibanaResponseFactory, RequestHandler } from '@kbn/core/server';
 
-import { isEsError, License } from '../../../shared_imports';
-import { formatEsError } from '../../../lib/format_es_error';
-import { mockRouteContext } from '../test_lib';
+import { handleEsError } from '../../../shared_imports';
+import { mockRouteContext, mockLicense } from '../test_lib';
 import { registerGetRoute } from './register_get_route';
 
 const httpService = httpServiceMock.createSetupContract();
@@ -23,12 +22,9 @@ describe('[CCR API] Get one auto-follow pattern', () => {
 
     registerGetRoute({
       router,
-      license: {
-        guardApiRoute: (route: any) => route,
-      } as License,
+      license: mockLicense,
       lib: {
-        isEsError,
-        formatEsError,
+        handleEsError,
       },
     });
 
@@ -51,7 +47,9 @@ describe('[CCR API] Get one auto-follow pattern', () => {
     };
 
     const routeContextMock = mockRouteContext({
-      callAsCurrentUser: jest.fn().mockResolvedValueOnce(ccrAutoFollowPatternResponseMock),
+      ccr: {
+        getAutoFollowPattern: jest.fn().mockResolvedValueOnce(ccrAutoFollowPatternResponseMock),
+      },
     });
 
     const request = httpServerMock.createKibanaRequest();

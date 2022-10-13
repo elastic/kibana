@@ -6,18 +6,23 @@
  */
 
 import React, { useEffect, FC } from 'react';
-import { useHistory, useLocation, Router, Route, RouteProps } from 'react-router-dom';
+import { useHistory, useLocation, Router, RouteProps } from 'react-router-dom';
 import { Location } from 'history';
 
-import { AppMountParameters, IUiSettingsClient, ChromeStart } from 'kibana/public';
-import { ChromeBreadcrumb } from 'kibana/public';
-import { IndexPatternsContract } from 'src/plugins/data/public';
+import type {
+  AppMountParameters,
+  IUiSettingsClient,
+  ChromeStart,
+  ChromeBreadcrumb,
+} from '@kbn/core/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 
-import { useMlKibana, useNavigateToPath } from '../contexts/kibana';
+import { EuiLoadingContent } from '@elastic/eui';
+import { MlNotificationsContextProvider } from '../contexts/ml/ml_notifications_context';
 import { MlContext, MlContextValue } from '../contexts/ml';
 import { UrlStateProvider } from '../util/url_state';
 
-import * as routes from './routes';
+import { MlPage } from '../components/ml_page';
 
 // custom RouteProps making location non-optional
 interface MlRouteProps extends RouteProps {
@@ -25,9 +30,26 @@ interface MlRouteProps extends RouteProps {
 }
 
 export interface MlRoute {
+  /**
+   * Route ID.
+   * Used for tab IDs
+   */
+  id?: string;
   path: string;
+  /**
+   * Route name.
+   * Used for side nav items and page titles.
+   */
+  title?: string;
   render(props: MlRouteProps, deps: PageDependencies): JSX.Element;
   breadcrumbs: ChromeBreadcrumb[];
+  /**
+   * Indicated if page contains a global date picker.
+   */
+  enableDatePicker?: boolean;
+  'data-test-subj'?: string;
+  actionMenu?: React.ReactNode;
+  disabled?: boolean;
 }
 
 export interface PageProps {
@@ -35,16 +57,19 @@ export interface PageProps {
   deps: PageDependencies;
 }
 
-interface PageDependencies {
+export interface PageDependencies {
   config: IUiSettingsClient;
   history: AppMountParameters['history'];
-  indexPatterns: IndexPatternsContract;
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+  dataViewsContract: DataViewsContract;
   setBreadcrumbs: ChromeStart['setBreadcrumbs'];
   redirectToMlAccessDeniedPage: () => Promise<void>;
 }
 
 export const PageLoader: FC<{ context: MlContextValue }> = ({ context, children }) => {
-  return context === null ? null : (
+  return context === null ? (
+    <EuiLoadingContent lines={10} />
+  ) : (
     <MlContext.Provider value={context}>{children}</MlContext.Provider>
   );
 };
@@ -64,48 +89,11 @@ const LegacyHashUrlRedirect: FC = ({ children }) => {
     if (location.hash.startsWith('#/')) {
       history.push(location.hash.replace('#', ''));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.hash]);
 
   return <>{children}</>;
 };
-
-/**
- * `MlRoutes` creates a React Router Route for every routeFactory
- * and passes on the `navigateToPath` helper.
- */
-const MlRoutes: FC<{
-  pageDeps: PageDependencies;
-}> = ({ pageDeps }) => {
-  const navigateToPath = useNavigateToPath();
-  const {
-    services: {
-      http: { basePath },
-    },
-  } = useMlKibana();
-
-  return (
-    <>
-      {Object.entries(routes).map(([name, routeFactory]) => {
-        const route = routeFactory(navigateToPath, basePath.get());
-
-        return (
-          <Route
-            key={name}
-            path={route.path}
-            exact
-            render={(props) => {
-              window.setTimeout(() => {
-                pageDeps.setBreadcrumbs(route.breadcrumbs);
-              });
-              return route.render(props, pageDeps);
-            }}
-          />
-        );
-      })}
-    </>
-  );
-};
-
 /**
  * `MlRouter` is based on `BrowserRouter` and takes in `ScopedHistory` provided
  * by Kibana. `LegacyHashUrlRedirect` provides compatibility with legacy hash based URLs.
@@ -118,9 +106,9 @@ export const MlRouter: FC<{
   <Router history={pageDeps.history}>
     <LegacyHashUrlRedirect>
       <UrlStateProvider>
-        <div className="ml-app" data-test-subj="mlApp">
-          <MlRoutes pageDeps={pageDeps} />
-        </div>
+        <MlNotificationsContextProvider>
+          <MlPage pageDeps={pageDeps} />
+        </MlNotificationsContextProvider>
       </UrlStateProvider>
     </LegacyHashUrlRedirect>
   </Router>

@@ -201,6 +201,9 @@ export function asDuration(
   const formatter = getDurationFormatter(value);
   return formatter(value, { defaultValue, extended }).formatted;
 }
+
+export type AsDuration = typeof asDuration;
+
 /**
  * Convert a microsecond value to decimal milliseconds. Normally we use
  * `asDuration`, but this is used in places like tables where we always want
@@ -212,3 +215,21 @@ export function asMillisecondDuration(value: Maybe<number>) {
     microseconds: value,
   }).formatted;
 }
+
+export type TimeUnitChar = 's' | 'm' | 'h' | 'd';
+
+export const formatDurationFromTimeUnitChar = (time: number, unit: TimeUnitChar): string => {
+  const sForPlural = time !== 0 && time > 1 ? 's' : ''; // Negative values are not taken into account
+  switch (unit) {
+    case 's':
+      return `${time} sec${sForPlural}`;
+    case 'm':
+      return `${time} min${sForPlural}`;
+    case 'h':
+      return `${time} hr${sForPlural}`;
+    case 'd':
+      return `${time} day${sForPlural}`;
+    default:
+      return `${time} ${unit}`;
+  }
+};

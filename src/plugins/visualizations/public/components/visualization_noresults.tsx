@@ -23,7 +23,7 @@ export class VisualizationNoResults extends React.Component<VisualizationNoResul
           iconColor="default"
           data-test-subj="visualization-error"
           body={
-            <EuiText size="xs">
+            <EuiText size="xs" className="visualization-error-text">
               {i18n.translate('visualizations.noResultsFoundTitle', {
                 defaultMessage: 'No results found',
               })}
@@ -48,3 +48,6 @@ export class VisualizationNoResults extends React.Component<VisualizationNoResul
     }
   }
 }
+
+// eslint-disable-next-line import/no-default-export
+export default VisualizationNoResults;

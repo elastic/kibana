@@ -49,9 +49,11 @@ export function handleResponse(response: ElasticsearchResponse, start: number, e
 
     //  add the beat
     const rateOptions = {
-      hitTimestamp: stats?.timestamp ?? hit._source['@timestamp'],
+      hitTimestamp: stats?.timestamp ?? hit._source['@timestamp'] ?? null,
       earliestHitTimestamp:
-        earliestStats?.timestamp ?? hit.inner_hits?.earliest.hits?.hits[0]._source['@timestamp'],
+        earliestStats?.timestamp ??
+        hit.inner_hits?.earliest.hits?.hits[0]._source['@timestamp'] ??
+        null,
       timeWindowMin: start,
       timeWindowMax: end,
     };
@@ -88,6 +90,7 @@ export function handleResponse(response: ElasticsearchResponse, start: number, e
       memory:
         hit._source.beats_stats?.metrics?.beat?.memstats?.memory_alloc ??
         hit._source.beat?.stats?.memstats?.memory?.alloc,
+      cgroup_memory: hit._source.beats_stats?.metrics?.beat?.cgroup?.memory.mem.usage.bytes,
       version: stats?.beat?.version,
       time_of_last_event: hit._source.beats_stats?.timestamp ?? hit._source['@timestamp'],
     });
@@ -101,15 +104,15 @@ export function handleResponse(response: ElasticsearchResponse, start: number, e
 export async function getApms(req: LegacyRequest, apmIndexPattern: string, clusterUuid: string) {
   checkParam(apmIndexPattern, 'apmIndexPattern in getBeats');
 
-  const config = req.server.config();
+  const config = req.server.config;
   const start = moment.utc(req.payload.timeRange.min).valueOf();
   const end = moment.utc(req.payload.timeRange.max).valueOf();
 
   const params = {
     index: apmIndexPattern,
-    size: config.get('monitoring.ui.max_bucket_size'), // FIXME
-    ignoreUnavailable: true,
-    filterPath: [
+    size: config.ui.max_bucket_size,
+    ignore_unavailable: true,
+    filter_path: [
       // only filter path can filter for inner_hits
       'hits.hits._source.timestamp',
       'hits.hits._source.@timestamp',
@@ -122,6 +125,7 @@ export async function getApms(req: LegacyRequest, apmIndexPattern: string, clust
       'hits.hits._source.beats_stats.metrics.libbeat.output.read.errors',
       'hits.hits._source.beats_stats.metrics.libbeat.output.write.errors',
       'hits.hits._source.beats_stats.metrics.beat.memstats.memory_alloc',
+      'hits.hits._source.beats_stats.metrics.beat.cgroup.memory.mem.usage.bytes',
       'hits.hits._source.beat.stats.beat.uuid',
       'hits.hits._source.beat.stats.beat.name',
       'hits.hits._source.beat.stats.beat.host',

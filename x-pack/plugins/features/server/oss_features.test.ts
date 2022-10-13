@@ -6,58 +6,15 @@
  */
 
 import { buildOSSFeatures } from './oss_features';
-// @ts-expect-error
 import { featurePrivilegeIterator } from './feature_privilege_iterator';
 import { KibanaFeature } from '.';
-import { LicenseType } from '../../licensing/server';
+import { LicenseType, LICENSE_TYPE } from '@kbn/licensing-plugin/server';
 
 describe('buildOSSFeatures', () => {
-  it('returns features including timelion', () => {
-    expect(
-      buildOSSFeatures({
-        savedObjectTypes: ['foo', 'bar'],
-        includeTimelion: true,
-        includeReporting: false,
-      }).map((f) => f.id)
-    ).toMatchInlineSnapshot(`
-Array [
-  "discover",
-  "visualize",
-  "dashboard",
-  "dev_tools",
-  "advancedSettings",
-  "indexPatterns",
-  "savedObjectsManagement",
-  "timelion",
-]
-`);
-  });
-
-  it('returns features excluding timelion', () => {
-    expect(
-      buildOSSFeatures({
-        savedObjectTypes: ['foo', 'bar'],
-        includeTimelion: false,
-        includeReporting: false,
-      }).map((f) => f.id)
-    ).toMatchInlineSnapshot(`
-Array [
-  "discover",
-  "visualize",
-  "dashboard",
-  "dev_tools",
-  "advancedSettings",
-  "indexPatterns",
-  "savedObjectsManagement",
-]
-`);
-  });
-
   it('returns features including reporting subfeatures', () => {
     expect(
       buildOSSFeatures({
         savedObjectTypes: ['foo', 'bar'],
-        includeTimelion: false,
         includeReporting: true,
       }).map(({ id, subFeatures }) => ({ id, subFeatures }))
     ).toMatchSnapshot();
@@ -67,7 +24,6 @@ Array [
     expect(
       buildOSSFeatures({
         savedObjectTypes: ['foo', 'bar'],
-        includeTimelion: false,
         includeReporting: false,
       }).map(({ id, subFeatures }) => ({ id, subFeatures }))
     ).toMatchSnapshot();
@@ -75,7 +31,6 @@ Array [
 
   const features = buildOSSFeatures({
     savedObjectTypes: ['foo', 'bar'],
-    includeTimelion: true,
     includeReporting: false,
   });
   features.forEach((featureConfig) => {
@@ -87,7 +42,8 @@ Array [
             new KibanaFeature(featureConfig),
             {
               augmentWithSubFeaturePrivileges: true,
-              licenseType,
+              licenseHasAtLeast: (licenseTypeToCheck: LicenseType) =>
+                LICENSE_TYPE[licenseTypeToCheck] <= LICENSE_TYPE[licenseType],
             }
           )) {
             privileges.push(featurePrivilege);

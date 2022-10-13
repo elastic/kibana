@@ -8,9 +8,9 @@
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 
+import { wrapRouteWithLicenseCheck } from '@kbn/licensing-plugin/server';
+import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { Pipeline } from '../../models/pipeline';
-import { wrapRouteWithLicenseCheck } from '../../../../licensing/server';
-import { SecurityPluginSetup } from '../../../../security/server';
 import { checkLicense } from '../../lib/check_license';
 import type { LogstashPluginRouter } from '../../types';
 
@@ -42,11 +42,12 @@ export function registerPipelineSaveRoute(
             username = user?.username;
           }
 
-          const { client } = context.core.elasticsearch;
+          const { client } = (await context.core).elasticsearch;
           const pipeline = Pipeline.fromDownstreamJSON(request.body, request.params.id, username);
 
           await client.asCurrentUser.logstash.putPipeline({
             id: pipeline.id,
+            // @ts-expect-error description is required
             body: pipeline.upstreamJSON,
           });
 

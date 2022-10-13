@@ -10,13 +10,13 @@ import {
   HttpStart,
   OverlayStart,
   SavedObjectsClientContract,
-} from 'kibana/public';
+} from '@kbn/core/public';
 import createSagaMiddleware from 'redux-saga';
 import { createStore, applyMiddleware, AnyAction } from 'redux';
-import { ChromeStart } from 'kibana/public';
+import { ChromeStart } from '@kbn/core/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { GraphStoreDependencies, createRootReducer, GraphStore, GraphState } from './store';
-import { Workspace, GraphWorkspaceSavedObject, IndexPatternSavedObject } from '../types';
-import { IndexPattern } from '../../../../../src/plugins/data/public';
+import { Workspace } from '../types';
 
 export interface MockedGraphEnvironment {
   store: GraphStore;
@@ -40,58 +40,53 @@ export function createMockGraphStore({
   mockedDepsOverwrites?: Partial<jest.Mocked<GraphStoreDependencies>>;
   initialStateOverwrites?: Partial<GraphState>;
 }): MockedGraphEnvironment {
-  const workspaceMock = ({
+  const workspaceMock = {
     runLayout: jest.fn(),
+    simpleSearch: jest.fn(),
     nodes: [],
     edges: [],
     options: {},
     blocklistedNodes: [],
-  } as unknown) as Workspace;
-
-  const savedWorkspace = ({
-    save: jest.fn(),
-  } as unknown) as GraphWorkspaceSavedObject;
+  } as unknown as Workspace;
 
   const mockedDeps: jest.Mocked<GraphStoreDependencies> = {
+    basePath: '',
     addBasePath: jest.fn((url: string) => url),
     changeUrl: jest.fn(),
-    chrome: ({
+    chrome: {
       setBreadcrumbs: jest.fn(),
-    } as unknown) as ChromeStart,
-    createWorkspace: jest.fn(),
+    } as unknown as ChromeStart,
+    createWorkspace: jest.fn((index, advancedSettings) => workspaceMock),
     getWorkspace: jest.fn(() => workspaceMock),
-    getSavedWorkspace: jest.fn(() => savedWorkspace),
     indexPatternProvider: {
-      get: jest.fn(() =>
-        Promise.resolve(({ id: '123', title: 'test-pattern' } as unknown) as IndexPattern)
-      ),
+      get: jest.fn(async (id: string) => {
+        if (id === 'missing-dataview') {
+          throw Error('No data view with this id');
+        }
+        return { id: '123', title: 'test-pattern' } as unknown as DataView;
+      }),
     },
-    indexPatterns: [
-      ({ id: '123', attributes: { title: 'test-pattern' } } as unknown) as IndexPatternSavedObject,
-    ],
     I18nContext: jest
       .fn()
       .mockImplementation(({ children }: { children: React.ReactNode }) => children),
-    notifications: ({
+    notifications: {
       toasts: {
         addDanger: jest.fn(),
         addSuccess: jest.fn(),
       },
-    } as unknown) as NotificationsStart,
+    } as unknown as NotificationsStart,
     http: {} as HttpStart,
-    notifyAngular: jest.fn(),
+    notifyReact: jest.fn(),
     savePolicy: 'configAndData',
     showSaveModal: jest.fn(),
-    setLiveResponseFields: jest.fn(),
-    setUrlTemplates: jest.fn(),
-    setWorkspaceInitialized: jest.fn(),
-    overlays: ({
+    overlays: {
       openModal: jest.fn(),
-    } as unknown) as OverlayStart,
-    savedObjectsClient: ({
+    } as unknown as OverlayStart,
+    savedObjectsClient: {
       find: jest.fn(),
       get: jest.fn(),
-    } as unknown) as SavedObjectsClientContract,
+    } as unknown as SavedObjectsClientContract,
+    handleSearchQueryError: jest.fn(),
     ...mockedDepsOverwrites,
   };
   const sagaMiddleware = createSagaMiddleware();

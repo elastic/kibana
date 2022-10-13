@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { loggingSystemMock } from '../../../../core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { Collector } from './collector';
 
 const logger = loggingSystemMock.createLogger();
@@ -17,19 +17,6 @@ describe('collector', () => {
       // @ts-expect-error
       expect(() => new Collector(logger, {})).toThrowError(
         'Collector must be instantiated with a options.type string property'
-      );
-    });
-
-    it('should fail if init is not a function', () => {
-      expect(
-        () =>
-          new Collector(logger, {
-            type: 'my_test_collector',
-            // @ts-expect-error
-            init: 1,
-          })
-      ).toThrowError(
-        'If init property is passed, Collector must be instantiated with a options.init as a function property'
       );
     });
 

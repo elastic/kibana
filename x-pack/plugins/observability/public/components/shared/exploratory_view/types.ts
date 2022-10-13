@@ -5,30 +5,32 @@
  * 2.0.
  */
 
-import { PaletteOutput } from 'src/plugins/charts/public';
-import {
+import type { PaletteOutput } from '@kbn/coloring';
+import type { ExistsFilter, PhraseFilter } from '@kbn/es-query';
+import type {
   LastValueIndexPatternColumn,
   DateHistogramIndexPatternColumn,
   FieldBasedIndexPatternColumn,
   SeriesType,
   OperationType,
-} from '../../../../../lens/public';
+  YConfig,
+  MetricState,
+} from '@kbn/lens-plugin/public';
 
-import { PersistableFilter } from '../../../../../lens/common';
-import { IIndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns';
-import { ExistsFilter } from '../../../../../../../src/plugins/data/common/es_query/filters';
+import type { PersistableFilter } from '@kbn/lens-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import {
+  FieldFormatParams as BaseFieldFormatParams,
+  SerializedFieldFormat,
+} from '@kbn/field-formats-plugin/common';
+import { FORMULA_COLUMN } from './configurations/constants';
 
 export const ReportViewTypes = {
-  pld: 'page-load-dist',
-  kpi: 'kpi-trends',
-  upd: 'uptime-duration',
-  upp: 'uptime-pings',
-  svl: 'service-latency',
-  tpt: 'service-throughput',
-  logs: 'logs-frequency',
-  cpu: 'cpu-usage',
-  mem: 'memory-usage',
-  nwk: 'network-activity',
+  dist: 'data-distribution',
+  kpi: 'kpi-over-time',
+  cwv: 'core-web-vitals',
+  mdd: 'device-data-distribution',
+  smt: 'single-metric',
 } as const;
 
 type ValueOf<T> = T[keyof T];
@@ -37,40 +39,72 @@ export type ReportViewTypeId = keyof typeof ReportViewTypes;
 
 export type ReportViewType = ValueOf<typeof ReportViewTypes>;
 
-export interface ReportDefinition {
-  field: string;
-  required?: boolean;
-  custom?: boolean;
-  defaultValue?: string;
-  options?: Array<{
-    field: string;
-    label: string;
-    description?: string;
-    columnType?: 'range' | 'operation';
-  }>;
+export interface ColumnFilter {
+  language: 'kuery';
+  query: string;
 }
 
-export interface DataSeries {
-  reportType: ReportViewType;
+export interface ParamFilter {
+  label: string;
+  input: ColumnFilter;
+}
+
+export interface MetricOption {
   id: string;
+  field?: string;
+  label: string;
+  description?: string;
+  columnType?:
+    | 'range'
+    | 'operation'
+    | 'FILTER_RECORDS'
+    | 'TERMS_COLUMN'
+    | 'unique_count'
+    | typeof FORMULA_COLUMN;
+  columnFilters?: ColumnFilter[];
+  columnFilter?: ColumnFilter;
+  paramFilters?: ParamFilter[];
+  timeScale?: string;
+  showPercentileAnnotations?: boolean;
+  formula?: string;
+  metricStateOptions?: Pick<MetricState, 'colorMode' | 'palette' | 'titlePosition'>;
+  palette?: PaletteOutput;
+  format?: 'percent' | 'number';
+}
+
+export interface SeriesConfig {
+  reportType: ReportViewType | string;
   xAxisColumn: Partial<LastValueIndexPatternColumn> | Partial<DateHistogramIndexPatternColumn>;
   yAxisColumns: Array<Partial<FieldBasedIndexPatternColumn>>;
-
-  breakdowns: string[];
+  breakdownFields: string[];
   defaultSeriesType: SeriesType;
-  defaultFilters: Array<string | { field: string; nested?: string; isNegated?: boolean }>;
+  filterFields: Array<string | { field: string; nested?: string; isNegated?: boolean }>;
   seriesTypes: SeriesType[];
-  filters?: PersistableFilter[] | ExistsFilter[];
-  reportDefinitions: ReportDefinition[];
+  baseFilters?: Array<PersistableFilter | ExistsFilter | PhraseFilter>;
+  definitionFields: Array<
+    | string
+    | {
+        field: string;
+        nested?: string;
+        singleSelection?: boolean;
+        filters?: Array<PersistableFilter | ExistsFilter | PhraseFilter>;
+      }
+  >;
+  textDefinitionFields?: string[];
+  metricOptions?: MetricOption[];
   labels: Record<string, string>;
   hasOperationType: boolean;
   palette?: PaletteOutput;
   yTitle?: string;
+  yConfig?: YConfig[];
+  query?: { query: string; language: 'kuery' };
 }
 
 export type URLReportDefinition = Record<string, string[]>;
+export type URLTextReportDefinition = Record<string, string>;
 
 export interface SeriesUrl {
+  name: string;
   time: {
     to: string;
     from: string;
@@ -78,40 +112,55 @@ export interface SeriesUrl {
   breakdown?: string;
   filters?: UrlFilter[];
   seriesType?: SeriesType;
-  reportType: ReportViewTypeId;
   operationType?: OperationType;
   dataType: AppDataType;
   reportDefinitions?: URLReportDefinition;
+  textReportDefinitions?: URLTextReportDefinition;
+  selectedMetricField?: string;
+  hidden?: boolean;
+  showPercentileAnnotations?: boolean;
+  color?: string;
 }
 
 export interface UrlFilter {
   field: string;
   values?: string[];
   notValues?: string[];
+  wildcards?: string[];
+  notWildcards?: string[];
 }
 
 export interface ConfigProps {
-  seriesId: string;
-  indexPattern: IIndexPattern;
+  dataView?: DataView;
+  series?: SeriesUrl;
 }
 
-export type AppDataType = 'synthetics' | 'ux' | 'infra_logs' | 'infra_metrics' | 'apm';
+interface FormatType extends SerializedFieldFormat<FieldFormatParams> {
+  id: 'duration' | 'number' | 'bytes' | 'percent';
+}
 
-type FormatType = 'duration' | 'number';
+export type AppDataType = 'synthetics' | 'ux' | 'infra_logs' | 'infra_metrics' | 'apm' | 'mobile';
+
 type InputFormat = 'microseconds' | 'milliseconds' | 'seconds';
-type OutputFormat = 'asSeconds' | 'asMilliseconds' | 'humanize';
+type OutputFormat = 'asSeconds' | 'asMilliseconds' | 'humanize' | 'humanizePrecise';
 
-export interface FieldFormatParams {
-  inputFormat: InputFormat;
-  outputFormat: OutputFormat;
+export interface FieldFormatParams extends BaseFieldFormatParams {
+  inputFormat?: InputFormat;
+  outputFormat?: OutputFormat;
   outputPrecision?: number;
   showSuffix?: boolean;
+  useShortSuffix?: boolean;
 }
 
 export interface FieldFormat {
   field: string;
-  format: {
-    id: FormatType;
-    params: FieldFormatParams;
-  };
+  format: FormatType;
 }
+
+export interface BuilderItem {
+  id: number;
+  series: SeriesUrl;
+  seriesConfig?: SeriesConfig;
+}
+
+export type SupportedOperations = 'average' | 'median' | 'sum' | 'unique_count' | 'min' | 'max';

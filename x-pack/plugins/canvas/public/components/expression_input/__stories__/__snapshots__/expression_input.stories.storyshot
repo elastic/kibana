@@ -16,7 +16,9 @@ exports[`Storyshots components/ExpressionInput default 1`] = `
         id="generated-id"
         onBlur={[Function]}
         onFocus={[Function]}
-      />
+      >
+        ExpressionInput
+      </div>
     </div>
   </div>
 </div>

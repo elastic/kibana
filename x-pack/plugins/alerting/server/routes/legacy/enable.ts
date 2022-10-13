@@ -6,18 +6,24 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { AlertingRouter } from '../../types';
 import { ILicenseState } from '../../lib/license_state';
 import { verifyApiAccess } from '../../lib/license_api_access';
 import { LEGACY_BASE_ALERT_API_PATH } from '../../../common';
-import { handleDisabledApiKeysError } from './../lib/error_handler';
-import { AlertTypeDisabledError } from '../../lib/errors/alert_type_disabled';
+import { handleDisabledApiKeysError } from '../lib/error_handler';
+import { RuleTypeDisabledError } from '../../lib/errors/rule_type_disabled';
+import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 
 const paramSchema = schema.object({
   id: schema.string(),
 });
 
-export const enableAlertRoute = (router: AlertingRouter, licenseState: ILicenseState) => {
+export const enableAlertRoute = (
+  router: AlertingRouter,
+  licenseState: ILicenseState,
+  usageCounter?: UsageCounter
+) => {
   router.post(
     {
       path: `${LEGACY_BASE_ALERT_API_PATH}/alert/{id}/_enable`,
@@ -31,13 +37,14 @@ export const enableAlertRoute = (router: AlertingRouter, licenseState: ILicenseS
         if (!context.alerting) {
           return res.badRequest({ body: 'RouteHandlerContext is not registered for alerting' });
         }
-        const alertsClient = context.alerting.getAlertsClient();
+        trackLegacyRouteUsage('enable', usageCounter);
+        const rulesClient = (await context.alerting).getRulesClient();
         const { id } = req.params;
         try {
-          await alertsClient.enable({ id });
+          await rulesClient.enable({ id });
           return res.noContent();
         } catch (e) {
-          if (e instanceof AlertTypeDisabledError) {
+          if (e instanceof RuleTypeDisabledError) {
             return e.sendResponse(res);
           }
           throw e;

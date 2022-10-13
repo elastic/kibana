@@ -17,15 +17,15 @@ import { EuiCallOut, EuiCheckbox, EuiLink, EuiSpacer, EuiTitle } from '@elastic/
 import { ScopeExpression } from './scope_expression';
 import { checkPermission } from '../../capabilities/check_capabilities';
 import { getScopeFieldDefaults } from './utils';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { ML_PAGES } from '../../../../common/constants/ml_url_generator';
-import { useMlUrlGenerator, useNavigateToPath } from '../../contexts/kibana';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { ML_PAGES } from '../../../../common/constants/locator';
+import { useMlLocator, useNavigateToPath } from '../../contexts/kibana';
 
 function NoFilterListsCallOut() {
-  const mlUrlGenerator = useMlUrlGenerator();
+  const mlLocator = useMlLocator();
   const navigateToPath = useNavigateToPath();
   const redirectToFilterManagementPage = async () => {
-    const path = await mlUrlGenerator.createUrl({
+    const path = await mlLocator.getUrl({
       page: ML_PAGES.FILTER_LISTS_MANAGE,
     });
     await navigateToPath(path, true);

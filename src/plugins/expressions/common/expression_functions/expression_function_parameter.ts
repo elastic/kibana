@@ -6,21 +6,27 @@
  * Side Public License, v 1.
  */
 
+import { KnownTypeToString } from '../types';
 import { ArgumentType } from './arguments';
 
-export class ExpressionFunctionParameter {
+export class ExpressionFunctionParameter<T = unknown> {
   name: string;
   required: boolean;
   help: string;
-  types: string[];
-  default: any;
+  types: ArgumentType<T>['types'];
+  default?: ArgumentType<T>['default'];
   aliases: string[];
+  deprecated: boolean;
   multi: boolean;
   resolve: boolean;
-  options: any[];
+  /**
+   * @deprecated
+   */
+  strict?: boolean;
+  options: T[];
 
-  constructor(name: string, arg: ArgumentType<any>) {
-    const { required, help, types, aliases, multi, resolve, options } = arg;
+  constructor(name: string, arg: ArgumentType<T>) {
+    const { required, help, types, aliases, deprecated, multi, options, resolve, strict } = arg;
 
     if (name === '_') {
       throw Error('Arg names must not be _. Use it in aliases instead.');
@@ -32,13 +38,14 @@ export class ExpressionFunctionParameter {
     this.types = types || [];
     this.default = arg.default;
     this.aliases = aliases || [];
+    this.deprecated = !!deprecated;
     this.multi = !!multi;
-    this.resolve = resolve == null ? true : resolve;
     this.options = options || [];
+    this.resolve = resolve == null ? true : resolve;
+    this.strict = strict;
   }
 
   accepts(type: string) {
-    if (!this.types.length) return true;
-    return this.types.indexOf(type) > -1;
+    return !this.types?.length || this.types.includes(type as KnownTypeToString<T>);
   }
 }

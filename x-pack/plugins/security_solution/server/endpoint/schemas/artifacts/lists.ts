@@ -6,13 +6,12 @@
  */
 
 import * as t from 'io-ts';
-import { operator } from '../../../../../lists/common/schemas';
+import { listOperator as operator } from '@kbn/securitysolution-io-ts-list-types';
 
 export const translatedEntryMatchAnyMatcher = t.keyof({
   exact_cased_any: null,
   exact_caseless_any: null,
 });
-export type TranslatedEntryMatchAnyMatcher = t.TypeOf<typeof translatedEntryMatchAnyMatcher>;
 
 export const translatedEntryMatchAny = t.exact(
   t.type({
@@ -22,13 +21,11 @@ export const translatedEntryMatchAny = t.exact(
     value: t.array(t.string),
   })
 );
-export type TranslatedEntryMatchAny = t.TypeOf<typeof translatedEntryMatchAny>;
 
 export const translatedEntryMatchMatcher = t.keyof({
   exact_cased: null,
   exact_caseless: null,
 });
-export type TranslatedEntryMatchMatcher = t.TypeOf<typeof translatedEntryMatchMatcher>;
 
 export const translatedEntryMatchWildcardMatcher = t.keyof({
   wildcard_cased: null,
@@ -48,6 +45,19 @@ export const translatedEntryMatchWildcard = t.exact(
 );
 export type TranslatedEntryMatchWildcard = t.TypeOf<typeof translatedEntryMatchWildcard>;
 
+export const translatedEntryMatchWildcardNameMatcher = t.keyof({
+  exact_cased: null,
+  exact_caseless: null,
+});
+
+export const translatedEntryMatchWildcardName = t.exact(
+  t.type({
+    field: t.string,
+    operator,
+    type: translatedEntryMatchWildcardNameMatcher,
+    value: t.string,
+  })
+);
 export const translatedEntryMatch = t.exact(
   t.type({
     field: t.string,
@@ -56,7 +66,6 @@ export const translatedEntryMatch = t.exact(
     value: t.string,
   })
 );
-export type TranslatedEntryMatch = t.TypeOf<typeof translatedEntryMatch>;
 
 export const translatedEntryMatcher = t.union([
   translatedEntryMatchMatcher,
@@ -74,7 +83,6 @@ export const translatedEntryNested = t.exact(
     entries: t.array(translatedEntryNestedEntry),
   })
 );
-export type TranslatedEntryNested = t.TypeOf<typeof translatedEntryNested>;
 
 export const translatedEntry = t.union([
   translatedEntryNested,
@@ -83,6 +91,12 @@ export const translatedEntry = t.union([
   translatedEntryMatchAny,
 ]);
 export type TranslatedEntry = t.TypeOf<typeof translatedEntry>;
+
+export const translatedPerformantEntries = t.array(
+  t.union([translatedEntryMatchWildcard, translatedEntryMatchWildcardName])
+);
+
+export type TranslatedPerformantEntries = t.TypeOf<typeof translatedPerformantEntries>;
 
 export const translatedExceptionListItem = t.exact(
   t.type({

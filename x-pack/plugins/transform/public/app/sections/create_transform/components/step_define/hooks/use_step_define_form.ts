@@ -25,21 +25,21 @@ export type StepDefineFormHook = ReturnType<typeof useStepDefineForm>;
 
 export const useStepDefineForm = ({ overrides, onChange, searchItems }: StepDefineFormProps) => {
   const defaults = { ...getDefaultStepDefineState(searchItems), ...overrides };
-  const { indexPattern } = searchItems;
+  const { dataView } = searchItems;
 
   const [transformFunction, setTransformFunction] = useState(defaults.transformFunction);
 
-  const searchBar = useSearchBar(defaults, indexPattern);
-  const pivotConfig = usePivotConfig(defaults, indexPattern);
+  const searchBar = useSearchBar(defaults, dataView);
+  const pivotConfig = usePivotConfig(defaults, dataView);
 
   const latestFunctionConfig = useLatestFunctionConfig(
     defaults.latestConfig,
-    indexPattern,
+    dataView,
     defaults?.runtimeMappings
   );
 
   const previewRequest = getPreviewTransformRequestBody(
-    indexPattern.title,
+    dataView.title,
     searchBar.state.pivotQuery,
     pivotConfig.state.requestPayload,
     defaults?.runtimeMappings
@@ -58,7 +58,7 @@ export const useStepDefineForm = ({ overrides, onChange, searchItems }: StepDefi
     const runtimeMappings = runtimeMappingsEditor.state.runtimeMappings;
     if (!advancedSourceEditor.state.isAdvancedSourceEditorEnabled) {
       const previewRequestUpdate = getPreviewTransformRequestBody(
-        indexPattern.title,
+        dataView.title,
         searchBar.state.pivotQuery,
         pivotConfig.state.requestPayload,
         runtimeMappings

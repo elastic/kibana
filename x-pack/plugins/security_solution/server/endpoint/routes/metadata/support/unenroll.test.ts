@@ -5,30 +5,21 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
 import { findAllUnenrolledAgentIds } from './unenroll';
+import type { AgentClient } from '@kbn/fleet-plugin/server/services';
 import {
-  elasticsearchServiceMock,
-  savedObjectsClientMock,
-} from '../../../../../../../../src/core/server/mocks';
-import { AgentService } from '../../../../../../fleet/server/services';
-import {
-  createMockAgentService,
+  createMockAgentClient,
   createPackagePolicyServiceMock,
-} from '../../../../../../fleet/server/mocks';
-import { Agent, PackagePolicy } from '../../../../../../fleet/common/types/models';
-import { PackagePolicyServiceInterface } from '../../../../../../fleet/server';
+} from '@kbn/fleet-plugin/server/mocks';
+import type { Agent, PackagePolicy } from '@kbn/fleet-plugin/common/types/models';
+import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 
 describe('test find all unenrolled Agent id', () => {
-  let mockSavedObjectClient: jest.Mocked<SavedObjectsClientContract>;
-  let mockElasticsearchClient: jest.Mocked<ElasticsearchClient>;
-  let mockAgentService: jest.Mocked<AgentService>;
-  let mockPackagePolicyService: jest.Mocked<PackagePolicyServiceInterface>;
+  let mockAgentClient: jest.Mocked<AgentClient>;
+  let mockPackagePolicyService: jest.Mocked<PackagePolicyClient>;
 
   beforeEach(() => {
-    mockSavedObjectClient = savedObjectsClientMock.create();
-    mockElasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    mockAgentService = createMockAgentService();
+    mockAgentClient = createMockAgentClient();
     mockPackagePolicyService = createPackagePolicyServiceMock();
   });
 
@@ -36,10 +27,10 @@ describe('test find all unenrolled Agent id', () => {
     mockPackagePolicyService.list
       .mockResolvedValueOnce({
         items: [
-          ({
+          {
             id: '1',
             policy_id: 'abc123',
-          } as unknown) as PackagePolicy,
+          } as unknown as PackagePolicy,
         ],
         total: 1,
         perPage: 10,
@@ -51,13 +42,13 @@ describe('test find all unenrolled Agent id', () => {
         perPage: 10,
         page: 1,
       });
-    mockAgentService.listAgents
+    mockAgentClient.listAgents
       .mockImplementationOnce(() =>
         Promise.resolve({
           agents: [
-            ({
+            {
               id: 'id1',
-            } as unknown) as Agent,
+            } as unknown as Agent,
           ],
           total: 2,
           page: 1,
@@ -67,9 +58,9 @@ describe('test find all unenrolled Agent id', () => {
       .mockImplementationOnce(() =>
         Promise.resolve({
           agents: [
-            ({
+            {
               id: 'id2',
-            } as unknown) as Agent,
+            } as unknown as Agent,
           ],
           total: 2,
           page: 1,
@@ -84,26 +75,17 @@ describe('test find all unenrolled Agent id', () => {
           perPage: 1,
         })
       );
-    const agentIds = await findAllUnenrolledAgentIds(
-      mockAgentService,
-      mockPackagePolicyService,
-      mockSavedObjectClient,
-      mockElasticsearchClient
-    );
+    const endpointPolicyIds = ['test-endpoint-policy-id'];
+    const agentIds = await findAllUnenrolledAgentIds(mockAgentClient, endpointPolicyIds);
 
     expect(agentIds).toBeTruthy();
     expect(agentIds).toEqual(['id1', 'id2']);
 
-    expect(mockPackagePolicyService.list).toHaveBeenNthCalledWith(1, mockSavedObjectClient, {
-      kuery: 'ingest-package-policies.package.name:endpoint',
-      page: 1,
-      perPage: 1000,
-    });
-    expect(mockAgentService.listAgents).toHaveBeenNthCalledWith(1, mockElasticsearchClient, {
+    expect(mockAgentClient.listAgents).toHaveBeenNthCalledWith(1, {
       page: 1,
       perPage: 1000,
       showInactive: true,
-      kuery: '(active : false) OR (active: true AND NOT policy_id:("abc123"))',
+      kuery: `(active : false) OR (active: true AND NOT policy_id:("${endpointPolicyIds[0]}"))`,
     });
   });
 });

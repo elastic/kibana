@@ -6,24 +6,28 @@
  */
 
 import expect from '@kbn/expect';
+import { getLifecycleMethods } from '../data_stream';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
 
-  describe('list mb', () => {
-    const archive = 'monitoring/apm_mb';
+  describe('list mb', function () {
+    // Archive contains non-cgroup data which collides with the in-cgroup services present by default on cloud deployments
+    this.tags(['skipCloud']);
+
+    const { setup, tearDown } = getLifecycleMethods(getService);
+    const archive = 'x-pack/test/functional/es_archives/monitoring/apm_mb';
     const timeRange = {
       min: '2018-08-31T12:59:49.104Z',
       max: '2018-08-31T13:59:49.104Z',
     };
 
-    before('load clusters archive', () => {
-      return esArchiver.load(archive);
+    before('load archive', () => {
+      return setup(archive);
     });
 
-    after('unload clusters archive', () => {
-      return esArchiver.unload(archive);
+    after('unload archive', () => {
+      return tearDown();
     });
 
     it('should load multiple clusters', async () => {
@@ -67,6 +71,7 @@ export default function ({ getService }) {
             time_of_last_event: '2018-08-31T13:59:21.163Z',
           },
         ],
+        cgroup: false,
       };
 
       expect(body).to.eql(expected);

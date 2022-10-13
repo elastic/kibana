@@ -6,16 +6,26 @@
  */
 
 import React from 'react';
-import { Route, Switch } from 'react-router-dom';
 
-import { Case } from './pages';
-import { NotFoundPage } from '../app/404';
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
+import type { SecuritySubPluginRoutes } from '../app/types';
+import { CASES_PATH } from '../../common/constants';
+import { Cases } from './pages';
+import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 
-export const CasesRoutes: React.FC = () => (
-  <Switch>
-    <Route path="/">
-      <Case />
-    </Route>
-    <Route render={() => <NotFoundPage />} />
-  </Switch>
-);
+export const CasesRoutes = () => {
+  return (
+    <PluginTemplateWrapper>
+      <TrackApplicationView viewId="case">
+        <Cases />
+      </TrackApplicationView>
+    </PluginTemplateWrapper>
+  );
+};
+
+export const routes: SecuritySubPluginRoutes = [
+  {
+    path: CASES_PATH,
+    component: CasesRoutes,
+  },
+];

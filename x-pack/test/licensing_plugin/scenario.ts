@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
+import { PublicLicenseJSON } from '@kbn/licensing-plugin/server';
 import { FtrProviderContext } from './services';
-import { PublicLicenseJSON } from '../../plugins/licensing/server';
-import '../../../test/plugin_functional/plugins/core_provider_plugin/types';
+import '@kbn/core-provider-plugin/types';
 
 const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
 

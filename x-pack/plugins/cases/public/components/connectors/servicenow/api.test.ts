@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { httpServiceMock } from '../../../../../../../src/core/public/mocks';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 import { getChoices } from './api';
 import { choices } from '../mock';
 
@@ -31,7 +31,7 @@ describe('ServiceNow API', () => {
       });
 
       expect(res).toEqual(choicesResponse);
-      expect(http.post).toHaveBeenCalledWith('/api/actions/action/test/_execute', {
+      expect(http.post).toHaveBeenCalledWith('/api/actions/connector/test/_execute', {
         body: '{"params":{"subAction":"getChoices","subActionParams":{"fields":["priority"]}}}',
         signal: abortCtrl.signal,
       });

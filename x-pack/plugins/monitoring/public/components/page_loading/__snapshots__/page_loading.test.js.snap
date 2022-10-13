@@ -2,14 +2,14 @@
 
 exports[`PageLoading should show a simple page loading component 1`] = `
 <div
-  class="euiPage euiPage--paddingMedium euiPage--grow"
+  class="euiPage emotion-euiPage-row-grow"
   style="height:calc(100vh - 50px)"
 >
-  <main
-    class="euiPageBody euiPageBody--borderRadiusNone"
+  <div
+    class="euiPageBody emotion-euiPageBody"
   >
     <div
-      class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter monNoData__content"
+      class="euiPanel euiPanel--plain euiPanel--paddingLarge euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter monNoData__content emotion-euiPanel-grow-m-l-plain-hasShadow"
       role="main"
     >
       <div
@@ -25,7 +25,9 @@ exports[`PageLoading should show a simple page loading component 1`] = `
               class="euiFlexItem euiFlexItem--flexGrowZero"
             >
               <span
-                class="euiLoadingSpinner euiLoadingSpinner--xLarge"
+                aria-label="Loading"
+                class="euiLoadingSpinner emotion-euiLoadingSpinner-xl"
+                role="progressbar"
               />
             </div>
             <div
@@ -37,6 +39,6 @@ exports[`PageLoading should show a simple page loading component 1`] = `
         </div>
       </div>
     </div>
-  </main>
+  </div>
 </div>
 `;

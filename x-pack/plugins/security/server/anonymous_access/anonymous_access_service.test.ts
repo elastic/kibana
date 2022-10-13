@@ -7,15 +7,15 @@
 
 import { errors } from '@elastic/elasticsearch';
 
-import type { Logger } from 'src/core/server';
+import type { Logger } from '@kbn/core/server';
 import {
   coreMock,
   elasticsearchServiceMock,
   httpServerMock,
   loggingSystemMock,
-} from 'src/core/server/mocks';
+} from '@kbn/core/server/mocks';
+import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 
-import { spacesMock } from '../../../spaces/server/mocks';
 import { ConfigSchema, createConfig } from '../config';
 import { securityMock } from '../mocks';
 import { AnonymousAccessService } from './anonymous_access_service';
@@ -223,9 +223,7 @@ describe('AnonymousAccessService', () => {
         );
 
         expect(startParams.capabilities.resolveCapabilities).toHaveBeenCalledTimes(1);
-        expect(
-          startParams.capabilities.resolveCapabilities
-        ).toHaveBeenCalledWith(
+        expect(startParams.capabilities.resolveCapabilities).toHaveBeenCalledWith(
           expect.objectContaining({ headers: { authorization: 'Basic dXNlcjpwYXNzd29yZA==' } }),
           { useDefaultCapabilities: false }
         );
@@ -245,9 +243,7 @@ describe('AnonymousAccessService', () => {
           resolvedCapabilities
         );
         expect(startParams.capabilities.resolveCapabilities).toHaveBeenCalledTimes(1);
-        expect(
-          startParams.capabilities.resolveCapabilities
-        ).toHaveBeenCalledWith(
+        expect(startParams.capabilities.resolveCapabilities).toHaveBeenCalledWith(
           expect.objectContaining({ headers: { authorization: 'Basic dXNlcjpwYXNzd29yZA==' } }),
           { useDefaultCapabilities: false }
         );

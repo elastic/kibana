@@ -1,9 +1,0 @@
-{
-  "id": "visTypeMetric",
-  "version": "8.0.0",
-  "kibanaVersion": "kibana",
-  "server": true,
-  "ui": true,
-  "requiredPlugins": ["data", "visualizations", "charts", "expressions"],
-  "requiredBundles": ["kibanaUtils", "visDefaultEditor"]
-}

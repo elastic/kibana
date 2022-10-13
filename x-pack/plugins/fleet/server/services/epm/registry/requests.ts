@@ -34,13 +34,13 @@ async function registryFetch(url: string) {
   }
 }
 
-export async function getResponse(url: string): Promise<Response> {
+export async function getResponse(url: string, retries: number = 5): Promise<Response> {
   try {
     // we only want to retry certain failures like network issues
     // the rest should only try the one time then fail as they do now
     const response = await pRetry(() => registryFetch(url), {
       factor: 2,
-      retries: 5,
+      retries,
       onFailedAttempt: (error) => {
         // we only want to retry certain types of errors, like `ECONNREFUSED` and other operational errors
         // and let the others through without retrying
@@ -67,13 +67,16 @@ export async function getResponse(url: string): Promise<Response> {
   }
 }
 
-export async function getResponseStream(url: string): Promise<NodeJS.ReadableStream> {
-  const res = await getResponse(url);
+export async function getResponseStream(
+  url: string,
+  retries?: number
+): Promise<NodeJS.ReadableStream> {
+  const res = await getResponse(url, retries);
   return res.body;
 }
 
-export async function fetchUrl(url: string): Promise<string> {
-  return getResponseStream(url).then(streamToString);
+export async function fetchUrl(url: string, retries?: number): Promise<string> {
+  return getResponseStream(url, retries).then(streamToString);
 }
 
 // node-fetch throws a FetchError for those types of errors and
@@ -88,16 +91,19 @@ function isSystemError(error: FailedAttemptErrors): boolean {
 }
 
 export function getFetchOptions(targetUrl: string): RequestInit | undefined {
+  const options: RequestInit = {
+    headers: {
+      'User-Agent': `Kibana/${appContextService.getKibanaVersion()} node-fetch`,
+    },
+  };
   const proxyUrl = getRegistryProxyUrl();
   if (!proxyUrl) {
-    return undefined;
+    return options;
   }
 
   const logger = appContextService.getLogger();
   logger.debug(`Using ${proxyUrl} as proxy for ${targetUrl}`);
 
-  return {
-    // @ts-expect-error The types exposed by 'HttpsProxyAgent' isn't up to date with 'Agent'
-    agent: getProxyAgent({ proxyUrl, targetUrl }),
-  };
+  options.agent = getProxyAgent({ proxyUrl, targetUrl });
+  return options;
 }

@@ -19,11 +19,16 @@ import {
   EuiTabbedContent,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React, { useMemo, Fragment } from 'react';
 import styled from 'styled-components';
 
+import { useLocation } from 'react-router-dom';
+import type { InputsModelId } from '../../store/inputs/constants';
 import { NO_ALERT_INDEX } from '../../../../common/constants';
 import * as i18n from './translations';
+import { getScopeFromPath, useSourcererDataView } from '../../containers/sourcerer';
+import { SourcererScopeName } from '../../store/sourcerer/model';
 
 const DescriptionListStyled = styled(EuiDescriptionList)`
   @media only screen and (min-width: ${(props) => props.theme.eui.euiBreakpoints.s}) {
@@ -39,11 +44,13 @@ const DescriptionListStyled = styled(EuiDescriptionList)`
 
 DescriptionListStyled.displayName = 'DescriptionListStyled';
 
-interface ModalInspectProps {
+export interface ModalInspectProps {
+  additionalRequests?: string[] | null;
+  additionalResponses?: string[] | null;
   closeModal: () => void;
-  isShowing: boolean;
-  request: string | null;
-  response: string | null;
+  inputId?: InputsModelId.global | InputsModelId.timeline;
+  request: string;
+  response: string;
   title: string | React.ReactElement | React.ReactNode;
 }
 
@@ -73,11 +80,11 @@ const MyEuiModal = styled(EuiModal)`
 `;
 
 MyEuiModal.displayName = 'MyEuiModal';
-const parseInspectString = function <T>(objectStringify: string): T | null {
+const parseInspectStrings = function <T>(stringsArray: string[]): T[] {
   try {
-    return JSON.parse(objectStringify);
+    return stringsArray.map((objectStringify) => JSON.parse(objectStringify));
   } catch {
-    return null;
+    return [];
   }
 };
 
@@ -99,17 +106,32 @@ export const formatIndexPatternRequested = (indices: string[] = []) => {
 };
 
 export const ModalInspectQuery = ({
+  additionalRequests,
+  additionalResponses,
   closeModal,
-  isShowing = false,
+  inputId,
   request,
   response,
   title,
 }: ModalInspectProps) => {
-  if (!isShowing || request == null || response == null) {
-    return null;
-  }
-  const inspectRequest: Request | null = parseInspectString(request);
-  const inspectResponse: Response | null = parseInspectString(response);
+  const { pathname } = useLocation();
+  const { selectedPatterns } = useSourcererDataView(
+    inputId === 'timeline' ? SourcererScopeName.timeline : getScopeFromPath(pathname)
+  );
+  const requests: string[] = [request, ...(additionalRequests != null ? additionalRequests : [])];
+  const responses: string[] = [
+    response,
+    ...(additionalResponses != null ? additionalResponses : []),
+  ];
+
+  const inspectRequests: Request[] = parseInspectStrings(requests);
+  const inspectResponses: Response[] = parseInspectStrings(responses);
+
+  const isSourcererPattern = useMemo(
+    () => (inspectRequests[0]?.index ?? []).every((pattern) => selectedPatterns.includes(pattern)),
+    [inspectRequests, selectedPatterns]
+  );
+
   const statistics: Array<{
     title: NonNullable<ReactNode | string>;
     description: NonNullable<ReactNode | string>;
@@ -123,7 +145,15 @@ export const ModalInspectQuery = ({
       ),
       description: (
         <span data-test-subj="index-pattern-description">
-          {formatIndexPatternRequested(inspectRequest?.index ?? [])}
+          <p>{formatIndexPatternRequested(inspectRequests[0]?.index ?? [])}</p>
+
+          {!isSourcererPattern && (
+            <p>
+              <small>
+                <i data-test-subj="not-sourcerer-msg">{i18n.INSPECT_PATTERN_DIFFERENT}</i>
+              </small>
+            </p>
+          )}
         </span>
       ),
     },
@@ -137,8 +167,10 @@ export const ModalInspectQuery = ({
       ),
       description: (
         <span data-test-subj="query-time-description">
-          {inspectResponse != null
-            ? `${numeral(inspectResponse.took).format('0,0')}ms`
+          {inspectResponses[0]?.took === 0
+            ? '0ms'
+            : inspectResponses[0]?.took
+            ? `${numeral(inspectResponses[0].took).format('0,0')}ms`
             : i18n.SOMETHING_WENT_WRONG}
         </span>
       ),
@@ -170,42 +202,50 @@ export const ModalInspectQuery = ({
     {
       id: 'request',
       name: 'Request',
-      content: (
-        <>
-          <EuiSpacer />
-          <EuiCodeBlock
-            language="js"
-            fontSize="m"
-            paddingSize="m"
-            color="dark"
-            overflowHeight={300}
-            isCopyable
-          >
-            {inspectRequest != null
-              ? manageStringify(inspectRequest.body)
-              : i18n.SOMETHING_WENT_WRONG}
-          </EuiCodeBlock>
-        </>
-      ),
+      content:
+        inspectRequests.length > 0 ? (
+          inspectRequests.map((inspectRequest, index) => (
+            <Fragment key={index}>
+              <EuiSpacer />
+              <EuiCodeBlock
+                language="js"
+                fontSize="m"
+                paddingSize="m"
+                color="dark"
+                overflowHeight={300}
+                isCopyable
+              >
+                {manageStringify(inspectRequest.body)}
+              </EuiCodeBlock>
+            </Fragment>
+          ))
+        ) : (
+          <EuiCodeBlock>{i18n.SOMETHING_WENT_WRONG}</EuiCodeBlock>
+        ),
     },
     {
       id: 'response',
       name: 'Response',
-      content: (
-        <>
-          <EuiSpacer />
-          <EuiCodeBlock
-            language="js"
-            fontSize="m"
-            paddingSize="m"
-            color="dark"
-            overflowHeight={300}
-            isCopyable
-          >
-            {response}
-          </EuiCodeBlock>
-        </>
-      ),
+      content:
+        inspectResponses.length > 0 ? (
+          responses.map((responseText, index) => (
+            <Fragment key={index}>
+              <EuiSpacer />
+              <EuiCodeBlock
+                language="js"
+                fontSize="m"
+                paddingSize="m"
+                color="dark"
+                overflowHeight={300}
+                isCopyable
+              >
+                {responseText}
+              </EuiCodeBlock>
+            </Fragment>
+          ))
+        ) : (
+          <EuiCodeBlock>{i18n.SOMETHING_WENT_WRONG}</EuiCodeBlock>
+        ),
     },
   ];
 

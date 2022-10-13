@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { BytesFormat, FieldFormatsGetConfigFn } from '../../../../../common/field_formats';
+import { RangeFilter } from '@kbn/es-query';
+import { BytesFormat, FieldFormatsGetConfigFn } from '@kbn/field-formats-plugin/common';
 import { AggConfigs } from '../../agg_configs';
 import { mockAggTypesRegistry, mockGetFieldFormatsStart } from '../../test_helpers';
 import { IBucketAggConfig } from '../bucket_agg_type';
@@ -46,7 +47,8 @@ describe('AggConfig Filters', () => {
         ],
         {
           typesRegistry: mockAggTypesRegistry(),
-        }
+        },
+        jest.fn()
       );
     };
 
@@ -59,16 +61,16 @@ describe('AggConfig Filters', () => {
           lt: 2048.0,
           label: 'A custom label',
         }
-      );
+      ) as RangeFilter;
 
       expect(mockGetFieldFormatsStart().deserialize).toHaveBeenCalledTimes(1);
-      expect(filter).toHaveProperty('range');
+      expect(filter.query).toHaveProperty('range');
       expect(filter).toHaveProperty('meta');
       expect(filter.meta).toHaveProperty('index', '1234');
-      expect(filter.range).toHaveProperty('bytes');
-      expect(filter.range.bytes).toHaveProperty('gte', 1024.0);
-      expect(filter.range.bytes).toHaveProperty('lt', 2048.0);
-      expect(filter.range.bytes).not.toHaveProperty('label');
+      expect(filter.query.range).toHaveProperty('bytes');
+      expect(filter.query.range.bytes).toHaveProperty('gte', 1024.0);
+      expect(filter.query.range.bytes).toHaveProperty('lt', 2048.0);
+      expect(filter.query.range.bytes).not.toHaveProperty('label');
       expect(filter.meta).toHaveProperty('formattedValue');
     });
   });

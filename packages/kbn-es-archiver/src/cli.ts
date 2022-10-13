@@ -17,36 +17,38 @@ import Url from 'url';
 import readline from 'readline';
 import Fs from 'fs';
 
-import { RunWithCommands, createFlagError, CA_CERT_PATH } from '@kbn/dev-utils';
-import { readConfigFile, KbnClient } from '@kbn/test';
-import { Client } from '@elastic/elasticsearch';
+import { CA_CERT_PATH } from '@kbn/dev-utils';
+import { RunWithCommands } from '@kbn/dev-cli-runner';
+import { createFlagError } from '@kbn/dev-cli-errors';
+import { readConfigFile, KbnClient, EsVersion } from '@kbn/test';
+import { Client, HttpConnection } from '@elastic/elasticsearch';
 
 import { EsArchiver } from './es_archiver';
 
 const resolveConfigPath = (v: string) => Path.resolve(process.cwd(), v);
-const defaultConfigPath = resolveConfigPath('test/functional/config.js');
+const defaultConfigPath = resolveConfigPath('test/functional/config.base.js');
 
 export function runCli() {
   new RunWithCommands({
     description: 'CLI to manage archiving/restoring data in elasticsearch',
     globalFlags: {
-      string: ['es-url', 'kibana-url', 'dir', 'config', 'es-ca', 'kibana-ca'],
+      string: ['es-url', 'kibana-url', 'config', 'es-ca', 'kibana-ca'],
       help: `
-        --config           path to an FTR config file that sets --es-url, --kibana-url, and --dir
-                             default: ${defaultConfigPath}
+        --config           path to an FTR config file that sets --es-url and --kibana-url
+                             default: ${Path.relative(process.cwd(), defaultConfigPath)}
         --es-url           url for Elasticsearch, prefer the --config flag
         --kibana-url       url for Kibana, prefer the --config flag
-        --dir              where arechives are stored, prefer the --config flag
         --kibana-ca        if Kibana url points to https://localhost we default to the CA from @kbn/dev-utils, customize the CA with this flag
         --es-ca            if Elasticsearch url points to https://localhost we default to the CA from @kbn/dev-utils, customize the CA with this flag
       `,
     },
-    async extendContext({ log, flags, addCleanupTask }) {
+    async extendContext({ log, flags, addCleanupTask, statsMeta }) {
       const configPath = flags.config || defaultConfigPath;
       if (typeof configPath !== 'string') {
         throw createFlagError('--config must be a string');
       }
-      const config = await readConfigFile(log, Path.resolve(configPath));
+      const config = await readConfigFile(log, EsVersion.getDefault(), Path.resolve(configPath));
+      statsMeta.set('ftrConfigPath', configPath);
 
       let esUrl = flags['es-url'];
       if (esUrl && typeof esUrl !== 'string') {
@@ -104,20 +106,10 @@ export function runCli() {
         }
       }
 
-      let dir = flags.dir;
-      if (dir && typeof dir !== 'string') {
-        throw createFlagError('--dir must be a string');
-      }
-      if (!dir && config) {
-        dir = Path.resolve(config.get('esArchiver.directory'));
-      }
-      if (!dir) {
-        throw createFlagError('--dir or --config must be defined');
-      }
-
       const client = new Client({
         node: esUrl,
-        ssl: esCa ? { ca: esCa } : undefined,
+        tls: esCa ? { ca: esCa } : undefined,
+        Connection: HttpConnection,
       });
       addCleanupTask(() => client.close());
 
@@ -130,7 +122,7 @@ export function runCli() {
       const esArchiver = new EsArchiver({
         log,
         client,
-        dataDir: dir,
+        baseDir: process.cwd(),
         kbnClient,
       });
 
@@ -141,37 +133,47 @@ export function runCli() {
   })
     .command({
       name: 'save',
-      usage: 'save [name] [...indices]',
+      usage: 'save [path] [...indices]',
       description: `
-        archive the [indices ...] into the --dir with [name]
+        archive the [indices ...] into a directory at [path]
 
         Example:
-          Save all [logstash-*] indices from http://localhost:9200 to [snapshots/my_test_data] directory
+          Save all [logstash-*] indices from http://localhost:9200 to the [test/functional/es_archives/my_test_data] directory
 
-          WARNING: If the [my_test_data] snapshot exists it will be deleted!
+          WARNING: If the [test/functional/es_archives/my_test_data] snapshot exists it will be deleted!
 
-          $ node scripts/es_archiver save my_test_data logstash-* --dir snapshots
+          $ node scripts/es_archiver save test/functional/es_archives/my_test_data logstash-*
       `,
       flags: {
-        boolean: ['raw'],
+        boolean: ['raw', 'keep-index-names'],
         string: ['query'],
         help: `
-          --raw              don't gzip the archives
-          --query            query object to limit the documents being archived, needs to be properly escaped JSON
+          --raw                    don't gzip the archives
+          --keep-index-names       don't change the names of Kibana indices to .kibana_1
+          --query                  query object to limit the documents being archived, needs to be properly escaped JSON
         `,
       },
-      async run({ flags, esArchiver }) {
-        const [name, ...indices] = flags._;
-        if (!name) {
-          throw createFlagError('missing [name] argument');
+      async run({ flags, esArchiver, statsMeta }) {
+        const [path, ...indices] = flags._;
+        if (!path) {
+          throw createFlagError('missing [path] argument');
         }
+
         if (!indices.length) {
           throw createFlagError('missing [...indices] arguments');
         }
 
+        statsMeta.set('esArchiverPath', path);
+        statsMeta.set('esArchiverIndices', indices.join(','));
+
         const raw = flags.raw;
         if (typeof raw !== 'boolean') {
           throw createFlagError('--raw does not take a value');
+        }
+
+        const keepIndexNames = flags['keep-index-names'];
+        if (typeof keepIndexNames !== 'boolean') {
+          throw createFlagError('--keep-index-names does not take a value');
         }
 
         const query = flags.query;
@@ -184,77 +186,89 @@ export function runCli() {
           }
         }
 
-        await esArchiver.save(name, indices, { raw, query: parsedQuery });
+        await esArchiver.save(path, indices, { raw, keepIndexNames, query: parsedQuery });
       },
     })
     .command({
       name: 'load',
-      usage: 'load [name]',
+      usage: 'load [path]',
       description: `
-        load the archive in --dir with [name]
+        load the archive stored at [path]
 
         Example:
-          Load the [my_test_data] snapshot from the archive directory and elasticsearch instance defined
-          in the [test/functional/config.js] config file
+          Load the [my_test_data] snapshot from the local directory and elasticsearch instance defined
+          in the [../config.js] config file
 
           WARNING: If the indices exist already they will be deleted!
 
-          $ node scripts/es_archiver load my_test_data --config test/functional/config.js
+          $ node scripts/es_archiver load my_test_data --config ../config.js
       `,
       flags: {
-        boolean: ['use-create'],
+        boolean: ['use-create', 'docs-only'],
         help: `
           --use-create       use create instead of index for loading documents
+          --docs-only        load only documents, not indices
         `,
       },
-      async run({ flags, esArchiver }) {
-        const [name] = flags._;
-        if (!name) {
-          throw createFlagError('missing [name] argument');
+      async run({ flags, esArchiver, statsMeta }) {
+        const [path] = flags._;
+        if (!path) {
+          throw createFlagError('missing [path] argument');
         }
         if (flags._.length > 1) {
           throw createFlagError(`unknown extra arguments: [${flags._.slice(1).join(', ')}]`);
         }
+
+        statsMeta.set('esArchiverPath', path);
 
         const useCreate = flags['use-create'];
         if (typeof useCreate !== 'boolean') {
           throw createFlagError('--use-create does not take a value');
         }
 
-        await esArchiver.load(name, { useCreate });
+        const docsOnly = flags['docs-only'];
+        if (typeof docsOnly !== 'boolean') {
+          throw createFlagError('--docs-only does not take a value');
+        }
+
+        await esArchiver.load(path, { useCreate, docsOnly });
       },
     })
     .command({
       name: 'unload',
-      usage: 'unload [name]',
-      description: 'remove indices created by the archive in --dir with [name]',
-      async run({ flags, esArchiver }) {
-        const [name] = flags._;
-        if (!name) {
-          throw createFlagError('missing [name] argument');
+      usage: 'unload [path]',
+      description: 'remove indices created by the archive at [path]',
+      async run({ flags, esArchiver, statsMeta }) {
+        const [path] = flags._;
+        if (!path) {
+          throw createFlagError('missing [path] argument');
         }
         if (flags._.length > 1) {
           throw createFlagError(`unknown extra arguments: [${flags._.slice(1).join(', ')}]`);
         }
 
-        await esArchiver.unload(name);
+        statsMeta.set('esArchiverPath', path);
+
+        await esArchiver.unload(path);
       },
     })
     .command({
       name: 'edit',
-      usage: 'edit [prefix]',
+      usage: 'edit [path]',
       description:
-        'extract the archives under the prefix, wait for edits to be completed, and then recompress the archives',
-      async run({ flags, esArchiver }) {
-        const [prefix] = flags._;
-        if (!prefix) {
-          throw createFlagError('missing [prefix] argument');
+        'extract the archives within or at [path], wait for edits to be completed, and then recompress the archives',
+      async run({ flags, esArchiver, statsMeta }) {
+        const [path] = flags._;
+        if (!path) {
+          throw createFlagError('missing [path] argument');
         }
         if (flags._.length > 1) {
           throw createFlagError(`unknown extra arguments: [${flags._.slice(1).join(', ')}]`);
         }
 
-        await esArchiver.edit(prefix, async () => {
+        statsMeta.set('esArchiverPath', path);
+
+        await esArchiver.edit(path, async () => {
           const rl = readline.createInterface({
             input: process.stdin,
             output: process.stdout,
@@ -278,10 +292,19 @@ export function runCli() {
       },
     })
     .command({
-      name: 'rebuild-all',
-      description: '[internal] read and write all archives in --dir to remove any inconsistencies',
-      async run({ esArchiver }) {
-        await esArchiver.rebuildAll();
+      name: 'rebuild-all [dir]',
+      description:
+        '[internal] read and write all archives within [dir] to remove any inconsistencies',
+      async run({ flags, esArchiver }) {
+        const [dir] = flags._;
+        if (!dir) {
+          throw createFlagError('missing [dir] argument');
+        }
+        if (flags._.length > 1) {
+          throw createFlagError(`unknown extra arguments: [${flags._.slice(1).join(', ')}]`);
+        }
+
+        await esArchiver.rebuildAll(dir);
       },
     })
     .execute();

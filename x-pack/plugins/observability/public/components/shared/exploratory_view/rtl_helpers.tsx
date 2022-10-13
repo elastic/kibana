@@ -9,41 +9,49 @@ import { of } from 'rxjs';
 import React, { ReactElement } from 'react';
 import { stringify } from 'query-string';
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { render as reactTestLibRender, RenderOptions } from '@testing-library/react';
-import { Router } from 'react-router-dom';
+import {
+  render as reactTestLibRender,
+  RenderOptions,
+  MatcherFunction,
+} from '@testing-library/react';
+import { Route, Router } from 'react-router-dom';
 import { createMemoryHistory, History } from 'history';
-import { CoreStart } from 'kibana/public';
-import { I18nProvider } from '@kbn/i18n/react';
-import { coreMock } from 'src/core/public/mocks';
-import {
-  KibanaServices,
-  KibanaContextProvider,
-} from '../../../../../../../src/plugins/kibana_react/public';
+import { CoreStart } from '@kbn/core/public';
+import { I18nProvider } from '@kbn/i18n-react';
+import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
+import { KibanaContextProvider, KibanaServices } from '@kbn/kibana-react-plugin/public';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
+import { setIndexPatterns } from '@kbn/unified-search-plugin/public/services';
+import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
+import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
+import { DataViewSpec } from '@kbn/data-views-plugin/public';
+import { rumFieldFormats } from './configurations/rum/field_formats';
 import { ObservabilityPublicPluginsStart } from '../../../plugin';
-import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
-import { lensPluginMock } from '../../../../../lens/public/mocks';
-import { IndexPatternContextProvider } from './hooks/use_app_index_pattern';
-import { AllSeries, UrlStorageContextProvider } from './hooks/use_url_storage';
+import * as useAppDataViewHook from './hooks/use_app_data_view';
+import { DataViewContext, DataViewContextProvider } from './hooks/use_app_data_view';
 import {
-  withNotifyOnErrors,
-  createKbnUrlStateStorage,
-} from '../../../../../../../src/plugins/kibana_utils/public';
+  AllSeries,
+  reportTypeKey,
+  SeriesContextValue,
+  UrlStorageContext,
+} from './hooks/use_series_storage';
+
 import * as fetcherHook from '../../../hooks/use_fetcher';
-import * as useUrlHook from './hooks/use_url_storage';
 import * as useSeriesFilterHook from './hooks/use_series_filters';
 import * as useHasDataHook from '../../../hooks/use_has_data';
 import * as useValuesListHook from '../../../hooks/use_values_list';
-import * as useAppIndexPatternHook from './hooks/use_app_index_pattern';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { getStubIndexPattern } from '../../../../../../../src/plugins/data/public/index_patterns/index_pattern.stub';
-import indexPatternData from './configurations/test_data/test_index_pattern.json';
+import dataViewData from './configurations/test_data/test_data_view.json';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { setIndexPatterns } from '../../../../../../../src/plugins/data/public/services';
-import { IndexPatternsContract } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
-import { UrlFilter } from './types';
-import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
+import { AppDataType, SeriesUrl, UrlFilter } from './types';
+import { ListItem } from '../../../hooks/use_values_list';
+import { TRANSACTION_DURATION } from './configurations/constants/elasticsearch_fieldnames';
+import { dataTypes, obsvReportConfigMap, reportTypesList } from './obsv_exploratory_view';
+import { ExploratoryViewContextProvider } from './contexts/exploratory_view_config';
 
 interface KibanaProps {
   services?: KibanaServices;
@@ -73,23 +81,28 @@ interface RenderRouterOptions<ExtraCore> extends KibanaProviderOptions<ExtraCore
   history?: History;
   renderOptions?: Omit<RenderOptions, 'queries'>;
   url?: Url;
+  initSeries?: {
+    data?: AllSeries;
+    filters?: UrlFilter[];
+    breakdown?: string;
+  };
 }
 
 function getSetting<T = any>(key: string): T {
   if (key === 'timepicker:quickRanges') {
-    return ([
+    return [
       {
         display: 'Today',
         from: 'now/d',
         to: 'now/d',
       },
-    ] as unknown) as T;
+    ] as unknown as T;
   }
-  return ('MMM D, YYYY @ HH:mm:ss.SSS' as unknown) as T;
+  return 'MMM D, YYYY @ HH:mm:ss.SSS' as unknown as T;
 }
 
 function setSetting$<T = any>(key: string): T {
-  return (of('MMM D, YYYY @ HH:mm:ss.SSS') as unknown) as T;
+  return of('MMM D, YYYY @ HH:mm:ss.SSS') as unknown as T;
 }
 
 /* default mock core */
@@ -118,6 +131,8 @@ export const mockCore: () => Partial<CoreStart & ObservabilityPublicPluginsStart
     },
     lens: lensPluginMock.createStartContract(),
     data: dataPluginMock.createStartContract(),
+    dataViews: dataViewPluginMocks.createStartContract(),
+    cases: casesPluginMock.createStartContract(),
   };
 
   return core;
@@ -127,40 +142,26 @@ export const mockCore: () => Partial<CoreStart & ObservabilityPublicPluginsStart
 export function MockKibanaProvider<ExtraCore extends Partial<CoreStart>>({
   children,
   core,
-  history,
   kibanaProps,
 }: MockKibanaProviderProps<ExtraCore>) {
-  const { notifications } = core!;
-
-  const kbnUrlStateStorage = createKbnUrlStateStorage({
-    history,
-    useHash: false,
-    ...withNotifyOnErrors(notifications!.toasts),
-  });
-
-  const indexPattern = mockIndexPattern;
-
-  setIndexPatterns(({
-    ...[indexPattern],
-    get: async () => indexPattern,
-  } as unknown) as IndexPatternsContract);
+  const dataView = mockDataView;
+  setIndexPatterns({
+    ...[dataView],
+    get: async () => dataView,
+  } as unknown as DataViewsContract);
 
   return (
     <KibanaContextProvider services={{ ...core }} {...kibanaProps}>
       <EuiThemeProvider darkMode={false}>
         <I18nProvider>
-          <IndexPatternContextProvider>
-            <UrlStorageContextProvider storage={kbnUrlStateStorage}>
-              {children}
-            </UrlStorageContextProvider>
-          </IndexPatternContextProvider>
+          <DataViewContextProvider>{children}</DataViewContextProvider>
         </I18nProvider>
       </EuiThemeProvider>
     </KibanaContextProvider>
   );
 }
 
-export function MockRouter<ExtraCore>({
+export function MockRouter<ExtraCore extends Partial<CoreStart>>({
   children,
   core,
   history = createMemoryHistory(),
@@ -168,9 +169,11 @@ export function MockRouter<ExtraCore>({
 }: MockRouterProps<ExtraCore>) {
   return (
     <Router history={history}>
-      <MockKibanaProvider core={core} kibanaProps={kibanaProps} history={history}>
-        {children}
-      </MockKibanaProvider>
+      <Route path={'/app/observability/exploratory-view/'}>
+        <MockKibanaProvider core={core} kibanaProps={kibanaProps} history={history}>
+          {children}
+        </MockKibanaProvider>
+      </Route>
     </Router>
   );
 }
@@ -183,7 +186,8 @@ export function render<ExtraCore>(
     core: customCore,
     kibanaProps,
     renderOptions,
-    url,
+    url = '/app/observability/exploratory-view/',
+    initSeries = {},
   }: RenderRouterOptions<ExtraCore> = {}
 ) {
   if (url) {
@@ -195,19 +199,33 @@ export function render<ExtraCore>(
     ...customCore,
   };
 
+  const seriesContextValue = mockSeriesStorageContext(initSeries);
+
   return {
     ...reactTestLibRender(
       <MockRouter history={history} kibanaProps={kibanaProps} core={core}>
-        {ui}
+        <ExploratoryViewContextProvider
+          reportTypes={reportTypesList}
+          dataTypes={dataTypes}
+          dataViews={{}}
+          reportConfigMap={obsvReportConfigMap}
+          setHeaderActionMenu={jest.fn()}
+          theme$={themeServiceMock.createTheme$()}
+        >
+          <UrlStorageContext.Provider value={{ ...seriesContextValue }}>
+            {ui}
+          </UrlStorageContext.Provider>
+        </ExploratoryViewContextProvider>
       </MockRouter>,
       renderOptions
     ),
     history,
     core,
+    ...seriesContextValue,
   };
 }
 
-const getHistoryFromUrl = (url: Url) => {
+export const getHistoryFromUrl = (url: Url) => {
   if (typeof url === 'string') {
     return createMemoryHistory({
       initialEntries: [url],
@@ -235,20 +253,22 @@ export const mockUseHasData = () => {
   return { spy, onRefreshTimeRange };
 };
 
-export const mockAppIndexPattern = () => {
-  const loadIndexPattern = jest.fn();
-  const spy = jest.spyOn(useAppIndexPatternHook, 'useAppIndexPatternContext').mockReturnValue({
-    indexPattern: mockIndexPattern,
-    selectedApp: 'ux',
+export const mockAppDataView = (props?: Partial<DataViewContext>) => {
+  const loadDataView = jest.fn();
+  const spy = jest.spyOn(useAppDataViewHook, 'useAppDataViewContext').mockReturnValue({
+    dataView: mockDataView,
     hasData: true,
     loading: false,
     hasAppData: { ux: true } as any,
-    loadIndexPattern,
+    loadDataView,
+    dataViews: { ux: mockDataView } as unknown as Record<AppDataType, DataView>,
+    dataViewErrors: {} as any,
+    ...(props || {}),
   });
-  return { spy, loadIndexPattern };
+  return { spy, loadDataView };
 };
 
-export const mockUseValuesList = (values?: string[]) => {
+export const mockUseValuesList = (values?: ListItem[]) => {
   const onRefreshTimeRange = jest.fn();
   const spy = jest.spyOn(useValuesListHook, 'useValuesList').mockReturnValue({
     values: values ?? [],
@@ -256,7 +276,16 @@ export const mockUseValuesList = (values?: string[]) => {
   return { spy, onRefreshTimeRange };
 };
 
-export const mockUrlStorage = ({
+export const mockUxSeries = {
+  name: 'performance-distribution',
+  dataType: 'ux',
+  breakdown: 'user_agent.name',
+  time: { from: 'now-15m', to: 'now' },
+  reportDefinitions: { 'service.name': ['elastic-co'] },
+  selectedMetricField: TRANSACTION_DURATION,
+} as SeriesUrl;
+
+function mockSeriesStorageContext({
   data,
   filters,
   breakdown,
@@ -264,45 +293,56 @@ export const mockUrlStorage = ({
   data?: AllSeries;
   filters?: UrlFilter[];
   breakdown?: string;
-}) => {
-  const mockDataSeries = data || {
-    'performance-distribution': {
-      reportType: 'pld',
-      dataType: 'ux',
-      breakdown: breakdown || 'user_agent.name',
-      time: { from: 'now-15m', to: 'now' },
-      ...(filters ? { filters } : {}),
-    },
+}) {
+  const testSeries = {
+    ...mockUxSeries,
+    breakdown: breakdown || 'user_agent.name',
+    ...(filters ? { filters } : {}),
   };
-  const allSeriesIds = Object.keys(mockDataSeries);
-  const firstSeriesId = allSeriesIds?.[0];
 
-  const series = mockDataSeries[firstSeriesId];
+  const mockDataSeries = data || [testSeries];
 
   const removeSeries = jest.fn();
   const setSeries = jest.fn();
 
-  const spy = jest.spyOn(useUrlHook, 'useUrlStorage').mockReturnValue({
-    firstSeriesId,
-    allSeriesIds,
+  const getSeries = jest.fn().mockReturnValue(testSeries);
+
+  return {
     removeSeries,
     setSeries,
-    series,
-    firstSeries: mockDataSeries[firstSeriesId],
+    getSeries,
+    autoApply: true,
+    reportType: 'data-distribution',
+    lastRefresh: Date.now(),
+    setLastRefresh: jest.fn(),
+    setAutoApply: jest.fn(),
+    applyChanges: jest.fn(),
+    firstSeries: mockDataSeries[0],
     allSeries: mockDataSeries,
-  } as any);
-
-  return { spy, removeSeries, setSeries };
-};
+    setReportType: jest.fn(),
+    setChartTimeRangeContext: jest.fn(),
+    storage: {
+      get: jest
+        .fn()
+        .mockImplementation((key: string) =>
+          key === reportTypeKey ? 'data-distribution' : mockDataSeries
+        ),
+    } as any,
+  } as SeriesContextValue;
+}
 
 export function mockUseSeriesFilter() {
   const removeFilter = jest.fn();
   const invertFilter = jest.fn();
   const setFilter = jest.fn();
+  const replaceFilter = jest.fn();
+  const setFiltersWildcard = jest.fn();
   const spy = jest.spyOn(useSeriesFilterHook, 'useSeriesFilters').mockReturnValue({
     removeFilter,
     invertFilter,
     setFilter,
+    replaceFilter,
+    setFiltersWildcard,
   });
 
   return {
@@ -310,6 +350,8 @@ export function mockUseSeriesFilter() {
     removeFilter,
     invertFilter,
     setFilter,
+    replaceFilter,
+    setFiltersWildcard,
   };
 }
 
@@ -324,10 +366,33 @@ export const mockHistory = {
   },
 };
 
-export const mockIndexPattern = getStubIndexPattern(
-  'apm-*',
-  () => {},
-  '@timestamp',
-  JSON.parse(indexPatternData.attributes.fields),
-  mockCore() as any
-);
+const fieldFormatMap: DataViewSpec['fieldFormats'] = {};
+
+rumFieldFormats.forEach(({ field, format }) => {
+  fieldFormatMap[field] = format;
+});
+
+export const mockDataView = createStubDataView({
+  spec: {
+    id: 'apm-*',
+    title: 'apm-*',
+    timeFieldName: '@timestamp',
+    fields: JSON.parse(dataViewData.attributes.fields),
+    fieldFormats: fieldFormatMap,
+  },
+});
+
+// This function allows us to query for the nearest button with test
+// no matter whether it has nested tags or not (as EuiButton elements do).
+export const forNearestButton =
+  (getByText: (f: MatcherFunction) => HTMLElement | null) =>
+  (text: string): HTMLElement | null =>
+    getByText((_content: string, node: Element | null) => {
+      if (!node) return false;
+      const noOtherButtonHasText = Array.from(node.children).every(
+        (child) => child && (child.textContent !== text || child.tagName.toLowerCase() !== 'button')
+      );
+      return (
+        noOtherButtonHasText && node.textContent === text && node.tagName.toLowerCase() === 'button'
+      );
+    });

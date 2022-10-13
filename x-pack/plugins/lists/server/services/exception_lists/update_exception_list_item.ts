@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
-
-import {
+import { SavedObjectsClientContract } from '@kbn/core/server';
+import type {
   DescriptionOrUndefined,
   EntriesArray,
   ExceptionListItemSchema,
   ExceptionListItemTypeOrUndefined,
-  ExceptionListSoSchema,
   IdOrUndefined,
   ItemIdOrUndefined,
   MetaOrUndefined,
@@ -22,10 +20,12 @@ import {
   TagsOrUndefined,
   UpdateCommentsArrayOrUndefined,
   _VersionOrUndefined,
-} from '../../../common/schemas';
+} from '@kbn/securitysolution-io-ts-list-types';
+import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
+
+import { ExceptionListSoSchema } from '../../schemas/saved_objects';
 
 import {
-  getSavedObjectType,
   transformSavedObjectUpdateToExceptionListItem,
   transformUpdateCommentsToComments,
 } from './utils';

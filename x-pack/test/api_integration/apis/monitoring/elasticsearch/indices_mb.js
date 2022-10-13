@@ -6,29 +6,32 @@
  */
 
 import expect from '@kbn/expect';
-import relocatingShardsFixture from './fixtures/indices_shards_relocating';
-import relocationShardsAllFixture from './fixtures/indices_shards_relocating_all';
-import indicesRedClusterFixture from './fixtures/indices_red_cluster';
-import indicesRedClusterAllFixture from './fixtures/indices_red_cluster_all';
+import relocatingShardsFixture from './fixtures/indices_shards_relocating.json';
+import relocationShardsAllFixture from './fixtures/indices_shards_relocating_all.json';
+import indicesRedClusterFixture from './fixtures/indices_red_cluster.json';
+import indicesRedClusterAllFixture from './fixtures/indices_red_cluster_all.json';
+import { getLifecycleMethods } from '../data_stream';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const { setup, tearDown } = getLifecycleMethods(getService);
 
   describe('indices mb', () => {
     describe('shard-relocation', () => {
-      const archive = 'monitoring/singlecluster_three_nodes_shard_relocation_mb';
+      const archive =
+        'x-pack/test/functional/es_archives/monitoring/singlecluster_three_nodes_shard_relocation_mb';
       const timeRange = {
         min: '2017-10-05T20:31:48.000Z',
         max: '2017-10-05T20:35:12.000Z',
       };
 
       before('load archive', () => {
-        return esArchiver.load(archive);
+        return setup(archive);
       });
 
       after('unload archive', () => {
-        return esArchiver.unload(archive);
+        return tearDown();
       });
 
       it('should summarize the non-system indices with stats', async () => {
@@ -56,7 +59,7 @@ export default function ({ getService }) {
     });
 
     describe('health-red', () => {
-      const archive = 'monitoring/singlecluster_red_platinum';
+      const archive = 'x-pack/test/functional/es_archives/monitoring/singlecluster_red_platinum';
       const timeRange = {
         min: '2017-10-06T19:53:06.000Z',
         max: '2017-10-06T20:15:30.000Z',

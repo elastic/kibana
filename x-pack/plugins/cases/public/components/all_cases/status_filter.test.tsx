@@ -9,7 +9,8 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 
-import { CaseStatuses, StatusAll } from '../../../common';
+import { StatusAll } from '../../../common/ui/types';
+import { CaseStatuses } from '../../../common/api';
 import { StatusFilter } from './status_filter';
 
 const stats = {
@@ -63,23 +64,20 @@ describe('StatusFilter', () => {
     });
   });
 
-  it('should disabled selected statuses', () => {
+  it('should not render hidden statuses', () => {
     const wrapper = mount(
-      <StatusFilter {...defaultProps} disabledStatuses={[CaseStatuses.closed]} />
+      <StatusFilter {...defaultProps} hiddenStatuses={[StatusAll, CaseStatuses.closed]} />
     );
 
     wrapper.find('button[data-test-subj="case-status-filter"]').simulate('click');
 
-    expect(
-      wrapper.find('button[data-test-subj="case-status-filter-open"]').prop('disabled')
-    ).toBeFalsy();
+    expect(wrapper.find(`[data-test-subj="case-status-filter-all"]`).exists()).toBeFalsy();
+    expect(wrapper.find('button[data-test-subj="case-status-filter-closed"]').exists()).toBeFalsy();
+
+    expect(wrapper.find('button[data-test-subj="case-status-filter-open"]').exists()).toBeTruthy();
 
     expect(
-      wrapper.find('button[data-test-subj="case-status-filter-in-progress"]').prop('disabled')
-    ).toBeFalsy();
-
-    expect(
-      wrapper.find('button[data-test-subj="case-status-filter-closed"]').prop('disabled')
+      wrapper.find('button[data-test-subj="case-status-filter-in-progress"]').exists()
     ).toBeTruthy();
   });
 });

@@ -21,22 +21,22 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { Vis } from 'src/plugins/visualizations/public';
-import { SavedObject } from 'src/plugins/saved_objects/public';
-import { ApplicationStart } from '../../../../../core/public';
-import { useKibana } from '../../../../kibana_react/public';
+import { Vis } from '@kbn/visualizations-plugin/public';
+import { SavedSearch, getSavedSearchUrl } from '@kbn/discover-plugin/public';
+import { ApplicationStart } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 interface LinkedSearchProps {
-  savedSearch: SavedObject;
+  savedSearch: SavedSearch;
   eventEmitter: EventEmitter;
 }
 
 interface SidebarTitleProps {
   isLinkedSearch: boolean;
-  savedSearch?: SavedObject;
+  savedSearch?: SavedSearch;
   vis: Vis;
   eventEmitter: EventEmitter;
 }
@@ -55,7 +55,7 @@ export function LinkedSearch({ savedSearch, eventEmitter }: LinkedSearchProps) {
   }, [eventEmitter]);
   const onClickViewInDiscover = useCallback(() => {
     application.navigateToApp('discover', {
-      path: `#/view/${savedSearch.id}`,
+      path: getSavedSearchUrl(savedSearch.id),
     });
   }, [application, savedSearch.id]);
 
@@ -167,11 +167,11 @@ function SidebarTitle({ savedSearch, vis, isLinkedSearch, eventEmitter }: Sideba
         title={i18n.translate('visDefaultEditor.sidebar.indexPatternAriaLabel', {
           defaultMessage: 'Index pattern: {title}',
           values: {
-            title: vis.data.indexPattern!.title,
+            title: vis.data.indexPattern!.getName(),
           },
         })}
       >
-        {vis.data.indexPattern!.title}
+        {vis.data.indexPattern!.getName()}
       </h2>
     </EuiTitle>
   ) : (

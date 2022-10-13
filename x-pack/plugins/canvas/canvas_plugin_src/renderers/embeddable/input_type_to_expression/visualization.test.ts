@@ -6,10 +6,11 @@
  */
 
 import { toExpression } from './visualization';
-import { fromExpression, Ast } from '@kbn/interpreter/common';
+import { fromExpression, Ast } from '@kbn/interpreter';
 
 const baseInput = {
-  id: 'embeddableId',
+  id: 'elementId',
+  savedObjectId: 'embeddableId',
 };
 
 describe('toExpression', () => {
@@ -24,7 +25,7 @@ describe('toExpression', () => {
     expect(ast.type).toBe('expression');
     expect(ast.chain[0].function).toBe('savedVisualization');
 
-    expect(ast.chain[0].arguments.id).toStrictEqual([input.id]);
+    expect(ast.chain[0].arguments.id).toStrictEqual([input.savedObjectId]);
   });
 
   it('includes timerange if given', () => {

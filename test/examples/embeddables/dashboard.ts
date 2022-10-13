@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginFunctionalProviderContext } from 'test/plugin_functional/services';
+import { PluginFunctionalProviderContext } from '../../plugin_functional/services';
 
 export const testDashboardInput = {
   panels: {
@@ -93,22 +93,30 @@ export const testDashboardInput = {
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const pieChart = getService('pieChart');
-  const browser = getService('browser');
   const dashboardExpect = getService('dashboardExpect');
-  const PageObjects = getPageObjects(['common']);
+  const elasticChart = getService('elasticChart');
+  const PageObjects = getPageObjects(['common', 'visChart', 'dashboard']);
+  const monacoEditor = getService('monacoEditor');
 
   describe('dashboard container', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('../functional/fixtures/es_archiver/dashboard/current/data');
-      await esArchiver.loadIfNeeded('../functional/fixtures/es_archiver/dashboard/current/kibana');
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/dashboard/current/data');
+      await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.importExport.load(
+        'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
+      );
       await PageObjects.common.navigateToApp('dashboardEmbeddableExamples');
       await testSubjects.click('dashboardEmbeddableByValue');
+      await PageObjects.dashboard.waitForRenderComplete();
+
       await updateInput(JSON.stringify(testDashboardInput, null, 4));
     });
 
     it('pie charts', async () => {
+      await elasticChart.setNewChartUiDebugFlag();
       await pieChart.expectPieSliceCount(5);
     });
 
@@ -117,22 +125,12 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     });
 
     it('saved search', async () => {
-      await dashboardExpect.savedSearchRowCount(11);
+      await dashboardExpect.savedSearchRowCount(10);
     });
   });
 
   async function updateInput(input: string) {
-    const editorWrapper = await (
-      await testSubjects.find('dashboardEmbeddableByValueInputEditor')
-    ).findByClassName('ace_editor');
-    const editorId = await editorWrapper.getAttribute('id');
-    await browser.execute(
-      (_editorId: string, _input: string) => {
-        return (window as any).ace.edit(_editorId).setValue(_input);
-      },
-      editorId,
-      input
-    );
+    await monacoEditor.setCodeEditorValue(input);
     await testSubjects.click('dashboardEmbeddableByValueInputSubmit');
   }
 }

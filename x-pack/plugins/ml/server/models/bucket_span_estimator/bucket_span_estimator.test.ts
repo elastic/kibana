@@ -5,22 +5,26 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 
 import { ES_AGGREGATION } from '../../../common/constants/aggregation_types';
 import { BucketSpanEstimatorData } from '../../../common/types/job_service';
 
 import { estimateBucketSpanFactory } from './bucket_span_estimator';
 
+jest.mock('../../lib/log', () => ({
+  mlLog: { warn: jest.fn() },
+}));
+
 const callAs = {
   search: () => Promise.resolve({ body: {} }),
   cluster: { getSettings: () => Promise.resolve({ body: {} }) },
 };
 
-const mlClusterClient = ({
+const mlClusterClient = {
   asCurrentUser: callAs,
   asInternalUser: callAs,
-} as unknown) as IScopedClusterClient;
+} as unknown as IScopedClusterClient;
 
 // mock configuration to be passed to the estimator
 const formConfig: BucketSpanEstimatorData = {

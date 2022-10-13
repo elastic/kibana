@@ -1,0 +1,76 @@
+{
+  "id": "kubernetesSecurity",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "kubernetesSecurity",
+        "id": "def-public.KubernetesSecurityStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "KubernetesSecurityStart",
+        "description": [],
+        "path": "x-pack/plugins/kubernetes_security/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "kubernetesSecurity",
+            "id": "def-public.KubernetesSecurityStart.getKubernetesPage",
+            "type": "Function",
+            "tags": [],
+            "label": "getKubernetesPage",
+            "description": [],
+            "signature": [
+              "(kubernetesSecurityDeps: ",
+              "KubernetesSecurityDeps",
+              ") => JSX.Element"
+            ],
+            "path": "x-pack/plugins/kubernetes_security/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "kubernetesSecurity",
+                "id": "def-public.KubernetesSecurityStart.getKubernetesPage.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "kubernetesSecurityDeps",
+                "description": [],
+                "signature": [
+                  "KubernetesSecurityDeps"
+                ],
+                "path": "x-pack/plugins/kubernetes_security/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

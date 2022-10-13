@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { UiActionsStart } from 'src/plugins/ui_actions/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { Container, EmbeddableFactoryDefinition } from '../../..';
 import { ContactCardEmbeddable, ContactCardEmbeddableInput } from './contact_card_embeddable';
 import { CONTACT_CARD_EMBEDDABLE } from './contact_card_embeddable_factory';
@@ -17,7 +17,8 @@ interface SlowContactCardEmbeddableFactoryOptions {
 }
 
 export class SlowContactCardEmbeddableFactory
-  implements EmbeddableFactoryDefinition<ContactCardEmbeddableInput> {
+  implements EmbeddableFactoryDefinition<ContactCardEmbeddableInput>
+{
   private loadTickCount = 0;
   public readonly type = CONTACT_CARD_EMBEDDABLE;
 

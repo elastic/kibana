@@ -7,7 +7,7 @@
  */
 
 /**
- * https://www.elastic.co/guide/en/ecs/1.9/ecs-os.html
+ * https://www.elastic.co/guide/en/ecs/master/ecs-os.html
  *
  * @internal
  */
@@ -17,6 +17,6 @@ export interface EcsOs {
   kernel?: string;
   name?: string;
   platform?: string;
-  type?: string;
+  type?: 'linux' | 'macos' | 'unix' | 'windows';
   version?: string;
 }

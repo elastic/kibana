@@ -8,18 +8,21 @@
 import React, { MouseEventHandler, FC } from 'react';
 import PropTypes from 'prop-types';
 import { EuiButtonIcon } from '@elastic/eui';
-// @ts-expect-error untyped local
-import { Popover, PopoverChildrenProps } from '../popover';
+import { i18n } from '@kbn/i18n';
+import { Popover } from '../popover';
 import { ArgAdd } from '../arg_add';
-// @ts-expect-error untyped local
-import { Arg } from '../../expression_types/arg';
 
-import { ComponentStrings } from '../../../i18n';
+const strings = {
+  getAddAriaLabel: () =>
+    i18n.translate('xpack.canvas.argAddPopover.addAriaLabel', {
+      defaultMessage: 'Add argument',
+    }),
+};
 
-const { ArgAddPopover: strings } = ComponentStrings;
-
-interface ArgOptions {
-  arg: Arg;
+export interface ArgOptions {
+  name?: string;
+  displayName?: string;
+  help?: string;
   onValueAdd: () => void;
 }
 
@@ -44,12 +47,12 @@ export const ArgAddPopover: FC<Props> = ({ options }) => {
       panelPaddingSize="none"
       button={button}
     >
-      {({ closePopover }: PopoverChildrenProps) =>
+      {({ closePopover }) =>
         options.map((opt) => (
           <ArgAdd
-            key={`${opt.arg.name}-add`}
-            displayName={opt.arg.displayName}
-            help={opt.arg.help}
+            key={`${opt.name}-add`}
+            displayName={opt.displayName ?? ''}
+            help={opt.help ?? ''}
             onValueAdd={() => {
               opt.onValueAdd();
               closePopover();

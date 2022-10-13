@@ -7,32 +7,37 @@
 
 import type Boom from '@hapi/boom';
 import { isBoom } from '@hapi/boom';
-import { errors as LegacyESErrors } from 'elasticsearch';
 
 import type {
   IKibanaResponse,
   KibanaResponseFactory,
   RequestHandlerContext,
-} from 'src/core/server';
-import type { KibanaRequest } from 'src/core/server';
+} from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 
 import { appContextService } from '../services';
 
 import {
   AgentNotFoundError,
+  AgentActionNotFoundError,
   AgentPolicyNameExistsError,
   ConcurrentInstallOperationError,
-  IngestManagerError,
+  FleetError,
   PackageNotFoundError,
   PackageUnsupportedMediaTypeError,
+  RegistryConnectionError,
   RegistryError,
-} from './index';
+  RegistryResponseError,
+  PackageFailedVerificationError,
+  PackagePolicyNotFoundError,
+  FleetUnauthorizedError,
+} from '.';
 
 type IngestErrorHandler = (
   params: IngestErrorHandlerParams
 ) => IKibanaResponse | Promise<IKibanaResponse>;
 interface IngestErrorHandlerParams {
-  error: IngestManagerError | Boom.Boom | Error;
+  error: FleetError | Boom.Boom | Error;
   response: KibanaResponseFactory;
   request?: KibanaRequest;
   context?: RequestHandlerContext;
@@ -40,31 +45,16 @@ interface IngestErrorHandlerParams {
 // unsure if this is correct. would prefer to use something "official"
 // this type is based on BadRequest values observed while debugging https://github.com/elastic/kibana/issues/75862
 
-interface LegacyESClientError {
-  message: string;
-  stack: string;
-  status: number;
-  displayName: string;
-  path?: string;
-  query?: string | undefined;
-  body?: {
-    error: {
-      type: string;
-    };
-    status: number;
-  };
-  statusCode?: number;
-  response?: string;
-}
-export const isLegacyESClientError = (error: any): error is LegacyESClientError => {
-  return error instanceof LegacyESErrors._Abstract;
-};
-
-const getHTTPResponseCode = (error: IngestManagerError): number => {
-  if (error instanceof RegistryError) {
+const getHTTPResponseCode = (error: FleetError): number => {
+  if (error instanceof RegistryResponseError) {
+    // 4xx/5xx's from EPR
+    return 500;
+  }
+  if (error instanceof RegistryConnectionError || error instanceof RegistryError) {
+    // Connection errors (ie. RegistryConnectionError) / fallback  (RegistryError) from EPR
     return 502; // Bad Gateway
   }
-  if (error instanceof PackageNotFoundError) {
+  if (error instanceof PackageNotFoundError || error instanceof PackagePolicyNotFoundError) {
     return 404; // Not Found
   }
   if (error instanceof AgentPolicyNameExistsError) {
@@ -73,41 +63,36 @@ const getHTTPResponseCode = (error: IngestManagerError): number => {
   if (error instanceof PackageUnsupportedMediaTypeError) {
     return 415; // Unsupported Media Type
   }
+  if (error instanceof PackageFailedVerificationError) {
+    return 400; // Bad Request
+  }
   if (error instanceof ConcurrentInstallOperationError) {
     return 409; // Conflict
   }
   if (error instanceof AgentNotFoundError) {
     return 404;
   }
+  if (error instanceof AgentActionNotFoundError) {
+    return 404;
+  }
+  if (error instanceof FleetUnauthorizedError) {
+    return 403; // Unauthorized
+  }
   return 400; // Bad Request
 };
 
-export function ingestErrorToResponseOptions(error: IngestErrorHandlerParams['error']) {
+export function fleetErrorToResponseOptions(error: IngestErrorHandlerParams['error']) {
   const logger = appContextService.getLogger();
-  if (isLegacyESClientError(error)) {
-    // there was a problem communicating with ES (e.g. via `callCluster`)
-    // only log the message
-    const message =
-      error?.path && error?.response
-        ? // if possible, return the failing endpoint and its response
-          `${error.message} response from ${error.path}: ${error.response}`
-        : error.message;
-
-    logger.error(message);
-
-    return {
-      statusCode: error?.statusCode || error.status,
-      body: { message },
-    };
-  }
-
   // our "expected" errors
-  if (error instanceof IngestManagerError) {
+  if (error instanceof FleetError) {
     // only log the message
     logger.error(error.message);
     return {
       statusCode: getHTTPResponseCode(error),
-      body: { message: error.message },
+      body: {
+        message: error.message,
+        ...(error.attributes && { attributes: error.attributes }),
+      },
     };
   }
 
@@ -129,10 +114,10 @@ export function ingestErrorToResponseOptions(error: IngestErrorHandlerParams['er
   };
 }
 
-export const defaultIngestErrorHandler: IngestErrorHandler = async ({
+export const defaultFleetErrorHandler: IngestErrorHandler = async ({
   error,
   response,
 }: IngestErrorHandlerParams): Promise<IKibanaResponse> => {
-  const options = ingestErrorToResponseOptions(error);
+  const options = fleetErrorToResponseOptions(error);
   return response.customError(options);
 };

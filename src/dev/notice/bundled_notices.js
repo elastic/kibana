@@ -7,18 +7,17 @@
  */
 
 import { resolve } from 'path';
-import { readFile } from 'fs';
+import { readFile } from 'fs/promises';
 
-import { fromNode as fcb } from 'bluebird';
-import glob from 'glob';
+import globby from 'globby';
 
 export async function getBundledNotices(packageDirectory) {
   const pattern = resolve(packageDirectory, '*{LICENSE,NOTICE}*');
-  const paths = await fcb((cb) => glob(pattern, cb));
+  const paths = await globby(pattern);
   return Promise.all(
     paths.map(async (path) => ({
       path,
-      text: await fcb((cb) => readFile(path, 'utf8', cb)),
+      text: await readFile(path, 'utf8'),
     }))
   );
 }

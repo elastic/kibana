@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
+import { forOwn } from 'lodash';
+import { extractSearchSourceReferences } from '@kbn/data-plugin/public';
 import { SavedObject, SavedObjectConfig } from '../../types';
-import { extractSearchSourceReferences } from '../../../../data/public';
 import { expandShorthand } from './field_mapping';
 
 export function serializeSavedObject(savedObject: SavedObject, config: SavedObjectConfig) {
@@ -17,7 +17,7 @@ export function serializeSavedObject(savedObject: SavedObject, config: SavedObje
   const attributes = {} as Record<string, any>;
   const references = [];
 
-  _.forOwn(mapping, (fieldMapping, fieldName) => {
+  forOwn(mapping, (fieldMapping, fieldName) => {
     if (typeof fieldName !== 'string') {
       return;
     }
@@ -31,10 +31,8 @@ export function serializeSavedObject(savedObject: SavedObject, config: SavedObje
   });
 
   if (savedObject.searchSource) {
-    const {
-      searchSourceJSON,
-      references: searchSourceReferences,
-    } = savedObject.searchSource.serialize();
+    const { searchSourceJSON, references: searchSourceReferences } =
+      savedObject.searchSource.serialize();
     attributes.kibanaSavedObjectMeta = { searchSourceJSON };
     references.push(...searchSourceReferences);
   }

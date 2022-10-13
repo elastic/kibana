@@ -6,14 +6,13 @@
  */
 
 import { of } from 'rxjs';
-import { Capabilities } from 'src/core/server';
+import { Capabilities } from '@kbn/core/server';
 import {
   savedObjectsTypeRegistryMock,
   savedObjectsClientMock,
-  elasticsearchServiceMock,
   uiSettingsServiceMock,
   capabilitiesServiceMock,
-} from '../../../../../src/core/server/mocks';
+} from '@kbn/core/server/mocks';
 
 const createContextMock = (capabilities: Partial<Capabilities> = {}) => {
   return {
@@ -21,11 +20,6 @@ const createContextMock = (capabilities: Partial<Capabilities> = {}) => {
       savedObjects: {
         client: savedObjectsClientMock.create(),
         typeRegistry: savedObjectsTypeRegistryMock.create(),
-      },
-      elasticsearch: {
-        legacy: {
-          client: elasticsearchServiceMock.createLegacyScopedClusterClient(),
-        },
       },
       uiSettings: {
         client: uiSettingsServiceMock.createClient(),

@@ -7,12 +7,12 @@
 
 import { mockLogger } from '../../__mocks__';
 
-jest.mock('../../../../../../src/core/server', () => ({
+jest.mock('@kbn/core/server', () => ({
   SavedObjectsErrorHelpers: {
     isNotFoundError: jest.fn(),
   },
 }));
-import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { getSavedObjectAttributesFromRepo, incrementUICounter } from './telemetry';
 

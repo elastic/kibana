@@ -21,23 +21,23 @@ import {
   NumberOrNull,
   StringOrNull,
 } from '../../../..';
-import { SectionContainer } from '../';
+import { SectionContainer } from '..';
 import { getDataHandler } from '../../../../data_handler';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useHasData } from '../../../../hooks/use_has_data';
-import { useTimeRange } from '../../../../hooks/use_time_range';
+import { useDatePickerContext } from '../../../../hooks/use_date_picker_context';
 import { HostLink } from './host_link';
 import { formatDuration } from './lib/format_duration';
 import { MetricWithSparkline } from './metric_with_sparkline';
+import { BucketSize } from '../../../../pages/overview';
 
-const SPARK_LINE_COLUMN_WIDTH = '120px';
 const COLOR_ORANGE = 7;
 const COLOR_BLUE = 1;
 const COLOR_GREEN = 0;
 const COLOR_PURPLE = 3;
 
 interface Props {
-  bucketSize?: string;
+  bucketSize: BucketSize;
 }
 
 const percentFormatter = (value: NumberOrNull) =>
@@ -50,26 +50,32 @@ const bytesPerSecondFormatter = (value: NumberOrNull) =>
   value === null ? '' : numeral(value).format('0b') + '/s';
 
 export function MetricsSection({ bucketSize }: Props) {
-  const { forceUpdate, hasData } = useHasData();
-  const { relativeStart, relativeEnd, absoluteStart, absoluteEnd } = useTimeRange();
+  const { forceUpdate, hasDataMap } = useHasData();
+  const { relativeStart, relativeEnd, absoluteStart, absoluteEnd, lastUpdated } =
+    useDatePickerContext();
   const [sortDirection, setSortDirection] = useState<Direction>('asc');
   const [sortField, setSortField] = useState<keyof MetricsFetchDataSeries>('uptime');
   const [sortedData, setSortedData] = useState<MetricsFetchDataResponse | null>(null);
 
-  const { data, status } = useFetcher(
-    () => {
-      if (bucketSize) {
-        return getDataHandler('infra_metrics')?.fetchData({
-          absoluteTime: { start: absoluteStart, end: absoluteEnd },
-          relativeTime: { start: relativeStart, end: relativeEnd },
-          bucketSize,
-        });
-      }
-    },
-    // Absolute times shouldn't be used here, since it would refetch on every render
+  const { data, status } = useFetcher(() => {
+    if (bucketSize && absoluteStart && absoluteEnd) {
+      return getDataHandler('infra_metrics')?.fetchData({
+        absoluteTime: { start: absoluteStart, end: absoluteEnd },
+        relativeTime: { start: relativeStart, end: relativeEnd },
+        ...bucketSize,
+      });
+    }
+    // `forceUpdate` and `lastUpdated` should trigger a reload
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [bucketSize, relativeStart, relativeEnd, forceUpdate]
-  );
+  }, [
+    bucketSize,
+    relativeStart,
+    relativeEnd,
+    absoluteStart,
+    absoluteEnd,
+    forceUpdate,
+    lastUpdated,
+  ]);
 
   const handleTableChange = useCallback(
     ({ sort }: Criteria<MetricsFetchDataSeries>) => {
@@ -88,7 +94,7 @@ export function MetricsSection({ bucketSize }: Props) {
     [data, setSortField, setSortDirection]
   );
 
-  if (!hasData.infra_metrics?.hasData) {
+  if (!hasDataMap.infra_metrics?.hasData) {
     return null;
   }
 
@@ -120,13 +126,12 @@ export function MetricsSection({ bucketSize }: Props) {
       sortable: true,
       truncateText: true,
       isExpander: true,
+      textOnly: true,
       render: (value: StringOrNull, record: MetricsFetchDataSeries) => (
         <HostLink
           id={record.id}
           name={value}
-          provider={record.provider}
-          platform={record.platform}
-          timerange={{ from: absoluteStart, to: absoluteEnd }}
+          timerange={{ from: absoluteStart!, to: absoluteEnd! }}
         />
       ),
     },
@@ -136,7 +141,6 @@ export function MetricsSection({ bucketSize }: Props) {
         defaultMessage: 'CPU %',
       }),
       sortable: true,
-      width: SPARK_LINE_COLUMN_WIDTH,
       render: (value: NumberOrNull, record: MetricsFetchDataSeries) => (
         <MetricWithSparkline
           id="cpu"
@@ -153,7 +157,6 @@ export function MetricsSection({ bucketSize }: Props) {
         defaultMessage: 'Load 15',
       }),
       sortable: true,
-      width: SPARK_LINE_COLUMN_WIDTH,
       render: (value: NumberOrNull, record: MetricsFetchDataSeries) => (
         <MetricWithSparkline
           id="load"
@@ -168,7 +171,6 @@ export function MetricsSection({ bucketSize }: Props) {
       field: 'rx',
       name: 'RX',
       sortable: true,
-      width: SPARK_LINE_COLUMN_WIDTH,
       render: (value: NumberOrNull, record: MetricsFetchDataSeries) => (
         <MetricWithSparkline
           id="rx"
@@ -183,7 +185,6 @@ export function MetricsSection({ bucketSize }: Props) {
       field: 'tx',
       name: 'TX',
       sortable: true,
-      width: SPARK_LINE_COLUMN_WIDTH,
       render: (value: NumberOrNull, record: MetricsFetchDataSeries) => (
         <MetricWithSparkline
           id="tx"
@@ -207,12 +208,12 @@ export function MetricsSection({ bucketSize }: Props) {
   return (
     <SectionContainer
       title={i18n.translate('xpack.observability.overview.metrics.title', {
-        defaultMessage: 'Metrics',
+        defaultMessage: 'Hosts',
       })}
       appLink={{
         href: appLink,
         label: i18n.translate('xpack.observability.overview.metrics.appLink', {
-          defaultMessage: 'View in app',
+          defaultMessage: 'Show inventory',
         }),
       }}
       hasError={status === FETCH_STATUS.FAILURE}

@@ -22,7 +22,7 @@ export const registerFindAssignableObjectsRoute = (router: TagsPluginRouter) => 
       },
     },
     router.handleLegacyErrors(async (ctx, req, res) => {
-      const { assignmentService } = ctx.tags!;
+      const { assignmentService } = await ctx.tags;
       const { query } = req;
 
       const results = await assignmentService.findAssignableObjects({

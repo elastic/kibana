@@ -25,7 +25,7 @@ To resolve errors, you can:
 ==== Path parameters
 
 `space_id`::
-  (Optional, string) An identifier for the <<xpack-spaces,space>>. When `space_id` is unspecfied in the URL, the default space is used.
+  (Optional, string) An identifier for the <<xpack-spaces,space>>. When `space_id` is unspecified in the URL, the default space is used.
 
 [[saved-objects-api-resolve-import-errors-query-params]]
 ==== Query parameters
@@ -99,7 +99,7 @@ to the <<saved-objects-api-resolve-import-errors-example, examples>>.
 
 This example builds upon the <<saved-objects-api-import-example-3,Import objects API example with conflict errors>>.
 
-Resolve conflict errors for an index pattern, visualization, and *Canvas* workpad by overwriting the existing saved objects:
+Resolve conflict errors for {a-data-source}, visualization, and *Canvas* workpad by overwriting the existing saved objects:
 
 [source,sh]
 --------------------------------------------------
@@ -173,7 +173,7 @@ that were returned in the `successResults` array. In this example, we retried im
 
 This example builds upon the <<saved-objects-api-import-example-4,Import objects API example with missing reference errors>>.
 
-Resolve a missing reference error for a visualization by replacing the index pattern with another, and resolve a missing reference error for
+Resolve a missing reference error for a visualization by replacing the {data-source} with another, and resolve a missing reference error for
 a search by ignoring it:
 
 [source,sh]

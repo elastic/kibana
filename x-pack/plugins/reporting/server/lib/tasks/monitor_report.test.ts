@@ -5,18 +5,15 @@
  * 2.0.
  */
 
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { ReportingCore } from '../..';
-import { RunContext } from '../../../../task_manager/server';
-import { taskManagerMock } from '../../../../task_manager/server/mocks';
+import { RunContext } from '@kbn/task-manager-plugin/server';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ReportingConfigType } from '../../config';
-import {
-  createMockConfigSchema,
-  createMockLevelLogger,
-  createMockReportingCore,
-} from '../../test_helpers';
-import { MonitorReportsTask } from './';
+import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
+import { MonitorReportsTask } from '.';
 
-const logger = createMockLevelLogger();
+const logger = loggingSystemMock.createLogger();
 
 describe('Execute Report Task', () => {
   let mockReporting: ReportingCore;
@@ -53,12 +50,12 @@ describe('Execute Report Task', () => {
 
     const task = new MonitorReportsTask(mockReporting, configType, logger);
     const taskDef = task.getTaskDefinition();
-    const taskRunner = taskDef.createTaskRunner(({
+    const taskRunner = taskDef.createTaskRunner({
       taskInstance: {
         id: 'random-task-id',
         params: { index: 'cool-reporting-index', id: 'cool-reporting-id' },
       },
-    } as unknown) as RunContext);
+    } as unknown as RunContext);
     expect(taskRunner).toHaveProperty('run');
     expect(taskRunner).toHaveProperty('cancel');
   });

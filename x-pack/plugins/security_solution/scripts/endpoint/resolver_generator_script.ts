@@ -5,34 +5,31 @@
  * 2.0.
  */
 
-/* eslint-disable no-console */
+/* eslint-disable no-console,max-classes-per-file */
 import yargs from 'yargs';
 import fs from 'fs';
-import { Client, ClientOptions } from '@elastic/elasticsearch';
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
-import { ToolingLog, CA_CERT_PATH } from '@kbn/dev-utils';
+import { Client, errors } from '@elastic/elasticsearch';
+import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
+import { CA_CERT_PATH } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
+import type { KbnClientOptions } from '@kbn/test';
 import { KbnClient } from '@kbn/test';
-import { AxiosResponse } from 'axios';
+import { EndpointMetadataGenerator } from '../../common/endpoint/data_generators/endpoint_metadata_generator';
 import { indexHostsAndAlerts } from '../../common/endpoint/index_data';
 import { ANCESTRY_LIMIT, EndpointDocGenerator } from '../../common/endpoint/generate_data';
-import { AGENTS_SETUP_API_ROUTES, SETUP_API_ROUTE } from '../../../fleet/common/constants';
-import {
-  CreateFleetSetupResponse,
-  PostIngestSetupResponse,
-} from '../../../fleet/common/types/rest_spec';
-import { KbnClientWithApiKeySupport } from './kbn_client_with_api_key_support';
+import { fetchStackVersion } from './common/stack_services';
 
 main();
 
-async function deleteIndices(indices: string[], client: Client) {
-  const handleErr = (err: unknown) => {
-    if (err instanceof ResponseError && err.statusCode !== 404) {
-      console.log(JSON.stringify(err, null, 2));
-      // eslint-disable-next-line no-process-exit
-      process.exit(1);
-    }
-  };
+function handleErr(err: unknown) {
+  if (err instanceof errors.ResponseError && err.statusCode !== 404) {
+    console.log(JSON.stringify(err, null, 2));
+    // eslint-disable-next-line no-process-exit
+    process.exit(1);
+  }
+}
 
+async function deleteIndices(indices: string[], client: Client) {
   for (const index of indices) {
     try {
       // The index could be a data stream so let's try deleting that first
@@ -44,38 +41,71 @@ async function deleteIndices(indices: string[], client: Client) {
   }
 }
 
-async function doIngestSetup(kbnClient: KbnClient) {
-  // Setup Ingest
-  try {
-    const setupResponse = (await kbnClient.request({
-      path: SETUP_API_ROUTE,
-      method: 'POST',
-    })) as AxiosResponse<PostIngestSetupResponse>;
+interface UserInfo {
+  username: string;
+  password: string;
+}
 
-    if (!setupResponse.data.isInitialized) {
-      console.error(setupResponse.data);
-      throw new Error('Initializing the ingest manager failed, existing');
-    }
-  } catch (error) {
-    console.error(error);
-    throw error;
+async function addUser(
+  esClient: Client,
+  user?: { username: string; password: string }
+): Promise<UserInfo | undefined> {
+  if (!user) {
+    return;
   }
 
-  // Setup Fleet
+  const path = `_security/user/${user.username}`;
+  // add user if doesn't exist already
   try {
-    const setupResponse = (await kbnClient.request({
-      path: AGENTS_SETUP_API_ROUTES.CREATE_PATTERN,
+    console.log(`Adding ${user.username}...`);
+    const addedUser = await esClient.transport.request<Promise<{ created: boolean }>>({
       method: 'POST',
-    })) as AxiosResponse<CreateFleetSetupResponse>;
-
-    if (!setupResponse.data.isInitialized) {
-      console.error(setupResponse.data);
-      throw new Error('Initializing Fleet failed, existing');
+      path,
+      body: {
+        password: user.password,
+        roles: ['superuser', 'kibana_system'],
+        full_name: user.username,
+      },
+    });
+    if (addedUser.created) {
+      console.log(`User ${user.username} added successfully!`);
+    } else {
+      console.log(`User ${user.username} already exists!`);
     }
+    return {
+      username: user.username,
+      password: user.password,
+    };
   } catch (error) {
-    console.error(error);
-    throw error;
+    handleErr(error);
   }
+}
+
+async function deleteUser(esClient: Client, username: string): Promise<{ found: boolean }> {
+  return esClient.transport.request({
+    method: 'DELETE',
+    path: `_security/user/${username}`,
+  });
+}
+
+function updateURL({
+  url,
+  user,
+  protocol,
+}: {
+  url: string;
+  user?: { username: string; password: string };
+  protocol?: string;
+}): string {
+  const urlObject = new URL(url);
+  if (user) {
+    urlObject.username = user.username;
+    urlObject.password = user.password;
+  }
+  if (protocol) {
+    urlObject.protocol = protocol;
+  }
+  return urlObject.href;
 }
 
 async function main() {
@@ -212,42 +242,87 @@ async function main() {
       type: 'boolean',
       default: false,
     },
+    withNewUser: {
+      alias: 'wnu',
+      describe:
+        'If the --fleet flag is enabled, using `--withNewUser=username:password` would add a new user with \
+         the given username, password and `superuser`, `kibana_system` roles. Adding a new user would also write \
+        to indices in the generator as this user with the new roles.',
+      type: 'string',
+      default: '',
+    },
+    randomVersions: {
+      describe:
+        'By default, the data generated (that contains a stack version - ex: `agent.version`) will have a ' +
+        'version number set to be the same as the version of the running stack. Using this flag (`--randomVersions=true`) ' +
+        'will result in random version being generated',
+      default: false,
+    },
   }).argv;
   let ca: Buffer;
-  let kbnClient: KbnClientWithApiKeySupport;
+
   let clientOptions: ClientOptions;
+  let url: string;
+  let node: string;
+  const toolingLogOptions = {
+    log: new ToolingLog({
+      level: 'info',
+      writeTo: process.stdout,
+    }),
+  };
+
+  let kbnClientOptions: KbnClientOptions = {
+    ...toolingLogOptions,
+    url: argv.kibana,
+  };
 
   if (argv.ssl) {
     ca = fs.readFileSync(CA_CERT_PATH);
-    const url = argv.kibana.replace('http:', 'https:');
-    const node = argv.node.replace('http:', 'https:');
-    kbnClient = new KbnClientWithApiKeySupport({
-      log: new ToolingLog({
-        level: 'info',
-        writeTo: process.stdout,
-      }),
+    url = updateURL({ url: argv.kibana, protocol: 'https:' });
+    node = updateURL({ url: argv.node, protocol: 'https:' });
+    kbnClientOptions = {
+      ...kbnClientOptions,
       url,
       certificateAuthorities: [ca],
-    });
-    clientOptions = { node, ssl: { ca: [ca] } };
+    };
+
+    clientOptions = { node, tls: { ca: [ca] } };
   } else {
-    kbnClient = new KbnClientWithApiKeySupport({
-      log: new ToolingLog({
-        level: 'info',
-        writeTo: process.stdout,
-      }),
-      url: argv.kibana,
-    });
     clientOptions = { node: argv.node };
   }
-  const client = new Client(clientOptions);
+  let client = new Client(clientOptions);
+  let user: UserInfo | undefined;
+  // if fleet flag is used
+  if (argv.fleet) {
+    // add endpoint user if --withNewUser flag has values as username:password
+    const newUserCreds =
+      argv.withNewUser.indexOf(':') !== -1 ? argv.withNewUser.split(':') : undefined;
+    user = await addUser(
+      client,
+      newUserCreds
+        ? {
+            username: newUserCreds[0],
+            password: newUserCreds[1],
+          }
+        : undefined
+    );
 
-  try {
-    await doIngestSetup(kbnClient);
-  } catch (error) {
-    // eslint-disable-next-line no-process-exit
-    process.exit(1);
+    // update client and kibana options before instantiating
+    if (user) {
+      // use endpoint user for Es and Kibana URLs
+
+      url = updateURL({ url: argv.kibana, user });
+      node = updateURL({ url: argv.node, user });
+
+      kbnClientOptions = {
+        ...kbnClientOptions,
+        url,
+      };
+      client = new Client({ ...clientOptions, node });
+    }
   }
+  // instantiate kibana client
+  const kbnClient = new KbnClient({ ...kbnClientOptions });
 
   if (argv.delete) {
     await deleteIndices(
@@ -257,11 +332,45 @@ async function main() {
   }
 
   let seed = argv.seed;
+
   if (!seed) {
     seed = Math.random().toString();
     console.log(`No seed supplied, using random seed: ${seed}`);
   }
+
   const startTime = new Date().getTime();
+
+  if (argv.fleet && !argv.withNewUser) {
+    // warn and exit when using fleet flag
+    console.log(
+      'Please use the --withNewUser=username:password flag to add a custom user with required roles when --fleet is enabled!'
+    );
+    // eslint-disable-next-line no-process-exit
+    process.exit(0);
+  }
+
+  let DocGenerator: typeof EndpointDocGenerator = EndpointDocGenerator;
+
+  // If `--randomVersions` is NOT set, then use custom generator that ensures all data generated
+  // has a stack version number that matches that of the running stack
+  if (!argv.randomVersions) {
+    const stackVersion = await fetchStackVersion(kbnClient);
+
+    // Document Generator override that uses a custom Endpoint Metadata generator and sets the
+    // `agent.version` to the current version
+    DocGenerator = class extends EndpointDocGenerator {
+      constructor(...args: ConstructorParameters<typeof EndpointDocGenerator>) {
+        const MetadataGenerator = class extends EndpointMetadataGenerator {
+          protected randomVersion(): string {
+            return stackVersion;
+          }
+        };
+
+        super(args[0], MetadataGenerator);
+      }
+    };
+  }
+
   await indexHostsAndAlerts(
     client,
     kbnClient,
@@ -286,7 +395,16 @@ async function main() {
       ancestryArraySize: argv.ancestryArraySize,
       eventsDataStream: EndpointDocGenerator.createDataStreamFromIndex(argv.eventIndex),
       alertsDataStream: EndpointDocGenerator.createDataStreamFromIndex(argv.alertIndex),
-    }
+    },
+    DocGenerator
   );
+
+  // delete endpoint_user after
+  if (user) {
+    const deleted = await deleteUser(client, user.username);
+    if (deleted.found) {
+      console.log(`User ${user.username} deleted successfully!`);
+    }
+  }
   console.log(`Creating and indexing documents took: ${new Date().getTime() - startTime}ms`);
 }

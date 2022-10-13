@@ -81,7 +81,7 @@ export function extractDocumentation(
    * @param type
    */
   function getTypeMembers(type: ts.Type): ts.Symbol[] | undefined {
-    const argsOfType = checker.getTypeArguments((type as unknown) as ts.TypeReference);
+    const argsOfType = checker.getTypeArguments(type as unknown as ts.TypeReference);
 
     let members = type.getProperties();
 
@@ -99,7 +99,7 @@ export function extractDocumentation(
   function resolveTypeProperties(type: ts.Type): ts.Symbol[] {
     let props = type.getProperties();
 
-    const typeArguments = checker.getTypeArguments((type as unknown) as ts.TypeReference);
+    const typeArguments = checker.getTypeArguments(type as unknown as ts.TypeReference);
 
     if (type.aliasTypeArguments) {
       // @ts-ignores

@@ -7,10 +7,12 @@
  */
 
 import React, { FC, MouseEvent } from 'react';
-import PropTypes from 'prop-types';
-import { EuiFlexGroup, EuiHorizontalRule, EuiSpacer, EuiTitle, EuiFlexItem } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiButtonEmpty, EuiFlexGroup, EuiSpacer, EuiTitle, EuiFlexItem } from '@elastic/eui';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { ApplicationStart } from '@kbn/core/public';
+import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
 import { FeatureCatalogueEntry } from '../../../services';
 import { createAppNavigationHandler } from '../app_navigation_handler';
 // @ts-expect-error untyped component
@@ -19,68 +21,106 @@ import { getServices } from '../../kibana_services';
 
 interface Props {
   addBasePath: (path: string) => string;
+  application: ApplicationStart;
   features: FeatureCatalogueEntry[];
 }
 
-export const ManageData: FC<Props> = ({ addBasePath, features }) => {
-  const { trackUiMetric } = getServices();
-  return (
-    <>
-      {features.length > 1 && <EuiHorizontalRule margin="xl" aria-hidden="true" />}
+export const ManageData: FC<Props> = ({ addBasePath, application, features }) => {
+  const { share, trackUiMetric } = getServices();
+  const consoleHref = share.url.locators.get('CONSOLE_APP_LOCATOR')?.useUrl({});
+  const managementHref = share.url.locators
+    .get('MANAGEMENT_APP_LOCATOR')
+    ?.useUrl({ sectionId: '' });
 
-      {features.length > 0 && (
-        <section
-          className="homDataManage"
-          aria-labelledby="homDataManage__title"
-          data-test-subj="homDataManage"
-        >
-          <EuiTitle size="s">
-            <h2 id="homDataManage__title">
-              <FormattedMessage
-                id="home.manageData.sectionTitle"
-                defaultMessage="Manage your data"
+  if (features.length) {
+    const { management: isManagementEnabled, dev_tools: isDevToolsEnabled } =
+      application.capabilities.navLinks;
+
+    return (
+      <KibanaPageTemplate.Section
+        bottomBorder
+        paddingSize="xl"
+        className="homDataManage"
+        aria-labelledby="homDataManage__title"
+        data-test-subj="homDataManage"
+      >
+        <EuiFlexGroup alignItems="center">
+          <EuiFlexItem grow={1}>
+            <EuiTitle size="s">
+              <h2 id="homDataManage__title">
+                <FormattedMessage id="home.manageData.sectionTitle" defaultMessage="Management" />
+              </h2>
+            </EuiTitle>
+          </EuiFlexItem>
+
+          {isDevToolsEnabled || isManagementEnabled ? (
+            <EuiFlexItem className="homDataManage__actions" grow={false}>
+              <EuiFlexGroup alignItems="center" responsive={false} wrap>
+                {/* Check if both the Dev Tools UI and the Console UI are enabled. */}
+                {isDevToolsEnabled && consoleHref !== undefined ? (
+                  <EuiFlexItem grow={false}>
+                    <RedirectAppLinks application={application}>
+                      <EuiButtonEmpty
+                        data-test-subj="homeDevTools"
+                        className="kbnOverviewPageHeader__actionButton"
+                        flush="both"
+                        iconType="wrench"
+                        href={consoleHref}
+                      >
+                        <FormattedMessage
+                          id="home.manageData.devToolsButtonLabel"
+                          defaultMessage="Dev Tools"
+                        />
+                      </EuiButtonEmpty>
+                    </RedirectAppLinks>
+                  </EuiFlexItem>
+                ) : null}
+
+                {isManagementEnabled ? (
+                  <EuiFlexItem grow={false}>
+                    <RedirectAppLinks application={application}>
+                      <EuiButtonEmpty
+                        data-test-subj="homeManage"
+                        className="kbnOverviewPageHeader__actionButton"
+                        flush="both"
+                        iconType="gear"
+                        href={managementHref}
+                      >
+                        <FormattedMessage
+                          id="home.manageData.stackManagementButtonLabel"
+                          defaultMessage="Stack Management"
+                        />
+                      </EuiButtonEmpty>
+                    </RedirectAppLinks>
+                  </EuiFlexItem>
+                ) : null}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
+
+        <EuiSpacer />
+
+        <EuiFlexGroup className="homDataManage__content">
+          {features.map((feature) => (
+            <EuiFlexItem className="homDataManage__item" key={feature.id}>
+              <Synopsis
+                description={feature.description}
+                iconType={feature.icon}
+                id={feature.id}
+                onClick={(event: MouseEvent) => {
+                  trackUiMetric(METRIC_TYPE.CLICK, `manage_data_card_${feature.id}`);
+                  createAppNavigationHandler(feature.path)(event);
+                }}
+                title={feature.title}
+                url={addBasePath(feature.path)}
               />
-            </h2>
-          </EuiTitle>
-
-          <EuiSpacer size="m" />
-
-          <EuiFlexGroup className="homDataManage__content">
-            {features.map((feature) => (
-              <EuiFlexItem key={feature.id}>
-                <Synopsis
-                  id={feature.id}
-                  onClick={(event: MouseEvent) => {
-                    trackUiMetric(METRIC_TYPE.CLICK, `manage_data_card_${feature.id}`);
-                    createAppNavigationHandler(feature.path)(event);
-                  }}
-                  description={feature.description}
-                  iconType={feature.icon}
-                  title={feature.title}
-                  url={addBasePath(feature.path)}
-                  wrapInPanel
-                />
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
-        </section>
-      )}
-    </>
-  );
-};
-
-ManageData.propTypes = {
-  addBasePath: PropTypes.func.isRequired,
-  features: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      title: PropTypes.string.isRequired,
-      description: PropTypes.string.isRequired,
-      icon: PropTypes.string.isRequired,
-      path: PropTypes.string.isRequired,
-      showOnHomePage: PropTypes.bool.isRequired,
-      category: PropTypes.string.isRequired,
-      order: PropTypes.number,
-    })
-  ),
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+      </KibanaPageTemplate.Section>
+    );
+  } else {
+    return null;
+  }
 };

@@ -4,32 +4,33 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { flow, omit } from 'lodash/fp';
 import set from 'set-value';
 
-import { Logger, SavedObject } from '../../../../../../../src/core/server';
-import {
+import type {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertServices,
-} from '../../../../../alerting/server';
-import { RefreshTypes } from '../types';
-import { singleBulkCreate, SingleBulkCreateResponse } from './single_bulk_create';
-import { AnomalyResults, Anomaly } from '../../machine_learning';
-import { BuildRuleMessage } from './rule_messages';
-import { AlertAttributes } from './types';
-import { MachineLearningRuleParams } from '../schemas/rule_schemas';
+  RuleExecutorServices,
+} from '@kbn/alerting-plugin/server';
+import type { GenericBulkCreateResponse } from '../rule_types/factories';
+import type { Anomaly } from '../../machine_learning';
+import type { BulkCreate, WrapHits } from './types';
+import type { CompleteRule, MachineLearningRuleParams } from '../schemas/rule_schemas';
+import { buildReasonMessageForMlAlert } from './reason_formatters';
+import type { BaseFieldsLatest } from '../../../../common/detection_engine/schemas/alerts';
+import type { IRuleExecutionLogForExecutors } from '../rule_monitoring';
+import { createEnrichEventsFunction } from './enrichments';
 
 interface BulkCreateMlSignalsParams {
-  someResult: AnomalyResults;
-  ruleSO: SavedObject<AlertAttributes<MachineLearningRuleParams>>;
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
-  logger: Logger;
+  anomalyHits: Array<estypes.SearchHit<Anomaly>>;
+  completeRule: CompleteRule<MachineLearningRuleParams>;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
   id: string;
   signalsIndex: string;
-  refresh: RefreshTypes;
-  buildRuleMessage: BuildRuleMessage;
+  bulkCreate: BulkCreate;
+  wrapHits: WrapHits;
 }
 
 interface EcsAnomaly extends Anomaly {
@@ -53,8 +54,8 @@ export const transformAnomalyFieldsToEcs = (anomaly: Anomaly): EcsAnomaly => {
   }
 
   const omitDottedFields = omit(errantFields.map((field) => field.name));
-  const setNestedFields = errantFields.map((field) => (_anomaly: Anomaly) =>
-    set(_anomaly, field.name, field.value)
+  const setNestedFields = errantFields.map(
+    (field) => (_anomaly: Anomaly) => set(_anomaly, field.name, field.value)
   );
   const setTimestamp = (_anomaly: Anomaly) =>
     set(_anomaly, '@timestamp', new Date(timestamp).toISOString());
@@ -63,31 +64,30 @@ export const transformAnomalyFieldsToEcs = (anomaly: Anomaly): EcsAnomaly => {
 };
 
 const transformAnomalyResultsToEcs = (
-  results: AnomalyResults
-): estypes.SearchResponse<EcsAnomaly> => {
-  const transformedHits = results.hits.hits.map(({ _source, ...rest }) => ({
+  results: Array<estypes.SearchHit<Anomaly>>
+): Array<estypes.SearchHit<EcsAnomaly>> => {
+  return results.map(({ _source, ...rest }) => ({
     ...rest,
     _source: transformAnomalyFieldsToEcs(
       // @ts-expect-error @elastic/elasticsearch _source is optional
       _source
     ),
   }));
-
-  // @ts-expect-error Anomaly is not assignable to EcsAnomaly
-  return {
-    ...results,
-    hits: {
-      ...results.hits,
-      hits: transformedHits,
-    },
-  };
 };
 
 export const bulkCreateMlSignals = async (
   params: BulkCreateMlSignalsParams
-): Promise<SingleBulkCreateResponse> => {
-  const anomalyResults = params.someResult;
+): Promise<GenericBulkCreateResponse<BaseFieldsLatest>> => {
+  const anomalyResults = params.anomalyHits;
   const ecsResults = transformAnomalyResultsToEcs(anomalyResults);
-  const buildRuleMessage = params.buildRuleMessage;
-  return singleBulkCreate({ ...params, filteredEvents: ecsResults, buildRuleMessage });
+
+  const wrappedDocs = params.wrapHits(ecsResults, buildReasonMessageForMlAlert);
+  return params.bulkCreate(
+    wrappedDocs,
+    undefined,
+    createEnrichEventsFunction({
+      services: params.services,
+      logger: params.ruleExecutionLogger,
+    })
+  );
 };

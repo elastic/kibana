@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SavedObject } from 'src/core/types';
-import type { Tag, TagAttributes } from '../../../../src/plugins/saved_objects_tagging_oss/common';
+import { SavedObject } from '@kbn/core/types';
+import type { Tag, TagAttributes } from '@kbn/saved-objects-tagging-oss-plugin/common';
 
 export type TagSavedObject = SavedObject<TagAttributes>;
 
@@ -21,6 +21,7 @@ export type TagWithRelations = Tag & {
 export type {
   Tag,
   TagAttributes,
+  TagWithOptionalId,
   GetAllTagsOptions,
   ITagsClient,
-} from '../../../../src/plugins/saved_objects_tagging_oss/common';
+} from '@kbn/saved-objects-tagging-oss-plugin/common';

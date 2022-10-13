@@ -6,37 +6,35 @@
  * Side Public License, v 1.
  */
 
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
+import { isErrorEmbeddable, IContainer, ErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 
-import { isErrorEmbeddable, IContainer, ErrorEmbeddable } from '../../services/embeddable';
-import { DashboardContainer } from '../../application/embeddable';
-import { getSampleDashboardInput, getSampleDashboardPanel } from '../../application/test_helpers';
+import { DashboardContainer } from '../embeddable/dashboard_container';
+import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
 import {
   ContactCardEmbeddable,
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
   ContactCardExportableEmbeddableFactory,
   CONTACT_CARD_EXPORTABLE_EMBEDDABLE,
-} from '../../services/embeddable_test_samples';
-import { coreMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
+} from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
+import { coreMock } from '@kbn/core/public/mocks';
 import { ExportCSVAction } from './export_csv_action';
-import { embeddablePluginMock } from '../../../../embeddable/public/mocks';
-import { DataPublicPluginStart } from '../../../../data/public/types';
-import { dataPluginMock } from '../../../../data/public/mocks';
-import { LINE_FEED_CHARACTER } from 'src/plugins/data/common/exports/export_csv';
+import { LINE_FEED_CHARACTER } from '@kbn/data-plugin/common/exports/export_csv';
+import { pluginServices } from '../../services/plugin_services';
 
 describe('Export CSV action', () => {
-  const { setup, doStart } = embeddablePluginMock.createInstance();
-  setup.registerEmbeddableFactory(
-    CONTACT_CARD_EXPORTABLE_EMBEDDABLE,
-    new ContactCardExportableEmbeddableFactory((() => null) as any, {} as any)
-  );
-  const start = doStart();
-
   let container: DashboardContainer;
   let embeddable: ContactCardEmbeddable;
   let coreStart: CoreStart;
-  let dataMock: jest.Mocked<DataPublicPluginStart>;
+
+  const mockEmbeddableFactory = new ContactCardExportableEmbeddableFactory(
+    (() => null) as any,
+    {} as any
+  );
+  pluginServices.getServices().embeddable.getEmbeddableFactory = jest
+    .fn()
+    .mockReturnValue(mockEmbeddableFactory);
 
   beforeEach(async () => {
     coreStart = coreMock.createStart();
@@ -47,19 +45,6 @@ describe('Export CSV action', () => {
       create: jest.fn().mockImplementation(() => ({ id: 'brandNewSavedObject' })),
     };
 
-    const options = {
-      ExitFullScreenButton: () => null,
-      SavedObjectFinder: () => null,
-      application: {} as any,
-      embeddable: start,
-      inspector: {} as any,
-      notifications: {} as any,
-      overlays: coreStart.overlays,
-      savedObjectMetaData: {} as any,
-      uiActions: {} as any,
-      uiSettings: uiSettingsServiceMock.createStartContract(),
-      http: coreStart.http,
-    };
     const input = getSampleDashboardInput({
       panels: {
         '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
@@ -68,8 +53,7 @@ describe('Export CSV action', () => {
         }),
       },
     });
-    container = new DashboardContainer(input, options);
-    dataMock = dataPluginMock.createStartContract();
+    container = new DashboardContainer(input);
 
     const contactCardEmbeddable = await container.addNewEmbeddable<
       ContactCardEmbeddableInput,
@@ -87,7 +71,7 @@ describe('Export CSV action', () => {
   });
 
   test('Download is incompatible with embeddables without getInspectorAdapters implementation', async () => {
-    const action = new ExportCSVAction({ core: coreStart, data: dataMock });
+    const action = new ExportCSVAction();
     const errorEmbeddable = new ErrorEmbeddable(
       'Wow what an awful error',
       { id: ' 404' },
@@ -97,29 +81,29 @@ describe('Export CSV action', () => {
   });
 
   test('Should download a compatible Embeddable', async () => {
-    const action = new ExportCSVAction({ core: coreStart, data: dataMock });
-    const result = ((await action.execute({ embeddable, asString: true })) as unknown) as
+    const action = new ExportCSVAction();
+    const result = (await action.execute({ embeddable, asString: true })) as unknown as
       | undefined
       | Record<string, { content: string; type: string }>;
     expect(result).toEqual({
       'Hello Kibana.csv': {
-        content: `First Name,Last Name${LINE_FEED_CHARACTER}Kibana,undefined${LINE_FEED_CHARACTER}`,
+        content: `First Name,Last Name${LINE_FEED_CHARACTER}Kibana,${LINE_FEED_CHARACTER}`,
         type: 'text/plain;charset=utf-8',
       },
     });
   });
 
   test('Should not download incompatible Embeddable', async () => {
-    const action = new ExportCSVAction({ core: coreStart, data: dataMock });
+    const action = new ExportCSVAction();
     const errorEmbeddable = new ErrorEmbeddable(
       'Wow what an awful error',
       { id: ' 404' },
       embeddable.getRoot() as IContainer
     );
-    const result = ((await action.execute({
+    const result = (await action.execute({
       embeddable: errorEmbeddable,
       asString: true,
-    })) as unknown) as undefined | Record<string, string>;
+    })) as unknown as undefined | Record<string, string>;
     expect(result).toBeUndefined();
   });
 });

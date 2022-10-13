@@ -11,9 +11,9 @@ This guide introduces you to three of {kib}'s security features: spaces, roles, 
 [float]
 === Spaces
 
-Do you have multiple teams using {kib}? Do you want a “playground” to experiment with new visualizations or alerts? If so, then <<xpack-spaces,{kib} Spaces>> can help.
+Do you have multiple teams or tenants using {kib}? Do you want a “playground” to experiment with new visualizations or rules? If so, then <<xpack-spaces,{kib} Spaces>> can help.
 
-Think of a space as another instance of {kib}. A space allows you to organize your <<dashboard, dashboards>>, <<alerting-getting-started, alerts>>, <<xpack-ml, machine learning jobs>>, and much more into their own categories. For example, you might have a Marketing space for your marketeers to track the results of their campaigns, and an Engineering space for your developers to {apm-get-started-ref}/overview.html[monitor application performance].
+Think of a space as another instance of {kib}. A space allows you to organize your <<dashboard, dashboards>>, <<alerting-getting-started, rules>>, <<xpack-ml, machine learning jobs>>, and much more into their own categories. For example, you might have a Marketing space for your marketeers to track the results of their campaigns, and an Engineering space for your developers to {apm-guide-ref}/apm-overview.html[monitor application performance].
 
 The assets you create in one space are isolated from other spaces, so when you enter a space, you only see the assets that belong to that space.
 
@@ -61,7 +61,7 @@ Create a Marketing space for your marketing analysts to use.
 If you’ve followed the example above, you should end up with a space that looks like this:
 +
 [role="screenshot"]
-image::user/security/images/tutorial-secure-access-example-1-space.png[Create space UI]
+image::security/images/tutorial-secure-access-example-1-space.png[Create space UI]
 
 
 [float]
@@ -93,7 +93,7 @@ TIP: You can add multiple patterns of indices, and grant different access levels
 If you’ve followed the example above, you should end up with a role that looks like this:
 +
 [role="screenshot"]
-image::user/security/images/tutorial-secure-access-example-1-role.png[Create role UI]
+image::security/images/tutorial-secure-access-example-1-role.png[Create role UI]
 
 
 [float]
@@ -108,7 +108,7 @@ Now that you created a role, create a user account.
 . Click *Create user*.
 
 [role="screenshot"]
-image::user/security/images/tutorial-secure-access-example-1-user.png[Create user UI]
+image::security/images/tutorial-secure-access-example-1-user.png[Create user UI]
 
 [float]
 ==== Verify
@@ -121,7 +121,7 @@ Verify that the user and role are working correctly.
 You’re taken into the `Marketing` space, and the main navigation shows only the *Dashboard* application.
 +
 [role="screenshot"]
-image::user/security/images/tutorial-secure-access-example-1-test.png[Verifying access to dashboards]
+image::security/images/tutorial-secure-access-example-1-test.png[Verifying access to dashboards]
 
 
 [float]
@@ -131,6 +131,6 @@ This guide is an introduction to {kib}'s security features. Check out these addi
 
 * View the <<kibana-authentication, authentication guide>> to learn more about single-sign on and other login features.
 
-* View the <<xpack-kibana-role-management, authorization guide>> to learn more about authorizing access to {kib}'s features.
+* View the <<kibana-role-management, authorization guide>> to learn more about authorizing access to {kib}'s features.
 
 Still have questions? Ask  on our https://discuss.elastic.co/c/kibana[Kibana discuss forum] and a fellow community member or Elastic engineer will help out.

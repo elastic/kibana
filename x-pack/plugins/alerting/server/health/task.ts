@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { CoreStart, Logger } from 'kibana/server';
+import { CoreStart, Logger } from '@kbn/core/server';
 import {
   RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../task_manager/server';
-import { AlertsConfig } from '../config';
+} from '@kbn/task-manager-plugin/server';
+import { AlertingConfig } from '../config';
 import { AlertingPluginsStart } from '../plugin';
 import { HealthStatus } from '../types';
-import { getHealth } from './get_health';
+import { getAlertingHealthStatus } from './get_health';
 
 export const HEALTH_TASK_TYPE = 'alerting_health_check';
 
@@ -30,11 +30,11 @@ export function initializeAlertingHealth(
 
 export async function scheduleAlertingHealthCheck(
   logger: Logger,
-  config: Promise<AlertsConfig>,
+  config: AlertingConfig,
   taskManager: TaskManagerStartContract
 ) {
   try {
-    const interval = (await config).healthCheck.interval;
+    const interval = config.healthCheck.interval;
     await taskManager.ensureScheduled({
       id: HEALTH_TASK_ID,
       taskType: HEALTH_TASK_TYPE,
@@ -71,15 +71,12 @@ export function healthCheckTaskRunner(
     return {
       async run() {
         try {
-          const alertingHealthStatus = await getHealth(
-            (await coreStartServices)[0].savedObjects.createInternalRepository(['alert'])
+          return await getAlertingHealthStatus(
+            (
+              await coreStartServices
+            )[0].savedObjects,
+            state.runs
           );
-          return {
-            state: {
-              runs: (state.runs || 0) + 1,
-              health_status: alertingHealthStatus.decryptionHealth.status,
-            },
-          };
         } catch (errMsg) {
           logger.warn(`Error executing alerting health check task: ${errMsg}`);
           return {

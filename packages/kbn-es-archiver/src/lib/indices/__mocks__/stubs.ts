@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import type { Client } from '@elastic/elasticsearch';
 import sinon from 'sinon';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import { Stats } from '../../stats';
 
 type StubStats = Stats & {
@@ -19,7 +19,9 @@ export const createStubStats = (): StubStats =>
   ({
     createdIndex: sinon.stub(),
     createdAliases: sinon.stub(),
+    createdDataStream: sinon.stub(),
     deletedIndex: sinon.stub(),
+    deletedDataStream: sinon.stub(),
     skippedIndex: sinon.stub(),
     archivedIndex: sinon.stub(),
     getTestSummary() {
@@ -47,6 +49,11 @@ export const createStubIndexRecord = (index: string, aliases = {}) => ({
   value: { index, aliases },
 });
 
+export const createStubDataStreamRecord = (dataStream: string, template: string) => ({
+  type: 'data_stream',
+  value: { data_stream: dataStream, template: { name: template } },
+});
+
 export const createStubDocRecord = (index: string, id: number) => ({
   type: 'doc',
   value: { index, id },
@@ -67,7 +74,7 @@ const createEsClientError = (errorType: string) => {
 const indexAlias = (aliases: Record<string, any>, index: string) =>
   Object.keys(aliases).find((k) => aliases[k] === index);
 
-type StubClient = KibanaClient;
+type StubClient = Client;
 
 export const createStubClient = (
   existingIndices: string[] = [],
@@ -140,5 +147,10 @@ export const createStubClient = (
       exists: sinon.spy(async () => {
         throw new Error('Do not use indices.exists(). React to errors instead.');
       }),
+
+      createDataStream: sinon.spy(async ({ name }) => {}),
+      deleteDataStream: sinon.spy(async ({ name }) => {}),
+      putIndexTemplate: sinon.spy(async ({ name }) => {}),
+      deleteIndexTemplate: sinon.spy(async ({ name }) => {}),
     },
   } as any);

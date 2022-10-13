@@ -8,7 +8,7 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiTable,
   EuiTableHeader,
@@ -24,9 +24,9 @@ import {
   LEFT_ALIGNMENT,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { ProcessListAPIResponse } from '../../../../../../../../common/http_api';
 import { FORMATTERS } from '../../../../../../../../common/formatters';
-import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common';
 import { SortBy } from '../../../../hooks/use_process_list';
 import { Process } from './types';
 import { ProcessRow } from './process_row';
@@ -202,7 +202,7 @@ const ProcessesTableBody = ({ items, currentTime }: TableBodyProps) => (
       const cells = columns.map((column) => (
         <EuiTableRowCell
           key={`${String(column.field)}-${i}`}
-          header={column.name}
+          mobileOptions={{ header: column.name }}
           align={column.align ?? LEFT_ALIGNMENT}
           textOnly={column.textOnly ?? true}
         >
@@ -218,7 +218,7 @@ const StyledTableBody = euiStyled(EuiTableBody)`
   & .euiTableCellContent {
     padding-top: 0;
     padding-bottom: 0;
-    
+
   }
 `;
 

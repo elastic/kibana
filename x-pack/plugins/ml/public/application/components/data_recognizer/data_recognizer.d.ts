@@ -6,11 +6,11 @@
  */
 
 import { FC } from 'react';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearchSavedObject } from '../../../../common/types/kibana';
-import type { IIndexPattern } from '../../../../../../../src/plugins/data/public';
 
 declare const DataRecognizer: FC<{
-  indexPattern: IIndexPattern;
+  indexPattern: DataView;
   savedSearch: SavedSearchSavedObject | null;
   results: {
     count: number;

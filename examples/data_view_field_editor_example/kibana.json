@@ -1,0 +1,15 @@
+{
+  "id": "dataViewFieldEditorExample",
+  "kibanaVersion": "kibana",
+  "version": "0.0.1",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["data", "dataViewFieldEditor", "developerExamples"],
+  "optionalPlugins": [],
+  "requiredBundles": [],
+  "owner": {
+    "name": "App Services",
+    "githubTeam": "kibana-app-services"
+  },
+  "description": "Data view field editor example app"
+}

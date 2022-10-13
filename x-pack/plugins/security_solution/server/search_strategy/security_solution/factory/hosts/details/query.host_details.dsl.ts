@@ -5,18 +5,21 @@
  * 2.0.
  */
 
-import { ISearchRequestParams } from '../../../../../../../../../src/plugins/data/common';
+import type { ISearchRequestParams } from '@kbn/data-plugin/common';
 import { cloudFieldsMap, hostFieldsMap } from '../../../../../../common/ecs/ecs_fields';
-import { HostDetailsRequestOptions } from '../../../../../../common/search_strategy/security_solution';
+import type { HostDetailsRequestOptions } from '../../../../../../common/search_strategy/security_solution';
 import { reduceFields } from '../../../../../utils/build_query/reduce_fields';
-import { HOST_FIELDS, buildFieldsTermAggregation } from './helpers';
+import { HOST_DETAILS_FIELDS, buildFieldsTermAggregation } from './helpers';
 
 export const buildHostDetailsQuery = ({
   hostName,
   defaultIndex,
   timerange: { from, to },
 }: HostDetailsRequestOptions): ISearchRequestParams => {
-  const esFields = reduceFields(HOST_FIELDS, { ...hostFieldsMap, ...cloudFieldsMap });
+  const esFields = reduceFields(HOST_DETAILS_FIELDS, {
+    ...hostFieldsMap,
+    ...cloudFieldsMap,
+  });
 
   const filter = [
     { term: { 'host.name': hostName } },
@@ -32,15 +35,39 @@ export const buildHostDetailsQuery = ({
   ];
 
   const dslQuery = {
-    allowNoIndices: true,
+    allow_no_indices: true,
     index: defaultIndex,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     track_total_hits: false,
     body: {
       aggregations: {
         ...buildFieldsTermAggregation(esFields.filter((field) => !['@timestamp'].includes(field))),
+        endpoint_id: {
+          filter: {
+            term: {
+              'agent.type': 'endpoint',
+            },
+          },
+          aggs: {
+            value: {
+              terms: {
+                field: 'agent.id',
+              },
+            },
+          },
+        },
       },
       query: { bool: { filter } },
+      _source: false,
+      fields: [
+        ...esFields,
+        'agent.type',
+        'agent.id',
+        {
+          field: '@timestamp',
+          format: 'strict_date_optional_time',
+        },
+      ],
       size: 0,
     },
   };

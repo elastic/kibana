@@ -123,12 +123,19 @@ export const CLUSTER_ALERTS_ADDRESS_CONFIG_KEY = 'cluster_alerts.email_notificat
 
 export const STANDALONE_CLUSTER_CLUSTER_UUID = '__standalone_cluster__';
 
-export const INDEX_PATTERN = '.monitoring-*-6-*,.monitoring-*-7-*';
-export const INDEX_PATTERN_KIBANA = '.monitoring-kibana-6-*,.monitoring-kibana-7-*';
-export const INDEX_PATTERN_LOGSTASH = '.monitoring-logstash-6-*,.monitoring-logstash-7-*';
-export const INDEX_PATTERN_BEATS = '.monitoring-beats-6-*,.monitoring-beats-7-*';
-export const INDEX_ALERTS = '.monitoring-alerts-6*,.monitoring-alerts-7*';
-export const INDEX_PATTERN_ELASTICSEARCH = '.monitoring-es-6-*,.monitoring-es-7-*';
+export const CCS_REMOTE_PATTERN = '*';
+export const INDEX_PATTERN = '.monitoring-*';
+export const INDEX_PATTERN_KIBANA = '.monitoring-kibana-*';
+export const INDEX_PATTERN_LOGSTASH = '.monitoring-logstash-*';
+export const INDEX_PATTERN_BEATS = '.monitoring-beats-*';
+export const INDEX_ALERTS = '.monitoring-alerts-*';
+export const INDEX_PATTERN_ELASTICSEARCH = '.monitoring-es-*';
+// ECS-compliant patterns (metricbeat >8 and agent)
+export const INDEX_PATTERN_ELASTICSEARCH_ECS = '.monitoring-es-8-*';
+export const INDEX_PATTERN_ENTERPRISE_SEARCH = '.monitoring-ent-search-*';
+export const DS_INDEX_PATTERN_METRICS = 'metrics';
+export const DS_INDEX_PATTERN_LOGS = 'logs';
+export const DS_INDEX_PATTERN_ES = 'elasticsearch';
 
 // This is the unique token that exists in monitoring indices collected by metricbeat
 export const METRICBEAT_INDEX_NAME_UNIQUE_TOKEN = '-mb-';
@@ -158,6 +165,7 @@ export const CODE_PATH_LOGSTASH = 'logstash';
 export const CODE_PATH_APM = 'apm';
 export const CODE_PATH_LICENSE = 'license';
 export const CODE_PATH_LOGS = 'logs';
+export const CODE_PATH_ENTERPRISE_SEARCH = 'enterprise_search';
 
 /**
  * The header sent by telemetry service when hitting Elasticsearch to identify query source
@@ -176,6 +184,12 @@ export const KIBANA_SYSTEM_ID = 'kibana';
  * @type {string}
  */
 export const BEATS_SYSTEM_ID = 'beats';
+
+/**
+ * The name of the Enterprise Search System ID used to publish and look up Enterprise Search stats through the Monitoring system.
+ * @type {string}
+ */
+export const ENTERPRISE_SEARCH_SYSTEM_ID = 'enterprise_search';
 
 /**
  * The name of the Apm System ID used to publish and look up Apm stats through the Monitoring system.
@@ -220,29 +234,29 @@ export const CLUSTER_DETAILS_FETCH_INTERVAL = 10800000;
 export const USAGE_FETCH_INTERVAL = 1200000;
 
 /**
- * The prefix for all alert types used by monitoring
+ * The prefix for all rule types used by monitoring
  */
-export const ALERT_PREFIX = 'monitoring_';
-export const ALERT_LICENSE_EXPIRATION = `${ALERT_PREFIX}alert_license_expiration`;
-export const ALERT_CLUSTER_HEALTH = `${ALERT_PREFIX}alert_cluster_health`;
-export const ALERT_CPU_USAGE = `${ALERT_PREFIX}alert_cpu_usage`;
-export const ALERT_DISK_USAGE = `${ALERT_PREFIX}alert_disk_usage`;
-export const ALERT_NODES_CHANGED = `${ALERT_PREFIX}alert_nodes_changed`;
-export const ALERT_ELASTICSEARCH_VERSION_MISMATCH = `${ALERT_PREFIX}alert_elasticsearch_version_mismatch`;
-export const ALERT_KIBANA_VERSION_MISMATCH = `${ALERT_PREFIX}alert_kibana_version_mismatch`;
-export const ALERT_LOGSTASH_VERSION_MISMATCH = `${ALERT_PREFIX}alert_logstash_version_mismatch`;
-export const ALERT_MEMORY_USAGE = `${ALERT_PREFIX}alert_jvm_memory_usage`;
-export const ALERT_MISSING_MONITORING_DATA = `${ALERT_PREFIX}alert_missing_monitoring_data`;
-export const ALERT_THREAD_POOL_SEARCH_REJECTIONS = `${ALERT_PREFIX}alert_thread_pool_search_rejections`;
-export const ALERT_THREAD_POOL_WRITE_REJECTIONS = `${ALERT_PREFIX}alert_thread_pool_write_rejections`;
-export const ALERT_CCR_READ_EXCEPTIONS = `${ALERT_PREFIX}ccr_read_exceptions`;
-export const ALERT_LARGE_SHARD_SIZE = `${ALERT_PREFIX}shard_size`;
+export const RULE_PREFIX = 'monitoring_';
+export const RULE_LICENSE_EXPIRATION = `${RULE_PREFIX}alert_license_expiration`;
+export const RULE_CLUSTER_HEALTH = `${RULE_PREFIX}alert_cluster_health`;
+export const RULE_CPU_USAGE = `${RULE_PREFIX}alert_cpu_usage`;
+export const RULE_DISK_USAGE = `${RULE_PREFIX}alert_disk_usage`;
+export const RULE_NODES_CHANGED = `${RULE_PREFIX}alert_nodes_changed`;
+export const RULE_ELASTICSEARCH_VERSION_MISMATCH = `${RULE_PREFIX}alert_elasticsearch_version_mismatch`;
+export const RULE_KIBANA_VERSION_MISMATCH = `${RULE_PREFIX}alert_kibana_version_mismatch`;
+export const RULE_LOGSTASH_VERSION_MISMATCH = `${RULE_PREFIX}alert_logstash_version_mismatch`;
+export const RULE_MEMORY_USAGE = `${RULE_PREFIX}alert_jvm_memory_usage`;
+export const RULE_MISSING_MONITORING_DATA = `${RULE_PREFIX}alert_missing_monitoring_data`;
+export const RULE_THREAD_POOL_SEARCH_REJECTIONS = `${RULE_PREFIX}alert_thread_pool_search_rejections`;
+export const RULE_THREAD_POOL_WRITE_REJECTIONS = `${RULE_PREFIX}alert_thread_pool_write_rejections`;
+export const RULE_CCR_READ_EXCEPTIONS = `${RULE_PREFIX}ccr_read_exceptions`;
+export const RULE_LARGE_SHARD_SIZE = `${RULE_PREFIX}shard_size`;
 
 /**
- * Legacy alerts details/label for server and public use
+ * Legacy rules details/label for server and public use
  */
-export const LEGACY_ALERT_DETAILS = {
-  [ALERT_CLUSTER_HEALTH]: {
+export const LEGACY_RULE_DETAILS = {
+  [RULE_CLUSTER_HEALTH]: {
     label: i18n.translate('xpack.monitoring.alerts.clusterHealth.label', {
       defaultMessage: 'Cluster health',
     }),
@@ -250,7 +264,7 @@ export const LEGACY_ALERT_DETAILS = {
       defaultMessage: 'Alert when the health of the cluster changes.',
     }),
   },
-  [ALERT_ELASTICSEARCH_VERSION_MISMATCH]: {
+  [RULE_ELASTICSEARCH_VERSION_MISMATCH]: {
     label: i18n.translate('xpack.monitoring.alerts.elasticsearchVersionMismatch.label', {
       defaultMessage: 'Elasticsearch version mismatch',
     }),
@@ -261,7 +275,7 @@ export const LEGACY_ALERT_DETAILS = {
       }
     ),
   },
-  [ALERT_KIBANA_VERSION_MISMATCH]: {
+  [RULE_KIBANA_VERSION_MISMATCH]: {
     label: i18n.translate('xpack.monitoring.alerts.kibanaVersionMismatch.label', {
       defaultMessage: 'Kibana version mismatch',
     }),
@@ -269,7 +283,7 @@ export const LEGACY_ALERT_DETAILS = {
       defaultMessage: 'Alert when the cluser has multiple versions of Kibana.',
     }),
   },
-  [ALERT_LICENSE_EXPIRATION]: {
+  [RULE_LICENSE_EXPIRATION]: {
     label: i18n.translate('xpack.monitoring.alerts.licenseExpiration.label', {
       defaultMessage: 'License expiration',
     }),
@@ -277,7 +291,7 @@ export const LEGACY_ALERT_DETAILS = {
       defaultMessage: 'Alert when the cluster license is about to expire.',
     }),
   },
-  [ALERT_LOGSTASH_VERSION_MISMATCH]: {
+  [RULE_LOGSTASH_VERSION_MISMATCH]: {
     label: i18n.translate('xpack.monitoring.alerts.logstashVersionMismatch.label', {
       defaultMessage: 'Logstash version mismatch',
     }),
@@ -285,7 +299,7 @@ export const LEGACY_ALERT_DETAILS = {
       defaultMessage: 'Alert when the cluster has multiple versions of Logstash.',
     }),
   },
-  [ALERT_NODES_CHANGED]: {
+  [RULE_NODES_CHANGED]: {
     label: i18n.translate('xpack.monitoring.alerts.nodesChanged.label', {
       defaultMessage: 'Nodes changed',
     }),
@@ -296,10 +310,10 @@ export const LEGACY_ALERT_DETAILS = {
 };
 
 /**
- * Alerts details/label for server and public use
+ * Rules details/label for server and public use
  */
-export const ALERT_DETAILS = {
-  [ALERT_CPU_USAGE]: {
+export const RULE_DETAILS = {
+  [RULE_CPU_USAGE]: {
     label: i18n.translate('xpack.monitoring.alerts.cpuUsage.label', {
       defaultMessage: 'CPU Usage',
     }),
@@ -321,7 +335,7 @@ export const ALERT_DETAILS = {
       } as CommonAlertParamDetail,
     },
   },
-  [ALERT_DISK_USAGE]: {
+  [RULE_DISK_USAGE]: {
     paramDetails: {
       threshold: {
         label: i18n.translate('xpack.monitoring.alerts.diskUsage.paramDetails.threshold.label', {
@@ -343,7 +357,7 @@ export const ALERT_DETAILS = {
       defaultMessage: 'Alert when the disk usage for a node is consistently high.',
     }),
   },
-  [ALERT_MEMORY_USAGE]: {
+  [RULE_MEMORY_USAGE]: {
     paramDetails: {
       threshold: {
         label: i18n.translate('xpack.monitoring.alerts.memoryUsage.paramDetails.threshold.label', {
@@ -365,7 +379,7 @@ export const ALERT_DETAILS = {
       defaultMessage: 'Alert when a node reports high memory usage.',
     }),
   },
-  [ALERT_MISSING_MONITORING_DATA]: {
+  [RULE_MISSING_MONITORING_DATA]: {
     paramDetails: {
       duration: {
         label: i18n.translate('xpack.monitoring.alerts.missingData.paramDetails.duration.label', {
@@ -387,7 +401,7 @@ export const ALERT_DETAILS = {
       defaultMessage: 'Alert when monitoring data is missing.',
     }),
   },
-  [ALERT_THREAD_POOL_SEARCH_REJECTIONS]: {
+  [RULE_THREAD_POOL_SEARCH_REJECTIONS]: {
     paramDetails: {
       threshold: {
         label: i18n.translate('xpack.monitoring.alerts.rejection.paramDetails.threshold.label', {
@@ -412,7 +426,7 @@ export const ALERT_DETAILS = {
         'Alert when the number of rejections in the search thread pool exceeds the threshold.',
     }),
   },
-  [ALERT_THREAD_POOL_WRITE_REJECTIONS]: {
+  [RULE_THREAD_POOL_WRITE_REJECTIONS]: {
     paramDetails: {
       threshold: {
         label: i18n.translate('xpack.monitoring.alerts.rejection.paramDetails.threshold.label', {
@@ -437,7 +451,7 @@ export const ALERT_DETAILS = {
         'Alert when the number of rejections in the write thread pool exceeds the threshold.',
     }),
   },
-  [ALERT_CCR_READ_EXCEPTIONS]: {
+  [RULE_CCR_READ_EXCEPTIONS]: {
     paramDetails: {
       duration: {
         label: i18n.translate(
@@ -456,7 +470,7 @@ export const ALERT_DETAILS = {
       defaultMessage: 'Alert if any CCR read exceptions have been detected.',
     }),
   },
-  [ALERT_LARGE_SHARD_SIZE]: {
+  [RULE_LARGE_SHARD_SIZE]: {
     paramDetails: {
       threshold: {
         label: i18n.translate('xpack.monitoring.alerts.shardSize.paramDetails.threshold.label', {
@@ -482,91 +496,91 @@ export const ALERT_DETAILS = {
   },
 };
 
-export const ALERT_PANEL_MENU = [
+export const RULE_PANEL_MENU = [
   {
     label: i18n.translate('xpack.monitoring.alerts.badge.panelCategory.clusterHealth', {
       defaultMessage: 'Cluster health',
     }),
-    alerts: [
-      { alertName: ALERT_NODES_CHANGED },
-      { alertName: ALERT_CLUSTER_HEALTH },
-      { alertName: ALERT_ELASTICSEARCH_VERSION_MISMATCH },
-      { alertName: ALERT_KIBANA_VERSION_MISMATCH },
-      { alertName: ALERT_LOGSTASH_VERSION_MISMATCH },
+    rules: [
+      { ruleName: RULE_NODES_CHANGED },
+      { ruleName: RULE_CLUSTER_HEALTH },
+      { ruleName: RULE_ELASTICSEARCH_VERSION_MISMATCH },
+      { ruleName: RULE_KIBANA_VERSION_MISMATCH },
+      { ruleName: RULE_LOGSTASH_VERSION_MISMATCH },
     ],
   },
   {
     label: i18n.translate('xpack.monitoring.alerts.badge.panelCategory.resourceUtilization', {
       defaultMessage: 'Resource utilization',
     }),
-    alerts: [
-      { alertName: ALERT_CPU_USAGE },
-      { alertName: ALERT_DISK_USAGE },
-      { alertName: ALERT_MEMORY_USAGE },
-      { alertName: ALERT_LARGE_SHARD_SIZE },
+    rules: [
+      { ruleName: RULE_CPU_USAGE },
+      { ruleName: RULE_DISK_USAGE },
+      { ruleName: RULE_MEMORY_USAGE },
+      { ruleName: RULE_LARGE_SHARD_SIZE },
     ],
   },
   {
     label: i18n.translate('xpack.monitoring.alerts.badge.panelCategory.errors', {
       defaultMessage: 'Errors and exceptions',
     }),
-    alerts: [
-      { alertName: ALERT_MISSING_MONITORING_DATA },
-      { alertName: ALERT_LICENSE_EXPIRATION },
-      { alertName: ALERT_THREAD_POOL_SEARCH_REJECTIONS },
-      { alertName: ALERT_THREAD_POOL_WRITE_REJECTIONS },
-      { alertName: ALERT_CCR_READ_EXCEPTIONS },
+    rules: [
+      { ruleName: RULE_MISSING_MONITORING_DATA },
+      { ruleName: RULE_LICENSE_EXPIRATION },
+      { ruleName: RULE_THREAD_POOL_SEARCH_REJECTIONS },
+      { ruleName: RULE_THREAD_POOL_WRITE_REJECTIONS },
+      { ruleName: RULE_CCR_READ_EXCEPTIONS },
     ],
   },
 ];
 
 /**
- * A listing of all alert types
+ * A listing of all rule types
  */
-export const ALERTS = [
-  ALERT_LICENSE_EXPIRATION,
-  ALERT_CLUSTER_HEALTH,
-  ALERT_CPU_USAGE,
-  ALERT_DISK_USAGE,
-  ALERT_NODES_CHANGED,
-  ALERT_ELASTICSEARCH_VERSION_MISMATCH,
-  ALERT_KIBANA_VERSION_MISMATCH,
-  ALERT_LOGSTASH_VERSION_MISMATCH,
-  ALERT_MEMORY_USAGE,
-  ALERT_MISSING_MONITORING_DATA,
-  ALERT_THREAD_POOL_SEARCH_REJECTIONS,
-  ALERT_THREAD_POOL_WRITE_REJECTIONS,
-  ALERT_CCR_READ_EXCEPTIONS,
-  ALERT_LARGE_SHARD_SIZE,
+export const RULES = [
+  RULE_LICENSE_EXPIRATION,
+  RULE_CLUSTER_HEALTH,
+  RULE_CPU_USAGE,
+  RULE_DISK_USAGE,
+  RULE_NODES_CHANGED,
+  RULE_ELASTICSEARCH_VERSION_MISMATCH,
+  RULE_KIBANA_VERSION_MISMATCH,
+  RULE_LOGSTASH_VERSION_MISMATCH,
+  RULE_MEMORY_USAGE,
+  RULE_MISSING_MONITORING_DATA,
+  RULE_THREAD_POOL_SEARCH_REJECTIONS,
+  RULE_THREAD_POOL_WRITE_REJECTIONS,
+  RULE_CCR_READ_EXCEPTIONS,
+  RULE_LARGE_SHARD_SIZE,
 ];
 
 /**
- * A list of all legacy alerts, which means they are powered by watcher
+ * A list of all legacy rules, which means they are powered by watcher
  */
-export const LEGACY_ALERTS = [
-  ALERT_LICENSE_EXPIRATION,
-  ALERT_CLUSTER_HEALTH,
-  ALERT_NODES_CHANGED,
-  ALERT_ELASTICSEARCH_VERSION_MISMATCH,
-  ALERT_KIBANA_VERSION_MISMATCH,
-  ALERT_LOGSTASH_VERSION_MISMATCH,
+export const LEGACY_RULES = [
+  RULE_LICENSE_EXPIRATION,
+  RULE_CLUSTER_HEALTH,
+  RULE_NODES_CHANGED,
+  RULE_ELASTICSEARCH_VERSION_MISMATCH,
+  RULE_KIBANA_VERSION_MISMATCH,
+  RULE_LOGSTASH_VERSION_MISMATCH,
 ];
 
 /**
  * Matches the id for the built-in in email action type
- * See x-pack/plugins/actions/server/builtin_action_types/email.ts
+ * See x-pack/plugins/stack_connectors/server/connector_types/stack/email/index.ts
  */
 export const ALERT_ACTION_TYPE_EMAIL = '.email';
 /**
  * Matches the id for the built-in in log action type
- * See x-pack/plugins/actions/server/builtin_action_types/log.ts
+ * See x-pack/plugins/stack_connectors/server/connector_types/stack/server_log/index.ts
  */
 export const ALERT_ACTION_TYPE_LOG = '.server-log';
 
 /**
- * To enable modifing of alerts in under actions
+ * To enable modifing of rules in under actions
  */
-export const ALERT_REQUIRES_APP_CONTEXT = true;
+export const RULE_REQUIRES_APP_CONTEXT = false;
 
 export const ALERT_EMAIL_SERVICES = ['gmail', 'hotmail', 'icloud', 'outlook365', 'ses', 'yahoo'];
 
@@ -576,3 +590,13 @@ export const ALERT_EMAIL_SERVICES = ['gmail', 'hotmail', 'icloud', 'outlook365',
 export const SAVED_OBJECT_TELEMETRY = 'monitoring-telemetry';
 
 export const TELEMETRY_METRIC_BUTTON_CLICK = 'btnclick__';
+
+export type INDEX_PATTERN_TYPES =
+  | typeof ELASTICSEARCH_SYSTEM_ID
+  | typeof KIBANA_SYSTEM_ID
+  | typeof LOGSTASH_SYSTEM_ID
+  | typeof BEATS_SYSTEM_ID
+  | typeof ENTERPRISE_SEARCH_SYSTEM_ID
+  | typeof APM_SYSTEM_ID;
+
+export type DS_INDEX_PATTERN_TYPES = typeof DS_INDEX_PATTERN_METRICS | typeof DS_INDEX_PATTERN_LOGS;

@@ -7,17 +7,19 @@
 
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from '@kbn/i18n/react';
-
-import { EuiPageContent } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageContent_Deprecated as EuiPageContent,
+} from '@elastic/eui';
 
 import { setBreadcrumbs, listBreadcrumb, addBreadcrumb } from '../../services/breadcrumbs';
 import {
   FollowerIndexForm,
   FollowerIndexPageTitle,
   RemoteClustersProvider,
-  SectionLoading,
 } from '../../components';
+import { SectionLoading } from '../../../shared_imports';
 
 export class FollowerIndexAdd extends PureComponent {
   static propTypes = {
@@ -45,30 +47,36 @@ export class FollowerIndexAdd extends PureComponent {
     } = this.props;
 
     return (
-      <EuiPageContent horizontalPosition="center" className="ccrPageContent">
-        <FollowerIndexPageTitle
-          title={
-            <FormattedMessage
-              id="xpack.crossClusterReplication.followerIndex.addTitle"
-              defaultMessage="Add follower index"
-            />
-          }
-        />
-
-        <RemoteClustersProvider>
-          {({ isLoading, error, remoteClusters }) => {
-            if (isLoading) {
-              return (
-                <SectionLoading dataTestSubj="remoteClustersLoading">
+      <RemoteClustersProvider>
+        {({ isLoading, error, remoteClusters }) => {
+          if (isLoading) {
+            return (
+              <EuiPageContent
+                verticalPosition="center"
+                horizontalPosition="center"
+                color="subdued"
+                data-test-subj="remoteClustersLoading"
+              >
+                <SectionLoading>
                   <FormattedMessage
                     id="xpack.crossClusterReplication.followerIndexCreateForm.loadingRemoteClustersMessage"
                     defaultMessage="Loading remote clusters…"
                   />
                 </SectionLoading>
-              );
-            }
+              </EuiPageContent>
+            );
+          }
 
-            return (
+          return (
+            <EuiPageContentBody restrictWidth style={{ width: '100%' }}>
+              <FollowerIndexPageTitle
+                title={
+                  <FormattedMessage
+                    id="xpack.crossClusterReplication.followerIndex.addTitle"
+                    defaultMessage="Add follower index"
+                  />
+                }
+              />
               <FollowerIndexForm
                 apiStatus={apiStatus}
                 apiError={apiError}
@@ -83,10 +91,10 @@ export class FollowerIndexAdd extends PureComponent {
                   />
                 }
               />
-            );
-          }}
-        </RemoteClustersProvider>
-      </EuiPageContent>
+            </EuiPageContentBody>
+          );
+        }}
+      </RemoteClustersProvider>
     );
   }
 }

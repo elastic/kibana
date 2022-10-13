@@ -5,16 +5,6 @@
  * 2.0.
  */
 
-import { coreMock } from '../../../../../src/core/public/mocks';
-import { getExceptionListSchemaMock } from '../../common/schemas/response/exception_list_schema.mock';
-import { getExceptionListItemSchemaMock } from '../../common/schemas/response/exception_list_item_schema.mock';
-import { getCreateExceptionListSchemaMock } from '../../common/schemas/request/create_exception_list_schema.mock';
-import { getCreateExceptionListItemSchemaMock } from '../../common/schemas/request/create_exception_list_item_schema.mock';
-import { getFoundExceptionListItemSchemaMock } from '../../common/schemas/response/found_exception_list_item_schema.mock';
-import { getUpdateExceptionListItemSchemaMock } from '../../common/schemas/request/update_exception_list_item_schema.mock';
-import { getUpdateExceptionListSchemaMock } from '../../common/schemas/request/update_exception_list_schema.mock';
-import { getFoundExceptionListSchemaMock } from '../../common/schemas/response/found_exception_list_schema.mock';
-
 import {
   addEndpointExceptionList,
   addExceptionList,
@@ -28,7 +18,20 @@ import {
   fetchExceptionListsItemsByListIds,
   updateExceptionList,
   updateExceptionListItem,
-} from './api';
+} from '@kbn/securitysolution-list-api';
+import { coreMock } from '@kbn/core/public/mocks';
+
+import { getExceptionListSchemaMock } from '../../common/schemas/response/exception_list_schema.mock';
+import { getExceptionListItemSchemaMock } from '../../common/schemas/response/exception_list_item_schema.mock';
+import { getCreateExceptionListSchemaMock } from '../../common/schemas/request/create_exception_list_schema.mock';
+import { getCreateExceptionListItemSchemaMock } from '../../common/schemas/request/create_exception_list_item_schema.mock';
+import { getFoundExceptionListItemSchemaMock } from '../../common/schemas/response/found_exception_list_item_schema.mock';
+import { getUpdateExceptionListItemSchemaMock } from '../../common/schemas/request/update_exception_list_item_schema.mock';
+import { getUpdateExceptionListSchemaMock } from '../../common/schemas/request/update_exception_list_schema.mock';
+import { getFoundExceptionListSchemaMock } from '../../common/schemas/response/found_exception_list_schema.mock';
+
+// TODO: These tests are left here until we move the mocks including the coreMock above into a location where we can consume them in a kbn package
+// TODO: This really belongs as: kbn-securitysolution-list-api/src/api/index.test.ts as soon as we can.
 
 const abortCtrl = new AbortController();
 
@@ -275,6 +278,31 @@ describe('Exceptions Lists API', () => {
       expect(exceptionResponse.data).toEqual([getExceptionListSchemaMock()]);
     });
 
+    test('it returns expected exception lists when empty filter', async () => {
+      const exceptionResponse = await fetchExceptionLists({
+        filters: '',
+        http: httpMock,
+        namespaceTypes: 'single,agnostic',
+        pagination: {
+          page: 1,
+          perPage: 20,
+        },
+        signal: abortCtrl.signal,
+      });
+      expect(httpMock.fetch).toHaveBeenCalledWith('/api/exception_lists/_find', {
+        method: 'GET',
+        query: {
+          namespace_type: 'single,agnostic',
+          page: '1',
+          per_page: '20',
+          sort_field: 'exception-list.created_at',
+          sort_order: 'desc',
+        },
+        signal: abortCtrl.signal,
+      });
+      expect(exceptionResponse.data).toEqual([getExceptionListSchemaMock()]);
+    });
+
     test('it returns error if response payload fails decode', async () => {
       const badPayload = getExceptionListSchemaMock();
       // @ts-expect-error
@@ -352,7 +380,6 @@ describe('Exceptions Lists API', () => {
 
     test('it invokes "fetchExceptionListsItemsByListIds" with expected url and body values', async () => {
       await fetchExceptionListsItemsByListIds({
-        filterOptions: [],
         http: httpMock,
         listIds: ['myList', 'myOtherListId'],
         namespaceTypes: ['single', 'single'],
@@ -377,14 +404,9 @@ describe('Exceptions Lists API', () => {
       });
     });
 
-    test('it invokes with expected url and body values when a filter exists and "namespaceType" of "single"', async () => {
+    test('it invokes with expected url and body values when a filter exists', async () => {
       await fetchExceptionListsItemsByListIds({
-        filterOptions: [
-          {
-            filter: 'hello world',
-            tags: [],
-          },
-        ],
+        filter: 'exception-list.attributes.entries.field:hello world*',
         http: httpMock,
         listIds: ['myList'],
         namespaceTypes: ['single'],
@@ -410,14 +432,8 @@ describe('Exceptions Lists API', () => {
       });
     });
 
-    test('it invokes with expected url and body values when a filter exists and "namespaceType" of "agnostic"', async () => {
+    test('it invokes with expected url and body values when search exists', async () => {
       await fetchExceptionListsItemsByListIds({
-        filterOptions: [
-          {
-            filter: 'hello world',
-            tags: [],
-          },
-        ],
         http: httpMock,
         listIds: ['myList'],
         namespaceTypes: ['agnostic'],
@@ -425,84 +441,18 @@ describe('Exceptions Lists API', () => {
           page: 1,
           perPage: 20,
         },
+        search: '-@timestamp',
         signal: abortCtrl.signal,
       });
 
       expect(httpMock.fetch).toHaveBeenCalledWith('/api/exception_lists/items/_find', {
         method: 'GET',
         query: {
-          filter: 'exception-list-agnostic.attributes.entries.field:hello world*',
           list_id: 'myList',
           namespace_type: 'agnostic',
           page: '1',
           per_page: '20',
-          sort_field: 'exception-list.created_at',
-          sort_order: 'desc',
-        },
-        signal: abortCtrl.signal,
-      });
-    });
-
-    test('it invokes with expected url and body values when tags exists', async () => {
-      await fetchExceptionListsItemsByListIds({
-        filterOptions: [
-          {
-            filter: '',
-            tags: ['malware'],
-          },
-        ],
-        http: httpMock,
-        listIds: ['myList'],
-        namespaceTypes: ['agnostic'],
-        pagination: {
-          page: 1,
-          perPage: 20,
-        },
-        signal: abortCtrl.signal,
-      });
-
-      expect(httpMock.fetch).toHaveBeenCalledWith('/api/exception_lists/items/_find', {
-        method: 'GET',
-        query: {
-          filter: 'exception-list-agnostic.attributes.tags:malware',
-          list_id: 'myList',
-          namespace_type: 'agnostic',
-          page: '1',
-          per_page: '20',
-          sort_field: 'exception-list.created_at',
-          sort_order: 'desc',
-        },
-        signal: abortCtrl.signal,
-      });
-    });
-
-    test('it invokes with expected url and body values when filter and tags exists', async () => {
-      await fetchExceptionListsItemsByListIds({
-        filterOptions: [
-          {
-            filter: 'host.name',
-            tags: ['malware'],
-          },
-        ],
-        http: httpMock,
-        listIds: ['myList'],
-        namespaceTypes: ['agnostic'],
-        pagination: {
-          page: 1,
-          perPage: 20,
-        },
-        signal: abortCtrl.signal,
-      });
-
-      expect(httpMock.fetch).toHaveBeenCalledWith('/api/exception_lists/items/_find', {
-        method: 'GET',
-        query: {
-          filter:
-            'exception-list-agnostic.attributes.entries.field:host.name* AND exception-list-agnostic.attributes.tags:malware',
-          list_id: 'myList',
-          namespace_type: 'agnostic',
-          page: '1',
-          per_page: '20',
+          search: '-@timestamp',
           sort_field: 'exception-list.created_at',
           sort_order: 'desc',
         },
@@ -512,7 +462,6 @@ describe('Exceptions Lists API', () => {
 
     test('it returns expected format when call succeeds', async () => {
       const exceptionResponse = await fetchExceptionListsItemsByListIds({
-        filterOptions: [],
         http: httpMock,
         listIds: ['endpoint_list_id'],
         namespaceTypes: ['single'],
@@ -533,7 +482,6 @@ describe('Exceptions Lists API', () => {
 
       await expect(
         fetchExceptionListsItemsByListIds({
-          filterOptions: [],
           http: httpMock,
           listIds: ['myList'],
           namespaceTypes: ['single'],
@@ -756,7 +704,7 @@ describe('Exceptions Lists API', () => {
       });
 
       expect(httpMock.fetch).toHaveBeenCalledWith('/api/exception_lists/_export', {
-        method: 'GET',
+        method: 'POST',
         query: {
           id: 'some-id',
           list_id: 'list-id',

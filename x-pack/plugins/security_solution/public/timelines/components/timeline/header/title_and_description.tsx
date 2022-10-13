@@ -24,12 +24,14 @@ import usePrevious from 'react-use/lib/usePrevious';
 import { getUseField, Field, Form, useForm } from '../../../../shared_imports';
 import { TimelineId, TimelineStatus, TimelineType } from '../../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { timelineActions, timelineSelectors } from '../../../../timelines/store/timeline';
+import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { NOTES_PANEL_WIDTH } from '../properties/notes_size';
 import { useCreateTimeline } from '../properties/use_create_timeline';
 import * as commonI18n from '../properties/translations';
 import * as i18n from './translations';
 import { formSchema } from './schema';
+import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
+import { TIMELINE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 
 const CommonUseField = getUseField({ component: Field });
 interface TimelineTitleAndDescriptionProps {
@@ -44,6 +46,7 @@ interface TimelineTitleAndDescriptionProps {
 // the unsaved timeline / template
 export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptionProps>(
   ({ closeSaveTimeline, initialFocus, timelineId, showWarning }) => {
+    const { startTransaction } = useStartTransaction();
     const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
     const {
       isSaving,
@@ -99,6 +102,11 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
     });
     const { isSubmitted, isSubmitting, submit } = form;
 
+    const onSubmit = useCallback(() => {
+      startTransaction({ name: TIMELINE_ACTIONS.SAVE });
+      submit();
+    }, [submit, startTransaction]);
+
     const handleCancel = useCallback(() => {
       if (showWarning) {
         handleCreateNewTimeline();
@@ -137,9 +145,10 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
       [showWarning, status, timelineType]
     );
 
-    const calloutMessage = useMemo(() => i18n.UNSAVED_TIMELINE_WARNING(timelineType), [
-      timelineType,
-    ]);
+    const calloutMessage = useMemo(
+      () => i18n.UNSAVED_TIMELINE_WARNING(timelineType),
+      [timelineType]
+    );
 
     const descriptionLabel = useMemo(() => `${i18n.TIMELINE_DESCRIPTION} (${i18n.OPTIONAL})`, []);
 
@@ -235,7 +244,7 @@ export const TimelineTitleAndDescription = React.memo<TimelineTitleAndDescriptio
                     size="s"
                     isDisabled={isSaving || isSubmitting}
                     fill={true}
-                    onClick={submit}
+                    onClick={onSubmit}
                     data-test-subj="save-button"
                   >
                     {saveButtonTitle}

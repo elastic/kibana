@@ -10,15 +10,16 @@ import { omit, isEqual } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 
-import { flashAPIErrors, setSuccessMessage } from '../../../shared/flash_messages';
+import { flashAPIErrors, flashSuccessToast } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
-import { Schema, SchemaConflicts } from '../../../shared/types';
+import { AdvancedSchema, SchemaConflicts, SchemaType } from '../../../shared/schema/types';
 import { EngineLogic } from '../engine';
 
 import { DEFAULT_SNIPPET_SIZE } from './constants';
 import {
   FieldResultSetting,
   FieldResultSettingObject,
+  ServerFieldResultSetting,
   ServerFieldResultSettingObject,
 } from './types';
 
@@ -35,11 +36,11 @@ import {
 interface ResultSettingsActions {
   initializeResultFields(
     serverResultFields: ServerFieldResultSettingObject,
-    schema: Schema,
+    schema: AdvancedSchema,
     schemaConflicts?: SchemaConflicts
   ): {
     resultFields: FieldResultSettingObject;
-    schema: Schema;
+    schema: AdvancedSchema;
     schemaConflicts: SchemaConflicts;
   };
   clearAllFields(): void;
@@ -67,9 +68,10 @@ interface ResultSettingsValues {
   saving: boolean;
   resultFields: FieldResultSettingObject;
   lastSavedResultFields: FieldResultSettingObject;
-  schema: Schema;
+  schema: AdvancedSchema;
   schemaConflicts: SchemaConflicts;
   // Selectors
+  validResultFields: FieldResultSettingObject;
   textResultFields: FieldResultSettingObject;
   nonTextResultFields: FieldResultSettingObject;
   serverResultFields: ServerFieldResultSettingObject;
@@ -78,6 +80,7 @@ interface ResultSettingsValues {
   stagedUpdates: true;
   reducedServerResultFields: ServerFieldResultSettingObject;
   queryPerformanceScore: number;
+  isSnippetAllowed: (fieldName: string) => boolean;
 }
 
 const SAVE_CONFIRMATION_MESSAGE = i18n.translate(
@@ -92,7 +95,7 @@ const RESET_CONFIRMATION_MESSAGE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.engine.resultSettings.confirmResetMessage',
   {
     defaultMessage:
-      'This will revert your settings back to the default: all fields set to raw. The default will take over immediately and impact your search results.',
+      'Are you sure you want to restore result settings defaults? This will set all fields back to raw with no limits.',
   }
 );
 
@@ -169,22 +172,38 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
     ],
   }),
   selectors: ({ selectors }) => ({
-    textResultFields: [
+    validResultFields: [
       () => [selectors.resultFields, selectors.schema],
-      (resultFields: FieldResultSettingObject, schema: Schema) => {
+      (resultFields: FieldResultSettingObject, schema: AdvancedSchema): FieldResultSettingObject =>
+        Object.entries(resultFields).reduce((validResultFields, [fieldName, fieldSettings]) => {
+          if (!schema[fieldName] || schema[fieldName].type === SchemaType.Nested) {
+            return validResultFields;
+          }
+          return { ...validResultFields, [fieldName]: fieldSettings };
+        }, {}),
+    ],
+    textResultFields: [
+      () => [selectors.validResultFields, selectors.schema],
+      (resultFields: FieldResultSettingObject, schema: AdvancedSchema) => {
         const { textResultFields } = splitResultFields(resultFields, schema);
         return textResultFields;
       },
     ],
     nonTextResultFields: [
-      () => [selectors.resultFields, selectors.schema],
-      (resultFields: FieldResultSettingObject, schema: Schema) => {
+      () => [selectors.validResultFields, selectors.schema],
+      (resultFields: FieldResultSettingObject, schema: AdvancedSchema) => {
         const { nonTextResultFields } = splitResultFields(resultFields, schema);
         return nonTextResultFields;
       },
     ],
+    isSnippetAllowed: [
+      () => [selectors.schema],
+      (schema: AdvancedSchema) => {
+        return (fieldName: string): boolean => !!schema[fieldName]?.capabilities.snippet;
+      },
+    ],
     serverResultFields: [
-      () => [selectors.resultFields],
+      () => [selectors.validResultFields],
       (resultFields: FieldResultSettingObject) => {
         return Object.entries(resultFields).reduce((serverResultFields, [fieldName, settings]) => {
           return {
@@ -195,11 +214,11 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
       },
     ],
     resultFieldsAtDefaultSettings: [
-      () => [selectors.resultFields],
+      () => [selectors.validResultFields],
       (resultFields) => areFieldsAtDefaultSettings(resultFields),
     ],
     resultFieldsEmpty: [
-      () => [selectors.resultFields],
+      () => [selectors.validResultFields],
       (resultFields) => areFieldsEmpty(resultFields),
     ],
     stagedUpdates: [
@@ -221,11 +240,11 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
     ],
     queryPerformanceScore: [
       () => [selectors.serverResultFields, selectors.schema],
-      (serverResultFields: ServerFieldResultSettingObject, schema: Schema) => {
+      (serverResultFields: ServerFieldResultSettingObject, schema: AdvancedSchema) => {
         return Object.entries(serverResultFields).reduce((acc, [fieldName, resultField]) => {
           let newAcc = acc;
           if (resultField.raw) {
-            if (schema[fieldName] !== 'text') {
+            if (schema[fieldName].type !== SchemaType.Text) {
               newAcc += 0.2;
             } else if (
               typeof resultField.raw === 'object' &&
@@ -271,7 +290,7 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
       actions.updateField(fieldName, {
         ...omit(field, ['snippetSize']),
         snippet,
-        ...(snippet ? { snippetSize: DEFAULT_SNIPPET_SIZE } : {}),
+        ...(snippet ? { snippetSize: DEFAULT_SNIPPET_SIZE } : { snippetFallback: false }),
       });
     },
     toggleSnippetFallbackForField: ({ fieldName }) => {
@@ -292,14 +311,18 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
       const { http } = HttpLogic.values;
       const { engineName } = EngineLogic.values;
 
-      const url = `/api/app_search/engines/${engineName}/result_settings/details`;
+      const url = `/internal/app_search/engines/${engineName}/result_settings/details`;
 
       try {
         const {
           schema,
           schemaConflicts,
           searchSettings: { result_fields: serverFieldResultSettings },
-        } = await http.get(url);
+        } = await http.get<{
+          schema: AdvancedSchema;
+          schemaConflicts?: SchemaConflicts;
+          searchSettings: { result_fields: Record<string, ServerFieldResultSetting> };
+        }>(url);
 
         actions.initializeResultFields(serverFieldResultSettings, schema, schemaConflicts);
       } catch (e) {
@@ -317,30 +340,31 @@ export const ResultSettingsLogic = kea<MakeLogicType<ResultSettingsValues, Resul
 
         const { http } = HttpLogic.values;
         const { engineName } = EngineLogic.values;
-        const url = `/api/app_search/engines/${engineName}/result_settings`;
+        const url = `/internal/app_search/engines/${engineName}/result_settings`;
 
         actions.saving();
 
-        let response;
         try {
-          response = await http.put(url, {
+          const response = await http.put<{
+            result_fields: Record<string, ServerFieldResultSetting>;
+          }>(url, {
             body: JSON.stringify({
               result_fields: values.reducedServerResultFields,
             }),
           });
+
+          actions.initializeResultFields(response.result_fields, values.schema);
+          flashSuccessToast(
+            i18n.translate(
+              'xpack.enterpriseSearch.appSearch.engine.resultSettings.saveSuccessMessage',
+              {
+                defaultMessage: 'Result settings were saved',
+              }
+            )
+          );
         } catch (e) {
           flashAPIErrors(e);
         }
-
-        actions.initializeResultFields(response.result_fields, values.schema);
-        setSuccessMessage(
-          i18n.translate(
-            'xpack.enterpriseSearch.appSearch.engine.resultSettings.saveSuccessMessage',
-            {
-              defaultMessage: 'Result settings have been saved successfully.',
-            }
-          )
-        );
       }
     },
   }),

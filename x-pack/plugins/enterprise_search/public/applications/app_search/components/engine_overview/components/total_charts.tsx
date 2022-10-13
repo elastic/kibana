@@ -11,6 +11,7 @@ import { useValues } from 'kea';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
+import { EngineOverviewLogic } from '..';
 import { EuiButtonEmptyTo } from '../../../../shared/react_router_helpers';
 import { ENGINE_ANALYTICS_PATH, ENGINE_API_LOGS_PATH } from '../../../routes';
 import { AnalyticsChart, convertToChartData } from '../../analytics';
@@ -19,7 +20,6 @@ import { DataPanel } from '../../data_panel';
 import { generateEnginePath } from '../../engine';
 
 import { VIEW_ANALYTICS, VIEW_API_LOGS, LAST_7_DAYS } from '../constants';
-import { EngineOverviewLogic } from '../index';
 
 export const TotalCharts: React.FC = () => {
   const { startDate, queriesPerDay, operationsPerDay } = useValues(EngineOverviewLogic);

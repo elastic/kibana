@@ -5,15 +5,27 @@
  * 2.0.
  */
 
-import { Filter } from '../../../../../../src/plugins/data/common/es_query/filters';
-import { Query } from '../../../../../../src/plugins/data/common/query';
-import { esKuery, esQuery } from '../../../../../../src/plugins/data/public';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  Filter,
+  fromKueryExpression,
+  luceneStringToDsl,
+  Query,
+  toElasticsearchQuery,
+} from '@kbn/es-query';
+import { getDefaultQuery } from '@kbn/data-plugin/public';
 
-export function processFilters(filters: Filter[], query: Query, controlledBy?: string) {
+export function processFilters(
+  optionalFilters?: Filter[],
+  optionalQuery?: Query,
+  controlledBy?: string
+): estypes.QueryDslQueryContainer {
+  const filters = optionalFilters ?? [];
+  const query = optionalQuery ?? getDefaultQuery();
   const inputQuery =
     query.language === 'kuery'
-      ? esKuery.toElasticsearchQuery(esKuery.fromKueryExpression(query.query as string))
-      : esQuery.luceneStringToDsl(query.query);
+      ? toElasticsearchQuery(fromKueryExpression(query.query as string))
+      : luceneStringToDsl(query.query);
 
   const must = [inputQuery];
   const mustNot = [];
@@ -40,10 +52,12 @@ export function processFilters(filters: Filter[], query: Query, controlledBy?: s
       };
     }
 
-    if (negate) {
-      mustNot.push(filterQuery);
-    } else {
-      must.push(filterQuery);
+    if (filterQuery) {
+      if (negate) {
+        mustNot.push(filterQuery);
+      } else {
+        must.push(filterQuery);
+      }
     }
   }
   return {

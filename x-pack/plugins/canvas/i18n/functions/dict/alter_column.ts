@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { alterColumn } from '../../../canvas_plugin_src/functions/common/alterColumn';
+import type { alterColumn } from '../../../canvas_plugin_src/functions/common/alterColumn';
 import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 import { DATATABLE_COLUMN_TYPES } from '../../../common/lib/constants';
@@ -15,7 +15,7 @@ export const help: FunctionHelp<FunctionFactory<typeof alterColumn>> = {
   help: i18n.translate('xpack.canvas.functions.alterColumnHelpText', {
     defaultMessage:
       'Converts between core types, including {list}, and {end}, and renames columns. ' +
-      'See also {mapColumnFn} and {staticColumnFn}.',
+      'See also {mapColumnFn}, {mathColumnFn}, and {staticColumnFn}.',
     values: {
       list: Object.values(DATATABLE_COLUMN_TYPES)
         .slice(0, -1)
@@ -24,6 +24,7 @@ export const help: FunctionHelp<FunctionFactory<typeof alterColumn>> = {
       end: `\`${Object.values(DATATABLE_COLUMN_TYPES).slice(-1)[0]}\``,
       mapColumnFn: '`mapColumn`',
       staticColumnFn: '`staticColumn`',
+      mathColumnFn: '`mathColumn`',
     },
   }),
   args: {

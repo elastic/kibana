@@ -11,13 +11,12 @@ import { shallow } from 'enzyme';
 
 import { EuiBadge } from '@elastic/eui';
 
-import { LicenseBadge } from './';
+import { LicenseBadge } from '.';
 
 describe('LicenseBadge', () => {
   it('renders', () => {
     const wrapper = shallow(<LicenseBadge />);
 
-    expect(wrapper.find(EuiBadge)).toHaveLength(1);
-    expect(wrapper.find('span').text()).toEqual('Platinum Feature');
+    expect(wrapper.find(EuiBadge).prop('children')).toEqual('Platinum feature');
   });
 });

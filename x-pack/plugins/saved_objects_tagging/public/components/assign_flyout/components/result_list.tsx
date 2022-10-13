@@ -7,7 +7,7 @@
 
 import React, { FC } from 'react';
 import { EuiIcon, EuiSelectable, EuiSelectableOption, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { AssignableObject } from '../../../../common/assignments';
 import { AssignmentAction, AssignmentOverrideMap, AssignmentStatusMap } from '../types';
 import { getKey, getOverriddenStatus, getAssignmentAction } from '../utils';
@@ -64,6 +64,7 @@ export const AssignFlyoutResultList: FC<AssignFlyoutResultListProps> = ({
     <EuiSelectable<ResultInternals>
       height="full"
       data-test-subj="assignFlyoutResultList"
+      aria-label="Saved objects which can be assigned to this tag"
       options={options}
       allowExclusions={false}
       isLoading={isLoading}

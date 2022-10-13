@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import { JsonObject } from '@kbn/utility-types';
 import { useCallback } from 'react';
 import { Observable } from 'rxjs';
 import { exhaustMap } from 'rxjs/operators';
-import { IKibanaSearchRequest } from '../../../../../../../src/plugins/data/public';
-import { LogSourceColumnConfiguration } from '../../../../common/log_sources';
+import { IKibanaSearchRequest } from '@kbn/data-plugin/public';
 import { LogEntryAfterCursor } from '../../../../common/log_entry';
+import { LogViewColumnConfiguration } from '../../../../common/log_views';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 import {
   logEntriesSearchRequestParamsRT,
@@ -36,7 +37,7 @@ export const useLogEntriesAfterRequest = ({
   sourceId,
   startTimestamp,
 }: {
-  columnOverrides?: LogSourceColumnConfiguration[];
+  columnOverrides?: LogViewColumnConfiguration[];
   endTimestamp: number;
   highlightPhrase?: string;
   query?: LogEntriesSearchRequestQuery;
@@ -55,7 +56,7 @@ export const useLogEntriesAfterRequest = ({
                     columns: columnOverrides,
                     endTimestamp: params?.extendTo ?? endTimestamp,
                     highlightPhrase,
-                    query,
+                    query: query as JsonObject,
                     size: params.size,
                     sourceId,
                     startTimestamp,
@@ -87,13 +88,8 @@ export const useLogEntriesAfterResponse = <Request extends IKibanaSearchRequest>
     flattenLogEntriesAfterSearchResponse
   );
 
-  const {
-    cancelRequest,
-    isRequestRunning,
-    isResponsePartial,
-    loaded,
-    total,
-  } = useDataSearchResponseState(logEntriesAfterSearchResponse$);
+  const { cancelRequest, isRequestRunning, isResponsePartial, loaded, total } =
+    useDataSearchResponseState(logEntriesAfterSearchResponse$);
 
   return {
     cancelRequest,
@@ -114,7 +110,7 @@ export const useFetchLogEntriesAfter = ({
   sourceId,
   startTimestamp,
 }: {
-  columnOverrides?: LogSourceColumnConfiguration[];
+  columnOverrides?: LogViewColumnConfiguration[];
   endTimestamp: number;
   highlightPhrase?: string;
   query?: LogEntriesSearchRequestQuery;

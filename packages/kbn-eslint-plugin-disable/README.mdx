@@ -1,0 +1,17 @@
+---
+id: kibDevDocsOpsEslintPluginDisable
+slug: /kibana-dev-docs/ops/kbn-eslint-plugin-disable
+title: "@kbn/eslint-plugin-disable"
+description: Custom ESLint rules for managing eslint rules disable in the Kibana repository
+tags: ['kibana', 'dev', 'contributor', 'operations', 'eslint', 'disable']
+---
+
+`@kbn/eslint-plugin-disable` is an ESLint plugin providing custom rules to allow us to enforce specific eslint rules behaviours around eslint disables that we need to implement Bazel packages across the monorepo as our main development unit.
+
+## `@kbn/disable/no_naked_eslint_disable`
+
+Disallows the usage of naked eslint-disable comments without being specific about each rule to disable.
+
+## `@kbn/disable/no_protected_eslint_disable`
+
+Disallows the eslint-disable comments with specific protected rules that were built to not be disabled. Please contact the Kibana Operations team if you have a justifiable use case for disabling one of them.

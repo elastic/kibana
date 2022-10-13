@@ -6,7 +6,7 @@
  */
 
 import _ from 'lodash';
-import { Map as MbMap } from 'mapbox-gl';
+import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { AbstractStyleProperty } from './style_property';
 import { DEFAULT_LABEL_SIZE } from '../vector_style_defaults';
 import { LABEL_BORDER_SIZES } from '../../../../../common/constants';
@@ -51,8 +51,9 @@ export class LabelBorderSizeProperty extends AbstractStyleProperty<LabelBorderSi
     const widthRatio = getWidthRatio(this.getOptions().size);
 
     if (this._labelSizeProperty.isDynamic() && this._labelSizeProperty.isComplete()) {
-      const labelSizeExpression = (this
-        ._labelSizeProperty as DynamicSizeProperty).getMbSizeExpression();
+      const labelSizeExpression = (
+        this._labelSizeProperty as DynamicSizeProperty
+      ).getMbSizeExpression();
       if (labelSizeExpression) {
         mbMap.setPaintProperty(mbLayerId, 'text-halo-width', [
           'max',

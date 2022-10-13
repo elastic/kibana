@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { shallowWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 
 import { ValidateJob } from './validate_job_view';
@@ -20,7 +20,7 @@ jest.mock('../../util/dependency_cache', () => ({
   }),
 }));
 
-jest.mock('../../../../../../../src/plugins/kibana_react/public', () => ({
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
   withKibana: (comp) => {
     return comp;
   },
@@ -41,7 +41,7 @@ function prepareTest(messages) {
   };
   const kibana = {
     services: {
-      notifications: { toasts: { addDanger: jest.fn() } },
+      notifications: { toasts: { addDanger: jest.fn(), addError: jest.fn() } },
     },
   };
 
@@ -79,8 +79,7 @@ describe('ValidateJob', () => {
         fieldName: 'airline',
         id: 'over_field_low_cardinality',
         status: 'warning',
-        text:
-          'Cardinality of over_field "airline" is low and therefore less suitable for population analysis.',
+        text: 'Cardinality of over_field "airline" is low and therefore less suitable for population analysis.',
         url: 'https://www.elastic.co/blog/sizing-machine-learning-with-elasticsearch',
       },
     ],

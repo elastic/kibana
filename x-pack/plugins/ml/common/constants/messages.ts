@@ -8,7 +8,7 @@
 import { once } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-import type { DocLinksStart } from 'kibana/public';
+import type { DocLinksStart } from '@kbn/core/public';
 
 import { JOB_ID_MAX_LENGTH, VALIDATION_STATUS } from './validation';
 
@@ -624,6 +624,30 @@ export const getMessages = once((docLinks?: DocLinksStart) => {
         defaultMessage:
           'The selected or available time range contains data with timestamps before ' +
           'the UNIX epoch beginning. Timestamps before 01/01/1970 00:00:00 (UTC) are not supported for machine learning jobs.',
+      }),
+    },
+    datafeed_preview_no_documents: {
+      status: VALIDATION_STATUS.WARNING,
+      heading: i18n.translate(
+        'xpack.ml.models.jobValidation.messages.datafeedPreviewNoDocumentsHeading',
+        {
+          defaultMessage: 'Datafeed preview',
+        }
+      ),
+      text: i18n.translate(
+        'xpack.ml.models.jobValidation.messages.datafeedPreviewNoDocumentsMessage',
+        {
+          defaultMessage:
+            'Running the datafeed preview over the current job configuration produces no results. ' +
+            'If the index contains no documents this warning can be ignored, otherwise the job may be misconfigured.',
+        }
+      ),
+    },
+    datafeed_preview_failed: {
+      status: VALIDATION_STATUS.ERROR,
+      text: i18n.translate('xpack.ml.models.jobValidation.messages.datafeedPreviewFailedMessage', {
+        defaultMessage:
+          'The datafeed preview failed. This may be due to an error in the job or datafeed configurations.',
       }),
     },
   };

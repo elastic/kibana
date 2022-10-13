@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const spacesService = getService('spaces');
   const PageObjects = getPageObjects(['common', 'dashboard', 'security', 'error']);
   const appsMenu = getService('appsMenu');
@@ -17,13 +17,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('spaces', () => {
     before(async () => {
-      await esArchiver.load('empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     after(async () => {
-      await esArchiver.unload('empty_kibana');
-      await PageObjects.common.navigateToApp('home');
+      // NOTE: Logout needs to happen before anything else to avoid flaky behavior
       await PageObjects.security.forceLogout();
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     describe('space with no features disabled', () => {
@@ -52,7 +52,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           basePath: '/s/custom_space',
         });
 
-        const exists = await find.existsByCssSelector('monitoring-main');
+        const exists = await find.existsByCssSelector('[data-test-subj="monitoringAppContainer"]');
         expect(exists).to.be(true);
       });
     });

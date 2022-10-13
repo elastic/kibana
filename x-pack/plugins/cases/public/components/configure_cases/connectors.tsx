@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
+  EuiText,
 } from '@elastic/eui';
 
 import styled from 'styled-components';
@@ -21,7 +22,10 @@ import * as i18n from './translations';
 
 import { ActionConnector, CaseConnectorMapping } from '../../containers/configure/types';
 import { Mapping } from './mapping';
-import { ConnectorTypes } from '../../../common';
+import { ActionTypeConnector, ConnectorTypes } from '../../../common/api';
+import { DeprecatedCallout } from '../connectors/deprecated_callout';
+import { isDeprecatedConnector } from '../utils';
+import { useApplicationCapabilities } from '../../common/lib/kibana';
 
 const EuiFormRowExtended = styled(EuiFormRow)`
   .euiFormRow__labelWrapper {
@@ -32,16 +36,18 @@ const EuiFormRowExtended = styled(EuiFormRow)`
 `;
 
 export interface Props {
+  actionTypes: ActionTypeConnector[];
   connectors: ActionConnector[];
   disabled: boolean;
   handleShowEditFlyout: () => void;
   isLoading: boolean;
   mappings: CaseConnectorMapping[];
   onChangeConnector: (id: string) => void;
-  selectedConnector: { id: string; type: string };
+  selectedConnector: { id: string; type: ConnectorTypes };
   updateConnectorDisabled: boolean;
 }
 const ConnectorsComponent: React.FC<Props> = ({
+  actionTypes,
   connectors,
   disabled,
   handleShowEditFlyout,
@@ -51,9 +57,17 @@ const ConnectorsComponent: React.FC<Props> = ({
   selectedConnector,
   updateConnectorDisabled,
 }) => {
-  const connectorsName = useMemo(
-    () => connectors.find((c) => c.id === selectedConnector.id)?.name ?? 'none',
+  const { actions } = useApplicationCapabilities();
+  const connector = useMemo(
+    () => connectors.find((c) => c.id === selectedConnector.id),
     [connectors, selectedConnector.id]
+  );
+
+  const connectorsName = connector?.name ?? 'none';
+
+  const actionTypeName = useMemo(
+    () => actionTypes.find((c) => c.id === selectedConnector.type)?.name ?? 'Unknown',
+    [actionTypes, selectedConnector.type]
   );
 
   const dropDownLabel = useMemo(
@@ -90,20 +104,32 @@ const ConnectorsComponent: React.FC<Props> = ({
         >
           <EuiFlexGroup direction="column">
             <EuiFlexItem grow={false}>
-              <ConnectorsDropdown
-                connectors={connectors}
-                disabled={disabled}
-                selectedConnector={selectedConnector.id}
-                isLoading={isLoading}
-                onChange={onChangeConnector}
-                data-test-subj="case-connectors-dropdown"
-                appendAddConnectorButton={true}
-              />
+              {actions.read ? (
+                <ConnectorsDropdown
+                  connectors={connectors}
+                  disabled={disabled}
+                  selectedConnector={selectedConnector.id}
+                  isLoading={isLoading}
+                  onChange={onChangeConnector}
+                  data-test-subj="case-connectors-dropdown"
+                  appendAddConnectorButton={true}
+                />
+              ) : (
+                <EuiText data-test-subj="configure-case-connector-permissions-error-msg" size="s">
+                  <span>{i18n.READ_ACTIONS_PERMISSIONS_ERROR_MSG}</span>
+                </EuiText>
+              )}
             </EuiFlexItem>
+            {selectedConnector.type !== ConnectorTypes.none && isDeprecatedConnector(connector) && (
+              <EuiFlexItem grow={false}>
+                <DeprecatedCallout />
+              </EuiFlexItem>
+            )}
             {selectedConnector.type !== ConnectorTypes.none ? (
               <EuiFlexItem grow={false}>
                 <Mapping
-                  connectorActionTypeId={selectedConnector.type}
+                  actionTypeName={actionTypeName}
+                  connectorType={selectedConnector.type}
                   isLoading={isLoading}
                   mappings={mappings}
                 />
@@ -115,5 +141,6 @@ const ConnectorsComponent: React.FC<Props> = ({
     </>
   );
 };
+ConnectorsComponent.displayName = 'Connectors';
 
 export const Connectors = React.memo(ConnectorsComponent);

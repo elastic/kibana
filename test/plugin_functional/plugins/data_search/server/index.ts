@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializer } from 'src/core/server';
+import { PluginInitializer } from '@kbn/core/server';
 import { DataSearchTestPlugin, TestPluginSetup, TestPluginStart } from './plugin';
 
 export const plugin: PluginInitializer<TestPluginSetup, TestPluginStart> = () =>

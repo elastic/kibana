@@ -9,7 +9,9 @@ import React from 'react';
 
 import classNames from 'classnames';
 
-import { FieldType, Raw, Snippet } from './types';
+import { SchemaType } from '../../../shared/schema/types';
+
+import { FieldType, Raw, SimpleFieldValue, Snippet } from './types';
 
 import './result_field_value.scss';
 
@@ -18,7 +20,27 @@ const isNotNumeric = (raw: string | number): boolean => {
   return isNaN(parseFloat(raw));
 };
 
-const getRawArrayDisplay = (rawArray: Array<string | number>): string => {
+const isScalarValue = (_: Raw, type?: FieldType): _ is SimpleFieldValue => {
+  return type !== SchemaType.Nested;
+};
+
+const getRawDisplay = (raw?: Raw, type?: FieldType): string | null => {
+  if (!raw) {
+    return null;
+  }
+
+  if (!isScalarValue(raw, type)) {
+    return JSON.stringify(raw);
+  }
+
+  if (Array.isArray(raw)) {
+    return getRawArrayDisplay(raw);
+  }
+
+  return raw.toString();
+};
+
+const getRawArrayDisplay = (rawArray: string[] | number[]): string => {
   return `[${rawArray.map((raw) => (isNotNumeric(raw) ? `"${raw}"` : raw)).join(', ')}]`;
 };
 
@@ -56,7 +78,7 @@ export const ResultFieldValue: React.FC<Props> = ({ snippet, raw, type, classNam
        */
       dangerouslySetInnerHTML={snippet ? { __html: parseHighlights(snippet) } : undefined} // eslint-disable-line react/no-danger
     >
-      {!!snippet ? null : Array.isArray(raw) ? getRawArrayDisplay(raw) : raw}
+      {!!snippet ? null : getRawDisplay(raw, type)}
     </div>
   );
 };

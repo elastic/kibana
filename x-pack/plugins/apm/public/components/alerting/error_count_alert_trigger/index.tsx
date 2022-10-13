@@ -6,96 +6,106 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { useParams } from 'react-router-dom';
-import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
+import { defaults, omit } from 'lodash';
+import React, { useEffect } from 'react';
+import { CoreStart } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ForLastExpression } from '@kbn/triggers-actions-ui-plugin/public';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { asInteger } from '../../../../common/utils/formatters';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
-import { useEnvironmentsFetcher } from '../../../hooks/use_environments_fetcher';
 import { useFetcher } from '../../../hooks/use_fetcher';
+import { createCallApmApi } from '../../../services/rest/create_call_apm_api';
 import { ChartPreview } from '../chart_preview';
 import { EnvironmentField, IsAboveField, ServiceField } from '../fields';
-import { getAbsoluteTimeRange } from '../helper';
+import { AlertMetadata, getIntervalAndTimeRange, TimeUnit } from '../helper';
 import { ServiceAlertTrigger } from '../service_alert_trigger';
 
-export interface AlertParams {
-  windowSize: number;
-  windowUnit: string;
-  threshold: number;
-  serviceName: string;
-  environment: string;
+export interface RuleParams {
+  windowSize?: number;
+  windowUnit?: TimeUnit;
+  threshold?: number;
+  serviceName?: string;
+  environment?: string;
 }
 
 interface Props {
-  alertParams: AlertParams;
-  setAlertParams: (key: string, value: any) => void;
-  setAlertProperty: (key: string, value: any) => void;
+  ruleParams: RuleParams;
+  metadata?: AlertMetadata;
+  setRuleParams: (key: string, value: any) => void;
+  setRuleProperty: (key: string, value: any) => void;
 }
 
 export function ErrorCountAlertTrigger(props: Props) {
-  const { setAlertParams, setAlertProperty, alertParams } = props;
-  const { serviceName } = useParams<{ serviceName?: string }>();
-  const { urlParams } = useUrlParams();
-  const { start, end } = urlParams;
-  const { environmentOptions } = useEnvironmentsFetcher({
-    serviceName,
-    start,
-    end,
-  });
+  const { services } = useKibana();
+  const { ruleParams, metadata, setRuleParams, setRuleProperty } = props;
 
-  const { threshold, windowSize, windowUnit, environment } = alertParams;
+  useEffect(() => {
+    createCallApmApi(services as CoreStart);
+  }, [services]);
+
+  const params = defaults(
+    { ...omit(metadata, ['start', 'end']), ...ruleParams },
+    {
+      threshold: 25,
+      windowSize: 1,
+      windowUnit: 'm',
+      environment: ENVIRONMENT_ALL.value,
+    }
+  );
 
   const { data } = useFetcher(
     (callApmApi) => {
-      if (windowSize && windowUnit) {
-        return callApmApi({
-          endpoint: 'GET /api/apm/alerts/chart_preview/transaction_error_count',
-          params: {
-            query: {
-              ...getAbsoluteTimeRange(windowSize, windowUnit),
-              environment,
-              serviceName,
+      const { interval, start, end } = getIntervalAndTimeRange({
+        windowSize: params.windowSize,
+        windowUnit: params.windowUnit as TimeUnit,
+      });
+      if (interval && start && end) {
+        return callApmApi(
+          'GET /internal/apm/alerts/chart_preview/transaction_error_count',
+          {
+            params: {
+              query: {
+                environment: params.environment,
+                serviceName: params.serviceName,
+                interval,
+                start,
+                end,
+              },
             },
-          },
-        });
+          }
+        );
       }
     },
-    [windowSize, windowUnit, environment, serviceName]
+    [
+      params.windowSize,
+      params.windowUnit,
+      params.environment,
+      params.serviceName,
+    ]
   );
 
-  const defaults = {
-    threshold: 25,
-    windowSize: 1,
-    windowUnit: 'm',
-    environment: urlParams.environment || ENVIRONMENT_ALL.value,
-  };
-
-  const params = {
-    ...defaults,
-    ...alertParams,
-  };
-
   const fields = [
-    <ServiceField value={serviceName} />,
+    <ServiceField
+      currentValue={params.serviceName}
+      onChange={(value) => setRuleParams('serviceName', value)}
+    />,
     <EnvironmentField
       currentValue={params.environment}
-      options={environmentOptions}
-      onChange={(e) => setAlertParams('environment', e.target.value)}
+      onChange={(value) => setRuleParams('environment', value)}
     />,
     <IsAboveField
       value={params.threshold}
       unit={i18n.translate('xpack.apm.errorCountAlertTrigger.errors', {
         defaultMessage: ' errors',
       })}
-      onChange={(value) => setAlertParams('threshold', value || 0)}
+      onChange={(value) => setRuleParams('threshold', value || 0)}
     />,
     <ForLastExpression
       onChangeWindowSize={(timeWindowSize) =>
-        setAlertParams('windowSize', timeWindowSize || '')
+        setRuleParams('windowSize', timeWindowSize || '')
       }
       onChangeWindowUnit={(timeWindowUnit) =>
-        setAlertParams('windowUnit', timeWindowUnit)
+        setRuleParams('windowUnit', timeWindowUnit)
       }
       timeWindowSize={params.windowSize}
       timeWindowUnit={params.windowUnit}
@@ -109,17 +119,18 @@ export function ErrorCountAlertTrigger(props: Props) {
   const chartPreview = (
     <ChartPreview
       data={data?.errorCountChartPreview}
-      threshold={threshold}
+      threshold={params.threshold}
       yTickFormat={asInteger}
+      uiSettings={services.uiSettings}
     />
   );
 
   return (
     <ServiceAlertTrigger
-      defaults={defaults}
+      defaults={params}
       fields={fields}
-      setAlertParams={setAlertParams}
-      setAlertProperty={setAlertProperty}
+      setRuleParams={setRuleParams}
+      setRuleProperty={setRuleProperty}
       chartPreview={chartPreview}
     />
   );

@@ -17,10 +17,11 @@ interface Props {
   eventId: string;
   hostName: string | null | undefined;
   workingDirectory: string | null | undefined;
+  isDraggable?: boolean;
 }
 
 export const HostWorkingDir = React.memo<Props>(
-  ({ contextId, eventId, hostName, workingDirectory }) => (
+  ({ contextId, eventId, hostName, workingDirectory, isDraggable }) => (
     <>
       <TokensFlexItem grow={false} component="span">
         <DraggableBadge
@@ -28,6 +29,9 @@ export const HostWorkingDir = React.memo<Props>(
           eventId={eventId}
           field="host.name"
           value={hostName}
+          isDraggable={isDraggable}
+          fieldType="keyword"
+          isAggregatable={true}
         />
       </TokensFlexItem>
       {workingDirectory != null && (
@@ -42,6 +46,9 @@ export const HostWorkingDir = React.memo<Props>(
           field="process.working_directory"
           value={workingDirectory}
           iconType="folderOpen"
+          isDraggable={isDraggable}
+          fieldType="keyword"
+          isAggregatable={true}
         />
       </TokensFlexItem>
     </>

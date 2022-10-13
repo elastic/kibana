@@ -10,7 +10,7 @@ import React from 'react';
 
 import * as i18n from './translations';
 
-interface Props {
+export interface TooltipWithKeyboardShortcutProps {
   additionalScreenReaderOnlyContext?: string;
   content: React.ReactNode;
   shortcut: string;
@@ -22,7 +22,7 @@ const TooltipWithKeyboardShortcutComponent = ({
   content,
   shortcut,
   showShortcut,
-}: Props) => (
+}: TooltipWithKeyboardShortcutProps) => (
   <>
     <div data-test-subj="content">{content}</div>
     {additionalScreenReaderOnlyContext !== '' && (

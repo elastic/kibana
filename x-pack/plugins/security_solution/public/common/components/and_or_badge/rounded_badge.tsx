@@ -10,9 +10,9 @@ import React from 'react';
 import styled from 'styled-components';
 
 import * as i18n from './translations';
-import { AndOr } from '.';
+import type { AndOr } from '.';
 
-const RoundBadge = (styled(EuiBadge)`
+const RoundBadge = styled(EuiBadge)`
   align-items: center;
   border-radius: 100%;
   display: inline-flex;
@@ -30,7 +30,7 @@ const RoundBadge = (styled(EuiBadge)`
   .euiBadge__text {
     text-overflow: clip;
   }
-` as unknown) as typeof EuiBadge;
+` as unknown as typeof EuiBadge;
 
 RoundBadge.displayName = 'RoundBadge';
 

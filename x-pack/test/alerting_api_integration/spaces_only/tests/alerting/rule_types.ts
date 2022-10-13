@@ -29,6 +29,7 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
           { id: 'recovered', name: 'Recovered' },
         ],
         default_action_group_id: 'default',
+        does_set_recovery_context: false,
         id: 'test.noop',
         name: 'Test: Noop',
         action_variables: {
@@ -42,7 +43,9 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
         },
         producer: 'alertsFixture',
         minimum_license_required: 'basic',
+        is_exportable: true,
         enabled_in_license: true,
+        rule_task_timeout: '5m',
       });
       expect(Object.keys(authorizedConsumers)).to.contain('alertsFixture');
     });
@@ -113,6 +116,7 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
             { id: 'recovered', name: 'Recovered' },
           ],
           defaultActionGroupId: 'default',
+          doesSetRecoveryContext: false,
           id: 'test.noop',
           name: 'Test: Noop',
           actionVariables: {
@@ -126,7 +130,9 @@ export default function listAlertTypes({ getService }: FtrProviderContext) {
           },
           producer: 'alertsFixture',
           minimumLicenseRequired: 'basic',
+          isExportable: true,
           enabledInLicense: true,
+          ruleTaskTimeout: '5m',
         });
         expect(Object.keys(authorizedConsumers)).to.contain('alertsFixture');
       });

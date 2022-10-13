@@ -5,11 +5,35 @@
  * 2.0.
  */
 
-export {
-  sendRequest,
+export type {
   SendRequestConfig,
   SendRequestResponse,
-  useRequest,
   UseRequestConfig,
+  Privileges,
+  MissingPrivileges,
+  Authorization,
+} from '@kbn/es-ui-shared-plugin/public';
+
+export {
+  sendRequest,
+  useRequest,
   SectionLoading,
-} from '../../../../src/plugins/es_ui_shared/public/';
+  GlobalFlyout,
+  WithPrivileges,
+  AuthorizationProvider,
+  AuthorizationContext,
+  NotAuthorizedSection,
+} from '@kbn/es-ui-shared-plugin/public';
+
+export { Storage } from '@kbn/kibana-utils-plugin/public';
+
+export {
+  KibanaContextProvider,
+  reactRouterNavigate,
+  RedirectAppLinks,
+  KibanaThemeProvider,
+} from '@kbn/kibana-react-plugin/public';
+
+export type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+
+export { APP_WRAPPER_CLASS } from '@kbn/core/public';

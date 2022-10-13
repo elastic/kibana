@@ -15,6 +15,7 @@ interface Props {
   contextId: string;
   endgameParentProcessName: string | null | undefined;
   eventId: string;
+  isDraggable?: boolean;
   processParentPid: number | null | undefined;
   processParentName: string | null | undefined;
   processPpid: number | undefined | null;
@@ -26,6 +27,7 @@ export const ParentProcessDraggable = React.memo<Props>(
     contextId,
     endgameParentProcessName,
     eventId,
+    isDraggable,
     processParentName,
     processParentPid,
     processPpid,
@@ -56,7 +58,10 @@ export const ParentProcessDraggable = React.memo<Props>(
               contextId={contextId}
               eventId={eventId}
               field="process.parent.name"
+              isDraggable={isDraggable}
               value={processParentName}
+              fieldType="keyword"
+              isAggregatable={true}
             />
           </TokensFlexItem>
         )}
@@ -67,7 +72,10 @@ export const ParentProcessDraggable = React.memo<Props>(
               contextId={contextId}
               eventId={eventId}
               field="endgame.parent_process_name"
+              isDraggable={isDraggable}
               value={endgameParentProcessName}
+              fieldType="keyword"
+              isAggregatable={true}
             />
           </TokensFlexItem>
         )}
@@ -78,8 +86,11 @@ export const ParentProcessDraggable = React.memo<Props>(
               contextId={contextId}
               eventId={eventId}
               field="process.parent.pid"
+              isDraggable={isDraggable}
               queryValue={String(processParentPid)}
               value={`(${String(processParentPid)})`}
+              fieldType="keyword"
+              isAggregatable={true}
             />
           </TokensFlexItem>
         )}
@@ -90,8 +101,11 @@ export const ParentProcessDraggable = React.memo<Props>(
               contextId={contextId}
               eventId={eventId}
               field="process.ppid"
+              isDraggable={isDraggable}
               queryValue={String(processPpid)}
               value={`(${String(processPpid)})`}
+              fieldType="keyword"
+              isAggregatable={true}
             />
           </TokensFlexItem>
         )}

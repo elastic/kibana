@@ -7,7 +7,7 @@
 
 import path from 'path';
 import { REPO_ROOT } from '@kbn/utils';
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@kbn/test';
 
 interface CreateTestConfigOptions {
   license: string;
@@ -21,7 +21,9 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     const config = {
       kibana: {
         api: await readConfigFile(path.resolve(REPO_ROOT, 'test/api_integration/config.js')),
-        functional: await readConfigFile(require.resolve('../../../../test/functional/config.js')),
+        functional: await readConfigFile(
+          require.resolve('../../../../test/functional/config.base.js')
+        ),
       },
       xpack: {
         api: await readConfigFile(require.resolve('../../api_integration/config.ts')),
@@ -39,13 +41,10 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         retry: config.xpack.api.get('services.retry'),
         esArchiver: config.kibana.functional.get('services.esArchiver'),
         kibanaServer: config.kibana.functional.get('services.kibanaServer'),
+        spaces: config.xpack.api.get('services.spaces'),
       },
       junit: {
         reportName: 'X-Pack Spaces API Integration Tests -- ' + name,
-      },
-
-      esArchiver: {
-        directory: path.join(__dirname, 'fixtures', 'es_archiver'),
       },
 
       esTestCluster: {
@@ -65,7 +64,9 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           '--status.allowAnonymous=false',
           '--server.xsrf.disableProtection=true',
           `--plugin-path=${path.join(__dirname, 'fixtures', 'spaces_test_plugin')}`,
-          ...disabledPlugins.map((key) => `--xpack.${key}.enabled=false`),
+          ...disabledPlugins
+            .filter((k) => k !== 'security')
+            .map((key) => `--xpack.${key}.enabled=false`),
         ],
       },
     };

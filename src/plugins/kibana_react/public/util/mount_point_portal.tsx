@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import React, { useRef, useEffect, useState, Component } from 'react';
 import ReactDOM from 'react-dom';
-import { MountPoint } from 'kibana/public';
+import { MountPoint } from '@kbn/core/public';
 import { useIfMounted } from './utils';
 
 interface MountPointPortalProps {
@@ -60,12 +60,12 @@ export const MountPointPortal: React.FC<MountPointPortalProps> = ({ children, se
   }
 };
 
-class MountPointPortalErrorBoundary extends Component<{}, { error?: any }> {
+class MountPointPortalErrorBoundary extends Component<{}, { error?: unknown }> {
   state = {
     error: undefined,
   };
 
-  static getDerivedStateFromError(error: any) {
+  static getDerivedStateFromError(error: unknown) {
     return { error };
   }
 

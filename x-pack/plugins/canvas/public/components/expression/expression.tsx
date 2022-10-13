@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, MutableRefObject } from 'react';
+import React, { FC, useRef } from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiPanel,
@@ -17,27 +17,57 @@ import {
   EuiLink,
   EuiPortal,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { monaco } from '@kbn/monaco';
+
 // @ts-expect-error
 import { Shortcuts } from 'react-shortcuts';
-import { ComponentStrings } from '../../../i18n';
+
+import {
+  ExpressionInputEditorRef,
+  OnExpressionInputEditorDidMount,
+} from '@kbn/presentation-util-plugin/public';
 import { ExpressionInput } from '../expression_input';
 import { ToolTipShortcut } from '../tool_tip_shortcut';
 import { ExpressionFunction } from '../../../types';
-import { FormState } from './';
+import { FormState } from '.';
 
-const { Expression: strings } = ComponentStrings;
+const strings = {
+  getCancelButtonLabel: () =>
+    i18n.translate('xpack.canvas.expression.cancelButtonLabel', {
+      defaultMessage: 'Cancel',
+    }),
+  getCloseButtonLabel: () =>
+    i18n.translate('xpack.canvas.expression.closeButtonLabel', {
+      defaultMessage: 'Close',
+    }),
+  getLearnLinkText: () =>
+    i18n.translate('xpack.canvas.expression.learnLinkText', {
+      defaultMessage: 'Learn expression syntax',
+    }),
+  getMaximizeButtonLabel: () =>
+    i18n.translate('xpack.canvas.expression.maximizeButtonLabel', {
+      defaultMessage: 'Maximize editor',
+    }),
+  getMinimizeButtonLabel: () =>
+    i18n.translate('xpack.canvas.expression.minimizeButtonLabel', {
+      defaultMessage: 'Minimize Editor',
+    }),
+  getRunButtonLabel: () =>
+    i18n.translate('xpack.canvas.expression.runButtonLabel', {
+      defaultMessage: 'Run',
+    }),
+  getRunTooltip: () =>
+    i18n.translate('xpack.canvas.expression.runTooltip', {
+      defaultMessage: 'Run the expression',
+    }),
+};
 
-const { useRef } = React;
-
-const shortcut = (
-  ref: MutableRefObject<ExpressionInput | null>,
-  cmd: string,
-  callback: () => void
-) => (
+const shortcut = (ref: ExpressionInputEditorRef, cmd: string, callback: () => void) => (
   <Shortcuts
     name="EXPRESSION"
     handler={(command: string) => {
-      const isInputActive = ref.current && ref.current.editor && ref.current.editor.hasTextFocus();
+      const isInputActive = ref.current && ref.current && ref.current.hasTextFocus();
       if (isInputActive && command === cmd) {
         callback();
       }
@@ -69,7 +99,7 @@ export const Expression: FC<Props> = ({
   isCompact,
   toggleCompactView,
 }) => {
-  const refExpressionInput = useRef<null | ExpressionInput>(null);
+  const refExpressionInput: ExpressionInputEditorRef = useRef(null);
 
   const handleRun = () => {
     setExpression(formState.expression);
@@ -77,6 +107,23 @@ export const Expression: FC<Props> = ({
     if (!isCompact && !error) {
       toggleCompactView();
     }
+  };
+
+  const onEditorDidMount: OnExpressionInputEditorDidMount = (editor) => {
+    /*
+      To enable the CMD+ENTER keybinding, which is running the expression,
+      it is necessary to disable the `-editor.action.insertLineAfter`,
+      which has the same keybinding in the Monaco editor.
+      The only available way is adding the empty dynamic keybinding
+      (by using private monaco API, proposed by the monaco team), which is bubbling the event.
+    */
+    // @ts-expect-error
+    editor?._standaloneKeybindingService.addDynamicKeybinding(
+      '-editor.action.insertLineAfter',
+      // eslint-disable-next-line no-bitwise
+      monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
+      () => {}
+    );
   };
 
   const expressionPanel = (
@@ -95,12 +142,13 @@ export const Expression: FC<Props> = ({
       {/* Error code below is to pass a non breaking space so the editor does not jump */}
 
       <ExpressionInput
-        ref={refExpressionInput}
         isCompact={isCompact}
-        functionDefinitions={functionDefinitions}
+        expressionFunctions={functionDefinitions}
         error={error ? error : `\u00A0`}
-        value={formState.expression}
+        expression={formState.expression}
         onChange={updateValue}
+        onEditorDidMount={onEditorDidMount}
+        editorRef={refExpressionInput}
       />
       <div className="canvasExpression__settings">
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -142,7 +190,7 @@ export const Expression: FC<Props> = ({
                 </EuiLink>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty iconType="fullScreen" onClick={toggleCompactView} size="xs">
+                <EuiButtonEmpty iconType="fullScreen" onClick={toggleCompactView} size="s">
                   {isCompact ? strings.getMaximizeButtonLabel() : strings.getMinimizeButtonLabel()}
                 </EuiButtonEmpty>
               </EuiFlexItem>

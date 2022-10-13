@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Anomalies, InfluencerInput, CriteriaFields } from '../types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { Anomalies, InfluencerInput, CriteriaFields } from '../types';
 import { KibanaServices } from '../../../lib/kibana';
 
 export interface Body {
@@ -19,6 +20,7 @@ export interface Body {
   dateFormatTz: string;
   maxRecords: number;
   maxExamples: number;
+  influencersFilterQuery?: estypes.QueryDslQueryContainer;
 }
 
 export const anomaliesTableData = async (body: Body, signal: AbortSignal): Promise<Anomalies> => {

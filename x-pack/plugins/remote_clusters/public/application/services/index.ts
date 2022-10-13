@@ -13,12 +13,7 @@ export { setBreadcrumbs } from './breadcrumb';
 
 export { redirect } from './redirect';
 
-export {
-  setUserHasLeftApp,
-  getUserHasLeftApp,
-  registerRouter,
-  getRouter,
-  AppRouter,
-} from './routing';
+export type { AppRouter } from './routing';
+export { setUserHasLeftApp, getUserHasLeftApp, registerRouter, getRouter } from './routing';
 
 export { trackUiMetric, METRIC_TYPE } from './ui_metric';

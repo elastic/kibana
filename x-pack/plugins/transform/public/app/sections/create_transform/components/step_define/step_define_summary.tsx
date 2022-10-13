@@ -7,7 +7,7 @@
 
 import React, { Fragment, FC } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import { EuiBadge, EuiCodeBlock, EuiForm, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
@@ -56,14 +56,14 @@ export const StepDefineSummary: FC<Props> = ({
   const pivotQuery = getPivotQuery(searchQuery);
 
   const previewRequest = getPreviewTransformRequestBody(
-    searchItems.indexPattern.title,
+    searchItems.dataView.title,
     pivotQuery,
     partialPreviewRequest,
     runtimeMappings
   );
 
   const pivotPreviewProps = usePivotData(
-    searchItems.indexPattern.title,
+    searchItems.dataView.title,
     pivotQuery,
     validationStatus,
     partialPreviewRequest,
@@ -88,11 +88,11 @@ export const StepDefineSummary: FC<Props> = ({
         {searchItems.savedSearch === undefined && (
           <Fragment>
             <EuiFormRow
-              label={i18n.translate('xpack.transform.stepDefineSummary.indexPatternLabel', {
-                defaultMessage: 'Index pattern',
+              label={i18n.translate('xpack.transform.stepDefineSummary.dataViewLabel', {
+                defaultMessage: 'Data view',
               })}
             >
-              <span>{searchItems.indexPattern.title}</span>
+              <span>{searchItems.dataView.title}</span>
             </EuiFormRow>
             {typeof searchString === 'string' && (
               <EuiFormRow

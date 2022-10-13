@@ -5,26 +5,28 @@
  * 2.0.
  */
 
+import { AwaitedProperties } from '@kbn/utility-types';
 import sinon from 'sinon';
 import { CANVAS_TYPE } from '../../../common/lib/constants';
 import { initializeUpdateWorkpadRoute, initializeUpdateWorkpadAssetsRoute } from './update';
-import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from 'src/core/server';
-import { savedObjectsClientMock, httpServerMock } from 'src/core/server/mocks';
+import { kibanaResponseFactory, RequestHandler, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { savedObjectsClientMock, httpServerMock, coreMock } from '@kbn/core/server/mocks';
 import { workpads } from '../../../__fixtures__/workpads';
 import { okResponse } from '../ok_response';
 import { getMockedRouterDeps } from '../test_helpers';
+import { workpadRouteContextMock, MockWorkpadRouteContext } from '../../mocks';
 
-const mockRouteContext = ({
+const mockRouteContext = {
   core: {
     savedObjects: {
       client: savedObjectsClientMock.create(),
     },
   },
-} as unknown) as RequestHandlerContext;
+  canvas: workpadRouteContextMock.create(),
+} as unknown as AwaitedProperties<MockWorkpadRouteContext>;
 
 const workpad = workpads[0];
 const now = new Date();
-const nowIso = now.toISOString();
 
 jest.mock('uuid/v4', () => jest.fn().mockReturnValue('123abc'));
 
@@ -48,7 +50,7 @@ describe('PUT workpad', () => {
 
   it(`returns 200 ok when the workpad is updated`, async () => {
     const updatedWorkpad = { name: 'new name' };
-    const { id, ...workpadAttributes } = workpad;
+    const { id } = workpad;
 
     const request = httpServerMock.createKibanaRequest({
       method: 'put',
@@ -59,33 +61,17 @@ describe('PUT workpad', () => {
       body: updatedWorkpad,
     });
 
-    const savedObjectsClient = savedObjectsClientMock.create();
-    savedObjectsClient.get.mockResolvedValueOnce({
-      id,
-      type: CANVAS_TYPE,
-      attributes: workpadAttributes as any,
-      references: [],
-    });
+    mockRouteContext.canvas.workpad.update.mockResolvedValue(true);
 
-    mockRouteContext.core.savedObjects.client = savedObjectsClient;
-
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+    const response = await routeHandler(
+      coreMock.createCustomRequestHandlerContext(mockRouteContext),
+      request,
+      kibanaResponseFactory
+    );
 
     expect(response.status).toBe(200);
     expect(response.payload).toEqual(okResponse);
-    expect(mockRouteContext.core.savedObjects.client.create).toBeCalledWith(
-      CANVAS_TYPE,
-      {
-        ...workpadAttributes,
-        ...updatedWorkpad,
-        '@timestamp': nowIso,
-        '@created': workpad['@created'],
-      },
-      {
-        overwrite: true,
-        id,
-      }
-    );
+    expect(mockRouteContext.canvas.workpad.update).toBeCalledWith(id, updatedWorkpad);
   });
 
   it(`returns not found if existing workpad is not found`, async () => {
@@ -98,13 +84,15 @@ describe('PUT workpad', () => {
       body: {},
     });
 
-    (mockRouteContext.core.savedObjects.client.get as jest.Mock).mockImplementationOnce(() => {
-      throw mockRouteContext.core.savedObjects.client.errors.createGenericNotFoundError(
-        'not found'
-      );
+    mockRouteContext.canvas.workpad.update.mockImplementationOnce(() => {
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError('not found');
     });
 
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+    const response = await routeHandler(
+      coreMock.createCustomRequestHandlerContext(mockRouteContext),
+      request,
+      kibanaResponseFactory
+    );
 
     expect(response.status).toBe(404);
   });
@@ -119,21 +107,15 @@ describe('PUT workpad', () => {
       body: {},
     });
 
-    const savedObjectsClient = savedObjectsClientMock.create();
-    savedObjectsClient.get.mockResolvedValueOnce({
-      id: 'some-id',
-      type: CANVAS_TYPE,
-      attributes: {},
-      references: [],
+    mockRouteContext.canvas.workpad.update.mockImplementationOnce(() => {
+      throw SavedObjectsErrorHelpers.createBadRequestError('bad request');
     });
 
-    mockRouteContext.core.savedObjects.client = savedObjectsClient;
-
-    (mockRouteContext.core.savedObjects.client.create as jest.Mock).mockImplementationOnce(() => {
-      throw mockRouteContext.core.savedObjects.client.errors.createBadRequestError('bad request');
-    });
-
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+    const response = await routeHandler(
+      coreMock.createCustomRequestHandlerContext(mockRouteContext),
+      request,
+      kibanaResponseFactory
+    );
 
     expect(response.status).toBe(400);
   });
@@ -182,27 +164,22 @@ describe('update assets', () => {
       body: assets,
     });
 
-    (mockRouteContext.core.savedObjects.client.get as jest.Mock).mockResolvedValueOnce({
+    mockRouteContext.canvas.workpad.update.mockResolvedValueOnce({
       id,
       type: CANVAS_TYPE,
       attributes: attributes as any,
       references: [],
     });
 
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+    const response = await routeHandler(
+      coreMock.createCustomRequestHandlerContext(mockRouteContext),
+      request,
+      kibanaResponseFactory
+    );
     expect(response.status).toBe(200);
 
-    expect(mockRouteContext.core.savedObjects.client.create).toBeCalledWith(
-      CANVAS_TYPE,
-      {
-        ...attributes,
-        '@timestamp': nowIso,
-        assets,
-      },
-      {
-        id,
-        overwrite: true,
-      }
-    );
+    expect(mockRouteContext.canvas.workpad.update).toBeCalledWith(id, {
+      assets,
+    });
   });
 });

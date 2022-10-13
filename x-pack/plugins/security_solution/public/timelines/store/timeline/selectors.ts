@@ -7,10 +7,11 @@
 
 import { createSelector } from 'reselect';
 
-import { State } from '../../../common/store/types';
+export { getManageTimelineById } from '@kbn/timelines-plugin/public';
+import type { State } from '../../../common/store/types';
 
-import { TimelineModel } from './model';
-import { AutoSavedWarningMsg, InsertTimeline, TimelineById } from './types';
+import type { TimelineModel } from './model';
+import type { AutoSavedWarningMsg, InsertTimeline, TimelineById } from './types';
 
 const selectTimelineById = (state: State): TimelineById => state.timeline.timelineById;
 
@@ -37,8 +38,6 @@ export const getShowCallOutUnauthorizedMsg = () =>
     selectCallOutUnauthorizedMsg,
     (showCallOutUnauthorizedMsg) => showCallOutUnauthorizedMsg
   );
-
-export const getTimelines = () => timelineByIdSelector;
 
 export const getTimelineByIdSelector = () => createSelector(selectTimeline, (timeline) => timeline);
 

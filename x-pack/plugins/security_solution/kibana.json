@@ -1,5 +1,9 @@
 {
   "id": "securitySolution",
+  "owner": {
+    "name": "Security solution",
+    "githubTeam": "security-solution"
+  },
   "version": "8.0.0",
   "extraPublicDirs": ["common"],
   "kibanaVersion": "kibana",
@@ -8,18 +12,29 @@
     "actions",
     "alerting",
     "cases",
+    "cloud",
+    "cloudSecurityPosture",
+    "dashboard",
     "data",
-    "dataEnhanced",
     "embeddable",
+    "eventLog",
     "features",
-    "taskManager",
     "inspector",
+    "kubernetesSecurity",
+    "lens",
     "licensing",
     "maps",
+    "ruleRegistry",
+    "sessionView",
+    "taskManager",
+    "threatIntelligence",
+    "timelines",
     "triggersActionsUi",
-    "uiActions"
+    "uiActions",
+    "unifiedSearch"
   ],
   "optionalPlugins": [
+    "cloudExperiments",
     "encryptedSavedObjects",
     "fleet",
     "ml",
@@ -30,9 +45,20 @@
     "lists",
     "home",
     "telemetry",
-    "telemetryManagementSection"
+    "dataViewFieldEditor",
+    "osquery",
+    "savedObjectsTaggingOss"
   ],
   "server": true,
   "ui": true,
-  "requiredBundles": ["esUiShared", "fleet", "kibanaUtils", "kibanaReact", "lists", "ml"]
+  "requiredBundles": [
+    "esUiShared",
+    "fleet",
+    "kibanaUtils",
+    "kibanaReact",
+    "usageCollection",
+    "lists",
+    "ml",
+    "unifiedSearch"
+  ]
 }

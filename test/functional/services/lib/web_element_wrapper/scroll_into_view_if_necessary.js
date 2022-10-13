@@ -27,7 +27,7 @@
  * SOFTWARE.
  */
 
-export function scrollIntoViewIfNecessary(target, fixedHeaderHeight) {
+export function scrollIntoViewIfNecessary(target, fixedHeaderHeight, fixedFooterHeight) {
   var rootScroller = document.scrollingElement || document.documentElement;
   if (!rootScroller) {
     throw new Error('Unable to find document.scrollingElement or document.documentElement');
@@ -62,5 +62,12 @@ export function scrollIntoViewIfNecessary(target, fixedHeaderHeight) {
 
   if (additionalScrollNecessary > 0) {
     rootScroller.scrollTop = rootScroller.scrollTop - additionalScrollNecessary;
+  }
+
+  if (fixedFooterHeight) {
+    var bottomOfVisibility = viewportHeight - fixedFooterHeight;
+    if (bottomOfVisibility < boundingRect.bottom) {
+      rootScroller.scrollTop = rootScroller.scrollTop + fixedFooterHeight;
+    }
   }
 }

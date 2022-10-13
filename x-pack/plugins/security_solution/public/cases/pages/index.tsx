@@ -5,46 +5,152 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useRef } from 'react';
+import { useDispatch } from 'react-redux';
+import type { CaseViewRefreshPropInterface } from '@kbn/cases-plugin/common';
+import { TimelineId } from '../../../common/types/timeline';
 
-import { Route, Switch } from 'react-router-dom';
-import { CaseDetailsPage } from './case_details';
-import { CasesPage } from './case';
-import { CreateCasePage } from './create_case';
-import { ConfigureCasesPage } from './configure_cases';
+import { getRuleDetailsUrl, useFormatUrl } from '../../common/components/link_to';
 
-const casesPagePath = '';
-const caseDetailsPagePath = `${casesPagePath}/:detailName`;
-const subCaseDetailsPagePath = `${caseDetailsPagePath}/sub-cases/:subCaseId`;
-const caseDetailsPagePathWithCommentId = `${caseDetailsPagePath}/:commentId`;
-const subCaseDetailsPagePathWithCommentId = `${subCaseDetailsPagePath}/:commentId`;
-const createCasePagePath = `${casesPagePath}/create`;
-const configureCasesPagePath = `${casesPagePath}/configure`;
+import { useGetUserCasesPermissions, useKibana, useNavigation } from '../../common/lib/kibana';
+import { APP_ID, CASES_PATH, SecurityPageName } from '../../../common/constants';
+import { timelineActions } from '../../timelines/store/timeline';
+import { useSourcererDataView } from '../../common/containers/sourcerer';
+import { SourcererScopeName } from '../../common/store/sourcerer/model';
+import { CaseDetailsRefreshContext } from '../../common/components/endpoint/host_isolation/endpoint_host_isolation_cases_context';
+import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
+import { getEndpointDetailsPath } from '../../management/common/routing';
+import { SpyRoute } from '../../common/utils/route/spy_routes';
+import { useInsertTimeline } from '../components/use_insert_timeline';
+import * as timelineMarkdownPlugin from '../../common/components/markdown_editor/plugins/timeline';
+import { DetailsPanel } from '../../timelines/components/side_panel';
+import { useFetchAlertData } from './use_fetch_alert_data';
 
-const CaseContainerComponent: React.FC = () => (
-  <Switch>
-    <Route path={createCasePagePath}>
-      <CreateCasePage />
-    </Route>
-    <Route path={configureCasesPagePath}>
-      <ConfigureCasesPage />
-    </Route>
-    <Route exact path={subCaseDetailsPagePathWithCommentId}>
-      <CaseDetailsPage />
-    </Route>
-    <Route exact path={caseDetailsPagePathWithCommentId}>
-      <CaseDetailsPage />
-    </Route>
-    <Route exact path={subCaseDetailsPagePath}>
-      <CaseDetailsPage />
-    </Route>
-    <Route path={caseDetailsPagePath}>
-      <CaseDetailsPage />
-    </Route>
-    <Route strict exact path={casesPagePath}>
-      <CasesPage />
-    </Route>
-  </Switch>
-);
+const TimelineDetailsPanel = () => {
+  const { browserFields, runtimeMappings } = useSourcererDataView(SourcererScopeName.detections);
+  return (
+    <DetailsPanel
+      browserFields={browserFields}
+      entityType="events"
+      isFlyoutView
+      runtimeMappings={runtimeMappings}
+      timelineId={TimelineId.casePage}
+    />
+  );
+};
 
-export const Case = React.memo(CaseContainerComponent);
+const CaseContainerComponent: React.FC = () => {
+  const { cases } = useKibana().services;
+  const { getAppUrl, navigateTo } = useNavigation();
+  const userCasesPermissions = useGetUserCasesPermissions();
+  const dispatch = useDispatch();
+  const { formatUrl: detectionsFormatUrl, search: detectionsUrlSearch } = useFormatUrl(
+    SecurityPageName.rules
+  );
+
+  const getDetectionsRuleDetailsHref = useCallback(
+    (ruleId) => detectionsFormatUrl(getRuleDetailsUrl(ruleId ?? '', detectionsUrlSearch)),
+    [detectionsFormatUrl, detectionsUrlSearch]
+  );
+
+  const showAlertDetails = useCallback(
+    (alertId: string, index: string) => {
+      dispatch(
+        timelineActions.toggleDetailPanel({
+          panelView: 'eventDetail',
+          timelineId: TimelineId.casePage,
+          params: {
+            eventId: alertId,
+            indexName: index,
+          },
+        })
+      );
+    },
+    [dispatch]
+  );
+
+  const endpointDetailsHref = (endpointId: string) =>
+    getAppUrl({
+      path: getEndpointDetailsPath({
+        name: 'endpointActivityLog',
+        selected_endpoint: endpointId,
+      }),
+    });
+
+  const onComponentInitialized = useCallback(() => {
+    dispatch(
+      timelineActions.createTimeline({
+        id: TimelineId.casePage,
+        columns: [],
+        dataViewId: null,
+        indexNames: [],
+        expandedDetail: {},
+        show: false,
+      })
+    );
+  }, [dispatch]);
+
+  const refreshRef = useRef<CaseViewRefreshPropInterface>(null);
+
+  return (
+    <SecuritySolutionPageWrapper noPadding>
+      <CaseDetailsRefreshContext.Provider value={refreshRef}>
+        {cases.ui.getCases({
+          basePath: CASES_PATH,
+          owner: [APP_ID],
+          features: {
+            metrics: ['alerts.count', 'alerts.users', 'alerts.hosts', 'connectors', 'lifespan'],
+            alerts: { isExperimental: true },
+          },
+          refreshRef,
+          onComponentInitialized,
+          actionsNavigation: {
+            href: endpointDetailsHref,
+            onClick: (endpointId: string, e) => {
+              if (e) {
+                e.preventDefault();
+              }
+              return navigateTo({
+                path: getEndpointDetailsPath({
+                  name: 'endpointActivityLog',
+                  selected_endpoint: endpointId,
+                }),
+              });
+            },
+          },
+          ruleDetailsNavigation: {
+            href: getDetectionsRuleDetailsHref,
+            onClick: async (ruleId: string | null | undefined, e) => {
+              if (e) {
+                e.preventDefault();
+              }
+              return navigateTo({
+                deepLinkId: SecurityPageName.rules,
+                path: getRuleDetailsUrl(ruleId ?? ''),
+              });
+            },
+          },
+          showAlertDetails,
+          timelineIntegration: {
+            editor_plugins: {
+              parsingPlugin: timelineMarkdownPlugin.parser,
+              processingPluginRenderer: timelineMarkdownPlugin.renderer,
+              uiPlugin: timelineMarkdownPlugin.plugin,
+            },
+            hooks: {
+              useInsertTimeline,
+            },
+            ui: {
+              renderTimelineDetailsPanel: TimelineDetailsPanel,
+            },
+          },
+          useFetchAlertData,
+          permissions: userCasesPermissions,
+        })}
+      </CaseDetailsRefreshContext.Provider>
+      <SpyRoute pageName={SecurityPageName.case} />
+    </SecuritySolutionPageWrapper>
+  );
+};
+
+export const Cases = React.memo(CaseContainerComponent);

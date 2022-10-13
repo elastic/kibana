@@ -1,0 +1,14 @@
+{
+  "id": "responseStream",
+  "kibanaVersion": "kibana",
+  "version": "0.0.1",
+  "server": true,
+  "ui": true,
+  "owner": {
+    "name": "ML UI",
+    "githubTeam": "ml-ui"
+  },
+  "requiredPlugins": ["developerExamples"],
+  "optionalPlugins": [],
+  "requiredBundles": ["kibanaReact"]
+}

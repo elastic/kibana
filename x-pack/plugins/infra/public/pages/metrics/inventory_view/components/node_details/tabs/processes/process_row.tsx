@@ -21,8 +21,8 @@ import {
   EuiButton,
   EuiSpacer,
 } from '@elastic/eui';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { AutoSizer } from '../../../../../../../components/auto_sizer';
-import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common';
 import { Process } from './types';
 import { ProcessRowCharts } from './process_row_charts';
 
@@ -149,6 +149,6 @@ const ExpandedRowCell = euiStyled(EuiTableRowCell).attrs({
   colSpan: 6,
 })<{ commandHeight: number }>`
   height: ${(props) => props.commandHeight + 240}px;
-  padding: 0 ${(props) => props.theme.eui.paddingSizes.m};
+  padding: 0 ${(props) => props.theme.eui.euiSizeM};
   background-color: ${(props) => props.theme.eui.euiColorLightestShade};
 `;

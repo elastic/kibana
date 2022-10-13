@@ -1,0 +1,53 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+import React from 'react';
+import { shallow } from 'enzyme';
+import { Route, RouteProps } from 'react-router-dom';
+import { createSearchSessionMock } from '../__mocks__/search_session';
+import { discoverServiceMock as mockDiscoverServices } from '../__mocks__/services';
+import { discoverRouter } from './discover_router';
+import { DiscoverMainRoute } from './main';
+import { SingleDocRoute } from './doc';
+import { ContextAppRoute } from './context';
+
+const pathMap: Record<string, never> = {};
+
+describe('Discover router', () => {
+  const props = {
+    isDev: false,
+  };
+  beforeAll(() => {
+    const { history } = createSearchSessionMock();
+    const component = shallow(discoverRouter(mockDiscoverServices, history, props.isDev));
+    component.find(Route).forEach((route) => {
+      const routeProps = route.props() as RouteProps;
+      const path = routeProps.path;
+      const children = routeProps.children;
+      if (typeof path === 'string') {
+        // @ts-expect-error
+        pathMap[path] = children;
+      }
+    });
+  });
+
+  it('should show DiscoverMainRoute component for / route', () => {
+    expect(pathMap['/']).toMatchObject(<DiscoverMainRoute {...props} />);
+  });
+
+  it('should show DiscoverMainRoute component for /view/:id route', () => {
+    expect(pathMap['/view/:id']).toMatchObject(<DiscoverMainRoute {...props} />);
+  });
+
+  it('should show SingleDocRoute component for /doc/:dataViewId/:index route', () => {
+    expect(pathMap['/doc/:dataViewId/:index']).toMatchObject(<SingleDocRoute />);
+  });
+
+  it('should show ContextAppRoute component for /context/:dataViewId/:id route', () => {
+    expect(pathMap['/context/:dataViewId/:id']).toMatchObject(<ContextAppRoute />);
+  });
+});

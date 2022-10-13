@@ -16,25 +16,27 @@ import {
 } from '../../common/suites/resolve';
 
 const {
-  SPACE_1: { spaceId: SPACE_1_ID },
+  SPACE_2: { spaceId: SPACE_2_ID },
 } = SPACES;
-const { fail404 } = testCaseFailures;
+const { fail400, fail404 } = testCaseFailures;
 
 const createTestCases = (spaceId: string) => {
   // for each permitted (non-403) outcome, if failure !== undefined then we expect
   // to receive an error; otherwise, we expect to receive a success result
   const normalTypes = [
     CASES.EXACT_MATCH,
-    { ...CASES.ALIAS_MATCH, ...fail404(spaceId !== SPACE_1_ID) },
+    { ...CASES.ALIAS_MATCH, ...fail404(spaceId === SPACE_2_ID) }, // the alias exists in the default space and space_1, but not space_2
     {
       ...CASES.CONFLICT,
-      ...(spaceId !== SPACE_1_ID && { expectedOutcome: 'exactMatch' as 'exactMatch' }),
+      // the default expectedOutcome for this case is 'conflict'; the alias exists in the default space and space_1, but not space_2
+      // if we are testing in space_2, the expectedOutcome should be 'exactMatch' instead
+      ...(spaceId === SPACE_2_ID && { expectedOutcome: 'exactMatch' as const }),
     },
     { ...CASES.DISABLED, ...fail404() },
     { ...CASES.DOES_NOT_EXIST, ...fail404() },
   ];
-  const hiddenType = [{ ...CASES.HIDDEN, ...fail404() }];
-  const allTypes = normalTypes.concat(hiddenType);
+  const hiddenType = [{ ...CASES.HIDDEN, ...fail400() }];
+  const allTypes = [...normalTypes, ...hiddenType];
   return { normalTypes, hiddenType, allTypes };
 };
 

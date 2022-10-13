@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { ApplicationSetup, FatalErrorsSetup, HttpSetup } from 'src/core/public';
+import type { ApplicationSetup, FatalErrorsSetup, HttpSetup } from '@kbn/core/public';
 
 import { AUTH_URL_HASH_QUERY_STRING_PARAMETER } from '../../../common/constants';
-import { parseNext } from '../../../common/parse_next';
 
 interface CreateDeps {
   application: ApplicationSetup;
@@ -46,6 +45,9 @@ export const captureURLApp = Object.freeze({
       appRoute: '/internal/security/capture-url',
       async mount() {
         try {
+          // This is an async import because it requires `url`, which is a sizable dependency.
+          // Otherwise this becomes part of the "page load bundle".
+          const { parseNext } = await import('../../../common/parse_next');
           const url = new URL(
             parseNext(window.location.href, http.basePath.serverBasePath),
             window.location.origin

@@ -11,7 +11,9 @@ import { AggType, AggTypeConfig } from '../agg_type';
 import { AggParamType } from '../param_types/agg';
 import { AggConfig } from '../agg_config';
 import { METRIC_TYPES } from './metric_agg_types';
-import { FieldTypes } from '../param_types';
+import { BaseParamType, FieldTypes } from '../param_types';
+import { AggGroupNames } from '../agg_groups';
+import { createMetricFilter } from './lib/create_filter';
 
 export interface IMetricAggConfig extends AggConfig {
   type: InstanceType<typeof MetricAggType>;
@@ -21,6 +23,7 @@ export interface MetricAggParam<TMetricAggConfig extends AggConfig>
   extends AggParamType<TMetricAggConfig> {
   filterFieldTypes?: FieldTypes;
   onlyAggregatable?: boolean;
+  scriptable?: boolean;
 }
 
 const metricType = 'metrics';
@@ -29,6 +32,7 @@ interface MetricAggTypeConfig<TMetricAggConfig extends AggConfig>
   extends AggTypeConfig<TMetricAggConfig, MetricAggParam<TMetricAggConfig>> {
   isScalable?: () => boolean;
   subtype?: string;
+  enableEmptyAsNull?: boolean;
 }
 
 // TODO need to make a more explicit interface for this
@@ -45,21 +49,49 @@ export class MetricAggType<TMetricAggConfig extends AggConfig = IMetricAggConfig
   getKey = () => {};
 
   constructor(config: MetricAggTypeConfig<TMetricAggConfig>) {
+    if (!config.createFilter) {
+      config.createFilter = createMetricFilter;
+    }
     super(config);
+
+    this.params.push(
+      new BaseParamType({
+        name: 'timeShift',
+        type: 'string',
+        write: () => {},
+      }) as MetricAggParam<TMetricAggConfig>
+    );
+
+    if (config.enableEmptyAsNull) {
+      this.params.push(
+        new BaseParamType({
+          name: 'emptyAsNull',
+          type: 'boolean',
+          default: false,
+          write: () => {},
+        }) as MetricAggParam<TMetricAggConfig>
+      );
+    }
 
     this.getValue =
       config.getValue ||
       ((agg, bucket) => {
         // Metric types where an empty set equals `zero`
-        const isSettableToZero = [METRIC_TYPES.CARDINALITY, METRIC_TYPES.SUM].includes(
-          agg.type.name as METRIC_TYPES
-        );
+        const isSettableToZero = [
+          METRIC_TYPES.CARDINALITY,
+          METRIC_TYPES.VALUE_COUNT,
+          METRIC_TYPES.SUM,
+        ].includes(agg.type.name as METRIC_TYPES);
 
         // Return proper values when no buckets are present
         // `Count` handles empty sets properly
-        if (!bucket[agg.id] && isSettableToZero) return 0;
+        if (!bucket[agg.id] && isSettableToZero && !agg.params.emptyAsNull) return 0;
 
-        return bucket[agg.id] && bucket[agg.id].value;
+        const val = bucket[agg.id] && bucket[agg.id].value;
+        if (val === 0 && agg.params.emptyAsNull) {
+          return null;
+        }
+        return val;
       });
 
     this.subtype =
@@ -69,6 +101,14 @@ export class MetricAggType<TMetricAggConfig extends AggConfig = IMetricAggConfig
       });
 
     this.isScalable = config.isScalable || (() => false);
+
+    // split at this point if there are time shifts and this is the first metric
+    this.splitForTimeShift = (agg, aggs) =>
+      aggs.hasTimeShifts() &&
+      aggs.byType(AggGroupNames.Metrics)[0] === agg &&
+      !aggs
+        .byType(AggGroupNames.Buckets)
+        .some((bucketAgg) => bucketAgg.type.splitForTimeShift(bucketAgg, aggs));
   }
 }
 

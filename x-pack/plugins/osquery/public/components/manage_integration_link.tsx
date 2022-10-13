@@ -6,48 +6,42 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiFlexItem } from '@elastic/eui';
 
-import { pagePathGetters } from '../../../fleet/public';
-
+import { INTEGRATIONS_PLUGIN_ID } from '@kbn/fleet-plugin/common';
+import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { useKibana, isModifiedEvent, isLeftClickEvent } from '../common/lib/kibana';
-import { useOsqueryIntegration } from '../common/hooks';
+import { OSQUERY_INTEGRATION_NAME } from '../../common';
 
 const ManageIntegrationLinkComponent = () => {
   const {
     application: { getUrlForApp, navigateToApp },
   } = useKibana().services;
-  const { data: osqueryIntegration } = useOsqueryIntegration();
 
-  const integrationHref = useMemo(() => {
-    if (osqueryIntegration) {
-      return getUrlForApp('fleet', {
-        path:
-          '#' +
-          pagePathGetters.integration_details_policies({
-            pkgkey: `${osqueryIntegration.name}-${osqueryIntegration.version}`,
-          }),
-      });
-    }
-  }, [getUrlForApp, osqueryIntegration]);
+  const integrationHref = useMemo(
+    () =>
+      getUrlForApp(INTEGRATIONS_PLUGIN_ID, {
+        path: pagePathGetters.integration_details_policies({
+          pkgkey: OSQUERY_INTEGRATION_NAME,
+        })[1],
+      }),
+    [getUrlForApp]
+  );
 
   const integrationClick = useCallback(
     (event) => {
       if (!isModifiedEvent(event) && isLeftClickEvent(event)) {
         event.preventDefault();
-        if (osqueryIntegration) {
-          return navigateToApp('fleet', {
-            path:
-              '#' +
-              pagePathGetters.integration_details_policies({
-                pkgkey: `${osqueryIntegration.name}-${osqueryIntegration.version}`,
-              }),
-          });
-        }
+
+        return navigateToApp(INTEGRATIONS_PLUGIN_ID, {
+          path: pagePathGetters.integration_details_policies({
+            pkgkey: OSQUERY_INTEGRATION_NAME,
+          })[1],
+        });
       }
     },
-    [navigateToApp, osqueryIntegration]
+    [navigateToApp]
   );
 
   return integrationHref ? (

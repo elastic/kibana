@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AbstractTMSSource } from '../tms_source';
+import { AbstractSource } from '../source';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters';
 import { WmsClient } from './wms_client';
@@ -16,18 +16,27 @@ export const sourceTitle = i18n.translate('xpack.maps.source.wmsTitle', {
   defaultMessage: 'Web Map Service',
 });
 
-export class WMSSource extends AbstractTMSSource {
+export class WMSSource extends AbstractSource {
   static type = SOURCE_TYPES.WMS;
 
-  static createDescriptor({ serviceUrl, layers, styles, attributionText, attributionUrl }) {
+  static createDescriptor({ serviceUrl, layers, styles }) {
     return {
       type: WMSSource.type,
       serviceUrl,
       layers,
       styles,
-      attributionText,
-      attributionUrl,
     };
+  }
+
+  isSourceStale(mbSource, sourceData) {
+    if (!sourceData.url) {
+      return false;
+    }
+    return mbSource.tiles?.[0] !== sourceData.url;
+  }
+
+  async canSkipSourceUpdate() {
+    return false;
   }
 
   async getImmutableProperties() {
@@ -51,20 +60,6 @@ export class WMSSource extends AbstractTMSSource {
 
   async getDisplayName() {
     return this._descriptor.serviceUrl;
-  }
-
-  getAttributions() {
-    const { attributionText, attributionUrl } = this._descriptor;
-    const attributionComplete = !!attributionText && !!attributionUrl;
-
-    return attributionComplete
-      ? [
-          {
-            url: attributionUrl,
-            label: attributionText,
-          },
-        ]
-      : [];
   }
 
   getUrlTemplate() {

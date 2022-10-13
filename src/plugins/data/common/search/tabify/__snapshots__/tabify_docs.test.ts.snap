@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`tabifyDocs combines meta fields if meta option is set 1`] = `
+exports[`tabify_docs tabifyDocs converts fields by default 1`] = `
 Object {
   "columns": Array [
     Object {
@@ -77,23 +77,12 @@ Object {
       },
       "name": "_score",
     },
-    Object {
-      "id": "_type",
-      "meta": Object {
-        "field": "_type",
-        "index": "test-index",
-        "params": undefined,
-        "type": "string",
-      },
-      "name": "_type",
-    },
   ],
   "rows": Array [
     Object {
       "_id": "hit-id-value",
       "_index": "hit-index-value",
       "_score": 77,
-      "_type": "hit-type-value",
       "fieldTest": 123,
       "invalidMapping": 345,
       "nested": Array [
@@ -108,7 +97,7 @@ Object {
 }
 `;
 
-exports[`tabifyDocs converts fields by default 1`] = `
+exports[`tabify_docs tabifyDocs converts source if option is set 1`] = `
 Object {
   "columns": Array [
     Object {
@@ -185,23 +174,12 @@ Object {
       },
       "name": "_score",
     },
-    Object {
-      "id": "_type",
-      "meta": Object {
-        "field": "_type",
-        "index": "test-index",
-        "params": undefined,
-        "type": "string",
-      },
-      "name": "_type",
-    },
   ],
   "rows": Array [
     Object {
       "_id": "hit-id-value",
       "_index": "hit-index-value",
       "_score": 77,
-      "_type": "hit-type-value",
       "fieldTest": 123,
       "invalidMapping": 345,
       "nested": Array [
@@ -216,7 +194,7 @@ Object {
 }
 `;
 
-exports[`tabifyDocs converts source if option is set 1`] = `
+exports[`tabify_docs tabifyDocs skips nested fields if option is set 1`] = `
 Object {
   "columns": Array [
     Object {
@@ -293,23 +271,12 @@ Object {
       },
       "name": "_score",
     },
-    Object {
-      "id": "_type",
-      "meta": Object {
-        "field": "_type",
-        "index": "test-index",
-        "params": undefined,
-        "type": "string",
-      },
-      "name": "_type",
-    },
   ],
   "rows": Array [
     Object {
       "_id": "hit-id-value",
       "_index": "hit-index-value",
       "_score": 77,
-      "_type": "hit-type-value",
       "fieldTest": 123,
       "invalidMapping": 345,
       "nested": Array [
@@ -324,115 +291,7 @@ Object {
 }
 `;
 
-exports[`tabifyDocs skips nested fields if option is set 1`] = `
-Object {
-  "columns": Array [
-    Object {
-      "id": "fieldTest",
-      "meta": Object {
-        "field": "fieldTest",
-        "index": "test-index",
-        "params": Object {
-          "id": "number",
-        },
-        "type": "number",
-      },
-      "name": "fieldTest",
-    },
-    Object {
-      "id": "invalidMapping",
-      "meta": Object {
-        "field": "invalidMapping",
-        "index": "test-index",
-        "params": undefined,
-        "type": "number",
-      },
-      "name": "invalidMapping",
-    },
-    Object {
-      "id": "nested",
-      "meta": Object {
-        "field": "nested",
-        "index": "test-index",
-        "params": undefined,
-        "type": "object",
-      },
-      "name": "nested",
-    },
-    Object {
-      "id": "sourceTest",
-      "meta": Object {
-        "field": "sourceTest",
-        "index": "test-index",
-        "params": Object {
-          "id": "number",
-        },
-        "type": "number",
-      },
-      "name": "sourceTest",
-    },
-    Object {
-      "id": "_id",
-      "meta": Object {
-        "field": "_id",
-        "index": "test-index",
-        "params": undefined,
-        "type": "string",
-      },
-      "name": "_id",
-    },
-    Object {
-      "id": "_index",
-      "meta": Object {
-        "field": "_index",
-        "index": "test-index",
-        "params": undefined,
-        "type": "string",
-      },
-      "name": "_index",
-    },
-    Object {
-      "id": "_score",
-      "meta": Object {
-        "field": "_score",
-        "index": "test-index",
-        "params": undefined,
-        "type": "number",
-      },
-      "name": "_score",
-    },
-    Object {
-      "id": "_type",
-      "meta": Object {
-        "field": "_type",
-        "index": "test-index",
-        "params": undefined,
-        "type": "string",
-      },
-      "name": "_type",
-    },
-  ],
-  "rows": Array [
-    Object {
-      "_id": "hit-id-value",
-      "_index": "hit-index-value",
-      "_score": 77,
-      "_type": "hit-type-value",
-      "fieldTest": 123,
-      "invalidMapping": 345,
-      "nested": Array [
-        Object {
-          "field": 123,
-        },
-      ],
-      "sourceTest": 123,
-    },
-  ],
-  "type": "datatable",
-}
-`;
-
-exports[`tabifyDocs works without provided index pattern 1`] = `
+exports[`tabify_docs tabifyDocs works without provided index pattern 1`] = `
 Object {
   "columns": Array [
     Object {
@@ -475,53 +334,9 @@ Object {
       },
       "name": "sourceTest",
     },
-    Object {
-      "id": "_id",
-      "meta": Object {
-        "field": "_id",
-        "index": undefined,
-        "params": undefined,
-        "type": "string",
-      },
-      "name": "_id",
-    },
-    Object {
-      "id": "_index",
-      "meta": Object {
-        "field": "_index",
-        "index": undefined,
-        "params": undefined,
-        "type": "string",
-      },
-      "name": "_index",
-    },
-    Object {
-      "id": "_score",
-      "meta": Object {
-        "field": "_score",
-        "index": undefined,
-        "params": undefined,
-        "type": "number",
-      },
-      "name": "_score",
-    },
-    Object {
-      "id": "_type",
-      "meta": Object {
-        "field": "_type",
-        "index": undefined,
-        "params": undefined,
-        "type": "string",
-      },
-      "name": "_type",
-    },
   ],
   "rows": Array [
     Object {
-      "_id": "hit-id-value",
-      "_index": "hit-index-value",
-      "_score": 77,
-      "_type": "hit-type-value",
       "fieldTest": 123,
       "invalidMapping": 345,
       "nested": Array [

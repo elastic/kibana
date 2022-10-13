@@ -9,7 +9,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('Timelines plugin API', function () {
-    this.tags('ciGroup7');
     const pageObjects = getPageObjects(['common']);
     const testSubjects = getService('testSubjects');
 
@@ -18,7 +17,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.common.navigateToApp('timelineTest');
       });
       it('shows the timeline component on navigation', async () => {
-        await testSubjects.existOrFail('timeline-wrapper');
+        await testSubjects.existOrFail('events-viewer-panel');
       });
     });
   });

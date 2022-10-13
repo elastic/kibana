@@ -9,10 +9,9 @@ import type { Crypto, EncryptOutput } from '@elastic/node-crypto';
 import stringify from 'json-stable-stringify';
 import typeDetect from 'type-detect';
 
-import type { Logger } from 'src/core/server';
+import type { Logger } from '@kbn/core/server';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
 
-import type { AuthenticatedUser } from '../../../security/common/model';
-import type { EncryptedSavedObjectsAuditLogger } from '../audit';
 import { EncryptedSavedObjectAttributesDefinition } from './encrypted_saved_object_type_definition';
 import { EncryptionError, EncryptionErrorOperation } from './encryption_error';
 
@@ -70,7 +69,12 @@ interface DecryptParameters extends CommonParameters {
    * the object was previously encrypted with its namespace in the descriptor portion of the AAD; on the other hand, if the object is being
    * decrypted during object migration, the object was never encrypted with its namespace in the descriptor portion of the AAD.
    */
-  convertToMultiNamespaceType?: boolean;
+  isTypeBeingConverted?: boolean;
+  /**
+   * If the originId (old object ID) is present and the object is being converted from a single-namespace type to a multi-namespace type,
+   * we will attempt to decrypt with both the old object ID and the current object ID.
+   */
+  originId?: string;
 }
 
 interface EncryptedSavedObjectsServiceOptions {
@@ -78,11 +82,6 @@ interface EncryptedSavedObjectsServiceOptions {
    * Service logger instance.
    */
   logger: Logger;
-
-  /**
-   * Audit logger instance.
-   */
-  audit: EncryptedSavedObjectsAuditLogger;
 
   /**
    * NodeCrypto instance used for both encryption and decryption.
@@ -117,10 +116,8 @@ export class EncryptedSavedObjectsService {
    * Map of all registered saved object types where the `key` is saved object type and the `value`
    * is the definition (names of attributes that need to be encrypted etc.).
    */
-  private readonly typeDefinitions: Map<
-    string,
-    EncryptedSavedObjectAttributesDefinition
-  > = new Map();
+  private readonly typeDefinitions: Map<string, EncryptedSavedObjectAttributesDefinition> =
+    new Map();
 
   constructor(private readonly options: EncryptedSavedObjectsServiceOptions) {}
 
@@ -168,25 +165,78 @@ export class EncryptedSavedObjectsService {
    */
   public async stripOrDecryptAttributes<T extends Record<string, unknown>>(
     descriptor: SavedObjectDescriptor,
-    attributes: T,
+    attributesToStripOrDecrypt: T,
     originalAttributes?: T,
     params?: DecryptParameters
   ) {
+    const { attributes, attributesToDecrypt } = this.prepareAttributesForStripOrDecrypt(
+      descriptor,
+      attributesToStripOrDecrypt,
+      originalAttributes
+    );
+    try {
+      const decryptedAttributes = attributesToDecrypt
+        ? await this.decryptAttributes(descriptor, attributesToDecrypt, params)
+        : {};
+      return { attributes: { ...attributes, ...decryptedAttributes } };
+    } catch (error) {
+      return { attributes, error };
+    }
+  }
+
+  /**
+   * Takes saved object attributes for the specified type and, depending on the type definition,
+   * either decrypts or strips encrypted attributes (e.g. in case AAD or encryption key has changed
+   * and decryption is no longer possible).
+   * @param descriptor Saved object descriptor (ID, type and optional namespace)
+   * @param attributesToStripOrDecrypt Object that includes a dictionary of __ALL__ saved object attributes stored
+   * in Elasticsearch.
+   * @param [originalAttributes] An optional dictionary of __ALL__ saved object original attributes
+   * that were used to create that saved object (i.e. values are NOT encrypted).
+   * @param [params] Parameters that control the way encrypted attributes are handled.
+   */
+  public stripOrDecryptAttributesSync<T extends Record<string, unknown>>(
+    descriptor: SavedObjectDescriptor,
+    attributesToStripOrDecrypt: T,
+    originalAttributes?: T,
+    params?: DecryptParameters
+  ) {
+    const { attributes, attributesToDecrypt } = this.prepareAttributesForStripOrDecrypt(
+      descriptor,
+      attributesToStripOrDecrypt,
+      originalAttributes
+    );
+    try {
+      const decryptedAttributes = attributesToDecrypt
+        ? this.decryptAttributesSync(descriptor, attributesToDecrypt, params)
+        : {};
+      return { attributes: { ...attributes, ...decryptedAttributes } };
+    } catch (error) {
+      return { attributes, error };
+    }
+  }
+
+  /**
+   * Takes saved object attributes for the specified type and, depending on the type definition,
+   * either strips encrypted attributes, replaces with original decrypted value if available, or
+   * prepares them for decryption.
+   * @private
+   */
+  private prepareAttributesForStripOrDecrypt<T extends Record<string, unknown>>(
+    descriptor: SavedObjectDescriptor,
+    attributes: T,
+    originalAttributes?: T
+  ) {
     const typeDefinition = this.typeDefinitions.get(descriptor.type);
     if (typeDefinition === undefined) {
-      return { attributes };
+      return { attributes, attributesToDecrypt: null };
     }
 
-    let decryptedAttributes: T | null = null;
-    let decryptionError: Error | undefined;
+    let attributesToDecrypt: T | undefined;
     const clonedAttributes: Record<string, unknown> = {};
     for (const [attributeName, attributeValue] of Object.entries(attributes)) {
-      // We should strip encrypted attribute if definition explicitly mandates that or decryption
-      // failed.
-      if (
-        typeDefinition.shouldBeStripped(attributeName) ||
-        (!!decryptionError && typeDefinition.shouldBeEncrypted(attributeName))
-      ) {
+      // We should strip encrypted attribute if definition explicitly mandates that.
+      if (typeDefinition.shouldBeStripped(attributeName)) {
         continue;
       }
 
@@ -197,30 +247,21 @@ export class EncryptedSavedObjectsService {
         // If attribute should be decrypted, but we have original attributes used to create object
         // we should get raw unencrypted value from there to avoid performance penalty.
         clonedAttributes[attributeName] = originalAttributes[attributeName];
-      } else {
-        // Otherwise just try to decrypt attribute. We decrypt all attributes at once, cache it and
-        // reuse for any other attributes.
-        if (decryptedAttributes === null) {
-          try {
-            decryptedAttributes = await this.decryptAttributes(
-              descriptor,
-              // Decrypt only attributes that are supposed to be exposed.
-              Object.fromEntries(
-                Object.entries(attributes).filter(([key]) => !typeDefinition.shouldBeStripped(key))
-              ) as T,
-              params
-            );
-          } catch (err) {
-            decryptionError = err;
-            continue;
-          }
-        }
-
-        clonedAttributes[attributeName] = decryptedAttributes[attributeName];
+      } else if (!attributesToDecrypt) {
+        // Decrypt only attributes that are supposed to be exposed.
+        attributesToDecrypt = Object.fromEntries(
+          Object.entries(attributes).filter(([key]) => !typeDefinition.shouldBeStripped(key))
+        ) as T;
       }
     }
 
-    return { attributes: clonedAttributes as T, error: decryptionError };
+    return {
+      attributes: clonedAttributes as T,
+      attributesToDecrypt:
+        attributesToDecrypt && Object.keys(attributesToDecrypt).length > 0
+          ? attributesToDecrypt
+          : null,
+    };
   }
 
   private *attributesToEncryptIterator<T extends Record<string, unknown>>(
@@ -247,7 +288,6 @@ export class EncryptedSavedObjectsService {
           this.options.logger.error(
             `Failed to encrypt "${attributeName}" attribute: ${err.message || err}`
           );
-          this.options.audit.encryptAttributeFailure(attributeName, descriptor, params?.user);
 
           throw new EncryptionError(
             `Unable to encrypt attribute "${attributeName}"`,
@@ -275,8 +315,6 @@ export class EncryptedSavedObjectsService {
     if (encryptedAttributesKeys.length === 0) {
       return attributes;
     }
-
-    this.options.audit.encryptAttributesSuccess(encryptedAttributesKeys, descriptor, params?.user);
 
     return {
       ...attributes,
@@ -476,7 +514,6 @@ export class EncryptedSavedObjectsService {
       }
 
       if (typeof attributeValue !== 'string') {
-        this.options.audit.decryptAttributeFailure(attributeName, descriptor, params?.user);
         throw new Error(
           `Encrypted "${attributeName}" attribute should be a string, but found ${typeDetect(
             attributeValue
@@ -484,11 +521,23 @@ export class EncryptedSavedObjectsService {
         );
       }
       if (!encryptionAADs.length) {
-        encryptionAADs.push(this.getAAD(typeDefinition, descriptor, attributes));
-        if (params?.convertToMultiNamespaceType && descriptor.namespace) {
-          // This is happening during a migration; create an alternate AAD for decrypting the object attributes by stripping out the namespace from the descriptor.
-          const { namespace, ...alternateDescriptor } = descriptor;
-          encryptionAADs.push(this.getAAD(typeDefinition, alternateDescriptor, attributes));
+        if (params?.isTypeBeingConverted) {
+          // The object is either pending conversion to a multi-namespace type, or it was just converted. We may need to attempt to decrypt
+          // it with several different descriptors depending upon how the migrations are structured, and whether this is a full index
+          // migration or a single document migration. Note that the originId is set either when the document is converted _or_ when it is
+          // imported with "createNewCopies: false", so we have to try with and without it.
+          const decryptDescriptors = params.originId
+            ? [{ ...descriptor, id: params.originId }, descriptor]
+            : [descriptor];
+          for (const decryptDescriptor of decryptDescriptors) {
+            encryptionAADs.push(this.getAAD(typeDefinition, decryptDescriptor, attributes));
+            if (descriptor.namespace) {
+              const { namespace, ...alternateDescriptor } = decryptDescriptor;
+              encryptionAADs.push(this.getAAD(typeDefinition, alternateDescriptor, attributes));
+            }
+          }
+        } else {
+          encryptionAADs.push(this.getAAD(typeDefinition, descriptor, attributes));
         }
       }
       try {
@@ -497,7 +546,6 @@ export class EncryptedSavedObjectsService {
         this.options.logger.error(
           `Failed to decrypt "${attributeName}" attribute: ${err.message || err}`
         );
-        this.options.audit.decryptAttributeFailure(attributeName, descriptor, params?.user);
 
         throw new EncryptionError(
           `Unable to decrypt attribute "${attributeName}"`,
@@ -524,8 +572,6 @@ export class EncryptedSavedObjectsService {
     if (decryptedAttributesKeys.length === 0) {
       return attributes;
     }
-
-    this.options.audit.decryptAttributesSuccess(decryptedAttributesKeys, descriptor, params?.user);
 
     return {
       ...attributes,

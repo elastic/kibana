@@ -12,7 +12,33 @@ import { createAssignmentProxy } from './assignment_proxy';
 import { wrapFunction } from './wrap_function';
 import { wrapRunnableArgs } from './wrap_runnable_args';
 
-export function decorateMochaUi(lifecycle, context) {
+const allTestsSkippedCache = new WeakMap();
+function allTestsAreSkipped(suite) {
+  // cache result for each suite so we don't have to traverse over and over
+  const cache = allTestsSkippedCache.get(suite);
+  if (cache) {
+    return cache;
+  }
+
+  // if this suite is skipped directly then all it's children are skipped
+  if (suite.pending) {
+    allTestsSkippedCache.set(suite, true);
+    return true;
+  }
+
+  // if any of this suites own tests are not skipped, then we don't need to traverse to child suites
+  if (suite.tests.some((t) => !t.pending)) {
+    allTestsSkippedCache.set(suite, false);
+    return false;
+  }
+
+  // otherwise traverse down through the child suites and return true only if all children are all skipped
+  const childrenSkipped = suite.suites.every(allTestsAreSkipped);
+  allTestsSkippedCache.set(suite, childrenSkipped);
+  return childrenSkipped;
+}
+
+export function decorateMochaUi(log, lifecycle, context, { rootTags }) {
   // incremented at the start of each suite, decremented after
   // so that in each non-suite call we can know if we are within
   // a suite, or that when a suite is defined it is within a suite
@@ -48,21 +74,36 @@ export function decorateMochaUi(lifecycle, context) {
         }
 
         argumentsList[1] = function () {
-          before(async () => {
+          before('beforeTestSuite.trigger', async () => {
             await lifecycle.beforeTestSuite.trigger(this);
           });
 
-          this.tags = (tags) => {
-            this._tags = [].concat(this._tags || [], tags);
-          };
-
           const relativeFilePath = relative(REPO_ROOT, this.file);
-          this.tags(relativeFilePath);
+          this._tags = [
+            relativeFilePath,
+            // we attach the "root tags" to all the child suites of the root suite, so that if they
+            // need to be excluded they can be removed from the root suite without removing the entire
+            // root suite
+            ...(this.parent.root ? [...(rootTags ?? [])] : []),
+          ];
           this.suiteTag = relativeFilePath; // The tag that uniquely targets this suite/file
+          this.tags = (tags) => {
+            const tagsToAdd = Array.isArray(tags) ? tags : [tags];
+            this._tags = [...this._tags, ...tagsToAdd];
+          };
+          this.onlyEsVersion = (semver) => {
+            this._esVersionRequirement = semver;
+          };
 
           provider.call(this);
 
-          after(async () => {
+          if (allTestsAreSkipped(this)) {
+            // all the children in this suite are skipped, so make sure the suite is
+            // marked as pending so that its hooks are not run
+            this.pending = true;
+          }
+
+          after('afterTestSuite.trigger', async () => {
             await lifecycle.afterTestSuite.trigger(this);
           });
         };

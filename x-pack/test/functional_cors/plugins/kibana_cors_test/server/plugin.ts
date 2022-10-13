@@ -6,13 +6,11 @@
  */
 
 import Hapi from '@hapi/hapi';
-// @ts-expect-error https://github.com/elastic/kibana/issues/95679
 import { kbnTestConfig } from '@kbn/test';
-import { take } from 'rxjs/operators';
 import Url from 'url';
 import abab from 'abab';
 
-import type { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from 'src/core/server';
+import type { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/server';
 import type { ConfigSchema } from './config';
 
 const apiToken = abab.btoa(kbnTestConfig.getUrlParts().auth!);
@@ -48,20 +46,18 @@ fetch('${url}', {
 
 export class CorsTestPlugin implements Plugin {
   private server?: Hapi.Server;
+
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
-  async setup(core: CoreSetup) {
+  setup(core: CoreSetup) {
     const router = core.http.createRouter();
     router.post({ path: '/cors-test', validate: false }, (context, req, res) =>
       res.ok({ body: 'content from kibana' })
     );
   }
 
-  async start(core: CoreStart) {
-    const config = await this.initializerContext.config
-      .create<ConfigSchema>()
-      .pipe(take(1))
-      .toPromise();
+  start(core: CoreStart) {
+    const config = this.initializerContext.config.get<ConfigSchema>();
 
     const server = new Hapi.Server({
       port: config.port,
@@ -79,8 +75,9 @@ export class CorsTestPlugin implements Plugin {
         return h.response(renderBody(kibanaUrl));
       },
     });
-    await server.start();
+    server.start();
   }
+
   public stop() {
     if (this.server) {
       this.server.stop();

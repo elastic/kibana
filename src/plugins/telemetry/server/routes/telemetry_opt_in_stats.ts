@@ -8,15 +8,18 @@
 
 import fetch from 'node-fetch';
 
-import { IRouter } from 'kibana/server';
+import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import {
   TelemetryCollectionManagerPluginSetup,
   StatsGetterConfig,
-} from 'src/plugins/telemetry_collection_manager/server';
+} from '@kbn/telemetry-collection-manager-plugin/server';
+import { getTelemetryChannelEndpoint } from '../../common/telemetry_config';
+import { PAYLOAD_CONTENT_ENCODING } from '../../common/constants';
+import type { UnencryptedTelemetryPayload } from '../../common/types';
 
 interface SendTelemetryOptInStatusConfig {
-  optInStatusUrl: string;
+  sendUsageTo: 'staging' | 'prod';
   newOptInStatus: boolean;
   currentKibanaVersion: string;
 }
@@ -25,18 +28,30 @@ export async function sendTelemetryOptInStatus(
   telemetryCollectionManager: Pick<TelemetryCollectionManagerPluginSetup, 'getOptInStats'>,
   config: SendTelemetryOptInStatusConfig,
   statsGetterConfig: StatsGetterConfig
-) {
-  const { optInStatusUrl, newOptInStatus, currentKibanaVersion } = config;
-  const optInStatus = await telemetryCollectionManager.getOptInStats(
-    newOptInStatus,
-    statsGetterConfig
-  );
-
-  await fetch(optInStatusUrl, {
-    method: 'post',
-    body: JSON.stringify(optInStatus),
-    headers: { 'X-Elastic-Stack-Version': currentKibanaVersion },
+): Promise<void> {
+  const { sendUsageTo, newOptInStatus, currentKibanaVersion } = config;
+  const optInStatusUrl = getTelemetryChannelEndpoint({
+    env: sendUsageTo,
+    channelName: 'optInStatus',
   });
+
+  const optInStatusPayload: UnencryptedTelemetryPayload =
+    await telemetryCollectionManager.getOptInStats(newOptInStatus, statsGetterConfig);
+
+  await Promise.all(
+    optInStatusPayload.map(async ({ clusterUuid, stats }) => {
+      return await fetch(optInStatusUrl, {
+        method: 'post',
+        body: typeof stats === 'string' ? stats : JSON.stringify(stats),
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Elastic-Stack-Version': currentKibanaVersion,
+          'X-Elastic-Cluster-ID': clusterUuid,
+          'X-Elastic-Content-Encoding': PAYLOAD_CONTENT_ENCODING,
+        },
+      });
+    })
+  );
 }
 
 export function registerTelemetryOptInStatsRoutes(
@@ -58,9 +73,17 @@ export function registerTelemetryOptInStatsRoutes(
         const newOptInStatus = req.body.enabled;
         const unencrypted = req.body.unencrypted;
 
+        if (!(await telemetryCollectionManager.shouldGetTelemetry())) {
+          // We probably won't reach here because there is a license check in the auth phase of the HTTP requests.
+          // But let's keep it here should that changes at any point.
+          return res.customError({
+            statusCode: 503,
+            body: `Can't fetch telemetry at the moment because some services are down. Check the /status page for more details.`,
+          });
+        }
+
         const statsGetterConfig: StatsGetterConfig = {
           unencrypted,
-          request: req,
         };
 
         const optInStatus = await telemetryCollectionManager.getOptInStats(

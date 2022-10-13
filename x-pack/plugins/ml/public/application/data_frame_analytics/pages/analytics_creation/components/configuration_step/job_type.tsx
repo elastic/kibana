@@ -82,7 +82,6 @@ export const JobType: FC<Props> = ({ type, setFormState }) => {
                   setFormState({
                     previousJobType: type,
                     jobType,
-                    includes: [],
                     requiredFieldsError: undefined,
                   });
                   setSelectedCard({ [jobType]: !selectedCard[jobType] });

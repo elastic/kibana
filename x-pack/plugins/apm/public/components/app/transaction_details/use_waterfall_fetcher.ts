@@ -6,24 +6,36 @@
  */
 
 import { useMemo } from 'react';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useFetcher } from '../../../hooks/use_fetcher';
-import { getWaterfall } from './WaterfallWithSummmary/WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
+import { APIReturnType } from '../../../services/rest/create_call_apm_api';
+import { getWaterfall } from './waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 
-const INITIAL_DATA = {
-  root: undefined,
-  trace: { items: [], exceedsMax: false, errorDocs: [] },
-  errorsPerTransaction: {},
+const INITIAL_DATA: APIReturnType<'GET /internal/apm/traces/{traceId}'> = {
+  errorDocs: [],
+  traceDocs: [],
+  exceedsMax: false,
+  linkedChildrenOfSpanCountBySpanId: {},
 };
 
-export function useWaterfallFetcher() {
-  const { urlParams } = useUrlParams();
-  const { traceId, start, end, transactionId } = urlParams;
-  const { data = INITIAL_DATA, status, error } = useFetcher(
+export function useWaterfallFetcher({
+  traceId,
+  transactionId,
+  start,
+  end,
+}: {
+  traceId?: string;
+  transactionId?: string;
+  start: string;
+  end: string;
+}) {
+  const {
+    data = INITIAL_DATA,
+    status,
+    error,
+  } = useFetcher(
     (callApmApi) => {
       if (traceId && start && end) {
-        return callApmApi({
-          endpoint: 'GET /api/apm/traces/{traceId}',
+        return callApmApi('GET /internal/apm/traces/{traceId}', {
           params: {
             path: { traceId },
             query: {
@@ -37,10 +49,10 @@ export function useWaterfallFetcher() {
     [traceId, start, end]
   );
 
-  const waterfall = useMemo(() => getWaterfall(data, transactionId), [
-    data,
-    transactionId,
-  ]);
+  const waterfall = useMemo(
+    () => getWaterfall(data, transactionId),
+    [data, transactionId]
+  );
 
-  return { waterfall, status, error, exceedsMax: data.trace.exceedsMax };
+  return { waterfall, status, error };
 }

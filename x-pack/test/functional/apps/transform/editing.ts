@@ -5,46 +5,38 @@
  * 2.0.
  */
 
-import { TransformPivotConfig } from '../../../../plugins/transform/common/types/transform';
-import { TRANSFORM_STATE } from '../../../../plugins/transform/common/constants';
+import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
+import type {
+  TransformLatestConfig,
+  TransformPivotConfig,
+} from '@kbn/transform-plugin/common/types/transform';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-
-function getTransformConfig(): TransformPivotConfig {
-  const date = Date.now();
-  return {
-    id: `ec_editing_${date}`,
-    source: { index: ['ft_ecommerce'] },
-    pivot: {
-      group_by: { category: { terms: { field: 'category.keyword' } } },
-      aggregations: { 'products.base_price.avg': { avg: { field: 'products.base_price' } } },
-    },
-    description:
-      'ecommerce batch transform with avg(products.base_price) grouped by terms(category.keyword)',
-    dest: { index: `user-ec_2_${date}` },
-  };
-}
+import { getLatestTransformConfig, getPivotTransformConfig } from '.';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
   describe('editing', function () {
-    const transformConfigWithPivot = getTransformConfig();
-    // const transformConfigWithLatest = getLatestTransformConfig();
+    const transformConfigWithPivot: TransformPivotConfig = getPivotTransformConfig('editing');
+    const transformConfigWithLatest: TransformLatestConfig = {
+      ...getLatestTransformConfig('editing'),
+      retention_policy: { time: { field: 'order_date', max_age: '1d' } },
+    };
 
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/ecommerce');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
       await transform.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
 
       await transform.api.createAndRunTransform(
         transformConfigWithPivot.id,
         transformConfigWithPivot
       );
-      // await transform.api.createAndRunTransform(
-      //   transformConfigWithLatest.id,
-      //   transformConfigWithLatest
-      // );
+      await transform.api.createAndRunTransform(
+        transformConfigWithLatest.id,
+        transformConfigWithLatest
+      );
 
       await transform.testResources.setKibanaTimeZoneToUTC();
       await transform.securityUI.loginAsTransformPowerUser();
@@ -53,9 +45,10 @@ export default function ({ getService }: FtrProviderContext) {
     after(async () => {
       await transform.testResources.deleteIndexPatternByTitle(transformConfigWithPivot.dest.index);
       await transform.api.deleteIndices(transformConfigWithPivot.dest.index);
-      // await transform.testResources.deleteIndexPatternByTitle(transformConfigWithLatest.dest.index);
-      // await transform.api.deleteIndices(transformConfigWithLatest.dest.index);
+      await transform.testResources.deleteIndexPatternByTitle(transformConfigWithLatest.dest.index);
+      await transform.api.deleteIndices(transformConfigWithLatest.dest.index);
       await transform.api.cleanTransformIndices();
+      await transform.testResources.deleteIndexPatternByTitle('ft_ecommerce');
     });
 
     const testDataList = [
@@ -65,31 +58,46 @@ export default function ({ getService }: FtrProviderContext) {
         transformDescription: 'updated description',
         transformDocsPerSecond: '1000',
         transformFrequency: '10m',
+        resetRetentionPolicy: false,
+        transformRetentionPolicyField: 'order_date',
+        transformRetentionPolicyMaxAge: '1d',
+        numFailureRetries: '0',
         expected: {
           messageText: 'updated transform.',
+          retentionPolicy: {
+            field: '',
+            maxAge: '',
+          },
           row: {
             status: TRANSFORM_STATE.STOPPED,
+            type: 'pivot',
             mode: 'batch',
             progress: '100',
           },
         },
       },
-      // TODO enable tests when https://github.com/elastic/elasticsearch/issues/67148 is resolved
-      // {
-      //   suiteTitle: 'edit transform with latest configuration',
-      //   originalConfig: transformConfigWithLatest,
-      //   transformDescription: 'updated description',
-      //   transformDocsPerSecond: '1000',
-      //   transformFrequency: '10m',
-      //   expected: {
-      //     messageText: 'updated transform.',
-      //     row: {
-      //       status: TRANSFORM_STATE.STOPPED,
-      //       mode: 'batch',
-      //       progress: '100',
-      //     },
-      //   },
-      // },
+      {
+        suiteTitle: 'edit transform with latest configuration',
+        originalConfig: transformConfigWithLatest,
+        transformDescription: 'updated description',
+        transformDocsPerSecond: '1000',
+        transformFrequency: '10m',
+        resetRetentionPolicy: true,
+        numFailureRetries: '7',
+        expected: {
+          messageText: 'updated transform.',
+          retentionPolicy: {
+            field: 'order_date',
+            maxAge: '1d',
+          },
+          row: {
+            status: TRANSFORM_STATE.STOPPED,
+            type: 'latest',
+            mode: 'batch',
+            progress: '100',
+          },
+        },
+      },
     ];
 
     for (const testData of testDataList) {
@@ -112,7 +120,7 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.table.assertTransformRowActions(testData.originalConfig.id, false);
 
           await transform.testExecution.logTestStep('should show the edit flyout');
-          await transform.table.clickTransformRowAction('Edit');
+          await transform.table.clickTransformRowAction(testData.originalConfig.id, 'Edit');
           await transform.editFlyout.assertTransformEditFlyoutExists();
         });
 
@@ -139,17 +147,69 @@ export default function ({ getService }: FtrProviderContext) {
             testData.transformDocsPerSecond
           );
 
+          await transform.testExecution.logTestStep(
+            'should update the transform number of failure retries'
+          );
+          await transform.editFlyout.openTransformEditAccordionAdvancedSettings();
+          await transform.editFlyout.assertTransformEditFlyoutInputExists('NumFailureRetries');
+          await transform.editFlyout.assertTransformEditFlyoutInputValue('NumFailureRetries', '');
+          await transform.editFlyout.setTransformEditFlyoutInputValue(
+            'NumFailureRetries',
+            testData.numFailureRetries
+          );
+
           await transform.testExecution.logTestStep('should update the transform frequency');
           await transform.editFlyout.assertTransformEditFlyoutInputExists('Frequency');
-          await transform.editFlyout.assertTransformEditFlyoutInputValue('Frequency', '');
+          await transform.editFlyout.assertTransformEditFlyoutInputValue(
+            'Frequency',
+            testData.originalConfig.frequency || ''
+          );
           await transform.editFlyout.setTransformEditFlyoutInputValue(
             'Frequency',
             testData.transformFrequency
           );
+
+          await transform.testExecution.logTestStep('should update the transform retention policy');
+          await transform.editFlyout.clickTransformEditRetentionPolicySettings(
+            !testData.resetRetentionPolicy
+          );
+
+          if (
+            !testData.resetRetentionPolicy &&
+            testData?.transformRetentionPolicyField &&
+            testData?.transformRetentionPolicyMaxAge
+          ) {
+            await transform.editFlyout.assertTransformEditFlyoutRetentionPolicyFieldSelectEnabled(
+              true
+            );
+            await transform.editFlyout.assertTransformEditFlyoutRetentionPolicyFieldSelectValue(
+              testData.expected.retentionPolicy.field
+            );
+
+            await transform.editFlyout.setTransformEditFlyoutRetentionPolicyFieldSelectValue(
+              testData.transformRetentionPolicyField
+            );
+
+            await transform.editFlyout.assertTransformEditFlyoutInputEnabled(
+              'RetentionPolicyMaxAge',
+              true
+            );
+            await transform.editFlyout.assertTransformEditFlyoutInputValue(
+              'RetentionPolicyMaxAge',
+              testData.expected.retentionPolicy.maxAge
+            );
+
+            await transform.editFlyout.setTransformEditFlyoutInputValue(
+              'RetentionPolicyMaxAge',
+              testData.transformRetentionPolicyMaxAge
+            );
+          }
         });
 
         it('updates the transform and displays it correctly in the job list', async () => {
           await transform.testExecution.logTestStep('should update the transform');
+          await transform.editFlyout.assertUpdateTransformButtonExists();
+          await transform.editFlyout.assertUpdateTransformButtonEnabled(true);
           await transform.editFlyout.updateTransform();
 
           await transform.testExecution.logTestStep('should display the transforms table');
@@ -167,6 +227,7 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.table.assertTransformRowFields(testData.originalConfig.id, {
             id: testData.originalConfig.id,
             description: testData.transformDescription,
+            type: testData.expected.row.type,
             status: testData.expected.row.status,
             mode: testData.expected.row.mode,
             progress: testData.expected.row.progress,
@@ -175,6 +236,12 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.testExecution.logTestStep(
             'should display the messages tab and include an update message'
           );
+
+          await transform.table.assertTransformExpandedRowJson(
+            'retention_policy',
+            !testData.resetRetentionPolicy
+          );
+          await transform.table.assertTransformExpandedRowJson('updated description');
           await transform.table.assertTransformExpandedRowMessages(testData.expected.messageText);
         });
       });

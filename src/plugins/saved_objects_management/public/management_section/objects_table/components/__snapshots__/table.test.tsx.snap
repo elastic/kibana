@@ -57,7 +57,7 @@ exports[`Table prevents saved objects from being deleted 1`] = `
             </EuiButton>
           }
           closePopover={[Function]}
-          display="inlineBlock"
+          display="inline-block"
           hasArrow={true}
           isOpen={false}
           ownFocus={true}
@@ -131,7 +131,7 @@ exports[`Table prevents saved objects from being deleted 1`] = `
             "field": "type",
             "name": "Type",
             "render": [Function],
-            "sortable": false,
+            "sortable": true,
             "width": "50px",
           },
           Object {
@@ -144,9 +144,15 @@ exports[`Table prevents saved objects from being deleted 1`] = `
             "sortable": false,
           },
           Object {
+            "field": "updated_at",
+            "name": "Last updated",
+            "render": [Function],
+            "sortable": true,
+            "width": "150px",
+          },
+          Object {
             "actions": Array [
               Object {
-                "available": [Function],
                 "data-test-subj": "savedObjectsTableAction-inspect",
                 "description": "Inspect this saved object",
                 "icon": "inspect",
@@ -175,10 +181,10 @@ exports[`Table prevents saved objects from being deleted 1`] = `
             "attributes": Object {},
             "id": "1",
             "meta": Object {
-              "editUrl": "#/management/kibana/indexPatterns/patterns/1",
+              "editUrl": "#/management/kibana/dataViews/dataView/1",
               "icon": "indexPatternApp",
               "inAppUrl": Object {
-                "path": "/management/kibana/indexPatterns/patterns/1",
+                "path": "/management/kibana/dataViews/dataView/1",
                 "uiCapabilitiesPath": "management.kibana.indexPatterns",
               },
               "title": "MyIndexPattern*",
@@ -189,7 +195,12 @@ exports[`Table prevents saved objects from being deleted 1`] = `
         ]
       }
       loading={false}
-      noItemsMessage="No items found"
+      noItemsMessage={
+        <EuiI18n
+          default="No items found"
+          token="euiBasicTable.noItemsMessage"
+        />
+      }
       onChange={[Function]}
       pagination={
         Object {
@@ -209,6 +220,14 @@ exports[`Table prevents saved objects from being deleted 1`] = `
       selection={
         Object {
           "onSelectionChange": [Function],
+        }
+      }
+      sorting={
+        Object {
+          "sort": Object {
+            "direction": "desc",
+            "field": "updated_at",
+          },
         }
       }
       tableLayout="fixed"
@@ -273,7 +292,7 @@ exports[`Table should render normally 1`] = `
             </EuiButton>
           }
           closePopover={[Function]}
-          display="inlineBlock"
+          display="inline-block"
           hasArrow={true}
           isOpen={false}
           ownFocus={true}
@@ -347,7 +366,7 @@ exports[`Table should render normally 1`] = `
             "field": "type",
             "name": "Type",
             "render": [Function],
-            "sortable": false,
+            "sortable": true,
             "width": "50px",
           },
           Object {
@@ -360,9 +379,15 @@ exports[`Table should render normally 1`] = `
             "sortable": false,
           },
           Object {
+            "field": "updated_at",
+            "name": "Last updated",
+            "render": [Function],
+            "sortable": true,
+            "width": "150px",
+          },
+          Object {
             "actions": Array [
               Object {
-                "available": [Function],
                 "data-test-subj": "savedObjectsTableAction-inspect",
                 "description": "Inspect this saved object",
                 "icon": "inspect",
@@ -391,10 +416,10 @@ exports[`Table should render normally 1`] = `
             "attributes": Object {},
             "id": "1",
             "meta": Object {
-              "editUrl": "#/management/kibana/indexPatterns/patterns/1",
+              "editUrl": "#/management/kibana/dataViews/dataView/1",
               "icon": "indexPatternApp",
               "inAppUrl": Object {
-                "path": "/management/kibana/indexPatterns/patterns/1",
+                "path": "/management/kibana/dataViews/dataView/1",
                 "uiCapabilitiesPath": "management.kibana.indexPatterns",
               },
               "title": "MyIndexPattern*",
@@ -405,7 +430,12 @@ exports[`Table should render normally 1`] = `
         ]
       }
       loading={false}
-      noItemsMessage="No items found"
+      noItemsMessage={
+        <EuiI18n
+          default="No items found"
+          token="euiBasicTable.noItemsMessage"
+        />
+      }
       onChange={[Function]}
       pagination={
         Object {
@@ -425,6 +455,14 @@ exports[`Table should render normally 1`] = `
       selection={
         Object {
           "onSelectionChange": [Function],
+        }
+      }
+      sorting={
+        Object {
+          "sort": Object {
+            "direction": "desc",
+            "field": "updated_at",
+          },
         }
       }
       tableLayout="fixed"

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, Plugin } from 'kibana/server';
+import { CoreSetup, Plugin } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { PluginStart as DataPluginStart } from '../../../../../src/plugins/data/server';
+import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 
 export interface IndexPatternsTestStartDeps {
   data: DataPluginStart;
@@ -21,7 +21,8 @@ export class IndexPatternsTestPlugin
       IndexPatternsTestPluginStart,
       {},
       IndexPatternsTestStartDeps
-    > {
+    >
+{
   public setup(core: CoreSetup<IndexPatternsTestStartDeps>) {
     const router = core.http.createRouter();
 
@@ -35,9 +36,10 @@ export class IndexPatternsTestPlugin
       async (context, req, res) => {
         const [{ savedObjects, elasticsearch }, { data }] = await core.getStartServices();
         const savedObjectsClient = savedObjects.getScopedClient(req);
-        const service = await data.indexPatterns.indexPatternsServiceFactory(
+        const service = await data.indexPatterns.dataViewsServiceFactory(
           savedObjectsClient,
-          elasticsearch.client.asScoped(req).asCurrentUser
+          elasticsearch.client.asScoped(req).asCurrentUser,
+          req
         );
         const ids = await service.createAndSave(req.body);
         return res.ok({ body: ids });
@@ -49,9 +51,10 @@ export class IndexPatternsTestPlugin
       async (context, req, res) => {
         const [{ savedObjects, elasticsearch }, { data }] = await core.getStartServices();
         const savedObjectsClient = savedObjects.getScopedClient(req);
-        const service = await data.indexPatterns.indexPatternsServiceFactory(
+        const service = await data.indexPatterns.dataViewsServiceFactory(
           savedObjectsClient,
-          elasticsearch.client.asScoped(req).asCurrentUser
+          elasticsearch.client.asScoped(req).asCurrentUser,
+          req
         );
         const ids = await service.getIds(true);
         return res.ok({ body: ids });
@@ -71,9 +74,10 @@ export class IndexPatternsTestPlugin
         const id = (req.params as Record<string, string>).id;
         const [{ savedObjects, elasticsearch }, { data }] = await core.getStartServices();
         const savedObjectsClient = savedObjects.getScopedClient(req);
-        const service = await data.indexPatterns.indexPatternsServiceFactory(
+        const service = await data.indexPatterns.dataViewsServiceFactory(
           savedObjectsClient,
-          elasticsearch.client.asScoped(req).asCurrentUser
+          elasticsearch.client.asScoped(req).asCurrentUser,
+          req
         );
         const ip = await service.get(id);
         return res.ok({ body: ip.toSpec() });
@@ -93,9 +97,10 @@ export class IndexPatternsTestPlugin
         const [{ savedObjects, elasticsearch }, { data }] = await core.getStartServices();
         const id = (req.params as Record<string, string>).id;
         const savedObjectsClient = savedObjects.getScopedClient(req);
-        const service = await data.indexPatterns.indexPatternsServiceFactory(
+        const service = await data.indexPatterns.dataViewsServiceFactory(
           savedObjectsClient,
-          elasticsearch.client.asScoped(req).asCurrentUser
+          elasticsearch.client.asScoped(req).asCurrentUser,
+          req
         );
         const ip = await service.get(id);
         await service.updateSavedObject(ip);
@@ -116,9 +121,10 @@ export class IndexPatternsTestPlugin
         const [{ savedObjects, elasticsearch }, { data }] = await core.getStartServices();
         const id = (req.params as Record<string, string>).id;
         const savedObjectsClient = savedObjects.getScopedClient(req);
-        const service = await data.indexPatterns.indexPatternsServiceFactory(
+        const service = await data.indexPatterns.dataViewsServiceFactory(
           savedObjectsClient,
-          elasticsearch.client.asScoped(req).asCurrentUser
+          elasticsearch.client.asScoped(req).asCurrentUser,
+          req
         );
         await service.delete(id);
         return res.ok();

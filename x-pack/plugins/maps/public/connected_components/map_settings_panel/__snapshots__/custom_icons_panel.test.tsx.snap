@@ -1,0 +1,125 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`should render 1`] = `
+<Fragment>
+  <EuiPanel>
+    <EuiTitle
+      size="xs"
+    >
+      <h5>
+        <FormattedMessage
+          defaultMessage="Custom icons"
+          id="xpack.maps.mapSettingsPanel.customIconsTitle"
+          values={Object {}}
+        />
+      </h5>
+    </EuiTitle>
+    <EuiSpacer
+      size="m"
+    />
+    <EuiText
+      size="s"
+      textAlign="center"
+    >
+      <p>
+        <EuiTextColor
+          color="subdued"
+        >
+          <FormattedMessage
+            defaultMessage="Add a custom icon that can be used in layers in this map."
+            id="xpack.maps.mapSettingsPanel.customIcons.emptyState.description"
+            values={Object {}}
+          />
+        </EuiTextColor>
+      </p>
+    </EuiText>
+    <EuiTextAlign
+      textAlign="center"
+    >
+      <EuiButtonEmpty
+        data-test-subj="mapsCustomIconPanel-add"
+        iconType="plusInCircleFilled"
+        onClick={[Function]}
+        size="xs"
+      >
+        <FormattedMessage
+          defaultMessage="Add"
+          id="xpack.maps.mapSettingsPanel.customIconsAddIconButton"
+          values={Object {}}
+        />
+      </EuiButtonEmpty>
+    </EuiTextAlign>
+  </EuiPanel>
+</Fragment>
+`;
+
+exports[`should render with custom icons 1`] = `
+<Fragment>
+  <EuiPanel>
+    <EuiTitle
+      size="xs"
+    >
+      <h5>
+        <FormattedMessage
+          defaultMessage="Custom icons"
+          id="xpack.maps.mapSettingsPanel.customIconsTitle"
+          values={Object {}}
+        />
+      </h5>
+    </EuiTitle>
+    <EuiSpacer
+      size="m"
+    />
+    <EuiListGroup
+      listItems={
+        Array [
+          Object {
+            "extraAction": Object {
+              "alwaysShow": true,
+              "iconType": "gear",
+              "onClick": [Function],
+            },
+            "icon": <SymbolIcon
+              fill="rgb(52, 55, 65)"
+              svg="<svg width=\\"200\\" height=\\"250\\" xmlns=\\"http://www.w3.org/2000/svg\\"><path stroke=\\"#000\\" fill=\\"transparent\\" stroke-width=\\"5\\" d=\\"M10 10h30v30H10z\\"/></svg>"
+              symbolId="My Custom Icon"
+            />,
+            "key": "__kbn__custom_icon_sdf__foobar",
+            "label": "My Custom Icon",
+          },
+          Object {
+            "extraAction": Object {
+              "alwaysShow": true,
+              "iconType": "gear",
+              "onClick": [Function],
+            },
+            "icon": <SymbolIcon
+              fill="rgb(52, 55, 65)"
+              svg="<?xml version=\\"1.0\\" encoding=\\"UTF-8\\"?><svg xmlns=\\"http://www.w3.org/2000/svg\\" width=\\"531.74\\" height=\\"460.5\\" overflow=\\"visible\\" xml:space=\\"preserve\\"><path stroke=\\"#000\\" d=\\"M.866 460 265.87 1l265.004 459z\\"/></svg>"
+              symbolId="My Other Custom Icon"
+            />,
+            "key": "__kbn__custom_icon_sdf__bizzbuzz",
+            "label": "My Other Custom Icon",
+          },
+        ]
+      }
+    />
+    <EuiTextAlign
+      textAlign="center"
+    >
+      <EuiButtonEmpty
+        data-test-subj="mapsCustomIconPanel-add"
+        iconType="plusInCircleFilled"
+        onClick={[Function]}
+        size="xs"
+      >
+        <FormattedMessage
+          defaultMessage="Add"
+          id="xpack.maps.mapSettingsPanel.customIconsAddIconButton"
+          values={Object {}}
+        />
+      </EuiButtonEmpty>
+    </EuiTextAlign>
+  </EuiPanel>
+</Fragment>
+`;

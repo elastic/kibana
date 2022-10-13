@@ -10,8 +10,9 @@ import { render, act } from '@testing-library/react';
 import { mockAnomalies } from '../mock';
 import { cloneDeep } from 'lodash/fp';
 import { ExplorerLink } from './create_explorer_link';
-import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public/context';
-import { MlUrlGenerator } from '../../../../../../ml/public/ml_url_generator';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public/context';
+import { MlLocatorDefinition } from '@kbn/ml-plugin/public/locator';
+import { MockUrlService } from '@kbn/share-plugin/common/mocks';
 
 describe('create_explorer_link', () => {
   let anomalies = cloneDeep(mockAnomalies);
@@ -21,7 +22,9 @@ describe('create_explorer_link', () => {
   });
 
   test('it returns expected link', async () => {
-    const ml = { urlGenerator: new MlUrlGenerator({ appBasePath: '/app/ml', useHash: false }) };
+    const urlService = new MockUrlService();
+    const locator = urlService.locators.create(new MlLocatorDefinition());
+    const ml = { locator };
     const http = { basePath: { get: jest.fn(() => {}) } };
 
     await act(async () => {

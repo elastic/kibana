@@ -8,10 +8,10 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { UiActionsStart } from 'src/plugins/ui_actions/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
-import { CoreStart } from 'src/core/public';
-import { toMountPoint } from '../../../../../../kibana_react/public';
+import { CoreStart } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { EmbeddableFactoryDefinition } from '../../../embeddables';
 import { Container } from '../../../containers';
 import { ContactCardEmbeddableInput } from './contact_card_embeddable';
@@ -21,7 +21,8 @@ import { ContactCardInitializer } from './contact_card_initializer';
 export const CONTACT_CARD_EXPORTABLE_EMBEDDABLE = 'CONTACT_CARD_EXPORTABLE_EMBEDDABLE';
 
 export class ContactCardExportableEmbeddableFactory
-  implements EmbeddableFactoryDefinition<ContactCardEmbeddableInput> {
+  implements EmbeddableFactoryDefinition<ContactCardEmbeddableInput>
+{
   public readonly type = CONTACT_CARD_EXPORTABLE_EMBEDDABLE;
 
   constructor(
@@ -31,6 +32,10 @@ export class ContactCardExportableEmbeddableFactory
 
   public async isEditable() {
     return true;
+  }
+
+  public getDefaultInput() {
+    return {};
   }
 
   public getDisplayName() {

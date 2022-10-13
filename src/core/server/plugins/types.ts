@@ -10,15 +10,24 @@ import { Observable } from 'rxjs';
 import { Type } from '@kbn/config-schema';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { PathConfigType } from '@kbn/utils';
-
-import { ConfigPath, EnvironmentMode, PackageInfo, ConfigDeprecationProvider } from '../config';
-import { LoggerFactory } from '../logging';
-import { KibanaConfigType } from '../kibana_config';
-import { ElasticsearchConfigType } from '../elasticsearch/elasticsearch_config';
-import { SavedObjectsConfigType } from '../saved_objects/saved_objects_config';
-import { CoreSetup, CoreStart } from '..';
+import { LoggerFactory } from '@kbn/logging';
+import type {
+  ConfigPath,
+  EnvironmentMode,
+  PackageInfo,
+  ConfigDeprecationProvider,
+} from '@kbn/config';
+import type { PluginName, PluginOpaqueId, PluginType } from '@kbn/core-base-common';
+import type { NodeInfo } from '@kbn/core-node-server';
+import type { ElasticsearchConfigType } from '@kbn/core-elasticsearch-server-internal';
+import type { SavedObjectsConfigType } from '@kbn/core-saved-objects-base-server-internal';
+import { CorePreboot, CoreSetup, CoreStart } from '..';
 
 type Maybe<T> = T | undefined;
+
+// re-exporting for now to avoid adapting all imports, will be removed later on in the migration process
+export type { PluginName, PluginOpaqueId, DiscoveredPlugin } from '@kbn/core-base-common';
+export { PluginType } from '@kbn/core-base-common';
 
 /**
  * Dedicated type for plugin configuration schema.
@@ -28,13 +37,30 @@ type Maybe<T> = T | undefined;
 export type PluginConfigSchema<T> = Type<T>;
 
 /**
+ * Type defining the list of configuration properties that will be exposed on the client-side
+ * Object properties can either be fully exposed
+ *
+ * @public
+ */
+export type ExposedToBrowserDescriptor<T> = {
+  [Key in keyof T]?: T[Key] extends Maybe<any[]>
+    ? // handles arrays as primitive values
+      boolean
+    : T[Key] extends Maybe<object>
+    ? // can be nested for objects
+      ExposedToBrowserDescriptor<T[Key]> | boolean
+    : // primitives
+      boolean;
+};
+
+/**
  * Describes a plugin configuration properties.
  *
  * @example
  * ```typescript
  * // my_plugin/server/index.ts
  * import { schema, TypeOf } from '@kbn/config-schema';
- * import { PluginConfigDescriptor } from 'kibana/server';
+ * import { PluginConfigDescriptor } from '@kbn/core/server';
  *
  * const configSchema = schema.object({
  *   secret: schema.string({ defaultValue: 'Only on server' }),
@@ -65,7 +91,7 @@ export interface PluginConfigDescriptor<T = any> {
   /**
    * List of configuration properties that will be available on the client-side plugin.
    */
-  exposeToBrowser?: { [P in keyof T]?: boolean };
+  exposeToBrowser?: ExposedToBrowserDescriptor<T>;
   /**
    * Schema to use to validate the plugin configuration.
    *
@@ -105,17 +131,6 @@ export type MakeUsageFromSchema<T> = {
     : boolean;
 };
 
-/**
- * Dedicated type for plugin name/id that is supposed to make Map/Set/Arrays
- * that use it as a key or value more obvious.
- *
- * @public
- */
-export type PluginName = string;
-
-/** @public */
-export type PluginOpaqueId = symbol;
-
 /** @internal */
 export interface PluginDependencies {
   asNames: ReadonlyMap<PluginName, PluginName[]>;
@@ -148,6 +163,11 @@ export interface PluginManifest {
    * The version of Kibana the plugin is compatible with, defaults to "version".
    */
   readonly kibanaVersion: string;
+
+  /**
+   * Type of the plugin, defaults to `standard`.
+   */
+  readonly type: PluginType;
 
   /**
    * Root {@link ConfigPath | configuration path} used by the plugin, defaults
@@ -199,7 +219,7 @@ export interface PluginManifest {
    * Specifies directory names that can be imported by other ui-plugins built
    * using the same instance of the @kbn/optimizer. A temporary measure we plan
    * to replace with better mechanisms for sharing static code between plugins
-   * @deprecated
+   * @deprecated To be deleted when https://github.com/elastic/kibana/issues/101948 is done.
    */
   readonly extraPublicDirs?: string[];
 
@@ -208,74 +228,45 @@ export interface PluginManifest {
    * folders will cause your plugin API reference to be broken up into sub sections.
    */
   readonly serviceFolders?: readonly string[];
+
+  readonly owner: {
+    /**
+     * The name of the team that currently owns this plugin.
+     */
+    readonly name: string;
+    /**
+     * All internal plugins should have a github team specified. GitHub teams can be viewed here:
+     * https://github.com/orgs/elastic/teams
+     */
+    readonly githubTeam?: string;
+  };
+
+  /**
+   * TODO: make required once all plugins specify this.
+   * A brief description of what this plugin does and any capabilities it provides.
+   */
+  readonly description?: string;
+
+  /**
+   * Specifies whether this plugin - and its required dependencies - will be enabled for anonymous pages (login page, status page when
+   * configured, etc.) Default is false.
+   */
+  readonly enabledOnAnonymousPages?: boolean;
 }
 
 /**
- * Small container object used to expose information about discovered plugins that may
- * or may not have been started.
+ * The interface that should be returned by a `PluginInitializer` for a `preboot` plugin.
+ *
  * @public
  */
-export interface DiscoveredPlugin {
-  /**
-   * Identifier of the plugin.
-   */
-  readonly id: PluginName;
+export interface PrebootPlugin<TSetup = void, TPluginsSetup extends object = object> {
+  setup(core: CorePreboot, plugins: TPluginsSetup): TSetup;
 
-  /**
-   * Root configuration path used by the plugin, defaults to "id" in snake_case format.
-   */
-  readonly configPath: ConfigPath;
-
-  /**
-   * An optional list of the other plugins that **must be** installed and enabled
-   * for this plugin to function properly.
-   */
-  readonly requiredPlugins: readonly PluginName[];
-
-  /**
-   * An optional list of the other plugins that if installed and enabled **may be**
-   * leveraged by this plugin for some additional functionality but otherwise are
-   * not required for this plugin to work properly.
-   */
-  readonly optionalPlugins: readonly PluginName[];
-
-  /**
-   * List of plugin ids that this plugin's UI code imports modules from that are
-   * not in `requiredPlugins`.
-   *
-   * @remarks
-   * The plugins listed here will be loaded in the browser, even if the plugin is
-   * disabled. Required by `@kbn/optimizer` to support cross-plugin imports.
-   * "core" and plugins already listed in `requiredPlugins` do not need to be
-   * duplicated here.
-   */
-  readonly requiredBundles: readonly PluginName[];
+  stop?(): void;
 }
 
 /**
- * @internal
- */
-export interface InternalPluginInfo {
-  /**
-   * Version of the plugin
-   */
-  readonly version: string;
-  /**
-   * Bundles that must be loaded for this plugin
-   */
-  readonly requiredBundles: readonly string[];
-  /**
-   * Path to the target/public directory of the plugin which should be served
-   */
-  readonly publicTargetDir: string;
-  /**
-   * Path to the plugin assets directory.
-   */
-  readonly publicAssetsDir: string;
-}
-
-/**
- * The interface that should be returned by a `PluginInitializer`.
+ * The interface that should be returned by a `PluginInitializer` for a `standard` plugin.
  *
  * @public
  */
@@ -296,6 +287,7 @@ export interface Plugin<
  * A plugin with asynchronous lifecycle methods.
  *
  * @deprecated Asynchronous lifecycles are deprecated, and should be migrated to sync {@link Plugin | plugin}
+ * @removeBy 8.8.0
  * @public
  */
 export interface AsyncPlugin<
@@ -313,7 +305,6 @@ export interface AsyncPlugin<
 
 export const SharedGlobalConfigKeys = {
   // We can add more if really needed
-  kibana: ['index', 'autocompleteTerminateAfter', 'autocompleteTimeout'] as const,
   elasticsearch: ['shardTimeout', 'requestTimeout', 'pingTimeout'] as const,
   path: ['data'] as const,
   savedObjects: ['maxImportPayloadBytes'] as const,
@@ -323,7 +314,6 @@ export const SharedGlobalConfigKeys = {
  * @public
  */
 export type SharedGlobalConfig = RecursiveReadonly<{
-  kibana: Pick<KibanaConfigType, typeof SharedGlobalConfigKeys.kibana[number]>;
   elasticsearch: Pick<ElasticsearchConfigType, typeof SharedGlobalConfigKeys.elasticsearch[number]>;
   path: Pick<PathConfigType, typeof SharedGlobalConfigKeys.path[number]>;
   savedObjects: Pick<SavedObjectsConfigType, typeof SharedGlobalConfigKeys.savedObjects[number]>;
@@ -340,7 +330,31 @@ export interface PluginInitializerContext<ConfigSchema = unknown> {
     mode: EnvironmentMode;
     packageInfo: Readonly<PackageInfo>;
     instanceUuid: string;
+    configs: readonly string[];
   };
+  /**
+   * Access the configuration for this particular Kibana node.
+   * Can be used to determine which `roles` the current process was started with.
+   *
+   * @example
+   * ```typescript
+   * // plugins/my-plugin/server/plugin.ts
+   *
+   * export class MyPlugin implements Plugin  {
+   *   constructor(private readonly initContext: PluginInitializerContext) {
+   *     this.initContext = initContext;
+   *   }
+   *   setup() {
+   *     if (this.initContext.node.roles.backgroundTasks) {
+   *       // run background tasks
+   *     } else if (this.initContext.node.roles.ui) {
+   *       // register http routes, etc
+   *     }
+   *   }
+   * }
+   * ```
+   */
+  node: NodeInfo;
   /**
    * {@link LoggerFactory | logger factory} instance already bound to the plugin's logging context
    *
@@ -368,7 +382,8 @@ export interface PluginInitializerContext<ConfigSchema = unknown> {
      * Provide access to Kibana legacy configuration values.
      *
      * @remarks Naming not final here, it may be renamed in a near future
-     * @deprecated Accessing configuration values outside of the plugin's config scope is highly discouraged
+     * @deprecated Accessing configuration values outside of the plugin's config scope is highly discouraged.
+     * Can be removed when https://github.com/elastic/kibana/issues/119862 is done.
      */
     legacy: {
       globalConfig$: Observable<SharedGlobalConfig>;
@@ -450,4 +465,5 @@ export type PluginInitializer<
   core: PluginInitializerContext
 ) =>
   | Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>
+  | PrebootPlugin<TSetup, TPluginsSetup>
   | AsyncPlugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;

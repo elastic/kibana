@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Query } from '../../../../common';
+import { Query } from '../../..';
 import { AggConfigs } from '../agg_configs';
 import { AggTypesDependencies } from '../agg_types';
 import { mockAggTypesRegistry, mockAggTypesDependencies } from '../test_helpers';
@@ -51,7 +51,8 @@ describe('Filters Agg', () => {
         ],
         {
           typesRegistry: mockAggTypesRegistry(aggTypesDependencies),
-        }
+        },
+        jest.fn()
       );
     };
 
@@ -80,7 +81,96 @@ describe('Filters Agg', () => {
                   true,
                 ],
                 "filters": Array [
-                  "[{\\"label\\":\\"a\\",\\"input\\":{\\"language\\":\\"lucene\\",\\"query\\":\\"foo\\"}},{\\"label\\":\\"b\\",\\"input\\":{\\"language\\":\\"lucene\\",\\"query\\":\\"status:200\\"}},{\\"label\\":\\"c\\",\\"input\\":{\\"language\\":\\"lucene\\",\\"query\\":\\"status:[400 TO 499] AND (foo OR bar)\\"}}]",
+                  Object {
+                    "chain": Array [
+                      Object {
+                        "arguments": Object {
+                          "input": Array [
+                            Object {
+                              "chain": Array [
+                                Object {
+                                  "arguments": Object {
+                                    "q": Array [
+                                      "\\"foo\\"",
+                                    ],
+                                  },
+                                  "function": "lucene",
+                                  "type": "function",
+                                },
+                              ],
+                              "type": "expression",
+                            },
+                          ],
+                          "label": Array [
+                            "a",
+                          ],
+                        },
+                        "function": "queryFilter",
+                        "type": "function",
+                      },
+                    ],
+                    "type": "expression",
+                  },
+                  Object {
+                    "chain": Array [
+                      Object {
+                        "arguments": Object {
+                          "input": Array [
+                            Object {
+                              "chain": Array [
+                                Object {
+                                  "arguments": Object {
+                                    "q": Array [
+                                      "\\"status:200\\"",
+                                    ],
+                                  },
+                                  "function": "lucene",
+                                  "type": "function",
+                                },
+                              ],
+                              "type": "expression",
+                            },
+                          ],
+                          "label": Array [
+                            "b",
+                          ],
+                        },
+                        "function": "queryFilter",
+                        "type": "function",
+                      },
+                    ],
+                    "type": "expression",
+                  },
+                  Object {
+                    "chain": Array [
+                      Object {
+                        "arguments": Object {
+                          "input": Array [
+                            Object {
+                              "chain": Array [
+                                Object {
+                                  "arguments": Object {
+                                    "q": Array [
+                                      "\\"status:[400 TO 499] AND (foo OR bar)\\"",
+                                    ],
+                                  },
+                                  "function": "lucene",
+                                  "type": "function",
+                                },
+                              ],
+                              "type": "expression",
+                            },
+                          ],
+                          "label": Array [
+                            "c",
+                          ],
+                        },
+                        "function": "queryFilter",
+                        "type": "function",
+                      },
+                    ],
+                    "type": "expression",
+                  },
                 ],
                 "id": Array [
                   "test",

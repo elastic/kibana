@@ -7,8 +7,66 @@
 
 import seedrandom from 'seedrandom';
 import uuid from 'uuid';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 const OS_FAMILY = ['windows', 'macos', 'linux'];
+/** Array of 14 day offsets */
+const DAY_OFFSETS = Array.from({ length: 14 }, (_, i) => 8.64e7 * (i + 1));
+
+const USERS = [
+  'elastic',
+  'shay',
+  'Damian',
+  'Sarai',
+  'Deirdre',
+  'Shawana',
+  'Treena',
+  'Ellamae',
+  'Myriam',
+  'Roberto',
+  'Cordell',
+  'Demetrice',
+  'Audrea',
+  'Shanel',
+  'Gail',
+  'Hermila',
+  'Mara',
+  'Elden',
+  'Malisa',
+  'Derick',
+  'Teddy',
+  'Dovie',
+  'Betty',
+  'Kay',
+  'Sharice',
+  'Evalyn',
+  'Teressa',
+  'Teisha',
+  'Marianne',
+  'Cherelle',
+  'Tabitha',
+  'Deneen',
+  'Leo',
+  'Tess',
+  'Clair',
+  'Marty',
+  'Dexter',
+  'Candis',
+  'Dina',
+  'Bennett',
+  'Vesta',
+  'Trinity',
+  'Drusilla',
+  'Bree',
+  'Bryon',
+  'Johnson',
+  'Justa',
+  'Jada',
+  'Armand',
+  'Raeann',
+  'Yolande',
+  'Genevieve',
+];
 
 /**
  * A generic base class to assist in creating domain specific data generators. It includes
@@ -16,6 +74,7 @@ const OS_FAMILY = ['windows', 'macos', 'linux'];
  * public method named `generate()` which should be implemented by sub-classes.
  */
 export class BaseDataGenerator<GeneratedDoc extends {} = {}> {
+  /** A javascript seeded random number (float between 0 and 1). Don't use `Math.random()` */
   protected random: seedrandom.prng;
 
   constructor(seed: string | seedrandom.prng = Math.random().toString()) {
@@ -33,8 +92,34 @@ export class BaseDataGenerator<GeneratedDoc extends {} = {}> {
     throw new Error('method not implemented!');
   }
 
+  public randomUser(): string {
+    return this.randomChoice(USERS);
+  }
+
+  /** Returns a future ISO date string */
+  protected randomFutureDate(from?: Date): string {
+    const now = from ? from.getTime() : Date.now();
+    return new Date(now + this.randomChoice(DAY_OFFSETS)).toISOString();
+  }
+
+  /** Returns a past ISO date string */
+  protected randomPastDate(from?: Date): string {
+    const now = from ? from.getTime() : Date.now();
+    return new Date(now - this.randomChoice(DAY_OFFSETS)).toISOString();
+  }
+
+  /**
+   * Generate either `true` or `false`. By default, the boolean is calculated by determining if a
+   * float is less than `0.5`, but that can be adjusted via the input argument
+   *
+   * @param isLessThan
+   */
+  protected randomBoolean(isLessThan: number = 0.5): boolean {
+    return this.random() < isLessThan;
+  }
+
   /** generate random OS family value */
-  protected randomOSFamily(): string {
+  public randomOSFamily(): string {
     return this.randomChoice(OS_FAMILY);
   }
 
@@ -43,8 +128,13 @@ export class BaseDataGenerator<GeneratedDoc extends {} = {}> {
     return uuid.v4();
   }
 
+  /** generate a seeded random UUID v4 */
+  protected seededUUIDv4(): string {
+    return uuid.v4({ random: [...this.randomNGenerator(255, 16)] });
+  }
+
   /** Generate a random number up to the max provided */
-  protected randomN(max: number): number {
+  public randomN(max: number): number {
     return Math.floor(this.random() * max);
   }
 
@@ -77,10 +167,12 @@ export class BaseDataGenerator<GeneratedDoc extends {} = {}> {
   }
 
   protected randomVersion(): string {
-    return [6, ...this.randomNGenerator(10, 2)].map((x) => x.toString()).join('.');
+    // the `major` is sometimes (30%) 7 and most of the time (70%) 8
+    const major = this.randomBoolean(0.4) ? 7 : 8;
+    return [major, ...this.randomNGenerator(20, 2)].map((x) => x.toString()).join('.');
   }
 
-  protected randomChoice<T>(choices: T[]): T {
+  protected randomChoice<T>(choices: T[] | readonly T[]): T {
     return choices[this.randomN(choices.length)];
   }
 
@@ -90,5 +182,50 @@ export class BaseDataGenerator<GeneratedDoc extends {} = {}> {
 
   protected randomHostname(): string {
     return `Host-${this.randomString(10)}`;
+  }
+
+  /**
+   * Returns an single search hit (normally found in a `SearchResponse`) for the given document source.
+   * @param hitSource
+   * @param index
+   */
+  toEsSearchHit<T extends object = object>(
+    hitSource: T,
+    index: string = 'some-index'
+  ): estypes.SearchHit<T> {
+    return {
+      _index: index,
+      _id: this.seededUUIDv4(),
+      _score: 1.0,
+      _source: hitSource,
+    };
+  }
+
+  /**
+   * Returns an ES Search Response for the give set of records. Each record will be wrapped with
+   * the `toEsSearchHit()`
+   * @param hitsSource
+   */
+  toEsSearchResponse<T extends object = object>(
+    hitsSource: Array<estypes.SearchHit<T>>
+  ): estypes.SearchResponse<T> {
+    return {
+      took: 3,
+      timed_out: false,
+      _shards: {
+        total: 2,
+        successful: 2,
+        skipped: 0,
+        failed: 0,
+      },
+      hits: {
+        total: {
+          value: hitsSource.length,
+          relation: 'eq',
+        },
+        max_score: 0,
+        hits: hitsSource,
+      },
+    };
   }
 }

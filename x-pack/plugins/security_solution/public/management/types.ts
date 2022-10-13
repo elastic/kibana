@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { CombinedState } from 'redux';
-import { SecurityPageName } from '../app/types';
-import { PolicyDetailsState } from './pages/policy/types';
-import { EndpointState } from './pages/endpoint_hosts/types';
-import { TrustedAppsListPageState } from './pages/trusted_apps/state';
-import { EventFiltersListPageState } from './pages/event_filters/state';
+import type { CombinedState } from 'redux';
+import type { SecurityPageName } from '../app/types';
+import type { PolicyDetailsState } from './pages/policy/types';
+import type { EndpointState } from './pages/endpoint_hosts/types';
 
 /**
  * The type for the management store global namespace. Used mostly internally to reference
@@ -21,8 +19,6 @@ export type ManagementStoreGlobalNamespace = 'management';
 export type ManagementState = CombinedState<{
   policyDetails: PolicyDetailsState;
   endpoints: EndpointState;
-  trustedApps: TrustedAppsListPageState;
-  eventFilters: EventFiltersListPageState;
 }>;
 
 /**
@@ -33,6 +29,9 @@ export enum AdministrationSubTab {
   policies = 'policy',
   trustedApps = 'trusted_apps',
   eventFilters = 'event_filters',
+  hostIsolationExceptions = 'host_isolation_exceptions',
+  blocklist = 'blocklist',
+  responseActionsHistory = 'response_actions_history',
 }
 
 /**

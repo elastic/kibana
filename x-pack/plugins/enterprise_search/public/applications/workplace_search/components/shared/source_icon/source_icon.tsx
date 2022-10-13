@@ -18,8 +18,20 @@ interface SourceIconProps {
   name: string;
   className?: string;
   size?: IconSize;
+  iconAsBase64?: string;
 }
 
-export const SourceIcon: React.FC<SourceIconProps> = ({ name, serviceType, className, size }) => (
-  <EuiIcon type={images[camelCase(serviceType)]} title={name} className={className} size={size} />
+export const SourceIcon: React.FC<SourceIconProps> = ({
+  name,
+  serviceType,
+  className,
+  size,
+  iconAsBase64,
+}) => (
+  <EuiIcon
+    type={iconAsBase64 ? `data:image/png;base64,${iconAsBase64}` : images[camelCase(serviceType)]}
+    title={`${name} logo`}
+    className={className}
+    size={size}
+  />
 );

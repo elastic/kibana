@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { findTestSubject, mountWithIntl } from '@kbn/test/jest';
+import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { AllRule, FieldRule } from '../../model';
 import { AddRuleButton } from './add_rule_button';

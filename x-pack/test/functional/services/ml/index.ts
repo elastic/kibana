@@ -13,6 +13,7 @@ import { MachineLearningAPIProvider } from './api';
 import { MachineLearningCommonAPIProvider } from './common_api';
 import { MachineLearningCommonConfigsProvider } from './common_config';
 import { MachineLearningCommonUIProvider } from './common_ui';
+import { MachineLearningCommonDataGridProvider } from './common_data_grid';
 import { MachineLearningCustomUrlsProvider } from './custom_urls';
 import { MachineLearningDataFrameAnalyticsProvider } from './data_frame_analytics';
 import { MachineLearningDataFrameAnalyticsCreationProvider } from './data_frame_analytics_creation';
@@ -23,6 +24,8 @@ import { MachineLearningDataFrameAnalyticsTableProvider } from './data_frame_ana
 import { MachineLearningDataVisualizerProvider } from './data_visualizer';
 import { MachineLearningDataVisualizerFileBasedProvider } from './data_visualizer_file_based';
 import { MachineLearningDataVisualizerIndexBasedProvider } from './data_visualizer_index_based';
+import { MachineLearningDataVisualizerIndexPatternManagementProvider } from './data_visualizer_index_pattern_management';
+import { MachineLearningForecastProvider } from './forecast';
 import { MachineLearningJobManagementProvider } from './job_management';
 import { MachineLearningJobSelectionProvider } from './job_selection';
 import { MachineLearningJobSourceSelectionProvider } from './job_source_selection';
@@ -33,6 +36,7 @@ import { MachineLearningJobWizardCommonProvider } from './job_wizard_common';
 import { MachineLearningJobWizardCategorizationProvider } from './job_wizard_categorization';
 import { MachineLearningJobWizardMultiMetricProvider } from './job_wizard_multi_metric';
 import { MachineLearningJobWizardPopulationProvider } from './job_wizard_population';
+import { MachineLearningLensVisualizationsProvider } from './lens_visualizations';
 import { MachineLearningNavigationProvider } from './navigation';
 import { MachineLearningOverviewPageProvider } from './overview_page';
 import { MachineLearningSecurityCommonProvider } from './security_common';
@@ -41,6 +45,7 @@ import { MachineLearningSettingsProvider } from './settings';
 import { MachineLearningSettingsCalendarProvider } from './settings_calendar';
 import { MachineLearningSettingsFilterListProvider } from './settings_filter_list';
 import { MachineLearningSingleMetricViewerProvider } from './single_metric_viewer';
+import { MachineLearningStackManagementJobsProvider } from './stack_management_jobs';
 import { MachineLearningTestExecutionProvider } from './test_execution';
 import { MachineLearningTestResourcesProvider } from './test_resources';
 import { MachineLearningDataVisualizerTableProvider } from './data_visualizer_table';
@@ -48,13 +53,23 @@ import { MachineLearningAlertingProvider } from './alerting';
 import { SwimLaneProvider } from './swim_lane';
 import { MachineLearningDashboardJobSelectionTableProvider } from './dashboard_job_selection_table';
 import { MachineLearningDashboardEmbeddablesProvider } from './dashboard_embeddables';
+import { TrainedModelsProvider } from './trained_models';
+import { TrainedModelsTableProvider } from './trained_models_table';
+import { MachineLearningJobAnnotationsProvider } from './job_annotations_table';
+import { MlNodesPanelProvider } from './ml_nodes_list';
+import { MachineLearningCasesProvider } from './cases';
+import { AnomalyChartsProvider } from './anomaly_charts';
+import { NotificationsProvider } from './notifications';
+import { MlTableServiceProvider } from './common_table_service';
 
 export function MachineLearningProvider(context: FtrProviderContext) {
   const commonAPI = MachineLearningCommonAPIProvider(context);
   const commonUI = MachineLearningCommonUIProvider(context);
+  const commonDataGrid = MachineLearningCommonDataGridProvider(context);
 
   const anomaliesTable = MachineLearningAnomaliesTableProvider(context);
-  const anomalyExplorer = MachineLearningAnomalyExplorerProvider(context);
+  const anomalyCharts = AnomalyChartsProvider(context);
+  const anomalyExplorer = MachineLearningAnomalyExplorerProvider(context, anomalyCharts);
   const api = MachineLearningAPIProvider(context);
   const commonConfig = MachineLearningCommonConfigsProvider(context);
   const customUrls = MachineLearningCustomUrlsProvider(context);
@@ -62,7 +77,6 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const dashboardJobSelectionTable = MachineLearningDashboardJobSelectionTableProvider(context);
   const dashboardEmbeddables = MachineLearningDashboardEmbeddablesProvider(
     context,
-    commonUI,
     dashboardJobSelectionTable
   );
 
@@ -75,7 +89,8 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const dataFrameAnalyticsEdit = MachineLearningDataFrameAnalyticsEditProvider(context, commonUI);
   const dataFrameAnalyticsResults = MachineLearningDataFrameAnalyticsResultsProvider(
     context,
-    commonUI
+    commonUI,
+    commonDataGrid
   );
   const dataFrameAnalyticsMap = MachineLearningDataFrameAnalyticsMapProvider(context);
   const dataFrameAnalyticsTable = MachineLearningDataFrameAnalyticsTableProvider(context);
@@ -85,17 +100,22 @@ export function MachineLearningProvider(context: FtrProviderContext) {
 
   const dataVisualizerFileBased = MachineLearningDataVisualizerFileBasedProvider(context, commonUI);
   const dataVisualizerIndexBased = MachineLearningDataVisualizerIndexBasedProvider(context);
+  const dataVisualizerIndexPatternManagement =
+    MachineLearningDataVisualizerIndexPatternManagementProvider(context, dataVisualizerTable);
 
+  const forecast = MachineLearningForecastProvider(context);
+  const jobAnnotations = MachineLearningJobAnnotationsProvider(context);
   const jobManagement = MachineLearningJobManagementProvider(context, api);
   const jobSelection = MachineLearningJobSelectionProvider(context);
   const jobSourceSelection = MachineLearningJobSourceSelectionProvider(context);
-  const jobTable = MachineLearningJobTableProvider(context);
+  const jobTable = MachineLearningJobTableProvider(context, commonUI, customUrls);
   const jobTypeSelection = MachineLearningJobTypeSelectionProvider(context);
   const jobWizardAdvanced = MachineLearningJobWizardAdvancedProvider(context, commonUI);
   const jobWizardCategorization = MachineLearningJobWizardCategorizationProvider(context);
   const jobWizardCommon = MachineLearningJobWizardCommonProvider(context, commonUI, customUrls);
   const jobWizardMultiMetric = MachineLearningJobWizardMultiMetricProvider(context);
   const jobWizardPopulation = MachineLearningJobWizardPopulationProvider(context);
+  const lensVisualizations = MachineLearningLensVisualizationsProvider(context, commonUI);
   const navigation = MachineLearningNavigationProvider(context);
   const overviewPage = MachineLearningOverviewPageProvider(context);
   const securityCommon = MachineLearningSecurityCommonProvider(context);
@@ -104,18 +124,29 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const settingsCalendar = MachineLearningSettingsCalendarProvider(context, commonUI);
   const settingsFilterList = MachineLearningSettingsFilterListProvider(context, commonUI);
   const singleMetricViewer = MachineLearningSingleMetricViewerProvider(context, commonUI);
+  const stackManagementJobs = MachineLearningStackManagementJobsProvider(context);
+  const tableService = MlTableServiceProvider(context);
   const testExecution = MachineLearningTestExecutionProvider(context);
-  const testResources = MachineLearningTestResourcesProvider(context);
-  const alerting = MachineLearningAlertingProvider(context, commonUI);
+  const testResources = MachineLearningTestResourcesProvider(context, api);
+  const alerting = MachineLearningAlertingProvider(context, api, commonUI);
   const swimLane = SwimLaneProvider(context);
+  const trainedModels = TrainedModelsProvider(context, commonUI);
+  const trainedModelsTable = TrainedModelsTableProvider(context, commonUI);
+  const mlNodesPanel = MlNodesPanelProvider(context);
+  const notifications = NotificationsProvider(context, commonUI, tableService);
+
+  const cases = MachineLearningCasesProvider(context, swimLane, anomalyCharts);
 
   return {
     anomaliesTable,
+    anomalyCharts,
     anomalyExplorer,
     alerting,
     api,
+    cases,
     commonAPI,
     commonConfig,
+    commonDataGrid,
     commonUI,
     customUrls,
     dashboardJobSelectionTable,
@@ -129,7 +160,10 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     dataVisualizer,
     dataVisualizerFileBased,
     dataVisualizerIndexBased,
+    dataVisualizerIndexPatternManagement,
     dataVisualizerTable,
+    forecast,
+    jobAnnotations,
     jobManagement,
     jobSelection,
     jobSourceSelection,
@@ -140,7 +174,10 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     jobWizardCommon,
     jobWizardMultiMetric,
     jobWizardPopulation,
+    lensVisualizations,
+    mlNodesPanel,
     navigation,
+    notifications,
     overviewPage,
     securityCommon,
     securityUI,
@@ -148,8 +185,12 @@ export function MachineLearningProvider(context: FtrProviderContext) {
     settingsCalendar,
     settingsFilterList,
     singleMetricViewer,
+    stackManagementJobs,
     swimLane,
+    tableService,
     testExecution,
     testResources,
+    trainedModels,
+    trainedModelsTable,
   };
 }

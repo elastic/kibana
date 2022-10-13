@@ -1,7 +1,6 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "composite": true,
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
@@ -24,8 +23,12 @@
     { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
     { "path": "../alerting/tsconfig.json" },
     { "path": "../licensing/tsconfig.json" },
+    { "path": "../cases/tsconfig.json" },
     { "path": "../lens/tsconfig.json" },
     { "path": "../rule_registry/tsconfig.json" },
-    { "path": "../translations/tsconfig.json" }
+    { "path": "../spaces/tsconfig.json" },
+    { "path": "../timelines/tsconfig.json"},
+    { "path": "../translations/tsconfig.json" },
+    { "path":  "../../../src/plugins/unified_search/tsconfig.json"},
   ]
 }

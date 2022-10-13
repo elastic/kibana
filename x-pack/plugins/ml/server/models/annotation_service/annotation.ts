@@ -7,8 +7,9 @@
 
 import Boom from '@hapi/boom';
 import { each, get } from 'lodash';
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ANNOTATION_EVENT_USER, ANNOTATION_TYPE } from '../../../common/constants/annotations';
 import { PARTITION_FIELDS } from '../../../common/constants/anomalies';
 import {
@@ -23,8 +24,8 @@ import {
   isAnnotations,
   getAnnotationFieldName,
   getAnnotationFieldValue,
-  EsAggregationResult,
 } from '../../../common/types/annotations';
+import { JobId } from '../../../common/types/anomaly_detection_jobs';
 
 // TODO All of the following interface/type definitions should
 // eventually be replaced by the proper upstream definitions
@@ -33,41 +34,34 @@ interface EsResult {
   _id: string;
 }
 
-export interface FieldToBucket {
-  field: string;
-  missing?: string | number;
-}
-
 export interface IndexAnnotationArgs {
   jobIds: string[];
-  earliestMs: number;
-  latestMs: number;
+  earliestMs: number | null;
+  latestMs: number | null;
   maxAnnotations: number;
-  fields?: FieldToBucket[];
   detectorIndex?: number;
   entities?: any[];
-}
-
-export interface AggTerm {
-  terms: FieldToBucket;
+  event?: Annotation['event'];
 }
 
 export interface GetParams {
   index: string;
   size: number;
   body: object;
+  track_total_hits: boolean;
 }
 
 export interface GetResponse {
   success: true;
-  annotations: Record<string, Annotations>;
-  aggregations: EsAggregationResult;
+  annotations: Record<JobId, Annotations>;
+  totalCount: number;
 }
 
 export interface IndexParams {
   index: string;
   body: Annotation;
   refresh: boolean | 'wait_for' | undefined;
+  require_alias?: boolean;
   id?: string;
 }
 
@@ -77,7 +71,38 @@ export interface DeleteParams {
   id: string;
 }
 
+export interface AggByJob {
+  key: string;
+  doc_count: number;
+  latest_delayed: Pick<estypes.SearchResponse<Annotation>, 'hits'>;
+}
+
 export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
+  // Find the index the annotation is stored in.
+  async function fetchAnnotationIndex(id: string) {
+    const searchParams: estypes.SearchRequest = {
+      index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
+      size: 1,
+      body: {
+        query: {
+          ids: {
+            values: [id],
+          },
+        },
+      },
+    };
+
+    const body = await asInternalUser.search(searchParams, { maxRetries: 0 });
+    const totalCount =
+      typeof body.hits.total === 'number' ? body.hits.total : body.hits.total!.value;
+
+    if (totalCount === 0) {
+      throw Boom.notFound(`Cannot find annotation with ID ${id}`);
+    }
+
+    return body.hits.hits[0]._index;
+  }
+
   async function indexAnnotation(annotation: Annotation, username: string) {
     if (isAnnotation(annotation) === false) {
       // No need to translate, this will not be exposed in the UI.
@@ -96,16 +121,18 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
       index: ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
       body: annotation,
       refresh: 'wait_for',
+      require_alias: true,
     };
 
     if (typeof annotation._id !== 'undefined') {
       params.id = annotation._id;
+      params.index = await fetchAnnotationIndex(annotation._id);
+      params.require_alias = false;
       delete params.body._id;
       delete params.body.key;
     }
 
-    const { body } = await asInternalUser.index(params);
-    return body;
+    return await asInternalUser.index(params, { maxRetries: 0 });
   }
 
   async function getAnnotations({
@@ -113,14 +140,14 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
     earliestMs,
     latestMs,
     maxAnnotations,
-    fields,
     detectorIndex,
     entities,
-  }: IndexAnnotationArgs) {
+    event,
+  }: IndexAnnotationArgs): Promise<GetResponse> {
     const obj: GetResponse = {
       success: true,
       annotations: {},
-      aggregations: {},
+      totalCount: 0,
     };
 
     const boolCriteria: object[] = [];
@@ -190,6 +217,12 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
       exists: { field: 'annotation' },
     });
 
+    if (event) {
+      boolCriteria.push({
+        term: { event },
+      });
+    }
+
     if (jobIds && jobIds.length > 0 && !(jobIds.length === 1 && jobIds[0] === '*')) {
       let jobIdFilterStr = '';
       each(jobIds, (jobId, i: number) => {
@@ -200,18 +233,6 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
           analyze_wildcard: false,
           query: jobIdFilterStr,
         },
-      });
-    }
-
-    // Find unique buckets (e.g. events) from the queried annotations to show in dropdowns
-    const aggs: Record<string, AggTerm> = {};
-    if (fields) {
-      fields.forEach((fieldToBucket) => {
-        aggs[fieldToBucket.field] = {
-          terms: {
-            ...fieldToBucket,
-          },
-        };
       });
     }
 
@@ -264,6 +285,7 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
     const params: GetParams = {
       index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
       size: maxAnnotations,
+      track_total_hits: true,
       body: {
         query: {
           bool: {
@@ -283,18 +305,20 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
             ...(shouldClauses ? { should: shouldClauses, minimum_should_match: 1 } : {}),
           },
         },
-        ...(fields ? { aggs } : {}),
       },
     };
 
     try {
-      const { body } = await asInternalUser.search(params);
+      const body = await asInternalUser.search(params, { maxRetries: 0 });
 
       // @ts-expect-error TODO fix search response types
       if (body.error !== undefined && body.message !== undefined) {
         // No need to translate, this will not be exposed in the UI.
         throw new Error(`Annotations couldn't be retrieved from Elasticsearch.`);
       }
+
+      // @ts-expect-error incorrect search response type
+      obj.totalCount = body.hits.total.value;
 
       // @ts-expect-error TODO fix search response types
       const docs: Annotations = get(body, ['hits', 'hits'], []).map((d: EsResult) => {
@@ -309,10 +333,6 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
         } as Annotation;
       });
 
-      const aggregations = get(body, ['aggregations'], {}) as EsAggregationResult;
-      if (fields) {
-        obj.aggregations = aggregations;
-      }
       if (isAnnotations(docs) === false) {
         // No need to translate, this will not be exposed in the UI.
         throw new Error(`Annotations didn't pass integrity check.`);
@@ -332,20 +352,85 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
     }
   }
 
+  /**
+   * Fetches the latest delayed data annotation per job.
+   * @param jobIds
+   * @param earliestMs - Timestamp for the end_timestamp range query.
+   */
+  async function getDelayedDataAnnotations({
+    jobIds,
+    earliestMs,
+  }: {
+    jobIds: string[];
+    earliestMs?: number;
+  }): Promise<Annotation[]> {
+    const params: estypes.SearchRequest = {
+      index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
+      size: 0,
+      body: {
+        query: {
+          bool: {
+            filter: [
+              ...(earliestMs ? [{ range: { end_timestamp: { gte: earliestMs } } }] : []),
+              {
+                term: { event: { value: 'delayed_data' } },
+              },
+              { terms: { job_id: jobIds } },
+            ],
+          },
+        },
+        aggs: {
+          by_job: {
+            terms: { field: 'job_id', size: jobIds.length },
+            aggs: {
+              latest_delayed: {
+                top_hits: {
+                  size: 1,
+                  sort: [
+                    {
+                      end_timestamp: {
+                        order: 'desc',
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+
+    const body = await asInternalUser.search<Annotation>(params, { maxRetries: 0 });
+
+    const annotations = (
+      (body.aggregations!.by_job as estypes.AggregationsTermsAggregateBase<AggByJob>)
+        .buckets as AggByJob[]
+    ).map((bucket) => {
+      return bucket.latest_delayed.hits.hits[0]._source!;
+    });
+
+    return annotations;
+  }
+
   async function deleteAnnotation(id: string) {
-    const params: DeleteParams = {
-      index: ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
+    const index = await fetchAnnotationIndex(id);
+
+    const deleteParams: DeleteParams = {
+      index,
       id,
       refresh: 'wait_for',
     };
 
-    const { body } = await asInternalUser.delete(params);
-    return body;
+    return await asInternalUser.delete(deleteParams);
   }
 
   return {
     getAnnotations,
     indexAnnotation,
     deleteAnnotation,
+    getDelayedDataAnnotations,
   };
 }
+
+export type AnnotationService = ReturnType<typeof annotationProvider>;

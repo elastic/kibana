@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'kibana/server';
+import { IRouter } from '@kbn/core/server';
 import { ILicenseState } from '../lib';
 import { BASE_ACTION_API_PATH } from '../../common';
 import { ActionsRequestHandlerContext } from '../types';
@@ -29,7 +29,7 @@ export const deleteActionRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const actionsClient = context.actions.getActionsClient();
+        const actionsClient = (await context.actions).getActionsClient();
         const { id } = req.params;
         await actionsClient.delete({ id });
         return res.noContent();

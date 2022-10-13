@@ -34,13 +34,16 @@ describe('agg_expression_functions', () => {
 
     test('includes optional params when they are provided', () => {
       const actual = fn({
-        filters: JSON.stringify([
+        filters: [
           {
-            query: 'query',
-            language: 'lucene',
+            type: 'kibana_query_filter',
+            input: {
+              query: 'query',
+              language: 'lucene',
+            },
             label: 'test',
           },
-        ]),
+        ],
       });
 
       expect(actual.value).toMatchInlineSnapshot(`
@@ -50,9 +53,11 @@ describe('agg_expression_functions', () => {
           "params": Object {
             "filters": Array [
               Object {
+                "input": Object {
+                  "language": "lucene",
+                  "query": "query",
+                },
                 "label": "test",
-                "language": "lucene",
-                "query": "query",
               },
             ],
             "json": undefined,

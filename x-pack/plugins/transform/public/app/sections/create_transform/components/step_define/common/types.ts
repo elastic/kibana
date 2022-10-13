@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { KBN_FIELD_TYPES } from '../../../../../../../../../../src/plugins/data/public';
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import { EsFieldName } from '../../../../../../../common/types/fields';
 
@@ -24,7 +25,7 @@ import {
 } from '../../../../../../../common/types/transform';
 import { LatestFunctionConfig } from '../../../../../../../common/api_schemas/transforms';
 
-import { isPopulatedObject } from '../../../../../../../common/shared_imports';
+import { RUNTIME_FIELD_TYPES } from '../../../../../../../common/shared_imports';
 
 export interface ErrorMessage {
   query: string;
@@ -36,8 +37,6 @@ export interface Field {
   type: KBN_FIELD_TYPES;
 }
 
-// Replace this with import once #88995 is merged
-const RUNTIME_FIELD_TYPES = ['keyword', 'long', 'double', 'date', 'ip', 'boolean'] as const;
 type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
 
 export interface RuntimeField {

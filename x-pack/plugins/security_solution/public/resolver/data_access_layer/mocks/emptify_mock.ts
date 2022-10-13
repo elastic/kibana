@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import {
+import type {
   ResolverRelatedEvents,
   ResolverNode,
   ResolverEntityIndex,
   SafeResolverEvent,
 } from '../../../../common/endpoint/types';
 import { mockTreeWithNoProcessEvents } from '../../mocks/resolver_tree';
-import { DataAccessLayer } from '../../types';
+import type { DataAccessLayer } from '../../types';
 
 type EmptiableRequests =
   | 'relatedEvents'
@@ -66,9 +66,7 @@ export function emptifyMock<T>(
           : dataAccessLayer.relatedEvents(...args);
       },
 
-      async eventsWithEntityIDAndCategory(
-        ...args
-      ): Promise<{
+      async eventsWithEntityIDAndCategory(...args): Promise<{
         events: SafeResolverEvent[];
         nextEvent: string | null;
       }> {

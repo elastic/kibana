@@ -1,0 +1,1 @@
+See x-pack/plugins/security_solution/common/detection_engine/schemas/alerts/README.md for full description of versioned alert schema strategy and how it's used in the Security Solution's Detection Engine.

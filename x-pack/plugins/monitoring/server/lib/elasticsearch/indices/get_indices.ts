@@ -8,8 +8,6 @@
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
-import { checkParam } from '../../error_missing_required';
-// @ts-ignore
 import { ElasticsearchMetric } from '../../metrics';
 // @ts-ignore
 import { createQuery } from '../../create_query';
@@ -19,6 +17,8 @@ import { calculateRate } from '../../calculate_rate';
 import { getUnassignedShards } from '../shards';
 import { ElasticsearchResponse } from '../../../../common/types/es';
 import { LegacyRequest } from '../../../types';
+import { getIndexPatterns, getElasticsearchDataset } from '../../cluster/get_index_patterns';
+import { Globals } from '../../../static_globals';
 
 export function handleResponse(
   resp: ElasticsearchResponse,
@@ -35,10 +35,11 @@ export function handleResponse(
       hit.inner_hits?.earliest?.hits?.hits[0]?._source.elasticsearch?.index;
 
     const rateOptions = {
-      hitTimestamp: hit._source.timestamp ?? hit._source['@timestamp'],
+      hitTimestamp: hit._source.timestamp ?? hit._source['@timestamp'] ?? null,
       earliestHitTimestamp:
         hit.inner_hits?.earliest?.hits?.hits[0]?._source.timestamp ??
-        hit.inner_hits?.earliest?.hits?.hits[0]?._source['@timestamp'],
+        hit.inner_hits?.earliest?.hits?.hits[0]?._source['@timestamp'] ??
+        null,
       timeWindowMin: min,
       timeWindowMax: max,
     };
@@ -94,7 +95,7 @@ export function handleResponse(
 }
 
 export function buildGetIndicesQuery(
-  esIndexPattern: string,
+  req: LegacyRequest,
   clusterUuid: string,
   {
     start,
@@ -112,12 +113,21 @@ export function buildGetIndicesQuery(
     });
   }
   const metricFields = ElasticsearchMetric.getMetricFields();
+  const dataset = 'index'; // data_stream.dataset
+  const type = 'index_stats'; // legacy
+  const moduleType = 'elasticsearch';
+  const indexPatterns = getIndexPatterns({
+    config: Globals.app.config,
+    ccs: req.payload.ccs,
+    dataset,
+    moduleType,
+  });
 
   return {
-    index: esIndexPattern,
+    index: indexPatterns,
     size,
-    ignoreUnavailable: true,
-    filterPath: [
+    ignore_unavailable: true,
+    filter_path: [
       // only filter path can filter for inner_hits
       'hits.hits._source.index_stats.index',
       'hits.hits._source.elasticsearch.index.name',
@@ -144,7 +154,9 @@ export function buildGetIndicesQuery(
     ],
     body: {
       query: createQuery({
-        types: ['index', 'index_stats'],
+        type,
+        dsDataset: getElasticsearchDataset(dataset),
+        metricset: dataset,
         start,
         end,
         clusterUuid,
@@ -166,21 +178,18 @@ export function buildGetIndicesQuery(
 
 export function getIndices(
   req: LegacyRequest,
-  esIndexPattern: string,
   showSystemIndices: boolean = false,
   shardStats: any
 ) {
-  checkParam(esIndexPattern, 'esIndexPattern in elasticsearch/getIndices');
-
   const { min: start, max: end } = req.payload.timeRange;
 
   const clusterUuid = req.params.clusterUuid;
-  const config = req.server.config();
-  const params = buildGetIndicesQuery(esIndexPattern, clusterUuid, {
+  const config = req.server.config;
+  const params = buildGetIndicesQuery(req, clusterUuid, {
     start,
     end,
     showSystemIndices,
-    size: parseInt(config.get('monitoring.ui.max_bucket_size') || '', 10),
+    size: config.ui.max_bucket_size,
   });
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');

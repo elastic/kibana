@@ -14,9 +14,7 @@ import { HiddenText } from '.';
 describe('HiddenText', () => {
   it('provides the passed "text" in a "hiddenText" field, with all characters obfuscated', () => {
     const wrapper = shallow(
-      <HiddenText text="hidden_test">
-        {({ hiddenText, isHidden, toggle }) => <div>{hiddenText}</div>}
-      </HiddenText>
+      <HiddenText text="hidden_test">{({ hiddenText }) => <div>{hiddenText}</div>}</HiddenText>
     );
     expect(wrapper.text()).toEqual('•••••••••••');
   });
@@ -26,7 +24,7 @@ describe('HiddenText', () => {
 
     const wrapper = shallow(
       <HiddenText text="hidden_test">
-        {({ hiddenText, isHidden, toggle }) => {
+        {({ hiddenText, toggle }) => {
           toggleFn = toggle;
           return <div>{hiddenText}</div>;
         }}

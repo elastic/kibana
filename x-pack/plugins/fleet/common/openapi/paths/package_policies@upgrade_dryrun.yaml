@@ -1,0 +1,35 @@
+post:
+  summary: Package policy - Upgrade Dry run
+  operationId: upgrade-package-policy
+  requestBody:
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            packagePolicyIds:
+              type: array
+              items:
+                type: string
+            packageVersion:
+              type: string
+          required:
+            - packagePolicyIds
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                hasErrors:
+                  type: boolean
+                diff:
+                  $ref: ../components/schemas/upgrade_diff.yaml
+                agent_diff:
+                  $ref: ../components/schemas/upgrade_agent_diff.yaml
+              required:
+                - hasErrors

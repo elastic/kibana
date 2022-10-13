@@ -7,7 +7,7 @@
 
 import React, { FC, useState, useEffect, useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,19 +19,20 @@ import {
 
 import { CombinedJob } from '../../../../../../../../common/types/anomaly_detection_jobs';
 import { MLJobEditor } from '../../../../../jobs_list/components/ml_job_editor';
-import { mlJobService } from '../../../../../../services/job_service';
-import { ML_DATA_PREVIEW_COUNT } from '../../../../../../../../common/util/job_utils';
-import { isPopulatedObject } from '../../../../../../../../common/util/object_utils';
-import { isMultiBucketAggregate } from '../../../../../../../../common/types/es_client';
+import { useMlApiContext } from '../../../../../../contexts/kibana';
 
 export const DatafeedPreview: FC<{
   combinedJob: CombinedJob | null;
   heightOffset?: number;
 }> = ({ combinedJob, heightOffset = 0 }) => {
+  const {
+    jobs: { datafeedPreview },
+  } = useMlApiContext();
   // the ace editor requires a fixed height
-  const editorHeight = useMemo(() => `${window.innerHeight - 230 - heightOffset}px`, [
-    heightOffset,
-  ]);
+  const editorHeight = useMemo(
+    () => `${window.innerHeight - 230 - heightOffset}px`,
+    [heightOffset]
+  );
   const [loading, setLoading] = useState(false);
   const [previewJsonString, setPreviewJsonString] = useState('');
   const [outOfDate, setOutOfDate] = useState(false);
@@ -50,6 +51,7 @@ export const DatafeedPreview: FC<{
     } catch (error) {
       // fail silently
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [combinedJob]);
 
   const loadDataPreview = useCallback(async () => {
@@ -63,18 +65,17 @@ export const DatafeedPreview: FC<{
 
     if (combinedJob.datafeed_config && combinedJob.datafeed_config.indices.length) {
       try {
-        const resp = await mlJobService.searchPreview(combinedJob);
-        let data = resp.hits.hits;
-        // the first item under aggregations can be any name
-        if (isPopulatedObject(resp.aggregations)) {
-          const accessor = Object.keys(resp.aggregations)[0];
-          const aggregate = resp.aggregations[accessor];
-          if (isMultiBucketAggregate(aggregate)) {
-            data = aggregate.buckets.slice(0, ML_DATA_PREVIEW_COUNT);
-          }
+        const { datafeed_config: datafeed, ...job } = combinedJob;
+        if (job.analysis_config.detectors.length === 0) {
+          setPreviewJsonString(
+            i18n.translate('xpack.ml.newJob.wizard.datafeedPreviewFlyout.noDetectors', {
+              defaultMessage: 'No detectors configured',
+            })
+          );
+        } else {
+          const preview = await datafeedPreview(undefined, job, datafeed);
+          setPreviewJsonString(JSON.stringify(preview, null, 2));
         }
-
-        setPreviewJsonString(JSON.stringify(data, null, 2));
       } catch (error) {
         setPreviewJsonString(JSON.stringify(error, null, 2));
       }
@@ -89,6 +90,7 @@ export const DatafeedPreview: FC<{
       );
       setPreviewJsonString(errorText);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [combinedJob]);
 
   return (

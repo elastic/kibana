@@ -6,18 +6,16 @@
  * Side Public License, v 1.
  */
 
-const {
-  ToolingLog,
-  ES_P12_PATH,
-  ES_P12_PASSWORD,
-  createAnyInstanceSerializer,
-} = require('@kbn/dev-utils');
+const { ES_NOPASSWORD_P12_PATH } = require('@kbn/dev-utils');
+const { ToolingLog, ToolingLogCollectingWriter } = require('@kbn/tooling-log');
+const { createAnyInstanceSerializer, createStripAnsiSerializer } = require('@kbn/jest-serializers');
 const execa = require('execa');
 const { Cluster } = require('../cluster');
 const { installSource, installSnapshot, installArchive } = require('../install');
 const { extractConfigFiles } = require('../utils/extract_config_files');
 
 expect.addSnapshotSerializer(createAnyInstanceSerializer(ToolingLog));
+expect.addSnapshotSerializer(createStripAnsiSerializer());
 
 jest.mock('../install', () => ({
   installSource: jest.fn(),
@@ -31,6 +29,8 @@ jest.mock('../utils/extract_config_files', () => ({
 }));
 
 const log = new ToolingLog();
+const logWriter = new ToolingLogCollectingWriter();
+log.setWriters([logWriter]);
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -71,9 +71,17 @@ function mockEsBin({ exitCode, start }) {
   );
 }
 
+const initialEnv = { ...process.env };
+
 beforeEach(() => {
   jest.resetAllMocks();
   extractConfigFiles.mockImplementation((config) => config);
+  log.indent(-log.getIndent());
+  logWriter.messages.length = 0;
+});
+
+afterEach(() => {
+  process.env = { ...initialEnv };
 });
 
 describe('#installSource()', () => {
@@ -101,11 +109,21 @@ describe('#installSource()', () => {
     installSource.mockResolvedValue({});
     const cluster = new Cluster({ log });
     await cluster.installSource({ foo: 'bar' });
-    expect(installSource).toHaveBeenCalledTimes(1);
-    expect(installSource).toHaveBeenCalledWith({
-      log,
-      foo: 'bar',
-    });
+    expect(installSource.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Object {
+            "foo": "bar",
+            "log": <ToolingLog>,
+          },
+        ],
+      ]
+    `);
+    expect(logWriter.messages).toMatchInlineSnapshot(`
+      Array [
+        " info source[@kbn/es Cluster] Installing from source",
+      ]
+    `);
   });
 
   it('rejects if installSource() rejects', async () => {
@@ -140,11 +158,21 @@ describe('#installSnapshot()', () => {
     installSnapshot.mockResolvedValue({});
     const cluster = new Cluster({ log });
     await cluster.installSnapshot({ foo: 'bar' });
-    expect(installSnapshot).toHaveBeenCalledTimes(1);
-    expect(installSnapshot).toHaveBeenCalledWith({
-      log,
-      foo: 'bar',
-    });
+    expect(installSnapshot.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Object {
+            "foo": "bar",
+            "log": <ToolingLog>,
+          },
+        ],
+      ]
+    `);
+    expect(logWriter.messages).toMatchInlineSnapshot(`
+      Array [
+        " info source[@kbn/es Cluster] Installing from snapshot",
+      ]
+    `);
   });
 
   it('rejects if installSnapshot() rejects', async () => {
@@ -179,11 +207,22 @@ describe('#installArchive(path)', () => {
     installArchive.mockResolvedValue({});
     const cluster = new Cluster({ log });
     await cluster.installArchive('path', { foo: 'bar' });
-    expect(installArchive).toHaveBeenCalledTimes(1);
-    expect(installArchive).toHaveBeenCalledWith('path', {
-      log,
-      foo: 'bar',
-    });
+    expect(installArchive.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "path",
+          Object {
+            "foo": "bar",
+            "log": <ToolingLog>,
+          },
+        ],
+      ]
+    `);
+    expect(logWriter.messages).toMatchInlineSnapshot(`
+      Array [
+        " info source[@kbn/es Cluster] Installing from an archive",
+      ]
+    `);
   });
 
   it('rejects if installArchive() rejects', async () => {
@@ -248,9 +287,8 @@ describe('#start(installPath)', () => {
 
     const config = extractConfigFiles.mock.calls[0][0];
     expect(config).toContain('xpack.security.http.ssl.enabled=true');
-    expect(config).toContain(`xpack.security.http.ssl.keystore.path=${ES_P12_PATH}`);
+    expect(config).toContain(`xpack.security.http.ssl.keystore.path=${ES_NOPASSWORD_P12_PATH}`);
     expect(config).toContain(`xpack.security.http.ssl.keystore.type=PKCS12`);
-    expect(config).toContain(`xpack.security.http.ssl.keystore.password=${ES_P12_PASSWORD}`);
   });
 
   it(`doesn't setup SSL when disabled`, async () => {
@@ -266,7 +304,41 @@ describe('#start(installPath)', () => {
         Array [
           Array [
             "action.destructive_requires_name=true",
+            "cluster.routing.allocation.disk.threshold_enabled=false",
             "ingest.geoip.downloader.enabled=false",
+            "search.check_ccs_compatibility=true",
+          ],
+          undefined,
+          Object {
+            "log": <ToolingLog>,
+          },
+        ],
+      ]
+    `);
+  });
+
+  it(`allows overriding search.check_ccs_compatibility`, async () => {
+    mockEsBin({ start: true });
+
+    extractConfigFiles.mockReturnValueOnce([]);
+
+    const cluster = new Cluster({
+      log,
+      ssl: false,
+    });
+
+    await cluster.start(undefined, {
+      esArgs: ['search.check_ccs_compatibility=false'],
+    });
+
+    expect(extractConfigFiles.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Array [
+            "action.destructive_requires_name=true",
+            "cluster.routing.allocation.disk.threshold_enabled=false",
+            "ingest.geoip.downloader.enabled=false",
+            "search.check_ccs_compatibility=false",
           ],
           undefined,
           Object {
@@ -327,9 +399,8 @@ describe('#run()', () => {
 
     const config = extractConfigFiles.mock.calls[0][0];
     expect(config).toContain('xpack.security.http.ssl.enabled=true');
-    expect(config).toContain(`xpack.security.http.ssl.keystore.path=${ES_P12_PATH}`);
+    expect(config).toContain(`xpack.security.http.ssl.keystore.path=${ES_NOPASSWORD_P12_PATH}`);
     expect(config).toContain(`xpack.security.http.ssl.keystore.type=PKCS12`);
-    expect(config).toContain(`xpack.security.http.ssl.keystore.password=${ES_P12_PASSWORD}`);
   });
 
   it(`doesn't setup SSL when disabled`, async () => {
@@ -345,7 +416,9 @@ describe('#run()', () => {
         Array [
           Array [
             "action.destructive_requires_name=true",
+            "cluster.routing.allocation.disk.threshold_enabled=false",
             "ingest.geoip.downloader.enabled=false",
+            "search.check_ccs_compatibility=true",
           ],
           undefined,
           Object {
@@ -354,6 +427,25 @@ describe('#run()', () => {
         ],
       ]
     `);
+  });
+
+  it('sets default Java heap', async () => {
+    mockEsBin({ start: true });
+
+    const cluster = new Cluster({ log });
+    await cluster.run();
+
+    expect(execa.mock.calls[0][2].env.ES_JAVA_OPTS).toMatchInlineSnapshot(`"-Xms1536m -Xmx1536m"`);
+  });
+
+  it('allows Java heap to be overwritten', async () => {
+    mockEsBin({ start: true });
+    process.env.ES_JAVA_OPTS = '-Xms5g -Xmx5g';
+
+    const cluster = new Cluster({ log });
+    await cluster.run();
+
+    expect(execa.mock.calls[0][2].env.ES_JAVA_OPTS).toMatchInlineSnapshot(`"-Xms5g -Xmx5g"`);
   });
 });
 

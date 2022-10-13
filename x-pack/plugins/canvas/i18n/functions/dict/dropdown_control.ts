@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { dropdownControl } from '../../../canvas_plugin_src/functions/common/dropdownControl';
+import type { dropdownControl } from '../../../canvas_plugin_src/functions/common/dropdownControl';
 import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 

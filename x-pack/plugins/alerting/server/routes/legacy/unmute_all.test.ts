@@ -5,16 +5,22 @@
  * 2.0.
  */
 
+import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { unmuteAllAlertRoute } from './unmute_all';
-import { httpServiceMock } from 'src/core/server/mocks';
+import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../lib/license_state.mock';
-import { mockHandlerArguments } from './../_mock_handler_arguments';
-import { alertsClientMock } from '../../alerts_client.mock';
-import { AlertTypeDisabledError } from '../../lib/errors/alert_type_disabled';
+import { mockHandlerArguments } from '../_mock_handler_arguments';
+import { rulesClientMock } from '../../rules_client.mock';
+import { RuleTypeDisabledError } from '../../lib/errors/rule_type_disabled';
+import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 
-const alertsClient = alertsClientMock.create();
-jest.mock('../../lib/license_api_access.ts', () => ({
+const rulesClient = rulesClientMock.create();
+jest.mock('../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
+}));
+
+jest.mock('../../lib/track_legacy_route_usage', () => ({
+  trackLegacyRouteUsage: jest.fn(),
 }));
 
 beforeEach(() => {
@@ -32,10 +38,10 @@ describe('unmuteAllAlertRoute', () => {
 
     expect(config.path).toMatchInlineSnapshot(`"/api/alerts/alert/{id}/_unmute_all"`);
 
-    alertsClient.unmuteAll.mockResolvedValueOnce();
+    rulesClient.unmuteAll.mockResolvedValueOnce();
 
     const [context, req, res] = mockHandlerArguments(
-      { alertsClient },
+      { rulesClient },
       {
         params: {
           id: '1',
@@ -46,8 +52,8 @@ describe('unmuteAllAlertRoute', () => {
 
     expect(await handler(context, req, res)).toEqual(undefined);
 
-    expect(alertsClient.unmuteAll).toHaveBeenCalledTimes(1);
-    expect(alertsClient.unmuteAll.mock.calls[0]).toMatchInlineSnapshot(`
+    expect(rulesClient.unmuteAll).toHaveBeenCalledTimes(1);
+    expect(rulesClient.unmuteAll.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "id": "1",
@@ -66,9 +72,9 @@ describe('unmuteAllAlertRoute', () => {
 
     const [, handler] = router.post.mock.calls[0];
 
-    alertsClient.unmuteAll.mockRejectedValue(new AlertTypeDisabledError('Fail', 'license_invalid'));
+    rulesClient.unmuteAll.mockRejectedValue(new RuleTypeDisabledError('Fail', 'license_invalid'));
 
-    const [context, req, res] = mockHandlerArguments({ alertsClient }, { params: {}, body: {} }, [
+    const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: {}, body: {} }, [
       'ok',
       'forbidden',
     ]);
@@ -76,5 +82,20 @@ describe('unmuteAllAlertRoute', () => {
     await handler(context, req, res);
 
     expect(res.forbidden).toHaveBeenCalledWith({ body: { message: 'Fail' } });
+  });
+
+  it('should track every call', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
+    const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
+
+    unmuteAllAlertRoute(router, licenseState, mockUsageCounter);
+    const [, handler] = router.post.mock.calls[0];
+    const [context, req, res] = mockHandlerArguments({ rulesClient }, { params: {}, body: {} }, [
+      'ok',
+    ]);
+    await handler(context, req, res);
+    expect(trackLegacyRouteUsage).toHaveBeenCalledWith('unmuteAll', mockUsageCounter);
   });
 });

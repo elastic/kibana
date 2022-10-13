@@ -7,10 +7,10 @@
 
 import { getInternalArtifactMock } from '../../schemas/artifacts/saved_objects.mock';
 import { EndpointArtifactClient } from './artifact_client';
-import { createArtifactsClientMock } from '../../../../../fleet/server/mocks';
+import { createArtifactsClientMock } from '@kbn/fleet-plugin/server/mocks';
 
 describe('artifact_client', () => {
-  describe('ArtifactClient sanity checks', () => {
+  describe('ArtifactClient checks', () => {
     let fleetArtifactClient: ReturnType<typeof createArtifactsClientMock>;
     let artifactClient: EndpointArtifactClient;
 
@@ -28,8 +28,14 @@ describe('artifact_client', () => {
       expect(fleetArtifactClient.listArtifacts).toHaveBeenCalled();
     });
 
+    test('can list artifact', async () => {
+      const response = await artifactClient.listArtifacts();
+      expect(fleetArtifactClient.listArtifacts).toHaveBeenCalled();
+      expect(response.items[0].id).toEqual('123');
+    });
+
     test('can create artifact', async () => {
-      const artifact = await getInternalArtifactMock('linux', 'v1', { compress: true });
+      const artifact = await getInternalArtifactMock('linux', 'v1');
       await artifactClient.createArtifact(artifact);
       expect(fleetArtifactClient.createArtifact).toHaveBeenCalledWith({
         identifier: artifact.identifier,

@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { LicenseType } from '../../../licensing/common/types';
+import { LicenseType } from '@kbn/licensing-plugin/common/types';
 
 const platinumLicense: LicenseType = 'platinum';
 
@@ -18,6 +18,8 @@ export const PLUGIN = {
   }),
   minimumLicenseType: platinumLicense,
 };
+
+export const MAJOR_VERSION = '8.0.0';
 
 export const APPS = {
   CCR_APP: 'ccr',

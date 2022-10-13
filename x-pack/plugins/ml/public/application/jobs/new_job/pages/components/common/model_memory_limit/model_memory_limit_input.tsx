@@ -12,13 +12,8 @@ import { JobCreatorContext } from '../../job_creator_context';
 import { Description } from './description';
 
 export const ModelMemoryLimitInput: FC = () => {
-  const {
-    jobCreator,
-    jobCreatorUpdate,
-    jobCreatorUpdated,
-    jobValidator,
-    jobValidatorUpdated,
-  } = useContext(JobCreatorContext);
+  const { jobCreator, jobCreatorUpdate, jobCreatorUpdated, jobValidator, jobValidatorUpdated } =
+    useContext(JobCreatorContext);
   const [validation, setValidation] = useState(jobValidator.modelMemoryLimit);
   const [modelMemoryLimit, setModelMemoryLimit] = useState(
     jobCreator.modelMemoryLimit === null ? '' : jobCreator.modelMemoryLimit
@@ -30,14 +25,17 @@ export const ModelMemoryLimitInput: FC = () => {
   useEffect(() => {
     jobCreator.modelMemoryLimit = modelMemoryLimit === '' ? null : modelMemoryLimit;
     jobCreatorUpdate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [modelMemoryLimit]);
 
   useEffect(() => {
     setModelMemoryLimit(jobCreator.modelMemoryLimit === null ? '' : jobCreator.modelMemoryLimit);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdated]);
 
   useEffect(() => {
     setValidation(jobValidator.modelMemoryLimit);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobValidatorUpdated]);
 
   return (

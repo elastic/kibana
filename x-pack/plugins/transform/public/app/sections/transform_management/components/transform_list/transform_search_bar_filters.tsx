@@ -7,9 +7,14 @@
 
 import React from 'react';
 import { EuiBadge, SearchFilterConfig } from '@elastic/eui';
+import type { Clause, Value } from '@elastic/eui/src/components/search_bar/query/ast';
 import { i18n } from '@kbn/i18n';
-import { TermClause, FieldClause, Value } from './common';
-import { TRANSFORM_MODE, TRANSFORM_STATE } from '../../../../../../common/constants';
+import {
+  TRANSFORM_FUNCTION,
+  TRANSFORM_MODE,
+  TRANSFORM_STATE,
+} from '../../../../../../common/constants';
+import { isLatestTransform, isPivotTransform } from '../../../../../../common/types/transform';
 import { TransformListRow } from '../../../../common';
 import { getTaskStateBadge } from './use_columns';
 
@@ -50,10 +55,7 @@ function stringMatch(str: string | undefined, substr: any) {
   );
 }
 
-export const filterTransforms = (
-  transforms: TransformListRow[],
-  clauses: Array<TermClause | FieldClause>
-) => {
+export const filterTransforms = (transforms: TransformListRow[], clauses: Clause[]) => {
   // keep count of the number of matches we make as we're looping over the clauses
   // we only want to return transforms which match all clauses, i.e. each search term is ANDed
   // { transform-one:  { transform: { id: transform-one, config: {}, state: {}, ... }, count: 0 }, transform-two: {...} }
@@ -89,11 +91,24 @@ export const filterTransforms = (
       }
     } else {
       // filter other clauses, i.e. the mode and status filters
-      if (Array.isArray(c.value)) {
+      if (c.type !== 'is' && Array.isArray(c.value)) {
         // the status value is an array of string(s) e.g. ['failed', 'stopped']
         ts = transforms.filter((transform) => (c.value as Value[]).includes(transform.stats.state));
       } else {
-        ts = transforms.filter((transform) => transform.mode === c.value);
+        ts = transforms.filter((transform) => {
+          if (c.type === 'field' && c.field === 'mode') {
+            return transform.mode === c.value;
+          }
+          if (c.type === 'field' && c.field === 'type') {
+            if (c.value === TRANSFORM_FUNCTION.PIVOT) {
+              return isPivotTransform(transform.config);
+            }
+            if (c.value === TRANSFORM_FUNCTION.LATEST) {
+              return isLatestTransform(transform.config);
+            }
+          }
+          return false;
+        });
       }
     }
 

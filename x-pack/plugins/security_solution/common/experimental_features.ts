@@ -11,10 +11,59 @@ export type ExperimentalFeatures = typeof allowedExperimentalValues;
  * A list of allowed values that can be used in `xpack.securitySolution.enableExperimental`.
  * This object is then used to validate and parse the value entered.
  */
-const allowedExperimentalValues = Object.freeze({
-  trustedAppsByPolicyEnabled: false,
-  eventFilteringEnabled: false,
-  hostIsolationEnabled: false,
+export const allowedExperimentalValues = Object.freeze({
+  tGridEnabled: true,
+  tGridEventRenderedViewEnabled: true,
+  excludePoliciesInFilterEnabled: false,
+  kubernetesEnabled: true,
+  disableIsolationUIPendingStatuses: false,
+  pendingActionResponsesWithAck: true,
+  policyListEnabled: true,
+  policyResponseInFleetEnabled: true,
+
+  /**
+   * This is used for enabling the end-to-end tests for the security_solution telemetry.
+   * We disable the telemetry since we don't have specific roles or permissions around it and
+   * we don't want people to be able to violate security by getting access to whole documents
+   * around telemetry they should not.
+   * @see telemetry_detection_rules_preview_route.ts
+   * @see test/detection_engine_api_integration/security_and_spaces/tests/telemetry/README.md
+   */
+  previewTelemetryUrlEnabled: false,
+
+  /**
+   * Enables the Endpoint response actions console in various areas of the app
+   */
+  responseActionsConsoleEnabled: true,
+
+  /**
+   * Enables the insights module for related alerts by process ancestry
+   */
+  insightsRelatedAlertsByProcessAncestry: true,
+
+  /**
+   * Enables extended rule execution logging to Event Log. When this setting is enabled:
+   * - Rules write their console error, info, debug, and trace messages to Event Log,
+   *   in addition to other events they log there (status changes and execution metrics).
+   * - We add a Kibana Advanced Setting that controls this behavior (on/off and log level).
+   * - We show a table with plain execution logs on the Rule Details page.
+   */
+  extendedRuleExecutionLoggingEnabled: false,
+
+  /**
+   * Enables the SOC trends timerange and stats on D&R page
+   */
+  socTrendsEnabled: false,
+
+  /**
+   * Enables the detection response actions in rule + alerts
+   */
+  responseActionsEnabled: true,
+
+  /**
+   * Enables endpoint package level rbac
+   */
+  endpointRbacEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

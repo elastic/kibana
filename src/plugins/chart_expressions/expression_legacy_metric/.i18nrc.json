@@ -1,0 +1,6 @@
+{
+  "prefix": "expressionLegacyMetricVis",
+  "paths": {
+    "expressionLegacyMetricVis": "."
+  }
+}

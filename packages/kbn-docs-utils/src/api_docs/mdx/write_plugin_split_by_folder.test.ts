@@ -7,10 +7,11 @@
  */
 
 import { Project } from 'ts-morph';
-import { ToolingLog, KibanaPlatformPlugin } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import { splitApisByFolder } from './write_plugin_split_by_folder';
 import { getPluginApi } from '../get_plugin_api';
-import { getKibanaPlatformPlugin } from '../tests/kibana_platform_plugin_mock';
+import { getKibanaPlatformPlugin } from '../integration_tests/kibana_platform_plugin_mock';
+import { PluginOrPackage } from '../types';
 
 const log = new ToolingLog({
   level: 'debug',
@@ -44,7 +45,7 @@ export interface Zed = { zed: string }`
   );
 
   const plugin = getKibanaPlatformPlugin('example', '/src/plugins/example');
-  const plugins: KibanaPlatformPlugin[] = [
+  const plugins: PluginOrPackage[] = [
     {
       ...plugin,
       manifest: {
@@ -54,7 +55,7 @@ export interface Zed = { zed: string }`
     },
   ];
 
-  const doc = getPluginApi(project, plugins[0], plugins, log);
+  const doc = getPluginApi(project, plugins[0], plugins, log, false);
   const docs = splitApisByFolder(doc);
 
   // The api at the main level, and one on a service level.

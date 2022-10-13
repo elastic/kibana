@@ -9,6 +9,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { omit } from 'lodash/fp';
 
+import { useKibana } from '../../../common/lib/kibana';
 import { connector, issues } from '../mock';
 import { useGetIssueTypes } from './use_get_issue_types';
 import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
@@ -27,6 +28,7 @@ const useGetIssueTypesMock = useGetIssueTypes as jest.Mock;
 const useGetFieldsByIssueTypeMock = useGetFieldsByIssueType as jest.Mock;
 const useGetSingleIssueMock = useGetSingleIssue as jest.Mock;
 const useGetIssuesMock = useGetIssues as jest.Mock;
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
 describe('Jira Fields', () => {
   const useGetIssueTypesResponse = {
@@ -87,6 +89,10 @@ describe('Jira Fields', () => {
     useGetIssueTypesMock.mockReturnValue(useGetIssueTypesResponse);
     useGetFieldsByIssueTypeMock.mockReturnValue(useGetFieldsByIssueTypeResponse);
     useGetSingleIssueMock.mockReturnValue(useGetSingleIssueResponse);
+    useKibanaMock().services.triggersActionsUi.actionTypeRegistry.get = jest.fn().mockReturnValue({
+      actionTypeTitle: '.jira',
+      iconClass: 'logoSecurity',
+    });
     jest.clearAllMocks();
   });
 
@@ -133,9 +139,11 @@ describe('Jira Fields', () => {
     const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
 
     await waitFor(() =>
-      ((wrapper.find(EuiComboBox).props() as unknown) as {
-        onChange: (a: EuiComboBoxOptionOption[]) => void;
-      }).onChange([{ label: 'parentId', value: 'parentId' }])
+      (
+        wrapper.find(EuiComboBox).props() as unknown as {
+          onChange: (a: EuiComboBoxOptionOption[]) => void;
+        }
+      ).onChange([{ label: 'parentId', value: 'parentId' }])
     );
     wrapper.update();
     expect(onChange).toHaveBeenCalledWith({
@@ -144,6 +152,7 @@ describe('Jira Fields', () => {
       priority: 'High',
     });
   });
+
   test('it searches parent correctly', async () => {
     useGetFieldsByIssueTypeMock.mockReturnValue({
       ...useGetFieldsByIssueTypeResponse,
@@ -157,9 +166,11 @@ describe('Jira Fields', () => {
     const wrapper = mount(<Fields fields={fields} onChange={onChange} connector={connector} />);
 
     await waitFor(() =>
-      ((wrapper.find(EuiComboBox).props() as unknown) as {
-        onSearchChange: (a: string) => void;
-      }).onSearchChange('womanId')
+      (
+        wrapper.find(EuiComboBox).props() as unknown as {
+          onSearchChange: (a: string) => void;
+        }
+      ).onSearchChange('womanId')
     );
     wrapper.update();
     expect(useGetIssuesMock.mock.calls[2][0].query).toEqual('womanId');

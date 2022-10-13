@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { SearchSessionStatus } from './status';
+import type { SavedObjectsFindResponse } from '@kbn/core/server';
+import { SerializableRecord } from '@kbn/utility-types';
+import type { SearchSessionStatus, SearchStatus } from './status';
 
 export const SEARCH_SESSION_TYPE = 'search-session';
 export interface SearchSessionSavedObjectAttributes {
@@ -23,54 +25,46 @@ export interface SearchSessionSavedObjectAttributes {
    * Creation time of the session
    */
   created: string;
-  /**
-   * Last touch time of the session
-   */
-  touched: string;
+
   /**
    * Expiration time of the session. Expiration itself is managed by Elasticsearch.
    */
   expires: string;
+
   /**
-   * Time of transition into completed state,
-   *
-   * Can be "null" in case already completed session
-   * transitioned into in-progress session
+   * locatorId (see share.url.locators service)
    */
-  completed?: string | null;
-  /**
-   * status
-   */
-  status: SearchSessionStatus;
-  /**
-   * urlGeneratorId
-   */
-  urlGeneratorId?: string;
+  locatorId?: string;
   /**
    * The application state that was used to create the session.
    * Should be used, for example, to re-load an expired search session.
    */
-  initialState?: Record<string, unknown>;
+  initialState?: SerializableRecord;
   /**
    * Application state that should be used to restore the session.
    * For example, relative dates are conveted to absolute ones.
    */
-  restoreState?: Record<string, unknown>;
+  restoreState?: SerializableRecord;
   /**
    * Mapping of search request hashes to their corresponsing info (async search id, etc.)
    */
   idMapping: Record<string, SearchSessionRequestInfo>;
 
   /**
-   * This value is true if the session was actively stored by the user. If it is false, the session may be purged by the system.
-   */
-  persisted: boolean;
-  /**
    * The realm type/name & username uniquely identifies the user who created this search session
    */
   realmType?: string;
   realmName?: string;
   username?: string;
+  /**
+   * Version information to display warnings when trying to restore a session from a different version
+   */
+  version: string;
+
+  /**
+   * `true` if session was cancelled
+   */
+  isCanceled?: boolean;
 }
 
 export interface SearchSessionRequestInfo {
@@ -82,20 +76,30 @@ export interface SearchSessionRequestInfo {
    * Search strategy used to submit the search request
    */
   strategy: string;
-  /**
-   * status
-   */
-  status: string;
+}
+
+export interface SearchSessionRequestStatus {
+  status: SearchStatus;
   /**
    * An optional error. Set if status is set to error.
    */
   error?: string;
 }
 
-export interface SearchSessionFindOptions {
-  page?: number;
-  perPage?: number;
-  sortField?: string;
-  sortOrder?: string;
-  filter?: string;
+/**
+ * On-the-fly calculated search session status
+ */
+export interface SearchSessionStatusResponse {
+  status: SearchSessionStatus;
+}
+
+/**
+ * List of search session objects with on-the-fly calculated search session statuses
+ */
+export interface SearchSessionsFindResponse
+  extends SavedObjectsFindResponse<SearchSessionSavedObjectAttributes> {
+  /**
+   * Map containing calculated statuses of search sessions from the find response
+   */
+  statuses: Record<string, SearchSessionStatusResponse>;
 }

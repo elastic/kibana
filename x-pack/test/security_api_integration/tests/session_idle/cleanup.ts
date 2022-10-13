@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import request, { Cookie } from 'request';
-import { delay } from 'bluebird';
+import { parse as parseCookie, Cookie } from 'tough-cookie';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import expect from '@kbn/expect';
-// @ts-expect-error https://github.com/elastic/kibana/issues/95679
 import { adminTestUser } from '@kbn/test';
-import type { AuthenticationProvider } from '../../../../plugins/security/common/model';
+import type { AuthenticationProvider } from '@kbn/security-plugin/common';
 import { getSAMLRequestId, getSAMLResponse } from '../../fixtures/saml/saml_tools';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -29,24 +28,26 @@ export default function ({ getService }: FtrProviderContext) {
     username: string,
     provider: AuthenticationProvider
   ) {
+    log.debug(`Verifying session cookie for ${username}.`);
     const apiResponse = await supertest
       .get('/internal/security/me')
       .set('kbn-xsrf', 'xxx')
       .set('Cookie', sessionCookie.cookieString())
       .expect(200);
+    log.debug(`Session cookie for ${username} is valid.`);
 
     expect(apiResponse.body.username).to.be(username);
     expect(apiResponse.body.authentication_provider).to.eql(provider);
 
     return Array.isArray(apiResponse.headers['set-cookie'])
-      ? request.cookie(apiResponse.headers['set-cookie'][0])!
+      ? parseCookie(apiResponse.headers['set-cookie'][0])!
       : undefined;
   }
 
   async function getNumberOfSessionDocuments() {
     return (
       // @ts-expect-error doesn't handle total as number
-      (await es.search({ index: '.kibana_security_session*' })).body.hits.total.value as number
+      (await es.search({ index: '.kibana_security_session*' })).hits.total.value as number
     );
   }
 
@@ -60,7 +61,7 @@ export default function ({ getService }: FtrProviderContext) {
     const authenticationResponse = await supertest
       .post('/api/security/saml/callback')
       .set('kbn-xsrf', 'xxx')
-      .set('Cookie', request.cookie(handshakeResponse.headers['set-cookie'][0])!.cookieString())
+      .set('Cookie', parseCookie(handshakeResponse.headers['set-cookie'][0])!.cookieString())
       .send({
         SAMLResponse: await getSAMLResponse({
           destination: `http://localhost:${kibanaServerConfig.port}/api/security/saml/callback`,
@@ -70,7 +71,7 @@ export default function ({ getService }: FtrProviderContext) {
       })
       .expect(302);
 
-    const cookie = request.cookie(authenticationResponse.headers['set-cookie'][0])!;
+    const cookie = parseCookie(authenticationResponse.headers['set-cookie'][0])!;
     await checkSessionCookie(cookie, 'a@b.c', { type: 'saml', name: providerName });
     return cookie;
   }
@@ -82,8 +83,9 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should properly clean up session expired because of idle timeout', async function () {
-      this.timeout(60000);
+      this.timeout(100000);
 
+      log.debug(`Log in as ${basicUsername} using ${basicPassword} password.`);
       const response = await supertest
         .post('/internal/security/login')
         .set('kbn-xsrf', 'xxx')
@@ -95,17 +97,20 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
-      const sessionCookie = request.cookie(response.headers['set-cookie'][0])!;
+      const sessionCookie = parseCookie(response.headers['set-cookie'][0])!;
       await checkSessionCookie(sessionCookie, basicUsername, { type: 'basic', name: 'basic1' });
       expect(await getNumberOfSessionDocuments()).to.be(1);
 
-      // Cleanup routine runs every 10s, and idle timeout threshold is three times larger than 5s
-      // idle timeout, let's wait for 40s to make sure cleanup routine runs when idle timeout
+      // Cleanup routine runs every 20s, and idle timeout threshold is three times larger than 10s
+      // idle timeout, let's wait for 60s to make sure cleanup routine runs when idle timeout
       // threshold is exceeded.
-      await delay(40000);
+      log.debug('Waiting for cleanup job to run...');
+      await setTimeoutAsync(60000);
 
       // Session info is removed from the index and cookie isn't valid anymore
       expect(await getNumberOfSessionDocuments()).to.be(0);
+
+      log.debug(`Authenticating as ${basicUsername} with invalid session cookie.`);
       await supertest
         .get('/internal/security/me')
         .set('kbn-xsrf', 'xxx')
@@ -114,17 +119,14 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should properly clean up session expired because of idle timeout when providers override global session config', async function () {
-      this.timeout(60000);
+      this.timeout(100000);
 
-      const [
-        samlDisableSessionCookie,
-        samlOverrideSessionCookie,
-        samlFallbackSessionCookie,
-      ] = await Promise.all([
-        loginWithSAML('saml_disable'),
-        loginWithSAML('saml_override'),
-        loginWithSAML('saml_fallback'),
-      ]);
+      const [samlDisableSessionCookie, samlOverrideSessionCookie, samlFallbackSessionCookie] =
+        await Promise.all([
+          loginWithSAML('saml_disable'),
+          loginWithSAML('saml_override'),
+          loginWithSAML('saml_fallback'),
+        ]);
 
       const response = await supertest
         .post('/internal/security/login')
@@ -137,17 +139,18 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
-      const basicSessionCookie = request.cookie(response.headers['set-cookie'][0])!;
+      const basicSessionCookie = parseCookie(response.headers['set-cookie'][0])!;
       await checkSessionCookie(basicSessionCookie, basicUsername, {
         type: 'basic',
         name: 'basic1',
       });
       expect(await getNumberOfSessionDocuments()).to.be(4);
 
-      // Cleanup routine runs every 10s, and idle timeout threshold is three times larger than 5s
-      // idle timeout, let's wait for 40s to make sure cleanup routine runs when idle timeout
+      // Cleanup routine runs every 20s, and idle timeout threshold is three times larger than 10s
+      // idle timeout, let's wait for 60s to make sure cleanup routine runs when idle timeout
       // threshold is exceeded.
-      await delay(40000);
+      log.debug('Waiting for cleanup job to run...');
+      await setTimeoutAsync(60000);
 
       // Session for basic and SAML that used global session settings should not be valid anymore.
       expect(await getNumberOfSessionDocuments()).to.be(2);
@@ -174,7 +177,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should not clean up session if user is active', async function () {
-      this.timeout(60000);
+      this.timeout(100000);
 
       const response = await supertest
         .post('/internal/security/login')
@@ -187,21 +190,21 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
-      let sessionCookie = request.cookie(response.headers['set-cookie'][0])!;
+      let sessionCookie = parseCookie(response.headers['set-cookie'][0])!;
       await checkSessionCookie(sessionCookie, basicUsername, { type: 'basic', name: 'basic1' });
       expect(await getNumberOfSessionDocuments()).to.be(1);
 
-      // Run 20 consequent requests with 1.5s delay, during this time cleanup procedure should run at
+      // Run 20 consequent requests with 3s delay, during this time cleanup procedure should run at
       // least twice.
       for (const counter of [...Array(20).keys()]) {
-        // Session idle timeout is 15s, let's wait 10s and make a new request that would extend the session.
-        await delay(1500);
+        // Session idle timeout is 10s, let's wait 3s and make a new request that would extend the session.
+        await setTimeoutAsync(3000);
 
         sessionCookie = (await checkSessionCookie(sessionCookie, basicUsername, {
           type: 'basic',
           name: 'basic1',
         }))!;
-        log.debug(`Session is still valid after ${(counter + 1) * 1.5}s`);
+        log.debug(`Session is still valid after ${(counter + 1) * 3}s`);
       }
 
       // Session document should still be present.

@@ -16,7 +16,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should return the ES cluster info', async () => {
       const { body } = await supertest.get('/api/logstash/cluster').expect(200);
 
-      const { body: responseFromES } = await es.info();
+      const responseFromES = await es.info();
       expect(body.cluster.uuid).to.eql(responseFromES.cluster_uuid);
     });
   });

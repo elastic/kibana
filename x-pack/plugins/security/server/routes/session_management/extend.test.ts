@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { RequestHandler, RouteConfig } from 'src/core/server';
-import { kibanaResponseFactory } from 'src/core/server';
-import { httpServerMock } from 'src/core/server/mocks';
+import type { RequestHandler, RouteConfig } from '@kbn/core/server';
+import { kibanaResponseFactory } from '@kbn/core/server';
+import { httpServerMock } from '@kbn/core/server/mocks';
 
 import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types';
 import { routeDefinitionParamsMock } from '../index.mock';
@@ -42,7 +42,7 @@ describe('Extend session routes', () => {
     it('always returns 302.', async () => {
       await expect(
         routeHandler(
-          ({} as unknown) as SecurityRequestHandlerContext,
+          {} as unknown as SecurityRequestHandlerContext,
           httpServerMock.createKibanaRequest(),
           kibanaResponseFactory
         )

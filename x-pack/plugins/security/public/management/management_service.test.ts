@@ -7,13 +7,13 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-import { coreMock } from 'src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import type {
   DefinedSections,
   ManagementApp,
   ManagementSetup,
-} from 'src/plugins/management/public';
-import { createManagementSectionMock } from 'src/plugins/management/public/mocks';
+} from '@kbn/management-plugin/public';
+import { createManagementSectionMock } from '@kbn/management-plugin/public/mocks';
 
 import { licenseMock } from '../../common/licensing/index.mock';
 import type { SecurityLicenseFeatures } from '../../common/licensing/license_features';
@@ -40,6 +40,7 @@ describe('ManagementService', () => {
             security: mockSection,
           } as DefinedSections,
         },
+        locator: {} as any,
       };
 
       const service = new ManagementService();
@@ -87,7 +88,7 @@ describe('ManagementService', () => {
       const { fatalErrors, getStartServices } = coreMock.createSetup();
 
       const licenseSubject = new BehaviorSubject<SecurityLicenseFeatures>(
-        (initialFeatures as unknown) as SecurityLicenseFeatures
+        initialFeatures as unknown as SecurityLicenseFeatures
       );
       const license = licenseMock.create();
       license.features$ = licenseSubject;
@@ -101,6 +102,7 @@ describe('ManagementService', () => {
             security: mockSection,
           } as DefinedSections,
         },
+        locator: {} as any,
       };
 
       service.setup({
@@ -114,7 +116,7 @@ describe('ManagementService', () => {
       const getMockedApp = (id: string) => {
         // All apps are enabled by default.
         let enabled = true;
-        return ({
+        return {
           id,
           get enabled() {
             return enabled;
@@ -125,7 +127,7 @@ describe('ManagementService', () => {
           disable: jest.fn().mockImplementation(() => {
             enabled = false;
           }),
-        } as unknown) as jest.Mocked<ManagementApp>;
+        } as unknown as jest.Mocked<ManagementApp>;
       };
       mockSection.getApp = jest.fn().mockImplementation((id) => mockApps.get(id));
       const mockApps = new Map<string, jest.Mocked<ManagementApp>>([
@@ -153,7 +155,7 @@ describe('ManagementService', () => {
       return {
         mockApps,
         updateFeatures(features: Partial<SecurityLicenseFeatures>) {
-          licenseSubject.next((features as unknown) as SecurityLicenseFeatures);
+          licenseSubject.next(features as unknown as SecurityLicenseFeatures);
         },
       };
     }

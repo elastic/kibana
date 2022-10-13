@@ -7,35 +7,39 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ViewMode } from '../../services/embeddable';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { TopNavIds } from './top_nav_ids';
 import { NavAction } from '../../types';
-import { TopNavMenuData } from '../../../../navigation/public';
 
 /**
  * @param actions - A mapping of TopNavIds to an action function that should run when the
  * corresponding top nav is clicked.
- * @param hideWriteControls if true, does not include any controls that allow editing or creating objects.
+ * @param showWriteControls if false, does not include any controls that allow editing or creating objects.
  * @return an array of objects for a top nav configuration, based on the mode.
  */
 export function getTopNavConfig(
   dashboardMode: ViewMode,
   actions: { [key: string]: NavAction },
   options: {
-    hideWriteControls: boolean;
+    showWriteControls: boolean;
     isNewDashboard: boolean;
     isDirty: boolean;
     isSaveInProgress?: boolean;
+    isLabsEnabled?: boolean;
   }
 ) {
+  const labs = options.isLabsEnabled ? [getLabsConfig(actions[TopNavIds.LABS])] : [];
   switch (dashboardMode) {
     case ViewMode.VIEW:
-      return options.hideWriteControls
+      return !options.showWriteControls
         ? [
+            ...labs,
             getFullScreenConfig(actions[TopNavIds.FULL_SCREEN]),
             getShareConfig(actions[TopNavIds.SHARE]),
           ]
         : [
+            ...labs,
             getFullScreenConfig(actions[TopNavIds.FULL_SCREEN]),
             getShareConfig(actions[TopNavIds.SHARE]),
             getCloneConfig(actions[TopNavIds.CLONE]),
@@ -44,6 +48,7 @@ export function getTopNavConfig(
     case ViewMode.EDIT:
       const disableButton = options.isSaveInProgress;
       const navItems: TopNavMenuData[] = [
+        ...labs,
         getOptionsConfig(actions[TopNavIds.OPTIONS], disableButton),
         getShareConfig(actions[TopNavIds.SHARE], disableButton),
       ];
@@ -87,6 +92,20 @@ function getFullScreenConfig(action: NavAction) {
       defaultMessage: 'Full Screen Mode',
     }),
     testId: 'dashboardFullScreenMode',
+    run: action,
+  };
+}
+
+function getLabsConfig(action: NavAction) {
+  return {
+    id: 'labs',
+    label: i18n.translate('dashboard.topNav.labsButtonAriaLabel', {
+      defaultMessage: 'labs',
+    }),
+    description: i18n.translate('dashboard.topNav.labsConfigDescription', {
+      defaultMessage: 'Labs',
+    }),
+    testId: 'dashboardLabs',
     run: action,
   };
 }

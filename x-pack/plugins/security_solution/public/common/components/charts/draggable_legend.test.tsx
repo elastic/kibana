@@ -5,27 +5,26 @@
  * 2.0.
  */
 
-import { mount, ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
 import React from 'react';
 
 import '../../mock/match_media';
 import '../../mock/react_beautiful_dnd';
 import { TestProviders } from '../../mock';
 
-import { MIN_LEGEND_HEIGHT, DraggableLegend } from './draggable_legend';
-import { LegendItem } from './draggable_legend_item';
+import { DEFAULT_WIDTH, MIN_LEGEND_HEIGHT, DraggableLegend } from './draggable_legend';
+import type { LegendItem } from './draggable_legend_item';
+
+jest.mock('../../lib/kibana');
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
     ...original,
-    // eslint-disable-next-line react/display-name
     EuiScreenReaderOnly: () => <></>,
   };
 });
-
-const allOthersDataProviderId =
-  'draggable-legend-item-527adabe-8e1c-4a1f-965c-2f3d65dda9e1-event_dataset-All others';
 
 const legendItems: LegendItem[] = [
   {
@@ -55,12 +54,6 @@ const legendItems: LegendItem[] = [
     field: 'event.dataset',
     value: 'esensor',
   },
-  {
-    color: '#F37020',
-    dataProviderId: allOthersDataProviderId,
-    field: 'event.dataset',
-    value: 'All others',
-  },
 ];
 
 describe('DraggableLegend', () => {
@@ -83,6 +76,28 @@ describe('DraggableLegend', () => {
       );
     });
 
+    it(`renders a container with the default 'min-width'`, () => {
+      expect(wrapper.find('[data-test-subj="draggable-legend"]').first()).toHaveStyleRule(
+        'min-width',
+        `${DEFAULT_WIDTH}px`
+      );
+    });
+
+    it(`renders a container with the specified 'min-width'`, () => {
+      const width = 1234;
+
+      wrapper = mount(
+        <TestProviders>
+          <DraggableLegend height={height} legendItems={legendItems} minWidth={width} />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="draggable-legend"]').first()).toHaveStyleRule(
+        'min-width',
+        `${width}px`
+      );
+    });
+
     it('scrolls when necessary', () => {
       expect(wrapper.find('[data-test-subj="draggable-legend"]').first()).toHaveStyleRule(
         'overflow',
@@ -93,14 +108,7 @@ describe('DraggableLegend', () => {
     it('renders the legend items', () => {
       legendItems.forEach((item) =>
         expect(
-          wrapper
-            .find(
-              item.dataProviderId !== allOthersDataProviderId
-                ? `[data-test-subj="legend-item-${item.dataProviderId}"]`
-                : '[data-test-subj="all-others-legend-item"]'
-            )
-            .first()
-            .text()
+          wrapper.find(`[data-test-subj="legend-item-${item.dataProviderId}"]`).first().text()
         ).toEqual(item.value)
       );
     });
@@ -132,6 +140,20 @@ describe('DraggableLegend', () => {
     expect(wrapper.find('[data-test-subj="draggable-legend"]').first()).toHaveStyleRule(
       'height',
       `${MIN_LEGEND_HEIGHT}px`
+    );
+  });
+
+  it('renders a legend with specified class names', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <DraggableLegend className="foo bar baz" height={0} legendItems={legendItems} />
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="draggable-legend"]').first().getDOMNode()).toHaveClass(
+      'foo',
+      'bar',
+      'baz'
     );
   });
 });

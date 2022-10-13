@@ -6,12 +6,8 @@
  * Side Public License, v 1.
  */
 
-import {
-  ToolingLog,
-  ToolingLogCollectingWriter,
-  createStripAnsiSerializer,
-  createRecursiveSerializer,
-} from '@kbn/dev-utils';
+import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
+import { createStripAnsiSerializer, createRecursiveSerializer } from '@kbn/jest-serializers';
 import { Config } from './config';
 import { createRunner } from './runner';
 import { Build } from './build';
@@ -45,65 +41,28 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-const setup = async (opts: { buildDefaultDist: boolean; buildOssDist: boolean }) => {
+const setup = async () => {
   const config = await Config.create({
     isRelease: true,
     targetAllPlatforms: true,
     versionQualifier: '-SNAPSHOT',
+    dockerContextUseLocalArtifact: false,
+    dockerCrossCompile: false,
+    dockerPush: false,
+    dockerTagQualifier: '',
   });
 
   const run = createRunner({
     config,
     log,
-    ...opts,
   });
 
   return { config, run };
 };
 
-describe('buildOssDist = true, buildDefaultDist = true', () => {
+describe('default dist', () => {
   it('runs global task once, passing config and log', async () => {
-    const { config, run } = await setup({
-      buildDefaultDist: true,
-      buildOssDist: true,
-    });
-
-    const mock = jest.fn();
-
-    await run({
-      global: true,
-      description: 'foo',
-      run: mock,
-    });
-
-    expect(mock).toHaveBeenCalledTimes(1);
-    expect(mock).toHaveBeenLastCalledWith(config, log, [expect.any(Build), expect.any(Build)]);
-  });
-
-  it('calls local tasks twice, passing each build', async () => {
-    const { config, run } = await setup({
-      buildDefaultDist: true,
-      buildOssDist: true,
-    });
-
-    const mock = jest.fn();
-
-    await run({
-      description: 'foo',
-      run: mock,
-    });
-
-    expect(mock).toHaveBeenCalledTimes(2);
-    expect(mock).toHaveBeenCalledWith(config, log, expect.any(Build));
-  });
-});
-
-describe('just default dist', () => {
-  it('runs global task once, passing config and log', async () => {
-    const { config, run } = await setup({
-      buildDefaultDist: true,
-      buildOssDist: false,
-    });
+    const { config, run } = await setup();
 
     const mock = jest.fn();
 
@@ -118,10 +77,7 @@ describe('just default dist', () => {
   });
 
   it('calls local tasks once, passing the default build', async () => {
-    const { config, run } = await setup({
-      buildDefaultDist: true,
-      buildOssDist: false,
-    });
+    const { config, run } = await setup();
 
     const mock = jest.fn();
 
@@ -132,62 +88,12 @@ describe('just default dist', () => {
 
     expect(mock).toHaveBeenCalledTimes(1);
     expect(mock).toHaveBeenCalledWith(config, log, expect.any(Build));
-    const [args] = mock.mock.calls;
-    const [, , build] = args;
-    if (build.isOss()) {
-      throw new Error('expected build to be the default dist, not the oss dist');
-    }
-  });
-});
-
-describe('just oss dist', () => {
-  it('runs global task once, passing config and log', async () => {
-    const { config, run } = await setup({
-      buildDefaultDist: false,
-      buildOssDist: true,
-    });
-
-    const mock = jest.fn();
-
-    await run({
-      global: true,
-      description: 'foo',
-      run: mock,
-    });
-
-    expect(mock).toHaveBeenCalledTimes(1);
-    expect(mock).toHaveBeenLastCalledWith(config, log, [expect.any(Build)]);
-  });
-
-  it('calls local tasks once, passing the oss build', async () => {
-    const { config, run } = await setup({
-      buildDefaultDist: false,
-      buildOssDist: true,
-    });
-
-    const mock = jest.fn();
-
-    await run({
-      description: 'foo',
-      run: mock,
-    });
-
-    expect(mock).toHaveBeenCalledTimes(1);
-    expect(mock).toHaveBeenCalledWith(config, log, expect.any(Build));
-    const [args] = mock.mock.calls;
-    const [, , build] = args;
-    if (!build.isOss()) {
-      throw new Error('expected build to be the oss dist, not the default dist');
-    }
   });
 });
 
 describe('task rejection', () => {
   it('rejects, logs error, and marks error logged', async () => {
-    const { run } = await setup({
-      buildDefaultDist: true,
-      buildOssDist: false,
-    });
+    const { run } = await setup();
 
     const error = new Error('FOO');
     expect(isErrorLogged(error)).toBe(false);
@@ -213,10 +119,7 @@ describe('task rejection', () => {
   });
 
   it('just rethrows errors that have already been logged', async () => {
-    const { run } = await setup({
-      buildDefaultDist: true,
-      buildOssDist: false,
-    });
+    const { run } = await setup();
 
     const error = markErrorLogged(new Error('FOO'));
     const promise = run({

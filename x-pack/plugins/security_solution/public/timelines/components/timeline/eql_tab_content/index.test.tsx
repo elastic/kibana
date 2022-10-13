@@ -15,26 +15,34 @@ import { defaultHeaders, mockTimelineData } from '../../../../common/mock';
 import '../../../../common/mock/match_media';
 import { TestProviders } from '../../../../common/mock/test_providers';
 
-import { EqlTabContentComponent, Props as EqlTabContentComponentProps } from './index';
+import type { Props as EqlTabContentComponentProps } from '.';
+import { EqlTabContentComponent } from '.';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
-import { useTimelineEvents } from '../../../containers/index';
-import { useTimelineEventsDetails } from '../../../containers/details/index';
-import { useSourcererScope } from '../../../../common/containers/sourcerer';
+import { useTimelineEvents } from '../../../containers';
+import { useTimelineEventsDetails } from '../../../containers/details';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { mockSourcererScope } from '../../../../common/containers/sourcerer/mocks';
+import { useDraggableKeyboardWrapper as mockUseDraggableKeyboardWrapper } from '@kbn/timelines-plugin/public/components';
+import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
 
-jest.mock('../../../containers/index', () => ({
+jest.mock('../../../containers', () => ({
   useTimelineEvents: jest.fn(),
 }));
-jest.mock('../../../containers/details/index', () => ({
+jest.mock('../../../containers/details', () => ({
   useTimelineEventsDetails: jest.fn(),
 }));
-jest.mock('../body/events/index', () => ({
-  // eslint-disable-next-line react/display-name
+jest.mock('../../fields_browser', () => ({
+  useFieldBrowserOptions: jest.fn(),
+}));
+jest.mock('../body/events', () => ({
   Events: () => <></>,
 }));
 
 jest.mock('../../../../common/containers/sourcerer');
+jest.mock('../../../../common/containers/sourcerer/use_signal_helpers', () => ({
+  useSignalHelpers: () => ({ signalIndexNeedsInit: false }),
+}));
 
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');
@@ -46,9 +54,17 @@ jest.mock('../../../../common/lib/kibana', () => {
     ...originalModule,
     useKibana: jest.fn().mockReturnValue({
       services: {
+        theme: {
+          theme$: {},
+        },
         application: {
           navigateToApp: jest.fn(),
           getUrlForApp: jest.fn(),
+        },
+        cases: {
+          ui: {
+            getCasesContext: () => mockCasesContext,
+          },
         },
         docLinks: { links: { query: { eql: 'url-eql_doc' } } },
         uiSettings: {
@@ -56,6 +72,13 @@ jest.mock('../../../../common/lib/kibana', () => {
         },
         savedObjects: {
           client: {},
+        },
+        timelines: {
+          getLastUpdated: jest.fn(),
+          getUseDraggableKeyboardWrapper: () => mockUseDraggableKeyboardWrapper,
+        },
+        triggersActionsUi: {
+          getFieldBrowser: jest.fn(),
         },
       },
     }),
@@ -83,15 +106,14 @@ describe('Timeline', () => {
     ]);
     (useTimelineEventsDetails as jest.Mock).mockReturnValue([false, {}]);
 
-    (useSourcererScope as jest.Mock).mockReturnValue(mockSourcererScope);
+    (useSourcererDataView as jest.Mock).mockReturnValue(mockSourcererScope);
 
     props = {
+      activeTab: TimelineTabs.eql,
       columns: defaultHeaders,
       end: endDate,
       eqlOptions: {},
       expandedDetail: {},
-      eventType: 'all',
-      timelineId: TimelineId.test,
       isLive: false,
       itemsPerPage: 5,
       itemsPerPageOptions: [5, 10, 20],
@@ -100,9 +122,8 @@ describe('Timeline', () => {
       rowRenderers: defaultRowRenderers,
       showExpandedDetails: false,
       start: startDate,
+      timelineId: TimelineId.test,
       timerangeKind: 'absolute',
-      updateEventTypeAndIndexesName: jest.fn(),
-      activeTab: TimelineTabs.eql,
     };
   });
 
@@ -171,12 +192,12 @@ describe('Timeline', () => {
     });
 
     test('it does render the timeline table when the source is loading with no events', () => {
-      (useSourcererScope as jest.Mock).mockReturnValue({
+      (useSourcererDataView as jest.Mock).mockReturnValue({
         browserFields: {},
-        docValueFields: [],
         loading: true,
         indexPattern: {},
         selectedPatterns: [],
+        missingPatterns: [],
       });
       const wrapper = mount(
         <TestProviders>

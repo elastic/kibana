@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { HttpSetup, HttpFetchQuery } from '../../../../../src/core/public';
+import { HttpSetup, HttpFetchQuery } from '@kbn/core/public';
 
 export interface SendRequestConfig {
   path: string;
@@ -31,7 +31,7 @@ export const sendRequest = async <D = any, E = any>(
 ): Promise<SendRequestResponse<D, E>> => {
   try {
     const stringifiedBody = typeof body === 'string' ? body : JSON.stringify(body);
-    const response = await httpClient[method](path, {
+    const response = await httpClient[method]<{ data?: D } & D>(path, {
       body: stringifiedBody,
       query,
       asSystemRequest,

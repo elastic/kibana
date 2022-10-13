@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup, AppNavLinkStatus } from '../../../../src/core/public';
-import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
-import { LensPublicStart } from '../../../plugins/lens/public';
-import { DeveloperExamplesSetup } from '../../../../examples/developer_examples/public';
+import { Plugin, CoreSetup, AppNavLinkStatus } from '@kbn/core/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { LensPublicStart } from '@kbn/lens-plugin/public';
+import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { mount } from './mount';
 
 export interface SetupDependencies {
@@ -21,7 +21,8 @@ export interface StartDependencies {
 }
 
 export class EmbeddedLensExamplePlugin
-  implements Plugin<void, void, SetupDependencies, StartDependencies> {
+  implements Plugin<void, void, SetupDependencies, StartDependencies>
+{
   public setup(core: CoreSetup<StartDependencies>, { developerExamples }: SetupDependencies) {
     core.application.register({
       id: 'embedded_lens_example',
@@ -38,8 +39,7 @@ export class EmbeddedLensExamplePlugin
       links: [
         {
           label: 'README',
-          href:
-            'https://github.com/elastic/kibana/tree/master/x-pack/examples/embedded_lens_example',
+          href: 'https://github.com/elastic/kibana/tree/main/x-pack/examples/embedded_lens_example',
           iconType: 'logoGithub',
           size: 's',
           target: '_blank',

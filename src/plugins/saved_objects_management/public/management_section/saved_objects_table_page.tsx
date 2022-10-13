@@ -12,15 +12,13 @@ import { get } from 'lodash';
 import { Query } from '@elastic/eui';
 import { parse } from 'query-string';
 import { i18n } from '@kbn/i18n';
-import { CoreStart, ChromeBreadcrumb } from 'src/core/public';
-import type {
-  SpacesAvailableStartContract,
-  SpacesContextProps,
-} from 'src/plugins/spaces_oss/public';
-import { DataPublicPluginStart } from '../../../data/public';
-import { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/public';
+import { CoreStart, ChromeBreadcrumb } from '@kbn/core/public';
+import type { SpacesApi, SpacesContextProps } from '@kbn/spaces-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { SavedObjectManagementTypeInfo } from '../../common/types';
 import {
-  ISavedObjectsManagementServiceRegistry,
   SavedObjectsManagementActionServiceStart,
   SavedObjectsManagementColumnServiceStart,
 } from '../services';
@@ -31,20 +29,20 @@ const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) =
 const SavedObjectsTablePage = ({
   coreStart,
   dataStart,
+  dataViewsApi,
   taggingApi,
   spacesApi,
   allowedTypes,
-  serviceRegistry,
   actionRegistry,
   columnRegistry,
   setBreadcrumbs,
 }: {
   coreStart: CoreStart;
   dataStart: DataPublicPluginStart;
+  dataViewsApi: DataViewsContract;
   taggingApi?: SavedObjectsTaggingApi;
-  spacesApi?: SpacesAvailableStartContract;
-  allowedTypes: string[];
-  serviceRegistry: ISavedObjectsManagementServiceRegistry;
+  spacesApi?: SpacesApi;
+  allowedTypes: SavedObjectManagementTypeInfo[];
   actionRegistry: SavedObjectsManagementActionServiceStart;
   columnRegistry: SavedObjectsManagementColumnServiceStart;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
@@ -68,7 +66,6 @@ const SavedObjectsTablePage = ({
         text: i18n.translate('savedObjectsManagement.breadcrumb.index', {
           defaultMessage: 'Saved objects',
         }),
-        href: '/',
       },
     ]);
   }, [setBreadcrumbs]);
@@ -78,18 +75,16 @@ const SavedObjectsTablePage = ({
       spacesApi ? spacesApi.ui.components.getSpacesContextProvider : getEmptyFunctionComponent,
     [spacesApi]
   );
-
   return (
     <ContextWrapper>
       <SavedObjectsTable
         initialQuery={initialQuery}
         allowedTypes={allowedTypes}
-        serviceRegistry={serviceRegistry}
         actionRegistry={actionRegistry}
         columnRegistry={columnRegistry}
         taggingApi={taggingApi}
         savedObjectsClient={coreStart.savedObjects.client}
-        indexPatterns={dataStart.indexPatterns}
+        dataViews={dataViewsApi}
         search={dataStart.search}
         http={coreStart.http}
         overlays={coreStart.overlays}
@@ -97,16 +92,16 @@ const SavedObjectsTablePage = ({
         applications={coreStart.application}
         perPageConfig={itemsPerPage}
         goInspectObject={(savedObject) => {
-          const { editUrl } = savedObject.meta;
-          if (editUrl) {
-            return coreStart.application.navigateToUrl(
-              coreStart.http.basePath.prepend(`/app${editUrl}`)
-            );
-          }
+          const savedObjectEditUrl = savedObject.meta.editUrl
+            ? `/app${savedObject.meta.editUrl}`
+            : `/app/management/kibana/objects/${savedObject.type}/${savedObject.id}`;
+          coreStart.application.navigateToUrl(coreStart.http.basePath.prepend(savedObjectEditUrl));
         }}
         canGoInApp={(savedObject) => {
           const { inAppUrl } = savedObject.meta;
-          return inAppUrl ? Boolean(get(capabilities, inAppUrl.uiCapabilitiesPath)) : false;
+          if (!inAppUrl) return false;
+          if (!inAppUrl.uiCapabilitiesPath) return true;
+          return Boolean(get(capabilities, inAppUrl.uiCapabilitiesPath));
         }}
       />
     </ContextWrapper>

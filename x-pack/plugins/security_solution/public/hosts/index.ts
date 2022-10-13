@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import { Storage } from '../../../../../src/plugins/kibana_utils/public';
-import { TimelineIdLiteral, TimelineId } from '../../common/types/timeline';
-import { SecuritySubPluginWithStore } from '../app/types';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { TimelineIdLiteral } from '../../common/types/timeline';
+import { TimelineId } from '../../common/types/timeline';
+import type { SecuritySubPluginWithStore } from '../app/types';
 import { getTimelinesInStorageByIds } from '../timelines/containers/local_storage';
-import { HostsRoutes } from './routes';
-import { initialHostsState, hostsReducer, HostsState } from './store';
+import { routes } from './routes';
+import type { HostsState } from './store';
+import { initialHostsState, hostsReducer } from './store';
 
 const HOST_TIMELINE_IDS: TimelineIdLiteral[] = [
   TimelineId.hostsPageEvents,
-  TimelineId.hostsPageExternalAlerts,
+  TimelineId.hostsPageSessions,
 ];
 
 export class Hosts {
@@ -22,7 +24,7 @@ export class Hosts {
 
   public start(storage: Storage): SecuritySubPluginWithStore<'hosts', HostsState> {
     return {
-      SubPluginRoutes: HostsRoutes,
+      routes,
       storageTimelines: {
         timelineById: getTimelinesInStorageByIds(storage, HOST_TIMELINE_IDS),
       },

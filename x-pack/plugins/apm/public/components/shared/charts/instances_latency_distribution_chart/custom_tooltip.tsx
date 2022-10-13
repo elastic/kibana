@@ -9,13 +9,18 @@ import { TooltipInfo } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { getServiceNodeName } from '../../../../../common/service_nodes';
 import {
   asTransactionRate,
   TimeFormatter,
 } from '../../../../../common/utils/formatters';
 import { useTheme } from '../../../../hooks/use_theme';
-import { MainStatsServiceInstanceItem } from '../../../app/service_overview/service_overview_instances_chart_and_table';
+
+type ServiceInstanceMainStatistics =
+  APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
+type MainStatsServiceInstanceItem =
+  ServiceInstanceMainStatistics['currentPeriod'][0];
 
 const latencyLabel = i18n.translate(
   'xpack.apm.instancesLatencyDistributionChartTooltipLatencyLabel',
@@ -48,7 +53,7 @@ function SingleInstanceCustomTooltip({
 }) {
   const value = values[0];
   const { color } = value;
-  const datum = (value.datum as unknown) as MainStatsServiceInstanceItem;
+  const datum = value.datum as unknown as MainStatsServiceInstanceItem;
   const { latency, serviceNodeName, throughput } = datum;
 
   return (
@@ -119,7 +124,7 @@ function MultipleInstanceCustomTooltip({
       </div>
       {values.map((value) => {
         const { color } = value;
-        const datum = (value.datum as unknown) as MainStatsServiceInstanceItem;
+        const datum = value.datum as unknown as MainStatsServiceInstanceItem;
         const { latency, serviceNodeName, throughput } = datum;
         return (
           <div className="echTooltip__list" key={serviceNodeName}>
@@ -151,7 +156,7 @@ function MultipleInstanceCustomTooltip({
               </div>
               <div
                 className="echTooltip__item--container"
-                style={{ paddingLeft: theme.eui.paddingSizes.s }}
+                style={{ paddingLeft: theme.eui.euiSizeS }}
               >
                 <span className="echTooltip__label">{latencyLabel}</span>
                 <span className="echTooltip__value">
@@ -171,7 +176,7 @@ function MultipleInstanceCustomTooltip({
               </div>
               <div
                 className="echTooltip__item--container"
-                style={{ paddingLeft: theme.eui.paddingSizes.s }}
+                style={{ paddingLeft: theme.eui.euiSizeS }}
               >
                 <span className="echTooltip__label">{throughputLabel}</span>
                 <span className="echTooltip__value">
@@ -206,7 +211,7 @@ export function CustomTooltip(
       ) : (
         <SingleInstanceCustomTooltip {...props} />
       )}
-      <div style={{ padding: theme.eui.paddingSizes.xs }}>
+      <div style={{ padding: theme.eui.euiSizeXS }}>
         <EuiIcon type="filter" /> {clickToFilterDescription}
       </div>
     </div>

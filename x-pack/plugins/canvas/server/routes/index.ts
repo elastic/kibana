@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { IRouter, Logger, ElasticsearchServiceSetup } from 'src/core/server';
-import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
-import { BfetchServerSetup } from 'src/plugins/bfetch/server';
+import { IRouter, Logger } from '@kbn/core/server';
+import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
+import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
 import { initCustomElementsRoutes } from './custom_elements';
 import { initESFieldsRoutes } from './es_fields';
 import { initShareablesRoutes } from './shareables';
 import { initWorkpadRoutes } from './workpad';
 import { initTemplateRoutes } from './templates';
 import { initFunctionsRoutes } from './functions';
+import { CanvasRouteHandlerContext } from '../workpad_route_context';
 
 export interface RouteInitializerDeps {
-  router: IRouter;
+  router: IRouter<CanvasRouteHandlerContext>;
   logger: Logger;
   expressions: ExpressionsServerSetup;
   bfetch: BfetchServerSetup;
-  elasticsearch: ElasticsearchServiceSetup;
 }
 
 export function initRoutes(deps: RouteInitializerDeps) {

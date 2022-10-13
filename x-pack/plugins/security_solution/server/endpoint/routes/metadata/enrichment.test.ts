@@ -5,53 +5,38 @@
  * 2.0.
  */
 
-import { HostStatus, MetadataQueryStrategyVersions } from '../../../../common/endpoint/types';
+import { coreMock } from '@kbn/core/server/mocks';
+import { HostStatus } from '../../../../common/endpoint/types';
 import { createMockMetadataRequestContext } from '../../mocks';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
-import { enrichHostMetadata, MetadataRequestContext } from './handlers';
+import type { MetadataRequestContext } from './handlers';
+import { enrichHostMetadata } from './handlers';
+import type { AgentClient } from '@kbn/fleet-plugin/server';
 
 describe('test document enrichment', () => {
-  let metaReqCtx: jest.Mocked<MetadataRequestContext>;
+  let metaReqCtx: ReturnType<typeof createMockMetadataRequestContext>;
   const docGen = new EndpointDocGenerator();
 
   beforeEach(() => {
     metaReqCtx = createMockMetadataRequestContext();
   });
 
-  // verify query version passed through
-  describe('metadata query strategy enrichment', () => {
-    it('should match v1 strategy when directed', async () => {
-      const enrichedHostList = await enrichHostMetadata(
-        docGen.generateHostMetadata(),
-        metaReqCtx,
-        MetadataQueryStrategyVersions.VERSION_1
-      );
-      expect(enrichedHostList.query_strategy_version).toEqual(
-        MetadataQueryStrategyVersions.VERSION_1
-      );
-    });
-    it('should match v2 strategy when directed', async () => {
-      const enrichedHostList = await enrichHostMetadata(
-        docGen.generateHostMetadata(),
-        metaReqCtx,
-        MetadataQueryStrategyVersions.VERSION_2
-      );
-      expect(enrichedHostList.query_strategy_version).toEqual(
-        MetadataQueryStrategyVersions.VERSION_2
-      );
-    });
-  });
+  const getMetadataRequestContext = () =>
+    ({
+      ...metaReqCtx,
+      requestHandlerContext: coreMock.createCustomRequestHandlerContext(
+        metaReqCtx.requestHandlerContext
+      ),
+    } as unknown as MetadataRequestContext);
 
   describe('host status enrichment', () => {
     let statusFn: jest.Mock;
 
     beforeEach(() => {
       statusFn = jest.fn();
-      (metaReqCtx.endpointAppContextService.getAgentService as jest.Mock).mockImplementation(() => {
-        return {
-          getAgentStatusById: statusFn,
-        };
-      });
+      metaReqCtx.requestHandlerContext!.fleet!.agentClient.asCurrentUser = {
+        getAgentStatusById: statusFn,
+      } as unknown as AgentClient;
     });
 
     it('should return host healthy for online agent', async () => {
@@ -59,8 +44,7 @@ describe('test document enrichment', () => {
 
       const enrichedHostList = await enrichHostMetadata(
         docGen.generateHostMetadata(),
-        metaReqCtx,
-        MetadataQueryStrategyVersions.VERSION_2
+        getMetadataRequestContext()
       );
       expect(enrichedHostList.host_status).toEqual(HostStatus.HEALTHY);
     });
@@ -70,8 +54,7 @@ describe('test document enrichment', () => {
 
       const enrichedHostList = await enrichHostMetadata(
         docGen.generateHostMetadata(),
-        metaReqCtx,
-        MetadataQueryStrategyVersions.VERSION_2
+        getMetadataRequestContext()
       );
       expect(enrichedHostList.host_status).toEqual(HostStatus.OFFLINE);
     });
@@ -81,8 +64,7 @@ describe('test document enrichment', () => {
 
       const enrichedHostList = await enrichHostMetadata(
         docGen.generateHostMetadata(),
-        metaReqCtx,
-        MetadataQueryStrategyVersions.VERSION_2
+        getMetadataRequestContext()
       );
       expect(enrichedHostList.host_status).toEqual(HostStatus.UPDATING);
     });
@@ -92,8 +74,7 @@ describe('test document enrichment', () => {
 
       const enrichedHostList = await enrichHostMetadata(
         docGen.generateHostMetadata(),
-        metaReqCtx,
-        MetadataQueryStrategyVersions.VERSION_2
+        getMetadataRequestContext()
       );
       expect(enrichedHostList.host_status).toEqual(HostStatus.UNHEALTHY);
     });
@@ -103,8 +84,7 @@ describe('test document enrichment', () => {
 
       const enrichedHostList = await enrichHostMetadata(
         docGen.generateHostMetadata(),
-        metaReqCtx,
-        MetadataQueryStrategyVersions.VERSION_2
+        getMetadataRequestContext()
       );
       expect(enrichedHostList.host_status).toEqual(HostStatus.UNHEALTHY);
     });
@@ -114,8 +94,7 @@ describe('test document enrichment', () => {
 
       const enrichedHostList = await enrichHostMetadata(
         docGen.generateHostMetadata(),
-        metaReqCtx,
-        MetadataQueryStrategyVersions.VERSION_2
+        getMetadataRequestContext()
       );
       expect(enrichedHostList.host_status).toEqual(HostStatus.UNHEALTHY);
     });
@@ -125,8 +104,7 @@ describe('test document enrichment', () => {
 
       const enrichedHostList = await enrichHostMetadata(
         docGen.generateHostMetadata(),
-        metaReqCtx,
-        MetadataQueryStrategyVersions.VERSION_2
+        getMetadataRequestContext()
       );
       expect(enrichedHostList.host_status).toEqual(HostStatus.UNHEALTHY);
     });
@@ -139,12 +117,10 @@ describe('test document enrichment', () => {
     beforeEach(() => {
       agentMock = jest.fn();
       agentPolicyMock = jest.fn();
-      (metaReqCtx.endpointAppContextService.getAgentService as jest.Mock).mockImplementation(() => {
-        return {
-          getAgent: agentMock,
-          getAgentStatusById: jest.fn(),
-        };
-      });
+      metaReqCtx.requestHandlerContext!.fleet!.agentClient.asCurrentUser = {
+        getAgent: agentMock,
+        getAgentStatusById: jest.fn(),
+      } as unknown as AgentClient;
       (metaReqCtx.endpointAppContextService.getAgentPolicyService as jest.Mock).mockImplementation(
         () => {
           return {
@@ -166,12 +142,11 @@ describe('test document enrichment', () => {
 
       const enrichedHostList = await enrichHostMetadata(
         docGen.generateHostMetadata(),
-        metaReqCtx,
-        MetadataQueryStrategyVersions.VERSION_2
+        getMetadataRequestContext()
       );
       expect(enrichedHostList.policy_info).toBeDefined();
-      expect(enrichedHostList.policy_info!.agent.applied.id).toEqual(policyID);
-      expect(enrichedHostList.policy_info!.agent.applied.revision).toEqual(policyRev);
+      expect(enrichedHostList.policy_info?.agent.applied.id).toEqual(policyID);
+      expect(enrichedHostList.policy_info?.agent.applied.revision).toEqual(policyRev);
     });
 
     it('reflects current fleet agent info', async () => {
@@ -186,12 +161,11 @@ describe('test document enrichment', () => {
 
       const enrichedHostList = await enrichHostMetadata(
         docGen.generateHostMetadata(),
-        metaReqCtx,
-        MetadataQueryStrategyVersions.VERSION_2
+        getMetadataRequestContext()
       );
       expect(enrichedHostList.policy_info).toBeDefined();
-      expect(enrichedHostList.policy_info!.agent.configured.id).toEqual(policyID);
-      expect(enrichedHostList.policy_info!.agent.configured.revision).toEqual(policyRev);
+      expect(enrichedHostList.policy_info?.agent.configured.id).toEqual(policyID);
+      expect(enrichedHostList.policy_info?.agent.configured.revision).toEqual(policyRev);
     });
 
     it('reflects current endpoint policy info', async () => {
@@ -211,12 +185,11 @@ describe('test document enrichment', () => {
 
       const enrichedHostList = await enrichHostMetadata(
         docGen.generateHostMetadata(),
-        metaReqCtx,
-        MetadataQueryStrategyVersions.VERSION_2
+        getMetadataRequestContext()
       );
       expect(enrichedHostList.policy_info).toBeDefined();
-      expect(enrichedHostList.policy_info!.endpoint.id).toEqual(policyID);
-      expect(enrichedHostList.policy_info!.endpoint.revision).toEqual(policyRev);
+      expect(enrichedHostList.policy_info?.endpoint.id).toEqual(policyID);
+      expect(enrichedHostList.policy_info?.endpoint.revision).toEqual(policyRev);
     });
   });
 });

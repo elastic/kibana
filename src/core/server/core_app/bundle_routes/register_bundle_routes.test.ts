@@ -9,8 +9,8 @@
 import { registerRouteForBundleMock } from './register_bundle_routes.test.mocks';
 
 import { PackageInfo } from '@kbn/config';
-import { httpServiceMock } from '../../http/http_service.mock';
-import { InternalPluginInfo, UiPlugins } from '../../plugins';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
+import type { InternalPluginInfo, UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import { registerBundleRoutes } from './register_bundle_routes';
 import { FileHashCache } from './file_hash_cache';
 
@@ -56,14 +56,22 @@ describe('registerBundleRoutes', () => {
       uiPlugins: createUiPlugins(),
     });
 
-    expect(registerRouteForBundleMock).toHaveBeenCalledTimes(2);
+    expect(registerRouteForBundleMock).toHaveBeenCalledTimes(3);
 
     expect(registerRouteForBundleMock).toHaveBeenCalledWith(router, {
       fileHashCache: expect.any(FileHashCache),
       isDist: true,
-      bundlesPath: 'uiSharedDepsDistDir',
-      publicPath: '/server-base-path/42/bundles/kbn-ui-shared-deps/',
-      routePath: '/42/bundles/kbn-ui-shared-deps/',
+      bundlesPath: 'uiSharedDepsSrcDistDir',
+      publicPath: '/server-base-path/42/bundles/kbn-ui-shared-deps-src/',
+      routePath: '/42/bundles/kbn-ui-shared-deps-src/',
+    });
+
+    expect(registerRouteForBundleMock).toHaveBeenCalledWith(router, {
+      fileHashCache: expect.any(FileHashCache),
+      isDist: true,
+      bundlesPath: 'uiSharedDepsNpmDistDir',
+      publicPath: '/server-base-path/42/bundles/kbn-ui-shared-deps-npm/',
+      routePath: '/42/bundles/kbn-ui-shared-deps-npm/',
     });
 
     expect(registerRouteForBundleMock).toHaveBeenCalledWith(router, {
@@ -83,7 +91,7 @@ describe('registerBundleRoutes', () => {
       uiPlugins: createUiPlugins('plugin-a', 'plugin-b'),
     });
 
-    expect(registerRouteForBundleMock).toHaveBeenCalledTimes(4);
+    expect(registerRouteForBundleMock).toHaveBeenCalledTimes(5);
 
     expect(registerRouteForBundleMock).toHaveBeenCalledWith(router, {
       fileHashCache: expect.any(FileHashCache),

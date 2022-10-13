@@ -5,13 +5,31 @@
  * 2.0.
  */
 
-import { SetupTimeRange } from './setup_request';
-
-export function calculateThroughput({
+export function calculateThroughputWithRange({
   start,
   end,
   value,
-}: SetupTimeRange & { value: number }) {
+}: {
+  start: number;
+  end: number;
+  value: number;
+}) {
   const durationAsMinutes = (end - start) / 1000 / 60;
   return value / durationAsMinutes;
+}
+
+export function calculateThroughputWithInterval({
+  bucketSize,
+  value,
+}: {
+  bucketSize: number;
+  value: number;
+}) {
+  const durationAsMinutes = bucketSize / 60;
+  return value / durationAsMinutes;
+}
+
+export type ThroughputUnit = 'minute' | 'second';
+export function getThroughputUnit(bucketSize: number): ThroughputUnit {
+  return bucketSize >= 60 ? 'minute' : 'second';
 }

@@ -5,16 +5,21 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { pick, transform, uniq } from 'lodash';
 
-import type { IClusterClient, KibanaRequest } from 'src/core/server';
+import type { IClusterClient, KibanaRequest } from '@kbn/core/server';
 
 import { GLOBAL_RESOURCE } from '../../common/constants';
 import { ResourceSerializer } from './resource_serializer';
 import type {
   CheckPrivileges,
+  CheckPrivilegesOptions,
   CheckPrivilegesPayload,
   CheckPrivilegesResponse,
+  CheckUserProfilesPrivileges,
+  CheckUserProfilesPrivilegesPayload,
+  CheckUserProfilesPrivilegesResponse,
   HasPrivilegesResponse,
   HasPrivilegesResponseApplication,
 } from './types';
@@ -25,7 +30,7 @@ interface CheckPrivilegesActions {
   version: string;
 }
 
-export function checkPrivilegesWithRequestFactory(
+export function checkPrivilegesFactory(
   actions: CheckPrivilegesActions,
   getClusterClient: () => Promise<IClusterClient>,
   applicationName: string
@@ -38,31 +43,88 @@ export function checkPrivilegesWithRequestFactory(
     );
   };
 
-  return function checkPrivilegesWithRequest(request: KibanaRequest): CheckPrivileges {
+  const createApplicationPrivilegesCheck = (
+    resources: string[],
+    kibanaPrivileges: string | string[],
+    { requireLoginAction }: CheckPrivilegesOptions
+  ) => {
+    const normalizedKibanaPrivileges = Array.isArray(kibanaPrivileges)
+      ? kibanaPrivileges
+      : [kibanaPrivileges];
+
+    return {
+      application: applicationName,
+      resources,
+      privileges: uniq([
+        actions.version,
+        ...(requireLoginAction ? [actions.login] : []),
+        ...normalizedKibanaPrivileges,
+      ]),
+    };
+  };
+
+  function checkUserProfilesPrivileges(userProfileUids: Set<string>): CheckUserProfilesPrivileges {
     const checkPrivilegesAtResources = async (
       resources: string[],
-      privileges: CheckPrivilegesPayload
+      privileges: CheckUserProfilesPrivilegesPayload
+    ): Promise<CheckUserProfilesPrivilegesResponse> => {
+      const clusterClient = await getClusterClient();
+
+      const applicationPrivilegesCheck = createApplicationPrivilegesCheck(
+        resources,
+        privileges.kibana,
+        { requireLoginAction: true }
+      );
+
+      const response = await clusterClient.asInternalUser.transport.request<{
+        has_privilege_uids: string[];
+        error_uids?: string[];
+      }>({
+        method: 'POST',
+        path: '_security/profile/_has_privileges',
+        body: {
+          uids: [...userProfileUids],
+          privileges: { application: [applicationPrivilegesCheck] },
+        },
+      });
+
+      return {
+        hasPrivilegeUids: response.has_privilege_uids,
+        errorUids: response.error_uids ?? [],
+      };
+    };
+
+    return {
+      async atSpace(spaceId: string, privileges: CheckUserProfilesPrivilegesPayload) {
+        const spaceResource = ResourceSerializer.serializeSpaceResource(spaceId);
+        return await checkPrivilegesAtResources([spaceResource], privileges);
+      },
+    };
+  }
+
+  function checkPrivilegesWithRequest(request: KibanaRequest): CheckPrivileges {
+    const checkPrivilegesAtResources = async (
+      resources: string[],
+      privileges: CheckPrivilegesPayload,
+      { requireLoginAction = true }: CheckPrivilegesOptions = {}
     ): Promise<CheckPrivilegesResponse> => {
-      const kibanaPrivileges = Array.isArray(privileges.kibana)
-        ? privileges.kibana
-        : privileges.kibana
-        ? [privileges.kibana]
-        : [];
-      const allApplicationPrivileges = uniq([actions.version, actions.login, ...kibanaPrivileges]);
+      const applicationPrivilegesCheck = createApplicationPrivilegesCheck(
+        resources,
+        privileges.kibana ?? [],
+        { requireLoginAction }
+      );
 
       const clusterClient = await getClusterClient();
-      const { body } = await clusterClient.asScoped(request).asCurrentUser.security.hasPrivileges({
+      const body = await clusterClient.asScoped(request).asCurrentUser.security.hasPrivileges({
         body: {
-          cluster: privileges.elasticsearch?.cluster,
+          cluster: privileges.elasticsearch?.cluster as estypes.SecurityClusterPrivilege[],
           index: Object.entries(privileges.elasticsearch?.index ?? {}).map(
             ([name, indexPrivileges]) => ({
               names: [name],
-              privileges: indexPrivileges,
+              privileges: indexPrivileges as estypes.SecurityIndexPrivilege[],
             })
           ),
-          application: [
-            { application: applicationName, resources, privileges: allApplicationPrivileges },
-          ],
+          application: [applicationPrivilegesCheck],
         },
       });
 
@@ -71,7 +133,7 @@ export function checkPrivilegesWithRequestFactory(
       validateEsPrivilegeResponse(
         hasPrivilegesResponse,
         applicationName,
-        allApplicationPrivileges,
+        applicationPrivilegesCheck.privileges,
         resources
       );
 
@@ -135,19 +197,29 @@ export function checkPrivilegesWithRequestFactory(
     };
 
     return {
-      async atSpace(spaceId: string, privileges: CheckPrivilegesPayload) {
+      async atSpace(
+        spaceId: string,
+        privileges: CheckPrivilegesPayload,
+        options?: CheckPrivilegesOptions
+      ) {
         const spaceResource = ResourceSerializer.serializeSpaceResource(spaceId);
-        return await checkPrivilegesAtResources([spaceResource], privileges);
+        return await checkPrivilegesAtResources([spaceResource], privileges, options);
       },
-      async atSpaces(spaceIds: string[], privileges: CheckPrivilegesPayload) {
+      async atSpaces(
+        spaceIds: string[],
+        privileges: CheckPrivilegesPayload,
+        options?: CheckPrivilegesOptions
+      ) {
         const spaceResources = spaceIds.map((spaceId) =>
           ResourceSerializer.serializeSpaceResource(spaceId)
         );
-        return await checkPrivilegesAtResources(spaceResources, privileges);
+        return await checkPrivilegesAtResources(spaceResources, privileges, options);
       },
-      async globally(privileges: CheckPrivilegesPayload) {
-        return await checkPrivilegesAtResources([GLOBAL_RESOURCE], privileges);
+      async globally(privileges: CheckPrivilegesPayload, options?: CheckPrivilegesOptions) {
+        return await checkPrivilegesAtResources([GLOBAL_RESOURCE], privileges, options);
       },
     };
-  };
+  }
+
+  return { checkPrivilegesWithRequest, checkUserProfilesPrivileges };
 }

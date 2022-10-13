@@ -7,12 +7,13 @@
  */
 
 import { get } from 'lodash';
-import { StartServicesAccessor } from 'src/core/public';
+import { defer } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
+import { StartServicesAccessor } from '@kbn/core/public';
 import {
   EsaggsExpressionFunctionDefinition,
   EsaggsStartDependencies,
   getEsaggsMeta,
-  handleEsaggsRequest,
 } from '../../../common/search/expressions';
 import { DataPublicPluginStart, DataStartDependencies } from '../../types';
 
@@ -35,30 +36,45 @@ export function getFunctionDefinition({
 }) {
   return (): EsaggsExpressionFunctionDefinition => ({
     ...getEsaggsMeta(),
-    async fn(input, args, { inspectorAdapters, abortSignal, getSearchSessionId }) {
-      const { aggs, indexPatterns, searchSource, getNow } = await getStartDependencies();
+    fn(
+      input,
+      args,
+      { inspectorAdapters, abortSignal, getSearchSessionId, getExecutionContext, getSearchContext }
+    ) {
+      return defer(async () => {
+        const { aggs, indexPatterns, searchSource, getNow } = await getStartDependencies();
 
-      const indexPattern = await indexPatterns.create(args.index.value, true);
-      const aggConfigs = aggs.createAggConfigs(
-        indexPattern,
-        args.aggs!.map((agg) => agg.value)
+        const indexPattern = await indexPatterns.create(args.index.value, true);
+        const aggConfigs = aggs.createAggConfigs(
+          indexPattern,
+          args.aggs?.map((agg) => agg.value) ?? [],
+          { hierarchical: args.metricsAtAllLevels, partialRows: args.partialRows }
+        );
+
+        const { handleEsaggsRequest } = await import('../../../common/search/expressions');
+
+        return { aggConfigs, indexPattern, searchSource, getNow, handleEsaggsRequest };
+      }).pipe(
+        switchMap(({ aggConfigs, indexPattern, searchSource, getNow, handleEsaggsRequest }) => {
+          const { disableShardWarnings } = getSearchContext();
+
+          return handleEsaggsRequest({
+            abortSignal,
+            aggs: aggConfigs,
+            filters: get(input, 'filters', undefined),
+            indexPattern,
+            inspectorAdapters,
+            query: get(input, 'query', undefined) as any,
+            searchSessionId: getSearchSessionId(),
+            searchSourceService: searchSource,
+            timeFields: args.timeFields,
+            timeRange: get(input, 'timeRange', undefined),
+            disableShardWarnings: (disableShardWarnings || false) as boolean,
+            getNow,
+            executionContext: getExecutionContext(),
+          });
+        })
       );
-      aggConfigs.hierarchical = args.metricsAtAllLevels;
-
-      return await handleEsaggsRequest({
-        abortSignal,
-        aggs: aggConfigs,
-        filters: get(input, 'filters', undefined),
-        indexPattern,
-        inspectorAdapters,
-        partialRows: args.partialRows,
-        query: get(input, 'query', undefined) as any,
-        searchSessionId: getSearchSessionId(),
-        searchSourceService: searchSource,
-        timeFields: args.timeFields,
-        timeRange: get(input, 'timeRange', undefined),
-        getNow,
-      });
     },
   });
 }

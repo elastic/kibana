@@ -8,29 +8,28 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled, { css } from 'styled-components';
 
-import { EuiCallOut } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiCallOut, EuiLink } from '@elastic/eui';
 
-import { SUPPORTED_CONNECTORS } from '../../../common';
+import { ActionConnectorTableItem } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { useKibana } from '../../common/lib/kibana';
-import { useConnectors } from '../../containers/configure/use_connectors';
-import { useActionTypes } from '../../containers/configure/use_action_types';
+import { useGetActionTypes } from '../../containers/configure/use_action_types';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
 
 import { ClosureType } from '../../containers/configure/types';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ActionConnectorTableItem } from '../../../../triggers_actions_ui/public/types';
-
-import { SectionWrapper } from '../wrappers';
+import { SectionWrapper, ContentWrapper, WhitePageWrapper } from '../wrappers';
 import { Connectors } from './connectors';
 import { ClosureOptions } from './closure_options';
-import {
-  getConnectorById,
-  getNoneConnector,
-  normalizeActionConnector,
-  normalizeCaseConnector,
-} from './utils';
+import { getNoneConnector, normalizeActionConnector, normalizeCaseConnector } from './utils';
 import * as i18n from './translations';
+import { getConnectorById } from '../utils';
+import { HeaderPage } from '../header_page';
+import { useCasesContext } from '../cases_context/use_cases_context';
+import { useCasesBreadcrumbs } from '../use_breadcrumbs';
+import { CasesDeepLinkId } from '../../common/navigation';
+import { useGetConnectors } from '../../containers/configure/use_connectors';
 
 const FormWrapper = styled.div`
   ${({ theme }) => css`
@@ -42,20 +41,18 @@ const FormWrapper = styled.div`
       margin-top: 0;
     }
 
-    padding-top: ${theme.eui.paddingSizes.xl};
-    padding-bottom: ${theme.eui.paddingSizes.xl};
+    padding-top: ${theme.eui.euiSizeXL};
+    padding-bottom: ${theme.eui.euiSizeXL};
     .euiFlyout {
       z-index: ${theme.eui.euiZNavigation + 1};
     }
   `}
 `;
 
-export interface ConfigureCasesProps {
-  userCanCrud: boolean;
-}
-
-const ConfigureCasesComponent: React.FC<ConfigureCasesProps> = ({ userCanCrud }) => {
+export const ConfigureCases: React.FC = React.memo(() => {
+  const { permissions } = useCasesContext();
   const { triggersActionsUi } = useKibana().services;
+  useCasesBreadcrumbs(CasesDeepLinkId.casesConfigure);
 
   const [connectorIsValid, setConnectorIsValid] = useState(true);
   const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
@@ -76,14 +73,18 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesProps> = ({ userCanCrud })
     setClosureType,
   } = useCaseConfigure();
 
-  const { loading: isLoadingConnectors, connectors, refetchConnectors } = useConnectors();
-  const { loading: isLoadingActionTypes, actionTypes, refetchActionTypes } = useActionTypes();
-  const supportedActionTypes = useMemo(
-    () => actionTypes.filter((actionType) => SUPPORTED_CONNECTORS.includes(actionType.id)),
-    [actionTypes]
-  );
+  const {
+    isLoading: isLoadingConnectors,
+    data: connectors = [],
+    refetch: refetchConnectors,
+  } = useGetConnectors();
+  const {
+    isLoading: isLoadingActionTypes,
+    data: actionTypes = [],
+    refetch: refetchActionTypes,
+  } = useGetActionTypes();
 
-  const onConnectorUpdate = useCallback(async () => {
+  const onConnectorUpdated = useCallback(async () => {
     refetchConnectors();
     refetchActionTypes();
     refetchCaseConfigure();
@@ -96,9 +97,10 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesProps> = ({ userCanCrud })
     setEditFlyoutVisibility(true);
   }, []);
 
-  const onCloseAddFlyout = useCallback(() => setAddFlyoutVisibility(false), [
-    setAddFlyoutVisibility,
-  ]);
+  const onCloseAddFlyout = useCallback(
+    () => setAddFlyoutVisibility(false),
+    [setAddFlyoutVisibility]
+  );
 
   const onCloseEditFlyout = useCallback(() => setEditFlyoutVisibility(false), []);
 
@@ -160,24 +162,22 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesProps> = ({ userCanCrud })
     () =>
       addFlyoutVisible
         ? triggersActionsUi.getAddConnectorFlyout({
-            consumer: 'case',
             onClose: onCloseAddFlyout,
-            actionTypes: supportedActionTypes,
-            reloadConnectors: onConnectorUpdate,
+            featureId: CasesConnectorFeatureId,
+            onConnectorCreated: onConnectorUpdated,
           })
         : null,
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [addFlyoutVisible, supportedActionTypes]
+    [addFlyoutVisible]
   );
 
   const ConnectorEditFlyout = useMemo(
     () =>
       editedConnectorItem && editFlyoutVisible
         ? triggersActionsUi.getEditConnectorFlyout({
-            initialConnector: editedConnectorItem,
-            consumer: 'case',
+            connector: editedConnectorItem,
             onClose: onCloseEditFlyout,
-            reloadConnectors: onConnectorUpdate,
+            onConnectorUpdated,
           })
         : null,
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -185,44 +185,64 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesProps> = ({ userCanCrud })
   );
 
   return (
-    <FormWrapper>
-      {!connectorIsValid && (
-        <SectionWrapper style={{ marginTop: 0 }}>
-          <EuiCallOut
-            title={i18n.WARNING_NO_CONNECTOR_TITLE}
-            color="warning"
-            iconType="help"
-            data-test-subj="configure-cases-warning-callout"
-          >
-            {i18n.WARNING_NO_CONNECTOR_MESSAGE}
-          </EuiCallOut>
-        </SectionWrapper>
-      )}
-      <SectionWrapper>
-        <ClosureOptions
-          closureTypeSelected={closureType}
-          disabled={persistLoading || isLoadingConnectors || !userCanCrud}
-          onChangeClosureType={onChangeClosureType}
-        />
-      </SectionWrapper>
-      <SectionWrapper>
-        <Connectors
-          connectors={connectors ?? []}
-          disabled={persistLoading || isLoadingConnectors || !userCanCrud}
-          handleShowEditFlyout={onClickUpdateConnector}
-          isLoading={isLoadingAny}
-          mappings={mappings}
-          onChangeConnector={onChangeConnector}
-          selectedConnector={connector}
-          updateConnectorDisabled={updateConnectorDisabled || !userCanCrud}
-        />
-      </SectionWrapper>
-      {ConnectorAddFlyout}
-      {ConnectorEditFlyout}
-    </FormWrapper>
+    <>
+      <HeaderPage
+        showBackButton={true}
+        data-test-subj="case-configure-title"
+        title={i18n.CONFIGURE_CASES_PAGE_TITLE}
+      />
+      <WhitePageWrapper>
+        <ContentWrapper>
+          <FormWrapper>
+            {!connectorIsValid && (
+              <SectionWrapper style={{ marginTop: 0 }}>
+                <EuiCallOut
+                  title={i18n.WARNING_NO_CONNECTOR_TITLE}
+                  color="warning"
+                  iconType="help"
+                  data-test-subj="configure-cases-warning-callout"
+                >
+                  <FormattedMessage
+                    defaultMessage="The selected connector has been deleted or you do not have the {appropriateLicense} to use it. Either select a different connector or create a new one."
+                    id="xpack.cases.configure.connectorDeletedOrLicenseWarning"
+                    values={{
+                      appropriateLicense: (
+                        <EuiLink href="https://www.elastic.co/subscriptions" target="_blank">
+                          {i18n.LINK_APPROPRIATE_LICENSE}
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                </EuiCallOut>
+              </SectionWrapper>
+            )}
+            <SectionWrapper>
+              <ClosureOptions
+                closureTypeSelected={closureType}
+                disabled={persistLoading || isLoadingConnectors || !permissions.update}
+                onChangeClosureType={onChangeClosureType}
+              />
+            </SectionWrapper>
+            <SectionWrapper>
+              <Connectors
+                actionTypes={actionTypes}
+                connectors={connectors ?? []}
+                disabled={persistLoading || isLoadingConnectors || !permissions.update}
+                handleShowEditFlyout={onClickUpdateConnector}
+                isLoading={isLoadingAny}
+                mappings={mappings}
+                onChangeConnector={onChangeConnector}
+                selectedConnector={connector}
+                updateConnectorDisabled={updateConnectorDisabled || !permissions.update}
+              />
+            </SectionWrapper>
+            {ConnectorAddFlyout}
+            {ConnectorEditFlyout}
+          </FormWrapper>
+        </ContentWrapper>
+      </WhitePageWrapper>
+    </>
   );
-};
+});
 
-export const ConfigureCases = React.memo(ConfigureCasesComponent);
-// eslint-disable-next-line import/no-default-export
-export default ConfigureCases;
+ConfigureCases.displayName = 'ConfigureCases';

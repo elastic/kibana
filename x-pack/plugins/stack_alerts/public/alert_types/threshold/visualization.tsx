@@ -6,8 +6,7 @@
  */
 
 import React, { Fragment, useEffect, useState } from 'react';
-import { IUiSettingsClient, HttpSetup } from 'kibana/public';
-import { i18n } from '@kbn/i18n';
+import { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
 import { interval } from 'rxjs';
 import {
   AnnotationDomainType,
@@ -29,17 +28,17 @@ import {
   EuiText,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { ChartsPluginSetup } from 'src/plugins/charts/public';
-import { FieldFormatsStart } from 'src/plugins/data/public';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { AggregationType, Comparator } from '@kbn/triggers-actions-ui-plugin/public';
+import { parseDuration } from '@kbn/alerting-plugin/common/parse_duration';
 import {
   getThresholdAlertVisualizationData,
   GetThresholdAlertVisualizationDataParams,
 } from './index_threshold_api';
-import { AggregationType, Comparator } from '../../../../triggers_actions_ui/public';
 import { IndexThresholdAlertParams } from './types';
-import { parseDuration } from '../../../../alerting/common/parse_duration';
 
 const customTheme = () => {
   return {
@@ -88,7 +87,7 @@ const getDomain = (alertInterval: string, startAt: Date) => {
 };
 
 interface Props {
-  alertParams: IndexThresholdAlertParams;
+  ruleParams: IndexThresholdAlertParams;
   alertInterval: string;
   aggregationTypes: { [key: string]: AggregationType };
   comparators: {
@@ -109,7 +108,7 @@ enum LoadingStateType {
 
 type MetricResult = [number, number]; // [epochMillis, value]
 export const ThresholdVisualization: React.FunctionComponent<Props> = ({
-  alertParams,
+  ruleParams,
   alertInterval,
   aggregationTypes,
   comparators,
@@ -129,10 +128,11 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
     timeWindowUnit,
     groupBy,
     threshold,
-  } = alertParams;
-  const { http, notifications, uiSettings } = useKibana().services;
+  } = ruleParams;
+  const { http, uiSettings } = useKibana().services;
   const [loadingState, setLoadingState] = useState<LoadingStateType | null>(null);
-  const [error, setError] = useState<undefined | Error>(undefined);
+  const [hasError, setHasError] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<undefined | string>(undefined);
   const [visualizationData, setVisualizationData] = useState<Record<string, MetricResult[]>>();
   const [startVisualizationAt, setStartVisualizationAt] = useState<Date>(new Date());
 
@@ -153,16 +153,11 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
         setVisualizationData(
           await getVisualizationData(alertWithoutActions, visualizeOptions, http!)
         );
+        setHasError(false);
+        setErrorMessage(undefined);
       } catch (e) {
-        if (notifications) {
-          notifications.toasts.addDanger({
-            title: i18n.translate(
-              'xpack.stackAlerts.threshold.ui.visualization.unableToLoadVisualizationMessage',
-              { defaultMessage: 'Unable to load visualization' }
-            ),
-          });
-        }
-        setError(e);
+        setHasError(true);
+        setErrorMessage(e?.body?.message || e?.message);
       } finally {
         setLoadingState(LoadingStateType.Idle);
       }
@@ -197,7 +192,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
   };
 
   // Fetching visualization data is independent of alert actions
-  const alertWithoutActions = { ...alertParams, actions: [], type: 'threshold' };
+  const alertWithoutActions = { ...ruleParams, actions: [], type: 'threshold' };
 
   if (loadingState === LoadingStateType.FirstLoad) {
     return (
@@ -216,7 +211,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
     );
   }
 
-  if (error) {
+  if (hasError) {
     return (
       <Fragment>
         <EuiSpacer size="l" />
@@ -232,7 +227,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
           color="danger"
           iconType="alert"
         >
-          {error}
+          {errorMessage}
         </EuiCallOut>
       </Fragment>
     );
@@ -282,7 +277,12 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
               showOverlappingTicks={true}
               tickFormat={dateFormatter}
             />
-            <Axis domain={{ max: maxY }} id="left" title={aggLabel} position={Position.Left} />
+            <Axis
+              domain={{ max: maxY, min: NaN }}
+              id="left"
+              title={aggLabel}
+              position={Position.Left}
+            />
             {alertVisualizationDataKeys.map((key: string) => {
               return (
                 <LineSeries

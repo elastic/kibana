@@ -5,26 +5,19 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { get, isEmpty } from 'lodash/fp';
-import { useDispatch } from 'react-redux';
+import { isEmpty } from 'lodash/fp';
 
-import { Ecs } from '../../../../../common/ecs';
-import { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
-import { setActiveTabTimeline, updateTimelineGraphEventId } from '../../../store/timeline/actions';
-import {
-  TimelineEventsType,
-  TimelineTypeLiteral,
-  TimelineType,
-  TimelineId,
-  TimelineTabs,
-} from '../../../../../common/types/timeline';
-import { OnPinEvent, OnUnPinEvent } from '../events';
-import { ActionIconItem } from './actions/action_icon_item';
+import type { Ecs } from '../../../../../common/ecs';
+import type { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
+import type { TimelineEventsType, TimelineTypeLiteral } from '../../../../../common/types/timeline';
+import { TimelineType } from '../../../../../common/types/timeline';
+import type { OnPinEvent, OnUnPinEvent } from '../events';
 import * as i18n from './translations';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const omitTypenameAndEmpty = (k: string, v: any): any | undefined =>
+export const omitTypenameAndEmpty = (
+  k: string,
+  v: string | object | Array<string | object>
+): string | object | Array<string | object> | undefined =>
   k !== '__typename' && v != null ? v : undefined;
 
 export const stringifyEvent = (ecs: Ecs): string => JSON.stringify(ecs, omitTypenameAndEmpty, 2);
@@ -32,22 +25,27 @@ export const stringifyEvent = (ecs: Ecs): string => JSON.stringify(ecs, omitType
 export const eventHasNotes = (noteIds: string[]): boolean => !isEmpty(noteIds);
 
 export const getPinTooltip = ({
+  isAlert,
   isPinned,
   // eslint-disable-next-line @typescript-eslint/no-shadow
   eventHasNotes,
   timelineType,
 }: {
+  isAlert: boolean;
   isPinned: boolean;
   eventHasNotes: boolean;
   timelineType: TimelineTypeLiteral;
-}) =>
-  timelineType === TimelineType.template
-    ? i18n.DISABLE_PIN
-    : isPinned && eventHasNotes
-    ? i18n.PINNED_WITH_NOTES
-    : isPinned
-    ? i18n.PINNED
-    : i18n.UNPINNED;
+}) => {
+  if (timelineType === TimelineType.template) {
+    return i18n.DISABLE_PIN(isAlert);
+  } else if (isPinned && eventHasNotes) {
+    return i18n.PINNED_WITH_NOTES(isAlert);
+  } else if (isPinned) {
+    return i18n.PINNED(isAlert);
+  } else {
+    return i18n.UNPINNED(isAlert);
+  }
+};
 
 export interface IsPinnedParams {
   eventId: string;
@@ -106,7 +104,7 @@ export const getEventIdToDataMapping = (
   }, {});
 
 export const isEventBuildingBlockType = (event: Ecs): boolean =>
-  !isEmpty(event.signal?.rule?.building_block_type);
+  !isEmpty(event.kibana?.alert?.building_block_type);
 
 export const isEvenEqlSequence = (event: Ecs): boolean => {
   if (!isEmpty(event.eql?.sequenceNumber)) {
@@ -121,61 +119,12 @@ export const isEvenEqlSequence = (event: Ecs): boolean => {
 };
 /** Return eventType raw or signal or eql */
 export const getEventType = (event: Ecs): Omit<TimelineEventsType, 'all'> => {
-  if (!isEmpty(event.signal?.rule?.id)) {
+  if (!isEmpty(event.kibana?.alert?.rule?.uuid)) {
     return 'signal';
   } else if (!isEmpty(event.eql?.parentId)) {
     return 'eql';
   }
   return 'raw';
 };
-
-export const isInvestigateInResolverActionEnabled = (ecsData?: Ecs) =>
-  (get(['agent', 'type', 0], ecsData) === 'endpoint' ||
-    (get(['agent', 'type', 0], ecsData) === 'winlogbeat' &&
-      get(['event', 'module', 0], ecsData) === 'sysmon')) &&
-  get(['process', 'entity_id'], ecsData)?.length === 1 &&
-  get(['process', 'entity_id', 0], ecsData) !== '';
-
-interface InvestigateInResolverActionProps {
-  ariaLabel?: string;
-  timelineId: string;
-  ecsData: Ecs;
-}
-
-const InvestigateInResolverActionComponent: React.FC<InvestigateInResolverActionProps> = ({
-  ariaLabel = i18n.ACTION_INVESTIGATE_IN_RESOLVER,
-  timelineId,
-  ecsData,
-}) => {
-  const dispatch = useDispatch();
-  const isDisabled = useMemo(() => !isInvestigateInResolverActionEnabled(ecsData), [ecsData]);
-  const handleClick = useCallback(() => {
-    dispatch(updateTimelineGraphEventId({ id: timelineId, graphEventId: ecsData._id }));
-    if (timelineId === TimelineId.active) {
-      dispatch(setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.graph }));
-    }
-  }, [dispatch, ecsData._id, timelineId]);
-
-  return (
-    <ActionIconItem
-      ariaLabel={ariaLabel}
-      content={
-        isDisabled ? i18n.INVESTIGATE_IN_RESOLVER_DISABLED : i18n.ACTION_INVESTIGATE_IN_RESOLVER
-      }
-      dataTestSubj="investigate-in-resolver"
-      iconType="analyzeEvent"
-      isDisabled={isDisabled}
-      onClick={handleClick}
-    />
-  );
-};
-
-InvestigateInResolverActionComponent.displayName = 'InvestigateInResolverActionComponent';
-
-export const InvestigateInResolverAction = React.memo(InvestigateInResolverActionComponent);
-
-export const ROW_RENDERER_CLASS_NAME = 'row-renderer';
-
-export const NOTES_CONTAINER_CLASS_NAME = 'notes-container';
 
 export const NOTE_CONTENT_CLASS_NAME = 'note-content';

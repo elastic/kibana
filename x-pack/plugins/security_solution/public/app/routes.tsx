@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import { History } from 'history';
-import React, { FC, memo, useEffect } from 'react';
-import { Route, Router, Switch } from 'react-router-dom';
+import type { History } from 'history';
+import type { FC } from 'react';
+import React, { memo, useEffect } from 'react';
+import { Router, Switch } from 'react-router-dom';
+import { Route } from '@kbn/kibana-react-plugin/public';
 import { useDispatch } from 'react-redux';
 
-import { AppLeaveHandler } from '../../../../../src/core/public';
+import type { AppLeaveHandler, AppMountParameters } from '@kbn/core/public';
 import { ManageRoutesSpy } from '../common/utils/route/manage_spy_routes';
 import { RouteCapture } from '../common/components/endpoint/route_capture';
-import { AppAction } from '../common/store/actions';
+import type { AppAction } from '../common/store/actions';
 import { NotFoundPage } from './404';
 import { HomePage } from './home';
 
@@ -21,9 +23,15 @@ interface RouterProps {
   children: React.ReactNode;
   history: History;
   onAppLeave: (handler: AppLeaveHandler) => void;
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
 }
 
-const PageRouterComponent: FC<RouterProps> = ({ children, history, onAppLeave }) => {
+const PageRouterComponent: FC<RouterProps> = ({
+  children,
+  history,
+  onAppLeave,
+  setHeaderActionMenu,
+}) => {
   const dispatch = useDispatch<(action: AppAction) => void>();
   useEffect(() => {
     return () => {
@@ -42,7 +50,7 @@ const PageRouterComponent: FC<RouterProps> = ({ children, history, onAppLeave })
         <RouteCapture>
           <Switch>
             <Route path="/">
-              <HomePage onAppLeave={onAppLeave}>{children}</HomePage>
+              <HomePage setHeaderActionMenu={setHeaderActionMenu}>{children}</HomePage>
             </Route>
             <Route>
               <NotFoundPage />

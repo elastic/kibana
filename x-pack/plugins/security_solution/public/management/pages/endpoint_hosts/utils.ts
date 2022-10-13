@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { HostInfo, HostMetadata } from '../../../../common/endpoint/types';
+import dateMath from '@kbn/datemath';
+import moment from 'moment';
+import type { HostInfo, HostMetadata } from '../../../../common/endpoint/types';
 
 export const isPolicyOutOfDate = (
   reported: HostMetadata['Endpoint']['policy']['applied'],
   current: HostInfo['policy_info']
 ): boolean => {
-  if (current === undefined || current === null) {
+  if (!current || !reported.id) {
     return false; // we don't know, can't declare it out-of-date
   }
   return !(
@@ -22,4 +24,19 @@ export const isPolicyOutOfDate = (
     reported.version >= current.agent.configured.revision &&
     reported.endpoint_policy_version >= current.endpoint.revision
   );
+};
+
+export const getIsInvalidDateRange = ({
+  startDate,
+  endDate,
+}: {
+  startDate: string;
+  endDate: string;
+}) => {
+  const start = moment(dateMath.parse(startDate));
+  const end = moment(dateMath.parse(endDate));
+  if (start.isValid() && end.isValid()) {
+    return start.isAfter(end);
+  }
+  return false;
 };

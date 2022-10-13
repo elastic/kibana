@@ -5,14 +5,28 @@
  * 2.0.
  */
 
-import { EuiHorizontalRule, EuiSpacer, EuiWindowEvent } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiSpacer,
+  EuiWindowEvent,
+} from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React, { useEffect, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { HostItem, LastEventIndexKey } from '../../../../common/search_strategy';
+import type { Filter } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
+
+import { AlertsByStatus } from '../../../overview/components/detection_response/alerts_by_status';
+import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
+import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
+import { InputsModelId } from '../../../common/store/inputs/constants';
+import type { HostItem } from '../../../../common/search_strategy';
+import { LastEventIndexKey } from '../../../../common/search_strategy';
 import { SecurityPageName } from '../../../app/types';
-import { UpdateDateRange } from '../../../common/components/charts/common';
 import { FiltersGlobal } from '../../../common/components/filters_global';
 import { HeaderPage } from '../../../common/components/header_page';
 import { LastEventTime } from '../../../common/components/last_event_time';
@@ -21,24 +35,20 @@ import { hostToCriteria } from '../../../common/components/ml/criteria/host_to_c
 import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml_user_permissions';
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 import { scoreIntervalToDateTime } from '../../../common/components/ml/score/score_interval_to_datetime';
-import { SiemNavigation } from '../../../common/components/navigation';
-import { HostsDetailsKpiComponent } from '../../components/kpi_hosts';
+import { SecuritySolutionTabNavigation } from '../../../common/components/navigation';
 import { HostOverview } from '../../../overview/components/host_overview';
 import { SiemSearchBar } from '../../../common/components/search_bar';
-import { WrapperPage } from '../../../common/components/wrapper_page';
+import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useKibana } from '../../../common/lib/kibana';
-import { convertToBuildEsQuery } from '../../../common/lib/keury';
 import { inputsSelectors } from '../../../common/store';
 import { setHostDetailsTablesActivePageToZero } from '../../store/actions';
 import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
-import { esQuery, Filter } from '../../../../../../../src/plugins/data/public';
 
-import { OverviewEmpty } from '../../../overview/components/overview_empty';
 import { HostDetailsTabs } from './details_tabs';
 import { navTabsHostDetails } from './nav_tabs';
-import { HostDetailsProps } from './types';
+import type { HostDetailsProps } from './types';
 import { type } from './utils';
 import { getHostDetailsPageFilters } from './helpers';
 import { showGlobalFilters } from '../../../timelines/components/timeline/helpers';
@@ -47,9 +57,17 @@ import { Display } from '../display';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
-import { useSourcererScope } from '../../../common/containers/sourcerer';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
-import { useHostDetails } from '../../containers/hosts/details';
+import { ID, useHostDetails } from '../../containers/hosts/details';
+import { manageQuery } from '../../../common/components/page/manage_query';
+import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
+import { useSourcererDataView } from '../../../common/containers/sourcerer';
+import { LandingPageComponent } from '../../../common/components/landing_page';
+import { AlertCountByRuleByStatus } from '../../../common/components/alert_count_by_status';
+import { useLicense } from '../../../common/hooks/use_license';
+
+const ES_HOST_FIELD = 'host.hostname';
+const HostOverviewManage = manageQuery(HostOverview);
 
 const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDetailsPagePath }) => {
   const dispatch = useDispatch();
@@ -67,48 +85,84 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
 
   const { to, from, deleteQuery, setQuery, isInitializing } = useGlobalTime();
   const { globalFullScreen } = useGlobalFullScreen();
+  const { signalIndexName } = useSignalIndex();
 
   const capabilities = useMlCapabilities();
-  const kibana = useKibana();
-  const hostDetailsPageFilters: Filter[] = useMemo(() => getHostDetailsPageFilters(detailName), [
-    detailName,
-  ]);
-  const getFilters = () => [...hostDetailsPageFilters, ...filters];
+  const {
+    services: { uiSettings },
+  } = useKibana();
 
-  const narrowDateRange = useCallback<UpdateDateRange>(
-    ({ x }) => {
-      if (!x) {
-        return;
-      }
-      const [min, max] = x;
+  const hostDetailsPageFilters: Filter[] = useMemo(
+    () => getHostDetailsPageFilters(detailName),
+    [detailName]
+  );
+
+  const isEnterprisePlus = useLicense().isEnterprise();
+
+  const narrowDateRange = useCallback(
+    (score, interval) => {
+      const fromTo = scoreIntervalToDateTime(score, interval);
       dispatch(
         setAbsoluteRangeDatePicker({
-          id: 'global',
-          from: new Date(min).toISOString(),
-          to: new Date(max).toISOString(),
+          id: InputsModelId.global,
+          from: fromTo.from,
+          to: fromTo.to,
         })
       );
     },
     [dispatch]
   );
 
-  const { docValueFields, indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
-  const [loading, { hostDetails: hostOverview, id }] = useHostDetails({
+  const { indexPattern, indicesExist, selectedPatterns } = useSourcererDataView();
+  const [loading, { inspect, hostDetails: hostOverview, id, refetch }] = useHostDetails({
     endDate: to,
     startDate: from,
     hostName: detailName,
     indexNames: selectedPatterns,
+    skip: selectedPatterns.length === 0,
   });
-  const filterQuery = convertToBuildEsQuery({
-    config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
-    indexPattern,
-    queries: [query],
-    filters: getFilters(),
+
+  const [rawFilteredQuery, kqlError] = useMemo(() => {
+    try {
+      return [
+        buildEsQuery(
+          indexPattern,
+          [query],
+          [...hostDetailsPageFilters, ...filters],
+          getEsQueryConfig(uiSettings)
+        ),
+      ];
+    } catch (e) {
+      return [undefined, e];
+    }
+  }, [filters, indexPattern, query, uiSettings, hostDetailsPageFilters]);
+
+  const stringifiedAdditionalFilters = JSON.stringify(rawFilteredQuery);
+  useInvalidFilterQuery({
+    id: ID,
+    filterQuery: stringifiedAdditionalFilters,
+    kqlError,
+    query,
+    startDate: from,
+    endDate: to,
   });
 
   useEffect(() => {
     dispatch(setHostDetailsTablesActivePageToZero());
   }, [dispatch, detailName]);
+
+  const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
+
+  const { hasKibanaREAD, hasIndexRead } = useAlertsPrivileges();
+  const canReadAlerts = hasKibanaREAD && hasIndexRead;
+
+  const entityFilter = useMemo(
+    () => ({
+      field: ES_HOST_FIELD,
+      value: detailName,
+    }),
+    [detailName]
+  );
 
   return (
     <>
@@ -116,16 +170,18 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
         <>
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
-            <SiemSearchBar indexPattern={indexPattern} id="global" />
+            <SiemSearchBar indexPattern={indexPattern} id={InputsModelId.global} />
           </FiltersGlobal>
 
-          <WrapperPage noPadding={globalFullScreen}>
+          <SecuritySolutionPageWrapper
+            noPadding={globalFullScreen}
+            data-test-subj="hostDetailsPage"
+          >
             <Display show={!globalFullScreen}>
               <HeaderPage
                 border
                 subtitle={
                   <LastEventTime
-                    docValueFields={docValueFields}
                     indexKey={LastEventIndexKey.hostDetails}
                     hostName={detailName}
                     indexNames={selectedPatterns}
@@ -141,52 +197,62 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                 skip={isInitializing}
               >
                 {({ isLoadingAnomaliesData, anomaliesData }) => (
-                  <HostOverview
-                    docValueFields={docValueFields}
+                  <HostOverviewManage
                     id={id}
                     isInDetailsSidePanel={false}
                     data={hostOverview as HostItem}
                     anomaliesData={anomaliesData}
                     isLoadingAnomaliesData={isLoadingAnomaliesData}
-                    indexNames={selectedPatterns}
                     loading={loading}
                     startDate={from}
                     endDate={to}
-                    narrowDateRange={(score, interval) => {
-                      const fromTo = scoreIntervalToDateTime(score, interval);
-                      setAbsoluteRangeDatePicker({
-                        id: 'global',
-                        from: fromTo.from,
-                        to: fromTo.to,
-                      });
-                    }}
+                    narrowDateRange={narrowDateRange}
+                    setQuery={setQuery}
+                    refetch={refetch}
+                    inspect={inspect}
+                    hostName={detailName}
+                    indexNames={selectedPatterns}
                   />
                 )}
               </AnomalyTableProvider>
-
               <EuiHorizontalRule />
-
-              <HostsDetailsKpiComponent
-                filterQuery={filterQuery}
-                from={from}
-                indexNames={selectedPatterns}
-                setQuery={setQuery}
-                to={to}
-                narrowDateRange={narrowDateRange}
-                skip={isInitializing}
-              />
-
               <EuiSpacer />
 
-              <SiemNavigation
-                navTabs={navTabsHostDetails(detailName, hasMlUserPermissions(capabilities))}
+              {canReadAlerts && (
+                <>
+                  <EuiFlexGroup>
+                    <EuiFlexItem>
+                      <AlertsByStatus
+                        signalIndexName={signalIndexName}
+                        entityFilter={entityFilter}
+                        additionalFilters={rawFilteredQuery ? [rawFilteredQuery] : []}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <AlertCountByRuleByStatus
+                        entityFilter={entityFilter}
+                        signalIndexName={signalIndexName}
+                        additionalFilters={rawFilteredQuery ? [rawFilteredQuery] : []}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                  <EuiSpacer />
+                </>
+              )}
+
+              <SecuritySolutionTabNavigation
+                navTabs={navTabsHostDetails({
+                  hasMlUserPermissions: hasMlUserPermissions(capabilities),
+                  isRiskyHostsEnabled: isPlatinumOrTrialLicense,
+                  hostName: detailName,
+                  isEnterprise: isEnterprisePlus,
+                })}
               />
 
               <EuiSpacer />
             </Display>
 
             <HostDetailsTabs
-              docValueFields={docValueFields}
               indexNames={selectedPatterns}
               isInitializing={isInitializing}
               deleteQuery={deleteQuery}
@@ -196,19 +262,14 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
               detailName={detailName}
               type={type}
               setQuery={setQuery}
-              filterQuery={filterQuery}
+              filterQuery={stringifiedAdditionalFilters}
               hostDetailsPagePath={hostDetailsPagePath}
               indexPattern={indexPattern}
-              setAbsoluteRangeDatePicker={setAbsoluteRangeDatePicker}
             />
-          </WrapperPage>
+          </SecuritySolutionPageWrapper>
         </>
       ) : (
-        <WrapperPage>
-          <HeaderPage border title={detailName} />
-
-          <OverviewEmpty />
-        </WrapperPage>
+        <LandingPageComponent />
       )}
 
       <SpyRoute pageName={SecurityPageName.hosts} />

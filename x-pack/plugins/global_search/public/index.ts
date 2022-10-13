@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializer } from 'src/core/public';
+import { PluginInitializer } from '@kbn/core/public';
 import {
   GlobalSearchPlugin,
   GlobalSearchPluginSetupDeps,
@@ -20,7 +20,7 @@ export const plugin: PluginInitializer<
   GlobalSearchPluginStartDeps
 > = (context) => new GlobalSearchPlugin(context);
 
-export {
+export type {
   GlobalSearchBatchedResults,
   GlobalSearchProviderFindOptions,
   GlobalSearchProviderResult,
@@ -29,9 +29,9 @@ export {
   GlobalSearchFindParams,
   GlobalSearchProviderFindParams,
 } from '../common/types';
-export {
+export type {
   GlobalSearchPluginSetup,
   GlobalSearchPluginStart,
   GlobalSearchResultProvider,
 } from './types';
-export { GlobalSearchFindOptions } from './services/types';
+export type { GlobalSearchFindOptions } from './services/types';

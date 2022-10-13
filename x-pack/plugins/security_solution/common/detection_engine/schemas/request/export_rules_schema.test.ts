@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import {
-  exportRulesQuerySchema,
-  exportRulesSchema,
+import type {
   ExportRulesSchema,
   ExportRulesQuerySchema,
   ExportRulesQuerySchemaDecoded,
 } from './export_rules_schema';
-import { exactCheck } from '../../../exact_check';
+import { exportRulesQuerySchema, exportRulesSchema } from './export_rules_schema';
+import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { foldLeftRight, getPaths } from '../../../test_utils';
 import { left } from 'fp-ts/lib/Either';
 
 describe('create rules schema', () => {

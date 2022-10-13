@@ -5,18 +5,21 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-import { RequestHandlerContext } from 'kibana/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { RequestHandlerContext } from '@kbn/core/server';
+import { prefixIndexPatternWithCcs } from '../../../../../../common/ccs_utils';
 import {
   INDEX_PATTERN_ELASTICSEARCH,
   INDEX_PATTERN_KIBANA,
   INDEX_PATTERN_LOGSTASH,
 } from '../../../../../../common/constants';
-// @ts-ignore
-import { prefixIndexPattern } from '../../../../../lib/ccs_utils';
-// @ts-ignore
+import {
+  postElasticsearchSettingsInternalMonitoringRequestPayloadRT,
+  postElasticsearchSettingsInternalMonitoringResponsePayloadRT,
+} from '../../../../../../common/http_api/elasticsearch_settings';
+import { createValidationFunction } from '../../../../../lib/create_route_validation_function';
 import { handleError } from '../../../../../lib/errors';
-import { RouteDependencies } from '../../../../../types';
+import { MonitoringCore, RouteDependencies } from '../../../../../types';
 
 const queryBody = {
   size: 0,
@@ -44,11 +47,11 @@ const queryBody = {
 };
 
 const checkLatestMonitoringIsLegacy = async (context: RequestHandlerContext, index: string) => {
-  const { client: esClient } = context.core.elasticsearch.legacy;
-  const result = await esClient.callAsCurrentUser('search', {
+  const client = (await context.core).elasticsearch.client.asCurrentUser;
+  const result = await client.search<estypes.SearchResponse<unknown>>({
     index,
     body: queryBody,
-  });
+  } as estypes.SearchRequest);
 
   const { aggregations } = result;
   const counts = {
@@ -62,24 +65,23 @@ const checkLatestMonitoringIsLegacy = async (context: RequestHandlerContext, ind
 
   const {
     types: { buckets },
-  } = aggregations;
+  } = aggregations as { types: { buckets: Array<{ key: string }> } };
   counts.mbIndicesCount = buckets.filter(({ key }: { key: string }) => key.includes('-mb-')).length;
 
   counts.legacyIndicesCount = buckets.length - counts.mbIndicesCount;
   return counts;
 };
 
-export function internalMonitoringCheckRoute(
-  server: { config: () => unknown },
-  npRoute: RouteDependencies
-) {
+export function internalMonitoringCheckRoute(server: MonitoringCore, npRoute: RouteDependencies) {
+  const validateBody = createValidationFunction(
+    postElasticsearchSettingsInternalMonitoringRequestPayloadRT
+  );
+
   npRoute.router.post(
     {
       path: '/api/monitoring/v1/elasticsearch_settings/check/internal_monitoring',
       validate: {
-        body: schema.object({
-          ccs: schema.maybe(schema.string()),
-        }),
+        body: validateBody,
       },
     },
     async (context, request, response) => {
@@ -89,11 +91,11 @@ export function internalMonitoringCheckRoute(
           mb_indices: 0,
         };
 
-        const config = server.config();
+        const config = server.config;
         const { ccs } = request.body;
-        const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, ccs, true);
-        const kbnIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_KIBANA, ccs, true);
-        const lsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_LOGSTASH, ccs, true);
+        const esIndexPattern = prefixIndexPatternWithCcs(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
+        const kbnIndexPattern = prefixIndexPatternWithCcs(config, INDEX_PATTERN_KIBANA, ccs);
+        const lsIndexPattern = prefixIndexPatternWithCcs(config, INDEX_PATTERN_LOGSTASH, ccs);
         const indexCounts = await Promise.all([
           checkLatestMonitoringIsLegacy(context, esIndexPattern),
           checkLatestMonitoringIsLegacy(context, kbnIndexPattern),
@@ -105,9 +107,11 @@ export function internalMonitoringCheckRoute(
           typeCount.mb_indices += counts.mbIndicesCount;
         });
 
-        return response.ok({
-          body: typeCount,
-        });
+        return response.ok(
+          postElasticsearchSettingsInternalMonitoringResponsePayloadRT.encode({
+            body: typeCount,
+          })
+        );
       } catch (err) {
         throw handleError(err);
       }

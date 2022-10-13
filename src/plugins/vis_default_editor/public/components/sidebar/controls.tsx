@@ -7,12 +7,19 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiToolTip,
+  EuiIconTip,
+} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import useDebounce from 'react-use/lib/useDebounce';
 
-import { Vis } from 'src/plugins/visualizations/public';
+import { Vis } from '@kbn/visualizations-plugin/public';
 import { discardChanges, EditorAction } from './state';
 
 interface DefaultEditorControlsProps {
@@ -84,19 +91,32 @@ function DefaultEditorControls({
                 </EuiButton>
               </EuiToolTip>
             ) : (
-              <EuiButton
-                data-test-subj="visualizeEditorRenderButton"
-                disabled={!isDirty}
-                fill
-                iconType="play"
-                onClick={applyChanges}
-                size="s"
-              >
-                <FormattedMessage
-                  id="visDefaultEditor.sidebar.updateChartButtonLabel"
-                  defaultMessage="Update"
-                />
-              </EuiButton>
+              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiIconTip
+                    content={i18n.translate('visDefaultEditor.sidebar.updateInfoTooltip', {
+                      defaultMessage: 'CTRL + Enter is a shortcut for Update.',
+                    })}
+                    type="keyboard"
+                    color="subdued"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    data-test-subj="visualizeEditorRenderButton"
+                    disabled={!isDirty}
+                    fill
+                    iconType="play"
+                    onClick={applyChanges}
+                    size="s"
+                  >
+                    <FormattedMessage
+                      id="visDefaultEditor.sidebar.updateChartButtonLabel"
+                      defaultMessage="Update"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             )}
           </EuiFlexItem>
         </EuiFlexGroup>

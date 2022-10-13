@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiText,
   EuiFlyout,
@@ -15,14 +15,18 @@ import {
   EuiFlyoutBody,
   EuiTitle,
   EuiSpacer,
+  EuiLink,
 } from '@elastic/eui';
 import { EditorExample } from './editor_example';
+import { useServicesContext } from '../contexts';
 
 interface Props {
   onClose: () => void;
 }
 
 export function HelpPanel(props: Props) {
+  const { docLinks } = useServicesContext();
+
   return (
     <EuiFlyout onClose={props.onClose} data-test-subj="helpFlyout" size="s">
       <EuiFlyoutHeader hasBorder>
@@ -43,7 +47,25 @@ export function HelpPanel(props: Props) {
           <p>
             <FormattedMessage
               id="console.helpPage.requestFormatDescription"
-              defaultMessage="You can type one or more requests in the white editor. Console understands requests in a compact format:"
+              defaultMessage="You can type one or more requests in the editor. Console understands requests in a compact format."
+            />
+          </p>
+          <p>
+            <FormattedMessage
+              id="console.helpPage.learnAboutConsoleAndQueryDslText"
+              defaultMessage="Learn about {console} and {queryDsl}"
+              values={{
+                console: (
+                  <EuiLink href={docLinks.console.guide} target="_blank" external>
+                    Console
+                  </EuiLink>
+                ),
+                queryDsl: (
+                  <EuiLink href={docLinks.query.queryDsl} target="_blank" external>
+                    Query DSL
+                  </EuiLink>
+                ),
+              }}
             />
           </p>
           <EditorExample panel="help" />
@@ -116,6 +138,13 @@ export function HelpPanel(props: Props) {
               <FormattedMessage
                 id="console.helpPage.keyboardCommands.selectCurrentlySelectedInAutoCompleteMenuDescription"
                 defaultMessage="Select the currently selected or the top most term in auto-complete menu"
+              />
+            </dd>
+            <dt>Ctrl/Cmd + L</dt>
+            <dd>
+              <FormattedMessage
+                id="console.helpPage.keyboardCommands.goToLineNumberDescription"
+                defaultMessage="Go to line number"
               />
             </dd>
             <dt>Esc</dt>

@@ -5,22 +5,21 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
-import { IEsSearchResponse } from '../../../../../../../src/plugins/data/common';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 
-import { Inspect, Maybe, PageInfoPaginated } from '../../common';
-import { RequestOptionsPaginated } from '../..';
+import type { Inspect, Maybe, SortField } from '../../common';
+import type { RequestOptionsPaginated } from '../..';
 
 export type ResultEdges = estypes.SearchResponse<unknown>['hits']['hits'];
 
 export interface ResultsStrategyResponse extends IEsSearchResponse {
   edges: ResultEdges;
-  totalCount: number;
-  pageInfo: PageInfoPaginated;
   inspect?: Maybe<Inspect>;
 }
 
-export interface ResultsRequestOptions extends RequestOptionsPaginated {
+export interface ResultsRequestOptions extends Omit<RequestOptionsPaginated, 'sort'> {
   actionId: string;
   agentId?: string;
+  sort: SortField[];
 }

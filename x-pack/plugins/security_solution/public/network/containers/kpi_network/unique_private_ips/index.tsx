@@ -10,27 +10,24 @@ import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
+import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { inputsModel } from '../../../../common/store';
+import type { inputsModel } from '../../../../common/store';
 import { createFilter } from '../../../../common/containers/helpers';
 import { useKibana } from '../../../../common/lib/kibana';
-import {
+import type {
   NetworkKpiHistogramData,
-  NetworkKpiQueries,
   NetworkKpiUniquePrivateIpsRequestOptions,
   NetworkKpiUniquePrivateIpsStrategyResponse,
 } from '../../../../../common/search_strategy';
-import { ESTermQuery } from '../../../../../common/typed_json';
+import { NetworkKpiQueries } from '../../../../../common/search_strategy';
+import type { ESTermQuery } from '../../../../../common/typed_json';
 
 import * as i18n from './translations';
-import {
-  isCompleteResponse,
-  isErrorResponse,
-} from '../../../../../../../../src/plugins/data/common';
 import { getInspectResponse } from '../../../../helpers';
-import { InspectResponse } from '../../../../types';
+import type { InspectResponse } from '../../../../types';
 
-const ID = 'networkKpiUniquePrivateIpsQuery';
+export const ID = 'networkKpiUniquePrivateIpsQuery';
 
 export interface NetworkKpiUniquePrivateIpsArgs {
   uniqueDestinationPrivateIps: number;
@@ -63,27 +60,23 @@ export const useNetworkKpiUniquePrivateIps = ({
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
-  const [
-    networkKpiUniquePrivateIpsRequest,
-    setNetworkKpiUniquePrivateIpsRequest,
-  ] = useState<NetworkKpiUniquePrivateIpsRequestOptions | null>(null);
+  const [networkKpiUniquePrivateIpsRequest, setNetworkKpiUniquePrivateIpsRequest] =
+    useState<NetworkKpiUniquePrivateIpsRequestOptions | null>(null);
 
-  const [
-    networkKpiUniquePrivateIpsResponse,
-    setNetworkKpiUniquePrivateIpsResponse,
-  ] = useState<NetworkKpiUniquePrivateIpsArgs>({
-    uniqueDestinationPrivateIps: 0,
-    uniqueDestinationPrivateIpsHistogram: null,
-    uniqueSourcePrivateIps: 0,
-    uniqueSourcePrivateIpsHistogram: null,
-    id: ID,
-    inspect: {
-      dsl: [],
-      response: [],
-    },
-    isInspected: false,
-    refetch: refetch.current,
-  });
+  const [networkKpiUniquePrivateIpsResponse, setNetworkKpiUniquePrivateIpsResponse] =
+    useState<NetworkKpiUniquePrivateIpsArgs>({
+      uniqueDestinationPrivateIps: 0,
+      uniqueDestinationPrivateIpsHistogram: null,
+      uniqueSourcePrivateIps: 0,
+      uniqueSourcePrivateIpsHistogram: null,
+      id: ID,
+      inspect: {
+        dsl: [],
+        response: [],
+      },
+      isInspected: false,
+      refetch: refetch.current,
+    });
   const { addError, addWarning } = useAppToasts();
 
   const networkKpiUniquePrivateIpsSearch = useCallback(
@@ -169,6 +162,14 @@ export const useNetworkKpiUniquePrivateIps = ({
       abortCtrl.current.abort();
     };
   }, [networkKpiUniquePrivateIpsRequest, networkKpiUniquePrivateIpsSearch]);
+
+  useEffect(() => {
+    if (skip) {
+      setLoading(false);
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+    }
+  }, [skip]);
 
   return [loading, networkKpiUniquePrivateIpsResponse];
 };

@@ -99,16 +99,19 @@ export const getDeprecatedSettingWarning = (
 ): ReindexWarning | undefined => {
   const { settings } = flatSettings;
 
-  const deprecatedSettingsInUse = Object.keys(settings).filter((setting) => {
+  const deprecatedSettingsInUse = Object.keys(settings || {}).filter((setting) => {
     return deprecatedSettings.indexOf(setting) > -1;
   });
 
   // Translog settings are only marked as deprecated if soft deletes is enabled
+  // @ts-expect-error @elastic/elasticsearch doesn't declare such a setting
   if (settings['index.soft_deletes.enabled'] === 'true') {
+    // @ts-expect-error @elastic/elasticsearch doesn't declare such a setting
     if (settings['index.translog.retention.size']) {
       deprecatedSettingsInUse.push('index.translog.retention.size');
     }
 
+    // @ts-expect-error @elastic/elasticsearch doesn't declare such a setting
     if (settings['index.translog.retention.age']) {
       deprecatedSettingsInUse.push('index.translog.retention.age');
     }
@@ -175,6 +178,9 @@ const removeUnsettableSettings = (settings: FlatSettings['settings']) =>
     'index.verified_before_close',
     'index.version.created',
 
+    // Ignored since 6.x and forbidden in 7.x
+    'index.mapper.dynamic',
+
     // Deprecated in 9.0
     'index.version.upgraded',
   ]);
@@ -183,12 +189,17 @@ const removeDeprecatedSettings = (settings: FlatSettings['settings']) => {
   const updatedSettings = { ...settings };
 
   // Translog settings are only marked as deprecated if soft deletes is enabled
+  // @ts-expect-error @elastic/elasticsearch doesn't declare such a setting
   if (updatedSettings['index.soft_deletes.enabled'] === 'true') {
+    // @ts-expect-error @elastic/elasticsearch doesn't declare such a setting
     if (updatedSettings['index.translog.retention.size']) {
+      // @ts-expect-error @elastic/elasticsearch doesn't declare such a setting
       delete updatedSettings['index.translog.retention.size'];
     }
 
+    // @ts-expect-error @elastic/elasticsearch doesn't declare such a setting
     if (settings['index.translog.retention.age']) {
+      // @ts-expect-error @elastic/elasticsearch doesn't declare such a setting
       delete updatedSettings['index.translog.retention.age'];
     }
   }

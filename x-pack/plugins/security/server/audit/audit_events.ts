@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type { EcsEventOutcome, EcsEventType, KibanaRequest, LogMeta } from 'src/core/server';
+import type { EcsEventOutcome, EcsEventType, KibanaRequest, LogMeta } from '@kbn/core/server';
 
+import type { AuthenticationProvider } from '../../common/model';
 import type { AuthenticationResult } from '../authentication/authentication_result';
 
 /**
- * Audit event schema using ECS format: https://www.elastic.co/guide/en/ecs/1.9/index.html
+ * Audit event schema using ECS format: https://www.elastic.co/guide/en/ecs/1.12/index.html
  *
  * If you add additional fields to the schema ensure you update the Kibana Filebeat module:
  * https://github.com/elastic/beats/tree/master/filebeat/module/kibana
@@ -96,12 +97,16 @@ export interface UserLoginParams {
   authenticationResult: AuthenticationResult;
   authenticationProvider?: string;
   authenticationType?: string;
+  sessionId?: string;
+  userProfileId?: string;
 }
 
 export function userLoginEvent({
   authenticationResult,
   authenticationProvider,
   authenticationType,
+  sessionId,
+  userProfileId,
 }: UserLoginParams): AuditEvent {
   return {
     message: authenticationResult.user
@@ -113,11 +118,13 @@ export function userLoginEvent({
       outcome: authenticationResult.user ? 'success' : 'failure',
     },
     user: authenticationResult.user && {
+      id: userProfileId,
       name: authenticationResult.user.username,
       roles: authenticationResult.user.roles as string[],
     },
     kibana: {
       space_id: undefined, // Ensure this does not get populated by audit service
+      session_id: sessionId,
       authentication_provider: authenticationProvider,
       authentication_type: authenticationType,
       authentication_realm: authenticationResult.user?.authentication_realm.name,
@@ -130,6 +137,93 @@ export function userLoginEvent({
   };
 }
 
+export interface UserLogoutParams {
+  username?: string;
+  provider: AuthenticationProvider;
+  userProfileId?: string;
+}
+
+export function userLogoutEvent({
+  username,
+  provider,
+  userProfileId,
+}: UserLogoutParams): AuditEvent {
+  return {
+    message: `User [${username}] is logging out using ${provider.type} provider [name=${provider.name}]`,
+    event: {
+      action: 'user_logout',
+      category: ['authentication'],
+      outcome: 'unknown',
+    },
+    user:
+      userProfileId || username
+        ? {
+            id: userProfileId,
+            name: username,
+          }
+        : undefined,
+    kibana: {
+      authentication_provider: provider.name,
+      authentication_type: provider.type,
+    },
+  };
+}
+
+export interface SessionCleanupParams {
+  sessionId: string;
+  usernameHash?: string;
+  provider: AuthenticationProvider;
+}
+
+export function sessionCleanupEvent({
+  usernameHash,
+  sessionId,
+  provider,
+}: SessionCleanupParams): AuditEvent {
+  return {
+    message: `Removing invalid or expired session for user [hash=${usernameHash}]`,
+    event: {
+      action: 'session_cleanup',
+      category: ['authentication'],
+      outcome: 'unknown',
+    },
+    user: {
+      hash: usernameHash,
+    },
+    kibana: {
+      session_id: sessionId,
+      authentication_provider: provider.name,
+      authentication_type: provider.type,
+    },
+  };
+}
+
+export interface AccessAgreementAcknowledgedParams {
+  username: string;
+  provider: AuthenticationProvider;
+}
+
+export function accessAgreementAcknowledgedEvent({
+  username,
+  provider,
+}: AccessAgreementAcknowledgedParams): AuditEvent {
+  return {
+    message: `${username} acknowledged access agreement using ${provider.type} provider [name=${provider.name}].`,
+    event: {
+      action: 'access_agreement_acknowledged',
+      category: ['authentication'],
+    },
+    user: {
+      name: username,
+    },
+    kibana: {
+      space_id: undefined, // Ensure this does not get populated by audit service
+      authentication_provider: provider.name,
+      authentication_type: provider.type,
+    },
+  };
+}
+
 export enum SavedObjectAction {
   CREATE = 'saved_object_create',
   GET = 'saved_object_get',
@@ -137,11 +231,11 @@ export enum SavedObjectAction {
   UPDATE = 'saved_object_update',
   DELETE = 'saved_object_delete',
   FIND = 'saved_object_find',
-  ADD_TO_SPACES = 'saved_object_add_to_spaces',
-  DELETE_FROM_SPACES = 'saved_object_delete_from_spaces',
   REMOVE_REFERENCES = 'saved_object_remove_references',
   OPEN_POINT_IN_TIME = 'saved_object_open_point_in_time',
   CLOSE_POINT_IN_TIME = 'saved_object_close_point_in_time',
+  COLLECT_MULTINAMESPACE_REFERENCES = 'saved_object_collect_multinamespace_references', // this is separate from 'saved_object_get' because the user is only accessing an object's metadata
+  UPDATE_OBJECTS_SPACES = 'saved_object_update_objects_spaces', // this is separate from 'saved_object_update' because the user is only updating an object's metadata
 }
 
 type VerbsTuple = [string, string, string];
@@ -153,8 +247,6 @@ const savedObjectAuditVerbs: Record<SavedObjectAction, VerbsTuple> = {
   saved_object_update: ['update', 'updating', 'updated'],
   saved_object_delete: ['delete', 'deleting', 'deleted'],
   saved_object_find: ['access', 'accessing', 'accessed'],
-  saved_object_add_to_spaces: ['update', 'updating', 'updated'],
-  saved_object_delete_from_spaces: ['update', 'updating', 'updated'],
   saved_object_open_point_in_time: [
     'open point-in-time',
     'opening point-in-time',
@@ -170,6 +262,16 @@ const savedObjectAuditVerbs: Record<SavedObjectAction, VerbsTuple> = {
     'removing references to',
     'removed references to',
   ],
+  saved_object_collect_multinamespace_references: [
+    'collect references and spaces of',
+    'collecting references and spaces of',
+    'collected references and spaces of',
+  ],
+  saved_object_update_objects_spaces: [
+    'update spaces of',
+    'updating spaces of',
+    'updated spaces of',
+  ],
 };
 
 const savedObjectAuditTypes: Record<SavedObjectAction, EcsEventType> = {
@@ -179,11 +281,11 @@ const savedObjectAuditTypes: Record<SavedObjectAction, EcsEventType> = {
   saved_object_update: 'change',
   saved_object_delete: 'deletion',
   saved_object_find: 'access',
-  saved_object_add_to_spaces: 'change',
-  saved_object_delete_from_spaces: 'change',
   saved_object_open_point_in_time: 'creation',
   saved_object_close_point_in_time: 'deletion',
   saved_object_remove_references: 'change',
+  saved_object_collect_multinamespace_references: 'access',
+  saved_object_update_objects_spaces: 'change',
 };
 
 export interface SavedObjectEventParams {

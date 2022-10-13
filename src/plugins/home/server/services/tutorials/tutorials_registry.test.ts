@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { MockedKeys } from '@kbn/utility-types/jest';
+import type { MockedKeys } from '@kbn/utility-types-jest';
 import { TutorialsRegistry } from './tutorials_registry';
-import { coreMock } from '../../../../../core/server/mocks';
-import { CoreSetup } from '../../../../../core/server';
-import { httpServerMock } from '../../../../../core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { CoreSetup } from '@kbn/core/server';
+import { httpServerMock } from '@kbn/core/server/mocks';
 
 import {
   TutorialProvider,
@@ -18,6 +18,8 @@ import {
   TutorialsCategory,
   ScopedTutorialContextFactory,
 } from './lib/tutorials_registry_types';
+import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
+import { customIntegrationsMock } from '@kbn/custom-integrations-plugin/server/mocks';
 
 const INVALID_TUTORIAL: TutorialSchema = {
   id: 'test',
@@ -67,12 +69,19 @@ const validTutorialProvider = VALID_TUTORIAL;
 
 describe('TutorialsRegistry', () => {
   let mockCoreSetup: MockedKeys<CoreSetup>;
+  let mockInitContext: ReturnType<typeof coreMock.createPluginInitializerContext>;
   let testProvider: TutorialProvider;
   let testScopedTutorialContextFactory: ScopedTutorialContextFactory;
+  let mockCustomIntegrationsPluginSetup: jest.Mocked<CustomIntegrationsPluginSetup>;
+
+  beforeEach(() => {
+    mockCustomIntegrationsPluginSetup = customIntegrationsMock.createSetup();
+  });
 
   describe('GET /api/kibana/home/tutorials', () => {
     beforeEach(() => {
       mockCoreSetup = coreMock.createSetup();
+      mockInitContext = coreMock.createPluginInitializerContext();
     });
 
     test('has a router that retrieves registered tutorials', () => {
@@ -83,27 +92,58 @@ describe('TutorialsRegistry', () => {
 
   describe('setup', () => {
     test('exposes proper contract', () => {
-      const setup = new TutorialsRegistry().setup(mockCoreSetup);
+      const setup = new TutorialsRegistry(mockInitContext).setup(
+        mockCoreSetup,
+        mockCustomIntegrationsPluginSetup
+      );
       expect(setup).toHaveProperty('registerTutorial');
       expect(setup).toHaveProperty('addScopedTutorialContextFactory');
     });
 
     test('registerTutorial throws when registering a tutorial with an invalid schema', () => {
-      const setup = new TutorialsRegistry().setup(mockCoreSetup);
+      const setup = new TutorialsRegistry(mockInitContext).setup(
+        mockCoreSetup,
+        mockCustomIntegrationsPluginSetup
+      );
       testProvider = ({}) => invalidTutorialProvider;
       expect(() => setup.registerTutorial(testProvider)).toThrowErrorMatchingInlineSnapshot(
-        `"Unable to register tutorial spec because its invalid. ValidationError: child \\"name\\" fails because [\\"name\\" is not allowed to be empty]"`
+        `"Unable to register tutorial spec because its invalid. Error: [name]: is not allowed to be empty"`
       );
     });
 
     test('registerTutorial registers a tutorial with a valid schema', () => {
-      const setup = new TutorialsRegistry().setup(mockCoreSetup);
+      const setup = new TutorialsRegistry(mockInitContext).setup(
+        mockCoreSetup,
+        mockCustomIntegrationsPluginSetup
+      );
       testProvider = ({}) => validTutorialProvider;
       expect(() => setup.registerTutorial(testProvider)).not.toThrowError();
+      expect(mockCustomIntegrationsPluginSetup.registerCustomIntegration.mock.calls).toEqual([
+        [
+          {
+            id: 'test',
+            title: 'new tutorial provider',
+            categories: [],
+            uiInternalPath: '/app/home#/tutorial/test',
+            description: 'short description',
+            icons: [
+              {
+                src: 'alert',
+                type: 'eui',
+              },
+            ],
+            shipper: 'tutorial',
+            isBeta: false,
+          },
+        ],
+      ]);
     });
 
     test('addScopedTutorialContextFactory throws when given a scopedTutorialContextFactory that is not a function', () => {
-      const setup = new TutorialsRegistry().setup(mockCoreSetup);
+      const setup = new TutorialsRegistry(mockInitContext).setup(
+        mockCoreSetup,
+        mockCustomIntegrationsPluginSetup
+      );
       const testItem = {} as TutorialProvider;
       expect(() =>
         setup.addScopedTutorialContextFactory(testItem)
@@ -113,7 +153,10 @@ describe('TutorialsRegistry', () => {
     });
 
     test('addScopedTutorialContextFactory adds a scopedTutorialContextFactory when given a function', () => {
-      const setup = new TutorialsRegistry().setup(mockCoreSetup);
+      const setup = new TutorialsRegistry(mockInitContext).setup(
+        mockCoreSetup,
+        mockCustomIntegrationsPluginSetup
+      );
       testScopedTutorialContextFactory = ({}) => 'string';
       expect(() =>
         setup.addScopedTutorialContextFactory(testScopedTutorialContextFactory)
@@ -123,7 +166,10 @@ describe('TutorialsRegistry', () => {
 
   describe('start', () => {
     test('exposes proper contract', () => {
-      const start = new TutorialsRegistry().start();
+      const start = new TutorialsRegistry(mockInitContext).start(
+        coreMock.createStart(),
+        mockCustomIntegrationsPluginSetup
+      );
       expect(start).toBeDefined();
     });
   });

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Datafeed } from '@elastic/elasticsearch/api/types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { DATAFEED_STATE } from '@kbn/ml-plugin/common/constants/states';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { DATAFEED_STATE } from '../../../../plugins/ml/common/constants/states';
 
 function createTestJobAndDatafeed() {
   const timestamp = Date.now();
@@ -40,7 +40,7 @@ function createTestJobAndDatafeed() {
         categorization_examples_limit: 4,
       },
     },
-    datafeed: ({
+    datafeed: {
       datafeed_id: `datafeed-${jobId}`,
       job_id: jobId,
       query: {
@@ -56,7 +56,7 @@ function createTestJobAndDatafeed() {
       },
       query_delay: '120s',
       indices: ['ft_ecommerce'],
-    } as unknown) as Datafeed,
+    } as unknown as estypes.MlDatafeed,
   };
 }
 
@@ -68,10 +68,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   let testJobId = '';
 
   describe('anomaly detection alert', function () {
-    this.tags('ciGroup13');
-
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/ecommerce');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
       await ml.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
@@ -92,6 +90,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     after(async () => {
+      await ml.api.deleteAnomalyDetectionJobES(testJobId);
       await ml.api.cleanMlIndices();
       await ml.alerting.cleanAnomalyDetectionRules();
     });
@@ -117,9 +116,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await ml.testExecution.logTestStep('should preview the alert condition');
         await ml.alerting.assertPreviewButtonState(false);
-        await ml.alerting.setTestInterval('2y');
+        await ml.alerting.setTestInterval('5y');
         await ml.alerting.assertPreviewButtonState(true);
-        await ml.alerting.checkPreview('Triggers 2 times in the last 2y');
+
+        // don't check the exact number provided by the backend, just make sure it's > 0
+        await ml.alerting.checkPreview(/Found [1-9]\d* anomal(y|ies) in the last 5y/);
 
         await ml.testExecution.logTestStep('should create an alert');
         await pageObjects.triggersActionsUI.setAlertName('ml-test-alert');

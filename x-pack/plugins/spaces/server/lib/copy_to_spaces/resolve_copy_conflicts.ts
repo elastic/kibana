@@ -12,7 +12,7 @@ import type {
   KibanaRequest,
   SavedObject,
   SavedObjectsImportRetry,
-} from 'src/core/server';
+} from '@kbn/core/server';
 
 import { spaceIdToNamespace } from '../utils/namespace';
 import { createEmptyFailureResponse } from './lib/create_empty_failure_response';
@@ -90,6 +90,10 @@ export function resolveCopySavedObjectsToSpacesConflictsFactory(
       const [spaceId, entryRetries] = entry;
 
       const retries = entryRetries.map((retry) => ({ ...retry, replaceReferences: [] }));
+
+      // We do *not* include a check to ensure that each object doesn't already exist in the destination. Since we already do this in
+      // copySavedObjectsToSpaces, it is much less likely to occur while resolving copy errors, and as such we've omitted the same check
+      // here to reduce complexity and test cases.
 
       response[spaceId] = await resolveConflictsForSpace(
         spaceId,

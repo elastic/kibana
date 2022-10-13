@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from 'kibana/server';
-
+import { SavedObjectsType } from '@kbn/core/server';
 import {
   exceptionListAgnosticSavedObjectType,
   exceptionListSavedObjectType,
-} from '../../common/types';
+} from '@kbn/securitysolution-list-utils';
 
 import { migrations } from './migrations';
 
@@ -178,11 +177,12 @@ const combinedMappings: SavedObjectsType['mappings'] = {
 };
 
 export const exceptionListType: SavedObjectsType = {
+  convertToMultiNamespaceTypeVersion: '8.0.0',
   hidden: false,
   mappings: combinedMappings,
   migrations,
   name: exceptionListSavedObjectType,
-  namespaceType: 'single',
+  namespaceType: 'multiple-isolated',
 };
 
 export const exceptionListAgnosticType: SavedObjectsType = {

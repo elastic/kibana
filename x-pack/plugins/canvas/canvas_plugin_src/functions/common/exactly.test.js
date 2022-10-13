@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { functionWrapper } from '../../../test_helpers/function_wrapper';
+import { functionWrapper } from '@kbn/presentation-util-plugin/common/lib';
 import { emptyFilter } from './__fixtures__/test_filters';
 import { exactly } from './exactly';
 

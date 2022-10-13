@@ -8,18 +8,28 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n/react';
-import { DashboardCloneModal } from './clone_modal';
 
-export function showCloneModal(
+import { i18n } from '@kbn/i18n';
+import { I18nProvider } from '@kbn/i18n-react';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+
+import { DashboardCloneModal } from './clone_modal';
+import { pluginServices } from '../../services/plugin_services';
+
+export interface ShowCloneModalProps {
   onClone: (
     newTitle: string,
     isTitleDuplicateConfirmed: boolean,
     onTitleDuplicate: () => void
-  ) => Promise<{ id?: string } | { error: Error }>,
-  title: string
-) {
+  ) => Promise<{ id?: string } | { error: Error }>;
+  title: string;
+}
+
+export function showCloneModal({ onClone, title }: ShowCloneModalProps) {
+  const {
+    settings: { theme },
+  } = pluginServices.getServices();
+
   const container = document.createElement('div');
   const closeModal = () => {
     ReactDOM.unmountComponentAtNode(container);
@@ -44,14 +54,16 @@ export function showCloneModal(
   document.body.appendChild(container);
   const element = (
     <I18nProvider>
-      <DashboardCloneModal
-        onClone={onCloneConfirmed}
-        onClose={closeModal}
-        title={i18n.translate('dashboard.topNav.showCloneModal.dashboardCopyTitle', {
-          defaultMessage: '{title} Copy',
-          values: { title },
-        })}
-      />
+      <KibanaThemeProvider theme$={theme.theme$}>
+        <DashboardCloneModal
+          onClone={onCloneConfirmed}
+          onClose={closeModal}
+          title={i18n.translate('dashboard.topNav.showCloneModal.dashboardCopyTitle', {
+            defaultMessage: '{title} Copy',
+            values: { title },
+          })}
+        />
+      </KibanaThemeProvider>
     </I18nProvider>
   );
   ReactDOM.render(element, container);

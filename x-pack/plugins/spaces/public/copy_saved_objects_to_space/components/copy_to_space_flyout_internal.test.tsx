@@ -10,13 +10,13 @@ import Boom from '@hapi/boom';
 import { act } from '@testing-library/react';
 import React from 'react';
 
-import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test/jest';
-import { coreMock } from 'src/core/public/mocks';
-import type { Space } from 'src/plugins/spaces_oss/common';
+import { coreMock } from '@kbn/core/public/mocks';
+import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 
+import type { Space } from '../../../common';
 import { getSpacesContextProviderWrapper } from '../../spaces_context';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
-import type { SavedObjectTarget } from '../types';
+import type { CopyToSpaceSavedObjectTarget } from '../types';
 import { CopyModeControl } from './copy_mode_control';
 import { getCopyToSpaceFlyoutComponent } from './copy_to_space_flyout';
 import { CopyToSpaceForm } from './copy_to_space_form';
@@ -82,7 +82,7 @@ const setup = async (opts: SetupOpts = {}) => {
     namespaces: ['default'],
     icon: 'dashboard',
     title: 'foo',
-  } as SavedObjectTarget;
+  } as CopyToSpaceSavedObjectTarget;
 
   const SpacesContext = await getSpacesContextProviderWrapper({
     getStartServices,
@@ -112,8 +112,7 @@ const setup = async (opts: SetupOpts = {}) => {
   return { wrapper, onClose, mockSpacesManager, mockToastNotifications, savedObjectToCopy };
 };
 
-// flaky https://github.com/elastic/kibana/issues/96708
-describe.skip('CopyToSpaceFlyout', () => {
+describe('CopyToSpaceFlyout', () => {
   it('waits for spaces to load', async () => {
     const { wrapper } = await setup({ returnBeforeSpacesLoad: true });
 
@@ -121,6 +120,8 @@ describe.skip('CopyToSpaceFlyout', () => {
     expect(wrapper.find(EuiEmptyPrompt)).toHaveLength(0);
     expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(1);
 
+    // Wait for loading spinner to clear
+    await act(async () => {});
     wrapper.update();
 
     expect(wrapper.find(CopyToSpaceForm)).toHaveLength(1);
@@ -257,13 +258,8 @@ describe.skip('CopyToSpaceFlyout', () => {
   });
 
   it('allows the form to be filled out', async () => {
-    const {
-      wrapper,
-      onClose,
-      mockSpacesManager,
-      mockToastNotifications,
-      savedObjectToCopy,
-    } = await setup();
+    const { wrapper, onClose, mockSpacesManager, mockToastNotifications, savedObjectToCopy } =
+      await setup();
 
     mockSpacesManager.copySavedObjects.mockResolvedValue({
       'space-1': {
@@ -319,13 +315,8 @@ describe.skip('CopyToSpaceFlyout', () => {
   });
 
   it('allows conflicts to be resolved', async () => {
-    const {
-      wrapper,
-      onClose,
-      mockSpacesManager,
-      mockToastNotifications,
-      savedObjectToCopy,
-    } = await setup();
+    const { wrapper, onClose, mockSpacesManager, mockToastNotifications, savedObjectToCopy } =
+      await setup();
 
     mockSpacesManager.copySavedObjects.mockResolvedValue({
       'space-1': {
@@ -464,13 +455,8 @@ describe.skip('CopyToSpaceFlyout', () => {
   });
 
   it('displays a warning when missing references are encountered', async () => {
-    const {
-      wrapper,
-      onClose,
-      mockSpacesManager,
-      mockToastNotifications,
-      savedObjectToCopy,
-    } = await setup();
+    const { wrapper, onClose, mockSpacesManager, mockToastNotifications, savedObjectToCopy } =
+      await setup();
 
     mockSpacesManager.copySavedObjects.mockResolvedValue({
       'space-1': {

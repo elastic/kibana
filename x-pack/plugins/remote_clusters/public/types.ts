@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import { ManagementSetup } from 'src/plugins/management/public';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import { RegisterManagementAppArgs } from 'src/plugins/management/public';
-import { I18nStart } from 'kibana/public';
-import { CloudSetup } from '../../cloud/public';
+import { ManagementSetup } from '@kbn/management-plugin/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { RegisterManagementAppArgs } from '@kbn/management-plugin/public';
+import { SharePluginSetup } from '@kbn/share-plugin/public';
+import { I18nStart } from '@kbn/core/public';
+import { CloudSetup } from '@kbn/cloud-plugin/public';
 
 export interface Dependencies {
   management: ManagementSetup;
   usageCollection: UsageCollectionSetup;
   cloud: CloudSetup;
+  share: SharePluginSetup;
 }
 
 export interface ClientConfigType {
@@ -23,6 +25,6 @@ export interface ClientConfigType {
   };
 }
 
-export { RegisterManagementAppArgs };
+export type { RegisterManagementAppArgs };
 
-export { I18nStart };
+export type { I18nStart };

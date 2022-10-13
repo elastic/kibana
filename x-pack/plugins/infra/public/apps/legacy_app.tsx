@@ -7,7 +7,7 @@
 
 import { EuiErrorBoundary } from '@elastic/eui';
 import { createBrowserHistory, History } from 'history';
-import { AppMountParameters } from 'kibana/public';
+import { AppMountParameters } from '@kbn/core/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route, RouteProps, Router, Switch } from 'react-router-dom';

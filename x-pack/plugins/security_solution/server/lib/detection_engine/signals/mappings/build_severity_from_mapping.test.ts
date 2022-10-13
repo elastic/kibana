@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import {
+import type {
   Severity,
   SeverityMappingOrUndefined,
-} from '../../../../../common/detection_engine/schemas/common/schemas';
+} from '@kbn/securitysolution-io-ts-alerting-types';
+
 import { sampleDocSeverity } from '../__mocks__/es_results';
-import {
-  buildSeverityFromMapping,
-  BuildSeverityFromMappingReturn,
-} from './build_severity_from_mapping';
+import type { BuildSeverityFromMappingReturn } from './build_severity_from_mapping';
+import { buildSeverityFromMapping } from './build_severity_from_mapping';
 
 const ECS_FIELD = 'event.severity';
 const ANY_FIELD = 'event.my_custom_severity';

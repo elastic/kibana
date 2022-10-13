@@ -6,7 +6,7 @@
  */
 
 import { checkLicense } from './check_license';
-import { ILicense } from '../../../licensing/server';
+import { ILicense } from '@kbn/licensing-plugin/server';
 import { ExportTypesRegistry } from './export_types_registry';
 
 describe('check_license', () => {
@@ -14,32 +14,34 @@ describe('check_license', () => {
   let license: ILicense;
 
   beforeEach(() => {
-    exportTypesRegistry = ({
+    exportTypesRegistry = {
       getAll: () => [],
-    } as unknown) as ExportTypesRegistry;
+    } as unknown as ExportTypesRegistry;
   });
 
   describe('license information is not ready', () => {
     beforeEach(() => {
-      exportTypesRegistry = ({
-        getAll: () => [{ id: 'csv' }],
-      } as unknown) as ExportTypesRegistry;
+      exportTypesRegistry = {
+        getAll: () => [{ id: 'csv_searchsource' }],
+      } as unknown as ExportTypesRegistry;
     });
 
     it('should set management.showLinks to true', () => {
       expect(checkLicense(exportTypesRegistry, undefined).management.showLinks).toEqual(true);
     });
 
-    it('should set csv.showLinks to true', () => {
-      expect(checkLicense(exportTypesRegistry, undefined).csv.showLinks).toEqual(true);
+    it('should set csv_searchsource.showLinks to true', () => {
+      expect(checkLicense(exportTypesRegistry, undefined).csv_searchsource.showLinks).toEqual(true);
     });
 
     it('should set management.enableLinks to false', () => {
       expect(checkLicense(exportTypesRegistry, undefined).management.enableLinks).toEqual(false);
     });
 
-    it('should set csv.enableLinks to false', () => {
-      expect(checkLicense(exportTypesRegistry, undefined).csv.enableLinks).toEqual(false);
+    it('should set csv_searchsource.enableLinks to false', () => {
+      expect(checkLicense(exportTypesRegistry, undefined).csv_searchsource.enableLinks).toEqual(
+        false
+      );
     });
 
     it('should set management.jobTypes to undefined', () => {
@@ -52,25 +54,27 @@ describe('check_license', () => {
       license = {
         type: undefined,
       } as ILicense;
-      exportTypesRegistry = ({
-        getAll: () => [{ id: 'csv' }],
-      } as unknown) as ExportTypesRegistry;
+      exportTypesRegistry = {
+        getAll: () => [{ id: 'csv_searchsource' }],
+      } as unknown as ExportTypesRegistry;
     });
 
     it('should set management.showLinks to true', () => {
       expect(checkLicense(exportTypesRegistry, license).management.showLinks).toEqual(true);
     });
 
-    it('should set csv.showLinks to true', () => {
-      expect(checkLicense(exportTypesRegistry, license).csv.showLinks).toEqual(true);
+    it('should set csv_searchsource.showLinks to true', () => {
+      expect(checkLicense(exportTypesRegistry, license).csv_searchsource.showLinks).toEqual(true);
     });
 
     it('should set management.enableLinks to false', () => {
       expect(checkLicense(exportTypesRegistry, license).management.enableLinks).toEqual(false);
     });
 
-    it('should set csv.enableLinks to false', () => {
-      expect(checkLicense(exportTypesRegistry, license).csv.enableLinks).toEqual(false);
+    it('should set csv_searchsource.enableLinks to false', () => {
+      expect(checkLicense(exportTypesRegistry, license).csv_searchsource.enableLinks).toEqual(
+        false
+      );
     });
 
     it('should set management.jobTypes to undefined', () => {
@@ -86,9 +90,9 @@ describe('check_license', () => {
     describe('& license is > basic', () => {
       beforeEach(() => {
         license.type = 'gold';
-        exportTypesRegistry = ({
+        exportTypesRegistry = {
           getAll: () => [{ id: 'pdf', validLicenses: ['gold'], jobType: 'printable_pdf' }],
-        } as unknown) as ExportTypesRegistry;
+        } as unknown as ExportTypesRegistry;
       });
 
       describe('& license is active', () => {
@@ -147,9 +151,9 @@ describe('check_license', () => {
     describe('& license is basic', () => {
       beforeEach(() => {
         license.type = 'basic';
-        exportTypesRegistry = ({
+        exportTypesRegistry = {
           getAll: () => [{ id: 'pdf', validLicenses: ['gold'], jobType: 'printable_pdf' }],
-        } as unknown) as ExportTypesRegistry;
+        } as unknown as ExportTypesRegistry;
       });
 
       describe('& license is active', () => {

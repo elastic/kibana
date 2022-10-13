@@ -7,6 +7,7 @@
 
 import React, { Fragment } from 'react';
 import { get, first } from 'lodash';
+import { getTechnicalPreview } from './get_technical_preview';
 import { getTitle } from './get_title';
 import { getUnits } from './get_units';
 import { MonitoringTimeseries } from './monitoring_timeseries';
@@ -14,6 +15,7 @@ import { InfoTooltip } from './info_tooltip';
 import './monitoring_timeseries_container.scss';
 
 import {
+  EuiBadge,
   EuiIconTip,
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,7 +24,7 @@ import {
   EuiTextAlign,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { AlertsBadge } from '../../alerts/badge';
 
@@ -50,12 +52,30 @@ const zoomOutBtn = (zoomInfo) => {
   );
 };
 
+const technicalPreviewBadge = (technicalPreview) => {
+  if (!technicalPreview) {
+    return null;
+  }
+
+  return (
+    <EuiFlexItem>
+      <EuiBadge color="hollow" iconType="cheer">
+        <FormattedMessage
+          id="xpack.monitoring.chart.timeSeries.technicalPreview"
+          defaultMessage="Technical Preview"
+        />
+      </EuiBadge>
+    </EuiFlexItem>
+  );
+};
+
 export function MonitoringTimeseriesContainer({ series, onBrush, zoomInfo }) {
   if (series === undefined) {
     return null; // still loading
   }
 
   const title = getTitle(series);
+  const technicalPreview = getTechnicalPreview(series);
   const titleForAriaIds = title.replace(/\s+/, '--');
   const units = getUnits(series);
   const bucketSize = get(first(series), 'bucket_size'); // bucket size will be the same for all metrics in all series
@@ -115,6 +135,7 @@ export function MonitoringTimeseriesContainer({ series, onBrush, zoomInfo }) {
                   </EuiScreenReaderOnly>
                 </Fragment>
               </EuiFlexItem>
+              {technicalPreviewBadge(technicalPreview)}
               {zoomOutBtn(zoomInfo)}
             </EuiFlexGroup>
           </EuiFlexItem>

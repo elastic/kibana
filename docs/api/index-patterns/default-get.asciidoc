@@ -1,0 +1,57 @@
+[[index-patterns-api-default-get]]
+=== Get default index pattern API
+++++
+<titleabbrev>Get default index pattern</titleabbrev>
+++++
+
+deprecated::[8.0.0,Use <<data-views-api-default-get>> instead.]
+
+experimental[] Retrieve a default index pattern ID. Kibana UI uses default index pattern unless user picks a different one.
+
+[[index-patterns-api-default-get-request]]
+==== Request
+
+`GET <kibana host>:<port>/api/index_patterns/default`
+
+`GET <kibana host>:<port>/s/<space_id>/api/index_patterns/default`
+
+[[index-patterns-api-default-get-params]]
+==== Path parameters
+
+`space_id`::
+(Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+
+[[index-patterns-api-default-get-codes]]
+==== Response code
+
+`200`::
+Indicates a successful call.
+
+[[index-patterns-api-default-get-example]]
+==== Example
+
+Retrieve the default index pattern id:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X GET api/index_patterns/default
+--------------------------------------------------
+// KIBANA
+
+The API returns an ID of a default index pattern:
+
+[source,sh]
+--------------------------------------------------
+{
+    "index_pattern_id": "..."
+}
+--------------------------------------------------
+
+In case there is no default index pattern, the API returns:
+
+[source,sh]
+--------------------------------------------------
+{
+    "index_pattern_id": null
+}
+--------------------------------------------------

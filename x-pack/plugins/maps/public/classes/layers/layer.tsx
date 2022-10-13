@@ -7,43 +7,42 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import { Map as MbMap } from 'mapbox-gl';
-import { Query } from 'src/plugins/data/public';
+import type { Map as MbMap } from '@kbn/mapbox-gl';
+import type { Query } from '@kbn/es-query';
 import _ from 'lodash';
-import React, { ReactElement, ReactNode } from 'react';
+import React, { ReactElement } from 'react';
 import { EuiIcon } from '@elastic/eui';
 import uuid from 'uuid/v4';
 import { FeatureCollection } from 'geojson';
 import { DataRequest } from '../util/data_request';
 import {
-  AGG_TYPE,
-  FIELD_ORIGIN,
   LAYER_TYPE,
   MAX_ZOOM,
   MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER,
   MIN_ZOOM,
-  SOURCE_BOUNDS_DATA_REQUEST_ID,
   SOURCE_DATA_REQUEST_ID,
-  SOURCE_TYPES,
-  STYLE_TYPE,
 } from '../../../common/constants';
 import { copyPersistentState } from '../../reducers/copy_persistent_state';
 import {
-  AggDescriptor,
-  ESTermSourceDescriptor,
-  JoinDescriptor,
+  Attribution,
+  CustomIcon,
   LayerDescriptor,
   MapExtent,
   StyleDescriptor,
+  TileMetaFeature,
+  Timeslice,
+  StyleMetaDescriptor,
 } from '../../../common/descriptor_types';
-import { Attribution, ImmutableSourceProperty, ISource, SourceEditorArgs } from '../sources/source';
+import { ImmutableSourceProperty, ISource, SourceEditorArgs } from '../sources/source';
 import { DataRequestContext } from '../../actions';
 import { IStyle } from '../styles/style';
-import { getJoinAggKey } from '../../../common/get_agg_key';
 import { LICENSED_FEATURES } from '../../licensed_features';
+import { IESSource } from '../sources/es_source';
 
 export interface ILayer {
-  getBounds(dataRequestContext: DataRequestContext): Promise<MapExtent | null>;
+  getBounds(
+    getDataRequestContext: (layerId: string) => DataRequestContext
+  ): Promise<MapExtent | null>;
   getDataRequest(id: string): DataRequest | undefined;
   getDisplayName(source?: ISource): Promise<string>;
   getId(): string;
@@ -55,6 +54,7 @@ export interface ILayer {
   supportsFitToBounds(): Promise<boolean>;
   getAttributions(): Promise<Attribution[]>;
   getLabel(): string;
+  getLocale(): string | null;
   hasLegendDetails(): Promise<boolean>;
   renderLegendDetails(): ReactElement<any> | null;
   showAtZoomLevel(zoom: number): boolean;
@@ -67,42 +67,61 @@ export interface ILayer {
   getStyleForEditing(): IStyle;
   getCurrentStyle(): IStyle;
   getImmutableSourceProperties(): Promise<ImmutableSourceProperty[]>;
-  renderSourceSettingsEditor({ onChange }: SourceEditorArgs): ReactElement<any> | null;
+  renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> | null;
   isLayerLoading(): boolean;
-  isLoadingBounds(): boolean;
   isFilteredByGlobalTime(): Promise<boolean>;
   hasErrors(): boolean;
   getErrors(): string;
+
+  /*
+   * ILayer.getMbLayerIds returns a list of all mapbox layers assoicated with this layer.
+   */
   getMbLayerIds(): string[];
+
+  /*
+   * ILayer.getMbSourceId returns mapbox source id assoicated with this layer.
+   */
+  getMbSourceId(): string;
+
   ownsMbLayerId(mbLayerId: string): boolean;
   ownsMbSourceId(mbSourceId: string): boolean;
-  canShowTooltip(): boolean;
-  syncLayerWithMB(mbMap: MbMap): void;
+  syncLayerWithMB(mbMap: MbMap, timeslice?: Timeslice): void;
   getLayerTypeIconName(): string;
   isInitialDataLoadComplete(): boolean;
   getIndexPatternIds(): string[];
   getQueryableIndexPatternIds(): string[];
-  getType(): LAYER_TYPE | undefined;
+  getType(): LAYER_TYPE;
   isVisible(): boolean;
-  cloneDescriptor(): Promise<LayerDescriptor>;
+  cloneDescriptor(): Promise<LayerDescriptor[]>;
   renderStyleEditor(
-    onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void
+    onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void,
+    onCustomIconsChange: (customIcons: CustomIcon[]) => void
   ): ReactElement<any> | null;
   getInFlightRequestTokens(): symbol[];
   getPrevRequestToken(dataId: string): symbol | undefined;
-  destroy: () => void;
   isPreviewLayer: () => boolean;
   areLabelsOnTop: () => boolean;
   supportsLabelsOnTop: () => boolean;
-  showJoinEditor(): boolean;
-  getJoinsDisabledReason(): string | null;
+  supportsLabelLocales: () => boolean;
   isFittable(): Promise<boolean>;
+  isIncludeInFitToBounds(): boolean;
   getLicensedFeatures(): Promise<LICENSED_FEATURES[]>;
-  getCustomIconAndTooltipContent(): CustomIconAndTooltipContent;
+
+  /*
+   * ILayer.getLayerIcon returns layer icon and associated state.
+   * isTocIcon is set to true when icon is generated for Table of Contents.
+   * Icons in Table of Contents may contain additional layer status, for example, indicate when a layer has incomplete results.
+   */
+  getLayerIcon(isTocIcon: boolean): LayerIcon;
+  getDescriptor(): LayerDescriptor;
+  getGeoFieldNames(): string[];
+  getStyleMetaDescriptorFromLocalFeatures(): Promise<StyleMetaDescriptor | null>;
+  isBasemap(order: number): boolean;
+  getParent(): string | undefined;
 }
 
-export type CustomIconAndTooltipContent = {
-  icon: ReactNode;
+export type LayerIcon = {
+  icon: ReactElement;
   tooltipContent?: string | null;
   areResultsTrimmed?: boolean;
 };
@@ -129,13 +148,9 @@ export class AbstractLayer implements ILayer {
       alpha: _.get(options, 'alpha', 0.75),
       visible: _.get(options, 'visible', true),
       style: _.get(options, 'style', null),
+      includeInFitToBounds:
+        typeof options.includeInFitToBounds === 'boolean' ? options.includeInFitToBounds : true,
     };
-  }
-
-  destroy() {
-    if (this._source) {
-      this._source.destroy();
-    }
   }
 
   constructor({ layerDescriptor, source }: ILayerArguments) {
@@ -156,75 +171,22 @@ export class AbstractLayer implements ILayer {
     return mbStyle.sources[sourceId].data;
   }
 
-  async cloneDescriptor(): Promise<LayerDescriptor> {
+  getDescriptor(): LayerDescriptor {
+    return this._descriptor;
+  }
+
+  async cloneDescriptor(): Promise<LayerDescriptor[]> {
     const clonedDescriptor = copyPersistentState(this._descriptor);
     // layer id is uuid used to track styles/layers in mapbox
     clonedDescriptor.id = uuid();
     const displayName = await this.getDisplayName();
     clonedDescriptor.label = `Clone of ${displayName}`;
     clonedDescriptor.sourceDescriptor = this.getSource().cloneDescriptor();
-
-    if (clonedDescriptor.joins) {
-      clonedDescriptor.joins.forEach((joinDescriptor: JoinDescriptor) => {
-        if (joinDescriptor.right && joinDescriptor.right.type === SOURCE_TYPES.TABLE_SOURCE) {
-          throw new Error(
-            'Cannot clone table-source. Should only be used in MapEmbeddable, not in UX'
-          );
-        }
-        const termSourceDescriptor: ESTermSourceDescriptor = joinDescriptor.right as ESTermSourceDescriptor;
-
-        // todo: must tie this to generic thing
-        const originalJoinId = joinDescriptor.right.id!;
-
-        // right.id is uuid used to track requests in inspector
-        joinDescriptor.right.id = uuid();
-
-        // Update all data driven styling properties using join fields
-        if (clonedDescriptor.style && 'properties' in clonedDescriptor.style) {
-          const metrics =
-            termSourceDescriptor.metrics && termSourceDescriptor.metrics.length
-              ? termSourceDescriptor.metrics
-              : [{ type: AGG_TYPE.COUNT }];
-          metrics.forEach((metricsDescriptor: AggDescriptor) => {
-            const originalJoinKey = getJoinAggKey({
-              aggType: metricsDescriptor.type,
-              aggFieldName: 'field' in metricsDescriptor ? metricsDescriptor.field : '',
-              rightSourceId: originalJoinId,
-            });
-            const newJoinKey = getJoinAggKey({
-              aggType: metricsDescriptor.type,
-              aggFieldName: 'field' in metricsDescriptor ? metricsDescriptor.field : '',
-              rightSourceId: joinDescriptor.right.id!,
-            });
-
-            Object.keys(clonedDescriptor.style.properties).forEach((key) => {
-              const styleProp = clonedDescriptor.style.properties[key];
-              if (
-                styleProp.type === STYLE_TYPE.DYNAMIC &&
-                styleProp.options.field &&
-                styleProp.options.field.origin === FIELD_ORIGIN.JOIN &&
-                styleProp.options.field.name === originalJoinKey
-              ) {
-                styleProp.options.field.name = newJoinKey;
-              }
-            });
-          });
-        }
-      });
-    }
-    return clonedDescriptor;
+    return [clonedDescriptor];
   }
 
   makeMbLayerId(layerNameSuffix: string): string {
     return `${this.getId()}${MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER}${layerNameSuffix}`;
-  }
-
-  showJoinEditor(): boolean {
-    return this.getSource().showJoinEditor();
-  }
-
-  getJoinsDisabledReason() {
-    return this.getSource().getJoinsDisabledReason();
   }
 
   isPreviewLayer(): boolean {
@@ -240,7 +202,11 @@ export class AbstractLayer implements ILayer {
   }
 
   async isFittable(): Promise<boolean> {
-    return (await this.supportsFitToBounds()) && this.isVisible();
+    return (await this.supportsFitToBounds()) && this.isVisible() && this.isIncludeInFitToBounds();
+  }
+
+  isIncludeInFitToBounds(): boolean {
+    return !!this._descriptor.includeInFitToBounds;
   }
 
   async isFilteredByGlobalTime(): Promise<boolean> {
@@ -259,10 +225,16 @@ export class AbstractLayer implements ILayer {
   }
 
   async getAttributions(): Promise<Attribution[]> {
-    if (!this.hasErrors()) {
-      return await this.getSource().getAttributions();
+    if (this.hasErrors() || !this.isVisible()) {
+      return [];
     }
-    return [];
+
+    const attributionProvider = this.getSource().getAttributionProvider();
+    if (attributionProvider) {
+      return attributionProvider();
+    }
+
+    return this._descriptor.attribution !== undefined ? [this._descriptor.attribution] : [];
   }
 
   getStyleForEditing(): IStyle {
@@ -281,7 +253,11 @@ export class AbstractLayer implements ILayer {
     return this._descriptor.label ? this._descriptor.label : '';
   }
 
-  getCustomIconAndTooltipContent(): CustomIconAndTooltipContent {
+  getLocale(): string | null {
+    return null;
+  }
+
+  getLayerIcon(isTocIcon: boolean): LayerIcon {
     return {
       icon: <EuiIcon size="m" type={this.getLayerTypeIconName()} />,
     };
@@ -327,7 +303,7 @@ export class AbstractLayer implements ILayer {
     return this._source.getMinZoom();
   }
 
-  _getMbSourceId() {
+  getMbSourceId() {
     return this.getId();
   }
 
@@ -368,9 +344,8 @@ export class AbstractLayer implements ILayer {
     return await source.getImmutableProperties();
   }
 
-  renderSourceSettingsEditor({ onChange }: SourceEditorArgs) {
-    const source = this.getSourceForEditing();
-    return source.renderSourceSettingsEditor({ onChange, currentLayerType: this._descriptor.type });
+  renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs) {
+    return this.getSourceForEditing().renderSourceSettingsEditor(sourceEditorArgs);
   }
 
   getPrevRequestToken(dataId: string): symbol | undefined {
@@ -409,11 +384,6 @@ export class AbstractLayer implements ILayer {
     return areTilesLoading || this._dataRequests.some((dataRequest) => dataRequest.isLoading());
   }
 
-  isLoadingBounds() {
-    const boundsDataRequest = this.getDataRequest(SOURCE_BOUNDS_DATA_REQUEST_ID);
-    return !!boundsDataRequest && boundsDataRequest.isLoading();
-  }
-
   hasErrors(): boolean {
     return _.get(this._descriptor, '__isInErrorState', false);
   }
@@ -440,10 +410,6 @@ export class AbstractLayer implements ILayer {
     throw new Error('Should implement AbstractLayer#ownsMbSourceId');
   }
 
-  canShowTooltip() {
-    return false;
-  }
-
   syncLayerWithMB(mbMap: MbMap) {
     throw new Error('Should implement AbstractLayer#syncLayerWithMB');
   }
@@ -457,18 +423,21 @@ export class AbstractLayer implements ILayer {
     return sourceDataRequest ? sourceDataRequest.hasData() : false;
   }
 
-  async getBounds(dataRequestContext: DataRequestContext): Promise<MapExtent | null> {
+  async getBounds(
+    getDataRequestContext: (layerId: string) => DataRequestContext
+  ): Promise<MapExtent | null> {
     return null;
   }
 
   renderStyleEditor(
-    onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void
+    onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void,
+    onCustomIconsChange: (customIcons: CustomIcon[]) => void
   ): ReactElement<any> | null {
     const style = this.getStyleForEditing();
     if (!style) {
       return null;
     }
-    return style.renderEditor(onStyleDescriptorChange);
+    return style.renderEditor(onStyleDescriptorChange, onCustomIconsChange);
   }
 
   getIndexPatternIds(): string[] {
@@ -484,7 +453,7 @@ export class AbstractLayer implements ILayer {
     mbMap.setLayoutProperty(mbLayerId, 'visibility', this.isVisible() ? 'visible' : 'none');
   }
 
-  getType(): LAYER_TYPE | undefined {
+  getType(): LAYER_TYPE {
     return this._descriptor.type as LAYER_TYPE;
   }
 
@@ -496,7 +465,32 @@ export class AbstractLayer implements ILayer {
     return false;
   }
 
+  supportsLabelLocales(): boolean {
+    return false;
+  }
+
   async getLicensedFeatures(): Promise<LICENSED_FEATURES[]> {
     return [];
+  }
+
+  getGeoFieldNames(): string[] {
+    const source = this.getSource();
+    return source.isESSource() ? [(source as IESSource).getGeoFieldName()] : [];
+  }
+
+  async getStyleMetaDescriptorFromLocalFeatures(): Promise<StyleMetaDescriptor | null> {
+    return null;
+  }
+
+  isBasemap(order: number): boolean {
+    return false;
+  }
+
+  getParent(): string | undefined {
+    return this._descriptor.parent;
+  }
+
+  _getMetaFromTiles(): TileMetaFeature[] {
+    return this._descriptor.__metaFromTiles || [];
   }
 }

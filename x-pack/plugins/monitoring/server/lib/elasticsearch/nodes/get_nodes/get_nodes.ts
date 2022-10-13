@@ -6,21 +6,16 @@
  */
 
 import moment from 'moment';
-// @ts-ignore
-import { checkParam } from '../../../error_missing_required';
-// @ts-ignore
 import { createQuery } from '../../../create_query';
-// @ts-ignore
 import { calculateAuto } from '../../../calculate_auto';
-// @ts-ignore
 import { ElasticsearchMetric } from '../../../metrics';
-// @ts-ignore
 import { getMetricAggs } from './get_metric_aggs';
 import { handleResponse } from './handle_response';
-// @ts-ignore
 import { LISTING_METRICS_NAMES, LISTING_METRICS_PATHS } from './nodes_listing_metrics';
 import { LegacyRequest } from '../../../../types';
 import { ElasticsearchModifiedSource } from '../../../../../common/types/es';
+import { getIndexPatterns, getElasticsearchDataset } from '../../../cluster/get_index_patterns';
+import { Globals } from '../../../../static_globals';
 
 /* Run an aggregation on node_stats to get stat data for the selected time
  * range for all the active nodes.  Every option is a key to a configuration
@@ -41,26 +36,23 @@ import { ElasticsearchModifiedSource } from '../../../../../common/types/es';
  */
 export async function getNodes(
   req: LegacyRequest,
-  esIndexPattern: string,
   pageOfNodes: Array<{ uuid: string }>,
   clusterStats: ElasticsearchModifiedSource,
   nodesShardCount: { nodes: { [nodeId: string]: { shardCount: number } } }
 ) {
-  checkParam(esIndexPattern, 'esIndexPattern in getNodes');
-
   const start = moment.utc(req.payload.timeRange.min).valueOf();
   const orgStart = start;
   const end = moment.utc(req.payload.timeRange.max).valueOf();
   const max = end;
   const duration = moment.duration(max - orgStart, 'ms');
 
-  const config = req.server.config();
+  const config = req.server.config;
   const clusterUuid = req.params.clusterUuid;
   const metricFields = ElasticsearchMetric.getMetricFields();
   const min = start;
 
   const bucketSize = Math.max(
-    parseInt(config.get('monitoring.ui.min_interval_seconds') as string, 10),
+    config.ui.min_interval_seconds,
     calculateAuto(100, duration).asSeconds()
   );
 
@@ -73,13 +65,26 @@ export async function getNodes(
     },
   ];
 
+  const dataset = 'node_stats';
+  const moduleType = 'elasticsearch';
+  const indexPatterns = getIndexPatterns({
+    config: Globals.app.config,
+    ccs: req.payload.ccs,
+    moduleType,
+    dataset,
+  });
+
+  const maxBucketSize = config.ui.max_bucket_size;
+
   const params = {
-    index: esIndexPattern,
-    size: config.get('monitoring.ui.max_bucket_size'),
-    ignoreUnavailable: true,
+    index: indexPatterns,
+    size: maxBucketSize,
+    ignore_unavailable: true,
     body: {
       query: createQuery({
-        type: 'node_stats',
+        type: dataset,
+        dsDataset: getElasticsearchDataset(dataset),
+        metricset: dataset,
         start,
         end,
         clusterUuid,
@@ -94,7 +99,7 @@ export async function getNodes(
           terms: {
             field: `source_node.uuid`,
             include: uuidsToInclude,
-            size: config.get('monitoring.ui.max_bucket_size'),
+            size: maxBucketSize,
           },
           aggs: {
             by_date: {
@@ -103,14 +108,14 @@ export async function getNodes(
                 min_doc_count: 0,
                 fixed_interval: bucketSize + 's',
               },
-              aggs: getMetricAggs(LISTING_METRICS_NAMES, bucketSize),
+              aggs: getMetricAggs(LISTING_METRICS_NAMES),
             },
           },
         },
       },
       sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
     },
-    filterPath: [
+    filter_path: [
       'hits.hits._source.source_node',
       'hits.hits._source.service.address',
       'hits.hits._source.elasticsearch.node',
@@ -118,7 +123,6 @@ export async function getNodes(
       ...LISTING_METRICS_PATHS,
     ],
   };
-
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   const response = await callWithRequest(req, 'search', params);
 

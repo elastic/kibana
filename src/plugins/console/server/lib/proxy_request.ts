@@ -42,8 +42,9 @@ export const proxyRequest = ({
   payload,
   rejectUnauthorized,
 }: Args) => {
-  const { hostname, port, protocol, pathname, search } = uri;
+  const { hostname, port, protocol, search, pathname } = uri;
   const client = uri.protocol === 'https:' ? https : http;
+
   let resolved = false;
 
   let resolve: (res: http.IncomingMessage) => void;
@@ -95,7 +96,10 @@ export const proxyRequest = ({
 
   const timeoutPromise = new Promise<any>((timeoutResolve, timeoutReject) => {
     setTimeout(() => {
-      if (!req.aborted && !req.socket) req.abort();
+      // Destroy the stream on timeout and close the connection.
+      if (!req.destroyed) {
+        req.destroy();
+      }
       if (!resolved) {
         timeoutReject(Boom.gatewayTimeout('Client request timeout'));
       } else {

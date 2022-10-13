@@ -5,25 +5,28 @@
  * 2.0.
  */
 
-import { assertUnreachable } from '../../../../common/utility_types';
-import { getQueryFilter } from '../../../../common/detection_engine/get_query_filter';
-import {
-  LanguageOrUndefined,
-  QueryOrUndefined,
+import { BadRequestError } from '@kbn/securitysolution-es-utils';
+import type {
   Type,
-  SavedIdOrUndefined,
-  IndexOrUndefined,
+  LanguageOrUndefined,
   Language,
-} from '../../../../common/detection_engine/schemas/common/schemas';
-import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
-import {
+} from '@kbn/securitysolution-io-ts-alerting-types';
+import type {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertServices,
-} from '../../../../../alerting/server';
-import { PartialFilter } from '../types';
-import { BadRequestError } from '../errors/bad_request_error';
-import { QueryFilter } from './types';
+  RuleExecutorServices,
+} from '@kbn/alerting-plugin/server';
+import type { Filter } from '@kbn/es-query';
+import { assertUnreachable } from '../../../../common/utility_types';
+import type {
+  QueryOrUndefined,
+  SavedIdOrUndefined,
+  IndexOrUndefined,
+} from '../../../../common/detection_engine/schemas/common/schemas';
+import type { PartialFilter } from '../types';
+import { withSecuritySpan } from '../../../utils/with_security_span';
+import type { ESBoolQuery } from '../../../../common/typed_json';
+import { getQueryFilter } from './get_query_filter';
 
 interface GetFilterArgs {
   type: Type;
@@ -31,9 +34,9 @@ interface GetFilterArgs {
   language: LanguageOrUndefined;
   query: QueryOrUndefined;
   savedId: SavedIdOrUndefined;
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   index: IndexOrUndefined;
-  lists: ExceptionListItemSchema[];
+  exceptionFilter: Filter | undefined;
 }
 
 interface QueryAttributes {
@@ -53,11 +56,17 @@ export const getFilter = async ({
   services,
   type,
   query,
-  lists,
-}: GetFilterArgs): Promise<QueryFilter> => {
+  exceptionFilter,
+}: GetFilterArgs): Promise<ESBoolQuery> => {
   const queryFilter = () => {
     if (query != null && language != null && index != null) {
-      return getQueryFilter(query, language, filters || [], index, lists);
+      return getQueryFilter({
+        query,
+        language,
+        filters: filters || [],
+        index,
+        exceptionFilter,
+      });
     } else {
       throw new BadRequestError('query, filters, and index parameter should be defined');
     }
@@ -67,25 +76,31 @@ export const getFilter = async ({
     if (savedId != null && index != null) {
       try {
         // try to get the saved object first
-        const savedObject = await services.savedObjectsClient.get<QueryAttributes>(
-          'query',
-          savedId
+        const savedObject = await withSecuritySpan('getSavedFilter', () =>
+          services.savedObjectsClient.get<QueryAttributes>('query', savedId)
         );
-        return getQueryFilter(
-          savedObject.attributes.query.query,
-          savedObject.attributes.query.language,
-          savedObject.attributes.filters,
+        return getQueryFilter({
+          query: savedObject.attributes.query.query,
+          language: savedObject.attributes.query.language,
+          filters: savedObject.attributes.filters,
           index,
-          lists
-        );
+          exceptionFilter,
+        });
       } catch (err) {
         // saved object does not exist, so try and fall back if the user pushed
         // any additional language, query, filters, etc...
         if (query != null && language != null && index != null) {
-          return getQueryFilter(query, language, filters || [], index, lists);
+          return getQueryFilter({
+            query,
+            language,
+            filters: filters || [],
+            index,
+            exceptionFilter,
+          });
         } else {
           // user did not give any additional fall back mechanism for generating a rule
           // rethrow error for activity monitoring
+          err.message = `Failed to fetch saved query. "${err.message}"`;
           throw err;
         }
       }
@@ -96,9 +111,8 @@ export const getFilter = async ({
 
   switch (type) {
     case 'threat_match':
-    case 'threshold': {
-      return savedId != null ? savedQueryFilter() : queryFilter();
-    }
+    case 'threshold':
+    case 'new_terms':
     case 'query': {
       return queryFilter();
     }

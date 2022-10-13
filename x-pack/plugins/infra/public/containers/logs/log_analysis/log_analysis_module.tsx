@@ -6,12 +6,12 @@
  */
 
 import { useCallback, useMemo } from 'react';
+import { useUiTracker } from '@kbn/observability-plugin/public';
 import { DatasetFilter } from '../../../../common/log_analysis';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { useModuleStatus } from './log_analysis_module_status';
 import { ModuleDescriptor, ModuleSourceConfiguration } from './log_analysis_module_types';
-import { useUiTracker } from '../../../../../observability/public';
 
 export const useLogAnalysisModule = <JobType extends string>({
   sourceConfiguration,
@@ -127,9 +127,10 @@ export const useLogAnalysisModule = <JobType extends string>({
     [spaceId, sourceId]
   );
 
-  const isCleaningUp = useMemo(() => cleanUpModuleRequest.state === 'pending', [
-    cleanUpModuleRequest.state,
-  ]);
+  const isCleaningUp = useMemo(
+    () => cleanUpModuleRequest.state === 'pending',
+    [cleanUpModuleRequest.state]
+  );
 
   const cleanUpAndSetUpModule = useCallback(
     (
@@ -154,11 +155,10 @@ export const useLogAnalysisModule = <JobType extends string>({
     dispatchModuleStatus({ type: 'viewedResults' });
   }, [dispatchModuleStatus]);
 
-  const jobIds = useMemo(() => moduleDescriptor.getJobIds(spaceId, sourceId), [
-    moduleDescriptor,
-    spaceId,
-    sourceId,
-  ]);
+  const jobIds = useMemo(
+    () => moduleDescriptor.getJobIds(spaceId, sourceId),
+    [moduleDescriptor, spaceId, sourceId]
+  );
 
   return {
     cleanUpAndSetUpModule,

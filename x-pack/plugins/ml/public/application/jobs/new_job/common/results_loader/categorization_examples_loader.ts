@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { IndexPatternTitle } from '../../../../../../common/types/kibana';
 import { CategorizationJobCreator } from '../job_creator';
 import { ml } from '../../../../services/ml_api_service';
@@ -20,7 +20,7 @@ export class CategorizationExamplesLoader {
   private _timeFieldName: string = '';
   private _query: object = {};
 
-  constructor(jobCreator: CategorizationJobCreator, indexPattern: IndexPattern, query: object) {
+  constructor(jobCreator: CategorizationJobCreator, indexPattern: DataView, query: object) {
     this._jobCreator = jobCreator;
     this._indexPatternTitle = indexPattern.title;
     this._query = query;
@@ -52,7 +52,6 @@ export class CategorizationExamplesLoader {
       this._jobCreator.end,
       analyzer,
       this._jobCreator.runtimeMappings ?? undefined,
-      // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
       this._jobCreator.datafeedConfig.indices_options
     );
     return resp;

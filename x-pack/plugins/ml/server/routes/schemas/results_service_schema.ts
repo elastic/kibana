@@ -103,3 +103,45 @@ export const getCategorizerStoppedPartitionsSchema = schema.object({
    */
   fieldToBucket: schema.maybe(schema.string()),
 });
+
+export const getDatafeedResultsChartDataSchema = schema.object({
+  /**
+   * Job id to fetch the bucket results for
+   */
+  jobId: schema.string(),
+  start: schema.number(),
+  end: schema.number(),
+});
+
+export const getAnomalyChartsSchema = schema.object({
+  jobIds: schema.arrayOf(schema.string()),
+  influencers: schema.arrayOf(schema.any()),
+  /**
+   * Severity threshold
+   */
+  threshold: schema.number({ defaultValue: 0, min: 0, max: 99 }),
+  earliestMs: schema.number(),
+  latestMs: schema.number(),
+  /**
+   * Maximum amount of series data.
+   */
+  maxResults: schema.number({ defaultValue: 6, min: 1, max: 10 }),
+  influencersFilterQuery: schema.maybe(schema.any()),
+  /**
+   * Optimal number of data points per chart
+   */
+  numberOfPoints: schema.number(),
+  timeBounds: schema.object({
+    min: schema.maybe(schema.number()),
+    max: schema.maybe(schema.number()),
+  }),
+});
+
+export const getAnomalyRecordsSchema = schema.object({
+  jobIds: schema.arrayOf(schema.string()),
+  threshold: schema.number({ defaultValue: 0, min: 0, max: 99 }),
+  earliestMs: schema.number(),
+  latestMs: schema.number(),
+  criteriaFields: schema.arrayOf(schema.any()),
+  interval: schema.string(),
+});

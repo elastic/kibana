@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { esdocs } from '../../../canvas_plugin_src/functions/server/esdocs';
+import type { esdocs } from '../../../canvas_plugin_src/functions/browser/esdocs';
 import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 import { ELASTICSEARCH, LUCENE } from '../../constants';
@@ -35,7 +35,7 @@ export const help: FunctionHelp<FunctionFactory<typeof esdocs>> = {
       defaultMessage: 'A comma-separated list of fields. For better performance, use fewer fields.',
     }),
     index: i18n.translate('xpack.canvas.functions.esdocs.args.indexHelpText', {
-      defaultMessage: 'An index or index pattern. For example, {example}.',
+      defaultMessage: 'An index or data view. For example, {example}.',
       values: {
         example: '`"logstash-*"`',
       },

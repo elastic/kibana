@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { functionWrapper } from '../../../test_helpers/function_wrapper';
+import { functionWrapper } from '@kbn/presentation-util-plugin/common/lib';
 import { testTable } from './__fixtures__/test_tables';
 import { clear } from './clear';
 

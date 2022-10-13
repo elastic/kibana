@@ -9,8 +9,8 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { context, createKibanaReactContext, useKibana, KibanaContextProvider } from './context';
-import { coreMock, overlayServiceMock } from '../../../../core/public/mocks';
-import { CoreStart } from '../../../../core/public';
+import { coreMock, overlayServiceMock } from '@kbn/core/public/mocks';
+import { CoreStart } from '@kbn/core/public';
 
 let container: HTMLDivElement | null;
 
@@ -184,19 +184,19 @@ test('notifications wrapper uses the closest notifications service', () => {
   };
 
   const core1 = {
-    notifications: ({
+    notifications: {
       toasts: {
         add: jest.fn(),
       },
-    } as unknown) as CoreStart['notifications'],
+    } as unknown as CoreStart['notifications'],
   } as Partial<CoreStart>;
 
   const core2 = {
-    notifications: ({
+    notifications: {
       toasts: {
         add: jest.fn(),
       },
-    } as unknown) as CoreStart['notifications'],
+    } as unknown as CoreStart['notifications'],
   } as Partial<CoreStart>;
 
   ReactDOM.render(
@@ -221,19 +221,19 @@ test('overlays wrapper uses available overlays service, higher up in <KibanaCont
 
   const core1 = {
     overlays: overlayServiceMock.createStartContract(),
-    notifications: ({
+    notifications: {
       toasts: {
         add: jest.fn(),
       },
-    } as unknown) as CoreStart['notifications'],
+    } as unknown as CoreStart['notifications'],
   } as Partial<CoreStart>;
 
   const core2 = {
-    notifications: ({
+    notifications: {
       toasts: {
         add: jest.fn(),
       },
-    } as unknown) as CoreStart['notifications'],
+    } as unknown as CoreStart['notifications'],
   } as Partial<CoreStart>;
 
   expect(core1.overlays!.openFlyout).toHaveBeenCalledTimes(0);

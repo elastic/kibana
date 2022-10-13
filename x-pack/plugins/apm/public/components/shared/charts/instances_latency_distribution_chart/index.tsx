@@ -22,7 +22,8 @@ import { EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { useChartTheme } from '../../../../../../observability/public';
+import { useChartTheme } from '@kbn/observability-plugin/public';
+import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_text';
 import { SERVICE_NODE_NAME } from '../../../../../common/elasticsearch_fieldnames';
 import {
   asTransactionRate,
@@ -30,13 +31,14 @@ import {
 } from '../../../../../common/utils/formatters';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
-import { APIReturnType } from '../../../../services/rest/createCallApmApi';
-import * as urlHelpers from '../../Links/url_helpers';
+import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import * as urlHelpers from '../../links/url_helpers';
 import { ChartContainer } from '../chart_container';
 import { getResponseTimeTickFormatter } from '../transaction_charts/helper';
 import { CustomTooltip } from './custom_tooltip';
 
-type ApiResponseMainStats = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
+type ApiResponseMainStats =
+  APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
 
 export interface InstancesLatencyDistributionChartProps {
   height: number;
@@ -61,6 +63,7 @@ export function InstancesLatencyDistributionChart({
   const latencyFormatter = getDurationFormatter(maxLatency);
 
   const tooltip: TooltipProps = {
+    stickTo: 'center',
     type: TooltipType.Follow,
     snap: false,
     customTooltip: (props: TooltipInfo) => (
@@ -102,9 +105,10 @@ export function InstancesLatencyDistributionChart({
     min: 0,
     max: Math.max(maxThroughput, maxComparisonThroughput),
   };
+  const previousPeriodLabel = usePreviousPeriodLabel();
 
   return (
-    <EuiPanel>
+    <EuiPanel hasBorder={true}>
       <EuiTitle size="xs">
         <h2>
           {i18n.translate('xpack.apm.instancesLatencyDistributionChartTitle', {
@@ -112,8 +116,13 @@ export function InstancesLatencyDistributionChart({
           })}
         </h2>
       </EuiTitle>
-      <ChartContainer hasData={hasData} height={height} status={status}>
-        <Chart id="instances-latency-distribution">
+      <ChartContainer
+        hasData={hasData}
+        height={height}
+        status={status}
+        id="instancesLatencyDistribution"
+      >
+        <Chart>
           <Settings
             legendPosition={Position.Bottom}
             onElementClick={handleElementClick}
@@ -145,10 +154,7 @@ export function InstancesLatencyDistributionChart({
           {!!comparisonItems.length && (
             <BubbleSeries
               data={comparisonItems}
-              id={i18n.translate(
-                'xpack.apm.instancesLatencyDistributionChartLegend.previousPeriod',
-                { defaultMessage: 'Previous period' }
-              )}
+              id={previousPeriodLabel}
               xAccessor={(item) => item.throughput}
               xScaleType={ScaleType.Linear}
               yAccessors={[(item) => item.latency]}

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { CSV_JOB_TYPE } from '../../../common/constants';
 import { getFieldFormats } from '../../services';
 import { RunTaskFn, RunTaskFnFactory } from '../../types';
 import { decryptJobHeaders } from '../common';
@@ -17,11 +16,11 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadCSV>> = (
   parentLogger
 ) => {
   const config = reporting.getConfig();
+  const encryptionKey = config.get('encryptionKey');
+  const csvConfig = config.get('csv');
 
-  return async function runTask(jobId, job, cancellationToken) {
-    const logger = parentLogger.clone([CSV_JOB_TYPE, 'execute-job', jobId]);
-
-    const encryptionKey = config.get('encryptionKey');
+  return async function runTask(jobId, job, cancellationToken, stream) {
+    const logger = parentLogger.get(`execute-job:${jobId}`);
     const headers = await decryptJobHeaders(encryptionKey, job.headers, logger);
     const fakeRequest = reporting.getFakeRequest({ headers }, job.spaceId, logger);
     const uiSettings = await reporting.getUiSettingsClient(fakeRequest, logger);
@@ -43,7 +42,15 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadCSV>> = (
       fieldFormatsRegistry,
     };
 
-    const csv = new CsvGenerator(job, config, clients, dependencies, cancellationToken, logger);
+    const csv = new CsvGenerator(
+      job,
+      csvConfig,
+      clients,
+      dependencies,
+      cancellationToken,
+      logger,
+      stream
+    );
     return await csv.generateData();
   };
 };

@@ -12,5 +12,6 @@
   },
   "settings": {
     "syncAlerts": true
-  }
+  },
+  "owner": "securitySolution"
 }

@@ -5,27 +5,36 @@
  * 2.0.
  */
 
-export const esArchiverLoad = (folder: string) => {
-  cy.exec(
-    `node ../../../../scripts/es_archiver load ${folder} --dir ./cypress/fixtures/es_archiver --config ../../../test/functional/config.js --es-url ${Cypress.env(
-      'ELASTICSEARCH_URL'
-    )} --kibana-url ${Cypress.config().baseUrl}`
+import path from 'path';
+import { execSync } from 'child_process';
+
+const ES_ARCHIVE_DIR = path.resolve(
+  __dirname,
+  '../../cypress/fixtures/es_archiver'
+);
+
+// Otherwise execSync would inject NODE_TLS_REJECT_UNAUTHORIZED=0 and node would abort if used over https
+const NODE_TLS_REJECT_UNAUTHORIZED = '1';
+
+export const esArchiverLoad = (archiveName: string) => {
+  const archivePath = path.join(ES_ARCHIVE_DIR, archiveName);
+  execSync(
+    `node ../../../../scripts/es_archiver load "${archivePath}" --config ../../../test/functional/config.base.js`,
+    { env: { ...process.env, NODE_TLS_REJECT_UNAUTHORIZED }, stdio: 'inherit' }
   );
 };
 
-export const esArchiverUnload = (folder: string) => {
-  cy.exec(
-    `node ../../../../scripts/es_archiver unload ${folder} --dir ./cypress/fixtures/es_archiver --config ../../../test/functional/config.js --es-url ${Cypress.env(
-      'ELASTICSEARCH_URL'
-    )} --kibana-url ${Cypress.config().baseUrl}`
+export const esArchiverUnload = (archiveName: string) => {
+  const archivePath = path.join(ES_ARCHIVE_DIR, archiveName);
+  execSync(
+    `node ../../../../scripts/es_archiver unload "${archivePath}" --config ../../../test/functional/config.base.js`,
+    { env: { ...process.env, NODE_TLS_REJECT_UNAUTHORIZED }, stdio: 'inherit' }
   );
 };
 
 export const esArchiverResetKibana = () => {
-  cy.exec(
-    `node ../../../../scripts/es_archiver empty-kibana-index --config ../../../test/functional/config.js --es-url ${Cypress.env(
-      'ELASTICSEARCH_URL'
-    )} --kibana-url ${Cypress.config().baseUrl}`,
-    { failOnNonZeroExit: false }
+  execSync(
+    `node ../../../../scripts/es_archiver empty-kibana-index --config ../../../test/functional/config.base.js`,
+    { env: { ...process.env, NODE_TLS_REJECT_UNAUTHORIZED }, stdio: 'inherit' }
   );
 };

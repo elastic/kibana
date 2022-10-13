@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { DropResult } from 'react-beautiful-dnd';
-
 import { kea, MakeLogicType } from 'kea';
 import { cloneDeep, isEqual, differenceBy } from 'lodash';
 
+import { DropResult } from '@elastic/eui';
+
 import {
-  setSuccessMessage,
+  flashSuccessToast,
   clearFlashMessages,
   flashAPIErrors,
 } from '../../../../../shared/flash_messages';
@@ -55,6 +55,10 @@ interface DisplaySettingsActions {
   setUrlField(urlField: string): string;
   setSubtitleField(subtitleField: string | null): string | null;
   setDescriptionField(descriptionField: string | null): string | null;
+  setTypeField(typeField: string | null): string | null;
+  setMediaTypeField(mediaTypeField: string | null): string | null;
+  setCreatedByField(createdByField: string | null): string | null;
+  setUpdatedByField(updatedByField: string | null): string | null;
   setColorField(hex: string): string;
   setDetailFields(result: DropResult): { result: DropResult };
   openEditDetailField(editFieldIndex: number | null): number | null;
@@ -70,6 +74,10 @@ interface DisplaySettingsActions {
   toggleTitleFieldHover(): void;
   toggleSubtitleFieldHover(): void;
   toggleDescriptionFieldHover(): void;
+  toggleTypeFieldHover(): void;
+  toggleMediaTypeFieldHover(): void;
+  toggleCreatedByFieldHover(): void;
+  toggleUpdatedByFieldHover(): void;
   toggleUrlFieldHover(): void;
 }
 
@@ -89,6 +97,10 @@ interface DisplaySettingsValues {
   urlFieldHover: boolean;
   subtitleFieldHover: boolean;
   descriptionFieldHover: boolean;
+  typeFieldHover: boolean;
+  mediaTypeFieldHover: boolean;
+  createdByFieldHover: boolean;
+  updatedByFieldHover: boolean;
   fieldOptions: OptionValue[];
   optionalFieldOptions: OptionValue[];
   availableFieldOptions: OptionValue[];
@@ -100,6 +112,10 @@ export const defaultSearchResultConfig = {
   subtitleField: '',
   descriptionField: '',
   urlField: '',
+  typeField: '',
+  mediaTypeField: '',
+  createdByField: '',
+  updatedByField: '',
   color: '#000000',
   detailFields: [],
 };
@@ -107,6 +123,7 @@ export const defaultSearchResultConfig = {
 export const DisplaySettingsLogic = kea<
   MakeLogicType<DisplaySettingsValues, DisplaySettingsActions>
 >({
+  path: ['enterprise_search', 'workplace_search', 'display_settings_logic'],
   actions: {
     onInitializeDisplaySettings: (displaySettingsProps: DisplaySettingsInitialData) =>
       displaySettingsProps,
@@ -115,7 +132,11 @@ export const DisplaySettingsLogic = kea<
     setTitleField: (titleField: string) => titleField,
     setUrlField: (urlField: string) => urlField,
     setSubtitleField: (subtitleField: string | null) => subtitleField,
-    setDescriptionField: (descriptionField: string) => descriptionField,
+    setDescriptionField: (descriptionField: string | null) => descriptionField,
+    setTypeField: (typeField: string | null) => typeField,
+    setMediaTypeField: (mediaTypeField: string | null) => mediaTypeField,
+    setCreatedByField: (createdByField: string | null) => createdByField,
+    setUpdatedByField: (updatedByField: string | null) => updatedByField,
     setColorField: (hex: string) => hex,
     setDetailFields: (result: DropResult) => ({ result }),
     openEditDetailField: (editFieldIndex: number | null) => editFieldIndex,
@@ -128,6 +149,10 @@ export const DisplaySettingsLogic = kea<
     toggleTitleFieldHover: () => true,
     toggleSubtitleFieldHover: () => true,
     toggleDescriptionFieldHover: () => true,
+    toggleTypeFieldHover: () => true,
+    toggleMediaTypeFieldHover: () => true,
+    toggleCreatedByFieldHover: () => true,
+    toggleUpdatedByFieldHover: () => true,
     toggleUrlFieldHover: () => true,
     initializeDisplaySettings: () => true,
     setServerData: () => true,
@@ -180,6 +205,19 @@ export const DisplaySettingsLogic = kea<
         setDescriptionField: (searchResultConfig, descriptionField) => ({
           ...searchResultConfig,
           descriptionField,
+        }),
+        setTypeField: (searchResultConfig, typeField) => ({ ...searchResultConfig, typeField }),
+        setMediaTypeField: (searchResultConfig, mediaTypeField) => ({
+          ...searchResultConfig,
+          mediaTypeField,
+        }),
+        setCreatedByField: (searchResultConfig, createdByField) => ({
+          ...searchResultConfig,
+          createdByField,
+        }),
+        setUpdatedByField: (searchResultConfig, updatedByField) => ({
+          ...searchResultConfig,
+          updatedByField,
         }),
         setColorField: (searchResultConfig, color) => ({ ...searchResultConfig, color }),
         setDetailFields: (searchResultConfig, { result: { destination, source } }) => {
@@ -273,7 +311,31 @@ export const DisplaySettingsLogic = kea<
     descriptionFieldHover: [
       false,
       {
-        toggleDescriptionFieldHover: (addFieldModalVisible) => !addFieldModalVisible,
+        toggleDescriptionFieldHover: (descriptionFieldHover) => !descriptionFieldHover,
+      },
+    ],
+    typeFieldHover: [
+      false,
+      {
+        toggleTypeFieldHover: (typeFieldHover) => !typeFieldHover,
+      },
+    ],
+    mediaTypeFieldHover: [
+      false,
+      {
+        toggleMediaTypeFieldHover: (mediaTypeFieldHover) => !mediaTypeFieldHover,
+      },
+    ],
+    createdByFieldHover: [
+      false,
+      {
+        toggleCreatedByFieldHover: (createdByFieldHover) => !createdByFieldHover,
+      },
+    ],
+    updatedByFieldHover: [
+      false,
+      {
+        toggleUpdatedByFieldHover: (updatedByFieldHover) => !updatedByFieldHover,
       },
     ],
   },
@@ -316,12 +378,14 @@ export const DisplaySettingsLogic = kea<
       } = SourceLogic.values;
 
       const route = isOrganization
-        ? `/api/workplace_search/org/sources/${sourceId}/display_settings/config`
-        : `/api/workplace_search/account/sources/${sourceId}/display_settings/config`;
+        ? `/internal/workplace_search/org/sources/${sourceId}/display_settings/config`
+        : `/internal/workplace_search/account/sources/${sourceId}/display_settings/config`;
 
       try {
-        const response = await HttpLogic.values.http.get(route);
+        const response = await HttpLogic.values.http.get<DisplaySettingsResponseProps>(route);
         actions.onInitializeDisplaySettings({
+          // isOrganization is not typed
+          // @ts-expect-error TS2345
           isOrganization,
           sourceId,
           serverRoute: route,
@@ -335,16 +399,17 @@ export const DisplaySettingsLogic = kea<
       const { searchResultConfig, serverRoute } = values;
 
       try {
-        const response = await HttpLogic.values.http.post(serverRoute, {
-          body: JSON.stringify({ ...searchResultConfig }),
-        });
+        const response = await HttpLogic.values.http.post<DisplaySettingsResponseProps>(
+          serverRoute,
+          { body: JSON.stringify({ ...searchResultConfig }) }
+        );
         actions.setServerResponseData(response);
       } catch (e) {
         flashAPIErrors(e);
       }
     },
     setServerResponseData: () => {
-      setSuccessMessage(SUCCESS_MESSAGE);
+      flashSuccessToast(SUCCESS_MESSAGE);
     },
     toggleFieldEditorModal: () => {
       clearFlashMessages();

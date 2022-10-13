@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
-import { PLUGIN_ID } from '../../../plugins/fleet/common';
+import { INTEGRATIONS_PLUGIN_ID } from '@kbn/fleet-plugin/common';
 
 // NOTE: import path below should be the deep path to the actual module - else we get CI errors
-import { pagePathGetters } from '../../../plugins/fleet/public/applications/fleet/constants/page_paths';
+import { pagePathGetters } from '@kbn/fleet-plugin/public/constants/page_paths';
+import { FtrProviderContext } from '../ftr_provider_context';
 
 export function FleetIntegrations({ getService, getPageObjects }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common']);
@@ -17,9 +17,10 @@ export function FleetIntegrations({ getService, getPageObjects }: FtrProviderCon
 
   return {
     async navigateToIntegrationDetails(pkgkey: string) {
-      await pageObjects.common.navigateToApp(PLUGIN_ID, {
-        hash: pagePathGetters.integration_details_overview({ pkgkey }),
-      });
+      await pageObjects.common.navigateToUrlWithBrowserHistory(
+        INTEGRATIONS_PLUGIN_ID,
+        pagePathGetters.integration_details_overview({ pkgkey })[1]
+      );
     },
 
     async integrationDetailCustomTabExistsOrFail() {

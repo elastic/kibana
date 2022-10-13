@@ -5,20 +5,31 @@
  * 2.0.
  */
 
-import { EuiPanel, EuiTitle } from '@elastic/eui';
+import {
+  EuiPanel,
+  EuiTitle,
+  EuiIconTip,
+  EuiFlexItem,
+  EuiFlexGroup,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useParams } from 'react-router-dom';
-import { asTransactionRate } from '../../../../common/utils/formatters';
+import { usePreviousPeriodLabel } from '../../../hooks/use_previous_period_text';
+import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
+import { ApmMlDetectorType } from '../../../../common/anomaly_detection/apm_ml_detectors';
+import { asExactTransactionRate } from '../../../../common/utils/formatters';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
+import { useEnvironmentsContext } from '../../../context/environments_context/use_environments_context';
+import { useApmParams } from '../../../hooks/use_apm_params';
 import { useFetcher } from '../../../hooks/use_fetcher';
-import { useTheme } from '../../../hooks/use_theme';
+import { usePreferredServiceAnomalyTimeseries } from '../../../hooks/use_preferred_service_anomaly_timeseries';
+import { useTimeRange } from '../../../hooks/use_time_range';
 import { TimeseriesChart } from '../../shared/charts/timeseries_chart';
+import { getComparisonChartTheme } from '../../shared/time_comparison/get_comparison_chart_theme';
 import {
-  getComparisonChartTheme,
-  getTimeRangeComparison,
-} from '../../shared/time_comparison/get_time_range_comparison';
+  ChartType,
+  getTimeSeriesColor,
+} from '../../shared/charts/helper/get_timeseries_color';
 
 const INITIAL_STATE = {
   currentPeriod: [],
@@ -27,50 +38,54 @@ const INITIAL_STATE = {
 
 export function ServiceOverviewThroughputChart({
   height,
+  kuery,
+  transactionName,
 }: {
   height?: number;
+  kuery: string;
+  transactionName?: string;
 }) {
-  const theme = useTheme();
-  const { serviceName } = useParams<{ serviceName?: string }>();
   const {
-    urlParams: {
-      environment,
-      kuery,
-      start,
-      end,
-      comparisonEnabled,
-      comparisonType,
-    },
-  } = useUrlParams();
-  const { transactionType } = useApmServiceContext();
-  const comparisonChartTheme = getComparisonChartTheme(theme);
-  const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
-    start,
-    end,
-    comparisonType,
-    comparisonEnabled,
-  });
+    query: { rangeFrom, rangeTo, comparisonEnabled, offset },
+  } = useApmParams('/services/{serviceName}');
+
+  const { environment } = useEnvironmentsContext();
+
+  const preferredAnomalyTimeseries = usePreferredServiceAnomalyTimeseries(
+    ApmMlDetectorType.txThroughput
+  );
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
+  const { transactionType, serviceName } = useApmServiceContext();
+
+  const comparisonChartTheme = getComparisonChartTheme();
 
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
       if (serviceName && transactionType && start && end) {
-        return callApmApi({
-          endpoint: 'GET /api/apm/services/{serviceName}/throughput',
-          params: {
-            path: {
-              serviceName,
+        return callApmApi(
+          'GET /internal/apm/services/{serviceName}/throughput',
+          {
+            params: {
+              path: {
+                serviceName,
+              },
+              query: {
+                environment,
+                kuery,
+                start,
+                end,
+                transactionType,
+                offset:
+                  comparisonEnabled && isTimeComparison(offset)
+                    ? offset
+                    : undefined,
+                transactionName,
+              },
             },
-            query: {
-              environment,
-              kuery,
-              start,
-              end,
-              transactionType,
-              comparisonStart,
-              comparisonEnd,
-            },
-          },
-        });
+          }
+        );
       }
     },
     [
@@ -80,16 +95,22 @@ export function ServiceOverviewThroughputChart({
       start,
       end,
       transactionType,
-      comparisonStart,
-      comparisonEnd,
+      offset,
+      transactionName,
+      comparisonEnabled,
     ]
   );
 
+  const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
+    ChartType.THROUGHPUT
+  );
+
+  const previousPeriodLabel = usePreviousPeriodLabel();
   const timeseries = [
     {
       data: data.currentPeriod,
       type: 'linemark',
-      color: theme.eui.euiColorVis0,
+      color: currentPeriodColor,
       title: i18n.translate('xpack.apm.serviceOverview.throughtputChartTitle', {
         defaultMessage: 'Throughput',
       }),
@@ -99,33 +120,54 @@ export function ServiceOverviewThroughputChart({
           {
             data: data.previousPeriod,
             type: 'area',
-            color: theme.eui.euiColorMediumShade,
-            title: i18n.translate(
-              'xpack.apm.serviceOverview.throughtputChart.previousPeriodLabel',
-              { defaultMessage: 'Previous period' }
-            ),
+            color: previousPeriodColor,
+            title: previousPeriodLabel,
           },
         ]
       : []),
   ];
 
   return (
-    <EuiPanel>
-      <EuiTitle size="xs">
-        <h2>
-          {i18n.translate('xpack.apm.serviceOverview.throughtputChartTitle', {
-            defaultMessage: 'Throughput',
-          })}
-        </h2>
-      </EuiTitle>
+    <EuiPanel hasBorder={true}>
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <h2>
+              {i18n.translate(
+                'xpack.apm.serviceOverview.throughtputChartTitle',
+                { defaultMessage: 'Throughput' }
+              )}
+            </h2>
+          </EuiTitle>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiIconTip
+            content={i18n.translate('xpack.apm.serviceOverview.tpmHelp', {
+              defaultMessage:
+                'Throughput is measured in transactions per minute (tpm).',
+            })}
+            position="right"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
       <TimeseriesChart
         id="throughput"
         height={height}
         showAnnotations={false}
         fetchStatus={status}
         timeseries={timeseries}
-        yLabelFormat={asTransactionRate}
+        yLabelFormat={asExactTransactionRate}
         customTheme={comparisonChartTheme}
+        anomalyTimeseries={
+          preferredAnomalyTimeseries
+            ? {
+                ...preferredAnomalyTimeseries,
+                color: previousPeriodColor,
+              }
+            : undefined
+        }
       />
     </EuiPanel>
   );

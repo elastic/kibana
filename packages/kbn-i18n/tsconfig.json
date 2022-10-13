@@ -1,21 +1,18 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../../tsconfig.bazel.json",
   "compilerOptions": {
-    "incremental": false,
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
     "declaration": true,
     "declarationMap": true,
-    "sourceMap": true,
-    "sourceRoot": "../../../../../packages/kbn-i18n/src",
+    "emitDeclarationOnly": true,
+    "outDir": "./target_types",
     "types": [
       "jest",
       "node"
     ]
   },
   "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx",
+    "**/*.ts",
+    "**/*.tsx",
     "types/intl_format_cache.d.ts",
     "types/intl_relativeformat.d.ts"
   ],

@@ -5,19 +5,20 @@
  * 2.0.
  */
 
+import { buildEsQuery } from '@kbn/es-query';
 import createContainer from 'constate';
+import { isEqual } from 'lodash';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import useSetState from 'react-use/lib/useSetState';
-import { esQuery } from '../../../../../../../src/plugins/data/public';
 import { LogEntry, LogEntryCursor } from '../../../../common/log_entry';
+import { LogViewColumnConfiguration } from '../../../../common/log_views';
 import { useSubscription } from '../../../utils/use_observable';
-import { LogSourceConfigurationProperties } from '../log_source';
 import { useFetchLogEntriesAfter } from './use_fetch_log_entries_after';
 import { useFetchLogEntriesAround } from './use_fetch_log_entries_around';
 import { useFetchLogEntriesBefore } from './use_fetch_log_entries_before';
 
-export type BuiltEsQuery = ReturnType<typeof esQuery.buildEsQuery>;
+export type BuiltEsQuery = ReturnType<typeof buildEsQuery>;
 
 interface LogStreamProps {
   sourceId: string;
@@ -25,7 +26,7 @@ interface LogStreamProps {
   endTimestamp: number;
   query?: BuiltEsQuery;
   center?: LogEntryCursor;
-  columns?: LogSourceConfigurationProperties['logColumns'];
+  columns?: LogViewColumnConfiguration[];
 }
 
 interface LogStreamState {
@@ -65,6 +66,11 @@ export function useLogStream({
   const prevStartTimestamp = usePrevious(startTimestamp);
   const prevEndTimestamp = usePrevious(endTimestamp);
 
+  const [cachedQuery, setCachedQuery] = useState(query);
+  if (!isEqual(query, cachedQuery)) {
+    setCachedQuery(query);
+  }
+
   useEffect(() => {
     if (prevStartTimestamp && prevStartTimestamp > startTimestamp) {
       setState({ hasMoreBefore: true });
@@ -82,10 +88,10 @@ export function useLogStream({
       sourceId,
       startTimestamp,
       endTimestamp,
-      query,
+      query: cachedQuery,
       columnOverrides: columns,
     }),
-    [columns, endTimestamp, query, sourceId, startTimestamp]
+    [columns, endTimestamp, cachedQuery, sourceId, startTimestamp]
   );
 
   const {

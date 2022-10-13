@@ -7,13 +7,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { ReactElement } from 'react';
-import { CoreSetup } from 'src/core/public';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { CoreSetup, SavedObjectAttributes, SimpleSavedObject, Toast } from '@kbn/core/public';
 
 import { EuiContextMenuItem, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 
-import { EmbeddableStart } from 'src/plugins/embeddable/public';
+import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import { EmbeddableFactory, EmbeddableStart } from '../../../../..';
 import { IContainer } from '../../../../containers';
 import { EmbeddableFactoryNotFoundError } from '../../../../errors';
 import { SavedObjectFinderCreateNew } from './saved_object_finder_create_new';
@@ -27,6 +29,7 @@ interface Props {
   notifications: CoreSetup['notifications'];
   SavedObjectFinder: React.ComponentType<any>;
   showCreateNewMenu?: boolean;
+  reportUiCounter?: UsageCollectionStart['reportUiCounter'];
 }
 
 interface State {
@@ -38,7 +41,7 @@ function capitalize([first, ...letters]: string) {
 }
 
 export class AddPanelFlyout extends React.Component<Props, State> {
-  private lastToast: any;
+  private lastToast?: string | Toast;
 
   public state = {
     isCreateMenuOpen: false,
@@ -84,7 +87,12 @@ export class AddPanelFlyout extends React.Component<Props, State> {
     }
   };
 
-  public onAddPanel = async (savedObjectId: string, savedObjectType: string, name: string) => {
+  public onAddPanel = async (
+    savedObjectId: string,
+    savedObjectType: string,
+    name: string,
+    so: SimpleSavedObject<SavedObjectAttributes>
+  ) => {
     const factoryForSavedObjectType = [...this.props.getAllFactories()].find(
       (factory) =>
         factory.savedObjectMetaData && factory.savedObjectMetaData.type === savedObjectType
@@ -98,12 +106,31 @@ export class AddPanelFlyout extends React.Component<Props, State> {
       { savedObjectId }
     );
 
+    this.doTelemetryForAddEvent(this.props.container.type, factoryForSavedObjectType, so);
+
     this.showToast(name);
   };
+
+  private doTelemetryForAddEvent(
+    appName: string,
+    factoryForSavedObjectType: EmbeddableFactory,
+    so: SimpleSavedObject<SavedObjectAttributes>
+  ) {
+    const { reportUiCounter } = this.props;
+
+    if (reportUiCounter) {
+      const type = factoryForSavedObjectType.savedObjectMetaData?.getSavedObjectSubType
+        ? factoryForSavedObjectType.savedObjectMetaData.getSavedObjectSubType(so)
+        : factoryForSavedObjectType.type;
+
+      reportUiCounter(appName, METRIC_TYPE.CLICK, `${type}:add`);
+    }
+  }
 
   private getCreateMenuItems(): ReactElement[] {
     return [...this.props.getAllFactories()]
       .filter(
+        // @ts-expect-error ts 4.5 upgrade
         (factory) => factory.isEditable() && !factory.isContainerType && factory.canCreateNew()
       )
       .map((factory) => (
@@ -125,7 +152,7 @@ export class AddPanelFlyout extends React.Component<Props, State> {
         (embeddableFactory) =>
           Boolean(embeddableFactory.savedObjectMetaData) && !embeddableFactory.isContainerType
       )
-      .map(({ savedObjectMetaData }) => savedObjectMetaData as any);
+      .map(({ savedObjectMetaData }) => savedObjectMetaData);
     const savedObjectsFinder = (
       <SavedObjectFinder
         onChoose={this.onAddPanel}

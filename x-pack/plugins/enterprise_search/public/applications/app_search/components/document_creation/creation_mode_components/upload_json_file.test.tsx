@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockValues, setMockActions, rerender } from '../../../../__mocks__';
+import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -13,9 +13,9 @@ import { shallow } from 'enzyme';
 
 import { EuiFilePicker, EuiButtonEmpty, EuiButton } from '@elastic/eui';
 
-import { Errors } from '../creation_response_components';
+import { rerender } from '../../../../test_helpers';
 
-import { UploadJsonFile, FlyoutHeader, FlyoutBody, FlyoutFooter } from './upload_json_file';
+import { UploadJsonFileTabContent, UploadJsonFileFooterContent } from './upload_json_file';
 
 describe('UploadJsonFile', () => {
   const mockFile = new File(['mock'], 'mock.json', { type: 'application/json' });
@@ -41,23 +41,9 @@ describe('UploadJsonFile', () => {
     setMockActions(actions);
   });
 
-  it('renders', () => {
-    const wrapper = shallow(<UploadJsonFile />);
-    expect(wrapper.find(FlyoutHeader)).toHaveLength(1);
-    expect(wrapper.find(FlyoutBody)).toHaveLength(1);
-    expect(wrapper.find(FlyoutFooter)).toHaveLength(1);
-  });
-
-  describe('FlyoutHeader', () => {
-    it('renders', () => {
-      const wrapper = shallow(<FlyoutHeader />);
-      expect(wrapper.find('h2').text()).toEqual('Drag and drop .json');
-    });
-  });
-
-  describe('FlyoutBody', () => {
+  describe('UploadJsonFileTabContent', () => {
     it('updates fileInput when files are added & removed', () => {
-      const wrapper = shallow(<FlyoutBody />);
+      const wrapper = shallow(<UploadJsonFileTabContent />);
 
       wrapper.find(EuiFilePicker).simulate('change', [mockFile]);
       expect(actions.setFileInput).toHaveBeenCalledWith(mockFile);
@@ -67,42 +53,32 @@ describe('UploadJsonFile', () => {
     });
 
     it('sets isLoading based on isUploading', () => {
-      const wrapper = shallow(<FlyoutBody />);
+      const wrapper = shallow(<UploadJsonFileTabContent />);
       expect(wrapper.find(EuiFilePicker).prop('isLoading')).toBe(false);
 
       setMockValues({ ...values, isUploading: true });
       rerender(wrapper);
       expect(wrapper.find(EuiFilePicker).prop('isLoading')).toBe(true);
     });
-
-    it('shows an error banner and sets invalid form props if errors exist', () => {
-      const wrapper = shallow(<FlyoutBody />);
-      expect(wrapper.find(EuiFilePicker).prop('isInvalid')).toBe(false);
-
-      setMockValues({ ...values, errors: ['some error'] });
-      rerender(wrapper);
-      expect(wrapper.find(EuiFilePicker).prop('isInvalid')).toBe(true);
-      expect(wrapper.prop('banner').type).toEqual(Errors);
-    });
   });
 
-  describe('FlyoutFooter', () => {
+  describe('UploadJsonFileFooterContent', () => {
     it('closes the flyout', () => {
-      const wrapper = shallow(<FlyoutFooter />);
+      const wrapper = shallow(<UploadJsonFileFooterContent />);
 
       wrapper.find(EuiButtonEmpty).simulate('click');
       expect(actions.closeDocumentCreation).toHaveBeenCalled();
     });
 
     it('submits the json file', () => {
-      const wrapper = shallow(<FlyoutFooter />);
+      const wrapper = shallow(<UploadJsonFileFooterContent />);
 
       wrapper.find(EuiButton).simulate('click');
       expect(actions.onSubmitFile).toHaveBeenCalled();
     });
 
     it('disables/enables the Continue button based on whether files have been uploaded', () => {
-      const wrapper = shallow(<FlyoutFooter />);
+      const wrapper = shallow(<UploadJsonFileFooterContent />);
       expect(wrapper.find(EuiButton).prop('isDisabled')).toBe(true);
 
       setMockValues({ ...values, fineInput: mockFile });
@@ -111,7 +87,7 @@ describe('UploadJsonFile', () => {
     });
 
     it('sets isLoading based on isUploading', () => {
-      const wrapper = shallow(<FlyoutFooter />);
+      const wrapper = shallow(<UploadJsonFileFooterContent />);
       expect(wrapper.find(EuiButton).prop('isLoading')).toBe(false);
 
       setMockValues({ ...values, isUploading: true });

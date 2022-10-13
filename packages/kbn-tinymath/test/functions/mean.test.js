@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const { mean } = require('../../src/functions/mean.js');
+const { mean } = require('../../src/functions/mean');
 
 describe('Mean', () => {
   it('numbers', () => {

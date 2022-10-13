@@ -84,11 +84,8 @@ function RuntimeFieldsListItemComponent(
     <li className="mappingsEditor__fieldsListItem" data-test-subj="runtimeFieldsListItem">
       <div
         className={classNames('mappingsEditor__fieldsListItem__field', {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'mappingsEditor__fieldsListItem__field--enabled': areActionButtonsVisible,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'mappingsEditor__fieldsListItem__field--highlighted': isHighlighted,
-          // eslint-disable-next-line @typescript-eslint/naming-convention
           'mappingsEditor__fieldsListItem__field--dim': isDimmed,
         })}
       >

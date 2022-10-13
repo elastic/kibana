@@ -6,16 +6,25 @@
  */
 
 import { listActionTypesRoute } from './list_action_types';
-import { httpServiceMock } from 'src/core/server/mocks';
+import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../lib/license_state.mock';
 import { verifyApiAccess } from '../../lib';
 import { mockHandlerArguments } from './_mock_handler_arguments';
-import { LicenseType } from '../../../../../plugins/licensing/server';
+import { LicenseType } from '@kbn/licensing-plugin/server';
 import { actionsClientMock } from '../../mocks';
+import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
+import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 
-jest.mock('../../lib/verify_api_access.ts', () => ({
+jest.mock('../../lib/verify_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
+
+jest.mock('../../lib/track_legacy_route_usage', () => ({
+  trackLegacyRouteUsage: jest.fn(),
+}));
+
+const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
+const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -40,6 +49,7 @@ describe('listActionTypesRoute', () => {
         enabledInConfig: true,
         enabledInLicense: true,
         minimumLicenseRequired: 'gold' as LicenseType,
+        supportedFeatureIds: ['alerting'],
       },
     ];
 
@@ -57,6 +67,9 @@ describe('listActionTypesRoute', () => {
             "id": "1",
             "minimumLicenseRequired": "gold",
             "name": "name",
+            "supportedFeatureIds": Array [
+              "alerting",
+            ],
           },
         ],
       }
@@ -85,6 +98,7 @@ describe('listActionTypesRoute', () => {
         enabledInConfig: true,
         enabledInLicense: true,
         minimumLicenseRequired: 'gold' as LicenseType,
+        supportedFeatureIds: ['alerting'],
       },
     ];
 
@@ -126,6 +140,7 @@ describe('listActionTypesRoute', () => {
         enabledInConfig: true,
         enabledInLicense: true,
         minimumLicenseRequired: 'gold' as LicenseType,
+        supportedFeatureIds: ['alerting'],
       },
     ];
 
@@ -143,5 +158,17 @@ describe('listActionTypesRoute', () => {
     expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: OMG]`);
 
     expect(verifyApiAccess).toHaveBeenCalledWith(licenseState);
+  });
+
+  it('should track every call', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    const actionsClient = actionsClientMock.create();
+
+    listActionTypesRoute(router, licenseState, mockUsageCounter);
+    const [, handler] = router.get.mock.calls[0];
+    const [context, req, res] = mockHandlerArguments({ actionsClient }, {});
+    await handler(context, req, res);
+    expect(trackLegacyRouteUsage).toHaveBeenCalledWith('listActionTypes', mockUsageCounter);
   });
 });

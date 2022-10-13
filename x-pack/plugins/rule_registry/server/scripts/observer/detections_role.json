@@ -1,0 +1,14 @@
+{
+  "elasticsearch": {
+    "cluster": [],
+    "indices": []
+  },
+  "kibana": [
+    {
+      "feature": {
+        "apm": ["all"]
+      },
+      "spaces": ["*"]
+    }
+  ]
+}

@@ -4,67 +4,171 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { AppDataType, ReportViewTypeId } from '../../types';
-import { CLS_FIELD, FCP_FIELD, FID_FIELD, LCP_FIELD, TBT_FIELD } from './elasticsearch_fieldnames';
+import { OperationType } from '@kbn/lens-plugin/public';
+import { DOCUMENT_FIELD_NAME } from '@kbn/lens-plugin/common/constants';
+import { ReportViewType } from '../../types';
+import {
+  CLS_FIELD,
+  FCP_FIELD,
+  FID_FIELD,
+  LCP_FIELD,
+  TBT_FIELD,
+  TRANSACTION_TIME_TO_FIRST_BYTE,
+  TRANSACTION_DURATION,
+} from './elasticsearch_fieldnames';
+import {
+  AGENT_HOST_LABEL,
+  AGENT_TYPE_LABEL,
+  BROWSER_FAMILY_LABEL,
+  BROWSER_VERSION_LABEL,
+  CLS_LABEL,
+  CORE_WEB_VITALS_LABEL,
+  DCL_LABEL,
+  DEVICE_DISTRIBUTION_LABEL,
+  DEVICE_LABEL,
+  ENVIRONMENT_LABEL,
+  FCP_LABEL,
+  FID_LABEL,
+  HOST_NAME_LABEL,
+  KPI_OVER_TIME_LABEL,
+  KPI_LABEL,
+  LCP_LABEL,
+  LOCATION_LABEL,
+  METRIC_LABEL,
+  MONITOR_ID_LABEL,
+  MONITOR_NAME_LABEL,
+  MONITOR_STATUS_LABEL,
+  MONITOR_TYPE_LABEL,
+  OBSERVER_LOCATION_LABEL,
+  OS_LABEL,
+  PERF_DIST_LABEL,
+  PORT_LABEL,
+  REQUEST_METHOD,
+  SERVICE_NAME_LABEL,
+  SERVICE_TYPE_LABEL,
+  TAGS_LABEL,
+  TBT_LABEL,
+  URL_LABEL,
+  BACKEND_TIME_LABEL,
+  MONITORS_DURATION_LABEL,
+  PAGE_LOAD_TIME_LABEL,
+  LABELS_FIELD,
+  STEP_NAME_LABEL,
+  STEP_DURATION_LABEL,
+  EVENT_DATASET_LABEL,
+  MESSAGE_LABEL,
+  SINGLE_METRIC_LABEL,
+} from './labels';
+import {
+  MONITOR_DURATION_US,
+  SYNTHETICS_CLS,
+  SYNTHETICS_DCL,
+  SYNTHETICS_DOCUMENT_ONLOAD,
+  SYNTHETICS_FCP,
+  SYNTHETICS_LCP,
+  SYNTHETICS_STEP_DURATION,
+  SYNTHETICS_STEP_NAME,
+} from './field_names/synthetics';
 
 export const DEFAULT_TIME = { from: 'now-1h', to: 'now' };
 
+export const RECORDS_FIELD = DOCUMENT_FIELD_NAME;
+export const RECORDS_PERCENTAGE_FIELD = 'RecordsPercentage';
+export const FORMULA_COLUMN = 'FORMULA_COLUMN';
+
 export const FieldLabels: Record<string, string> = {
-  'user_agent.name': 'Browser family',
-  'user_agent.version': 'Browser version',
-  'user_agent.os.name': 'Operating system',
-  'client.geo.country_name': 'Location',
-  'user_agent.device.name': 'Device',
-  'observer.geo.name': 'Observer location',
-  'service.name': 'Service Name',
-  'service.environment': 'Environment',
+  'user_agent.name': BROWSER_FAMILY_LABEL,
+  'user_agent.version': BROWSER_VERSION_LABEL,
+  'user_agent.os.name': OS_LABEL,
+  'client.geo.country_name': LOCATION_LABEL,
+  'user_agent.device.name': DEVICE_LABEL,
+  'observer.geo.name': OBSERVER_LOCATION_LABEL,
+  'service.name': SERVICE_NAME_LABEL,
+  'service.environment': ENVIRONMENT_LABEL,
+  'service.type': SERVICE_TYPE_LABEL,
+  'event.dataset': EVENT_DATASET_LABEL,
+  message: MESSAGE_LABEL,
 
-  [LCP_FIELD]: 'Largest contentful paint (Seconds)',
-  [FCP_FIELD]: 'First contentful paint (Seconds)',
-  [TBT_FIELD]: 'Total blocking time  (Seconds)',
-  [FID_FIELD]: 'First input delay (Seconds)',
-  [CLS_FIELD]: 'Cumulative layout shift',
+  [LCP_FIELD]: LCP_LABEL,
+  [FCP_FIELD]: FCP_LABEL,
+  [TBT_FIELD]: TBT_LABEL,
+  [FID_FIELD]: FID_LABEL,
+  [CLS_FIELD]: CLS_LABEL,
 
-  'monitor.id': 'Monitor Id',
-  'monitor.status': 'Monitor Status',
+  [SYNTHETICS_CLS]: CLS_LABEL,
+  [SYNTHETICS_DCL]: DCL_LABEL,
+  [SYNTHETICS_STEP_DURATION]: STEP_DURATION_LABEL,
+  [SYNTHETICS_LCP]: LCP_LABEL,
+  [SYNTHETICS_FCP]: FCP_LABEL,
+  [SYNTHETICS_DOCUMENT_ONLOAD]: PAGE_LOAD_TIME_LABEL,
+  [TRANSACTION_TIME_TO_FIRST_BYTE]: BACKEND_TIME_LABEL,
+  [TRANSACTION_DURATION]: PAGE_LOAD_TIME_LABEL,
 
-  'agent.hostname': 'Agent host',
-  'host.hostname': 'Host name',
-  'monitor.name': 'Monitor name',
-  'monitor.type': 'Monitor Type',
-  'url.port': 'Port',
-  'url.full': 'URL',
-  tags: 'Tags',
+  'monitor.id': MONITOR_ID_LABEL,
+  'monitor.status': MONITOR_STATUS_LABEL,
+  [MONITOR_DURATION_US]: MONITORS_DURATION_LABEL,
+  [SYNTHETICS_STEP_NAME]: STEP_NAME_LABEL,
+
+  'agent.hostname': AGENT_HOST_LABEL,
+  'agent.type': AGENT_TYPE_LABEL,
+  'host.hostname': HOST_NAME_LABEL,
+  'monitor.name': MONITOR_NAME_LABEL,
+  'monitor.type': MONITOR_TYPE_LABEL,
+  'url.port': PORT_LABEL,
+  'url.full': URL_LABEL,
+  tags: TAGS_LABEL,
 
   // custom
 
-  'performance.metric': 'Metric',
-  'Business.KPI': 'KPI',
+  'performance.metric': METRIC_LABEL,
+  'Business.KPI': KPI_LABEL,
+  'http.request.method': REQUEST_METHOD,
+  percentile: 'Percentile',
+  LABEL_FIELDS_FILTER: LABELS_FIELD,
+  LABEL_FIELDS_BREAKDOWN: 'Labels field',
 };
 
-export const DataViewLabels: Record<ReportViewTypeId, string> = {
-  pld: 'Performance Distribution',
-  upd: 'Uptime monitor duration',
-  upp: 'Uptime pings',
-  svl: 'APM Service latency',
-  kpi: 'KPI over time',
-  tpt: 'APM Service throughput',
-  cpu: 'System CPU Usage',
-  logs: 'Logs Frequency',
-  mem: 'System Memory Usage',
-  nwk: 'Network Activity',
+export const DataViewLabels: Record<ReportViewType, string> = {
+  'data-distribution': PERF_DIST_LABEL,
+  'kpi-over-time': KPI_OVER_TIME_LABEL,
+  'core-web-vitals': CORE_WEB_VITALS_LABEL,
+  'device-data-distribution': DEVICE_DISTRIBUTION_LABEL,
+  'single-metric': SINGLE_METRIC_LABEL,
 };
 
-export const ReportToDataTypeMap: Record<ReportViewTypeId, AppDataType> = {
-  upd: 'synthetics',
-  upp: 'synthetics',
-  tpt: 'apm',
-  svl: 'apm',
-  kpi: 'ux',
-  pld: 'ux',
-  nwk: 'infra_metrics',
-  mem: 'infra_metrics',
-  logs: 'infra_logs',
-  cpu: 'infra_metrics',
-};
+export enum ReportTypes {
+  KPI = 'kpi-over-time',
+  DISTRIBUTION = 'data-distribution',
+  CORE_WEB_VITAL = 'core-web-vitals',
+  DEVICE_DISTRIBUTION = 'device-data-distribution',
+  SINGLE_METRIC = 'single-metric',
+}
+
+export enum DataTypes {
+  SYNTHETICS = 'synthetics',
+  UX = 'ux',
+  MOBILE = 'mobile',
+  METRICS = 'infra_metrics',
+  LOGS = 'infra_logs',
+}
+
+export const USE_BREAK_DOWN_COLUMN = 'USE_BREAK_DOWN_COLUMN';
+export const FILTER_RECORDS = 'FILTER_RECORDS';
+export const TERMS_COLUMN = 'TERMS_COLUMN';
+export const OPERATION_COLUMN = 'operation';
+export const PERCENTILE = 'percentile';
+
+export const REPORT_METRIC_FIELD = 'REPORT_METRIC_FIELD';
+
+export const PERCENTILE_RANKS = [
+  '99th' as OperationType,
+  '95th' as OperationType,
+  '90th' as OperationType,
+  '75th' as OperationType,
+  '50th' as OperationType,
+  '25th' as OperationType,
+];
+export const LABEL_FIELDS_FILTER = 'LABEL_FIELDS_FILTER';
+export const LABEL_FIELDS_BREAKDOWN = 'LABEL_FIELDS_BREAKDOWN';
+
+export const ENVIRONMENT_ALL = 'ENVIRONMENT_ALL';

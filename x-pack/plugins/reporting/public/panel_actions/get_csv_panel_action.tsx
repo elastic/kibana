@@ -6,38 +6,33 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import moment from 'moment-timezone';
 import * as Rx from 'rxjs';
-import type { CoreSetup } from 'src/core/public';
-import { CoreStart } from 'src/core/public';
-import type { ISearchEmbeddable, SavedSearch } from '../../../../../src/plugins/discover/public';
-import {
-  loadSharingDataHelpers,
-  SEARCH_EMBEDDABLE_TYPE,
-} from '../../../../../src/plugins/discover/public';
-import type { IEmbeddable } from '../../../../../src/plugins/embeddable/public';
-import { ViewMode } from '../../../../../src/plugins/embeddable/public';
-import type { UiActionsActionDefinition as ActionDefinition } from '../../../../../src/plugins/ui_actions/public';
-import { IncompatibleActionError } from '../../../../../src/plugins/ui_actions/public';
-import type { LicensingPluginSetup } from '../../../licensing/public';
-import { API_GENERATE_IMMEDIATE, CSV_REPORTING_ACTION } from '../../common/constants';
-import type { JobParamsDownloadCSV } from '../../server/export_types/csv_searchsource_immediate/types';
+import type { CoreSetup, NotificationsSetup } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
+import type { ISearchEmbeddable, SavedSearch } from '@kbn/discover-plugin/public';
+import { loadSharingDataHelpers, SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-plugin/public';
+import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+import type { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { CSV_REPORTING_ACTION } from '../../common/constants';
 import { checkLicense } from '../lib/license_check';
-
+import { ReportingAPIClient } from '../lib/reporting_api_client';
+import type { ReportingPublicPluginStartDendencies } from '../plugin';
 function isSavedSearchEmbeddable(
   embeddable: IEmbeddable | ISearchEmbeddable
 ): embeddable is ISearchEmbeddable {
   return embeddable.type === SEARCH_EMBEDDABLE_TYPE;
 }
 
-interface ActionContext {
+export interface ActionContext {
   embeddable: ISearchEmbeddable;
 }
 
 interface Params {
+  apiClient: ReportingAPIClient;
   core: CoreSetup;
-  startServices$: Rx.Observable<[CoreStart, object, unknown]>;
-  license$: LicensingPluginSetup['license$'];
+  startServices$: Rx.Observable<[CoreStart, ReportingPublicPluginStartDendencies, unknown]>;
   usesUiCapabilities: boolean;
 }
 
@@ -47,25 +42,19 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
   public readonly id = CSV_REPORTING_ACTION;
   private licenseHasDownloadCsv: boolean = false;
   private capabilityHasDownloadCsv: boolean = false;
-  private core: CoreSetup;
+  private notifications: NotificationsSetup;
+  private apiClient: ReportingAPIClient;
+  private startServices$: Params['startServices$'];
+  private usesUiCapabilities: any;
 
-  constructor({ core, startServices$, license$, usesUiCapabilities }: Params) {
+  constructor({ core, apiClient, startServices$, usesUiCapabilities }: Params) {
     this.isDownloading = false;
-    this.core = core;
 
-    license$.subscribe((license) => {
-      const results = license.check('reporting', 'basic');
-      const { showLinks } = checkLicense(results);
-      this.licenseHasDownloadCsv = showLinks;
-    });
+    this.notifications = core.notifications;
+    this.apiClient = apiClient;
 
-    if (usesUiCapabilities) {
-      startServices$.subscribe(([{ application }]) => {
-        this.capabilityHasDownloadCsv = application.capabilities.dashboard?.downloadCsv === true;
-      });
-    } else {
-      this.capabilityHasDownloadCsv = true; // deprecated
-    }
+    this.startServices$ = startServices$;
+    this.usesUiCapabilities = usesUiCapabilities;
   }
 
   public getIconType() {
@@ -78,23 +67,50 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
     });
   }
 
-  public async getSearchSource(savedSearch: SavedSearch, embeddable: ISearchEmbeddable) {
+  public async getSearchSource(savedSearch: SavedSearch, _embeddable: ISearchEmbeddable) {
+    const [{ uiSettings }, { data }] = await Rx.firstValueFrom(this.startServices$);
     const { getSharingData } = await loadSharingDataHelpers();
-    return await getSharingData(
-      savedSearch.searchSource,
-      savedSearch, // TODO: get unsaved state (using embeddale.searchScope): https://github.com/elastic/kibana/issues/43977
-      this.core.uiSettings
-    );
+    return await getSharingData(savedSearch.searchSource, savedSearch, { uiSettings, data });
   }
 
   public isCompatible = async (context: ActionContext) => {
+    await new Promise<void>((resolve) => {
+      this.startServices$.subscribe(([{ application }, { licensing }]) => {
+        licensing.license$.subscribe((license) => {
+          const results = license.check('reporting', 'basic');
+          const { showLinks } = checkLicense(results);
+          this.licenseHasDownloadCsv = showLinks;
+        });
+
+        if (this.usesUiCapabilities) {
+          this.capabilityHasDownloadCsv = application.capabilities.dashboard?.downloadCsv === true;
+        } else {
+          this.capabilityHasDownloadCsv = true; // deprecated
+        }
+
+        resolve();
+      });
+    });
+
     if (!this.licenseHasDownloadCsv || !this.capabilityHasDownloadCsv) {
       return false;
     }
 
     const { embeddable } = context;
 
-    return embeddable.getInput().viewMode !== ViewMode.EDIT && embeddable.type === 'search';
+    if (embeddable.type !== 'search') {
+      return false;
+    }
+
+    const savedSearch = embeddable.getSavedSearch();
+    const query = savedSearch.searchSource.getField('query');
+
+    // using isOfAggregateQueryType(query) added increased the bundle size over the configured limit of 55.7KB
+    if (query && Boolean(query && 'sql' in query)) {
+      // hide exporting CSV for SQL
+      return false;
+    }
+    return embeddable.getInput().viewMode !== ViewMode.EDIT;
   };
 
   public execute = async (context: ActionContext) => {
@@ -109,26 +125,18 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
     }
 
     const savedSearch = embeddable.getSavedSearch();
-    const { columns, searchSource } = await this.getSearchSource(savedSearch, embeddable);
+    const { columns, getSearchSource } = await this.getSearchSource(savedSearch, embeddable);
 
-    // If the TZ is set to the default "Browser", it will not be useful for
-    // server-side export. We need to derive the timezone and pass it as a param
-    // to the export API.
-    // TODO: create a helper utility in Reporting. This is repeated in a few places.
-    const kibanaTimezone = this.core.uiSettings.get('dateFormat:tz');
-    const browserTimezone = kibanaTimezone === 'Browser' ? moment.tz.guess() : kibanaTimezone;
-    const immediateJobParams: JobParamsDownloadCSV = {
-      searchSource,
+    const immediateJobParams = this.apiClient.getDecoratedJobParams({
+      searchSource: getSearchSource(true),
       columns,
-      browserTimezone,
-      title: savedSearch.title,
-    };
-
-    const body = JSON.stringify(immediateJobParams);
+      title: savedSearch.title || '',
+      objectType: 'downloadCsv', // FIXME: added for typescript, but immediate download job does not need objectType
+    });
 
     this.isDownloading = true;
 
-    this.core.notifications.toasts.addSuccess({
+    this.notifications.toasts.addSuccess({
       title: i18n.translate('xpack.reporting.dashboard.csvDownloadStartedTitle', {
         defaultMessage: `CSV Download Started`,
       }),
@@ -138,16 +146,20 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
       'data-test-subj': 'csvDownloadStarted',
     });
 
-    await this.core.http
-      .post(`${API_GENERATE_IMMEDIATE}`, { body })
-      .then((rawResponse: string) => {
+    await this.apiClient
+      .createImmediateReport(immediateJobParams)
+      .then(({ body, response }) => {
         this.isDownloading = false;
 
         const download = `${savedSearch.title}.csv`;
-        const blob = new Blob([rawResponse], { type: 'text/csv;charset=utf-8;' });
+        const blob = new Blob([body as BlobPart], {
+          type: response?.headers.get('content-type') || undefined,
+        });
 
         // Hack for IE11 Support
+        // @ts-expect-error
         if (window.navigator.msSaveOrOpenBlob) {
+          // @ts-expect-error
           return window.navigator.msSaveOrOpenBlob(blob, download);
         }
 
@@ -164,9 +176,9 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
       .catch(this.onGenerationFail.bind(this));
   };
 
-  private onGenerationFail(error: Error) {
+  private onGenerationFail(_error: Error) {
     this.isDownloading = false;
-    this.core.notifications.toasts.addDanger({
+    this.notifications.toasts.addDanger({
       title: i18n.translate('xpack.reporting.dashboard.failedCsvDownloadTitle', {
         defaultMessage: `CSV download failed`,
       }),

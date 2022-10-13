@@ -5,18 +5,14 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '../../../../../../src/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { fetchAllFromScroll } from './fetch_all_from_scroll';
 
 describe('fetch_all_from_scroll', () => {
-  let mockScopedClusterClient;
+  const mockScopedClusterClient = {};
 
   beforeEach(() => {
-    mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-
-    elasticsearchServiceMock
-      .createLegacyClusterClient()
-      .asScoped.mockReturnValue(mockScopedClusterClient);
+    mockScopedClusterClient.asCurrentUser = elasticsearchServiceMock.createElasticsearchClient();
   });
 
   describe('#fetchAllFromScroll', () => {
@@ -33,9 +29,9 @@ describe('fetch_all_from_scroll', () => {
         });
       });
 
-      it('should not call callWithRequest', () => {
+      it('should not call asCurrentUser.scroll', () => {
         return fetchAllFromScroll(mockSearchResults, mockScopedClusterClient).then(() => {
-          expect(mockScopedClusterClient.callAsCurrentUser).not.toHaveBeenCalled();
+          expect(mockScopedClusterClient.asCurrentUser.scroll).not.toHaveBeenCalled();
         });
       });
     });
@@ -62,9 +58,9 @@ describe('fetch_all_from_scroll', () => {
           },
         };
 
-        mockScopedClusterClient.callAsCurrentUser
-          .mockReturnValueOnce(Promise.resolve(mockResponse1))
-          .mockReturnValueOnce(Promise.resolve(mockResponse2));
+        mockScopedClusterClient.asCurrentUser.scroll
+          .mockResolvedValueOnce(mockResponse1)
+          .mockResolvedValueOnce(mockResponse2);
       });
 
       it('should return the hits from the response', () => {
@@ -75,15 +71,17 @@ describe('fetch_all_from_scroll', () => {
         );
       });
 
-      it('should call callWithRequest', () => {
+      it('should call asCurrentUser.scroll', () => {
         return fetchAllFromScroll(mockInitialSearchResults, mockScopedClusterClient).then(() => {
-          expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenCalledTimes(2);
+          expect(mockScopedClusterClient.asCurrentUser.scroll).toHaveBeenCalledTimes(2);
 
-          expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenNthCalledWith(1, 'scroll', {
-            body: { scroll: '30s', scroll_id: 'originalScrollId' },
+          expect(mockScopedClusterClient.asCurrentUser.scroll).toHaveBeenNthCalledWith(1, {
+            scroll: '30s',
+            scroll_id: 'originalScrollId',
           });
-          expect(mockScopedClusterClient.callAsCurrentUser).toHaveBeenNthCalledWith(2, 'scroll', {
-            body: { scroll: '30s', scroll_id: 'newScrollId' },
+          expect(mockScopedClusterClient.asCurrentUser.scroll).toHaveBeenNthCalledWith(2, {
+            scroll: '30s',
+            scroll_id: 'newScrollId',
           });
         });
       });

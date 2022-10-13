@@ -7,41 +7,43 @@
  */
 
 import React from 'react';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import PropTypes from 'prop-types';
 import { Home } from './home';
 import { TutorialDirectory } from './tutorial_directory';
 import { Tutorial } from './tutorial/tutorial';
-import { HashRouter as Router, Switch, Route } from 'react-router-dom';
+import { HashRouter as Router, Switch, Route, Redirect } from 'react-router-dom';
 import { getTutorial } from '../load_tutorials';
 import { replaceTemplateStrings } from './tutorial/replace_template_strings';
 import { getServices } from '../kibana_services';
-import useMount from 'react-use/lib/useMount';
+import { GettingStarted } from './guided_onboarding';
 
-const RedirectToDefaultApp = () => {
-  useMount(() => {
-    const { urlForwarding } = getServices();
-    urlForwarding.navigateToDefaultApp();
-  });
-  return null;
-};
+const REDIRECT_TO_INTEGRATIONS_TAB_IDS = ['all', 'logging', 'metrics', 'security'];
 
 export function HomeApp({ directories, solutions }) {
   const {
+    application,
     savedObjectsClient,
     getBasePath,
     addBasePath,
     environmentService,
-    telemetry,
+    dataViewsService,
   } = getServices();
   const environment = environmentService.getEnvironment();
   const isCloudEnabled = environment.cloud;
 
   const renderTutorialDirectory = (props) => {
+    // Redirect to integrations app unless a specific tab that is still supported was specified.
+    const tabId = props.match.params.tab;
+    if (!tabId || REDIRECT_TO_INTEGRATIONS_TAB_IDS.includes(tabId)) {
+      application.navigateToApp('integrations', { replace: true });
+      return null;
+    }
+
     return (
       <TutorialDirectory
         addBasePath={addBasePath}
-        openTab={props.match.params.tab}
+        openTab={tabId}
         isCloudEnabled={isCloudEnabled}
       />
     );
@@ -66,18 +68,20 @@ export function HomeApp({ directories, solutions }) {
         <Switch>
           <Route path="/tutorial/:id" render={renderTutorial} />
           <Route path="/tutorial_directory/:tab?" render={renderTutorialDirectory} />
+          <Route path="/getting_started">
+            <GettingStarted />
+          </Route>
           <Route exact path="/">
             <Home
               addBasePath={addBasePath}
               directories={directories}
               solutions={solutions}
-              find={savedObjectsClient.find}
               localStorage={localStorage}
               urlBasePath={getBasePath()}
-              telemetry={telemetry}
+              hasUserDataView={() => dataViewsService.hasUserDataView()}
             />
           </Route>
-          <Route path="*" exact={true} component={RedirectToDefaultApp} />
+          <Redirect to="/" />
         </Switch>
       </Router>
     </I18nProvider>
@@ -103,9 +107,7 @@ HomeApp.propTypes = {
     PropTypes.shape({
       id: PropTypes.string.isRequired,
       title: PropTypes.string.isRequired,
-      subtitle: PropTypes.string.isRequired,
       description: PropTypes.string,
-      appDescriptions: PropTypes.arrayOf(PropTypes.string).isRequired,
       icon: PropTypes.string.isRequired,
       path: PropTypes.string.isRequired,
       order: PropTypes.number,

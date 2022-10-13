@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-export { createMockBrowserDriverFactory } from './create_mock_browserdriverfactory';
-export { createMockLayoutInstance } from './create_mock_layoutinstance';
-export { createMockLevelLogger } from './create_mock_levellogger';
 export {
   createMockConfig,
   createMockConfigSchema,
   createMockPluginSetup,
+  createMockPluginStart,
   createMockReportingCore,
 } from './create_mock_reportingplugin';

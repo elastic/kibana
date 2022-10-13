@@ -7,7 +7,7 @@
  */
 
 // Rename PluginStart to something better
-import { PluginSetup, PluginStart } from '../../../src/plugins/data/server';
+import { PluginSetup, PluginStart } from '@kbn/data-plugin/server';
 
 export interface SearchExamplesPluginSetupDeps {
   data: PluginSetup;

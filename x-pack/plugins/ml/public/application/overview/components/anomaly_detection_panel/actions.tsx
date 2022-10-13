@@ -5,41 +5,64 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
-import { EuiToolTip, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { MlSummaryJobs } from '../../../../../common/types/anomaly_detection_jobs';
-import { useCreateADLinks } from '../../../components/custom_hooks/use_create_ad_links';
+import { Action } from '@elastic/eui/src/components/basic_table/action_types';
+import { useMlLocator, useNavigateToPath, useTimefilter } from '../../../contexts/kibana';
+import { ML_PAGES } from '../../../../../common/constants/locator';
+import { Group } from './anomaly_detection_panel';
 
-interface Props {
-  jobsList: MlSummaryJobs;
-}
+export function useGroupActions(): Array<Action<Group>> {
+  const locator = useMlLocator();
+  const timefilter = useTimefilter();
+  const navigateToPath = useNavigateToPath();
 
-export const ExplorerLink: FC<Props> = ({ jobsList }) => {
-  const openJobsInAnomalyExplorerText = i18n.translate(
-    'xpack.ml.overview.anomalyDetection.resultActions.openJobsInAnomalyExplorerText',
+  return [
     {
-      defaultMessage: 'Open {jobsCount, plural, one {{jobId}} other {# jobs}} in Anomaly Explorer',
-      values: { jobsCount: jobsList.length, jobId: jobsList[0] && jobsList[0].id },
-    }
-  );
-  const { createLinkWithUserDefaults } = useCreateADLinks();
-
-  return (
-    <EuiToolTip position="bottom" content={openJobsInAnomalyExplorerText}>
-      <EuiButtonEmpty
-        href={createLinkWithUserDefaults('explorer', jobsList)}
-        color="text"
-        size="xs"
-        iconType="visTable"
-        aria-label={openJobsInAnomalyExplorerText}
-        className="results-button"
-        data-test-subj={`openOverviewJobsInAnomalyExplorer`}
-      >
-        {i18n.translate('xpack.ml.overview.anomalyDetection.viewActionName', {
-          defaultMessage: 'View',
-        })}
-      </EuiButtonEmpty>
-    </EuiToolTip>
-  );
-};
+      isPrimary: true,
+      name: i18n.translate('xpack.ml.overview.anomalyDetection.viewJobsActionName', {
+        defaultMessage: 'View jobs',
+      }),
+      description: i18n.translate(
+        'xpack.ml.overview.anomalyDetection.resultActions.openInJobManagementText',
+        {
+          defaultMessage: 'View jobs',
+        }
+      ),
+      icon: 'list',
+      type: 'icon',
+      onClick: async (item) => {
+        const path = await locator?.getUrl({
+          page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
+          pageState: {
+            groupIds: [item.id],
+          },
+        });
+        await navigateToPath(path);
+      },
+    },
+    {
+      isPrimary: false,
+      name: i18n.translate('xpack.ml.overview.anomalyDetection.viewResultsActionName', {
+        defaultMessage: 'View in Anomaly Explorer',
+      }),
+      description: i18n.translate(
+        'xpack.ml.overview.anomalyDetection.resultActions.openJobsInAnomalyExplorerText',
+        {
+          defaultMessage: 'View in Anomaly Explorer',
+        }
+      ),
+      icon: 'visTable',
+      type: 'icon',
+      onClick: async (item) => {
+        const path = await locator?.getUrl({
+          page: ML_PAGES.ANOMALY_EXPLORER,
+          pageState: {
+            jobIds: item.jobIds,
+            timeRange: timefilter.getTime(),
+          },
+        });
+        await navigateToPath(path);
+      },
+    },
+  ];
+}

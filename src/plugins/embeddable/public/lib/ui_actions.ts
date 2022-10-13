@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from '../../../ui_actions/public';
+export * from '@kbn/ui-actions-plugin/public';

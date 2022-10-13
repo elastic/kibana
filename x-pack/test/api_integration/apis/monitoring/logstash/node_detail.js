@@ -6,15 +6,15 @@
  */
 
 import expect from '@kbn/expect';
-import nodeDetailFixture from './fixtures/node_detail';
-import nodeDetailAdvancedFixture from './fixtures/node_detail_advanced';
+import nodeDetailFixture from './fixtures/node_detail.json';
+import nodeDetailAdvancedFixture from './fixtures/node_detail_advanced.json';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
   describe('node detail', () => {
-    const archive = 'monitoring/logstash_pipelines';
+    const archive = 'x-pack/test/functional/es_archives/monitoring/logstash_pipelines';
     const timeRange = {
       min: '2018-01-22T09:33:13.000Z',
       max: '2018-01-22T09:41:04.000Z',

@@ -8,11 +8,13 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { AlertsTableFilterGroup } from './index';
+import { AlertsTableFilterGroup } from '.';
 
 describe('AlertsTableFilterGroup', () => {
   it('renders correctly', () => {
-    const wrapper = shallow(<AlertsTableFilterGroup onFilterGroupChanged={jest.fn()} />);
+    const wrapper = shallow(
+      <AlertsTableFilterGroup status={'open'} onFilterGroupChanged={jest.fn()} />
+    );
 
     expect(wrapper.find('EuiFilterButton')).toBeTruthy();
   });

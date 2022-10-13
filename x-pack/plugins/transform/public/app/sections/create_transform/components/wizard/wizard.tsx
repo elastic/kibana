@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { Fragment, FC, useEffect, useRef, useState, createContext, useMemo } from 'react';
+import React, { Fragment, FC, useRef, useState, createContext, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
 import { EuiSteps, EuiStepStatus } from '@elastic/eui';
 
-import { TransformPivotConfig } from '../../../../../../common/types/transform';
+import { DataView } from '@kbn/data-views-plugin/public';
+import type { TransformConfigUnion } from '../../../../../../common/types/transform';
 
 import { getCreateTransformRequestBody } from '../../../../common';
 import { SearchItems } from '../../../../hooks/use_search_items';
@@ -31,13 +32,7 @@ import {
   StepDetailsSummary,
 } from '../step_details';
 import { WizardNav } from '../wizard_nav';
-import { IndexPattern } from '../../../../../../../../../src/plugins/data/public';
 import type { RuntimeMappings } from '../step_define/common/types';
-
-enum KBN_MANAGEMENT_PAGE_CLASSNAME {
-  DEFAULT_BODY = 'mgtPage__body',
-  TRANSFORM_BODY_MODIFIER = 'mgtPage__body--transformWizard',
-}
 
 enum WIZARD_STEPS {
   DEFINE,
@@ -86,31 +81,27 @@ const StepDefine: FC<DefinePivotStepProps> = ({
 };
 
 interface WizardProps {
-  cloneConfig?: TransformPivotConfig;
+  cloneConfig?: TransformConfigUnion;
   searchItems: SearchItems;
 }
 
 export const CreateTransformWizardContext = createContext<{
-  indexPattern: IndexPattern | null;
+  dataView: DataView | null;
   runtimeMappings: RuntimeMappings | undefined;
 }>({
-  indexPattern: null,
+  dataView: null,
   runtimeMappings: undefined,
 });
 
 export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems }) => {
-  const { indexPattern } = searchItems;
+  const { dataView } = searchItems;
 
   // The current WIZARD_STEP
   const [currentStep, setCurrentStep] = useState(WIZARD_STEPS.DEFINE);
 
   // The DEFINE state
   const [stepDefineState, setStepDefineState] = useState(
-    applyTransformConfigToDefineState(
-      getDefaultStepDefineState(searchItems),
-      cloneConfig,
-      indexPattern
-    )
+    applyTransformConfigToDefineState(getDefaultStepDefineState(searchItems), cloneConfig, dataView)
   );
 
   // The DETAILS state
@@ -121,36 +112,8 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
   // The CREATE state
   const [stepCreateState, setStepCreateState] = useState(getDefaultStepCreateState);
 
-  useEffect(() => {
-    // The transform plugin doesn't control the wrapping management page via React
-    // so we use plain JS to add and remove a custom CSS class to set the full
-    // page width to 100% for the transform wizard. It's done to replicate the layout
-    // as it was when transforms were part of the ML plugin. This will be revisited
-    // to come up with an approach that's more in line with the overall layout
-    // of the Kibana management section.
-    let managementBody = document.getElementsByClassName(
-      KBN_MANAGEMENT_PAGE_CLASSNAME.DEFAULT_BODY
-    );
-
-    if (managementBody.length > 0) {
-      managementBody[0].classList.replace(
-        KBN_MANAGEMENT_PAGE_CLASSNAME.DEFAULT_BODY,
-        KBN_MANAGEMENT_PAGE_CLASSNAME.TRANSFORM_BODY_MODIFIER
-      );
-      return () => {
-        managementBody = document.getElementsByClassName(
-          KBN_MANAGEMENT_PAGE_CLASSNAME.TRANSFORM_BODY_MODIFIER
-        );
-        managementBody[0].classList.replace(
-          KBN_MANAGEMENT_PAGE_CLASSNAME.TRANSFORM_BODY_MODIFIER,
-          KBN_MANAGEMENT_PAGE_CLASSNAME.DEFAULT_BODY
-        );
-      };
-    }
-  }, []);
-
   const transformConfig = getCreateTransformRequestBody(
-    indexPattern.title,
+    dataView.title,
     stepDefineState,
     stepDetailsState
   );
@@ -213,12 +176,12 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
         <Fragment>
           {currentStep === WIZARD_STEPS.CREATE ? (
             <StepCreateForm
-              createIndexPattern={stepDetailsState.createIndexPattern}
+              createDataView={stepDetailsState.createDataView}
               transformId={stepDetailsState.transformId}
               transformConfig={transformConfig}
               onChange={setStepCreateState}
               overrides={stepCreateState}
-              timeFieldName={stepDetailsState.indexPatternTimeField}
+              timeFieldName={stepDetailsState.dataViewTimeField}
             />
           ) : (
             <StepCreateSummary />
@@ -233,19 +196,19 @@ export const Wizard: FC<WizardProps> = React.memo(({ cloneConfig, searchItems })
   }, [
     currentStep,
     setCurrentStep,
-    stepDetailsState.createIndexPattern,
+    stepDetailsState.createDataView,
     stepDetailsState.transformId,
     transformConfig,
     setStepCreateState,
     stepCreateState,
-    stepDetailsState.indexPatternTimeField,
+    stepDetailsState.dataViewTimeField,
   ]);
 
   const stepsConfig = [stepDefine, stepDetails, stepCreate];
 
   return (
     <CreateTransformWizardContext.Provider
-      value={{ indexPattern, runtimeMappings: stepDefineState.runtimeMappings }}
+      value={{ dataView, runtimeMappings: stepDefineState.runtimeMappings }}
     >
       <EuiSteps className="transform__steps" steps={stepsConfig} />
     </CreateTransformWizardContext.Provider>

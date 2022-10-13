@@ -8,7 +8,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { StepPanel } from './index';
+import { StepPanel } from '.';
 
 describe('StepPanel', () => {
   it('renders correctly', () => {

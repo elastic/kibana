@@ -31,7 +31,7 @@ export const InventoryFormatterTypeRT = rt.keyof({
   bytes: null,
   number: null,
   percent: null,
-  highPercision: null,
+  highPrecision: null,
 });
 export type InventoryFormatterType = rt.TypeOf<typeof InventoryFormatterTypeRT>;
 export type InventoryItemType = rt.TypeOf<typeof ItemTypeRT>;
@@ -64,6 +64,9 @@ export const InventoryMetricRT = rt.keyof({
   containerDiskIOBytes: null,
   containerMemory: null,
   containerNetworkTraffic: null,
+  containerK8sOverview: null,
+  containerK8sCpuUsage: null,
+  containerK8sMemoryUsage: null,
   nginxHits: null,
   nginxRequestRate: null,
   nginxActiveConnections: null,
@@ -252,7 +255,7 @@ export const ESCaridnalityAggRT = rt.type({
 export const ESBucketScriptAggRT = rt.type({
   bucket_script: rt.intersection([
     rt.type({
-      buckets_path: rt.record(rt.string, rt.union([rt.undefined, rt.string])),
+      buckets_path: rt.record(rt.string, rt.string),
       script: rt.type({
         source: rt.string,
         lang: rt.keyof({ painless: null, expression: null }),
@@ -288,6 +291,21 @@ export const ESTopMetricsAggRT = rt.type({
   }),
 });
 
+export const ESMaxPeriodFilterExistsAggRT = rt.type({
+  filter: rt.type({
+    exists: rt.type({
+      field: rt.string,
+    }),
+  }),
+  aggs: rt.type({
+    period: rt.type({
+      max: rt.type({
+        field: rt.string,
+      }),
+    }),
+  }),
+});
+
 export interface SnapshotTermsWithAggregation {
   terms: { field: string };
   aggregations: MetricsUIAggregation;
@@ -312,6 +330,7 @@ export const ESAggregationRT = rt.union([
   ESTermsWithAggregationRT,
   ESCaridnalityAggRT,
   ESTopMetricsAggRT,
+  ESMaxPeriodFilterExistsAggRT,
 ]);
 
 export const MetricsUIAggregationRT = rt.record(rt.string, ESAggregationRT);
@@ -349,7 +368,7 @@ export type SnapshotMetricType = rt.TypeOf<typeof SnapshotMetricTypeRT>;
 
 export interface InventoryMetrics {
   tsvb: { [name: string]: TSVBMetricModelCreator };
-  snapshot: { [name: string]: MetricsUIAggregation };
+  snapshot: { [name: string]: MetricsUIAggregation | undefined };
   defaultSnapshot: SnapshotMetricType;
   /** This is used by the inventory view to calculate the appropriate amount of time for the metrics detail page. Some metris like awsS3 require multiple days where others like host only need an hour.*/
   defaultTimeRangeInSeconds: number;

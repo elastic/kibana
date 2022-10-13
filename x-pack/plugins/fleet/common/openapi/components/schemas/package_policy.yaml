@@ -1,4 +1,4 @@
-title: PackagePolicy
+title: Package policy
 allOf:
   - type: object
     properties:

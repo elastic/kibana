@@ -5,19 +5,38 @@
  * 2.0.
  */
 
-export {
-  AuthorizationProvider,
-  CronEditor,
+export type {
   Error,
   Frequency,
-  NotAuthorizedSection,
-  SectionError,
-  sendRequest,
   SendRequestConfig,
   SendRequestResponse,
   UseRequestResponse,
+  UseRequestConfig,
+  Privileges,
+  MissingPrivileges,
+  Authorization,
+} from '@kbn/es-ui-shared-plugin/public';
+
+export {
+  AuthorizationProvider,
+  CronEditor,
+  NotAuthorizedSection,
+  SectionError,
+  PageError,
+  PageLoading,
+  sendRequest,
   useAuthorizationContext,
   useRequest,
-  UseRequestConfig,
   WithPrivileges,
-} from '../../../../src/plugins/es_ui_shared/public';
+  EuiCodeEditor,
+  AuthorizationContext,
+  GlobalFlyout,
+} from '@kbn/es-ui-shared-plugin/public';
+
+export { APP_WRAPPER_CLASS } from '@kbn/core/public';
+
+export {
+  reactRouterNavigate,
+  KibanaThemeProvider,
+  useExecutionContext,
+} from '@kbn/kibana-react-plugin/public';

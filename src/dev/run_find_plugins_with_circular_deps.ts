@@ -9,8 +9,9 @@
 import dedent from 'dedent';
 import { parseDependencyTree, parseCircular, prettyCircular } from 'dpdm';
 import { relative } from 'path';
-import { getPluginSearchPaths } from '@kbn/config';
-import { REPO_ROOT, run } from '@kbn/dev-utils';
+import { getPluginSearchPaths } from '@kbn/plugin-discovery';
+import { run } from '@kbn/dev-cli-runner';
+import { REPO_ROOT } from '@kbn/utils';
 
 interface Options {
   debug?: boolean;
@@ -19,11 +20,7 @@ interface Options {
 
 type CircularDepList = Set<string>;
 
-const allowedList: CircularDepList = new Set([
-  'x-pack/plugins/apm -> x-pack/plugins/infra',
-  'x-pack/plugins/lists -> x-pack/plugins/security_solution',
-  'x-pack/plugins/security -> x-pack/plugins/spaces',
-]);
+const allowedList: CircularDepList = new Set([]);
 
 run(
   async ({ flags, log }) => {
@@ -44,7 +41,8 @@ run(
     const circularDependenciesFullPaths = parseCircular(depTree).filter((circularDeps) => {
       const first = circularDeps[0];
       const last = circularDeps[circularDeps.length - 1];
-      const matchRegex = /(?<pluginFolder>(src|x-pack)\/plugins|examples|x-pack\/examples)\/(?<pluginName>[^\/]*)\/.*/;
+      const matchRegex =
+        /(?<pluginFolder>(src|x-pack)\/plugins|examples|x-pack\/examples)\/(?<pluginName>[^\/]*)\/.*/;
       const firstMatch = first.match(matchRegex);
       const lastMatch = last.match(matchRegex);
 

@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import { SearchResponse } from 'elasticsearch';
-import {
-  ElasticsearchClient,
-  ILegacyScopedClusterClient,
-  SavedObjectsClientContract,
-} from 'kibana/server';
-import { GetHostPolicyResponse, HostPolicyResponse } from '../../../../common/endpoint/types';
-import { INITIAL_POLICY_ID } from './index';
-import { Agent } from '../../../../../fleet/common/types/models';
-import { EndpointAppContext } from '../../types';
+import type { IScopedClusterClient, KibanaRequest } from '@kbn/core/server';
+import type { Agent } from '@kbn/fleet-plugin/common/types/models';
+import type { ISearchRequestParams } from '@kbn/data-plugin/common';
+import type { GetHostPolicyResponse, HostPolicyResponse } from '../../../../common/endpoint/types';
+import { INITIAL_POLICY_ID } from '.';
+import type { EndpointAppContext } from '../../types';
 
-export function getESQueryPolicyResponseByAgentID(agentID: string, index: string) {
+export const getESQueryPolicyResponseByAgentID = (
+  agentID: string,
+  index: string
+): ISearchRequestParams => {
   return {
     body: {
       query: {
@@ -44,26 +43,23 @@ export function getESQueryPolicyResponseByAgentID(agentID: string, index: string
     },
     index,
   };
-}
+};
 
 export async function getPolicyResponseByAgentId(
   index: string,
   agentID: string,
-  dataClient: ILegacyScopedClusterClient
+  dataClient: IScopedClusterClient
 ): Promise<GetHostPolicyResponse | undefined> {
   const query = getESQueryPolicyResponseByAgentID(agentID, index);
-  const response = (await dataClient.callAsCurrentUser(
-    'search',
-    query
-  )) as SearchResponse<HostPolicyResponse>;
+  const response = await dataClient.asInternalUser.search<HostPolicyResponse>(query);
 
-  if (response.hits.hits.length === 0) {
-    return undefined;
+  if (response.hits.hits.length > 0 && response.hits.hits[0]._source != null) {
+    return {
+      policy_response: response.hits.hits[0]._source,
+    };
   }
 
-  return {
-    policy_response: response.hits.hits[0]._source,
-  };
+  return undefined;
 }
 
 const transformAgentVersionMap = (versionMap: Map<string, number>): { [key: string]: number } => {
@@ -76,8 +72,7 @@ const transformAgentVersionMap = (versionMap: Map<string, number>): { [key: stri
 
 export async function getAgentPolicySummary(
   endpointAppContext: EndpointAppContext,
-  soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient,
+  request: KibanaRequest,
   packageName: string,
   policyId?: string,
   pageSize: number = 1000
@@ -87,8 +82,7 @@ export async function getAgentPolicySummary(
     return transformAgentVersionMap(
       await agentVersionsMap(
         endpointAppContext,
-        soClient,
-        esClient,
+        request,
         `${agentQuery} AND policy_id:${policyId}`,
         pageSize
       )
@@ -96,14 +90,13 @@ export async function getAgentPolicySummary(
   }
 
   return transformAgentVersionMap(
-    await agentVersionsMap(endpointAppContext, soClient, esClient, agentQuery, pageSize)
+    await agentVersionsMap(endpointAppContext, request, agentQuery, pageSize)
   );
 }
 
 export async function agentVersionsMap(
   endpointAppContext: EndpointAppContext,
-  soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient,
+  request: KibanaRequest,
   kqlQuery: string,
   pageSize: number = 1000
 ): Promise<Map<string, number>> {
@@ -120,12 +113,15 @@ export async function agentVersionsMap(
   const result: Map<string, number> = new Map<string, number>();
   let hasMore = true;
   while (hasMore) {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const queryResult = await endpointAppContext.service
       .getAgentService()!
-      .listAgents(esClient, searchOptions(page++));
+      .asScoped(request)
+      .listAgents(searchOptions(page++));
     queryResult.agents.forEach((agent: Agent) => {
       const agentVersion = agent.local_metadata?.elastic?.agent?.version;
       if (result.has(agentVersion)) {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         result.set(agentVersion, result.get(agentVersion)! + 1);
       } else {
         result.set(agentVersion, 1);

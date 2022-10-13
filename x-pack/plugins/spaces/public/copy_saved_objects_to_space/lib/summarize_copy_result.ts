@@ -8,13 +8,10 @@
 import type {
   SavedObjectsImportAmbiguousConflictError,
   SavedObjectsImportConflictError,
-} from 'src/core/public';
-import type {
-  FailedImport,
-  ProcessedImportResponse,
-} from 'src/plugins/saved_objects_management/public';
+} from '@kbn/core/public';
 
-import type { SavedObjectTarget } from '../types';
+import type { FailedImport, ProcessedImportResponse } from '.';
+import type { CopyToSpaceSavedObjectTarget } from '../types';
 
 export interface SummarizedSavedObjectResult {
   type: string;
@@ -68,7 +65,7 @@ export type SummarizedCopyToSpaceResult =
   | ProcessingResponse;
 
 export function summarizeCopyResult(
-  savedObjectTarget: Required<SavedObjectTarget>,
+  savedObjectTarget: Required<CopyToSpaceSavedObjectTarget>,
   copyResult: ProcessedImportResponse | undefined
 ): SummarizedCopyToSpaceResult {
   const conflicts = copyResult?.failedImports.filter(isAnyConflict) ?? [];

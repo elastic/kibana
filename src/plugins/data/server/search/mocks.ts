@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ISearchSetup, ISearchStart } from './types';
+import type { ISearchSetup, ISearchStart } from './types';
 import { searchAggsSetupMock, searchAggsStartMock } from './aggs/mocks';
 import { searchSourceMock } from './search_source/mocks';
 
@@ -16,13 +16,14 @@ export function createSearchSetupMock(): jest.Mocked<ISearchSetup> {
   return {
     aggs: searchAggsSetupMock(),
     registerSearchStrategy: jest.fn(),
-    __enhance: jest.fn(),
+    searchSource: searchSourceMock.createSetupContract(),
   };
 }
 
 export function createSearchStartMock(): jest.Mocked<ISearchStart> {
   return {
     aggs: searchAggsStartMock(),
+    searchAsInternalUser: createSearchRequestHandlerContext(),
     getSearchStrategy: jest.fn(),
     asScoped: jest.fn().mockReturnValue(createSearchRequestHandlerContext()),
     searchSource: searchSourceMock.createStartContract(),
@@ -41,5 +42,6 @@ export function createSearchRequestHandlerContext() {
     extendSession: jest.fn(),
     cancelSession: jest.fn(),
     deleteSession: jest.fn(),
+    getSessionStatus: jest.fn(),
   };
 }

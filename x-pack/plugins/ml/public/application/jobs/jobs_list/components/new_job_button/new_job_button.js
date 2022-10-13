@@ -11,9 +11,9 @@ import { mlNodesAvailable } from '../../../../ml_nodes_check/check_ml_nodes';
 import React from 'react';
 
 import { EuiButton } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useCreateAndNavigateToMlLink } from '../../../../contexts/kibana/use_create_url';
-import { ML_PAGES } from '../../../../../../common/constants/ml_url_generator';
+import { ML_PAGES } from '../../../../../../common/constants/locator';
 
 export function NewJobButton() {
   const buttonEnabled = checkPermission('canCreateJob') && mlNodesAvailable();

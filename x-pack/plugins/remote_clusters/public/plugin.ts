@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, Plugin, CoreStart, PluginInitializerContext } from 'kibana/public';
+import { CoreSetup, Plugin, CoreStart, PluginInitializerContext } from '@kbn/core/public';
 
 import { PLUGIN } from '../common/constants';
 import { init as initBreadcrumbs } from './application/services/breadcrumb';
@@ -16,18 +16,20 @@ import { init as initUiMetric } from './application/services/ui_metric';
 import { init as initNotification } from './application/services/notification';
 import { init as initRedirect } from './application/services/redirect';
 import { Dependencies, ClientConfigType } from './types';
+import { RemoteClustersLocatorDefinition } from './locator';
 
 export interface RemoteClustersPluginSetup {
   isUiEnabled: boolean;
 }
 
 export class RemoteClustersUIPlugin
-  implements Plugin<RemoteClustersPluginSetup, void, Dependencies, any> {
+  implements Plugin<RemoteClustersPluginSetup, void, Dependencies, any>
+{
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   setup(
     { notifications: { toasts }, http, getStartServices }: CoreSetup,
-    { management, usageCollection, cloud }: Dependencies
+    { management, usageCollection, cloud, share }: Dependencies
   ) {
     const {
       ui: { enabled: isRemoteClustersUiEnabled },
@@ -42,13 +44,14 @@ export class RemoteClustersUIPlugin
           defaultMessage: 'Remote Clusters',
         }),
         order: 7,
-        mount: async ({ element, setBreadcrumbs, history }) => {
+        mount: async ({ element, setBreadcrumbs, history, theme$ }) => {
           const [core] = await getStartServices();
           const {
             chrome: { docTitle },
             i18n: { Context: i18nContext },
             docLinks,
             fatalErrors,
+            executionContext,
           } = core;
 
           docTitle.change(PLUGIN.getI18nName());
@@ -67,8 +70,9 @@ export class RemoteClustersUIPlugin
           const unmountAppCallback = await renderApp(
             element,
             i18nContext,
-            { isCloudEnabled, cloudBaseUrl },
-            history
+            { isCloudEnabled, cloudBaseUrl, executionContext },
+            history,
+            theme$
           );
 
           return () => {
@@ -77,6 +81,12 @@ export class RemoteClustersUIPlugin
           };
         },
       });
+
+      share.url.locators.create(
+        new RemoteClustersLocatorDefinition({
+          managementAppLocator: management.locator,
+        })
+      );
     }
 
     return {

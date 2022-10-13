@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 
+import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { AGENTS_INDEX } from '../../../../plugins/fleet/common';
 
 export default function ({ getService }: FtrProviderContext) {
   const es = getService('es');
@@ -17,7 +17,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('fleet_agents_status', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('fleet/agents');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/fleet/agents');
       // 2 agents online
       await es.update({
         id: 'agent1',
@@ -25,6 +25,7 @@ export default function ({ getService }: FtrProviderContext) {
         index: AGENTS_INDEX,
         body: {
           doc: {
+            policy_revision_idx: 1,
             last_checkin: new Date().toISOString(),
           },
         },
@@ -35,7 +36,8 @@ export default function ({ getService }: FtrProviderContext) {
         index: AGENTS_INDEX,
         body: {
           doc: {
-            last_checkin: new Date().toISOString(),
+            policy_revision_idx: 1,
+            last_checkin: new Date(Date.now() - 1000 * 60 * 3).toISOString(), // 2m online
           },
         },
       });
@@ -46,7 +48,8 @@ export default function ({ getService }: FtrProviderContext) {
         index: AGENTS_INDEX,
         body: {
           doc: {
-            last_checkin: new Date(Date.now() - 1000 * 60 * 60 * 60 * 10).toISOString(),
+            policy_revision_idx: 1,
+            last_checkin: new Date(Date.now() - 1000 * 60 * 6).toISOString(), // 6m offline
           },
         },
       });
@@ -57,31 +60,70 @@ export default function ({ getService }: FtrProviderContext) {
         index: AGENTS_INDEX,
         body: {
           doc: {
+            policy_revision_idx: 1,
             last_checkin: new Date().toISOString(),
             upgrade_started_at: new Date().toISOString(),
           },
         },
       });
+      // 1 agent reassigned to a new policy
+      await es.create({
+        id: 'agent5',
+        refresh: 'wait_for',
+        index: AGENTS_INDEX,
+        document: {
+          active: true,
+          access_api_key_id: 'api-key-4',
+          policy_id: 'policy1',
+          type: 'PERMANENT',
+          local_metadata: { host: { hostname: 'host5' } },
+          user_provided_metadata: {},
+          enrolled_at: '2022-06-21T12:17:25Z',
+          last_checkin: new Date().toISOString(),
+          policy_revision_idx: null,
+        },
+      });
+
+      // 1 agent inactive
+      await es.create({
+        id: 'agent6',
+        refresh: 'wait_for',
+        index: AGENTS_INDEX,
+        document: {
+          active: false,
+          access_api_key_id: 'api-key-4',
+          policy_id: 'policy1',
+          type: 'PERMANENT',
+          policy_revision_idx: 1,
+          local_metadata: { host: { hostname: 'host6' } },
+          user_provided_metadata: {},
+          enrolled_at: '2022-06-21T12:17:25Z',
+          last_checkin: '2022-06-27T12:29:29Z',
+        },
+      });
     });
     after(async () => {
-      await esArchiver.unload('fleet/agents');
+      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/agents');
     });
 
     it('should return the status of agents', async () => {
-      const { body: apiResponse } = await supertest.get(`/api/fleet/agent-status`).expect(200);
-
+      const { body: apiResponse } = await supertest.get(`/api/fleet/agent_status`).expect(200);
       expect(apiResponse).to.eql({
         results: {
           events: 0,
-          total: 4,
+          total: 5,
           online: 2,
           error: 0,
           offline: 1,
-          updating: 1,
-          other: 1,
-          inactive: 0,
+          updating: 2,
+          other: 3,
+          inactive: 1,
         },
       });
+    });
+
+    it('should work with deprecated api', async () => {
+      await supertest.get(`/api/fleet/agent-status`).expect(200);
     });
   });
 }

@@ -14,7 +14,7 @@ import {
   EuiPopover,
   EuiText,
 } from '@elastic/eui';
-import { ConfusionMatrix } from '../../../../common/analytics';
+import { ConfusionMatrix } from '../../../../../../../common/types/data_frame_analytics';
 
 const COL_INITIAL_WIDTH = 165; // in pixels
 
@@ -35,9 +35,7 @@ export const ACTUAL_CLASS_ID = 'actual_class';
 export const OTHER_CLASS_ID = 'other';
 export const MAX_COLUMNS = 6;
 
-export function getColumnData(
-  confusionMatrixData: ConfusionMatrix[]
-): {
+export function getColumnData(confusionMatrixData: ConfusionMatrix[]): {
   columns: ConfusionMatrixColumn[];
   columnData: ConfusionMatrixColumnData[];
 } {

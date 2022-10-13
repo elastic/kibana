@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { IEsSearchResponse } from '../../../../../../../src/plugins/data/common';
-import { AuthenticationHit } from '../hosts';
-import { Inspect, Maybe, TimerangeInput } from '../../common';
-import { RequestBasicOptions } from '../';
-import { AlertsGroupData } from './alerts';
-import { AnomaliesActionGroupData, AnomalyHit } from './anomalies';
-import { DnsHistogramGroupData } from './dns';
-import { AuthenticationsActionGroupData } from './authentications';
-import { EventsActionGroupData, EventHit } from './events';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { Inspect, Maybe, TimerangeInput } from '../../common';
+import type { RequestBasicOptions } from '..';
+import type { AlertsGroupData } from './alerts';
+import type { AnomaliesActionGroupData } from './anomalies';
+import type { DnsHistogramGroupData } from './dns';
+import type { AuthenticationsActionGroupData } from './authentications';
+import type { EventsActionGroupData } from './events';
+import type { PreviewHistogramGroupData } from './preview';
 
 export * from './alerts';
 export * from './anomalies';
@@ -21,6 +22,7 @@ export * from './authentications';
 export * from './common';
 export * from './dns';
 export * from './events';
+export * from './preview';
 
 export const MatrixHistogramQuery = 'matrixHistogram';
 
@@ -30,7 +32,17 @@ export enum MatrixHistogramType {
   events = 'events',
   alerts = 'alerts',
   dns = 'dns',
+  preview = 'preview',
 }
+
+export const MatrixHistogramTypeToAggName = {
+  [MatrixHistogramType.alerts]: 'aggregations.alertsGroup.buckets',
+  [MatrixHistogramType.anomalies]: 'aggregations.anomalyActionGroup.buckets',
+  [MatrixHistogramType.authentications]: 'aggregations.eventActionGroup.buckets',
+  [MatrixHistogramType.dns]: 'aggregations.dns_name_query_count.buckets',
+  [MatrixHistogramType.events]: 'aggregations.eventActionGroup.buckets',
+  [MatrixHistogramType.preview]: 'aggregations.preview.buckets',
+};
 
 export interface MatrixHistogramRequestOptions extends RequestBasicOptions {
   timerange: TimerangeInput;
@@ -48,6 +60,8 @@ export interface MatrixHistogramRequestOptions extends RequestBasicOptions {
     | undefined;
   inspect?: Maybe<Inspect>;
   isPtrIncluded?: boolean;
+  includeMissingData?: boolean;
+  runtimeMappings?: MappingRuntimeFields;
 }
 
 export interface MatrixHistogramStrategyResponse extends IEsSearchResponse {
@@ -84,18 +98,8 @@ export type MatrixHistogramParseData<T> = T extends MatrixHistogramType.alerts
   ? AuthenticationsActionGroupData[]
   : T extends MatrixHistogramType.events
   ? EventsActionGroupData[]
-  : never;
-
-export type MatrixHistogramHit<T> = T extends MatrixHistogramType.alerts
-  ? EventHit
-  : T extends MatrixHistogramType.anomalies
-  ? AnomalyHit
-  : T extends MatrixHistogramType.dns
-  ? EventHit
-  : T extends MatrixHistogramType.authentications
-  ? AuthenticationHit
-  : T extends MatrixHistogramType.events
-  ? EventHit
+  : T extends MatrixHistogramType.preview
+  ? PreviewHistogramGroupData[]
   : never;
 
 export type MatrixHistogramDataConfig = Record<

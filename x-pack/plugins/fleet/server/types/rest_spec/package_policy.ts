@@ -7,12 +7,20 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { NewPackagePolicySchema, UpdatePackagePolicySchema } from '../models';
+import {
+  CreatePackagePolicyRequestBodySchema,
+  SimplifiedCreatePackagePolicyRequestBodySchema,
+  UpdatePackagePolicyRequestBodySchema,
+} from '../models';
 
-import { ListWithKuerySchema } from './index';
+import { ListWithKuerySchema, BulkRequestBodySchema } from './common';
 
 export const GetPackagePoliciesRequestSchema = {
   query: ListWithKuerySchema,
+};
+
+export const BulkGetPackagePoliciesRequestSchema = {
+  body: BulkRequestBodySchema,
 };
 
 export const GetOnePackagePolicyRequestSchema = {
@@ -22,17 +30,45 @@ export const GetOnePackagePolicyRequestSchema = {
 };
 
 export const CreatePackagePolicyRequestSchema = {
-  body: NewPackagePolicySchema,
+  body: schema.oneOf([
+    CreatePackagePolicyRequestBodySchema,
+    SimplifiedCreatePackagePolicyRequestBodySchema,
+  ]),
 };
 
 export const UpdatePackagePolicyRequestSchema = {
   ...GetOnePackagePolicyRequestSchema,
-  body: UpdatePackagePolicySchema,
+  body: schema.oneOf([
+    UpdatePackagePolicyRequestBodySchema,
+    SimplifiedCreatePackagePolicyRequestBodySchema,
+  ]),
 };
 
 export const DeletePackagePoliciesRequestSchema = {
   body: schema.object({
     packagePolicyIds: schema.arrayOf(schema.string()),
     force: schema.maybe(schema.boolean()),
+  }),
+};
+
+export const DeleteOnePackagePolicyRequestSchema = {
+  params: schema.object({
+    packagePolicyId: schema.string(),
+  }),
+  query: schema.object({
+    force: schema.maybe(schema.boolean()),
+  }),
+};
+
+export const UpgradePackagePoliciesRequestSchema = {
+  body: schema.object({
+    packagePolicyIds: schema.arrayOf(schema.string()),
+  }),
+};
+
+export const DryRunPackagePoliciesRequestSchema = {
+  body: schema.object({
+    packagePolicyIds: schema.arrayOf(schema.string()),
+    packageVersion: schema.maybe(schema.string()),
   }),
 };

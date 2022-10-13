@@ -11,6 +11,17 @@ import { isString, isPlainObject, cloneDeepWith } from 'lodash';
 export type Escape = 'markdown' | 'slack' | 'json' | 'none';
 type Variables = Record<string, unknown>;
 
+// return a rendered mustache template with no escape given the specified variables and escape
+// Individual variable values should be stringified already
+export function renderMustacheStringNoEscape(string: string, variables: Variables): string {
+  try {
+    return Mustache.render(`${string}`, variables);
+  } catch (err) {
+    // log error; the mustache code does not currently leak variables
+    return `error rendering mustache template "${string}": ${err.message}`;
+  }
+}
+
 // return a rendered mustache template given the specified variables and escape
 export function renderMustacheString(string: string, variables: Variables, escape: Escape): string {
   const augmentedVariables = augmentObjectVariables(variables);
@@ -40,7 +51,7 @@ export function renderMustacheObject<Params>(params: Params, variables: Variable
   // The return type signature for `cloneDeep()` ends up taking the return
   // type signature for the customizer, but rather than pollute the customizer
   // with casts, seemed better to just do it in one place, here.
-  return (result as unknown) as Params;
+  return result as unknown as Params;
 }
 
 // return variables cloned, with a toString() added to objects
@@ -123,6 +134,7 @@ function escapeMarkdown(value: unknown): string {
 
   return `${value}`
     .replace(/\\/g, '\\\\')
+    .replace(/\|/g, '\\|')
     .replace(/`/g, '\\`')
     .replace(/\*/g, '\\*')
     .replace(/_/g, '\\_')

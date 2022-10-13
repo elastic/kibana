@@ -8,9 +8,19 @@
 
 import path from 'path';
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 
-import { deleteAll, download, gunzip, untar, Task, Config, Build, Platform, read } from '../lib';
+import {
+  deleteAll,
+  downloadToDisk,
+  gunzip,
+  untar,
+  Task,
+  Config,
+  Build,
+  Platform,
+  read,
+} from '../lib';
 
 const DOWNLOAD_DIRECTORY = '.native_modules';
 
@@ -31,36 +41,50 @@ interface Package {
 const packages: Package[] = [
   {
     name: 're2',
-    version: '1.15.4',
+    version: '1.17.4',
     destinationPath: 'node_modules/re2/build/Release/re2.node',
     extractMethod: 'gunzip',
     archives: {
       'darwin-x64': {
-        url: 'https://github.com/uhop/node-re2/releases/download/1.15.4/darwin-x64-83.gz',
-        sha256: 'b45cd8296fd6eb2a091399c20111af43093ba30c99ed9e5d969278f5ff69ba8f',
+        url: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.17.4/darwin-x64-93.gz',
+        sha256: '9558c5cb39622e9b3653203e772b129d6c634e7dbd7af1b244352fc1d704601f',
       },
       'linux-x64': {
-        url: 'https://github.com/uhop/node-re2/releases/download/1.15.4/linux-x64-83.gz',
-        sha256: '1bbc3f90f0ba105772b37c04e3a718f69544b4df01dda00435c2b8e50b2ad0d9',
+        url: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.17.4/linux-x64-93.gz',
+        sha256: '4d06747b266c75b6f7ced93977692c0586ce6a52924cabb569bd966378941aa1',
       },
 
-      // ARM build is currently done manually as Github Actions used in upstream project
+      // ARM builds are currently done manually as Github Actions used in upstream project
       // do not natively support an ARM target.
 
-      // From a AWS Graviton instance:
-      // * checkout the node-re2 project,
-      // * install Node using the same minor used by Kibana
-      // * npm install, which will also create a build
-      // * gzip -c build/Release/re2.node > linux-arm64-83.gz
-      // * upload to kibana-ci-proxy-cache bucket
+      // From a AWS Graviton instance running Ubuntu:
+      // * install build-essential package
+      // * install nvm and the node version used by the Kibana repository
+      // * `npm install re2@1.17.4`
+      // * re2 will build itself on install
+      // * `cp node_modules/re2/build/Release/re2.node > linux-arm64-$(node -e "console.log(process.versions.modules)")
+      // * `gzip linux-arm64-*`
+      // * capture the sha256 with: `shasum -a 256 linux-arm64-*`
+      // * upload the `linux-arm64-*.gz` artifact to the `yarn-prebuilt-assets` bucket in GCS using the correct version number
       'linux-arm64': {
-        url:
-          'https://storage.googleapis.com/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.15.4/linux-arm64-83.gz',
-        sha256: '4eb524ca9a79dea9c07342e487fbe91591166fdbc022ae987104840df948a4e9',
+        url: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.17.4/linux-arm64-93.gz',
+        sha256: '25409584f76f3d6ed85463d84adf094eb6e256ed1cb0b754b95bcbda6691fc26',
       },
+
+      // A similar process is necessary for building on ARM macs:
+      // * bootstrap and re2 will build itself on install
+      // * `cp node_modules/re2/build/Release/re2.node > darwin-arm64-$(node -e "console.log(process.versions.modules)")
+      // * `gzip darwin-arm64-*`
+      // * capture the sha256 with: `shasum -a 256 darwin-arm64-*`
+      // * upload the `darwin-arm64-*.gz` artifact to the `yarn-prebuilt-assets` bucket in GCS using the correct version number
+      'darwin-arm64': {
+        url: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.17.4/darwin-arm64-93.gz',
+        sha256: 'd4b708749ddef1c87019f6b80e051ed0c29ccd1de34f233c47d8dcaddf803872',
+      },
+
       'win32-x64': {
-        url: 'https://github.com/uhop/node-re2/releases/download/1.15.4/win32-x64-83.gz',
-        sha256: 'efe939d3cda1d64ee3ee3e60a20613b95166d55632e702c670763ea7e69fca06',
+        url: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.17.4/win32-x64-93.gz',
+        sha256: '0320d0c0385432944c6fb3c8c8fcd78d440ce5626f7618f9ec71d88e44820674',
       },
     },
   },
@@ -96,12 +120,13 @@ async function patchModule(
   log.debug(`Patching ${pkg.name} binaries from ${archive.url} to ${extractPath}`);
 
   await deleteAll([extractPath], log);
-  await download({
+  await downloadToDisk({
     log,
     url: archive.url,
     destination: downloadPath,
-    sha256: archive.sha256,
-    retries: 3,
+    shaChecksum: archive.sha256,
+    shaAlgorithm: 'sha256',
+    maxAttempts: 3,
   });
   switch (pkg.extractMethod) {
     case 'gunzip':

@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-// @ts-ignore
 import { createApmQuery } from './create_apm_query';
-// @ts-ignore
 import { ApmClusterMetric } from '../metrics';
 import { LegacyRequest } from '../../types';
 import { ElasticsearchResponse } from '../../../common/types/es';
@@ -23,14 +21,14 @@ export async function getTimeOfLastEvent({
   req: LegacyRequest;
   callWithRequest: (_req: any, endpoint: string, params: any) => Promise<ElasticsearchResponse>;
   apmIndexPattern: string;
-  start: number;
-  end: number;
+  start?: number;
+  end?: number;
   clusterUuid: string;
 }) {
   const params = {
     index: apmIndexPattern,
     size: 1,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
       _source: ['beats_stats.timestamp', '@timestamp'],
       sort: [

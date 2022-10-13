@@ -1,0 +1,119 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`roles mapped to a deprecated role includes steps to remove the incompatible config, when applicable 1`] = `
+Array [
+  Object {
+    "correctiveActions": Object {
+      "manualSteps": Array [
+        "Set \\"xpack.reporting.roles.enabled\\" to \\"false\\" in kibana.yml.",
+        "Remove \\"xpack.reporting.roles.allow\\" in kibana.yml, if present.",
+        "Go to Management > Security > Roles to create one or more roles that grant the Kibana application privilege for Reporting.",
+        "Grant Reporting privileges to users by assigning one of the new roles.",
+        "Remove the \\"reporting_user\\" role from all users and add the custom role. The affected users are: reportron[reporting_user].",
+      ],
+    },
+    "deprecationType": "feature",
+    "documentationUrl": "https://www.elastic.co/guide/en/kibana/branch/kibana-privileges.html",
+    "level": "warning",
+    "message": "The default mechanism for Reporting privileges will work differently in future versions, and this cluster has users who have a deprecated role for this privilege. Set \\"xpack.reporting.roles.enabled\\" to \\"false\\" to adopt the future behavior before upgrading.",
+    "title": "The \\"reporting_user\\" role is deprecated: check user roles",
+  },
+]
+`;
+
+exports[`roles mapped to a deprecated role logs a deprecation when a role was found that maps to a deprecated custom role from the roles.allow setting 1`] = `
+Array [
+  Object {
+    "correctiveActions": Object {
+      "manualSteps": Array [
+        "Go to Management > Security > Roles to create one or more roles that grant the Kibana application privilege for Reporting.",
+        "Grant Reporting privileges to users by assigning one of the new roles.",
+        "Remove the \\"reporting_user\\" role from all role mappings and add the custom role. The affected role mappings are: dungeon_master[my_test_reporting_user].",
+      ],
+    },
+    "deprecationType": "feature",
+    "documentationUrl": "https://www.elastic.co/guide/en/kibana/branch/kibana-privileges.html",
+    "level": "warning",
+    "message": "The default mechanism for Reporting privileges will work differently in future versions, and this cluster has role mappings that are mapped to a deprecated role for this privilege. Set \\"xpack.reporting.roles.enabled\\" to \\"false\\" to adopt the future behavior before upgrading.",
+    "title": "The \\"reporting_user\\" role is deprecated: check role mappings",
+  },
+]
+`;
+
+exports[`roles mapped to a deprecated role logs a deprecation when a role was found that maps to the deprecated reporting_user role 1`] = `
+Array [
+  Object {
+    "correctiveActions": Object {
+      "manualSteps": Array [
+        "Go to Management > Security > Roles to create one or more roles that grant the Kibana application privilege for Reporting.",
+        "Grant Reporting privileges to users by assigning one of the new roles.",
+        "Remove the \\"reporting_user\\" role from all role mappings and add the custom role. The affected role mappings are: dungeon_master[reporting_user].",
+      ],
+    },
+    "deprecationType": "feature",
+    "documentationUrl": "https://www.elastic.co/guide/en/kibana/branch/kibana-privileges.html",
+    "level": "warning",
+    "message": "The default mechanism for Reporting privileges will work differently in future versions, and this cluster has role mappings that are mapped to a deprecated role for this privilege. Set \\"xpack.reporting.roles.enabled\\" to \\"false\\" to adopt the future behavior before upgrading.",
+    "title": "The \\"reporting_user\\" role is deprecated: check role mappings",
+  },
+]
+`;
+
+exports[`users assigned to a deprecated role includes steps to remove the incompatible config, when applicable 1`] = `
+Array [
+  Object {
+    "correctiveActions": Object {
+      "manualSteps": Array [
+        "Set \\"xpack.reporting.roles.enabled\\" to \\"false\\" in kibana.yml.",
+        "Remove \\"xpack.reporting.roles.allow\\" in kibana.yml, if present.",
+        "Go to Management > Security > Roles to create one or more roles that grant the Kibana application privilege for Reporting.",
+        "Grant Reporting privileges to users by assigning one of the new roles.",
+        "Remove the \\"reporting_user\\" role from all users and add the custom role. The affected users are: reportron[reporting_user].",
+      ],
+    },
+    "deprecationType": "feature",
+    "documentationUrl": "https://www.elastic.co/guide/en/kibana/branch/kibana-privileges.html",
+    "level": "warning",
+    "message": "The default mechanism for Reporting privileges will work differently in future versions, and this cluster has users who have a deprecated role for this privilege. Set \\"xpack.reporting.roles.enabled\\" to \\"false\\" to adopt the future behavior before upgrading.",
+    "title": "The \\"reporting_user\\" role is deprecated: check user roles",
+  },
+]
+`;
+
+exports[`users assigned to a deprecated role logs a deprecation when a user was found with a deprecated custom role from the roles.allow setting 1`] = `
+Array [
+  Object {
+    "correctiveActions": Object {
+      "manualSteps": Array [
+        "Go to Management > Security > Roles to create one or more roles that grant the Kibana application privilege for Reporting.",
+        "Grant Reporting privileges to users by assigning one of the new roles.",
+        "Remove the \\"reporting_user\\" role from all users and add the custom role. The affected users are: reportron[my_test_reporting_user].",
+      ],
+    },
+    "deprecationType": "feature",
+    "documentationUrl": "https://www.elastic.co/guide/en/kibana/branch/kibana-privileges.html",
+    "level": "warning",
+    "message": "The default mechanism for Reporting privileges will work differently in future versions, and this cluster has users who have a deprecated role for this privilege. Set \\"xpack.reporting.roles.enabled\\" to \\"false\\" to adopt the future behavior before upgrading.",
+    "title": "The \\"reporting_user\\" role is deprecated: check user roles",
+  },
+]
+`;
+
+exports[`users assigned to a deprecated role logs a deprecation when a user was found with a deprecated reporting_user role 1`] = `
+Array [
+  Object {
+    "correctiveActions": Object {
+      "manualSteps": Array [
+        "Go to Management > Security > Roles to create one or more roles that grant the Kibana application privilege for Reporting.",
+        "Grant Reporting privileges to users by assigning one of the new roles.",
+        "Remove the \\"reporting_user\\" role from all users and add the custom role. The affected users are: reportron[reporting_user].",
+      ],
+    },
+    "deprecationType": "feature",
+    "documentationUrl": "https://www.elastic.co/guide/en/kibana/branch/kibana-privileges.html",
+    "level": "warning",
+    "message": "The default mechanism for Reporting privileges will work differently in future versions, and this cluster has users who have a deprecated role for this privilege. Set \\"xpack.reporting.roles.enabled\\" to \\"false\\" to adopt the future behavior before upgrading.",
+    "title": "The \\"reporting_user\\" role is deprecated: check user roles",
+  },
+]
+`;

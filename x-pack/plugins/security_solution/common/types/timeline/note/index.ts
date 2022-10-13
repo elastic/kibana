@@ -8,7 +8,8 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
 import * as runtimeTypes from 'io-ts';
-import { Direction, Maybe } from '../../../search_strategy/common';
+import type { Maybe } from '../../../search_strategy/common';
+import { Direction } from '../../../search_strategy/common';
 
 import { unionWithNullType } from '../../../utility_types';
 
@@ -30,6 +31,12 @@ export const SavedNoteRuntimeType = runtimeTypes.intersection([
 ]);
 
 export interface SavedNote extends runtimeTypes.TypeOf<typeof SavedNoteRuntimeType> {}
+
+/**
+ * This type represents a note type stored in a saved object that does not include any fields that reference
+ * other saved objects.
+ */
+export type NoteWithoutExternalRefs = Omit<SavedNote, 'timelineId'>;
 
 /**
  * Note Saved object type with metadata

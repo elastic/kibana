@@ -10,13 +10,15 @@ import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
 import { DRAGGABLE_KEYBOARD_INSTRUCTIONS_NOT_DRAGGING_SCREEN_READER_ONLY } from '../../../../../common/components/drag_and_drop/translations';
-import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
+import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import { defaultHeaders, mockTimelineData, TestProviders } from '../../../../../common/mock';
 import '../../../../../common/mock/match_media';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
 import { getEmptyValue } from '../../../../../common/components/empty_value';
 import { deleteItemIdx, findItem } from './helpers';
 import { emptyColumnRenderer } from './empty_column_renderer';
+
+jest.mock('../../../../../common/lib/kibana');
 
 describe('empty_column_renderer', () => {
   let mockDatum: TimelineNonEcsData[];

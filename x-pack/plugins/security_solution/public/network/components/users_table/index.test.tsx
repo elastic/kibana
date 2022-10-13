@@ -19,12 +19,15 @@ import {
   createSecuritySolutionStorageMock,
 } from '../../../common/mock';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
-import { createStore, State } from '../../../common/store';
+import type { State } from '../../../common/store';
+import { createStore } from '../../../common/store';
 import { networkModel } from '../../store';
 
 import { UsersTable } from '.';
 import { mockUsersData } from './mock';
-import { FlowTarget } from '../../../../common/search_strategy';
+import { FlowTargetSourceDest } from '../../../../common/search_strategy';
+
+jest.mock('../../../common/lib/kibana');
 
 describe('Users Table Component', () => {
   const loadPage = jest.fn();
@@ -38,22 +41,25 @@ describe('Users Table Component', () => {
     store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   });
 
+  const defaultProps = {
+    data: mockUsersData.edges,
+    flowTarget: FlowTargetSourceDest.source,
+    fakeTotalCount: getOr(50, 'fakeTotalCount', mockUsersData.pageInfo),
+    id: 'user',
+    isInspect: false,
+    loading: false,
+    loadPage,
+    setQuerySkip: jest.fn(),
+    showMorePagesIndicator: getOr(false, 'showMorePagesIndicator', mockUsersData.pageInfo),
+    totalCount: 1,
+    type: networkModel.NetworkType.details,
+  };
+
   describe('Rendering', () => {
     test('it renders the default Users table', () => {
       const wrapper = shallow(
         <ReduxStoreProvider store={store}>
-          <UsersTable
-            data={mockUsersData.edges}
-            flowTarget={FlowTarget.source}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockUsersData.pageInfo)}
-            id="user"
-            isInspect={false}
-            loading={false}
-            loadPage={loadPage}
-            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockUsersData.pageInfo)}
-            totalCount={1}
-            type={networkModel.NetworkType.details}
-          />
+          <UsersTable {...defaultProps} />
         </ReduxStoreProvider>
       );
 
@@ -65,21 +71,10 @@ describe('Users Table Component', () => {
     test('when you click on the column header, you should show the sorting icon', () => {
       const wrapper = mount(
         <TestProviders store={store}>
-          <UsersTable
-            data={mockUsersData.edges}
-            flowTarget={FlowTarget.source}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', mockUsersData.pageInfo)}
-            id="user"
-            isInspect={false}
-            loading={false}
-            loadPage={loadPage}
-            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', mockUsersData.pageInfo)}
-            totalCount={1}
-            type={networkModel.NetworkType.details}
-          />
+          <UsersTable {...defaultProps} />
         </TestProviders>
       );
-      expect(store.getState().network.details.queries!.users.sort).toEqual({
+      expect(store.getState().network.details.queries?.users.sort).toEqual({
         direction: 'asc',
         field: 'name',
       });
@@ -88,13 +83,11 @@ describe('Users Table Component', () => {
 
       wrapper.update();
 
-      expect(store.getState().network.details.queries!.users.sort).toEqual({
+      expect(store.getState().network.details.queries?.users.sort).toEqual({
         direction: 'desc',
         field: 'name',
       });
-      expect(wrapper.find('.euiTable thead tr th button').first().text()).toEqual(
-        'UserClick to sort in ascending order'
-      );
+      expect(wrapper.find('.euiTable thead tr th button').first().text()).toEqual('User');
     });
   });
 });

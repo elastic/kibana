@@ -1,0 +1,8 @@
+{
+  "name": "@kbn/react-field",
+  "main": "./target_node/index.js",
+  "browser": "./target_webpack/index.js",
+  "version": "1.0.0",
+  "license": "SSPL-1.0 OR Elastic License 2.0",
+  "private": true
+}

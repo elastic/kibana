@@ -15,28 +15,34 @@ exports[`Storyshots components/datasource/DatasourceComponent datasource with ex
     >
       <span
         className="euiButtonContent__icon"
+        color="inherit"
         data-euiicon-type="arrowRight"
         size="m"
-      />
+      >
+        
+      </span>
       <span
         className="euiButtonEmpty__text"
       >
         <span
           className="canvasDataSource__triggerButtonIcon"
           data-euiicon-type="training"
-        />
+        >
+          
+        </span>
         Test Datasource
       </span>
     </span>
   </button>
   <div
-    className="euiSpacer euiSpacer--s"
+    className="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />
   <div
-    className="euiCallOut euiCallOut--warning"
+    className="euiPanel euiPanel--warning euiPanel--paddingMedium euiCallOut euiCallOut--warning emotion-euiPanel-none-m-warning-euiCallOut"
   >
     <div
-      className="euiText euiText--small"
+      className="euiText emotion-euiText-s-euiTextColor-default-euiCallOut__description"
+      style={Object {}}
     >
       <p>
         The datasource has an argument controlled by an expression. Use the expression editor to modify the datasource.
@@ -61,28 +67,33 @@ exports[`Storyshots components/datasource/DatasourceComponent simple datasource 
     >
       <span
         className="euiButtonContent__icon"
+        color="inherit"
         data-euiicon-type="arrowRight"
         size="m"
-      />
+      >
+        
+      </span>
       <span
         className="euiButtonEmpty__text"
       >
         <span
           className="canvasDataSource__triggerButtonIcon"
           data-euiicon-type="training"
-        />
+        >
+          
+        </span>
         Test Datasource
       </span>
     </span>
   </button>
   <div
-    className="euiSpacer euiSpacer--s"
+    className="euiSpacer euiSpacer--s emotion-euiSpacer-s"
   />
   <div
     className="render_to_dom"
   />
   <hr
-    className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
+    className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium emotion-euiHorizontalRule-full-m"
   />
   <div
     className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -111,7 +122,7 @@ exports[`Storyshots components/datasource/DatasourceComponent simple datasource 
       className="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <button
-        className="euiButton euiButton--secondary euiButton--small euiButton--fill"
+        className="euiButton euiButton--success euiButton--small euiButton--fill"
         disabled={false}
         onClick={[Function]}
         style={

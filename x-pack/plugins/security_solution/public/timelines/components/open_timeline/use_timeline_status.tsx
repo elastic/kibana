@@ -8,17 +8,19 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { EuiFilterButton } from '@elastic/eui';
 
-import {
-  TimelineStatus,
-  TimelineType,
+import type {
   TimelineTypeLiteralWithNull,
-  TemplateTimelineType,
   TemplateTimelineTypeLiteralWithNull,
   TimelineStatusLiteralWithNull,
 } from '../../../../common/types/timeline';
+import {
+  TimelineStatus,
+  TimelineType,
+  TemplateTimelineType,
+} from '../../../../common/types/timeline';
 
 import * as i18n from './translations';
-import { TemplateTimelineFilter } from './types';
+import type { TemplateTimelineFilter } from './types';
 import { installPrepackedTimelines } from '../../containers/api';
 
 export const useTimelineStatus = ({
@@ -36,14 +38,15 @@ export const useTimelineStatus = ({
   installPrepackagedTimelines: () => void;
 } => {
   const [selectedTab, setSelectedTab] = useState<TemplateTimelineTypeLiteralWithNull>(null);
-  const isTemplateFilterEnabled = useMemo(() => timelineType === TimelineType.template, [
-    timelineType,
-  ]);
+  const isTemplateFilterEnabled = useMemo(
+    () => timelineType === TimelineType.template,
+    [timelineType]
+  );
 
-  const templateTimelineType = useMemo(() => (!isTemplateFilterEnabled ? null : selectedTab), [
-    selectedTab,
-    isTemplateFilterEnabled,
-  ]);
+  const templateTimelineType = useMemo(
+    () => (!isTemplateFilterEnabled ? null : selectedTab),
+    [selectedTab, isTemplateFilterEnabled]
+  );
 
   const timelineStatus = useMemo(
     () =>
@@ -96,6 +99,7 @@ export const useTimelineStatus = ({
             onClick={onFilterClicked.bind(null, tab.id)}
             withNext={tab.withNext}
             isDisabled={tab.disabled}
+            data-test-subj={tab.name}
           >
             {tab.name}
           </EuiFilterButton>

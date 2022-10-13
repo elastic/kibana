@@ -6,14 +6,14 @@
  */
 
 import expect from '@kbn/expect';
-import fixture from './fixtures/detect_beats';
+import fixture from './fixtures/detect_beats.json';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
   describe('detect_beats', () => {
-    const archive = 'monitoring/setup/collection/detect_beats';
+    const archive = 'x-pack/test/functional/es_archives/monitoring/setup/collection/detect_beats';
     const timeRange = {
       min: '2019-04-09T00:00:00.741Z',
       max: '2019-04-09T23:59:59.741Z',

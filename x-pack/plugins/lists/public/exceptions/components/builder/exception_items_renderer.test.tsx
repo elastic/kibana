@@ -8,14 +8,11 @@
 import React from 'react';
 import { ReactWrapper, mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
-import { coreMock } from 'src/core/public/mocks';
-import { dataPluginMock } from 'src/plugins/data/public/mocks';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { fields, getField } from '@kbn/data-plugin/common/mocks';
 
-import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
-import {
-  fields,
-  getField,
-} from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
 import { getExceptionListItemSchemaMock } from '../../../../common/schemas/response/exception_list_item_schema.mock';
 import { getEntryMatchAnyMock } from '../../../../common/schemas/types/entry_match_any.mock';
 import { getEmptyValue } from '../../../common/empty_value';
@@ -23,7 +20,7 @@ import { getEmptyValue } from '../../../common/empty_value';
 import { ExceptionBuilderComponent } from './exception_items_renderer';
 
 const mockKibanaHttpService = coreMock.createStart().http;
-const { autocomplete: autocompleteStartMock } = dataPluginMock.createStartContract();
+const { autocomplete: autocompleteStartMock } = unifiedSearchPluginMock.createStartContract();
 
 describe('ExceptionBuilderComponent', () => {
   let wrapper: ReactWrapper;
@@ -118,6 +115,80 @@ describe('ExceptionBuilderComponent', () => {
     expect(wrapper.find('[data-test-subj="valuesAutocompleteMatchAny"]').at(0).text()).toEqual(
       'some ip'
     );
+  });
+
+  test('it displays "is in list" operators if "allowLargeValueLists" is true', async () => {
+    wrapper = mount(
+      <EuiThemeProvider>
+        <ExceptionBuilderComponent
+          allowLargeValueLists={true}
+          autocompleteService={autocompleteStartMock}
+          exceptionListItems={[
+            {
+              ...getExceptionListItemSchemaMock(),
+              entries: [
+                { ...getEntryMatchAnyMock(), field: getField('ip').name, value: ['some ip'] },
+              ],
+            },
+          ]}
+          httpService={mockKibanaHttpService}
+          indexPatterns={{
+            fields,
+            id: '1234',
+            title: 'logstash-*',
+          }}
+          isAndDisabled={false}
+          isNestedDisabled={false}
+          isOrDisabled={false}
+          listId="list_id"
+          listNamespaceType="single"
+          listType="detection"
+          ruleName="Test rule"
+          onChange={jest.fn()}
+        />
+      </EuiThemeProvider>
+    );
+
+    expect(
+      wrapper.find('[data-test-subj="operatorAutocompleteComboBox"]').at(0).prop('options')
+    ).toEqual(expect.arrayContaining([{ label: 'is in list' }, { label: 'is not in list' }]));
+  });
+
+  test('it still displays "is in list" operators if "allowLargeValueLists" is false', async () => {
+    wrapper = mount(
+      <EuiThemeProvider>
+        <ExceptionBuilderComponent
+          allowLargeValueLists={false}
+          autocompleteService={autocompleteStartMock}
+          exceptionListItems={[
+            {
+              ...getExceptionListItemSchemaMock(),
+              entries: [
+                { ...getEntryMatchAnyMock(), field: getField('ip').name, value: ['some ip'] },
+              ],
+            },
+          ]}
+          httpService={mockKibanaHttpService}
+          indexPatterns={{
+            fields,
+            id: '1234',
+            title: 'logstash-*',
+          }}
+          isAndDisabled={false}
+          isNestedDisabled={false}
+          isOrDisabled={false}
+          listId="list_id"
+          listNamespaceType="single"
+          listType="detection"
+          ruleName="Test rule"
+          onChange={jest.fn()}
+        />
+      </EuiThemeProvider>
+    );
+
+    expect(
+      wrapper.find('[data-test-subj="operatorAutocompleteComboBox"]').at(0).prop('options')
+    ).toEqual(expect.arrayContaining([{ label: 'is in list' }, { label: 'is not in list' }]));
   });
 
   test('it displays "or", "and" and "add nested button" enabled', () => {

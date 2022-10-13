@@ -9,11 +9,11 @@
 import { Observable } from 'rxjs';
 import { SearchFilterConfig, EuiTableFieldDataColumnType } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
-import { SavedObject, SavedObjectReference } from '../../../core/types';
-import { SavedObjectsFindOptionsReference } from '../../../core/public';
-import { SavedObject as SavedObjectClass } from '../../saved_objects/public';
+import { SavedObject, SavedObjectReference } from '@kbn/core/types';
+import { SavedObjectsFindOptionsReference } from '@kbn/core/public';
+import { SavedObject as SavedObjectClass } from '@kbn/saved-objects-plugin/public';
 import { TagDecoratedSavedObject } from './decorator';
-import { ITagsClient, Tag } from '../common';
+import { ITagsClient, Tag, TagWithOptionalId } from '../common';
 
 /**
  * @public
@@ -102,7 +102,9 @@ export interface SavedObjectsTaggingApiUi {
    * )
    * ```
    */
-  getTableColumnDefinition(): EuiTableFieldDataColumnType<SavedObject>;
+  getTableColumnDefinition(
+    options?: GetTableColumnDefinitionOptions
+  ): EuiTableFieldDataColumnType<SavedObject>;
 
   /**
    * Convert given tag name to a {@link SavedObjectsFindOptionsReference | reference }
@@ -215,7 +217,11 @@ export interface TagListComponentProps {
   /**
    * The object to display tags for.
    */
-  object: SavedObject;
+  object: { references: SavedObject['references'] };
+  /**
+   * Handler to execute when clicking on a tag
+   */
+  onClick?: (tag: TagWithOptionalId) => void;
 }
 
 /**
@@ -249,6 +255,28 @@ export interface SavedObjectSaveModalTagSelectorComponentProps {
    * tags selection callback
    */
   onTagsSelected: (ids: string[]) => void;
+}
+
+/**
+ * Options for the {@link SavedObjectsTaggingApiUi.getTableColumnDefinition | getTableColumnDefinition api}
+ *
+ * @public
+ */
+export interface GetTableColumnDefinitionOptions {
+  /**
+   * By default, the `tags` column definition will be automatically sortable
+   * by tag name.
+   *
+   * However, when paging is performed on the server, we need to remove the sorting
+   * capability from the column to avoid unexpected behavior by triggering fetch request
+   * when sorting by column.
+   *
+   * Should be set to `true` when generating the definition for a table that performs
+   * server-side paging.
+   *
+   * Defaults to false.
+   */
+  serverPaging?: boolean;
 }
 
 /**

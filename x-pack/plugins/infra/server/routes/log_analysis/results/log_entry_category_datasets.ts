@@ -35,10 +35,10 @@ export const initGetLogEntryCategoryDatasetsRoute = ({ framework }: InfraBackend
       } = request.body;
 
       try {
-        assertHasInfraMlPlugins(requestContext);
+        const infraMlContext = await assertHasInfraMlPlugins(requestContext);
 
         const { data: logEntryCategoryDatasets, timing } = await getLogEntryCategoryDatasets(
-          requestContext,
+          { infra: await infraMlContext.infra },
           sourceId,
           startTime,
           endTime

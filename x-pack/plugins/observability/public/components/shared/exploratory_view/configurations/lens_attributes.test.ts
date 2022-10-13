@@ -5,44 +5,176 @@
  * 2.0.
  */
 
-import { LensAttributes } from './lens_attributes';
-import { mockAppIndexPattern, mockIndexPattern } from '../rtl_helpers';
+import { LayerConfig, LensAttributes } from './lens_attributes';
+import { mockAppDataView, mockDataView } from '../rtl_helpers';
 import { getDefaultConfigs } from './default_configs';
 import { sampleAttribute } from './test_data/sample_attribute';
-import { LCP_FIELD, SERVICE_NAME, USER_AGENT_NAME } from './constants/elasticsearch_fieldnames';
+
+import {
+  LCP_FIELD,
+  TRANSACTION_DURATION,
+  USER_AGENT_NAME,
+} from './constants/elasticsearch_fieldnames';
+import { buildExistsFilter, buildPhrasesFilter } from './utils';
+import { sampleAttributeKpi } from './test_data/sample_attribute_kpi';
+import { RECORDS_FIELD, REPORT_METRIC_FIELD, PERCENTILE_RANKS, ReportTypes } from './constants';
+import { obsvReportConfigMap } from '../obsv_exploratory_view';
+import { sampleAttributeWithReferenceLines } from './test_data/sample_attribute_with_reference_lines';
+import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
+import { FormulaPublicApi } from '@kbn/lens-plugin/public';
 
 describe('Lens Attribute', () => {
-  mockAppIndexPattern();
+  mockAppDataView();
 
   const reportViewConfig = getDefaultConfigs({
-    reportType: 'pld',
-    indexPattern: mockIndexPattern,
-    seriesId: 'series-id',
+    reportType: 'data-distribution',
+    dataType: 'ux',
+    dataView: mockDataView,
+    reportConfigMap: obsvReportConfigMap,
   });
+
+  reportViewConfig.baseFilters?.push(...buildExistsFilter('transaction.type', mockDataView));
 
   let lnsAttr: LensAttributes;
 
-  beforeEach(() => {
-    lnsAttr = new LensAttributes(mockIndexPattern, reportViewConfig, 'line', [], 'count', {});
+  const layerConfig: LayerConfig = {
+    seriesConfig: reportViewConfig,
+    seriesType: 'line',
+    operationType: 'count',
+    indexPattern: mockDataView,
+    reportDefinitions: {},
+    time: { from: 'now-15m', to: 'now' },
+    color: 'green',
+    name: 'test-series',
+    selectedMetricField: TRANSACTION_DURATION,
+  };
+
+  const lensPluginMockStart = lensPluginMock.createStartContract();
+
+  let formulaHelper: FormulaPublicApi;
+
+  beforeEach(async () => {
+    formulaHelper = (await lensPluginMockStart.stateHelperApi()).formula;
+    lnsAttr = new LensAttributes([layerConfig], reportViewConfig.reportType, formulaHelper);
   });
 
   it('should return expected json', function () {
     expect(lnsAttr.getJSON()).toEqual(sampleAttribute);
   });
 
+  it('should return expected json for kpi report type', function () {
+    const seriesConfigKpi = getDefaultConfigs({
+      reportType: ReportTypes.KPI,
+      dataType: 'ux',
+      dataView: mockDataView,
+      reportConfigMap: obsvReportConfigMap,
+    });
+
+    const lnsAttrKpi = new LensAttributes(
+      [
+        {
+          seriesConfig: seriesConfigKpi,
+          seriesType: 'line',
+          operationType: 'count',
+          indexPattern: mockDataView,
+          reportDefinitions: { 'service.name': ['elastic-co'] },
+          time: { from: 'now-15m', to: 'now' },
+          color: 'green',
+          name: 'test-series',
+          selectedMetricField: RECORDS_FIELD,
+        },
+      ],
+      ReportTypes.KPI
+    );
+
+    expect(lnsAttrKpi.getJSON()).toEqual(sampleAttributeKpi);
+  });
+
+  it('should return expected json for percentile breakdowns', function () {
+    const seriesConfigKpi = getDefaultConfigs({
+      reportType: ReportTypes.KPI,
+      dataType: 'ux',
+      dataView: mockDataView,
+      reportConfigMap: obsvReportConfigMap,
+    });
+
+    const lnsAttrKpi = new LensAttributes(
+      [
+        {
+          filters: [],
+          seriesConfig: seriesConfigKpi,
+          time: {
+            from: 'now-1h',
+            to: 'now',
+          },
+          indexPattern: mockDataView,
+          name: 'ux-series-1',
+          breakdown: 'percentile',
+          reportDefinitions: {},
+          selectedMetricField: 'transaction.duration.us',
+          color: '#54b399',
+        },
+      ],
+      ReportTypes.KPI
+    );
+
+    expect(lnsAttrKpi.getJSON().state.datasourceStates.formBased.layers.layer0.columns).toEqual({
+      'x-axis-column-layer0': {
+        dataType: 'date',
+        isBucketed: true,
+        label: '@timestamp',
+        operationType: 'date_histogram',
+        params: {
+          interval: 'auto',
+        },
+        scale: 'interval',
+        sourceField: '@timestamp',
+      },
+      ...PERCENTILE_RANKS.reduce((acc: Record<string, any>, rank, index) => {
+        acc[`y-axis-column-${index === 0 ? 'layer' + index : index}`] = {
+          customLabel: true,
+          dataType: 'number',
+          filter: {
+            language: 'kuery',
+            query: 'transaction.type: page-load and processor.event: transaction',
+          },
+          isBucketed: false,
+          label: `${rank} percentile of page load time`,
+          operationType: 'percentile',
+          params: {
+            percentile: Number(rank.slice(0, 2)),
+          },
+          scale: 'ratio',
+          sourceField: 'transaction.duration.us',
+        };
+        return acc;
+      }, {}),
+    });
+  });
+
   it('should return main y axis', function () {
-    expect(lnsAttr.getMainYAxis()).toEqual({
+    expect(lnsAttr.getMainYAxis(layerConfig, 'layer0', '')).toEqual({
+      customLabel: true,
       dataType: 'number',
       isBucketed: false,
       label: 'Pages loaded',
-      operationType: 'count',
-      scale: 'ratio',
-      sourceField: 'Records',
+      operationType: 'formula',
+      params: {
+        format: {
+          id: 'percent',
+          params: {
+            decimals: 0,
+          },
+        },
+        formula: 'count() / overall_sum(count())',
+        isFormulaBroken: false,
+      },
+      references: ['y-axis-column-layer0X3'],
     });
   });
 
   it('should return expected field type', function () {
-    expect(JSON.stringify(lnsAttr.getFieldMeta('transaction.type'))).toEqual(
+    expect(JSON.stringify(lnsAttr.getFieldMeta('transaction.type', layerConfig))).toEqual(
       JSON.stringify({
         fieldMeta: {
           count: 0,
@@ -60,7 +192,7 @@ describe('Lens Attribute', () => {
   });
 
   it('should return expected field type for custom field with default value', function () {
-    expect(JSON.stringify(lnsAttr.getFieldMeta('performance.metric'))).toEqual(
+    expect(JSON.stringify(lnsAttr.getFieldMeta(REPORT_METRIC_FIELD, layerConfig))).toEqual(
       JSON.stringify({
         fieldMeta: {
           count: 0,
@@ -73,37 +205,51 @@ describe('Lens Attribute', () => {
           readFromDocValues: true,
         },
         fieldName: 'transaction.duration.us',
+        columnLabel: 'Page load time',
+        showPercentileAnnotations: true,
       })
     );
   });
 
   it('should return expected field type for custom field with passed value', function () {
-    lnsAttr = new LensAttributes(mockIndexPattern, reportViewConfig, 'line', [], 'count', {
-      'performance.metric': [LCP_FIELD],
-    });
+    const layerConfig1: LayerConfig = {
+      seriesConfig: reportViewConfig,
+      seriesType: 'line',
+      operationType: 'count',
+      indexPattern: mockDataView,
+      reportDefinitions: { 'performance.metric': [LCP_FIELD] },
+      time: { from: 'now-15m', to: 'now' },
+      color: 'green',
+      name: 'test-series',
+      selectedMetricField: TRANSACTION_DURATION,
+    };
 
-    expect(JSON.stringify(lnsAttr.getFieldMeta('performance.metric'))).toEqual(
+    lnsAttr = new LensAttributes([layerConfig1], reportViewConfig.reportType, formulaHelper);
+
+    expect(JSON.stringify(lnsAttr.getFieldMeta(REPORT_METRIC_FIELD, layerConfig1))).toEqual(
       JSON.stringify({
         fieldMeta: {
           count: 0,
-          name: LCP_FIELD,
+          name: TRANSACTION_DURATION,
           type: 'number',
-          esTypes: ['scaled_float'],
+          esTypes: ['long'],
           scripted: false,
           searchable: true,
           aggregatable: true,
           readFromDocValues: true,
         },
-        fieldName: LCP_FIELD,
+        fieldName: TRANSACTION_DURATION,
+        columnLabel: 'Page load time',
+        showPercentileAnnotations: true,
       })
     );
   });
 
   it('should return expected number range column', function () {
-    expect(lnsAttr.getNumberRangeColumn('transaction.duration.us')).toEqual({
+    expect(lnsAttr.getNumberRangeColumn('transaction.duration.us', reportViewConfig)).toEqual({
       dataType: 'number',
       isBucketed: true,
-      label: 'Page load time (Seconds)',
+      label: 'Page load time',
       operationType: 'range',
       params: {
         maxBars: 'auto',
@@ -122,10 +268,10 @@ describe('Lens Attribute', () => {
   });
 
   it('should return expected number operation column', function () {
-    expect(lnsAttr.getNumberRangeColumn('transaction.duration.us')).toEqual({
+    expect(lnsAttr.getNumberRangeColumn('transaction.duration.us', reportViewConfig)).toEqual({
       dataType: 'number',
       isBucketed: true,
-      label: 'Page load time (Seconds)',
+      label: 'Page load time',
       operationType: 'range',
       params: {
         maxBars: 'auto',
@@ -158,10 +304,10 @@ describe('Lens Attribute', () => {
   });
 
   it('should return main x axis', function () {
-    expect(lnsAttr.getXAxis()).toEqual({
+    expect(lnsAttr.getXAxis(layerConfig, 'layer0')).toEqual({
       dataType: 'number',
       isBucketed: true,
-      label: 'Page load time (Seconds)',
+      label: 'Page load time',
       operationType: 'range',
       params: {
         maxBars: 'auto',
@@ -179,241 +325,353 @@ describe('Lens Attribute', () => {
     });
   });
 
-  it('should return first layer', function () {
-    expect(lnsAttr.getLayer()).toEqual({
-      columnOrder: ['x-axis-column', 'y-axis-column'],
-      columns: {
-        'x-axis-column': {
-          dataType: 'number',
-          isBucketed: true,
-          label: 'Page load time (Seconds)',
-          operationType: 'range',
-          params: {
-            maxBars: 'auto',
-            ranges: [
-              {
-                from: 0,
-                label: '',
-                to: 1000,
-              },
-            ],
-            type: 'histogram',
-          },
-          scale: 'interval',
-          sourceField: 'transaction.duration.us',
-        },
-        'y-axis-column': {
-          dataType: 'number',
-          isBucketed: false,
-          label: 'Pages loaded',
-          operationType: 'count',
-          scale: 'ratio',
-          sourceField: 'Records',
-        },
-      },
-      incompleteColumns: {},
+  it('should hide y axis when there are multiple series', function () {
+    const lensAttrWithMultiSeries = new LensAttributes(
+      [layerConfig, layerConfig],
+      reportViewConfig.reportType,
+      formulaHelper
+    ).getJSON() as any;
+    expect(lensAttrWithMultiSeries.state.visualization.axisTitlesVisibilitySettings).toEqual({
+      x: false,
+      yLeft: false,
+      yRight: false,
     });
+  });
+
+  it('should show y axis when there is a single series', function () {
+    const lensAttrWithMultiSeries = new LensAttributes(
+      [layerConfig],
+      reportViewConfig.reportType,
+      formulaHelper
+    ).getJSON() as any;
+    expect(lensAttrWithMultiSeries.state.visualization.axisTitlesVisibilitySettings).toEqual({
+      x: false,
+      yLeft: true,
+      yRight: true,
+    });
+  });
+
+  it('should return first layer', function () {
+    expect(lnsAttr.getLayers()).toEqual(sampleAttribute.state.datasourceStates.formBased.layers);
   });
 
   it('should return expected XYState', function () {
     expect(lnsAttr.getXyState()).toEqual({
-      axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
+      axisTitlesVisibilitySettings: { x: false, yLeft: true, yRight: true },
       curveType: 'CURVE_MONOTONE_X',
       fittingFunction: 'Linear',
-      gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },
+      gridlinesVisibilitySettings: { x: false, yLeft: true, yRight: true },
       layers: [
         {
-          accessors: ['y-axis-column'],
-          layerId: 'layer1',
+          accessors: ['y-axis-column-layer0'],
+          layerId: 'layer0',
+          layerType: 'data',
           palette: undefined,
           seriesType: 'line',
-          xAccessor: 'x-axis-column',
-          yConfig: [{ color: 'green', forAccessor: 'y-axis-column' }],
+          xAccessor: 'x-axis-column-layer0',
+          yConfig: [{ color: 'green', forAccessor: 'y-axis-column-layer0', axisMode: 'left' }],
+        },
+        {
+          accessors: [
+            '50th-percentile-reference-line-layer0-reference-lines',
+            '75th-percentile-reference-line-layer0-reference-lines',
+            '90th-percentile-reference-line-layer0-reference-lines',
+            '95th-percentile-reference-line-layer0-reference-lines',
+            '99th-percentile-reference-line-layer0-reference-lines',
+          ],
+          layerId: 'layer0-reference-lines',
+          layerType: 'referenceLine',
+          yConfig: [
+            {
+              axisMode: 'bottom',
+              color: '#6092C0',
+              forAccessor: '50th-percentile-reference-line-layer0-reference-lines',
+              lineStyle: 'solid',
+              lineWidth: 2,
+              textVisibility: true,
+            },
+            {
+              axisMode: 'bottom',
+              color: '#6092C0',
+              forAccessor: '75th-percentile-reference-line-layer0-reference-lines',
+              lineStyle: 'solid',
+              lineWidth: 2,
+              textVisibility: true,
+            },
+            {
+              axisMode: 'bottom',
+              color: '#6092C0',
+              forAccessor: '90th-percentile-reference-line-layer0-reference-lines',
+              lineStyle: 'solid',
+              lineWidth: 2,
+              textVisibility: true,
+            },
+            {
+              axisMode: 'bottom',
+              color: '#6092C0',
+              forAccessor: '95th-percentile-reference-line-layer0-reference-lines',
+              lineStyle: 'solid',
+              lineWidth: 2,
+              textVisibility: true,
+            },
+            {
+              axisMode: 'bottom',
+              color: '#6092C0',
+              forAccessor: '99th-percentile-reference-line-layer0-reference-lines',
+              lineStyle: 'solid',
+              lineWidth: 2,
+              textVisibility: true,
+            },
+          ],
         },
       ],
-      legend: { isVisible: true, position: 'right' },
+      legend: { isVisible: true, showSingleSeries: true, position: 'right' },
       preferredSeriesType: 'line',
       tickLabelsVisibilitySettings: { x: true, yLeft: true, yRight: true },
       valueLabels: 'hide',
     });
   });
 
-  describe('ParseFilters function', function () {
-    it('should parse default filters', function () {
-      expect(lnsAttr.parseFilters()).toEqual([
-        { meta: { index: 'apm-*' }, query: { match_phrase: { 'transaction.type': 'page-load' } } },
-        { meta: { index: 'apm-*' }, query: { match_phrase: { 'processor.event': 'transaction' } } },
-      ]);
-    });
-
-    it('should parse default and ui filters', function () {
-      lnsAttr = new LensAttributes(
-        mockIndexPattern,
-        reportViewConfig,
-        'line',
-        [
-          { field: SERVICE_NAME, values: ['elastic-co', 'kibana-front'] },
-          { field: USER_AGENT_NAME, values: ['Firefox'], notValues: ['Chrome'] },
-        ],
-        'count',
-        {}
-      );
-
-      expect(lnsAttr.parseFilters()).toEqual([
-        { meta: { index: 'apm-*' }, query: { match_phrase: { 'transaction.type': 'page-load' } } },
-        { meta: { index: 'apm-*' }, query: { match_phrase: { 'processor.event': 'transaction' } } },
-        {
-          meta: {
-            index: 'apm-*',
-            key: 'service.name',
-            params: ['elastic-co', 'kibana-front'],
-            type: 'phrases',
-            value: 'elastic-co, kibana-front',
-          },
-          query: {
-            bool: {
-              minimum_should_match: 1,
-              should: [
-                {
-                  match_phrase: {
-                    'service.name': 'elastic-co',
-                  },
-                },
-                {
-                  match_phrase: {
-                    'service.name': 'kibana-front',
-                  },
-                },
-              ],
-            },
-          },
-        },
-        {
-          meta: {
-            index: 'apm-*',
-          },
-          query: {
-            match_phrase: {
-              'user_agent.name': 'Firefox',
-            },
-          },
-        },
-        {
-          meta: {
-            index: 'apm-*',
-            negate: true,
-          },
-          query: {
-            match_phrase: {
-              'user_agent.name': 'Chrome',
-            },
-          },
-        },
-      ]);
-    });
+  it('should not use global filters when there is more than one series', function () {
+    const multiSeriesLensAttr = new LensAttributes(
+      [layerConfig, layerConfig],
+      reportViewConfig.reportType,
+      formulaHelper
+    ).getJSON();
+    expect(multiSeriesLensAttr.state.query.query).toEqual('transaction.duration.us < 60000000');
   });
 
   describe('Layer breakdowns', function () {
-    it('should add breakdown column', function () {
-      lnsAttr.addBreakdown(USER_AGENT_NAME);
+    it('should return breakdown column', function () {
+      const layerConfig1: LayerConfig = {
+        seriesConfig: reportViewConfig,
+        seriesType: 'line',
+        operationType: 'count',
+        indexPattern: mockDataView,
+        reportDefinitions: { 'performance.metric': [LCP_FIELD] },
+        breakdown: USER_AGENT_NAME,
+        time: { from: 'now-15m', to: 'now' },
+        color: 'green',
+        name: 'test-series',
+        selectedMetricField: LCP_FIELD,
+      };
 
-      expect(lnsAttr.visualization.layers).toEqual([
+      lnsAttr = new LensAttributes([layerConfig1], reportViewConfig.reportType, formulaHelper);
+
+      lnsAttr.getBreakdownColumn({
+        layerConfig: layerConfig1,
+        sourceField: USER_AGENT_NAME,
+        layerId: 'layer0',
+        indexPattern: mockDataView,
+        labels: layerConfig.seriesConfig.labels,
+      });
+
+      expect(lnsAttr.visualization?.layers).toEqual([
         {
-          accessors: ['y-axis-column'],
-          layerId: 'layer1',
+          accessors: ['y-axis-column-layer0'],
+          layerId: 'layer0',
+          layerType: 'data',
           palette: undefined,
           seriesType: 'line',
-          splitAccessor: 'break-down-column',
-          xAccessor: 'x-axis-column',
-          yConfig: [{ color: 'green', forAccessor: 'y-axis-column' }],
+          splitAccessor: 'breakdown-column-layer0',
+          xAccessor: 'x-axis-column-layer0',
+          yConfig: [{ color: 'green', forAccessor: 'y-axis-column-layer0', axisMode: 'left' }],
         },
       ]);
 
-      expect(lnsAttr.layers.layer1).toEqual({
-        columnOrder: ['x-axis-column', 'break-down-column', 'y-axis-column'],
+      expect(lnsAttr.layers.layer0).toEqual({
+        columnOrder: [
+          'breakdown-column-layer0',
+          'x-axis-column-layer0',
+          'y-axis-column-layer0',
+          'y-axis-column-layer0X0',
+          'y-axis-column-layer0X1',
+          'y-axis-column-layer0X2',
+          'y-axis-column-layer0X3',
+        ],
         columns: {
-          'break-down-column': {
+          'breakdown-column-layer0': {
             dataType: 'string',
             isBucketed: true,
             label: 'Top values of Browser family',
             operationType: 'terms',
             params: {
               missingBucket: false,
-              orderBy: { columnId: 'y-axis-column', type: 'column' },
+              orderAgg: {
+                dataType: 'number',
+                isBucketed: false,
+                label: 'Count of records',
+                operationType: 'count',
+                scale: 'ratio',
+                sourceField: '___records___',
+              },
+              orderBy: {
+                type: 'custom',
+              },
               orderDirection: 'desc',
               otherBucket: true,
-              size: 3,
+              size: 10,
             },
             scale: 'ordinal',
             sourceField: 'user_agent.name',
           },
-          'x-axis-column': {
+          'x-axis-column-layer0': {
             dataType: 'number',
             isBucketed: true,
-            label: 'Page load time (Seconds)',
+            label: 'Largest contentful paint',
             operationType: 'range',
             params: {
               maxBars: 'auto',
-              ranges: [{ from: 0, label: '', to: 1000 }],
+              ranges: [
+                {
+                  from: 0,
+                  label: '',
+                  to: 1000,
+                },
+              ],
               type: 'histogram',
             },
             scale: 'interval',
-            sourceField: 'transaction.duration.us',
+            sourceField: LCP_FIELD,
           },
-          'y-axis-column': {
+          'y-axis-column-layer0': {
+            customLabel: true,
             dataType: 'number',
+            filter: {
+              language: 'kuery',
+              query:
+                'transaction.type: page-load and processor.event: transaction and transaction.type : *',
+            },
             isBucketed: false,
             label: 'Pages loaded',
+            operationType: 'formula',
+            params: {
+              format: {
+                id: 'percent',
+                params: {
+                  decimals: 0,
+                },
+              },
+              formula:
+                "count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *') / overall_sum(count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *'))",
+              isFormulaBroken: false,
+            },
+            references: ['y-axis-column-layer0X3'],
+          },
+          'y-axis-column-layer0X0': {
+            customLabel: true,
+            dataType: 'number',
+            filter: {
+              language: 'kuery',
+              query:
+                'transaction.type: page-load and processor.event: transaction and transaction.type : *',
+            },
+            isBucketed: false,
+            label: 'Part of Pages loaded',
             operationType: 'count',
+            params: {
+              emptyAsNull: false,
+            },
             scale: 'ratio',
-            sourceField: 'Records',
+            sourceField: RECORDS_FIELD,
+          },
+          'y-axis-column-layer0X1': {
+            customLabel: true,
+            dataType: 'number',
+            filter: {
+              language: 'kuery',
+              query:
+                'transaction.type: page-load and processor.event: transaction and transaction.type : *',
+            },
+            isBucketed: false,
+            label: 'Part of Pages loaded',
+            operationType: 'count',
+            params: {
+              emptyAsNull: false,
+            },
+            scale: 'ratio',
+            sourceField: RECORDS_FIELD,
+          },
+          'y-axis-column-layer0X2': {
+            customLabel: true,
+            dataType: 'number',
+            isBucketed: false,
+            label: 'Part of Pages loaded',
+            operationType: 'overall_sum',
+            references: ['y-axis-column-layer0X1'],
+            scale: 'ratio',
+          },
+          'y-axis-column-layer0X3': {
+            customLabel: true,
+            dataType: 'number',
+            isBucketed: false,
+            label: 'Part of Pages loaded',
+            operationType: 'math',
+            params: {
+              tinymathAst: {
+                args: ['y-axis-column-layer0X0', 'y-axis-column-layer0X2'],
+                location: {
+                  max: 212,
+                  min: 0,
+                },
+                name: 'divide',
+                text: "count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *') / overall_sum(count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *'))",
+                type: 'function',
+              },
+            },
+            references: ['y-axis-column-layer0X0', 'y-axis-column-layer0X2'],
+            scale: 'ratio',
           },
         },
         incompleteColumns: {},
       });
     });
+  });
 
-    it('should remove breakdown column', function () {
-      lnsAttr.addBreakdown(USER_AGENT_NAME);
+  describe('Layer Filters', function () {
+    it('should return expected filters', function () {
+      reportViewConfig.baseFilters?.push(
+        ...buildPhrasesFilter('service.name', ['elastic', 'kibana'], mockDataView)
+      );
 
-      lnsAttr.removeBreakdown();
+      const layerConfig1: LayerConfig = {
+        seriesConfig: reportViewConfig,
+        seriesType: 'line',
+        operationType: 'count',
+        indexPattern: mockDataView,
+        reportDefinitions: { 'performance.metric': [LCP_FIELD] },
+        time: { from: 'now-15m', to: 'now' },
+        color: 'green',
+        name: 'test-series',
+        selectedMetricField: TRANSACTION_DURATION,
+      };
 
-      expect(lnsAttr.visualization.layers).toEqual([
-        {
-          accessors: ['y-axis-column'],
-          layerId: 'layer1',
-          palette: undefined,
-          seriesType: 'line',
-          xAccessor: 'x-axis-column',
-          yConfig: [{ color: 'green', forAccessor: 'y-axis-column' }],
-        },
-      ]);
+      const filters = lnsAttr.getLayerFilters(layerConfig1, 2);
 
-      expect(lnsAttr.layers.layer1.columnOrder).toEqual(['x-axis-column', 'y-axis-column']);
+      expect(filters).toEqual(
+        '@timestamp >= now-15m and @timestamp <= now and transaction.type: page-load and processor.event: transaction and transaction.type : * and service.name: (elastic or kibana)'
+      );
+    });
+  });
 
-      expect(lnsAttr.layers.layer1.columns).toEqual({
-        'x-axis-column': {
-          dataType: 'number',
-          isBucketed: true,
-          label: 'Page load time (Seconds)',
-          operationType: 'range',
-          params: {
-            maxBars: 'auto',
-            ranges: [{ from: 0, label: '', to: 1000 }],
-            type: 'histogram',
-          },
-          scale: 'interval',
-          sourceField: 'transaction.duration.us',
-        },
-        'y-axis-column': {
-          dataType: 'number',
-          isBucketed: false,
-          label: 'Pages loaded',
-          operationType: 'count',
-          scale: 'ratio',
-          sourceField: 'Records',
-        },
-      });
+  describe('Reference line layers', function () {
+    it('should return expected reference lines', function () {
+      const layerConfig1: LayerConfig = {
+        seriesConfig: reportViewConfig,
+        seriesType: 'line',
+        indexPattern: mockDataView,
+        reportDefinitions: {},
+        time: { from: 'now-15m', to: 'now' },
+        color: 'green',
+        name: 'test-series',
+        selectedMetricField: TRANSACTION_DURATION,
+      };
+
+      lnsAttr = new LensAttributes([layerConfig1], reportViewConfig.reportType, formulaHelper);
+
+      const attributes = lnsAttr.getJSON();
+
+      expect(attributes).toEqual(sampleAttributeWithReferenceLines);
     });
   });
 });

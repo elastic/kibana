@@ -6,12 +6,11 @@
  */
 
 import _ from 'lodash';
+import { stackManagementSchema } from '@kbn/kibana-usage-collection-plugin/server/collectors/management/schema';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { stackManagementSchema } from '../../../../../src/plugins/kibana_usage_collection/server/collectors/management/schema';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Stack Management', function () {
-    this.tags('ciGroup1');
     const { common } = getPageObjects(['common']);
     const browser = getService('browser');
 
@@ -19,6 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     before(async () => {
       await common.navigateToApp('home'); // Navigate to Home to make sure all the appIds are loaded
+      await common.isChromeVisible(); // Make sure the page is fully loaded
       registeredSettings = await browser.execute(() => window.__registeredUiSettings__);
     });
 

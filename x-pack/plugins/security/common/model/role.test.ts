@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Role } from '../../common/model';
+import type { Role } from '.';
 import {
   copyRole,
   getExtendedRoleDeprecationNotice,
@@ -14,7 +14,7 @@ import {
   isRoleReadOnly,
   isRoleReserved,
   prepareRoleClone,
-} from '../../common/model';
+} from '.';
 
 describe('role', () => {
   describe('isRoleEnabled', () => {

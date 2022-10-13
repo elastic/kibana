@@ -7,9 +7,10 @@
 
 import {
   EuiErrorBoundary,
+  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
+  EuiPanel,
   EuiLink,
   EuiText,
   EuiTitle,
@@ -30,7 +31,7 @@ export function NewsFeed({ items }: Props) {
     // The news feed is manually added/edited, to prevent any errors caused by typos or missing fields,
     // wraps the component with EuiErrorBoundary to avoid breaking the entire page.
     <EuiErrorBoundary>
-      <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexGrid direction="column" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
             <h4>
@@ -45,7 +46,7 @@ export function NewsFeed({ items }: Props) {
             <NewsItem item={item} />
           </EuiFlexItem>
         ))}
-      </EuiFlexGroup>
+      </EuiFlexGrid>
     </EuiErrorBoundary>
   );
 }
@@ -56,48 +57,49 @@ function NewsItem({ item }: { item: INewsItem }) {
   const theme = useContext(ThemeContext);
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiFlexItem grow={false}>
-        <EuiTitle size="xxxs">
-          <h4>{item.title.en}</h4>
-        </EuiTitle>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="s">
-          <EuiFlexItem>
-            <EuiFlexGroup direction="column" gutterSize="s" alignItems="baseline">
-              <EuiFlexItem>
-                <EuiText grow={false} size="xs" color="subdued">
-                  {limitString(item.description.en, 128)}
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs">
-                  <EuiLink href={item.link_url.en} target="_blank" external>
-                    {i18n.translate('xpack.observability.news.readFullStory', {
-                      defaultMessage: 'Read full story',
-                    })}
-                  </EuiLink>
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          {item.image_url?.en && (
+    <EuiPanel hasBorder={true}>
+      <EuiFlexGrid direction="column" gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xxs">
+            <h4>{item.title.en}</h4>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFlexGroup gutterSize="s">
             <EuiFlexItem grow={false}>
-              <img
-                data-test-subj="news_image"
-                style={{ border: theme.eui.euiBorderThin }}
-                width={48}
-                height={48}
-                alt={item.title.en}
-                src={item.image_url.en}
-                className="obsNewsFeed__itemImg"
-              />
+              <EuiFlexGroup direction="column" gutterSize="s">
+                <EuiFlexItem>
+                  <EuiText size="s" color="subdued">
+                    {limitString(item.description.en, 128)}
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiText size="s">
+                    <EuiLink href={item.link_url.en} target="_blank" external>
+                      {i18n.translate('xpack.observability.news.readFullStory', {
+                        defaultMessage: 'Read full story',
+                      })}
+                    </EuiLink>
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiHorizontalRule margin="s" />
-    </EuiFlexGroup>
+            {item.image_url?.en && (
+              <EuiFlexItem grow={false}>
+                <img
+                  data-test-subj="newsImage"
+                  style={{ border: theme.eui.euiBorderThin }}
+                  width={48}
+                  height={48}
+                  alt={item.title.en}
+                  src={item.image_url.en}
+                  className="obsNewsFeed__itemImg"
+                />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGrid>
+    </EuiPanel>
   );
 }

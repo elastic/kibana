@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { FrameworkRequest } from '../../../framework';
-import {
+import type { FrameworkRequest } from '../../../framework';
+import type {
   SavedNote,
   NoteSavedObject,
   PageInfoNote,
@@ -28,13 +28,17 @@ export interface Notes {
     search: string | null,
     sort: SortNote | null
   ) => Promise<ResponseNotes>;
-  persistNote: (
-    request: FrameworkRequest,
-    noteId: string | null,
-    version: string | null,
-    note: SavedNote,
-    overrideOwner: boolean
-  ) => Promise<ResponseNote>;
+  persistNote: ({
+    request,
+    noteId,
+    note,
+    overrideOwner,
+  }: {
+    request: FrameworkRequest;
+    noteId: string | null;
+    note: SavedNote;
+    overrideOwner: boolean;
+  }) => Promise<ResponseNote>;
   convertSavedObjectToSavedNote: (
     savedObject: unknown,
     timelineVersion?: string | undefined | null

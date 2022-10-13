@@ -15,23 +15,16 @@ export const PAGE_TITLE = i18n.translate(
 );
 
 export const BACK_TO_RULES = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.backToRulesDescription',
+  'xpack.securitySolution.detectionEngine.ruleDetails.backToRulesButton',
   {
-    defaultMessage: 'Back to detection rules',
+    defaultMessage: 'Rules',
   }
 );
 
-export const EXPERIMENTAL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.experimentalDescription',
+export const ENABLE_RULE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.enableRuleLabel',
   {
-    defaultMessage: 'Experimental',
-  }
-);
-
-export const ACTIVATED_RULE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.activatedRuleLabel',
-  {
-    defaultMessage: 'Activated',
+    defaultMessage: 'Enable',
   }
 );
 
@@ -42,65 +35,37 @@ export const UNKNOWN = i18n.translate(
   }
 );
 
-export const ERROR_CALLOUT_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.errorCalloutTitle',
-  {
-    defaultMessage: 'Rule failure at',
-  }
-);
-
-export const PARTIAL_FAILURE_CALLOUT_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.partialErrorCalloutTitle',
-  {
-    defaultMessage: 'Warning at',
-  }
-);
-
-export const FAILURE_HISTORY_TAB = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.failureHistoryTab',
-  {
-    defaultMessage: 'Failure History',
-  }
-);
-
-export const LAST_FIVE_ERRORS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.lastFiveErrorsTitle',
-  {
-    defaultMessage: 'Last five errors',
-  }
-);
-
-export const COLUMN_STATUS_TYPE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.statusTypeColumn',
-  {
-    defaultMessage: 'Type',
-  }
-);
-
-export const COLUMN_FAILED_AT = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.statusFailedAtColumn',
-  {
-    defaultMessage: 'Failed at',
-  }
-);
-
-export const COLUMN_FAILED_MSG = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.statusFailedMsgColumn',
-  {
-    defaultMessage: 'Failed message',
-  }
-);
-
-export const TYPE_FAILED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.statusFailedDescription',
-  {
-    defaultMessage: 'Failed',
-  }
-);
-
 export const EXCEPTIONS_TAB = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.exceptionsTab',
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExceptionsTab',
   {
-    defaultMessage: 'Exceptions',
+    defaultMessage: 'Rule exceptions',
+  }
+);
+
+export const ENDPOINT_EXCEPTIONS_TAB = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.endpointExceptionsTab',
+  {
+    defaultMessage: 'Endpoint exceptions',
+  }
+);
+
+export const EXECUTION_RESULTS_TAB = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionResultsTab',
+  {
+    defaultMessage: 'Execution results',
+  }
+);
+
+export const EXECUTION_EVENTS_TAB = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionEventsTab',
+  {
+    defaultMessage: 'Execution events',
+  }
+);
+
+export const DELETED_RULE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.deletedRule',
+  {
+    defaultMessage: 'Deleted rule',
   }
 );

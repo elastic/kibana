@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { Datatable } from 'src/plugins/expressions';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 
 export type TableInspectorAdapter = Record<string, Datatable>;
 
 export interface ErrorMessage {
   shortMessage: string;
-  longMessage: string;
+  longMessage: React.ReactNode;
   type?: 'fixable' | 'critical';
 }

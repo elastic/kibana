@@ -5,57 +5,118 @@
  * 2.0.
  */
 
-import { Filter, Query } from '../../../../../../../src/plugins/data/public';
-import { HostsTableType } from '../../../hosts/store/model';
-import { UrlInputsModel } from '../../store/inputs/model';
-import { TimelineUrl } from '../../../timelines/store/timeline/model';
-import { CONSTANTS, UrlStateType } from '../url_state/constants';
+import type { IconType } from '@elastic/eui';
 import { SecurityPageName } from '../../../app/types';
-import { SourcererScopePatterns } from '../../store/sourcerer/model';
+import type { SiemRouteType } from '../../utils/route/types';
+import type { LinkCategories } from '../../links';
 
-export interface SiemNavigationProps {
-  display?: 'default' | 'condensed';
-  navTabs: Record<string, NavTab>;
-}
-
-export interface SiemNavigationComponentProps {
-  pathName: string;
+export interface TabNavigationComponentProps {
   pageName: string;
-  tabName: HostsTableType | undefined;
-  urlState: {
-    [CONSTANTS.appQuery]?: Query;
-    [CONSTANTS.filters]?: Filter[];
-    [CONSTANTS.savedQuery]?: string;
-    [CONSTANTS.sourcerer]: SourcererScopePatterns;
-    [CONSTANTS.timerange]: UrlInputsModel;
-    [CONSTANTS.timeline]: TimelineUrl;
-  };
+  tabName: SiemRouteType | undefined;
+  pathName: string;
 }
 
 export type SearchNavTab = NavTab | { urlKey: UrlStateType; isDetailPage: boolean };
 
+export interface NavGroupTab {
+  id: string;
+  name: string;
+}
+export enum SecurityNavGroupKey {
+  dashboards = 'dashboards',
+  detect = 'detect',
+  findings = 'findings',
+  explore = 'explore',
+  intelligence = 'intelligence',
+  investigate = 'investigate',
+  manage = 'manage',
+}
+
+export type UrlStateType =
+  | 'administration'
+  | 'alerts'
+  | 'cases'
+  | 'detection_response'
+  | 'exceptions'
+  | 'get_started'
+  | 'host'
+  | 'users'
+  | 'network'
+  | 'kubernetes'
+  | 'overview'
+  | 'rules'
+  | 'timeline'
+  | 'explore'
+  | 'dashboards'
+  | 'indicators'
+  | 'cloud_posture'
+  | 'findings'
+  | 'entity_analytics';
+
+export type SecurityNavGroup = Record<SecurityNavGroupKey, NavGroupTab>;
 export interface NavTab {
   id: string;
   name: string;
   href: string;
   disabled: boolean;
-  urlKey: UrlStateType;
-  isDetailPage?: boolean;
+  urlKey?: UrlStateType;
   pageId?: SecurityPageName;
+  isBeta?: boolean;
+  betaOptions?: {
+    text: string;
+  };
+}
+export const securityNavKeys = [
+  SecurityPageName.alerts,
+  SecurityPageName.blocklist,
+  SecurityPageName.detectionAndResponse,
+  SecurityPageName.case,
+  SecurityPageName.endpoints,
+  SecurityPageName.landing,
+  SecurityPageName.policies,
+  SecurityPageName.eventFilters,
+  SecurityPageName.exceptions,
+  SecurityPageName.hostIsolationExceptions,
+  SecurityPageName.hosts,
+  SecurityPageName.network,
+  SecurityPageName.overview,
+  SecurityPageName.responseActionsHistory,
+  SecurityPageName.rules,
+  SecurityPageName.timelines,
+  SecurityPageName.trustedApps,
+  SecurityPageName.users,
+  SecurityPageName.kubernetes,
+  SecurityPageName.threatIntelligenceIndicators,
+  SecurityPageName.cloudSecurityPostureDashboard,
+  SecurityPageName.cloudSecurityPostureFindings,
+  SecurityPageName.cloudSecurityPostureBenchmarks,
+  SecurityPageName.cloudSecurityPostureRules,
+  SecurityPageName.entityAnalytics,
+] as const;
+export type SecurityNavKey = typeof securityNavKeys[number];
+
+export type SecurityNav = Record<SecurityNavKey, NavTab>;
+
+export type GenericNavRecord = Record<string, NavTab>;
+
+export interface SecuritySolutionTabNavigationProps {
+  display?: 'default' | 'condensed';
+  navTabs: GenericNavRecord;
 }
 
-export type SiemNavTabKey =
-  | SecurityPageName.overview
-  | SecurityPageName.hosts
-  | SecurityPageName.network
-  | SecurityPageName.detections
-  | SecurityPageName.timelines
-  | SecurityPageName.case
-  | SecurityPageName.administration;
-
-export type SiemNavTab = Record<SiemNavTabKey, NavTab>;
-
-export type GetUrlForApp = (
-  appId: string,
-  options?: { path?: string; absolute?: boolean }
-) => string;
+export type NavigateToUrl = (url: string) => void;
+export interface NavLinkItem {
+  categories?: LinkCategories;
+  description?: string;
+  disabled?: boolean;
+  icon?: IconType;
+  id: SecurityPageName;
+  links?: NavLinkItem[];
+  image?: string;
+  title: string;
+  skipUrlState?: boolean;
+  isBeta?: boolean;
+  betaOptions?: {
+    text: string;
+  };
+}

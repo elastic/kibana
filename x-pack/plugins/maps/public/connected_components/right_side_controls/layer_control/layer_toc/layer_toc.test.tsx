@@ -18,28 +18,38 @@ import { ILayer } from '../../../../classes/layers/layer';
 import { LayerTOC } from './layer_toc';
 
 const mockLayers = [
-  ({
+  {
     getId: () => {
       return '1';
+    },
+    getParent: () => {
+      return undefined;
     },
     supportsFitToBounds: () => {
       return true;
     },
-  } as unknown) as ILayer,
-  ({
+  } as unknown as ILayer,
+  {
     getId: () => {
       return '2';
+    },
+    getParent: () => {
+      return undefined;
     },
     supportsFitToBounds: () => {
       return false;
     },
-  } as unknown) as ILayer,
+  } as unknown as ILayer,
 ];
 
 const defaultProps = {
   layerList: mockLayers,
   isReadOnly: false,
-  updateLayerOrder: () => {},
+  openTOCDetails: [],
+  moveLayerToBottom: () => {},
+  moveLayerToLeftOfTarget: () => {},
+  setLayerParent: () => {},
+  createLayerGroup: () => {},
 };
 
 describe('LayerTOC', () => {

@@ -7,15 +7,15 @@
 
 import moment from 'moment';
 import { schema, ByteSizeValue } from '@kbn/config-schema';
-import { PluginInitializerContext, RequestHandlerContext } from '../../../../src/core/server';
-import { coreMock, httpServerMock } from '../../../../src/core/server/mocks';
-import { usageCollectionPluginMock } from '../../../../src/plugins/usage_collection/server/mocks';
-import { licensingMock } from '../../licensing/server/mocks';
-import { featuresPluginMock } from '../../features/server/mocks';
-import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
-import { taskManagerMock } from '../../task_manager/server/mocks';
-import { eventLogMock } from '../../event_log/server/mocks';
-import { ActionType, ActionsApiRequestHandlerContext } from './types';
+import { PluginInitializerContext, RequestHandlerContext } from '@kbn/core/server';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { eventLogMock } from '@kbn/event-log-plugin/server/mocks';
+import { ActionType, ActionsApiRequestHandlerContext, ExecutorType } from './types';
 import { ActionsConfig } from './config';
 import {
   ActionsPlugin,
@@ -24,6 +24,10 @@ import {
   PluginSetupContract,
 } from './plugin';
 import { AlertHistoryEsIndexConnectorId } from '../common';
+
+const executor: ExecutorType<{}, {}, {}, void> = async (options) => {
+  return { status: 'ok', actionId: options.actionId };
+};
 
 describe('Actions Plugin', () => {
   describe('setup()', () => {
@@ -34,7 +38,6 @@ describe('Actions Plugin', () => {
 
     beforeEach(() => {
       context = coreMock.createPluginInitializerContext<ActionsConfig>({
-        enabled: true,
         enabledActionTypes: ['*'],
         allowedHosts: ['*'],
         preconfiguredAlertHistoryEsIndex: false,
@@ -61,6 +64,14 @@ describe('Actions Plugin', () => {
         usageCollection: usageCollectionPluginMock.createSetupContract(),
         features: featuresPluginMock.createSetup(),
       };
+      coreSetup.getStartServices.mockResolvedValue([
+        coreMock.createStart(),
+        {
+          ...pluginsSetup,
+          encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
+        },
+        {},
+      ]);
     });
 
     it('should log warning when Encrypted Saved Objects plugin is missing encryption key', async () => {
@@ -88,8 +99,8 @@ describe('Actions Plugin', () => {
         ];
         expect(handler[0]).toEqual('actions');
 
-        const actionsContextHandler = ((await handler[1](
-          ({
+        const actionsContextHandler = (await handler[1](
+          {
             core: {
               savedObjects: {
                 client: {},
@@ -98,11 +109,11 @@ describe('Actions Plugin', () => {
                 client: jest.fn(),
               },
             },
-          } as unknown) as RequestHandlerContext,
+          } as unknown as RequestHandlerContext,
           httpServerMock.createKibanaRequest(),
           httpServerMock.createResponseFactory()
-        )) as unknown) as ActionsApiRequestHandlerContext;
-        actionsContextHandler!.getActionsClient();
+        )) as unknown as ActionsApiRequestHandlerContext;
+        expect(actionsContextHandler!.getActionsClient()).toBeDefined();
       });
 
       it('should throw error when ESO plugin is missing encryption key', async () => {
@@ -115,17 +126,17 @@ describe('Actions Plugin', () => {
         ];
         expect(handler[0]).toEqual('actions');
 
-        const actionsContextHandler = ((await handler[1](
-          ({
+        const actionsContextHandler = (await handler[1](
+          {
             core: {
               savedObjects: {
                 client: {},
               },
             },
-          } as unknown) as RequestHandlerContext,
+          } as unknown as RequestHandlerContext,
           httpServerMock.createKibanaRequest(),
           httpServerMock.createResponseFactory()
-        )) as unknown) as ActionsApiRequestHandlerContext;
+        )) as unknown as ActionsApiRequestHandlerContext;
         expect(() => actionsContextHandler!.getActionsClient()).toThrowErrorMatchingInlineSnapshot(
           `"Unable to create actions client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command."`
         );
@@ -138,6 +149,7 @@ describe('Actions Plugin', () => {
         id: 'test',
         name: 'test',
         minimumLicenseRequired: 'basic',
+        supportedFeatureIds: ['alerting'],
         async executor(options) {
           return { status: 'ok', actionId: options.actionId };
         },
@@ -185,6 +197,62 @@ describe('Actions Plugin', () => {
         });
       });
     });
+
+    describe('isPreconfiguredConnector', () => {
+      function getConfig(overrides = {}) {
+        return {
+          enabled: true,
+          enabledActionTypes: ['*'],
+          allowedHosts: ['*'],
+          preconfiguredAlertHistoryEsIndex: false,
+          preconfigured: {
+            preconfiguredServerLog: {
+              actionTypeId: '.server-log',
+              name: 'preconfigured-server-log',
+              config: {},
+              secrets: {},
+            },
+          },
+          proxyRejectUnauthorizedCertificates: true,
+          proxyBypassHosts: undefined,
+          proxyOnlyHosts: undefined,
+          rejectUnauthorized: true,
+          maxResponseContentLength: new ByteSizeValue(1000000),
+          responseTimeout: moment.duration('60s'),
+          cleanupFailedExecutionsTask: {
+            enabled: true,
+            cleanupInterval: schema.duration().validate('5m'),
+            idleInterval: schema.duration().validate('1h'),
+            pageSize: 100,
+          },
+          ...overrides,
+        };
+      }
+
+      function setup(config: ActionsConfig) {
+        context = coreMock.createPluginInitializerContext<ActionsConfig>(config);
+        plugin = new ActionsPlugin(context);
+        coreSetup = coreMock.createSetup();
+        pluginsSetup = {
+          taskManager: taskManagerMock.createSetup(),
+          encryptedSavedObjects: encryptedSavedObjectsMock.createSetup(),
+          licensing: licensingMock.createSetup(),
+          eventLog: eventLogMock.createSetup(),
+          usageCollection: usageCollectionPluginMock.createSetupContract(),
+          features: featuresPluginMock.createSetup(),
+        };
+      }
+
+      it('should correctly return whether connector is preconfigured', async () => {
+        setup(getConfig());
+        // coreMock.createSetup doesn't support Plugin generics
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+
+        expect(pluginSetup.isPreconfiguredConnector('preconfiguredServerLog')).toEqual(true);
+        expect(pluginSetup.isPreconfiguredConnector('anotherConnectorId')).toEqual(false);
+      });
+    });
   });
 
   describe('start()', () => {
@@ -197,7 +265,6 @@ describe('Actions Plugin', () => {
 
     beforeEach(() => {
       context = coreMock.createPluginInitializerContext<ActionsConfig>({
-        enabled: true,
         enabledActionTypes: ['*'],
         allowedHosts: ['*'],
         preconfiguredAlertHistoryEsIndex: false,
@@ -320,7 +387,15 @@ describe('Actions Plugin', () => {
         setup(getConfig());
         // coreMock.createSetup doesn't support Plugin generics
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        await plugin.setup(coreSetup as any, pluginsSetup);
+        const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+        pluginSetup.registerType({
+          id: '.server-log',
+          name: 'Server log',
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['alerting'],
+          executor,
+        });
+
         const pluginStart = await plugin.start(coreStart, pluginsStart);
 
         expect(pluginStart.preconfiguredActions.length).toEqual(1);
@@ -330,7 +405,16 @@ describe('Actions Plugin', () => {
       it('should handle preconfiguredAlertHistoryEsIndex = true', async () => {
         setup(getConfig({ preconfiguredAlertHistoryEsIndex: true }));
 
-        await plugin.setup(coreSetup, pluginsSetup);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+        pluginSetup.registerType({
+          id: '.index',
+          name: 'ES Index',
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['alerting'],
+          executor,
+        });
+
         const pluginStart = await plugin.start(coreStart, pluginsStart);
 
         expect(pluginStart.preconfiguredActions.length).toEqual(2);
@@ -369,6 +453,7 @@ describe('Actions Plugin', () => {
         id: 'my-action-type',
         name: 'My action type',
         minimumLicenseRequired: 'gold',
+        supportedFeatureIds: ['alerting'],
         executor: jest.fn(),
       };
 
@@ -391,6 +476,7 @@ describe('Actions Plugin', () => {
         id: 'my-action-type',
         name: 'My action type',
         minimumLicenseRequired: 'gold',
+        supportedFeatureIds: ['alerting'],
         executor: jest.fn(),
       };
 
@@ -405,6 +491,25 @@ describe('Actions Plugin', () => {
         expect(pluginsStart.licensing.featureUsage.notifyUsage).toHaveBeenCalledWith(
           'Connector: My action type'
         );
+      });
+    });
+
+    describe('getActionsHealth()', () => {
+      it('should return hasPermanentEncryptionKey false if canEncrypt of encryptedSavedObjects is false', async () => {
+        // coreMock.createSetup doesn't support Plugin generics
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+        expect(pluginSetup.getActionsHealth()).toEqual({ hasPermanentEncryptionKey: false });
+      });
+      it('should return hasPermanentEncryptionKey true if canEncrypt of encryptedSavedObjects is true', async () => {
+        const pluginSetup = await plugin.setup(coreSetup, {
+          ...pluginsSetup,
+          encryptedSavedObjects: {
+            ...pluginsSetup.encryptedSavedObjects,
+            canEncrypt: true,
+          },
+        });
+        expect(pluginSetup.getActionsHealth()).toEqual({ hasPermanentEncryptionKey: true });
       });
     });
   });

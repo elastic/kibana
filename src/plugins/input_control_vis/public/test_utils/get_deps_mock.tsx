@@ -31,13 +31,15 @@ export const getDepsMock = ({
             search: {
               searchSource,
             },
-            ui: {
-              IndexPatternSelect: () => (<div />) as any,
-            },
             indexPatterns: {
               get: () => ({
                 fields,
               }),
+            },
+          },
+          unifiedSearch: {
+            ui: {
+              IndexPatternSelect: () => (<div />) as any,
             },
           },
         },

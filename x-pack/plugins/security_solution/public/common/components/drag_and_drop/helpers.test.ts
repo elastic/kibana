@@ -6,9 +6,10 @@
  */
 
 import { omit } from 'lodash/fp';
-import { DropResult } from 'react-beautiful-dnd';
+import type { DropResult } from 'react-beautiful-dnd';
+import { getTimelineIdFromColumnDroppableId } from '@kbn/timelines-plugin/public';
 
-import { IdToDataProvider } from '../../store/drag_and_drop/model';
+import type { IdToDataProvider } from '../../store/drag_and_drop/model';
 
 import {
   addProviderToTimeline,
@@ -33,7 +34,6 @@ import {
   getDroppableId,
   getFieldIdFromDraggable,
   getProviderIdFromDraggable,
-  getTimelineIdFromColumnDroppableId,
   getTimelineProviderDraggableId,
   getTimelineProviderDroppableId,
   providerWasDroppedOnTimeline,
@@ -653,8 +653,10 @@ describe('helpers', () => {
     test('it returns true for an aggregatable field that is an allowed type', () => {
       expect(
         allowTopN({
-          browserField: aggregatableAllowedType,
+          fieldType: 'keyword',
+          isAggregatable: true,
           fieldName: aggregatableAllowedType.name,
+          hideTopN: false,
         })
       ).toBe(true);
     });
@@ -662,8 +664,10 @@ describe('helpers', () => {
     test('it returns true for a allowlisted non-BrowserField', () => {
       expect(
         allowTopN({
-          browserField: undefined,
-          fieldName: 'signal.rule.name',
+          fieldType: 'not right',
+          isAggregatable: false,
+          fieldName: 'kibana.alert.rule.name',
+          hideTopN: false,
         })
       ).toBe(true);
     });
@@ -676,8 +680,10 @@ describe('helpers', () => {
 
       expect(
         allowTopN({
-          browserField: nonAggregatableAllowedType,
+          fieldType: 'keyword',
+          isAggregatable: false,
           fieldName: nonAggregatableAllowedType.name,
+          hideTopN: false,
         })
       ).toBe(false);
     });
@@ -690,19 +696,10 @@ describe('helpers', () => {
 
       expect(
         allowTopN({
-          browserField: aggregatableNotAllowedType,
+          fieldType: 'text',
+          isAggregatable: false,
           fieldName: aggregatableNotAllowedType.name,
-        })
-      ).toBe(false);
-    });
-
-    test('it returns false if the BrowserField is missing the aggregatable property', () => {
-      const missingAggregatable = omit('aggregatable', aggregatableAllowedType);
-
-      expect(
-        allowTopN({
-          browserField: missingAggregatable,
-          fieldName: missingAggregatable.name,
+          hideTopN: false,
         })
       ).toBe(false);
     });
@@ -712,8 +709,10 @@ describe('helpers', () => {
 
       expect(
         allowTopN({
-          browserField: missingType,
+          fieldType: 'not real',
+          isAggregatable: false,
           fieldName: missingType.name,
+          hideTopN: false,
         })
       ).toBe(false);
     });
@@ -721,8 +720,21 @@ describe('helpers', () => {
     test('it returns false for a non-allowlisted field when a BrowserField is not provided', () => {
       expect(
         allowTopN({
-          browserField: undefined,
+          fieldType: 'string',
+          isAggregatable: false,
           fieldName: 'non-allowlisted',
+          hideTopN: false,
+        })
+      ).toBe(false);
+    });
+
+    test('it returns false when hideTopN is true', () => {
+      expect(
+        allowTopN({
+          fieldType: 'keyword',
+          isAggregatable: true,
+          fieldName: aggregatableAllowedType.name,
+          hideTopN: true, // <-- the Top N action shall not be shown for this (otherwise valid) field
         })
       ).toBe(false);
     });

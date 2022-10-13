@@ -8,16 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export * from '../../common/translations';
-
-export const SHOWING_CASES = (actionDate: string, actionName: string, userName: string) =>
-  i18n.translate('xpack.cases.caseView.actionHeadline', {
-    values: {
-      actionDate,
-      actionName,
-      userName,
-    },
-    defaultMessage: '{userName} {actionName} on {actionDate}',
-  });
+export * from '../user_profiles/translations';
 
 export const ADDED_FIELD = i18n.translate('xpack.cases.caseView.actionLabel.addedField', {
   defaultMessage: 'added',
@@ -25,6 +16,14 @@ export const ADDED_FIELD = i18n.translate('xpack.cases.caseView.actionLabel.adde
 
 export const CHANGED_FIELD = i18n.translate('xpack.cases.caseView.actionLabel.changededField', {
   defaultMessage: 'changed',
+});
+
+export const ENABLED_SETTING = i18n.translate('xpack.cases.caseView.actionLabel.enabledSetting', {
+  defaultMessage: 'enabled',
+});
+
+export const DISABLED_SETTING = i18n.translate('xpack.cases.caseView.actionLabel.disableSetting', {
+  defaultMessage: 'disabled',
 });
 
 export const SELECTED_THIRD_PARTY = (thirdParty: string) =>
@@ -85,12 +84,16 @@ export const EDIT_COMMENT = i18n.translate('xpack.cases.caseView.edit.comment', 
   defaultMessage: 'Edit comment',
 });
 
-export const ON = i18n.translate('xpack.cases.caseView.actionLabel.on', {
-  defaultMessage: 'on',
+export const DELETE_COMMENT = i18n.translate('xpack.cases.caseView.delete.comment', {
+  defaultMessage: 'Delete comment',
 });
 
-export const ADDED_COMMENT = i18n.translate('xpack.cases.caseView.actionLabel.addComment', {
-  defaultMessage: 'added comment',
+export const DELETE_COMMENT_TITLE = i18n.translate('xpack.cases.caseView.deleteTitle.comment', {
+  defaultMessage: 'Delete this comment?',
+});
+
+export const ON = i18n.translate('xpack.cases.caseView.actionLabel.on', {
+  defaultMessage: 'on',
 });
 
 export const STATUS = i18n.translate('xpack.cases.caseView.statusLabel', {
@@ -107,6 +110,10 @@ export const COMMENT = i18n.translate('xpack.cases.caseView.comment', {
 
 export const CASE_REFRESH = i18n.translate('xpack.cases.caseView.caseRefresh', {
   defaultMessage: 'Refresh case',
+});
+
+export const ACTIVITY = i18n.translate('xpack.cases.caseView.activity', {
+  defaultMessage: 'Activity',
 });
 
 export const EMAIL_SUBJECT = (caseTitle: string) =>
@@ -128,3 +135,74 @@ export const CHANGED_CONNECTOR_FIELD = i18n.translate('xpack.cases.caseView.fiel
 export const SYNC_ALERTS = i18n.translate('xpack.cases.caseView.syncAlertsLabel', {
   defaultMessage: `Sync alerts`,
 });
+
+export const SYNC_ALERTS_LC = i18n.translate('xpack.cases.caseView.syncAlertsLowercaseLabel', {
+  defaultMessage: `sync alerts`,
+});
+
+export const DOES_NOT_EXIST_TITLE = i18n.translate('xpack.cases.caseView.doesNotExist.title', {
+  defaultMessage: 'This case does not exist',
+});
+
+export const DOES_NOT_EXIST_DESCRIPTION = (caseId: string) =>
+  i18n.translate('xpack.cases.caseView.doesNotExist.description', {
+    values: {
+      caseId,
+    },
+    defaultMessage:
+      'A case with id {caseId} could not be found. This likely means the case has been deleted, or the id is incorrect.',
+  });
+
+export const DOES_NOT_EXIST_BUTTON = i18n.translate('xpack.cases.caseView.doesNotExist.button', {
+  defaultMessage: 'Back to Cases',
+});
+
+export const ACTIVITY_TAB = i18n.translate('xpack.cases.caseView.tabs.activity', {
+  defaultMessage: 'Activity',
+});
+
+export const ALERTS_TAB = i18n.translate('xpack.cases.caseView.tabs.alerts', {
+  defaultMessage: 'Alerts',
+});
+
+export const ALERTS_EMPTY_DESCRIPTION = i18n.translate(
+  'xpack.cases.caseView.tabs.alerts.emptyDescription',
+  {
+    defaultMessage: 'No alerts have been added to this case.',
+  }
+);
+
+export const SEND_EMAIL_ARIA = (user: string) =>
+  i18n.translate('xpack.cases.caseView.sendEmalLinkAria', {
+    values: { user },
+    defaultMessage: 'click to send an email to {user}',
+  });
+
+export const EDIT_ASSIGNEES_ARIA_LABEL = i18n.translate(
+  'xpack.cases.caseView.editAssigneesAriaLabel',
+  {
+    defaultMessage: 'click to edit assignees',
+  }
+);
+
+export const NO_ASSIGNEES = i18n.translate('xpack.cases.caseView.noAssignees', {
+  defaultMessage: 'No users have been assigned.',
+});
+
+export const ASSIGN_A_USER = i18n.translate('xpack.cases.caseView.assignUser', {
+  defaultMessage: 'Assign a user',
+});
+
+export const SPACED_OR = i18n.translate('xpack.cases.caseView.spacedOrText', {
+  defaultMessage: ' or ',
+});
+
+export const ASSIGN_YOURSELF = i18n.translate('xpack.cases.caseView.assignYourself', {
+  defaultMessage: 'assign yourself',
+});
+
+export const TOTAL_USERS_ASSIGNED = (total: number) =>
+  i18n.translate('xpack.cases.caseView.totalUsersAssigned', {
+    defaultMessage: '{total} assigned',
+    values: { total },
+  });

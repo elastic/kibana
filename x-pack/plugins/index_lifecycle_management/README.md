@@ -34,7 +34,6 @@ PUT /_ilm/policy/full
       "cold" : {
         "min_age" : "30s",
         "actions" : {
-          "freeze": {}
         }
       },
       "delete" : {
@@ -117,3 +116,7 @@ this by running:
 ```bash
 yarn es snapshot --license=trial
 ```
+
+## Integration tests
+
+See `./integration_tests/README.md`

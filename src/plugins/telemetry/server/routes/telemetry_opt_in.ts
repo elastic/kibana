@@ -6,15 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { firstValueFrom, Observable } from 'rxjs';
 import { schema } from '@kbn/config-schema';
-import { IRouter, Logger } from 'kibana/server';
+import { IRouter, Logger } from '@kbn/core/server';
 import {
   StatsGetterConfig,
   TelemetryCollectionManagerPluginSetup,
-} from 'src/plugins/telemetry_collection_manager/server';
-import { SavedObjectsErrorHelpers } from '../../../../core/server';
+} from '@kbn/telemetry-collection-manager-plugin/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { getTelemetryAllowChangingOptInStatus } from '../../common/telemetry_config';
 import { sendTelemetryOptInStatus } from './telemetry_opt_in_stats';
 
@@ -49,12 +48,13 @@ export function registerTelemetryOptInRoutes({
     },
     async (context, req, res) => {
       const newOptInStatus = req.body.enabled;
+      const soClient = (await context.core).savedObjects.client;
       const attributes: TelemetrySavedObjectAttributes = {
         enabled: newOptInStatus,
         lastVersionChecked: currentKibanaVersion,
       };
-      const config = await config$.pipe(take(1)).toPromise();
-      const telemetrySavedObject = await getTelemetrySavedObject(context.core.savedObjects.client);
+      const config = await firstValueFrom(config$);
+      const telemetrySavedObject = await getTelemetrySavedObject(soClient);
 
       if (telemetrySavedObject === false) {
         // If we get false, we couldn't get the saved object due to lack of permissions
@@ -83,21 +83,21 @@ export function registerTelemetryOptInRoutes({
       );
 
       if (config.sendUsageFrom === 'server') {
-        const optInStatusUrl = config.optInStatusUrl;
+        const { sendUsageTo } = config;
         sendTelemetryOptInStatus(
           telemetryCollectionManager,
-          { optInStatusUrl, newOptInStatus, currentKibanaVersion },
+          { sendUsageTo, newOptInStatus, currentKibanaVersion },
           statsGetterConfig
         ).catch((err) => {
           // The server is likely behind a firewall and can't reach the remote service
           logger.warn(
-            `Failed to notify "${optInStatusUrl}" from the server about the opt-in selection. Possibly blocked by a firewall? - Error: ${err.message}`
+            `Failed to notify the telemetry endpoint about the opt-in selection. Possibly blocked by a firewall? - Error: ${err.message}`
           );
         });
       }
 
       try {
-        await updateTelemetrySavedObject(context.core.savedObjects.client, attributes);
+        await updateTelemetrySavedObject(soClient, attributes);
       } catch (e) {
         if (SavedObjectsErrorHelpers.isForbiddenError(e)) {
           return res.forbidden();

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { createQueryFilterClauses } from '../../../../../../utils/build_query';
 import { reduceFields } from '../../../../../../utils/build_query/reduce_fields';
 import {
@@ -12,8 +12,8 @@ import {
   processFieldsMap,
   userFieldsMap,
 } from '../../../../../../../common/ecs/ecs_fields';
-import { RequestOptionsPaginated } from '../../../../../../../common/search_strategy/security_solution';
-import { uncommonProcessesFields } from '../helpers';
+import type { RequestOptionsPaginated } from '../../../../../../../common/search_strategy/security_solution';
+import { UNCOMMON_PROCESSES_FIELDS } from '../helpers';
 
 export const buildQuery = ({
   defaultIndex,
@@ -21,11 +21,11 @@ export const buildQuery = ({
   pagination: { querySize },
   timerange: { from, to },
 }: RequestOptionsPaginated) => {
-  const processUserFields = reduceFields(uncommonProcessesFields, {
+  const processUserFields = reduceFields(UNCOMMON_PROCESSES_FIELDS, {
     ...processFieldsMap,
     ...userFieldsMap,
   }) as string[];
-  const hostFields = reduceFields(uncommonProcessesFields, hostFieldsMap) as string[];
+  const hostFields = reduceFields(UNCOMMON_PROCESSES_FIELDS, hostFieldsMap) as string[];
   const filter = [
     ...createQueryFilterClauses(filterQuery),
     {
@@ -48,9 +48,9 @@ export const buildQuery = ({
   };
 
   const dslQuery = {
-    allowNoIndices: true,
+    allow_no_indices: true,
     index: defaultIndex,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
       aggregations: {
         ...agg,
@@ -68,14 +68,21 @@ export const buildQuery = ({
               {
                 _key: 'asc' as const,
               },
-            ] as estypes.TermsAggregationOrder,
+            ] as estypes.AggregationsTermsAggregationOrder,
           },
           aggregations: {
             process: {
               top_hits: {
                 size: 1,
                 sort: [{ '@timestamp': { order: 'desc' as const } }],
-                _source: processUserFields,
+                _source: false,
+                fields: [
+                  ...processUserFields,
+                  {
+                    field: '@timestamp',
+                    format: 'strict_date_optional_time',
+                  },
+                ],
               },
             },
             host_count: {
@@ -91,7 +98,14 @@ export const buildQuery = ({
                 host: {
                   top_hits: {
                     size: 1,
-                    _source: hostFields,
+                    _source: false,
+                    fields: [
+                      ...hostFields,
+                      {
+                        field: '@timestamp',
+                        format: 'strict_date_optional_time',
+                      },
+                    ],
                   },
                 },
               },
@@ -120,7 +134,7 @@ export const buildQuery = ({
                       'event.action': 'executed',
                     },
                   },
-                ] as estypes.QueryContainer[],
+                ] as estypes.QueryDslQueryContainer[],
               },
             },
             {
@@ -146,7 +160,7 @@ export const buildQuery = ({
                       'event.action': 'process_started',
                     },
                   },
-                ] as estypes.QueryContainer[],
+                ] as estypes.QueryDslQueryContainer[],
               },
             },
             {
@@ -218,6 +232,7 @@ export const buildQuery = ({
           filter,
         },
       },
+      _source: false,
     },
     size: 0,
     track_total_hits: false,

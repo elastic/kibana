@@ -6,7 +6,7 @@
  */
 
 import '../../../__mocks__/shallow_useeffect.mock';
-import { setMockActions, setMockValues } from '../../../__mocks__';
+import { setMockActions, setMockValues } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -14,10 +14,11 @@ import { shallow } from 'enzyme';
 
 import { EuiCallOut } from '@elastic/eui';
 
-import { MetaEngineCreation } from './';
+import { MetaEngineCreation } from '.';
 
 const DEFAULT_VALUES = {
   // MetaEngineLogic
+  isLoading: false,
   name: 'test-meta-engine',
   rawName: 'test-meta-engine',
   indexedEngineNames: [],
@@ -182,6 +183,14 @@ describe('MetaEngineCreation', () => {
       const submitButton = wrapper.find('[data-test-subj="NewMetaEngineSubmitButton"]');
 
       expect(submitButton.prop('disabled')).toEqual(true);
+    });
+
+    it('passes isLoading state', () => {
+      setMockValues({ ...DEFAULT_VALUES, isLoading: true });
+      const wrapper = shallow(<MetaEngineCreation />);
+      const submitButton = wrapper.find('[data-test-subj="NewMetaEngineSubmitButton"]');
+
+      expect(submitButton.prop('isLoading')).toEqual(true);
     });
   });
 });

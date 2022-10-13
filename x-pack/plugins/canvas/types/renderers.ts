@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
+import {
+  ExpressionRenderDefinition,
+  IInterpreterRenderHandlers,
+} from '@kbn/expressions-plugin/common';
 
 type GenericRendererCallback = (callback: () => void) => void;
 
-export interface RendererHandlers extends IInterpreterRenderHandlers {
+export interface CanvasSpecificRendererHandlers {
   /** Handler to invoke when an element should be destroyed. */
   destroy: () => void;
   /** Get the id of the element being rendered.  Can be used as a unique ID in a render function */
@@ -26,17 +29,16 @@ export interface RendererHandlers extends IInterpreterRenderHandlers {
   onResize: GenericRendererCallback;
   /** Handler to invoke when an element should be resized. */
   resize: (size: { height: number; width: number }) => void;
-  /** Sets the value of the filter property on the element object persisted on the workpad */
-  setFilter: (filter: string) => void;
 }
 
+export type RendererHandlers = IInterpreterRenderHandlers & CanvasSpecificRendererHandlers;
 export interface RendererSpec<RendererConfig = {}> {
   /** The render type */
   name: string;
   /** The name to display */
-  displayName: string;
+  displayName?: string;
   /** A description of what is rendered */
-  help: string;
+  help?: string;
   /** Indicate whether the element should reuse the existing DOM element when re-rendering */
   reuseDomNode: boolean;
   /** The default width of the element in pixels */
@@ -49,5 +51,7 @@ export interface RendererSpec<RendererConfig = {}> {
 
 export type RendererFactory<RendererConfig = {}> = () => RendererSpec<RendererConfig>;
 
-export type AnyRendererFactory = RendererFactory<any>;
+export type AnyRendererFactory =
+  | RendererFactory<any>
+  | Array<() => ExpressionRenderDefinition<any>>;
 export type AnyRendererSpec = RendererSpec<any>;

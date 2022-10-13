@@ -6,29 +6,34 @@
  */
 
 import '../../../../../__mocks__/shallow_useeffect.mock';
-import { mockKibanaValues, setMockActions, setMockValues } from '../../../../../__mocks__';
+import {
+  mockKibanaValues,
+  setMockActions,
+  setMockValues,
+} from '../../../../../__mocks__/kea_logic';
+import { mockUseParams } from '../../../../../__mocks__/react_router';
 import { sourceConfigData } from '../../../../__mocks__/content_sources.mock';
 
 import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { Loading } from '../../../../../shared/loading';
+import {
+  WorkplaceSearchPageTemplate,
+  PersonalDashboardLayout,
+} from '../../../../components/layout';
 
 import { AddSource } from './add_source';
 import { AddSourceSteps } from './add_source_logic';
 import { ConfigCompleted } from './config_completed';
-import { ConfigurationIntro } from './configuration_intro';
-import { ConfigureCustom } from './configure_custom';
 import { ConfigureOauth } from './configure_oauth';
 import { ConnectInstance } from './connect_instance';
 import { Reauthenticate } from './reauthenticate';
 import { SaveConfig } from './save_config';
-import { SaveCustom } from './save_custom';
 
 describe('AddSourceList', () => {
   const { navigateToUrl } = mockKibanaValues;
-  const initializeAddSource = jest.fn();
+  const getSourceConfigData = jest.fn();
   const setAddSourceStep = jest.fn();
   const saveSourceConfig = jest.fn((_, setConfigCompletedStep) => {
     setConfigCompletedStep();
@@ -39,36 +44,48 @@ describe('AddSourceList', () => {
   const resetSourcesState = jest.fn();
 
   const mockValues = {
-    addSourceCurrentStep: AddSourceSteps.ConfigIntroStep,
+    addSourceCurrentStep: null,
     sourceConfigData,
     dataLoading: false,
     newCustomSource: {},
     isOrganization: true,
+    externalConfigured: false,
   };
 
   beforeEach(() => {
+    jest.clearAllMocks();
     setMockActions({
-      initializeAddSource,
+      getSourceConfigData,
       setAddSourceStep,
       saveSourceConfig,
       createContentSource,
       resetSourcesState,
     });
     setMockValues(mockValues);
+    mockUseParams.mockReturnValue({ serviceType: 'box' });
   });
 
-  it('renders default state', () => {
-    const wrapper = shallow(<AddSource sourceIndex={1} />);
-    wrapper.find(ConfigurationIntro).prop('advanceStep')();
+  describe('layout', () => {
+    it('renders the default workplace search layout when on an organization view', () => {
+      setMockValues({ ...mockValues, isOrganization: true });
+      const wrapper = shallow(<AddSource />);
 
-    expect(setAddSourceStep).toHaveBeenCalledWith(AddSourceSteps.SaveConfigStep);
+      expect(wrapper.type()).toEqual(WorkplaceSearchPageTemplate);
+    });
+
+    it('renders the personal dashboard layout when not in an organization', () => {
+      setMockValues({ ...mockValues, isOrganization: false });
+      const wrapper = shallow(<AddSource />);
+
+      expect(wrapper.type()).toEqual(PersonalDashboardLayout);
+    });
   });
 
-  it('handles loading state', () => {
-    setMockValues({ ...mockValues, dataLoading: true });
-    const wrapper = shallow(<AddSource sourceIndex={1} />);
+  it('renders a breadcrumb fallback while data is loading', () => {
+    setMockValues({ ...mockValues, dataLoading: true, sourceConfigData: {} });
+    const wrapper = shallow(<AddSource />);
 
-    expect(wrapper.find(Loading)).toHaveLength(1);
+    expect(wrapper.prop('pageChrome')).toEqual(['Sources', 'Add Source', '...']);
   });
 
   it('renders Config Completed step', () => {
@@ -76,10 +93,24 @@ describe('AddSourceList', () => {
       ...mockValues,
       addSourceCurrentStep: AddSourceSteps.ConfigCompletedStep,
     });
-    const wrapper = shallow(<AddSource sourceIndex={1} />);
+    const wrapper = shallow(<AddSource />);
+    expect(wrapper.find(ConfigCompleted).prop('showFeedbackLink')).toEqual(false);
     wrapper.find(ConfigCompleted).prop('advanceStep')();
 
-    expect(navigateToUrl).toHaveBeenCalledWith('/sources/add/confluence_cloud/connect');
+    expect(setAddSourceStep).toHaveBeenCalledWith(AddSourceSteps.ConnectInstanceStep);
+  });
+
+  it('renders Config Completed step with feedback for external connectors', () => {
+    mockUseParams.mockReturnValue({ serviceType: 'external' });
+    setMockValues({
+      ...mockValues,
+      sourceConfigData: { ...sourceConfigData, serviceType: 'external' },
+      addSourceCurrentStep: AddSourceSteps.ConfigCompletedStep,
+    });
+    const wrapper = shallow(<AddSource />);
+    expect(wrapper.find(ConfigCompleted).prop('showFeedbackLink')).toEqual(true);
+    wrapper.find(ConfigCompleted).prop('advanceStep')();
+
     expect(setAddSourceStep).toHaveBeenCalledWith(AddSourceSteps.ConnectInstanceStep);
   });
 
@@ -88,13 +119,13 @@ describe('AddSourceList', () => {
       ...mockValues,
       addSourceCurrentStep: AddSourceSteps.SaveConfigStep,
     });
-    const wrapper = shallow(<AddSource sourceIndex={1} />);
+    const wrapper = shallow(<AddSource />);
     const saveConfig = wrapper.find(SaveConfig);
     saveConfig.prop('advanceStep')();
-    saveConfig.prop('goBackStep')!();
-
-    expect(setAddSourceStep).toHaveBeenCalledWith(AddSourceSteps.ConfigIntroStep);
     expect(saveSourceConfig).toHaveBeenCalled();
+
+    saveConfig.prop('goBackStep')!();
+    expect(navigateToUrl).toHaveBeenCalledWith('/sources/add/box/intro');
   });
 
   it('renders Connect Instance step', () => {
@@ -103,21 +134,11 @@ describe('AddSourceList', () => {
       sourceConfigData,
       addSourceCurrentStep: AddSourceSteps.ConnectInstanceStep,
     });
-    const wrapper = shallow(<AddSource sourceIndex={1} connect />);
+
+    const wrapper = shallow(<AddSource />);
     wrapper.find(ConnectInstance).prop('onFormCreated')('foo');
 
-    expect(navigateToUrl).toHaveBeenCalledWith('/sources/add/confluence_cloud/connect');
-  });
-
-  it('renders Configure Custom step', () => {
-    setMockValues({
-      ...mockValues,
-      addSourceCurrentStep: AddSourceSteps.ConfigureCustomStep,
-    });
-    const wrapper = shallow(<AddSource sourceIndex={1} />);
-    wrapper.find(ConfigureCustom).prop('advanceStep')();
-
-    expect(createContentSource).toHaveBeenCalled();
+    expect(navigateToUrl).toHaveBeenCalledWith('/sources');
   });
 
   it('renders Configure Oauth step', () => {
@@ -125,21 +146,11 @@ describe('AddSourceList', () => {
       ...mockValues,
       addSourceCurrentStep: AddSourceSteps.ConfigureOauthStep,
     });
-    const wrapper = shallow(<AddSource sourceIndex={1} />);
+    const wrapper = shallow(<AddSource />);
 
     wrapper.find(ConfigureOauth).prop('onFormCreated')('foo');
 
-    expect(navigateToUrl).toHaveBeenCalledWith('/sources/add/confluence_cloud/connect');
-  });
-
-  it('renders Save Custom step', () => {
-    setMockValues({
-      ...mockValues,
-      addSourceCurrentStep: AddSourceSteps.SaveCustomStep,
-    });
-    const wrapper = shallow(<AddSource sourceIndex={1} />);
-
-    expect(wrapper.find(SaveCustom)).toHaveLength(1);
+    expect(navigateToUrl).toHaveBeenCalledWith('/sources');
   });
 
   it('renders Reauthenticate step', () => {
@@ -147,7 +158,7 @@ describe('AddSourceList', () => {
       ...mockValues,
       addSourceCurrentStep: AddSourceSteps.ReauthenticateStep,
     });
-    const wrapper = shallow(<AddSource sourceIndex={1} />);
+    const wrapper = shallow(<AddSource />);
 
     expect(wrapper.find(Reauthenticate)).toHaveLength(1);
   });

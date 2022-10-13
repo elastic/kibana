@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { cloneDeep, isEqual, pick } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -22,6 +22,7 @@ import {
   EuiFlexItem,
   EuiTabbedContent,
   EuiConfirmModal,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { JobDetails, Detectors, Datafeed, CustomUrls } from './tabs';
@@ -30,9 +31,13 @@ import { loadFullJob } from '../utils';
 import { validateModelMemoryLimit, validateGroupNames, isValidCustomUrls } from '../validate_job';
 import { toastNotificationServiceProvider } from '../../../../services/toast_notification_service';
 import { ml } from '../../../../services/ml_api_service';
-import { withKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
-import { collapseLiteralStrings } from '../../../../../../shared_imports';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
+import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { DATAFEED_STATE, JOB_STATE } from '../../../../../../common/constants/states';
+import { isManagedJob } from '../../../jobs_utils';
+import { ManagedJobsWarningCallout } from '../confirm_modals/managed_jobs_warning_callout';
+
+const { collapseLiteralStrings } = XJson;
 
 export class EditJobFlyoutUI extends Component {
   _initialJobFormState = null;
@@ -193,8 +198,9 @@ export class EditJobFlyoutUI extends Component {
     let { jobModelMemoryLimitValidationError, jobGroupsValidationError } = this.state;
 
     if (jobDetails.jobModelMemoryLimit !== undefined) {
-      jobModelMemoryLimitValidationError = validateModelMemoryLimit(jobDetails.jobModelMemoryLimit)
-        .message;
+      jobModelMemoryLimitValidationError = validateModelMemoryLimit(
+        jobDetails.jobModelMemoryLimit
+      ).message;
     }
 
     if (jobDetails.jobGroups !== undefined) {
@@ -326,6 +332,7 @@ export class EditJobFlyoutUI extends Component {
       const tabs = [
         {
           id: 'job-details',
+          'data-test-subj': 'mlEditJobFlyout-jobDetails',
           name: i18n.translate('xpack.ml.jobsList.editJobFlyout.jobDetailsTitle', {
             defaultMessage: 'Job details',
           }),
@@ -346,6 +353,7 @@ export class EditJobFlyoutUI extends Component {
         },
         {
           id: 'detectors',
+          'data-test-subj': 'mlEditJobFlyout-detectors',
           name: i18n.translate('xpack.ml.jobsList.editJobFlyout.detectorsTitle', {
             defaultMessage: 'Detectors',
           }),
@@ -359,6 +367,7 @@ export class EditJobFlyoutUI extends Component {
         },
         {
           id: 'datafeed',
+          'data-test-subj': 'mlEditJobFlyout-datafeed',
           name: i18n.translate('xpack.ml.jobsList.editJobFlyout.datafeedTitle', {
             defaultMessage: 'Datafeed',
           }),
@@ -376,6 +385,7 @@ export class EditJobFlyoutUI extends Component {
         },
         {
           id: 'custom-urls',
+          'data-test-subj': 'mlEditJobFlyout-customUrls',
           name: i18n.translate('xpack.ml.jobsList.editJobFlyout.customUrlsTitle', {
             defaultMessage: 'Custom URLs',
           }),
@@ -395,6 +405,7 @@ export class EditJobFlyoutUI extends Component {
             this.closeFlyout();
           }}
           size="m"
+          data-test-subj="mlJobEditFlyout"
         >
           <EuiFlyoutHeader>
             <EuiTitle>
@@ -406,6 +417,21 @@ export class EditJobFlyoutUI extends Component {
                 />
               </h2>
             </EuiTitle>
+
+            {isManagedJob(job) ? (
+              <>
+                <EuiSpacer size="s" />
+                <ManagedJobsWarningCallout
+                  jobsCount={1}
+                  action={i18n.translate(
+                    'xpack.ml.jobsList.editJobModal.editManagedJobDescription',
+                    {
+                      defaultMessage: 'editing',
+                    }
+                  )}
+                />
+              </>
+            ) : null}
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
             <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} onTabClick={() => {}} />
@@ -419,6 +445,7 @@ export class EditJobFlyoutUI extends Component {
                     this.closeFlyout();
                   }}
                   flush="left"
+                  data-test-subj="mlEditJobFlyoutCloseButton"
                 >
                   <FormattedMessage
                     id="xpack.ml.jobsList.editJobFlyout.closeButtonLabel"
@@ -431,6 +458,7 @@ export class EditJobFlyoutUI extends Component {
                   onClick={this.save}
                   fill
                   isDisabled={isValidJobDetails === false || isValidJobCustomUrls === false}
+                  data-test-subj="mlEditJobFlyoutSaveButton"
                 >
                   <FormattedMessage
                     id="xpack.ml.jobsList.editJobFlyout.saveButtonLabel"

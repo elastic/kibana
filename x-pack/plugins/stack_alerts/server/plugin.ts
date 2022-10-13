@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { Plugin, Logger, CoreSetup, PluginInitializerContext } from 'src/core/server';
+import { Plugin, Logger, CoreSetup, PluginInitializerContext } from '@kbn/core/server';
 
 import { StackAlertsDeps, StackAlertsStartDeps } from './types';
 import { registerBuiltInAlertTypes } from './alert_types';
 import { BUILT_IN_ALERTS_FEATURE } from './feature';
 
 export class AlertingBuiltinsPlugin
-  implements Plugin<void, void, StackAlertsDeps, StackAlertsStartDeps> {
+  implements Plugin<void, void, StackAlertsDeps, StackAlertsStartDeps>
+{
   private readonly logger: Logger;
 
   constructor(ctx: PluginInitializerContext) {
@@ -28,6 +29,7 @@ export class AlertingBuiltinsPlugin
         .getStartServices()
         .then(async ([, { triggersActionsUi }]) => triggersActionsUi.data),
       alerting,
+      core,
     });
   }
 

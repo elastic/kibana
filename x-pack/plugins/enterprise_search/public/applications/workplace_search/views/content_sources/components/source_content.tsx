@@ -29,15 +29,14 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import { Loading } from '../../../../shared/loading';
+import { docLinks } from '../../../../shared/doc_links';
 import { TruncatedContent } from '../../../../shared/truncate';
 import { ComponentLoader } from '../../../components/shared/component_loader';
 import { TablePaginationBar } from '../../../components/shared/table_pagination_bar';
 import { ViewContentHeader } from '../../../components/shared/view_content_header';
-import { CUSTOM_SERVICE_TYPE } from '../../../constants';
-import { CUSTOM_SOURCE_DOCS_URL } from '../../../routes';
+import { NAV, CUSTOM_SERVICE_TYPE } from '../../../constants';
 import { SourceContentItem } from '../../../types';
 import {
   NO_CONTENT_MESSAGE,
@@ -47,18 +46,21 @@ import {
   GO_BUTTON,
   RESET_BUTTON,
   SOURCE_CONTENT_TITLE,
+  SEARCH_CONTENT_PLACEHOLDER,
+  FILTER_CONTENT_PLACEHOLDER,
   CONTENT_LOADING_TEXT,
 } from '../constants';
 import { SourceLogic } from '../source_logic';
+
+import { SourceLayout } from './source_layout';
 
 const MAX_LENGTH = 28;
 
 export const SourceContent: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
-  const { setActivePage, searchContentSourceDocuments, setContentFilterValue } = useActions(
-    SourceLogic
-  );
+  const { setActivePage, searchContentSourceDocuments, setContentFilterValue } =
+    useActions(SourceLogic);
 
   const {
     contentSource: { id, serviceType, urlField, titleField, urlFieldIsLinkable, isFederatedSource },
@@ -67,15 +69,12 @@ export const SourceContent: React.FC = () => {
     },
     contentItems,
     contentFilterValue,
-    dataLoading,
     sectionLoading,
   } = useValues(SourceLogic);
 
   useEffect(() => {
     searchContentSourceDocuments(id);
   }, [contentFilterValue, activePage]);
-
-  if (dataLoading) return <Loading />;
 
   const showPagination = totalPages > 1;
   const hasItems = totalItems > 0;
@@ -111,7 +110,7 @@ export const SourceContent: React.FC = () => {
                 defaultMessage="Learn more about adding content in our {documentationLink}"
                 values={{
                   documentationLink: (
-                    <EuiLink target="_blank" href={CUSTOM_SOURCE_DOCS_URL}>
+                    <EuiLink target="_blank" href={docLinks.workplaceSearchCustomSources}>
                       {CUSTOM_DOCUMENTATION_LINK}
                     </EuiLink>
                   ),
@@ -139,7 +138,7 @@ export const SourceContent: React.FC = () => {
             <TruncatedContent tooltipType="title" content={url.toString()} length={MAX_LENGTH} />
           )}
           {urlFieldIsLinkable && (
-            <EuiLink target="_blank" href={url}>
+            <EuiLink target="_blank" href={url.toString()}>
               <TruncatedContent tooltipType="title" content={url.toString()} length={MAX_LENGTH} />
             </EuiLink>
           )}
@@ -193,19 +192,15 @@ export const SourceContent: React.FC = () => {
   );
 
   return (
-    <>
+    <SourceLayout pageChrome={[NAV.CONTENT]} pageViewTelemetry="source_overview">
       <ViewContentHeader title={SOURCE_CONTENT_TITLE} />
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiFieldSearch
             disabled={!hasItems && !contentFilterValue}
-            placeholder={i18n.translate(
-              'xpack.enterpriseSearch.workplaceSearch.sources.sourceContent.searchBar.placeholder',
-              {
-                defaultMessage: '{prefix} content...',
-                values: { prefix: isFederatedSource ? 'Search' : 'Filter' },
-              }
-            )}
+            placeholder={
+              isFederatedSource ? SEARCH_CONTENT_PLACEHOLDER : FILTER_CONTENT_PLACEHOLDER
+            }
             incremental={!isFederatedSource}
             isClearable={!isFederatedSource}
             onSearch={setContentFilterValue}
@@ -219,6 +214,6 @@ export const SourceContent: React.FC = () => {
       <EuiSpacer size="xl" />
       {sectionLoading && <ComponentLoader text={CONTENT_LOADING_TEXT} />}
       {!sectionLoading && (hasItems ? contentTable : emptyState)}
-    </>
+    </SourceLayout>
   );
 };

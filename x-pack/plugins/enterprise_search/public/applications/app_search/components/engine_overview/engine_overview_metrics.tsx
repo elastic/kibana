@@ -5,25 +5,42 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiPageHeader, EuiSpacer } from '@elastic/eui';
+import { useActions, useValues } from 'kea';
+
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { FlashMessages } from '../../../shared/flash_messages';
+import { getEngineBreadcrumbs } from '../engine';
+import { AppSearchPageTemplate } from '../layout';
 
 import { TotalStats, TotalCharts, RecentApiLogs } from './components';
 
-export const EngineOverviewMetrics: React.FC = () => {
-  return (
-    <>
-      <EuiPageHeader
-        pageTitle={i18n.translate('xpack.enterpriseSearch.appSearch.engine.overview.heading', {
-          defaultMessage: 'Engine overview',
-        })}
-      />
-      <FlashMessages />
+import { SuggestedCurationsCallout } from './components/suggested_curations_callout';
 
+import { EngineOverviewLogic } from '.';
+
+export const EngineOverviewMetrics: React.FC = () => {
+  const { loadOverviewMetrics } = useActions(EngineOverviewLogic);
+  const { dataLoading } = useValues(EngineOverviewLogic);
+
+  useEffect(() => {
+    loadOverviewMetrics();
+  }, []);
+
+  return (
+    <AppSearchPageTemplate
+      pageChrome={getEngineBreadcrumbs()}
+      pageHeader={{
+        pageTitle: i18n.translate('xpack.enterpriseSearch.appSearch.engine.overview.heading', {
+          defaultMessage: 'Engine overview',
+        }),
+      }}
+      isLoading={dataLoading}
+      data-test-subj="EngineOverview"
+    >
+      <SuggestedCurationsCallout />
       <EuiFlexGroup>
         <EuiFlexItem grow={1}>
           <TotalStats />
@@ -34,6 +51,6 @@ export const EngineOverviewMetrics: React.FC = () => {
       </EuiFlexGroup>
       <EuiSpacer size="xl" />
       <RecentApiLogs />
-    </>
+    </AppSearchPageTemplate>
   );
 };

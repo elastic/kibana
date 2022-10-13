@@ -9,15 +9,19 @@ import { mount } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
+import { ALERT_DURATION, ALERT_STATUS } from '@kbn/rule-data-utils';
+
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { DragDropContextWrapper } from '../../../../common/components/drag_and_drop/drag_drop_context_wrapper';
 import { defaultHeaders, mockTimelineData, TestProviders } from '../../../../common/mock';
-import { TimelineNonEcsData } from '../../../../../common/search_strategy/timeline';
-import { CellValueElementProps } from '../../../../timelines/components/timeline/cell_rendering';
+import type { TimelineNonEcsData } from '../../../../../common/search_strategy/timeline';
+import type { CellValueElementProps } from '../../../../timelines/components/timeline/cell_rendering';
 import { DefaultCellRenderer } from '../../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
-import { ColumnHeaderOptions } from '../../../../timelines/store/timeline/model';
+import type { ColumnHeaderOptions } from '../../../../../common/types';
 
 import { RenderCellValue } from '.';
+
+jest.mock('../../../../common/lib/kibana');
 
 describe('RenderCellValue', () => {
   const columnId = '@timestamp';
@@ -39,10 +43,12 @@ describe('RenderCellValue', () => {
       eventId,
       header,
       isDetails: false,
+      isDraggable: true,
       isExpandable: false,
       isExpanded: false,
       linkValues,
       rowIndex,
+      colIndex: 0,
       setCellProps: jest.fn(),
       timelineId,
     };
@@ -52,7 +58,7 @@ describe('RenderCellValue', () => {
     const wrapper = mount(
       <TestProviders>
         <DragDropContextWrapper browserFields={mockBrowserFields}>
-          <RenderCellValue {...props} columnId="kibana.rac.alert.status" />
+          <RenderCellValue {...props} columnId={ALERT_STATUS} />
         </DragDropContextWrapper>
       </TestProviders>
     );
@@ -64,7 +70,7 @@ describe('RenderCellValue', () => {
     const wrapper = mount(
       <TestProviders>
         <DragDropContextWrapper browserFields={mockBrowserFields}>
-          <RenderCellValue {...props} columnId="kibana.rac.alert.duration.us" />
+          <RenderCellValue {...props} columnId={ALERT_DURATION} />
         </DragDropContextWrapper>
       </TestProviders>
     );

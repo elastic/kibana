@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import React, { Component, Fragment } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { FieldRule, Rule, RuleGroup } from '../../model';
 import { isRuleGroup } from '../services/is_rule_group';
@@ -37,6 +37,8 @@ export class RuleGroupEditor extends Component<Props, {}> {
     return (
       <EuiPanel
         className={`secRoleMapping__ruleEditorGroup--${this.props.ruleDepth % 2 ? 'odd' : 'even'}`}
+        hasBorder={true}
+        hasShadow={false}
       >
         <EuiFlexGroup direction="column">
           <EuiFlexItem>

@@ -10,6 +10,8 @@ import React, { Component, Fragment, ReactNode } from 'react';
 import { EuiButtonEmpty, EuiIcon, EuiToolTip, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ILayer } from '../../../../../../classes/layers/layer';
+import { IVectorSource } from '../../../../../../classes/sources/vector_source';
+import { isLayerGroup } from '../../../../../../classes/layers/layer_group';
 
 interface Footnote {
   icon: ReactNode;
@@ -68,66 +70,88 @@ export class TOCEntryButton extends Component<Props, State> {
   }
 
   getIconAndTooltipContent(): IconAndTooltipContent {
-    let icon;
-    let tooltipContent = null;
-    const footnotes = [];
     if (this.props.layer.hasErrors()) {
-      icon = (
-        <EuiIcon
-          aria-label={i18n.translate('xpack.maps.layer.loadWarningAriaLabel', {
-            defaultMessage: 'Load warning',
-          })}
-          size="m"
-          type="alert"
-          color="warning"
-        />
-      );
-      tooltipContent = this.props.layer.getErrors();
-    } else if (!this.props.layer.isVisible()) {
-      icon = <EuiIcon size="m" type="eyeClosed" />;
-      tooltipContent = i18n.translate('xpack.maps.layer.layerHiddenTooltip', {
-        defaultMessage: `Layer is hidden.`,
-      });
-    } else if (this.props.layer.isLayerLoading()) {
-      icon = <EuiLoadingSpinner size="m" />;
-    } else if (!this.props.layer.showAtZoomLevel(this.props.zoom)) {
+      return {
+        icon: (
+          <EuiIcon
+            aria-label={i18n.translate('xpack.maps.layer.loadWarningAriaLabel', {
+              defaultMessage: 'Load warning',
+            })}
+            size="m"
+            type="alert"
+            color="warning"
+          />
+        ),
+        tooltipContent: this.props.layer.getErrors(),
+        footnotes: [],
+      };
+    }
+
+    if (!this.props.layer.isVisible()) {
+      return {
+        icon: <EuiIcon size="m" type="eyeClosed" />,
+        tooltipContent: i18n.translate('xpack.maps.layer.layerHiddenTooltip', {
+          defaultMessage: `Layer is hidden.`,
+        }),
+        footnotes: [],
+      };
+    }
+
+    if (this.props.layer.isLayerLoading()) {
+      return {
+        icon: <EuiLoadingSpinner size="m" />,
+        tooltipContent: '',
+        footnotes: [],
+      };
+    }
+
+    if (!this.props.layer.showAtZoomLevel(this.props.zoom)) {
       const minZoom = this.props.layer.getMinZoom();
       const maxZoom = this.props.layer.getMaxZoom();
-      icon = <EuiIcon size="m" type="expand" />;
-      tooltipContent = i18n.translate('xpack.maps.layer.zoomFeedbackTooltip', {
-        defaultMessage: `Layer is visible between zoom levels {minZoom} and {maxZoom}.`,
-        values: { minZoom, maxZoom },
-      });
-    } else {
-      const customIconAndTooltipContent = this.props.layer.getCustomIconAndTooltipContent();
-      if (customIconAndTooltipContent) {
-        icon = customIconAndTooltipContent.icon;
-        if (!customIconAndTooltipContent.areResultsTrimmed) {
-          tooltipContent = customIconAndTooltipContent.tooltipContent;
-        } else {
-          footnotes.push({
-            icon: <EuiIcon color="subdued" type="partial" size="s" />,
-            message: customIconAndTooltipContent.tooltipContent,
-          });
-        }
-      }
+      return {
+        icon: <EuiIcon size="m" type="expand" />,
+        tooltipContent: i18n.translate('xpack.maps.layer.zoomFeedbackTooltip', {
+          defaultMessage: `Layer is visible between zoom levels {minZoom} and {maxZoom}.`,
+          values: { minZoom, maxZoom },
+        }),
+        footnotes: [],
+      };
+    }
 
-      if (this.props.isUsingSearch && this.props.layer.getQueryableIndexPatternIds().length) {
-        footnotes.push({
-          icon: <EuiIcon color="subdued" type="filter" size="s" />,
-          message: i18n.translate('xpack.maps.layer.isUsingSearchMsg', {
-            defaultMessage: 'Results narrowed by search bar',
-          }),
-        });
-      }
-      if (this.state.isFilteredByGlobalTime) {
-        footnotes.push({
-          icon: <EuiIcon color="subdued" type="clock" size="s" />,
-          message: i18n.translate('xpack.maps.layer.isUsingTimeFilter', {
-            defaultMessage: 'Results narrowed by time filter',
-          }),
-        });
-      }
+    const { icon, tooltipContent } = this.props.layer.getLayerIcon(true);
+
+    if (isLayerGroup(this.props.layer)) {
+      return { icon, tooltipContent, footnotes: [] };
+    }
+
+    const footnotes = [];
+    if (this.props.isUsingSearch && this.props.layer.getQueryableIndexPatternIds().length) {
+      footnotes.push({
+        icon: <EuiIcon color="subdued" type="filter" size="s" />,
+        message: i18n.translate('xpack.maps.layer.isUsingSearchMsg', {
+          defaultMessage: 'Results narrowed by global search',
+        }),
+      });
+    }
+    if (this.state.isFilteredByGlobalTime) {
+      footnotes.push({
+        icon: <EuiIcon color="subdued" type="clock" size="s" />,
+        message: i18n.translate('xpack.maps.layer.isUsingTimeFilter', {
+          defaultMessage: 'Results narrowed by global time',
+        }),
+      });
+    }
+    const source = this.props.layer.getSource();
+    if (
+      typeof source.isFilterByMapBounds === 'function' &&
+      (source as IVectorSource).isFilterByMapBounds()
+    ) {
+      footnotes.push({
+        icon: <EuiIcon color="subdued" type="stop" size="s" />,
+        message: i18n.translate('xpack.maps.layer.isUsingBoundsFilter', {
+          defaultMessage: 'Results narrowed by visible map area',
+        }),
+      });
     }
 
     return {
@@ -167,6 +191,7 @@ export class TOCEntryButton extends Component<Props, State> {
             {footnoteTooltipContent}
           </Fragment>
         }
+        data-test-subj="layerTocTooltip"
       >
         <EuiButtonEmpty
           className="mapTocEntry__layerName eui-textLeft"

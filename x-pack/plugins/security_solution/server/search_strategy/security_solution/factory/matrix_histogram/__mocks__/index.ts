@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 
-import { MatrixHistogramStrategyResponse } from '../../../../../../common/search_strategy';
+import type { MatrixHistogramStrategyResponse } from '../../../../../../common/search_strategy';
 
 export const mockAlertsSearchStrategyResponse: IEsSearchResponse<unknown> = {
   isPartial: false,
@@ -33,6 +33,7 @@ export const formattedAlertsSearchStrategyResponse: MatrixHistogramStrategyRespo
         {
           index: [
             'apm-*-transaction*',
+            'traces-apm*',
             'auditbeat-*',
             'endgame-*',
             'filebeat-*',
@@ -40,8 +41,8 @@ export const formattedAlertsSearchStrategyResponse: MatrixHistogramStrategyRespo
             'packetbeat-*',
             'winlogbeat-*',
           ],
-          allowNoIndices: true,
-          ignoreUnavailable: true,
+          allow_no_indices: true,
+          ignore_unavailable: true,
           track_total_hits: true,
           body: {
             aggregations: {
@@ -126,7 +127,7 @@ export const formattedAlertsSearchStrategyResponse: MatrixHistogramStrategyRespo
 };
 
 export const expectedDsl = {
-  allowNoIndices: true,
+  allow_no_indices: true,
   track_total_hits: false,
   body: {
     aggregations: {
@@ -163,9 +164,10 @@ export const expectedDsl = {
     },
     size: 0,
   },
-  ignoreUnavailable: true,
+  ignore_unavailable: true,
   index: [
     'apm-*-transaction*',
+    'traces-apm*',
     'auditbeat-*',
     'endgame-*',
     'filebeat-*',
@@ -199,6 +201,7 @@ export const formattedAnomaliesSearchStrategyResponse: MatrixHistogramStrategyRe
         {
           index: [
             'apm-*-transaction*',
+            'traces-apm*',
             'auditbeat-*',
             'endgame-*',
             'filebeat-*',
@@ -206,8 +209,8 @@ export const formattedAnomaliesSearchStrategyResponse: MatrixHistogramStrategyRe
             'packetbeat-*',
             'winlogbeat-*',
           ],
-          allowNoIndices: true,
-          ignoreUnavailable: true,
+          allow_no_indices: true,
+          ignore_unavailable: true,
           track_total_hits: true,
           body: {
             aggs: {
@@ -381,6 +384,7 @@ export const formattedAuthenticationsSearchStrategyResponse: MatrixHistogramStra
         {
           index: [
             'apm-*-transaction*',
+            'traces-apm*',
             'auditbeat-*',
             'endgame-*',
             'filebeat-*',
@@ -388,8 +392,8 @@ export const formattedAuthenticationsSearchStrategyResponse: MatrixHistogramStra
             'packetbeat-*',
             'winlogbeat-*',
           ],
-          allowNoIndices: true,
-          ignoreUnavailable: true,
+          allow_no_indices: true,
+          ignore_unavailable: true,
           track_total_hits: true,
           body: {
             aggregations: {
@@ -947,6 +951,7 @@ export const formattedEventsSearchStrategyResponse: MatrixHistogramStrategyRespo
         {
           index: [
             'apm-*-transaction*',
+            'traces-apm*',
             'auditbeat-*',
             'endgame-*',
             'filebeat-*',
@@ -954,8 +959,8 @@ export const formattedEventsSearchStrategyResponse: MatrixHistogramStrategyRespo
             'packetbeat-*',
             'winlogbeat-*',
           ],
-          allowNoIndices: true,
-          ignoreUnavailable: true,
+          allow_no_indices: true,
+          ignore_unavailable: true,
           track_total_hits: true,
           body: {
             aggregations: {
@@ -992,6 +997,14 @@ export const formattedEventsSearchStrategyResponse: MatrixHistogramStrategyRespo
                     },
                   },
                 ],
+              },
+            },
+            runtime_mappings: {
+              '@a.runtime.field': {
+                script: {
+                  source: 'emit("Radically mocked dude: " + doc[\'host.name\'].value)',
+                },
+                type: 'keyword',
               },
             },
             size: 0,
@@ -1922,9 +1935,10 @@ export const formattedDnsSearchStrategyResponse: MatrixHistogramStrategyResponse
     dsl: [
       JSON.stringify(
         {
-          allowNoIndices: true,
+          allow_no_indices: true,
           index: [
             'apm-*-transaction*',
+            'traces-apm*',
             'auditbeat-*',
             'endgame-*',
             'filebeat-*',
@@ -1932,7 +1946,7 @@ export const formattedDnsSearchStrategyResponse: MatrixHistogramStrategyResponse
             'packetbeat-*',
             'winlogbeat-*',
           ],
-          ignoreUnavailable: true,
+          ignore_unavailable: true,
           body: {
             aggregations: {
               dns_count: { cardinality: { field: 'dns.question.registered_domain' } },
@@ -2082,5 +2096,85 @@ export const formattedDnsSearchStrategyResponse: MatrixHistogramStrategyResponse
     { x: 1605159021402, y: 0, g: 'windows.net' },
     { x: 1605159518499, y: 0, g: 'windows.net' },
   ],
+  totalCount: 0,
+};
+
+export const formattedPreviewStrategyResponse = {
+  ...mockAlertsSearchStrategyResponse,
+  inspect: {
+    dsl: [
+      JSON.stringify(
+        {
+          index: ['.siem-preview-signals-default'],
+          allow_no_indices: true,
+          ignore_unavailable: true,
+          track_total_hits: true,
+          body: {
+            aggregations: {
+              preview: {
+                terms: {
+                  field: 'event.category',
+                  missing: 'All others',
+                  order: { _count: 'desc' },
+                  size: 10,
+                },
+                aggs: {
+                  preview: {
+                    date_histogram: {
+                      field: 'signal.original_time',
+                      fixed_interval: '2700000ms',
+                      min_doc_count: 0,
+                      extended_bounds: { min: 1599574984482, max: 1599661384482 },
+                    },
+                  },
+                },
+              },
+            },
+            query: {
+              bool: {
+                filter: [
+                  {
+                    bool: {
+                      must: [],
+                      filter: [
+                        { match_all: {} },
+                        {
+                          bool: {
+                            filter: [
+                              {
+                                bool: {
+                                  should: [{ match: { 'signal.rule.id': 'test-preview-id' } }],
+                                  minimum_should_match: 1,
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      ],
+                      should: [],
+                      must_not: [],
+                    },
+                  },
+                  {
+                    range: {
+                      'signal.original_time': {
+                        gte: '2020-09-08T14:23:04.482Z',
+                        lte: '2020-09-09T14:23:04.482Z',
+                        format: 'strict_date_optional_time',
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+            size: 0,
+          },
+        },
+        null,
+        2
+      ),
+    ],
+  },
+  matrixHistogramData: [],
   totalCount: 0,
 };

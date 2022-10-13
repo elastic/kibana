@@ -6,14 +6,14 @@
  */
 
 import expect from '@kbn/expect';
-import instanceFixture from './fixtures/instance';
+import instanceFixture from './fixtures/instance.json';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
   describe('instance detail', () => {
-    const archive = 'monitoring/singlecluster_yellow_platinum';
+    const archive = 'x-pack/test/functional/es_archives/monitoring/singlecluster_yellow_platinum';
     const timeRange = {
       min: '2017-08-29T17:24:17.000Z',
       max: '2017-08-29T17:26:08.000Z',
@@ -35,7 +35,6 @@ export default function ({ getService }) {
         .set('kbn-xsrf', 'xxx')
         .send({ timeRange })
         .expect(200);
-
       expect(body).to.eql(instanceFixture);
     });
   });

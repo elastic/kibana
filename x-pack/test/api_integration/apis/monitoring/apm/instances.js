@@ -12,7 +12,7 @@ export default function ({ getService }) {
   const esArchiver = getService('esArchiver');
 
   describe('list', () => {
-    const archive = 'monitoring/apm';
+    const archive = 'x-pack/test/functional/es_archives/monitoring/apm';
     const timeRange = {
       min: '2018-08-31T12:59:49.104Z',
       max: '2018-08-31T13:59:49.104Z',
@@ -33,7 +33,7 @@ export default function ({ getService }) {
         .send({ timeRange })
         .expect(200);
 
-      const expected = {
+      const expectedWithoutCgroup = {
         stats: {
           totalEvents: 18,
           apms: {
@@ -69,7 +69,12 @@ export default function ({ getService }) {
         ],
       };
 
-      expect(body).to.eql(expected);
+      // Due to the lack of `expect`s expressiveness this is an awkward way to
+      // tolate cgroup being false or true, which depends on the test execution
+      // environment. On cloud it is always true.
+      const { cgroup, ...bodyWithoutCgroup } = body;
+      expect(bodyWithoutCgroup).to.eql(expectedWithoutCgroup);
+      expect(cgroup).to.be.a('boolean');
     });
   });
 }

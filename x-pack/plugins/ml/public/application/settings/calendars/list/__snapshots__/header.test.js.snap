@@ -2,6 +2,13 @@
 
 exports[`CalendarListsHeader renders header 1`] = `
 <Fragment>
+  <MlPageHeader>
+    <FormattedMessage
+      defaultMessage="Calendars"
+      id="xpack.ml.settings.calendars.listHeader.calendarsTitle"
+      values={Object {}}
+    />
+  </MlPageHeader>
   <EuiFlexGroup
     alignItems="baseline"
     justifyContent="spaceBetween"
@@ -14,19 +21,6 @@ exports[`CalendarListsHeader renders header 1`] = `
         gutterSize="m"
         responsive={false}
       >
-        <EuiFlexItem
-          grow={false}
-        >
-          <EuiTitle>
-            <h1>
-              <FormattedMessage
-                defaultMessage="Calendars"
-                id="xpack.ml.settings.calendars.listHeader.calendarsTitle"
-                values={Object {}}
-              />
-            </h1>
-          </EuiTitle>
-        </EuiFlexItem>
         <EuiFlexItem
           grow={false}
         >

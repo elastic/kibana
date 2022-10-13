@@ -5,29 +5,26 @@
  * 2.0.
  */
 
-import { CoreStart } from '../../../../src/core/public';
-import { LensPluginStartDependencies } from './plugin';
-import { AttributeService } from '../../../../src/plugins/embeddable/public';
-import {
+import type { CoreStart } from '@kbn/core/public';
+import type { AttributeService } from '@kbn/embeddable-plugin/public';
+import { OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import type { LensPluginStartDependencies } from './plugin';
+import type {
   LensSavedObjectAttributes,
   LensByValueInput,
+  LensUnwrapMetaInfo,
+  LensUnwrapResult,
   LensByReferenceInput,
-} from './editor_frame_service/embeddable/embeddable';
-import { SavedObjectIndexStore, Document } from './persistence';
-import { checkForDuplicateTitle, OnSaveProps } from '../../../../src/plugins/saved_objects/public';
-import { DOC_TYPE } from '../common';
+} from './embeddable/embeddable';
+import { SavedObjectIndexStore, checkForDuplicateTitle } from './persistence';
+import { DOC_TYPE } from '../common/constants';
 
 export type LensAttributeService = AttributeService<
   LensSavedObjectAttributes,
   LensByValueInput,
-  LensByReferenceInput
+  LensByReferenceInput,
+  LensUnwrapMetaInfo
 >;
-
-function documentToAttributes(doc: Document): LensSavedObjectAttributes {
-  delete doc.savedObjectId;
-  delete doc.type;
-  return { ...doc };
-}
 
 export function getLensAttributeService(
   core: CoreStart,
@@ -37,7 +34,8 @@ export function getLensAttributeService(
   return startDependencies.embeddable.getAttributeService<
     LensSavedObjectAttributes,
     LensByValueInput,
-    LensByReferenceInput
+    LensByReferenceInput,
+    LensUnwrapMetaInfo
   >(DOC_TYPE, {
     saveMethod: async (attributes: LensSavedObjectAttributes, savedObjectId?: string) => {
       const savedDoc = await savedObjectStore.save({
@@ -47,9 +45,34 @@ export function getLensAttributeService(
       });
       return { id: savedDoc.savedObjectId };
     },
-    unwrapMethod: async (savedObjectId: string): Promise<LensSavedObjectAttributes> => {
-      const attributes = documentToAttributes(await savedObjectStore.load(savedObjectId));
-      return attributes;
+    unwrapMethod: async (savedObjectId: string): Promise<LensUnwrapResult> => {
+      const {
+        saved_object: savedObject,
+        outcome,
+        alias_target_id: aliasTargetId,
+        alias_purpose: aliasPurpose,
+      } = await savedObjectStore.load(savedObjectId);
+      const { attributes, references, id } = savedObject;
+      const document = {
+        ...attributes,
+        references,
+      };
+
+      const sharingSavedObjectProps = {
+        aliasTargetId,
+        outcome,
+        aliasPurpose,
+        sourceId: id,
+      };
+
+      return {
+        attributes: {
+          ...document,
+        },
+        metaInfo: {
+          sharingSavedObjectProps,
+        },
+      };
     },
     checkForDuplicateTitle: (props: OnSaveProps) => {
       const savedObjectsClient = core.savedObjects.client;
@@ -57,12 +80,11 @@ export function getLensAttributeService(
       return checkForDuplicateTitle(
         {
           title: props.newTitle,
-          copyOnSave: false,
+          displayName: DOC_TYPE,
+          isTitleDuplicateConfirmed: props.isTitleDuplicateConfirmed,
           lastSavedTitle: '',
-          getEsType: () => DOC_TYPE,
-          getDisplayName: () => DOC_TYPE,
+          copyOnSave: false,
         },
-        props.isTitleDuplicateConfirmed,
         props.onTitleDuplicate,
         {
           savedObjectsClient,

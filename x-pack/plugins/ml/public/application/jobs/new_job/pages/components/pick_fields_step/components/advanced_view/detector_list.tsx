@@ -6,7 +6,7 @@
  */
 
 import React, { Fragment, FC, useContext, useEffect, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -35,15 +35,19 @@ interface Props {
 }
 
 export const DetectorList: FC<Props> = ({ isActive, onEditJob, onDeleteJob }) => {
-  const { jobCreator: jc, jobCreatorUpdated, jobValidator, jobValidatorUpdated } = useContext(
-    JobCreatorContext
-  );
+  const {
+    jobCreator: jc,
+    jobCreatorUpdated,
+    jobValidator,
+    jobValidatorUpdated,
+  } = useContext(JobCreatorContext);
   const jobCreator = jc as AdvancedJobCreator;
   const [detectors, setDetectors] = useState(jobCreator.detectors);
   const [validation, setValidation] = useState(jobValidator.duplicateDetectors);
 
   useEffect(() => {
     setDetectors(jobCreator.detectors);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdated]);
 
   useEffect(() => {
@@ -56,6 +60,7 @@ export const DetectorList: FC<Props> = ({ isActive, onEditJob, onDeleteJob }) =>
     if (!jobValidator.categorizerMissingPerPartition.valid) {
       setValidation(jobValidator.categorizerMissingPerPartition);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobValidatorUpdated]);
 
   const Buttons: FC<{ index: number }> = ({ index }) => {

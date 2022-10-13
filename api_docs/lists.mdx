@@ -1,15 +1,27 @@
 ---
+####
+#### This document is auto-generated and is meant to be viewed inside our experimental, new docs system.
+#### Reach out in #docs-engineering for more info.
+####
 id: kibListsPluginApi
-slug: /kibana-dev-docs/listsPluginApi
-title: lists
+slug: /kibana-dev-docs/api/lists
+title: "lists"
 image: https://source.unsplash.com/400x175/?github
-summary: API docs for the lists plugin
-date: 2020-11-16
+description: API docs for the lists plugin
+date: 2022-10-13
 tags: ['contributor', 'dev', 'apidocs', 'kibana', 'lists']
-warning: This document is auto-generated and is meant to be viewed inside our experimental, new docs system. Reach out in #docs-engineering for more info.
 ---
+import listsObj from './lists.devdocs.json';
 
-import listsObj from './lists.json';
+
+
+Contact [Security detections response](https://github.com/orgs/elastic/teams/security-detections-response) for questions regarding this plugin.
+
+**Code health stats**
+
+| Public API count  | Any count | Items lacking comments | Missing exports |
+|-------------------|-----------|------------------------|-----------------|
+| 204 | 0 | 92 | 50 |
 
 ## Client
 
@@ -18,9 +30,6 @@ import listsObj from './lists.json';
 
 ### Start
 <DocDefinitionList data={[listsObj.client.start]}/>
-
-### Objects
-<DocDefinitionList data={listsObj.client.objects}/>
 
 ### Functions
 <DocDefinitionList data={listsObj.client.functions}/>
@@ -33,23 +42,15 @@ import listsObj from './lists.json';
 
 ## Server
 
+### Setup
+<DocDefinitionList data={[listsObj.server.setup]}/>
+
 ### Classes
 <DocDefinitionList data={listsObj.server.classes}/>
 
 ### Interfaces
 <DocDefinitionList data={listsObj.server.interfaces}/>
 
-## Common
-
-### Objects
-<DocDefinitionList data={listsObj.common.objects}/>
-
-### Functions
-<DocDefinitionList data={listsObj.common.functions}/>
-
-### Enums
-<DocDefinitionList data={listsObj.common.enums}/>
-
 ### Consts, variables and types
-<DocDefinitionList data={listsObj.common.misc}/>
+<DocDefinitionList data={listsObj.server.misc}/>
 

@@ -6,18 +6,19 @@
  */
 
 import React from 'react';
+import { render, screen } from '@testing-library/react';
 
-import { useKibana } from '../../../../common/lib/kibana';
+import { useKibana, useGetUserCasesPermissions } from '../../../../common/lib/kibana';
 import { TestProviders, mockIndexNames, mockIndexPattern } from '../../../../common/mock';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { useTimelineKpis } from '../../../containers/kpis';
 import { FlyoutHeader } from '.';
-import { useSourcererScope } from '../../../../common/containers/sourcerer';
-import { mockBrowserFields, mockDocValueFields } from '../../../../common/containers/source/mock';
-import { useMountAppended } from '../../../../common/utils/use_mount_appended';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { getEmptyValue } from '../../../../common/components/empty_value';
+import { allCasesPermissions, readCasesPermissions } from '../../../../cases_test_utils';
 
-const mockUseSourcererScope: jest.Mock = useSourcererScope as jest.Mock;
+const mockUseSourcererDataView: jest.Mock = useSourcererDataView as jest.Mock;
 jest.mock('../../../../common/containers/sourcerer');
 
 const mockUseTimelineKpis: jest.Mock = useTimelineKpis as jest.Mock;
@@ -26,8 +27,8 @@ jest.mock('../../../containers/kpis', () => ({
 }));
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 jest.mock('../../../../common/lib/kibana');
-jest.mock('@kbn/i18n/react', () => {
-  const originalModule = jest.requireActual('@kbn/i18n/react');
+jest.mock('@kbn/i18n-react', () => {
+  const originalModule = jest.requireActual('@kbn/i18n-react');
   const FormattedRelative = jest.fn().mockImplementation(() => '20 hours ago');
 
   return {
@@ -52,17 +53,14 @@ const mockUseTimelineLargeKpiResponse = {
 };
 const defaultMocks = {
   browserFields: mockBrowserFields,
-  docValueFields: mockDocValueFields,
   indexPattern: mockIndexPattern,
   loading: false,
   selectedPatterns: mockIndexNames,
 };
-describe('Timeline KPIs', () => {
-  const mount = useMountAppended();
-
+describe('header', () => {
   beforeEach(() => {
     // Mocking these services is required for the header component to render.
-    mockUseSourcererScope.mockImplementation(() => defaultMocks);
+    mockUseSourcererDataView.mockImplementation(() => defaultMocks);
     useKibanaMock().services.application.capabilities = {
       navLinks: {},
       management: {},
@@ -75,86 +73,99 @@ describe('Timeline KPIs', () => {
     jest.clearAllMocks();
   });
 
-  describe('when the data is not loading and the response contains data', () => {
+  describe('AddToCaseButton', () => {
     beforeEach(() => {
       mockUseTimelineKpis.mockReturnValue([false, mockUseTimelineKpiResponse]);
     });
-    it('renders the component, labels and values succesfully', async () => {
-      const wrapper = mount(
+
+    it('renders the button when the user has create and read permissions', () => {
+      (useGetUserCasesPermissions as jest.Mock).mockReturnValue(allCasesPermissions());
+
+      render(
         <TestProviders>
           <FlyoutHeader timelineId={TimelineId.test} />
         </TestProviders>
       );
-      expect(wrapper.find('[data-test-subj="siem-timeline-kpis"]').exists()).toEqual(true);
-      // label
-      expect(wrapper.find('[data-test-subj="siem-timeline-process-kpi"]').first().text()).toEqual(
-        expect.stringContaining('Processes')
+
+      expect(screen.getByTestId('attach-timeline-case-button')).toBeInTheDocument();
+    });
+
+    it('does not render the button when the user does not have create permissions', () => {
+      (useGetUserCasesPermissions as jest.Mock).mockReturnValue(readCasesPermissions());
+
+      render(
+        <TestProviders>
+          <FlyoutHeader timelineId={TimelineId.test} />
+        </TestProviders>
       );
-      // value
-      expect(wrapper.find('[data-test-subj="siem-timeline-process-kpi"]').first().text()).toEqual(
-        expect.stringContaining('1')
-      );
+
+      expect(screen.queryByTestId('attach-timeline-case-button')).not.toBeInTheDocument();
     });
   });
 
-  describe('when the data is loading', () => {
-    beforeEach(() => {
-      mockUseTimelineKpis.mockReturnValue([true, mockUseTimelineKpiResponse]);
+  describe('Timeline KPIs', () => {
+    describe('when the data is not loading and the response contains data', () => {
+      beforeEach(() => {
+        mockUseTimelineKpis.mockReturnValue([false, mockUseTimelineKpiResponse]);
+      });
+      it('renders the component, labels and values successfully', () => {
+        render(
+          <TestProviders>
+            <FlyoutHeader timelineId={TimelineId.test} />
+          </TestProviders>
+        );
+        expect(screen.getByTestId('siem-timeline-kpis')).toBeInTheDocument();
+        // label
+        expect(screen.getByText('Processes')).toBeInTheDocument();
+        // value
+        expect(screen.getByTestId('siem-timeline-process-kpi').textContent).toContain('1');
+      });
     });
-    it('renders a loading indicator for values', async () => {
-      const wrapper = mount(
-        <TestProviders>
-          <FlyoutHeader timelineId={TimelineId.test} />
-        </TestProviders>
-      );
-      expect(wrapper.find('[data-test-subj="siem-timeline-process-kpi"]').first().text()).toEqual(
-        expect.stringContaining('--')
-      );
-    });
-  });
 
-  describe('when the response is null and timeline is blank', () => {
-    beforeEach(() => {
-      mockUseTimelineKpis.mockReturnValue([false, null]);
+    describe('when the data is loading', () => {
+      beforeEach(() => {
+        mockUseTimelineKpis.mockReturnValue([true, mockUseTimelineKpiResponse]);
+      });
+      it('renders a loading indicator for values', async () => {
+        render(
+          <TestProviders>
+            <FlyoutHeader timelineId={TimelineId.test} />
+          </TestProviders>
+        );
+        expect(screen.getAllByText('--')).not.toHaveLength(0);
+      });
     });
-    it('renders labels and the default empty string', async () => {
-      const wrapper = mount(
-        <TestProviders>
-          <FlyoutHeader timelineId={TimelineId.test} />
-        </TestProviders>
-      );
 
-      expect(wrapper.find('[data-test-subj="siem-timeline-process-kpi"]').first().text()).toEqual(
-        expect.stringContaining('Processes')
-      );
-      expect(wrapper.find('[data-test-subj="siem-timeline-process-kpi"]').first().text()).toEqual(
-        expect.stringContaining(getEmptyValue())
-      );
+    describe('when the response is null and timeline is blank', () => {
+      beforeEach(() => {
+        mockUseTimelineKpis.mockReturnValue([false, null]);
+      });
+      it('renders labels and the default empty string', () => {
+        render(
+          <TestProviders>
+            <FlyoutHeader timelineId={TimelineId.test} />
+          </TestProviders>
+        );
+        expect(screen.getByText('Processes')).toBeInTheDocument();
+        expect(screen.getAllByText(getEmptyValue())).not.toHaveLength(0);
+      });
     });
-  });
 
-  describe('when the response contains numbers larger than one thousand', () => {
-    beforeEach(() => {
-      mockUseTimelineKpis.mockReturnValue([false, mockUseTimelineLargeKpiResponse]);
-    });
-    it('formats the numbers correctly', async () => {
-      const wrapper = mount(
-        <TestProviders>
-          <FlyoutHeader timelineId={TimelineId.test} />
-        </TestProviders>
-      );
-      expect(wrapper.find('[data-test-subj="siem-timeline-process-kpi"]').first().text()).toEqual(
-        expect.stringContaining('1k')
-      );
-      expect(wrapper.find('[data-test-subj="siem-timeline-user-kpi"]').first().text()).toEqual(
-        expect.stringContaining('1m')
-      );
-      expect(wrapper.find('[data-test-subj="siem-timeline-source-ip-kpi"]').first().text()).toEqual(
-        expect.stringContaining('1b')
-      );
-      expect(wrapper.find('[data-test-subj="siem-timeline-host-kpi"]').first().text()).toEqual(
-        expect.stringContaining('999')
-      );
+    describe('when the response contains numbers larger than one thousand', () => {
+      beforeEach(() => {
+        mockUseTimelineKpis.mockReturnValue([false, mockUseTimelineLargeKpiResponse]);
+      });
+      it('formats the numbers correctly', () => {
+        render(
+          <TestProviders>
+            <FlyoutHeader timelineId={TimelineId.test} />
+          </TestProviders>
+        );
+        expect(screen.getByText('1k', { selector: '.euiTitle' })).toBeInTheDocument();
+        expect(screen.getByText('1m', { selector: '.euiTitle' })).toBeInTheDocument();
+        expect(screen.getByText('1b', { selector: '.euiTitle' })).toBeInTheDocument();
+        expect(screen.getByText('999', { selector: '.euiTitle' })).toBeInTheDocument();
+      });
     });
   });
 });

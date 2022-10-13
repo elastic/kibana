@@ -1,0 +1,15 @@
+title: Test stream
+type: logs
+streams:
+  - input: test_input
+    vars:
+    - name: test_var_required
+      type: string
+      title: Test Var
+      required: true
+      show_user: true
+    - name: test_var
+      type: string
+      title: Test Var
+      required: false
+      show_user: true

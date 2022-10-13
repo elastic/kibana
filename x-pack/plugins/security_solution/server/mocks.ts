@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { AppClient } from './types';
+import type { AppClient } from './types';
 
 type AppClientMock = jest.Mocked<AppClient>;
 const createAppClientMock = (): AppClientMock =>
-  (({
+  ({
     getSignalsIndex: jest.fn(),
-  } as unknown) as AppClientMock);
+    getSourcererDataViewId: jest.fn().mockReturnValue('security-solution'),
+  } as unknown as AppClientMock);
 
 export const siemMock = {
   createClient: createAppClientMock,

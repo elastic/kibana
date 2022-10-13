@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { run, REPO_ROOT, ToolingLog } from '@kbn/dev-utils';
+import { run } from '@kbn/dev-cli-runner';
+import { ToolingLog } from '@kbn/tooling-log';
+import { REPO_ROOT } from '@kbn/utils';
 import chalk from 'chalk';
 import cheerio from 'cheerio';
 import fs from 'fs';
 import fetch from 'node-fetch';
 import path from 'path';
-import { PackageJson } from 'type-fest';
 
 type PuppeteerRelease = string;
 type ChromiumRevision = string;
@@ -26,7 +27,7 @@ const forkCompatibilityMap: Record<string, PuppeteerRelease> = {
 
 async function getPuppeteerRelease(log: ToolingLog): Promise<PuppeteerRelease> {
   // open node_modules/puppeteer/package.json
-  const puppeteerPackageJson: PackageJson = JSON.parse(
+  const puppeteerPackageJson = JSON.parse(
     fs.readFileSync(path.resolve(REPO_ROOT, 'node_modules', 'puppeteer', 'package.json'), 'utf8')
   );
   const { version } = puppeteerPackageJson;
@@ -35,8 +36,10 @@ async function getPuppeteerRelease(log: ToolingLog): Promise<PuppeteerRelease> {
       'Could not get the Puppeteer version! Check node_modules/puppteer/package.json'
     );
   }
-  log.info(`Kibana is using Puppeteer ${version} (${forkCompatibilityMap[version]})`);
-  return forkCompatibilityMap[version];
+  const puppeteerRelease = forkCompatibilityMap[version] ?? version;
+
+  log.info(`Kibana is using Puppeteer ${version} (${puppeteerRelease})`);
+  return puppeteerRelease;
 }
 
 async function getChromiumRevision(
@@ -129,8 +132,8 @@ run(
     description: chalk`
       Display the Chromium git commit that correlates to a given Puppeteer release.
 
-      -  node x-pack/dev-tools/chromium_version 5.5.0  {dim # gets the Chromium commit for Puppeteer v5.5.0}
-      -  node x-pack/dev-tools/chromium_version       {dim  # gets the Chromium commit for the Kibana dependency version of Puppeteer}
+      -  node scripts/chromium_version 5.5.0  {dim # gets the Chromium commit for Puppeteer v5.5.0}
+      -  node scripts/chromium_version       {dim  # gets the Chromium commit for the Kibana dependency version of Puppeteer}
 
       You can use https://omahaproxy.appspot.com/ to look up the Chromium release that first shipped with that commit.
     `,

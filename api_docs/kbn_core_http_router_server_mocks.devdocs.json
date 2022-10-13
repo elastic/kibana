@@ -1,0 +1,200 @@
+{
+  "id": "@kbn/core-http-router-server-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-http-router-server-mocks",
+        "id": "def-server.RouterMock",
+        "type": "Type",
+        "tags": [],
+        "label": "RouterMock",
+        "description": [],
+        "signature": [
+          "{ routerPath: string; get: jest.MockInstance<void, [route: ",
+          "RouteConfig",
+          "<unknown, unknown, unknown, \"get\">, handler: ",
+          "RequestHandler",
+          "<unknown, unknown, unknown, any, \"get\", ",
+          "KibanaResponseFactory",
+          ">]>; post: jest.MockInstance<void, [route: ",
+          "RouteConfig",
+          "<unknown, unknown, unknown, \"post\">, handler: ",
+          "RequestHandler",
+          "<unknown, unknown, unknown, any, \"post\", ",
+          "KibanaResponseFactory",
+          ">]>; put: jest.MockInstance<void, [route: ",
+          "RouteConfig",
+          "<unknown, unknown, unknown, \"put\">, handler: ",
+          "RequestHandler",
+          "<unknown, unknown, unknown, any, \"put\", ",
+          "KibanaResponseFactory",
+          ">]>; patch: jest.MockInstance<void, [route: ",
+          "RouteConfig",
+          "<unknown, unknown, unknown, \"patch\">, handler: ",
+          "RequestHandler",
+          "<unknown, unknown, unknown, any, \"patch\", ",
+          "KibanaResponseFactory",
+          ">]>; delete: jest.MockInstance<void, [route: ",
+          "RouteConfig",
+          "<unknown, unknown, unknown, \"delete\">, handler: ",
+          "RequestHandler",
+          "<unknown, unknown, unknown, any, \"delete\", ",
+          "KibanaResponseFactory",
+          ">]>; handleLegacyErrors: jest.MockInstance<",
+          "RequestHandler",
+          "<unknown, unknown, unknown, ",
+          "RequestHandlerContextBase",
+          ", ",
+          "RouteMethod",
+          ", ",
+          "KibanaResponseFactory",
+          ">, [handler: ",
+          "RequestHandler",
+          "<unknown, unknown, unknown, ",
+          "RequestHandlerContextBase",
+          ", ",
+          "RouteMethod",
+          ", ",
+          "KibanaResponseFactory",
+          ">]>; getRoutes: jest.MockInstance<",
+          "RouterRoute",
+          "[], []>; } & ",
+          "IRouter",
+          "<any>"
+        ],
+        "path": "packages/core/http/core-http-router-server-mocks/src/router.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-http-router-server-mocks",
+        "id": "def-server.mockRouter",
+        "type": "Object",
+        "tags": [],
+        "label": "mockRouter",
+        "description": [],
+        "path": "packages/core/http/core-http-router-server-mocks/src/router.mock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-router-server-mocks",
+            "id": "def-server.mockRouter.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "({ routerPath }?: { routerPath?: string | undefined; }) => ",
+              {
+                "pluginId": "@kbn/core-http-router-server-mocks",
+                "scope": "server",
+                "docId": "kibKbnCoreHttpRouterServerMocksPluginApi",
+                "section": "def-server.RouterMock",
+                "text": "RouterMock"
+              }
+            ],
+            "path": "packages/core/http/core-http-router-server-mocks/src/router.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-router-server-mocks",
+                "id": "def-server.mockRouter.create.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "__0",
+                "description": [],
+                "signature": [
+                  "{ routerPath?: string | undefined; }"
+                ],
+                "path": "packages/core/http/core-http-router-server-mocks/src/router.mock.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-http-router-server-mocks",
+            "id": "def-server.mockRouter.createKibanaRequest",
+            "type": "Function",
+            "tags": [],
+            "label": "createKibanaRequest",
+            "description": [],
+            "signature": [
+              "<P = any, Q = any, B = any>({ path, headers, params, body, query, method, socket, routeTags, routeAuthRequired, validation, kibanaRouteOptions, kibanaRequestState, auth, }?: ",
+              "RequestFixtureOptions",
+              "<P, Q, B>) => ",
+              "KibanaRequest",
+              "<P, Q, B, any>"
+            ],
+            "path": "packages/core/http/core-http-router-server-mocks/src/router.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-router-server-mocks",
+                "id": "def-server.mockRouter.createKibanaRequest.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "__0",
+                "description": [],
+                "signature": [
+                  "RequestFixtureOptions",
+                  "<P, Q, B>"
+                ],
+                "path": "packages/core/http/core-http-router-server-mocks/src/router.mock.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-http-router-server-mocks",
+            "id": "def-server.mockRouter.createResponseFactory",
+            "type": "Function",
+            "tags": [],
+            "label": "createResponseFactory",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "KibanaResponseFactory",
+              ">"
+            ],
+            "path": "packages/core/http/core-http-router-server-mocks/src/router.mock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

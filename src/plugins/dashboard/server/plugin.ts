@@ -6,37 +6,48 @@
  * Side Public License, v 1.
  */
 
-import {
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  Logger,
-} from '../../../core/server';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
 
+import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 import { createDashboardSavedObjectType } from './saved_objects';
 import { capabilitiesProvider } from './capabilities_provider';
 
 import { DashboardPluginSetup, DashboardPluginStart } from './types';
-import { EmbeddableSetup } from '../../embeddable/server';
-import { UsageCollectionSetup } from '../../usage_collection/server';
 import { registerDashboardUsageCollector } from './usage/register_collector';
 import { dashboardPersistableStateServiceFactory } from './embeddable/dashboard_container_embeddable_factory';
+import { getUISettings } from './ui_settings';
+
+import {
+  initializeDashboardTelemetryTask,
+  scheduleDashboardTelemetry,
+  TASK_ID,
+} from './usage/dashboard_telemetry_collection_task';
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;
   usageCollection: UsageCollectionSetup;
+  taskManager: TaskManagerSetupContract;
+}
+
+interface StartDeps {
+  taskManager: TaskManagerStartContract;
 }
 
 export class DashboardPlugin
-  implements Plugin<DashboardPluginSetup, DashboardPluginStart, SetupDeps> {
+  implements Plugin<DashboardPluginSetup, DashboardPluginStart, SetupDeps>
+{
   private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup, plugins: SetupDeps) {
+  public setup(core: CoreSetup<StartDeps>, plugins: SetupDeps) {
     this.logger.debug('dashboard: Setup');
 
     core.savedObjects.registerType(
@@ -46,19 +57,41 @@ export class DashboardPlugin
         },
       })
     );
+
+    if (plugins.taskManager) {
+      initializeDashboardTelemetryTask(this.logger, core, plugins.taskManager, plugins.embeddable);
+    }
     core.capabilities.registerProvider(capabilitiesProvider);
 
-    registerDashboardUsageCollector(plugins.usageCollection, plugins.embeddable);
+    if (plugins.usageCollection && plugins.taskManager) {
+      registerDashboardUsageCollector(
+        plugins.usageCollection,
+        core.getStartServices().then(([_, { taskManager }]) => taskManager)
+      );
+    }
 
     plugins.embeddable.registerEmbeddableFactory(
       dashboardPersistableStateServiceFactory(plugins.embeddable)
     );
 
+    core.uiSettings.register(getUISettings());
+
     return {};
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart, plugins: StartDeps) {
     this.logger.debug('dashboard: Started');
+
+    if (plugins.taskManager) {
+      scheduleDashboardTelemetry(this.logger, plugins.taskManager)
+        .then(async () => {
+          await plugins.taskManager.runSoon(TASK_ID);
+        })
+        .catch((e) => {
+          this.logger.debug(`Error scheduling task, received ${e.message}`);
+        });
+    }
+
     return {};
   }
 

@@ -7,7 +7,9 @@
 
 import React from 'react';
 
-import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
+import { coreMock } from '@kbn/core/public/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 
 import { licenseMock } from '../../../../../../common/licensing/index.mock';
 import { indicesAPIClientMock } from '../../../index.mock';
@@ -44,9 +46,13 @@ test('it renders without crashing', async () => {
     indicesAPIClient: indicesAPIClientMock.create(),
     license,
   };
-  const wrapper = shallowWithIntl(<IndexPrivileges {...props} />);
+  const wrapper = shallowWithIntl(
+    <KibanaContextProvider services={coreMock.createStart()}>
+      <IndexPrivileges {...props} />
+    </KibanaContextProvider>
+  );
   await flushPromises();
-  expect(wrapper).toMatchSnapshot();
+  expect(wrapper.children()).toMatchSnapshot();
 });
 
 test('it renders a IndexPrivilegeForm for each privilege on the role', async () => {
@@ -55,6 +61,9 @@ test('it renders a IndexPrivilegeForm for each privilege on the role', async () 
     allowRoleFieldLevelSecurity: true,
     allowRoleDocumentLevelSecurity: true,
   } as any);
+
+  const indicesAPIClient = indicesAPIClientMock.create();
+  indicesAPIClient.getFields.mockResolvedValue(['foo']);
 
   const props = {
     role: {
@@ -80,10 +89,14 @@ test('it renders a IndexPrivilegeForm for each privilege on the role', async () 
     editable: true,
     validator: new RoleValidator(),
     availableIndexPrivileges: ['all', 'read', 'write', 'index'],
-    indicesAPIClient: indicesAPIClientMock.create(),
+    indicesAPIClient,
     license,
   };
-  const wrapper = mountWithIntl(<IndexPrivileges {...props} />);
+  const wrapper = mountWithIntl(
+    <KibanaContextProvider services={coreMock.createStart()}>
+      <IndexPrivileges {...props} />
+    </KibanaContextProvider>
+  );
   await flushPromises();
   expect(wrapper.find(IndexPrivilegeForm)).toHaveLength(1);
 });

@@ -5,21 +5,23 @@
  * 2.0.
  */
 
-import { mountWithIntl } from '../../../../../__mocks__';
+import '../../../../../__mocks__/kea_logic';
+import '../../../../../__mocks__/react_router';
 import '../../../../__mocks__/engine_logic.mock';
 
 import React from 'react';
 
 import { EuiBasicTable, EuiLink, EuiBadge, EuiEmptyPrompt } from '@elastic/eui';
 
-import { QueryClicksTable } from './';
+import { mountWithIntl } from '../../../../../test_helpers';
+
+import { QueryClicksTable } from '.';
 
 describe('QueryClicksTable', () => {
   const items = [
     {
       key: 'some-document',
       document: {
-        engine: 'some-engine',
         id: 'some-document',
       },
       tags: ['tagA'],
@@ -28,7 +30,6 @@ describe('QueryClicksTable', () => {
     {
       key: 'another-document',
       document: {
-        engine: 'another-engine',
         id: 'another-document',
       },
       tags: ['tagB'],
@@ -54,7 +55,7 @@ describe('QueryClicksTable', () => {
       '/app/enterprise_search/engines/some-engine/documents/some-document'
     );
     expect(wrapper.find(EuiLink).last().prop('href')).toEqual(
-      '/app/enterprise_search/engines/another-engine/documents/another-document'
+      '/app/enterprise_search/engines/some-engine/documents/another-document'
     );
     // deleted-document should not have a link
 

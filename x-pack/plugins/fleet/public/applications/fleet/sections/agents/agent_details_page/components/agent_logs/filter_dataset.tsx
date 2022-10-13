@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { memo, useState, useEffect } from 'react';
+import React, { memo, useState, useEffect, useCallback } from 'react';
 import { EuiPopover, EuiFilterButton, EuiFilterSelectItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 
 import { useStartServices } from '../../../../../hooks';
 
@@ -17,38 +18,41 @@ export const DatasetFilter: React.FunctionComponent<{
   selectedDatasets: string[];
   onToggleDataset: (dataset: string) => void;
 }> = memo(({ selectedDatasets, onToggleDataset }) => {
-  const { data } = useStartServices();
+  const { unifiedSearch } = useStartServices();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [datasetValues, setDatasetValues] = useState<string[]>([AGENT_DATASET]);
+
+  const togglePopover = useCallback(() => setIsOpen((prevIsOpen) => !prevIsOpen), [setIsOpen]);
+  const closePopover = useCallback(() => setIsOpen(false), [setIsOpen]);
 
   useEffect(() => {
     const fetchValues = async () => {
       setIsLoading(true);
       try {
-        const values = await data.autocomplete.getValueSuggestions({
+        const values = await unifiedSearch.autocomplete.getValueSuggestions({
           indexPattern: {
             title: AGENT_LOG_INDEX_PATTERN,
             fields: [DATASET_FIELD],
-          },
-          field: DATASET_FIELD,
+          } as DataView,
+          field: DATASET_FIELD as DataViewField,
           query: '',
         });
-        setDatasetValues(values.sort());
+        if (values.length > 0) setDatasetValues(values.sort());
       } catch (e) {
         setDatasetValues([AGENT_DATASET]);
       }
       setIsLoading(false);
     };
     fetchValues();
-  }, [data.autocomplete]);
+  }, [unifiedSearch.autocomplete]);
 
   return (
     <EuiPopover
       button={
         <EuiFilterButton
           iconType="arrowDown"
-          onClick={() => setIsOpen(true)}
+          onClick={togglePopover}
           isSelected={isOpen}
           isLoading={isLoading}
           numFilters={datasetValues.length}
@@ -61,7 +65,7 @@ export const DatasetFilter: React.FunctionComponent<{
         </EuiFilterButton>
       }
       isOpen={isOpen}
-      closePopover={() => setIsOpen(false)}
+      closePopover={closePopover}
       panelPaddingSize="none"
     >
       {datasetValues.map((dataset) => (

@@ -45,7 +45,7 @@ describe('[Snapshot and Restore API Routes] Restore', () => {
 
     it('should return successful response from ES', async () => {
       const mockEsResponse = { acknowledged: true };
-      restoreSnapshotFn.mockResolvedValue({ body: mockEsResponse });
+      restoreSnapshotFn.mockResolvedValue(mockEsResponse);
 
       await expect(router.runRequest(mockRequest)).resolves.toEqual({
         body: mockEsResponse,
@@ -82,7 +82,7 @@ describe('[Snapshot and Restore API Routes] Restore', () => {
         },
       };
 
-      indicesRecoveryFn.mockResolvedValue({ body: mockEsResponse });
+      indicesRecoveryFn.mockResolvedValue(mockEsResponse);
 
       const expectedResponse = [
         {
@@ -106,7 +106,7 @@ describe('[Snapshot and Restore API Routes] Restore', () => {
 
     it('should return empty array if no repositories returned from ES', async () => {
       const mockEsResponse = {};
-      indicesRecoveryFn.mockResolvedValue({ body: mockEsResponse });
+      indicesRecoveryFn.mockResolvedValue(mockEsResponse);
       const expectedResponse: any[] = [];
 
       await expect(router.runRequest(mockRequest)).resolves.toEqual({

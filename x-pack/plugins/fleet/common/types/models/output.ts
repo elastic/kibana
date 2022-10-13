@@ -6,24 +6,31 @@
  */
 
 import type { outputType } from '../../constants';
-import type { ValueOf } from '../index';
+import type { ValueOf } from '..';
 
 export type OutputType = typeof outputType;
 
 export interface NewOutput {
   is_default: boolean;
+  is_default_monitoring: boolean;
+  is_preconfigured?: boolean;
   name: string;
   type: ValueOf<OutputType>;
   hosts?: string[];
-  ca_sha256?: string;
-  api_key?: string;
-  fleet_enroll_username?: string;
-  fleet_enroll_password?: string;
-  config?: Record<string, any>;
-  config_yaml?: string;
+  ca_sha256?: string | null;
+  ca_trusted_fingerprint?: string | null;
+  config_yaml?: string | null;
+  ssl?: {
+    certificate_authorities?: string[];
+    certificate?: string;
+    key?: string;
+  } | null;
 }
 
-export type OutputSOAttributes = NewOutput;
+export type OutputSOAttributes = NewOutput & {
+  output_id?: string;
+  ssl?: string | null; // encrypted ssl field
+};
 
 export type Output = NewOutput & {
   id: string;

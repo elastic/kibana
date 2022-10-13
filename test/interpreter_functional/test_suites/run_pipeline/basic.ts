@@ -46,7 +46,7 @@ export default function ({
       const expression = `kibana | kibana_context | esaggs index={indexPatternLoad id='logstash-*'}
         aggs={aggCount id="1" enabled=true schema="metric"}
         aggs={aggTerms id="2" enabled=true schema="segment" field="response.raw" size=4 order="desc" orderBy="1"}
-        | metricVis metric={visdimension 1 format="number"} bucket={visdimension 0}
+        | legacyMetricVis metric={visdimension 1 format="number"} bucket={visdimension 0}
       `;
 
       // we can execute an expression and validate the result manually:
@@ -88,20 +88,15 @@ export default function ({
         // we execute the part of expression that fetches the data and store its response
         const context = await expectExpression('partial_test', expression).getResponse();
 
-        // we reuse that response to render 3 different charts and compare screenshots with baselines
+        // we reuse that response to render 2 different charts and compare screenshots with baselines
         const tagCloudExpr = `tagcloud metric={visdimension 1 format="number"} bucket={visdimension 0}`;
         await (
           await expectExpression('partial_test_1', tagCloudExpr, context).toMatchSnapshot()
         ).toMatchScreenshot();
 
-        const metricExpr = `metricVis metric={visdimension 1 format="number"} bucket={visdimension 0}`;
+        const metricExpr = `legacyMetricVis metric={visdimension 1 format="number"} bucket={visdimension 0}`;
         await (
           await expectExpression('partial_test_2', metricExpr, context).toMatchSnapshot()
-        ).toMatchScreenshot();
-
-        const regionMapExpr = `regionmap visConfig='{"metric":{"accessor":1,"format":{"id":"number"}},"bucket":{"accessor":0},"legendPosition":"bottomright","addTooltip":true,"colorSchema":"Yellow to Red","isDisplayWarning":true,"wms":{},"mapZoom":2,"mapCenter":[0,0],"outlineWeight":1,"showAllShapes":true,"selectedLayer":{},"selectedJoinField":{}}'`;
-        await (
-          await expectExpression('partial_test_3', regionMapExpr, context).toMatchSnapshot()
         ).toMatchScreenshot();
       });
     });

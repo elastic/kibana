@@ -5,8 +5,15 @@
  * 2.0.
  */
 
-import { ACTIONS_PANEL_ID } from './addon/src/constants';
+import { ACTIONS_PANEL_ID } from './addon/constants';
 
 export * from './decorators';
-export { ACTIONS_PANEL_ID } from './addon/src/constants';
+export { ACTIONS_PANEL_ID } from './addon/constants';
+
 export const getAddonPanelParameters = () => ({ options: { selectedPanel: ACTIONS_PANEL_ID } });
+
+export const getDisableStoryshotsParameter = () => ({
+  storyshots: {
+    disable: true,
+  },
+});

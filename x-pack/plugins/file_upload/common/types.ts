@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
-import { ES_FIELD_TYPES } from 'src/plugins/data/common';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ES_FIELD_TYPES } from '@kbn/data-plugin/common';
 
 export interface InputOverrides {
   [key: string]: string | undefined;
@@ -111,14 +111,18 @@ export interface ImportResponse {
 export interface ImportFailure {
   item: number;
   reason: string;
+  caused_by?: {
+    type: string;
+    reason: string;
+  };
   doc: ImportDoc;
 }
 
-export interface Doc {
+export interface ImportDocMessage {
   message: string;
 }
 
-export type ImportDoc = Doc | string | object;
+export type ImportDoc = ImportDocMessage | string | object;
 
 export interface Settings {
   pipeline?: string;

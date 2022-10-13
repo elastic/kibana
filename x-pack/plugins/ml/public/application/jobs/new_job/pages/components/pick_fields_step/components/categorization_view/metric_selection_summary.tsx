@@ -17,9 +17,12 @@ import { CategoryStoppedPartitions } from './category_stopped_partitions';
 const DTR_IDX = 0;
 
 export const CategorizationDetectorsSummary: FC = () => {
-  const { jobCreator: jc, chartLoader, resultsLoader, chartInterval } = useContext(
-    JobCreatorContext
-  );
+  const {
+    jobCreator: jc,
+    chartLoader,
+    resultsLoader,
+    chartInterval,
+  } = useContext(JobCreatorContext);
   const jobCreator = jc as CategorizationJobCreator;
 
   const [loadingData, setLoadingData] = useState(false);
@@ -46,6 +49,7 @@ export const CategorizationDetectorsSummary: FC = () => {
     return () => {
       resultsSubscription.unsubscribe();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function loadChart() {
@@ -56,7 +60,6 @@ export const CategorizationDetectorsSummary: FC = () => {
         jobCreator.end,
         chartInterval.getInterval().asMilliseconds(),
         jobCreator.runtimeMappings ?? undefined,
-        // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
         jobCreator.datafeedConfig.indices_options
       );
       setEventRateChartData(resp);

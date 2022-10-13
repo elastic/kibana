@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '../../../../src/core/server';
+import { PluginInitializerContext } from '@kbn/core/server';
 import { FeaturesPlugin } from './plugin';
 
 // These exports are part of public Features plugin contract, any change in signature of exported
@@ -14,15 +14,14 @@ import { FeaturesPlugin } from './plugin';
 // run-time contracts.
 export { uiCapabilitiesRegex } from './feature_schema';
 
-export {
-  KibanaFeature,
+export type {
   KibanaFeatureConfig,
   FeatureKibanaPrivileges,
-  ElasticsearchFeature,
   ElasticsearchFeatureConfig,
   FeatureElasticsearchPrivileges,
 } from '../common';
-export { PluginSetupContract, PluginStartContract } from './plugin';
+export { KibanaFeature, ElasticsearchFeature } from '../common';
+export type { PluginSetupContract, PluginStartContract } from './plugin';
 
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new FeaturesPlugin(initializerContext);

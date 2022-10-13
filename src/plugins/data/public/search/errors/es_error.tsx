@@ -8,8 +8,9 @@
 
 import React from 'react';
 import { EuiCodeBlock, EuiSpacer } from '@elastic/eui';
-import { ApplicationStart } from 'kibana/public';
-import { KbnError } from '../../../../kibana_utils/common';
+import { ApplicationStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { KbnError } from '@kbn/kibana-utils-plugin/common';
 import { IEsError } from './types';
 import { getRootCause } from './utils';
 
@@ -17,7 +18,12 @@ export class EsError extends KbnError {
   readonly attributes: IEsError['attributes'];
 
   constructor(protected readonly err: IEsError) {
-    super('EsError');
+    super(
+      `EsError: ${
+        getRootCause(err)?.reason ||
+        i18n.translate('data.esError.unknownRootCause', { defaultMessage: 'unknown' })
+      }`
+    );
     this.attributes = err.attributes;
   }
 

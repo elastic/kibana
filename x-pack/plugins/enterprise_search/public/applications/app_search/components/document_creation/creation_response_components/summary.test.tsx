@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockValues, setMockActions } from '../../../../__mocks__/kea.mock';
+import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -20,7 +20,7 @@ import {
   SchemaFieldsSummary,
 } from './summary_sections';
 
-import { Summary } from './';
+import { Summary } from '.';
 
 describe('Summary', () => {
   const values = {

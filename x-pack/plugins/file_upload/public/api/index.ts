@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React from 'react';
-import { FileUploadComponentProps, lazyLoadModules } from '../lazy_load_bundle';
+import { lazyLoadModules } from '../lazy_load_bundle';
 import type { IImporter, ImportFactoryOptions } from '../importer';
-import { IndexNameFormProps } from '../';
-import type { HasImportPermission, FindFileStructureResponse } from '../../common';
+import type { HasImportPermission, FindFileStructureResponse } from '../../common/types';
 import type { getMaxBytes, getMaxBytesFormatted } from '../importer/get_max_bytes';
+import { GeoUploadWizardAsyncWrapper } from './geo_upload_wizard_async_wrapper';
+import { IndexNameFormAsyncWrapper } from './index_name_form_async_wrapper';
 
 export interface FileUploadStartApi {
-  getFileUploadComponent(): ReturnType<typeof getFileUploadComponent>;
-  getIndexNameFormComponent(): Promise<React.ComponentType<IndexNameFormProps>>;
+  FileUploadComponent: typeof GeoUploadWizardAsyncWrapper;
+  IndexNameFormComponent: typeof IndexNameFormAsyncWrapper;
   importerFactory: typeof importerFactory;
   getMaxBytes: typeof getMaxBytes;
   getMaxBytesFormatted: typeof getMaxBytesFormatted;
@@ -30,19 +30,8 @@ export interface GetTimeFieldRangeResponse {
   end: { epoch: number; string: string };
 }
 
-export async function getFileUploadComponent(): Promise<
-  React.ComponentType<FileUploadComponentProps>
-> {
-  const fileUploadModules = await lazyLoadModules();
-  return fileUploadModules.JsonUploadAndParse;
-}
-
-export async function getIndexNameFormComponent(): Promise<
-  React.ComponentType<IndexNameFormProps>
-> {
-  const fileUploadModules = await lazyLoadModules();
-  return fileUploadModules.IndexNameForm;
-}
+export const FileUploadComponent = GeoUploadWizardAsyncWrapper;
+export const IndexNameFormComponent = IndexNameFormAsyncWrapper;
 
 export async function importerFactory(
   format: string,
@@ -53,7 +42,7 @@ export async function importerFactory(
 }
 
 interface HasImportPermissionParams {
-  checkCreateIndexPattern: boolean;
+  checkCreateDataView: boolean;
   checkHasManagePipeline: boolean;
   indexName?: string;
 }

@@ -9,14 +9,13 @@ import { get } from 'lodash';
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { Fields } from '../../../../../../../common/search_strategy';
+import type { Fields } from '../../../../../../../common/search_strategy';
 import {
-  EVENT_DATASET,
-  EVENT_REFERENCE,
   MATCHED_ATOMIC,
   MATCHED_FIELD,
   MATCHED_TYPE,
-  PROVIDER,
+  REFERENCE,
+  FEED_NAME,
 } from '../../../../../../../common/cti/constants';
 import { MatchDetails } from './match_details';
 import { IndicatorDetails } from './indicator_details';
@@ -24,10 +23,10 @@ import { IndicatorDetails } from './indicator_details';
 export interface ThreatMatchRowProps {
   contextId: string;
   eventId: string;
-  indicatorDataset: string | undefined;
-  indicatorProvider: string | undefined;
+  feedName: string | undefined;
   indicatorReference: string | undefined;
   indicatorType: string | undefined;
+  isDraggable?: boolean;
   sourceField: string;
   sourceValue: string;
 }
@@ -36,18 +35,20 @@ export const ThreatMatchRow = ({
   contextId,
   data,
   eventId,
+  isDraggable,
 }: {
   contextId: string;
   data: Fields;
   eventId: string;
+  isDraggable?: boolean;
 }) => {
   const props = {
     contextId,
     eventId,
-    indicatorDataset: get(data, EVENT_DATASET)[0] as string | undefined,
-    indicatorReference: get(data, EVENT_REFERENCE)[0] as string | undefined,
-    indicatorProvider: get(data, PROVIDER)[0] as string | undefined,
+    indicatorReference: get(data, REFERENCE)[0] as string | undefined,
+    feedName: get(data, FEED_NAME)[0] as string | undefined,
     indicatorType: get(data, MATCHED_TYPE)[0] as string | undefined,
+    isDraggable,
     sourceField: get(data, MATCHED_FIELD)[0] as string,
     sourceValue: get(data, MATCHED_ATOMIC)[0] as string,
   };
@@ -58,10 +59,10 @@ export const ThreatMatchRow = ({
 export const ThreatMatchRowView = ({
   contextId,
   eventId,
-  indicatorDataset,
-  indicatorProvider,
+  feedName,
   indicatorReference,
   indicatorType,
+  isDraggable,
   sourceField,
   sourceValue,
 }: ThreatMatchRowProps) => {
@@ -76,6 +77,7 @@ export const ThreatMatchRowView = ({
         <MatchDetails
           contextId={contextId}
           eventId={eventId}
+          isDraggable={isDraggable}
           sourceField={sourceField}
           sourceValue={sourceValue}
         />
@@ -84,10 +86,10 @@ export const ThreatMatchRowView = ({
         <IndicatorDetails
           contextId={contextId}
           eventId={eventId}
-          indicatorDataset={indicatorDataset}
-          indicatorProvider={indicatorProvider}
+          feedName={feedName}
           indicatorReference={indicatorReference}
           indicatorType={indicatorType}
+          isDraggable={isDraggable}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

@@ -6,16 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, Plugin } from 'kibana/server';
+import { CoreSetup, Plugin } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { PluginStart as DataPluginStart } from '../../../../../src/plugins/data/server';
+import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 
 export interface DataSearchTestStartDeps {
   data: DataPluginStart;
 }
 
 export class DataSearchTestPlugin
-  implements Plugin<TestPluginSetup, TestPluginStart, {}, DataSearchTestStartDeps> {
+  implements Plugin<TestPluginSetup, TestPluginStart, {}, DataSearchTestStartDeps>
+{
   public setup(core: CoreSetup<DataSearchTestStartDeps>) {
     const router = core.http.createRouter();
 
@@ -54,9 +55,10 @@ export class DataSearchTestPlugin
 
         // Since the index pattern ID can change on each test run, we need
         // to look it up on the fly and insert it into the request.
-        const indexPatterns = await data.indexPatterns.indexPatternsServiceFactory(
+        const indexPatterns = await data.indexPatterns.dataViewsServiceFactory(
           savedObjectsClient,
-          clusterClient
+          clusterClient,
+          req
         );
         const ids = await indexPatterns.getIds();
         // @ts-expect-error Force overwriting the request

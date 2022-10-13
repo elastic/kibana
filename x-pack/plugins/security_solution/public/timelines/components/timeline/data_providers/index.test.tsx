@@ -11,21 +11,7 @@ import { TestProviders } from '../../../../common/mock/test_providers';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 
 import { DataProviders } from '.';
-import { ManageGlobalTimeline, getTimelineDefaults } from '../../manage_timeline';
-import { FilterManager } from '../../../../../../../../src/plugins/data/public/query/filter_manager';
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
 
-const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
-
-jest.mock('../../../../common/hooks/use_selector', () => {
-  const actual = jest.requireActual('../../../../common/hooks/use_selector');
-  return {
-    ...actual,
-    useDeepEqualSelector: jest.fn().mockReturnValue([]),
-  };
-});
-
-const filterManager = new FilterManager(mockUiSettingsForFilterManager);
 describe('DataProviders', () => {
   const mount = useMountAppended();
 
@@ -33,17 +19,9 @@ describe('DataProviders', () => {
     const dropMessage = ['Drop', 'query', 'build', 'here'];
 
     test('renders correctly against snapshot', () => {
-      const manageTimelineForTesting = {
-        foo: {
-          ...getTimelineDefaults('foo'),
-          filterManager,
-        },
-      };
       const wrapper = mount(
         <TestProviders>
-          <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
-            <DataProviders data-test-subj="dataProviders-container" timelineId="foo" />
-          </ManageGlobalTimeline>
+          <DataProviders data-test-subj="dataProviders-container" timelineId="foo" />
         </TestProviders>
       );
       expect(wrapper.find(`[data-test-subj="dataProviders-container"]`)).toBeTruthy();
@@ -73,19 +51,10 @@ describe('DataProviders', () => {
     });
 
     describe('resizable drop target', () => {
-      const manageTimelineForTesting = {
-        foo: {
-          ...getTimelineDefaults('test'),
-          filterManager,
-        },
-      };
-
       test('it may be resized vertically via a resize handle', () => {
         const wrapper = mount(
           <TestProviders>
-            <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
-              <DataProviders timelineId="test" />
-            </ManageGlobalTimeline>
+            <DataProviders timelineId="test" />
           </TestProviders>
         );
 
@@ -98,9 +67,7 @@ describe('DataProviders', () => {
       test('it never grows taller than one third (33%) of the view height', () => {
         const wrapper = mount(
           <TestProviders>
-            <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
-              <DataProviders timelineId="test" />
-            </ManageGlobalTimeline>
+            <DataProviders timelineId="test" />
           </TestProviders>
         );
 
@@ -113,9 +80,7 @@ describe('DataProviders', () => {
       test('it automatically displays scroll bars when the width or height of the data providers exceeds the drop target', () => {
         const wrapper = mount(
           <TestProviders>
-            <ManageGlobalTimeline manageTimelineForTesting={manageTimelineForTesting}>
-              <DataProviders timelineId="test" />
-            </ManageGlobalTimeline>
+            <DataProviders timelineId="test" />
           </TestProviders>
         );
 

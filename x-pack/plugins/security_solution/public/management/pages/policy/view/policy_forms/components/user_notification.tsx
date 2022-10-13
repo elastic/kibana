@@ -8,7 +8,7 @@
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { cloneDeep } from 'lodash';
 import {
   EuiSpacer,
@@ -19,16 +19,13 @@ import {
   EuiText,
   EuiTextArea,
 } from '@elastic/eui';
-import {
-  ImmutableArray,
-  ProtectionModes,
-  UIPolicyConfig,
-} from '../../../../../../../common/endpoint/types';
-import { PolicyProtection, MacPolicyProtection } from '../../../types';
+import type { ImmutableArray, UIPolicyConfig } from '../../../../../../../common/endpoint/types';
+import { ProtectionModes } from '../../../../../../../common/endpoint/types';
+import type { PolicyProtection, MacPolicyProtection, LinuxPolicyProtection } from '../../../types';
 import { ConfigFormHeading } from '../../components/config_form';
 import { usePolicyDetailsSelector } from '../../policy_hooks';
 import { policyConfig } from '../../../store/policy_details/selectors';
-import { AppAction } from '../../../../../../common/store/actions';
+import type { AppAction } from '../../../../../../common/store/actions';
 import { SupportedVersionNotice } from './supported_version';
 
 export const UserNotification = React.memo(
@@ -57,6 +54,9 @@ export const UserNotification = React.memo(
             } else if (os === 'mac') {
               newPayload[os].popup[protection as MacPolicyProtection].enabled =
                 event.target.checked;
+            } else if (os === 'linux') {
+              newPayload[os].popup[protection as LinuxPolicyProtection].enabled =
+                event.target.checked;
             }
           }
           dispatch({
@@ -77,6 +77,9 @@ export const UserNotification = React.memo(
               newPayload[os].popup[protection].message = event.target.value;
             } else if (os === 'mac') {
               newPayload[os].popup[protection as MacPolicyProtection].message = event.target.value;
+            } else if (os === 'linux') {
+              newPayload[os].popup[protection as LinuxPolicyProtection].message =
+                event.target.value;
             }
           }
           dispatch({
@@ -88,13 +91,45 @@ export const UserNotification = React.memo(
       [policyDetailsConfig, dispatch, protection, osList]
     );
 
+    const tooltipProtectionText = (protectionType: PolicyProtection) => {
+      if (protectionType === 'memory_protection') {
+        return i18n.translate(
+          'xpack.securitySolution.endpoint.policyDetail.memoryProtectionTooltip',
+          {
+            defaultMessage: 'memory threat',
+          }
+        );
+      } else if (protectionType === 'behavior_protection') {
+        return i18n.translate(
+          'xpack.securitySolution.endpoint.policyDetail.behaviorProtectionTooltip',
+          {
+            defaultMessage: 'malicious behavior',
+          }
+        );
+      } else {
+        return protectionType;
+      }
+    };
+
+    const tooltipBracketText = (protectionType: PolicyProtection) => {
+      if (protectionType === 'memory_protection' || protection === 'behavior_protection') {
+        return i18n.translate('xpack.securitySolution.endpoint.policyDetail.rule', {
+          defaultMessage: 'rule',
+        });
+      } else {
+        return i18n.translate('xpack.securitySolution.endpoint.policyDetail.filename', {
+          defaultMessage: 'filename',
+        });
+      }
+    };
+
     return (
       <>
         <EuiSpacer size="m" />
         <ConfigFormHeading>
           <FormattedMessage
             id="xpack.securitySolution.endpoint.policyDetailsConfig.userNotification"
-            defaultMessage="User Notification"
+            defaultMessage="User notification"
           />
         </ConfigFormHeading>
         <SupportedVersionNotice optionName={protection} />
@@ -106,15 +141,15 @@ export const UserNotification = React.memo(
           checked={userNotificationSelected}
           disabled={selected === ProtectionModes.off}
           label={i18n.translate('xpack.securitySolution.endpoint.policyDetail.notifyUser', {
-            defaultMessage: 'Notify User',
+            defaultMessage: 'Notify user',
           })}
         />
         {userNotificationSelected && (
           <>
-            <EuiSpacer size="s" />
-            <EuiFlexGroup gutterSize="s">
+            <EuiSpacer size="m" />
+            <EuiFlexGroup gutterSize="xs">
               <EuiFlexItem grow={false}>
-                <EuiText size="xs">
+                <EuiText size="s">
                   <h4>
                     <FormattedMessage
                       id="xpack.securitySolution.endpoint.policyDetailsConfig.customizeUserNotification"
@@ -133,14 +168,17 @@ export const UserNotification = React.memo(
                         id="xpack.securitySolution.endpoint.policyDetailsConfig.notifyUserTooltip.a"
                         defaultMessage="Selecting the user notification option will display a notification to the host user when { protectionName } is prevented or detected."
                         values={{
-                          protectionName: protection,
+                          protectionName: tooltipProtectionText(protection),
                         }}
                       />
                       <EuiSpacer size="m" />
                       <FormattedMessage
-                        id="xpack.securitySolution.endpoint.policyDetailsConfig.notifyUserTooltip.b"
+                        id="xpack.securitySolution.endpoint.policyDetailsConfig.notifyUserTooltip.c"
                         defaultMessage="
-                    The user notification can be customized in the text box below. Bracketed tags can be used to dynamically populate the applicable action (such as prevented or detected) and the filename."
+                    The user notification can be customized in the text box below. Bracketed tags can be used to dynamically populate the applicable action (such as prevented or detected) and the { bracketText }."
+                        values={{
+                          bracketText: tooltipBracketText(protection),
+                        }}
                       />
                     </>
                   }

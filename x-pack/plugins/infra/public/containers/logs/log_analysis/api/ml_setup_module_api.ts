@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import type { HttpHandler } from 'src/core/public';
+import type { HttpHandler } from '@kbn/core/public';
 
 import { getJobIdPrefix, jobCustomSettingsRT } from '../../../../../common/log_analysis';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
@@ -21,6 +21,7 @@ interface RequestArgs {
   jobOverrides?: SetupMlModuleJobOverrides[];
   datafeedOverrides?: SetupMlModuleDatafeedOverrides[];
   query?: object;
+  useDedicatedIndex?: boolean;
 }
 
 export const callSetupMlModuleAPI = async (requestArgs: RequestArgs, fetch: HttpHandler) => {
@@ -34,6 +35,7 @@ export const callSetupMlModuleAPI = async (requestArgs: RequestArgs, fetch: Http
     jobOverrides = [],
     datafeedOverrides = [],
     query,
+    useDedicatedIndex = false,
   } = requestArgs;
 
   const response = await fetch(`/api/ml/modules/setup/${moduleId}`, {
@@ -48,6 +50,7 @@ export const callSetupMlModuleAPI = async (requestArgs: RequestArgs, fetch: Http
         jobOverrides,
         datafeedOverrides,
         query,
+        useDedicatedIndex,
       })
     ),
   });
@@ -78,6 +81,7 @@ const setupMlModuleRequestParamsRT = rt.intersection([
     startDatafeed: rt.boolean,
     jobOverrides: rt.array(setupMlModuleJobOverridesRT),
     datafeedOverrides: rt.array(setupMlModuleDatafeedOverridesRT),
+    useDedicatedIndex: rt.boolean,
   }),
   rt.exact(
     rt.partial({
@@ -113,6 +117,7 @@ const datafeedSetupResponseRT = rt.intersection([
     success: rt.boolean,
   }),
   rt.partial({
+    awaitingNodeAssignment: rt.boolean,
     error: setupErrorResponseRT,
   }),
 ]);

@@ -27,7 +27,7 @@ import { getWorkplaceSearchUrl } from '../../../../shared/enterprise_search_url'
 import { EuiButtonEmptyTo } from '../../../../shared/react_router_helpers';
 import { AppLogic } from '../../../app_logic';
 import { WORKPLACE_SEARCH_TITLE, ACCOUNT_NAV } from '../../../constants';
-import { PERSONAL_SOURCES_PATH, LOGOUT_ROUTE, KIBANA_ACCOUNT_ROUTE } from '../../../routes';
+import { PRIVATE_SOURCES_PATH, LOGOUT_ROUTE, PERSONAL_SETTINGS_PATH } from '../../../routes';
 
 export const AccountHeader: React.FC = () => {
   const [isPopoverOpen, setPopover] = useState(false);
@@ -44,11 +44,12 @@ export const AccountHeader: React.FC = () => {
 
   const accountNavItems = [
     <EuiContextMenuItem key="accountSettings">
-      {/* TODO: Once auth is completed, we need to have non-admins redirect to the self-hosted form */}
-      <EuiButtonEmpty href={KIBANA_ACCOUNT_ROUTE}>{ACCOUNT_NAV.SETTINGS}</EuiButtonEmpty>
+      <EuiButtonEmptyTo to={PERSONAL_SETTINGS_PATH}>{ACCOUNT_NAV.SETTINGS}</EuiButtonEmptyTo>
     </EuiContextMenuItem>,
     <EuiContextMenuItem key="logout">
-      <EuiButtonEmpty href={LOGOUT_ROUTE}>{ACCOUNT_NAV.LOGOUT}</EuiButtonEmpty>
+      <EuiButtonEmptyTo to={LOGOUT_ROUTE} shouldNotCreateHref>
+        {ACCOUNT_NAV.LOGOUT}
+      </EuiButtonEmptyTo>
     </EuiContextMenuItem>,
   ];
 
@@ -67,13 +68,13 @@ export const AccountHeader: React.FC = () => {
   return (
     <EuiHeader>
       <EuiHeaderSection grow={false}>
-        <EuiHeaderSectionItem>
+        <EuiHeaderSectionItem border="none">
           <EuiHeaderLogo iconType="logoWorkplaceSearch" />
-          <EuiText>{WORKPLACE_SEARCH_TITLE}</EuiText>
+          <EuiText role="banner">{WORKPLACE_SEARCH_TITLE}</EuiText>
         </EuiHeaderSectionItem>
-        <EuiHeaderSectionItem>
+        <EuiHeaderSectionItem border="none">
           <EuiHeaderLinks>
-            <EuiButtonEmptyTo to={PERSONAL_SOURCES_PATH}>{ACCOUNT_NAV.SOURCES}</EuiButtonEmptyTo>
+            <EuiButtonEmptyTo to={PRIVATE_SOURCES_PATH}>{ACCOUNT_NAV.SOURCES}</EuiButtonEmptyTo>
           </EuiHeaderLinks>
         </EuiHeaderSectionItem>
       </EuiHeaderSection>

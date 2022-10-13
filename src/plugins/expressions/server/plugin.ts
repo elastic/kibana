@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from 'src/core/server';
+import { pick } from 'lodash';
+import { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { ExpressionsService, ExpressionsServiceSetup, ExpressionsServiceStart } from '../common';
 
 export type ExpressionsServerSetup = ExpressionsServiceSetup;
@@ -14,17 +15,18 @@ export type ExpressionsServerSetup = ExpressionsServiceSetup;
 export type ExpressionsServerStart = ExpressionsServiceStart;
 
 export class ExpressionsServerPlugin
-  implements Plugin<ExpressionsServerSetup, ExpressionsServerStart> {
-  readonly expressions: ExpressionsService = new ExpressionsService();
+  implements Plugin<ExpressionsServerSetup, ExpressionsServerStart>
+{
+  readonly expressions: ExpressionsService;
 
-  constructor(initializerContext: PluginInitializerContext) {}
+  constructor(context: PluginInitializerContext) {
+    this.expressions = new ExpressionsService({
+      logger: context.logger.get('expressions'),
+    });
+  }
 
   public setup(core: CoreSetup): ExpressionsServerSetup {
-    this.expressions.executor.extendContext({
-      environment: 'server',
-    });
-
-    const setup = this.expressions.setup();
+    const setup = this.expressions.setup(pick(core, 'getStartServices'));
 
     return Object.freeze(setup);
   }

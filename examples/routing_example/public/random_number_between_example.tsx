@@ -16,8 +16,7 @@ import {
   EuiCallOut,
   EuiFormRow,
 } from '@elastic/eui';
-import { HttpFetchError } from '../../../src/core/public';
-import { isError } from './is_error';
+import { type IHttpFetchError, isHttpFetchError } from '@kbn/core-http-browser';
 import { Services } from './services';
 
 interface Props {
@@ -25,7 +24,7 @@ interface Props {
 }
 
 export function RandomNumberBetweenRouteExample({ fetchRandomNumberBetween }: Props) {
-  const [error, setError] = useState<HttpFetchError | undefined>();
+  const [error, setError] = useState<IHttpFetchError | undefined>();
   const [randomNumber, setRandomNumber] = useState<number>(0);
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [maxInput, setMaxInput] = useState<string>('10');
@@ -35,7 +34,7 @@ export function RandomNumberBetweenRouteExample({ fetchRandomNumberBetween }: Pr
     setIsFetching(true);
     const response = await fetchRandomNumberBetween(Number.parseInt(maxInput, 10));
 
-    if (isError(response)) {
+    if (isHttpFetchError(response)) {
       setError(response);
     } else {
       setRandomNumber(response);

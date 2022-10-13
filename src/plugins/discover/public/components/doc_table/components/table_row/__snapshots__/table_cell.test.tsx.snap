@@ -1,0 +1,183 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Doc table cell component renders a cell with filter buttons if it is filterable 1`] = `
+<TableCell
+  column="foo"
+  filterable={true}
+  formatted={
+    <span>
+      formatted content
+    </span>
+  }
+  inlineFilter={[Function]}
+  sourcefield={false}
+  timefield={true}
+>
+  <td
+    className="eui-textNoWrap kbnDocTableCell--extraWidth"
+    data-test-subj="docTableField"
+  >
+    <span>
+      formatted content
+    </span>
+    <TableCellActions
+      handleFilterFor={[Function]}
+      handleFilterOut={[Function]}
+    >
+      <span
+        className="kbnDocTableCell__filter"
+      >
+        <EuiToolTip
+          className="kbnDocTableCell__filterButton"
+          content="Filter for value"
+          delay="regular"
+          display="inlineBlock"
+          position="bottom"
+        >
+          <span
+            className="euiToolTipAnchor"
+            onMouseOut={[Function]}
+            onMouseOver={[Function]}
+          >
+            <button
+              aria-label="Filter for value"
+              className="kbnDocTableRowFilterButton"
+              data-test-subj="docTableCellFilter"
+              onBlur={[Function]}
+              onClick={[Function]}
+              onFocus={[Function]}
+            >
+              <EuiIcon
+                color="primary"
+                size="s"
+                type="plusInCircle"
+              >
+                <span
+                  color="primary"
+                  data-euiicon-type="plusInCircle"
+                  size="s"
+                />
+              </EuiIcon>
+            </button>
+          </span>
+        </EuiToolTip>
+        <EuiToolTip
+          className="kbnDocTableCell__filterButton"
+          content="Filter out value"
+          delay="regular"
+          display="inlineBlock"
+          position="bottom"
+        >
+          <span
+            className="euiToolTipAnchor"
+            onMouseOut={[Function]}
+            onMouseOver={[Function]}
+          >
+            <button
+              aria-label="Filter out value"
+              className="kbnDocTableRowFilterButton"
+              data-test-subj="docTableCellFilterNegate"
+              onBlur={[Function]}
+              onClick={[Function]}
+              onFocus={[Function]}
+            >
+              <EuiIcon
+                color="primary"
+                size="s"
+                type="minusInCircle"
+              >
+                <span
+                  color="primary"
+                  data-euiicon-type="minusInCircle"
+                  size="s"
+                />
+              </EuiIcon>
+            </button>
+          </span>
+        </EuiToolTip>
+      </span>
+    </TableCellActions>
+  </td>
+</TableCell>
+`;
+
+exports[`Doc table cell component renders a cell without filter buttons if it is not filterable 1`] = `
+<TableCell
+  column="foo"
+  filterable={false}
+  formatted={
+    <span>
+      formatted content
+    </span>
+  }
+  inlineFilter={[Function]}
+  sourcefield={false}
+  timefield={true}
+>
+  <td
+    className="eui-textNoWrap kbnDocTableCell--extraWidth"
+    data-test-subj="docTableField"
+  >
+    <span>
+      formatted content
+    </span>
+    <span
+      className="kbnDocTableCell__filter"
+    />
+  </td>
+</TableCell>
+`;
+
+exports[`Doc table cell component renders a field that is neither a timefield or sourcefield 1`] = `
+<TableCell
+  column="foo"
+  filterable={false}
+  formatted={
+    <span>
+      formatted content
+    </span>
+  }
+  inlineFilter={[Function]}
+  sourcefield={false}
+  timefield={false}
+>
+  <td
+    className="kbnDocTableCell__dataField eui-textBreakAll eui-textBreakWord"
+    data-test-subj="docTableField"
+  >
+    <span>
+      formatted content
+    </span>
+    <span
+      className="kbnDocTableCell__filter"
+    />
+  </td>
+</TableCell>
+`;
+
+exports[`Doc table cell component renders a sourcefield 1`] = `
+<TableCell
+  column="foo"
+  filterable={false}
+  formatted={
+    <span>
+      formatted content
+    </span>
+  }
+  inlineFilter={[Function]}
+  sourcefield={true}
+  timefield={false}
+>
+  <td
+    className="eui-textBreakAll eui-textBreakWord"
+    data-test-subj="docTableField"
+  >
+    <span>
+      formatted content
+    </span>
+    <span
+      className="kbnDocTableCell__filter"
+    />
+  </td>
+</TableCell>
+`;

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionRenderDefinition } from 'src/plugins/expressions';
+import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
 import { InputControlVisDependencies } from './plugin';
 import { InputControlRenderValue } from './input_control_fn';
 import type { InputControlVisControllerType } from './vis_controller';
@@ -24,8 +24,7 @@ export const getInputControlVisRenderer: (
     if (!registeredController) {
       const { createInputControlVisController } = await import('./vis_controller');
 
-      const Controller = createInputControlVisController(deps, handlers);
-      registeredController = new Controller(domNode);
+      registeredController = createInputControlVisController(deps, handlers, domNode);
       inputControlVisRegistry.set(domNode, registeredController);
 
       handlers.onDestroy(() => {

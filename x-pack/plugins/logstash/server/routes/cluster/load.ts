@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { wrapRouteWithLicenseCheck } from '../../../../licensing/server';
+import { wrapRouteWithLicenseCheck } from '@kbn/licensing-plugin/server';
 import { Cluster } from '../../models/cluster';
 import { checkLicense } from '../../lib/check_license';
 import type { LogstashPluginRouter } from '../../types';
@@ -18,8 +18,8 @@ export function registerClusterLoadRoute(router: LogstashPluginRouter) {
     },
     wrapRouteWithLicenseCheck(checkLicense, async (context, request, response) => {
       try {
-        const { client } = context.core.elasticsearch;
-        const { body: info } = await client.asCurrentUser.info();
+        const { client } = (await context.core).elasticsearch;
+        const info = await client.asCurrentUser.info();
         return response.ok({
           body: {
             cluster: Cluster.fromUpstreamJSON(info).downstreamJSON,

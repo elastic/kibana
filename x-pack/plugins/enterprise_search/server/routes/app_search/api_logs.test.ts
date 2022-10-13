@@ -10,14 +10,14 @@ import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks_
 import { registerApiLogsRoutes } from './api_logs';
 
 describe('API logs routes', () => {
-  describe('GET /api/app_search/engines/{engineName}/api_logs', () => {
+  describe('GET /internal/app_search/engines/{engineName}/api_logs', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/app_search/engines/{engineName}/api_logs',
+        path: '/internal/app_search/engines/{engineName}/api_logs',
       });
 
       registerApiLogsRoutes({

@@ -6,22 +6,22 @@
  */
 
 import uuid from 'uuid';
-import { ElasticsearchClient } from 'kibana/server';
-
-import { encodeHitVersion } from '../utils/encode_hit_version';
-import {
+import { ElasticsearchClient } from '@kbn/core/server';
+import type {
   Description,
   DeserializerOrUndefined,
   IdOrUndefined,
   Immutable,
-  IndexEsListSchema,
   ListSchema,
   MetaOrUndefined,
   Name,
   SerializerOrUndefined,
   Type,
-  Version,
-} from '../../../common/schemas';
+} from '@kbn/securitysolution-io-ts-list-types';
+import type { Version } from '@kbn/securitysolution-io-ts-types';
+import { encodeHitVersion } from '@kbn/securitysolution-es-utils';
+
+import { IndexEsListSchema } from '../../schemas/elastic_query';
 
 export interface CreateListOptions {
   id: IdOrUndefined;
@@ -72,7 +72,7 @@ export const createList = async ({
     updated_by: user,
     version,
   };
-  const { body: response } = await esClient.index({
+  const response = await esClient.index({
     body,
     id,
     index: listIndex,

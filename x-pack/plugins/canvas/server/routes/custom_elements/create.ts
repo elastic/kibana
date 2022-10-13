@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RouteInitializerDeps } from '../';
+import { RouteInitializerDeps } from '..';
 import { CUSTOM_ELEMENT_TYPE, API_ROUTE_CUSTOM_ELEMENT } from '../../../common/lib/constants';
 import { getId } from '../../../common/lib/get_id';
 import { CustomElementSchema } from './custom_element_schema';
@@ -34,7 +34,8 @@ export function initializeCreateCustomElementRoute(deps: RouteInitializerDeps) {
       const now = new Date().toISOString();
       const { id, ...payload } = customElement;
 
-      await context.core.savedObjects.client.create<CustomElementAttributes>(
+      const soClient = (await context.core).savedObjects.client;
+      await soClient.create<CustomElementAttributes>(
         CUSTOM_ELEMENT_TYPE,
         {
           ...payload,

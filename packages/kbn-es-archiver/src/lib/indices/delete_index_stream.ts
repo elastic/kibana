@@ -7,32 +7,40 @@
  */
 
 import { Transform } from 'stream';
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
-import { ToolingLog } from '@kbn/dev-utils';
+import type { Client } from '@elastic/elasticsearch';
+import { ToolingLog } from '@kbn/tooling-log';
 
 import { Stats } from '../stats';
 import { deleteIndex } from './delete_index';
 import { cleanKibanaIndices } from './kibana_index';
+import { deleteDataStream } from './delete_data_stream';
 
-export function createDeleteIndexStream(
-  client: KibanaClient,
-  stats: Stats,
-  log: ToolingLog,
-  kibanaPluginIds: string[]
-) {
+export function createDeleteIndexStream(client: Client, stats: Stats, log: ToolingLog) {
   return new Transform({
     readableObjectMode: true,
     writableObjectMode: true,
     async transform(record, enc, callback) {
       try {
-        if (!record || record.type === 'index') {
+        if (!record) {
+          log.warning(`deleteIndexStream: empty index provided`);
+          return callback();
+        }
+        if (record.type === 'index') {
           const { index } = record.value;
 
           if (index.startsWith('.kibana')) {
-            await cleanKibanaIndices({ client, stats, log, kibanaPluginIds });
+            await cleanKibanaIndices({ client, stats, log });
           } else {
             await deleteIndex({ client, stats, log, index });
           }
+        } else if (record.type === 'data_stream') {
+          const {
+            data_stream: dataStream,
+            template: { name },
+          } = record.value;
+
+          await deleteDataStream(client, dataStream, name);
+          stats.deletedDataStream(dataStream, name);
         } else {
           this.push(record);
         }

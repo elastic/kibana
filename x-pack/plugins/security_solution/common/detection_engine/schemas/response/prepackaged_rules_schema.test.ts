@@ -7,12 +7,9 @@
 
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
-import {
-  PrePackagedRulesAndTimelinesSchema,
-  prePackagedRulesAndTimelinesSchema,
-} from './prepackaged_rules_schema';
-import { exactCheck } from '../../../exact_check';
-import { foldLeftRight, getPaths } from '../../../test_utils';
+import type { PrePackagedRulesAndTimelinesSchema } from './prepackaged_rules_schema';
+import { prePackagedRulesAndTimelinesSchema } from './prepackaged_rules_schema';
+import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 describe('prepackaged_rules_schema', () => {
   test('it should validate an empty prepackaged response with defaults', () => {

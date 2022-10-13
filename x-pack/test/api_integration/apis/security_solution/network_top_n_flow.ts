@@ -12,7 +12,8 @@ import {
   Direction,
   FlowTargetSourceDest,
   NetworkTopTablesFields,
-} from '../../../../plugins/security_solution/common/search_strategy';
+  NetworkTopNFlowStrategyResponse,
+} from '@kbn/security-solution-plugin/common/search_strategy';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -21,20 +22,24 @@ const EDGE_LENGTH = 10;
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
+  const bsearch = getService('bsearch');
 
   describe('Network Top N Flow', () => {
     describe('With filebeat', () => {
-      before(() => esArchiver.load('filebeat/default'));
-      after(() => esArchiver.unload('filebeat/default'));
+      before(
+        async () => await esArchiver.load('x-pack/test/functional/es_archives/filebeat/default')
+      );
+      after(
+        async () => await esArchiver.unload('x-pack/test/functional/es_archives/filebeat/default')
+      );
 
       const FROM = '2019-02-09T01:57:24.870Z';
       const TO = '2019-02-12T01:57:24.870Z';
 
       it('Make sure that we get Source NetworkTopNFlow data with bytes_in descending sort', async () => {
-        const { body: networkTopNFlow } = await supertest
-          .post('/internal/search/securitySolutionSearchStrategy/')
-          .set('kbn-xsrf', 'true')
-          .send({
+        const networkTopNFlow = await bsearch.send<NetworkTopNFlowStrategyResponse>({
+          supertest,
+          options: {
             defaultIndex: ['filebeat-*'],
             factoryQueryType: NetworkQueries.topNFlow,
             flowTarget: FlowTargetSourceDest.source,
@@ -50,11 +55,10 @@ export default function ({ getService }: FtrProviderContext) {
               to: TO,
               from: FROM,
             },
-            docValueFields: [],
             inspect: false,
-            wait_for_completion_timeout: '10s',
-          })
-          .expect(200);
+          },
+          strategy: 'securitySolutionSearchStrategy',
+        });
 
         expect(networkTopNFlow.edges.length).to.be(EDGE_LENGTH);
         expect(networkTopNFlow.totalCount).to.be(121);
@@ -70,10 +74,9 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('Make sure that we get Source NetworkTopNFlow data with bytes_in ascending sort ', async () => {
-        const { body: networkTopNFlow } = await supertest
-          .post('/internal/search/securitySolutionSearchStrategy/')
-          .set('kbn-xsrf', 'true')
-          .send({
+        const networkTopNFlow = await bsearch.send<NetworkTopNFlowStrategyResponse>({
+          supertest,
+          options: {
             defaultIndex: ['filebeat-*'],
             factoryQueryType: 'topNFlow',
             filterQuery:
@@ -91,11 +94,10 @@ export default function ({ getService }: FtrProviderContext) {
               to: TO,
               from: FROM,
             },
-            docValueFields: [],
             inspect: false,
-            wait_for_completion_timeout: '10s',
-          })
-          .expect(200);
+          },
+          strategy: 'securitySolutionSearchStrategy',
+        });
 
         expect(networkTopNFlow.edges.length).to.be(EDGE_LENGTH);
         expect(networkTopNFlow.totalCount).to.be(121);
@@ -111,10 +113,9 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('Make sure that we get Destination NetworkTopNFlow data', async () => {
-        const { body: networkTopNFlow } = await supertest
-          .post('/internal/search/securitySolutionSearchStrategy/')
-          .set('kbn-xsrf', 'true')
-          .send({
+        const networkTopNFlow = await bsearch.send<NetworkTopNFlowStrategyResponse>({
+          supertest,
+          options: {
             defaultIndex: ['filebeat-*'],
             factoryQueryType: 'topNFlow',
             filterQuery:
@@ -132,11 +133,11 @@ export default function ({ getService }: FtrProviderContext) {
               to: TO,
               from: FROM,
             },
-            docValueFields: [],
             inspect: false,
-            wait_for_completion_timeout: '10s',
-          })
-          .expect(200);
+          },
+          strategy: 'securitySolutionSearchStrategy',
+        });
+
         expect(networkTopNFlow.edges.length).to.be(EDGE_LENGTH);
         expect(networkTopNFlow.totalCount).to.be(154);
         expect(networkTopNFlow.edges[0].node.destination!.flows).to.be(19);
@@ -146,10 +147,9 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('Make sure that pagination is working in NetworkTopNFlow query', async () => {
-        const { body: networkTopNFlow } = await supertest
-          .post('/internal/search/securitySolutionSearchStrategy/')
-          .set('kbn-xsrf', 'true')
-          .send({
+        const networkTopNFlow = await bsearch.send<NetworkTopNFlowStrategyResponse>({
+          supertest,
+          options: {
             defaultIndex: ['filebeat-*'],
             factoryQueryType: 'topNFlow',
             filterQuery:
@@ -167,11 +167,10 @@ export default function ({ getService }: FtrProviderContext) {
               to: TO,
               from: FROM,
             },
-            docValueFields: [],
             inspect: false,
-            wait_for_completion_timeout: '10s',
-          })
-          .expect(200);
+          },
+          strategy: 'securitySolutionSearchStrategy',
+        });
 
         expect(networkTopNFlow.edges.length).to.be(EDGE_LENGTH);
         expect(networkTopNFlow.totalCount).to.be(121);

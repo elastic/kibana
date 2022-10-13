@@ -10,8 +10,15 @@ import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
 import { reduxDecorator, getAddonPanelParameters } from '../../../../storybook';
 
-import { AssetManager, AssetManagerComponent } from '../';
+import { AssetManager, AssetManagerComponent } from '..';
 import { assets } from './assets';
+
+const promiseAction =
+  (actionName: string) =>
+  (...args: any[]): Promise<string | void> => {
+    action(actionName)(...args);
+    return Promise.resolve();
+  };
 
 storiesOf('components/Assets/AssetManager', module)
   .addDecorator(reduxDecorator({ assets }))
@@ -21,13 +28,13 @@ storiesOf('components/Assets/AssetManager', module)
     <AssetManagerComponent
       assets={[]}
       onClose={action('onClose')}
-      onAddAsset={action('onAddAsset')}
+      onAddAsset={promiseAction('onAddAsset')}
     />
   ))
   .add('two assets', () => (
     <AssetManagerComponent
       assets={assets}
       onClose={action('onClose')}
-      onAddAsset={action('onAddAsset')}
+      onAddAsset={promiseAction('onAddAsset')}
     />
   ));

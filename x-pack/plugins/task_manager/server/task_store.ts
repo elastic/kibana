@@ -11,16 +11,16 @@
 import { Subject } from 'rxjs';
 import { omit, defaults } from 'lodash';
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import {
   SavedObject,
-  SavedObjectsSerializer,
+  ISavedObjectsSerializer,
   SavedObjectsRawDoc,
   ISavedObjectsRepository,
   SavedObjectsUpdateResponse,
   ElasticsearchClient,
-} from '../../../../src/core/server';
+} from '@kbn/core/server';
 
 import { asOk, asErr, Result } from './lib/result_type';
 
@@ -40,20 +40,21 @@ export interface StoreOpts {
   taskManagerId: string;
   definitions: TaskTypeDictionary;
   savedObjectsRepository: ISavedObjectsRepository;
-  serializer: SavedObjectsSerializer;
+  serializer: ISavedObjectsSerializer;
 }
 
 export interface SearchOpts {
   search_after?: Array<number | string>;
   size?: number;
   sort?: estypes.Sort;
-  query?: estypes.QueryContainer;
+  query?: estypes.QueryDslQueryContainer;
   seq_no_primary_term?: boolean;
 }
 
 export interface AggregationOpts {
-  aggs: Record<string, estypes.AggregationContainer>;
-  query?: estypes.QueryContainer;
+  aggs: Record<string, estypes.AggregationsAggregationContainer>;
+  query?: estypes.QueryDslQueryContainer;
+  runtime_mappings?: estypes.MappingRuntimeFields;
   size?: number;
 }
 
@@ -92,7 +93,7 @@ export class TaskStore {
   private esClient: ElasticsearchClient;
   private definitions: TaskTypeDictionary;
   private savedObjectsRepository: ISavedObjectsRepository;
-  private serializer: SavedObjectsSerializer;
+  private serializer: ISavedObjectsSerializer;
 
   /**
    * Constructs a new TaskStore.
@@ -144,6 +145,35 @@ export class TaskStore {
     }
 
     return savedObjectToConcreteTaskInstance(savedObject);
+  }
+
+  /**
+   * Bulk schedules a task.
+   *
+   * @param tasks - The tasks being scheduled.
+   */
+  public async bulkSchedule(taskInstances: TaskInstance[]): Promise<ConcreteTaskInstance[]> {
+    const objects = taskInstances.map((taskInstance) => {
+      this.definitions.ensureHas(taskInstance.taskType);
+      return {
+        type: 'task',
+        attributes: taskInstanceToAttributes(taskInstance),
+        id: taskInstance.id,
+      };
+    });
+
+    let savedObjects;
+    try {
+      savedObjects = await this.savedObjectsRepository.bulkCreate<SerializedConcreteTaskInstance>(
+        objects,
+        { refresh: false }
+      );
+    } catch (e) {
+      this.errors$.next(e);
+      throw e;
+    }
+
+    return savedObjects.saved_objects.map((so) => savedObjectToConcreteTaskInstance(so));
   }
 
   /**
@@ -211,19 +241,18 @@ export class TaskStore {
 
     let updatedSavedObjects: Array<SavedObjectsUpdateResponse | Error>;
     try {
-      ({
-        saved_objects: updatedSavedObjects,
-      } = await this.savedObjectsRepository.bulkUpdate<SerializedConcreteTaskInstance>(
-        docs.map((doc) => ({
-          type: 'task',
-          id: doc.id,
-          options: { version: doc.version },
-          attributes: attributesByDocId.get(doc.id)!,
-        })),
-        {
-          refresh: false,
-        }
-      ));
+      ({ saved_objects: updatedSavedObjects } =
+        await this.savedObjectsRepository.bulkUpdate<SerializedConcreteTaskInstance>(
+          docs.map((doc) => ({
+            type: 'task',
+            id: doc.id,
+            options: { version: doc.version },
+            attributes: attributesByDocId.get(doc.id)!,
+          })),
+          {
+            refresh: false,
+          }
+        ));
     } catch (e) {
       this.errors$.next(e);
       throw e;
@@ -305,9 +334,7 @@ export class TaskStore {
 
     try {
       const {
-        body: {
-          hits: { hits: tasks },
-        },
+        hits: { hits: tasks },
       } = await this.esClient.search<SavedObjectsRawDoc['_source']>({
         index: this.index,
         ignore_unavailable: true,
@@ -319,9 +346,9 @@ export class TaskStore {
 
       return {
         docs: tasks
-          // @ts-expect-error @elastic/elasticsearch `Hid._id` expected to be `string`
+          // @ts-expect-error @elastic/elasticsearch _source is optional
           .filter((doc) => this.serializer.isRawSavedObject(doc))
-          // @ts-expect-error @elastic/elasticsearch `Hid._id` expected to be `string`
+          // @ts-expect-error @elastic/elasticsearch _source is optional
           .map((doc) => this.serializer.rawToSavedObject(doc))
           .map((doc) => omit(doc, 'namespace') as SavedObject<SerializedConcreteTaskInstance>)
           .map(savedObjectToConcreteTaskInstance),
@@ -335,14 +362,21 @@ export class TaskStore {
   public async aggregate<TSearchRequest extends AggregationOpts>({
     aggs,
     query,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    runtime_mappings,
     size = 0,
   }: TSearchRequest): Promise<estypes.SearchResponse<ConcreteTaskInstance>> {
-    const { body } = await this.esClient.search<ConcreteTaskInstance>({
+    const body = await this.esClient.search<
+      ConcreteTaskInstance,
+      Record<string, estypes.AggregationsAggregate>
+    >({
       index: this.index,
       ignore_unavailable: true,
+      track_total_hits: true,
       body: ensureAggregationOnlyReturnsTaskObjects({
         query,
         aggs,
+        runtime_mappings,
         size,
       }),
     });
@@ -356,20 +390,18 @@ export class TaskStore {
   ): Promise<UpdateByQueryResult> {
     const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
     try {
-      const {
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        body: { total, updated, version_conflicts },
-      } = await this.esClient.updateByQuery({
-        index: this.index,
-        ignore_unavailable: true,
-        refresh: true,
-        conflicts: 'proceed',
-        body: {
-          ...opts,
-          max_docs,
-          query,
-        },
-      });
+      const // eslint-disable-next-line @typescript-eslint/naming-convention
+        { total, updated, version_conflicts } = await this.esClient.updateByQuery({
+          index: this.index,
+          ignore_unavailable: true,
+          refresh: true,
+          conflicts: 'proceed',
+          body: {
+            ...opts,
+            max_docs,
+            query,
+          },
+        });
 
       const conflictsCorrectedForContinuation = correctVersionConflictsForContinuation(
         updated,
@@ -378,10 +410,8 @@ export class TaskStore {
       );
 
       return {
-        // @ts-expect-error @elastic/elasticsearch declares UpdateByQueryResponse.total as optional
-        total,
-        // @ts-expect-error @elastic/elasticsearch declares UpdateByQueryResponse.total as optional
-        updated,
+        total: total || 0,
+        updated: updated || 0,
         version_conflicts: conflictsCorrectedForContinuation,
       };
     } catch (e) {
@@ -390,6 +420,7 @@ export class TaskStore {
     }
   }
 }
+
 /**
  * When we run updateByQuery with conflicts='proceed', it's possible for the `version_conflicts`
  * to count against the specified `max_docs`, as per https://github.com/elastic/elasticsearch/issues/63671

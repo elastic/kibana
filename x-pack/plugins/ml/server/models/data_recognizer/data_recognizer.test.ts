@@ -5,31 +5,37 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract, KibanaRequest, IScopedClusterClient } from 'kibana/server';
-import { Module } from '../../../common/types/modules';
-import { DataRecognizer } from '../data_recognizer';
+import type {
+  SavedObjectsClientContract,
+  KibanaRequest,
+  IScopedClusterClient,
+} from '@kbn/core/server';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
+import type { Module } from '../../../common/types/modules';
+import { DataRecognizer } from '.';
 import type { MlClient } from '../../lib/ml_client';
-import { JobSavedObjectService } from '../../saved_objects';
+import type { MLSavedObjectService } from '../../saved_objects';
 
 const callAs = () => Promise.resolve({ body: {} });
 
-const mlClusterClient = ({
+const mlClusterClient = {
   asCurrentUser: callAs,
   asInternalUser: callAs,
-} as unknown) as IScopedClusterClient;
+} as unknown as IScopedClusterClient;
 
-const mlClient = (callAs as unknown) as MlClient;
+const mlClient = callAs as unknown as MlClient;
 
 describe('ML - data recognizer', () => {
   const dr = new DataRecognizer(
     mlClusterClient,
     mlClient,
-    ({
+    {
       find: jest.fn(),
       bulkCreate: jest.fn(),
-    } as unknown) as SavedObjectsClientContract,
-    {} as JobSavedObjectService,
-    { headers: { authorization: '' } } as KibanaRequest
+    } as unknown as SavedObjectsClientContract,
+    { find: jest.fn() } as unknown as DataViewsService,
+    {} as MLSavedObjectService,
+    { headers: { authorization: '' } } as unknown as KibanaRequest
   );
 
   describe('jobOverrides', () => {
@@ -37,7 +43,7 @@ describe('ML - data recognizer', () => {
       // arrange
       const prefix = 'pre-';
       const testJobId = 'test-job';
-      const moduleConfig = ({
+      const moduleConfig = {
         jobs: [
           {
             id: `${prefix}${testJobId}`,
@@ -54,7 +60,7 @@ describe('ML - data recognizer', () => {
             },
           },
         ],
-      } as unknown) as Module;
+      } as unknown as Module;
       const jobOverrides = [
         {
           analysis_limits: {

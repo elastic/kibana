@@ -592,7 +592,5 @@ export const reducer = (state: State, action: Action): State => {
         isValid: action.value,
       };
     }
-    default:
-      throw new Error(`Action "${action!.type}" not recognized.`);
   }
 };

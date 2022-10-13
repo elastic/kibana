@@ -5,19 +5,15 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, IScopedClusterClient } from 'kibana/server';
-import {
-  INDEX_META_DATA_CREATED_BY,
-  CreateDocSourceResp,
-  IndexSourceMappings,
-  BodySettings,
-} from '../../common';
-import { IndexPatternsCommonService } from '../../../../../src/plugins/data/server';
+import { ElasticsearchClient, IScopedClusterClient } from '@kbn/core/server';
+import { DataViewsCommonService } from '@kbn/data-plugin/server';
+import { CreateDocSourceResp, IndexSourceMappings, BodySettings } from '../../common/types';
+import { MAPS_NEW_VECTOR_LAYER_META_CREATED_BY } from '../../common/constants';
 
 const DEFAULT_SETTINGS = { number_of_shards: 1 };
-const DEFAULT_MAPPINGS = {
+const DEFAULT_META = {
   _meta: {
-    created_by: INDEX_META_DATA_CREATED_BY,
+    created_by: MAPS_NEW_VECTOR_LAYER_META_CREATED_BY,
   },
 };
 
@@ -25,13 +21,14 @@ export async function createDocSource(
   index: string,
   mappings: IndexSourceMappings,
   { asCurrentUser }: IScopedClusterClient,
-  indexPatternsService: IndexPatternsCommonService
+  indexPatternsService: DataViewsCommonService
 ): Promise<CreateDocSourceResp> {
   try {
     await createIndex(index, mappings, asCurrentUser);
-    await indexPatternsService.createAndSave({ title: index }, true);
+    const { id: indexPatternId } = await indexPatternsService.createAndSave({ title: index }, true);
 
     return {
+      indexPatternId,
       success: true,
     };
   } catch (error) {
@@ -49,7 +46,7 @@ async function createIndex(
 ) {
   const body: { mappings: IndexSourceMappings; settings: BodySettings } = {
     mappings: {
-      ...DEFAULT_MAPPINGS,
+      ...DEFAULT_META,
       ...mappings,
     },
     settings: DEFAULT_SETTINGS,

@@ -5,23 +5,27 @@
  * 2.0.
  */
 
-import { ApplicationStart } from 'kibana/public';
-import { IndexPatternsContract } from '../../../../../../../../../src/plugins/data/public';
+import type { ApplicationStart } from '@kbn/core/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { mlJobService } from '../../../../services/job_service';
-import { loadIndexPatterns, getIndexPatternIdFromName } from '../../../../util/index_utils';
-import { Datafeed, Job } from '../../../../../../common/types/anomaly_detection_jobs';
+import { Datafeed } from '../../../../../../common/types/anomaly_detection_jobs';
 import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../common/constants/new_job';
 
 export async function preConfiguredJobRedirect(
-  indexPatterns: IndexPatternsContract,
+  dataViewsContract: DataViewsContract,
   basePath: string,
   navigateToUrl: ApplicationStart['navigateToUrl']
 ) {
   const { createdBy, job, datafeed } = mlJobService.tempJobCloningObjects;
+
   if (job && datafeed) {
+    const dataViewId = await getDataViewIdFromName(datafeed, dataViewsContract);
+    if (dataViewId === null) {
+      return Promise.resolve();
+    }
+
     try {
-      await loadIndexPatterns(indexPatterns);
-      const redirectUrl = getWizardUrlFromCloningJob(createdBy, job, datafeed);
+      const redirectUrl = await getWizardUrlFromCloningJob(createdBy, dataViewId);
       await navigateToUrl(`${basePath}/app/ml/${redirectUrl}`);
       return Promise.reject();
     } catch (error) {
@@ -34,15 +38,17 @@ export async function preConfiguredJobRedirect(
   }
 }
 
-function getWizardUrlFromCloningJob(createdBy: string | undefined, job: Job, datafeed: Datafeed) {
+async function getWizardUrlFromCloningJob(createdBy: string | undefined, dataViewId: string) {
   const created = createdBy;
   let page = '';
 
   switch (created) {
     case CREATED_BY_LABEL.SINGLE_METRIC:
+    case CREATED_BY_LABEL.SINGLE_METRIC_FROM_LENS:
       page = JOB_TYPE.SINGLE_METRIC;
       break;
     case CREATED_BY_LABEL.MULTI_METRIC:
+    case CREATED_BY_LABEL.MULTI_METRIC_FROM_LENS:
       page = JOB_TYPE.MULTI_METRIC;
       break;
     case CREATED_BY_LABEL.POPULATION:
@@ -51,12 +57,28 @@ function getWizardUrlFromCloningJob(createdBy: string | undefined, job: Job, dat
     case CREATED_BY_LABEL.CATEGORIZATION:
       page = JOB_TYPE.CATEGORIZATION;
       break;
+    case CREATED_BY_LABEL.RARE:
+      page = JOB_TYPE.RARE;
+      break;
     default:
       page = JOB_TYPE.ADVANCED;
       break;
   }
 
-  const indexPatternId = getIndexPatternIdFromName(datafeed.indices.join());
+  return `jobs/new_job/${page}?index=${dataViewId}&_g=()`;
+}
 
-  return `jobs/new_job/${page}?index=${indexPatternId}&_g=()`;
+async function getDataViewIdFromName(
+  datafeed: Datafeed,
+  dataViewsContract: DataViewsContract
+): Promise<string | null> {
+  if (dataViewsContract === null) {
+    throw new Error('Data views are not initialized!');
+  }
+
+  const [dv] = await dataViewsContract?.find(datafeed.indices.join(','));
+  if (!dv) {
+    return null;
+  }
+  return dv.id ?? dv.title;
 }

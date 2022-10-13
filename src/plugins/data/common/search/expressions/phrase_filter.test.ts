@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { createMockContext } from '../../../../expressions/common';
+import { createMockContext } from '@kbn/expressions-plugin/common';
 import { functionWrapper } from './utils';
 import { phraseFilterFunction } from './phrase_filter';
 
@@ -32,7 +32,6 @@ describe('interpreter/functions#phraseFilter', () => {
             "something",
           ],
           "type": "phrases",
-          "value": "test, something",
         },
         "query": Object {
           "bool": Object {

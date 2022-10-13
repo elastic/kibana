@@ -6,7 +6,7 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import { TestBed } from '@kbn/test/jest';
+import { TestBed } from '@kbn/test-jest-helpers';
 
 import { RemoteClusterForm } from '../../../public/application/sections/components/remote_cluster_form';
 import { RemoteClustersActions, setupEnvironment } from '../helpers';
@@ -20,18 +20,15 @@ import { Cluster } from '../../../common/lib';
 
 let component: TestBed['component'];
 let actions: RemoteClustersActions;
-const { server, httpRequestsMockHelpers } = setupEnvironment();
 
 describe('Edit Remote cluster', () => {
-  afterAll(() => {
-    server.restore();
-  });
+  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   httpRequestsMockHelpers.setLoadRemoteClustersResponse([REMOTE_CLUSTER_EDIT]);
 
   beforeEach(async () => {
     await act(async () => {
-      ({ component, actions } = await setup());
+      ({ component, actions } = await setup(httpSetup));
     });
     component.update();
   });
@@ -54,7 +51,7 @@ describe('Edit Remote cluster', () => {
     let addRemoteClusterTestBed: TestBed;
 
     await act(async () => {
-      addRemoteClusterTestBed = await setupRemoteClustersAdd();
+      addRemoteClusterTestBed = await setupRemoteClustersAdd(httpSetup);
     });
 
     addRemoteClusterTestBed!.component.update();
@@ -90,7 +87,7 @@ describe('Edit Remote cluster', () => {
       httpRequestsMockHelpers.setLoadRemoteClustersResponse([cluster]);
 
       await act(async () => {
-        ({ component, actions } = await setup(true));
+        ({ component, actions } = await setup(httpSetup, { isCloudEnabled: true }));
       });
       component.update();
 
@@ -108,7 +105,7 @@ describe('Edit Remote cluster', () => {
       httpRequestsMockHelpers.setLoadRemoteClustersResponse([cluster]);
 
       await act(async () => {
-        ({ component, actions } = await setup(true));
+        ({ component, actions } = await setup(httpSetup, { isCloudEnabled: true }));
       });
       component.update();
 
@@ -128,7 +125,7 @@ describe('Edit Remote cluster', () => {
       httpRequestsMockHelpers.setLoadRemoteClustersResponse([cluster]);
 
       await act(async () => {
-        ({ component, actions } = await setup(true));
+        ({ component, actions } = await setup(httpSetup, { isCloudEnabled: true }));
       });
       component.update();
 

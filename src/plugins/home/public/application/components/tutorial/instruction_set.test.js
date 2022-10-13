@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { shallowWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 
 import { InstructionSet } from './instruction_set';
 import * as StatusCheckStates from './status_check_states';
@@ -34,12 +34,6 @@ const instructionVariants = [
   },
 ];
 
-jest.mock('../../../../../kibana_react/public', () => {
-  return {
-    Markdown: () => <div className="markdown" />,
-  };
-});
-
 test('render', () => {
   const component = shallowWithIntl(
     <InstructionSet.WrappedComponent
@@ -49,9 +43,10 @@ test('render', () => {
       offset={1}
       paramValues={{}}
       replaceTemplateStrings={() => {}}
+      isCloudEnabled={false}
     />
   );
-  expect(component).toMatchSnapshot(); // eslint-disable-line
+  expect(component).toMatchSnapshot();
 });
 
 describe('statusCheckState', () => {
@@ -74,9 +69,10 @@ describe('statusCheckState', () => {
         statusCheckConfig={statusCheckConfig}
         replaceTemplateStrings={() => {}}
         statusCheckState={StatusCheckStates.FETCHING}
+        isCloudEnabled={false}
       />
     );
-    expect(component).toMatchSnapshot(); // eslint-disable-line
+    expect(component).toMatchSnapshot();
   });
 
   test('checking status', () => {
@@ -90,9 +86,10 @@ describe('statusCheckState', () => {
         statusCheckConfig={statusCheckConfig}
         replaceTemplateStrings={() => {}}
         statusCheckState={StatusCheckStates.FETCHING}
+        isCloudEnabled={false}
       />
     );
-    expect(component).toMatchSnapshot(); // eslint-disable-line
+    expect(component).toMatchSnapshot();
   });
 
   test('failed status check - error', () => {
@@ -106,9 +103,10 @@ describe('statusCheckState', () => {
         statusCheckConfig={statusCheckConfig}
         replaceTemplateStrings={() => {}}
         statusCheckState={StatusCheckStates.ERROR}
+        isCloudEnabled={false}
       />
     );
-    expect(component).toMatchSnapshot(); // eslint-disable-line
+    expect(component).toMatchSnapshot();
   });
 
   test('failed status check - no data', () => {
@@ -122,9 +120,10 @@ describe('statusCheckState', () => {
         statusCheckConfig={statusCheckConfig}
         replaceTemplateStrings={() => {}}
         statusCheckState={StatusCheckStates.NO_DATA}
+        isCloudEnabled={false}
       />
     );
-    expect(component).toMatchSnapshot(); // eslint-disable-line
+    expect(component).toMatchSnapshot();
   });
 
   test('successful status check', () => {
@@ -138,8 +137,9 @@ describe('statusCheckState', () => {
         statusCheckConfig={statusCheckConfig}
         replaceTemplateStrings={() => {}}
         statusCheckState={StatusCheckStates.HAS_DATA}
+        isCloudEnabled={false}
       />
     );
-    expect(component).toMatchSnapshot(); // eslint-disable-line
+    expect(component).toMatchSnapshot();
   });
 });

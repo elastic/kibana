@@ -18,10 +18,10 @@ import {
 } from '@elastic/eui';
 import React, { Component, Fragment } from 'react';
 
+import type { DocLinksStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { DocLinksStart } from 'src/core/public';
 
 import type { SecurityLicense } from '../../../../../../common/licensing';
 import type { BuiltinESPrivileges, Role } from '../../../../../../common/model';
@@ -176,7 +176,7 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
         <EuiHorizontalRule />
 
         {this.props.editable && (
-          <EuiButton iconType={'plusInCircleFilled'} onClick={this.addIndexPrivilege}>
+          <EuiButton iconType={'plusInCircle'} onClick={this.addIndexPrivilege}>
             <FormattedMessage
               id="xpack.security.management.editRole.elasticSearchPrivileges.addIndexPrivilegesButtonLabel"
               defaultMessage="Add index privilege"

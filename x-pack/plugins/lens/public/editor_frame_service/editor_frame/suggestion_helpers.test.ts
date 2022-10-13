@@ -5,10 +5,16 @@
  * 2.0.
  */
 
+import type { PaletteOutput } from '@kbn/coloring';
 import { getSuggestions, getTopSuggestionForField } from './suggestion_helpers';
-import { createMockVisualization, createMockDatasource, DatasourceMock } from '../mocks';
+import {
+  createMockVisualization,
+  createMockDatasource,
+  DatasourceMock,
+  createMockFramePublicAPI,
+} from '../../mocks';
 import { TableSuggestion, DatasourceSuggestion, Visualization } from '../../types';
-import { PaletteOutput } from 'src/plugins/charts/public';
+import { DatasourceStates, DataViewsState } from '../../state_management';
 
 const generateSuggestion = (state = {}, layerId: string = 'first'): DatasourceSuggestion => ({
   state,
@@ -22,13 +28,8 @@ const generateSuggestion = (state = {}, layerId: string = 'first'): DatasourceSu
 });
 
 let datasourceMap: Record<string, DatasourceMock>;
-let datasourceStates: Record<
-  string,
-  {
-    isLoading: boolean;
-    state: unknown;
-  }
->;
+let datasourceStates: DatasourceStates;
+let dataViews: DataViewsState;
 
 beforeEach(() => {
   datasourceMap = {
@@ -41,6 +42,8 @@ beforeEach(() => {
       state: {},
     },
   };
+
+  dataViews = createMockFramePublicAPI().dataViews;
 });
 
 describe('suggestion helpers', () => {
@@ -50,24 +53,26 @@ describe('suggestion helpers', () => {
       generateSuggestion(),
     ]);
     const suggestedState = {};
-    const suggestions = getSuggestions({
-      visualizationMap: {
-        vis1: {
-          ...mockVisualization,
-          getSuggestions: () => [
-            {
-              score: 0.5,
-              title: 'Test',
-              state: suggestedState,
-              previewIcon: 'empty',
-            },
-          ],
-        },
+    const visualizationMap = {
+      testVis: {
+        ...mockVisualization,
+        getSuggestions: () => [
+          {
+            score: 0.5,
+            title: 'Test',
+            state: suggestedState,
+            previewIcon: 'empty',
+          },
+        ],
       },
-      activeVisualizationId: 'vis1',
+    };
+    const suggestions = getSuggestions({
+      visualizationMap,
+      activeVisualization: visualizationMap.testVis,
       visualizationState: {},
       datasourceMap,
       datasourceStates,
+      dataViews,
     });
     expect(suggestions).toHaveLength(1);
     expect(suggestions[0].visualizationState).toBe(suggestedState);
@@ -79,41 +84,43 @@ describe('suggestion helpers', () => {
     datasourceMap.mock.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
       generateSuggestion(),
     ]);
-    const suggestions = getSuggestions({
-      visualizationMap: {
-        vis1: {
-          ...mockVisualization1,
-          getSuggestions: () => [
-            {
-              score: 0.5,
-              title: 'Test',
-              state: {},
-              previewIcon: 'empty',
-            },
-            {
-              score: 0.5,
-              title: 'Test2',
-              state: {},
-              previewIcon: 'empty',
-            },
-          ],
-        },
-        vis2: {
-          ...mockVisualization2,
-          getSuggestions: () => [
-            {
-              score: 0.5,
-              title: 'Test3',
-              state: {},
-              previewIcon: 'empty',
-            },
-          ],
-        },
+    const visualizationMap = {
+      testVis: {
+        ...mockVisualization1,
+        getSuggestions: () => [
+          {
+            score: 0.5,
+            title: 'Test',
+            state: {},
+            previewIcon: 'empty',
+          },
+          {
+            score: 0.5,
+            title: 'Test2',
+            state: {},
+            previewIcon: 'empty',
+          },
+        ],
       },
-      activeVisualizationId: 'vis1',
+      vis2: {
+        ...mockVisualization2,
+        getSuggestions: () => [
+          {
+            score: 0.5,
+            title: 'Test3',
+            state: {},
+            previewIcon: 'empty',
+          },
+        ],
+      },
+    };
+    const suggestions = getSuggestions({
+      visualizationMap,
+      activeVisualization: visualizationMap.testVis,
       visualizationState: {},
       datasourceMap,
       datasourceStates,
+      dataViews,
     });
     expect(suggestions).toHaveLength(3);
   });
@@ -121,19 +128,23 @@ describe('suggestion helpers', () => {
   it('should call getDatasourceSuggestionsForField when a field is passed', () => {
     datasourceMap.mock.getDatasourceSuggestionsForField.mockReturnValue([generateSuggestion()]);
     const droppedField = {};
+    const visualizationMap = {
+      testVis: createMockVisualization(),
+    };
     getSuggestions({
-      visualizationMap: {
-        vis1: createMockVisualization(),
-      },
-      activeVisualizationId: 'vis1',
+      visualizationMap,
+      activeVisualization: visualizationMap.testVis,
       visualizationState: {},
       datasourceMap,
       datasourceStates,
       field: droppedField,
+      dataViews,
     });
     expect(datasourceMap.mock.getDatasourceSuggestionsForField).toHaveBeenCalledWith(
       datasourceStates.mock.state,
-      droppedField
+      droppedField,
+      expect.any(Function),
+      dataViews.indexPatterns
     );
   });
 
@@ -153,24 +164,30 @@ describe('suggestion helpers', () => {
       mock2: createMockDatasource('a'),
       mock3: createMockDatasource('a'),
     };
+    const visualizationMap = {
+      testVis: createMockVisualization(),
+    };
     const droppedField = {};
     getSuggestions({
-      visualizationMap: {
-        vis1: createMockVisualization(),
-      },
-      activeVisualizationId: 'vis1',
+      visualizationMap,
+      activeVisualization: visualizationMap.testVis,
       visualizationState: {},
       datasourceMap: multiDatasourceMap,
       datasourceStates: multiDatasourceStates,
       field: droppedField,
+      dataViews,
     });
     expect(multiDatasourceMap.mock.getDatasourceSuggestionsForField).toHaveBeenCalledWith(
       multiDatasourceStates.mock.state,
-      droppedField
+      droppedField,
+      expect.any(Function),
+      dataViews.indexPatterns
     );
     expect(multiDatasourceMap.mock2.getDatasourceSuggestionsForField).toHaveBeenCalledWith(
       multiDatasourceStates.mock2.state,
-      droppedField
+      droppedField,
+      expect.any(Function),
+      dataViews.indexPatterns
     );
     expect(multiDatasourceMap.mock3.getDatasourceSuggestionsForField).not.toHaveBeenCalled();
   });
@@ -179,23 +196,28 @@ describe('suggestion helpers', () => {
     datasourceMap.mock.getDatasourceSuggestionsForVisualizeField.mockReturnValue([
       generateSuggestion(),
     ]);
+
+    const visualizationMap = {
+      testVis: createMockVisualization(),
+    };
+
     getSuggestions({
-      visualizationMap: {
-        vis1: createMockVisualization(),
-      },
-      activeVisualizationId: 'vis1',
+      visualizationMap,
+      activeVisualization: visualizationMap.testVis,
       visualizationState: {},
       datasourceMap,
       datasourceStates,
       visualizeTriggerFieldContext: {
-        indexPatternId: '1',
+        dataViewSpec: { id: '1' },
         fieldName: 'test',
       },
+      dataViews,
     });
     expect(datasourceMap.mock.getDatasourceSuggestionsForVisualizeField).toHaveBeenCalledWith(
       datasourceStates.mock.state,
       '1',
-      'test'
+      'test',
+      dataViews.indexPatterns
     );
   });
 
@@ -216,28 +238,33 @@ describe('suggestion helpers', () => {
       mock3: createMockDatasource('a'),
     };
     const visualizeTriggerField = {
-      indexPatternId: '1',
+      dataViewSpec: { id: '1' },
       fieldName: 'test',
     };
+
+    const visualizationMap = {
+      testVis: createMockVisualization(),
+    };
     getSuggestions({
-      visualizationMap: {
-        vis1: createMockVisualization(),
-      },
-      activeVisualizationId: 'vis1',
+      visualizationMap,
+      activeVisualization: visualizationMap.testVis,
       visualizationState: {},
       datasourceMap: multiDatasourceMap,
       datasourceStates: multiDatasourceStates,
       visualizeTriggerFieldContext: visualizeTriggerField,
+      dataViews,
     });
     expect(multiDatasourceMap.mock.getDatasourceSuggestionsForVisualizeField).toHaveBeenCalledWith(
       multiDatasourceStates.mock.state,
       '1',
-      'test'
+      'test',
+      dataViews.indexPatterns
     );
     expect(multiDatasourceMap.mock2.getDatasourceSuggestionsForVisualizeField).toHaveBeenCalledWith(
       multiDatasourceStates.mock2.state,
       '1',
-      'test'
+      'test',
+      dataViews.indexPatterns
     );
     expect(
       multiDatasourceMap.mock3.getDatasourceSuggestionsForVisualizeField
@@ -250,41 +277,43 @@ describe('suggestion helpers', () => {
     datasourceMap.mock.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
       generateSuggestion(),
     ]);
-    const suggestions = getSuggestions({
-      visualizationMap: {
-        vis1: {
-          ...mockVisualization1,
-          getSuggestions: () => [
-            {
-              score: 0.2,
-              title: 'Test',
-              state: {},
-              previewIcon: 'empty',
-            },
-            {
-              score: 0.8,
-              title: 'Test2',
-              state: {},
-              previewIcon: 'empty',
-            },
-          ],
-        },
-        vis2: {
-          ...mockVisualization2,
-          getSuggestions: () => [
-            {
-              score: 0.6,
-              title: 'Test3',
-              state: {},
-              previewIcon: 'empty',
-            },
-          ],
-        },
+    const visualizationMap = {
+      testVis: {
+        ...mockVisualization1,
+        getSuggestions: () => [
+          {
+            score: 0.2,
+            title: 'Test',
+            state: {},
+            previewIcon: 'empty',
+          },
+          {
+            score: 0.8,
+            title: 'Test2',
+            state: {},
+            previewIcon: 'empty',
+          },
+        ],
       },
-      activeVisualizationId: 'vis1',
+      vis2: {
+        ...mockVisualization2,
+        getSuggestions: () => [
+          {
+            score: 0.6,
+            title: 'Test3',
+            state: {},
+            previewIcon: 'empty',
+          },
+        ],
+      },
+    };
+    const suggestions = getSuggestions({
+      visualizationMap,
+      activeVisualization: visualizationMap.testVis,
       visualizationState: {},
       datasourceMap,
       datasourceStates,
+      dataViews,
     });
     expect(suggestions[0].score).toBe(0.8);
     expect(suggestions[1].score).toBe(0.6);
@@ -310,15 +339,17 @@ describe('suggestion helpers', () => {
       { state: {}, table: table1, keptLayerIds: ['first'] },
       { state: {}, table: table2, keptLayerIds: ['first'] },
     ]);
+    const visualizationMap = {
+      testVis: mockVisualization1,
+      vis2: mockVisualization2,
+    };
     getSuggestions({
-      visualizationMap: {
-        vis1: mockVisualization1,
-        vis2: mockVisualization2,
-      },
-      activeVisualizationId: 'vis1',
+      visualizationMap,
+      activeVisualization: visualizationMap.testVis,
       visualizationState: {},
       datasourceMap,
       datasourceStates,
+      dataViews,
     });
     expect(mockVisualization1.getSuggestions.mock.calls[0][0].table).toEqual(table1);
     expect(mockVisualization1.getSuggestions.mock.calls[1][0].table).toEqual(table2);
@@ -362,21 +393,24 @@ describe('suggestion helpers', () => {
         previewIcon: 'empty',
       },
     ]);
-    const suggestions = getSuggestions({
-      visualizationMap: {
-        vis1: {
-          ...mockVisualization1,
-          getSuggestions: vis1Suggestions,
-        },
-        vis2: {
-          ...mockVisualization2,
-          getSuggestions: vis2Suggestions,
-        },
+    const visualizationMap = {
+      testVis: {
+        ...mockVisualization1,
+        getSuggestions: vis1Suggestions,
       },
-      activeVisualizationId: 'vis1',
+      vis2: {
+        ...mockVisualization2,
+        getSuggestions: vis2Suggestions,
+      },
+    };
+
+    const suggestions = getSuggestions({
+      visualizationMap,
+      activeVisualization: visualizationMap.testVis,
       visualizationState: {},
       datasourceMap,
       datasourceStates,
+      dataViews,
     });
     expect(suggestions[0].datasourceState).toBe(tableState1);
     expect(suggestions[0].datasourceId).toBe('mock');
@@ -394,15 +428,19 @@ describe('suggestion helpers', () => {
       generateSuggestion(0),
       generateSuggestion(1),
     ]);
+
+    const visualizationMap = {
+      testVis: mockVisualization1,
+      vis2: mockVisualization2,
+    };
+
     getSuggestions({
-      visualizationMap: {
-        vis1: mockVisualization1,
-        vis2: mockVisualization2,
-      },
-      activeVisualizationId: 'vis1',
+      visualizationMap,
+      activeVisualization: visualizationMap.testVis,
       visualizationState: {},
       datasourceMap,
       datasourceStates,
+      dataViews,
     });
     expect(mockVisualization1.getSuggestions).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -424,16 +462,18 @@ describe('suggestion helpers', () => {
       generateSuggestion(0),
       generateSuggestion(1),
     ]);
+    const visualizationMap = {
+      testVis: mockVisualization1,
+      vis2: mockVisualization2,
+    };
     getSuggestions({
-      visualizationMap: {
-        vis1: mockVisualization1,
-        vis2: mockVisualization2,
-      },
-      activeVisualizationId: 'vis1',
+      visualizationMap,
+      activeVisualization: visualizationMap.testVis,
       visualizationState: {},
       datasourceMap,
       datasourceStates,
       mainPalette,
+      dataViews,
     });
     expect(mockVisualization1.getSuggestions).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -456,15 +496,18 @@ describe('suggestion helpers', () => {
       generateSuggestion(0),
       generateSuggestion(1),
     ]);
+    const visualizationMap = {
+      testVis: mockVisualization1,
+      vis2: mockVisualization2,
+    };
+
     getSuggestions({
-      visualizationMap: {
-        vis1: mockVisualization1,
-        vis2: mockVisualization2,
-      },
-      activeVisualizationId: 'vis1',
+      visualizationMap,
+      activeVisualization: visualizationMap.testVis,
       visualizationState: {},
       datasourceMap,
       datasourceStates,
+      dataViews,
     });
     expect(mockVisualization1.getMainPalette).toHaveBeenCalledWith({});
     expect(mockVisualization2.getSuggestions).toHaveBeenCalledWith(
@@ -520,19 +563,22 @@ describe('suggestion helpers', () => {
       defaultParams = [
         {
           '1': {
-            getTableSpec: () => [{ columnId: 'col1' }],
+            getTableSpec: () => [{ columnId: 'col1', fields: [] }],
             datasourceId: '',
             getOperationForColumnId: jest.fn(),
+            getVisualDefaults: jest.fn(),
+            getSourceId: jest.fn(),
+            getFilters: jest.fn(),
+            getMaxPossibleNumValues: jest.fn(),
+            isTextBasedLanguage: jest.fn(() => false),
           },
         },
-        'vis1',
-        { vis1: mockVisualization1 },
-        {},
+        { activeId: 'testVis', state: {} },
+        { testDatasource: { state: mockDatasourceState, isLoading: false } },
+        { testVis: mockVisualization1 },
         datasourceMap.mock,
-        {
-          mockindexpattern: { state: mockDatasourceState, isLoading: false },
-        },
         { id: 'myfield', humanData: { label: 'myfieldLabel' } },
+        dataViews,
       ];
     });
 
@@ -546,8 +592,47 @@ describe('suggestion helpers', () => {
           humanData: {
             label: 'myfieldLabel',
           },
-        }
+        },
+        expect.any(Function),
+        dataViews.indexPatterns
       );
+    });
+
+    it('should get the top non-hidden suggestion if there is no active visualization', () => {
+      defaultParams[0] = {
+        '1': {
+          getTableSpec: () => [],
+          datasourceId: '',
+          getOperationForColumnId: jest.fn(),
+          getVisualDefaults: jest.fn(),
+          getSourceId: jest.fn(),
+          getFilters: jest.fn(),
+          getMaxPossibleNumValues: jest.fn(),
+          isTextBasedLanguage: jest.fn(() => false),
+        },
+      };
+      defaultParams[3] = {
+        testVis: mockVisualization1,
+        vis2: mockVisualization2,
+      };
+      mockVisualization1.getSuggestions.mockReturnValue([]);
+      mockVisualization2.getSuggestions.mockReturnValue([
+        {
+          score: 0.3,
+          title: 'second suggestion',
+          state: { second: true },
+          previewIcon: 'empty',
+        },
+        {
+          score: 0.5,
+          title: 'mop suggestion',
+          state: { first: true },
+          previewIcon: 'empty',
+          hide: true,
+        },
+      ]);
+      const result = getTopSuggestionForField(...defaultParams);
+      expect(result!.title).toEqual('second suggestion');
     });
 
     it('should return nothing if visualization does not produce suggestions', () => {
@@ -558,8 +643,8 @@ describe('suggestion helpers', () => {
 
     it('should return nothing if datasource does not produce suggestions', () => {
       datasourceMap.mock.getDatasourceSuggestionsForField.mockReturnValue([]);
-      defaultParams[2] = {
-        vis1: { ...mockVisualization1, getSuggestions: () => [] },
+      defaultParams[3] = {
+        testVis: { ...mockVisualization1, getSuggestions: () => [] },
         vis2: mockVisualization2,
       };
       const result = getTopSuggestionForField(...defaultParams);
@@ -567,8 +652,8 @@ describe('suggestion helpers', () => {
     });
 
     it('should not consider suggestion from other visualization if there is data', () => {
-      defaultParams[2] = {
-        vis1: { ...mockVisualization1, getSuggestions: () => [] },
+      defaultParams[3] = {
+        testVis: { ...mockVisualization1, getSuggestions: () => [] },
         vis2: mockVisualization2,
       };
       const result = getTopSuggestionForField(...defaultParams);
@@ -582,6 +667,11 @@ describe('suggestion helpers', () => {
           getTableSpec: () => [],
           datasourceId: '',
           getOperationForColumnId: jest.fn(),
+          getVisualDefaults: jest.fn(),
+          getSourceId: jest.fn(),
+          getFilters: jest.fn(),
+          getMaxPossibleNumValues: jest.fn(),
+          isTextBasedLanguage: jest.fn(() => false),
         },
       };
       mockVisualization1.getSuggestions.mockReturnValue([]);
@@ -593,8 +683,8 @@ describe('suggestion helpers', () => {
           previewIcon: 'empty',
         },
       ]);
-      defaultParams[2] = {
-        vis1: mockVisualization1,
+      defaultParams[3] = {
+        testVis: mockVisualization1,
         vis2: mockVisualization2,
         vis3: mockVisualization3,
       };

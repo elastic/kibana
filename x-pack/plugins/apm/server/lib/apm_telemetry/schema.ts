@@ -5,22 +5,26 @@
  * 2.0.
  */
 
-import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
+import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
 import {
   AggregatedTransactionsCounts,
   APMUsage,
   TimeframeMap,
   TimeframeMap1d,
   TimeframeMapAll,
+  APMPerService,
 } from './types';
 import { ElasticAgentName } from '../../../typings/es_schemas/ui/fields/agent';
 
 const long: { type: 'long' } = { type: 'long' };
 
-const aggregatedTransactionCountSchema: MakeSchemaFrom<AggregatedTransactionsCounts> = {
-  expected_metric_document_count: long,
-  transaction_count: long,
-};
+const keyword: { type: 'keyword' } = { type: 'keyword' };
+
+const aggregatedTransactionCountSchema: MakeSchemaFrom<AggregatedTransactionsCounts> =
+  {
+    expected_metric_document_count: long,
+    transaction_count: long,
+  };
 
 const timeframeMap1dSchema: MakeSchemaFrom<TimeframeMap1d> = {
   '1d': long,
@@ -73,7 +77,9 @@ const apmPerAgentSchema: Pick<
   // TODO: Find a way for `@kbn/telemetry-tools` to understand and evaluate expressions.
   //  In the meanwhile, we'll have to maintain these lists up to date (TS will remind us to update)
   services_per_agent: {
+    'android/java': long,
     dotnet: long,
+    'iOS/swift': long,
     go: long,
     java: long,
     'js-base': long,
@@ -92,10 +98,13 @@ const apmPerAgentSchema: Pick<
     'opentelemetry/php': long,
     'opentelemetry/python': long,
     'opentelemetry/ruby': long,
+    'opentelemetry/swift': long,
     'opentelemetry/webjs': long,
   },
   agents: {
+    'android/java': agentSchema,
     dotnet: agentSchema,
+    'iOS/swift': agentSchema,
     go: agentSchema,
     java: agentSchema,
     'js-base': agentSchema,
@@ -104,6 +113,47 @@ const apmPerAgentSchema: Pick<
     python: agentSchema,
     ruby: agentSchema,
     'rum-js': agentSchema,
+  },
+};
+
+export const apmPerServiceSchema: MakeSchemaFrom<APMPerService> = {
+  service_id: keyword,
+  timed_out: { type: 'boolean' },
+  cloud: {
+    availability_zones: { type: 'array', items: { type: 'keyword' } },
+    regions: { type: 'array', items: { type: 'keyword' } },
+    providers: { type: 'array', items: { type: 'keyword' } },
+  },
+  faas: {
+    trigger: {
+      type: { type: 'array', items: { type: 'keyword' } },
+    },
+  },
+  agent: {
+    name: keyword,
+    version: keyword,
+  },
+  service: {
+    language: {
+      name: keyword,
+      version: keyword,
+    },
+    framework: {
+      name: keyword,
+      version: keyword,
+    },
+    runtime: {
+      name: keyword,
+      version: keyword,
+    },
+  },
+  kubernetes: {
+    pod: {
+      name: keyword,
+    },
+  },
+  container: {
+    id: keyword,
   },
 };
 
@@ -135,6 +185,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
     provider: { type: 'array', items: { type: 'keyword' } },
     region: { type: 'array', items: { type: 'keyword' } },
   },
+  host: { os: { platform: { type: 'array', items: { type: 'keyword' } } } },
   counts: {
     transaction: timeframeMapSchema,
     span: timeframeMapSchema,
@@ -182,9 +233,15 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
       },
     },
   },
+  service_groups: {
+    kuery_fields: { type: 'array', items: { type: 'keyword' } },
+    total: long,
+  },
+  per_service: { type: 'array', items: { ...apmPerServiceSchema } },
   tasks: {
     aggregated_transactions: { took: { ms: long } },
     cloud: { took: { ms: long } },
+    host: { took: { ms: long } },
     processor_events: { took: { ms: long } },
     agent_configuration: { took: { ms: long } },
     services: { took: { ms: long } },
@@ -195,5 +252,7 @@ export const apmSchema: MakeSchemaFrom<APMUsage> = {
     indices_stats: { took: { ms: long } },
     cardinality: { took: { ms: long } },
     environments: { took: { ms: long } },
+    service_groups: { took: { ms: long } },
+    per_service: { took: { ms: long } },
   },
 };

@@ -5,26 +5,55 @@
  * 2.0.
  */
 
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { shallow } from 'enzyme';
 import React from 'react';
-import { DraggableStateSnapshot, DraggingStyle } from 'react-beautiful-dnd';
-import { waitFor } from '@testing-library/react';
+import type { DraggableStateSnapshot, DraggingStyle } from 'react-beautiful-dnd';
+
 import '../../mock/match_media';
+import { TimelineId } from '../../../../common/types';
 import { mockBrowserFields } from '../../containers/source/mock';
 import { TestProviders } from '../../mock';
 import { mockDataProviders } from '../../../timelines/components/timeline/data_providers/mock/mock_data_providers';
+import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../../../timelines/components/row_renderers_browser/constants';
 import { DragDropContextWrapper } from './drag_drop_context_wrapper';
-import { ConditionalPortal, DraggableWrapper, getStyle } from './draggable_wrapper';
+import {
+  ConditionalPortal,
+  disableHoverActions,
+  DraggableWrapper,
+  getStyle,
+} from './draggable_wrapper';
 import { useMountAppended } from '../../utils/use_mount_appended';
+
+jest.mock('../../lib/kibana');
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
     ...original,
-    // eslint-disable-next-line react/display-name
     EuiScreenReaderOnly: () => <></>,
   };
 });
+
+const timelineIdsWithHoverActions = [
+  undefined,
+  TimelineId.active,
+  TimelineId.alternateTest,
+  TimelineId.casePage,
+  TimelineId.detectionsPage,
+  TimelineId.detectionsRulesDetailsPage,
+  TimelineId.hostsPageEvents,
+  TimelineId.hostsPageSessions,
+  TimelineId.kubernetesPageSessions,
+  TimelineId.networkPageEvents,
+  TimelineId.test,
+  TimelineId.usersPageEvents,
+];
+
+const timelineIdsNoHoverActions = [
+  TimelineId.rulePreview,
+  ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,
+];
 
 describe('DraggableWrapper', () => {
   const dataProvider = mockDataProviders[0];
@@ -35,12 +64,25 @@ describe('DraggableWrapper', () => {
     jest.useFakeTimers();
   });
 
+  afterEach(() => {
+    const portal = document.querySelector('[data-euiportal="true"]');
+    if (portal != null) {
+      portal.innerHTML = '';
+    }
+
+    jest.useRealTimers();
+  });
+
   describe('rendering', () => {
     test('it renders against the snapshot', () => {
       const wrapper = shallow(
         <TestProviders>
           <DragDropContextWrapper browserFields={mockBrowserFields}>
-            <DraggableWrapper dataProvider={dataProvider} render={() => message} />
+            <DraggableWrapper
+              dataProvider={dataProvider}
+              isDraggable={true}
+              render={() => message}
+            />
           </DragDropContextWrapper>
         </TestProviders>
       );
@@ -52,7 +94,11 @@ describe('DraggableWrapper', () => {
       const wrapper = mount(
         <TestProviders>
           <DragDropContextWrapper browserFields={mockBrowserFields}>
-            <DraggableWrapper dataProvider={dataProvider} render={() => message} />
+            <DraggableWrapper
+              dataProvider={dataProvider}
+              isDraggable={true}
+              render={() => message}
+            />
           </DragDropContextWrapper>
         </TestProviders>
       );
@@ -64,29 +110,84 @@ describe('DraggableWrapper', () => {
       const wrapper = mount(
         <TestProviders>
           <DragDropContextWrapper browserFields={mockBrowserFields}>
-            <DraggableWrapper dataProvider={dataProvider} render={() => message} />
+            <DraggableWrapper
+              dataProvider={dataProvider}
+              isDraggable={true}
+              render={() => message}
+            />
           </DragDropContextWrapper>
         </TestProviders>
       );
 
-      expect(wrapper.find('[data-test-subj="copy-to-clipboard"]').exists()).toBe(false);
+      expect(wrapper.find('[data-test-subj="hover-actions-copy-button"]').exists()).toBe(false);
     });
 
     test('it renders hover actions when the mouse is over the text of draggable wrapper', async () => {
       const wrapper = mount(
         <TestProviders>
           <DragDropContextWrapper browserFields={mockBrowserFields}>
-            <DraggableWrapper dataProvider={dataProvider} render={() => message} />
+            <DraggableWrapper
+              dataProvider={dataProvider}
+              isDraggable={true}
+              render={() => message}
+            />
           </DragDropContextWrapper>
         </TestProviders>
       );
 
       await waitFor(() => {
         wrapper.find('[data-test-subj="withHoverActionsButton"]').simulate('mouseenter');
-        wrapper.update();
-        jest.runAllTimers();
-        wrapper.update();
-        expect(wrapper.find('[data-test-subj="copy-to-clipboard"]').exists()).toBe(true);
+        expect(wrapper.find('[data-test-subj="hover-actions-copy-button"]').exists()).toBe(true);
+      });
+    });
+
+    timelineIdsWithHoverActions.forEach((timelineId) => {
+      test(`it renders hover actions (by default) when 'isDraggable' is false and timelineId is '${timelineId}'`, async () => {
+        const isDraggable = false;
+
+        const { container } = render(
+          <TestProviders>
+            <DragDropContextWrapper browserFields={mockBrowserFields}>
+              <DraggableWrapper
+                dataProvider={dataProvider}
+                isDraggable={isDraggable}
+                render={() => message}
+                timelineId={timelineId}
+              />
+            </DragDropContextWrapper>
+          </TestProviders>
+        );
+
+        fireEvent.mouseEnter(container.querySelector('[data-test-subj="withHoverActionsButton"]')!);
+
+        await waitFor(() => {
+          expect(screen.getByTestId('hover-actions-copy-button')).toBeInTheDocument();
+        });
+      });
+    });
+
+    timelineIdsNoHoverActions.forEach((timelineId) => {
+      test(`it does NOT render hover actions when 'isDraggable' is false and timelineId is '${timelineId}'`, async () => {
+        const isDraggable = false;
+
+        const { container } = render(
+          <TestProviders>
+            <DragDropContextWrapper browserFields={mockBrowserFields}>
+              <DraggableWrapper
+                dataProvider={dataProvider}
+                isDraggable={isDraggable}
+                render={() => message}
+                timelineId={timelineId}
+              />
+            </DragDropContextWrapper>
+          </TestProviders>
+        );
+
+        fireEvent.mouseEnter(container.querySelector('[data-test-subj="withHoverActionsButton"]')!);
+
+        await waitFor(() => {
+          expect(screen.queryByTestId('hover-actions-copy-button')).not.toBeInTheDocument();
+        });
       });
     });
   });
@@ -96,7 +197,12 @@ describe('DraggableWrapper', () => {
       const wrapper = mount(
         <TestProviders>
           <DragDropContextWrapper browserFields={mockBrowserFields}>
-            <DraggableWrapper dataProvider={dataProvider} render={() => message} truncate />
+            <DraggableWrapper
+              dataProvider={dataProvider}
+              isDraggable={true}
+              render={() => message}
+              truncate
+            />
           </DragDropContextWrapper>
         </TestProviders>
       );
@@ -110,7 +216,11 @@ describe('DraggableWrapper', () => {
       const wrapper = mount(
         <TestProviders>
           <DragDropContextWrapper browserFields={mockBrowserFields}>
-            <DraggableWrapper dataProvider={dataProvider} render={() => message} />
+            <DraggableWrapper
+              dataProvider={dataProvider}
+              isDraggable={true}
+              render={() => message}
+            />
           </DragDropContextWrapper>
         </TestProviders>
       );
@@ -168,5 +278,19 @@ describe('ConditionalPortal', () => {
 
       expect(getStyle(style, snapshot)).toHaveProperty('transitionDuration', '0.00000001s');
     });
+  });
+
+  describe('disableHoverActions', () => {
+    timelineIdsNoHoverActions.forEach((timelineId) =>
+      test(`it returns true when timelineId is ${timelineId}`, () => {
+        expect(disableHoverActions(timelineId)).toBe(true);
+      })
+    );
+
+    timelineIdsWithHoverActions.forEach((timelineId) =>
+      test(`it returns false when timelineId is ${timelineId}`, () => {
+        expect(disableHoverActions(timelineId)).toBe(false);
+      })
+    );
   });
 });

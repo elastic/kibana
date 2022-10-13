@@ -17,8 +17,7 @@ describe('date_range params', () => {
   beforeEach(() => {
     aggTypesDependencies = {
       ...mockAggTypesDependencies,
-      getConfig: jest.fn(),
-      isDefaultTimezone: jest.fn().mockReturnValue(false),
+      getConfig: jest.fn().mockReturnValue('kibanaTimeZone'),
     };
   });
 
@@ -59,7 +58,8 @@ describe('date_range params', () => {
       ],
       {
         typesRegistry: mockAggTypesRegistry(aggTypesDependencies),
-      }
+      },
+      jest.fn()
     );
   };
 
@@ -78,7 +78,23 @@ describe('date_range params', () => {
                 "date_range",
               ],
               "ranges": Array [
-                "[{\\"from\\":\\"now-1w/w\\",\\"to\\":\\"now\\"}]",
+                Object {
+                  "chain": Array [
+                    Object {
+                      "arguments": Object {
+                        "from": Array [
+                          "now-1w/w",
+                        ],
+                        "to": Array [
+                          "now",
+                        ],
+                      },
+                      "function": "dateRange",
+                      "type": "function",
+                    },
+                  ],
+                  "type": "expression",
+                },
               ],
               "schema": Array [
                 "buckets",
@@ -126,11 +142,6 @@ describe('date_range params', () => {
     });
 
     test('should use the Kibana time_zone if no parameter specified', () => {
-      aggTypesDependencies = {
-        ...aggTypesDependencies,
-        getConfig: () => 'kibanaTimeZone' as any,
-      };
-
       const aggConfigs = getAggConfigs(
         {
           field: 'bytes',

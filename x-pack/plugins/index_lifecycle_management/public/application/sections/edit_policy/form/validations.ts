@@ -6,6 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 
+import moment from 'moment';
 import {
   fieldValidators,
   ValidationFunc,
@@ -16,8 +17,8 @@ import {
 import { ROLLOVER_FORM_PATHS } from '../constants';
 
 import { i18nTexts } from '../i18n_texts';
-import { PolicyFromES } from '../../../../../common/types';
-import { FormInternal, MinAgePhase } from '../types';
+import { PhaseWithDownsample, PhaseWithTiming, PolicyFromES } from '../../../../../common/types';
+import { FormInternal } from '../types';
 
 const { numberGreaterThanField, containsCharsField, emptyField, startsWithField } = fieldValidators;
 
@@ -86,6 +87,9 @@ export const rolloverThresholdsValidator: ValidationFunc = ({ form, path }) => {
       case ROLLOVER_FORM_PATHS.maxPrimaryShardSize:
         errorToReturn.message = i18nTexts.editPolicy.errors.maximumPrimaryShardSizeRequiredMessage;
         break;
+      case ROLLOVER_FORM_PATHS.maxPrimaryShardDocs:
+        errorToReturn.message = i18nTexts.editPolicy.errors.maximumPrimaryShardDocsRequiredMessage;
+        break;
       default:
         errorToReturn.message = i18nTexts.editPolicy.errors.maximumSizeRequiredMessage;
     }
@@ -105,11 +109,11 @@ export const integerValidator: ValidationFunc<FormInternal, string, string> = (a
 
 export const createPolicyNameValidations = ({
   policies,
-  saveAsNewPolicy,
+  isClonedPolicy,
   originalPolicyName,
 }: {
   policies: PolicyFromES[];
-  saveAsNewPolicy: boolean;
+  isClonedPolicy: boolean;
   originalPolicyName?: string;
 }): Array<ValidationConfig<FormInternal, string, string>> => {
   return [
@@ -141,7 +145,7 @@ export const createPolicyNameValidations = ({
     {
       validator: (arg) => {
         const policyName = arg.value;
-        if (saveAsNewPolicy && policyName === originalPolicyName) {
+        if (isClonedPolicy && policyName === originalPolicyName) {
           return {
             message: i18nTexts.editPolicy.errors.policyNameMustBeDifferentErrorMessage,
           };
@@ -164,110 +168,208 @@ export const createPolicyNameValidations = ({
  * For example, the user can't define '5 days' for cold phase if the
  * warm phase is set to '10 days'.
  */
-export const minAgeGreaterThanPreviousPhase = (phase: MinAgePhase) => ({
-  formData,
-}: {
-  formData: Record<string, number>;
-}) => {
-  if (phase === 'warm') {
-    return;
-  }
+export const minAgeGreaterThanPreviousPhase =
+  (phase: PhaseWithTiming) =>
+  ({ formData }: { formData: Record<string, number> }) => {
+    if (phase === 'warm') {
+      return;
+    }
 
-  const getValueFor = (_phase: MinAgePhase) => {
-    const milli = formData[`_meta.${_phase}.minAgeToMilliSeconds`];
+    const getValueFor = (_phase: PhaseWithTiming) => {
+      const milli = formData[`_meta.${_phase}.minAgeToMilliSeconds`];
 
-    const esFormat =
-      milli >= 0
-        ? formData[`phases.${_phase}.min_age`] + formData[`_meta.${_phase}.minAgeUnit`]
-        : undefined;
+      const esFormat =
+        milli >= 0
+          ? formData[`phases.${_phase}.min_age`] + formData[`_meta.${_phase}.minAgeUnit`]
+          : undefined;
 
-    return {
-      milli,
-      esFormat,
+      return {
+        milli,
+        esFormat,
+      };
     };
+
+    const minAgeValues = {
+      warm: getValueFor('warm'),
+      cold: getValueFor('cold'),
+      frozen: getValueFor('frozen'),
+      delete: getValueFor('delete'),
+    };
+
+    const i18nErrors = {
+      greaterThanWarmPhase: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.minAgeSmallerThanWarmPhaseError',
+        {
+          defaultMessage: 'Must be greater or equal than the warm phase value ({value})',
+          values: {
+            value: minAgeValues.warm.esFormat,
+          },
+        }
+      ),
+      greaterThanColdPhase: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.minAgeSmallerThanColdPhaseError',
+        {
+          defaultMessage: 'Must be greater or equal than the cold phase value ({value})',
+          values: {
+            value: minAgeValues.cold.esFormat,
+          },
+        }
+      ),
+      greaterThanFrozenPhase: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.minAgeSmallerThanFrozenPhaseError',
+        {
+          defaultMessage: 'Must be greater or equal than the frozen phase value ({value})',
+          values: {
+            value: minAgeValues.frozen.esFormat,
+          },
+        }
+      ),
+    };
+
+    if (phase === 'cold') {
+      if (minAgeValues.warm.milli >= 0 && minAgeValues.cold.milli < minAgeValues.warm.milli) {
+        return {
+          message: i18nErrors.greaterThanWarmPhase,
+        };
+      }
+      return;
+    }
+
+    if (phase === 'frozen') {
+      if (minAgeValues.cold.milli >= 0 && minAgeValues.frozen.milli < minAgeValues.cold.milli) {
+        return {
+          message: i18nErrors.greaterThanColdPhase,
+        };
+      } else if (
+        minAgeValues.warm.milli >= 0 &&
+        minAgeValues.frozen.milli < minAgeValues.warm.milli
+      ) {
+        return {
+          message: i18nErrors.greaterThanWarmPhase,
+        };
+      }
+      return;
+    }
+
+    if (phase === 'delete') {
+      if (minAgeValues.frozen.milli >= 0 && minAgeValues.delete.milli < minAgeValues.frozen.milli) {
+        return {
+          message: i18nErrors.greaterThanFrozenPhase,
+        };
+      } else if (
+        minAgeValues.cold.milli >= 0 &&
+        minAgeValues.delete.milli < minAgeValues.cold.milli
+      ) {
+        return {
+          message: i18nErrors.greaterThanColdPhase,
+        };
+      } else if (
+        minAgeValues.warm.milli >= 0 &&
+        minAgeValues.delete.milli < minAgeValues.warm.milli
+      ) {
+        return {
+          message: i18nErrors.greaterThanWarmPhase,
+        };
+      }
+    }
   };
 
-  const minAgeValues = {
-    warm: getValueFor('warm'),
-    cold: getValueFor('cold'),
-    frozen: getValueFor('frozen'),
-    delete: getValueFor('delete'),
+export const downsampleIntervalMultipleOfPreviousOne =
+  (phase: PhaseWithDownsample) =>
+  ({ formData }: { formData: Record<string, any> }) => {
+    if (phase === 'hot') return;
+
+    const getValueFor = (_phase: PhaseWithDownsample) => {
+      const intervalSize = formData[`_meta.${_phase}.downsample.fixedIntervalSize`];
+      const intervalUnits = formData[`_meta.${_phase}.downsample.fixedIntervalUnits`];
+
+      if (!intervalSize || !intervalUnits) {
+        return null;
+      }
+
+      const milliseconds = moment.duration(intervalSize, intervalUnits).asMilliseconds();
+      const esFormat = intervalSize + intervalUnits;
+
+      return {
+        milliseconds,
+        esFormat,
+      };
+    };
+
+    const intervalValues = {
+      hot: getValueFor('hot'),
+      warm: getValueFor('warm'),
+      cold: getValueFor('cold'),
+    };
+
+    const checkIfGreaterAndMultiple = (nextInterval: number, previousInterval: number): boolean =>
+      nextInterval > previousInterval && nextInterval % previousInterval === 0;
+
+    if (phase === 'warm' && intervalValues.warm) {
+      if (intervalValues.hot) {
+        if (
+          !checkIfGreaterAndMultiple(
+            intervalValues.warm.milliseconds,
+            intervalValues.hot.milliseconds
+          )
+        ) {
+          return {
+            message: i18n.translate(
+              'xpack.indexLifecycleMgmt.editPolicy.downsamplePreviousIntervalWarmPhaseError',
+              {
+                defaultMessage:
+                  'Must be greater than and a multiple of the hot phase value ({value})',
+                values: {
+                  value: intervalValues.hot.esFormat,
+                },
+              }
+            ),
+          };
+        }
+      }
+    }
+
+    if (phase === 'cold' && intervalValues.cold) {
+      if (intervalValues.warm) {
+        if (
+          !checkIfGreaterAndMultiple(
+            intervalValues.cold.milliseconds,
+            intervalValues.warm.milliseconds
+          )
+        ) {
+          return {
+            message: i18n.translate(
+              'xpack.indexLifecycleMgmt.editPolicy.downsamplePreviousIntervalColdPhaseWarmError',
+              {
+                defaultMessage:
+                  'Must be greater than and a multiple of the warm phase value ({value})',
+                values: {
+                  value: intervalValues.warm.esFormat,
+                },
+              }
+            ),
+          };
+        }
+      } else if (intervalValues.hot) {
+        if (
+          !checkIfGreaterAndMultiple(
+            intervalValues.cold.milliseconds,
+            intervalValues.hot.milliseconds
+          )
+        ) {
+          return {
+            message: i18n.translate(
+              'xpack.indexLifecycleMgmt.editPolicy.downsamplePreviousIntervalColdPhaseHotError',
+              {
+                defaultMessage:
+                  'Must be greater than and a multiple of the hot phase value ({value})',
+                values: {
+                  value: intervalValues.hot.esFormat,
+                },
+              }
+            ),
+          };
+        }
+      }
+    }
   };
-
-  const i18nErrors = {
-    greaterThanWarmPhase: i18n.translate(
-      'xpack.indexLifecycleMgmt.editPolicy.minAgeSmallerThanWarmPhaseError',
-      {
-        defaultMessage: 'Must be greater or equal than the warm phase value ({value})',
-        values: {
-          value: minAgeValues.warm.esFormat,
-        },
-      }
-    ),
-    greaterThanColdPhase: i18n.translate(
-      'xpack.indexLifecycleMgmt.editPolicy.minAgeSmallerThanColdPhaseError',
-      {
-        defaultMessage: 'Must be greater or equal than the cold phase value ({value})',
-        values: {
-          value: minAgeValues.cold.esFormat,
-        },
-      }
-    ),
-    greaterThanFrozenPhase: i18n.translate(
-      'xpack.indexLifecycleMgmt.editPolicy.minAgeSmallerThanFrozenPhaseError',
-      {
-        defaultMessage: 'Must be greater or equal than the frozen phase value ({value})',
-        values: {
-          value: minAgeValues.frozen.esFormat,
-        },
-      }
-    ),
-  };
-
-  if (phase === 'cold') {
-    if (minAgeValues.warm.milli >= 0 && minAgeValues.cold.milli < minAgeValues.warm.milli) {
-      return {
-        message: i18nErrors.greaterThanWarmPhase,
-      };
-    }
-    return;
-  }
-
-  if (phase === 'frozen') {
-    if (minAgeValues.cold.milli >= 0 && minAgeValues.frozen.milli < minAgeValues.cold.milli) {
-      return {
-        message: i18nErrors.greaterThanColdPhase,
-      };
-    } else if (
-      minAgeValues.warm.milli >= 0 &&
-      minAgeValues.frozen.milli < minAgeValues.warm.milli
-    ) {
-      return {
-        message: i18nErrors.greaterThanWarmPhase,
-      };
-    }
-    return;
-  }
-
-  if (phase === 'delete') {
-    if (minAgeValues.frozen.milli >= 0 && minAgeValues.delete.milli < minAgeValues.frozen.milli) {
-      return {
-        message: i18nErrors.greaterThanFrozenPhase,
-      };
-    } else if (
-      minAgeValues.cold.milli >= 0 &&
-      minAgeValues.delete.milli < minAgeValues.cold.milli
-    ) {
-      return {
-        message: i18nErrors.greaterThanColdPhase,
-      };
-    } else if (
-      minAgeValues.warm.milli >= 0 &&
-      minAgeValues.delete.milli < minAgeValues.warm.milli
-    ) {
-      return {
-        message: i18nErrors.greaterThanWarmPhase,
-      };
-    }
-  }
-};

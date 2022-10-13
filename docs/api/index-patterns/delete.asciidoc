@@ -1,0 +1,43 @@
+[[index-patterns-api-delete]]
+=== Delete index pattern API
+++++
+<titleabbrev>Delete index pattern</titleabbrev>
+++++
+
+deprecated::[8.0.0,Use <<data-views-api-delete>> instead.]
+
+experimental[] Delete {kib} index patterns.
+
+WARNING: Once you delete an index pattern, _it cannot be recovered_.
+
+[[index-patterns-api-delete-request]]
+==== Request
+
+`DELETE <kibana host>:<port>/api/index_patterns/index_pattern/<id>`
+
+`DELETE <kibana host>:<port>/s/<space_id>/api/index_patterns/index_pattern/<id>`
+
+[[index-patterns-api-delete-path-params]]
+==== Path parameters
+
+`space_id`::
+  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+
+`id`::
+  (Required, string) The ID of the index pattern you want to delete.
+
+[[index-patterns-api-delete-response-codes]]
+==== Response code
+
+`200`::
+  Indicates that index pattern is deleted. Returns an empty response body. 
+
+==== Example
+
+Delete an index pattern object with the `my-pattern` ID:
+
+[source,sh]
+--------------------------------------------------
+$ curl -X DELETE api/index_patterns/index_pattern/my-pattern
+--------------------------------------------------
+// KIBANA

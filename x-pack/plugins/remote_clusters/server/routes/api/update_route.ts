@@ -8,14 +8,13 @@
 import { get } from 'lodash';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { RequestHandler } from 'src/core/server';
+import { RequestHandler } from '@kbn/core/server';
 
 import { API_BASE_PATH, SNIFF_MODE, PROXY_MODE } from '../../../common/constants';
 import { serializeCluster, deserializeCluster, Cluster, ClusterInfoEs } from '../../../common/lib';
 import { doesClusterExist } from '../../lib/does_cluster_exist';
 import { RouteDependencies } from '../../types';
 import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
-import { isEsError } from '../../shared_imports';
 
 const bodyValidation = schema.object({
   skipUnavailable: schema.boolean(),
@@ -37,18 +36,23 @@ type RouteParams = TypeOf<typeof paramsValidation>;
 type RouteBody = TypeOf<typeof bodyValidation>;
 
 export const register = (deps: RouteDependencies): void => {
+  const {
+    router,
+    lib: { handleEsError },
+  } = deps;
+
   const updateHandler: RequestHandler<RouteParams, unknown, RouteBody> = async (
     ctx,
     request,
     response
   ) => {
     try {
-      const callAsCurrentUser = ctx.core.elasticsearch.legacy.client.callAsCurrentUser;
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
 
       const { name } = request.params;
 
       // Check if cluster does exist.
-      const existingCluster = await doesClusterExist(callAsCurrentUser, name);
+      const existingCluster = await doesClusterExist(clusterClient, name);
       if (!existingCluster) {
         return response.notFound({
           body: {
@@ -65,7 +69,7 @@ export const register = (deps: RouteDependencies): void => {
       // Update cluster as new settings
       const updateClusterPayload = serializeCluster({ ...request.body, name } as Cluster);
 
-      const updateClusterResponse = await callAsCurrentUser('cluster.putSettings', {
+      const updateClusterResponse = await clusterClient.asCurrentUser.cluster.putSettings({
         body: updateClusterPayload,
       });
 
@@ -97,14 +101,11 @@ export const register = (deps: RouteDependencies): void => {
         },
       });
     } catch (error) {
-      if (isEsError(error)) {
-        return response.customError({ statusCode: error.statusCode, body: error });
-      }
-      throw error;
+      return handleEsError({ error, response });
     }
   };
 
-  deps.router.put(
+  router.put(
     {
       path: `${API_BASE_PATH}/{name}`,
       validate: {

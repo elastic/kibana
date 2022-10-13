@@ -5,18 +5,22 @@
  * 2.0.
  */
 
-import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { Expression, Props } from '../components/param_details_form/expression';
-import { AlertTypeModel, ValidationResult } from '../../../../triggers_actions_ui/public';
+import React from 'react';
+import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
+import type { RuleTypeModel, ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
 import {
-  ALERT_LARGE_SHARD_SIZE,
-  ALERT_DETAILS,
-  ALERT_REQUIRES_APP_CONTEXT,
+  RULE_DETAILS,
+  RULE_LARGE_SHARD_SIZE,
+  RULE_REQUIRES_APP_CONTEXT,
 } from '../../../common/constants';
-import { AlertTypeParams } from '../../../../alerting/common';
+import type { MonitoringConfig } from '../../types';
+import {
+  LazyExpression,
+  LazyExpressionProps,
+} from '../components/param_details_form/lazy_expression';
 
-interface ValidateOptions extends AlertTypeParams {
+interface ValidateOptions extends RuleTypeParams {
   indexPattern: string;
 }
 
@@ -36,19 +40,25 @@ const validate = (inputValues: ValidateOptions): ValidationResult => {
   return validationResult;
 };
 
-export function createLargeShardSizeAlertType(): AlertTypeModel<ValidateOptions> {
+export function createLargeShardSizeAlertType(
+  config: MonitoringConfig
+): RuleTypeModel<ValidateOptions> {
   return {
-    id: ALERT_LARGE_SHARD_SIZE,
-    description: ALERT_DETAILS[ALERT_LARGE_SHARD_SIZE].description,
+    id: RULE_LARGE_SHARD_SIZE,
+    description: RULE_DETAILS[RULE_LARGE_SHARD_SIZE].description,
     iconClass: 'bell',
     documentationUrl(docLinks) {
       return `${docLinks.links.monitoring.alertsKibanaLargeShardSize}`;
     },
-    alertParamsExpression: (props: Props) => (
-      <Expression {...props} paramDetails={ALERT_DETAILS[ALERT_LARGE_SHARD_SIZE].paramDetails} />
+    ruleParamsExpression: (props: LazyExpressionProps) => (
+      <LazyExpression
+        {...props}
+        config={config}
+        paramDetails={RULE_DETAILS[RULE_LARGE_SHARD_SIZE].paramDetails}
+      />
     ),
     validate,
     defaultActionMessage: '{{context.internalFullMessage}}',
-    requiresAppContext: ALERT_REQUIRES_APP_CONTEXT,
+    requiresAppContext: RULE_REQUIRES_APP_CONTEXT,
   };
 }

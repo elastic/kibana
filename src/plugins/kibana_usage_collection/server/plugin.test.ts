@@ -10,14 +10,13 @@ import {
   coreMock,
   savedObjectsRepositoryMock,
   uiSettingsServiceMock,
-} from '../../../core/server/mocks';
+} from '@kbn/core/server/mocks';
 import {
   CollectorOptions,
   createUsageCollectionSetupMock,
-} from '../../usage_collection/server/mocks';
-import { cloudDetailsMock } from './mocks';
-
-import { plugin } from './';
+} from '@kbn/usage-collection-plugin/server/mocks';
+import { cloudDetailsMock, registerEbtCountersMock } from './plugin.test.mocks';
+import { plugin } from '.';
 
 describe('kibana_usage_collection', () => {
   const pluginInstance = plugin(coreMock.createPluginInitializerContext({}));
@@ -42,6 +41,11 @@ describe('kibana_usage_collection', () => {
     const coreSetup = coreMock.createSetup();
 
     expect(pluginInstance.setup(coreSetup, { usageCollection })).toBe(undefined);
+
+    expect(coreSetup.coreUsageData.registerUsageCounter).toHaveBeenCalled();
+
+    expect(registerEbtCountersMock).toHaveBeenCalledTimes(1);
+    expect(registerEbtCountersMock).toHaveBeenCalledWith(coreSetup.analytics, usageCollection);
 
     await expect(
       Promise.all(
@@ -68,6 +72,10 @@ describe('kibana_usage_collection', () => {
         Object {
           "isReady": true,
           "type": "kibana",
+        },
+        Object {
+          "isReady": true,
+          "type": "saved_objects_counts",
         },
         Object {
           "isReady": false,
@@ -100,6 +108,10 @@ describe('kibana_usage_collection', () => {
         Object {
           "isReady": true,
           "type": "localization",
+        },
+        Object {
+          "isReady": false,
+          "type": "event_loop_delays",
         },
       ]
     `);

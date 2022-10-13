@@ -7,27 +7,28 @@
 
 import uuid from 'uuid';
 import React from 'react';
-import { OutPortal, PortalNode } from 'react-reverse-portal';
+import type { HtmlPortalNode } from 'react-reverse-portal';
+import { OutPortal } from 'react-reverse-portal';
 import minimatch from 'minimatch';
-import { IndexPatternMapping } from './types';
-import { getLayerList } from './map_config';
-import { MAP_SAVED_OBJECT_TYPE } from '../../../../../maps/public';
+import type { Filter, Query } from '@kbn/es-query';
+import { MAP_SAVED_OBJECT_TYPE } from '@kbn/maps-plugin/public';
 import type {
   RenderTooltipContentParams,
   MapEmbeddable,
   MapEmbeddableInput,
-} from '../../../../../../plugins/maps/public';
-import * as i18n from './translations';
-import { Query, Filter } from '../../../../../../../src/plugins/data/public';
-import {
+} from '@kbn/maps-plugin/public';
+import type {
   EmbeddableStart,
-  isErrorEmbeddable,
   EmbeddableOutput,
-  ViewMode,
   ErrorEmbeddable,
-} from '../../../../../../../src/plugins/embeddable/public';
-import { IndexPatternSavedObject } from '../../../common/hooks/types';
-import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
+} from '@kbn/embeddable-plugin/public';
+import { isErrorEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
+import type { IndexPatternMapping } from './types';
+import { getLayerList } from './map_config';
+import * as i18n from './translations';
+
+import type { IndexPatternSavedObject } from '../../../common/hooks/types';
+import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 
 /**
  * Creates MapEmbeddable with provided initial configuration
@@ -50,7 +51,7 @@ export const createEmbeddable = async (
   startDate: GlobalTimeArgs['from'],
   endDate: GlobalTimeArgs['to'],
   setQuery: GlobalTimeArgs['setQuery'],
-  portalNode: PortalNode,
+  portalNode: HtmlPortalNode,
   embeddableApi: EmbeddableStart
 ): Promise<MapEmbeddable | ErrorEmbeddable> => {
   const factory = embeddableApi.getEmbeddableFactory<
@@ -70,7 +71,6 @@ export const createEmbeddable = async (
     filters,
     hidePanelTitles: true,
     query,
-    refreshConfig: { value: 0, pause: true },
     timeRange: {
       from: new Date(startDate).toISOString(),
       to: new Date(endDate).toISOString(),

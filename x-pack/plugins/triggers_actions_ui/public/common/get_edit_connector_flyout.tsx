@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import React, { lazy, Suspense } from 'react';
-import type { ConnectorEditFlyoutProps } from '../application/sections/action_connector_form/connector_edit_flyout';
+import React from 'react';
+import { ConnectorProvider } from '../application/context/connector_context';
+import { EditConnectorFlyout } from '../application/sections/action_connector_form';
+import { EditConnectorFlyoutProps } from '../application/sections/action_connector_form/edit_connector_flyout';
+import { ConnectorServices } from '../types';
 
-export const getEditConnectorFlyoutLazy = (props: ConnectorEditFlyoutProps) => {
-  const ConnectorEditFlyoutLazy = lazy(
-    () => import('../application/sections/action_connector_form/connector_edit_flyout')
-  );
+export const getEditConnectorFlyoutLazy = (
+  props: EditConnectorFlyoutProps & { connectorServices: ConnectorServices }
+) => {
   return (
-    <Suspense fallback={null}>
-      <ConnectorEditFlyoutLazy {...props} />
-    </Suspense>
+    <ConnectorProvider value={{ services: props.connectorServices }}>
+      <EditConnectorFlyout {...props} />
+    </ConnectorProvider>
   );
 };

@@ -14,30 +14,30 @@ import {
   SectionLinks,
   SectionSubtitle,
   SectionTitle,
-} from '../../../../../../../observability/public';
+} from '@kbn/observability-plugin/public';
 import { isJavaAgentName } from '../../../../../../common/agent_name';
 import { SERVICE_NODE_NAME } from '../../../../../../common/elasticsearch_fieldnames';
 import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
-import { useUrlParams } from '../../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS } from '../../../../../hooks/use_fetcher';
-import { px } from '../../../../../style/variables';
-import { pushNewItemToKueryBar } from '../../../../shared/KueryBar/utils';
-import { useMetricOverviewHref } from '../../../../shared/Links/apm/MetricOverviewLink';
-import { useServiceNodeMetricOverviewHref } from '../../../../shared/Links/apm/ServiceNodeMetricOverviewLink';
+import { pushNewItemToKueryBar } from '../../../../shared/kuery_bar/utils';
+import { useMetricOverviewHref } from '../../../../shared/links/apm/metric_overview_link';
+import { useServiceNodeMetricOverviewHref } from '../../../../shared/links/apm/service_node_metric_overview_link';
 import { useInstanceDetailsFetcher } from '../use_instance_details_fetcher';
 import { getMenuSections } from './menu_sections';
 
 interface Props {
   serviceName: string;
   serviceNodeName: string;
+  kuery: string;
   onClose: () => void;
 }
 
-const POPOVER_WIDTH = px(305);
+const POPOVER_WIDTH = '305px';
 
 export function InstanceActionsMenu({
   serviceName,
   serviceNodeName,
+  kuery,
   onClose,
 }: Props) {
   const { core } = useApmPluginContext();
@@ -51,9 +51,6 @@ export function InstanceActionsMenu({
   });
   const metricOverviewHref = useMetricOverviewHref(serviceName);
   const history = useHistory();
-  const {
-    urlParams: { kuery },
-  } = useUrlParams();
 
   if (
     status === FETCH_STATUS.LOADING ||

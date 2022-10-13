@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import type { ApiResponse } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/elasticsearch';
 
 import { licenseMock } from '../common/licensing/index.mock';
 import type { MockAuthenticatedUserProps } from '../common/model/authenticated_user.mock';
 import { mockAuthenticatedUser } from '../common/model/authenticated_user.mock';
-import { auditServiceMock } from './audit/index.mock';
+import { auditServiceMock } from './audit/mocks';
 import { authenticationServiceMock } from './authentication/authentication_service.mock';
 import { authorizationMock } from './authorization/index.mock';
+import { userProfileServiceMock } from './user_profile/user_profile_service.mock';
 
 function createSetupMock() {
   const mockAuthz = authorizationMock.create();
@@ -23,16 +24,22 @@ function createSetupMock() {
       actions: mockAuthz.actions,
       checkPrivilegesWithRequest: mockAuthz.checkPrivilegesWithRequest,
       checkPrivilegesDynamicallyWithRequest: mockAuthz.checkPrivilegesDynamicallyWithRequest,
+      checkSavedObjectsPrivilegesWithRequest: mockAuthz.checkSavedObjectsPrivilegesWithRequest,
       mode: mockAuthz.mode,
     },
     registerSpacesService: jest.fn(),
     license: licenseMock.create(),
+    privilegeDeprecationsService: {
+      getKibanaRolesByFeatureId: jest.fn(),
+    },
+    setIsElasticCloudDeployment: jest.fn(),
   };
 }
 
 function createStartMock() {
   const mockAuthz = authorizationMock.create();
   const mockAuthc = authenticationServiceMock.createStart();
+  const mockUserProfiles = userProfileServiceMock.createStart();
   return {
     authc: {
       apiKeys: mockAuthc.apiKeys,
@@ -42,17 +49,25 @@ function createStartMock() {
       actions: mockAuthz.actions,
       checkPrivilegesWithRequest: mockAuthz.checkPrivilegesWithRequest,
       checkPrivilegesDynamicallyWithRequest: mockAuthz.checkPrivilegesDynamicallyWithRequest,
+      checkSavedObjectsPrivilegesWithRequest: mockAuthz.checkSavedObjectsPrivilegesWithRequest,
       mode: mockAuthz.mode,
+    },
+    userProfiles: {
+      getCurrent: mockUserProfiles.getCurrent,
+      suggest: mockUserProfiles.suggest,
+      bulkGet: mockUserProfiles.bulkGet,
     },
   };
 }
 
 function createApiResponseMock<TResponse, TContext>(
-  apiResponse: Pick<ApiResponse<TResponse, TContext>, 'body'> &
-    Partial<Omit<ApiResponse<TResponse, TContext>, 'body'>>
-): ApiResponse<TResponse, TContext> {
+  apiResponse: Pick<TransportResult<TResponse, TContext>, 'body'> &
+    Partial<Omit<TransportResult<TResponse, TContext>, 'body'>>
+): TransportResult<TResponse, TContext> {
   return {
+    // @ts-expect-error null is not supported
     statusCode: null,
+    // @ts-expect-error null is not supported
     headers: null,
     warnings: null,
     meta: {} as any,

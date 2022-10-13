@@ -19,14 +19,14 @@ import { LegacyRequest } from '../../types';
 import { ElasticsearchResponse } from '../../../common/types/es';
 
 interface Beat {
-  uuid: string | undefined;
-  name: string | undefined;
-  type: string | undefined;
-  output: string | undefined;
+  uuid?: string;
+  name?: string;
+  type?: string;
+  output?: string;
   total_events_rate: number;
   bytes_sent_rate: number;
-  memory: number | undefined;
-  version: string | undefined;
+  memory?: number;
+  version?: string;
   errors: any;
 }
 
@@ -63,9 +63,9 @@ export function handleResponse(response: ElasticsearchResponse, start: number, e
 
     //  add the beat
     const rateOptions = {
-      hitTimestamp: stats?.timestamp ?? hit._source['@timestamp'],
+      hitTimestamp: stats?.timestamp ?? hit._source['@timestamp']!,
       earliestHitTimestamp:
-        earliestStats?.timestamp ?? hit.inner_hits?.earliest.hits?.hits[0]._source['@timestamp'],
+        earliestStats?.timestamp ?? hit.inner_hits?.earliest.hits?.hits[0]._source['@timestamp']!,
       timeWindowMin: start,
       timeWindowMax: end,
     };
@@ -96,8 +96,8 @@ export function handleResponse(response: ElasticsearchResponse, start: number, e
       name: stats?.beat?.name,
       type: upperFirst(stats?.beat?.type),
       output: upperFirst(statsMetrics?.libbeat?.output?.type),
-      total_events_rate: totalEventsRate,
-      bytes_sent_rate: bytesSentRate,
+      total_events_rate: totalEventsRate!,
+      bytes_sent_rate: bytesSentRate!,
       errors,
       memory:
         hit._source.beats_stats?.metrics?.beat?.memstats?.memory_alloc ??
@@ -114,15 +114,15 @@ export function handleResponse(response: ElasticsearchResponse, start: number, e
 export async function getBeats(req: LegacyRequest, beatsIndexPattern: string, clusterUuid: string) {
   checkParam(beatsIndexPattern, 'beatsIndexPattern in getBeats');
 
-  const config = req.server.config();
+  const config = req.server.config;
   const start = moment.utc(req.payload.timeRange.min).valueOf();
   const end = moment.utc(req.payload.timeRange.max).valueOf();
 
   const params = {
     index: beatsIndexPattern,
-    size: config.get('monitoring.ui.max_bucket_size'), // FIXME
-    ignoreUnavailable: true,
-    filterPath: [
+    size: config.ui.max_bucket_size,
+    ignore_unavailable: true,
+    filter_path: [
       // only filter path can filter for inner_hits
       'hits.hits._source.beats_stats.beat.uuid',
       'hits.hits._source.beat.stats.beat.uuid',

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { first } from 'rxjs/operators';
-import { CoreSetup, Plugin, PluginInitializerContext } from 'src/core/public';
+import { firstValueFrom } from 'rxjs';
+import { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
 
-import { TelemetryPluginStart } from '../../../../src/plugins/telemetry/public';
-import { ManagementSetup } from '../../../../src/plugins/management/public';
-import { LicensingPluginSetup } from '../../../plugins/licensing/public';
+import { TelemetryPluginStart } from '@kbn/telemetry-plugin/public';
+import { ManagementSetup } from '@kbn/management-plugin/public';
+import { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
 import { PLUGIN } from '../common/constants';
 import { ClientConfigType } from './types';
 import { AppDependencies } from './application';
@@ -31,7 +31,8 @@ export interface LicenseManagementUIPluginSetup {
 export type LicenseManagementUIPluginStart = void;
 
 export class LicenseManagementUIPlugin
-  implements Plugin<LicenseManagementUIPluginSetup, LicenseManagementUIPluginStart, any, any> {
+  implements Plugin<LicenseManagementUIPluginSetup, LicenseManagementUIPluginStart, any, any>
+{
   private breadcrumbService = new BreadcrumbService();
 
   constructor(private readonly initializerContext: PluginInitializerContext) {}
@@ -56,9 +57,9 @@ export class LicenseManagementUIPlugin
       id: PLUGIN.id,
       title: PLUGIN.title,
       order: 0,
-      mount: async ({ element, setBreadcrumbs, history }) => {
+      mount: async ({ element, setBreadcrumbs, history, theme$ }) => {
         const [coreStart, { telemetry }] = await getStartServices();
-        const initialLicense = await plugins.licensing.license$.pipe(first()).toPromise();
+        const initialLicense = await firstValueFrom(plugins.licensing.license$);
 
         // Setup documentation links
         const {
@@ -89,6 +90,7 @@ export class LicenseManagementUIPlugin
             initialLicense,
           },
           docLinks: appDocLinks,
+          theme$,
         };
 
         const { renderApp } = await import('./application');

@@ -1,15 +1,27 @@
 ---
+####
+#### This document is auto-generated and is meant to be viewed inside our experimental, new docs system.
+#### Reach out in #docs-engineering for more info.
+####
 id: kibEventLogPluginApi
-slug: /kibana-dev-docs/eventLogPluginApi
-title: eventLog
+slug: /kibana-dev-docs/api/eventLog
+title: "eventLog"
 image: https://source.unsplash.com/400x175/?github
-summary: API docs for the eventLog plugin
-date: 2020-11-16
+description: API docs for the eventLog plugin
+date: 2022-10-13
 tags: ['contributor', 'dev', 'apidocs', 'kibana', 'eventLog']
-warning: This document is auto-generated and is meant to be viewed inside our experimental, new docs system. Reach out in #docs-engineering for more info.
 ---
+import eventLogObj from './event_log.devdocs.json';
 
-import eventLogObj from './event_log.json';
+
+
+Contact [Response Ops](https://github.com/orgs/elastic/teams/response-ops) for questions regarding this plugin.
+
+**Code health stats**
+
+| Public API count  | Any count | Items lacking comments | Missing exports |
+|-------------------|-----------|------------------------|-----------------|
+| 106 | 0 | 106 | 10 |
 
 ## Server
 
@@ -32,6 +44,9 @@ import eventLogObj from './event_log.json';
 <DocDefinitionList data={eventLogObj.server.misc}/>
 
 ## Common
+
+### Functions
+<DocDefinitionList data={eventLogObj.common.functions}/>
 
 ### Consts, variables and types
 <DocDefinitionList data={eventLogObj.common.misc}/>

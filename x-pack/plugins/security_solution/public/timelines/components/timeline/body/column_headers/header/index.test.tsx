@@ -10,14 +10,15 @@ import React from 'react';
 
 import { timelineActions } from '../../../../../store/timeline';
 import { TestProviders } from '../../../../../../common/mock';
-import { ColumnHeaderType } from '../../../../../store/timeline/model';
-import { Sort } from '../../sort';
+import type { ColumnHeaderType } from '../../../../../store/timeline/model';
+import type { Sort } from '../../sort';
 import { CloseButton } from '../actions';
 import { defaultHeaders } from '../default_headers';
 
 import { HeaderComponent } from '.';
 import { getNewSortDirectionOnClick, getNextSortDirection, getSortDirection } from './helpers';
 import { Direction } from '../../../../../../../common/search_strategy';
+import { useDeepEqualSelector } from '../../../../../../common/hooks/use_selector';
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -30,6 +31,11 @@ jest.mock('react-redux', () => {
   };
 });
 
+jest.mock('../../../../../../common/hooks/use_selector', () => ({
+  useShallowEqualSelector: jest.fn(),
+  useDeepEqualSelector: jest.fn(),
+}));
+
 const filteredColumnHeader: ColumnHeaderType = 'text-filter';
 
 describe('Header', () => {
@@ -37,11 +43,16 @@ describe('Header', () => {
   const sort: Sort[] = [
     {
       columnId: columnHeader.id,
-      columnType: columnHeader.type ?? 'number',
+      columnType: columnHeader.type ?? '',
+      esTypes: columnHeader.esTypes ?? [],
       sortDirection: Direction.desc,
     },
   ];
-  const timelineId = 'fakeId';
+  const timelineId = 'test';
+
+  beforeEach(() => {
+    (useDeepEqualSelector as jest.Mock).mockReturnValue({ isLoading: false });
+  });
 
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
@@ -173,6 +184,7 @@ describe('Header', () => {
             {
               columnId: columnHeader.id,
               columnType: columnHeader.type ?? 'number',
+              esTypes: columnHeader.esTypes ?? [],
               sortDirection: Direction.asc, // (because the previous state was Direction.desc)
             },
           ],
@@ -241,6 +253,7 @@ describe('Header', () => {
         {
           columnId: 'differentSocks',
           columnType: columnHeader.type ?? 'number',
+          esTypes: columnHeader.esTypes ?? [],
           sortDirection: Direction.desc,
         },
       ];
@@ -254,6 +267,7 @@ describe('Header', () => {
       const sortDescending: Sort = {
         columnId: columnHeader.id,
         columnType: columnHeader.type ?? 'number',
+        esTypes: columnHeader.esTypes ?? [],
         sortDirection: Direction.desc,
       };
 
@@ -264,6 +278,7 @@ describe('Header', () => {
       const sortAscending: Sort = {
         columnId: columnHeader.id,
         columnType: columnHeader.type ?? 'number',
+        esTypes: columnHeader.esTypes ?? [],
         sortDirection: Direction.asc,
       };
 
@@ -274,6 +289,7 @@ describe('Header', () => {
       const sortNone: Sort = {
         columnId: columnHeader.id,
         columnType: columnHeader.type ?? 'number',
+        esTypes: columnHeader.esTypes ?? [],
         sortDirection: 'none',
       };
 
@@ -287,6 +303,7 @@ describe('Header', () => {
         {
           columnId: columnHeader.id,
           columnType: columnHeader.type ?? 'number',
+          esTypes: columnHeader.esTypes ?? [],
           sortDirection: Direction.desc,
         },
       ];
@@ -304,6 +321,7 @@ describe('Header', () => {
         {
           columnId: 'someOtherColumn',
           columnType: columnHeader.type ?? 'number',
+          esTypes: columnHeader.esTypes ?? [],
           sortDirection: 'none',
         },
       ];

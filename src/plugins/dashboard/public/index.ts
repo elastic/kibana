@@ -6,30 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from '../../../core/public';
+import { PluginInitializerContext } from '@kbn/core/public';
 import { DashboardPlugin } from './plugin';
 
-export {
-  DashboardContainer,
-  DashboardContainerInput,
-  DashboardContainerFactoryDefinition,
-  DASHBOARD_CONTAINER_TYPE,
-} from './application';
+export { DASHBOARD_CONTAINER_TYPE } from './dashboard_constants';
 export { DashboardConstants, createDashboardEditUrl } from './dashboard_constants';
 
+export type { DashboardSetup, DashboardStart, DashboardFeatureFlagConfig } from './plugin';
 export {
-  DashboardSetup,
-  DashboardStart,
-  DashboardUrlGenerator,
-  DashboardFeatureFlagConfig,
-} from './plugin';
-export {
-  DASHBOARD_APP_URL_GENERATOR,
-  createDashboardUrlGenerator,
-  DashboardUrlGeneratorState,
-} from './url_generator';
-export { DashboardSavedObject } from './saved_dashboards';
-export { SavedDashboardPanel } from './types';
+  type DashboardAppLocator,
+  type DashboardAppLocatorParams,
+  cleanEmptyKeys,
+} from './locator';
+
+export type { SavedDashboardPanel, DashboardContainerInput } from './types';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DashboardPlugin(initializerContext);

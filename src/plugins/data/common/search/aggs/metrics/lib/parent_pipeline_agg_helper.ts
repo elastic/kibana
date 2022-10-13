@@ -15,6 +15,7 @@ import { parentPipelineAggWriter } from './parent_pipeline_agg_writer';
 
 const metricAggFilter = [
   '!top_hits',
+  '!top_metrics',
   '!percentiles',
   '!percentile_ranks',
   '!median',
@@ -50,9 +51,8 @@ export const parentPipelineAggHelper = {
           metricAgg.id = termsAgg.id + '-metric';
           return metricAgg;
         },
-        modifyAggConfigOnSearchRequestStart: forwardModifyAggConfigOnSearchRequestStart(
-          'customMetric'
-        ),
+        modifyAggConfigOnSearchRequestStart:
+          forwardModifyAggConfigOnSearchRequestStart('customMetric'),
         write: noop,
       },
       {

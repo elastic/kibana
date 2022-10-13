@@ -16,7 +16,8 @@ export const progressGauge: ElementFactory = () => ({
   width: 200,
   height: 200,
   icon: 'visGoal',
-  expression: `filters
+  expression: `kibana
+| selectFilter
 | demodata
 | math "mean(percent_uptime)"
 | progress shape="gauge" label={formatnumber 0%} font={font size=24 family="${openSans.value}" color="#000000" align=center}

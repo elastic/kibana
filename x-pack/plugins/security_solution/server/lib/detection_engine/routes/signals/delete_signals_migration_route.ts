@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { transformError } from '@kbn/securitysolution-es-utils';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { SetupPlugins } from '../../../../plugin';
+import type { SetupPlugins } from '../../../../plugin';
 import { DETECTION_ENGINE_SIGNALS_MIGRATION_URL } from '../../../../../common/constants';
 import { deleteSignalsMigrationSchema } from '../../../../../common/detection_engine/schemas/request/delete_signals_migration_schema';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
-import { buildSiemResponse, transformError } from '../utils';
+import { buildSiemResponse } from '../utils';
+
 import { signalsMigrationService } from '../../migrations/migration_service';
 import { getMigrationSavedObjectsById } from '../../migrations/get_migration_saved_objects_by_id';
 
@@ -33,9 +35,12 @@ export const deleteSignalsMigrationRoute = (
       const { migration_ids: migrationIds } = request.body;
 
       try {
-        const esClient = context.core.elasticsearch.client.asCurrentUser;
-        const soClient = context.core.savedObjects.client;
-        const appClient = context.securitySolution?.getAppClient();
+        const core = await context.core;
+        const securitySolution = await context.securitySolution;
+
+        const esClient = core.elasticsearch.client.asCurrentUser;
+        const soClient = core.savedObjects.client;
+        const appClient = securitySolution?.getAppClient();
         if (!appClient) {
           return siemResponse.error({ statusCode: 404 });
         }

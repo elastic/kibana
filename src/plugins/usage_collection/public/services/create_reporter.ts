@@ -7,7 +7,7 @@
  */
 
 import { Reporter, Storage } from '@kbn/analytics';
-import { HttpSetup } from 'kibana/public';
+import { HttpSetup } from '@kbn/core/public';
 
 interface AnalyicsReporterConfig {
   localStorage: Storage;
@@ -22,7 +22,8 @@ export function createReporter(config: AnalyicsReporterConfig): Reporter {
     debug,
     storage: localStorage,
     async http(report) {
-      const response = await fetch.post('/api/ui_counters/_report', {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const response = await fetch.post<any>('/api/ui_counters/_report', {
         body: JSON.stringify({ report }),
         asSystemRequest: true,
       });

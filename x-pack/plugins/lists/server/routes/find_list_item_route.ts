@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import type { ListsPluginRouter } from '../types';
-import { LIST_ITEM_URL } from '../../common/constants';
-import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
-import { validate } from '../../common/shared_imports';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
+import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   FindListItemSchemaDecoded,
   findListItemSchema,
   foundListItemSchema,
-} from '../../common/schemas';
+} from '@kbn/securitysolution-io-ts-list-types';
+import { LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
+
+import type { ListsPluginRouter } from '../types';
 import { decodeCursor } from '../services/utils';
 
-import { getListClient } from './utils';
+import { buildRouteValidation, buildSiemResponse, getListClient } from './utils';
 
 export const findListItemRoute = (router: ListsPluginRouter): void => {
   router.get(
@@ -34,7 +35,7 @@ export const findListItemRoute = (router: ListsPluginRouter): void => {
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        const lists = getListClient(context);
+        const lists = await getListClient(context);
         const {
           cursor,
           filter: filterOrUndefined,
@@ -51,7 +52,7 @@ export const findListItemRoute = (router: ListsPluginRouter): void => {
         const {
           isValid,
           errorMessage,
-          cursor: [currentIndexPosition, searchAfter],
+          cursor: [currentIndexPosition, searchAfter = []],
         } = decodeCursor({
           cursor,
           page,
@@ -71,6 +72,7 @@ export const findListItemRoute = (router: ListsPluginRouter): void => {
             listId,
             page,
             perPage,
+            runtimeMappings: undefined,
             searchAfter,
             sortField,
             sortOrder,

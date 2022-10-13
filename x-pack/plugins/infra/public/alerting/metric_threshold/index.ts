@@ -7,21 +7,20 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AlertTypeModel } from '../../../../triggers_actions_ui/public/types';
-import { validateMetricThreshold } from './components/validation';
-import { AlertTypeParams } from '../../../../alerting/common';
+import { RuleTypeParams } from '@kbn/alerting-plugin/common';
+import { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
 import {
   MetricExpressionParams,
   METRIC_THRESHOLD_ALERT_TYPE_ID,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../server/lib/alerting/metric_threshold/types';
+} from '../../../common/alerting/metrics';
+import { validateMetricThreshold } from './components/validation';
+import { formatReason } from './rule_data_formatters';
 
-interface MetricThresholdAlertTypeParams extends AlertTypeParams {
+interface MetricThresholdRuleTypeParams extends RuleTypeParams {
   criteria: MetricExpressionParams[];
 }
 
-export function createMetricThresholdAlertType(): AlertTypeModel<MetricThresholdAlertTypeParams> {
+export function createMetricThresholdRuleType(): ObservabilityRuleTypeModel<MetricThresholdRuleTypeParams> {
   return {
     id: METRIC_THRESHOLD_ALERT_TYPE_ID,
     description: i18n.translate('xpack.infra.metrics.alertFlyout.alertDescription', {
@@ -29,9 +28,9 @@ export function createMetricThresholdAlertType(): AlertTypeModel<MetricThreshold
     }),
     iconClass: 'bell',
     documentationUrl(docLinks) {
-      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/observability/${docLinks.DOC_LINK_VERSION}/metrics-threshold-alert.html`;
+      return `${docLinks.links.observability.metricsThreshold}`;
     },
-    alertParamsExpression: React.lazy(() => import('./components/expression')),
+    ruleParamsExpression: React.lazy(() => import('./components/expression')),
     validate: validateMetricThreshold,
     defaultActionMessage: i18n.translate(
       'xpack.infra.metrics.alerting.threshold.defaultActionMessage',
@@ -44,5 +43,6 @@ Reason:
       }
     ),
     requiresAppContext: false,
+    format: formatReason,
   };
 }

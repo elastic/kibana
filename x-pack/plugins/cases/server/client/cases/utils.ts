@@ -6,24 +6,30 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { flow } from 'lodash';
+import { flow, uniqBy, isEmpty } from 'lodash';
+import { ActionsClient } from '@kbn/actions-plugin/server';
+import { UserProfile } from '@kbn/security-plugin/common';
+import { isPushedUserAction } from '../../../common/utils/user_actions';
 import {
   ActionConnector,
   CaseFullExternalService,
   CaseResponse,
   CaseUserActionsResponse,
-  CommentAttributes,
-  CommentRequestAlertType,
-  CommentRequestUserType,
   CommentResponse,
   CommentResponseAlertsType,
   CommentType,
   ConnectorMappingsAttributes,
-  ConnectorTypes,
-} from '../../../common';
-import { ActionsClient } from '../../../../actions/server';
-import { externalServiceFormatters, FormatterConnectorTypes } from '../../connectors';
-import { CasesClientGetAlertsResponse } from '../../client/alerts/types';
+  CommentAttributes,
+  CommentRequestUserType,
+  CommentRequestAlertType,
+  CommentRequestActionsType,
+  ActionTypes,
+  CaseStatuses,
+  User,
+  CaseAttributes,
+  CaseAssignees,
+} from '../../../common/api';
+import { CasesClientGetAlertsResponse } from '../alerts/types';
 import {
   BasicParams,
   EntityInformation,
@@ -38,7 +44,8 @@ import {
   TransformerArgs,
   TransformFieldsArgs,
 } from './types';
-import { getAlertIds } from '../../routes/api/utils';
+import { getAlertIds } from '../utils';
+import { CasesConnectorsMap } from '../../connectors';
 
 interface CreateIncidentArgs {
   actionsClient: ActionsClient;
@@ -47,50 +54,110 @@ interface CreateIncidentArgs {
   connector: ActionConnector;
   mappings: ConnectorMappingsAttributes[];
   alerts: CasesClientGetAlertsResponse;
+  casesConnectors: CasesConnectorsMap;
+  userProfiles?: Map<string, UserProfile>;
 }
+
+export const dedupAssignees = (assignees?: CaseAssignees): CaseAssignees | undefined => {
+  if (assignees == null) {
+    return;
+  }
+
+  return uniqBy(assignees, 'uid');
+};
 
 export const getLatestPushInfo = (
   connectorId: string,
   userActions: CaseUserActionsResponse
 ): { index: number; pushedInfo: CaseFullExternalService } | null => {
   for (const [index, action] of [...userActions].reverse().entries()) {
-    if (action.action === 'push-to-service' && action.new_value)
+    if (isPushedUserAction(action) && connectorId === action.payload.externalService.connector_id) {
       try {
-        const pushedInfo = JSON.parse(action.new_value);
-        if (pushedInfo.connector_id === connectorId) {
-          // We returned the index of the element in the userActions array.
-          // As we traverse the userActions in reverse we need to calculate the index of a normal traversal
-          return { index: userActions.length - index - 1, pushedInfo };
-        }
+        const pushedInfo = action.payload.externalService;
+        // We returned the index of the element in the userActions array.
+        // As we traverse the userActions in reverse we need to calculate the index of a normal traversal
+        return {
+          index: userActions.length - index - 1,
+          pushedInfo,
+        };
       } catch (e) {
-        // Silence JSON parse errors
+        // ignore parse failures and check the next user action
       }
+    }
   }
 
   return null;
 };
 
-const isConnectorSupported = (connectorId: string): connectorId is FormatterConnectorTypes =>
-  Object.values(ConnectorTypes).includes(connectorId as ConnectorTypes);
-
 const getCommentContent = (comment: CommentResponse): string => {
   if (comment.type === CommentType.user) {
     return comment.comment;
-  } else if (comment.type === CommentType.alert || comment.type === CommentType.generatedAlert) {
+  } else if (comment.type === CommentType.alert) {
     const ids = getAlertIds(comment);
     return `Alert with ids ${ids.join(', ')} added to case`;
+  } else if (
+    comment.type === CommentType.actions &&
+    (comment.actions.type === 'isolate' || comment.actions.type === 'unisolate')
+  ) {
+    const firstHostname =
+      comment.actions.targets?.length > 0 ? comment.actions.targets[0].hostname : 'unknown';
+    const totalHosts = comment.actions.targets.length;
+    const actionText = comment.actions.type === 'isolate' ? 'Isolated' : 'Released';
+    const additionalHostsText = totalHosts - 1 > 0 ? `and ${totalHosts - 1} more ` : ``;
+
+    return `${actionText} host ${firstHostname} ${additionalHostsText}with comment: ${comment.comment}`;
   }
 
   return '';
 };
 
-const countAlerts = (comments: CaseResponse['comments']): number =>
-  comments?.reduce<number>((total, comment) => {
-    if (comment.type === CommentType.alert || comment.type === CommentType.generatedAlert) {
-      return total + (Array.isArray(comment.alertId) ? comment.alertId.length : 1);
-    }
-    return total;
-  }, 0) ?? 0;
+interface CountAlertsInfo {
+  totalComments: number;
+  pushed: number;
+  totalAlerts: number;
+}
+
+const getAlertsInfo = (
+  comments: CaseResponse['comments']
+): { totalAlerts: number; hasUnpushedAlertComments: boolean } => {
+  const countingInfo = { totalComments: 0, pushed: 0, totalAlerts: 0 };
+
+  const res =
+    comments?.reduce<CountAlertsInfo>(({ totalComments, pushed, totalAlerts }, comment) => {
+      if (comment.type === CommentType.alert) {
+        return {
+          totalComments: totalComments + 1,
+          pushed: comment.pushed_at != null ? pushed + 1 : pushed,
+          totalAlerts: totalAlerts + (Array.isArray(comment.alertId) ? comment.alertId.length : 1),
+        };
+      }
+      return { totalComments, pushed, totalAlerts };
+    }, countingInfo) ?? countingInfo;
+
+  return {
+    totalAlerts: res.totalAlerts,
+    hasUnpushedAlertComments: res.totalComments > res.pushed,
+  };
+};
+
+const addAlertMessage = (
+  caseId: string,
+  caseComments: CaseResponse['comments'],
+  comments: ExternalServiceComment[]
+): ExternalServiceComment[] => {
+  const { totalAlerts, hasUnpushedAlertComments } = getAlertsInfo(caseComments);
+
+  const newComments = [...comments];
+
+  if (hasUnpushedAlertComments) {
+    newComments.push({
+      comment: `Elastic Alerts attached to the case: ${totalAlerts}`,
+      commentId: `${caseId}-total-alerts`,
+    });
+  }
+
+  return newComments;
+};
 
 export const createIncident = async ({
   actionsClient,
@@ -99,6 +166,8 @@ export const createIncident = async ({
   connector,
   mappings,
   alerts,
+  casesConnectors,
+  userProfiles,
 }: CreateIncidentArgs): Promise<MapIncident> => {
   const {
     comments: caseComments,
@@ -110,31 +179,26 @@ export const createIncident = async ({
     updated_by: updatedBy,
   } = theCase;
 
-  if (!isConnectorSupported(connector.actionTypeId)) {
-    throw new Error('Invalid external service');
-  }
-
   const params = { title, description, createdAt, createdBy, updatedAt, updatedBy };
   const latestPushInfo = getLatestPushInfo(connector.id, userActions);
   const externalId = latestPushInfo?.pushedInfo?.external_id ?? null;
   const defaultPipes = externalId ? ['informationUpdated'] : ['informationCreated'];
   let currentIncident: ExternalServiceParams | undefined;
 
-  const externalServiceFields = externalServiceFormatters[connector.actionTypeId].format(
-    theCase,
-    alerts
-  );
+  const externalServiceFields =
+    casesConnectors.get(connector.actionTypeId)?.format(theCase, alerts) ?? {};
+
   let incident: Partial<PushToServiceApiParams['incident']> = { ...externalServiceFields };
 
   if (externalId) {
     try {
-      currentIncident = ((await actionsClient.execute({
+      currentIncident = (await actionsClient.execute({
         actionId: connector.id,
         params: {
           subAction: 'getIncident',
           subActionParams: { externalId },
         },
-      })) as unknown) as ExternalServiceParams | undefined;
+      })) as unknown as ExternalServiceParams | undefined;
     } catch (ex) {
       throw new Error(
         `Retrieving Incident by id ${externalId} from ${connector.actionTypeId} failed with exception: ${ex}`
@@ -152,6 +216,7 @@ export const createIncident = async ({
     params,
     fields,
     currentIncident,
+    userProfiles,
   });
 
   incident = { ...incident, ...transformedFields, externalId };
@@ -159,49 +224,71 @@ export const createIncident = async ({
   const commentsIdsToBeUpdated = new Set(
     userActions
       .slice(latestPushInfo?.index ?? 0)
-      .filter(
-        (action) => Array.isArray(action.action_field) && action.action_field[0] === 'comment'
-      )
+      .filter((action) => action.type === ActionTypes.comment)
       .map((action) => action.comment_id)
   );
 
   const commentsToBeUpdated = caseComments?.filter(
     (comment) =>
       // We push only user's comments
-      comment.type === CommentType.user && commentsIdsToBeUpdated.has(comment.id)
+      (comment.type === CommentType.user || comment.type === CommentType.actions) &&
+      commentsIdsToBeUpdated.has(comment.id)
   );
-
-  const totalAlerts = countAlerts(caseComments);
 
   let comments: ExternalServiceComment[] = [];
 
   if (commentsToBeUpdated && Array.isArray(commentsToBeUpdated) && commentsToBeUpdated.length > 0) {
     const commentsMapping = mappings.find((m) => m.source === 'comments');
     if (commentsMapping?.action_type !== 'nothing') {
-      comments = transformComments(commentsToBeUpdated, ['informationAdded']);
+      comments = transformComments(commentsToBeUpdated, ['informationAdded'], userProfiles);
     }
   }
 
-  if (totalAlerts > 0) {
-    comments.push({
-      comment: `Elastic Alerts attached to the case: ${totalAlerts}`,
-      commentId: `${theCase.id}-total-alerts`,
-    });
-  }
+  comments = addAlertMessage(theCase.id, caseComments, comments);
 
   return { incident, comments };
 };
 
-export const getEntity = (entity: EntityInformation): string =>
-  (entity.updatedBy != null
-    ? entity.updatedBy.full_name
-      ? entity.updatedBy.full_name
-      : entity.updatedBy.username
-    : entity.createdBy != null
-    ? entity.createdBy.full_name
-      ? entity.createdBy.full_name
-      : entity.createdBy.username
-    : '') ?? '';
+export const getEntity = (
+  entity: EntityInformation,
+  userProfiles?: Map<string, UserProfile>
+): string => {
+  return (
+    getDisplayName(entity.updatedBy, userProfiles) ??
+    getDisplayName(entity.createdBy, userProfiles) ??
+    ''
+  );
+};
+
+const getDisplayName = (
+  user: User | null | undefined,
+  userProfiles?: Map<string, UserProfile>
+): string | undefined => {
+  if (user == null) {
+    return;
+  }
+
+  if (user.profile_uid != null) {
+    const updatedByProfile = userProfiles?.get(user.profile_uid);
+
+    if (updatedByProfile != null) {
+      return (
+        validOrUndefined(updatedByProfile.user.full_name) ??
+        validOrUndefined(updatedByProfile.user.username)
+      );
+    }
+  }
+
+  return validOrUndefined(user.full_name) ?? validOrUndefined(user.username) ?? '';
+};
+
+const validOrUndefined = (value: string | undefined | null): string | undefined => {
+  if (value == null || isEmpty(value)) {
+    return;
+  }
+
+  return value;
+};
 
 export const FIELD_INFORMATION = (
   mode: string,
@@ -259,6 +346,7 @@ export const prepareFieldsForTransformation = ({
   mappings.reduce(
     (acc: PipedField[], mapping) =>
       mapping != null &&
+      mapping.target != null &&
       mapping.target !== 'not_mapped' &&
       mapping.action_type !== 'nothing' &&
       mapping.source !== 'comments'
@@ -289,6 +377,7 @@ export const transformFields = <
   params,
   fields,
   currentIncident,
+  userProfiles,
 }: TransformFieldsArgs<P, S>): R => {
   return fields.reduce((prev, cur) => {
     const transform = flow(...cur.pipes.map((p) => transformers[p]));
@@ -297,7 +386,7 @@ export const transformFields = <
       [cur.key]: transform({
         value: cur.value,
         date: params.updatedAt ?? params.createdAt,
-        user: getEntity(params),
+        user: getEntity(params, userProfiles),
         previousValue: currentIncident ? currentIncident[cur.key] : '',
       }).value,
     };
@@ -306,18 +395,22 @@ export const transformFields = <
 
 export const transformComments = (
   comments: CaseResponse['comments'] = [],
-  pipes: string[]
+  pipes: string[],
+  userProfiles?: Map<string, UserProfile>
 ): ExternalServiceComment[] =>
   comments.map((c) => ({
     comment: flow(...pipes.map((p) => transformers[p]))({
       value: getCommentContent(c),
       date: c.updated_at ?? c.created_at,
-      user: getEntity({
-        createdAt: c.created_at,
-        createdBy: c.created_by,
-        updatedAt: c.updated_at,
-        updatedBy: c.updated_by,
-      }),
+      user: getEntity(
+        {
+          createdAt: c.created_at,
+          createdBy: c.created_by,
+          updatedAt: c.updated_at,
+          updatedBy: c.updated_by,
+        },
+        userProfiles
+      ),
     }).value,
     commentId: c.id,
   }));
@@ -328,25 +421,103 @@ export const isCommentAlertType = (
 
 export const getCommentContextFromAttributes = (
   attributes: CommentAttributes
-): CommentRequestUserType | CommentRequestAlertType => {
+): CommentRequestUserType | CommentRequestAlertType | CommentRequestActionsType => {
+  const owner = attributes.owner;
   switch (attributes.type) {
     case CommentType.user:
       return {
         type: CommentType.user,
         comment: attributes.comment,
+        owner,
       };
-    case CommentType.generatedAlert:
     case CommentType.alert:
       return {
         type: attributes.type,
         alertId: attributes.alertId,
         index: attributes.index,
         rule: attributes.rule,
+        owner,
+      };
+    case CommentType.actions:
+      return {
+        type: attributes.type,
+        comment: attributes.comment,
+        actions: {
+          targets: attributes.actions.targets,
+          type: attributes.actions.type,
+        },
+        owner,
       };
     default:
       return {
         type: CommentType.user,
         comment: '',
+        owner,
       };
+  }
+};
+
+export const getClosedInfoForUpdate = ({
+  user,
+  status,
+  closedDate,
+}: {
+  closedDate: string;
+  user: User;
+  status?: CaseStatuses;
+}): Pick<CaseAttributes, 'closed_at' | 'closed_by'> | undefined => {
+  if (status && status === CaseStatuses.closed) {
+    return {
+      closed_at: closedDate,
+      closed_by: user,
+    };
+  }
+
+  if (status && (status === CaseStatuses.open || status === CaseStatuses['in-progress'])) {
+    return {
+      closed_at: null,
+      closed_by: null,
+    };
+  }
+};
+
+export const getDurationInSeconds = ({
+  closedAt,
+  createdAt,
+}: {
+  closedAt: string;
+  createdAt: CaseAttributes['created_at'];
+}) => {
+  try {
+    if (createdAt != null && closedAt != null) {
+      const createdAtMillis = new Date(createdAt).getTime();
+      const closedAtMillis = new Date(closedAt).getTime();
+
+      if (!isNaN(createdAtMillis) && !isNaN(closedAtMillis) && closedAtMillis >= createdAtMillis) {
+        return { duration: Math.floor((closedAtMillis - createdAtMillis) / 1000) };
+      }
+    }
+  } catch (err) {
+    // Silence date errors
+  }
+};
+
+export const getDurationForUpdate = ({
+  status,
+  closedAt,
+  createdAt,
+}: {
+  closedAt: string;
+  createdAt: CaseAttributes['created_at'];
+  status?: CaseStatuses;
+}): Pick<CaseAttributes, 'duration'> | undefined => {
+  if (status && status === CaseStatuses.closed) {
+    return getDurationInSeconds({ createdAt, closedAt });
+  }
+
+  if (status && (status === CaseStatuses.open || status === CaseStatuses['in-progress'])) {
+    return {
+      duration: null,
+    };
   }
 };

@@ -5,32 +5,33 @@
  * 2.0.
  */
 
+import { IScopedClusterClient } from '@kbn/core/server';
 import { serializeTemplate, serializeLegacyTemplate } from '../../../../common/lib';
 import { TemplateDeserialized, LegacyTemplateSerialized } from '../../../../common';
-import { CallAsCurrentUser } from '../../../types';
 
 export const doesTemplateExist = async ({
   name,
-  callAsCurrentUser,
+  client,
   isLegacy,
 }: {
   name: string;
-  callAsCurrentUser: CallAsCurrentUser;
+  client: IScopedClusterClient;
   isLegacy?: boolean;
 }) => {
   if (isLegacy) {
-    return await callAsCurrentUser('indices.existsTemplate', { name });
+    return await client.asCurrentUser.indices.existsTemplate({ name });
   }
-  return await callAsCurrentUser('dataManagement.existsTemplate', { name });
+
+  return await client.asCurrentUser.indices.existsIndexTemplate({ name });
 };
 
 export const saveTemplate = async ({
   template,
-  callAsCurrentUser,
+  client,
   isLegacy,
 }: {
   template: TemplateDeserialized;
-  callAsCurrentUser: CallAsCurrentUser;
+  client: IScopedClusterClient;
   isLegacy?: boolean;
 }) => {
   const serializedTemplate = isLegacy
@@ -48,7 +49,7 @@ export const saveTemplate = async ({
       aliases,
     } = serializedTemplate as LegacyTemplateSerialized;
 
-    return await callAsCurrentUser('indices.putTemplate', {
+    return await client.asCurrentUser.indices.putTemplate({
       name: template.name,
       order,
       body: {
@@ -61,8 +62,9 @@ export const saveTemplate = async ({
     });
   }
 
-  return await callAsCurrentUser('dataManagement.saveComposableIndexTemplate', {
+  return await client.asCurrentUser.indices.putIndexTemplate({
     name: template.name,
+    // @ts-expect-error LegacyTemplateSerialized | TemplateSerialized conflicts with @elastic/elasticsearch IndicesPutIndexTemplateRequest
     body: serializedTemplate,
   });
 };

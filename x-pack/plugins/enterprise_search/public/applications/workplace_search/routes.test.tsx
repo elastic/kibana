@@ -16,13 +16,13 @@ import {
   getGroupPath,
   getGroupSourcePrioritizationPath,
   getReindexJobRoute,
-  getRoleMappingPath,
   getSourcesPath,
   GROUPS_PATH,
   SOURCES_PATH,
-  PERSONAL_SOURCES_PATH,
-  ROLE_MAPPINGS_PATH,
+  PRIVATE_SOURCES_PATH,
   SOURCE_DETAILS_PATH,
+  getAddPath,
+  getEditPath,
 } from './routes';
 
 const TestComponent = ({ id, isOrg }: { id: string; isOrg?: boolean }) => {
@@ -42,19 +42,13 @@ describe('getContentSourcePath', () => {
     const wrapper = shallow(<TestComponent id="123" />);
     const path = wrapper.find(EuiLink).prop('href');
 
-    expect(path).toEqual(`${PERSONAL_SOURCES_PATH}/123`);
+    expect(path).toEqual(`${PRIVATE_SOURCES_PATH}/123`);
   });
 });
 
 describe('getGroupPath', () => {
   it('should format path', () => {
     expect(getGroupPath('123')).toEqual(`${GROUPS_PATH}/123`);
-  });
-});
-
-describe('getRoleMappingPath', () => {
-  it('should format path', () => {
-    expect(getRoleMappingPath('123')).toEqual(`${ROLE_MAPPINGS_PATH}/123`);
   });
 });
 
@@ -84,13 +78,42 @@ describe('getReindexJobRoute', () => {
 
   it('should format org path', () => {
     expect(getReindexJobRoute(SOURCE_ID, REINDEX_ID, true)).toEqual(
-      `/sources/${SOURCE_ID}/schema_errors/${REINDEX_ID}`
+      `/sources/${SOURCE_ID}/schemas/${REINDEX_ID}`
     );
   });
 
   it('should format user path', () => {
     expect(getReindexJobRoute(SOURCE_ID, REINDEX_ID, false)).toEqual(
-      `/p/sources/${SOURCE_ID}/schema_errors/${REINDEX_ID}`
+      `/p/sources/${SOURCE_ID}/schemas/${REINDEX_ID}`
     );
+  });
+});
+
+describe('getAddPath', () => {
+  it('should handle a service type', () => {
+    expect(getAddPath('share_point')).toEqual('/sources/add/share_point');
+  });
+
+  it('should should handle an external service type with no base service type', () => {
+    expect(getAddPath('external')).toEqual('/sources/add/external');
+  });
+
+  it('should should handle an external service type with a base service type', () => {
+    expect(getAddPath('external', 'share_point')).toEqual('/sources/add/share_point/external');
+  });
+  it('should should handle a custom service type with no base service type', () => {
+    expect(getAddPath('external')).toEqual('/sources/add/external');
+  });
+
+  it('should should handle a custom service type with a base service type', () => {
+    expect(getAddPath('custom', 'share_point_server')).toEqual(
+      '/sources/add/share_point_server/custom'
+    );
+  });
+});
+
+describe('getEditPath', () => {
+  it('should handle a service type', () => {
+    expect(getEditPath('share_point')).toEqual('/settings/connectors/share_point/edit');
   });
 });

@@ -6,15 +6,16 @@
  */
 
 import './index.scss';
+import { PluginInitializerContext } from '@kbn/core/public';
 import { IndexMgmtUIPlugin } from './plugin';
 
 /** @public */
-export const plugin = () => {
-  return new IndexMgmtUIPlugin();
+export const plugin = (ctx: PluginInitializerContext) => {
+  return new IndexMgmtUIPlugin(ctx);
 };
 
-export { IndexManagementPluginSetup } from './types';
+export type { IndexManagementPluginSetup } from './types';
 
-export { getIndexListUri } from './application/services/routing';
+export { getIndexListUri, getTemplateDetailsLink } from './application/services/routing';
 
 export type { Index } from '../common';

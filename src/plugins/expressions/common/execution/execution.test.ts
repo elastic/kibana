@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { of } from 'rxjs';
-import { first, scan } from 'rxjs/operators';
+import { lastValueFrom, of } from 'rxjs';
+import { scan } from 'rxjs/operators';
 import { TestScheduler } from 'rxjs/testing';
 import { Execution } from './execution';
 import { parseExpression, ExpressionAstExpression } from '../ast';
 import { createUnitTestExecutor } from '../test_helpers';
-import { ExpressionFunctionDefinition } from '../../common';
+import { ExpressionFunctionDefinition } from '..';
 import { ExecutionContract } from './execution_contract';
 
 beforeAll(() => {
   if (typeof performance === 'undefined') {
-    (global as any).performance = { now: Date.now };
+    global.performance = { now: Date.now } as typeof performance;
   }
 });
 
@@ -41,11 +41,11 @@ const createExecution = (
 const run = async (
   expression: string = 'foo bar=123',
   context?: Record<string, unknown>,
-  input: any = null
+  input: unknown = null
 ) => {
   const execution = createExecution(expression, context);
   execution.start(input);
-  return await execution.result.pipe(first()).toPromise();
+  return await lastValueFrom(execution.result);
 };
 
 let testScheduler: TestScheduler;
@@ -84,7 +84,7 @@ describe('Execution', () => {
     /* eslint-enable no-console */
 
     execution.start(123);
-    const result = await execution.result.pipe(first()).toPromise();
+    const { result } = await lastValueFrom(execution.result);
 
     expect(result).toBe(123);
     expect(spy).toHaveBeenCalledTimes(1);
@@ -102,7 +102,7 @@ describe('Execution', () => {
       value: -1,
     });
 
-    const result = await execution.result.pipe(first()).toPromise();
+    const { result } = await lastValueFrom(execution.result);
 
     expect(result).toEqual({
       type: 'num',
@@ -117,7 +117,7 @@ describe('Execution', () => {
       value: 0,
     });
 
-    const result = await execution.result.pipe(first()).toPromise();
+    const { result } = await lastValueFrom(execution.result);
 
     expect(result).toEqual({
       type: 'num',
@@ -131,7 +131,7 @@ describe('Execution', () => {
 
       // Below 1 is cast to { type: 'num', value: 1 }.
       execution.start(1);
-      const result = await execution.result.pipe(first()).toPromise();
+      const { result } = await lastValueFrom(execution.result);
 
       expect(result).toEqual({
         type: 'num',
@@ -143,7 +143,7 @@ describe('Execution', () => {
       const execution = createExecution('add val=1');
 
       execution.start(Promise.resolve(1));
-      const result = await execution.result.pipe(first()).toPromise();
+      const { result } = await lastValueFrom(execution.result);
 
       expect(result).toEqual({
         type: 'num',
@@ -155,7 +155,7 @@ describe('Execution', () => {
       const execution = createExecution('add val=1');
 
       execution.start(of(1));
-      const result = await execution.result.pipe(first()).toPromise();
+      const { result } = await lastValueFrom(execution.result);
 
       expect(result).toEqual({
         type: 'num',
@@ -167,14 +167,14 @@ describe('Execution', () => {
       const execution = createExecution('add val=1');
 
       testScheduler.run(({ cold, expectObservable }) => {
-        const input = cold('   -a--b-c-', { a: 1, b: 2, c: 3 });
+        const input = cold('   -a--b-c|', { a: 1, b: 2, c: 3 });
         const subscription = ' ---^---!';
-        const expected = '     ---ab-c-';
+        const expected = '     ---ab-c|';
 
         expectObservable(execution.start(input), subscription).toBe(expected, {
-          a: { type: 'num', value: 2 },
-          b: { type: 'num', value: 3 },
-          c: { type: 'num', value: 4 },
+          a: { partial: false, result: { type: 'num', value: 2 } },
+          b: { partial: false, result: { type: 'num', value: 3 } },
+          c: { partial: false, result: { type: 'num', value: 4 } },
         });
       });
     });
@@ -187,21 +187,21 @@ describe('Execution', () => {
         const expected = '  -a-#';
 
         expectObservable(execution.start(input)).toBe(expected, {
-          a: { type: 'num', value: 2 },
+          a: { partial: false, result: { type: 'num', value: 2 } },
         });
       });
     });
 
-    test('does not complete when input completes', () => {
+    test('completes when input completes', () => {
       const execution = createExecution('add val=1');
 
       testScheduler.run(({ cold, expectObservable }) => {
         const input = cold('-a-b|', { a: 1, b: 2 });
-        const expected = '  -a-b-';
+        const expected = '  -a-b|';
 
         expectObservable(execution.start(input)).toBe(expected, {
-          a: { type: 'num', value: 2 },
-          b: { type: 'num', value: 3 },
+          a: expect.objectContaining({ result: { type: 'num', value: 2 } }),
+          b: expect.objectContaining({ result: { type: 'num', value: 3 } }),
         });
       });
     });
@@ -216,9 +216,9 @@ describe('Execution', () => {
         const input = items.pipe(scan((result, value) => [...result, value], new Array<number>()));
 
         expectObservable(execution.start(input), subscription).toBe(expected, {
-          a: { type: 'num', value: 1 },
-          b: { type: 'num', value: 3 },
-          c: { type: 'num', value: 6 },
+          a: { partial: false, result: { type: 'num', value: 1 } },
+          b: { partial: false, result: { type: 'num', value: 3 } },
+          c: { partial: false, result: { type: 'num', value: 6 } },
         });
       });
     });
@@ -262,64 +262,81 @@ describe('Execution', () => {
 
   describe('execution context', () => {
     test('context.variables is an object', async () => {
-      const { result } = (await run('introspectContext key="variables"')) as any;
-      expect(typeof result).toBe('object');
+      const { result } = await run('introspectContext key="variables"');
+
+      expect(result).toHaveProperty('result', expect.any(Object));
     });
 
     test('context.types is an object', async () => {
-      const { result } = (await run('introspectContext key="types"')) as any;
-      expect(typeof result).toBe('object');
+      const { result } = await run('introspectContext key="types"');
+
+      expect(result).toHaveProperty('result', expect.any(Object));
     });
 
     test('context.abortSignal is an object', async () => {
-      const { result } = (await run('introspectContext key="abortSignal"')) as any;
-      expect(typeof result).toBe('object');
+      const { result } = await run('introspectContext key="abortSignal"');
+
+      expect(result).toHaveProperty('result', expect.any(Object));
     });
 
     test('context.inspectorAdapters is an object', async () => {
-      const { result } = (await run('introspectContext key="inspectorAdapters"')) as any;
-      expect(typeof result).toBe('object');
+      const { result } = await run('introspectContext key="inspectorAdapters"');
+
+      expect(result).toHaveProperty('result', expect.any(Object));
     });
 
     test('context.getKibanaRequest is a function if provided', async () => {
-      const { result } = (await run('introspectContext key="getKibanaRequest"', {
+      const { result } = await run('introspectContext key="getKibanaRequest"', {
         kibanaRequest: {},
-      })) as any;
-      expect(typeof result).toBe('function');
+      });
+
+      expect(result).toHaveProperty('result', expect.any(Function));
     });
 
     test('context.getKibanaRequest is undefined if not provided', async () => {
-      const { result } = (await run('introspectContext key="getKibanaRequest"')) as any;
-      expect(typeof result).toBe('undefined');
+      const { result } = await run('introspectContext key="getKibanaRequest"');
+
+      expect(result).toHaveProperty('result', undefined);
     });
 
     test('unknown context key is undefined', async () => {
-      const { result } = (await run('introspectContext key="foo"')) as any;
-      expect(typeof result).toBe('undefined');
+      const { result } = await run('introspectContext key="foo"');
+
+      expect(result).toHaveProperty('result', undefined);
     });
 
     test('can set context variables', async () => {
       const variables = { foo: 'bar' };
-      const result = await run('var name="foo"', { variables });
+      const { result } = await run('var name="foo"', { variables });
+      expect(result).toBe('bar');
+    });
+
+    test('can access variables set from the parent expression', async () => {
+      const { result } = await run(
+        'var_set name="a" value="bar" | var_set name="b" value={var name="a"} | var name="b"'
+      );
       expect(result).toBe('bar');
     });
   });
 
   describe('inspector adapters', () => {
     test('by default, "tables" and "requests" inspector adapters are available', async () => {
-      const { result } = (await run('introspectContext key="inspectorAdapters"')) as any;
-      expect(result).toMatchObject({
-        tables: expect.any(Object),
-        requests: expect.any(Object),
-      });
+      const { result } = await run('introspectContext key="inspectorAdapters"');
+      expect(result).toHaveProperty(
+        'result',
+        expect.objectContaining({
+          tables: expect.any(Object),
+          requests: expect.any(Object),
+        })
+      );
     });
 
     test('can set custom inspector adapters', async () => {
       const inspectorAdapters = {};
-      const { result } = (await run('introspectContext key="inspectorAdapters"', {
+      const { result } = await run('introspectContext key="inspectorAdapters"', {
         inspectorAdapters,
-      })) as any;
-      expect(result).toBe(inspectorAdapters);
+      });
+      expect(result).toHaveProperty('result', inspectorAdapters);
     });
 
     test('can access custom inspector adapters on Execution object', async () => {
@@ -329,14 +346,21 @@ describe('Execution', () => {
       });
       expect(execution.inspectorAdapters).toBe(inspectorAdapters);
     });
+
+    test('it should reset the request adapter only on startup', async () => {
+      const inspectorAdapters = { requests: { reset: jest.fn() } };
+      await run('add val={add 5 | access "value"}', {
+        inspectorAdapters,
+      });
+      expect(inspectorAdapters.requests.reset).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('expression abortion', () => {
     test('context has abortSignal object', async () => {
-      const { result } = (await run('introspectContext key="abortSignal"')) as any;
+      const { result } = await run('introspectContext key="abortSignal"');
 
-      expect(typeof result).toBe('object');
-      expect((result as AbortSignal).aborted).toBe(false);
+      expect(result).toHaveProperty('result.aborted', false);
     });
   });
 
@@ -348,7 +372,7 @@ describe('Execution', () => {
         value: 0,
       });
 
-      const result = await execution.result.pipe(first()).toPromise();
+      const { result } = await lastValueFrom(execution.result);
 
       expect(result).toEqual({
         type: 'num',
@@ -357,26 +381,33 @@ describe('Execution', () => {
     });
 
     test('can execute async functions', async () => {
-      const res = await run('sleep 10 | sleep 10');
-      expect(res).toBe(null);
+      const { result } = await run('sleep 10 | sleep 10');
+      expect(result).toBe(null);
     });
 
     test('result is undefined until execution completes', async () => {
+      jest.useFakeTimers();
       const execution = createExecution('sleep 10');
       expect(execution.state.get().result).toBe(undefined);
       execution.start(null).subscribe(jest.fn());
       expect(execution.state.get().result).toBe(undefined);
-      await new Promise((r) => setTimeout(r, 1));
+
+      jest.advanceTimersByTime(1);
+      await new Promise(process.nextTick);
       expect(execution.state.get().result).toBe(undefined);
-      await new Promise((r) => setTimeout(r, 11));
-      expect(execution.state.get().result).toBe(null);
+
+      jest.advanceTimersByTime(10);
+      await new Promise(process.nextTick);
+      expect(execution.state.get().result).toHaveProperty('result', null);
+
+      jest.useRealTimers();
     });
 
     test('handles functions returning observables', () => {
       testScheduler.run(({ cold, expectObservable }) => {
         const arg = cold('     -a-b-c|', { a: 1, b: 2, c: 3 });
-        const expected = '     -a-b-c-';
-        const observable: ExpressionFunctionDefinition<'observable', any, {}, any> = {
+        const expected = '     -a-b-c|';
+        const observable: ExpressionFunctionDefinition<'observable', unknown, {}, unknown> = {
           name: 'observable',
           args: {},
           help: '',
@@ -387,14 +418,18 @@ describe('Execution', () => {
 
         const result = executor.run('observable', null, {});
 
-        expectObservable(result).toBe(expected, { a: 1, b: 2, c: 3 });
+        expectObservable(result).toBe(expected, {
+          a: { result: 1, partial: true },
+          b: { result: 2, partial: true },
+          c: { result: 3, partial: false },
+        });
       });
     });
   });
 
   describe('when function throws', () => {
     test('error is reported in output object', async () => {
-      const result = await run('error "foobar"');
+      const { result } = await run('error "foobar"');
 
       expect(result).toMatchObject({
         type: 'error',
@@ -402,7 +437,7 @@ describe('Execution', () => {
     });
 
     test('error message is prefixed with function name', async () => {
-      const result = await run('error "foobar"');
+      const { result } = await run('error "foobar"');
 
       expect(result).toMatchObject({
         error: {
@@ -412,7 +447,7 @@ describe('Execution', () => {
     });
 
     test('returns error of the first function that throws', async () => {
-      const result = await run('error "foo" | error "bar"');
+      const { result } = await run('error "foo" | error "bar"');
 
       expect(result).toMatchObject({
         error: {
@@ -425,19 +460,22 @@ describe('Execution', () => {
       const execution = await createExecution('error "foo"');
       execution.start(null);
 
-      const result = await execution.result.pipe(first()).toPromise();
+      const { result } = await lastValueFrom(execution.result);
 
       expect(result).toMatchObject({
         type: 'error',
       });
       expect(execution.state.get().state).toBe('result');
-      expect(execution.state.get().result).toMatchObject({
-        type: 'error',
-      });
+      expect(execution.state.get().result).toHaveProperty(
+        'result',
+        expect.objectContaining({
+          type: 'error',
+        })
+      );
     });
 
     test('does not execute remaining functions in pipeline', async () => {
-      const spy: ExpressionFunctionDefinition<'spy', any, {}, any> = {
+      const spy: ExpressionFunctionDefinition<'spy', unknown, {}, unknown> = {
         name: 'spy',
         args: {},
         help: '',
@@ -446,9 +484,66 @@ describe('Execution', () => {
       const executor = createUnitTestExecutor();
       executor.registerFunction(spy);
 
-      await executor.run('error "..." | spy', null).pipe(first()).toPromise();
+      await executor.run('error "..." | spy', null).toPromise();
 
       expect(spy.fn).toHaveBeenCalledTimes(0);
+    });
+
+    test('continues execution when error state is gone', async () => {
+      testScheduler.run(({ cold, expectObservable, flush }) => {
+        const a = 1;
+        const b = 2;
+        const c = 3;
+        const observable$ = cold('abc|', { a, b, c });
+        const flakyFn = jest
+          .fn()
+          .mockImplementationOnce((value) => value)
+          .mockImplementationOnce(() => {
+            throw new Error('Some error.');
+          })
+          .mockImplementationOnce((value) => value);
+        const spyFn = jest.fn((value) => value);
+
+        const executor = createUnitTestExecutor();
+        executor.registerFunction({
+          name: 'observable',
+          args: {},
+          help: '',
+          fn: () => observable$,
+        });
+        executor.registerFunction({
+          name: 'flaky',
+          args: {},
+          help: '',
+          fn: (value) => flakyFn(value),
+        });
+        executor.registerFunction({
+          name: 'spy',
+          args: {},
+          help: '',
+          fn: (value) => spyFn(value),
+        });
+
+        const result = executor.run('observable | flaky | spy', null, {});
+
+        expectObservable(result).toBe('abc|', {
+          a: { partial: true, result: a },
+          b: {
+            partial: true,
+            result: {
+              type: 'error',
+              error: expect.objectContaining({ message: '[flaky] > Some error.' }),
+            },
+          },
+          c: { partial: false, result: c },
+        });
+
+        flush();
+
+        expect(spyFn).toHaveBeenCalledTimes(2);
+        expect(spyFn).toHaveBeenNthCalledWith(1, a);
+        expect(spyFn).toHaveBeenNthCalledWith(2, c);
+      });
     });
   });
 
@@ -476,21 +571,21 @@ describe('Execution', () => {
     test('execution state is "result" when execution successfully completes', async () => {
       const execution = createExecution('sleep 1');
       execution.start(null);
-      await execution.result.pipe(first()).toPromise();
+      await execution.result.toPromise();
       expect(execution.state.get().state).toBe('result');
     });
 
     test('execution state is "result" when execution successfully completes - 2', async () => {
       const execution = createExecution('var foo');
       execution.start(null);
-      await execution.result.pipe(first()).toPromise();
+      await execution.result.toPromise();
       expect(execution.state.get().state).toBe('result');
     });
   });
 
   describe('sub-expressions', () => {
     test('executes sub-expressions', async () => {
-      const result = await run('add val={add 5 | access "value"}', {}, null);
+      const { result } = await run('add val={add 5 | access "value"}', {}, null);
 
       expect(result).toMatchObject({
         type: 'num',
@@ -499,7 +594,7 @@ describe('Execution', () => {
     });
 
     test('can use global variables', async () => {
-      const result = await run(
+      const { result } = await run(
         'add val={var foo}',
         {
           variables: {
@@ -516,7 +611,7 @@ describe('Execution', () => {
     });
 
     test('can modify global variables', async () => {
-      const result = await run(
+      const { result } = await run(
         'add val={var_set name=foo value=66 | var bar} | var foo',
         {
           variables: {
@@ -540,18 +635,20 @@ describe('Execution', () => {
       const executor = createUnitTestExecutor();
       executor.registerFunction(observable);
 
-      expect(
-        executor.run('add val={observable}', 1, {}).pipe(first()).toPromise()
-      ).resolves.toEqual({
-        type: 'num',
-        value: 2,
-      });
+      expect(executor.run('add val={observable}', 1, {}).toPromise()).resolves.toEqual(
+        expect.objectContaining({
+          result: {
+            type: 'num',
+            value: 2,
+          },
+        })
+      );
     });
 
     test('supports observables in arguments emitting multiple values', () => {
       testScheduler.run(({ cold, expectObservable }) => {
-        const arg = cold('-a-b-c-', { a: 1, b: 2, c: 3 });
-        const expected = '-a-b-c-';
+        const arg = cold('-a-b-c|', { a: 1, b: 2, c: 3 });
+        const expected = '-a-b-c|';
         const observable = {
           name: 'observable',
           args: {},
@@ -564,18 +661,18 @@ describe('Execution', () => {
         const result = executor.run('add val={observable}', 1, {});
 
         expectObservable(result).toBe(expected, {
-          a: { type: 'num', value: 2 },
-          b: { type: 'num', value: 3 },
-          c: { type: 'num', value: 4 },
+          a: { partial: true, result: { type: 'num', value: 2 } },
+          b: { partial: true, result: { type: 'num', value: 3 } },
+          c: { partial: false, result: { type: 'num', value: 4 } },
         });
       });
     });
 
     test('combines multiple observables in arguments', () => {
       testScheduler.run(({ cold, expectObservable }) => {
-        const arg1 = cold('--ab-c-', { a: 0, b: 2, c: 4 });
-        const arg2 = cold('-a--bc-', { a: 1, b: 3, c: 5 });
-        const expected = ' --abc(de)-';
+        const arg1 = cold('--ab-c---|', { a: 0, b: 2, c: 4 });
+        const arg2 = cold('-a--bc---|', { a: 1, b: 3, c: 5 });
+        const expected = ' --abc(de)|';
         const observable1 = {
           name: 'observable1',
           args: {},
@@ -588,7 +685,12 @@ describe('Execution', () => {
           help: '',
           fn: () => arg2,
         };
-        const max: ExpressionFunctionDefinition<'max', any, { val1: number; val2: number }, any> = {
+        const max: ExpressionFunctionDefinition<
+          'max',
+          unknown,
+          { val1: number; val2: number },
+          unknown
+        > = {
           name: 'max',
           args: {
             val1: { help: '', types: ['number'] },
@@ -605,32 +707,11 @@ describe('Execution', () => {
         const result = executor.run('max val1={observable1} val2={observable2}', {});
 
         expectObservable(result).toBe(expected, {
-          a: { type: 'num', value: 1 },
-          b: { type: 'num', value: 2 },
-          c: { type: 'num', value: 3 },
-          d: { type: 'num', value: 4 },
-          e: { type: 'num', value: 5 },
-        });
-      });
-    });
-
-    test('does not complete when an argument completes', () => {
-      testScheduler.run(({ cold, expectObservable }) => {
-        const arg = cold('-a|', { a: 1 });
-        const expected = '-a-';
-        const observable = {
-          name: 'observable',
-          args: {},
-          help: '',
-          fn: () => arg,
-        };
-        const executor = createUnitTestExecutor();
-        executor.registerFunction(observable);
-
-        const result = executor.run('add val={observable}', 1, {});
-
-        expectObservable(result).toBe(expected, {
-          a: { type: 'num', value: 2 },
+          a: { partial: true, result: { type: 'num', value: 1 } },
+          b: { partial: true, result: { type: 'num', value: 2 } },
+          c: { partial: true, result: { type: 'num', value: 3 } },
+          d: { partial: true, result: { type: 'num', value: 4 } },
+          e: { partial: false, result: { type: 'num', value: 5 } },
         });
       });
     });
@@ -638,7 +719,7 @@ describe('Execution', () => {
     test('handles error in observable arguments', () => {
       testScheduler.run(({ cold, expectObservable }) => {
         const arg = cold('-a-#', { a: 1 }, new Error('some error'));
-        const expected = '-a-b';
+        const expected = '-a-(b|)';
         const observable = {
           name: 'observable',
           args: {},
@@ -651,13 +732,15 @@ describe('Execution', () => {
         const result = executor.run('add val={observable}', 1, {});
 
         expectObservable(result).toBe(expected, {
-          a: { type: 'num', value: 2 },
-          b: {
-            error: expect.objectContaining({
-              message: '[add] > [observable] > some error',
-            }),
-            type: 'error',
-          },
+          a: expect.objectContaining({ result: { type: 'num', value: 2 } }),
+          b: expect.objectContaining({
+            result: {
+              error: expect.objectContaining({
+                message: '[add] > [observable] > some error',
+              }),
+              type: 'error',
+            },
+          }),
         });
       });
     });
@@ -665,7 +748,12 @@ describe('Execution', () => {
 
   describe('when arguments are missing', () => {
     it('when required argument is missing and has not alias, returns error', async () => {
-      const requiredArg: ExpressionFunctionDefinition<'requiredArg', any, { arg: any }, any> = {
+      const requiredArg: ExpressionFunctionDefinition<
+        'requiredArg',
+        unknown,
+        { arg: unknown },
+        unknown
+      > = {
         name: 'requiredArg',
         args: {
           arg: {
@@ -678,25 +766,84 @@ describe('Execution', () => {
       };
       const executor = createUnitTestExecutor();
       executor.registerFunction(requiredArg);
-      const result = await executor.run('requiredArg', null, {}).pipe(first()).toPromise();
+      const { result } = await lastValueFrom(executor.run('requiredArg', null, {}));
 
       expect(result).toMatchObject({
         type: 'error',
         error: {
-          message: '[requiredArg] > requiredArg requires an argument',
+          message: '[requiredArg] > requiredArg requires the "arg" argument',
         },
       });
     });
 
     test('when required argument is missing and has alias, returns error', async () => {
-      const result = await run('var_set', {});
+      const { result } = await run('var_set', {});
 
       expect(result).toMatchObject({
         type: 'error',
         error: {
-          message: '[var_set] > var_set requires an "name" argument',
+          message: '[var_set] > var_set requires the "name" argument',
         },
       });
+    });
+  });
+
+  describe('when arguments are not valid', () => {
+    let executor: ReturnType<typeof createUnitTestExecutor>;
+
+    beforeEach(() => {
+      const validateArg: ExpressionFunctionDefinition<
+        'validateArg',
+        unknown,
+        { arg: unknown },
+        unknown
+      > = {
+        name: 'validateArg',
+        args: {
+          arg: {
+            help: '',
+            multi: true,
+            options: ['valid'],
+            strict: true,
+          },
+        },
+        help: '',
+        fn: () => 'something',
+      };
+      executor = createUnitTestExecutor();
+      executor.registerFunction(validateArg);
+    });
+
+    it('errors when argument is invalid', async () => {
+      const { result } = await lastValueFrom(executor.run('validateArg arg="invalid"', null));
+
+      expect(result).toMatchObject({
+        type: 'error',
+        error: {
+          message:
+            "[validateArg] > Value 'invalid' is not among the allowed options for argument 'arg': 'valid'",
+        },
+      });
+    });
+
+    it('errors when at least one value is invalid', async () => {
+      const { result } = await lastValueFrom(
+        executor.run('validateArg arg="valid" arg="invalid"', null)
+      );
+
+      expect(result).toMatchObject({
+        type: 'error',
+        error: {
+          message:
+            "[validateArg] > Value 'invalid' is not among the allowed options for argument 'arg': 'valid'",
+        },
+      });
+    });
+
+    it('does not error when argument is valid', async () => {
+      const { result } = await lastValueFrom(executor.run('validateArg arg="valid"', null));
+
+      expect(result).toBe('something');
     });
   });
 
@@ -704,7 +851,7 @@ describe('Execution', () => {
     test('can execute expression in debug mode', async () => {
       const execution = createExecution('add val=1 | add val=2 | add val=3', {}, true);
       execution.start(-1);
-      const result = await execution.result.pipe(first()).toPromise();
+      const { result } = await lastValueFrom(execution.result);
 
       expect(result).toEqual({
         type: 'num',
@@ -719,7 +866,7 @@ describe('Execution', () => {
         true
       );
       execution.start(0);
-      const result = await execution.result.pipe(first()).toPromise();
+      const { result } = await lastValueFrom(execution.result);
 
       expect(result).toEqual({
         type: 'num',
@@ -731,7 +878,7 @@ describe('Execution', () => {
       test('sets "success" flag on all functions to true', async () => {
         const execution = createExecution('add val=1 | add val=2 | add val=3', {}, true);
         execution.start(-1);
-        await execution.result.pipe(first()).toPromise();
+        await execution.result.toPromise();
 
         for (const node of execution.state.get().ast.chain) {
           expect(node.debug?.success).toBe(true);
@@ -741,7 +888,7 @@ describe('Execution', () => {
       test('stores "fn" reference to the function', async () => {
         const execution = createExecution('add val=1 | add val=2 | add val=3', {}, true);
         execution.start(-1);
-        await execution.result.pipe(first()).toPromise();
+        await execution.result.toPromise();
 
         for (const node of execution.state.get().ast.chain) {
           expect(node.debug?.fn).toBe('add');
@@ -749,13 +896,15 @@ describe('Execution', () => {
       });
 
       test('saves duration it took to execute each function', async () => {
+        const startTime = Date.now();
         const execution = createExecution('add val=1 | add val=2 | add val=3', {}, true);
         execution.start(-1);
-        await execution.result.pipe(first()).toPromise();
+        await execution.result.toPromise();
+        const duration = Date.now() - startTime;
 
         for (const node of execution.state.get().ast.chain) {
           expect(typeof node.debug?.duration).toBe('number');
-          expect(node.debug?.duration).toBeLessThan(100);
+          expect(node.debug?.duration).toBeLessThanOrEqual(duration);
           expect(node.debug?.duration).toBeGreaterThanOrEqual(0);
         }
       });
@@ -763,7 +912,7 @@ describe('Execution', () => {
       test('adds .debug field in expression AST on each executed function', async () => {
         const execution = createExecution('add val=1 | add val=2 | add val=3', {}, true);
         execution.start(-1);
-        await execution.result.pipe(first()).toPromise();
+        await execution.result.toPromise();
 
         for (const node of execution.state.get().ast.chain) {
           expect(typeof node.debug).toBe('object');
@@ -774,7 +923,7 @@ describe('Execution', () => {
       test('stores input of each function', async () => {
         const execution = createExecution('add val=1 | add val=2 | add val=3', {}, true);
         execution.start(-1);
-        await execution.result.pipe(first()).toPromise();
+        await execution.result.toPromise();
 
         const { chain } = execution.state.get().ast;
 
@@ -792,7 +941,7 @@ describe('Execution', () => {
       test('stores output of each function', async () => {
         const execution = createExecution('add val=1 | add val=2 | add val=3', {}, true);
         execution.start(-1);
-        await execution.result.pipe(first()).toPromise();
+        await execution.result.toPromise();
 
         const { chain } = execution.state.get().ast;
 
@@ -817,7 +966,7 @@ describe('Execution', () => {
           true
         );
         execution.start(-1);
-        await execution.result.pipe(first()).toPromise();
+        await execution.result.toPromise();
 
         const { chain } = execution.state.get().ast;
 
@@ -827,8 +976,8 @@ describe('Execution', () => {
 
         expect((chain[0].arguments.val[0] as ExpressionAstExpression).chain[0].debug!.args).toEqual(
           {
-            name: 'foo',
-            value: 5,
+            name: ['foo'],
+            value: [5],
           }
         );
       });
@@ -840,7 +989,7 @@ describe('Execution', () => {
           true
         );
         execution.start(0);
-        await execution.result.pipe(first()).toPromise();
+        await execution.result.toPromise();
 
         const { chain } = execution.state.get().ast.chain[0].arguments
           .val[0] as ExpressionAstExpression;
@@ -875,7 +1024,7 @@ describe('Execution', () => {
           params: { debug: true },
         });
         execution.start(0);
-        await execution.result.pipe(first()).toPromise();
+        await execution.result.toPromise();
 
         const node1 = execution.state.get().ast.chain[0];
         const node2 = execution.state.get().ast.chain[1];
@@ -893,7 +1042,7 @@ describe('Execution', () => {
           params: { debug: true },
         });
         execution.start(0);
-        await execution.result.pipe(first()).toPromise();
+        await execution.result.toPromise();
 
         const node2 = execution.state.get().ast.chain[1];
 
@@ -914,7 +1063,7 @@ describe('Execution', () => {
           params: { debug: true },
         });
         execution.start(0);
-        await execution.result.pipe(first()).toPromise();
+        await execution.result.toPromise();
 
         const node2 = execution.state.get().ast.chain[1];
 

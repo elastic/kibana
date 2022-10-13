@@ -13,13 +13,13 @@ export default function ({ getService }: FtrProviderContext) {
   const security = getService('security');
   const spaces = getService('spaces');
 
-  const isElasticsearchAnonymousAccessEnabled = (config.get(
-    'esTestCluster.serverArgs'
-  ) as string[]).some((setting) => setting.startsWith('xpack.security.authc.anonymous'));
+  const isElasticsearchAnonymousAccessEnabled = (
+    config.get('esTestCluster.serverArgs') as string[]
+  ).some((setting) => setting.startsWith('xpack.security.authc.anonymous'));
 
   async function getAnonymousCapabilities(spaceId?: string) {
     const apiResponse = await supertest
-      .get(`${spaceId ? `/s/${spaceId}` : ''}/internal/security_oss/anonymous_access/capabilities`)
+      .get(`${spaceId ? `/s/${spaceId}` : ''}/internal/security/anonymous_access/capabilities`)
       .expect(200);
 
     return Object.fromEntries(
@@ -56,8 +56,6 @@ export default function ({ getService }: FtrProviderContext) {
             "dashboard": Object {
               "createNew": false,
               "createShortUrl": false,
-              "downloadCsv": false,
-              "generateScreenshot": false,
               "saveQuery": false,
               "show": false,
               "showWriteControls": false,
@@ -65,7 +63,6 @@ export default function ({ getService }: FtrProviderContext) {
             },
             "discover": Object {
               "createShortUrl": false,
-              "generateCsv": false,
               "save": false,
               "saveQuery": false,
               "show": false,
@@ -79,7 +76,6 @@ export default function ({ getService }: FtrProviderContext) {
             "visualize": Object {
               "createShortUrl": false,
               "delete": false,
-              "generateScreenshot": false,
               "save": false,
               "saveQuery": false,
               "show": false,
@@ -91,8 +87,6 @@ export default function ({ getService }: FtrProviderContext) {
             "dashboard": Object {
               "createNew": false,
               "createShortUrl": false,
-              "downloadCsv": false,
-              "generateScreenshot": false,
               "saveQuery": false,
               "show": false,
               "showWriteControls": false,
@@ -100,7 +94,6 @@ export default function ({ getService }: FtrProviderContext) {
             },
             "discover": Object {
               "createShortUrl": false,
-              "generateCsv": false,
               "save": false,
               "saveQuery": false,
               "show": false,
@@ -114,7 +107,6 @@ export default function ({ getService }: FtrProviderContext) {
             "visualize": Object {
               "createShortUrl": false,
               "delete": false,
-              "generateScreenshot": false,
               "save": false,
               "saveQuery": false,
               "show": false,
@@ -126,8 +118,6 @@ export default function ({ getService }: FtrProviderContext) {
             "dashboard": Object {
               "createNew": false,
               "createShortUrl": false,
-              "downloadCsv": false,
-              "generateScreenshot": false,
               "saveQuery": false,
               "show": false,
               "showWriteControls": false,
@@ -135,7 +125,6 @@ export default function ({ getService }: FtrProviderContext) {
             },
             "discover": Object {
               "createShortUrl": false,
-              "generateCsv": false,
               "save": false,
               "saveQuery": false,
               "show": false,
@@ -149,7 +138,6 @@ export default function ({ getService }: FtrProviderContext) {
             "visualize": Object {
               "createShortUrl": false,
               "delete": false,
-              "generateScreenshot": false,
               "save": false,
               "saveQuery": false,
               "show": false,
@@ -180,8 +168,6 @@ export default function ({ getService }: FtrProviderContext) {
             "dashboard": Object {
               "createNew": false,
               "createShortUrl": false,
-              "downloadCsv": false,
-              "generateScreenshot": false,
               "saveQuery": false,
               "show": false,
               "showWriteControls": false,
@@ -189,7 +175,6 @@ export default function ({ getService }: FtrProviderContext) {
             },
             "discover": Object {
               "createShortUrl": false,
-              "generateCsv": false,
               "save": false,
               "saveQuery": false,
               "show": false,
@@ -203,7 +188,6 @@ export default function ({ getService }: FtrProviderContext) {
             "visualize": Object {
               "createShortUrl": false,
               "delete": false,
-              "generateScreenshot": false,
               "save": false,
               "saveQuery": false,
               "show": false,
@@ -215,8 +199,6 @@ export default function ({ getService }: FtrProviderContext) {
             "dashboard": Object {
               "createNew": false,
               "createShortUrl": false,
-              "downloadCsv": false,
-              "generateScreenshot": false,
               "saveQuery": false,
               "show": false,
               "showWriteControls": false,
@@ -224,7 +206,6 @@ export default function ({ getService }: FtrProviderContext) {
             },
             "discover": Object {
               "createShortUrl": false,
-              "generateCsv": false,
               "save": false,
               "saveQuery": false,
               "show": false,
@@ -238,7 +219,6 @@ export default function ({ getService }: FtrProviderContext) {
             "visualize": Object {
               "createShortUrl": false,
               "delete": false,
-              "generateScreenshot": false,
               "save": false,
               "saveQuery": false,
               "show": false,
@@ -250,8 +230,6 @@ export default function ({ getService }: FtrProviderContext) {
             "dashboard": Object {
               "createNew": false,
               "createShortUrl": false,
-              "downloadCsv": false,
-              "generateScreenshot": false,
               "saveQuery": false,
               "show": false,
               "showWriteControls": false,
@@ -259,7 +237,6 @@ export default function ({ getService }: FtrProviderContext) {
             },
             "discover": Object {
               "createShortUrl": false,
-              "generateCsv": false,
               "save": false,
               "saveQuery": false,
               "show": false,
@@ -273,7 +250,6 @@ export default function ({ getService }: FtrProviderContext) {
             "visualize": Object {
               "createShortUrl": false,
               "delete": false,
-              "generateScreenshot": false,
               "save": false,
               "saveQuery": false,
               "show": false,
@@ -322,8 +298,6 @@ export default function ({ getService }: FtrProviderContext) {
             "dashboard": Object {
               "createNew": false,
               "createShortUrl": false,
-              "downloadCsv": false,
-              "generateScreenshot": false,
               "saveQuery": false,
               "show": true,
               "showWriteControls": false,
@@ -331,7 +305,6 @@ export default function ({ getService }: FtrProviderContext) {
             },
             "discover": Object {
               "createShortUrl": false,
-              "generateCsv": false,
               "save": false,
               "saveQuery": false,
               "show": true,
@@ -345,7 +318,6 @@ export default function ({ getService }: FtrProviderContext) {
             "visualize": Object {
               "createShortUrl": false,
               "delete": false,
-              "generateScreenshot": false,
               "save": false,
               "saveQuery": false,
               "show": true,
@@ -359,8 +331,6 @@ export default function ({ getService }: FtrProviderContext) {
             "dashboard": Object {
               "createNew": false,
               "createShortUrl": false,
-              "downloadCsv": false,
-              "generateScreenshot": false,
               "saveQuery": false,
               "show": false,
               "showWriteControls": false,
@@ -368,7 +338,6 @@ export default function ({ getService }: FtrProviderContext) {
             },
             "discover": Object {
               "createShortUrl": false,
-              "generateCsv": false,
               "save": false,
               "saveQuery": false,
               "show": false,
@@ -382,7 +351,6 @@ export default function ({ getService }: FtrProviderContext) {
             "visualize": Object {
               "createShortUrl": false,
               "delete": false,
-              "generateScreenshot": false,
               "save": false,
               "saveQuery": false,
               "show": false,
@@ -396,8 +364,6 @@ export default function ({ getService }: FtrProviderContext) {
             "dashboard": Object {
               "createNew": false,
               "createShortUrl": false,
-              "downloadCsv": false,
-              "generateScreenshot": false,
               "saveQuery": false,
               "show": false,
               "showWriteControls": false,
@@ -405,7 +371,6 @@ export default function ({ getService }: FtrProviderContext) {
             },
             "discover": Object {
               "createShortUrl": false,
-              "generateCsv": false,
               "save": false,
               "saveQuery": false,
               "show": false,
@@ -419,7 +384,6 @@ export default function ({ getService }: FtrProviderContext) {
             "visualize": Object {
               "createShortUrl": false,
               "delete": false,
-              "generateScreenshot": false,
               "save": false,
               "saveQuery": false,
               "show": true,

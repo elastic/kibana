@@ -18,7 +18,7 @@ import {
 import _ from 'lodash';
 import React, { Component } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { KibanaPrivilege } from '../../../../model';
 import { NO_PRIVILEGE_VALUE } from '../constants';

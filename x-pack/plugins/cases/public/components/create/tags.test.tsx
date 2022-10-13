@@ -11,11 +11,14 @@ import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { waitFor } from '@testing-library/react';
 
 import { useForm, Form, FormHook } from '../../common/shared_imports';
-import { useGetTags } from '../../containers/use_get_tags';
 import { Tags } from './tags';
 import { schema, FormProps } from './schema';
+import { TestProviders } from '../../common/mock';
+import { useGetTags } from '../../containers/use_get_tags';
 
+jest.mock('../../common/lib/kibana');
 jest.mock('../../containers/use_get_tags');
+
 const useGetTagsMock = useGetTags as jest.Mock;
 
 describe('Tags', () => {
@@ -31,12 +34,16 @@ describe('Tags', () => {
 
     globalForm = form;
 
-    return <Form form={form}>{children}</Form>;
+    return (
+      <TestProviders>
+        <Form form={form}>{children}</Form>
+      </TestProviders>
+    );
   };
 
   beforeEach(() => {
-    jest.resetAllMocks();
-    useGetTagsMock.mockReturnValue({ tags: ['test'] });
+    jest.clearAllMocks();
+    useGetTagsMock.mockReturnValue({ data: ['test'] });
   });
 
   it('it renders', async () => {
@@ -69,9 +76,11 @@ describe('Tags', () => {
     );
 
     await waitFor(() => {
-      ((wrapper.find(EuiComboBox).props() as unknown) as {
-        onChange: (a: EuiComboBoxOptionOption[]) => void;
-      }).onChange(['test', 'case'].map((tag) => ({ label: tag })));
+      (
+        wrapper.find(EuiComboBox).props() as unknown as {
+          onChange: (a: EuiComboBoxOptionOption[]) => void;
+        }
+      ).onChange(['test', 'case'].map((tag) => ({ label: tag })));
     });
 
     expect(globalForm.getFormData()).toEqual({ tags: ['test', 'case'] });

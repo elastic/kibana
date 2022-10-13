@@ -7,21 +7,24 @@
 
 import { flatMap, isEqual } from 'lodash';
 import semver from 'semver';
-import { validate } from '../../../../common';
-import {
+import { validate } from '@kbn/securitysolution-io-ts-utils';
+import type {
   InternalArtifactSchema,
   InternalManifestSchema,
   InternalManifestEntrySchema,
+  InternalArtifactCompleteSchema,
 } from '../../schemas/artifacts';
-import {
+import type {
   ManifestSchemaVersion,
   SemanticVersion,
-  semanticVersion,
 } from '../../../../common/endpoint/schema/common';
-import { manifestSchema, ManifestSchema } from '../../../../common/endpoint/schema/manifest';
+import { semanticVersion } from '../../../../common/endpoint/schema/common';
+import type { ManifestSchema } from '../../../../common/endpoint/schema/manifest';
+import { manifestSchema } from '../../../../common/endpoint/schema/manifest';
 import { ManifestEntry } from './manifest_entry';
 import { getArtifactId } from './common';
-import { ManifestVersion, manifestVersion } from '../../schemas/artifacts/manifest';
+import type { ManifestVersion } from '../../schemas/artifacts/manifest';
+import { manifestVersion } from '../../schemas/artifacts/manifest';
 
 function createInternalManifestEntries(
   artifactIds: string[],
@@ -137,6 +140,27 @@ export class Manifest {
 
   public getArtifactTargetPolicies(artifact: InternalArtifactSchema): Set<string> | undefined {
     return this.allEntries.get(getArtifactId(artifact))?.specificTargetPolicies;
+  }
+
+  /**
+   * Replaces an artifact from all the collections.
+   *
+   * @param artifact An InternalArtifactCompleteSchema representing the artifact.
+   */
+  public replaceArtifact(artifact: InternalArtifactCompleteSchema) {
+    const existingEntry = this.allEntries.get(getArtifactId(artifact));
+    if (existingEntry) {
+      existingEntry.entry = new ManifestEntry(artifact);
+
+      this.allEntries.set(getArtifactId(artifact), existingEntry);
+      this.defaultEntries.set(getArtifactId(artifact), existingEntry.entry);
+
+      existingEntry.specificTargetPolicies.forEach((policyId) => {
+        const entries = this.policySpecificEntries.get(policyId) || new Map();
+        entries.set(existingEntry.entry.getDocId(), existingEntry.entry);
+        this.policySpecificEntries.set(policyId, entries);
+      });
+    }
   }
 
   public diff(manifest: Manifest): ManifestDiff {

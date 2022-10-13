@@ -158,9 +158,9 @@ export const AnalyticsLogic = kea<MakeLogicType<AnalyticsValues, AnalyticsAction
           tag,
           size: 20,
         };
-        const url = `/api/app_search/engines/${engineName}/analytics/queries`;
+        const url = `/internal/app_search/engines/${engineName}/analytics/queries`;
 
-        const response = await http.get(url, { query });
+        const response = await http.get<AnalyticsData>(url, { query });
         actions.onAnalyticsDataLoad(response);
       } catch (e) {
         flashAPIErrors(e);
@@ -178,9 +178,9 @@ export const AnalyticsLogic = kea<MakeLogicType<AnalyticsValues, AnalyticsAction
           end: end || DEFAULT_END_DATE,
           tag,
         };
-        const url = `/api/app_search/engines/${engineName}/analytics/queries/${query}`;
+        const url = `/internal/app_search/engines/${engineName}/analytics/queries/${query}`;
 
-        const response = await http.get(url, { query: queryParams });
+        const response = await http.get<QueryDetails>(url, { query: queryParams });
 
         actions.onQueryDataLoad(response);
       } catch (e) {

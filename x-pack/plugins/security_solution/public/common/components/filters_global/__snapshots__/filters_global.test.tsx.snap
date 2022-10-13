@@ -2,19 +2,30 @@
 
 exports[`rendering renders correctly 1`] = `
 <InPortal
-  node={<div />}
+  node={
+    Object {
+      "element": <div />,
+      "elementType": "html",
+      "getInitialPortalProps": [Function],
+      "mount": [Function],
+      "setPortalProps": [Function],
+      "unmount": [Function],
+    }
+  }
 >
-  <FiltersGlobalContainer
-    data-test-subj="filters-global-container"
-    show={true}
+  <EuiPanel
+    borderRadius="none"
+    color="subdued"
+    paddingSize="none"
   >
-    <Wrapper
-      className="siemFiltersGlobal"
+    <FiltersGlobalContainer
+      data-test-subj="filters-global-container"
+      show={true}
     >
       <p>
         Additional filters here.
       </p>
-    </Wrapper>
-  </FiltersGlobalContainer>
+    </FiltersGlobalContainer>
+  </EuiPanel>
 </InPortal>
 `;

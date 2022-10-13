@@ -16,11 +16,13 @@ import {
   EuiFieldText,
   EuiButtonIcon,
   EuiLoadingSpinner,
+  EuiFormRow,
 } from '@elastic/eui';
 
+import { MAX_TITLE_LENGTH } from '../../../common/constants';
 import * as i18n from './translations';
-
 import { Title } from './title';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
 const MyEuiButtonIcon = styled(EuiButtonIcon)`
   ${({ theme }) => css`
@@ -34,49 +36,64 @@ const MySpinner = styled(EuiLoadingSpinner)`
   `}
 `;
 
-interface Props {
-  disabled?: boolean;
+export interface EditableTitleProps {
   isLoading: boolean;
-  title: string | React.ReactNode;
+  title: string;
   onSubmit: (title: string) => void;
 }
 
-const EditableTitleComponent: React.FC<Props> = ({
-  disabled = false,
-  onSubmit,
-  isLoading,
-  title,
-}) => {
+const EditableTitleComponent: React.FC<EditableTitleProps> = ({ onSubmit, isLoading, title }) => {
+  const { releasePhase, permissions } = useCasesContext();
   const [editMode, setEditMode] = useState(false);
-  const [changedTitle, onTitleChange] = useState<string>(typeof title === 'string' ? title : '');
+  const [errors, setErrors] = useState<string[]>([]);
+  const [newTitle, setNewTitle] = useState<string>(title);
 
-  const onCancel = useCallback(() => setEditMode(false), []);
+  const onCancel = useCallback(() => {
+    setEditMode(false);
+    setErrors([]);
+    setNewTitle(title);
+  }, [title]);
+
   const onClickEditIcon = useCallback(() => setEditMode(true), []);
-
   const onClickSubmit = useCallback((): void => {
-    if (changedTitle !== title) {
-      onSubmit(changedTitle);
+    if (newTitle.length > MAX_TITLE_LENGTH) {
+      setErrors([i18n.MAX_LENGTH_ERROR('title', MAX_TITLE_LENGTH)]);
+      return;
+    }
+
+    if (newTitle !== title) {
+      onSubmit(newTitle);
     }
     setEditMode(false);
-  }, [changedTitle, onSubmit, title]);
+    setErrors([]);
+  }, [newTitle, onSubmit, title]);
 
   const handleOnChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => onTitleChange(e.target.value),
+    (e: ChangeEvent<HTMLInputElement>) => setNewTitle(e.target.value),
     []
   );
+
+  const hasErrors = errors.length > 0;
+
   return editMode ? (
-    <EuiFlexGroup alignItems="center" gutterSize="m" justifyContent="spaceBetween">
-      <EuiFlexItem grow={false}>
-        <EuiFieldText
-          onChange={handleOnChange}
-          value={`${changedTitle}`}
-          data-test-subj="editable-title-input-field"
-        />
-      </EuiFlexItem>
-      <EuiFlexGroup gutterSize="none" responsive={false} wrap={true}>
+    <EuiFormRow isInvalid={hasErrors} error={errors} fullWidth>
+      <EuiFlexGroup
+        alignItems="center"
+        responsive={true}
+        gutterSize="m"
+        justifyContent="spaceBetween"
+      >
+        <EuiFlexItem grow={true}>
+          <EuiFieldText
+            fullWidth={true}
+            onChange={handleOnChange}
+            value={`${newTitle}`}
+            data-test-subj="editable-title-input-field"
+          />
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
-            color="secondary"
+            color="success"
             data-test-subj="editable-title-submit-btn"
             fill
             iconType="save"
@@ -97,27 +114,21 @@ const EditableTitleComponent: React.FC<Props> = ({
           </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiFlexItem />
-    </EuiFlexGroup>
+    </EuiFormRow>
   ) : (
-    <EuiFlexGroup alignItems="center" gutterSize="none">
-      <EuiFlexItem grow={false}>
-        <Title title={title} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        {isLoading && <MySpinner data-test-subj="editable-title-loading" />}
-        {!isLoading && (
-          <MyEuiButtonIcon
-            isDisabled={disabled}
-            aria-label={i18n.EDIT_TITLE_ARIA(title as string)}
-            iconType="pencil"
-            onClick={onClickEditIcon}
-            data-test-subj="editable-title-edit-icon"
-          />
-        )}
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <Title title={title} releasePhase={releasePhase}>
+      {isLoading && <MySpinner data-test-subj="editable-title-loading" />}
+      {!isLoading && permissions.update && (
+        <MyEuiButtonIcon
+          aria-label={i18n.EDIT_TITLE_ARIA(title as string)}
+          iconType="pencil"
+          onClick={onClickEditIcon}
+          data-test-subj="editable-title-edit-icon"
+        />
+      )}
+    </Title>
   );
 };
+EditableTitleComponent.displayName = 'EditableTitle';
 
 export const EditableTitle = React.memo(EditableTitleComponent);

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from 'src/core/public';
+import { PluginInitializerContext } from '@kbn/core/public';
 import { LicenseManagementUIPlugin } from './plugin';
 import './application/index.scss';
 
-export { LicenseManagementUIPluginSetup, LicenseManagementUIPluginStart } from './plugin';
+export type { LicenseManagementUIPluginSetup, LicenseManagementUIPluginStart } from './plugin';
 export const plugin = (ctx: PluginInitializerContext) => new LicenseManagementUIPlugin(ctx);

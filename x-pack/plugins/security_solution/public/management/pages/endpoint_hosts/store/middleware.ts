@@ -5,328 +5,138 @@
  * 2.0.
  */
 
-import { HttpStart } from 'kibana/public';
-import { HostInfo, HostResultList } from '../../../../../common/endpoint/types';
-import { GetPolicyListResponse } from '../../policy/types';
-import { ImmutableMiddlewareFactory } from '../../../../common/store';
+import type { DataViewBase, Query } from '@kbn/es-query';
+import type { CoreStart, HttpStart } from '@kbn/core/public';
+import type { Dispatch } from 'redux';
+import semverGte from 'semver/functions/gte';
 import {
-  isOnEndpointPage,
-  hasSelectedEndpoint,
-  uiQueryParams,
-  listData,
+  BASE_POLICY_RESPONSE_ROUTE,
+  HOST_METADATA_GET_ROUTE,
+  HOST_METADATA_LIST_ROUTE,
+  metadataCurrentIndexPattern,
+  METADATA_UNITED_INDEX,
+  METADATA_TRANSFORMS_STATUS_ROUTE,
+} from '../../../../../common/endpoint/constants';
+import type {
+  GetHostPolicyResponse,
+  HostInfo,
+  HostIsolationRequestBody,
+  ResponseActionApiResponse,
+  HostResultList,
+  Immutable,
+  ImmutableObject,
+  MetadataListResponse,
+} from '../../../../../common/endpoint/types';
+import { isolateHost, unIsolateHost } from '../../../../common/lib/endpoint_isolation';
+import { fetchPendingActionsByAgentId } from '../../../../common/lib/endpoint_pending_actions';
+import type { ImmutableMiddlewareAPI, ImmutableMiddlewareFactory } from '../../../../common/store';
+import type { AppAction } from '../../../../common/store/actions';
+import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
+import { sendGetEndpointSpecificPackagePolicies } from '../../../services/policies/policies';
+import {
+  asStaleResourceState,
+  createFailedResourceState,
+  createLoadedResourceState,
+  createLoadingResourceState,
+} from '../../../state';
+import {
+  sendBulkGetPackagePolicies,
+  sendGetEndpointSecurityPackage,
+  sendGetFleetAgentsWithEndpoint,
+} from '../../../services/policies/ingest';
+import type { GetPolicyListResponse } from '../../policy/types';
+import type {
+  AgentIdsPendingActions,
+  EndpointState,
+  PolicyIds,
+  TransformStats,
+  TransformStatsResponse,
+} from '../types';
+import type { EndpointPackageInfoStateChanged } from './action';
+import {
+  detailsData,
   endpointPackageInfo,
+  endpointPackageVersion,
+  getCurrentIsolationRequestState,
+  getIsEndpointPackageInfoUninitialized,
+  getIsIsolationRequestPending,
+  getMetadataTransformStats,
+  hasSelectedEndpoint,
+  isMetadataTransformStatsLoading,
+  isOnEndpointPage,
+  listData,
   nonExistingPolicies,
   patterns,
   searchBarQuery,
-  isTransformEnabled,
+  uiQueryParams,
 } from './selectors';
-import { EndpointState, PolicyIds } from '../types';
-import {
-  sendGetEndpointSpecificPackagePolicies,
-  sendGetEndpointSecurityPackage,
-  sendGetAgentPolicyList,
-  sendGetFleetAgentsWithEndpoint,
-} from '../../policy/store/services/ingest';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../fleet/common';
-import { metadataCurrentIndexPattern } from '../../../../../common/endpoint/constants';
-import { IIndexPattern, Query } from '../../../../../../../../src/plugins/data/public';
+
+type EndpointPageStore = ImmutableMiddlewareAPI<EndpointState, AppAction>;
+
+// eslint-disable-next-line no-console
+const logError = console.error;
 
 export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState> = (
   coreStart,
   depsStart
 ) => {
-  async function fetchIndexPatterns(): Promise<IIndexPattern[]> {
+  // this needs to be called after endpointPackageVersion is loaded (getEndpointPackageInfo)
+  // or else wrong pattern might be loaded
+  async function fetchIndexPatterns(
+    state: ImmutableObject<EndpointState>
+  ): Promise<DataViewBase[]> {
+    const packageVersion = endpointPackageVersion(state) ?? '';
+    const parsedPackageVersion = packageVersion.includes('-')
+      ? packageVersion.substring(0, packageVersion.indexOf('-'))
+      : packageVersion;
+    const minUnitedIndexVersion = '1.2.0';
+    const indexPatternToFetch = semverGte(parsedPackageVersion, minUnitedIndexVersion)
+      ? METADATA_UNITED_INDEX
+      : metadataCurrentIndexPattern;
+
     const { indexPatterns } = depsStart.data;
     const fields = await indexPatterns.getFieldsForWildcard({
-      pattern: metadataCurrentIndexPattern,
+      pattern: indexPatternToFetch,
     });
-    const indexPattern: IIndexPattern = {
-      title: metadataCurrentIndexPattern,
+    const indexPattern: DataViewBase = {
+      title: indexPatternToFetch,
       fields,
     };
     return [indexPattern];
   }
-  // eslint-disable-next-line complexity
-  return ({ getState, dispatch }) => (next) => async (action) => {
+  return (store) => (next) => async (action) => {
     next(action);
+
+    const { getState, dispatch } = store;
+
+    await getEndpointPackageInfo(getState(), dispatch, coreStart);
 
     // Endpoint list
     if (
       (action.type === 'userChangedUrl' || action.type === 'appRequestedEndpointList') &&
       isOnEndpointPage(getState()) &&
-      hasSelectedEndpoint(getState()) !== true
+      !hasSelectedEndpoint(getState())
     ) {
-      if (!endpointPackageInfo(getState())) {
-        try {
-          const packageInfo = await sendGetEndpointSecurityPackage(coreStart.http);
-          dispatch({
-            type: 'serverReturnedEndpointPackageInfo',
-            payload: packageInfo,
-          });
-        } catch (error) {
-          // Ignore Errors, since this should not hinder the user's ability to use the UI
-          // eslint-disable-next-line no-console
-          console.error(error);
-        }
-      }
-
-      const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(getState());
-      let endpointResponse;
-
-      try {
-        const decodedQuery: Query = searchBarQuery(getState());
-
-        endpointResponse = await coreStart.http.post<HostResultList>('/api/endpoint/metadata', {
-          body: JSON.stringify({
-            paging_properties: [{ page_index: pageIndex }, { page_size: pageSize }],
-            filters: { kql: decodedQuery.query },
-          }),
-        });
-        endpointResponse.request_page_index = Number(pageIndex);
-
-        dispatch({
-          type: 'serverReturnedEndpointList',
-          payload: endpointResponse,
-        });
-
-        try {
-          const endpointsTotalCount = await endpointsTotal(coreStart.http);
-          dispatch({
-            type: 'serverReturnedEndpointsTotal',
-            payload: endpointsTotalCount,
-          });
-        } catch (error) {
-          dispatch({
-            type: 'serverFailedToReturnEndpointsTotal',
-            payload: error,
-          });
-        }
-
-        try {
-          const agentsWithEndpoint = await sendGetFleetAgentsWithEndpoint(coreStart.http);
-          dispatch({
-            type: 'serverReturnedAgenstWithEndpointsTotal',
-            payload: agentsWithEndpoint.total,
-          });
-        } catch (error) {
-          dispatch({
-            type: 'serverFailedToReturnAgenstWithEndpointsTotal',
-            payload: error,
-          });
-        }
-
-        try {
-          const ingestPolicies = await getAgentAndPoliciesForEndpointsList(
-            coreStart.http,
-            endpointResponse.hosts,
-            nonExistingPolicies(getState())
-          );
-          if (ingestPolicies?.packagePolicy !== undefined) {
-            dispatch({
-              type: 'serverReturnedEndpointNonExistingPolicies',
-              payload: ingestPolicies.packagePolicy,
-            });
-          }
-          if (ingestPolicies?.agentPolicy !== undefined) {
-            dispatch({
-              type: 'serverReturnedEndpointAgentPolicies',
-              payload: ingestPolicies.agentPolicy,
-            });
-          }
-        } catch (error) {
-          // Ignore Errors, since this should not hinder the user's ability to use the UI
-          // eslint-disable-next-line no-console
-          console.error(error);
-        }
-      } catch (error) {
-        dispatch({
-          type: 'serverFailedToReturnEndpointList',
-          payload: error,
-        });
-      }
-
-      // get index pattern and fields for search bar
-      if (patterns(getState()).length === 0 && isTransformEnabled(getState())) {
-        try {
-          const indexPatterns = await fetchIndexPatterns();
-          if (indexPatterns !== undefined) {
-            dispatch({
-              type: 'serverReturnedMetadataPatterns',
-              payload: indexPatterns,
-            });
-          }
-        } catch (error) {
-          dispatch({
-            type: 'serverFailedToReturnMetadataPatterns',
-            payload: error,
-          });
-        }
-      }
-
-      // No endpoints, so we should check to see if there are policies for onboarding
-      if (endpointResponse && endpointResponse.hosts.length === 0) {
-        const http = coreStart.http;
-
-        // The original query to the list could have had an invalid param (ex. invalid page_size),
-        // so we check first if endpoints actually do exist before pulling in data for the onboarding
-        // messages.
-        if (await doEndpointsExist(http)) {
-          return;
-        }
-
-        dispatch({
-          type: 'serverReturnedEndpointExistValue',
-          payload: false,
-        });
-
-        try {
-          const policyDataResponse: GetPolicyListResponse = await sendGetEndpointSpecificPackagePolicies(
-            http,
-            {
-              query: {
-                perPage: 50, // Since this is an oboarding flow, we'll cap at 50 policies.
-                page: 1,
-              },
-            }
-          );
-
-          dispatch({
-            type: 'serverReturnedPoliciesForOnboarding',
-            payload: {
-              policyItems: policyDataResponse.items,
-            },
-          });
-        } catch (error) {
-          dispatch({
-            type: 'serverFailedToReturnPoliciesForOnboarding',
-            payload: error.body ?? error,
-          });
-          return;
-        }
-      } else {
-        dispatch({
-          type: 'serverCancelledPolicyItemsLoading',
-        });
-
-        dispatch({
-          type: 'serverReturnedEndpointExistValue',
-          payload: true,
-        });
-      }
+      await endpointDetailsListMiddleware({ coreStart, store, fetchIndexPatterns });
     }
 
     // Endpoint Details
-    if (action.type === 'userChangedUrl' && hasSelectedEndpoint(getState()) === true) {
-      dispatch({
-        type: 'serverCancelledPolicyItemsLoading',
-      });
-
-      // If user navigated directly to a endpoint details page, load the endpoint list
-      if (listData(getState()).length === 0) {
-        const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(getState());
-        try {
-          const response = await coreStart.http.post('/api/endpoint/metadata', {
-            body: JSON.stringify({
-              paging_properties: [{ page_index: pageIndex }, { page_size: pageSize }],
-            }),
-          });
-          response.request_page_index = Number(pageIndex);
-          dispatch({
-            type: 'serverReturnedEndpointList',
-            payload: response,
-          });
-
-          try {
-            const ingestPolicies = await getAgentAndPoliciesForEndpointsList(
-              coreStart.http,
-              response.hosts,
-              nonExistingPolicies(getState())
-            );
-            if (ingestPolicies?.packagePolicy !== undefined) {
-              dispatch({
-                type: 'serverReturnedEndpointNonExistingPolicies',
-                payload: ingestPolicies.packagePolicy,
-              });
-            }
-            if (ingestPolicies?.agentPolicy !== undefined) {
-              dispatch({
-                type: 'serverReturnedEndpointAgentPolicies',
-                payload: ingestPolicies.agentPolicy,
-              });
-            }
-          } catch (error) {
-            // Ignore Errors, since this should not hinder the user's ability to use the UI
-            // eslint-disable-next-line no-console
-            console.error(error);
-          }
-        } catch (error) {
-          dispatch({
-            type: 'serverFailedToReturnEndpointList',
-            payload: error,
-          });
-        }
-      } else {
-        dispatch({
-          type: 'serverCancelledEndpointListLoading',
-        });
-      }
-
-      // call the endpoint details api
+    if (action.type === 'userChangedUrl' && hasSelectedEndpoint(getState())) {
       const { selected_endpoint: selectedEndpoint } = uiQueryParams(getState());
-      try {
-        const response = await coreStart.http.get<HostInfo>(
-          `/api/endpoint/metadata/${selectedEndpoint}`
-        );
-        dispatch({
-          type: 'serverReturnedEndpointDetails',
-          payload: response,
-        });
+      await endpointDetailsMiddleware({ store, coreStart, selectedEndpoint });
+    }
 
-        try {
-          const ingestPolicies = await getAgentAndPoliciesForEndpointsList(
-            coreStart.http,
-            [response],
-            nonExistingPolicies(getState())
-          );
-          if (ingestPolicies !== undefined) {
-            dispatch({
-              type: 'serverReturnedEndpointNonExistingPolicies',
-              payload: ingestPolicies.packagePolicy,
-            });
-          }
-          if (ingestPolicies?.agentPolicy !== undefined) {
-            dispatch({
-              type: 'serverReturnedEndpointAgentPolicies',
-              payload: ingestPolicies.agentPolicy,
-            });
-          }
-        } catch (error) {
-          // Ignore Errors, since this should not hinder the user's ability to use the UI
-          // eslint-disable-next-line no-console
-          console.error(error);
-        }
-      } catch (error) {
-        dispatch({
-          type: 'serverFailedToReturnEndpointDetails',
-          payload: error,
-        });
-      }
+    if (action.type === 'endpointDetailsLoad') {
+      await loadEndpointDetails({ store, coreStart, selectedEndpoint: action.payload.endpointId });
+    }
 
-      // call the policy response api
-      try {
-        const policyResponse = await coreStart.http.get(`/api/endpoint/policy_response`, {
-          query: { agentId: selectedEndpoint },
-        });
-        dispatch({
-          type: 'serverReturnedEndpointPolicyResponse',
-          payload: policyResponse,
-        });
-      } catch (error) {
-        dispatch({
-          type: 'serverFailedToReturnEndpointPolicyResponse',
-          payload: error,
-        });
-      }
+    // Isolate Host
+    if (action.type === 'endpointIsolationRequest') {
+      return handleIsolateEndpointHost(store, action);
+    }
+
+    if (action.type === 'loadMetadataTransformStats') {
+      return handleLoadMetadataTransformStats(coreStart.http, store);
     }
   };
 };
@@ -341,13 +151,17 @@ const getAgentAndPoliciesForEndpointsList = async (
   }
 
   // Create an array of unique policy IDs that are not yet known to be non-existing.
-  const policyIdsToCheck = Array.from(
-    new Set(
-      hosts
-        .filter((host) => !currentNonExistingPolicies[host.metadata.Endpoint.policy.applied.id])
-        .map((host) => host.metadata.Endpoint.policy.applied.id)
-    )
-  );
+  const policyIdsToCheck = [
+    ...new Set(
+      hosts.reduce((acc: string[], host) => {
+        const appliedPolicyId = host.metadata.Endpoint.policy.applied.id;
+        if (!currentNonExistingPolicies[appliedPolicyId]) {
+          acc.push(appliedPolicyId);
+        }
+        return acc;
+      }, [])
+    ),
+  ];
 
   if (policyIdsToCheck.length === 0) {
     return;
@@ -358,19 +172,12 @@ const getAgentAndPoliciesForEndpointsList = async (
   // Package Ids that it uses, thus if a reference exists there, then the package policy (policy)
   // exists.
   const policiesFound = (
-    await sendGetAgentPolicyList(http, {
-      query: {
-        kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.package_policies: (${policyIdsToCheck.join(
-          ' or '
-        )})`,
-      },
-    })
+    await sendBulkGetPackagePolicies(http, policyIdsToCheck)
   ).items.reduce<PolicyIds>(
-    (list, agentPolicy) => {
-      (agentPolicy.package_policies as string[]).forEach((packagePolicy) => {
-        list.packagePolicy[packagePolicy as string] = true;
-        list.agentPolicy[packagePolicy as string] = agentPolicy.id;
-      });
+    (list, packagePolicy) => {
+      list.packagePolicy[packagePolicy.id as string] = true;
+      list.agentPolicy[packagePolicy.id as string] = packagePolicy.policy_id;
+
       return list;
     },
     { packagePolicy: {}, agentPolicy: {} }
@@ -402,17 +209,18 @@ const getAgentAndPoliciesForEndpointsList = async (
 const endpointsTotal = async (http: HttpStart): Promise<number> => {
   try {
     return (
-      await http.post<HostResultList>('/api/endpoint/metadata', {
-        body: JSON.stringify({
-          paging_properties: [{ page_index: 0 }, { page_size: 1 }],
-        }),
+      await http.get<MetadataListResponse>(HOST_METADATA_LIST_ROUTE, {
+        query: {
+          page: 0,
+          pageSize: 1,
+        },
       })
     ).total;
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error(`error while trying to check for total endpoints`);
-    // eslint-disable-next-line no-console
-    console.error(error);
+    // TODO should handle the error instead of logging it to the browser
+    // Also this is an anti-pattern we shouldn't use
+    logError(`error while trying to check for total endpoints`);
+    logError(error);
   }
   return 0;
 };
@@ -421,10 +229,446 @@ const doEndpointsExist = async (http: HttpStart): Promise<boolean> => {
   try {
     return (await endpointsTotal(http)) > 0;
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error(`error while trying to check if endpoints exist`);
-    // eslint-disable-next-line no-console
-    console.error(error);
+    // TODO should handle the error instead of logging it to the browser
+    // Also this is an anti-pattern we shouldn't use
+    logError(`error while trying to check if endpoints exist`);
+    logError(error);
   }
   return false;
 };
+
+const handleIsolateEndpointHost = async (
+  { getState, dispatch }: EndpointPageStore,
+  action: Immutable<AppAction & { type: 'endpointIsolationRequest' }>
+) => {
+  const state = getState();
+
+  if (getIsIsolationRequestPending(state)) {
+    return;
+  }
+
+  dispatch({
+    type: 'endpointIsolationRequestStateChange',
+    payload: createLoadingResourceState(
+      asStaleResourceState(getCurrentIsolationRequestState(state))
+    ),
+  });
+
+  try {
+    // Cast needed below due to the value of payload being `Immutable<>`
+    let response: ResponseActionApiResponse;
+
+    if (action.payload.type === 'unisolate') {
+      response = await unIsolateHost(action.payload.data as HostIsolationRequestBody);
+    } else {
+      response = await isolateHost(action.payload.data as HostIsolationRequestBody);
+    }
+
+    dispatch({
+      type: 'endpointIsolationRequestStateChange',
+      payload: createLoadedResourceState<ResponseActionApiResponse>(response),
+    });
+  } catch (error) {
+    dispatch({
+      type: 'endpointIsolationRequestStateChange',
+      payload: createFailedResourceState<ResponseActionApiResponse>(error.body ?? error),
+    });
+  }
+};
+
+async function getEndpointPackageInfo(
+  state: ImmutableObject<EndpointState>,
+  dispatch: Dispatch<EndpointPackageInfoStateChanged>,
+  coreStart: CoreStart
+) {
+  if (!getIsEndpointPackageInfoUninitialized(state)) return;
+
+  dispatch({
+    type: 'endpointPackageInfoStateChanged',
+    payload: createLoadingResourceState(asStaleResourceState(endpointPackageInfo(state))),
+  });
+
+  try {
+    const packageInfo = await sendGetEndpointSecurityPackage(coreStart.http);
+    dispatch({
+      type: 'endpointPackageInfoStateChanged',
+      payload: createLoadedResourceState(packageInfo),
+    });
+  } catch (error) {
+    // TODO should handle the error instead of logging it to the browser
+    // Also this is an anti-pattern we shouldn't use
+    // Ignore Errors, since this should not hinder the user's ability to use the UI
+    logError(error);
+    dispatch({
+      type: 'endpointPackageInfoStateChanged',
+      payload: createFailedResourceState(error),
+    });
+  }
+}
+
+/**
+ * retrieves the Endpoint pending actions for all of the existing endpoints being displayed on the list
+ * or the details tab.
+ *
+ * @param store
+ */
+const loadEndpointsPendingActions = async ({
+  getState,
+  dispatch,
+}: EndpointPageStore): Promise<void> => {
+  const state = getState();
+  const detailsEndpoint = detailsData(state);
+  const listEndpoints = listData(state);
+  const agentsIds = new Set<string>();
+
+  // get all agent ids for the endpoints in the list
+  if (detailsEndpoint) {
+    agentsIds.add(detailsEndpoint.elastic.agent.id);
+  }
+
+  for (const endpointInfo of listEndpoints) {
+    agentsIds.add(endpointInfo.metadata.elastic.agent.id);
+  }
+
+  if (agentsIds.size === 0) {
+    return;
+  }
+
+  try {
+    const { data: pendingActions } = await fetchPendingActionsByAgentId(Array.from(agentsIds));
+    const agentIdToPendingActions: AgentIdsPendingActions = new Map();
+
+    for (const pendingAction of pendingActions) {
+      agentIdToPendingActions.set(pendingAction.agent_id, pendingAction.pending_actions);
+    }
+
+    dispatch({
+      type: 'endpointPendingActionsStateChanged',
+      payload: createLoadedResourceState(agentIdToPendingActions),
+    });
+  } catch (error) {
+    // TODO should handle the error instead of logging it to the browser
+    // Also this is an anti-pattern we shouldn't use
+    logError(error);
+  }
+};
+
+async function endpointDetailsListMiddleware({
+  store,
+  coreStart,
+  fetchIndexPatterns,
+}: {
+  store: ImmutableMiddlewareAPI<EndpointState, AppAction>;
+  coreStart: CoreStart;
+  fetchIndexPatterns: (state: ImmutableObject<EndpointState>) => Promise<DataViewBase[]>;
+}) {
+  const { getState, dispatch } = store;
+
+  const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(getState());
+  let endpointResponse: MetadataListResponse | undefined;
+
+  try {
+    const decodedQuery: Query = searchBarQuery(getState());
+
+    endpointResponse = await coreStart.http.get<MetadataListResponse>(HOST_METADATA_LIST_ROUTE, {
+      query: {
+        page: pageIndex,
+        pageSize,
+        kuery: decodedQuery.query as string,
+      },
+    });
+
+    dispatch({
+      type: 'serverReturnedEndpointList',
+      payload: endpointResponse,
+    });
+
+    loadEndpointsPendingActions(store);
+
+    try {
+      const endpointsTotalCount = await endpointsTotal(coreStart.http);
+      dispatch({
+        type: 'serverReturnedEndpointsTotal',
+        payload: endpointsTotalCount,
+      });
+    } catch (error) {
+      dispatch({
+        type: 'serverFailedToReturnEndpointsTotal',
+        payload: error,
+      });
+    }
+
+    try {
+      const agentsWithEndpoint = await sendGetFleetAgentsWithEndpoint(coreStart.http);
+      dispatch({
+        type: 'serverReturnedAgenstWithEndpointsTotal',
+        payload: agentsWithEndpoint.total,
+      });
+    } catch (error) {
+      dispatch({
+        type: 'serverFailedToReturnAgenstWithEndpointsTotal',
+        payload: error,
+      });
+    }
+
+    dispatchIngestPolicies({ http: coreStart.http, hosts: endpointResponse.data, store });
+  } catch (error) {
+    dispatch({
+      type: 'serverFailedToReturnEndpointList',
+      payload: error,
+    });
+  }
+
+  // get index pattern and fields for search bar
+  if (patterns(getState()).length === 0) {
+    try {
+      const indexPatterns = await fetchIndexPatterns(getState());
+      if (indexPatterns !== undefined) {
+        dispatch({
+          type: 'serverReturnedMetadataPatterns',
+          payload: indexPatterns,
+        });
+      }
+    } catch (error) {
+      dispatch({
+        type: 'serverFailedToReturnMetadataPatterns',
+        payload: error,
+      });
+    }
+  }
+
+  // No endpoints, so we should check to see if there are policies for onboarding
+  if (endpointResponse && endpointResponse.data.length === 0) {
+    const http = coreStart.http;
+
+    // The original query to the list could have had an invalid param (ex. invalid page_size),
+    // so we check first if endpoints actually do exist before pulling in data for the onboarding
+    // messages.
+    if (await doEndpointsExist(http)) {
+      return;
+    }
+
+    dispatch({
+      type: 'serverReturnedEndpointExistValue',
+      payload: false,
+    });
+
+    try {
+      const policyDataResponse: GetPolicyListResponse =
+        await sendGetEndpointSpecificPackagePolicies(http, {
+          query: {
+            perPage: 50, // Since this is an oboarding flow, we'll cap at 50 policies.
+            page: 1,
+          },
+        });
+
+      dispatch({
+        type: 'serverReturnedPoliciesForOnboarding',
+        payload: {
+          policyItems: policyDataResponse.items,
+        },
+      });
+    } catch (error) {
+      dispatch({
+        type: 'serverFailedToReturnPoliciesForOnboarding',
+        payload: error.body ?? error,
+      });
+    }
+  } else {
+    dispatch({
+      type: 'serverCancelledPolicyItemsLoading',
+    });
+
+    dispatch({
+      type: 'serverReturnedEndpointExistValue',
+      payload: true,
+    });
+  }
+}
+
+async function loadEndpointDetails({
+  selectedEndpoint,
+  store,
+  coreStart,
+}: {
+  store: ImmutableMiddlewareAPI<EndpointState, AppAction>;
+  coreStart: CoreStart;
+  selectedEndpoint: string;
+}) {
+  const { getState, dispatch } = store;
+  // call the endpoint details api
+  try {
+    const response = await coreStart.http.get<HostInfo>(
+      resolvePathVariables(HOST_METADATA_GET_ROUTE, { id: selectedEndpoint as string })
+    );
+    dispatch({
+      type: 'serverReturnedEndpointDetails',
+      payload: response,
+    });
+
+    try {
+      const ingestPolicies = await getAgentAndPoliciesForEndpointsList(
+        coreStart.http,
+        [response],
+        nonExistingPolicies(getState())
+      );
+      if (ingestPolicies !== undefined) {
+        dispatch({
+          type: 'serverReturnedEndpointNonExistingPolicies',
+          payload: ingestPolicies.packagePolicy,
+        });
+      }
+      if (ingestPolicies?.agentPolicy !== undefined) {
+        dispatch({
+          type: 'serverReturnedEndpointAgentPolicies',
+          payload: ingestPolicies.agentPolicy,
+        });
+      }
+    } catch (error) {
+      // TODO should handle the error instead of logging it to the browser
+      // Also this is an anti-pattern we shouldn't use
+      // Ignore Errors, since this should not hinder the user's ability to use the UI
+      logError(error);
+    }
+  } catch (error) {
+    dispatch({
+      type: 'serverFailedToReturnEndpointDetails',
+      payload: error,
+    });
+  }
+
+  loadEndpointsPendingActions(store);
+
+  // call the policy response api
+  try {
+    const policyResponse = await coreStart.http.get<GetHostPolicyResponse>(
+      BASE_POLICY_RESPONSE_ROUTE,
+      { query: { agentId: selectedEndpoint } }
+    );
+    dispatch({
+      type: 'serverReturnedEndpointPolicyResponse',
+      payload: policyResponse,
+    });
+  } catch (error) {
+    dispatch({
+      type: 'serverFailedToReturnEndpointPolicyResponse',
+      payload: error,
+    });
+  }
+}
+
+async function endpointDetailsMiddleware({
+  coreStart,
+  selectedEndpoint,
+  store,
+}: {
+  coreStart: CoreStart;
+  selectedEndpoint?: string;
+  store: ImmutableMiddlewareAPI<EndpointState, AppAction>;
+}) {
+  const { getState, dispatch } = store;
+  dispatch({
+    type: 'serverCancelledPolicyItemsLoading',
+  });
+
+  // If user navigated directly to a endpoint details page, load the endpoint list
+  if (listData(getState()).length === 0) {
+    const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(getState());
+    try {
+      const response = await coreStart.http.get<MetadataListResponse>(HOST_METADATA_LIST_ROUTE, {
+        query: {
+          page: pageIndex,
+          pageSize,
+        },
+      });
+
+      dispatch({
+        type: 'serverReturnedEndpointList',
+        payload: response,
+      });
+
+      dispatchIngestPolicies({ http: coreStart.http, hosts: response.data, store });
+    } catch (error) {
+      dispatch({
+        type: 'serverFailedToReturnEndpointList',
+        payload: error,
+      });
+    }
+  } else {
+    dispatch({
+      type: 'serverCancelledEndpointListLoading',
+    });
+  }
+  if (typeof selectedEndpoint === 'undefined') {
+    return;
+  }
+  await loadEndpointDetails({ store, coreStart, selectedEndpoint });
+}
+
+export async function handleLoadMetadataTransformStats(http: HttpStart, store: EndpointPageStore) {
+  const { getState, dispatch } = store;
+
+  if (!http || !getState || !dispatch) {
+    return;
+  }
+
+  const state = getState();
+  if (isMetadataTransformStatsLoading(state)) return;
+
+  dispatch({
+    type: 'metadataTransformStatsChanged',
+    payload: createLoadingResourceState(asStaleResourceState(getMetadataTransformStats(state))),
+  });
+
+  try {
+    const transformStatsResponse: TransformStatsResponse = await http.get(
+      METADATA_TRANSFORMS_STATUS_ROUTE
+    );
+
+    dispatch({
+      type: 'metadataTransformStatsChanged',
+      payload: createLoadedResourceState<TransformStats[]>(transformStatsResponse.transforms),
+    });
+  } catch (error) {
+    dispatch({
+      type: 'metadataTransformStatsChanged',
+      payload: createFailedResourceState<TransformStats[]>(error),
+    });
+  }
+}
+
+async function dispatchIngestPolicies({
+  store,
+  hosts,
+  http,
+}: {
+  store: EndpointPageStore;
+  hosts: HostResultList['hosts'];
+  http: HttpStart;
+}) {
+  const { getState, dispatch } = store;
+  try {
+    const ingestPolicies = await getAgentAndPoliciesForEndpointsList(
+      http,
+      hosts,
+      nonExistingPolicies(getState())
+    );
+    if (ingestPolicies?.packagePolicy !== undefined) {
+      dispatch({
+        type: 'serverReturnedEndpointNonExistingPolicies',
+        payload: ingestPolicies.packagePolicy,
+      });
+    }
+    if (ingestPolicies?.agentPolicy !== undefined) {
+      dispatch({
+        type: 'serverReturnedEndpointAgentPolicies',
+        payload: ingestPolicies.agentPolicy,
+      });
+    }
+  } catch (error) {
+    // TODO should handle the error instead of logging it to the browser
+    // Also this is an anti-pattern we shouldn't use
+    // Ignore Errors, since this should not hinder the user's ability to use the UI
+    logError(error);
+  }
+}

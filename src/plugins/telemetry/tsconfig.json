@@ -1,7 +1,6 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "composite": true,
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
@@ -12,13 +11,18 @@
     "public/**/**/*",
     "server/**/**/*",
     "common/**/*",
-    "../../../typings/**/*"
+    "../../../typings/**/*",
+    "schema/oss_plugins.json",
+    "schema/oss_root.json",
   ],
   "references": [
     { "path": "../../core/tsconfig.json" },
-    { "path": "../../plugins/usage_collection/tsconfig.json" },
-    { "path": "../../plugins/telemetry_collection_manager/tsconfig.json" },
+    { "path": "../../plugins/home/tsconfig.json" },
+    { "path": "../../plugins/kibana_react/tsconfig.json" },
     { "path": "../../plugins/kibana_utils/tsconfig.json" },
-    { "path": "../../plugins/kibana_react/tsconfig.json" }
+    { "path": "../../plugins/screenshot_mode/tsconfig.json" },
+    { "path": "../../plugins/telemetry_collection_manager/tsconfig.json" },
+    { "path": "../../plugins/usage_collection/tsconfig.json" },
+    { "path": "../../../x-pack/plugins/security/tsconfig.json" }
   ]
 }

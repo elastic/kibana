@@ -9,7 +9,7 @@ import {
   elasticsearchServiceMock,
   httpServiceMock,
   loggingSystemMock,
-} from 'src/core/server/mocks';
+} from '@kbn/core/server/mocks';
 
 export type MockAuthenticationProviderOptions = ReturnType<
   typeof mockAuthenticationProviderOptions
@@ -17,6 +17,7 @@ export type MockAuthenticationProviderOptions = ReturnType<
 
 export function mockAuthenticationProviderOptions(options?: { name: string }) {
   return {
+    getServerBaseURL: () => 'test-protocol://test-hostname:1234',
     client: elasticsearchServiceMock.createClusterClient(),
     logger: loggingSystemMock.create().get(),
     basePath: httpServiceMock.createBasePath(),
@@ -26,5 +27,6 @@ export function mockAuthenticationProviderOptions(options?: { name: string }) {
     urls: {
       loggedOut: jest.fn().mockReturnValue('/mock-server-basepath/security/logged_out'),
     },
+    isElasticCloudDeployment: jest.fn().mockReturnValue(false),
   };
 }

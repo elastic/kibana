@@ -6,20 +6,26 @@
  */
 
 import { requestMock, serverMock } from '../__mocks__';
-import { SetupPlugins } from '../../../../plugin';
-import { SignalsReindexOptions } from '../../../../../common/detection_engine/schemas/request/create_signals_migration_schema';
+import type { SetupPlugins } from '../../../../plugin';
+import type { SignalsReindexOptions } from '../../../../../common/detection_engine/schemas/request/create_signals_migration_schema';
 import { DETECTION_ENGINE_SIGNALS_MIGRATION_URL } from '../../../../../common/constants';
 import { getCreateSignalsMigrationSchemaMock } from '../../../../../common/detection_engine/schemas/request/create_signals_migration_schema.mock';
 import { getIndexVersionsByIndex } from '../../migrations/get_index_versions_by_index';
 import { getSignalVersionsByIndex } from '../../migrations/get_signal_versions_by_index';
 import { createMigration } from '../../migrations/create_migration';
-import { getIndexAliases } from '../../index/get_index_aliases';
+import { getIndexAliases } from '@kbn/securitysolution-es-utils';
 import { getTemplateVersion } from '../index/check_template_version';
 import { createSignalsMigrationRoute } from './create_signals_migration_route';
 import { SIGNALS_TEMPLATE_VERSION } from '../index/get_signals_template';
 
 jest.mock('../index/check_template_version');
-jest.mock('../../index/get_index_aliases');
+jest.mock('@kbn/securitysolution-es-utils', () => {
+  const original = jest.requireActual('@kbn/securitysolution-es-utils');
+  return {
+    ...original,
+    getIndexAliases: jest.fn(),
+  };
+});
 jest.mock('../../migrations/create_migration');
 jest.mock('../../migrations/get_index_versions_by_index');
 jest.mock('../../migrations/get_signal_versions_by_index');
@@ -37,11 +43,11 @@ describe('creating signals migrations route', () => {
     (getIndexVersionsByIndex as jest.Mock).mockResolvedValue({ 'my-signals-index': -1 });
     (getSignalVersionsByIndex as jest.Mock).mockResolvedValue({ 'my-signals-index': [] });
 
-    const securityMock = ({
+    const securityMock = {
       authc: {
         getCurrentUser: jest.fn().mockReturnValue({ user: { username: 'my-username' } }),
       },
-    } as unknown) as SetupPlugins['security'];
+    } as unknown as SetupPlugins['security'];
 
     createSignalsMigrationRoute(server.router, securityMock);
   });

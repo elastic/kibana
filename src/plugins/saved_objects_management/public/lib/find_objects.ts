@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { HttpStart, SavedObjectsFindOptions } from 'src/core/public';
+import { HttpStart, SavedObjectsFindOptions } from '@kbn/core/public';
 import { keysToCamelCaseShallow } from './case_conversion';
 import { SavedObjectWithMetadata } from '../types';
 
@@ -34,14 +34,4 @@ export async function findObjects(
   );
 
   return keysToCamelCaseShallow(response) as SavedObjectsFindResponse;
-}
-
-export async function findObject(
-  http: HttpStart,
-  type: string,
-  id: string
-): Promise<SavedObjectWithMetadata> {
-  return await http.get<SavedObjectWithMetadata>(
-    `/api/kibana/management/saved_objects/${encodeURIComponent(type)}/${encodeURIComponent(id)}`
-  );
 }

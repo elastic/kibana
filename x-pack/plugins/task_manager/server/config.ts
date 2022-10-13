@@ -12,12 +12,14 @@ export const DEFAULT_MAX_WORKERS = 10;
 export const DEFAULT_POLL_INTERVAL = 3000;
 export const DEFAULT_MAX_POLL_INACTIVITY_CYCLES = 10;
 export const DEFAULT_VERSION_CONFLICT_THRESHOLD = 80;
+export const DEFAULT_MAX_EPHEMERAL_REQUEST_CAPACITY = MAX_WORKERS_LIMIT;
 
 // Monitoring Constants
 // ===================
 // Refresh aggregated monitored stats at a default rate of once a minute
 export const DEFAULT_MONITORING_REFRESH_RATE = 60 * 1000;
 export const DEFAULT_MONITORING_STATS_RUNNING_AVERGAE_WINDOW = 50;
+export const DEFAULT_MONITORING_STATS_WARN_DELAYED_TASK_START_IN_SECONDS = 60;
 
 export const taskExecutionFailureThresholdSchema = schema.object(
   {
@@ -39,9 +41,16 @@ export const taskExecutionFailureThresholdSchema = schema.object(
   }
 );
 
+const eventLoopDelaySchema = schema.object({
+  monitor: schema.boolean({ defaultValue: true }),
+  warn_threshold: schema.number({
+    defaultValue: 5000,
+    min: 10,
+  }),
+});
+
 export const configSchema = schema.object(
   {
-    enabled: schema.boolean({ defaultValue: true }),
     /* The maximum number of times a task will be attempted before being abandoned as failed */
     max_attempts: schema.number({
       defaultValue: 3,
@@ -62,15 +71,6 @@ export const configSchema = schema.object(
       // a nice round contrived number, feel free to change as we learn how it behaves
       defaultValue: 1000,
       min: 1,
-    }),
-    /* The name of the index used to store task information. */
-    index: schema.string({
-      defaultValue: '.kibana_task_manager',
-      validate: (val) => {
-        if (val.toLowerCase() === '.tasks') {
-          return `"${val}" is an invalid Kibana Task Manager index, as it is already in use by the ElasticSearch Tasks Manager`;
-        }
-      },
     }),
     /* The maximum number of tasks that this Kibana instance will run simultaneously. */
     max_workers: schema.number({
@@ -109,6 +109,28 @@ export const configSchema = schema.object(
         defaultValue: {},
       }),
     }),
+    monitored_stats_health_verbose_log: schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
+      /* The amount of seconds we allow a task to delay before printing a warning server log */
+      warn_delayed_task_start_in_seconds: schema.number({
+        defaultValue: DEFAULT_MONITORING_STATS_WARN_DELAYED_TASK_START_IN_SECONDS,
+      }),
+    }),
+    ephemeral_tasks: schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
+      /* How many requests can Task Manager buffer before it rejects new requests. */
+      request_capacity: schema.number({
+        // a nice round contrived number, feel free to change as we learn how it behaves
+        defaultValue: 10,
+        min: 1,
+        max: DEFAULT_MAX_EPHEMERAL_REQUEST_CAPACITY,
+      }),
+    }),
+    event_loop_delay: eventLoopDelaySchema,
+    /* These are not designed to be used by most users. Please use caution when changing these */
+    unsafe: schema.object({
+      exclude_task_types: schema.arrayOf(schema.string(), { defaultValue: [] }),
+    }),
   },
   {
     validate: (config) => {
@@ -125,3 +147,4 @@ export const configSchema = schema.object(
 
 export type TaskManagerConfig = TypeOf<typeof configSchema>;
 export type TaskExecutionFailureThreshold = TypeOf<typeof taskExecutionFailureThresholdSchema>;
+export type EventLoopDelayConfig = TypeOf<typeof eventLoopDelaySchema>;

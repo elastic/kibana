@@ -7,10 +7,10 @@
 
 import React from 'react';
 import { EuiNotificationBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useContainerState } from '../../../../../../../../src/plugins/kibana_utils/public';
-import { EnhancedEmbeddableContext } from '../../../../../../embeddable_enhanced/public';
+import { useContainerState } from '@kbn/kibana-utils-plugin/public';
+import { EnhancedEmbeddableContext } from '@kbn/embeddable-enhanced-plugin/public';
+import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { txtDisplayName } from './i18n';
-import { ActionExecutionContext } from '../../../../../../../../src/plugins/ui_actions/public';
 
 export const MenuItem: React.FC<{ context: ActionExecutionContext<EnhancedEmbeddableContext> }> = ({
   context,

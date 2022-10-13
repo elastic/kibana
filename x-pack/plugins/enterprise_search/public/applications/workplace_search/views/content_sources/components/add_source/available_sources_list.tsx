@@ -10,22 +10,27 @@ import React from 'react';
 import { useValues } from 'kea';
 
 import {
-  EuiCard,
   EuiFlexGrid,
+  EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiSpacer,
   EuiTitle,
   EuiText,
   EuiToolTip,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { LicensingLogic } from '../../../../../shared/licensing';
-import { EuiLinkTo } from '../../../../../shared/react_router_helpers';
+import { EuiButtonEmptyTo, EuiLinkTo } from '../../../../../shared/react_router_helpers';
 import { SourceIcon } from '../../../../components/shared/source_icon';
-import { ADD_CUSTOM_PATH, getSourcesPath } from '../../../../routes';
+import { ADD_CUSTOM_PATH, getAddPath, getSourcesPath } from '../../../../routes';
 import { SourceDataItem } from '../../../../types';
 
+import { staticCustomSourceData } from '../../source_data';
+
+import { BYOSourcePrompt } from './byo_source_prompt';
 import {
   AVAILABLE_SOURCE_EMPTY_STATE,
   AVAILABLE_SOURCE_TITLE,
@@ -40,46 +45,102 @@ interface AvailableSourcesListProps {
 export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sources }) => {
   const { hasPlatinumLicense } = useValues(LicensingLogic);
 
-  const getSourceCard = ({ name, serviceType, addPath, accountContextOnly }: SourceDataItem) => {
+  const getSourceCard = ({
+    accountContextOnly,
+    baseServiceType,
+    name,
+    serviceType,
+  }: SourceDataItem) => {
+    const addPath = getAddPath(serviceType, baseServiceType);
     const disabled = !hasPlatinumLicense && accountContextOnly;
+
+    const connectButton = () => {
+      if (disabled) {
+        return (
+          <EuiToolTip
+            position="top"
+            content={i18n.translate(
+              'xpack.enterpriseSearch.workplaceSearch.contentSource.availableSourceList.toolTipContent',
+              {
+                defaultMessage:
+                  '{name} is configurable as a Private Source, available with a Platinum subscription.',
+                values: { name },
+              }
+            )}
+          >
+            <EuiButtonEmpty disabled>
+              {i18n.translate(
+                'xpack.enterpriseSearch.workplaceSearch.contentSource.availableSourceList.connectButtonLabel',
+                {
+                  defaultMessage: 'Connect',
+                }
+              )}
+            </EuiButtonEmpty>
+          </EuiToolTip>
+        );
+      } else {
+        return (
+          <EuiButtonEmptyTo
+            to={
+              getSourcesPath(addPath, true) +
+              (serviceType === 'custom' || serviceType === 'external' ? '' : '/intro')
+            }
+          >
+            {i18n.translate(
+              'xpack.enterpriseSearch.workplaceSearch.contentSource.availableSourceList.connectButtonLabel',
+              {
+                defaultMessage: 'Connect',
+              }
+            )}
+          </EuiButtonEmptyTo>
+        );
+      }
+    };
+
     const card = (
-      <EuiCard
-        titleSize="xs"
-        title={name}
-        description={<></>}
-        isDisabled={disabled}
-        icon={<SourceIcon serviceType={serviceType} name={name} size="xxl" />}
-      />
+      <>
+        <EuiFlexGroup alignItems="center" responsive={false} gutterSize="m">
+          <EuiFlexItem grow={false}>
+            <SourceIcon serviceType={baseServiceType || serviceType} name={name} size="l" />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText size="m">{name}</EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{connectButton()}</EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="m" />
+        <EuiHorizontalRule size="full" margin="none" />
+      </>
     );
 
-    if (disabled) {
-      return (
-        <EuiToolTip
-          position="top"
-          content={i18n.translate(
-            'xpack.enterpriseSearch.workplaceSearch.contentSource.availableSourceList.toolTipContent',
-            {
-              defaultMessage:
-                '{name} is configurable as a Private Source, available with a Platinum subscription.',
-              values: { name },
-            }
-          )}
-        >
-          {card}
-        </EuiToolTip>
-      );
-    }
-    return <EuiLinkTo to={getSourcesPath(addPath, true)}>{card}</EuiLinkTo>;
+    return card;
   };
 
   const visibleSources = (
-    <EuiFlexGrid columns={3} gutterSize="m" responsive={false}>
-      {sources.map((source, i) => (
-        <EuiFlexItem key={i} data-test-subj="AvailableSourceCard">
-          {getSourceCard(source)}
+    <>
+      <EuiFlexGrid columns={2} direction="column" gutterSize="l">
+        {sources.map((source, i) => (
+          <EuiFlexItem grow={false} key={i} data-test-subj="AvailableSourceListItem">
+            <EuiFlexGroup
+              justifyContent="center"
+              alignItems="stretch"
+              data-test-subj="AvailableSourceCard"
+            >
+              <EuiFlexItem>{getSourceCard(source)}</EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        ))}
+        <EuiFlexItem grow={false} data-test-subj="AvailableSourceListItem">
+          <EuiFlexGroup
+            justifyContent="center"
+            alignItems="stretch"
+            data-test-subj="AvailableSourceCard"
+          >
+            <EuiFlexItem>{getSourceCard(staticCustomSourceData)}</EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
-      ))}
-    </EuiFlexGrid>
+      </EuiFlexGrid>
+    </>
   );
 
   const emptyState = (
@@ -105,6 +166,8 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
       </EuiText>
       <EuiSpacer size="m" />
       {sources.length > 0 ? visibleSources : emptyState}
+      <EuiSpacer size="xl" />
+      <BYOSourcePrompt />
     </>
   );
 };

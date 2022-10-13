@@ -8,11 +8,14 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { EuiLoadingChart } from '@elastic/eui';
 import classNames from 'classnames';
-import { Embeddable, EmbeddableInput, IContainer } from '../../../services/embeddable';
 
-export const PLACEHOLDER_EMBEDDABLE = 'placeholder';
+import { EuiLoadingChart } from '@elastic/eui';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { Embeddable, type EmbeddableInput, type IContainer } from '@kbn/embeddable-plugin/public';
+
+import { PLACEHOLDER_EMBEDDABLE } from '.';
+import { pluginServices } from '../../../services/plugin_services';
 
 export class PlaceholderEmbeddable extends Embeddable {
   public readonly type = PLACEHOLDER_EMBEDDABLE;
@@ -28,11 +31,19 @@ export class PlaceholderEmbeddable extends Embeddable {
     }
     this.node = node;
 
+    const {
+      settings: {
+        theme: { theme$ },
+      },
+    } = pluginServices.getServices();
+
     const classes = classNames('embPanel', 'embPanel-isLoading');
     ReactDOM.render(
-      <div className={classes}>
-        <EuiLoadingChart size="l" mono />
-      </div>,
+      <KibanaThemeProvider theme$={theme$}>
+        <div className={classes}>
+          <EuiLoadingChart size="l" mono />
+        </div>
+      </KibanaThemeProvider>,
       node
     );
   }

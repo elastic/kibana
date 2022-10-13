@@ -16,24 +16,29 @@ const createTestAction = ({
   dispayName,
   order,
   grouping = undefined,
+  disabled,
 }: {
   type?: string;
   dispayName: string;
   order?: number;
   grouping?: PresentableGrouping;
+  disabled?: boolean;
 }) =>
   createAction({
-    id: type as any, // mapping doesn't matter for this test
-    type: type as any, // mapping doesn't matter for this test
+    id: type as string,
+    type,
     getDisplayName: () => dispayName,
     order,
     execute: async () => {},
     grouping,
+    disabled,
   });
 
 const resultMapper = (panel: EuiContextMenuPanelDescriptor) => ({
   items: panel.items
-    ? panel.items.map((item) => ({ name: item.isSeparator ? 'SEPARATOR' : item.name }))
+    ? panel.items.map((item) =>
+        item.isSeparator ? { name: 'SEPARATOR' } : { name: item.name, disabled: item.disabled }
+      )
     : [],
 });
 
@@ -67,7 +72,7 @@ test('sorts items in DESC order by "order" field first, then by display name', a
   ].sort(() => 0.5 - Math.random());
 
   const result = await buildContextMenuForActions({
-    actions: actions.map((action) => ({ action, context: {}, trigger: '' as any })),
+    actions: actions.map((action) => ({ action, context: {}, trigger: { id: '' } })),
   });
 
   expect(result.map(resultMapper)).toMatchInlineSnapshot(`
@@ -75,15 +80,19 @@ test('sorts items in DESC order by "order" field first, then by display name', a
       Object {
         "items": Array [
           Object {
+            "disabled": undefined,
             "name": "a-3",
           },
           Object {
+            "disabled": undefined,
             "name": "a-2",
           },
           Object {
+            "disabled": undefined,
             "name": "b-2",
           },
           Object {
+            "disabled": undefined,
             "name": "More",
           },
         ],
@@ -91,9 +100,11 @@ test('sorts items in DESC order by "order" field first, then by display name', a
       Object {
         "items": Array [
           Object {
+            "disabled": undefined,
             "name": "c-2",
           },
           Object {
+            "disabled": undefined,
             "name": "a-1",
           },
         ],
@@ -125,7 +136,9 @@ test('can build menu with one action', async () => {
           dispayName: 'Foo',
         }),
         context: {},
-        trigger: 'TETS_TRIGGER' as any,
+        trigger: {
+          id: 'TETS_TRIGGER',
+        },
       },
     ],
     closeMenu: () => {},
@@ -136,6 +149,7 @@ test('can build menu with one action', async () => {
       Object {
         "items": Array [
           Object {
+            "disabled": undefined,
             "name": "Foo",
           },
         ],
@@ -156,7 +170,7 @@ test('orders items according to "order" field', async () => {
     }),
   ];
   const menu = await buildContextMenuForActions({
-    actions: actions.map((action) => ({ action, context: {}, trigger: 'TEST' as any })),
+    actions: actions.map((action) => ({ action, context: {}, trigger: { id: 'TEST' } })),
   });
 
   expect(menu[0].items![0].name).toBe('Bar');
@@ -173,7 +187,7 @@ test('orders items according to "order" field', async () => {
     }),
   ];
   const menu2 = await buildContextMenuForActions({
-    actions: actions2.map((action) => ({ action, context: {}, trigger: 'TEST' as any })),
+    actions: actions2.map((action) => ({ action, context: {}, trigger: { id: 'TEST' } })),
   });
 
   expect(menu2[0].items![0].name).toBe('Bar');
@@ -199,7 +213,7 @@ test('hides items behind in "More" submenu if there are more than 4 actions', as
     }),
   ];
   const menu = await buildContextMenuForActions({
-    actions: actions.map((action) => ({ action, context: {}, trigger: 'TEST' as any })),
+    actions: actions.map((action) => ({ action, context: {}, trigger: { id: 'TEST' } })),
   });
 
   expect(menu.map(resultMapper)).toMatchInlineSnapshot(`
@@ -207,15 +221,19 @@ test('hides items behind in "More" submenu if there are more than 4 actions', as
       Object {
         "items": Array [
           Object {
+            "disabled": undefined,
             "name": "Foo 1",
           },
           Object {
+            "disabled": undefined,
             "name": "Foo 2",
           },
           Object {
+            "disabled": undefined,
             "name": "Foo 3",
           },
           Object {
+            "disabled": undefined,
             "name": "More",
           },
         ],
@@ -223,9 +241,11 @@ test('hides items behind in "More" submenu if there are more than 4 actions', as
       Object {
         "items": Array [
           Object {
+            "disabled": undefined,
             "name": "Foo 4",
           },
           Object {
+            "disabled": undefined,
             "name": "Foo 5",
           },
         ],
@@ -256,7 +276,7 @@ test('separates grouped items from main items with a separator', async () => {
     }),
   ];
   const menu = await buildContextMenuForActions({
-    actions: actions.map((action) => ({ action, context: {}, trigger: 'TEST' as any })),
+    actions: actions.map((action) => ({ action, context: {}, trigger: { id: 'TEST' } })),
   });
 
   expect(menu.map(resultMapper)).toMatchInlineSnapshot(`
@@ -264,18 +284,22 @@ test('separates grouped items from main items with a separator', async () => {
       Object {
         "items": Array [
           Object {
+            "disabled": undefined,
             "name": "Foo 1",
           },
           Object {
+            "disabled": undefined,
             "name": "Foo 2",
           },
           Object {
+            "disabled": undefined,
             "name": "Foo 3",
           },
           Object {
             "name": "SEPARATOR",
           },
           Object {
+            "disabled": undefined,
             "name": "Foo 4",
           },
         ],
@@ -283,6 +307,7 @@ test('separates grouped items from main items with a separator', async () => {
       Object {
         "items": Array [
           Object {
+            "disabled": undefined,
             "name": "Foo 4",
           },
         ],
@@ -322,7 +347,7 @@ test('separates multiple groups each with its own separator', async () => {
     }),
   ];
   const menu = await buildContextMenuForActions({
-    actions: actions.map((action) => ({ action, context: {}, trigger: 'TEST' as any })),
+    actions: actions.map((action) => ({ action, context: {}, trigger: { id: 'TEST' } })),
   });
 
   expect(menu.map(resultMapper)).toMatchInlineSnapshot(`
@@ -330,24 +355,29 @@ test('separates multiple groups each with its own separator', async () => {
       Object {
         "items": Array [
           Object {
+            "disabled": undefined,
             "name": "Foo 1",
           },
           Object {
+            "disabled": undefined,
             "name": "Foo 2",
           },
           Object {
+            "disabled": undefined,
             "name": "Foo 3",
           },
           Object {
             "name": "SEPARATOR",
           },
           Object {
+            "disabled": undefined,
             "name": "Foo 4",
           },
           Object {
             "name": "SEPARATOR",
           },
           Object {
+            "disabled": undefined,
             "name": "Foo 5",
           },
         ],
@@ -355,6 +385,7 @@ test('separates multiple groups each with its own separator', async () => {
       Object {
         "items": Array [
           Object {
+            "disabled": undefined,
             "name": "Foo 4",
           },
         ],
@@ -362,6 +393,7 @@ test('separates multiple groups each with its own separator', async () => {
       Object {
         "items": Array [
           Object {
+            "disabled": undefined,
             "name": "Foo 5",
           },
         ],
@@ -392,7 +424,7 @@ test('does not add separator for first grouping if there are no main items', asy
     }),
   ];
   const menu = await buildContextMenuForActions({
-    actions: actions.map((action) => ({ action, context: {}, trigger: 'TEST' as any })),
+    actions: actions.map((action) => ({ action, context: {}, trigger: { id: 'TEST' } })),
   });
 
   expect(menu.map(resultMapper)).toMatchInlineSnapshot(`
@@ -400,12 +432,14 @@ test('does not add separator for first grouping if there are no main items', asy
       Object {
         "items": Array [
           Object {
+            "disabled": undefined,
             "name": "Foo 4",
           },
           Object {
             "name": "SEPARATOR",
           },
           Object {
+            "disabled": undefined,
             "name": "Foo 5",
           },
         ],
@@ -413,6 +447,7 @@ test('does not add separator for first grouping if there are no main items', asy
       Object {
         "items": Array [
           Object {
+            "disabled": undefined,
             "name": "Foo 4",
           },
         ],
@@ -420,6 +455,39 @@ test('does not add separator for first grouping if there are no main items', asy
       Object {
         "items": Array [
           Object {
+            "disabled": undefined,
+            "name": "Foo 5",
+          },
+        ],
+      },
+    ]
+  `);
+});
+
+test('it creates disabled actions', async () => {
+  const actions = [
+    createTestAction({
+      dispayName: 'Foo 4',
+      disabled: true,
+    }),
+    createTestAction({
+      dispayName: 'Foo 5',
+    }),
+  ];
+  const menu = await buildContextMenuForActions({
+    actions: actions.map((action) => ({ action, context: {}, trigger: { id: 'TEST' } })),
+  });
+
+  expect(menu.map(resultMapper)).toMatchInlineSnapshot(`
+    Array [
+      Object {
+        "items": Array [
+          Object {
+            "disabled": true,
+            "name": "Foo 4",
+          },
+          Object {
+            "disabled": undefined,
             "name": "Foo 5",
           },
         ],

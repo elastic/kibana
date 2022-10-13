@@ -6,7 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { Logger } from '../../../../src/core/server';
+import { Logger } from '@kbn/core/server';
 
 export enum AllowedHosts {
   Any = '*',
@@ -31,9 +31,18 @@ const customHostSettingsSchema = schema.object({
       requireTLS: schema.maybe(schema.boolean()),
     })
   ),
-  tls: schema.maybe(
+  ssl: schema.maybe(
     schema.object({
+      /**
+       * @deprecated in favor of `verificationMode`
+       **/
       rejectUnauthorized: schema.maybe(schema.boolean()),
+      verificationMode: schema.maybe(
+        schema.oneOf(
+          [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
+          { defaultValue: 'full' }
+        )
+      ),
       certificateAuthoritiesFiles: schema.maybe(
         schema.oneOf([
           schema.string({ minLength: 1 }),
@@ -48,7 +57,6 @@ const customHostSettingsSchema = schema.object({
 export type CustomHostSettings = TypeOf<typeof customHostSettingsSchema>;
 
 export const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }),
   allowedHosts: schema.arrayOf(
     schema.oneOf([schema.string({ hostname: true }), schema.literal(AllowedHosts.Any)]),
     {
@@ -68,10 +76,32 @@ export const configSchema = schema.object({
   }),
   proxyUrl: schema.maybe(schema.string()),
   proxyHeaders: schema.maybe(schema.recordOf(schema.string(), schema.string())),
+  /**
+   * @deprecated in favor of `ssl.proxyVerificationMode`
+   **/
   proxyRejectUnauthorizedCertificates: schema.boolean({ defaultValue: true }),
   proxyBypassHosts: schema.maybe(schema.arrayOf(schema.string({ hostname: true }))),
   proxyOnlyHosts: schema.maybe(schema.arrayOf(schema.string({ hostname: true }))),
+  /**
+   * @deprecated in favor of `ssl.verificationMode`
+   **/
   rejectUnauthorized: schema.boolean({ defaultValue: true }),
+  ssl: schema.maybe(
+    schema.object({
+      verificationMode: schema.maybe(
+        schema.oneOf(
+          [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
+          { defaultValue: 'full' }
+        )
+      ),
+      proxyVerificationMode: schema.maybe(
+        schema.oneOf(
+          [schema.literal('none'), schema.literal('certificate'), schema.literal('full')],
+          { defaultValue: 'full' }
+        )
+      ),
+    })
+  ),
   maxResponseContentLength: schema.byteSize({ defaultValue: '1mb' }),
   responseTimeout: schema.duration({ defaultValue: '60s' }),
   customHostSettings: schema.maybe(schema.arrayOf(customHostSettingsSchema)),
@@ -81,6 +111,12 @@ export const configSchema = schema.object({
     idleInterval: schema.duration({ defaultValue: '1h' }),
     pageSize: schema.number({ defaultValue: 100 }),
   }),
+  microsoftGraphApiUrl: schema.maybe(schema.string()),
+  email: schema.maybe(
+    schema.object({
+      domain_allowlist: schema.arrayOf(schema.string()),
+    })
+  ),
 });
 
 export type ActionsConfig = TypeOf<typeof configSchema>;
@@ -91,6 +127,15 @@ export type ActionsConfig = TypeOf<typeof configSchema>;
 export function getValidatedConfig(logger: Logger, originalConfig: ActionsConfig): ActionsConfig {
   const proxyBypassHosts = originalConfig.proxyBypassHosts;
   const proxyOnlyHosts = originalConfig.proxyOnlyHosts;
+  const proxyUrl = originalConfig.proxyUrl;
+
+  if (proxyUrl) {
+    try {
+      new URL(proxyUrl);
+    } catch (err) {
+      logger.warn(`The confguration xpack.actions.proxyUrl: ${proxyUrl} is invalid.`);
+    }
+  }
 
   if (proxyBypassHosts && proxyOnlyHosts) {
     logger.warn(

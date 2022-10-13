@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { coreMock } from '@kbn/core/public/mocks';
 import { BfetchPublicSetup, BfetchPublicStart } from '.';
 import { plugin as pluginInitializer } from '.';
-import { coreMock } from '../../../core/public/mocks';
 
 export type Setup = jest.Mocked<BfetchPublicSetup>;
 export type Start = jest.Mocked<BfetchPublicStart>;

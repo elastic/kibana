@@ -5,22 +5,15 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiText } from '@elastic/eui';
-import React, { useRef, useState, useEffect, useCallback } from 'react';
+import { EuiButtonEmpty } from '@elastic/eui';
+import type { ReactNode } from 'react';
+import React, { useState, useCallback } from 'react';
 import styled from 'styled-components';
+import { useIsOverflow } from '../../hooks/use_is_overflow';
 import * as i18n from './translations';
 
 const LINE_CLAMP = 3;
 const LINE_CLAMP_HEIGHT = 5.5;
-
-const StyledLineClamp = styled.div`
-  display: -webkit-box;
-  -webkit-line-clamp: ${LINE_CLAMP};
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  max-height: ${`${LINE_CLAMP_HEIGHT}em`};
-  height: ${`${LINE_CLAMP_HEIGHT}em`};
-`;
 
 const ReadMore = styled(EuiButtonEmpty)`
   span.euiButtonContent {
@@ -35,51 +28,57 @@ const ExpandedContent = styled.div`
   overflow-y: auto;
 `;
 
-const LineClampComponent: React.FC<{ content?: string | null }> = ({ content }) => {
-  const [isOverflow, setIsOverflow] = useState<boolean | null>(null);
+const StyledLineClamp = styled.div<{ lineClampHeight: number }>`
+  display: -webkit-box;
+  -webkit-line-clamp: ${LINE_CLAMP};
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  max-height: ${({ lineClampHeight }) => lineClampHeight}em;
+  height: ${({ lineClampHeight }) => lineClampHeight}em;
+`;
+
+const LineClampComponent: React.FC<{
+  children: ReactNode;
+  lineClampHeight?: number;
+}> = ({ children, lineClampHeight = LINE_CLAMP_HEIGHT }) => {
   const [isExpanded, setIsExpanded] = useState<boolean | null>(null);
-  const descriptionRef = useRef<HTMLDivElement>(null);
+  const [isOverflow, descriptionRef] = useIsOverflow(children);
+
   const toggleReadMore = useCallback(() => {
     setIsExpanded((prevState) => !prevState);
   }, []);
 
-  useEffect(() => {
-    if (content != null && descriptionRef?.current?.clientHeight != null) {
-      if (
-        (descriptionRef?.current?.scrollHeight ?? 0) > (descriptionRef?.current?.clientHeight ?? 0)
-      ) {
-        setIsOverflow(true);
-      }
-
-      if (
-        ((content == null || descriptionRef?.current?.scrollHeight) ?? 0) <=
-        (descriptionRef?.current?.clientHeight ?? 0)
-      ) {
-        setIsOverflow(false);
-      }
-    }
-  }, [content]);
-
-  if (!content) {
-    return null;
+  if (isExpanded) {
+    return (
+      <>
+        <ExpandedContent data-test-subj="expanded-line-clamp">
+          <p>{children}</p>
+        </ExpandedContent>
+        {isOverflow && (
+          <ReadMore onClick={toggleReadMore} size="s" data-test-subj="summary-view-readmore">
+            {i18n.READ_LESS}
+          </ReadMore>
+        )}
+      </>
+    );
   }
 
   return (
     <>
-      {isExpanded ? (
-        <ExpandedContent data-test-subj="expanded-line-clamp">
-          <p>{content}</p>
-        </ExpandedContent>
-      ) : isOverflow == null || isOverflow === true ? (
-        <StyledLineClamp data-test-subj="styled-line-clamp" ref={descriptionRef}>
-          {content}
+      {isOverflow == null || isOverflow === true ? (
+        <StyledLineClamp
+          data-test-subj="styled-line-clamp"
+          ref={descriptionRef}
+          lineClampHeight={lineClampHeight}
+        >
+          {children}
         </StyledLineClamp>
       ) : (
-        <EuiText data-test-subj="default-line-clamp">{content}</EuiText>
+        children
       )}
       {isOverflow && (
         <ReadMore onClick={toggleReadMore} size="s" data-test-subj="summary-view-readmore">
-          {isExpanded ? i18n.READ_LESS : i18n.READ_MORE}
+          {i18n.READ_MORE}
         </ReadMore>
       )}
     </>

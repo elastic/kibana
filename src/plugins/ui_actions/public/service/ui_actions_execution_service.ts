@@ -7,8 +7,8 @@
  */
 
 import { uniqBy } from 'lodash';
+import { defer as createDefer, Defer } from '@kbn/kibana-utils-plugin/public';
 import { Action } from '../actions';
-import { defer as createDefer, Defer } from '../../../kibana_utils/public';
 import { buildContextMenuForActions, openContextMenu } from '../context_menu';
 import { Trigger } from '../triggers';
 
@@ -120,7 +120,7 @@ export class UiActionsExecutionService {
         context,
         trigger,
       })),
-      title: '', // intentionally don't have any title
+      title: '', // Empty title is set intentionally.
       closeMenu: () => {
         tasks.forEach((t) => t.defer.resolve());
         session.close();

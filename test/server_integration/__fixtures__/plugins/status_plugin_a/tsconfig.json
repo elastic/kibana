@@ -1,0 +1,15 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./target/types",
+  },
+  "include": [
+    "index.ts",
+    "server/**/*.ts",
+    "../../../../../../typings/**/*",
+  ],
+  "exclude": [],
+  "references": [
+    { "path": "../../../../../src/core/tsconfig.json" }
+  ]
+}

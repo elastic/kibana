@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
+
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -18,111 +20,46 @@ import {
   EuiText,
   EUI_MODAL_CANCEL_BUTTON,
 } from '@elastic/eui';
-import React from 'react';
-import { OverlayStart } from '../../../../../core/public';
-import {
-  createConfirmStrings,
-  discardConfirmStrings,
-  leaveEditModeConfirmStrings,
-} from '../../dashboard_strings';
-import { toMountPoint } from '../../services/kibana_react';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+
+import { createConfirmStrings, discardConfirmStrings } from '../../dashboard_strings';
+import { pluginServices } from '../../services/plugin_services';
 
 export type DiscardOrKeepSelection = 'cancel' | 'discard' | 'keep';
 
-export const confirmDiscardUnsavedChanges = (overlays: OverlayStart, discardCallback: () => void) =>
-  overlays
-    .openConfirm(discardConfirmStrings.getDiscardSubtitle(), {
-      confirmButtonText: discardConfirmStrings.getDiscardConfirmButtonText(),
-      cancelButtonText: discardConfirmStrings.getDiscardCancelButtonText(),
-      buttonColor: 'danger',
-      defaultFocusedButton: EUI_MODAL_CANCEL_BUTTON,
-      title: discardConfirmStrings.getDiscardTitle(),
-    })
-    .then((isConfirmed) => {
-      if (isConfirmed) {
-        discardCallback();
-      }
-    });
+export const confirmDiscardUnsavedChanges = (discardCallback: () => void) => {
+  const {
+    overlays: { openConfirm },
+  } = pluginServices.getServices();
 
-export const confirmDiscardOrKeepUnsavedChanges = (
-  overlays: OverlayStart
-): Promise<DiscardOrKeepSelection> => {
-  const titleId = 'confirmDiscardOrKeepTitle';
-  const descriptionId = 'confirmDiscardOrKeepDescription';
-
-  return new Promise((resolve) => {
-    const session = overlays.openModal(
-      toMountPoint(
-        <EuiFocusTrap clickOutsideDisables={true} initialFocus={'.discardConfirmKeepButton'}>
-          <EuiOutsideClickDetector onOutsideClick={() => session.close()}>
-            <div
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby={titleId}
-              aria-describedby={descriptionId}
-            >
-              <EuiModalHeader data-test-subj="dashboardDiscardConfirm">
-                <EuiModalHeaderTitle>
-                  <h2 id={titleId}>{leaveEditModeConfirmStrings.getLeaveEditModeTitle()}</h2>
-                </EuiModalHeaderTitle>
-              </EuiModalHeader>
-
-              <EuiModalBody>
-                <EuiText>
-                  <p id={descriptionId}>{leaveEditModeConfirmStrings.getLeaveEditModeSubtitle()}</p>
-                </EuiText>
-              </EuiModalBody>
-
-              <EuiModalFooter>
-                <EuiButtonEmpty
-                  data-test-subj="dashboardDiscardConfirmCancel"
-                  onClick={() => session.close()}
-                >
-                  {leaveEditModeConfirmStrings.getLeaveEditModeCancelButtonText()}
-                </EuiButtonEmpty>
-                <EuiButtonEmpty
-                  color="danger"
-                  data-test-subj="dashboardDiscardConfirmDiscard"
-                  onClick={() => {
-                    session.close();
-                    resolve('discard');
-                  }}
-                >
-                  {leaveEditModeConfirmStrings.getLeaveEditModeDiscardButtonText()}
-                </EuiButtonEmpty>
-                <EuiButton
-                  fill
-                  data-test-subj="dashboardDiscardConfirmKeep"
-                  className="discardConfirmKeepButton"
-                  onClick={() => {
-                    session.close();
-                    resolve('keep');
-                  }}
-                >
-                  {leaveEditModeConfirmStrings.getLeaveEditModeKeepChangesText()}
-                </EuiButton>
-              </EuiModalFooter>
-            </div>
-          </EuiOutsideClickDetector>
-        </EuiFocusTrap>
-      ),
-      {
-        'data-test-subj': 'dashboardDiscardConfirmModal',
-        maxWidth: 550,
-      }
-    );
+  openConfirm(discardConfirmStrings.getDiscardSubtitle(), {
+    confirmButtonText: discardConfirmStrings.getDiscardConfirmButtonText(),
+    cancelButtonText: discardConfirmStrings.getDiscardCancelButtonText(),
+    buttonColor: 'danger',
+    defaultFocusedButton: EUI_MODAL_CANCEL_BUTTON,
+    title: discardConfirmStrings.getDiscardTitle(),
+  }).then((isConfirmed) => {
+    if (isConfirmed) {
+      discardCallback();
+    }
   });
 };
 
 export const confirmCreateWithUnsaved = (
-  overlays: OverlayStart,
   startBlankCallback: () => void,
   contineCallback: () => void
 ) => {
   const titleId = 'confirmDiscardOrKeepTitle';
   const descriptionId = 'confirmDiscardOrKeepDescription';
 
-  const session = overlays.openModal(
+  const {
+    settings: {
+      theme: { theme$ },
+    },
+    overlays: { openModal },
+  } = pluginServices.getServices();
+
+  const session = openModal(
     toMountPoint(
       <EuiFocusTrap
         clickOutsideDisables={true}
@@ -178,7 +115,8 @@ export const confirmCreateWithUnsaved = (
             </EuiModalFooter>
           </div>
         </EuiOutsideClickDetector>
-      </EuiFocusTrap>
+      </EuiFocusTrap>,
+      { theme$ }
     ),
     {
       'data-test-subj': 'dashboardCreateConfirmModal',

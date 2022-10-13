@@ -6,23 +6,21 @@
  */
 
 import { useState, useEffect } from 'react';
-import {
-  SavedQueryService,
-  createSavedQueryService,
-} from '../../../../../../../src/plugins/data/public';
+import type { SavedQueryService } from '@kbn/data-plugin/public';
+import { createSavedQueryService } from '@kbn/data-plugin/public';
 
 import { useKibana } from '../../lib/kibana';
 
 export const useSavedQueryServices = () => {
   const kibana = useKibana();
-  const client = kibana.services.savedObjects.client;
+  const { http } = kibana.services;
 
   const [savedQueryService, setSavedQueryService] = useState<SavedQueryService>(
-    createSavedQueryService(client)
+    createSavedQueryService(http)
   );
 
   useEffect(() => {
-    setSavedQueryService(createSavedQueryService(client));
-  }, [client]);
+    setSavedQueryService(createSavedQueryService(http));
+  }, [http]);
   return savedQueryService;
 };

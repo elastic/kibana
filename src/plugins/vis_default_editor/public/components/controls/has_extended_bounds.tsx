@@ -9,7 +9,7 @@
 import React, { useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { search } from '../../../../data/public';
+import { search } from '@kbn/data-plugin/public';
 import { SwitchParamEditor } from './switch';
 import { AggParamEditorProps } from '../agg_param_props';
 

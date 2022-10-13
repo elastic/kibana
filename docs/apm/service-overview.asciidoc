@@ -4,7 +4,48 @@
 
 Selecting a <<services,*service*>> brings you to the *Service overview*.
 The *Service overview* contains a wide variety of charts and tables that provide
-visibility into how a service performs across your infrastructure.
+high-level visibility into how a service is performing across your infrastructure:
+
+* Service details like service version, runtime version, framework, and agent name and version
+* Container and orchestration information
+* Cloud provider, machine type, service name, region, and availability zone
+* Serverless function names and event trigger type
+* Latency, throughput, and errors over time
+* Service dependencies
+
+[discrete]
+[[service-time-comparison]]
+=== Time series and expected bounds comparison
+
+For insight into the health of your services, you can compare how a service
+performs relative to a previous time frame or to the expected bounds from the
+corresponding {anomaly-job}. For example, has latency been slowly increasing
+over time, did the service experience a sudden spike, is the throughput similar
+to what the {ml} job expects – enabling a comparison can provide the answer.
+
+[role="screenshot"]
+image::apm/images/time-series-expected-bounds-comparison.png[Time series and expected bounds comparison]
+
+Select the *Comparison* box to apply a time-based or expected bounds comparison.
+The time-based comparison options are based on the selected time filter range:
+
+[options="header"]
+|====
+|Time filter | Time comparison options
+
+|≤ 24 hours
+|One day or one week
+
+|> 24 hours and ≤ 7 days
+|One week
+
+|> 7 days
+|An identical amount of time immediately before the selected time range
+|====
+
+You can use the expected bounds comparison if {ml-jobs} exist in your selected
+environment and you have
+{ml-docs}/setup.html#kib-visibility-spaces[access to the {ml-features}].
 
 [discrete]
 [[service-latency]]
@@ -35,34 +76,43 @@ image::apm/images/traffic-transactions.png[Traffic and transactions]
 
 [discrete]
 [[service-error-rates]]
-=== Error rate and errors
+=== Failed transaction rate and errors
 
-The *Error rate* chart displays the average error rates relating to the service, within a specific time range.
-An HTTP response code greater than 400 does not necessarily indicate a failed transaction.
-<<transaction-error-rate,Learn more>>.
+The failed transaction rate represents the percentage of failed transactions from the perspective of the selected service.
+It's useful for visualizing unexpected increases, decreases, or irregular patterns in a service's transactions.
+
+[TIP]
+====
+HTTP **transactions** from the HTTP server perspective do not consider a `4xx` status code (client error) as a failure
+because the failure was caused by the caller, not the HTTP server. Thus, `event.outcome=success` and there will be no increase in failed transaction rate.
+
+HTTP **spans** from the client perspective however, are considered failures if the HTTP status code is ≥ 400.
+These spans will set `event.outcome=failure` and increase the failed transaction rate.
+
+If there is no HTTP status, both transactions and spans are considered successful unless an error is reported.
+====
 
 The *Errors* table provides a high-level view of each error message when it first and last occurred,
 along with the total number of occurrences. This makes it very easy to quickly see which errors affect
 your services and take actions to rectify them. To do so, click *View errors*.
 
 [role="screenshot"]
-image::apm/images/error-rate.png[Error rate and errors]
+image::apm/images/error-rate.png[failed transaction rate and errors]
 
 [discrete]
 [[service-span-duration]]
 === Span types average duration and dependencies
 
-The *Average duration by span type* chart visualizes each span type's average duration and helps you determine
+The *Time spent by span type* chart visualizes each span type's average duration and helps you determine
 which spans could be slowing down transactions. The "app" label displayed under the
 chart indicates that something was happening within the application. This could signal that the
 agent does not have auto-instrumentation for whatever was happening during that time or that the time was spent in the
 application code and not in database or external requests.
 
 The *Dependencies* table displays a list of downstream services or external connections relevant
-to the service at the selected time range. The table displays latency, traffic, error rate, and the impact of
+to the service at the selected time range. The table displays latency, throughput, failed transaction rate, and the impact of
 each dependency. By default, dependencies are sorted by _Impact_ to show the most used and the slowest dependency.
-If there is a particular dependency you are interested in, click *View service map* to view the related
-<<service-maps, service map>>.
+If there is a particular dependency you are interested in, click *<<dependencies,View dependencies>>* to learn more about it.
 
 NOTE: Displaying dependencies for services instrumented with the Real User Monitoring (RUM) agent
 requires an agent version ≥ v5.6.3.
@@ -71,12 +121,23 @@ requires an agent version ≥ v5.6.3.
 image::apm/images/spans-dependencies.png[Span type duration and dependencies]
 
 [discrete]
-[[service-instances]]
-=== All instances
+[[service-cold-start]]
+=== Cold start rate
 
-The *All instances* table displays a list of all the available service instances within the selected time range.
-Depending on how the service runs, the instance could be a host or a container. The table displays latency, traffic,
-errors, CPU usage, and memory usage for each instance. By default, instances are sorted by _Throughput_.
+The cold start rate chart is specific to serverless services.
+It displays the percentage of requests that trigger a cold start of a serverless function.
+See <<apm-lambda-cold-start-info>> for more information.
+
+[role="screenshot"]
+image::apm/images/lambda-cold-start.png[lambda cold start graph]
+
+[discrete]
+[[service-instances]]
+=== Instances
+
+The *Instances* table displays a list of all the available service instances within the selected time range.
+Depending on how the service runs, the instance could be a host or a container. The table displays latency, throughput,
+failed transaction, CPU usage, and memory usage for each instance. By default, instances are sorted by _Throughput_.
 
 [role="screenshot"]
 image::apm/images/all-instances.png[All instances]
@@ -108,6 +169,17 @@ image::apm/images/metadata-icons.png[Service metadata]
 *Cloud provider information*
 
 * Cloud provider
+* Cloud service name
 * Availability zones
 * Machine types
 * Project ID
+* Region
+
+*Serverless information*
+
+* Function name(s)
+* Event trigger type
+
+*Alerts*
+
+* Recently fired alerts

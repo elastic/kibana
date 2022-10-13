@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { monitorEventLoopDelay } from 'perf_hooks';
+
 import { Option } from 'fp-ts/lib/Option';
 
 import { ConcreteTaskInstance } from './task';
@@ -13,6 +15,14 @@ import { Result, Err } from './lib/result_type';
 import { ClaimAndFillPoolResult } from './lib/fill_pool';
 import { PollingError } from './polling';
 import { TaskRunResult } from './task_running';
+import { EphemeralTaskInstanceRequest } from './ephemeral_task_lifecycle';
+import type { EventLoopDelayConfig } from './config';
+
+export enum TaskPersistence {
+  Recurring = 'recurring',
+  NonRecurring = 'non_recurring',
+  Ephemeral = 'ephemeral',
+}
 
 export enum TaskEventType {
   TASK_CLAIM = 'TASK_CLAIM',
@@ -21,6 +31,7 @@ export enum TaskEventType {
   TASK_RUN_REQUEST = 'TASK_RUN_REQUEST',
   TASK_POLLING_CYCLE = 'TASK_POLLING_CYCLE',
   TASK_MANAGER_STAT = 'TASK_MANAGER_STAT',
+  EPHEMERAL_TASK_DELAYED_DUE_TO_CAPACITY = 'EPHEMERAL_TASK_DELAYED_DUE_TO_CAPACITY',
 }
 
 export enum TaskClaimErrorType {
@@ -32,12 +43,29 @@ export enum TaskClaimErrorType {
 export interface TaskTiming {
   start: number;
   stop: number;
+  eventLoopBlockMs?: number;
 }
 export type WithTaskTiming<T> = T & { timing: TaskTiming };
 
 export function startTaskTimer(): () => TaskTiming {
   const start = Date.now();
   return () => ({ start, stop: Date.now() });
+}
+
+export function startTaskTimerWithEventLoopMonitoring(
+  eventLoopDelayConfig: EventLoopDelayConfig
+): () => TaskTiming {
+  const stopTaskTimer = startTaskTimer();
+  const eldHistogram = eventLoopDelayConfig.monitor ? monitorEventLoopDelay() : null;
+  eldHistogram?.enable();
+
+  return () => {
+    const { start, stop } = stopTaskTimer();
+    eldHistogram?.disable();
+    const eldMax = eldHistogram?.max ?? 0;
+    const eventLoopBlockMs = Math.round(eldMax / 1000 / 1000); // original in nanoseconds
+    return { start, stop, eventLoopBlockMs };
+  };
 }
 
 export interface TaskEvent<OkResult, ErrorResult, ID = string> {
@@ -48,6 +76,7 @@ export interface TaskEvent<OkResult, ErrorResult, ID = string> {
 }
 export interface RanTask {
   task: ConcreteTaskInstance;
+  persistence: TaskPersistence;
   result: TaskRunResult;
 }
 export type ErroredTask = RanTask & {
@@ -62,9 +91,15 @@ export type TaskMarkRunning = TaskEvent<ConcreteTaskInstance, Error>;
 export type TaskRun = TaskEvent<RanTask, ErroredTask>;
 export type TaskClaim = TaskEvent<ConcreteTaskInstance, ClaimTaskErr>;
 export type TaskRunRequest = TaskEvent<ConcreteTaskInstance, Error>;
+export type EphemeralTaskRejectedDueToCapacity = TaskEvent<EphemeralTaskInstanceRequest, Error>;
 export type TaskPollingCycle<T = string> = TaskEvent<ClaimAndFillPoolResult, PollingError<T>>;
 
-export type TaskManagerStats = 'load' | 'pollingDelay' | 'claimDuration';
+export type TaskManagerStats =
+  | 'load'
+  | 'pollingDelay'
+  | 'claimDuration'
+  | 'queuedEphemeralTasks'
+  | 'ephemeralTaskDelay';
 export type TaskManagerStat = TaskEvent<number, never, TaskManagerStats>;
 
 export type OkResultOf<EventType> = EventType extends TaskEvent<infer OkResult, infer ErrorResult>
@@ -149,6 +184,19 @@ export function asTaskManagerStatEvent(
   };
 }
 
+export function asEphemeralTaskRejectedDueToCapacityEvent(
+  id: string,
+  event: Result<EphemeralTaskInstanceRequest, Error>,
+  timing?: TaskTiming
+): EphemeralTaskRejectedDueToCapacity {
+  return {
+    id,
+    type: TaskEventType.EPHEMERAL_TASK_DELAYED_DUE_TO_CAPACITY,
+    event,
+    timing,
+  };
+}
+
 export function isTaskMarkRunningEvent(
   taskEvent: TaskEvent<unknown, unknown>
 ): taskEvent is TaskMarkRunning {
@@ -174,4 +222,9 @@ export function isTaskManagerStatEvent(
   taskEvent: TaskEvent<unknown, unknown>
 ): taskEvent is TaskManagerStat {
   return taskEvent.type === TaskEventType.TASK_MANAGER_STAT;
+}
+export function isEphemeralTaskRejectedDueToCapacityEvent(
+  taskEvent: TaskEvent<unknown, unknown>
+): taskEvent is EphemeralTaskRejectedDueToCapacity {
+  return taskEvent.type === TaskEventType.EPHEMERAL_TASK_DELAYED_DUE_TO_CAPACITY;
 }

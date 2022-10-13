@@ -6,11 +6,9 @@
  */
 
 import _ from 'lodash';
+import type { Event, Tree, TreeNode } from './generate_data';
 import {
   EndpointDocGenerator,
-  Event,
-  Tree,
-  TreeNode,
   RelatedEventCategory,
   ECSCategory,
   ANCESTRY_LIMIT,
@@ -87,7 +85,9 @@ describe('data generator', () => {
     expect(event2.event?.sequence).toBe((firstNonNullValue(event1.event?.sequence) ?? 0) + 1);
   });
 
-  it('creates the same documents with same random seed', () => {
+  // Lets run this one multiple times just to ensure that the randomness
+  // is truly predicable based on the seed passed
+  it.each([1, 2, 3, 4, 5])('[%#] creates the same documents with same random seed', () => {
     const generator1 = new EndpointDocGenerator('seed');
     const generator2 = new EndpointDocGenerator('seed');
     const timestamp = new Date().getTime();
@@ -504,7 +504,7 @@ describe('data generator', () => {
         events[previousProcessEventIndex].process?.parent?.entity_id
       );
       expect(events[events.length - 1].event?.kind).toEqual('alert');
-      expect(events[events.length - 1].event?.category).toEqual('malware');
+      expect(events[events.length - 1].event?.category).toEqual('behavior');
     });
   });
 
@@ -575,5 +575,17 @@ describe('data generator', () => {
     const rootNode = buildResolverTree(events);
     const visitedEvents = countResolverEvents(rootNode, alertAncestors + generations);
     expect(visitedEvents).toEqual(events.length);
+  });
+
+  it('creates full resolver tree with a single entry_leader id', () => {
+    const events = [...generator.alertsGenerator(1)];
+    const [rootEvent, ...children] = events;
+    expect(
+      children.every((event) => {
+        return (
+          event.process?.entry_leader?.entity_id === rootEvent.process?.entry_leader?.entity_id
+        );
+      })
+    ).toBe(true);
   });
 });

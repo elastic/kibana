@@ -41,6 +41,120 @@ describe('Parser', () => {
     });
   });
 
+  describe('Math', () => {
+    it('converts basic symbols into left-to-right pairs', () => {
+      expect(parse('a + b + c - d')).toEqual({
+        args: [
+          {
+            name: 'add',
+            type: 'function',
+            args: [
+              {
+                name: 'add',
+                type: 'function',
+                args: [
+                  expect.objectContaining({ location: { min: 0, max: 2 } }),
+                  expect.objectContaining({ location: { min: 3, max: 6 } }),
+                ],
+              },
+              expect.objectContaining({ location: { min: 7, max: 10 } }),
+            ],
+          },
+          expect.objectContaining({ location: { min: 11, max: 13 } }),
+        ],
+        name: 'subtract',
+        type: 'function',
+        text: 'a + b + c - d',
+        location: { min: 0, max: 13 },
+      });
+    });
+
+    describe('Comparison', () => {
+      it('should throw for non valid comparison symbols', () => {
+        const symbols = ['<>', '><', '===', '>>', '<<'];
+        for (const symbol of symbols) {
+          expect(() => parse(`5 ${symbol} 1`)).toThrow();
+        }
+      });
+      describe.each`
+        symbol  | fn
+        ${'<'}  | ${'lt'}
+        ${'>'}  | ${'gt'}
+        ${'=='} | ${'eq'}
+        ${'>='} | ${'gte'}
+        ${'<='} | ${'lte'}
+      `('Symbol "$symbol" ( $fn )', ({ symbol, fn }) => {
+        it(`should parse comparison symbol: "$symbol"`, () => {
+          expect(parse(`5 ${symbol} 1`)).toEqual({
+            name: fn,
+            type: 'function',
+            args: [5, 1],
+            text: `5 ${symbol} 1`,
+            location: { min: 0, max: 4 + symbol.length },
+          });
+          expect(parse(`a ${symbol} b`)).toEqual({
+            name: fn,
+            type: 'function',
+            args: [variableEqual('a'), variableEqual('b')],
+            text: `a ${symbol} b`,
+            location: { min: 0, max: 4 + symbol.length },
+          });
+        });
+
+        it.each`
+          expression
+          ${`1 + (1 ${symbol} 1)`}
+          ${`(1 ${symbol} 1) + 1`}
+          ${`((1 ${symbol} 1) + 1)`}
+          ${`((1 ${symbol} 1) + (1 ${symbol} 1))`}
+          ${`((1 ${symbol} 1) + ( ${symbol} 1))`}
+          ${` ${symbol} 1`}
+          ${`1 ${symbol} `}
+          ${`a + (b ${symbol} c)`}
+          ${`(a ${symbol} b) + c`}
+          ${`((a ${symbol} b) + c)`}
+          ${`((a ${symbol} b) + (c ${symbol} d))`}
+          ${`((a ${symbol} b) + ( ${symbol} c))`}
+          ${` ${symbol} a`}
+          ${`a ${symbol} `}
+        `(
+          'should throw for invalid expression with comparison arguments: $expression',
+          ({ expression }) => {
+            expect(() => parse(expression)).toThrow();
+          }
+        );
+
+        it.each`
+          expression
+          ${`1 ${symbol} 1 ${symbol} 1`}
+          ${`(1 ${symbol} 1) ${symbol} 1`}
+          ${`1 ${symbol} (1 ${symbol} 1)`}
+          ${`a ${symbol} b ${symbol} c`}
+          ${`(a ${symbol} b) ${symbol} c`}
+          ${`a ${symbol} (b ${symbol} c)`}
+        `('should throw for cascading comparison operators: $expression', ({ expression }) => {
+          expect(() => parse(expression)).toThrow();
+        });
+
+        it.each`
+          expression
+          ${`1 ${symbol} 1`}
+          ${`(1 ${symbol} 1)`}
+          ${`((1 ${symbol} 1))`}
+          ${`((1 + 1) ${symbol} 1)`}
+          ${`1 + 1 ${symbol} 1 * 1`}
+          ${`a ${symbol} b`}
+          ${`(a ${symbol} b)`}
+          ${`((a ${symbol} b))`}
+          ${`((a + b) ${symbol} c)`}
+          ${`a + b ${symbol} c * d`}
+        `('should parse comparison expressions: $expression', ({ expression }) => {
+          expect(() => parse(expression)).not.toThrow();
+        });
+      });
+    });
+  });
+
   describe('Variables', () => {
     it('strings', () => {
       expect(parse('f')).toEqual(variableEqual('f'));
@@ -63,6 +177,7 @@ describe('Parser', () => {
       expect(parse('@foo0')).toEqual(variableEqual('@foo0'));
       expect(parse('.foo0')).toEqual(variableEqual('.foo0'));
       expect(parse('-foo0')).toEqual(variableEqual('-foo0'));
+      expect(() => parse(`foo😀\t')`)).toThrow('Failed to parse');
     });
   });
 
@@ -74,6 +189,7 @@ describe('Parser', () => {
       expect(parse('"foo bar fizz buzz"')).toEqual(variableEqual('foo bar fizz buzz'));
       expect(parse('"foo   bar   baby"')).toEqual(variableEqual('foo   bar   baby'));
       expect(parse(`"f'oo"`)).toEqual(variableEqual(`f'oo`));
+      expect(parse(`"foo😀\t"`)).toEqual(variableEqual(`foo😀\t`));
     });
 
     it('strings with single quotes', () => {
@@ -90,6 +206,7 @@ describe('Parser', () => {
       expect(parse("'foo bar '")).toEqual(variableEqual("foo bar "));
       expect(parse("'0foo'")).toEqual(variableEqual("0foo"));
       expect(parse(`'f"oo'`)).toEqual(variableEqual(`f"oo`));
+      expect(parse(`'foo😀\t'`)).toEqual(variableEqual(`foo😀\t`));
       /* eslint-enable prettier/prettier */
     });
 
@@ -263,6 +380,8 @@ describe('Evaluate', () => {
     expect(evaluate('5/20')).toEqual(0.25);
     expect(evaluate('1 + 1 + 2 + 3 + 12')).toEqual(19);
     expect(evaluate('100 / 10 / 10')).toEqual(1);
+    expect(evaluate('0 * 1 - 100 / 10 / 10')).toEqual(-1);
+    expect(evaluate('100 / (10 / 10)')).toEqual(100);
   });
 
   it('equations with functions', () => {

@@ -8,11 +8,11 @@
 import { useEffect, useCallback } from 'react';
 
 import { flow } from 'fp-ts/lib/function';
-import { useAsync, withOptionalSignal } from '../../../../shared_imports';
+import { useAsync, withOptionalSignal } from '@kbn/securitysolution-hook-utils';
 import { useHttp } from '../../../../common/lib/kibana';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { pureFetchRuleById } from './api';
-import { Rule } from './types';
+import type { Rule } from './types';
 import * as i18n from './translations';
 import { transformInput } from './transforms';
 

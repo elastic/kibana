@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from 'src/core/server';
-import { PluginConfigDescriptor } from 'kibana/server';
+import { PluginInitializerContext } from '@kbn/core/server';
+import { PluginConfigDescriptor } from '@kbn/core/server';
 import { MapsPlugin } from './plugin';
 import { configSchema, MapsXPackConfig } from '../config';
 
@@ -14,8 +14,6 @@ export const config: PluginConfigDescriptor<MapsXPackConfig> = {
   // exposeToBrowser specifies kibana.yml settings to expose to the browser
   // the value `true` in this context signals configuration is exposed to browser
   exposeToBrowser: {
-    enabled: true,
-    showMapVisualizationTypes: true,
     showMapsInspectorAdapter: true,
     preserveDrawingBuffer: true,
   },

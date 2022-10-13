@@ -22,10 +22,8 @@ const { useGlobalFlyout } = GlobalFlyout;
 export const DocumentFields = React.memo(() => {
   const { fields, search, documentFields } = useMappingsState();
   const dispatch = useDispatch();
-  const {
-    addContent: addContentToGlobalFlyout,
-    removeContent: removeContentFromGlobalFlyout,
-  } = useGlobalFlyout();
+  const { addContent: addContentToGlobalFlyout, removeContent: removeContentFromGlobalFlyout } =
+    useGlobalFlyout();
 
   const { editor: editorType } = documentFields;
   const isEditing = documentFields.status === 'editingField';

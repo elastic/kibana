@@ -10,10 +10,10 @@ import {
   Collector,
   createUsageCollectionSetupMock,
   createCollectorFetchContextMock,
-} from '../../../../usage_collection/server/mocks';
+} from '@kbn/usage-collection-plugin/server/mocks';
 import { registerCoreUsageCollector } from './core_usage_collector';
-import { coreUsageDataServiceMock, loggingSystemMock } from '../../../../../core/server/mocks';
-import type { CoreUsageData } from '../../../../../core/server';
+import { coreUsageDataServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type { CoreUsageData } from '@kbn/core/server';
 
 const logger = loggingSystemMock.createLogger();
 
@@ -28,7 +28,7 @@ describe('telemetry_core', () => {
 
   const collectorFetchContext = createCollectorFetchContextMock();
   const coreUsageDataStart = coreUsageDataServiceMock.createStartContract();
-  const getCoreUsageDataReturnValue = (Symbol('core telemetry') as unknown) as CoreUsageData;
+  const getCoreUsageDataReturnValue = Symbol('core telemetry') as unknown as CoreUsageData;
   coreUsageDataStart.getCoreUsageData.mockResolvedValue(getCoreUsageDataReturnValue);
 
   beforeAll(() => registerCoreUsageCollector(usageCollectionMock, () => coreUsageDataStart));

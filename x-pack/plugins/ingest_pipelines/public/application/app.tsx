@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiPageContent } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiPageContent_Deprecated as EuiPageContent, EuiEmptyPrompt } from '@elastic/eui';
 import React, { FunctionComponent } from 'react';
 import { Router, Switch, Route } from 'react-router-dom';
 
-import { useKibana } from '../shared_imports';
+import { useKibana, useExecutionContext } from '../shared_imports';
 
 import { APP_CLUSTER_REQUIRED_PRIVILEGES } from '../../common/constants';
 
@@ -19,10 +19,15 @@ import {
   useAuthorizationContext,
   WithPrivileges,
   SectionLoading,
-  NotAuthorizedSection,
 } from '../shared_imports';
 
-import { PipelinesList, PipelinesCreate, PipelinesEdit, PipelinesClone } from './sections';
+import {
+  PipelinesList,
+  PipelinesCreate,
+  PipelinesEdit,
+  PipelinesClone,
+  PipelinesCreateFromCsv,
+} from './sections';
 import { ROUTES } from './services/navigation';
 
 export const AppWithoutRouter = () => (
@@ -31,6 +36,7 @@ export const AppWithoutRouter = () => (
     <Route exact path={ROUTES.clone} component={PipelinesClone} />
     <Route exact path={ROUTES.create} component={PipelinesCreate} />
     <Route exact path={ROUTES.edit} component={PipelinesEdit} />
+    <Route exact path={ROUTES.createFromCsv} component={PipelinesCreateFromCsv} />
     {/* Catch all */}
     <Route component={PipelinesList} />
   </Switch>
@@ -38,7 +44,12 @@ export const AppWithoutRouter = () => (
 
 export const App: FunctionComponent = () => {
   const { apiError } = useAuthorizationContext();
-  const { history } = useKibana().services;
+  const { history, executionContext } = useKibana().services;
+
+  useExecutionContext(executionContext!, {
+    type: 'application',
+    page: 'ingestPipelines',
+  });
 
   if (apiError) {
     return (
@@ -61,35 +72,42 @@ export const App: FunctionComponent = () => {
       {({ isLoading, hasPrivileges, privilegesMissing }) => {
         if (isLoading) {
           return (
-            <SectionLoading>
-              <FormattedMessage
-                id="xpack.ingestPipelines.app.checkingPrivilegesDescription"
-                defaultMessage="Checking privileges…"
-              />
-            </SectionLoading>
+            <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+              <SectionLoading>
+                <FormattedMessage
+                  id="xpack.ingestPipelines.app.checkingPrivilegesDescription"
+                  defaultMessage="Checking privileges…"
+                />
+              </SectionLoading>
+            </EuiPageContent>
           );
         }
 
         if (!hasPrivileges) {
           return (
-            <EuiPageContent>
-              <NotAuthorizedSection
+            <EuiPageContent verticalPosition="center" horizontalPosition="center" color="subdued">
+              <EuiEmptyPrompt
+                iconType="securityApp"
                 title={
-                  <FormattedMessage
-                    id="xpack.ingestPipelines.app.deniedPrivilegeTitle"
-                    defaultMessage="Cluster privileges required"
-                  />
+                  <h2>
+                    <FormattedMessage
+                      id="xpack.ingestPipelines.app.deniedPrivilegeTitle"
+                      defaultMessage="Cluster privileges required"
+                    />
+                  </h2>
                 }
-                message={
-                  <FormattedMessage
-                    id="xpack.ingestPipelines.app.deniedPrivilegeDescription"
-                    defaultMessage="To use Ingest Pipelines, you must have {privilegesCount,
-                    plural, one {this cluster privilege} other {these cluster privileges}}: {missingPrivileges}."
-                    values={{
-                      missingPrivileges: privilegesMissing.cluster!.join(', '),
-                      privilegesCount: privilegesMissing.cluster!.length,
-                    }}
-                  />
+                body={
+                  <p>
+                    <FormattedMessage
+                      id="xpack.ingestPipelines.app.deniedPrivilegeDescription"
+                      defaultMessage="To use Ingest Pipelines, you must have {privilegesCount,
+                      plural, one {this cluster privilege} other {these cluster privileges}}: {missingPrivileges}."
+                      values={{
+                        missingPrivileges: privilegesMissing.cluster!.join(', '),
+                        privilegesCount: privilegesMissing.cluster!.length,
+                      }}
+                    />
+                  </p>
                 }
               />
             </EuiPageContent>

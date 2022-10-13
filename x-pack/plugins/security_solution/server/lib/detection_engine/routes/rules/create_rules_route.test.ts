@@ -8,23 +8,20 @@
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import {
   getEmptyFindResult,
-  getAlertMock,
+  getRuleMock,
   getCreateRequest,
-  getFindResultStatus,
-  getNonEmptyIndex,
   getFindResultWithSingleHit,
   createMlRuleRequest,
+  getBasicEmptySearchResponse,
 } from '../__mocks__/request_responses';
 import { mlServicesMock, mlAuthzMock as mockMlAuthzFactory } from '../../../machine_learning/mocks';
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { createRulesRoute } from './create_rules_route';
-import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
-jest.mock('../../rules/update_rules_notifications');
+
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 
 describe('create_rules', () => {
@@ -37,67 +34,55 @@ describe('create_rules', () => {
     ({ clients, context } = requestContextMock.createTools());
     ml = mlServicesMock.createSetupContract();
 
-    clients.clusterClient.callAsCurrentUser.mockResolvedValue(getNonEmptyIndex()); // index exists
-    clients.alertsClient.find.mockResolvedValue(getEmptyFindResult()); // no current rules
-    clients.alertsClient.create.mockResolvedValue(getAlertMock(getQueryRuleParams())); // creation succeeds
-    clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus()); // needed to transform
+    clients.rulesClient.find.mockResolvedValue(getEmptyFindResult()); // no current rules
+    clients.rulesClient.create.mockResolvedValue(getRuleMock(getQueryRuleParams())); // creation succeeds
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (context.core.elasticsearch.client.asCurrentUser.search as any).mockResolvedValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise({ _shards: { total: 1 } })
+    context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
+      elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())
     );
     createRulesRoute(server.router, ml);
   });
 
-  describe('status codes with actionClient and alertClient', () => {
-    test('returns 200 when creating a single rule with a valid actionClient and alertClient', async () => {
-      (updateRulesNotifications as jest.Mock).mockResolvedValue({
-        id: 'id',
-        actions: [],
-        alertThrottle: null,
-        ruleThrottle: 'no_actions',
-      });
-      const response = await server.inject(getCreateRequest(), context);
+  describe('status codes', () => {
+    test('returns 200 with a rule created via RulesClient', async () => {
+      const response = await server.inject(
+        getCreateRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(200);
     });
 
-    test('returns 404 if alertClient is not available on the route', async () => {
-      context.alerting!.getAlertsClient = jest.fn();
-      const response = await server.inject(getCreateRequest(), context);
-      expect(response.status).toEqual(404);
-      expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
-    });
-
-    it('returns 404 if siem client is unavailable', async () => {
-      const { securitySolution, ...contextWithoutSecuritySolution } = context;
-      // @ts-expect-error
-      const response = await server.inject(getCreateRequest(), contextWithoutSecuritySolution);
-      expect(response.status).toEqual(404);
-      expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
-    });
-
-    it('returns 200 if license is not platinum', async () => {
+    test('returns 200 if license is not platinum', async () => {
       (context.licensing.license.hasAtLeast as jest.Mock).mockReturnValue(false);
 
-      const response = await server.inject(getCreateRequest(), context);
+      const response = await server.inject(
+        getCreateRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(200);
     });
   });
 
   describe('creating an ML Rule', () => {
-    it('is successful', async () => {
-      const response = await server.inject(createMlRuleRequest(), context);
+    test('is successful', async () => {
+      const response = await server.inject(
+        createMlRuleRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(200);
     });
 
-    it('returns a 403 if ML Authz fails', async () => {
+    test('returns a 403 if ML Authz fails', async () => {
       (buildMlAuthz as jest.Mock).mockReturnValueOnce({
         validateRuleType: jest
           .fn()
           .mockResolvedValue({ valid: false, message: 'mocked validation message' }),
       });
 
-      const response = await server.inject(createMlRuleRequest(), context);
+      const response = await server.inject(
+        createMlRuleRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(403);
       expect(response.body).toEqual({
         message: 'mocked validation message',
@@ -107,23 +92,12 @@ describe('create_rules', () => {
   });
 
   describe('unhappy paths', () => {
-    test('it returns a 400 if the index does not exist', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (context.core.elasticsearch.client.asCurrentUser.search as any).mockResolvedValueOnce(
-        elasticsearchClientMock.createSuccessTransportRequestPromise({ _shards: { total: 0 } })
-      );
-      const response = await server.inject(getCreateRequest(), context);
-
-      expect(response.status).toEqual(400);
-      expect(response.body).toEqual({
-        message: 'To create a rule, the index must exist first. Index undefined does not exist',
-        status_code: 400,
-      });
-    });
-
     test('returns a duplicate error if rule_id already exists', async () => {
-      clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
-      const response = await server.inject(getCreateRequest(), context);
+      clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
+      const response = await server.inject(
+        getCreateRequest(),
+        requestContextMock.convertContext(context)
+      );
 
       expect(response.status).toEqual(409);
       expect(response.body).toEqual({
@@ -133,10 +107,13 @@ describe('create_rules', () => {
     });
 
     test('catches error if creation throws', async () => {
-      clients.alertsClient.create.mockImplementation(async () => {
+      clients.rulesClient.create.mockImplementation(async () => {
         throw new Error('Test error');
       });
-      const response = await server.inject(getCreateRequest(), context);
+      const response = await server.inject(
+        getCreateRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
         message: 'Test error',

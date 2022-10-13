@@ -11,13 +11,37 @@
     "auditbeat-*",
     "logs-endpoint.events.*"
   ],
-  "language": "lucene",
+  "language": "eql",
   "license": "Elastic License v2",
   "max_signals": 33,
-  "name": "Creation of Hidden Files and Directories",
-  "query": "event.category:process AND event.type:(start or process_started) AND process.working_directory:(\"/tmp\" or \"/var/tmp\" or \"/dev/shm\") AND process.args:/\\.[a-zA-Z0-9_\\-][a-zA-Z0-9_\\-\\.]{1,254}/ AND NOT process.name:(ls or find)",
+  "name": "Creation of Hidden Files and Directories via CommandLine",
+  "note": "",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n  process.working_directory in (\"/tmp\", \"/var/tmp\", \"/dev/shm\") and\n  process.args regex~ \"\"\"\\.[a-z0-9_\\-][a-z0-9_\\-\\.]{1,254}\"\"\" and\n  not process.name in (\"ls\", \"find\", \"grep\")\n",
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.args",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.name",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "process.working_directory",
+      "type": "keyword"
+    }
+  ],
   "risk_score": 47,
   "rule_id": "b9666521-4742-49ce-9ddc-b8e84c35acae",
+  "setup": "If enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.",
   "severity": "medium",
   "tags": [
     "Elastic",
@@ -60,6 +84,6 @@
     }
   ],
   "timestamp_override": "event.ingested",
-  "type": "query",
-  "version": 6
+  "type": "eql",
+  "version": 100
 }

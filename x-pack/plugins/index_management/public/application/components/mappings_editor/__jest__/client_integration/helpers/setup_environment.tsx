@@ -5,14 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
-import { GlobalFlyout } from '../../../../../../../../../../src/plugins/es_ui_shared/public';
-import {
-  docLinksServiceMock,
-  uiSettingsServiceMock,
-} from '../../../../../../../../../../src/core/public/mocks';
+import React, { ComponentType, MemoExoticComponent } from 'react';
+import SemVer from 'semver/classes/semver';
+
+import '@kbn/es-ui-shared-plugin/public/components/code_editor/jest_mock';
+import { GlobalFlyout } from '@kbn/es-ui-shared-plugin/public';
+import { docLinksServiceMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
+import { MAJOR_VERSION } from '../../../../../../../common';
 import { MappingsEditorProvider } from '../../../mappings_editor_context';
 import { createKibanaReactContext } from '../../../shared_imports';
+import { Props as MappingsEditorProps } from '../../../mappings_editor';
+
+export const kibanaVersion = new SemVer(MAJOR_VERSION);
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -30,16 +34,6 @@ jest.mock('@elastic/eui', () => {
         }}
       />
     ),
-    // Mocking EuiCodeEditor, which uses React Ace under the hood
-    EuiCodeEditor: (props: any) => (
-      <input
-        data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
-        data-currentvalue={props.value}
-        onChange={(e: any) => {
-          props.onChange(e.jsonContent);
-        }}
-      />
-    ),
     // Mocking EuiSuperSelect to be able to easily change its value
     // with a `myWrapper.simulate('change', { target: { value: 'someValue' } })`
     EuiSuperSelect: (props: any) => (
@@ -54,10 +48,8 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-jest.mock('../../../../../../../../../../src/plugins/kibana_react/public', () => {
-  const original = jest.requireActual(
-    '../../../../../../../../../../src/plugins/kibana_react/public'
-  );
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
 
   const CodeEditorMock = (props: any) => (
     <input
@@ -80,18 +72,26 @@ const { GlobalFlyoutProvider } = GlobalFlyout;
 
 const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
   uiSettings: uiSettingsServiceMock.createSetupContract(),
+  kibanaVersion: {
+    get: () => kibanaVersion,
+  },
 });
 
-const defaultProps = {
+const defaultProps: MappingsEditorProps = {
   docLinks: docLinksServiceMock.createStartContract(),
+  onChange: () => undefined,
+  esNodesPlugins: [],
 };
 
-export const WithAppDependencies = (Comp: any) => (props: any) => (
-  <KibanaReactContextProvider>
-    <MappingsEditorProvider>
-      <GlobalFlyoutProvider>
-        <Comp {...defaultProps} {...props} />
-      </GlobalFlyoutProvider>
-    </MappingsEditorProvider>
-  </KibanaReactContextProvider>
-);
+export const WithAppDependencies =
+  (Comp: MemoExoticComponent<ComponentType<MappingsEditorProps>>) =>
+  (props: Partial<MappingsEditorProps>) =>
+    (
+      <KibanaReactContextProvider>
+        <MappingsEditorProvider>
+          <GlobalFlyoutProvider>
+            <Comp {...defaultProps} {...props} />
+          </GlobalFlyoutProvider>
+        </MappingsEditorProvider>
+      </KibanaReactContextProvider>
+    );

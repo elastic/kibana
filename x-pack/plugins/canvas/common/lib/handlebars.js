@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import Hbars from 'handlebars/dist/handlebars';
+import Hbars from '@kbn/handlebars';
 import { evaluate } from '@kbn/tinymath';
 import { pivotObjectArray } from './pivot_object_array';
 

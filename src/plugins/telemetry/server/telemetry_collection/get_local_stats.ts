@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   StatsGetter,
   StatsCollectionContext,
-} from 'src/plugins/telemetry_collection_manager/server';
+} from '@kbn/telemetry-collection-manager-plugin/server';
 import { getClusterInfo } from './get_cluster_info';
 import { getClusterStats } from './get_cluster_stats';
 import { getKibana, handleKibanaStats, KibanaUsageStats } from './get_kibana';
@@ -28,7 +28,7 @@ import { getDataTelemetry, DATA_TELEMETRY_ID, DataTelemetryPayload } from './get
  */
 export function handleLocalStats<ClusterStats extends estypes.ClusterStatsResponse>(
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  { cluster_name, cluster_uuid, version }: estypes.RootNodeInfoResponse,
+  { cluster_name, cluster_uuid, version }: estypes.InfoResponse,
   { _nodes, cluster_name: clusterName, ...clusterStats }: ClusterStats,
   kibana: KibanaUsageStats | undefined,
   dataTelemetry: DataTelemetryPayload | undefined,
@@ -65,7 +65,7 @@ export const getLocalStats: StatsGetter<TelemetryLocalStats> = async (
   config,
   context
 ) => {
-  const { usageCollection, esClient, soClient, kibanaRequest } = config;
+  const { usageCollection, esClient, soClient } = config;
 
   return await Promise.all(
     clustersDetails.map(async (clustersDetail) => {
@@ -73,7 +73,7 @@ export const getLocalStats: StatsGetter<TelemetryLocalStats> = async (
         getClusterInfo(esClient), // cluster info
         getClusterStats(esClient), // cluster stats (not to be confused with cluster _state_)
         getNodesUsage(esClient), // nodes_usage info
-        getKibana(usageCollection, esClient, soClient, kibanaRequest),
+        getKibana(usageCollection, esClient, soClient),
         getDataTelemetry(esClient),
       ]);
       return handleLocalStats(

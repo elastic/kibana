@@ -1,0 +1,66 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import React from 'react';
+import { EuiComboBox } from '@elastic/eui';
+
+import { FieldProps } from './types';
+import { useField } from './use_field';
+
+const AS_PLAIN_TEXT = { asPlainText: true };
+
+export const FieldComponent: React.FC<FieldProps> = ({
+  fieldInputWidth,
+  fieldTypeFilter = [],
+  indexPattern,
+  isClearable = false,
+  isDisabled = false,
+  isLoading = false,
+  isRequired = false,
+  onChange,
+  placeholder,
+  selectedField,
+}): JSX.Element => {
+  const {
+    isInvalid,
+    comboOptions,
+    selectedComboOptions,
+    fieldWidth,
+
+    renderFields,
+    handleTouch,
+    handleValuesChange,
+  } = useField({
+    indexPattern,
+    fieldTypeFilter,
+    isRequired,
+    selectedField,
+    fieldInputWidth,
+    onChange,
+  });
+  return (
+    <EuiComboBox
+      placeholder={placeholder}
+      options={comboOptions}
+      selectedOptions={selectedComboOptions}
+      onChange={handleValuesChange}
+      isLoading={isLoading}
+      isDisabled={isDisabled}
+      isClearable={isClearable}
+      isInvalid={isInvalid}
+      onFocus={handleTouch}
+      singleSelection={AS_PLAIN_TEXT}
+      data-test-subj="fieldAutocompleteComboBox"
+      style={fieldWidth}
+      fullWidth
+      renderOption={renderFields}
+    />
+  );
+};
+
+FieldComponent.displayName = 'Field';

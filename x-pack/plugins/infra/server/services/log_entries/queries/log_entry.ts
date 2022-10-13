@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import * as rt from 'io-ts';
 import { jsonArrayRT } from '../../../../common/typed_json';
 import {
@@ -18,7 +18,7 @@ export const createGetLogEntryQuery = (
   logEntryId: string,
   timestampField: string,
   tiebreakerField: string,
-  runtimeMappings?: estypes.RuntimeFields
+  runtimeMappings?: estypes.MappingRuntimeFields
 ): estypes.AsyncSearchSubmitRequest => ({
   index: logEntryIndex,
   terminate_after: 1,
@@ -31,7 +31,6 @@ export const createGetLogEntryQuery = (
         values: [logEntryId],
       },
     },
-    // @ts-expect-error @elastic/elasticsearch doesn't declare body.fields on AsyncSearchSubmitRequest
     fields: ['*'],
     runtime_mappings: runtimeMappings,
     sort: [{ [timestampField]: 'desc' }, { [tiebreakerField]: 'desc' }],

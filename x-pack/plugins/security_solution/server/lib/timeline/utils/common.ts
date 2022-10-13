@@ -4,33 +4,32 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as rt from 'io-ts';
-import { set } from '@elastic/safer-lodash-set/fp';
+import type * as rt from 'io-ts';
+import { set } from '@kbn/safer-lodash-set/fp';
 import readline from 'readline';
 import fs from 'fs';
-import { Readable } from 'stream';
+import type { Readable } from 'stream';
 import { createListStream } from '@kbn/utils';
 import { schema } from '@kbn/config-schema';
-import { isObject } from 'lodash/fp';
 
-import { KibanaRequest } from 'src/core/server';
-import { SetupPlugins } from '../../../plugin';
-import type { SecuritySolutionRequestHandlerContext } from '../../../types';
+import type { KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
+import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
+import type { SetupPlugins, StartPlugins } from '../../../plugin';
 
-import { FrameworkRequest } from '../../framework';
+import type { FrameworkRequest } from '../../framework';
 
 export const buildFrameworkRequest = async (
-  context: SecuritySolutionRequestHandlerContext,
-  security: SetupPlugins['security'],
+  context: RequestHandlerContext,
+  security: StartPlugins['security'] | SetupPlugins['security'] | undefined,
   request: KibanaRequest
 ): Promise<FrameworkRequest> => {
-  const savedObjectsClient = context.core.savedObjects.client;
+  const savedObjectsClient = (await context.core).savedObjects.client;
   const user = await security?.authc.getCurrentUser(request);
 
   return set<FrameworkRequest>(
     'user',
     user,
-    set<KibanaRequest & { context: SecuritySolutionRequestHandlerContext }>(
+    set<KibanaRequest & { context: RequestHandlerContext }>(
       'context.core.savedObjects.client',
       savedObjectsClient,
       request
@@ -39,29 +38,6 @@ export const buildFrameworkRequest = async (
 };
 
 export const escapeHatch = schema.object({}, { unknowns: 'allow' });
-
-export const formatErrors = (errors: rt.Errors): string[] => {
-  const err = errors.map((error) => {
-    if (error.message != null) {
-      return error.message;
-    } else {
-      const keyContext = error.context
-        .filter(
-          (entry) => entry.key != null && !Number.isInteger(+entry.key) && entry.key.trim() !== ''
-        )
-        .map((entry) => entry.key)
-        .join(',');
-
-      const nameContext = error.context.find((entry) => entry.type?.name?.length > 0);
-      const suppliedValue =
-        keyContext !== '' ? keyContext : nameContext != null ? nameContext.type.name : '';
-      const value = isObject(error.value) ? JSON.stringify(error.value) : error.value;
-      return `Invalid value "${value}" supplied to "${suppliedValue}"`;
-    }
-  });
-
-  return [...new Set(err)];
-};
 
 type ErrorFactory = (message: string) => Error;
 

@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { setMockValues, rerender } from '../../../../../../__mocks__';
+import { setMockValues } from '../../../../../../__mocks__/kea_logic';
 import '../__mocks__/engines_logic.mock';
 
 import { ShallowWrapper } from 'enzyme';
 
 import { EuiBasicTable, EuiButtonIcon } from '@elastic/eui';
 
-import { EnginesLogic } from '../../../../engines';
+import { EnginesLogic } from '../../..';
+import { rerender } from '../../../../../../test_helpers';
 
 import * as engineLinkHelpers from '../engine_link_helpers';
 

@@ -76,11 +76,11 @@ export default function ({ getService }: FtrProviderContext) {
       const esArchiver = getService('esArchiver');
       const reportingApi = getService('reportingAPI');
       before('initialize tests', async () => {
-        await esArchiver.load('canvas/reports');
+        await esArchiver.load('x-pack/test/functional/es_archives/canvas/reports');
       });
 
       after('teardown tests', async () => {
-        await esArchiver.unload('canvas/reports');
+        await esArchiver.unload('x-pack/test/functional/es_archives/canvas/reports');
         await reportingApi.deleteAllReports();
         await reportingFunctional.initEcommerce();
       });

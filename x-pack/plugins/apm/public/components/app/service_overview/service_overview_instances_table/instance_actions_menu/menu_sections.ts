@@ -6,30 +6,18 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IBasePath } from 'kibana/public';
-import { isEmpty } from 'lodash';
+import { IBasePath } from '@kbn/core/public';
 import moment from 'moment';
-import { APIReturnType } from '../../../../../services/rest/createCallApmApi';
-import { getInfraHref } from '../../../../shared/Links/InfraLink';
+import { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
+import { getInfraHref } from '../../../../shared/links/infra_link';
+import {
+  Action,
+  getNonEmptySections,
+  SectionRecord,
+} from '../../../../shared/transaction_action_menu/sections_helper';
 
-type InstaceDetails = APIReturnType<'GET /api/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}'>;
-
-interface Action {
-  key: string;
-  label: string;
-  href?: string;
-  onClick?: () => void;
-  condition: boolean;
-}
-
-interface Section {
-  key: string;
-  title?: string;
-  subtitle?: string;
-  actions: Action[];
-}
-
-type SectionRecord = Record<string, Section[]>;
+type InstaceDetails =
+  APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}'>;
 
 function getInfraMetricsQuery(timestamp?: string) {
   if (!timestamp) {
@@ -189,15 +177,5 @@ export function getMenuSections({
     apm: [{ key: 'apm', actions: apmActions }],
   };
 
-  // Filter out actions that shouldnt be shown and sections without any actions.
-  return Object.values(sectionRecord)
-    .map((sections) =>
-      sections
-        .map((section) => ({
-          ...section,
-          actions: section.actions.filter((action) => action.condition),
-        }))
-        .filter((section) => !isEmpty(section.actions))
-    )
-    .filter((sections) => !isEmpty(sections));
+  return getNonEmptySections(sectionRecord);
 }

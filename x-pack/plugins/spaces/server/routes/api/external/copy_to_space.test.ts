@@ -8,14 +8,14 @@
 import * as Rx from 'rxjs';
 
 import type { ObjectType } from '@kbn/config-schema';
-import type { RouteValidatorConfig } from 'src/core/server';
-import { kibanaResponseFactory } from 'src/core/server';
+import type { RouteValidatorConfig } from '@kbn/core/server';
+import { kibanaResponseFactory } from '@kbn/core/server';
 import {
   coreMock,
   httpServerMock,
   httpServiceMock,
   loggingSystemMock,
-} from 'src/core/server/mocks';
+} from '@kbn/core/server/mocks';
 
 import { spacesConfig } from '../../../lib/__fixtures__';
 import { SpacesClientService } from '../../../spaces_client';
@@ -47,11 +47,8 @@ describe('copy to space', () => {
     const log = loggingSystemMock.create().get('spaces');
 
     const coreStart = coreMock.createStart();
-    const {
-      savedObjects,
-      savedObjectsExporter,
-      savedObjectsImporter,
-    } = createMockSavedObjectsService(spaces);
+    const { savedObjects, savedObjectsExporter, savedObjectsImporter } =
+      createMockSavedObjectsService(spaces);
     coreStart.savedObjects = savedObjects;
     savedObjectsExporter.exportByObjects.mockImplementation(createExportSavedObjectsToStreamMock());
     savedObjectsImporter.import.mockImplementation(createImportSavedObjectsFromStreamMock());
@@ -89,10 +86,8 @@ describe('copy to space', () => {
       usageStatsServicePromise,
     });
 
-    const [
-      [ctsRouteDefinition, ctsRouteHandler],
-      [resolveRouteDefinition, resolveRouteHandler],
-    ] = router.post.mock.calls;
+    const [[ctsRouteDefinition, ctsRouteHandler], [resolveRouteDefinition, resolveRouteHandler]] =
+      router.post.mock.calls;
 
     return {
       coreStart,
@@ -412,15 +407,13 @@ describe('copy to space', () => {
 
       expect(status).toEqual(200);
       expect(savedObjectsImporter.resolveImportErrors).toHaveBeenCalledTimes(2);
-      const [
-        resolveImportErrorsFirstCallOptions,
-      ] = savedObjectsImporter.resolveImportErrors.mock.calls[0];
+      const [resolveImportErrorsFirstCallOptions] =
+        savedObjectsImporter.resolveImportErrors.mock.calls[0];
 
       expect(resolveImportErrorsFirstCallOptions).toMatchObject({ namespace: 'a-space' });
 
-      const [
-        resolveImportErrorsSecondCallOptions,
-      ] = savedObjectsImporter.resolveImportErrors.mock.calls[1];
+      const [resolveImportErrorsSecondCallOptions] =
+        savedObjectsImporter.resolveImportErrors.mock.calls[1];
 
       expect(resolveImportErrorsSecondCallOptions).toMatchObject({ namespace: 'b-space' });
     });

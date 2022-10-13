@@ -7,12 +7,10 @@
  */
 
 import moment from 'moment';
-import { IScopedSearchSessionsClient } from './types';
+import type { IScopedSearchSessionsClient } from './types';
 import { SearchSessionsConfigSchema } from '../../../config';
 
-export function createSearchSessionsClientMock<T = unknown>(): jest.Mocked<
-  IScopedSearchSessionsClient<T>
-> {
+export function createSearchSessionsClientMock(): jest.Mocked<IScopedSearchSessionsClient> {
   return {
     getId: jest.fn(),
     trackId: jest.fn(),
@@ -24,11 +22,13 @@ export function createSearchSessionsClientMock<T = unknown>(): jest.Mocked<
     cancel: jest.fn(),
     extend: jest.fn(),
     delete: jest.fn(),
+    status: jest.fn(),
     getConfig: jest.fn(
       () =>
-        (({
-          defaultExpiration: moment.duration('1', 'm'),
-        } as unknown) as SearchSessionsConfigSchema)
+        ({
+          defaultExpiration: moment.duration('1', 'w'),
+          enabled: true,
+        } as unknown as SearchSessionsConfigSchema)
     ),
   };
 }

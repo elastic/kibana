@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
+import { Datafeed, Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { Datafeed, Job } from '../../../../../plugins/ml/common/types/anomaly_detection_jobs';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -50,7 +50,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('GetAnomaliesTableData', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.setKibanaTimeZoneToUTC();
       await createMockJobs();
     });
@@ -72,12 +72,12 @@ export default ({ getService }: FtrProviderContext) => {
         maxRecords: 500,
       };
 
-      const { body } = await supertest
+      const { body, status } = await supertest
         .post(`/api/ml/results/anomalies_table_data`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
         .set(COMMON_REQUEST_HEADERS)
-        .send(requestBody)
-        .expect(200);
+        .send(requestBody);
+      ml.api.assertResponseStatusCode(200, status, body);
 
       expect(body.interval).to.eql('hour');
       expect(body.anomalies.length).to.eql(13);
@@ -97,12 +97,12 @@ export default ({ getService }: FtrProviderContext) => {
         maxRecords: 500,
       };
 
-      const { body } = await supertest
+      const { body, status } = await supertest
         .post(`/api/ml/results/anomalies_table_data`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
         .set(COMMON_REQUEST_HEADERS)
-        .send(requestBody)
-        .expect(400);
+        .send(requestBody);
+      ml.api.assertResponseStatusCode(400, status, body);
 
       expect(body.error).to.eql('Bad Request');
       expect(body.message).to.eql(
@@ -122,12 +122,12 @@ export default ({ getService }: FtrProviderContext) => {
         dateFormatTz: 'UTC',
         maxRecords: 500,
       };
-      const { body } = await supertest
+      const { body, status } = await supertest
         .post(`/api/ml/results/anomalies_table_data`)
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
         .set(COMMON_REQUEST_HEADERS)
-        .send(requestBody)
-        .expect(403);
+        .send(requestBody);
+      ml.api.assertResponseStatusCode(403, status, body);
 
       expect(body.error).to.eql('Forbidden');
       expect(body.message).to.eql('Forbidden');

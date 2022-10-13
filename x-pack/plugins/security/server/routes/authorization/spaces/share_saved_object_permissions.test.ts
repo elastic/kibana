@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { DeeplyMockedKeys } from '@kbn/utility-types/target/jest';
-import type { RequestHandler, RouteConfig } from 'src/core/server';
-import { kibanaResponseFactory } from 'src/core/server';
-import { httpServerMock } from 'src/core/server/mocks';
+import type { RequestHandler, RouteConfig } from '@kbn/core/server';
+import { kibanaResponseFactory } from '@kbn/core/server';
+import { httpServerMock } from '@kbn/core/server/mocks';
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
 import type { RouteDefinitionParams } from '../..';
 import type { CheckPrivileges } from '../../../authorization/types';
@@ -20,11 +20,11 @@ describe('Share Saved Object Permissions', () => {
   let router: jest.Mocked<SecurityRouter>;
   let routeParamsMock: DeeplyMockedKeys<RouteDefinitionParams>;
 
-  const mockContext = ({
+  const mockContext = {
     licensing: {
       license: { check: jest.fn().mockReturnValue({ state: 'valid' }) },
     },
-  } as unknown) as SecurityRequestHandlerContext;
+  } as unknown as SecurityRequestHandlerContext;
 
   beforeEach(() => {
     routeParamsMock = routeDefinitionParamsMock.create();
@@ -36,6 +36,7 @@ describe('Share Saved Object Permissions', () => {
   describe('GET /internal/security/_share_saved_object_permissions', () => {
     let routeHandler: RequestHandler<any, any, any, SecurityRequestHandlerContext>;
     let routeConfig: RouteConfig<any, any, any, any>;
+
     beforeEach(() => {
       const [shareRouteConfig, shareRouteHandler] = router.get.mock.calls.find(
         ([{ path }]) => path === '/internal/security/_share_saved_object_permissions'
@@ -50,12 +51,30 @@ describe('Share Saved Object Permissions', () => {
       expect(routeConfig.validate).toHaveProperty('query');
     });
 
+    it('returns `not found` when security is diabled', async () => {
+      routeParamsMock.license.isEnabled = jest.fn().mockReturnValue(false);
+
+      const request = httpServerMock.createKibanaRequest({
+        query: {
+          type: 'foo-type',
+        },
+      });
+
+      await expect(
+        routeHandler(mockContext, request, kibanaResponseFactory)
+      ).resolves.toMatchObject({
+        status: 404,
+      });
+
+      expect(routeParamsMock.license.isEnabled).toHaveBeenCalled();
+    });
+
     it('returns `true` when the user is authorized globally', async () => {
       const checkPrivilegesWithRequest = jest.fn().mockResolvedValue({ hasAllRequested: true });
 
-      routeParamsMock.authz.checkPrivilegesWithRequest.mockReturnValue(({
+      routeParamsMock.authz.checkPrivilegesWithRequest.mockReturnValue({
         globally: checkPrivilegesWithRequest,
-      } as unknown) as CheckPrivileges);
+      } as unknown as CheckPrivileges);
 
       const request = httpServerMock.createKibanaRequest({
         query: {
@@ -83,9 +102,9 @@ describe('Share Saved Object Permissions', () => {
     it('returns `false` when the user is not authorized globally', async () => {
       const checkPrivilegesWithRequest = jest.fn().mockResolvedValue({ hasAllRequested: false });
 
-      routeParamsMock.authz.checkPrivilegesWithRequest.mockReturnValue(({
+      routeParamsMock.authz.checkPrivilegesWithRequest.mockReturnValue({
         globally: checkPrivilegesWithRequest,
-      } as unknown) as CheckPrivileges);
+      } as unknown as CheckPrivileges);
 
       const request = httpServerMock.createKibanaRequest({
         query: {

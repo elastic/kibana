@@ -7,7 +7,7 @@
 
 import React, { Fragment, FC, useState, useContext, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlyout,
   EuiFlyoutFooter,
@@ -20,7 +20,7 @@ import {
   EuiSpacer,
   EuiCallOut,
 } from '@elastic/eui';
-import { collapseLiteralStrings } from '../../../../../../../../shared_imports';
+import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { CombinedJob, Datafeed } from '../../../../../../../../common/types/anomaly_detection_jobs';
 import { ML_EDITOR_MODE, MLJobEditor } from '../../../../../jobs_list/components/ml_job_editor';
 import { isValidJson } from '../../../../../../../../common/util/validation_utils';
@@ -28,6 +28,8 @@ import { JobCreatorContext } from '../../job_creator_context';
 import { isAdvancedJobCreator } from '../../../../common/job_creator';
 import { DatafeedPreview } from '../datafeed_preview_flyout';
 import { useToastNotificationService } from '../../../../../../services/toast_notification_service';
+
+const { collapseLiteralStrings } = XJson;
 
 export enum EDITOR_MODE {
   HIDDEN,
@@ -56,6 +58,7 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
   useEffect(() => {
     setJobConfigString(jobCreator.formattedJobJson);
     setDatafeedConfigString(jobCreator.formattedDatafeedJson);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdated]);
 
   useEffect(() => {
@@ -72,6 +75,7 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
     } else {
       setTempCombinedJob(null);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showJsonFlyout]);
 
   const editJsonMode =
@@ -204,7 +208,7 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
                 >
                   <FormattedMessage
                     id="xpack.ml.newJob.wizard.jsonFlyout.indicesChange.calloutText"
-                    defaultMessage="It is not possible to alter the indices being used by the datafeed here. If you wish to select a different index pattern or saved search, please start the job creation again, selecting a different index pattern."
+                    defaultMessage="You cannot alter the indices being used by the datafeed here. To select a different data view or saved search, go to step 1 of the wizard and select the Change data view option."
                   />
                 </EuiCallOut>
               </>
@@ -272,9 +276,10 @@ const Contents: FC<{
   heightOffset?: number;
 }> = ({ title, value, editJson, onChange, heightOffset = 0 }) => {
   // the ace editor requires a fixed height
-  const editorHeight = useMemo(() => `${window.innerHeight - 230 - heightOffset}px`, [
-    heightOffset,
-  ]);
+  const editorHeight = useMemo(
+    () => `${window.innerHeight - 230 - heightOffset}px`,
+    [heightOffset]
+  );
   return (
     <EuiFlexItem>
       <EuiTitle size="s">

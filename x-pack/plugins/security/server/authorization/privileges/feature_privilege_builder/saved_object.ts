@@ -7,7 +7,8 @@
 
 import { flatten, uniq } from 'lodash';
 
-import type { FeatureKibanaPrivileges } from '../../../../../features/server';
+import type { FeatureKibanaPrivileges } from '@kbn/features-plugin/server';
+
 import { BaseFeaturePrivilegeBuilder } from './feature_privilege_builder';
 
 const readOperations: string[] = [
@@ -23,6 +24,7 @@ const writeOperations: string[] = [
   'update',
   'bulk_update',
   'delete',
+  'bulk_delete',
   'share_to_space',
 ];
 const allOperations: string[] = [...readOperations, ...writeOperations];

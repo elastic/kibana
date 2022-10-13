@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LicenseType } from '../../licensing/common/types';
+import { LicenseType } from '@kbn/licensing-plugin/common/types';
 
 const basicLicense: LicenseType = 'basic';
 
@@ -13,6 +13,8 @@ export const PLUGIN = {
   ID: 'rollup',
   minimumLicenseType: basicLicense,
 };
+
+export const MAJOR_VERSION = '8.0.0';
 
 export const CONFIG_ROLLUPS = 'rollups:enableIndexPatterns';
 

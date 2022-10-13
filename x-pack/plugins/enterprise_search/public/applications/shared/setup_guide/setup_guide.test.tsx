@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockValues, rerender } from '../../__mocks__';
+import { setMockValues } from '../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -13,10 +13,12 @@ import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiIcon } from '@elastic/eui';
 
+import { rerender } from '../../test_helpers';
+
 import { CloudSetupInstructions } from './cloud/instructions';
 import { SetupInstructions } from './instructions';
 
-import { SetupGuideLayout } from './';
+import { SetupGuideLayout } from '.';
 
 describe('SetupGuideLayout', () => {
   let wrapper: ShallowWrapper;

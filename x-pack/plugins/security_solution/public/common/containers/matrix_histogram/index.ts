@@ -6,23 +6,26 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import { getOr, isEmpty, noop } from 'lodash/fp';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { getOr, noop } from 'lodash/fp';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
-import { MatrixHistogramQueryProps } from '../../components/matrix_histogram/types';
-import { inputsModel } from '../../../common/store';
-import { createFilter } from '../../../common/containers/helpers';
-import { useKibana } from '../../../common/lib/kibana';
-import {
-  MatrixHistogramQuery,
+import { isErrorResponse, isCompleteResponse } from '@kbn/data-plugin/common';
+import type { MatrixHistogramQueryProps } from '../../components/matrix_histogram/types';
+import type { inputsModel } from '../../store';
+import { createFilter } from '../helpers';
+import { useKibana } from '../../lib/kibana';
+import type {
   MatrixHistogramRequestOptions,
   MatrixHistogramStrategyResponse,
   MatrixHistogramData,
 } from '../../../../common/search_strategy/security_solution';
-import { isErrorResponse, isCompleteResponse } from '../../../../../../../src/plugins/data/common';
+import {
+  MatrixHistogramQuery,
+  MatrixHistogramTypeToAggName,
+} from '../../../../common/search_strategy/security_solution';
 import { getInspectResponse } from '../../../helpers';
-import { InspectResponse } from '../../../types';
+import type { InspectResponse } from '../../../types';
 import * as i18n from './translations';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 
@@ -45,17 +48,19 @@ export interface UseMatrixHistogramArgs {
 }
 
 export const useMatrixHistogram = ({
-  docValueFields,
   endDate,
   errorMessage,
   filterQuery,
   histogramType,
   indexNames,
   isPtrIncluded,
+  onError,
   stackByField,
+  runtimeMappings,
   startDate,
   threshold,
   skip = false,
+  includeMissingData = true,
 }: MatrixHistogramQueryProps): [
   boolean,
   UseMatrixHistogramArgs,
@@ -66,24 +71,24 @@ export const useMatrixHistogram = ({
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
-  const [
-    matrixHistogramRequest,
-    setMatrixHistogramRequest,
-  ] = useState<MatrixHistogramRequestOptions>({
-    defaultIndex: indexNames,
-    factoryQueryType: MatrixHistogramQuery,
-    filterQuery: createFilter(filterQuery),
-    histogramType,
-    timerange: {
-      interval: '12h',
-      from: startDate,
-      to: endDate,
-    },
-    stackByField,
-    threshold,
-    ...(isPtrIncluded != null ? { isPtrIncluded } : {}),
-    ...(!isEmpty(docValueFields) ? { docValueFields } : {}),
-  });
+
+  const [matrixHistogramRequest, setMatrixHistogramRequest] =
+    useState<MatrixHistogramRequestOptions>({
+      defaultIndex: indexNames,
+      factoryQueryType: MatrixHistogramQuery,
+      filterQuery: createFilter(filterQuery),
+      histogramType: histogramType ?? histogramType,
+      timerange: {
+        interval: '12h',
+        from: startDate,
+        to: endDate,
+      },
+      stackByField,
+      runtimeMappings,
+      threshold,
+      ...(isPtrIncluded != null ? { isPtrIncluded } : {}),
+      ...(includeMissingData != null ? { includeMissingData } : {}),
+    });
   const { addError, addWarning } = useAppToasts();
 
   const [matrixHistogramResponse, setMatrixHistogramResponse] = useState<UseMatrixHistogramArgs>({
@@ -113,8 +118,8 @@ export const useMatrixHistogram = ({
               if (isCompleteResponse(response)) {
                 const histogramBuckets: Buckets = getOr(
                   bucketEmpty,
-                  'rawResponse.aggregations.eventActionGroup.buckets',
-                  response
+                  MatrixHistogramTypeToAggName[histogramType],
+                  response.rawResponse
                 );
                 setLoading(false);
                 setMatrixHistogramResponse((prevResponse) => ({
@@ -122,7 +127,7 @@ export const useMatrixHistogram = ({
                   data: response.matrixHistogramData,
                   inspect: getInspectResponse(response, prevResponse.inspect),
                   refetch: refetch.current,
-                  totalCount: response.totalCount,
+                  totalCount: histogramBuckets.reduce((acc, bucket) => bucket.doc_count + acc, 0),
                   buckets: histogramBuckets,
                 }));
                 searchSubscription$.current.unsubscribe();
@@ -146,7 +151,7 @@ export const useMatrixHistogram = ({
       asyncSearch();
       refetch.current = asyncSearch;
     },
-    [data.search, errorMessage, addError, addWarning]
+    [data.search, errorMessage, addError, addWarning, histogramType]
   );
 
   useEffect(() => {
@@ -164,7 +169,6 @@ export const useMatrixHistogram = ({
         stackByField,
         threshold,
         ...(isPtrIncluded != null ? { isPtrIncluded } : {}),
-        ...(!isEmpty(docValueFields) ? { docValueFields } : {}),
       };
       if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
@@ -180,10 +184,10 @@ export const useMatrixHistogram = ({
     histogramType,
     threshold,
     isPtrIncluded,
-    docValueFields,
   ]);
 
   useEffect(() => {
+    // We want to search if it is not skipped, stackByField ends with ip and include missing data
     if (!skip) {
       hostsSearch(matrixHistogramRequest);
     }
@@ -192,6 +196,14 @@ export const useMatrixHistogram = ({
       abortCtrl.current.abort();
     };
   }, [matrixHistogramRequest, hostsSearch, skip]);
+
+  useEffect(() => {
+    if (skip) {
+      setLoading(false);
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+    }
+  }, [skip]);
 
   const runMatrixHistogramSearch = useCallback(
     (to: string, from: string) => {
@@ -208,4 +220,74 @@ export const useMatrixHistogram = ({
   );
 
   return [loading, matrixHistogramResponse, runMatrixHistogramSearch];
+};
+
+/* function needed to split ip histogram data requests due to elasticsearch bug https://github.com/elastic/kibana/issues/89205
+ * using includeMissingData parameter to do the "missing data" query separately
+ **/
+export const useMatrixHistogramCombined = (
+  matrixHistogramQueryProps: MatrixHistogramQueryProps
+): [boolean, UseMatrixHistogramArgs] => {
+  const [mainLoading, mainResponse] = useMatrixHistogram({
+    ...matrixHistogramQueryProps,
+    includeMissingData: true,
+  });
+
+  const skipMissingData = useMemo(
+    () => !matrixHistogramQueryProps.stackByField.endsWith('.ip'),
+    [matrixHistogramQueryProps.stackByField]
+  );
+  const [missingDataLoading, missingDataResponse] = useMatrixHistogram({
+    ...matrixHistogramQueryProps,
+    includeMissingData: false,
+    skip: skipMissingData || matrixHistogramQueryProps.filterQuery === undefined,
+  });
+
+  const combinedLoading = useMemo<boolean>(
+    () => mainLoading || missingDataLoading,
+    [mainLoading, missingDataLoading]
+  );
+
+  const combinedResponse = useMemo<UseMatrixHistogramArgs>(() => {
+    if (skipMissingData) return mainResponse;
+
+    const { data, inspect, totalCount, refetch, buckets } = mainResponse;
+    const {
+      data: extraData,
+      inspect: extraInspect,
+      totalCount: extraTotalCount,
+      refetch: extraRefetch,
+    } = missingDataResponse;
+
+    const combinedRefetch = () => {
+      refetch();
+      extraRefetch();
+    };
+
+    if (combinedLoading) {
+      return {
+        data: [],
+        inspect: {
+          dsl: [],
+          response: [],
+        },
+        refetch: combinedRefetch,
+        totalCount: -1,
+        buckets: [],
+      };
+    }
+
+    return {
+      data: [...data, ...extraData],
+      inspect: {
+        dsl: [...inspect.dsl, ...extraInspect.dsl],
+        response: [...inspect.response, ...extraInspect.response],
+      },
+      totalCount: totalCount + extraTotalCount,
+      refetch: combinedRefetch,
+      buckets,
+    };
+  }, [combinedLoading, mainResponse, missingDataResponse, skipMissingData]);
+
+  return [combinedLoading, combinedResponse];
 };

@@ -6,16 +6,15 @@
  */
 
 import React, { useEffect } from 'react';
-import { Link, Redirect } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiButton } from '@elastic/eui';
-
-import { Loading } from '../../../shared/loading';
+import { EuiButtonTo } from '../../../shared/react_router_helpers';
+import { WorkplaceSearchPageTemplate } from '../../components/layout';
 import { ContentSection } from '../../components/shared/content_section';
 import { SourcesTable } from '../../components/shared/sources_table';
-import { ViewContentHeader } from '../../components/shared/view_content_header';
+import { NAV } from '../../constants';
 import { ADD_SOURCE_PATH, getSourcesPath } from '../../routes';
 
 import {
@@ -36,33 +35,41 @@ export const OrganizationSources: React.FC = () => {
 
   const { dataLoading, contentSources } = useValues(SourcesLogic);
 
-  if (dataLoading) return <Loading />;
-
-  if (contentSources.length === 0) return <Redirect to={getSourcesPath(ADD_SOURCE_PATH, true)} />;
-
   return (
-    <SourcesView>
-      <ViewContentHeader
-        title={ORG_SOURCES_HEADER_TITLE}
-        action={
-          <Link to={getSourcesPath(ADD_SOURCE_PATH, true)}>
-            <EuiButton fill color="primary" data-test-subj="AddSourceButton">
-              {ORG_SOURCES_LINK}
-            </EuiButton>
-          </Link>
-        }
-        description={ORG_SOURCES_HEADER_DESCRIPTION}
-        alignItems="flexStart"
-      />
-
-      <ContentSection>
-        <SourcesTable
-          showDetails
-          isOrganization
-          onSearchableToggle={setSourceSearchability}
-          sources={contentSources}
-        />
-      </ContentSection>
-    </SourcesView>
+    <WorkplaceSearchPageTemplate
+      pageChrome={[NAV.SOURCES]}
+      pageViewTelemetry="organization_sources"
+      pageHeader={
+        dataLoading
+          ? undefined
+          : {
+              pageTitle: ORG_SOURCES_HEADER_TITLE,
+              description: ORG_SOURCES_HEADER_DESCRIPTION,
+              rightSideItems: [
+                <EuiButtonTo
+                  to={getSourcesPath(ADD_SOURCE_PATH, true)}
+                  data-test-subj="AddSourceButton"
+                  fill
+                >
+                  {ORG_SOURCES_LINK}
+                </EuiButtonTo>,
+              ],
+            }
+      }
+      isLoading={dataLoading}
+      isEmptyState={!contentSources.length}
+      emptyState={<Redirect to={getSourcesPath(ADD_SOURCE_PATH, true)} />}
+    >
+      <SourcesView>
+        <ContentSection>
+          <SourcesTable
+            showDetails
+            isOrganization
+            onSearchableToggle={setSourceSearchability}
+            sources={contentSources}
+          />
+        </ContentSection>
+      </SourcesView>
+    </WorkplaceSearchPageTemplate>
   );
 };

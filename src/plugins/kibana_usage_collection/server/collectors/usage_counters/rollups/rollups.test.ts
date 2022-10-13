@@ -8,13 +8,13 @@
 
 import moment from 'moment';
 import { isSavedObjectOlderThan, rollUsageCountersIndices } from './rollups';
-import { savedObjectsRepositoryMock, loggingSystemMock } from '../../../../../../core/server/mocks';
-import { SavedObjectsFindResult } from '../../../../../../core/server';
+import { savedObjectsRepositoryMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { SavedObjectsFindResult } from '@kbn/core/server';
 
 import {
   UsageCountersSavedObjectAttributes,
   USAGE_COUNTERS_SAVED_OBJECT_TYPE,
-} from '../../../../../usage_collection/server';
+} from '@kbn/usage-collection-plugin/server';
 
 import { USAGE_COUNTERS_KEEP_DOCS_FOR_DAYS } from './constants';
 

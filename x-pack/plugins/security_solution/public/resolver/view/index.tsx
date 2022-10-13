@@ -9,10 +9,10 @@
 
 import React, { useMemo, useState, useEffect } from 'react';
 import { Provider } from 'react-redux';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { resolverStoreFactory } from '../store';
-import { StartServices } from '../../types';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import { DataAccessLayer, ResolverProps } from '../types';
+import type { StartServices } from '../../types';
+import type { DataAccessLayer, ResolverProps } from '../types';
 import { dataAccessLayerFactory } from '../data_access_layer/factory';
 import { ResolverWithoutProviders } from './resolver_without_providers';
 
@@ -21,13 +21,12 @@ import { ResolverWithoutProviders } from './resolver_without_providers';
  */
 export const Resolver = React.memo((props: ResolverProps) => {
   const context = useKibana<StartServices>();
-  const dataAccessLayer: DataAccessLayer = useMemo(() => dataAccessLayerFactory(context), [
-    context,
-  ]);
+  const dataAccessLayer: DataAccessLayer = useMemo(
+    () => dataAccessLayerFactory(context),
+    [context]
+  );
 
-  const store = useMemo(() => {
-    return resolverStoreFactory(dataAccessLayer);
-  }, [dataAccessLayer]);
+  const store = useMemo(() => resolverStoreFactory(dataAccessLayer), [dataAccessLayer]);
 
   const [activeStore, updateActiveStore] = useState(store);
 

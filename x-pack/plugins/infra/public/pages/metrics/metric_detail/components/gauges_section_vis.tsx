@@ -7,7 +7,7 @@
 
 import {
   EuiFlexItem,
-  EuiPageContentBody,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiPanel,
   EuiProgress,
   EuiSpacer,
@@ -17,29 +17,31 @@ import {
 import { get, last, max } from 'lodash';
 import React, { ReactText } from 'react';
 
-import { euiStyled } from '../../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { createFormatter } from '../../../../../common/formatters';
 import { InventoryFormatterType } from '../../../../../common/inventory_models/types';
 import { SeriesOverrides, VisSectionProps } from '../types';
 import { getChartName } from './helpers';
 
-const getFormatter = (
-  defaultFormatter: InventoryFormatterType = 'number',
-  defaultFormatterTemplate: string = '{{value}}',
-  seriesOverrides: SeriesOverrides = {},
-  seriesId: string
-) => (val: ReactText) => {
-  if (val == null) {
-    return '';
-  }
-  const formatter = get(seriesOverrides, [seriesId, 'formatter'], defaultFormatter);
-  const formatterTemplate = get(
-    seriesOverrides,
-    [seriesId, 'formatterTemplate'],
-    defaultFormatterTemplate
-  );
-  return createFormatter(formatter, formatterTemplate)(val);
-};
+const getFormatter =
+  (
+    defaultFormatter: InventoryFormatterType = 'number',
+    defaultFormatterTemplate: string = '{{value}}',
+    seriesOverrides: SeriesOverrides = {},
+    seriesId: string
+  ) =>
+  (val: ReactText) => {
+    if (val == null) {
+      return '';
+    }
+    const formatter = get(seriesOverrides, [seriesId, 'formatter'], defaultFormatter);
+    const formatterTemplate = get(
+      seriesOverrides,
+      [seriesId, 'formatterTemplate'],
+      defaultFormatterTemplate
+    );
+    return createFormatter(formatter, formatterTemplate)(val);
+  };
 
 export const GaugesSectionVis = ({
   id,

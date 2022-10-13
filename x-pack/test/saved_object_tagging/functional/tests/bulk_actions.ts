@@ -10,17 +10,21 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'security', 'savedObjects', 'tagManagement']);
   const tagManagementPage = PageObjects.tagManagement;
 
   describe('table bulk actions', () => {
     beforeEach(async () => {
-      await esArchiver.load('functional_base');
+      await kibanaServer.importExport.load(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/functional_base/data.json'
+      );
       await tagManagementPage.navigateTo();
     });
     afterEach(async () => {
-      await esArchiver.unload('functional_base');
+      await kibanaServer.importExport.unload(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/functional_base/data.json'
+      );
     });
 
     describe('bulk delete', () => {

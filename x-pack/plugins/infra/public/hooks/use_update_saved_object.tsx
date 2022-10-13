@@ -10,8 +10,8 @@ import {
   SavedObjectAttributes,
   SavedObjectsCreateOptions,
   SimpleSavedObject,
-} from 'src/core/public';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+} from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 export const useUpdateSavedObject = (type: string) => {
   const kibana = useKibana();

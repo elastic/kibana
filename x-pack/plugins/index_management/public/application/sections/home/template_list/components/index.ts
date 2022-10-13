@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './template_type_indicator';
+export { TemplateTypeIndicator } from './template_type_indicator';

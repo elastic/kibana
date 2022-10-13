@@ -11,3 +11,20 @@ export const agentPolicyStatuses = {
   Active: 'active',
   Inactive: 'inactive',
 } as const;
+
+export const AGENT_POLICY_DEFAULT_MONITORING_DATASETS = [
+  'elastic_agent',
+  'elastic_agent.elastic_agent',
+  'elastic_agent.apm_server',
+  'elastic_agent.filebeat',
+  'elastic_agent.fleet_server',
+  'elastic_agent.metricbeat',
+  'elastic_agent.osquerybeat',
+  'elastic_agent.packetbeat',
+  'elastic_agent.endpoint_security',
+  'elastic_agent.auditbeat',
+  'elastic_agent.heartbeat',
+  'elastic_agent.cloudbeat',
+];
+
+export const LICENSE_FOR_SCHEDULE_UPGRADE = 'platinum';

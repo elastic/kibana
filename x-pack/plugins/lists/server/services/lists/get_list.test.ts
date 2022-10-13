@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
-import { getSearchListMock } from '../../../common/schemas/elastic_response/search_es_list_schema.mock';
 import { getListResponseMock } from '../../../common/schemas/response/list_schema.mock';
 import { LIST_ID, LIST_INDEX } from '../../../common/constants.mock';
+import { getSearchListMock } from '../../schemas/elastic_response/search_es_list_schema.mock';
 
 import { getList } from './get_list';
 
@@ -26,9 +25,7 @@ describe('get_list', () => {
   test('it returns a list as expected if the list is found', async () => {
     const data = getSearchListMock();
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
-    esClient.search.mockReturnValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(data)
-    );
+    esClient.search.mockResponse(data);
     const list = await getList({ esClient, id: LIST_ID, listIndex: LIST_INDEX });
     const expected = getListResponseMock();
     expect(list).toEqual(expected);
@@ -38,9 +35,7 @@ describe('get_list', () => {
     const data = getSearchListMock();
     data.hits.hits = [];
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
-    esClient.search.mockReturnValue(
-      elasticsearchClientMock.createSuccessTransportRequestPromise(data)
-    );
+    esClient.search.mockResponse(data);
     const list = await getList({ esClient, id: LIST_ID, listIndex: LIST_INDEX });
     expect(list).toEqual(null);
   });

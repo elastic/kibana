@@ -11,7 +11,7 @@ import { datasourceSelector, requestDatasource } from './datasource';
 import { datasourceSaga } from './datasource.sagas';
 import { fieldsSelector } from './fields';
 import { updateSettings } from './advanced_settings';
-import { IndexPattern } from '../../../../../src/plugins/data/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 const waitForPromise = () => new Promise((r) => setTimeout(r));
 
@@ -27,7 +27,7 @@ describe('datasource saga', () => {
             Promise.resolve({
               title: 'test-pattern',
               getNonScriptedFields: () => [{ name: 'field1', type: 'string', isMapped: true }],
-            } as IndexPattern)
+            } as DataView)
           ),
         },
       },

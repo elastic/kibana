@@ -1,0 +1,64 @@
+get:
+  summary: Agents - Action status
+  parameters:
+  - $ref: ../components/parameters/page_size.yaml
+  - $ref: ../components/parameters/page_index.yaml
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              items:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    actionId:
+                      type: string
+                    status:
+                      type: string
+                      enum:
+                        - COMPLETE
+                        - EXPIRED
+                        - CANCELLED
+                        - FAILED
+                        - IN_PROGRESS
+                    nbAgentsActioned:
+                      type: number
+                    nbAgentsActionCreated:
+                      type: number
+                    nbAgentsAck:
+                      type: number
+                    nbAgentsFailed:
+                      type: number  
+                    version:
+                      type: string
+                    startTime:
+                      type: string
+                    type:
+                      type: string
+                    expiration:
+                      type: string
+                    completionTime:
+                      type: string
+                    cancellationTime:
+                      type: string
+                    newPolicyId:
+                      type: string
+                    creationTime:
+                      type: string          
+                  required:
+                    - actionId
+                    - complete
+                    - nbAgentsActioned
+                    - nbAgentsActionCreated
+                    - nbAgentsAck
+                    - nbAgentsFailed
+                    - status
+                    - creationTime
+            required:
+              - items
+  operationId: agents-action-status

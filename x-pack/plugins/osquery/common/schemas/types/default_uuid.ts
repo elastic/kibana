@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { Either } from 'fp-ts/lib/Either';
+import type { Either } from 'fp-ts/lib/Either';
 import uuid from 'uuid';
 
 import { NonEmptyString } from './non_empty_string';

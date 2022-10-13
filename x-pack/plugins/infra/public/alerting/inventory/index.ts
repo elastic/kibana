@@ -7,21 +7,20 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { RuleTypeParams } from '@kbn/alerting-plugin/common';
+import { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
 import {
   InventoryMetricConditions,
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
-  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../server/lib/alerting/inventory_metric_threshold/types';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AlertTypeModel } from '../../../../triggers_actions_ui/public/types';
-import { AlertTypeParams } from '../../../../alerting/common';
+} from '../../../common/alerting/metrics';
 import { validateMetricThreshold } from './components/validation';
+import { formatReason } from './rule_data_formatters';
 
-interface InventoryMetricAlertTypeParams extends AlertTypeParams {
+interface InventoryMetricRuleTypeParams extends RuleTypeParams {
   criteria: InventoryMetricConditions[];
 }
 
-export function createInventoryMetricAlertType(): AlertTypeModel<InventoryMetricAlertTypeParams> {
+export function createInventoryMetricRuleType(): ObservabilityRuleTypeModel<InventoryMetricRuleTypeParams> {
   return {
     id: METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
     description: i18n.translate('xpack.infra.metrics.inventory.alertFlyout.alertDescription', {
@@ -29,9 +28,9 @@ export function createInventoryMetricAlertType(): AlertTypeModel<InventoryMetric
     }),
     iconClass: 'bell',
     documentationUrl(docLinks) {
-      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/observability/${docLinks.DOC_LINK_VERSION}/infrastructure-threshold-alert.html`;
+      return `${docLinks.links.observability.infrastructureThreshold}`;
     },
-    alertParamsExpression: React.lazy(() => import('./components/expression')),
+    ruleParamsExpression: React.lazy(() => import('./components/expression')),
     validate: validateMetricThreshold,
     defaultActionMessage: i18n.translate(
       'xpack.infra.metrics.alerting.inventory.threshold.defaultActionMessage',
@@ -44,5 +43,6 @@ Reason:
       }
     ),
     requiresAppContext: false,
+    format: formatReason,
   };
 }

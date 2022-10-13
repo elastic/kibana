@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { PluginConfigDescriptor } from 'kibana/server';
+import { PluginConfigDescriptor } from '@kbn/core/server';
 
 import { configSchema, ConfigSchema } from '../config';
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   schema: configSchema,
   deprecations: ({ renameFromRoot }) => [
-    renameFromRoot('markdown_vis.enabled', 'vis_type_markdown.enabled'),
+    renameFromRoot('markdown_vis.enabled', 'vis_type_markdown.enabled', { level: 'warning' }),
   ],
 };
 

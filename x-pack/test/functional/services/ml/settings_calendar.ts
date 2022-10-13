@@ -214,6 +214,11 @@ export function MachineLearningSettingsCalendarProvider(
       );
     },
 
+    async waitForFormEnabled() {
+      // @ts-expect-error null is acceptable for a disabled attribute that no longer exists.
+      await testSubjects.waitForAttributeToChange('mlCalendarIdInput', 'disabled', null);
+    },
+
     async assertCalendarRowExists(calendarId: string) {
       await testSubjects.existOrFail(this.calendarRowSelector(calendarId));
     },
@@ -279,7 +284,7 @@ export function MachineLearningSettingsCalendarProvider(
       const subj = 'mlCalendarApplyToAllJobsSwitch';
       if ((await this.getApplyToAllJobsSwitchCheckedState()) !== toggle) {
         await retry.tryForTime(5 * 1000, async () => {
-          await testSubjects.clickWhenNotDisabled(subj);
+          await testSubjects.clickWhenNotDisabledWithoutRetry(subj);
           await this.assertApplyToAllJobsSwitchCheckState(toggle);
         });
       }

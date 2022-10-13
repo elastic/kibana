@@ -6,17 +6,25 @@
  */
 
 import React from 'react';
-import { Route, Switch } from 'react-router-dom';
-
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { NetworkContainer } from './pages';
-import { NotFoundPage } from '../app/404';
+
+import type { SecuritySubPluginRoutes } from '../app/types';
+import { SecurityPageName } from '../app/types';
+import { NETWORK_PATH } from '../../common/constants';
+import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 
 export const NetworkRoutes = () => (
-  <Switch>
-    <Route
-      path="/"
-      render={({ location, match }) => <NetworkContainer location={location} url={match.url} />}
-    />
-    <Route render={() => <NotFoundPage />} />
-  </Switch>
+  <PluginTemplateWrapper>
+    <TrackApplicationView viewId={SecurityPageName.network}>
+      <NetworkContainer />
+    </TrackApplicationView>
+  </PluginTemplateWrapper>
 );
+
+export const routes: SecuritySubPluginRoutes = [
+  {
+    path: NETWORK_PATH,
+    component: NetworkRoutes,
+  },
+];

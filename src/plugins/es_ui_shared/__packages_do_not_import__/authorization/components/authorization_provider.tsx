@@ -6,16 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { HttpSetup } from 'kibana/public';
+import type { HttpSetup } from '@kbn/core/public';
 import React, { createContext, useContext } from 'react';
 
-import { useRequest } from '../../../public';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
+import { useRequest } from '../../../public/request';
 
-import { Error as CustomError } from './section_error';
+import { Privileges, Error as CustomError } from '../types';
 
-import { Privileges } from '../types';
-
-interface Authorization {
+export interface Authorization {
   isLoading: boolean;
   apiError: CustomError | null;
   privileges: Privileges;
@@ -47,7 +46,11 @@ interface Props {
 }
 
 export const AuthorizationProvider = ({ privilegesEndpoint, httpClient, children }: Props) => {
-  const { isLoading, error, data: privilegesData } = useRequest<any, CustomError>(httpClient, {
+  const {
+    isLoading,
+    error,
+    data: privilegesData,
+  } = useRequest<any, CustomError>(httpClient, {
     path: privilegesEndpoint,
     method: 'get',
   });

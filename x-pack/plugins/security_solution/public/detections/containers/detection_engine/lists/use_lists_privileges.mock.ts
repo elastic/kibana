@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { UseListsPrivilegesReturn } from './use_lists_privileges';
+import type { UseListsPrivilegesReturn } from './use_lists_privileges';
 
 export const getUseListsPrivilegesMock: () => jest.Mocked<UseListsPrivilegesReturn> = () => ({
   isAuthenticated: null,
+  canReadIndex: null,
   canManageIndex: null,
   canWriteIndex: null,
   loading: false,

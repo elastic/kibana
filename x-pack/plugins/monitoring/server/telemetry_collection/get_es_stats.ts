@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { SearchResponse } from 'elasticsearch';
-import { LegacyAPICaller } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import moment from 'moment';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
 
 /**
@@ -17,11 +18,19 @@ import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
  * @param {Array} clusterUuids The string Cluster UUIDs to fetch details for
  */
 export async function getElasticsearchStats(
-  callCluster: LegacyAPICaller,
+  callCluster: ElasticsearchClient,
   clusterUuids: string[],
+  start: string,
+  end: string,
   maxBucketSize: number
 ) {
-  const response = await fetchElasticsearchStats(callCluster, clusterUuids, maxBucketSize);
+  const response = await fetchElasticsearchStats(
+    callCluster,
+    clusterUuids,
+    start,
+    end,
+    maxBucketSize
+  );
   return handleElasticsearchStats(response);
 }
 
@@ -34,16 +43,18 @@ export async function getElasticsearchStats(
  *
  * Returns the response for the aggregations to fetch details for the product.
  */
-export function fetchElasticsearchStats(
-  callCluster: LegacyAPICaller,
+export async function fetchElasticsearchStats(
+  callCluster: ElasticsearchClient,
   clusterUuids: string[],
+  start: string,
+  end: string,
   maxBucketSize: number
 ) {
-  const params = {
+  const params: estypes.SearchRequest = {
     index: INDEX_PATTERN_ELASTICSEARCH,
     size: maxBucketSize,
-    ignoreUnavailable: true,
-    filterPath: [
+    ignore_unavailable: true,
+    filter_path: [
       'hits.hits._source.cluster_uuid',
       'hits.hits._source.timestamp',
       'hits.hits._source.cluster_name',
@@ -61,6 +72,15 @@ export function fetchElasticsearchStats(
              */
             { term: { type: 'cluster_stats' } },
             { terms: { cluster_uuid: clusterUuids } },
+            {
+              range: {
+                timestamp: {
+                  format: 'epoch_millis',
+                  gte: moment.utc(start).valueOf(),
+                  lte: moment.utc(end).valueOf(),
+                },
+              },
+            },
           ],
         },
       },
@@ -69,7 +89,7 @@ export function fetchElasticsearchStats(
     },
   };
 
-  return callCluster('search', params);
+  return await callCluster.search<ESClusterStats>(params);
 }
 
 export interface ESClusterStats {
@@ -84,8 +104,8 @@ export interface ESClusterStats {
 /**
  * Extract the cluster stats for each cluster.
  */
-export function handleElasticsearchStats(response: SearchResponse<ESClusterStats>) {
+export function handleElasticsearchStats(response: estypes.SearchResponse<ESClusterStats>) {
   const clusters = response.hits?.hits || [];
 
-  return clusters.map((cluster) => cluster._source);
+  return clusters.map((cluster) => cluster._source!);
 }

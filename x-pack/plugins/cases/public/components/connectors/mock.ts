@@ -5,12 +5,32 @@
  * 2.0.
  */
 
+import { SwimlaneConnectorType } from '../../../common/api';
+
 export const connector = {
   id: '123',
   name: 'My connector',
   actionTypeId: '.jira',
   config: {},
   isPreconfigured: false,
+  isDeprecated: false,
+};
+
+export const swimlaneConnector = {
+  id: '123',
+  name: 'My connector',
+  actionTypeId: '.swimlane',
+  config: {
+    connectorType: SwimlaneConnectorType.Cases,
+    mappings: {
+      caseIdConfig: {},
+      caseNameConfig: {},
+      descriptionConfig: {},
+      commentsConfig: {},
+    },
+  },
+  isPreconfigured: false,
+  isDeprecated: false,
 };
 
 export const issues = [
@@ -69,6 +89,12 @@ export const choices = [
     label: 'Operation System',
     value: 'os',
     element: 'subcategory',
+  },
+  {
+    dependent_value: '',
+    label: 'Failed Login',
+    value: 'failed_login',
+    element: 'category',
   },
   ...['severity', 'urgency', 'impact', 'priority']
     .map((element) => [

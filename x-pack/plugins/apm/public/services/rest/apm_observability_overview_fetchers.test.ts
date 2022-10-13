@@ -10,7 +10,7 @@ import {
   fetchObservabilityOverviewPageData,
   getHasData,
 } from './apm_observability_overview_fetchers';
-import { getCallApmApiSpy } from './callApmApiSpy';
+import { getCallApmApiSpy } from './call_apm_api_spy';
 
 describe('Observability dashboard data', () => {
   const callApmApiMock = getCallApmApiSpy();
@@ -23,7 +23,8 @@ describe('Observability dashboard data', () => {
       start: 'now-15m',
       end: 'now',
     },
-    bucketSize: '600s',
+    intervalString: '600s',
+    bucketSize: 600,
   };
   afterEach(() => {
     callApmApiMock.mockClear();

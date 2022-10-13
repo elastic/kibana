@@ -6,8 +6,7 @@ set SCRIPT_DIR=%~dp0
 for %%I in ("%SCRIPT_DIR%..") do set DIR=%%~dpfI
 
 set NODE=%DIR%\node\node.exe
-
-set NODE_ENV="production"
+set NODE_ENV=production
 
 If Not Exist "%NODE%" (
   Echo unable to find usable node.js executable.
@@ -15,7 +14,7 @@ If Not Exist "%NODE%" (
 )
 
 set CONFIG_DIR=%KBN_PATH_CONF%
-If [%KBN_PATH_CONF%] == [] (
+If ["%KBN_PATH_CONF%"] == [] (
   set "CONFIG_DIR=%DIR%\config"
 )
 

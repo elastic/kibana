@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
-import { getIndexCount } from '../index/get_index_count';
+import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { getIndexCount } from '@kbn/securitysolution-es-utils';
 import { updateMigrationSavedObject } from './update_migration_saved_object';
 import { getSignalsMigrationSavedObjectMock } from './saved_objects_schema.mock';
 import { finalizeMigration } from './finalize_migration';
 
 jest.mock('./update_migration_saved_object');
-jest.mock('../index/get_index_count');
+jest.mock('@kbn/securitysolution-es-utils');
 
 describe('finalizeMigration', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
@@ -24,7 +24,7 @@ describe('finalizeMigration', () => {
 
     // @ts-expect-error stubbing what we use of the task response
     // all our reindex tasks are completed
-    esClient.tasks.get.mockResolvedValueOnce({ body: { completed: true } });
+    esClient.tasks.get.mockResponse({ completed: true });
 
     // stub out our update call to just return the attributes we passed
     (updateMigrationSavedObject as jest.Mock).mockImplementation(({ attributes }) => ({

@@ -7,26 +7,15 @@
  */
 
 import React, { Component, Fragment } from 'react';
-import {
-  EuiCallOut,
-  EuiPanel,
-  EuiForm,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiCallOut, EuiForm, EuiLink, EuiSpacer, EuiSplitPanel, EuiTitle } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type { TelemetryPluginSetup } from 'src/plugins/telemetry/public';
-import type { DocLinksStart, ToastsStart } from 'src/core/public';
-import { PRIVACY_STATEMENT_URL } from '../../../telemetry/common/constants';
+import type { TelemetryPluginSetup } from '@kbn/telemetry-plugin/public';
+import type { DocLinksStart, ToastsStart } from '@kbn/core/public';
+import { LazyField } from '@kbn/advanced-settings-plugin/public';
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { OptInExampleFlyout } from './opt_in_example_flyout';
-import { OptInSecurityExampleFlyout } from './opt_in_security_example_flyout';
-import { LazyField } from '../../../advanced_settings/public';
-import { TrackApplicationView } from '../../../usage_collection/public';
 
 type TelemetryService = TelemetryPluginSetup['telemetryService'];
 
@@ -35,7 +24,6 @@ const SEARCH_TERMS = ['telemetry', 'usage', 'data', 'usage data'];
 interface Props {
   telemetryService: TelemetryService;
   onQueryMatchChange: (searchTermMatches: boolean) => void;
-  isSecurityExampleEnabled: () => boolean;
   showAppliesSettingMessage: boolean;
   enableSaving: boolean;
   query?: { text: string };
@@ -89,9 +77,8 @@ export class TelemetryManagementSection extends Component<Props, State> {
   }
 
   render() {
-    const { telemetryService, isSecurityExampleEnabled } = this.props;
-    const { showExample, showSecurityExample, queryMatches, enabled, processing } = this.state;
-    const securityExampleEnabled = isSecurityExampleEnabled();
+    const { telemetryService } = this.props;
+    const { showExample, queryMatches, enabled, processing } = this.state;
 
     if (!telemetryService.getCanChangeOptInStatus()) {
       return null;
@@ -111,51 +98,46 @@ export class TelemetryManagementSection extends Component<Props, State> {
             />
           </TrackApplicationView>
         )}
-        {showSecurityExample && securityExampleEnabled && (
-          <TrackApplicationView viewId="optInSecurityExampleFlyout">
-            <OptInSecurityExampleFlyout onClose={this.toggleSecurityExample} />
-          </TrackApplicationView>
-        )}
-        <EuiPanel paddingSize="l">
+        <EuiSplitPanel.Outer hasBorder>
           <EuiForm>
-            <EuiText>
-              <EuiFlexGroup alignItems="baseline">
-                <EuiFlexItem grow={false}>
-                  <h2>
-                    <FormattedMessage id="telemetry.usageDataTitle" defaultMessage="Usage Data" />
-                  </h2>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiText>
+            <EuiSplitPanel.Inner color="subdued">
+              <EuiTitle>
+                <h2>
+                  <FormattedMessage id="telemetry.usageDataTitle" defaultMessage="Usage Data" />
+                </h2>
+              </EuiTitle>
+            </EuiSplitPanel.Inner>
 
-            {this.maybeGetAppliesSettingMessage()}
-            <EuiSpacer size="s" />
-            <LazyField
-              setting={{
-                type: 'boolean',
-                name: 'telemetry:enabled',
-                displayName: i18n.translate('telemetry.provideUsageStatisticsTitle', {
-                  defaultMessage: 'Provide usage statistics',
-                }),
-                value: enabled,
-                description: this.renderDescription(),
-                defVal: true,
-                ariaName: i18n.translate('telemetry.provideUsageStatisticsAriaName', {
-                  defaultMessage: 'Provide usage statistics',
-                }),
-                requiresPageReload: false,
-                category: [],
-                isOverridden: false,
-                isCustom: true,
-              }}
-              loading={processing}
-              dockLinks={this.props.docLinks}
-              toasts={this.props.toasts}
-              handleChange={this.toggleOptIn}
-              enableSaving={this.props.enableSaving}
-            />
+            <EuiSplitPanel.Inner>
+              {this.maybeGetAppliesSettingMessage()}
+              <EuiSpacer size="s" />
+              <LazyField
+                setting={{
+                  type: 'boolean',
+                  name: 'telemetry:enabled',
+                  displayName: i18n.translate('telemetry.provideUsageDataTitle', {
+                    defaultMessage: 'Provide usage data',
+                  }),
+                  value: enabled,
+                  description: this.renderDescription(),
+                  defVal: true,
+                  ariaName: i18n.translate('telemetry.provideUsageDataAriaName', {
+                    defaultMessage: 'Provide usage data',
+                  }),
+                  requiresPageReload: false,
+                  category: [],
+                  isOverridden: false,
+                  isCustom: true,
+                }}
+                loading={processing}
+                docLinks={this.props.docLinks}
+                toasts={this.props.toasts}
+                handleChange={this.toggleOptIn}
+                enableSaving={this.props.enableSaving}
+              />
+            </EuiSplitPanel.Inner>
           </EuiForm>
-        </EuiPanel>
+        </EuiSplitPanel.Outer>
       </Fragment>
     );
   }
@@ -169,39 +151,41 @@ export class TelemetryManagementSection extends Component<Props, State> {
         color="primary"
         iconType="spacesApp"
         title={
-          <p>
-            <FormattedMessage
-              id="telemetry.callout.appliesSettingTitle"
-              defaultMessage="Changes to this setting apply to {allOfKibanaText} and are saved automatically."
-              values={{
-                allOfKibanaText: (
-                  <strong>
-                    <FormattedMessage
-                      id="telemetry.callout.appliesSettingTitle.allOfKibanaText"
-                      defaultMessage="all of Kibana"
-                    />
-                  </strong>
-                ),
-              }}
-            />
-          </p>
+          <FormattedMessage
+            id="telemetry.callout.appliesSettingTitle"
+            defaultMessage="Changes to this setting apply to {allOfKibanaText} and are saved automatically."
+            values={{
+              allOfKibanaText: (
+                <strong>
+                  <FormattedMessage
+                    id="telemetry.callout.appliesSettingTitle.allOfKibanaText"
+                    defaultMessage="all of Kibana"
+                  />
+                </strong>
+              ),
+            }}
+          />
         }
       />
     );
   };
 
   renderDescription = () => {
-    const { isSecurityExampleEnabled } = this.props;
-    const securityExampleEnabled = isSecurityExampleEnabled();
+    const { docLinks } = this.props;
+
     const clusterDataLink = (
       <EuiLink onClick={this.toggleExample} data-test-id="cluster_data_example">
         <FormattedMessage id="telemetry.clusterData" defaultMessage="cluster data" />
       </EuiLink>
     );
 
-    const endpointSecurityDataLink = (
-      <EuiLink onClick={this.toggleSecurityExample} data-test-id="endpoint_security_example">
-        <FormattedMessage id="telemetry.securityData" defaultMessage="endpoint security data" />
+    const securityDataLink = (
+      <EuiLink
+        href="https://www.elastic.co/guide/en/security/current/advanced-settings.html#telemetry-settings"
+        data-test-id="endpoint_security_example"
+        target="_blank"
+      >
+        <FormattedMessage id="telemetry.securityData" defaultMessage="security data" />
       </EuiLink>
     );
 
@@ -214,7 +198,7 @@ export class TelemetryManagementSection extends Component<Props, State> {
             See our {privacyStatementLink} for more details."
             values={{
               privacyStatementLink: (
-                <EuiLink href={PRIVACY_STATEMENT_URL} target="_blank">
+                <EuiLink href={docLinks.legal.privacyStatement} target="_blank">
                   <FormattedMessage
                     id="telemetry.readOurUsageDataPrivacyStatementLinkText"
                     defaultMessage="Privacy Statement"
@@ -225,24 +209,14 @@ export class TelemetryManagementSection extends Component<Props, State> {
           />
         </p>
         <p>
-          {securityExampleEnabled ? (
-            <FormattedMessage
-              id="telemetry.seeExampleOfClusterDataAndEndpointSecuity"
-              defaultMessage="See examples of the {clusterData} and {endpointSecurityData} that we collect."
-              values={{
-                clusterData: clusterDataLink,
-                endpointSecurityData: endpointSecurityDataLink,
-              }}
-            />
-          ) : (
-            <FormattedMessage
-              id="telemetry.seeExampleOfClusterData"
-              defaultMessage="See an example of the {clusterData} that we collect."
-              values={{
-                clusterData: clusterDataLink,
-              }}
-            />
-          )}
+          <FormattedMessage
+            id="telemetry.seeExampleOfClusterDataAndEndpointSecuity"
+            defaultMessage="See examples of the {clusterData} and {securityData} that we collect."
+            values={{
+              clusterData: clusterDataLink,
+              securityData: securityDataLink,
+            }}
+          />
         </p>
       </Fragment>
     );
@@ -284,15 +258,6 @@ export class TelemetryManagementSection extends Component<Props, State> {
   toggleExample = () => {
     this.setState({
       showExample: !this.state.showExample,
-    });
-  };
-
-  toggleSecurityExample = () => {
-    const { isSecurityExampleEnabled } = this.props;
-    const securityExampleEnabled = isSecurityExampleEnabled();
-    if (!securityExampleEnabled) return;
-    this.setState({
-      showSecurityExample: !this.state.showSecurityExample,
     });
   };
 }

@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { CoreUsageData, CoreUsageDataStart } from '../../../../../core/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { CoreUsageDataStart } from '@kbn/core/server';
+import { CoreUsageData } from './core_usage_data';
 
 export function getCoreUsageCollector(
   usageCollection: UsageCollectionSetup,
@@ -129,6 +130,13 @@ export function getCoreUsageCollector(
             _meta: {
               description:
                 'The interval in miliseconds between health check requests Kibana sends to the Elasticsearch.',
+            },
+          },
+          principal: {
+            type: 'keyword',
+            _meta: {
+              description:
+                'Indicates how Kibana authenticates itself to Elasticsearch. If elasticsearch.username is configured, this can be any of: "elastic_user", "kibana_user", "kibana_system_user", or "other_user". Otherwise, if elasticsearch.serviceAccountToken is configured, this will be "kibana_service_account". Otherwise, this value will be "unknown", because some other principal might be used to authenticate Kibana to Elasticsearch (such as an x509 certificate), or authentication may be skipped altogether.',
             },
           },
         },
@@ -308,6 +316,23 @@ export function getCoreUsageCollector(
             },
           },
         },
+
+        deprecatedKeys: {
+          set: {
+            type: 'array',
+            items: {
+              type: 'keyword',
+              _meta: { description: 'Config path added during config deprecation.' },
+            },
+          },
+          unset: {
+            type: 'array',
+            items: {
+              type: 'keyword',
+              _meta: { description: 'Config path removed during config deprecation.' },
+            },
+          },
+        },
       },
       environment: {
         memory: {
@@ -331,14 +356,14 @@ export function getCoreUsageCollector(
                 type: 'long',
                 _meta: {
                   description:
-                    'The number of documents in the index, including hidden nested documents.',
+                    'The number of lucene documents in the index, including hidden nested documents.',
                 },
               },
               docsDeleted: {
                 type: 'long',
                 _meta: {
                   description:
-                    'The number of deleted documents in the index, including hidden nested documents.',
+                    'The number of deleted lucene documents in the index, including hidden nested documents.',
                 },
               },
               alias: {
@@ -357,6 +382,40 @@ export function getCoreUsageCollector(
                 _meta: {
                   description: 'The size in bytes of the index, for primaries and replicas.',
                 },
+              },
+              savedObjectsDocsCount: {
+                type: 'long',
+                _meta: {
+                  description: 'The number of saved objects documents in the index.',
+                },
+              },
+            },
+          },
+          legacyUrlAliases: {
+            inactiveCount: {
+              type: 'long',
+              _meta: {
+                description:
+                  'Count of legacy URL aliases that are inactive; they are not disabled, but they have not been resolved.',
+              },
+            },
+            activeCount: {
+              type: 'long',
+              _meta: {
+                description:
+                  'Count of legacy URL aliases that are active; they are not disabled, and they have been resolved at least once.',
+              },
+            },
+            disabledCount: {
+              type: 'long',
+              _meta: {
+                description: 'Count of legacy URL aliases that are disabled.',
+              },
+            },
+            totalCount: {
+              type: 'long',
+              _meta: {
+                description: 'Total count of legacy URL aliases.',
               },
             },
           },
@@ -437,6 +496,46 @@ export function getCoreUsageCollector(
         },
       },
       'apiCalls.savedObjectsBulkGet.namespace.custom.kibanaRequest.no': {
+        type: 'long',
+        _meta: {
+          description:
+            'How many times this API has been called by a non-Kibana client in a custom space.',
+        },
+      },
+      'apiCalls.savedObjectsBulkResolve.total': {
+        type: 'long',
+        _meta: { description: 'How many times this API has been called.' },
+      },
+      'apiCalls.savedObjectsBulkResolve.namespace.default.total': {
+        type: 'long',
+        _meta: { description: 'How many times this API has been called in the Default space.' },
+      },
+      'apiCalls.savedObjectsBulkResolve.namespace.default.kibanaRequest.yes': {
+        type: 'long',
+        _meta: {
+          description:
+            'How many times this API has been called by the Kibana client in the Default space.',
+        },
+      },
+      'apiCalls.savedObjectsBulkResolve.namespace.default.kibanaRequest.no': {
+        type: 'long',
+        _meta: {
+          description:
+            'How many times this API has been called by a non-Kibana client in the Default space.',
+        },
+      },
+      'apiCalls.savedObjectsBulkResolve.namespace.custom.total': {
+        type: 'long',
+        _meta: { description: 'How many times this API has been called in a custom space.' },
+      },
+      'apiCalls.savedObjectsBulkResolve.namespace.custom.kibanaRequest.yes': {
+        type: 'long',
+        _meta: {
+          description:
+            'How many times this API has been called by the Kibana client in a custom space.',
+        },
+      },
+      'apiCalls.savedObjectsBulkResolve.namespace.custom.kibanaRequest.no': {
         type: 'long',
         _meta: {
           description:
@@ -723,6 +822,46 @@ export function getCoreUsageCollector(
             'How many times this API has been called by a non-Kibana client in a custom space.',
         },
       },
+      'apiCalls.savedObjectsBulkDelete.total': {
+        type: 'long',
+        _meta: { description: 'How many times this API has been called.' },
+      },
+      'apiCalls.savedObjectsBulkDelete.namespace.default.total': {
+        type: 'long',
+        _meta: { description: 'How many times this API has been called in the Default space.' },
+      },
+      'apiCalls.savedObjectsBulkDelete.namespace.default.kibanaRequest.yes': {
+        type: 'long',
+        _meta: {
+          description:
+            'How many times this API has been called by the Kibana client in the Default space.',
+        },
+      },
+      'apiCalls.savedObjectsBulkDelete.namespace.default.kibanaRequest.no': {
+        type: 'long',
+        _meta: {
+          description:
+            'How many times this API has been called by a non-Kibana client in the Default space.',
+        },
+      },
+      'apiCalls.savedObjectsBulkDelete.namespace.custom.total': {
+        type: 'long',
+        _meta: { description: 'How many times this API has been called in a custom space.' },
+      },
+      'apiCalls.savedObjectsBulkDelete.namespace.custom.kibanaRequest.yes': {
+        type: 'long',
+        _meta: {
+          description:
+            'How many times this API has been called by the Kibana client in a custom space.',
+        },
+      },
+      'apiCalls.savedObjectsBulkDelete.namespace.custom.kibanaRequest.no': {
+        type: 'long',
+        _meta: {
+          description:
+            'How many times this API has been called by a non-Kibana client in a custom space.',
+        },
+      },
       // Saved Objects Management APIs
       'apiCalls.savedObjectsImport.total': {
         type: 'long',
@@ -884,17 +1023,129 @@ export function getCoreUsageCollector(
             'How many times this API has been called by a non-Kibana client in a custom space.',
         },
       },
-      'apiCalls.savedObjectsExport.allTypesSelected.yes': {
+      // Legacy dashboard import/export APIs
+      'apiCalls.legacyDashboardExport.total': {
+        type: 'long',
+        _meta: { description: 'How many times this API has been called.' },
+      },
+      'apiCalls.legacyDashboardExport.namespace.default.total': {
+        type: 'long',
+        _meta: { description: 'How many times this API has been called in the Default space.' },
+      },
+      'apiCalls.legacyDashboardExport.namespace.default.kibanaRequest.yes': {
         type: 'long',
         _meta: {
           description:
-            'How many times this API has been called with the `createNewCopiesEnabled` option.',
+            'How many times this API has been called by the Kibana client in the Default space.',
+        },
+      },
+      'apiCalls.legacyDashboardExport.namespace.default.kibanaRequest.no': {
+        type: 'long',
+        _meta: {
+          description:
+            'How many times this API has been called by a non-Kibana client in the Default space.',
+        },
+      },
+      'apiCalls.legacyDashboardExport.namespace.custom.total': {
+        type: 'long',
+        _meta: { description: 'How many times this API has been called in a custom space.' },
+      },
+      'apiCalls.legacyDashboardExport.namespace.custom.kibanaRequest.yes': {
+        type: 'long',
+        _meta: {
+          description:
+            'How many times this API has been called by the Kibana client in a custom space.',
+        },
+      },
+      'apiCalls.legacyDashboardExport.namespace.custom.kibanaRequest.no': {
+        type: 'long',
+        _meta: {
+          description:
+            'How many times this API has been called by a non-Kibana client in a custom space.',
+        },
+      },
+      'apiCalls.savedObjectsExport.allTypesSelected.yes': {
+        type: 'long',
+        _meta: {
+          description: 'How many times this API has been called with all types selected.',
         },
       },
       'apiCalls.savedObjectsExport.allTypesSelected.no': {
         type: 'long',
         _meta: {
           description: 'How many times this API has been called without all types selected.',
+        },
+      },
+      'apiCalls.legacyDashboardImport.total': {
+        type: 'long',
+        _meta: { description: 'How many times this API has been called.' },
+      },
+      'apiCalls.legacyDashboardImport.namespace.default.total': {
+        type: 'long',
+        _meta: { description: 'How many times this API has been called in the Default space.' },
+      },
+      'apiCalls.legacyDashboardImport.namespace.default.kibanaRequest.yes': {
+        type: 'long',
+        _meta: {
+          description:
+            'How many times this API has been called by the Kibana client in the Default space.',
+        },
+      },
+      'apiCalls.legacyDashboardImport.namespace.default.kibanaRequest.no': {
+        type: 'long',
+        _meta: {
+          description:
+            'How many times this API has been called by a non-Kibana client in the Default space.',
+        },
+      },
+      'apiCalls.legacyDashboardImport.namespace.custom.total': {
+        type: 'long',
+        _meta: { description: 'How many times this API has been called in a custom space.' },
+      },
+      'apiCalls.legacyDashboardImport.namespace.custom.kibanaRequest.yes': {
+        type: 'long',
+        _meta: {
+          description:
+            'How many times this API has been called by the Kibana client in a custom space.',
+        },
+      },
+      'apiCalls.legacyDashboardImport.namespace.custom.kibanaRequest.no': {
+        type: 'long',
+        _meta: {
+          description:
+            'How many times this API has been called by a non-Kibana client in a custom space.',
+        },
+      },
+      // Saved Objects Repository counters
+      'savedObjectsRepository.resolvedOutcome.exactMatch': {
+        type: 'long',
+        _meta: {
+          description: 'How many times a saved object has resolved with an exact match outcome.',
+        },
+      },
+      'savedObjectsRepository.resolvedOutcome.aliasMatch': {
+        type: 'long',
+        _meta: {
+          description: 'How many times a saved object has resolved with an alias match outcome.',
+        },
+      },
+      'savedObjectsRepository.resolvedOutcome.conflict': {
+        type: 'long',
+        _meta: {
+          description: 'How many times a saved object has resolved with a conflict outcome.',
+        },
+      },
+      'savedObjectsRepository.resolvedOutcome.notFound': {
+        type: 'long',
+        _meta: {
+          description: 'How many times a saved object has resolved with a not found outcome.',
+        },
+      },
+      'savedObjectsRepository.resolvedOutcome.total': {
+        type: 'long',
+        _meta: {
+          description:
+            'How many times a saved object has resolved with any of the four possible outcomes.',
         },
       },
     },

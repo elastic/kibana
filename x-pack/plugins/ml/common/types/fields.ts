@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
-import { ES_FIELD_TYPES } from '../../../../../src/plugins/data/common';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ES_FIELD_TYPES } from '@kbn/data-plugin/common';
 import {
   ML_JOB_AGGREGATION,
   KIBANA_AGGREGATION,
@@ -28,7 +28,7 @@ export interface Field {
   aggregatable?: boolean;
   aggIds?: AggId[];
   aggs?: Aggregation[];
-  runtimeField?: estypes.RuntimeField;
+  runtimeField?: estypes.MappingRuntimeField;
 }
 
 export interface Aggregation {
@@ -97,19 +97,6 @@ export const mlCategory: Field = {
   aggregatable: false,
 };
 
-export interface FieldAggCardinality {
-  field: string;
-  percent?: any;
-}
-
-export interface ScriptAggCardinality {
-  script: any;
-}
-
-export interface AggCardinality {
-  cardinality: FieldAggCardinality | ScriptAggCardinality;
-}
-
 export type RollupFields = Record<FieldId, [Record<'agg', ES_AGGREGATION>]>;
 
-export type RuntimeMappings = estypes.RuntimeFields;
+export type RuntimeMappings = estypes.MappingRuntimeFields;

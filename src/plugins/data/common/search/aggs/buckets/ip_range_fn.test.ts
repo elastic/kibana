@@ -42,9 +42,7 @@ describe('agg_expression_functions', () => {
       const actual = fn({
         field: 'ip_field',
         ipRangeType: IP_RANGE_TYPES.MASK,
-        ranges: JSON.stringify({
-          mask: [{ mask: '10.0.0.0/25' }],
-        }),
+        ranges: [{ mask: '10.0.0.0/25', type: 'cidr' }],
       });
 
       expect(actual.value).toMatchInlineSnapshot(`

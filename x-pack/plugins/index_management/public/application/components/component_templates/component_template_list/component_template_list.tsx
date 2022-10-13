@@ -9,12 +9,17 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { ScopedHistory } from 'kibana/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { ScopedHistory } from '@kbn/core/public';
 import { EuiLink, EuiText, EuiSpacer } from '@elastic/eui';
 
-import { attemptToURIDecode } from '../../../../shared_imports';
-import { SectionLoading, ComponentTemplateDeserialized, GlobalFlyout } from '../shared_imports';
+import {
+  APP_WRAPPER_CLASS,
+  PageLoading,
+  PageError,
+  attemptToURIDecode,
+} from '../../../../shared_imports';
+import { ComponentTemplateDeserialized, GlobalFlyout } from '../shared_imports';
 import { UIM_COMPONENT_TEMPLATE_LIST_LOAD } from '../constants';
 import { useComponentTemplatesContext } from '../component_templates_context';
 import {
@@ -24,8 +29,8 @@ import {
 } from '../component_template_details';
 import { EmptyPrompt } from './empty_prompt';
 import { ComponentTable } from './table';
-import { LoadError } from './error';
 import { ComponentTemplatesDeleteModal } from './delete_modal';
+import { useRedirectPath } from '../../../hooks/redirect_path';
 
 interface Props {
   componentTemplateName?: string;
@@ -38,21 +43,20 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
   componentTemplateName,
   history,
 }) => {
-  const {
-    addContent: addContentToGlobalFlyout,
-    removeContent: removeContentFromGlobalFlyout,
-  } = useGlobalFlyout();
+  const { addContent: addContentToGlobalFlyout, removeContent: removeContentFromGlobalFlyout } =
+    useGlobalFlyout();
   const { api, trackMetric, documentation } = useComponentTemplatesContext();
+  const redirectTo = useRedirectPath(history);
 
   const { data, isLoading, error, resendRequest } = api.useLoadComponentTemplates();
 
   const [componentTemplatesToDelete, setComponentTemplatesToDelete] = useState<string[]>([]);
 
   const goToComponentTemplateList = useCallback(() => {
-    return history.push({
+    return redirectTo({
       pathname: 'component_templates',
     });
-  }, [history]);
+  }, [redirectTo]);
 
   const goToEditComponentTemplate = useCallback(
     (name: string) => {
@@ -138,18 +142,20 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
     }
   }, [componentTemplateName, removeContentFromGlobalFlyout]);
 
-  let content: React.ReactNode;
-
   if (isLoading) {
-    content = (
-      <SectionLoading data-test-subj="sectionLoading">
+    return (
+      <PageLoading data-test-subj="sectionLoading">
         <FormattedMessage
           id="xpack.idxMgmt.home.componentTemplates.list.loadingMessage"
           defaultMessage="Loading component templates…"
         />
-      </SectionLoading>
+      </PageLoading>
     );
-  } else if (data?.length) {
+  }
+
+  let content: React.ReactNode;
+
+  if (data?.length) {
     content = (
       <>
         <EuiText color="subdued">
@@ -183,11 +189,22 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
   } else if (data && data.length === 0) {
     content = <EmptyPrompt history={history} />;
   } else if (error) {
-    content = <LoadError onReloadClick={resendRequest} />;
+    content = (
+      <PageError
+        title={
+          <FormattedMessage
+            id="xpack.idxMgmt.home.componentTemplates.list.loadingErrorMessage"
+            defaultMessage="Error loading component templates"
+          />
+        }
+        error={error}
+        data-test-subj="componentTemplatesLoadError"
+      />
+    );
   }
 
   return (
-    <div data-test-subj="componentTemplateList">
+    <div className={APP_WRAPPER_CLASS} data-test-subj="componentTemplateList">
       {content}
 
       {/* delete modal */}

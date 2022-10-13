@@ -6,12 +6,10 @@
  */
 
 import { GeoJsonProperties } from 'geojson';
+import { Query } from '@kbn/data-plugin/common/query';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { IField } from '../../fields/field';
-import { Query } from '../../../../../../../src/plugins/data/common/query';
-import {
-  VectorJoinSourceRequestMeta,
-  VectorSourceSyncMeta,
-} from '../../../../common/descriptor_types';
+import { VectorJoinSourceRequestMeta } from '../../../../common/descriptor_types';
 import { PropertiesMap } from '../../../../common/elasticsearch_util';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { ISource } from '../source';
@@ -24,9 +22,16 @@ export interface ITermJoinSource extends ISource {
     searchFilters: VectorJoinSourceRequestMeta,
     leftSourceName: string,
     leftFieldName: string,
-    registerCancelCallback: (callback: () => void) => void
+    registerCancelCallback: (callback: () => void) => void,
+    inspectorAdapters: Adapters
   ): Promise<PropertiesMap>;
-  getSyncMeta(): VectorSourceSyncMeta | null;
+
+  /*
+   * Vector layer avoids unnecessarily re-fetching join data.
+   * Use getSyncMeta to expose fields that require join data re-fetch when changed.
+   */
+  getSyncMeta(): object | null;
+
   getId(): string;
   getRightFields(): IField[];
   getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;

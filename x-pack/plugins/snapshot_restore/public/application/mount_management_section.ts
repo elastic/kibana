@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CoreSetup } from 'src/core/public';
-import { ManagementAppMountParams } from 'src/plugins/management/public';
+import { CoreSetup } from '@kbn/core/public';
+import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { i18n } from '@kbn/i18n';
 
 import { ClientConfigType } from '../types';
@@ -24,7 +24,7 @@ export async function mountManagementSection(
   config: ClientConfigType,
   params: ManagementAppMountParams
 ) {
-  const { element, setBreadcrumbs, history } = params;
+  const { element, setBreadcrumbs, history, theme$ } = params;
   const [core] = await coreSetup.getStartServices();
   const {
     chrome: { docTitle },
@@ -42,6 +42,7 @@ export async function mountManagementSection(
       i18n,
       history,
     },
+    theme$,
   };
 
   const unmountAppCallback = renderApp(element, appDependencies);

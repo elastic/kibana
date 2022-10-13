@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import type { ListsPluginRouter } from '../types';
-import { ENDPOINT_LIST_ID, ENDPOINT_LIST_ITEM_URL } from '../../common/constants';
-import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
-import { validate } from '../../common/shared_imports';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
+import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   FindEndpointListItemSchemaDecoded,
   findEndpointListItemSchema,
   foundExceptionListItemSchema,
-} from '../../common/schemas';
+} from '@kbn/securitysolution-io-ts-list-types';
+import { ENDPOINT_LIST_ID, ENDPOINT_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 
-import { getExceptionListClient } from './utils';
+import type { ListsPluginRouter } from '../types';
+
+import { buildRouteValidation, buildSiemResponse, getExceptionListClient } from './utils';
 
 export const findEndpointListItemRoute = (router: ListsPluginRouter): void => {
   router.get(
@@ -34,7 +35,7 @@ export const findEndpointListItemRoute = (router: ListsPluginRouter): void => {
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        const exceptionLists = getExceptionListClient(context);
+        const exceptionLists = await getExceptionListClient(context);
         const {
           filter,
           page,
@@ -47,6 +48,8 @@ export const findEndpointListItemRoute = (router: ListsPluginRouter): void => {
           filter,
           page,
           perPage,
+          pit: undefined,
+          searchAfter: undefined,
           sortField,
           sortOrder,
         });

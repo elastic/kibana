@@ -6,16 +6,20 @@
  */
 
 import { TooltipInfo } from '@elastic/charts';
-import React, { ComponentType } from 'react';
-import { EuiThemeProvider } from '../../../../../../../../src/plugins/kibana_react/common';
+import React from 'react';
+import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
-import { MainStatsServiceInstanceItem } from '../../../app/service_overview/service_overview_instances_chart_and_table';
 import { CustomTooltip } from './custom_tooltip';
+
+type ServiceInstanceMainStatistics =
+  APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
+type MainStatsServiceInstanceItem =
+  ServiceInstanceMainStatistics['currentPeriod'][0];
 
 function getLatencyFormatter(props: TooltipInfo) {
   const maxLatency = Math.max(
     ...props.values.map((value) => {
-      const datum = (value.datum as unknown) as MainStatsServiceInstanceItem;
+      const datum = value.datum as unknown as MainStatsServiceInstanceItem;
       return datum.latency ?? 0;
     })
   );
@@ -25,13 +29,6 @@ function getLatencyFormatter(props: TooltipInfo) {
 export default {
   title: 'shared/charts/InstancesLatencyDistributionChart/CustomTooltip',
   component: CustomTooltip,
-  decorators: [
-    (Story: ComponentType) => (
-      <EuiThemeProvider>
-        <Story />
-      </EuiThemeProvider>
-    ),
-  ],
 };
 
 export function Example(props: TooltipInfo) {
@@ -42,8 +39,7 @@ export function Example(props: TooltipInfo) {
 Example.args = {
   header: {
     seriesIdentifier: {
-      key:
-        'groupId{__global__}spec{Instances}yAccessor{(index:0)}splitAccessors{}',
+      key: 'groupId{__global__}spec{Instances}yAccessor{(index:0)}splitAccessors{}',
       specId: 'Instances',
       yAccessor: '(index:0)',
       splitAccessors: {},
@@ -70,8 +66,7 @@ Example.args = {
   values: [
     {
       seriesIdentifier: {
-        key:
-          'groupId{__global__}spec{Instances}yAccessor{(index:0)}splitAccessors{}',
+        key: 'groupId{__global__}spec{Instances}yAccessor{(index:0)}splitAccessors{}',
         specId: 'Instances',
       },
       valueAccessor: 'y1',
@@ -103,8 +98,7 @@ export function MultipleInstances(props: TooltipInfo) {
 MultipleInstances.args = {
   header: {
     seriesIdentifier: {
-      key:
-        'groupId{__global__}spec{Instances}yAccessor{(index:0)}splitAccessors{}',
+      key: 'groupId{__global__}spec{Instances}yAccessor{(index:0)}splitAccessors{}',
       specId: 'Instances',
       yAccessor: '(index:0)',
       splitAccessors: {},
@@ -131,8 +125,7 @@ MultipleInstances.args = {
   values: [
     {
       seriesIdentifier: {
-        key:
-          'groupId{__global__}spec{Instances}yAccessor{(index:0)}splitAccessors{}',
+        key: 'groupId{__global__}spec{Instances}yAccessor{(index:0)}splitAccessors{}',
         specId: 'Instances',
       },
       valueAccessor: 'y1',
@@ -155,8 +148,7 @@ MultipleInstances.args = {
     },
     {
       seriesIdentifier: {
-        key:
-          'groupId{__global__}spec{Instances}yAccessor{(index:0)}splitAccessors{}',
+        key: 'groupId{__global__}spec{Instances}yAccessor{(index:0)}splitAccessors{}',
         specId: 'Instances',
       },
       valueAccessor: 'y1',

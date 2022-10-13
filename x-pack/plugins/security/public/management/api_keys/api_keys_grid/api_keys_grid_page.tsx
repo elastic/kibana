@@ -15,27 +15,24 @@ import {
   EuiHealth,
   EuiIcon,
   EuiInMemoryTable,
-  EuiPageContent,
-  EuiPageContentBody,
-  EuiPageContentHeader,
-  EuiPageContentHeaderSection,
   EuiSpacer,
   EuiText,
-  EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { History } from 'history';
 import moment from 'moment-timezone';
 import React, { Component } from 'react';
 import { Route } from 'react-router-dom';
 
+import type { NotificationsStart } from '@kbn/core/public';
+import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { NotificationsStart } from 'src/core/public';
 
-import { SectionLoading } from '../../../../../../../src/plugins/es_ui_shared/public';
-import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
 import type { ApiKey, ApiKeyToInvalidate } from '../../../../common/model';
 import { Breadcrumb } from '../../../components/breadcrumb';
 import { SelectableTokenField } from '../../../components/token_field';
@@ -88,7 +85,7 @@ export class APIKeysGridPage extends Component<Props, State> {
 
   public render() {
     return (
-      <div>
+      <>
         <Route path="/create">
           <Breadcrumb
             text={i18n.translate('xpack.security.management.apiKeys.createBreadcrumb', {
@@ -107,32 +104,23 @@ export class APIKeysGridPage extends Component<Props, State> {
           </Breadcrumb>
         </Route>
         {this.renderContent()}
-      </div>
+      </>
     );
   }
 
   public renderContent() {
-    const {
-      isLoadingApp,
-      isLoadingTable,
-      areApiKeysEnabled,
-      isAdmin,
-      canManage,
-      error,
-      apiKeys,
-    } = this.state;
+    const { isLoadingApp, isLoadingTable, areApiKeysEnabled, isAdmin, canManage, error, apiKeys } =
+      this.state;
 
     if (!apiKeys) {
       if (isLoadingApp) {
         return (
-          <EuiPageContent>
-            <SectionLoading>
-              <FormattedMessage
-                id="xpack.security.management.apiKeys.table.loadingApiKeysDescription"
-                defaultMessage="Loading API keys…"
-              />
-            </SectionLoading>
-          </EuiPageContent>
+          <SectionLoading>
+            <FormattedMessage
+              id="xpack.security.management.apiKeys.table.loadingApiKeysDescription"
+              defaultMessage="Loading API keys…"
+            />
+          </SectionLoading>
         );
       }
 
@@ -142,85 +130,86 @@ export class APIKeysGridPage extends Component<Props, State> {
 
       if (error) {
         return (
-          <EuiPageContent>
-            <ApiKeysEmptyPrompt error={error}>
-              <EuiButton iconType="refresh" onClick={this.reloadApiKeys}>
-                <FormattedMessage
-                  id="xpack.security.accountManagement.apiKeys.retryButton"
-                  defaultMessage="Try again"
-                />
-              </EuiButton>
-            </ApiKeysEmptyPrompt>
-          </EuiPageContent>
+          <ApiKeysEmptyPrompt error={error}>
+            <EuiButton iconType="refresh" onClick={this.reloadApiKeys}>
+              <FormattedMessage
+                id="xpack.security.accountManagement.apiKeys.retryButton"
+                defaultMessage="Try again"
+              />
+            </EuiButton>
+          </ApiKeysEmptyPrompt>
         );
       }
 
       if (!areApiKeysEnabled) {
-        return (
-          <EuiPageContent>
-            <NotEnabled />
-          </EuiPageContent>
-        );
+        return <NotEnabled />;
       }
     }
 
     if (!isLoadingTable && apiKeys && apiKeys.length === 0) {
       return (
-        <EuiPageContent>
-          <ApiKeysEmptyPrompt>
-            <EuiButton {...reactRouterNavigate(this.props.history, '/create')} fill>
-              <FormattedMessage
-                id="xpack.security.management.apiKeys.table.createButton"
-                defaultMessage="Create API key"
-              />
-            </EuiButton>
-          </ApiKeysEmptyPrompt>
-        </EuiPageContent>
+        <ApiKeysEmptyPrompt>
+          <EuiButton
+            {...reactRouterNavigate(this.props.history, '/create')}
+            fill
+            iconType="plusInCircleFilled"
+            data-test-subj="apiKeysCreatePromptButton"
+          >
+            <FormattedMessage
+              id="xpack.security.management.apiKeys.table.createButton"
+              defaultMessage="Create API key"
+            />
+          </EuiButton>
+        </ApiKeysEmptyPrompt>
       );
     }
 
     const concatenated = `${this.state.createdApiKey?.id}:${this.state.createdApiKey?.api_key}`;
 
     return (
-      <EuiPageContent>
-        <EuiPageContentHeader>
-          <EuiPageContentHeaderSection>
-            <EuiTitle>
-              <h1>
+      <>
+        <KibanaPageTemplate.Header
+          paddingSize="none"
+          bottomBorder
+          pageTitle={
+            <FormattedMessage
+              id="xpack.security.management.apiKeys.table.apiKeysTitle"
+              defaultMessage="API Keys"
+            />
+          }
+          description={
+            <>
+              {isAdmin ? (
                 <FormattedMessage
-                  id="xpack.security.management.apiKeys.table.apiKeysTitle"
-                  defaultMessage="API Keys"
+                  id="xpack.security.management.apiKeys.table.apiKeysAllDescription"
+                  defaultMessage="View and delete API keys. An API key sends requests on behalf of a user."
                 />
-              </h1>
-            </EuiTitle>
-            <EuiText color="subdued" size="s" data-test-subj="apiKeysDescriptionText">
-              <p>
-                {isAdmin ? (
-                  <FormattedMessage
-                    id="xpack.security.management.apiKeys.table.apiKeysAllDescription"
-                    defaultMessage="View and delete API keys. An API key sends requests on behalf of a user."
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="xpack.security.management.apiKeys.table.apiKeysOwnDescription"
-                    defaultMessage="View and delete your API keys. An API key sends requests on your behalf."
-                  />
-                )}
-              </p>
-            </EuiText>
-          </EuiPageContentHeaderSection>
-          <EuiPageContentHeaderSection>
-            <EuiButton {...reactRouterNavigate(this.props.history, '/create')}>
+              ) : (
+                <FormattedMessage
+                  id="xpack.security.management.apiKeys.table.apiKeysOwnDescription"
+                  defaultMessage="View and delete your API keys. An API key sends requests on your behalf."
+                />
+              )}
+            </>
+          }
+          rightSideItems={[
+            <EuiButton
+              {...reactRouterNavigate(this.props.history, '/create')}
+              fill
+              iconType="plusInCircleFilled"
+              data-test-subj="apiKeysCreateTableButton"
+            >
               <FormattedMessage
                 id="xpack.security.management.apiKeys.table.createButton"
                 defaultMessage="Create API key"
               />
-            </EuiButton>
-          </EuiPageContentHeaderSection>
-        </EuiPageContentHeader>
+            </EuiButton>,
+          ]}
+        />
 
         {this.state.createdApiKey && !this.state.isLoadingTable && (
           <>
+            <EuiSpacer size="l" />
             <EuiCallOut
               color="success"
               iconType="check"
@@ -296,12 +285,15 @@ export class APIKeysGridPage extends Component<Props, State> {
                 ]}
               />
             </EuiCallOut>
-            <EuiSpacer />
           </>
         )}
 
-        <EuiPageContentBody>{this.renderTable()}</EuiPageContentBody>
-      </EuiPageContent>
+        <EuiSpacer size="l" />
+
+        <KibanaPageTemplate.Section paddingSize="none">
+          {this.renderTable()}
+        </KibanaPageTemplate.Section>
+      </>
     );
   }
 
@@ -387,14 +379,21 @@ export class APIKeysGridPage extends Component<Props, State> {
                 return {
                   value: username,
                   view: (
-                    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                      <EuiFlexItem grow={false}>
-                        <EuiIcon type="user" />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiText>{username}</EuiText>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
+                    <EuiToolTip delay="long" position="left" content={username}>
+                      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                        <EuiFlexItem grow={false}>
+                          <EuiIcon type="user" />
+                        </EuiFlexItem>
+                        <EuiFlexItem
+                          css={css`
+                            overflow: hidden;
+                          `}
+                          grow={false}
+                        >
+                          <EuiText className="eui-textTruncate">{username}</EuiText>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiToolTip>
                   ),
                 };
               }),
@@ -527,7 +526,7 @@ export class APIKeysGridPage extends Component<Props, State> {
         render: (creation: string, item: ApiKey) => (
           <EuiToolTip content={moment(creation).format(DATE_FORMAT)}>
             {item.id === createdApiKey?.id ? (
-              <EuiBadge color="secondary">
+              <EuiBadge color="success">
                 <FormattedMessage
                   id="xpack.security.management.apiKeys.table.createdBadge"
                   defaultMessage="Just now"
@@ -598,6 +597,7 @@ export class APIKeysGridPage extends Component<Props, State> {
             color: 'danger',
             onClick: (item) =>
               invalidateApiKeyPrompt([{ id: item.id, name: item.name }], this.onApiKeysInvalidated),
+            'data-test-subj': 'apiKeysTableDeleteAction',
           },
         ],
       },
@@ -614,11 +614,8 @@ export class APIKeysGridPage extends Component<Props, State> {
 
   private async checkPrivileges() {
     try {
-      const {
-        isAdmin,
-        canManage,
-        areApiKeysEnabled,
-      } = await this.props.apiKeysAPIClient.checkPrivileges();
+      const { isAdmin, canManage, areApiKeysEnabled } =
+        await this.props.apiKeysAPIClient.checkPrivileges();
       this.setState({ isAdmin, canManage, areApiKeysEnabled });
 
       if (!canManage || !areApiKeysEnabled) {

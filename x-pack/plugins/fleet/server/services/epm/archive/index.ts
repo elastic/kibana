@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AssetParts, InstallSource } from '../../../../common/types';
+import type { AssetParts } from '../../../../common/types';
 import { PackageInvalidArchiveError, PackageUnsupportedMediaTypeError } from '../../../errors';
 
 import {
@@ -16,13 +16,14 @@ import {
   setArchiveFilelist,
   deleteArchiveFilelist,
   deletePackageInfo,
+  clearPackageFileCache,
 } from './cache';
 import type { SharedKey } from './cache';
 import { getBufferExtractor } from './extract';
 
 export * from './cache';
 export { getBufferExtractor, untarBuffer, unzipBuffer } from './extract';
-export { parseAndVerifyArchiveBuffer as parseAndVerifyArchiveEntries } from './validation';
+export { generatePackageInfoFromArchiveBuffer } from './parse';
 
 export interface ArchiveEntry {
   path: string;
@@ -34,14 +35,15 @@ export async function unpackBufferToCache({
   version,
   contentType,
   archiveBuffer,
-  installSource,
 }: {
   name: string;
   version: string;
   contentType: string;
   archiveBuffer: Buffer;
-  installSource: InstallSource;
 }): Promise<string[]> {
+  // Make sure any buffers from previous installations from registry or upload are deleted first
+  clearPackageFileCache({ name, version });
+
   const entries = await unpackBufferEntries(archiveBuffer, contentType);
   const paths: string[] = [];
   entries.forEach((entry) => {
@@ -112,6 +114,20 @@ export function getPathParts(path: string): AssetParts {
     dataset = type;
     // drop the `data_stream/dataset-name` portion & re-parse
     [pkgkey, service, type, file] = path.replace(`data_stream/${dataset}/`, '').split('/');
+  }
+
+  // To support the NOTICE asset at the root level
+  if (service === 'NOTICE.txt') {
+    file = service;
+    type = 'notice';
+    service = '';
+  }
+
+  // To support the LICENSE asset at the root level
+  if (service === 'LICENSE.txt') {
+    file = service;
+    type = 'license';
+    service = '';
   }
 
   // This is to cover for the fields.yml files inside the "fields" directory

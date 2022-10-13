@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger } from 'src/core/server';
+import { Logger } from '@kbn/core/server';
 import { map } from 'lodash';
 import { Subject, race, from } from 'rxjs';
 import { bufferWhen, filter, bufferCount, flatMap, mapTo, first } from 'rxjs/operators';

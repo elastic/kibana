@@ -7,20 +7,19 @@
  */
 
 import { Observable } from 'rxjs';
+import { ErrorLike } from '@kbn/expressions-plugin/common';
 import { Adapters } from '../types';
 import { IContainer } from '../containers/i_container';
 import { EmbeddableInput } from '../../../common/types';
 
-export interface EmbeddableError {
-  name: string;
-  message: string;
-}
-
-export { EmbeddableInput };
+export type EmbeddableError = ErrorLike;
+export type { EmbeddableInput };
 
 export interface EmbeddableOutput {
   // Whether the embeddable is actively loading.
   loading?: boolean;
+  // Whether the embeddable is rendered.
+  rendered?: boolean;
   // Whether the embeddable finished loading with an error.
   error?: EmbeddableError;
   editUrl?: string;
@@ -61,6 +60,14 @@ export interface IEmbeddable<
   readonly id: string;
 
   /**
+   * If set to true, defer embeddable load tells the container that this embeddable
+   * type isn't completely loaded when the constructor returns. This embeddable
+   * will have to manually call setChildLoaded on its parent when all of its initial
+   * output is finalized. For instance, after loading a saved object.
+   */
+  readonly deferEmbeddableLoad: boolean;
+
+  /**
    * Unique ID an embeddable is assigned each time it is initialized. This ID
    * is different for different instances of the same embeddable. For example,
    * if the same dashboard is rendered twice on the screen, all embeddable
@@ -77,6 +84,14 @@ export interface IEmbeddable<
    * If this embeddable has encountered a fatal error, that error will be stored here
    **/
   fatalError?: Error;
+
+  /**
+   * This method returns false by default.
+   * It should be set to true for any embeddable type that utilizes the `loading` and `rendered`
+   * output variables to notify a container of their loading progress. If set to false, a container should assume
+   * the embeddable is loaded immediately.
+   */
+  reportsEmbeddableLoad(): boolean;
 
   /**
    * A functional representation of the isContainer variable, but helpful for typescript to
@@ -96,6 +111,20 @@ export interface IEmbeddable<
   getInput(): Readonly<I>;
 
   /**
+   * Because embeddables can inherit input from their parents, they also need a way to separate their own
+   * input from input which is inherited. If the embeddable does not have a parent, getExplicitInput
+   * and getInput should return the same.
+   **/
+  getExplicitInput(): Readonly<Partial<I>>;
+
+  /**
+   * Some embeddables contain input that should not be persisted anywhere beyond their own state. This method
+   * is a way for containers to separate input to store from input which can be ephemeral. In most cases, this
+   * will be the same as getExplicitInput
+   **/
+  getPersistableInput(): Readonly<Partial<I>>;
+
+  /**
    * Output state is:
    *
    * - State that should not change once the embeddable is instantiated, or
@@ -112,6 +141,12 @@ export interface IEmbeddable<
    * @param changes
    */
   updateInput(changes: Partial<I>): void;
+
+  /**
+   * Updates output state with the given changes.
+   * @param changes
+   */
+  updateOutput(changes: Partial<O>): void;
 
   /**
    * Returns an observable which will be notified when input state changes.
@@ -141,6 +176,13 @@ export interface IEmbeddable<
   render(domNode: HTMLElement | Element): void;
 
   /**
+   * Renders a custom embeddable error at the given node.
+   * @param domNode
+   * @returns A callback that will be called on error destroy.
+   */
+  renderError?(domNode: HTMLElement | Element, error: ErrorLike): () => void;
+
+  /**
    * Reload the embeddable so output and rendering is up to date. Especially relevant
    * if the embeddable takes relative time as input (e.g. now to now-15)
    */
@@ -162,4 +204,11 @@ export interface IEmbeddable<
    * List of triggers that this embeddable will execute.
    */
   supportedTriggers(): string[];
+
+  /**
+   * Used to diff explicit embeddable input
+   */
+  getExplicitInputIsEqual(lastInput: Partial<I>): Promise<boolean>;
+
+  refreshInputFromParent(): void;
 }

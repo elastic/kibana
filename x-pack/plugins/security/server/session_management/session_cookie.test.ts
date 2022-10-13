@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { SessionStorage } from 'src/core/server';
+import type { SessionStorage } from '@kbn/core/server';
 import {
   httpServerMock,
   httpServiceMock,
   loggingSystemMock,
   sessionStorageMock,
-} from 'src/core/server/mocks';
+} from '@kbn/core/server/mocks';
 
 import type { SessionCookieOptions } from './session_cookie';
 import { SessionCookie } from './session_cookie';
@@ -59,9 +59,8 @@ describe('Session cookie', () => {
     });
 
     it('cookie validator properly handles cookies with different base path', () => {
-      const [
-        [{ validate }],
-      ] = (sessionCookieOptions.createCookieSessionStorageFactory as jest.Mock).mock.calls;
+      const [[{ validate }]] = (sessionCookieOptions.createCookieSessionStorageFactory as jest.Mock)
+        .mock.calls;
 
       expect(
         validate(sessionCookieMock.createValue({ path: sessionCookieOptions.serverBasePath }))

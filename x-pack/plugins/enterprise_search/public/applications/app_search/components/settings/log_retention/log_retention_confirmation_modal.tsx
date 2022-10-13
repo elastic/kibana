@@ -20,7 +20,7 @@ export const LogRetentionConfirmationModal: React.FC = () => {
   const CANNOT_BE_RECOVERED_TEXT = i18n.translate(
     'xpack.enterpriseSearch.appSearch.settings.logRetention.modal.recovery',
     {
-      defaultMessage: 'Once your data has been removed, it cannot be recovered.',
+      defaultMessage: 'You cannot recover deleted data.',
     }
   );
 
@@ -72,7 +72,7 @@ export const LogRetentionConfirmationModal: React.FC = () => {
                   'xpack.enterpriseSearch.appSearch.settings.logRetention.modal.analytics.description',
                   {
                     defaultMessage:
-                      'When disabling Analytics Logs, all your engines will immediately stop indexing Analytics Logs. Your existing data will be deleted in accordance with the storage timeframes outlined above.',
+                      'When you disable writing, engines stop logging analytics events. Your existing data is deleted according to the storage time frame.',
                   }
                 )}
               </p>
@@ -117,7 +117,7 @@ export const LogRetentionConfirmationModal: React.FC = () => {
                   'xpack.enterpriseSearch.appSearch.settings.logRetention.modal.api.description',
                   {
                     defaultMessage:
-                      'When disabling API Logs, all your engines will immediately stop indexing API Logs. Your existing data will be deleted in accordance with the storage timeframes outlined above.',
+                      'When you disable writing, engines stop logging API events. Your existing data is deleted according to the storage time frame.',
                   }
                 )}
               </p>
@@ -131,6 +131,98 @@ export const LogRetentionConfirmationModal: React.FC = () => {
           target={DISABLE_TEXT}
           onClose={closeModals}
           onSave={() => saveLogRetention(LogRetentionOptions.API, false)}
+        />
+      )}
+      {openedModal === LogRetentionOptions.Audit && (
+        <GenericConfirmationModal
+          data-test-subj="APILogRetentionConfirmationModal"
+          title={i18n.translate(
+            'xpack.enterpriseSearch.appSearch.settings.logRetention.modal.audit.title',
+            {
+              defaultMessage: 'Disable Audit writes',
+            }
+          )}
+          subheading={
+            logRetention &&
+            logRetention?.[LogRetentionOptions.Audit].retentionPolicy?.minAgeDays &&
+            i18n.translate(
+              'xpack.enterpriseSearch.appSearch.settings.logRetention.modal.audit.subheading',
+              {
+                defaultMessage: 'Your audit Logs are currently being stored for {minAgeDays} days.',
+                values: {
+                  minAgeDays: logRetention?.[LogRetentionOptions.Audit].retentionPolicy?.minAgeDays,
+                },
+              }
+            )
+          }
+          description={
+            <>
+              <p>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.appSearch.settings.logRetention.modal.audit.description',
+                  {
+                    defaultMessage:
+                      'When you disable writing, engines stop logging audit events. Your existing data is deleted according to the storage time frame.',
+                  }
+                )}
+              </p>
+              <p>
+                <strong>
+                  <EuiTextColor color="danger">{CANNOT_BE_RECOVERED_TEXT}</EuiTextColor>
+                </strong>
+              </p>
+            </>
+          }
+          target={DISABLE_TEXT}
+          onClose={closeModals}
+          onSave={() => saveLogRetention(LogRetentionOptions.Audit, false)}
+        />
+      )}
+      {openedModal === LogRetentionOptions.Crawler && (
+        <GenericConfirmationModal
+          data-test-subj="CrawlerLogRetentionConfirmationModal"
+          title={i18n.translate(
+            'xpack.enterpriseSearch.appSearch.settings.logRetention.modal.crawler.title',
+            {
+              defaultMessage: 'Disable Web Crawler writes',
+            }
+          )}
+          subheading={
+            logRetention &&
+            logRetention?.[LogRetentionOptions.Crawler].retentionPolicy?.minAgeDays &&
+            i18n.translate(
+              'xpack.enterpriseSearch.appSearch.settings.logRetention.modal.crawler.subheading',
+              {
+                defaultMessage:
+                  'Your Web Crawler Logs are currently being stored for {minAgeDays} days.',
+                values: {
+                  minAgeDays:
+                    logRetention?.[LogRetentionOptions.Crawler].retentionPolicy?.minAgeDays,
+                },
+              }
+            )
+          }
+          description={
+            <>
+              <p>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.appSearch.settings.logRetention.modal.crawler.description',
+                  {
+                    defaultMessage:
+                      'When you disable writing, engines stop logging Web Crawler events. Your existing data is deleted according to the storage time frame.',
+                  }
+                )}
+              </p>
+              <p>
+                <strong>
+                  <EuiTextColor color="danger">{CANNOT_BE_RECOVERED_TEXT}</EuiTextColor>
+                </strong>
+              </p>
+            </>
+          }
+          target={DISABLE_TEXT}
+          onClose={closeModals}
+          onSave={() => saveLogRetention(LogRetentionOptions.Crawler, false)}
         />
       )}
     </>

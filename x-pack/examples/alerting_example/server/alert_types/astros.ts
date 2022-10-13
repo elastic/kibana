@@ -6,7 +6,7 @@
  */
 
 import axios from 'axios';
-import { AlertType } from '../../../../plugins/alerting/server';
+import { RuleType } from '@kbn/alerting-plugin/server';
 import { Operator, Craft, ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
 
 interface PeopleInSpace {
@@ -39,8 +39,9 @@ function getCraftFilter(craft: string) {
     craft === Craft.OuterSpace ? true : craft === person.craft;
 }
 
-export const alertType: AlertType<
+export const alertType: RuleType<
   { outerSpaceCapacity: number; craft: string; op: string },
+  never,
   { peopleInSpace: number },
   { craft: string },
   never,
@@ -51,6 +52,7 @@ export const alertType: AlertType<
   name: 'People In Space Right Now',
   actionGroups: [{ id: 'default', name: 'default' }],
   minimumLicenseRequired: 'basic',
+  isExportable: true,
   defaultActionGroupId: 'default',
   recoveryActionGroup: {
     id: 'hasLandedBackOnEarth',
@@ -68,7 +70,7 @@ export const alertType: AlertType<
 
     if (getOperator(op)(peopleInCraft.length, outerSpaceCapacity)) {
       peopleInCraft.forEach(({ craft, name }) => {
-        services.alertInstanceFactory(name).replaceState({ craft }).scheduleActions('default');
+        services.alertFactory.create(name).replaceState({ craft }).scheduleActions('default');
       });
     }
 

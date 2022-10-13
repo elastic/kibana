@@ -2,6 +2,34 @@
 
 exports[`SavedObjectsTable delete should show a confirm modal 1`] = `
 <DeleteConfirmModal
+  allowedTypes={
+    Array [
+      Object {
+        "displayName": "index-pattern",
+        "hidden": false,
+        "name": "index-pattern",
+        "namespaceType": "single",
+      },
+      Object {
+        "displayName": "visualization",
+        "hidden": false,
+        "name": "visualization",
+        "namespaceType": "single",
+      },
+      Object {
+        "displayName": "dashboard",
+        "hidden": false,
+        "name": "dashboard",
+        "namespaceType": "single",
+      },
+      Object {
+        "displayName": "search",
+        "hidden": false,
+        "name": "search",
+        "namespaceType": "single",
+      },
+    ]
+  }
   isDeleting={false}
   onCancel={[Function]}
   onConfirm={[Function]}
@@ -62,9 +90,7 @@ exports[`SavedObjectsTable export should allow the user to choose when exporting
 `;
 
 exports[`SavedObjectsTable should render normally 1`] = `
-<EuiPageContent
-  horizontalPosition="center"
->
+<div>
   <Header
     filteredCount={4}
     onExportAll={[Function]}
@@ -72,15 +98,15 @@ exports[`SavedObjectsTable should render normally 1`] = `
     onRefresh={[Function]}
   />
   <EuiSpacer
-    size="xs"
+    size="l"
   />
   <RedirectAppLinks
     application={
       Object {
         "applications$": BehaviorSubject {
-          "_isScalar": false,
           "_value": Map {},
           "closed": false,
+          "currentObservers": null,
           "hasError": false,
           "isStopped": false,
           "observers": Array [],
@@ -97,10 +123,9 @@ exports[`SavedObjectsTable should render normally 1`] = `
           },
         },
         "currentAppId$": Observable {
-          "_isScalar": false,
           "source": Subject {
-            "_isScalar": false,
             "closed": false,
+            "currentObservers": null,
             "hasError": false,
             "isStopped": false,
             "observers": Array [],
@@ -119,6 +144,34 @@ exports[`SavedObjectsTable should render normally 1`] = `
           "getAll": [MockFunction],
           "has": [MockFunction],
         }
+      }
+      allowedTypes={
+        Array [
+          Object {
+            "displayName": "index-pattern",
+            "hidden": false,
+            "name": "index-pattern",
+            "namespaceType": "single",
+          },
+          Object {
+            "displayName": "visualization",
+            "hidden": false,
+            "name": "visualization",
+            "namespaceType": "single",
+          },
+          Object {
+            "displayName": "dashboard",
+            "hidden": false,
+            "name": "dashboard",
+            "namespaceType": "single",
+          },
+          Object {
+            "displayName": "search",
+            "hidden": false,
+            "name": "search",
+            "namespaceType": "single",
+          },
+        ]
       }
       basePath={
         BasePath {
@@ -181,10 +234,10 @@ exports[`SavedObjectsTable should render normally 1`] = `
           Object {
             "id": "1",
             "meta": Object {
-              "editUrl": "#/management/kibana/indexPatterns/patterns/1",
+              "editUrl": "#/management/kibana/dataViews/dataView/1",
               "icon": "indexPatternApp",
               "inAppUrl": Object {
-                "path": "/management/kibana/indexPatterns/patterns/1",
+                "path": "/management/kibana/dataViews/dataView/1",
                 "uiCapabilitiesPath": "management.kibana.indexPatterns",
               },
               "title": "MyIndexPattern*",
@@ -194,7 +247,6 @@ exports[`SavedObjectsTable should render normally 1`] = `
           Object {
             "id": "2",
             "meta": Object {
-              "editUrl": "/management/kibana/objects/savedSearches/2",
               "icon": "search",
               "inAppUrl": Object {
                 "path": "/discover/2",
@@ -207,7 +259,6 @@ exports[`SavedObjectsTable should render normally 1`] = `
           Object {
             "id": "3",
             "meta": Object {
-              "editUrl": "/management/kibana/objects/savedDashboards/3",
               "icon": "dashboardApp",
               "inAppUrl": Object {
                 "path": "/dashboard/3",
@@ -220,7 +271,6 @@ exports[`SavedObjectsTable should render normally 1`] = `
           Object {
             "id": "4",
             "meta": Object {
-              "editUrl": "/management/kibana/objects/savedVisualizations/4",
               "icon": "visualizeApp",
               "inAppUrl": Object {
                 "path": "/edit/4",
@@ -246,8 +296,14 @@ exports[`SavedObjectsTable should render normally 1`] = `
           "onSelectionChange": [Function],
         }
       }
+      sort={
+        Object {
+          "direction": "desc",
+          "field": "updated_at",
+        }
+      }
       totalItemCount={4}
     />
   </RedirectAppLinks>
-</EuiPageContent>
+</div>
 `;

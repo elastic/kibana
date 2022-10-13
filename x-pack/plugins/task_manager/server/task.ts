@@ -258,6 +258,11 @@ export interface TaskInstance {
   state: Record<string, any>;
 
   /**
+   * The serialized traceparent string of the current APM transaction or span.
+   */
+  traceparent?: string;
+
+  /**
    * The id of the user who scheduled this task.
    */
   user?: string;
@@ -272,6 +277,11 @@ export interface TaskInstance {
    * The random uuid of the Kibana instance which claimed ownership of the task last
    */
   ownerId?: string | null;
+
+  /**
+   * Indicates whether the task is currently enabled. Disabled tasks will not be claimed.
+   */
+  enabled?: boolean;
 }
 
 /**
@@ -302,7 +312,12 @@ export interface ConcreteTaskInstance extends TaskInstance {
   id: string;
 
   /**
-   * The saved object version from the Elaticsearch document.
+   * @deprecated This field has been moved under schedule (deprecated) with version 7.6.0
+   */
+  interval?: string;
+
+  /**
+   * The saved object version from the Elasticsearch document.
    */
   version?: string;
 
@@ -358,12 +373,23 @@ export interface ConcreteTaskInstance extends TaskInstance {
   ownerId: string | null;
 }
 
+/**
+ * A task instance that has an id and is ready for storage.
+ */
+export type EphemeralTask = Pick<
+  ConcreteTaskInstance,
+  'taskType' | 'params' | 'state' | 'scope' | 'enabled'
+>;
+export type EphemeralTaskInstance = EphemeralTask &
+  Pick<ConcreteTaskInstance, 'id' | 'scheduledAt' | 'startedAt' | 'runAt' | 'status' | 'ownerId'>;
+
 export type SerializedConcreteTaskInstance = Omit<
   ConcreteTaskInstance,
   'state' | 'params' | 'scheduledAt' | 'startedAt' | 'retryAt' | 'runAt'
 > & {
   state: string;
   params: string;
+  traceparent: string;
   scheduledAt: string;
   startedAt: string | null;
   retryAt: string | null;

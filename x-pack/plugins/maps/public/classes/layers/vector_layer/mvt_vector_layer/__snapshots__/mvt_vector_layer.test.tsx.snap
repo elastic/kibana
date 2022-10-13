@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getLayerIcon Layers with non-elasticsearch sources should display icon 1`] = `
+<PolygonIcon
+  style={
+    Object {
+      "fill": "#54B399",
+      "stroke": "#41937c",
+      "strokeWidth": "1px",
+    }
+  }
+/>
+`;

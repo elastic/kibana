@@ -7,35 +7,25 @@
 
 import React, { FC, useCallback, useMemo } from 'react';
 import { EuiCheckbox, htmlIdGenerator } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { useExplorerUrlState } from '../../../explorer/hooks/use_explorer_url_state';
-
-const SHOW_CHARTS_DEFAULT = true;
-
-export const useShowCharts = (): [boolean, (v: boolean) => void] => {
-  const [explorerUrlState, setExplorerUrlState] = useExplorerUrlState();
-
-  const showCharts = explorerUrlState?.mlShowCharts ?? SHOW_CHARTS_DEFAULT;
-
-  const setShowCharts = useCallback(
-    (v: boolean) => {
-      setExplorerUrlState({ mlShowCharts: v });
-    },
-    [setExplorerUrlState]
-  );
-
-  return [showCharts, setShowCharts];
-};
+import { FormattedMessage } from '@kbn/i18n-react';
+import useObservable from 'react-use/lib/useObservable';
+import { useAnomalyExplorerContext } from '../../../explorer/anomaly_explorer_context';
 
 /*
  * React component for a checkbox element to toggle charts display.
  */
 export const CheckboxShowCharts: FC = () => {
-  const [showCharts, setShowCharts] = useShowCharts();
+  const { chartsStateService } = useAnomalyExplorerContext();
 
-  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setShowCharts(e.target.checked);
-  };
+  const showCharts = useObservable(
+    chartsStateService.getShowCharts$(),
+    chartsStateService.getShowCharts()
+  );
+
+  const onChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    chartsStateService.setShowCharts(e.target.checked);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const id = useMemo(() => htmlIdGenerator()(), []);
 

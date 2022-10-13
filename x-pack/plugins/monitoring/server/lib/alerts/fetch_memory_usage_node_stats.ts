@@ -5,22 +5,32 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { get } from 'lodash';
 import { AlertCluster, AlertMemoryUsageNodeStats } from '../../../common/types/alerts';
+import { createDatasetFilter } from './create_dataset_query_filter';
+import { Globals } from '../../static_globals';
+import { CCS_REMOTE_PATTERN } from '../../../common/constants';
+import { getIndexPatterns, getElasticsearchDataset } from '../cluster/get_index_patterns';
 
 export async function fetchMemoryUsageNodeStats(
   esClient: ElasticsearchClient,
   clusters: AlertCluster[],
-  index: string,
   startMs: number,
   endMs: number,
-  size: number
+  size: number,
+  filterQuery?: string
 ): Promise<AlertMemoryUsageNodeStats[]> {
   const clustersIds = clusters.map((cluster) => cluster.clusterUuid);
+  const indexPatterns = getIndexPatterns({
+    config: Globals.app.config,
+    moduleType: 'elasticsearch',
+    dataset: 'node_stats',
+    ccs: CCS_REMOTE_PATTERN,
+  });
   const params = {
-    index,
-    filterPath: ['aggregations'],
+    index: indexPatterns,
+    filter_path: ['aggregations'],
     body: {
       size: 0,
       query: {
@@ -31,11 +41,7 @@ export async function fetchMemoryUsageNodeStats(
                 cluster_uuid: clustersIds,
               },
             },
-            {
-              term: {
-                type: 'node_stats',
-              },
-            },
+            createDatasetFilter('node_stats', 'node_stats', getElasticsearchDataset('node_stats')),
             {
               range: {
                 timestamp: {
@@ -92,12 +98,26 @@ export async function fetchMemoryUsageNodeStats(
     },
   };
 
-  const { body: response } = await esClient.search(params);
-  const stats: AlertMemoryUsageNodeStats[] = [];
-  // @ts-expect-error @elastic/elasticsearch Aggregate does not define buckets
-  const { buckets: clusterBuckets = [] } = response.aggregations.clusters;
+  try {
+    if (filterQuery) {
+      const filterQueryObject = JSON.parse(filterQuery);
+      params.body.query.bool.filter.push(filterQueryObject);
+    }
+  } catch (e) {
+    // meh
+  }
 
-  if (!clusterBuckets.length) {
+  const response = await esClient.search(params);
+  const stats: AlertMemoryUsageNodeStats[] = [];
+
+  if (!response.aggregations) {
+    return stats;
+  }
+
+  // @ts-expect-error declare type for aggregations explicitly
+  const { buckets: clusterBuckets } = response.aggregations.clusters;
+
+  if (!clusterBuckets?.length) {
     return stats;
   }
 

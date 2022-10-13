@@ -36,6 +36,7 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
 
   const fields = useMemo(
     () => sortFields([...newJobCapsService.fields, ...jobCreator.runtimeFields]),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
   const [selectedOptions, setSelectedOptions] = useState<DropDownProps>([]);
@@ -87,6 +88,7 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
     jobCreatorUpdate();
     loadCharts();
     setIsValid(aggFieldPairList.length > 0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [aggFieldPairList.length]);
 
   // watch for change in jobCreator
@@ -103,6 +105,7 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
     }
 
     setSplitField(jobCreator.splitField);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdated]);
 
   // watch for changes in split field.
@@ -114,7 +117,6 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
         .loadFieldExampleValues(
           splitField,
           jobCreator.runtimeMappings,
-          // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
           jobCreator.datafeedConfig.indices_options
         )
         .then(setFieldValues)
@@ -124,12 +126,14 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
     } else {
       setFieldValues([]);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [splitField]);
 
   // watch for changes in the split field values
   // reload the charts
   useEffect(() => {
     loadCharts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fieldValues]);
 
   async function loadCharts() {
@@ -146,7 +150,6 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
           fieldValues.length > 0 ? fieldValues[0] : null,
           cs.intervalMs,
           jobCreator.runtimeMappings,
-          // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
           jobCreator.datafeedConfig.indices_options
         );
         setLineChartsData(resp);

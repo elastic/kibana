@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { HttpStart } from 'src/core/public';
+import type { HttpStart } from '@kbn/core/public';
 
 import type { ApiKey, ApiKeyRoleDescriptors, ApiKeyToInvalidate } from '../../../common/model';
 
@@ -28,6 +28,7 @@ export interface CreateApiKeyRequest {
   name: string;
   expiration?: string;
   role_descriptors?: ApiKeyRoleDescriptors;
+  metadata?: Record<string, any>;
 }
 
 export interface CreateApiKeyResponse {

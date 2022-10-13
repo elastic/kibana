@@ -10,7 +10,7 @@ import * as React from 'react';
 import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { uiToReactComponent } from '../../../kibana_react/public';
+import { uiToReactComponent } from '@kbn/kibana-react-plugin/public';
 import { Action, ActionExecutionContext } from '../actions';
 import { Trigger } from '../triggers';
 
@@ -43,23 +43,23 @@ type PanelDescriptor = EuiContextMenuPanelDescriptor & {
   items: ItemDescriptor[];
 };
 
-const onClick = (action: Action, context: ActionExecutionContext<object>, close: () => void) => (
-  event: React.MouseEvent
-) => {
-  if (event.currentTarget instanceof HTMLAnchorElement) {
-    // from react-router's <Link/>
-    if (
-      !event.defaultPrevented && // onClick prevented default
-      event.button === 0 && // ignore everything but left clicks
-      (!event.currentTarget.target || event.currentTarget.target === '_self') && // let browser handle "target=_blank" etc.
-      !(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey) // ignore clicks with modifier keys
-    ) {
-      event.preventDefault();
-      action.execute(context);
-    }
-  } else action.execute(context);
-  close();
-};
+const onClick =
+  (action: Action, context: ActionExecutionContext<object>, close: () => void) =>
+  (event: React.MouseEvent) => {
+    if (event.currentTarget instanceof HTMLAnchorElement) {
+      // from react-router's <Link/>
+      if (
+        !event.defaultPrevented && // onClick prevented default
+        event.button === 0 && // ignore everything but left clicks
+        (!event.currentTarget.target || event.currentTarget.target === '_self') && // let browser handle "target=_blank" etc.
+        !(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey) // ignore clicks with modifier keys
+      ) {
+        event.preventDefault();
+        action.execute(context);
+      }
+    } else action.execute(context);
+    close();
+  };
 
 /**
  * This method adds "More" item to panels, which have more than 4 items; and
@@ -167,11 +167,13 @@ export async function buildContextMenuForActions({
         ? React.createElement(uiToReactComponent(action.MenuItem), { context })
         : action.getDisplayName(context),
       icon: action.getIconType(context),
+      toolTipContent: action.getDisplayNameTooltip ? action.getDisplayNameTooltip(context) : '',
       'data-test-subj': `embeddablePanelAction-${action.id}`,
       onClick: onClick(action, context, closeMenu),
       href: action.getHref ? await action.getHref(context) : undefined,
       _order: action.order || 0,
       _title: action.getDisplayName(context),
+      disabled: action.disabled,
     });
   });
   await Promise.all(promises);

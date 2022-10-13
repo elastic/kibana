@@ -6,46 +6,40 @@
  * Side Public License, v 1.
  */
 
-import { get, hasIn } from 'lodash';
+import { get } from 'lodash';
 import {
-  FilterValueFormatter,
+  ScriptedRangeFilter,
   RangeFilter,
   isScriptedRangeFilter,
   isRangeFilter,
   Filter,
   FILTERS,
-} from '../../../../../common';
+} from '@kbn/es-query';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
 
-const getFormattedValueFn = (left: any, right: any) => {
-  return (formatter?: FilterValueFormatter) => {
-    let displayValue = `${left} to ${right}`;
-    if (formatter) {
-      const convert = formatter.getConverterFor('text');
-      displayValue = `${convert(left)} to ${convert(right)}`;
-    }
-    return displayValue;
-  };
-};
+export function getRangeDisplayValue(
+  { meta: { params } }: RangeFilter | ScriptedRangeFilter,
+  formatter?: FieldFormat
+) {
+  const left = params.gte ?? params.gt ?? -Infinity;
+  const right = params.lte ?? params.lt ?? Infinity;
+  if (!formatter) return `${left} to ${right}`;
+  const convert = formatter.getConverterFor('text');
+  return `${convert(left)} to ${convert(right)}`;
+}
 
-const getFirstRangeKey = (filter: RangeFilter) => filter.range && Object.keys(filter.range)[0];
-const getRangeByKey = (filter: RangeFilter, key: string) => get(filter, ['range', key]);
+const getFirstRangeKey = (filter: RangeFilter) =>
+  filter.query.range && Object.keys(filter.query.range)[0];
+const getRangeByKey = (filter: RangeFilter, key: string) => get(filter.query, ['range', key]);
 
 function getParams(filter: RangeFilter) {
   const isScriptedRange = isScriptedRangeFilter(filter);
   const key: string = (isScriptedRange ? filter.meta.field : getFirstRangeKey(filter)) || '';
   const params: any = isScriptedRange
-    ? get(filter, 'script.script.params')
+    ? get(filter.query, 'script.script.params')
     : getRangeByKey(filter, key);
 
-  let left = hasIn(params, 'gte') ? params.gte : params.gt;
-  if (left == null) left = -Infinity;
-
-  let right = hasIn(params, 'lte') ? params.lte : params.lt;
-  if (right == null) right = Infinity;
-
-  const value = getFormattedValueFn(left, right);
-
-  return { type: FILTERS.RANGE, key, value, params };
+  return { type: FILTERS.RANGE, key, value: params, params };
 }
 
 export const isMapRangeFilter = (filter: any): filter is RangeFilter =>

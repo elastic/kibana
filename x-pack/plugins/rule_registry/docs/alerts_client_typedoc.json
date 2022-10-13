@@ -1,0 +1,17 @@
+{
+  "entryPoints": [
+    "../server/alert_data_client/alerts_client.ts"
+  ],
+  "exclude": [
+    "**/mock.ts",
+    "../server/alert_data_client/+(mock.ts|utils.ts|utils.test.ts|types.ts)"
+  ],
+  "excludeExternals": true,
+  "out": "alerts_client",
+  "theme": "markdown",
+  "plugin": "typedoc-plugin-markdown",
+  "entryDocument": "alerts_client_api.md",
+  "readme": "none",
+  "name": "Alerts as data client API Interface"
+}
+

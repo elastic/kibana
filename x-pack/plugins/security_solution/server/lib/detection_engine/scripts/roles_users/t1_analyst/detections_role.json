@@ -2,16 +2,20 @@
   "elasticsearch": {
     "cluster": [],
     "indices": [
-      { "names": [".siem-signals-*"], "privileges": ["read", "write", "maintenance"] },
+      { "names": [".alerts-security*", ".siem-signals-*"], "privileges": ["read", "write", "maintenance"] },
       {
         "names": [
           "apm-*-transaction*",
+          "traces-apm*",
           "auditbeat-*",
           "endgame-*",
           "filebeat-*",
           "logs-*",
           "packetbeat-*",
-          "winlogbeat-*"
+          "winlogbeat-*",
+          "metrics-endpoint.metadata_current_*",
+          ".fleet-agents*",
+          ".fleet-actions*"
         ],
         "privileges": ["read"]
       }
@@ -21,7 +25,8 @@
     {
       "feature": {
         "ml": ["read"],
-        "siem": ["read"],
+        "siem": ["read", "read_alerts"],
+        "securitySolutionCases": ["read"],
         "actions": ["read"],
         "builtInAlerts": ["read"]
       },

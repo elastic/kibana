@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiExpression, EuiPopover, EuiSelect } from '@elastic/eui';
 import { builtInAggregationTypes } from '../constants';
 import { AggregationType } from '../types';
@@ -66,7 +66,7 @@ export const WhenExpression = ({
         setAggTypePopoverOpen(false);
       }}
       ownFocus
-      display={display === 'fullWidth' ? 'block' : 'inlineBlock'}
+      display={display === 'fullWidth' ? 'block' : 'inline-block'}
       anchorPosition={popupPosition ?? 'downLeft'}
       repositionOnScroll
     >

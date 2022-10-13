@@ -36,6 +36,10 @@ exports[`draggables rendering it renders the default DefaultDraggable 1`] = `
       },
     }
   }
+  fieldType=""
+  hideTopN={false}
+  isAggregatable={false}
+  isDraggable={true}
   render={[Function]}
 />
 `;

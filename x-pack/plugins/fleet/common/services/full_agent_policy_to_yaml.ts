@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { safeDump } from 'js-yaml';
+import type { safeDump } from 'js-yaml';
 
 import type { FullAgentPolicy } from '../types';
 
@@ -23,10 +23,11 @@ const POLICY_KEYS_ORDER = [
   'use_output',
   'meta',
   'input',
+  'download',
 ];
 
-export const fullAgentPolicyToYaml = (policy: FullAgentPolicy): string => {
-  return safeDump(policy, {
+export const fullAgentPolicyToYaml = (policy: FullAgentPolicy, toYaml: typeof safeDump): string => {
+  return toYaml(policy, {
     skipInvalid: true,
     sortKeys: (keyA: string, keyB: string) => {
       const indexA = POLICY_KEYS_ORDER.indexOf(keyA);

@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
 import {
-  EuiPopoverTitle,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiPopover,
-  EuiSelect,
-  EuiFieldNumber,
-  EuiExpression,
-  EuiFieldText,
   EuiButtonIcon,
+  EuiComboBox,
+  EuiExpression,
+  EuiFieldNumber,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFormRow,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiSelect,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isNumber, isFinite } from 'lodash';
-import { IFieldType } from 'src/plugins/data/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { IErrorObject } from '../../../../../../triggers_actions_ui/public/types';
+import { isFinite, isNumber } from 'lodash';
+import React, { useCallback, useMemo, useState } from 'react';
+import type { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   Comparator,
-  Criterion as CriterionType,
   ComparatorToi18nMap,
+  Criterion as CriterionType,
 } from '../../../../../common/alerting/logs/log_threshold/types';
+import type { ResolvedLogViewField } from '../../../../../common/log_views';
 
 const firstCriterionFieldPrefix = i18n.translate(
   'xpack.infra.logs.alertFlyout.firstCriterionFieldPrefix',
@@ -54,7 +54,7 @@ const criterionComparatorValueTitle = i18n.translate(
   }
 );
 
-const getCompatibleComparatorsForField = (fieldInfo: IFieldType | undefined) => {
+const getCompatibleComparatorsForField = (fieldInfo: ResolvedLogViewField | undefined) => {
   if (fieldInfo?.type === 'number') {
     return [
       { value: Comparator.GT, text: ComparatorToi18nMap[Comparator.GT] },
@@ -82,7 +82,10 @@ const getCompatibleComparatorsForField = (fieldInfo: IFieldType | undefined) => 
   }
 };
 
-const getFieldInfo = (fields: IFieldType[], fieldName: string): IFieldType | undefined => {
+const getFieldInfo = (
+  fields: ResolvedLogViewField[],
+  fieldName: string
+): ResolvedLogViewField | undefined => {
   return fields.find((field) => {
     return field.name === fieldName;
   });
@@ -90,7 +93,7 @@ const getFieldInfo = (fields: IFieldType[], fieldName: string): IFieldType | und
 
 interface Props {
   idx: number;
-  fields: IFieldType[];
+  fields: ResolvedLogViewField[];
   criterion: Partial<CriterionType>;
   updateCriterion: (idx: number, params: Partial<CriterionType>) => void;
   removeCriterion: (idx: number) => void;
@@ -112,11 +115,11 @@ export const Criterion: React.FC<Props> = ({
 
   const fieldOptions = useMemo(() => {
     return fields.map((field) => {
-      return { value: field.name, text: field.name };
+      return { label: field.name };
     });
   }, [fields]);
 
-  const fieldInfo: IFieldType | undefined = useMemo(() => {
+  const fieldInfo: ResolvedLogViewField | undefined = useMemo(() => {
     if (criterion.field) {
       return getFieldInfo(fields, criterion.field);
     } else {
@@ -129,8 +132,14 @@ export const Criterion: React.FC<Props> = ({
   }, [fieldInfo]);
 
   const handleFieldChange = useCallback(
-    (e) => {
-      const fieldName = e.target.value;
+    ([selectedOption]) => {
+      if (!selectedOption) {
+        updateCriterion(idx, { field: '' });
+        return;
+      }
+
+      const fieldName = selectedOption.label;
+
       const nextFieldInfo = getFieldInfo(fields, fieldName);
       // If the field information we're dealing with has changed, reset the comparator and value.
       if (
@@ -146,9 +155,13 @@ export const Criterion: React.FC<Props> = ({
       } else {
         updateCriterion(idx, { field: fieldName });
       }
+
+      setIsFieldPopoverOpen(false);
     },
     [fieldInfo, fields, idx, updateCriterion]
   );
+
+  const selectedField = criterion.field ? [{ label: criterion.field }] : [];
 
   return (
     <EuiFlexGroup gutterSize="s">
@@ -165,28 +178,35 @@ export const Criterion: React.FC<Props> = ({
                   uppercase={true}
                   value={criterion.field ?? 'a chosen field'}
                   isActive={isFieldPopoverOpen}
-                  color={errors.field.length === 0 ? 'secondary' : 'danger'}
-                  onClick={(e) => {
+                  color={errors.field.length === 0 ? 'success' : 'danger'}
+                  onClick={(e: React.MouseEvent) => {
                     e.stopPropagation();
-                    setIsFieldPopoverOpen(true);
+                    setIsFieldPopoverOpen(!isFieldPopoverOpen);
                   }}
                 />
               }
               isOpen={isFieldPopoverOpen}
               closePopover={() => setIsFieldPopoverOpen(false)}
+              onClick={(e: React.MouseEvent) => e.stopPropagation()}
               ownFocus
               panelPaddingSize="s"
               anchorPosition="downLeft"
             >
               <div>
                 <EuiPopoverTitle>{criterionFieldTitle}</EuiPopoverTitle>
-                <EuiFormRow isInvalid={errors.field.length > 0} error={errors.field}>
-                  <EuiSelect
+                <EuiFormRow
+                  style={{ minWidth: '300px' }}
+                  isInvalid={errors.field.length > 0}
+                  error={errors.field}
+                >
+                  <EuiComboBox
                     compressed
-                    hasNoInitialSelection={criterion.field == null}
-                    value={criterion.field ?? ''}
-                    onChange={handleFieldChange}
+                    fullWidth
+                    isClearable={false}
+                    singleSelection={{ asPlainText: true }}
                     options={fieldOptions}
+                    selectedOptions={selectedField}
+                    onChange={handleFieldChange}
                   />
                 </EuiFormRow>
               </div>
@@ -209,17 +229,18 @@ export const Criterion: React.FC<Props> = ({
                   isActive={isComparatorPopoverOpen}
                   color={
                     errors.comparator.length === 0 && errors.value.length === 0
-                      ? 'secondary'
+                      ? 'success'
                       : 'danger'
                   }
-                  onClick={(e) => {
+                  onClick={(e: React.MouseEvent) => {
                     e.stopPropagation();
-                    setIsComparatorPopoverOpen(true);
+                    setIsComparatorPopoverOpen(!isComparatorPopoverOpen);
                   }}
                 />
               }
               isOpen={isComparatorPopoverOpen}
               closePopover={() => setIsComparatorPopoverOpen(false)}
+              onClick={(e) => e.stopPropagation()}
               ownFocus
               panelPaddingSize="s"
               anchorPosition="downLeft"

@@ -241,7 +241,9 @@ export function MachineLearningSettingsFilterListProvider(
 
     async selectFilterItem(filterItem: string) {
       if ((await this.isFilterItemSelected(filterItem)) === false) {
-        await testSubjects.click(this.filterItemSelector(filterItem));
+        const item = await testSubjects.find(this.filterItemSelector(filterItem));
+        const label = await item.findByTagName('label');
+        await label.click();
       }
 
       await this.assertFilterItemSelected(filterItem, true);

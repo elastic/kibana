@@ -7,12 +7,13 @@
  */
 
 import React, { Fragment } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiTextArea, EuiSwitch } from '@elastic/eui';
+import { SavedObjectSaveModal } from '@kbn/saved-objects-plugin/public';
 
-import type { SavedObjectsTaggingApi } from '../../services/saved_objects_tagging_oss';
-import { SavedObjectSaveModal } from '../../services/saved_objects';
-import { DashboardSaveOptions } from '../types';
+import type { DashboardSaveOptions } from '../../types';
+import { pluginServices } from '../../services/plugin_services';
 
 interface Props {
   onSave: ({
@@ -30,7 +31,6 @@ interface Props {
   tags?: string[];
   timeRestore: boolean;
   showCopyOnSave: boolean;
-  savedObjectsTagging?: SavedObjectsTaggingApi;
 }
 
 interface State {
@@ -85,9 +85,12 @@ export class DashboardSaveModal extends React.Component<Props, State> {
   };
 
   renderDashboardSaveOptions() {
-    const { savedObjectsTagging } = this.props;
-    const tagSelector = savedObjectsTagging ? (
-      <savedObjectsTagging.ui.components.SavedObjectSaveModalTagSelector
+    const {
+      savedObjectsTagging: { components },
+    } = pluginServices.getServices();
+
+    const tagSelector = components ? (
+      <components.SavedObjectSaveModalTagSelector
         initialSelection={this.state.tags}
         onTagsSelected={(tags) => {
           this.setState({
@@ -148,7 +151,9 @@ export class DashboardSaveModal extends React.Component<Props, State> {
         title={this.props.title}
         showCopyOnSave={this.props.showCopyOnSave}
         initialCopyOnSave={this.props.showCopyOnSave}
-        objectType="dashboard"
+        objectType={i18n.translate('dashboard.topNav.saveModal.objectType', {
+          defaultMessage: 'dashboard',
+        })}
         options={this.renderDashboardSaveOptions()}
         showDescription={false}
       />

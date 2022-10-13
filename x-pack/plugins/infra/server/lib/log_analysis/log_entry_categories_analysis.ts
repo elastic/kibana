@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
-import type { ILegacyScopedClusterClient } from 'src/core/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import {
+  CategoriesSort,
   compareDatasetsByMaximumAnomalyScore,
   getJobId,
   jobCustomSettingsRT,
   logEntryCategoriesJobTypes,
-  CategoriesSort,
 } from '../../../common/log_analysis';
 import { LogEntryContext } from '../../../common/log_entry';
-import type { ResolvedLogSourceConfiguration } from '../../../common/log_sources';
+import { ResolvedLogView } from '../../../common/log_views';
 import { startTracingSpan } from '../../../common/performance_tracing';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import type { MlAnomalyDetectors, MlSystem } from '../../types';
+import { fetchMlJob, getLogEntryDatasets } from './common';
 import { InsufficientLogAnalysisMlJobConfigurationError, UnknownCategoryError } from './errors';
 import {
   createLogEntryCategoriesQuery,
@@ -38,7 +39,6 @@ import {
   createTopLogEntryCategoriesQuery,
   topLogEntryCategoriesResponseRT,
 } from './queries/top_log_entry_categories';
-import { fetchMlJob, getLogEntryDatasets } from './common';
 
 export async function getTopLogEntryCategories(
   context: {
@@ -136,7 +136,7 @@ export async function getLogEntryCategoryDatasets(
 
 export async function getLogEntryCategoryExamples(
   context: {
-    core: { elasticsearch: { legacy: { client: ILegacyScopedClusterClient } } };
+    core: { elasticsearch: { client: { asCurrentUser: ElasticsearchClient } } };
     infra: {
       mlAnomalyDetectors: MlAnomalyDetectors;
       mlSystem: MlSystem;
@@ -148,7 +148,7 @@ export async function getLogEntryCategoryExamples(
   endTime: number,
   categoryId: number,
   exampleCount: number,
-  resolvedSourceConfiguration: ResolvedLogSourceConfiguration
+  resolvedLogView: ResolvedLogView
 ) {
   const finalizeLogEntryCategoryExamplesSpan = startTracingSpan('get category example log entries');
 
@@ -166,7 +166,7 @@ export async function getLogEntryCategoryExamples(
   const customSettings = decodeOrThrow(jobCustomSettingsRT)(mlJob.custom_settings);
   const indices = customSettings?.logs_source_config?.indexPattern;
   const timestampField = customSettings?.logs_source_config?.timestampField;
-  const { tiebreakerField, runtimeMappings } = resolvedSourceConfiguration;
+  const { tiebreakerField, runtimeMappings } = resolvedLogView;
 
   if (indices == null || timestampField == null) {
     throw new InsufficientLogAnalysisMlJobConfigurationError(
@@ -244,15 +244,14 @@ async function fetchTopLogEntryCategories(
   const topLogEntryCategories =
     topLogEntryCategoriesResponse.aggregations?.terms_category_id.buckets.map(
       (topCategoryBucket) => {
-        const maximumAnomalyScoresByDataset = topCategoryBucket.filter_record.terms_dataset.buckets.reduce<
-          Record<string, number>
-        >(
-          (accumulatedMaximumAnomalyScores, datasetFromRecord) => ({
-            ...accumulatedMaximumAnomalyScores,
-            [datasetFromRecord.key]: datasetFromRecord.maximum_record_score.value ?? 0,
-          }),
-          {}
-        );
+        const maximumAnomalyScoresByDataset =
+          topCategoryBucket.filter_record.terms_dataset.buckets.reduce<Record<string, number>>(
+            (accumulatedMaximumAnomalyScores, datasetFromRecord) => ({
+              ...accumulatedMaximumAnomalyScores,
+              [datasetFromRecord.key]: datasetFromRecord.maximum_record_score.value ?? 0,
+            }),
+            {}
+          );
 
         return {
           categoryId: parseCategoryId(topCategoryBucket.key),
@@ -402,9 +401,9 @@ async function fetchTopLogEntryCategoryHistograms(
 }
 
 async function fetchLogEntryCategoryExamples(
-  requestContext: { core: { elasticsearch: { legacy: { client: ILegacyScopedClusterClient } } } },
+  requestContext: { core: { elasticsearch: { client: { asCurrentUser: ElasticsearchClient } } } },
   indices: string,
-  runtimeMappings: estypes.RuntimeFields,
+  runtimeMappings: estypes.MappingRuntimeFields,
   timestampField: string,
   tiebreakerField: string,
   startTime: number,
@@ -417,8 +416,7 @@ async function fetchLogEntryCategoryExamples(
   const {
     hits: { hits },
   } = decodeOrThrow(logEntryCategoryExamplesResponseRT)(
-    await requestContext.core.elasticsearch.legacy.client.callAsCurrentUser(
-      'search',
+    await requestContext.core.elasticsearch.client.asCurrentUser.search(
       createLogEntryCategoryExamplesQuery(
         indices,
         runtimeMappings,

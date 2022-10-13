@@ -6,9 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup } from 'src/core/public';
-import { ManagementAppMountParams } from 'src/plugins/management/public/';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
+import SemVer from 'semver/classes/semver';
+import { CoreSetup } from '@kbn/core/public';
+import { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 
 import { UIM_APP_NAME } from '../../common/constants';
 import { PLUGIN } from '../../common/constants/plugin';
@@ -50,9 +51,10 @@ export async function mountManagementSection(
   usageCollection: UsageCollectionSetup,
   params: ManagementAppMountParams,
   extensionsService: ExtensionsService,
-  isFleetEnabled: boolean
+  isFleetEnabled: boolean,
+  kibanaVersion: SemVer
 ) {
-  const { element, setBreadcrumbs, history } = params;
+  const { element, setBreadcrumbs, history, theme$ } = params;
   const [core, startDependencies] = await coreSetup.getStartServices();
   const {
     docLinks,
@@ -60,9 +62,10 @@ export async function mountManagementSection(
     application,
     chrome: { docTitle },
     uiSettings,
+    executionContext,
   } = core;
 
-  const { urlGenerators } = startDependencies.share;
+  const { url } = startDependencies.share;
   docTitle.change(PLUGIN.getI18nName(i18n));
 
   breadcrumbService.setup(setBreadcrumbs);
@@ -77,17 +80,26 @@ export async function mountManagementSection(
     core: {
       fatalErrors,
       getUrlForApp: application.getUrlForApp,
+      executionContext,
+      application,
     },
     plugins: {
       usageCollection,
       isFleetEnabled,
     },
-    services: { httpService, notificationService, uiMetricService, extensionsService },
+    services: {
+      httpService,
+      notificationService,
+      uiMetricService,
+      extensionsService,
+    },
     history,
     setBreadcrumbs,
     uiSettings,
-    urlGenerators,
+    url,
     docLinks,
+    kibanaVersion,
+    theme$,
   };
 
   const unmountAppCallback = renderApp(element, { core, dependencies: appDependencies });

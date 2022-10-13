@@ -7,9 +7,19 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { Adapters } from 'src/plugins/inspector/public';
+import { Adapters } from '@kbn/inspector-plugin/public';
 import {
-  getCoreChrome,
+  checkForDuplicateTitle,
+  SavedObjectSaveModalOrigin,
+  OnSaveProps,
+  showSaveModal,
+} from '@kbn/saved-objects-plugin/public';
+import {
+  LazySavedObjectSaveModalDashboard,
+  withSuspense,
+} from '@kbn/presentation-util-plugin/public';
+import {
+  getNavigateToApp,
   getMapsCapabilities,
   getIsAllowByValueEmbeddables,
   getInspector,
@@ -19,19 +29,9 @@ import {
   getSavedObjectsTagging,
   getPresentationUtilContext,
 } from '../../kibana_services';
-import {
-  checkForDuplicateTitle,
-  SavedObjectSaveModalOrigin,
-  OnSaveProps,
-  showSaveModal,
-} from '../../../../../../src/plugins/saved_objects/public';
 import { MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import { SavedMap } from './saved_map';
 import { getMapEmbeddableDisplayName } from '../../../common/i18n_getters';
-import {
-  LazySavedObjectSaveModalDashboard,
-  withSuspense,
-} from '../../../../../../src/plugins/presentation_util/public';
 
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 
@@ -92,11 +92,27 @@ export function getTopNavConfig({
       }),
       testId: 'mapsFullScreenMode',
       run() {
-        getCoreChrome().setIsVisible(false);
         enableFullScreen();
       },
     }
   );
+
+  if (savedMap.hasOriginatingApp()) {
+    topNavConfigs.push({
+      label: i18n.translate('xpack.maps.topNav.cancel', {
+        defaultMessage: 'Cancel',
+      }),
+      run: () => {
+        getNavigateToApp()(savedMap.getOriginatingApp()!, {
+          path: savedMap.getOriginatingPath(),
+        });
+      },
+      testId: 'mapsCancelButton',
+      description: i18n.translate('xpack.maps.topNav.cancelButtonAriaLabel', {
+        defaultMessage: 'Return to the last app without saving changes',
+      }),
+    });
+  }
 
   if (getMapsCapabilities().save) {
     const hasSaveAndReturnConfig = savedMap.hasSaveAndReturnConfig();
@@ -151,9 +167,8 @@ export function getTopNavConfig({
         const saveModalProps = {
           onSave: async (
             props: OnSaveProps & {
-              returnToOrigin?: boolean;
               dashboardId?: string | null;
-              addToLibrary?: boolean;
+              addToLibrary: boolean;
             }
           ) => {
             try {
@@ -181,7 +196,7 @@ export function getTopNavConfig({
             await savedMap.save({
               ...props,
               newTags: selectedTags,
-              saveByReference: Boolean(props.addToLibrary),
+              saveByReference: props.addToLibrary,
             });
             // showSaveModal wrapper requires onSave to return an object with an id to close the modal after successful save
             return { id: 'id' };
@@ -200,12 +215,23 @@ export function getTopNavConfig({
 
         let saveModal;
 
-        if (savedMap.getOriginatingApp() || !getIsAllowByValueEmbeddables()) {
+        if (savedMap.hasOriginatingApp() || !getIsAllowByValueEmbeddables()) {
           saveModal = (
             <SavedObjectSaveModalOrigin
               {...saveModalProps}
+              onSave={async (props: OnSaveProps) => {
+                return saveModalProps.onSave({ ...props, addToLibrary: true });
+              }}
               originatingApp={savedMap.getOriginatingApp()}
               getAppNameFromId={savedMap.getAppNameFromId}
+              returnToOriginSwitchLabel={
+                savedMap.isByValue()
+                  ? i18n.translate('xpack.maps.topNav.updatePanel', {
+                      defaultMessage: 'Update panel on {originatingAppName}',
+                      values: { originatingAppName: savedMap.getOriginatingAppName() },
+                    })
+                  : undefined
+              }
               options={tagSelector}
             />
           );

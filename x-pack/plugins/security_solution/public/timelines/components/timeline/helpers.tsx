@@ -14,22 +14,12 @@ import {
   getFocusedAriaColindexCell,
   getTableSkipFocus,
   stopPropagationAndPreventDefault,
-} from '../../../common/components/accessibility/helpers';
-import { escapeQueryValue, convertToBuildEsQuery } from '../../../common/lib/keury';
+} from '@kbn/timelines-plugin/public';
+import { escapeQueryValue } from '../../../common/lib/kuery';
 
-import {
-  DataProvider,
-  DataProviderType,
-  DataProvidersAnd,
-  EXISTS_OPERATOR,
-} from './data_providers/data_provider';
-import { BrowserFields } from '../../../common/containers/source';
-import {
-  IIndexPattern,
-  Query,
-  EsQueryConfig,
-  Filter,
-} from '../../../../../../../src/plugins/data/public';
+import type { DataProvider, DataProvidersAnd } from './data_providers/data_provider';
+import { DataProviderType, EXISTS_OPERATOR } from './data_providers/data_provider';
+import type { BrowserFields } from '../../../common/containers/source';
 
 import { EVENTS_TABLE_CLASS_NAME } from './styles';
 
@@ -143,64 +133,11 @@ export const buildGlobalQuery = (dataProviders: DataProvider[], browserFields: B
       return !index ? `(${queryMatch})` : `${globalQuery} or (${queryMatch})`;
     }, '');
 
-export const combineQueries = ({
-  config,
-  dataProviders,
-  indexPattern,
-  browserFields,
-  filters = [],
-  kqlQuery,
-  kqlMode,
-  isEventViewer,
-}: {
-  config: EsQueryConfig;
-  dataProviders: DataProvider[];
-  indexPattern: IIndexPattern;
-  browserFields: BrowserFields;
-  filters: Filter[];
-  kqlQuery: Query;
-  kqlMode: string;
-  isEventViewer?: boolean;
-}): { filterQuery: string } | null => {
-  const kuery: Query = { query: '', language: kqlQuery.language };
-  if (isEmpty(dataProviders) && isEmpty(kqlQuery.query) && isEmpty(filters) && !isEventViewer) {
-    return null;
-  } else if (isEmpty(dataProviders) && isEmpty(kqlQuery.query) && isEventViewer) {
-    return {
-      filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
-    };
-  } else if (isEmpty(dataProviders) && isEmpty(kqlQuery.query) && !isEmpty(filters)) {
-    return {
-      filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
-    };
-  } else if (isEmpty(dataProviders) && !isEmpty(kqlQuery.query)) {
-    kuery.query = `(${kqlQuery.query})`;
-    return {
-      filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
-    };
-  } else if (!isEmpty(dataProviders) && isEmpty(kqlQuery)) {
-    kuery.query = `(${buildGlobalQuery(dataProviders, browserFields)})`;
-    return {
-      filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
-    };
-  }
-  const operatorKqlQuery = kqlMode === 'filter' ? 'and' : 'or';
-  const postpend = (q: string) => `${!isEmpty(q) ? ` ${operatorKqlQuery} (${q})` : ''}`;
-  kuery.query = `((${buildGlobalQuery(dataProviders, browserFields)})${postpend(
-    kqlQuery.query as string
-  )})`;
-  return {
-    filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
-  };
-};
-
 /**
  * The CSS class name of a "stateful event", which appears in both
  * the `Timeline` and the `Events Viewer` widget
  */
 export const STATEFUL_EVENT_CSS_CLASS_NAME = 'event-column-view';
-
-export const DEFAULT_ICON_BUTTON_WIDTH = 24;
 
 export const resolverIsShowing = (graphEventId: string | undefined): boolean =>
   graphEventId != null && graphEventId !== '';
@@ -283,7 +220,6 @@ export const onTimelineTabKeyPressed = ({
 
 export const ACTIVE_TIMELINE_BUTTON_CLASS_NAME = 'active-timeline-button';
 export const FLYOUT_BUTTON_BAR_CLASS_NAME = 'timeline-flyout-button-bar';
-export const FLYOUT_BUTTON_CLASS_NAME = 'timeline-flyout-button';
 
 /**
  * This function focuses the active timeline button on the next tick. Focus

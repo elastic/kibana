@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { IEsSearchResponse } from '../../../../../../../../../../src/plugins/data/common';
-import {
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type {
   NetworkKpiQueries,
   NetworkKpiTlsHandshakesStrategyResponse,
   NetworkKpiTlsHandshakesRequestOptions,
 } from '../../../../../../../common/search_strategy/security_solution/network';
 import { inspectStringifyObject } from '../../../../../../utils/build_query';
-import { SecuritySolutionFactory } from '../../../types';
+import type { SecuritySolutionFactory } from '../../../types';
 import { buildTlsHandshakeQuery } from './query.network_kpi_tls_handshakes.dsl';
 
 export const networkKpiTlsHandshakes: SecuritySolutionFactory<NetworkKpiQueries.tlsHandshakes> = {

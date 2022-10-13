@@ -1,9 +1,10 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../../tsconfig.bazel.json",
   "compilerOptions": {
-    "tsBuildInfoFile": "../../build/tsbuildinfo/packages/kbn-es"
+    "outDir": "target/types"
   },
   "include": [
-    "src/**/*"
+    "**/*.ts",
+    "**/*.js"
   ]
 }

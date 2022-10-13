@@ -6,26 +6,41 @@
  */
 
 import type React from 'react';
-import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
-import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
+import type { Filter } from '@kbn/es-query';
+
+import type { ColumnHeaderOptions, RowRenderer } from '../../../../../../common/types';
+import type { Ecs } from '../../../../../../common/ecs';
+import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 
 export interface ColumnRenderer {
   isInstance: (columnName: string, data: TimelineNonEcsData[]) => boolean;
   renderColumn: ({
+    className,
     columnName,
     eventId,
     field,
+    globalFilters,
+    isDetails,
+    isDraggable,
+    linkValues,
+    rowRenderers,
     timelineId,
     truncate,
     values,
-    linkValues,
   }: {
+    asPlainText?: boolean;
+    className?: string;
     columnName: string;
+    ecsData?: Ecs;
     eventId: string;
     field: ColumnHeaderOptions;
+    globalFilters?: Filter[];
+    isDetails?: boolean;
+    isDraggable?: boolean;
+    linkValues?: string[] | null | undefined;
+    rowRenderers?: RowRenderer[];
     timelineId: string;
     truncate?: boolean;
     values: string[] | null | undefined;
-    linkValues?: string[] | null | undefined;
   }) => React.ReactNode;
 }

@@ -6,3 +6,6 @@
  */
 
 export * from './artifacts';
+export { getMetadataForEndpoints } from './metadata/metadata';
+export * from './actions';
+export type { FeatureKeys } from './feature_usage';

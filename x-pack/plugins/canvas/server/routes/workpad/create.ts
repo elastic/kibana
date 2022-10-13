@@ -6,11 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { RouteInitializerDeps } from '../';
-import { CANVAS_TYPE, API_ROUTE_WORKPAD, TEMPLATE_TYPE } from '../../../common/lib/constants';
+import { RouteInitializerDeps } from '..';
+import { API_ROUTE_WORKPAD, TEMPLATE_TYPE } from '../../../common/lib/constants';
 import { CanvasWorkpad } from '../../../types';
-import { getId } from '../../../common/lib/get_id';
-import { WorkpadAttributes } from './workpad_attributes';
 import { WorkpadSchema } from './workpad_schema';
 import { okResponse } from '../ok_response';
 import { catchErrorHandler } from '../catch_error_handler';
@@ -52,30 +50,19 @@ export function initializeCreateWorkpadRoute(deps: RouteInitializerDeps) {
       let workpad = request.body as CanvasWorkpad;
 
       if (isCreateFromTemplate(request.body)) {
-        const templateSavedObject = await context.core.savedObjects.client.get<TemplateAttributes>(
+        const soClient = (await context.core).savedObjects.client;
+        const templateSavedObject = await soClient.get<TemplateAttributes>(
           TEMPLATE_TYPE,
           request.body.templateId
         );
         workpad = templateSavedObject.attributes.template;
       }
 
-      const now = new Date().toISOString();
-      const { id: maybeId, ...payload } = workpad;
-
-      const id = maybeId ? maybeId : getId('workpad');
-
-      await context.core.savedObjects.client.create<WorkpadAttributes>(
-        CANVAS_TYPE,
-        {
-          ...payload,
-          '@timestamp': now,
-          '@created': now,
-        },
-        { id }
-      );
+      const canvasContext = await context.canvas;
+      const createdObject = await canvasContext.workpad.create(workpad);
 
       return response.ok({
-        body: { ...okResponse, id },
+        body: { ...okResponse, id: createdObject.id },
       });
     })
   );

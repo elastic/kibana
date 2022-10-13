@@ -29,46 +29,50 @@
  */
 
 import { Type } from '@kbn/config-schema';
+import type { DocLinksServiceStart, DocLinksServiceSetup } from '@kbn/core-doc-links-server';
+import type { AppenderConfigType, LoggingServiceSetup } from '@kbn/core-logging-server';
+import { appendersSchema } from '@kbn/core-logging-server-internal';
+import type {
+  AnalyticsServiceSetup,
+  AnalyticsServiceStart,
+  AnalyticsServicePreboot,
+} from '@kbn/core-analytics-server';
+import type {
+  ExecutionContextSetup,
+  ExecutionContextStart,
+} from '@kbn/core-execution-context-server';
+import type {
+  IRouter,
+  RequestHandler,
+  KibanaResponseFactory,
+  RouteMethod,
+  HttpServicePreboot,
+  HttpServiceSetup,
+  HttpServiceStart,
+} from '@kbn/core-http-server';
+import type { PrebootServicePreboot } from '@kbn/core-preboot-server';
+import type { MetricsServiceSetup, MetricsServiceStart } from '@kbn/core-metrics-server';
 import {
   ElasticsearchServiceSetup,
-  ILegacyScopedClusterClient,
-  configSchema as elasticsearchConfigSchema,
   ElasticsearchServiceStart,
-  IScopedClusterClient,
-} from './elasticsearch';
-import { HttpServiceSetup, HttpServiceStart } from './http';
-import { HttpResources } from './http_resources';
-
-import { PluginsServiceSetup, PluginsServiceStart, PluginOpaqueId } from './plugins';
-import { ContextSetup } from './context';
-import { IUiSettingsClient, UiSettingsServiceSetup, UiSettingsServiceStart } from './ui_settings';
-import { SavedObjectsClientContract } from './saved_objects/types';
-import {
-  ISavedObjectTypeRegistry,
+  ElasticsearchServicePreboot,
+} from '@kbn/core-elasticsearch-server';
+import { configSchema as elasticsearchConfigSchema } from '@kbn/core-elasticsearch-server-internal';
+import type { CapabilitiesSetup, CapabilitiesStart } from '@kbn/core-capabilities-server';
+import type {
   SavedObjectsServiceSetup,
   SavedObjectsServiceStart,
-  ISavedObjectsExporter,
-  ISavedObjectsImporter,
-  SavedObjectsClientProviderOptions,
-} from './saved_objects';
-import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
-import { MetricsServiceSetup, MetricsServiceStart } from './metrics';
-import { StatusServiceSetup } from './status';
-import { AppenderConfigType, appendersSchema, LoggingServiceSetup } from './logging';
-import { CoreUsageDataStart } from './core_usage_data';
-import { I18nServiceSetup } from './i18n';
-import { DeprecationsServiceSetup } from './deprecations';
-// Because of #79265 we need to explicity import, then export these types for
-// scripts/telemetry_check.js to work as expected
-import {
-  CoreUsageStats,
-  CoreUsageData,
-  CoreConfigUsageData,
-  ConfigUsageData,
-  CoreEnvironmentUsageData,
-  CoreServicesUsageData,
-} from './core_usage_data';
+} from '@kbn/core-saved-objects-server';
+import type { DeprecationsServiceSetup } from '@kbn/core-deprecations-server';
+import type { CoreUsageDataStart, CoreUsageDataSetup } from '@kbn/core-usage-data-server';
+import type { I18nServiceSetup } from '@kbn/core-i18n-server';
+import type { StatusServiceSetup } from '@kbn/core-status-server';
+import type { UiSettingsServiceSetup, UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
+import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
+import type { HttpResources } from '@kbn/core-http-resources-server';
+import { PluginsServiceSetup, PluginsServiceStart } from './plugins';
 
+export type { PluginOpaqueId } from '@kbn/core-base-common';
 export type {
   CoreUsageStats,
   CoreUsageData,
@@ -76,135 +80,91 @@ export type {
   CoreEnvironmentUsageData,
   CoreServicesUsageData,
   ConfigUsageData,
-};
+  CoreUsageDataSetup,
+  CoreUsageDataStart,
+  CoreUsageCounter,
+  CoreIncrementUsageCounter,
+  CoreIncrementCounterParams,
+} from '@kbn/core-usage-data-server';
+
+export type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
+export type { IExecutionContextContainer } from '@kbn/core-execution-context-server';
 
 export { bootstrap } from './bootstrap';
+export type { Capabilities } from '@kbn/core-capabilities-common';
 export type {
-  Capabilities,
   CapabilitiesProvider,
   CapabilitiesSwitcher,
   ResolveCapabilitiesOptions,
-} from './capabilities';
+} from '@kbn/core-capabilities-server';
 export type {
   ConfigPath,
   ConfigService,
   ConfigDeprecation,
+  ConfigDeprecationContext,
   ConfigDeprecationProvider,
   ConfigDeprecationFactory,
   AddConfigDeprecation,
   EnvironmentMode,
   PackageInfo,
-} from './config';
-export type {
-  IContextContainer,
-  IContextProvider,
-  HandlerFunction,
-  HandlerContextType,
-  HandlerParameters,
-} from './context';
-export type { CoreId } from './core_context';
+} from '@kbn/config';
 
-export { CspConfig } from './csp';
-export type { ICspConfig } from './csp';
+export type { CoreId } from '@kbn/core-base-common-internal';
 
-export { ElasticsearchConfig } from './elasticsearch';
+export { ElasticsearchConfig, pollEsNodesVersion } from '@kbn/core-elasticsearch-server-internal';
 export type {
-  LegacyClusterClient,
-  ILegacyClusterClient,
-  ILegacyCustomClusterClient,
-  LegacyScopedClusterClient,
-  ILegacyScopedClusterClient,
-  LegacyElasticsearchClientConfig,
-  LegacyElasticsearchError,
-  LegacyElasticsearchErrorHelpers,
+  NodesVersionCompatibility,
+  PollEsNodesVersionOptions,
+} from '@kbn/core-elasticsearch-server-internal';
+export type {
+  ElasticsearchServicePreboot,
   ElasticsearchServiceSetup,
   ElasticsearchServiceStart,
-  ElasticsearchStatusMeta,
-  NodesVersionCompatibility,
-  LegacyAPICaller,
+  ElasticsearchConfigPreboot,
+  ElasticsearchRequestHandlerContext,
   FakeRequest,
   ScopeableRequest,
   ElasticsearchClient,
   IClusterClient,
   ICustomClusterClient,
   ElasticsearchClientConfig,
+  ElasticsearchClientSslConfig,
   IScopedClusterClient,
-  SearchResponse,
-  CountResponse,
-  ShardsInfo,
-  ShardsResponse,
-  GetResponse,
-  DeleteDocumentResponse,
-} from './elasticsearch';
+  UnauthorizedErrorHandlerOptions,
+  UnauthorizedErrorHandlerResultRetryParams,
+  UnauthorizedErrorHandlerRetryResult,
+  UnauthorizedErrorHandlerNotHandledResult,
+  UnauthorizedErrorHandlerResult,
+  UnauthorizedErrorHandlerToolkit,
+  UnauthorizedErrorHandler,
+} from '@kbn/core-elasticsearch-server';
 
-export type {
-  LegacyCallAPIOptions,
-  AssistantAPIClientParams,
-  MIGRATION_ASSISTANCE_INDEX_ACTION,
-  MIGRATION_DEPRECATION_LEVEL,
-  AssistanceAPIResponse,
-  DeprecationAPIClientParams,
-  DeprecationInfo,
-  IndexSettingsDeprecationInfo,
-  DeprecationAPIResponse,
-} from './elasticsearch/legacy/api_types';
-export type { IExternalUrlConfig, IExternalUrlPolicy } from './external_url';
+export { CspConfig } from '@kbn/core-http-server-internal';
+export { CoreKibanaRequest, kibanaResponseFactory } from '@kbn/core-http-router-server-internal';
+
 export type {
   AuthenticationHandler,
   AuthHeaders,
   AuthResultParams,
-  AuthStatus,
   AuthToolkit,
-  AuthRedirected,
+  AuthResultRedirected,
   AuthRedirectedParams,
   AuthResult,
   AuthResultType,
-  Authenticated,
-  AuthNotHandled,
-  BasePath,
-  IBasePath,
-  CustomHttpResponseOptions,
-  GetAuthHeaders,
-  GetAuthState,
-  Headers,
-  HttpAuth,
-  HttpResponseOptions,
-  HttpResponsePayload,
-  HttpServerInfo,
-  HttpServiceSetup,
-  HttpServiceStart,
-  ErrorHttpResponseOptions,
-  IKibanaSocket,
-  IsAuthenticated,
-  KibanaRequestEvents,
-  KibanaRequestRoute,
-  KibanaRequestRouteOptions,
-  IKibanaResponse,
-  LifecycleResponseFactory,
-  KnownHeaders,
-  LegacyRequest,
-  OnPreAuthHandler,
-  OnPreAuthToolkit,
-  OnPreRoutingHandler,
-  OnPreRoutingToolkit,
-  OnPostAuthHandler,
-  OnPostAuthToolkit,
-  OnPreResponseHandler,
-  OnPreResponseToolkit,
-  OnPreResponseRender,
-  OnPreResponseExtensions,
-  OnPreResponseInfo,
-  RedirectResponseOptions,
-  RequestHandler,
-  RequestHandlerWrapper,
-  RequestHandlerContextContainer,
-  RequestHandlerContextProvider,
+  AuthResultAuthenticated,
+  AuthResultNotHandled,
+  IContextProvider,
+  HandlerFunction,
+  HandlerContextType,
+  HandlerParameters,
+  DestructiveRouteMethod,
+  SafeRouteMethod,
+  KibanaRequest,
   ResponseError,
   ResponseErrorAttributes,
   ResponseHeaders,
   KibanaResponseFactory,
   RouteConfig,
-  IRouter,
   RouteRegistrar,
   RouteMethod,
   RouteConfigOptions,
@@ -217,24 +177,65 @@ export type {
   RouteValidatorFullConfig,
   RouteValidationResultFactory,
   RouteValidationError,
+  RedirectResponseOptions,
+  RequestHandlerWrapper,
+  KibanaRequestEvents,
+  KibanaRequestRoute,
+  KibanaRequestRouteOptions,
+  IKibanaResponse,
+  LifecycleResponseFactory,
+  KnownHeaders,
+  ErrorHttpResponseOptions,
+  IKibanaSocket,
+  HttpResponseOptions,
+  HttpResponsePayload,
+  Headers,
+  CustomHttpResponseOptions,
+  OnPreAuthHandler,
+  OnPreAuthToolkit,
+  OnPreRoutingHandler,
+  OnPreRoutingToolkit,
+  OnPostAuthHandler,
+  OnPostAuthToolkit,
+  OnPreResponseHandler,
+  OnPreResponseToolkit,
+  OnPreResponseRender,
+  OnPreResponseExtensions,
+  OnPreResponseInfo,
+  ICspConfig,
+  IExternalUrlConfig,
+  IBasePath,
   SessionStorage,
   SessionStorageCookieOptions,
   SessionCookieValidationResult,
   SessionStorageFactory,
-  DestructiveRouteMethod,
-  SafeRouteMethod,
-} from './http';
+  GetAuthState,
+  IsAuthenticated,
+  AuthStatus,
+  GetAuthHeaders,
+  IContextContainer,
+  HttpAuth,
+  HttpServerInfo,
+  HttpServicePreboot,
+  HttpServiceStart,
+} from '@kbn/core-http-server';
+export type { IExternalUrlPolicy } from '@kbn/core-http-common';
 
-export { KibanaRequest, kibanaResponseFactory, validBodyOutput } from './http';
+export { validBodyOutput } from '@kbn/core-http-server';
 
 export type {
   HttpResourcesRenderOptions,
   HttpResourcesResponseOptions,
   HttpResourcesServiceToolkit,
   HttpResourcesRequestHandler,
-} from './http_resources';
+} from '@kbn/core-http-resources-server';
 
-export type { IRenderOptions } from './rendering';
+export type {
+  LoggingServiceSetup,
+  LoggerContextConfigInput,
+  LoggerConfigType,
+  AppenderConfigType,
+} from '@kbn/core-logging-server';
 export type {
   Logger,
   LoggerFactory,
@@ -246,14 +247,15 @@ export type {
   LogMeta,
   LogRecord,
   LogLevel,
-  LoggingServiceSetup,
-  LoggerContextConfigInput,
-  LoggerConfigType,
-  AppenderConfigType,
-} from './logging';
+} from '@kbn/logging';
+
+export type { NodeInfo, NodeRoles } from '@kbn/core-node-server';
+
+export { PluginType } from '@kbn/core-base-common';
 
 export type {
   DiscoveredPlugin,
+  PrebootPlugin,
   Plugin,
   AsyncPlugin,
   PluginConfigDescriptor,
@@ -264,16 +266,30 @@ export type {
   PluginName,
   SharedGlobalConfig,
   MakeUsageFromSchema,
+  ExposedToBrowserDescriptor,
 } from './plugins';
 
-export {
-  SavedObjectsClient,
-  SavedObjectsErrorHelpers,
-  SavedObjectsSerializer,
-  SavedObjectTypeRegistry,
-  SavedObjectsUtils,
-} from './saved_objects';
-
+export type {
+  SavedObject,
+  SavedObjectAttribute,
+  SavedObjectAttributes,
+  SavedObjectAttributeSingle,
+  SavedObjectReference,
+  SavedObjectsMigrationVersion,
+  SavedObjectsImportConflictError,
+  SavedObjectsImportAmbiguousConflictError,
+  SavedObjectsImportFailure,
+  SavedObjectsImportMissingReferencesError,
+  SavedObjectsImportResponse,
+  SavedObjectsImportRetry,
+  SavedObjectsImportSuccess,
+  SavedObjectsImportUnknownError,
+  SavedObjectsImportUnsupportedTypeError,
+  SavedObjectsNamespaceType,
+  SavedObjectsImportSimpleWarning,
+  SavedObjectsImportActionRequiredWarning,
+  SavedObjectsImportWarning,
+} from '@kbn/core-saved-objects-common';
 export type {
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
@@ -283,101 +299,116 @@ export type {
   SavedObjectsBulkUpdateResponse,
   SavedObjectsCheckConflictsObject,
   SavedObjectsCheckConflictsResponse,
-  SavedObjectsClientProviderOptions,
-  SavedObjectsClientWrapperFactory,
-  SavedObjectsClientWrapperOptions,
-  SavedObjectsClientFactory,
-  SavedObjectsClientFactoryProvider,
   SavedObjectsClosePointInTimeOptions,
   SavedObjectsClosePointInTimeResponse,
   ISavedObjectsPointInTimeFinder,
   SavedObjectsCreatePointInTimeFinderDependencies,
   SavedObjectsCreatePointInTimeFinderOptions,
   SavedObjectsCreateOptions,
-  SavedObjectsExportResultDetails,
   SavedObjectsFindResult,
   SavedObjectsFindResponse,
-  SavedObjectsImportConflictError,
-  SavedObjectsImportAmbiguousConflictError,
-  SavedObjectsImportFailure,
-  SavedObjectsImportMissingReferencesError,
-  SavedObjectsImportOptions,
-  SavedObjectsImportResponse,
-  SavedObjectsImportRetry,
-  SavedObjectsImportSuccess,
-  SavedObjectsImportUnknownError,
-  SavedObjectsImportUnsupportedTypeError,
-  SavedObjectMigrationContext,
-  SavedObjectsMigrationLogger,
   SavedObjectsOpenPointInTimeOptions,
   SavedObjectsOpenPointInTimeResponse,
+  SavedObjectsBulkResolveObject,
+  SavedObjectsBulkResolveResponse,
+  SavedObjectsResolveResponse,
+  SavedObjectsUpdateOptions,
+  SavedObjectsUpdateResponse,
+  SavedObjectsRemoveReferencesToOptions,
+  SavedObjectsRemoveReferencesToResponse,
+  SavedObjectsCollectMultiNamespaceReferencesObject,
+  SavedObjectsCollectMultiNamespaceReferencesOptions,
+  SavedObjectReferenceWithContext,
+  SavedObjectsCollectMultiNamespaceReferencesResponse,
+  SavedObjectsUpdateObjectsSpacesObject,
+  SavedObjectsUpdateObjectsSpacesOptions,
+  SavedObjectsUpdateObjectsSpacesResponse,
+  SavedObjectsUpdateObjectsSpacesResponseObject,
+  SavedObjectsDeleteOptions,
+  ISavedObjectsRepository,
+  SavedObjectsDeleteByNamespaceOptions,
+  SavedObjectsIncrementCounterOptions,
+  SavedObjectsIncrementCounterField,
+  SavedObjectsBaseOptions,
+  MutatingOperationRefreshSetting,
+  SavedObjectsClientContract,
+  SavedObjectsFindOptions,
+  SavedObjectsFindOptionsReference,
+  SavedObjectsPitParams,
+  SavedObjectsBulkDeleteObject,
+  SavedObjectsBulkDeleteOptions,
+  SavedObjectsBulkDeleteResponse,
+} from '@kbn/core-saved-objects-api-server';
+export type {
+  SavedObjectsServiceSetup,
+  SavedObjectsServiceStart,
+  SavedObjectsClientProviderOptions,
+  SavedObjectsClientWrapperFactory,
+  SavedObjectsClientWrapperOptions,
+  SavedObjectsClientFactory,
+  SavedObjectsClientFactoryProvider,
+  SavedObjectTypeExcludeFromUpgradeFilterHook,
+  SavedObjectsExportResultDetails,
+  SavedObjectsExportExcludedObject,
+  SavedObjectsImportOptions,
+  SavedObjectMigrationContext,
+  SavedObjectsMigrationLogger,
   SavedObjectsRawDoc,
+  SavedObjectsRawDocSource,
   SavedObjectsRawDocParseOptions,
   SavedObjectSanitizedDoc,
   SavedObjectUnsanitizedDoc,
   SavedObjectsRepositoryFactory,
   SavedObjectsResolveImportErrorsOptions,
-  SavedObjectsResolveResponse,
-  SavedObjectsUpdateOptions,
-  SavedObjectsUpdateResponse,
-  SavedObjectsAddToNamespacesOptions,
-  SavedObjectsAddToNamespacesResponse,
-  SavedObjectsDeleteFromNamespacesOptions,
-  SavedObjectsDeleteFromNamespacesResponse,
-  SavedObjectsRemoveReferencesToOptions,
-  SavedObjectsRemoveReferencesToResponse,
-  SavedObjectsServiceStart,
-  SavedObjectsServiceSetup,
   SavedObjectStatusMeta,
-  SavedObjectsDeleteOptions,
-  ISavedObjectsRepository,
-  SavedObjectsRepository,
-  SavedObjectsDeleteByNamespaceOptions,
-  SavedObjectsIncrementCounterOptions,
-  SavedObjectsIncrementCounterField,
-  SavedObjectsComplexFieldMapping,
-  SavedObjectsCoreFieldMapping,
   SavedObjectsFieldMapping,
   SavedObjectsTypeMappingDefinition,
   SavedObjectsMappingProperties,
   ISavedObjectTypeRegistry,
-  SavedObjectsNamespaceType,
   SavedObjectsType,
   SavedObjectsTypeManagementDefinition,
   SavedObjectMigrationMap,
   SavedObjectMigrationFn,
-  SavedObjectsExporter,
   ISavedObjectsExporter,
   SavedObjectExportBaseOptions,
   SavedObjectsExportByObjectOptions,
   SavedObjectsExportByTypeOptions,
-  SavedObjectsExportError,
   SavedObjectsExportTransform,
   SavedObjectsExportTransformContext,
-  SavedObjectsImporter,
   ISavedObjectsImporter,
-  SavedObjectsImportError,
   SavedObjectsImportHook,
   SavedObjectsImportHookResult,
-  SavedObjectsImportSimpleWarning,
-  SavedObjectsImportActionRequiredWarning,
-  SavedObjectsImportWarning,
-} from './saved_objects';
+  SavedObjectsValidationMap,
+  SavedObjectsValidationSpec,
+  ISavedObjectsSerializer,
+  SavedObjectsRequestHandlerContext,
+} from '@kbn/core-saved-objects-server';
+export {
+  SavedObjectsErrorHelpers,
+  SavedObjectsUtils,
+  mergeSavedObjectMigrationMaps,
+} from '@kbn/core-saved-objects-utils-server';
+export { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
+export type { SavedObjectsRepository } from '@kbn/core-saved-objects-api-server-internal';
+export { SavedObjectsClient } from '@kbn/core-saved-objects-api-server-internal';
+export type {
+  SavedObjectsExportError,
+  SavedObjectsImportError,
+} from '@kbn/core-saved-objects-import-export-server-internal';
 
 export type {
-  IUiSettingsClient,
   UiSettingsParams,
   PublicUiSettingsParams,
   UiSettingsType,
+  UserProvidedValues,
+  DeprecationSettings,
+} from '@kbn/core-ui-settings-common';
+export type {
+  IUiSettingsClient,
   UiSettingsServiceSetup,
   UiSettingsServiceStart,
-  UserProvidedValues,
-  ImageValidation,
-  DeprecationSettings,
-  StringValidation,
-  StringValidationRegex,
-  StringValidationRegexString,
-} from './ui_settings';
+  UiSettingsRequestHandlerContext,
+} from '@kbn/core-ui-settings-server';
 
 export type {
   OpsMetrics,
@@ -386,82 +417,73 @@ export type {
   OpsProcessMetrics,
   MetricsServiceSetup,
   MetricsServiceStart,
-} from './metrics';
+  IntervalHistogram,
+  IEventLoopDelaysMonitor,
+} from '@kbn/core-metrics-server';
+export { EventLoopDelaysMonitor } from '@kbn/core-metrics-collectors-server-internal';
 
-export type { I18nServiceSetup } from './i18n';
+export type { I18nServiceSetup } from '@kbn/core-i18n-server';
 export type {
-  DeprecationsDetails,
   RegisterDeprecationsConfig,
   GetDeprecationsContext,
   DeprecationsServiceSetup,
-} from './deprecations';
+  DeprecationsClient,
+  DeprecationsRequestHandlerContext,
+} from '@kbn/core-deprecations-server';
+export type { DeprecationsDetails } from '@kbn/core-deprecations-common';
 
-export type { AppCategory } from '../types';
-export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '../utils';
+export type { AppCategory } from '@kbn/core-application-common';
+export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '@kbn/core-application-common';
+
+export { ServiceStatusLevels } from '@kbn/core-status-common';
+export type { CoreStatus, ServiceStatus, ServiceStatusLevel } from '@kbn/core-status-common';
+export type { StatusServiceSetup } from '@kbn/core-status-server';
+
+export type { DocLinksServiceStart, DocLinksServiceSetup } from '@kbn/core-doc-links-server';
 
 export type {
-  SavedObject,
-  SavedObjectAttribute,
-  SavedObjectAttributes,
-  SavedObjectAttributeSingle,
-  SavedObjectReference,
-  SavedObjectsBaseOptions,
-  MutatingOperationRefreshSetting,
-  SavedObjectsClientContract,
-  SavedObjectsFindOptions,
-  SavedObjectsFindOptionsReference,
-  SavedObjectsPitParams,
-  SavedObjectsMigrationVersion,
-} from './types';
-
-export { ServiceStatusLevels } from './status';
-export type { CoreStatus, ServiceStatus, ServiceStatusLevel, StatusServiceSetup } from './status';
-
-export type { CoreUsageDataStart } from './core_usage_data';
+  AnalyticsClient,
+  Event,
+  EventContext,
+  EventType,
+  EventTypeOpts,
+  IShipper,
+  ContextProviderOpts,
+  OptInConfig,
+  ShipperClassConstructor,
+  TelemetryCounter,
+  TelemetryCounterType,
+} from '@kbn/analytics-client';
+export type {
+  AnalyticsServiceSetup,
+  AnalyticsServicePreboot,
+  AnalyticsServiceStart,
+} from '@kbn/core-analytics-server';
+export type {
+  RequestHandlerContext,
+  CoreRequestHandlerContext,
+  CustomRequestHandlerContext,
+  PrebootRequestHandlerContext,
+  PrebootCoreRequestHandlerContext,
+} from '@kbn/core-http-request-handler-context-server';
 
 /**
- * Plugin specific context passed to a route handler.
- *
- * Provides the following clients and services:
- *    - {@link SavedObjectsClient | savedObjects.client} - Saved Objects client
- *      which uses the credentials of the incoming request
- *    - {@link ISavedObjectTypeRegistry | savedObjects.typeRegistry} - Type registry containing
- *      all the registered types.
- *    - {@link IScopedClusterClient | elasticsearch.client} - Elasticsearch
- *      data client which uses the credentials of the incoming request
- *    - {@link LegacyScopedClusterClient | elasticsearch.legacy.client} - The legacy Elasticsearch
- *      data client which uses the credentials of the incoming request
- *    - {@link IUiSettingsClient | uiSettings.client} - uiSettings client
- *      which uses the credentials of the incoming request
- *
+ * Context passed to the `setup` method of `preboot` plugins.
  * @public
  */
-export interface RequestHandlerContext {
-  core: {
-    savedObjects: {
-      client: SavedObjectsClientContract;
-      typeRegistry: ISavedObjectTypeRegistry;
-      getClient: (options?: SavedObjectsClientProviderOptions) => SavedObjectsClientContract;
-      getExporter: (client: SavedObjectsClientContract) => ISavedObjectsExporter;
-      getImporter: (client: SavedObjectsClientContract) => ISavedObjectsImporter;
-    };
-    elasticsearch: {
-      client: IScopedClusterClient;
-      legacy: {
-        /*
-         * @deprecated Use {@link IScopedClusterClient}.
-         */
-        client: ILegacyScopedClusterClient;
-      };
-    };
-    uiSettings: {
-      client: IUiSettingsClient;
-    };
-  };
+export interface CorePreboot {
+  /** {@link AnalyticsServicePreboot} */
+  analytics: AnalyticsServicePreboot;
+  /** {@link ElasticsearchServicePreboot} */
+  elasticsearch: ElasticsearchServicePreboot;
+  /** {@link HttpServicePreboot} */
+  http: HttpServicePreboot<RequestHandlerContext>;
+  /** {@link PrebootServicePreboot} */
+  preboot: PrebootServicePreboot;
 }
 
 /**
- * Context passed to the plugins `setup` method.
+ * Context passed to the `setup` method of `standard` plugins.
  *
  * @typeParam TPluginsStart - the type of the consuming plugin's start dependencies. Should be the same
  *                            as the consuming {@link Plugin}'s `TPluginsStart` type. Used by `getStartServices`.
@@ -470,14 +492,18 @@ export interface RequestHandlerContext {
  * @public
  */
 export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
+  /** {@link AnalyticsServiceSetup} */
+  analytics: AnalyticsServiceSetup;
   /** {@link CapabilitiesSetup} */
   capabilities: CapabilitiesSetup;
-  /** {@link ContextSetup} */
-  context: ContextSetup;
+  /** {@link DocLinksServiceSetup} */
+  docLinks: DocLinksServiceSetup;
   /** {@link ElasticsearchServiceSetup} */
   elasticsearch: ElasticsearchServiceSetup;
+  /** {@link ExecutionContextSetup} */
+  executionContext: ExecutionContextSetup;
   /** {@link HttpServiceSetup} */
-  http: HttpServiceSetup & {
+  http: HttpServiceSetup<RequestHandlerContext> & {
     /** {@link HttpResources} */
     resources: HttpResources;
   };
@@ -497,6 +523,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   deprecations: DeprecationsServiceSetup;
   /** {@link StartServicesAccessor} */
   getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
+  /** @internal {@link CoreUsageDataSetup} */
+  coreUsageData: CoreUsageDataSetup;
 }
 
 /**
@@ -518,10 +546,16 @@ export type StartServicesAccessor<
  * @public
  */
 export interface CoreStart {
+  /** {@link AnalyticsServiceStart} */
+  analytics: AnalyticsServiceStart;
   /** {@link CapabilitiesStart} */
   capabilities: CapabilitiesStart;
+  /** {@link DocLinksServiceStart} */
+  docLinks: DocLinksServiceStart;
   /** {@link ElasticsearchServiceStart} */
   elasticsearch: ElasticsearchServiceStart;
+  /** {@link ExecutionContextStart} */
+  executionContext: ExecutionContextStart;
   /** {@link HttpServiceStart} */
   http: HttpServiceStart;
   /** {@link MetricsServiceStart} */
@@ -537,11 +571,11 @@ export interface CoreStart {
 export type {
   CapabilitiesSetup,
   CapabilitiesStart,
-  ContextSetup,
+  ExecutionContextSetup,
+  ExecutionContextStart,
   HttpResources,
   PluginsServiceSetup,
   PluginsServiceStart,
-  PluginOpaqueId,
 };
 
 /**
@@ -556,4 +590,43 @@ export const config = {
   logging: {
     appenders: appendersSchema as Type<AppenderConfigType>,
   },
+};
+
+/**
+ * Public version of RequestHandler, default-scoped to {@link RequestHandlerContext}
+ * See [@link RequestHandler}
+ * @public
+ */
+type PublicRequestHandler<
+  P = unknown,
+  Q = unknown,
+  B = unknown,
+  Context extends RequestHandlerContext = RequestHandlerContext,
+  Method extends RouteMethod = any,
+  ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory
+> = RequestHandler<P, Q, B, Context, Method, ResponseFactory>;
+
+export type { PublicRequestHandler as RequestHandler, RequestHandler as BaseRequestHandler };
+
+/**
+ * Public version of IRouter, default-scoped to {@link RequestHandlerContext}
+ * See [@link IRouter}
+ * @public
+ */
+type PublicRouter<ContextType extends RequestHandlerContext = RequestHandlerContext> =
+  IRouter<ContextType>;
+
+export type { PublicRouter as IRouter, IRouter as IBaseRouter };
+
+/**
+ * Public version of RequestHandlerContext, default-scoped to {@link RequestHandlerContext}
+ * See [@link RequestHandlerContext}
+ * @public
+ */
+type PublicHttpServiceSetup<ContextType extends RequestHandlerContext = RequestHandlerContext> =
+  HttpServiceSetup<ContextType>;
+
+export type {
+  PublicHttpServiceSetup as HttpServiceSetup,
+  HttpServiceSetup as BaseHttpServiceSetup,
 };

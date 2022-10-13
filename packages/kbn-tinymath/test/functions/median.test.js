@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const { median } = require('../../src/functions/median.js');
+const { median } = require('../../src/functions/median');
 
 describe('Median', () => {
   it('numbers', () => {

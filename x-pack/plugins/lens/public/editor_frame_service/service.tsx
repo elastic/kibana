@@ -6,16 +6,24 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
-import { CoreSetup, CoreStart } from 'kibana/public';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import { ExpressionsSetup, ExpressionsStart } from '../../../../../src/plugins/expressions/public';
-import { EmbeddableSetup, EmbeddableStart } from '../../../../../src/plugins/embeddable/public';
+import { CoreStart, IUiSettingsClient } from '@kbn/core/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
+import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
-} from '../../../../../src/plugins/data/public';
+  DataViewsContract,
+} from '@kbn/data-plugin/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import { DashboardStart } from '@kbn/dashboard-plugin/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import {
+  DataViewsPublicPluginSetup,
+  DataViewsPublicPluginStart,
+} from '@kbn/data-views-plugin/public';
+import { Document } from '../persistence/saved_object_store';
 import {
   Datasource,
   Visualization,
@@ -23,13 +31,6 @@ import {
   EditorFrameInstance,
   EditorFrameStart,
 } from '../types';
-import { Document } from '../persistence/saved_object_store';
-import { mergeTables } from './merge_tables';
-import { EmbeddableFactory, LensEmbeddableStartServices } from './embeddable/embeddable_factory';
-import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
-import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
-import { DashboardStart } from '../../../../../src/plugins/dashboard/public';
-import { LensAttributeService } from '../lens_attribute_service';
 
 export interface EditorFrameSetupPlugins {
   data: DataPublicPluginSetup;
@@ -37,15 +38,23 @@ export interface EditorFrameSetupPlugins {
   expressions: ExpressionsSetup;
   charts: ChartsPluginSetup;
   usageCollection?: UsageCollectionSetup;
+  dataViews: DataViewsPublicPluginSetup;
 }
 
 export interface EditorFrameStartPlugins {
+  uiActions: UiActionsStart;
   data: DataPublicPluginStart;
   embeddable?: EmbeddableStart;
   dashboard?: DashboardStart;
   expressions: ExpressionsStart;
-  uiActions?: UiActionsStart;
   charts: ChartsPluginSetup;
+  dataViews: DataViewsPublicPluginStart;
+}
+
+export interface EditorFramePlugins {
+  dataViews: DataViewsContract;
+  uiSettings: IUiSettingsClient;
+  storage: IStorageWrapper;
 }
 
 async function collectAsyncDefinitions<T extends { id: string }>(
@@ -63,54 +72,30 @@ async function collectAsyncDefinitions<T extends { id: string }>(
 }
 
 export class EditorFrameService {
-  constructor() {}
-
   private readonly datasources: Array<Datasource | (() => Promise<Datasource>)> = [];
   private readonly visualizations: Array<Visualization | (() => Promise<Visualization>)> = [];
+
+  public loadDatasources = () => collectAsyncDefinitions(this.datasources);
+  public loadVisualizations = () => collectAsyncDefinitions(this.visualizations);
 
   /**
    * This method takes a Lens saved object as returned from the persistence helper,
    * initializes datsources and visualization and creates the current expression.
-   * This is an asynchronous process and should only be triggered once for a saved object.
+   * This is an asynchronous process.
    * @param doc parsed Lens saved object
    */
-  private documentToExpression = async (doc: Document) => {
+  public documentToExpression = async (doc: Document, services: EditorFramePlugins) => {
     const [resolvedDatasources, resolvedVisualizations] = await Promise.all([
-      collectAsyncDefinitions(this.datasources),
-      collectAsyncDefinitions(this.visualizations),
+      this.loadDatasources(),
+      this.loadVisualizations(),
     ]);
 
     const { persistedStateToExpression } = await import('../async_services');
 
-    return await persistedStateToExpression(resolvedDatasources, resolvedVisualizations, doc);
+    return persistedStateToExpression(resolvedDatasources, resolvedVisualizations, doc, services);
   };
 
-  public setup(
-    core: CoreSetup<EditorFrameStartPlugins>,
-    plugins: EditorFrameSetupPlugins,
-    getAttributeService: () => Promise<LensAttributeService>
-  ): EditorFrameSetup {
-    plugins.expressions.registerFunction(() => mergeTables);
-
-    const getStartServices = async (): Promise<LensEmbeddableStartServices> => {
-      const [coreStart, deps] = await core.getStartServices();
-      return {
-        attributeService: await getAttributeService(),
-        capabilities: coreStart.application.capabilities,
-        coreHttp: coreStart.http,
-        timefilter: deps.data.query.timefilter.timefilter,
-        expressionRenderer: deps.expressions.ReactExpressionRenderer,
-        documentToExpression: this.documentToExpression,
-        indexPatternService: deps.data.indexPatterns,
-        uiActions: deps.uiActions,
-        usageCollection: plugins.usageCollection,
-      };
-    };
-
-    if (plugins.embeddable) {
-      plugins.embeddable.registerEmbeddableFactory('lens', new EmbeddableFactory(getStartServices));
-    }
-
+  public setup(): EditorFrameSetup {
     return {
       registerDatasource: (datasource) => {
         this.datasources.push(datasource as Datasource<unknown, unknown>);
@@ -123,76 +108,33 @@ export class EditorFrameService {
 
   public start(core: CoreStart, plugins: EditorFrameStartPlugins): EditorFrameStart {
     const createInstance = async (): Promise<EditorFrameInstance> => {
-      let domElement: Element;
       const [resolvedDatasources, resolvedVisualizations] = await Promise.all([
-        collectAsyncDefinitions(this.datasources),
-        collectAsyncDefinitions(this.visualizations),
+        this.loadDatasources(),
+        this.loadVisualizations(),
       ]);
 
-      const unmount = () => {
-        if (domElement) {
-          unmountComponentAtNode(domElement);
-        }
-      };
+      const { EditorFrame } = await import('../async_services');
 
       return {
-        mount: async (
-          element,
-          {
-            doc,
-            onError,
-            dateRange,
-            query,
-            filters,
-            savedQuery,
-            onChange,
-            showNoDataPopover,
-            initialContext,
-            searchSessionId,
-          }
-        ) => {
-          if (domElement !== element) {
-            unmount();
-          }
-          domElement = element;
-          const firstDatasourceId = Object.keys(resolvedDatasources)[0];
-          const firstVisualizationId = Object.keys(resolvedVisualizations)[0];
-
-          const { EditorFrame, getActiveDatasourceIdFromDoc } = await import('../async_services');
-
-          const palettes = await plugins.charts.palettes.getPalettes();
-
-          render(
-            <I18nProvider>
+        EditorFrameContainer: ({ showNoDataPopover, lensInspector, indexPatternService }) => {
+          return (
+            <div className="lnsApp__frame">
               <EditorFrame
                 data-test-subj="lnsEditorFrame"
-                onError={onError}
-                datasourceMap={resolvedDatasources}
-                visualizationMap={resolvedVisualizations}
-                initialDatasourceId={getActiveDatasourceIdFromDoc(doc) || firstDatasourceId || null}
-                initialVisualizationId={
-                  (doc && doc.visualizationType) || firstVisualizationId || null
-                }
-                key={doc?.savedObjectId} // ensures rerendering when switching to another visualization inside of lens (eg global search)
                 core={core}
                 plugins={plugins}
-                ExpressionRenderer={plugins.expressions.ReactExpressionRenderer}
-                palettes={palettes}
-                doc={doc}
-                dateRange={dateRange}
-                query={query}
-                filters={filters}
-                savedQuery={savedQuery}
-                onChange={onChange}
+                lensInspector={lensInspector}
                 showNoDataPopover={showNoDataPopover}
-                initialContext={initialContext}
-                searchSessionId={searchSessionId}
+                indexPatternService={indexPatternService}
+                datasourceMap={resolvedDatasources}
+                visualizationMap={resolvedVisualizations}
+                ExpressionRenderer={plugins.expressions.ReactExpressionRenderer}
               />
-            </I18nProvider>,
-            domElement
+            </div>
           );
         },
-        unmount,
+        datasourceMap: resolvedDatasources,
+        visualizationMap: resolvedVisualizations,
       };
     };
 

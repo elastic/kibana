@@ -1,19 +1,8 @@
 {
   "name": "@kbn/server-http-tools",
-  "main": "./target/index.js",
-  "types": "./target/index.d.ts",
+  "main": "./target_node/index.js",
   "version": "1.0.0",
+  "author": "Kibana Core",
   "license": "SSPL-1.0 OR Elastic License 2.0",
-  "private": true,
-  "scripts": {
-    "build": "rm -rf target && ../../node_modules/.bin/tsc",
-    "kbn:bootstrap": "yarn build",
-    "kbn:watch": "yarn build --watch"
-  },
-  "dependencies": {
-    "@kbn/crypto": "link:../kbn-crypto"
-  },
-  "devDependencies": {
-    "@kbn/utility-types": "link:../kbn-utility-types"
-  }
+  "private": true
 }

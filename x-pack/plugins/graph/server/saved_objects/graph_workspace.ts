@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from 'kibana/server';
+import { SavedObjectsType } from '@kbn/core/server';
 import { graphMigrations } from './migrations';
 
 export const graphWorkspace: SavedObjectsType = {
   name: 'graph-workspace',
-  namespaceType: 'single',
+  namespaceType: 'multiple-isolated',
+  convertToMultiNamespaceTypeVersion: '8.0.0',
   hidden: false,
   management: {
     icon: 'graphApp',

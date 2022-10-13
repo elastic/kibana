@@ -20,7 +20,6 @@ import {
   EuiFlyoutHeader,
   EuiForm,
   EuiFormRow,
-  EuiOverlayMask,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -28,10 +27,11 @@ import {
 import React, { Component, Fragment } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { Space } from '@kbn/spaces-plugin/public';
 
-import type { Space } from '../../../../../../../../spaces/public';
-import type { Role } from '../../../../../../../common/model';
+import { ALL_SPACES_ID } from '../../../../../../../common/constants';
+import type { FeaturesPrivileges, Role } from '../../../../../../../common/model';
 import { copyRole } from '../../../../../../../common/model';
 import type { KibanaPrivileges } from '../../../../model';
 import { CUSTOM_PRIVILEGE_VALUE } from '../constants';
@@ -93,64 +93,67 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
 
   public render() {
     return (
-      <EuiOverlayMask headerZindexLocation="below">
-        <EuiFlyout onClose={this.closeFlyout} size="m" maxWidth={true}>
-          <EuiFlyoutHeader hasBorder>
-            <EuiTitle size="m">
-              <h2>
+      <EuiFlyout
+        onClose={this.closeFlyout}
+        size="m"
+        maxWidth={true}
+        maskProps={{ headerZindexLocation: 'below' }}
+      >
+        <EuiFlyoutHeader hasBorder>
+          <EuiTitle size="m">
+            <h2>
+              <FormattedMessage
+                id="xpack.security.management.editRole.spacePrivilegeForm.modalTitle"
+                defaultMessage="Kibana privileges"
+              />
+            </h2>
+          </EuiTitle>
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          <EuiErrorBoundary>{this.getForm()}</EuiErrorBoundary>
+        </EuiFlyoutBody>
+        <EuiFlyoutFooter>
+          {this.state.privilegeCalculator.hasSupersededInheritedPrivileges(
+            this.state.privilegeIndex
+          ) && (
+            <Fragment>
+              <EuiCallOut
+                color="warning"
+                iconType="alert"
+                data-test-subj="spaceFormGlobalPermissionsSupersedeWarning"
+                title={
+                  <FormattedMessage
+                    id="xpack.security.management.editRole.spacePrivilegeForm.supersededWarningTitle"
+                    defaultMessage="Superseded by global privileges"
+                  />
+                }
+              >
                 <FormattedMessage
-                  id="xpack.security.management.editRole.spacePrivilegeForm.modalTitle"
-                  defaultMessage="Kibana privileges"
+                  id="xpack.security.management.editRole.spacePrivilegeForm.supersededWarning"
+                  defaultMessage="Declared privileges are less permissive than configured global privileges. View the privilege summary to see effective privileges."
                 />
-              </h2>
-            </EuiTitle>
-          </EuiFlyoutHeader>
-          <EuiFlyoutBody>
-            <EuiErrorBoundary>{this.getForm()}</EuiErrorBoundary>
-          </EuiFlyoutBody>
-          <EuiFlyoutFooter>
-            {this.state.privilegeCalculator.hasSupersededInheritedPrivileges(
-              this.state.privilegeIndex
-            ) && (
-              <Fragment>
-                <EuiCallOut
-                  color="warning"
-                  iconType="alert"
-                  data-test-subj="spaceFormGlobalPermissionsSupersedeWarning"
-                  title={
-                    <FormattedMessage
-                      id="xpack.security.management.editRole.spacePrivilegeForm.supersededWarningTitle"
-                      defaultMessage="Superseded by global privileges"
-                    />
-                  }
-                >
-                  <FormattedMessage
-                    id="xpack.security.management.editRole.spacePrivilegeForm.supersededWarning"
-                    defaultMessage="Declared privileges are less permissive than configured global privileges. View the privilege summary to see effective privileges."
-                  />
-                </EuiCallOut>
-                <EuiSpacer size="s" />
-              </Fragment>
-            )}
-            <EuiFlexGroup justifyContent="spaceBetween">
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  iconType="cross"
-                  onClick={this.closeFlyout}
-                  flush="left"
-                  data-test-subj={'cancelSpacePrivilegeButton'}
-                >
-                  <FormattedMessage
-                    id="xpack.security.management.editRole.spacePrivilegeForm.cancelButton"
-                    defaultMessage="Cancel"
-                  />
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>{this.getSaveButton()}</EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlyoutFooter>
-        </EuiFlyout>
-      </EuiOverlayMask>
+              </EuiCallOut>
+              <EuiSpacer size="s" />
+            </Fragment>
+          )}
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                iconType="cross"
+                onClick={this.closeFlyout}
+                flush="left"
+                data-test-subj={'cancelSpacePrivilegeButton'}
+              >
+                <FormattedMessage
+                  id="xpack.security.management.editRole.spacePrivilegeForm.cancelButton"
+                  defaultMessage="Cancel"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{this.getSaveButton()}</EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
+      </EuiFlyout>
     );
   }
 
@@ -259,6 +262,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
           privilegeIndex={this.state.privilegeIndex}
           canCustomizeSubFeaturePrivileges={this.props.canCustomizeSubFeaturePrivileges}
           disabled={this.state.selectedBasePrivilege.length > 0 || !hasSelectedSpaces}
+          allSpacesSelected={this.state.selectedSpaceIds.includes(ALL_SPACES_ID)}
         />
 
         {this.requiresGlobalPrivilegeWarning() && (
@@ -425,6 +429,7 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
 
     const form = role.kibana[this.state.privilegeIndex];
     form.spaces = [...selectedSpaceIds];
+    form.feature = this.resetRoleFeature(form.feature, selectedSpaceIds); // Remove any feature privilege(s) that cannot currently be selected
 
     this.setState({
       selectedSpaceIds,
@@ -457,6 +462,28 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
     });
   };
 
+  private resetRoleFeature = (roleFeature: FeaturesPrivileges, selectedSpaceIds: string[]) => {
+    const securedFeatures = this.props.kibanaPrivileges.getSecuredFeatures();
+    return Object.entries(roleFeature).reduce((features, [featureId, privileges]) => {
+      if (!Array.isArray(privileges)) {
+        return features;
+      }
+      const securedFeature = securedFeatures.find((sf) => sf.id === featureId);
+      const primaryFeaturePrivilege = securedFeature
+        ?.getPrimaryFeaturePrivileges({ includeMinimalFeaturePrivileges: true })
+        .find((pfp) => privileges.includes(pfp.id)) ?? { disabled: false, requireAllSpaces: false };
+      const newFeaturePrivileges =
+        primaryFeaturePrivilege?.disabled ||
+        (primaryFeaturePrivilege?.requireAllSpaces && !selectedSpaceIds.includes(ALL_SPACES_ID))
+          ? [] // The primary feature privilege cannot be selected; remove that and any selected sub-feature privileges, too
+          : privileges;
+      return {
+        ...features,
+        ...(newFeaturePrivileges.length && { [featureId]: newFeaturePrivileges }),
+      };
+    }, {});
+  };
+
   private getDisplayedBasePrivilege = () => {
     const basePrivilege = this.state.privilegeCalculator.getBasePrivilege(
       this.state.privilegeIndex
@@ -470,42 +497,62 @@ export class PrivilegeSpaceForm extends Component<Props, State> {
   };
 
   private onFeaturePrivilegesChange = (featureId: string, privileges: string[]) => {
-    const role = copyRole(this.state.role);
-    const form = role.kibana[this.state.privilegeIndex];
-
-    if (privileges.length === 0) {
-      delete form.feature[featureId];
-    } else {
-      form.feature[featureId] = [...privileges];
-    }
-
-    this.setState({
-      role,
-      privilegeCalculator: new PrivilegeFormCalculator(this.props.kibanaPrivileges, role),
-    });
+    this.setRole(privileges, featureId);
   };
 
   private onChangeAllFeaturePrivileges = (privileges: string[]) => {
+    this.setRole(privileges);
+  };
+
+  private setRole(privileges: string[], featureId?: string) {
     const role = copyRole(this.state.role);
     const entry = role.kibana[this.state.privilegeIndex];
 
     if (privileges.length === 0) {
-      entry.feature = {};
+      if (featureId) {
+        delete entry.feature[featureId];
+      } else {
+        entry.feature = {};
+      }
     } else {
-      this.props.kibanaPrivileges.getSecuredFeatures().forEach((feature) => {
+      let securedFeaturesToSet = this.props.kibanaPrivileges.getSecuredFeatures();
+      if (featureId) {
+        securedFeaturesToSet = [securedFeaturesToSet.find((sf) => sf.id === featureId)!];
+      }
+      securedFeaturesToSet.forEach((feature) => {
         const nextFeaturePrivilege = feature
-          .getPrimaryFeaturePrivileges()
-          .find((pfp) => privileges.includes(pfp.id));
+          .getPrimaryFeaturePrivileges({ includeMinimalFeaturePrivileges: true })
+          .find((pfp) => {
+            if (
+              pfp?.disabled ||
+              (pfp?.requireAllSpaces && !this.state.selectedSpaceIds.includes(ALL_SPACES_ID))
+            ) {
+              return false;
+            }
+            return Array.isArray(privileges) && privileges.includes(pfp.id);
+          });
+        let newPrivileges: string[] = [];
         if (nextFeaturePrivilege) {
-          entry.feature[feature.id] = [nextFeaturePrivilege.id];
+          newPrivileges = [nextFeaturePrivilege.id];
+          feature.getSubFeaturePrivileges().forEach((psf) => {
+            if (Array.isArray(privileges) && privileges.includes(psf.id)) {
+              newPrivileges.push(psf.id);
+            }
+          });
+        }
+        if (newPrivileges.length === 0) {
+          delete entry.feature[feature.id];
+        } else {
+          entry.feature[feature.id] = newPrivileges;
         }
       });
     }
+
     this.setState({
       role,
       privilegeCalculator: new PrivilegeFormCalculator(this.props.kibanaPrivileges, role),
     });
-  };
+  }
 
   private canSave = () => {
     if (this.state.selectedSpaceIds.length === 0) {

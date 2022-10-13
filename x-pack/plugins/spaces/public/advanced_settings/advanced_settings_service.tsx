@@ -7,9 +7,9 @@
 
 import React from 'react';
 
-import type { AdvancedSettingsSetup } from 'src/plugins/advanced_settings/public';
-import type { Space } from 'src/plugins/spaces_oss/common';
+import type { AdvancedSettingsSetup } from '@kbn/advanced-settings-plugin/public';
 
+import type { Space } from '../../common';
 import { AdvancedSettingsSubtitle, AdvancedSettingsTitle } from './components';
 
 interface SetupDeps {

@@ -10,9 +10,11 @@ import { useValues } from 'kea';
 import { EuiBreadcrumb } from '@elastic/eui';
 
 import {
-  ENTERPRISE_SEARCH_PLUGIN,
+  ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
+  ANALYTICS_PLUGIN,
   APP_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
+  ENTERPRISE_SEARCH_CONTENT_PLUGIN,
 } from '../../../../common/constants';
 
 import { stripLeadingSlash } from '../../../../common/strip_slashes';
@@ -97,10 +99,19 @@ export const useEuiBreadcrumbs = (breadcrumbs: Breadcrumbs): EuiBreadcrumb[] => 
 export const useEnterpriseSearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
   useEuiBreadcrumbs([
     {
-      text: ENTERPRISE_SEARCH_PLUGIN.NAME,
-      path: ENTERPRISE_SEARCH_PLUGIN.URL,
+      text: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.NAME,
+      path: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
       shouldNotCreateHref: true,
     },
+    ...breadcrumbs,
+  ]);
+
+export const useAnalyticsBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
+  useEnterpriseSearchBreadcrumbs([{ text: ANALYTICS_PLUGIN.NAME, path: '/' }, ...breadcrumbs]);
+
+export const useElasticsearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
+  useEnterpriseSearchBreadcrumbs([
+    { text: 'Getting started with Elasticsearch', path: '/' },
     ...breadcrumbs,
   ]);
 
@@ -110,5 +121,11 @@ export const useAppSearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
 export const useWorkplaceSearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
   useEnterpriseSearchBreadcrumbs([
     { text: WORKPLACE_SEARCH_PLUGIN.NAME, path: '/' },
+    ...breadcrumbs,
+  ]);
+
+export const useEnterpriseSearchContentBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
+  useEnterpriseSearchBreadcrumbs([
+    { text: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAV_TITLE, path: '/' },
     ...breadcrumbs,
   ]);

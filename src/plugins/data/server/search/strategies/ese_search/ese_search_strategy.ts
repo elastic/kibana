@@ -7,10 +7,11 @@
  */
 
 import type { Observable } from 'rxjs';
-import type { IScopedClusterClient, Logger, SharedGlobalConfig } from 'kibana/server';
-import { catchError, first, tap } from 'rxjs/operators';
-import { SearchResponse } from 'elasticsearch';
-import { from } from 'rxjs';
+import type { IScopedClusterClient, Logger, SharedGlobalConfig } from '@kbn/core/server';
+import { catchError, tap } from 'rxjs/operators';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { firstValueFrom, from } from 'rxjs';
+import { getKbnServerError, KbnServerError } from '@kbn/kibana-utils-plugin/server';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
 import type {
   IAsyncSearchOptions,
@@ -25,24 +26,26 @@ import {
   getIgnoreThrottled,
 } from './request_utils';
 import { toAsyncKibanaSearchResponse } from './response_utils';
-import { getKbnServerError, KbnServerError } from '../../../../../kibana_utils/server';
-import { SearchUsage, searchUsageObserver } from '../../collectors';
+import { SearchUsage, searchUsageObserver } from '../../collectors/search';
 import {
   getDefaultSearchParams,
   getShardTimeout,
   getTotalLoaded,
-  shimAbortSignal,
   shimHitsTotal,
 } from '../es_search';
+import { SearchConfigSchema } from '../../../../config';
 
 export const enhancedEsSearchStrategyProvider = (
   legacyConfig$: Observable<SharedGlobalConfig>,
+  searchConfig: SearchConfigSchema,
   logger: Logger,
-  usage?: SearchUsage
-): ISearchStrategy<IEsSearchRequest> => {
+  usage?: SearchUsage,
+  useInternalUser: boolean = false
+): ISearchStrategy => {
   async function cancelAsyncSearch(id: string, esClient: IScopedClusterClient) {
     try {
-      await esClient.asCurrentUser.asyncSearch.delete({ id });
+      const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
+      await client.asyncSearch.delete({ id });
     } catch (e) {
       throw getKbnServerError(e);
     }
@@ -51,28 +54,34 @@ export const enhancedEsSearchStrategyProvider = (
   function asyncSearch(
     { id, ...request }: IEsSearchRequest,
     options: IAsyncSearchOptions,
-    { esClient, uiSettingsClient, searchSessionsClient }: SearchStrategyDependencies
+    { esClient, uiSettingsClient }: SearchStrategyDependencies
   ) {
-    const client = esClient.asCurrentUser.asyncSearch;
+    const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
 
     const search = async () => {
       const params = id
-        ? getDefaultAsyncGetParams(options)
+        ? getDefaultAsyncGetParams(searchConfig, options)
         : {
-            ...(await getDefaultAsyncSubmitParams(
-              uiSettingsClient,
-              searchSessionsClient.getConfig(),
-              options
-            )),
+            ...(await getDefaultAsyncSubmitParams(uiSettingsClient, searchConfig, options)),
             ...request.params,
           };
-      const promise = id ? client.get({ ...params, id }) : client.submit(params);
-      const { body } = await shimAbortSignal(promise, options.abortSignal);
+      const { body, headers } = id
+        ? await client.asyncSearch.get(
+            { ...params, id },
+            { ...options.transport, signal: options.abortSignal, meta: true }
+          )
+        : await client.asyncSearch.submit(params, {
+            ...options.transport,
+            signal: options.abortSignal,
+            meta: true,
+          });
+
       const response = shimHitsTotal(body.response, options);
 
       return toAsyncKibanaSearchResponse(
         // @ts-expect-error @elastic/elasticsearch start_time_in_millis expected to be number
-        { ...body, response }
+        { ...body, response },
+        headers?.warning
       );
     };
 
@@ -96,7 +105,8 @@ export const enhancedEsSearchStrategyProvider = (
     options: ISearchOptions,
     { esClient, uiSettingsClient }: SearchStrategyDependencies
   ): Promise<IEsSearchResponse> {
-    const legacyConfig = await legacyConfig$.pipe(first()).toPromise();
+    const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
+    const legacyConfig = await firstValueFrom(legacyConfig$);
     const { body, index, ...params } = request.params!;
     const method = 'POST';
     const path = encodeURI(`/${index}/_rollup_search`);
@@ -108,15 +118,20 @@ export const enhancedEsSearchStrategyProvider = (
     };
 
     try {
-      const promise = esClient.asCurrentUser.transport.request({
-        method,
-        path,
-        body,
-        querystring,
-      });
+      const esResponse = await client.transport.request(
+        {
+          method,
+          path,
+          body,
+          querystring,
+        },
+        {
+          signal: options?.abortSignal,
+          meta: true,
+        }
+      );
 
-      const esResponse = await shimAbortSignal(promise, options?.abortSignal);
-      const response = esResponse.body as SearchResponse<any>;
+      const response = esResponse.body as estypes.SearchResponse<any>;
       return {
         rawResponse: shimHitsTotal(response, options),
         ...getTotalLoaded(response),
@@ -169,7 +184,11 @@ export const enhancedEsSearchStrategyProvider = (
     extend: async (id, keepAlive, options, { esClient }) => {
       logger.debug(`extend ${id} by ${keepAlive}`);
       try {
-        await esClient.asCurrentUser.asyncSearch.get({ id, body: { keep_alive: keepAlive } });
+        const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
+        await client.asyncSearch.get({
+          id,
+          keep_alive: keepAlive,
+        });
       } catch (e) {
         throw getKbnServerError(e);
       }

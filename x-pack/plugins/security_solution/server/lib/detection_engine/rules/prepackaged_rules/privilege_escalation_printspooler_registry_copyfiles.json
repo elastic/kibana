@@ -5,9 +5,7 @@
   "description": "Detects attempts to exploit a privilege escalation vulnerability (CVE-2020-1030) related to the print spooler service. Exploitation involves chaining multiple primitives to load an arbitrary DLL into the print spooler process running as SYSTEM.",
   "from": "now-9m",
   "index": [
-    "winlogbeat-*",
-    "logs-endpoint.events.*",
-    "logs-windows.*"
+    "logs-endpoint.events.*"
   ],
   "language": "eql",
   "license": "Elastic License v2",
@@ -17,6 +15,23 @@
     "https://www.accenture.com/us-en/blogs/cyber-defense/discovering-exploiting-shutting-down-dangerous-windows-print-spooler-vulnerability",
     "https://github.com/sbousseaden/EVTX-ATTACK-SAMPLES/blob/master/Privilege%20Escalation/privesc_sysmon_cve_20201030_spooler.evtx",
     "https://msrc.microsoft.com/update-guide/en-US/vulnerability/CVE-2020-1030"
+  ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "host.id",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "registry.data.strings",
+      "type": "wildcard"
+    },
+    {
+      "ecs": true,
+      "name": "registry.path",
+      "type": "keyword"
+    }
   ],
   "risk_score": 73,
   "rule_id": "bd7eefee-f671-494e-98df-f01daf9e5f17",
@@ -46,5 +61,5 @@
     }
   ],
   "type": "eql",
-  "version": 2
+  "version": 100
 }

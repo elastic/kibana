@@ -6,14 +6,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';
 
-import { IFieldType, KBN_FIELD_TYPES } from '../../../../../../src/plugins/data/public';
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { DataViewField } from '@kbn/data-views-plugin/common';
+import { ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';
 
 // convert kibana types to ML Job types
 // this is needed because kibana types only have string and not text and keyword.
 // and we can't use ES_FIELD_TYPES because it has no NUMBER type
-export function kbnTypeToMLJobType(field: IFieldType) {
+export function kbnTypeToMLJobType(field: DataViewField) {
   // Return undefined if not one of the supported data visualizer field types.
   let type;
   switch (field.type) {

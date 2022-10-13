@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TestBed, SetupFunc } from '@kbn/test/jest';
+import { TestBed, SetupFunc } from '@kbn/test-jest-helpers';
 
 export interface PolicyFormTestBed extends TestBed<PolicyFormTestSubjects> {
   actions: {
@@ -40,6 +40,11 @@ export const formSetup = async (
 export type PolicyFormTestSubjects =
   | 'advancedCronInput'
   | 'allIndicesToggle'
+  | 'globalStateToggle'
+  | 'featureStatesDropdown'
+  | 'toggleIncludeNone'
+  | 'noFeatureStatesCallout'
+  | 'featureStatesToggle'
   | 'backButton'
   | 'deselectIndicesLink'
   | 'allDataStreamsToggle'

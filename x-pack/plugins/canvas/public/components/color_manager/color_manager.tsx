@@ -9,11 +9,24 @@ import React, { FC } from 'react';
 import PropTypes from 'prop-types';
 import { EuiButtonIcon, EuiFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import tinycolor from 'tinycolor2';
+import { i18n } from '@kbn/i18n';
+
 import { ColorDot } from '../color_dot/color_dot';
 
-import { ComponentStrings } from '../../../i18n/components';
-
-const { ColorManager: strings } = ComponentStrings;
+const strings = {
+  getAddAriaLabel: () =>
+    i18n.translate('xpack.canvas.colorManager.addAriaLabel', {
+      defaultMessage: 'Add Color',
+    }),
+  getCodePlaceholder: () =>
+    i18n.translate('xpack.canvas.colorManager.codePlaceholder', {
+      defaultMessage: 'Color code',
+    }),
+  getRemoveAriaLabel: () =>
+    i18n.translate('xpack.canvas.colorManager.removeAriaLabel', {
+      defaultMessage: 'Remove Color',
+    }),
+};
 
 export interface Props {
   /**

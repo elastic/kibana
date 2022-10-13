@@ -3,7 +3,7 @@
 == Create a graph
 
 You must index data into {es} before you can create a graph.
-<<index-patterns, Learn how>> or get started with a <<add-sample-data, sample data set>>.
+<<data-views, Learn how>> or get started with a <<add-sample-data, sample data set>>.
 
 [float]
 [[exploring-connections]]
@@ -95,7 +95,7 @@ a field, select *Edit Settings*, and change *Terms per hop*.
 Documents that match a blocked term are not allowed in the graph.
 To block a term, select its vertex and click
 the block icon
-image:user/graph/images/graph-block-button.png[Block selection]
+image:user/graph/images/graph-block-button.png[Block list]
 in the control panel.
 For a list of blocked terms, go to *Settings > Blocked terms*.
 

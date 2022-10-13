@@ -4,5 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export * from './field_map';
-export * from './pick_with_patterns';
+export { parseTechnicalFields, type ParsedTechnicalFields } from './parse_technical_fields';
+export type {
+  RuleRegistrySearchRequest,
+  RuleRegistrySearchResponse,
+  RuleRegistrySearchRequestPagination,
+} from './search_strategy';
+export { BASE_RAC_ALERTS_API_PATH } from './constants';
+export type { BrowserFields, BrowserField } from './types';

@@ -1,7 +1,6 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "composite": true,
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
@@ -12,10 +11,12 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    "static/**/*"
+    "static/**/*",
+    "../../../typings/**/*",
+    ".storybook/**/*"
   ],
   "references": [
     { "path": "../../core/tsconfig.json" },
-    { "path": "../data/tsconfig.json" }
+    { "path": "../data_views/tsconfig.json" }
   ]
 }

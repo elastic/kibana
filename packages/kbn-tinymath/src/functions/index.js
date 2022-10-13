@@ -14,6 +14,7 @@ const { clamp } = require('./clamp');
 const { cos } = require('./cos');
 const { count } = require('./count');
 const { cube } = require('./cube');
+const { defaults } = require('./defaults');
 const { degtorad } = require('./degtorad');
 const { divide } = require('./divide');
 const { exp } = require('./exp');
@@ -44,6 +45,7 @@ const { subtract } = require('./subtract');
 const { sum } = require('./sum');
 const { tan } = require('./tan');
 const { unique } = require('./unique');
+const { eq, lt, gt, lte, gte, ifelse } = require('./comparison');
 
 module.exports = {
   functions: {
@@ -56,11 +58,13 @@ module.exports = {
     count,
     cube,
     degtorad,
+    defaults,
     divide,
     exp,
     first,
     fix,
     floor,
+    ifelse,
     last,
     log,
     log10,
@@ -85,5 +89,10 @@ module.exports = {
     sum,
     tan,
     unique,
+    eq,
+    lt,
+    gt,
+    lte,
+    gte,
   },
 };

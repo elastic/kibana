@@ -6,23 +6,29 @@
  */
 
 import styled from 'styled-components';
-import React, { FC, memo } from 'react';
+import type { FC } from 'react';
+import React, { memo } from 'react';
 import { EuiIcon } from '@elastic/eui';
-import {
-  LinkToApp,
-  LinkToAppProps,
-} from '../../../../../../../common/components/endpoint/link_to_app';
+import type { LinkToAppProps } from '../../../../../../../common/components/endpoint/link_to_app';
+import { LinkToApp } from '../../../../../../../common/components/endpoint/link_to_app';
 
-const LinkLabel = styled.span`
+const LinkLabel = styled.span<{
+  size?: 'm' | 'l';
+}>`
   display: inline-block;
-  padding-right: ${(props) => props.theme.eui.paddingSizes.s};
+  padding-right: ${(props) => props.theme.eui.euiSizeS};
+  font-size: ${({ size, theme }) => (size === 'm' ? theme.eui.euiFontSizeXS : 'innherit')};
 `;
 
-export const LinkWithIcon: FC<LinkToAppProps> = memo(({ children, ...props }) => {
+type ComponentProps = LinkToAppProps & {
+  size?: 'm' | 'l';
+};
+
+export const LinkWithIcon: FC<ComponentProps> = memo(({ children, size = 'l', ...props }) => {
   return (
     <LinkToApp {...props}>
-      <LinkLabel>{children}</LinkLabel>
-      <EuiIcon type="popout" />
+      <LinkLabel size={size}>{children}</LinkLabel>
+      <EuiIcon type={size === 'm' ? 'arrowRight' : 'popout'} />
     </LinkToApp>
   );
 });

@@ -5,35 +5,69 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from '../../../../../../src/core/server';
+import { produce } from 'immer';
+import type { SavedObjectsType } from '@kbn/core/server';
+import {
+  savedQuerySavedObjectType,
+  packSavedObjectType,
+  packAssetSavedObjectType,
+  usageMetricSavedObjectType,
+} from '../../../common/types';
 
-import { savedQuerySavedObjectType, packSavedObjectType } from '../../../common/types';
+export const usageMetricSavedObjectMappings: SavedObjectsType['mappings'] = {
+  properties: {
+    count: {
+      type: 'long',
+    },
+    errors: {
+      type: 'long',
+    },
+  },
+};
+
+export const usageMetricType: SavedObjectsType = {
+  name: usageMetricSavedObjectType,
+  hidden: false,
+  namespaceType: 'agnostic',
+  mappings: usageMetricSavedObjectMappings,
+};
 
 export const savedQuerySavedObjectMappings: SavedObjectsType['mappings'] = {
+  dynamic: false,
   properties: {
     description: {
       type: 'text',
     },
-    name: {
-      type: 'text',
+    id: {
+      type: 'keyword',
     },
     query: {
       type: 'text',
     },
-    created: {
+    created_at: {
       type: 'date',
     },
-    createdBy: {
+    created_by: {
       type: 'text',
     },
     platform: {
       type: 'keyword',
     },
-    updated: {
+    version: {
+      type: 'keyword',
+    },
+    updated_at: {
       type: 'date',
     },
-    updatedBy: {
+    updated_by: {
       type: 'text',
+    },
+    interval: {
+      type: 'keyword',
+    },
+    ecs_mapping: {
+      type: 'object',
+      enabled: false,
     },
   },
 };
@@ -41,8 +75,29 @@ export const savedQuerySavedObjectMappings: SavedObjectsType['mappings'] = {
 export const savedQueryType: SavedObjectsType = {
   name: savedQuerySavedObjectType,
   hidden: false,
-  namespaceType: 'single',
+  namespaceType: 'multiple-isolated',
   mappings: savedQuerySavedObjectMappings,
+  management: {
+    importableAndExportable: true,
+    getTitle: (savedObject) => savedObject.attributes.id,
+    getEditUrl: (savedObject) => `/saved_queries/${savedObject.id}/edit`,
+    getInAppUrl: (savedObject) => ({
+      path: `/app/osquery/saved_queries/${savedObject.id}`,
+      uiCapabilitiesPath: 'osquery.read',
+    }),
+    onExport: (context, objects) =>
+      produce(objects, (draft) => {
+        draft.forEach((savedQuerySO) => {
+          // Only prebuilt saved queries should have a version
+          if (savedQuerySO.attributes.version) {
+            savedQuerySO.attributes.id += '_copy';
+            delete savedQuerySO.attributes.version;
+          }
+        });
+
+        return draft;
+      }),
+  },
 };
 
 export const packSavedObjectMappings: SavedObjectsType['mappings'] = {
@@ -53,25 +108,45 @@ export const packSavedObjectMappings: SavedObjectsType['mappings'] = {
     name: {
       type: 'text',
     },
-    created: {
+    created_at: {
       type: 'date',
     },
-    createdBy: {
-      type: 'text',
+    created_by: {
+      type: 'keyword',
     },
-    updated: {
+    updated_at: {
       type: 'date',
     },
-    updatedBy: {
-      type: 'text',
+    updated_by: {
+      type: 'keyword',
+    },
+    enabled: {
+      type: 'boolean',
+    },
+    version: {
+      type: 'long',
     },
     queries: {
+      dynamic: false,
       properties: {
-        name: {
+        id: {
           type: 'keyword',
+        },
+        query: {
+          type: 'text',
         },
         interval: {
           type: 'text',
+        },
+        platform: {
+          type: 'keyword',
+        },
+        version: {
+          type: 'keyword',
+        },
+        ecs_mapping: {
+          type: 'object',
+          enabled: false,
         },
       },
     },
@@ -81,6 +156,79 @@ export const packSavedObjectMappings: SavedObjectsType['mappings'] = {
 export const packType: SavedObjectsType = {
   name: packSavedObjectType,
   hidden: false,
-  namespaceType: 'single',
+  namespaceType: 'multiple-isolated',
   mappings: packSavedObjectMappings,
+  management: {
+    defaultSearchField: 'name',
+    importableAndExportable: true,
+    getTitle: (savedObject) => `Pack: ${savedObject.attributes.name}`,
+    getEditUrl: (savedObject) => `/packs/${savedObject.id}/edit`,
+    getInAppUrl: (savedObject) => ({
+      path: `/app/osquery/packs/${savedObject.id}`,
+      uiCapabilitiesPath: 'osquery.read',
+    }),
+    onExport: (context, objects) =>
+      produce(objects, (draft) => {
+        draft.forEach((packSO) => {
+          packSO.references = [];
+          // Only prebuilt packs should have a version
+          if (packSO.attributes.version) {
+            packSO.attributes.name += '_copy';
+            delete packSO.attributes.version;
+          }
+        });
+
+        return draft;
+      }),
+  },
+};
+
+export const packAssetSavedObjectMappings: SavedObjectsType['mappings'] = {
+  dynamic: false,
+  properties: {
+    description: {
+      type: 'text',
+    },
+    name: {
+      type: 'text',
+    },
+    version: {
+      type: 'long',
+    },
+    queries: {
+      dynamic: false,
+      properties: {
+        id: {
+          type: 'keyword',
+        },
+        query: {
+          type: 'text',
+        },
+        interval: {
+          type: 'text',
+        },
+        platform: {
+          type: 'keyword',
+        },
+        version: {
+          type: 'keyword',
+        },
+        ecs_mapping: {
+          type: 'object',
+          enabled: false,
+        },
+      },
+    },
+  },
+};
+
+export const packAssetType: SavedObjectsType = {
+  name: packAssetSavedObjectType,
+  hidden: false,
+  management: {
+    importableAndExportable: true,
+    visibleInManagement: false,
+  },
+  namespaceType: 'agnostic',
+  mappings: packAssetSavedObjectMappings,
 };

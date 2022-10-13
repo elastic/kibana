@@ -28,13 +28,6 @@ export const EQL_VALIDATION_ERROR_POPOVER_LABEL = i18n.translate(
   }
 );
 
-export const EQL_QUERY_BAR_LABEL = i18n.translate(
-  'xpack.securitySolution.detectionEngine.eqlQueryBar.label',
-  {
-    defaultMessage: 'Enter an EQL Query',
-  }
-);
-
 export const EQL_OVERVIEW_LINK_TEXT = i18n.translate(
   'xpack.securitySolution.detectionEngine.eqlOverViewLink.text',
   {

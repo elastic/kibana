@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { MouseEventHandler, useCallback } from 'react';
-import { ApplicationStart, NavigateToAppOptions } from 'kibana/public';
+import type { MouseEventHandler } from 'react';
+import { useCallback } from 'react';
+import type { ApplicationStart, NavigateToAppOptions } from '@kbn/core/public';
 import { useKibana } from '../../lib/kibana';
 
 type NavigateToAppHandlerOptions<S = unknown> = NavigateToAppOptions & {
@@ -26,7 +27,7 @@ type EventHandlerCallback = MouseEventHandler<HTMLButtonElement | HTMLAnchorElem
  *
  * @example
  *
- * const handleOnClick = useNavigateToAppEventHandler('fleet', {path: '#/policies'})
+ * const handleOnClick = useNavigateToAppEventHandler('fleet', {path: '/policies'})
  * return <EuiLink onClick={handleOnClick}>See policies</EuiLink>
  */
 export const useNavigateToAppEventHandler = <S = unknown>(
@@ -37,7 +38,8 @@ export const useNavigateToAppEventHandler = <S = unknown>(
   options?: NavigateToAppHandlerOptions<S>
 ): EventHandlerCallback => {
   const { services } = useKibana();
-  const { path, state, onClick } = options || {};
+  const { path, state, onClick, deepLinkId, openInNewTab } = options || {};
+
   return useCallback(
     (ev) => {
       try {
@@ -70,8 +72,8 @@ export const useNavigateToAppEventHandler = <S = unknown>(
       }
 
       ev.preventDefault();
-      services.application.navigateToApp(appId, { path, state });
+      services.application.navigateToApp(appId, { deepLinkId, path, state, openInNewTab });
     },
-    [appId, onClick, path, services.application, state]
+    [appId, deepLinkId, onClick, path, services.application, state, openInNewTab]
   );
 };

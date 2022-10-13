@@ -5,29 +5,46 @@
  * 2.0.
  */
 
-import { ISearchRequestParams } from '../../../../../../../../../src/plugins/data/common';
-import { AgentsRequestOptions } from '../../../../../../common/search_strategy';
-// import { createQueryFilterClauses } from '../../../../../../common/utils/build_query';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
+import type { ISearchRequestParams } from '@kbn/data-plugin/common';
+import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
+import { ACTIONS_INDEX } from '../../../../../../common/constants';
+import type { AgentsRequestOptions } from '../../../../../../common/search_strategy';
+import { createQueryFilterClauses } from '../../../../../../common/utils/build_query';
 
 export const buildActionsQuery = ({
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   filterQuery,
   sort,
   pagination: { cursorStart, querySize },
+  componentTemplateExists,
 }: AgentsRequestOptions): ISearchRequestParams => {
-  // const filter = [...createQueryFilterClauses(filterQuery)];
+  const filter = [...createQueryFilterClauses(filterQuery)];
 
   const dslQuery = {
-    allowNoIndices: true,
-    index: '.fleet-actions',
-    ignoreUnavailable: true,
+    allow_no_indices: true,
+    index: componentTemplateExists ? `${ACTIONS_INDEX}*` : AGENT_ACTIONS_INDEX,
+    ignore_unavailable: true,
     body: {
-      // query: { bool: { filter } },
       query: {
-        term: {
-          type: {
-            value: 'INPUT_ACTION',
-          },
+        bool: {
+          filter,
+          must: [
+            {
+              term: {
+                type: {
+                  value: 'INPUT_ACTION',
+                },
+              },
+            },
+            {
+              term: {
+                input_type: {
+                  value: 'osquery',
+                },
+              },
+            },
+          ] as estypes.QueryDslQueryContainer[],
         },
       },
       from: cursorStart,

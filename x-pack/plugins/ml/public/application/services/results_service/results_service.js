@@ -7,6 +7,8 @@
 
 import { each, get } from 'lodash';
 
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+
 import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
 import { escapeForElasticsearchQuery } from '../../util/string_utils';
 import {
@@ -14,7 +16,6 @@ import {
   SWIM_LANE_DEFAULT_PAGE_SIZE,
 } from '../../explorer/explorer_constants';
 import { aggregationTypeTransform } from '../../../../common/util/anomaly_utils';
-import { isPopulatedObject } from '../../../../common/util/object_utils';
 
 /**
  * Service for carrying out Elasticsearch queries to obtain data for the Ml Results dashboards.
@@ -30,7 +31,15 @@ export function resultsServiceProvider(mlApiServices) {
     // Pass an empty array or ['*'] to search over all job IDs.
     // Returned response contains a results property, with a key for job
     // which has results for the specified time range.
-    getScoresByBucket(jobIds, earliestMs, latestMs, intervalMs, perPage = 10, fromPage = 1) {
+    getScoresByBucket(
+      jobIds,
+      earliestMs,
+      latestMs,
+      intervalMs,
+      perPage = 10,
+      fromPage = 1,
+      swimLaneSeverity = 0
+    ) {
       return new Promise((resolve, reject) => {
         const obj = {
           success: true,
@@ -46,6 +55,13 @@ export function resultsServiceProvider(mlApiServices) {
                 gte: earliestMs,
                 lte: latestMs,
                 format: 'epoch_millis',
+              },
+            },
+          },
+          {
+            range: {
+              anomaly_score: {
+                gte: swimLaneSeverity,
               },
             },
           },
@@ -463,7 +479,7 @@ export function resultsServiceProvider(mlApiServices) {
     // Obtains the overall bucket scores for the specified job ID(s).
     // Pass ['*'] to search over all job IDs.
     // Returned response contains a results property as an object of max score by time.
-    getOverallBucketScores(jobIds, topN, earliestMs, latestMs, interval) {
+    getOverallBucketScores(jobIds, topN, earliestMs, latestMs, interval, overallScore) {
       return new Promise((resolve, reject) => {
         const obj = { success: true, results: {} };
 
@@ -474,6 +490,7 @@ export function resultsServiceProvider(mlApiServices) {
             bucketSpan: interval,
             start: earliestMs,
             end: latestMs,
+            overallScore,
           })
           .then((resp) => {
             const dataByTime = get(resp, ['overall_buckets'], []);
@@ -507,7 +524,8 @@ export function resultsServiceProvider(mlApiServices) {
       maxResults = ANOMALY_SWIM_LANE_HARD_LIMIT,
       perPage = SWIM_LANE_DEFAULT_PAGE_SIZE,
       fromPage = 1,
-      influencersFilterQuery
+      influencersFilterQuery,
+      swimLaneSeverity
     ) {
       return new Promise((resolve, reject) => {
         const obj = { success: true, results: {} };
@@ -527,7 +545,7 @@ export function resultsServiceProvider(mlApiServices) {
           {
             range: {
               influencer_score: {
-                gt: 0,
+                gt: swimLaneSeverity !== undefined ? swimLaneSeverity : 0,
               },
             },
           },

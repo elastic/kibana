@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { StubBrowserStorage } from '@kbn/test/jest';
+import { StubBrowserStorage } from '@kbn/test-jest-helpers';
 import { getDefaultPreference } from './utils';
 
 describe('getDefaultPreference', () => {

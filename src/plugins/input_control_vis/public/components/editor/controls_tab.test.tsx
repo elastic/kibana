@@ -7,11 +7,11 @@
  */
 
 import React from 'react';
-import { shallowWithIntl, mountWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl, mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { getDepsMock, getIndexPatternMock } from '../../test_utils';
 import ControlsTab, { ControlsTabProps } from './controls_tab';
-import { Vis } from '../../../../visualizations/public';
+import { Vis } from '@kbn/visualizations-plugin/public';
 
 const indexPatternsMock = {
   get: getIndexPatternMock,
@@ -19,9 +19,9 @@ const indexPatternsMock = {
 let props: ControlsTabProps;
 
 beforeEach(() => {
-  props = ({
+  props = {
     deps: getDepsMock(),
-    vis: ({
+    vis: {
       API: {
         indexPatterns: indexPatternsMock,
       },
@@ -33,7 +33,7 @@ beforeEach(() => {
         requiresSearch: false,
         hidden: false,
       },
-    } as unknown) as Vis,
+    } as unknown as Vis,
     stateParams: {
       controls: [
         {
@@ -65,7 +65,7 @@ beforeEach(() => {
     },
     setValue: jest.fn(),
     intl: null as any,
-  } as unknown) as ControlsTabProps;
+  } as unknown as ControlsTabProps;
 });
 
 test('renders ControlsTab', () => {

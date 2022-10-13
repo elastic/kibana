@@ -6,9 +6,9 @@
  */
 
 import type { MethodKeysOf } from '@kbn/utility-types';
-import { RequestHandlerContext, KibanaRequest, KibanaResponseFactory } from 'kibana/server';
+import { RequestHandlerContext, KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { identity } from 'lodash';
-import { httpServerMock } from '../../../../../src/core/server/mocks';
+import { httpServerMock } from '@kbn/core/server/mocks';
 
 export function mockHandlerArguments(
   {}: {},
@@ -16,7 +16,7 @@ export function mockHandlerArguments(
   res?: Array<MethodKeysOf<KibanaResponseFactory>>
 ): [RequestHandlerContext, KibanaRequest<unknown, unknown, unknown>, KibanaResponseFactory] {
   return [
-    ({} as unknown) as RequestHandlerContext,
+    {} as unknown as RequestHandlerContext,
     req as KibanaRequest<unknown, unknown, unknown>,
     mockResponseFactory(res),
   ];
@@ -31,5 +31,5 @@ export const mockResponseFactory = (resToMock: Array<MethodKeysOf<KibanaResponse
       });
     }
   });
-  return (factory as unknown) as KibanaResponseFactory;
+  return factory as unknown as KibanaResponseFactory;
 };

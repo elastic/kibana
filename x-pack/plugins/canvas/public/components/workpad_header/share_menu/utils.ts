@@ -5,36 +5,20 @@
  * 2.0.
  */
 
-import rison from 'rison-node';
-import { IBasePath } from 'kibana/public';
-import moment from 'moment-timezone';
-import { fetch } from '../../../../common/lib/fetch';
+import { JobAppParamsPDFV2 } from '@kbn/reporting-plugin/common/types';
+import type { RedirectOptions } from '@kbn/share-plugin/public';
+import { CanvasAppLocatorParams, CANVAS_APP_LOCATOR } from '../../../../common/locator';
 import { CanvasWorkpad } from '../../../../types';
-import { url } from '../../../../../../../src/plugins/kibana_utils/public';
 
-interface PageCount {
+export interface CanvasWorkpadSharingData {
+  workpad: Pick<CanvasWorkpad, 'id' | 'name' | 'height' | 'width'>;
   pageCount: number;
 }
 
-export type LayoutType = 'canvas' | 'preserve_layout';
-
-type Arguments = [CanvasWorkpad, LayoutType, PageCount, IBasePath];
-
-interface PdfUrlData {
-  createPdfUri: string;
-  createPdfPayload: { jobParams: string };
-}
-
-function getPdfUrlParts(
-  { id, name: title, width, height }: CanvasWorkpad,
-  layoutType: LayoutType,
-  { pageCount }: PageCount,
-  basePath: IBasePath
-): PdfUrlData {
-  const reportingEntry = basePath.prepend('/api/reporting/generate');
-  const urlPrefix = basePath.get().replace(basePath.serverBasePath, ''); // for Spaces prefix, which is included in basePath.get()
-  const canvasEntry = `${urlPrefix}/app/canvas#`;
-
+export function getPdfJobParams(
+  { workpad: { id, name: title, width, height }, pageCount }: CanvasWorkpadSharingData,
+  version: string
+): JobAppParamsPDFV2 {
   // The viewport in Reporting by specifying the dimensions. In order for things to work,
   // we need a viewport that will include all of the pages in the workpad. The viewport
   // also needs to include any offset values from the 0,0 position, otherwise the cropped
@@ -46,39 +30,24 @@ function getPdfUrlParts(
   // viewport size.
 
   // build a list of all page urls for exporting, they are captured one at a time
-  const workpadUrls = [];
+
+  const locatorParams: Array<RedirectOptions<CanvasAppLocatorParams>> = [];
   for (let i = 1; i <= pageCount; i++) {
-    workpadUrls.push(rison.encode(`${canvasEntry}/export/workpad/pdf/${id}/page/${i}`));
+    locatorParams.push({
+      id: CANVAS_APP_LOCATOR,
+      version,
+      params: {
+        view: 'workpadPDF',
+        id,
+        page: i,
+      },
+    });
   }
 
-  const jobParams = {
-    browserTimezone: moment.tz.guess(),
-    layout: {
-      dimensions: { width, height },
-      id: layoutType,
-    },
+  return {
+    layout: { dimensions: { width, height }, id: 'canvas' },
     objectType: 'canvas workpad',
-    relativeUrls: workpadUrls,
+    locatorParams,
     title,
   };
-
-  return {
-    createPdfUri: `${reportingEntry}/printablePdf`,
-    createPdfPayload: {
-      jobParams: rison.encode(jobParams),
-    },
-  };
-}
-
-export function getPdfUrl(...args: Arguments): string {
-  const urlParts = getPdfUrlParts(...args);
-  const param = (key: string, val: any) =>
-    url.encodeUriQuery(key, true) + (val === true ? '' : '=' + url.encodeUriQuery(val, true));
-
-  return `${urlParts.createPdfUri}?${param('jobParams', urlParts.createPdfPayload.jobParams)}`;
-}
-
-export function createPdf(...args: Arguments) {
-  const { createPdfUri, createPdfPayload } = getPdfUrlParts(...args);
-  return fetch.post(createPdfUri, createPdfPayload);
 }

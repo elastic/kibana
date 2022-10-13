@@ -13,11 +13,12 @@ interface TaskStoreOptions {
 }
 export const taskStoreMock = {
   create({ index = '', taskManagerId = '' }: TaskStoreOptions = {}) {
-    const mocked = ({
+    const mocked = {
       convertToSavedObjectIds: jest.fn(),
       update: jest.fn(),
       remove: jest.fn(),
       schedule: jest.fn(),
+      bulkSchedule: jest.fn(),
       bulkUpdate: jest.fn(),
       get: jest.fn(),
       getLifecycle: jest.fn(),
@@ -26,7 +27,7 @@ export const taskStoreMock = {
       updateByQuery: jest.fn(),
       index,
       taskManagerId,
-    } as unknown) as jest.Mocked<TaskStore>;
+    } as unknown as jest.Mocked<TaskStore>;
     return mocked;
   },
 };

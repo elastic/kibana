@@ -6,18 +6,17 @@
  */
 
 import { pick } from 'lodash';
-import { RawAlert } from '../types';
-
 import {
   SavedObjectsClient,
   SavedObjectsErrorHelpers,
   SavedObjectsUpdateOptions,
-} from '../../../../../src/core/server';
+} from '@kbn/core/server';
+import { RawRule } from '../types';
 
-import { AlertAttributesExcludedFromAAD, AlertAttributesExcludedFromAADType } from './index';
+import { AlertAttributesExcludedFromAAD, AlertAttributesExcludedFromAADType } from '.';
 
 export type PartiallyUpdateableAlertAttributes = Partial<
-  Pick<RawAlert, AlertAttributesExcludedFromAADType>
+  Pick<RawRule, AlertAttributesExcludedFromAADType>
 >;
 
 export interface PartiallyUpdateAlertSavedObjectOptions {
@@ -40,10 +39,15 @@ export async function partiallyUpdateAlert(
 ): Promise<void> {
   // ensure we only have the valid attributes excluded from AAD
   const attributeUpdates = pick(attributes, AlertAttributesExcludedFromAAD);
-  const updateOptions: SavedObjectsUpdateOptions = pick(options, 'namespace', 'version', 'refresh');
+  const updateOptions: SavedObjectsUpdateOptions<RawRule> = pick(
+    options,
+    'namespace',
+    'version',
+    'refresh'
+  );
 
   try {
-    await savedObjectsClient.update<RawAlert>('alert', id, attributeUpdates, updateOptions);
+    await savedObjectsClient.update<RawRule>('alert', id, attributeUpdates, updateOptions);
   } catch (err) {
     if (options?.ignore404 && SavedObjectsErrorHelpers.isNotFoundError(err)) {
       return;

@@ -1,39 +1,52 @@
 {
   "id": "apm",
+  "owner": {
+    "name": "APM UI",
+    "githubTeam": "apm-ui"
+  },
+  "description": "The user interface for Elastic APM",
   "version": "8.0.0",
   "kibanaVersion": "kibana",
   "requiredPlugins": [
-    "features",
-    "apmOss",
     "data",
-    "licensing",
-    "triggersActionsUi",
     "embeddable",
+    "features",
     "infra",
-    "observability"
+    "inspector",
+    "licensing",
+    "observability",
+    "ruleRegistry",
+    "triggersActionsUi",
+    "share",
+    "unifiedSearch",
+    "dataViews",
+    "advancedSettings"
   ],
   "optionalPlugins": [
-    "spaces",
-    "cloud",
-    "usageCollection",
-    "taskManager",
     "actions",
     "alerting",
-    "security",
-    "ml",
+    "cases",
+    "cloud",
+    "fleet",
     "home",
-    "maps"
+    "ml",
+    "security",
+    "spaces",
+    "taskManager",
+    "usageCollection"
   ],
   "server": true,
   "ui": true,
-  "configPath": ["xpack", "apm"],
-  "extraPublicDirs": ["public/style/variables"],
+  "configPath": [
+    "xpack",
+    "apm"
+  ],
   "requiredBundles": [
-    "home",
+    "fleet",
     "kibanaReact",
     "kibanaUtils",
-    "maps",
     "ml",
-    "observability"
+    "observability",
+    "esUiShared"
   ]
 }

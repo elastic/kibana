@@ -12,7 +12,7 @@ import { AggTypesDependencies } from '../agg_types';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { IBucketHistogramAggConfig, getHistogramBucketAgg, AutoBounds } from './histogram';
 import { BucketAggType } from './bucket_agg_type';
-import { SerializableState } from 'src/plugins/expressions/common';
+import { SerializableRecord } from '@kbn/utility-types';
 
 describe('Histogram Agg', () => {
   let aggTypesDependencies: AggTypesDependencies;
@@ -48,7 +48,8 @@ describe('Histogram Agg', () => {
       ],
       {
         typesRegistry: mockAggTypesRegistry(aggTypesDependencies),
-      }
+      },
+      jest.fn()
     );
   };
 
@@ -74,11 +75,30 @@ describe('Histogram Agg', () => {
         "chain": Array [
           Object {
             "arguments": Object {
+              "autoExtendBounds": Array [
+                false,
+              ],
               "enabled": Array [
                 true,
               ],
               "extended_bounds": Array [
-                "{\\"min\\":\\"\\",\\"max\\":\\"\\"}",
+                Object {
+                  "chain": Array [
+                    Object {
+                      "arguments": Object {
+                        "max": Array [
+                          "",
+                        ],
+                        "min": Array [
+                          "",
+                        ],
+                      },
+                      "function": "extendedBounds",
+                      "type": "function",
+                    },
+                  ],
+                  "type": "expression",
+                },
               ],
               "field": Array [
                 "field",
@@ -240,7 +260,7 @@ describe('Histogram Agg', () => {
         });
         (aggConfigs.aggs[0] as IBucketHistogramAggConfig).setAutoBounds({ min: 0, max: 1000 });
         const serializedAgg = aggConfigs.aggs[0].serialize();
-        const serializedIntervalParam = (serializedAgg.params as SerializableState).used_interval;
+        const serializedIntervalParam = (serializedAgg.params as SerializableRecord).used_interval;
         expect(serializedIntervalParam).toBe(500);
         const freshHistogramAggConfig = getAggConfigs({
           interval: 100,
@@ -381,6 +401,20 @@ describe('Histogram Agg', () => {
 
           expect(output.extended_bounds).toHaveProperty('min', 99);
           expect(output.extended_bounds).toHaveProperty('max', 100);
+        });
+
+        test('writes when auto bounds and autoExtendBounds are set', () => {
+          const aggConfigs = getAggConfigs({
+            autoExtendBounds: true,
+            field: {
+              name: 'field',
+            },
+          });
+          (aggConfigs.aggs[0] as IBucketHistogramAggConfig).setAutoBounds({ min: 0, max: 1000 });
+          const output = aggConfigs.aggs[0].toDsl()[BUCKET_TYPES.HISTOGRAM];
+
+          expect(output.extended_bounds).toHaveProperty('min', 0);
+          expect(output.extended_bounds).toHaveProperty('max', 1000);
         });
 
         test('does not write when nothing is set', () => {

@@ -8,14 +8,14 @@
 import Boom from '@hapi/boom';
 
 // @ts-ignore
+import type { CoreSetup, IBasePath, IRouter, RequestHandlerContext } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import * as kbnTestServer from '@kbn/core/test_helpers/kbn_server';
+import type { KibanaFeature } from '@kbn/features-plugin/server';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { kibanaTestUser } from '@kbn/test';
-import type { CoreSetup, IBasePath, IRouter } from 'src/core/server';
-import { coreMock, elasticsearchServiceMock, loggingSystemMock } from 'src/core/server/mocks';
-import * as kbnTestServer from 'src/core/test_helpers/kbn_server';
 
-import { SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
-import type { KibanaFeature } from '../../../../features/server';
-import { featuresPluginMock } from '../../../../features/server/mocks';
 import { convertSavedObjectToSpace } from '../../routes/lib';
 import { spacesClientServiceMock } from '../../spaces_client/spaces_client_service.mock';
 import { SpacesService } from '../../spaces_service';
@@ -57,15 +57,17 @@ describe.skip('onPostAuthInterceptor', () => {
     availableSpaces: any[],
     testOptions = { simulateGetSpacesFailure: false, simulateGetSingleSpaceFailure: false }
   ) {
+    await root.preboot();
     const { http, elasticsearch } = await root.setup();
 
     // Mock esNodesCompatibility$ to prevent `root.start()` from blocking on ES version check
-    elasticsearch.esNodesCompatibility$ = elasticsearchServiceMock.createInternalSetup().esNodesCompatibility$;
+    elasticsearch.esNodesCompatibility$ =
+      elasticsearchServiceMock.createInternalSetup().esNodesCompatibility$;
 
     const loggingMock = loggingSystemMock.create().asLoggerFactory().get('xpack', 'spaces');
 
     const featuresPlugin = featuresPluginMock.createSetup();
-    featuresPlugin.getKibanaFeatures.mockReturnValue(([
+    featuresPlugin.getKibanaFeatures.mockReturnValue([
       {
         id: 'feature-1',
         name: 'feature 1',
@@ -86,7 +88,7 @@ describe.skip('onPostAuthInterceptor', () => {
         name: 'feature 4',
         app: ['kibana'],
       },
-    ] as unknown) as KibanaFeature[]);
+    ] as unknown as KibanaFeature[]);
 
     const mockRepository = jest.fn().mockImplementation(() => {
       return {
@@ -141,17 +143,17 @@ describe.skip('onPostAuthInterceptor', () => {
     // interceptor to parse out the space id and rewrite the request's URL. Rather than duplicating that logic,
     // we are including the already tested interceptor here in the test chain.
     initSpacesOnRequestInterceptor({
-      http: (http as unknown) as CoreSetup['http'],
+      http: http as unknown as CoreSetup['http'],
     });
 
     initSpacesOnPostAuthRequestInterceptor({
-      http: (http as unknown) as CoreSetup['http'],
+      http: http as unknown as CoreSetup['http'],
       log: loggingMock,
       features: featuresPlugin,
       getSpacesService: () => spacesServiceStart,
     });
 
-    const router = http.createRouter('/');
+    const router = http.createRouter<RequestHandlerContext>('/');
 
     initKbnServer(router, http.basePath);
 

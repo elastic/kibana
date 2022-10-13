@@ -9,15 +9,14 @@ import { noop } from 'lodash/fp';
 import { EuiFocusTrap, EuiOutsideClickDetector, EuiScreenReaderOnly } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
-import { BrowserFields } from '../../../../../../common/containers/source';
 import {
   ARIA_COLINDEX_ATTRIBUTE,
   ARIA_ROWINDEX_ATTRIBUTE,
   getRowRendererClassName,
-} from '../../../../../../common/components/accessibility/helpers';
-import { TimelineItem } from '../../../../../../../common/search_strategy/timeline';
+} from '@kbn/timelines-plugin/public';
+import type { RowRenderer } from '../../../../../../../common/types';
+import type { TimelineItem } from '../../../../../../../common/search_strategy/timeline';
 import { getRowRenderer } from '../../renderers/get_row_renderer';
-import { RowRenderer } from '../../renderers/row_renderer';
 import { useStatefulEventFocus } from '../use_stateful_event_focus';
 
 import * as i18n from '../translations';
@@ -37,7 +36,6 @@ import * as i18n from '../translations';
  */
 export const StatefulRowRenderer = ({
   ariaRowindex,
-  browserFields,
   containerRef,
   event,
   lastFocusedAriaColindex,
@@ -45,7 +43,6 @@ export const StatefulRowRenderer = ({
   timelineId,
 }: {
   ariaRowindex: number;
-  browserFields: BrowserFields;
   containerRef: React.MutableRefObject<HTMLDivElement | null>;
   event: TimelineItem;
   lastFocusedAriaColindex: number;
@@ -61,10 +58,10 @@ export const StatefulRowRenderer = ({
     rowindexAttribute: ARIA_ROWINDEX_ATTRIBUTE,
   });
 
-  const rowRenderer = useMemo(() => getRowRenderer(event.ecs, rowRenderers), [
-    event.ecs,
-    rowRenderers,
-  ]);
+  const rowRenderer = useMemo(
+    () => getRowRenderer({ data: event.ecs, rowRenderers }),
+    [event.ecs, rowRenderers]
+  );
 
   const content = useMemo(
     () =>
@@ -78,8 +75,8 @@ export const StatefulRowRenderer = ({
               </EuiScreenReaderOnly>
               <div onKeyDown={onKeyDown}>
                 {rowRenderer.renderRow({
-                  browserFields,
                   data: event.ecs,
+                  isDraggable: true,
                   timelineId,
                 })}
               </div>
@@ -89,7 +86,6 @@ export const StatefulRowRenderer = ({
       ),
     [
       ariaRowindex,
-      browserFields,
       event.ecs,
       focusOwnership,
       onFocus,

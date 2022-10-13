@@ -30,7 +30,6 @@ export const internalArtifactRecordSchema = t.exact(
     encodedSize: size,
   })
 );
-export type InternalArtifactRecordSchema = t.TypeOf<typeof internalArtifactRecordSchema>;
 
 export const internalArtifactAdditionalFields = {
   body,
@@ -48,16 +47,6 @@ export const internalArtifactCompleteSchema = t.intersection([
 ]);
 export type InternalArtifactCompleteSchema = t.TypeOf<typeof internalArtifactCompleteSchema>;
 
-export const internalArtifactCreateSchema = t.intersection([
-  internalArtifactCompleteSchema,
-  t.exact(
-    t.type({
-      created,
-    })
-  ),
-]);
-export type InternalArtifactCreateSchema = t.TypeOf<typeof internalArtifactCreateSchema>;
-
 export const internalManifestEntrySchema = t.exact(
   t.type({
     policyId: t.union([identifier, t.undefined]),
@@ -73,6 +62,10 @@ export const internalManifestSchema = t.exact(
     semanticVersion,
   })
 );
+
+/**
+ * The Internal map of all artifacts that the ManifestManager knows about and is managing
+ */
 export type InternalManifestSchema = t.TypeOf<typeof internalManifestSchema>;
 
 export const internalManifestCreateSchema = t.intersection([

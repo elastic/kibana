@@ -6,24 +6,19 @@
  */
 
 import React from 'react';
-import { Action } from '../../../../../../../../src/plugins/ui_actions/public';
-import {
-  reactToUiComponent,
-  toMountPoint,
-} from '../../../../../../../../src/plugins/kibana_react/public';
-import {
-  EmbeddableContext,
-  ViewMode,
-  CONTEXT_MENU_TRIGGER,
-} from '../../../../../../../../src/plugins/embeddable/public';
-import { txtDisplayName } from './i18n';
-import { MenuItem } from './menu_item';
+import { distinctUntilChanged, filter, map, skip, take, takeUntil } from 'rxjs/operators';
+import { Subject } from 'rxjs';
+import { Action } from '@kbn/ui-actions-plugin/public';
+import { reactToUiComponent, toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { EmbeddableContext, ViewMode, CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import {
   isEnhancedEmbeddable,
   embeddableEnhancedDrilldownGrouping,
-} from '../../../../../../embeddable_enhanced/public';
+} from '@kbn/embeddable-enhanced-plugin/public';
+import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import { txtDisplayName } from './i18n';
+import { MenuItem } from './menu_item';
 import { StartDependencies } from '../../../../plugin';
-import { StartServicesGetter } from '../../../../../../../../src/plugins/kibana_utils/public';
 import { createDrilldownTemplatesFromSiblings, ensureNestedTriggers } from '../drilldown_shared';
 
 export const OPEN_FLYOUT_EDIT_DRILLDOWN = 'OPEN_FLYOUT_EDIT_DRILLDOWN';
@@ -67,6 +62,14 @@ export class FlyoutEditDrilldownAction implements Action<EmbeddableContext> {
     }
 
     const templates = createDrilldownTemplatesFromSiblings(embeddable);
+    const closed$ = new Subject<true>();
+    const close = () => {
+      closed$.next(true);
+      handle.close();
+    };
+    const closeFlyout = () => {
+      close();
+    };
 
     const handle = core.overlays.openFlyout(
       toMountPoint(
@@ -76,7 +79,7 @@ export class FlyoutEditDrilldownAction implements Action<EmbeddableContext> {
           triggers={[...ensureNestedTriggers(embeddable.supportedTriggers()), CONTEXT_MENU_TRIGGER]}
           placeContext={{ embeddable }}
           templates={templates}
-          onClose={() => handle.close()}
+          onClose={close}
         />
       ),
       {
@@ -84,5 +87,22 @@ export class FlyoutEditDrilldownAction implements Action<EmbeddableContext> {
         'data-test-subj': 'editDrilldownFlyout',
       }
     );
+
+    // Close flyout on application change.
+    core.application.currentAppId$
+      .pipe(takeUntil(closed$), skip(1), take(1))
+      .subscribe(closeFlyout);
+
+    // Close flyout on dashboard switch to "view" mode or on embeddable destroy.
+    embeddable
+      .getInput$()
+      .pipe(
+        takeUntil(closed$),
+        map((input) => input.viewMode),
+        distinctUntilChanged(),
+        filter((mode) => mode !== ViewMode.EDIT),
+        take(1)
+      )
+      .subscribe({ next: closeFlyout, complete: closeFlyout });
   }
 }

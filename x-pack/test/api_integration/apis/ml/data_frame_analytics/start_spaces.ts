@@ -7,10 +7,10 @@
 
 import expect from '@kbn/expect';
 
+import { DATA_FRAME_TASK_STATE } from '@kbn/ml-plugin/common/constants/data_frame_analytics';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { DATA_FRAME_TASK_STATE } from '../../../../../plugins/ml/common/constants/data_frame_analytics';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -26,14 +26,14 @@ export default ({ getService }: FtrProviderContext) => {
   const initialModelMemoryLimit = '17mb';
 
   async function runStartRequest(jobId: string, space: string, expectedStatusCode: number) {
-    const { body } = await supertest
+    const { body, status } = await supertest
       .post(`/s/${space}/api/ml/data_frame/analytics/${jobId}/_start`)
       .auth(
         USER.ML_POWERUSER_ALL_SPACES,
         ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER_ALL_SPACES)
       )
-      .set(COMMON_REQUEST_HEADERS)
-      .expect(expectedStatusCode);
+      .set(COMMON_REQUEST_HEADERS);
+    ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
 
     return body;
   }
@@ -43,7 +43,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('POST data_frame/analytics/{analyticsId}/_start with spaces', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/ihp_outlier');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ihp_outlier');
       await spacesService.create({ id: idSpace1, name: 'space_one', disabledFeatures: [] });
       await spacesService.create({ id: idSpace2, name: 'space_two', disabledFeatures: [] });
 

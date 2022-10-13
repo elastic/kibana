@@ -9,6 +9,7 @@
 import RowParser from '../../../lib/row_parser';
 import { ESRequest } from '../../../types';
 import { SenseEditor } from '../../models/sense_editor';
+import { formatRequestBodyDoc } from '../../../lib/utils';
 
 export function restoreRequestFromHistory(editor: SenseEditor, req: ESRequest) {
   const coreEditor = editor.getCoreEditor();
@@ -32,7 +33,9 @@ export function restoreRequestFromHistory(editor: SenseEditor, req: ESRequest) {
 
   let s = prefix + req.method + ' ' + req.endpoint;
   if (req.data) {
-    s += '\n' + req.data;
+    const indent = true;
+    const formattedData = formatRequestBodyDoc([req.data], indent);
+    s += '\n' + formattedData.data;
   }
 
   s += suffix;

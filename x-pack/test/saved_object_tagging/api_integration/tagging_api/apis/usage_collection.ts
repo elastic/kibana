@@ -10,22 +10,26 @@ import { FtrProviderContext } from '../services';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const usageAPI = getService('usageAPI');
 
   describe('saved_object_tagging usage collector data', () => {
     beforeEach(async () => {
-      await esArchiver.load('usage_collection');
+      await kibanaServer.importExport.load(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/usage_collection/data.json'
+      );
     });
 
     afterEach(async () => {
-      await esArchiver.unload('usage_collection');
+      await kibanaServer.importExport.unload(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/usage_collection/data.json'
+      );
     });
 
     /*
      * Dataset description:
      *
-     * 5 tags: tag-1 tag-2 tag-3 tag-4 ununsed-tag
+     * 5 tags: tag-1 tag-2 tag-3 tag-4 unused-tag
      * 3 dashboard:
      *   - dash-1: ref to tag-1 + tag-2
      *   - dash-2: ref to tag-2 + tag 4
@@ -36,11 +40,12 @@ export default function ({ getService }: FtrProviderContext) {
      *   - vis-3: ref to tag-3
      */
     it('collects the expected data', async () => {
-      const telemetryStats = (await usageAPI.getTelemetryStats({
+      const [{ stats: telemetryStats }] = (await usageAPI.getTelemetryStats({
         unencrypted: true,
+        refreshCache: true,
       })) as any;
 
-      const taggingStats = telemetryStats[0].stack_stats.kibana.plugins.saved_objects_tagging;
+      const taggingStats = telemetryStats.stack_stats.kibana.plugins.saved_objects_tagging;
       expect(taggingStats).to.eql({
         usedTags: 4,
         taggedObjects: 5,

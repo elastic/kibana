@@ -8,26 +8,29 @@
 import React, { useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { assertUnreachable } from '../../../../common/utility_types';
-import {
+import type {
   Columns,
   Criteria,
   ItemsPerRow,
-  PaginatedTable,
   SortingBasicTable,
 } from '../../../common/components/paginated_table';
+import { PaginatedTable } from '../../../common/components/paginated_table';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { hostsActions, hostsModel, hostsSelectors } from '../../store';
 import { getHostsColumns } from './columns';
 import * as i18n from './translations';
-import {
+import type {
   HostsEdges,
   HostItem,
   HostsSortField,
-  HostsFields,
 } from '../../../../common/search_strategy/security_solution/hosts';
-import { Direction } from '../../../../common/search_strategy';
-import { HostEcs, OsEcs } from '../../../../common/ecs/host';
+import { HostsFields } from '../../../../common/search_strategy/security_solution/hosts';
+import type { Direction, RiskSeverity } from '../../../../common/search_strategy';
+import type { HostEcs, OsEcs } from '../../../../common/ecs/host';
+import { SecurityPageName } from '../../../../common/constants';
+import { HostsTableType } from '../../store/model';
+import { useNavigateTo } from '../../../common/lib/kibana/hooks';
+import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 
 const tableType = hostsModel.HostsTableType.hosts;
 
@@ -38,6 +41,7 @@ interface HostsTableProps {
   isInspect: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
+  setQuerySkip: (skip: boolean) => void;
   showMorePagesIndicator: boolean;
   totalCount: number;
   type: hostsModel.HostsType;
@@ -47,7 +51,8 @@ export type HostsTableColumns = [
   Columns<HostEcs['name']>,
   Columns<HostItem['lastSeen']>,
   Columns<OsEcs['name']>,
-  Columns<OsEcs['version']>
+  Columns<OsEcs['version']>,
+  Columns<RiskSeverity>?
 ];
 
 const rowItems: ItemsPerRow[] = [
@@ -72,15 +77,18 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
   isInspect,
   loading,
   loadPage,
+  setQuerySkip,
   showMorePagesIndicator,
   totalCount,
   type,
 }) => {
   const dispatch = useDispatch();
+  const { navigateTo } = useNavigateTo();
   const getHostsSelector = useMemo(() => hostsSelectors.hostsSelector(), []);
   const { activePage, direction, limit, sortField } = useDeepEqualSelector((state) =>
     getHostsSelector(state, type)
   );
+
   const updateLimitPagination = useCallback(
     (newLimit) =>
       dispatch(
@@ -124,8 +132,28 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
     },
     [direction, sortField, type, dispatch]
   );
+  const isPlatinumOrTrialLicense = useMlCapabilities().isPlatinumOrTrialLicense;
 
-  const hostsColumns = useMemo(() => getHostsColumns(), []);
+  const dispatchSeverityUpdate = useCallback(
+    (s: RiskSeverity) => {
+      dispatch(
+        hostsActions.updateHostRiskScoreSeverityFilter({
+          severitySelection: [s],
+          hostsType: type,
+        })
+      );
+      navigateTo({
+        deepLinkId: SecurityPageName.hosts,
+        path: HostsTableType.risk,
+      });
+    },
+    [dispatch, navigateTo, type]
+  );
+
+  const hostsColumns = useMemo(
+    () => getHostsColumns(isPlatinumOrTrialLicense, dispatchSeverityUpdate),
+    [dispatchSeverityUpdate, isPlatinumOrTrialLicense]
+  );
 
   const sorting = useMemo(() => getSorting(sortField, direction), [sortField, direction]);
 
@@ -145,6 +173,7 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
       loadPage={loadPage}
       onChange={onChange}
       pageOfItems={data}
+      setQuerySkip={setQuerySkip}
       showMorePagesIndicator={showMorePagesIndicator}
       sorting={sorting}
       totalCount={fakeTotalCount}
@@ -174,7 +203,6 @@ const getNodeField = (field: HostsFields): string => {
     case HostsFields.lastSeen:
       return 'node.lastSeen';
   }
-  assertUnreachable(field);
 };
 
 export const HostsTable = React.memo(HostsTableComponent);

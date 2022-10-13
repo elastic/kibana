@@ -8,6 +8,7 @@
 import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 import { EuiSuperSelect } from '@elastic/eui';
+import { render, screen } from '@testing-library/react';
 
 import { ConnectorsDropdown, Props } from './connectors_dropdown';
 import { TestProviders } from '../../common/mock';
@@ -65,7 +66,7 @@ describe('ConnectorsDropdown', () => {
           "data-test-subj": "dropdown-connector-servicenow-1",
           "inputDisplay": <EuiFlexGroup
             alignItems="center"
-            gutterSize="none"
+            gutterSize="s"
             responsive={false}
           >
             <EuiFlexItem
@@ -73,10 +74,12 @@ describe('ConnectorsDropdown', () => {
             >
               <Styled(EuiIcon)
                 size="m"
-                type="test-file-stub"
+                type="logoSecurity"
               />
             </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
               <span>
                 My Connector
               </span>
@@ -88,7 +91,7 @@ describe('ConnectorsDropdown', () => {
           "data-test-subj": "dropdown-connector-resilient-2",
           "inputDisplay": <EuiFlexGroup
             alignItems="center"
-            gutterSize="none"
+            gutterSize="s"
             responsive={false}
           >
             <EuiFlexItem
@@ -96,10 +99,12 @@ describe('ConnectorsDropdown', () => {
             >
               <Styled(EuiIcon)
                 size="m"
-                type="test-file-stub"
+                type="logoSecurity"
               />
             </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
               <span>
                 My Connector 2
               </span>
@@ -111,7 +116,7 @@ describe('ConnectorsDropdown', () => {
           "data-test-subj": "dropdown-connector-jira-1",
           "inputDisplay": <EuiFlexGroup
             alignItems="center"
-            gutterSize="none"
+            gutterSize="s"
             responsive={false}
           >
             <EuiFlexItem
@@ -119,10 +124,12 @@ describe('ConnectorsDropdown', () => {
             >
               <Styled(EuiIcon)
                 size="m"
-                type="test-file-stub"
+                type="logoSecurity"
               />
             </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
               <span>
                 Jira
               </span>
@@ -134,7 +141,7 @@ describe('ConnectorsDropdown', () => {
           "data-test-subj": "dropdown-connector-servicenow-sir",
           "inputDisplay": <EuiFlexGroup
             alignItems="center"
-            gutterSize="none"
+            gutterSize="s"
             responsive={false}
           >
             <EuiFlexItem
@@ -142,16 +149,55 @@ describe('ConnectorsDropdown', () => {
             >
               <Styled(EuiIcon)
                 size="m"
-                type="test-file-stub"
+                type="logoSecurity"
               />
             </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
               <span>
                 My Connector SIR
               </span>
             </EuiFlexItem>
           </EuiFlexGroup>,
           "value": "servicenow-sir",
+        },
+        Object {
+          "data-test-subj": "dropdown-connector-servicenow-uses-table-api",
+          "inputDisplay": <EuiFlexGroup
+            alignItems="center"
+            gutterSize="s"
+            responsive={false}
+          >
+            <EuiFlexItem
+              grow={false}
+            >
+              <Styled(EuiIcon)
+                size="m"
+                type="logoSecurity"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
+              <span>
+                My Connector
+                 (deprecated)
+              </span>
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
+              <Styled(EuiIconTip)
+                aria-label="This connector is deprecated. Update it, or create a new one."
+                color="warning"
+                content="This connector is deprecated. Update it, or create a new one."
+                size="m"
+                type="alert"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>,
+          "value": "servicenow-uses-table-api",
         },
       ]
     `);
@@ -182,27 +228,68 @@ describe('ConnectorsDropdown', () => {
       wrappingComponent: TestProviders,
     });
 
-    expect(newWrapper.find('button span:not([data-euiicon-type])').text()).toEqual('My Connector');
+    expect(
+      newWrapper
+        .find('[data-test-subj="dropdown-connectors"]')
+        .first()
+        .text()
+        .includes('My Connector, is selected')
+    ).toBeTruthy();
   });
 
-  test('if the props hideConnectorServiceNowSir is true, the connector should not be part of the list of options  ', () => {
-    const newWrapper = mount(
+  test('it does not throw when accessing the icon if the connector type is not registered', () => {
+    expect(() =>
+      mount(
+        <ConnectorsDropdown
+          {...props}
+          connectors={[
+            {
+              id: 'none',
+              actionTypeId: '.none',
+              name: 'None',
+              config: {},
+              isPreconfigured: false,
+              isDeprecated: false,
+            },
+          ]}
+        />,
+        {
+          wrappingComponent: TestProviders,
+        }
+      )
+    ).not.toThrowError();
+  });
+
+  test('it shows the deprecated tooltip when the connector is deprecated', () => {
+    render(<ConnectorsDropdown {...props} selectedConnector="servicenow-uses-table-api" />, {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
+
+    const tooltips = screen.getAllByText(
+      'This connector is deprecated. Update it, or create a new one.'
+    );
+    expect(tooltips[0]).toBeInTheDocument();
+  });
+
+  test('it shows the deprecated tooltip when the connector is deprecated by configuration', () => {
+    const connector = connectors[0];
+    render(
       <ConnectorsDropdown
         {...props}
-        selectedConnector={'servicenow-1'}
-        hideConnectorServiceNowSir={true}
+        connectors={[
+          {
+            ...connector,
+            isDeprecated: true,
+          },
+        ]}
+        selectedConnector={connector.id}
       />,
-      {
-        wrappingComponent: TestProviders,
-      }
+      { wrapper: ({ children }) => <TestProviders>{children}</TestProviders> }
     );
-    const selectProps = newWrapper.find(EuiSuperSelect).props();
-    const options = selectProps.options as Array<{ 'data-test-subj': string }>;
-    expect(
-      options.some((o) => o['data-test-subj'] === 'dropdown-connector-servicenow-1')
-    ).toBeTruthy();
-    expect(
-      options.some((o) => o['data-test-subj'] === 'dropdown-connector-servicenow-sir')
-    ).toBeFalsy();
+
+    const tooltips = screen.getAllByText(
+      'This connector is deprecated. Update it, or create a new one.'
+    );
+    expect(tooltips[0]).toBeInTheDocument();
   });
 });

@@ -7,42 +7,35 @@
 
 import React from 'react';
 
-import { EuiButton, EuiEmptyPrompt, EuiPanel } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { DOCS_PREFIX } from '../../../routes';
+import { RELEVANCE_DOCS_URL } from '../../../routes';
 
 export const EmptyState: React.FC = () => (
-  <EuiPanel color="subdued">
-    <EuiEmptyPrompt
-      iconType="wrench"
-      title={
-        <h2>
-          {i18n.translate('xpack.enterpriseSearch.appSearch.engine.relevanceTuning.empty.title', {
-            defaultMessage: 'Add documents to tune relevance',
-          })}
-        </h2>
+  <EuiEmptyPrompt
+    iconType="wrench"
+    title={
+      <h2>
+        {i18n.translate('xpack.enterpriseSearch.appSearch.engine.relevanceTuning.empty.title', {
+          defaultMessage: 'Add documents to tune relevance',
+        })}
+      </h2>
+    }
+    body={i18n.translate(
+      'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.empty.description',
+      {
+        defaultMessage:
+          'A schema will be automatically created for you after you index some documents.',
       }
-      body={i18n.translate(
-        'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.empty.description',
-        {
-          defaultMessage:
-            'A schema will be automatically created for you after you index some documents.',
-        }
-      )}
-      actions={
-        <EuiButton
-          size="s"
-          target="_blank"
-          iconType="popout"
-          href={`${DOCS_PREFIX}/relevance-tuning-guide.html`}
-        >
-          {i18n.translate(
-            'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.empty.buttonLabel',
-            { defaultMessage: 'Read the relevance tuning guide' }
-          )}
-        </EuiButton>
-      }
-    />
-  </EuiPanel>
+    )}
+    actions={
+      <EuiButton size="s" target="_blank" iconType="popout" href={RELEVANCE_DOCS_URL}>
+        {i18n.translate(
+          'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.empty.buttonLabel',
+          { defaultMessage: 'Read the relevance tuning guide' }
+        )}
+      </EuiButton>
+    }
+  />
 );

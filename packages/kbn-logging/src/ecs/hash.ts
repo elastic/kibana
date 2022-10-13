@@ -7,7 +7,7 @@
  */
 
 /**
- * https://www.elastic.co/guide/en/ecs/1.9/ecs-hash.html
+ * https://www.elastic.co/guide/en/ecs/master/ecs-hash.html
  *
  * @internal
  */
@@ -15,6 +15,8 @@ export interface EcsHash {
   md5?: string;
   sha1?: string;
   sha256?: string;
+  sha384?: string;
   sha512?: string;
   ssdeep?: string;
+  tlsh?: string;
 }

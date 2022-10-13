@@ -1,0 +1,19 @@
+/**
+ *  Global utilities
+ */
+
+/* elements can hide themselves when shared */
+.hide-for-sharing {
+  display: none !important;
+}
+
+/**
+* Global overrides
+*/
+
+/**
+ * The global banner (e.g. "Help us improve Elastic...") should not print.
+ */
+#globalBannerList {
+  display: none;
+}

@@ -13,7 +13,7 @@ import { FormProvider } from '../form_context';
 import { FormDataContextProvider } from '../form_data_context';
 import { FormHook } from '../types';
 
-interface Props {
+export interface Props {
   form: FormHook<any>;
   FormWrapper?: React.ComponentType;
   children: ReactNode | ReactNode[];

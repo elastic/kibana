@@ -7,9 +7,9 @@
  */
 
 import * as React from 'react';
-import { DashboardContainerInput } from './dashboard_container';
+import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
+import { DashboardContainerInput } from '../..';
 import { DashboardContainerFactory } from './dashboard_container_factory';
-import { EmbeddableRenderer } from '../../services/embeddable';
 
 interface Props {
   input: DashboardContainerInput;
@@ -17,10 +17,13 @@ interface Props {
   // TODO: add other props as needed
 }
 
-export const createDashboardContainerByValueRenderer = ({
-  factory,
-}: {
-  factory: DashboardContainerFactory;
-}): React.FC<Props> => (props: Props) => (
-  <EmbeddableRenderer input={props.input} onInputUpdated={props.onInputUpdated} factory={factory} />
-);
+export const createDashboardContainerByValueRenderer =
+  ({ factory }: { factory: DashboardContainerFactory }): React.FC<Props> =>
+  (props: Props) =>
+    (
+      <EmbeddableRenderer
+        input={props.input}
+        onInputUpdated={props.onInputUpdated}
+        factory={factory}
+      />
+    );

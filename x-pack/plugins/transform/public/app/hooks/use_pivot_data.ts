@@ -13,7 +13,8 @@ import { EuiDataGridColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getFlattenedObject } from '@kbn/std';
 
-import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/common';
+import { difference } from 'lodash';
+import { ES_FIELD_TYPES } from '@kbn/data-plugin/common';
 
 import type { PreviewMappingsProperties } from '../../../common/api_schemas/transforms';
 import { isPostTransformsPreviewResponseSchema } from '../../../common/api_schemas/type_guards';
@@ -71,23 +72,45 @@ function sortColumnsForLatest(sortField: string) {
   };
 }
 
+/**
+ * Extracts missing mappings from docs.
+ */
+export function getCombinedProperties(
+  populatedProperties: PreviewMappingsProperties,
+  docs: Array<Record<string, unknown>>
+): PreviewMappingsProperties {
+  // Identify missing mappings
+  const missingMappings = difference(
+    // Create an array of unique flattened field names across all docs
+    [...new Set(docs.flatMap(Object.keys))],
+    Object.keys(populatedProperties)
+  );
+  return {
+    ...populatedProperties,
+    ...missingMappings.reduce((acc, curr) => {
+      const sampleDoc = docs.find((d) => typeof d[curr] !== 'undefined') ?? {};
+      acc[curr] = { type: typeof sampleDoc[curr] as ES_FIELD_TYPES };
+      return acc;
+    }, {} as PreviewMappingsProperties),
+  };
+}
+
 export const usePivotData = (
-  indexPatternTitle: SearchItems['indexPattern']['title'],
+  dataViewTitle: SearchItems['dataView']['title'],
   query: PivotQuery,
   validationStatus: StepDefineExposedState['validationStatus'],
   requestPayload: StepDefineExposedState['previewRequest'],
   combinedRuntimeMappings?: StepDefineExposedState['runtimeMappings']
 ): UseIndexDataReturnType => {
-  const [
-    previewMappingsProperties,
-    setPreviewMappingsProperties,
-  ] = useState<PreviewMappingsProperties>({});
+  const [previewMappingsProperties, setPreviewMappingsProperties] =
+    useState<PreviewMappingsProperties>({});
   const api = useApi();
   const {
     ml: {
       getDataGridSchemaFromESFieldType,
       formatHumanReadableDateTimeSeconds,
       multiColumnSortFactory,
+      getNestedOrEscapedVal,
       useDataGrid,
       INDEX_STATUS,
     },
@@ -142,7 +165,7 @@ export const usePivotData = (
     setStatus(INDEX_STATUS.LOADING);
 
     const previewRequest = getPreviewTransformRequestBody(
-      indexPatternTitle,
+      dataViewTitle,
       query,
       requestPayload,
       combinedRuntimeMappings
@@ -170,7 +193,7 @@ export const usePivotData = (
     const populatedFields = [...new Set(docs.map(Object.keys).flat(1))];
 
     // 3. Filter mapping properties by populated fields
-    const populatedProperties: PreviewMappingsProperties = Object.entries(
+    let populatedProperties: PreviewMappingsProperties = Object.entries(
       resp.generated_dest_index.mappings.properties
     )
       .filter(([key]) => populatedFields.includes(key))
@@ -181,6 +204,8 @@ export const usePivotData = (
         }),
         {}
       );
+
+    populatedProperties = getCombinedProperties(populatedProperties, docs);
 
     setTableItems(docs);
     setRowCount(docs.length);
@@ -208,10 +233,15 @@ export const usePivotData = (
     getPreviewData();
     // custom comparison
     /* eslint-disable react-hooks/exhaustive-deps */
-  }, [indexPatternTitle, JSON.stringify([requestPayload, query, combinedRuntimeMappings])]);
+  }, [dataViewTitle, JSON.stringify([requestPayload, query, combinedRuntimeMappings])]);
 
   if (sortingColumns.length > 0) {
-    tableItems.sort(multiColumnSortFactory(sortingColumns));
+    const sortingColumnsWithTypes = sortingColumns.map((c) => ({
+      ...c,
+      // Since items might contain undefined/null values, we want to accurate find the data type
+      type: typeof tableItems.find((item) => getNestedOrEscapedVal(item, c.id) !== undefined),
+    }));
+    tableItems.sort(multiColumnSortFactory(sortingColumnsWithTypes));
   }
 
   const pageData = tableItems.slice(

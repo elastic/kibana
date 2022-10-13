@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { RowRenderer } from '../../../../../../../common/types/timeline';
 import { RowRendererId } from '../../../../../../../common/types/timeline';
-import { RowRenderer } from '../row_renderer';
 import { hasThreatMatchValue } from './helpers';
 import { ThreatMatchRows } from './threat_match_rows';
 

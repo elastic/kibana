@@ -1,0 +1,44 @@
+get:
+  summary: Agents - Summary stats
+  tags: []
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: integer
+              events:
+                type: integer
+              inactive:
+                type: integer
+              offline:
+                type: integer
+              online:
+                type: integer
+              other:
+                type: integer
+              total:
+                type: integer
+              updating:
+                type: integer
+            required:
+              - error
+              - events
+              - inactive
+              - offline
+              - online
+              - other
+              - total
+              - updating
+  operationId: get-agent-status
+  parameters:
+    - schema:
+        type: string
+      name: policyId
+      in: query
+      required: false
+  deprecated: true

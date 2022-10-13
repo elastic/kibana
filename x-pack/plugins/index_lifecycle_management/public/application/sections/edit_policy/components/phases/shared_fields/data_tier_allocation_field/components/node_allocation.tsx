@@ -8,10 +8,10 @@
 import { i18n } from '@kbn/i18n';
 import React, { useState, FunctionComponent } from 'react';
 import { get } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiText, EuiSpacer } from '@elastic/eui';
 
-import { SelectField, useFormData } from '../../../../../../../../shared_imports';
+import { SelectField, useFormData, useKibana } from '../../../../../../../../shared_imports';
 
 import { UseField } from '../../../../../form';
 
@@ -21,32 +21,27 @@ import { NodeAttrsDetails } from './node_attrs_details';
 
 import { SharedProps } from './types';
 
-const learnMoreLink = (
-  <LearnMoreLink
-    text={
-      <FormattedMessage
-        id="xpack.indexLifecycleMgmt.editPolicy.learnAboutShardAllocationLink"
-        defaultMessage="Learn about shard allocation"
-      />
-    }
-    docPath="modules-cluster.html#cluster-shard-allocation-settings"
-  />
-);
-
 const i18nTexts = {
-  doNotModifyAllocationOption: i18n.translate(
-    'xpack.indexLifecycleMgmt.editPolicy.nodeAllocation.doNotModifyAllocationOption',
-    { defaultMessage: 'Do not modify allocation configuration' }
+  allocateToDataNodesOption: i18n.translate(
+    'xpack.indexLifecycleMgmt.editPolicy.nodeAllocation.allocateToDataNodesOption',
+    { defaultMessage: 'Any data node' }
   ),
 };
 
-export const NodeAllocation: FunctionComponent<SharedProps> = ({ phase, nodes, isLoading }) => {
+export const NodeAllocation: FunctionComponent<SharedProps> = ({
+  phase,
+  nodes,
+  isLoading,
+  isCloudEnabled,
+  isUsingDeprecatedDataRoleConfig,
+}) => {
   const allocationNodeAttributePath = `_meta.${phase}.allocationNodeAttribute`;
 
   const [formData] = useFormData({
     watch: [allocationNodeAttributePath],
   });
-
+  const { docLinks } = useKibana().services;
+  const shardAllocationSettingsUrl = docLinks.links.elasticsearch.shardAllocationSettings;
   const selectedAllocationNodeAttribute = get(formData, allocationNodeAttributePath);
 
   const [selectedNodeAttrsForDetails, setSelectedNodeAttrsForDetails] = useState<string | null>(
@@ -60,6 +55,19 @@ export const NodeAllocation: FunctionComponent<SharedProps> = ({ phase, nodes, i
 
   nodeOptions.sort((a, b) => a.value.localeCompare(b.value));
 
+  let nodeAllocationOptions = [];
+
+  // On Cloud, allocating to data tiers and allocating to data nodes is mutually exclusive. So we
+  // only let users select this option if they're using data nodes. Otherwise we remove it.
+  //
+  // On prem, users should have the freedom to choose this option, even if they're using node roles.
+  // So we always give them this option.
+  if (!isCloudEnabled || isUsingDeprecatedDataRoleConfig) {
+    const allocateToDataNodesOption = { text: i18nTexts.allocateToDataNodesOption, value: '' };
+    nodeAllocationOptions.push(allocateToDataNodesOption);
+  }
+
+  nodeAllocationOptions = nodeAllocationOptions.concat(nodeOptions);
   return (
     <>
       <EuiText size="s">
@@ -67,7 +75,19 @@ export const NodeAllocation: FunctionComponent<SharedProps> = ({ phase, nodes, i
           <FormattedMessage
             id="xpack.indexLifecycleMgmt.editPolicy.nodeAllocation.customOption.description"
             defaultMessage="Use node attributes to control shard allocation. {learnMoreLink}."
-            values={{ learnMoreLink }}
+            values={{
+              learnMoreLink: (
+                <LearnMoreLink
+                  text={
+                    <FormattedMessage
+                      id="xpack.indexLifecycleMgmt.editPolicy.learnAboutShardAllocationLink"
+                      defaultMessage="Learn about shard allocation"
+                    />
+                  }
+                  docPath={shardAllocationSettingsUrl}
+                />
+              ),
+            }}
           />
         </p>
       </EuiText>
@@ -97,9 +117,7 @@ export const NodeAllocation: FunctionComponent<SharedProps> = ({ phase, nodes, i
           ) : undefined,
           euiFieldProps: {
             'data-test-subj': `${phase}-selectedNodeAttrs`,
-            options: [{ text: i18nTexts.doNotModifyAllocationOption, value: '' }].concat(
-              nodeOptions
-            ),
+            options: nodeAllocationOptions,
             hasNoInitialSelection: false,
             isLoading,
           },

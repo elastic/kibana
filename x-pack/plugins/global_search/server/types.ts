@@ -8,13 +8,12 @@
 import { Observable } from 'rxjs';
 import type {
   ISavedObjectTypeRegistry,
-  ILegacyScopedClusterClient,
   IUiSettingsClient,
   SavedObjectsClientContract,
   Capabilities,
   IRouter,
-  RequestHandlerContext,
-} from 'src/core/server';
+  CustomRequestHandlerContext,
+} from '@kbn/core/server';
 import {
   GlobalSearchBatchedResults,
   GlobalSearchProviderFindOptions,
@@ -30,9 +29,9 @@ export type GlobalSearchPluginStart = Pick<SearchServiceStart, 'find' | 'getSear
 /**
  * @internal
  */
-export interface GlobalSearchRequestHandlerContext extends RequestHandlerContext {
+export type GlobalSearchRequestHandlerContext = CustomRequestHandlerContext<{
   globalSearch: RouteHandlerGlobalSearchContext;
-}
+}>;
 
 /**
  * @internal
@@ -67,11 +66,6 @@ export interface GlobalSearchProviderContext {
     savedObjects: {
       client: SavedObjectsClientContract;
       typeRegistry: ISavedObjectTypeRegistry;
-    };
-    elasticsearch: {
-      legacy: {
-        client: ILegacyScopedClusterClient;
-      };
     };
     uiSettings: {
       client: IUiSettingsClient;

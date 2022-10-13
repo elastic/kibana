@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HostsEdges } from '../../../../common/search_strategy/security_solution/hosts';
+import type { HostsEdges } from '../../../../common/search_strategy/security_solution/hosts';
 
 export const mockData: HostsEdges[] = [
   {

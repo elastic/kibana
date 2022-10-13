@@ -1,0 +1,8 @@
+steps:
+  - wait: ~
+    continue_on_failure: true
+
+  - command: .buildkite/scripts/lifecycle/post_build.sh
+    label: Post-Build
+    agents:
+      queue: kibana-default

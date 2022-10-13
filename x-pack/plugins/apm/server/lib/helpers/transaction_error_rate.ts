@@ -5,19 +5,22 @@
  * 2.0.
  */
 
-import { EVENT_OUTCOME } from '../../../common/elasticsearch_fieldnames';
-import { EventOutcome } from '../../../common/event_outcome';
-import {
+import type {
   AggregationOptionsByType,
   AggregationResultOf,
-} from '../../../../../../typings/elasticsearch';
+} from '@kbn/es-types';
+import { isNull } from 'lodash';
+import { EVENT_OUTCOME } from '../../../common/elasticsearch_fieldnames';
+import { EventOutcome } from '../../../common/event_outcome';
 
-export const getOutcomeAggregation = () => ({
-  terms: {
-    field: EVENT_OUTCOME,
-    include: [EventOutcome.failure, EventOutcome.success],
-  },
-});
+export const getOutcomeAggregation = () => {
+  return {
+    terms: {
+      field: EVENT_OUTCOME,
+      include: [EventOutcome.failure, EventOutcome.success],
+    },
+  };
+};
 
 type OutcomeAggregation = ReturnType<typeof getOutcomeAggregation>;
 
@@ -35,7 +38,7 @@ export const getTimeseriesAggregation = (
   aggs: { outcomes: getOutcomeAggregation() },
 });
 
-export function calculateTransactionErrorPercentage(
+export function calculateFailedTransactionRate(
   outcomeResponse: AggregationResultOf<OutcomeAggregation, {}>
 ) {
   const outcomes = Object.fromEntries(
@@ -48,7 +51,22 @@ export function calculateTransactionErrorPercentage(
   return failedTransactions / (successfulTransactions + failedTransactions);
 }
 
-export function getTransactionErrorRateTimeSeries(
+export function calculateFailedTransactionRateFromServiceMetrics({
+  failedTransactions,
+  successfulTransactions,
+}: {
+  failedTransactions: number | null;
+  successfulTransactions: number | null;
+}) {
+  if (isNull(failedTransactions) || failedTransactions === 0) {
+    return 0;
+  }
+
+  successfulTransactions = successfulTransactions ?? 0;
+  return failedTransactions / (successfulTransactions + failedTransactions);
+}
+
+export function getFailedTransactionRateTimeSeries(
   buckets: AggregationResultOf<
     {
       date_histogram: AggregationOptionsByType['date_histogram'];
@@ -60,7 +78,7 @@ export function getTransactionErrorRateTimeSeries(
   return buckets.map((dateBucket) => {
     return {
       x: dateBucket.key,
-      y: calculateTransactionErrorPercentage(dateBucket.outcomes),
+      y: calculateFailedTransactionRate(dateBucket.outcomes),
     };
   });
 }

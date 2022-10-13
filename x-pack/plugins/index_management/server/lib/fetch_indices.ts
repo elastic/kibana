@@ -5,104 +5,75 @@
  * 2.0.
  */
 
-import { CatIndicesParams } from 'elasticsearch';
+import { ByteSizeValue } from '@kbn/config-schema';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { IndexDataEnricher } from '../services';
-import { CallAsCurrentUser } from '../types';
-import { Index } from '../index';
-
-interface Hit {
-  health: string;
-  status: string;
-  index: string;
-  uuid: string;
-  pri: string;
-  rep: string;
-  'docs.count': any;
-  'store.size': any;
-  sth: 'true' | 'false';
-  hidden: boolean;
-}
-
-interface IndexInfo {
-  aliases: { [aliasName: string]: unknown };
-  mappings: unknown;
-  data_stream?: string;
-  settings: {
-    index: {
-      hidden: 'true' | 'false';
-    };
-  };
-}
-
-interface GetIndicesResponse {
-  [indexName: string]: IndexInfo;
-}
+import { Index } from '..';
 
 async function fetchIndicesCall(
-  callAsCurrentUser: CallAsCurrentUser,
+  client: IScopedClusterClient,
   indexNames?: string[]
 ): Promise<Index[]> {
   const indexNamesString = indexNames && indexNames.length ? indexNames.join(',') : '*';
 
   // This call retrieves alias and settings (incl. hidden status) information about indices
-  const indices: GetIndicesResponse = await callAsCurrentUser('transport.request', {
-    method: 'GET',
-    // transport.request doesn't do any URI encoding, unlike other JS client APIs. This enables
-    // working with Logstash indices with names like %{[@metadata][beat]}-%{[@metadata][version]}.
-    path: `/${encodeURIComponent(indexNamesString)}`,
-    query: {
-      expand_wildcards: 'hidden,all',
-    },
+  const indices = await client.asCurrentUser.indices.get({
+    index: indexNamesString,
+    expand_wildcards: ['hidden', 'all'],
+    // only get specified index properties from ES to keep the response under 536MB
+    // node.js string length limit: https://github.com/nodejs/node/issues/33960
+    filter_path: [
+      '*.aliases',
+      '*.settings.index.number_of_shards',
+      '*.settings.index.number_of_replicas',
+      '*.settings.index.frozen',
+      '*.settings.index.hidden',
+      '*.data_stream',
+    ],
+    // for better performance only compute aliases and settings of indices but not mappings
+    features: ['aliases', 'settings'],
   });
 
   if (!Object.keys(indices).length) {
     return [];
   }
 
-  const catQuery: Pick<CatIndicesParams, 'format' | 'h'> & {
-    expand_wildcards: string;
-    index?: string;
-  } = {
-    format: 'json',
-    h: 'health,status,index,uuid,pri,rep,docs.count,sth,store.size',
-    expand_wildcards: 'hidden,all',
+  const { indices: indicesStats = {} } = await client.asCurrentUser.indices.stats({
     index: indexNamesString,
-  };
-
-  // This call retrieves health and other high-level information about indices.
-  const catHits: Hit[] = await callAsCurrentUser('transport.request', {
-    method: 'GET',
-    path: '/_cat/indices',
-    query: catQuery,
+    expand_wildcards: ['hidden', 'all'],
+    forbid_closed_indices: false,
+    metric: ['docs', 'store'],
   });
-
-  // The two responses should be equal in the number of indices returned
-  return catHits.map((hit) => {
-    const index = indices[hit.index];
-    const aliases = Object.keys(index.aliases);
-
+  const indicesNames = Object.keys(indices);
+  return indicesNames.map((indexName: string) => {
+    const indexData = indices[indexName];
+    const indexStats = indicesStats[indexName];
+    const aliases = Object.keys(indexData.aliases!);
     return {
-      health: hit.health,
-      status: hit.status,
-      name: hit.index,
-      uuid: hit.uuid,
-      primary: hit.pri,
-      replica: hit.rep,
-      documents: hit['docs.count'],
-      size: hit['store.size'],
-      isFrozen: hit.sth === 'true', // sth value coming back as a string from ES
+      health: indexStats?.health,
+      status: indexStats?.status,
+      name: indexName,
+      uuid: indexStats?.uuid,
+      primary: indexData.settings?.index?.number_of_shards,
+      replica: indexData.settings?.index?.number_of_replicas,
+      documents: indexStats?.primaries?.docs?.count ?? 0,
+      documents_deleted: indexStats?.primaries?.docs?.deleted ?? 0,
+      size: new ByteSizeValue(indexStats?.total?.store?.size_in_bytes ?? 0).toString(),
+      primary_size: new ByteSizeValue(indexStats?.primaries?.store?.size_in_bytes ?? 0).toString(),
+      // @ts-expect-error
+      isFrozen: indexData.settings?.index?.frozen === 'true',
       aliases: aliases.length ? aliases : 'none',
-      hidden: index.settings.index.hidden === 'true',
-      data_stream: index.data_stream,
+      hidden: indexData.settings?.index?.hidden === 'true',
+      data_stream: indexData.data_stream,
     };
   });
 }
 
 export const fetchIndices = async (
-  callAsCurrentUser: CallAsCurrentUser,
+  client: IScopedClusterClient,
   indexDataEnricher: IndexDataEnricher,
   indexNames?: string[]
 ) => {
-  const indices = await fetchIndicesCall(callAsCurrentUser, indexNames);
-  return await indexDataEnricher.enrichIndices(indices, callAsCurrentUser);
+  const indices = await fetchIndicesCall(client, indexNames);
+  return await indexDataEnricher.enrichIndices(indices, client);
 };

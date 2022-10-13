@@ -8,7 +8,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiButton,
@@ -152,7 +152,7 @@ export class GroupSelector extends Component {
       }
     }
 
-    const tempJobs = newJobs.map((j) => ({ job_id: j.id, groups: j.newGroups }));
+    const tempJobs = newJobs.map((j) => ({ jobId: j.id, groups: j.newGroups }));
     ml.jobs
       .updateGroups(tempJobs)
       .then((resp) => {

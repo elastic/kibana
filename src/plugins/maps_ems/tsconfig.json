@@ -1,12 +1,14 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "composite": true,
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
     "declarationMap": true
   },
   "include": ["common/**/*", "public/**/*", "server/**/*", "./config.ts"],
-  "references": [{ "path": "../../core/tsconfig.json" }]
+  "references": [
+    { "path": "../../core/tsconfig.json" },
+    { "path": "../../../x-pack/plugins/licensing/tsconfig.json" }
+  ]
 }

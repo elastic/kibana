@@ -7,18 +7,24 @@
 
 import { cloneDeep, omit } from 'lodash';
 
-import { NUMBER } from '../../../shared/constants/field_types';
-import { SchemaTypes } from '../../../shared/types';
+import { SchemaType } from '../../../shared/schema/types';
 
-import { RawBoost, Boost, SearchSettings, BoostType, ValueBoost } from './types';
+import {
+  RawBoost,
+  Boost,
+  SearchSettingsRequest,
+  SearchSettings,
+  BoostType,
+  ValueBoost,
+} from './types';
 
 // If the user hasn't entered a filter, then we can skip filtering the array entirely
 export const filterIfTerm = (array: string[], filterTerm: string): string[] => {
   return filterTerm === '' ? array : array.filter((item) => item.includes(filterTerm));
 };
 
-export const removeBoostStateProps = (searchSettings: SearchSettings) => {
-  const updatedSettings = cloneDeep(searchSettings);
+export const removeBoostStateProps = (searchSettings: SearchSettings): SearchSettingsRequest => {
+  const { precision_enabled: precisionEnabled, ...updatedSettings } = cloneDeep(searchSettings);
   const { boosts } = updatedSettings;
   const keys = Object.keys(boosts);
   keys.forEach((key) => boosts[key].forEach((boost) => delete boost.newBoost));
@@ -26,9 +32,9 @@ export const removeBoostStateProps = (searchSettings: SearchSettings) => {
   return updatedSettings;
 };
 
-export const parseBoostCenter = (fieldType: SchemaTypes, value: string | number) => {
+export const parseBoostCenter = (fieldType: SchemaType, value: string | number) => {
   // Leave non-numeric fields alone
-  if (fieldType === NUMBER) {
+  if (fieldType === SchemaType.Number) {
     const floatValue = parseFloat(value as string);
     return isNaN(floatValue) ? value : floatValue;
   }

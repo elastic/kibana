@@ -6,8 +6,8 @@
  */
 
 import { Type } from '@kbn/config-schema';
-import type { HttpResources, HttpResourcesRequestHandler, RouteConfig } from 'src/core/server';
-import { httpResourcesMock, httpServerMock } from 'src/core/server/mocks';
+import type { HttpResources, HttpResourcesRequestHandler, RouteConfig } from '@kbn/core/server';
+import { httpResourcesMock, httpServerMock } from '@kbn/core/server/mocks';
 
 import type { SecurityRequestHandlerContext } from '../../types';
 import { routeDefinitionParamsMock } from '../index.mock';
@@ -53,7 +53,7 @@ describe('Capture URL view routes', () => {
     const request = httpServerMock.createKibanaRequest();
     const responseFactory = httpResourcesMock.createResponseFactory();
 
-    await routeHandler(({} as unknown) as SecurityRequestHandlerContext, request, responseFactory);
+    await routeHandler({} as unknown as SecurityRequestHandlerContext, request, responseFactory);
 
     expect(responseFactory.renderAnonymousCoreApp).toHaveBeenCalledWith();
   });

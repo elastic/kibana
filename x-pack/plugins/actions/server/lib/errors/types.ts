@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaResponseFactory, IKibanaResponse } from '../../../../../../src/core/server';
+import { KibanaResponseFactory, IKibanaResponse } from '@kbn/core/server';
 
 export interface ErrorThatHandlesItsOwnResponse extends Error {
   sendResponse(res: KibanaResponseFactory): IKibanaResponse;

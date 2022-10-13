@@ -7,25 +7,26 @@
 
 import { omit } from 'lodash';
 import expect from '@kbn/expect';
-import ccrShardFixture from './fixtures/ccr_shard';
+import ccrShardFixture from './fixtures/ccr_shard.json';
+import { getLifecycleMethods } from '../data_stream';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
+  const { setup, tearDown } = getLifecycleMethods(getService);
 
   describe('ccr shard mb', () => {
-    const archive = 'monitoring/ccr_mb';
+    const archive = 'x-pack/test/functional/es_archives/monitoring/ccr_mb';
     const timeRange = {
       min: '2018-09-19T00:00:00.000Z',
       max: '2018-09-19T23:59:59.000Z',
     };
 
     before('load archive', () => {
-      return esArchiver.load(archive);
+      return setup(archive);
     });
 
     after('unload archive', () => {
-      return esArchiver.unload(archive);
+      return tearDown();
     });
 
     it('should return specific shard details', async () => {

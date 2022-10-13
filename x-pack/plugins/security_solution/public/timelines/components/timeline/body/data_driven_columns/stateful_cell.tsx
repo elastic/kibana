@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import React, { HTMLAttributes, useState } from 'react';
+import type { HTMLAttributes } from 'react';
+import React, { useState } from 'react';
 
-import { CellValueElementProps } from '../../cell_rendering';
-import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
-import { TimelineTabs } from '../../../../../../common/types/timeline';
-import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
+import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
+import type {
+  ColumnHeaderOptions,
+  CellValueElementProps,
+  TimelineTabs,
+} from '../../../../../../common/types/timeline';
 
 export interface CommonProps {
   className?: string;
@@ -19,7 +22,8 @@ export interface CommonProps {
 }
 
 const StatefulCellComponent = ({
-  ariaRowindex,
+  rowIndex,
+  colIndex,
   data,
   header,
   eventId,
@@ -28,7 +32,8 @@ const StatefulCellComponent = ({
   tabType,
   timelineId,
 }: {
-  ariaRowindex: number;
+  rowIndex: number;
+  colIndex: number;
   data: TimelineNonEcsData[];
   header: ColumnHeaderOptions;
   eventId: string;
@@ -38,7 +43,6 @@ const StatefulCellComponent = ({
   timelineId: string;
 }) => {
   const [cellProps, setCellProps] = useState<CommonProps & HTMLAttributes<HTMLDivElement>>({});
-
   return (
     <div data-test-subj="statefulCell" {...cellProps}>
       {renderCellValue({
@@ -46,11 +50,14 @@ const StatefulCellComponent = ({
         eventId,
         data,
         header,
+        isDraggable: true,
         isExpandable: true,
         isExpanded: false,
         isDetails: false,
+        isTimeline: true,
         linkValues,
-        rowIndex: ariaRowindex - 1,
+        rowIndex,
+        colIndex,
         setCellProps,
         timelineId: tabType != null ? `${timelineId}-${tabType}` : timelineId,
       })}

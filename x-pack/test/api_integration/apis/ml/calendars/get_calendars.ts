@@ -35,7 +35,6 @@ export default ({ getService }: FtrProviderContext) => {
       beforeEach(async () => {
         for (const testCalendar of testCalendars) {
           await ml.api.createCalendar(testCalendar.calendar_id, testCalendar);
-          // @ts-expect-error not full interface
           await ml.api.createCalendarEvents(testCalendar.calendar_id, testEvents);
         }
       });
@@ -47,37 +46,36 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should fetch all calendars', async () => {
-        const { body } = await supertest
+        const { body, status } = await supertest
           .get(`/api/ml/calendars`)
           .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-          .set(COMMON_REQUEST_HEADERS)
-          .expect(200);
+          .set(COMMON_REQUEST_HEADERS);
+        ml.api.assertResponseStatusCode(200, status, body);
 
         expect(body).to.have.length(testCalendars.length);
         expect(body[0].events).to.have.length(testEvents.length);
-        // @ts-expect-error not full interface
         ml.api.assertAllEventsExistInCalendar(testEvents, body[0]);
       });
 
       it('should fetch all calendars for user with view permission', async () => {
-        const { body } = await supertest
+        const { body, status } = await supertest
           .get(`/api/ml/calendars`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-          .set(COMMON_REQUEST_HEADERS)
-          .expect(200);
+          .set(COMMON_REQUEST_HEADERS);
+        ml.api.assertResponseStatusCode(200, status, body);
 
         expect(body).to.have.length(testCalendars.length);
         expect(body[0].events).to.have.length(testEvents.length);
-        // @ts-expect-error not full interface
         ml.api.assertAllEventsExistInCalendar(testEvents, body[0]);
       });
 
       it('should not fetch calendars for unauthorized user', async () => {
-        const { body } = await supertest
+        const { body, status } = await supertest
           .get(`/api/ml/calendars`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-          .set(COMMON_REQUEST_HEADERS)
-          .expect(403);
+          .set(COMMON_REQUEST_HEADERS);
+        ml.api.assertResponseStatusCode(403, status, body);
+
         expect(body.error).to.eql('Forbidden');
       });
     });
@@ -92,7 +90,6 @@ export default ({ getService }: FtrProviderContext) => {
 
       beforeEach(async () => {
         await ml.api.createCalendar(calendarId, testCalendar);
-        // @ts-expect-error not full interface
         await ml.api.createCalendarEvents(calendarId, testEvents);
       });
 
@@ -101,50 +98,49 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should fetch calendar & associated events by id', async () => {
-        const { body } = await supertest
+        const { body, status } = await supertest
           .get(`/api/ml/calendars/${calendarId}`)
           .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-          .set(COMMON_REQUEST_HEADERS)
-          .expect(200);
+          .set(COMMON_REQUEST_HEADERS);
+        ml.api.assertResponseStatusCode(200, status, body);
 
         expect(body.job_ids).to.eql(testCalendar.job_ids);
         expect(body.description).to.eql(testCalendar.description);
         expect(body.events).to.have.length(testEvents.length);
-        // @ts-expect-error not full interface
         ml.api.assertAllEventsExistInCalendar(testEvents, body);
       });
 
       it('should fetch calendar & associated events by id for user with view permission', async () => {
-        const { body } = await supertest
+        const { body, status } = await supertest
           .get(`/api/ml/calendars/${calendarId}`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-          .set(COMMON_REQUEST_HEADERS)
-          .expect(200);
+          .set(COMMON_REQUEST_HEADERS);
+        ml.api.assertResponseStatusCode(200, status, body);
 
         expect(body.job_ids).to.eql(testCalendar.job_ids);
         expect(body.description).to.eql(testCalendar.description);
         expect(body.events).to.have.length(testEvents.length);
-        // @ts-expect-error not full interface
         ml.api.assertAllEventsExistInCalendar(testEvents, body);
       });
 
       it('should not fetch calendars for unauthorized user', async () => {
-        const { body } = await supertest
+        const { body, status } = await supertest
           .get(`/api/ml/calendars/${calendarId}`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-          .set(COMMON_REQUEST_HEADERS)
-          .expect(403);
+          .set(COMMON_REQUEST_HEADERS);
+        ml.api.assertResponseStatusCode(403, status, body);
 
         expect(body.error).to.eql('Forbidden');
       });
     });
 
     it('should return 404 if invalid calendar id', async () => {
-      const { body } = await supertest
+      const { body, status } = await supertest
         .get(`/api/ml/calendars/calendar_id_dne`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(COMMON_REQUEST_HEADERS)
-        .expect(404);
+        .set(COMMON_REQUEST_HEADERS);
+      ml.api.assertResponseStatusCode(404, status, body);
+
       expect(body.error).to.eql('Not Found');
     });
   });

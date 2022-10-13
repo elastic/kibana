@@ -6,14 +6,15 @@
  */
 
 import expect from '@kbn/expect';
-import fixture from './fixtures/detect_logstash_management';
+import fixture from './fixtures/detect_logstash_management.json';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
   describe('detect_logstash_management', () => {
-    const archive = 'monitoring/setup/collection/detect_logstash_management';
+    const archive =
+      'x-pack/test/functional/es_archives/monitoring/setup/collection/detect_logstash_management';
     const timeRange = {
       min: '2019-04-16T00:00:00.741Z',
       max: '2019-04-16T23:59:59.741Z',

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
-import { IEsSearchResponse } from '../../../../../../../../src/plugins/data/common';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 
-import { Inspect, Maybe, TimerangeInput } from '../../../common';
-import { HostItem, HostsFields } from '../common';
-import { RequestOptionsPaginated } from '../..';
+import type { Inspect, Maybe, TimerangeInput } from '../../../common';
+import type { HostItem, HostsFields } from '../common';
+import type { RequestOptionsPaginated } from '../..';
 
 export interface HostDetailsStrategyResponse extends IEsSearchResponse {
   hostDetails: HostItem;
@@ -25,5 +25,5 @@ export interface HostDetailsRequestOptions extends Partial<RequestOptionsPaginat
 }
 
 export interface AggregationRequest {
-  [aggField: string]: estypes.AggregationContainer;
+  [aggField: string]: estypes.AggregationsAggregationContainer;
 }

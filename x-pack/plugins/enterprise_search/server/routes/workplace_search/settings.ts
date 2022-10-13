@@ -9,13 +9,15 @@ import { schema } from '@kbn/config-schema';
 
 import { RouteDependencies } from '../../plugin';
 
+const MAX_IMAGE_BYTES = 2000000;
+
 export function registerOrgSettingsRoute({
   router,
   enterpriseSearchRequestHandler,
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/workplace_search/org/settings',
+      path: '/internal/workplace_search/org/settings',
       validate: false,
     },
     enterpriseSearchRequestHandler.createRequest({
@@ -30,7 +32,7 @@ export function registerOrgSettingsCustomizeRoute({
 }: RouteDependencies) {
   router.put(
     {
-      path: '/api/workplace_search/org/settings/customize',
+      path: '/internal/workplace_search/org/settings/customize',
       validate: {
         body: schema.object({
           name: schema.string(),
@@ -43,13 +45,38 @@ export function registerOrgSettingsCustomizeRoute({
   );
 }
 
+export function registerOrgSettingsUploadImagesRoute({
+  router,
+  enterpriseSearchRequestHandler,
+}: RouteDependencies) {
+  router.put(
+    {
+      path: '/internal/workplace_search/org/settings/upload_images',
+      validate: {
+        body: schema.object({
+          logo: schema.maybe(schema.nullable(schema.string())),
+          icon: schema.maybe(schema.nullable(schema.string())),
+        }),
+      },
+      options: {
+        body: {
+          maxBytes: MAX_IMAGE_BYTES,
+        },
+      },
+    },
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/ws/org/settings/upload_images',
+    })
+  );
+}
+
 export function registerOrgSettingsOauthApplicationRoute({
   router,
   enterpriseSearchRequestHandler,
 }: RouteDependencies) {
   router.put(
     {
-      path: '/api/workplace_search/org/settings/oauth_application',
+      path: '/internal/workplace_search/org/settings/oauth_application',
       validate: {
         body: schema.object({
           oauth_application: schema.object({
@@ -69,5 +96,6 @@ export function registerOrgSettingsOauthApplicationRoute({
 export const registerSettingsRoutes = (dependencies: RouteDependencies) => {
   registerOrgSettingsRoute(dependencies);
   registerOrgSettingsCustomizeRoute(dependencies);
+  registerOrgSettingsUploadImagesRoute(dependencies);
   registerOrgSettingsOauthApplicationRoute(dependencies);
 };

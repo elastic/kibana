@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 
-import type { KibanaRequest } from 'src/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 
 import { NEXT_URL_QUERY_STRING_PARAMETER } from '../../../common/constants';
 import type { AuthenticationInfo } from '../../elasticsearch';
@@ -71,23 +71,22 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
         access_token: accessToken,
         refresh_token: refreshToken,
         authentication: authenticationInfo,
-      } = (
-        await this.options.client.asInternalUser.security.getToken({
-          body: {
-            grant_type: 'password',
-            username,
-            password,
-          },
-        })
-      ).body;
+      } = await this.options.client.asInternalUser.security.getToken({
+        body: {
+          grant_type: 'password',
+          username,
+          password,
+        },
+      });
 
       this.logger.debug('Get token API request to Elasticsearch successful');
       return AuthenticationResult.succeeded(
         this.authenticationInfoToAuthenticatedUser(
-          // @ts-expect-error @elastic/elasticsearch GetUserAccessTokenResponse declares authentication: string, but expected AuthenticatedUser
+          // @ts-expect-error @elastic/elasticsearch metadata defined as Record<string, any>;
           authenticationInfo as AuthenticationInfo
         ),
         {
+          userProfileGrant: { type: 'accessToken', accessToken },
           authHeaders: {
             authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
           },

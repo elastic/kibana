@@ -7,11 +7,15 @@
 
 import { EuiButtonIconColor } from '@elastic/eui';
 
-import { InternalSchemaTypes, SchemaTypes } from '../../../shared/types';
+import { InternalSchemaType, SchemaType } from '../../../shared/schema/types';
 
-export type FieldType = InternalSchemaTypes | SchemaTypes;
+export type FieldType = InternalSchemaType | SchemaType;
 
-export type Raw = string | string[] | number | number[];
+export type NestedFieldValue =
+  | { [fieldName: string]: SimpleFieldValue | NestedFieldValue }
+  | NestedFieldValue[];
+export type SimpleFieldValue = string | string[] | number | number[];
+export type Raw = SimpleFieldValue | NestedFieldValue;
 export type Snippet = string;
 export interface FieldValue {
   raw?: Raw;
@@ -22,23 +26,13 @@ export interface ResultMeta {
   id: string;
   score?: number;
   engine: string;
+  clicks?: number;
 }
-
-// A search result item
-export type Result = {
-  id: {
-    raw: string;
-  };
-  _meta: ResultMeta;
-} & {
-  // this should be a FieldType object, but there's no good way to do that in TS: https://github.com/microsoft/TypeScript/issues/17867
-  // You'll need to cast it to FieldValue whenever you use it.
-  [key: string]: object;
-};
 
 export interface ResultAction {
   onClick(): void;
   title: string;
   iconType: string;
   iconColor?: EuiButtonIconColor;
+  disabled?: boolean;
 }

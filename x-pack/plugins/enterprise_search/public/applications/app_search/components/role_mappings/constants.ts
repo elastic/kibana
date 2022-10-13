@@ -9,49 +9,24 @@ import { i18n } from '@kbn/i18n';
 
 import { AdvanceRoleType } from '../../types';
 
-export const SAVE_ROLE_MAPPING = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.roleMapping.saveRoleMappingButtonLabel',
-  { defaultMessage: 'Save role mapping' }
-);
-export const UPDATE_ROLE_MAPPING = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.roleMapping.updateRoleMappingButtonLabel',
-  { defaultMessage: 'Update role mapping' }
-);
-
-export const EMPTY_ROLE_MAPPINGS_BODY = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.roleMapping.emptyRoleMappingsBody',
-  {
-    defaultMessage:
-      'All users who successfully authenticate will be assigned the Owner role and have access to all engines. Add a new role to override the default.',
-  }
-);
-
-export const DELETE_ROLE_MAPPING_MESSAGE = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.deleteRoleMappingMessage',
-  {
-    defaultMessage:
-      'Are you sure you want to permanently delete this mapping? This action is not reversible and some users might lose access.',
-  }
-);
-
 export const ROLE_MAPPING_DELETED_MESSAGE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.roleMappingDeletedMessage',
   {
-    defaultMessage: 'Successfully deleted role mapping',
+    defaultMessage: 'Your role mapping was deleted',
   }
 );
 
 export const ROLE_MAPPING_CREATED_MESSAGE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.roleMappingCreatedMessage',
   {
-    defaultMessage: 'Role mapping successfully created.',
+    defaultMessage: 'Your role mapping was created',
   }
 );
 
 export const ROLE_MAPPING_UPDATED_MESSAGE = i18n.translate(
   'xpack.enterpriseSearch.appSearch.roleMappingUpdatedMessage',
   {
-    defaultMessage: 'Role mapping successfully updated.',
+    defaultMessage: 'Your role mapping was updated',
   }
 );
 
@@ -59,34 +34,6 @@ export const ROLE_MAPPINGS_ENGINE_ACCESS_HEADING = i18n.translate(
   'xpack.enterpriseSearch.appSearch.roleMappingsEngineAccessHeading',
   {
     defaultMessage: 'Engine access',
-  }
-);
-
-export const ROLE_MAPPINGS_RESET_BUTTON = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.roleMappingsResetButton',
-  {
-    defaultMessage: 'Reset mappings',
-  }
-);
-
-export const ROLE_MAPPINGS_RESET_CONFIRM_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.roleMappingsResetConfirmTitle',
-  {
-    defaultMessage: 'Are you sure you want to reset role mappings?',
-  }
-);
-
-export const ROLE_MAPPINGS_RESET_CONFIRM_BUTTON = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.roleMappingsResetConfirmButton',
-  {
-    defaultMessage: 'Reset role mappings',
-  }
-);
-
-export const ROLE_MAPPINGS_RESET_CANCEL_BUTTON = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.roleMappingsResetCancelButton',
-  {
-    defaultMessage: 'Cancel',
   }
 );
 
@@ -126,74 +73,71 @@ export const ADMIN_ROLE_TYPE_DESCRIPTION = i18n.translate(
   }
 );
 
-export const ADVANCED_ROLE_SELECTORS_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.advancedRoleSelectorsTitle',
+export const ENGINE_REQUIRED_ERROR = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engineRequiredError',
   {
-    defaultMessage: 'Full or limited engine access',
+    defaultMessage: 'At least one assigned engine is required.',
   }
 );
 
-export const ROLE_TITLE = i18n.translate('xpack.enterpriseSearch.appSearch.roleTitle', {
-  defaultMessage: 'Role',
-});
-
-export const FULL_ENGINE_ACCESS_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.fullEngineAccessTitle',
+export const ALL_ENGINES_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.allEnginesLabel',
   {
-    defaultMessage: 'Full engine access',
+    defaultMessage: 'Assign to all engines',
   }
 );
 
-export const FULL_ENGINE_ACCESS_DESCRIPTION = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.fullEngineAccessDescription',
+export const ALL_ENGINES_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.allEnginesDescription',
   {
-    defaultMessage: 'Access to all current and future engines.',
+    defaultMessage:
+      'Assigning to all engines includes all current and future engines as created and administered at a later date.',
   }
 );
 
-export const LIMITED_ENGINE_ACCESS_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.limitedEngineAccessTitle',
+export const SPECIFIC_ENGINES_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.specificEnginesLabel',
   {
-    defaultMessage: 'Limited engine access',
+    defaultMessage: 'Assign to specific engines',
   }
 );
 
-export const LIMITED_ENGINE_ACCESS_DESCRIPTION = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.limitedEngineAccessDescription',
+export const SPECIFIC_ENGINES_DESCRIPTION = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.specificEnginesDescription',
   {
-    defaultMessage: 'Limit user access to specific engines:',
+    defaultMessage: 'Assign to a select set of engines statically.',
   }
 );
 
-export const ENGINE_ACCESS_TITLE = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.engineAccessTitle',
+export const ENGINE_ASSIGNMENT_LABEL = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.engineAssignmentLabel',
   {
-    defaultMessage: 'Engine access',
+    defaultMessage: 'Engine assignment',
   }
 );
 
 export const ADVANCED_ROLE_TYPES = [
   {
-    type: 'dev',
+    id: 'dev',
     description: DEV_ROLE_TYPE_DESCRIPTION,
   },
   {
-    type: 'editor',
+    id: 'editor',
     description: EDITOR_ROLE_TYPE_DESCRIPTION,
   },
   {
-    type: 'analyst',
+    id: 'analyst',
     description: ANALYST_ROLE_TYPE_DESCRIPTION,
   },
 ] as AdvanceRoleType[];
 
 export const STANDARD_ROLE_TYPES = [
   {
-    type: 'owner',
+    id: 'owner',
     description: OWNER_ROLE_TYPE_DESCRIPTION,
   },
   {
-    type: 'admin',
+    id: 'admin',
     description: ADMIN_ROLE_TYPE_DESCRIPTION,
   },
 ] as AdvanceRoleType[];

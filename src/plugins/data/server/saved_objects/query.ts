@@ -6,12 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsType } from 'kibana/server';
+import { SavedObjectsType } from '@kbn/core/server';
+import { savedQueryMigrations } from './migrations/query';
 
 export const querySavedObjectType: SavedObjectsType = {
   name: 'query',
   hidden: false,
-  namespaceType: 'single',
+  namespaceType: 'multiple-isolated',
+  convertToMultiNamespaceTypeVersion: '8.0.0',
   management: {
     icon: 'search',
     defaultSearchField: 'title',
@@ -37,5 +39,5 @@ export const querySavedObjectType: SavedObjectsType = {
       timefilter: { type: 'object', enabled: false },
     },
   },
-  migrations: {},
+  migrations: savedQueryMigrations,
 };

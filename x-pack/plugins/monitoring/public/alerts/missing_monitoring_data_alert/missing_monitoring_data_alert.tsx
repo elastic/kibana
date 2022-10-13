@@ -6,32 +6,31 @@
  */
 
 import React from 'react';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AlertTypeModel } from '../../../../triggers_actions_ui/public/types';
-import { validate } from './validation';
+import type { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import {
-  ALERT_MISSING_MONITORING_DATA,
-  ALERT_DETAILS,
-  ALERT_REQUIRES_APP_CONTEXT,
+  RULE_DETAILS,
+  RULE_MISSING_MONITORING_DATA,
+  RULE_REQUIRES_APP_CONTEXT,
 } from '../../../common/constants';
-import { Expression } from './expression';
+import { LazyExpression, LazyExpressionProps } from './lazy_expression';
+import { validate } from './validation';
 
-export function createMissingMonitoringDataAlertType(): AlertTypeModel {
+export function createMissingMonitoringDataAlertType(): RuleTypeModel {
   return {
-    id: ALERT_MISSING_MONITORING_DATA,
-    description: ALERT_DETAILS[ALERT_MISSING_MONITORING_DATA].description,
+    id: RULE_MISSING_MONITORING_DATA,
+    description: RULE_DETAILS[RULE_MISSING_MONITORING_DATA].description,
     iconClass: 'bell',
     documentationUrl(docLinks) {
       return `${docLinks.links.monitoring.alertsKibanaMissingData}`;
     },
-    alertParamsExpression: (props: any) => (
-      <Expression
+    ruleParamsExpression: (props: LazyExpressionProps) => (
+      <LazyExpression
         {...props}
-        paramDetails={ALERT_DETAILS[ALERT_MISSING_MONITORING_DATA].paramDetails}
+        paramDetails={RULE_DETAILS[RULE_MISSING_MONITORING_DATA].paramDetails}
       />
     ),
     validate,
     defaultActionMessage: '{{context.internalFullMessage}}',
-    requiresAppContext: ALERT_REQUIRES_APP_CONTEXT,
+    requiresAppContext: RULE_REQUIRES_APP_CONTEXT,
   };
 }

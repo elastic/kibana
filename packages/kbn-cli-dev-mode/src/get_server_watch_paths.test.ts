@@ -8,7 +8,8 @@
 
 import Path from 'path';
 
-import { REPO_ROOT, createAbsolutePathSerializer } from '@kbn/dev-utils';
+import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
+import { REPO_ROOT } from '@kbn/utils';
 
 import { getServerWatchPaths } from './get_server_watch_paths';
 
@@ -38,7 +39,7 @@ it('produces the right watch and ignore list', () => {
   expect(ignorePaths).toMatchInlineSnapshot(`
     Array [
       /\\[\\\\\\\\\\\\/\\]\\(\\\\\\.\\.\\*\\|node_modules\\|bower_components\\|target\\|public\\|__\\[a-z0-9_\\]\\+__\\|coverage\\)\\(\\[\\\\\\\\\\\\/\\]\\|\\$\\)/,
-      /\\\\\\.test\\\\\\.\\(js\\|tsx\\?\\)\\$/,
+      /\\\\\\.\\(test\\|spec\\)\\\\\\.\\(js\\|ts\\|tsx\\)\\$/,
       /\\\\\\.\\(md\\|sh\\|txt\\)\\$/,
       /debug\\\\\\.log\\$/,
       <absolute path>/src/plugins/*/test/**,
@@ -65,16 +66,19 @@ it('produces the right watch and ignore list', () => {
       <absolute path>/x-pack/test/plugin_functional/plugins/resolver_test/target/**,
       <absolute path>/x-pack/test/plugin_functional/plugins/resolver_test/scripts/**,
       <absolute path>/x-pack/test/plugin_functional/plugins/resolver_test/docs/**,
-      <absolute path>/x-pack/plugins/reporting/chromium,
+      <absolute path>/x-pack/plugins/screenshotting/chromium,
       <absolute path>/x-pack/plugins/security_solution/cypress,
-      <absolute path>/x-pack/plugins/apm/e2e,
       <absolute path>/x-pack/plugins/apm/scripts,
+      <absolute path>/x-pack/plugins/apm/ftr_e2e,
       <absolute path>/x-pack/plugins/canvas/canvas_plugin_src,
       <absolute path>/x-pack/plugins/cases/server/scripts,
       <absolute path>/x-pack/plugins/lists/scripts,
       <absolute path>/x-pack/plugins/lists/server/scripts,
       <absolute path>/x-pack/plugins/security_solution/scripts,
       <absolute path>/x-pack/plugins/security_solution/server/lib/detection_engine/scripts,
+      <absolute path>/x-pack/plugins/synthetics/e2e,
+      <absolute path>/x-pack/plugins/ux/e2e,
+      <absolute path>/x-pack/plugins/observability/e2e,
     ]
   `);
 });

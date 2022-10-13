@@ -30,9 +30,6 @@ instead be:
 "@kbn/i18n": "link:../../kibana/packages/kbn-i18n"
 ```
 
-How all of this works is described in more detail in the
-[`@kbn/pm` docs](./kbn-pm#how-it-works).
-
 ## Creating a new package
 
 Create a new sub-folder. The name of the folder should mirror the `name` in the
@@ -51,7 +48,7 @@ A package should follow the pattern of having `.test.js` files as siblings of th
 
 A package using the `.test.js` naming convention will have those tests automatically picked up by Jest and run by the unit test runner, currently mapped to the Kibana `test` script in the root `package.json`.
 
-* `yarn test` or `yarn grunt test` runs all unit tests.
+* `yarn test` runs all unit tests.
 * `yarn jest` runs all Jest tests in Kibana.
 
 In order for the plugin or package to use Jest, a jest.config.js file must be present in it's root. However, there are safeguards for this in CI should a test file be added without a corresponding config file.

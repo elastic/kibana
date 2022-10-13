@@ -11,8 +11,8 @@ import {
   SavedObjectSaveModalOrigin,
   OnSaveProps,
   SaveModalState,
-} from '../../../../../src/plugins/saved_objects/public';
-import { SavedObjectTaggingPluginStart } from '../../../saved_objects_tagging/public';
+} from '@kbn/saved-objects-plugin/public';
+import { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 
 export type OriginSaveProps = OnSaveProps & { returnToOrigin: boolean; newTags?: string[] };
 
@@ -22,13 +22,9 @@ export type TagEnhancedSavedObjectSaveModalOriginProps = Omit<OriginSaveModalPro
   onSave: (props: OriginSaveProps) => void;
 };
 
-export const TagEnhancedSavedObjectSaveModalOrigin: FC<TagEnhancedSavedObjectSaveModalOriginProps> = ({
-  initialTags,
-  onSave,
-  savedObjectsTagging,
-  options,
-  ...otherProps
-}) => {
+export const TagEnhancedSavedObjectSaveModalOrigin: FC<
+  TagEnhancedSavedObjectSaveModalOriginProps
+> = ({ initialTags, onSave, savedObjectsTagging, options, ...otherProps }) => {
   const [selectedTags, setSelectedTags] = useState(initialTags);
 
   const tagSelectorOption = useMemo(

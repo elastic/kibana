@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockActions } from '../../../../__mocks__/kea.mock';
+import { setMockActions } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -13,7 +13,7 @@ import { shallow } from 'enzyme';
 
 import { EuiFlyout } from '@elastic/eui';
 
-import { CredentialsFlyout } from './';
+import { CredentialsFlyout } from '.';
 
 describe('CredentialsFlyout', () => {
   const actions = {

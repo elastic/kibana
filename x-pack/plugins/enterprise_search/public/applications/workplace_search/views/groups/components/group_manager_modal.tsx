@@ -26,7 +26,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { EuiButtonTo } from '../../../../shared/react_router_helpers';
-import noSharedSourcesIcon from '../../../assets/share_circle.svg';
+import noOrgSourcesIcon from '../../../assets/share_circle.svg';
 import { UPDATE_BUTTON, CANCEL_BUTTON } from '../../../constants';
 import { SOURCES_PATH } from '../../../routes';
 import { Group } from '../../../types';
@@ -36,7 +36,7 @@ import { GroupsLogic } from '../groups_logic';
 const ADD_SOURCE_BUTTON_TEXT = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.groups.groupManagerUpdateAddSourceButton',
   {
-    defaultMessage: 'Add a Shared Source',
+    defaultMessage: 'Add an organizational source',
   }
 );
 const EMPTY_STATE_TITLE = i18n.translate(
@@ -48,7 +48,21 @@ const EMPTY_STATE_TITLE = i18n.translate(
 const EMPTY_STATE_BODY = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.groups.groupManagerSourceEmpty.body',
   {
-    defaultMessage: 'Looks like you have not added any shared content sources yet.',
+    defaultMessage: 'Looks like you have not added any organizational content sources yet.',
+  }
+);
+
+const ADD_SOURCE_MODAL_SELECT_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.groups.groupManagerSourceModal.selectButton.text',
+  {
+    defaultMessage: 'Select all',
+  }
+);
+
+const ADD_SOURCE_MODAL_DESELECT_BUTTON = i18n.translate(
+  'xpack.enterpriseSearch.workplaceSearch.groups.groupManagerSourceModal.deselectButton.text',
+  {
+    defaultMessage: 'Deselect all',
   }
 );
 
@@ -75,8 +89,7 @@ export const GroupManagerModal: React.FC<GroupManagerModalProps> = ({
   const { contentSources } = useValues(GroupsLogic);
 
   const allSelected = numSelected === allItems.length;
-  const isSources = label === 'shared content sources';
-  const showEmptyState = isSources && contentSources.length < 1;
+  const showEmptyState = contentSources.length < 1;
   const handleClose = () => hideModal(group);
   const handleSelectAll = () => selectAll(allSelected ? [] : allItems);
 
@@ -90,7 +103,7 @@ export const GroupManagerModal: React.FC<GroupManagerModalProps> = ({
     <EuiModalBody>
       <EuiSpacer size="m" />
       <EuiEmptyPrompt
-        iconType={noSharedSourcesIcon}
+        iconType={noOrgSourcesIcon}
         title={<h3>{EMPTY_STATE_TITLE}</h3>}
         body={EMPTY_STATE_BODY}
         actions={sourcesButton}
@@ -125,13 +138,7 @@ export const GroupManagerModal: React.FC<GroupManagerModalProps> = ({
         <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty data-test-subj="SelectAllGroups" onClick={handleSelectAll}>
-              {i18n.translate(
-                'xpack.enterpriseSearch.workplaceSearch.groups.groupManagerSelectAllToggle',
-                {
-                  defaultMessage: '{action} All',
-                  values: { action: allSelected ? 'Deselect' : 'Select' },
-                }
-              )}
+              {allSelected ? ADD_SOURCE_MODAL_DESELECT_BUTTON : ADD_SOURCE_MODAL_SELECT_BUTTON}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

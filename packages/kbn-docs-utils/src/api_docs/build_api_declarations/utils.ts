@@ -8,7 +8,8 @@
 import Path from 'path';
 import { REPO_ROOT } from '@kbn/utils';
 import { ParameterDeclaration, ClassMemberTypes, Node } from 'ts-morph';
-import { SourceLink } from '../types';
+import { BuildApiDecOpts } from './types';
+import { isNamedNode } from '../tsmorph_utils';
 
 // Collect any paths encountered that are not in the correct scope folder.
 // APIs inside these folders will cause issues with the API docs system. The
@@ -17,7 +18,10 @@ import { SourceLink } from '../types';
 export const pathsOutsideScopes: { [key: string]: string } = {};
 
 export function isPrivate(node: ParameterDeclaration | ClassMemberTypes): boolean {
-  return node.getModifiers().find((mod) => mod.getText() === 'private') !== undefined;
+  if (Node.isModifierable(node)) {
+    return node.getModifiers().find((mod) => mod.getText() === 'private') !== undefined;
+  }
+  return false;
 }
 
 /**
@@ -27,11 +31,36 @@ export function getRelativePath(fullPath: string): string {
   return Path.relative(REPO_ROOT, fullPath);
 }
 
-export function getSourceForNode(node: Node): SourceLink {
+export function getSourceForNode(node: Node): string {
   const path = getRelativePath(node.getSourceFile().getFilePath());
-  const lineNumber = node.getStartLineNumber();
+  return path;
+}
+
+export function buildApiId(id: string, parentId?: string): string {
+  const clean = id.replace(/[^A-Za-z_.$0-9]+/g, '');
+  return parentId ? `${parentId}.${clean}` : clean;
+}
+
+export function buildParentApiId(parentName: string, parentsParentApiId?: string) {
+  return parentsParentApiId ? `${parentsParentApiId}.${parentName}` : parentName;
+}
+
+export function getOptsForChild(node: Node, parentOpts: BuildApiDecOpts): BuildApiDecOpts {
+  const name = Node.isConstructSignatureDeclaration(node)
+    ? 'new'
+    : isNamedNode(node)
+    ? node.getName()
+    : 'Unnamed';
+  return getOptsForChildWithName(name, parentOpts);
+}
+
+export function getOptsForChildWithName(
+  name: string,
+  parentOpts: BuildApiDecOpts
+): BuildApiDecOpts {
   return {
-    path,
-    lineNumber,
+    ...parentOpts,
+    name,
+    id: buildApiId(name, parentOpts.id),
   };
 }

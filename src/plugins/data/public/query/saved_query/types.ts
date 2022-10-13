@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { RefreshInterval, TimeRange, Query, Filter } from '../..';
+import type { TimeRange, Query, Filter } from '@kbn/es-query';
+import { RefreshInterval } from '../..';
 
 export type SavedQueryTimeFilter = TimeRange & {
   refreshInterval: RefreshInterval;
@@ -26,10 +27,8 @@ export interface SavedQueryAttributes {
 }
 
 export interface SavedQueryService {
-  saveQuery: (
-    attributes: SavedQueryAttributes,
-    config?: { overwrite: boolean }
-  ) => Promise<SavedQuery>;
+  createQuery: (attributes: SavedQueryAttributes) => Promise<SavedQuery>;
+  updateQuery: (id: string, attributes: SavedQueryAttributes) => Promise<SavedQuery>;
   getAllSavedQueries: () => Promise<SavedQuery[]>;
   findSavedQueries: (
     searchText?: string,

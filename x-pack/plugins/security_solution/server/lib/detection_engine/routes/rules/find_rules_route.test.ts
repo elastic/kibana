@@ -5,51 +5,52 @@
  * 2.0.
  */
 
-import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { DETECTION_ENGINE_RULES_URL_FIND } from '../../../../../common/constants';
+import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
+import { requestContextMock, requestMock, serverMock } from '../__mocks__';
 import {
-  getAlertMock,
+  getRuleMock,
   getFindRequest,
   getFindResultWithSingleHit,
-  getFindResultStatus,
+  getEmptySavedObjectsResponse,
 } from '../__mocks__/request_responses';
-import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { findRulesRoute } from './find_rules_route';
-import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 
-jest.mock('../../signals/rule_status_service');
 describe('find_rules', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(async () => {
     server = serverMock.create();
+    logger = loggingSystemMock.createLogger();
     ({ clients, context } = requestContextMock.createTools());
 
-    clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
-    clients.alertsClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams()));
-    clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus());
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
+    clients.rulesClient.get.mockResolvedValue(getRuleMock(getQueryRuleParams()));
+    clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse());
 
-    findRulesRoute(server.router);
+    findRulesRoute(server.router, logger);
   });
 
-  describe('status codes with actionClient and alertClient', () => {
-    test('returns 200 when finding a single rule with a valid actionClient and alertClient', async () => {
-      const response = await server.inject(getFindRequest(), context);
+  describe('status codes', () => {
+    test('returns 200', async () => {
+      const response = await server.inject(
+        getFindRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(200);
     });
 
-    test('returns 404 if alertClient is not available on the route', async () => {
-      context.alerting!.getAlertsClient = jest.fn();
-      const response = await server.inject(getFindRequest(), context);
-      expect(response.status).toEqual(404);
-      expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
-    });
-
     test('catches error if search throws error', async () => {
-      clients.alertsClient.find.mockImplementation(async () => {
+      clients.rulesClient.find.mockImplementation(async () => {
         throw new Error('Test error');
       });
-      const response = await server.inject(getFindRequest(), context);
+      const response = await server.inject(
+        getFindRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
         message: 'Test error',
@@ -62,7 +63,7 @@ describe('find_rules', () => {
     test('allows optional query params', async () => {
       const request = requestMock.create({
         method: 'get',
-        path: `${DETECTION_ENGINE_RULES_URL}/_find`,
+        path: DETECTION_ENGINE_RULES_URL_FIND,
         query: {
           page: 2,
           per_page: 20,
@@ -78,7 +79,7 @@ describe('find_rules', () => {
     test('rejects unknown query params', async () => {
       const request = requestMock.create({
         method: 'get',
-        path: `${DETECTION_ENGINE_RULES_URL}/_find`,
+        path: DETECTION_ENGINE_RULES_URL_FIND,
         query: {
           invalid_value: 'hi mom',
         },

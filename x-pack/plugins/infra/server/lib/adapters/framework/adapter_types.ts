@@ -5,21 +5,23 @@
  * 2.0.
  */
 
-import { GenericParams, SearchResponse } from 'elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Lifecycle } from '@hapi/hapi';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { RouteConfig, RouteMethod } from '../../../../../../../src/core/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { JsonArray, JsonValue } from '@kbn/utility-types';
+import { RouteConfig, RouteMethod } from '@kbn/core/server';
 import {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
-} from '../../../../../../../src/plugins/data/server';
-import { HomeServerPluginSetup } from '../../../../../../../src/plugins/home/server';
-import { VisTypeTimeseriesSetup } from '../../../../../../../src/plugins/vis_type_timeseries/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../plugins/features/server';
-import { SpacesPluginSetup } from '../../../../../../plugins/spaces/server';
-import { PluginSetupContract as AlertingPluginContract } from '../../../../../alerting/server';
-import { MlPluginSetup } from '../../../../../ml/server';
-import { JsonArray, JsonValue } from '../../../../../../../src/plugins/kibana_utils/common';
+} from '@kbn/data-plugin/server';
+import { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
+import { HomeServerPluginSetup } from '@kbn/home-plugin/server';
+import { VisTypeTimeseriesSetup } from '@kbn/vis-type-timeseries-plugin/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import { PluginSetupContract as AlertingPluginContract } from '@kbn/alerting-plugin/server';
+import { MlPluginSetup } from '@kbn/ml-plugin/server';
+import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 
 export interface InfraServerPluginSetupDeps {
   data: DataPluginSetup;
@@ -29,14 +31,16 @@ export interface InfraServerPluginSetupDeps {
   visTypeTimeseries: VisTypeTimeseriesSetup;
   features: FeaturesPluginSetup;
   alerting: AlertingPluginContract;
+  ruleRegistry: RuleRegistryPluginSetupContract;
   ml?: MlPluginSetup;
 }
 
 export interface InfraServerPluginStartDeps {
   data: DataPluginStart;
+  dataViews: DataViewsPluginStart;
 }
 
-export interface CallWithRequestParams extends GenericParams {
+export interface CallWithRequestParams extends estypes.RequestBase {
   max_concurrent_shard_requests?: number;
   name?: string;
   index?: string | string[];
@@ -48,6 +52,7 @@ export interface CallWithRequestParams extends GenericParams {
   path?: string;
   query?: string | object;
   track_total_hits?: boolean | number;
+  body?: any;
 }
 
 export type InfraResponse = Lifecycle.ReturnValue;
@@ -115,7 +120,7 @@ export interface InfraDatabaseGetIndicesResponse {
   };
 }
 
-export type SearchHit = SearchResponse<object>['hits']['hits'][0];
+export type SearchHit = estypes.SearchHit;
 
 export interface SortedSearchHit extends SearchHit {
   sort: any[];

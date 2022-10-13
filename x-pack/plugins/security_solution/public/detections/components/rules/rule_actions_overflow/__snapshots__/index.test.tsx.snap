@@ -8,6 +8,7 @@ exports[`RuleActionsOverflow snapshots renders correctly against snapshot 1`] = 
       <EuiToolTip
         content="All actions"
         delay="regular"
+        display="inlineBlock"
         position="top"
       >
         <Styled(EuiButtonIcon)
@@ -21,7 +22,7 @@ exports[`RuleActionsOverflow snapshots renders correctly against snapshot 1`] = 
     }
     closePopover={[Function]}
     data-test-subj="rules-details-popover"
-    display="inlineBlock"
+    display="inline-block"
     hasArrow={true}
     id="ruleActionsOverflow"
     isOpen={false}
@@ -31,7 +32,6 @@ exports[`RuleActionsOverflow snapshots renders correctly against snapshot 1`] = 
   >
     <EuiContextMenuPanel
       data-test-subj="rules-details-menu-panel"
-      hasFocus={true}
       items={
         Array [
           <EuiContextMenuItem
@@ -42,6 +42,7 @@ exports[`RuleActionsOverflow snapshots renders correctly against snapshot 1`] = 
           >
             <EuiToolTip
               delay="regular"
+              display="inlineBlock"
               position="left"
             >
               <React.Fragment>
@@ -69,12 +70,5 @@ exports[`RuleActionsOverflow snapshots renders correctly against snapshot 1`] = 
       }
     />
   </EuiPopover>
-  <GenericDownloader
-    data-test-subj="rules-details-generic-downloader"
-    exportSelectedData={[Function]}
-    filename="rules_export.ndjson"
-    ids={Array []}
-    onExportSuccess={[Function]}
-  />
 </Fragment>
 `;

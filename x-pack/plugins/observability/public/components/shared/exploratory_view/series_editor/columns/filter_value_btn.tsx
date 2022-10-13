@@ -5,13 +5,15 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
+
 import React, { useMemo } from 'react';
 import { EuiFilterButton, hexToRgb } from '@elastic/eui';
-import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
-import { useUrlStorage } from '../../hooks/use_url_storage';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { useAppDataViewContext } from '../../hooks/use_app_data_view';
 import { useSeriesFilters } from '../../hooks/use_series_filters';
-import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import FieldValueSuggestions from '../../../field_value_suggestions';
+import { SeriesUrl } from '../../types';
+import { NestedFilterOpen } from './filter_expanded';
 
 interface Props {
   value: string;
@@ -19,12 +21,13 @@ interface Props {
   allSelectedValues?: string[];
   negate: boolean;
   nestedField?: string;
-  seriesId: string;
+  seriesId: number;
+  series: SeriesUrl;
   isNestedOpen: {
     value: string;
     negate: boolean;
   };
-  setIsNestedOpen: (val: { value: string; negate: boolean }) => void;
+  setIsNestedOpen: (val: NestedFilterOpen) => void;
 }
 
 export function FilterValueButton({
@@ -34,14 +37,13 @@ export function FilterValueButton({
   field,
   negate,
   seriesId,
+  series,
   nestedField,
   allSelectedValues,
 }: Props) {
-  const { series } = useUrlStorage(seriesId);
+  const { dataViews } = useAppDataViewContext(series.dataType);
 
-  const { indexPattern } = useAppIndexPatternContext();
-
-  const { setFilter, removeFilter } = useSeriesFilters({ seriesId });
+  const { setFilter, removeFilter } = useSeriesFilters({ seriesId, series });
 
   const hasActiveFilters = (allSelectedValues ?? []).includes(value);
 
@@ -94,13 +96,14 @@ export function FilterValueButton({
     <FieldValueSuggestions
       button={button}
       label={'Version'}
-      indexPattern={indexPattern}
       sourceField={nestedField}
       onChange={onNestedChange}
       filters={filters}
       forceOpen={forceOpenNested}
       anchorPosition="rightCenter"
       time={series.time}
+      asCombobox={false}
+      dataViewTitle={dataViews[series.dataType]?.title}
     />
   ) : (
     button

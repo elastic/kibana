@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import path from 'path';
-
 export default async function ({ readConfigFile }) {
   // Read the Kibana API integration tests config file so that we can utilize its services.
   const kibanaAPITestsConfig = await readConfigFile(
     require.resolve('../../../test/api_integration/config.js')
   );
   const xPackFunctionalTestsConfig = await readConfigFile(
-    require.resolve('../functional/config.js')
+    require.resolve('../functional/config.base.js')
   );
   const kibanaCommonConfig = await readConfigFile(
     require.resolve('../../../test/common/config.js')
@@ -26,14 +24,14 @@ export default async function ({ readConfigFile }) {
       ...kibanaCommonConfig.get('services'),
       supertest: kibanaAPITestsConfig.get('services.supertest'),
     },
-    esArchiver: xPackFunctionalTestsConfig.get('esArchiver'),
     junit: {
       reportName: 'X-Pack Upgrade Assistant Integration Tests',
     },
     kbnTestServer: xPackFunctionalTestsConfig.get('kbnTestServer'),
     esTestCluster: {
       ...xPackFunctionalTestsConfig.get('esTestCluster'),
-      dataArchive: path.resolve(__dirname, './fixtures/data_archives/upgrade_assistant.zip'),
+      // this archive can not be loaded into 8.0+
+      // dataArchive: path.resolve(__dirname, './fixtures/data_archives/upgrade_assistant.zip'),
     },
   };
 }

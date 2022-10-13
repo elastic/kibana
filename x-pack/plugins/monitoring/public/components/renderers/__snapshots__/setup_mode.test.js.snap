@@ -76,16 +76,9 @@ exports[`SetupModeRenderer should render the flyout open 1`] = `
           <EuiFlexItem
             grow={false}
           >
-            <EuiButton
-              color="danger"
-              fill={true}
-              iconSide="right"
-              iconType="flag"
-              onClick={[Function]}
-              size="s"
-            >
-              Exit setup mode
-            </EuiButton>
+            <SetupModeExitButton
+              exitSetupMode={[Function]}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
@@ -176,16 +169,9 @@ exports[`SetupModeRenderer should render with setup mode enabled 1`] = `
           <EuiFlexItem
             grow={false}
           >
-            <EuiButton
-              color="danger"
-              fill={true}
-              iconSide="right"
-              iconType="flag"
-              onClick={[Function]}
-              size="s"
-            >
-              Exit setup mode
-            </EuiButton>
+            <SetupModeExitButton
+              exitSetupMode={[Function]}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

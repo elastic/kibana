@@ -7,9 +7,9 @@
 
 import React, { FC, Fragment, useCallback, memo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
-import { XYBrushArea } from '@elastic/charts';
+import { XYBrushEvent, BrushEndListener } from '@elastic/charts';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -23,7 +23,7 @@ import {
 
 import { EventRateChart } from '../../../jobs/new_job/pages/components/charts/event_rate_chart/event_rate_chart';
 import { Anomaly } from '../../../jobs/new_job/common/results_loader/results_loader';
-import { useCurrentEuiTheme } from '../../../components/color_range_legend';
+import { useCurrentEuiTheme } from '../../color_range_legend';
 import { LineChartPoint } from '../../../jobs/new_job/common/chart_loader/chart_loader';
 
 export interface CalendarEvent {
@@ -57,7 +57,7 @@ export const CreateCalendar: FC<Props> = ({
   const { euiTheme } = useCurrentEuiTheme();
 
   const onBrushEnd = useCallback(
-    ({ x }: XYBrushArea) => {
+    ({ x }: XYBrushEvent) => {
       if (x && x.length === 2) {
         const end = x[1] < minSelectableTimeStamp ? null : x[1];
         if (end !== null) {
@@ -74,6 +74,7 @@ export const CreateCalendar: FC<Props> = ({
         }
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [calendarEvents]
   );
 
@@ -90,6 +91,7 @@ export const CreateCalendar: FC<Props> = ({
         setCalendarEvents([...calendarEvents]);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [calendarEvents]
   );
 
@@ -106,6 +108,7 @@ export const CreateCalendar: FC<Props> = ({
         setCalendarEvents([...calendarEvents]);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [calendarEvents]
   );
 
@@ -117,6 +120,7 @@ export const CreateCalendar: FC<Props> = ({
         setCalendarEvents([...calendarEvents]);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [calendarEvents]
   );
 
@@ -128,6 +132,7 @@ export const CreateCalendar: FC<Props> = ({
         setCalendarEvents(ce);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [calendarEvents]
   );
 
@@ -252,7 +257,7 @@ interface ChartProps {
   eventRateData: LineChartPoint[];
   anomalies: Anomaly[];
   loading: boolean;
-  onBrushEnd(area: XYBrushArea): void;
+  onBrushEnd(area: XYBrushEvent): void;
   overlayRanges: Array<{ start: number; end: number }>;
   overlayColor: string;
 }
@@ -272,7 +277,7 @@ const Chart: FC<ChartProps> = memo(
         color: overlayColor,
         showMarker: false,
       }))}
-      onBrushEnd={onBrushEnd}
+      onBrushEnd={onBrushEnd as BrushEndListener}
     />
   ),
   (prev: ChartProps, next: ChartProps) => {

@@ -19,7 +19,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { policyConfig } from '../store/policy_details/selectors';
 import { usePolicyDetailsSelector } from './policy_hooks';
@@ -95,7 +95,7 @@ const warningMessage = i18n.translate(
   }
 );
 
-export const AdvancedPolicyForms = React.memo(() => {
+export const AdvancedPolicyForms = React.memo(({ isPlatinumPlus }: { isPlatinumPlus: boolean }) => {
   return (
     <>
       <EuiCallOut title={calloutTitle} color="warning" iconType="alert">
@@ -113,14 +113,17 @@ export const AdvancedPolicyForms = React.memo(() => {
       <EuiPanel data-test-subj="advancedPolicyPanel" paddingSize="s">
         {AdvancedPolicySchema.map((advancedField, index) => {
           const configPath = advancedField.key.split('.');
+          const failsPlatinumLicenseCheck = !isPlatinumPlus && advancedField.license === 'platinum';
           return (
-            <PolicyAdvanced
-              key={index}
-              configPath={configPath}
-              firstSupportedVersion={advancedField.first_supported_version}
-              lastSupportedVersion={advancedField.last_supported_version}
-              documentation={advancedField.documentation}
-            />
+            !failsPlatinumLicenseCheck && (
+              <PolicyAdvanced
+                key={index}
+                configPath={configPath}
+                firstSupportedVersion={advancedField.first_supported_version}
+                lastSupportedVersion={advancedField.last_supported_version}
+                documentation={advancedField.documentation}
+              />
+            )
           );
         })}
       </EuiPanel>
@@ -149,7 +152,7 @@ const PolicyAdvanced = React.memo(
         if (policyDetailsConfig) {
           const newPayload = cloneDeep(policyDetailsConfig);
           setValue(
-            (newPayload as unknown) as Record<string, unknown>,
+            newPayload as unknown as Record<string, unknown>,
             event.target.value,
             configPath
           );
@@ -164,17 +167,17 @@ const PolicyAdvanced = React.memo(
 
     const value =
       policyDetailsConfig &&
-      getValue((policyDetailsConfig as unknown) as Record<string, unknown>, configPath);
+      getValue(policyDetailsConfig as unknown as Record<string, unknown>, configPath);
 
     return (
       <>
         <EuiFormRow
           fullWidth
           label={
-            <EuiFlexGroup>
-              <EuiFlexItem>{configPath.join('.')}</EuiFlexItem>
+            <EuiFlexGroup responsive={false}>
+              <EuiFlexItem grow={true}>{configPath.join('.')}</EuiFlexItem>
               {documentation && (
-                <EuiFlexItem>
+                <EuiFlexItem grow={false}>
                   <EuiIconTip content={documentation} position="right" />
                 </EuiFlexItem>
               )}

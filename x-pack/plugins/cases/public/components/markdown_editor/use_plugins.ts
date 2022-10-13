@@ -13,14 +13,20 @@ import {
 import { useMemo } from 'react';
 import { useTimelineContext } from '../timeline_context/use_timeline_context';
 import { TemporaryProcessingPluginsType } from './types';
+import { KibanaServices, useApplicationCapabilities } from '../../common/lib/kibana';
+import * as lensMarkdownPlugin from './plugins/lens';
+import { ID as LensPluginId } from './plugins/lens/constants';
 
-export const usePlugins = () => {
+export const usePlugins = (disabledPlugins?: string[]) => {
+  const kibanaConfig = KibanaServices.getConfig();
   const timelinePlugins = useTimelineContext()?.editor_plugins;
+  const appCapabilities = useApplicationCapabilities();
 
   return useMemo(() => {
     const uiPlugins = getDefaultEuiMarkdownUiPlugins();
     const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();
-    const processingPlugins = getDefaultEuiMarkdownProcessingPlugins() as TemporaryProcessingPluginsType;
+    const processingPlugins =
+      getDefaultEuiMarkdownProcessingPlugins() as TemporaryProcessingPluginsType;
 
     if (timelinePlugins) {
       uiPlugins.push(timelinePlugins.uiPlugin);
@@ -31,10 +37,27 @@ export const usePlugins = () => {
       processingPlugins[1][1].components.timeline = timelinePlugins.processingPluginRenderer;
     }
 
+    if (
+      kibanaConfig?.markdownPlugins?.lens &&
+      !disabledPlugins?.includes(LensPluginId) &&
+      appCapabilities?.visualize.crud
+    ) {
+      uiPlugins.push(lensMarkdownPlugin.plugin);
+    }
+
+    parsingPlugins.push(lensMarkdownPlugin.parser);
+    // This line of code is TS-compatible and it will break if [1][1] change in the future.
+    processingPlugins[1][1].components.lens = lensMarkdownPlugin.renderer;
+
     return {
       uiPlugins,
       parsingPlugins,
       processingPlugins,
     };
-  }, [timelinePlugins]);
+  }, [
+    appCapabilities?.visualize.crud,
+    disabledPlugins,
+    kibanaConfig?.markdownPlugins?.lens,
+    timelinePlugins,
+  ]);
 };

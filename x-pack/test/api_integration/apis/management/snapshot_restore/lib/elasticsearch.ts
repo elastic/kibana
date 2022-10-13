@@ -7,9 +7,10 @@
 
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-interface SlmPolicy {
+export interface SlmPolicy {
+  policyName: string;
+  // snapshot name
   name: string;
-  snapshotName: string;
   schedule: string;
   repository: string;
   isManagedPolicy: boolean;
@@ -29,56 +30,48 @@ interface SlmPolicy {
 }
 
 /**
- * Helpers to create and delete SLM policies on the Elasticsearch instance
+ * Helpers to create and delete SLM policies, repositories and snapshots on the Elasticsearch instance
  * during our tests.
- * @param {ElasticsearchClient} es The Elasticsearch client instance
  */
 export const registerEsHelpers = (getService: FtrProviderContext['getService']) => {
   let policiesCreated: string[] = [];
 
   const es = getService('es');
 
-  const createRepository = (repoName: string) => {
-    return es.snapshot
-      .createRepository({
-        repository: repoName,
-        body: {
-          type: 'fs',
-          settings: {
-            location: '/tmp/',
-          },
+  const createRepository = (repoName: string, repoPath?: string) => {
+    return es.snapshot.createRepository({
+      name: repoName,
+      body: {
+        type: 'fs',
+        settings: {
+          location: repoPath ?? '/tmp/repo',
         },
-        verify: false,
-      })
-      .then(({ body }) => body);
+      },
+      verify: false,
+    });
   };
 
   const createPolicy = (policy: SlmPolicy, cachePolicy?: boolean) => {
     if (cachePolicy) {
-      policiesCreated.push(policy.name);
+      policiesCreated.push(policy.policyName);
     }
 
-    return es.slm
-      .putLifecycle({
-        policy_id: policy.name,
-        // TODO: bring {@link SlmPolicy} in line with {@link PutSnapshotLifecycleRequest['body']}
-        // @ts-expect-error
-        body: policy,
-      })
-      .then(({ body }) => body);
+    return es.slm.putLifecycle({
+      policy_id: policy.policyName,
+      // TODO: bring {@link SlmPolicy} in line with {@link PutSnapshotLifecycleRequest['body']}
+      // @ts-expect-error
+      body: policy,
+    });
   };
 
   const getPolicy = (policyName: string) => {
-    return es.slm
-      .getLifecycle({
-        policy_id: policyName,
-        human: true,
-      })
-      .then(({ body }) => body);
+    return es.slm.getLifecycle({
+      policy_id: policyName,
+      human: true,
+    });
   };
 
-  const deletePolicy = (policyName: string) =>
-    es.slm.deleteLifecycle({ policy_id: policyName }).then(({ body }) => body);
+  const deletePolicy = (policyName: string) => es.slm.deleteLifecycle({ policy_id: policyName });
 
   const cleanupPolicies = () =>
     Promise.all(policiesCreated.map(deletePolicy))
@@ -90,11 +83,32 @@ export const registerEsHelpers = (getService: FtrProviderContext['getService']) 
         console.log(`[Cleanup error] Error deleting ES resources: ${err.message}`);
       });
 
+  const executePolicy = (policyName: string) => {
+    return es.slm.executeLifecycle({ policy_id: policyName });
+  };
+
+  const createSnapshot = (snapshotName: string, repositoryName: string) => {
+    return es.snapshot.create({ snapshot: snapshotName, repository: repositoryName });
+  };
+
+  const deleteSnapshots = (repositoryName: string) => {
+    es.snapshot
+      .delete({ repository: repositoryName, snapshot: '*' })
+      .then(() => {})
+      .catch((err) => {
+        // eslint-disable-next-line no-console
+        console.log(`[Cleanup error] Error deleting snapshots: ${err.message}`);
+      });
+  };
+
   return {
     createRepository,
     createPolicy,
     deletePolicy,
     cleanupPolicies,
     getPolicy,
+    executePolicy,
+    createSnapshot,
+    deleteSnapshots,
   };
 };

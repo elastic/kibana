@@ -5,22 +5,20 @@
  * 2.0.
  */
 
-import { AlertAction } from '../../../alerting/common';
+import type { RuleAction } from '@kbn/alerting-plugin/common';
 
-export type RuleAlertAction = Omit<AlertAction, 'actionTypeId'> & {
+export type RuleAlertAction = Omit<RuleAction, 'actionTypeId'> & {
   action_type_id: string;
 };
 
-export type SearchTypes =
-  | string
-  | string[]
-  | number
-  | number[]
-  | boolean
-  | boolean[]
-  | object
-  | object[]
-  | undefined;
+/**
+ * Defines the search types you can have from Elasticsearch within a
+ * doc._source. It uses recursive types of "| SearchTypes[]" to designate
+ * anything can also be of a type array, and it uses the recursive type of
+ * "| { [property: string]: SearchTypes }" to designate you can can sub-objects
+ * or sub-sub-objects, etc...
+ */
+export type SearchTypes = string | number | boolean | object | SearchTypes[] | undefined;
 
 export interface Explanation {
   value: number;
@@ -55,4 +53,8 @@ export interface EqlSearchResponse<T> {
     sequences?: Array<EqlSequence<T>>;
     events?: Array<BaseHit<T>>;
   };
+}
+
+export interface HTTPError extends Error {
+  body?: unknown;
 }

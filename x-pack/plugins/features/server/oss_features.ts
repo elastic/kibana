@@ -6,18 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import type { KibanaFeatureConfig, SubFeatureConfig } from '../common';
 
 export interface BuildOSSFeaturesParams {
   savedObjectTypes: string[];
-  includeTimelion: boolean;
   includeReporting: boolean;
 }
 
 export const buildOSSFeatures = ({
   savedObjectTypes,
-  includeTimelion,
   includeReporting,
 }: BuildOSSFeaturesParams): KibanaFeatureConfig[] => {
   return [
@@ -34,15 +32,25 @@ export const buildOSSFeatures = ({
       category: DEFAULT_APP_CATEGORIES.kibana,
       app: ['discover', 'kibana'],
       catalogue: ['discover'],
+      alerting: ['.es-query'],
       privileges: {
         all: {
           app: ['discover', 'kibana'],
+          api: ['fileUpload:analyzeFile'],
           catalogue: ['discover'],
           savedObject: {
-            all: ['search', 'query', 'index-pattern'],
-            read: [],
+            all: ['search', 'query'],
+            read: ['index-pattern'],
           },
           ui: ['show', 'save', 'saveQuery'],
+          alerting: {
+            rule: {
+              all: ['.es-query'],
+            },
+            alert: {
+              all: ['.es-query'],
+            },
+          },
         },
         read: {
           app: ['discover', 'kibana'],
@@ -52,6 +60,14 @@ export const buildOSSFeatures = ({
             read: ['index-pattern', 'search', 'query'],
           },
           ui: ['show'],
+          alerting: {
+            rule: {
+              all: ['.es-query'],
+            },
+            alert: {
+              all: ['.es-query'],
+            },
+          },
         },
       },
       subFeatures: [
@@ -202,7 +218,6 @@ export const buildOSSFeatures = ({
               'index-pattern',
               'search',
               'visualization',
-              'timelion-sheet',
               'canvas-workpad',
               'lens',
               'map',
@@ -220,7 +235,6 @@ export const buildOSSFeatures = ({
               'index-pattern',
               'search',
               'visualization',
-              'timelion-sheet',
               'canvas-workpad',
               'lens',
               'map',
@@ -371,8 +385,8 @@ export const buildOSSFeatures = ({
     },
     {
       id: 'indexPatterns',
-      name: i18n.translate('xpack.features.indexPatternFeatureName', {
-        defaultMessage: 'Index Pattern Management',
+      name: i18n.translate('xpack.features.dataViewFeatureName', {
+        defaultMessage: 'Data View Management',
       }),
       order: 1600,
       category: DEFAULT_APP_CATEGORIES.management,
@@ -449,37 +463,7 @@ export const buildOSSFeatures = ({
         },
       },
     },
-    ...(includeTimelion ? [timelionFeature] : []),
   ] as KibanaFeatureConfig[];
-};
-
-const timelionFeature: KibanaFeatureConfig = {
-  id: 'timelion',
-  name: 'Timelion',
-  order: 350,
-  category: DEFAULT_APP_CATEGORIES.kibana,
-  app: ['timelion', 'kibana'],
-  catalogue: ['timelion'],
-  privileges: {
-    all: {
-      app: ['timelion', 'kibana'],
-      catalogue: ['timelion'],
-      savedObject: {
-        all: ['timelion-sheet'],
-        read: ['index-pattern'],
-      },
-      ui: ['save'],
-    },
-    read: {
-      app: ['timelion', 'kibana'],
-      catalogue: ['timelion'],
-      savedObject: {
-        all: [],
-        read: ['index-pattern', 'timelion-sheet'],
-      },
-      ui: [],
-    },
-  },
 };
 
 const reportingPrivilegeGroupName = i18n.translate(
@@ -530,7 +514,7 @@ const reportingFeatures: {
               }
             ),
             includeIn: 'all',
-            minimumLicense: 'platinum',
+            minimumLicense: 'gold',
             savedObject: { all: [], read: [] },
             management: { insightsAndAlerting: ['reporting'] },
             api: ['generateReport'],
@@ -566,7 +550,7 @@ const reportingFeatures: {
               }
             ),
             includeIn: 'all',
-            minimumLicense: 'platinum',
+            minimumLicense: 'gold',
             savedObject: { all: [], read: [] },
             management: { insightsAndAlerting: ['reporting'] },
             api: ['generateReport'],

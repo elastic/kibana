@@ -38,12 +38,12 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should successfully create calendar by id', async () => {
-      await supertest
+      const { body, status } = await supertest
         .put(`/api/ml/calendars`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
         .set(COMMON_REQUEST_HEADERS)
-        .send(requestBody)
-        .expect(200);
+        .send(requestBody);
+      ml.api.assertResponseStatusCode(200, status, body);
 
       const results = await ml.api.getCalendar(requestBody.calendarId);
       const createdCalendar = results.body.calendars[0];
@@ -52,20 +52,16 @@ export default ({ getService }: FtrProviderContext) => {
       expect(createdCalendar.description).to.eql(requestBody.description);
       expect(createdCalendar.job_ids).to.eql(requestBody.job_ids);
 
-      await ml.api.waitForEventsToExistInCalendar(
-        calendarId,
-        // @ts-expect-error not full interface
-        requestBody.events
-      );
+      await ml.api.waitForEventsToExistInCalendar(calendarId, requestBody.events);
     });
 
     it('should not create new calendar for user without required permission', async () => {
-      const { body } = await supertest
+      const { body, status } = await supertest
         .put(`/api/ml/calendars`)
         .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
         .set(COMMON_REQUEST_HEADERS)
-        .send(requestBody)
-        .expect(403);
+        .send(requestBody);
+      ml.api.assertResponseStatusCode(403, status, body);
 
       expect(body.error).to.eql('Forbidden');
       expect(body.message).to.eql('Forbidden');
@@ -73,12 +69,12 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should not create new calendar for unauthorized user', async () => {
-      const { body } = await supertest
+      const { body, status } = await supertest
         .put(`/api/ml/calendars`)
         .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
         .set(COMMON_REQUEST_HEADERS)
-        .send(requestBody)
-        .expect(403);
+        .send(requestBody);
+      ml.api.assertResponseStatusCode(403, status, body);
 
       expect(body.error).to.eql('Forbidden');
       expect(body.message).to.eql('Forbidden');

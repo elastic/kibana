@@ -10,16 +10,16 @@ import { failure } from 'io-ts/lib/PathReporter';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
+import type { TimelineSavedObject } from '../../../../../common/types/timeline';
 import {
   SavedTimelineRuntimeType,
   TimelineTypeLiteralWithNullRt,
-  TimelineSavedObject,
   TimelineType,
   TimelineStatus,
 } from '../../../../../common/types/timeline';
 
 // TODO: Added to support legacy TimelineType.draft, can be removed in 7.10
-export const TimelineSavedObjectWithDraftRuntimeType = intersection([
+const TimelineSavedObjectWithDraftRuntime = intersection([
   type({
     id: string,
     version: string,
@@ -51,9 +51,9 @@ const getTimelineTypeAndStatus = (
   };
 };
 
-export const convertSavedObjectToSavedTimeline = (savedObject: unknown): TimelineSavedObject => {
-  const timeline = pipe(
-    TimelineSavedObjectWithDraftRuntimeType.decode(savedObject),
+export const convertSavedObjectToSavedTimeline = (savedObject: unknown): TimelineSavedObject =>
+  pipe(
+    TimelineSavedObjectWithDraftRuntime.decode(savedObject),
     map((savedTimeline) => {
       const attributes = {
         ...savedTimeline.attributes,
@@ -78,6 +78,3 @@ export const convertSavedObjectToSavedTimeline = (savedObject: unknown): Timelin
       throw new Error(failure(errors).join('\n'));
     }, identity)
   );
-
-  return timeline;
-};

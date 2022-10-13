@@ -13,9 +13,8 @@ import { tabColor } from '../../../../../../../../../common/util/group_color_uti
 import { Description } from './description';
 
 export const GroupsInput: FC = () => {
-  const { jobCreator, jobCreatorUpdate, jobValidator, jobValidatorUpdated } = useContext(
-    JobCreatorContext
-  );
+  const { jobCreator, jobCreatorUpdate, jobValidator, jobValidatorUpdated } =
+    useContext(JobCreatorContext);
   const { existingJobsAndGroups } = useContext(JobCreatorContext);
   const [selectedGroups, setSelectedGroups] = useState(jobCreator.groups);
 
@@ -30,11 +29,13 @@ export const GroupsInput: FC = () => {
       valid,
       message,
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobValidatorUpdated]);
 
   useEffect(() => {
     jobCreator.groups = selectedGroups;
     jobCreatorUpdate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedGroups.join()]);
 
   const options: EuiComboBoxOptionOption[] = existingJobsAndGroups.groupIds.map((g: string) => ({

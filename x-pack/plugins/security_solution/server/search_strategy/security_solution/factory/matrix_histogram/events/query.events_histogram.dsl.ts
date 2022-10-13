@@ -12,9 +12,10 @@ import {
   createQueryFilterClauses,
   calculateTimeSeriesInterval,
 } from '../../../../../utils/build_query';
-import { MatrixHistogramRequestOptions } from '../../../../../../common/search_strategy/security_solution/matrix_histogram';
+import type { MatrixHistogramRequestOptions } from '../../../../../../common/search_strategy/security_solution/matrix_histogram';
 import * as i18n from './translations';
-import { BaseQuery, buildThresholdCardinalityQuery, buildThresholdTermsQuery } from './helpers';
+import type { BaseQuery } from './helpers';
+import { buildThresholdCardinalityQuery, buildThresholdTermsQuery } from './helpers';
 
 export const buildEventsHistogramQuery = ({
   filterQuery,
@@ -22,9 +23,46 @@ export const buildEventsHistogramQuery = ({
   defaultIndex,
   stackByField = 'event.action',
   threshold,
+  includeMissingData = true,
+  runtimeMappings,
 }: MatrixHistogramRequestOptions) => {
+  const [queryFilterFirstClause, ...queryFilterClauses] = createQueryFilterClauses(filterQuery);
+  const stackByIpField =
+    stackByField != null &&
+    showAllOthersBucket.includes(stackByField) &&
+    stackByField.endsWith('.ip');
+
   const filter = [
-    ...createQueryFilterClauses(filterQuery),
+    ...[
+      {
+        ...queryFilterFirstClause,
+        bool: {
+          ...(queryFilterFirstClause.bool || {}),
+          must_not: [
+            ...(queryFilterFirstClause.bool?.must_not || []),
+            ...(stackByIpField && includeMissingData
+              ? [
+                  {
+                    exists: {
+                      field: stackByField,
+                    },
+                  },
+                ]
+              : []),
+          ],
+        },
+      },
+      ...queryFilterClauses,
+    ],
+    ...(stackByIpField && !includeMissingData
+      ? [
+          {
+            exists: {
+              field: stackByField,
+            },
+          },
+        ]
+      : []),
     {
       range: {
         '@timestamp': {
@@ -54,7 +92,12 @@ export const buildEventsHistogramQuery = ({
     const missing =
       stackByField != null && showAllOthersBucket.includes(stackByField)
         ? {
-            missing: stackByField?.endsWith('.ip') ? '0.0.0.0' : i18n.ALL_OTHERS,
+            ...(includeMissingData
+              ? stackByField?.endsWith('.ip')
+                ? { missing: '0.0.0.0' }
+                : { missing: i18n.ALL_OTHERS }
+              : {}),
+            ...(stackByField?.endsWith('.ip') ? { value_type: 'ip' } : {}),
           }
         : {};
 
@@ -111,8 +154,8 @@ export const buildEventsHistogramQuery = ({
 
   const dslQuery = {
     index: defaultIndex,
-    allowNoIndices: true,
-    ignoreUnavailable: true,
+    allow_no_indices: true,
+    ignore_unavailable: true,
     track_total_hits: true,
     body: {
       aggregations: getHistogramAggregation(),
@@ -121,6 +164,7 @@ export const buildEventsHistogramQuery = ({
           filter,
         },
       },
+      runtime_mappings: runtimeMappings,
       size: 0,
     },
   };

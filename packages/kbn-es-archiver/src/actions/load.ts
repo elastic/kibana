@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { resolve } from 'path';
+import { resolve, relative } from 'path';
 import { createReadStream } from 'fs';
 import { Readable } from 'stream';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
+import { REPO_ROOT } from '@kbn/utils';
 import { KbnClient } from '@kbn/test';
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
+import type { Client } from '@elastic/elasticsearch';
 import { createPromiseFromStreams, concatStreamProviders } from '@kbn/utils';
 import { ES_CLIENT_HEADERS } from '../client_headers';
 
@@ -37,23 +38,23 @@ const pipeline = (...streams: Readable[]) =>
   );
 
 export async function loadAction({
-  name,
+  inputDir,
   skipExisting,
   useCreate,
+  docsOnly,
   client,
-  dataDir,
   log,
   kbnClient,
 }: {
-  name: string;
+  inputDir: string;
   skipExisting: boolean;
   useCreate: boolean;
-  client: KibanaClient;
-  dataDir: string;
+  docsOnly?: boolean;
+  client: Client;
   log: ToolingLog;
   kbnClient: KbnClient;
 }) {
-  const inputDir = resolve(dataDir, name);
+  const name = relative(REPO_ROOT, inputDir);
   const stats = createStats(name, log);
   const files = prioritizeMappings(await readDirectory(inputDir));
   const kibanaPluginIds = await kbnClient.plugins.getEnabledIds();
@@ -78,22 +79,24 @@ export async function loadAction({
 
   await createPromiseFromStreams([
     recordStream,
-    createCreateIndexStream({ client, stats, skipExisting, log }),
+    createCreateIndexStream({ client, stats, skipExisting, docsOnly, log }),
     createIndexDocRecordsStream(client, stats, progress, useCreate),
   ]);
 
   progress.deactivate();
   const result = stats.toJSON();
 
+  const indicesWithDocs: string[] = [];
   for (const [index, { docs }] of Object.entries(result)) {
     if (docs && docs.indexed > 0) {
       log.info('[%s] Indexed %d docs into %j', name, docs.indexed, index);
+      indicesWithDocs.push(index);
     }
   }
 
   await client.indices.refresh(
     {
-      index: '_all',
+      index: indicesWithDocs.join(','),
       allow_no_indices: true,
     },
     {

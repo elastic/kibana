@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockValues, setMockActions } from '../../../../../__mocks__/kea.mock';
+import { setMockValues, setMockActions } from '../../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -13,7 +13,7 @@ import { shallow } from 'enzyme';
 
 import { EuiCheckbox } from '@elastic/eui';
 
-import { FormKeyReadWriteAccess } from './';
+import { FormKeyReadWriteAccess } from '.';
 
 describe('FormKeyReadWriteAccess', () => {
   const values = {

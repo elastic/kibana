@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { AGENT_POLICY_INDEX } from '../../../../plugins/fleet/common';
+import { AGENT_POLICY_INDEX } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
@@ -21,7 +21,7 @@ export default function (providerContext: FtrProviderContext) {
   describe('Settings - update', async function () {
     skipIfNoDockerRegistry(providerContext);
     before(async () => {
-      await esArchiver.load('fleet/empty_fleet_server');
+      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
     setupFleetAndAgents(providerContext);
 
@@ -36,8 +36,20 @@ export default function (providerContext: FtrProviderContext) {
       await Promise.all(deletedPromises);
     });
     after(async () => {
-      await esArchiver.unload('fleet/empty_fleet_server');
+      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
     });
+
+    it('should explicitly set port on fleet_server_hosts', async function () {
+      await supertest
+        .put(`/api/fleet/settings`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ fleet_server_hosts: ['https://test.fr'] })
+        .expect(200);
+
+      const { body: getSettingsRes } = await supertest.get(`/api/fleet/settings`).expect(200);
+      expect(getSettingsRes.item.fleet_server_hosts).to.eql(['https://test.fr:443']);
+    });
+
     it("should bump all agent policy's revision", async function () {
       const { body: testPolicy1PostRes } = await supertest
         .post(`/api/fleet/agent_policies`)
@@ -118,7 +130,7 @@ export default function (providerContext: FtrProviderContext) {
         },
       });
 
-      expect(res.body.hits.hits.length).equal(beforeRes.body.hits.hits.length + 1);
+      expect(res.hits.hits.length).equal(beforeRes.hits.hits.length + 1);
     });
   });
 }

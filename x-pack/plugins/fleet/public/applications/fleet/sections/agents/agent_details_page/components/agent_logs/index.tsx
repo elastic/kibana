@@ -7,23 +7,20 @@
 
 import React, { memo, useEffect, useState, useMemo } from 'react';
 
-import type {
-  INullableBaseStateContainer,
-  PureTransition,
-} from '../../../../../../../../../../../src/plugins/kibana_utils/public';
+import type { INullableBaseStateContainer, PureTransition } from '@kbn/kibana-utils-plugin/public';
 import {
   createStateContainer,
   syncState,
   createKbnUrlStateStorage,
   getStateFromKbnUrl,
-} from '../../../../../../../../../../../src/plugins/kibana_utils/public';
+} from '@kbn/kibana-utils-plugin/public';
 
 import { DEFAULT_LOGS_STATE, STATE_STORAGE_KEY } from './constants';
 import type { AgentLogsProps, AgentLogsState } from './agent_logs';
 import { AgentLogsUI, AgentLogsUrlStateHelper } from './agent_logs';
 
-export const AgentLogs: React.FunctionComponent<Pick<AgentLogsProps, 'agent'>> = memo(
-  ({ agent }) => {
+export const AgentLogs: React.FunctionComponent<Pick<AgentLogsProps, 'agent' | 'agentPolicy'>> =
+  memo(({ agent, agentPolicy }) => {
     const stateContainer = useMemo(
       () =>
         createStateContainer<
@@ -34,7 +31,9 @@ export const AgentLogs: React.FunctionComponent<Pick<AgentLogsProps, 'agent'>> =
         >(
           {
             ...DEFAULT_LOGS_STATE,
-            ...getStateFromKbnUrl<AgentLogsState>(STATE_STORAGE_KEY, window.location.href),
+            ...getStateFromKbnUrl<AgentLogsState>(STATE_STORAGE_KEY, window.location.href, {
+              getFromHashQuery: false,
+            }),
           },
           {
             update: (state) => (updatedState) => ({ ...state, ...updatedState }),
@@ -54,7 +53,7 @@ export const AgentLogs: React.FunctionComponent<Pick<AgentLogsProps, 'agent'>> =
     const [isSyncReady, setIsSyncReady] = useState<boolean>(false);
 
     useEffect(() => {
-      const stateStorage = createKbnUrlStateStorage();
+      const stateStorage = createKbnUrlStateStorage({ useHashQuery: false, useHash: false });
       const { start, stop } = syncState({
         storageKey: STATE_STORAGE_KEY,
         stateContainer: stateContainer as INullableBaseStateContainer<AgentLogsState>,
@@ -71,8 +70,7 @@ export const AgentLogs: React.FunctionComponent<Pick<AgentLogsProps, 'agent'>> =
 
     return (
       <AgentLogsUrlStateHelper.Provider value={stateContainer}>
-        {isSyncReady ? <AgentLogsConnected agent={agent} /> : null}
+        {isSyncReady ? <AgentLogsConnected agent={agent} agentPolicy={agentPolicy} /> : null}
       </AgentLogsUrlStateHelper.Provider>
     );
-  }
-);
+  });

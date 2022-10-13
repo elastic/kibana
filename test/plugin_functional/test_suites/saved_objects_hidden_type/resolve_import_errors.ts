@@ -16,12 +16,12 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
   describe('export', () => {
     before(() =>
       esArchiver.load(
-        '../functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
+        'test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
       )
     );
     after(() =>
       esArchiver.unload(
-        '../functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
+        'test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
       )
     );
 
@@ -95,7 +95,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
               {
                 id: 'op3767a1-9rcg-53u7-jkb3-3dnb74193awc',
                 type: 'test-hidden-non-importable-exportable',
-                title: 'new title!',
                 meta: {
                   title: 'new title!',
                 },

@@ -5,32 +5,34 @@
  * 2.0.
  */
 
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 
 import { i18n } from '@kbn/i18n';
+import type { AgentPolicy } from '@kbn/fleet-plugin/common';
 import { useKibana } from '../common/lib/kibana';
-import { agentPolicyRouteService } from '../../../fleet/common';
+import { useErrorToast } from '../common/hooks/use_error_toast';
 
 interface UseAgentPolicy {
-  policyId: string;
+  policyId?: string;
+  silent?: boolean;
   skip?: boolean;
 }
 
-export const useAgentPolicy = ({ policyId, skip }: UseAgentPolicy) => {
-  const {
-    http,
-    notifications: { toasts },
-  } = useKibana().services;
+export const useAgentPolicy = ({ policyId, skip, silent }: UseAgentPolicy) => {
+  const { http } = useKibana().services;
+  const setErrorToast = useErrorToast();
 
-  return useQuery(
+  return useQuery<{ item: AgentPolicy }, Error, AgentPolicy>(
     ['agentPolicy', { policyId }],
-    () => http.get(agentPolicyRouteService.getInfoPath(policyId)),
+    () => http.get(`/internal/osquery/fleet_wrapper/agent_policies/${policyId}`),
     {
-      enabled: !skip,
+      enabled: !!(policyId && !skip),
       keepPreviousData: true,
       select: (response) => response.item,
+      onSuccess: () => setErrorToast(),
       onError: (error: Error) =>
-        toasts.addError(error, {
+        !silent &&
+        setErrorToast(error, {
           title: i18n.translate('xpack.osquery.agent_policy_details.fetchError', {
             defaultMessage: 'Error while fetching agent policy details',
           }),

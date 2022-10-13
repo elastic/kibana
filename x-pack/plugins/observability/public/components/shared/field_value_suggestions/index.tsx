@@ -6,8 +6,6 @@
  */
 
 import React, { useState } from 'react';
-
-import { useDebounce } from 'react-use';
 import { useValuesList } from '../../../hooks/use_values_list';
 import { FieldValueSelection } from './field_value_selection';
 import { FieldValueSuggestionsProps } from './types';
@@ -17,37 +15,42 @@ export function FieldValueSuggestions({
   fullWidth,
   sourceField,
   label,
-  indexPattern,
+  dataViewTitle,
   selectedValue,
+  excludedValue,
   filters,
   button,
   time,
   width,
   forceOpen,
+  setForceOpen,
   anchorPosition,
   singleSelection,
+  compressed,
+  asFilterButton,
+  usePrependLabel,
+  allowAllValuesSelection,
+  required,
+  allowExclusions = true,
+  cardinalityField,
+  inspector,
   asCombobox = true,
+  keepHistory = true,
   onChange: onSelectionChange,
 }: FieldValueSuggestionsProps) {
   const [query, setQuery] = useState('');
-  const [debouncedValue, setDebouncedValue] = useState('');
 
   const { values, loading } = useValuesList({
-    indexPattern,
+    dataViewTitle,
     query,
     sourceField,
     filters,
     time,
-    keepHistory: true,
+    inspector,
+    cardinalityField,
+    keepHistory,
+    label,
   });
-
-  useDebounce(
-    () => {
-      setQuery(debouncedValue);
-    },
-    400,
-    [debouncedValue]
-  );
 
   const SelectionComponent = asCombobox ? FieldValueCombobox : FieldValueSelection;
 
@@ -55,16 +58,25 @@ export function FieldValueSuggestions({
     <SelectionComponent
       fullWidth={fullWidth}
       singleSelection={singleSelection}
-      values={values as string[]}
+      values={values}
       label={label}
       onChange={onSelectionChange}
-      setQuery={setDebouncedValue}
+      query={query}
+      setQuery={setQuery}
       loading={loading}
       selectedValue={selectedValue}
+      excludedValue={excludedValue}
       button={button}
       forceOpen={forceOpen}
+      setForceOpen={setForceOpen}
       anchorPosition={anchorPosition}
       width={width}
+      compressed={compressed}
+      asFilterButton={asFilterButton}
+      usePrependLabel={usePrependLabel}
+      allowExclusions={allowExclusions}
+      allowAllValuesSelection={singleSelection ? false : allowAllValuesSelection}
+      required={required}
     />
   );
 }

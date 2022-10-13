@@ -36,6 +36,7 @@ import { LoadingIndicator } from '../../components/loading_indicator/loading_ind
 import { mlFieldFormatService } from '../../services/field_format_service';
 
 import { CHART_TYPE } from '../explorer_constants';
+import { TRANSPARENT_BACKGROUND } from './constants';
 
 const CONTENT_WRAPPER_HEIGHT = 215;
 
@@ -62,7 +63,15 @@ export class ExplorerChartDistribution extends React.Component {
   }
 
   renderChart() {
-    const { tooManyBuckets, tooltipService, timeBuckets } = this.props;
+    const {
+      tooManyBuckets,
+      tooltipService,
+      timeBuckets,
+      showSelectedInterval,
+      onPointerUpdate,
+      chartTheme,
+      cursor,
+    } = this.props;
 
     const element = this.rootNode;
     const config = this.props.seriesConfig;
@@ -256,8 +265,71 @@ export class ExplorerChartDistribution extends React.Component {
 
       drawRareChartAxes();
       drawRareChartHighlightedSpan();
+      drawSyncedCursorLine(lineChartGroup);
       drawRareChartDots(data, lineChartGroup, lineChartValuesLine);
       drawRareChartMarkers(data);
+    }
+
+    function drawSyncedCursorLine(lineChartGroup) {
+      lineChartGroup
+        .append('rect')
+        .attr('x', 0)
+        .attr('y', 0)
+        .attr('height', chartHeight)
+        .attr('width', vizWidth)
+        .on('mouseout', function () {
+          onPointerUpdate({
+            chartId: 'ml-anomaly-chart-metric',
+            scale: 'time',
+            smHorizontalValue: null,
+            smVerticalValue: null,
+            type: 'Out',
+            unit: undefined,
+          });
+        })
+        .on('mousemove', function () {
+          const mouse = d3.mouse(this);
+
+          onPointerUpdate({
+            chartId: 'ml-anomaly-chart-metric',
+            scale: 'time',
+            smHorizontalValue: null,
+            smVerticalValue: null,
+            type: 'Over',
+            unit: undefined,
+            x: moment(lineChartXScale.invert(mouse[0])).unix() * 1000,
+          });
+        })
+        .style('fill', TRANSPARENT_BACKGROUND);
+
+      const cursorData =
+        cursor &&
+        cursor.type === 'Over' &&
+        cursor.x >= config.plotEarliest &&
+        cursor.x <= config.plotLatest
+          ? [cursor.x]
+          : [];
+
+      const cursorMouseLine = lineChartGroup
+        .append('g')
+        .attr('class', 'ml-anomaly-chart-cursor')
+        .selectAll('.ml-anomaly-chart-cursor-line')
+        .data(cursorData);
+
+      cursorMouseLine
+        .enter()
+        .append('path')
+        .attr('class', 'ml-anomaly-chart-cursor-line')
+        .attr('d', (ts) => {
+          const xPosition = lineChartXScale(ts);
+          return `M${xPosition},${chartHeight} ${xPosition},0`;
+        })
+        // Use elastic chart's cursor line style if possible
+        .style('stroke', `${chartTheme.crosshair.line.stroke ?? 'black'}`)
+        .style('stroke-width', `${chartTheme.crosshair.line.strokeWidth ?? '1'}px`)
+        .style('stroke-dasharray', chartTheme.crosshair.line.dash ?? '4,4');
+
+      cursorMouseLine.exit().remove();
     }
 
     function drawRareChartAxes() {
@@ -270,12 +342,6 @@ export class ExplorerChartDistribution extends React.Component {
       const tickValuesStart = Math.max(config.selectedEarliest, config.plotEarliest);
       // +1 ms to account for the ms that was subtracted for query aggregations.
       const interval = config.selectedLatest - config.selectedEarliest + 1;
-      const tickValues = getTickValues(
-        tickValuesStart,
-        interval,
-        config.plotEarliest,
-        config.plotLatest
-      );
 
       const xAxis = d3.svg
         .axis()
@@ -286,10 +352,18 @@ export class ExplorerChartDistribution extends React.Component {
         .tickPadding(10)
         .tickFormat((d) => moment(d).format(xAxisTickFormat));
 
-      // With tooManyBuckets the chart would end up with no x-axis labels
-      // because the ticks are based on the span of the emphasis section,
-      // and the highlighted area spans the whole chart.
-      if (tooManyBuckets === false) {
+      // With tooManyBuckets, or when the chart is used as an embeddable,
+      // the chart would end up with no x-axis labels because the ticks are based on the span of the
+      // emphasis section, and the selected area spans the whole chart.
+      const useAutoTicks =
+        tooManyBuckets === true || interval >= config.plotLatest - config.plotEarliest;
+      if (useAutoTicks === false) {
+        const tickValues = getTickValues(
+          tickValuesStart,
+          interval,
+          config.plotEarliest,
+          config.plotLatest
+        );
         xAxis.tickValues(tickValues);
       } else {
         xAxis.ticks(numTicksForDateFormat(vizWidth, xAxisTickFormat));
@@ -327,7 +401,7 @@ export class ExplorerChartDistribution extends React.Component {
           });
       }
 
-      if (tooManyBuckets === false) {
+      if (useAutoTicks === false) {
         removeLabelOverlap(gAxis, tickValuesStart, interval, vizWidth);
       }
     }
@@ -357,6 +431,7 @@ export class ExplorerChartDistribution extends React.Component {
     }
 
     function drawRareChartHighlightedSpan() {
+      if (showSelectedInterval === false) return;
       // Draws a rectangle which highlights the time span that has been selected for view.
       // Note depending on the overall time range and the bucket span, the selected time
       // span may be longer than the range actually being plotted.

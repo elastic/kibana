@@ -11,7 +11,7 @@ export default function ({ getService }: FtrProviderContext) {
   const a11y = getService('a11y');
   const transform = getService('transform');
 
-  describe('transform', () => {
+  describe('transform Accessibility', () => {
     const esArchiver = getService('esArchiver');
 
     before(async () => {
@@ -30,6 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
         await transform.securityUI.logout();
       });
 
@@ -45,8 +46,8 @@ export default function ({ getService }: FtrProviderContext) {
 
         const pivotGroupByEntries = [
           {
-            identifier: 'terms(category.keyword)',
-            label: 'category.keyword',
+            identifier: 'terms(category)',
+            label: 'category',
           },
           {
             identifier: 'date_histogram(order_date)',
@@ -83,7 +84,7 @@ export default function ({ getService }: FtrProviderContext) {
         const latestTransformDestinationIndex = `user-${latestTransformId}`;
 
         before(async () => {
-          await esArchiver.loadIfNeeded('ml/ecommerce');
+          await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
           await transform.testResources.createIndexPatternIfNeeded(ecIndexPattern, 'order_date');
           await transform.testResources.setKibanaTimeZoneToUTC();
         });
@@ -95,7 +96,7 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.testResources.deleteIndexPatternByTitle(pivotTransformDestinationIndex);
           await transform.testResources.deleteIndexPatternByTitle(latestTransformDestinationIndex);
           await transform.testResources.deleteIndexPatternByTitle(ecIndexPattern);
-          await esArchiver.unload('ml/ecommerce');
+          await esArchiver.unload('x-pack/test/functional/es_archives/ml/ecommerce');
           await transform.testResources.resetKibanaTimeZone();
         });
 

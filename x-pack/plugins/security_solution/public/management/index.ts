@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { CoreStart } from 'kibana/public';
-import { Reducer, CombinedState } from 'redux';
-import { ManagementRoutes } from './routes';
-import { StartPlugins } from '../types';
-import { SecuritySubPluginWithStore } from '../app/types';
+import type { CoreStart } from '@kbn/core/public';
+import type { Reducer, CombinedState } from 'redux';
+import { routes } from './routes';
+import type { StartPlugins } from '../types';
+import type { SecuritySubPluginWithStore } from '../app/types';
 import { managementReducer } from './store/reducer';
-import { AppAction } from '../common/store/actions';
+import type { AppAction } from '../common/store/actions';
 import { managementMiddlewareFactory } from './store/middleware';
-import { ManagementState } from './types';
+import type { ManagementState } from './types';
 
 /**
  * Internally, our state is sometimes immutable, ignore that in our external
@@ -39,16 +39,21 @@ export class Management {
     plugins: StartPlugins
   ): SecuritySubPluginWithStore<'management', ManagementState> {
     return {
-      SubPluginRoutes: ManagementRoutes,
+      routes,
       store: {
         initialState: {
-          management: undefined,
+          /**
+           * Cast the state to ManagementState for compatibility with
+           * the subplugin architecture (which expects initialize state.)
+           * but you do not need it because this plugin is doing it through its middleware
+           */
+          management: {} as ManagementState,
         },
         /**
          * Cast the ImmutableReducer to a regular reducer for compatibility with
          * the subplugin architecture (which expects plain redux reducers.)
          */
-        reducer: { management: managementReducer } as ManagementPluginReducer,
+        reducer: { management: managementReducer } as unknown as ManagementPluginReducer,
         middleware: managementMiddlewareFactory(core, plugins),
       },
     };

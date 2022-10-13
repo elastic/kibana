@@ -6,35 +6,30 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from 'src/core/server';
+import { PluginInitializerContext } from '@kbn/core/server';
 import { ExpressionsServerPlugin } from './plugin';
 
-export { ExpressionsServerSetup, ExpressionsServerStart } from './plugin';
+export type { ExpressionsServerSetup, ExpressionsServerStart } from './plugin';
 
 // Kibana Platform.
 export { ExpressionsServerPlugin as Plugin };
-export * from './plugin';
 export function plugin(initializerContext: PluginInitializerContext) {
   return new ExpressionsServerPlugin(initializerContext);
 }
 
 // Static exports.
-export {
+export type {
   AnyExpressionFunctionDefinition,
   AnyExpressionTypeDefinition,
   ArgumentType,
-  buildExpression,
-  buildExpressionFunction,
   Datatable,
   DatatableColumn,
   DatatableColumnType,
   DatatableRow,
-  Execution,
   ExecutionContainer,
   ExecutionContext,
   ExecutionParams,
   ExecutionState,
-  Executor,
   ExecutorContainer,
   ExecutorState,
   ExpressionAstArgument,
@@ -43,15 +38,10 @@ export {
   ExpressionAstFunction,
   ExpressionAstFunctionBuilder,
   ExpressionAstNode,
-  ExpressionFunction,
   ExpressionFunctionDefinition,
   ExpressionFunctionDefinitions,
-  ExpressionFunctionParameter,
   ExpressionImage,
   ExpressionRenderDefinition,
-  ExpressionRenderer,
-  ExpressionRendererRegistry,
-  ExpressionType,
   ExpressionTypeDefinition,
   ExpressionTypeStyle,
   ExpressionValue,
@@ -64,20 +54,11 @@ export {
   ExpressionValueFilter,
   Font,
   FontLabel,
-  FontStyle,
   FontValue,
-  FontWeight,
-  format,
-  formatExpression,
-  FunctionsRegistry,
   IInterpreterRenderHandlers,
   InterpreterErrorType,
   IRegistry,
-  isExpressionAstBuilder,
   KnownTypeToString,
-  Overflow,
-  parse,
-  parseExpression,
   PointSeries,
   PointSeriesColumn,
   PointSeriesColumnName,
@@ -85,13 +66,32 @@ export {
   PointSeriesRow,
   Range,
   SerializedDatatable,
-  SerializedFieldFormat,
   Style,
-  TextAlignment,
-  TextDecoration,
-  TypesRegistry,
   TypeString,
   TypeToString,
   UnmappedTypeStrings,
   ExpressionValueRender as Render,
+} from '../common';
+export {
+  buildExpression,
+  buildExpressionFunction,
+  Execution,
+  Executor,
+  ExpressionFunction,
+  ExpressionFunctionParameter,
+  ExpressionRenderer,
+  ExpressionRendererRegistry,
+  ExpressionType,
+  FontStyle,
+  FontWeight,
+  format,
+  formatExpression,
+  FunctionsRegistry,
+  isExpressionAstBuilder,
+  Overflow,
+  parse,
+  parseExpression,
+  TextAlignment,
+  TextDecoration,
+  TypesRegistry,
 } from '../common';

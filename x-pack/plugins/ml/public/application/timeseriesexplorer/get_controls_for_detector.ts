@@ -16,7 +16,7 @@ export function getControlsForDetector(
   selectedDetectorIndex: number,
   selectedEntities: Record<string, any>,
   selectedJobId: JobId
-) {
+): Entity[] {
   const selectedJob = mlJobService.getJob(selectedJobId);
 
   const entities: Entity[] = [];

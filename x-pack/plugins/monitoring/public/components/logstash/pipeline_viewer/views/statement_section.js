@@ -17,7 +17,7 @@ export function StatementSection({ iconType, headingText, elements, onShowVertex
   }
 
   return (
-    <div>
+    <div data-test-subj={`pipelineViewerSection_${headingText}`}>
       <StatementListHeading iconType={iconType} title={headingText} />
       <EuiSpacer size="s" />
       <StatementList elements={elements} onShowVertexDetails={onShowVertexDetails} />

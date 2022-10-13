@@ -1,15 +1,27 @@
 ---
+####
+#### This document is auto-generated and is meant to be viewed inside our experimental, new docs system.
+#### Reach out in #docs-engineering for more info.
+####
 id: kibObservabilityPluginApi
-slug: /kibana-dev-docs/observabilityPluginApi
-title: observability
+slug: /kibana-dev-docs/api/observability
+title: "observability"
 image: https://source.unsplash.com/400x175/?github
-summary: API docs for the observability plugin
-date: 2020-11-16
+description: API docs for the observability plugin
+date: 2022-10-13
 tags: ['contributor', 'dev', 'apidocs', 'kibana', 'observability']
-warning: This document is auto-generated and is meant to be viewed inside our experimental, new docs system. Reach out in #docs-engineering for more info.
 ---
+import observabilityObj from './observability.devdocs.json';
 
-import observabilityObj from './observability.json';
+
+
+Contact [Observability UI](https://github.com/orgs/elastic/teams/observability-ui) for questions regarding this plugin.
+
+**Code health stats**
+
+| Public API count  | Any count | Items lacking comments | Missing exports |
+|-------------------|-----------|------------------------|-----------------|
+| 529 | 2 | 525 | 30 |
 
 ## Client
 
@@ -36,12 +48,29 @@ import observabilityObj from './observability.json';
 ### Setup
 <DocDefinitionList data={[observabilityObj.server.setup]}/>
 
+### Objects
+<DocDefinitionList data={observabilityObj.server.objects}/>
+
 ### Functions
 <DocDefinitionList data={observabilityObj.server.functions}/>
 
 ### Classes
 <DocDefinitionList data={observabilityObj.server.classes}/>
 
+### Interfaces
+<DocDefinitionList data={observabilityObj.server.interfaces}/>
+
 ### Consts, variables and types
 <DocDefinitionList data={observabilityObj.server.misc}/>
+
+## Common
+
+### Functions
+<DocDefinitionList data={observabilityObj.common.functions}/>
+
+### Enums
+<DocDefinitionList data={observabilityObj.common.enums}/>
+
+### Consts, variables and types
+<DocDefinitionList data={observabilityObj.common.misc}/>
 

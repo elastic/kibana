@@ -5,13 +5,18 @@
  * 2.0.
  */
 
+import React from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
 import { useUpdateComment, UseUpdateComment } from './use_update_comment';
-import { basicCase, basicCaseCommentPatch, basicSubCaseId } from './mock';
+import { basicCase } from './mock';
 import * as api from './api';
+import { TestProviders } from '../common/mock';
+import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
+import { useRefreshCaseViewPage } from '../components/case_view/use_on_refresh_case_view_page';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
+jest.mock('../components/case_view/use_on_refresh_case_view_page');
 
 describe('useUpdateComment', () => {
   const abortCtrl = new AbortController();
@@ -25,6 +30,12 @@ describe('useUpdateComment', () => {
     updateCase,
     version: basicCase.comments[0].version,
   };
+
+  const renderHookUseUpdateComment = () =>
+    renderHook<string, UseUpdateComment>(() => useUpdateComment(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
+
   beforeEach(() => {
     jest.clearAllMocks();
     jest.restoreAllMocks();
@@ -32,9 +43,7 @@ describe('useUpdateComment', () => {
 
   it('init', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseUpdateComment>(() =>
-        useUpdateComment()
-      );
+      const { result, waitForNextUpdate } = renderHookUseUpdateComment();
       await waitForNextUpdate();
       expect(result.current).toEqual({
         isLoadingIds: [],
@@ -48,51 +57,25 @@ describe('useUpdateComment', () => {
     const spyOnPatchComment = jest.spyOn(api, 'patchComment');
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseUpdateComment>(() =>
-        useUpdateComment()
-      );
+      const { result, waitForNextUpdate } = renderHookUseUpdateComment();
       await waitForNextUpdate();
 
       result.current.patchComment(sampleUpdate);
       await waitForNextUpdate();
-      expect(spyOnPatchComment).toBeCalledWith(
-        basicCase.id,
-        basicCase.comments[0].id,
-        'updated comment',
-        basicCase.comments[0].version,
-        abortCtrl.signal,
-        undefined
-      );
-    });
-  });
-
-  it('calls patchComment with correct arguments - sub case', async () => {
-    const spyOnPatchComment = jest.spyOn(api, 'patchComment');
-
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseUpdateComment>(() =>
-        useUpdateComment()
-      );
-      await waitForNextUpdate();
-
-      result.current.patchComment({ ...sampleUpdate, subCaseId: basicSubCaseId });
-      await waitForNextUpdate();
-      expect(spyOnPatchComment).toBeCalledWith(
-        basicCase.id,
-        basicCase.comments[0].id,
-        'updated comment',
-        basicCase.comments[0].version,
-        abortCtrl.signal,
-        basicSubCaseId
-      );
+      expect(spyOnPatchComment).toBeCalledWith({
+        caseId: basicCase.id,
+        commentId: basicCase.comments[0].id,
+        commentUpdate: 'updated comment',
+        version: basicCase.comments[0].version,
+        signal: abortCtrl.signal,
+        owner: SECURITY_SOLUTION_OWNER,
+      });
     });
   });
 
   it('patch comment', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseUpdateComment>(() =>
-        useUpdateComment()
-      );
+      const { result, waitForNextUpdate } = renderHookUseUpdateComment();
       await waitForNextUpdate();
       result.current.patchComment(sampleUpdate);
       await waitForNextUpdate();
@@ -101,16 +84,13 @@ describe('useUpdateComment', () => {
         isError: false,
         patchComment: result.current.patchComment,
       });
-      expect(fetchUserActions).toBeCalled();
-      expect(updateCase).toBeCalledWith(basicCaseCommentPatch);
+      expect(useRefreshCaseViewPage()).toBeCalled();
     });
   });
 
   it('set isLoading to true when posting case', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseUpdateComment>(() =>
-        useUpdateComment()
-      );
+      const { result, waitForNextUpdate } = renderHookUseUpdateComment();
       await waitForNextUpdate();
       result.current.patchComment(sampleUpdate);
 
@@ -125,9 +105,7 @@ describe('useUpdateComment', () => {
     });
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseUpdateComment>(() =>
-        useUpdateComment()
-      );
+      const { result, waitForNextUpdate } = renderHookUseUpdateComment();
       await waitForNextUpdate();
       result.current.patchComment(sampleUpdate);
 

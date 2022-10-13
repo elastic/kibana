@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import { CoreSetup } from 'src/core/server';
+import { CoreSetup } from '@kbn/core/server';
 import { schema, TypeOf } from '@kbn/config-schema';
+import { ActionType } from '@kbn/actions-plugin/server';
 import { FixtureStartDeps, FixtureSetupDeps } from './plugin';
-import { ActionType } from '../../../../../../../plugins/actions/server';
+import {
+  getTestSubActionConnector,
+  getTestSubActionConnectorWithoutSubActions,
+} from './sub_action_connector';
 
 export function defineActionTypes(
   core: CoreSetup<FixtureStartDeps>,
@@ -19,24 +23,47 @@ export function defineActionTypes(
     id: 'test.noop',
     name: 'Test: Noop',
     minimumLicenseRequired: 'gold',
+    supportedFeatureIds: ['alerting'],
     async executor() {
       return { status: 'ok', actionId: '' };
     },
   };
+
   const throwActionType: ActionType = {
     id: 'test.throw',
     name: 'Test: Throw',
     minimumLicenseRequired: 'gold',
+    supportedFeatureIds: ['alerting'],
     async executor() {
       throw new Error('this action is intended to fail');
     },
   };
+
+  const cappedActionType: ActionType = {
+    id: 'test.capped',
+    name: 'Test: Capped',
+    minimumLicenseRequired: 'gold',
+    supportedFeatureIds: ['alerting'],
+    async executor() {
+      return { status: 'ok', actionId: '' };
+    },
+  };
+
   actions.registerType(noopActionType);
   actions.registerType(throwActionType);
+  actions.registerType(cappedActionType);
   actions.registerType(getIndexRecordActionType());
+  actions.registerType(getDelayedActionType());
   actions.registerType(getFailingActionType());
   actions.registerType(getRateLimitedActionType());
+  actions.registerType(getNoAttemptsRateLimitedActionType());
   actions.registerType(getAuthorizationActionType(core));
+  actions.registerType(getExcludedActionType());
+
+  /** Sub action framework */
+
+  actions.registerSubActionConnectorType(getTestSubActionConnector(actions));
+  actions.registerSubActionConnectorType(getTestSubActionConnectorWithoutSubActions(actions));
 }
 
 function getIndexRecordActionType() {
@@ -58,10 +85,17 @@ function getIndexRecordActionType() {
     id: 'test.index-record',
     name: 'Test: Index Record',
     minimumLicenseRequired: 'gold',
+    supportedFeatureIds: ['alerting'],
     validate: {
-      params: paramsSchema,
-      config: configSchema,
-      secrets: secretsSchema,
+      params: {
+        schema: paramsSchema,
+      },
+      config: {
+        schema: configSchema,
+      },
+      secrets: {
+        schema: secretsSchema,
+      },
     },
     async executor({ config, secrets, params, services, actionId }) {
       await services.scopedClusterClient.index({
@@ -81,6 +115,47 @@ function getIndexRecordActionType() {
   return result;
 }
 
+function getDelayedActionType() {
+  const paramsSchema = schema.object({
+    delayInMs: schema.number({ defaultValue: 1000 }),
+  });
+  type ParamsType = TypeOf<typeof paramsSchema>;
+  const configSchema = schema.object({
+    unencrypted: schema.string(),
+  });
+  type ConfigType = TypeOf<typeof configSchema>;
+  const secretsSchema = schema.object({
+    encrypted: schema.string(),
+  });
+  type SecretsType = TypeOf<typeof secretsSchema>;
+  const result: ActionType<ConfigType, SecretsType, ParamsType> = {
+    id: 'test.delayed',
+    name: 'Test: Delayed',
+    minimumLicenseRequired: 'gold',
+    supportedFeatureIds: ['alerting'],
+    validate: {
+      params: {
+        schema: paramsSchema,
+      },
+      config: {
+        schema: configSchema,
+      },
+      secrets: {
+        schema: secretsSchema,
+      },
+    },
+    async executor({ config, secrets, params, services, actionId }) {
+      await new Promise((resolve) => {
+        setTimeout(() => {
+          resolve(true);
+        }, params.delayInMs);
+      });
+      return { status: 'ok', actionId };
+    },
+  };
+  return result;
+}
+
 function getFailingActionType() {
   const paramsSchema = schema.object({
     index: schema.string(),
@@ -91,8 +166,11 @@ function getFailingActionType() {
     id: 'test.failing',
     name: 'Test: Failing',
     minimumLicenseRequired: 'gold',
+    supportedFeatureIds: ['alerting'],
     validate: {
-      params: paramsSchema,
+      params: {
+        schema: paramsSchema,
+      },
     },
     async executor({ config, secrets, params, services }) {
       await services.scopedClusterClient.index({
@@ -123,9 +201,12 @@ function getRateLimitedActionType() {
     id: 'test.rate-limit',
     name: 'Test: Rate Limit',
     minimumLicenseRequired: 'gold',
+    supportedFeatureIds: ['alerting'],
     maxAttempts: 2,
     validate: {
-      params: paramsSchema,
+      params: {
+        schema: paramsSchema,
+      },
     },
     async executor({ config, params, services }) {
       await services.scopedClusterClient.index({
@@ -148,6 +229,46 @@ function getRateLimitedActionType() {
   return result;
 }
 
+function getNoAttemptsRateLimitedActionType() {
+  const paramsSchema = schema.object({
+    index: schema.string(),
+    reference: schema.string(),
+    retryAt: schema.number(),
+  });
+  type ParamsType = TypeOf<typeof paramsSchema>;
+  const result: ActionType<{}, {}, ParamsType> = {
+    id: 'test.no-attempts-rate-limit',
+    name: 'Test: Rate Limit',
+    minimumLicenseRequired: 'gold',
+    supportedFeatureIds: ['alerting'],
+    maxAttempts: 0,
+    validate: {
+      params: {
+        schema: paramsSchema,
+      },
+    },
+    async executor({ config, params, services }) {
+      await services.scopedClusterClient.index({
+        index: params.index,
+        refresh: 'wait_for',
+        body: {
+          params,
+          config,
+          reference: params.reference,
+          source: 'action:test.rate-limit',
+        },
+      });
+      return {
+        status: 'error',
+        message: 'intentional failure from action',
+        retry: new Date(params.retryAt),
+        actionId: '',
+      };
+    },
+  };
+  return result;
+}
+
 function getAuthorizationActionType(core: CoreSetup<FixtureStartDeps>) {
   const paramsSchema = schema.object({
     callClusterAuthorizationIndex: schema.string(),
@@ -161,8 +282,11 @@ function getAuthorizationActionType(core: CoreSetup<FixtureStartDeps>) {
     id: 'test.authorization',
     name: 'Test: Authorization',
     minimumLicenseRequired: 'gold',
+    supportedFeatureIds: ['alerting'],
     validate: {
-      params: paramsSchema,
+      params: {
+        schema: paramsSchema,
+      },
     },
     async executor({ params, services, actionId }) {
       // Call cluster
@@ -230,6 +354,19 @@ function getAuthorizationActionType(core: CoreSetup<FixtureStartDeps>) {
         actionId,
         status: 'ok',
       };
+    },
+  };
+  return result;
+}
+
+function getExcludedActionType() {
+  const result: ActionType<{}, {}, {}, void> = {
+    id: 'test.excluded',
+    name: 'Test: Excluded',
+    minimumLicenseRequired: 'gold',
+    supportedFeatureIds: ['alerting'],
+    async executor({ actionId }) {
+      return { status: 'ok', actionId };
     },
   };
   return result;

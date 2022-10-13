@@ -7,16 +7,23 @@
  */
 
 /**
- * https://www.elastic.co/guide/en/ecs/1.9/ecs-service.html
+ * https://www.elastic.co/guide/en/ecs/master/ecs-service.html
  *
  * @internal
  */
 export interface EcsService {
+  address?: string;
+  environment?: string;
   ephemeral_id?: string;
   id?: string;
   name?: string;
-  node?: { name: string };
+  node?: Node;
   state?: string;
   type?: string;
   version?: string;
+}
+
+interface Node {
+  name?: string;
+  roles?: string[];
 }

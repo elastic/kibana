@@ -5,363 +5,172 @@
  * 2.0.
  */
 
-import {
-  EuiBasicTableColumn,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiInMemoryTable,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiIcon, EuiToolTip } from '@elastic/eui';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
-import { keyBy } from 'lodash';
-import React from 'react';
-import { offsetPreviousPeriodCoordinates } from '../../../../../common/utils/offset_previous_period_coordinate';
-import { Coordinate } from '../../../../../typings/timeseries';
-import { getNextEnvironmentUrlParam } from '../../../../../common/environment_filter_values';
-import {
-  asMillisecondDuration,
-  asPercent,
-  asTransactionRate,
-} from '../../../../../common/utils/formatters';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ServiceDependencyItem } from '../../../../../server/lib/services/get_service_dependencies';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { px, unit } from '../../../../style/variables';
-import { AgentIcon } from '../../../shared/AgentIcon';
-import { SparkPlot } from '../../../shared/charts/spark_plot';
-import { ImpactBar } from '../../../shared/ImpactBar';
-import { ServiceMapLink } from '../../../shared/Links/apm/ServiceMapLink';
-import { ServiceOverviewLink } from '../../../shared/Links/apm/service_overview_link';
-import { SpanIcon } from '../../../shared/span_icon';
-import { TableFetchWrapper } from '../../../shared/table_fetch_wrapper';
-import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
-import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
-import { ServiceOverviewTableContainer } from '../service_overview_table_container';
+import React, { ReactNode } from 'react';
+import { useUiTracker } from '@kbn/observability-plugin/public';
+import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
+import { getNodeName, NodeType } from '../../../../../common/connections';
+import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
+import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useFetcher } from '../../../../hooks/use_fetcher';
+import { useTimeRange } from '../../../../hooks/use_time_range';
+import { DependencyLink } from '../../../shared/dependency_link';
+import { DependenciesTable } from '../../../shared/dependencies_table';
+import { ServiceLink } from '../../../shared/service_link';
 
-interface Props {
-  serviceName: string;
+interface ServiceOverviewDependenciesTableProps {
+  fixedHeight?: boolean;
+  link?: ReactNode;
+  showPerPageOptions?: boolean;
 }
 
-type ServiceDependencyPeriods = ServiceDependencyItem & {
-  latency: { previousPeriodTimeseries?: Coordinate[] };
-  throughput: { previousPeriodTimeseries?: Coordinate[] };
-  errorRate: { previousPeriodTimeseries?: Coordinate[] };
-  previousPeriodImpact?: number;
-};
-
-function mergeCurrentAndPreviousPeriods({
-  currentPeriod = [],
-  previousPeriod = [],
-}: {
-  currentPeriod?: ServiceDependencyItem[];
-  previousPeriod?: ServiceDependencyItem[];
-}): ServiceDependencyPeriods[] {
-  const previousPeriodMap = keyBy(previousPeriod, 'name');
-
-  return currentPeriod.map((currentDependency) => {
-    const previousDependency = previousPeriodMap[currentDependency.name];
-    if (!previousDependency) {
-      return currentDependency;
-    }
-    return {
-      ...currentDependency,
-      latency: {
-        ...currentDependency.latency,
-        previousPeriodTimeseries: offsetPreviousPeriodCoordinates({
-          currentPeriodTimeseries: currentDependency.latency.timeseries,
-          previousPeriodTimeseries: previousDependency.latency?.timeseries,
-        }),
-      },
-      throughput: {
-        ...currentDependency.throughput,
-        previousPeriodTimeseries: offsetPreviousPeriodCoordinates({
-          currentPeriodTimeseries: currentDependency.throughput.timeseries,
-          previousPeriodTimeseries: previousDependency.throughput?.timeseries,
-        }),
-      },
-      errorRate: {
-        ...currentDependency.errorRate,
-        previousPeriodTimeseries: offsetPreviousPeriodCoordinates({
-          currentPeriodTimeseries: currentDependency.errorRate.timeseries,
-          previousPeriodTimeseries: previousDependency.errorRate?.timeseries,
-        }),
-      },
-      previousPeriodImpact: previousDependency.impact,
-    };
-  });
-}
-
-export function ServiceOverviewDependenciesTable({ serviceName }: Props) {
+export function ServiceOverviewDependenciesTable({
+  fixedHeight,
+  link,
+  showPerPageOptions = true,
+}: ServiceOverviewDependenciesTableProps) {
   const {
-    urlParams: { start, end, environment, comparisonEnabled, comparisonType },
-  } = useUrlParams();
+    query: {
+      environment,
+      kuery,
+      rangeFrom,
+      rangeTo,
+      serviceGroup,
+      comparisonEnabled,
+      offset,
+      latencyAggregationType,
+    },
+  } = useApmParams('/services/{serviceName}/*');
 
-  const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
-    start,
-    end,
-    comparisonEnabled,
-    comparisonType,
-  });
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const columns: Array<EuiBasicTableColumn<ServiceDependencyPeriods>> = [
-    {
-      field: 'name',
-      name: i18n.translate(
-        'xpack.apm.serviceOverview.dependenciesTableColumnBackend',
-        {
-          defaultMessage: 'Backend',
-        }
-      ),
-      render: (_, item) => {
-        return (
-          <TruncateWithTooltip
-            text={item.name}
-            content={
-              <EuiFlexGroup gutterSize="s" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  {item.type === 'service' ? (
-                    <AgentIcon agentName={item.agentName} />
-                  ) : (
-                    <SpanIcon type={item.spanType} subType={item.spanSubtype} />
-                  )}
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  {item.type === 'service' ? (
-                    <ServiceOverviewLink
-                      serviceName={item.serviceName}
-                      environment={getNextEnvironmentUrlParam({
-                        requestedEnvironment: item.environment,
-                        currentEnvironmentUrlParam: environment,
-                      })}
-                    >
-                      {item.name}
-                    </ServiceOverviewLink>
-                  ) : (
-                    item.name
-                  )}
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            }
-          />
-        );
-      },
-      sortable: true,
-    },
-    {
-      field: 'latencyValue',
-      name: i18n.translate(
-        'xpack.apm.serviceOverview.dependenciesTableColumnLatency',
-        {
-          defaultMessage: 'Latency (avg.)',
-        }
-      ),
-      width: px(unit * 10),
-      render: (_, { latency }) => {
-        return (
-          <SparkPlot
-            color="euiColorVis1"
-            series={latency.timeseries}
-            comparisonSeries={
-              comparisonEnabled ? latency.previousPeriodTimeseries : undefined
-            }
-            valueLabel={asMillisecondDuration(latency.value)}
-          />
-        );
-      },
-      sortable: true,
-    },
-    {
-      field: 'throughputValue',
-      name: i18n.translate(
-        'xpack.apm.serviceOverview.dependenciesTableColumnThroughput',
-        { defaultMessage: 'Throughput' }
-      ),
-      width: px(unit * 10),
-      render: (_, { throughput }) => {
-        return (
-          <SparkPlot
-            compact
-            color="euiColorVis0"
-            series={throughput.timeseries}
-            comparisonSeries={
-              comparisonEnabled
-                ? throughput.previousPeriodTimeseries
-                : undefined
-            }
-            valueLabel={asTransactionRate(throughput.value)}
-          />
-        );
-      },
-      sortable: true,
-    },
-    {
-      field: 'errorRateValue',
-      name: i18n.translate(
-        'xpack.apm.serviceOverview.dependenciesTableColumnErrorRate',
-        {
-          defaultMessage: 'Error rate',
-        }
-      ),
-      width: px(unit * 10),
-      render: (_, { errorRate }) => {
-        return (
-          <SparkPlot
-            compact
-            color="euiColorVis7"
-            series={errorRate.timeseries}
-            comparisonSeries={
-              comparisonEnabled ? errorRate.previousPeriodTimeseries : undefined
-            }
-            valueLabel={asPercent(errorRate.value, 1)}
-          />
-        );
-      },
-      sortable: true,
-    },
-    {
-      field: 'impactValue',
-      name: i18n.translate(
-        'xpack.apm.serviceOverview.dependenciesTableColumnImpact',
-        {
-          defaultMessage: 'Impact',
-        }
-      ),
-      width: px(unit * 5),
-      render: (_, { impact, previousPeriodImpact }) => {
-        return (
-          <EuiFlexGroup gutterSize="xs" direction="column">
-            <EuiFlexItem>
-              <ImpactBar value={impact} size="m" />
-            </EuiFlexItem>
-            {comparisonEnabled && previousPeriodImpact !== undefined && (
-              <EuiFlexItem>
-                <ImpactBar
-                  value={previousPeriodImpact}
-                  size="s"
-                  color="subdued"
-                />
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        );
-      },
-      sortable: true,
-    },
-  ];
-  // Fetches current period dependencies
+  const { serviceName, transactionType } = useApmServiceContext();
+
+  const trackEvent = useUiTracker();
+
   const { data, status } = useFetcher(
     (callApmApi) => {
       if (!start || !end) {
         return;
       }
 
-      return callApmApi({
-        endpoint: 'GET /api/apm/services/{serviceName}/dependencies',
-        params: {
-          path: { serviceName },
-          query: { start, end, environment, numBuckets: 20 },
-        },
-      });
-    },
-    [start, end, serviceName, environment]
-  );
-
-  // Fetches previous period dependencies
-  const { data: previousPeriodData, status: previousPeriodStatus } = useFetcher(
-    (callApmApi) => {
-      if (!comparisonStart || !comparisonEnd) {
-        return;
-      }
-
-      return callApmApi({
-        endpoint: 'GET /api/apm/services/{serviceName}/dependencies',
-        params: {
-          path: { serviceName },
-          query: {
-            start: comparisonStart,
-            end: comparisonEnd,
-            environment,
-            numBuckets: 20,
+      return callApmApi(
+        'GET /internal/apm/services/{serviceName}/dependencies',
+        {
+          params: {
+            path: { serviceName },
+            query: {
+              start,
+              end,
+              environment,
+              numBuckets: 20,
+              offset:
+                comparisonEnabled && isTimeComparison(offset)
+                  ? offset
+                  : undefined,
+            },
           },
-        },
-      });
+        }
+      );
     },
-    [comparisonStart, comparisonEnd, serviceName, environment]
+    [start, end, serviceName, environment, offset, comparisonEnabled]
   );
 
-  const serviceDependencies = mergeCurrentAndPreviousPeriods({
-    currentPeriod: data?.serviceDependencies,
-    previousPeriod: previousPeriodData?.serviceDependencies,
-  });
+  const dependencies =
+    data?.serviceDependencies.map((dependency) => {
+      const { location } = dependency;
+      const name = getNodeName(location);
+      const itemLink =
+        location.type === NodeType.dependency ? (
+          <DependencyLink
+            type={location.spanType}
+            subtype={location.spanSubtype}
+            query={{
+              dependencyName: location.dependencyName,
+              comparisonEnabled,
+              offset,
+              environment,
+              kuery,
+              rangeFrom,
+              rangeTo,
+            }}
+            onClick={() => {
+              trackEvent({
+                app: 'apm',
+                metricType: METRIC_TYPE.CLICK,
+                metric: 'service_dependencies_to_dependency_detail',
+              });
+            }}
+          />
+        ) : (
+          <ServiceLink
+            serviceName={location.serviceName}
+            agentName={location.agentName}
+            query={{
+              comparisonEnabled,
+              offset,
+              environment,
+              kuery,
+              rangeFrom,
+              rangeTo,
+              latencyAggregationType,
+              transactionType,
+              serviceGroup,
+            }}
+          />
+        );
 
-  // need top-level sortable fields for the managed table
-  const items = serviceDependencies.map((item) => ({
-    ...item,
-    errorRateValue: item.errorRate.value,
-    latencyValue: item.latency.value,
-    throughputValue: item.throughput.value,
-    impactValue: item.impact,
-  }));
+      return {
+        name,
+        currentStats: dependency.currentStats,
+        previousStats: dependency.previousStats,
+        link: itemLink,
+      };
+    }) ?? [];
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiFlexItem>
-        <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xs">
-              <h2>
-                {i18n.translate(
-                  'xpack.apm.serviceOverview.dependenciesTableTitle',
-                  {
-                    defaultMessage: 'Dependencies',
-                  }
-                )}
-              </h2>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <ServiceMapLink serviceName={serviceName}>
-              {i18n.translate(
-                'xpack.apm.serviceOverview.dependenciesTableLinkText',
-                {
-                  defaultMessage: 'View service map',
-                }
-              )}
-            </ServiceMapLink>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <TableFetchWrapper status={status}>
-          <ServiceOverviewTableContainer
-            isEmptyAndLoading={
-              items.length === 0 && status === FETCH_STATUS.LOADING
+    <DependenciesTable
+      dependencies={dependencies}
+      fixedHeight={fixedHeight}
+      title={
+        <EuiToolTip
+          content={i18n.translate(
+            'xpack.apm.serviceOverview.dependenciesTableTitleTip',
+            {
+              defaultMessage:
+                'Downstream services and external connections to uninstrumented services',
             }
-          >
-            <EuiInMemoryTable
-              columns={columns}
-              items={items}
-              allowNeutralSort={false}
-              loading={
-                status === FETCH_STATUS.LOADING ||
-                previousPeriodStatus === FETCH_STATUS.LOADING
+          )}
+        >
+          <>
+            {i18n.translate(
+              'xpack.apm.serviceOverview.dependenciesTableTitle',
+              {
+                defaultMessage: 'Dependencies',
               }
-              pagination={{
-                initialPageSize: 5,
-                pageSizeOptions: [5],
-                hidePerPageOptions: true,
-              }}
-              sorting={{
-                sort: {
-                  direction: 'desc',
-                  field: 'impactValue',
-                },
-              }}
+            )}
+            &nbsp;
+            <EuiIcon
+              size="s"
+              color="subdued"
+              type="questionInCircle"
+              className="eui-alignCenter"
             />
-          </ServiceOverviewTableContainer>
-        </TableFetchWrapper>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+          </>
+        </EuiToolTip>
+      }
+      nameColumnTitle={i18n.translate(
+        'xpack.apm.serviceOverview.dependenciesTableColumn',
+        {
+          defaultMessage: 'Dependency',
+        }
+      )}
+      status={status}
+      link={link}
+      showPerPageOptions={showPerPageOptions}
+      initialPageSize={5}
+    />
   );
 }

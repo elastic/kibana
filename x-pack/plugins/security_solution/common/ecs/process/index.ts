@@ -5,14 +5,19 @@
  * 2.0.
  */
 
-import { Ext } from '../file';
+import type { CodeSignature, Ext } from '../file';
 
 export interface ProcessEcs {
   Ext?: Ext;
+  command_line?: string[];
   entity_id?: string[];
+  entry_leader?: ProcessSessionData;
+  session_leader?: ProcessSessionData;
+  group_leader?: ProcessSessionData;
   exit_code?: number[];
   hash?: ProcessHashData;
   parent?: ProcessParentData;
+  code_signature?: CodeSignature;
   pid?: number[];
   name?: string[];
   ppid?: number[];
@@ -21,6 +26,12 @@ export interface ProcessEcs {
   title?: string[];
   thread?: Thread;
   working_directory?: string[];
+}
+
+export interface ProcessSessionData {
+  entity_id?: string[];
+  pid?: string[];
+  name?: string[];
 }
 
 export interface ProcessHashData {
@@ -32,9 +43,17 @@ export interface ProcessHashData {
 export interface ProcessParentData {
   name?: string[];
   pid?: number[];
+  executable?: string[];
 }
 
 export interface Thread {
   id?: number[];
   start?: string[];
+  Ext?: Ext;
+}
+export interface ProcessPe {
+  original_file_name?: string;
+  company?: string;
+  description?: string;
+  file_version?: string;
 }

@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectAttributes } from 'kibana/public';
+import type { SerializableRecord } from '@kbn/utility-types';
+import { SavedObjectAttributes } from '@kbn/core/public';
+import { PersistableState, PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
 import {
   EmbeddableFactory,
   EmbeddableInput,
@@ -14,21 +16,16 @@ import {
   IEmbeddable,
   EmbeddableFactoryDefinition,
 } from './lib/embeddables';
-import {
-  PersistableState,
-  PersistableStateDefinition,
-  SerializableState,
-} from '../../kibana_utils/common';
 
 export type EmbeddableFactoryRegistry = Map<string, EmbeddableFactory>;
 export type EnhancementsRegistry = Map<string, EnhancementRegistryItem>;
 
-export interface EnhancementRegistryDefinition<P extends SerializableState = SerializableState>
+export interface EnhancementRegistryDefinition<P extends SerializableRecord = SerializableRecord>
   extends PersistableStateDefinition<P> {
   id: string;
 }
 
-export interface EnhancementRegistryItem<P extends SerializableState = SerializableState>
+export interface EnhancementRegistryItem<P extends SerializableRecord = SerializableRecord>
   extends PersistableState<P> {
   id: string;
 }
@@ -37,7 +34,7 @@ export type EmbeddableFactoryProvider = <
   I extends EmbeddableInput = EmbeddableInput,
   O extends EmbeddableOutput = EmbeddableOutput,
   E extends IEmbeddable<I, O> = IEmbeddable<I, O>,
-  T extends SavedObjectAttributes = SavedObjectAttributes
+  T = SavedObjectAttributes
 >(
   def: EmbeddableFactoryDefinition<I, O, E, T>
 ) => EmbeddableFactory<I, O, E, T>;

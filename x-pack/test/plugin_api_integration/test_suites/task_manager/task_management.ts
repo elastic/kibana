@@ -5,17 +5,14 @@
  * 2.0.
  */
 
-import _ from 'lodash';
+import moment from 'moment';
+import { random } from 'lodash';
 import expect from '@kbn/expect';
-import url from 'url';
-import supertestAsPromised from 'supertest-as-promised';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import TaskManagerMapping from '@kbn/task-manager-plugin/server/saved_objects/mappings.json';
+import { DEFAULT_POLL_INTERVAL } from '@kbn/task-manager-plugin/server/config';
+import { ConcreteTaskInstance, BulkUpdateTaskResult } from '@kbn/task-manager-plugin/server';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import TaskManagerMapping from '../../../../plugins/task_manager/server/saved_objects/mappings.json';
-import {
-  DEFAULT_MAX_WORKERS,
-  DEFAULT_POLL_INTERVAL,
-} from '../../../../plugins/task_manager/server/config';
-import { ConcreteTaskInstance } from '../../../../plugins/task_manager/server';
 
 const {
   task: { properties: taskManagerIndexMapping },
@@ -54,9 +51,8 @@ export default function ({ getService }: FtrProviderContext) {
   const es = getService('es');
   const log = getService('log');
   const retry = getService('retry');
-  const config = getService('config');
+  const supertest = getService('supertest');
   const testHistoryIndex = '.kibana_task_manager_test_result';
-  const supertest = supertestAsPromised(url.format(config.get('servers.kibana')));
 
   describe('scheduling and running tasks', () => {
     beforeEach(async () => {
@@ -66,7 +62,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     beforeEach(async () => {
       const exists = await es.indices.exists({ index: testHistoryIndex });
-      if (exists.body) {
+      if (exists) {
         await es.deleteByQuery({
           index: testHistoryIndex,
           refresh: true,
@@ -87,7 +83,7 @@ export default function ({ getService }: FtrProviderContext) {
                 params: taskManagerIndexMapping.params,
                 state: taskManagerIndexMapping.state,
                 runAt: taskManagerIndexMapping.runAt,
-              },
+              } as Record<string, estypes.MappingProperty>,
             },
           },
         });
@@ -153,7 +149,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
         })
         .then((result) =>
-          ((result.body as unknown) as SearchResults).hits.hits.filter((task) =>
+          (result as unknown as SearchResults).hits.hits.filter((task) =>
             taskId ? task._source?.taskId === taskId : true
           )
         );
@@ -173,14 +169,55 @@ export default function ({ getService }: FtrProviderContext) {
         });
     }
 
-    function runTaskNow(task: { id: string }) {
+    function runTaskSoon(task: { id: string }) {
       return supertest
-        .post('/api/sample_tasks/run_now')
+        .post('/api/sample_tasks/run_soon')
         .set('kbn-xsrf', 'xxx')
         .send({ task })
         .expect(200)
         .then((response) => response.body);
     }
+
+    function bulkEnable(taskIds: string[], runSoon: boolean) {
+      return supertest
+        .post('/api/sample_tasks/bulk_enable')
+        .set('kbn-xsrf', 'xxx')
+        .send({ taskIds, runSoon })
+        .expect(200)
+        .then((response) => response.body);
+    }
+
+    function bulkDisable(taskIds: string[]) {
+      return supertest
+        .post('/api/sample_tasks/bulk_disable')
+        .set('kbn-xsrf', 'xxx')
+        .send({ taskIds })
+        .expect(200)
+        .then((response) => response.body);
+    }
+
+    function bulkUpdateSchedules(taskIds: string[], schedule: { interval: string }) {
+      return supertest
+        .post('/api/sample_tasks/bulk_update_schedules')
+        .set('kbn-xsrf', 'xxx')
+        .send({ taskIds, schedule })
+        .expect(200)
+        .then((response: { body: BulkUpdateTaskResult }) => response.body);
+    }
+
+    // TODO: Add this back in with https://github.com/elastic/kibana/issues/106139
+    // function runEphemeralTaskNow(task: {
+    //   taskType: string;
+    //   params: Record<string, any>;
+    //   state: Record<string, any>;
+    // }) {
+    //   return supertest
+    //     .post('/api/sample_tasks/ephemeral_run_now')
+    //     .set('kbn-xsrf', 'xxx')
+    //     .send({ task })
+    //     .expect(200)
+    //     .then((response) => response.body);
+    // }
 
     function scheduleTaskIfNotExists(task: Partial<ConcreteTaskInstance>) {
       return supertest
@@ -224,7 +261,7 @@ export default function ({ getService }: FtrProviderContext) {
     }
 
     it('should support middleware', async () => {
-      const historyItem = _.random(1, 100);
+      const historyItem = random(1, 100);
 
       const scheduledTask = await scheduleTask({
         taskType: 'sampleTask',
@@ -329,8 +366,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should reschedule if task returns runAt', async () => {
-      const nextRunMilliseconds = _.random(60000, 200000);
-      const count = _.random(1, 20);
+      const nextRunMilliseconds = random(60000, 200000);
+      const count = random(1, 20);
 
       const originalTask = await scheduleTask({
         taskType: 'sampleTask',
@@ -350,7 +387,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should reschedule if task has an interval', async () => {
-      const interval = _.random(5, 200);
+      const interval = random(5, 200);
       const intervalMilliseconds = interval * 60000;
 
       const originalTask = await scheduleTask({
@@ -371,7 +408,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should support the deprecated interval field', async () => {
-      const interval = _.random(5, 200);
+      const interval = random(5, 200);
       const intervalMilliseconds = interval * 60000;
 
       const originalTask = await scheduleTask({
@@ -415,11 +452,11 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       const now = Date.now();
-      const runNowResult = await runTaskNow({
+      const runSoonResult = await runTaskSoon({
         id: originalTask.id,
       });
 
-      expect(runNowResult).to.eql({ id: originalTask.id });
+      expect(runSoonResult).to.eql({ id: originalTask.id });
 
       await retry.try(async () => {
         expect(
@@ -434,81 +471,6 @@ export default function ({ getService }: FtrProviderContext) {
 
         // ensure this task shouldnt run for another half hour
         expectReschedule(now, task, 30 * 60000);
-      });
-    });
-
-    it('should prioritize tasks which are called using runNow', async () => {
-      const originalTask = await scheduleTask({
-        taskType: 'sampleTask',
-        schedule: { interval: `30m` },
-        params: {},
-      });
-
-      await retry.try(async () => {
-        const docs = await historyDocs(originalTask.id);
-        expect(docs.length).to.eql(1);
-
-        const task = await currentTask<{ count: number }>(originalTask.id);
-
-        expect(task.state.count).to.eql(1);
-
-        // ensure this task shouldnt run for another half hour
-        expectReschedule(Date.parse(originalTask.runAt), task, 30 * 60000);
-      });
-
-      const taskToBeReleased = await scheduleTask({
-        taskType: 'sampleTask',
-        params: { waitForEvent: 'releaseSingleTask' },
-      });
-
-      await retry.try(async () => {
-        // wait for taskToBeReleased to stall
-        expect((await historyDocs(taskToBeReleased.id)).length).to.eql(1);
-      });
-
-      // schedule multiple tasks that should force
-      // Task Manager to use up its worker capacity
-      // causing tasks to pile up
-      await Promise.all(
-        _.times(DEFAULT_MAX_WORKERS + _.random(1, DEFAULT_MAX_WORKERS), () =>
-          scheduleTask({
-            taskType: 'sampleTask',
-            params: {
-              waitForEvent: 'releaseTheOthers',
-            },
-          })
-        )
-      );
-
-      // we need to ensure that TM has a chance to fill its queue with the stalling tasks
-      await delay(DEFAULT_POLL_INTERVAL);
-
-      // call runNow for our task
-      const runNowResult = runTaskNow({
-        id: originalTask.id,
-      });
-
-      // we need to ensure that TM has a chance to push the runNow task into the queue
-      // before we release the stalled task, so lets give it a chance
-      await delay(DEFAULT_POLL_INTERVAL);
-
-      // and release only one slot in our worker queue
-      await releaseTasksWaitingForEventToComplete('releaseSingleTask');
-
-      expect(await runNowResult).to.eql({ id: originalTask.id });
-
-      await retry.try(async () => {
-        const task = await currentTask<{ count: number }>(originalTask.id);
-        expect(task.state.count).to.eql(2);
-      });
-
-      // drain tasks, othrwise they'll keep Task Manager stalled
-      await retry.try(async () => {
-        await releaseTasksWaitingForEventToComplete('releaseTheOthers');
-        const tasks = (
-          await currentTasks<{}, { originalParams: { waitForEvent: string } }>()
-        ).docs.filter((task) => task.params.originalParams.waitForEvent === 'releaseTheOthers');
-        expect(tasks.length).to.eql(0);
       });
     });
 
@@ -595,109 +557,6 @@ export default function ({ getService }: FtrProviderContext) {
       await releaseTasksWaitingForEventToComplete('releaseSecondWaveOfTasks');
     });
 
-    it('should return a task run error result when RunNow is called at a time that would cause the task to exceed its maxConcurrency', async () => {
-      // should run as there's only one and maxConcurrency on this TaskType is 1
-      const firstWithSingleConcurrency = await scheduleTask({
-        taskType: 'sampleTaskWithSingleConcurrency',
-        // include a schedule so that the task isn't deleted after completion
-        schedule: { interval: `30m` },
-        params: {
-          waitForEvent: 'releaseRunningTaskWithSingleConcurrency',
-        },
-      });
-
-      // should not run as the first is running
-      const secondWithSingleConcurrency = await scheduleTask({
-        taskType: 'sampleTaskWithSingleConcurrency',
-        params: {
-          waitForEvent: 'releaseRunningTaskWithSingleConcurrency',
-        },
-      });
-
-      // run the first tasks once just so that we can be sure it runs in response to our
-      // runNow callm, rather than the initial execution
-      await retry.try(async () => {
-        expect((await historyDocs(firstWithSingleConcurrency.id)).length).to.eql(1);
-      });
-      await releaseTasksWaitingForEventToComplete('releaseRunningTaskWithSingleConcurrency');
-
-      // wait for second task to stall
-      await retry.try(async () => {
-        expect((await historyDocs(secondWithSingleConcurrency.id)).length).to.eql(1);
-      });
-
-      // run the first task again using runNow - should fail due to concurrency concerns
-      const failedRunNowResult = await runTaskNow({
-        id: firstWithSingleConcurrency.id,
-      });
-
-      expect(failedRunNowResult).to.eql({
-        id: firstWithSingleConcurrency.id,
-        error: `Error: Failed to run task "${firstWithSingleConcurrency.id}" as we would exceed the max concurrency of "Sample Task With Single Concurrency" which is 1. Rescheduled the task to ensure it is picked up as soon as possible.`,
-      });
-
-      // release the second task
-      await releaseTasksWaitingForEventToComplete('releaseRunningTaskWithSingleConcurrency');
-    });
-
-    it('should return a task run error result when running a task now fails', async () => {
-      const originalTask = await scheduleTask({
-        taskType: 'sampleTask',
-        schedule: { interval: `30m` },
-        params: { failWith: 'this task was meant to fail!', failOn: 3 },
-      });
-
-      await retry.try(async () => {
-        const docs = await historyDocs();
-        expect(docs.filter((taskDoc) => taskDoc._source.taskId === originalTask.id).length).to.eql(
-          1
-        );
-
-        const task = await currentTask<{ count: number }>(originalTask.id);
-        expect(task.state.count).to.eql(1);
-        expect(task.status).to.eql('idle');
-
-        // ensure this task shouldnt run for another half hour
-        expectReschedule(Date.parse(originalTask.runAt), task, 30 * 60000);
-      });
-
-      await ensureTasksIndexRefreshed();
-
-      // second run should still be successful
-      const successfulRunNowResult = await runTaskNow({
-        id: originalTask.id,
-      });
-      expect(successfulRunNowResult).to.eql({ id: originalTask.id });
-
-      await retry.try(async () => {
-        const task = await currentTask<{ count: number }>(originalTask.id);
-        expect(task.state.count).to.eql(2);
-        expect(task.status).to.eql('idle');
-      });
-
-      await ensureTasksIndexRefreshed();
-
-      // third run should fail
-      const failedRunNowResult = await runTaskNow({
-        id: originalTask.id,
-      });
-
-      expect(failedRunNowResult).to.eql({
-        id: originalTask.id,
-        error: `Error: Failed to run task \"${originalTask.id}\": Error: this task was meant to fail!`,
-      });
-
-      await retry.try(async () => {
-        expect(
-          (await historyDocs()).filter((taskDoc) => taskDoc._source.taskId === originalTask.id)
-            .length
-        ).to.eql(2);
-
-        const task = await currentTask(originalTask.id);
-        expect(task.attempts).to.eql(1);
-      });
-    });
-
     it('should increment attempts when task fails on markAsRunning', async () => {
       const originalTask = await scheduleTask({
         taskType: 'sampleTask',
@@ -714,12 +573,12 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should return a task run error result when trying to run a non-existent task', async () => {
-      // runNow should fail
-      const failedRunNowResult = await runTaskNow({
+      // runSoon should fail
+      const failedRunSoonResult = await runTaskSoon({
         id: 'i-dont-exist',
       });
-      expect(failedRunNowResult).to.eql({
-        error: `Error: Failed to run task "i-dont-exist" as it does not exist`,
+      expect(failedRunSoonResult).to.eql({
+        error: `Error: Saved object [task/i-dont-exist] not found`,
         id: 'i-dont-exist',
       });
     });
@@ -733,9 +592,9 @@ export default function ({ getService }: FtrProviderContext) {
         },
       });
 
-      // tell the task to wait for the 'runNowHasBeenAttempted' event
+      // tell the task to wait for the 'runSoonHasBeenAttempted' event
       await provideParamsToTasksWaitingForParams(longRunningTask.id, {
-        waitForEvent: 'runNowHasBeenAttempted',
+        waitForEvent: 'runSoonHasBeenAttempted',
       });
 
       await retry.try(async () => {
@@ -750,18 +609,18 @@ export default function ({ getService }: FtrProviderContext) {
 
       await ensureTasksIndexRefreshed();
 
-      // first runNow should fail
-      const failedRunNowResult = await runTaskNow({
+      // first runSoon should fail
+      const failedRunSoonResult = await runTaskSoon({
         id: longRunningTask.id,
       });
 
-      expect(failedRunNowResult).to.eql({
+      expect(failedRunSoonResult).to.eql({
         error: `Error: Failed to run task "${longRunningTask.id}" as it is currently running`,
         id: longRunningTask.id,
       });
 
-      // finish first run by emitting 'runNowHasBeenAttempted' event
-      await releaseTasksWaitingForEventToComplete('runNowHasBeenAttempted');
+      // finish first run by emitting 'runSoonHasBeenAttempted' event
+      await releaseTasksWaitingForEventToComplete('runSoonHasBeenAttempted');
       await retry.try(async () => {
         const tasks = (await currentTasks<{ count: number }>()).docs;
         expect(getTaskById(tasks, longRunningTask.id).state.count).to.eql(1);
@@ -772,47 +631,89 @@ export default function ({ getService }: FtrProviderContext) {
 
       await ensureTasksIndexRefreshed();
 
-      // second runNow should be successful
-      const successfulRunNowResult = runTaskNow({
+      // second runSoon should be successful
+      const successfulRunSoonResult = runTaskSoon({
         id: longRunningTask.id,
       });
 
       await provideParamsToTasksWaitingForParams(longRunningTask.id);
 
-      expect(await successfulRunNowResult).to.eql({ id: longRunningTask.id });
+      expect(await successfulRunSoonResult).to.eql({ id: longRunningTask.id });
     });
 
-    it('should allow a failed task to be rerun using runNow', async () => {
-      const taskThatFailsBeforeRunNow = await scheduleTask({
-        taskType: 'singleAttemptSampleTask',
-        params: {
-          waitForParams: true,
-        },
+    it('should disable and reenable task and run it when runSoon = true', async () => {
+      const historyItem = random(1, 100);
+      const scheduledTask = await scheduleTask({
+        taskType: 'sampleTask',
+        schedule: { interval: '1h' },
+        params: { historyItem },
       });
 
-      // tell the task to fail on its next run
-      await provideParamsToTasksWaitingForParams(taskThatFailsBeforeRunNow.id, {
-        failWith: 'error on first run',
-      });
-
-      // wait for task to fail
       await retry.try(async () => {
-        const tasks = (await currentTasks()).docs;
-        expect(getTaskById(tasks, taskThatFailsBeforeRunNow.id).status).to.eql('failed');
+        expect((await historyDocs()).length).to.eql(1);
+        const task = await currentTask(scheduledTask.id);
+
+        expect(task.enabled).to.eql(true);
       });
 
-      // runNow should be successfully run the failing task
-      const runNowResultWithExpectedFailure = runTaskNow({
-        id: taskThatFailsBeforeRunNow.id,
+      // disable the task
+      await bulkDisable([scheduledTask.id]);
+
+      await retry.try(async () => {
+        const task = await currentTask(scheduledTask.id);
+        expect(task.enabled).to.eql(false);
       });
 
-      // release the task without failing this time
-      await provideParamsToTasksWaitingForParams(taskThatFailsBeforeRunNow.id);
+      // re-enable the task
+      await bulkEnable([scheduledTask.id], true);
 
-      expect(await runNowResultWithExpectedFailure).to.eql({ id: taskThatFailsBeforeRunNow.id });
+      await retry.try(async () => {
+        const task = await currentTask(scheduledTask.id);
+
+        expect(task.enabled).to.eql(true);
+        expect(Date.parse(task.scheduledAt)).to.be.greaterThan(
+          Date.parse(scheduledTask.scheduledAt)
+        );
+        expect(Date.parse(task.runAt)).to.be.greaterThan(Date.parse(scheduledTask.runAt));
+      });
     });
 
-    async function expectReschedule(
+    it('should disable and reenable task and not run it when runSoon = false', async () => {
+      const historyItem = random(1, 100);
+      const scheduledTask = await scheduleTask({
+        taskType: 'sampleTask',
+        schedule: { interval: '1h' },
+        params: { historyItem },
+      });
+
+      await retry.try(async () => {
+        expect((await historyDocs()).length).to.eql(1);
+
+        const task = await currentTask(scheduledTask.id);
+        expect(task.enabled).to.eql(true);
+      });
+
+      // disable the task
+      await bulkDisable([scheduledTask.id]);
+
+      let disabledTask: SerializedConcreteTaskInstance;
+      await retry.try(async () => {
+        disabledTask = await currentTask(scheduledTask.id);
+        expect(disabledTask.enabled).to.eql(false);
+      });
+
+      // re-enable the task
+      await bulkEnable([scheduledTask.id], false);
+
+      await retry.try(async () => {
+        const task = await currentTask(scheduledTask.id);
+
+        expect(task.enabled).to.eql(true);
+        expect(Date.parse(task.scheduledAt)).to.eql(Date.parse(disabledTask.scheduledAt));
+      });
+    });
+
+    function expectReschedule(
       originalRunAt: number,
       task: SerializedConcreteTaskInstance<any, any>,
       expectedDiff: number
@@ -886,5 +787,374 @@ export default function ({ getService }: FtrProviderContext) {
         expect(scheduledTask.attempts).to.be.greaterThan(3);
       });
     });
+
+    it('should bulk update schedules for multiple tasks', async () => {
+      const initialTime = Date.now();
+      const tasks = await Promise.all([
+        scheduleTask({
+          taskType: 'sampleTask',
+          schedule: { interval: '1h' },
+          params: {},
+        }),
+
+        scheduleTask({
+          taskType: 'sampleTask',
+          schedule: { interval: '5m' },
+          params: {},
+        }),
+      ]);
+
+      const taskIds = tasks.map(({ id }) => id);
+
+      await retry.try(async () => {
+        // ensure each task has ran at least once and been rescheduled for future run
+        for (const task of tasks) {
+          const { state } = await currentTask<{ count: number }>(task.id);
+          expect(state.count).to.be(1);
+        }
+
+        // first task to be scheduled in 1h
+        expect(Date.parse((await currentTask(tasks[0].id)).runAt) - initialTime).to.be.greaterThan(
+          moment.duration(1, 'hour').asMilliseconds()
+        );
+
+        // second task to be scheduled in 5m
+        expect(Date.parse((await currentTask(tasks[1].id)).runAt) - initialTime).to.be.greaterThan(
+          moment.duration(5, 'minutes').asMilliseconds()
+        );
+      });
+
+      await retry.try(async () => {
+        const updates = await bulkUpdateSchedules(taskIds, { interval: '3h' });
+
+        expect(updates.tasks.length).to.be(2);
+        expect(updates.errors.length).to.be(0);
+      });
+
+      await retry.try(async () => {
+        const updatedTasks = (await currentTasks()).docs;
+
+        updatedTasks.forEach((task) => {
+          expect(task.schedule).to.eql({ interval: '3h' });
+          // should be scheduled to run in 3 hours
+          expect(Date.parse(task.runAt) - initialTime).to.be.greaterThan(
+            moment.duration(3, 'hours').asMilliseconds()
+          );
+        });
+      });
+    });
+
+    it('should not bulk update schedules for task in running status', async () => {
+      // this task should be in running status for 60s until it will be time outed
+      const longRunningTask = await scheduleTask({
+        taskType: 'sampleRecurringTaskWhichHangs',
+        schedule: { interval: '1h' },
+        params: {},
+      });
+
+      runTaskSoon({ id: longRunningTask.id });
+
+      let scheduledRunAt: string;
+      // ensure task is running and store scheduled runAt
+      await retry.try(async () => {
+        const task = await currentTask(longRunningTask.id);
+
+        expect(task.status).to.be('running');
+
+        scheduledRunAt = task.runAt;
+      });
+
+      await retry.try(async () => {
+        const updates = await bulkUpdateSchedules([longRunningTask.id], { interval: '3h' });
+
+        // length should be 0, as task in running status won't be updated
+        expect(updates.tasks.length).to.be(0);
+        expect(updates.errors.length).to.be(0);
+      });
+
+      // ensure task wasn't updated
+      await retry.try(async () => {
+        const task = await currentTask(longRunningTask.id);
+
+        // interval shouldn't be changed
+        expect(task.schedule).to.eql({ interval: '1h' });
+
+        // scheduledRunAt shouldn't be changed
+        expect(task.runAt).to.eql(scheduledRunAt);
+      });
+    });
+
+    it('should allow a failed task to be rerun using runSoon', async () => {
+      const taskThatFailsBeforeRunNow = await scheduleTask({
+        taskType: 'singleAttemptSampleTask',
+        params: {
+          waitForParams: true,
+        },
+      });
+      // tell the task to fail on its next run
+      await provideParamsToTasksWaitingForParams(taskThatFailsBeforeRunNow.id, {
+        failWith: 'error on first run',
+      });
+
+      // wait for task to fail
+      await retry.try(async () => {
+        const tasks = (await currentTasks()).docs;
+        expect(getTaskById(tasks, taskThatFailsBeforeRunNow.id).status).to.eql('failed');
+      });
+
+      // run the task again
+      await runTaskSoon({
+        id: taskThatFailsBeforeRunNow.id,
+      });
+
+      // runTaskSoon should successfully update the runAt property of the task
+      await retry.try(async () => {
+        const tasks = (await currentTasks()).docs;
+        expect(
+          Date.parse(getTaskById(tasks, taskThatFailsBeforeRunNow.id).runAt)
+        ).to.be.greaterThan(Date.parse(taskThatFailsBeforeRunNow.runAt));
+      });
+    });
+
+    // TODO: Add this back in with https://github.com/elastic/kibana/issues/106139
+    // it('should return the resulting task state when asked to run an ephemeral task now', async () => {
+    //   const ephemeralTask = await runEphemeralTaskNow({
+    //     taskType: 'sampleTask',
+    //     params: {},
+    //     state: {},
+    //   });
+
+    //   await retry.try(async () => {
+    //     expect(
+    //       (await historyDocs()).filter((taskDoc) => taskDoc._source.taskId === ephemeralTask.id)
+    //         .length
+    //     ).to.eql(1);
+
+    //     expect(ephemeralTask.state.count).to.eql(1);
+    //   });
+
+    //   const secondEphemeralTask = await runEphemeralTaskNow({
+    //     taskType: 'sampleTask',
+    //     params: {},
+    //     // pass state from previous ephemeral run as input for the second run
+    //     state: ephemeralTask.state,
+    //   });
+
+    //   // ensure state is cumulative
+    //   expect(secondEphemeralTask.state.count).to.eql(2);
+
+    //   await retry.try(async () => {
+    //     // ensure new id is produced for second task execution
+    //     expect(
+    //       (await historyDocs()).filter((taskDoc) => taskDoc._source.taskId === ephemeralTask.id)
+    //         .length
+    //     ).to.eql(1);
+    //     expect(
+    //       (await historyDocs()).filter(
+    //         (taskDoc) => taskDoc._source.taskId === secondEphemeralTask.id
+    //       ).length
+    //     ).to.eql(1);
+    //   });
+    // });
+
+    // TODO: Add this back in with https://github.com/elastic/kibana/issues/106139
+    // it('Epheemral task run should only run one instance of a task if its maxConcurrency is 1', async () => {
+    //   const ephemeralTaskWithSingleConcurrency: {
+    //     state: {
+    //       executions: Array<{
+    //         result: {
+    //           id: string;
+    //           state: {
+    //             timings: Array<{
+    //               start: number;
+    //               stop: number;
+    //             }>;
+    //           };
+    //         };
+    //       }>;
+    //     };
+    //   } = await runEphemeralTaskNow({
+    //     taskType: 'taskWhichExecutesOtherTasksEphemerally',
+    //     params: {
+    //       tasks: [
+    //         {
+    //           taskType: 'timedTaskWithSingleConcurrency',
+    //           params: { delay: 1000 },
+    //           state: {},
+    //         },
+    //         {
+    //           taskType: 'timedTaskWithSingleConcurrency',
+    //           params: { delay: 1000 },
+    //           state: {},
+    //         },
+    //         {
+    //           taskType: 'timedTaskWithSingleConcurrency',
+    //           params: { delay: 1000 },
+    //           state: {},
+    //         },
+    //         {
+    //           taskType: 'timedTaskWithSingleConcurrency',
+    //           params: { delay: 1000 },
+    //           state: {},
+    //         },
+    //       ],
+    //     },
+    //     state: {},
+    //   });
+
+    //   ensureOverlappingTasksDontExceedThreshold(
+    //     ephemeralTaskWithSingleConcurrency.state.executions,
+    //     // make sure each task intersects with any other task
+    //     0
+    //   );
+    // });
+
+    // TODO: Add this back in with https://github.com/elastic/kibana/issues/106139
+    // it('Ephemeral task run should only run as many instances of a task as its maxConcurrency will allow', async () => {
+    //   const ephemeralTaskWithSingleConcurrency: {
+    //     state: {
+    //       executions: Array<{
+    //         result: {
+    //           id: string;
+    //           state: {
+    //             timings: Array<{
+    //               start: number;
+    //               stop: number;
+    //             }>;
+    //           };
+    //         };
+    //       }>;
+    //     };
+    //   } = await runEphemeralTaskNow({
+    //     taskType: 'taskWhichExecutesOtherTasksEphemerally',
+    //     params: {
+    //       tasks: [
+    //         {
+    //           taskType: 'timedTaskWithLimitedConcurrency',
+    //           params: { delay: 100 },
+    //           state: {},
+    //         },
+    //         {
+    //           taskType: 'timedTaskWithLimitedConcurrency',
+    //           params: { delay: 100 },
+    //           state: {},
+    //         },
+    //         {
+    //           taskType: 'timedTaskWithLimitedConcurrency',
+    //           params: { delay: 100 },
+    //           state: {},
+    //         },
+    //         {
+    //           taskType: 'timedTaskWithLimitedConcurrency',
+    //           params: { delay: 100 },
+    //           state: {},
+    //         },
+    //         {
+    //           taskType: 'timedTaskWithLimitedConcurrency',
+    //           params: { delay: 100 },
+    //           state: {},
+    //         },
+    //         {
+    //           taskType: 'timedTaskWithLimitedConcurrency',
+    //           params: { delay: 100 },
+    //           state: {},
+    //         },
+    //       ],
+    //     },
+    //     state: {},
+    //   });
+
+    //   ensureOverlappingTasksDontExceedThreshold(
+    //     ephemeralTaskWithSingleConcurrency.state.executions,
+    //     // make sure each task intersects with, at most, 1 other task
+    //     1
+    //   );
+    // });
+
+    // TODO: Add this back in with https://github.com/elastic/kibana/issues/106139
+    // it('Ephemeral task executions cant exceed the max workes in Task Manager', async () => {
+    //   const ephemeralTaskWithSingleConcurrency: {
+    //     state: {
+    //       executions: Array<{
+    //         result: {
+    //           id: string;
+    //           state: {
+    //             timings: Array<{
+    //               start: number;
+    //               stop: number;
+    //             }>;
+    //           };
+    //         };
+    //       }>;
+    //     };
+    //   } = await runEphemeralTaskNow({
+    //     taskType: 'taskWhichExecutesOtherTasksEphemerally',
+    //     params: {
+    //       tasks: times(20, () => ({
+    //         taskType: 'timedTask',
+    //         params: { delay: 100 },
+    //         state: {},
+    //       })),
+    //     },
+    //     state: {},
+    //   });
+
+    //   ensureOverlappingTasksDontExceedThreshold(
+    //     ephemeralTaskWithSingleConcurrency.state.executions,
+    //     // make sure each task intersects with, at most, 9 other tasks (as max workes is 10)
+    //     9
+    //   );
+    // });
   });
+
+  // TODO: Add this back in with https://github.com/elastic/kibana/issues/106139
+  // function ensureOverlappingTasksDontExceedThreshold(
+  //   executions: Array<{
+  //     result: {
+  //       id: string;
+  //       state: {
+  //         timings: Array<{
+  //           start: number;
+  //           stop: number;
+  //         }>;
+  //       };
+  //     };
+  //   }>,
+  //   threshold: number
+  // ) {
+  //   const executionRanges = executions.map((execution) => ({
+  //     id: execution.result.id,
+  //     range: range(
+  //       // calculate range of milliseconds
+  //       // in which the task was running (that should be good enough)
+  //       execution.result.state.timings[0].start,
+  //       execution.result.state.timings[0].stop
+  //     ),
+  //   }));
+
+  //   const intersections = new Map<string, string[]>();
+  //   for (const currentExecution of executionRanges) {
+  //     for (const executionToComparteTo of executionRanges) {
+  //       if (currentExecution.id !== executionToComparteTo.id) {
+  //         // find all executions that intersect
+  //         if (intersection(currentExecution.range, executionToComparteTo.range).length) {
+  //           intersections.set(currentExecution.id, [
+  //             ...(intersections.get(currentExecution.id) ?? []),
+  //             executionToComparteTo.id,
+  //           ]);
+  //         }
+  //       }
+  //     }
+  //   }
+
+  //   const tooManyIntersectingTasks = [...intersections.entries()].find(
+  //     // make sure each task intersects with, at most, threshold of other task
+  //     ([, intersectingTasks]) => intersectingTasks.length > threshold
+  //   );
+  //   if (tooManyIntersectingTasks) {
+  //     throw new Error(
+  //       `Invalid execution found: ${tooManyIntersectingTasks[0]} overlaps with ${tooManyIntersectingTasks[1]}`
+  //     );
+  //   }
+  // }
 }

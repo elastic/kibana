@@ -6,97 +6,92 @@
  * Side Public License, v 1.
  */
 
-import { relative, resolve, sep } from 'path';
-import { writeFileSync } from 'fs';
-
-import execa from 'execa';
-import globby from 'globby';
-import Mustache from 'mustache';
-
-import { run } from '@kbn/dev-utils';
+import Path from 'path';
+import { run } from '@kbn/dev-cli-runner';
+import { createFailError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/utils';
 
-// @ts-ignore
-import { testMatch } from '../../jest-preset';
+import { getAllJestPaths, getTestsForConfigPaths } from './configs';
 
-const template: string = `module.exports = {
-  preset: '@kbn/test',
-  rootDir: '{{{relToRoot}}}',
-  roots: ['<rootDir>/{{{modulePath}}}'],
+const fmtMs = (ms: number) => {
+  if (ms < 1000) {
+    return `${Math.round(ms)} ms`;
+  }
+
+  return `${(Math.round(ms) / 1000).toFixed(2)} s`;
 };
-`;
 
-const roots: string[] = ['x-pack/plugins', 'packages', 'src/legacy', 'src/plugins', 'test', 'src'];
+const fmtList = (list: Iterable<string>) => [...list].map((i) => ` - ${i}`).join('\n');
 
 export async function runCheckJestConfigsCli() {
   run(
-    async ({ flags: { fix = false }, log }) => {
-      const { stdout: coveredFiles } = await execa(
-        'yarn',
-        ['--silent', 'jest', '--listTests', '--json'],
-        {
-          cwd: REPO_ROOT,
+    async ({ log }) => {
+      const start = performance.now();
+
+      const jestPaths = await getAllJestPaths();
+      const allConfigs = await getTestsForConfigPaths(jestPaths.configs);
+      const missingConfigs = new Set<string>();
+      const multipleConfigs = new Set<{ configs: string[]; rel: string }>();
+
+      for (const testPath of jestPaths.tests) {
+        const configs = allConfigs
+          .filter((c) => c.testPaths.has(testPath))
+          .map((c) => Path.relative(REPO_ROOT, c.path))
+          .sort((a, b) => Path.dirname(a).localeCompare(Path.dirname(b)));
+
+        if (configs.length === 0) {
+          missingConfigs.add(Path.relative(REPO_ROOT, testPath));
+        } else if (configs.length > 1) {
+          multipleConfigs.add({
+            configs,
+            rel: Path.relative(REPO_ROOT, testPath),
+          });
         }
-      );
+      }
 
-      const allFiles = new Set(
-        await globby(testMatch.concat(['!**/integration_tests/**']), {
-          gitignore: true,
-        })
-      );
-
-      JSON.parse(coveredFiles).forEach((file: string) => {
-        const pathFromRoot = relative(REPO_ROOT, file);
-        allFiles.delete(pathFromRoot);
-      });
-
-      if (allFiles.size) {
+      if (missingConfigs.size) {
         log.error(
-          `The following files do not belong to a jest.config.js file, or that config is not included from the root jest.config.js\n${[
-            ...allFiles,
-          ]
-            .map((file) => ` - ${file}`)
-            .join('\n')}`
+          `The following test files are not selected by any jest config file:\n${fmtList(
+            missingConfigs
+          )}`
         );
-      } else {
-        log.success('All test files are included by a Jest configuration');
-        return;
       }
 
-      if (fix) {
-        allFiles.forEach((file) => {
-          const root = roots.find((r) => file.startsWith(r));
-
-          if (root) {
-            const name = relative(root, file).split(sep)[0];
-            const modulePath = [root, name].join('/');
-
-            const content = Mustache.render(template, {
-              relToRoot: relative(modulePath, '.'),
-              modulePath,
-            });
-
-            writeFileSync(resolve(root, name, 'jest.config.js'), content);
+      if (multipleConfigs.size) {
+        const overlaps = new Map<string, { configs: string[]; rels: string[] }>();
+        for (const { configs, rel } of multipleConfigs) {
+          const key = configs.join(':');
+          const group = overlaps.get(key);
+          if (group) {
+            group.rels.push(rel);
           } else {
-            log.warning(`Unable to determind where to place jest.config.js for ${file}`);
+            overlaps.set(key, {
+              configs,
+              rels: [rel],
+            });
           }
-        });
-      } else {
-        log.info(
-          `Run 'node scripts/check_jest_configs --fix' to attempt to create the missing config files`
-        );
+        }
+
+        const list = [...overlaps.values()]
+          .map(
+            ({ configs, rels }) =>
+              `configs: ${configs
+                .map((c) => Path.relative(REPO_ROOT, c))
+                .join(', ')}\ntests:\n${fmtList(rels)}`
+          )
+          .join('\n\n');
+
+        log.error(`The following test files are selected by multiple config files:\n${list}`);
       }
 
-      process.exit(1);
+      if (missingConfigs.size || multipleConfigs.size) {
+        throw createFailError('Please resolve the previously logged issues.');
+      }
+
+      log.success('Checked all jest config files in', fmtMs(performance.now() - start));
     },
     {
-      description: 'Check that all test files are covered by a jest.config.js',
-      flags: {
-        boolean: ['fix'],
-        help: `
-        --fix           Attempt to create missing config files
-      `,
-      },
+      description: 'Check that all test files are covered by one, and only one, Jest config',
     }
   );
 }

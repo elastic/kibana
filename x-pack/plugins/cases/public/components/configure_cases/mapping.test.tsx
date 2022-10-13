@@ -11,17 +11,16 @@ import { mount } from 'enzyme';
 import { TestProviders } from '../../common/mock';
 import { Mapping, MappingProps } from './mapping';
 import { mappings } from './__mock__';
+import { ConnectorTypes } from '../../../common/api';
 
 describe('Mapping', () => {
   const props: MappingProps = {
-    connectorActionTypeId: '.servicenow',
+    actionTypeName: 'ServiceNow ITSM',
+    connectorType: ConnectorTypes.serviceNowITSM,
     isLoading: false,
     mappings,
   };
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
   test('it shows mapping form group', () => {
     const wrapper = mount(<Mapping {...props} />, { wrappingComponent: TestProviders });
     expect(wrapper.find('[data-test-subj="static-mappings"]').first().exists()).toBe(true);
@@ -36,12 +35,27 @@ describe('Mapping', () => {
       'short_description'
     );
   });
+
+  test('displays the title correctly', () => {
+    const wrapper = mount(<Mapping {...props} />, { wrappingComponent: TestProviders });
+    expect(wrapper.find('[data-test-subj="field-mapping-text"] h4').first().text()).toBe(
+      'ServiceNow ITSM field mappings'
+    );
+  });
+
+  test('displays the description correctly', () => {
+    const wrapper = mount(<Mapping {...props} />, { wrappingComponent: TestProviders });
+    expect(wrapper.find('[data-test-subj="field-mapping-desc"]').first().text()).toBe(
+      'Map Case fields to ServiceNow ITSM fields when pushing data to ServiceNow ITSM. Field mappings require an established connection to ServiceNow ITSM.'
+    );
+  });
+
   test('displays connection warning when isLoading: false and mappings: []', () => {
     const wrapper = mount(<Mapping {...{ ...props, mappings: [] }} />, {
       wrappingComponent: TestProviders,
     });
     expect(wrapper.find('[data-test-subj="field-mapping-desc"]').first().text()).toBe(
-      'Field mappings require an established connection to ServiceNow ITSM. Please check your connection credentials.'
+      'Failed to retrieve mappings for ServiceNow ITSM.'
     );
   });
 });

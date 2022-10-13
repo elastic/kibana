@@ -15,6 +15,19 @@ export interface FeatureKibanaPrivileges {
   excludeFromBasePrivileges?: boolean;
 
   /**
+   * Whether or not this privilege should only be granted to `All Spaces *`. Should be used for features that do not
+   * support Spaces. Defaults to `false`.
+   */
+  requireAllSpaces?: boolean;
+
+  /**
+   * Whether or not this privilege should be hidden in the roles UI and disallowed on the API. Defaults to `false`.
+   * @deprecated
+   * @removeBy 8.8.0
+   */
+  disabled?: boolean;
+
+  /**
    * If this feature includes management sections, you can specify them here to control visibility of those
    * pages based on user privileges.
    *
@@ -82,28 +95,119 @@ export interface FeatureKibanaPrivileges {
    * Alert Types and Alert Types provided by other features to which you wish to grant access.
    */
   alerting?: {
+    rule?: {
+      /**
+       * List of rule types which users should have full read/write access to when granted this privilege.
+       * @example
+       * ```ts
+       *  {
+       *    all: ['my-alert-type-within-my-feature']
+       *  }
+       * ```
+       */
+      all?: readonly string[];
+      /**
+       * List of rule types which users should have read-only access to when granted this privilege.
+       * @example
+       * ```ts
+       *  {
+       *    read: ['my-alert-type']
+       *  }
+       * ```
+       */
+      read?: readonly string[];
+    };
+    alert?: {
+      /**
+       * List of rule types for which users should have full read/write access their alert data to when granted this privilege.
+       * @example
+       * ```ts
+       *  {
+       *    all: ['my-alert-type-within-my-feature']
+       *  }
+       * ```
+       */
+      all?: readonly string[];
+      /**
+       * List of rule types for which users should have read-only access to their alert data when granted this privilege.
+       * @example
+       * ```ts
+       *  {
+       *    read: ['my-alert-type']
+       *  }
+       * ```
+       */
+      read?: readonly string[];
+    };
+  };
+
+  /**
+   * If your feature requires access to specific owners of cases (aka plugins that have created cases), then specify your access needs here. The values here should
+   * be unique identifiers for the owners of cases you want access to.
+   */
+  cases?: {
     /**
-     * List of alert types which users should have full read/write access to when granted this privilege.
+     * List of case owners which users should have full read/write access to when granted this privilege.
      * @example
      * ```ts
      *  {
-     *    all: ['my-alert-type-within-my-feature']
+     *    all: ['securitySolution']
      *  }
      * ```
      */
     all?: readonly string[];
-
     /**
-     * List of alert types which users should have read-only access to when granted this privilege.
+     * List of case owners which users should have push access to when granted this privilege.
      * @example
      * ```ts
      *  {
-     *    read: ['my-alert-type']
+     *    push: ['securitySolution']
+     *  }
+     * ```
+     */
+    push?: readonly string[];
+    /**
+     * List of case owners which users should have create access to when granted this privilege.
+     * @example
+     * ```ts
+     *  {
+     *    create: ['securitySolution']
+     *  }
+     * ```
+     */
+    create?: readonly string[];
+    /**
+     * List of case owners which users should have read-only access to when granted this privilege.
+     * @example
+     * ```ts
+     *  {
+     *    read: ['securitySolution']
      *  }
      * ```
      */
     read?: readonly string[];
+    /**
+     * List of case owners which users should have update access to when granted this privilege.
+     * @example
+     * ```ts
+     *  {
+     *    update: ['securitySolution']
+     *  }
+     * ```
+     */
+    update?: readonly string[];
+    /**
+     * List of case owners which users should have delete access to when granted this privilege.
+     * @example
+     * ```ts
+     *  {
+     *    delete: ['securitySolution']
+     *  }
+     * ```
+     */
+    delete?: readonly string[];
   };
+
   /**
    * If your feature requires access to specific saved objects, then specify your access needs here.
    */

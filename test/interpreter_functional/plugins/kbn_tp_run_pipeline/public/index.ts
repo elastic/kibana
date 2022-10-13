@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializer, PluginInitializerContext } from 'src/core/public';
+import { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
 import { Plugin, StartDeps } from './plugin';
-export { StartDeps };
+export type { StartDeps };
 
 export const plugin: PluginInitializer<void, void, {}, StartDeps> = (
   initializerContext: PluginInitializerContext

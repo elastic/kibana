@@ -6,7 +6,7 @@
  */
 
 import { Importer } from './importer';
-import { Doc } from '../../common';
+import { ImportDocMessage } from '../../common/types';
 import { CreateDocsResponse, ImportFactoryOptions } from './types';
 
 export class MessageImporter extends Importer {
@@ -30,16 +30,24 @@ export class MessageImporter extends Importer {
   // multiline_start_pattern regex
   // if it does, it is a legitimate end of line and can be pushed into the list,
   // if not, it must be a newline char inside a field value, so keep looking.
-  protected _createDocs(text: string): CreateDocsResponse {
+  protected _createDocs(text: string, isLastPart: boolean): CreateDocsResponse {
     let remainder = 0;
     try {
-      const docs: Doc[] = [];
+      const docs: ImportDocMessage[] = [];
 
       let message = '';
       let line = '';
       for (let i = 0; i < text.length; i++) {
         const char = text[i];
+        const isLastChar = i === text.length - 1;
         if (char === '\n') {
+          message = this._processLine(docs, message, line);
+          line = '';
+        } else if (isLastPart && isLastChar) {
+          // if this is the end of the last line and the last chunk of data,
+          // add the remainder as a final line.
+          // just in case the last line doesn't end in a new line char.
+          line += char;
           message = this._processLine(docs, message, line);
           line = '';
         } else {
@@ -74,7 +82,7 @@ export class MessageImporter extends Importer {
     }
   }
 
-  private _processLine(data: Doc[], message: string, line: string) {
+  private _processLine(data: ImportDocMessage[], message: string, line: string) {
     if (this._excludeLinesRegex === null || line.match(this._excludeLinesRegex) === null) {
       if (this._multilineStartRegex === null || line.match(this._multilineStartRegex) !== null) {
         this._addMessage(data, message);
@@ -92,7 +100,7 @@ export class MessageImporter extends Importer {
     return message;
   }
 
-  private _addMessage(data: Doc[], message: string) {
+  private _addMessage(data: ImportDocMessage[], message: string) {
     // if the message ended \r\n (Windows line endings)
     // then omit the \r as well as the \n for consistency
     message = message.replace(/\r$/, '');

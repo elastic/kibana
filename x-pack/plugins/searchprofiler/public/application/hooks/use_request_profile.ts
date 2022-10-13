@@ -21,6 +21,16 @@ interface ReturnValue {
   error?: string;
 }
 
+interface ProfileResponse {
+  profile?: { shards: ShardSerialized[] };
+  _shards: {
+    failed: number;
+    skipped: number;
+    total: number;
+    successful: number;
+  };
+}
+
 const extractProfilerErrorMessage = (e: any): string | undefined => {
   if (e.body?.attributes?.error?.reason) {
     const { reason, line, col } = e.body.attributes.error;
@@ -66,7 +76,9 @@ export const useRequestProfile = () => {
     }
 
     try {
-      const resp = await http.post('../api/searchprofiler/profile', {
+      const resp = await http.post<
+        { ok: true; resp: ProfileResponse } | { ok: false; err: { msg: string } }
+      >('../api/searchprofiler/profile', {
         body: JSON.stringify(payload),
         headers: { 'Content-Type': 'application/json' },
       });
@@ -75,7 +87,23 @@ export const useRequestProfile = () => {
         return { data: null, error: resp.err.msg };
       }
 
-      return { data: resp.resp.profile.shards };
+      // If a user attempts to run Search Profiler without any indices,
+      // _shards=0 and a "profile" output will not be returned
+      if (resp.resp._shards.total === 0) {
+        notifications.addDanger({
+          'data-test-subj': 'noShardsNotification',
+          title: i18n.translate('xpack.searchProfiler.errorNoShardsTitle', {
+            defaultMessage: 'Unable to profile',
+          }),
+          text: i18n.translate('xpack.searchProfiler.errorNoShardsDescription', {
+            defaultMessage: 'Verify your index input matches a valid index',
+          }),
+        });
+
+        return { data: null };
+      }
+
+      return { data: resp.resp.profile!.shards };
     } catch (e) {
       const profilerErrorMessage = extractProfilerErrorMessage(e);
       if (profilerErrorMessage) {

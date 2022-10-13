@@ -5,21 +5,39 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 
-import { EuiLink } from '@elastic/eui';
 import * as i18n from '../translations';
+import { LinkAnchor } from '../../links';
+import { useCasesContext } from '../../cases_context/use_cases_context';
+import { useCreateCaseNavigation } from '../../../common/navigation';
 
-const NoCasesComponent = ({ createCaseHref }: { createCaseHref: string }) => (
-  <>
-    <span>{i18n.NO_CASES}</span>
-    <EuiLink
-      data-test-subj="no-cases-create-case"
-      href={createCaseHref}
-    >{` ${i18n.START_A_NEW_CASE}`}</EuiLink>
-    {'!'}
-  </>
-);
+const NoCasesComponent = () => {
+  const { permissions } = useCasesContext();
+  const { getCreateCaseUrl, navigateToCreateCase } = useCreateCaseNavigation();
+
+  const navigateToCreateCaseClick = useCallback(
+    (e) => {
+      e.preventDefault();
+      navigateToCreateCase();
+    },
+    [navigateToCreateCase]
+  );
+
+  return permissions.create ? (
+    <>
+      <span>{i18n.NO_CASES}</span>
+      <LinkAnchor
+        data-test-subj="no-cases-create-case"
+        onClick={navigateToCreateCaseClick}
+        href={getCreateCaseUrl()}
+      >{` ${i18n.START_A_NEW_CASE}`}</LinkAnchor>
+      {'!'}
+    </>
+  ) : (
+    <span data-test-subj="no-cases-readonly">{i18n.NO_CASES_READ_ONLY}</span>
+  );
+};
 
 NoCasesComponent.displayName = 'NoCasesComponent';
 

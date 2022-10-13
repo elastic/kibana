@@ -1,0 +1,27 @@
+- name: stat /run/kibana
+  become: yes
+  register: kibana_pid_directory
+  stat:
+    path: /run/kibana
+
+- name: /run/kibana 0775 kibana:kibana
+  assert:
+    that:
+      - kibana_pid_directory.stat.exists
+      - kibana_pid_directory.stat.mode == "0775"
+      - kibana_pid_directory.stat.pw_name == "kibana"
+      - kibana_pid_directory.stat.gr_name == "kibana"
+
+- name: stat /run/kibana/kibana.pid
+  become: yes
+  register: kibana_pid
+  stat:
+    path: /run/kibana/kibana.pid
+
+- name: /run/kibana/kibana.pid 0644 kibana:kibana
+  assert:
+    that:
+      - kibana_pid.stat.exists
+      - kibana_pid.stat.mode == "0644"
+      - kibana_pid.stat.pw_name == "kibana"
+      - kibana_pid.stat.gr_name == "kibana"

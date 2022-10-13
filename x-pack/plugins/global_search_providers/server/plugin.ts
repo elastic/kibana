@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CoreSetup, Plugin } from 'src/core/server';
-import { GlobalSearchPluginSetup } from '../../global_search/server';
+import { CoreSetup, Plugin } from '@kbn/core/server';
+import { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/server';
 import { createSavedObjectsResultProvider } from './providers';
 
 export interface GlobalSearchProvidersPluginSetupDeps {
@@ -14,7 +14,8 @@ export interface GlobalSearchProvidersPluginSetupDeps {
 }
 
 export class GlobalSearchProvidersPlugin
-  implements Plugin<{}, {}, GlobalSearchProvidersPluginSetupDeps, {}> {
+  implements Plugin<{}, {}, GlobalSearchProvidersPluginSetupDeps, {}>
+{
   setup(
     { getStartServices }: CoreSetup<{}, {}>,
     { globalSearch }: GlobalSearchProvidersPluginSetupDeps

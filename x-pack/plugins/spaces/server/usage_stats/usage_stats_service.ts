@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreSetup, Logger } from 'src/core/server';
+import type { CoreSetup, Logger } from '@kbn/core/server';
 
 import { SPACES_USAGE_STATS_TYPE } from './constants';
 import { UsageStatsClient } from './usage_stats_client';

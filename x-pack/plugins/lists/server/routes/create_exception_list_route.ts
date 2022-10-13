@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type { ListsPluginRouter } from '../types';
-import { EXCEPTION_LIST_URL } from '../../common/constants';
-import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
-import { validate } from '../../common/shared_imports';
+import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   CreateExceptionListSchemaDecoded,
   createExceptionListSchema,
-  exceptionListSchema,
-} from '../../common/schemas';
+} from '@kbn/securitysolution-io-ts-list-types';
+import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 
-import { getExceptionListClient } from './utils/get_exception_list_client';
+import type { ListsPluginRouter } from '../types';
+import { createExceptionListHandler } from '../handlers/create_exception_list_handler';
+
+import { buildRouteValidation, buildSiemResponse } from './utils';
 
 export const createExceptionListRoute = (router: ListsPluginRouter): void => {
   router.post(
@@ -34,46 +34,7 @@ export const createExceptionListRoute = (router: ListsPluginRouter): void => {
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        const {
-          name,
-          tags,
-          meta,
-          namespace_type: namespaceType,
-          description,
-          list_id: listId,
-          type,
-          version,
-        } = request.body;
-        const exceptionLists = getExceptionListClient(context);
-        const exceptionList = await exceptionLists.getExceptionList({
-          id: undefined,
-          listId,
-          namespaceType,
-        });
-        if (exceptionList != null) {
-          return siemResponse.error({
-            body: `exception list id: "${listId}" already exists`,
-            statusCode: 409,
-          });
-        } else {
-          const createdList = await exceptionLists.createExceptionList({
-            description,
-            immutable: false,
-            listId,
-            meta,
-            name,
-            namespaceType,
-            tags,
-            type,
-            version,
-          });
-          const [validated, errors] = validate(createdList, exceptionListSchema);
-          if (errors != null) {
-            return siemResponse.error({ body: errors, statusCode: 500 });
-          } else {
-            return response.ok({ body: validated ?? {} });
-          }
-        }
+        return await createExceptionListHandler(context, request, response, siemResponse);
       } catch (err) {
         const error = transformError(err);
         return siemResponse.error({

@@ -2,12 +2,10 @@
   "author": [
     "Elastic"
   ],
-  "description": "Windows operating systems are utilizing the time provider architecture in order to obtain accurate time stamps from other network devices or clients in the network. Time providers are implemented in the form of a DLL file which resides in System32 folder. The service W32Time initiates during the startup of Windows and loads w32time.dll. Adversaries may abuse this architecture to establish persistence, specifically by registering and enabling a malicious DLL as a time provider.",
+  "description": "Identifies modification of the Time Provider. Adversaries may establish persistence by registering and enabling a malicious DLL as a time provider. Windows uses the time provider architecture to obtain accurate time stamps from other network devices or clients in the network. Time providers are implemented in the form of a DLL file which resides in the System32 folder. The service W32Time initiates during the startup of Windows and loads w32time.dll.",
   "from": "now-9m",
   "index": [
-    "winlogbeat-*",
-    "logs-endpoint.events.*",
-    "logs-windows.*"
+    "logs-endpoint.events.*"
   ],
   "language": "eql",
   "license": "Elastic License v2",
@@ -15,6 +13,23 @@
   "query": "registry where event.type:\"change\" and\n  registry.path:\"HKLM\\\\SYSTEM\\\\*ControlSet*\\\\Services\\\\W32Time\\\\TimeProviders\\\\*\" and\n  registry.data.strings:\"*.dll\"\n",
   "references": [
     "https://pentestlab.blog/2019/10/22/persistence-time-providers/"
+  ],
+  "required_fields": [
+    {
+      "ecs": true,
+      "name": "event.type",
+      "type": "keyword"
+    },
+    {
+      "ecs": true,
+      "name": "registry.data.strings",
+      "type": "wildcard"
+    },
+    {
+      "ecs": true,
+      "name": "registry.path",
+      "type": "keyword"
+    }
   ],
   "risk_score": 47,
   "rule_id": "14ed1aa9-ebfd-4cf9-a463-0ac59ec55204",
@@ -52,5 +67,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 1
+  "version": 100
 }

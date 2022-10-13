@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mockKibanaValues } from '../../../../__mocks__';
+import { mockKibanaValues } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -13,7 +13,7 @@ import { shallow } from 'enzyme';
 
 import { Chart, Settings, LineSeries, Axis } from '@elastic/charts';
 
-import { AnalyticsChart } from './';
+import { AnalyticsChart } from '.';
 
 describe('AnalyticsChart', () => {
   const MOCK_DATA = [

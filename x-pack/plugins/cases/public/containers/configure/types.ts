@@ -15,9 +15,9 @@ import {
   CasesConfigure,
   ClosureType,
   ThirdPartyField,
-} from '../../../common';
+} from '../../../common/api';
 
-export {
+export type {
   ActionConnector,
   ActionTypeConnector,
   ActionType,
@@ -34,6 +34,7 @@ export interface CaseConnectorMapping {
 }
 
 export interface CaseConfigure {
+  id: string;
   closureType: ClosureType;
   connector: CasesConfigure['connector'];
   createdAt: string;
@@ -43,4 +44,5 @@ export interface CaseConfigure {
   updatedAt: string;
   updatedBy: ElasticUser;
   version: string;
+  owner: string;
 }

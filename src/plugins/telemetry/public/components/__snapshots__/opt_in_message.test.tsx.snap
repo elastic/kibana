@@ -8,7 +8,7 @@ exports[`OptInMessage renders as expected 1`] = `
     values={
       Object {
         "privacyStatementLink": <EuiLink
-          href="https://www.elastic.co/legal/privacy-statement"
+          href="https://some-host/some-url"
           rel="noopener"
           target="_blank"
         >

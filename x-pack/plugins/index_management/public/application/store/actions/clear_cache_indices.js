@@ -11,22 +11,24 @@ import { i18n } from '@kbn/i18n';
 import { clearCacheIndices as request } from '../../services';
 import { notificationService } from '../../services/notification';
 
-import { clearRowStatus, reloadIndices } from '../actions';
+import { clearRowStatus, reloadIndices } from '.';
 
 export const clearCacheIndicesStart = createAction('INDEX_MANAGEMENT_CLEAR_CACHE_INDICES_START');
-export const clearCacheIndices = ({ indexNames }) => async (dispatch) => {
-  dispatch(clearCacheIndicesStart({ indexNames }));
-  try {
-    await request(indexNames);
-  } catch (error) {
-    notificationService.showDangerToast(error.message);
-    return dispatch(clearRowStatus({ indexNames }));
-  }
-  dispatch(reloadIndices(indexNames));
-  notificationService.showSuccessToast(
-    i18n.translate('xpack.idxMgmt.clearCacheIndicesAction.successMessage', {
-      defaultMessage: 'Successfully cleared cache: [{indexNames}]',
-      values: { indexNames: indexNames.join(', ') },
-    })
-  );
-};
+export const clearCacheIndices =
+  ({ indexNames }) =>
+  async (dispatch) => {
+    dispatch(clearCacheIndicesStart({ indexNames }));
+    try {
+      await request(indexNames);
+    } catch (error) {
+      notificationService.showDangerToast(error.message);
+      return dispatch(clearRowStatus({ indexNames }));
+    }
+    dispatch(reloadIndices(indexNames));
+    notificationService.showSuccessToast(
+      i18n.translate('xpack.idxMgmt.clearCacheIndicesAction.successMessage', {
+        defaultMessage: 'Successfully cleared cache: [{indexNames}]',
+        values: { indexNames: indexNames.join(', ') },
+      })
+    );
+  };

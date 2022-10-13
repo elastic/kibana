@@ -6,8 +6,8 @@
  */
 
 import { get, omit } from 'lodash';
-// @ts-expect-error untyped local
-import { safeElementFromExpression, fromExpression } from '@kbn/interpreter/common';
+import { safeElementFromExpression, fromExpression } from '@kbn/interpreter';
+import type { CanvasRenderedWorkpad } from '../../../shareable_runtime/types';
 import { append } from '../../lib/modify_path';
 import { getAssets } from './assets';
 import {
@@ -27,6 +27,7 @@ import {
   ExpressionAstFunction,
   ExpressionAstExpression,
 } from '../../../types';
+import { isExpressionWithFilters } from '../../lib/filter';
 
 type Modify<T, R> = Pick<T, Exclude<keyof T, keyof R>> & R;
 type WorkpadInfo = Modify<CanvasWorkpad, { pages: undefined }>;
@@ -248,7 +249,7 @@ function extractFilterGroups(
     // TODO: we always get a function here, right?
     const { function: fn, arguments: args } = item;
 
-    if (fn === 'filters') {
+    if (isExpressionWithFilters(fn)) {
       // we have a filter function, extract groups from args
       return groups.concat(
         buildGroupValues(args, (argValue) => {
@@ -355,11 +356,13 @@ export function getElements(
   return elements.map(elementAppendAst);
 }
 
-const augment = (type: string) => <T extends CanvasElement | CanvasGroup>(n: T): T => ({
-  ...n,
-  position: { ...n.position, type },
-  ...(type === 'group' && { expression: 'shape fill="rgba(255,255,255,0)" | render' }), // fixme unify with mw/aeroelastic
-});
+const augment =
+  (type: string) =>
+  <T extends CanvasElement | CanvasGroup>(n: T): T => ({
+    ...n,
+    position: { ...n.position, type },
+    ...(type === 'group' && { expression: 'shape fill="rgba(255,255,255,0)" | render' }), // fixme unify with mw/aeroelastic
+  });
 
 const getNodesOfPage = (page: CanvasPage): Array<CanvasElement | CanvasGroup> => {
   const elements: Array<CanvasElement | CanvasGroup> = get(page, 'elements').map(
@@ -454,7 +457,7 @@ export function getResolvedArgs(state: State, elementId: string, path: any): any
   return args;
 }
 
-export function getSelectedResolvedArgs(state: State, path: any): any {
+export function getSelectedResolvedArgs(state: State, path: Array<string | number>): any {
   const elementId = getSelectedElementId(state);
 
   if (elementId) {
@@ -462,8 +465,12 @@ export function getSelectedResolvedArgs(state: State, path: any): any {
   }
 }
 
-export function getContextForIndex(state: State, index: number): ExpressionContext {
-  return getSelectedResolvedArgs(state, ['expressionContext', index - 1]);
+export function getContextForIndex(
+  state: State,
+  parentPath: string,
+  index: number
+): ExpressionContext {
+  return getSelectedResolvedArgs(state, ['expressionContext', parentPath, index - 1]);
 }
 
 export function getRefreshInterval(state: State): number {
@@ -501,7 +508,7 @@ export function getRenderedWorkpad(state: State) {
   return {
     pages: renderedPages,
     ...rest,
-  };
+  } as CanvasRenderedWorkpad;
 }
 
 export function getRenderedWorkpadExpressions(state: State) {

@@ -9,9 +9,9 @@ import React, { useMemo, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { IndexPattern } from '../../../../../../../src/plugins/data/common';
+import type { DataViewBase } from '@kbn/es-query';
 import { getFormattedEntries, getUpdatedEntriesOnDelete } from './helpers';
-import { FormattedEntry, ThreatMapEntries, Entry } from './types';
+import type { FormattedEntry, ThreatMapEntries, Entry } from './types';
 import { EntryItem } from './entry_item';
 import { EntryDeleteButtonComponent } from './entry_delete_button';
 import { AndBadgeComponent } from './and_badge';
@@ -24,8 +24,8 @@ const MyOverflowContainer = styled(EuiFlexItem)`
 interface ListItemProps {
   listItem: ThreatMapEntries;
   listItemIndex: number;
-  indexPattern: IndexPattern;
-  threatIndexPatterns: IndexPattern;
+  indexPattern: DataViewBase;
+  threatIndexPatterns: DataViewBase;
   andLogicIncluded: boolean;
   isOnlyItem: boolean;
   onDeleteEntryItem: (item: ThreatMapEntries, index: number) => void;

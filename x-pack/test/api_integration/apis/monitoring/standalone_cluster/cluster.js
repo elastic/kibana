@@ -6,14 +6,17 @@
  */
 
 import expect from '@kbn/expect';
-import clusterFixture from './fixtures/cluster';
+import clusterFixture from './fixtures/cluster.json';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('cluster', () => {
-    const archive = 'monitoring/standalone_cluster';
+  describe('cluster', function () {
+    // Archive contains non-cgroup data which collides with the in-cgroup services present by default on cloud deployments
+    this.tags(['skipCloud']);
+
+    const archive = 'x-pack/test/functional/es_archives/monitoring/standalone_cluster';
     const timeRange = {
       min: '2019-02-04T16:52:11.741Z',
       max: '2019-02-04T17:52:11.741Z',
@@ -34,7 +37,6 @@ export default function ({ getService }) {
         .set('kbn-xsrf', 'xxx')
         .send({ timeRange, codePaths })
         .expect(200);
-
       expect(body).to.eql(clusterFixture);
     });
   });

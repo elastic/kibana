@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash/fp';
-
 import moment from 'moment';
 
-import { MatrixHistogramRequestOptions } from '../../../../../../common/search_strategy';
+import type { MatrixHistogramRequestOptions } from '../../../../../../common/search_strategy';
 import {
   calculateTimeSeriesInterval,
   createQueryFilterClauses,
@@ -57,7 +55,6 @@ const getHistogramAggregation = ({ from, to }: { from: string; to: string }) => 
 
 export const buildDnsHistogramQuery = ({
   defaultIndex,
-  docValueFields,
   filterQuery,
   isPtrIncluded = false,
   stackByField = 'dns.question.registered_domain',
@@ -77,11 +74,10 @@ export const buildDnsHistogramQuery = ({
   ];
 
   const dslQuery = {
-    allowNoIndices: true,
+    allow_no_indices: true,
     index: defaultIndex,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
-      ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
       aggregations: {
         ...getCountAgg(),
         dns_name_query_count: {

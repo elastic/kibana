@@ -6,71 +6,73 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-
 import {
   EuiButtonEmpty,
+  EuiCheckbox,
+  EuiCode,
   EuiCodeBlock,
-  EuiPageBody,
-  EuiPageContent,
-  EuiPageContentBody,
-  EuiPageHeader,
-  EuiTitle,
-  EuiText,
+  EuiComboBox,
+  EuiFieldNumber,
   EuiFlexGrid,
   EuiFlexItem,
-  EuiCheckbox,
-  EuiSpacer,
-  EuiCode,
-  EuiComboBox,
   EuiFormLabel,
+  EuiHorizontalRule,
+  EuiPageBody,
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageHeader,
+  EuiProgress,
+  EuiSpacer,
   EuiTabbedContent,
+  EuiTabbedContentTab,
+  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
-
-import { CoreStart } from '../../../../src/core/public';
-import { mountReactNode } from '../../../../src/core/public/utils';
-import { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/public';
-
-import {
-  PLUGIN_ID,
-  PLUGIN_NAME,
-  IMyStrategyResponse,
-  SERVER_SEARCH_ROUTE_PATH,
-} from '../../common';
-
+import { CoreStart } from '@kbn/core/public';
+import { IInspectorInfo } from '@kbn/data-plugin/common';
 import {
   DataPublicPluginStart,
-  IndexPattern,
-  IndexPatternField,
+  IKibanaSearchResponse,
   isCompleteResponse,
   isErrorResponse,
-} from '../../../../src/plugins/data/public';
+} from '@kbn/data-plugin/public';
+import { SearchResponseWarning } from '@kbn/data-plugin/public/search/types';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import React, { useEffect, useState } from 'react';
+import { lastValueFrom } from 'rxjs';
+import { PLUGIN_ID, PLUGIN_NAME, SERVER_SEARCH_ROUTE_PATH } from '../../common';
+import { IMyStrategyResponse } from '../../common/types';
 
 interface SearchExamplesAppDeps {
   notifications: CoreStart['notifications'];
   http: CoreStart['http'];
   navigation: NavigationPublicPluginStart;
   data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
-function getNumeric(fields?: IndexPatternField[]) {
+function getNumeric(fields?: DataViewField[]) {
   if (!fields) return [];
   return fields?.filter((f) => f.type === 'number' && f.aggregatable);
 }
 
-function getAggregatableStrings(fields?: IndexPatternField[]) {
+function getAggregatableStrings(fields?: DataViewField[]) {
   if (!fields) return [];
   return fields?.filter((f) => f.type === 'string' && f.aggregatable);
 }
 
-function formatFieldToComboBox(field?: IndexPatternField | null) {
+function formatFieldToComboBox(field?: DataViewField | null) {
   if (!field) return [];
   return formatFieldsToComboBox([field]);
 }
 
-function formatFieldsToComboBox(fields?: IndexPatternField[]) {
+function formatFieldsToComboBox(fields?: DataViewField[]) {
   if (!fields) return [];
 
   return fields?.map((field) => {
@@ -80,59 +82,112 @@ function formatFieldsToComboBox(fields?: IndexPatternField[]) {
   });
 }
 
+const bucketAggType = 'terms';
+const metricAggType = 'median';
+
 export const SearchExamplesApp = ({
   http,
   notifications,
   navigation,
   data,
+  unifiedSearch,
 }: SearchExamplesAppDeps) => {
-  const { IndexPatternSelect } = data.ui;
+  const { IndexPatternSelect } = unifiedSearch.ui;
   const [getCool, setGetCool] = useState<boolean>(false);
+  const [fibonacciN, setFibonacciN] = useState<number>(10);
   const [timeTook, setTimeTook] = useState<number | undefined>();
-  const [indexPattern, setIndexPattern] = useState<IndexPattern | null>();
-  const [fields, setFields] = useState<IndexPatternField[]>();
-  const [selectedFields, setSelectedFields] = useState<IndexPatternField[]>([]);
+  const [total, setTotal] = useState<number>(100);
+  const [loaded, setLoaded] = useState<number>(0);
+  const [dataView, setDataView] = useState<DataView | null>();
+  const [fields, setFields] = useState<DataViewField[]>();
+  const [selectedFields, setSelectedFields] = useState<DataViewField[]>([]);
   const [selectedNumericField, setSelectedNumericField] = useState<
-    IndexPatternField | null | undefined
+    DataViewField | null | undefined
   >();
   const [selectedBucketField, setSelectedBucketField] = useState<
-    IndexPatternField | null | undefined
+    DataViewField | null | undefined
   >();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [currentAbortController, setAbortController] = useState<AbortController>();
   const [request, setRequest] = useState<Record<string, any>>({});
-  const [response, setResponse] = useState<Record<string, any>>({});
+  const [rawResponse, setRawResponse] = useState<Record<string, any>>({});
+  const [warningContents, setWarningContents] = useState<SearchResponseWarning[]>([]);
+  const [selectedTab, setSelectedTab] = useState(0);
 
-  // Fetch the default index pattern using the `data.indexPatterns` service, as the component is mounted.
+  function setResponse(response: IKibanaSearchResponse) {
+    setWarningContents([]);
+    setRawResponse(response.rawResponse);
+    setLoaded(response.loaded!);
+    setTotal(response.total!);
+    setTimeTook(response.rawResponse.took);
+  }
+
+  // Fetch the default data view using the `data.dataViews` service, as the component is mounted.
   useEffect(() => {
-    const setDefaultIndexPattern = async () => {
-      const defaultIndexPattern = await data.indexPatterns.getDefault();
-      setIndexPattern(defaultIndexPattern);
+    const setDefaultDataView = async () => {
+      const defaultDataView = await data.dataViews.getDefault();
+      setDataView(defaultDataView);
     };
 
-    setDefaultIndexPattern();
+    setDefaultDataView();
   }, [data]);
 
-  // Update the fields list every time the index pattern is modified.
+  // Update the fields list every time the data view is modified.
   useEffect(() => {
-    setFields(indexPattern?.fields);
-  }, [indexPattern]);
+    setFields(dataView?.fields);
+  }, [dataView]);
   useEffect(() => {
     setSelectedBucketField(fields?.length ? getAggregatableStrings(fields)[0] : null);
     setSelectedNumericField(fields?.length ? getNumeric(fields)[0] : null);
   }, [fields]);
 
-  const doAsyncSearch = async (strategy?: string, sessionId?: string) => {
-    if (!indexPattern || !selectedNumericField) return;
+  const doAsyncSearch = async (
+    strategy?: string,
+    sessionId?: string,
+    addWarning: boolean = false,
+    addError: boolean = false
+  ) => {
+    if (!dataView || !selectedNumericField) return;
 
     // Construct the query portion of the search request
-    const query = data.query.getEsQuery(indexPattern);
+    const query = data.query.getEsQuery(dataView);
+
+    if (addWarning) {
+      query.bool.must.push({
+        // @ts-ignore
+        error_query: {
+          indices: [
+            {
+              name: dataView.title,
+              error_type: 'warning',
+              message: 'Watch out!',
+            },
+          ],
+        },
+      });
+    }
+    if (addError) {
+      query.bool.must.push({
+        // @ts-ignore
+        error_query: {
+          indices: [
+            {
+              name: dataView.title,
+              error_type: 'exception',
+              message: 'Watch out!',
+            },
+          ],
+        },
+      });
+    }
 
     // Construct the aggregations portion of the search request by using the `data.search.aggs` service.
-    const aggs = [{ type: 'avg', params: { field: selectedNumericField!.name } }];
-    const aggsDsl = data.search.aggs.createAggConfigs(indexPattern, aggs).toDsl();
+    const aggs = [{ type: metricAggType, params: { field: selectedNumericField!.name } }];
+    const aggsDsl = data.search.aggs.createAggConfigs(dataView, aggs).toDsl();
 
     const req = {
       params: {
-        index: indexPattern.title,
+        index: dataView.title,
         body: {
           aggs: aggsDsl,
           query,
@@ -142,19 +197,27 @@ export const SearchExamplesApp = ({
       ...(strategy ? { get_cool: getCool } : {}),
     };
 
+    const abortController = new AbortController();
+    setAbortController(abortController);
+
     // Submit the search request using the `data.search` service.
     setRequest(req.params.body);
-    const searchSubscription$ = data.search
+    setRawResponse({});
+    setWarningContents([]);
+    setIsLoading(true);
+
+    data.search
       .search(req, {
         strategy,
         sessionId,
+        abortSignal: abortController.signal,
       })
       .subscribe({
         next: (res) => {
           if (isCompleteResponse(res)) {
-            setResponse(res.rawResponse);
-            setTimeTook(res.rawResponse.took);
-            const avgResult: number | undefined = res.rawResponse.aggregations
+            setIsLoading(false);
+            setResponse(res);
+            const aggResult: number | undefined = res.rawResponse.aggregations
               ? // @ts-expect-error @elastic/elasticsearch no way to declare a type for aggregation in the search response
                 res.rawResponse.aggregations[1].value
               : undefined;
@@ -163,8 +226,8 @@ export const SearchExamplesApp = ({
             const message = (
               <EuiText>
                 Searched {res.rawResponse.hits.total} documents. <br />
-                The average of {selectedNumericField!.name} is{' '}
-                {avgResult ? Math.floor(avgResult) : 0}.
+                The ${metricAggType} of {selectedNumericField!.name} is{' '}
+                {aggResult ? Math.floor(aggResult) : 0}.
                 <br />
                 {isCool ? `Is it Cool? ${isCool}` : undefined}
                 <br />
@@ -176,31 +239,39 @@ export const SearchExamplesApp = ({
             notifications.toasts.addSuccess(
               {
                 title: 'Query result',
-                text: mountReactNode(message),
+                text: toMountPoint(message),
               },
               {
                 toastLifeTimeMs: 300000,
               }
             );
-            searchSubscription$.unsubscribe();
+            if (res.warning) {
+              notifications.toasts.addWarning({
+                title: 'Warning',
+                text: toMountPoint(res.warning),
+              });
+            }
           } else if (isErrorResponse(res)) {
             // TODO: Make response error status clearer
-            notifications.toasts.addWarning('An error has occurred');
-            searchSubscription$.unsubscribe();
+            notifications.toasts.addDanger('An error has occurred');
           }
         },
-        error: () => {
-          notifications.toasts.addDanger('Failed to run search');
+        error: (e) => {
+          setIsLoading(false);
+          data.search.showError(e);
         },
       });
   };
 
-  const doSearchSourceSearch = async (otherBucket: boolean) => {
-    if (!indexPattern) return;
+  const doSearchSourceSearch = async (
+    otherBucket: boolean,
+    showWarningToastNotifications = true
+  ) => {
+    if (!dataView) return;
 
     const query = data.query.queryString.getQuery();
     const filters = data.query.filterManager.getFilters();
-    const timefilter = data.query.timefilter.timefilter.createFilter(indexPattern);
+    const timefilter = data.query.timefilter.timefilter.createFilter(dataView);
     if (timefilter) {
       filters.push(timefilter);
     }
@@ -209,7 +280,7 @@ export const SearchExamplesApp = ({
       const searchSource = await data.search.searchSource.create();
 
       searchSource
-        .setField('index', indexPattern)
+        .setField('index', dataView)
         .setField('filter', filters)
         .setField('query', query)
         .setField('fields', selectedFields.length ? selectedFields.map((f) => f.name) : [''])
@@ -219,36 +290,74 @@ export const SearchExamplesApp = ({
       const aggDef = [];
       if (selectedBucketField) {
         aggDef.push({
-          type: 'terms',
+          type: bucketAggType,
           schema: 'split',
           params: { field: selectedBucketField.name, size: 2, otherBucket },
         });
       }
       if (selectedNumericField) {
-        aggDef.push({ type: 'avg', params: { field: selectedNumericField.name } });
+        aggDef.push({ type: metricAggType, params: { field: selectedNumericField.name } });
       }
       if (aggDef.length > 0) {
-        const ac = data.search.aggs.createAggConfigs(indexPattern, aggDef);
+        const ac = data.search.aggs.createAggConfigs(dataView, aggDef);
         searchSource.setField('aggs', ac);
       }
-
       setRequest(searchSource.getSearchRequestBody());
-      const { rawResponse: res } = await searchSource.fetch$().toPromise();
-      setResponse(res);
+      setRawResponse({});
+      setWarningContents([]);
+      const abortController = new AbortController();
 
-      const message = <EuiText>Searched {res.hits.total} documents.</EuiText>;
+      const inspector: Required<IInspectorInfo> = {
+        adapter: new RequestAdapter(),
+        title: 'Example App Inspector!',
+        id: 'greatest-example-app-inspector',
+        description: 'Use the `description` field for more info about the inspector.',
+      };
+
+      setAbortController(abortController);
+      setIsLoading(true);
+      const result = await lastValueFrom(
+        searchSource.fetch$({
+          abortSignal: abortController.signal,
+          disableShardFailureWarning: !showWarningToastNotifications,
+          inspector,
+        })
+      );
+      setRawResponse(result.rawResponse);
+
+      /* Here is an example of using showWarnings on the search service, using an optional callback to
+       * intercept the warnings before notification warnings are shown.
+       *
+       * Suppressing the shard failure warning notification from appearing by default requires setting
+       * { disableShardFailureWarning: true } in the SearchSourceSearchOptions passed to $fetch
+       */
+      if (showWarningToastNotifications) {
+        setWarningContents([]);
+      } else {
+        const warnings: SearchResponseWarning[] = [];
+        data.search.showWarnings(inspector.adapter, (warning) => {
+          warnings.push(warning);
+          return false; // allow search service from showing this warning on its own
+        });
+        // click the warnings tab to see the warnings
+        setWarningContents(warnings);
+      }
+
+      const message = <EuiText>Searched {result.rawResponse.hits.total} documents.</EuiText>;
       notifications.toasts.addSuccess(
         {
           title: 'Query result',
-          text: mountReactNode(message),
+          text: toMountPoint(message),
         },
         {
           toastLifeTimeMs: 300000,
         }
       );
     } catch (e) {
-      setResponse(e.body);
-      notifications.toasts.addWarning(`An error has occurred: ${e.message}`);
+      setRawResponse(e.body);
+      data.search.showError(e);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -260,31 +369,89 @@ export const SearchExamplesApp = ({
     doAsyncSearch('myStrategy');
   };
 
+  const onWarningSearchClickHandler = () => {
+    doAsyncSearch(undefined, undefined, true);
+  };
+
+  const onErrorSearchClickHandler = () => {
+    doAsyncSearch(undefined, undefined, false, true);
+  };
+
+  const onPartialResultsClickHandler = () => {
+    setSelectedTab(1);
+    const req = {
+      params: {
+        n: fibonacciN,
+      },
+    };
+
+    const abortController = new AbortController();
+    setAbortController(abortController);
+
+    // Submit the search request using the `data.search` service.
+    setRequest(req.params);
+    setIsLoading(true);
+    data.search
+      .search(req, {
+        strategy: 'fibonacciStrategy',
+        abortSignal: abortController.signal,
+      })
+      .subscribe({
+        next: (res) => {
+          setResponse(res);
+          if (isCompleteResponse(res)) {
+            setIsLoading(false);
+            notifications.toasts.addSuccess({
+              title: 'Query result',
+              text: 'Query finished',
+            });
+          } else if (isErrorResponse(res)) {
+            setIsLoading(false);
+            // TODO: Make response error status clearer
+            notifications.toasts.addWarning('An error has occurred');
+          }
+        },
+        error: (e) => {
+          setIsLoading(false);
+          data.search.showError(e);
+        },
+      });
+  };
+
   const onClientSideSessionCacheClickHandler = () => {
     doAsyncSearch('myStrategy', data.search.session.getSessionId());
   };
 
   const onServerClickHandler = async () => {
-    if (!indexPattern || !selectedNumericField) return;
+    if (!dataView || !selectedNumericField) return;
+    const abortController = new AbortController();
+    setAbortController(abortController);
+    setIsLoading(true);
     try {
       const res = await http.get(SERVER_SEARCH_ROUTE_PATH, {
         query: {
-          index: indexPattern.title,
+          index: dataView.title,
           field: selectedNumericField!.name,
         },
+        signal: abortController.signal,
       });
 
       notifications.toasts.addSuccess(`Server returned ${JSON.stringify(res)}`);
     } catch (e) {
-      notifications.toasts.addDanger('Failed to run search');
+      data.search.showError(e);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const onSearchSourceClickHandler = (withOtherBucket: boolean) => {
-    doSearchSourceSearch(withOtherBucket);
+  const onSearchSourceClickHandler = (
+    withOtherBucket: boolean,
+    showWarningToastNotifications: boolean
+  ) => {
+    doSearchSourceSearch(withOtherBucket, showWarningToastNotifications);
   };
 
-  const reqTabs = [
+  const reqTabs: EuiTabbedContentTab[] = [
     {
       id: 'request',
       name: <EuiText data-test-subj="requestTab">Request</EuiText>,
@@ -318,6 +485,7 @@ export const SearchExamplesApp = ({
               values={{ time: timeTook ?? 'Unknown' }}
             />
           </EuiText>
+          <EuiProgress value={loaded} max={total} size="xs" data-test-subj="progressBar" />
           <EuiCodeBlock
             language="json"
             fontSize="s"
@@ -326,8 +494,37 @@ export const SearchExamplesApp = ({
             isCopyable
             data-test-subj="responseCodeBlock"
           >
-            {JSON.stringify(response, null, 2)}
+            {JSON.stringify(rawResponse, null, 2)}
           </EuiCodeBlock>
+        </>
+      ),
+    },
+    {
+      id: 'warnings',
+      name: <EuiText data-test-subj="warningsTab">Warnings</EuiText>,
+      content: (
+        <>
+          {' '}
+          <EuiSpacer />{' '}
+          <EuiText size="xs">
+            {' '}
+            <FormattedMessage
+              id="searchExamples.warningsObject"
+              defaultMessage="Timeout and shard failure warnings for high-level search may be handled in a callback to the showWarnings method on the search service."
+            />{' '}
+          </EuiText>{' '}
+          <EuiProgress value={loaded} max={total} size="xs" data-test-subj="progressBar" />{' '}
+          <EuiCodeBlock
+            language="json"
+            fontSize="s"
+            paddingSize="s"
+            overflowHeight={450}
+            isCopyable
+            data-test-subj="warningsCodeBlock"
+          >
+            {' '}
+            {JSON.stringify(warningContents, null, 2)}{' '}
+          </EuiCodeBlock>{' '}
         </>
       ),
     },
@@ -352,33 +549,37 @@ export const SearchExamplesApp = ({
             appName={PLUGIN_ID}
             showSearchBar={true}
             useDefaultBehaviors={true}
-            indexPatterns={indexPattern ? [indexPattern] : undefined}
+            indexPatterns={dataView ? [dataView] : undefined}
           />
           <EuiFlexGrid columns={4}>
             <EuiFlexItem>
-              <EuiFormLabel>Index Pattern</EuiFormLabel>
+              <EuiFormLabel>Data view</EuiFormLabel>
               <IndexPatternSelect
-                placeholder={i18n.translate('searchSessionExample.selectIndexPatternPlaceholder', {
-                  defaultMessage: 'Select index pattern',
+                placeholder={i18n.translate('searchSessionExample.selectDataViewPlaceholder', {
+                  defaultMessage: 'Select data view',
                 })}
-                indexPatternId={indexPattern?.id || ''}
-                onChange={async (newIndexPatternId: any) => {
-                  const newIndexPattern = await data.indexPatterns.get(newIndexPatternId);
-                  setIndexPattern(newIndexPattern);
+                indexPatternId={dataView?.id || ''}
+                onChange={async (dataViewId?: string) => {
+                  if (dataViewId) {
+                    const newDataView = await data.dataViews.get(dataViewId);
+                    setDataView(newDataView);
+                  } else {
+                    setDataView(undefined);
+                  }
                 }}
                 isClearable={false}
-                data-test-subj="indexPatternSelector"
+                data-test-subj="dataViewSelector"
               />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiFormLabel>Field (bucket)</EuiFormLabel>
+              <EuiFormLabel>Field (using {bucketAggType} buckets)</EuiFormLabel>
               <EuiComboBox
                 options={formatFieldsToComboBox(getAggregatableStrings(fields))}
                 selectedOptions={formatFieldToComboBox(selectedBucketField)}
                 singleSelection={true}
                 onChange={(option) => {
                   if (option.length) {
-                    const fld = indexPattern?.getFieldByName(option[0].label);
+                    const fld = dataView?.getFieldByName(option[0].label);
                     setSelectedBucketField(fld || null);
                   } else {
                     setSelectedBucketField(null);
@@ -389,14 +590,14 @@ export const SearchExamplesApp = ({
               />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiFormLabel>Numeric Field (metric)</EuiFormLabel>
+              <EuiFormLabel>Numeric Field (using {metricAggType} metrics)</EuiFormLabel>
               <EuiComboBox
                 options={formatFieldsToComboBox(getNumeric(fields))}
                 selectedOptions={formatFieldToComboBox(selectedNumericField)}
                 singleSelection={true}
                 onChange={(option) => {
                   if (option.length) {
-                    const fld = indexPattern?.getFieldByName(option[0].label);
+                    const fld = dataView?.getFieldByName(option[0].label);
                     setSelectedNumericField(fld || null);
                   } else {
                     setSelectedNumericField(null);
@@ -414,14 +615,17 @@ export const SearchExamplesApp = ({
                 singleSelection={false}
                 onChange={(option) => {
                   const flds = option
-                    .map((opt) => indexPattern?.getFieldByName(opt?.label))
+                    .map((opt) => dataView?.getFieldByName(opt?.label))
                     .filter((f) => f);
-                  setSelectedFields(flds.length ? (flds as IndexPatternField[]) : []);
+                  setSelectedFields(flds.length ? (flds as DataViewField[]) : []);
                 }}
                 sortMatchesBy="startsWith"
               />
             </EuiFlexItem>
           </EuiFlexGrid>
+
+          <EuiHorizontalRule />
+
           <EuiFlexGrid columns={2}>
             <EuiFlexItem style={{ width: '40%' }}>
               <EuiSpacer />
@@ -432,9 +636,8 @@ export const SearchExamplesApp = ({
               </EuiTitle>
               <EuiText>
                 If you want to fetch data from Elasticsearch, you can use the different services
-                provided by the <EuiCode>data</EuiCode> plugin. These help you get the index pattern
-                and search bar configuration, format them into a DSL query and send it to
-                Elasticsearch.
+                provided by the <EuiCode>data</EuiCode> plugin. These help you get the data view and
+                search bar configuration, format them into a DSL query and send it to Elasticsearch.
                 <EuiSpacer />
                 <EuiButtonEmpty size="xs" onClick={onClickHandler} iconType="play">
                   <FormattedMessage
@@ -450,7 +653,7 @@ export const SearchExamplesApp = ({
                 </EuiText>
                 <EuiButtonEmpty
                   size="xs"
-                  onClick={() => onSearchSourceClickHandler(true)}
+                  onClick={() => onSearchSourceClickHandler(true, true)}
                   iconType="play"
                   data-test-subj="searchSourceWithOther"
                 >
@@ -462,12 +665,12 @@ export const SearchExamplesApp = ({
                 <EuiText size="xs" color="subdued" className="searchExampleStepDsc">
                   <FormattedMessage
                     id="searchExamples.buttonText"
-                    defaultMessage="Bucket and metrics aggregations with other bucket."
+                    defaultMessage="Bucket and metrics aggregations, with other bucket and default warnings."
                   />
                 </EuiText>
                 <EuiButtonEmpty
                   size="xs"
-                  onClick={() => onSearchSourceClickHandler(false)}
+                  onClick={() => onSearchSourceClickHandler(false, false)}
                   iconType="play"
                   data-test-subj="searchSourceWithoutOther"
                 >
@@ -479,9 +682,72 @@ export const SearchExamplesApp = ({
                 <EuiText size="xs" color="subdued" className="searchExampleStepDsc">
                   <FormattedMessage
                     id="searchExamples.buttonText"
-                    defaultMessage="Bucket and metrics aggregations without other bucket."
+                    defaultMessage="Bucket and metrics aggregations, without other bucket and with custom logic to handle warnings."
                   />
                 </EuiText>
+              </EuiText>
+              <EuiSpacer />
+              <EuiTitle size="xs">
+                <h3>Handling errors & warnings</h3>
+              </EuiTitle>
+              <EuiText>
+                When fetching data from Elasticsearch, there are several different ways warnings and
+                errors may be returned. In general, it is recommended to surface these in the UX.
+                <EuiSpacer />
+                <EuiButtonEmpty
+                  size="xs"
+                  onClick={onWarningSearchClickHandler}
+                  iconType="play"
+                  data-test-subj="searchWithWarning"
+                >
+                  <FormattedMessage
+                    id="searchExamples.searchWithWarningButtonText"
+                    defaultMessage="Request with a warning in response"
+                  />
+                </EuiButtonEmpty>
+                <EuiText />
+                <EuiButtonEmpty
+                  size="xs"
+                  onClick={onErrorSearchClickHandler}
+                  iconType="play"
+                  data-test-subj="searchWithError"
+                >
+                  <FormattedMessage
+                    id="searchExamples.searchWithErrorButtonText"
+                    defaultMessage="Request with an error in response"
+                  />
+                </EuiButtonEmpty>
+              </EuiText>
+              <EuiSpacer />
+              <EuiTitle size="xs">
+                <h3>Handling partial results</h3>
+              </EuiTitle>
+              <EuiText>
+                The observable returned from <EuiCode>data.search</EuiCode> provides partial results
+                when the response is not yet complete. These can be handled to update a chart or
+                simply a progress bar:
+                <EuiSpacer />
+                <EuiCodeBlock language="html" fontSize="s" paddingSize="s" overflowHeight={450}>
+                  &lt;EuiProgress value=&#123;response.loaded&#125; max=&#123;response.total&#125;
+                  /&gt;
+                </EuiCodeBlock>
+                Below is an example showing a custom search strategy that emits partial Fibonacci
+                sequences up to the length provided, updates the response with each partial result,
+                and updates a progress bar (see the Response tab).
+                <EuiFieldNumber
+                  id="FibonacciN"
+                  placeholder="Number of Fibonacci numbers to generate"
+                  value={fibonacciN}
+                  onChange={(event) => setFibonacciN(parseInt(event.target.value, 10))}
+                />
+                <EuiButtonEmpty
+                  size="xs"
+                  onClick={onPartialResultsClickHandler}
+                  iconType="play"
+                  data-test-subj="requestFibonacci"
+                >
+                  Request Fibonacci sequence
+                </EuiButtonEmpty>
               </EuiText>
               <EuiSpacer />
               <EuiTitle size="s">
@@ -558,6 +824,11 @@ export const SearchExamplesApp = ({
                 strategy. This request does not take the configuration of{' '}
                 <EuiCode>TopNavMenu</EuiCode> into account, but you could pass those down to the
                 server as well.
+                <br />
+                When executing search on the server, make sure to cancel the search in case user
+                cancels corresponding network request. This could happen in case user re-runs a
+                query or leaves the page without waiting for the result. Cancellation API is similar
+                on client and server and use `AbortController`.
                 <EuiSpacer />
                 <EuiButtonEmpty size="xs" onClick={onServerClickHandler} iconType="play">
                   <FormattedMessage
@@ -567,8 +838,22 @@ export const SearchExamplesApp = ({
                 </EuiButtonEmpty>
               </EuiText>
             </EuiFlexItem>
+
             <EuiFlexItem style={{ width: '60%' }}>
-              <EuiTabbedContent tabs={reqTabs} />
+              <EuiTabbedContent
+                tabs={reqTabs}
+                selectedTab={reqTabs[selectedTab]}
+                onTabClick={(tab) => setSelectedTab(reqTabs.indexOf(tab))}
+              />
+              <EuiSpacer />
+              {currentAbortController && isLoading && (
+                <EuiButtonEmpty size="xs" onClick={() => currentAbortController?.abort()}>
+                  <FormattedMessage
+                    id="searchExamples.abortButtonText"
+                    defaultMessage="Abort request"
+                  />
+                </EuiButtonEmpty>
+              )}
             </EuiFlexItem>
           </EuiFlexGrid>
         </EuiPageContentBody>

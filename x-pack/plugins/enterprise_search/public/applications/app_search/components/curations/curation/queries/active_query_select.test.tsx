@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockValues, setMockActions } from '../../../../../__mocks__';
+import { setMockValues, setMockActions } from '../../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -13,7 +13,7 @@ import { shallow } from 'enzyme';
 
 import { EuiSelect } from '@elastic/eui';
 
-import { ActiveQuerySelect } from './';
+import { ActiveQuerySelect } from '.';
 
 describe('ActiveQuerySelect', () => {
   const values = {

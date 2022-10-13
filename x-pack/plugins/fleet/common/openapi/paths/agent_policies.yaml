@@ -1,5 +1,5 @@
 get:
-  summary: Agent policy - List
+  summary: Agent policies - List
   tags: []
   responses:
     '200':
@@ -29,6 +29,12 @@ get:
     - $ref: ../components/parameters/page_size.yaml
     - $ref: ../components/parameters/page_index.yaml
     - $ref: ../components/parameters/kuery.yaml
+    - schema:
+        type: boolean
+      in: query
+      name: full
+      description: When set to true, retrieve the related package policies for each agent policy.
+
   description: ''
 post:
   summary: Agent policy - Create
@@ -43,7 +49,7 @@ post:
             properties:
               item:
                 $ref: ../components/schemas/agent_policy.yaml
-  operationId: post-agent-policy
+  operationId: create-agent-policy
   requestBody:
     content:
       application/json:

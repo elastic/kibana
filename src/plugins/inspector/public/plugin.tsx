@@ -8,14 +8,19 @@
 
 import { i18n } from '@kbn/i18n';
 import * as React from 'react';
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
-import { toMountPoint } from '../../kibana_react/public';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 import { InspectorViewRegistry } from './view_registry';
 import { InspectorOptions, InspectorSession } from './types';
 import { InspectorPanel } from './ui/inspector_panel';
 import { Adapters } from '../common';
 
 import { getRequestsViewDescription } from './views';
+
+export interface InspectorPluginStartDeps {
+  share: SharePluginStart;
+}
 
 export interface Setup {
   registerView: InspectorViewRegistry['register'];
@@ -70,7 +75,7 @@ export class InspectorPublicPlugin implements Plugin<Setup, Start> {
     };
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart, startDeps: InspectorPluginStartDeps) {
     const isAvailable: Start['isAvailable'] = (adapters) =>
       this.views!.getVisible(adapters).length > 0;
 
@@ -95,8 +100,14 @@ export class InspectorPublicPlugin implements Plugin<Setup, Start> {
             adapters={adapters}
             title={options.title}
             options={options.options}
-            dependencies={{ uiSettings: core.uiSettings }}
-          />
+            dependencies={{
+              application: core.application,
+              http: core.http,
+              uiSettings: core.uiSettings,
+              share: startDeps.share,
+            }}
+          />,
+          { theme$: core.theme.theme$ }
         ),
         {
           'data-test-subj': 'inspectorPanel',

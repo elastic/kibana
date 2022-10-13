@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { SecuritySubPluginWithStore } from '../app/types';
-import { TimelinesRoutes } from './routes';
+import type { SecuritySubPluginWithStore } from '../app/types';
+import { routes } from './routes';
 import { initialTimelineState, timelineReducer } from './store/timeline/reducer';
-import { TimelineState } from './store/timeline/types';
+import type { TimelineState } from './store/timeline/types';
 
 export class Timelines {
   public setup() {}
 
   public start(): SecuritySubPluginWithStore<'timeline', TimelineState> {
     return {
-      SubPluginRoutes: TimelinesRoutes,
+      routes,
       store: {
         initialState: { timeline: initialTimelineState },
         reducer: { timeline: timelineReducer },

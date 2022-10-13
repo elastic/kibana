@@ -24,7 +24,7 @@ import {
 import { checkCreateJobsCapabilitiesResolver } from '../../../capabilities/check_capabilities';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { useCreateAndNavigateToMlLink } from '../../../contexts/kibana/use_create_url';
-import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
+import { ML_PAGES } from '../../../../../common/constants/locator';
 
 interface WizardPageProps extends PageProps {
   jobType: JOB_TYPE;
@@ -86,6 +86,16 @@ const getCategorizationBreadcrumbs = (navigateToPath: NavigateToPath, basePath: 
   },
 ];
 
+const getRareBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string) => [
+  ...getBaseBreadcrumbs(navigateToPath, basePath),
+  {
+    text: i18n.translate('xpack.ml.jobsBreadcrumbs.rareLabel', {
+      defaultMessage: 'Rare',
+    }),
+    href: '',
+  },
+];
+
 export const singleMetricRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
@@ -131,19 +141,31 @@ export const categorizationRouteFactory = (
   breadcrumbs: getCategorizationBreadcrumbs(navigateToPath, basePath),
 });
 
+export const rareRouteFactory = (navigateToPath: NavigateToPath, basePath: string): MlRoute => ({
+  path: '/jobs/new_job/rare',
+  render: (props, deps) => <PageWrapper {...props} jobType={JOB_TYPE.RARE} deps={deps} />,
+  breadcrumbs: getRareBreadcrumbs(navigateToPath, basePath),
+});
+
 const PageWrapper: FC<WizardPageProps> = ({ location, jobType, deps }) => {
   const redirectToJobsManagementPage = useCreateAndNavigateToMlLink(
     ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE
   );
 
   const { index, savedSearchId }: Record<string, any> = parse(location.search, { sort: false });
-  const { context, results } = useResolver(index, savedSearchId, deps.config, {
-    ...basicResolvers(deps),
-    privileges: () => checkCreateJobsCapabilitiesResolver(redirectToJobsManagementPage),
-    jobCaps: () =>
-      loadNewJobCapabilities(index, savedSearchId, deps.indexPatterns, ANOMALY_DETECTOR),
-    existingJobsAndGroups: mlJobService.getJobAndGroupIds,
-  });
+  const { context, results } = useResolver(
+    index,
+    savedSearchId,
+    deps.config,
+    deps.dataViewsContract,
+    {
+      ...basicResolvers(deps),
+      privileges: () => checkCreateJobsCapabilitiesResolver(redirectToJobsManagementPage),
+      jobCaps: () =>
+        loadNewJobCapabilities(index, savedSearchId, deps.dataViewsContract, ANOMALY_DETECTOR),
+      existingJobsAndGroups: mlJobService.getJobAndGroupIds,
+    }
+  );
 
   return (
     <PageLoader context={context}>

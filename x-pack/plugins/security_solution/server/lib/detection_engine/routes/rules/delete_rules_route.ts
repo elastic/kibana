@@ -5,20 +5,19 @@
  * 2.0.
  */
 
+import { transformError } from '@kbn/securitysolution-es-utils';
 import { queryRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/query_rules_type_dependents';
-import {
-  queryRulesSchema,
-  QueryRulesSchemaDecoded,
-} from '../../../../../common/detection_engine/schemas/request/query_rules_schema';
+import type { QueryRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/query_rules_schema';
+import { queryRulesSchema } from '../../../../../common/detection_engine/schemas/request/query_rules_schema';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { deleteRules } from '../../rules/delete_rules';
 import { getIdError, transform } from './utils';
-import { transformError, buildSiemResponse } from '../utils';
-import { deleteNotifications } from '../../notifications/delete_notifications';
-import { deleteRuleActionsSavedObject } from '../../rule_actions/delete_rule_actions_saved_object';
-import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
+import { buildSiemResponse } from '../utils';
+
+import { readRules } from '../../rules/read_rules';
+import { legacyMigrate } from '../../rules/utils';
 
 export const deleteRulesRoute = (router: SecuritySolutionPluginRouter) => {
   router.delete(
@@ -43,43 +42,39 @@ export const deleteRulesRoute = (router: SecuritySolutionPluginRouter) => {
       try {
         const { id, rule_id: ruleId } = request.query;
 
-        const alertsClient = context.alerting?.getAlertsClient();
-        const savedObjectsClient = context.core.savedObjects.client;
+        const ctx = await context.resolve(['core', 'securitySolution', 'alerting']);
+        const rulesClient = ctx.alerting.getRulesClient();
+        const ruleExecutionLog = ctx.securitySolution.getRuleExecutionLog();
+        const savedObjectsClient = ctx.core.savedObjects.client;
 
-        if (!alertsClient) {
-          return siemResponse.error({ statusCode: 404 });
-        }
-
-        const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
-        const rule = await deleteRules({
-          alertsClient,
-          id,
-          ruleId,
+        const rule = await readRules({ rulesClient, id, ruleId });
+        const migratedRule = await legacyMigrate({
+          rulesClient,
+          savedObjectsClient,
+          rule,
         });
-        if (rule != null) {
-          await deleteNotifications({ alertsClient, ruleAlertId: rule.id });
-          await deleteRuleActionsSavedObject({
-            ruleAlertId: rule.id,
-            savedObjectsClient,
-          });
-          const ruleStatuses = await ruleStatusClient.find({
-            perPage: 6,
-            search: rule.id,
-            searchFields: ['alertId'],
-          });
-          ruleStatuses.saved_objects.forEach(async (obj) => ruleStatusClient.delete(obj.id));
-          const transformed = transform(rule, undefined, ruleStatuses.saved_objects[0]);
-          if (transformed == null) {
-            return siemResponse.error({ statusCode: 500, body: 'failed to transform alert' });
-          } else {
-            return response.ok({ body: transformed ?? {} });
-          }
-        } else {
+
+        if (!migratedRule) {
           const error = getIdError({ id, ruleId });
           return siemResponse.error({
             body: error.message,
             statusCode: error.statusCode,
           });
+        }
+
+        const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(migratedRule.id);
+
+        await deleteRules({
+          ruleId: migratedRule.id,
+          rulesClient,
+          ruleExecutionLog,
+        });
+
+        const transformed = transform(migratedRule, ruleExecutionSummary);
+        if (transformed == null) {
+          return siemResponse.error({ statusCode: 500, body: 'failed to transform alert' });
+        } else {
+          return response.ok({ body: transformed ?? {} });
         }
       } catch (err) {
         const error = transformError(err);

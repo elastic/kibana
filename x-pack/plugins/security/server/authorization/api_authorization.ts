@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { HttpServiceSetup, Logger } from 'src/core/server';
+import type { HttpServiceSetup, Logger } from '@kbn/core/server';
 
 import type { AuthorizationServiceSetup } from './authorization_service';
 

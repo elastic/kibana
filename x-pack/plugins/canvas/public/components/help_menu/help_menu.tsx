@@ -5,56 +5,22 @@
  * 2.0.
  */
 
-import React, { FC, useState, lazy, Suspense } from 'react';
-import { EuiButtonEmpty, EuiPortal, EuiSpacer } from '@elastic/eui';
-import { ExpressionFunction } from 'src/plugins/expressions';
-import { ComponentStrings } from '../../../i18n';
-import { KeyboardShortcutsDoc } from '../keyboard_shortcuts_doc';
-
-let FunctionReferenceGenerator: null | React.LazyExoticComponent<any> = null;
-if (process.env.NODE_ENV === 'development') {
-  FunctionReferenceGenerator = lazy(() =>
-    import('../function_reference_generator').then((module) => ({
-      default: module.FunctionReferenceGenerator,
-    }))
-  );
-}
-
-const { HelpMenu: strings } = ComponentStrings;
+import React, { FC, useCallback } from 'react';
+import { ChromeHelpMenuActions } from '@kbn/core/public';
+import { useDispatch } from 'react-redux';
+import { HelpMenu as Component } from './help_menu.component';
+import { setKeyboardShortcutsDocVisibility } from '../../state/actions/flyouts';
 
 interface Props {
-  functionRegistry: Record<string, ExpressionFunction>;
+  hideHelpMenu: ChromeHelpMenuActions['hideHelpMenu'];
 }
 
-export const HelpMenu: FC<Props> = ({ functionRegistry }) => {
-  const [isFlyoutVisible, setFlyoutVisible] = useState(false);
-
-  const showFlyout = () => {
-    setFlyoutVisible(true);
-  };
-
-  const hideFlyout = () => {
-    setFlyoutVisible(false);
-  };
-
-  return (
-    <>
-      <EuiButtonEmpty size="xs" flush="left" iconType="keyboardShortcut" onClick={showFlyout}>
-        {strings.getKeyboardShortcutsLinkLabel()}
-      </EuiButtonEmpty>
-
-      {FunctionReferenceGenerator ? (
-        <Suspense fallback={null}>
-          <EuiSpacer size="s" />
-          <FunctionReferenceGenerator functionRegistry={functionRegistry} />
-        </Suspense>
-      ) : null}
-
-      {isFlyoutVisible && (
-        <EuiPortal>
-          <KeyboardShortcutsDoc onClose={hideFlyout} />
-        </EuiPortal>
-      )}
-    </>
+export const HelpMenu: FC<Props> = (props) => {
+  const dispatch = useDispatch();
+  const showKeyboardShortcutsDocFlyout = useCallback(
+    () => dispatch(setKeyboardShortcutsDocVisibility(true)),
+    [dispatch]
   );
+
+  return <Component {...props} showKeyboardShortcutsDocFlyout={showKeyboardShortcutsDocFlyout} />;
 };

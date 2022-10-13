@@ -6,7 +6,7 @@
  */
 
 import sinon from 'sinon';
-import { functionWrapper } from '../../../test_helpers/function_wrapper';
+import { functionWrapper } from '@kbn/presentation-util-plugin/common/lib';
 import { getFunctionErrors } from '../../../i18n';
 import { date } from './date';
 

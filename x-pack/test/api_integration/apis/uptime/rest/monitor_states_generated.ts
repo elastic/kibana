@@ -6,10 +6,10 @@
  */
 
 import expect from '@kbn/expect';
+import { MonitorSummary } from '@kbn/synthetics-plugin/common/runtime_types';
+import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { makeChecksWithStatus } from './helper/make_checks';
-import { MonitorSummary } from '../../../../../plugins/uptime/common/runtime_types';
-import { API_URLS } from '../../../../../plugins/uptime/common/constants';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -24,8 +24,12 @@ export default function ({ getService }: FtrProviderContext) {
     const getBaseUrl = (from: string, to: string) =>
       `${API_URLS.MONITOR_LIST}?dateRangeStart=${from}&dateRangeEnd=${to}&pageSize=10`;
 
-    before('load heartbeat data', () => getService('esArchiver').load('uptime/blank'));
-    after('unload heartbeat index', () => getService('esArchiver').unload('uptime/blank'));
+    before('load heartbeat data', () =>
+      getService('esArchiver').load('x-pack/test/functional/es_archives/uptime/blank')
+    );
+    after('unload heartbeat index', () =>
+      getService('esArchiver').unload('x-pack/test/functional/es_archives/uptime/blank')
+    );
 
     // In this case we don't actually have any monitors to display
     // but the query should still return successfully. This has
@@ -36,7 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
     describe('checks with no summaries', async () => {
       const testMonitorId = 'scope-test-id';
       before(async () => {
-        const es = getService('legacyEs');
+        const es = getService('es');
         dateRangeStart = new Date().toISOString();
         await makeChecksWithStatus(es, testMonitorId, 1, numIps, 1, {}, 'up', (d) => {
           delete d.summary;
@@ -64,7 +68,7 @@ export default function ({ getService }: FtrProviderContext) {
       };
 
       before(async () => {
-        const es = getService('legacyEs');
+        const es = getService('es');
         dateRangeStart = new Date().toISOString();
         checks = await makeChecksWithStatus(es, testMonitorId, 1, numIps, 1, {}, 'up', (d) => {
           // turn an all up status into having at least one down
@@ -78,15 +82,6 @@ export default function ({ getService }: FtrProviderContext) {
 
         dateRangeEnd = new Date().toISOString();
         nonSummaryIp = checks[0][0].monitor.ip;
-      });
-
-      it('should match non summary documents without a status filter', async () => {
-        const filters = makeApiParams(testMonitorId, [{ match: { 'monitor.ip': nonSummaryIp } }]);
-
-        const url = getBaseUrl(dateRangeStart, dateRangeEnd) + `&filters=${filters}`;
-        const apiResponse = await supertest.get(url);
-        const nonSummaryRes = apiResponse.body;
-        expect(nonSummaryRes.summaries.length).to.eql(1);
       });
 
       it('should not match non summary documents if the check status does not match the document status', async () => {
@@ -139,9 +134,9 @@ export default function ({ getService }: FtrProviderContext) {
       const downMonitorId = 'down-test-id';
       const mixMonitorId = 'mix-test-id';
       before('generate three monitors with up, down, mix state', async () => {
-        await getService('esArchiver').load('uptime/blank');
+        await getService('esArchiver').load('x-pack/test/functional/es_archives/uptime/blank');
 
-        const es = getService('legacyEs');
+        const es = getService('es');
 
         const observer = {
           geo: {
@@ -169,7 +164,9 @@ export default function ({ getService }: FtrProviderContext) {
         dateRangeEnd = new Date().toISOString();
       });
 
-      after('unload heartbeat index', () => getService('esArchiver').unload('uptime/blank'));
+      after('unload heartbeat index', () =>
+        getService('esArchiver').unload('x-pack/test/functional/es_archives/uptime/blank')
+      );
 
       it('should return all monitor when no status filter', async () => {
         const apiResponse = await supertest.get(getBaseUrl(dateRangeStart, dateRangeEnd));

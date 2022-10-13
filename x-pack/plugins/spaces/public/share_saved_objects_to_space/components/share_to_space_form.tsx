@@ -7,17 +7,17 @@
 
 import './share_to_space_form.scss';
 
-import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
-import React, { Fragment } from 'react';
+import { EuiCallOut, EuiFlexItem, EuiLink, EuiSpacer } from '@elastic/eui';
+import React from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { ShareToSpaceTarget } from '../../types';
+import type { SpacesDataEntry } from '../../types';
 import type { ShareOptions } from '../types';
 import { ShareModeControl } from './share_mode_control';
 
 interface Props {
-  spaces: ShareToSpaceTarget[];
+  spaces: SpacesDataEntry[];
   objectNoun: string;
   onUpdate: (shareOptions: ShareOptions) => void;
   shareOptions: ShareOptions;
@@ -26,6 +26,7 @@ interface Props {
   makeCopy: () => void;
   enableCreateNewSpaceLink: boolean;
   enableSpaceAgnosticBehavior: boolean;
+  prohibitedSpaces: Set<string>;
 }
 
 export const ShareToSpaceForm = (props: Props) => {
@@ -39,13 +40,14 @@ export const ShareToSpaceForm = (props: Props) => {
     makeCopy,
     enableCreateNewSpaceLink,
     enableSpaceAgnosticBehavior,
+    prohibitedSpaces,
   } = props;
 
   const setSelectedSpaceIds = (selectedSpaceIds: string[]) =>
     onUpdate({ ...shareOptions, selectedSpaceIds });
 
   const createCopyCallout = showCreateCopyCallout ? (
-    <Fragment>
+    <EuiFlexItem grow={false}>
       <EuiCallOut
         size="s"
         title={
@@ -61,7 +63,7 @@ export const ShareToSpaceForm = (props: Props) => {
           defaultMessage="Your changes appear in each space you select. {makeACopyLink} if you don't want to synchronize your changes."
           values={{
             makeACopyLink: (
-              <EuiLink data-test-subj="sts-copy-link" onClick={() => makeCopy()}>
+              <EuiLink data-test-subj="sts-copy-button" onClick={() => makeCopy()}>
                 <FormattedMessage
                   id="xpack.spaces.shareToSpace.shareWarningLink"
                   defaultMessage="Make a copy"
@@ -73,11 +75,11 @@ export const ShareToSpaceForm = (props: Props) => {
       </EuiCallOut>
 
       <EuiSpacer size="m" />
-    </Fragment>
+    </EuiFlexItem>
   ) : null;
 
   return (
-    <div data-test-subj="share-to-space-form">
+    <>
       {createCopyCallout}
 
       <ShareModeControl
@@ -88,7 +90,8 @@ export const ShareToSpaceForm = (props: Props) => {
         onChange={(selection) => setSelectedSpaceIds(selection)}
         enableCreateNewSpaceLink={enableCreateNewSpaceLink}
         enableSpaceAgnosticBehavior={enableSpaceAgnosticBehavior}
+        prohibitedSpaces={prohibitedSpaces}
       />
-    </div>
+    </>
   );
 };

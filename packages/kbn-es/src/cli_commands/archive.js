@@ -10,6 +10,7 @@ const dedent = require('dedent');
 const getopts = require('getopts');
 const { Cluster } = require('../cluster');
 const { createCliError } = require('../errors');
+const { parseTimeoutToMs } = require('../utils');
 
 exports.description = 'Install and run from an Elasticsearch tar';
 
@@ -27,6 +28,8 @@ exports.help = (defaults = {}) => {
       --password.[user] Sets password for native realm user [default: ${password}]
       --ssl             Sets up SSL on Elasticsearch
       -E                Additional key=value settings to pass to Elasticsearch
+      --skip-ready-check  Disable the ready check,
+      --ready-timeout   Customize the ready check timeout, in seconds or "Xm" format, defaults to 1m
 
     Example:
 
@@ -41,7 +44,12 @@ exports.run = async (defaults = {}) => {
       basePath: 'base-path',
       installPath: 'install-path',
       esArgs: 'E',
+      skipReadyCheck: 'skip-ready-check',
+      readyTimeout: 'ready-timeout',
     },
+
+    string: ['ready-timeout'],
+    boolean: ['skip-ready-check'],
 
     default: defaults,
   });
@@ -54,5 +62,8 @@ exports.run = async (defaults = {}) => {
   }
 
   const { installPath } = await cluster.installArchive(path, options);
-  await cluster.run(installPath, options);
+  await cluster.run(installPath, {
+    ...options,
+    readyTimeout: parseTimeoutToMs(options.readyTimeout),
+  });
 };

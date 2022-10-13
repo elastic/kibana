@@ -7,15 +7,15 @@
 
 import expect from '@kbn/expect';
 import deepmerge from 'deepmerge';
-import type { FtrProviderContext } from '../../ftr_provider_context';
+import ossRootTelemetrySchema from '@kbn/telemetry-plugin/schema/oss_root.json';
+import ossPluginsTelemetrySchema from '@kbn/telemetry-plugin/schema/oss_plugins.json';
+import xpackRootTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_root.json';
+import xpackPluginsTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_plugins.json';
 import {
   assertTelemetryPayload,
   flatKeys,
 } from '../../../../../test/api_integration/apis/telemetry/utils';
-import ossRootTelemetrySchema from '../../../../../src/plugins/telemetry/schema/oss_root.json';
-import ossPluginsTelemetrySchema from '../../../../../src/plugins/telemetry/schema/oss_plugins.json';
-import xpackRootTelemetrySchema from '../../../../plugins/telemetry_collection_xpack/schema/xpack_root.json';
-import xpackPluginsTelemetrySchema from '../../../../plugins/telemetry_collection_xpack/schema/xpack_plugins.json';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const disableCollection = {
   persistent: {
@@ -43,11 +43,11 @@ export default function ({ getService }: FtrProviderContext) {
       const { body } = await supertest
         .post('/api/telemetry/v2/clusters/_stats')
         .set('kbn-xsrf', 'xxx')
-        .send({ unencrypted: true })
+        .send({ unencrypted: true, refreshCache: true })
         .expect(200);
 
       expect(body.length).to.be(1);
-      stats = body[0];
+      stats = body[0].stats;
     });
 
     it('should pass the schema validation', () => {
@@ -77,7 +77,6 @@ export default function ({ getService }: FtrProviderContext) {
       expect(stats.stack_stats.kibana.graph_workspace.total).to.be.a('number');
       expect(stats.stack_stats.kibana.index_pattern.total).to.be.a('number');
       expect(stats.stack_stats.kibana.search.total).to.be.a('number');
-      expect(stats.stack_stats.kibana.timelion_sheet.total).to.be.a('number');
       expect(stats.stack_stats.kibana.visualization.total).to.be.a('number');
 
       expect(stats.stack_stats.kibana.plugins.apm.services_per_agent).to.be.an('object');
@@ -87,6 +86,21 @@ export default function ({ getService }: FtrProviderContext) {
       expect(stats.stack_stats.kibana.plugins.maps.attributes).to.be(undefined);
       expect(stats.stack_stats.kibana.plugins.maps.id).to.be(undefined);
       expect(stats.stack_stats.kibana.plugins.maps.type).to.be(undefined);
+
+      // Saved Objects Count collector
+      expect(stats.stack_stats.kibana.plugins.saved_objects_counts.total).to.be.a('number');
+      expect(stats.stack_stats.kibana.plugins.saved_objects_counts.total).to.be.greaterThan(0); // At least the `config` document should be there
+      expect(stats.stack_stats.kibana.plugins.saved_objects_counts.by_type).to.be.an('array');
+      expect(
+        stats.stack_stats.kibana.plugins.saved_objects_counts.by_type.length
+      ).to.be.greaterThan(0); // At least the `config` document should be there
+      expect(
+        stats.stack_stats.kibana.plugins.saved_objects_counts.by_type.find(
+          ({ type }: { type: string }) => type === 'config'
+        )
+      ).to.eql({ type: 'config', count: 1 });
+      expect(stats.stack_stats.kibana.plugins.saved_objects_counts.others).to.be(0); // Unless there's a bug/unexpected situation, it should be 0
+      expect(stats.stack_stats.kibana.plugins.saved_objects_counts.non_registered_types).to.eql([]); // During tests, we shouldn't expect to list types that are not registered.
 
       expect(stats.stack_stats.kibana.plugins.reporting.enabled).to.be(true);
       expect(stats.stack_stats.kibana.plugins.rollups.index_patterns).to.be.an('object');
@@ -157,7 +171,6 @@ export default function ({ getService }: FtrProviderContext) {
         'stack_stats.kibana.os',
         'stack_stats.kibana.plugins',
         'stack_stats.kibana.search',
-        'stack_stats.kibana.timelion_sheet',
         'stack_stats.kibana.versions',
         'stack_stats.kibana.visualization',
         'stack_stats.xpack.ccr',

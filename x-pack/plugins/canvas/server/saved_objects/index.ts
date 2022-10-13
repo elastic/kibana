@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { workpadType } from './workpad';
+import { workpadTypeFactory } from './workpad';
 import { customElementType } from './custom_element';
 import { workpadTemplateType } from './workpad_template';
 
-export { customElementType, workpadType, workpadTemplateType };
+export { customElementType, workpadTypeFactory, workpadTemplateType };

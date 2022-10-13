@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { DiscoverSetup, DiscoverStart } from '.';
 
 export type Setup = jest.Mocked<DiscoverSetup>;
@@ -16,16 +17,14 @@ const createSetupContract = (): Setup => {
     docViews: {
       addDocView: jest.fn(),
     },
+    locator: sharePluginMock.createLocator(),
   };
   return setupContract;
 };
 
 const createStartContract = (): Start => {
   const startContract: Start = {
-    savedSearchLoader: {} as any,
-    urlGenerator: {
-      createUrl: jest.fn(),
-    } as any,
+    locator: sharePluginMock.createLocator(),
   };
   return startContract;
 };

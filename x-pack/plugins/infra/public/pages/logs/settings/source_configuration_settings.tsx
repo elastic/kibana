@@ -10,20 +10,19 @@ import {
   EuiErrorBoundary,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPage,
-  EuiPageBody,
-  EuiPageContentBody,
   EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { useTrackPageview } from '../../../../../observability/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { Prompt, useTrackPageview } from '@kbn/observability-plugin/public';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
-import { useLogSourceContext } from '../../../containers/logs/log_source';
-import { Prompt } from '../../../utils/navigation_warning_prompt';
+import { useLogsBreadcrumbs } from '../../../hooks/use_logs_breadcrumbs';
+import { useLogViewContext } from '../../../hooks/use_log_view';
+import { settingsTitle } from '../../../translations';
+import { LogsPageTemplate } from '../page_template';
 import { IndicesConfigurationPanel } from './indices_configuration_panel';
 import { LogColumnsConfigurationPanel } from './log_columns_configuration_panel';
 import { NameConfigurationPanel } from './name_configuration_panel';
@@ -41,17 +40,18 @@ export const LogsSettingsPage = () => {
     delay: 15000,
   });
 
-  const {
-    sourceConfiguration: source,
-    isLoading,
-    isUninitialized,
-    updateSourceConfiguration,
-    resolvedSourceConfiguration,
-  } = useLogSourceContext();
+  useLogsBreadcrumbs([
+    {
+      text: settingsTitle,
+    },
+  ]);
+
+  const { logView, hasFailedLoadingLogView, isLoading, isUninitialized, update, resolvedLogView } =
+    useLogViewContext();
 
   const availableFields = useMemo(
-    () => resolvedSourceConfiguration?.fields.map((field) => field.name) ?? [],
-    [resolvedSourceConfiguration]
+    () => resolvedLogView?.fields.map((field) => field.name) ?? [],
+    [resolvedLogView]
   );
 
   const {
@@ -60,125 +60,123 @@ export const LogsSettingsPage = () => {
     logIndicesFormElement,
     logColumnsFormElement,
     nameFormElement,
-    tiebreakerFieldFormElement,
-    timestampFieldFormElement,
-  } = useLogSourceConfigurationFormState(source?.configuration);
+  } = useLogSourceConfigurationFormState(logView?.attributes);
 
   const persistUpdates = useCallback(async () => {
-    await updateSourceConfiguration(formState);
+    await update(formState);
     sourceConfigurationFormElement.resetValue();
-  }, [updateSourceConfiguration, sourceConfigurationFormElement, formState]);
+  }, [update, sourceConfigurationFormElement, formState]);
 
-  const isWriteable = useMemo(() => shouldAllowEdit && source && source.origin !== 'internal', [
-    shouldAllowEdit,
-    source,
-  ]);
+  const isWriteable = useMemo(
+    () => shouldAllowEdit && logView && logView.origin !== 'internal',
+    [shouldAllowEdit, logView]
+  );
 
-  if ((isLoading || isUninitialized) && !resolvedSourceConfiguration) {
+  if ((isLoading || isUninitialized) && !resolvedLogView) {
     return <SourceLoadingPage />;
   }
-  if (!source?.configuration) {
+  if (hasFailedLoadingLogView) {
     return null;
   }
 
   return (
     <EuiErrorBoundary>
-      <EuiPage style={{ flex: '1 0 0%' }}>
-        <EuiPageBody data-test-subj="sourceConfigurationContent" restrictWidth>
-          <EuiPageContentBody>
-            <Prompt
-              prompt={sourceConfigurationFormElement.isDirty ? unsavedFormPromptMessage : undefined}
+      <LogsPageTemplate
+        pageHeader={{
+          pageTitle: settingsTitle,
+        }}
+        data-test-subj="sourceConfigurationContent"
+        restrictWidth
+      >
+        <Prompt
+          prompt={sourceConfigurationFormElement.isDirty ? unsavedFormPromptMessage : undefined}
+        />
+        <EuiPanel paddingSize="l" hasShadow={false} hasBorder={true}>
+          <NameConfigurationPanel
+            isLoading={isLoading}
+            isReadOnly={!isWriteable}
+            nameFormElement={nameFormElement}
+          />
+        </EuiPanel>
+        <EuiSpacer />
+        <EuiPanel paddingSize="l" hasShadow={false} hasBorder={true}>
+          <IndicesConfigurationPanel
+            isLoading={isLoading}
+            isReadOnly={!isWriteable}
+            indicesFormElement={logIndicesFormElement}
+          />
+        </EuiPanel>
+        <EuiSpacer />
+        <EuiPanel paddingSize="l" hasShadow={false} hasBorder={true}>
+          <LogColumnsConfigurationPanel
+            availableFields={availableFields}
+            isLoading={isLoading}
+            logColumnsFormElement={logColumnsFormElement}
+          />
+        </EuiPanel>
+        <EuiSpacer />
+        {sourceConfigurationFormElement.validity.validity === 'invalid' ? (
+          <>
+            <LogSourceConfigurationFormErrors
+              errors={sourceConfigurationFormElement.validity.reasons}
             />
-            <EuiPanel paddingSize="l">
-              <NameConfigurationPanel
-                isLoading={isLoading}
-                isReadOnly={!isWriteable}
-                nameFormElement={nameFormElement}
-              />
-            </EuiPanel>
             <EuiSpacer />
-            <EuiPanel paddingSize="l">
-              <IndicesConfigurationPanel
-                isLoading={isLoading}
-                isReadOnly={!isWriteable}
-                indicesFormElement={logIndicesFormElement}
-                tiebreakerFieldFormElement={tiebreakerFieldFormElement}
-                timestampFieldFormElement={timestampFieldFormElement}
-              />
-            </EuiPanel>
-            <EuiSpacer />
-            <EuiPanel paddingSize="l">
-              <LogColumnsConfigurationPanel
-                availableFields={availableFields}
-                isLoading={isLoading}
-                logColumnsFormElement={logColumnsFormElement}
-              />
-            </EuiPanel>
-            <EuiSpacer />
-            {sourceConfigurationFormElement.validity.validity === 'invalid' ? (
-              <>
-                <LogSourceConfigurationFormErrors
-                  errors={sourceConfigurationFormElement.validity.reasons}
-                />
-                <EuiSpacer />
-              </>
-            ) : null}
-            <EuiFlexGroup>
-              {isWriteable && (
-                <EuiFlexItem>
-                  {isLoading ? (
-                    <EuiFlexGroup justifyContent="flexEnd">
-                      <EuiFlexItem grow={false}>
-                        <EuiButton color="primary" isLoading fill>
-                          Loading
-                        </EuiButton>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  ) : (
-                    <>
-                      <EuiFlexGroup justifyContent="flexEnd">
-                        <EuiFlexItem grow={false}>
-                          <EuiButton
-                            data-test-subj="discardSettingsButton"
-                            color="danger"
-                            iconType="cross"
-                            isDisabled={isLoading || !sourceConfigurationFormElement.isDirty}
-                            onClick={() => {
-                              sourceConfigurationFormElement.resetValue();
-                            }}
-                          >
-                            <FormattedMessage
-                              id="xpack.infra.sourceConfiguration.discardSettingsButtonLabel"
-                              defaultMessage="Discard"
-                            />
-                          </EuiButton>
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <EuiButton
-                            data-test-subj="applySettingsButton"
-                            color="primary"
-                            isDisabled={
-                              !sourceConfigurationFormElement.isDirty ||
-                              sourceConfigurationFormElement.validity.validity !== 'valid'
-                            }
-                            fill
-                            onClick={persistUpdates}
-                          >
-                            <FormattedMessage
-                              id="xpack.infra.sourceConfiguration.applySettingsButtonLabel"
-                              defaultMessage="Apply"
-                            />
-                          </EuiButton>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </>
-                  )}
-                </EuiFlexItem>
+          </>
+        ) : null}
+        <EuiFlexGroup>
+          {isWriteable && (
+            <EuiFlexItem>
+              {isLoading ? (
+                <EuiFlexGroup justifyContent="flexEnd">
+                  <EuiFlexItem grow={false}>
+                    <EuiButton color="primary" isLoading fill>
+                      Loading
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              ) : (
+                <>
+                  <EuiFlexGroup justifyContent="flexEnd">
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        data-test-subj="discardSettingsButton"
+                        color="danger"
+                        iconType="cross"
+                        isDisabled={isLoading || !sourceConfigurationFormElement.isDirty}
+                        onClick={() => {
+                          sourceConfigurationFormElement.resetValue();
+                        }}
+                      >
+                        <FormattedMessage
+                          id="xpack.infra.sourceConfiguration.discardSettingsButtonLabel"
+                          defaultMessage="Discard"
+                        />
+                      </EuiButton>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        data-test-subj="applySettingsButton"
+                        color="primary"
+                        isDisabled={
+                          !sourceConfigurationFormElement.isDirty ||
+                          sourceConfigurationFormElement.validity.validity !== 'valid'
+                        }
+                        fill
+                        onClick={persistUpdates}
+                      >
+                        <FormattedMessage
+                          id="xpack.infra.sourceConfiguration.applySettingsButtonLabel"
+                          defaultMessage="Apply"
+                        />
+                      </EuiButton>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </>
               )}
-            </EuiFlexGroup>
-          </EuiPageContentBody>
-        </EuiPageBody>
-      </EuiPage>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      </LogsPageTemplate>
     </EuiErrorBoundary>
   );
 };

@@ -10,7 +10,7 @@ import { relative, basename } from 'path';
 
 import { dim } from 'chalk';
 
-import { createFailError } from '@kbn/dev-utils';
+import { createFailError } from '@kbn/dev-cli-errors';
 import { matchesAnyGlob } from '../globs';
 
 import {
@@ -85,7 +85,6 @@ async function checkForKebabCase(log, files) {
  * Check that all passed File objects are using valid casing. Every
  * file SHOULD be using snake_case but some files are allowed to stray:
  *
- *  - grunt config: the file name needs to match the module name
  *  - eslint/babel packages: the directory name matches the module
  *    name, which uses kebab-case to mimic other babel/eslint plugins,
  *    configs, and presets

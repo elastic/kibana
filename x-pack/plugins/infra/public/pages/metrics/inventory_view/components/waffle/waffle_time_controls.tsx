@@ -5,27 +5,25 @@
  * 2.0.
  */
 
-import { EuiButton, EuiDatePicker, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiButton, EuiDatePicker, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import moment, { Moment } from 'moment';
 import React, { useCallback } from 'react';
-import { withTheme, EuiTheme } from '../../../../../../../../../src/plugins/kibana_react/common';
+import { withTheme, EuiTheme } from '@kbn/kibana-react-plugin/common';
+import { convertIntervalToString } from '../../../../../utils/convert_interval_to_string';
 import { useWaffleTimeContext } from '../../hooks/use_waffle_time';
 
 interface Props {
   theme: EuiTheme | undefined;
+  interval: string;
 }
 
-export const WaffleTimeControls = withTheme(({ theme }: Props) => {
-  const {
-    currentTime,
-    isAutoReloading,
-    startAutoReload,
-    stopAutoReload,
-    jumpToTime,
-  } = useWaffleTimeContext();
+export const WaffleTimeControls = withTheme(({ interval }: Props) => {
+  const { currentTime, isAutoReloading, startAutoReload, stopAutoReload, jumpToTime } =
+    useWaffleTimeContext();
 
   const currentMoment = moment(currentTime);
+  const intervalAsString = convertIntervalToString(interval);
 
   const liveStreamingButton = isAutoReloading ? (
     <EuiButton color="primary" iconSide="left" iconType="pause" onClick={stopAutoReload}>
@@ -53,29 +51,28 @@ export const WaffleTimeControls = withTheme(({ theme }: Props) => {
   );
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="none">
-      <EuiFlexItem
-        grow={false}
-        style={{
-          border: theme?.eui.euiFormInputGroupBorder,
-          boxShadow: `0px 3px 2px ${theme?.eui.euiTableActionsBorderColor}, 0px 1px 1px ${theme?.eui.euiTableActionsBorderColor}`,
-          marginRight: theme?.eui.paddingSizes.m,
-        }}
-        data-test-subj="waffleDatePicker"
-      >
-        <EuiDatePicker
-          className="euiFieldText--inGroup"
-          dateFormat="L LTS"
-          disabled={isAutoReloading}
-          injectTimes={currentMoment ? [currentMoment] : []}
-          isLoading={isAutoReloading}
-          onChange={handleChangeDate}
-          popperPlacement="top-end"
-          selected={currentMoment}
-          shouldCloseOnSelect
-          showTimeSelect
-          timeFormat="LT"
-        />
+    <EuiFlexGroup gutterSize="m">
+      <EuiFlexItem grow={false} data-test-subj="waffleDatePicker">
+        <EuiToolTip
+          content={`Last ${intervalAsString} of data for the selected time`}
+          delay="long"
+          display="inlineBlock"
+          position="top"
+          data-test-subj="waffleDatePickerIntervalTooltip"
+        >
+          <EuiDatePicker
+            dateFormat="L LTS"
+            disabled={isAutoReloading}
+            injectTimes={currentMoment ? [currentMoment] : []}
+            isLoading={isAutoReloading}
+            onChange={handleChangeDate}
+            popoverPlacement="upRight"
+            selected={currentMoment}
+            shouldCloseOnSelect
+            showTimeSelect
+            timeFormat="LT"
+          />
+        </EuiToolTip>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>{liveStreamingButton}</EuiFlexItem>
     </EuiFlexGroup>

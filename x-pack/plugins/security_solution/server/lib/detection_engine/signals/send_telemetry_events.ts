@@ -5,19 +5,22 @@
  * 2.0.
  */
 
-import { TelemetryEventsSender, TelemetryEvent } from '../../telemetry/sender';
-import { BuildRuleMessage } from './rule_messages';
-import { SignalSearchResponse, SignalSource } from './types';
-import { Logger } from '../../../../../../../src/core/server';
+import type { ITelemetryEventsSender } from '../../telemetry/sender';
+import type { TelemetryEvent } from '../../telemetry/types';
+import type { IRuleExecutionLogForExecutors } from '../rule_monitoring';
+import type { SignalSource, SignalSourceHit } from './types';
 
-export interface SearchResultWithSource {
+interface SearchResultSource {
   _source: SignalSource;
 }
 
-export function selectEvents(filteredEvents: SignalSearchResponse): TelemetryEvent[] {
+type CreatedSignalId = string;
+type AlertId = string;
+
+export function selectEvents(filteredEvents: SignalSourceHit[]): TelemetryEvent[] {
   // @ts-expect-error @elastic/elasticsearch _source is optional
-  const sources: TelemetryEvent[] = filteredEvents.hits.hits.map(function (
-    obj: SearchResultWithSource
+  const sources: TelemetryEvent[] = filteredEvents.map(function (
+    obj: SearchResultSource
   ): TelemetryEvent {
     return obj._source;
   });
@@ -26,21 +29,49 @@ export function selectEvents(filteredEvents: SignalSearchResponse): TelemetryEve
   return sources.filter((obj: TelemetryEvent) => obj.data_stream?.dataset === 'endpoint.alerts');
 }
 
+export function enrichEndpointAlertsSignalID(
+  events: TelemetryEvent[],
+  signalIdMap: Map<string, string>
+): TelemetryEvent[] {
+  return events.map(function (obj: TelemetryEvent): TelemetryEvent {
+    obj.signal_id = undefined;
+    if (obj?.event?.id !== undefined) {
+      obj.signal_id = signalIdMap.get(obj.event.id);
+    }
+    return obj;
+  });
+}
+
 export function sendAlertTelemetryEvents(
-  logger: Logger,
-  eventsTelemetry: TelemetryEventsSender | undefined,
-  filteredEvents: SignalSearchResponse,
-  buildRuleMessage: BuildRuleMessage
+  filteredEvents: SignalSourceHit[],
+  createdEvents: SignalSource[],
+  eventsTelemetry: ITelemetryEventsSender | undefined,
+  ruleExecutionLogger: IRuleExecutionLogForExecutors
 ) {
   if (eventsTelemetry === undefined) {
     return;
   }
 
-  const sources = selectEvents(filteredEvents);
+  let selectedEvents = selectEvents(filteredEvents);
+  if (selectedEvents.length > 0) {
+    // Create map of ancenstor_id -> alert_id
+    let signalIdMap = new Map<CreatedSignalId, AlertId>();
+    /* eslint-disable no-param-reassign */
+    signalIdMap = createdEvents.reduce((signalMap, obj) => {
+      const ancestorId = obj['kibana.alert.original_event.id']?.toString();
+      const alertId = obj._id?.toString();
+      if (ancestorId !== null && ancestorId !== undefined && alertId !== undefined) {
+        signalMap = signalIdMap.set(ancestorId, alertId);
+      }
 
+      return signalMap;
+    }, new Map<CreatedSignalId, AlertId>());
+
+    selectedEvents = enrichEndpointAlertsSignalID(selectedEvents, signalIdMap);
+  }
   try {
-    eventsTelemetry.queueTelemetryEvents(sources);
+    eventsTelemetry.queueTelemetryEvents(selectedEvents);
   } catch (exc) {
-    logger.error(buildRuleMessage(`[-] queing telemetry events failed ${exc}`));
+    ruleExecutionLogger.error(`[-] queing telemetry events failed ${exc}`);
   }
 }

@@ -6,7 +6,7 @@
  */
 
 import createContainer from 'constate';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useMemo } from 'react';
 import { useLogAnalysisModule } from '../../log_analysis_module';
 import { useLogAnalysisModuleConfiguration } from '../../log_analysis_module_configuration';
@@ -26,7 +26,7 @@ export const useLogEntryCategoriesModule = ({
   sourceId: string;
   spaceId: string;
   timestampField: string;
-  runtimeMappings: estypes.RuntimeFields;
+  runtimeMappings: estypes.MappingRuntimeFields;
 }) => {
   const sourceConfiguration: ModuleSourceConfiguration = useMemo(
     () => ({
@@ -86,7 +86,5 @@ export const useLogEntryCategoriesModule = ({
   };
 };
 
-export const [
-  LogEntryCategoriesModuleProvider,
-  useLogEntryCategoriesModuleContext,
-] = createContainer(useLogEntryCategoriesModule);
+export const [LogEntryCategoriesModuleProvider, useLogEntryCategoriesModuleContext] =
+  createContainer(useLogEntryCategoriesModule);

@@ -11,5 +11,6 @@ export const extendMap = (
 ): Readonly<Record<string, string>> =>
   Object.entries(map).reduce<Record<string, string>>((accum, [key, value]) => {
     accum[`${path}.${key}`] = `${path}.${value}`;
+
     return accum;
   }, {});

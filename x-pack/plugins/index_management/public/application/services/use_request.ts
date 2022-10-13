@@ -11,6 +11,7 @@ import {
   UseRequestConfig,
   sendRequest as _sendRequest,
   useRequest as _useRequest,
+  Error,
 } from '../../shared_imports';
 
 import { httpService } from './http';
@@ -19,6 +20,6 @@ export const sendRequest = (config: SendRequestConfig): Promise<SendRequestRespo
   return _sendRequest(httpService.httpClient, config);
 };
 
-export const useRequest = <T = any>(config: UseRequestConfig) => {
-  return _useRequest<T>(httpService.httpClient, config);
+export const useRequest = <T = any, E = Error>(config: UseRequestConfig) => {
+  return _useRequest<T, E>(httpService.httpClient, config);
 };

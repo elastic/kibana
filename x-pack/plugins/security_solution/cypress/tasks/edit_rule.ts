@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import {
-  BACK_TO_RULE_DETAILS,
-  EDIT_SUBMIT_BUTTON,
-  KIBANA_LOADING_COMPLETE_INDICATOR,
-} from '../screens/edit_rule';
+import { BACK_TO_RULE_DETAILS, EDIT_SUBMIT_BUTTON } from '../screens/edit_rule';
+import { ACTIONS_THROTTLE_INPUT } from '../screens/create_new_rule';
 
 export const saveEditedRule = () => {
   cy.get(EDIT_SUBMIT_BUTTON).should('exist').click({ force: true });
@@ -21,6 +18,6 @@ export const goBackToRuleDetails = () => {
   cy.get(BACK_TO_RULE_DETAILS).should('not.exist');
 };
 
-export const waitForKibana = () => {
-  cy.get(KIBANA_LOADING_COMPLETE_INDICATOR).should('exist');
+export const assertSelectedActionFrequency = (frequency: string) => {
+  cy.get(ACTIONS_THROTTLE_INPUT).find('option:selected').should('have.text', frequency);
 };

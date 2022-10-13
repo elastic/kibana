@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './slide.scss';
-
 import { TransitionStrings } from '../../../i18n';
 
 const { slide: strings } = TransitionStrings;

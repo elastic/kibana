@@ -8,16 +8,17 @@
 import React, { Component } from 'react';
 import { EuiCallOut, EuiFormRow, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { IndexPattern, IndexPatternsContract } from 'src/plugins/data/public';
-import { HttpSetup } from 'kibana/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { DataViewsContract } from '@kbn/data-plugin/public';
+import { HttpSetup } from '@kbn/core/public';
+import { DataView } from '@kbn/data-plugin/common';
 
 interface Props {
-  onChange: (indexPattern: IndexPattern) => void;
+  onChange: (indexPattern: DataView) => void;
   value: string | undefined;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   IndexPatternSelectComponent: any;
-  indexPatternService: IndexPatternsContract | undefined;
+  indexPatternService: DataViewsContract | undefined;
   http: HttpSetup;
   includedGeoTypes: string[];
 }
@@ -41,9 +42,12 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
 
   componentDidMount() {
     this._isMounted = true;
+    if (this.props.value) {
+      this._loadIndexPattern(this.props.value);
+    }
   }
 
-  _onIndexPatternSelect = async (indexPatternId: string) => {
+  _loadIndexPattern = async (indexPatternId: string) => {
     if (!indexPatternId || indexPatternId.length === 0 || !this.props.indexPatternService) {
       return;
     }
@@ -55,14 +59,22 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
       return;
     }
 
-    // method may be called again before 'get' returns
-    // ignore response when fetched index pattern does not match active index pattern
-    if (this._isMounted && indexPattern.id === indexPatternId) {
-      this.setState({
-        doesIndexPatternHaveGeoField: indexPattern.fields.some((field) => {
-          return this.props.includedGeoTypes.includes(field.type);
-        }),
-      });
+    if (!this._isMounted || indexPattern.id !== indexPatternId) {
+      return;
+    }
+
+    this.setState({
+      doesIndexPatternHaveGeoField: indexPattern.fields.some((field) => {
+        return this.props.includedGeoTypes.includes(field.type);
+      }),
+    });
+
+    return indexPattern;
+  };
+
+  _onIndexPatternSelect = async (indexPatternId: string) => {
+    const indexPattern = await this._loadIndexPattern(indexPatternId);
+    if (indexPattern) {
       this.props.onChange(indexPattern);
     }
   };
@@ -80,7 +92,7 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
       <>
         <EuiCallOut
           title={i18n.translate('xpack.stackAlerts.geoContainment.noIndexPattern.messageTitle', {
-            defaultMessage: `Couldn't find any index patterns`,
+            defaultMessage: `Couldn't find any data views`,
           })}
           color="warning"
         >
@@ -89,12 +101,10 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
               id="xpack.stackAlerts.geoContainment.noIndexPattern.doThisPrefixDescription"
               defaultMessage="You'll need to "
             />
-            <EuiLink
-              href={this.props.http.basePath.prepend(`/app/management/kibana/indexPatterns`)}
-            >
+            <EuiLink href={this.props.http.basePath.prepend(`/app/management/kibana/dataViews`)}>
               <FormattedMessage
                 id="xpack.stackAlerts.geoContainment.noIndexPattern.doThisLinkTextDescription"
-                defaultMessage="Create an index pattern."
+                defaultMessage="Create a data view."
               />
             </EuiLink>
           </p>
@@ -123,16 +133,21 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
     const isIndexPatternInvalid = !!this.props.value && !this.state.doesIndexPatternHaveGeoField;
     const error = isIndexPatternInvalid
       ? i18n.translate('xpack.stackAlerts.geoContainment.noGeoFieldInIndexPattern.message', {
-          defaultMessage: 'Index pattern does not contain any geospatial fields',
+          defaultMessage:
+            'Data view does not contain any allowed geospatial fields. Must have one of type {geoFields}.',
+          values: {
+            geoFields: this.props.includedGeoTypes.join(', '),
+          },
         })
       : '';
+
     return (
       <>
         {this._renderNoIndexPatternWarning()}
 
         <EuiFormRow
           label={i18n.translate('xpack.stackAlerts.geoContainment.indexPatternSelectLabel', {
-            defaultMessage: 'Index pattern',
+            defaultMessage: 'Data view',
           })}
           isInvalid={isIndexPatternInvalid}
           error={error}
@@ -146,7 +161,7 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
               placeholder={i18n.translate(
                 'xpack.stackAlerts.geoContainment.indexPatternSelectPlaceholder',
                 {
-                  defaultMessage: 'Select index pattern',
+                  defaultMessage: 'Select data view',
                 }
               )}
               fieldTypes={this.props.includedGeoTypes}

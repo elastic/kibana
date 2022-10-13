@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { embeddablePluginMock } from '../../../../../../../src/plugins/embeddable/public/mocks';
+import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { createEmbeddable, findMatchingIndexPatterns } from './embedded_map_helpers';
-import { createPortalNode } from 'react-reverse-portal';
+import { createHtmlPortalNode } from 'react-reverse-portal';
 import {
   mockAPMIndexPattern,
   mockAPMRegexIndexPattern,
   mockAPMTransactionIndexPattern,
+  mockAPMTracesDataStreamIndexPattern,
   mockAuditbeatIndexPattern,
   mockCCSGlobIndexPattern,
   mockCommaFilebeatAuditbeatCCSGlobIndexPattern,
@@ -42,7 +43,7 @@ describe('embedded_map_helpers', () => {
         '2020-07-07T08:20:18.966Z',
         '2020-07-08T08:20:18.966Z',
         setQueryMock,
-        createPortalNode(),
+        createHtmlPortalNode(),
         mockEmbeddable
       );
       expect(setQueryMock).toHaveBeenCalledTimes(1);
@@ -57,7 +58,7 @@ describe('embedded_map_helpers', () => {
         '2020-07-07T08:20:18.966Z',
         '2020-07-08T08:20:18.966Z',
         setQueryMock,
-        createPortalNode(),
+        createHtmlPortalNode(),
         mockEmbeddable
       );
       expect(setQueryMock.mock.calls[0][0].refetch).not.toBe(embeddable.reload);
@@ -69,6 +70,7 @@ describe('embedded_map_helpers', () => {
   describe('findMatchingIndexPatterns', () => {
     const siemDefaultIndices = [
       'apm-*-transaction*',
+      'traces-apm*',
       'auditbeat-*',
       'endgame-*',
       'filebeat-*',
@@ -102,11 +104,16 @@ describe('embedded_map_helpers', () => {
 
     test('finds exact glob-matched index patterns ', () => {
       const matchingIndexPatterns = findMatchingIndexPatterns({
-        kibanaIndexPatterns: [mockAPMTransactionIndexPattern, mockFilebeatIndexPattern],
+        kibanaIndexPatterns: [
+          mockAPMTransactionIndexPattern,
+          mockAPMTracesDataStreamIndexPattern,
+          mockFilebeatIndexPattern,
+        ],
         siemDefaultIndices,
       });
       expect(matchingIndexPatterns).toEqual([
         mockAPMTransactionIndexPattern,
+        mockAPMTracesDataStreamIndexPattern,
         mockFilebeatIndexPattern,
       ]);
     });

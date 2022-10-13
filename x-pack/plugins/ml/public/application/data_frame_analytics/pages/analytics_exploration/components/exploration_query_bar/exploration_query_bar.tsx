@@ -10,14 +10,12 @@ import { EuiButtonGroup, EuiCode, EuiFlexGroup, EuiFlexItem, EuiInputPopover } f
 import { i18n } from '@kbn/i18n';
 
 import { debounce } from 'lodash';
+import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { DataView } from '@kbn/data-views-plugin/common';
+import type { Query } from '@kbn/es-query';
+import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import { Dictionary } from '../../../../../../../common/types/common';
-import { IIndexPattern } from '../../../../../../../../../../src/plugins/data/common/index_patterns';
-import {
-  esKuery,
-  esQuery,
-  Query,
-  QueryStringInput,
-} from '../../../../../../../../../../src/plugins/data/public';
 
 import {
   SEARCH_QUERY_LANGUAGE,
@@ -25,6 +23,7 @@ import {
 } from '../../../../../../../common/constants/search';
 import { removeFilterFromQueryString } from '../../../../../explorer/explorer_utils';
 import { SavedSearchQuery } from '../../../../../contexts/ml';
+import { useMlKibana } from '../../../../../contexts/kibana';
 
 interface ErrorMessage {
   query: string;
@@ -32,7 +31,7 @@ interface ErrorMessage {
 }
 
 export interface ExplorationQueryBarProps {
-  indexPattern: IIndexPattern;
+  indexPattern: DataView;
   setSearchQuery: (update: {
     queryString: string;
     query?: SavedSearchQuery;
@@ -58,11 +57,16 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
   const [idToSelectedMap, setIdToSelectedMap] = useState<{ [id: string]: boolean }>({});
   const [errorMessage, setErrorMessage] = useState<ErrorMessage | undefined>(undefined);
 
+  const { services } = useMlKibana();
+  const { unifiedSearch, data, storage, appName, notifications, http, docLinks, uiSettings } =
+    services;
+
   const searchChangeHandler = (q: Query) => setSearchInput(q);
 
-  const regex = useMemo(() => new RegExp(`${filters?.columnId}\\s*:\\s*(true|false)`, 'g'), [
-    filters?.columnId,
-  ]);
+  const regex = useMemo(
+    () => new RegExp(`${filters?.columnId}\\s*:\\s*(true|false)`, 'g'),
+    [filters?.columnId]
+  );
 
   /**
    * Restoring state from the URL once on load. If a filter option is active
@@ -85,6 +89,7 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
         setIdToSelectedMap({ [filterKeyInEffect]: true });
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /**
@@ -93,16 +98,16 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
    */
   useEffect(() => {
     try {
-      let convertedQuery;
+      let convertedQuery: estypes.QueryDslQueryContainer = {};
       switch (query.language) {
         case SEARCH_QUERY_LANGUAGE.KUERY:
-          convertedQuery = esKuery.toElasticsearchQuery(
-            esKuery.fromKueryExpression(query.query as string),
+          convertedQuery = toElasticsearchQuery(
+            fromKueryExpression(query.query as string),
             indexPattern
           );
           break;
         case SEARCH_QUERY_LANGUAGE.LUCENE:
-          convertedQuery = esQuery.luceneStringToDsl(query.query as string);
+          convertedQuery = luceneStringToDsl(query.query as string);
           break;
         default:
           setErrorMessage({
@@ -121,6 +126,7 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
     } catch (e) {
       setErrorMessage({ query: query.query as string, message: e.message });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query.query]);
 
   const searchSubmitHandler = (q: Query, filtering?: boolean) => {
@@ -194,8 +200,10 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
                     })
               }
               disableAutoFocus={true}
-              dataTestSubj="transformQueryInput"
+              dataTestSubj="mlDFAnalyticsQueryInput"
               languageSwitcherPopoverAnchorPosition="rightDown"
+              appName={appName}
+              deps={{ unifiedSearch, notifications, http, docLinks, uiSettings, data, storage }}
             />
           </EuiFlexItem>
           {filters && filters.options && (

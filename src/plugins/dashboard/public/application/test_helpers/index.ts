@@ -7,4 +7,4 @@
  */
 
 export { getSampleDashboardInput, getSampleDashboardPanel } from './get_sample_dashboard_input';
-export { getSavedDashboardMock } from './get_saved_dashboard_mock';
+export { setupIntersectionObserverMock } from './intersection_observer_mock';

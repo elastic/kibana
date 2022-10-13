@@ -7,8 +7,8 @@
  */
 
 import { Subject } from 'rxjs';
-import { Plugin, CoreSetup, CoreStart } from '../../../src/core/server';
-import { BfetchServerSetup, BfetchServerStart } from '../../../src/plugins/bfetch/server';
+import { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
+import { BfetchServerSetup, BfetchServerStart } from '@kbn/bfetch-plugin/server';
 
 export interface BfetchExplorerSetupPlugins {
   bfetch: BfetchServerSetup;

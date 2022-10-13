@@ -6,17 +6,17 @@
  */
 
 import _ from 'lodash';
-import { Plugin, CoreSetup, CoreStart } from 'src/core/server';
+import { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
 import { EventEmitter } from 'events';
-import { Subject } from 'rxjs';
-import { first } from 'rxjs/operators';
-import { initRoutes } from './init_routes';
+import { firstValueFrom, Subject } from 'rxjs';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
   ConcreteTaskInstance,
-} from '../../../../../plugins/task_manager/server';
-import { DEFAULT_MAX_WORKERS } from '../../../../../plugins/task_manager/server/config';
+  EphemeralTask,
+} from '@kbn/task-manager-plugin/server';
+import { DEFAULT_MAX_WORKERS } from '@kbn/task-manager-plugin/server/config';
+import { initRoutes } from './init_routes';
 
 // this plugin's dependendencies
 export interface SampleTaskManagerFixtureSetupDeps {
@@ -28,15 +28,16 @@ export interface SampleTaskManagerFixtureStartDeps {
 
 export class SampleTaskManagerFixturePlugin
   implements
-    Plugin<void, void, SampleTaskManagerFixtureSetupDeps, SampleTaskManagerFixtureStartDeps> {
+    Plugin<void, void, SampleTaskManagerFixtureSetupDeps, SampleTaskManagerFixtureStartDeps>
+{
   taskManagerStart$: Subject<TaskManagerStartContract> = new Subject<TaskManagerStartContract>();
-  taskManagerStart: Promise<TaskManagerStartContract> = this.taskManagerStart$
-    .pipe(first())
-    .toPromise();
+  taskManagerStart: Promise<TaskManagerStartContract> = firstValueFrom(this.taskManagerStart$);
 
   public setup(core: CoreSetup, { taskManager }: SampleTaskManagerFixtureSetupDeps) {
     const taskTestingEvents = new EventEmitter();
     taskTestingEvents.setMaxListeners(DEFAULT_MAX_WORKERS * 2);
+
+    const tmStart = this.taskManagerStart;
 
     const defaultSampleTaskConfig = {
       timeout: '1m',
@@ -66,7 +67,8 @@ export class SampleTaskManagerFixturePlugin
             }
           }
 
-          await core.elasticsearch.legacy.client.callAsInternalUser('index', {
+          const [{ elasticsearch }] = await core.getStartServices();
+          await elasticsearch.client.asInternalUser.index({
             index: '.kibana_task_manager_test_result',
             body: {
               type: 'task',
@@ -155,6 +157,85 @@ export class SampleTaskManagerFixturePlugin
       },
     });
 
+    const taskWithTiming = {
+      createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => ({
+        async run() {
+          const stopTiming = startTaskTimer();
+
+          const {
+            params: { delay = 0 },
+            state: { timings = [] },
+          } = taskInstance;
+
+          if (delay) {
+            await new Promise((resolve) => {
+              setTimeout(resolve, delay);
+            });
+          }
+
+          return {
+            state: { timings: [...timings, stopTiming()] },
+          };
+        },
+      }),
+    };
+
+    taskManager.registerTaskDefinitions({
+      timedTask: {
+        title: 'Task With Tracked Timings',
+        timeout: '60s',
+        description: 'A task that tracks its execution timing.',
+        ...taskWithTiming,
+      },
+      timedTaskWithSingleConcurrency: {
+        title: 'Task With Tracked Timings and Single Concurrency',
+        maxConcurrency: 1,
+        timeout: '60s',
+        description:
+          'A task that can only have one concurrent instance and tracks its execution timing.',
+        ...taskWithTiming,
+      },
+      timedTaskWithLimitedConcurrency: {
+        title: 'Task With Tracked Timings and Limited Concurrency',
+        maxConcurrency: 2,
+        timeout: '60s',
+        description:
+          'A task that can only have two concurrent instance and tracks its execution timing.',
+        ...taskWithTiming,
+      },
+      taskWhichExecutesOtherTasksEphemerally: {
+        title: 'Task Which Executes Other Tasks Ephemerally',
+        description: 'A sample task used to validate how ephemeral tasks are executed.',
+        maxAttempts: 1,
+        timeout: '60s',
+        createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => ({
+          async run() {
+            const {
+              params: { tasks = [] },
+            } = taskInstance;
+
+            const tm = await tmStart;
+            const executions = await Promise.all(
+              (tasks as EphemeralTask[]).map(async (task) => {
+                return tm
+                  .ephemeralRunNow(task)
+                  .then((result) => ({
+                    result,
+                  }))
+                  .catch((error) => ({
+                    error,
+                  }));
+              })
+            );
+
+            return {
+              state: { executions },
+            };
+          },
+        }),
+      },
+    });
+
     taskManager.addMiddleware({
       async beforeSave({ taskInstance, ...opts }) {
         const modifiedInstance = {
@@ -188,7 +269,7 @@ export class SampleTaskManagerFixturePlugin
         return context;
       },
     });
-    initRoutes(core.http.createRouter(), core, this.taskManagerStart, taskTestingEvents);
+    initRoutes(core.http.createRouter(), this.taskManagerStart, taskTestingEvents);
   }
 
   public start(core: CoreStart, { taskManager }: SampleTaskManagerFixtureStartDeps) {
@@ -213,3 +294,8 @@ const once = function (emitter: EventEmitter, event: string): Promise<Record<str
     emitter.once(event, (data) => resolve(data || {}));
   });
 };
+
+function startTaskTimer(): () => { start: number; stop: number } {
+  const start = Date.now();
+  return () => ({ start, stop: Date.now() });
+}

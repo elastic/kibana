@@ -6,14 +6,15 @@
  */
 
 import React, { memo } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 
-import { useCapabilities, useLink } from '../../../../../hooks';
+import { useAuthz, useStartServices } from '../../../../../hooks';
+import { pagePathGetters, INTEGRATIONS_PLUGIN_ID } from '../../../../../constants';
 
 export const NoPackagePolicies = memo<{ policyId: string }>(({ policyId }) => {
-  const { getHref } = useLink();
-  const hasWriteCapabilities = useCapabilities().write;
+  const { application } = useStartServices();
+  const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
 
   return (
     <EuiEmptyPrompt
@@ -34,9 +35,16 @@ export const NoPackagePolicies = memo<{ policyId: string }>(({ policyId }) => {
       }
       actions={
         <EuiButton
-          isDisabled={!hasWriteCapabilities}
+          iconType="plusInCircle"
+          isDisabled={!canWriteIntegrationPolicies}
           fill
-          href={getHref('add_integration_from_policy', { policyId })}
+          onClick={() =>
+            application.navigateToApp(INTEGRATIONS_PLUGIN_ID, {
+              path: pagePathGetters.integrations_all({})[1],
+              state: { forAgentPolicyId: policyId },
+            })
+          }
+          data-test-subj="addPackagePolicyButton"
         >
           <FormattedMessage
             id="xpack.fleet.policyDetailsPackagePolicies.createFirstButtonText"

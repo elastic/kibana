@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import { EmbeddablesService } from '../embeddables';
+import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
+import { CanvasEmbeddablesService } from '../embeddables';
+
+type EmbeddablesServiceFactory = PluginServiceFactory<CanvasEmbeddablesService>;
 
 const noop = (..._args: any[]): any => {};
 
-export const embeddablesService: EmbeddablesService = {
+export const embeddablesServiceFactory: EmbeddablesServiceFactory = () => ({
   getEmbeddableFactories: noop,
-};
+  getStateTransfer: noop,
+});

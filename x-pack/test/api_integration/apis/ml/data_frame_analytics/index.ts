@@ -22,5 +22,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./delete_spaces'));
     loadTestFile(require.resolve('./evaluate'));
     loadTestFile(require.resolve('./explain'));
+    loadTestFile(require.resolve('./jobs_exist_spaces'));
+    loadTestFile(require.resolve('./new_job_caps'));
   });
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { httpServiceMock, httpServerMock } from '../../../../../src/core/server/mocks';
+import { httpServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 import { getRequestBasePath } from './utils';
 
 describe('getRequestBasePath', () => {

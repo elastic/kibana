@@ -6,13 +6,13 @@
  */
 
 import LRU from 'lru-cache';
-import { savedObjectsClientMock, loggingSystemMock } from 'src/core/server/mocks';
-import { Logger } from 'src/core/server';
-import { PackagePolicyServiceInterface } from '../../../../../../fleet/server';
-import { createPackagePolicyServiceMock } from '../../../../../../fleet/server/mocks';
-import { ExceptionListClient } from '../../../../../../lists/server';
-import { listMock } from '../../../../../../lists/server/mocks';
-import { ExceptionListItemSchema } from '../../../../../../lists/common/schemas/response';
+import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type { Logger } from '@kbn/core/server';
+import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
+import { createPackagePolicyServiceMock } from '@kbn/fleet-plugin/server/mocks';
+import type { ExceptionListClient } from '@kbn/lists-plugin/server';
+import { listMock } from '@kbn/lists-plugin/server/mocks';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
   createPackagePolicyWithManifestMock,
   createPackagePolicyWithInitialManifestMock,
@@ -21,7 +21,8 @@ import {
   getEmptyMockArtifacts,
 } from '../../../lib/artifacts/mocks';
 import { createEndpointArtifactClientMock, getManifestClientMock } from '../mocks';
-import { ManifestManager, ManifestManagerContext } from './manifest_manager';
+import type { ManifestManagerContext } from './manifest_manager';
+import { ManifestManager } from './manifest_manager';
 import { parseExperimentalConfigValue } from '../../../../../common/experimental_features';
 
 export const createExceptionListResponse = (data: ExceptionListItemSchema[], total?: number) => ({
@@ -42,14 +43,14 @@ export const mockFindExceptionListItemResponses = (
   responses: Record<string, Record<string, ExceptionListItemSchema[]>>
 ) => {
   return jest.fn().mockImplementation((options: FindExceptionListItemOptions) => {
-    const matches = options.filter!.match(FILTER_REGEXP) || [];
+    const matches = options.filter?.match(FILTER_REGEXP) || [];
 
-    if (matches[4] && responses[options.listId]?.[`${matches![1]}-${matches[4]}`]) {
+    if (matches[4] && responses[options.listId]?.[`${matches?.[1]}-${matches[4]}`]) {
       return createExceptionListResponse(
-        responses[options.listId]?.[`${matches![1]}-${matches[4]}`] || []
+        responses[options.listId]?.[`${matches?.[1]}-${matches[4]}`] || []
       );
     } else {
-      return createExceptionListResponse(responses[options.listId]?.[matches![1] || ''] || []);
+      return createExceptionListResponse(responses[options.listId]?.[matches?.[1] || ''] || []);
     }
   });
 };
@@ -63,19 +64,22 @@ export enum ManifestManagerMockType {
 export interface ManifestManagerMockOptions {
   cache: LRU<string, Buffer>;
   exceptionListClient: ExceptionListClient;
-  packagePolicyService: jest.Mocked<PackagePolicyServiceInterface>;
+  packagePolicyService: jest.Mocked<PackagePolicyClient>;
   savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
 }
 
 export const buildManifestManagerMockOptions = (
   opts: Partial<ManifestManagerMockOptions>
-): ManifestManagerMockOptions => ({
-  cache: new LRU<string, Buffer>({ max: 10, maxAge: 1000 * 60 * 60 }),
-  exceptionListClient: listMock.getExceptionListClient(),
-  packagePolicyService: createPackagePolicyServiceMock(),
-  savedObjectsClient: savedObjectsClientMock.create(),
-  ...opts,
-});
+): ManifestManagerMockOptions => {
+  const savedObjectMock = savedObjectsClientMock.create();
+  return {
+    cache: new LRU<string, Buffer>({ max: 10, maxAge: 1000 * 60 * 60 }),
+    exceptionListClient: listMock.getExceptionListClient(savedObjectMock),
+    packagePolicyService: createPackagePolicyServiceMock(),
+    savedObjectsClient: savedObjectMock,
+    ...opts,
+  };
+};
 
 export const buildManifestManagerContextMock = (
   opts: Partial<ManifestManagerMockOptions>
@@ -137,7 +141,7 @@ export const getManifestManagerMock = (
         case ManifestManagerMockType.InitialSystemState:
           return null;
         case ManifestManagerMockType.NormalFlow:
-          return getMockManifest({ compress: true });
+          return getMockManifest();
       }
     });
 

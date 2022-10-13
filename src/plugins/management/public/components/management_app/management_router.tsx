@@ -7,9 +7,8 @@
  */
 
 import React, { memo } from 'react';
-import { Route, Router, Switch } from 'react-router-dom';
-import { EuiPageBody } from '@elastic/eui';
-import { AppMountParameters, ChromeBreadcrumb, ScopedHistory } from 'kibana/public';
+import { Route, Router, Switch, Redirect } from 'react-router-dom';
+import { AppMountParameters, ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
 import { ManagementAppWrapper } from '../management_app_wrapper';
 import { ManagementLandingPage } from '../landing';
 import { ManagementAppDependencies } from './management_app';
@@ -17,6 +16,7 @@ import { ManagementSection } from '../../utils';
 
 interface ManagementRouterProps {
   history: AppMountParameters['history'];
+  theme$: AppMountParameters['theme$'];
   dependencies: ManagementAppDependencies;
   setBreadcrumbs: (crumbs?: ChromeBreadcrumb[], appHistory?: ScopedHistory) => void;
   onAppMounted: (id: string) => void;
@@ -24,38 +24,51 @@ interface ManagementRouterProps {
 }
 
 export const ManagementRouter = memo(
-  ({ dependencies, history, setBreadcrumbs, onAppMounted, sections }: ManagementRouterProps) => (
+  ({
+    dependencies,
+    history,
+    setBreadcrumbs,
+    onAppMounted,
+    sections,
+    theme$,
+  }: ManagementRouterProps) => (
     <Router history={history}>
-      <EuiPageBody restrictWidth={false} className="mgtPage__body">
-        <Switch>
-          {sections.map((section) =>
-            section
-              .getAppsEnabled()
-              .map((app) => (
-                <Route
-                  path={`${app.basePath}`}
-                  component={() => (
-                    <ManagementAppWrapper
-                      app={app}
-                      setBreadcrumbs={setBreadcrumbs}
-                      onAppMounted={onAppMounted}
-                      history={history}
-                    />
-                  )}
-                />
-              ))
-          )}
-          <Route
-            path={'/'}
-            component={() => (
-              <ManagementLandingPage
-                version={dependencies.kibanaVersion}
-                setBreadcrumbs={setBreadcrumbs}
+      <Switch>
+        {sections.map((section) =>
+          section
+            .getAppsEnabled()
+            .map((app) => (
+              <Route
+                path={`${app.basePath}`}
+                component={() => (
+                  <ManagementAppWrapper
+                    app={app}
+                    setBreadcrumbs={setBreadcrumbs}
+                    onAppMounted={onAppMounted}
+                    history={history}
+                    theme$={theme$}
+                  />
+                )}
               />
-            )}
-          />
-        </Switch>
-      </EuiPageBody>
+            ))
+        )}
+        {sections.map((section) =>
+          section
+            .getAppsEnabled()
+            .filter((app) => app.redirectFrom)
+            .map((app) => <Redirect path={`/${app.redirectFrom}*`} to={`${app.basePath}*`} />)
+        )}
+        <Route
+          path={'/'}
+          component={() => (
+            <ManagementLandingPage
+              version={dependencies.kibanaVersion}
+              setBreadcrumbs={setBreadcrumbs}
+              onAppMounted={onAppMounted}
+            />
+          )}
+        />
+      </Switch>
     </Router>
   )
 );

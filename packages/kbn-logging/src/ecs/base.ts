@@ -7,13 +7,13 @@
  */
 
 /**
- * https://www.elastic.co/guide/en/ecs/1.9/ecs-base.html
+ * https://www.elastic.co/guide/en/ecs/master/ecs-base.html
  *
  * @internal
  */
 export interface EcsBase {
   ['@timestamp']: string;
-  labels?: Record<string, unknown>;
+  labels?: Record<string, string>;
   message?: string;
   tags?: string[];
 }

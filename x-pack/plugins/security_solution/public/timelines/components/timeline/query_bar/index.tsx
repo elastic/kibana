@@ -11,25 +11,22 @@ import { useDispatch } from 'react-redux';
 import { Subscription } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 
-import { useSourcererScope } from '../../../../common/containers/sourcerer';
+import type { Filter, Query } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
+import type { FilterManager, SavedQuery, SavedQueryTimeFilter } from '@kbn/data-plugin/public';
+import { InputsModelId } from '../../../../common/store/inputs/constants';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import {
-  Query,
-  Filter,
-  esFilters,
-  FilterManager,
-  SavedQuery,
-  SavedQueryTimeFilter,
-} from '../../../../../../../../src/plugins/data/public';
-import { convertKueryToElasticSearchQuery } from '../../../../common/lib/keury';
-import { KueryFilterQuery, KueryFilterQueryKind } from '../../../../common/store';
-import { KqlMode } from '../../../../timelines/store/timeline/model';
+
+import { convertKueryToElasticSearchQuery } from '../../../../common/lib/kuery';
+import type { KqlMode } from '../../../store/timeline/model';
 import { useSavedQueryServices } from '../../../../common/utils/saved_query_services';
-import { DispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
+import type { DispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
 import { QueryBar } from '../../../../common/components/query_bar';
-import { DataProvider } from '../data_providers/data_provider';
+import type { DataProvider } from '../data_providers/data_provider';
 import { buildGlobalQuery } from '../helpers';
 import { timelineActions } from '../../../store/timeline';
+import type { KueryFilterQuery, KueryFilterQueryKind } from '../../../../../common/types/timeline';
 
 export interface QueryBarTimelineComponentProps {
   dataProviders: DataProvider[];
@@ -81,8 +78,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
     const [dateRangeTo, setDateRangTo] = useState<string>(
       toStr != null ? toStr : new Date(to).toISOString()
     );
-    const { browserFields, indexPattern } = useSourcererScope(SourcererScopeName.timeline);
-
+    const { browserFields, indexPattern } = useSourcererDataView(SourcererScopeName.timeline);
     const [savedQuery, setSavedQuery] = useState<SavedQuery | undefined>(undefined);
     const [filterQueryConverted, setFilterQueryConverted] = useState<Query>({
       query: filterQuery != null ? filterQuery.expression : '',
@@ -218,7 +214,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
           const isQuickSelection = timefilter.from.includes('now') || timefilter.to.includes('now');
 
           updateReduxTime({
-            id: 'timeline',
+            id: InputsModelId.timeline,
             end: timefilter.to,
             start: timefilter.from,
             isInvalid: false,
@@ -244,27 +240,19 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
                     (f) => f.meta.controlledBy === TIMELINE_FILTER_DROP_AREA
                   )
                 : -1;
-            savedQueryServices.saveQuery(
-              {
-                ...newSavedQuery.attributes,
-                filters:
-                  newSavedQuery.attributes.filters != null
-                    ? dataProviderFilterExists > -1
-                      ? [
-                          ...newSavedQuery.attributes.filters.slice(0, dataProviderFilterExists),
-                          getDataProviderFilter(dataProvidersDsl),
-                          ...newSavedQuery.attributes.filters.slice(dataProviderFilterExists + 1),
-                        ]
-                      : [
-                          ...newSavedQuery.attributes.filters,
-                          getDataProviderFilter(dataProvidersDsl),
-                        ]
-                    : [],
-              },
-              {
-                overwrite: true,
-              }
-            );
+            savedQueryServices.updateQuery(newSavedQuery.id, {
+              ...newSavedQuery.attributes,
+              filters:
+                newSavedQuery.attributes.filters != null
+                  ? dataProviderFilterExists > -1
+                    ? [
+                        ...newSavedQuery.attributes.filters.slice(0, dataProviderFilterExists),
+                        getDataProviderFilter(dataProvidersDsl),
+                        ...newSavedQuery.attributes.filters.slice(dataProviderFilterExists + 1),
+                      ]
+                    : [...newSavedQuery.attributes.filters, getDataProviderFilter(dataProvidersDsl)]
+                  : [],
+            });
           }
         } else {
           setSavedQueryId(null);
@@ -289,6 +277,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
         savedQuery={savedQuery}
         onSavedQuery={onSavedQuery}
         dataTestSubj={'timelineQueryInput'}
+        displayStyle="inPage"
       />
     );
   }
@@ -309,7 +298,7 @@ export const getDataProviderFilter = (dataProviderDsl: string): Filter => {
       value: dataProviderDsl,
     },
     $state: {
-      store: esFilters.FilterStateStore.APP_STATE,
+      store: FilterStateStore.APP_STATE,
     },
   };
 };

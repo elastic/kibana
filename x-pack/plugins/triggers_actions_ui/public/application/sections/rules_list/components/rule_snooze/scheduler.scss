@@ -1,0 +1,13 @@
+.RuleSnoozeScheduler__pseudofocus {
+  &:not(:focus) {
+    background-image: linear-gradient(
+      to top,
+      #07C,
+      #07C 2px,
+      transparent 2px,
+      transparent 100%
+    );
+    background-size: 100% 100%;
+    outline: none;
+  }
+}

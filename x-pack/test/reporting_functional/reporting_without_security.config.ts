@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { resolve } from 'path';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
@@ -17,10 +17,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     testFiles: [resolve(__dirname, './reporting_without_security')],
     kbnTestServer: {
       ...reportingConfig.get('kbnTestServer'),
-      serverArgs: [
-        ...reportingConfig.get('kbnTestServer.serverArgs'),
-        `--xpack.security.enabled=false`,
-      ],
+      serverArgs: [...reportingConfig.get('kbnTestServer.serverArgs')],
     },
     esTestCluster: {
       ...reportingConfig.get('esTestCluster'),

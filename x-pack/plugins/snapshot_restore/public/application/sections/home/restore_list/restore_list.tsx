@@ -6,8 +6,9 @@
  */
 
 import React, { useEffect, useState, Fragment } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiEmptyPrompt,
   EuiPopover,
   EuiButtonEmpty,
@@ -19,21 +20,21 @@ import {
   EuiLoadingSpinner,
   EuiLink,
 } from '@elastic/eui';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { APP_RESTORE_INDEX_PRIVILEGES } from '../../../../../common';
 import {
   WithPrivileges,
   NotAuthorizedSection,
-  SectionError,
+  PageError,
+  PageLoading,
   Error,
+  useExecutionContext,
 } from '../../../../shared_imports';
-import { SectionLoading } from '../../../components';
 import { UIM_RESTORE_LIST_LOAD } from '../../../constants';
 import { useLoadRestores } from '../../../services/http';
 import { linkToSnapshots } from '../../../services/navigation';
-import { useServices } from '../../../app_context';
+import { useAppContext, useServices } from '../../../app_context';
 import { RestoreTable } from './restore_table';
-
-import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
 
 const ONE_SECOND_MS = 1000;
 const TEN_SECONDS_MS = 10 * 1000;
@@ -62,11 +63,17 @@ export const RestoreList: React.FunctionComponent = () => {
   } = useLoadRestores(currentInterval);
 
   const { uiMetricService, history } = useServices();
+  const { core } = useAppContext();
 
   // Track component loaded
   useEffect(() => {
     uiMetricService.trackUiMetric(UIM_RESTORE_LIST_LOAD);
   }, [uiMetricService]);
+
+  useExecutionContext(core.executionContext, {
+    type: 'application',
+    page: 'snapshotRestoreRestoreTab',
+  });
 
   let content: JSX.Element;
 
@@ -74,18 +81,18 @@ export const RestoreList: React.FunctionComponent = () => {
     if (isLoading) {
       // Because we're polling for new data, we only want to hide the list during the initial fetch.
       content = (
-        <SectionLoading>
+        <PageLoading>
           <FormattedMessage
             id="xpack.snapshotRestore.restoreList.loadingRestoresDescription"
             defaultMessage="Loading restores…"
           />
-        </SectionLoading>
+        </PageLoading>
       );
     } else if (error) {
       // If we get an error while polling we don't need to show it to the user because they can still
       // work with the table.
       content = (
-        <SectionError
+        <PageError
           title={
             <FormattedMessage
               id="xpack.snapshotRestore.restoreList.loadingRestoresErrorMessage"
@@ -99,42 +106,49 @@ export const RestoreList: React.FunctionComponent = () => {
   } else {
     if (restores && restores.length === 0) {
       content = (
-        <EuiEmptyPrompt
-          iconType="managementApp"
-          title={
-            <h1>
-              <FormattedMessage
-                id="xpack.snapshotRestore.restoreList.emptyPromptTitle"
-                defaultMessage="No restored snapshots"
-              />
-            </h1>
-          }
-          body={
-            <Fragment>
-              <p>
+        <EuiPageContent
+          hasShadow={false}
+          paddingSize="none"
+          verticalPosition="center"
+          horizontalPosition="center"
+        >
+          <EuiEmptyPrompt
+            iconType="managementApp"
+            title={
+              <h1 data-test-subj="noRestoredSnapshotsHeader">
                 <FormattedMessage
-                  id="xpack.snapshotRestore.restoreList.emptyPromptDescription"
-                  defaultMessage="Go to {snapshotsLink} to start a restore."
-                  values={{
-                    snapshotsLink: (
-                      <EuiLink {...reactRouterNavigate(history, linkToSnapshots())}>
-                        <FormattedMessage
-                          id="xpack.snapshotRestore.restoreList.emptyPromptDescriptionLink"
-                          defaultMessage="Snapshots"
-                        />
-                      </EuiLink>
-                    ),
-                  }}
+                  id="xpack.snapshotRestore.restoreList.emptyPromptTitle"
+                  defaultMessage="No restored snapshots"
                 />
-              </p>
-            </Fragment>
-          }
-          data-test-subj="emptyPrompt"
-        />
+              </h1>
+            }
+            body={
+              <Fragment>
+                <p>
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.restoreList.emptyPromptDescription"
+                    defaultMessage="Go to {snapshotsLink} to start a restore."
+                    values={{
+                      snapshotsLink: (
+                        <EuiLink {...reactRouterNavigate(history, linkToSnapshots())}>
+                          <FormattedMessage
+                            id="xpack.snapshotRestore.restoreList.emptyPromptDescriptionLink"
+                            defaultMessage="Snapshots"
+                          />
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                </p>
+              </Fragment>
+            }
+            data-test-subj="emptyPrompt"
+          />
+        </EuiPageContent>
       );
     } else {
       content = (
-        <Fragment>
+        <section data-test-subj="restoreList">
           <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
             <EuiFlexItem grow={false}>
               <EuiPopover
@@ -208,7 +222,7 @@ export const RestoreList: React.FunctionComponent = () => {
           </EuiFlexGroup>
           <EuiSpacer size="m" />
           <RestoreTable restores={restores} />
-        </Fragment>
+        </section>
       );
     }
   }
@@ -217,7 +231,7 @@ export const RestoreList: React.FunctionComponent = () => {
     <WithPrivileges privileges={APP_RESTORE_INDEX_PRIVILEGES.map((name) => `index.${name}`)}>
       {({ hasPrivileges, privilegesMissing }) =>
         hasPrivileges ? (
-          <section data-test-subj="restoreList">{content}</section>
+          content
         ) : (
           <NotAuthorizedSection
             title={

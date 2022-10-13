@@ -4,9 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { get } from 'lodash';
 import { AlertCluster, AlertVersions } from '../../../common/types/alerts';
+import { createDatasetFilter } from './create_dataset_query_filter';
+import { Globals } from '../../static_globals';
+import { CCS_REMOTE_PATTERN } from '../../../common/constants';
+import { getIndexPatterns, getKibanaDataset } from '../cluster/get_index_patterns';
 
 interface ESAggResponse {
   key: string;
@@ -15,12 +19,18 @@ interface ESAggResponse {
 export async function fetchKibanaVersions(
   esClient: ElasticsearchClient,
   clusters: AlertCluster[],
-  index: string,
-  size: number
+  size: number,
+  filterQuery?: string
 ): Promise<AlertVersions[]> {
+  const indexPatterns = getIndexPatterns({
+    config: Globals.app.config,
+    moduleType: 'kibana',
+    dataset: 'stats',
+    ccs: CCS_REMOTE_PATTERN,
+  });
   const params = {
-    index,
-    filterPath: ['aggregations'],
+    index: indexPatterns,
+    filter_path: ['aggregations'],
     body: {
       size: 0,
       query: {
@@ -31,11 +41,7 @@ export async function fetchKibanaVersions(
                 cluster_uuid: clusters.map((cluster) => cluster.clusterUuid),
               },
             },
-            {
-              term: {
-                type: 'kibana_stats',
-              },
-            },
+            createDatasetFilter('kibana_stats', 'stats', getKibanaDataset('stats')),
             {
               range: {
                 timestamp: {
@@ -89,7 +95,16 @@ export async function fetchKibanaVersions(
     },
   };
 
-  const { body: response } = await esClient.search(params);
+  try {
+    if (filterQuery) {
+      const filterQueryObject = JSON.parse(filterQuery);
+      params.body.query.bool.filter.push(filterQueryObject);
+    }
+  } catch (e) {
+    // meh
+  }
+
+  const response = await esClient.search(params);
   const indexName = get(response, 'aggregations.index.buckets[0].key', '');
   const clusterList = get(response, 'aggregations.cluster.buckets', []) as ESAggResponse[];
   return clusterList.map((cluster) => {

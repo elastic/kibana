@@ -3,14 +3,8 @@
   "private": true,
   "version": "1.0.0",
   "description": "Kibana Analytics tool",
-  "main": "target/node/index.js",
-  "browser": "target/web/index.js",
-  "types": "target/types/index.d.ts",
-  "author": "Ahmad Bamieh <ahmadbamieh@gmail.com>",
-  "license": "SSPL-1.0 OR Elastic License 2.0",
-  "scripts": {
-    "build": "node scripts/build",
-    "kbn:bootstrap": "node scripts/build --source-maps",
-    "kbn:watch": "node scripts/build --source-maps --watch"
-  }
+  "main": "target_node/index.js",
+  "browser": "target_web/index.js",
+  "author": "Kibana Core",
+  "license": "SSPL-1.0 OR Elastic License 2.0"
 }

@@ -7,18 +7,18 @@
 
 import { schema } from '@kbn/config-schema';
 import { get } from 'lodash';
-import { ILegacyScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { INDEX_NAMES } from '../../../common/constants';
 import { RouteDependencies } from '../../types';
 // @ts-ignore
-import { WatchHistoryItem } from '../../models/watch_history_item/index';
+import { WatchHistoryItem } from '../../models/watch_history_item';
 
 const paramsSchema = schema.object({
   id: schema.string(),
 });
 
-function fetchHistoryItem(dataClient: ILegacyScopedClusterClient, watchHistoryItemId: string) {
-  return dataClient.callAsCurrentUser('search', {
+function fetchHistoryItem(dataClient: IScopedClusterClient, watchHistoryItemId: string) {
+  return dataClient.asCurrentUser.search({
     index: INDEX_NAMES.WATCHER_HISTORY,
     body: {
       query: {
@@ -33,7 +33,7 @@ function fetchHistoryItem(dataClient: ILegacyScopedClusterClient, watchHistoryIt
 export function registerLoadHistoryRoute({
   router,
   license,
-  lib: { isEsError },
+  lib: { handleEsError },
 }: RouteDependencies) {
   router.get(
     {
@@ -46,7 +46,8 @@ export function registerLoadHistoryRoute({
       const id = request.params.id;
 
       try {
-        const responseFromES = await fetchHistoryItem(ctx.watcher!.client, id);
+        const esClient = (await ctx.core).elasticsearch.client;
+        const responseFromES = await fetchHistoryItem(esClient, id);
         const hit = get(responseFromES, 'hits.hits[0]');
         if (!hit) {
           return response.notFound({ body: `Watch History Item with id = ${id} not found` });
@@ -65,13 +66,7 @@ export function registerLoadHistoryRoute({
           body: { watchHistoryItem: watchHistoryItem.downstreamJson },
         });
       } catch (e) {
-        // Case: Error from Elasticsearch JS client
-        if (isEsError(e)) {
-          return response.customError({ statusCode: e.statusCode, body: e });
-        }
-
-        // Case: default
-        throw e;
+        return handleEsError({ error: e, response });
       }
     })
   );

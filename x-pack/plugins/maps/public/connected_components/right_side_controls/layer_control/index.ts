@@ -11,7 +11,14 @@ import { connect } from 'react-redux';
 import { LayerControl } from './layer_control';
 
 import { FLYOUT_STATE } from '../../../reducers/ui';
-import { setSelectedLayer, updateFlyout, setIsLayerTOCOpen } from '../../../actions';
+import {
+  hideAllLayers,
+  setSelectedLayer,
+  updateFlyout,
+  setIsLayerTOCOpen,
+  setDrawMode,
+  showAllLayers,
+} from '../../../actions';
 import {
   getIsReadOnly,
   getIsLayerTOCOpen,
@@ -19,6 +26,7 @@ import {
 } from '../../../selectors/ui_selectors';
 import { getLayerList } from '../../../selectors/map_selectors';
 import { MapStoreState } from '../../../reducers/store';
+import { DRAW_MODE } from '../../../../common/constants';
 
 function mapStateToProps(state: MapStoreState) {
   return {
@@ -34,12 +42,19 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
     showAddLayerWizard: async () => {
       await dispatch(setSelectedLayer(null));
       dispatch(updateFlyout(FLYOUT_STATE.ADD_LAYER_WIZARD));
+      dispatch(setDrawMode(DRAW_MODE.NONE));
     },
     closeLayerTOC: () => {
       dispatch(setIsLayerTOCOpen(false));
     },
     openLayerTOC: () => {
       dispatch(setIsLayerTOCOpen(true));
+    },
+    hideAllLayers: () => {
+      dispatch(hideAllLayers());
+    },
+    showAllLayers: () => {
+      dispatch(showAllLayers());
     },
   };
 }

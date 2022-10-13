@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { setMockValues } from '../../../../__mocks__/kea.mock';
+import { setMockValues } from '../../../../__mocks__/kea_logic';
 import { setMockSearchContextState } from './__mocks__/hooks.mock';
 
 import React from 'react';
 
 import { shallow } from 'enzyme';
 
-// @ts-expect-error types are not available for this package yet
 import { Results } from '@elastic/react-search-ui';
 
-import { SchemaTypes } from '../../../../shared/types';
+import { Loading } from '../../../../shared/loading';
+import { SchemaType } from '../../../../shared/schema/types';
 
 import { Pagination } from './pagination';
 import { SearchExperienceContent } from './search_experience_content';
@@ -33,7 +33,7 @@ describe('SearchExperienceContent', () => {
     myRole: { canManageEngineDocuments: true },
     engine: {
       schema: {
-        title: 'string' as SchemaTypes,
+        title: SchemaType.Text,
       },
     },
   };
@@ -82,13 +82,13 @@ describe('SearchExperienceContent', () => {
     expect(wrapper.find(Pagination).exists()).toBe(true);
   });
 
-  it('renders empty if a search was not performed yet', () => {
+  it('renders a loading state if a search was not performed yet', () => {
     setMockSearchContextState({
       ...searchState,
       wasSearched: false,
     });
     const wrapper = shallow(<SearchExperienceContent />);
-    expect(wrapper.isEmptyRender()).toBe(true);
+    expect(wrapper.find(Loading)).toHaveLength(1);
   });
 
   it('renders results if a search was performed and there are more than 0 totalResults', () => {

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart } from 'src/core/public';
-import { UiActionsStart } from '../../../ui_actions/public';
-import { uiActionsPluginMock } from '../../../ui_actions/public/mocks';
-import { inspectorPluginMock } from '../../../inspector/public/mocks';
-import { coreMock } from '../../../../core/public/mocks';
+import { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
+import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { EmbeddablePublicPlugin, EmbeddableSetup, EmbeddableStart } from '../plugin';
 
 export interface TestPluginReturn {
@@ -27,7 +27,7 @@ export const testPlugin = (
   coreStart: CoreStart = coreMock.createStart()
 ): TestPluginReturn => {
   const uiActions = uiActionsPluginMock.createPlugin(coreSetup, coreStart);
-  const initializerContext = {} as any;
+  const initializerContext = {} as PluginInitializerContext;
   const plugin = new EmbeddablePublicPlugin(initializerContext);
   const setup = plugin.setup(coreSetup, {
     uiActions: uiActions.setup,

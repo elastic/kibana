@@ -7,7 +7,7 @@
 
 import React, { Fragment, FC, useEffect, useState, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlyout,
   EuiFlyoutFooter,
@@ -41,6 +41,7 @@ export const EditCategorizationAnalyzerFlyout: FC = () => {
     if (showJsonFlyout === true) {
       setCategorizationAnalyzerString(JSON.stringify(jobCreator.categorizationAnalyzer, null, 2));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showJsonFlyout]);
 
   function toggleJsonFlyout() {

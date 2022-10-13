@@ -10,44 +10,41 @@ import {
   mockFlashMessageHelpers,
   mockHttpValues,
   mockKibanaValues,
-  expectedAsyncError,
-} from '../../../__mocks__';
+} from '../../../__mocks__/kea_logic';
 import { fullContentSources, contentItems } from '../../__mocks__/content_sources.mock';
 import { meta } from '../../__mocks__/meta.mock';
 
 import { DEFAULT_META } from '../../../shared/constants';
+import { expectedAsyncError } from '../../../test_helpers';
 
 jest.mock('../../app_logic', () => ({
   AppLogic: { values: { isOrganization: true } },
 }));
+import { itShowsServerErrorAsFlashMessage } from '../../../test_helpers';
 import { AppLogic } from '../../app_logic';
-
-import { NOT_FOUND_PATH } from '../../routes';
 
 import { SourceLogic } from './source_logic';
 
 describe('SourceLogic', () => {
   const { http } = mockHttpValues;
-  const {
-    clearFlashMessages,
-    flashAPIErrors,
-    setSuccessMessage,
-    setQueuedSuccessMessage,
-    setErrorMessage,
-  } = mockFlashMessageHelpers;
+  const { clearFlashMessages, flashAPIErrors, flashSuccessToast, setErrorMessage } =
+    mockFlashMessageHelpers;
   const { navigateToUrl } = mockKibanaValues;
   const { mount, getListeners } = new LogicMounter(SourceLogic);
 
   const contentSource = fullContentSources[0];
 
-  const defaultValues = {
+  const DEFAULT_VALUES = {
     contentSource: {},
     contentItems: [],
     dataLoading: true,
     sectionLoading: true,
     buttonLoading: false,
+    diagnosticDownloadButtonVisible: false,
     contentMeta: DEFAULT_META,
     contentFilterValue: '',
+    isConfigurationUpdateButtonLoading: false,
+    stagedPrivateKey: null,
   };
 
   const searchServerResponse = {
@@ -61,51 +58,69 @@ describe('SourceLogic', () => {
   });
 
   it('has expected default values', () => {
-    expect(SourceLogic.values).toEqual(defaultValues);
+    expect(SourceLogic.values).toEqual(DEFAULT_VALUES);
   });
 
   describe('actions', () => {
-    it('onInitializeSource', () => {
-      SourceLogic.actions.onInitializeSource(contentSource);
+    it('setContentSource', () => {
+      SourceLogic.actions.setContentSource(contentSource);
 
-      expect(SourceLogic.values.contentSource).toEqual(contentSource);
-      expect(SourceLogic.values.dataLoading).toEqual(false);
+      expect(SourceLogic.values).toEqual({
+        ...DEFAULT_VALUES,
+        contentSource,
+        dataLoading: false,
+      });
     });
 
     it('onUpdateSourceName', () => {
       const NAME = 'foo';
-      SourceLogic.actions.onInitializeSource(contentSource);
+      SourceLogic.actions.setContentSource(contentSource);
       SourceLogic.actions.onUpdateSourceName(NAME);
 
-      expect(SourceLogic.values.contentSource).toEqual({
-        ...contentSource,
-        name: NAME,
+      expect(SourceLogic.values).toEqual({
+        ...DEFAULT_VALUES,
+        dataLoading: false,
+        contentSource: {
+          ...contentSource,
+          name: NAME,
+        },
       });
-      expect(setSuccessMessage).toHaveBeenCalled();
+      expect(flashSuccessToast).toHaveBeenCalled();
     });
 
     it('setSearchResults', () => {
       SourceLogic.actions.setSearchResults(searchServerResponse);
 
-      expect(SourceLogic.values.contentItems).toEqual(contentItems);
-      expect(SourceLogic.values.contentMeta).toEqual(meta);
-      expect(SourceLogic.values.sectionLoading).toEqual(false);
+      expect(SourceLogic.values).toEqual({
+        ...DEFAULT_VALUES,
+        contentItems,
+        contentMeta: meta,
+        sectionLoading: false,
+      });
     });
 
     it('setContentFilterValue', () => {
       const VALUE = 'bar';
       SourceLogic.actions.setSearchResults(searchServerResponse);
-      SourceLogic.actions.onInitializeSource(contentSource);
+      SourceLogic.actions.setContentSource(contentSource);
       SourceLogic.actions.setContentFilterValue(VALUE);
 
-      expect(SourceLogic.values.contentMeta).toEqual({
-        ...meta,
-        page: {
-          ...meta.page,
-          current: DEFAULT_META.page.current,
+      expect(SourceLogic.values).toEqual({
+        ...DEFAULT_VALUES,
+        dataLoading: false,
+        sectionLoading: false,
+        contentItems,
+        contentSource,
+
+        contentMeta: {
+          ...meta,
+          page: {
+            ...meta.page,
+            current: DEFAULT_META.page.current,
+          },
         },
+        contentFilterValue: VALUE,
       });
-      expect(SourceLogic.values.contentFilterValue).toEqual(VALUE);
     });
 
     it('setActivePage', () => {
@@ -113,11 +128,16 @@ describe('SourceLogic', () => {
       SourceLogic.actions.setSearchResults(searchServerResponse);
       SourceLogic.actions.setActivePage(PAGE);
 
-      expect(SourceLogic.values.contentMeta).toEqual({
-        ...meta,
-        page: {
-          ...meta.page,
-          current: PAGE,
+      expect(SourceLogic.values).toEqual({
+        ...DEFAULT_VALUES,
+        contentItems,
+        sectionLoading: false,
+        contentMeta: {
+          ...meta,
+          page: {
+            ...meta.page,
+            current: PAGE,
+          },
         },
       });
     });
@@ -127,19 +147,31 @@ describe('SourceLogic', () => {
       SourceLogic.actions.removeContentSource(contentSource.id);
       SourceLogic.actions.setButtonNotLoading();
 
-      expect(SourceLogic.values.buttonLoading).toEqual(false);
+      expect(SourceLogic.values).toEqual({
+        ...DEFAULT_VALUES,
+        buttonLoading: false,
+      });
+    });
+
+    it('showDiagnosticDownloadButton', () => {
+      SourceLogic.actions.showDiagnosticDownloadButton();
+
+      expect(SourceLogic.values).toEqual({
+        ...DEFAULT_VALUES,
+        diagnosticDownloadButtonVisible: true,
+      });
     });
   });
 
   describe('listeners', () => {
     describe('initializeSource', () => {
       it('calls API and sets values (org)', async () => {
-        const onInitializeSourceSpy = jest.spyOn(SourceLogic.actions, 'onInitializeSource');
+        const onInitializeSourceSpy = jest.spyOn(SourceLogic.actions, 'setContentSource');
         const promise = Promise.resolve(contentSource);
         http.get.mockReturnValue(promise);
         SourceLogic.actions.initializeSource(contentSource.id);
 
-        expect(http.get).toHaveBeenCalledWith('/api/workplace_search/org/sources/123');
+        expect(http.get).toHaveBeenCalledWith('/internal/workplace_search/org/sources/123');
         await promise;
         expect(onInitializeSourceSpy).toHaveBeenCalledWith(contentSource);
       });
@@ -147,12 +179,12 @@ describe('SourceLogic', () => {
       it('calls API and sets values (account)', async () => {
         AppLogic.values.isOrganization = false;
 
-        const onInitializeSourceSpy = jest.spyOn(SourceLogic.actions, 'onInitializeSource');
+        const onInitializeSourceSpy = jest.spyOn(SourceLogic.actions, 'setContentSource');
         const promise = Promise.resolve(contentSource);
         http.get.mockReturnValue(promise);
         SourceLogic.actions.initializeSource(contentSource.id);
 
-        expect(http.get).toHaveBeenCalledWith('/api/workplace_search/account/sources/123');
+        expect(http.get).toHaveBeenCalledWith('/internal/workplace_search/account/sources/123');
         await promise;
         expect(onInitializeSourceSpy).toHaveBeenCalledWith(contentSource);
       });
@@ -171,52 +203,81 @@ describe('SourceLogic', () => {
         http.get.mockReturnValue(promise);
         SourceLogic.actions.initializeSource(contentSource.id);
 
-        expect(http.get).toHaveBeenCalledWith('/api/workplace_search/account/sources/123');
+        expect(http.get).toHaveBeenCalledWith('/internal/workplace_search/account/sources/123');
         await promise;
         expect(initializeFederatedSummarySpy).toHaveBeenCalledWith(contentSource.id);
       });
 
-      it('handles error', async () => {
-        const error = {
-          response: {
-            error: 'this is an error',
-            status: 400,
-          },
-        };
-        const promise = Promise.reject(error);
-        http.get.mockReturnValue(promise);
-        SourceLogic.actions.initializeSource(contentSource.id);
-        await expectedAsyncError(promise);
+      describe('errors', () => {
+        it('handles generic errors', async () => {
+          const mockError = Promise.reject('error');
+          http.get.mockReturnValue(mockError);
 
-        expect(flashAPIErrors).toHaveBeenCalledWith(error);
-      });
+          SourceLogic.actions.initializeSource(contentSource.id);
+          await expectedAsyncError(mockError);
 
-      it('handles not found state', async () => {
-        const error = {
-          response: {
-            error: 'this is an error',
-            status: 404,
-          },
-        };
-        const promise = Promise.reject(error);
-        http.get.mockReturnValue(promise);
-        SourceLogic.actions.initializeSource(contentSource.id);
-        await expectedAsyncError(promise);
-
-        expect(navigateToUrl).toHaveBeenCalledWith(NOT_FOUND_PATH);
-      });
-
-      it('renders error messages passed in success response from server', async () => {
-        const errors = ['ERROR'];
-        const promise = Promise.resolve({
-          ...contentSource,
-          errors,
+          expect(flashAPIErrors).toHaveBeenCalledWith('error');
         });
-        http.get.mockReturnValue(promise);
-        SourceLogic.actions.initializeSource(contentSource.id);
-        await promise;
 
-        expect(setErrorMessage).toHaveBeenCalledWith(errors);
+        it('handles error message with diagnostic bundle error message', async () => {
+          const showDiagnosticDownloadButtonSpy = jest.spyOn(
+            SourceLogic.actions,
+            'showDiagnosticDownloadButton'
+          );
+
+          // For contenst source errors, the API returns the source errors in an error property in the success
+          // response. We don't reject here because we still render the content source with the error.
+          const promise = Promise.resolve({
+            ...contentSource,
+            errors: [
+              'The database is on fire. [Check diagnostic bundle for details - Message id: 123]',
+            ],
+          });
+          http.get.mockReturnValue(promise);
+          SourceLogic.actions.initializeSource(contentSource.id);
+          await promise;
+
+          expect(showDiagnosticDownloadButtonSpy).toHaveBeenCalled();
+        });
+
+        describe('404s', () => {
+          const mock404 = Promise.reject({ response: { status: 404 } });
+
+          it('redirects to the organization sources page on organization views', async () => {
+            AppLogic.values.isOrganization = true;
+            http.get.mockReturnValue(mock404);
+
+            SourceLogic.actions.initializeSource('404ing_org_source');
+            await expectedAsyncError(mock404);
+
+            expect(navigateToUrl).toHaveBeenCalledWith('/sources');
+            expect(setErrorMessage).toHaveBeenCalledWith('Source not found.');
+          });
+
+          it('redirects to the personal dashboard sources page on personal views', async () => {
+            AppLogic.values.isOrganization = false;
+            http.get.mockReturnValue(mock404);
+
+            SourceLogic.actions.initializeSource('404ing_private_source');
+            await expectedAsyncError(mock404);
+
+            expect(navigateToUrl).toHaveBeenCalledWith('/p/sources');
+            expect(setErrorMessage).toHaveBeenCalledWith('Source not found.');
+          });
+        });
+
+        it('renders error messages passed in success response from server', async () => {
+          const errors = ['ERROR'];
+          const promise = Promise.resolve({
+            ...contentSource,
+            errors,
+          });
+          http.get.mockReturnValue(promise);
+          SourceLogic.actions.initializeSource(contentSource.id);
+          await promise;
+
+          expect(setErrorMessage).toHaveBeenCalledWith(errors);
+        });
       });
     });
 
@@ -228,25 +289,14 @@ describe('SourceLogic', () => {
         SourceLogic.actions.initializeFederatedSummary(contentSource.id);
 
         expect(http.get).toHaveBeenCalledWith(
-          '/api/workplace_search/account/sources/123/federated_summary'
+          '/internal/workplace_search/account/sources/123/federated_summary'
         );
         await promise;
         expect(onUpdateSummarySpy).toHaveBeenCalledWith(contentSource.summary);
       });
 
-      it('handles error', async () => {
-        const error = {
-          response: {
-            error: 'this is an error',
-            status: 400,
-          },
-        };
-        const promise = Promise.reject(error);
-        http.get.mockReturnValue(promise);
+      itShowsServerErrorAsFlashMessage(http.get, () => {
         SourceLogic.actions.initializeFederatedSummary(contentSource.id);
-        await expectedAsyncError(promise);
-
-        expect(flashAPIErrors).toHaveBeenCalledWith(error);
       });
     });
 
@@ -265,9 +315,12 @@ describe('SourceLogic', () => {
         http.post.mockReturnValue(promise);
 
         await searchContentSourceDocuments({ sourceId: contentSource.id }, mockBreakpoint);
-        expect(http.post).toHaveBeenCalledWith('/api/workplace_search/org/sources/123/documents', {
-          body: JSON.stringify({ query: '', page: meta.page }),
-        });
+        expect(http.post).toHaveBeenCalledWith(
+          '/internal/workplace_search/org/sources/123/documents',
+          {
+            body: JSON.stringify({ query: '', page: meta.page }),
+          }
+        );
 
         await promise;
         expect(actions.setSearchResults).toHaveBeenCalledWith(searchServerResponse);
@@ -281,7 +334,7 @@ describe('SourceLogic', () => {
         SourceLogic.actions.searchContentSourceDocuments(contentSource.id);
         await searchContentSourceDocuments({ sourceId: contentSource.id }, mockBreakpoint);
         expect(http.post).toHaveBeenCalledWith(
-          '/api/workplace_search/account/sources/123/documents',
+          '/internal/workplace_search/account/sources/123/documents',
           {
             body: JSON.stringify({ query: '', page: meta.page }),
           }
@@ -291,20 +344,8 @@ describe('SourceLogic', () => {
         expect(actions.setSearchResults).toHaveBeenCalledWith(searchServerResponse);
       });
 
-      it('handles error', async () => {
-        const error = {
-          response: {
-            error: 'this is an error',
-            status: 400,
-          },
-        };
-        const promise = Promise.reject(error);
-        http.post.mockReturnValue(promise);
-
-        await searchContentSourceDocuments({ sourceId: contentSource.id }, mockBreakpoint);
-        await expectedAsyncError(promise);
-
-        expect(flashAPIErrors).toHaveBeenCalledWith(error);
+      itShowsServerErrorAsFlashMessage(http.post, () => {
+        searchContentSourceDocuments({ sourceId: contentSource.id }, mockBreakpoint);
       });
     });
 
@@ -317,11 +358,32 @@ describe('SourceLogic', () => {
         http.patch.mockReturnValue(promise);
         SourceLogic.actions.updateContentSource(contentSource.id, contentSource);
 
-        expect(http.patch).toHaveBeenCalledWith('/api/workplace_search/org/sources/123/settings', {
-          body: JSON.stringify({ content_source: contentSource }),
-        });
+        expect(http.patch).toHaveBeenCalledWith(
+          '/internal/workplace_search/org/sources/123/settings',
+          {
+            body: JSON.stringify({ content_source: contentSource }),
+          }
+        );
         await promise;
         expect(onUpdateSourceNameSpy).toHaveBeenCalledWith(contentSource.name);
+      });
+
+      it('does not call onUpdateSourceName when the name is not supplied', async () => {
+        AppLogic.values.isOrganization = true;
+
+        const onUpdateSourceNameSpy = jest.spyOn(SourceLogic.actions, 'onUpdateSourceName');
+        const promise = Promise.resolve(contentSource);
+        http.patch.mockReturnValue(promise);
+        SourceLogic.actions.updateContentSource(contentSource.id, { indexing: { enabled: true } });
+
+        expect(http.patch).toHaveBeenCalledWith(
+          '/internal/workplace_search/org/sources/123/settings',
+          {
+            body: JSON.stringify({ content_source: { indexing: { enabled: true } } }),
+          }
+        );
+        await promise;
+        expect(onUpdateSourceNameSpy).not.toHaveBeenCalledWith(contentSource.name);
       });
 
       it('calls API and sets values (account)', async () => {
@@ -333,7 +395,7 @@ describe('SourceLogic', () => {
         SourceLogic.actions.updateContentSource(contentSource.id, contentSource);
 
         expect(http.patch).toHaveBeenCalledWith(
-          '/api/workplace_search/account/sources/123/settings',
+          '/internal/workplace_search/account/sources/123/settings',
           {
             body: JSON.stringify({ content_source: contentSource }),
           }
@@ -342,19 +404,8 @@ describe('SourceLogic', () => {
         expect(onUpdateSourceNameSpy).toHaveBeenCalledWith(contentSource.name);
       });
 
-      it('handles error', async () => {
-        const error = {
-          response: {
-            error: 'this is an error',
-            status: 400,
-          },
-        };
-        const promise = Promise.reject(error);
-        http.patch.mockReturnValue(promise);
+      itShowsServerErrorAsFlashMessage(http.patch, () => {
         SourceLogic.actions.updateContentSource(contentSource.id, contentSource);
-        await expectedAsyncError(promise);
-
-        expect(flashAPIErrors).toHaveBeenCalledWith(error);
       });
     });
 
@@ -368,9 +419,9 @@ describe('SourceLogic', () => {
         SourceLogic.actions.removeContentSource(contentSource.id);
 
         expect(clearFlashMessages).toHaveBeenCalled();
-        expect(http.delete).toHaveBeenCalledWith('/api/workplace_search/org/sources/123');
+        expect(http.delete).toHaveBeenCalledWith('/internal/workplace_search/org/sources/123');
         await promise;
-        expect(setQueuedSuccessMessage).toHaveBeenCalled();
+        expect(flashSuccessToast).toHaveBeenCalled();
         expect(setButtonNotLoadingSpy).toHaveBeenCalled();
       });
 
@@ -383,24 +434,30 @@ describe('SourceLogic', () => {
         SourceLogic.actions.removeContentSource(contentSource.id);
 
         expect(clearFlashMessages).toHaveBeenCalled();
-        expect(http.delete).toHaveBeenCalledWith('/api/workplace_search/account/sources/123');
+        expect(http.delete).toHaveBeenCalledWith('/internal/workplace_search/account/sources/123');
         await promise;
         expect(setButtonNotLoadingSpy).toHaveBeenCalled();
       });
 
-      it('handles error', async () => {
-        const error = {
-          response: {
-            error: 'this is an error',
-            status: 400,
-          },
-        };
-        const promise = Promise.reject(error);
-        http.delete.mockReturnValue(promise);
+      itShowsServerErrorAsFlashMessage(http.delete, () => {
         SourceLogic.actions.removeContentSource(contentSource.id);
-        await expectedAsyncError(promise);
+      });
+    });
 
-        expect(flashAPIErrors).toHaveBeenCalledWith(error);
+    describe('initializeSourceSynchronization', () => {
+      it('calls API and fetches fresh source state', async () => {
+        const initializeSourceSpy = jest.spyOn(SourceLogic.actions, 'initializeSource');
+        const promise = Promise.resolve(contentSource);
+        http.post.mockReturnValue(promise);
+        SourceLogic.actions.initializeSourceSynchronization(contentSource.id);
+
+        expect(http.post).toHaveBeenCalledWith('/internal/workplace_search/org/sources/123/sync');
+        await promise;
+        expect(initializeSourceSpy).toHaveBeenCalledWith(contentSource.id);
+      });
+
+      itShowsServerErrorAsFlashMessage(http.post, () => {
+        SourceLogic.actions.initializeSourceSynchronization(contentSource.id);
       });
     });
 

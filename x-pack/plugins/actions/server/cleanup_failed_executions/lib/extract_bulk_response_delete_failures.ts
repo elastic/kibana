@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { ApiResponse, estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { TransportResult } from '@elastic/elasticsearch';
 
-type ResponseFailures = Array<Pick<estypes.BulkDeleteResponseItem, '_id' | 'status' | 'result'>>;
+type ResponseFailures = Array<Pick<estypes.BulkResponseItem, '_id' | 'status' | 'result'>>;
 
 export function extractBulkResponseDeleteFailures(
-  response: ApiResponse<estypes.BulkResponse, unknown>
+  response: TransportResult<estypes.BulkResponse, unknown>
 ): ResponseFailures {
   const result: ResponseFailures = [];
   for (const item of response.body.items) {

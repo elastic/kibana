@@ -5,138 +5,138 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
-import { Observable, of } from 'rxjs';
+import React, { ReactNode, useMemo } from 'react';
+import { RouterProvider } from '@kbn/typed-react-router-config';
+import { useHistory } from 'react-router-dom';
+import { createMemoryHistory, History } from 'history';
+import { merge } from 'lodash';
+import { coreMock } from '@kbn/core/public/mocks';
+import { UrlService } from '@kbn/share-plugin/common/url_service';
+import { createObservabilityRuleTypeRegistryMock } from '@kbn/observability-plugin/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { MlLocatorDefinition } from '@kbn/ml-plugin/public';
+import { enableComparisonByDefault } from '@kbn/observability-plugin/public';
 import { ApmPluginContext, ApmPluginContextValue } from './apm_plugin_context';
 import { ConfigSchema } from '../..';
-import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
-import { createCallApmApi } from '../../services/rest/createCallApmApi';
-import { MlUrlGenerator } from '../../../../ml/public';
-import { ApmRuleRegistry } from '../../plugin';
+import { createCallApmApi } from '../../services/rest/create_call_apm_api';
+import { apmRouter } from '../../components/routing/apm_route_config';
 
-const uiSettings: Record<string, unknown> = {
-  [UI_SETTINGS.TIMEPICKER_QUICK_RANGES]: [
-    {
-      from: 'now/d',
-      to: 'now/d',
-      display: 'Today',
-    },
-    {
-      from: 'now/w',
-      to: 'now/w',
-      display: 'This week',
-    },
-  ],
-  [UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS]: {
-    from: 'now-15m',
-    to: 'now',
-  },
-  [UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS]: {
-    pause: false,
-    value: 100000,
-  },
-};
+const coreStart = coreMock.createStart({ basePath: '/basepath' });
 
-const mockCore = {
+const mockCore = merge({}, coreStart, {
   application: {
     capabilities: {
       apm: {},
       ml: {},
-    },
-    currentAppId$: new Observable(),
-    navigateToUrl: (url: string) => {},
-  },
-  chrome: {
-    docTitle: { change: () => {} },
-    setBreadcrumbs: () => {},
-    setHelpExtension: () => {},
-    setBadge: () => {},
-  },
-  docLinks: {
-    DOC_LINK_VERSION: '0',
-    ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
-  },
-  http: {
-    basePath: {
-      prepend: (path: string) => `/basepath${path}`,
-      get: () => `/basepath`,
-    },
-  },
-  i18n: {
-    Context: ({ children }: { children: ReactNode }) => children,
-  },
-  notifications: {
-    toasts: {
-      addWarning: () => {},
-      addDanger: () => {},
+      savedObjectsManagement: { edit: true },
     },
   },
   uiSettings: {
-    get: (key: string) => uiSettings[key],
-    get$: (key: string) => of(mockCore.uiSettings.get(key)),
+    get: (key: string) => {
+      const uiSettings: Record<string, unknown> = {
+        [UI_SETTINGS.TIMEPICKER_QUICK_RANGES]: [
+          {
+            from: 'now/d',
+            to: 'now/d',
+            display: 'Today',
+          },
+          {
+            from: 'now/w',
+            to: 'now/w',
+            display: 'This week',
+          },
+        ],
+        [UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS]: {
+          from: 'now-15m',
+          to: 'now',
+        },
+        [UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS]: {
+          pause: false,
+          value: 100000,
+        },
+        [enableComparisonByDefault]: true,
+      };
+      return uiSettings[key];
+    },
   },
-};
-
-const mockApmRuleRegistry = ({
-  getTypeByRuleId: () => undefined,
-  registerType: () => undefined,
-} as unknown) as ApmRuleRegistry;
+});
 
 const mockConfig: ConfigSchema = {
   serviceMapEnabled: true,
   ui: {
     enabled: false,
   },
-  profilingEnabled: false,
 };
+
+const urlService = new UrlService({
+  navigate: async () => {},
+  getUrl: async ({ app, path }, { absolute }) => {
+    return `${absolute ? 'http://localhost:8888' : ''}/app/${app}${path}`;
+  },
+  shortUrls: () => ({ get: () => {} } as any),
+});
+const locator = urlService.locators.create(new MlLocatorDefinition());
 
 const mockPlugin = {
   ml: {
-    urlGenerator: new MlUrlGenerator({
-      appBasePath: '/app/ml',
-      useHash: false,
-    }),
+    locator,
   },
   data: {
     query: {
       timefilter: { timefilter: { setTime: () => {}, getTime: () => ({}) } },
     },
   },
-  observability: {
-    isAlertingExperienceEnabled: () => false,
-  },
 };
 
-const mockAppMountParameters = {
-  setHeaderActionMenu: () => {},
+const mockCorePlugins = {
+  embeddable: {},
+  inspector: {},
+  maps: {},
+  observability: {},
+  data: {},
 };
 
 export const mockApmPluginContextValue = {
-  appMountParameters: mockAppMountParameters,
+  appMountParameters: coreMock.createAppMountParameters('/basepath'),
   config: mockConfig,
   core: mockCore,
   plugins: mockPlugin,
-  apmRuleRegistry: mockApmRuleRegistry,
+  observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
+  corePlugins: mockCorePlugins,
+  deps: {},
 };
 
 export function MockApmPluginContextWrapper({
   children,
   value = {} as ApmPluginContextValue,
+  history,
 }: {
-  children?: React.ReactNode;
+  children?: ReactNode;
   value?: ApmPluginContextValue;
+  history?: History;
 }) {
-  if (value.core) {
-    createCallApmApi(value.core);
+  const contextValue = merge({}, mockApmPluginContextValue, value);
+
+  if (contextValue.core) {
+    createCallApmApi(contextValue.core);
   }
+
+  const contextHistory = useHistory();
+
+  const usedHistory = useMemo(() => {
+    return (
+      history ||
+      contextHistory ||
+      createMemoryHistory({
+        initialEntries: ['/services/?rangeFrom=now-15m&rangeTo=now'],
+      })
+    );
+  }, [history, contextHistory]);
   return (
-    <ApmPluginContext.Provider
-      value={{
-        ...mockApmPluginContextValue,
-        ...value,
-      }}
-    >
-      {children}
+    <ApmPluginContext.Provider value={contextValue}>
+      <RouterProvider router={apmRouter as any} history={usedHistory}>
+        {children}
+      </RouterProvider>
     </ApmPluginContext.Provider>
   );
 }

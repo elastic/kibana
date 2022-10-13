@@ -8,7 +8,7 @@
 
 import { resolve } from 'path';
 // deep import to avoid loading the whole package
-import { getConfigPath } from '@kbn/utils/target/path';
+import { getConfigPath } from '@kbn/utils';
 import { getArgValues } from './read_argv';
 
 /**
@@ -22,5 +22,9 @@ export const getConfigurationFilePaths = (argv: string[]): string[] => {
   if (rawPaths.length) {
     return rawPaths.map((path) => resolve(process.cwd(), path));
   }
-  return [getConfigPath()];
+
+  const configPath = getConfigPath();
+
+  // Pick up settings from dev.yml as well
+  return [configPath, configPath.replace('kibana.yml', 'kibana.dev.yml')];
 };

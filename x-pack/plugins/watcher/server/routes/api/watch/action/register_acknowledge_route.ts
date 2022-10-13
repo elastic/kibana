@@ -7,9 +7,12 @@
 
 import { schema } from '@kbn/config-schema';
 import { get } from 'lodash';
-import { ILegacyScopedClusterClient } from 'kibana/server';
-// @ts-ignore
-import { WatchStatus } from '../../../../models/watch_status/index';
+import { IScopedClusterClient } from '@kbn/core/server';
+
+import {
+  buildServerWatchStatusModel,
+  buildClientWatchStatusModel,
+} from '../../../../models/watch_status_model';
 import { RouteDependencies } from '../../../../types';
 
 const paramsSchema = schema.object({
@@ -17,21 +20,17 @@ const paramsSchema = schema.object({
   actionId: schema.string(),
 });
 
-function acknowledgeAction(
-  dataClient: ILegacyScopedClusterClient,
-  watchId: string,
-  actionId: string
-) {
-  return dataClient.callAsCurrentUser('watcher.ackWatch', {
-    id: watchId,
-    action: actionId,
+function acknowledgeAction(dataClient: IScopedClusterClient, watchId: string, actionId: string) {
+  return dataClient.asCurrentUser.watcher.ackWatch({
+    watch_id: watchId,
+    action_id: actionId,
   });
 }
 
 export function registerAcknowledgeRoute({
   router,
   license,
-  lib: { isEsError },
+  lib: { handleEsError },
 }: RouteDependencies) {
   router.put(
     {
@@ -44,26 +43,23 @@ export function registerAcknowledgeRoute({
       const { watchId, actionId } = request.params;
 
       try {
-        const hit = await acknowledgeAction(ctx.watcher!.client, watchId, actionId);
+        const esClient = (await ctx.core).elasticsearch.client;
+        const hit = await acknowledgeAction(esClient, watchId, actionId);
         const watchStatusJson = get(hit, 'status');
         const json = {
           id: watchId,
           watchStatusJson,
         };
 
-        const watchStatus = WatchStatus.fromUpstreamJson(json);
+        const watchStatus = buildServerWatchStatusModel(json);
         return response.ok({
-          body: { watchStatus: watchStatus.downstreamJson },
+          body: { watchStatus: buildClientWatchStatusModel(watchStatus) },
         });
       } catch (e) {
-        // Case: Error from Elasticsearch JS client
-        if (isEsError(e)) {
-          const body = e.statusCode === 404 ? `Watch with id = ${watchId} not found` : e;
-          return response.customError({ statusCode: e.statusCode, body });
+        if (e?.statusCode === 404 && e.meta?.body?.error) {
+          e.meta.body.error.reason = `Watch with id = ${watchId} not found`;
         }
-
-        // Case: default
-        throw e;
+        return handleEsError({ error: e, response });
       }
     })
   );

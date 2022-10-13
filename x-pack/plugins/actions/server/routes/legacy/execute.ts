@@ -6,12 +6,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'kibana/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { IRouter } from '@kbn/core/server';
 import { ILicenseState, verifyApiAccess, isErrorThatHandlesItsOwnResponse } from '../../lib';
 
 import { ActionTypeExecutorResult, ActionsRequestHandlerContext } from '../../types';
 import { BASE_ACTION_API_PATH } from '../../../common';
 import { asHttpRequestExecutionSource } from '../../lib/action_execution_source';
+import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -23,7 +25,8 @@ const bodySchema = schema.object({
 
 export const executeActionRoute = (
   router: IRouter<ActionsRequestHandlerContext>,
-  licenseState: ILicenseState
+  licenseState: ILicenseState,
+  usageCounter?: UsageCounter
 ) => {
   router.post(
     {
@@ -40,14 +43,16 @@ export const executeActionRoute = (
         return res.badRequest({ body: 'RouteHandlerContext is not registered for actions' });
       }
 
-      const actionsClient = context.actions.getActionsClient();
+      const actionsClient = (await context.actions).getActionsClient();
       const { params } = req.body;
       const { id } = req.params;
+      trackLegacyRouteUsage('execute', usageCounter);
       try {
         const body: ActionTypeExecutorResult<unknown> = await actionsClient.execute({
           params,
           actionId: id,
           source: asHttpRequestExecutionSource(req),
+          relatedSavedObjects: [],
         });
         return body
           ? res.ok({

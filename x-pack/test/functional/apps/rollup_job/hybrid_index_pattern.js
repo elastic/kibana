@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import datemath from '@elastic/datemath';
+import datemath from '@kbn/datemath';
 import expect from '@kbn/expect';
 import mockRolledUpData, { mockIndices } from './hybrid_index_helper';
 
 export default function ({ getService, getPageObjects }) {
   const es = getService('es');
-  const esArchiver = getService('esArchiver');
-  const find = getService('find');
   const retry = getService('retry');
+  const security = getService('security');
+  const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['common', 'settings']);
   const esDeleteAllIndices = getService('esDeleteAllIndices');
 
@@ -32,6 +32,17 @@ export default function ({ getService, getPageObjects }) {
       datemath.parse('now-3d', { forceNow: now }),
     ];
 
+    before(async () => {
+      // load visualize to have an index pattern ready, otherwise visualize will redirect
+      await security.testUser.setRoles([
+        'global_index_pattern_management_all',
+        'test_rollup_reader',
+      ]);
+      await kibanaServer.uiSettings.replace({
+        defaultIndex: 'rollup',
+      });
+    });
+
     it('create hybrid index pattern', async () => {
       //Create data for rollup job to recognize.
       //Index past data to be used in the test.
@@ -43,7 +54,7 @@ export default function ({ getService, getPageObjects }) {
         'waiting for 3 records to be loaded into elasticsearch.',
         10000,
         async () => {
-          const { body: response } = await es.indices.get({
+          const response = await es.indices.get({
             index: `${rollupSourceIndexPrefix}*`,
             allow_no_indices: false,
           });
@@ -91,14 +102,10 @@ export default function ({ getService, getPageObjects }) {
       );
       expect(filteredIndexPatternNames.length).to.be(1);
 
-      // make sure there are no toasts which might be showing unexpected errors
-      const toastShown = await find.existsByCssSelector('.euiToast');
-      expect(toastShown).to.be(false);
-
       // ensure all fields are available
       await PageObjects.settings.clickIndexPatternByName(rollupIndexPatternName);
       const fields = await PageObjects.settings.getFieldNames();
-      expect(fields).to.eql(['@timestamp', '_id', '_index', '_score', '_source', '_type']);
+      expect(fields).to.eql(['@timestamp', '_id', '_index', '_score', '_source']);
     });
 
     after(async () => {
@@ -110,8 +117,7 @@ export default function ({ getService, getPageObjects }) {
         `${regularIndexPrefix}*`,
         `${rollupSourceIndexPrefix}*`,
       ]);
-
-      await esArchiver.load('empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
   });
 }

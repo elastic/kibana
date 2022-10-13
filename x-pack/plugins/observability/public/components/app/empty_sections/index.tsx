@@ -8,32 +8,22 @@
 import { EuiFlexGrid, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
-import { Alert } from '../../../../../alerting/common';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ObservabilityAppServices } from '../../../application/types';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useHasData } from '../../../hooks/use_has_data';
-import { usePluginContext } from '../../../hooks/use_plugin_context';
-import { getEmptySections } from '../../../pages/overview/empty_section';
-import { UXHasDataResponse } from '../../../typings';
+import { getEmptySections } from '../../../pages/overview';
 import { EmptySection } from './empty_section';
 
 export function EmptySections() {
-  const { core } = usePluginContext();
+  const { http } = useKibana<ObservabilityAppServices>().services;
   const theme = useContext(ThemeContext);
-  const { hasData } = useHasData();
+  const { hasDataMap } = useHasData();
 
-  const appEmptySections = getEmptySections({ core }).filter(({ id }) => {
-    if (id === 'alert') {
-      const { status, hasData: alerts } = hasData.alert || {};
-      return (
-        status === FETCH_STATUS.FAILURE ||
-        (status === FETCH_STATUS.SUCCESS && (alerts as Alert[]).length === 0)
-      );
-    } else {
-      const app = hasData[id];
-      if (app) {
-        const _hasData = id === 'ux' ? (app.hasData as UXHasDataResponse)?.hasData : app.hasData;
-        return app.status === FETCH_STATUS.FAILURE || !_hasData;
-      }
+  const appEmptySections = getEmptySections({ http }).filter(({ id }) => {
+    const app = hasDataMap[id];
+    if (app) {
+      return app.status === FETCH_STATUS.FAILURE || !app.hasData;
     }
     return false;
   });
@@ -52,8 +42,8 @@ export function EmptySections() {
             <EuiFlexItem
               key={app.id}
               style={{
-                border: `1px dashed ${theme.eui.euiBorderColor}`,
-                borderRadius: '4px',
+                border: `${theme.eui.euiBorderEditable}`,
+                borderRadius: `${theme.eui.euiBorderRadius}`,
               }}
             >
               <EmptySection section={app} />

@@ -5,22 +5,17 @@
  * 2.0.
  */
 
-import { indexPatterns } from '../../../../../../src/plugins/data/public';
+import { indexPatterns } from '@kbn/data-plugin/public';
 import './mocks';
 import { setupEnvironment, pageHelpers, nextTick, getRandomString } from './helpers';
 
 const { setup } = pageHelpers.autoFollowPatternAdd;
 
 describe('Create Auto-follow pattern', () => {
-  let server;
   let httpRequestsMockHelpers;
 
   beforeAll(() => {
-    ({ server, httpRequestsMockHelpers } = setupEnvironment());
-  });
-
-  afterAll(() => {
-    server.restore();
+    ({ httpRequestsMockHelpers } = setupEnvironment());
   });
 
   beforeEach(() => {
@@ -39,10 +34,6 @@ describe('Create Auto-follow pattern', () => {
       expect(exists('remoteClustersLoading')).toBe(true);
       expect(find('remoteClustersLoading').text()).toBe('Loading remote clusters…');
     });
-
-    test('should have a link to the documentation', () => {
-      expect(exists('docsButton')).toBe(true);
-    });
   });
 
   describe('when remote clusters are loaded', () => {
@@ -57,6 +48,10 @@ describe('Create Auto-follow pattern', () => {
 
       await nextTick(); // We need to wait next tick for the mock server response to comes in
       component.update();
+    });
+
+    test('should have a link to the documentation', () => {
+      expect(exists('docsButton')).toBe(true);
     });
 
     test('should display the Auto-follow pattern form', async () => {
@@ -162,7 +157,7 @@ describe('Create Auto-follow pattern', () => {
           const errorCallOut = find('notConnectedError');
 
           expect(errorCallOut.length).toBe(1);
-          expect(errorCallOut.find('.euiCallOutHeader__title').text()).toBe(
+          expect(errorCallOut.find('.euiCallOutHeader__title').last().text()).toBe(
             `Remote cluster '${clusterName}' is not connected`
           );
           expect(exists('notConnectedError.editButton')).toBe(true);

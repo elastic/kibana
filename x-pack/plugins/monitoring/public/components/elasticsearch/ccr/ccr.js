@@ -11,14 +11,14 @@ import {
   EuiLink,
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
-  EuiPageContentBody,
+  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageContentBody_Deprecated as EuiPageContentBody,
   EuiIcon,
   EuiIconTip,
   EuiTextColor,
   EuiScreenReaderOnly,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import { AlertsStatus } from '../../../alerts/status';

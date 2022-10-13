@@ -21,9 +21,9 @@ export const Positionable: FC<Props> = ({ children, transformMatrix, width, heig
   // Throw if there is more than one child
   const childNode = React.Children.only(children);
 
-  const matrix = (transformMatrix.map((n, i) =>
+  const matrix = transformMatrix.map((n, i) =>
     i < 12 ? n : Math.round(n)
-  ) as any) as TransformMatrix3d;
+  ) as any as TransformMatrix3d;
 
   const newStyle: CSSProperties = {
     width,

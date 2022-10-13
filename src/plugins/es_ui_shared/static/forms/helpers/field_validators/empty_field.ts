@@ -11,16 +11,16 @@ import { isEmptyString } from '../../../validators/string';
 import { isEmptyArray } from '../../../validators/array';
 import { ERROR_CODE } from './types';
 
-export const emptyField = (message: string) => (
-  ...args: Parameters<ValidationFunc>
-): ReturnType<ValidationFunc<any, ERROR_CODE>> => {
-  const [{ value, path }] = args;
+export const emptyField =
+  (message: string) =>
+  (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc<any, ERROR_CODE>> => {
+    const [{ value, path }] = args;
 
-  if (typeof value === 'string') {
-    return isEmptyString(value) ? { code: 'ERR_FIELD_MISSING', path, message } : undefined;
-  }
+    if (typeof value === 'string') {
+      return isEmptyString(value) ? { code: 'ERR_FIELD_MISSING', path, message } : undefined;
+    }
 
-  if (Array.isArray(value)) {
-    return isEmptyArray(value) ? { code: 'ERR_FIELD_MISSING', path, message } : undefined;
-  }
-};
+    if (Array.isArray(value)) {
+      return isEmptyArray(value) ? { code: 'ERR_FIELD_MISSING', path, message } : undefined;
+    }
+  };

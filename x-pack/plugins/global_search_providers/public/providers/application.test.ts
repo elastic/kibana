@@ -9,12 +9,12 @@ import { getAppResultsMock } from './application.test.mocks';
 
 import { EMPTY, of } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
-import { ApplicationStart, AppNavLinkStatus, AppStatus, PublicAppInfo } from 'src/core/public';
+import { ApplicationStart, AppNavLinkStatus, AppStatus, PublicAppInfo } from '@kbn/core/public';
 import {
   GlobalSearchProviderFindOptions,
   GlobalSearchProviderResult,
-} from '../../../global_search/public';
-import { applicationServiceMock } from 'src/core/public/mocks';
+} from '@kbn/global-search-plugin/public';
+import { applicationServiceMock } from '@kbn/core/public/mocks';
 import { createApplicationResultProvider } from './application';
 
 const getTestScheduler = () =>
@@ -28,11 +28,10 @@ const createApp = (props: Partial<PublicAppInfo> = {}): PublicAppInfo => ({
   appRoute: '/app/app1',
   status: AppStatus.accessible,
   navLinkStatus: AppNavLinkStatus.visible,
+  searchable: true,
   chromeless: false,
-  meta: {
-    keywords: props.meta?.keywords || [],
-    searchDeepLinks: [],
-  },
+  keywords: props.keywords || [],
+  deepLinks: [],
   ...props,
 });
 
@@ -165,7 +164,7 @@ describe('applicationResultProvider', () => {
       expect(getAppResultsMock).toHaveBeenCalledWith('term', [expectApp('app1')]);
     });
 
-    it('ignores apps with non-visible navlink', async () => {
+    it('does not ignore apps with non-visible navlink', async () => {
       application.applications$ = of(
         createAppMap([
           createApp({ id: 'app1', title: 'App 1', navLinkStatus: AppNavLinkStatus.visible }),
@@ -180,7 +179,11 @@ describe('applicationResultProvider', () => {
       const provider = createApplicationResultProvider(Promise.resolve(application));
       await provider.find({ term: 'term' }, defaultOption).toPromise();
 
-      expect(getAppResultsMock).toHaveBeenCalledWith('term', [expectApp('app1')]);
+      expect(getAppResultsMock).toHaveBeenCalledWith('term', [
+        expectApp('app1'),
+        expectApp('disabled'),
+        expectApp('hidden'),
+      ]);
     });
 
     it('ignores chromeless apps', async () => {
@@ -243,9 +246,9 @@ describe('applicationResultProvider', () => {
 
         // test scheduler doesnt play well with promises. need to workaround by passing
         // an observable instead. Behavior with promise is asserted in previous tests of the suite
-        const applicationPromise = (hot('a', {
+        const applicationPromise = hot('a', {
           a: application,
-        }) as unknown) as Promise<ApplicationStart>;
+        }) as unknown as Promise<ApplicationStart>;
 
         const provider = createApplicationResultProvider(applicationPromise);
 
@@ -268,9 +271,9 @@ describe('applicationResultProvider', () => {
 
         // test scheduler doesnt play well with promises. need to workaround by passing
         // an observable instead. Behavior with promise is asserted in previous tests of the suite
-        const applicationPromise = (hot('a', {
+        const applicationPromise = hot('a', {
           a: application,
-        }) as unknown) as Promise<ApplicationStart>;
+        }) as unknown as Promise<ApplicationStart>;
 
         const provider = createApplicationResultProvider(applicationPromise);
 

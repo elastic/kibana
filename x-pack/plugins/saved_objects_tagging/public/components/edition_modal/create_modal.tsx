@@ -44,12 +44,13 @@ export const CreateTagModal: FC<CreateTagModalProps> = ({
   );
 
   const setField = useCallback(
-    <T extends keyof TagAttributes>(field: T) => (value: TagAttributes[T]) => {
-      setTagAttributes((current) => ({
-        ...current,
-        [field]: value,
-      }));
-    },
+    <T extends keyof TagAttributes>(field: T) =>
+      (value: TagAttributes[T]) => {
+        setTagAttributes((current) => ({
+          ...current,
+          [field]: value,
+        }));
+      },
     []
   );
 
@@ -64,7 +65,7 @@ export const CreateTagModal: FC<CreateTagModalProps> = ({
       const createdTag = await tagClient.create(tagAttributes);
       onSave(createdTag);
     } catch (e) {
-      // if e is HttpFetchError, actual server error payload is in e.body
+      // if e is IHttpFetchError, actual server error payload is in e.body
       if (isServerValidationError(e.body)) {
         setValidation(e.body.attributes);
       }

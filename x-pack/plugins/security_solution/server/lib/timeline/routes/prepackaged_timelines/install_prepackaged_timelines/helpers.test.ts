@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { join, resolve } from 'path';
-
 import { createPromiseFromStreams } from '@kbn/utils';
-import { SecurityPluginSetup } from '../../../../../../../security/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 
-import { FrameworkRequest } from '../../../../framework';
+import type { FrameworkRequest } from '../../../../framework';
 import {
   createMockConfig,
   requestContextMock,
@@ -18,21 +16,20 @@ import {
 } from '../../../../detection_engine/routes/__mocks__';
 import {
   addPrepackagedRulesRequest,
-  getNonEmptyIndex,
   getFindResultWithSingleHit,
 } from '../../../../detection_engine/routes/__mocks__/request_responses';
 
-import * as lib from './helpers';
-import { importTimelines } from '../../timelines/import_timelines';
+import * as helpers from './helpers';
+import { importTimelines } from '../../timelines/import_timelines/helpers';
 import { buildFrameworkRequest } from '../../../utils/common';
-import { ImportTimelineResultSchema } from '../../../../../../common/types/timeline';
+import type { ImportTimelineResultSchema } from '../../../../../../common/types/timeline';
 
-jest.mock('../../timelines/import_timelines');
+jest.mock('../../timelines/import_timelines/helpers');
 
 describe('installPrepackagedTimelines', () => {
   let securitySetup: SecurityPluginSetup;
   let frameworkRequest: FrameworkRequest;
-  const spyInstallPrepackagedTimelines = jest.spyOn(lib, 'installPrepackagedTimelines');
+  const spyInstallPrepackagedTimelines = jest.spyOn(helpers, 'installPrepackagedTimelines');
 
   const { clients, context } = requestContextMock.createTools();
   const config = createMockConfig();
@@ -40,29 +37,32 @@ describe('installPrepackagedTimelines', () => {
   const mockFileName = 'prepackaged_timelines.ndjson';
 
   beforeEach(async () => {
-    securitySetup = ({
+    securitySetup = {
       authc: {
         getCurrentUser: jest.fn().mockReturnValue(mockGetCurrentUser),
       },
       authz: {},
-    } as unknown) as SecurityPluginSetup;
+    } as unknown as SecurityPluginSetup;
 
-    clients.clusterClient.callAsCurrentUser.mockResolvedValue(getNonEmptyIndex());
-    clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit());
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
 
     jest.doMock('./helpers', () => {
       return {
-        ...lib,
+        ...helpers,
         installPrepackagedTimelines: spyInstallPrepackagedTimelines,
       };
     });
 
     const request = addPrepackagedRulesRequest();
-    frameworkRequest = await buildFrameworkRequest(context, securitySetup, request);
+    frameworkRequest = await buildFrameworkRequest(
+      requestContextMock.convertContext(context),
+      securitySetup,
+      request
+    );
   });
 
   afterEach(() => {
-    spyInstallPrepackagedTimelines.mockClear();
+    jest.clearAllMocks();
   });
 
   afterAll(() => {
@@ -70,10 +70,10 @@ describe('installPrepackagedTimelines', () => {
   });
 
   test('should call importTimelines', async () => {
-    await lib.installPrepackagedTimelines(
+    await helpers.installPrepackagedTimelines(
       config.maxTimelineImportExportSize,
       frameworkRequest,
-      true,
+      false,
       mockFilePath,
       mockFileName
     );
@@ -82,14 +82,12 @@ describe('installPrepackagedTimelines', () => {
   });
 
   test('should call importTimelines with Readables', async () => {
-    const dir = resolve(join(__dirname, mockFilePath));
-    const file = mockFileName;
-    await lib.installPrepackagedTimelines(
+    await helpers.installPrepackagedTimelines(
       config.maxTimelineImportExportSize,
       frameworkRequest,
       true,
-      dir,
-      file
+      mockFilePath,
+      mockFileName
     );
     const args = await createPromiseFromStreams([(importTimelines as jest.Mock).mock.calls[0][0]]);
     const expected = JSON.stringify({
@@ -107,7 +105,7 @@ describe('installPrepackagedTimelines', () => {
           indexes: null,
           name: null,
           columnHeaderType: 'not-filtered',
-          id: 'signal.rule.description',
+          id: 'kibana.alert.rule.description',
           searchable: null,
         },
         {
@@ -169,8 +167,7 @@ describe('installPrepackagedTimelines', () => {
             value: '3c322ed995865f642c1a269d54cbd177bd4b0e6efcf15a589f4f8582efbe7509',
             operator: ':',
           },
-          id:
-            'send-signal-to-timeline-action-default-draggable-event-details-value-formatted-field-value-timeline-1-signal-id-3c322ed995865f642c1a269d54cbd177bd4b0e6efcf15a589f4f8582efbe7509',
+          id: 'send-signal-to-timeline-action-default-draggable-event-details-value-formatted-field-value-timeline-1-signal-id-3c322ed995865f642c1a269d54cbd177bd4b0e6efcf15a589f4f8582efbe7509',
           enabled: true,
         },
       ],
@@ -196,14 +193,12 @@ describe('installPrepackagedTimelines', () => {
   });
 
   test('should call importTimelines with maxTimelineImportExportSize', async () => {
-    const dir = resolve(join(__dirname, mockFilePath));
-    const file = mockFileName;
-    await lib.installPrepackagedTimelines(
+    await helpers.installPrepackagedTimelines(
       config.maxTimelineImportExportSize,
       frameworkRequest,
       true,
-      dir,
-      file
+      mockFilePath,
+      mockFileName
     );
 
     expect((importTimelines as jest.Mock).mock.calls[0][1]).toEqual(
@@ -212,14 +207,12 @@ describe('installPrepackagedTimelines', () => {
   });
 
   test('should call importTimelines with frameworkRequest', async () => {
-    const dir = resolve(join(__dirname, mockFilePath));
-    const file = mockFileName;
-    await lib.installPrepackagedTimelines(
+    await helpers.installPrepackagedTimelines(
       config.maxTimelineImportExportSize,
       frameworkRequest,
       true,
-      dir,
-      file
+      mockFilePath,
+      mockFileName
     );
 
     expect(JSON.stringify((importTimelines as jest.Mock).mock.calls[0][2])).toEqual(
@@ -228,21 +221,19 @@ describe('installPrepackagedTimelines', () => {
   });
 
   test('should call importTimelines with immutable', async () => {
-    const dir = resolve(join(__dirname, mockFilePath));
-    const file = mockFileName;
-    await lib.installPrepackagedTimelines(
+    await helpers.installPrepackagedTimelines(
       config.maxTimelineImportExportSize,
       frameworkRequest,
       true,
-      dir,
-      file
+      mockFilePath,
+      mockFileName
     );
 
     expect((importTimelines as jest.Mock).mock.calls[0][3]).toEqual(true);
   });
 
   test('should handle errors from getReadables', async () => {
-    const result = await lib.installPrepackagedTimelines(
+    const result = await helpers.installPrepackagedTimelines(
       config.maxTimelineImportExportSize,
       frameworkRequest,
       true,

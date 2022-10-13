@@ -5,22 +5,41 @@
  * 2.0.
  */
 
+import type { FindHit } from '../routes/__mocks__/request_responses';
 import {
-  getAlertMock,
+  getRuleMock,
   getFindResultWithSingleHit,
-  FindHit,
+  getEmptySavedObjectsResponse,
 } from '../routes/__mocks__/request_responses';
-import { alertsClientMock } from '../../../../../alerting/server/mocks';
+import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import { getExportAll } from './get_export_all';
 import { getListArrayMock } from '../../../../common/detection_engine/schemas/types/lists.mock';
 import { getThreatMock } from '../../../../common/detection_engine/schemas/types/threat.mock';
+import {
+  getOutputDetailsSampleWithExceptions,
+  getSampleDetailsAsNdjson,
+} from '../../../../common/detection_engine/schemas/response/export_rules_details_schema.mock';
+
 import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
+import { getExceptionListClientMock } from '@kbn/lists-plugin/server/services/exception_lists/exception_list_client.mock';
+import type { loggingSystemMock } from '@kbn/core/server/mocks';
+import { requestContextMock } from '../routes/__mocks__/request_context';
+
+const exceptionsClient = getExceptionListClientMock();
 
 describe('getExportAll', () => {
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+  const { clients } = requestContextMock.createTools();
+
+  beforeEach(async () => {
+    clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse());
+  });
+
   test('it exports everything from the alerts client', async () => {
-    const alertsClient = alertsClientMock.create();
+    const rulesClient = rulesClientMock.create();
     const result = getFindResultWithSingleHit();
-    const alert = getAlertMock(getQueryRuleParams());
+    const alert = getRuleMock(getQueryRuleParams());
+
     alert.params = {
       ...alert.params,
       filters: [{ query: { match_phrase: { 'host.name': 'some-host' } } }],
@@ -30,9 +49,14 @@ describe('getExportAll', () => {
       timelineTitle: 'some-timeline-title',
     };
     result.data = [alert];
-    alertsClient.find.mockResolvedValue(result);
+    rulesClient.find.mockResolvedValue(result);
 
-    const exports = await getExportAll(alertsClient);
+    const exports = await getExportAll(
+      rulesClient,
+      exceptionsClient,
+      clients.savedObjectsClient,
+      logger
+    );
     const rulesJson = JSON.parse(exports.rulesNdjson);
     const detailsJson = JSON.parse(exports.exportDetails);
     expect(rulesJson).toEqual({
@@ -61,6 +85,9 @@ describe('getExportAll', () => {
       name: 'Detect Root/Admin Users',
       query: 'user.name: root or user.name: admin',
       references: ['http://example.com', 'https://example.com'],
+      related_integrations: [],
+      required_fields: [],
+      setup: '',
       timeline_id: 'some-timeline-id',
       timeline_title: 'some-timeline-title',
       meta: { someMeta: 'someField' },
@@ -77,27 +104,41 @@ describe('getExportAll', () => {
       exceptions_list: getListArrayMock(),
     });
     expect(detailsJson).toEqual({
-      exported_count: 1,
+      exported_exception_list_count: 1,
+      exported_exception_list_item_count: 1,
+      exported_count: 3,
+      exported_rules_count: 1,
+      missing_exception_list_item_count: 0,
+      missing_exception_list_items: [],
+      missing_exception_lists: [],
+      missing_exception_lists_count: 0,
       missing_rules: [],
       missing_rules_count: 0,
     });
   });
 
   test('it will export empty rules', async () => {
-    const alertsClient = alertsClientMock.create();
+    const rulesClient = rulesClientMock.create();
     const findResult: FindHit = {
       page: 1,
       perPage: 1,
       total: 0,
       data: [],
     };
+    const details = getOutputDetailsSampleWithExceptions();
 
-    alertsClient.find.mockResolvedValue(findResult);
+    rulesClient.find.mockResolvedValue(findResult);
 
-    const exports = await getExportAll(alertsClient);
+    const exports = await getExportAll(
+      rulesClient,
+      exceptionsClient,
+      clients.savedObjectsClient,
+      logger
+    );
     expect(exports).toEqual({
       rulesNdjson: '',
-      exportDetails: '{"exported_count":0,"missing_rules":[],"missing_rules_count":0}\n',
+      exportDetails: getSampleDetailsAsNdjson(details),
+      exceptionLists: '',
     });
   });
 });

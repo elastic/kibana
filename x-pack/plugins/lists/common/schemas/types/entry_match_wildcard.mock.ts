@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ENTRY_VALUE, FIELD, OPERATOR, WILDCARD } from '../../constants.mock';
+import { EntryMatchWildcard } from '@kbn/securitysolution-io-ts-list-types';
 
-import { EntryMatchWildcard } from './entry_match_wildcard';
+import { ENTRY_VALUE, FIELD, OPERATOR, WILDCARD } from '../../constants.mock';
 
 export const getEntryMatchWildcardMock = (): EntryMatchWildcard => ({
   field: FIELD,

@@ -5,21 +5,22 @@
  * 2.0.
  */
 
-import type { PackageInfo, AgentPolicy, PackagePolicy } from '../types';
+import type { PackageInfo, AgentPolicy } from '../types';
 
-// Assume packages only ever include 1 config template for now
 export const isPackageLimited = (packageInfo: PackageInfo): boolean => {
-  return packageInfo.policy_templates?.[0]?.multiple === false;
+  return (packageInfo.policy_templates || []).some(
+    (policyTemplate) => policyTemplate.multiple === false
+  );
 };
 
 export const doesAgentPolicyAlreadyIncludePackage = (
   agentPolicy: AgentPolicy,
   packageName: string
 ): boolean => {
-  if (agentPolicy.package_policies.length && typeof agentPolicy.package_policies[0] === 'string') {
+  if (!agentPolicy.package_policies) {
     throw new Error('Unable to read full package policy information');
   }
-  return (agentPolicy.package_policies as PackagePolicy[])
+  return agentPolicy.package_policies
     .map((packagePolicy) => packagePolicy.package?.name || '')
     .includes(packageName);
 };

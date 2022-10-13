@@ -7,16 +7,14 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_registry';
-// @ts-ignore
+import { LayerWizard, RenderWizardArguments } from '../../layers';
 import { EMSTMSSource, getSourceTitle } from './ems_tms_source';
-// @ts-ignore
-import { VectorTileLayer } from '../../layers/vector_tile_layer/vector_tile_layer';
+import { EmsVectorTileLayer } from '../../layers/ems_vector_tile_layer/ems_vector_tile_layer';
 import { EmsTmsSourceConfig } from './tile_service_select';
 import { CreateSourceEditor } from './create_source_editor';
 import { getEMSSettings } from '../../../kibana_services';
-import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
-import { WorldMapLayerIcon } from '../../layers/icons/world_map_layer_icon';
+import { LAYER_WIZARD_CATEGORY, WIZARD_ID } from '../../../../common/constants';
+import { WorldMapLayerIcon } from '../../layers/wizards/icons/world_map_layer_icon';
 
 function getDescription() {
   const emsSettings = getEMSSettings();
@@ -29,6 +27,8 @@ function getDescription() {
 }
 
 export const emsBaseMapLayerWizardConfig: LayerWizard = {
+  id: WIZARD_ID.EMS_BASEMAP,
+  order: 10,
   categories: [LAYER_WIZARD_CATEGORY.REFERENCE],
   checkVisibility: async () => {
     const emsSettings = getEMSSettings();
@@ -45,7 +45,7 @@ export const emsBaseMapLayerWizardConfig: LayerWizard = {
   icon: WorldMapLayerIcon,
   renderWizard: ({ previewLayers }: RenderWizardArguments) => {
     const onSourceConfigChange = (sourceConfig: EmsTmsSourceConfig) => {
-      const layerDescriptor = VectorTileLayer.createDescriptor({
+      const layerDescriptor = EmsVectorTileLayer.createDescriptor({
         sourceDescriptor: EMSTMSSource.createDescriptor(sourceConfig),
       });
       previewLayers([layerDescriptor]);

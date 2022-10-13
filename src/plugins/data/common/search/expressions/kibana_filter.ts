@@ -7,12 +7,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { KibanaFilter } from './kibana_context_type';
 
 interface Arguments {
   query: string;
   negate?: boolean;
+  disabled?: boolean;
 }
 
 export type ExpressionFunctionKibanaFilter = ExpressionFunctionDefinition<
@@ -45,6 +46,13 @@ export const kibanaFilterFunction: ExpressionFunctionKibanaFilter = {
         defaultMessage: 'Should the filter be negated',
       }),
     },
+    disabled: {
+      types: ['boolean'],
+      default: false,
+      help: i18n.translate('data.search.functions.kibanaFilter.disabled.help', {
+        defaultMessage: 'Should the filter be disabled',
+      }),
+    },
   },
 
   fn(input, args) {
@@ -53,9 +61,9 @@ export const kibanaFilterFunction: ExpressionFunctionKibanaFilter = {
       meta: {
         negate: args.negate || false,
         alias: '',
-        disabled: false,
+        disabled: args.disabled || false,
       },
-      ...JSON.parse(args.query),
+      query: JSON.parse(args.query),
     };
   },
 };

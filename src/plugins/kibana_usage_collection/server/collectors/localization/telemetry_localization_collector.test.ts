@@ -11,13 +11,13 @@ interface TranslationsMock {
 }
 
 const createI18nLoaderMock = (translations: TranslationsMock) => {
-  return ({
+  return {
     getTranslationsByLocale() {
       return {
         messages: translations,
       };
     },
-  } as unknown) as typeof i18nLoader;
+  } as unknown as typeof i18nLoader;
 };
 
 import { getTranslationCount } from './telemetry_localization_collector';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup } from '../../../../../../../src/core/server';
+import { CoreSetup } from '@kbn/core/server';
 import { getSAMLResponse, getSAMLRequestId } from '../../saml_tools';
 
 export function initRoutes(core: CoreSetup) {
@@ -53,6 +53,27 @@ export function initRoutes(core: CoreSetup) {
     },
     async (context, request, response) => {
       return response.redirected({ headers: { location: '/logout?SAMLResponse=something' } });
+    }
+  );
+
+  let attemptsCounter = 0;
+  core.http.resources.register(
+    {
+      path: '/saml_provider/never_login',
+      validate: false,
+      options: { authRequired: false },
+    },
+    async (context, request, response) => {
+      return response.renderHtml({
+        body: `
+          <!DOCTYPE html>
+          <title>Kibana SAML Login</title>
+          <link rel="icon" href="data:,">
+          <body data-test-subj="idp-page">
+            <span>Attempt #${++attemptsCounter}</span>
+          </body>
+        `,
+      });
     }
   );
 }

@@ -6,7 +6,7 @@
  */
 
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
-import { Direction, HostsFields } from '../../../common/search_strategy';
+import { Direction, HostsFields, RiskScoreFields } from '../../../common/search_strategy';
 
 import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../../common/store/constants';
 
@@ -14,14 +14,19 @@ import {
   setHostDetailsTablesActivePageToZero,
   setHostTablesActivePageToZero,
   updateHostsSort,
+  updateHostRiskScoreSeverityFilter,
+  updateHostRiskScoreSort,
   updateTableActivePage,
   updateTableLimit,
+  updateHostsAnomaliesJobIdFilter,
+  updateHostsAnomaliesInterval,
 } from './actions';
 import {
   setHostPageQueriesActivePageToZero,
   setHostDetailsQueriesActivePageToZero,
 } from './helpers';
-import { HostsModel, HostsTableType } from './model';
+import type { HostsModel } from './model';
+import { HostsTableType } from './model';
 
 export type HostsState = HostsModel;
 
@@ -34,8 +39,8 @@ export const initialHostsState: HostsState = {
       },
       [HostsTableType.hosts]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
-        direction: Direction.desc,
         limit: DEFAULT_TABLE_LIMIT,
+        direction: Direction.desc,
         sortField: HostsFields.lastSeen,
       },
       [HostsTableType.events]: {
@@ -46,8 +51,20 @@ export const initialHostsState: HostsState = {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
       },
-      [HostsTableType.anomalies]: null,
-      [HostsTableType.alerts]: {
+      [HostsTableType.anomalies]: {
+        jobIdSelection: [],
+        intervalSelection: 'auto',
+      },
+      [HostsTableType.risk]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+        sort: {
+          field: RiskScoreFields.hostRiskScore,
+          direction: Direction.desc,
+        },
+        severitySelection: [],
+      },
+      [HostsTableType.sessions]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
       },
@@ -73,8 +90,20 @@ export const initialHostsState: HostsState = {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
       },
-      [HostsTableType.anomalies]: null,
-      [HostsTableType.alerts]: {
+      [HostsTableType.anomalies]: {
+        jobIdSelection: [],
+        intervalSelection: 'auto',
+      },
+      [HostsTableType.risk]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+        sort: {
+          field: RiskScoreFields.hostRiskScore,
+          direction: Direction.desc,
+        },
+        severitySelection: [],
+      },
+      [HostsTableType.sessions]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
       },
@@ -137,6 +166,60 @@ export const hostsReducer = reducerWithInitialState(initialHostsState)
           ...state[hostsType].queries[HostsTableType.hosts],
           direction: sort.direction,
           sortField: sort.field,
+          activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        },
+      },
+    },
+  }))
+  .case(updateHostRiskScoreSort, (state, { sort, hostsType }) => ({
+    ...state,
+    [hostsType]: {
+      ...state[hostsType],
+      queries: {
+        ...state[hostsType].queries,
+        [HostsTableType.risk]: {
+          ...state[hostsType].queries[HostsTableType.risk],
+          sort,
+        },
+      },
+    },
+  }))
+  .case(updateHostRiskScoreSeverityFilter, (state, { severitySelection, hostsType }) => ({
+    ...state,
+    [hostsType]: {
+      ...state[hostsType],
+      queries: {
+        ...state[hostsType].queries,
+        [HostsTableType.risk]: {
+          ...state[hostsType].queries[HostsTableType.risk],
+          severitySelection,
+          activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        },
+      },
+    },
+  }))
+  .case(updateHostsAnomaliesJobIdFilter, (state, { jobIds, hostsType }) => ({
+    ...state,
+    [hostsType]: {
+      ...state[hostsType],
+      queries: {
+        ...state[hostsType].queries,
+        [HostsTableType.anomalies]: {
+          ...state[hostsType].queries[HostsTableType.anomalies],
+          jobIdSelection: jobIds,
+        },
+      },
+    },
+  }))
+  .case(updateHostsAnomaliesInterval, (state, { interval, hostsType }) => ({
+    ...state,
+    [hostsType]: {
+      ...state[hostsType],
+      queries: {
+        ...state[hostsType].queries,
+        [HostsTableType.anomalies]: {
+          ...state[hostsType].queries[HostsTableType.anomalies],
+          intervalSelection: interval,
         },
       },
     },

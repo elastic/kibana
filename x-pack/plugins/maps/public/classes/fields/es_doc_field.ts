@@ -5,33 +5,43 @@
  * 2.0.
  */
 
+import type { DataViewField } from '@kbn/data-views-plugin/public';
+import { indexPatterns } from '@kbn/data-plugin/public';
+import type {
+  AggregationsExtendedStatsAggregation,
+  AggregationsPercentilesAggregation,
+  AggregationsTermsAggregation,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FIELD_ORIGIN } from '../../../common/constants';
 import { ESTooltipProperty } from '../tooltips/es_tooltip_property';
 import { ITooltipProperty, TooltipProperty } from '../tooltips/tooltip_property';
-import { indexPatterns } from '../../../../../../src/plugins/data/public';
-import { IFieldType } from '../../../../../../src/plugins/data/public';
 import { IField, AbstractField } from './field';
 import { IESSource } from '../sources/es_source';
 import { IVectorSource } from '../sources/vector_source';
 
 export class ESDocField extends AbstractField implements IField {
   private readonly _source: IESSource;
-  private readonly _canReadFromGeoJson: boolean;
 
   constructor({
     fieldName,
     source,
     origin,
-    canReadFromGeoJson = true,
   }: {
     fieldName: string;
     source: IESSource;
     origin: FIELD_ORIGIN;
-    canReadFromGeoJson?: boolean;
   }) {
     super({ fieldName, origin });
     this._source = source;
-    this._canReadFromGeoJson = canReadFromGeoJson;
+  }
+
+  supportsFieldMetaFromEs(): boolean {
+    return true;
+  }
+
+  supportsFieldMetaFromLocalData(): boolean {
+    // Elasticsearch vector tile search API does not return meta tiles for documents
+    return !this.getSource().isMvt();
   }
 
   canValueBeFormatted(): boolean {
@@ -42,7 +52,7 @@ export class ESDocField extends AbstractField implements IField {
     return this._source;
   }
 
-  async _getIndexPatternField(): Promise<IFieldType | undefined> {
+  async _getIndexPatternField(): Promise<DataViewField | undefined> {
     const indexPattern = await this._source.getIndexPattern();
     const indexPatternField = indexPattern.fields.getByName(this.getName());
     return indexPatternField && indexPatterns.isNestedField(indexPatternField)
@@ -53,7 +63,12 @@ export class ESDocField extends AbstractField implements IField {
   async createTooltipProperty(value: string | string[] | undefined): Promise<ITooltipProperty> {
     const indexPattern = await this._source.getIndexPattern();
     const tooltipProperty = new TooltipProperty(this.getName(), await this.getLabel(), value);
-    return new ESTooltipProperty(tooltipProperty, indexPattern, this as IField);
+    return new ESTooltipProperty(
+      tooltipProperty,
+      indexPattern,
+      this as IField,
+      this._source.getApplyGlobalQuery()
+    );
   }
 
   async getDataType(): Promise<string> {
@@ -68,15 +83,10 @@ export class ESDocField extends AbstractField implements IField {
       : super.getLabel();
   }
 
-  supportsFieldMeta(): boolean {
-    return true;
-  }
-
-  canReadFromGeoJson(): boolean {
-    return this._canReadFromGeoJson;
-  }
-
-  async getExtendedStatsFieldMetaRequest(): Promise<unknown | null> {
+  async getExtendedStatsFieldMetaRequest(): Promise<Record<
+    string,
+    { extended_stats: AggregationsExtendedStatsAggregation }
+  > | null> {
     const indexPatternField = await this._getIndexPatternField();
 
     if (
@@ -86,10 +96,8 @@ export class ESDocField extends AbstractField implements IField {
       return null;
     }
 
-    // TODO remove local typing once Kibana has figured out a core place for Elasticsearch aggregation request types
-    // https://github.com/elastic/kibana/issues/60102
-    const metricAggConfig: { script?: unknown; field?: string } = {};
-    if (indexPatternField.scripted) {
+    const metricAggConfig: AggregationsExtendedStatsAggregation = {};
+    if (indexPatternField.scripted && indexPatternField.script) {
       metricAggConfig.script = {
         source: indexPatternField.script,
         lang: indexPatternField.lang,
@@ -104,17 +112,19 @@ export class ESDocField extends AbstractField implements IField {
     };
   }
 
-  async getPercentilesFieldMetaRequest(percentiles: number[]): Promise<unknown | null> {
+  async getPercentilesFieldMetaRequest(
+    percentiles: number[]
+  ): Promise<Record<string, { percentiles: AggregationsPercentilesAggregation }> | null> {
     const indexPatternField = await this._getIndexPatternField();
 
     if (!indexPatternField || indexPatternField.type !== 'number') {
       return null;
     }
 
-    const metricAggConfig: { script?: unknown; field?: string; percents: number[] } = {
+    const metricAggConfig: AggregationsPercentilesAggregation = {
       percents: [0, ...percentiles],
     };
-    if (indexPatternField.scripted) {
+    if (indexPatternField.scripted && indexPatternField.script) {
       metricAggConfig.script = {
         source: indexPatternField.script,
         lang: indexPatternField.lang,
@@ -129,18 +139,16 @@ export class ESDocField extends AbstractField implements IField {
     };
   }
 
-  async getCategoricalFieldMetaRequest(size: number): Promise<unknown> {
+  async getCategoricalFieldMetaRequest(
+    size: number
+  ): Promise<Record<string, { terms: AggregationsTermsAggregation }> | null> {
     const indexPatternField = await this._getIndexPatternField();
     if (!indexPatternField || size <= 0) {
       return null;
     }
 
-    // TODO remove local typing once Kibana has figured out a core place for Elasticsearch aggregation request types
-    // https://github.com/elastic/kibana/issues/60102
-    const topTerms: { size: number; script?: unknown; field?: string } = {
-      size: size - 1, // need additional color for the "other"-value
-    };
-    if (indexPatternField.scripted) {
+    const topTerms: AggregationsTermsAggregation = { size };
+    if (indexPatternField.scripted && indexPatternField.script) {
       topTerms.script = {
         source: indexPatternField.script,
         lang: indexPatternField.lang,

@@ -11,16 +11,16 @@ import {
   SavedObjectsFindResponse,
   KibanaRequest,
   SavedObjectsClientContract,
-} from 'kibana/server';
-import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
-import { InvalidateAPIKeysParams, SecurityPluginStart } from '../../../security/server';
+} from '@kbn/core/server';
+import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import { InvalidateAPIKeysParams, SecurityPluginStart } from '@kbn/security-plugin/server';
 import {
   RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../task_manager/server';
-import { InvalidateAPIKeyResult } from '../alerts_client';
-import { AlertsConfig } from '../config';
+} from '@kbn/task-manager-plugin/server';
+import { InvalidateAPIKeyResult } from '../rules_client';
+import { AlertingConfig } from '../config';
 import { timePeriodBeforeDate } from '../lib/get_cadence';
 import { AlertingPluginsStart } from '../plugin';
 import { InvalidatePendingApiKey } from '../types';
@@ -52,17 +52,17 @@ export function initializeApiKeyInvalidator(
   logger: Logger,
   coreStartServices: Promise<[CoreStart, AlertingPluginsStart, unknown]>,
   taskManager: TaskManagerSetupContract,
-  config: Promise<AlertsConfig>
+  config: AlertingConfig
 ) {
   registerApiKeyInvalidatorTaskDefinition(logger, coreStartServices, taskManager, config);
 }
 
 export async function scheduleApiKeyInvalidatorTask(
   logger: Logger,
-  config: Promise<AlertsConfig>,
+  config: AlertingConfig,
   taskManager: TaskManagerStartContract
 ) {
-  const interval = (await config).invalidateApiKeysTask.interval;
+  const interval = config.invalidateApiKeysTask.interval;
   try {
     await taskManager.ensureScheduled({
       id: TASK_ID,
@@ -82,7 +82,7 @@ function registerApiKeyInvalidatorTaskDefinition(
   logger: Logger,
   coreStartServices: Promise<[CoreStart, AlertingPluginsStart, unknown]>,
   taskManager: TaskManagerSetupContract,
-  config: Promise<AlertsConfig>
+  config: AlertingConfig
 ) {
   taskManager.registerTaskDefinitions({
     [TASK_TYPE]: {
@@ -94,7 +94,7 @@ function registerApiKeyInvalidatorTaskDefinition(
 
 function getFakeKibanaRequest(basePath: string) {
   const requestHeaders: Record<string, string> = {};
-  return ({
+  return {
     headers: requestHeaders,
     getBasePath: () => basePath,
     path: '/',
@@ -107,25 +107,22 @@ function getFakeKibanaRequest(basePath: string) {
         url: '/',
       },
     },
-  } as unknown) as KibanaRequest;
+  } as unknown as KibanaRequest;
 }
 
 function taskRunner(
   logger: Logger,
   coreStartServices: Promise<[CoreStart, AlertingPluginsStart, unknown]>,
-  config: Promise<AlertsConfig>
+  config: AlertingConfig
 ) {
   return ({ taskInstance }: RunContext) => {
     const { state } = taskInstance;
     return {
       async run() {
         let totalInvalidated = 0;
-        const configResult = await config;
         try {
-          const [
-            { savedObjects, http },
-            { encryptedSavedObjects, security },
-          ] = await coreStartServices;
+          const [{ savedObjects, http }, { encryptedSavedObjects, security }] =
+            await coreStartServices;
           const savedObjectsClient = savedObjects.getScopedClient(
             getFakeKibanaRequest(http.basePath.serverBasePath),
             {
@@ -136,7 +133,7 @@ function taskRunner(
           const encryptedSavedObjectsClient = encryptedSavedObjects.getClient({
             includedHiddenTypes: ['api_key_pending_invalidation'],
           });
-          const configuredDelay = configResult.invalidateApiKeysTask.removalDelay;
+          const configuredDelay = config.invalidateApiKeysTask.removalDelay;
           const delay = timePeriodBeforeDate(new Date(), configuredDelay).toISOString();
 
           let hasApiKeysPendingInvalidation = true;
@@ -167,7 +164,7 @@ function taskRunner(
               total_invalidated: totalInvalidated,
             },
             schedule: {
-              interval: configResult.invalidateApiKeysTask.interval,
+              interval: config.invalidateApiKeysTask.interval,
             },
           };
         } catch (e) {
@@ -178,7 +175,7 @@ function taskRunner(
               total_invalidated: totalInvalidated,
             },
             schedule: {
-              interval: configResult.invalidateApiKeysTask.interval,
+              interval: config.invalidateApiKeysTask.interval,
             },
           };
         }
@@ -197,10 +194,11 @@ async function invalidateApiKeys(
   let totalInvalidated = 0;
   const apiKeyIds = await Promise.all(
     apiKeysToInvalidate.saved_objects.map(async (apiKeyObj) => {
-      const decryptedApiKey = await encryptedSavedObjectsClient.getDecryptedAsInternalUser<InvalidatePendingApiKey>(
-        'api_key_pending_invalidation',
-        apiKeyObj.id
-      );
+      const decryptedApiKey =
+        await encryptedSavedObjectsClient.getDecryptedAsInternalUser<InvalidatePendingApiKey>(
+          'api_key_pending_invalidation',
+          apiKeyObj.id
+        );
       return decryptedApiKey.attributes.apiKeyId;
     })
   );

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart } from 'kibana/public';
+import { CoreSetup, CoreStart } from '@kbn/core/public';
 
 declare global {
   interface Window {

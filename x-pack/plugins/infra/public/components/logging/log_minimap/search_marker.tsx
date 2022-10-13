@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import * as React from 'react';
 
-import { euiStyled, keyframes } from '../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled, keyframes } from '@kbn/kibana-react-plugin/common';
 import { LogEntryTime } from '../../../../common/log_entry';
 import { SearchMarkerTooltip } from './search_marker_tooltip';
 import { LogEntriesSummaryHighlightsBucket } from '../../../../common/http_api';

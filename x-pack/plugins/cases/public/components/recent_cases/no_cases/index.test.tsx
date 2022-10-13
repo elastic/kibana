@@ -8,19 +8,30 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { TestProviders } from '../../../common/mock';
+import { readCasesPermissions, TestProviders } from '../../../common/mock';
 import { NoCases } from '.';
 
-describe('RecentCases', () => {
+jest.mock('../../../common/navigation/hooks');
+
+describe('NoCases', () => {
   it('if no cases, a link to create cases will exist', () => {
-    const createCaseHref = '/create';
     const wrapper = mount(
       <TestProviders>
-        <NoCases createCaseHref={createCaseHref} />
+        <NoCases />
       </TestProviders>
     );
     expect(wrapper.find(`[data-test-subj="no-cases-create-case"]`).first().prop('href')).toEqual(
-      createCaseHref
+      '/app/security/cases/create'
     );
+  });
+
+  it('displays a message without a link to create a case when the user does not have create permissions', () => {
+    const wrapper = mount(
+      <TestProviders permissions={readCasesPermissions()}>
+        <NoCases />
+      </TestProviders>
+    );
+    expect(wrapper.find(`[data-test-subj="no-cases-create-case"]`).exists()).toBeFalsy();
+    expect(wrapper.find(`[data-test-subj="no-cases-readonly"]`).exists()).toBeTruthy();
   });
 });

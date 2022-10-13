@@ -6,9 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { createAction } from '../../../../../src/plugins/ui_actions/public';
+import { SerializableRecord } from '@kbn/utility-types';
+import { createAction } from '@kbn/ui-actions-plugin/public';
 import { MlCoreSetup } from '../plugin';
-import { ML_APP_URL_GENERATOR } from '../../common/constants/ml_url_generator';
+import { ML_APP_LOCATOR } from '../../common/constants/locator';
 import {
   ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
   ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
@@ -18,7 +19,7 @@ import {
   SwimLaneDrilldownContext,
 } from '../embeddables';
 import { ENTITY_FIELD_OPERATIONS } from '../../common/util/anomaly_utils';
-import { ExplorerAppState } from '../../common/types/ml_url_generator';
+import { ExplorerAppState } from '../../common/types/locator';
 
 export const OPEN_IN_ANOMALY_EXPLORER_ACTION = 'openInAnomalyExplorerAction';
 
@@ -36,7 +37,7 @@ export function createOpenInExplorerAction(getStartServices: MlCoreSetup['getSta
     },
     async getHref(context): Promise<string | undefined> {
       const [, pluginsStart] = await getStartServices();
-      const urlGenerator = pluginsStart.share.urlGenerators.getUrlGenerator(ML_APP_URL_GENERATOR);
+      const locator = pluginsStart.share.url.locators.get(ML_APP_LOCATOR)!;
 
       if (isSwimLaneEmbeddable(context)) {
         const { embeddable, data } = context;
@@ -44,7 +45,7 @@ export function createOpenInExplorerAction(getStartServices: MlCoreSetup['getSta
         const { jobIds, timeRange, viewBy } = embeddable.getInput();
         const { perPage, fromPage } = embeddable.getOutput();
 
-        return urlGenerator.createUrl({
+        return locator.getUrl({
           page: 'explorer',
           pageState: {
             jobIds,
@@ -82,7 +83,7 @@ export function createOpenInExplorerAction(getStartServices: MlCoreSetup['getSta
                 should: [
                   {
                     match_phrase: {
-                      [fieldName]: fieldValue,
+                      [fieldName]: String(fieldValue),
                     },
                   },
                 ],
@@ -98,12 +99,13 @@ export function createOpenInExplorerAction(getStartServices: MlCoreSetup['getSta
             };
           }
         }
-        return urlGenerator.createUrl({
+        return locator.getUrl({
           page: 'explorer',
           pageState: {
             jobIds,
             timeRange,
-            ...(mlExplorerFilter ? { mlExplorerFilter } : {}),
+            // @ts-ignore QueryDslQueryContainer is not compatible with SerializableRecord
+            ...(mlExplorerFilter ? ({ mlExplorerFilter } as SerializableRecord) : {}),
             query: {},
           },
         });

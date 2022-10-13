@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { Observable, of } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { firstValueFrom, Observable, of } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 import { duration } from 'moment';
-import { httpServiceMock, httpServerMock, coreMock } from '../../../../../src/core/server/mocks';
+import { httpServiceMock, httpServerMock, coreMock } from '@kbn/core/server/mocks';
 import { licenseCheckerMock } from '../../common/license_checker.mock';
 import { GlobalSearchProviderResult } from '../../common/types';
 import { GlobalSearchFindError } from '../../common/errors';
@@ -178,6 +177,44 @@ describe('SearchService', () => {
         });
       });
 
+      it('catches errors from providers', async () => {
+        const { registerResultProvider } = service.setup({
+          config: createConfig(),
+          basePath,
+        });
+
+        getTestScheduler().run(({ expectObservable, hot }) => {
+          registerResultProvider(
+            createProvider('A', {
+              source: hot('a---c-|', {
+                a: [result('A1'), result('A2')],
+                c: [result('A3')],
+              }),
+            })
+          );
+          registerResultProvider(
+            createProvider('B', {
+              source: hot(
+                '-b-#  ',
+                {
+                  b: [result('B1')],
+                },
+                new Error('something went bad')
+              ),
+            })
+          );
+
+          const { find } = service.start({ core: coreStart, licenseChecker });
+          const results = find({ term: 'foobar' }, {}, request);
+
+          expectObservable(results).toBe('ab--c-|', {
+            a: expectedBatch('A1', 'A2'),
+            b: expectedBatch('B1'),
+            c: expectedBatch('A3'),
+          });
+        });
+      });
+
       it('handles the `aborted$` option', async () => {
         const { registerResultProvider } = service.setup({
           config: createConfig(),
@@ -286,7 +323,7 @@ describe('SearchService', () => {
         registerResultProvider(provider);
 
         const { find } = service.start({ core: coreStart, licenseChecker });
-        const batch = await find({ term: 'foobar' }, {}, request).pipe(take(1)).toPromise();
+        const batch = await firstValueFrom(find({ term: 'foobar' }, {}, request));
 
         expect(batch.results).toHaveLength(2);
         expect(batch.results[0]).toEqual({

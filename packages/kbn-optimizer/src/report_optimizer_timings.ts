@@ -7,7 +7,8 @@
  */
 
 import { concatMap } from 'rxjs/operators';
-import { CiStatsReporter, ToolingLog } from '@kbn/dev-utils';
+import { CiStatsReporter } from '@kbn/ci-stats-reporter';
+import { ToolingLog } from '@kbn/tooling-log';
 
 import { OptimizerConfig } from './optimizer';
 import { OptimizerUpdate$ } from './run_optimizer';
@@ -46,14 +47,14 @@ export function reportOptimizerTimings(log: ToolingLog, config: OptimizerConfig)
         await reporter.timings({
           timings: [
             {
-              group: '@kbn/optimizer',
-              id: 'overall time',
+              group: 'scripts/build_kibana_platform_plugins',
+              id: 'total',
               ms: time,
               meta: {
-                optimizerBundleCount: config.bundles.length,
+                optimizerBundleCount: config.filteredBundles.length,
                 optimizerBundleCacheCount: cachedBundles.size,
                 optimizerBundleCachePct: Math.floor(
-                  (cachedBundles.size / config.bundles.length) * 100
+                  (cachedBundles.size / config.filteredBundles.length) * 100
                 ),
                 optimizerWatch: config.watch,
                 optimizerProduction: config.dist,

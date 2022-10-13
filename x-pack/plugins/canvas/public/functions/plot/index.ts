@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { set } from '@elastic/safer-lodash-set';
+import { set } from '@kbn/safer-lodash-set';
 import { groupBy, get, keyBy, map, sortBy } from 'lodash';
-import { ExpressionFunctionDefinition, Style } from 'src/plugins/expressions';
-import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
+import { ExpressionFunctionDefinition, Style } from '@kbn/expressions-plugin/common';
+import type { PaletteRegistry, PaletteOutput } from '@kbn/coloring';
 import { getLegendConfig } from '../../../common/lib/get_legend_config';
 import { getFlotAxisConfig } from './get_flot_axis_config';
 import { getFontSpec } from './get_font_spec';
@@ -144,7 +144,7 @@ export function plotFunctionFactory(
               canvas: false,
               colors: paletteService
                 .get(args.palette.name || 'custom')
-                .getColors(data.length, args.palette.params),
+                .getCategoricalColors(data.length, args.palette.params),
               legend: getLegendConfig(args.legend, data.length),
               grid: gridConfig,
               xaxis: getFlotAxisConfig('x', args.xaxis, {

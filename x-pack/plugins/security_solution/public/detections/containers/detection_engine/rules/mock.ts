@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FetchRulesResponse, Rule } from './types';
+import type { FetchRulesResponse, Rule } from './types';
 
 export const savedRuleMock: Rule = {
   author: [],
@@ -20,6 +20,7 @@ export const savedRuleMock: Rule = {
   id: '12345678987654321',
   index: [
     'apm-*-transaction*',
+    'traces-apm*',
     'auditbeat-*',
     'endgame-*',
     'filebeat-*',
@@ -36,6 +37,9 @@ export const savedRuleMock: Rule = {
   max_signals: 100,
   query: "user.email: 'root@elastic.co'",
   references: [],
+  related_integrations: [],
+  required_fields: [],
+  setup: '',
   severity: 'high',
   severity_mapping: [],
   tags: ['APM'],
@@ -78,6 +82,9 @@ export const rulesMock: FetchRulesResponse = {
         'event.kind:alert and event.module:endgame and event.action:cred_theft_event and endgame.metadata.type:detection',
       filters: [],
       references: [],
+      related_integrations: [],
+      required_fields: [],
+      setup: '',
       severity: 'high',
       severity_mapping: [],
       updated_by: 'elastic',
@@ -113,6 +120,9 @@ export const rulesMock: FetchRulesResponse = {
       query: 'event.kind:alert and event.module:endgame and event.action:rules_engine_event',
       filters: [],
       references: [],
+      related_integrations: [],
+      required_fields: [],
+      setup: '',
       severity: 'medium',
       severity_mapping: [],
       updated_by: 'elastic',

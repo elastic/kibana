@@ -7,12 +7,44 @@
 
 export * from './routes';
 export * as AgentStatusKueryHelper from './agent_status';
-export { packageToPackagePolicyInputs, packageToPackagePolicy } from './package_to_package_policy';
-export { storedPackagePoliciesToAgentInputs } from './package_policies_to_agent_inputs';
+export {
+  packageToPackagePolicyInputs,
+  packageToPackagePolicy,
+  getStreamsForInputType,
+} from './package_to_package_policy';
 export { fullAgentPolicyToYaml } from './full_agent_policy_to_yaml';
 export { isPackageLimited, doesAgentPolicyAlreadyIncludePackage } from './limited_package';
 export { decodeCloudId } from './decode_cloud_id';
-export { isValidNamespace } from './is_valid_namespace';
+export { isValidNamespace, INVALID_NAMESPACE_CHARACTERS } from './is_valid_namespace';
 export { isDiffPathProtocol } from './is_diff_path_protocol';
 export { LicenseService } from './license';
 export { isAgentUpgradeable } from './is_agent_upgradeable';
+export {
+  isInputOnlyPolicyTemplate,
+  isIntegrationPolicyTemplate,
+  getNormalizedInputs,
+  getNormalizedDataStreams,
+} from './policy_template';
+export { doesPackageHaveIntegrations } from './packages_with_integrations';
+export type {
+  PackagePolicyValidationResults,
+  PackagePolicyConfigValidationResults,
+  PackagePolicyInputValidationResults,
+} from './validate_package_policy';
+export {
+  validatePackagePolicy,
+  validatePackagePolicyConfig,
+  validationHasErrors,
+  countValidationErrors,
+} from './validate_package_policy';
+
+export { normalizeHostsForAgents } from './hosts_utils';
+export { splitPkgKey } from './split_pkg_key';
+export { getMaxPackageName } from './max_package_name';
+export { getMinVersion, getMaxVersion } from './get_min_max_version';
+export {
+  getPipelineNameForDatastream,
+  getCustomPipelineNameForDatastream,
+  getRegistryDataStreamAssetBaseName,
+  getComponentTemplateNameForDatastream,
+} from './datastream_es_name';

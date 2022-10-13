@@ -7,10 +7,13 @@
 
 import { Stream } from 'stream';
 
+import { transformError } from '@kbn/securitysolution-es-utils';
+import { exportListItemQuerySchema } from '@kbn/securitysolution-io-ts-list-types';
+import { LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
+
 import type { ListsPluginRouter } from '../types';
-import { LIST_ITEM_URL } from '../../common/constants';
-import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
-import { exportListItemQuerySchema } from '../../common/schemas';
+
+import { buildRouteValidation, buildSiemResponse } from './utils';
 
 import { getListClient } from '.';
 
@@ -29,7 +32,7 @@ export const exportListItemRoute = (router: ListsPluginRouter): void => {
       const siemResponse = buildSiemResponse(response);
       try {
         const { list_id: listId } = request.query;
-        const lists = getListClient(context);
+        const lists = await getListClient(context);
         const list = await lists.getList({ id: listId });
         if (list == null) {
           return siemResponse.error({

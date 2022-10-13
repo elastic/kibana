@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { openSans } from '../../../common/lib/fonts';
 import { ViewStrings } from '../../../i18n';
 import { SetupInitializer } from '../../plugin';
-import { UI_SETTINGS } from '../../../../../../src/plugins/data/public';
 
 const { Metric: strings } = ViewStrings;
 
@@ -24,7 +24,7 @@ export const metricInitializer: SetupInitializer<unknown> = (core, plugin) => {
         displayName: strings.getMetricFormatDisplayName(),
         help: strings.getMetricFormatHelp(),
         argType: 'numberFormat',
-        default: `"${core.uiSettings.get(UI_SETTINGS.FORMAT_NUMBER_DEFAULT_PATTERN)}"`,
+        default: `"${core.uiSettings.get(FORMATS_UI_SETTINGS.FORMAT_NUMBER_DEFAULT_PATTERN)}"`,
       },
       {
         name: '_',

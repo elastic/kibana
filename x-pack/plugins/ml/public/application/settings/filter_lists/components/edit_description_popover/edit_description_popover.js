@@ -15,7 +15,7 @@ import React, { Component } from 'react';
 import { EuiButtonIcon, EuiPopover, EuiForm, EuiFormRow, EuiFieldText } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export class EditDescriptionPopover extends Component {
   static displayName = 'EditDescriptionPopover';
@@ -88,10 +88,12 @@ export class EditDescriptionPopover extends Component {
           button={button}
           isOpen={isPopoverOpen}
           closePopover={this.closePopover}
+          initialFocus="#filter_list_edit_description_row"
         >
           <div style={{ width: '300px' }}>
             <EuiForm>
               <EuiFormRow
+                id="filter_list_edit_description_row"
                 label={
                   <FormattedMessage
                     id="xpack.ml.settings.filterLists.editDescriptionPopover.filterListDescriptionAriaLabel"

@@ -26,17 +26,22 @@ export interface Refresh {
 export const useRefresh = () => {
   const timefilter = useTimefilter();
 
+  const getTimeRange = () => {
+    const { from, to } = timefilter.getTime();
+    return { start: from, end: to };
+  };
+
   const refresh$ = useMemo(() => {
     return merge(
       mlTimefilterRefresh$,
       timefilter.getTimeUpdate$().pipe(
         map(() => {
-          const { from, to } = timefilter.getTime();
-          return { lastRefresh: Date.now(), timeRange: { start: from, end: to } };
+          return { lastRefresh: Date.now(), timeRange: getTimeRange() };
         })
       ),
       annotationsRefresh$.pipe(map((d) => ({ lastRefresh: d })))
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return useObservable<Refresh>(refresh$);

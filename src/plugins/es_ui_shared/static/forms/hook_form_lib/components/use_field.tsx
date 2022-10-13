@@ -9,8 +9,7 @@
 import React, { FunctionComponent } from 'react';
 
 import { FieldHook, FieldConfig, FormData } from '../types';
-import { useField } from '../hooks';
-import { useFormContext } from '../form_context';
+import { useFieldFromProps } from '../hooks';
 
 export interface Props<T, FormType = FormData, I = T> {
   path: string;
@@ -19,6 +18,29 @@ export interface Props<T, FormType = FormData, I = T> {
   component?: FunctionComponent<any>;
   componentProps?: Record<string, any>;
   readDefaultValueOnForm?: boolean;
+  /**
+   * Use this prop to pass down dynamic data **asynchronously** to your validators.
+   * Your validator accesses the dynamic data by resolving the provider() Promise.
+   * ```typescript
+   * validator: ({ customData }) => {
+   *   // Wait until a value is sent to the "validationData$" Observable
+   *   const dynamicData = await customData.provider();
+   * }
+   * ```
+   */
+  validationDataProvider?: () => Promise<unknown>;
+  /**
+   * Use this prop to pass down dynamic data to your validators. The validation data
+   * is then accessible in your validator inside the `customData.value` property.
+   *
+   * ```typescript
+   * validator: ({ customData: { value: dynamicData } }) => {
+   *   // Validate with the dynamic data
+   *   if (dynamicData) { .. }
+   * }
+   * ```
+   */
+  validationData?: unknown;
   onChange?: (value: I) => void;
   onError?: (errors: string[] | null) => void;
   children?: (field: FieldHook<T, I>) => JSX.Element | null;
@@ -26,49 +48,13 @@ export interface Props<T, FormType = FormData, I = T> {
 }
 
 function UseFieldComp<T = unknown, FormType = FormData, I = T>(props: Props<T, FormType, I>) {
-  const {
-    path,
-    config,
-    defaultValue,
-    component,
-    componentProps,
-    readDefaultValueOnForm = true,
-    onChange,
-    onError,
-    children,
-    ...rest
-  } = props;
+  const { field, propsToForward } = useFieldFromProps<T, FormType, I>(props);
 
-  const form = useFormContext<FormType>();
-  const ComponentToRender = component ?? 'input';
-  const propsToForward = { ...componentProps, ...rest };
-
-  const fieldConfig: FieldConfig<T, FormType, I> & { initialValue?: T } =
-    config !== undefined
-      ? { ...config }
-      : ({
-          ...form.__readFieldConfigFromSchema(path),
-        } as Partial<FieldConfig<T, FormType, I>>);
-
-  if (defaultValue !== undefined) {
-    // update the form "defaultValue" ref object so when/if we reset the form we can go back to this value
-    form.__updateDefaultValueAt(path, defaultValue);
-
-    // Use the defaultValue prop as initial value
-    fieldConfig.initialValue = defaultValue;
-  } else {
-    if (readDefaultValueOnForm) {
-      // Read the field initial value from the "defaultValue" object passed to the form
-      fieldConfig.initialValue =
-        (form.__getFieldDefaultValue(path) as T) ?? fieldConfig.defaultValue;
-    }
-  }
-
-  const field = useField<T, FormType, I>(form, path, fieldConfig, onChange, onError);
+  const ComponentToRender = props.component ?? 'input';
 
   // Children prevails over anything else provided.
-  if (children) {
-    return children!(field);
+  if (props.children) {
+    return props.children(field);
   }
 
   if (ComponentToRender === 'input') {
@@ -76,7 +62,7 @@ function UseFieldComp<T = unknown, FormType = FormData, I = T>(props: Props<T, F
       <ComponentToRender
         type={field.type}
         onChange={field.onChange}
-        value={(field.value as unknown) as string}
+        value={field.value as unknown as string}
         {...propsToForward}
       />
     );
@@ -90,6 +76,18 @@ export const UseField = React.memo(UseFieldComp) as typeof UseFieldComp;
 /**
  * Get a <UseField /> component providing some common props for all instances.
  * @param partialProps Partial props to apply to all <UseField /> instances
+ *
+ * @example
+ *
+ * // All the "MyUseField" are TextFields
+ * const MyUseField = getUseField({ component: TextField });
+ *
+ * // JSX
+ * <Form>
+ *   <MyUseField path="textField_0" />
+ *   <MyUseField path="textField_1" />
+ *   <MyUseField path="textField_2" />
+ * </Form>
  */
 export function getUseField<T1 = unknown, FormType1 = FormData, I1 = T1>(
   partialProps: Partial<Props<T1, FormType1, I1>>

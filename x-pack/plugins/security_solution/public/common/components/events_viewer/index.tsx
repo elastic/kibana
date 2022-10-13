@@ -5,50 +5,68 @@
  * 2.0.
  */
 
-import React, { useMemo, useEffect } from 'react';
-import { connect, ConnectedProps } from 'react-redux';
-import deepEqual from 'fast-deep-equal';
+import React, { useRef, useCallback, useMemo, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
-
-import { inputsModel, inputsSelectors, State } from '../../store';
+import type { Filter } from '@kbn/es-query';
+import type { EntityType } from '@kbn/timelines-plugin/common';
+import type { TGridCellAction } from '@kbn/timelines-plugin/common/types';
+import { InputsModelId } from '../../store/inputs/constants';
+import { useBulkAddToCaseActions } from '../../../detections/components/alerts_table/timeline_actions/use_bulk_add_to_case_actions';
+import type { inputsModel, State } from '../../store';
 import { inputsActions } from '../../store/actions';
+import type { ControlColumnProps, RowRenderer } from '../../../../common/types/timeline';
 import { TimelineId } from '../../../../common/types/timeline';
-import { timelineSelectors, timelineActions } from '../../../timelines/store/timeline';
-import { SubsetTimelineModel, TimelineModel } from '../../../timelines/store/timeline/model';
-import { Filter } from '../../../../../../../src/plugins/data/public';
-import { EventsViewer } from './events_viewer';
+import { APP_UI_ID } from '../../../../common/constants';
+import { timelineActions } from '../../../timelines/store/timeline';
+import type { SubsetTimelineModel } from '../../../timelines/store/timeline/model';
+import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { InspectButtonContainer } from '../inspect';
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
-import { SourcererScopeName } from '../../store/sourcerer/model';
-import { useSourcererScope } from '../../containers/sourcerer';
-import { DetailsPanel } from '../../../timelines/components/side_panel';
-import { RowRenderer } from '../../../timelines/components/timeline/body/renderers/row_renderer';
-import { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+import { eventsViewerSelector } from './selectors';
+import type { SourcererScopeName } from '../../store/sourcerer/model';
+import { useSourcererDataView } from '../../containers/sourcerer';
+import type { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
+import { FIELDS_WITHOUT_CELL_ACTIONS } from '../../lib/cell_actions/constants';
+import { useKibana } from '../../lib/kibana';
+import { GraphOverlay } from '../../../timelines/components/graph_overlay';
+import type { FieldEditorActions } from '../../../timelines/components/fields_browser';
+import { useFieldBrowserOptions } from '../../../timelines/components/fields_browser';
+import { getRowRenderer } from '../../../timelines/components/timeline/body/renderers/get_row_renderer';
+import {
+  useSessionViewNavigation,
+  useSessionView,
+} from '../../../timelines/components/timeline/session_tab_content/use_session_view';
 
-const DEFAULT_EVENTS_VIEWER_HEIGHT = 652;
+const EMPTY_CONTROL_COLUMNS: ControlColumnProps[] = [];
 
 const FullScreenContainer = styled.div<{ $isFullScreen: boolean }>`
-  height: ${({ $isFullScreen }) => ($isFullScreen ? '100%' : `${DEFAULT_EVENTS_VIEWER_HEIGHT}px`)};
+  height: ${({ $isFullScreen }) => ($isFullScreen ? '100%' : undefined)};
   flex: 1 1 auto;
   display: flex;
   width: 100%;
 `;
 
-export interface OwnProps {
+export interface Props {
+  defaultCellActions?: TGridCellAction[];
   defaultModel: SubsetTimelineModel;
   end: string;
+  entityType: EntityType;
   id: TimelineId;
+  leadingControlColumns: ControlColumnProps[];
   scopeId: SourcererScopeName;
   start: string;
-  headerFilterGroup?: React.ReactNode;
+  showTotalCount?: boolean;
   pageFilters?: Filter[];
+  currentFilter?: Status;
   onRuleChange?: () => void;
   renderCellValue: (props: CellValueElementProps) => React.ReactNode;
   rowRenderers: RowRenderer[];
-  utilityBar?: (refetch: inputsModel.Refetch, totalCount: number) => React.ReactNode;
+  additionalFilters?: React.ReactNode;
+  hasAlertsCrud?: boolean;
+  unit?: (n: number) => string;
 }
-
-type Props = OwnProps & PropsFromRedux;
 
 /**
  * The stateful events viewer component is the highest level component that is utilized across the security_solution pages layer where
@@ -56,182 +74,195 @@ type Props = OwnProps & PropsFromRedux;
  * NOTE: As of writting, it is not used in the Case_View component
  */
 const StatefulEventsViewerComponent: React.FC<Props> = ({
-  createTimeline,
-  columns,
-  dataProviders,
-  deletedEventIds,
-  deleteEventQuery,
+  defaultCellActions,
+  defaultModel,
   end,
-  excludedRowRendererIds,
-  filters,
-  headerFilterGroup,
+  entityType,
   id,
-  isLive,
-  itemsPerPage,
-  itemsPerPageOptions,
-  kqlMode,
+  leadingControlColumns,
   pageFilters,
+  currentFilter,
   onRuleChange,
-  query,
   renderCellValue,
   rowRenderers,
   start,
   scopeId,
-  showCheckboxes,
-  sort,
-  utilityBar,
-  // If truthy, the graph viewer (Resolver) is showing
-  graphEventId,
+  additionalFilters,
+  hasAlertsCrud = false,
+  unit,
 }) => {
+  const dispatch = useDispatch();
+  const {
+    filters,
+    input,
+    query,
+    globalQueries,
+    timelineQuery,
+    timeline: {
+      columns,
+      dataProviders,
+      defaultColumns,
+      deletedEventIds,
+      excludedRowRendererIds,
+      graphEventId, // If truthy, the graph viewer (Resolver) is showing
+      itemsPerPage,
+      itemsPerPageOptions,
+      kqlMode,
+      sessionViewConfig,
+      showCheckboxes,
+      sort,
+    } = defaultModel,
+  } = useSelector((state: State) => eventsViewerSelector(state, id));
+
+  const { timelines: timelinesUi } = useKibana().services;
   const {
     browserFields,
-    docValueFields,
+    dataViewId,
     indexPattern,
+    runtimeMappings,
     selectedPatterns,
+    dataViewId: selectedDataViewId,
     loading: isLoadingIndexPattern,
-  } = useSourcererScope(scopeId);
+  } = useSourcererDataView(scopeId);
+
   const { globalFullScreen } = useGlobalFullScreen();
+  const tGridEventRenderedViewEnabled = useIsExperimentalFeatureEnabled(
+    'tGridEventRenderedViewEnabled'
+  );
+  const editorActionsRef = useRef<FieldEditorActions>(null);
 
   useEffect(() => {
-    if (createTimeline != null) {
-      createTimeline({
-        id,
+    dispatch(
+      timelineActions.createTimeline({
         columns,
+        dataViewId: selectedDataViewId,
+        defaultColumns,
         excludedRowRendererIds,
+        id,
         indexNames: selectedPatterns,
-        sort,
         itemsPerPage,
         showCheckboxes,
-      });
-    }
+        sort,
+      })
+    );
+
     return () => {
-      deleteEventQuery({ id, inputId: 'global' });
+      dispatch(inputsActions.deleteOneQuery({ id, inputId: InputsModelId.global }));
+      if (editorActionsRef.current) {
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        editorActionsRef.current.closeEditor();
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const globalFilters = useMemo(() => [...filters, ...(pageFilters ?? [])], [filters, pageFilters]);
+  const trailingControlColumns: ControlColumnProps[] = EMPTY_CONTROL_COLUMNS;
+
+  const { Navigation } = useSessionViewNavigation({
+    timelineId: id,
+  });
+
+  const { DetailsPanel, SessionView } = useSessionView({
+    entityType,
+    timelineId: id,
+  });
+
+  const graphOverlay = useMemo(() => {
+    const shouldShowOverlay =
+      (graphEventId != null && graphEventId.length > 0) || sessionViewConfig != null;
+    return shouldShowOverlay ? (
+      <GraphOverlay timelineId={id} SessionView={SessionView} Navigation={Navigation} />
+    ) : null;
+  }, [graphEventId, id, sessionViewConfig, SessionView, Navigation]);
+  const setQuery = useCallback(
+    (inspect, loading, refetch) => {
+      dispatch(
+        inputsActions.setQuery({ id, inputId: InputsModelId.global, inspect, loading, refetch })
+      );
+    },
+    [dispatch, id]
+  );
+
+  const refetchQuery = (newQueries: inputsModel.GlobalQuery[]) => {
+    newQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
+  };
+
+  const addToCaseBulkActions = useBulkAddToCaseActions();
+  const bulkActions = useMemo(
+    () => ({
+      onAlertStatusActionSuccess: () => {
+        if (id === TimelineId.active) {
+          refetchQuery([timelineQuery]);
+        } else {
+          refetchQuery(globalQueries);
+        }
+      },
+      customBulkActions: addToCaseBulkActions,
+    }),
+    [addToCaseBulkActions, globalQueries, id, timelineQuery]
+  );
+
+  const fieldBrowserOptions = useFieldBrowserOptions({
+    sourcererScope: scopeId,
+    timelineId: id,
+    editorActionsRef,
+  });
+
+  const isLive = input.policy.kind === 'interval';
 
   return (
     <>
       <FullScreenContainer $isFullScreen={globalFullScreen}>
         <InspectButtonContainer>
-          <EventsViewer
-            browserFields={browserFields}
-            columns={columns}
-            docValueFields={docValueFields}
-            id={id}
-            dataProviders={dataProviders!}
-            deletedEventIds={deletedEventIds}
-            end={end}
-            isLoadingIndexPattern={isLoadingIndexPattern}
-            filters={globalFilters}
-            headerFilterGroup={headerFilterGroup}
-            indexNames={selectedPatterns}
-            indexPattern={indexPattern}
-            isLive={isLive}
-            itemsPerPage={itemsPerPage!}
-            itemsPerPageOptions={itemsPerPageOptions!}
-            kqlMode={kqlMode}
-            query={query}
-            onRuleChange={onRuleChange}
-            renderCellValue={renderCellValue}
-            rowRenderers={rowRenderers}
-            start={start}
-            sort={sort}
-            utilityBar={utilityBar}
-            graphEventId={graphEventId}
-          />
+          {timelinesUi.getTGrid<'embedded'>({
+            additionalFilters,
+            appId: APP_UI_ID,
+            browserFields,
+            bulkActions,
+            columns,
+            dataProviders,
+            dataViewId,
+            defaultCellActions,
+            deletedEventIds,
+            disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
+            end,
+            entityType,
+            fieldBrowserOptions,
+            filters: globalFilters,
+            filterStatus: currentFilter,
+            getRowRenderer,
+            globalFullScreen,
+            graphEventId,
+            graphOverlay,
+            hasAlertsCrud,
+            id,
+            indexNames: selectedPatterns,
+            indexPattern,
+            isLive,
+            isLoadingIndexPattern,
+            itemsPerPage,
+            itemsPerPageOptions,
+            kqlMode,
+            leadingControlColumns,
+            onRuleChange,
+            query,
+            renderCellValue,
+            rowRenderers,
+            runtimeMappings,
+            setQuery,
+            sort,
+            start,
+            tGridEventRenderedViewEnabled,
+            trailingControlColumns,
+            type: 'embedded',
+            unit,
+          })}
         </InspectButtonContainer>
       </FullScreenContainer>
-      <DetailsPanel
-        browserFields={browserFields}
-        docValueFields={docValueFields}
-        isFlyoutView
-        timelineId={id}
-      />
+      {DetailsPanel}
     </>
   );
 };
 
-const makeMapStateToProps = () => {
-  const getInputsTimeline = inputsSelectors.getTimelineSelector();
-  const getGlobalQuerySelector = inputsSelectors.globalQuerySelector();
-  const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
-  const getTimeline = timelineSelectors.getTimelineByIdSelector();
-  const mapStateToProps = (state: State, { id, defaultModel }: OwnProps) => {
-    const input: inputsModel.InputsRange = getInputsTimeline(state);
-    const timeline: TimelineModel = getTimeline(state, id) ?? defaultModel;
-    const {
-      columns,
-      dataProviders,
-      deletedEventIds,
-      excludedRowRendererIds,
-      graphEventId,
-      itemsPerPage,
-      itemsPerPageOptions,
-      kqlMode,
-      sort,
-      showCheckboxes,
-    } = timeline;
-
-    return {
-      columns,
-      dataProviders,
-      deletedEventIds,
-      excludedRowRendererIds,
-      filters: getGlobalFiltersQuerySelector(state),
-      id,
-      isLive: input.policy.kind === 'interval',
-      itemsPerPage,
-      itemsPerPageOptions,
-      kqlMode,
-      query: getGlobalQuerySelector(state),
-      sort,
-      showCheckboxes,
-      // Used to determine whether the footer should show (since it is hidden if the graph is showing.)
-      // `getTimeline` actually returns `TimelineModel | undefined`
-      graphEventId,
-    };
-  };
-  return mapStateToProps;
-};
-
-const mapDispatchToProps = {
-  createTimeline: timelineActions.createTimeline,
-  deleteEventQuery: inputsActions.deleteOneQuery,
-};
-
-const connector = connect(makeMapStateToProps, mapDispatchToProps);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export const StatefulEventsViewer = connector(
-  React.memo(
-    StatefulEventsViewerComponent,
-    // eslint-disable-next-line complexity
-    (prevProps, nextProps) =>
-      prevProps.id === nextProps.id &&
-      prevProps.scopeId === nextProps.scopeId &&
-      deepEqual(prevProps.columns, nextProps.columns) &&
-      deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&
-      deepEqual(prevProps.excludedRowRendererIds, nextProps.excludedRowRendererIds) &&
-      prevProps.deletedEventIds === nextProps.deletedEventIds &&
-      prevProps.end === nextProps.end &&
-      deepEqual(prevProps.filters, nextProps.filters) &&
-      prevProps.isLive === nextProps.isLive &&
-      prevProps.itemsPerPage === nextProps.itemsPerPage &&
-      deepEqual(prevProps.itemsPerPageOptions, nextProps.itemsPerPageOptions) &&
-      prevProps.kqlMode === nextProps.kqlMode &&
-      deepEqual(prevProps.query, nextProps.query) &&
-      prevProps.renderCellValue === nextProps.renderCellValue &&
-      prevProps.rowRenderers === nextProps.rowRenderers &&
-      deepEqual(prevProps.sort, nextProps.sort) &&
-      prevProps.start === nextProps.start &&
-      deepEqual(prevProps.pageFilters, nextProps.pageFilters) &&
-      prevProps.showCheckboxes === nextProps.showCheckboxes &&
-      prevProps.start === nextProps.start &&
-      prevProps.utilityBar === nextProps.utilityBar &&
-      prevProps.graphEventId === nextProps.graphEventId
-  )
-);
+export const StatefulEventsViewer = React.memo(StatefulEventsViewerComponent);

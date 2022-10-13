@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-export async function doesClusterExist(callAsCurrentUser: any, clusterName: string): Promise<any> {
+import { IScopedClusterClient } from '@kbn/core/server';
+
+export async function doesClusterExist(
+  clusterClient: IScopedClusterClient,
+  clusterName: string
+): Promise<boolean> {
   try {
-    const clusterInfoByName = await callAsCurrentUser('cluster.remoteInfo');
+    const clusterInfoByName = await clusterClient.asCurrentUser.cluster.remoteInfo();
     return Boolean(clusterInfoByName && clusterInfoByName[clusterName]);
   } catch (err) {
     throw new Error('Unable to check if cluster already exists.');

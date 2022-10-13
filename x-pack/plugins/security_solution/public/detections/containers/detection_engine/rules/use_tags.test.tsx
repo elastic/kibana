@@ -8,18 +8,17 @@
 import { renderHook, act } from '@testing-library/react-hooks';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
-import { useTags, ReturnTags } from './use_tags';
+import type { ReturnTags } from './use_tags';
+import { useTags } from './use_tags';
 
 jest.mock('./api');
 jest.mock('../../../../common/hooks/use_app_toasts');
 
 describe('useTags', () => {
-  let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
+  (useAppToasts as jest.Mock).mockReturnValue(useAppToastsMock.create());
 
   beforeEach(() => {
-    jest.resetAllMocks();
-    appToastsMock = useAppToastsMock.create();
-    (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
+    jest.clearAllMocks();
   });
 
   test('init', async () => {

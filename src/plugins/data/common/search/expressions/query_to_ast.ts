@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { buildExpression, buildExpressionFunction } from '../../../../expressions/common';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import { Query } from '../../query';
 import { ExpressionFunctionKql } from './kql';
 import { ExpressionFunctionLucene } from './lucene';
@@ -15,9 +15,9 @@ export const queryToAst = (query: Query) => {
   if (query.language === 'kuery') {
     return buildExpression([
       buildExpressionFunction<ExpressionFunctionKql>('kql', { q: query.query as string }),
-    ]);
+    ]).toAst();
   }
   return buildExpression([
     buildExpressionFunction<ExpressionFunctionLucene>('lucene', { q: JSON.stringify(query.query) }),
-  ]);
+  ]).toAst();
 };

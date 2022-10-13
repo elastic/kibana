@@ -6,7 +6,7 @@
  */
 
 import { first, take, bufferCount } from 'rxjs/operators';
-import { loggingSystemMock, elasticsearchServiceMock } from '../../../../../src/core/server/mocks';
+import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import {
   TaskTypeAggregation,
   WorkloadAggregationResponse,
@@ -21,7 +21,7 @@ import { times } from 'lodash';
 import { taskStoreMock } from '../task_store.mock';
 import { of, Subject } from 'rxjs';
 import { sleep } from '../test_utils';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 type ResponseWithAggs = Omit<estypes.SearchResponse<ConcreteTaskInstance>, 'aggregations'> & {
   aggregations: WorkloadAggregationResponse;
@@ -61,13 +61,24 @@ describe('Workload Statistics Aggregator', () => {
             doc_count_error_upper_bound: 0,
             sum_other_doc_count: 0,
           },
-          // The `FiltersAggregate` doesn't cover the case of a nested `AggregationContainer`, in which `FiltersAggregate`
+          nonRecurringTasks: {
+            doc_count: 13,
+          },
+          ownerIds: {
+            ownerIds: {
+              value: 1,
+            },
+          },
+          // The `FiltersAggregate` doesn't cover the case of a nested `AggregationsAggregationContainer`, in which `FiltersAggregate`
           // would not have a `buckets` property, but rather a keyed property that's inferred from the request.
           // @ts-expect-error
           idleTasks: {
             doc_count: 0,
             overdue: {
               doc_count: 0,
+              nonRecurring: {
+                doc_count: 0,
+              },
             },
             scheduleDensity: {
               buckets: [
@@ -102,7 +113,7 @@ describe('Workload Statistics Aggregator', () => {
         expect(taskStore.aggregate).toHaveBeenCalledWith({
           aggs: {
             taskType: {
-              terms: { field: 'task.taskType' },
+              terms: { size: 100, field: 'task.taskType' },
               aggs: {
                 status: {
                   terms: { field: 'task.status' },
@@ -112,6 +123,25 @@ describe('Workload Statistics Aggregator', () => {
             schedule: {
               terms: {
                 field: 'task.schedule.interval',
+              },
+            },
+            nonRecurringTasks: {
+              missing: { field: 'task.schedule' },
+            },
+            ownerIds: {
+              filter: {
+                range: {
+                  'task.startedAt': {
+                    gte: 'now-1w/w',
+                  },
+                },
+              },
+              aggs: {
+                ownerIds: {
+                  cardinality: {
+                    field: 'task.ownerId',
+                  },
+                },
               },
             },
             idleTasks: {
@@ -144,6 +174,11 @@ describe('Workload Statistics Aggregator', () => {
                   filter: {
                     range: {
                       'task.runAt': { lt: 'now' },
+                    },
+                  },
+                  aggs: {
+                    nonRecurring: {
+                      missing: { field: 'task.schedule' },
                     },
                   },
                 },
@@ -238,13 +273,24 @@ describe('Workload Statistics Aggregator', () => {
             },
           ],
         },
-        // The `FiltersAggregate` doesn't cover the case of a nested `AggregationContainer`, in which `FiltersAggregate`
+        nonRecurringTasks: {
+          doc_count: 13,
+        },
+        ownerIds: {
+          ownerIds: {
+            value: 1,
+          },
+        },
+        // The `FiltersAggregate` doesn't cover the case of a nested `AggregationsAggregationContainer`, in which `FiltersAggregate`
         // would not have a `buckets` property, but rather a keyed property that's inferred from the request.
         // @ts-expect-error
         idleTasks: {
           doc_count: 13,
           overdue: {
             doc_count: 6,
+            nonRecurring: {
+              doc_count: 6,
+            },
           },
           scheduleDensity: {
             buckets: [
@@ -297,27 +343,44 @@ describe('Workload Statistics Aggregator', () => {
       loggingSystemMock.create().get()
     );
 
-    return new Promise<void>(async (resolve) => {
-      workloadAggregator.pipe(first()).subscribe((result) => {
-        expect(result.key).toEqual('workload');
-        expect(result.value).toMatchObject({
-          count: 4,
-          task_types: {
-            actions_telemetry: { count: 2, status: { idle: 2 } },
-            alerting_telemetry: { count: 1, status: { idle: 1 } },
-            session_cleanup: { count: 1, status: { idle: 1 } },
-          },
+    return new Promise<void>(async (resolve, reject) => {
+      try {
+        workloadAggregator.pipe(first()).subscribe((result) => {
+          expect(result.key).toEqual('workload');
+          expect(result.value).toMatchObject({
+            count: 4,
+            task_types: {
+              actions_telemetry: {
+                count: 2,
+                status: {
+                  idle: 2,
+                },
+              },
+              alerting_telemetry: {
+                count: 1,
+                status: {
+                  idle: 1,
+                },
+              },
+              session_cleanup: {
+                count: 1,
+                status: {
+                  idle: 1,
+                },
+              },
+            },
+          });
+          resolve();
         });
-        resolve();
-      });
-
-      availability$.next(false);
-
-      await sleep(10);
-      expect(taskStore.aggregate).not.toHaveBeenCalled();
-      await sleep(10);
-      expect(taskStore.aggregate).not.toHaveBeenCalled();
-      availability$.next(true);
+        availability$.next(false);
+        await sleep(10);
+        expect(taskStore.aggregate).not.toHaveBeenCalled();
+        await sleep(10);
+        expect(taskStore.aggregate).not.toHaveBeenCalled();
+        availability$.next(true);
+      } catch (error) {
+        reject(error);
+      }
     });
   });
 
@@ -496,6 +559,117 @@ describe('Workload Statistics Aggregator', () => {
     });
   });
 
+  test('returns an estimate of the workload by task type', async () => {
+    // poll every 3 seconds
+    const pollingIntervalInSeconds = 3;
+
+    const taskStore = taskStoreMock.create({});
+    taskStore.aggregate.mockResolvedValue(
+      asApiResponse({
+        hits: {
+          hits: [],
+          max_score: 0,
+          total: { value: 4, relation: 'eq' },
+        },
+        took: 1,
+        timed_out: false,
+        _shards: {
+          total: 1,
+          successful: 1,
+          skipped: 1,
+          failed: 0,
+        },
+        aggregations: {
+          schedule: {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [
+              // repeats each cycle
+              {
+                key: `${pollingIntervalInSeconds}s`,
+                doc_count: 1,
+              },
+              {
+                key: `10s`, // 6 times per minute
+                doc_count: 20,
+              },
+              {
+                key: `60s`, // 1 times per minute
+                doc_count: 10,
+              },
+              {
+                key: '15m', // 4 times per hour
+                doc_count: 90,
+              },
+              {
+                key: '720m', // 2 times per day
+                doc_count: 10,
+              },
+              {
+                key: '3h', // 8 times per day
+                doc_count: 100,
+              },
+            ],
+          },
+          taskType: {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [],
+          },
+          nonRecurringTasks: {
+            doc_count: 13,
+          },
+          ownerIds: {
+            ownerIds: {
+              value: 3,
+            },
+          },
+          // The `FiltersAggregate` doesn't cover the case of a nested `AggregationContainer`, in which `FiltersAggregate`
+          // would not have a `buckets` property, but rather a keyed property that's inferred from the request.
+          // @ts-expect-error
+          idleTasks: {
+            doc_count: 13,
+            overdue: {
+              doc_count: 6,
+              nonRecurring: {
+                doc_count: 0,
+              },
+            },
+            scheduleDensity: {
+              buckets: [
+                mockHistogram(0, 7 * 3000 + 500, 60 * 1000, 3000, [2, 2, 5, 0, 0, 0, 0, 0, 0, 1]),
+              ],
+            },
+          },
+        },
+      })
+    );
+
+    const workloadAggregator = createWorkloadAggregator(
+      taskStore,
+      of(true),
+      10,
+      pollingIntervalInSeconds * 1000,
+      loggingSystemMock.create().get()
+    );
+
+    return new Promise<void>((resolve) => {
+      workloadAggregator.pipe(first()).subscribe((result) => {
+        expect(result.key).toEqual('workload');
+
+        expect(result.value).toMatchObject({
+          capacity_requirements: {
+            // these are buckets of required capacity, rather than aggregated requirmenets.
+            per_minute: 150,
+            per_hour: 360,
+            per_day: 820,
+          },
+        });
+        resolve();
+      });
+    });
+  });
+
   test('recovery after errors occurrs at the next interval', async () => {
     const refreshInterval = 1000;
 
@@ -618,26 +792,7 @@ describe('estimateRecurringTaskScheduling', () => {
     schedule[6].nonRecurring = 3;
 
     expect(estimateRecurringTaskScheduling(schedule, 3000)).toEqual([
-      1,
-      1,
-      0,
-      1,
-      4,
-      2,
-      6,
-      3,
-      3,
-      2,
-      4,
-      2,
-      3,
-      3,
-      3,
-      2,
-      4,
-      2,
-      3,
-      3,
+      1, 1, 0, 1, 4, 2, 6, 3, 3, 2, 4, 2, 3, 3, 3, 2, 4, 2, 3, 3,
     ]);
   });
 });
@@ -648,11 +803,11 @@ describe('padBuckets', () => {
       padBuckets(10, 3000, {
         key: '2020-10-02T19:47:28.128Z-2020-10-02T19:48:28.128Z',
         from: 1601668048128,
-        // @ts-expect-error @elastic/elasticsearch doesn't decalre from_as_string property
         from_as_string: '2020-10-02T19:47:28.128Z',
         to: 1601668108128,
         to_as_string: '2020-10-02T19:48:28.128Z',
         doc_count: 0,
+        // @ts-expect-error result type doesn't define histogram
         histogram: {
           buckets: [],
         },
@@ -665,11 +820,11 @@ describe('padBuckets', () => {
       padBuckets(10, 3000, {
         key: '2020-10-02T19:47:28.128Z-2020-10-02T19:48:28.128Z',
         from: 1601668046000,
-        // @ts-expect-error @elastic/elasticsearch doesn't decalre from_as_string property
         from_as_string: '2020-10-02T19:47:26.000Z',
         to: 1601668076000,
         to_as_string: '2020-10-02T19:47:56.000Z',
         doc_count: 3,
+        // @ts-expect-error result type doesn't define histogram
         histogram: {
           buckets: [
             {
@@ -743,11 +898,11 @@ describe('padBuckets', () => {
       padBuckets(10, 3000, {
         key: '2020-10-02T20:39:45.793Z-2020-10-02T20:40:14.793Z',
         from: 1601671183000,
-        // @ts-expect-error @elastic/elasticsearch doesn't decalre from_as_string property
         from_as_string: '2020-10-02T20:39:43.000Z',
         to: 1601671213000,
         to_as_string: '2020-10-02T20:40:13.000Z',
         doc_count: 2,
+        // @ts-expect-error result type doesn't define histogram
         histogram: {
           buckets: [
             {
@@ -773,11 +928,11 @@ describe('padBuckets', () => {
       padBuckets(20, 3000, {
         key: '2020-10-02T20:39:45.793Z-2020-10-02T20:40:14.793Z',
         from: 1601671185793,
-        // @ts-expect-error @elastic/elasticsearch doesn't decalre from_as_string property
         from_as_string: '2020-10-02T20:39:45.793Z',
         to: 1601671245793,
         to_as_string: '2020-10-02T20:40:45.793Z',
         doc_count: 2,
+        // @ts-expect-error result type doesn't define histogram
         histogram: {
           buckets: [
             {
@@ -803,11 +958,11 @@ describe('padBuckets', () => {
       padBuckets(20, 3000, {
         key: '2021-02-02T10:08:32.161Z-2021-02-02T10:09:32.161Z',
         from: 1612260512161,
-        // @ts-expect-error @elastic/elasticsearch doesn't decalre from_as_string property
         from_as_string: '2021-02-02T10:08:32.161Z',
         to: 1612260572161,
         to_as_string: '2021-02-02T10:09:32.161Z',
         doc_count: 2,
+        // @ts-expect-error result type doesn't define histogram
         histogram: {
           buckets: [
             {
@@ -944,7 +1099,7 @@ function setTaskTypeCount(
       ...rest.hits,
       total: {
         value: buckets.reduce((sum, bucket) => sum + bucket.doc_count, 0),
-        relation: 'eq' as estypes.TotalHitsRelation,
+        relation: 'eq' as estypes.SearchTotalHitsRelation,
       },
     },
     aggregations: {

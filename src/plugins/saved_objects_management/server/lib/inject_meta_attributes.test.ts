@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObject } from 'src/core/server';
+import { SavedObject } from '@kbn/core/server';
 import { injectMetaAttributes } from './inject_meta_attributes';
 import { managementMock } from '../services/management.mock';
 

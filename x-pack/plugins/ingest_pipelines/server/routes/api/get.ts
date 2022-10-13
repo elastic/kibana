@@ -15,32 +15,25 @@ const paramsSchema = schema.object({
   name: schema.string(),
 });
 
-export const registerGetRoutes = ({
-  router,
-  license,
-  lib: { handleEsError },
-}: RouteDependencies): void => {
+export const registerGetRoutes = ({ router, lib: { handleEsError } }: RouteDependencies): void => {
   // Get all pipelines
-  router.get(
-    { path: API_BASE_PATH, validate: false },
-    license.guardApiRoute(async (ctx, req, res) => {
-      const { client: clusterClient } = ctx.core.elasticsearch;
+  router.get({ path: API_BASE_PATH, validate: false }, async (ctx, req, res) => {
+    const { client: clusterClient } = (await ctx.core).elasticsearch;
 
-      try {
-        const { body: pipelines } = await clusterClient.asCurrentUser.ingest.getPipeline();
+    try {
+      const pipelines = await clusterClient.asCurrentUser.ingest.getPipeline();
 
-        return res.ok({ body: deserializePipelines(pipelines) });
-      } catch (error) {
-        const esErrorResponse = handleEsError({ error, response: res });
-        if (esErrorResponse.status === 404) {
-          // ES returns 404 when there are no pipelines
-          // Instead, we return an empty array and 200 status back to the client
-          return res.ok({ body: [] });
-        }
-        return esErrorResponse;
+      return res.ok({ body: deserializePipelines(pipelines) });
+    } catch (error) {
+      const esErrorResponse = handleEsError({ error, response: res });
+      if (esErrorResponse.status === 404) {
+        // ES returns 404 when there are no pipelines
+        // Instead, we return an empty array and 200 status back to the client
+        return res.ok({ body: [] });
       }
-    })
-  );
+      return esErrorResponse;
+    }
+  });
 
   // Get single pipeline
   router.get(
@@ -50,24 +43,25 @@ export const registerGetRoutes = ({
         params: paramsSchema,
       },
     },
-    license.guardApiRoute(async (ctx, req, res) => {
-      const { client: clusterClient } = ctx.core.elasticsearch;
+    async (ctx, req, res) => {
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
       const { name } = req.params;
 
       try {
-        const { body: pipelines } = await clusterClient.asCurrentUser.ingest.getPipeline({
-          id: name,
-        });
-
+        const pipelines = deserializePipelines(
+          await clusterClient.asCurrentUser.ingest.getPipeline({
+            id: name,
+          })
+        );
         return res.ok({
           body: {
-            ...pipelines[name],
+            ...pipelines!.find((pipeline) => pipeline.name),
             name,
           },
         });
       } catch (error) {
         return handleEsError({ error, response: res });
       }
-    })
+    }
   );
 };

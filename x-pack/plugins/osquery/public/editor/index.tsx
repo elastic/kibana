@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiCodeEditor } from '@elastic/eui';
-import 'brace/theme/tomorrow';
+import React, { useEffect, useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
 
-import './osquery_mode.ts';
+import type { EuiCodeEditorProps } from '../shared_imports';
+import { EuiCodeEditor } from '../shared_imports';
+
+import './osquery_mode';
+import 'brace/theme/tomorrow';
 
 const EDITOR_SET_OPTIONS = {
   enableBasicAutocompletion: true,
@@ -22,27 +25,35 @@ const EDITOR_PROPS = {
 
 interface OsqueryEditorProps {
   defaultValue: string;
-  disabled?: boolean;
   onChange: (newValue: string) => void;
+  commands?: EuiCodeEditorProps['commands'];
 }
 
 const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
   defaultValue,
-  // disabled,
   onChange,
-}) => (
-  <EuiCodeEditor
-    value={defaultValue}
-    mode="osquery"
-    // isReadOnly={disabled}
-    theme="tomorrow"
-    onChange={onChange}
-    name="osquery_editor"
-    setOptions={EDITOR_SET_OPTIONS}
-    editorProps={EDITOR_PROPS}
-    height="200px"
-    width="100%"
-  />
-);
+  commands,
+}) => {
+  const [editorValue, setEditorValue] = useState(defaultValue ?? '');
+
+  useDebounce(() => onChange(editorValue), 500, [editorValue]);
+
+  useEffect(() => setEditorValue(defaultValue), [defaultValue]);
+
+  return (
+    <EuiCodeEditor
+      value={editorValue}
+      mode="osquery"
+      onChange={setEditorValue}
+      theme="tomorrow"
+      name="osquery_editor"
+      setOptions={EDITOR_SET_OPTIONS}
+      editorProps={EDITOR_PROPS}
+      height="100px"
+      width="100%"
+      commands={commands}
+    />
+  );
+};
 
 export const OsqueryEditor = React.memo(OsqueryEditorComponent);

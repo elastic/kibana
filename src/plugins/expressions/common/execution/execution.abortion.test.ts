@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { first } from 'rxjs/operators';
 import { waitFor } from '@testing-library/react';
+import { lastValueFrom } from 'rxjs';
 import { Execution } from './execution';
 import { parseExpression } from '../ast';
 import { createUnitTestExecutor } from '../test_helpers';
@@ -40,9 +40,9 @@ describe('Execution abortion tests', () => {
     execution.start();
     execution.cancel();
 
-    const result = await execution.result.pipe(first()).toPromise();
+    const result = await execution.result.toPromise();
 
-    expect(result).toMatchObject({
+    expect(result).toHaveProperty('result', {
       type: 'error',
       error: {
         message: 'The expression was aborted.',
@@ -58,9 +58,9 @@ describe('Execution abortion tests', () => {
     jest.advanceTimersByTime(100);
     execution.cancel();
 
-    const result = await execution.result.pipe(first()).toPromise();
+    const result = await execution.result.toPromise();
 
-    expect(result).toMatchObject({
+    expect(result).toHaveProperty('result', {
       type: 'error',
       error: {
         message: 'The expression was aborted.',
@@ -76,7 +76,7 @@ describe('Execution abortion tests', () => {
 
     execution.start();
 
-    const result = await execution.result.pipe(first()).toPromise();
+    const { result } = await lastValueFrom(execution.result);
 
     execution.cancel();
 
@@ -91,7 +91,7 @@ describe('Execution abortion tests', () => {
     const completed = jest.fn();
     const aborted = jest.fn();
 
-    const defer: ExpressionFunctionDefinition<'defer', any, { time: number }, any> = {
+    const defer: ExpressionFunctionDefinition<'defer', unknown, { time: number }, unknown> = {
       name: 'defer',
       args: {
         time: {
@@ -136,7 +136,7 @@ describe('Execution abortion tests', () => {
     await waitFor(() => expect(started).toHaveBeenCalledTimes(1));
 
     execution.cancel();
-    const result = await execution.result.pipe(first()).toPromise();
+    const { result } = await lastValueFrom(execution.result);
     expect(result).toMatchObject({
       type: 'error',
       error: {

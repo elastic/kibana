@@ -5,35 +5,32 @@
  * 2.0.
  */
 
-import { RuleAlertAction } from '../../../../../common/detection_engine/types';
+import { transformError } from '@kbn/securitysolution-es-utils';
 import { patchRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/patch_rules_type_dependents';
-import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
-import {
-  PatchRulesSchemaDecoded,
-  patchRulesSchema,
-} from '../../../../../common/detection_engine/schemas/request/patch_rules_schema';
+import { buildRouteValidationNonExact } from '../../../../utils/build_validation/route_validation';
+import { patchRulesSchema } from '../../../../../common/detection_engine/schemas/request/patch_rules_schema';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { SetupPlugins } from '../../../../plugin';
+import type { SetupPlugins } from '../../../../plugin';
 import { buildMlAuthz } from '../../../machine_learning/authz';
-import { throwHttpError } from '../../../machine_learning/validation';
+import { throwAuthzError } from '../../../machine_learning/validation';
 import { patchRules } from '../../rules/patch_rules';
-import { transformError, buildSiemResponse } from '../utils';
+import { buildSiemResponse } from '../utils';
+import { checkDefaultRuleExceptionListReferences } from './utils/check_for_default_rule_exception_list';
 import { getIdError } from './utils';
 import { transformValidate } from './validate';
-import { updateRulesNotifications } from '../../rules/update_rules_notifications';
-import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 import { readRules } from '../../rules/read_rules';
-import { PartialFilter } from '../../types';
+import { legacyMigrate } from '../../rules/utils';
 
 export const patchRulesRoute = (router: SecuritySolutionPluginRouter, ml: SetupPlugins['ml']) => {
   router.patch(
     {
       path: DETECTION_ENGINE_RULES_URL,
       validate: {
-        body: buildRouteValidation<typeof patchRulesSchema, PatchRulesSchemaDecoded>(
-          patchRulesSchema
-        ),
+        // Use non-exact validation because everything is optional in patch - since everything is optional,
+        // io-ts can't find the right schema from the type specific union and the exact check breaks.
+        // We do type specific validation after fetching the existing rule so we know the rule type.
+        body: buildRouteValidationNonExact<typeof patchRulesSchema>(patchRulesSchema),
       },
       options: {
         tags: ['access:securitySolution'],
@@ -45,166 +42,57 @@ export const patchRulesRoute = (router: SecuritySolutionPluginRouter, ml: SetupP
       if (validationErrors.length) {
         return siemResponse.error({ statusCode: 400, body: validationErrors });
       }
-      const {
-        actions: actionsRest,
-        author,
-        building_block_type: buildingBlockType,
-        description,
-        enabled,
-        event_category_override: eventCategoryOverride,
-        false_positives: falsePositives,
-        from,
-        query,
-        language,
-        license,
-        output_index: outputIndex,
-        saved_id: savedId,
-        timeline_id: timelineId,
-        timeline_title: timelineTitle,
-        meta,
-        filters: filtersRest,
-        rule_id: ruleId,
-        id,
-        index,
-        interval,
-        max_signals: maxSignals,
-        risk_score: riskScore,
-        risk_score_mapping: riskScoreMapping,
-        rule_name_override: ruleNameOverride,
-        name,
-        severity,
-        severity_mapping: severityMapping,
-        tags,
-        to,
-        type,
-        threat,
-        threshold,
-        threat_filters: threatFilters,
-        threat_index: threatIndex,
-        threat_query: threatQuery,
-        threat_mapping: threatMapping,
-        threat_language: threatLanguage,
-        concurrent_searches: concurrentSearches,
-        items_per_search: itemsPerSearch,
-        timestamp_override: timestampOverride,
-        throttle,
-        references,
-        note,
-        version,
-        anomaly_threshold: anomalyThreshold,
-        machine_learning_job_id: machineLearningJobId,
-        exceptions_list: exceptionsList,
-      } = request.body;
       try {
-        // TODO: Fix these either with an is conversion or by better typing them within io-ts
-        const actions: RuleAlertAction[] = actionsRest as RuleAlertAction[];
-        const filters: PartialFilter[] | undefined = filtersRest as PartialFilter[];
-
-        const alertsClient = context.alerting?.getAlertsClient();
-        const savedObjectsClient = context.core.savedObjects.client;
-
-        if (!alertsClient) {
-          return siemResponse.error({ statusCode: 404 });
-        }
+        const params = request.body;
+        const rulesClient = (await context.alerting).getRulesClient();
+        const ruleExecutionLog = (await context.securitySolution).getRuleExecutionLog();
+        const savedObjectsClient = (await context.core).savedObjects.client;
 
         const mlAuthz = buildMlAuthz({
-          license: context.licensing.license,
+          license: (await context.licensing).license,
           ml,
           request,
           savedObjectsClient,
         });
-        if (type) {
+        if (params.type) {
           // reject an unauthorized "promotion" to ML
-          throwHttpError(await mlAuthz.validateRuleType(type));
+          throwAuthzError(await mlAuthz.validateRuleType(params.type));
         }
 
-        const existingRule = await readRules({ alertsClient, ruleId, id });
+        const existingRule = await readRules({
+          rulesClient,
+          ruleId: params.rule_id,
+          id: params.id,
+        });
         if (existingRule?.params.type) {
           // reject an unauthorized modification of an ML rule
-          throwHttpError(await mlAuthz.validateRuleType(existingRule?.params.type));
+          throwAuthzError(await mlAuthz.validateRuleType(existingRule?.params.type));
         }
 
-        const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
-        const rule = await patchRules({
-          alertsClient,
-          author,
-          buildingBlockType,
-          description,
-          enabled,
-          eventCategoryOverride,
-          falsePositives,
-          from,
-          query,
-          language,
-          license,
-          outputIndex,
-          savedId,
+        checkDefaultRuleExceptionListReferences({ exceptionLists: params.exceptions_list });
+
+        const migratedRule = await legacyMigrate({
+          rulesClient,
           savedObjectsClient,
-          timelineId,
-          timelineTitle,
-          meta,
-          filters,
           rule: existingRule,
-          index,
-          interval,
-          maxSignals,
-          riskScore,
-          riskScoreMapping,
-          ruleNameOverride,
-          name,
-          severity,
-          severityMapping,
-          tags,
-          to,
-          type,
-          threat,
-          threshold,
-          threatFilters,
-          threatIndex,
-          threatQuery,
-          threatMapping,
-          threatLanguage,
-          concurrentSearches,
-          itemsPerSearch,
-          timestampOverride,
-          references,
-          note,
-          version,
-          anomalyThreshold,
-          machineLearningJobId,
-          actions,
-          exceptionsList,
+        });
+
+        const rule = await patchRules({
+          rulesClient,
+          existingRule: migratedRule,
+          nextParams: params,
         });
         if (rule != null && rule.enabled != null && rule.name != null) {
-          const ruleActions = await updateRulesNotifications({
-            ruleAlertId: rule.id,
-            alertsClient,
-            savedObjectsClient,
-            enabled: rule.enabled,
-            actions,
-            throttle,
-            name: rule.name,
-          });
-          const ruleStatuses = await ruleStatusClient.find({
-            perPage: 1,
-            sortField: 'statusDate',
-            sortOrder: 'desc',
-            search: rule.id,
-            searchFields: ['alertId'],
-          });
+          const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(rule.id);
 
-          const [validated, errors] = transformValidate(
-            rule,
-            ruleActions,
-            ruleStatuses.saved_objects[0]
-          );
+          const [validated, errors] = transformValidate(rule, ruleExecutionSummary);
           if (errors != null) {
             return siemResponse.error({ statusCode: 500, body: errors });
           } else {
             return response.ok({ body: validated ?? {} });
           }
         } else {
-          const error = getIdError({ id, ruleId });
+          const error = getIdError({ id: params.id, ruleId: params.rule_id });
           return siemResponse.error({
             body: error.message,
             statusCode: error.statusCode,

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiCallOut, EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
-import { HttpSetup } from 'kibana/public';
+import { HttpSetup } from '@kbn/core/public';
 import { useKibana } from '../../common/lib/kibana';
 
 export const DeleteModalConfirmation = ({
@@ -19,6 +19,8 @@ export const DeleteModalConfirmation = ({
   onErrors,
   singleTitle,
   multipleTitle,
+  showWarningText,
+  warningText,
   setIsLoadingState,
 }: {
   idsToDelete: string[];
@@ -35,6 +37,8 @@ export const DeleteModalConfirmation = ({
   singleTitle: string;
   multipleTitle: string;
   setIsLoadingState: (isLoading: boolean) => void;
+  showWarningText?: boolean;
+  warningText?: string;
 }) => {
   const [deleteModalFlyoutVisible, setDeleteModalVisibility] = useState<boolean>(false);
 
@@ -54,7 +58,7 @@ export const DeleteModalConfirmation = ({
     'xpack.triggersActionsUI.deleteSelectedIdsConfirmModal.descriptionText',
     {
       defaultMessage:
-        "You can't recover {numIdsToDelete, plural, one {a deleted {singleTitle}} other {deleted {multipleTitle}}}.",
+        "You won't be able to recover {numIdsToDelete, plural, one {a deleted {singleTitle}} other {deleted {multipleTitle}}}.",
       values: { numIdsToDelete, singleTitle, multipleTitle },
     }
   );
@@ -120,7 +124,10 @@ export const DeleteModalConfirmation = ({
       cancelButtonText={cancelButtonText}
       confirmButtonText={confirmButtonText}
     >
-      {confirmModalText}
+      <p>{confirmModalText}</p>
+      {showWarningText && (
+        <EuiCallOut title={<>{warningText}</>} color="warning" iconType="alert" />
+      )}
     </EuiConfirmModal>
   );
 };

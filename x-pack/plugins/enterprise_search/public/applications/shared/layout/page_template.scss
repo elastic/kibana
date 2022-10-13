@@ -1,0 +1,20 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+.enterpriseSearchPageTemplate {
+  position: relative;
+
+  &__content {
+    // Note: relative positioning is required for our centered Loading component
+    position: relative;
+  }
+
+  .euiSideNavItem--emphasized {
+    background-color: transparent;
+    box-shadow: none;
+  }
+}

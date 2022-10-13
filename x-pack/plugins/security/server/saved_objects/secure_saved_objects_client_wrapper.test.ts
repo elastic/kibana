@@ -5,21 +5,32 @@
  * 2.0.
  */
 
-import type { EcsEventOutcome, SavedObjectsClientContract } from 'src/core/server';
-import { httpServerMock, savedObjectsClientMock } from 'src/core/server/mocks';
+import { mockEnsureAuthorized } from './secure_saved_objects_client_wrapper.test.mocks';
+
+import type {
+  EcsEventOutcome,
+  SavedObject,
+  SavedObjectReferenceWithContext,
+  SavedObjectsErrorHelpers,
+  SavedObjectsResolveResponse,
+  SavedObjectsUpdateObjectsSpacesResponseObject,
+} from '@kbn/core/server';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import type { AuditEvent } from '../audit';
-import { auditServiceMock, securityAuditLoggerMock } from '../audit/index.mock';
+import { auditLoggerMock } from '../audit/mocks';
 import { Actions } from '../authorization';
 import type { SavedObjectActions } from '../authorization/actions/saved_object';
 import { SecureSavedObjectsClientWrapper } from './secure_saved_objects_client_wrapper';
 
-jest.mock('src/core/server/saved_objects/service/lib/utils', () => {
-  const { SavedObjectsUtils } = jest.requireActual(
-    'src/core/server/saved_objects/service/lib/utils'
+jest.mock('@kbn/core-saved-objects-utils-server', () => {
+  const { SavedObjectsUtils, ...actual } = jest.requireActual(
+    '@kbn/core-saved-objects-utils-server'
   );
   return {
+    ...actual,
     SavedObjectsUtils: {
+      ...SavedObjectsUtils,
       createEmptyFindResponse: SavedObjectsUtils.createEmptyFindResponse,
       generateId: () => 'mock-saved-object-id',
     },
@@ -39,12 +50,12 @@ const createSecureSavedObjectsClientWrapperOptions = () => {
   const forbiddenError = new Error('Mock ForbiddenError');
   const generalError = new Error('Mock GeneralError');
 
-  const errors = ({
+  const errors = {
     decorateForbiddenError: jest.fn().mockReturnValue(forbiddenError),
     decorateGeneralError: jest.fn().mockReturnValue(generalError),
     createBadRequestError: jest.fn().mockImplementation((message) => new Error(message)),
     isNotFoundError: jest.fn().mockReturnValue(false),
-  } as unknown) as jest.Mocked<SavedObjectsClientContract['errors']>;
+  } as unknown as jest.Mocked<typeof SavedObjectsErrorHelpers>;
   const getSpacesService = jest.fn().mockReturnValue({
     namespaceToSpaceId: (namespace?: string) => (namespace ? namespace : 'default'),
   });
@@ -55,8 +66,7 @@ const createSecureSavedObjectsClientWrapperOptions = () => {
     checkSavedObjectsPrivilegesAsCurrentUser: jest.fn(),
     errors,
     getSpacesService,
-    legacyAuditLogger: securityAuditLoggerMock.create(),
-    auditLogger: auditServiceMock.create().asScoped(httpServerMock.createKibanaRequest()),
+    auditLogger: auditLoggerMock.create(),
     forbiddenError,
     generalError,
   };
@@ -71,8 +81,6 @@ const expectGeneralError = async (fn: Function, args: Record<string, any>) => {
     clientOpts.generalError
   );
   expect(clientOpts.errors.decorateGeneralError).toHaveBeenCalledTimes(1);
-  expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
-  expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
 };
 
 /**
@@ -88,51 +96,12 @@ const expectForbiddenError = async (fn: Function, args: Record<string, any>, act
   await expect(fn.bind(client)(...Object.values(args))).rejects.toThrowError(
     clientOpts.forbiddenError
   );
-  const getCalls = (clientOpts.actions.savedObject.get as jest.MockedFunction<
-    SavedObjectActions['get']
-  >).mock.calls;
-  const actions = clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mock.calls[0][0];
-  const spaceId = args.options?.namespaces
-    ? args.options?.namespaces[0]
-    : args.options?.namespace || 'default';
-
-  const ACTION = getCalls[0][1];
-  const types = getCalls.map((x) => x[0]);
-  const missing = [{ spaceId, privilege: actions[0] }]; // if there was more than one type, only the first type was unauthorized
-  const spaceIds = [spaceId];
 
   expect(clientOpts.errors.decorateForbiddenError).toHaveBeenCalledTimes(1);
-  expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledTimes(1);
-  expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
-    USERNAME,
-    action ?? ACTION,
-    types,
-    spaceIds,
-    missing,
-    args
-  );
-  expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
 };
 
 const expectSuccess = async (fn: Function, args: Record<string, any>, action?: string) => {
-  const result = await fn.bind(client)(...Object.values(args));
-  const getCalls = (clientOpts.actions.savedObject.get as jest.MockedFunction<
-    SavedObjectActions['get']
-  >).mock.calls;
-  const ACTION = getCalls[0][1];
-  const types = getCalls.map((x) => x[0]);
-  const spaceIds = args.options?.namespaces || [args.options?.namespace || 'default'];
-
-  expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
-  expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledTimes(1);
-  expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(
-    USERNAME,
-    action ?? ACTION,
-    types,
-    spaceIds,
-    args
-  );
-  return result;
+  return await fn.bind(client)(...Object.values(args));
 };
 
 const expectPrivilegeCheck = async (
@@ -145,9 +114,9 @@ const expectPrivilegeCheck = async (
   );
 
   await expect(fn.bind(client)(...Object.values(args))).rejects.toThrow(); // test is simpler with error case
-  const getResults = (clientOpts.actions.savedObject.get as jest.MockedFunction<
-    SavedObjectActions['get']
-  >).mock.results;
+  const getResults = (
+    clientOpts.actions.savedObject.get as jest.MockedFunction<SavedObjectActions['get']>
+  ).mock.results;
   const actions = getResults.map((x) => x.value);
 
   expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledTimes(1);
@@ -179,8 +148,6 @@ const expectObjectNamespaceFiltering = async (
   clientOpts.baseClient.get.mockReturnValue(returnValue as any);
   // 'resolve' is excluded because it has a specific test case written for it
   clientOpts.baseClient.update.mockReturnValue(returnValue as any);
-  clientOpts.baseClient.addToNamespaces.mockReturnValue(returnValue as any);
-  clientOpts.baseClient.deleteFromNamespaces.mockReturnValue(returnValue as any);
 
   const result = await fn.bind(client)(...Object.values(args));
   // we will never redact the "All Spaces" ID
@@ -210,7 +177,7 @@ const expectAuditEvent = (
       }),
       kibana: savedObject
         ? expect.objectContaining({
-            saved_object: savedObject,
+            saved_object: { type: savedObject.type, id: savedObject.id },
           })
         : expect.anything(),
     })
@@ -313,146 +280,12 @@ beforeEach(() => {
   clientOpts = createSecureSavedObjectsClientWrapperOptions();
   client = new SecureSavedObjectsClientWrapper(clientOpts);
 
-  // succeed privilege checks by default
+  // succeed legacyEnsureAuthorized privilege checks by default
   clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockImplementation(
     getMockCheckPrivilegesSuccess
   );
-});
 
-describe('#addToNamespaces', () => {
-  const type = 'foo';
-  const id = `${type}-id`;
-  const newNs1 = 'foo-namespace';
-  const newNs2 = 'bar-namespace';
-  const namespaces = [newNs1, newNs2];
-  const currentNs = 'default';
-  const privilege = `mock-saved_object:${type}/share_to_space`;
-
-  test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
-    await expectGeneralError(client.addToNamespaces, { type, id, namespaces });
-  });
-
-  test(`throws decorated ForbiddenError when unauthorized to create in new space`, async () => {
-    clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockImplementation(
-      getMockCheckPrivilegesFailure
-    );
-
-    await expect(client.addToNamespaces(type, id, namespaces)).rejects.toThrowError(
-      clientOpts.forbiddenError
-    );
-
-    expect(clientOpts.errors.decorateForbiddenError).toHaveBeenCalledTimes(1);
-    expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledTimes(1);
-    expect(
-      clientOpts.legacyAuditLogger.savedObjectsAuthorizationFailure
-    ).toHaveBeenCalledWith(
-      USERNAME,
-      'addToNamespacesCreate',
-      [type],
-      namespaces.sort(),
-      [{ privilege, spaceId: newNs1 }],
-      { id, type, namespaces, options: {} }
-    );
-    expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
-  });
-
-  test(`throws decorated ForbiddenError when unauthorized to update in current space`, async () => {
-    clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockImplementationOnce(
-      getMockCheckPrivilegesSuccess // create
-    );
-    clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockImplementation(
-      getMockCheckPrivilegesFailure // update
-    );
-
-    await expect(client.addToNamespaces(type, id, namespaces)).rejects.toThrowError(
-      clientOpts.forbiddenError
-    );
-
-    expect(clientOpts.errors.decorateForbiddenError).toHaveBeenCalledTimes(1);
-    expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledTimes(1);
-    expect(
-      clientOpts.legacyAuditLogger.savedObjectsAuthorizationFailure
-    ).toHaveBeenLastCalledWith(
-      USERNAME,
-      'addToNamespacesUpdate',
-      [type],
-      [currentNs],
-      [{ privilege, spaceId: currentNs }],
-      { id, type, namespaces, options: {} }
-    );
-    expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledTimes(1);
-  });
-
-  test(`returns result of baseClient.addToNamespaces when authorized`, async () => {
-    const apiCallReturnValue = Symbol();
-    clientOpts.baseClient.addToNamespaces.mockReturnValue(apiCallReturnValue as any);
-
-    const result = await client.addToNamespaces(type, id, namespaces);
-    expect(result).toBe(apiCallReturnValue);
-
-    expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
-    expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledTimes(2);
-    expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenNthCalledWith(
-      1,
-      USERNAME,
-      'addToNamespacesCreate', // action for privilege check is 'share_to_space', but auditAction is 'addToNamespacesCreate'
-      [type],
-      namespaces.sort(),
-      { type, id, namespaces, options: {} }
-    );
-    expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenNthCalledWith(
-      2,
-      USERNAME,
-      'addToNamespacesUpdate', // action for privilege check is 'share_to_space', but auditAction is 'addToNamespacesUpdate'
-      [type],
-      [currentNs],
-      { type, id, namespaces, options: {} }
-    );
-  });
-
-  test(`checks privileges for user, actions, and namespaces`, async () => {
-    clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockImplementationOnce(
-      getMockCheckPrivilegesSuccess // create
-    );
-    clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockImplementation(
-      getMockCheckPrivilegesFailure // update
-    );
-
-    await expect(client.addToNamespaces(type, id, namespaces)).rejects.toThrow(); // test is simpler with error case
-
-    expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledTimes(2);
-    expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenNthCalledWith(
-      1,
-      [privilege],
-      namespaces
-    );
-    expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenNthCalledWith(
-      2,
-      [privilege],
-      undefined // default namespace
-    );
-  });
-
-  test(`filters namespaces that the user doesn't have access to`, async () => {
-    // this operation is unique because it requires two privilege checks before it executes
-    await expectObjectNamespaceFiltering(client.addToNamespaces, { type, id, namespaces }, 2);
-  });
-
-  test(`adds audit event when successful`, async () => {
-    const apiCallReturnValue = Symbol();
-    clientOpts.baseClient.addToNamespaces.mockReturnValue(apiCallReturnValue as any);
-    await client.addToNamespaces(type, id, namespaces);
-
-    expect(clientOpts.auditLogger.log).toHaveBeenCalledTimes(1);
-    expectAuditEvent('saved_object_add_to_spaces', 'unknown', { type, id });
-  });
-
-  test(`adds audit event when not successful`, async () => {
-    clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockRejectedValue(new Error());
-    await expect(() => client.addToNamespaces(type, id, namespaces)).rejects.toThrow();
-    expect(clientOpts.auditLogger.log).toHaveBeenCalledTimes(1);
-    expectAuditEvent('saved_object_add_to_spaces', 'failure', { type, id });
-  });
+  mockEnsureAuthorized.mockReset();
 });
 
 describe('#bulkCreate', () => {
@@ -553,10 +386,17 @@ describe('#bulkGet', () => {
     expect(result).toEqual(apiCallReturnValue);
   });
 
-  test(`checks privileges for user, actions, and namespace`, async () => {
-    const objects = [obj1, obj2];
+  test(`checks privileges for user, actions, namespace, and (object) namespaces`, async () => {
+    const objects = [
+      { ...obj1, namespaces: ['another-ns'] },
+      { ...obj2, namespaces: ['yet-another-ns'] },
+    ];
     const options = { namespace };
-    await expectPrivilegeCheck(client.bulkGet, { objects, options }, namespace);
+    await expectPrivilegeCheck(client.bulkGet, { objects, options }, [
+      namespace,
+      'another-ns',
+      'yet-another-ns',
+    ]);
   });
 
   test(`filters namespaces that the user doesn't have access to`, async () => {
@@ -582,6 +422,103 @@ describe('#bulkGet', () => {
     expect(clientOpts.auditLogger.log).toHaveBeenCalledTimes(2);
     expectAuditEvent('saved_object_get', 'failure', obj1);
     expectAuditEvent('saved_object_get', 'failure', obj2);
+  });
+});
+
+describe('#bulkResolve', () => {
+  const obj1 = Object.freeze({ type: 'foo', id: 'foo-id' });
+  const obj2 = Object.freeze({ type: 'bar', id: 'bar-id' });
+  const namespace = 'some-ns';
+
+  test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
+    const objects = [obj1];
+    await expectGeneralError(client.bulkResolve, { objects });
+  });
+
+  test(`throws decorated ForbiddenError when unauthorized`, async () => {
+    const objects = [obj1, obj2];
+    const options = { namespace };
+    await expectForbiddenError(client.bulkResolve, { objects, options }, 'bulk_resolve');
+  });
+
+  test(`returns result of baseClient.bulkResolve when authorized`, async () => {
+    const apiCallReturnValue = { resolved_objects: [] };
+    clientOpts.baseClient.bulkResolve.mockResolvedValue(apiCallReturnValue);
+
+    const objects = [obj1, obj2];
+    const options = { namespace };
+    const result = await expectSuccess(client.bulkResolve, { objects, options }, 'bulk_resolve');
+    expect(result).toEqual(apiCallReturnValue);
+  });
+
+  test(`checks privileges for user, actions, and namespace`, async () => {
+    const objects = [obj1, obj2];
+    const options = { namespace };
+    await expectPrivilegeCheck(client.bulkResolve, { objects, options }, namespace);
+  });
+
+  test(`filters namespaces that the user doesn't have access to`, async () => {
+    const objects = [obj1, obj2];
+    const options = { namespace };
+
+    clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockImplementationOnce(
+      getMockCheckPrivilegesSuccess // privilege check for authorization
+    );
+    clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockImplementation(
+      getMockCheckPrivilegesFailure // privilege check for namespace filtering
+    );
+
+    clientOpts.baseClient.bulkResolve.mockResolvedValue({
+      resolved_objects: [
+        // omit other fields from the SavedObjectsResolveResponse such as outcome, as they are not needed for this test case
+        { saved_object: { namespaces: ['*'] } } as unknown as SavedObjectsResolveResponse,
+        { saved_object: { namespaces: [namespace] } } as unknown as SavedObjectsResolveResponse,
+        {
+          saved_object: { namespaces: ['some-other-namespace', namespace] },
+        } as unknown as SavedObjectsResolveResponse,
+      ],
+    });
+
+    const result = await client.bulkResolve(objects, options);
+    expect(result).toEqual({
+      resolved_objects: [
+        { saved_object: { namespaces: ['*'] } },
+        { saved_object: { namespaces: [namespace] } },
+        { saved_object: { namespaces: [namespace, '?'] } },
+      ],
+    });
+
+    expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledTimes(2);
+    expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenLastCalledWith(
+      'login:',
+      ['some-other-namespace']
+      // when we check what namespaces to redact, we don't check privileges for '*', only actual space IDs
+      // we don't check privileges for authorizedNamespaces either, as that was already checked earlier in the operation
+    );
+  });
+
+  test(`adds audit event when successful`, async () => {
+    const apiCallReturnValue = {
+      resolved_objects: [
+        { saved_object: obj1 } as unknown as SavedObjectsResolveResponse,
+        { saved_object: obj2 } as unknown as SavedObjectsResolveResponse,
+      ],
+    };
+    clientOpts.baseClient.bulkResolve.mockResolvedValue(apiCallReturnValue);
+    const objects = [obj1, obj2];
+    const options = { namespace };
+    await expectSuccess(client.bulkResolve, { objects, options }, 'bulk_resolve');
+    expect(clientOpts.auditLogger.log).toHaveBeenCalledTimes(2);
+    expectAuditEvent('saved_object_resolve', 'success', obj1);
+    expectAuditEvent('saved_object_resolve', 'success', obj2);
+  });
+
+  test(`adds audit event when not successful`, async () => {
+    clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockRejectedValue(new Error());
+    await expect(() => client.bulkResolve([obj1, obj2], { namespace })).rejects.toThrow();
+    expect(clientOpts.auditLogger.log).toHaveBeenCalledTimes(2);
+    expectAuditEvent('saved_object_resolve', 'failure', obj1);
+    expectAuditEvent('saved_object_resolve', 'failure', obj2);
   });
 });
 
@@ -651,6 +588,67 @@ describe('#bulkUpdate', () => {
     expect(clientOpts.auditLogger.log).toHaveBeenCalledTimes(2);
     expectAuditEvent('saved_object_update', 'failure', { type: obj1.type, id: obj1.id });
     expectAuditEvent('saved_object_update', 'failure', { type: obj2.type, id: obj2.id });
+  });
+});
+
+describe('#bulkDelete', () => {
+  const obj1 = Object.freeze({ type: 'foo', id: 'foo-id' });
+  const obj2 = Object.freeze({ type: 'bar', id: 'bar-id' });
+  const namespace = 'some-ns';
+
+  test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
+    const objects = [obj1];
+    await expectGeneralError(client.bulkDelete, { objects });
+  });
+
+  test(`throws decorated ForbiddenError when unauthorized`, async () => {
+    const objects = [obj1, obj2];
+    const options = { namespace };
+    await expectForbiddenError(client.bulkDelete, { objects, options });
+  });
+
+  test(`returns result of baseClient.bulkDelete when authorized`, async () => {
+    const apiCallReturnValue = {
+      statuses: [obj1, obj2].map((obj) => {
+        return { ...obj, success: true };
+      }),
+    };
+    clientOpts.baseClient.bulkDelete.mockReturnValue(apiCallReturnValue as any);
+
+    const objects = [obj1, obj2];
+    const options = { namespace };
+    const result = await expectSuccess(client.bulkDelete, { objects, options });
+    expect(result).toEqual(apiCallReturnValue);
+  });
+
+  test(`checks privileges for user, actions, and namespace`, async () => {
+    const objects = [obj1, obj2];
+    const options = { namespace };
+    await expectPrivilegeCheck(client.bulkDelete, { objects, options }, namespace);
+  });
+
+  test(`adds audit event when successful`, async () => {
+    const apiCallReturnValue = {
+      statuses: [obj1, obj2].map((obj) => {
+        return { ...obj, success: true };
+      }),
+    };
+    clientOpts.baseClient.bulkDelete.mockReturnValue(apiCallReturnValue as any);
+
+    const objects = [obj1, obj2];
+    const options = { namespace };
+    await expectSuccess(client.bulkDelete, { objects, options });
+    expect(clientOpts.auditLogger.log).toHaveBeenCalledTimes(2);
+    expectAuditEvent('saved_object_delete', 'success', { type: obj1.type, id: obj1.id });
+    expectAuditEvent('saved_object_delete', 'success', { type: obj2.type, id: obj2.id });
+  });
+
+  test(`adds audit event when not successful`, async () => {
+    clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockRejectedValue(new Error());
+    await expect(() => client.bulkDelete([obj1, obj2], { namespace })).rejects.toThrow();
+    expect(clientOpts.auditLogger.log).toHaveBeenCalledTimes(2);
+    expectAuditEvent('saved_object_delete', 'failure', { type: obj1.type, id: obj1.id });
+    expectAuditEvent('saved_object_delete', 'failure', { type: obj2.type, id: obj2.id });
   });
 });
 
@@ -817,17 +815,6 @@ describe('#find', () => {
     const result = await client.find(options);
 
     expect(clientOpts.baseClient.find).not.toHaveBeenCalled();
-    expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledTimes(1);
-    expect(
-      clientOpts.legacyAuditLogger.savedObjectsAuthorizationFailure
-    ).toHaveBeenCalledWith(
-      USERNAME,
-      'find',
-      [type1],
-      options.namespaces,
-      [{ spaceId: 'some-ns', privilege: 'mock-saved_object:foo/find' }],
-      { options }
-    );
     expect(result).toEqual({ page: 1, per_page: 20, total: 0, saved_objects: [] });
   });
 
@@ -903,17 +890,6 @@ describe('#find', () => {
     const options = { type: [type1, type2], namespaces };
     await expect(client.find(options)).rejects.toThrowErrorMatchingInlineSnapshot(
       `"_find across namespaces is not permitted when the Spaces plugin is disabled."`
-    );
-  });
-
-  test(`throws BadRequestError when searching across namespaces when pit is provided`, async () => {
-    const options = {
-      type: [type1, type2],
-      pit: { id: 'abc123' },
-      namespaces: ['some-ns', 'another-ns'],
-    };
-    await expect(client.find(options)).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"_find across namespaces is not permitted when using the \`pit\` option."`
     );
   });
 
@@ -1011,7 +987,7 @@ describe('#openPointInTimeForType', () => {
     const apiCallReturnValue = Symbol();
     clientOpts.baseClient.openPointInTimeForType.mockReturnValue(apiCallReturnValue as any);
 
-    const options = { namespace };
+    const options = { namespaces: [namespace] };
     const result = await expectSuccess(client.openPointInTimeForType, { type, options });
     expect(result).toBe(apiCallReturnValue);
   });
@@ -1019,17 +995,112 @@ describe('#openPointInTimeForType', () => {
   test(`adds audit event when successful`, async () => {
     const apiCallReturnValue = Symbol();
     clientOpts.baseClient.openPointInTimeForType.mockReturnValue(apiCallReturnValue as any);
-    const options = { namespace };
+    const options = { namespaces: [namespace] };
     await expectSuccess(client.openPointInTimeForType, { type, options });
     expect(clientOpts.auditLogger.log).toHaveBeenCalledTimes(1);
     expectAuditEvent('saved_object_open_point_in_time', 'unknown');
   });
 
-  test(`adds audit event when not successful`, async () => {
-    clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockRejectedValue(new Error());
-    await expect(() => client.openPointInTimeForType(type, { namespace })).rejects.toThrow();
+  test(`throws an error when unauthorized`, async () => {
+    clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockImplementation(
+      getMockCheckPrivilegesFailure
+    );
+    const options = { namespaces: [namespace] };
+    await expect(() => client.openPointInTimeForType(type, options)).rejects.toThrowError(
+      'unauthorized'
+    );
+  });
+
+  test(`adds audit event when unauthorized`, async () => {
+    clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockImplementation(
+      getMockCheckPrivilegesFailure
+    );
+    const options = { namespaces: [namespace] };
+    await expect(() => client.openPointInTimeForType(type, options)).rejects.toThrow();
     expect(clientOpts.auditLogger.log).toHaveBeenCalledTimes(1);
     expectAuditEvent('saved_object_open_point_in_time', 'failure');
+  });
+
+  test(`filters types based on authorization`, async () => {
+    clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockResolvedValue({
+      hasAllRequested: false,
+      username: USERNAME,
+      privileges: {
+        kibana: [
+          {
+            resource: 'some-ns',
+            privilege: 'mock-saved_object:foo/open_point_in_time',
+            authorized: true,
+          },
+          {
+            resource: 'some-ns',
+            privilege: 'mock-saved_object:bar/open_point_in_time',
+            authorized: true,
+          },
+          {
+            resource: 'some-ns',
+            privilege: 'mock-saved_object:baz/open_point_in_time',
+            authorized: false,
+          },
+          {
+            resource: 'some-ns',
+            privilege: 'mock-saved_object:qux/open_point_in_time',
+            authorized: false,
+          },
+          {
+            resource: 'another-ns',
+            privilege: 'mock-saved_object:foo/open_point_in_time',
+            authorized: true,
+          },
+          {
+            resource: 'another-ns',
+            privilege: 'mock-saved_object:bar/open_point_in_time',
+            authorized: false,
+          },
+          {
+            resource: 'another-ns',
+            privilege: 'mock-saved_object:baz/open_point_in_time',
+            authorized: true,
+          },
+          {
+            resource: 'another-ns',
+            privilege: 'mock-saved_object:qux/open_point_in_time',
+            authorized: false,
+          },
+          {
+            resource: 'forbidden-ns',
+            privilege: 'mock-saved_object:foo/open_point_in_time',
+            authorized: false,
+          },
+          {
+            resource: 'forbidden-ns',
+            privilege: 'mock-saved_object:bar/open_point_in_time',
+            authorized: false,
+          },
+          {
+            resource: 'forbidden-ns',
+            privilege: 'mock-saved_object:baz/open_point_in_time',
+            authorized: false,
+          },
+          {
+            resource: 'forbidden-ns',
+            privilege: 'mock-saved_object:qux/open_point_in_time',
+            authorized: false,
+          },
+        ],
+      },
+    });
+
+    await client.openPointInTimeForType(['foo', 'bar', 'baz', 'qux'], {
+      namespaces: ['some-ns', 'another-ns', 'forbidden-ns'],
+    });
+
+    expect(clientOpts.baseClient.openPointInTimeForType).toHaveBeenCalledWith(
+      ['foo', 'bar', 'baz'],
+      {
+        namespaces: ['some-ns', 'another-ns', 'forbidden-ns'],
+      }
+    );
   });
 });
 
@@ -1163,92 +1234,6 @@ describe('#resolve', () => {
   });
 });
 
-describe('#deleteFromNamespaces', () => {
-  const type = 'foo';
-  const id = `${type}-id`;
-  const namespace1 = 'default';
-  const namespace2 = 'another-namespace';
-  const namespaces = [namespace1, namespace2];
-  const privilege = `mock-saved_object:${type}/share_to_space`;
-
-  test(`throws decorated GeneralError when hasPrivileges rejects promise`, async () => {
-    await expectGeneralError(client.deleteFromNamespaces, { type, id, namespaces });
-  });
-
-  test(`throws decorated ForbiddenError when unauthorized`, async () => {
-    clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockImplementation(
-      getMockCheckPrivilegesFailure
-    );
-
-    await expect(client.deleteFromNamespaces(type, id, namespaces)).rejects.toThrowError(
-      clientOpts.forbiddenError
-    );
-
-    expect(clientOpts.errors.decorateForbiddenError).toHaveBeenCalledTimes(1);
-    expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledTimes(1);
-    expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
-      USERNAME,
-      'deleteFromNamespaces', // action for privilege check is 'share_to_space', but auditAction is 'deleteFromNamespaces'
-      [type],
-      namespaces.sort(),
-      [{ privilege, spaceId: namespace1 }],
-      { type, id, namespaces, options: {} }
-    );
-    expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
-  });
-
-  test(`returns result of baseClient.deleteFromNamespaces when authorized`, async () => {
-    const apiCallReturnValue = Symbol();
-    clientOpts.baseClient.deleteFromNamespaces.mockReturnValue(apiCallReturnValue as any);
-
-    const result = await client.deleteFromNamespaces(type, id, namespaces);
-    expect(result).toBe(apiCallReturnValue);
-
-    expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationFailure).not.toHaveBeenCalled();
-    expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledTimes(1);
-    expect(clientOpts.legacyAuditLogger.savedObjectsAuthorizationSuccess).toHaveBeenCalledWith(
-      USERNAME,
-      'deleteFromNamespaces', // action for privilege check is 'share_to_space', but auditAction is 'deleteFromNamespaces'
-      [type],
-      namespaces.sort(),
-      { type, id, namespaces, options: {} }
-    );
-  });
-
-  test(`checks privileges for user, actions, and namespace`, async () => {
-    clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockImplementation(
-      getMockCheckPrivilegesFailure
-    );
-
-    await expect(client.deleteFromNamespaces(type, id, namespaces)).rejects.toThrow(); // test is simpler with error case
-
-    expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledTimes(1);
-    expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledWith(
-      [privilege],
-      namespaces
-    );
-  });
-
-  test(`filters namespaces that the user doesn't have access to`, async () => {
-    await expectObjectNamespaceFiltering(client.deleteFromNamespaces, { type, id, namespaces });
-  });
-
-  test(`adds audit event when successful`, async () => {
-    const apiCallReturnValue = Symbol();
-    clientOpts.baseClient.deleteFromNamespaces.mockReturnValue(apiCallReturnValue as any);
-    await client.deleteFromNamespaces(type, id, namespaces);
-    expect(clientOpts.auditLogger.log).toHaveBeenCalledTimes(1);
-    expectAuditEvent('saved_object_delete_from_spaces', 'unknown', { type, id });
-  });
-
-  test(`adds audit event when not successful`, async () => {
-    clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockRejectedValue(new Error());
-    await expect(() => client.deleteFromNamespaces(type, id, namespaces)).rejects.toThrow();
-    expect(clientOpts.auditLogger.log).toHaveBeenCalledTimes(1);
-    expectAuditEvent('saved_object_delete_from_spaces', 'failure', { type, id });
-  });
-});
-
 describe('#update', () => {
   const type = 'foo';
   const id = `${type}-id`;
@@ -1348,6 +1333,610 @@ describe('#removeReferencesTo', () => {
     await expect(() => client.removeReferencesTo(type, id)).rejects.toThrow();
     expect(clientOpts.auditLogger.log).toHaveBeenCalledTimes(1);
     expectAuditEvent('saved_object_remove_references', 'failure', { type, id });
+  });
+});
+
+/**
+ * Naming conventions used in this group of tests:
+ *   * 'reqObj' is an object that the consumer requests (SavedObjectsCollectMultiNamespaceReferencesObject)
+ *   * 'obj' is the object result that was fetched from Elasticsearch (SavedObjectReferenceWithContext)
+ */
+describe('#collectMultiNamespaceReferences', () => {
+  const AUDIT_ACTION = 'saved_object_collect_multinamespace_references';
+  const spaceX = 'space-x';
+  const spaceY = 'space-y';
+  const spaceZ = 'space-z';
+
+  /** Returns a valid inboundReferences field for mock baseClient results. */
+  function getInboundRefsFrom(
+    ...objects: Array<{ type: string; id: string }>
+  ): Pick<SavedObjectReferenceWithContext, 'inboundReferences'> {
+    return {
+      inboundReferences: objects.map(({ type, id }) => {
+        return { type, id, name: `ref-${type}:${id}` };
+      }),
+    };
+  }
+
+  beforeEach(() => {
+    // by default, the result is a success, each object exists in the current space and another space
+    clientOpts.baseClient.collectMultiNamespaceReferences.mockImplementation((objects) =>
+      Promise.resolve({
+        objects: objects.map<SavedObjectReferenceWithContext>(({ type, id }) => ({
+          type,
+          id,
+          spaces: [spaceX, spaceY, spaceZ],
+          inboundReferences: [],
+        })),
+      })
+    );
+  });
+
+  describe('errors', () => {
+    const reqObj1 = { type: 'a', id: '1' };
+    const reqObj2 = { type: 'b', id: '2' };
+    const reqObj3 = { type: 'c', id: '3' };
+
+    test(`throws an error if the base client operation fails`, async () => {
+      clientOpts.baseClient.collectMultiNamespaceReferences.mockRejectedValue(new Error('Oh no!'));
+      await expect(() =>
+        client.collectMultiNamespaceReferences([reqObj1], { namespace: spaceX })
+      ).rejects.toThrowError('Oh no!');
+      expect(clientOpts.baseClient.collectMultiNamespaceReferences).toHaveBeenCalledTimes(1);
+      expect(mockEnsureAuthorized).not.toHaveBeenCalled();
+      expect(clientOpts.auditLogger.log).not.toHaveBeenCalled();
+    });
+
+    describe(`throws decorated ForbiddenError and adds audit events when unauthorized`, () => {
+      test(`with purpose 'collectMultiNamespaceReferences'`, async () => {
+        // Use the default mocked results for the base client call.
+        // This fails because the user is not authorized to bulk_get type 'c' in the current space.
+        mockEnsureAuthorized.mockResolvedValue({
+          status: 'partially_authorized',
+          typeActionMap: new Map()
+            .set('a', { bulk_get: { isGloballyAuthorized: true, authorizedSpaces: [] } })
+            .set('b', { bulk_get: { authorizedSpaces: [spaceX, spaceY] } })
+            .set('c', { bulk_get: { authorizedSpaces: [spaceY] } }),
+        });
+        const options = { namespace: spaceX }; // spaceX is the current space
+        await expect(() =>
+          client.collectMultiNamespaceReferences([reqObj1, reqObj2, reqObj3], options)
+        ).rejects.toThrowError(clientOpts.forbiddenError);
+        expect(clientOpts.baseClient.collectMultiNamespaceReferences).toHaveBeenCalledTimes(1);
+        expect(mockEnsureAuthorized).toHaveBeenCalledTimes(1);
+        expect(clientOpts.auditLogger.log).toHaveBeenCalledTimes(3);
+        expectAuditEvent(AUDIT_ACTION, 'failure', reqObj1);
+        expectAuditEvent(AUDIT_ACTION, 'failure', reqObj2);
+        expectAuditEvent(AUDIT_ACTION, 'failure', reqObj3);
+      });
+
+      test(`with purpose 'updateObjectsSpaces'`, async () => {
+        // Use the default mocked results for the base client call.
+        // This fails because the user is not authorized to share_to_space type 'c' in the current space.
+        mockEnsureAuthorized.mockResolvedValue({
+          status: 'partially_authorized',
+          typeActionMap: new Map()
+            .set('a', {
+              bulk_get: { isGloballyAuthorized: true, authorizedSpaces: [] },
+              share_to_space: { isGloballyAuthorized: true, authorizedSpaces: [] },
+            })
+            .set('b', {
+              bulk_get: { authorizedSpaces: [spaceX, spaceY] },
+              share_to_space: { authorizedSpaces: [spaceX, spaceY] },
+            })
+            .set('c', {
+              bulk_get: { authorizedSpaces: [spaceX, spaceY] },
+              share_to_space: { authorizedSpaces: [spaceY] },
+            }),
+        });
+        const options = { namespace: spaceX, purpose: 'updateObjectsSpaces' as const }; // spaceX is the current space
+        await expect(() =>
+          client.collectMultiNamespaceReferences([reqObj1, reqObj2, reqObj3], options)
+        ).rejects.toThrowError(clientOpts.forbiddenError);
+        expect(clientOpts.baseClient.collectMultiNamespaceReferences).toHaveBeenCalledTimes(1);
+        expect(mockEnsureAuthorized).toHaveBeenCalledTimes(1);
+        expect(clientOpts.auditLogger.log).toHaveBeenCalledTimes(3);
+        expectAuditEvent(AUDIT_ACTION, 'failure', reqObj1);
+        expectAuditEvent(AUDIT_ACTION, 'failure', reqObj2);
+        expectAuditEvent(AUDIT_ACTION, 'failure', reqObj3);
+      });
+    });
+
+    test(`throws an error if the base client result includes a requested object without a valid inbound reference`, async () => {
+      // We *shouldn't* ever get an inbound reference that is not also present in the base client response objects array.
+      const spaces = [spaceX];
+
+      const obj1 = { ...reqObj1, spaces, inboundReferences: [] };
+      const obj2 = {
+        type: 'a',
+        id: '2',
+        spaces,
+        ...getInboundRefsFrom({ type: 'some-type', id: 'some-id' }),
+      };
+      clientOpts.baseClient.collectMultiNamespaceReferences.mockResolvedValueOnce({
+        objects: [obj1, obj2],
+      });
+      mockEnsureAuthorized.mockResolvedValue({
+        status: 'partially_authorized',
+        typeActionMap: new Map().set('a', {
+          bulk_get: { isGloballyAuthorized: true, authorizedSpaces: [] },
+        }),
+      });
+      // When the loop gets to obj2, it will determine that the user is authorized for the object but *not* for the graph. However, it will
+      // also determine that there is *no* valid inbound reference tying this object back to what was requested. In this case, throw an
+      // error.
+
+      const options = { namespace: spaceX }; // spaceX is the current space
+      await expect(() =>
+        client.collectMultiNamespaceReferences([reqObj1], options)
+      ).rejects.toThrowError('Unexpected inbound reference to "some-type:some-id"');
+    });
+  });
+
+  describe(`checks privileges`, () => {
+    // Other test cases below contain more complex assertions for privilege checks, but these focus on the current space (default vs non-default)
+    const reqObj1 = { type: 'a', id: '1' };
+    const obj1 = { ...reqObj1, spaces: ['*'], inboundReferences: [] };
+
+    beforeEach(() => {
+      clientOpts.baseClient.collectMultiNamespaceReferences.mockResolvedValueOnce({
+        objects: [obj1],
+      });
+      mockEnsureAuthorized.mockResolvedValue({
+        status: 'fully_authorized',
+        typeActionMap: new Map().set('a', {
+          bulk_get: { isGloballyAuthorized: true, authorizedSpaces: [] }, // success case for the simplest test
+        }),
+      });
+    });
+
+    test(`in the default space`, async () => {
+      await client.collectMultiNamespaceReferences([reqObj1]);
+      expect(mockEnsureAuthorized).toHaveBeenCalledTimes(1);
+      expect(mockEnsureAuthorized).toHaveBeenCalledWith(
+        expect.any(Object), // dependencies
+        ['a'], // unique types of the fetched objects
+        ['bulk_get'], // actions
+        ['default'], // unique spaces that the fetched objects exist in, along with the current space
+        { requireFullAuthorization: false }
+      );
+    });
+
+    test(`in a non-default space`, async () => {
+      await client.collectMultiNamespaceReferences([reqObj1], { namespace: spaceX });
+      expect(mockEnsureAuthorized).toHaveBeenCalledTimes(1);
+      expect(mockEnsureAuthorized).toHaveBeenCalledWith(
+        expect.any(Object), // dependencies
+        ['a'], // unique types of the fetched objects
+        ['bulk_get'], // actions
+        [spaceX], // unique spaces that the fetched objects exist in, along with the current space
+        { requireFullAuthorization: false }
+      );
+    });
+  });
+
+  describe(`checks privileges, filters/redacts objects correctly, and records audit events`, () => {
+    const reqObj1 = { type: 'a', id: '1' };
+    const reqObj2 = { type: 'b', id: '2' };
+    const spaces = [spaceX, spaceY, spaceZ];
+    const spacesWithMatchingAliases = [spaceX, spaceY, spaceZ];
+    const spacesWithMatchingOrigins = [spaceX, spaceY, spaceZ];
+
+    // Actual object graph:
+    //   ─► obj1 (a:1) ─┬─► obj3 (c:3) ───► obj5 (c:5) ─► obj8 (c:8) ─┐
+    //                  │                       ▲                     │
+    //                  │                       │                     │
+    //                  └─► obj4 (d:4) ─┬─► obj6 (c:6) ◄──────────────┘
+    //   ─► obj2 (b:2)                  └─► obj7 (c:7)
+    //
+    // Object graph that the consumer sees after authorization:
+    //   ─► obj1 (a:1) ─┬─► obj3 (c:3) ───► obj5 (c:5) ─► obj8 (c:8) ─► obj6 (c:6) ─┐
+    //                  │                       ▲                                   │
+    //                  │                       └───────────────────────────────────┘
+    //                  └─► obj4 (d:4)
+    //   ─► obj2 (b:2)
+    const obj1 = {
+      ...reqObj1,
+      spaces,
+      inboundReferences: [],
+      // We include spacesWithMatchingAliases and spacesWithMatchingOrigins on this object of type 'a' (which the user is authorized to access globally) to assert that they are not redacted
+      spacesWithMatchingAliases,
+      spacesWithMatchingOrigins,
+    };
+    const obj2 = { ...reqObj2, spaces: [], inboundReferences: [] }; // non-multi-namespace types and hidden types will be returned with an empty spaces array
+    const obj3 = {
+      type: 'c',
+      id: '3',
+      spaces,
+      ...getInboundRefsFrom(obj1),
+      // We include spacesWithMatchingAliases and spacesWithMatchingOrigins on this object of type 'c' (which the user is partially authorized for) to assert that they are redacted
+      spacesWithMatchingAliases,
+      spacesWithMatchingOrigins,
+    };
+    const obj4 = { type: 'd', id: '4', spaces, ...getInboundRefsFrom(obj1) };
+    const obj5 = {
+      type: 'c',
+      id: '5',
+      spaces: ['*'],
+      ...getInboundRefsFrom(obj3, { type: 'c', id: '6' }),
+    };
+    const obj6 = {
+      type: 'c',
+      id: '6',
+      spaces,
+      ...getInboundRefsFrom(obj4, { type: 'c', id: '8' }),
+    };
+    const obj7 = { type: 'c', id: '7', spaces, ...getInboundRefsFrom(obj4) };
+    const obj8 = { type: 'c', id: '8', spaces, ...getInboundRefsFrom(obj5) };
+
+    beforeEach(() => {
+      clientOpts.baseClient.collectMultiNamespaceReferences.mockResolvedValueOnce({
+        objects: [obj1, obj2, obj3, obj4, obj5, obj6, obj7, obj8],
+      });
+    });
+
+    test(`with purpose 'collectMultiNamespaceReferences'`, async () => {
+      mockEnsureAuthorized.mockResolvedValue({
+        status: 'partially_authorized',
+        typeActionMap: new Map()
+          .set('a', { bulk_get: { isGloballyAuthorized: true, authorizedSpaces: [] } })
+          .set('b', { bulk_get: { authorizedSpaces: [spaceX] } })
+          .set('c', { bulk_get: { authorizedSpaces: [spaceX] } }),
+        // the user is not authorized to read type 'd'
+      });
+
+      const options = { namespace: spaceX }; // spaceX is the current space
+      const result = await client.collectMultiNamespaceReferences([reqObj1, reqObj2], options);
+      expect(result).toEqual({
+        objects: [
+          obj1, // obj1's spaces, spacesWithMatchingAliases, and spacesWithMatchingOrigins arrays are not redacted because the user is globally authorized to access it
+          obj2, // obj2 has an empty spaces array (see above)
+          {
+            ...obj3,
+            spaces: [spaceX, '?', '?'],
+            spacesWithMatchingAliases: [spaceX, '?', '?'],
+            spacesWithMatchingOrigins: [spaceX, '?', '?'],
+          },
+          { ...obj4, spaces: [], isMissing: true }, // obj4 is marked as Missing because the user was not authorized to access it
+          obj5, // obj5's spaces array is not redacted, because it exists in All Spaces
+          // obj7 is not included at all because the user was not authorized to access its inbound reference (obj4)
+          { ...obj8, spaces: [spaceX, '?', '?'] },
+          { ...obj6, spaces: [spaceX, '?', '?'], ...getInboundRefsFrom(obj8) }, // obj6 is at the back of the list and its inboundReferences array is redacted because the user is not authorized to access one of its inbound references, obj4
+        ],
+      });
+      expect(clientOpts.baseClient.collectMultiNamespaceReferences).toHaveBeenCalledTimes(1);
+      expect(clientOpts.baseClient.collectMultiNamespaceReferences).toHaveBeenCalledWith(
+        [reqObj1, reqObj2],
+        options
+      );
+      expect(mockEnsureAuthorized).toHaveBeenCalledTimes(1);
+      expect(mockEnsureAuthorized).toHaveBeenCalledWith(
+        expect.any(Object), // dependencies
+        ['a', 'b', 'c', 'd'], // unique types of the fetched objects
+        ['bulk_get'], // actions
+        [spaceX, spaceY, spaceZ], // unique spaces that the fetched objects exist in, along with the current space
+        { requireFullAuthorization: false }
+      );
+      expect(clientOpts.auditLogger.log).toHaveBeenCalledTimes(5);
+      expectAuditEvent(AUDIT_ACTION, 'success', obj1);
+      expectAuditEvent(AUDIT_ACTION, 'success', obj3);
+      expectAuditEvent(AUDIT_ACTION, 'success', obj5);
+      expectAuditEvent(AUDIT_ACTION, 'success', obj8);
+      expectAuditEvent(AUDIT_ACTION, 'success', obj6);
+      // obj2, obj4, and obj7 are intentionally excluded from the audit record because we did not return any information about them to the user
+    });
+
+    test(`with purpose 'updateObjectsSpaces'`, async () => {
+      mockEnsureAuthorized.mockResolvedValue({
+        status: 'partially_authorized',
+        typeActionMap: new Map()
+          .set('a', {
+            share_to_space: { authorizedSpaces: [spaceX] },
+            bulk_get: { isGloballyAuthorized: true, authorizedSpaces: [] },
+            // Even though the user can only share type 'a' in spaceX, we won't redact spaceY or spaceZ because the user has global read privileges
+          })
+          .set('b', {
+            share_to_space: { authorizedSpaces: [spaceX] },
+            bulk_get: { authorizedSpaces: [spaceX, spaceY] },
+          })
+          .set('c', {
+            share_to_space: { authorizedSpaces: [spaceX] },
+            bulk_get: { authorizedSpaces: [spaceX, spaceY] },
+            // Even though the user can only share type 'c' in spaceX, we won't redact spaceY because the user has read privileges there
+          }),
+        // the user is not authorized to read or share type 'd'
+      });
+
+      const options = { namespace: spaceX, purpose: 'updateObjectsSpaces' as const }; // spaceX is the current space
+      const result = await client.collectMultiNamespaceReferences([reqObj1, reqObj2], options);
+      expect(result).toEqual({
+        objects: [
+          obj1, // obj1's spaces, spacesWithMatchingAliases, and spacesWithMatchingOrigins arrays are not redacted because the user is globally authorized to access it
+          obj2, // obj2 has an empty spaces array (see above)
+          {
+            ...obj3,
+            spaces: [spaceX, spaceY, '?'],
+            spacesWithMatchingAliases: [spaceX, spaceY, '?'],
+            spacesWithMatchingOrigins: [spaceX, spaceY, '?'],
+          },
+          { ...obj4, spaces: [], isMissing: true }, // obj4 is marked as Missing because the user was not authorized to access it
+          obj5, // obj5's spaces array is not redacted, because it exists in All Spaces
+          // obj7 is not included at all because the user was not authorized to access its inbound reference (obj4)
+          { ...obj8, spaces: [spaceX, spaceY, '?'] },
+          { ...obj6, spaces: [spaceX, spaceY, '?'], ...getInboundRefsFrom(obj8) }, // obj6 is at the back of the list and its inboundReferences array is redacted because the user is not authorized to access one of its inbound references, obj4
+        ],
+      });
+      expect(clientOpts.baseClient.collectMultiNamespaceReferences).toHaveBeenCalledTimes(1);
+      expect(clientOpts.baseClient.collectMultiNamespaceReferences).toHaveBeenCalledWith(
+        [reqObj1, reqObj2],
+        options
+      );
+      expect(mockEnsureAuthorized).toHaveBeenCalledTimes(1);
+      expect(mockEnsureAuthorized).toHaveBeenCalledWith(
+        expect.any(Object), // dependencies
+        ['a', 'b', 'c', 'd'], // unique types of the fetched objects
+        ['bulk_get', 'share_to_space'], // actions
+        [spaceX, spaceY, spaceZ], // unique spaces that the fetched objects exist in, along with the current space
+        { requireFullAuthorization: false }
+      );
+      expect(clientOpts.auditLogger.log).toHaveBeenCalledTimes(5);
+      expectAuditEvent(AUDIT_ACTION, 'success', obj1);
+      expectAuditEvent(AUDIT_ACTION, 'success', obj3);
+      expectAuditEvent(AUDIT_ACTION, 'success', obj5);
+      expectAuditEvent(AUDIT_ACTION, 'success', obj8);
+      expectAuditEvent(AUDIT_ACTION, 'success', obj6);
+      // obj2, obj4, and obj7 are intentionally excluded from the audit record because we did not return any information about them to the user
+    });
+  });
+});
+
+describe('#updateObjectsSpaces', () => {
+  const AUDIT_ACTION = 'saved_object_update_objects_spaces';
+  const spaceA = 'space-a';
+  const spaceB = 'space-b';
+  const spaceC = 'space-c';
+  const spaceD = 'space-d';
+  const obj1 = { type: 'x', id: '1' };
+  const obj2 = { type: 'y', id: '2' };
+  const obj3 = { type: 'z', id: '3' };
+  const obj4 = { type: 'z', id: '4' };
+  const obj5 = { type: 'z', id: '5' };
+
+  describe('errors', () => {
+    test(`throws an error if the base client bulkGet operation fails`, async () => {
+      clientOpts.baseClient.bulkGet.mockRejectedValue(new Error('Oh no!'));
+      await expect(() =>
+        client.updateObjectsSpaces([obj1], [spaceA], [spaceB], { namespace: spaceC })
+      ).rejects.toThrowError('Oh no!');
+      expect(clientOpts.baseClient.bulkGet).toHaveBeenCalledTimes(1);
+      expect(mockEnsureAuthorized).not.toHaveBeenCalled();
+      expect(clientOpts.auditLogger.log).not.toHaveBeenCalled();
+    });
+
+    test(`throws decorated ForbiddenError and adds audit events when unauthorized`, async () => {
+      clientOpts.baseClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          { ...obj1, namespaces: [spaceB, spaceC, spaceD] },
+          { ...obj2, namespaces: [spaceB, spaceC, spaceD] },
+          { ...obj3, namespaces: [spaceB, spaceC, spaceD] },
+        ] as SavedObject[],
+      });
+      // This fails because the user is not authorized to share_to_space type 'z' in the current space.
+      mockEnsureAuthorized.mockResolvedValue({
+        status: 'partially_authorized',
+        typeActionMap: new Map()
+          .set('x', {
+            bulk_get: { isGloballyAuthorized: true, authorizedSpaces: [] },
+            share_to_space: { isGloballyAuthorized: true, authorizedSpaces: [] },
+          })
+          .set('y', {
+            bulk_get: { authorizedSpaces: [spaceA, spaceB, spaceC, spaceD] },
+            share_to_space: { authorizedSpaces: [spaceA, spaceB, spaceC, spaceD] },
+          })
+          .set('z', {
+            bulk_get: { authorizedSpaces: [spaceA, spaceB, spaceC] },
+            share_to_space: { authorizedSpaces: [spaceA, spaceB] },
+          }),
+      });
+
+      const objects = [obj1, obj2, obj3];
+      const spacesToAdd = [spaceA];
+      const spacesToRemove = [spaceB];
+      const options = { namespace: spaceC }; // spaceC is the current space
+      await expect(() =>
+        client.updateObjectsSpaces(objects, spacesToAdd, spacesToRemove, options)
+      ).rejects.toThrowError(clientOpts.forbiddenError);
+      expect(clientOpts.baseClient.bulkGet).toHaveBeenCalledTimes(1);
+      expect(mockEnsureAuthorized).toHaveBeenCalledTimes(1);
+      expect(clientOpts.auditLogger.log).toHaveBeenCalledTimes(3);
+      expectAuditEvent(AUDIT_ACTION, 'failure', obj1);
+      expectAuditEvent(AUDIT_ACTION, 'failure', obj2);
+      expectAuditEvent(AUDIT_ACTION, 'failure', obj3);
+      expect(clientOpts.baseClient.updateObjectsSpaces).not.toHaveBeenCalled();
+    });
+
+    test(`throws an error if the base client updateObjectsSpaces operation fails`, async () => {
+      clientOpts.baseClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          { ...obj1, namespaces: [spaceB, spaceC, spaceD] },
+          { ...obj2, namespaces: [spaceB, spaceC, spaceD] },
+          { ...obj3, namespaces: [spaceB, spaceC, spaceD] },
+        ] as SavedObject[],
+      });
+      mockEnsureAuthorized.mockResolvedValue({
+        status: 'partially_authorized',
+        typeActionMap: new Map()
+          .set('x', {
+            bulk_get: { isGloballyAuthorized: true, authorizedSpaces: [] },
+            share_to_space: { isGloballyAuthorized: true, authorizedSpaces: [] },
+          })
+          .set('y', {
+            bulk_get: { authorizedSpaces: [spaceA, spaceB, spaceC, spaceD] },
+            share_to_space: { authorizedSpaces: [spaceA, spaceB, spaceC] },
+          })
+          .set('z', {
+            bulk_get: { authorizedSpaces: [spaceA, spaceB, spaceC] },
+            share_to_space: { authorizedSpaces: [spaceA, spaceB, spaceC] },
+          }),
+      });
+      clientOpts.baseClient.updateObjectsSpaces.mockRejectedValue(new Error('Oh no!'));
+
+      const objects = [obj1, obj2, obj3];
+      const spacesToAdd = [spaceA];
+      const spacesToRemove = [spaceB];
+      const options = { namespace: spaceC }; // spaceC is the current space
+      await expect(() =>
+        client.updateObjectsSpaces(objects, spacesToAdd, spacesToRemove, options)
+      ).rejects.toThrowError('Oh no!');
+      expect(clientOpts.baseClient.bulkGet).toHaveBeenCalledTimes(1);
+      expect(mockEnsureAuthorized).toHaveBeenCalledTimes(1);
+      expect(clientOpts.auditLogger.log).toHaveBeenCalledTimes(3);
+      expectAuditEvent(AUDIT_ACTION, 'unknown', obj1);
+      expectAuditEvent(AUDIT_ACTION, 'unknown', obj2);
+      expectAuditEvent(AUDIT_ACTION, 'unknown', obj3);
+      expect(clientOpts.baseClient.updateObjectsSpaces).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  test(`checks privileges, filters/redacts objects correctly, and records audit events`, async () => {
+    const bulkGetResults = [
+      { ...obj1, namespaces: [spaceB, spaceC, spaceD], version: 'v1' },
+      { ...obj2, namespaces: [spaceB, spaceC, spaceD], version: 'v2' },
+      { ...obj3, namespaces: [spaceB, spaceC, spaceD], version: 'v3' },
+      { ...obj4, namespaces: ['*'], version: 'v4' }, // obj4 exists in all spaces
+      { ...obj5, namespaces: [spaceB, spaceC, spaceD], version: 'v5' },
+    ] as SavedObject[];
+    clientOpts.baseClient.bulkGet.mockResolvedValue({ saved_objects: bulkGetResults });
+    mockEnsureAuthorized.mockResolvedValue({
+      status: 'partially_authorized',
+      typeActionMap: new Map()
+        .set('x', {
+          bulk_get: { isGloballyAuthorized: true, authorizedSpaces: [] },
+          share_to_space: { isGloballyAuthorized: true, authorizedSpaces: [] },
+        })
+        .set('y', {
+          bulk_get: { authorizedSpaces: [spaceA, spaceB, spaceC, spaceD] },
+          share_to_space: { authorizedSpaces: [spaceA, spaceB, spaceC] },
+        })
+        .set('z', {
+          bulk_get: { authorizedSpaces: [spaceA, spaceB, spaceC] }, // the user is not authorized to bulkGet type 'z' in spaceD, so it will be redacted from the results
+          share_to_space: { authorizedSpaces: [spaceA, spaceB, spaceC] },
+        }),
+    });
+    clientOpts.baseClient.updateObjectsSpaces.mockResolvedValue({
+      objects: [
+        // Each object was added to spaceA and removed from spaceB
+        { ...obj1, spaces: [spaceA, spaceC, spaceD] },
+        { ...obj2, spaces: [spaceA, spaceC, spaceD] },
+        { ...obj3, spaces: [spaceA, spaceC, spaceD] },
+        { ...obj4, spaces: ['*', spaceA] }, // even though this object exists in all spaces, we won't pass '*' to ensureAuthorized
+        { ...obj5, spaces: [], error: new Error('Oh no!') }, // we encountered an error when attempting to update obj5
+      ] as SavedObjectsUpdateObjectsSpacesResponseObject[],
+    });
+
+    const objects = [obj1, obj2, obj3, obj4, obj5];
+    const spacesToAdd = [spaceA];
+    const spacesToRemove = [spaceB];
+    const options = { namespace: spaceC }; // spaceC is the current space
+    const result = await client.updateObjectsSpaces(objects, spacesToAdd, spacesToRemove, options);
+    expect(result).toEqual({
+      objects: [
+        { ...obj1, spaces: [spaceA, spaceC, spaceD] }, // obj1's spaces array is not redacted because the user is globally authorized to access it
+        { ...obj2, spaces: [spaceA, spaceC, spaceD] }, // obj2's spaces array is not redacted because the user is authorized to access it in each space
+        { ...obj3, spaces: [spaceA, spaceC, '?'] }, // obj3's spaces array is redacted because the user is not authorized to access it in spaceD
+        { ...obj4, spaces: ['*', spaceA] },
+        { ...obj5, spaces: [], error: new Error('Oh no!') },
+      ],
+    });
+
+    expect(clientOpts.baseClient.bulkGet).toHaveBeenCalledTimes(1);
+    expect(mockEnsureAuthorized).toHaveBeenCalledTimes(1);
+    expect(mockEnsureAuthorized).toHaveBeenCalledWith(
+      expect.any(Object), // dependencies
+      ['x', 'y', 'z'], // unique types of the fetched objects
+      ['bulk_get', 'share_to_space'], // actions
+      [spaceC, spaceA, spaceB, spaceD], // unique spaces of: the current space, spacesToAdd, spacesToRemove, and spaces that the fetched objects exist in (excludes '*')
+      { requireFullAuthorization: false }
+    );
+    expect(clientOpts.auditLogger.log).toHaveBeenCalledTimes(5);
+    expectAuditEvent(AUDIT_ACTION, 'unknown', obj1);
+    expectAuditEvent(AUDIT_ACTION, 'unknown', obj2);
+    expectAuditEvent(AUDIT_ACTION, 'unknown', obj3);
+    expectAuditEvent(AUDIT_ACTION, 'unknown', obj4);
+    expectAuditEvent(AUDIT_ACTION, 'unknown', obj5);
+    expect(clientOpts.baseClient.updateObjectsSpaces).toHaveBeenCalledTimes(1);
+    expect(clientOpts.baseClient.updateObjectsSpaces).toHaveBeenCalledWith(
+      bulkGetResults.map(({ namespaces: spaces, ...otherAttrs }) => ({ spaces, ...otherAttrs })),
+      spacesToAdd,
+      spacesToRemove,
+      options
+    );
+  });
+
+  test(`checks privileges for the global resource when spacesToAdd includes '*'`, async () => {
+    const bulkGetResults = [{ ...obj1, namespaces: [spaceA], version: 'v1' }] as SavedObject[];
+    clientOpts.baseClient.bulkGet.mockResolvedValue({ saved_objects: bulkGetResults });
+    mockEnsureAuthorized.mockResolvedValue({
+      status: 'fully_authorized',
+      typeActionMap: new Map().set('x', {
+        bulk_get: { isGloballyAuthorized: true, authorizedSpaces: [] },
+        share_to_space: { isGloballyAuthorized: true, authorizedSpaces: [] },
+      }),
+    });
+    clientOpts.baseClient.updateObjectsSpaces.mockResolvedValue({
+      objects: [
+        // The object was removed from spaceA and added to '*'
+        { ...obj1, spaces: ['*'] },
+      ] as SavedObjectsUpdateObjectsSpacesResponseObject[],
+    });
+
+    const objects = [obj1];
+    const spacesToAdd = ['*'];
+    const spacesToRemove = [spaceA];
+    const options = { namespace: spaceC }; // spaceC is the current space
+    await client.updateObjectsSpaces(objects, spacesToAdd, spacesToRemove, options);
+
+    expect(mockEnsureAuthorized).toHaveBeenCalledTimes(1);
+    expect(mockEnsureAuthorized).toHaveBeenCalledWith(
+      expect.any(Object), // dependencies
+      ['x'], // unique types of the fetched objects
+      ['bulk_get', 'share_to_space'], // actions
+      [spaceC, '*', spaceA], // unique spaces of: the current space, spacesToAdd, spacesToRemove, and spaces that the fetched objects exist in (excludes '*')
+      { requireFullAuthorization: false }
+    );
+  });
+
+  test(`checks privileges for the global resource when spacesToRemove includes '*'`, async () => {
+    const bulkGetResults = [{ ...obj1, namespaces: ['*'], version: 'v1' }] as SavedObject[];
+    clientOpts.baseClient.bulkGet.mockResolvedValue({ saved_objects: bulkGetResults });
+    mockEnsureAuthorized.mockResolvedValue({
+      status: 'fully_authorized',
+      typeActionMap: new Map().set('x', {
+        bulk_get: { isGloballyAuthorized: true, authorizedSpaces: [] },
+        share_to_space: { isGloballyAuthorized: true, authorizedSpaces: [] },
+      }),
+    });
+    clientOpts.baseClient.updateObjectsSpaces.mockResolvedValue({
+      objects: [
+        // The object was removed from spaceA and added to '*'
+        { ...obj1, spaces: ['*'] },
+      ] as SavedObjectsUpdateObjectsSpacesResponseObject[],
+    });
+
+    const objects = [obj1];
+    const spacesToAdd = [spaceA];
+    const spacesToRemove = ['*'];
+    const options = { namespace: spaceC }; // spaceC is the current space
+    await client.updateObjectsSpaces(objects, spacesToAdd, spacesToRemove, options);
+
+    expect(mockEnsureAuthorized).toHaveBeenCalledTimes(1);
+    expect(mockEnsureAuthorized).toHaveBeenCalledWith(
+      expect.any(Object), // dependencies
+      ['x'], // unique types of the fetched objects
+      ['bulk_get', 'share_to_space'], // actions
+      [spaceC, spaceA, '*'], // unique spaces of: the current space, spacesToAdd, spacesToRemove, and spaces that the fetched objects exist in (excludes '*')
+      { requireFullAuthorization: false }
+    );
   });
 });
 

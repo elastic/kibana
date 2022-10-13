@@ -9,7 +9,7 @@ import { createBytesFormatter } from './bytes';
 import { formatNumber } from './number';
 import { formatPercent } from './percent';
 import { InventoryFormatterType } from '../inventory_models/types';
-import { formatHighPercision } from './high_precision';
+import { formatHighPrecision } from './high_precision';
 import { InfraWaffleMapDataFormat } from './types';
 
 export const FORMATTERS = {
@@ -22,16 +22,16 @@ export const FORMATTERS = {
   // bytes in bits formatted string out
   bits: createBytesFormatter(InfraWaffleMapDataFormat.bitsDecimal),
   percent: formatPercent,
-  highPercision: formatHighPercision,
+  highPrecision: formatHighPrecision,
 };
 
-export const createFormatter = (format: InventoryFormatterType, template: string = '{{value}}') => (
-  val: string | number
-) => {
-  if (val == null) {
-    return '';
-  }
-  const fmtFn = FORMATTERS[format];
-  const value = fmtFn(Number(val));
-  return template.replace(/{{value}}/g, value);
-};
+export const createFormatter =
+  (format: InventoryFormatterType, template: string = '{{value}}') =>
+  (val: string | number) => {
+    if (val == null) {
+      return '';
+    }
+    const fmtFn = FORMATTERS[format];
+    const value = fmtFn(Number(val));
+    return template.replace(/{{value}}/g, value);
+  };

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { httpServiceMock } from 'src/core/server/mocks';
+import { httpServiceMock } from '@kbn/core/server/mocks';
 import { mockHandlerArguments, fakeEvent } from './_mock_handler_arguments';
 import { eventLogClientMock } from '../event_log_client.mock';
-import { loggingSystemMock } from 'src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { findByIdsRoute } from './find_by_ids';
 
 const eventLogClient = eventLogClientMock.create();
@@ -26,7 +26,7 @@ describe('find_by_ids', () => {
 
     const [config, handler] = router.post.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/event_log/{type}/_find"`);
+    expect(config.path).toMatchInlineSnapshot(`"/internal/event_log/{type}/_find"`);
 
     const events = [fakeEvent(), fakeEvent()];
     const result = {
@@ -41,7 +41,7 @@ describe('find_by_ids', () => {
       eventLogClient,
       {
         params: { type: 'action' },
-        body: { ids: ['1'] },
+        body: { ids: ['1'], legacyIds: ['2'] },
       },
       ['ok']
     );
@@ -50,9 +50,10 @@ describe('find_by_ids', () => {
 
     expect(eventLogClient.findEventsBySavedObjectIds).toHaveBeenCalledTimes(1);
 
-    const [type, ids] = eventLogClient.findEventsBySavedObjectIds.mock.calls[0];
+    const [type, ids, , legacyIds] = eventLogClient.findEventsBySavedObjectIds.mock.calls[0];
     expect(type).toEqual(`action`);
     expect(ids).toEqual(['1']);
+    expect(legacyIds).toEqual(['2']);
 
     expect(res.ok).toHaveBeenCalledWith({
       body: result,

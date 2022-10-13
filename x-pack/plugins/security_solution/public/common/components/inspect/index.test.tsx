@@ -15,18 +15,25 @@ import {
   kibanaObservable,
   createSecuritySolutionStorageMock,
 } from '../../mock';
-import { createStore, State } from '../../store';
-import { UpdateQueryParams, upsertQuery } from '../../store/inputs/helpers';
+import type { State } from '../../store';
+import { createStore } from '../../store';
+import type { UpdateQueryParams } from '../../store/inputs/helpers';
+import { upsertQuery } from '../../store/inputs/helpers';
 
-import { InspectButton, InspectButtonContainer, BUTTON_CLASS } from '.';
+import { InspectButton } from '.';
 import { cloneDeep } from 'lodash/fp';
+import { InputsModelId } from '../../store/inputs/constants';
+
+jest.mock('./modal', () => ({
+  ModalInspectQuery: jest.fn(() => <div data-test-subj="mocker-modal" />),
+}));
 
 describe('Inspect Button', () => {
   const refetch = jest.fn();
   const state: State = mockGlobalState;
   const { storage } = createSecuritySolutionStorageMock();
   const newQuery: UpdateQueryParams = {
-    inputId: 'global',
+    inputId: InputsModelId.global,
     id: 'myQuery',
     inspect: null,
     loading: false,
@@ -45,7 +52,7 @@ describe('Inspect Button', () => {
     test('Eui Empty Button', () => {
       const wrapper = mount(
         <TestProviders store={store}>
-          <InspectButton queryId={newQuery.id} inputId="timeline" title="My title" />
+          <InspectButton queryId={newQuery.id} inputId={InputsModelId.timeline} title="My title" />
         </TestProviders>
       );
       expect(wrapper.find('button[data-test-subj="inspect-empty-button"]').first().exists()).toBe(
@@ -56,7 +63,28 @@ describe('Inspect Button', () => {
     test('it does NOT render the Eui Empty Button when timeline is timeline and compact is true', () => {
       const wrapper = mount(
         <TestProviders store={store}>
-          <InspectButton compact={true} queryId={newQuery.id} inputId="timeline" title="My title" />
+          <InspectButton
+            compact={true}
+            queryId={newQuery.id}
+            inputId={InputsModelId.timeline}
+            title="My title"
+          />
+        </TestProviders>
+      );
+      expect(wrapper.find('button[data-test-subj="inspect-empty-button"]').first().exists()).toBe(
+        false
+      );
+    });
+
+    test('it does NOT render the Empty Button when showInspectButton is false', () => {
+      const wrapper = mount(
+        <TestProviders store={store}>
+          <InspectButton
+            queryId={newQuery.id}
+            inputId={InputsModelId.timeline}
+            showInspectButton={false}
+            title="My title"
+          />
         </TestProviders>
       );
       expect(wrapper.find('button[data-test-subj="inspect-empty-button"]').first().exists()).toBe(
@@ -78,11 +106,27 @@ describe('Inspect Button', () => {
     test('renders the Icon Button when inputId does NOT equal global, but compact is true', () => {
       const wrapper = mount(
         <TestProviders store={store}>
-          <InspectButton compact={true} inputId="timeline" queryId={newQuery.id} title="My title" />
+          <InspectButton
+            compact={true}
+            inputId={InputsModelId.timeline}
+            queryId={newQuery.id}
+            title="My title"
+          />
         </TestProviders>
       );
       expect(wrapper.find('button[data-test-subj="inspect-icon-button"]').first().exists()).toBe(
         true
+      );
+    });
+
+    test('it does NOT render the Icon Button when showInspectButton is false', () => {
+      const wrapper = mount(
+        <TestProviders store={store}>
+          <InspectButton queryId={newQuery.id} showInspectButton={false} title="My title" />
+        </TestProviders>
+      );
+      expect(wrapper.find('button[data-test-subj="inspect-icon-button"]').first().exists()).toBe(
+        false
       );
     });
 
@@ -104,34 +148,52 @@ describe('Inspect Button', () => {
       expect(wrapper.find('.euiButtonIcon').get(0).props.disabled).toBe(true);
     });
 
-    describe('InspectButtonContainer', () => {
-      test('it renders a transparent inspect button by default', async () => {
-        const wrapper = mount(
-          <TestProviders store={store}>
-            <InspectButtonContainer>
-              <InspectButton queryId={newQuery.id} title="My title" />
-            </InspectButtonContainer>
-          </TestProviders>
-        );
+    test('Button disabled when inspect == null', () => {
+      const myState = cloneDeep(state);
+      const myQuery = cloneDeep(newQuery);
+      myQuery.inspect = null;
+      myState.inputs = upsertQuery(myQuery);
+      store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+      const wrapper = mount(
+        <TestProviders store={store}>
+          <InspectButton queryId={newQuery.id} title="My title" />
+        </TestProviders>
+      );
+      expect(wrapper.find('.euiButtonIcon').get(0).props.disabled).toBe(true);
+    });
 
-        expect(wrapper.find(`InspectButtonContainer`)).toHaveStyleRule('opacity', '0', {
-          modifier: `.${BUTTON_CLASS}`,
-        });
-      });
+    test('Button disabled when inspect.dsl.length == 0', () => {
+      const myState = cloneDeep(state);
+      const myQuery = cloneDeep(newQuery);
+      myQuery.inspect = {
+        dsl: [],
+        response: ['my response'],
+      };
+      myState.inputs = upsertQuery(myQuery);
+      store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+      const wrapper = mount(
+        <TestProviders store={store}>
+          <InspectButton queryId={newQuery.id} title="My title" />
+        </TestProviders>
+      );
+      expect(wrapper.find('.euiButtonIcon').get(0).props.disabled).toBe(true);
+    });
 
-      test('it renders an opaque inspect button when it has mouse focus', async () => {
-        const wrapper = mount(
-          <TestProviders store={store}>
-            <InspectButtonContainer>
-              <InspectButton queryId={newQuery.id} title="My title" />
-            </InspectButtonContainer>
-          </TestProviders>
-        );
-
-        expect(wrapper.find(`InspectButtonContainer`)).toHaveStyleRule('opacity', '1', {
-          modifier: `:hover .${BUTTON_CLASS}`,
-        });
-      });
+    test('Button disabled when inspect.response.length == 0', () => {
+      const myState = cloneDeep(state);
+      const myQuery = cloneDeep(newQuery);
+      myQuery.inspect = {
+        dsl: ['my dsl'],
+        response: [],
+      };
+      myState.inputs = upsertQuery(myQuery);
+      store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+      const wrapper = mount(
+        <TestProviders store={store}>
+          <InspectButton queryId={newQuery.id} title="My title" />
+        </TestProviders>
+      );
+      expect(wrapper.find('.euiButtonIcon').get(0).props.disabled).toBe(true);
     });
   });
 
@@ -157,29 +219,7 @@ describe('Inspect Button', () => {
       wrapper.update();
 
       expect(store.getState().inputs.global.queries[0].isInspected).toBe(true);
-      expect(wrapper.find('button[data-test-subj="modal-inspect-close"]').first().exists()).toBe(
-        true
-      );
-    });
-
-    test('Close Inspect Modal', () => {
-      const wrapper = mount(
-        <TestProviders store={store}>
-          <InspectButton queryId={newQuery.id} title="My title" />
-        </TestProviders>
-      );
-      wrapper.find('button[data-test-subj="inspect-icon-button"]').first().simulate('click');
-
-      wrapper.update();
-
-      wrapper.find('button[data-test-subj="modal-inspect-close"]').first().simulate('click');
-
-      wrapper.update();
-
-      expect(store.getState().inputs.global.queries[0].isInspected).toBe(false);
-      expect(wrapper.find('button[data-test-subj="modal-inspect-close"]').first().exists()).toBe(
-        false
-      );
+      expect(wrapper.find('[data-test-subj="mocker-modal"]').first().exists()).toBe(true);
     });
 
     test('Do not Open Inspect Modal if it is loading', () => {
@@ -188,6 +228,7 @@ describe('Inspect Button', () => {
           <InspectButton queryId={newQuery.id} title="My title" />
         </TestProviders>
       );
+      expect(store.getState().inputs.global.queries[0].isInspected).toBe(false);
       store.getState().inputs.global.queries[0].loading = true;
       wrapper.find('button[data-test-subj="inspect-icon-button"]').first().simulate('click');
 
@@ -197,6 +238,84 @@ describe('Inspect Button', () => {
       expect(wrapper.find('button[data-test-subj="modal-inspect-close"]').first().exists()).toBe(
         false
       );
+    });
+  });
+
+  describe('Modal Inspect - show or hide', () => {
+    test('shows when request/response are complete and isInspected=true', () => {
+      const myState = cloneDeep(state);
+      const myQuery = cloneDeep(newQuery);
+      myQuery.inspect = {
+        dsl: ['a length'],
+        response: ['my response'],
+      };
+      myState.inputs = upsertQuery(myQuery);
+      myState.inputs.global.queries[0].isInspected = true;
+      store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+      const wrapper = mount(
+        <TestProviders store={store}>
+          <InspectButton queryId={newQuery.id} title="My title" />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="mocker-modal"]').first().exists()).toEqual(true);
+    });
+
+    test('hides when request/response are complete and isInspected=false', () => {
+      const myState = cloneDeep(state);
+      const myQuery = cloneDeep(newQuery);
+      myQuery.inspect = {
+        dsl: ['a length'],
+        response: ['my response'],
+      };
+      myState.inputs = upsertQuery(myQuery);
+      myState.inputs.global.queries[0].isInspected = false;
+      store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+      const wrapper = mount(
+        <TestProviders store={store}>
+          <InspectButton queryId={newQuery.id} title="My title" />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="mocker-modal"]').first().exists()).toEqual(false);
+    });
+
+    test('hides when request is empty and isInspected=true', () => {
+      const myState = cloneDeep(state);
+      const myQuery = cloneDeep(newQuery);
+      myQuery.inspect = {
+        dsl: [],
+        response: ['my response'],
+      };
+      myState.inputs = upsertQuery(myQuery);
+      myState.inputs.global.queries[0].isInspected = true;
+      store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+      const wrapper = mount(
+        <TestProviders store={store}>
+          <InspectButton queryId={newQuery.id} title="My title" />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="mocker-modal"]').first().exists()).toEqual(false);
+    });
+
+    test('hides when response is empty and isInspected=true', () => {
+      const myState = cloneDeep(state);
+      const myQuery = cloneDeep(newQuery);
+      myQuery.inspect = {
+        dsl: ['my dsl'],
+        response: [],
+      };
+      myState.inputs = upsertQuery(myQuery);
+      myState.inputs.global.queries[0].isInspected = true;
+      store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+      const wrapper = mount(
+        <TestProviders store={store}>
+          <InspectButton queryId={newQuery.id} title="My title" />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="mocker-modal"]').first().exists()).toEqual(false);
     });
   });
 });

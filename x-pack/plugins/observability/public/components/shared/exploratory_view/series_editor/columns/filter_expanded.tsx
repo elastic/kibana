@@ -5,121 +5,52 @@
  * 2.0.
  */
 
-import React, { useState, Fragment } from 'react';
-import { EuiFieldSearch, EuiSpacer, EuiButtonEmpty, EuiFilterGroup } from '@elastic/eui';
-import styled from 'styled-components';
-import { rgba } from 'polished';
-import { i18n } from '@kbn/i18n';
-import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
-import { useUrlStorage } from '../../hooks/use_url_storage';
-import { UrlFilter } from '../../types';
-import { FilterValueButton } from './filter_value_btn';
-import { useValuesList } from '../../../../../hooks/use_values_list';
-import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
+import React, { useState } from 'react';
 
-interface Props {
-  seriesId: string;
+import { EuiFilterButton, EuiPopover } from '@elastic/eui';
+import { SeriesConfig, SeriesUrl } from '../../types';
+import { useFilterValues } from '../use_filter_values';
+import { FilterValuesList } from '../components/filter_values_list';
+
+export interface FilterProps {
+  seriesId: number;
+  series: SeriesUrl;
   label: string;
   field: string;
   isNegated?: boolean;
-  goBack: () => void;
   nestedField?: string;
+  baseFilters: SeriesConfig['baseFilters'];
 }
 
-export function FilterExpanded({ seriesId, field, label, goBack, nestedField, isNegated }: Props) {
-  const { indexPattern } = useAppIndexPatternContext();
+export interface NestedFilterOpen {
+  value: string;
+  negate: boolean;
+}
 
-  const [value, setValue] = useState('');
+export function FilterExpanded(props: FilterProps) {
+  const [isOpen, setIsOpen] = useState(false);
 
-  const [isOpen, setIsOpen] = useState({ value: '', negate: false });
+  const [query, setQuery] = useState('');
 
-  const { series } = useUrlStorage(seriesId);
-
-  const { values, loading } = useValuesList({
-    query: value,
-    indexPattern,
-    sourceField: field,
-    time: series.time,
-    keepHistory: true,
-  });
-
-  const filters = series?.filters ?? [];
-
-  const currFilter: UrlFilter | undefined = filters.find(({ field: fd }) => field === fd);
-
-  const displayValues = values.filter((opt) => opt.toLowerCase().includes(value.toLowerCase()));
+  const { values, loading } = useFilterValues(props, query);
 
   return (
-    <Wrapper>
-      <EuiButtonEmpty iconType="arrowLeft" color="text" onClick={() => goBack()}>
-        {label}
-      </EuiButtonEmpty>
-      <EuiFieldSearch
-        fullWidth
-        isLoading={loading}
-        value={value}
-        onChange={(evt) => {
-          setValue(evt.target.value);
-        }}
-        placeholder={i18n.translate('xpack.observability.filters.expanded.search', {
-          defaultMessage: 'Search for {label}',
-          values: { label },
-        })}
+    <EuiPopover
+      button={
+        <EuiFilterButton onClick={() => setIsOpen((prevState) => !prevState)} iconType="arrowDown">
+          {props.label}
+        </EuiFilterButton>
+      }
+      isOpen={isOpen}
+      closePopover={() => setIsOpen(false)}
+    >
+      <FilterValuesList
+        {...props}
+        setQuery={setQuery}
+        query={query}
+        values={values}
+        loading={loading}
       />
-      <EuiSpacer size="s" />
-      <ListWrapper>
-        {displayValues.map((opt) => (
-          <Fragment key={opt}>
-            <EuiFilterGroup fullWidth={true} color="primary">
-              {isNegated !== false && (
-                <FilterValueButton
-                  field={field}
-                  value={opt}
-                  allSelectedValues={currFilter?.notValues}
-                  negate={true}
-                  nestedField={nestedField}
-                  seriesId={seriesId}
-                  isNestedOpen={isOpen}
-                  setIsNestedOpen={setIsOpen}
-                />
-              )}
-              <FilterValueButton
-                field={field}
-                value={opt}
-                allSelectedValues={currFilter?.values}
-                nestedField={nestedField}
-                seriesId={seriesId}
-                negate={false}
-                isNestedOpen={isOpen}
-                setIsNestedOpen={setIsOpen}
-              />
-            </EuiFilterGroup>
-            <EuiSpacer size="s" />
-          </Fragment>
-        ))}
-      </ListWrapper>
-    </Wrapper>
+    </EuiPopover>
   );
 }
-
-const ListWrapper = euiStyled.div`
-  height: 400px;
-  overflow-y: auto;
-  &::-webkit-scrollbar {
-    height: ${({ theme }) => theme.eui.euiScrollBar};
-    width: ${({ theme }) => theme.eui.euiScrollBar};
-  }
-  &::-webkit-scrollbar-thumb {
-    background-clip: content-box;
-    background-color: ${({ theme }) => rgba(theme.eui.euiColorDarkShade, 0.5)};
-    border: ${({ theme }) => theme.eui.euiScrollBarCorner} solid transparent;
-  }
-  &::-webkit-scrollbar-corner,
-  &::-webkit-scrollbar-track {
-    background-color: transparent;
-  }
-`;
-
-const Wrapper = styled.div`
-  width: 400px;
-`;

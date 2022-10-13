@@ -1,0 +1,7 @@
+{
+  "extends": "../../tsconfig.bazel.json",
+  "compilerOptions": {},
+  "include": [
+    "**/*",
+  ],
+}

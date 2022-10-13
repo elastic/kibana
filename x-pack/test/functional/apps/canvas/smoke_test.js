@@ -6,23 +6,36 @@
  */
 
 import expect from '@kbn/expect';
-import { parse } from 'url';
 
 export default function canvasSmokeTest({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common']);
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
+  const config = getService('config');
+  const archive = {
+    local: 'x-pack/test/functional/fixtures/kbn_archiver/canvas/default',
+    ccs: 'x-pack/test/functional/fixtures/kbn_archiver/canvas/ccs/default',
+  };
 
   describe('smoke test', function () {
     this.tags('includeFirefox');
-    const workpadListSelector = 'canvasWorkpadLoaderTable > canvasWorkpadLoaderWorkpad';
+    const workpadListSelector = 'canvasWorkpadTable > canvasWorkpadTableWorkpad';
     const testWorkpadId = 'workpad-1705f884-6224-47de-ba49-ca224fe6ec31';
 
     before(async () => {
-      await esArchiver.load('canvas/default');
+      if (config.get('esTestCluster.ccs')) {
+        await kibanaServer.importExport.load(archive.ccs);
+      } else {
+        await kibanaServer.importExport.load(archive.local);
+      }
+
       await PageObjects.common.navigateToApp('canvas');
+    });
+
+    after(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     it('loads workpad list', async () => {
@@ -44,9 +57,9 @@ export default function canvasSmokeTest({ getService, getPageObjects }) {
       await retry.try(async () => {
         const url = await browser.getCurrentUrl();
 
-        // remove all the search params, just compare the route
-        const hashRoute = parse(url).hash.split('?')[0];
-        expect(hashRoute).to.equal(`#/workpad/${testWorkpadId}/page/1`);
+        const path = new URL(url).pathname;
+
+        expect(path).to.equal(`/app/canvas/workpad/${testWorkpadId}/page/1`);
       });
     });
 

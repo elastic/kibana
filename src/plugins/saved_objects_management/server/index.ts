@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from 'src/core/server';
+import { PluginInitializerContext } from '@kbn/core/server';
 import { SavedObjectsManagementPlugin } from './plugin';
 
 export const plugin = (context: PluginInitializerContext) =>
   new SavedObjectsManagementPlugin(context);
 
-export {
+export type {
   SavedObjectsManagementPluginSetup,
   SavedObjectsManagementPluginStart,
   SavedObjectMetadata,

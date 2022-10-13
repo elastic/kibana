@@ -7,45 +7,50 @@
 
 import ReactDOM, { unmountComponentAtNode } from 'react-dom';
 import React from 'react';
-import { CoreSetup, CoreStart } from 'kibana/public';
-import { ManagementAppMountParams } from '../../../../../../../src/plugins/management/public/';
-import { MlStartDependencies } from '../../../plugin';
+import type { CoreSetup, CoreStart } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { MlStartDependencies } from '../../../plugin';
 import { JobsListPage } from './components';
 import { getJobsListBreadcrumbs } from '../breadcrumbs';
-import { setDependencyCache, clearCache } from '../../util/dependency_cache';
-import './_index.scss';
-import { SharePluginStart } from '../../../../../../../src/plugins/share/public';
-import { SpacesPluginStart } from '../../../../../spaces/public';
 
 const renderApp = (
   element: HTMLElement,
   history: ManagementAppMountParams['history'],
   coreStart: CoreStart,
   share: SharePluginStart,
-  spacesApi?: SpacesPluginStart
+  data: DataPublicPluginStart,
+  fieldFormats: FieldFormatsStart,
+  spacesApi?: SpacesPluginStart,
+  usageCollection?: UsageCollectionSetup
 ) => {
   ReactDOM.render(
-    React.createElement(JobsListPage, { coreStart, history, share, spacesApi }),
+    React.createElement(JobsListPage, {
+      coreStart,
+      history,
+      share,
+      data,
+      spacesApi,
+      usageCollection,
+      fieldFormats,
+    }),
     element
   );
   return () => {
     unmountComponentAtNode(element);
-    clearCache();
   };
 };
 
 export async function mountApp(
   core: CoreSetup<MlStartDependencies>,
-  params: ManagementAppMountParams
+  params: ManagementAppMountParams,
+  deps: { usageCollection?: UsageCollectionSetup }
 ) {
   const [coreStart, pluginsStart] = await core.getStartServices();
-
-  setDependencyCache({
-    docLinks: coreStart.docLinks!,
-    basePath: coreStart.http.basePath,
-    http: coreStart.http,
-    i18n: coreStart.i18n,
-  });
 
   params.setBreadcrumbs(getJobsListBreadcrumbs());
   return renderApp(
@@ -53,6 +58,9 @@ export async function mountApp(
     params.history,
     coreStart,
     pluginsStart.share,
-    pluginsStart.spaces
+    pluginsStart.data,
+    pluginsStart.fieldFormats,
+    pluginsStart.spaces,
+    deps.usageCollection
   );
 }

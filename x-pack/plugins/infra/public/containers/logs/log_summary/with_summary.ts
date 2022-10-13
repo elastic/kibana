@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { useContext } from 'react';
 import useThrottle from 'react-use/lib/useThrottle';
+import { useLogViewContext } from '../../../hooks/use_log_view';
 import { RendererFunction } from '../../../utils/typed_react';
-import { LogFilterState } from '../log_filter';
-import { LogPositionState } from '../log_position';
-import { useLogSourceContext } from '../log_source';
+import { useLogFilterStateContext } from '../log_filter';
+import { useLogPositionStateContext } from '../log_position';
 import { LogSummaryBuckets, useLogSummary } from './log_summary';
 
 const FETCH_THROTTLE_INTERVAL = 3000;
@@ -24,16 +23,16 @@ export const WithSummary = ({
     end: number | null;
   }>;
 }) => {
-  const { sourceId } = useLogSourceContext();
-  const { filterQuery } = useContext(LogFilterState.Context);
-  const { startTimestamp, endTimestamp } = useContext(LogPositionState.Context);
+  const { logViewId } = useLogViewContext();
+  const { filterQuery } = useLogFilterStateContext();
+  const { startTimestamp, endTimestamp } = useLogPositionStateContext();
 
   // Keep it reasonably updated for the `now` case, but don't reload all the time when the user scrolls
   const throttledStartTimestamp = useThrottle(startTimestamp, FETCH_THROTTLE_INTERVAL);
   const throttledEndTimestamp = useThrottle(endTimestamp, FETCH_THROTTLE_INTERVAL);
 
   const { buckets, start, end } = useLogSummary(
-    sourceId,
+    logViewId,
     throttledStartTimestamp,
     throttledEndTimestamp,
     filterQuery?.serializedQuery ?? null

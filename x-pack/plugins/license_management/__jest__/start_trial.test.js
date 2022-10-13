@@ -8,12 +8,6 @@
 import { StartTrial } from '../public/application/sections/license_dashboard/start_trial';
 import { createMockLicense, getComponent } from './util';
 
-jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
-  return {
-    htmlIdGenerator: () => () => `generated-id`,
-  };
-});
-
 describe('StartTrial component when trial is allowed', () => {
   test('display for basic license', () => {
     const rendered = getComponent(
@@ -23,7 +17,7 @@ describe('StartTrial component when trial is allowed', () => {
       },
       StartTrial
     );
-    expect(rendered.html()).toMatchSnapshot();
+    expect(rendered.render()).toMatchSnapshot();
   });
   test('should display for gold license', () => {
     const rendered = getComponent(
@@ -33,7 +27,7 @@ describe('StartTrial component when trial is allowed', () => {
       },
       StartTrial
     );
-    expect(rendered.html()).toMatchSnapshot();
+    expect(rendered.render()).toMatchSnapshot();
   });
 
   test('should not display for trial license', () => {
@@ -64,7 +58,7 @@ describe('StartTrial component when trial is allowed', () => {
       },
       StartTrial
     );
-    expect(rendered.html()).toMatchSnapshot();
+    expect(rendered.render()).toMatchSnapshot();
   });
   test('should not display for active enterprise license', () => {
     const rendered = getComponent(
@@ -84,7 +78,7 @@ describe('StartTrial component when trial is allowed', () => {
       },
       StartTrial
     );
-    expect(rendered.html()).toMatchSnapshot();
+    expect(rendered.render()).toMatchSnapshot();
   });
 });
 

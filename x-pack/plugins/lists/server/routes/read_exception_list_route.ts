@@ -5,17 +5,23 @@
  * 2.0.
  */
 
-import type { ListsPluginRouter } from '../types';
-import { EXCEPTION_LIST_URL } from '../../common/constants';
-import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
-import { validate } from '../../common/shared_imports';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
+import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   ReadExceptionListSchemaDecoded,
   exceptionListSchema,
   readExceptionListSchema,
-} from '../../common/schemas';
+} from '@kbn/securitysolution-io-ts-list-types';
+import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 
-import { getErrorMessageExceptionList, getExceptionListClient } from './utils';
+import type { ListsPluginRouter } from '../types';
+
+import {
+  buildRouteValidation,
+  buildSiemResponse,
+  getErrorMessageExceptionList,
+  getExceptionListClient,
+} from './utils';
 
 export const readExceptionListRoute = (router: ListsPluginRouter): void => {
   router.get(
@@ -34,7 +40,7 @@ export const readExceptionListRoute = (router: ListsPluginRouter): void => {
       const siemResponse = buildSiemResponse(response);
       try {
         const { id, list_id: listId, namespace_type: namespaceType } = request.query;
-        const exceptionLists = getExceptionListClient(context);
+        const exceptionLists = await getExceptionListClient(context);
         if (id != null || listId != null) {
           const exceptionList = await exceptionLists.getExceptionList({
             id,

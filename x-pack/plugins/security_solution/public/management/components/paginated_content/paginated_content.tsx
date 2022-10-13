@@ -5,39 +5,36 @@
  * 2.0.
  */
 
-import React, {
+import type {
   ComponentProps,
   ComponentType,
   FunctionComponent,
   Key,
-  memo,
   ReactElement,
   ReactNode,
-  useCallback,
-  useMemo,
-  useState,
 } from 'react';
+import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
+import type { CommonProps, EuiTablePaginationProps, Pagination } from '@elastic/eui';
 import {
-  CommonProps,
   EuiEmptyPrompt,
   EuiIcon,
   EuiProgress,
   EuiSpacer,
   EuiTablePagination,
-  EuiTablePaginationProps,
   EuiText,
-  Pagination,
 } from '@elastic/eui';
 import styled from 'styled-components';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { v4 as generateUUI } from 'uuid';
-import { useTestIdGenerator } from '../hooks/use_test_id_generator';
+import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
+import type { MaybeImmutable } from '../../../../common/endpoint/types';
+import { MANAGEMENT_DEFAULT_PAGE, MANAGEMENT_DEFAULT_PAGE_SIZE } from '../../common/constants';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ComponentWithAnyProps = ComponentType<any>;
 
 export interface PaginatedContentProps<T, C extends ComponentWithAnyProps> extends CommonProps {
-  items: T[];
+  items: MaybeImmutable<T[]>;
   onChange: (changes: { pageIndex: number; pageSize: number }) => void;
   /**
    * The React Component that will be used to render the `items`. use `itemComponentProps` below to
@@ -79,6 +76,7 @@ interface TypedGenericComponentMemo {
 
 const RootContainer = styled.div`
   position: relative;
+  padding-top: ${({ theme }) => theme.eui.euiSizeXS};
 
   .body {
     min-height: ${({ theme }) => theme.eui.gutterTypes.gutterExtraLarge};
@@ -89,30 +87,35 @@ const RootContainer = styled.div`
   }
 `;
 
-const DefaultNoItemsFound = memo(() => {
-  return (
-    <EuiEmptyPrompt
-      title={
-        <FormattedMessage
-          id="xpack.securitySolution.endpoint.paginatedContent.noItemsFoundTitle"
-          defaultMessage="No items found"
-        />
-      }
-    />
-  );
-});
+const DefaultNoItemsFound = memo<{ 'data-test-subj'?: string }>(
+  ({ 'data-test-subj': dataTestSubj }) => {
+    return (
+      <EuiEmptyPrompt
+        data-test-subj={dataTestSubj}
+        title={
+          <FormattedMessage
+            id="xpack.securitySolution.endpoint.paginatedContent.noItemsFoundTitle"
+            defaultMessage="No items found"
+          />
+        }
+      />
+    );
+  }
+);
 
 DefaultNoItemsFound.displayName = 'DefaultNoItemsFound';
 
-const ErrorMessage = memo<{ message: string }>(({ message }) => {
-  return (
-    <EuiText textAlign="center">
-      <EuiSpacer size="m" />
-      <EuiIcon type="minusInCircle" color="danger" /> {message}
-      <EuiSpacer size="m" />
-    </EuiText>
-  );
-});
+const ErrorMessage = memo<{ message: string; 'data-test-subj'?: string }>(
+  ({ message, 'data-test-subj': dataTestSubj }) => {
+    return (
+      <EuiText textAlign="center" data-test-subj={dataTestSubj}>
+        <EuiSpacer size="m" />
+        <EuiIcon type="minusInCircle" color="danger" /> {message}
+        <EuiSpacer size="m" />
+      </EuiText>
+    );
+  }
+);
 
 ErrorMessage.displayName = 'ErrorMessage';
 
@@ -148,23 +151,51 @@ export const PaginatedContent = memo(
       [pagination?.pageSize, pagination?.totalItemCount]
     );
 
+    // If loading is done,
+    // then check to ensure the pagination numbers are correct based by ensuring that the
+    // `pageIndex` is not higher than the number of available pages.
+    useEffect(() => {
+      if (!loading && pageCount > 0 && pageCount < (pagination?.pageIndex || 0) + 1) {
+        onChange({ pageIndex: pageCount - 1, pageSize: pagination?.pageSize || 0 });
+      }
+    }, [pageCount, onChange, pagination, loading]);
+
     const handleItemsPerPageChange: EuiTablePaginationProps['onChangeItemsPerPage'] = useCallback(
       (pageSize) => {
-        onChange({ pageSize, pageIndex: pagination?.pageIndex || 0 });
+        if (pagination?.pageIndex) {
+          const pageIndex = Math.floor(
+            ((pagination?.pageIndex ?? MANAGEMENT_DEFAULT_PAGE) *
+              (pagination?.pageSize ?? MANAGEMENT_DEFAULT_PAGE_SIZE)) /
+              pageSize
+          );
+          onChange({
+            pageSize,
+            pageIndex: isNaN(pageIndex) ? MANAGEMENT_DEFAULT_PAGE : pageIndex,
+          });
+        } else {
+          onChange({ pageSize, pageIndex: MANAGEMENT_DEFAULT_PAGE });
+        }
       },
-      [onChange, pagination?.pageIndex]
+      [onChange, pagination]
     );
 
     const handlePageChange: EuiTablePaginationProps['onChangePage'] = useCallback(
       (pageIndex) => {
-        onChange({ pageIndex, pageSize: pagination?.pageSize || 10 });
+        onChange({ pageIndex, pageSize: pagination?.pageSize || MANAGEMENT_DEFAULT_PAGE_SIZE });
       },
       [onChange, pagination?.pageSize]
     );
 
     const generatedBodyItemContent = useMemo(() => {
       if (error) {
-        return 'string' === typeof error ? <ErrorMessage message={error} /> : error;
+        if (error instanceof Error) {
+          return <ErrorMessage message={error.message} data-test-subj={getTestId('error')} />;
+        }
+        return 'string' === typeof error ? (
+          <ErrorMessage message={error} data-test-subj={getTestId('error')} />
+        ) : (
+          error
+        );
       }
 
       // This casting here is needed in order to avoid the following a TS error (TS2322)
@@ -174,13 +205,18 @@ export const PaginatedContent = memo(
       const Item = ItemComponent as ComponentType<ReturnType<typeof itemComponentProps>>;
 
       if (items.length) {
-        return items.map((item) => {
+        // Cast here is to get around the fact that TS does not seem to be able to narrow the types down when the only
+        // difference is that the array might be Readonly. The error output is:
+        // `...has signatures, but none of those signatures are compatible with each other.`
+        // Can read more about it here: https://github.com/microsoft/TypeScript/issues/33591
+        return (items as T[]).map((item) => {
           let key: Key;
 
           if (itemId) {
-            key = (item[itemId] as unknown) as Key;
+            key = item[itemId] as unknown as Key;
           } else {
             if (itemKeys.has(item)) {
+              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
               key = itemKeys.get(item)!;
             } else {
               key = generateUUI();
@@ -191,22 +227,38 @@ export const PaginatedContent = memo(
           return <Item {...itemComponentProps(item)} key={key} />;
         });
       }
-
-      return noItemsMessage || <DefaultNoItemsFound />;
-    }, [ItemComponent, error, itemComponentProps, itemId, itemKeys, items, noItemsMessage]);
+      if (!loading)
+        return noItemsMessage || <DefaultNoItemsFound data-test-subj={getTestId('noResults')} />;
+    }, [
+      ItemComponent,
+      error,
+      getTestId,
+      itemComponentProps,
+      itemId,
+      itemKeys,
+      items,
+      noItemsMessage,
+      loading,
+    ]);
 
     return (
       <RootContainer data-test-subj={dataTestSubj} aria-label={ariaLabel} className={className}>
-        {loading && <EuiProgress size="xs" color="primary" />}
+        {loading && (
+          <EuiProgress
+            size="xs"
+            color="primary"
+            position="absolute"
+            data-test-subj={getTestId('loader')}
+          />
+        )}
 
         <div className="body" data-test-subj={getTestId('body')}>
-          <EuiSpacer size="l" />
           <div className={`body-content ${contentClassName}`}>
             {children ? children : generatedBodyItemContent}
           </div>
         </div>
 
-        {pagination && (
+        {pagination && (children || items.length > 0) && (
           <div data-test-subj={getTestId('footer')}>
             <EuiSpacer size="l" />
 
@@ -215,7 +267,7 @@ export const PaginatedContent = memo(
               itemsPerPage={pagination.pageSize}
               itemsPerPageOptions={pagination.pageSizeOptions}
               pageCount={pageCount}
-              hidePerPageOptions={pagination.hidePerPageOptions}
+              showPerPageOptions={pagination.showPerPageOptions}
               onChangeItemsPerPage={handleItemsPerPageChange}
               onChangePage={handlePageChange}
             />

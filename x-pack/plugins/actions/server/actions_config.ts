@@ -14,8 +14,13 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { ActionsConfig, AllowedHosts, EnabledActionTypes, CustomHostSettings } from './config';
 import { getCanonicalCustomHostUrl } from './lib/custom_host_settings';
 import { ActionTypeDisabledError } from './lib';
-import { ProxySettings, ResponseSettings } from './types';
-
+import { ProxySettings, ResponseSettings, SSLSettings } from './types';
+import { getSSLSettingsFromConfig } from './lib/get_node_ssl_options';
+import {
+  ValidateEmailAddressesOptions,
+  validateEmailAddresses,
+  invalidEmailsAsMessage,
+} from '../common';
 export { AllowedHosts, EnabledActionTypes } from './config';
 
 enum AllowListingField {
@@ -30,10 +35,15 @@ export interface ActionsConfigurationUtilities {
   ensureHostnameAllowed: (hostname: string) => void;
   ensureUriAllowed: (uri: string) => void;
   ensureActionTypeEnabled: (actionType: string) => void;
-  isRejectUnauthorizedCertificatesEnabled: () => boolean;
+  getSSLSettings: () => SSLSettings;
   getProxySettings: () => undefined | ProxySettings;
   getResponseSettings: () => ResponseSettings;
   getCustomHostSettings: (targetUrl: string) => CustomHostSettings | undefined;
+  getMicrosoftGraphApiUrl: () => undefined | string;
+  validateEmailAddresses(
+    addresses: string[],
+    options?: ValidateEmailAddressesOptions
+  ): string | undefined;
 }
 
 function allowListErrorMessage(field: AllowListingField, value: string) {
@@ -66,7 +76,7 @@ function isAllowed({ allowedHosts }: ActionsConfig, hostname: string | null): bo
 
 function isHostnameAllowedInUri(config: ActionsConfig, uri: string): boolean {
   return pipe(
-    tryCatch(() => url.parse(uri)),
+    tryCatch(() => url.parse(uri, false /* parseQueryString */, true /* slashesDenoteHost */)),
     map((parsedUrl) => parsedUrl.hostname),
     mapNullable((hostname) => isAllowed(config, hostname)),
     getOrElse<boolean>(() => false)
@@ -93,8 +103,15 @@ function getProxySettingsFromConfig(config: ActionsConfig): undefined | ProxySet
     proxyBypassHosts: arrayAsSet(config.proxyBypassHosts),
     proxyOnlyHosts: arrayAsSet(config.proxyOnlyHosts),
     proxyHeaders: config.proxyHeaders,
-    proxyRejectUnauthorizedCertificates: config.proxyRejectUnauthorizedCertificates,
+    proxySSLSettings: getSSLSettingsFromConfig(
+      config.ssl?.proxyVerificationMode,
+      config.proxyRejectUnauthorizedCertificates
+    ),
   };
+}
+
+function getMicrosoftGraphApiUrlFromConfig(config: ActionsConfig): undefined | string {
+  return config.microsoftGraphApiUrl;
 }
 
 function arrayAsSet<T>(arr: T[] | undefined): Set<T> | undefined {
@@ -130,20 +147,34 @@ function getCustomHostSettings(
   return customHostSettings.find((settings) => settings.url === canonicalUrl);
 }
 
+function validateEmails(
+  config: ActionsConfig,
+  addresses: string[],
+  options: ValidateEmailAddressesOptions
+): string | undefined {
+  if (config.email == null) {
+    return;
+  }
+
+  const validated = validateEmailAddresses(config.email.domain_allowlist, addresses, options);
+  return invalidEmailsAsMessage(validated);
+}
+
 export function getActionsConfigurationUtilities(
   config: ActionsConfig
 ): ActionsConfigurationUtilities {
   const isHostnameAllowed = curry(isAllowed)(config);
   const isUriAllowed = curry(isHostnameAllowedInUri)(config);
   const isActionTypeEnabled = curry(isActionTypeEnabledInConfig)(config);
+  const validatedEmailCurried = curry(validateEmails)(config);
   return {
     isHostnameAllowed,
     isUriAllowed,
     isActionTypeEnabled,
     getProxySettings: () => getProxySettingsFromConfig(config),
     getResponseSettings: () => getResponseSettingsFromConfig(config),
-    // returns the global rejectUnauthorized setting
-    isRejectUnauthorizedCertificatesEnabled: () => config.rejectUnauthorized,
+    getSSLSettings: () =>
+      getSSLSettingsFromConfig(config.ssl?.verificationMode, config.rejectUnauthorized),
     ensureUriAllowed(uri: string) {
       if (!isUriAllowed(uri)) {
         throw new Error(allowListErrorMessage(AllowListingField.URL, uri));
@@ -160,5 +191,8 @@ export function getActionsConfigurationUtilities(
       }
     },
     getCustomHostSettings: (targetUrl: string) => getCustomHostSettings(config, targetUrl),
+    getMicrosoftGraphApiUrl: () => getMicrosoftGraphApiUrlFromConfig(config),
+    validateEmailAddresses: (addresses: string[], options: ValidateEmailAddressesOptions) =>
+      validatedEmailCurried(addresses, options),
   };
 }

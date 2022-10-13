@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockValues, setMockActions } from '../../../../__mocks__/kea.mock';
+import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -25,8 +25,8 @@ describe('RelevanceTuningForm', () => {
     filteredSchemaFields: ['foo', 'bar'],
     filteredSchemaFieldsWithConflicts: [],
     schema: {
-      foo: 'text',
-      bar: 'number',
+      foo: { type: 'text' },
+      bar: { type: 'number' },
     },
     searchSettings: {
       boosts: {

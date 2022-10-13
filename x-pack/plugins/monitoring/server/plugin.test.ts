@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import { coreMock } from 'src/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
 import { MonitoringPlugin } from './plugin';
 import { AlertsFactory } from './alerts';
 
 jest.mock('./es_client/instantiate_client', () => ({
   instantiateClient: jest.fn().mockImplementation(() => ({
+    cluster: {},
+  })),
+  instantiateLegacyClient: jest.fn().mockImplementation(() => ({
     cluster: {},
   })),
 }));

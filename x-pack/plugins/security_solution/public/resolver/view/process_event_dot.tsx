@@ -9,15 +9,17 @@ import React, { useCallback, useMemo, useContext } from 'react';
 import styled from 'styled-components';
 import { htmlIdGenerator, EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useSelector } from 'react-redux';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { NodeSubMenu } from './styles';
 import { applyMatrix3 } from '../models/vector2';
-import { Vector2, Matrix3, ResolverState } from '../types';
-import { ResolverNode } from '../../../common/endpoint/types';
+import type { Vector2, Matrix3, ResolverState } from '../types';
+import type { ResolverNode } from '../../../common/endpoint/types';
 import { useResolverDispatch } from './use_resolver_dispatch';
 import { SideEffectContext } from './side_effect_context';
 import * as nodeModel from '../../../common/endpoint/models/node';
+import * as eventModel from '../../../common/endpoint/models/event';
+import * as nodeDataModel from '../models/node_data';
 import * as selectors from '../store/selectors';
 import { fontSize } from './font_size';
 import { useCubeAssets } from './use_cube_assets';
@@ -174,9 +176,10 @@ const UnstyledProcessEventDot = React.memo(
 
     // define a standard way of giving HTML IDs to nodes based on their entity_id/nodeID.
     // this is used to link nodes via aria attributes
-    const nodeHTMLID = useCallback((id: string) => htmlIdGenerator(htmlIDPrefix)(`${id}:node`), [
-      htmlIDPrefix,
-    ]);
+    const nodeHTMLID = useCallback(
+      (id: string) => htmlIdGenerator(htmlIDPrefix)(`${id}:node`),
+      [htmlIDPrefix]
+    );
 
     const ariaLevel: number | null = useSelector((state: ResolverState) =>
       selectors.ariaLevel(state)(nodeID)
@@ -326,13 +329,19 @@ const UnstyledProcessEventDot = React.memo(
     const grandTotal: number | null = useSelector((state: ResolverState) =>
       selectors.statsTotalForNode(state)(node)
     );
-
     const nodeName = nodeModel.nodeName(node);
+    const processEvent = useSelector((state: ResolverState) =>
+      nodeDataModel.firstEvent(selectors.nodeDataForID(state)(String(node.id)))
+    );
+    const processName = useMemo(() => {
+      if (processEvent !== undefined) {
+        return eventModel.processNameSafeVersion(processEvent);
+      } else {
+        return nodeName;
+      }
+    }, [processEvent, nodeName]);
 
     /* eslint-disable jsx-a11y/click-events-have-key-events */
-    /**
-     * Key event handling (e.g. 'Enter'/'Space') is provisioned by the `EuiKeyboardAccessible` component
-     */
     return (
       <div
         data-test-subj="resolver:node"
@@ -467,7 +476,7 @@ const UnstyledProcessEventDot = React.memo(
                 maxWidth: `${isShowingEventActions ? 400 : 210 * xScale}px`,
               }}
               tabIndex={-1}
-              title={nodeModel.nodeName(node)}
+              title={processName}
               data-test-subj="resolver:node:primary-button"
               data-test-resolver-node-id={nodeID}
             >
@@ -479,7 +488,7 @@ const UnstyledProcessEventDot = React.memo(
                     defaultMessage: `{nodeState, select, error {Reload {nodeName}} other {{nodeName}}}`,
                     values: {
                       nodeState,
-                      nodeName,
+                      nodeName: processName,
                     },
                   })}
                 </span>

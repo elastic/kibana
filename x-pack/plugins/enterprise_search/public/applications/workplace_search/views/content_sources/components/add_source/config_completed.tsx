@@ -9,6 +9,7 @@ import React from 'react';
 
 import {
   EuiButton,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -19,17 +20,14 @@ import {
   EuiTextAlign,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
+import { docLinks } from '../../../../../shared/doc_links';
 import { EuiLinkTo, EuiButtonTo } from '../../../../../shared/react_router_helpers';
-import {
-  getSourcesPath,
-  ADD_SOURCE_PATH,
-  SECURITY_PATH,
-  PRIVATE_SOURCES_DOCS_URL,
-} from '../../../../routes';
+import { getSourcesPath, ADD_SOURCE_PATH, SECURITY_PATH } from '../../../../routes';
 
 import {
+  CONFIG_COMPLETED_PRIVATE_SOURCES_DISABLED_LINK,
   CONFIG_COMPLETED_PRIVATE_SOURCES_DOCS_LINK,
   CONFIG_COMPLETED_CONFIGURE_NEW_BUTTON,
 } from './constants';
@@ -40,6 +38,7 @@ interface ConfigCompletedProps {
   accountContextOnly?: boolean;
   privateSourcesEnabled: boolean;
   advanceStep(): void;
+  showFeedbackLink?: boolean;
 }
 
 export const ConfigCompleted: React.FC<ConfigCompletedProps> = ({
@@ -48,6 +47,7 @@ export const ConfigCompleted: React.FC<ConfigCompletedProps> = ({
   accountContextOnly,
   header,
   privateSourcesEnabled,
+  showFeedbackLink,
 }) => (
   <>
     {header}
@@ -62,7 +62,7 @@ export const ConfigCompleted: React.FC<ConfigCompletedProps> = ({
         <EuiFlexItem>
           <EuiFlexGroup direction="column" alignItems="center" responsive={false}>
             <EuiFlexItem>
-              <EuiIcon type="checkInCircleFilled" color="#42CC89" size="xxl" />
+              <EuiIcon type="checkInCircleFilled" color="success" size="xxl" />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText>
@@ -114,7 +114,7 @@ export const ConfigCompleted: React.FC<ConfigCompletedProps> = ({
                             values={{
                               securityLink: (
                                 <EuiLinkTo to={SECURITY_PATH}>
-                                  enable private source connection
+                                  {CONFIG_COMPLETED_PRIVATE_SOURCES_DISABLED_LINK}
                                 </EuiLinkTo>
                               ),
                             }}
@@ -125,7 +125,7 @@ export const ConfigCompleted: React.FC<ConfigCompletedProps> = ({
                         <EuiLink
                           target="_blank"
                           data-test-subj="ConfigCompletedPrivateSourcesDocsLink"
-                          href={PRIVATE_SOURCES_DOCS_URL}
+                          href={docLinks.workplaceSearchPrivateSourcePermissions}
                         >
                           {CONFIG_COMPLETED_PRIVATE_SOURCES_DOCS_LINK}
                         </EuiLink>
@@ -169,5 +169,31 @@ export const ConfigCompleted: React.FC<ConfigCompletedProps> = ({
         )}
       </EuiFlexGroup>
     </EuiPanel>
+    {showFeedbackLink && (
+      <>
+        <EuiSpacer />
+        <EuiFlexGroup justifyContent="center">
+          <EuiFlexItem grow={false}>
+            <EuiCallOut
+              size="s"
+              color="primary"
+              iconType="email"
+              title={
+                <EuiLink href="https://www.elastic.co/kibana/feedback" external>
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.workplaceSearch.contentSource.addSource.configCompleted.feedbackCallOutText',
+                    {
+                      defaultMessage:
+                        'Have feedback about deploying a {name} Connector Package? Let us know.',
+                      values: { name },
+                    }
+                  )}
+                </EuiLink>
+              }
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </>
+    )}
   </>
 );

@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import { ALERT_SEVERITY, ALERT_REASON } from '@kbn/rule-data-utils';
 import React from 'react';
 
 import { DefaultDraggable } from '../../../../common/components/draggables';
 import { TruncatableText } from '../../../../common/components/truncatable_text';
 import { Severity } from '../../../components/severity';
-import { getMappedNonEcsValue } from '../../../../timelines/components/timeline/body/data_driven_columns';
-import { CellValueElementProps } from '../../../../timelines/components/timeline/cell_rendering';
+import { useGetMappedNonEcsValue } from '../../../../timelines/components/timeline/body/data_driven_columns';
+import type { CellValueElementProps } from '../../../../timelines/components/timeline/cell_rendering';
 import { DefaultCellRenderer } from '../../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
 
 const reason =
@@ -35,11 +36,12 @@ export const RenderCellValue: React.FC<
   isExpanded,
   linkValues,
   rowIndex,
+  colIndex,
   setCellProps,
   timelineId,
 }) => {
   const value =
-    getMappedNonEcsValue({
+    useGetMappedNonEcsValue({
       data,
       fieldName: columnId,
     })?.reduce((x) => x[0]) ?? '';
@@ -47,6 +49,7 @@ export const RenderCellValue: React.FC<
 
   switch (columnId) {
     case 'signal.rule.severity':
+    case ALERT_SEVERITY:
       return (
         <DefaultDraggable
           data-test-subj="custom-severity"
@@ -58,6 +61,7 @@ export const RenderCellValue: React.FC<
         </DefaultDraggable>
       );
     case 'signal.reason':
+    case ALERT_REASON:
       return <TruncatableText data-test-subj="custom-reason">{reason}</TruncatableText>;
     default:
       return (
@@ -67,10 +71,12 @@ export const RenderCellValue: React.FC<
           eventId={eventId}
           header={header}
           isDetails={isDetails}
+          isDraggable={false}
           isExpandable={isExpandable}
           isExpanded={isExpanded}
           linkValues={linkValues}
           rowIndex={rowIndex}
+          colIndex={colIndex}
           setCellProps={setCellProps}
           timelineId={timelineId}
         />

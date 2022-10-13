@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup, SavedObject } from 'kibana/server';
+import { CoreSetup, SavedObject } from '@kbn/core/server';
 
 export class Plugin {
   constructor() {}
@@ -22,7 +22,7 @@ export class Plugin {
       properties: {
         title: { type: 'text' },
       },
-    };
+    } as const;
 
     core.savedObjects.registerType({
       name: 'isolatedtype',

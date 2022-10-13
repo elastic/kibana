@@ -6,10 +6,12 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiCodeEditor } from '@elastic/eui';
+import { EuiFormRow } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+
 import { EDITOR } from '../../../common/constants';
+import { EuiCodeEditor } from '../../shared_imports';
 import { GrokMode } from '../../lib/ace';
-import { FormattedMessage } from '@kbn/i18n/react';
 
 export function PatternInput({ value, onChange }) {
   return (

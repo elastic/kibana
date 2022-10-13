@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { registerTestBed } from '@kbn/test/jest';
+import { registerTestBed } from '@kbn/test-jest-helpers';
 import { getJob } from '../../../../../fixtures';
 import { rollupJobsStore } from '../../../store';
 import { DetailPanel } from './detail_panel';
@@ -70,7 +70,7 @@ describe('<DetailPanel />', () => {
       ({ component, find, exists } = initTestBed({ isLoading: true }));
       const loading = find('rollupJobDetailLoading');
       expect(loading.length).toBeTruthy();
-      expect(loading.text()).toEqual('Loading rollup job...');
+      expect(loading.text()).toEqual('Loading rollup job…');
 
       // Make sure the title and the tabs are visible
       expect(exists('detailPanelTabSelected')).toBeTruthy();

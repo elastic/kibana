@@ -5,34 +5,33 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from 'kibana/server';
-import { AlertInfo } from '../../common';
-import { AlertServiceContract } from '../../services';
+import { MgetResponseItem, GetGetResult } from '@elastic/elasticsearch/lib/api/types';
 import { CasesClientGetAlertsResponse } from './types';
+import { CasesClientArgs } from '..';
+import { AlertInfo } from '../../common/types';
+import { Alert } from '../../services/alerts';
 
-interface GetParams {
-  alertsService: AlertServiceContract;
-  alertsInfo: AlertInfo[];
-  scopedClusterClient: ElasticsearchClient;
-  logger: Logger;
+function isAlert(
+  doc?: MgetResponseItem<unknown>
+): doc is Omit<GetGetResult<Alert>, '_source'> & { _source: Alert } {
+  return Boolean(doc && !('error' in doc) && '_source' in doc);
 }
 
-export const get = async ({
-  alertsService,
-  alertsInfo,
-  scopedClusterClient,
-  logger,
-}: GetParams): Promise<CasesClientGetAlertsResponse> => {
+export const getAlerts = async (
+  alertsInfo: AlertInfo[],
+  clientArgs: CasesClientArgs
+): Promise<CasesClientGetAlertsResponse> => {
+  const { alertsService } = clientArgs.services;
   if (alertsInfo.length === 0) {
     return [];
   }
 
-  const alerts = await alertsService.getAlerts({ alertsInfo, scopedClusterClient, logger });
+  const alerts = await alertsService.getAlerts(alertsInfo);
   if (!alerts) {
     return [];
   }
 
-  return alerts.docs.map((alert) => ({
+  return alerts.docs.filter(isAlert).map((alert) => ({
     id: alert._id,
     index: alert._index,
     ...alert._source,

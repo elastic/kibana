@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { MatrixHistogramTypeToAggName } from '../../../../../../common/search_strategy';
 import { buildAuthenticationsHistogramQuery } from './query.authentications_histogram.dsl';
 
 export const authenticationsMatrixHistogramConfig = {
   buildDsl: buildAuthenticationsHistogramQuery,
-  aggName: 'aggregations.eventActionGroup.buckets',
+  aggName: MatrixHistogramTypeToAggName.authentications,
   parseKey: 'events.buckets',
 };

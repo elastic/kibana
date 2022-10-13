@@ -9,8 +9,14 @@ import { createSelector, defaultMemoize } from 'reselect';
 import * as cameraSelectors from './camera/selectors';
 import * as dataSelectors from './data/selectors';
 import * as uiSelectors from './ui/selectors';
-import { ResolverState, IsometricTaxiLayout, DataState } from '../types';
-import { EventStats } from '../../../common/endpoint/types';
+import type {
+  ResolverState,
+  IsometricTaxiLayout,
+  DataState,
+  VisibleEntites,
+  NodeData,
+} from '../types';
+import type { EventStats } from '../../../common/endpoint/types';
 import * as nodeModel from '../../../common/endpoint/models/node';
 
 /**
@@ -22,8 +28,9 @@ export const projectionMatrix = composeSelectors(
   cameraSelectors.projectionMatrix
 );
 
-export const clippingPlanes = composeSelectors(cameraStateSelector, cameraSelectors.clippingPlanes);
 export const translation = composeSelectors(cameraStateSelector, cameraSelectors.translation);
+
+export const detectedBounds = composeSelectors(dataStateSelector, dataSelectors.detectedBounds);
 
 /**
  * A matrix that when applied to a Vector2 converts it from screen coordinates to world coordinates.
@@ -54,6 +61,11 @@ export const userIsPanning = composeSelectors(cameraStateSelector, cameraSelecto
  */
 export const isAnimating = composeSelectors(cameraStateSelector, cameraSelectors.isAnimating);
 
+export const resolverTreeHasNodes = composeSelectors(
+  dataStateSelector,
+  dataSelectors.resolverTreeHasNodes
+);
+
 /**
  * The position of nodes and edges.
  */
@@ -76,14 +88,6 @@ export const treeRequestParametersToAbort = composeSelectors(
 );
 
 /**
- * This should be the siem default indices to pass to the backend for querying data.
- */
-export const treeParameterIndices = composeSelectors(
-  dataStateSelector,
-  dataSelectors.treeParameterIndices
-);
-
-/**
  * An array of indices to use for resolver panel requests.
  */
 export const eventIndices = composeSelectors(dataStateSelector, dataSelectors.eventIndices);
@@ -96,12 +100,8 @@ export const resolverComponentInstanceID = composeSelectors(
 /**
  * This returns a map of nodeIDs to the associated stats provided by the datasource.
  */
-export const nodeStats: (
-  state: ResolverState
-) => (nodeID: string) => EventStats | undefined = composeSelectors(
-  dataStateSelector,
-  dataSelectors.nodeStats
-);
+export const nodeStats: (state: ResolverState) => (nodeID: string) => EventStats | undefined =
+  composeSelectors(dataStateSelector, dataSelectors.nodeStats);
 
 /**
  * This returns the "aggregate total" for related events, tallied as the sum
@@ -113,13 +113,6 @@ export const relatedEventTotalCount: (
 ) => (nodeID: string) => number | undefined = composeSelectors(
   dataStateSelector,
   dataSelectors.relatedEventTotalCount
-);
-
-export const relatedEventCountByCategory: (
-  state: ResolverState
-) => (nodeID: string, eventCategory: string) => number | undefined = composeSelectors(
-  dataStateSelector,
-  dataSelectors.relatedEventCountByCategory
 );
 
 /**
@@ -205,11 +198,6 @@ export const hasMoreGenerations = composeSelectors(
   dataSelectors.hasMoreGenerations
 );
 
-/**
- * An array containing all the processes currently in the Resolver than can be graphed
- */
-export const graphableNodes = composeSelectors(dataStateSelector, dataSelectors.graphableNodes);
-
 const boundingBox = composeSelectors(cameraStateSelector, cameraSelectors.viewableBoundingBox);
 
 const nodesAndEdgelines = composeSelectors(dataStateSelector, dataSelectors.nodesAndEdgelines);
@@ -228,25 +216,20 @@ export const statsTotalForNode = composeSelectors(
  * The bounding box represents what the camera can see. The camera position is a function of time because it can be
  * animated. So in order to get the currently visible entities, we need to pass in time.
  */
-export const visibleNodesAndEdgeLines = createSelector(nodesAndEdgelines, boundingBox, function (
-  /* eslint-disable @typescript-eslint/no-shadow */
+export const visibleNodesAndEdgeLines = createSelector(
   nodesAndEdgelines,
-  boundingBox
-  /* eslint-enable @typescript-eslint/no-shadow */
-) {
-  // `boundingBox` and `nodesAndEdgelines` are each memoized.
-  return (time: number) => nodesAndEdgelines(boundingBox(time));
-});
+  boundingBox,
+  function (nodesAndEdgelinesFn, boundingBoxFn) {
+    // `boundingBox` and `nodesAndEdgelines` are each memoized.
+    return (time: number) => nodesAndEdgelinesFn(boundingBoxFn(time));
+  }
+);
 
 /**
  * Takes a nodeID (aka entity_id) and returns the associated aria level as a number or null if the node ID isn't in the tree.
  */
-export const ariaLevel: (
-  state: ResolverState
-) => (nodeID: string) => number | null = composeSelectors(
-  dataStateSelector,
-  dataSelectors.ariaLevel
-);
+export const ariaLevel: (state: ResolverState) => (nodeID: string) => number | null =
+  composeSelectors(dataStateSelector, dataSelectors.ariaLevel);
 
 /**
  * the node ID of the node representing the databaseDocumentID
@@ -260,12 +243,13 @@ export const originID: (state: ResolverState) => string | undefined = composeSel
  * Takes a nodeID (aka entity_id) and returns the node ID of the node that aria should 'flowto' or null
  * If the node has a flowto candidate that is currently visible, that will be returned, otherwise null.
  */
-export const ariaFlowtoNodeID: (
-  state: ResolverState
-) => (time: number) => (nodeID: string) => string | null = createSelector(
+export const ariaFlowtoNodeID = createSelector(
   visibleNodesAndEdgeLines,
   composeSelectors(dataStateSelector, dataSelectors.ariaFlowtoCandidate),
-  (visibleNodesAndEdgeLinesAtTime, ariaFlowtoCandidate) => {
+  function (
+    visibleNodesAndEdgeLinesAtTime: (time: number) => VisibleEntites,
+    ariaFlowtoCandidate: (nodeId: string) => string | null
+  ) {
     return defaultMemoize((time: number) => {
       // get the visible nodes at `time`
       const { processNodePositions } = visibleNodesAndEdgeLinesAtTime(time);
@@ -298,14 +282,6 @@ export const panelViewAndParameters = composeSelectors(
 );
 
 export const relativeHref = composeSelectors(uiStateSelector, uiSelectors.relativeHref);
-
-/**
- * @deprecated use `useLinkProps`
- */
-export const relatedEventsRelativeHrefs = composeSelectors(
-  uiStateSelector,
-  uiSelectors.relatedEventsRelativeHrefs
-);
 
 /**
  * Total count of events related to `nodeID`.
@@ -385,30 +361,32 @@ export const graphNodeForID = composeSelectors(dataStateSelector, dataSelectors.
 /**
  * Returns a Set of node IDs representing the visible nodes in the view that we do no have node data for already.
  */
-export const newIDsToRequest: (
-  state: ResolverState
-) => (time: number) => Set<string> = createSelector(
-  composeSelectors(dataStateSelector, (dataState: DataState) => dataState.nodeData),
-  visibleNodesAndEdgeLines,
-  function (nodeData, visibleNodesAndEdgeLinesAtTime) {
-    return defaultMemoize((time: number) => {
-      const { processNodePositions: nodesInView } = visibleNodesAndEdgeLinesAtTime(time);
+export const newIDsToRequest: (state: ResolverState) => (time: number) => Set<string> =
+  createSelector(
+    composeSelectors(dataStateSelector, (dataState: DataState) => dataState.nodeData),
+    visibleNodesAndEdgeLines,
+    function (
+      nodeData: Map<string, NodeData> | undefined,
+      visibleNodesAndEdgeLinesAtTime: (time: number) => VisibleEntites
+    ) {
+      return defaultMemoize((time: number) => {
+        const { processNodePositions: nodesInView } = visibleNodesAndEdgeLinesAtTime(time);
 
-      const nodes: Set<string> = new Set();
-      // loop through the nodes in view and see if any of them are new aka we don't have node data for them already
-      for (const node of nodesInView.keys()) {
-        const id = nodeModel.nodeID(node);
-        // if the node has a valid ID field, and we either don't have any node data currently, or
-        // the map doesn't have info for this particular node, then add it to the set so it'll be requested
-        // by the middleware
-        if (id !== undefined && (!nodeData || !nodeData.has(id))) {
-          nodes.add(id);
+        const nodes: Set<string> = new Set();
+        // loop through the nodes in view and see if any of them are new aka we don't have node data for them already
+        for (const node of nodesInView.keys()) {
+          const id = nodeModel.nodeID(node);
+          // if the node has a valid ID field, and we either don't have any node data currently, or
+          // the map doesn't have info for this particular node, then add it to the set so it'll be requested
+          // by the middleware
+          if (id !== undefined && (!nodeData || !nodeData.has(id))) {
+            nodes.add(id);
+          }
         }
-      }
-      return nodes;
-    });
-  }
-);
+        return nodes;
+      });
+    }
+  );
 
 /**
  * Returns the schema for the current resolver tree. Currently, only used in the graph controls panel.

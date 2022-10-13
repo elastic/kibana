@@ -47,7 +47,7 @@ image::maps/images/fu_gs_new_england_map.png[]
 For each GeoJSON file you downloaded, complete the following steps:
 
 . Click *Add layer*.
-. From the list of layer types, click *Upload GeoJSON*.
+. From the list of layer types, click *Upload file*.
 . Using the File Picker, upload the GeoJSON file.
 +
 Depending on the geometry type of your features, this will
@@ -58,8 +58,8 @@ auto-populate *Index type* with either {ref}/geo-point.html[geo_point] or
 . Click *Import file*.
 +
 You'll see activity as the GeoJSON Upload utility creates a new index
-and index pattern for the data set. When the process is complete, you should
-receive messages that the creation of the new index and index pattern
+and data view for the data set. When the process is complete, you should
+receive messages that the creation of the new index and data view
 were successful.
 
 . Click *Add layer*.

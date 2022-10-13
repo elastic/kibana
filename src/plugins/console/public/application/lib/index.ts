@@ -6,5 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { createApi, Api } from './api';
+export type { Api } from './api';
+export { createApi } from './api';
 export { createEsHostService, EsHostService } from './es_host_service';

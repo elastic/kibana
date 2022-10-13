@@ -9,7 +9,7 @@ import { shallow } from 'enzyme';
 import React from 'react';
 import '../../../../common/mock/match_media';
 import { MapToolTipComponent } from './map_tool_tip';
-import { TooltipFeature } from '../../../../../../maps/common/descriptor_types';
+import type { TooltipFeature } from '@kbn/maps-plugin/common';
 
 describe('MapToolTip', () => {
   test('placeholder component renders correctly against snapshot', () => {
@@ -25,6 +25,7 @@ describe('MapToolTip', () => {
         id: 1,
         layerId: 'layerId',
         mbProperties: {},
+        actions: [],
       },
     ];
     const getLayerName = jest.fn();

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ILicense } from '../../licensing/common/types';
+import { ILicense } from '@kbn/licensing-plugin/common/types';
 
 // Can be used in switch statements to ensure we perform exhaustive checks, see
 // https://www.typescriptlang.org/docs/handbook/advanced-types.html#exhaustiveness-checking
@@ -17,7 +17,7 @@ export function assertNever(x: never): never {
 export interface GraphLicenseInformation {
   showAppLink: boolean;
   enableAppLink: boolean;
-  message: string;
+  message?: string;
 }
 
 export function checkLicense(license: ILicense | undefined): GraphLicenseInformation {
@@ -53,20 +53,19 @@ export function checkLicense(license: ILicense | undefined): GraphLicenseInforma
       return {
         showAppLink: true,
         enableAppLink: false,
-        message: check.message || '',
+        message: check.message,
       };
     case 'invalid':
     case 'unavailable':
       return {
         showAppLink: false,
         enableAppLink: false,
-        message: check.message || '',
+        message: check.message,
       };
     case 'valid':
       return {
         showAppLink: true,
         enableAppLink: true,
-        message: '',
       };
     default:
       return assertNever(check.state);

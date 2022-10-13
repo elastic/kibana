@@ -16,9 +16,12 @@ import { ChartGrid } from './chart_grid';
 import { getToastNotificationService } from '../../../../../../../services/toast_notification_service';
 
 export const MultiMetricDetectorsSummary: FC = () => {
-  const { jobCreator: jc, chartLoader, resultsLoader, chartInterval } = useContext(
-    JobCreatorContext
-  );
+  const {
+    jobCreator: jc,
+    chartLoader,
+    resultsLoader,
+    chartInterval,
+  } = useContext(JobCreatorContext);
 
   const jobCreator = jc as MultiMetricJobCreator;
 
@@ -44,7 +47,6 @@ export const MultiMetricDetectorsSummary: FC = () => {
           const tempFieldValues = await chartLoader.loadFieldExampleValues(
             jobCreator.splitField,
             jobCreator.runtimeMappings,
-            // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
             jobCreator.datafeedConfig.indices_options
           );
           setFieldValues(tempFieldValues);
@@ -57,12 +59,14 @@ export const MultiMetricDetectorsSummary: FC = () => {
     return () => {
       subscription.unsubscribe();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     if (allDataReady()) {
       loadCharts();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fieldValues]);
 
   async function loadCharts() {
@@ -79,7 +83,6 @@ export const MultiMetricDetectorsSummary: FC = () => {
           fieldValues.length > 0 ? fieldValues[0] : null,
           cs.intervalMs,
           jobCreator.runtimeMappings,
-          // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
           jobCreator.datafeedConfig.indices_options
         );
         setLineChartsData(resp);

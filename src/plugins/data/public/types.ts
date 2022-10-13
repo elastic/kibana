@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { CoreStart } from 'src/core/public';
-import { BfetchPublicSetup } from 'src/plugins/bfetch/public';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { ExpressionsSetup } from 'src/plugins/expressions/public';
-import { UiActionsSetup, UiActionsStart } from 'src/plugins/ui_actions/public';
-import { AutocompleteSetup, AutocompleteStart } from './autocomplete';
-import { FieldFormatsSetup, FieldFormatsStart } from './field_formats';
+import { BfetchPublicSetup } from '@kbn/bfetch-plugin/public';
+import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { Setup as InspectorSetup } from '@kbn/inspector-plugin/public';
+import { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
+import { SharePluginStart } from '@kbn/share-plugin/public';
+import { ManagementSetup } from '@kbn/management-plugin/public';
+import { DatatableUtilitiesService } from '../common';
 import { createFiltersFromRangeSelectAction, createFiltersFromValueClickAction } from './actions';
-import { ISearchSetup, ISearchStart } from './search';
+import type { ISearchSetup, ISearchStart } from './search';
 import { QuerySetup, QueryStart } from './query';
-import { IndexPatternsContract } from './index_patterns';
-import { IndexPatternSelectProps, StatefulSearchBarProps } from './ui';
-import { UsageCollectionSetup, UsageCollectionStart } from '../../usage_collection/public';
-import { Setup as InspectorSetup } from '../../inspector/public';
+import { DataViewsContract } from './data_views';
 import { NowProviderPublicContract } from './now_provider';
 
 export interface DataSetupDependencies {
@@ -29,28 +29,24 @@ export interface DataSetupDependencies {
   uiActions: UiActionsSetup;
   inspector: InspectorSetup;
   usageCollection?: UsageCollectionSetup;
+  fieldFormats: FieldFormatsSetup;
+  management: ManagementSetup;
 }
 
 export interface DataStartDependencies {
   uiActions: UiActionsStart;
+  fieldFormats: FieldFormatsStart;
+  dataViews: DataViewsPublicPluginStart;
+  screenshotMode: ScreenshotModePluginStart;
+  share: SharePluginStart;
 }
 
 /**
  * Data plugin public Setup contract
  */
 export interface DataPublicPluginSetup {
-  autocomplete: AutocompleteSetup;
   search: ISearchSetup;
-  fieldFormats: FieldFormatsSetup;
   query: QuerySetup;
-}
-
-/**
- * Data plugin prewired UI components
- */
-export interface DataPublicPluginStartUi {
-  IndexPatternSelect: React.ComponentType<IndexPatternSelectProps>;
-  SearchBar: React.ComponentType<StatefulSearchBarProps>;
 }
 
 /**
@@ -71,23 +67,29 @@ export interface DataPublicPluginStart {
    */
   actions: DataPublicPluginStartActions;
   /**
-   * autocomplete service
-   * {@link AutocompleteStart}
+   * data views service
+   * {@link DataViewsContract}
    */
-  autocomplete: AutocompleteStart;
+  dataViews: DataViewsContract;
+
+  /**
+   * Datatable type utility functions.
+   */
+  datatableUtilities: DatatableUtilitiesService;
+
   /**
    * index patterns service
-   * {@link IndexPatternsContract}
+   * {@link DataViewsContract}
+   * @deprecated Use dataViews service instead.  All index pattern interfaces were renamed.
    */
-  indexPatterns: IndexPatternsContract;
+  indexPatterns: DataViewsContract;
   /**
    * search service
    * {@link ISearchStart}
    */
   search: ISearchStart;
   /**
-   * field formats service
-   * {@link FieldFormatsStart}
+   * @deprecated Use fieldFormats plugin instead
    */
   fieldFormats: FieldFormatsStart;
   /**
@@ -95,22 +97,6 @@ export interface DataPublicPluginStart {
    * {@link QueryStart}
    */
   query: QueryStart;
-  /**
-   * prewired UI components
-   * {@link DataPublicPluginStartUi}
-   */
-  ui: DataPublicPluginStartUi;
 
   nowProvider: NowProviderPublicContract;
-}
-
-export interface IDataPluginServices extends Partial<CoreStart> {
-  appName: string;
-  uiSettings: CoreStart['uiSettings'];
-  savedObjects: CoreStart['savedObjects'];
-  notifications: CoreStart['notifications'];
-  http: CoreStart['http'];
-  storage: IStorageWrapper;
-  data: DataPublicPluginStart;
-  usageCollection?: UsageCollectionStart;
 }

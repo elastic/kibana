@@ -9,15 +9,15 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingLogo, EuiLoadingSpinner } from '@elastic/eui';
 
-import { Loading, LoadingOverlay } from './';
+import { Loading, LoadingOverlay } from '.';
 
 describe('Loading', () => {
   it('renders', () => {
     const wrapper = shallow(<Loading />);
     expect(wrapper.hasClass('enterpriseSearchLoading')).toBe(true);
-    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(1);
+    expect(wrapper.find(EuiLoadingLogo)).toHaveLength(1);
   });
 });
 
@@ -25,6 +25,6 @@ describe('LoadingOverlay', () => {
   it('renders', () => {
     const wrapper = shallow(<LoadingOverlay />);
     expect(wrapper.hasClass('enterpriseSearchLoadingOverlay')).toBe(true);
-    expect(wrapper.find(Loading)).toHaveLength(1);
+    expect(wrapper.find(EuiLoadingSpinner)).toHaveLength(1);
   });
 });

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { useAsync, withOptionalSignal } from '@kbn/securitysolution-hook-utils';
 import { getMlCapabilities } from '../api/get_ml_capabilities';
-import { useAsync, withOptionalSignal } from '../../../../shared_imports';
 
 const _getMlCapabilities = withOptionalSignal(getMlCapabilities);
 

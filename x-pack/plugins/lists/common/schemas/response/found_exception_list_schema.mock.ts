@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import type { FoundExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
+
 import { getExceptionListSchemaMock } from './exception_list_schema.mock';
-import { FoundExceptionListSchema } from './found_exception_list_schema';
 
 export const getFoundExceptionListSchemaMock = (): FoundExceptionListSchema => ({
   data: [getExceptionListSchemaMock()],
   page: 1,
-  per_page: 1,
+  per_page: 20,
   total: 1,
 });

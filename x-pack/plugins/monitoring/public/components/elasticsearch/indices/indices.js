@@ -16,7 +16,7 @@ import { EuiMonitoringTable } from '../../table';
 import {
   EuiLink,
   EuiPage,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiPageBody,
   EuiPanel,
   EuiSwitch,
@@ -24,7 +24,7 @@ import {
   EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { AlertsStatus } from '../../../alerts/status';
 import './indices.scss';
 

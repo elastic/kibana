@@ -5,47 +5,43 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { memo, useCallback, useMemo, useEffect } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
-import { ConnectorTypes } from '../../../common';
-import { UseField, useFormData, FieldHook, useFormContext } from '../../common/shared_imports';
+import { ActionConnector } from '../../../common/api';
+import {
+  UseField,
+  useFormData,
+  FieldHook,
+  useFormContext,
+  FieldConfig,
+} from '../../common/shared_imports';
 import { ConnectorSelector } from '../connector_selector/form';
 import { ConnectorFieldsForm } from '../connectors/fields_form';
-import { ActionConnector } from '../../../common';
-import { getConnectorById } from '../configure_cases/utils';
-import { FormProps } from './schema';
+import { FormProps, schema } from './schema';
+import { useCaseConfigure } from '../../containers/configure/use_configure';
+import { getConnectorById, getConnectorsFormValidators } from '../utils';
+import { useApplicationCapabilities } from '../../common/lib/kibana';
+import * as i18n from '../../common/translations';
 
 interface Props {
   connectors: ActionConnector[];
   isLoading: boolean;
   isLoadingConnectors: boolean;
-  hideConnectorServiceNowSir?: boolean;
 }
 
 interface ConnectorsFieldProps {
   connectors: ActionConnector[];
   field: FieldHook<FormProps['fields']>;
   isEdit: boolean;
-  hideConnectorServiceNowSir?: boolean;
+  setErrors: (errors: boolean) => void;
 }
 
-const ConnectorFields = ({
-  connectors,
-  isEdit,
-  field,
-  hideConnectorServiceNowSir = false,
-}: ConnectorsFieldProps) => {
+const ConnectorFields = ({ connectors, isEdit, field, setErrors }: ConnectorsFieldProps) => {
   const [{ connectorId }] = useFormData({ watch: ['connectorId'] });
   const { setValue } = field;
-  let connector = getConnectorById(connectorId, connectors) ?? null;
-  if (
-    connector &&
-    hideConnectorServiceNowSir &&
-    connector.actionTypeId === ConnectorTypes.serviceNowSIR
-  ) {
-    connector = null;
-  }
+  const connector = getConnectorById(connectorId, connectors) ?? null;
+
   return (
     <ConnectorFieldsForm
       connector={connector}
@@ -55,29 +51,53 @@ const ConnectorFields = ({
     />
   );
 };
+ConnectorFields.displayName = 'ConnectorFields';
 
-const ConnectorComponent: React.FC<Props> = ({
-  connectors,
-  hideConnectorServiceNowSir = false,
-  isLoading,
-  isLoadingConnectors,
-}) => {
-  const { getFields } = useFormContext();
+const ConnectorComponent: React.FC<Props> = ({ connectors, isLoading, isLoadingConnectors }) => {
+  const { getFields, setFieldValue } = useFormContext();
+  const { connector: configurationConnector } = useCaseConfigure();
+  const { actions } = useApplicationCapabilities();
+
   const handleConnectorChange = useCallback(() => {
     const { fields } = getFields();
     fields.setValue(null);
   }, [getFields]);
+
+  const defaultConnectorId = useMemo(() => {
+    return connectors.some((connector) => connector.id === configurationConnector.id)
+      ? configurationConnector.id
+      : 'none';
+  }, [configurationConnector.id, connectors]);
+
+  useEffect(
+    () => setFieldValue('connectorId', defaultConnectorId),
+    [defaultConnectorId, setFieldValue]
+  );
+
+  const connectorIdConfig = getConnectorsFormValidators({
+    config: schema.connectorId as FieldConfig,
+    connectors,
+  });
+
+  if (!actions.read) {
+    return (
+      <EuiText data-test-subj="create-case-connector-permissions-error-msg" size="s">
+        <span>{i18n.READ_ACTIONS_PERMISSIONS_ERROR_MSG}</span>
+      </EuiText>
+    );
+  }
 
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
         <UseField
           path="connectorId"
+          config={connectorIdConfig}
           component={ConnectorSelector}
+          defaultValue={defaultConnectorId}
           componentProps={{
             connectors,
             handleChange: handleConnectorChange,
-            hideConnectorServiceNowSir,
             dataTestSubj: 'caseConnectors',
             disabled: isLoading || isLoadingConnectors,
             idAria: 'caseConnectors',
@@ -91,7 +111,6 @@ const ConnectorComponent: React.FC<Props> = ({
           component={ConnectorFields}
           componentProps={{
             connectors,
-            hideConnectorServiceNowSir,
             isEdit: true,
           }}
         />

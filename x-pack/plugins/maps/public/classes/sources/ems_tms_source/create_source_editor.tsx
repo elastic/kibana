@@ -21,7 +21,7 @@ export class CreateSourceEditor extends Component<Props, State> {
   state: State = {};
 
   componentDidMount() {
-    this._onTileSelect({ id: null, isAutoSelect: true });
+    this._onTileSelect({ isAutoSelect: true });
   }
 
   _onTileSelect = (config: EmsTmsSourceConfig) => {

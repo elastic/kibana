@@ -16,7 +16,7 @@ import { StepDetailsExposedState } from './common';
 export const StepDetailsSummary: FC<StepDetailsExposedState> = React.memo((props) => {
   const {
     continuousModeDateField,
-    createIndexPattern,
+    createDataView,
     isContinuousModeEnabled,
     isRetentionPolicyEnabled,
     retentionPolicyDateField,
@@ -25,18 +25,20 @@ export const StepDetailsSummary: FC<StepDetailsExposedState> = React.memo((props
     transformDescription,
     transformFrequency,
     transformSettingsMaxPageSearchSize,
+    transformSettingsNumFailureRetries,
     destinationIndex,
+    destinationIngestPipeline,
     touched,
-    indexPatternTimeField,
+    dataViewTimeField,
   } = props;
 
   if (touched === false) {
     return null;
   }
 
-  const destinationIndexHelpText = createIndexPattern
-    ? i18n.translate('xpack.transform.stepDetailsSummary.createIndexPatternMessage', {
-        defaultMessage: 'A Kibana index pattern will be created for this transform.',
+  const destinationIndexHelpText = createDataView
+    ? i18n.translate('xpack.transform.stepDetailsSummary.createDataViewMessage', {
+        defaultMessage: 'A Kibana data view will be created for this transform.',
       })
     : '';
 
@@ -68,13 +70,26 @@ export const StepDetailsSummary: FC<StepDetailsExposedState> = React.memo((props
       >
         <span>{destinationIndex}</span>
       </EuiFormRow>
-      {createIndexPattern && indexPatternTimeField !== undefined && indexPatternTimeField !== '' && (
+      {createDataView && dataViewTimeField !== undefined && dataViewTimeField !== '' && (
         <EuiFormRow
-          label={i18n.translate('xpack.transform.stepDetailsSummary.indexPatternTimeFieldLabel', {
-            defaultMessage: 'Kibana index pattern time field',
+          label={i18n.translate('xpack.transform.stepDetailsSummary.dataViewTimeFieldLabel', {
+            defaultMessage: 'Kibana data view time field',
           })}
         >
-          <span>{indexPatternTimeField}</span>
+          <span>{dataViewTimeField}</span>
+        </EuiFormRow>
+      )}
+
+      {destinationIngestPipeline !== undefined && destinationIngestPipeline !== '' && (
+        <EuiFormRow
+          label={i18n.translate(
+            'xpack.transform.stepDetailsSummary.destinationIngestPipelineLabel',
+            {
+              defaultMessage: 'Destination ingest pipeline',
+            }
+          )}
+        >
+          <span>{destinationIngestPipeline}</span>
         </EuiFormRow>
       )}
 
@@ -139,6 +154,16 @@ export const StepDetailsSummary: FC<StepDetailsExposedState> = React.memo((props
         >
           <span>{transformSettingsMaxPageSearchSize}</span>
         </EuiFormRow>
+        {typeof transformSettingsNumFailureRetries === 'number' ? (
+          <EuiFormRow
+            data-test-subj={'transformWizardAdvancedSettingsNumFailureRetriesLabel'}
+            label={i18n.translate('xpack.transform.stepDetailsSummary.numFailureRetriesLabel', {
+              defaultMessage: 'Number of retries',
+            })}
+          >
+            <span>{transformSettingsNumFailureRetries}</span>
+          </EuiFormRow>
+        ) : null}
       </EuiAccordion>
     </div>
   );

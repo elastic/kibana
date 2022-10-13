@@ -8,9 +8,8 @@
 import React, { Fragment, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import type { Space } from 'src/plugins/spaces_oss/common';
-import type { SpacesApiUi } from 'src/plugins/spaces_oss/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { Space, SpacesApiUi } from '@kbn/spaces-plugin/public';
 
 import type { RoleKibanaPrivilege } from '../../../../../../../common/model';
 import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';

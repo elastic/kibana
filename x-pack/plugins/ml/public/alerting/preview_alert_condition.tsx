@@ -7,7 +7,7 @@
 
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -88,7 +88,18 @@ const AlertInstancePreview: FC<PreviewResponse['results'][number]> = React.memo(
                       <EuiCode transparentBackground>
                         {i.function}({i.field_name})
                       </EuiCode>{' '}
-                      {i.by_field_value} {i.over_field_value} {i.partition_field_value} [{i.score}]
+                      {i.by_field_value} {i.over_field_value} {i.partition_field_value} [{i.score}];
+                      (
+                      <FormattedMessage
+                        id="xpack.ml.previewAlert.typicalLabel"
+                        defaultMessage="Typical:"
+                      />{' '}
+                      {i.typical ?? '-'},{' '}
+                      <FormattedMessage
+                        id="xpack.ml.previewAlert.actualLabel"
+                        defaultMessage="Actual:"
+                      />{' '}
+                      {i.actual ?? '-'})
                     </li>
                   ))}
                 </ul>
@@ -109,6 +120,7 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
   const sampleSize = ALERT_PREVIEW_SAMPLE_SIZE;
 
   const [lookBehindInterval, setLookBehindInterval] = useState<string>();
+  const [lastQueryInterval, setLastQueryInterval] = useState<string>();
   const [areResultsVisible, setAreResultVisible] = useState<boolean>(true);
   const [previewError, setPreviewError] = useState<Error | undefined>();
   const [previewResponse, setPreviewResponse] = useState<PreviewResponse | undefined>();
@@ -118,6 +130,7 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
     []
   );
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const validationErrors = useMemo(() => validators(lookBehindInterval), [lookBehindInterval]);
 
   useEffect(
@@ -135,11 +148,13 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
         sampleSize,
       });
       setPreviewResponse(response);
+      setLastQueryInterval(lookBehindInterval);
       setPreviewError(undefined);
     } catch (e) {
       setPreviewResponse(undefined);
       setPreviewError(e.body ?? e);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [alertParams, lookBehindInterval]);
 
   const sampleHits = useMemo(() => {
@@ -165,7 +180,7 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
             label={
               <FormattedMessage
                 id="xpack.ml.previewAlert.intervalLabel"
-                defaultMessage="Check the alert condition with an interval"
+                defaultMessage="Check the rule condition with an interval"
               />
             }
             isInvalid={isInvalid}
@@ -173,7 +188,7 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
           >
             <EuiFieldText
               placeholder="15d, 6m"
-              value={lookBehindInterval}
+              value={lookBehindInterval ?? ''}
               onChange={(e) => {
                 setLookBehindInterval(e.target.value);
               }}
@@ -220,10 +235,10 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
                 <strong>
                   <FormattedMessage
                     id="xpack.ml.previewAlert.previewMessage"
-                    defaultMessage="Triggers {alertsCount, plural, one {# time} other {# times}} in the last {interval}"
+                    defaultMessage="Found {alertsCount, plural, one {# anomaly} other {# anomalies}} in the last {interval}."
                     values={{
                       alertsCount: previewResponse.count,
-                      interval: lookBehindInterval,
+                      interval: lastQueryInterval,
                     }}
                   />
                 </strong>

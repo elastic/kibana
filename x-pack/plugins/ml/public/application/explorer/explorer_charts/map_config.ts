@@ -5,31 +5,17 @@
  * 2.0.
  */
 
-import { FIELD_ORIGIN, STYLE_TYPE } from '../../../../../maps/common/constants';
-import { ANOMALY_THRESHOLD, SEVERITY_COLORS } from '../../../../common';
+import { FIELD_ORIGIN, LAYER_TYPE, STYLE_TYPE } from '@kbn/maps-plugin/common';
+import { SEVERITY_COLOR_RAMP } from '../../../../common';
+import { AnomaliesTableData } from '../explorer_utils';
 
 const FEATURE = 'Feature';
 const POINT = 'Point';
-const SEVERITY_COLOR_RAMP = [
-  {
-    stop: ANOMALY_THRESHOLD.LOW,
-    color: SEVERITY_COLORS.WARNING,
-  },
-  {
-    stop: ANOMALY_THRESHOLD.MINOR,
-    color: SEVERITY_COLORS.MINOR,
-  },
-  {
-    stop: ANOMALY_THRESHOLD.MAJOR,
-    color: SEVERITY_COLORS.MAJOR,
-  },
-  {
-    stop: ANOMALY_THRESHOLD.CRITICAL,
-    color: SEVERITY_COLORS.CRITICAL,
-  },
-];
 
-function getAnomalyFeatures(anomalies: any[], type: 'actual_point' | 'typical_point') {
+function getAnomalyFeatures(
+  anomalies: AnomaliesTableData['anomalies'],
+  type: 'actual_point' | 'typical_point'
+) {
   const anomalyFeatures = [];
   for (let i = 0; i < anomalies.length; i++) {
     const anomaly = anomalies[i];
@@ -58,7 +44,7 @@ function getAnomalyFeatures(anomalies: any[], type: 'actual_point' | 'typical_po
   return anomalyFeatures;
 }
 
-export const getMLAnomaliesTypicalLayer = (anomalies: any) => {
+export const getMLAnomaliesTypicalLayer = (anomalies: AnomaliesTableData['anomalies']) => {
   return {
     id: 'anomalies_typical_layer',
     label: 'Typical',
@@ -100,7 +86,7 @@ export const getMLAnomaliesTypicalLayer = (anomalies: any) => {
         },
       },
     },
-    type: 'VECTOR',
+    type: LAYER_TYPE.GEOJSON_VECTOR,
   };
 };
 
@@ -157,6 +143,6 @@ export const getMLAnomaliesActualLayer = (anomalies: any) => {
         },
       },
     },
-    type: 'VECTOR',
+    type: LAYER_TYPE.GEOJSON_VECTOR,
   };
 };

@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
-import { ShardsResponse } from 'elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export interface AsyncSearchResponse<T = unknown> {
   id?: string;
@@ -19,5 +18,5 @@ export interface AsyncSearchResponse<T = unknown> {
 }
 export interface AsyncSearchStatusResponse extends Omit<AsyncSearchResponse, 'response'> {
   completion_status: number;
-  _shards: ShardsResponse;
+  _shards: estypes.ShardStatistics;
 }

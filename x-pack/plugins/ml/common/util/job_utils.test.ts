@@ -21,8 +21,12 @@ import {
   getLatestDataOrBucketTimestamp,
   getEarliestDatafeedStartTime,
   resolveMaxTimeInterval,
+  getFiltersForDSLQuery,
+  isKnownEmptyQuery,
 } from './job_utils';
 import { CombinedJob, Job } from '../types/anomaly_detection_jobs';
+import { FilterStateStore } from '@kbn/es-query';
+
 import moment from 'moment';
 
 describe('ML - job utils', () => {
@@ -55,7 +59,7 @@ describe('ML - job utils', () => {
 
   describe('isTimeSeriesViewJob', () => {
     test('returns true when job has a single detector with a metric function', () => {
-      const job = ({
+      const job = {
         analysis_config: {
           detectors: [
             {
@@ -65,13 +69,13 @@ describe('ML - job utils', () => {
             },
           ],
         },
-      } as unknown) as CombinedJob;
+      } as unknown as CombinedJob;
 
       expect(isTimeSeriesViewJob(job)).toBe(true);
     });
 
     test('returns true when job has at least one detector with a metric function', () => {
-      const job = ({
+      const job = {
         analysis_config: {
           detectors: [
             {
@@ -87,13 +91,13 @@ describe('ML - job utils', () => {
             },
           ],
         },
-      } as unknown) as CombinedJob;
+      } as unknown as CombinedJob;
 
       expect(isTimeSeriesViewJob(job)).toBe(true);
     });
 
     test('returns false when job does not have at least one detector with a metric function', () => {
-      const job = ({
+      const job = {
         analysis_config: {
           detectors: [
             {
@@ -109,13 +113,13 @@ describe('ML - job utils', () => {
             },
           ],
         },
-      } as unknown) as CombinedJob;
+      } as unknown as CombinedJob;
 
       expect(isTimeSeriesViewJob(job)).toBe(false);
     });
 
     test('returns false when job has a single count by category detector', () => {
-      const job = ({
+      const job = {
         analysis_config: {
           detectors: [
             {
@@ -125,14 +129,14 @@ describe('ML - job utils', () => {
             },
           ],
         },
-      } as unknown) as CombinedJob;
+      } as unknown as CombinedJob;
 
       expect(isTimeSeriesViewJob(job)).toBe(false);
     });
   });
 
   describe('isTimeSeriesViewDetector', () => {
-    const job = ({
+    const job = {
       analysis_config: {
         detectors: [
           {
@@ -172,7 +176,7 @@ describe('ML - job utils', () => {
           },
         },
       },
-    } as unknown) as CombinedJob;
+    } as unknown as CombinedJob;
 
     test('returns true for a detector with a metric function', () => {
       expect(isTimeSeriesViewDetector(job, 0)).toBe(true);
@@ -196,7 +200,7 @@ describe('ML - job utils', () => {
   });
 
   describe('isSourceDataChartableForDetector', () => {
-    const job = ({
+    const job = {
       analysis_config: {
         detectors: [
           { function: 'count' }, // 0
@@ -255,7 +259,7 @@ describe('ML - job utils', () => {
           },
         },
       },
-    } as unknown) as CombinedJob;
+    } as unknown as CombinedJob;
 
     test('returns true for expected detectors', () => {
       expect(isSourceDataChartableForDetector(job, 0)).toBe(true);
@@ -303,13 +307,13 @@ describe('ML - job utils', () => {
   });
 
   describe('isModelPlotChartableForDetector', () => {
-    const job1 = ({
+    const job1 = {
       analysis_config: {
         detectors: [{ function: 'count' }],
       },
-    } as unknown) as Job;
+    } as unknown as Job;
 
-    const job2 = ({
+    const job2 = {
       analysis_config: {
         detectors: [
           { function: 'count' },
@@ -323,7 +327,7 @@ describe('ML - job utils', () => {
       model_plot_config: {
         enabled: true,
       },
-    } as unknown) as Job;
+    } as unknown as Job;
 
     test('returns false when model plot is not enabled', () => {
       expect(isModelPlotChartableForDetector(job1, 0)).toBe(false);
@@ -343,7 +347,7 @@ describe('ML - job utils', () => {
   });
 
   describe('getPartitioningFieldNames', () => {
-    const job = ({
+    const job = {
       analysis_config: {
         detectors: [
           {
@@ -371,7 +375,7 @@ describe('ML - job utils', () => {
           },
         ],
       },
-    } as unknown) as CombinedJob;
+    } as unknown as CombinedJob;
 
     test('returns empty array for a detector with no partitioning fields', () => {
       const resp = getPartitioningFieldNames(job, 0);
@@ -396,7 +400,7 @@ describe('ML - job utils', () => {
 
   describe('isModelPlotEnabled', () => {
     test('returns true for a job in which model plot has been enabled', () => {
-      const job = ({
+      const job = {
         analysis_config: {
           detectors: [
             {
@@ -409,13 +413,13 @@ describe('ML - job utils', () => {
         model_plot_config: {
           enabled: true,
         },
-      } as unknown) as Job;
+      } as unknown as Job;
 
       expect(isModelPlotEnabled(job, 0)).toBe(true);
     });
 
     test('returns expected values for a job in which model plot has been enabled with terms', () => {
-      const job = ({
+      const job = {
         analysis_config: {
           detectors: [
             {
@@ -430,7 +434,7 @@ describe('ML - job utils', () => {
           enabled: true,
           terms: 'US,AAL',
         },
-      } as unknown) as Job;
+      } as unknown as Job;
 
       expect(
         isModelPlotEnabled(job, 0, [
@@ -454,7 +458,7 @@ describe('ML - job utils', () => {
     });
 
     test('returns true for jobs in which model plot has not been enabled', () => {
-      const job1 = ({
+      const job1 = {
         analysis_config: {
           detectors: [
             {
@@ -467,8 +471,8 @@ describe('ML - job utils', () => {
         model_plot_config: {
           enabled: false,
         },
-      } as unknown) as CombinedJob;
-      const job2 = ({} as unknown) as CombinedJob;
+      } as unknown as CombinedJob;
+      const job2 = {} as unknown as CombinedJob;
 
       expect(isModelPlotEnabled(job1, 0)).toBe(false);
       expect(isModelPlotEnabled(job2, 0)).toBe(false);
@@ -476,9 +480,9 @@ describe('ML - job utils', () => {
   });
 
   describe('isJobVersionGte', () => {
-    const job = ({
+    const job = {
       job_version: '6.1.1',
-    } as unknown) as CombinedJob;
+    } as unknown as CombinedJob;
 
     test('returns true for later job version', () => {
       expect(isJobVersionGte(job, '6.1.0')).toBe(true);
@@ -610,6 +614,181 @@ describe('ML - job utils', () => {
     });
     test('returns undefined for an empty array', () => {
       expect(resolveMaxTimeInterval([])).toBe(undefined);
+    });
+  });
+});
+
+describe('getFiltersForDSLQuery', () => {
+  describe('when DSL query contains match_all', () => {
+    test('returns empty array when query contains a must clause that contains match_all', () => {
+      const actual = getFiltersForDSLQuery(
+        { bool: { must: [{ match_all: {} }] } },
+        'dataview-id',
+        'test-alias'
+      );
+      expect(actual).toEqual([]);
+    });
+  });
+
+  describe('when DSL query is valid', () => {
+    const query = {
+      bool: {
+        must: [],
+        filter: [
+          {
+            range: {
+              '@timestamp': {
+                format: 'strict_date_optional_time',
+                gte: '2007-09-29T15:05:14.509Z',
+                lte: '2022-09-29T15:05:14.509Z',
+              },
+            },
+          },
+          {
+            match_phrase: {
+              response_code: '200',
+            },
+          },
+        ],
+        should: [],
+        must_not: [],
+      },
+    };
+
+    test('returns filters with alias', () => {
+      const actual = getFiltersForDSLQuery(query, 'dataview-id', 'test-alias');
+      expect(actual).toEqual([
+        {
+          $state: { store: 'appState' },
+          meta: {
+            alias: 'test-alias',
+            disabled: false,
+            index: 'dataview-id',
+            negate: false,
+            type: 'custom',
+            value:
+              '{"bool":{"must":[],"filter":[{"range":{"@timestamp":{"format":"strict_date_optional_time","gte":"2007-09-29T15:05:14.509Z","lte":"2022-09-29T15:05:14.509Z"}}},{"match_phrase":{"response_code":"200"}}],"should":[],"must_not":[]}}',
+          },
+          query,
+        },
+      ]);
+    });
+
+    test('returns filter with no alias if alias is not provided', () => {
+      const actual = getFiltersForDSLQuery(query, 'dataview-id');
+      expect(actual).toEqual([
+        {
+          $state: { store: 'appState' },
+          meta: {
+            disabled: false,
+            index: 'dataview-id',
+            negate: false,
+            type: 'custom',
+            value:
+              '{"bool":{"must":[],"filter":[{"range":{"@timestamp":{"format":"strict_date_optional_time","gte":"2007-09-29T15:05:14.509Z","lte":"2022-09-29T15:05:14.509Z"}}},{"match_phrase":{"response_code":"200"}}],"should":[],"must_not":[]}}',
+          },
+          query,
+        },
+      ]);
+    });
+
+    test('returns global state filter when GLOBAL_STATE is specified', () => {
+      const actual = getFiltersForDSLQuery(
+        query,
+        'dataview-id',
+        undefined,
+        FilterStateStore.GLOBAL_STATE
+      );
+      expect(actual).toEqual([
+        {
+          $state: { store: 'globalState' },
+          meta: {
+            disabled: false,
+            index: 'dataview-id',
+            negate: false,
+            type: 'custom',
+            value:
+              '{"bool":{"must":[],"filter":[{"range":{"@timestamp":{"format":"strict_date_optional_time","gte":"2007-09-29T15:05:14.509Z","lte":"2022-09-29T15:05:14.509Z"}}},{"match_phrase":{"response_code":"200"}}],"should":[],"must_not":[]}}',
+          },
+          query,
+        },
+      ]);
+    });
+  });
+
+  describe('isKnownEmptyQuery', () => {
+    test('returns true for default lens created query', () => {
+      const result = isKnownEmptyQuery({
+        bool: {
+          filter: [],
+          must: [
+            {
+              match_all: {},
+            },
+          ],
+          must_not: [],
+        },
+      });
+      expect(result).toBe(true);
+    });
+
+    test('returns true for default lens created query variation 1', () => {
+      const result = isKnownEmptyQuery({
+        bool: {
+          must: [
+            {
+              match_all: {},
+            },
+          ],
+          must_not: [],
+        },
+      });
+      expect(result).toBe(true);
+    });
+
+    test('returns true for default lens created query variation 2', () => {
+      const result = isKnownEmptyQuery({
+        bool: {
+          must: [
+            {
+              match_all: {},
+            },
+          ],
+        },
+      });
+      expect(result).toBe(true);
+    });
+
+    test('returns true for QA framework created query4', () => {
+      const result = isKnownEmptyQuery({
+        match_all: {},
+      });
+      expect(result).toBe(true);
+    });
+
+    test('returns false for query with match_phrase', () => {
+      const result = isKnownEmptyQuery({
+        match_phrase: {
+          region: 'us-east-1',
+        },
+      });
+      expect(result).toBe(false);
+    });
+
+    test('returns false for query with match_phrase in should', () => {
+      const result = isKnownEmptyQuery({
+        bool: {
+          should: [
+            {
+              match_phrase: {
+                region: 'us-east-1',
+              },
+            },
+          ],
+          minimum_should_match: 1,
+        },
+      });
+      expect(result).toBe(false);
     });
   });
 });

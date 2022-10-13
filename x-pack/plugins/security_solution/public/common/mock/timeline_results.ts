@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import { FilterStateStore } from '../../../../../../src/plugins/data/common/es_query/filters/meta_filter';
+import { FilterStateStore } from '@kbn/es-query';
 
+import type { TimelineResult } from '../../../common/types/timeline';
 import {
   TimelineId,
   TimelineType,
   TimelineStatus,
   TimelineTabs,
-  TimelineResult,
 } from '../../../common/types/timeline';
 
-import { OpenTimelineResult } from '../../timelines/components/open_timeline/types';
-import { Direction, TimelineEventsDetailsItem } from '../../../common/search_strategy';
-import { CreateTimelineProps } from '../../detections/components/alerts_table/types';
-import { TimelineModel } from '../../timelines/store/timeline/model';
+import type { OpenTimelineResult } from '../../timelines/components/open_timeline/types';
+import type { TimelineEventsDetailsItem } from '../../../common/search_strategy';
+import { Direction } from '../../../common/search_strategy';
+import type { CreateTimelineProps } from '../../detections/components/alerts_table/types';
+import type { TimelineModel } from '../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../timelines/store/timeline/defaults';
 
 export const mockOpenTimelineQueryResults = {
@@ -1631,8 +1632,7 @@ export const mockTimelineResults: OpenTimelineResult[] = [
     noteIds: ['noteId4'],
     notes: [
       {
-        note:
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Magna ac placerat vestibulum lectus. Morbi tincidunt ornare massa eget egestas purus. Quis varius quam quisque id diam. Nulla pellentesque dignissim enim sit amet.',
+        note: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Magna ac placerat vestibulum lectus. Morbi tincidunt ornare massa eget egestas purus. Quis varius quam quisque id diam. Nulla pellentesque dignissim enim sit amet.',
         savedObjectId: 'noteId1',
         updated: 1553700738 * 1000,
         updatedBy: 'alice',
@@ -1644,106 +1644,91 @@ export const mockTimelineResults: OpenTimelineResult[] = [
         updatedBy: 'alice',
       },
       {
-        note:
-          'Cras tincidunt lobortis feugiat vivamus at augue eget arcu dictum. Morbi quis commodo odio aenean sed. Sit amet aliquam id diam. Enim nec dui nunc mattis enim ut tellus elementum.',
+        note: 'Cras tincidunt lobortis feugiat vivamus at augue eget arcu dictum. Morbi quis commodo odio aenean sed. Sit amet aliquam id diam. Enim nec dui nunc mattis enim ut tellus elementum.',
         savedObjectId: 'noteId3',
         updated: 1553700740 * 1000,
         updatedBy: 'bob',
       },
       {
-        note:
-          'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
+        note: 'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
         savedObjectId: 'noteId4',
         updated: 1553700741 * 1000,
         updatedBy: 'alice',
       },
       {
-        note:
-          'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
+        note: 'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
         savedObjectId: 'noteId5',
         updated: 1553700742 * 1000,
         updatedBy: 'alice',
       },
       {
-        note:
-          'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
+        note: 'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
         savedObjectId: 'noteId6',
         updated: 1553700743 * 1000,
         updatedBy: 'alice',
       },
       {
-        note:
-          'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
+        note: 'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
         savedObjectId: 'noteId7',
         updated: 1553700744 * 1000,
         updatedBy: 'alice',
       },
       {
-        note:
-          'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
+        note: 'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
         savedObjectId: 'noteId8',
         updated: 1553700745 * 1000,
         updatedBy: 'alice',
       },
       {
-        note:
-          'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
+        note: 'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
         savedObjectId: 'noteId9',
         updated: 1553700746 * 1000,
         updatedBy: 'alice',
       },
       {
-        note:
-          'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
+        note: 'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
         savedObjectId: 'noteId10',
         updated: 1553700747 * 1000,
         updatedBy: 'alice',
       },
       {
-        note:
-          'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
+        note: 'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
         savedObjectId: 'noteId11',
         updated: 1553700748 * 1000,
         updatedBy: 'alice',
       },
       {
-        note:
-          'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
+        note: 'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
         savedObjectId: 'noteId12',
         updated: 1553700749 * 1000,
         updatedBy: 'alice',
       },
       {
-        note:
-          'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
+        note: 'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
         savedObjectId: 'noteId13',
         updated: 1553700750 * 1000,
         updatedBy: 'alice',
       },
       {
-        note:
-          'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
+        note: 'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
         savedObjectId: 'noteId14',
         updated: 1553700751 * 1000,
         updatedBy: 'alice',
       },
       {
-        note:
-          'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
+        note: 'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
         savedObjectId: 'noteId15',
         updated: 1553700752 * 1000,
         updatedBy: 'alice',
       },
       {
-        note:
-          'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
+        note: 'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
         savedObjectId: 'noteId16',
         updated: 1553700753 * 1000,
         updatedBy: 'alice',
       },
       {
-        note:
-          'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
+        note: 'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
         savedObjectId: 'noteId17',
         updated: 1553700753 * 1000,
         updatedBy: 'alice',
@@ -1836,8 +1821,7 @@ export const mockTimelineResults: OpenTimelineResult[] = [
         updatedBy: 'olivia',
       },
       {
-        note:
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+        note: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
         savedObjectId: 'noteId6',
         updated: 1543604192 * 1000,
         updatedBy: 'olivia',
@@ -1874,8 +1858,7 @@ export const mockTimelineResults: OpenTimelineResult[] = [
     noteIds: [],
     notes: [
       {
-        note:
-          'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
+        note: 'Lobortis elementum nibh tellus molestie nunc non blandit massa enim. Vulputate ut pharetra sit amet aliquam id diam.',
         savedObjectId: 'noteId7',
         updated: 1541677314 * 1000,
         updatedBy: 'charlotte',
@@ -1930,53 +1913,57 @@ export const mockTimelineResults: OpenTimelineResult[] = [
   },
 ];
 
+const mockTimelineModelColumns: TimelineModel['columns'] = [
+  {
+    columnHeaderType: 'not-filtered',
+    id: '@timestamp',
+    initialWidth: 190,
+  },
+  {
+    columnHeaderType: 'not-filtered',
+    id: 'message',
+    initialWidth: 180,
+  },
+  {
+    columnHeaderType: 'not-filtered',
+    id: 'event.category',
+    initialWidth: 180,
+  },
+  {
+    columnHeaderType: 'not-filtered',
+    id: 'host.name',
+    initialWidth: 180,
+  },
+  {
+    columnHeaderType: 'not-filtered',
+    id: 'source.ip',
+    initialWidth: 180,
+  },
+  {
+    columnHeaderType: 'not-filtered',
+    id: 'destination.ip',
+    initialWidth: 180,
+  },
+  {
+    columnHeaderType: 'not-filtered',
+    id: 'user.name',
+    initialWidth: 180,
+  },
+];
 export const mockTimelineModel: TimelineModel = {
   activeTab: TimelineTabs.query,
   prevActiveTab: TimelineTabs.notes,
-  columns: [
-    {
-      columnHeaderType: 'not-filtered',
-      id: '@timestamp',
-      initialWidth: 190,
-    },
-    {
-      columnHeaderType: 'not-filtered',
-      id: 'message',
-      initialWidth: 180,
-    },
-    {
-      columnHeaderType: 'not-filtered',
-      id: 'event.category',
-      initialWidth: 180,
-    },
-    {
-      columnHeaderType: 'not-filtered',
-      id: 'host.name',
-      initialWidth: 180,
-    },
-    {
-      columnHeaderType: 'not-filtered',
-      id: 'source.ip',
-      initialWidth: 180,
-    },
-    {
-      columnHeaderType: 'not-filtered',
-      id: 'destination.ip',
-      initialWidth: 180,
-    },
-    {
-      columnHeaderType: 'not-filtered',
-      id: 'user.name',
-      initialWidth: 180,
-    },
-  ],
+  columns: mockTimelineModelColumns,
+  defaultColumns: mockTimelineModelColumns,
   dataProviders: [],
+  dataViewId: null,
   dateRange: {
     end: '2020-03-18T13:52:38.929Z',
     start: '2020-03-18T13:46:38.929Z',
   },
   deletedEventIds: [],
   description: 'This is a sample rule description',
+  documentType: '',
   eqlOptions: {
     eventCategoryField: 'event.category',
     tiebreakerField: 'event.sequence',
@@ -1999,7 +1986,7 @@ export const mockTimelineModel: TimelineModel = {
         params: '"{"query":"placeholder"}"',
         type: 'phrase',
       },
-      query: '"{"match_phrase":{"host.name":"placeholder"}}"',
+      query: { match_phrase: { 'host.name': 'placeholder' } },
     },
   ],
   highlightedDropAndProviderId: '',
@@ -2015,6 +2002,7 @@ export const mockTimelineModel: TimelineModel = {
   kqlQuery: {
     filterQuery: null,
   },
+  queryFields: [],
   itemsPerPage: 25,
   itemsPerPageOptions: [10, 25, 50, 100],
   loadingEventIds: [],
@@ -2022,13 +2010,16 @@ export const mockTimelineModel: TimelineModel = {
   pinnedEventIds: {},
   pinnedEventsSaveObject: {},
   savedObjectId: 'ef579e40-jibber-jabber',
+  selectAll: false,
   selectedEventIds: {},
+  sessionViewConfig: null,
   show: false,
   showCheckboxes: false,
   sort: [
     {
       columnId: '@timestamp',
-      columnType: 'number',
+      columnType: 'date',
+      esTypes: ['date'],
       sortDirection: Direction.desc,
     },
   ],
@@ -2076,36 +2067,45 @@ export const mockTimelineResult = {
   stale: false,
 };
 
+const defaultTimelineColumns: CreateTimelineProps['timeline']['columns'] = [
+  {
+    columnHeaderType: 'not-filtered',
+    id: '@timestamp',
+    type: 'date',
+    esTypes: ['date'],
+    initialWidth: 190,
+  },
+  { columnHeaderType: 'not-filtered', id: 'message', initialWidth: 180 },
+  { columnHeaderType: 'not-filtered', id: 'event.category', initialWidth: 180 },
+  { columnHeaderType: 'not-filtered', id: 'event.action', initialWidth: 180 },
+  { columnHeaderType: 'not-filtered', id: 'host.name', initialWidth: 180 },
+  { columnHeaderType: 'not-filtered', id: 'source.ip', initialWidth: 180 },
+  { columnHeaderType: 'not-filtered', id: 'destination.ip', initialWidth: 180 },
+  { columnHeaderType: 'not-filtered', id: 'user.name', initialWidth: 180 },
+];
 export const defaultTimelineProps: CreateTimelineProps = {
   from: '2018-11-05T18:58:25.937Z',
   timeline: {
     activeTab: TimelineTabs.query,
     prevActiveTab: TimelineTabs.query,
-    columns: [
-      { columnHeaderType: 'not-filtered', id: '@timestamp', type: 'number', initialWidth: 190 },
-      { columnHeaderType: 'not-filtered', id: 'message', initialWidth: 180 },
-      { columnHeaderType: 'not-filtered', id: 'event.category', initialWidth: 180 },
-      { columnHeaderType: 'not-filtered', id: 'event.action', initialWidth: 180 },
-      { columnHeaderType: 'not-filtered', id: 'host.name', initialWidth: 180 },
-      { columnHeaderType: 'not-filtered', id: 'source.ip', initialWidth: 180 },
-      { columnHeaderType: 'not-filtered', id: 'destination.ip', initialWidth: 180 },
-      { columnHeaderType: 'not-filtered', id: 'user.name', initialWidth: 180 },
-    ],
+    columns: defaultTimelineColumns,
+    defaultColumns: defaultTimelineColumns,
     dataProviders: [
       {
         and: [],
         enabled: true,
         excluded: false,
-        id:
-          'send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-timeline-1-alert-id-1',
+        id: 'send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-timeline-1-alert-id-1',
         kqlQuery: '',
         name: '1',
         queryMatch: { field: '_id', operator: ':', value: '1' },
       },
     ],
+    dataViewId: null,
     dateRange: { end: '2018-11-05T19:03:25.937Z', start: '2018-11-05T18:58:25.937Z' },
     deletedEventIds: [],
     description: '',
+    documentType: '',
     eqlOptions: {
       eventCategoryField: 'event.category',
       query: '',
@@ -2137,11 +2137,21 @@ export const defaultTimelineProps: CreateTimelineProps = {
     noteIds: [],
     pinnedEventIds: {},
     pinnedEventsSaveObject: {},
+    queryFields: [],
     savedObjectId: null,
+    selectAll: false,
     selectedEventIds: {},
+    sessionViewConfig: null,
     show: false,
     showCheckboxes: false,
-    sort: [{ columnId: '@timestamp', columnType: 'number', sortDirection: Direction.desc }],
+    sort: [
+      {
+        columnId: '@timestamp',
+        columnType: 'date',
+        esTypes: ['date'],
+        sortDirection: Direction.desc,
+      },
+    ],
     status: TimelineStatus.draft,
     title: '',
     timelineType: TimelineType.default,
@@ -2168,16 +2178,3 @@ export const mockTimelineDetails: TimelineEventsDetailsItem[] = [
     isObjectArray: false,
   },
 ];
-
-export const mockTimelineDetailsApollo = {
-  data: {
-    source: {
-      TimelineDetails: {
-        data: mockTimelineDetails,
-      },
-    },
-  },
-  loading: false,
-  networkStatus: 7,
-  stale: false,
-};

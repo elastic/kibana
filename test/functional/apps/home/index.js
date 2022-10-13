@@ -9,9 +9,7 @@
 export default function ({ getService, loadTestFile }) {
   const browser = getService('browser');
 
-  describe('homepage app', function () {
-    this.tags('ciGroup6');
-
+  describe('home app', function () {
     before(function () {
       return browser.setWindowSize(1200, 800);
     });
@@ -21,5 +19,6 @@ export default function ({ getService, loadTestFile }) {
     loadTestFile(require.resolve('./_newsfeed'));
     loadTestFile(require.resolve('./_add_data'));
     loadTestFile(require.resolve('./_sample_data'));
+    loadTestFile(require.resolve('./_welcome'));
   });
 }

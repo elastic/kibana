@@ -6,16 +6,17 @@
  */
 
 import type React from 'react';
-import { EuiTitleSize } from '@elastic/eui';
-import { ScaleType, Position, TickFormatter } from '@elastic/charts';
-import { ActionCreator } from 'redux';
-import { ESQuery } from '../../../../common/typed_json';
-import { InputsModelId } from '../../store/inputs/constants';
-import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
-import { UpdateDateRange } from '../charts/common';
-import { GlobalTimeArgs } from '../../containers/use_global_time';
-import { DocValueFields } from '../../../../common/search_strategy';
-import { Threshold } from '../../../detections/components/rules/query_preview';
+import type { EuiTitleSize } from '@elastic/eui';
+import type { ScaleType, Position, TickFormatter } from '@elastic/charts';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { ActionCreator } from 'redux';
+import type { ESQuery } from '../../../../common/typed_json';
+import type { InputsModelId } from '../../store/inputs/constants';
+import type { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
+import type { UpdateDateRange } from '../charts/common';
+import type { GlobalTimeArgs } from '../../containers/use_global_time';
+import type { FieldValueThreshold } from '../../../detections/components/rules/threshold_input';
+import type { GetLensAttributes, LensAttributes } from '../visualization_actions/types';
 
 export type MatrixHistogramMappingTypes = Record<
   string,
@@ -32,9 +33,11 @@ export type GetTitle = (matrixHistogramOption: MatrixHistogramOption) => string;
 export interface MatrixHistogramConfigs {
   defaultStackByOption: MatrixHistogramOption;
   errorMessage: string;
+  getLensAttributes?: GetLensAttributes;
   hideHistogramIfEmpty?: boolean;
   histogramType: MatrixHistogramType;
   legendPosition?: Position;
+  lensAttributes?: LensAttributes;
   mapping?: MatrixHistogramMappingTypes;
   stackByOptions: MatrixHistogramOption[];
   subtitle?: string | GetSubTitle;
@@ -52,6 +55,7 @@ interface MatrixHistogramBasicProps {
   legendPosition?: Position;
   mapping?: MatrixHistogramMappingTypes;
   panelHeight?: number;
+  paddingSize?: 's' | 'm' | 'l' | 'none';
   setQuery: GlobalTimeArgs['setQuery'];
   startDate: GlobalTimeArgs['from'];
   stackByOptions: MatrixHistogramOption[];
@@ -61,11 +65,11 @@ interface MatrixHistogramBasicProps {
 }
 
 export interface MatrixHistogramQueryProps {
-  docValueFields?: DocValueFields[];
   endDate: string;
   errorMessage: string;
   indexNames: string[];
   filterQuery?: ESQuery | string | undefined;
+  onError?: () => void;
   setAbsoluteRangeDatePicker?: ActionCreator<{
     id: InputsModelId;
     from: string;
@@ -75,9 +79,11 @@ export interface MatrixHistogramQueryProps {
   stackByField: string;
   startDate: string;
   histogramType: MatrixHistogramType;
-  threshold?: Threshold;
+  threshold?: FieldValueThreshold;
   skip?: boolean;
   isPtrIncluded?: boolean;
+  includeMissingData?: boolean;
+  runtimeMappings?: MappingRuntimeFields;
 }
 
 export interface MatrixHistogramProps extends MatrixHistogramBasicProps {
@@ -87,18 +93,6 @@ export interface MatrixHistogramProps extends MatrixHistogramBasicProps {
   showSpacer?: boolean;
   timelineId?: string;
   yTickFormatter?: (value: number) => string;
-}
-
-export interface HistogramBucket {
-  key_as_string: string;
-  key: number;
-  doc_count: number;
-}
-export interface GroupBucket {
-  key: string;
-  signals: {
-    buckets: HistogramBucket[];
-  };
 }
 
 export interface BarchartConfigs {

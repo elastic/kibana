@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, Plugin } from 'kibana/server';
-import { PluginInitializerContext } from 'kibana/public';
+import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
 
 export class NewsFeedSimulatorPlugin implements Plugin {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
@@ -60,7 +59,7 @@ export class NewsFeedSimulatorPlugin implements Plugin {
           title: { en: 'Staging too!' },
           description: { en: 'Hello world' },
           link_text: { en: 'Generic feed-viewer could go here' },
-          link_url: { en: 'https://feeds-staging.elastic.co' },
+          link_url: { en: 'https://feeds.elastic.co' },
           languages: null,
           badge: null,
           image_url: null,
@@ -72,7 +71,7 @@ export class NewsFeedSimulatorPlugin implements Plugin {
           title: { en: 'This item is expired!' },
           description: { en: 'This should not show up.' },
           link_text: { en: 'Generic feed-viewer could go here' },
-          link_url: { en: 'https://feeds-staging.elastic.co' },
+          link_url: { en: 'https://feeds.elastic.co' },
           languages: null,
           badge: null,
           image_url: null,

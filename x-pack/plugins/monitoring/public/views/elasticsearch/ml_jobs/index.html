@@ -1,9 +1,0 @@
-<monitoring-main product="elasticsearch" name="ml" is-ccr-enabled="{{ mlJobs.isCcrEnabled }}">
-  <monitoring-ml-listing
-    paginationSettings="mlJobs.pagination"
-    sorting="mlJobs.sorting"
-    on-table-change="mlJobs.onTableChange"
-    jobs="mlJobs.data.rows"
-    status="mlJobs.data.clusterStatus"
-  ></monitoring-ml-listing>
-</monitoring-main>

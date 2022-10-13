@@ -10,34 +10,33 @@ import { DraggableProvidedDragHandleProps } from 'react-beautiful-dnd';
 
 import { useValues } from 'kea';
 
-import { EuiSpacer } from '@elastic/eui';
+import type { SearchResult } from '@elastic/search-ui';
 
 import { EngineLogic } from '../../../engine';
 import { Result } from '../../../result';
-import { Result as ResultType, ResultAction } from '../../../result/types';
+import { ResultAction } from '../../../result/types';
 
 interface Props {
-  result: ResultType;
   actions: ResultAction[];
   dragHandleProps?: DraggableProvidedDragHandleProps;
+  result: SearchResult;
+  index?: number;
 }
 
-export const CurationResult: React.FC<Props> = ({ result, actions, dragHandleProps }) => {
+export const CurationResult: React.FC<Props> = ({ actions, dragHandleProps, result, index }) => {
   const {
     isMetaEngine,
     engine: { schema },
   } = useValues(EngineLogic);
 
   return (
-    <>
-      <Result
-        result={result}
-        actions={actions}
-        isMetaEngine={isMetaEngine}
-        schemaForTypeHighlights={schema}
-        dragHandleProps={dragHandleProps}
-      />
-      <EuiSpacer size="m" />
-    </>
+    <Result
+      result={result}
+      actions={actions}
+      isMetaEngine={isMetaEngine}
+      schemaForTypeHighlights={schema}
+      dragHandleProps={dragHandleProps}
+      resultPosition={typeof index === 'undefined' ? undefined : index + 1}
+    />
   );
 };

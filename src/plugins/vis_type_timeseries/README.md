@@ -1,1 +1,0 @@
-Contains everything around TSVB (the editor, visualizatin implementations and backends).

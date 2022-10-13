@@ -9,9 +9,8 @@ import type {
   AGENT_TYPE_EPHEMERAL,
   AGENT_TYPE_PERMANENT,
   AGENT_TYPE_TEMPORARY,
+  FleetServerAgentComponentStatuses,
 } from '../../constants';
-
-import type { FullAgentPolicy } from './agent_policy';
 
 export type AgentType =
   | typeof AGENT_TYPE_EPHEMERAL
@@ -32,16 +31,30 @@ export type AgentStatus =
 export type SimplifiedAgentStatus = 'healthy' | 'unhealthy' | 'updating' | 'offline' | 'inactive';
 
 export type AgentActionType =
-  | 'POLICY_CHANGE'
   | 'UNENROLL'
   | 'UPGRADE'
   | 'SETTINGS'
-  | 'POLICY_REASSIGN';
+  | 'POLICY_REASSIGN'
+  | 'CANCEL'
+  | 'FORCE_UNENROLL'
+  | 'UPDATE_TAGS';
+
+type FleetServerAgentComponentStatusTuple = typeof FleetServerAgentComponentStatuses;
+export type FleetServerAgentComponentStatus = FleetServerAgentComponentStatusTuple[number];
 
 export interface NewAgentAction {
   type: AgentActionType;
   data?: any;
+  ack_data?: any;
   sent_at?: string;
+  agents: string[];
+  created_at?: string;
+  id?: string;
+  expiration?: string;
+  start_time?: string;
+  minimum_execution_duration?: number;
+  source_uri?: string;
+  total?: number;
 }
 
 export interface AgentAction extends NewAgentAction {
@@ -49,81 +62,9 @@ export interface AgentAction extends NewAgentAction {
   data?: any;
   sent_at?: string;
   id: string;
-  agent_id: string;
   created_at: string;
   ack_data?: any;
 }
-
-export interface AgentPolicyAction extends NewAgentAction {
-  id: string;
-  type: AgentActionType;
-  data: {
-    policy: FullAgentPolicy;
-  };
-  policy_id: string;
-  policy_revision: number;
-  created_at: string;
-  ack_data?: any;
-}
-
-// Make policy change action renaming BWC with agent version <= 7.9
-// eslint-disable-next-line @typescript-eslint/naming-convention
-export type AgentPolicyActionV7_9 = Omit<AgentPolicyAction, 'type' | 'data'> & {
-  type: 'CONFIG_CHANGE';
-  data: {
-    config: FullAgentPolicy;
-  };
-};
-
-interface CommonAgentActionSOAttributes {
-  type: AgentActionType;
-  sent_at?: string;
-  timestamp?: string;
-  created_at: string;
-  data?: string;
-  ack_data?: string;
-}
-
-export type AgentActionSOAttributes = CommonAgentActionSOAttributes & {
-  agent_id: string;
-};
-export type AgentPolicyActionSOAttributes = CommonAgentActionSOAttributes & {
-  policy_id: string;
-  policy_revision: number;
-};
-export type BaseAgentActionSOAttributes = AgentActionSOAttributes | AgentPolicyActionSOAttributes;
-
-export interface NewAgentEvent {
-  type: 'STATE' | 'ERROR' | 'ACTION_RESULT' | 'ACTION';
-  subtype: // State
-  | 'RUNNING'
-    | 'STARTING'
-    | 'IN_PROGRESS'
-    | 'CONFIG'
-    | 'FAILED'
-    | 'STOPPING'
-    | 'STOPPED'
-    | 'DEGRADED'
-    | 'UPDATING'
-    // Action results
-    | 'DATA_DUMP'
-    // Actions
-    | 'ACKNOWLEDGED'
-    | 'UNKNOWN';
-  timestamp: string;
-  message: string;
-  payload?: any;
-  agent_id: string;
-  action_id?: string;
-  policy_id?: string;
-  stream_id?: string;
-}
-
-export interface AgentEvent extends NewAgentEvent {
-  id: string;
-}
-
-export type AgentEventSOAttributes = NewAgentEvent;
 
 export interface AgentMetadata {
   [x: string]: any;
@@ -143,24 +84,82 @@ interface AgentBase {
   policy_revision?: number | null;
   last_checkin?: string;
   last_checkin_status?: 'error' | 'online' | 'degraded' | 'updating';
+  last_checkin_message?: string;
   user_provided_metadata: AgentMetadata;
   local_metadata: AgentMetadata;
+  tags?: string[];
+  components?: FleetServerAgentComponent[];
 }
 
 export interface Agent extends AgentBase {
   id: string;
-  current_error_events: AgentEvent[];
   access_api_key?: string;
-  status?: string;
+  // @deprecated
+  default_api_key_history?: FleetServerAgent['default_api_key_history'];
+  outputs?: Record<
+    string,
+    {
+      api_key_id: string;
+      to_retire_api_key_ids?: FleetServerAgent['default_api_key_history'];
+    }
+  >;
+  status?: AgentStatus;
   packages: string[];
+  sort?: Array<number | string | null>;
 }
 
 export interface AgentSOAttributes extends AgentBase {
-  current_error_events?: string;
   packages?: string[];
 }
 
+export interface CurrentUpgrade {
+  actionId: string;
+  complete: boolean;
+  nbAgents: number;
+  nbAgentsAck: number;
+  version: string;
+  startTime?: string;
+}
+
+export interface ActionStatus {
+  actionId: string;
+  // how many agents are successfully included in action documents
+  nbAgentsActionCreated: number;
+  // how many agents acknowledged the action sucessfully (completed)
+  nbAgentsAck: number;
+  // how many agents failed
+  nbAgentsFailed: number;
+  version?: string;
+  startTime?: string;
+  type?: string;
+  // how many agents were actioned by the user
+  nbAgentsActioned: number;
+  status: 'COMPLETE' | 'EXPIRED' | 'CANCELLED' | 'FAILED' | 'IN_PROGRESS';
+  expiration?: string;
+  completionTime?: string;
+  cancellationTime?: string;
+  newPolicyId?: string;
+  creationTime: string;
+}
+
 // Generated from FleetServer schema.json
+export interface FleetServerAgentComponentUnit {
+  id: string;
+  type: 'input' | 'output';
+  status: FleetServerAgentComponentStatus;
+  message: string;
+  payload?: {
+    [key: string]: any;
+  };
+}
+
+interface FleetServerAgentComponent {
+  id: string;
+  type: string;
+  status: FleetServerAgentComponentStatus;
+  message: string;
+  units: FleetServerAgentComponentUnit[];
+}
 
 /**
  * An Elastic Agent that has enrolled into Fleet
@@ -236,9 +235,13 @@ export interface FleetServerAgent {
    */
   last_checkin?: string;
   /**
-   * Lst checkin status
+   * Last checkin status
    */
   last_checkin_status?: 'error' | 'online' | 'degraded' | 'updating';
+  /**
+   * Last checkin message
+   */
+  last_checkin_message?: string;
   /**
    * ID of the API key the Elastic Agent uses to authenticate with elasticsearch
    */
@@ -259,6 +262,21 @@ export interface FleetServerAgent {
    * The last acknowledged action sequence number for the Elastic Agent
    */
   action_seq_no?: number;
+  /**
+   * A list of tags used for organizing/filtering agents
+   */
+  tags?: string[];
+  /**
+   * Default API Key History
+   */
+  default_api_key_history?: Array<{
+    id: string;
+    retired_at: string;
+  }>;
+  /**
+   * Components array
+   */
+  components?: FleetServerAgentComponent[];
 }
 /**
  * An Elastic Agent metadata
@@ -311,11 +329,24 @@ export interface FleetServerAgentAction {
    * The Agent IDs the action is intended for. No support for json.RawMessage with the current generator. Could be useful to lazy parse the agent ids
    */
   agents?: string[];
+
+  /**
+   * Date when the agent should execute that agent. This field could be altered by Fleet server for progressive rollout of the action.
+   */
+  start_time?: string;
+
+  /**
+   * Minimun execution duration in seconds, used for progressive rollout of the action.
+   */
+  minimum_execution_duration?: number;
+
   /**
    * The opaque payload.
    */
   data?: {
     [k: string]: unknown;
   };
+
+  total?: number;
   [k: string]: unknown;
 }

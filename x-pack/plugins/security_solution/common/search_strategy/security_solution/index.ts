@@ -4,32 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { estypes } from '@elastic/elasticsearch';
-import { IEsSearchRequest } from '../../../../../../src/plugins/data/common';
-import { ESQuery } from '../../typed_json';
-import {
+import type { IEsSearchRequest } from '@kbn/data-plugin/common';
+import type { ESQuery } from '../../typed_json';
+import type {
   HostDetailsStrategyResponse,
   HostDetailsRequestOptions,
   HostsOverviewStrategyResponse,
-  HostAuthenticationsRequestOptions,
-  HostAuthenticationsStrategyResponse,
   HostOverviewRequestOptions,
-  HostFirstLastSeenStrategyResponse,
   HostsQueries,
   HostsRequestOptions,
   HostsStrategyResponse,
   HostsUncommonProcessesStrategyResponse,
   HostsUncommonProcessesRequestOptions,
   HostsKpiQueries,
-  HostsKpiAuthenticationsStrategyResponse,
-  HostsKpiAuthenticationsRequestOptions,
   HostsKpiHostsStrategyResponse,
   HostsKpiHostsRequestOptions,
   HostsKpiUniqueIpsStrategyResponse,
   HostsKpiUniqueIpsRequestOptions,
-  HostFirstLastSeenRequestOptions,
 } from './hosts';
-import {
+import type {
   NetworkQueries,
   NetworkDetailsStrategyResponse,
   NetworkDetailsRequestOptions,
@@ -59,38 +52,78 @@ import {
   NetworkKpiUniquePrivateIpsStrategyResponse,
   NetworkKpiUniquePrivateIpsRequestOptions,
 } from './network';
-import {
+import type {
   MatrixHistogramQuery,
   MatrixHistogramRequestOptions,
   MatrixHistogramStrategyResponse,
 } from './matrix_histogram';
-import { TimerangeInput, SortField, PaginationInput, PaginationInputPaginated } from '../common';
+import type { TimerangeInput, SortField, PaginationInputPaginated } from '../common';
+import type {
+  CtiEventEnrichmentRequestOptions,
+  CtiEventEnrichmentStrategyResponse,
+  CtiQueries,
+  CtiDataSourceRequestOptions,
+  CtiDataSourceStrategyResponse,
+} from './cti';
 
+import type {
+  RiskQueries,
+  KpiRiskScoreStrategyResponse,
+  KpiRiskScoreRequestOptions,
+  HostsRiskScoreStrategyResponse,
+  UsersRiskScoreStrategyResponse,
+  RiskScoreRequestOptions,
+} from './risk_score';
+import type { UsersQueries } from './users';
+import type { UserDetailsRequestOptions, UserDetailsStrategyResponse } from './users/details';
+import type {
+  TotalUsersKpiRequestOptions,
+  TotalUsersKpiStrategyResponse,
+} from './users/kpi/total_users';
+
+import type {
+  UsersKpiAuthenticationsRequestOptions,
+  UsersKpiAuthenticationsStrategyResponse,
+} from './users/kpi/authentications';
+
+import type { UsersRequestOptions, UsersStrategyResponse } from './users/all';
+import type {
+  UserAuthenticationsRequestOptions,
+  UserAuthenticationsStrategyResponse,
+} from './users/authentications';
+import type {
+  FirstLastSeenQuery,
+  FirstLastSeenRequestOptions,
+  FirstLastSeenStrategyResponse,
+} from './first_last_seen';
+
+export * from './cti';
 export * from './hosts';
+export * from './risk_score';
 export * from './matrix_histogram';
 export * from './network';
+export * from './users';
+export * from './first_last_seen';
 
 export type FactoryQueryTypes =
   | HostsQueries
   | HostsKpiQueries
+  | UsersQueries
   | NetworkQueries
   | NetworkKpiQueries
-  | typeof MatrixHistogramQuery;
+  | RiskQueries
+  | CtiQueries
+  | typeof MatrixHistogramQuery
+  | typeof FirstLastSeenQuery;
 
 export interface RequestBasicOptions extends IEsSearchRequest {
   timerange: TimerangeInput;
   filterQuery: ESQuery | string | undefined;
   defaultIndex: string[];
-  docValueFields?: estypes.DocValueField[];
   factoryQueryType?: FactoryQueryTypes;
 }
 
 /** A mapping of semantic fields to their document counterparts */
-
-export interface RequestOptions<Field = string> extends RequestBasicOptions {
-  pagination: PaginationInput;
-  sort: SortField<Field>;
-}
 
 export interface RequestOptionsPaginated<Field = string> extends RequestBasicOptions {
   pagination: PaginationInputPaginated;
@@ -103,18 +136,24 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? HostDetailsStrategyResponse
   : T extends HostsQueries.overview
   ? HostsOverviewStrategyResponse
-  : T extends HostsQueries.authentications
-  ? HostAuthenticationsStrategyResponse
-  : T extends HostsQueries.firstOrLastSeen
-  ? HostFirstLastSeenStrategyResponse
+  : T extends typeof FirstLastSeenQuery
+  ? FirstLastSeenStrategyResponse
   : T extends HostsQueries.uncommonProcesses
   ? HostsUncommonProcessesStrategyResponse
-  : T extends HostsKpiQueries.kpiAuthentications
-  ? HostsKpiAuthenticationsStrategyResponse
   : T extends HostsKpiQueries.kpiHosts
   ? HostsKpiHostsStrategyResponse
   : T extends HostsKpiQueries.kpiUniqueIps
   ? HostsKpiUniqueIpsStrategyResponse
+  : T extends UsersQueries.details
+  ? UserDetailsStrategyResponse
+  : T extends UsersQueries.kpiTotalUsers
+  ? TotalUsersKpiStrategyResponse
+  : T extends UsersQueries.authentications
+  ? UserAuthenticationsStrategyResponse
+  : T extends UsersQueries.users
+  ? UsersStrategyResponse
+  : T extends UsersQueries.kpiAuthentications
+  ? UsersKpiAuthenticationsStrategyResponse
   : T extends NetworkQueries.details
   ? NetworkDetailsStrategyResponse
   : T extends NetworkQueries.dns
@@ -143,6 +182,16 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? NetworkKpiUniquePrivateIpsStrategyResponse
   : T extends typeof MatrixHistogramQuery
   ? MatrixHistogramStrategyResponse
+  : T extends CtiQueries.eventEnrichment
+  ? CtiEventEnrichmentStrategyResponse
+  : T extends CtiQueries.dataSource
+  ? CtiDataSourceStrategyResponse
+  : T extends RiskQueries.hostsRiskScore
+  ? HostsRiskScoreStrategyResponse
+  : T extends RiskQueries.usersRiskScore
+  ? UsersRiskScoreStrategyResponse
+  : T extends RiskQueries.kpiRiskScore
+  ? KpiRiskScoreStrategyResponse
   : never;
 
 export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQueries.hosts
@@ -151,18 +200,24 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? HostDetailsRequestOptions
   : T extends HostsQueries.overview
   ? HostOverviewRequestOptions
-  : T extends HostsQueries.authentications
-  ? HostAuthenticationsRequestOptions
-  : T extends HostsQueries.firstOrLastSeen
-  ? HostFirstLastSeenRequestOptions
+  : T extends typeof FirstLastSeenQuery
+  ? FirstLastSeenRequestOptions
   : T extends HostsQueries.uncommonProcesses
   ? HostsUncommonProcessesRequestOptions
-  : T extends HostsKpiQueries.kpiAuthentications
-  ? HostsKpiAuthenticationsRequestOptions
   : T extends HostsKpiQueries.kpiHosts
   ? HostsKpiHostsRequestOptions
   : T extends HostsKpiQueries.kpiUniqueIps
   ? HostsKpiUniqueIpsRequestOptions
+  : T extends UsersQueries.authentications
+  ? UserAuthenticationsRequestOptions
+  : T extends UsersQueries.details
+  ? UserDetailsRequestOptions
+  : T extends UsersQueries.kpiTotalUsers
+  ? TotalUsersKpiRequestOptions
+  : T extends UsersQueries.users
+  ? UsersRequestOptions
+  : T extends UsersQueries.kpiAuthentications
+  ? UsersKpiAuthenticationsRequestOptions
   : T extends NetworkQueries.details
   ? NetworkDetailsRequestOptions
   : T extends NetworkQueries.dns
@@ -191,10 +246,18 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? NetworkKpiUniquePrivateIpsRequestOptions
   : T extends typeof MatrixHistogramQuery
   ? MatrixHistogramRequestOptions
+  : T extends CtiQueries.eventEnrichment
+  ? CtiEventEnrichmentRequestOptions
+  : T extends CtiQueries.dataSource
+  ? CtiDataSourceRequestOptions
+  : T extends RiskQueries.hostsRiskScore
+  ? RiskScoreRequestOptions
+  : T extends RiskQueries.usersRiskScore
+  ? RiskScoreRequestOptions
+  : T extends RiskQueries.kpiRiskScore
+  ? KpiRiskScoreRequestOptions
   : never;
 
-export interface DocValueFieldsInput {
-  field: string;
-
-  format: string;
+export interface CommonFields {
+  '@timestamp'?: string[];
 }

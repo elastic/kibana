@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { resolve } from 'path';
 import { ReportingAPIProvider } from './services';
 
@@ -33,9 +33,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...apiConfig.get('kbnTestServer'),
       serverArgs: [
         ...apiConfig.get('kbnTestServer.serverArgs'),
-        `--xpack.reporting.capture.networkPolicy.rules=${JSON.stringify(testPolicyRules)}`,
+        `--xpack.screenshotting.networkPolicy.rules=${JSON.stringify(testPolicyRules)}`,
         `--xpack.reporting.capture.maxAttempts=1`,
         `--xpack.reporting.csv.maxSizeBytes=6000`,
+        '--xpack.reporting.roles.enabled=false', // Reporting access control is implemented by sub-feature application privileges
       ],
     },
   };

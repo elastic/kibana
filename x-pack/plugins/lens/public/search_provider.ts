@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import levenshtein from 'js-levenshtein';
-import { ApplicationStart } from 'kibana/public';
+import type { ApplicationStart } from '@kbn/core/public';
 import { from, of } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
-import { GlobalSearchResultProvider } from '../../global_search/public';
-import { getFullPath } from '../common';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import type { GlobalSearchResultProvider } from '@kbn/global-search-plugin/public';
+import { getFullPath } from '../common/constants';
 
 /**
  * Global search provider adding a Lens entry.
@@ -52,15 +51,6 @@ export const getSearchProvider: (
           score = 90;
         } else if (searchableTitle.includes(term)) {
           score = 75;
-        } else {
-          const length = Math.max(term.length, searchableTitle.length);
-          const distance = levenshtein(term, searchableTitle);
-
-          // maximum lev distance is length, we compute the match ratio (lower distance is better)
-          const ratio = Math.floor((1 - distance / length) * 100);
-          if (ratio >= 60) {
-            score = ratio;
-          }
         }
         if (score === 0) return [];
         return [

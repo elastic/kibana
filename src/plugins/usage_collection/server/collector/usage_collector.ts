@@ -6,27 +6,27 @@
  * Side Public License, v 1.
  */
 
-import { Logger } from 'src/core/server';
-import { Collector, CollectorOptions } from './collector';
+import type { Logger } from '@kbn/core/server';
+import type { CollectorOptions } from './types';
+import { Collector } from './collector';
 
-// Enforce the `schema` property for UsageCollectors
+/**
+ * Same as {@link CollectorOptions} but with the `schema` property enforced
+ */
 export type UsageCollectorOptions<
   TFetchReturn = unknown,
-  WithKibanaRequest extends boolean = false,
   ExtraOptions extends object = {}
-> = CollectorOptions<TFetchReturn, WithKibanaRequest, ExtraOptions> &
-  Required<Pick<CollectorOptions<TFetchReturn, boolean>, 'schema'>>;
+> = CollectorOptions<TFetchReturn, ExtraOptions> &
+  Required<Pick<CollectorOptions<TFetchReturn>, 'schema'>>;
 
+/**
+ * @private Only used in fixtures as a type
+ */
 export class UsageCollector<TFetchReturn, ExtraOptions extends object = {}> extends Collector<
   TFetchReturn,
   ExtraOptions
 > {
-  constructor(
-    log: Logger,
-    // Needed because it doesn't affect on anything here but being explicit creates a lot of pain down the line
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    collectorOptions: UsageCollectorOptions<TFetchReturn, any, ExtraOptions>
-  ) {
+  constructor(log: Logger, collectorOptions: UsageCollectorOptions<TFetchReturn, ExtraOptions>) {
     super(log, collectorOptions);
   }
 }

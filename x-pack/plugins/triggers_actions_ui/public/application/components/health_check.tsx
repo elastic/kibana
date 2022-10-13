@@ -5,22 +5,23 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
-import { Option, none, some, fold } from 'fp-ts/lib/Option';
+import React from 'react';
+import { Option, none, some, fold, isSome } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { EuiEmptyPrompt, EuiCode } from '@elastic/eui';
-import { DocLinksStart } from 'kibana/public';
+import { EuiEmptyPrompt } from '@elastic/eui';
+import { DocLinksStart, HttpSetup } from '@kbn/core/public';
+import { AlertingFrameworkHealth } from '@kbn/alerting-plugin/common';
 import './health_check.scss';
 import { useHealthContext } from '../context/health_context';
 import { useKibana } from '../../common/lib/kibana';
 import { CenterJustifiedSpinner } from './center_justified_spinner';
 import { triggersActionsUiHealth } from '../../common/lib/health_api';
-import { alertingFrameworkHealth } from '../lib/alert_api';
+import { alertingFrameworkHealth } from '../lib/rule_api';
 
 interface Props {
   inFlyout?: boolean;
@@ -28,7 +29,7 @@ interface Props {
 }
 
 interface HealthStatus {
-  isAlertsAvailable: boolean;
+  isRulesAvailable: boolean;
   isSufficientlySecure: boolean;
   hasPermanentEncryptionKey: boolean;
 }
@@ -51,13 +52,23 @@ export const HealthCheck: React.FunctionComponent<Props> = ({
         isSufficientlySecure: false,
         hasPermanentEncryptionKey: false,
       };
-      if (healthStatus.isAlertsAvailable) {
-        const alertingHealthResult = await alertingFrameworkHealth({ http });
-        healthStatus.isSufficientlySecure = alertingHealthResult.isSufficientlySecure;
-        healthStatus.hasPermanentEncryptionKey = alertingHealthResult.hasPermanentEncryptionKey;
+      if (healthStatus.isRulesAvailable) {
+        // Get the framework health, but if not available, do NOT cause the
+        // framework health errors/toasts to appear, since the state is
+        // actually unknown. These also need to be set to clear the busy
+        // indicator.
+        const alertingHealthResult = await getAlertingFrameworkHealth(http);
+        if (isSome(alertingHealthResult)) {
+          healthStatus.isSufficientlySecure = alertingHealthResult.value.isSufficientlySecure;
+          healthStatus.hasPermanentEncryptionKey =
+            alertingHealthResult.value.hasPermanentEncryptionKey;
+        } else {
+          healthStatus.isSufficientlySecure = true;
+          healthStatus.hasPermanentEncryptionKey = true;
+        }
+        setAlertingHealth(some(healthStatus));
       }
 
-      setAlertingHealth(some(healthStatus));
       setLoadingHealthCheck(false);
     })();
   }, [http, setLoadingHealthCheck]);
@@ -69,29 +80,42 @@ export const HealthCheck: React.FunctionComponent<Props> = ({
     fold(
       () =>
         waitForCheck ? (
-          <Fragment>
+          <>
             <EuiSpacer size="m" />
             <CenterJustifiedSpinner />
-          </Fragment>
+          </>
         ) : (
-          <Fragment>{children}</Fragment>
+          <>{children}</>
         ),
       (healthCheck) => {
         return healthCheck?.isSufficientlySecure && healthCheck?.hasPermanentEncryptionKey ? (
-          <Fragment>{children}</Fragment>
-        ) : !healthCheck.isAlertsAvailable ? (
+          <>{children}</>
+        ) : !healthCheck.isRulesAvailable ? (
           <AlertsError docLinks={docLinks} className={className} />
         ) : !healthCheck.isSufficientlySecure && !healthCheck.hasPermanentEncryptionKey ? (
-          <TlsAndEncryptionError docLinks={docLinks} className={className} />
+          <ApiKeysAndEncryptionError docLinks={docLinks} className={className} />
         ) : !healthCheck.hasPermanentEncryptionKey ? (
           <EncryptionError docLinks={docLinks} className={className} />
         ) : (
-          <TlsError docLinks={docLinks} className={className} />
+          <ApiKeysDisabledError docLinks={docLinks} className={className} />
         );
       }
     )
   );
 };
+
+// Return as an Option, returning none if error occurred getting health.
+// Currently, alerting health returns a 403 if the user is not authorized
+// for rules.
+async function getAlertingFrameworkHealth(
+  http: HttpSetup
+): Promise<Option<AlertingFrameworkHealth>> {
+  try {
+    return some(await alertingFrameworkHealth({ http }));
+  } catch (err) {
+    return none;
+  }
+}
 
 interface PromptErrorProps {
   docLinks: DocLinksStart;
@@ -108,7 +132,7 @@ const EncryptionError = ({ docLinks, className }: PromptErrorProps) => (
       <h2>
         <FormattedMessage
           id="xpack.triggersActionsUI.components.healthCheck.encryptionErrorTitle"
-          defaultMessage="Encrypted saved objects are not available"
+          defaultMessage="Additional setup required"
         />
       </h2>
     }
@@ -118,22 +142,14 @@ const EncryptionError = ({ docLinks, className }: PromptErrorProps) => (
           {i18n.translate(
             'xpack.triggersActionsUI.components.healthCheck.encryptionErrorBeforeKey',
             {
-              defaultMessage: 'To create a rule, set a value for ',
-            }
-          )}
-          <EuiCode>{'xpack.encryptedSavedObjects.encryptionKey'}</EuiCode>
-          {i18n.translate(
-            'xpack.triggersActionsUI.components.healthCheck.encryptionErrorAfterKey',
-            {
-              defaultMessage:
-                ' in your kibana.yml file and ensure the Encrypted Saved Objects plugin is enabled. ',
+              defaultMessage: 'You must configure an encryption key to use Alerting. ',
             }
           )}
           <EuiLink href={docLinks.links.alerting.generalSettings} external target="_blank">
             {i18n.translate(
               'xpack.triggersActionsUI.components.healthCheck.encryptionErrorAction',
               {
-                defaultMessage: 'Learn how.',
+                defaultMessage: 'Learn more.',
               }
             )}
           </EuiLink>
@@ -143,7 +159,7 @@ const EncryptionError = ({ docLinks, className }: PromptErrorProps) => (
   />
 );
 
-const TlsError = ({ docLinks, className }: PromptErrorProps) => (
+const ApiKeysDisabledError = ({ docLinks, className }: PromptErrorProps) => (
   <EuiEmptyPrompt
     iconType="watchesApp"
     data-test-subj="actionNeededEmptyPrompt"
@@ -152,22 +168,28 @@ const TlsError = ({ docLinks, className }: PromptErrorProps) => (
     title={
       <h2>
         <FormattedMessage
-          id="xpack.triggersActionsUI.components.healthCheck.tlsErrorTitle"
-          defaultMessage="You must enable Transport Layer Security"
+          id="xpack.triggersActionsUI.components.healthCheck.apiKeysDisabledErrorTitle"
+          defaultMessage="Additional setup required"
         />
       </h2>
     }
     body={
       <div className={`${className}__body`}>
         <p role="banner">
-          {i18n.translate('xpack.triggersActionsUI.components.healthCheck.tlsError', {
-            defaultMessage:
-              'Alerting relies on API keys, which require TLS between Elasticsearch and Kibana. ',
+          {i18n.translate('xpack.triggersActionsUI.components.healthCheck.apiKeysDisabledError', {
+            defaultMessage: 'You must enable API keys to use Alerting. ',
           })}
-          <EuiLink href={docLinks.links.security.kibanaTLS} external target="_blank">
-            {i18n.translate('xpack.triggersActionsUI.components.healthCheck.tlsErrorAction', {
-              defaultMessage: 'Learn how to enable TLS.',
-            })}
+          <EuiLink
+            href={docLinks.links.security.elasticsearchEnableApiKeys}
+            external
+            target="_blank"
+          >
+            {i18n.translate(
+              'xpack.triggersActionsUI.components.healthCheck.apiKeysDisabledErrorAction',
+              {
+                defaultMessage: 'Learn more.',
+              }
+            )}
           </EuiLink>
         </p>
       </div>
@@ -206,7 +228,7 @@ const AlertsError = ({ docLinks, className }: PromptErrorProps) => (
   />
 );
 
-const TlsAndEncryptionError = ({ docLinks, className }: PromptErrorProps) => (
+const ApiKeysAndEncryptionError = ({ docLinks, className }: PromptErrorProps) => (
   <EuiEmptyPrompt
     iconType="watchesApp"
     data-test-subj="actionNeededEmptyPrompt"
@@ -215,7 +237,7 @@ const TlsAndEncryptionError = ({ docLinks, className }: PromptErrorProps) => (
     title={
       <h2>
         <FormattedMessage
-          id="xpack.triggersActionsUI.components.healthCheck.tlsAndEncryptionErrorTitle"
+          id="xpack.triggersActionsUI.components.healthCheck.apiKeysAndEncryptionErrorTitle"
           defaultMessage="Additional setup required"
         />
       </h2>
@@ -223,15 +245,18 @@ const TlsAndEncryptionError = ({ docLinks, className }: PromptErrorProps) => (
     body={
       <div className={`${className}__body`}>
         <p role="banner">
-          {i18n.translate('xpack.triggersActionsUI.components.healthCheck.tlsAndEncryptionError', {
-            defaultMessage:
-              'You must enable Transport Layer Security between Kibana and Elasticsearch and configure an encryption key in your kibana.yml file. ',
-          })}
+          {i18n.translate(
+            'xpack.triggersActionsUI.components.healthCheck.apiKeysAndEncryptionError',
+            {
+              defaultMessage:
+                'You must enable API keys and configure an encryption key to use Alerting. ',
+            }
+          )}
           <EuiLink href={docLinks.links.alerting.setupPrerequisites} external target="_blank">
             {i18n.translate(
-              'xpack.triggersActionsUI.components.healthCheck.tlsAndEncryptionErrorAction',
+              'xpack.triggersActionsUI.components.healthCheck.apiKeysAndEncryptionErrorAction',
               {
-                defaultMessage: 'Learn how.',
+                defaultMessage: 'Learn more.',
               }
             )}
           </EuiLink>

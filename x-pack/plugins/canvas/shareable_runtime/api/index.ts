@@ -6,9 +6,9 @@
  */
 
 import 'core-js/stable';
-import 'regenerator-runtime/runtime';
+import '@babel/runtime/regenerator';
 import 'whatwg-fetch';
 import 'jquery';
-import '@kbn/ui-shared-deps/flot_charts';
+import '@kbn/flot-charts';
 
 export * from './shareable';

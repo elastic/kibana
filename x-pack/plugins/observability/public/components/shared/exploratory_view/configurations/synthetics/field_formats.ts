@@ -6,6 +6,13 @@
  */
 
 import { FieldFormat } from '../../types';
+import {
+  SYNTHETICS_DCL,
+  SYNTHETICS_DOCUMENT_ONLOAD,
+  SYNTHETICS_FCP,
+  SYNTHETICS_LCP,
+  SYNTHETICS_STEP_DURATION,
+} from '../constants/field_names/synthetics';
 
 export const syntheticsFieldFormats: FieldFormat[] = [
   {
@@ -14,9 +21,75 @@ export const syntheticsFieldFormats: FieldFormat[] = [
       id: 'duration',
       params: {
         inputFormat: 'microseconds',
-        outputFormat: 'asMilliseconds',
-        outputPrecision: 0,
+        outputFormat: 'humanizePrecise',
+        outputPrecision: 1,
         showSuffix: true,
+        useShortSuffix: true,
+      },
+    },
+  },
+  {
+    field: SYNTHETICS_STEP_DURATION,
+    format: {
+      id: 'duration',
+      params: {
+        inputFormat: 'microseconds',
+        outputFormat: 'humanizePrecise',
+        outputPrecision: 1,
+        showSuffix: true,
+        useShortSuffix: true,
+      },
+    },
+  },
+  {
+    field: SYNTHETICS_LCP,
+    format: {
+      id: 'duration',
+      params: {
+        inputFormat: 'microseconds',
+        outputFormat: 'humanizePrecise',
+        outputPrecision: 1,
+        showSuffix: true,
+        useShortSuffix: true,
+      },
+    },
+  },
+  {
+    field: SYNTHETICS_FCP,
+    format: {
+      id: 'duration',
+      params: {
+        inputFormat: 'microseconds',
+        outputFormat: 'humanizePrecise',
+        outputPrecision: 1,
+        showSuffix: true,
+        useShortSuffix: true,
+      },
+    },
+  },
+  {
+    field: SYNTHETICS_DOCUMENT_ONLOAD,
+    format: {
+      id: 'duration',
+      params: {
+        inputFormat: 'microseconds',
+        outputFormat: 'humanizePrecise',
+        outputPrecision: 1,
+        showSuffix: true,
+        useShortSuffix: true,
+      },
+    },
+  },
+  {
+    field: SYNTHETICS_DCL,
+    format: {
+      id: 'duration',
+      params: {
+        inputFormat: 'microseconds',
+        outputFormat: 'humanizePrecise',
+        outputPrecision: 1,
+        showSuffix: true,
+        useShortSuffix: true,
       },
     },
   },

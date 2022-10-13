@@ -5,6 +5,12 @@
  * 2.0.
  */
 
-import { QueryClient } from 'react-query';
+import { QueryClient } from '@tanstack/react-query';
 
-export const queryClient = new QueryClient();
+export const queryClient = new QueryClient({
+  logger: {
+    log: () => null,
+    warn: () => null,
+    error: () => null,
+  },
+});

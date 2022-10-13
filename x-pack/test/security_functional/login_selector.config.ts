@@ -6,7 +6,7 @@
  */
 
 import { resolve } from 'path';
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { services } from '../functional/services';
 import { pageObjects } from '../functional/page_objects';
 
@@ -17,13 +17,17 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     require.resolve('../../../test/common/config.js')
   );
   const kibanaFunctionalConfig = await readConfigFile(
-    require.resolve('../../../test/functional/config.js')
+    require.resolve('../../../test/functional/config.base.js')
   );
 
   const kibanaPort = kibanaFunctionalConfig.get('servers.kibana.port');
   const idpPath = resolve(
     __dirname,
     '../security_api_integration/fixtures/saml/saml_provider/metadata.xml'
+  );
+  const idpNeverLoginPath = resolve(
+    __dirname,
+    '../security_api_integration/fixtures/saml/idp_metadata_never_login.xml'
   );
   const samlIdPPlugin = resolve(
     __dirname,
@@ -53,6 +57,13 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `xpack.security.authc.realms.saml.saml1.sp.logout=http://localhost:${kibanaPort}/logout`,
         `xpack.security.authc.realms.saml.saml1.sp.acs=http://localhost:${kibanaPort}/api/security/saml/callback`,
         'xpack.security.authc.realms.saml.saml1.attributes.principal=urn:oid:0.0.7',
+        'xpack.security.authc.realms.saml.saml_never.order=2',
+        `xpack.security.authc.realms.saml.saml_never.idp.metadata.path=${idpNeverLoginPath}`,
+        'xpack.security.authc.realms.saml.saml_never.idp.entity_id=http://www.elastic.co/saml1',
+        `xpack.security.authc.realms.saml.saml_never.sp.entity_id=http://localhost:${kibanaPort}`,
+        `xpack.security.authc.realms.saml.saml_never.sp.logout=http://localhost:${kibanaPort}/logout`,
+        `xpack.security.authc.realms.saml.saml_never.sp.acs=http://localhost:${kibanaPort}/api/security/saml/callback`,
+        'xpack.security.authc.realms.saml.saml_never.attributes.principal=urn:oid:0.0.7',
       ],
     },
 
@@ -80,6 +91,12 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
               description: 'Do-not-log-in-with-THIS-SAML',
               icon: 'logoAWS',
             },
+            saml_never: {
+              order: 4,
+              realm: 'saml_never',
+              description: 'Never-log-in-with-SAML',
+              icon: 'logoKibana',
+            },
           },
           anonymous: {
             anonymous1: {
@@ -97,7 +114,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       },
     },
     apps: kibanaFunctionalConfig.get('apps'),
-    esArchiver: { directory: resolve(__dirname, 'es_archives') },
     screenshots: { directory: resolve(__dirname, 'screenshots') },
 
     junit: {

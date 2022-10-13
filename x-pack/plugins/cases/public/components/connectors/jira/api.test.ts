@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { httpServiceMock } from '../../../../../../../src/core/public/mocks';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 import { getIssueTypes, getFieldsByIssueType, getIssues, getIssue } from './api';
 
 const issueTypesResponse = {
@@ -74,13 +74,33 @@ const fieldsResponse = {
   },
 };
 
-const issueResponse = {
+const issue = {
   id: '10267',
   key: 'RJ-107',
-  fields: { summary: 'Test title' },
+  title: 'test title',
 };
 
-const issuesResponse = [issueResponse];
+const issueResponse = {
+  status: 'ok' as const,
+  connector_id: '1',
+  data: issue,
+};
+
+const issuesResponse = {
+  ...issueResponse,
+  data: [issue],
+};
+
+const camelCasedIssueResponse = {
+  status: 'ok' as const,
+  actionId: '1',
+  data: issue,
+};
+
+const camelCasedIssuesResponse = {
+  ...camelCasedIssueResponse,
+  data: [issue],
+};
 
 describe('Jira API', () => {
   const http = httpServiceMock.createStartContract();
@@ -94,7 +114,7 @@ describe('Jira API', () => {
       const res = await getIssueTypes({ http, signal: abortCtrl.signal, connectorId: 'test' });
 
       expect(res).toEqual(issueTypesResponse);
-      expect(http.post).toHaveBeenCalledWith('/api/actions/action/test/_execute', {
+      expect(http.post).toHaveBeenCalledWith('/api/actions/connector/test/_execute', {
         body: '{"params":{"subAction":"issueTypes","subActionParams":{}}}',
         signal: abortCtrl.signal,
       });
@@ -113,7 +133,7 @@ describe('Jira API', () => {
       });
 
       expect(res).toEqual(fieldsResponse);
-      expect(http.post).toHaveBeenCalledWith('/api/actions/action/test/_execute', {
+      expect(http.post).toHaveBeenCalledWith('/api/actions/connector/test/_execute', {
         body: '{"params":{"subAction":"fieldsByIssueType","subActionParams":{"id":"10006"}}}',
         signal: abortCtrl.signal,
       });
@@ -131,8 +151,8 @@ describe('Jira API', () => {
         title: 'test issue',
       });
 
-      expect(res).toEqual(issuesResponse);
-      expect(http.post).toHaveBeenCalledWith('/api/actions/action/test/_execute', {
+      expect(res).toEqual(camelCasedIssuesResponse);
+      expect(http.post).toHaveBeenCalledWith('/api/actions/connector/test/_execute', {
         body: '{"params":{"subAction":"issues","subActionParams":{"title":"test issue"}}}',
         signal: abortCtrl.signal,
       });
@@ -142,7 +162,7 @@ describe('Jira API', () => {
   describe('getIssue', () => {
     test('should call get fields API', async () => {
       const abortCtrl = new AbortController();
-      http.post.mockResolvedValueOnce(issuesResponse);
+      http.post.mockResolvedValueOnce(issueResponse);
       const res = await getIssue({
         http,
         signal: abortCtrl.signal,
@@ -150,8 +170,8 @@ describe('Jira API', () => {
         id: 'RJ-107',
       });
 
-      expect(res).toEqual(issuesResponse);
-      expect(http.post).toHaveBeenCalledWith('/api/actions/action/test/_execute', {
+      expect(res).toEqual(camelCasedIssueResponse);
+      expect(http.post).toHaveBeenCalledWith('/api/actions/connector/test/_execute', {
         body: '{"params":{"subAction":"issue","subActionParams":{"id":"RJ-107"}}}',
         signal: abortCtrl.signal,
       });

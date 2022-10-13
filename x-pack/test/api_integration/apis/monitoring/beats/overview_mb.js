@@ -6,25 +6,26 @@
  */
 
 import expect from '@kbn/expect';
-import beatsClusterFixture from './fixtures/cluster';
+import beatsClusterFixture from './fixtures/cluster.json';
+import { getLifecycleMethods } from '../data_stream';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
 
   describe('overview mb', () => {
-    const archive = 'monitoring/beats_mb';
+    const { setup, tearDown } = getLifecycleMethods(getService);
+    const archive = 'x-pack/test/functional/es_archives/monitoring/beats_mb';
     const timeRange = {
       min: '2017-12-19T18:11:32.000Z',
       max: '2017-12-19T18:14:38.000Z',
     };
 
     before('load archive', () => {
-      return esArchiver.load(archive);
+      return setup(archive);
     });
 
     after('unload archive', () => {
-      return esArchiver.unload(archive);
+      return tearDown();
     });
 
     it('should summarize beats cluster with metrics', async () => {

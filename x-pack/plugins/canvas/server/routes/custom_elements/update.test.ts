@@ -6,21 +6,27 @@
  */
 
 import sinon from 'sinon';
+import { AwaitedProperties } from '@kbn/utility-types';
 import { CustomElement } from '../../../types';
 import { CUSTOM_ELEMENT_TYPE } from '../../../common/lib/constants';
 import { initializeUpdateCustomElementRoute } from './update';
-import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from 'src/core/server';
-import { savedObjectsClientMock, httpServerMock } from 'src/core/server/mocks';
+import {
+  kibanaResponseFactory,
+  RequestHandlerContext,
+  RequestHandler,
+  SavedObjectsErrorHelpers,
+} from '@kbn/core/server';
+import { savedObjectsClientMock, httpServerMock, coreMock } from '@kbn/core/server/mocks';
 import { okResponse } from '../ok_response';
 import { getMockedRouterDeps } from '../test_helpers';
 
-const mockRouteContext = ({
+const mockRouteContext = {
   core: {
     savedObjects: {
       client: savedObjectsClientMock.create(),
     },
   },
-} as unknown) as RequestHandlerContext;
+} as unknown as AwaitedProperties<RequestHandlerContext>;
 
 const now = new Date();
 const nowIso = now.toISOString();
@@ -82,7 +88,11 @@ describe('PUT custom element', () => {
 
     mockRouteContext.core.savedObjects.client = savedObjectsClient;
 
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+    const response = await routeHandler(
+      coreMock.createCustomRequestHandlerContext(mockRouteContext),
+      request,
+      kibanaResponseFactory
+    );
 
     expect(response.status).toBe(200);
     expect(response.payload).toEqual(okResponse);
@@ -112,12 +122,14 @@ describe('PUT custom element', () => {
     });
 
     (mockRouteContext.core.savedObjects.client.get as jest.Mock).mockImplementationOnce(() => {
-      throw mockRouteContext.core.savedObjects.client.errors.createGenericNotFoundError(
-        'not found'
-      );
+      throw SavedObjectsErrorHelpers.createGenericNotFoundError('not found');
     });
 
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+    const response = await routeHandler(
+      coreMock.createCustomRequestHandlerContext(mockRouteContext),
+      request,
+      kibanaResponseFactory
+    );
     expect(response.status).toBe(404);
   });
 
@@ -141,10 +153,14 @@ describe('PUT custom element', () => {
 
     mockRouteContext.core.savedObjects.client = savedObjectsClient;
     (mockRouteContext.core.savedObjects.client.create as jest.Mock).mockImplementationOnce(() => {
-      throw mockRouteContext.core.savedObjects.client.errors.createBadRequestError('bad request');
+      throw SavedObjectsErrorHelpers.createBadRequestError('bad request');
     });
 
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+    const response = await routeHandler(
+      coreMock.createCustomRequestHandlerContext(mockRouteContext),
+      request,
+      kibanaResponseFactory
+    );
 
     expect(response.status).toBe(400);
   });

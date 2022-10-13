@@ -1,113 +1,145 @@
 pageLoadAssetSize:
+  actions: 20000
   advancedSettings: 27596
+  aiops: 10000
   alerting: 106936
   apm: 64385
-  apmOss: 18996
-  beatsManagement: 188135
-  bfetch: 41874
+  banners: 17946
+  bfetch: 22837
   canvas: 1066647
-  charts: 195358
+  cases: 144442
+  charts: 55000
   cloud: 21076
+  cloudChat: 19894
+  cloudExperiments: 59358
+  cloudFullStory: 18493
+  cloudLinks: 17629
+  cloudSecurityPosture: 19109
   console: 46091
-  core: 414000
+  controls: 40000
+  core: 435325
   crossClusterReplication: 65408
-  dashboard: 374194
+  customIntegrations: 28810
+  dashboard: 82025
   dashboardEnhanced: 65646
-  dashboardMode: 22716
-  data: 900000
-  dataEnhanced: 50420
+  data: 454087
+  dataViewEditor: 12000
+  dataViewFieldEditor: 27000
+  dataViewManagement: 5000
+  dataViews: 46532
+  dataVisualizer: 27530
   devTools: 38637
-  discover: 105145
+  discover: 99999
   discoverEnhanced: 42730
-  embeddable: 312874
-  embeddableEnhanced: 41145
+  embeddable: 87309
+  embeddableEnhanced: 22107
   enterpriseSearch: 35741
   esUiShared: 326654
-  expressions: 224136
+  eventAnnotation: 20500
+  expressionError: 22127
+  expressionGauge: 25000
+  expressionHeatmap: 27505
+  expressionImage: 19288
+  expressionLegacyMetricVis: 23121
+  expressionMetric: 22238
+  expressionMetricVis: 23121
+  expressionPartitionVis: 26338
+  expressionRepeatImage: 22341
+  expressionRevealImage: 25675
+  expressions: 140958
+  expressionShape: 34008
+  expressionTagcloud: 27505
+  expressionXY: 38000
   features: 21723
+  fieldFormats: 65209
+  files: 22673
+  fileUpload: 25664
+  fleet: 126917
   globalSearch: 29696
   globalSearchBar: 50403
   globalSearchProviders: 25554
   graph: 31504
   grokdebugger: 26779
+  guidedOnboarding: 26875
   home: 30182
   indexLifecycleManagement: 107090
   indexManagement: 140608
-  indexPatternManagement: 28222
   infra: 184320
-  fleet: 415829
   ingestPipelines: 58003
   inputControlVis: 172675
   inspector: 148711
-  kibanaLegacy: 107711
+  interactiveSetup: 80000
   kibanaOverview: 56279
-  kibanaReact: 161921
-  kibanaUtils: 198829
-  lens: 96624
+  kibanaReact: 74422
+  kibanaUsageCollection: 16463
+  kibanaUtils: 79713
+  kubernetesSecurity: 77234
+  lens: 36500
   licenseManagement: 41817
   licensing: 29004
-  lists: 228500
+  lists: 22900
   logstash: 53548
   management: 46112
-  maps: 80000
-  mapsLegacy: 87859
+  maps: 90000
+  mapsEms: 26072
   ml: 82187
   monitoring: 80000
   navigation: 37269
   newsfeed: 42228
-  observability: 89709
+  observability: 95000
+  osquery: 107090
   painlessLab: 179748
-  regionMap: 66098
+  presentationUtil: 58834
+  profiling: 18628
   remoteClusters: 51327
-  reporting: 183418
+  reporting: 57003
   rollup: 97204
-  ruleRegistry: 100000
+  runtimeFields: 41752
   savedObjects: 108518
+  savedObjectsFinder: 21691
   savedObjectsManagement: 101836
   savedObjectsTagging: 59482
   savedObjectsTaggingOss: 20590
+  savedSearch: 16225
+  screenshotMode: 17856
+  screenshotting: 22870
   searchprofiler: 67080
-  security: 189428
-  securityOss: 30806
-  securitySolution: 187863
-  share: 99061
+  security: 65433
+  securitySolution: 273763
+  sessionView: 77750
+  share: 71239
   snapshotRestore: 79032
-  spaces: 387915
+  spaces: 57868
+  stackAlerts: 29684
+  stackConnectors: 36314
+  synthetics: 40958
   telemetry: 51957
   telemetryManagementSection: 38586
-  tileMap: 65337
-  timelion: 29920
+  threatIntelligence: 44299
+  timelines: 327300
   transform: 41007
-  triggersActionsUi: 186732
-  uiActions: 97717
-  uiActionsEnhanced: 313011
+  triggersActionsUi: 119000
+  uiActions: 35121
+  uiActionsEnhanced: 38494
+  unifiedFieldList: 65500
+  unifiedSearch: 71059
   upgradeAssistant: 81241
-  uptime: 40825
-  urlDrilldown: 70674
+  urlDrilldown: 30063
   urlForwarding: 32579
   usageCollection: 39762
+  ux: 20784
   visDefaultEditor: 50178
+  visTypeGauge: 24113
+  visTypeHeatmap: 25340
   visTypeMarkdown: 30896
-  visTypeMetric: 42790
+  visTypeMetric: 23332
+  visTypePie: 35583
   visTypeTable: 94934
   visTypeTagcloud: 37575
   visTypeTimelion: 68883
   visTypeTimeseries: 55203
   visTypeVega: 153573
   visTypeVislib: 242838
-  visTypeXy: 113478
-  visualizations: 295025
-  visualize: 57431
+  visTypeXy: 30000
+  visualizations: 90000
   watcher: 43598
-  runtimeFields: 41752
-  stackAlerts: 29684
-  presentationUtil: 49767
-  spacesOss: 18817
-  indexPatternFieldEditor: 90489
-  osquery: 107090
-  fileUpload: 25664
-  fileDataVisualizer: 27530
-  banners: 17946
-  mapsEms: 26072
-  timelines: 28613
-  cases: 162385

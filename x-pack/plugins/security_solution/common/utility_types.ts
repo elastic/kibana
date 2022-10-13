@@ -6,7 +6,7 @@
  */
 
 import * as runtimeTypes from 'io-ts';
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 // This type is for typing EuiDescriptionList
 export interface DescriptionList {
@@ -25,7 +25,7 @@ export const stringEnum = <T>(enumObj: T, enumName = 'enum') =>
       Object.values(enumObj).includes(u)
         ? runtimeTypes.success(u as T[keyof T])
         : runtimeTypes.failure(u, c),
-    (a) => (a as unknown) as string
+    (a) => a as unknown as string
   );
 
 /**

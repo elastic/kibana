@@ -11,8 +11,8 @@ import { schema, ByteSizeValue } from '@kbn/config-schema';
 import moment from 'moment';
 
 import { ActionsConfig } from '../config';
-import { Logger } from '../../../../../src/core/server';
-import { loggingSystemMock } from '../../../../../src/core/server/mocks';
+import { Logger } from '@kbn/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { resolveCustomHosts, getCanonicalCustomHostUrl } from './custom_host_settings';
 
@@ -65,7 +65,6 @@ describe('custom_host_settings', () => {
 
   describe('resolveCustomHosts()', () => {
     const defaultActionsConfig: ActionsConfig = {
-      enabled: true,
       allowedHosts: [],
       enabledActionTypes: [],
       preconfiguredAlertHistoryEsIndex: false,
@@ -112,14 +111,14 @@ describe('custom_host_settings', () => {
         customHostSettings: [
           {
             url: 'https://elastic.co:443',
-            tls: {
+            ssl: {
               certificateAuthoritiesData: 'xyz',
               rejectUnauthorized: false,
             },
           },
           {
             url: 'smtp://mail.elastic.com:25',
-            tls: {
+            ssl: {
               certificateAuthoritiesData: 'abc',
               rejectUnauthorized: true,
             },
@@ -338,7 +337,7 @@ describe('custom_host_settings', () => {
         customHostSettings: [
           {
             url: 'https://almost.purrfect.com/',
-            tls: {
+            ssl: {
               certificateAuthoritiesFiles: 'this-file-does-not-exist',
             },
           },
@@ -350,7 +349,7 @@ describe('custom_host_settings', () => {
         customHostSettings: [
           {
             url: 'https://almost.purrfect.com:443',
-            tls: {
+            ssl: {
               certificateAuthoritiesFiles: 'this-file-does-not-exist',
             },
           },
@@ -371,7 +370,7 @@ describe('custom_host_settings', () => {
         customHostSettings: [
           {
             url: 'https://almost.purrfect.com/',
-            tls: {
+            ssl: {
               certificateAuthoritiesFiles: CA_FILE1,
             },
           },
@@ -380,7 +379,7 @@ describe('custom_host_settings', () => {
       const resConfig = resolveCustomHosts(mockLogger, config);
 
       // not checking the full structure anymore, just ca bits
-      expect(resConfig?.customHostSettings?.[0].tls?.certificateAuthoritiesData).toBe(CA_CONTENTS1);
+      expect(resConfig?.customHostSettings?.[0].ssl?.certificateAuthoritiesData).toBe(CA_CONTENTS1);
       expect(warningLogs()).toEqual([]);
     });
 
@@ -390,7 +389,7 @@ describe('custom_host_settings', () => {
         customHostSettings: [
           {
             url: 'https://almost.purrfect.com/',
-            tls: {
+            ssl: {
               certificateAuthoritiesFiles: [CA_FILE1, CA_FILE2],
             },
           },
@@ -399,7 +398,7 @@ describe('custom_host_settings', () => {
       const resConfig = resolveCustomHosts(mockLogger, config);
 
       // not checking the full structure anymore, just ca bits
-      expect(resConfig?.customHostSettings?.[0].tls?.certificateAuthoritiesData).toBe(
+      expect(resConfig?.customHostSettings?.[0].ssl?.certificateAuthoritiesData).toBe(
         `${CA_CONTENTS1}\n${CA_CONTENTS2}`
       );
       expect(warningLogs()).toEqual([]);
@@ -411,7 +410,7 @@ describe('custom_host_settings', () => {
         customHostSettings: [
           {
             url: 'https://almost.purrfect.com/',
-            tls: {
+            ssl: {
               certificateAuthoritiesFiles: [CA_FILE2],
               certificateAuthoritiesData: CA_CONTENTS1,
             },
@@ -421,7 +420,7 @@ describe('custom_host_settings', () => {
       const resConfig = resolveCustomHosts(mockLogger, config);
 
       // not checking the full structure anymore, just ca bits
-      expect(resConfig?.customHostSettings?.[0].tls?.certificateAuthoritiesData).toBe(
+      expect(resConfig?.customHostSettings?.[0].ssl?.certificateAuthoritiesData).toBe(
         `${CA_CONTENTS1}\n${CA_CONTENTS2}`
       );
       expect(warningLogs()).toEqual([]);
@@ -468,13 +467,13 @@ describe('custom_host_settings', () => {
         customHostSettings: [
           {
             url: 'https://almost.purrfect.com/',
-            tls: {
+            ssl: {
               rejectUnauthorized: true,
             },
           },
           {
             url: 'https://almost.purrfect.com:443',
-            tls: {
+            ssl: {
               rejectUnauthorized: false,
             },
           },
@@ -486,7 +485,7 @@ describe('custom_host_settings', () => {
         customHostSettings: [
           {
             url: 'https://almost.purrfect.com:443',
-            tls: {
+            ssl: {
               rejectUnauthorized: true,
             },
           },

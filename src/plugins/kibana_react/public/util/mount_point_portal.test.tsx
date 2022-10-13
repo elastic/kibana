@@ -8,7 +8,7 @@
 
 import React, { FC } from 'react';
 import { mount, ReactWrapper } from 'enzyme';
-import { MountPoint, UnmountCallback } from 'kibana/public';
+import { MountPoint, UnmountCallback } from '@kbn/core/public';
 import { MountPointPortal } from './mount_point_portal';
 import { act } from 'react-dom/test-utils';
 
@@ -19,13 +19,18 @@ describe('MountPointPortal', () => {
   let dom: ReactWrapper;
 
   const refresh = () => {
-    new Promise(async (resolve) => {
-      if (dom) {
-        act(() => {
-          dom.update();
-        });
+    new Promise(async (resolve, reject) => {
+      try {
+        if (dom) {
+          act(() => {
+            dom.update();
+          });
+        }
+
+        setImmediate(() => resolve(dom)); // flushes any pending promises
+      } catch (error) {
+        reject(error);
       }
-      setImmediate(() => resolve(dom)); // flushes any pending promises
     });
   };
 

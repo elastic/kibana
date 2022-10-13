@@ -1,0 +1,31 @@
+name: Add to Infra Monitoring UI project
+on:
+  issues:
+    types:
+      - labeled
+jobs:
+  add_to_project:
+    runs-on: ubuntu-latest
+    if: |
+      contains(github.event.issue.labels.*.name, 'Team:Infra Monitoring UI') ||
+      contains(github.event.issue.labels.*.name, 'Feature:Stack Monitoring') ||
+      contains(github.event.issue.labels.*.name, 'Feature:Logs UI') ||
+      contains(github.event.issue.labels.*.name, 'Feature:Metrics UI')
+    steps:
+      - uses: octokit/graphql-action@v2.x
+        id: add_to_project
+        with:
+          headers: '{"GraphQL-Features": "projects_next_graphql"}'
+          query: |
+            mutation add_to_project($projectid:ID!,$contentid:ID!) {
+              addProjectNextItem(input:{projectId:$projectid contentId:$contentid}) {
+                projectNextItem {
+                  id
+                }
+              }
+            }
+          projectid: ${{ env.PROJECT_ID }}
+          contentid: ${{ github.event.issue.node_id }}
+        env:
+          PROJECT_ID: "PN_kwDOAGc3Zs1EEA"
+          GITHUB_TOKEN: ${{ secrets.PROJECT_ASSIGNER_TOKEN }}

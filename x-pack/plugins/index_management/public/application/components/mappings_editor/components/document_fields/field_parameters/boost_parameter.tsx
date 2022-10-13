@@ -33,6 +33,7 @@ export const BoostParameter = ({ defaultToggleValue }: Props) => (
       href: documentationService.getBoostLink(),
     }}
     defaultToggleValue={defaultToggleValue}
+    data-test-subj="boostParameter"
   >
     {/* Boost level */}
     <UseField

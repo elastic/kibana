@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { SavedObject } from '../../../../core/types/saved_objects';
+import type { SimpleSavedObject } from '@kbn/core/public';
+import { BaseVisType } from './base_vis_type';
 
 export type VisualizationStage = 'experimental' | 'beta' | 'production';
 
@@ -23,12 +24,13 @@ export interface VisualizationListItem {
   getSupportedTriggers?: () => string[];
   typeTitle: string;
   image?: string;
+  type?: BaseVisType | string;
 }
 
 export interface VisualizationsAppExtension {
   docTypes: string[];
   searchFields?: string[];
-  toListItem: (savedObject: SavedObject) => VisualizationListItem;
+  toListItem: (savedObject: SimpleSavedObject) => VisualizationListItem;
 }
 
 export interface VisTypeAlias {
@@ -42,6 +44,7 @@ export interface VisTypeAlias {
   note?: string;
   getSupportedTriggers?: () => string[];
   stage: VisualizationStage;
+  isDeprecated?: boolean;
 
   appExtensions?: {
     visualizations: VisualizationsAppExtension;

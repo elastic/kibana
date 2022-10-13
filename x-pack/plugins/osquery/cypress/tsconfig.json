@@ -1,0 +1,19 @@
+{
+    "extends": "../../../../tsconfig.base.json",
+    "include": [
+      "**/*",
+      "../cypress.config.ts"
+    ],
+    "exclude": [
+      "target/**/*"
+    ],
+    "compilerOptions": {
+      "outDir": "target/types",
+      "types": [
+        "cypress",
+        "node",
+        "cypress-react-selector"
+      ],
+      "resolveJsonModule": true,
+    },
+  }

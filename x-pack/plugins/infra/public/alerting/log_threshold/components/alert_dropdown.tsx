@@ -7,10 +7,9 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiPopover, EuiButtonEmpty, EuiContextMenuItem, EuiContextMenuPanel } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiPopover, EuiContextMenuItem, EuiContextMenuPanel, EuiHeaderLink } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { AlertFlyout } from './alert_flyout';
-import { useLinkProps } from '../../../hooks/use_link_props';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 const readOnlyUserTooltipContent = i18n.translate(
@@ -31,20 +30,16 @@ export const AlertDropdown = () => {
   const {
     services: {
       application: { capabilities },
+      observability,
     },
   } = useKibanaContextForPlugin();
   const canCreateAlerts = capabilities?.logs?.save ?? false;
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [flyoutVisible, setFlyoutVisible] = useState(false);
-  const manageAlertsLinkProps = useLinkProps(
-    {
-      app: 'management',
-      pathname: '/insightsAndAlerting/triggersActions/alerts',
-    },
-    {
-      hrefOnly: true,
-    }
-  );
+
+  const manageRulesLinkProps = observability.useRulesLink({
+    hrefOnly: true,
+  });
 
   const closePopover = useCallback(() => {
     setPopoverOpen(false);
@@ -54,38 +49,51 @@ export const AlertDropdown = () => {
     setPopoverOpen(true);
   }, [setPopoverOpen]);
 
+  const openFlyout = useCallback(() => {
+    setFlyoutVisible(true);
+    closePopover();
+  }, [setFlyoutVisible, closePopover]);
+
   const menuItems = useMemo(() => {
     return [
       <EuiContextMenuItem
         disabled={!canCreateAlerts}
         icon="bell"
         key="createLink"
-        onClick={() => setFlyoutVisible(true)}
+        onClick={openFlyout}
         toolTipContent={!canCreateAlerts ? readOnlyUserTooltipContent : undefined}
         toolTipTitle={!canCreateAlerts ? readOnlyUserTooltipTitle : undefined}
       >
         <FormattedMessage
           id="xpack.infra.alerting.logs.createAlertButton"
-          defaultMessage="Create alert"
+          defaultMessage="Create rule"
         />
       </EuiContextMenuItem>,
-      <EuiContextMenuItem icon="tableOfContents" key="manageLink" {...manageAlertsLinkProps}>
+      <EuiContextMenuItem icon="tableOfContents" key="manageLink" {...manageRulesLinkProps}>
         <FormattedMessage
           id="xpack.infra.alerting.logs.manageAlerts"
-          defaultMessage="Manage alerts"
+          defaultMessage="Manage rules"
         />
       </EuiContextMenuItem>,
     ];
-  }, [manageAlertsLinkProps, canCreateAlerts]);
+  }, [manageRulesLinkProps, canCreateAlerts, openFlyout]);
 
   return (
     <>
       <EuiPopover
         panelPaddingSize="none"
         button={
-          <EuiButtonEmpty iconSide={'right'} iconType={'arrowDown'} onClick={openPopover}>
-            <FormattedMessage id="xpack.infra.alerting.logs.alertsButton" defaultMessage="Alerts" />
-          </EuiButtonEmpty>
+          <EuiHeaderLink
+            color="text"
+            iconSide={'right'}
+            iconType={'arrowDown'}
+            onClick={openPopover}
+          >
+            <FormattedMessage
+              id="xpack.infra.alerting.logs.alertsButton"
+              defaultMessage="Alerts and rules"
+            />
+          </EuiHeaderLink>
         }
         isOpen={popoverOpen}
         closePopover={closePopover}

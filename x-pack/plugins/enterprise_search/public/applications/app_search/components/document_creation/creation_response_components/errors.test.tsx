@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockValues } from '../../../../__mocks__/kea.mock';
+import { setMockValues } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -13,7 +13,7 @@ import { shallow } from 'enzyme';
 
 import { EuiCallOut } from '@elastic/eui';
 
-import { Errors } from './';
+import { Errors } from '.';
 
 describe('Errors', () => {
   it('does not render if no errors or warnings to render', () => {

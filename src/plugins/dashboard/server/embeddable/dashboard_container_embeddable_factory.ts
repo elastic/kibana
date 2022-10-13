@@ -6,12 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { EmbeddablePersistableStateService } from 'src/plugins/embeddable/common';
-import { EmbeddableRegistryDefinition } from '../../../embeddable/server';
-import {
-  createExtract,
-  createInject,
-} from '../../common/embeddable/dashboard_container_persistable_state';
+import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
+import { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/server';
+import { createExtract, createInject } from '../../common';
 
 export const dashboardPersistableStateServiceFactory = (
   persistableStateService: EmbeddablePersistableStateService

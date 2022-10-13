@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-export {
-  applyTransformConfigToDetailsState,
-  getDefaultStepDetailsState,
-  StepDetailsExposedState,
-} from './common';
+export type { StepDetailsExposedState } from './common';
+export { applyTransformConfigToDetailsState, getDefaultStepDetailsState } from './common';
 export { StepDetailsForm } from './step_details_form';
 export { StepDetailsSummary } from './step_details_summary';

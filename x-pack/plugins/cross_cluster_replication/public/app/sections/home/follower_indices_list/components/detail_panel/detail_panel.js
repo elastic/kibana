@@ -7,12 +7,12 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
-  EuiCodeEditor,
+  EuiCodeBlock,
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
@@ -30,9 +30,10 @@ import {
   EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
+import 'react-ace';
 import 'brace/theme/textmate';
 
-import { getIndexListUri } from '../../../../../../../../../plugins/index_management/public';
+import { getIndexListUri } from '@kbn/index-management-plugin/public';
 import { routing } from '../../../../../services/routing';
 import { API_STATUS } from '../../../../../constants';
 import { ContextMenu } from '../context_menu';
@@ -356,18 +357,9 @@ export class DetailPanel extends Component {
                     </h3>
                   </EuiTitle>
                   <EuiSpacer size="s" />
-                  <EuiCodeEditor
-                    mode="json"
-                    theme="textmate"
-                    width="100%"
-                    isReadOnly
-                    setOptions={{ maxLines: Infinity }}
-                    value={JSON.stringify(shard, null, 2)}
-                    editorProps={{
-                      $blockScrolling: Infinity,
-                    }}
-                    data-test-subj={`shardsStats${i}`}
-                  />
+                  <EuiCodeBlock language="json" data-test-subj="shardsStats">
+                    {JSON.stringify(shard, null, 2)}
+                  </EuiCodeBlock>
                 </Fragment>
               ))}
           </section>

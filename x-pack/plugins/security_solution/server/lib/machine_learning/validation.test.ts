@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import { toHttpError, throwHttpError } from './validation';
+import { toAuthzError, throwAuthzError } from './validation';
 
-describe('toHttpError', () => {
+describe('toAuthzError', () => {
   it('returns nothing if validation is valid', () => {
-    expect(toHttpError({ valid: true, message: undefined })).toBeUndefined();
+    expect(toAuthzError({ valid: true, message: undefined })).toBeUndefined();
   });
 
   it('returns an HTTP error if validation is invalid', () => {
-    const error = toHttpError({ valid: false, message: 'validation message' });
+    const error = toAuthzError({ valid: false, message: 'validation message' });
     expect(error?.statusCode).toEqual(403);
     expect(error?.message).toEqual('validation message');
   });
 });
 
-describe('throwHttpError', () => {
+describe('throwAuthzError', () => {
   it('does nothing if validation is valid', () => {
-    expect(() => throwHttpError({ valid: true, message: undefined })).not.toThrowError();
+    expect(() => throwAuthzError({ valid: true, message: undefined })).not.toThrowError();
   });
 
   it('throws an error if validation is invalid', () => {
     let error;
     try {
-      throwHttpError({ valid: false, message: 'validation failed' });
+      throwAuthzError({ valid: false, message: 'validation failed' });
     } catch (e) {
       error = e;
     }

@@ -26,13 +26,8 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
   const { services } = useMlKibana();
   const mlContext = useMlContext();
 
-  const {
-    jobCreator,
-    jobCreatorUpdate,
-    jobCreatorUpdated,
-    chartLoader,
-    chartInterval,
-  } = useContext(JobCreatorContext);
+  const { jobCreator, jobCreatorUpdate, jobCreatorUpdated, chartLoader, chartInterval } =
+    useContext(JobCreatorContext);
 
   const [timeRange, setTimeRange] = useState<TimeRange>({
     start: jobCreator.start,
@@ -49,7 +44,6 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
         jobCreator.end,
         chartInterval.getInterval().asMilliseconds(),
         jobCreator.runtimeMappings ?? undefined,
-        // @ts-expect-error @elastic/elasticsearch Datafeed is missing indices_options
         jobCreator.datafeedConfig.indices_options
       );
       setEventRateChartData(resp);
@@ -75,6 +69,7 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
 
     jobCreatorUpdate();
     loadChart();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(timeRange)]);
 
   useEffect(() => {
@@ -82,13 +77,14 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
       start: jobCreator.start,
       end: jobCreator.end,
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdated]);
 
   function fullTimeRangeCallback(range: GetTimeFieldRangeResponse) {
-    if (range.start.epoch !== null && range.end.epoch !== null) {
+    if (range.start !== null && range.end !== null) {
       setTimeRange({
-        start: range.start.epoch,
-        end: range.end.epoch,
+        start: range.start,
+        end: range.end,
       });
     } else {
       const { toasts } = services.notifications;
@@ -110,7 +106,7 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <FullTimeRangeSelector
-                indexPattern={mlContext.currentIndexPattern}
+                dataView={mlContext.currentDataView}
                 query={mlContext.combinedQuery}
                 disabled={false}
                 callback={fullTimeRangeCallback}

@@ -17,10 +17,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Metrics UI Anomaly Flyout', function () {
     before(async () => {
-      await esArchiver.load('empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
     after(async () => {
-      await esArchiver.unload('empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     describe('with no anomalies present', () => {
@@ -40,7 +40,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     describe('with anomalies present', () => {
       before(async () => {
-        await esArchiver.load('infra/metrics_anomalies');
+        await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_anomalies');
         // create the ml jobs saved objects
         await Promise.all(
           ML_JOB_IDS.map((id) =>
@@ -58,19 +58,23 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         );
       });
       after(async () => {
-        await esArchiver.unload('infra/metrics_anomalies');
+        await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_anomalies');
       });
       it('renders the anomaly table with anomalies', async () => {
+        // default threshold should already be 50 but trying to prevent unknown flakiness by setting it
+        // https://github.com/elastic/kibana/issues/100445
+        await pageObjects.infraHome.goToSettings();
+        await pageObjects.infraHome.setAnomaliesThreshold('50');
+        await infraSourceConfigurationForm.saveConfiguration();
+        await pageObjects.infraHome.goToInventory();
         await pageObjects.infraHome.openAnomalyFlyout();
         await pageObjects.infraHome.goToAnomaliesTab();
         await pageObjects.infraHome.clickHostsAnomaliesDropdown();
         await pageObjects.infraHome.setAnomaliesDate('Apr 21, 2021 @ 00:00:00.000');
         const hostAnomalies = await pageObjects.infraHome.findAnomalies();
-        // expect 2 anomalies with default Anomaly Severity Threshold setting (50)
         expect(hostAnomalies.length).to.be(2);
         await pageObjects.infraHome.clickK8sAnomaliesDropdown();
         const k8sAnomalies = await pageObjects.infraHome.findAnomalies();
-        // expect 3 anomalies with default Anomaly Severity Threshold setting (50)
         expect(k8sAnomalies.length).to.be(1);
         await pageObjects.infraHome.closeFlyout();
       });
@@ -92,6 +96,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHome.openAnomalyFlyout();
         await pageObjects.infraHome.goToAnomaliesTab();
         await pageObjects.infraHome.clickHostsAnomaliesDropdown();
+        await pageObjects.infraHome.setAnomaliesDate('Apr 21, 2021 @ 00:00:00.000');
         const hostAnomalies = await pageObjects.infraHome.findAnomalies();
         expect(hostAnomalies.length).to.be(4);
         await pageObjects.infraHome.clickK8sAnomaliesDropdown();

@@ -5,37 +5,51 @@
  * 2.0.
  */
 
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { LensPlugin } from './plugin';
 
-export {
+export type {
   EmbeddableComponentProps,
   TypedLensByValueInput,
-} from './editor_frame_service/embeddable/embeddable_component';
+} from './embeddable/embeddable_component';
 export type {
   XYState,
-  AxesSettingsConfig,
+  XYReferenceLineLayerConfig,
   XYLayerConfig,
-  LegendConfig,
-  SeriesType,
-  ValueLabelConfig,
+  ValidLayer,
+  XYDataLayerConfig,
+  XYAnnotationLayerConfig,
   YAxisMode,
-  XYCurveType,
-} from './xy_visualization/types';
-export type { DataType, OperationMetadata } from './types';
+  SeriesType,
+  YConfig,
+} from './visualizations/xy/types';
 export type {
+  DatasourcePublicAPI,
+  DataType,
+  OperationMetadata,
+  SuggestionRequest,
+  TableSuggestion,
+  Visualization,
+  VisualizationSuggestion,
+} from './types';
+export type {
+  LegacyMetricState as MetricState,
+  ValueLabelConfig,
   PieVisualizationState,
   PieLayerState,
   SharedPieLayerState,
-} from './pie_visualization/types';
-export type { DatatableVisualizationState } from './datatable_visualization/visualization';
-export type { MetricState } from './metric_visualization/types';
+} from '../common/types';
+
+export type { DatatableVisualizationState } from './visualizations/datatable/visualization';
+export type { HeatmapVisualizationState } from './visualizations/heatmap/types';
+export type { GaugeVisualizationState } from './visualizations/gauge/constants';
 export type {
-  IndexPatternPersistedState,
+  FormBasedPersistedState,
   PersistedIndexPatternLayer,
-  IndexPatternColumn,
-  FieldBasedIndexPatternColumn,
   OperationType,
   IncompleteColumn,
+  GenericIndexPatternColumn,
+  FieldBasedIndexPatternColumn,
   FiltersIndexPatternColumn,
   RangeIndexPatternColumn,
   TermsIndexPatternColumn,
@@ -46,14 +60,54 @@ export type {
   CardinalityIndexPatternColumn,
   SumIndexPatternColumn,
   MedianIndexPatternColumn,
+  StandardDeviationIndexPatternColumn,
   PercentileIndexPatternColumn,
+  PercentileRanksIndexPatternColumn,
   CountIndexPatternColumn,
   LastValueIndexPatternColumn,
   CumulativeSumIndexPatternColumn,
   CounterRateIndexPatternColumn,
   DerivativeIndexPatternColumn,
   MovingAverageIndexPatternColumn,
-} from './indexpattern_datasource/types';
-export { LensPublicStart } from './plugin';
+  FormulaIndexPatternColumn,
+  MathIndexPatternColumn,
+  OverallSumIndexPatternColumn,
+  FormulaPublicApi,
+  StaticValueIndexPatternColumn,
+  TimeScaleIndexPatternColumn,
+  FormBasedLayer,
+} from './datasources/form_based/types';
+export type {
+  XYArgs,
+  XYRender,
+  LayerType,
+  LineStyle,
+  FillStyle,
+  YScaleType,
+  XScaleType,
+  AxisConfig,
+  XYCurveType,
+  XYChartProps,
+  LegendConfig,
+  IconPosition,
+  DataLayerArgs,
+  ValueLabelMode,
+  AxisExtentMode,
+  DataLayerConfig,
+  FittingFunction,
+  AxisExtentConfig,
+  LegendConfigResult,
+  AxesSettingsConfig,
+  AxisExtentConfigResult,
+  ReferenceLineLayerArgs,
+  ReferenceLineLayerConfig,
+} from '@kbn/expression-xy-plugin/common';
+
+export type { LensEmbeddableInput, LensSavedObjectAttributes, Embeddable } from './embeddable';
+
+/** @deprecated  Please use LayerTypes from @kbn/expression-xy-plugin **/
+export const layerTypes = LayerTypes;
+
+export type { LensPublicStart, LensPublicSetup } from './plugin';
 
 export const plugin = () => new LensPlugin();

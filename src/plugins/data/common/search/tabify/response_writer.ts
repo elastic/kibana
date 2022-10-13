@@ -7,11 +7,11 @@
  */
 
 import { isEmpty } from 'lodash';
+import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common/expression_types/specs';
 import { IAggConfigs } from '../aggs';
 import { tabifyGetColumns } from './get_columns';
 
-import { TabbedResponseWriterOptions, TabbedAggColumn, TabbedAggRow } from './types';
-import { Datatable, DatatableColumn } from '../../../../expressions/common/expression_types/specs';
+import type { TabbedResponseWriterOptions, TabbedAggColumn, TabbedAggRow } from './types';
 
 interface BufferColumn {
   id: string;
@@ -80,6 +80,7 @@ export class TabbedAggResponseWriter {
             params: column.aggConfig.toSerializedFieldFormat(),
             source: 'esaggs',
             sourceParams: {
+              hasPrecisionError: Boolean(column.hasPrecisionError),
               indexPatternId: column.aggConfig.getIndexPattern()?.id,
               appliedTimeRange:
                 column.aggConfig.params.field?.name &&

@@ -5,23 +5,31 @@
  * 2.0.
  */
 
-// @ts-expect-error untyped local
-import { functionWrapper } from '../../../test_helpers/function_wrapper';
+import { functionWrapper } from '@kbn/presentation-util-plugin/common/lib';
 import { testTable, relationalTable } from './__fixtures__/test_tables';
 import { dropdownControl } from './dropdownControl';
+import { ExecutionContext } from '@kbn/expressions-plugin/common';
+import { Adapters } from '@kbn/inspector-plugin/common';
+import { SerializableRecord } from '@kbn/utility-types';
 
 describe('dropdownControl', () => {
   const fn = functionWrapper(dropdownControl);
 
   it('returns a render as dropdown_filter', () => {
-    expect(fn(testTable, { filterColumn: 'name', valueColumn: 'name' })).toHaveProperty(
-      'type',
-      'render'
-    );
-    expect(fn(testTable, { filterColumn: 'name', valueColumn: 'name' })).toHaveProperty(
-      'as',
-      'dropdown_filter'
-    );
+    expect(
+      fn(
+        testTable,
+        { filterColumn: 'name', valueColumn: 'name' },
+        {} as ExecutionContext<Adapters, SerializableRecord>
+      )
+    ).toHaveProperty('type', 'render');
+    expect(
+      fn(
+        testTable,
+        { filterColumn: 'name', valueColumn: 'name' },
+        {} as ExecutionContext<Adapters, SerializableRecord>
+      )
+    ).toHaveProperty('as', 'dropdown_filter');
   });
 
   describe('args', () => {
@@ -32,12 +40,27 @@ describe('dropdownControl', () => {
             unique.find(([value, label]) => value === name) ? unique : [...unique, [name, name]],
           []
         );
-        expect(fn(testTable, { valueColumn: 'name' }).value.choices).toEqual(uniqueNames);
+        expect(
+          fn(
+            testTable,
+            { valueColumn: 'name' },
+            {} as ExecutionContext<Adapters, SerializableRecord>
+          )?.value?.choices
+        ).toEqual(uniqueNames);
       });
 
       it('returns an empty array when provided an invalid column', () => {
-        expect(fn(testTable, { valueColumn: 'foo' }).value.choices).toEqual([]);
-        expect(fn(testTable, { valueColumn: '' }).value.choices).toEqual([]);
+        expect(
+          fn(
+            testTable,
+            { valueColumn: 'foo' },
+            {} as ExecutionContext<Adapters, SerializableRecord>
+          )?.value?.choices
+        ).toEqual([]);
+        expect(
+          fn(testTable, { valueColumn: '' }, {} as ExecutionContext<Adapters, SerializableRecord>)
+            ?.value?.choices
+        ).toEqual([]);
       });
     });
 
@@ -45,7 +68,11 @@ describe('dropdownControl', () => {
       it('populates dropdown choices with labels from label column', () => {
         const expectedChoices = relationalTable.rows.map((row) => [row.id, row.name]);
         expect(
-          fn(relationalTable, { valueColumn: 'id', labelColumn: 'name' }).value.choices
+          fn(
+            relationalTable,
+            { valueColumn: 'id', labelColumn: 'name' },
+            {} as ExecutionContext<Adapters, SerializableRecord>
+          )?.value?.choices
         ).toEqual(expectedChoices);
       });
     });
@@ -53,19 +80,30 @@ describe('dropdownControl', () => {
 
   describe('filterColumn', () => {
     it('sets which column the filter is applied to', () => {
-      expect(fn(testTable, { filterColumn: 'name' }).value).toHaveProperty('column', 'name');
-      expect(fn(testTable, { filterColumn: 'name', valueColumn: 'price' }).value).toHaveProperty(
-        'column',
-        'name'
-      );
+      expect(
+        fn(
+          testTable,
+          { filterColumn: 'name' },
+          {} as ExecutionContext<Adapters, SerializableRecord>
+        )?.value
+      ).toHaveProperty('column', 'name');
+      expect(
+        fn(
+          testTable,
+          { filterColumn: 'name', valueColumn: 'price' },
+          {} as ExecutionContext<Adapters, SerializableRecord>
+        )?.value
+      ).toHaveProperty('column', 'name');
     });
 
     it('defaults to valueColumn if not provided', () => {
-      expect(fn(testTable, { valueColumn: 'price' }).value).toHaveProperty('column', 'price');
-    });
-
-    it('sets column to undefined if no args are provided', () => {
-      expect(fn(testTable).value).toHaveProperty('column', undefined);
+      expect(
+        fn(
+          testTable,
+          { valueColumn: 'price' },
+          {} as ExecutionContext<Adapters, SerializableRecord>
+        )?.value
+      ).toHaveProperty('column', 'price');
     });
   });
 });

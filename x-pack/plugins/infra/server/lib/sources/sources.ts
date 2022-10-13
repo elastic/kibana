@@ -5,26 +5,33 @@
  * 2.0.
  */
 
-import { failure } from 'io-ts/lib/PathReporter';
-import { identity, constant } from 'fp-ts/lib/function';
+import { fold, map } from 'fp-ts/lib/Either';
+import { constant, identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { map, fold } from 'fp-ts/lib/Either';
+import { failure } from 'io-ts/lib/PathReporter';
 import { inRange } from 'lodash';
-import { SavedObjectsClientContract } from 'src/core/server';
-import { defaultSourceConfiguration } from './defaults';
-import { AnomalyThresholdRangeError, NotFoundError } from './errors';
-import { infraSourceConfigurationSavedObjectName } from './saved_object_type';
+import {
+  SavedObject,
+  SavedObjectsClientContract,
+  SavedObjectsErrorHelpers,
+} from '@kbn/core/server';
 import {
   InfraSavedSourceConfiguration,
+  InfraSource,
   InfraSourceConfiguration,
   InfraStaticSourceConfiguration,
-  pickSavedSourceConfiguration,
-  SourceConfigurationSavedObjectRuntimeType,
-  InfraSource,
-  sourceConfigurationConfigFilePropertiesRT,
   SourceConfigurationConfigFileProperties,
+  sourceConfigurationConfigFilePropertiesRT,
+  SourceConfigurationSavedObjectRuntimeType,
 } from '../../../common/source_configuration/source_configuration';
-import { InfraConfig } from '../../../server';
+import { InfraConfig } from '../..';
+import { defaultSourceConfiguration } from './defaults';
+import { AnomalyThresholdRangeError, NotFoundError } from './errors';
+import {
+  extractSavedObjectReferences,
+  resolveSavedObjectReferences,
+} from './saved_object_references';
+import { infraSourceConfigurationSavedObjectName } from './saved_object_type';
 
 interface Libs {
   config: InfraConfig;
@@ -69,7 +76,7 @@ export class InfraSources {
           : Promise.reject(err)
       )
       .catch((err) =>
-        savedObjectsClient.errors.isNotFoundError(err)
+        SavedObjectsErrorHelpers.isNotFoundError(err)
           ? Promise.resolve({
               id: sourceId,
               version: undefined,
@@ -113,13 +120,13 @@ export class InfraSources {
       staticDefaultSourceConfiguration,
       source
     );
+    const { attributes, references } = extractSavedObjectReferences(newSourceConfiguration);
 
     const createdSourceConfiguration = convertSavedObjectToSavedSourceConfiguration(
-      await savedObjectsClient.create(
-        infraSourceConfigurationSavedObjectName,
-        pickSavedSourceConfiguration(newSourceConfiguration) as any,
-        { id: sourceId }
-      )
+      await savedObjectsClient.create(infraSourceConfigurationSavedObjectName, attributes, {
+        id: sourceId,
+        references,
+      })
     );
 
     return {
@@ -158,19 +165,19 @@ export class InfraSources {
       configuration,
       sourceProperties
     );
+    const { attributes, references } = extractSavedObjectReferences(
+      updatedSourceConfigurationAttributes
+    );
 
     const updatedSourceConfiguration = convertSavedObjectToSavedSourceConfiguration(
       // update() will perform a deep merge. We use create() with overwrite: true instead. mergeSourceConfiguration()
       // ensures the correct and intended merging of properties.
-      await savedObjectsClient.create(
-        infraSourceConfigurationSavedObjectName,
-        pickSavedSourceConfiguration(updatedSourceConfigurationAttributes) as any,
-        {
-          id: sourceId,
-          version,
-          overwrite: true,
-        }
-      )
+      await savedObjectsClient.create(infraSourceConfigurationSavedObjectName, attributes, {
+        id: sourceId,
+        overwrite: true,
+        references,
+        version,
+      })
     );
 
     return {
@@ -202,32 +209,14 @@ export class InfraSources {
   }
 
   private async getStaticDefaultSourceConfiguration() {
-    const staticSourceConfiguration: SourceConfigurationConfigFileProperties['sources']['default'] = pipe(
-      sourceConfigurationConfigFilePropertiesRT.decode(this.libs.config),
-      map(({ sources: { default: defaultConfiguration } }) => defaultConfiguration),
-      fold(constant({}), identity)
-    );
-
-    // NOTE: Legacy logAlias needs converting to a logIndices reference until we can remove
-    // config file sources in 8.0.0.
-    if (staticSourceConfiguration && staticSourceConfiguration.logAlias) {
-      const convertedStaticSourceConfiguration: InfraStaticSourceConfiguration & {
-        logAlias?: string;
-      } = {
-        ...staticSourceConfiguration,
-        logIndices: {
-          type: 'index_name',
-          indexName: staticSourceConfiguration.logAlias,
-        },
-      };
-      delete convertedStaticSourceConfiguration.logAlias;
-      return mergeSourceConfiguration(
-        defaultSourceConfiguration,
-        convertedStaticSourceConfiguration
+    const staticSourceConfiguration: SourceConfigurationConfigFileProperties['sources']['default'] =
+      pipe(
+        sourceConfigurationConfigFilePropertiesRT.decode(this.libs.config),
+        map(({ sources: { default: defaultConfiguration } }) => defaultConfiguration),
+        fold(constant({}), identity)
       );
-    } else {
-      return mergeSourceConfiguration(defaultSourceConfiguration, staticSourceConfiguration);
-    }
+
+    return mergeSourceConfiguration(defaultSourceConfiguration, staticSourceConfiguration);
   }
 
   private async getSavedSourceConfiguration(
@@ -251,7 +240,7 @@ export class InfraSources {
   }
 }
 
-const mergeSourceConfiguration = (
+export const mergeSourceConfiguration = (
   first: InfraSourceConfiguration,
   ...others: InfraStaticSourceConfiguration[]
 ) =>
@@ -267,7 +256,7 @@ const mergeSourceConfiguration = (
     first
   );
 
-export const convertSavedObjectToSavedSourceConfiguration = (savedObject: unknown) =>
+export const convertSavedObjectToSavedSourceConfiguration = (savedObject: SavedObject<unknown>) =>
   pipe(
     SourceConfigurationSavedObjectRuntimeType.decode(savedObject),
     map((savedSourceConfiguration) => ({
@@ -275,7 +264,10 @@ export const convertSavedObjectToSavedSourceConfiguration = (savedObject: unknow
       version: savedSourceConfiguration.version,
       updatedAt: savedSourceConfiguration.updated_at,
       origin: 'stored' as 'stored',
-      configuration: savedSourceConfiguration.attributes,
+      configuration: resolveSavedObjectReferences(
+        savedSourceConfiguration.attributes,
+        savedObject.references
+      ),
     })),
     fold((errors) => {
       throw new Error(failure(errors).join('\n'));

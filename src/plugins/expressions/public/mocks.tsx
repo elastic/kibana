@@ -7,9 +7,8 @@
  */
 
 import React from 'react';
+import { coreMock } from '@kbn/core/public/mocks';
 import { ExpressionsSetup, ExpressionsStart, plugin as pluginInitializer } from '.';
-
-import { coreMock } from '../../../core/public/mocks';
 
 export type Setup = jest.Mocked<ExpressionsSetup>;
 export type Start = jest.Mocked<ExpressionsStart>;
@@ -19,14 +18,11 @@ const createSetupContract = (): Setup => {
     fork: jest.fn(),
     getFunction: jest.fn(),
     getFunctions: jest.fn(),
-    getRenderer: jest.fn(),
-    getRenderers: jest.fn(),
-    getType: jest.fn(),
     getTypes: jest.fn(),
     registerFunction: jest.fn(),
     registerRenderer: jest.fn(),
     registerType: jest.fn(),
-    run: jest.fn(),
+    getAllMigrations: jest.fn(),
   };
   return setupContract;
 };
@@ -34,16 +30,20 @@ const createSetupContract = (): Setup => {
 const createStartContract = (): Start => {
   return {
     execute: jest.fn(),
-    ExpressionLoader: jest.fn(),
-    ExpressionRenderHandler: jest.fn(),
-    fork: jest.fn(),
     getFunction: jest.fn(),
+    getFunctions: jest.fn(),
     getRenderer: jest.fn(),
+    getRenderers: jest.fn(),
     getType: jest.fn(),
+    getTypes: jest.fn(),
     loader: jest.fn(),
-    ReactExpressionRenderer: jest.fn((props) => <></>),
     render: jest.fn(),
+    ReactExpressionRenderer: jest.fn((props) => <></>),
     run: jest.fn(),
+    telemetry: jest.fn(),
+    extract: jest.fn(),
+    inject: jest.fn(),
+    getAllMigrations: jest.fn(),
   };
 };
 

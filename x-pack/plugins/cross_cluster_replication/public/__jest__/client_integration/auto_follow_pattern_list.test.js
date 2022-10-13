@@ -12,15 +12,10 @@ import { setupEnvironment, pageHelpers, nextTick, delay, getRandomString } from 
 const { setup } = pageHelpers.autoFollowPatternList;
 
 describe('<AutoFollowPatternList />', () => {
-  let server;
   let httpRequestsMockHelpers;
 
   beforeAll(() => {
-    ({ server, httpRequestsMockHelpers } = setupEnvironment());
-  });
-
-  afterAll(() => {
-    server.restore();
+    ({ httpRequestsMockHelpers } = setupEnvironment());
   });
 
   beforeEach(() => {
@@ -38,7 +33,7 @@ describe('<AutoFollowPatternList />', () => {
     });
 
     test('should show a loading indicator on component', async () => {
-      expect(exists('autoFollowPatternLoading')).toBe(true);
+      expect(exists('sectionLoading')).toBe(true);
     });
   });
 
@@ -63,7 +58,6 @@ describe('<AutoFollowPatternList />', () => {
   });
 
   describe('when there are multiple pages of auto-follow patterns', () => {
-    let find;
     let component;
     let table;
     let actions;
@@ -83,7 +77,7 @@ describe('<AutoFollowPatternList />', () => {
       httpRequestsMockHelpers.setLoadAutoFollowPatternsResponse({ patterns: autoFollowPatterns });
 
       // Mount the component
-      ({ find, component, table, actions, form } = setup());
+      ({ component, table, actions, form } = setup());
 
       await nextTick(); // Make sure that the http request is fulfilled
       component.update();
@@ -98,9 +92,8 @@ describe('<AutoFollowPatternList />', () => {
       expect(tableCellsValues.length).toBe(10);
     });
 
-    // Skipped until we can figure out how to get this test to work.
-    test.skip('search works', () => {
-      form.setInputValue(find('autoFollowPatternSearch'), 'unique');
+    test('search works', () => {
+      form.setInputValue('autoFollowPatternSearch', 'unique');
       const { tableCellsValues } = table.getMetaData('autoFollowPatternListTable');
       expect(tableCellsValues.length).toBe(1);
     });
@@ -215,7 +208,7 @@ describe('<AutoFollowPatternList />', () => {
         expect(rows.length).toBe(2);
 
         // We wil delete the *first* auto-follow pattern in the table
-        httpRequestsMockHelpers.setDeleteAutoFollowPatternResponse({
+        httpRequestsMockHelpers.setDeleteAutoFollowPatternResponse(autoFollowPattern1.name, {
           itemsDeleted: [autoFollowPattern1.name],
         });
 

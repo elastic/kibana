@@ -11,7 +11,7 @@ import Fs from 'fs';
 
 import execa from 'execa';
 import { REPO_ROOT } from '@kbn/utils';
-import { createStripAnsiSerializer, createReplaceSerializer } from '@kbn/dev-utils';
+import { createStripAnsiSerializer, createReplaceSerializer } from '@kbn/jest-serializers';
 import extract from 'extract-zip';
 import del from 'del';
 import globby from 'globby';
@@ -43,8 +43,14 @@ it('builds a generated plugin into a viable archive', async () => {
       all: true,
     }
   );
+  const filterLogs = (logs: string | undefined) => {
+    return logs
+      ?.split('\n')
+      .filter((l) => !l.includes('failed to reach ci-stats service'))
+      .join('\n');
+  };
 
-  expect(generateProc.all).toMatchInlineSnapshot(`
+  expect(filterLogs(generateProc.all)).toMatchInlineSnapshot(`
     " succ 🎉
 
           Your plugin has been created in plugins/foo_test_plugin
@@ -60,7 +66,7 @@ it('builds a generated plugin into a viable archive', async () => {
     }
   );
 
-  expect(buildProc.all).toMatchInlineSnapshot(`
+  expect(filterLogs(buildProc.all)).toMatchInlineSnapshot(`
     " info deleting the build and target directories
      info running @kbn/optimizer
      │ info initialized, 0 bundles cached
@@ -89,10 +95,8 @@ it('builds a generated plugin into a viable archive', async () => {
       "kibana/fooTestPlugin/server/types.js",
       "kibana/fooTestPlugin/target/public/fooTestPlugin.chunk.1.js",
       "kibana/fooTestPlugin/target/public/fooTestPlugin.chunk.1.js.br",
-      "kibana/fooTestPlugin/target/public/fooTestPlugin.chunk.1.js.gz",
       "kibana/fooTestPlugin/target/public/fooTestPlugin.plugin.js",
       "kibana/fooTestPlugin/target/public/fooTestPlugin.plugin.js.br",
-      "kibana/fooTestPlugin/target/public/fooTestPlugin.plugin.js.gz",
       "kibana/fooTestPlugin/translations/ja-JP.json",
       "kibana/fooTestPlugin/tsconfig.json",
     ]
@@ -101,9 +105,14 @@ it('builds a generated plugin into a viable archive', async () => {
   expect(loadJsonFile.sync(Path.resolve(TMP_DIR, 'kibana', 'fooTestPlugin', 'kibana.json')))
     .toMatchInlineSnapshot(`
     Object {
+      "description": "",
       "id": "fooTestPlugin",
       "kibanaVersion": "7.5.0",
       "optionalPlugins": Array [],
+      "owner": Object {
+        "githubTeam": "",
+        "name": "",
+      },
       "requiredPlugins": Array [
         "navigation",
       ],

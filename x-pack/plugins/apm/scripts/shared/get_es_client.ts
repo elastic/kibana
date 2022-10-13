@@ -6,11 +6,8 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import { ApiKeyAuth, BasicAuth } from '@elastic/elasticsearch/lib/pool';
-import {
-  ESSearchResponse,
-  ESSearchRequest,
-} from '../../../../../typings/elasticsearch';
+import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
+import type { ESSearchResponse, ESSearchRequest } from '@kbn/es-types';
 
 export type ESClient = ReturnType<typeof getEsClient>;
 
@@ -19,36 +16,37 @@ export function getEsClient({
   auth,
 }: {
   node: string;
-  auth?: BasicAuth | ApiKeyAuth;
-}) {
+  auth?: ClientOptions['auth'];
+  // Should be refactored
+  // The inferred type of 'getEsClient' references an inaccessible 'unique symbol' type. A type annotation is necessary.
+}): any {
   const client = new Client({
     node,
-    ssl: {
+    tls: {
       rejectUnauthorized: false,
     },
     requestTimeout: 120000,
     auth,
   });
 
+  const originalSearch = client.search.bind(client);
+
   async function search<
     TDocument = unknown,
     TSearchRequest extends ESSearchRequest = ESSearchRequest
   >(request: TSearchRequest) {
-    const response = await client.search<TDocument>(request);
+    const response = await originalSearch(request);
 
     return {
       ...response,
-      body: (response.body as unknown) as ESSearchResponse<
-        TDocument,
-        TSearchRequest
-      >,
+      body: response as unknown as ESSearchResponse<TDocument, TSearchRequest>,
     };
   }
 
   // @ts-expect-error
   client.search = search;
 
-  return (client as unknown) as Omit<Client, 'search'> & {
+  return client as unknown as Omit<Client, 'search'> & {
     search: typeof search;
   };
 }

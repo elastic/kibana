@@ -5,255 +5,99 @@
  * 2.0.
  */
 
-import { get } from 'lodash/fp';
-import set from 'set-value';
-import {
-  ThresholdNormalized,
-  TimestampOverrideOrUndefined,
-} from '../../../../../common/detection_engine/schemas/common/schemas';
-import { Logger, SavedObject } from '../../../../../../../../src/core/server';
-import {
+import { TIMESTAMP } from '@kbn/rule-data-utils';
+
+import type {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertServices,
-} from '../../../../../../alerting/server';
-import { BaseHit } from '../../../../../common/detection_engine/types';
-import { TermAggregationBucket } from '../../../types';
-import { RefreshTypes } from '../../types';
-import { singleBulkCreate, SingleBulkCreateResponse } from '../single_bulk_create';
-import {
-  calculateThresholdSignalUuid,
-  getThresholdAggregationParts,
-  getThresholdTermsHash,
-} from '../utils';
-import { BuildRuleMessage } from '../rule_messages';
-import type {
-  MultiAggBucket,
-  SignalSource,
-  SignalSearchResponse,
-  ThresholdSignalHistory,
-  AlertAttributes,
-} from '../types';
-import { ThresholdRuleParams } from '../../schemas/rule_schemas';
+  RuleExecutorServices,
+} from '@kbn/alerting-plugin/server';
+import type { ThresholdNormalized } from '../../../../../common/detection_engine/schemas/common/schemas';
+import type { GenericBulkCreateResponse } from '../../rule_types/factories/bulk_create_factory';
+import { calculateThresholdSignalUuid } from '../utils';
+import { buildReasonMessageForThresholdAlert } from '../reason_formatters';
+import type { ThresholdSignalHistory, BulkCreate, WrapHits } from '../types';
+import type { CompleteRule, ThresholdRuleParams } from '../../schemas/rule_schemas';
+import type { BaseFieldsLatest } from '../../../../../common/detection_engine/schemas/alerts';
+import type { ThresholdBucket } from './types';
+import { createEnrichEventsFunction } from '../enrichments';
+import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 
 interface BulkCreateThresholdSignalsParams {
-  someResult: SignalSearchResponse;
-  ruleSO: SavedObject<AlertAttributes<ThresholdRuleParams>>;
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  buckets: ThresholdBucket[];
+  completeRule: CompleteRule<ThresholdRuleParams>;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   inputIndexPattern: string[];
-  logger: Logger;
-  id: string;
   filter: unknown;
   signalsIndex: string;
-  refresh: RefreshTypes;
   startedAt: Date;
   from: Date;
-  thresholdSignalHistory: ThresholdSignalHistory;
-  buildRuleMessage: BuildRuleMessage;
+  signalHistory: ThresholdSignalHistory;
+  bulkCreate: BulkCreate;
+  wrapHits: WrapHits;
+  ruleExecutionLogger: IRuleExecutionLogForExecutors;
 }
 
-const getTransformedHits = (
-  results: SignalSearchResponse,
+export const getTransformedHits = (
+  buckets: ThresholdBucket[],
   inputIndex: string,
   startedAt: Date,
   from: Date,
-  logger: Logger,
   threshold: ThresholdNormalized,
-  ruleId: string,
-  filter: unknown,
-  timestampOverride: TimestampOverrideOrUndefined,
-  thresholdSignalHistory: ThresholdSignalHistory
-) => {
-  const aggParts = threshold.field.length
-    ? results.aggregations && getThresholdAggregationParts(results.aggregations)
-    : {
-        field: null,
-        index: 0,
-        name: 'threshold_0',
-      };
-
-  if (!aggParts) {
-    return [];
-  }
-
-  const getCombinations = (buckets: TermAggregationBucket[], i: number, field: string) => {
-    return buckets.reduce((acc: MultiAggBucket[], bucket: TermAggregationBucket) => {
-      if (i < threshold.field.length - 1) {
-        const nextLevelIdx = i + 1;
-        const nextLevelAggParts = getThresholdAggregationParts(bucket, nextLevelIdx);
-        if (nextLevelAggParts == null) {
-          throw new Error('Unable to parse aggregation.');
-        }
-        const nextLevelPath = `['${nextLevelAggParts.name}']['buckets']`;
-        const nextBuckets = get(nextLevelPath, bucket);
-        const combinations = getCombinations(nextBuckets, nextLevelIdx, nextLevelAggParts.field);
-        combinations.forEach((val) => {
-          const el = {
-            terms: [
-              {
-                field,
-                value: bucket.key,
-              },
-              ...val.terms,
-            ].filter((term) => term.field != null),
-            cardinality: val.cardinality,
-            topThresholdHits: val.topThresholdHits,
-            docCount: val.docCount,
-          };
-          acc.push(el);
-        });
-      } else {
-        const el = {
-          terms: [
-            {
-              field,
-              value: bucket.key,
-            },
-          ].filter((term) => term.field != null),
+  ruleId: string
+) =>
+  buckets.map((bucket, i) => {
+    // In case of absent threshold fields, `bucket.key` will be an empty string. Note that `Object.values('')` is `[]`,
+    // so the below logic works in either case (whether `terms` or `composite`).
+    return {
+      _index: inputIndex,
+      _id: calculateThresholdSignalUuid(
+        ruleId,
+        startedAt,
+        threshold.field,
+        Object.values(bucket.key).sort().join(',')
+      ),
+      _source: {
+        [TIMESTAMP]: bucket.max_timestamp.value_as_string,
+        ...bucket.key,
+        threshold_result: {
           cardinality: threshold.cardinality?.length
             ? [
                 {
                   field: threshold.cardinality[0].field,
-                  value: bucket.cardinality_count!.value,
+                  value: bucket.cardinality_count?.value,
                 },
               ]
             : undefined,
-          topThresholdHits: bucket.top_threshold_hits,
-          docCount: bucket.doc_count,
-        };
-        acc.push(el);
-      }
-
-      return acc;
-    }, []);
-  };
-
-  // Recurse through the nested buckets and collect each unique combination of terms. Collect the
-  // cardinality and document count from the leaf buckets and return a signal for each set of terms.
-  // @ts-expect-error @elastic/elasticsearch no way to declare a type for aggregation in the search response
-  return getCombinations(results.aggregations![aggParts.name].buckets, 0, aggParts.field).reduce(
-    (acc: Array<BaseHit<SignalSource>>, bucket) => {
-      const hit = bucket.topThresholdHits?.hits.hits[0];
-      if (hit == null) {
-        return acc;
-      }
-
-      const timestampArray = get(timestampOverride ?? '@timestamp', hit.fields);
-      if (timestampArray == null) {
-        return acc;
-      }
-
-      const timestamp = timestampArray[0];
-      if (typeof timestamp !== 'string') {
-        return acc;
-      }
-
-      const termsHash = getThresholdTermsHash(bucket.terms);
-      const signalHit = thresholdSignalHistory[termsHash];
-
-      const source = {
-        '@timestamp': timestamp,
-        ...bucket.terms.reduce<object>((termAcc, term) => {
-          if (!term.field.startsWith('signal.')) {
-            return {
-              ...termAcc,
-              [term.field]: term.value,
-            };
-          }
-          return termAcc;
-        }, {}),
-        threshold_result: {
-          terms: bucket.terms,
-          cardinality: bucket.cardinality,
-          count: bucket.docCount,
-          // Store `from` in the signal so that we know the lower bound for the
-          // threshold set in the timeline search. The upper bound will always be
-          // the `original_time` of the signal (the timestamp of the latest event
-          // in the set).
-          from:
-            signalHit?.lastSignalTimestamp != null
-              ? new Date(signalHit!.lastSignalTimestamp)
-              : from,
+          count: bucket.doc_count,
+          from: bucket.min_timestamp.value_as_string
+            ? new Date(bucket.min_timestamp.value_as_string)
+            : from,
+          terms: Object.entries(bucket.key).map(([key, val]) => ({ field: key, value: val })),
         },
-      };
-
-      acc.push({
-        _index: inputIndex,
-        _id: calculateThresholdSignalUuid(
-          ruleId,
-          startedAt,
-          threshold.field,
-          bucket.terms
-            .map((term) => term.value)
-            .sort()
-            .join(',')
-        ),
-        _source: source,
-      });
-
-      return acc;
-    },
-    []
-  );
-};
-
-export const transformThresholdResultsToEcs = (
-  results: SignalSearchResponse,
-  inputIndex: string,
-  startedAt: Date,
-  from: Date,
-  filter: unknown,
-  logger: Logger,
-  threshold: ThresholdNormalized,
-  ruleId: string,
-  timestampOverride: TimestampOverrideOrUndefined,
-  thresholdSignalHistory: ThresholdSignalHistory
-): SignalSearchResponse => {
-  const transformedHits = getTransformedHits(
-    results,
-    inputIndex,
-    startedAt,
-    from,
-    logger,
-    threshold,
-    ruleId,
-    filter,
-    timestampOverride,
-    thresholdSignalHistory
-  );
-  const thresholdResults = {
-    ...results,
-    hits: {
-      ...results.hits,
-      hits: transformedHits,
-    },
-  };
-
-  delete thresholdResults.aggregations; // delete because no longer needed
-
-  set(thresholdResults, 'results.hits.total', transformedHits.length);
-
-  return thresholdResults;
-};
+      },
+    };
+  });
 
 export const bulkCreateThresholdSignals = async (
   params: BulkCreateThresholdSignalsParams
-): Promise<SingleBulkCreateResponse> => {
-  const ruleParams = params.ruleSO.attributes.params;
-  const thresholdResults = params.someResult;
-  const ecsResults = transformThresholdResultsToEcs(
-    thresholdResults,
+): Promise<GenericBulkCreateResponse<BaseFieldsLatest>> => {
+  const ruleParams = params.completeRule.ruleParams;
+  const ecsResults = getTransformedHits(
+    params.buckets,
     params.inputIndexPattern.join(','),
     params.startedAt,
     params.from,
-    params.filter,
-    params.logger,
     ruleParams.threshold,
-    ruleParams.ruleId,
-    ruleParams.timestampOverride,
-    params.thresholdSignalHistory
+    ruleParams.ruleId
   );
-  const buildRuleMessage = params.buildRuleMessage;
 
-  return singleBulkCreate({ ...params, filteredEvents: ecsResults, buildRuleMessage });
+  return params.bulkCreate(
+    params.wrapHits(ecsResults, buildReasonMessageForThresholdAlert),
+    undefined,
+    createEnrichEventsFunction({
+      services: params.services,
+      logger: params.ruleExecutionLogger,
+    })
+  );
 };

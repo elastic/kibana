@@ -7,18 +7,18 @@
 
 import React, { FC } from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 interface Props {
-  indexPatternAvailableTimeFields: string[];
-  indexPatternTimeField: string | undefined;
+  dataViewAvailableTimeFields: string[];
+  dataViewTimeField: string | undefined;
   onTimeFieldChanged: (e: React.ChangeEvent<HTMLSelectElement>) => void;
 }
 
 export const StepDetailsTimeField: FC<Props> = ({
-  indexPatternAvailableTimeFields,
-  indexPatternTimeField,
+  dataViewAvailableTimeFields,
+  dataViewTimeField,
   onTimeFieldChanged,
 }) => {
   const noTimeFieldLabel = i18n.translate(
@@ -43,26 +43,26 @@ export const StepDetailsTimeField: FC<Props> = ({
     <EuiFormRow
       label={
         <FormattedMessage
-          id="xpack.transform.stepDetailsForm.indexPatternTimeFieldLabel"
-          defaultMessage="Time field for Kibana index pattern"
+          id="xpack.transform.stepDetailsForm.dataViewTimeFieldLabel"
+          defaultMessage="Time field for Kibana data view"
         />
       }
       helpText={
         <FormattedMessage
-          id="xpack.transform.stepDetailsForm.indexPatternTimeFieldHelpText"
+          id="xpack.transform.stepDetailsForm.dataViewTimeFieldHelpText"
           defaultMessage="Select a primary time field for use with the global time filter."
         />
       }
     >
       <EuiSelect
         options={[
-          ...indexPatternAvailableTimeFields.map((text) => ({ text })),
+          ...dataViewAvailableTimeFields.map((text) => ({ text })),
           disabledDividerOption,
           noTimeFieldOption,
         ]}
-        value={indexPatternTimeField}
+        value={dataViewTimeField}
         onChange={onTimeFieldChanged}
-        data-test-subj="transformIndexPatternTimeFieldSelect"
+        data-test-subj="transformDataViewTimeFieldSelect"
       />
     </EuiFormRow>
   );

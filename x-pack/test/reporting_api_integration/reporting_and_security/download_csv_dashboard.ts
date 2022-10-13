@@ -7,13 +7,15 @@
 
 import expect from '@kbn/expect';
 import supertest from 'supertest';
-import { JobParamsDownloadCSV } from '../../../plugins/reporting/server/export_types/csv_searchsource_immediate/types';
+import { JobParamsDownloadCSV } from '@kbn/reporting-plugin/server/export_types/csv_searchsource_immediate/types';
 import { FtrProviderContext } from '../ftr_provider_context';
 
-const getMockJobParams = (obj: any): JobParamsDownloadCSV => ({
-  title: `Mock CSV Title`,
-  ...obj,
-});
+const getMockJobParams = (obj: object) => {
+  return {
+    title: `Mock CSV Title`,
+    ...obj,
+  } as JobParamsDownloadCSV;
+};
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
@@ -31,209 +33,178 @@ export default function ({ getService }: FtrProviderContext) {
     },
   };
 
+  const fromTime = '2019-06-20T00:00:00.000Z';
+  const toTime = '2019-06-25T00:00:00.000Z';
+
   describe('CSV Generation from SearchSource', () => {
     before(async () => {
-      await kibanaServer.uiSettings.update({
-        'csv:quoteValues': false,
-        'dateFormat:tz': 'UTC',
-        defaultIndex: 'logstash-*',
-      });
       await reportingAPI.initEcommerce();
+      await reportingAPI.initLogs();
+      await kibanaServer.uiSettings.update({
+        'csv:quoteValues': true,
+        'dateFormat:tz': 'UTC',
+      });
     });
+
     after(async () => {
       await reportingAPI.teardownEcommerce();
+      await reportingAPI.teardownLogs();
       await reportingAPI.deleteAllReports();
     });
 
-    it('Exports CSV with almost all fields when using fieldsFromSource', async () => {
-      const {
-        status: resStatus,
-        text: resText,
-        type: resType,
-      } = (await generateAPI.getCSVFromSearchSource(
-        getMockJobParams({
-          searchSource: {
-            query: { query: '', language: 'kuery' },
-            index: '5193f870-d861-11e9-a311-0fa548c5f953',
-            sort: [{ order_date: 'desc' }],
-            fieldsFromSource: [
-              '_id',
-              '_index',
-              '_score',
-              '_source',
-              '_type',
-              'category',
-              'category.keyword',
-              'currency',
-              'customer_birth_date',
-              'customer_first_name',
-              'customer_first_name.keyword',
-              'customer_full_name',
-              'customer_full_name.keyword',
-              'customer_gender',
-              'customer_id',
-              'customer_last_name',
-              'customer_last_name.keyword',
-              'customer_phone',
-              'day_of_week',
-              'day_of_week_i',
-              'email',
-              'geoip.city_name',
-              'geoip.continent_name',
-              'geoip.country_iso_code',
-              'geoip.location',
-              'geoip.region_name',
-              'manufacturer',
-              'manufacturer.keyword',
-              'order_date',
-              'order_id',
-              'products._id',
-              'products._id.keyword',
-              'products.base_price',
-              'products.base_unit_price',
-              'products.category',
-              'products.category.keyword',
-              'products.created_on',
-              'products.discount_amount',
-              'products.discount_percentage',
-              'products.manufacturer',
-              'products.manufacturer.keyword',
-              'products.min_price',
-              'products.price',
-              'products.product_id',
-              'products.product_name',
-              'products.product_name.keyword',
-              'products.quantity',
-              'products.sku',
-              'products.tax_amount',
-              'products.taxful_price',
-              'products.taxless_price',
-              'products.unit_discount_amount',
-              'sku',
-              'taxful_total_price',
-              'taxless_total_price',
-              'total_quantity',
-              'total_unique_products',
-              'type',
-              'user',
-            ],
-            filter: [],
-            parent: {
-              query: { language: 'kuery', query: '' },
-              filter: [],
-              parent: {
-                filter: [
-                  {
-                    meta: { index: '5193f870-d861-11e9-a311-0fa548c5f953', params: {} },
-                    range: {
-                      order_date: {
-                        gte: '2019-03-23T03:06:17.785Z',
-                        lte: '2019-10-04T02:33:16.708Z',
-                        format: 'strict_date_optional_time',
-                      },
-                    },
-                  },
-                ],
-              },
-            },
-          },
-          browserTimezone: 'UTC',
-          title: 'testfooyu78yt90-',
-        })
-      )) as supertest.Response;
-      expect(resStatus).to.eql(200);
-      expect(resType).to.eql('text/csv');
-      expectSnapshot(resText).toMatch();
-    });
+    describe('unquoted values', () => {
+      before(async () => {
+        await kibanaServer.uiSettings.update({ 'csv:quoteValues': false });
+      });
 
-    it('Exports CSV with all fields when using defaults', async () => {
-      const {
-        status: resStatus,
-        text: resText,
-        type: resType,
-      } = (await generateAPI.getCSVFromSearchSource(
-        getMockJobParams({
-          searchSource: {
-            query: { query: '', language: 'kuery' },
-            index: '5193f870-d861-11e9-a311-0fa548c5f953',
-            sort: [{ order_date: 'desc' }],
-            fields: ['*'],
-            filter: [],
-            parent: {
-              query: { language: 'kuery', query: '' },
-              filter: [],
-              parent: {
-                filter: [
-                  {
-                    meta: { index: '5193f870-d861-11e9-a311-0fa548c5f953', params: {} },
-                    range: {
-                      order_date: {
-                        gte: '2019-03-23T03:06:17.785Z',
-                        lte: '2019-10-04T02:33:16.708Z',
-                        format: 'strict_date_optional_time',
-                      },
-                    },
-                  },
-                ],
-              },
-            },
-          },
-          browserTimezone: 'UTC',
-          title: 'testfooyu78yt90-',
-        })
-      )) as supertest.Response;
-      expect(resStatus).to.eql(200);
-      expect(resType).to.eql('text/csv');
-      expectSnapshot(resText).toMatch();
-    });
+      after(async () => {
+        await kibanaServer.uiSettings.update({ 'csv:quoteValues': true });
+      });
 
-    it('Logs the error explanation if the search query returns an error', async () => {
-      const { status: resStatus, text: resText } = (await generateAPI.getCSVFromSearchSource(
-        getMockJobParams({
-          searchSource: {
-            query: { query: '', language: 'kuery' },
-            index: '5193f870-d861-11e9-a311-0fa548c5f953',
-            sort: [{ order_date: 'desc' }],
-            fields: ['order_date', 'products'], // products is a non-leaf field
-            filter: [],
-            parent: {
-              query: { language: 'kuery', query: '' },
+      it('Exports CSV with almost all fields when using fieldsFromSource', async () => {
+        const {
+          status: resStatus,
+          text: resText,
+          type: resType,
+        } = (await generateAPI.getCSVFromSearchSource(
+          getMockJobParams({
+            searchSource: {
+              query: { query: '', language: 'kuery' },
+              index: '5193f870-d861-11e9-a311-0fa548c5f953',
+              sort: [{ order_date: 'desc' }],
+              fieldsFromSource: [
+                '_id',
+                '_index',
+                '_score',
+                '_source',
+                '_type',
+                'category',
+                'category.keyword',
+                'currency',
+                'customer_birth_date',
+                'customer_first_name',
+                'customer_first_name.keyword',
+                'customer_full_name',
+                'customer_full_name.keyword',
+                'customer_gender',
+                'customer_id',
+                'customer_last_name',
+                'customer_last_name.keyword',
+                'customer_phone',
+                'day_of_week',
+                'day_of_week_i',
+                'email',
+                'geoip.city_name',
+                'geoip.continent_name',
+                'geoip.country_iso_code',
+                'geoip.location',
+                'geoip.region_name',
+                'manufacturer',
+                'manufacturer.keyword',
+                'order_date',
+                'order_id',
+                'products._id',
+                'products._id.keyword',
+                'products.base_price',
+                'products.base_unit_price',
+                'products.category',
+                'products.category.keyword',
+                'products.created_on',
+                'products.discount_amount',
+                'products.discount_percentage',
+                'products.manufacturer',
+                'products.manufacturer.keyword',
+                'products.min_price',
+                'products.price',
+                'products.product_id',
+                'products.product_name',
+                'products.product_name.keyword',
+                'products.quantity',
+                'products.sku',
+                'products.tax_amount',
+                'products.taxful_price',
+                'products.taxless_price',
+                'products.unit_discount_amount',
+                'sku',
+                'taxful_total_price',
+                'taxless_total_price',
+                'total_quantity',
+                'total_unique_products',
+                'type',
+                'user',
+              ],
               filter: [],
               parent: {
-                filter: [
-                  {
-                    meta: { index: '5193f870-d861-11e9-a311-0fa548c5f953', params: {} },
-                    range: {
-                      order_date: {
-                        gte: '2019-03-23T03:06:17.785Z',
-                        lte: '2019-10-04T02:33:16.708Z',
-                        format: 'strict_date_optional_time',
+                query: { language: 'kuery', query: '' },
+                filter: [],
+                parent: {
+                  filter: [
+                    {
+                      meta: { index: '5193f870-d861-11e9-a311-0fa548c5f953', params: {} },
+                      range: {
+                        order_date: {
+                          gte: fromTime,
+                          lte: toTime,
+                          format: 'strict_date_optional_time',
+                        },
                       },
                     },
-                  },
-                ],
+                  ],
+                },
               },
             },
-          },
-          browserTimezone: 'UTC',
-          title: 'testfooyu78yt90-',
-        })
-      )) as supertest.Response;
-      expect(resStatus).to.eql(500);
-      expectSnapshot(resText).toMatch();
+            browserTimezone: 'UTC',
+            title: 'testfooyu78yt90-',
+          })
+        )) as supertest.Response;
+        expect(resStatus).to.eql(200);
+        expect(resType).to.eql('text/csv');
+        expectSnapshot(resText).toMatch();
+      });
+
+      it('Exports CSV with all fields when using defaults', async () => {
+        const {
+          status: resStatus,
+          text: resText,
+          type: resType,
+        } = await generateAPI.getCSVFromSearchSource(
+          getMockJobParams({
+            searchSource: {
+              query: { query: '', language: 'kuery' },
+              index: '5193f870-d861-11e9-a311-0fa548c5f953',
+              sort: [{ order_date: 'desc' }],
+              fields: ['*'],
+              filter: [],
+              parent: {
+                query: { language: 'kuery', query: '' },
+                filter: [],
+                parent: {
+                  filter: [
+                    {
+                      meta: { index: '5193f870-d861-11e9-a311-0fa548c5f953', params: {} },
+                      range: {
+                        order_date: {
+                          gte: fromTime,
+                          lte: toTime,
+                          format: 'strict_date_optional_time',
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            browserTimezone: 'UTC',
+            title: 'testfooyu78yt90-',
+          })
+        );
+        expect(resStatus).to.eql(200);
+        expect(resType).to.eql('text/csv');
+        expectSnapshot(resText).toMatch();
+      });
     });
 
     describe('date formatting', () => {
-      before(async () => {
-        // load test data that contains a saved search and documents
-        await esArchiver.load('reporting/logs');
-        await esArchiver.load('logstash_functional');
-      });
-      after(async () => {
-        await esArchiver.unload('reporting/logs');
-        await esArchiver.unload('logstash_functional');
-      });
-
       it('With filters and timebased data, default to UTC', async () => {
         const res = (await generateAPI.getCSVFromSearchSource(
           getMockJobParams({
@@ -262,6 +233,7 @@ export default function ({ getService }: FtrProviderContext) {
               query: { language: 'kuery', query: '' },
               sort: [{ '@timestamp': 'desc' }],
             },
+            columns: ['@timestamp', 'clientip', 'extension'],
           })
         )) as supertest.Response;
         const { status: resStatus, text: resText, type: resType } = res;
@@ -300,6 +272,7 @@ export default function ({ getService }: FtrProviderContext) {
               query: { language: 'kuery', query: '' },
               sort: [{ '@timestamp': 'desc' }],
             },
+            columns: ['@timestamp', 'clientip', 'extension'],
           })
         )) as supertest.Response;
         const { status: resStatus, text: resText, type: resType } = res;
@@ -308,10 +281,18 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resType).to.eql('text/csv');
         expectSnapshot(resText).toMatch();
       });
+    });
+
+    describe('nanosecond formatting', () => {
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/reporting/nanos');
+      });
+
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/reporting/nanos');
+      });
 
       it('Formatted date_nanos data, UTC timezone', async () => {
-        await esArchiver.load('reporting/nanos');
-
         const res = await generateAPI.getCSVFromSearchSource(
           getMockJobParams({
             searchSource: {
@@ -322,6 +303,7 @@ export default function ({ getService }: FtrProviderContext) {
               fields: ['date', 'message'],
               filter: [],
             },
+            columns: ['date', 'message'],
           })
         );
         const { status: resStatus, text: resText, type: resType } = res;
@@ -329,13 +311,9 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resStatus).to.eql(200);
         expect(resType).to.eql('text/csv');
         expectSnapshot(resText).toMatch();
-
-        await esArchiver.unload('reporting/nanos');
       });
 
       it('Formatted date_nanos data, custom timezone (New York)', async () => {
-        await esArchiver.load('reporting/nanos');
-
         const res = await generateAPI.getCSVFromSearchSource(
           getMockJobParams({
             browserTimezone: 'America/New_York',
@@ -347,6 +325,7 @@ export default function ({ getService }: FtrProviderContext) {
               fields: ['date', 'message'],
               filter: [],
             },
+            columns: ['date', 'message'],
           })
         );
         const { status: resStatus, text: resText, type: resType } = res;
@@ -354,14 +333,12 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resStatus).to.eql(200);
         expect(resType).to.eql('text/csv');
         expectSnapshot(resText).toMatch();
-
-        await esArchiver.unload('reporting/nanos');
       });
     });
 
     describe('non-timebased', () => {
       it('Handle _id and _index columns', async () => {
-        await esArchiver.load('reporting/nanos');
+        await esArchiver.load('x-pack/test/functional/es_archives/reporting/nanos');
 
         const res = await generateAPI.getCSVFromSearchSource(
           getMockJobParams({
@@ -381,12 +358,11 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resType).to.eql('text/csv');
         expectSnapshot(resText).toMatch();
 
-        await esArchiver.unload('reporting/nanos');
+        await esArchiver.unload('x-pack/test/functional/es_archives/reporting/nanos');
       });
 
       it('With filters and non-timebased data', async () => {
-        // load test data that contains a saved search and documents
-        await esArchiver.load('reporting/sales');
+        await esArchiver.load('x-pack/test/functional/es_archives/reporting/sales');
 
         const {
           status: resStatus,
@@ -406,6 +382,7 @@ export default function ({ getService }: FtrProviderContext) {
                 },
               ],
             },
+            columns: ['name', 'power'],
           })
         )) as supertest.Response;
 
@@ -413,14 +390,11 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resType).to.eql('text/csv');
         expectSnapshot(resText).toMatch();
 
-        await esArchiver.unload('reporting/sales');
+        await esArchiver.unload('x-pack/test/functional/es_archives/reporting/sales');
       });
     });
 
     describe('validation', () => {
-      after(async () => {
-        await reportingAPI.deleteAllReports();
-      });
       it('Return a 404', async () => {
         const { body } = (await generateAPI.getCSVFromSearchSource(
           getMockJobParams({
@@ -437,9 +411,8 @@ export default function ({ getService }: FtrProviderContext) {
         expect(body).to.eql(expectedBody);
       });
 
+      // NOTE: this test requires having the test server run with `xpack.reporting.csv.maxSizeBytes=6000`
       it(`Searches large amount of data, stops at Max Size Reached`, async () => {
-        await reportingAPI.initEcommerce();
-
         const {
           status: resStatus,
           text: resText,
@@ -451,16 +424,7 @@ export default function ({ getService }: FtrProviderContext) {
               query: { query: '', language: 'kuery' },
               index: '5193f870-d861-11e9-a311-0fa548c5f953',
               sort: [{ order_date: 'desc' }],
-              fields: [
-                'order_date',
-                'category',
-                'currency',
-                'customer_id',
-                'order_id',
-                'day_of_week_i',
-                'products.created_on',
-                'sku',
-              ],
+              fields: ['*'],
               filter: [],
               parent: {
                 query: { language: 'kuery', query: '' },
@@ -471,8 +435,8 @@ export default function ({ getService }: FtrProviderContext) {
                       meta: { index: '5193f870-d861-11e9-a311-0fa548c5f953', params: {} },
                       range: {
                         order_date: {
-                          gte: '2019-03-23T03:06:17.785Z',
-                          lte: '2019-10-04T02:33:16.708Z',
+                          gte: '2019-03-23T00:00:00.000Z',
+                          lte: '2019-10-04T00:00:00.000Z',
                           format: 'strict_date_optional_time',
                         },
                       },
@@ -489,8 +453,6 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resStatus).to.eql(200);
         expect(resType).to.eql('text/csv');
         expectSnapshot(resText).toMatch();
-
-        await reportingAPI.teardownEcommerce();
       });
     });
   });

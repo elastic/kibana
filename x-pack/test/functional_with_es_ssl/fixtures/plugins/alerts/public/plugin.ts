@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import { Plugin, CoreSetup, AppMountParameters } from 'kibana/public';
-import { PluginSetupContract as AlertingSetup } from '../../../../../../plugins/alerting/public';
-import { AlertType, SanitizedAlert } from '../../../../../../plugins/alerting/common';
-import { TriggersAndActionsUIPublicPluginSetup } from '../../../../../../plugins/triggers_actions_ui/public';
+import { Plugin, CoreSetup, AppMountParameters } from '@kbn/core/public';
+import { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
+import { SanitizedRule } from '@kbn/alerting-plugin/common';
+import { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
 
 export type Setup = void;
 export type Start = void;
@@ -24,27 +24,27 @@ export class AlertingFixturePlugin implements Plugin<Setup, Start, AlertingExamp
     alerting.registerNavigation(
       'alerting_fixture',
       'test.noop',
-      (alert: SanitizedAlert, alertType: AlertType) => `/rule/${alert.id}`
+      (alert: SanitizedRule) => `/rule/${alert.id}`
     );
 
-    triggersActionsUi.alertTypeRegistry.register({
+    triggersActionsUi.ruleTypeRegistry.register({
       id: 'test.always-firing',
       description: 'Always fires',
       iconClass: 'alert',
       documentationUrl: null,
-      alertParamsExpression: () => React.createElement('div', null, 'Test Always Firing'),
+      ruleParamsExpression: () => React.createElement('div', null, 'Test Always Firing'),
       validate: () => {
         return { errors: {} };
       },
       requiresAppContext: false,
     });
 
-    triggersActionsUi.alertTypeRegistry.register({
+    triggersActionsUi.ruleTypeRegistry.register({
       id: 'test.noop',
       description: `Doesn't do anything`,
       iconClass: 'alert',
       documentationUrl: null,
-      alertParamsExpression: () => React.createElement('div', null, 'Test Noop'),
+      ruleParamsExpression: () => React.createElement('div', null, 'Test Noop'),
       validate: () => {
         return { errors: {} };
       },

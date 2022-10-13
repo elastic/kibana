@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import { NavLinkService } from '../nav_link';
+import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
+import { CanvasNavLinkService } from '../nav_link';
+
+type CanvasNavLinkServiceFactory = PluginServiceFactory<CanvasNavLinkService>;
 
 const noop = (..._args: any[]): any => {};
 
-export const navLinkService: NavLinkService = {
+export const navLinkServiceFactory: CanvasNavLinkServiceFactory = () => ({
   updatePath: noop,
-};
+});

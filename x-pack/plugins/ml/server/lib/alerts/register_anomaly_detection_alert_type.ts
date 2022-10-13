@@ -6,12 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { KibanaRequest } from 'kibana/server';
+import { KibanaRequest } from '@kbn/core/server';
 import {
-  ML_ALERT_TYPES,
-  ML_ALERT_TYPES_CONFIG,
-  AnomalyScoreMatchGroupId,
-} from '../../../common/constants/alerts';
+  ActionGroup,
+  AlertInstanceContext,
+  AlertInstanceState,
+  RuleTypeState,
+} from '@kbn/alerting-plugin/common';
+import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
 import { PLUGIN_ID } from '../../../common/constants/app';
 import { MINIMUM_FULL_LICENSE } from '../../../common/license';
 import {
@@ -20,25 +22,36 @@ import {
 } from '../../routes/schemas/alerting_schema';
 import { RegisterAlertParams } from './register_ml_alerts';
 import { InfluencerAnomalyAlertDoc, RecordAnomalyAlertDoc } from '../../../common/types/alerts';
-import {
-  AlertInstanceContext,
-  AlertInstanceState,
-  AlertTypeState,
-} from '../../../../alerting/common';
 
-const alertTypeConfig = ML_ALERT_TYPES_CONFIG[ML_ALERT_TYPES.ANOMALY_DETECTION];
-
-export type AnomalyDetectionAlertContext = {
-  name: string;
+/**
+ * Base Anomaly detection alerting rule context.
+ * Relevant for both active and recovered alerts.
+ */
+export type AnomalyDetectionAlertBaseContext = AlertInstanceContext & {
   jobIds: string[];
+  anomalyExplorerUrl: string;
+  message: string;
+};
+
+export type AnomalyDetectionAlertContext = AnomalyDetectionAlertBaseContext & {
   timestampIso8601: string;
   timestamp: number;
   score: number;
   isInterim: boolean;
   topRecords: RecordAnomalyAlertDoc[];
   topInfluencers?: InfluencerAnomalyAlertDoc[];
-  anomalyExplorerUrl: string;
-} & AlertInstanceContext;
+};
+
+export const ANOMALY_SCORE_MATCH_GROUP_ID = 'anomaly_score_match';
+
+export type AnomalyScoreMatchGroupId = typeof ANOMALY_SCORE_MATCH_GROUP_ID;
+
+export const THRESHOLD_MET_GROUP: ActionGroup<AnomalyScoreMatchGroupId> = {
+  id: ANOMALY_SCORE_MATCH_GROUP_ID,
+  name: i18n.translate('xpack.ml.anomalyDetectionAlert.actionGroupName', {
+    defaultMessage: 'Anomaly score matched the condition',
+  }),
+};
 
 export function registerAnomalyDetectionAlertType({
   alerting,
@@ -46,15 +59,18 @@ export function registerAnomalyDetectionAlertType({
 }: RegisterAlertParams) {
   alerting.registerType<
     MlAnomalyDetectionAlertParams,
-    AlertTypeState,
+    never, // Only use if defining useSavedObjectReferences hook
+    RuleTypeState,
     AlertInstanceState,
     AnomalyDetectionAlertContext,
     AnomalyScoreMatchGroupId
   >({
     id: ML_ALERT_TYPES.ANOMALY_DETECTION,
-    name: alertTypeConfig.name,
-    actionGroups: alertTypeConfig.actionGroups,
-    defaultActionGroupId: alertTypeConfig.defaultActionGroupId,
+    name: i18n.translate('xpack.ml.anomalyDetectionAlert.name', {
+      defaultMessage: 'Anomaly detection alert',
+    }),
+    actionGroups: [THRESHOLD_MET_GROUP],
+    defaultActionGroupId: ANOMALY_SCORE_MATCH_GROUP_ID,
     validate: {
       params: mlAnomalyDetectionAlertParams,
     },
@@ -75,7 +91,7 @@ export function registerAnomalyDetectionAlertType({
         {
           name: 'jobIds',
           description: i18n.translate('xpack.ml.alertContext.jobIdsDescription', {
-            defaultMessage: 'List of job IDs that triggered the alert instance',
+            defaultMessage: 'List of job IDs that triggered the alert',
           }),
         },
         {
@@ -119,18 +135,28 @@ export function registerAnomalyDetectionAlertType({
     },
     producer: PLUGIN_ID,
     minimumLicenseRequired: MINIMUM_FULL_LICENSE,
-    async executor({ services, params, alertId, state, previousStartedAt, startedAt }) {
+    isExportable: true,
+    doesSetRecoveryContext: true,
+    async executor({ services, params, alertId, state, previousStartedAt, startedAt, name }) {
       const fakeRequest = {} as KibanaRequest;
       const { execute } = mlSharedServices.alertingServiceProvider(
         services.savedObjectsClient,
         fakeRequest
       );
-      const executionResult = await execute(params, startedAt, previousStartedAt);
+      const executionResult = await execute(params);
 
-      if (executionResult) {
+      if (executionResult && !executionResult.isHealthy) {
         const alertInstanceName = executionResult.name;
-        const alertInstance = services.alertInstanceFactory(alertInstanceName);
-        alertInstance.scheduleActions(alertTypeConfig.defaultActionGroupId, executionResult);
+        const alertInstance = services.alertFactory.create(alertInstanceName);
+        alertInstance.scheduleActions(ANOMALY_SCORE_MATCH_GROUP_ID, executionResult.context);
+      }
+
+      // Set context for recovered alerts
+      const { getRecoveredAlerts } = services.alertFactory.done();
+      for (const recoveredAlert of getRecoveredAlerts()) {
+        if (!!executionResult?.isHealthy) {
+          recoveredAlert.setContext(executionResult.context);
+        }
       }
     },
   });

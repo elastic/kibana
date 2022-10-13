@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { location } from '../../../canvas_plugin_src/functions/browser/location';
+import type { location } from '../../../canvas_plugin_src/functions/browser/location';
 import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 

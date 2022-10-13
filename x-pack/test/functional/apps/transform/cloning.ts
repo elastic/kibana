@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   isLatestTransform,
   isPivotTransform,
   TransformPivotConfig,
-} from '../../../../plugins/transform/common/types/transform';
+} from '@kbn/transform-plugin/common/types/transform';
+import { FtrProviderContext } from '../../ftr_provider_context';
+import { getLatestTransformConfig } from '.';
 
 interface TestData {
   type: 'pivot' | 'latest';
@@ -20,6 +21,11 @@ interface TestData {
   transformDescription: string;
   destinationIndex: string;
   expected: any;
+}
+
+function getNumFailureRetriesStr(value: number | null | undefined) {
+  if (value === null || value === undefined) return '';
+  return value.toString();
 }
 
 function getTransformConfig(): TransformPivotConfig {
@@ -32,10 +38,12 @@ function getTransformConfig(): TransformPivotConfig {
       aggregations: { 'products.base_price.avg': { avg: { field: 'products.base_price' } } },
     },
     description:
-      'ecommerce batch transform with avg(products.base_price) grouped by terms(category.keyword)',
+      'ecommerce batch transform with avg(products.base_price) grouped by terms(category)',
     frequency: '3s',
+    retention_policy: { time: { field: 'order_date', max_age: '1d' } },
     settings: {
       max_page_search_size: 250,
+      num_failure_retries: 0,
     },
     dest: { index: `user-ec_2_${date}` },
   };
@@ -71,8 +79,90 @@ function getTransformConfigWithRuntimeMappings(): TransformPivotConfig {
     },
     description: 'ecommerce batch transform grouped by terms(rt_gender_lower)',
     frequency: '3s',
+    retention_policy: { time: { field: 'order_date', max_age: '3d' } },
     settings: {
       max_page_search_size: 250,
+      num_failure_retries: 5,
+    },
+    dest: { index: `user-ec_2_${date}` },
+  };
+}
+
+function getTransformConfigWithBoolFilterAgg(): TransformPivotConfig {
+  const date = Date.now();
+
+  return {
+    id: `ec_cloning_filter_agg_${date}`,
+    source: {
+      index: ['ft_ecommerce'],
+    },
+    // @ts-ignore Boolean filter doesn't have to have field
+    pivot: {
+      group_by: {
+        category: {
+          terms: {
+            field: 'category.keyword',
+          },
+        },
+      },
+      aggregations: {
+        'products.base_price.avg': {
+          avg: {
+            field: 'products.base_price',
+          },
+        },
+        Saturday: {
+          filter: {
+            term: {
+              day_of_week: 'Saturday',
+            },
+          },
+          aggs: {
+            'saturday.products.base_price.max': {
+              max: {
+                field: 'products.base_price',
+              },
+            },
+          },
+        },
+        FEMALE: {
+          filter: {
+            bool: {
+              must: [],
+              must_not: [],
+              should: [],
+            },
+          },
+          aggs: {
+            'female.products.base_price.sum': {
+              sum: {
+                field: 'products.base_price',
+              },
+            },
+          },
+        },
+        user_exists: {
+          filter: {
+            exists: {
+              field: 'user',
+            },
+          },
+          aggs: {
+            'user_exists.order_date.min': {
+              min: {
+                field: 'order_date',
+              },
+            },
+          },
+        },
+      },
+    },
+    description: 'ecommerce batch transform with filter aggregations',
+    frequency: '3s',
+    retention_policy: { time: { field: 'order_date', max_age: '3d' } },
+    settings: {
+      max_page_search_size: 250,
+      num_failure_retries: 5,
     },
     dest: { index: `user-ec_2_${date}` },
   };
@@ -85,10 +175,12 @@ export default function ({ getService }: FtrProviderContext) {
   describe('cloning', function () {
     const transformConfigWithPivot = getTransformConfig();
     const transformConfigWithRuntimeMapping = getTransformConfigWithRuntimeMappings();
-    // const transformConfigWithLatest = getLatestTransformConfig();
+    const transformConfigWithBoolFilterAgg = getTransformConfigWithBoolFilterAgg();
+
+    const transformConfigWithLatest = getLatestTransformConfig('cloning');
 
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/ecommerce');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
       await transform.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
       await transform.api.createAndRunTransform(
         transformConfigWithPivot.id,
@@ -98,11 +190,15 @@ export default function ({ getService }: FtrProviderContext) {
         transformConfigWithRuntimeMapping.id,
         transformConfigWithRuntimeMapping
       );
+      await transform.api.createAndRunTransform(
+        transformConfigWithBoolFilterAgg.id,
+        transformConfigWithBoolFilterAgg
+      );
+      await transform.api.createAndRunTransform(
+        transformConfigWithLatest.id,
+        transformConfigWithLatest
+      );
 
-      // await transform.api.createAndRunTransform(
-      //   transformConfigWithLatest.id,
-      //   transformConfigWithLatest
-      // );
       await transform.testResources.setKibanaTimeZoneToUTC();
 
       await transform.securityUI.loginAsTransformPowerUser();
@@ -114,11 +210,12 @@ export default function ({ getService }: FtrProviderContext) {
         transformConfigWithRuntimeMapping.dest.index
       );
 
-      // await transform.testResources.deleteIndexPatternByTitle(transformConfigWithLatest.dest.index);
+      await transform.testResources.deleteIndexPatternByTitle(transformConfigWithLatest.dest.index);
       await transform.api.deleteIndices(transformConfigWithPivot.dest.index);
       await transform.api.deleteIndices(transformConfigWithRuntimeMapping.dest.index);
-      // await transform.api.deleteIndices(transformConfigWithLatest.dest.index);
+      await transform.api.deleteIndices(transformConfigWithLatest.dest.index);
       await transform.api.cleanTransformIndices();
+      await transform.testResources.deleteIndexPatternByTitle('ft_ecommerce');
     });
 
     const testDataList: TestData[] = [
@@ -155,6 +252,12 @@ export default function ({ getService }: FtrProviderContext) {
               `Women's Clothing`,
             ],
           },
+          retentionPolicySwitchEnabled: true,
+          retentionPolicyField: 'order_date',
+          retentionPolicyMaxAge: '1d',
+          numFailureRetries: getNumFailureRetriesStr(
+            transformConfigWithPivot.settings?.num_failure_retries
+          ),
         },
       },
       {
@@ -184,35 +287,92 @@ export default function ({ getService }: FtrProviderContext) {
             column: 0,
             values: [`female`, `male`],
           },
+          retentionPolicySwitchEnabled: true,
+          retentionPolicyField: 'order_date',
+          retentionPolicyMaxAge: '3d',
+          numFailureRetries: getNumFailureRetriesStr(
+            transformConfigWithRuntimeMapping.settings?.num_failure_retries
+          ),
         },
       },
-      // TODO enable tests when https://github.com/elastic/elasticsearch/issues/67148 is resolved
-      // {
-      //   type: 'latest' as const,
-      //   suiteTitle: 'clone transform with latest function',
-      //   originalConfig: transformConfigWithLatest,
-      //   transformId: `clone_${transformConfigWithLatest.id}`,
-      //   transformDescription: `a cloned transform`,
-      //   get destinationIndex(): string {
-      //     return `user-${this.transformId}`;
-      //   },
-      //   expected: {
-      //     indexPreview: {
-      //       columns: 10,
-      //       rows: 5,
-      //     },
-      //     transformPreview: {
-      //       column: 0,
-      //       values: [
-      //         'July 12th 2019, 22:16:19',
-      //         'July 12th 2019, 22:50:53',
-      //         'July 12th 2019, 23:06:43',
-      //         'July 12th 2019, 23:15:22',
-      //         'July 12th 2019, 23:31:12',
-      //       ],
-      //     },
-      //   },
-      // },
+      {
+        type: 'pivot' as const,
+        suiteTitle: 'clone transform with filter agg',
+        originalConfig: transformConfigWithBoolFilterAgg,
+        transformId: `clone_${transformConfigWithBoolFilterAgg.id}`,
+        transformDescription: `a cloned transform with filter agg`,
+        get destinationIndex(): string {
+          return `user-${this.transformId}`;
+        },
+        expected: {
+          runtimeMappingsEditorValueArr: [''],
+          aggs: {
+            index: 0,
+            label: 'products.base_price.avg',
+          },
+          editableAggregations: [
+            'products.base_price.avg',
+            // term filter
+            'Saturday',
+            'saturday.products.base_price.max',
+            // boolean filter
+            'FEMALE',
+            'female.products.base_price.sum',
+            // exist filter
+            'user_exists',
+            'user_exists.order_date.min',
+          ],
+          indexPreview: {
+            columns: 10,
+            rows: 5,
+          },
+          groupBy: {
+            index: 0,
+            label: 'category',
+          },
+          transformPreview: {
+            column: 0,
+            values: [
+              `Men's Accessories`,
+              `Men's Clothing`,
+              `Men's Shoes`,
+              `Women's Accessories`,
+              `Women's Clothing`,
+            ],
+          },
+          retentionPolicySwitchEnabled: true,
+          retentionPolicyField: 'order_date',
+          retentionPolicyMaxAge: '3d',
+          numFailureRetries: getNumFailureRetriesStr(
+            transformConfigWithBoolFilterAgg.settings?.num_failure_retries
+          ),
+        },
+      },
+      {
+        type: 'latest' as const,
+        suiteTitle: 'clone transform with latest function',
+        originalConfig: transformConfigWithLatest,
+        transformId: `clone_${transformConfigWithLatest.id}`,
+        transformDescription: `a cloned transform`,
+        get destinationIndex(): string {
+          return `user-${this.transformId}`;
+        },
+        expected: {
+          indexPreview: {
+            columns: 10,
+            rows: 5,
+          },
+          transformPreview: {
+            column: 0,
+            values: [
+              'July 12th 2019, 23:06:43',
+              'July 12th 2019, 23:31:12',
+              'July 12th 2019, 23:45:36',
+            ],
+          },
+          retentionPolicySwitchEnabled: false,
+        },
+      },
     ];
 
     for (const testData of testDataList) {
@@ -240,7 +400,7 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.table.assertTransformRowActions(testData.originalConfig.id, false);
 
           await transform.testExecution.logTestStep('should display the define pivot step');
-          await transform.table.clickTransformRowAction('Clone');
+          await transform.table.clickTransformRowAction(testData.originalConfig.id, 'Clone');
           await transform.wizard.assertSelectedTransformFunction(testData.type);
           await transform.wizard.assertDefineStepActive();
         });
@@ -288,6 +448,14 @@ export default function ({ getService }: FtrProviderContext) {
               testData.expected.aggs.index,
               testData.expected.aggs.label
             );
+            if (
+              Array.isArray(testData.expected.editableAggregations) &&
+              testData.expected.editableAggregations?.length > 0
+            ) {
+              for (const aggName of testData.expected.editableAggregations) {
+                await transform.wizard.assertAggregationEntryEditPopoverValid(aggName);
+              }
+            }
           } else if (isLatestTransform(testData.originalConfig)) {
             await transform.testExecution.logTestStep('should show pre-filler unique keys');
             await transform.wizard.assertUniqueKeysInputValue(
@@ -304,6 +472,7 @@ export default function ({ getService }: FtrProviderContext) {
             testData.expected.transformPreview.values
           );
 
+          // assert details step form
           await transform.testExecution.logTestStep('should load the details step');
           await transform.wizard.advanceToDetailsStep();
 
@@ -324,15 +493,31 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.wizard.assertDestinationIndexValue('');
           await transform.wizard.setDestinationIndex(testData.destinationIndex);
 
-          await transform.testExecution.logTestStep(
-            'should display the create index pattern switch'
-          );
-          await transform.wizard.assertCreateIndexPatternSwitchExists();
-          await transform.wizard.assertCreateIndexPatternSwitchCheckState(true);
+          await transform.testExecution.logTestStep('should display the create data view switch');
+          await transform.wizard.assertCreateDataViewSwitchExists();
+          await transform.wizard.assertCreateDataViewSwitchCheckState(true);
 
           await transform.testExecution.logTestStep('should display the continuous mode switch');
           await transform.wizard.assertContinuousModeSwitchExists();
           await transform.wizard.assertContinuousModeSwitchCheckState(false);
+
+          await transform.testExecution.logTestStep(
+            'should display the retention policy settings with pre-filled configuration'
+          );
+          await transform.wizard.assertRetentionPolicySwitchExists();
+          await transform.wizard.assertRetentionPolicySwitchCheckState(
+            testData.expected.retentionPolicySwitchEnabled
+          );
+          if (testData.expected.retentionPolicySwitchEnabled) {
+            await transform.wizard.assertRetentionPolicyFieldSelectExists();
+            await transform.wizard.assertRetentionPolicyFieldSelectValue(
+              testData.expected.retentionPolicyField
+            );
+            await transform.wizard.assertRetentionPolicyMaxAgeInputExists();
+            await transform.wizard.assertRetentionsPolicyMaxAgeValue(
+              testData.expected.retentionPolicyMaxAge
+            );
+          }
 
           await transform.testExecution.logTestStep(
             'should display the advanced settings and show pre-filled configuration'
@@ -342,9 +527,22 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.wizard.assertTransformMaxPageSearchSizeValue(
             testData.originalConfig.settings!.max_page_search_size!
           );
+          if (testData.expected.numFailureRetries !== undefined) {
+            await transform.wizard.assertNumFailureRetriesValue(
+              testData.expected.numFailureRetries
+            );
+          }
 
           await transform.testExecution.logTestStep('should load the create step');
           await transform.wizard.advanceToCreateStep();
+
+          if (testData.expected.numFailureRetries !== undefined) {
+            await transform.testExecution.logTestStep('displays the summary details');
+            await transform.wizard.openTransformAdvancedSettingsSummaryAccordion();
+            await transform.wizard.assertTransformNumFailureRetriesSummaryValue(
+              testData.expected.numFailureRetries
+            );
+          }
 
           await transform.testExecution.logTestStep('should display the create and start button');
           await transform.wizard.assertCreateAndStartButtonExists();
@@ -367,6 +565,7 @@ export default function ({ getService }: FtrProviderContext) {
             'should start the transform and finish processing'
           );
           await transform.wizard.startTransform();
+          await transform.wizard.assertErrorToastsNotExist();
           await transform.wizard.waitForProgressBarComplete();
 
           await transform.testExecution.logTestStep('should return to the management page');

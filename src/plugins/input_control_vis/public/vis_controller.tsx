@@ -11,10 +11,11 @@ import { isEqual } from 'lodash';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Subscription } from 'rxjs';
 
-import { I18nStart } from 'kibana/public';
-import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
-import { VisualizationContainer } from '../../visualizations/public';
-import { FilterManager, Filter } from '../../data/public';
+import { I18nStart } from '@kbn/core/public';
+import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
+import { Filter } from '@kbn/es-query';
+import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
+import { FilterManager } from '@kbn/data-plugin/public';
 
 import { InputControlVis } from './components/vis/input_control_vis';
 import { getControlFactory } from './control/control_factory';
@@ -24,18 +25,17 @@ import { ListControl } from './control/list_control_factory';
 import { InputControlVisDependencies } from './plugin';
 import { InputControlVisParams } from './types';
 
-export type InputControlVisControllerType = InstanceType<
-  ReturnType<typeof createInputControlVisController>
->;
+export type InputControlVisControllerType = ReturnType<typeof createInputControlVisController>;
 
 export const createInputControlVisController = (
   deps: InputControlVisDependencies,
-  handlers: IInterpreterRenderHandlers
+  handlers: IInterpreterRenderHandlers,
+  el: Element
 ) => {
-  return class InputControlVisController {
-    private I18nContext?: I18nStart['Context'];
-    private _isLoaded = false;
+  let I18nContext: I18nStart['Context'] | undefined;
+  let isLoaded = false;
 
+  return new (class InputControlVisController {
     controls: Array<RangeControl | ListControl>;
     queryBarUpdateHandler: () => void;
     filterManager: FilterManager;
@@ -43,7 +43,7 @@ export const createInputControlVisController = (
     timeFilterSubscription: Subscription;
     visParams?: InputControlVisParams;
 
-    constructor(public el: Element) {
+    constructor() {
       this.controls = [];
 
       this.queryBarUpdateHandler = this.updateControlsFromKbn.bind(this);
@@ -56,21 +56,21 @@ export const createInputControlVisController = (
         .getTimeUpdate$()
         .subscribe(() => {
           if (this.visParams?.useTimeFilter) {
-            this._isLoaded = false;
+            isLoaded = false;
           }
         });
     }
 
     async render(visParams: InputControlVisParams) {
-      if (!this.I18nContext) {
+      if (!I18nContext) {
         const [{ i18n }] = await deps.core.getStartServices();
-        this.I18nContext = i18n.Context;
+        I18nContext = i18n.Context;
       }
-      if (!this._isLoaded || !isEqual(visParams, this.visParams)) {
+      if (!isLoaded || !isEqual(visParams, this.visParams)) {
         this.visParams = visParams;
         this.controls = [];
         this.controls = await this.initControls(visParams);
-        this._isLoaded = true;
+        isLoaded = true;
       }
       this.drawVis();
     }
@@ -78,17 +78,17 @@ export const createInputControlVisController = (
     destroy() {
       this.updateSubsciption.unsubscribe();
       this.timeFilterSubscription.unsubscribe();
-      unmountComponentAtNode(this.el);
+      unmountComponentAtNode(el);
       this.controls.forEach((control) => control.destroy());
     }
 
     drawVis = () => {
-      if (!this.I18nContext) {
+      if (!I18nContext) {
         throw new Error('no i18n context found');
       }
 
       render(
-        <this.I18nContext>
+        <I18nContext>
           <VisualizationContainer handlers={handlers}>
             <InputControlVis
               updateFiltersOnChange={this.visParams?.updateFiltersOnChange}
@@ -102,8 +102,8 @@ export const createInputControlVisController = (
               refreshControl={this.refreshControl}
             />
           </VisualizationContainer>
-        </this.I18nContext>,
-        this.el
+        </I18nContext>,
+        el
       );
     };
 
@@ -235,5 +235,5 @@ export const createInputControlVisController = (
       await this.controls[controlIndex].fetch(query);
       this.drawVis();
     };
-  };
+  })();
 };

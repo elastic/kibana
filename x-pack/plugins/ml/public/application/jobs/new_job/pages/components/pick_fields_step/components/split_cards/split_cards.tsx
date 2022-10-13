@@ -6,11 +6,12 @@
  */
 
 import React, { FC, memo, Fragment } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 
 import { SplitField } from '../../../../../../../../../common/types/fields';
 import { JOB_TYPE } from '../../../../../../../../../common/constants/new_job';
+import './style.scss';
 
 interface Props {
   fieldValues: string[];
@@ -72,7 +73,7 @@ export const SplitCards: FC<Props> = memo(
           <div key={fieldName} ref={(ref) => storePanels(ref, marginBottom)} style={style}>
             <EuiPanel
               paddingSize="m"
-              style={{ paddingTop: '4px' }}
+              className="mlPickFields__splitCard"
               data-test-subj="mlSplitCard back"
             >
               <div
@@ -112,7 +113,7 @@ export const SplitCards: FC<Props> = memo(
               {getBackPanels()}
               <EuiPanel
                 paddingSize="m"
-                style={{ paddingTop: '4px' }}
+                className="mlPickFields__splitCard"
                 data-test-subj="mlSplitCard front"
               >
                 <div

@@ -6,7 +6,7 @@
  */
 
 import '../../../../__mocks__/shallow_useeffect.mock';
-import { setMockValues, setMockActions } from '../../../../__mocks__/kea.mock';
+import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -14,9 +14,9 @@ import { shallow, mount } from 'enzyme';
 
 import { EuiIconTip } from '@elastic/eui';
 
-import { LogRetentionOptions, LogRetentionMessage } from '../';
+import { LogRetentionOptions, LogRetentionMessage } from '..';
 
-import { LogRetentionTooltip } from './';
+import { LogRetentionTooltip } from '.';
 
 describe('LogRetentionTooltip', () => {
   const values = {

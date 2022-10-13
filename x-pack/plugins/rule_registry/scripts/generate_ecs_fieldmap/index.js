@@ -9,7 +9,7 @@ const fs = require('fs');
 const util = require('util');
 const yaml = require('js-yaml');
 const { exec: execCb } = require('child_process');
-const { mapValues } = require('lodash');
+const { reduce } = require('lodash');
 
 const exists = util.promisify(fs.exists);
 const readFile = util.promisify(fs.readFile);
@@ -19,7 +19,7 @@ const exec = util.promisify(execCb);
 const ecsDir = path.resolve(__dirname, '../../../../../../ecs');
 const ecsYamlFilename = path.join(ecsDir, 'generated/ecs/ecs_flat.yml');
 
-const outputDir = path.join(__dirname, '../../common/field_map');
+const outputDir = path.join(__dirname, '../../common/assets/field_maps');
 
 const outputFieldMapFilename = path.join(outputDir, 'ecs_field_map.ts');
 
@@ -32,13 +32,27 @@ async function generate() {
 
   const flatYaml = await yaml.safeLoad(await readFile(ecsYamlFilename));
 
-  const fields = mapValues(flatYaml, (description) => {
-    return {
-      type: description.type,
-      array: description.normalize.includes('array'),
-      required: !!description.required,
-    };
-  });
+  const fields = reduce(
+    flatYaml,
+    (fieldsObj, value, key) => {
+      const field = {
+        type: value.type,
+        array: value.normalize.includes('array'),
+        required: !!value.required,
+      };
+
+      if (value.scaling_factor) {
+        field.scaling_factor = value.scaling_factor;
+      }
+
+      if (field.type !== 'constant_keyword') {
+        fieldsObj[key] = field;
+      }
+
+      return fieldsObj;
+    },
+    {}
+  );
 
   await Promise.all([
     writeFile(

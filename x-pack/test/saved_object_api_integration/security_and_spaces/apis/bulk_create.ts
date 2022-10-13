@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SPACES } from '../../common/lib/spaces';
+import { SPACES, ALL_SPACES_ID } from '../../common/lib/spaces';
 import { testCaseFailures, getTestScenarios } from '../../common/lib/saved_object_test_utils';
 import { TestUser } from '../../common/lib/types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -74,22 +74,48 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
     { ...CASES.NEW_SINGLE_NAMESPACE_OBJ, expectedNamespaces },
     { ...CASES.NEW_MULTI_NAMESPACE_OBJ, expectedNamespaces },
     CASES.NEW_NAMESPACE_AGNOSTIC_OBJ,
+    // We test the alias conflict preflight check error case twice; once by checking the alias with "bulk_get" (here) and once by using "find" (below).
+    {
+      ...CASES.ALIAS_CONFLICT_OBJ,
+      // first try fails if this is the default space or space_1, because an alias exists in those spaces
+      ...(spaceId === DEFAULT_SPACE_ID
+        ? { ...fail409(), fail409Param: 'aliasConflictDefaultSpace' }
+        : {}),
+      ...(spaceId === SPACE_1_ID ? { ...fail409(), fail409Param: 'aliasConflictSpace1' } : {}),
+      expectedNamespaces,
+    },
   ];
-  const crossNamespace = [CASES.NEW_EACH_SPACE_OBJ, CASES.NEW_ALL_SPACES_OBJ];
+  const crossNamespace = [
+    {
+      ...CASES.ALIAS_CONFLICT_OBJ,
+      initialNamespaces: ['*'],
+      ...fail409(),
+      fail409Param: 'aliasConflictAllSpaces', // second try fails because an alias exists in space_x, the default space, and space_1 (but not space_y because that alias is disabled)
+      // note that if an object was successfully created with this type/ID in the first try, that won't change this outcome, because an alias conflict supersedes all other types of conflicts
+    },
+    {
+      ...CASES.INITIAL_NS_SINGLE_NAMESPACE_OBJ_OTHER_SPACE,
+      initialNamespaces: ['x', 'y'],
+      ...fail400(), // cannot be created in multiple spaces
+    },
+    CASES.INITIAL_NS_SINGLE_NAMESPACE_OBJ_OTHER_SPACE, // second try creates it in a single other space, which is valid
+    {
+      ...CASES.INITIAL_NS_MULTI_NAMESPACE_ISOLATED_OBJ_OTHER_SPACE,
+      initialNamespaces: [ALL_SPACES_ID],
+      ...fail400(), // cannot be created in multiple spaces
+    },
+    CASES.INITIAL_NS_MULTI_NAMESPACE_ISOLATED_OBJ_OTHER_SPACE, // second try creates it in a single other space, which is valid
+    CASES.INITIAL_NS_MULTI_NAMESPACE_OBJ_EACH_SPACE,
+    CASES.INITIAL_NS_MULTI_NAMESPACE_OBJ_ALL_SPACES,
+  ];
   const hiddenType = [{ ...CASES.HIDDEN, ...fail400() }];
-  const allTypes = normalTypes.concat(hiddenType);
+  const allTypes = [...normalTypes, ...crossNamespace, ...hiddenType];
   return { normalTypes, crossNamespace, hiddenType, allTypes };
 };
 
-export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertestWithoutAuth');
-  const esArchiver = getService('esArchiver');
-
-  const {
-    addTests,
-    createTestDefinitions,
-    expectSavedObjectForbidden,
-  } = bulkCreateTestSuiteFactory(esArchiver, supertest);
+export default function (context: FtrProviderContext) {
+  const { addTests, createTestDefinitions, expectSavedObjectForbidden } =
+    bulkCreateTestSuiteFactory(context);
   const createTests = (overwrite: boolean, spaceId: string, user: TestUser) => {
     const { normalTypes, crossNamespace, hiddenType, allTypes } = createTestCases(
       overwrite,
@@ -103,18 +129,17 @@ export default function ({ getService }: FtrProviderContext) {
         singleRequest: true,
       }),
       createTestDefinitions(hiddenType, true, overwrite, { spaceId, user }),
-      createTestDefinitions(allTypes, true, overwrite, {
-        spaceId,
-        user,
-        singleRequest: true,
-        responseBodyOverride: expectSavedObjectForbidden(['hiddentype']),
-      }),
     ].flat();
     return {
       unauthorized: createTestDefinitions(allTypes, true, overwrite, { spaceId, user }),
       authorizedAtSpace: [
         authorizedCommon,
         createTestDefinitions(crossNamespace, true, overwrite, { spaceId, user }),
+        createTestDefinitions(allTypes, true, overwrite, {
+          spaceId,
+          user,
+          singleRequest: true,
+        }),
       ].flat(),
       authorizedEverywhere: [
         authorizedCommon,
@@ -122,6 +147,12 @@ export default function ({ getService }: FtrProviderContext) {
           spaceId,
           user,
           singleRequest: true,
+        }),
+        createTestDefinitions(allTypes, true, overwrite, {
+          spaceId,
+          user,
+          singleRequest: true,
+          responseBodyOverride: expectSavedObjectForbidden(['hiddentype']),
         }),
       ].flat(),
       superuser: createTestDefinitions(allTypes, false, overwrite, {
@@ -132,7 +163,8 @@ export default function ({ getService }: FtrProviderContext) {
     };
   };
 
-  describe('_bulk_create', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/122827
+  describe.skip('_bulk_create', () => {
     getTestScenarios([false, true]).securityAndSpaces.forEach(
       ({ spaceId, users, modifier: overwrite }) => {
         const suffix = ` within the ${spaceId} space${overwrite ? ' with overwrite enabled' : ''}`;

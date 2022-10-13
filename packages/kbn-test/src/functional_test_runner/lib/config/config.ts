@@ -10,6 +10,7 @@ import { Schema } from 'joi';
 import { cloneDeepWith, get, has, toPath } from 'lodash';
 
 import { schema } from './schema';
+import { ConfigModule } from './config_loading';
 
 const $values = Symbol('values');
 
@@ -17,23 +18,27 @@ interface Options {
   settings?: Record<string, any>;
   primary?: boolean;
   path: string;
+  module: ConfigModule;
 }
 
 export class Config {
+  public readonly path: string;
+  public readonly module: ConfigModule;
   private [$values]: Record<string, any>;
 
   constructor(options: Options) {
-    const { settings = {}, primary = false, path = null } = options || {};
-
-    if (!path) {
+    if (!options.path) {
       throw new TypeError('path is a required option');
     }
 
-    const { error, value } = schema.validate(settings, {
+    this.path = options.path;
+    this.module = options.module;
+
+    const { error, value } = schema.validate(options.settings, {
       abortEarly: false,
       context: {
-        primary: !!primary,
-        path,
+        primary: !!options?.primary,
+        path: options.path,
       },
     });
 
@@ -50,20 +55,20 @@ export class Config {
       values: Record<string, any>,
       childSchema: any
     ): boolean {
-      if (!childSchema._inner) {
+      if (!childSchema.$_terms.keys && !childSchema.$_terms.patterns) {
         return false;
       }
 
       // normalize child and pattern checks so we can iterate the checks in a single loop
       const checks: Array<{ test: (k: string) => boolean; schema: Schema }> = [
         // match children first, they have priority
-        ...(childSchema._inner.children || []).map((child: { key: string; schema: Schema }) => ({
+        ...(childSchema.$_terms.keys || []).map((child: { key: string; schema: Schema }) => ({
           test: (k: string) => child.key === k,
           schema: child.schema,
         })),
 
         // match patterns on any key that doesn't match an explicit child
-        ...(childSchema._inner.patterns || []).map((pattern: { regex: RegExp; rule: Schema }) => ({
+        ...(childSchema.$_terms.patterns || []).map((pattern: { regex: RegExp; rule: Schema }) => ({
           test: (k: string) => pattern.regex.test(k) && has(values, k),
           schema: pattern.rule,
         })),

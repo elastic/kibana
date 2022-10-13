@@ -48,12 +48,16 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: off, 
               className="euiSwitch__icon"
               data-euiicon-type="cross"
               size="m"
-            />
+            >
+              
+            </span>
             <span
               className="euiSwitch__icon euiSwitch__icon--checked"
               data-euiicon-type="check"
               size="m"
-            />
+            >
+              
+            </span>
           </span>
         </span>
       </button>
@@ -66,7 +70,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: off, 
       </span>
     </div>
     <hr
-      className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
+      className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium emotion-euiHorizontalRule-full-m"
     />
     <form
       onSubmit={[Function]}
@@ -78,7 +82,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: off, 
           className="euiFlexItem"
         >
           <div
-            className="euiFormRow euiFormRow--compressed"
+            className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
             id="generated-id-row"
           >
             <div
@@ -87,6 +91,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: off, 
               <label
                 className="euiFormLabel euiFormRow__label"
                 htmlFor="generated-id"
+                id="generated-id-label"
               >
                 Set a custom interval
               </label>
@@ -101,7 +106,8 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: off, 
                   className="euiFormControlLayout__childrenWrapper"
                 >
                   <input
-                    aria-describedby="generated-id-help"
+                    aria-describedby="generated-id-help-0"
+                    aria-invalid={false}
                     className="euiFieldText euiFieldText--compressed"
                     id="generated-id"
                     onBlur={[Function]}
@@ -114,7 +120,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: off, 
               </div>
               <div
                 className="euiFormHelpText euiFormRow__text"
-                id="generated-id-help"
+                id="generated-id-help-0"
               >
                 Use shorthand notation, like 30s, 10m, or 1h
               </div>
@@ -139,7 +145,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: off, 
                 onFocus={[Function]}
                 style={
                   Object {
-                    "minWidth": undefined,
+                    "minWidth": "auto",
                   }
                 }
                 type="submit"
@@ -211,12 +217,16 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: on, 5
               className="euiSwitch__icon"
               data-euiicon-type="cross"
               size="m"
-            />
+            >
+              
+            </span>
             <span
               className="euiSwitch__icon euiSwitch__icon--checked"
               data-euiicon-type="check"
               size="m"
-            />
+            >
+              
+            </span>
           </span>
         </span>
       </button>
@@ -229,7 +239,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: on, 5
       </span>
     </div>
     <hr
-      className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
+      className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium emotion-euiHorizontalRule-full-m"
     />
     <form
       onSubmit={[Function]}
@@ -241,7 +251,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: on, 5
           className="euiFlexItem"
         >
           <div
-            className="euiFormRow euiFormRow--compressed"
+            className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
             id="generated-id-row"
           >
             <div
@@ -250,6 +260,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: on, 5
               <label
                 className="euiFormLabel euiFormRow__label"
                 htmlFor="generated-id"
+                id="generated-id-label"
               >
                 Set a custom interval
               </label>
@@ -264,7 +275,8 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: on, 5
                   className="euiFormControlLayout__childrenWrapper"
                 >
                   <input
-                    aria-describedby="generated-id-help"
+                    aria-describedby="generated-id-help-0"
+                    aria-invalid={false}
                     className="euiFieldText euiFieldText--compressed"
                     id="generated-id"
                     onBlur={[Function]}
@@ -277,7 +289,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: on, 5
               </div>
               <div
                 className="euiFormHelpText euiFormRow__text"
-                id="generated-id-help"
+                id="generated-id-help-0"
               >
                 Use shorthand notation, like 30s, 10m, or 1h
               </div>
@@ -302,7 +314,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: on, 5
                 onFocus={[Function]}
                 style={
                   Object {
-                    "minWidth": undefined,
+                    "minWidth": "auto",
                   }
                 }
                 type="submit"
@@ -374,12 +386,16 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings contextual 1`] =
               className="euiSwitch__icon"
               data-euiicon-type="cross"
               size="m"
-            />
+            >
+              
+            </span>
             <span
               className="euiSwitch__icon euiSwitch__icon--checked"
               data-euiicon-type="check"
               size="m"
-            />
+            >
+              
+            </span>
           </span>
         </span>
       </button>
@@ -392,7 +408,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings contextual 1`] =
       </span>
     </div>
     <hr
-      className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
+      className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium emotion-euiHorizontalRule-full-m"
     />
     <form
       onSubmit={[Function]}
@@ -404,7 +420,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings contextual 1`] =
           className="euiFlexItem"
         >
           <div
-            className="euiFormRow euiFormRow--compressed"
+            className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
             id="generated-id-row"
           >
             <div
@@ -413,6 +429,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings contextual 1`] =
               <label
                 className="euiFormLabel euiFormRow__label"
                 htmlFor="generated-id"
+                id="generated-id-label"
               >
                 Set a custom interval
               </label>
@@ -427,7 +444,8 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings contextual 1`] =
                   className="euiFormControlLayout__childrenWrapper"
                 >
                   <input
-                    aria-describedby="generated-id-help"
+                    aria-describedby="generated-id-help-0"
+                    aria-invalid={false}
                     className="euiFieldText euiFieldText--compressed"
                     id="generated-id"
                     onBlur={[Function]}
@@ -440,7 +458,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings contextual 1`] =
               </div>
               <div
                 className="euiFormHelpText euiFormRow__text"
-                id="generated-id-help"
+                id="generated-id-help-0"
               >
                 Use shorthand notation, like 30s, 10m, or 1h
               </div>
@@ -465,7 +483,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings contextual 1`] =
                 onFocus={[Function]}
                 style={
                   Object {
-                    "minWidth": undefined,
+                    "minWidth": "auto",
                   }
                 }
                 type="submit"

@@ -8,14 +8,12 @@
 import { mount } from 'enzyme';
 import React from 'react';
 
-import { CONSTANTS } from '../url_state/constants';
-import { SiemNavigationComponent } from './';
-import { setBreadcrumbs } from './breadcrumbs';
+import { TabNavigationComponent } from '.';
 import { navTabs } from '../../../app/home/home_navigations';
 import { HostsTableType } from '../../../hosts/store/model';
-import { RouteSpyState } from '../../utils/route/types';
-import { SiemNavigationProps, SiemNavigationComponentProps } from './types';
-import { TimelineTabs } from '../../../../common/types/timeline';
+import type { RouteSpyState } from '../../utils/route/types';
+import type { TabNavigationComponentProps, SecuritySolutionTabNavigationProps } from './types';
+import { SecurityPageName } from '../../../app/types';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -28,11 +26,14 @@ jest.mock('react-router-dom', () => {
   };
 });
 
+const mockSetBreadcrumbs = jest.fn();
+
 jest.mock('./breadcrumbs', () => ({
-  setBreadcrumbs: jest.fn(),
+  useSetBreadcrumbs: () => mockSetBreadcrumbs,
 }));
 const mockGetUrlForApp = jest.fn();
-jest.mock('../../lib/kibana', () => {
+const mockNavigateToUrl = jest.fn();
+jest.mock('../../lib/kibana/kibana_react', () => {
   return {
     useKibana: () => ({
       services: {
@@ -40,6 +41,7 @@ jest.mock('../../lib/kibana', () => {
         application: {
           navigateToApp: jest.fn(),
           getUrlForApp: mockGetUrlForApp,
+          navigateToUrl: mockNavigateToUrl,
         },
       },
     }),
@@ -47,146 +49,41 @@ jest.mock('../../lib/kibana', () => {
 });
 jest.mock('../link_to');
 
+jest.mock('react-router-dom', () => ({
+  useLocation: jest.fn(() => ({
+    search: '',
+  })),
+  useHistory: jest.fn(),
+}));
+
 describe('SIEM Navigation', () => {
-  const mockProps: SiemNavigationComponentProps & SiemNavigationProps & RouteSpyState = {
-    pageName: 'hosts',
+  const mockProps: TabNavigationComponentProps &
+    SecuritySolutionTabNavigationProps &
+    RouteSpyState = {
+    pageName: SecurityPageName.hosts,
     pathName: '/',
     detailName: undefined,
     search: '',
     tabName: HostsTableType.authentications,
     navTabs,
-    urlState: {
-      [CONSTANTS.timerange]: {
-        global: {
-          [CONSTANTS.timerange]: {
-            from: '2019-05-16T23:10:43.696Z',
-            fromStr: 'now-24h',
-            kind: 'relative',
-            to: '2019-05-17T23:10:43.697Z',
-            toStr: 'now',
-          },
-          linkTo: ['timeline'],
-        },
-        timeline: {
-          [CONSTANTS.timerange]: {
-            from: '2019-05-16T23:10:43.696Z',
-            fromStr: 'now-24h',
-            kind: 'relative',
-            to: '2019-05-17T23:10:43.697Z',
-            toStr: 'now',
-          },
-          linkTo: ['global'],
-        },
-      },
-      [CONSTANTS.appQuery]: { query: '', language: 'kuery' },
-      [CONSTANTS.filters]: [],
-      [CONSTANTS.sourcerer]: {},
-      [CONSTANTS.timeline]: {
-        activeTab: TimelineTabs.query,
-        id: '',
-        isOpen: false,
-        graphEventId: '',
-      },
-    },
   };
-  const wrapper = mount(<SiemNavigationComponent {...mockProps} />);
+  const wrapper = mount(<TabNavigationComponent {...mockProps} />);
   test('it calls setBreadcrumbs with correct path on mount', () => {
-    expect(setBreadcrumbs).toHaveBeenNthCalledWith(
+    expect(mockSetBreadcrumbs).toHaveBeenNthCalledWith(
       1,
       {
         detailName: undefined,
-        navTabs: {
-          detections: {
-            disabled: false,
-            href: '/app/security/detections',
-            id: 'detections',
-            name: 'Detections',
-            urlKey: 'detections',
-          },
-          case: {
-            disabled: false,
-            href: '/app/security/cases',
-            id: 'case',
-            name: 'Cases',
-            urlKey: 'case',
-          },
-          administration: {
-            disabled: false,
-            href: '/app/security/administration',
-            id: 'administration',
-            name: 'Administration',
-            urlKey: 'administration',
-          },
-          hosts: {
-            disabled: false,
-            href: '/app/security/hosts',
-            id: 'hosts',
-            name: 'Hosts',
-            urlKey: 'host',
-          },
-          network: {
-            disabled: false,
-            href: '/app/security/network',
-            id: 'network',
-            name: 'Network',
-            urlKey: 'network',
-          },
-          overview: {
-            disabled: false,
-            href: '/app/security/overview',
-            id: 'overview',
-            name: 'Overview',
-            urlKey: 'overview',
-          },
-          timelines: {
-            disabled: false,
-            href: '/app/security/timelines',
-            id: 'timelines',
-            name: 'Timelines',
-            urlKey: 'timeline',
-          },
-        },
+        navTabs,
         pageName: 'hosts',
         pathName: '/',
         search: '',
-        sourcerer: {},
         state: undefined,
         tabName: 'authentications',
-        query: { query: '', language: 'kuery' },
-        filters: [],
         flowTarget: undefined,
         savedQuery: undefined,
-        timeline: {
-          activeTab: TimelineTabs.query,
-          id: '',
-          isOpen: false,
-          graphEventId: '',
-        },
-        timerange: {
-          global: {
-            linkTo: ['timeline'],
-            timerange: {
-              from: '2019-05-16T23:10:43.696Z',
-              fromStr: 'now-24h',
-              kind: 'relative',
-              to: '2019-05-17T23:10:43.697Z',
-              toStr: 'now',
-            },
-          },
-          timeline: {
-            linkTo: ['global'],
-            timerange: {
-              from: '2019-05-16T23:10:43.696Z',
-              fromStr: 'now-24h',
-              kind: 'relative',
-              to: '2019-05-17T23:10:43.697Z',
-              toStr: 'now',
-            },
-          },
-        },
       },
       undefined,
-      mockGetUrlForApp
+      mockNavigateToUrl
     );
   });
   test('it calls setBreadcrumbs with correct path on update', () => {
@@ -196,97 +93,20 @@ describe('SIEM Navigation', () => {
       tabName: 'authentications',
     });
     wrapper.update();
-    expect(setBreadcrumbs).toHaveBeenNthCalledWith(
+    expect(mockSetBreadcrumbs).toHaveBeenNthCalledWith(
       2,
       {
         detailName: undefined,
-        filters: [],
         flowTarget: undefined,
-        navTabs: {
-          detections: {
-            disabled: false,
-            href: '/app/security/detections',
-            id: 'detections',
-            name: 'Detections',
-            urlKey: 'detections',
-          },
-          case: {
-            disabled: false,
-            href: '/app/security/cases',
-            id: 'case',
-            name: 'Cases',
-            urlKey: 'case',
-          },
-          hosts: {
-            disabled: false,
-            href: '/app/security/hosts',
-            id: 'hosts',
-            name: 'Hosts',
-            urlKey: 'host',
-          },
-          administration: {
-            disabled: false,
-            href: '/app/security/administration',
-            id: 'administration',
-            name: 'Administration',
-            urlKey: 'administration',
-          },
-          network: {
-            disabled: false,
-            href: '/app/security/network',
-            id: 'network',
-            name: 'Network',
-            urlKey: 'network',
-          },
-          overview: {
-            disabled: false,
-            href: '/app/security/overview',
-            id: 'overview',
-            name: 'Overview',
-            urlKey: 'overview',
-          },
-          timelines: {
-            disabled: false,
-            href: '/app/security/timelines',
-            id: 'timelines',
-            name: 'Timelines',
-            urlKey: 'timeline',
-          },
-        },
+        navTabs,
+        search: '',
         pageName: 'network',
         pathName: '/',
-        query: { language: 'kuery', query: '' },
-        savedQuery: undefined,
-        search: '',
-        sourcerer: {},
         state: undefined,
         tabName: 'authentications',
-        timeline: { id: '', isOpen: false, activeTab: TimelineTabs.query, graphEventId: '' },
-        timerange: {
-          global: {
-            linkTo: ['timeline'],
-            timerange: {
-              from: '2019-05-16T23:10:43.696Z',
-              fromStr: 'now-24h',
-              kind: 'relative',
-              to: '2019-05-17T23:10:43.697Z',
-              toStr: 'now',
-            },
-          },
-          timeline: {
-            linkTo: ['global'],
-            timerange: {
-              from: '2019-05-16T23:10:43.696Z',
-              fromStr: 'now-24h',
-              kind: 'relative',
-              to: '2019-05-17T23:10:43.697Z',
-              toStr: 'now',
-            },
-          },
-        },
       },
       undefined,
-      mockGetUrlForApp
+      mockNavigateToUrl
     );
   });
 });

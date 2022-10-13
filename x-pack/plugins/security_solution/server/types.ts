@@ -5,24 +5,55 @@
  * 2.0.
  */
 
-import type { IRouter, RequestHandlerContext } from 'src/core/server';
-import type { ListsApiRequestHandlerContext } from '../../lists/server';
-import type { LicensingApiRequestHandlerContext } from '../../licensing/server';
-import type { AlertingApiRequestHandlerContext } from '../../alerting/server';
+import type {
+  IRouter,
+  CustomRequestHandlerContext,
+  CoreRequestHandlerContext,
+  KibanaRequest,
+} from '@kbn/core/server';
+import type { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
+import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
+import type { FleetRequestHandlerContext } from '@kbn/fleet-plugin/server';
+import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
+import type { ListsApiRequestHandlerContext, ExceptionListClient } from '@kbn/lists-plugin/server';
+import type { IRuleDataService, AlertsClient } from '@kbn/rule-registry-plugin/server';
 
+import type { CreateQueryRuleAdditionalOptions } from './lib/detection_engine/rule_types/types';
 import { AppClient } from './client';
+import type { ConfigType } from './config';
+import type { IRuleExecutionLogForRoutes } from './lib/detection_engine/rule_monitoring';
+import type { FrameworkRequest } from './lib/framework';
+import type { EndpointAuthz } from '../common/endpoint/types/authz';
+import type {
+  EndpointInternalFleetServicesInterface,
+  EndpointScopedFleetServicesInterface,
+} from './endpoint/services/fleet';
 
 export { AppClient };
 
-export interface AppRequestContext {
+export interface SecuritySolutionApiRequestHandlerContext {
+  core: CoreRequestHandlerContext;
+  endpointAuthz: EndpointAuthz;
+  getConfig: () => ConfigType;
+  getFrameworkRequest: () => FrameworkRequest;
   getAppClient: () => AppClient;
+  getSpaceId: () => string;
+  getRuleDataService: () => IRuleDataService;
+  getRuleExecutionLog: () => IRuleExecutionLogForRoutes;
+  getRacClient: (req: KibanaRequest) => Promise<AlertsClient>;
+  getExceptionListClient: () => ExceptionListClient | null;
+  getInternalFleetServices: () => EndpointInternalFleetServicesInterface;
+  getScopedFleetServices: (req: KibanaRequest) => EndpointScopedFleetServicesInterface;
+  getQueryRuleAdditionalOptions: CreateQueryRuleAdditionalOptions;
 }
 
-export type SecuritySolutionRequestHandlerContext = RequestHandlerContext & {
-  securitySolution: AppRequestContext;
-  licensing: LicensingApiRequestHandlerContext;
+export type SecuritySolutionRequestHandlerContext = CustomRequestHandlerContext<{
+  securitySolution: SecuritySolutionApiRequestHandlerContext;
+  actions: ActionsApiRequestHandlerContext;
   alerting: AlertingApiRequestHandlerContext;
+  licensing: LicensingApiRequestHandlerContext;
   lists?: ListsApiRequestHandlerContext;
-};
+  fleet?: FleetRequestHandlerContext['fleet'];
+}>;
 
 export type SecuritySolutionPluginRouter = IRouter<SecuritySolutionRequestHandlerContext>;

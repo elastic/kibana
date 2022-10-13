@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-/* eslint react/no-did-mount-set-state: 0, react/forbid-elements: 0 */
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { EuiPopover, EuiToolTip } from '@elastic/eui';
@@ -87,7 +86,7 @@ export class Popover extends Component<Props, State> {
     };
 
     const appWrapper = document.querySelector('.kbnAppWrapper');
-    const EuiPopoverAny = (EuiPopover as any) as React.FC<any>;
+    const EuiPopoverAny = EuiPopover as any as React.FC<any>;
 
     return (
       <EuiPopoverAny
@@ -96,6 +95,8 @@ export class Popover extends Component<Props, State> {
         isOpen={this.state.isPopoverOpen}
         closePopover={this.closePopover}
         container={appWrapper}
+        hasArrow={false}
+        offset={10}
       >
         {children({ closePopover: this.closePopover })}
       </EuiPopoverAny>

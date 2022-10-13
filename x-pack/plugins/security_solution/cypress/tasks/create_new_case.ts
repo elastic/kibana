@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import {
+import type {
   IbmResilientConnectorOptions,
   JiraConnectorOptions,
   ServiceNowconnectorOptions,
   TestCase,
+  TestCaseWithoutTimeline,
 } from '../objects/case';
 import { ALL_CASES_OPEN_CASES_COUNT, ALL_CASES_OPEN_FILTER } from '../screens/all_cases';
 
+import { TIMELINE_SEARCHBOX } from '../screens/common/controls';
 import {
   BACK_TO_CASES_BTN,
   DESCRIPTION_INPUT,
@@ -20,7 +22,6 @@ import {
   INSERT_TIMELINE_BTN,
   LOADING_SPINNER,
   TAGS_INPUT,
-  TIMELINE_SEARCHBOX,
   TITLE_INPUT,
 } from '../screens/create_new_case';
 import {
@@ -46,7 +47,7 @@ export const filterStatusOpen = () => {
   cy.get(ALL_CASES_OPEN_FILTER).click();
 };
 
-export const fillCasesMandatoryfields = (newCase: TestCase) => {
+export const fillCasesMandatoryfields = (newCase: TestCaseWithoutTimeline) => {
   cy.get(TITLE_INPUT).type(newCase.name, { force: true });
   newCase.tags.forEach((tag) => {
     cy.get(TAGS_INPUT).type(`${tag}{enter}`, { force: true });

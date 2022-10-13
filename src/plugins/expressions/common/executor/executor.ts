@@ -10,19 +10,25 @@
 
 import { cloneDeep, mapValues } from 'lodash';
 import { Observable } from 'rxjs';
+import type { Logger } from '@kbn/logging';
+import type { SerializableRecord } from '@kbn/utility-types';
+import { SavedObjectReference } from '@kbn/core/types';
+import {
+  MigrateFunctionsObject,
+  migrateToLatest,
+  PersistableStateService,
+  VersionedState,
+} from '@kbn/kibana-utils-plugin/common';
 import { ExecutorState, ExecutorContainer } from './container';
 import { createExecutorContainer } from './container';
 import { AnyExpressionFunctionDefinition, ExpressionFunction } from '../expression_functions';
-import { Execution, ExecutionParams } from '../execution/execution';
+import { Execution, ExecutionParams, ExecutionResult } from '../execution/execution';
 import { IRegistry } from '../types';
 import { ExpressionType } from '../expression_types/expression_type';
 import { AnyExpressionTypeDefinition } from '../expression_types/types';
 import { ExpressionAstExpression, ExpressionAstFunction } from '../ast';
 import { ExpressionValueError, typeSpecs } from '../expression_types/specs';
-import { functionSpecs } from '../expression_functions/specs';
-import { getByAlias } from '../util';
-import { SavedObjectReference } from '../../../../core/types';
-import { PersistableStateService, SerializableState } from '../../../kibana_utils/common';
+import { ALL_NAMESPACES, getByAlias } from '../util';
 import { ExpressionExecutionParams } from '../service';
 
 export interface ExpressionExecOptions {
@@ -35,7 +41,7 @@ export interface ExpressionExecOptions {
 }
 
 export class TypesRegistry implements IRegistry<ExpressionType> {
-  constructor(private readonly executor: Executor<any>) {}
+  constructor(private readonly executor: Executor) {}
 
   public register(
     typeDefinition: AnyExpressionTypeDefinition | (() => AnyExpressionTypeDefinition)
@@ -44,7 +50,7 @@ export class TypesRegistry implements IRegistry<ExpressionType> {
   }
 
   public get(id: string): ExpressionType | null {
-    return this.executor.state.selectors.getType(id);
+    return this.executor.getType(id) ?? null;
   }
 
   public toJS(): Record<string, ExpressionType> {
@@ -57,7 +63,7 @@ export class TypesRegistry implements IRegistry<ExpressionType> {
 }
 
 export class FunctionsRegistry implements IRegistry<ExpressionFunction> {
-  constructor(private readonly executor: Executor<any>) {}
+  constructor(private readonly executor: Executor) {}
 
   public register(
     functionDefinition: AnyExpressionFunctionDefinition | (() => AnyExpressionFunctionDefinition)
@@ -66,7 +72,7 @@ export class FunctionsRegistry implements IRegistry<ExpressionFunction> {
   }
 
   public get(id: string): ExpressionFunction | null {
-    return this.executor.state.selectors.getFunction(id);
+    return this.executor.getFunction(id) ?? null;
   }
 
   public toJS(): Record<string, ExpressionFunction> {
@@ -79,17 +85,19 @@ export class FunctionsRegistry implements IRegistry<ExpressionFunction> {
 }
 
 export class Executor<Context extends Record<string, unknown> = Record<string, unknown>>
-  implements PersistableStateService<ExpressionAstExpression> {
+  implements PersistableStateService<ExpressionAstExpression>
+{
   static createWithDefaults<Ctx extends Record<string, unknown> = Record<string, unknown>>(
+    logger?: Logger,
     state?: ExecutorState<Ctx>
   ): Executor<Ctx> {
-    const executor = new Executor<Ctx>(state);
+    const executor = new Executor<Ctx>(logger, state);
     for (const type of typeSpecs) executor.registerType(type);
-    for (const func of functionSpecs) executor.registerFunction(func);
+
     return executor;
   }
 
-  public readonly state: ExecutorContainer<Context>;
+  public readonly container: ExecutorContainer<Context>;
 
   /**
    * @deprecated
@@ -101,10 +109,14 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
    */
   public readonly types: TypesRegistry;
 
-  constructor(state?: ExecutorState<Context>) {
-    this.state = createExecutorContainer<Context>(state);
-    this.functions = new FunctionsRegistry(this);
-    this.types = new TypesRegistry(this);
+  constructor(private readonly logger?: Logger, state?: ExecutorState<Context>) {
+    this.functions = new FunctionsRegistry(this as Executor);
+    this.types = new TypesRegistry(this as Executor);
+    this.container = createExecutorContainer<Context>(state);
+  }
+
+  public get state(): ExecutorState<Context> {
+    return this.container.get();
   }
 
   public registerFunction(
@@ -113,15 +125,23 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     const fn = new ExpressionFunction(
       typeof functionDefinition === 'object' ? functionDefinition : functionDefinition()
     );
-    this.state.transitions.addFunction(fn);
+    this.container.transitions.addFunction(fn);
   }
 
-  public getFunction(name: string): ExpressionFunction | undefined {
-    return this.state.get().functions[name];
+  public getFunction(name: string, namespace?: string): ExpressionFunction | undefined {
+    const fn = this.container.get().functions[name];
+
+    if (!fn?.namespace || fn.namespace === namespace) {
+      return fn;
+    }
   }
 
-  public getFunctions(): Record<string, ExpressionFunction> {
-    return { ...this.state.get().functions };
+  public getFunctions(namespace?: string): Record<string, ExpressionFunction> {
+    const fns = Object.entries(this.container.get().functions);
+    const filtered = fns.filter(
+      ([key, value]) => !value.namespace || value.namespace === namespace
+    );
+    return Object.fromEntries(filtered);
   }
 
   public registerType(
@@ -130,23 +150,20 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     const type = new ExpressionType(
       typeof typeDefinition === 'object' ? typeDefinition : typeDefinition()
     );
-    this.state.transitions.addType(type);
+
+    this.container.transitions.addType(type);
   }
 
   public getType(name: string): ExpressionType | undefined {
-    return this.state.get().types[name];
+    return this.container.get().types[name];
   }
 
   public getTypes(): Record<string, ExpressionType> {
-    return { ...this.state.get().types };
-  }
-
-  public extendContext(extraContext: Record<string, unknown>) {
-    this.state.transitions.extendContext(extraContext);
+    return this.container.get().types;
   }
 
   public get context(): Record<string, unknown> {
-    return this.state.selectors.getContext();
+    return this.container.selectors.getContext();
   }
 
   /**
@@ -161,7 +178,7 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     ast: string | ExpressionAstExpression,
     input: Input,
     params: ExpressionExecutionParams = {}
-  ): Observable<Output | ExpressionValueError> {
+  ): Observable<ExecutionResult<Output | ExpressionValueError>> {
     return this.createExecution<Input, Output>(ast, params).start(input);
   }
 
@@ -169,20 +186,15 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     ast: string | ExpressionAstExpression,
     params: ExpressionExecutionParams = {}
   ): Execution<Input, Output> {
-    const executionParams: ExecutionParams = {
+    const executionParams = {
+      params,
       executor: this,
-      params: {
-        ...params,
-        // for canvas we are passing this in,
-        // canvas should be refactored to not pass any extra context in
-        extraContext: this.context,
-      } as any,
-    };
+    } as ExecutionParams;
 
     if (typeof ast === 'string') executionParams.expression = ast;
     else executionParams.ast = ast;
 
-    const execution = new Execution<Input, Output>(executionParams);
+    const execution = new Execution<Input, Output>(executionParams, this.logger);
 
     return execution;
   }
@@ -191,26 +203,80 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     ast: ExpressionAstExpression,
     action: (fn: ExpressionFunction, link: ExpressionAstFunction) => void
   ) {
+    const functions = this.container.get().functions;
     for (const link of ast.chain) {
       const { function: fnName, arguments: fnArgs } = link;
-      const fn = getByAlias(this.state.get().functions, fnName);
+      const fn = getByAlias(functions, fnName, ALL_NAMESPACES);
 
       if (fn) {
         // if any of arguments are expressions we should migrate those first
-        link.arguments = mapValues(fnArgs, (asts, argName) => {
-          return asts.map((arg) => {
-            if (typeof arg === 'object') {
-              return this.walkAst(arg, action);
-            }
-            return arg;
-          });
-        });
+        link.arguments = mapValues(fnArgs, (asts) =>
+          asts.map((arg) =>
+            arg != null && typeof arg === 'object' ? this.walkAst(arg, action) : arg
+          )
+        );
 
         action(fn, link);
       }
     }
 
     return ast;
+  }
+
+  private walkAstAndTransform(
+    ast: ExpressionAstExpression,
+    transform: (
+      fn: ExpressionFunction,
+      ast: ExpressionAstFunction
+    ) => ExpressionAstFunction | ExpressionAstExpression
+  ): ExpressionAstExpression {
+    let additionalFunctions = 0;
+    const functions = this.container.get().functions;
+    return (
+      ast.chain.reduce<ExpressionAstExpression>(
+        (newAst: ExpressionAstExpression, funcAst: ExpressionAstFunction, index: number) => {
+          const realIndex = index + additionalFunctions;
+          const { function: fnName, arguments: fnArgs } = funcAst;
+          const fn = getByAlias(functions, fnName, ALL_NAMESPACES);
+          if (!fn) {
+            return newAst;
+          }
+
+          // if any of arguments are expressions we should migrate those first
+          funcAst.arguments = mapValues(fnArgs, (asts) =>
+            asts.map((arg) =>
+              arg != null && typeof arg === 'object'
+                ? this.walkAstAndTransform(arg, transform)
+                : arg
+            )
+          );
+
+          const transformedFn = transform(fn, funcAst);
+          if (transformedFn.type === 'function') {
+            const prevChain = realIndex > 0 ? newAst.chain.slice(0, realIndex) : [];
+            const nextChain = newAst.chain.slice(realIndex + 1);
+            return {
+              ...newAst,
+              chain: [...prevChain, transformedFn, ...nextChain],
+            };
+          }
+
+          if (transformedFn.type === 'expression') {
+            const { chain } = transformedFn;
+            const prevChain = realIndex > 0 ? newAst.chain.slice(0, realIndex) : [];
+            const nextChain = newAst.chain.slice(realIndex + 1);
+            additionalFunctions += chain.length - 1;
+            return {
+              ...newAst,
+              chain: [...prevChain, ...chain, ...nextChain],
+            };
+          }
+
+          return newAst;
+        },
+        ast
+      ) ?? ast
+    );
   }
 
   public inject(ast: ExpressionAstExpression, references: SavedObjectReference[]) {
@@ -232,12 +298,13 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     const newAst = this.walkAst(cloneDeep(ast), (fn, link) => {
       const { state, references } = fn.extract(link.arguments);
       link.arguments = state;
-      allReferences.push(...references.map((r) => ({ ...r, name: `l${linkId++}_${r.name}` })));
+      allReferences.push(...references.map((r) => ({ ...r, name: `l${linkId}_${r.name}` })));
+      linkId = linkId + 1;
     });
     return { state: newAst, references: allReferences };
   }
 
-  public telemetry(ast: ExpressionAstExpression, telemetryData: Record<string, any>) {
+  public telemetry(ast: ExpressionAstExpression, telemetryData: Record<string, unknown>) {
     this.walkAst(cloneDeep(ast), (fn, link) => {
       telemetryData = fn.telemetry(link.arguments, telemetryData);
     });
@@ -245,42 +312,40 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     return telemetryData;
   }
 
-  public migrate(ast: SerializableState, version: string) {
-    return this.walkAst(cloneDeep(ast) as ExpressionAstExpression, (fn, link) => {
-      if (!fn.migrations[version]) return link;
-      const updatedAst = fn.migrations[version](link) as ExpressionAstFunction;
-      link.arguments = updatedAst.arguments;
-      link.type = updatedAst.type;
-    });
-  }
+  public getAllMigrations() {
+    const uniqueVersions = new Set(
+      Object.values(this.container.get().functions)
+        .map((fn) => {
+          const migrations =
+            typeof fn.migrations === 'function' ? fn.migrations() : fn.migrations || {};
+          return Object.keys(migrations);
+        })
+        .flat(1)
+    );
 
-  public fork(): Executor<Context> {
-    const initialState = this.state.get();
-    const fork = new Executor<Context>(initialState);
-
-    /**
-     * Synchronize registry state - make any new types, functions and context
-     * also available in the forked instance of `Executor`.
-     */
-    this.state.state$.subscribe(({ types, functions, context }) => {
-      const state = fork.state.get();
-      fork.state.set({
-        ...state,
-        types: {
-          ...types,
-          ...state.types,
-        },
-        functions: {
-          ...functions,
-          ...state.functions,
-        },
-        context: {
-          ...context,
-          ...state.context,
-        },
+    const migrations: MigrateFunctionsObject = {};
+    uniqueVersions.forEach((version) => {
+      migrations[version] = (state) => ({
+        ...this.migrate(state, version),
       });
     });
 
-    return fork;
+    return migrations;
+  }
+
+  public migrateToLatest(state: VersionedState) {
+    return migrateToLatest(this.getAllMigrations(), state) as ExpressionAstExpression;
+  }
+
+  private migrate(ast: SerializableRecord, version: string) {
+    return this.walkAstAndTransform(cloneDeep(ast) as ExpressionAstExpression, (fn, link) => {
+      const migrations =
+        typeof fn.migrations === 'function' ? fn.migrations() : fn.migrations || {};
+      if (!migrations[version]) {
+        return link;
+      }
+
+      return migrations[version](link) as ExpressionAstExpression;
+    });
   }
 }

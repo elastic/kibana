@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-jest.mock('../../../services/job_service.js', () => 'mlJobService');
+jest.mock('../../../services/job_service', () => 'mlJobService');
 
 // Mock the call for loading a filter.
 // The mock is hoisted to the top, so need to prefix the filter variable
@@ -29,7 +29,7 @@ jest.mock('../../../services/ml_api_service', () => ({
   },
 }));
 
-import { shallowWithIntl } from '@kbn/test/jest';
+import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
 
 import { RuleActionPanel } from './rule_action_panel';

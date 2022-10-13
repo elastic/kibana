@@ -28,7 +28,8 @@ export interface TransitionDescription<Type extends string = string, Args extend
  */
 export type Transition<State extends BaseState, Args extends any[]> = (...args: Args) => State;
 /**
- * @internal
+ * Given some state and an argument, transform the state and return a new version of the state.
+ * @public
  */
 export type PureTransition<State extends BaseState, Args extends any[]> = (
   state: State
@@ -37,10 +38,12 @@ export type PureTransition<State extends BaseState, Args extends any[]> = (
  * @public
  */
 export type EnsurePureTransition<T> = Ensure<T, PureTransition<any, any>>;
+
 /**
  * @internal
  */
 export type PureTransitionToTransition<T extends PureTransition<any, any>> = ReturnType<T>;
+
 /**
  * @internal
  */
@@ -132,16 +135,14 @@ export type Reducer<State extends BaseState> = (
  * Utility type for inferring state shape from {@link StateContainer}
  * @public
  */
-export type UnboxState<
-  Container extends StateContainer<any, any>
-> = Container extends StateContainer<infer T, any> ? T : never;
+export type UnboxState<Container extends StateContainer<any, any>> =
+  Container extends StateContainer<infer T, any> ? T : never;
 /**
  * Utility type for inferring transitions type from {@link StateContainer}
  * @public
  */
-export type UnboxTransitions<
-  Container extends StateContainer<any, any>
-> = Container extends StateContainer<any, infer T> ? T : never;
+export type UnboxTransitions<Container extends StateContainer<any, any>> =
+  Container extends StateContainer<any, infer T> ? T : never;
 
 /**
  * @public

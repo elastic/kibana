@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import { get } from 'lodash/fp';
 import React from 'react';
 
+import type { RowRenderer } from '../../../../../../../common/types/timeline';
 import { RowRendererId } from '../../../../../../../common/types/timeline';
 
 import { DnsRequestEventDetails } from '../dns/dns_request_event_details';
 import { EndgameSecurityEventDetails } from '../endgame/endgame_security_event_details';
 import { isFileEvent, isNillEmptyOrNotFinite } from '../helpers';
 import { RegistryEventDetails } from '../registry/registry_event_details';
-import { RowRenderer, RowRendererContainer } from '../row_renderer';
+import { RowRendererContainer } from '../row_renderer';
 
 import { SystemGenericDetails } from './generic_details';
 import { SystemGenericFileDetails } from './generic_file_details';
@@ -40,12 +39,12 @@ export const createGenericSystemRowRenderer = ({
       action.toLowerCase() === actionName
     );
   },
-  renderRow: ({ browserFields, data, timelineId }) => (
+  renderRow: ({ data, isDraggable, timelineId }) => (
     <RowRendererContainer>
       <SystemGenericDetails
-        browserFields={browserFields}
-        data={data}
         contextId={`${actionName}-${timelineId}`}
+        data={data}
+        isDraggable={isDraggable}
         text={text}
         timelineId={timelineId}
       />
@@ -71,12 +70,12 @@ export const createEndgameProcessRowRenderer = ({
       action?.toLowerCase() === actionName
     );
   },
-  renderRow: ({ browserFields, data, timelineId }) => (
+  renderRow: ({ data, isDraggable, timelineId }) => (
     <RowRendererContainer>
       <SystemGenericFileDetails
-        browserFields={browserFields}
         data={data}
         contextId={`endgame-process-${actionName}-${timelineId}`}
+        isDraggable={isDraggable}
         showMessage={false}
         text={text}
         timelineId={timelineId}
@@ -102,12 +101,12 @@ export const createFimRowRenderer = ({
       action?.toLowerCase() === actionName
     );
   },
-  renderRow: ({ browserFields, data, timelineId }) => (
+  renderRow: ({ data, isDraggable, timelineId }) => (
     <RowRendererContainer>
       <SystemGenericFileDetails
-        browserFields={browserFields}
         data={data}
         contextId={`fim-${actionName}-${timelineId}`}
+        isDraggable={isDraggable}
         showMessage={false}
         text={text}
         timelineId={timelineId}
@@ -151,12 +150,12 @@ export const createEndpointAlertsRowRenderer = ({
       eventActionMatches
     );
   },
-  renderRow: ({ browserFields, data, timelineId }) => (
+  renderRow: ({ data, isDraggable, timelineId }) => (
     <RowRendererContainer>
       <SystemGenericFileDetails
-        browserFields={browserFields}
-        data={data}
         contextId={`endpoint-alerts-row-renderer-${eventAction}-${eventCategory}-${eventType}-${timelineId}`}
+        data={data}
+        isDraggable={isDraggable}
         showMessage={false}
         skipRedundantFileDetails={skipRedundantFileDetails}
         skipRedundantProcessDetails={skipRedundantProcessDetails}
@@ -182,12 +181,12 @@ export const createEndpointLibraryRowRenderer = ({
       dataset?.toLowerCase() === 'endpoint.events.library' && action?.toLowerCase() === actionName
     );
   },
-  renderRow: ({ browserFields, data, timelineId }) => (
+  renderRow: ({ data, isDraggable, timelineId }) => (
     <RowRendererContainer>
       <SystemGenericFileDetails
-        browserFields={browserFields}
-        data={data}
         contextId={`library-row-renderer-${actionName}-${timelineId}`}
+        data={data}
+        isDraggable={isDraggable}
         showMessage={false}
         text={text}
         timelineId={timelineId}
@@ -214,12 +213,12 @@ export const createGenericFileRowRenderer = ({
       action.toLowerCase() === actionName
     );
   },
-  renderRow: ({ browserFields, data, timelineId }) => (
+  renderRow: ({ data, isDraggable, timelineId }) => (
     <RowRendererContainer>
       <SystemGenericFileDetails
-        browserFields={browserFields}
-        data={data}
         contextId={`${actionName}-${timelineId}`}
+        data={data}
+        isDraggable={isDraggable}
         text={text}
         timelineId={timelineId}
       />
@@ -239,12 +238,12 @@ export const createSocketRowRenderer = ({
     const action: string | null | undefined = get('event.action[0]', ecs);
     return action != null && action.toLowerCase() === actionName;
   },
-  renderRow: ({ browserFields, data, timelineId }) => (
+  renderRow: ({ data, isDraggable, timelineId }) => (
     <RowRendererContainer>
       <SystemGenericFileDetails
-        browserFields={browserFields}
-        data={data}
         contextId={`socket-${actionName}-${timelineId}`}
+        data={data}
+        isDraggable={isDraggable}
         text={text}
         timelineId={timelineId}
       />
@@ -268,12 +267,12 @@ export const createSecurityEventRowRenderer = ({
       action?.toLowerCase() === actionName
     );
   },
-  renderRow: ({ browserFields, data, timelineId }) => (
+  renderRow: ({ data, isDraggable, timelineId }) => (
     <RowRendererContainer>
       <EndgameSecurityEventDetails
-        browserFields={browserFields}
-        data={data}
         contextId={`authentication-${actionName}-${timelineId}`}
+        data={data}
+        isDraggable={isDraggable}
         timelineId={timelineId}
       />
     </RowRendererContainer>
@@ -287,12 +286,12 @@ export const createDnsRowRenderer = (): RowRenderer => ({
     const dnsQuestionName: string | null | undefined = get('dns.question.name[0]', ecs);
     return !isNillEmptyOrNotFinite(dnsQuestionType) && !isNillEmptyOrNotFinite(dnsQuestionName);
   },
-  renderRow: ({ browserFields, data, timelineId }) => (
+  renderRow: ({ data, isDraggable, timelineId }) => (
     <RowRendererContainer>
       <DnsRequestEventDetails
-        browserFields={browserFields}
-        data={data}
         contextId={`dns-request-${timelineId}`}
+        data={data}
+        isDraggable={isDraggable}
         timelineId={timelineId}
       />
     </RowRendererContainer>
@@ -315,12 +314,12 @@ export const createEndpointRegistryRowRenderer = ({
       dataset?.toLowerCase() === 'endpoint.events.registry' && action?.toLowerCase() === actionName
     );
   },
-  renderRow: ({ browserFields, data, timelineId }) => (
+  renderRow: ({ data, isDraggable, timelineId }) => (
     <RowRendererContainer>
       <RegistryEventDetails
-        browserFields={browserFields}
-        data={data}
         contextId={`registry-event-${timelineId}`}
+        data={data}
+        isDraggable={isDraggable}
         text={text}
       />
     </RowRendererContainer>

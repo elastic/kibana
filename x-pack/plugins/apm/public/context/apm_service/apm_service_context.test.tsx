@@ -5,27 +5,49 @@
  * 2.0.
  */
 
-import { getTransactionType } from './apm_service_context';
+import { getOrRedirectToTransactionType } from './apm_service_context';
+import { createMemoryHistory } from 'history';
 
-describe('getTransactionType', () => {
+describe('getOrRedirectToTransactionType', () => {
+  const history = createMemoryHistory();
+  jest.spyOn(history, 'replace');
+
   describe('with transaction type in url', () => {
     it('returns the transaction type in the url ', () => {
       expect(
-        getTransactionType({
-          transactionTypes: ['worker', 'request'],
-          urlParams: { transactionType: 'custom' },
+        getOrRedirectToTransactionType({
+          transactionTypes: ['worker', 'request', 'custom'],
+          transactionType: 'custom',
           agentName: 'nodejs',
+          history,
         })
       ).toBe('custom');
+      expect(history.replace).not.toHaveBeenCalled();
+    });
+
+    it('updates the transaction type in the url when it is not one of the options returned by the API', () => {
+      expect(
+        getOrRedirectToTransactionType({
+          transactionTypes: ['worker', 'request'],
+          transactionType: 'custom',
+          agentName: 'nodejs',
+          history,
+        })
+      ).toBe('request');
+      expect(history.replace).toHaveBeenCalledWith(
+        expect.objectContaining({
+          search: 'transactionType=request',
+        })
+      );
     });
   });
 
   describe('with no transaction types', () => {
     it('returns undefined', () => {
       expect(
-        getTransactionType({
+        getOrRedirectToTransactionType({
           transactionTypes: [],
-          urlParams: {},
+          history,
         })
       ).toBeUndefined();
     });
@@ -35,24 +57,34 @@ describe('getTransactionType', () => {
     describe('with default transaction type', () => {
       it('returns "request"', () => {
         expect(
-          getTransactionType({
+          getOrRedirectToTransactionType({
             transactionTypes: ['worker', 'request'],
-            urlParams: {},
             agentName: 'nodejs',
+            history,
           })
         ).toEqual('request');
+        expect(history.replace).toHaveBeenCalledWith(
+          expect.objectContaining({
+            search: 'transactionType=request',
+          })
+        );
       });
     });
 
     describe('with no default transaction type', () => {
       it('returns the first type', () => {
         expect(
-          getTransactionType({
+          getOrRedirectToTransactionType({
             transactionTypes: ['worker', 'custom'],
-            urlParams: {},
             agentName: 'nodejs',
+            history,
           })
         ).toEqual('worker');
+        expect(history.replace).toHaveBeenCalledWith(
+          expect.objectContaining({
+            search: 'transactionType=worker',
+          })
+        );
       });
     });
   });
@@ -60,12 +92,17 @@ describe('getTransactionType', () => {
   describe('with a rum agent', () => {
     it('returns "page-load"', () => {
       expect(
-        getTransactionType({
+        getOrRedirectToTransactionType({
           transactionTypes: ['http-request', 'page-load'],
-          urlParams: {},
           agentName: 'js-base',
+          history,
         })
       ).toEqual('page-load');
+      expect(history.replace).toHaveBeenCalledWith(
+        expect.objectContaining({
+          search: 'transactionType=page-load',
+        })
+      );
     });
   });
 });

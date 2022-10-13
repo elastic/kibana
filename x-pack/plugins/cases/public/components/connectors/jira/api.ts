@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import { HttpSetup } from 'kibana/public';
-import { ActionTypeExecutorResult } from '../../../../../actions/common';
+import { HttpSetup } from '@kbn/core/public';
+import { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import { getExecuteConnectorUrl } from '../../../../common/utils';
+import {
+  ConnectorExecutorResult,
+  rewriteResponseToCamelCase,
+} from '../rewrite_response_to_camel_case';
 import { IssueTypes, Fields, Issues, Issue } from './types';
-
-export const BASE_ACTION_API_PATH = '/api/actions';
 
 export interface GetIssueTypesProps {
   http: HttpSetup;
@@ -18,8 +21,8 @@ export interface GetIssueTypesProps {
 }
 
 export async function getIssueTypes({ http, signal, connectorId }: GetIssueTypesProps) {
-  return http.post<ActionTypeExecutorResult<IssueTypes>>(
-    `${BASE_ACTION_API_PATH}/action/${connectorId}/_execute`,
+  const res = await http.post<ConnectorExecutorResult<IssueTypes>>(
+    getExecuteConnectorUrl(connectorId),
     {
       body: JSON.stringify({
         params: { subAction: 'issueTypes', subActionParams: {} },
@@ -27,6 +30,8 @@ export async function getIssueTypes({ http, signal, connectorId }: GetIssueTypes
       signal,
     }
   );
+
+  return rewriteResponseToCamelCase(res);
 }
 
 export interface GetFieldsByIssueTypeProps {
@@ -42,12 +47,16 @@ export async function getFieldsByIssueType({
   connectorId,
   id,
 }: GetFieldsByIssueTypeProps): Promise<ActionTypeExecutorResult<Fields>> {
-  return http.post(`${BASE_ACTION_API_PATH}/action/${connectorId}/_execute`, {
-    body: JSON.stringify({
-      params: { subAction: 'fieldsByIssueType', subActionParams: { id } },
-    }),
-    signal,
-  });
+  const res = await http.post<ConnectorExecutorResult<Fields>>(
+    getExecuteConnectorUrl(connectorId),
+    {
+      body: JSON.stringify({
+        params: { subAction: 'fieldsByIssueType', subActionParams: { id } },
+      }),
+      signal,
+    }
+  );
+  return rewriteResponseToCamelCase(res);
 }
 
 export interface GetIssuesTypeProps {
@@ -63,12 +72,16 @@ export async function getIssues({
   connectorId,
   title,
 }: GetIssuesTypeProps): Promise<ActionTypeExecutorResult<Issues>> {
-  return http.post(`${BASE_ACTION_API_PATH}/action/${connectorId}/_execute`, {
-    body: JSON.stringify({
-      params: { subAction: 'issues', subActionParams: { title } },
-    }),
-    signal,
-  });
+  const res = await http.post<ConnectorExecutorResult<Issues>>(
+    getExecuteConnectorUrl(connectorId),
+    {
+      body: JSON.stringify({
+        params: { subAction: 'issues', subActionParams: { title } },
+      }),
+      signal,
+    }
+  );
+  return rewriteResponseToCamelCase(res);
 }
 
 export interface GetIssueTypeProps {
@@ -84,10 +97,11 @@ export async function getIssue({
   connectorId,
   id,
 }: GetIssueTypeProps): Promise<ActionTypeExecutorResult<Issue>> {
-  return http.post(`${BASE_ACTION_API_PATH}/action/${connectorId}/_execute`, {
+  const res = await http.post<ConnectorExecutorResult<Issue>>(getExecuteConnectorUrl(connectorId), {
     body: JSON.stringify({
       params: { subAction: 'issue', subActionParams: { id } },
     }),
     signal,
   });
+  return rewriteResponseToCamelCase(res);
 }

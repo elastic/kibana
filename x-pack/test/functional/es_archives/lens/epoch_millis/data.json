@@ -1,0 +1,187 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "AU_x4-TaGFA8no6QjiSJ",
+    "index": "epoch-millis1",
+    "source": {
+      "@message": "212.113.62.183 - - [2015-09-21T06:09:20.045Z] \"GET /uploads/dafydd-williams.jpg HTTP/1.1\" 200 3182 \"-\" \"Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1\"",
+      "@tags": [
+        "success",
+        "info"
+      ],
+      "@timestamp": 1442664000000,
+      "bytes": 3182,
+      "clientip": "212.113.62.183",
+      "extension": "jpg",
+      "geo": {
+        "coordinates": {
+          "lat": 34.57528944,
+          "lon": -117.1861792
+        },
+        "dest": "US",
+        "src": "BI",
+        "srcdest": "BI:US"
+      },
+      "headings": [
+        "<h3>stephen-thorne</h5>",
+        "http://nytimes.com/success/sandra-magnus"
+      ],
+      "host": "media-for-the-masses.theacademyofperformingartsandscience.org",
+      "index": "logstash-2015.09.21",
+      "ip": "212.113.62.183",
+      "links": [
+        "gherman-titov@nytimes.com",
+        "http://facebook.com/security/mercury-redstone-3",
+        "www.facebook.com"
+      ],
+      "machine": {
+        "os": "ios",
+        "ram": 17179869184,
+        "ram_range": {
+          "gte": 17179869184,
+          "lt": 17179869199
+        }
+      },
+      "referer": "http://twitter.com/error/takuya-onishi",
+      "relatedContent": [
+        {
+          "article:modified_time": "2014-11-26T18:18:09-08:00",
+          "article:published_time": "2008-02-06T16:56:48-08:00",
+          "article:section": "News",
+          "og:description": "If you followed the election fine print - those ballot measures having nothing to do with Hillary Clinton, Barack Obama, John McCain or Mitt Romney, you...",
+          "og:site_name": "LA Weekly",
+          "og:title": "Fabian, maybe it&#039;s the friends you keep",
+          "og:type": "article",
+          "og:url": "http://www.laweekly.com/news/fabian-maybe-its-the-friends-you-keep-2399081",
+          "twitter:card": "summary",
+          "twitter:description": "If you followed the election fine print - those ballot measures having nothing to do with Hillary Clinton, Barack Obama, John McCain or Mitt Romney, you...",
+          "twitter:site": "@laweekly",
+          "twitter:title": "Fabian, maybe it&#039;s the friends you keep",
+          "url": "http://www.laweekly.com/news/fabian-maybe-its-the-friends-you-keep-2399081"
+        }
+      ],
+      "request": "/uploads/dafydd-williams.jpg",
+      "response": "200",
+      "spaces": "this   is   a   thing    with lots of     spaces       wwwwoooooo",
+      "type": "apache",
+      "url": "https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/dafydd-williams.jpg",
+      "utc_time": "2015-09-21T06:09:20.045Z",
+      "xss": "<script>console.log(\"xss\")</script>"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "AU_x4-TaGFA8no6QjiSL",
+    "index": "epoch-millis2",
+    "source": {
+      "@message": "156.252.112.76 - - [2015-09-21T21:13:02.070Z] \"GET /uploads/aleksandr-samokutyayev.jpg HTTP/1.1\" 200 6176 \"-\" \"Mozilla/5.0 (X11; Linux i686) AppleWebKit/534.24 (KHTML, like Gecko) Chrome/11.0.696.50 Safari/534.24\"",
+      "@tags": [
+        "success",
+        "info"
+      ],
+      "@timestamp": 1442518400000,
+      "agent": "Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1",
+      "bytes": 6176,
+      "clientip": "156.252.112.76",
+      "extension": "jpg",
+      "geo": {
+        "coordinates": {
+          "lat": 41.55239139,
+          "lon": -112.0622625
+        },
+        "dest": "CA",
+        "src": "IR",
+        "srcdest": "IR:CA"
+      },
+      "headings": [
+        "<h3>oleg-atkov</h5>",
+        "http://twitter.com/warning/curt-michel"
+      ],
+      "host": "media-for-the-masses.theacademyofperformingartsandscience.org",
+      "index": "logstash-2015.09.21",
+      "ip": "156.252.112.76",
+      "links": [
+        "pavel-belyayev@twitter.com",
+        "http://www.slate.com/info/gregory-linteris",
+        "www.facebook.com"
+      ],
+      "machine": {
+        "ram": 21474836480,
+        "ram_range": {
+          "gte": 21474836480,
+          "lt": 21474836499
+        }
+      },
+      "referer": "http://twitter.com/error/duane-graveline",
+      "relatedContent": [
+        {
+          "article:modified_time": "2014-11-25T20:21:15-08:00",
+          "article:published_time": "2007-02-10T21:02:00-08:00",
+          "article:section": "Arts",
+          "og:description": "FRIDAY, 7:30 p.m. Viper Room There was a lively and fashionable crowd at the Viper Room Friday night for MSO PR&#039;s soiree celebrating the launch of their...",
+          "og:image": "http://images1.laweekly.com/imager/erasure-and-smashing-pumpkins-news/u/original/2440535/mitch.jpg",
+          "og:image:height": "225",
+          "og:image:width": "300",
+          "og:site_name": "LA Weekly",
+          "og:title": "Erasure and Smashing Pumpkins News",
+          "og:type": "article",
+          "og:url": "http://www.laweekly.com/arts/erasure-and-smashing-pumpkins-news-2372898",
+          "twitter:card": "summary",
+          "twitter:description": "FRIDAY, 7:30 p.m. Viper Room There was a lively and fashionable crowd at the Viper Room Friday night for MSO PR&#039;s soiree celebrating the launch of their...",
+          "twitter:image": "http://images1.laweekly.com/imager/erasure-and-smashing-pumpkins-news/u/original/2440535/mitch.jpg",
+          "twitter:site": "@laweekly",
+          "twitter:title": "Erasure and Smashing Pumpkins News",
+          "url": "http://www.laweekly.com/arts/erasure-and-smashing-pumpkins-news-2372898"
+        },
+        {
+          "article:modified_time": "2014-11-25T19:36:57-08:00",
+          "article:published_time": "2006-11-29T00:11:37-08:00",
+          "article:section": "Arts",
+          "og:description": "So, I was bored one evening (tonight, as it happens) and as we do in the digital age I decided to google my name and find out what other Steffies exist ...",
+          "og:image": "http://images1.laweekly.com/imager/i-amdoll-parts/u/original/2442334/1186talksteffie.jpg",
+          "og:image:height": "264",
+          "og:image:width": "281",
+          "og:site_name": "LA Weekly",
+          "og:title": "I Am...Doll Parts",
+          "og:type": "article",
+          "og:url": "http://www.laweekly.com/arts/i-amdoll-parts-2373466",
+          "twitter:card": "summary",
+          "twitter:description": "So, I was bored one evening (tonight, as it happens) and as we do in the digital age I decided to google my name and find out what other Steffies exist ...",
+          "twitter:image": "http://images1.laweekly.com/imager/i-amdoll-parts/u/original/2442334/1186talksteffie.jpg",
+          "twitter:site": "@laweekly",
+          "twitter:title": "I Am...Doll Parts",
+          "url": "http://www.laweekly.com/arts/i-amdoll-parts-2373466"
+        },
+        {
+          "article:modified_time": "2014-11-25T18:07:09-08:00",
+          "article:published_time": "2008-02-07T17:55:05-08:00",
+          "article:section": "Arts",
+          "og:description": "Grammy week... Fashion week (in NYC)...the writers strike... Britney... There so much to do and watch and bitch, uh write, about.... Our new year&#039;s reso...",
+          "og:image": "http://images1.laweekly.com/imager/shit-list/u/original/2443852/tees.jpg",
+          "og:image:height": "253",
+          "og:image:width": "179",
+          "og:site_name": "LA Weekly",
+          "og:title": "Shit List",
+          "og:type": "article",
+          "og:url": "http://www.laweekly.com/arts/shit-list-2373962",
+          "twitter:card": "summary",
+          "twitter:description": "Grammy week... Fashion week (in NYC)...the writers strike... Britney... There so much to do and watch and bitch, uh write, about.... Our new year&#039;s reso...",
+          "twitter:image": "http://images1.laweekly.com/imager/shit-list/u/original/2443852/tees.jpg",
+          "twitter:site": "@laweekly",
+          "twitter:title": "Shit List",
+          "url": "http://www.laweekly.com/arts/shit-list-2373962"
+        }
+      ],
+      "request": "/uploads/aleksandr-samokutyayev.jpg",
+      "response": "200",
+      "spaces": "this   is   a   thing    with lots of     spaces       wwwwoooooo",
+      "type": "apache",
+      "url": "https://media-for-the-masses.theacademyofperformingartsandscience.org/uploads/aleksandr-samokutyayev.jpg",
+      "utc_time": "2015-09-21T21:13:02.070Z",
+      "xss": "<script>console.log(\"xss\")</script>"
+    }
+  }
+}

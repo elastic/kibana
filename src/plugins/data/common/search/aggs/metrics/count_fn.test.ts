@@ -23,6 +23,8 @@ describe('agg_expression_functions', () => {
             "id": undefined,
             "params": Object {
               "customLabel": undefined,
+              "emptyAsNull": undefined,
+              "timeShift": undefined,
             },
             "schema": undefined,
             "type": "count",

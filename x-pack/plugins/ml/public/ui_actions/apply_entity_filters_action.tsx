@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { Filter, FilterStateStore } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { createAction } from '../../../../../src/plugins/ui_actions/public';
+import { createAction } from '@kbn/ui-actions-plugin/public';
 import { MlCoreSetup } from '../plugin';
-import { Filter, FilterStateStore } from '../../../../../src/plugins/data/common';
 import {
   ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
   AnomalyChartsFieldSelectionContext,

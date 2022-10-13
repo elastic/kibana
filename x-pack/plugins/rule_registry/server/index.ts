@@ -5,25 +5,37 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginInitializerContext } from 'src/core/server';
+// TODO: https://github.com/elastic/kibana/issues/110907
+/* eslint-disable @kbn/eslint/no_export_all */
+
+import { PluginInitializerContext } from '@kbn/core/server';
 import { RuleRegistryPlugin } from './plugin';
 
-export { RuleRegistryPluginSetupContract } from './plugin';
-export { createLifecycleRuleTypeFactory } from './rule_registry/rule_type_helpers/create_lifecycle_rule_type_factory';
-export { FieldMapOf } from './types';
-export { ScopedRuleRegistryClient } from './rule_registry/create_scoped_rule_registry_client/types';
+export type { RuleRegistryPluginSetupContract, RuleRegistryPluginStartContract } from './plugin';
+export type { IRuleDataService, RuleDataPluginService } from './rule_data_plugin_service';
+export { RuleDataClient } from './rule_data_client';
+export type { IRuleDataClient } from './rule_data_client/types';
+export type {
+  RacRequestHandlerContext,
+  RacApiRequestHandlerContext,
+  AlertTypeWithExecutor,
+} from './types';
 
-export const config = {
-  schema: schema.object({
-    enabled: schema.boolean({ defaultValue: true }),
-    unsafe: schema.object({
-      write: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
-    }),
-  }),
-};
+export * from './config';
+export * from './rule_data_plugin_service';
+export * from './rule_data_client';
+export * from './alert_data_client/audit_events';
 
-export type RuleRegistryConfig = TypeOf<typeof config.schema>;
+export { createLifecycleRuleTypeFactory } from './utils/create_lifecycle_rule_type_factory';
+export type {
+  LifecycleRuleExecutor,
+  LifecycleAlertService,
+  LifecycleAlertServices,
+} from './utils/create_lifecycle_executor';
+export { createLifecycleExecutor } from './utils/create_lifecycle_executor';
+export { createPersistenceRuleTypeWrapper } from './utils/create_persistence_rule_type_wrapper';
+export * from './utils/persistence_types';
+export type { AlertsClient } from './alert_data_client/alerts_client';
 
 export const plugin = (initContext: PluginInitializerContext) =>
   new RuleRegistryPlugin(initContext);

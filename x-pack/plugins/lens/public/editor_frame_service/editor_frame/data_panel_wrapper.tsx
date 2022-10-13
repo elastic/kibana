@@ -7,110 +7,183 @@
 
 import './data_panel_wrapper.scss';
 
-import React, { useMemo, memo, useContext, useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import { EuiPopover, EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
+import React, { useMemo, memo, useContext, useEffect, useCallback } from 'react';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { Easteregg } from './easteregg';
 import { NativeRenderer } from '../../native_renderer';
-import { Action } from './state_management';
 import { DragContext, DragDropIdentifier } from '../../drag_drop';
-import { StateSetter, FramePublicAPI, DatasourceDataPanelProps, Datasource } from '../../types';
-import { Query, Filter } from '../../../../../../src/plugins/data/public';
+import {
+  StateSetter,
+  DatasourceDataPanelProps,
+  DatasourceMap,
+  FramePublicAPI,
+  VisualizationMap,
+} from '../../types';
+import {
+  useLensDispatch,
+  updateDatasourceState,
+  useLensSelector,
+  setState,
+  applyChanges,
+  selectExecutionContext,
+  selectActiveDatasourceId,
+  selectDatasourceStates,
+  selectVisualizationState,
+} from '../../state_management';
+import { initializeSources } from './state_helpers';
+import type { IndexPatternServiceAPI } from '../../data_views_service/service';
+import { changeIndexPattern } from '../../state_management/lens_slice';
+import { getInitialDataViewsObject } from '../../utils';
 
 interface DataPanelWrapperProps {
-  datasourceState: unknown;
-  datasourceMap: Record<string, Datasource>;
-  activeDatasource: string | null;
-  datasourceIsLoading: boolean;
-  dispatch: (action: Action) => void;
+  datasourceMap: DatasourceMap;
+  visualizationMap: VisualizationMap;
   showNoDataPopover: () => void;
   core: DatasourceDataPanelProps['core'];
-  query: Query;
-  dateRange: FramePublicAPI['dateRange'];
-  filters: Filter[];
   dropOntoWorkspace: (field: DragDropIdentifier) => void;
   hasSuggestionForField: (field: DragDropIdentifier) => boolean;
+  plugins: { uiActions: UiActionsStart; dataViews: DataViewsPublicPluginStart };
+  indexPatternService: IndexPatternServiceAPI;
+  frame: FramePublicAPI;
 }
 
 export const DataPanelWrapper = memo((props: DataPanelWrapperProps) => {
-  const { dispatch, activeDatasource } = props;
-  const setDatasourceState: StateSetter<unknown> = useMemo(
-    () => (updater) => {
-      dispatch({
-        type: 'UPDATE_DATASOURCE_STATE',
-        updater,
-        datasourceId: activeDatasource!,
-        clearStagedPreview: true,
+  const externalContext = useLensSelector(selectExecutionContext);
+  const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
+  const datasourceStates = useLensSelector(selectDatasourceStates);
+  const visualizationState = useLensSelector(selectVisualizationState);
+
+  const datasourceIsLoading = activeDatasourceId
+    ? datasourceStates[activeDatasourceId].isLoading
+    : true;
+
+  const dispatchLens = useLensDispatch();
+  const setDatasourceState: StateSetter<unknown, { applyImmediately?: boolean }> = useMemo(() => {
+    return (updater: unknown | ((prevState: unknown) => unknown), options) => {
+      dispatchLens(
+        updateDatasourceState({
+          updater,
+          datasourceId: activeDatasourceId!,
+          clearStagedPreview: true,
+        })
+      );
+      if (options?.applyImmediately) {
+        dispatchLens(applyChanges());
+      }
+    };
+  }, [activeDatasourceId, dispatchLens]);
+
+  useEffect(() => {
+    if (activeDatasourceId && datasourceStates[activeDatasourceId].state === null) {
+      initializeSources(
+        {
+          datasourceMap: props.datasourceMap,
+          visualizationMap: props.visualizationMap,
+          visualizationState,
+          datasourceStates,
+          dataViews: props.plugins.dataViews,
+          references: undefined,
+          initialContext: undefined,
+          storage: new Storage(localStorage),
+          defaultIndexPatternId: props.core.uiSettings.get('defaultIndex'),
+        },
+        {
+          isFullEditor: true,
+        }
+      ).then(
+        ({
+          datasourceStates: newDatasourceStates,
+          visualizationState: newVizState,
+          indexPatterns,
+          indexPatternRefs,
+        }) => {
+          dispatchLens(
+            setState({
+              visualization: { ...visualizationState, state: newVizState },
+              datasourceStates: Object.entries(newDatasourceStates).reduce(
+                (state, [datasourceId, datasourceState]) => ({
+                  ...state,
+                  [datasourceId]: {
+                    ...datasourceState,
+                    isLoading: false,
+                  },
+                }),
+                {}
+              ),
+              dataViews: getInitialDataViewsObject(indexPatterns, indexPatternRefs),
+            })
+          );
+        }
+      );
+    }
+  }, [
+    datasourceStates,
+    visualizationState,
+    activeDatasourceId,
+    props.datasourceMap,
+    props.visualizationMap,
+    dispatchLens,
+    props.plugins.dataViews,
+    props.core.uiSettings,
+  ]);
+
+  const onChangeIndexPattern = useCallback(
+    async (indexPatternId: string, datasourceId: string, layerId?: string) => {
+      // reload the indexpattern
+      const indexPatterns = await props.indexPatternService.ensureIndexPattern({
+        id: indexPatternId,
+        cache: props.frame.dataViews.indexPatterns,
       });
+      // now update the state
+      dispatchLens(
+        changeIndexPattern({
+          dataViews: { indexPatterns },
+          datasourceIds: [datasourceId],
+          indexPatternId,
+          layerId,
+        })
+      );
     },
-    [dispatch, activeDatasource]
+    [props.indexPatternService, props.frame.dataViews.indexPatterns, dispatchLens]
   );
 
   const datasourceProps: DatasourceDataPanelProps = {
+    ...externalContext,
     dragDropContext: useContext(DragContext),
-    state: props.datasourceState,
+    state: activeDatasourceId ? datasourceStates[activeDatasourceId].state : null,
     setState: setDatasourceState,
     core: props.core,
-    query: props.query,
-    dateRange: props.dateRange,
-    filters: props.filters,
     showNoDataPopover: props.showNoDataPopover,
     dropOntoWorkspace: props.dropOntoWorkspace,
     hasSuggestionForField: props.hasSuggestionForField,
+    uiActions: props.plugins.uiActions,
+    onChangeIndexPattern,
+    indexPatternService: props.indexPatternService,
+    frame: props.frame,
+    // Visualization can handle dataViews, so need to pass to the data panel the full list of used dataViews
+    usedIndexPatterns: [
+      ...((activeDatasourceId &&
+        props.datasourceMap[activeDatasourceId]?.getUsedDataViews(
+          datasourceStates[activeDatasourceId].state
+        )) ||
+        []),
+      ...((visualizationState.activeId &&
+        props.visualizationMap[visualizationState.activeId]?.getUsedDataViews?.(
+          visualizationState.state
+        )) ||
+        []),
+    ],
   };
-
-  const [showDatasourceSwitcher, setDatasourceSwitcher] = useState(false);
 
   return (
     <>
-      {Object.keys(props.datasourceMap).length > 1 && (
-        <EuiPopover
-          id="datasource-switch"
-          className="lnsDataPanelWrapper__switchSource"
-          button={
-            <EuiButtonIcon
-              aria-label={i18n.translate('xpack.lens.dataPanelWrapper.switchDatasource', {
-                defaultMessage: 'Switch to datasource',
-              })}
-              title={i18n.translate('xpack.lens.dataPanelWrapper.switchDatasource', {
-                defaultMessage: 'Switch to datasource',
-              })}
-              data-test-subj="datasource-switch"
-              onClick={() => setDatasourceSwitcher(true)}
-              iconType="gear"
-            />
-          }
-          isOpen={showDatasourceSwitcher}
-          closePopover={() => setDatasourceSwitcher(false)}
-          panelPaddingSize="none"
-          anchorPosition="rightUp"
-        >
-          <EuiContextMenuPanel
-            title={i18n.translate('xpack.lens.dataPanelWrapper.switchDatasource', {
-              defaultMessage: 'Switch to datasource',
-            })}
-            items={Object.keys(props.datasourceMap).map((datasourceId) => (
-              <EuiContextMenuItem
-                key={datasourceId}
-                data-test-subj={`datasource-switch-${datasourceId}`}
-                icon={props.activeDatasource === datasourceId ? 'check' : 'empty'}
-                onClick={() => {
-                  setDatasourceSwitcher(false);
-                  props.dispatch({
-                    type: 'SWITCH_DATASOURCE',
-                    newDatasourceId: datasourceId,
-                  });
-                }}
-              >
-                {datasourceId}
-              </EuiContextMenuItem>
-            ))}
-          />
-        </EuiPopover>
-      )}
-      {props.activeDatasource && !props.datasourceIsLoading && (
+      <Easteregg query={externalContext?.query} />
+      {activeDatasourceId && !datasourceIsLoading && (
         <NativeRenderer
           className="lnsDataPanelWrapper"
-          render={props.datasourceMap[props.activeDatasource].renderDataPanel}
+          render={props.datasourceMap[activeDatasourceId].renderDataPanel}
           nativeProps={datasourceProps}
         />
       )}

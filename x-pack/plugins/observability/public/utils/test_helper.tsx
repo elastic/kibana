@@ -6,45 +6,44 @@
  */
 
 import { render as testLibRender } from '@testing-library/react';
-import { AppMountParameters, CoreStart } from 'kibana/public';
+import { AppMountParameters } from '@kbn/core/public';
+
+import { coreMock } from '@kbn/core/public/mocks';
 import React from 'react';
-import { IntlProvider } from 'react-intl';
-import { of } from 'rxjs';
-import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
-import translations from '../../../translations/translations/ja-JP.json';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import translations from '@kbn/translations-plugin/translations/ja-JP.json';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { PluginContext } from '../context/plugin_context';
-import { ObservabilityPublicPluginsStart } from '../plugin';
-import { EuiThemeProvider } from '../../../../../src/plugins/kibana_react/common';
-import { createObservabilityRuleRegistryMock } from '../rules/observability_rule_registry_mock';
+import { createObservabilityRuleTypeRegistryMock } from '../rules/observability_rule_type_registry_mock';
+import { ConfigSchema } from '../plugin';
 
-const appMountParameters = ({ setHeaderActionMenu: () => {} } as unknown) as AppMountParameters;
+const appMountParameters = { setHeaderActionMenu: () => {} } as unknown as AppMountParameters;
 
-export const core = ({
-  http: {
-    basePath: {
-      prepend: jest.fn(),
-    },
+export const core = coreMock.createStart();
+export const data = dataPluginMock.createStartContract();
+
+const observabilityRuleTypeRegistry = createObservabilityRuleTypeRegistryMock();
+
+const defaultConfig = {
+  unsafe: {
+    alertDetails: { enabled: false },
   },
-  uiSettings: {
-    get: (key: string) => true,
-    get$: (key: string) => of(true),
-  },
-} as unknown) as CoreStart;
+} as ConfigSchema;
 
-const config = { unsafe: { alertingExperience: { enabled: true } } };
-
-const plugins = ({
-  data: { query: { timefilter: { timefilter: { setTime: jest.fn() } } } },
-} as unknown) as ObservabilityPublicPluginsStart;
-
-const observabilityRuleRegistry = createObservabilityRuleRegistryMock();
-
-export const render = (component: React.ReactNode) => {
+export const render = (component: React.ReactNode, config: ConfigSchema = defaultConfig) => {
   return testLibRender(
     <IntlProvider locale="en-US" messages={translations.messages}>
-      <KibanaContextProvider services={{ ...core }}>
+      <KibanaContextProvider services={{ ...core, data }}>
         <PluginContext.Provider
-          value={{ appMountParameters, config, core, plugins, observabilityRuleRegistry }}
+          value={{
+            appMountParameters,
+            config,
+            observabilityRuleTypeRegistry,
+            ObservabilityPageTemplate: KibanaPageTemplate,
+          }}
         >
           <EuiThemeProvider>{component}</EuiThemeProvider>
         </PluginContext.Provider>

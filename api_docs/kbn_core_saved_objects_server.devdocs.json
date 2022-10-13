@@ -1,0 +1,4314 @@
+{
+  "id": "@kbn/core-saved-objects-server",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.ISavedObjectsExporter",
+        "type": "Interface",
+        "tags": [],
+        "label": "ISavedObjectsExporter",
+        "description": [
+          "\nUtility class used to export savedObjects.\n"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.ISavedObjectsExporter.exportByTypes",
+            "type": "Function",
+            "tags": [
+              "throws"
+            ],
+            "label": "exportByTypes",
+            "description": [
+              "\nGenerates an export stream for given types.\n\nSee the {@link SavedObjectsExportByTypeOptions | options} for more detailed information.\n"
+            ],
+            "signature": [
+              "(options: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsExportByTypeOptions",
+                "text": "SavedObjectsExportByTypeOptions"
+              },
+              ") => Promise<",
+              "Readable",
+              ">"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.ISavedObjectsExporter.exportByTypes.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                    "section": "def-server.SavedObjectsExportByTypeOptions",
+                    "text": "SavedObjectsExportByTypeOptions"
+                  }
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.ISavedObjectsExporter.exportByObjects",
+            "type": "Function",
+            "tags": [
+              "throws"
+            ],
+            "label": "exportByObjects",
+            "description": [
+              "\nGenerates an export stream for given object references.\n\nSee the {@link SavedObjectsExportByObjectOptions | options} for more detailed information.\n"
+            ],
+            "signature": [
+              "(options: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsExportByObjectOptions",
+                "text": "SavedObjectsExportByObjectOptions"
+              },
+              ") => Promise<",
+              "Readable",
+              ">"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.ISavedObjectsExporter.exportByObjects.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                    "section": "def-server.SavedObjectsExportByObjectOptions",
+                    "text": "SavedObjectsExportByObjectOptions"
+                  }
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.ISavedObjectsImporter",
+        "type": "Interface",
+        "tags": [],
+        "label": "ISavedObjectsImporter",
+        "description": [
+          "\nUtility class used to import savedObjects.\n"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/import.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.ISavedObjectsImporter.import",
+            "type": "Function",
+            "tags": [
+              "throws"
+            ],
+            "label": "import",
+            "description": [
+              "\nImport saved objects from given stream. See the {@link SavedObjectsImportOptions | options} for more\ndetailed information.\n"
+            ],
+            "signature": [
+              "(options: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsImportOptions",
+                "text": "SavedObjectsImportOptions"
+              },
+              ") => Promise<",
+              "SavedObjectsImportResponse",
+              ">"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/import.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.ISavedObjectsImporter.import.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                    "section": "def-server.SavedObjectsImportOptions",
+                    "text": "SavedObjectsImportOptions"
+                  }
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/import.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.ISavedObjectsImporter.resolveImportErrors",
+            "type": "Function",
+            "tags": [
+              "throws"
+            ],
+            "label": "resolveImportErrors",
+            "description": [
+              "\nResolve and return saved object import errors.\nSee the {@link SavedObjectsResolveImportErrorsOptions | options} for more detailed information.\n"
+            ],
+            "signature": [
+              "(options: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsResolveImportErrorsOptions",
+                "text": "SavedObjectsResolveImportErrorsOptions"
+              },
+              ") => Promise<",
+              "SavedObjectsImportResponse",
+              ">"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/import.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.ISavedObjectsImporter.resolveImportErrors.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                    "section": "def-server.SavedObjectsResolveImportErrorsOptions",
+                    "text": "SavedObjectsResolveImportErrorsOptions"
+                  }
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/import.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.ISavedObjectsSerializer",
+        "type": "Interface",
+        "tags": [],
+        "label": "ISavedObjectsSerializer",
+        "description": [
+          "\nA serializer that can be used to manually convert {@link SavedObjectsRawDoc | raw} or\n{@link SavedObjectSanitizedDoc | sanitized} documents to the other kind.\n"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.ISavedObjectsSerializer.isRawSavedObject",
+            "type": "Function",
+            "tags": [],
+            "label": "isRawSavedObject",
+            "description": [
+              "\nDetermines whether the raw document can be converted to a saved object.\n"
+            ],
+            "signature": [
+              "(doc: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsRawDoc",
+                "text": "SavedObjectsRawDoc"
+              },
+              ", options?: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsRawDocParseOptions",
+                "text": "SavedObjectsRawDocParseOptions"
+              },
+              " | undefined) => boolean"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.ISavedObjectsSerializer.isRawSavedObject.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "doc",
+                "description": [
+                  "- The raw ES document to be tested"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                    "section": "def-server.SavedObjectsRawDoc",
+                    "text": "SavedObjectsRawDoc"
+                  }
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.ISavedObjectsSerializer.isRawSavedObject.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [
+                  "- Options for parsing the raw document."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                    "section": "def-server.SavedObjectsRawDocParseOptions",
+                    "text": "SavedObjectsRawDocParseOptions"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.ISavedObjectsSerializer.rawToSavedObject",
+            "type": "Function",
+            "tags": [],
+            "label": "rawToSavedObject",
+            "description": [
+              "\nConverts a document from the format that is stored in elasticsearch to the saved object client format.\n"
+            ],
+            "signature": [
+              "<T = unknown>(doc: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsRawDoc",
+                "text": "SavedObjectsRawDoc"
+              },
+              ", options?: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsRawDocParseOptions",
+                "text": "SavedObjectsRawDocParseOptions"
+              },
+              " | undefined) => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectSanitizedDoc",
+                "text": "SavedObjectSanitizedDoc"
+              },
+              "<T>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.ISavedObjectsSerializer.rawToSavedObject.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "doc",
+                "description": [
+                  "- The raw ES document to be converted to saved object format."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                    "section": "def-server.SavedObjectsRawDoc",
+                    "text": "SavedObjectsRawDoc"
+                  }
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.ISavedObjectsSerializer.rawToSavedObject.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [
+                  "- Options for parsing the raw document."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                    "section": "def-server.SavedObjectsRawDocParseOptions",
+                    "text": "SavedObjectsRawDocParseOptions"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.ISavedObjectsSerializer.savedObjectToRaw",
+            "type": "Function",
+            "tags": [],
+            "label": "savedObjectToRaw",
+            "description": [
+              "\nConverts a document from the saved object client format to the format that is stored in elasticsearch.\n"
+            ],
+            "signature": [
+              "(savedObj: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectSanitizedDoc",
+                "text": "SavedObjectSanitizedDoc"
+              },
+              "<unknown>) => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsRawDoc",
+                "text": "SavedObjectsRawDoc"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.ISavedObjectsSerializer.savedObjectToRaw.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "savedObj",
+                "description": [
+                  "- The saved object to be converted to raw ES format."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                    "section": "def-server.SavedObjectSanitizedDoc",
+                    "text": "SavedObjectSanitizedDoc"
+                  },
+                  "<unknown>"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.ISavedObjectsSerializer.generateRawId",
+            "type": "Function",
+            "tags": [],
+            "label": "generateRawId",
+            "description": [
+              "\nGiven a saved object type and id, generates the compound id that is stored in the raw document.\n"
+            ],
+            "signature": [
+              "(namespace: string | undefined, type: string, id: string) => string"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.ISavedObjectsSerializer.generateRawId.$1",
+                "type": "string",
+                "tags": [],
+                "label": "namespace",
+                "description": [
+                  "- The namespace of the saved object"
+                ],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.ISavedObjectsSerializer.generateRawId.$2",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [
+                  "- The saved object type"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.ISavedObjectsSerializer.generateRawId.$3",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [
+                  "- The id of the saved object"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.ISavedObjectsSerializer.generateRawLegacyUrlAliasId",
+            "type": "Function",
+            "tags": [],
+            "label": "generateRawLegacyUrlAliasId",
+            "description": [
+              "\nGiven a saved object type and id, generates the compound id that is stored in the raw document for its legacy URL alias.\n"
+            ],
+            "signature": [
+              "(namespace: string | undefined, type: string, id: string) => string"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.ISavedObjectsSerializer.generateRawLegacyUrlAliasId.$1",
+                "type": "string",
+                "tags": [],
+                "label": "namespace",
+                "description": [
+                  "- The namespace of the saved object"
+                ],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.ISavedObjectsSerializer.generateRawLegacyUrlAliasId.$2",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [
+                  "- The saved object type"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.ISavedObjectsSerializer.generateRawLegacyUrlAliasId.$3",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [
+                  "- The id of the saved object"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.ISavedObjectTypeRegistry",
+        "type": "Interface",
+        "tags": [],
+        "label": "ISavedObjectTypeRegistry",
+        "description": [
+          "\nRegistry holding information about all the registered {@link SavedObjectsType | saved object types}."
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/type_registry.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.ISavedObjectTypeRegistry.getType",
+            "type": "Function",
+            "tags": [],
+            "label": "getType",
+            "description": [
+              "\nReturn the {@link SavedObjectsType | type} definition for given type name."
+            ],
+            "signature": [
+              "(type: string) => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsType",
+                "text": "SavedObjectsType"
+              },
+              "<any> | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/type_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.ISavedObjectTypeRegistry.getType.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/type_registry.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.ISavedObjectTypeRegistry.getVisibleTypes",
+            "type": "Function",
+            "tags": [],
+            "label": "getVisibleTypes",
+            "description": [
+              "\nReturns all visible {@link SavedObjectsType | types}.\n\nA visible type is a type that doesn't explicitly define `hidden=true` during registration."
+            ],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsType",
+                "text": "SavedObjectsType"
+              },
+              "<any>[]"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/type_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.ISavedObjectTypeRegistry.getAllTypes",
+            "type": "Function",
+            "tags": [],
+            "label": "getAllTypes",
+            "description": [
+              "\nReturn all {@link SavedObjectsType | types} currently registered, including the hidden ones.\n\nTo only get the visible types (which is the most common use case), use `getVisibleTypes` instead."
+            ],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsType",
+                "text": "SavedObjectsType"
+              },
+              "<any>[]"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/type_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.ISavedObjectTypeRegistry.getImportableAndExportableTypes",
+            "type": "Function",
+            "tags": [],
+            "label": "getImportableAndExportableTypes",
+            "description": [
+              "\nReturn all {@link SavedObjectsType | types} currently registered that are importable/exportable."
+            ],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsType",
+                "text": "SavedObjectsType"
+              },
+              "<any>[]"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/type_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.ISavedObjectTypeRegistry.isNamespaceAgnostic",
+            "type": "Function",
+            "tags": [],
+            "label": "isNamespaceAgnostic",
+            "description": [
+              "\nReturns whether the type is namespace-agnostic (global);\nresolves to `false` if the type is not registered"
+            ],
+            "signature": [
+              "(type: string) => boolean"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/type_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.ISavedObjectTypeRegistry.isNamespaceAgnostic.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/type_registry.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.ISavedObjectTypeRegistry.isSingleNamespace",
+            "type": "Function",
+            "tags": [],
+            "label": "isSingleNamespace",
+            "description": [
+              "\nReturns whether the type is single-namespace (isolated);\nresolves to `true` if the type is not registered"
+            ],
+            "signature": [
+              "(type: string) => boolean"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/type_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.ISavedObjectTypeRegistry.isSingleNamespace.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/type_registry.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.ISavedObjectTypeRegistry.isMultiNamespace",
+            "type": "Function",
+            "tags": [],
+            "label": "isMultiNamespace",
+            "description": [
+              "\nReturns whether the type is multi-namespace (shareable *or* isolated);\nresolves to `false` if the type is not registered"
+            ],
+            "signature": [
+              "(type: string) => boolean"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/type_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.ISavedObjectTypeRegistry.isMultiNamespace.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/type_registry.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.ISavedObjectTypeRegistry.isShareable",
+            "type": "Function",
+            "tags": [],
+            "label": "isShareable",
+            "description": [
+              "\nReturns whether the type is multi-namespace (shareable);\nresolves to `false` if the type is not registered"
+            ],
+            "signature": [
+              "(type: string) => boolean"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/type_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.ISavedObjectTypeRegistry.isShareable.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/type_registry.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.ISavedObjectTypeRegistry.isHidden",
+            "type": "Function",
+            "tags": [],
+            "label": "isHidden",
+            "description": [
+              "\nReturns the `hidden` property for given type, or `false` if\nthe type is not registered."
+            ],
+            "signature": [
+              "(type: string) => boolean"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/type_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.ISavedObjectTypeRegistry.isHidden.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/type_registry.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.ISavedObjectTypeRegistry.getIndex",
+            "type": "Function",
+            "tags": [],
+            "label": "getIndex",
+            "description": [
+              "\nReturns the `indexPattern` property for given type, or `undefined` if\nthe type is not registered."
+            ],
+            "signature": [
+              "(type: string) => string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/type_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.ISavedObjectTypeRegistry.getIndex.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/type_registry.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.ISavedObjectTypeRegistry.isImportableAndExportable",
+            "type": "Function",
+            "tags": [],
+            "label": "isImportableAndExportable",
+            "description": [
+              "\nReturns the `management.importableAndExportable` property for given type, or\n`false` if the type is not registered or does not define a management section."
+            ],
+            "signature": [
+              "(type: string) => boolean"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/type_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.ISavedObjectTypeRegistry.isImportableAndExportable.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/type_registry.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.SavedObjectExportBaseOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectExportBaseOptions",
+        "description": [],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectExportBaseOptions.request",
+            "type": "Object",
+            "tags": [],
+            "label": "request",
+            "description": [
+              "The http request initiating the export."
+            ],
+            "signature": [
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectExportBaseOptions.includeReferencesDeep",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "includeReferencesDeep",
+            "description": [
+              "flag to also include all related saved objects in the export stream."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectExportBaseOptions.includeNamespaces",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "includeNamespaces",
+            "description": [
+              "\nFlag to also include namespace information in the export stream. By default, namespace information is not included in exported objects.\nThis is only intended to be used internally during copy-to-space operations, and it is not exposed as an option for the external HTTP\nroute for exports."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectExportBaseOptions.excludeExportDetails",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "excludeExportDetails",
+            "description": [
+              "flag to not append {@link SavedObjectsExportResultDetails | export details} to the end of the export stream."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectExportBaseOptions.namespace",
+            "type": "string",
+            "tags": [],
+            "label": "namespace",
+            "description": [
+              "optional namespace to override the namespace used by the savedObjectsClient."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.SavedObjectMigrationContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectMigrationContext",
+        "description": [
+          "\nMigration context provided when invoking a {@link SavedObjectMigrationFn | migration handler}\n"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectMigrationContext.log",
+            "type": "Object",
+            "tags": [],
+            "label": "log",
+            "description": [
+              "\nlogger instance to be used by the migration handler"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsMigrationLogger",
+                "text": "SavedObjectsMigrationLogger"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectMigrationContext.migrationVersion",
+            "type": "string",
+            "tags": [],
+            "label": "migrationVersion",
+            "description": [
+              "\nThe migration version that this migration function is defined for"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectMigrationContext.convertToMultiNamespaceTypeVersion",
+            "type": "string",
+            "tags": [],
+            "label": "convertToMultiNamespaceTypeVersion",
+            "description": [
+              "\nThe version in which this object type is being converted to a multi-namespace type"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectMigrationContext.isSingleNamespaceType",
+            "type": "boolean",
+            "tags": [],
+            "label": "isSingleNamespaceType",
+            "description": [
+              "\nWhether this is a single-namespace type or not"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.SavedObjectMigrationMap",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectMigrationMap",
+        "description": [
+          "\nA map of {@link SavedObjectMigrationFn | migration functions} to be used for a given type.\nThe map's keys must be valid semver versions, and they cannot exceed the current Kibana version.\n\nFor a given document, only migrations with a higher version number than that of the document will be applied.\nMigrations are executed in order, starting from the lowest version and ending with the highest one.\n"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectMigrationMap.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[version: string]: SavedObjectMigrationFn<any, any>",
+            "description": [],
+            "signature": [
+              "[version: string]:  ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectMigrationFn",
+                "text": "SavedObjectMigrationFn"
+              },
+              "<any, any>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.SavedObjectsClientProviderOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsClientProviderOptions",
+        "description": [
+          "\nOptions to control the creation of the Saved Objects Client."
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/client_factory.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsClientProviderOptions.excludedWrappers",
+            "type": "Array",
+            "tags": [],
+            "label": "excludedWrappers",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/client_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsClientProviderOptions.includedHiddenTypes",
+            "type": "Array",
+            "tags": [],
+            "label": "includedHiddenTypes",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/client_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.SavedObjectsClientWrapperOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsClientWrapperOptions",
+        "description": [
+          "\nOptions passed to each SavedObjectsClientWrapperFactory to aid in creating the wrapper instance."
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/client_factory.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsClientWrapperOptions.client",
+            "type": "Object",
+            "tags": [],
+            "label": "client",
+            "description": [],
+            "signature": [
+              "SavedObjectsClientContract"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/client_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsClientWrapperOptions.typeRegistry",
+            "type": "Object",
+            "tags": [],
+            "label": "typeRegistry",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.ISavedObjectTypeRegistry",
+                "text": "ISavedObjectTypeRegistry"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/client_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsClientWrapperOptions.request",
+            "type": "Object",
+            "tags": [],
+            "label": "request",
+            "description": [],
+            "signature": [
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/client_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.SavedObjectsExportByObjectOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsExportByObjectOptions",
+        "description": [
+          "\nOptions for the {@link ISavedObjectsExporter.exportByObjects | export by objects API}\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-server.SavedObjectsExportByObjectOptions",
+            "text": "SavedObjectsExportByObjectOptions"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-server.SavedObjectExportBaseOptions",
+            "text": "SavedObjectExportBaseOptions"
+          }
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsExportByObjectOptions.objects",
+            "type": "Array",
+            "tags": [],
+            "label": "objects",
+            "description": [
+              "optional array of objects to export."
+            ],
+            "signature": [
+              "SavedObjectTypeIdTuple",
+              "[]"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.SavedObjectsExportByTypeOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsExportByTypeOptions",
+        "description": [
+          "\nOptions for the {@link ISavedObjectsExporter.exportByTypes | export by type API}\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-server.SavedObjectsExportByTypeOptions",
+            "text": "SavedObjectsExportByTypeOptions"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-server.SavedObjectExportBaseOptions",
+            "text": "SavedObjectExportBaseOptions"
+          }
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsExportByTypeOptions.types",
+            "type": "Array",
+            "tags": [],
+            "label": "types",
+            "description": [
+              "array of saved object types."
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsExportByTypeOptions.hasReference",
+            "type": "Array",
+            "tags": [],
+            "label": "hasReference",
+            "description": [
+              "optional array of references to search object for."
+            ],
+            "signature": [
+              "SavedObjectsFindOptionsReference",
+              "[] | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsExportByTypeOptions.search",
+            "type": "string",
+            "tags": [],
+            "label": "search",
+            "description": [
+              "optional query string to filter exported objects."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.SavedObjectsExportExcludedObject",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsExportExcludedObject",
+        "description": [],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsExportExcludedObject.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "id of the excluded object"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsExportExcludedObject.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "type of the excluded object"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsExportExcludedObject.reason",
+            "type": "string",
+            "tags": [],
+            "label": "reason",
+            "description": [
+              "optional cause of the exclusion"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.SavedObjectsExportResultDetails",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsExportResultDetails",
+        "description": [
+          "\nStructure of the export result details entry"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsExportResultDetails.exportedCount",
+            "type": "number",
+            "tags": [],
+            "label": "exportedCount",
+            "description": [
+              "number of successfully exported objects"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsExportResultDetails.missingRefCount",
+            "type": "number",
+            "tags": [],
+            "label": "missingRefCount",
+            "description": [
+              "number of missing references"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsExportResultDetails.missingReferences",
+            "type": "Array",
+            "tags": [],
+            "label": "missingReferences",
+            "description": [
+              "missing references details"
+            ],
+            "signature": [
+              "SavedObjectTypeIdTuple",
+              "[]"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsExportResultDetails.excludedObjectsCount",
+            "type": "number",
+            "tags": [],
+            "label": "excludedObjectsCount",
+            "description": [
+              "number of objects that were excluded from the export"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsExportResultDetails.excludedObjects",
+            "type": "Array",
+            "tags": [],
+            "label": "excludedObjects",
+            "description": [
+              "excluded objects details"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsExportExcludedObject",
+                "text": "SavedObjectsExportExcludedObject"
+              },
+              "[]"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.SavedObjectsExportTransformContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsExportTransformContext",
+        "description": [
+          "\nContext passed down to a {@link SavedObjectsExportTransform | export transform function}\n"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsExportTransformContext.request",
+            "type": "Object",
+            "tags": [],
+            "label": "request",
+            "description": [
+              "\nThe request that initiated the export request. Can be used to create scoped\nservices or client inside the {@link SavedObjectsExportTransform | transformation}"
+            ],
+            "signature": [
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.SavedObjectsImportHookResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsImportHookResult",
+        "description": [
+          "\nResult from a {@link SavedObjectsImportHook | import hook}\n"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/import.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsImportHookResult.warnings",
+            "type": "Array",
+            "tags": [],
+            "label": "warnings",
+            "description": [
+              "\nAn optional list of warnings to display in the UI when the import succeeds."
+            ],
+            "signature": [
+              "SavedObjectsImportWarning",
+              "[] | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/import.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.SavedObjectsImportOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsImportOptions",
+        "description": [
+          "\nOptions to control the import operation."
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/import.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsImportOptions.readStream",
+            "type": "Object",
+            "tags": [],
+            "label": "readStream",
+            "description": [
+              "The stream of {@link SavedObject | saved objects} to import"
+            ],
+            "signature": [
+              "Readable"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/import.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsImportOptions.overwrite",
+            "type": "boolean",
+            "tags": [],
+            "label": "overwrite",
+            "description": [
+              "If true, will override existing object if present. Note: this has no effect when used with the `createNewCopies` option."
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/import.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsImportOptions.namespace",
+            "type": "string",
+            "tags": [],
+            "label": "namespace",
+            "description": [
+              "if specified, will import in given namespace, else will import as global object"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/import.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsImportOptions.createNewCopies",
+            "type": "boolean",
+            "tags": [],
+            "label": "createNewCopies",
+            "description": [
+              "If true, will create new copies of import objects, each with a random `id` and undefined `originId`."
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/import.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsImportOptions.refresh",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "refresh",
+            "description": [
+              "Refresh setting, defaults to `wait_for`"
+            ],
+            "signature": [
+              "boolean | \"wait_for\" | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/import.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.SavedObjectsMappingProperties",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsMappingProperties",
+        "description": [
+          "\nDescribe the fields of a {@link SavedObjectsTypeMappingDefinition | saved object type}.\n"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/mapping_definition.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsMappingProperties.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[field: string]: SavedObjectsFieldMapping",
+            "description": [],
+            "signature": [
+              "[field: string]:  ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsFieldMapping",
+                "text": "SavedObjectsFieldMapping"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/mapping_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.SavedObjectsMigrationLogger",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsMigrationLogger",
+        "description": [],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsMigrationLogger.debug",
+            "type": "Function",
+            "tags": [],
+            "label": "debug",
+            "description": [],
+            "signature": [
+              "(msg: string) => void"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.SavedObjectsMigrationLogger.debug.$1",
+                "type": "string",
+                "tags": [],
+                "label": "msg",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsMigrationLogger.info",
+            "type": "Function",
+            "tags": [],
+            "label": "info",
+            "description": [],
+            "signature": [
+              "(msg: string) => void"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.SavedObjectsMigrationLogger.info.$1",
+                "type": "string",
+                "tags": [],
+                "label": "msg",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsMigrationLogger.warning",
+            "type": "Function",
+            "tags": [
+              "deprecated"
+            ],
+            "label": "warning",
+            "description": [],
+            "signature": [
+              "(msg: string) => void"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
+            "deprecated": true,
+            "removeBy": "8.8.0",
+            "trackAdoption": false,
+            "references": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.SavedObjectsMigrationLogger.warning.$1",
+                "type": "string",
+                "tags": [],
+                "label": "msg",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsMigrationLogger.warn",
+            "type": "Function",
+            "tags": [],
+            "label": "warn",
+            "description": [],
+            "signature": [
+              "(msg: string) => void"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.SavedObjectsMigrationLogger.warn.$1",
+                "type": "string",
+                "tags": [],
+                "label": "msg",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsMigrationLogger.error",
+            "type": "Function",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "<Meta extends ",
+              "LogMeta",
+              " = ",
+              "LogMeta",
+              ">(msg: string, meta: Meta) => void"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.SavedObjectsMigrationLogger.error.$1",
+                "type": "string",
+                "tags": [],
+                "label": "msg",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.SavedObjectsMigrationLogger.error.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "meta",
+                "description": [],
+                "signature": [
+                  "Meta"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.SavedObjectsRawDoc",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsRawDoc",
+        "description": [
+          "\nA raw document as represented directly in the saved object index.\n"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsRawDoc._id",
+            "type": "string",
+            "tags": [],
+            "label": "_id",
+            "description": [],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsRawDoc._source",
+            "type": "Object",
+            "tags": [],
+            "label": "_source",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsRawDocSource",
+                "text": "SavedObjectsRawDocSource"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsRawDoc._seq_no",
+            "type": "number",
+            "tags": [],
+            "label": "_seq_no",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsRawDoc._primary_term",
+            "type": "number",
+            "tags": [],
+            "label": "_primary_term",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.SavedObjectsRawDocParseOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsRawDocParseOptions",
+        "description": [
+          "\nOptions that can be specified when using the saved objects serializer to parse a raw document.\n"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsRawDocParseOptions.namespaceTreatment",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "namespaceTreatment",
+            "description": [
+              "\nOptional setting to allow for lax handling of the raw document ID and namespace field. This is needed when a previously\nsingle-namespace object type is converted to a multi-namespace object type, and it is only intended to be used during upgrade\nmigrations.\n\nIf not specified, the default treatment is `strict`."
+            ],
+            "signature": [
+              "\"strict\" | \"lax\" | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.SavedObjectsRawDocSource",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsRawDocSource",
+        "description": [],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsRawDocSource.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsRawDocSource.namespace",
+            "type": "string",
+            "tags": [],
+            "label": "namespace",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsRawDocSource.namespaces",
+            "type": "Array",
+            "tags": [],
+            "label": "namespaces",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsRawDocSource.migrationVersion",
+            "type": "Object",
+            "tags": [],
+            "label": "migrationVersion",
+            "description": [],
+            "signature": [
+              "SavedObjectsMigrationVersion",
+              " | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsRawDocSource.updated_at",
+            "type": "string",
+            "tags": [],
+            "label": "updated_at",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsRawDocSource.references",
+            "type": "Array",
+            "tags": [],
+            "label": "references",
+            "description": [],
+            "signature": [
+              "SavedObjectReference",
+              "[] | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsRawDocSource.originId",
+            "type": "string",
+            "tags": [],
+            "label": "originId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsRawDocSource.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[typeMapping: string]: any",
+            "description": [],
+            "signature": [
+              "[typeMapping: string]:  any"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.SavedObjectsRepositoryFactory",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsRepositoryFactory",
+        "description": [
+          "\nFactory provided when invoking a {@link SavedObjectsClientFactoryProvider | client factory provider}\nSee {@link SavedObjectsServiceSetup.setClientFactoryProvider}\n"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/client_factory.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsRepositoryFactory.createScopedRepository",
+            "type": "Function",
+            "tags": [],
+            "label": "createScopedRepository",
+            "description": [
+              "\nCreates a {@link ISavedObjectsRepository | Saved Objects repository} that\nuses the credentials from the passed in request to authenticate with\nElasticsearch.\n"
+            ],
+            "signature": [
+              "(req: ",
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>, includedHiddenTypes?: string[] | undefined) => ",
+              "ISavedObjectsRepository"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/client_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.SavedObjectsRepositoryFactory.createScopedRepository.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "req",
+                "description": [],
+                "signature": [
+                  "KibanaRequest",
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/client_factory.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.SavedObjectsRepositoryFactory.createScopedRepository.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "includedHiddenTypes",
+                "description": [
+                  "- A list of additional hidden types the repository should have access to."
+                ],
+                "signature": [
+                  "string[] | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/client_factory.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsRepositoryFactory.createInternalRepository",
+            "type": "Function",
+            "tags": [],
+            "label": "createInternalRepository",
+            "description": [
+              "\nCreates a {@link ISavedObjectsRepository | Saved Objects repository} that\nuses the internal Kibana user for authenticating with Elasticsearch.\n"
+            ],
+            "signature": [
+              "(includedHiddenTypes?: string[] | undefined) => ",
+              "ISavedObjectsRepository"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/client_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.SavedObjectsRepositoryFactory.createInternalRepository.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "includedHiddenTypes",
+                "description": [
+                  "- A list of additional hidden types the repository should have access to."
+                ],
+                "signature": [
+                  "string[] | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/client_factory.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.SavedObjectsRequestHandlerContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsRequestHandlerContext",
+        "description": [
+          "\nCore's `savedObjects` request handler context."
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/request_handler_context.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsRequestHandlerContext.client",
+            "type": "Object",
+            "tags": [],
+            "label": "client",
+            "description": [],
+            "signature": [
+              "SavedObjectsClientContract"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/request_handler_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsRequestHandlerContext.typeRegistry",
+            "type": "Object",
+            "tags": [],
+            "label": "typeRegistry",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.ISavedObjectTypeRegistry",
+                "text": "ISavedObjectTypeRegistry"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/request_handler_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsRequestHandlerContext.getClient",
+            "type": "Function",
+            "tags": [],
+            "label": "getClient",
+            "description": [],
+            "signature": [
+              "(options?: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsClientProviderOptions",
+                "text": "SavedObjectsClientProviderOptions"
+              },
+              " | undefined) => ",
+              "SavedObjectsClientContract"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/request_handler_context.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.SavedObjectsRequestHandlerContext.getClient.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                    "section": "def-server.SavedObjectsClientProviderOptions",
+                    "text": "SavedObjectsClientProviderOptions"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/request_handler_context.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsRequestHandlerContext.getExporter",
+            "type": "Function",
+            "tags": [],
+            "label": "getExporter",
+            "description": [],
+            "signature": [
+              "(client: ",
+              "SavedObjectsClientContract",
+              ") => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.ISavedObjectsExporter",
+                "text": "ISavedObjectsExporter"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/request_handler_context.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.SavedObjectsRequestHandlerContext.getExporter.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "client",
+                "description": [],
+                "signature": [
+                  "SavedObjectsClientContract"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/request_handler_context.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsRequestHandlerContext.getImporter",
+            "type": "Function",
+            "tags": [],
+            "label": "getImporter",
+            "description": [],
+            "signature": [
+              "(client: ",
+              "SavedObjectsClientContract",
+              ") => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.ISavedObjectsImporter",
+                "text": "ISavedObjectsImporter"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/request_handler_context.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.SavedObjectsRequestHandlerContext.getImporter.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "client",
+                "description": [],
+                "signature": [
+                  "SavedObjectsClientContract"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/request_handler_context.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.SavedObjectsResolveImportErrorsOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsResolveImportErrorsOptions",
+        "description": [
+          "\nOptions to control the \"resolve import\" operation."
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/import.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsResolveImportErrorsOptions.readStream",
+            "type": "Object",
+            "tags": [],
+            "label": "readStream",
+            "description": [
+              "The stream of {@link SavedObject | saved objects} to resolve errors from"
+            ],
+            "signature": [
+              "Readable"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/import.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsResolveImportErrorsOptions.retries",
+            "type": "Array",
+            "tags": [],
+            "label": "retries",
+            "description": [
+              "saved object import references to retry"
+            ],
+            "signature": [
+              "SavedObjectsImportRetry",
+              "[]"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/import.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsResolveImportErrorsOptions.namespace",
+            "type": "string",
+            "tags": [],
+            "label": "namespace",
+            "description": [
+              "if specified, will import in given namespace"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/import.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsResolveImportErrorsOptions.createNewCopies",
+            "type": "boolean",
+            "tags": [],
+            "label": "createNewCopies",
+            "description": [
+              "If true, will create new copies of import objects, each with a random `id` and undefined `originId`."
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/import.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.SavedObjectsServiceSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsServiceSetup",
+        "description": [
+          "\nSaved Objects is Kibana's data persistence mechanism allowing plugins to\nuse Elasticsearch for storing and querying state. The SavedObjectsServiceSetup API exposes methods\nfor registering Saved Object types, creating and registering Saved Object client wrappers and factories.\n"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsServiceSetup.setClientFactoryProvider",
+            "type": "Function",
+            "tags": [],
+            "label": "setClientFactoryProvider",
+            "description": [
+              "\nSet the default {@link SavedObjectsClientFactoryProvider | factory provider} for creating Saved Objects clients.\nOnly one provider can be set, subsequent calls to this method will fail."
+            ],
+            "signature": [
+              "(clientFactoryProvider: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsClientFactoryProvider",
+                "text": "SavedObjectsClientFactoryProvider"
+              },
+              ") => void"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.SavedObjectsServiceSetup.setClientFactoryProvider.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "clientFactoryProvider",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                    "section": "def-server.SavedObjectsClientFactoryProvider",
+                    "text": "SavedObjectsClientFactoryProvider"
+                  }
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsServiceSetup.addClientWrapper",
+            "type": "Function",
+            "tags": [],
+            "label": "addClientWrapper",
+            "description": [
+              "\nAdd a {@link SavedObjectsClientWrapperFactory | client wrapper factory} with the given priority."
+            ],
+            "signature": [
+              "(priority: number, id: string, factory: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsClientWrapperFactory",
+                "text": "SavedObjectsClientWrapperFactory"
+              },
+              ") => void"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.SavedObjectsServiceSetup.addClientWrapper.$1",
+                "type": "number",
+                "tags": [],
+                "label": "priority",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.SavedObjectsServiceSetup.addClientWrapper.$2",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.SavedObjectsServiceSetup.addClientWrapper.$3",
+                "type": "Function",
+                "tags": [],
+                "label": "factory",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                    "section": "def-server.SavedObjectsClientWrapperFactory",
+                    "text": "SavedObjectsClientWrapperFactory"
+                  }
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsServiceSetup.registerType",
+            "type": "Function",
+            "tags": [],
+            "label": "registerType",
+            "description": [
+              "\nRegister a {@link SavedObjectsType | savedObjects type} definition.\n\nSee the {@link SavedObjectsTypeMappingDefinition | mappings format} and\n{@link SavedObjectMigrationMap | migration format} for more details about these.\n"
+            ],
+            "signature": [
+              "<Attributes = unknown>(type: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsType",
+                "text": "SavedObjectsType"
+              },
+              "<Attributes>) => void"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.SavedObjectsServiceSetup.registerType.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                    "section": "def-server.SavedObjectsType",
+                    "text": "SavedObjectsType"
+                  },
+                  "<Attributes>"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsServiceSetup.getKibanaIndex",
+            "type": "Function",
+            "tags": [],
+            "label": "getKibanaIndex",
+            "description": [
+              "\nReturns the default index used for saved objects."
+            ],
+            "signature": [
+              "() => string"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.SavedObjectsServiceStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsServiceStart",
+        "description": [
+          "\nSaved Objects is Kibana's data persistence mechanism allowing plugins to\nuse Elasticsearch for storing and querying state. The\nSavedObjectsServiceStart API provides a scoped Saved Objects client for\ninteracting with Saved Objects.\n"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsServiceStart.getScopedClient",
+            "type": "Function",
+            "tags": [],
+            "label": "getScopedClient",
+            "description": [
+              "\nCreates a {@link SavedObjectsClientContract | Saved Objects client} that\nuses the credentials from the passed in request to authenticate with\nElasticsearch. If other plugins have registered Saved Objects client\nwrappers, these will be applied to extend the functionality of the client.\n\nA client that is already scoped to the incoming request is also exposed\nfrom the route handler context see {@link RequestHandlerContext}."
+            ],
+            "signature": [
+              "(req: ",
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>, options?: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsClientProviderOptions",
+                "text": "SavedObjectsClientProviderOptions"
+              },
+              " | undefined) => ",
+              "SavedObjectsClientContract"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.SavedObjectsServiceStart.getScopedClient.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "req",
+                "description": [],
+                "signature": [
+                  "KibanaRequest",
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.SavedObjectsServiceStart.getScopedClient.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-server",
+                    "scope": "server",
+                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                    "section": "def-server.SavedObjectsClientProviderOptions",
+                    "text": "SavedObjectsClientProviderOptions"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsServiceStart.createScopedRepository",
+            "type": "Function",
+            "tags": [],
+            "label": "createScopedRepository",
+            "description": [
+              "\nCreates a {@link ISavedObjectsRepository | Saved Objects repository} that\nuses the credentials from the passed in request to authenticate with\nElasticsearch.\n"
+            ],
+            "signature": [
+              "(req: ",
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>, includedHiddenTypes?: string[] | undefined) => ",
+              "ISavedObjectsRepository"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.SavedObjectsServiceStart.createScopedRepository.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "req",
+                "description": [
+                  "- The request to create the scoped repository from."
+                ],
+                "signature": [
+                  "KibanaRequest",
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.SavedObjectsServiceStart.createScopedRepository.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "includedHiddenTypes",
+                "description": [
+                  "- A list of additional hidden types the repository should have access to."
+                ],
+                "signature": [
+                  "string[] | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsServiceStart.createInternalRepository",
+            "type": "Function",
+            "tags": [],
+            "label": "createInternalRepository",
+            "description": [
+              "\nCreates a {@link ISavedObjectsRepository | Saved Objects repository} that\nuses the internal Kibana user for authenticating with Elasticsearch.\n"
+            ],
+            "signature": [
+              "(includedHiddenTypes?: string[] | undefined) => ",
+              "ISavedObjectsRepository"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.SavedObjectsServiceStart.createInternalRepository.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "includedHiddenTypes",
+                "description": [
+                  "- A list of additional hidden types the repository should have access to."
+                ],
+                "signature": [
+                  "string[] | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsServiceStart.createSerializer",
+            "type": "Function",
+            "tags": [],
+            "label": "createSerializer",
+            "description": [
+              "\nCreates a {@link ISavedObjectsSerializer | serializer} that is aware of all registered types."
+            ],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.ISavedObjectsSerializer",
+                "text": "ISavedObjectsSerializer"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsServiceStart.createExporter",
+            "type": "Function",
+            "tags": [],
+            "label": "createExporter",
+            "description": [
+              "\nCreates an {@link ISavedObjectsExporter | exporter} bound to given client."
+            ],
+            "signature": [
+              "(client: ",
+              "SavedObjectsClientContract",
+              ") => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.ISavedObjectsExporter",
+                "text": "ISavedObjectsExporter"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.SavedObjectsServiceStart.createExporter.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "client",
+                "description": [],
+                "signature": [
+                  "SavedObjectsClientContract"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsServiceStart.createImporter",
+            "type": "Function",
+            "tags": [],
+            "label": "createImporter",
+            "description": [
+              "\nCreates an {@link ISavedObjectsImporter | importer} bound to given client."
+            ],
+            "signature": [
+              "(client: ",
+              "SavedObjectsClientContract",
+              ") => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.ISavedObjectsImporter",
+                "text": "ISavedObjectsImporter"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.SavedObjectsServiceStart.createImporter.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "client",
+                "description": [],
+                "signature": [
+                  "SavedObjectsClientContract"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsServiceStart.getTypeRegistry",
+            "type": "Function",
+            "tags": [],
+            "label": "getTypeRegistry",
+            "description": [
+              "\nReturns the {@link ISavedObjectTypeRegistry | registry} containing all registered\n{@link SavedObjectsType | saved object types}"
+            ],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.ISavedObjectTypeRegistry",
+                "text": "ISavedObjectTypeRegistry"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.SavedObjectStatusMeta",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectStatusMeta",
+        "description": [
+          "\nMeta information about the SavedObjectService's status. Available to plugins via {@link CoreSetup.status}.\n"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_status.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectStatusMeta.migratedIndices",
+            "type": "Object",
+            "tags": [],
+            "label": "migratedIndices",
+            "description": [],
+            "signature": [
+              "{ [status: string]: number; skipped: number; migrated: number; }"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_status.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.SavedObjectsType",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsType",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-server.SavedObjectsType",
+            "text": "SavedObjectsType"
+          },
+          "<Attributes>"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsType.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "\nThe name of the type, which is also used as the internal id."
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsType.hidden",
+            "type": "boolean",
+            "tags": [],
+            "label": "hidden",
+            "description": [
+              "\nIs the type hidden by default. If true, repositories will not have access to this type unless explicitly\ndeclared as an `extraType` when creating the repository.\n\nSee {@link SavedObjectsServiceStart.createInternalRepository | createInternalRepository}."
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsType.namespaceType",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "namespaceType",
+            "description": [
+              "\nThe {@link SavedObjectsNamespaceType | namespace type} for the type."
+            ],
+            "signature": [
+              "\"single\" | \"multiple\" | \"multiple-isolated\" | \"agnostic\""
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsType.indexPattern",
+            "type": "string",
+            "tags": [],
+            "label": "indexPattern",
+            "description": [
+              "\nIf defined, the type instances will be stored in the given index instead of the default one."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsType.convertToAliasScript",
+            "type": "string",
+            "tags": [],
+            "label": "convertToAliasScript",
+            "description": [
+              "\nIf defined, will be used to convert the type to an alias."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsType.excludeOnUpgrade",
+            "type": "Function",
+            "tags": [],
+            "label": "excludeOnUpgrade",
+            "description": [
+              "\nIf defined, allows a type to exclude unneeded documents from the migration process and effectively be deleted.\nSee {@link SavedObjectTypeExcludeFromUpgradeFilterHook} for more details."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectTypeExcludeFromUpgradeFilterHook",
+                "text": "SavedObjectTypeExcludeFromUpgradeFilterHook"
+              },
+              " | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsType.mappings",
+            "type": "Object",
+            "tags": [],
+            "label": "mappings",
+            "description": [
+              "\nThe {@link SavedObjectsTypeMappingDefinition | mapping definition} for the type."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsTypeMappingDefinition",
+                "text": "SavedObjectsTypeMappingDefinition"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsType.migrations",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "migrations",
+            "description": [
+              "\nAn optional map of {@link SavedObjectMigrationFn | migrations} or a function returning a map of {@link SavedObjectMigrationFn | migrations} to be used to migrate the type."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectMigrationMap",
+                "text": "SavedObjectMigrationMap"
+              },
+              " | (() => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectMigrationMap",
+                "text": "SavedObjectMigrationMap"
+              },
+              ") | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsType.schemas",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "schemas",
+            "description": [
+              "\nAn optional schema that can be used to validate the attributes of the type.\n\nWhen provided, calls to {@link SavedObjectsClient.create | create} will be validated against this schema.\n\nSee {@link SavedObjectsValidationMap} for more details."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsValidationMap",
+                "text": "SavedObjectsValidationMap"
+              },
+              " | (() => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsValidationMap",
+                "text": "SavedObjectsValidationMap"
+              },
+              ") | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsType.convertToMultiNamespaceTypeVersion",
+            "type": "string",
+            "tags": [],
+            "label": "convertToMultiNamespaceTypeVersion",
+            "description": [
+              "\nIf defined, objects of this type will be converted to a 'multiple' or 'multiple-isolated' namespace type when migrating to this\nversion.\n\nRequirements:\n\n 1. This string value must be a valid semver version\n 2. This type must have previously specified {@link SavedObjectsNamespaceType | `namespaceType: 'single'`}\n 3. This type must also specify {@link SavedObjectsNamespaceType | `namespaceType: 'multiple'`} *or*\n    {@link SavedObjectsNamespaceType | `namespaceType: 'multiple-isolated'`}\n\nExample of a single-namespace type in 7.12:\n\n```ts\n{\n  name: 'foo',\n  hidden: false,\n  namespaceType: 'single',\n  mappings: {...}\n}\n```\n\nExample after converting to a multi-namespace (isolated) type in 8.0:\n\n```ts\n{\n  name: 'foo',\n  hidden: false,\n  namespaceType: 'multiple-isolated',\n  mappings: {...},\n  convertToMultiNamespaceTypeVersion: '8.0.0'\n}\n```\n\nExample after converting to a multi-namespace (shareable) type in 8.1:\n\n```ts\n{\n  name: 'foo',\n  hidden: false,\n  namespaceType: 'multiple',\n  mappings: {...},\n  convertToMultiNamespaceTypeVersion: '8.0.0'\n}\n```\n\nNote: migration function(s) can be optionally specified for any of these versions and will not interfere with the conversion process."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsType.management",
+            "type": "Object",
+            "tags": [],
+            "label": "management",
+            "description": [
+              "\nAn optional {@link SavedObjectsTypeManagementDefinition | saved objects management section} definition for the type."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsTypeManagementDefinition",
+                "text": "SavedObjectsTypeManagementDefinition"
+              },
+              "<Attributes> | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.SavedObjectsTypeManagementDefinition",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsTypeManagementDefinition",
+        "description": [
+          "\nConfiguration options for the {@link SavedObjectsType | type}'s management section.\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-server.SavedObjectsTypeManagementDefinition",
+            "text": "SavedObjectsTypeManagementDefinition"
+          },
+          "<Attributes>"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_management.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsTypeManagementDefinition.importableAndExportable",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "importableAndExportable",
+            "description": [
+              "\nIs the type importable or exportable. Defaults to `false`."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_management.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsTypeManagementDefinition.displayName",
+            "type": "string",
+            "tags": [],
+            "label": "displayName",
+            "description": [
+              "\nWhen specified, will be used instead of the type's name in SO management section's labels."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_management.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsTypeManagementDefinition.visibleInManagement",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "visibleInManagement",
+            "description": [
+              "\nWhen set to false, the type will not be listed or searchable in the SO management section.\nMain usage of setting this property to false for a type is when objects from the type should\nbe included in the export via references or export hooks, but should not directly appear in the SOM.\nDefaults to `true`.\n"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_management.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsTypeManagementDefinition.defaultSearchField",
+            "type": "string",
+            "tags": [],
+            "label": "defaultSearchField",
+            "description": [
+              "\nThe default search field to use for this type. Defaults to `id`."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_management.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsTypeManagementDefinition.icon",
+            "type": "string",
+            "tags": [],
+            "label": "icon",
+            "description": [
+              "\nThe eui icon name to display in the management table.\nIf not defined, the default icon will be used."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_management.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsTypeManagementDefinition.getTitle",
+            "type": "Function",
+            "tags": [],
+            "label": "getTitle",
+            "description": [
+              "\nFunction returning the title to display in the management table.\nIf not defined, will use the object's type and id to generate a label."
+            ],
+            "signature": [
+              "((savedObject: ",
+              "SavedObject",
+              "<Attributes>) => string) | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_management.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.SavedObjectsTypeManagementDefinition.getTitle.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "savedObject",
+                "description": [],
+                "signature": [
+                  "SavedObject",
+                  "<Attributes>"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_management.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsTypeManagementDefinition.getEditUrl",
+            "type": "Function",
+            "tags": [],
+            "label": "getEditUrl",
+            "description": [
+              "\nFunction returning the url to use to redirect to the editing page of this object.\nIf not defined, editing will not be allowed."
+            ],
+            "signature": [
+              "((savedObject: ",
+              "SavedObject",
+              "<Attributes>) => string) | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_management.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.SavedObjectsTypeManagementDefinition.getEditUrl.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "savedObject",
+                "description": [],
+                "signature": [
+                  "SavedObject",
+                  "<Attributes>"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_management.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsTypeManagementDefinition.getInAppUrl",
+            "type": "Function",
+            "tags": [],
+            "label": "getInAppUrl",
+            "description": [
+              "\nFunction returning the url to use to redirect to this object from the management section.\nIf not defined, redirecting to the object will not be allowed.\n"
+            ],
+            "signature": [
+              "((savedObject: ",
+              "SavedObject",
+              "<Attributes>) => { path: string; uiCapabilitiesPath: string; }) | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_management.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.SavedObjectsTypeManagementDefinition.getInAppUrl.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "savedObject",
+                "description": [],
+                "signature": [
+                  "SavedObject",
+                  "<Attributes>"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_management.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "an object containing a `path` and `uiCapabilitiesPath` properties. the `path` is the path to\nthe object page, relative to the base path. `uiCapabilitiesPath` is the path to check in the\n{@link Capabilities | uiCapabilities} to check if the user has permission to access the object."
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsTypeManagementDefinition.onExport",
+            "type": "Function",
+            "tags": [],
+            "label": "onExport",
+            "description": [
+              "\nAn optional export transform function that can be used transform the objects of the registered type during\nthe export process.\n\nIt can be used to either mutate the exported objects, or add additional objects (of any type) to the export list.\n\nSee {@link SavedObjectsExportTransform | the transform type documentation} for more info and examples.\n\nWhen implementing both `isExportable` and `onExport`, it is mandatory that\n`isExportable` returns the same value for an object before and after going\nthough the export transform.\nE.g `isExportable(objectBeforeTransform) === isExportable(objectAfterTransform)`\n"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsExportTransform",
+                "text": "SavedObjectsExportTransform"
+              },
+              "<Attributes> | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_management.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsTypeManagementDefinition.onImport",
+            "type": "Function",
+            "tags": [],
+            "label": "onImport",
+            "description": [
+              "\nAn optional {@link SavedObjectsImportHook | import hook} to use when importing given type.\n\nImport hooks are executed during the savedObjects import process and allow to interact\nwith the imported objects. See the {@link SavedObjectsImportHook | hook documentation}\nfor more info.\n"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsImportHook",
+                "text": "SavedObjectsImportHook"
+              },
+              "<Attributes> | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_management.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsTypeManagementDefinition.isExportable",
+            "type": "Function",
+            "tags": [],
+            "label": "isExportable",
+            "description": [
+              "\nOptional hook to specify whether an object should be exportable.\n\nIf specified, `isExportable` will be called during export for each\nof this type's objects in the export, and the ones not matching the\npredicate will be excluded from the export.\n\nWhen implementing both `isExportable` and `onExport`, it is mandatory that\n`isExportable` returns the same value for an object before and after going\nthough the export transform.\nE.g `isExportable(objectBeforeTransform) === isExportable(objectAfterTransform)`\n"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsExportablePredicate",
+                "text": "SavedObjectsExportablePredicate"
+              },
+              "<Attributes> | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_management.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.SavedObjectsTypeMappingDefinition",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsTypeMappingDefinition",
+        "description": [
+          "\nDescribe a saved object type mapping.\n"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/mapping_definition.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsTypeMappingDefinition.dynamic",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "dynamic",
+            "description": [
+              "The dynamic property of the mapping, either `false` or `'strict'`. If\nunspecified `dynamic: 'strict'` will be inherited from the top-level\nindex mappings."
+            ],
+            "signature": [
+              "false | \"strict\" | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/mapping_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsTypeMappingDefinition.properties",
+            "type": "Object",
+            "tags": [],
+            "label": "properties",
+            "description": [
+              "The underlying properties of the type mapping"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsMappingProperties",
+                "text": "SavedObjectsMappingProperties"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/mapping_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.SavedObjectsValidationMap",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsValidationMap",
+        "description": [
+          "\nA map of {@link SavedObjectsValidationSpec | validation specs} to be used for a given type.\nThe map's keys must be valid semver versions.\n\nAny time you change the schema of a {@link SavedObjectsType}, you should add a new entry\nto this map for the Kibana version the change was introduced in.\n"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/validation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsValidationMap.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[version: string]: SavedObjectsValidationSpec",
+            "description": [],
+            "signature": [
+              "[version: string]:  ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsValidationSpec",
+                "text": "SavedObjectsValidationSpec"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/validation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.CreatedObject",
+        "type": "Type",
+        "tags": [],
+        "label": "CreatedObject",
+        "description": [],
+        "signature": [
+          "SavedObject",
+          "<T> & { destinationId?: string | undefined; }"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/import.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.SavedObjectMigrationFn",
+        "type": "Type",
+        "tags": [],
+        "label": "SavedObjectMigrationFn",
+        "description": [
+          "\nA migration function for a {@link SavedObjectsType | saved object type}\nused to migrate it to a given version\n"
+        ],
+        "signature": [
+          "(doc: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-server.SavedObjectUnsanitizedDoc",
+            "text": "SavedObjectUnsanitizedDoc"
+          },
+          "<InputAttributes>, context: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-server.SavedObjectMigrationContext",
+            "text": "SavedObjectMigrationContext"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-server.SavedObjectUnsanitizedDoc",
+            "text": "SavedObjectUnsanitizedDoc"
+          },
+          "<MigratedAttributes>"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectMigrationFn.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "doc",
+            "description": [],
+            "signature": [
+              "SavedObjectDoc<InputAttributes> & { references?: ",
+              "SavedObjectReference",
+              "[] | undefined; }"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectMigrationFn.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectMigrationContext",
+                "text": "SavedObjectMigrationContext"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/migration.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.SavedObjectSanitizedDoc",
+        "type": "Type",
+        "tags": [],
+        "label": "SavedObjectSanitizedDoc",
+        "description": [
+          "\nDescribes Saved Object documents that have passed through the migration\nframework and are guaranteed to have a `references` root property.\n"
+        ],
+        "signature": [
+          "SavedObjectDoc<T> & { references: ",
+          "SavedObjectReference",
+          "[]; }"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.SavedObjectsClientFactory",
+        "type": "Type",
+        "tags": [],
+        "label": "SavedObjectsClientFactory",
+        "description": [
+          "\nDescribes the factory used to create instances of the Saved Objects Client."
+        ],
+        "signature": [
+          "({ request, includedHiddenTypes, }: { request: ",
+          "KibanaRequest",
+          "<unknown, unknown, unknown, any>; includedHiddenTypes?: string[] | undefined; }) => ",
+          "SavedObjectsClientContract"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/client_factory.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsClientFactory.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "__0",
+            "description": [],
+            "signature": [
+              "{ request: ",
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>; includedHiddenTypes?: string[] | undefined; }"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/client_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.SavedObjectsClientFactoryProvider",
+        "type": "Type",
+        "tags": [],
+        "label": "SavedObjectsClientFactoryProvider",
+        "description": [
+          "\nProvider to invoke to retrieve a {@link SavedObjectsClientFactory}."
+        ],
+        "signature": [
+          "(repositoryFactory: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-server.SavedObjectsRepositoryFactory",
+            "text": "SavedObjectsRepositoryFactory"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-server.SavedObjectsClientFactory",
+            "text": "SavedObjectsClientFactory"
+          }
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/client_factory.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsClientFactoryProvider.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "repositoryFactory",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsRepositoryFactory",
+                "text": "SavedObjectsRepositoryFactory"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/client_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.SavedObjectsClientWrapperFactory",
+        "type": "Type",
+        "tags": [],
+        "label": "SavedObjectsClientWrapperFactory",
+        "description": [
+          "\nDescribes the factory used to create instances of Saved Objects Client Wrappers."
+        ],
+        "signature": [
+          "(options: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-server.SavedObjectsClientWrapperOptions",
+            "text": "SavedObjectsClientWrapperOptions"
+          },
+          ") => ",
+          "SavedObjectsClientContract"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/client_factory.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsClientWrapperFactory.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsClientWrapperOptions",
+                "text": "SavedObjectsClientWrapperOptions"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/client_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.SavedObjectsExportablePredicate",
+        "type": "Type",
+        "tags": [],
+        "label": "SavedObjectsExportablePredicate",
+        "description": [],
+        "signature": [
+          "(obj: ",
+          "SavedObject",
+          "<Attributes>) => boolean"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_management.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsExportablePredicate.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "obj",
+            "description": [],
+            "signature": [
+              "SavedObject",
+              "<Attributes>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_management.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.SavedObjectsExportTransform",
+        "type": "Type",
+        "tags": [],
+        "label": "SavedObjectsExportTransform",
+        "description": [
+          "\nTransformation function used to mutate the exported objects of the associated type.\n\nA type's export transform function will be executed once per user-initiated export,\nfor all objects of that type.\n"
+        ],
+        "signature": [
+          "(context: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-server.SavedObjectsExportTransformContext",
+            "text": "SavedObjectsExportTransformContext"
+          },
+          ", objects: ",
+          "SavedObject",
+          "<T>[]) => ",
+          "SavedObject",
+          "<unknown>[] | Promise<",
+          "SavedObject",
+          "<unknown>[]>"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsExportTransform.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "server",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-server.SavedObjectsExportTransformContext",
+                "text": "SavedObjectsExportTransformContext"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsExportTransform.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "objects",
+            "description": [],
+            "signature": [
+              "SavedObject",
+              "<T>[]"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/export.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.SavedObjectsFieldMapping",
+        "type": "Type",
+        "tags": [],
+        "label": "SavedObjectsFieldMapping",
+        "description": [
+          "\nDescribe a {@link SavedObjectsTypeMappingDefinition | saved object type mapping} field.\n\nPlease refer to {@link https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-types.html | elasticsearch documentation}\nFor the mapping documentation\n"
+        ],
+        "signature": [
+          "MappingProperty",
+          " & { dynamic?: false | \"strict\" | undefined; properties?: Record<string, ",
+          "MappingProperty",
+          "> | undefined; }"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/mapping_definition.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.SavedObjectsImportHook",
+        "type": "Type",
+        "tags": [],
+        "label": "SavedObjectsImportHook",
+        "description": [
+          "\nA hook associated with a specific saved object type, that will be invoked during\nthe import process. The hook will have access to the objects of the registered type.\n\nCurrently, the only supported feature for import hooks is to return warnings to be displayed\nin the UI when the import succeeds.\n"
+        ],
+        "signature": [
+          "(objects: ",
+          "SavedObject",
+          "<T>[]) => ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-server.SavedObjectsImportHookResult",
+            "text": "SavedObjectsImportHookResult"
+          },
+          " | Promise<",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "server",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-server.SavedObjectsImportHookResult",
+            "text": "SavedObjectsImportHookResult"
+          },
+          ">"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/import.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsImportHook.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "objects",
+            "description": [],
+            "signature": [
+              "SavedObject",
+              "<T>[]"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/import.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.SavedObjectsValidationSpec",
+        "type": "Type",
+        "tags": [],
+        "label": "SavedObjectsValidationSpec",
+        "description": [
+          "\nAllows for validating properties using @kbn/config-schema validations.\n"
+        ],
+        "signature": [
+          "ObjectType",
+          "<any>"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/validation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.SavedObjectTypeExcludeFromUpgradeFilterHook",
+        "type": "Type",
+        "tags": [
+          "alpha"
+        ],
+        "label": "SavedObjectTypeExcludeFromUpgradeFilterHook",
+        "description": [
+          "\nIf defined, allows a type to run a search query and return a query filter that may match any documents which may\nbe excluded from the next migration upgrade process. Useful for cleaning up large numbers of old documents which\nare no longer needed and may slow the migration process.\n\nIf this hook fails, the migration will proceed without these documents having been filtered out, so this\nshould not be used as a guarantee that these documents have been deleted.\n"
+        ],
+        "signature": [
+          "(toolkit: { readonlyEsClient: Pick<",
+          "ElasticsearchClient",
+          ", \"search\">; }) => ",
+          "MaybePromise",
+          "<",
+          "QueryDslQueryContainer",
+          ">"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectTypeExcludeFromUpgradeFilterHook.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "toolkit",
+            "description": [],
+            "signature": [
+              "{ readonlyEsClient: Pick<",
+              "ElasticsearchClient",
+              ", \"search\">; }"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-server/src/saved_objects_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.SavedObjectUnsanitizedDoc",
+        "type": "Type",
+        "tags": [],
+        "label": "SavedObjectUnsanitizedDoc",
+        "description": [
+          "\nDescribes Saved Object documents from Kibana < 7.0.0 which don't have a\n`references` root property defined. This type should only be used in\nmigrations.\n"
+        ],
+        "signature": [
+          "SavedObjectDoc<T> & { references?: ",
+          "SavedObjectReference",
+          "[] | undefined; }"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-server/src/serialization.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

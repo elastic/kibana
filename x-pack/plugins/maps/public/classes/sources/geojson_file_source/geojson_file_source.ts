@@ -6,7 +6,7 @@
  */
 
 import { Feature, FeatureCollection } from 'geojson';
-import { AbstractVectorSource, BoundsFilters, GeoJsonWithMeta } from '../vector_source';
+import { AbstractVectorSource, BoundsRequestMeta, GeoJsonWithMeta } from '../vector_source';
 import { EMPTY_FEATURE_COLLECTION, FIELD_ORIGIN, SOURCE_TYPES } from '../../../../common/constants';
 import {
   InlineFieldDescriptor,
@@ -16,7 +16,6 @@ import {
 import { registerSource } from '../source_registry';
 import { IField } from '../../fields/field';
 import { getFeatureCollectionBounds } from '../../util/get_feature_collection_bounds';
-import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { InlineField } from '../../fields/inline_field';
 
 function getFeatureCollection(
@@ -55,9 +54,9 @@ export class GeoJsonFileSource extends AbstractVectorSource {
     };
   }
 
-  constructor(descriptor: Partial<GeojsonFileSourceDescriptor>, inspectorAdapters?: Adapters) {
+  constructor(descriptor: Partial<GeojsonFileSourceDescriptor>) {
     const normalizedDescriptor = GeoJsonFileSource.createDescriptor(descriptor);
-    super(normalizedDescriptor, inspectorAdapters);
+    super(normalizedDescriptor);
   }
 
   _getFields(): InlineFieldDescriptor[] {
@@ -103,7 +102,7 @@ export class GeoJsonFileSource extends AbstractVectorSource {
   }
 
   async getBoundsForFilters(
-    boundsFilters: BoundsFilters,
+    boundsFilters: BoundsRequestMeta,
     registerCancelCallback: (callback: () => void) => void
   ): Promise<MapExtent | null> {
     const featureCollection = (this._descriptor as GeojsonFileSourceDescriptor).__featureCollection;
@@ -121,11 +120,11 @@ export class GeoJsonFileSource extends AbstractVectorSource {
     return (this._descriptor as GeojsonFileSourceDescriptor).name;
   }
 
-  canFormatFeatureProperties() {
+  hasTooltipProperties() {
     return true;
   }
 
-  getSourceTooltipContent() {
+  getSourceStatus() {
     return {
       tooltipContent: (this._descriptor as GeojsonFileSourceDescriptor).tooltipContent,
       areResultsTrimmed: (this._descriptor as GeojsonFileSourceDescriptor).areResultsTrimmed,

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import * as rt from 'io-ts';
 import { commonSearchSuccessResponseFieldsRT } from '../../../utils/elasticsearch_runtime_types';
 import { defaultRequestParameters } from './common';
 
 export const createLogEntryCategoryExamplesQuery = (
   indices: string,
-  runtimeMappings: estypes.RuntimeFields,
+  runtimeMappings: estypes.MappingRuntimeFields,
   timestampField: string,
   tiebreakerField: string,
   startTime: number,
@@ -30,6 +30,7 @@ export const createLogEntryCategoryExamplesQuery = (
               [timestampField]: {
                 gte: startTime,
                 lte: endTime,
+                format: 'epoch_millis',
               },
             },
           },
@@ -37,7 +38,7 @@ export const createLogEntryCategoryExamplesQuery = (
             match: {
               message: {
                 query: categoryQuery,
-                operator: 'AND',
+                operator: 'and',
               },
             },
           },

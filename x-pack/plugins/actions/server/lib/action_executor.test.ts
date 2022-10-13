@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '../../../../../src/core/server';
+import { KibanaRequest } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { ActionExecutor } from './action_executor';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
-import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
-import { loggingSystemMock } from '../../../../../src/core/server/mocks';
-import { eventLoggerMock } from '../../../event_log/server/mocks';
-import { spacesServiceMock } from '../../../spaces/server/spaces_service/spaces_service.mock';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
+import { spacesServiceMock } from '@kbn/spaces-plugin/server/spaces_service/spaces_service.mock';
 import { ActionType } from '../types';
 import { actionsMock, actionsClientMock } from '../mocks';
 import { pick } from 'lodash';
@@ -23,12 +23,14 @@ const services = actionsMock.createServices();
 const actionsClient = actionsClientMock.create();
 const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
 const actionTypeRegistry = actionTypeRegistryMock.create();
+const eventLogger = eventLoggerMock.create();
 
 const executeParams = {
   actionId: '1',
   params: {
     foo: true,
   },
+  executionId: '123abc',
   request: {} as KibanaRequest,
 };
 
@@ -42,7 +44,7 @@ actionExecutor.initialize({
   getActionsClientWithRequest,
   actionTypeRegistry,
   encryptedSavedObjectsClient,
-  eventLogger: eventLoggerMock.create(),
+  eventLogger,
   preconfiguredActions: [],
 });
 
@@ -57,6 +59,7 @@ test('successfully executes', async () => {
     id: 'test',
     name: 'Test',
     minimumLicenseRequired: 'basic',
+    supportedFeatureIds: ['alerting'],
     executor: jest.fn(),
   };
   const actionSavedObject = {
@@ -78,6 +81,7 @@ test('successfully executes', async () => {
     name: actionSavedObject.id,
     ...pick(actionSavedObject.attributes, 'actionTypeId', 'config'),
     isPreconfigured: false,
+    isDeprecated: false,
   };
   actionsClient.get.mockResolvedValueOnce(actionResult);
   encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
@@ -108,6 +112,122 @@ test('successfully executes', async () => {
   });
 
   expect(loggerMock.debug).toBeCalledWith('executing action test:1: 1');
+  expect(eventLogger.logEvent.mock.calls).toMatchInlineSnapshot(`
+    Array [
+      Array [
+        Object {
+          "event": Object {
+            "action": "execute-start",
+            "kind": "action",
+          },
+          "kibana": Object {
+            "alert": Object {
+              "rule": Object {
+                "execution": Object {
+                  "uuid": "123abc",
+                },
+              },
+            },
+            "saved_objects": Array [
+              Object {
+                "id": "1",
+                "namespace": "some-namespace",
+                "rel": "primary",
+                "type": "action",
+                "type_id": "test",
+              },
+            ],
+            "space_ids": Array [
+              "some-namespace",
+            ],
+          },
+          "message": "action started: test:1: 1",
+        },
+      ],
+      Array [
+        Object {
+          "event": Object {
+            "action": "execute",
+            "kind": "action",
+            "outcome": "success",
+          },
+          "kibana": Object {
+            "alert": Object {
+              "rule": Object {
+                "execution": Object {
+                  "uuid": "123abc",
+                },
+              },
+            },
+            "saved_objects": Array [
+              Object {
+                "id": "1",
+                "namespace": "some-namespace",
+                "rel": "primary",
+                "type": "action",
+                "type_id": "test",
+              },
+            ],
+            "space_ids": Array [
+              "some-namespace",
+            ],
+          },
+          "message": "action executed: test:1: 1",
+        },
+      ],
+    ]
+  `);
+});
+
+test('successfully executes as a task', async () => {
+  const actionType: jest.Mocked<ActionType> = {
+    id: 'test',
+    name: 'Test',
+    minimumLicenseRequired: 'basic',
+    supportedFeatureIds: ['alerting'],
+    executor: jest.fn(),
+  };
+  const actionSavedObject = {
+    id: '1',
+    type: 'action',
+    attributes: {
+      actionTypeId: 'test',
+      config: {
+        bar: true,
+      },
+      secrets: {
+        baz: true,
+      },
+    },
+    references: [],
+  };
+  const actionResult = {
+    id: actionSavedObject.id,
+    name: actionSavedObject.id,
+    ...pick(actionSavedObject.attributes, 'actionTypeId', 'config'),
+    isPreconfigured: false,
+    isDeprecated: false,
+  };
+  actionsClient.get.mockResolvedValueOnce(actionResult);
+  encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
+  actionTypeRegistry.get.mockReturnValueOnce(actionType);
+
+  const scheduleDelay = 10000; // milliseconds
+  const scheduled = new Date(Date.now() - scheduleDelay);
+  const attempts = 1;
+  await actionExecutor.execute({
+    ...executeParams,
+    taskInfo: {
+      scheduled,
+      attempts,
+    },
+  });
+
+  const eventTask = eventLogger.logEvent.mock.calls[0][0]?.kibana?.task;
+  expect(eventTask).toBeDefined();
+  expect(eventTask?.scheduled).toBe(scheduled.toISOString());
+  expect(eventTask?.schedule_delay).toBeGreaterThanOrEqual(scheduleDelay * 1000 * 1000);
+  expect(eventTask?.schedule_delay).toBeLessThanOrEqual(2 * scheduleDelay * 1000 * 1000);
 });
 
 test('provides empty config when config and / or secrets is empty', async () => {
@@ -115,6 +235,7 @@ test('provides empty config when config and / or secrets is empty', async () => 
     id: 'test',
     name: 'Test',
     minimumLicenseRequired: 'basic',
+    supportedFeatureIds: ['alerting'],
     executor: jest.fn(),
   };
   const actionSavedObject = {
@@ -130,6 +251,7 @@ test('provides empty config when config and / or secrets is empty', async () => 
     name: actionSavedObject.id,
     actionTypeId: actionSavedObject.attributes.actionTypeId,
     isPreconfigured: false,
+    isDeprecated: false,
   };
   actionsClient.get.mockResolvedValueOnce(actionResult);
   encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
@@ -146,10 +268,13 @@ test('throws an error when config is invalid', async () => {
     id: 'test',
     name: 'Test',
     minimumLicenseRequired: 'basic',
+    supportedFeatureIds: ['alerting'],
     validate: {
-      config: schema.object({
-        param1: schema.string(),
-      }),
+      config: {
+        schema: schema.object({
+          param1: schema.string(),
+        }),
+      },
     },
     executor: jest.fn(),
   };
@@ -166,6 +291,7 @@ test('throws an error when config is invalid', async () => {
     name: actionSavedObject.id,
     actionTypeId: actionSavedObject.attributes.actionTypeId,
     isPreconfigured: false,
+    isDeprecated: false,
   };
   actionsClient.get.mockResolvedValueOnce(actionResult);
   encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
@@ -180,15 +306,16 @@ test('throws an error when config is invalid', async () => {
   });
 });
 
-test('throws an error when params is invalid', async () => {
+test('throws an error when connector is invalid', async () => {
   const actionType: jest.Mocked<ActionType> = {
     id: 'test',
     name: 'Test',
     minimumLicenseRequired: 'basic',
+    supportedFeatureIds: ['alerting'],
     validate: {
-      params: schema.object({
-        param1: schema.string(),
-      }),
+      connector: () => {
+        return 'error';
+      },
     },
     executor: jest.fn(),
   };
@@ -205,6 +332,50 @@ test('throws an error when params is invalid', async () => {
     name: actionSavedObject.id,
     actionTypeId: actionSavedObject.attributes.actionTypeId,
     isPreconfigured: false,
+    isDeprecated: false,
+  };
+  actionsClient.get.mockResolvedValueOnce(actionResult);
+  encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
+  actionTypeRegistry.get.mockReturnValueOnce(actionType);
+
+  const result = await actionExecutor.execute(executeParams);
+  expect(result).toEqual({
+    actionId: '1',
+    status: 'error',
+    retry: false,
+    message: `error validating action type connector: config must be defined`,
+  });
+});
+
+test('throws an error when params is invalid', async () => {
+  const actionType: jest.Mocked<ActionType> = {
+    id: 'test',
+    name: 'Test',
+    minimumLicenseRequired: 'basic',
+    supportedFeatureIds: ['alerting'],
+    validate: {
+      params: {
+        schema: schema.object({
+          param1: schema.string(),
+        }),
+      },
+    },
+    executor: jest.fn(),
+  };
+  const actionSavedObject = {
+    id: '1',
+    type: 'action',
+    attributes: {
+      actionTypeId: 'test',
+    },
+    references: [],
+  };
+  const actionResult = {
+    id: actionSavedObject.id,
+    name: actionSavedObject.id,
+    actionTypeId: actionSavedObject.attributes.actionTypeId,
+    isPreconfigured: false,
+    isDeprecated: false,
   };
   actionsClient.get.mockResolvedValueOnce(actionResult);
   encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
@@ -231,6 +402,7 @@ test('throws an error if actionType is not enabled', async () => {
     id: 'test',
     name: 'Test',
     minimumLicenseRequired: 'basic',
+    supportedFeatureIds: ['alerting'],
     executor: jest.fn(),
   };
   const actionSavedObject = {
@@ -246,6 +418,7 @@ test('throws an error if actionType is not enabled', async () => {
     name: actionSavedObject.id,
     actionTypeId: actionSavedObject.attributes.actionTypeId,
     isPreconfigured: false,
+    isDeprecated: false,
   };
   actionsClient.get.mockResolvedValueOnce(actionResult);
   encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
@@ -265,6 +438,7 @@ test('should not throws an error if actionType is preconfigured', async () => {
     id: 'test',
     name: 'Test',
     minimumLicenseRequired: 'basic',
+    supportedFeatureIds: ['alerting'],
     executor: jest.fn(),
   };
   const actionSavedObject = {
@@ -286,6 +460,7 @@ test('should not throws an error if actionType is preconfigured', async () => {
     name: actionSavedObject.id,
     ...pick(actionSavedObject.attributes, 'actionTypeId', 'config', 'secrets'),
     isPreconfigured: false,
+    isDeprecated: false,
   };
   actionsClient.get.mockResolvedValueOnce(actionResult);
   encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);
@@ -353,13 +528,19 @@ test('logs a warning when alert executor has an error', async () => {
   );
 });
 
-test('logs a warning when alert executor throws an error', async () => {
+test('logs a warning and error when alert executor throws an error', async () => {
   const executorMock = setupActionExecutorMock();
-  executorMock.mockRejectedValue(new Error('this action execution is intended to fail'));
+  const err = new Error('this action execution is intended to fail');
+  err.stack = 'foo error\n  stack 1\n  stack 2\n  stack 3';
+  executorMock.mockRejectedValue(err);
   await actionExecutor.execute(executeParams);
   expect(loggerMock.warn).toBeCalledWith(
-    'action execution failure: test:1: action-1: an error occurred while running the action executor: this action execution is intended to fail'
+    'action execution failure: test:1: action-1: an error occurred while running the action: this action execution is intended to fail'
   );
+  expect(loggerMock.error).toBeCalledWith(err, {
+    error: { stack_trace: 'foo error\n  stack 1\n  stack 2\n  stack 3' },
+    tags: ['test', '1', 'action-run-failed'],
+  });
 });
 
 test('logs a warning when alert executor returns invalid status', async () => {
@@ -379,11 +560,204 @@ test('logs a warning when alert executor returns invalid status', async () => {
   );
 });
 
+test('writes to event log for execute timeout', async () => {
+  setupActionExecutorMock();
+
+  await actionExecutor.logCancellation({
+    actionId: 'action1',
+    executionId: '123abc',
+    consumer: 'test-consumer',
+    relatedSavedObjects: [],
+    request: {} as KibanaRequest,
+  });
+  expect(eventLogger.logEvent).toHaveBeenCalledTimes(1);
+  expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
+    event: {
+      action: 'execute-timeout',
+      kind: 'action',
+    },
+    kibana: {
+      alert: {
+        rule: {
+          consumer: 'test-consumer',
+          execution: {
+            uuid: '123abc',
+          },
+        },
+      },
+      saved_objects: [
+        {
+          rel: 'primary',
+          type: 'action',
+          id: 'action1',
+          type_id: 'test',
+          namespace: 'some-namespace',
+        },
+      ],
+      space_ids: ['some-namespace'],
+    },
+    message: `action: test:action1: 'action-1' execution cancelled due to timeout - exceeded default timeout of "5m"`,
+  });
+});
+
+test('writes to event log for execute and execute start', async () => {
+  const executorMock = setupActionExecutorMock();
+  executorMock.mockResolvedValue({
+    actionId: '1',
+    status: 'ok',
+  });
+  await actionExecutor.execute(executeParams);
+  expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
+  expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
+    event: {
+      action: 'execute-start',
+      kind: 'action',
+    },
+    kibana: {
+      alert: {
+        rule: {
+          execution: {
+            uuid: '123abc',
+          },
+        },
+      },
+      saved_objects: [
+        {
+          rel: 'primary',
+          type: 'action',
+          id: '1',
+          type_id: 'test',
+          namespace: 'some-namespace',
+        },
+      ],
+      space_ids: ['some-namespace'],
+    },
+    message: 'action started: test:1: action-1',
+  });
+  expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, {
+    event: {
+      action: 'execute',
+      kind: 'action',
+      outcome: 'success',
+    },
+    kibana: {
+      alert: {
+        rule: {
+          execution: {
+            uuid: '123abc',
+          },
+        },
+      },
+      saved_objects: [
+        {
+          rel: 'primary',
+          type: 'action',
+          id: '1',
+          type_id: 'test',
+          namespace: 'some-namespace',
+        },
+      ],
+      space_ids: ['some-namespace'],
+    },
+    message: 'action executed: test:1: action-1',
+  });
+});
+
+test('writes to event log for execute and execute start when consumer and related saved object are defined', async () => {
+  const executorMock = setupActionExecutorMock();
+  executorMock.mockResolvedValue({
+    actionId: '1',
+    status: 'ok',
+  });
+  await actionExecutor.execute({
+    ...executeParams,
+    consumer: 'test-consumer',
+    relatedSavedObjects: [
+      {
+        typeId: '.rule-type',
+        type: 'alert',
+        id: '12',
+      },
+    ],
+  });
+  expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
+  expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
+    event: {
+      action: 'execute-start',
+      kind: 'action',
+    },
+    kibana: {
+      alert: {
+        rule: {
+          consumer: 'test-consumer',
+          execution: {
+            uuid: '123abc',
+          },
+          rule_type_id: '.rule-type',
+        },
+      },
+      saved_objects: [
+        {
+          rel: 'primary',
+          type: 'action',
+          id: '1',
+          type_id: 'test',
+          namespace: 'some-namespace',
+        },
+        {
+          rel: 'primary',
+          type: 'alert',
+          id: '12',
+          type_id: '.rule-type',
+        },
+      ],
+      space_ids: ['some-namespace'],
+    },
+    message: 'action started: test:1: action-1',
+  });
+  expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, {
+    event: {
+      action: 'execute',
+      kind: 'action',
+      outcome: 'success',
+    },
+    kibana: {
+      alert: {
+        rule: {
+          consumer: 'test-consumer',
+          execution: {
+            uuid: '123abc',
+          },
+          rule_type_id: '.rule-type',
+        },
+      },
+      saved_objects: [
+        {
+          rel: 'primary',
+          type: 'action',
+          id: '1',
+          type_id: 'test',
+          namespace: 'some-namespace',
+        },
+        {
+          rel: 'primary',
+          type: 'alert',
+          id: '12',
+          type_id: '.rule-type',
+        },
+      ],
+      space_ids: ['some-namespace'],
+    },
+    message: 'action executed: test:1: action-1',
+  });
+});
+
 function setupActionExecutorMock() {
   const actionType: jest.Mocked<ActionType> = {
     id: 'test',
     name: 'Test',
     minimumLicenseRequired: 'basic',
+    supportedFeatureIds: ['alerting'],
     executor: jest.fn(),
   };
   const actionSavedObject = {
@@ -406,6 +780,7 @@ function setupActionExecutorMock() {
     name: actionSavedObject.name,
     ...pick(actionSavedObject.attributes, 'actionTypeId', 'config'),
     isPreconfigured: false,
+    isDeprecated: false,
   };
   actionsClient.get.mockResolvedValueOnce(actionResult);
   encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(actionSavedObject);

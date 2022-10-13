@@ -6,10 +6,12 @@
  */
 
 import Boom from '@hapi/boom';
-import type { SavedObjectsClientContract } from 'kibana/server';
+import { isEqual } from 'lodash';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 
-import { decodeCloudId, GLOBAL_SETTINGS_SAVED_OBJECT_TYPE } from '../../common';
-import type { SettingsSOAttributes, Settings, BaseSettings } from '../../common';
+import { decodeCloudId, normalizeHostsForAgents } from '../../common/services';
+import { GLOBAL_SETTINGS_SAVED_OBJECT_TYPE, GLOBAL_SETTINGS_ID } from '../../common/constants';
+import type { SettingsSOAttributes, Settings, BaseSettings } from '../../common/types';
 
 import { appContextService } from './app_context';
 
@@ -26,20 +28,55 @@ export async function getSettings(soClient: SavedObjectsClientContract): Promise
     id: settingsSo.id,
     ...settingsSo.attributes,
     fleet_server_hosts: settingsSo.attributes.fleet_server_hosts || [],
+    preconfigured_fields: getConfigFleetServerHosts() ? ['fleet_server_hosts'] : [],
   };
+}
+
+export async function settingsSetup(soClient: SavedObjectsClientContract) {
+  try {
+    const settings = await getSettings(soClient);
+    const defaultSettings = createDefaultSettings();
+
+    const fleetServerHostsIsPreconfigured = getConfigFleetServerHosts()?.length ?? 0 > 0;
+
+    const fleetServerHostsShouldBeUpdated =
+      !settings.fleet_server_hosts ||
+      settings.fleet_server_hosts.length === 0 ||
+      (fleetServerHostsIsPreconfigured &&
+        !isEqual(settings.fleet_server_hosts, defaultSettings.fleet_server_hosts));
+
+    // Migration for < 7.13 Kibana
+    if (defaultSettings.fleet_server_hosts.length > 0 && fleetServerHostsShouldBeUpdated) {
+      return saveSettings(soClient, {
+        fleet_server_hosts: defaultSettings.fleet_server_hosts,
+      });
+    }
+  } catch (e) {
+    if (e.isBoom && e.output.statusCode === 404) {
+      const defaultSettings = createDefaultSettings();
+      return saveSettings(soClient, defaultSettings);
+    }
+
+    throw e;
+  }
 }
 
 export async function saveSettings(
   soClient: SavedObjectsClientContract,
   newData: Partial<Omit<Settings, 'id'>>
 ): Promise<Partial<Settings> & Pick<Settings, 'id'>> {
+  const data = { ...newData };
+  if (data.fleet_server_hosts) {
+    data.fleet_server_hosts = data.fleet_server_hosts.map(normalizeHostsForAgents);
+  }
+
   try {
     const settings = await getSettings(soClient);
 
     const res = await soClient.update<SettingsSOAttributes>(
       GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
       settings.id,
-      newData
+      data
     );
 
     return {
@@ -49,10 +86,17 @@ export async function saveSettings(
   } catch (e) {
     if (e.isBoom && e.output.statusCode === 404) {
       const defaultSettings = createDefaultSettings();
-      const res = await soClient.create<SettingsSOAttributes>(GLOBAL_SETTINGS_SAVED_OBJECT_TYPE, {
-        ...defaultSettings,
-        ...newData,
-      });
+      const res = await soClient.create<SettingsSOAttributes>(
+        GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
+        {
+          ...defaultSettings,
+          ...data,
+        },
+        {
+          id: GLOBAL_SETTINGS_ID,
+          overwrite: true,
+        }
+      );
 
       return {
         id: res.id,
@@ -64,8 +108,15 @@ export async function saveSettings(
   }
 }
 
+function getConfigFleetServerHosts() {
+  const config = appContextService.getConfig();
+  return config?.agents?.fleet_server?.hosts && config.agents.fleet_server.hosts.length > 0
+    ? config?.agents?.fleet_server?.hosts
+    : undefined;
+}
+
 export function createDefaultSettings(): BaseSettings {
-  const configFleetServerHosts = appContextService.getConfig()?.agents?.fleet_server?.hosts;
+  const configFleetServerHosts = getConfigFleetServerHosts();
   const cloudFleetServerHosts = getCloudFleetServersHosts();
 
   const fleetServerHosts = configFleetServerHosts ?? cloudFleetServerHosts ?? [];

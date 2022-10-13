@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-const { max } = require('./max.js');
-const { min } = require('./min.js');
-const { subtract } = require('./subtract.js');
+const { max } = require('./max');
+const { min } = require('./min');
+const { subtract } = require('./subtract');
 
 /**
  * Finds the range of one of more numbers/arrays of numbers into the function. If at least one array of numbers is passed into the function, the function will find the range by index.
@@ -21,8 +21,7 @@ const { subtract } = require('./subtract.js');
  * range([1, 9], 4, [3, 5]) // returns [range([1, 4, 3]), range([9, 4, 5])] = [3, 5]
  */
 
-module.exports = { range };
-
 function range(...args) {
   return subtract(max(...args), min(...args));
 }
+module.exports = { range };

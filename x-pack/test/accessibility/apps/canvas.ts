@@ -14,16 +14,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const { common } = getPageObjects(['common']);
 
-  describe('Canvas', () => {
+  describe('Canvas Accessibility', () => {
     before(async () => {
-      await esArchiver.load('canvas/default');
+      await esArchiver.load('x-pack/test/functional/es_archives/canvas/default');
       await common.navigateToApp('canvas');
     });
 
     it('loads workpads', async function () {
       await retry.waitFor(
         'canvas workpads visible',
-        async () => await testSubjects.exists('canvasWorkpadLoaderTable')
+        async () => await testSubjects.exists('canvasWorkpadTable')
       );
       await a11y.testAppSnapshot();
     });

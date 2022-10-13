@@ -31,22 +31,22 @@ export default ({ getService }: FtrProviderContext) => {
     expectedStatusCode: number,
     requestBody: unknown
   ) {
-    const { body } = await supertest
+    const { body, status } = await supertest
       .post(`/s/${space}/api/ml/data_frame/analytics/${jobId}/_update`)
       .auth(
         USER.ML_POWERUSER_ALL_SPACES,
         ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER_ALL_SPACES)
       )
       .set(COMMON_REQUEST_HEADERS)
-      .send(requestBody)
-      .expect(expectedStatusCode);
+      .send(requestBody);
+    ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
 
     return body;
   }
 
   describe('POST data_frame/analytics _update with spaces', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/ihp_outlier');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ihp_outlier');
       await spacesService.create({ id: idSpace1, name: 'space_one', disabledFeatures: [] });
       await spacesService.create({ id: idSpace2, name: 'space_two', disabledFeatures: [] });
 

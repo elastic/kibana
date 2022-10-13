@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { EuiSelectableProps } from '@elastic/eui';
+import type { EuiSelectableProps } from '@elastic/eui';
 import React from 'react';
-import { shallow, ShallowWrapper, mount } from 'enzyme';
+import type { ShallowWrapper } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 
 import { SortFieldTimeline, TimelineType } from '../../../../../common/types/timeline';
-import { SelectableTimeline, ORIGINAL_PAGE_SIZE } from './';
+import { SelectableTimeline, ORIGINAL_PAGE_SIZE } from '.';
 import { Direction } from '../../../../../common/search_strategy';
 
 const mockFetchAllTimeline = jest.fn();
@@ -25,7 +26,7 @@ jest.mock('../../../containers/all', () => {
 describe('SelectableTimeline', () => {
   const props = {
     hideUntitled: false,
-    getSelectableOptions: jest.fn(),
+    getSelectableOptions: jest.fn().mockReturnValue([]),
     onClosePopover: jest.fn(),
     onTimelineChange: jest.fn(),
     timelineType: TimelineType.default,
@@ -47,7 +48,7 @@ describe('SelectableTimeline', () => {
         const searchProps: EuiSelectableProps['searchProps'] = wrapper
           .find('[data-test-subj="selectable-input"]')
           .prop('searchProps');
-        expect(searchProps!.placeholder).toEqual('e.g. Timeline name or description');
+        expect(searchProps?.placeholder).toEqual('e.g. Timeline name or description');
       });
     });
 
@@ -65,7 +66,7 @@ describe('SelectableTimeline', () => {
         const searchProps: EuiSelectableProps['searchProps'] = wrapper
           .find('[data-test-subj="selectable-input"]')
           .prop('searchProps');
-        expect(searchProps!.placeholder).toEqual('e.g. Timeline template name or description');
+        expect(searchProps?.placeholder).toEqual('e.g. Timeline template name or description');
       });
     });
   });

@@ -1,6 +1,7 @@
 
 /**
  * [1] Will center vertically the empty search result
+ * [2] Align the height with the search input height
  */
 
 $heightHeader: $euiSizeL * 2;
@@ -22,8 +23,20 @@ $heightHeader: $euiSizeL * 2;
   &__searchBox {
     border-bottom: $euiBorderThin;
     border-top: $euiBorderThin;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
     box-shadow: none;
     max-width: initial;
+  }
+
+  &__filterListButton {
+    border-bottom: $euiBorderThin;
+    border-top: $euiBorderThin;
+    border-left: $euiBorderThin;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    box-shadow: none;
+    height: $euiSizeXXL; /* [2] */
   }
 
   &__listWrapper {

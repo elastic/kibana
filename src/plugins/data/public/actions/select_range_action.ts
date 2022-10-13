@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Datatable } from 'src/plugins/expressions/public';
-import { Action, createAction, UiActionsStart } from '../../../../plugins/ui_actions/public';
+import { Datatable } from '@kbn/expressions-plugin/public';
+import { Action, createAction, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '../triggers';
 import { createFiltersFromRangeSelectAction } from './filters/create_filters_from_range_select';
 

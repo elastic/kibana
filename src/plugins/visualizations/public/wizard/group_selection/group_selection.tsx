@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
 import { orderBy } from 'lodash';
 import {
@@ -26,12 +26,13 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
   EuiDescriptionList,
+  EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DocLinksStart } from '../../../../../core/public';
-import { VisTypeAlias } from '../../vis_types/vis_type_alias_registry';
+import { DocLinksStart } from '@kbn/core/public';
 import type { BaseVisType, TypesStart } from '../../vis_types';
-import { VisGroups } from '../../vis_types';
+import { VisGroups } from '../../vis_types/vis_groups_enum';
+import type { VisTypeAlias } from '../../vis_types/vis_type_alias_registry';
 import './group_selection.scss';
 
 interface GroupSelectionProps {
@@ -94,6 +95,7 @@ function GroupSelection(props: GroupSelectionProps) {
                 <EuiCard
                   titleSize="xs"
                   layout="horizontal"
+                  display="transparent"
                   onClick={() => props.toggleGroups(false)}
                   title={
                     <span data-test-subj="visGroupAggBasedTitle">
@@ -110,8 +112,7 @@ function GroupSelection(props: GroupSelectionProps) {
                         'Use our classic visualize library to create charts based on aggregations.',
                     }
                   )}
-                  icon={<EuiIcon type="heatmap" size="xl" color="secondary" />}
-                  className="visNewVisDialog__groupsCard"
+                  icon={<EuiIcon type="heatmap" size="xl" color="success" />}
                 >
                   <EuiLink
                     data-test-subj="visGroupAggBasedExploreLink"
@@ -185,6 +186,7 @@ const VisGroup = ({ visType, onVisTypeSelected }: VisCardProps) => {
     <EuiFlexItem className="visNewVisDialog__groupsCardWrapper">
       <EuiCard
         titleSize="xs"
+        hasBorder={true}
         title={
           <span data-test-subj="visTypeTitle">
             {'titleInWizard' in visType && visType.titleInWizard
@@ -203,8 +205,7 @@ const VisGroup = ({ visType, onVisTypeSelected }: VisCardProps) => {
           </>
         }
         layout="horizontal"
-        icon={<EuiIcon type={visType.icon || 'empty'} size="xl" color="secondary" />}
-        className="visNewVisDialog__groupsCard"
+        icon={<EuiIcon type={visType.icon || 'empty'} size="xl" color="success" />}
       />
     </EuiFlexItem>
   );
@@ -224,27 +225,39 @@ const ToolsGroup = ({ visType, onVisTypeSelected, showExperimental }: VisCardPro
         <EuiIcon type={visType.icon || 'empty'} size="l" />
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiLink data-test-subj={`visType-${visType.name}`} onClick={onClick}>
+            <EuiLink
+              data-test-subj={`visType-${visType.name}`}
+              data-vis-stage={visType.stage}
+              onClick={onClick}
+            >
               {'titleInWizard' in visType && visType.titleInWizard
                 ? visType.titleInWizard
                 : visType.title}
             </EuiLink>
           </EuiFlexItem>
-          {visType.stage === 'experimental' && (
+          {visType.stage === 'experimental' && !visType.isDeprecated ? (
             <EuiFlexItem grow={false}>
               <EuiBetaBadge
                 iconType="beaker"
                 tooltipContent={i18n.translate('visualizations.newVisWizard.experimentalTooltip', {
                   defaultMessage:
-                    'This visualization might be changed or removed in a future release and is not subject to the support SLA.',
+                    'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
                 })}
                 label={i18n.translate('visualizations.newVisWizard.experimentalTitle', {
-                  defaultMessage: 'Experimental',
+                  defaultMessage: 'Technical preview',
                 })}
               />
             </EuiFlexItem>
+          ) : (
+            visType.isDeprecated && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="warning">
+                  <FormattedMessage id="visualizations.deprecatedTag" defaultMessage="Deprecated" />
+                </EuiBadge>
+              </EuiFlexItem>
+            )
           )}
         </EuiFlexGroup>
         <EuiText color="subdued" size="s">

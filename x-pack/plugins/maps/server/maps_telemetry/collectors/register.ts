@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { getMapsTelemetry, MapsUsage } from '../maps_telemetry';
-import { MapsConfigType } from '../../../config';
 
-export function registerMapsUsageCollector(
-  usageCollection: UsageCollectionSetup,
-  config: MapsConfigType
-): void {
+export function registerMapsUsageCollector(usageCollection?: UsageCollectionSetup): void {
   if (!usageCollection) {
     return;
   }
@@ -20,11 +16,8 @@ export function registerMapsUsageCollector(
   const mapsUsageCollector = usageCollection.makeUsageCollector<MapsUsage>({
     type: 'maps',
     isReady: () => true,
-    fetch: async () => await getMapsTelemetry(config),
+    fetch: async () => await getMapsTelemetry(),
     schema: {
-      settings: {
-        showMapVisualizationTypes: { type: 'boolean' },
-      },
       indexPatternsWithGeoFieldCount: { type: 'long' },
       indexPatternsWithGeoPointFieldCount: { type: 'long' },
       indexPatternsWithGeoShapeFieldCount: { type: 'long' },
@@ -71,6 +64,15 @@ export function registerMapsUsageCollector(
             _meta: { description: 'total number of es grid layers in cluster' },
           },
         },
+        es_agg_hexagons: {
+          min: { type: 'long', _meta: { description: 'min number of es hexagon layers per map' } },
+          max: { type: 'long', _meta: { description: 'max number of es hexagon layers per map' } },
+          avg: { type: 'float', _meta: { description: 'avg number of es hexagon layers per map' } },
+          total: {
+            type: 'long',
+            _meta: { description: 'total number of es hexagon layers in cluster' },
+          },
+        },
         es_agg_heatmap: {
           min: { type: 'long', _meta: { description: 'min number of es heatmap layers per map' } },
           max: { type: 'long', _meta: { description: 'max number of es heatmap layers  per map' } },
@@ -104,6 +106,24 @@ export function registerMapsUsageCollector(
             _meta: { description: 'total number of es document layers in cluster' },
           },
         },
+        es_ml_anomalies: {
+          min: {
+            type: 'long',
+            _meta: { description: 'min number of es machine learning anomaly layers per map' },
+          },
+          max: {
+            type: 'long',
+            _meta: { description: 'max number of es machine learning anomaly layers per map' },
+          },
+          avg: {
+            type: 'float',
+            _meta: { description: 'avg number of es machine learning anomaly layers per map' },
+          },
+          total: {
+            type: 'long',
+            _meta: { description: 'total number of es machine learning anomaly layers in cluster' },
+          },
+        },
         es_point_to_point: {
           min: {
             type: 'long',
@@ -132,18 +152,6 @@ export function registerMapsUsageCollector(
           total: {
             type: 'long',
             _meta: { description: 'total number of es track layers in cluster' },
-          },
-        },
-        kbn_region: {
-          min: { type: 'long', _meta: { description: 'min number of kbn region layers per map' } },
-          max: { type: 'long', _meta: { description: 'max number of kbn region layers per map' } },
-          avg: {
-            type: 'float',
-            _meta: { description: 'avg number of kbn region layers per map' },
-          },
-          total: {
-            type: 'long',
-            _meta: { description: 'total number of kbn region layers in cluster' },
           },
         },
         kbn_tms_raster: {
@@ -275,6 +283,88 @@ export function registerMapsUsageCollector(
           },
         },
       },
+      resolutions: {
+        coarse: {
+          min: {
+            type: 'long',
+            _meta: { description: 'min number of grid-agg layers with coarse resolution' },
+          },
+          max: {
+            type: 'long',
+            _meta: { description: 'max number of grid-agg layers with coarse resolution' },
+          },
+          avg: {
+            type: 'float',
+            _meta: { description: 'avg number of grid-agg layers with coarse resolution' },
+          },
+          total: {
+            type: 'long',
+            _meta: {
+              description: 'total number of grid-agg layers with coarse resolution',
+            },
+          },
+        },
+        fine: {
+          min: {
+            type: 'long',
+            _meta: { description: 'min number of grid-agg layers with fine resolution' },
+          },
+          max: {
+            type: 'long',
+            _meta: { description: 'max number of grid-agg layers with fine resolution' },
+          },
+          avg: {
+            type: 'float',
+            _meta: { description: 'avg number of grid-agg layers with fine resolution' },
+          },
+          total: {
+            type: 'long',
+            _meta: {
+              description: 'total number of grid-agg layers with fine resolution',
+            },
+          },
+        },
+        most_fine: {
+          min: {
+            type: 'long',
+            _meta: { description: 'min number of grid-agg layers with most_fine resolution' },
+          },
+          max: {
+            type: 'long',
+            _meta: { description: 'max number of grid-agg layers with most_fine resolution' },
+          },
+          avg: {
+            type: 'float',
+            _meta: { description: 'avg number of grid-agg layers with most_fine resolution' },
+          },
+          total: {
+            type: 'long',
+            _meta: {
+              description: 'total number of grid-agg layers with most_fine resolution',
+            },
+          },
+        },
+        super_fine: {
+          min: {
+            type: 'long',
+            _meta: { description: 'min number of grid-agg layers with super_fine resolution' },
+          },
+          max: {
+            type: 'long',
+            _meta: { description: 'max number of grid-agg layers with super_fine resolution' },
+          },
+          avg: {
+            type: 'float',
+            _meta: { description: 'avg number of grid-agg layers with super_fine resolution' },
+          },
+          total: {
+            type: 'long',
+            _meta: {
+              description: 'total number of grid-agg layers with super_fine resolution',
+            },
+          },
+        },
+      },
       joins: {
         term: {
           min: {
@@ -402,6 +492,11 @@ export function registerMapsUsageCollector(
         },
         emsVectorLayersCount: {
           DYNAMIC_KEY: { min: { type: 'long' }, max: { type: 'long' }, avg: { type: 'float' } },
+        },
+        customIconsCount: {
+          min: { type: 'long' },
+          max: { type: 'long' },
+          avg: { type: 'float' },
         },
       },
     },

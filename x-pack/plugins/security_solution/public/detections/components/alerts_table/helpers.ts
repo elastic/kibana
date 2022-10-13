@@ -6,19 +6,17 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import {
-  Filter,
-  esKuery,
-  KueryNode,
-  esFilters,
-} from '../../../../../../../src/plugins/data/public';
-import {
+
+import type { Filter, KueryNode } from '@kbn/es-query';
+import { FilterStateStore, fromKueryExpression } from '@kbn/es-query';
+
+import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
+import { TimelineType } from '../../../../common/types/timeline';
+import type {
   DataProvider,
-  DataProviderType,
   DataProvidersAnd,
 } from '../../../timelines/components/timeline/data_providers/data_provider';
-import { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
-import { TimelineType } from '../../../../common/types/timeline';
+import { DataProviderType } from '../../../timelines/components/timeline/data_providers/data_provider';
 
 interface FindValueToChangeInQuery {
   field: string;
@@ -120,7 +118,7 @@ export const replaceTemplateFieldFromQuery = (
 ): string => {
   if (timelineType === TimelineType.default) {
     if (query.trim() !== '') {
-      const valueToChange = findValueToChangeInQuery(esKuery.fromKueryExpression(query));
+      const valueToChange = findValueToChangeInQuery(fromKueryExpression(query));
       return valueToChange.reduce((newQuery, vtc) => {
         const newValue = getStringArray(vtc.field, eventData);
         if (newValue.length) {
@@ -243,7 +241,7 @@ export const buildTimeRangeFilter = (from: string, to: string): Filter[] => [
       },
     },
     $state: {
-      store: esFilters.FilterStateStore.APP_STATE,
+      store: FilterStateStore.APP_STATE,
     },
   } as Filter,
 ];

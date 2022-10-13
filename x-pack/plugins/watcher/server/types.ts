@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import type { ILegacyScopedClusterClient, IRouter, RequestHandlerContext } from 'src/core/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
-import { License, isEsError } from './shared_imports';
+import { SemVer } from 'semver';
+import type { IRouter } from '@kbn/core/server';
+
+import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import { License, handleEsError } from './shared_imports';
 
 export interface SetupDependencies {
   licensing: LicensingPluginSetup;
@@ -27,28 +29,10 @@ export interface ServerShim {
 }
 
 export interface RouteDependencies {
-  router: WatcherRouter;
+  router: IRouter;
   license: License;
   lib: {
-    isEsError: typeof isEsError;
+    handleEsError: typeof handleEsError;
   };
+  kibanaVersion: SemVer;
 }
-
-/**
- * @internal
- */
-export interface WatcherContext {
-  client: ILegacyScopedClusterClient;
-}
-
-/**
- * @internal
- */
-export interface WatcherRequestHandlerContext extends RequestHandlerContext {
-  watcher: WatcherContext;
-}
-
-/**
- * @internal
- */
-export type WatcherRouter = IRouter<WatcherRequestHandlerContext>;

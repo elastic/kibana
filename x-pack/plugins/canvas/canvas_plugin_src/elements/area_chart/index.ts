@@ -13,9 +13,10 @@ export const areaChart: ElementFactory = () => ({
   help: 'A line chart with a filled body',
   type: 'chart',
   icon: 'visArea',
-  expression: `filters
-  | demodata
-  | pointseries x="time" y="mean(price)"
-  | plot defaultStyle={seriesStyle lines=1 fill=1}
-  | render`,
+  expression: `kibana
+| selectFilter
+| demodata
+| pointseries x="time" y="mean(price)"
+| plot defaultStyle={seriesStyle lines=1 fill=1}
+| render`,
 });

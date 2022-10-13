@@ -9,12 +9,19 @@ import React, { useMemo } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiBasicTable, EuiBasicTableColumn, EuiCopy, EuiEmptyPrompt } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  EuiButton,
+  EuiCopy,
+  EuiEmptyPrompt,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { EDIT_BUTTON_LABEL, DELETE_BUTTON_LABEL } from '../../../../shared/constants';
 import { HiddenText } from '../../../../shared/hidden_text';
 import { convertMetaToPagination, handlePageChange } from '../../../../shared/table_pagination';
+import { API_KEYS_DOCS_URL } from '../../../routes';
 import { TOKEN_TYPE_DISPLAY_NAMES } from '../constants';
 import { CredentialsLogic } from '../credentials_logic';
 import { ApiToken } from '../types';
@@ -32,17 +39,23 @@ export const CredentialsList: React.FC = () => {
 
   const columns: Array<EuiBasicTableColumn<ApiToken>> = [
     {
-      name: 'Name',
+      name: i18n.translate('xpack.enterpriseSearch.appSearch.credentials.list.nameTitle', {
+        defaultMessage: 'Name',
+      }),
       width: '12%',
       render: (token: ApiToken) => token.name,
     },
     {
-      name: 'Type',
+      name: i18n.translate('xpack.enterpriseSearch.appSearch.credentials.list.typeTitle', {
+        defaultMessage: 'Type',
+      }),
       width: '15%',
       render: (token: ApiToken) => TOKEN_TYPE_DISPLAY_NAMES[token.type],
     },
     {
-      name: 'Key',
+      name: i18n.translate('xpack.enterpriseSearch.appSearch.credentials.list.keyTitle', {
+        defaultMessage: 'Key',
+      }),
       width: '36%',
       className: 'eui-textBreakAll',
       render: (token: ApiToken) => {
@@ -71,12 +84,16 @@ export const CredentialsList: React.FC = () => {
       },
     },
     {
-      name: 'Modes',
+      name: i18n.translate('xpack.enterpriseSearch.appSearch.credentials.list.modesTitle', {
+        defaultMessage: 'Modes',
+      }),
       width: '10%',
       render: (token: ApiToken) => getModeDisplayText(token),
     },
     {
-      name: 'Engines',
+      name: i18n.translate('xpack.enterpriseSearch.appSearch.credentials.list.enginesTitle', {
+        defaultMessage: 'Engines',
+      }),
       width: '18%',
       render: (token: ApiToken) => getEnginesDisplayText(token),
     },
@@ -121,14 +138,21 @@ export const CredentialsList: React.FC = () => {
             </h2>
           }
           body={i18n.translate('xpack.enterpriseSearch.appSearch.credentials.empty.body', {
-            defaultMessage: 'Click the "Create a key" button to make your first one.',
+            defaultMessage: 'Allow applications to access Elastic App Search on your behalf.',
           })}
+          actions={
+            <EuiButton size="s" target="_blank" iconType="popout" href={API_KEYS_DOCS_URL}>
+              {i18n.translate('xpack.enterpriseSearch.appSearch.credentials.empty.buttonLabel', {
+                defaultMessage: 'Learn about API keys',
+              })}
+            </EuiButton>
+          }
         />
       }
       loading={!isCredentialsDataComplete}
       pagination={{
         ...convertMetaToPagination(meta),
-        hidePerPageOptions: true,
+        showPerPageOptions: false,
       }}
       onChange={handlePageChange(onPaginate)}
     />

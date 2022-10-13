@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const { divide } = require('../../src/functions/divide.js');
+const { divide } = require('../../src/functions/divide');
 
 describe('Divide', () => {
   it('number, number', () => {
@@ -28,5 +28,12 @@ describe('Divide', () => {
 
   it('array length mismatch', () => {
     expect(() => divide([1, 2], [3])).toThrow('Array length mismatch');
+  });
+
+  it('divide by 0', () => {
+    expect(() => divide([1, 2], 0)).toThrow('Cannot divide by 0');
+    expect(() => divide(1, 0)).toThrow('Cannot divide by 0');
+    expect(() => divide([1, 2], [0, 0])).toThrow('Cannot divide by 0');
+    expect(() => divide(1, [1, 0])).toThrow('Cannot divide by 0');
   });
 });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreStart } from 'src/core/public';
+import { CoreStart } from '@kbn/core/public';
 import { WorkspaceField, ServerResultNode } from '../types';
 
 const DEFAULT_SHARD_SIZE = 5000;
@@ -96,8 +96,8 @@ export async function fetchTopNodes(
     .reduce((allAggs, subAgg) => ({ ...allAggs, ...subAgg }));
   const body = createSamplerSearchBody(aggs);
 
-  const response: TopTermsAggResponse = (
-    await post('../api/graph/searchProxy', {
+  const response = (
+    await post<{ resp: TopTermsAggResponse }>('../api/graph/searchProxy', {
       body: JSON.stringify({ index, body }),
     })
   ).resp;

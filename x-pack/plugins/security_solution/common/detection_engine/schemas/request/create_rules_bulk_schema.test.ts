@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { createRulesBulkSchema, CreateRulesBulkSchema } from './create_rules_bulk_schema';
-import { exactCheck } from '../../../exact_check';
-import { foldLeftRight } from '../../../test_utils';
-import { formatErrors } from '../../../format_errors';
+import type { CreateRulesBulkSchema } from './create_rules_bulk_schema';
+import { createRulesBulkSchema } from './create_rules_bulk_schema';
+import { exactCheck, foldLeftRight, formatErrors } from '@kbn/securitysolution-io-ts-utils';
 import { getCreateRulesSchemaMock } from './rule_schemas.mock';
 
 // only the basics of testing are here.

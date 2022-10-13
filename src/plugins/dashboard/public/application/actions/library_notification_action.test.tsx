@@ -6,63 +6,44 @@
  * Side Public License, v 1.
  */
 
-import { DashboardContainer } from '../embeddable';
-import { getSampleDashboardInput } from '../test_helpers';
-
-import { coreMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
-import { CoreStart } from 'kibana/public';
-import { LibraryNotificationAction, UnlinkFromLibraryAction } from '.';
-import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
 import {
   ErrorEmbeddable,
   IContainer,
   isErrorEmbeddable,
   ReferenceOrValueEmbeddable,
   ViewMode,
-} from '../../services/embeddable';
+} from '@kbn/embeddable-plugin/public';
 import {
   ContactCardEmbeddable,
   ContactCardEmbeddableFactory,
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
   CONTACT_CARD_EMBEDDABLE,
-} from '../../services/embeddable_test_samples';
+} from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
+import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 
-const { setup, doStart } = embeddablePluginMock.createInstance();
-setup.registerEmbeddableFactory(
-  CONTACT_CARD_EMBEDDABLE,
-  new ContactCardEmbeddableFactory((() => null) as any, {} as any)
-);
-const start = doStart();
+import { getSampleDashboardInput } from '../test_helpers';
+import { pluginServices } from '../../services/plugin_services';
+import { DashboardContainer } from '../embeddable/dashboard_container';
+import { UnlinkFromLibraryAction } from './unlink_from_library_action';
+import { LibraryNotificationAction } from './library_notification_action';
+
+const mockEmbeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
+pluginServices.getServices().embeddable.getEmbeddableFactory = jest
+  .fn()
+  .mockReturnValue(mockEmbeddableFactory);
 
 let container: DashboardContainer;
 let embeddable: ContactCardEmbeddable & ReferenceOrValueEmbeddable;
-let coreStart: CoreStart;
 let unlinkAction: UnlinkFromLibraryAction;
 
 beforeEach(async () => {
-  coreStart = coreMock.createStart();
-
-  unlinkAction = ({
+  unlinkAction = {
     getDisplayName: () => 'unlink from dat library',
     execute: jest.fn(),
-  } as unknown) as UnlinkFromLibraryAction;
+  } as unknown as UnlinkFromLibraryAction;
 
-  const containerOptions = {
-    ExitFullScreenButton: () => null,
-    SavedObjectFinder: () => null,
-    application: {} as any,
-    embeddable: start,
-    inspector: {} as any,
-    notifications: {} as any,
-    overlays: coreStart.overlays,
-    savedObjectMetaData: {} as any,
-    uiActions: {} as any,
-    uiSettings: uiSettingsServiceMock.createStartContract(),
-    http: coreStart.http,
-  };
-
-  container = new DashboardContainer(getSampleDashboardInput(), containerOptions);
+  container = new DashboardContainer(getSampleDashboardInput());
 
   const contactCardEmbeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,

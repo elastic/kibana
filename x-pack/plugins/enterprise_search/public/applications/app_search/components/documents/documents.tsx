@@ -9,35 +9,38 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiPageHeader, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-import { FlashMessages } from '../../../shared/flash_messages';
-import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 
 import { AppLogic } from '../../app_logic';
 import { EngineLogic, getEngineBreadcrumbs } from '../engine';
+import { AppSearchPageTemplate } from '../layout';
 
-import { DocumentCreationButton } from './components';
+import { DocumentCreationButton, EmptyState } from './components';
 import { DOCUMENTS_TITLE } from './constants';
 import { SearchExperience } from './search_experience';
 
 export const Documents: React.FC = () => {
-  const { isMetaEngine } = useValues(EngineLogic);
+  const {
+    isMetaEngine,
+    isElasticsearchEngine,
+    hasNoDocuments,
+    engine: { elasticsearchIndexName },
+  } = useValues(EngineLogic);
   const { myRole } = useValues(AppLogic);
+  const showDocumentCreationButton =
+    myRole.canManageEngineDocuments && !isMetaEngine && !isElasticsearchEngine;
 
   return (
-    <>
-      <SetPageChrome trail={getEngineBreadcrumbs([DOCUMENTS_TITLE])} />
-      <EuiPageHeader
-        pageTitle={DOCUMENTS_TITLE}
-        rightSideItems={
-          myRole.canManageEngineDocuments && !isMetaEngine
-            ? [<DocumentCreationButton />]
-            : undefined
-        }
-      />
-      <FlashMessages />
+    <AppSearchPageTemplate
+      pageChrome={getEngineBreadcrumbs([DOCUMENTS_TITLE])}
+      pageHeader={{
+        pageTitle: DOCUMENTS_TITLE,
+        rightSideItems: showDocumentCreationButton ? [<DocumentCreationButton />] : [],
+      }}
+      isEmptyState={hasNoDocuments}
+      emptyState={<EmptyState />}
+    >
       {isMetaEngine && (
         <>
           <EuiCallOut
@@ -60,7 +63,33 @@ export const Documents: React.FC = () => {
           <EuiSpacer />
         </>
       )}
+      {isElasticsearchEngine && (
+        <>
+          <EuiCallOut
+            data-test-subj="ElasticsearchEnginesCallout"
+            iconType="iInCircle"
+            title={i18n.translate(
+              'xpack.enterpriseSearch.appSearch.documents.elasticsearchEngineCallout.title',
+              {
+                defaultMessage: "This engine's data is managed by Elasticsearch.",
+              }
+            )}
+          >
+            <p>
+              {i18n.translate(
+                'xpack.enterpriseSearch.appSearch.documents.elasticsearchEngineCallout',
+                {
+                  defaultMessage:
+                    "The engine is attached to {elasticsearchIndexName}. You can modify this index's data in Kibana.",
+                  values: { elasticsearchIndexName },
+                }
+              )}
+            </p>
+          </EuiCallOut>
+          <EuiSpacer />
+        </>
+      )}
       <SearchExperience />
-    </>
+    </AppSearchPageTemplate>
   );
 };

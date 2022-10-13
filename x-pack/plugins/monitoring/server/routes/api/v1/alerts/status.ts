@@ -6,13 +6,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
-// @ts-ignore
+import { CommonAlertFilter } from '../../../../../common/types/alerts';
+import { fetchStatus } from '../../../../lib/alerts/fetch_status';
 import { handleError } from '../../../../lib/errors';
 import { RouteDependencies } from '../../../../types';
-import { fetchStatus } from '../../../../lib/alerts/fetch_status';
-import { CommonAlertFilter } from '../../../../../common/types/alerts';
 
-export function alertStatusRoute(server: any, npRoute: RouteDependencies) {
+export function alertStatusRoute(npRoute: RouteDependencies) {
   npRoute.router.post(
     {
       path: '/api/monitoring/v1/alert/{clusterUuid}/status',
@@ -34,14 +33,13 @@ export function alertStatusRoute(server: any, npRoute: RouteDependencies) {
       try {
         const { clusterUuid } = request.params;
         const { alertTypeIds, filters } = request.body;
-        const alertsClient = context.alerting?.getAlertsClient();
-        if (!alertsClient) {
+        const rulesClient = (await context.alerting)?.getRulesClient();
+        if (!rulesClient) {
           return response.ok({ body: undefined });
         }
 
         const status = await fetchStatus(
-          alertsClient,
-          npRoute.licenseService,
+          rulesClient,
           alertTypeIds,
           [clusterUuid],
           filters as CommonAlertFilter[]

@@ -8,7 +8,7 @@
 import * as React from 'react';
 import { shallow } from 'enzyme';
 import { WhenExpression } from './when';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 describe('when expression', () => {
   it('renders with builtin aggregation types', () => {

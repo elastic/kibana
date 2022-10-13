@@ -1,13 +1,10 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../../tsconfig.bazel.json",
   "compilerOptions": {
     "declaration": true,
     "declarationMap": true,
-    "incremental": true,
-    "outDir": "target",
-    "rootDir": "src",
-    "sourceMap": true,
-    "sourceRoot": "../../../../packages/kbn-config-schema/src",
+    "emitDeclarationOnly": true,
+    "outDir": "target_types",
     "stripInternal": true,
     "types": [
       "jest",
@@ -15,7 +12,6 @@
     ]
   },
   "include": [
-    "types/joi.d.ts",
-    "src/**/*.ts"
+    "**/*.ts"
   ]
 }

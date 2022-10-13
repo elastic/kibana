@@ -7,7 +7,7 @@
 
 import React, { useMemo, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
 import { first, last } from 'lodash';
 import { EuiLoadingChart, EuiText, EuiEmptyPrompt, EuiButton } from '@elastic/eui';
@@ -21,11 +21,13 @@ import {
   ElementClickListener,
   RectAnnotation,
   RectAnnotationDatum,
+  XYChartElementEvent,
 } from '@elastic/charts';
 import { EuiFlexItem } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
 import { EuiIcon } from '@elastic/eui';
-import { useUiSetting } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { toMetricOpt } from '../../../../../../common/snapshot_metric_i18n';
 import { MetricsExplorerAggregation } from '../../../../../../common/http_api';
 import { colorTransformer, Color } from '../../../../../../common/color_palette';
@@ -36,10 +38,8 @@ import { useWaffleTimeContext } from '../../hooks/use_waffle_time';
 import { useWaffleFiltersContext } from '../../hooks/use_waffle_filters';
 import { MetricExplorerSeriesChart } from '../../../metrics_explorer/components/series_chart';
 import { MetricsExplorerChartType } from '../../../metrics_explorer/hooks/use_metrics_explorer_options';
-import { getTimelineChartTheme } from '../../../metrics_explorer/components/helpers/get_chart_theme';
+import { getTimelineChartTheme } from '../../../../../utils/get_chart_theme';
 import { calculateDomain } from '../../../metrics_explorer/components/helpers/calculate_domain';
-
-import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { InfraFormatter } from '../../../../../lib/lib';
 import { useMetricsHostsAnomaliesResults } from '../../hooks/use_metrics_hosts_anomalies';
 import { useMetricsK8sAnomaliesResults } from '../../hooks/use_metrics_k8s_anomalies';
@@ -80,12 +80,10 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
     defaultPaginationOptions: { pageSize: 100 },
   };
 
-  const { metricsHostsAnomalies, getMetricsHostsAnomalies } = useMetricsHostsAnomaliesResults(
-    anomalyParams
-  );
-  const { metricsK8sAnomalies, getMetricsK8sAnomalies } = useMetricsK8sAnomaliesResults(
-    anomalyParams
-  );
+  const { metricsHostsAnomalies, getMetricsHostsAnomalies } =
+    useMetricsHostsAnomaliesResults(anomalyParams);
+  const { metricsK8sAnomalies, getMetricsK8sAnomalies } =
+    useMetricsK8sAnomaliesResults(anomalyParams);
 
   const getAnomalies = useMemo(() => {
     if (nodeType === 'host') {
@@ -139,8 +137,10 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
     : { max: 0, min: 0 };
 
   const onClickPoint: ElementClickListener = useCallback(
-    ([[geometryValue]]) => {
-      if (!Array.isArray(geometryValue)) {
+    ([elementEvent]) => {
+      // casting to GeometryValue as we are using cartesian charts
+      const [geometryValue] = elementEvent as XYChartElementEvent;
+      if (geometryValue && !Array.isArray(geometryValue)) {
         const { x: timestamp } = geometryValue;
         jumpToTime(timestamp);
         stopAutoReload();
@@ -210,7 +210,9 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
   }
 
   return (
-    <TimelineContainer>
+    <TimelineContainer
+      data-test-subj={isVisible ? 'timelineContainerOpen' : 'timelineContainerClosed'}
+    >
       <TimelineHeader>
         <EuiFlexItem grow={true}>
           <EuiText>
@@ -308,8 +310,7 @@ const TimelineContainer = euiStyled.div`
   border-top: 1px solid ${(props) => props.theme.eui.euiColorLightShade};
   height: 220px;
   width: 100%;
-  padding: ${(props) => props.theme.eui.paddingSizes.s} ${(props) =>
-  props.theme.eui.paddingSizes.m};
+  padding: ${(props) => props.theme.eui.euiSizeS} ${(props) => props.theme.eui.euiSizeM};
   display: flex;
   flex-direction: column;
 `;
@@ -317,15 +318,14 @@ const TimelineContainer = euiStyled.div`
 const TimelineHeader = euiStyled.div`
   display: flex;
   width: 100%;
-  padding: ${(props) => props.theme.eui.paddingSizes.s} ${(props) =>
-  props.theme.eui.paddingSizes.m};
+  padding: ${(props) => props.theme.eui.euiSizeS} ${(props) => props.theme.eui.euiSizeM};
   @media only screen and (max-width: 767px) {
       margin-top: 30px;
   }
 `;
 
 const TimelineChartContainer = euiStyled.div`
-  padding-left: ${(props) => props.theme.eui.paddingSizes.xs};
+  padding-left: ${(props) => props.theme.eui.euiSizeXS};
   width: 100%;
   height: 100%;
 `;

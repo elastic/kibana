@@ -11,35 +11,42 @@ import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const esClient = getService('es');
 
   describe('fleet_service_tokens', async () => {
     before(async () => {
-      await esArchiver.load('empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     after(async () => {
-      await esArchiver.unload('empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    describe('POST /api/fleet/service-tokens', () => {
+    describe('POST /api/fleet/service_tokens', () => {
       it('should create a valid service account token', async () => {
         const { body: apiResponse } = await supertest
-          .post(`/api/fleet/service-tokens`)
+          .post(`/api/fleet/service_tokens`)
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
 
         expect(apiResponse).have.property('name');
         expect(apiResponse).have.property('value');
 
-        const { body: tokensResponse } = await esClient.transport.request({
-          method: 'GET',
-          path: `_security/service/elastic/fleet-server/credential`,
-        });
+        const { body: tokensResponse } = await esClient.transport.request<any>(
+          {
+            method: 'GET',
+            path: `_security/service/elastic/fleet-server/credential`,
+          },
+          { meta: true }
+        );
 
         expect(tokensResponse.tokens).have.property(apiResponse.name);
       });
+    });
+
+    it('should work with deprecated api', async () => {
+      await supertest.post(`/api/fleet/service-tokens`).set('kbn-xsrf', 'xxxx').expect(200);
     });
   });
 }

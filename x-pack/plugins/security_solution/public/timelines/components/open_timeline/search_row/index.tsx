@@ -17,7 +17,7 @@ import styled from 'styled-components';
 
 import { TimelineType } from '../../../../../common/types/timeline';
 import * as i18n from '../translations';
-import { OpenTimelineProps } from '../types';
+import type { OpenTimelineProps } from '../types';
 
 const SearchRowContainer = styled.div`
   &:not(:last-child) {
@@ -62,6 +62,7 @@ export const SearchRow = React.memo<Props>(
             ? i18n.SEARCH_PLACEHOLDER
             : i18n.SEARCH_TEMPLATE_PLACEHOLDER,
         incremental: false,
+        'data-test-subj': 'search-bar',
       }),
       [timelineType]
     );
@@ -70,7 +71,7 @@ export const SearchRow = React.memo<Props>(
       <SearchRowContainer>
         <SearchRowFlexGroup gutterSize="s">
           <EuiFlexItem>
-            <EuiSearchBar data-test-subj="search-bar" box={searchBox} onChange={onQueryChange} />
+            <EuiSearchBar box={searchBox} onChange={onQueryChange} />
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>

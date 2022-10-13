@@ -17,7 +17,7 @@ import {
   SavedObjectEmbeddableInput,
   ReferenceOrValueEmbeddable,
   AttributeService,
-} from '../../../../src/plugins/embeddable/public';
+} from '@kbn/embeddable-plugin/public';
 import { BookSavedObjectAttributes } from '../../common';
 import { BookEmbeddableComponent } from './book_component';
 
@@ -52,7 +52,8 @@ function getHasMatch(search?: string, savedAttributes?: BookSavedObjectAttribute
 
 export class BookEmbeddable
   extends Embeddable<BookEmbeddableInput, BookEmbeddableOutput>
-  implements ReferenceOrValueEmbeddable<BookByValueInput, BookByReferenceInput> {
+  implements ReferenceOrValueEmbeddable<BookByValueInput, BookByReferenceInput>
+{
   public readonly type = BOOK_EMBEDDABLE;
   private subscription: Subscription;
   private node?: HTMLElement;
@@ -91,13 +92,11 @@ export class BookEmbeddable
   };
 
   readonly getInputAsValueType = async (): Promise<BookByValueInput> => {
-    const input = this.attributeService.getExplicitInputFromEmbeddable(this);
-    return this.attributeService.getInputAsValueType(input);
+    return this.attributeService.getInputAsValueType(this.getExplicitInput());
   };
 
   readonly getInputAsRefType = async (): Promise<BookByReferenceInput> => {
-    const input = this.attributeService.getExplicitInputFromEmbeddable(this);
-    return this.attributeService.getInputAsRefType(input, {
+    return this.attributeService.getInputAsRefType(this.getExplicitInput(), {
       showSaveModal: true,
       saveModalTitle: this.getTitle(),
     });
@@ -112,7 +111,7 @@ export class BookEmbeddable
   }
 
   public async reload() {
-    this.attributes = await this.attributeService.unwrapAttributes(this.input);
+    this.attributes = (await this.attributeService.unwrapAttributes(this.input)).attributes;
 
     this.updateOutput({
       attributes: this.attributes,

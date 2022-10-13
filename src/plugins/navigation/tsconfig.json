@@ -1,7 +1,6 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "composite": true,
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
@@ -12,5 +11,6 @@
     { "path": "../../core/tsconfig.json" },
     { "path": "../kibana_react/tsconfig.json" },
     { "path": "../data/tsconfig.json" },
+    { "path": "../unified_search/tsconfig.json" }
   ]
 }

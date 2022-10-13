@@ -6,54 +6,54 @@
  */
 
 import { isEmpty } from 'lodash/fp';
+import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
+import { getAllConnectorTypesUrl } from '../../../common/utils/connectors_api';
 import {
-  ACTION_TYPES_URL,
   ActionConnector,
   ActionTypeConnector,
-  CASE_CONFIGURE_CONNECTORS_URL,
-  CASE_CONFIGURE_URL,
   CasesConfigurePatch,
   CasesConfigureRequest,
   CasesConfigureResponse,
-} from '../../../common';
+  CasesConfigurationsResponse,
+  getCaseConfigurationDetailsUrl,
+} from '../../../common/api';
+import { CASE_CONFIGURE_CONNECTORS_URL, CASE_CONFIGURE_URL } from '../../../common/constants';
 import { KibanaServices } from '../../common/lib/kibana';
-
+import { convertToCamelCase, convertArrayToCamelCase } from '../../api/utils';
 import { ApiProps } from '../types';
-import { convertToCamelCase, decodeCaseConfigureResponse } from '../utils';
+import { decodeCaseConfigurationsResponse, decodeCaseConfigureResponse } from '../utils';
 import { CaseConfigure } from './types';
 
 export const fetchConnectors = async ({ signal }: ApiProps): Promise<ActionConnector[]> => {
-  const response = await KibanaServices.get().http.fetch(`${CASE_CONFIGURE_CONNECTORS_URL}/_find`, {
-    method: 'GET',
-    signal,
-  });
+  const response = await KibanaServices.get().http.fetch<ActionConnector[]>(
+    `${CASE_CONFIGURE_CONNECTORS_URL}/_find`,
+    { method: 'GET', signal }
+  );
 
   return response;
 };
 
-export const getCaseConfigure = async ({ signal }: ApiProps): Promise<CaseConfigure | null> => {
-  const response = await KibanaServices.get().http.fetch<CasesConfigureResponse>(
+export const getCaseConfigure = async ({
+  signal,
+  owner,
+}: ApiProps & { owner: string[] }): Promise<CaseConfigure | null> => {
+  const response = await KibanaServices.get().http.fetch<CasesConfigurationsResponse>(
     CASE_CONFIGURE_URL,
     {
       method: 'GET',
       signal,
+      query: { ...(owner.length > 0 ? { owner } : {}) },
     }
   );
 
-  return !isEmpty(response)
-    ? convertToCamelCase<CasesConfigureResponse, CaseConfigure>(
-        decodeCaseConfigureResponse(response)
-      )
-    : null;
-};
+  if (!isEmpty(response)) {
+    const decodedConfigs = decodeCaseConfigurationsResponse(response);
+    if (Array.isArray(decodedConfigs) && decodedConfigs.length > 0) {
+      return convertToCamelCase<CasesConfigureResponse, CaseConfigure>(decodedConfigs[0]);
+    }
+  }
 
-export const getConnectorMappings = async ({ signal }: ApiProps): Promise<ActionConnector[]> => {
-  const response = await KibanaServices.get().http.fetch(`${CASE_CONFIGURE_CONNECTORS_URL}/_find`, {
-    method: 'GET',
-    signal,
-  });
-
-  return response;
+  return null;
 };
 
 export const postCaseConfigure = async (
@@ -74,11 +74,12 @@ export const postCaseConfigure = async (
 };
 
 export const patchCaseConfigure = async (
+  id: string,
   caseConfiguration: CasesConfigurePatch,
   signal: AbortSignal
 ): Promise<CaseConfigure> => {
   const response = await KibanaServices.get().http.fetch<CasesConfigureResponse>(
-    CASE_CONFIGURE_URL,
+    getCaseConfigurationDetailsUrl(id),
     {
       method: 'PATCH',
       body: JSON.stringify(caseConfiguration),
@@ -91,10 +92,10 @@ export const patchCaseConfigure = async (
 };
 
 export const fetchActionTypes = async ({ signal }: ApiProps): Promise<ActionTypeConnector[]> => {
-  const response = await KibanaServices.get().http.fetch(ACTION_TYPES_URL, {
-    method: 'GET',
-    signal,
-  });
+  const response = await KibanaServices.get().http.fetch<ActionTypeConnector[]>(
+    getAllConnectorTypesUrl(),
+    { method: 'GET', signal, query: { feature_id: CasesConnectorFeatureId } }
+  );
 
-  return response;
+  return convertArrayToCamelCase(response) as ActionTypeConnector[];
 };

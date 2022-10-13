@@ -8,8 +8,16 @@
 import { i18n } from '@kbn/i18n';
 import { getMaxBytes, getMaxBytesFormatted } from './get_max_bytes';
 
-export function validateFile(file: File, types: string[]) {
-  if (file.size > getMaxBytes()) {
+/*
+ * Extract file extension from file. Example: file.name "points.geojson" returns ".geojson"
+ */
+export function getFileExtension(file: File) {
+  const extension = file.name.split('.').pop();
+  return '.' + extension;
+}
+
+export function validateFile(file: File, types: string[], options?: { checkSizeLimit?: boolean }) {
+  if (file.size > getMaxBytes() && options?.checkSizeLimit) {
     throw new Error(
       i18n.translate('xpack.fileUpload.fileSizeError', {
         defaultMessage: 'File size {fileSize} exceeds maximum file size of {maxFileSize}',
@@ -29,9 +37,7 @@ export function validateFile(file: File, types: string[]) {
     );
   }
 
-  const nameSplit = file.name.split('.');
-  const fileType = nameSplit.pop();
-  if (!types.includes(`.${fileType}`)) {
+  if (!types.includes(getFileExtension(file))) {
     throw new Error(
       i18n.translate('xpack.fileUpload.fileTypeError', {
         defaultMessage: 'File is not one of acceptable types: {types}',

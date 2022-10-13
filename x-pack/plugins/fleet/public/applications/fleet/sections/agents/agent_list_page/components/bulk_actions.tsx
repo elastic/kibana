@@ -5,84 +5,78 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import styled from 'styled-components';
+import React, { useMemo, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
   EuiPopover,
   EuiContextMenu,
-  EuiButtonEmpty,
+  EuiButton,
   EuiIcon,
   EuiPortal,
 } from '@elastic/eui';
-import { FormattedMessage, FormattedNumber } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import { SO_SEARCH_LIMIT } from '../../../../constants';
-import type { Agent } from '../../../../types';
+import type { Agent, AgentPolicy } from '../../../../types';
 import {
   AgentReassignAgentPolicyModal,
   AgentUnenrollAgentModal,
   AgentUpgradeAgentModal,
 } from '../../components';
-import { useKibanaVersion } from '../../../../hooks';
+import { useLicense } from '../../../../hooks';
+import { LICENSE_FOR_SCHEDULE_UPGRADE } from '../../../../../../../common/constants';
 
-const Divider = styled.div`
-  width: 0;
-  height: ${(props) => props.theme.eui.euiSizeL};
-  border-left: ${(props) => props.theme.eui.euiBorderThin};
-`;
+import { getCommonTags } from '../utils';
 
-const FlexItem = styled(EuiFlexItem)`
-  height: ${(props) => props.theme.eui.euiSizeL};
-`;
+import type { SelectionMode } from './types';
+import { TagsAddRemove } from './tags_add_remove';
 
-const Button = styled(EuiButtonEmpty)`
-  .euiButtonEmpty__text {
-    font-size: ${(props) => props.theme.eui.euiFontSizeXS};
-  }
-`;
-
-export type SelectionMode = 'manual' | 'query';
-
-export const AgentBulkActions: React.FunctionComponent<{
+export interface Props {
   totalAgents: number;
   totalInactiveAgents: number;
-  selectableAgents: number;
   selectionMode: SelectionMode;
-  setSelectionMode: (mode: SelectionMode) => void;
   currentQuery: string;
   selectedAgents: Agent[];
-  setSelectedAgents: (agents: Agent[]) => void;
-  refreshAgents: () => void;
-}> = ({
+  visibleAgents: Agent[];
+  refreshAgents: (args?: { refreshTags?: boolean }) => void;
+  allTags: string[];
+  agentPolicies: AgentPolicy[];
+}
+
+export const AgentBulkActions: React.FunctionComponent<Props> = ({
   totalAgents,
   totalInactiveAgents,
-  selectableAgents,
   selectionMode,
-  setSelectionMode,
   currentQuery,
   selectedAgents,
-  setSelectedAgents,
+  visibleAgents,
   refreshAgents,
+  allTags,
+  agentPolicies,
 }) => {
-  const kibanaVersion = useKibanaVersion();
+  const licenseService = useLicense();
+  const isLicenceAllowingScheduleUpgrade = licenseService.hasAtLeast(LICENSE_FOR_SCHEDULE_UPGRADE);
+
   // Bulk actions menu states
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const closeMenu = () => setIsMenuOpen(false);
-  const openMenu = () => setIsMenuOpen(true);
+  const onClickMenu = () => setIsMenuOpen(!isMenuOpen);
 
   // Actions states
   const [isReassignFlyoutOpen, setIsReassignFlyoutOpen] = useState<boolean>(false);
   const [isUnenrollModalOpen, setIsUnenrollModalOpen] = useState<boolean>(false);
-  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState<boolean>(false);
+  const [updateModalState, setUpgradeModalState] = useState({ isOpen: false, isScheduled: false });
+  const [isTagAddVisible, setIsTagAddVisible] = useState<boolean>(false);
 
   // Check if user is working with only inactive agents
   const atLeastOneActiveAgentSelected =
     selectionMode === 'manual'
       ? !!selectedAgents.find((agent) => agent.active)
       : totalAgents > totalInactiveAgents;
+  const totalActiveAgents = totalAgents - totalInactiveAgents;
+  const agentCount = selectionMode === 'manual' ? selectedAgents.length : totalActiveAgents;
+  const agents = selectionMode === 'manual' ? selectedAgents : currentQuery;
+  const [tagsPopoverButton, setTagsPopoverButton] = useState<HTMLElement>();
 
   const panels = [
     {
@@ -91,7 +85,23 @@ export const AgentBulkActions: React.FunctionComponent<{
         {
           name: (
             <FormattedMessage
+              id="xpack.fleet.agentBulkActions.addRemoveTags"
+              data-test-subj="agentBulkActionsAddRemoveTags"
+              defaultMessage="Add / remove tags"
+            />
+          ),
+          icon: <EuiIcon type="tag" size="m" />,
+          disabled: !atLeastOneActiveAgentSelected,
+          onClick: (event: any) => {
+            setTagsPopoverButton((event.target as Element).closest('button')!);
+            setIsTagAddVisible(!isTagAddVisible);
+          },
+        },
+        {
+          name: (
+            <FormattedMessage
               id="xpack.fleet.agentBulkActions.reassignPolicy"
+              data-test-subj="agentBulkActionsReassign"
               defaultMessage="Assign to new policy"
             />
           ),
@@ -106,7 +116,11 @@ export const AgentBulkActions: React.FunctionComponent<{
           name: (
             <FormattedMessage
               id="xpack.fleet.agentBulkActions.unenrollAgents"
-              defaultMessage="Unenroll agents"
+              data-test-subj="agentBulkActionsUnenroll"
+              defaultMessage="Unenroll {agentCount, plural, one {# agent} other {# agents}}"
+              values={{
+                agentCount,
+              }}
             />
           ),
           icon: <EuiIcon type="trash" size="m" />,
@@ -120,42 +134,46 @@ export const AgentBulkActions: React.FunctionComponent<{
           name: (
             <FormattedMessage
               id="xpack.fleet.agentBulkActions.upgradeAgents"
-              defaultMessage="Upgrade agents"
+              data-test-subj="agentBulkActionsUpgrade"
+              defaultMessage="Upgrade {agentCount, plural, one {# agent} other {# agents}}"
+              values={{
+                agentCount,
+              }}
             />
           ),
           icon: <EuiIcon type="refresh" size="m" />,
           disabled: !atLeastOneActiveAgentSelected,
           onClick: () => {
             closeMenu();
-            setIsUpgradeModalOpen(true);
+            setUpgradeModalState({ isOpen: true, isScheduled: false });
           },
         },
         {
           name: (
             <FormattedMessage
-              id="xpack.fleet.agentBulkActions.clearSelection"
-              defaultMessage="Clear selection"
+              id="xpack.fleet.agentBulkActions.scheduleUpgradeAgents"
+              data-test-subj="agentBulkActionsScheduleUpgrade"
+              defaultMessage="Schedule upgrade for {agentCount, plural, one {# agent} other {# agents}}"
+              values={{
+                agentCount,
+              }}
             />
           ),
-          icon: <EuiIcon type="cross" size="m" />,
+          icon: <EuiIcon type="timeRefresh" size="m" />,
+          disabled: !atLeastOneActiveAgentSelected || !isLicenceAllowingScheduleUpgrade,
           onClick: () => {
             closeMenu();
-            setSelectionMode('manual');
-            setSelectedAgents([]);
+            setUpgradeModalState({ isOpen: true, isScheduled: true });
           },
         },
       ],
     },
   ];
 
-  const showSelectEverything =
-    selectionMode === 'manual' &&
-    selectedAgents.length === selectableAgents &&
-    selectableAgents < totalAgents;
-
-  const totalActiveAgents = totalAgents - totalInactiveAgents;
-  const agentCount = selectionMode === 'manual' ? selectedAgents.length : totalActiveAgents;
-  const agents = selectionMode === 'manual' ? selectedAgents : currentQuery;
+  const getSelectedTagsFromAgents = useMemo(
+    () => getCommonTags(agents, visibleAgents ?? [], agentPolicies),
+    [agents, visibleAgents, agentPolicies]
+  );
 
   return (
     <>
@@ -177,99 +195,65 @@ export const AgentBulkActions: React.FunctionComponent<{
             agentCount={agentCount}
             onClose={() => {
               setIsUnenrollModalOpen(false);
+              refreshAgents({ refreshTags: true });
+            }}
+          />
+        </EuiPortal>
+      )}
+      {updateModalState.isOpen && (
+        <EuiPortal>
+          <AgentUpgradeAgentModal
+            agents={agents}
+            agentCount={agentCount}
+            isScheduled={updateModalState.isScheduled}
+            onClose={() => {
+              setUpgradeModalState({ isOpen: false, isScheduled: false });
               refreshAgents();
             }}
           />
         </EuiPortal>
       )}
-      {isUpgradeModalOpen && (
-        <EuiPortal>
-          <AgentUpgradeAgentModal
-            version={kibanaVersion}
-            agents={agents}
-            agentCount={agentCount}
-            onClose={() => {
-              setIsUpgradeModalOpen(false);
-              refreshAgents();
-            }}
-          />
-        </EuiPortal>
+      {isTagAddVisible && (
+        <TagsAddRemove
+          agents={Array.isArray(agents) ? agents.map((agent) => agent.id) : agents}
+          allTags={allTags ?? []}
+          selectedTags={getSelectedTagsFromAgents}
+          button={tagsPopoverButton!}
+          onTagsUpdated={() => {
+            refreshAgents({ refreshTags: true });
+          }}
+          onClosePopover={() => {
+            setIsTagAddVisible(false);
+            closeMenu();
+          }}
+        />
       )}
       <EuiFlexGroup gutterSize="m" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            {totalAgents > SO_SEARCH_LIMIT ? (
-              <FormattedMessage
-                id="xpack.fleet.agentBulkActions.totalAgentsWithLimit"
-                defaultMessage="Showing {count} of {total} agents"
-                values={{
-                  count: <FormattedNumber value={SO_SEARCH_LIMIT} />,
-                  total: <FormattedNumber value={totalAgents} />,
-                }}
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.fleet.agentBulkActions.totalAgents"
-                defaultMessage="Showing {count, plural, one {# agent} other {# agents}}"
-                values={{ count: totalAgents }}
-              />
-            )}
-          </EuiText>
-        </EuiFlexItem>
-        {(selectionMode === 'manual' && selectedAgents.length) ||
-        (selectionMode === 'query' && totalAgents > 0) ? (
-          <>
-            <FlexItem grow={false}>
-              <Divider />
-            </FlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiPopover
-                id="agentBulkActionsMenu"
-                button={
-                  <Button
-                    size="xs"
-                    iconType="arrowDown"
-                    iconSide="right"
-                    flush="left"
-                    onClick={openMenu}
-                  >
-                    <FormattedMessage
-                      id="xpack.fleet.agentBulkActions.agentsSelected"
-                      defaultMessage="{count, plural, one {# agent} other {# agents} =all {All agents}} selected"
-                      values={{
-                        count: selectionMode === 'manual' ? selectedAgents.length : 'all',
-                      }}
-                    />
-                  </Button>
-                }
-                isOpen={isMenuOpen}
-                closePopover={closeMenu}
-                panelPaddingSize="none"
-                anchorPosition="downLeft"
+          <EuiPopover
+            id="agentBulkActionsMenu"
+            button={
+              <EuiButton
+                fill
+                iconType="arrowDown"
+                iconSide="right"
+                onClick={onClickMenu}
+                data-test-subj="agentBulkActionsButton"
               >
-                <EuiContextMenu initialPanelId={0} panels={panels} />
-              </EuiPopover>
-            </EuiFlexItem>
-            {showSelectEverything ? (
-              <EuiFlexItem grow={false}>
-                <Button
-                  size="xs"
-                  iconType="pagesSelect"
-                  iconSide="left"
-                  flush="left"
-                  onClick={() => setSelectionMode('query')}
-                >
-                  <FormattedMessage
-                    id="xpack.fleet.agentBulkActions.selectAll"
-                    defaultMessage="Select everything on all pages"
-                  />
-                </Button>
-              </EuiFlexItem>
-            ) : null}
-          </>
-        ) : (
-          <FlexItem grow={false} />
-        )}
+                <FormattedMessage
+                  id="xpack.fleet.agentBulkActions.actions"
+                  defaultMessage="Actions"
+                />
+              </EuiButton>
+            }
+            isOpen={isMenuOpen}
+            closePopover={closeMenu}
+            panelPaddingSize="none"
+            anchorPosition="downLeft"
+          >
+            <EuiContextMenu initialPanelId={0} panels={panels} />
+          </EuiPopover>
+        </EuiFlexItem>
       </EuiFlexGroup>
     </>
   );

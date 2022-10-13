@@ -13,10 +13,10 @@ import { NetworkKpiNetworkEvents } from './network_events';
 import { NetworkKpiTlsHandshakes } from './tls_handshakes';
 import { NetworkKpiUniqueFlows } from './unique_flows';
 import { NetworkKpiUniquePrivateIps } from './unique_private_ips';
-import { NetworkKpiProps } from './types';
+import type { NetworkKpiProps } from './types';
 
 export const NetworkKpiComponent = React.memo<NetworkKpiProps>(
-  ({ filterQuery, from, indexNames, to, setQuery, skip, narrowDateRange }) => (
+  ({ filterQuery, from, indexNames, to, setQuery, skip, updateDateRange }) => (
     <EuiFlexGroup wrap>
       <EuiFlexItem grow={1}>
         <EuiFlexGroup wrap>
@@ -26,7 +26,7 @@ export const NetworkKpiComponent = React.memo<NetworkKpiProps>(
               from={from}
               indexNames={indexNames}
               to={to}
-              narrowDateRange={narrowDateRange}
+              updateDateRange={updateDateRange}
               setQuery={setQuery}
               skip={skip}
             />
@@ -37,7 +37,7 @@ export const NetworkKpiComponent = React.memo<NetworkKpiProps>(
               from={from}
               indexNames={indexNames}
               to={to}
-              narrowDateRange={narrowDateRange}
+              updateDateRange={updateDateRange}
               setQuery={setQuery}
               skip={skip}
             />
@@ -51,7 +51,7 @@ export const NetworkKpiComponent = React.memo<NetworkKpiProps>(
               from={from}
               indexNames={indexNames}
               to={to}
-              narrowDateRange={narrowDateRange}
+              updateDateRange={updateDateRange}
               setQuery={setQuery}
               skip={skip}
             />
@@ -62,7 +62,7 @@ export const NetworkKpiComponent = React.memo<NetworkKpiProps>(
               from={from}
               indexNames={indexNames}
               to={to}
-              narrowDateRange={narrowDateRange}
+              updateDateRange={updateDateRange}
               setQuery={setQuery}
               skip={skip}
             />
@@ -75,7 +75,7 @@ export const NetworkKpiComponent = React.memo<NetworkKpiProps>(
           from={from}
           indexNames={indexNames}
           to={to}
-          narrowDateRange={narrowDateRange}
+          updateDateRange={updateDateRange}
           setQuery={setQuery}
           skip={skip}
         />

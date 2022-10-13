@@ -7,14 +7,17 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo, useState } from 'react';
-import { IHttpFetchError } from 'src/core/public';
-import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
+import type {
+  IHttpFetchError,
+  ResponseErrorBody,
+} from '@kbn/core-http-browser';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useInspectorContext } from '@kbn/observability-plugin/public';
+import { useTimeRangeId } from '../context/time_range_id/use_time_range_id';
 import {
-  callApmApi,
   AutoAbortedAPMClient,
-} from '../services/rest/createCallApmApi';
-import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
-import { useUrlParams } from '../context/url_params_context/use_url_params';
+  callApmApi,
+} from '../services/rest/create_call_apm_api';
 
 export enum FETCH_STATUS {
   LOADING = 'loading',
@@ -26,10 +29,12 @@ export enum FETCH_STATUS {
 export interface FetcherResult<Data> {
   data?: Data;
   status: FETCH_STATUS;
-  error?: IHttpFetchError;
+  error?: IHttpFetchError<ResponseErrorBody>;
 }
 
-function getDetailsFromErrorResponse(error: IHttpFetchError) {
+function getDetailsFromErrorResponse(
+  error: IHttpFetchError<ResponseErrorBody>
+) {
   const message = error.body?.message ?? error.response?.statusText;
   return (
     <>
@@ -47,8 +52,11 @@ function getDetailsFromErrorResponse(error: IHttpFetchError) {
 const createAutoAbortedAPMClient = (
   signal: AbortSignal
 ): AutoAbortedAPMClient => {
-  return ((options: Parameters<AutoAbortedAPMClient>[0]) => {
-    return callApmApi({ ...options, signal });
+  return ((endpoint, options) => {
+    return callApmApi(endpoint, {
+      ...options,
+      signal,
+    } as any);
   }) as AutoAbortedAPMClient;
 };
 
@@ -68,7 +76,7 @@ export function useFetcher<TReturn>(
     showToastOnError?: boolean;
   } = {}
 ): FetcherResult<InferResponseType<TReturn>> & { refetch: () => void } {
-  const { notifications } = useApmPluginContext().core;
+  const { notifications } = useKibana();
   const { preservePreviousData = true, showToastOnError = true } = options;
   const [result, setResult] = useState<
     FetcherResult<InferResponseType<TReturn>>
@@ -77,7 +85,8 @@ export function useFetcher<TReturn>(
     status: FETCH_STATUS.NOT_INITIATED,
   });
   const [counter, setCounter] = useState(0);
-  const { rangeId } = useUrlParams();
+  const { timeRangeId } = useTimeRangeId();
+  const { addInspectorRequest } = useInspectorContext();
 
   useEffect(() => {
     let controller: AbortController = new AbortController();
@@ -117,19 +126,19 @@ export function useFetcher<TReturn>(
           } as FetcherResult<InferResponseType<TReturn>>);
         }
       } catch (e) {
-        const err = e as Error | IHttpFetchError;
+        const err = e as Error | IHttpFetchError<ResponseErrorBody>;
 
         if (!signal.aborted) {
           const errorDetails =
             'response' in err ? getDetailsFromErrorResponse(err) : err.message;
 
           if (showToastOnError) {
-            notifications.toasts.addDanger({
+            notifications.toasts.danger({
               title: i18n.translate('xpack.apm.fetcher.error.title', {
                 defaultMessage: `Error while fetching resource`,
               }),
 
-              text: toMountPoint(
+              body: (
                 <div>
                   <h5>
                     {i18n.translate('xpack.apm.fetcher.error.status', {
@@ -160,11 +169,19 @@ export function useFetcher<TReturn>(
   }, [
     counter,
     preservePreviousData,
-    rangeId,
+    timeRangeId,
     showToastOnError,
     ...fnDeps,
     /* eslint-enable react-hooks/exhaustive-deps */
   ]);
+
+  useEffect(() => {
+    if (result.error) {
+      addInspectorRequest({ ...result, data: result.error.body?.attributes });
+    } else {
+      addInspectorRequest(result);
+    }
+  }, [addInspectorRequest, result]);
 
   return useMemo(() => {
     return {

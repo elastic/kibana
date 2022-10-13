@@ -8,17 +8,25 @@
 
 import { duration } from 'moment';
 import { first } from 'rxjs/operators';
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import { fromRoot } from '@kbn/utils';
-import { createPluginInitializerContext, InstanceInfo } from './plugin_context';
-import { CoreContext } from '../core_context';
-import { Env } from '../config';
-import { loggingSystemMock } from '../logging/logging_system.mock';
-import { rawConfigServiceMock, getEnvOptions } from '../config/mocks';
-import { PluginManifest } from './types';
+import { rawConfigServiceMock, getEnvOptions, configServiceMock } from '@kbn/config-mocks';
+import type { CoreContext } from '@kbn/core-base-server-internal';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import type { NodeInfo } from '@kbn/core-node-server';
+import { nodeServiceMock } from '@kbn/core-node-server-mocks';
+import {
+  createPluginInitializerContext,
+  createPluginPrebootSetupContext,
+  InstanceInfo,
+} from './plugin_context';
+
+import { PluginManifest, PluginType } from './types';
 import { Server } from '../server';
 import { schema, ByteSizeValue } from '@kbn/config-schema';
-import { ConfigService } from '@kbn/config';
+import { ConfigService, Env } from '@kbn/config';
+import { PluginWrapper } from './plugin';
+import { coreMock } from '../mocks';
 
 function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): PluginManifest {
   return {
@@ -26,11 +34,16 @@ function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): Plug
     version: 'some-version',
     configPath: 'path',
     kibanaVersion: '7.0.0',
+    type: PluginType.standard,
     requiredPlugins: ['some-required-dep'],
     requiredBundles: [],
     optionalPlugins: ['some-optional-dep'],
     server: true,
     ui: true,
+    owner: {
+      name: 'Core',
+      githubTeam: 'kibana-core',
+    },
     ...manifestProps,
   };
 }
@@ -43,6 +56,7 @@ describe('createPluginInitializerContext', () => {
   let coreContext: CoreContext;
   let server: Server;
   let instanceInfo: InstanceInfo;
+  let nodeInfo: NodeInfo;
 
   beforeEach(async () => {
     logger = loggingSystemMock.create();
@@ -51,6 +65,7 @@ describe('createPluginInitializerContext', () => {
     instanceInfo = {
       uuid: 'instance-uuid',
     };
+    nodeInfo = nodeServiceMock.createInternalPrebootContract();
     env = Env.createDefault(REPO_ROOT, getEnvOptions());
     const config$ = rawConfigServiceMock.create({ rawConfig: {} });
     server = new Server(config$, env, logger);
@@ -85,12 +100,13 @@ describe('createPluginInitializerContext', () => {
         configPath: 'plugin',
       });
 
-      const pluginInitializerContext = createPluginInitializerContext(
+      const pluginInitializerContext = createPluginInitializerContext({
         coreContext,
         opaqueId,
         manifest,
-        instanceInfo
-      );
+        instanceInfo,
+        nodeInfo,
+      });
 
       expect(pluginInitializerContext.config.get()).toEqual({
         foo: 'bar',
@@ -100,12 +116,13 @@ describe('createPluginInitializerContext', () => {
 
     it('config.globalConfig$ should be an observable for the global config', async () => {
       const manifest = createPluginManifest();
-      const pluginInitializerContext = createPluginInitializerContext(
+      const pluginInitializerContext = createPluginInitializerContext({
         coreContext,
         opaqueId,
         manifest,
-        instanceInfo
-      );
+        instanceInfo,
+        nodeInfo,
+      });
 
       expect(pluginInitializerContext.config.legacy.globalConfig$).toBeDefined();
 
@@ -113,11 +130,6 @@ describe('createPluginInitializerContext', () => {
         .pipe(first())
         .toPromise();
       expect(configObject).toStrictEqual({
-        kibana: {
-          index: '.kibana',
-          autocompleteTerminateAfter: duration(100000),
-          autocompleteTimeout: duration(1000),
-        },
         elasticsearch: {
           shardTimeout: duration(30, 's'),
           requestTimeout: duration(30, 's'),
@@ -135,13 +147,99 @@ describe('createPluginInitializerContext', () => {
       instanceInfo = {
         uuid: 'kibana-uuid',
       };
-      const pluginInitializerContext = createPluginInitializerContext(
+      const pluginInitializerContext = createPluginInitializerContext({
         coreContext,
         opaqueId,
         manifest,
-        instanceInfo
-      );
+        instanceInfo,
+        nodeInfo,
+      });
       expect(pluginInitializerContext.env.instanceUuid).toBe('kibana-uuid');
     });
+
+    it('should expose paths to the config files', () => {
+      coreContext = {
+        ...coreContext,
+        env: Env.createDefault(
+          REPO_ROOT,
+          getEnvOptions({
+            configs: ['/home/kibana/config/kibana.yml', '/home/kibana/config/kibana.dev.yml'],
+          })
+        ),
+      };
+      const pluginInitializerContext = createPluginInitializerContext({
+        coreContext,
+        opaqueId,
+        manifest: createPluginManifest(),
+        instanceInfo,
+        nodeInfo,
+      });
+      expect(pluginInitializerContext.env.configs).toEqual([
+        '/home/kibana/config/kibana.yml',
+        '/home/kibana/config/kibana.dev.yml',
+      ]);
+    });
+  });
+
+  describe('context.node', () => {
+    it('should expose the correct node roles', () => {
+      const pluginInitializerContext = createPluginInitializerContext({
+        coreContext,
+        opaqueId,
+        manifest: createPluginManifest(),
+        instanceInfo,
+        nodeInfo: { roles: { backgroundTasks: false, ui: true } },
+      });
+      expect(pluginInitializerContext.node.roles.backgroundTasks).toBe(false);
+      expect(pluginInitializerContext.node.roles.ui).toBe(true);
+    });
+  });
+});
+
+describe('createPluginPrebootSetupContext', () => {
+  let coreContext: CoreContext;
+  let opaqueId: symbol;
+  let nodeInfo: NodeInfo;
+
+  beforeEach(async () => {
+    opaqueId = Symbol();
+    coreContext = {
+      coreId: Symbol('core'),
+      env: Env.createDefault(REPO_ROOT, getEnvOptions()),
+      logger: loggingSystemMock.create(),
+      configService: configServiceMock.create(),
+    };
+    nodeInfo = nodeServiceMock.createInternalPrebootContract();
+  });
+
+  it('`holdSetupUntilResolved` captures plugin.name', () => {
+    const manifest = createPluginManifest();
+    const plugin = new PluginWrapper({
+      path: 'some-path',
+      manifest,
+      opaqueId,
+      initializerContext: createPluginInitializerContext({
+        coreContext,
+        opaqueId,
+        manifest,
+        instanceInfo: {
+          uuid: 'instance-uuid',
+        },
+        nodeInfo,
+      }),
+    });
+
+    const corePreboot = coreMock.createInternalPreboot();
+    const prebootSetupContext = createPluginPrebootSetupContext(coreContext, corePreboot, plugin);
+
+    const holdSetupPromise = Promise.resolve(undefined);
+    prebootSetupContext.preboot.holdSetupUntilResolved('some-reason', holdSetupPromise);
+
+    expect(corePreboot.preboot.holdSetupUntilResolved).toHaveBeenCalledTimes(1);
+    expect(corePreboot.preboot.holdSetupUntilResolved).toHaveBeenCalledWith(
+      'some-plugin-id',
+      'some-reason',
+      holdSetupPromise
+    );
   });
 });

@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-import { EuiCode } from '@elastic/eui';
-
-/* eslint-disable no-duplicate-imports */
-
-import { EuiBreadcrumbs } from '@elastic/eui';
+import { EuiCode, EuiBreadcrumbs, EuiDescriptionList } from '@elastic/eui';
 
 import styled from 'styled-components';
-import { EuiDescriptionList } from '@elastic/eui';
 
 /**
  * Used by the nodeDetail view to show attributes of the related events.
@@ -28,13 +23,6 @@ export const StyledDescriptionList = styled(EuiDescriptionList)`
  */
 export const StyledTitle = styled('h4')`
   overflow-wrap: break-word;
-`;
-
-/**
- * Used for a 'BETA' badge in the breadcrumbs of each panel.
- */
-export const BetaHeader = styled(`header`)`
-  margin-bottom: 1em;
 `;
 
 /**

@@ -5,33 +5,25 @@
  * 2.0.
  */
 
-import {
-  Action,
-  applyMiddleware,
-  compose,
-  createStore as createReduxStore,
-  Store,
-  Middleware,
-  Dispatch,
-  PreloadedState,
-  CombinedState,
-} from 'redux';
+import type { Action, Store, Middleware, Dispatch, PreloadedState, CombinedState } from 'redux';
+import { applyMiddleware, compose, createStore as createReduxStore } from 'redux';
 
 import { createEpicMiddleware } from 'redux-observable';
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
 import { telemetryMiddleware } from '../lib/telemetry';
 import { appSelectors } from './app';
 import { timelineSelectors } from '../../timelines/store/timeline';
 import { inputsSelectors } from './inputs';
-import { SubPluginsInitReducer, createReducer } from './reducer';
+import type { SubPluginsInitReducer } from './reducer';
+import { createReducer } from './reducer';
 import { createRootEpic } from './epic';
-import { AppAction } from './actions';
-import { Immutable } from '../../../common/endpoint/types';
-import { State } from './types';
-import { Storage } from '../../../../../../src/plugins/kibana_utils/public';
-import { CoreStart } from '../../../../../../src/core/public';
-import { TimelineEpicDependencies } from '../../timelines/store/timeline/types';
+import type { AppAction } from './actions';
+import type { Immutable } from '../../../common/endpoint/types';
+import type { State } from './types';
+import type { TimelineEpicDependencies } from '../../timelines/store/timeline/types';
 
 type ComposeType = typeof compose;
 declare global {
@@ -49,7 +41,7 @@ let store: Store<State, Action> | null = null;
  * Factory for Security App's redux store.
  */
 export const createStore = (
-  state: PreloadedState<State>,
+  state: State,
   pluginsReducer: SubPluginsInitReducer,
   kibana: Observable<CoreStart>,
   storage: Storage,
@@ -74,7 +66,7 @@ export const createStore = (
 
   store = createReduxStore(
     createReducer(pluginsReducer),
-    state,
+    state as PreloadedState<State>,
     composeEnhancers(
       applyMiddleware(epicMiddleware, telemetryMiddleware, ...(additionalMiddleware ?? []))
     )

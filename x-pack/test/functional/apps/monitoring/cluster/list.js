@@ -13,6 +13,8 @@ export default function ({ getService, getPageObjects }) {
   const clusterOverview = getService('monitoringClusterOverview');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['monitoring', 'header', 'common']);
+  const alertsService = getService('monitoringAlerts');
+  const browser = getService('browser');
 
   describe('Cluster listing', () => {
     describe('with trial license clusters', () => {
@@ -21,10 +23,12 @@ export default function ({ getService, getPageObjects }) {
       const UNSUPPORTED_CLUSTER_UUID = '6d-9tDFTRe-qT5GoBytdlQ';
 
       before(async () => {
-        await setup('monitoring/multicluster', {
+        await setup('x-pack/test/functional/es_archives/monitoring/multicluster', {
           from: 'Aug 15, 2017 @ 21:00:00.000',
           to: 'Aug 16, 2017 @ 00:00:00.000',
         });
+
+        await clusterList.closeAlertsModal();
 
         await clusterList.assertDefaults();
       });
@@ -71,6 +75,29 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
+    describe('with standalone cluster', () => {
+      const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
+
+      before(async () => {
+        await setup('x-pack/test/functional/es_archives/monitoring/standalone_cluster', {
+          from: 'Feb 4, 2019 @ 17:50:00.000',
+          to: 'Feb 4, 2019 @ 17:52:00.000',
+        });
+
+        await clusterList.closeAlertsModal();
+        await clusterList.assertDefaults();
+      });
+
+      after(async () => {
+        await tearDown();
+      });
+
+      it('displays a standalone cluster', async () => {
+        expect(await clusterList.hasCluster('__standalone_cluster__')).to.be(true);
+        expect(await clusterList.hasCluster('lfhHkgqfTy2Vy3SvlPSvXg')).to.be(true);
+      });
+    });
+
     describe('with all basic license clusters', () => {
       const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
@@ -78,10 +105,12 @@ export default function ({ getService, getPageObjects }) {
       const SUPPORTED_CLUSTER_UUID = 'NDKg6VXAT6-TaGzEK2Zy7g';
 
       before(async () => {
-        await setup('monitoring/multi_basic', {
+        await setup('x-pack/test/functional/es_archives/monitoring/multi_basic', {
           from: 'Sep 7, 2017 @ 20:12:04.011',
           to: 'Sep 7, 2017 @ 20:18:55.733',
         });
+
+        await clusterList.closeAlertsModal();
 
         await clusterList.assertDefaults();
       });
@@ -140,9 +169,34 @@ export default function ({ getService, getPageObjects }) {
 
           expect(await clusterOverview.isOnClusterOverview()).to.be(true);
           expect(await clusterOverview.getClusterName()).to.be('production');
+          await PageObjects.monitoring.closeAlertsModal();
 
           await PageObjects.monitoring.clickBreadcrumb('~breadcrumbClusters'); // reset for next test
         });
+      });
+    });
+
+    describe('Alerts', () => {
+      const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
+
+      before(async () => {
+        await setup('x-pack/test/functional/es_archives/monitoring/multicluster', {
+          from: 'Aug 15, 2017 @ 21:00:00.000',
+          to: 'Aug 16, 2017 @ 00:00:00.000',
+        });
+      });
+
+      after(async () => {
+        await tearDown();
+
+        await alertsService.deleteAlerts();
+
+        await browser.clearLocalStorage();
+      });
+
+      it('should show a toast when alerts are created successfully', async () => {
+        await clusterList.acceptAlertsModal();
+        expect(await testSubjects.exists('alertsCreatedToast', { timeout: 10000 })).to.be(true);
       });
     });
   });

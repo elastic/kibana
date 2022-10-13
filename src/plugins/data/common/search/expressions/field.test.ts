@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ExecutionContext } from 'src/plugins/expressions/common';
+import { ExecutionContext } from '@kbn/expressions-plugin/common';
 import { functionWrapper } from './utils';
 import { fieldFunction } from './field';
 
@@ -18,6 +18,7 @@ describe('interpreter/functions#field', () => {
     context = {
       getSearchContext: () => ({}),
       getSearchSessionId: () => undefined,
+      getExecutionContext: () => undefined,
       types: {},
       variables: {},
       abortSignal: {} as any,

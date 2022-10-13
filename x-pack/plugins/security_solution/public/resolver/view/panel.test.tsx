@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { createMemoryHistory, History as HistoryPackageHistoryInterface } from 'history';
+import type { History as HistoryPackageHistoryInterface } from 'history';
+import { createMemoryHistory } from 'history';
 import { noAncestorsTwoChildrenWithRelatedEventsOnOrigin } from '../data_access_layer/mocks/no_ancestors_two_children_with_related_events_on_origin';
 import { Simulator } from '../test_utilities/simulator';
 // Extend jest with a custom matcher
@@ -38,6 +39,7 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
     ['@timestamp', 'Sep 23, 2020 @ 08:25:32.316'],
     ['process.executable', 'executable'],
     ['process.pid', '0'],
+    ['process.entity_id', 'origin'],
     ['user.name', 'user.name'],
     ['user.domain', 'user.domain'],
     ['process.parent.pid', '0'],
@@ -49,10 +51,8 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
 
   beforeEach(() => {
     // create a mock data access layer
-    const {
-      metadata: dataAccessLayerMetadata,
-      dataAccessLayer,
-    } = noAncestorsTwoChildrenWithRelatedEventsOnOrigin();
+    const { metadata: dataAccessLayerMetadata, dataAccessLayer } =
+      noAncestorsTwoChildrenWithRelatedEventsOnOrigin();
 
     entityIDs = dataAccessLayerMetadata.entityIDs;
 
@@ -152,13 +152,13 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
             .filterWhere(Simulator.isDOM);
 
           expect(copyableFieldHoverArea).toHaveLength(1);
-          copyableFieldHoverArea!.simulate('mouseenter');
+          copyableFieldHoverArea?.simulate('mouseenter');
         });
         describe('and when they click the copy-to-clipboard button', () => {
           beforeEach(async () => {
             const copyButton = await simulator().resolve('resolver:panel:clipboard');
             expect(copyButton).toHaveLength(1);
-            copyButton!.simulate('click');
+            copyButton?.simulate('click');
             simulator().confirmTextWrittenToClipboard();
           });
           it(`should write ${value} to the clipboard`, async () => {
@@ -187,6 +187,7 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
         ['@timestamp', 'Sep 23, 2020 @ 08:25:32.317'],
         ['process.executable', 'executable'],
         ['process.pid', '1'],
+        ['process.entity_id', 'firstChild'],
         ['user.name', 'user.name'],
         ['user.domain', 'user.domain'],
         ['process.parent.pid', '0'],
@@ -234,11 +235,11 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
             .filterWhere(Simulator.isDOM)
         );
       });
-      cExtHoverArea!.simulate('mouseenter');
+      cExtHoverArea?.simulate('mouseenter');
     });
     describe('and when the user clicks the copy-to-clipboard button', () => {
       beforeEach(async () => {
-        (await simulator().resolve('resolver:panel:clipboard'))!.simulate('click');
+        (await simulator().resolve('resolver:panel:clipboard'))?.simulate('click');
         simulator().confirmTextWrittenToClipboard();
       });
       const expected = 'Sep 23, 2020 @ 08:25:32.316';
@@ -371,7 +372,7 @@ describe(`Resolver: when analyzing a tree with no ancestors and two children and
                 beforeEach(async () => {
                   const button = await simulator().resolve('resolver:panel:clipboard');
                   expect(button).toBeTruthy();
-                  button!.simulate('click');
+                  button?.simulate('click');
                   simulator().confirmTextWrittenToClipboard();
                 });
                 it(`should write ${expectedValue} to the clipboard`, async () => {

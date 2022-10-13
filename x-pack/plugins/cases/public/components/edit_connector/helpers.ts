@@ -5,29 +5,23 @@
  * 2.0.
  */
 
+import { isConnectorUserAction, isCreateCaseUserAction } from '../../../common/utils/user_actions';
+import { ConnectorTypeFields } from '../../../common/api';
 import { CaseUserActions } from '../../containers/types';
 
-export const getConnectorFieldsFromUserActions = (id: string, userActions: CaseUserActions[]) => {
-  try {
-    for (const action of [...userActions].reverse()) {
-      if (action.actionField.length === 1 && action.actionField[0] === 'connector') {
-        if (action.oldValue && action.newValue) {
-          const oldValue = JSON.parse(action.oldValue);
-          const newValue = JSON.parse(action.newValue);
+export const getConnectorFieldsFromUserActions = (
+  id: string,
+  userActions: CaseUserActions[]
+): ConnectorTypeFields['fields'] => {
+  for (const action of [...userActions].reverse()) {
+    if (isConnectorUserAction(action) || isCreateCaseUserAction(action)) {
+      const connector = action.payload.connector;
 
-          if (newValue.id === id) {
-            return newValue.fields;
-          }
-
-          if (oldValue.id === id) {
-            return oldValue.fields;
-          }
-        }
+      if (connector && id === connector.id) {
+        return connector.fields;
       }
     }
-
-    return null;
-  } catch {
-    return null;
   }
+
+  return null;
 };

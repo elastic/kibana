@@ -13,11 +13,11 @@ import {
   EuiLoadingSpinner,
   EuiButton,
 } from '@elastic/eui';
-import { FormattedMessage, FormattedTime, FormattedRelative } from '@kbn/i18n/react';
+import { FormattedMessage, FormattedTime, FormattedRelative } from '@kbn/i18n-react';
 import * as React from 'react';
-import { Unit } from '@elastic/datemath';
+import { Unit } from '@kbn/datemath';
 
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { LogTextSeparator } from './log_text_separator';
 import { extendDatemath } from '../../../utils/datemath';
 
@@ -43,7 +43,7 @@ const TIMESTAMP_FORMAT = {
   hour: 'numeric',
   minute: 'numeric',
   second: 'numeric',
-};
+} as const;
 
 export class LogTextStreamLoadingItemView extends React.PureComponent<
   LogTextStreamLoadingItemViewProps,

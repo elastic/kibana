@@ -5,20 +5,18 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiShowFor } from '@elastic/eui';
 import React, { useCallback, useState, useMemo } from 'react';
-import styled from 'styled-components';
 
-import { AlertsByCategory } from '../components/alerts_by_category';
+import { InputsModelId } from '../../common/store/inputs/constants';
 import { FiltersGlobal } from '../../common/components/filters_global';
 import { SiemSearchBar } from '../../common/components/search_bar';
-import { WrapperPage } from '../../common/components/wrapper_page';
+import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { useGlobalTime } from '../../common/containers/use_global_time';
 import { useFetchIndex } from '../../common/containers/source';
 
 import { EventsByDataset } from '../components/events_by_dataset';
 import { EventCounts } from '../components/event_counts';
-import { OverviewEmpty } from '../components/overview_empty';
 import { StatefulSidebar } from '../components/sidebar';
 import { SignalsByCategory } from '../components/signals_by_category';
 import { inputsSelectors } from '../../common/store';
@@ -27,15 +25,13 @@ import { SecurityPageName } from '../../app/types';
 import { EndpointNotice } from '../components/endpoint_notice';
 import { useMessagesStorage } from '../../common/containers/local_storage/use_messages_storage';
 import { ENDPOINT_METADATA_INDEX } from '../../../common/constants';
-import { useIngestEnabledCheck } from '../../common/hooks/endpoint/ingest_enabled';
-import { useSourcererScope } from '../../common/containers/sourcerer';
-import { Sourcerer } from '../../common/components/sourcerer';
-import { SourcererScopeName } from '../../common/store/sourcerer/model';
+import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
-
-const SidebarFlexItem = styled(EuiFlexItem)`
-  margin-right: 24px;
-`;
+import { ThreatIntelLinkPanel } from '../components/overview_cti_links';
+import { useAllTiDataSources } from '../containers/overview_cti_links/use_all_ti_data_sources';
+import { useUserPrivileges } from '../../common/components/user_privileges';
+import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
+import { LandingPageComponent } from '../../common/components/landing_page';
 
 const OverviewComponent = () => {
   const getGlobalFiltersQuerySelector = useMemo(
@@ -47,7 +43,7 @@ const OverviewComponent = () => {
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
 
   const { from, deleteQuery, setQuery, to } = useGlobalTime();
-  const { indicesExist, indexPattern, selectedPatterns } = useSourcererScope();
+  const { indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
 
   const endpointMetadataIndex = useMemo<string[]>(() => {
     return [ENDPOINT_METADATA_INDEX];
@@ -64,53 +60,42 @@ const OverviewComponent = () => {
     setDismissMessage(true);
     addMessage('management', 'dismissEndpointNotice');
   }, [addMessage]);
-  const { allEnabled: isIngestEnabled } = useIngestEnabledCheck();
+  const {
+    endpointPrivileges: { canAccessFleet },
+  } = useUserPrivileges();
+  const { hasIndexRead, hasKibanaREAD } = useAlertsPrivileges();
+  const { tiDataSources: allTiDataSources, isInitiallyLoaded: isTiLoaded } = useAllTiDataSources();
+
   return (
     <>
       {indicesExist ? (
         <>
           <FiltersGlobal>
-            <SiemSearchBar id="global" indexPattern={indexPattern} />
+            <SiemSearchBar id={InputsModelId.global} indexPattern={indexPattern} />
           </FiltersGlobal>
 
-          <WrapperPage>
-            {!dismissMessage && !metadataIndexExists && isIngestEnabled && (
+          <SecuritySolutionPageWrapper>
+            {!dismissMessage && !metadataIndexExists && canAccessFleet && (
               <>
                 <EndpointNotice onDismiss={dismissEndpointNotice} />
                 <EuiSpacer size="l" />
               </>
             )}
-            <Sourcerer scope={SourcererScopeName.default} />
-            <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
-              <SidebarFlexItem grow={false}>
-                <StatefulSidebar />
-              </SidebarFlexItem>
+            <EuiFlexGroup>
+              <EuiShowFor sizes={['xl']}>
+                <EuiFlexItem grow={1}>
+                  <StatefulSidebar />
+                </EuiFlexItem>
+              </EuiShowFor>
 
-              <EuiFlexItem grow={true}>
-                <EuiFlexGroup direction="column" gutterSize="none">
-                  <EuiFlexItem grow={false}>
-                    <SignalsByCategory
-                      filters={filters}
-                      from={from}
-                      query={query}
-                      setQuery={setQuery}
-                      to={to}
-                    />
-                    <EuiSpacer size="l" />
-                  </EuiFlexItem>
-
-                  <EuiFlexItem grow={false}>
-                    <AlertsByCategory
-                      deleteQuery={deleteQuery}
-                      filters={filters}
-                      from={from}
-                      indexPattern={indexPattern}
-                      indexNames={selectedPatterns}
-                      query={query}
-                      setQuery={setQuery}
-                      to={to}
-                    />
-                  </EuiFlexItem>
+              <EuiFlexItem grow={3}>
+                <EuiFlexGroup direction="column" responsive={false} gutterSize="none">
+                  {hasIndexRead && hasKibanaREAD && (
+                    <EuiFlexItem grow={false}>
+                      <SignalsByCategory filters={filters} query={query} />
+                      <EuiSpacer size="l" />
+                    </EuiFlexItem>
+                  )}
 
                   <EuiFlexItem grow={false}>
                     <EventsByDataset
@@ -120,6 +105,7 @@ const OverviewComponent = () => {
                       indexPattern={indexPattern}
                       indexNames={selectedPatterns}
                       query={query}
+                      queryType="overview"
                       setQuery={setQuery}
                       to={to}
                     />
@@ -136,13 +122,28 @@ const OverviewComponent = () => {
                       to={to}
                     />
                   </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup direction="row">
+                      <EuiFlexItem grow={1}>
+                        {isTiLoaded && (
+                          <ThreatIntelLinkPanel
+                            allTiDataSources={allTiDataSources}
+                            deleteQuery={deleteQuery}
+                            from={from}
+                            setQuery={setQuery}
+                            to={to}
+                          />
+                        )}
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
-          </WrapperPage>
+          </SecuritySolutionPageWrapper>
         </>
       ) : (
-        <OverviewEmpty />
+        <LandingPageComponent />
       )}
 
       <SpyRoute pageName={SecurityPageName.overview} />

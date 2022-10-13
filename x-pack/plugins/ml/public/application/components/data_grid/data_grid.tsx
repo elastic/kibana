@@ -6,8 +6,9 @@
  */
 
 import { isEqual } from 'lodash';
-import React, { memo, useEffect, FC, useMemo } from 'react';
+import React, { memo, useEffect, useCallback, useRef, FC } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiButtonEmpty,
@@ -16,14 +17,17 @@ import {
   EuiCodeBlock,
   EuiCopy,
   EuiDataGrid,
+  EuiDataGridCellPopoverElementProps,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiMutationObserver,
   EuiSpacer,
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
 
-import { CoreSetup } from 'src/core/public';
+import { CoreSetup } from '@kbn/core/public';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { DEFAULT_SAMPLER_SHARD_SIZE } from '../../../../common/constants/field_histograms';
 
 import { ANALYSIS_CONFIG_TYPE, INDEX_STATUS } from '../../data_frame_analytics/common';
@@ -111,50 +115,45 @@ export const DataGrid: FC<Props> = memo(
     //   };
     // };
 
-    // If the charts are visible, hide the column actions icon.
-    const columnsWithChartsActionized = columnsWithCharts.map((d) => {
-      if (chartsVisible === true) {
-        d.actions = false;
-      }
-      return d;
-    });
+    const renderCellPopover = useCallback(
+      (popoverProps: EuiDataGridCellPopoverElementProps) => {
+        const { schema, rowIndex, cellContentsElement, DefaultCellPopover } = popoverProps;
+        if (
+          analysisType === ANALYSIS_CONFIG_TYPE.REGRESSION ||
+          analysisType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION ||
+          analysisType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION
+        ) {
+          if (schema === 'featureImportance') {
+            const row = data[rowIndex];
+            if (!row) return <div />;
+            // if resultsField for some reason is not available then use ml
+            const mlResultsField = resultsField ?? DEFAULT_RESULTS_FIELD;
+            let predictedValue: string | number | undefined;
+            let predictedProbability: number | undefined;
+            let topClasses: TopClasses = [];
+            if (
+              predictionFieldName !== undefined &&
+              row &&
+              row[`${mlResultsField}.${predictionFieldName}`] !== undefined
+            ) {
+              predictedValue = row[`${mlResultsField}.${predictionFieldName}`];
+              topClasses = getTopClasses(row, mlResultsField);
+              predictedProbability = row[`${mlResultsField}.prediction_probability`];
+            }
 
-    const popOverContent = useMemo(() => {
-      return analysisType === ANALYSIS_CONFIG_TYPE.REGRESSION ||
-        analysisType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION ||
-        analysisType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION
-        ? {
-            featureImportance: ({ children }: { cellContentsElement: any; children: any }) => {
-              const rowIndex = children?.props?.visibleRowIndex;
-              const row = data[rowIndex];
-              if (!row) return <div />;
-              // if resultsField for some reason is not available then use ml
-              const mlResultsField = resultsField ?? DEFAULT_RESULTS_FIELD;
-              let predictedValue: string | number | undefined;
-              let predictedProbability: number | undefined;
-              let topClasses: TopClasses = [];
-              if (
-                predictionFieldName !== undefined &&
-                row &&
-                row[`${mlResultsField}.${predictionFieldName}`] !== undefined
-              ) {
-                predictedValue = row[`${mlResultsField}.${predictionFieldName}`];
-                topClasses = getTopClasses(row, mlResultsField);
-                predictedProbability = row[`${mlResultsField}.prediction_probability`];
-              }
+            const isClassTypeBoolean = topClasses.reduce(
+              (p, c) => typeof c.class_name === 'boolean' || p,
+              false
+            );
 
-              const isClassTypeBoolean = topClasses.reduce(
-                (p, c) => typeof c.class_name === 'boolean' || p,
-                false
-              );
+            const parsedFIArray: FeatureImportance[] = getFeatureImportance(
+              row,
+              mlResultsField,
+              isClassTypeBoolean
+            );
 
-              const parsedFIArray: FeatureImportance[] = getFeatureImportance(
-                row,
-                mlResultsField,
-                isClassTypeBoolean
-              );
-
-              return (
+            return (
+              <div data-test-subj="mlDFAFeatureImportancePopover">
                 <DecisionPathPopover
                   analysisType={analysisType}
                   predictedValue={predictedValue}
@@ -166,16 +165,20 @@ export const DataGrid: FC<Props> = memo(
                     predictionFieldName ? predictionFieldName.replace('_prediction', '') : undefined
                   }
                 />
-              );
-            },
-            featureInfluence: ({
-              cellContentsElement,
-            }: {
-              cellContentsElement: HTMLDivElement;
-            }) => <EuiCodeBlock isCopyable={true}>{cellContentsElement.textContent}</EuiCodeBlock>,
+              </div>
+            );
+          } else if (schema === 'featureInfluence') {
+            return <EuiCodeBlock isCopyable={true}>{cellContentsElement.textContent}</EuiCodeBlock>;
+          } else {
+            return <DefaultCellPopover {...popoverProps} />;
           }
-        : undefined;
-    }, [baseline, data]);
+        } else {
+          return <DefaultCellPopover {...popoverProps} />;
+        }
+      },
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [baseline, data]
+    );
 
     useEffect(() => {
       if (invalidSortingColumnns.length > 0) {
@@ -189,6 +192,8 @@ export const DataGrid: FC<Props> = memo(
         });
       }
     }, [invalidSortingColumnns, toastNotifications]);
+
+    const wrapperEl = useRef<HTMLDivElement>(null);
 
     if (status === INDEX_STATUS.LOADED && data.length === 0) {
       return (
@@ -261,8 +266,22 @@ export const DataGrid: FC<Props> = memo(
       }
     }
 
+    const onMutation = () => {
+      if (wrapperEl.current !== null) {
+        const els = wrapperEl.current.querySelectorAll('.euiDataGrid__virtualized');
+        for (const el of Array.from(els)) {
+          if (isPopulatedObject(el) && isPopulatedObject(el.style) && el.style.height !== 'auto') {
+            el.style.height = 'auto';
+          }
+        }
+      }
+    };
+
     return (
-      <div data-test-subj={`${dataTestSubj} ${status === INDEX_STATUS.ERROR ? 'error' : 'loaded'}`}>
+      <div
+        data-test-subj={`${dataTestSubj} ${status === INDEX_STATUS.ERROR ? 'error' : 'loaded'}`}
+        ref={wrapperEl}
+      >
         {isWithHeader(props) && (
           <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
             <EuiFlexItem>
@@ -303,69 +322,80 @@ export const DataGrid: FC<Props> = memo(
               <p>
                 {i18n.translate('xpack.ml.dataGrid.CcsWarningCalloutBody', {
                   defaultMessage:
-                    'There was an issue retrieving data for the index pattern. Source preview in combination with cross-cluster search is only supported for versions 7.10 and above. You may still configure and create the transform.',
+                    'There was an issue retrieving data for the data view. Source preview in combination with cross-cluster search is only supported for versions 7.10 and above. You may still configure and create the transform.',
                 })}
               </p>
             </EuiCallOut>
             <EuiSpacer size="m" />
           </div>
         )}
-        <div className="mlDataGrid">
-          <EuiDataGrid
-            aria-label={isWithHeader(props) ? props.title : ''}
-            columns={columnsWithChartsActionized.map((c) => {
-              c.initialWidth = 165;
-              return c;
-            })}
-            columnVisibility={{ visibleColumns, setVisibleColumns }}
-            gridStyle={euiDataGridStyle}
-            rowCount={rowCount}
-            renderCellValue={renderCellValue}
-            sorting={{ columns: sortingColumns, onSort }}
-            toolbarVisibility={{
-              ...euiDataGridToolbarSettings,
-              ...(chartsButtonVisible
-                ? {
-                    additionalControls: (
-                      <EuiToolTip
-                        content={i18n.translate('xpack.ml.dataGrid.histogramButtonToolTipContent', {
-                          defaultMessage:
-                            'Queries run to fetch histogram chart data will use a sample size per shard of {samplerShardSize} documents.',
-                          values: {
-                            samplerShardSize: DEFAULT_SAMPLER_SHARD_SIZE,
-                          },
-                        })}
-                      >
-                        <EuiButtonEmpty
-                          aria-pressed={chartsVisible === true}
-                          className={`euiDataGrid__controlBtn${
-                            chartsVisible === true ? ' euiDataGrid__controlBtn--active' : ''
-                          }`}
-                          data-test-subj={`${dataTestSubj}HistogramButton`}
-                          size="xs"
-                          iconType="visBarVertical"
-                          color="text"
-                          onClick={toggleChartVisibility}
-                          disabled={chartsVisible === undefined}
-                        >
-                          {i18n.translate('xpack.ml.dataGrid.histogramButtonText', {
-                            defaultMessage: 'Histogram charts',
-                          })}
-                        </EuiButtonEmpty>
-                      </EuiToolTip>
-                    ),
-                  }
-                : {}),
-            }}
-            popoverContents={popOverContent}
-            pagination={{
-              ...pagination,
-              pageSizeOptions: [5, 10, 25],
-              onChangeItemsPerPage,
-              onChangePage,
-            }}
-          />
-        </div>
+        <EuiMutationObserver
+          observerOptions={{ subtree: true, attributes: true, childList: true }}
+          onMutation={onMutation}
+        >
+          {(mutationRef) => (
+            <div className="mlDataGrid" ref={mutationRef}>
+              <EuiDataGrid
+                aria-label={isWithHeader(props) ? props.title : ''}
+                columns={columnsWithCharts.map((c) => {
+                  c.initialWidth = 165;
+                  return c;
+                })}
+                columnVisibility={{ visibleColumns, setVisibleColumns }}
+                gridStyle={euiDataGridStyle}
+                rowCount={rowCount}
+                renderCellValue={renderCellValue}
+                renderCellPopover={renderCellPopover}
+                sorting={{ columns: sortingColumns, onSort }}
+                toolbarVisibility={{
+                  ...euiDataGridToolbarSettings,
+                  ...(chartsButtonVisible
+                    ? {
+                        additionalControls: (
+                          <EuiToolTip
+                            content={i18n.translate(
+                              'xpack.ml.dataGrid.histogramButtonToolTipContent',
+                              {
+                                defaultMessage:
+                                  'Queries run to fetch histogram chart data will use a sample size per shard of {samplerShardSize} documents.',
+                                values: {
+                                  samplerShardSize: DEFAULT_SAMPLER_SHARD_SIZE,
+                                },
+                              }
+                            )}
+                          >
+                            <EuiButtonEmpty
+                              aria-pressed={chartsVisible === true}
+                              className={`euiDataGrid__controlBtn${
+                                chartsVisible === true ? ' euiDataGrid__controlBtn--active' : ''
+                              }`}
+                              data-test-subj={`${dataTestSubj}HistogramButton`}
+                              size="xs"
+                              iconType="visBarVertical"
+                              color="text"
+                              onClick={toggleChartVisibility}
+                              disabled={chartsVisible === undefined}
+                            >
+                              <FormattedMessage
+                                id="xpack.ml.dataGrid.histogramButtonText"
+                                defaultMessage="Histogram charts"
+                              />
+                            </EuiButtonEmpty>
+                          </EuiToolTip>
+                        ),
+                      }
+                    : {}),
+                }}
+                pagination={{
+                  ...pagination,
+                  pageSizeOptions: [5, 10, 25],
+                  onChangeItemsPerPage,
+                  onChangePage,
+                }}
+              />
+            </div>
+          )}
+        </EuiMutationObserver>
       </div>
     );
   },

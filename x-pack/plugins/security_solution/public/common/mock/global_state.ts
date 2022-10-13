@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { InputsModelId } from '../store/inputs/constants';
 import {
   Direction,
   FlowTarget,
@@ -13,8 +14,9 @@ import {
   NetworkTopTablesFields,
   NetworkTlsFields,
   NetworkUsersFields,
+  RiskScoreFields,
 } from '../../../common/search_strategy';
-import { State } from '../store';
+import type { State } from '../store';
 
 import { defaultHeaders } from './header';
 import {
@@ -23,14 +25,34 @@ import {
   DEFAULT_INTERVAL_TYPE,
   DEFAULT_INTERVAL_VALUE,
   DEFAULT_INDEX_PATTERN,
+  DEFAULT_DATA_VIEW_ID,
+  DEFAULT_SIGNALS_INDEX,
 } from '../../../common/constants';
 import { networkModel } from '../../network/store';
 import { TimelineType, TimelineStatus, TimelineTabs } from '../../../common/types/timeline';
 import { mockManagementState } from '../../management/store/reducer';
-import { ManagementState } from '../../management/types';
+import type { ManagementState } from '../../management/types';
 import { initialSourcererState, SourcererScopeName } from '../store/sourcerer/model';
-import { mockBrowserFields, mockDocValueFields } from '../containers/source/mock';
-import { mockIndexPattern } from './index_pattern';
+import { allowedExperimentalValues } from '../../../common/experimental_features';
+import { getScopePatternListSelection } from '../store/sourcerer/helpers';
+import { mockBrowserFields, mockIndexFields, mockRuntimeMappings } from '../containers/source/mock';
+import { usersModel } from '../../users/store';
+import { UsersFields } from '../../../common/search_strategy/security_solution/users/common';
+
+export const mockSourcererState = {
+  ...initialSourcererState,
+  signalIndexName: `${DEFAULT_SIGNALS_INDEX}-spacename`,
+  defaultDataView: {
+    ...initialSourcererState.defaultDataView,
+    browserFields: mockBrowserFields,
+    id: DEFAULT_DATA_VIEW_ID,
+    indexFields: mockIndexFields,
+    loading: false,
+    patternList: [...DEFAULT_INDEX_PATTERN, `${DEFAULT_SIGNALS_INDEX}-spacename`],
+    runtimeMappings: mockRuntimeMappings,
+    title: [...DEFAULT_INDEX_PATTERN, `${DEFAULT_SIGNALS_INDEX}-spacename`].join(','),
+  },
+};
 
 export const mockGlobalState: State = {
   app: {
@@ -39,11 +61,7 @@ export const mockGlobalState: State = {
       { id: 'error-id-1', title: 'title-1', message: ['error-message-1'] },
       { id: 'error-id-2', title: 'title-2', message: ['error-message-2'] },
     ],
-    enableExperimental: {
-      eventFilteringEnabled: false,
-      trustedAppsByPolicyEnabled: false,
-      hostIsolationEnabled: false,
-    },
+    enableExperimental: allowedExperimentalValues,
   },
   hosts: {
     page: {
@@ -57,8 +75,17 @@ export const mockGlobalState: State = {
         },
         events: { activePage: 0, limit: 10 },
         uncommonProcesses: { activePage: 0, limit: 10 },
-        anomalies: null,
-        alerts: { activePage: 0, limit: 10 },
+        anomalies: {
+          jobIdSelection: [],
+          intervalSelection: 'auto',
+        },
+        hostRisk: {
+          activePage: 0,
+          limit: 10,
+          sort: { field: RiskScoreFields.hostRiskScore, direction: Direction.desc },
+          severitySelection: [],
+        },
+        sessions: { activePage: 0, limit: 10 },
       },
     },
     details: {
@@ -72,8 +99,17 @@ export const mockGlobalState: State = {
         },
         events: { activePage: 0, limit: 10 },
         uncommonProcesses: { activePage: 0, limit: 10 },
-        anomalies: null,
-        alerts: { activePage: 0, limit: 10 },
+        anomalies: {
+          jobIdSelection: [],
+          intervalSelection: 'auto',
+        },
+        hostRisk: {
+          activePage: 0,
+          limit: 10,
+          sort: { field: RiskScoreFields.hostRiskScore, direction: Direction.desc },
+          severitySelection: [],
+        },
+        sessions: { activePage: 0, limit: 10 },
       },
     },
   },
@@ -120,6 +156,10 @@ export const mockGlobalState: State = {
           activePage: 0,
           limit: 10,
         },
+        [networkModel.NetworkTableType.anomalies]: {
+          jobIdSelection: [],
+          intervalSelection: 'auto',
+        },
       },
     },
     details: {
@@ -160,6 +200,48 @@ export const mockGlobalState: State = {
           limit: 10,
           sort: { direction: Direction.desc },
         },
+        [networkModel.NetworkTableType.anomalies]: {
+          jobIdSelection: [],
+          intervalSelection: 'auto',
+        },
+      },
+    },
+  },
+  users: {
+    page: {
+      queries: {
+        [usersModel.UsersTableType.allUsers]: {
+          activePage: 0,
+          limit: 10,
+          sort: { field: UsersFields.name, direction: Direction.asc },
+        },
+        [usersModel.UsersTableType.authentications]: {
+          activePage: 0,
+          limit: 10,
+        },
+        [usersModel.UsersTableType.anomalies]: {
+          jobIdSelection: [],
+          intervalSelection: 'auto',
+        },
+        [usersModel.UsersTableType.risk]: {
+          activePage: 0,
+          limit: 10,
+          sort: {
+            field: RiskScoreFields.timestamp,
+            direction: Direction.asc,
+          },
+          severitySelection: [],
+        },
+        [usersModel.UsersTableType.events]: { activePage: 0, limit: 10 },
+      },
+    },
+    details: {
+      queries: {
+        [usersModel.UsersTableType.anomalies]: {
+          jobIdSelection: [],
+          intervalSelection: 'auto',
+        },
+        [usersModel.UsersTableType.events]: { activePage: 0, limit: 10 },
       },
     },
   },
@@ -172,7 +254,7 @@ export const mockGlobalState: State = {
         from: '2020-07-07T08:20:18.966Z',
         to: '2020-07-08T08:20:18.966Z',
       },
-      linkTo: ['timeline'],
+      linkTo: [InputsModelId.timeline, InputsModelId.socTrends],
       queries: [],
       policy: { kind: DEFAULT_INTERVAL_TYPE, duration: DEFAULT_INTERVAL_VALUE },
       query: {
@@ -189,7 +271,7 @@ export const mockGlobalState: State = {
         from: '2020-07-07T08:20:18.966Z',
         to: '2020-07-08T08:20:18.966Z',
       },
-      linkTo: ['global'],
+      linkTo: [InputsModelId.global, InputsModelId.socTrends],
       queries: [],
       policy: { kind: DEFAULT_INTERVAL_TYPE, duration: DEFAULT_INTERVAL_VALUE },
       query: {
@@ -197,6 +279,17 @@ export const mockGlobalState: State = {
         language: 'kuery',
       },
       filters: [],
+    },
+    socTrends: {
+      timerange: {
+        kind: 'relative',
+        fromStr: DEFAULT_FROM,
+        toStr: DEFAULT_TO,
+        from: '2020-07-06T08:20:18.966Z',
+        to: '2020-07-07T08:20:18.966Z',
+      },
+      linkTo: [InputsModelId.global, InputsModelId.timeline],
+      policy: { kind: DEFAULT_INTERVAL_TYPE, duration: DEFAULT_INTERVAL_VALUE },
     },
   },
   dragAndDrop: { dataProviders: {} },
@@ -210,10 +303,15 @@ export const mockGlobalState: State = {
       test: {
         activeTab: TimelineTabs.query,
         prevActiveTab: TimelineTabs.notes,
+        dataViewId: DEFAULT_DATA_VIEW_ID,
         deletedEventIds: [],
+        documentType: '',
+        queryFields: [],
+        selectAll: false,
         id: 'test',
         savedObjectId: null,
         columns: defaultHeaders,
+        defaultColumns: defaultHeaders,
         indexNames: DEFAULT_INDEX_PATTERN,
         itemsPerPage: 5,
         dataProviders: [],
@@ -245,12 +343,20 @@ export const mockGlobalState: State = {
           end: '2020-07-08T08:20:18.966Z',
         },
         selectedEventIds: {},
+        sessionViewConfig: null,
         show: false,
         showCheckboxes: false,
         pinnedEventIds: {},
         pinnedEventsSaveObject: {},
         itemsPerPageOptions: [5, 10, 20],
-        sort: [{ columnId: '@timestamp', columnType: 'number', sortDirection: Direction.desc }],
+        sort: [
+          {
+            columnId: '@timestamp',
+            columnType: 'date',
+            esTypes: ['date'],
+            sortDirection: Direction.desc,
+          },
+        ],
         isSaving: false,
         version: null,
         status: TimelineStatus.active,
@@ -259,27 +365,52 @@ export const mockGlobalState: State = {
     insertTimeline: null,
   },
   sourcerer: {
-    ...initialSourcererState,
+    ...mockSourcererState,
+    defaultDataView: {
+      ...mockSourcererState.defaultDataView,
+      title: `${mockSourcererState.defaultDataView.title},fakebeat-*`,
+    },
+    kibanaDataViews: [
+      {
+        ...mockSourcererState.defaultDataView,
+        title: `${mockSourcererState.defaultDataView.title},fakebeat-*`,
+      },
+    ],
     sourcererScopes: {
-      ...initialSourcererState.sourcererScopes,
+      ...mockSourcererState.sourcererScopes,
       [SourcererScopeName.default]: {
-        ...initialSourcererState.sourcererScopes[SourcererScopeName.default],
-        selectedPatterns: DEFAULT_INDEX_PATTERN,
-        browserFields: mockBrowserFields,
-        indexPattern: mockIndexPattern,
-        docValueFields: mockDocValueFields,
-        loading: false,
+        ...mockSourcererState.sourcererScopes[SourcererScopeName.default],
+        selectedDataViewId: mockSourcererState.defaultDataView.id,
+        selectedPatterns: getScopePatternListSelection(
+          mockSourcererState.defaultDataView,
+          SourcererScopeName.default,
+          mockSourcererState.signalIndexName,
+          true
+        ),
+      },
+      [SourcererScopeName.detections]: {
+        ...mockSourcererState.sourcererScopes[SourcererScopeName.detections],
+        selectedDataViewId: mockSourcererState.defaultDataView.id,
+        selectedPatterns: getScopePatternListSelection(
+          mockSourcererState.defaultDataView,
+          SourcererScopeName.detections,
+          mockSourcererState.signalIndexName,
+          true
+        ),
       },
       [SourcererScopeName.timeline]: {
-        ...initialSourcererState.sourcererScopes[SourcererScopeName.timeline],
-        selectedPatterns: DEFAULT_INDEX_PATTERN,
-        browserFields: mockBrowserFields,
-        indexPattern: mockIndexPattern,
-        docValueFields: mockDocValueFields,
-        loading: false,
+        ...mockSourcererState.sourcererScopes[SourcererScopeName.timeline],
+        selectedDataViewId: mockSourcererState.defaultDataView.id,
+        selectedPatterns: getScopePatternListSelection(
+          mockSourcererState.defaultDataView,
+          SourcererScopeName.timeline,
+          mockSourcererState.signalIndexName,
+          true
+        ),
       },
     },
   },
+  globalUrlParam: {},
   /**
    * These state's are wrapped in `Immutable`, but for compatibility with the overall app architecture,
    * they are cast to mutable versions here.

@@ -17,7 +17,15 @@ const createClusterClientMock = () => {
     createIndexTemplate: jest.fn(),
     doesAliasExist: jest.fn(),
     createIndex: jest.fn(),
+    getExistingLegacyIndexTemplates: jest.fn(),
+    setLegacyIndexTemplateToHidden: jest.fn(),
+    getExistingIndices: jest.fn(),
+    setIndexToHidden: jest.fn(),
+    getExistingIndexAliases: jest.fn(),
+    setIndexAliasToHidden: jest.fn(),
     queryEventsBySavedObjects: jest.fn(),
+    aggregateEventsBySavedObjects: jest.fn(),
+    aggregateEventsWithAuthFilter: jest.fn(),
     shutdown: jest.fn(),
   };
   return mock;

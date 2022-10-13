@@ -8,11 +8,23 @@
 
 import React from 'react';
 import { AggParamEditorProps } from '../agg_param_props';
-import { IAggConfig } from 'src/plugins/data/public';
-import { mount } from 'enzyme';
+import { IAggConfig } from '@kbn/data-plugin/public';
+import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import { PercentilesEditor } from './percentiles';
 import { EditorVisState } from '../sidebar/state/reducers';
 
+// mocking random id generator function
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+
+  return {
+    ...original,
+    htmlIdGenerator: (fn: unknown) => {
+      let counter = 0;
+      return () => counter++;
+    },
+  };
+});
 describe('PercentilesEditor component', () => {
   let setValue: jest.Mock;
   let setValidity: jest.Mock;

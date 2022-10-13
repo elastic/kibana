@@ -5,116 +5,108 @@
  * 2.0.
  */
 
-import { mount, ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
 import React from 'react';
 
 import '../../mock/match_media';
 import '../../mock/react_beautiful_dnd';
 import { TestProviders } from '../../mock';
 
-import { DraggableLegendItem, LegendItem } from './draggable_legend_item';
+import type { LegendItem } from './draggable_legend_item';
+import { DraggableLegendItem } from './draggable_legend_item';
+
+jest.mock('../../lib/kibana');
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
     ...original,
-    // eslint-disable-next-line react/display-name
     EuiScreenReaderOnly: () => <></>,
   };
 });
 
 describe('DraggableLegendItem', () => {
-  describe('rendering a regular (non "All others") legend item', () => {
-    const legendItem: LegendItem = {
-      color: '#1EA593',
-      dataProviderId:
-        'draggable-legend-item-3207fda7-d008-402a-86a0-8ad632081bad-event_dataset-flow',
-      field: 'event.dataset',
-      value: 'flow',
-    };
+  const legendItem: LegendItem = {
+    color: '#1EA593',
+    dataProviderId: 'draggable-legend-item-3207fda7-d008-402a-86a0-8ad632081bad-event_dataset-flow',
+    field: 'event.dataset',
+    value: 'flow',
+  };
 
-    let wrapper: ReactWrapper;
+  let wrapper: ReactWrapper;
 
-    beforeEach(() => {
-      wrapper = mount(
-        <TestProviders>
-          <DraggableLegendItem legendItem={legendItem} />
-        </TestProviders>
-      );
-    });
-
-    it('renders a colored circle with the expected legend item color', () => {
-      expect(wrapper.find('[data-test-subj="legend-color"]').first().props().color).toEqual(
-        legendItem.color
-      );
-    });
-
-    it('renders draggable legend item text', () => {
-      expect(
-        wrapper.find(`[data-test-subj="legend-item-${legendItem.dataProviderId}"]`).first().text()
-      ).toEqual(legendItem.value);
-    });
-
-    it('does NOT render a non-draggable "All others" legend item', () => {
-      expect(wrapper.find(`[data-test-subj="all-others-legend-item"]`).exists()).toBe(false);
-    });
-  });
-
-  describe('rendering an "All others" legend item', () => {
-    const allOthersLegendItem: LegendItem = {
-      color: '#F37020',
-      dataProviderId:
-        'draggable-legend-item-527adabe-8e1c-4a1f-965c-2f3d65dda9e1-event_dataset-All others',
-      field: 'event.dataset',
-      value: 'All others',
-    };
-
-    let wrapper: ReactWrapper;
-
-    beforeEach(() => {
-      wrapper = mount(
-        <TestProviders>
-          <DraggableLegendItem legendItem={allOthersLegendItem} />
-        </TestProviders>
-      );
-    });
-
-    it('renders a colored circle with the expected legend item color', () => {
-      expect(wrapper.find('[data-test-subj="legend-color"]').first().props().color).toEqual(
-        allOthersLegendItem.color
-      );
-    });
-
-    it('does NOT render a draggable legend item', () => {
-      expect(
-        wrapper
-          .find(`[data-test-subj="legend-item-${allOthersLegendItem.dataProviderId}"]`)
-          .exists()
-      ).toBe(false);
-    });
-
-    it('renders NON-draggable `All others` legend item text', () => {
-      expect(wrapper.find(`[data-test-subj="all-others-legend-item"]`).first().text()).toEqual(
-        allOthersLegendItem.value
-      );
-    });
-  });
-
-  it('does NOT render a colored circle when the legend item has no color', () => {
-    const noColorLegendItem: LegendItem = {
-      // no `color` attribute for this `LegendItem`!
-      dataProviderId:
-        'draggable-legend-item-3207fda7-d008-402a-86a0-8ad632081bad-event_dataset-flow',
-      field: 'event.dataset',
-      value: 'flow',
-    };
-
-    const wrapper = mount(
+  beforeEach(() => {
+    wrapper = mount(
       <TestProviders>
-        <DraggableLegendItem legendItem={noColorLegendItem} />
+        <DraggableLegendItem legendItem={legendItem} />
+      </TestProviders>
+    );
+  });
+
+  it('renders a colored circle with the expected legend item color', () => {
+    expect(wrapper.find('[data-test-subj="legend-color"]').first().props().color).toEqual(
+      legendItem.color
+    );
+  });
+
+  it('renders draggable legend item text', () => {
+    expect(
+      wrapper.find(`[data-test-subj="legend-item-${legendItem.dataProviderId}"]`).first().text()
+    ).toEqual(legendItem.value);
+  });
+
+  it('renders a custom legend item via the `render` prop when provided', () => {
+    const render = (fieldValuePair?: { field: string; value: string | number }) => (
+      <div data-test-subj="custom">{`${fieldValuePair?.field} - ${fieldValuePair?.value}`}</div>
+    );
+
+    const customLegendItem = { ...legendItem, render };
+
+    wrapper = mount(
+      <TestProviders>
+        <DraggableLegendItem legendItem={customLegendItem} />
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="legend-color"]').exists()).toBe(false);
+    expect(wrapper.find(`[data-test-subj="custom"]`).first().text()).toEqual(
+      `${legendItem.field} - ${legendItem.value}`
+    );
+  });
+
+  it('renders an item count via the `count` prop when provided', () => {
+    const customLegendItem = { ...legendItem, count: 1234 };
+
+    wrapper = mount(
+      <TestProviders>
+        <DraggableLegendItem legendItem={customLegendItem} />
+      </TestProviders>
+    );
+
+    expect(wrapper.find(`[data-test-subj="legendItemCount"]`).first().exists()).toBe(true);
+  });
+
+  it('always hides the Top N action for legend items', () => {
+    expect(
+      wrapper.find(`[data-test-subj="legend-item-${legendItem.dataProviderId}"]`).prop('hideTopN')
+    ).toEqual(true);
+  });
+
+  it('renders the empty value label when the value is empty', () => {
+    wrapper = mount(
+      <TestProviders>
+        <DraggableLegendItem legendItem={{ ...legendItem, value: '' }} />
+      </TestProviders>
+    );
+    expect(wrapper.find('[data-test-subj="value-wrapper-empty"]').first().exists()).toBeTruthy();
+  });
+
+  it('does not render the empty value label when the value is a number', () => {
+    wrapper = mount(
+      <TestProviders>
+        <DraggableLegendItem legendItem={{ ...legendItem, value: 0 }} />
+      </TestProviders>
+    );
+    expect(wrapper.find('[data-test-subj="value-wrapper-empty"]').first().exists()).toBeFalsy();
   });
 });

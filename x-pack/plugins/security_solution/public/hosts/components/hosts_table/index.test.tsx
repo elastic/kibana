@@ -17,11 +17,21 @@ import {
   createSecuritySolutionStorageMock,
 } from '../../../common/mock';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
-import { createStore, State } from '../../../common/store';
-import { hostsModel } from '../../../hosts/store';
-import { HostsTableType } from '../../../hosts/store/model';
-import { HostsTable } from './index';
+import type { State } from '../../../common/store';
+import { createStore } from '../../../common/store';
+import { hostsModel } from '../../store';
+import { HostsTableType } from '../../store/model';
+import { HostsTable } from '.';
 import { mockData } from './mock';
+import { render } from '@testing-library/react';
+
+jest.mock('../../../common/lib/kibana');
+
+jest.mock('../../../common/lib/kibana/hooks', () => ({
+  useNavigateTo: () => ({
+    navigateTo: jest.fn(),
+  }),
+}));
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
@@ -33,6 +43,12 @@ jest.mock('../../../common/components/query_bar', () => ({
 }));
 
 jest.mock('../../../common/components/link_to');
+
+const mockUseMlCapabilities = jest.fn();
+
+jest.mock('../../../common/components/ml/hooks/use_ml_capabilities', () => ({
+  useMlCapabilities: () => mockUseMlCapabilities(),
+}));
 
 describe('Hosts Table', () => {
   const loadPage = jest.fn();
@@ -57,6 +73,7 @@ describe('Hosts Table', () => {
             fakeTotalCount={0}
             loading={false}
             loadPage={loadPage}
+            setQuerySkip={jest.fn()}
             showMorePagesIndicator={false}
             totalCount={-1}
             type={hostsModel.HostsType.page}
@@ -65,6 +82,52 @@ describe('Hosts Table', () => {
       );
 
       expect(wrapper.find('HostsTable')).toMatchSnapshot();
+    });
+
+    test('it renders "Host Risk classfication" column when "isPlatinumOrTrialLicense" is truthy', () => {
+      mockUseMlCapabilities.mockReturnValue({ isPlatinumOrTrialLicense: true });
+
+      const { queryByTestId } = render(
+        <TestProviders store={store}>
+          <HostsTable
+            id="hostsQuery"
+            isInspect={false}
+            loading={false}
+            data={mockData}
+            totalCount={0}
+            fakeTotalCount={-1}
+            setQuerySkip={jest.fn()}
+            showMorePagesIndicator={false}
+            loadPage={loadPage}
+            type={hostsModel.HostsType.page}
+          />
+        </TestProviders>
+      );
+
+      expect(queryByTestId('tableHeaderCell_node.risk_4')).toBeInTheDocument();
+    });
+
+    test("it doesn't renders 'Host Risk classfication' column when 'isPlatinumOrTrialLicense' is falsy", () => {
+      mockUseMlCapabilities.mockReturnValue({ isPlatinumOrTrialLicense: false });
+
+      const { queryByTestId } = render(
+        <TestProviders store={store}>
+          <HostsTable
+            id="hostsQuery"
+            isInspect={false}
+            loading={false}
+            data={mockData}
+            totalCount={0}
+            fakeTotalCount={-1}
+            setQuerySkip={jest.fn()}
+            showMorePagesIndicator={false}
+            loadPage={loadPage}
+            type={hostsModel.HostsType.page}
+          />
+        </TestProviders>
+      );
+
+      expect(queryByTestId('tableHeaderCell_node.riskScore_4')).not.toBeInTheDocument();
     });
 
     describe('Sorting on Table', () => {
@@ -80,6 +143,7 @@ describe('Hosts Table', () => {
               data={mockData}
               totalCount={0}
               fakeTotalCount={-1}
+              setQuerySkip={jest.fn()}
               showMorePagesIndicator={false}
               loadPage={loadPage}
               type={hostsModel.HostsType.page}
@@ -94,9 +158,7 @@ describe('Hosts Table', () => {
           sortField: 'lastSeen',
           limit: 10,
         });
-        expect(wrapper.find('.euiTable thead tr th button').at(1).text()).toEqual(
-          'Last seen Click to sort in ascending order'
-        );
+        expect(wrapper.find('.euiTable thead tr th button').at(1).text()).toEqual('Last seen ');
         expect(wrapper.find('.euiTable thead tr th button').at(1).find('svg')).toBeTruthy();
       });
 
@@ -111,9 +173,7 @@ describe('Hosts Table', () => {
           sortField: 'hostName',
           limit: 10,
         });
-        expect(wrapper.find('.euiTable thead tr th button').first().text()).toEqual(
-          'Host nameClick to sort in descending order'
-        );
+        expect(wrapper.find('.euiTable thead tr th button').first().text()).toEqual('Host name');
       });
     });
   });

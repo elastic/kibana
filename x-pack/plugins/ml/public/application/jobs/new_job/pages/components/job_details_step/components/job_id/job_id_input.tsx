@@ -11,9 +11,8 @@ import { JobCreatorContext } from '../../../job_creator_context';
 import { Description } from './description';
 
 export const JobIdInput: FC = () => {
-  const { jobCreator, jobCreatorUpdate, jobValidator, jobValidatorUpdated } = useContext(
-    JobCreatorContext
-  );
+  const { jobCreator, jobCreatorUpdate, jobValidator, jobValidatorUpdated } =
+    useContext(JobCreatorContext);
   const [jobId, setJobId] = useState(jobCreator.jobId);
 
   const validation = useMemo(() => {
@@ -30,11 +29,13 @@ export const JobIdInput: FC = () => {
       valid,
       message,
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobValidatorUpdated]);
 
   useEffect(() => {
     jobCreator.jobId = jobId;
     jobCreatorUpdate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobId]);
 
   return (

@@ -6,14 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin } from 'kibana/server';
+import type { SerializableRecord } from '@kbn/utility-types';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 import { identity } from 'lodash';
+import {
+  PersistableStateService,
+  PersistableStateMigrateFn,
+  MigrateFunctionsObject,
+} from '@kbn/kibana-utils-plugin/common';
 import {
   EmbeddableFactoryRegistry,
   EnhancementsRegistry,
   EnhancementRegistryDefinition,
   EnhancementRegistryItem,
-  EmbeddableRegistryDefinition,
 } from './types';
 import {
   getExtractFunction,
@@ -21,12 +26,17 @@ import {
   getMigrateFunction,
   getTelemetryFunction,
 } from '../common/lib';
-import { PersistableStateService, SerializableState } from '../../kibana_utils/common';
-import { EmbeddableStateWithType } from '../common/types';
+import {
+  EmbeddableStateWithType,
+  CommonEmbeddableStartContract,
+  EmbeddableRegistryDefinition,
+} from '../common/types';
+import { getAllMigrations } from '../common/lib/get_all_migrations';
 
 export interface EmbeddableSetup extends PersistableStateService<EmbeddableStateWithType> {
   registerEmbeddableFactory: (factory: EmbeddableRegistryDefinition) => void;
   registerEnhancement: (enhancement: EnhancementRegistryDefinition) => void;
+  getAllMigrations: () => MigrateFunctionsObject;
 }
 
 export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType>;
@@ -34,25 +44,35 @@ export type EmbeddableStart = PersistableStateService<EmbeddableStateWithType>;
 export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
   private readonly embeddableFactories: EmbeddableFactoryRegistry = new Map();
   private readonly enhancements: EnhancementsRegistry = new Map();
+  private migrateFn: PersistableStateMigrateFn | undefined;
 
   public setup(core: CoreSetup) {
-    const commonContract = {
-      getEmbeddableFactory: this.getEmbeddableFactory,
+    const commonContract: CommonEmbeddableStartContract = {
+      getEmbeddableFactory: this
+        .getEmbeddableFactory as unknown as CommonEmbeddableStartContract['getEmbeddableFactory'],
       getEnhancement: this.getEnhancement,
     };
+
+    this.migrateFn = getMigrateFunction(commonContract);
     return {
       registerEmbeddableFactory: this.registerEmbeddableFactory,
       registerEnhancement: this.registerEnhancement,
       telemetry: getTelemetryFunction(commonContract),
       extract: getExtractFunction(commonContract),
       inject: getInjectFunction(commonContract),
-      migrate: getMigrateFunction(commonContract),
+      getAllMigrations: () =>
+        getAllMigrations(
+          Array.from(this.embeddableFactories.values()),
+          Array.from(this.enhancements.values()),
+          this.migrateFn!
+        ),
     };
   }
 
   public start(core: CoreStart) {
-    const commonContract = {
-      getEmbeddableFactory: this.getEmbeddableFactory,
+    const commonContract: CommonEmbeddableStartContract = {
+      getEmbeddableFactory: this
+        .getEmbeddableFactory as unknown as CommonEmbeddableStartContract['getEmbeddableFactory'],
       getEnhancement: this.getEnhancement,
     };
 
@@ -60,7 +80,12 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
       telemetry: getTelemetryFunction(commonContract),
       extract: getExtractFunction(commonContract),
       inject: getInjectFunction(commonContract),
-      migrate: getMigrateFunction(commonContract),
+      getAllMigrations: () =>
+        getAllMigrations(
+          Array.from(this.embeddableFactories.values()),
+          Array.from(this.enhancements.values()),
+          this.migrateFn!
+        ),
     };
   }
 
@@ -72,11 +97,11 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
     }
     this.enhancements.set(enhancement.id, {
       id: enhancement.id,
-      telemetry: enhancement.telemetry || (() => ({})),
+      telemetry: enhancement.telemetry || ((state, stats) => stats),
       inject: enhancement.inject || identity,
       extract:
         enhancement.extract ||
-        ((state: SerializableState) => {
+        ((state: SerializableRecord) => {
           return { state, references: [] };
         }),
       migrations: enhancement.migrations || {},
@@ -87,9 +112,9 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
     return (
       this.enhancements.get(id) || {
         id: 'unknown',
-        telemetry: () => ({}),
+        telemetry: (state, stats) => stats,
         inject: identity,
-        extract: (state: SerializableState) => {
+        extract: (state: SerializableRecord) => {
           return { state, references: [] };
         },
         migrations: {},
@@ -105,7 +130,7 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
     }
     this.embeddableFactories.set(factory.id, {
       id: factory.id,
-      telemetry: factory.telemetry || (() => ({})),
+      telemetry: factory.telemetry || ((state, stats) => stats),
       inject: factory.inject || identity,
       extract: factory.extract || ((state: EmbeddableStateWithType) => ({ state, references: [] })),
       migrations: factory.migrations || {},
@@ -116,7 +141,7 @@ export class EmbeddableServerPlugin implements Plugin<EmbeddableSetup, Embeddabl
     return (
       this.embeddableFactories.get(embeddableFactoryId) || {
         id: 'unknown',
-        telemetry: () => ({}),
+        telemetry: (state, stats) => stats,
         inject: (state: EmbeddableStateWithType) => state,
         extract: (state: EmbeddableStateWithType) => {
           return { state, references: [] };

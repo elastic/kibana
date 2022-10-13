@@ -1,0 +1,177 @@
+{
+  "id": "@kbn/home-sample-data-tab",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/home-sample-data-tab",
+        "id": "def-common.SampleDataTab",
+        "type": "Function",
+        "tags": [],
+        "label": "SampleDataTab",
+        "description": [
+          "\nThe content for the Sample Data Tab in the `home` plugin."
+        ],
+        "signature": [
+          "() => JSX.Element"
+        ],
+        "path": "packages/home/sample_data_tab/src/sample_data_tab.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/home-sample-data-tab",
+        "id": "def-common.SampleDataTabKibanaProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "SampleDataTabKibanaProvider",
+        "description": [
+          "\nKibana-specific Provider that maps dependencies to services."
+        ],
+        "signature": [
+          "({ children, ...dependencies }: React.PropsWithChildren<",
+          "SampleDataTabKibanaDependencies",
+          ">) => JSX.Element"
+        ],
+        "path": "packages/home/sample_data_tab/src/services.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/home-sample-data-tab",
+            "id": "def-common.SampleDataTabKibanaProvider.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  children,\n  ...dependencies\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              "SampleDataTabKibanaDependencies",
+              ">"
+            ],
+            "path": "packages/home/sample_data_tab/src/services.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/home-sample-data-tab",
+        "id": "def-common.SampleDataTabProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "SampleDataTabProvider",
+        "description": [
+          "\nA Context Provider that provides services to the component and its dependencies."
+        ],
+        "signature": [
+          "({ children, ...services }: React.PropsWithChildren<",
+          "SampleDataTabServices",
+          ">) => JSX.Element"
+        ],
+        "path": "packages/home/sample_data_tab/src/services.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/home-sample-data-tab",
+            "id": "def-common.SampleDataTabProvider.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{ children, ...services }",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              "SampleDataTabServices",
+              ">"
+            ],
+            "path": "packages/home/sample_data_tab/src/services.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/home-sample-data-tab",
+        "id": "def-common.DATA_TEST_SUBJ_DEMO_ENV_BUTTON",
+        "type": "string",
+        "tags": [],
+        "label": "DATA_TEST_SUBJ_DEMO_ENV_BUTTON",
+        "description": [
+          "\nTest Subject name for the Demo Environment button."
+        ],
+        "signature": [
+          "\"goToDemoEnvButton\""
+        ],
+        "path": "packages/home/sample_data_tab/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/home-sample-data-tab",
+        "id": "def-common.DATA_TEST_SUBJ_SHOW_SAMPLE_DATA_ACCORDION",
+        "type": "string",
+        "tags": [],
+        "label": "DATA_TEST_SUBJ_SHOW_SAMPLE_DATA_ACCORDION",
+        "description": [
+          "\nTest Subject name for the sample data accordion button."
+        ],
+        "signature": [
+          "\"showSampleDataAccordion\""
+        ],
+        "path": "packages/home/sample_data_tab/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/home-sample-data-tab",
+        "id": "def-common.DATA_TEST_SUBJ_SHOW_SAMPLE_DATA_BUTTON",
+        "type": "string",
+        "tags": [],
+        "label": "DATA_TEST_SUBJ_SHOW_SAMPLE_DATA_BUTTON",
+        "description": [
+          "\nTest Subject name for the sample data accordion button."
+        ],
+        "signature": [
+          "\"showSampleDataButton\""
+        ],
+        "path": "packages/home/sample_data_tab/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

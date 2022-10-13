@@ -9,23 +9,25 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
-import { ShapePickerPopover } from '../../../public/components/shape_picker_popover/';
+import { ShapePickerPopover } from '../../../public/components/shape_picker_popover';
 import { ArgumentStrings } from '../../../i18n';
 
 const { Shape: strings } = ArgumentStrings;
 
-const ShapeArgInput = ({ onValueChange, argValue, typeInstance }) => (
-  <EuiFlexGroup gutterSize="s">
-    <EuiFlexItem grow={false}>
-      <ShapePickerPopover
-        value={argValue}
-        onChange={onValueChange}
-        shapes={typeInstance.options.shapes}
-        ariaLabel={typeInstance.displayName}
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+const ShapeArgInput = ({ onValueChange, argValue, typeInstance }) => {
+  return (
+    <EuiFlexGroup gutterSize="s">
+      <EuiFlexItem grow={false}>
+        <ShapePickerPopover
+          value={argValue}
+          onChange={onValueChange}
+          shapes={typeInstance.options.shapes}
+          ariaLabel={typeInstance.displayName}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
 
 ShapeArgInput.propTypes = {
   argValue: PropTypes.any.isRequired,

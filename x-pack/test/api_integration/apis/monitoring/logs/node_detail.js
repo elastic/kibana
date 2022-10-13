@@ -6,14 +6,14 @@
  */
 
 import expect from '@kbn/expect';
-import nodeDetailFixture from './fixtures/node_detail';
+import nodeDetailFixture from './fixtures/node_detail.json';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
   describe('cluster', () => {
-    const archive = 'monitoring/logs';
+    const archive = 'x-pack/test/functional/es_archives/monitoring/logs';
     const timeRange = {
       min: '2019-03-15T16:19:22.161Z',
       max: '2019-03-15T17:19:22.161Z',

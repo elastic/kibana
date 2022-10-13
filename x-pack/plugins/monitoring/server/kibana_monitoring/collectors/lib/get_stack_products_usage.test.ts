@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ElasticsearchClient } from '@kbn/core/server';
 import { getStackProductsUsage } from './get_stack_products_usage';
 
 describe('getStackProductsUsage', () => {
@@ -14,12 +15,14 @@ describe('getStackProductsUsage', () => {
     },
   };
   const clusterUuid = '1abcde2';
-  const availableCcs: string[] = [];
-  const callCluster = jest.fn().mockImplementation(() => ({
-    hits: {
-      hits: [],
-    },
-  }));
+  const availableCcs = false;
+  const callCluster = {
+    search: jest.fn().mockImplementation(() => ({
+      hits: {
+        hits: [],
+      },
+    })),
+  } as unknown as ElasticsearchClient;
 
   it('should get all stack products', async () => {
     const result = await getStackProductsUsage(config, callCluster, availableCcs, clusterUuid);

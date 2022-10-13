@@ -9,19 +9,54 @@ import {
   elasticsearchServiceMock,
   savedObjectsClientMock,
   httpServerMock,
-} from 'src/core/server/mocks';
+  coreMock,
+} from '@kbn/core/server/mocks';
+import { produce } from 'immer';
+import type {
+  KibanaRequest,
+  SavedObjectsClient,
+  SavedObjectsClientContract,
+  SavedObjectsUpdateResponse,
+} from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
-import type { SavedObjectsClient, SavedObjectsUpdateResponse } from 'src/core/server';
-import type { KibanaRequest } from 'kibana/server';
-
-import type { PackageInfo, PackagePolicySOAttributes, AgentPolicySOAttributes } from '../types';
+import type {
+  PackageInfo,
+  PackagePolicySOAttributes,
+  AgentPolicySOAttributes,
+  PostPackagePolicyDeleteCallback,
+  RegistryDataStream,
+  PackagePolicyInputStream,
+  PackagePolicy,
+  PostPackagePolicyPostCreateCallback,
+} from '../types';
 import { createPackagePolicyMock } from '../../common/mocks';
-import type { ExternalCallback } from '..';
+
+import type { PutPackagePolicyUpdateCallback, PostPackagePolicyCreateCallback } from '..';
 
 import { createAppContextStartContractMock, xpackMocks } from '../mocks';
 
-import { packagePolicyService } from './package_policy';
+import type {
+  DeletePackagePoliciesResponse,
+  InputsOverride,
+  NewPackagePolicy,
+  NewPackagePolicyInput,
+  PackagePolicyPackage,
+} from '../../common/types';
+import { packageToPackagePolicy } from '../../common/services';
+
+import { FleetError, PackagePolicyIneligibleForUpgradeError } from '../errors';
+
+import {
+  preconfigurePackageInputs,
+  updatePackageInputs,
+  packagePolicyService,
+  _applyIndexPrivileges,
+  _compilePackagePolicyInputs,
+} from './package_policy';
 import { appContextService } from './app_context';
+
+import { getPackageInfo } from './epm/packages';
 
 async function mockedGetAssetsData(_a: any, _b: any, dataset: string) {
   if (dataset === 'dataset1') {
@@ -34,10 +69,27 @@ paths:
 {{#each paths}}
 - {{this}}
 {{/each}}
+{{#if hosts}}
+hosts:
+{{#each hosts}}
+- {{this}}
+{{/each}}
+{{/if}}
 `),
       },
     ];
   }
+  if (dataset === 'dataset1_level1') {
+    return [
+      {
+        buffer: Buffer.from(`
+type: log
+metricset: ["dataset1.level1"]
+`),
+      },
+    ];
+  }
+
   return [
     {
       buffer: Buffer.from(`
@@ -50,6 +102,52 @@ hosts:
   ];
 }
 
+async function mockedGetInstallation(params: any) {
+  let pkg;
+  if (params.pkgName === 'apache') pkg = { version: '1.3.2' };
+  if (params.pkgName === 'aws') pkg = { version: '0.3.3' };
+  if (params.pkgName === 'endpoint') pkg = { version: '1.0.0' };
+  return Promise.resolve(pkg);
+}
+
+async function mockedGetPackageInfo(params: any) {
+  let pkg;
+  if (params.pkgName === 'apache') pkg = { version: '1.3.2' };
+  if (params.pkgName === 'aws') pkg = { version: '0.3.3' };
+  if (params.pkgName === 'endpoint') pkg = { version: '1.0.0' };
+  if (params.pkgName === 'test') {
+    pkg = {
+      version: '1.0.2',
+    };
+  }
+  if (params.pkgName === 'test-conflict') {
+    pkg = {
+      version: '1.0.2',
+      policy_templates: [
+        {
+          name: 'test-conflict',
+          inputs: [
+            {
+              title: 'test',
+              type: 'logs',
+              description: 'test',
+              vars: [
+                {
+                  name: 'test-var-required',
+                  required: true,
+                  type: 'integer',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+  }
+
+  return Promise.resolve(pkg);
+}
+
 jest.mock('./epm/packages/assets', () => {
   return {
     getAssetsData: mockedGetAssetsData,
@@ -58,15 +156,17 @@ jest.mock('./epm/packages/assets', () => {
 
 jest.mock('./epm/packages', () => {
   return {
-    getPackageInfo: () => ({}),
+    getPackageInfo: jest.fn().mockImplementation(mockedGetPackageInfo),
+    getInstallation: mockedGetInstallation,
   };
 });
 
-jest.mock('./epm/registry', () => {
-  return {
-    fetchInfo: () => ({}),
-  };
-});
+jest.mock('../../common/services/package_to_package_policy', () => ({
+  ...jest.requireActual('../../common/services/package_to_package_policy'),
+  packageToPackagePolicy: jest.fn(),
+}));
+
+jest.mock('./epm/registry');
 
 jest.mock('./agent_policy', () => {
   return {
@@ -84,20 +184,36 @@ jest.mock('./agent_policy', () => {
         return agentPolicy;
       },
       bumpRevision: () => {},
+      getDefaultAgentPolicyId: () => Promise.resolve('1'),
     },
   };
 });
 
+jest.mock('./epm/packages/cleanup', () => {
+  return {
+    removeOldAssets: jest.fn(),
+  };
+});
+
+jest.mock('./upgrade_sender', () => {
+  return {
+    sendTelemetryEvents: jest.fn(),
+  };
+});
+
+type CombinedExternalCallback = PutPackagePolicyUpdateCallback | PostPackagePolicyCreateCallback;
+
 describe('Package policy service', () => {
-  describe('compilePackagePolicyInputs', () => {
+  describe('_compilePackagePolicyInputs', () => {
     it('should work with config variables from the stream', async () => {
-      const inputs = await packagePolicyService.compilePackagePolicyInputs(
-        ({
+      const inputs = await _compilePackagePolicyInputs(
+        {
           data_streams: [
             {
               type: 'logs',
               dataset: 'package.dataset1',
               streams: [{ input: 'log', template_path: 'some_template_path.yml' }],
+              path: 'dataset1',
             },
           ],
           policy_templates: [
@@ -105,7 +221,8 @@ describe('Package policy service', () => {
               inputs: [{ type: 'log' }],
             },
           ],
-        } as unknown) as PackageInfo,
+        } as unknown as PackageInfo,
+        {},
         [
           {
             type: 'log',
@@ -151,14 +268,15 @@ describe('Package policy service', () => {
       ]);
     });
 
-    it('should work with config variables at the input level', async () => {
-      const inputs = await packagePolicyService.compilePackagePolicyInputs(
-        ({
+    it('should work with a two level dataset name', async () => {
+      const inputs = await _compilePackagePolicyInputs(
+        {
           data_streams: [
             {
-              dataset: 'package.dataset1',
               type: 'logs',
+              dataset: 'package.dataset1.level1',
               streams: [{ input: 'log', template_path: 'some_template_path.yml' }],
+              path: 'dataset1_level1',
             },
           ],
           policy_templates: [
@@ -166,7 +284,60 @@ describe('Package policy service', () => {
               inputs: [{ type: 'log' }],
             },
           ],
-        } as unknown) as PackageInfo,
+        } as unknown as PackageInfo,
+        {},
+        [
+          {
+            type: 'log',
+            enabled: true,
+            streams: [
+              {
+                id: 'datastream01',
+                data_stream: { dataset: 'package.dataset1.level1', type: 'logs' },
+                enabled: true,
+              },
+            ],
+          },
+        ]
+      );
+
+      expect(inputs).toEqual([
+        {
+          type: 'log',
+          enabled: true,
+          streams: [
+            {
+              id: 'datastream01',
+              data_stream: { dataset: 'package.dataset1.level1', type: 'logs' },
+              enabled: true,
+              compiled_stream: {
+                metricset: ['dataset1.level1'],
+                type: 'log',
+              },
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('should work with config variables at the input level', async () => {
+      const inputs = await _compilePackagePolicyInputs(
+        {
+          data_streams: [
+            {
+              dataset: 'package.dataset1',
+              type: 'logs',
+              streams: [{ input: 'log', template_path: 'some_template_path.yml' }],
+              path: 'dataset1',
+            },
+          ],
+          policy_templates: [
+            {
+              inputs: [{ type: 'log' }],
+            },
+          ],
+        } as unknown as PackageInfo,
+        {},
         [
           {
             type: 'log',
@@ -212,16 +383,85 @@ describe('Package policy service', () => {
       ]);
     });
 
+    it('should work with config variables at the package level', async () => {
+      const inputs = await _compilePackagePolicyInputs(
+        {
+          data_streams: [
+            {
+              dataset: 'package.dataset1',
+              type: 'logs',
+              streams: [{ input: 'log', template_path: 'some_template_path.yml' }],
+              path: 'dataset1',
+            },
+          ],
+          policy_templates: [
+            {
+              inputs: [{ type: 'log' }],
+            },
+          ],
+        } as unknown as PackageInfo,
+        {
+          hosts: {
+            value: ['localhost'],
+          },
+        },
+        [
+          {
+            type: 'log',
+            enabled: true,
+            vars: {
+              paths: {
+                value: ['/var/log/set.log'],
+              },
+            },
+            streams: [
+              {
+                id: 'datastream01',
+                data_stream: { dataset: 'package.dataset1', type: 'logs' },
+                enabled: true,
+              },
+            ],
+          },
+        ]
+      );
+
+      expect(inputs).toEqual([
+        {
+          type: 'log',
+          enabled: true,
+          vars: {
+            paths: {
+              value: ['/var/log/set.log'],
+            },
+          },
+          streams: [
+            {
+              id: 'datastream01',
+              data_stream: { dataset: 'package.dataset1', type: 'logs' },
+              enabled: true,
+              compiled_stream: {
+                metricset: ['dataset1'],
+                paths: ['/var/log/set.log'],
+                type: 'log',
+                hosts: ['localhost'],
+              },
+            },
+          ],
+        },
+      ]);
+    });
+
     it('should work with an input with a template and no streams', async () => {
-      const inputs = await packagePolicyService.compilePackagePolicyInputs(
-        ({
+      const inputs = await _compilePackagePolicyInputs(
+        {
           data_streams: [],
           policy_templates: [
             {
               inputs: [{ type: 'log', template_path: 'some_template_path.yml' }],
             },
           ],
-        } as unknown) as PackageInfo,
+        } as unknown as PackageInfo,
+        {},
         [
           {
             type: 'log',
@@ -254,24 +494,32 @@ describe('Package policy service', () => {
     });
 
     it('should work with an input with a template and streams', async () => {
-      const inputs = await packagePolicyService.compilePackagePolicyInputs(
-        ({
+      const inputs = await _compilePackagePolicyInputs(
+        {
           data_streams: [
             {
               dataset: 'package.dataset1',
               type: 'logs',
               streams: [{ input: 'log', template_path: 'some_template_path.yml' }],
+              path: 'dataset1',
             },
           ],
           policy_templates: [
             {
+              name: 'template_1',
+              inputs: [{ type: 'log', template_path: 'some_template_path.yml' }],
+            },
+            {
+              name: 'template_2',
               inputs: [{ type: 'log', template_path: 'some_template_path.yml' }],
             },
           ],
-        } as unknown) as PackageInfo,
+        } as unknown as PackageInfo,
+        {},
         [
           {
             type: 'log',
+            policy_template: 'template_1',
             enabled: true,
             vars: {
               hosts: {
@@ -289,12 +537,24 @@ describe('Package policy service', () => {
               },
             ],
           },
+          {
+            type: 'log',
+            policy_template: 'template_2',
+            enabled: true,
+            vars: {
+              hosts: {
+                value: ['localhost'],
+              },
+            },
+            streams: [],
+          },
         ]
       );
 
       expect(inputs).toEqual([
         {
           type: 'log',
+          policy_template: 'template_1',
           enabled: true,
           vars: {
             hosts: {
@@ -315,23 +575,39 @@ describe('Package policy service', () => {
               compiled_stream: {
                 metricset: ['dataset1'],
                 paths: ['/var/log/set.log'],
+                hosts: ['localhost'],
                 type: 'log',
               },
             },
           ],
         },
+        {
+          type: 'log',
+          policy_template: 'template_2',
+          enabled: true,
+          vars: {
+            hosts: {
+              value: ['localhost'],
+            },
+          },
+          compiled_input: {
+            hosts: ['localhost'],
+          },
+          streams: [],
+        },
       ]);
     });
 
     it('should work with a package without input', async () => {
-      const inputs = await packagePolicyService.compilePackagePolicyInputs(
-        ({
+      const inputs = await _compilePackagePolicyInputs(
+        {
           policy_templates: [
             {
               inputs: undefined,
             },
           ],
-        } as unknown) as PackageInfo,
+        } as unknown as PackageInfo,
+        {},
         []
       );
 
@@ -339,14 +615,15 @@ describe('Package policy service', () => {
     });
 
     it('should work with a package with a empty inputs array', async () => {
-      const inputs = await packagePolicyService.compilePackagePolicyInputs(
-        ({
+      const inputs = await _compilePackagePolicyInputs(
+        {
           policy_templates: [
             {
               inputs: [],
             },
           ],
-        } as unknown) as PackageInfo,
+        } as unknown as PackageInfo,
+        {},
         []
       );
 
@@ -355,6 +632,12 @@ describe('Package policy service', () => {
   });
 
   describe('update', () => {
+    beforeEach(() => {
+      appContextService.start(createAppContextStartContractMock());
+    });
+    afterEach(() => {
+      appContextService.stop();
+    });
     it('should fail to update on version conflict', async () => {
       const savedObjectsClient = savedObjectsClientMock.create();
       savedObjectsClient.get.mockResolvedValue({
@@ -369,7 +652,7 @@ describe('Package policy service', () => {
           _type: string,
           _id: string
         ): Promise<SavedObjectsUpdateResponse<PackagePolicySOAttributes>> => {
-          throw savedObjectsClient.errors.createConflictError('abc', '123');
+          throw SavedObjectsErrorHelpers.createConflictError('abc', '123');
         }
       );
       const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -383,13 +666,166 @@ describe('Package policy service', () => {
       ).rejects.toThrow('Saved object [abc/123] conflict');
     });
 
-    it('should only update input vars that are not frozen', async () => {
+    it('should fail to update if the name already exists on another policy', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      savedObjectsClient.find.mockResolvedValue({
+        total: 1,
+        per_page: 1,
+        page: 1,
+        saved_objects: [
+          {
+            id: 'existing-package-policy',
+            type: 'ingest-package-policies',
+            score: 1,
+            references: [],
+            version: '1.0.0',
+            attributes: {
+              name: 'endpoint-1',
+              description: '',
+              namespace: 'default',
+              enabled: true,
+              policy_id: 'policy-id-1',
+              package: {
+                name: 'endpoint',
+                title: 'Elastic Endpoint',
+                version: '0.9.0',
+              },
+              inputs: [],
+            },
+          },
+        ],
+      });
+      savedObjectsClient.get.mockResolvedValue({
+        id: 'the-package-policy-id',
+        type: 'abcd',
+        references: [],
+        version: 'test',
+        attributes: {},
+      });
+      savedObjectsClient.update.mockImplementation(
+        async (
+          type: string,
+          id: string,
+          attrs: any
+        ): Promise<SavedObjectsUpdateResponse<PackagePolicySOAttributes>> => {
+          savedObjectsClient.get.mockResolvedValue({
+            id: 'the-package-policy-id',
+            type,
+            references: [],
+            version: 'test',
+            attributes: attrs,
+          });
+          return attrs;
+        }
+      );
+      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      await expect(
+        packagePolicyService.update(
+          savedObjectsClient,
+          elasticsearchClient,
+          'the-package-policy-id',
+          {
+            name: 'endpoint-1',
+            description: '',
+            namespace: 'default',
+            enabled: true,
+            policy_id: '93c46720-c217-11ea-9906-b5b8a21b268e',
+            package: {
+              name: 'endpoint',
+              title: 'Elastic Endpoint',
+              version: '0.9.0',
+            },
+            inputs: [],
+          }
+        )
+      ).rejects.toThrow(
+        'An integration policy with the name endpoint-1 already exists. Please rename it or choose a different name.'
+      );
+    });
+
+    it('should not fail to update if skipUniqueNameVerification when the name already exists on another policy', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      savedObjectsClient.find.mockResolvedValue({
+        total: 1,
+        per_page: 1,
+        page: 1,
+        saved_objects: [
+          {
+            id: 'existing-package-policy',
+            type: 'ingest-package-policies',
+            score: 1,
+            references: [],
+            version: '1.0.0',
+            attributes: {
+              name: 'endpoint-1',
+              description: '',
+              namespace: 'default',
+              enabled: true,
+              policy_id: 'policy-id-1',
+              package: {
+                name: 'endpoint',
+                title: 'Elastic Endpoint',
+                version: '0.9.0',
+              },
+              inputs: [],
+            },
+          },
+        ],
+      });
+      savedObjectsClient.get.mockResolvedValue({
+        id: 'the-package-policy-id',
+        type: 'abcd',
+        references: [],
+        version: 'test',
+        attributes: {},
+      });
+      savedObjectsClient.update.mockImplementation(
+        async (
+          type: string,
+          id: string,
+          attrs: any
+        ): Promise<SavedObjectsUpdateResponse<PackagePolicySOAttributes>> => {
+          savedObjectsClient.get.mockResolvedValue({
+            id: 'the-package-policy-id',
+            type,
+            references: [],
+            version: 'test',
+            attributes: attrs,
+          });
+          return attrs;
+        }
+      );
+      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const result = await packagePolicyService.update(
+        savedObjectsClient,
+        elasticsearchClient,
+        'the-package-policy-id',
+        {
+          name: 'endpoint-1',
+          description: '',
+          namespace: 'default',
+          enabled: true,
+          policy_id: '93c46720-c217-11ea-9906-b5b8a21b268e',
+          package: {
+            name: 'endpoint',
+            title: 'Elastic Endpoint',
+            version: '0.9.0',
+          },
+          inputs: [],
+        },
+        { skipUniqueNameVerification: true }
+      );
+      expect(result.name).toEqual('endpoint-1');
+    });
+
+    it('should throw if the user try to update input vars that are frozen', async () => {
       const savedObjectsClient = savedObjectsClientMock.create();
       const mockPackagePolicy = createPackagePolicyMock();
       const mockInputs = [
         {
           config: {},
           enabled: true,
+          keep_enabled: true,
           type: 'endpoint',
           vars: {
             dog: {
@@ -428,7 +864,128 @@ describe('Package policy service', () => {
       const inputsUpdate = [
         {
           config: {},
+          enabled: false,
+          type: 'endpoint',
+          vars: {
+            dog: {
+              type: 'text',
+              value: 'labrador',
+            },
+            cat: {
+              type: 'text',
+              value: 'tabby',
+            },
+          },
+          streams: [
+            {
+              data_stream: {
+                type: 'birds',
+                dataset: 'migratory.patterns',
+              },
+              enabled: false,
+              id: `endpoint-migratory.patterns-${mockPackagePolicy.id}`,
+              vars: {
+                paths: {
+                  value: ['east', 'west'],
+                  type: 'text',
+                },
+                period: {
+                  value: '12mo',
+                  type: 'text',
+                },
+              },
+            },
+          ],
+        },
+      ];
+      const attributes = {
+        ...mockPackagePolicy,
+        inputs: mockInputs,
+      };
+
+      savedObjectsClient.get.mockResolvedValue({
+        id: 'test',
+        type: 'abcd',
+        references: [],
+        version: 'test',
+        attributes,
+      });
+
+      savedObjectsClient.update.mockImplementation(
+        async (
+          type: string,
+          id: string,
+          attrs: any
+        ): Promise<SavedObjectsUpdateResponse<PackagePolicySOAttributes>> => {
+          savedObjectsClient.get.mockResolvedValue({
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: attrs,
+          });
+          return attrs;
+        }
+      );
+      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const res = packagePolicyService.update(
+        savedObjectsClient,
+        elasticsearchClient,
+        'the-package-policy-id',
+        { ...mockPackagePolicy, inputs: inputsUpdate }
+      );
+
+      await expect(res).rejects.toThrow('cat is a frozen variable and cannot be modified');
+    });
+
+    it('should allow to update input vars that are frozen with the force flag', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      const mockPackagePolicy = createPackagePolicyMock();
+      const mockInputs = [
+        {
+          config: {},
           enabled: true,
+          keep_enabled: true,
+          type: 'endpoint',
+          vars: {
+            dog: {
+              type: 'text',
+              value: 'dalmatian',
+            },
+            cat: {
+              type: 'text',
+              value: 'siamese',
+              frozen: true,
+            },
+          },
+          streams: [
+            {
+              data_stream: {
+                type: 'birds',
+                dataset: 'migratory.patterns',
+              },
+              enabled: false,
+              id: `endpoint-migratory.patterns-${mockPackagePolicy.id}`,
+              vars: {
+                paths: {
+                  value: ['north', 'south'],
+                  type: 'text',
+                  frozen: true,
+                },
+                period: {
+                  value: '6mo',
+                  type: 'text',
+                },
+              },
+            },
+          ],
+        },
+      ];
+      const inputsUpdate = [
+        {
+          config: {},
+          enabled: false,
           type: 'endpoint',
           vars: {
             dog: {
@@ -497,15 +1054,853 @@ describe('Package policy service', () => {
         savedObjectsClient,
         elasticsearchClient,
         'the-package-policy-id',
+        { ...mockPackagePolicy, inputs: inputsUpdate },
+        { force: true }
+      );
+
+      const [modifiedInput] = result.inputs;
+      expect(modifiedInput.enabled).toEqual(true);
+      expect(modifiedInput.vars!.dog.value).toEqual('labrador');
+      expect(modifiedInput.vars!.cat.value).toEqual('tabby');
+      const [modifiedStream] = modifiedInput.streams;
+      expect(modifiedStream.vars!.paths.value).toEqual(expect.arrayContaining(['east', 'west']));
+      expect(modifiedStream.vars!.period.value).toEqual('12mo');
+    });
+    it('should add new input vars when updating', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      const mockPackagePolicy = createPackagePolicyMock();
+      const mockInputs = [
+        {
+          config: {},
+          enabled: true,
+          keep_enabled: true,
+          type: 'endpoint',
+          vars: {
+            dog: {
+              type: 'text',
+              value: 'dalmatian',
+            },
+            cat: {
+              type: 'text',
+              value: 'siamese',
+              frozen: true,
+            },
+          },
+          streams: [
+            {
+              data_stream: {
+                type: 'birds',
+                dataset: 'migratory.patterns',
+              },
+              enabled: false,
+              id: `endpoint-migratory.patterns-${mockPackagePolicy.id}`,
+              vars: {
+                paths: {
+                  value: ['north', 'south'],
+                  type: 'text',
+                  frozen: true,
+                },
+              },
+            },
+          ],
+        },
+      ];
+      const inputsUpdate = [
+        {
+          config: {},
+          enabled: false,
+          type: 'endpoint',
+          vars: {
+            dog: {
+              type: 'text',
+              value: 'labrador',
+            },
+            cat: {
+              type: 'text',
+              value: 'siamese',
+            },
+          },
+          streams: [
+            {
+              data_stream: {
+                type: 'birds',
+                dataset: 'migratory.patterns',
+              },
+              enabled: false,
+              id: `endpoint-migratory.patterns-${mockPackagePolicy.id}`,
+              vars: {
+                paths: {
+                  value: ['north', 'south'],
+                  type: 'text',
+                },
+                period: {
+                  value: '12mo',
+                  type: 'text',
+                },
+              },
+            },
+          ],
+        },
+      ];
+      const attributes = {
+        ...mockPackagePolicy,
+        inputs: mockInputs,
+      };
+
+      savedObjectsClient.get.mockResolvedValue({
+        id: 'test',
+        type: 'abcd',
+        references: [],
+        version: 'test',
+        attributes,
+      });
+
+      savedObjectsClient.update.mockImplementation(
+        async (
+          type: string,
+          id: string,
+          attrs: any
+        ): Promise<SavedObjectsUpdateResponse<PackagePolicySOAttributes>> => {
+          savedObjectsClient.get.mockResolvedValue({
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: attrs,
+          });
+          return attrs;
+        }
+      );
+      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const result = await packagePolicyService.update(
+        savedObjectsClient,
+        elasticsearchClient,
+        'the-package-policy-id',
         { ...mockPackagePolicy, inputs: inputsUpdate }
       );
 
       const [modifiedInput] = result.inputs;
+      expect(modifiedInput.enabled).toEqual(true);
       expect(modifiedInput.vars!.dog.value).toEqual('labrador');
       expect(modifiedInput.vars!.cat.value).toEqual('siamese');
       const [modifiedStream] = modifiedInput.streams;
       expect(modifiedStream.vars!.paths.value).toEqual(expect.arrayContaining(['north', 'south']));
       expect(modifiedStream.vars!.period.value).toEqual('12mo');
+    });
+
+    it('should update elasticsearch.priviles.cluster when updating', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      const mockPackagePolicy = createPackagePolicyMock();
+
+      const attributes = {
+        ...mockPackagePolicy,
+        inputs: [],
+      };
+      (getPackageInfo as jest.Mock).mockImplementation(async (params) => {
+        return Promise.resolve({
+          ...(await mockedGetPackageInfo(params)),
+          elasticsearch: {
+            privileges: {
+              cluster: ['monitor'],
+            },
+          },
+        } as PackageInfo);
+      });
+
+      savedObjectsClient.get.mockResolvedValue({
+        id: 'test',
+        type: 'abcd',
+        references: [],
+        version: 'test',
+        attributes,
+      });
+
+      savedObjectsClient.update.mockImplementation(
+        async (
+          type: string,
+          id: string,
+          attrs: any
+        ): Promise<SavedObjectsUpdateResponse<PackagePolicySOAttributes>> => {
+          savedObjectsClient.get.mockResolvedValue({
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: attrs,
+          });
+          return attrs;
+        }
+      );
+      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const result = await packagePolicyService.update(
+        savedObjectsClient,
+        elasticsearchClient,
+        'the-package-policy-id',
+        { ...mockPackagePolicy, inputs: [] }
+      );
+
+      expect(result.elasticsearch).toMatchObject({ privileges: { cluster: ['monitor'] } });
+    });
+
+    it('should not mutate packagePolicyUpdate object when trimming whitespace', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      const mockPackagePolicy = createPackagePolicyMock();
+
+      const attributes = {
+        ...mockPackagePolicy,
+        inputs: [],
+      };
+
+      savedObjectsClient.get.mockResolvedValue({
+        id: 'test',
+        type: 'abcd',
+        references: [],
+        version: 'test',
+        attributes,
+      });
+
+      savedObjectsClient.update.mockImplementation(
+        async (
+          type: string,
+          id: string,
+          attrs: any
+        ): Promise<SavedObjectsUpdateResponse<PackagePolicySOAttributes>> => {
+          savedObjectsClient.get.mockResolvedValue({
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: attrs,
+          });
+          return attrs;
+        }
+      );
+      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const result = await packagePolicyService.update(
+        savedObjectsClient,
+        elasticsearchClient,
+        'the-package-policy-id',
+        // this mimics the way that OSQuery plugin create immutable objects
+        produce<PackagePolicy>(
+          { ...mockPackagePolicy, name: '  test  ', inputs: [] },
+          (draft) => draft
+        )
+      );
+
+      expect(result.name).toEqual('test');
+    });
+  });
+
+  describe('bulkUpdate', () => {
+    beforeEach(() => {
+      appContextService.start(createAppContextStartContractMock());
+    });
+    afterEach(() => {
+      appContextService.stop();
+    });
+
+    it('should throw if the user try to update input vars that are frozen', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      const mockPackagePolicy = createPackagePolicyMock();
+      const mockInputs = [
+        {
+          config: {},
+          enabled: true,
+          keep_enabled: true,
+          type: 'endpoint',
+          vars: {
+            dog: {
+              type: 'text',
+              value: 'dalmatian',
+            },
+            cat: {
+              type: 'text',
+              value: 'siamese',
+              frozen: true,
+            },
+          },
+          streams: [
+            {
+              data_stream: {
+                type: 'birds',
+                dataset: 'migratory.patterns',
+              },
+              enabled: false,
+              id: `endpoint-migratory.patterns-${mockPackagePolicy.id}`,
+              vars: {
+                paths: {
+                  value: ['north', 'south'],
+                  type: 'text',
+                  frozen: true,
+                },
+                period: {
+                  value: '6mo',
+                  type: 'text',
+                },
+              },
+            },
+          ],
+        },
+      ];
+      const inputsUpdate = [
+        {
+          config: {},
+          enabled: false,
+          type: 'endpoint',
+          vars: {
+            dog: {
+              type: 'text',
+              value: 'labrador',
+            },
+            cat: {
+              type: 'text',
+              value: 'tabby',
+            },
+          },
+          streams: [
+            {
+              data_stream: {
+                type: 'birds',
+                dataset: 'migratory.patterns',
+              },
+              enabled: false,
+              id: `endpoint-migratory.patterns-${mockPackagePolicy.id}`,
+              vars: {
+                paths: {
+                  value: ['east', 'west'],
+                  type: 'text',
+                },
+                period: {
+                  value: '12mo',
+                  type: 'text',
+                },
+              },
+            },
+          ],
+        },
+      ];
+      const attributes = {
+        ...mockPackagePolicy,
+        inputs: mockInputs,
+      };
+
+      savedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes,
+          },
+        ],
+      });
+
+      savedObjectsClient.update.mockImplementation(
+        async (
+          type: string,
+          id: string,
+          attrs: any
+        ): Promise<SavedObjectsUpdateResponse<PackagePolicySOAttributes>> => {
+          savedObjectsClient.get.mockResolvedValue({
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: attrs,
+          });
+          return attrs;
+        }
+      );
+      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const res = packagePolicyService.bulkUpdate(
+        savedObjectsClient,
+        elasticsearchClient,
+
+        [{ ...mockPackagePolicy, inputs: inputsUpdate }]
+      );
+
+      await expect(res).rejects.toThrow('cat is a frozen variable and cannot be modified');
+    });
+
+    it('should allow to update input vars that are frozen with the force flag', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      const mockPackagePolicy = createPackagePolicyMock();
+      const mockInputs = [
+        {
+          config: {},
+          enabled: true,
+          keep_enabled: true,
+          type: 'endpoint',
+          vars: {
+            dog: {
+              type: 'text',
+              value: 'dalmatian',
+            },
+            cat: {
+              type: 'text',
+              value: 'siamese',
+              frozen: true,
+            },
+          },
+          streams: [
+            {
+              data_stream: {
+                type: 'birds',
+                dataset: 'migratory.patterns',
+              },
+              enabled: false,
+              id: `endpoint-migratory.patterns-${mockPackagePolicy.id}`,
+              vars: {
+                paths: {
+                  value: ['north', 'south'],
+                  type: 'text',
+                  frozen: true,
+                },
+                period: {
+                  value: '6mo',
+                  type: 'text',
+                },
+              },
+            },
+          ],
+        },
+      ];
+      const inputsUpdate = [
+        {
+          config: {},
+          enabled: false,
+          type: 'endpoint',
+          vars: {
+            dog: {
+              type: 'text',
+              value: 'labrador',
+            },
+            cat: {
+              type: 'text',
+              value: 'tabby',
+            },
+          },
+          streams: [
+            {
+              data_stream: {
+                type: 'birds',
+                dataset: 'migratory.patterns',
+              },
+              enabled: false,
+              id: `endpoint-migratory.patterns-${mockPackagePolicy.id}`,
+              vars: {
+                paths: {
+                  value: ['east', 'west'],
+                  type: 'text',
+                },
+                period: {
+                  value: '12mo',
+                  type: 'text',
+                },
+              },
+            },
+          ],
+        },
+      ];
+      const attributes = {
+        ...mockPackagePolicy,
+        inputs: mockInputs,
+      };
+
+      savedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes,
+          },
+        ],
+      });
+
+      savedObjectsClient.bulkUpdate.mockImplementation(
+        async (
+          objs: Array<{
+            type: string;
+            id: string;
+            attributes: any;
+          }>
+        ) => {
+          const newObjs = objs.map((obj) => ({
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: obj.attributes,
+          }));
+          savedObjectsClient.bulkGet.mockResolvedValue({
+            saved_objects: newObjs,
+          });
+          return {
+            saved_objects: newObjs,
+          };
+        }
+      );
+      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const result = await packagePolicyService.bulkUpdate(
+        savedObjectsClient,
+        elasticsearchClient,
+        [{ ...mockPackagePolicy, inputs: inputsUpdate }],
+        { force: true }
+      );
+
+      const [modifiedInput] = result![0].inputs;
+      expect(modifiedInput.enabled).toEqual(true);
+      expect(modifiedInput.vars!.dog.value).toEqual('labrador');
+      expect(modifiedInput.vars!.cat.value).toEqual('tabby');
+      const [modifiedStream] = modifiedInput.streams;
+      expect(modifiedStream.vars!.paths.value).toEqual(expect.arrayContaining(['east', 'west']));
+      expect(modifiedStream.vars!.period.value).toEqual('12mo');
+    });
+
+    it('should add new input vars when updating', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      const mockPackagePolicy = createPackagePolicyMock();
+      const mockInputs = [
+        {
+          config: {},
+          enabled: true,
+          keep_enabled: true,
+          type: 'endpoint',
+          vars: {
+            dog: {
+              type: 'text',
+              value: 'dalmatian',
+            },
+            cat: {
+              type: 'text',
+              value: 'siamese',
+              frozen: true,
+            },
+          },
+          streams: [
+            {
+              data_stream: {
+                type: 'birds',
+                dataset: 'migratory.patterns',
+              },
+              enabled: false,
+              id: `endpoint-migratory.patterns-${mockPackagePolicy.id}`,
+              vars: {
+                paths: {
+                  value: ['north', 'south'],
+                  type: 'text',
+                  frozen: true,
+                },
+              },
+            },
+          ],
+        },
+      ];
+      const inputsUpdate = [
+        {
+          config: {},
+          enabled: false,
+          type: 'endpoint',
+          vars: {
+            dog: {
+              type: 'text',
+              value: 'labrador',
+            },
+            cat: {
+              type: 'text',
+              value: 'siamese',
+            },
+          },
+          streams: [
+            {
+              data_stream: {
+                type: 'birds',
+                dataset: 'migratory.patterns',
+              },
+              enabled: false,
+              id: `endpoint-migratory.patterns-${mockPackagePolicy.id}`,
+              vars: {
+                paths: {
+                  value: ['north', 'south'],
+                  type: 'text',
+                },
+                period: {
+                  value: '12mo',
+                  type: 'text',
+                },
+              },
+            },
+          ],
+        },
+      ];
+      const attributes = {
+        ...mockPackagePolicy,
+        inputs: mockInputs,
+      };
+
+      savedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes,
+          },
+        ],
+      });
+
+      savedObjectsClient.bulkUpdate.mockImplementation(
+        async (
+          objs: Array<{
+            type: string;
+            id: string;
+            attributes: any;
+          }>
+        ) => {
+          const newObjs = objs.map((obj) => ({
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: obj.attributes,
+          }));
+          savedObjectsClient.bulkGet.mockResolvedValue({
+            saved_objects: newObjs,
+          });
+          return {
+            saved_objects: newObjs,
+          };
+        }
+      );
+
+      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const result = await packagePolicyService.bulkUpdate(
+        savedObjectsClient,
+        elasticsearchClient,
+        [{ ...mockPackagePolicy, inputs: inputsUpdate }]
+      );
+
+      const [modifiedInput] = result![0].inputs;
+      expect(modifiedInput.enabled).toEqual(true);
+      expect(modifiedInput.vars!.dog.value).toEqual('labrador');
+      expect(modifiedInput.vars!.cat.value).toEqual('siamese');
+      const [modifiedStream] = modifiedInput.streams;
+      expect(modifiedStream.vars!.paths.value).toEqual(expect.arrayContaining(['north', 'south']));
+      expect(modifiedStream.vars!.period.value).toEqual('12mo');
+    });
+
+    it('should update elasticsearch.privileges.cluster when updating', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      const mockPackagePolicy = createPackagePolicyMock();
+
+      const attributes = {
+        ...mockPackagePolicy,
+        inputs: [],
+      };
+      (getPackageInfo as jest.Mock).mockImplementation(async (params) => {
+        return Promise.resolve({
+          ...(await mockedGetPackageInfo(params)),
+          elasticsearch: {
+            privileges: {
+              cluster: ['monitor'],
+            },
+          },
+        } as PackageInfo);
+      });
+
+      savedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes,
+          },
+        ],
+      });
+
+      savedObjectsClient.bulkUpdate.mockImplementation(
+        async (
+          objs: Array<{
+            type: string;
+            id: string;
+            attributes: any;
+          }>
+        ) => {
+          const newObjs = objs.map((obj) => ({
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: obj.attributes,
+          }));
+          savedObjectsClient.bulkGet.mockResolvedValue({
+            saved_objects: newObjs,
+          });
+          return {
+            saved_objects: newObjs,
+          };
+        }
+      );
+
+      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const result = await packagePolicyService.bulkUpdate(
+        savedObjectsClient,
+        elasticsearchClient,
+        [{ ...mockPackagePolicy, inputs: [] }]
+      );
+
+      expect(result![0].elasticsearch).toMatchObject({ privileges: { cluster: ['monitor'] } });
+    });
+
+    it('should not mutate packagePolicyUpdate object when trimming whitespace', async () => {
+      const savedObjectsClient = savedObjectsClientMock.create();
+      const mockPackagePolicy = createPackagePolicyMock();
+
+      const attributes = {
+        ...mockPackagePolicy,
+        inputs: [],
+      };
+
+      savedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes,
+          },
+        ],
+      });
+
+      savedObjectsClient.bulkUpdate.mockImplementation(
+        async (
+          objs: Array<{
+            type: string;
+            id: string;
+            attributes: any;
+          }>
+        ) => {
+          const newObjs = objs.map((obj) => ({
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: obj.attributes,
+          }));
+          savedObjectsClient.bulkGet.mockResolvedValue({
+            saved_objects: newObjs,
+          });
+          return {
+            saved_objects: newObjs,
+          };
+        }
+      );
+
+      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const result = await packagePolicyService.bulkUpdate(
+        savedObjectsClient,
+        elasticsearchClient,
+        // this mimics the way that OSQuery plugin create immutable objects
+        [
+          produce<PackagePolicy>(
+            { ...mockPackagePolicy, name: '  test  ', inputs: [] },
+            (draft) => draft
+          ),
+        ]
+      );
+
+      expect(result![0].name).toEqual('test');
+    });
+  });
+
+  describe('delete', () => {
+    it('should allow to delete a package policy', async () => {});
+  });
+
+  describe('runDeleteExternalCallbacks', () => {
+    let callbackOne: jest.MockedFunction<PostPackagePolicyDeleteCallback>;
+    let callbackTwo: jest.MockedFunction<PostPackagePolicyDeleteCallback>;
+    let callingOrder: string[];
+    let deletedPackagePolicies: DeletePackagePoliciesResponse;
+
+    beforeEach(() => {
+      appContextService.start(createAppContextStartContractMock());
+      callingOrder = [];
+      deletedPackagePolicies = [
+        { id: 'a', success: true },
+        { id: 'a', success: true },
+      ];
+      callbackOne = jest.fn(async (deletedPolicies) => {
+        callingOrder.push('one');
+      });
+      callbackTwo = jest.fn(async (deletedPolicies) => {
+        callingOrder.push('two');
+      });
+      appContextService.addExternalCallback('postPackagePolicyDelete', callbackOne);
+      appContextService.addExternalCallback('postPackagePolicyDelete', callbackTwo);
+    });
+
+    afterEach(() => {
+      appContextService.stop();
+    });
+
+    it('should execute external callbacks', async () => {
+      await packagePolicyService.runDeleteExternalCallbacks(deletedPackagePolicies);
+
+      expect(callbackOne).toHaveBeenCalledWith(deletedPackagePolicies);
+      expect(callbackTwo).toHaveBeenCalledWith(deletedPackagePolicies);
+      expect(callingOrder).toEqual(['one', 'two']);
+    });
+
+    it("should execute all external callbacks even if one throw's", async () => {
+      callbackOne.mockImplementation(async (deletedPolicies) => {
+        callingOrder.push('one');
+        throw new Error('foo');
+      });
+      await expect(
+        packagePolicyService.runDeleteExternalCallbacks(deletedPackagePolicies)
+      ).rejects.toThrow(FleetError);
+      expect(callingOrder).toEqual(['one', 'two']);
+    });
+
+    it('should provide an array of errors encountered by running external callbacks', async () => {
+      let error: FleetError;
+      const callbackOneError = new Error('foo 1');
+      const callbackTwoError = new Error('foo 2');
+
+      callbackOne.mockImplementation(async (deletedPolicies) => {
+        callingOrder.push('one');
+        throw callbackOneError;
+      });
+      callbackTwo.mockImplementation(async (deletedPolicies) => {
+        callingOrder.push('two');
+        throw callbackTwoError;
+      });
+
+      await packagePolicyService.runDeleteExternalCallbacks(deletedPackagePolicies).catch((e) => {
+        error = e;
+      });
+
+      expect(error!.message).toEqual(
+        '2 encountered while executing package delete external callbacks'
+      );
+      expect(error!.meta).toEqual([callbackOneError, callbackTwoError]);
+      expect(callingOrder).toEqual(['one', 'two']);
     });
   });
 
@@ -520,7 +1915,6 @@ describe('Package policy service', () => {
       inputs: [],
       name: 'endpoint-1',
       namespace: 'default',
-      output_id: '',
       package: {
         name: 'endpoint',
         title: 'Elastic Endpoint',
@@ -531,7 +1925,7 @@ describe('Package policy service', () => {
     const callbackCallingOrder: string[] = [];
 
     // Callback one adds an input that includes a `config` property
-    const callbackOne: ExternalCallback[1] = jest.fn(async (ds) => {
+    const callbackOne: CombinedExternalCallback = jest.fn(async (ds) => {
       callbackCallingOrder.push('one');
       return {
         ...ds,
@@ -551,7 +1945,7 @@ describe('Package policy service', () => {
     });
 
     // Callback two adds an additional `input[0].config` property
-    const callbackTwo: ExternalCallback[1] = jest.fn(async (ds) => {
+    const callbackTwo: CombinedExternalCallback = jest.fn(async (ds) => {
       callbackCallingOrder.push('two');
       return {
         ...ds,
@@ -582,12 +1976,12 @@ describe('Package policy service', () => {
     });
 
     it('should call external callbacks in expected order', async () => {
-      const callbackA: ExternalCallback[1] = jest.fn(async (ds) => {
+      const callbackA: CombinedExternalCallback = jest.fn(async (ds) => {
         callbackCallingOrder.push('a');
         return ds;
       });
 
-      const callbackB: ExternalCallback[1] = jest.fn(async (ds) => {
+      const callbackB: CombinedExternalCallback = jest.fn(async (ds) => {
         callbackCallingOrder.push('b');
         return ds;
       });
@@ -598,7 +1992,7 @@ describe('Package policy service', () => {
       await packagePolicyService.runExternalCallbacks(
         'packagePolicyCreate',
         newPackagePolicy,
-        context,
+        coreMock.createCustomRequestHandlerContext(context),
         request
       );
       expect(callbackCallingOrder).toEqual(['a', 'b']);
@@ -611,7 +2005,7 @@ describe('Package policy service', () => {
       await packagePolicyService.runExternalCallbacks(
         'packagePolicyCreate',
         newPackagePolicy,
-        context,
+        coreMock.createCustomRequestHandlerContext(context),
         request
       );
 
@@ -623,12 +2017,12 @@ describe('Package policy service', () => {
     });
 
     describe('with a callback that throws an exception', () => {
-      const callbackThree: ExternalCallback[1] = jest.fn(async () => {
+      const callbackThree: CombinedExternalCallback = jest.fn(async () => {
         callbackCallingOrder.push('three');
         throw new Error('callbackThree threw error on purpose');
       });
 
-      const callbackFour: ExternalCallback[1] = jest.fn(async (ds) => {
+      const callbackFour: CombinedExternalCallback = jest.fn(async (ds) => {
         callbackCallingOrder.push('four');
         return {
           ...ds,
@@ -658,7 +2052,7 @@ describe('Package policy service', () => {
           await packagePolicyService.runExternalCallbacks(
             'packagePolicyCreate',
             newPackagePolicy,
-            context,
+            coreMock.createCustomRequestHandlerContext(context),
             request
           );
         } catch (e) {
@@ -677,11 +2071,2230 @@ describe('Package policy service', () => {
           packagePolicyService.runExternalCallbacks(
             'packagePolicyCreate',
             newPackagePolicy,
-            context,
+            coreMock.createCustomRequestHandlerContext(context),
             request
           )
         ).rejects.toThrow('callbackThree threw error on purpose');
       });
     });
+  });
+
+  describe('runPostPackagePolicyPostCreateCallback', () => {
+    let context: ReturnType<typeof xpackMocks.createRequestHandlerContext>;
+    let request: KibanaRequest;
+    const packagePolicy = {
+      id: '93ac25fe-0467-4fcc-a3c5-57a26a8496e2',
+      version: 'WzYyMzcsMV0=',
+      name: 'my-cis_kubernetes_benchmark',
+      namespace: 'default',
+      description: '',
+      package: {
+        name: 'cis_kubernetes_benchmark',
+        title: 'CIS Kubernetes Benchmark',
+        version: '0.0.3',
+      },
+      enabled: true,
+      policy_id: '1e6d0690-b995-11ec-a355-d35391e25881',
+      inputs: [
+        {
+          type: 'cloudbeat',
+          policy_template: 'findings',
+          enabled: true,
+          streams: [
+            {
+              enabled: true,
+              data_stream: {
+                type: 'logs',
+                dataset: 'cis_kubernetes_benchmark.findings',
+              },
+              id: 'cloudbeat-cis_kubernetes_benchmark.findings-66b402b3-f24a-4018-b3d0-b88582a836ab',
+              compiled_stream: {
+                processors: [
+                  {
+                    add_cluster_id: null,
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      ],
+      vars: {
+        dataYaml: {
+          type: 'yaml',
+        },
+      },
+      elasticsearch: undefined,
+      revision: 1,
+      created_at: '2022-04-11T12:44:43.385Z',
+      created_by: 'elastic',
+      updated_at: '2022-04-11T12:44:43.385Z',
+      updated_by: 'elastic',
+    };
+    const callbackCallingOrder: string[] = [];
+
+    beforeEach(() => {
+      context = xpackMocks.createRequestHandlerContext();
+      request = httpServerMock.createKibanaRequest();
+      appContextService.start(createAppContextStartContractMock());
+    });
+
+    afterEach(() => {
+      appContextService.stop();
+      jest.clearAllMocks();
+      callbackCallingOrder.length = 0;
+    });
+
+    it('should execute PostPackagePolicyPostCreateCallback external callbacks', async () => {
+      const callbackA: PostPackagePolicyPostCreateCallback = jest.fn(async (ds) => {
+        callbackCallingOrder.push('a');
+        return ds;
+      });
+
+      const callbackB: PostPackagePolicyPostCreateCallback = jest.fn(async (ds) => {
+        callbackCallingOrder.push('b');
+        return ds;
+      });
+
+      appContextService.addExternalCallback('packagePolicyPostCreate', callbackA);
+      appContextService.addExternalCallback('packagePolicyPostCreate', callbackB);
+
+      const requestContext = coreMock.createCustomRequestHandlerContext(context);
+      await packagePolicyService.runExternalCallbacks(
+        'packagePolicyPostCreate',
+        packagePolicy,
+        requestContext,
+        request
+      );
+
+      expect(callbackA).toHaveBeenCalledWith(packagePolicy, requestContext, request);
+      expect(callbackB).toHaveBeenCalledWith(packagePolicy, requestContext, request);
+      expect(callbackCallingOrder).toEqual(['a', 'b']);
+    });
+  });
+
+  describe('preconfigurePackageInputs', () => {
+    describe('when variable is already defined', () => {
+      it('override original variable value', () => {
+        const basePackagePolicy: NewPackagePolicy = {
+          name: 'base-package-policy',
+          description: 'Base Package Policy',
+          namespace: 'default',
+          enabled: true,
+          policy_id: 'xxxx',
+          package: {
+            name: 'test-package',
+            title: 'Test Package',
+            version: '0.0.1',
+          },
+          inputs: [
+            {
+              type: 'logs',
+              policy_template: 'template_1',
+              enabled: true,
+              vars: {
+                path: {
+                  type: 'text',
+                  value: ['/var/log/logfile.log'],
+                },
+              },
+              streams: [],
+            },
+          ],
+        };
+
+        const packageInfo: PackageInfo = {
+          name: 'test-package',
+          description: 'Test Package',
+          title: 'Test Package',
+          version: '0.0.1',
+          latestVersion: '0.0.1',
+          release: 'experimental',
+          format_version: '1.0.0',
+          owner: { github: 'elastic/fleet' },
+          policy_templates: [
+            {
+              name: 'template_1',
+              title: 'Template 1',
+              description: 'Template 1',
+              inputs: [
+                {
+                  type: 'logs',
+                  title: 'Log',
+                  description: 'Log Input',
+                  vars: [
+                    {
+                      name: 'path',
+                      type: 'text',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          // @ts-ignore
+          assets: {},
+        };
+
+        const inputsOverride: NewPackagePolicyInput[] = [
+          {
+            type: 'logs',
+            enabled: true,
+            streams: [],
+            vars: {
+              path: {
+                type: 'text',
+                value: '/var/log/new-logfile.log',
+              },
+            },
+          },
+        ];
+
+        const result = preconfigurePackageInputs(
+          basePackagePolicy,
+          packageInfo,
+          // TODO: Update this type assertion when the `InputsOverride` type is updated such
+          // that it no longer causes unresolvable type errors when used directly
+          inputsOverride as InputsOverride[]
+        );
+        expect(result.inputs[0]?.vars?.path.value).toEqual('/var/log/new-logfile.log');
+      });
+    });
+
+    describe('when variable is undefined in original object', () => {
+      it('adds the variable definition to the resulting object', () => {
+        const basePackagePolicy: NewPackagePolicy = {
+          name: 'base-package-policy',
+          description: 'Base Package Policy',
+          namespace: 'default',
+          enabled: true,
+          policy_id: 'xxxx',
+          package: {
+            name: 'test-package',
+            title: 'Test Package',
+            version: '0.0.1',
+          },
+          inputs: [
+            {
+              type: 'logs',
+              policy_template: 'template_1',
+              enabled: true,
+              vars: {
+                path: {
+                  type: 'text',
+                  value: ['/var/log/logfile.log'],
+                },
+              },
+              streams: [],
+            },
+          ],
+        };
+
+        const packageInfo: PackageInfo = {
+          name: 'test-package',
+          description: 'Test Package',
+          title: 'Test Package',
+          version: '0.0.1',
+          latestVersion: '0.0.1',
+          release: 'experimental',
+          format_version: '1.0.0',
+          owner: { github: 'elastic/fleet' },
+          policy_templates: [
+            {
+              name: 'template_1',
+              title: 'Template 1',
+              description: 'Template 1',
+              inputs: [
+                {
+                  type: 'logs',
+                  title: 'Log',
+                  description: 'Log Input',
+                  vars: [
+                    {
+                      name: 'path',
+                      type: 'text',
+                    },
+                    {
+                      name: 'path_2',
+                      type: 'text',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          // @ts-ignore
+          assets: {},
+        };
+
+        const inputsOverride: NewPackagePolicyInput[] = [
+          {
+            type: 'logs',
+            enabled: true,
+            streams: [],
+            policy_template: 'template_1',
+            vars: {
+              path: {
+                type: 'text',
+                value: '/var/log/new-logfile.log',
+              },
+              path_2: {
+                type: 'text',
+                value: '/var/log/custom.log',
+              },
+            },
+          },
+        ];
+
+        const result = preconfigurePackageInputs(
+          basePackagePolicy,
+          packageInfo,
+          // TODO: Update this type assertion when the `InputsOverride` type is updated such
+          // that it no longer causes unresolvable type errors when used directly
+          inputsOverride as InputsOverride[]
+        );
+
+        expect(result.inputs[0]?.vars?.path_2.value).toEqual('/var/log/custom.log');
+      });
+    });
+
+    describe('when variable is undefined in original object and policy_template is undefined', () => {
+      it('adds the variable definition to the resulting object', () => {
+        const basePackagePolicy: NewPackagePolicy = {
+          name: 'base-package-policy',
+          description: 'Base Package Policy',
+          namespace: 'default',
+          enabled: true,
+          policy_id: 'xxxx',
+          package: {
+            name: 'test-package',
+            title: 'Test Package',
+            version: '0.0.1',
+          },
+          inputs: [
+            {
+              type: 'logs',
+              policy_template: 'template_1',
+              enabled: true,
+              vars: {
+                path: {
+                  type: 'text',
+                  value: ['/var/log/logfile.log'],
+                },
+              },
+              streams: [],
+            },
+          ],
+        };
+
+        const packageInfo: PackageInfo = {
+          name: 'test-package',
+          description: 'Test Package',
+          title: 'Test Package',
+          version: '0.0.1',
+          latestVersion: '0.0.1',
+          release: 'experimental',
+          format_version: '1.0.0',
+          owner: { github: 'elastic/fleet' },
+          policy_templates: [
+            {
+              name: 'template_1',
+              title: 'Template 1',
+              description: 'Template 1',
+              inputs: [
+                {
+                  type: 'logs',
+                  title: 'Log',
+                  description: 'Log Input',
+                  vars: [
+                    {
+                      name: 'path',
+                      type: 'text',
+                    },
+                    {
+                      name: 'path_2',
+                      type: 'text',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          // @ts-ignore
+          assets: {},
+        };
+
+        const inputsOverride: NewPackagePolicyInput[] = [
+          {
+            type: 'logs',
+            enabled: true,
+            streams: [],
+            policy_template: undefined, // preconfigured input overrides don't have a policy_template
+            vars: {
+              path: {
+                type: 'text',
+                value: '/var/log/new-logfile.log',
+              },
+              path_2: {
+                type: 'text',
+                value: '/var/log/custom.log',
+              },
+            },
+          },
+        ];
+
+        const result = preconfigurePackageInputs(
+          basePackagePolicy,
+          packageInfo,
+          // TODO: Update this type assertion when the `InputsOverride` type is updated such
+          // that it no longer causes unresolvable type errors when used directly
+          inputsOverride as InputsOverride[]
+        );
+
+        expect(result.inputs[0]?.vars?.path_2.value).toEqual('/var/log/custom.log');
+      });
+    });
+
+    describe('when an input of the same type exists under multiple policy templates', () => {
+      it('adds variable definitions to the proper streams', () => {
+        const basePackagePolicy: NewPackagePolicy = {
+          name: 'base-package-policy',
+          description: 'Base Package Policy',
+          namespace: 'default',
+          enabled: true,
+          policy_id: 'xxxx',
+          package: {
+            name: 'test-package',
+            title: 'Test Package',
+            version: '0.0.1',
+          },
+          inputs: [
+            {
+              type: 'logs',
+              policy_template: 'template_1',
+              enabled: true,
+              streams: [
+                {
+                  enabled: true,
+                  data_stream: {
+                    dataset: 'test.logs',
+                    type: 'logfile',
+                  },
+                  vars: {
+                    log_file_path: {
+                      type: 'text',
+                    },
+                  },
+                },
+              ],
+            },
+            {
+              type: 'logs',
+              policy_template: 'template_2',
+              enabled: true,
+              streams: [
+                {
+                  enabled: true,
+                  data_stream: {
+                    dataset: 'test.logs',
+                    type: 'logfile',
+                  },
+                  vars: {
+                    log_file_path: {
+                      type: 'text',
+                    },
+                  },
+                },
+              ],
+            },
+          ],
+        };
+
+        const packageInfo: PackageInfo = {
+          name: 'test-package',
+          description: 'Test Package',
+          title: 'Test Package',
+          version: '0.0.1',
+          latestVersion: '0.0.1',
+          release: 'experimental',
+          format_version: '1.0.0',
+          owner: { github: 'elastic/fleet' },
+          policy_templates: [
+            {
+              name: 'template_1',
+              title: 'Template 1',
+              description: 'Template 1',
+              inputs: [
+                {
+                  type: 'logs',
+                  title: 'Log',
+                  description: 'Log Input',
+                  vars: [],
+                },
+              ],
+            },
+            {
+              name: 'template_2',
+              title: 'Template 2',
+              description: 'Template 2',
+              inputs: [
+                {
+                  type: 'logs',
+                  title: 'Log',
+                  description: 'Log Input',
+                  vars: [],
+                },
+              ],
+            },
+          ],
+          // @ts-ignore
+          assets: {},
+        };
+
+        const inputsOverride: NewPackagePolicyInput[] = [
+          {
+            type: 'logs',
+            enabled: true,
+            policy_template: 'template_1',
+            streams: [
+              {
+                enabled: true,
+                data_stream: {
+                  dataset: 'test.logs',
+                  type: 'logfile',
+                },
+                vars: {
+                  log_file_path: {
+                    type: 'text',
+                    value: '/var/log/template1-logfile.log',
+                  },
+                },
+              },
+            ],
+          },
+          {
+            type: 'logs',
+            enabled: true,
+            policy_template: 'template_2',
+            streams: [
+              {
+                enabled: true,
+                data_stream: {
+                  dataset: 'test.logs',
+                  type: 'logfile',
+                },
+                vars: {
+                  log_file_path: {
+                    type: 'text',
+                    value: '/var/log/template2-logfile.log',
+                  },
+                },
+              },
+            ],
+          },
+        ];
+
+        const result = preconfigurePackageInputs(
+          basePackagePolicy,
+          packageInfo,
+          // TODO: Update this type assertion when the `InputsOverride` type is updated such
+          // that it no longer causes unresolvable type errors when used directly
+          inputsOverride as InputsOverride[]
+        );
+
+        expect(result.inputs).toHaveLength(2);
+
+        const template1Input = result.inputs.find(
+          (input) => input.policy_template === 'template_1'
+        );
+        const template2Input = result.inputs.find(
+          (input) => input.policy_template === 'template_2'
+        );
+
+        expect(template1Input).toBeDefined();
+        expect(template2Input).toBeDefined();
+
+        expect(template1Input?.streams[0].vars?.log_file_path.value).toBe(
+          '/var/log/template1-logfile.log'
+        );
+
+        expect(template2Input?.streams[0].vars?.log_file_path.value).toBe(
+          '/var/log/template2-logfile.log'
+        );
+      });
+    });
+
+    describe('when an input or stream is disabled by default in the package', () => {
+      it('allow preconfiguration to enable it', () => {
+        const basePackagePolicy: NewPackagePolicy = {
+          name: 'base-package-policy',
+          description: 'Base Package Policy',
+          namespace: 'default',
+          enabled: true,
+          policy_id: 'xxxx',
+          package: {
+            name: 'test-package',
+            title: 'Test Package',
+            version: '0.0.1',
+          },
+          inputs: [
+            {
+              type: 'logs',
+              policy_template: 'template_1',
+              enabled: false,
+              streams: [
+                {
+                  enabled: false,
+                  data_stream: {
+                    dataset: 'test.logs',
+                    type: 'logfile',
+                  },
+                  vars: {
+                    log_file_path: {
+                      type: 'text',
+                    },
+                  },
+                },
+                {
+                  enabled: true,
+                  data_stream: {
+                    dataset: 'test.logs',
+                    type: 'logfile2',
+                  },
+                  vars: {
+                    log_file_path_2: {
+                      type: 'text',
+                    },
+                  },
+                },
+              ],
+            },
+            {
+              type: 'logs_2',
+              policy_template: 'template_1',
+              enabled: true,
+              streams: [
+                {
+                  enabled: true,
+                  data_stream: {
+                    dataset: 'test.logs',
+                    type: 'logfile',
+                  },
+                  vars: {
+                    log_file_path: {
+                      type: 'text',
+                    },
+                  },
+                },
+              ],
+            },
+            {
+              type: 'logs',
+              policy_template: 'template_2',
+              enabled: true,
+              streams: [
+                {
+                  enabled: true,
+                  data_stream: {
+                    dataset: 'test.logs',
+                    type: 'logfile',
+                  },
+                  vars: {
+                    log_file_path: {
+                      type: 'text',
+                    },
+                  },
+                },
+              ],
+            },
+          ],
+        };
+
+        const packageInfo: PackageInfo = {
+          name: 'test-package',
+          description: 'Test Package',
+          title: 'Test Package',
+          version: '0.0.1',
+          latestVersion: '0.0.1',
+          release: 'experimental',
+          format_version: '1.0.0',
+          owner: { github: 'elastic/fleet' },
+          policy_templates: [
+            {
+              name: 'template_1',
+              title: 'Template 1',
+              description: 'Template 1',
+              inputs: [
+                {
+                  type: 'logs',
+                  title: 'Log',
+                  description: 'Log Input',
+                  vars: [],
+                },
+                {
+                  type: 'logs_2',
+                  title: 'Log 2',
+                  description: 'Log Input 2',
+                  vars: [],
+                },
+              ],
+            },
+            {
+              name: 'template_2',
+              title: 'Template 2',
+              description: 'Template 2',
+              inputs: [
+                {
+                  type: 'logs',
+                  title: 'Log',
+                  description: 'Log Input',
+                  vars: [],
+                },
+              ],
+            },
+          ],
+          // @ts-ignore
+          assets: {},
+        };
+
+        const inputsOverride: NewPackagePolicyInput[] = [
+          {
+            type: 'logs',
+            enabled: true,
+            policy_template: 'template_1',
+            streams: [
+              {
+                enabled: true,
+                data_stream: {
+                  dataset: 'test.logs',
+                  type: 'logfile',
+                },
+                vars: {
+                  log_file_path: {
+                    type: 'text',
+                    value: '/var/log/template1-logfile.log',
+                  },
+                },
+              },
+              {
+                enabled: true,
+                data_stream: {
+                  dataset: 'test.logs',
+                  type: 'logfile2',
+                },
+                vars: {
+                  log_file_path_2: {
+                    type: 'text',
+                    value: '/var/log/template1-logfile2.log',
+                  },
+                },
+              },
+            ],
+          },
+          {
+            type: 'logs',
+            enabled: true,
+            policy_template: 'template_2',
+            streams: [
+              {
+                enabled: true,
+                data_stream: {
+                  dataset: 'test.logs',
+                  type: 'logfile',
+                },
+                vars: {
+                  log_file_path: {
+                    type: 'text',
+                    value: '/var/log/template2-logfile.log',
+                  },
+                },
+              },
+            ],
+          },
+        ];
+
+        const result = preconfigurePackageInputs(
+          basePackagePolicy,
+          packageInfo,
+          // TODO: Update this type assertion when the `InputsOverride` type is updated such
+          // that it no longer causes unresolvable type errors when used directly
+          inputsOverride as InputsOverride[]
+        );
+
+        const template1Inputs = result.inputs.filter(
+          (input) => input.policy_template === 'template_1'
+        );
+
+        const template2Inputs = result.inputs.filter(
+          (input) => input.policy_template === 'template_2'
+        );
+
+        expect(template1Inputs).toHaveLength(2);
+        expect(template2Inputs).toHaveLength(1);
+
+        const logsInput = template1Inputs?.find((input) => input.type === 'logs');
+        expect(logsInput?.enabled).toBe(true);
+
+        const logfileStream = logsInput?.streams.find(
+          (stream) => stream.data_stream.type === 'logfile'
+        );
+
+        expect(logfileStream?.enabled).toBe(true);
+      });
+    });
+
+    describe('when a datastream is deleted from an input', () => {
+      it('it remove the non existing datastream', () => {
+        const basePackagePolicy: NewPackagePolicy = {
+          name: 'base-package-policy',
+          description: 'Base Package Policy',
+          namespace: 'default',
+          enabled: true,
+          policy_id: 'xxxx',
+          package: {
+            name: 'test-package',
+            title: 'Test Package',
+            version: '0.0.1',
+          },
+          inputs: [
+            {
+              type: 'logs',
+              policy_template: 'template_1',
+              enabled: true,
+              vars: {
+                path: {
+                  type: 'text',
+                  value: ['/var/log/logfile.log'],
+                },
+              },
+              streams: [
+                {
+                  enabled: true,
+                  data_stream: { dataset: 'dataset.test123', type: 'log' },
+                },
+              ],
+            },
+          ],
+        };
+
+        const packageInfo: PackageInfo = {
+          name: 'test-package',
+          description: 'Test Package',
+          title: 'Test Package',
+          version: '0.0.1',
+          latestVersion: '0.0.1',
+          release: 'experimental',
+          format_version: '1.0.0',
+          owner: { github: 'elastic/fleet' },
+          policy_templates: [
+            {
+              name: 'template_1',
+              title: 'Template 1',
+              description: 'Template 1',
+              inputs: [
+                {
+                  type: 'logs',
+                  title: 'Log',
+                  description: 'Log Input',
+                  vars: [
+                    {
+                      name: 'path',
+                      type: 'text',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          // @ts-ignore
+          assets: {},
+        };
+
+        const inputsOverride: NewPackagePolicyInput[] = [
+          {
+            type: 'logs',
+            enabled: true,
+            streams: [],
+            vars: {
+              path: {
+                type: 'text',
+                value: '/var/log/new-logfile.log',
+              },
+            },
+          },
+        ];
+
+        const result = preconfigurePackageInputs(
+          basePackagePolicy,
+          packageInfo,
+          // TODO: Update this type assertion when the `InputsOverride` type is updated such
+          // that it no longer causes unresolvable type errors when used directly
+          inputsOverride as InputsOverride[]
+        );
+        expect(result.inputs[0]?.vars?.path.value).toEqual('/var/log/new-logfile.log');
+      });
+    });
+  });
+
+  describe('updatePackageInputs', () => {
+    describe('when variable is already defined', () => {
+      it('preserves original variable value without overwriting', () => {
+        const basePackagePolicy: NewPackagePolicy = {
+          name: 'base-package-policy',
+          description: 'Base Package Policy',
+          namespace: 'default',
+          enabled: true,
+          policy_id: 'xxxx',
+          package: {
+            name: 'test-package',
+            title: 'Test Package',
+            version: '0.0.1',
+          },
+          inputs: [
+            {
+              type: 'logs',
+              policy_template: 'template_1',
+              enabled: true,
+              vars: {
+                path: {
+                  type: 'text',
+                  value: ['/var/log/logfile.log'],
+                },
+                is_value_enabled: {
+                  type: 'bool',
+                  value: false,
+                },
+              },
+              streams: [],
+            },
+          ],
+        };
+
+        const packageInfo: PackageInfo = {
+          name: 'test-package',
+          description: 'Test Package',
+          title: 'Test Package',
+          version: '0.0.1',
+          latestVersion: '0.0.1',
+          release: 'experimental',
+          format_version: '1.0.0',
+          owner: { github: 'elastic/fleet' },
+          policy_templates: [
+            {
+              name: 'template_1',
+              title: 'Template 1',
+              description: 'Template 1',
+              inputs: [
+                {
+                  type: 'logs',
+                  title: 'Log',
+                  description: 'Log Input',
+                  vars: [
+                    {
+                      name: 'path',
+                      type: 'text',
+                    },
+                    {
+                      name: 'is_value_enabled',
+                      type: 'bool',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          // @ts-ignore
+          assets: {},
+        };
+
+        const inputsOverride: NewPackagePolicyInput[] = [
+          {
+            type: 'logs',
+            enabled: true,
+            streams: [],
+            vars: {
+              path: {
+                type: 'text',
+                value: '/var/log/new-logfile.log',
+              },
+              is_value_enabled: {
+                type: 'bool',
+                value: 'true',
+              },
+            },
+          },
+        ];
+
+        const result = updatePackageInputs(
+          basePackagePolicy,
+          packageInfo,
+          // TODO: Update this type assertion when the `InputsOverride` type is updated such
+          // that it no longer causes unresolvable type errors when used directly
+          inputsOverride as InputsOverride[],
+          false
+        );
+        expect(result.inputs[0]?.vars?.path.value).toEqual(['/var/log/logfile.log']);
+        expect(result.inputs[0]?.vars?.is_value_enabled.value).toEqual(false);
+      });
+    });
+
+    describe('when variable is undefined in original object', () => {
+      it('adds the variable definition to the resulting object', () => {
+        const basePackagePolicy: NewPackagePolicy = {
+          name: 'base-package-policy',
+          description: 'Base Package Policy',
+          namespace: 'default',
+          enabled: true,
+          policy_id: 'xxxx',
+          package: {
+            name: 'test-package',
+            title: 'Test Package',
+            version: '0.0.1',
+          },
+          inputs: [
+            {
+              type: 'logs',
+              policy_template: 'template_1',
+              enabled: true,
+              vars: {
+                path: {
+                  type: 'text',
+                  value: ['/var/log/logfile.log'],
+                },
+              },
+              streams: [],
+            },
+          ],
+        };
+
+        const packageInfo: PackageInfo = {
+          name: 'test-package',
+          description: 'Test Package',
+          title: 'Test Package',
+          version: '0.0.1',
+          latestVersion: '0.0.1',
+          release: 'experimental',
+          format_version: '1.0.0',
+          owner: { github: 'elastic/fleet' },
+          policy_templates: [
+            {
+              name: 'template_1',
+              title: 'Template 1',
+              description: 'Template 1',
+              inputs: [
+                {
+                  type: 'logs',
+                  title: 'Log',
+                  description: 'Log Input',
+                  vars: [
+                    {
+                      name: 'path',
+                      type: 'text',
+                    },
+                    {
+                      name: 'path_2',
+                      type: 'text',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          // @ts-ignore
+          assets: {},
+        };
+
+        const inputsOverride: NewPackagePolicyInput[] = [
+          {
+            type: 'logs',
+            enabled: true,
+            streams: [],
+            policy_template: 'template_1',
+            vars: {
+              path: {
+                type: 'text',
+                value: '/var/log/new-logfile.log',
+              },
+              path_2: {
+                type: 'text',
+                value: '/var/log/custom.log',
+              },
+            },
+          },
+        ];
+
+        const result = updatePackageInputs(
+          basePackagePolicy,
+          packageInfo,
+          // TODO: Update this type assertion when the `InputsOverride` type is updated such
+          // that it no longer causes unresolvable type errors when used directly
+          inputsOverride as InputsOverride[],
+          false
+        );
+
+        expect(result.inputs[0]?.vars?.path_2.value).toEqual('/var/log/custom.log');
+      });
+    });
+
+    describe('when variable is undefined in original object and policy_template is undefined', () => {
+      it('adds the variable definition to the resulting object', () => {
+        const basePackagePolicy: NewPackagePolicy = {
+          name: 'base-package-policy',
+          description: 'Base Package Policy',
+          namespace: 'default',
+          enabled: true,
+          policy_id: 'xxxx',
+          package: {
+            name: 'test-package',
+            title: 'Test Package',
+            version: '0.0.1',
+          },
+          inputs: [
+            {
+              type: 'logs',
+              policy_template: 'template_1',
+              enabled: true,
+              vars: {
+                path: {
+                  type: 'text',
+                  value: ['/var/log/logfile.log'],
+                },
+              },
+              streams: [],
+            },
+          ],
+        };
+
+        const packageInfo: PackageInfo = {
+          name: 'test-package',
+          description: 'Test Package',
+          title: 'Test Package',
+          version: '0.0.1',
+          latestVersion: '0.0.1',
+          release: 'experimental',
+          format_version: '1.0.0',
+          owner: { github: 'elastic/fleet' },
+          policy_templates: [
+            {
+              name: 'template_1',
+              title: 'Template 1',
+              description: 'Template 1',
+              inputs: [
+                {
+                  type: 'logs',
+                  title: 'Log',
+                  description: 'Log Input',
+                  vars: [
+                    {
+                      name: 'path',
+                      type: 'text',
+                    },
+                    {
+                      name: 'path_2',
+                      type: 'text',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          // @ts-ignore
+          assets: {},
+        };
+
+        const inputsOverride: NewPackagePolicyInput[] = [
+          {
+            type: 'logs',
+            enabled: true,
+            streams: [],
+            policy_template: undefined, // preconfigured input overrides don't have a policy_template
+            vars: {
+              path: {
+                type: 'text',
+                value: '/var/log/new-logfile.log',
+              },
+              path_2: {
+                type: 'text',
+                value: '/var/log/custom.log',
+              },
+            },
+          },
+        ];
+
+        const result = updatePackageInputs(
+          basePackagePolicy,
+          packageInfo,
+          // TODO: Update this type assertion when the `InputsOverride` type is updated such
+          // that it no longer causes unresolvable type errors when used directly
+          inputsOverride as InputsOverride[],
+          false
+        );
+
+        expect(result.inputs[0]?.vars?.path_2.value).toEqual('/var/log/custom.log');
+      });
+    });
+
+    describe('when an input of the same type exists under multiple policy templates', () => {
+      it('adds variable definitions to the proper streams', () => {
+        const basePackagePolicy: NewPackagePolicy = {
+          name: 'base-package-policy',
+          description: 'Base Package Policy',
+          namespace: 'default',
+          enabled: true,
+          policy_id: 'xxxx',
+          package: {
+            name: 'test-package',
+            title: 'Test Package',
+            version: '0.0.1',
+          },
+          inputs: [
+            {
+              type: 'logs',
+              policy_template: 'template_1',
+              enabled: true,
+              streams: [
+                {
+                  enabled: true,
+                  data_stream: {
+                    dataset: 'test.logs',
+                    type: 'logfile',
+                  },
+                  vars: {
+                    log_file_path: {
+                      type: 'text',
+                    },
+                  },
+                },
+              ],
+            },
+            {
+              type: 'logs',
+              policy_template: 'template_2',
+              enabled: true,
+              streams: [
+                {
+                  enabled: true,
+                  data_stream: {
+                    dataset: 'test.logs',
+                    type: 'logfile',
+                  },
+                  vars: {
+                    log_file_path: {
+                      type: 'text',
+                    },
+                  },
+                },
+              ],
+            },
+          ],
+        };
+
+        const packageInfo: PackageInfo = {
+          name: 'test-package',
+          description: 'Test Package',
+          title: 'Test Package',
+          version: '0.0.1',
+          latestVersion: '0.0.1',
+          release: 'experimental',
+          format_version: '1.0.0',
+          owner: { github: 'elastic/fleet' },
+          policy_templates: [
+            {
+              name: 'template_1',
+              title: 'Template 1',
+              description: 'Template 1',
+              inputs: [
+                {
+                  type: 'logs',
+                  title: 'Log',
+                  description: 'Log Input',
+                  vars: [],
+                },
+              ],
+            },
+            {
+              name: 'template_2',
+              title: 'Template 2',
+              description: 'Template 2',
+              inputs: [
+                {
+                  type: 'logs',
+                  title: 'Log',
+                  description: 'Log Input',
+                  vars: [],
+                },
+              ],
+            },
+          ],
+          // @ts-ignore
+          assets: {},
+        };
+
+        const inputsOverride: NewPackagePolicyInput[] = [
+          {
+            type: 'logs',
+            enabled: true,
+            policy_template: 'template_1',
+            streams: [
+              {
+                enabled: true,
+                data_stream: {
+                  dataset: 'test.logs',
+                  type: 'logfile',
+                },
+                vars: {
+                  log_file_path: {
+                    type: 'text',
+                    value: '/var/log/template1-logfile.log',
+                  },
+                },
+              },
+            ],
+          },
+          {
+            type: 'logs',
+            enabled: true,
+            policy_template: 'template_2',
+            streams: [
+              {
+                enabled: true,
+                data_stream: {
+                  dataset: 'test.logs',
+                  type: 'logfile',
+                },
+                vars: {
+                  log_file_path: {
+                    type: 'text',
+                    value: '/var/log/template2-logfile.log',
+                  },
+                },
+              },
+            ],
+          },
+        ];
+
+        const result = updatePackageInputs(
+          basePackagePolicy,
+          packageInfo,
+          // TODO: Update this type assertion when the `InputsOverride` type is updated such
+          // that it no longer causes unresolvable type errors when used directly
+          inputsOverride as InputsOverride[],
+          false
+        );
+
+        expect(result.inputs).toHaveLength(2);
+
+        const template1Input = result.inputs.find(
+          (input) => input.policy_template === 'template_1'
+        );
+        const template2Input = result.inputs.find(
+          (input) => input.policy_template === 'template_2'
+        );
+
+        expect(template1Input).toBeDefined();
+        expect(template2Input).toBeDefined();
+
+        expect(template1Input?.streams[0].vars?.log_file_path.value).toBe(
+          '/var/log/template1-logfile.log'
+        );
+
+        expect(template2Input?.streams[0].vars?.log_file_path.value).toBe(
+          '/var/log/template2-logfile.log'
+        );
+      });
+    });
+
+    describe('when an input or stream is disabled on the original policy object', () => {
+      it('remains disabled on the resulting policy object', () => {
+        const basePackagePolicy: NewPackagePolicy = {
+          name: 'base-package-policy',
+          description: 'Base Package Policy',
+          namespace: 'default',
+          enabled: true,
+          policy_id: 'xxxx',
+          package: {
+            name: 'test-package',
+            title: 'Test Package',
+            version: '0.0.1',
+          },
+          inputs: [
+            {
+              type: 'logs',
+              policy_template: 'template_1',
+              enabled: false,
+              streams: [
+                {
+                  enabled: false,
+                  data_stream: {
+                    dataset: 'test.logs',
+                    type: 'logfile',
+                  },
+                  vars: {
+                    log_file_path: {
+                      type: 'text',
+                    },
+                  },
+                },
+                {
+                  enabled: true,
+                  data_stream: {
+                    dataset: 'test.logs',
+                    type: 'logfile2',
+                  },
+                  vars: {
+                    log_file_path_2: {
+                      type: 'text',
+                    },
+                  },
+                },
+              ],
+            },
+            {
+              type: 'logs_2',
+              policy_template: 'template_1',
+              enabled: true,
+              streams: [
+                {
+                  enabled: true,
+                  data_stream: {
+                    dataset: 'test.logs',
+                    type: 'logfile',
+                  },
+                  vars: {
+                    log_file_path: {
+                      type: 'text',
+                    },
+                  },
+                },
+              ],
+            },
+            {
+              type: 'logs',
+              policy_template: 'template_2',
+              enabled: true,
+              streams: [
+                {
+                  enabled: true,
+                  data_stream: {
+                    dataset: 'test.logs',
+                    type: 'logfile',
+                  },
+                  vars: {
+                    log_file_path: {
+                      type: 'text',
+                    },
+                  },
+                },
+              ],
+            },
+          ],
+        };
+
+        const packageInfo: PackageInfo = {
+          name: 'test-package',
+          description: 'Test Package',
+          title: 'Test Package',
+          version: '0.0.1',
+          latestVersion: '0.0.1',
+          release: 'experimental',
+          format_version: '1.0.0',
+          owner: { github: 'elastic/fleet' },
+          policy_templates: [
+            {
+              name: 'template_1',
+              title: 'Template 1',
+              description: 'Template 1',
+              inputs: [
+                {
+                  type: 'logs',
+                  title: 'Log',
+                  description: 'Log Input',
+                  vars: [],
+                },
+                {
+                  type: 'logs_2',
+                  title: 'Log 2',
+                  description: 'Log Input 2',
+                  vars: [],
+                },
+              ],
+            },
+            {
+              name: 'template_2',
+              title: 'Template 2',
+              description: 'Template 2',
+              inputs: [
+                {
+                  type: 'logs',
+                  title: 'Log',
+                  description: 'Log Input',
+                  vars: [],
+                },
+              ],
+            },
+          ],
+          // @ts-ignore
+          assets: {},
+        };
+
+        const inputsOverride: NewPackagePolicyInput[] = [
+          {
+            type: 'logs',
+            enabled: true,
+            policy_template: 'template_1',
+            streams: [
+              {
+                enabled: true,
+                data_stream: {
+                  dataset: 'test.logs',
+                  type: 'logfile',
+                },
+                vars: {
+                  log_file_path: {
+                    type: 'text',
+                    value: '/var/log/template1-logfile.log',
+                  },
+                },
+              },
+              {
+                enabled: true,
+                data_stream: {
+                  dataset: 'test.logs',
+                  type: 'logfile2',
+                },
+                vars: {
+                  log_file_path_2: {
+                    type: 'text',
+                    value: '/var/log/template1-logfile2.log',
+                  },
+                },
+              },
+            ],
+          },
+          {
+            type: 'logs',
+            enabled: true,
+            policy_template: 'template_2',
+            streams: [
+              {
+                enabled: true,
+                data_stream: {
+                  dataset: 'test.logs',
+                  type: 'logfile',
+                },
+                vars: {
+                  log_file_path: {
+                    type: 'text',
+                    value: '/var/log/template2-logfile.log',
+                  },
+                },
+              },
+            ],
+          },
+        ];
+
+        const result = updatePackageInputs(
+          basePackagePolicy,
+          packageInfo,
+          // TODO: Update this type assertion when the `InputsOverride` type is updated such
+          // that it no longer causes unresolvable type errors when used directly
+          inputsOverride as InputsOverride[],
+          false
+        );
+
+        const template1Inputs = result.inputs.filter(
+          (input) => input.policy_template === 'template_1'
+        );
+
+        const template2Inputs = result.inputs.filter(
+          (input) => input.policy_template === 'template_2'
+        );
+
+        expect(template1Inputs).toHaveLength(2);
+        expect(template2Inputs).toHaveLength(1);
+
+        const logsInput = template1Inputs?.find((input) => input.type === 'logs');
+        expect(logsInput?.enabled).toBe(false);
+
+        const logfileStream = logsInput?.streams.find(
+          (stream) => stream.data_stream.type === 'logfile'
+        );
+
+        expect(logfileStream?.enabled).toBe(false);
+      });
+    });
+
+    describe('when a datastream is deleted from an input', () => {
+      it('it remove the non existing datastream', () => {
+        const basePackagePolicy: NewPackagePolicy = {
+          name: 'base-package-policy',
+          description: 'Base Package Policy',
+          namespace: 'default',
+          enabled: true,
+          policy_id: 'xxxx',
+          package: {
+            name: 'test-package',
+            title: 'Test Package',
+            version: '0.0.1',
+          },
+          inputs: [
+            {
+              type: 'logs',
+              policy_template: 'template_1',
+              enabled: true,
+              vars: {
+                path: {
+                  type: 'text',
+                  value: ['/var/log/logfile.log'],
+                },
+              },
+              streams: [
+                {
+                  enabled: true,
+                  data_stream: { dataset: 'dataset.test123', type: 'log' },
+                },
+              ],
+            },
+          ],
+        };
+
+        const packageInfo: PackageInfo = {
+          name: 'test-package',
+          description: 'Test Package',
+          title: 'Test Package',
+          version: '0.0.1',
+          latestVersion: '0.0.1',
+          release: 'experimental',
+          format_version: '1.0.0',
+          owner: { github: 'elastic/fleet' },
+          policy_templates: [
+            {
+              name: 'template_1',
+              title: 'Template 1',
+              description: 'Template 1',
+              inputs: [
+                {
+                  type: 'logs',
+                  title: 'Log',
+                  description: 'Log Input',
+                  vars: [
+                    {
+                      name: 'path',
+                      type: 'text',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          // @ts-ignore
+          assets: {},
+        };
+
+        const inputsOverride: NewPackagePolicyInput[] = [
+          {
+            type: 'logs',
+            enabled: true,
+            streams: [],
+            vars: {
+              path: {
+                type: 'text',
+                value: '/var/log/new-logfile.log',
+              },
+            },
+          },
+        ];
+
+        const result = updatePackageInputs(
+          basePackagePolicy,
+          packageInfo,
+          // TODO: Update this type assertion when the `InputsOverride` type is updated such
+          // that it no longer causes unresolvable type errors when used directly
+          inputsOverride as InputsOverride[],
+          false
+        );
+        expect(result.inputs[0]?.vars?.path.value).toEqual(['/var/log/logfile.log']);
+      });
+    });
+
+    describe('when policy_template is defined on update, but undefined on existing input with matching type', () => {
+      it('generates the proper inputs, and adds a policy_template field', () => {
+        const basePackagePolicy: NewPackagePolicy = {
+          name: 'base-package-policy',
+          description: 'Base Package Policy',
+          namespace: 'default',
+          enabled: true,
+          policy_id: 'xxxx',
+          package: {
+            name: 'test-package',
+            title: 'Test Package',
+            version: '0.0.1',
+          },
+          inputs: [
+            {
+              type: 'logs',
+              enabled: true,
+              vars: {
+                path: {
+                  type: 'text',
+                  value: ['/var/log/logfile.log'],
+                },
+              },
+              streams: [],
+            },
+          ],
+        };
+
+        const packageInfo: PackageInfo = {
+          name: 'test-package',
+          description: 'Test Package',
+          title: 'Test Package',
+          version: '0.0.1',
+          latestVersion: '0.0.1',
+          release: 'experimental',
+          format_version: '1.0.0',
+          owner: { github: 'elastic/fleet' },
+          policy_templates: [
+            {
+              name: 'template_1',
+              title: 'Template 1',
+              description: 'Template 1',
+              inputs: [
+                {
+                  type: 'logs',
+                  title: 'Log',
+                  description: 'Log Input',
+                  vars: [
+                    {
+                      name: 'path',
+                      type: 'text',
+                    },
+                    {
+                      name: 'path_2',
+                      type: 'text',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+          // @ts-ignore
+          assets: {},
+        };
+
+        const inputsOverride: NewPackagePolicyInput[] = [
+          {
+            type: 'logs',
+            enabled: true,
+            streams: [],
+            policy_template: 'template_1',
+            vars: {
+              path: {
+                type: 'text',
+                value: '/var/log/new-logfile.log',
+              },
+              path_2: {
+                type: 'text',
+                value: '/var/log/custom.log',
+              },
+            },
+          },
+        ];
+
+        const result = updatePackageInputs(
+          basePackagePolicy,
+          packageInfo,
+          // TODO: Update this type assertion when the `InputsOverride` type is updated such
+          // that it no longer causes unresolvable type errors when used directly
+          inputsOverride as InputsOverride[],
+          false
+        );
+
+        expect(result.inputs.length).toBe(1);
+        expect(result.inputs[0]?.vars?.path.value).toEqual(['/var/log/logfile.log']);
+        expect(result.inputs[0]?.vars?.path_2.value).toBe('/var/log/custom.log');
+        expect(result.inputs[0]?.policy_template).toBe('template_1');
+      });
+    });
+  });
+
+  describe('enrich package policy on create', () => {
+    beforeEach(() => {
+      (packageToPackagePolicy as jest.Mock).mockReturnValue({
+        package: { name: 'apache', title: 'Apache', version: '1.0.0' },
+        inputs: [
+          {
+            type: 'logfile',
+            policy_template: 'log',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: {
+                  type: 'logs',
+                  dataset: 'apache.access',
+                },
+              },
+            ],
+          },
+        ],
+        vars: {
+          paths: {
+            value: ['/var/log/apache2/access.log*'],
+            type: 'text',
+          },
+        },
+      });
+    });
+
+    it('should enrich from epm with defaults', async () => {
+      const newPolicy = {
+        name: 'apache-1',
+        inputs: [{ type: 'logfile', enabled: false }],
+        package: { name: 'apache', version: '0.3.3' },
+        policy_id: '1',
+      } as NewPackagePolicy;
+      const result = await packagePolicyService.enrichPolicyWithDefaultsFromPackage(
+        savedObjectsClientMock.create(),
+        newPolicy
+      );
+      expect(result).toEqual({
+        name: 'apache-1',
+        namespace: 'default',
+        description: '',
+        package: { name: 'apache', title: 'Apache', version: '1.0.0' },
+        enabled: true,
+        policy_id: '1',
+        inputs: [
+          {
+            enabled: false,
+            type: 'logfile',
+            policy_template: 'log',
+            streams: [
+              {
+                enabled: false,
+                data_stream: {
+                  type: 'logs',
+                  dataset: 'apache.access',
+                },
+              },
+            ],
+          },
+        ],
+        vars: {
+          paths: {
+            value: ['/var/log/apache2/access.log*'],
+            type: 'text',
+          },
+        },
+      });
+    });
+
+    it('should enrich from epm with defaults using policy template', async () => {
+      (packageToPackagePolicy as jest.Mock).mockReturnValueOnce({
+        package: { name: 'aws', title: 'AWS', version: '1.0.0' },
+        inputs: [
+          {
+            type: 'aws/metrics',
+            policy_template: 'cloudtrail',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: {
+                  type: 'metrics',
+                  dataset: 'cloudtrail',
+                },
+              },
+            ],
+          },
+          {
+            type: 'aws/metrics',
+            policy_template: 'cloudwatch',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: {
+                  type: 'metrics',
+                  dataset: 'cloudwatch',
+                },
+              },
+            ],
+          },
+        ],
+      });
+      const newPolicy = {
+        name: 'aws-1',
+        inputs: [{ type: 'aws/metrics', policy_template: 'cloudwatch', enabled: true }],
+        package: { name: 'aws', version: '1.0.0' },
+        policy_id: '1',
+      } as NewPackagePolicy;
+      const result = await packagePolicyService.enrichPolicyWithDefaultsFromPackage(
+        savedObjectsClientMock.create(),
+        newPolicy
+      );
+      expect(result).toEqual({
+        name: 'aws-1',
+        namespace: 'default',
+        description: '',
+        package: { name: 'aws', title: 'AWS', version: '1.0.0' },
+        enabled: true,
+        policy_id: '1',
+        inputs: [
+          {
+            type: 'aws/metrics',
+            policy_template: 'cloudwatch',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: {
+                  type: 'metrics',
+                  dataset: 'cloudwatch',
+                },
+              },
+            ],
+          },
+        ],
+      });
+    });
+
+    it('should override defaults with new values', async () => {
+      const newPolicy = {
+        name: 'apache-2',
+        namespace: 'namespace',
+        description: 'desc',
+        enabled: false,
+        policy_id: '2',
+        inputs: [
+          {
+            type: 'logfile',
+            enabled: true,
+            streams: [
+              {
+                enabled: true,
+                data_stream: {
+                  type: 'logs',
+                  dataset: 'apache.error',
+                },
+              },
+            ],
+          },
+        ],
+        vars: {
+          paths: {
+            value: ['/my/access.log*'],
+            type: 'text',
+          },
+        },
+        package: { name: 'apache', version: '1.0.0' } as PackagePolicyPackage,
+      } as NewPackagePolicy;
+      const result = await packagePolicyService.enrichPolicyWithDefaultsFromPackage(
+        savedObjectsClientMock.create(),
+        newPolicy
+      );
+      expect(result).toEqual({
+        name: 'apache-2',
+        namespace: 'namespace',
+        description: 'desc',
+        package: { name: 'apache', title: 'Apache', version: '1.0.0' },
+        enabled: false,
+        policy_id: '2',
+        inputs: [
+          {
+            enabled: true,
+            type: 'logfile',
+            streams: [
+              {
+                enabled: true,
+                data_stream: {
+                  type: 'logs',
+                  dataset: 'apache.error',
+                },
+              },
+            ],
+          },
+        ],
+        vars: {
+          paths: {
+            value: ['/my/access.log*'],
+            type: 'text',
+          },
+        },
+      });
+    });
+  });
+
+  describe('upgrade package policy info', () => {
+    let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+    beforeEach(() => {
+      savedObjectsClient = savedObjectsClientMock.create();
+    });
+
+    function mockPackage(pkgName: string) {
+      const mockPackagePolicy = createPackagePolicyMock();
+
+      const attributes = {
+        ...mockPackagePolicy,
+        inputs: [],
+        package: {
+          ...mockPackagePolicy.package,
+          name: pkgName,
+        },
+      };
+
+      savedObjectsClient.get.mockResolvedValueOnce({
+        id: 'package-policy-id',
+        type: 'abcd',
+        references: [],
+        version: '1.3.2',
+        attributes,
+      });
+    }
+
+    it('should return success if package and policy versions match', async () => {
+      mockPackage('apache');
+
+      const response = await packagePolicyService.getUpgradePackagePolicyInfo(
+        savedObjectsClient,
+        'package-policy-id'
+      );
+
+      expect(response).toBeDefined();
+    });
+
+    it('should return error if package policy newer than package version', async () => {
+      mockPackage('aws');
+
+      expect(
+        packagePolicyService.getUpgradePackagePolicyInfo(savedObjectsClient, 'package-policy-id')
+      ).rejects.toEqual(
+        new PackagePolicyIneligibleForUpgradeError(
+          "Package policy c6d16e42-c32d-4dce-8a88-113cfe276ad1's package version 0.9.0 of package aws is newer than the installed package version. Please install the latest version of aws."
+        )
+      );
+    });
+
+    it('should return error if package not installed', async () => {
+      mockPackage('notinstalled');
+
+      expect(
+        packagePolicyService.getUpgradePackagePolicyInfo(savedObjectsClient, 'package-policy-id')
+      ).rejects.toEqual(new FleetError('Package notinstalled is not installed'));
+    });
+  });
+});
+
+describe('getUpgradeDryRunDiff', () => {
+  let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  beforeEach(() => {
+    savedObjectsClient = savedObjectsClientMock.create();
+    appContextService.start(createAppContextStartContractMock());
+  });
+  afterEach(() => {
+    appContextService.stop();
+  });
+  it('should return no errors if there is no conflict to upgrade', async () => {
+    const res = await packagePolicyService.getUpgradeDryRunDiff(
+      savedObjectsClient,
+      'package-policy-id',
+      {
+        id: '123',
+        name: 'test-123',
+        package: {
+          title: 'test',
+          name: 'test',
+          version: '1.0.1',
+        },
+        namespace: 'default',
+        inputs: [
+          {
+            id: 'toto',
+            enabled: true,
+            streams: [],
+            type: 'logs',
+          },
+        ],
+      } as any,
+      '1.0.2'
+    );
+
+    expect(res.hasErrors).toBeFalsy();
+  });
+
+  it('should no errors if there is a conflict to upgrade', async () => {
+    const res = await packagePolicyService.getUpgradeDryRunDiff(
+      savedObjectsClient,
+      'package-policy-id',
+      {
+        id: '123',
+        name: 'test-123',
+        package: {
+          title: 'test',
+          name: 'test-conflict',
+          version: '1.0.1',
+        },
+        namespace: 'default',
+        inputs: [
+          {
+            id: 'toto',
+            enabled: true,
+            streams: [],
+            type: 'logs',
+          },
+        ],
+      } as any,
+      '1.0.2'
+    );
+
+    expect(res.hasErrors).toBeTruthy();
+  });
+
+  it('should return no errors if upgrading 2 package policies', async () => {
+    savedObjectsClient.get.mockImplementation((type, id) =>
+      Promise.resolve({
+        id,
+        type: 'abcd',
+        references: [],
+        version: '0.9.0',
+        attributes: { ...createPackagePolicyMock(), name: id },
+      })
+    );
+    const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const res = await packagePolicyService.upgrade(savedObjectsClient, elasticsearchClient, [
+      'package-policy-id',
+      'package-policy-id-2',
+    ]);
+
+    expect(res).toEqual([
+      {
+        id: 'package-policy-id',
+        name: 'package-policy-id',
+        success: true,
+      },
+      {
+        id: 'package-policy-id-2',
+        name: 'package-policy-id-2',
+        success: true,
+      },
+    ]);
+  });
+});
+
+describe('_applyIndexPrivileges()', () => {
+  function createPackageStream(indexPrivileges?: string[]): RegistryDataStream {
+    const stream: RegistryDataStream = {
+      type: '',
+      dataset: '',
+      title: '',
+      // @ts-ignore-error
+      release: '',
+      package: '',
+      path: '',
+    };
+
+    if (indexPrivileges) {
+      stream.elasticsearch = {
+        privileges: {
+          indices: indexPrivileges,
+        },
+      };
+    }
+
+    return stream;
+  }
+
+  function createInputStream(
+    opts: Partial<PackagePolicyInputStream> = {}
+  ): PackagePolicyInputStream {
+    return {
+      id: '',
+      enabled: true,
+      data_stream: {
+        dataset: '',
+        type: '',
+      },
+      ...opts,
+    };
+  }
+
+  beforeAll(async () => {
+    appContextService.start(createAppContextStartContractMock());
+  });
+
+  it('should do nothing if packageStream has no privileges', () => {
+    const packageStream = createPackageStream();
+    const inputStream = createInputStream();
+
+    const streamOut = _applyIndexPrivileges(packageStream, inputStream);
+    expect(streamOut).toEqual(inputStream);
+  });
+
+  it('should not apply privileges if all privileges are forbidden', () => {
+    const forbiddenPrivileges = ['write', 'delete', 'delete_index', 'all'];
+    const packageStream = createPackageStream(forbiddenPrivileges);
+    const inputStream = createInputStream();
+
+    const streamOut = _applyIndexPrivileges(packageStream, inputStream);
+    expect(streamOut).toEqual(inputStream);
+  });
+
+  it('should not apply privileges if all privileges are unrecognized', () => {
+    const unrecognizedPrivileges = ['idnotexist', 'invalidperm'];
+    const packageStream = createPackageStream(unrecognizedPrivileges);
+    const inputStream = createInputStream();
+
+    const streamOut = _applyIndexPrivileges(packageStream, inputStream);
+    expect(streamOut).toEqual(inputStream);
+  });
+
+  it('should apply privileges if all privileges are valid', () => {
+    const validPrivileges = [
+      'auto_configure',
+      'create_doc',
+      'maintenance',
+      'monitor',
+      'read',
+      'read_cross_cluster',
+    ];
+
+    const packageStream = createPackageStream(validPrivileges);
+    const inputStream = createInputStream();
+    const expectedStream = {
+      ...inputStream,
+      data_stream: {
+        ...inputStream.data_stream,
+        elasticsearch: {
+          privileges: {
+            indices: validPrivileges,
+          },
+        },
+      },
+    };
+
+    const streamOut = _applyIndexPrivileges(packageStream, inputStream);
+    expect(streamOut).toEqual(expectedStream);
+  });
+
+  it('should only apply valid privileges when there is a  mix of valid and invalid', () => {
+    const mixedPrivileges = ['auto_configure', 'read_cross_cluster', 'idontexist', 'delete'];
+
+    const packageStream = createPackageStream(mixedPrivileges);
+    const inputStream = createInputStream();
+    const expectedStream = {
+      ...inputStream,
+      data_stream: {
+        ...inputStream.data_stream,
+        elasticsearch: {
+          privileges: {
+            indices: ['auto_configure', 'read_cross_cluster'],
+          },
+        },
+      },
+    };
+
+    const streamOut = _applyIndexPrivileges(packageStream, inputStream);
+    expect(streamOut).toEqual(expectedStream);
   });
 });

@@ -5,110 +5,147 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { ReactElement } from 'react';
 
-import { SavedObject as SavedObjectType, SavedObjectAttributes } from 'src/core/public';
-import { Query, Filter } from './services/data';
-import { ViewMode } from './services/embeddable';
+import { History } from 'history';
+import { AnyAction, Dispatch } from 'redux';
+import { BehaviorSubject, Subject } from 'rxjs';
 
-import { SavedDashboardPanel } from '../common/types';
-export { SavedDashboardPanel };
+import type { AppMountParameters, ScopedHistory, KibanaExecutionContext } from '@kbn/core/public';
+import type { Filter } from '@kbn/es-query';
+import type { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
+import { type EmbeddableInput, ViewMode } from '@kbn/embeddable-plugin/common';
+import type { ContainerInput } from '@kbn/embeddable-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import type { RefreshInterval } from '@kbn/data-plugin/public';
+import type { Query, TimeRange } from '@kbn/es-query';
 
-// TODO: Replace Saved object interfaces by the ones Core will provide when it is ready.
-export type SavedObjectAttribute =
-  | string
-  | number
-  | boolean
-  | null
-  | undefined
-  | SavedObjectAttributes
-  | SavedObjectAttributes[];
+import type { DashboardContainer } from './application';
+import type { DashboardAppLocatorParams } from './locator';
+import type { DashboardPanelMap, DashboardPanelState, SavedDashboardPanel } from '../common';
 
-export interface SimpleSavedObject<T extends SavedObjectAttributes> {
-  attributes: T;
-  _version?: SavedObjectType<T>['version'];
-  id: SavedObjectType<T>['id'];
-  type: SavedObjectType<T>['type'];
-  migrationVersion: SavedObjectType<T>['migrationVersion'];
-  error: SavedObjectType<T>['error'];
-  references: SavedObjectType<T>['references'];
-  get(key: string): any;
-  set(key: string, value: any): T;
-  has(key: string): boolean;
-  save(): Promise<SimpleSavedObject<T>>;
-  delete(): void;
-}
-
-interface FieldSubType {
-  multi?: { parent: string };
-  nested?: { path: string };
-}
-
-export interface Field {
-  name: string;
-  type: string;
-  // esTypes might be undefined on old index patterns that have not been refreshed since we added
-  // this prop. It is also undefined on scripted fields.
-  esTypes?: string[];
-  aggregatable: boolean;
-  filterable: boolean;
-  searchable: boolean;
-  subType?: FieldSubType;
-}
+export type { SavedDashboardPanel };
 
 export type NavAction = (anchorElement?: any) => void;
 
-export interface DashboardAppState {
-  panels: SavedDashboardPanel[];
-  fullScreenMode: boolean;
+/**
+ * DashboardState contains all pieces of tracked state for an individual dashboard
+ */
+export interface DashboardState {
+  query: Query;
   title: string;
-  description: string;
   tags: string[];
-  timeRestore: boolean;
-  options: {
-    hidePanelTitles: boolean;
-    useMargins: boolean;
-    syncColors?: boolean;
-  };
-  query: Query | string;
   filters: Filter[];
   viewMode: ViewMode;
-  expandedPanelId?: string;
+  description: string;
   savedQuery?: string;
-}
+  timeRestore: boolean;
+  timeRange?: TimeRange;
+  savedObjectId?: string;
+  fullScreenMode: boolean;
+  expandedPanelId?: string;
+  options: DashboardOptions;
+  panels: DashboardPanelMap;
+  refreshInterval?: RefreshInterval;
+  timeslice?: [number, number];
 
-export type DashboardAppStateDefaults = DashboardAppState & {
-  description?: string;
-};
+  controlGroupInput?: PersistableControlGroupInput;
+}
 
 /**
- * Panels are not added to the URL
+ * RawDashboardState is the dashboard state as directly loaded from the panelJSON
  */
-export type DashboardAppStateInUrl = Omit<DashboardAppState, 'panels'> & {
-  panels?: SavedDashboardPanel[];
+export type RawDashboardState = Omit<DashboardState, 'panels'> & { panels: SavedDashboardPanel[] };
+
+export interface DashboardContainerInput extends ContainerInput {
+  controlGroupInput?: PersistableControlGroupInput;
+  refreshConfig?: RefreshInterval;
+  isEmbeddedExternally?: boolean;
+  isFullScreenMode: boolean;
+  expandedPanelId?: string;
+  timeRange: TimeRange;
+  timeslice?: [number, number];
+  timeRestore: boolean;
+  description?: string;
+  useMargins: boolean;
+  syncColors?: boolean;
+  syncTooltips?: boolean;
+  viewMode: ViewMode;
+  filters: Filter[];
+  title: string;
+  query: Query;
+  panels: {
+    [panelId: string]: DashboardPanelState<EmbeddableInput & { [k: string]: unknown }>;
+  };
+  executionContext?: KibanaExecutionContext;
+}
+
+/**
+ * DashboardAppState contains all the tools the dashboard application uses to track,
+ * update, and view its state.
+ */
+export interface DashboardAppState {
+  hasUnsavedChanges?: boolean;
+  dataViews?: DataView[];
+  updateLastSavedState?: () => void;
+  resetToLastSavedState?: () => void;
+  dashboardContainer?: DashboardContainer;
+  createConflictWarning?: () => ReactElement | undefined;
+  getLatestDashboardState?: () => DashboardState;
+  $triggerDashboardRefresh: Subject<{ force?: boolean }>;
+  $onDashboardStateChange: BehaviorSubject<DashboardState>;
+}
+
+/**
+ * The shared services and tools used to build a dashboard from a saved object ID.
+ */
+export interface DashboardBuildContext {
+  locatorState?: DashboardAppLocatorParams;
+  history: History;
+  isEmbeddedExternally: boolean;
+  kbnUrlStateStorage: IKbnUrlStateStorage;
+  $checkForUnsavedChanges: Subject<unknown>;
+  getLatestDashboardState: () => DashboardState;
+  dispatchDashboardStateChange: Dispatch<AnyAction>;
+  $triggerDashboardRefresh: Subject<{ force?: boolean }>;
+  $onDashboardStateChange: BehaviorSubject<DashboardState>;
+  executionContext?: KibanaExecutionContext;
+}
+
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type DashboardOptions = {
+  hidePanelTitles: boolean;
+  useMargins: boolean;
+  syncColors: boolean;
+  syncTooltips: boolean;
 };
 
-export interface DashboardAppStateTransitions {
-  set: (
-    state: DashboardAppState
-  ) => <T extends keyof DashboardAppState>(
-    prop: T,
-    value: DashboardAppState[T]
-  ) => DashboardAppState;
-  setOption: (
-    state: DashboardAppState
-  ) => <T extends keyof DashboardAppState['options']>(
-    prop: T,
-    value: DashboardAppState['options'][T]
-  ) => DashboardAppState;
+export type DashboardRedirect = (props: RedirectToProps) => void;
+export type RedirectToProps =
+  | { destination: 'dashboard'; id?: string; useReplace?: boolean; editMode?: boolean }
+  | { destination: 'listing'; filter?: string; useReplace?: boolean };
+
+export interface DashboardEmbedSettings {
+  forceHideFilterBar?: boolean;
+  forceShowTopNavMenu?: boolean;
+  forceShowQueryInput?: boolean;
+  forceShowDatePicker?: boolean;
 }
 
-export interface SavedDashboardPanelMap {
-  [key: string]: SavedDashboardPanel;
+export interface DashboardSaveOptions {
+  newTitle: string;
+  newTags?: string[];
+  newDescription: string;
+  newCopyOnSave: boolean;
+  newTimeRestore: boolean;
+  onTitleDuplicate: () => void;
+  isTitleDuplicateConfirmed: boolean;
 }
 
-export interface StagedFilter {
-  field: string;
-  value: string;
-  operator: string;
-  index: string;
+export interface DashboardMountContextProps {
+  restorePreviousUrl: () => void;
+  scopedHistory: () => ScopedHistory;
+  onAppLeave: AppMountParameters['onAppLeave'];
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
 }

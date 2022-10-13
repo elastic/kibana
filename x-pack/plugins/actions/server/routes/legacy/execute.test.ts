@@ -6,16 +6,25 @@
  */
 
 import { executeActionRoute } from './execute';
-import { httpServiceMock } from 'src/core/server/mocks';
+import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../../lib/license_state.mock';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { verifyApiAccess, ActionTypeDisabledError, asHttpRequestExecutionSource } from '../../lib';
 import { actionsClientMock } from '../../actions_client.mock';
 import { ActionTypeExecutorResult } from '../../types';
+import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
+import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 
-jest.mock('../../lib/verify_api_access.ts', () => ({
+jest.mock('../../lib/verify_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
+
+jest.mock('../../lib/track_legacy_route_usage', () => ({
+  trackLegacyRouteUsage: jest.fn(),
+}));
+
+const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
+const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -63,6 +72,7 @@ describe('executeActionRoute', () => {
         someData: 'data',
       },
       source: asHttpRequestExecutionSource(req),
+      relatedSavedObjects: [],
     });
 
     expect(res.ok).toHaveBeenCalled();
@@ -73,9 +83,7 @@ describe('executeActionRoute', () => {
     const router = httpServiceMock.createRouter();
 
     const actionsClient = actionsClientMock.create();
-    actionsClient.execute.mockResolvedValueOnce(
-      (null as unknown) as ActionTypeExecutorResult<void>
-    );
+    actionsClient.execute.mockResolvedValueOnce(null as unknown as ActionTypeExecutorResult<void>);
 
     const [context, req, res] = mockHandlerArguments(
       { actionsClient },
@@ -100,6 +108,7 @@ describe('executeActionRoute', () => {
       actionId: '1',
       params: {},
       source: asHttpRequestExecutionSource(req),
+      relatedSavedObjects: [],
     });
 
     expect(res.ok).not.toHaveBeenCalled();
@@ -189,5 +198,17 @@ describe('executeActionRoute', () => {
     await handler(context, req, res);
 
     expect(res.forbidden).toHaveBeenCalledWith({ body: { message: 'Fail' } });
+  });
+
+  it('should track every call', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+    const actionsClient = actionsClientMock.create();
+
+    executeActionRoute(router, licenseState, mockUsageCounter);
+    const [, handler] = router.post.mock.calls[0];
+    const [context, req, res] = mockHandlerArguments({ actionsClient }, { body: {}, params: {} });
+    await handler(context, req, res);
+    expect(trackLegacyRouteUsage).toHaveBeenCalledWith('execute', mockUsageCounter);
   });
 });

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { Fragment, FC } from 'react';
+import React, { FC } from 'react';
 
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { lazyMlNodesAvailable } from '../../ml_nodes_check';
 
 interface Props {
@@ -21,7 +21,7 @@ export const JobsAwaitingNodeWarning: FC<Props> = ({ jobCount }) => {
   }
 
   return (
-    <Fragment>
+    <>
       <EuiCallOut
         title={
           <FormattedMessage
@@ -43,6 +43,6 @@ export const JobsAwaitingNodeWarning: FC<Props> = ({ jobCount }) => {
         </div>
       </EuiCallOut>
       <EuiSpacer size="m" />
-    </Fragment>
+    </>
   );
 };

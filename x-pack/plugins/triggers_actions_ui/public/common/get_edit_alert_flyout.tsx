@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import React, { lazy, Suspense } from 'react';
-import type { AlertEditProps } from '../application/sections/alert_form/alert_edit';
+import React from 'react';
+import { ConnectorProvider } from '../application/context/connector_context';
+import { RuleEdit } from '../application/sections/rule_form';
+import type { ConnectorServices, RuleEditProps as AlertEditProps } from '../types';
 
-export const getEditAlertFlyoutLazy = (props: AlertEditProps) => {
-  const AlertEditFlyoutLazy = lazy(() => import('../application/sections/alert_form/alert_edit'));
+export const getEditAlertFlyoutLazy = (
+  props: AlertEditProps & { connectorServices: ConnectorServices }
+) => {
   return (
-    <Suspense fallback={null}>
-      <AlertEditFlyoutLazy {...props} />
-    </Suspense>
+    <ConnectorProvider value={{ services: props.connectorServices }}>
+      <RuleEdit {...props} />
+    </ConnectorProvider>
   );
 };

@@ -27,15 +27,13 @@ export default function ({ getService }) {
     flushIndex,
     refreshIndex,
     forceMerge,
-    freeze,
     unfreeze,
     list,
     reload,
     clearCache,
   } = registerHelpers({ supertest });
 
-  // Failing: See https://github.com/elastic/kibana/issues/64473
-  describe.skip('indices', () => {
+  describe('indices', () => {
     after(() => Promise.all([cleanUpEsResources()]));
 
     describe('clear cache', () => {
@@ -57,13 +55,17 @@ export default function ({ getService }) {
         const index = await createIndex();
 
         // Make sure the index is open
-        const [cat1] = await catIndex(index);
+        const {
+          body: [cat1],
+        } = await catIndex(index);
         expect(cat1.status).to.be('open');
 
         await closeIndex(index).expect(200);
 
         // Make sure the index has been closed
-        const [cat2] = await catIndex(index);
+        const {
+          body: [cat2],
+        } = await catIndex(index);
         expect(cat2.status).to.be('close');
       });
     });
@@ -79,13 +81,17 @@ export default function ({ getService }) {
         await closeIndex(index);
 
         // Make sure the index is closed
-        const [cat1] = await catIndex(index);
+        const {
+          body: [cat1],
+        } = await catIndex(index);
         expect(cat1.status).to.be('close');
 
         await openIndex(index).expect(200);
 
         // Make sure the index is opened
-        const [cat2] = await catIndex(index);
+        const {
+          body: [cat2],
+        } = await catIndex(index);
         expect(cat2.status).to.be('open');
       });
     });
@@ -94,12 +100,12 @@ export default function ({ getService }) {
       it('should delete an index', async () => {
         const index = await createIndex();
 
-        const indices1 = await catIndex(undefined, 'i');
+        const { body: indices1 } = await catIndex(undefined, 'i');
         expect(indices1.map((index) => index.i)).to.contain(index);
 
         await deleteIndex([index]).expect(200);
 
-        const indices2 = await catIndex(undefined, 'i');
+        const { body: indices2 } = await catIndex(undefined, 'i');
         expect(indices2.map((index) => index.i)).not.to.contain(index);
       });
 
@@ -113,12 +119,16 @@ export default function ({ getService }) {
       it('should flush an index', async () => {
         const index = await createIndex();
 
-        const { indices: indices1 } = await indexStats(index, 'flush');
+        const {
+          body: { indices: indices1 },
+        } = await indexStats(index, 'flush');
         expect(indices1[index].total.flush.total).to.be(0);
 
         await flushIndex(index).expect(200);
 
-        const { indices: indices2 } = await indexStats(index, 'flush');
+        const {
+          body: { indices: indices2 },
+        } = await indexStats(index, 'flush');
         expect(indices2[index].total.flush.total).to.be(1);
       });
     });
@@ -127,12 +137,16 @@ export default function ({ getService }) {
       it('should refresh an index', async () => {
         const index = await createIndex();
 
-        const { indices: indices1 } = await indexStats(index, 'refresh');
+        const {
+          body: { indices: indices1 },
+        } = await indexStats(index, 'refresh');
         const previousRefreshes = indices1[index].total.refresh.total;
 
         await refreshIndex(index).expect(200);
 
-        const { indices: indices2 } = await indexStats(index, 'refresh');
+        const {
+          body: { indices: indices2 },
+        } = await indexStats(index, 'refresh');
         expect(indices2[index].total.refresh.total).to.be(previousRefreshes + 1);
       });
     });
@@ -149,31 +163,16 @@ export default function ({ getService }) {
       });
     });
 
-    describe('freeze', () => {
-      it('should freeze an index', async () => {
-        const index = await createIndex();
-        // "sth" correspond to search throttling. Frozen indices are normal indices
-        // with search throttling turned on.
-        const [cat1] = await catIndex(index, 'sth');
-        expect(cat1.sth).to.be('false');
-
-        await freeze(index).expect(200);
-
-        const [cat2] = await catIndex(index, 'sth');
-        expect(cat2.sth).to.be('true');
-      });
-    });
-
     describe('unfreeze', () => {
       it('should unfreeze an index', async () => {
         const index = await createIndex();
 
-        await freeze(index).expect(200);
-        const [cat1] = await catIndex(index, 'sth');
-        expect(cat1.sth).to.be('true');
-
+        // Even if the index is already unfrozen, calling the unfreeze api
+        // will have no effect on it and will return a 200.
         await unfreeze(index).expect(200);
-        const [cat2] = await catIndex(index, 'sth');
+        const {
+          body: [cat2],
+        } = await catIndex(index, 'sth');
         expect(cat2.sth).to.be('false');
       });
     });
@@ -182,7 +181,15 @@ export default function ({ getService }) {
       this.tags(['skipCloud']);
 
       it('should list all the indices with the expected properties and data enrichers', async function () {
-        const { body } = await list().expect(200);
+        // Create an index that we can assert against
+        await createIndex('test_index');
+
+        // Verify indices request
+        const { body: indices } = await list().expect(200);
+
+        // Find the "test_index" created to verify expected keys
+        const indexCreated = indices.find((index) => index.name === 'test_index');
+
         const expectedKeys = [
           'health',
           'hidden',
@@ -192,7 +199,9 @@ export default function ({ getService }) {
           'primary',
           'replica',
           'documents',
+          'documents_deleted',
           'size',
+          'primary_size',
           'isFrozen',
           'aliases',
           // Cloud disables CCR, so wouldn't expect follower indices.
@@ -203,7 +212,8 @@ export default function ({ getService }) {
         // We need to sort the keys before comparing then, because race conditions
         // can cause enrichers to register in non-deterministic order.
         const sortedExpectedKeys = expectedKeys.sort();
-        const sortedReceivedKeys = Object.keys(body[0]).sort();
+        const sortedReceivedKeys = Object.keys(indexCreated).sort();
+
         expect(sortedReceivedKeys).to.eql(sortedExpectedKeys);
       });
     });
@@ -213,6 +223,8 @@ export default function ({ getService }) {
         this.tags(['skipCloud']);
 
         it('should list all the indices with the expected properties and data enrichers', async function () {
+          // create an index to assert against, otherwise the test is flaky
+          await createIndex('reload-test-index');
           const { body } = await reload().expect(200);
           const expectedKeys = [
             'health',
@@ -223,7 +235,9 @@ export default function ({ getService }) {
             'primary',
             'replica',
             'documents',
+            'documents_deleted',
             'size',
+            'primary_size',
             'isFrozen',
             'aliases',
             // Cloud disables CCR, so wouldn't expect follower indices.
@@ -234,7 +248,9 @@ export default function ({ getService }) {
           // We need to sort the keys before comparing then, because race conditions
           // can cause enrichers to register in non-deterministic order.
           const sortedExpectedKeys = expectedKeys.sort();
-          const sortedReceivedKeys = Object.keys(body[0]).sort();
+
+          const indexCreated = body.find((index) => index.name === 'reload-test-index');
+          const sortedReceivedKeys = Object.keys(indexCreated).sort();
           expect(sortedReceivedKeys).to.eql(sortedExpectedKeys);
           expect(body.length > 1).to.be(true); // to contrast it with the next test
         });

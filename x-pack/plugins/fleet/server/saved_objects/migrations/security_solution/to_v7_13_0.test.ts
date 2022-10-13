@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { SavedObjectUnsanitizedDoc } from 'kibana/server';
+import type { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { cloneDeepWith, cloneDeep } from 'lodash';
 
-import type { PackagePolicy } from '../../../../common';
+import { migrationMocks } from '@kbn/core/server/mocks';
 
-import { migrationMocks } from '../../../../../../../src/core/server/mocks';
+import type { PackagePolicy } from '../../../../common';
 
 import { migrateEndpointPackagePolicyToV7130 } from './to_v7_13_0';
 
@@ -29,7 +29,6 @@ describe('7.13.0 Endpoint Package Policy migration', () => {
         policy_id: '',
         enabled: true,
         namespace: '',
-        output_id: '',
         revision: 0,
         updated_at: '',
         updated_by: '',

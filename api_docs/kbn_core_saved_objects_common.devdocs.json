@@ -1,0 +1,1331 @@
+{
+  "id": "@kbn/core-saved-objects-common",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-saved-objects-common",
+        "id": "def-common.SavedObject",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObject",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObject",
+            "text": "SavedObject"
+          },
+          "<T>"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObject.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "The ID of this Saved Object, guaranteed to be unique for all objects of the same `type`"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObject.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [
+              " The type of Saved Object. Each plugin can define it's own custom Saved Object types."
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObject.version",
+            "type": "string",
+            "tags": [],
+            "label": "version",
+            "description": [
+              "An opaque version number which changes on each successful write operation. Can be used for implementing optimistic concurrency control."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObject.updated_at",
+            "type": "string",
+            "tags": [],
+            "label": "updated_at",
+            "description": [
+              "Timestamp of the last time this document had been updated."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObject.error",
+            "type": "Object",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectError",
+                "text": "SavedObjectError"
+              },
+              " | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObject.attributes",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "attributes",
+            "description": [
+              "The data for a Saved Object is stored as an object in the `attributes` property."
+            ],
+            "signature": [
+              "T"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObject.references",
+            "type": "Array",
+            "tags": [],
+            "label": "references",
+            "description": [
+              "{@inheritdoc SavedObjectReference}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectReference",
+                "text": "SavedObjectReference"
+              },
+              "[]"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObject.migrationVersion",
+            "type": "Object",
+            "tags": [],
+            "label": "migrationVersion",
+            "description": [
+              "{@inheritdoc SavedObjectsMigrationVersion}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectsMigrationVersion",
+                "text": "SavedObjectsMigrationVersion"
+              },
+              " | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObject.coreMigrationVersion",
+            "type": "string",
+            "tags": [],
+            "label": "coreMigrationVersion",
+            "description": [
+              "A semver value that is used when upgrading objects between Kibana versions."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObject.namespaces",
+            "type": "Array",
+            "tags": [],
+            "label": "namespaces",
+            "description": [
+              "\nSpace(s) that this saved object exists in. This attribute is not used for \"global\" saved object types which are registered with\n`namespaceType: 'agnostic'`."
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObject.originId",
+            "type": "string",
+            "tags": [],
+            "label": "originId",
+            "description": [
+              "\nThe ID of the saved object this originated from. This is set if this object's `id` was regenerated; that can happen during migration\nfrom a legacy single-namespace type, or during import. It is only set during migration or create operations. This is used during import\nto ensure that ID regeneration is deterministic, so saved objects will be overwritten if they are imported multiple times into a given\nspace."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-common",
+        "id": "def-common.SavedObjectAttributes",
+        "type": "Interface",
+        "tags": [
+          "deprecated"
+        ],
+        "label": "SavedObjectAttributes",
+        "description": [
+          "\nThe data for a Saved Object is stored as an object in the `attributes`\nproperty.\n"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects.ts",
+        "deprecated": true,
+        "trackAdoption": false,
+        "references": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObjectAttributes.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[key: string]: SavedObjectAttribute",
+            "description": [],
+            "signature": [
+              "[key: string]:  ",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectAttribute",
+                "text": "SavedObjectAttribute"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-common",
+        "id": "def-common.SavedObjectError",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectError",
+        "description": [],
+        "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObjectError.error",
+            "type": "string",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObjectError.message",
+            "type": "string",
+            "tags": [],
+            "label": "message",
+            "description": [],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObjectError.statusCode",
+            "type": "number",
+            "tags": [],
+            "label": "statusCode",
+            "description": [],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObjectError.metadata",
+            "type": "Object",
+            "tags": [],
+            "label": "metadata",
+            "description": [],
+            "signature": [
+              "Record<string, unknown> | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-common",
+        "id": "def-common.SavedObjectReference",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectReference",
+        "description": [
+          "\nA reference to another saved object.\n"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObjectReference.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObjectReference.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObjectReference.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-common",
+        "id": "def-common.SavedObjectsImportActionRequiredWarning",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsImportActionRequiredWarning",
+        "description": [
+          "\nA warning meant to notify that a specific user action is required to finalize the import\nof some type of object.\n"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObjectsImportActionRequiredWarning.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"action_required\""
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObjectsImportActionRequiredWarning.message",
+            "type": "string",
+            "tags": [],
+            "label": "message",
+            "description": [
+              "The translated message to display to the user."
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObjectsImportActionRequiredWarning.actionPath",
+            "type": "string",
+            "tags": [],
+            "label": "actionPath",
+            "description": [
+              "The path (without the basePath) that the user should be redirect to address this warning."
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObjectsImportActionRequiredWarning.buttonLabel",
+            "type": "string",
+            "tags": [],
+            "label": "buttonLabel",
+            "description": [
+              "An optional label to use for the link button. If unspecified, a default label will be used."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-common",
+        "id": "def-common.SavedObjectsImportAmbiguousConflictError",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsImportAmbiguousConflictError",
+        "description": [
+          "\nRepresents a failure to import due to a conflict, which can be resolved in different ways with an overwrite."
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObjectsImportAmbiguousConflictError.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"ambiguous_conflict\""
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObjectsImportAmbiguousConflictError.destinations",
+            "type": "Array",
+            "tags": [],
+            "label": "destinations",
+            "description": [],
+            "signature": [
+              "{ id: string; title?: string | undefined; updatedAt?: string | undefined; }[]"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-common",
+        "id": "def-common.SavedObjectsImportConflictError",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsImportConflictError",
+        "description": [
+          "\nRepresents a failure to import due to a conflict."
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObjectsImportConflictError.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"conflict\""
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObjectsImportConflictError.destinationId",
+            "type": "string",
+            "tags": [],
+            "label": "destinationId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-common",
+        "id": "def-common.SavedObjectsImportFailure",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsImportFailure",
+        "description": [
+          "\nRepresents a failure to import."
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObjectsImportFailure.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObjectsImportFailure.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObjectsImportFailure.meta",
+            "type": "Object",
+            "tags": [],
+            "label": "meta",
+            "description": [],
+            "signature": [
+              "{ title?: string | undefined; icon?: string | undefined; }"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObjectsImportFailure.overwrite",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "overwrite",
+            "description": [
+              "\nIf `overwrite` is specified, an attempt was made to overwrite an existing object."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObjectsImportFailure.error",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectsImportConflictError",
+                "text": "SavedObjectsImportConflictError"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectsImportAmbiguousConflictError",
+                "text": "SavedObjectsImportAmbiguousConflictError"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectsImportUnsupportedTypeError",
+                "text": "SavedObjectsImportUnsupportedTypeError"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectsImportMissingReferencesError",
+                "text": "SavedObjectsImportMissingReferencesError"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectsImportUnknownError",
+                "text": "SavedObjectsImportUnknownError"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-common",
+        "id": "def-common.SavedObjectsImportMissingReferencesError",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsImportMissingReferencesError",
+        "description": [
+          "\nRepresents a failure to import due to missing references."
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObjectsImportMissingReferencesError.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"missing_references\""
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObjectsImportMissingReferencesError.references",
+            "type": "Array",
+            "tags": [],
+            "label": "references",
+            "description": [],
+            "signature": [
+              "{ type: string; id: string; }[]"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-common",
+        "id": "def-common.SavedObjectsImportResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsImportResponse",
+        "description": [
+          "\nThe response describing the result of an import."
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObjectsImportResponse.success",
+            "type": "boolean",
+            "tags": [],
+            "label": "success",
+            "description": [],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObjectsImportResponse.successCount",
+            "type": "number",
+            "tags": [],
+            "label": "successCount",
+            "description": [],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObjectsImportResponse.successResults",
+            "type": "Array",
+            "tags": [],
+            "label": "successResults",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectsImportSuccess",
+                "text": "SavedObjectsImportSuccess"
+              },
+              "[] | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObjectsImportResponse.warnings",
+            "type": "Array",
+            "tags": [],
+            "label": "warnings",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectsImportWarning",
+                "text": "SavedObjectsImportWarning"
+              },
+              "[]"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObjectsImportResponse.errors",
+            "type": "Array",
+            "tags": [],
+            "label": "errors",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectsImportFailure",
+                "text": "SavedObjectsImportFailure"
+              },
+              "[] | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-common",
+        "id": "def-common.SavedObjectsImportRetry",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsImportRetry",
+        "description": [
+          "\nDescribes a retry operation for importing a saved object."
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObjectsImportRetry.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObjectsImportRetry.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObjectsImportRetry.overwrite",
+            "type": "boolean",
+            "tags": [],
+            "label": "overwrite",
+            "description": [],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObjectsImportRetry.destinationId",
+            "type": "string",
+            "tags": [],
+            "label": "destinationId",
+            "description": [
+              "\nThe object ID that will be created or overwritten. If not specified, the `id` field will be used."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObjectsImportRetry.replaceReferences",
+            "type": "Array",
+            "tags": [],
+            "label": "replaceReferences",
+            "description": [],
+            "signature": [
+              "{ type: string; from: string; to: string; }[]"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObjectsImportRetry.createNewCopy",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "createNewCopy",
+            "description": [
+              "\nIf `createNewCopy` is specified, the new object has a new (undefined) origin ID. This is only needed for the case where\n`createNewCopies` mode is disabled and ambiguous source conflicts are detected."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObjectsImportRetry.ignoreMissingReferences",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ignoreMissingReferences",
+            "description": [
+              "\nIf `ignoreMissingReferences` is specified, reference validation will be skipped for this object."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-common",
+        "id": "def-common.SavedObjectsImportSimpleWarning",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsImportSimpleWarning",
+        "description": [
+          "\nA simple informative warning that will be displayed to the user.\n"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObjectsImportSimpleWarning.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"simple\""
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObjectsImportSimpleWarning.message",
+            "type": "string",
+            "tags": [],
+            "label": "message",
+            "description": [
+              "The translated message to display to the user"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-common",
+        "id": "def-common.SavedObjectsImportSuccess",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsImportSuccess",
+        "description": [
+          "\nRepresents a successful import."
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObjectsImportSuccess.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObjectsImportSuccess.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObjectsImportSuccess.destinationId",
+            "type": "string",
+            "tags": [],
+            "label": "destinationId",
+            "description": [
+              "\nIf `destinationId` is specified, the new object has a new ID that is different from the import ID."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObjectsImportSuccess.createNewCopy",
+            "type": "CompoundType",
+            "tags": [
+              "deprecated"
+            ],
+            "label": "createNewCopy",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObjectsImportSuccess.meta",
+            "type": "Object",
+            "tags": [],
+            "label": "meta",
+            "description": [],
+            "signature": [
+              "{ title?: string | undefined; icon?: string | undefined; }"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObjectsImportSuccess.overwrite",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "overwrite",
+            "description": [
+              "\nIf `overwrite` is specified, this object overwrote an existing one (or will do so, in the case of a pending resolution)."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-common",
+        "id": "def-common.SavedObjectsImportUnknownError",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsImportUnknownError",
+        "description": [
+          "\nRepresents a failure to import due to an unknown reason."
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObjectsImportUnknownError.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"unknown\""
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObjectsImportUnknownError.message",
+            "type": "string",
+            "tags": [],
+            "label": "message",
+            "description": [],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObjectsImportUnknownError.statusCode",
+            "type": "number",
+            "tags": [],
+            "label": "statusCode",
+            "description": [],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-common",
+        "id": "def-common.SavedObjectsImportUnsupportedTypeError",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsImportUnsupportedTypeError",
+        "description": [
+          "\nRepresents a failure to import due to having an unsupported saved object type."
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObjectsImportUnsupportedTypeError.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"unsupported_type\""
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-common",
+        "id": "def-common.SavedObjectsMigrationVersion",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectsMigrationVersion",
+        "description": [
+          "\nInformation about the migrations that have been applied to this SavedObject.\nWhen Kibana starts up, KibanaMigrator detects outdated documents and\nmigrates them based on this value. For each migration that has been applied,\nthe plugin's name is used as a key and the latest migration version as the\nvalue.\n"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObjectsMigrationVersion.Unnamed",
+            "type": "IndexSignature",
+            "tags": [],
+            "label": "[pluginName: string]: string",
+            "description": [],
+            "signature": [
+              "[pluginName: string]:  string"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-common",
+        "id": "def-common.SavedObjectTypeIdTuple",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectTypeIdTuple",
+        "description": [
+          "\nAn identifier for a saved object within a space.\n"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-common/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObjectTypeIdTuple.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "The id of the saved object"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-common",
+            "id": "def-common.SavedObjectTypeIdTuple.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [
+              "The type of the saved object"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-common/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-saved-objects-common",
+        "id": "def-common.SavedObjectAttribute",
+        "type": "Type",
+        "tags": [],
+        "label": "SavedObjectAttribute",
+        "description": [
+          "\nType definition for a Saved Object attribute value\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObjectAttributeSingle",
+            "text": "SavedObjectAttributeSingle"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObjectAttributeSingle",
+            "text": "SavedObjectAttributeSingle"
+          },
+          "[]"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-common",
+        "id": "def-common.SavedObjectAttributeSingle",
+        "type": "Type",
+        "tags": [],
+        "label": "SavedObjectAttributeSingle",
+        "description": [
+          "\nDon't use this type, it's simply a helper type for {@link SavedObjectAttribute}\n"
+        ],
+        "signature": [
+          "string | number | boolean | ",
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObjectAttributes",
+            "text": "SavedObjectAttributes"
+          },
+          " | null | undefined"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-common",
+        "id": "def-common.SavedObjectsImportWarning",
+        "type": "Type",
+        "tags": [],
+        "label": "SavedObjectsImportWarning",
+        "description": [
+          "\nComposite type of all the possible types of import warnings.\n\nSee {@link SavedObjectsImportSimpleWarning} and {@link SavedObjectsImportActionRequiredWarning}\nfor more details.\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObjectsImportSimpleWarning",
+            "text": "SavedObjectsImportSimpleWarning"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObjectsImportActionRequiredWarning",
+            "text": "SavedObjectsImportActionRequiredWarning"
+          }
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects_imports.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-common",
+        "id": "def-common.SavedObjectsNamespaceType",
+        "type": "Type",
+        "tags": [],
+        "label": "SavedObjectsNamespaceType",
+        "description": [
+          "\nThe namespace type dictates how a saved object can be interacted in relation to namespaces. Each type is mutually exclusive:\n * single (default): This type of saved object is namespace-isolated, e.g., it exists in only one namespace.\n * multiple: This type of saved object is shareable, e.g., it can exist in one or more namespaces.\n * multiple-isolated: This type of saved object is namespace-isolated, e.g., it exists in only one namespace, but object IDs must be\n   unique across all namespaces. This is intended to be an intermediate step when objects with a \"single\" namespace type are being\n   converted to a \"multiple\" namespace type. In other words, objects with a \"multiple-isolated\" namespace type will be *share-capable*,\n   but will not actually be shareable until the namespace type is changed to \"multiple\".\n * agnostic: This type of saved object is global.\n"
+        ],
+        "signature": [
+          "\"single\" | \"multiple\" | \"multiple-isolated\" | \"agnostic\""
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-common/src/saved_objects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

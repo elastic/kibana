@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { KibanaRequest, KibanaResponseFactory } from 'kibana/server';
+import { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { identity } from 'lodash';
 import type { MethodKeysOf } from '@kbn/utility-types';
-import { httpServerMock } from '../../../../../../src/core/server/mocks';
+import { httpServerMock } from '@kbn/core/server/mocks';
 import { ActionType } from '../../../common';
 import { ActionsClientMock, actionsClientMock } from '../../actions_client.mock';
 import { ActionsRequestHandlerContext } from '../../types';
@@ -23,7 +23,7 @@ export function mockHandlerArguments(
 ): [ActionsRequestHandlerContext, KibanaRequest<unknown, unknown, unknown>, KibanaResponseFactory] {
   const listTypes = jest.fn(() => listTypesRes);
   return [
-    ({
+    {
       actions: {
         listTypes,
         getActionsClient() {
@@ -38,7 +38,7 @@ export function mockHandlerArguments(
           );
         },
       },
-    } as unknown) as ActionsRequestHandlerContext,
+    } as unknown as ActionsRequestHandlerContext,
     req as KibanaRequest<unknown, unknown, unknown>,
     mockResponseFactory(res),
   ];
@@ -53,5 +53,5 @@ export const mockResponseFactory = (resToMock: Array<MethodKeysOf<KibanaResponse
       });
     }
   });
-  return (factory as unknown) as KibanaResponseFactory;
+  return factory as unknown as KibanaResponseFactory;
 };

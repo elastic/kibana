@@ -6,7 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginConfigDescriptor } from 'kibana/server';
+import { PluginConfigDescriptor } from '@kbn/core/server';
 
 const apmConfigSchema = schema.object({
   url: schema.maybe(schema.string()),
@@ -19,26 +19,25 @@ const apmConfigSchema = schema.object({
 });
 
 const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }),
-  id: schema.maybe(schema.string()),
   apm: schema.maybe(apmConfigSchema),
-  cname: schema.maybe(schema.string()),
   base_url: schema.maybe(schema.string()),
-  profile_url: schema.maybe(schema.string()),
+  cname: schema.maybe(schema.string()),
   deployment_url: schema.maybe(schema.string()),
+  id: schema.maybe(schema.string()),
   organization_url: schema.maybe(schema.string()),
+  profile_url: schema.maybe(schema.string()),
 });
 
 export type CloudConfigType = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<CloudConfigType> = {
   exposeToBrowser: {
-    id: true,
-    cname: true,
     base_url: true,
-    profile_url: true,
+    cname: true,
     deployment_url: true,
+    id: true,
     organization_url: true,
+    profile_url: true,
   },
   schema: configSchema,
 };

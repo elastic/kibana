@@ -5,20 +5,27 @@
  * 2.0.
  */
 
-import * as H from 'history';
-import React from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import type * as H from 'history';
+import type React from 'react';
+import type { RouteComponentProps } from 'react-router-dom';
 
-import { TimelineType } from '../../../../common/types/timeline';
+import type { TimelineType } from '../../../../common/types/timeline';
 
-import { HostsTableType } from '../../../hosts/store/model';
-import { NetworkRouteType } from '../../../network/pages/navigation/types';
-import { AdministrationSubTab as AdministrationType } from '../../../management/types';
-import { FlowTarget } from '../../../../common/search_strategy';
+import type { HostsTableType } from '../../../hosts/store/model';
+import type { NetworkRouteType } from '../../../network/pages/navigation/types';
+import type { AdministrationSubTab as AdministrationType } from '../../../management/types';
+import type { FlowTarget } from '../../../../common/search_strategy';
+import type { UsersTableType } from '../../../users/store/model';
+import type { SecurityPageName } from '../../../app/types';
 
-export type SiemRouteType = HostsTableType | NetworkRouteType | TimelineType | AdministrationType;
+export type SiemRouteType =
+  | HostsTableType
+  | NetworkRouteType
+  | TimelineType
+  | AdministrationType
+  | UsersTableType;
 export interface RouteSpyState {
-  pageName: string;
+  pageName: SecurityPageName;
   detailName: string | undefined;
   tabName: SiemRouteType | undefined;
   search: string;
@@ -32,12 +39,12 @@ export interface HostRouteSpyState extends RouteSpyState {
   tabName: HostsTableType | undefined;
 }
 
-export interface NetworkRouteSpyState extends RouteSpyState {
-  tabName: NetworkRouteType | undefined;
+export interface UsersRouteSpyState extends RouteSpyState {
+  tabName: UsersTableType | undefined;
 }
 
-export interface TimelineRouteSpyState extends RouteSpyState {
-  tabName: TimelineType | undefined;
+export interface NetworkRouteSpyState extends RouteSpyState {
+  tabName: NetworkRouteType | undefined;
 }
 
 export interface AdministrationRouteSpyState extends RouteSpyState {

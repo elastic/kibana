@@ -7,6 +7,7 @@
 
 import { MetricsSourceConfiguration } from '../../../../common/metrics_sources';
 import { TopNodesRequest } from '../../../../common/http_api/overview_api';
+import { TIMESTAMP_FIELD } from '../../../../common/constants';
 
 export const createTopNodesQuery = (
   options: TopNodesRequest,
@@ -22,9 +23,10 @@ export const createTopNodesQuery = (
         filter: [
           {
             range: {
-              [source.configuration.fields.timestamp]: {
+              [TIMESTAMP_FIELD]: {
                 gte: options.timerange.from,
                 lte: options.timerange.to,
+                format: 'epoch_millis',
               },
             },
           },
@@ -49,7 +51,7 @@ export const createTopNodesQuery = (
                 { field: 'host.name' },
                 { field: 'cloud.provider' },
               ],
-              sort: { '@timestamp': 'desc' },
+              sort: { [TIMESTAMP_FIELD]: 'desc' },
               size: 1,
             },
           },
@@ -60,7 +62,7 @@ export const createTopNodesQuery = (
           },
           cpu: {
             avg: {
-              field: 'system.cpu.total.pct',
+              field: 'system.cpu.total.norm.pct',
             },
           },
           iowait: {
@@ -73,14 +75,68 @@ export const createTopNodesQuery = (
               field: 'system.load.15',
             },
           },
+          rx_avg: {
+            avg: {
+              field: 'host.network.ingress.bytes',
+            },
+          },
+          rx_period: {
+            filter: {
+              exists: {
+                field: 'host.network.ingress.bytes',
+              },
+            },
+            aggs: {
+              period: {
+                max: {
+                  field: 'metricset.period',
+                },
+              },
+            },
+          },
           rx: {
-            sum: {
-              field: 'host.network.in.bytes',
+            bucket_script: {
+              buckets_path: {
+                value: 'rx_avg',
+                period: 'rx_period>period',
+              },
+              script: {
+                source: 'params.value / (params.period / 1000)',
+                lang: 'painless',
+              },
+              gap_policy: 'skip',
+            },
+          },
+          tx_avg: {
+            avg: {
+              field: 'host.network.egress.bytes',
+            },
+          },
+          tx_period: {
+            filter: {
+              exists: {
+                field: 'host.network.egress.bytes',
+              },
+            },
+            aggs: {
+              period: {
+                max: {
+                  field: 'metricset.period',
+                },
+              },
             },
           },
           tx: {
-            sum: {
-              field: 'host.network.out.bytes',
+            bucket_script: {
+              buckets_path: {
+                value: 'tx_avg',
+                period: 'tx_period>period',
+              },
+              script: {
+                source: 'params.value / (params.period / 1000)',
+                lang: 'painless',
+              },
+              gap_policy: 'skip',
             },
           },
           timeseries: {
@@ -108,14 +164,68 @@ export const createTopNodesQuery = (
                   field: 'system.load.15',
                 },
               },
-              rx: {
-                rate: {
+              rx_avg: {
+                avg: {
                   field: 'host.network.ingress.bytes',
                 },
               },
-              tx: {
-                rate: {
+              rx_period: {
+                filter: {
+                  exists: {
+                    field: 'host.network.ingress.bytes',
+                  },
+                },
+                aggs: {
+                  period: {
+                    max: {
+                      field: 'metricset.period',
+                    },
+                  },
+                },
+              },
+              rx: {
+                bucket_script: {
+                  buckets_path: {
+                    value: 'rx_avg',
+                    period: 'rx_period>period',
+                  },
+                  script: {
+                    source: 'params.value / (params.period / 1000)',
+                    lang: 'painless',
+                  },
+                  gap_policy: 'skip',
+                },
+              },
+              tx_avg: {
+                avg: {
                   field: 'host.network.egress.bytes',
+                },
+              },
+              tx_period: {
+                filter: {
+                  exists: {
+                    field: 'host.network.egress.bytes',
+                  },
+                },
+                aggs: {
+                  period: {
+                    max: {
+                      field: 'metricset.period',
+                    },
+                  },
+                },
+              },
+              tx: {
+                bucket_script: {
+                  buckets_path: {
+                    value: 'tx_avg',
+                    period: 'tx_period>period',
+                  },
+                  script: {
+                    source: 'params.value / (params.period / 1000)',
+                    lang: 'painless',
+                  },
+                  gap_policy: 'skip',
                 },
               },
             },

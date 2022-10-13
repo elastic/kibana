@@ -7,20 +7,34 @@
 
 import { isEmpty } from 'lodash';
 import { createSelector } from 'reselect';
-import { State } from '../../store';
 import { InputsModelId } from '../../store/inputs/constants';
-import { Policy, InputsRange, TimeRange, GlobalQuery } from '../../store/inputs/model';
+import type { State } from '../../store';
+import type {
+  GlobalQuery,
+  InputsRange,
+  InputsRangeTimeOnly,
+  Policy,
+  TimeRange,
+} from '../../store/inputs/model';
 
-export const getPolicy = (inputState: InputsRange): Policy => inputState.policy;
+export const getPolicy = (inputState: InputsRange | InputsRangeTimeOnly): Policy =>
+  inputState.policy;
 
-export const getTimerange = (inputState: InputsRange): TimeRange => inputState.timerange;
+export const getTimerange = (inputState: InputsRange | InputsRangeTimeOnly): TimeRange =>
+  inputState.timerange;
 
 export const getQueries = (inputState: InputsRange): GlobalQuery[] => inputState.queries;
 
-export const getGlobalQueries = (state: State, id: InputsModelId): GlobalQuery[] => {
+export const getGlobalQueries = (
+  state: State,
+  id: InputsModelId.global | InputsModelId.timeline
+): GlobalQuery[] => {
   const inputsRange = state.inputs[id];
   return !isEmpty(inputsRange.linkTo)
     ? inputsRange.linkTo.reduce<GlobalQuery[]>((acc, linkToId) => {
+        if (linkToId === InputsModelId.socTrends) {
+          return acc;
+        }
         const linkToIdInputsRange: InputsRange = state.inputs[linkToId];
         return [...acc, ...linkToIdInputsRange.queries];
       }, inputsRange.queries)

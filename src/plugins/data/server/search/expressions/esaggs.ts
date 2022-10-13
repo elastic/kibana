@@ -7,8 +7,10 @@
  */
 
 import { get } from 'lodash';
+import { defer } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
-import { KibanaRequest, StartServicesAccessor } from 'src/core/server';
+import { KibanaRequest, StartServicesAccessor } from '@kbn/core/server';
 import {
   EsaggsExpressionFunctionDefinition,
   EsaggsStartDependencies,
@@ -36,45 +38,46 @@ export function getFunctionDefinition({
 }): () => EsaggsExpressionFunctionDefinition {
   return () => ({
     ...getEsaggsMeta(),
-    async fn(
-      input,
-      args,
-      { inspectorAdapters, abortSignal, getSearchSessionId, getKibanaRequest }
-    ) {
-      const kibanaRequest = getKibanaRequest ? getKibanaRequest() : null;
-      if (!kibanaRequest) {
-        throw new Error(
-          i18n.translate('data.search.esaggs.error.kibanaRequest', {
-            defaultMessage:
-              'A KibanaRequest is required to execute this search on the server. ' +
-              'Please provide a request object to the expression execution params.',
-          })
+    fn(input, args, { inspectorAdapters, abortSignal, getSearchSessionId, getKibanaRequest }) {
+      return defer(async () => {
+        const kibanaRequest = getKibanaRequest ? getKibanaRequest() : null;
+        if (!kibanaRequest) {
+          throw new Error(
+            i18n.translate('data.search.esaggs.error.kibanaRequest', {
+              defaultMessage:
+                'A KibanaRequest is required to execute this search on the server. ' +
+                'Please provide a request object to the expression execution params.',
+            })
+          );
+        }
+
+        const { aggs, indexPatterns, searchSource } = await getStartDependencies(kibanaRequest);
+
+        const indexPattern = await indexPatterns.create(args.index.value, true);
+        const aggConfigs = aggs.createAggConfigs(
+          indexPattern,
+          args.aggs?.map((agg) => agg.value) ?? [],
+          { hierarchical: args.metricsAtAllLevels, partialRows: args.partialRows }
         );
-      }
 
-      const { aggs, indexPatterns, searchSource } = await getStartDependencies(kibanaRequest);
-
-      const indexPattern = await indexPatterns.create(args.index.value, true);
-      const aggConfigs = aggs.createAggConfigs(
-        indexPattern,
-        args.aggs!.map((agg) => agg.value)
+        return { aggConfigs, indexPattern, searchSource };
+      }).pipe(
+        switchMap(({ aggConfigs, indexPattern, searchSource }) =>
+          handleEsaggsRequest({
+            abortSignal,
+            aggs: aggConfigs,
+            filters: get(input, 'filters', undefined),
+            indexPattern,
+            inspectorAdapters,
+            query: get(input, 'query', undefined) as any,
+            searchSessionId: getSearchSessionId(),
+            searchSourceService: searchSource,
+            disableShardWarnings: false,
+            timeFields: args.timeFields,
+            timeRange: get(input, 'timeRange', undefined),
+          })
+        )
       );
-
-      aggConfigs.hierarchical = args.metricsAtAllLevels;
-
-      return await handleEsaggsRequest({
-        abortSignal,
-        aggs: aggConfigs,
-        filters: get(input, 'filters', undefined),
-        indexPattern,
-        inspectorAdapters,
-        partialRows: args.partialRows,
-        query: get(input, 'query', undefined) as any,
-        searchSessionId: getSearchSessionId(),
-        searchSourceService: searchSource,
-        timeFields: args.timeFields,
-        timeRange: get(input, 'timeRange', undefined),
-      });
     },
   });
 }
@@ -107,7 +110,7 @@ export function getEsaggs({
 
       return {
         aggs: await search.aggs.asScopedToClient(savedObjectsClient, esClient.asCurrentUser),
-        indexPatterns: await indexPatterns.indexPatternsServiceFactory(
+        indexPatterns: await indexPatterns.dataViewsServiceFactory(
           savedObjectsClient,
           esClient.asCurrentUser
         ),

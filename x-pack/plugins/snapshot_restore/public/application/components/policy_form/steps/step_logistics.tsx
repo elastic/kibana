@@ -6,7 +6,7 @@
  */
 
 import React, { Fragment, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiDescribedFormGroup,
   EuiTitle,
@@ -24,16 +24,15 @@ import {
   EuiCode,
 } from '@elastic/eui';
 
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { Repository } from '../../../../../common/types';
 import { Frequency, CronEditor, SectionError } from '../../../../shared_imports';
 import { useCore, useServices } from '../../../app_context';
 import { DEFAULT_POLICY_SCHEDULE, DEFAULT_POLICY_FREQUENCY } from '../../../constants';
 import { useLoadRepositories } from '../../../services/http';
 import { linkToAddRepository } from '../../../services/navigation';
-import { SectionLoading } from '../../';
-import { StepProps } from './';
-
-import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
+import { InlineLoading } from '../..';
+import { StepProps } from '.';
 
 export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
   policy,
@@ -55,9 +54,8 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
   const { i18n, history } = useServices();
   const { docLinks } = useCore();
 
-  const [showRepositoryNotFoundWarning, setShowRepositoryNotFoundWarning] = useState<boolean>(
-    false
-  );
+  const [showRepositoryNotFoundWarning, setShowRepositoryNotFoundWarning] =
+    useState<boolean>(false);
 
   // State for touched inputs
   const [touched, setTouched] = useState({
@@ -174,12 +172,12 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
   const renderRepositorySelect = () => {
     if (isLoadingRepositories) {
       return (
-        <SectionLoading inline={true}>
+        <InlineLoading>
           <FormattedMessage
             id="xpack.snapshotRestore.policyForm.loadingRepositoriesDescription"
             defaultMessage="Loading repositories…"
           />
-        </SectionLoading>
+        </InlineLoading>
       );
     }
 

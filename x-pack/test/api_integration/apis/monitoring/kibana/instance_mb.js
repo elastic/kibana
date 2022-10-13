@@ -7,25 +7,28 @@
 
 import expect from '@kbn/expect';
 import { normalizeDataTypeDifferences } from '../normalize_data_type_differences';
-import instanceFixture from './fixtures/instance';
+import { setIndicesFound } from '../set_indices_found';
+import instanceFixture from './fixtures/instance.json';
+import { getLifecycleMethods } from '../data_stream';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
+  const { setup, tearDown } = getLifecycleMethods(getService);
 
   describe('instance detail mb', () => {
-    const archive = 'monitoring/singlecluster_yellow_platinum_mb';
+    const archive =
+      'x-pack/test/functional/es_archives/monitoring/singlecluster_yellow_platinum_mb';
     const timeRange = {
       min: '2017-08-29T17:24:17.000Z',
       max: '2017-08-29T17:26:08.000Z',
     };
 
     before('load archive', () => {
-      return esArchiver.load(archive);
+      return setup(archive);
     });
 
     after('unload archive', () => {
-      return esArchiver.unload(archive);
+      return tearDown();
     });
 
     it('should summarize single kibana instance with metrics', async () => {
@@ -38,6 +41,7 @@ export default function ({ getService }) {
         .expect(200);
 
       body.metrics = normalizeDataTypeDifferences(body.metrics, instanceFixture);
+      instanceFixture.metrics = setIndicesFound(instanceFixture.metrics, true);
       expect(body).to.eql(instanceFixture);
     });
   });

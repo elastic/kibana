@@ -16,6 +16,9 @@
       "retryAt": {
         "type": "date"
       },
+      "enabled": {
+        "type": "boolean"
+      },
       "schedule": {
         "properties": {
           "interval": {
@@ -28,6 +31,9 @@
       },
       "status": {
         "type": "keyword"
+      },
+      "traceparent": {
+        "type": "text"
       },
       "params": {
         "type": "text"

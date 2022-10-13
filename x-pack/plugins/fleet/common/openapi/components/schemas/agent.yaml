@@ -11,9 +11,6 @@ properties:
     type: string
   unenrollment_started_at:
     type: string
-  shared_id:
-    type: string
-    deprecated: true
   access_api_key_id:
     type: string
   default_api_key_id:
@@ -30,20 +27,19 @@ properties:
     $ref: ./agent_metadata.yaml
   id:
     type: string
-  current_error_events:
-    type: array
-    items:
-      $ref: ./agent_event.yaml
   access_api_key:
     type: string
   status:
     $ref: ./agent_status.yaml
   default_api_key:
     type: string
+  components:
+    type: array
+    items:
+      $ref: ./agent_component.yaml
 required:
   - type
   - active
   - enrolled_at
   - id
-  - current_error_events
   - status

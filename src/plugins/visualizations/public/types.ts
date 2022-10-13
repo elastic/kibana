@@ -6,25 +6,26 @@
  * Side Public License, v 1.
  */
 
-import { SavedObject } from '../../../plugins/saved_objects/public';
+import type { SavedObjectsMigrationVersion, ResolvedSimpleSavedObject } from '@kbn/core/public';
 import {
-  AggConfigOptions,
   IAggConfigs,
-  SearchSourceFields,
+  SerializedSearchSourceFields,
   TimefilterContract,
-} from '../../../plugins/data/public';
-import { ExpressionAstExpression } from '../../expressions/public';
+  AggConfigSerialized,
+} from '@kbn/data-plugin/public';
+import type { ISearchSource } from '@kbn/data-plugin/common';
+import { ExpressionAstExpression } from '@kbn/expressions-plugin/public';
 
-import { SerializedVis, Vis } from './vis';
-import { PersistedState } from './persisted_state';
-import { VisParams } from '../common';
+import type { Vis } from './vis';
+import type { PersistedState } from './persisted_state';
+import type { VisParams, SerializedVis } from '../common';
 
-export { Vis, SerializedVis, VisParams };
+export type { Vis, SerializedVis, VisParams };
 export interface SavedVisState {
   title: string;
   type: string;
   params: VisParams;
-  aggs: AggConfigOptions[];
+  aggs: AggConfigSerialized[];
 }
 
 export interface ISavedVis {
@@ -32,13 +33,44 @@ export interface ISavedVis {
   title: string;
   description?: string;
   visState: SavedVisState;
-  searchSourceFields?: SearchSourceFields;
+  searchSourceFields?: SerializedSearchSourceFields;
   uiStateJSON?: string;
   savedSearchRefName?: string;
   savedSearchId?: string;
+  sharingSavedObjectProps?: {
+    outcome?: ResolvedSimpleSavedObject['outcome'];
+    aliasTargetId?: ResolvedSimpleSavedObject['alias_target_id'];
+    aliasPurpose?: ResolvedSimpleSavedObject['alias_purpose'];
+    errorJSON?: string;
+  };
 }
 
-export interface VisSavedObject extends SavedObject, ISavedVis {}
+export interface VisSavedObject extends ISavedVis {
+  lastSavedTitle: string;
+  getEsType: () => string;
+  getDisplayName: () => string;
+  displayName: string;
+  migrationVersion?: SavedObjectsMigrationVersion;
+  searchSource?: ISearchSource;
+  version?: string;
+  tags?: string[];
+}
+
+export interface SaveVisOptions {
+  confirmOverwrite?: boolean;
+  isTitleDuplicateConfirmed?: boolean;
+  onTitleDuplicate?: () => void;
+  copyOnSave?: boolean;
+}
+
+export interface GetVisOptions {
+  id?: string;
+  searchSource?: boolean;
+  migrationVersion?: SavedObjectsMigrationVersion;
+  savedSearchId?: string;
+  type?: string;
+  indexPattern?: string;
+}
 
 export interface VisToExpressionAstParams {
   timefilter: TimefilterContract;

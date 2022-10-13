@@ -39,7 +39,7 @@ import Crypto from 'crypto';
 
 import * as babel from '@babel/core';
 import { addHook } from 'pirates';
-import { REPO_ROOT, UPSTREAM_BRANCH } from '@kbn/dev-utils';
+import { REPO_ROOT, UPSTREAM_BRANCH } from '@kbn/utils';
 import sourceMapSupport from 'source-map-support';
 
 import { Cache } from './cache';

@@ -8,7 +8,7 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiEmptyPrompt, EuiSpacer, EuiText, EuiTextColor } from '@elastic/eui';
 
 import { RequestStatus } from '../../../../common/adapters';
@@ -17,6 +17,7 @@ import { InspectorViewProps } from '../../../types';
 
 import { RequestSelector } from './request_selector';
 import { RequestDetails } from './request_details';
+import { disambiguateRequestNames } from './disambiguate_request_names';
 
 interface RequestSelectorState {
   requests: Request[];
@@ -34,15 +35,19 @@ export class RequestsViewComponent extends Component<InspectorViewProps, Request
 
     props.adapters.requests!.on('change', this._onRequestsChange);
 
-    const requests = props.adapters.requests!.getRequests();
+    const requests = this.getRequests();
     this.state = {
       requests,
       request: requests.length ? requests[0] : null,
     };
   }
 
+  getRequests(): Request[] {
+    return disambiguateRequestNames(this.props.adapters.requests!.getRequests());
+  }
+
   _onRequestsChange = () => {
-    const requests = this.props.adapters.requests!.getRequests();
+    const requests = this.getRequests();
     const newState = { requests } as RequestSelectorState;
 
     if (!this.state.request || !requests.includes(this.state.request)) {

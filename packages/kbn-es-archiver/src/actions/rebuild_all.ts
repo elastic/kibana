@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { resolve, dirname, relative } from 'path';
-import { stat, Stats, rename, createReadStream, createWriteStream } from 'fs';
+import { resolve, relative } from 'path';
+import { Stats, createReadStream, createWriteStream } from 'fs';
+import { stat, rename } from 'fs/promises';
 import { Readable, Writable } from 'stream';
-import { fromNode } from 'bluebird';
-import { ToolingLog } from '@kbn/dev-utils';
-import { createPromiseFromStreams } from '@kbn/utils';
+import { ToolingLog } from '@kbn/tooling-log';
+import { createPromiseFromStreams, REPO_ROOT } from '@kbn/utils';
 import {
   prioritizeMappings,
   readDirectory,
@@ -21,19 +21,11 @@ import {
 } from '../lib';
 
 async function isDirectory(path: string): Promise<boolean> {
-  const stats: Stats = await fromNode((cb) => stat(path, cb));
+  const stats: Stats = await stat(path);
   return stats.isDirectory();
 }
 
-export async function rebuildAllAction({
-  dataDir,
-  log,
-  rootDir = dataDir,
-}: {
-  dataDir: string;
-  log: ToolingLog;
-  rootDir?: string;
-}) {
+export async function rebuildAllAction({ dataDir, log }: { dataDir: string; log: ToolingLog }) {
   const childNames = prioritizeMappings(await readDirectory(dataDir));
   for (const childName of childNames) {
     const childPath = resolve(dataDir, childName);
@@ -42,13 +34,12 @@ export async function rebuildAllAction({
       await rebuildAllAction({
         dataDir: childPath,
         log,
-        rootDir,
       });
       continue;
     }
 
-    const archiveName = dirname(relative(rootDir, childPath));
-    log.info(`${archiveName} Rebuilding ${childName}`);
+    const archiveName = relative(REPO_ROOT, childPath);
+    log.info('[%s] Rebuilding %j', archiveName, childName);
     const gzip = isGzip(childPath);
     const tempFile = childPath + (gzip ? '.rebuilding.gz' : '.rebuilding');
 
@@ -59,7 +50,7 @@ export async function rebuildAllAction({
       createWriteStream(tempFile),
     ] as [Readable, ...Writable[]]);
 
-    await fromNode((cb) => rename(tempFile, childPath, cb));
-    log.info(`${archiveName} Rebuilt ${childName}`);
+    await rename(tempFile, childPath);
+    log.info('[%s] Rebuilt %j', archiveName, childName);
   }
 }

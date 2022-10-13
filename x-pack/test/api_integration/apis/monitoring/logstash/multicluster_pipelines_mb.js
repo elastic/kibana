@@ -6,14 +6,16 @@
  */
 
 import expect from '@kbn/expect';
-import fixture from './fixtures/multicluster_pipelines';
+import fixture from './fixtures/multicluster_pipelines.json';
+import { getLifecycleMethods } from '../data_stream';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
+  const { setup, tearDown } = getLifecycleMethods(getService);
 
   describe('pipelines listing multicluster mb', () => {
-    const archive = 'monitoring/logstash_pipelines_multicluster_mb';
+    const archive =
+      'x-pack/test/functional/es_archives/monitoring/logstash_pipelines_multicluster_mb';
     const timeRange = {
       min: '2019-11-11T15:13:45.266Z',
       max: '2019-11-11T15:17:05.399Z',
@@ -24,11 +26,11 @@ export default function ({ getService }) {
     };
 
     before('load archive', () => {
-      return esArchiver.load(archive);
+      return setup(archive);
     });
 
     after('unload archive', () => {
-      return esArchiver.unload(archive);
+      return tearDown();
     });
 
     it('should get the pipelines', async () => {

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { createMemoryHistory, History as HistoryPackageHistoryInterface } from 'history';
+import type { History as HistoryPackageHistoryInterface } from 'history';
+import { createMemoryHistory } from 'history';
 import { noAncestorsTwoChildrenWithRelatedEventsOnOrigin } from '../data_access_layer/mocks/no_ancestors_two_children_with_related_events_on_origin';
 import { Simulator } from '../test_utilities/simulator';
 import '../test_utilities/extend_jest';
@@ -26,10 +27,8 @@ describe(`Resolver: when analyzing a tree with 0 ancestors, 2 children, 2 relate
   };
 
   beforeEach(() => {
-    const {
-      metadata: dataAccessLayerMetadata,
-      dataAccessLayer,
-    } = noAncestorsTwoChildrenWithRelatedEventsOnOrigin();
+    const { metadata: dataAccessLayerMetadata, dataAccessLayer } =
+      noAncestorsTwoChildrenWithRelatedEventsOnOrigin();
 
     entityIDs = dataAccessLayerMetadata.entityIDs;
 

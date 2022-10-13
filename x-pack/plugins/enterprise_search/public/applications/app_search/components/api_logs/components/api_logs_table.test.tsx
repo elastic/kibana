@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { setMockValues, setMockActions, mountWithIntl } from '../../../../__mocks__';
+import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
 
 // NOTE: We're mocking FormattedRelative here because it (currently) has
 // console warn issues, and it allows us to skip mocking dates
-jest.mock('@kbn/i18n/react', () => ({
-  ...(jest.requireActual('@kbn/i18n/react') as object),
+jest.mock('@kbn/i18n-react', () => ({
+  ...(jest.requireActual('@kbn/i18n-react') as object),
   FormattedRelative: jest.fn(() => '20 hours ago'),
 }));
 
@@ -18,11 +18,12 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiBasicTable, EuiBadge, EuiHealth, EuiButtonEmpty, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiBasicTable, EuiBadge, EuiHealth, EuiButtonEmpty } from '@elastic/eui';
 
 import { DEFAULT_META } from '../../../../shared/constants';
+import { mountWithIntl } from '../../../../test_helpers';
 
-import { ApiLogsTable } from './';
+import { ApiLogsTable } from '.';
 
 describe('ApiLogsTable', () => {
   const apiLogs = [
@@ -88,14 +89,6 @@ describe('ApiLogsTable', () => {
     expect(wrapper.find(EuiButtonEmpty)).toHaveLength(3);
     wrapper.find('[data-test-subj="ApiLogsTableDetailsButton"]').first().simulate('click');
     expect(actions.openFlyout).toHaveBeenCalled();
-  });
-
-  it('renders an empty prompt if no items are passed', () => {
-    setMockValues({ ...values, apiLogs: [] });
-    const wrapper = mountWithIntl(<ApiLogsTable />);
-    const promptContent = wrapper.find(EuiEmptyPrompt).text();
-
-    expect(promptContent).toContain('Perform your first API call');
   });
 
   describe('hasPagination', () => {

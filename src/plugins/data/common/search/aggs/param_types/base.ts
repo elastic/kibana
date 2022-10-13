@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ISearchOptions, ISearchSource } from 'src/plugins/data/public';
-import { ExpressionAstExpression } from 'src/plugins/expressions/common';
+import { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
+import type { ISearchOptions, ISearchSource } from '../../../../public';
 import { IAggConfigs } from '../agg_configs';
 import { IAggConfig } from '../agg_config';
 
@@ -26,7 +26,7 @@ export class BaseParamType<TAggConfig extends IAggConfig = IAggConfig> {
   ) => void;
   serialize: (value: any, aggConfig?: TAggConfig) => any;
   deserialize: (value: any, aggConfig?: TAggConfig) => any;
-  toExpressionAst?: (value: any) => ExpressionAstExpression | undefined;
+  toExpressionAst?: (value: any) => ExpressionAstExpression[] | ExpressionAstExpression | undefined;
   options: any[];
   valueType?: any;
 

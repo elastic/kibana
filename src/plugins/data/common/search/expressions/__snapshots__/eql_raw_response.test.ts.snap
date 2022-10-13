@@ -1,0 +1,214 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`eqlRawResponse converts events to table simple aggregation response 1`] = `
+Object {
+  "columns": Array [
+    Object {
+      "id": "prop",
+      "meta": Object {
+        "field": "prop",
+        "params": Object {},
+        "type": "string",
+      },
+      "name": "prop",
+    },
+    Object {
+      "id": "prop2",
+      "meta": Object {
+        "field": "prop2",
+        "params": Object {},
+        "type": "number",
+      },
+      "name": "prop2",
+    },
+  ],
+  "meta": Object {
+    "source": "*",
+    "statistics": Object {
+      "totalCount": undefined,
+    },
+    "type": "eql",
+  },
+  "rows": Array [
+    Object {
+      "prop": "value",
+      "prop2": 3,
+    },
+    Object {
+      "prop": "value2",
+      "prop2": 5,
+    },
+  ],
+  "type": "datatable",
+}
+`;
+
+exports[`eqlRawResponse converts sequences to table simple docs response 1`] = `
+Object {
+  "columns": Array [
+    Object {
+      "id": "category",
+      "meta": Object {
+        "field": "category",
+        "params": Object {},
+        "type": "object",
+      },
+      "name": "category",
+    },
+    Object {
+      "id": "currency",
+      "meta": Object {
+        "field": "currency",
+        "params": Object {},
+        "type": "string",
+      },
+      "name": "currency",
+    },
+    Object {
+      "id": "customer_first_name",
+      "meta": Object {
+        "field": "customer_first_name",
+        "params": Object {},
+        "type": "string",
+      },
+      "name": "customer_first_name",
+    },
+    Object {
+      "id": "customer_full_name",
+      "meta": Object {
+        "field": "customer_full_name",
+        "params": Object {},
+        "type": "string",
+      },
+      "name": "customer_full_name",
+    },
+    Object {
+      "id": "customer_gender",
+      "meta": Object {
+        "field": "customer_gender",
+        "params": Object {},
+        "type": "string",
+      },
+      "name": "customer_gender",
+    },
+    Object {
+      "id": "products",
+      "meta": Object {
+        "field": "products",
+        "params": Object {},
+        "type": "object",
+      },
+      "name": "products",
+    },
+    Object {
+      "id": "sku",
+      "meta": Object {
+        "field": "sku",
+        "params": Object {},
+        "type": "object",
+      },
+      "name": "sku",
+    },
+    Object {
+      "id": "geoip.country_iso_code",
+      "meta": Object {
+        "field": "geoip.country_iso_code",
+        "params": Object {},
+        "type": "string",
+      },
+      "name": "geoip.country_iso_code",
+    },
+    Object {
+      "id": "geoip.location.lon",
+      "meta": Object {
+        "field": "geoip.location.lon",
+        "params": Object {},
+        "type": "number",
+      },
+      "name": "geoip.location.lon",
+    },
+    Object {
+      "id": "geoip.location.lat",
+      "meta": Object {
+        "field": "geoip.location.lat",
+        "params": Object {},
+        "type": "number",
+      },
+      "name": "geoip.location.lat",
+    },
+    Object {
+      "id": "geoip.continent_name",
+      "meta": Object {
+        "field": "geoip.continent_name",
+        "params": Object {},
+        "type": "string",
+      },
+      "name": "geoip.continent_name",
+    },
+  ],
+  "meta": Object {
+    "source": "*",
+    "statistics": Object {
+      "totalCount": undefined,
+    },
+    "type": "eql",
+  },
+  "rows": Array [
+    Object {
+      "category": Array [
+        "Men's Clothing",
+      ],
+      "currency": "EUR",
+      "customer_first_name": "Oliver",
+      "customer_full_name": "Oliver Rios",
+      "customer_gender": "MALE",
+      "geoip.continent_name": "Europe",
+      "geoip.country_iso_code": "GB",
+      "geoip.location.lat": 51.5,
+      "geoip.location.lon": -0.1,
+      "products": Array [
+        Object {
+          "base_price": 20.99,
+          "discount_percentage": 0,
+        },
+        Object {
+          "base_price": 24.99,
+          "discount_percentage": 0,
+        },
+      ],
+      "sku": Array [
+        "ZO0417504175",
+        "ZO0535205352",
+      ],
+    },
+    Object {
+      "category": Array [
+        "Men's Clothing",
+      ],
+      "currency": "EUR",
+      "customer_first_name": "Boris",
+      "customer_full_name": "Boris Bradley",
+      "customer_gender": "MALE",
+      "geoip.continent_name": "Europe",
+      "geoip.country_iso_code": "GB",
+      "geoip.location.lat": 51.5,
+      "geoip.location.lon": -0.1,
+      "products": Array [
+        Object {
+          "base_price": 32.99,
+          "discount_percentage": 0,
+        },
+        Object {
+          "base_price": 28.99,
+          "discount_percentage": 0,
+        },
+      ],
+      "sku": Array [
+        "ZO0112101121",
+        "ZO0530405304",
+      ],
+    },
+  ],
+  "type": "datatable",
+}
+`;

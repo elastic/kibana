@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-export {
+export type {
   ITagInternalClient,
-  TagsCache,
   ITagsCache,
-  TagsClient,
   ITagsChangeListener,
-  isServerValidationError,
   TagServerValidationError,
 } from './tags';
-export { TagAssignmentService, ITagAssignmentService } from './assignments';
+export { TagsCache, TagsClient, isServerValidationError } from './tags';
+export type { ITagAssignmentService } from './assignments';
+export { TagAssignmentService } from './assignments';

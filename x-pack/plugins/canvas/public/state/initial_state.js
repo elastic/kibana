@@ -6,11 +6,12 @@
  */
 
 import { get } from 'lodash';
-import { platformService } from '../services';
-import { getDefaultWorkpad } from './defaults';
+import { pluginServices } from '../services';
+import { getDefaultWorkpad, getDefaultSidebar, getDefaultFlyouts } from './defaults';
 
 export const getInitialState = (path) => {
-  const { getHasWriteAccess } = platformService.getService();
+  const platformService = pluginServices.getServices().platform;
+  const { getHasWriteAccess } = platformService;
 
   const state = {
     app: {}, // Kibana stuff in here
@@ -39,6 +40,8 @@ export const getInitialState = (path) => {
       // In there will live an object with a status (string), value (any), and error (Error) property.
       // If the state is 'error', the error property will be the error object, the value will not change
       // See the resolved_args reducer for more information.
+      sidebar: getDefaultSidebar(),
+      flyouts: getDefaultFlyouts(),
     },
     persistent: {
       schemaVersion: 2,

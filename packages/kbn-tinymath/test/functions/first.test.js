@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const { first } = require('../../src/functions/first.js');
+const { first } = require('../../src/functions/first');
 
 describe('First', () => {
   it('numbers', () => {

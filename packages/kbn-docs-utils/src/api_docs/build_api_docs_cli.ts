@@ -7,24 +7,28 @@
  */
 
 import Fs from 'fs';
+import Fsp from 'fs/promises';
 import Path from 'path';
 
-import { REPO_ROOT, run, CiStatsReporter, createFlagError } from '@kbn/dev-utils';
+import { run } from '@kbn/dev-cli-runner';
+import { createFlagError } from '@kbn/dev-cli-errors';
+import { CiStatsReporter } from '@kbn/ci-stats-reporter';
+import { REPO_ROOT } from '@kbn/utils';
 import { Project } from 'ts-morph';
 
 import { writePluginDocs } from './mdx/write_plugin_mdx_docs';
-import { ApiDeclaration, PluginApi, TypeKind } from './types';
+import { ApiDeclaration, ApiStats, PluginMetaInfo } from './types';
 import { findPlugins } from './find_plugins';
 import { pathsOutsideScopes } from './build_api_declarations/utils';
 import { getPluginApiMap } from './get_plugin_api_map';
-
-export interface PluginInfo {
-  apiCount: number;
-  apiCountMissingComments: number;
-  id: string;
-  missingApiItems: string[];
-  percentApiMissingComments: number;
-}
+import { writeDeprecationDocByApi } from './mdx/write_deprecations_doc_by_api';
+import { writeDeprecationDocByPlugin } from './mdx/write_deprecations_doc_by_plugin';
+import { writePluginDirectoryDoc } from './mdx/write_plugin_directory_doc';
+import { collectApiStatsForPlugin } from './stats';
+import { countEslintDisableLines, EslintDisableCounts } from './count_eslint_disable';
+import { writeDeprecationDueByTeam } from './mdx/write_deprecations_due_by_team';
+import { trimDeletedDocsFromNav } from './trim_deleted_docs_from_nav';
+import { getAllDocFileIds } from './mdx/get_all_doc_file_ids';
 
 function isStringArray(arr: unknown | string[]): arr is string[] {
   return Array.isArray(arr) && arr.every((p) => typeof p === 'string');
@@ -33,6 +37,7 @@ function isStringArray(arr: unknown | string[]): arr is string[] {
 export function runBuildApiDocsCli() {
   run(
     async ({ log, flags }) => {
+      const collectReferences = flags.references as boolean;
       const stats = flags.stats && typeof flags.stats === 'string' ? [flags.stats] : flags.stats;
       const pluginFilter =
         flags.plugin && typeof flags.plugin === 'string' ? [flags.plugin] : flags.plugin;
@@ -52,30 +57,62 @@ export function runBuildApiDocsCli() {
         );
       }
 
+      const outputFolder = Path.resolve(REPO_ROOT, 'api_docs');
+
+      const initialDocIds =
+        !pluginFilter && Fs.existsSync(outputFolder)
+          ? await getAllDocFileIds(outputFolder)
+          : undefined;
+
       const project = getTsProject(REPO_ROOT);
 
       const plugins = findPlugins();
 
-      const outputFolder = Path.resolve(REPO_ROOT, 'api_docs');
-      if (!Fs.existsSync(outputFolder)) {
-        Fs.mkdirSync(outputFolder);
-
-        // Don't delete all the files if a plugin filter is being used.
-      } else if (!pluginFilter) {
-        // Delete all files except the README that warns about the auto-generated nature of
-        // the folder.
-        const files = Fs.readdirSync(outputFolder);
-        files.forEach((file) => {
-          if (file.indexOf('README.md') < 0) {
-            Fs.rmSync(Path.resolve(outputFolder, file));
-          }
-        });
+      // if the output folder already exists and we don't have a plugin filter, delete all the files in the output folder
+      if (Fs.existsSync(outputFolder) && !pluginFilter) {
+        await Fsp.rm(outputFolder, { recursive: true });
       }
 
-      const { pluginApiMap, missingApiItems } = getPluginApiMap(project, plugins, log);
+      // if the output folder doesn't exist, create it
+      if (!Fs.existsSync(outputFolder)) {
+        await Fsp.mkdir(outputFolder, { recursive: true });
+      }
+
+      const {
+        pluginApiMap,
+        missingApiItems,
+        unreferencedDeprecations,
+        referencedDeprecations,
+        adoptionTrackedAPIs,
+      } = getPluginApiMap(project, plugins, log, {
+        collectReferences,
+        pluginFilter: pluginFilter as string[],
+      });
 
       const reporter = CiStatsReporter.fromEnv(log);
-      plugins.forEach((plugin) => {
+
+      const allPluginStats: { [key: string]: PluginMetaInfo & ApiStats & EslintDisableCounts } = {};
+      for (const plugin of plugins) {
+        const id = plugin.manifest.id;
+        const pluginApi = pluginApiMap[id];
+
+        allPluginStats[id] = {
+          ...(await countEslintDisableLines(plugin.directory)),
+          ...collectApiStatsForPlugin(
+            pluginApi,
+            missingApiItems,
+            referencedDeprecations,
+            adoptionTrackedAPIs
+          ),
+          owner: plugin.manifest.owner,
+          description: plugin.manifest.description,
+          isPlugin: plugin.isPlugin,
+        };
+      }
+
+      await writePluginDirectoryDoc(outputFolder, pluginApiMap, allPluginStats, log);
+
+      for (const plugin of plugins) {
         // Note that the filtering is done here, and not above because the entire public plugin API has to
         // be parsed in order to correctly determine reference links, and ensure that `removeBrokenLinks`
         // doesn't remove more links than necessary.
@@ -85,36 +122,120 @@ export function runBuildApiDocsCli() {
 
         const id = plugin.manifest.id;
         const pluginApi = pluginApiMap[id];
-        const apiCount = countApiForPlugin(pluginApi);
-        const pluginStats = collectApiStatsForPlugin(pluginApi);
+        const pluginStats = allPluginStats[id];
+        const pluginTeam = plugin.manifest.owner.name;
 
         reporter.metrics([
           {
             id,
-            group: 'API count',
-            value: apiCount,
+            meta: { pluginTeam },
+            group: 'Unreferenced deprecated APIs',
+            value: unreferencedDeprecations[id] ? unreferencedDeprecations[id].length : 0,
           },
           {
             id,
+            meta: { pluginTeam },
+            group: 'API count',
+            value: pluginStats.apiCount,
+          },
+          {
+            id,
+            meta: { pluginTeam },
             group: 'API count missing comments',
             value: pluginStats.missingComments.length,
           },
           {
             id,
+            meta: { pluginTeam },
             group: 'API count with any type',
             value: pluginStats.isAnyType.length,
           },
           {
             id,
+            meta: { pluginTeam },
             group: 'Non-exported public API item count',
             value: missingApiItems[id] ? Object.keys(missingApiItems[id]).length : 0,
           },
+          {
+            id,
+            meta: { pluginTeam },
+            group: 'References to deprecated APIs',
+            value: pluginStats.deprecatedAPIsReferencedCount,
+          },
+          {
+            id,
+            meta: {
+              pluginTeam,
+              // `meta` only allows primitives or string[]
+              // Also, each string is allowed to have a max length of 2056,
+              // so it's safer to stringify each element in the array over sending the entire array as stringified.
+              // My internal tests with 4 plugins using the same API gets to a length of 156 chars,
+              // so we should have enough room for tracking popular APIs.
+              // TODO: We can do a follow-up improvement to split the report if we find out we might hit the limit.
+              adoptionTrackedAPIs: pluginStats.adoptionTrackedAPIs.map((metric) =>
+                JSON.stringify(metric)
+              ),
+            },
+            group: 'Adoption-tracked APIs',
+            value: pluginStats.adoptionTrackedAPIsCount,
+          },
+          {
+            id,
+            meta: { pluginTeam },
+            group: 'Adoption-tracked APIs that are not used anywhere',
+            value: pluginStats.adoptionTrackedAPIsUnreferencedCount,
+          },
+          {
+            id,
+            meta: { pluginTeam },
+            group: 'ESLint disabled line counts',
+            value: pluginStats.eslintDisableLineCount,
+          },
+          {
+            id,
+            meta: { pluginTeam },
+            group: 'ESLint disabled in files',
+            value: pluginStats.eslintDisableFileCount,
+          },
+          {
+            id,
+            meta: { pluginTeam },
+            group: 'Total ESLint disabled count',
+            value: pluginStats.eslintDisableFileCount + pluginStats.eslintDisableLineCount,
+          },
         ]);
+
+        const getLink = (d: ApiDeclaration) =>
+          `https://github.com/elastic/kibana/tree/main/${d.path}#:~:text=${encodeURIComponent(
+            d.label
+          )}`;
+
+        if (collectReferences && pluginFilter === plugin.manifest.id) {
+          if (referencedDeprecations[id] && pluginStats.deprecatedAPIsReferencedCount > 0) {
+            log.info(`${referencedDeprecations[id].length} deprecated APIs used`);
+            // eslint-disable-next-line no-console
+            console.table(referencedDeprecations[id]);
+          } else {
+            log.info(`No referenced deprecations for plugin ${plugin.manifest.id}`);
+          }
+          if (pluginStats.noReferences.length > 0) {
+            // eslint-disable-next-line no-console
+            console.table(
+              pluginStats.noReferences.map((d) => ({
+                id: d.id,
+                link: getLink(d),
+              }))
+            );
+          } else {
+            log.info(`No unused APIs for plugin ${plugin.manifest.id}`);
+          }
+        }
 
         if (stats) {
           const passesAllChecks =
             pluginStats.isAnyType.length === 0 &&
             pluginStats.missingComments.length === 0 &&
+            pluginStats.deprecatedAPIsReferencedCount === 0 &&
             (!missingApiItems[id] || Object.keys(missingApiItems[id]).length === 0);
 
           log.info(`--- Plugin '${id}' ${passesAllChecks ? ` passes all checks ----` : '----`'}`);
@@ -122,8 +243,6 @@ export function runBuildApiDocsCli() {
           if (!passesAllChecks) {
             log.info(`${pluginStats.isAnyType.length} API items with ANY`);
 
-            const getLink = (d: ApiDeclaration) =>
-              `https://github.com/elastic/kibana/tree/master/${d.source.path}#L${d.source.lineNumber}`;
             if (stats.includes('any')) {
               // eslint-disable-next-line no-console
               console.table(
@@ -162,13 +281,29 @@ export function runBuildApiDocsCli() {
           }
         }
 
-        if (apiCount > 0) {
-          writePluginDocs(outputFolder, pluginApi, log);
+        if (pluginStats.apiCount > 0) {
+          log.info(`Writing public API doc for plugin ${pluginApi.id}.`);
+          await writePluginDocs(outputFolder, { doc: pluginApi, plugin, pluginStats, log });
+        } else {
+          log.info(`Plugin ${pluginApi.id} has no public API.`);
         }
-      });
+        await writeDeprecationDocByPlugin(outputFolder, referencedDeprecations, log);
+        await writeDeprecationDueByTeam(outputFolder, referencedDeprecations, plugins, log);
+        await writeDeprecationDocByApi(
+          outputFolder,
+          referencedDeprecations,
+          unreferencedDeprecations,
+          log
+        );
+      }
+
       if (Object.values(pathsOutsideScopes).length > 0) {
         log.warning(`Found paths outside of normal scope folders:`);
         log.warning(pathsOutsideScopes);
+      }
+
+      if (initialDocIds) {
+        await trimDeletedDocsFromNav(log, initialDocIds, outputFolder);
       }
     },
     {
@@ -177,9 +312,11 @@ export function runBuildApiDocsCli() {
       },
       flags: {
         string: ['plugin', 'stats'],
+        boolean: ['references'],
         help: `
           --plugin             Optionally, run for only a specific plugin
-          --stats              Optionally print API stats. Must be one or more of: any, comments or exports. 
+          --stats              Optionally print API stats. Must be one or more of: any, comments or exports.
+          --references         Collect references for API items
         `,
       },
     }
@@ -190,67 +327,13 @@ function getTsProject(repoPath: string) {
   const xpackTsConfig = `${repoPath}/tsconfig.json`;
   const project = new Project({
     tsConfigFilePath: xpackTsConfig,
+    // We'll use the files added below instead.
+    skipAddingFilesFromTsConfig: true,
   });
-  project.addSourceFilesAtPaths(`${repoPath}/x-pack/plugins/**/*{.d.ts,.ts}`);
+  project.addSourceFilesAtPaths([`${repoPath}/x-pack/plugins/**/*.ts`, '!**/*.d.ts']);
+  project.addSourceFilesAtPaths([`${repoPath}/x-pack/packages/**/*.ts`, '!**/*.d.ts']);
+  project.addSourceFilesAtPaths([`${repoPath}/src/plugins/**/*.ts`, '!**/*.d.ts']);
+  project.addSourceFilesAtPaths([`${repoPath}/packages/**/*.ts`, '!**/*.d.ts']);
   project.resolveSourceFileDependencies();
   return project;
-}
-
-interface ApiStats {
-  missingComments: ApiDeclaration[];
-  isAnyType: ApiDeclaration[];
-}
-
-function collectApiStatsForPlugin(doc: PluginApi): ApiStats {
-  const stats: ApiStats = { missingComments: [], isAnyType: [] };
-  Object.values(doc.client).forEach((def) => {
-    collectStatsForApi(def, stats);
-  });
-  Object.values(doc.server).forEach((def) => {
-    collectStatsForApi(def, stats);
-  });
-  Object.values(doc.common).forEach((def) => {
-    collectStatsForApi(def, stats);
-  });
-  return stats;
-}
-
-function collectStatsForApi(doc: ApiDeclaration, stats: ApiStats): void {
-  const missingComment = doc.description === undefined || doc.description.length === 0;
-  if (missingComment) {
-    stats.missingComments.push(doc);
-  }
-  if (doc.type === TypeKind.AnyKind) {
-    stats.isAnyType.push(doc);
-  }
-  if (doc.children) {
-    doc.children.forEach((child) => {
-      collectStatsForApi(child, stats);
-    });
-  }
-}
-
-function countApiForPlugin(doc: PluginApi) {
-  return (
-    doc.client.reduce((sum, def) => {
-      return sum + countApi(def);
-    }, 0) +
-    doc.server.reduce((sum, def) => {
-      return sum + countApi(def);
-    }, 0) +
-    doc.common.reduce((sum, def) => {
-      return sum + countApi(def);
-    }, 0)
-  );
-}
-
-function countApi(doc: ApiDeclaration): number {
-  if (!doc.children) return 1;
-  else
-    return (
-      1 +
-      doc.children.reduce((sum, child) => {
-        return sum + countApi(child);
-      }, 0)
-    );
 }

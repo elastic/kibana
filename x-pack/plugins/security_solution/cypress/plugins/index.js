@@ -34,6 +34,10 @@ module.exports = (on) => {
             loader: 'ts-loader',
             options: { transpileOnly: true },
           },
+          {
+            test: /\.gif$/,
+            loader: 'file-loader',
+          },
         ],
       },
     },

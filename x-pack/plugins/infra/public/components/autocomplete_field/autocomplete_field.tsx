@@ -7,8 +7,8 @@
 
 import { EuiFieldSearch, EuiOutsideClickDetector, EuiPanel } from '@elastic/eui';
 import React from 'react';
-import { QuerySuggestion } from '../../../../../../src/plugins/data/public';
-import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
+import { QuerySuggestion } from '@kbn/unified-search-plugin/public';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { composeStateUpdaters } from '../../utils/typed_react';
 import { SuggestionItem } from './suggestion_item';
 
@@ -73,9 +73,10 @@ export class AutocompleteField extends React.Component<
             placeholder={placeholder}
             value={value}
             aria-label={ariaLabel}
+            data-test-subj="infraSearchField"
           />
           {areSuggestionsVisible && !isLoadingSuggestions && suggestions.length > 0 ? (
-            <SuggestionsPanel>
+            <SuggestionsPanel data-test-subj="infraSuggestionsPanel">
               {suggestions.map((suggestion, suggestionIndex) => (
                 <SuggestionItem
                   key={suggestion.text}
@@ -265,18 +266,17 @@ const withNextSuggestionSelected = (
       : 0,
 });
 
-const withSuggestionAtIndexSelected = (suggestionIndex: number) => (
-  state: AutocompleteFieldState,
-  props: AutocompleteFieldProps
-): AutocompleteFieldState => ({
-  ...state,
-  selectedIndex:
-    props.suggestions.length === 0
-      ? null
-      : suggestionIndex >= 0 && suggestionIndex < props.suggestions.length
-      ? suggestionIndex
-      : 0,
-});
+const withSuggestionAtIndexSelected =
+  (suggestionIndex: number) =>
+  (state: AutocompleteFieldState, props: AutocompleteFieldProps): AutocompleteFieldState => ({
+    ...state,
+    selectedIndex:
+      props.suggestions.length === 0
+        ? null
+        : suggestionIndex >= 0 && suggestionIndex < props.suggestions.length
+        ? suggestionIndex
+        : 0,
+  });
 
 const withSuggestionsVisible = (state: AutocompleteFieldState) => ({
   ...state,

@@ -7,9 +7,9 @@
  */
 
 import React from 'react';
-import { shallowWithI18nProvider } from '@kbn/test/jest';
+import { shallowWithI18nProvider } from '@kbn/test-jest-helpers';
 
-jest.mock('../../../../saved_objects/public', () => ({
+jest.mock('@kbn/saved-objects-plugin/public', () => ({
   SavedObjectSaveModal: () => null,
 }));
 
@@ -26,5 +26,5 @@ test('renders DashboardSaveModal', () => {
       showCopyOnSave={true}
     />
   );
-  expect(component).toMatchSnapshot(); // eslint-disable-line
+  expect(component).toMatchSnapshot();
 });

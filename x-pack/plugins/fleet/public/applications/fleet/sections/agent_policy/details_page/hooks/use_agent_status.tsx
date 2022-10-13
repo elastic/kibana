@@ -7,10 +7,10 @@
 
 import React from 'react';
 
+import type { UseRequestConfig } from '../../../../hooks';
 import { useRequest } from '../../../../hooks';
 import type { GetAgentStatusResponse } from '../../../../types';
 import { agentRouteService } from '../../../../services';
-import type { UseRequestConfig } from '../../../../hooks/use_request/use_request';
 
 type RequestOptions = Pick<Partial<UseRequestConfig>, 'pollIntervalMs'>;
 

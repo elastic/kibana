@@ -9,7 +9,7 @@ import React from 'react';
 import { useMetricsExplorerData } from './use_metrics_explorer_data';
 
 import { renderHook } from '@testing-library/react-hooks';
-import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 
 import {
   options,
@@ -20,8 +20,8 @@ import {
   createSeries,
 } from '../../../../utils/fixtures/metrics_explorer';
 import { MetricsExplorerOptions, MetricsExplorerTimeOptions } from './use_metrics_explorer_options';
-import { IIndexPattern } from '../../../../../../../../src/plugins/data/public';
-import { HttpHandler } from 'kibana/public';
+import { DataViewBase } from '@kbn/es-query';
+import { HttpHandler } from '@kbn/core/public';
 import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
 
 const mockedFetch = jest.fn();
@@ -39,7 +39,7 @@ const renderUseMetricsExplorerDataHook = () => {
     (props: {
       options: MetricsExplorerOptions;
       source: MetricsSourceConfigurationProperties | undefined;
-      derivedIndexPattern: IIndexPattern;
+      derivedIndexPattern: DataViewBase;
       timeRange: MetricsExplorerTimeOptions;
       afterKey: string | null | Record<string, string | null>;
       signal: any;

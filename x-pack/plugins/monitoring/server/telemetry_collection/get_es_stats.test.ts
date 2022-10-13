@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ElasticsearchClient } from '@kbn/core/server';
 import sinon from 'sinon';
 import {
   fetchElasticsearchStats,
@@ -13,8 +14,9 @@ import {
 } from './get_es_stats';
 
 describe('get_es_stats', () => {
-  const callWith = sinon.stub();
-  const response = {
+  const searchMock = sinon.stub();
+  const client = { search: searchMock } as unknown as ElasticsearchClient;
+  const body = {
     hits: {
       hits: [
         { _id: 'abc', _source: { cluster_uuid: 'abc' } },
@@ -23,32 +25,34 @@ describe('get_es_stats', () => {
       ],
     },
   };
-  const expectedClusters = response.hits.hits.map((hit) => hit._source);
+  const expectedClusters = body.hits.hits.map((hit) => hit._source);
   const clusterUuids = expectedClusters.map((cluster) => cluster.cluster_uuid);
   const maxBucketSize = 1;
+  const start = '2022-03-09T00:00:00.000Z';
+  const end = '2022-03-09T00:20:00.000Z';
 
   describe('getElasticsearchStats', () => {
     it('returns clusters', async () => {
-      callWith.withArgs('search').returns(Promise.resolve(response));
+      searchMock.returns(Promise.resolve(body));
 
-      expect(await getElasticsearchStats(callWith, clusterUuids, maxBucketSize)).toStrictEqual(
-        expectedClusters
-      );
+      expect(
+        await getElasticsearchStats(client, clusterUuids, start, end, maxBucketSize)
+      ).toStrictEqual(expectedClusters);
     });
   });
 
   describe('fetchElasticsearchStats', () => {
     it('searches for clusters', async () => {
-      callWith.returns(response);
+      searchMock.returns(body);
 
-      expect(await fetchElasticsearchStats(callWith, clusterUuids, maxBucketSize)).toStrictEqual(
-        response
-      );
+      expect(
+        await fetchElasticsearchStats(client, clusterUuids, start, end, maxBucketSize)
+      ).toStrictEqual(body);
     });
   });
 
   describe('handleElasticsearchStats', () => {
-    // filterPath makes it easy to ignore anything unexpected because it will come back empty
+    // filter_path makes it easy to ignore anything unexpected because it will come back empty
     it('handles unexpected response', () => {
       const clusters = handleElasticsearchStats({} as any);
 
@@ -56,7 +60,7 @@ describe('get_es_stats', () => {
     });
 
     it('handles valid response', () => {
-      const clusters = handleElasticsearchStats(response as any);
+      const clusters = handleElasticsearchStats(body as any);
 
       expect(clusters).toStrictEqual(expectedClusters);
     });

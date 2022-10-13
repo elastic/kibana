@@ -4,62 +4,83 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { EuiFlexGroup, EuiPage, EuiPanel } from '@elastic/eui';
 import React from 'react';
-import { useTrackPageview } from '../../../../../observability/public';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
-import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
-import { APIReturnType } from '../../../services/rest/createCallApmApi';
-import { SearchBar } from '../../shared/search_bar';
-import { TraceList } from './TraceList';
+import { EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { useApmRouter } from '../../../hooks/use_apm_router';
+import { useApmParams } from '../../../hooks/use_apm_params';
+import { useApmRoutePath } from '../../../hooks/use_apm_route_path';
+import { TraceSearchType } from '../../../../common/trace_explorer';
+import { TransactionTab } from '../transaction_details/waterfall_with_summary/transaction_tabs';
+import { useTraceExplorerEnabledSetting } from '../../../hooks/use_trace_explorer_enabled_setting';
+import { TechnicalPreviewBadge } from '../../shared/technical_preview_badge';
 
-type TracesAPIResponse = APIReturnType<'GET /api/apm/traces'>;
-const DEFAULT_RESPONSE: TracesAPIResponse = {
-  items: [],
-  isAggregationAccurate: true,
-  bucketSize: 0,
-};
+export function TraceOverview({ children }: { children: React.ReactElement }) {
+  const isTraceExplorerEnabled = useTraceExplorerEnabledSetting();
 
-export function TraceOverview() {
-  const {
-    urlParams: { environment, kuery, start, end },
-  } = useUrlParams();
-  const { status, data = DEFAULT_RESPONSE } = useFetcher(
-    (callApmApi) => {
-      if (start && end) {
-        return callApmApi({
-          endpoint: 'GET /api/apm/traces',
-          params: {
-            query: {
-              environment,
-              kuery,
-              start,
-              end,
-            },
-          },
-        });
-      }
+  const router = useApmRouter();
+
+  const { query } = useApmParams('/traces');
+
+  const routePath = useApmRoutePath();
+
+  if (!isTraceExplorerEnabled) {
+    return children;
+  }
+
+  const explorerLink = router.link('/traces/explorer', {
+    query: {
+      comparisonEnabled: query.comparisonEnabled,
+      environment: query.environment,
+      kuery: query.kuery,
+      rangeFrom: query.rangeFrom,
+      rangeTo: query.rangeTo,
+      offset: query.offset,
+      refreshInterval: query.refreshInterval,
+      refreshPaused: query.refreshPaused,
+      query: '',
+      type: TraceSearchType.kql,
+      waterfallItemId: '',
+      traceId: '',
+      transactionId: '',
+      detailTab: TransactionTab.timeline,
     },
-    [environment, kuery, start, end]
-  );
+  });
 
-  useTrackPageview({ app: 'apm', path: 'traces_overview' });
-  useTrackPageview({ app: 'apm', path: 'traces_overview', delay: 15000 });
+  const topTracesLink = router.link('/traces', {
+    query: {
+      comparisonEnabled: query.comparisonEnabled,
+      environment: query.environment,
+      kuery: query.kuery,
+      rangeFrom: query.rangeFrom,
+      rangeTo: query.rangeTo,
+      offset: query.offset,
+      refreshInterval: query.refreshInterval,
+      refreshPaused: query.refreshPaused,
+    },
+  });
 
   return (
-    <>
-      <SearchBar />
-      <EuiPage>
-        <EuiFlexGroup direction="column" gutterSize="s">
-          <EuiPanel>
-            <TraceList
-              items={data.items}
-              isLoading={status === FETCH_STATUS.LOADING}
-            />
-          </EuiPanel>
-        </EuiFlexGroup>
-      </EuiPage>
-    </>
+    <EuiFlexGroup direction="column">
+      <EuiFlexItem>
+        <EuiTabs size="l">
+          <EuiTab href={topTracesLink} isSelected={routePath === '/traces'}>
+            {i18n.translate('xpack.apm.traceOverview.topTracesTab', {
+              defaultMessage: 'Top traces',
+            })}
+          </EuiTab>
+          <EuiTab
+            href={explorerLink}
+            append={<TechnicalPreviewBadge icon="beaker" />}
+            isSelected={routePath === '/traces/explorer'}
+          >
+            {i18n.translate('xpack.apm.traceOverview.traceExplorerTab', {
+              defaultMessage: 'Explorer',
+            })}
+          </EuiTab>
+        </EuiTabs>
+      </EuiFlexItem>
+      <EuiFlexItem>{children}</EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

@@ -6,7 +6,7 @@
  */
 
 import '../../../../__mocks__/enterprise_search_url.mock';
-import { setMockValues, setMockActions } from '../../../../__mocks__/kea.mock';
+import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -52,18 +52,16 @@ describe('ApiCodeExample', () => {
     });
 
     it('renders with the full remote Enterprise Search API URL', () => {
-      expect(wrapper.find(EuiCode).dive().dive().text()).toEqual(
+      expect(wrapper.find(EuiCode).dive().text()).toEqual(
         'http://localhost:3002/api/as/v1/engines/test-engine/documents'
       );
-      expect(wrapper.find(EuiCodeBlock).dive().dive().text()).toEqual(
+      expect(wrapper.find(EuiCodeBlock).dive().text()).toEqual(
         expect.stringContaining('http://localhost:3002/api/as/v1/engines/test-engine/documents')
       );
     });
 
     it('renders with the API key', () => {
-      expect(wrapper.find(EuiCodeBlock).dive().dive().text()).toEqual(
-        expect.stringContaining('test-key')
-      );
+      expect(wrapper.find(EuiCodeBlock).dive().text()).toEqual(expect.stringContaining('test-key'));
     });
   });
 

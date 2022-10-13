@@ -1,6 +1,6 @@
 {
   "name": "ml_kibana_api",
-  "version": "7.13.0",
+  "version": "8.0.0",
   "description": "This is the documentation of the REST API provided by the Machine Learning Kibana plugin. Each API is experimental and can include breaking changes in any version.",
   "title": "ML Kibana API",
   "order": [
@@ -22,8 +22,6 @@
     "ValidateDataFrameAnalytics",
 
     "DataVisualizer",
-    "GetOverallStats",
-    "GetStatsForFields",
     "GetHistogramsForFields",
 
     "AnomalyDetectors",
@@ -34,6 +32,7 @@
     "GetAnomalyDetectorsStats",
     "GetAnomalyDetectorsStatsById",
     "CloseAnomalyDetectorsJob",
+    "ResetAnomalyDetectorsJob",
     "ValidateAnomalyDetector",
     "ForecastAnomalyDetector",
     "GetRecords",
@@ -48,6 +47,7 @@
 
     "ResultsService",
     "GetAnomaliesTableData",
+    "GetDatafeedResultsChartData",
     "GetCategoryDefinition",
     "GetMaxAnomalyScore",
     "GetCategoryExamples",
@@ -55,6 +55,8 @@
     "AnomalySearch",
     "GetCategorizerStats",
     "GetCategoryStoppedPartitions",
+    "GetAnomalyChartsData",
+    "GetAnomalyRecords",
 
     "Modules",
     "DataRecognizer",
@@ -62,6 +64,10 @@
     "GetModule",
     "SetupModule",
     "CheckExistingModuleJobs",
+
+    "Notifications",
+    "GetNotifications",
+    "GetNotificationCounts",
 
     "Annotations",
     "GetAnnotations",
@@ -72,6 +78,7 @@
     "ForceStartDatafeeds",
     "StopDatafeeds",
     "CloseJobs",
+    "ResetJobs",
     "JobsSummary",
     "JobsWithTimeRange",
     "GetJobForCloning",
@@ -87,9 +94,10 @@
     "TopCategories",
     "DatafeedPreview",
     "UpdateGroups",
-    "DeletingJobTasks",
+    "BlockingJobTasks",
     "DeleteJobs",
     "RevertModelSnapshot",
+    "BulkCreateJobs",
 
     "Calendars",
     "PutCalendars",
@@ -116,16 +124,19 @@
     "MlInfo",
     "MlEsSearch",
     "MlIndexExists",
+    "MlSpecificIndexExists",
 
     "JobAuditMessages",
     "GetJobAuditMessages",
     "GetAllJobAuditMessages",
+    "ClearJobAuditMessages",
 
     "JobValidation",
     "EstimateBucketSpan",
     "CalculateModelMemoryLimit",
     "ValidateCardinality",
     "ValidateJob",
+    "ValidateDataFeedPreview",
 
     "DatafeedService",
     "CreateDatafeed",
@@ -143,23 +154,34 @@
     "GetCardinalityOfFields",
     "GetTimeFieldRange",
 
-    "JobSavedObjects",
+    "MLSavedObjects",
     "SavedObjectsStatus",
-    "SyncJobSavedObjects",
-    "InitializeJobSavedObjects",
-    "AssignJobsToSpaces",
-    "RemoveJobsFromSpaces",
-    "RemoveJobsFromCurrentSpace",
+    "SyncMLSavedObjects",
+    "InitializeMLSavedObjects",
+    "SyncCheck",
+    "UpdateJobsSpaces",
+    "UpdateTrainedModelsSpaces",
+    "RemoveMLSpaceAwareItemsFromCurrentSpace",
     "JobsSpaces",
-    "CanDeleteJob",
+    "TrainedModelsSpaces",
+    "CanDeleteMLSpaceAwareItems",
 
     "TrainedModels",
     "GetTrainedModel",
     "GetTrainedModelStats",
+    "GetTrainedModelStatsById",
+    "GetTrainedModelsNodesOverview",
     "GetTrainedModelPipelines",
+    "StartTrainedModelDeployment",
+    "StopTrainedModelDeployment",
+    "PutTrainedModel",
     "DeleteTrainedModel",
+    "InferTrainedModelDeployment",
 
     "Alerting",
-    "PreviewAlert"
+    "PreviewAlert",
+
+    "Management",
+    "ManagementList"
   ]
 }

@@ -7,11 +7,6 @@
 
 import { RevertToBasic } from '../public/application/sections/license_dashboard/revert_to_basic';
 import { createMockLicense, getComponent } from './util';
-jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
-  return {
-    htmlIdGenerator: () => () => `generated-id`,
-  };
-});
 
 describe('RevertToBasic component', () => {
   test('should display when trial is active', () => {
@@ -21,7 +16,7 @@ describe('RevertToBasic component', () => {
       },
       RevertToBasic
     );
-    expect(rendered.html()).toMatchSnapshot();
+    expect(rendered.render()).toMatchSnapshot();
   });
   test('should display when license is expired', () => {
     const rendered = getComponent(
@@ -30,7 +25,7 @@ describe('RevertToBasic component', () => {
       },
       RevertToBasic
     );
-    expect(rendered.html()).toMatchSnapshot();
+    expect(rendered.render()).toMatchSnapshot();
   });
   test('should display when license is about to expire', () => {
     // ten days from now
@@ -41,7 +36,7 @@ describe('RevertToBasic component', () => {
       },
       RevertToBasic
     );
-    expect(rendered.html()).toMatchSnapshot();
+    expect(rendered.render()).toMatchSnapshot();
   });
   test('should not display for active basic license', () => {
     const rendered = getComponent(

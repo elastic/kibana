@@ -20,18 +20,28 @@ export const Bytes = React.memo<{
   contextId: string;
   eventId: string;
   fieldName: string;
+  fieldType: string;
+  isAggregatable: boolean;
+  isDraggable: boolean;
   value?: string | null;
-}>(({ contextId, eventId, fieldName, value }) => (
-  <DefaultDraggable
-    id={`bytes-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
-    // @ts-expect-error
-    name={name}
-    field={fieldName}
-    tooltipContent={null}
-    value={value}
-  >
+}>(({ contextId, eventId, fieldName, fieldType, isAggregatable, isDraggable, value }) =>
+  isDraggable ? (
+    <DefaultDraggable
+      id={`bytes-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
+      fieldType={fieldType}
+      isAggregatable={isAggregatable}
+      isDraggable={isDraggable}
+      // @ts-expect-error
+      name={name}
+      field={fieldName}
+      tooltipContent={null}
+      value={value}
+    >
+      <PreferenceFormattedBytes value={`${value}`} />
+    </DefaultDraggable>
+  ) : (
     <PreferenceFormattedBytes value={`${value}`} />
-  </DefaultDraggable>
-));
+  )
+);
 
 Bytes.displayName = 'Bytes';

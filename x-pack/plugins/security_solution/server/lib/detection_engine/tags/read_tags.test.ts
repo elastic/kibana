@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { alertsClientMock } from '../../../../../alerting/server/mocks';
-import { getAlertMock, getFindResultWithMultiHits } from '../routes/__mocks__/request_responses';
-import { INTERNAL_RULE_ID_KEY, INTERNAL_IDENTIFIER } from '../../../../common/constants';
-import { readRawTags, readTags, convertTagsToSet, convertToTags, isTags } from './read_tags';
+import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
+import { getRuleMock, getFindResultWithMultiHits } from '../routes/__mocks__/request_responses';
+import { readTags, convertTagsToSet, convertToTags, isTags } from './read_tags';
 import { getQueryRuleParams } from '../schemas/rule_schemas.mock';
 
 describe('read_tags', () => {
@@ -16,228 +15,96 @@ describe('read_tags', () => {
     jest.resetAllMocks();
   });
 
-  describe('readRawTags', () => {
-    test('it should return the intersection of tags to where none are repeating', async () => {
-      const result1 = getAlertMock(getQueryRuleParams());
-      result1.id = '4baa53f8-96da-44ee-ad58-41bccb7f9f3d';
-      result1.params.ruleId = 'rule-1';
-      result1.tags = ['tag 1', 'tag 2', 'tag 3'];
-
-      const result2 = getAlertMock(getQueryRuleParams());
-      result2.id = '5baa53f8-96da-44ee-ad58-41bccb7f9f3d';
-      result2.params.ruleId = 'rule-2';
-      result2.tags = ['tag 1', 'tag 2', 'tag 3', 'tag 4'];
-
-      const alertsClient = alertsClientMock.create();
-      alertsClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1, result2] }));
-
-      const tags = await readRawTags({ alertsClient });
-      expect(tags).toEqual(['tag 1', 'tag 2', 'tag 3', 'tag 4']);
-    });
-
-    test('it should return the intersection of tags to where some are repeating values', async () => {
-      const result1 = getAlertMock(getQueryRuleParams());
-      result1.id = '4baa53f8-96da-44ee-ad58-41bccb7f9f3d';
-      result1.params.ruleId = 'rule-1';
-      result1.tags = ['tag 1', 'tag 2', 'tag 2', 'tag 3'];
-
-      const result2 = getAlertMock(getQueryRuleParams());
-      result2.id = '5baa53f8-96da-44ee-ad58-41bccb7f9f3d';
-      result2.params.ruleId = 'rule-2';
-      result2.tags = ['tag 1', 'tag 2', 'tag 2', 'tag 3', 'tag 4'];
-
-      const alertsClient = alertsClientMock.create();
-      alertsClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1, result2] }));
-
-      const tags = await readRawTags({ alertsClient });
-      expect(tags).toEqual(['tag 1', 'tag 2', 'tag 3', 'tag 4']);
-    });
-
-    test('it should work with no tags defined between two results', async () => {
-      const result1 = getAlertMock(getQueryRuleParams());
-      result1.id = '4baa53f8-96da-44ee-ad58-41bccb7f9f3d';
-      result1.params.ruleId = 'rule-1';
-      result1.tags = [];
-
-      const result2 = getAlertMock(getQueryRuleParams());
-      result2.id = '5baa53f8-96da-44ee-ad58-41bccb7f9f3d';
-      result2.params.ruleId = 'rule-2';
-      result2.tags = [];
-
-      const alertsClient = alertsClientMock.create();
-      alertsClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1, result2] }));
-
-      const tags = await readRawTags({ alertsClient });
-      expect(tags).toEqual([]);
-    });
-
-    test('it should work with a single tag which has repeating values in it', async () => {
-      const result1 = getAlertMock(getQueryRuleParams());
-      result1.id = '4baa53f8-96da-44ee-ad58-41bccb7f9f3d';
-      result1.params.ruleId = 'rule-1';
-      result1.tags = ['tag 1', 'tag 1', 'tag 1', 'tag 2'];
-
-      const alertsClient = alertsClientMock.create();
-      alertsClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1] }));
-
-      const tags = await readRawTags({ alertsClient });
-      expect(tags).toEqual(['tag 1', 'tag 2']);
-    });
-
-    test('it should work with a single tag which has empty tags', async () => {
-      const result1 = getAlertMock(getQueryRuleParams());
-      result1.id = '4baa53f8-96da-44ee-ad58-41bccb7f9f3d';
-      result1.params.ruleId = 'rule-1';
-      result1.tags = [];
-
-      const alertsClient = alertsClientMock.create();
-      alertsClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1] }));
-
-      const tags = await readRawTags({ alertsClient });
-      expect(tags).toEqual([]);
-    });
-  });
-
   describe('readTags', () => {
     test('it should return the intersection of tags to where none are repeating', async () => {
-      const result1 = getAlertMock(getQueryRuleParams());
+      const result1 = getRuleMock(getQueryRuleParams());
       result1.id = '4baa53f8-96da-44ee-ad58-41bccb7f9f3d';
       result1.params.ruleId = 'rule-1';
       result1.tags = ['tag 1', 'tag 2', 'tag 3'];
 
-      const result2 = getAlertMock(getQueryRuleParams());
+      const result2 = getRuleMock(getQueryRuleParams());
       result2.id = '5baa53f8-96da-44ee-ad58-41bccb7f9f3d';
       result2.params.ruleId = 'rule-2';
       result2.tags = ['tag 1', 'tag 2', 'tag 3', 'tag 4'];
 
-      const alertsClient = alertsClientMock.create();
-      alertsClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1, result2] }));
+      const rulesClient = rulesClientMock.create();
+      rulesClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1, result2] }));
 
-      const tags = await readTags({ alertsClient });
+      const tags = await readTags({ rulesClient });
       expect(tags).toEqual(['tag 1', 'tag 2', 'tag 3', 'tag 4']);
     });
 
     test('it should return the intersection of tags to where some are repeating values', async () => {
-      const result1 = getAlertMock(getQueryRuleParams());
+      const result1 = getRuleMock(getQueryRuleParams());
       result1.id = '4baa53f8-96da-44ee-ad58-41bccb7f9f3d';
       result1.params.ruleId = 'rule-1';
       result1.tags = ['tag 1', 'tag 2', 'tag 2', 'tag 3'];
 
-      const result2 = getAlertMock(getQueryRuleParams());
+      const result2 = getRuleMock(getQueryRuleParams());
       result2.id = '5baa53f8-96da-44ee-ad58-41bccb7f9f3d';
       result2.params.ruleId = 'rule-2';
       result2.tags = ['tag 1', 'tag 2', 'tag 2', 'tag 3', 'tag 4'];
 
-      const alertsClient = alertsClientMock.create();
-      alertsClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1, result2] }));
+      const rulesClient = rulesClientMock.create();
+      rulesClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1, result2] }));
 
-      const tags = await readTags({ alertsClient });
+      const tags = await readTags({ rulesClient });
       expect(tags).toEqual(['tag 1', 'tag 2', 'tag 3', 'tag 4']);
     });
 
     test('it should work with no tags defined between two results', async () => {
-      const result1 = getAlertMock(getQueryRuleParams());
+      const result1 = getRuleMock(getQueryRuleParams());
       result1.id = '4baa53f8-96da-44ee-ad58-41bccb7f9f3d';
       result1.params.ruleId = 'rule-1';
       result1.tags = [];
 
-      const result2 = getAlertMock(getQueryRuleParams());
+      const result2 = getRuleMock(getQueryRuleParams());
       result2.id = '5baa53f8-96da-44ee-ad58-41bccb7f9f3d';
       result2.params.ruleId = 'rule-2';
       result2.tags = [];
 
-      const alertsClient = alertsClientMock.create();
-      alertsClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1, result2] }));
+      const rulesClient = rulesClientMock.create();
+      rulesClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1, result2] }));
 
-      const tags = await readTags({ alertsClient });
+      const tags = await readTags({ rulesClient });
       expect(tags).toEqual([]);
     });
 
     test('it should work with a single tag which has repeating values in it', async () => {
-      const result1 = getAlertMock(getQueryRuleParams());
+      const result1 = getRuleMock(getQueryRuleParams());
       result1.id = '4baa53f8-96da-44ee-ad58-41bccb7f9f3d';
       result1.params.ruleId = 'rule-1';
       result1.tags = ['tag 1', 'tag 1', 'tag 1', 'tag 2'];
 
-      const alertsClient = alertsClientMock.create();
-      alertsClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1] }));
+      const rulesClient = rulesClientMock.create();
+      rulesClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1] }));
 
-      const tags = await readTags({ alertsClient });
+      const tags = await readTags({ rulesClient });
       expect(tags).toEqual(['tag 1', 'tag 2']);
     });
 
     test('it should work with a single tag which has empty tags', async () => {
-      const result1 = getAlertMock(getQueryRuleParams());
+      const result1 = getRuleMock(getQueryRuleParams());
       result1.id = '4baa53f8-96da-44ee-ad58-41bccb7f9f3d';
       result1.params.ruleId = 'rule-1';
       result1.tags = [];
 
-      const alertsClient = alertsClientMock.create();
-      alertsClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1] }));
+      const rulesClient = rulesClientMock.create();
+      rulesClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1] }));
 
-      const tags = await readTags({ alertsClient });
+      const tags = await readTags({ rulesClient });
       expect(tags).toEqual([]);
-    });
-
-    test('it should filter out any __internal tags for things such as alert_id', async () => {
-      const result1 = getAlertMock(getQueryRuleParams());
-      result1.id = '4baa53f8-96da-44ee-ad58-41bccb7f9f3d';
-      result1.params.ruleId = 'rule-1';
-      result1.tags = [
-        `${INTERNAL_IDENTIFIER}_some_value`,
-        `${INTERNAL_RULE_ID_KEY}_some_value`,
-        'tag 1',
-      ];
-
-      const alertsClient = alertsClientMock.create();
-      alertsClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1] }));
-
-      const tags = await readTags({ alertsClient });
-      expect(tags).toEqual(['tag 1']);
-    });
-
-    test('it should filter out any __internal tags with two different results', async () => {
-      const result1 = getAlertMock(getQueryRuleParams());
-      result1.id = '4baa53f8-96da-44ee-ad58-41bccb7f9f3d';
-      result1.params.ruleId = 'rule-1';
-      result1.tags = [
-        `${INTERNAL_IDENTIFIER}_some_value`,
-        `${INTERNAL_RULE_ID_KEY}_some_value`,
-        'tag 1',
-        'tag 2',
-        'tag 3',
-        'tag 4',
-        'tag 5',
-      ];
-
-      const result2 = getAlertMock(getQueryRuleParams());
-      result2.id = '5baa53f8-96da-44ee-ad58-41bccb7f9f3d';
-      result2.params.ruleId = 'rule-2';
-      result2.tags = [
-        `${INTERNAL_IDENTIFIER}_some_value`,
-        `${INTERNAL_RULE_ID_KEY}_some_value`,
-        'tag 1',
-        'tag 2',
-        'tag 3',
-        'tag 4',
-      ];
-
-      const alertsClient = alertsClientMock.create();
-      alertsClient.find.mockResolvedValue(getFindResultWithMultiHits({ data: [result1] }));
-
-      const tags = await readTags({ alertsClient });
-      expect(tags).toEqual(['tag 1', 'tag 2', 'tag 3', 'tag 4', 'tag 5']);
     });
   });
 
   describe('convertTagsToSet', () => {
     test('it should convert the intersection of two tag systems without duplicates', () => {
-      const result1 = getAlertMock(getQueryRuleParams());
+      const result1 = getRuleMock(getQueryRuleParams());
       result1.id = '4baa53f8-96da-44ee-ad58-41bccb7f9f3d';
       result1.params.ruleId = 'rule-1';
       result1.tags = ['tag 1', 'tag 2', 'tag 2', 'tag 3'];
 
-      const result2 = getAlertMock(getQueryRuleParams());
+      const result2 = getRuleMock(getQueryRuleParams());
       result2.id = '5baa53f8-96da-44ee-ad58-41bccb7f9f3d';
       result2.params.ruleId = 'rule-2';
       result2.tags = ['tag 1', 'tag 2', 'tag 2', 'tag 3', 'tag 4'];
@@ -255,12 +122,12 @@ describe('read_tags', () => {
 
   describe('convertToTags', () => {
     test('it should convert the two tag systems together with duplicates', () => {
-      const result1 = getAlertMock(getQueryRuleParams());
+      const result1 = getRuleMock(getQueryRuleParams());
       result1.id = '4baa53f8-96da-44ee-ad58-41bccb7f9f3d';
       result1.params.ruleId = 'rule-1';
       result1.tags = ['tag 1', 'tag 2', 'tag 2', 'tag 3'];
 
-      const result2 = getAlertMock(getQueryRuleParams());
+      const result2 = getRuleMock(getQueryRuleParams());
       result2.id = '5baa53f8-96da-44ee-ad58-41bccb7f9f3d';
       result2.params.ruleId = 'rule-2';
       result2.tags = ['tag 1', 'tag 2', 'tag 2', 'tag 3', 'tag 4'];
@@ -281,18 +148,18 @@ describe('read_tags', () => {
     });
 
     test('it should filter out anything that is not a tag', () => {
-      const result1 = getAlertMock(getQueryRuleParams());
+      const result1 = getRuleMock(getQueryRuleParams());
       result1.id = '4baa53f8-96da-44ee-ad58-41bccb7f9f3d';
       result1.params.ruleId = 'rule-1';
       result1.tags = ['tag 1', 'tag 2', 'tag 2', 'tag 3'];
 
-      const result2 = getAlertMock(getQueryRuleParams());
+      const result2 = getRuleMock(getQueryRuleParams());
       result2.id = '99979e67-19a7-455f-b452-8eded6135716';
       result2.params.ruleId = 'rule-2';
       // @ts-expect-error
       delete result2.tags;
 
-      const result3 = getAlertMock(getQueryRuleParams());
+      const result3 = getRuleMock(getQueryRuleParams());
       result3.id = '5baa53f8-96da-44ee-ad58-41bccb7f9f3d';
       result3.params.ruleId = 'rule-2';
       result3.tags = ['tag 1', 'tag 2', 'tag 2', 'tag 3', 'tag 4'];

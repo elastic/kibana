@@ -6,12 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import React, { FunctionComponent, memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiText, EuiIconTip } from '@elastic/eui';
 
-import { PhasesExceptDelete } from '../../../../../../common/types';
+import { useKibana } from '../../../../../shared_imports';
+
+import { PhaseExceptDelete } from '../../../../../../common/types';
 
 import {
   calculateRelativeFromAbsoluteMilliseconds,
@@ -136,10 +138,12 @@ export const Timeline: FunctionComponent<Props> = memo(
 
     const widths = calculateWidths(phaseAgeInMilliseconds);
 
-    const getDurationInPhaseContent = (phase: PhasesExceptDelete): string | React.ReactNode =>
+    const getDurationInPhaseContent = (phase: PhaseExceptDelete): string | React.ReactNode =>
       phaseAgeInMilliseconds.phases[phase] === Infinity ? (
         <InfinityIcon color="subdued" aria-label={i18nTexts.foreverIcon.ariaLabel} />
       ) : null;
+
+    const { docLinks } = useKibana().services;
 
     return (
       <EuiFlexGroup gutterSize="s" direction="column" responsive={false}>
@@ -151,7 +155,7 @@ export const Timeline: FunctionComponent<Props> = memo(
             {i18nTexts.description}
             &nbsp;
             <LearnMoreLink
-              docPath="ilm-index-lifecycle.html#ilm-phase-transitions"
+              docPath={docLinks.links.elasticsearch.ilmPhaseTransitions}
               text={
                 <FormattedMessage
                   id="xpack.indexLifecycleMgmt.editPolicy.learnAboutTimingText"
@@ -178,7 +182,7 @@ export const Timeline: FunctionComponent<Props> = memo(
                 <div className="ilmTimeline__phasesContainer">
                   {/* These are the actual color bars for the timeline */}
                   <div
-                    data-test-subj="ilmTimelineHotPhase"
+                    data-test-subj="ilmTimelinePhase-hot"
                     className="ilmTimeline__phasesContainer__phase ilmTimeline__hotPhase"
                   >
                     <div className="ilmTimeline__colorBar ilmTimeline__hotPhase__colorBar" />
@@ -189,7 +193,7 @@ export const Timeline: FunctionComponent<Props> = memo(
                   </div>
                   {exists(phaseAgeInMilliseconds.phases.warm) && (
                     <div
-                      data-test-subj="ilmTimelineWarmPhase"
+                      data-test-subj="ilmTimelinePhase-warm"
                       className="ilmTimeline__phasesContainer__phase ilmTimeline__warmPhase"
                     >
                       <div className="ilmTimeline__colorBar ilmTimeline__warmPhase__colorBar" />
@@ -201,7 +205,7 @@ export const Timeline: FunctionComponent<Props> = memo(
                   )}
                   {exists(phaseAgeInMilliseconds.phases.cold) && (
                     <div
-                      data-test-subj="ilmTimelineColdPhase"
+                      data-test-subj="ilmTimelinePhase-cold"
                       className="ilmTimeline__phasesContainer__phase ilmTimeline__coldPhase"
                     >
                       <div className="ilmTimeline__colorBar ilmTimeline__coldPhase__colorBar" />
@@ -213,7 +217,7 @@ export const Timeline: FunctionComponent<Props> = memo(
                   )}
                   {exists(phaseAgeInMilliseconds.phases.frozen) && (
                     <div
-                      data-test-subj="ilmTimelineFrozenPhase"
+                      data-test-subj="ilmTimelinePhase-frozen"
                       className="ilmTimeline__phasesContainer__phase ilmTimeline__frozenPhase"
                     >
                       <div className="ilmTimeline__colorBar ilmTimeline__frozenPhase__colorBar" />
@@ -228,7 +232,7 @@ export const Timeline: FunctionComponent<Props> = memo(
               {hasDeletePhase && (
                 <EuiFlexItem grow={false}>
                   <div
-                    data-test-subj="ilmTimelineDeletePhase"
+                    data-test-subj="ilmTimelinePhase-delete"
                     className="ilmTimeline__deleteIconContainer"
                   >
                     <EuiIconTip type="trash" content={i18nTexts.deleteIcon.toolTipContent} />

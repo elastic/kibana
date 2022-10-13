@@ -7,17 +7,22 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { FormSchema, fieldValidators } from '../../../../shared_imports';
+import {
+  PhaseExceptDelete,
+  PhaseWithDownsample,
+  PhaseWithTiming,
+} from '../../../../../common/types';
+import { fieldValidators, FormSchema } from '../../../../shared_imports';
 import { defaultIndexPriority } from '../../../constants';
-import { ROLLOVER_FORM_PATHS, CLOUD_DEFAULT_REPO } from '../constants';
-import { MinAgePhase } from '../types';
+import { CLOUD_DEFAULT_REPO, ROLLOVER_FORM_PATHS } from '../constants';
 import { i18nTexts } from '../i18n_texts';
 import {
   ifExistsNumberGreaterThanZero,
   ifExistsNumberNonNegative,
-  rolloverThresholdsValidator,
   integerValidator,
   minAgeGreaterThanPreviousPhase,
+  rolloverThresholdsValidator,
+  downsampleIntervalMultipleOfPreviousOne,
 } from './validations';
 
 const rolloverFormPaths = Object.values(ROLLOVER_FORM_PATHS);
@@ -93,6 +98,22 @@ const numberOfShardsField = {
   label: i18n.translate('xpack.indexLifecycleMgmt.shrink.numberOfPrimaryShardsLabel', {
     defaultMessage: 'Number of primary shards',
   }),
+  defaultValue: 1,
+  validations: [
+    {
+      validator: emptyField(i18nTexts.editPolicy.errors.numberRequired),
+    },
+    {
+      validator: numberGreaterThanField({
+        message: i18nTexts.editPolicy.errors.numberGreatThan0Required,
+        than: 0,
+      }),
+    },
+  ],
+  serializer: serializers.stringToNumber,
+};
+const shardSizeField = {
+  label: i18nTexts.editPolicy.maxPrimaryShardSizeLabel,
   validations: [
     {
       validator: emptyField(i18nTexts.editPolicy.errors.numberRequired),
@@ -107,8 +128,8 @@ const numberOfShardsField = {
   serializer: serializers.stringToNumber,
 };
 
-const getPriorityField = (phase: 'hot' | 'warm' | 'cold' | 'frozen') => ({
-  defaultValue: defaultIndexPriority[phase] as any,
+const getPriorityField = (phase: PhaseExceptDelete) => ({
+  defaultValue: defaultIndexPriority[phase],
   label: i18nTexts.editPolicy.indexPriorityFieldLabel,
   validations: [
     {
@@ -119,7 +140,7 @@ const getPriorityField = (phase: 'hot' | 'warm' | 'cold' | 'frozen') => ({
   serializer: serializers.stringToNumber,
 });
 
-const getMinAgeField = (phase: MinAgePhase, defaultValue?: string) => ({
+const getMinAgeField = (phase: PhaseWithTiming, defaultValue?: string) => ({
   defaultValue,
   // By passing an empty array we make sure to *not* trigger the validation when the field value changes.
   // The validation will be triggered when the millisecond variant (in the _meta) is updated (in sync)
@@ -139,6 +160,54 @@ const getMinAgeField = (phase: MinAgePhase, defaultValue?: string) => ({
     },
   ],
 });
+
+const getDownsampleFieldsToValidateOnChange = (
+  p: PhaseWithDownsample,
+  includeCurrentPhase = true
+) => {
+  const allPhases: PhaseWithDownsample[] = ['hot', 'warm', 'cold'];
+  const getIntervalSizePath = (currentPhase: PhaseWithDownsample) =>
+    `_meta.${currentPhase}.downsample.fixedIntervalSize`;
+  const omitPreviousPhases = (currentPhase: PhaseWithDownsample) =>
+    allPhases.slice(allPhases.indexOf(currentPhase) + (includeCurrentPhase ? 0 : 1));
+  // when a phase is validated, need to also validate all downsample intervals in the next phases
+  return omitPreviousPhases(p).map(getIntervalSizePath);
+};
+const getDownsampleSchema = (phase: PhaseWithDownsample): FormSchema['downsample'] => {
+  return {
+    enabled: {
+      defaultValue: false,
+      label: i18nTexts.editPolicy.downsampleEnabledFieldLabel,
+      fieldsToValidateOnChange: getDownsampleFieldsToValidateOnChange(
+        phase,
+        /* don't trigger validation on the current validation to prevent showing error state on pristine input */
+        false
+      ),
+    },
+    fixedIntervalSize: {
+      label: i18nTexts.editPolicy.downsampleIntervalFieldLabel,
+      fieldsToValidateOnChange: getDownsampleFieldsToValidateOnChange(phase),
+      validations: [
+        {
+          validator: emptyField(i18nTexts.editPolicy.errors.numberRequired),
+        },
+        {
+          validator: ifExistsNumberGreaterThanZero,
+        },
+        {
+          validator: integerValidator,
+        },
+        {
+          validator: downsampleIntervalMultipleOfPreviousOne(phase),
+        },
+      ],
+    },
+    fixedIntervalUnits: {
+      defaultValue: 'd',
+      fieldsToValidateOnChange: getDownsampleFieldsToValidateOnChange(phase),
+    },
+  };
+};
 
 export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
   _meta: {
@@ -173,6 +242,15 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
         defaultValue: false,
         label: i18nTexts.editPolicy.readonlyEnabledFieldLabel,
       },
+      shrink: {
+        isUsingShardSize: {
+          defaultValue: false,
+        },
+        maxPrimaryShardSizeUnits: {
+          defaultValue: 'gb',
+        },
+      },
+      downsample: getDownsampleSchema('hot'),
     },
     warm: {
       enabled: {
@@ -207,6 +285,15 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
         defaultValue: false,
         label: i18nTexts.editPolicy.readonlyEnabledFieldLabel,
       },
+      shrink: {
+        isUsingShardSize: {
+          defaultValue: false,
+        },
+        maxPrimaryShardSizeUnits: {
+          defaultValue: 'gb',
+        },
+      },
+      downsample: getDownsampleSchema('warm'),
     },
     cold: {
       enabled: {
@@ -215,12 +302,6 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
           'xpack.indexLifecycleMgmt.editPolicy.coldPhase.activateColdPhaseSwitchLabel',
           { defaultMessage: 'Activate cold phase' }
         ),
-      },
-      freezeEnabled: {
-        defaultValue: false,
-        label: i18n.translate('xpack.indexLifecycleMgmt.coldPhase.freezeIndexLabel', {
-          defaultMessage: 'Freeze index',
-        }),
       },
       readonlyEnabled: {
         defaultValue: false,
@@ -243,6 +324,7 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
       allocationNodeAttribute: {
         label: i18nTexts.editPolicy.allocationNodeAttributeFieldLabel,
       },
+      downsample: getDownsampleSchema('cold'),
     },
     frozen: {
       enabled: {
@@ -251,12 +333,6 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
           'xpack.indexLifecycleMgmt.editPolicy.frozenPhase.activateFrozenPhaseSwitchLabel',
           { defaultMessage: 'Activate frozen phase' }
         ),
-      },
-      freezeEnabled: {
-        defaultValue: false,
-        label: i18n.translate('xpack.indexLifecycleMgmt.frozePhase.freezeIndexLabel', {
-          defaultMessage: 'Freeze index',
-        }),
       },
       minAgeUnit: {
         defaultValue: 'd',
@@ -334,12 +410,7 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
             fieldsToValidateOnChange: rolloverFormPaths,
           },
           max_primary_shard_size: {
-            label: i18n.translate(
-              'xpack.indexLifecycleMgmt.hotPhase.maximumPrimaryShardSizeLabel',
-              {
-                defaultMessage: 'Maximum primary shard size',
-              }
-            ),
+            label: i18nTexts.editPolicy.maxPrimaryShardSizeLabel,
             validations: [
               {
                 validator: rolloverThresholdsValidator,
@@ -348,6 +419,22 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
                 validator: ifExistsNumberGreaterThanZero,
               },
             ],
+            fieldsToValidateOnChange: rolloverFormPaths,
+          },
+          max_primary_shard_docs: {
+            label: i18nTexts.editPolicy.maxPrimaryShardDocsLabel,
+            validations: [
+              {
+                validator: rolloverThresholdsValidator,
+              },
+              {
+                validator: ifExistsNumberGreaterThanZero,
+              },
+              {
+                validator: integerValidator,
+              },
+            ],
+            serializer: serializers.stringToNumber,
             fieldsToValidateOnChange: rolloverFormPaths,
           },
           max_size: {
@@ -370,6 +457,7 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
         },
         shrink: {
           number_of_shards: numberOfShardsField,
+          max_primary_shard_size: shardSizeField,
         },
         set_priority: {
           priority: getPriorityField('hot'),
@@ -385,6 +473,7 @@ export const getSchema = (isCloudEnabled: boolean): FormSchema => ({
         },
         shrink: {
           number_of_shards: numberOfShardsField,
+          max_primary_shard_size: shardSizeField,
         },
         forcemerge: {
           max_num_segments: maxNumSegmentsField,

@@ -15,6 +15,7 @@ export function MonitoringClusterListProvider({ getService, getPageObjects }) {
   const SUBJ_SEARCH_BAR = `${SUBJ_TABLE_CONTAINER} > monitoringTableToolBar`;
 
   const SUBJ_CLUSTER_ROW_PREFIX = `${SUBJ_TABLE_CONTAINER} > clusterRow_`;
+  const ALERTS_MODAL_BUTTON = 'alerts-modal-remind-later-button';
 
   return new (class ClusterList {
     async assertDefaults() {
@@ -39,6 +40,14 @@ export function MonitoringClusterListProvider({ getService, getPageObjects }) {
 
     clearFilter() {
       return PageObjects.monitoring.tableClearFilter(SUBJ_SEARCH_BAR);
+    }
+
+    closeAlertsModal() {
+      return testSubjects.click(ALERTS_MODAL_BUTTON);
+    }
+
+    acceptAlertsModal() {
+      return testSubjects.click('alerts-modal-button');
     }
 
     getClusterLink(clusterUuid) {
@@ -71,6 +80,9 @@ export function MonitoringClusterListProvider({ getService, getPageObjects }) {
       return testSubjects.getVisibleText(
         `${SUBJ_CLUSTER_ROW_PREFIX}${clusterUuid} > clusterLicense`
       );
+    }
+    hasCluster(clusterUuid) {
+      return testSubjects.exists(`${SUBJ_CLUSTER_ROW_PREFIX}${clusterUuid}`);
     }
   })();
 }

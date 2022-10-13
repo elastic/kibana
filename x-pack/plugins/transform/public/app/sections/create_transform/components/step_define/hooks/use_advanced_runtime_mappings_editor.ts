@@ -7,8 +7,8 @@
 
 import { useState } from 'react';
 import { XJsonMode } from '@kbn/ace';
+import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { StepDefineExposedState } from '../common';
-import { XJson } from '../../../../../../../../../../src/plugins/es_ui_shared/public';
 
 const { useXJsonMode } = XJson;
 const xJsonMode = new XJsonMode();
@@ -22,24 +22,18 @@ export const useAdvancedRuntimeMappingsEditor = (defaults: StepDefineExposedStat
   );
   const [runtimeMappings, setRuntimeMappings] = useState(defaults.runtimeMappings);
 
-  const [
-    isRuntimeMappingsEditorSwitchModalVisible,
-    setRuntimeMappingsEditorSwitchModalVisible,
-  ] = useState(false);
+  const [isRuntimeMappingsEditorSwitchModalVisible, setRuntimeMappingsEditorSwitchModalVisible] =
+    useState(false);
 
   const [isRuntimeMappingsEditorEnabled, setRuntimeMappingsEditorEnabled] = useState(
     defaults.isRuntimeMappingsEditorEnabled
   );
 
-  const [
-    isRuntimeMappingsEditorApplyButtonEnabled,
-    setRuntimeMappingsEditorApplyButtonEnabled,
-  ] = useState(false);
+  const [isRuntimeMappingsEditorApplyButtonEnabled, setRuntimeMappingsEditorApplyButtonEnabled] =
+    useState(false);
 
-  const [
-    advancedEditorRuntimeMappingsLastApplied,
-    setAdvancedEditorRuntimeMappingsLastApplied,
-  ] = useState(stringifiedRuntimeMappings);
+  const [advancedEditorRuntimeMappingsLastApplied, setAdvancedEditorRuntimeMappingsLastApplied] =
+    useState(stringifiedRuntimeMappings);
 
   const {
     convertToJson,

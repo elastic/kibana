@@ -1,0 +1,96 @@
+{
+  "id": "@kbn/core-deprecations-server-internal",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-deprecations-server-internal",
+        "id": "def-server.InternalDeprecationsServiceStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "InternalDeprecationsServiceStart",
+        "description": [],
+        "path": "packages/core/deprecations/core-deprecations-server-internal/src/deprecations_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-deprecations-server-internal",
+            "id": "def-server.InternalDeprecationsServiceStart.asScopedToClient",
+            "type": "Function",
+            "tags": [],
+            "label": "asScopedToClient",
+            "description": [
+              "\nCreates a {@link DeprecationsClient} with provided SO client and ES client.\n"
+            ],
+            "signature": [
+              "(esClient: ",
+              "IScopedClusterClient",
+              ", savedObjectsClient: ",
+              "SavedObjectsClientContract",
+              ") => ",
+              "DeprecationsClient"
+            ],
+            "path": "packages/core/deprecations/core-deprecations-server-internal/src/deprecations_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-deprecations-server-internal",
+                "id": "def-server.InternalDeprecationsServiceStart.asScopedToClient.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "esClient",
+                "description": [],
+                "signature": [
+                  "IScopedClusterClient"
+                ],
+                "path": "packages/core/deprecations/core-deprecations-server-internal/src/deprecations_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-deprecations-server-internal",
+                "id": "def-server.InternalDeprecationsServiceStart.asScopedToClient.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "savedObjectsClient",
+                "description": [],
+                "signature": [
+                  "SavedObjectsClientContract"
+                ],
+                "path": "packages/core/deprecations/core-deprecations-server-internal/src/deprecations_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

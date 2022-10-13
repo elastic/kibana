@@ -8,34 +8,47 @@
 import { URL } from 'url';
 
 import mime from 'mime-types';
-import semverValid from 'semver/functions/valid';
+import semverGte from 'semver/functions/gte';
+
 import type { Response } from 'node-fetch';
+import type { Logger } from '@kbn/logging';
+
+import { splitPkgKey as split } from '../../../../common/services';
 
 import { KibanaAssetType } from '../../../types';
 import type {
   AssetsGroupedByServiceByType,
   CategoryId,
   CategorySummaryList,
-  InstallSource,
   RegistryPackage,
   RegistrySearchResults,
-  RegistrySearchResult,
+  GetCategoriesRequest,
+  PackageVerificationResult,
+  ArchivePackage,
 } from '../../../types';
 import {
   getArchiveFilelist,
   getPathParts,
   unpackBufferToCache,
+  setVerificationResult,
+  getVerificationResult,
   getPackageInfo,
   setPackageInfo,
+  generatePackageInfoFromArchiveBuffer,
 } from '../archive';
-import { streamToBuffer } from '../streams';
+import { streamToBuffer, streamToString } from '../streams';
 import { appContextService } from '../..';
 import {
-  PackageKeyInvalidError,
   PackageNotFoundError,
-  PackageCacheError,
   RegistryResponseError,
+  PackageFailedVerificationError,
 } from '../../../errors';
+
+import { getBundledPackageByName } from '../packages/bundled_packages';
+
+import { withPackageSpan } from '../packages/utils';
+
+import { verifyPackageArchiveSignature } from '../packages/package_verification';
 
 import { fetchUrl, getResponse, getResponseStream } from './requests';
 import { getRegistryUrl } from './registry_url';
@@ -45,31 +58,7 @@ export interface SearchParams {
   experimental?: boolean;
 }
 
-export interface CategoriesParams {
-  experimental?: boolean;
-}
-
-/**
- * Extract the package name and package version from a string.
- *
- * @param pkgkey a string containing the package name delimited by the package version
- */
-export function splitPkgKey(pkgkey: string): { pkgName: string; pkgVersion: string } {
-  // this will return an empty string if `indexOf` returns -1
-  const pkgName = pkgkey.substr(0, pkgkey.indexOf('-'));
-  if (pkgName === '') {
-    throw new PackageKeyInvalidError('Package key parsing failed: package name was empty');
-  }
-
-  // this will return the entire string if `indexOf` return -1
-  const pkgVersion = pkgkey.substr(pkgkey.indexOf('-') + 1);
-  if (!semverValid(pkgVersion)) {
-    throw new PackageKeyInvalidError(
-      'Package key parsing failed: package version was not a valid semver'
-    );
-  }
-  return { pkgName, pkgVersion };
-}
+export const splitPkgKey = split;
 
 export const pkgToPkgKey = ({ name, version }: { name: string; version: string }) =>
   `${name}-${version}`;
@@ -77,8 +66,6 @@ export const pkgToPkgKey = ({ name, version }: { name: string; version: string }
 export async function fetchList(params?: SearchParams): Promise<RegistrySearchResults> {
   const registryUrl = getRegistryUrl();
   const url = new URL(`${registryUrl}/search`);
-  const kibanaVersion = appContextService.getKibanaVersion().split('-')[0]; // may be x.y.z-SNAPSHOT
-  const kibanaBranch = appContextService.getKibanaBranch();
   if (params) {
     if (params.category) {
       url.searchParams.set('category', params.category);
@@ -88,43 +75,115 @@ export async function fetchList(params?: SearchParams): Promise<RegistrySearchRe
     }
   }
 
-  // on master, request all packages regardless of version
-  if (kibanaVersion && kibanaBranch !== 'master') {
-    url.searchParams.set('kibana.version', kibanaVersion);
-  }
+  setKibanaVersion(url);
 
   return fetchUrl(url.toString()).then(JSON.parse);
 }
 
-export async function fetchFindLatestPackage(packageName: string): Promise<RegistrySearchResult> {
-  const registryUrl = getRegistryUrl();
-  const kibanaVersion = appContextService.getKibanaVersion().split('-')[0]; // may be x.y.z-SNAPSHOT
-  const kibanaBranch = appContextService.getKibanaBranch();
-  const url = new URL(
-    `${registryUrl}/search?package=${packageName}&internal=true&experimental=true`
-  );
+interface FetchFindLatestPackageOptions {
+  ignoreConstraints?: boolean;
+}
 
-  // on master, request all packages regardless of version
-  if (kibanaVersion && kibanaBranch !== 'master') {
-    url.searchParams.set('kibana.version', kibanaVersion);
+async function _fetchFindLatestPackage(
+  packageName: string,
+  options?: FetchFindLatestPackageOptions
+) {
+  return withPackageSpan(`Find latest package ${packageName}`, async () => {
+    const logger = appContextService.getLogger();
+    const { ignoreConstraints = false } = options ?? {};
+
+    const bundledPackage = await getBundledPackageByName(packageName);
+
+    const registryUrl = getRegistryUrl();
+    const url = new URL(`${registryUrl}/search?package=${packageName}&experimental=true`);
+
+    if (!ignoreConstraints) {
+      setKibanaVersion(url);
+    }
+
+    try {
+      const res = await fetchUrl(url.toString(), 1);
+      const searchResults: RegistryPackage[] = JSON.parse(res);
+
+      const latestPackageFromRegistry = searchResults[0] ?? null;
+
+      if (bundledPackage && semverGte(bundledPackage.version, latestPackageFromRegistry.version)) {
+        return bundledPackage;
+      }
+
+      return latestPackageFromRegistry;
+    } catch (error) {
+      logger.error(
+        `Failed to fetch latest version of ${packageName} from registry: ${error.message}`
+      );
+
+      // Fall back to the bundled version of the package if it exists
+      if (bundledPackage) {
+        return bundledPackage;
+      }
+
+      // Otherwise, return null and allow callers to determine whether they'll consider this an error or not
+      return null;
+    }
+  });
+}
+
+export async function fetchFindLatestPackageOrThrow(
+  packageName: string,
+  options?: FetchFindLatestPackageOptions
+) {
+  const latestPackage = await _fetchFindLatestPackage(packageName, options);
+
+  if (!latestPackage) {
+    throw new PackageNotFoundError(`[${packageName}] package not found in registry`);
   }
-  const res = await fetchUrl(url.toString());
-  const searchResults = JSON.parse(res);
-  if (searchResults.length) {
-    return searchResults[0];
-  } else {
-    throw new PackageNotFoundError(`${packageName} not found`);
+
+  return latestPackage;
+}
+
+export async function fetchFindLatestPackageOrUndefined(
+  packageName: string,
+  options?: FetchFindLatestPackageOptions
+) {
+  const logger = appContextService.getLogger();
+
+  try {
+    const latestPackage = await _fetchFindLatestPackage(packageName, options);
+
+    if (!latestPackage) {
+      return undefined;
+    }
+    return latestPackage;
+  } catch (error) {
+    logger.warn(`Error fetching latest package for ${packageName}: ${error.message}`);
+    return undefined;
   }
 }
 
-export async function fetchInfo(pkgName: string, pkgVersion: string): Promise<RegistryPackage> {
+export async function fetchInfo(
+  pkgName: string,
+  pkgVersion: string
+): Promise<RegistryPackage | ArchivePackage> {
   const registryUrl = getRegistryUrl();
   try {
-    const res = await fetchUrl(`${registryUrl}/package/${pkgName}/${pkgVersion}`).then(JSON.parse);
+    // Trailing slash avoids 301 redirect / extra hop
+    const res = await fetchUrl(`${registryUrl}/package/${pkgName}/${pkgVersion}/`).then(JSON.parse);
 
     return res;
   } catch (err) {
     if (err instanceof RegistryResponseError && err.status === 404) {
+      // Check bundled packages in case the exact package being requested is available on disk
+      const bundledPackage = await getBundledPackageByName(pkgName);
+
+      if (bundledPackage && bundledPackage.version === pkgVersion) {
+        const archivePackage = await generatePackageInfoFromArchiveBuffer(
+          bundledPackage.buffer,
+          'application/zip'
+        );
+
+        return archivePackage.packageInfo;
+      }
+
       throw new PackageNotFoundError(`${pkgName}@${pkgVersion} not found`);
     }
     throw err;
@@ -145,46 +204,124 @@ export async function fetchFile(filePath: string): Promise<Response> {
   return getResponse(`${registryUrl}${filePath}`);
 }
 
-export async function fetchCategories(params?: CategoriesParams): Promise<CategorySummaryList> {
+function setKibanaVersion(url: URL) {
+  const disableVersionCheck =
+    appContextService.getConfig()?.developer?.disableRegistryVersionCheck ?? false;
+  if (disableVersionCheck) {
+    return;
+  }
+
+  const kibanaVersion = appContextService.getKibanaVersion().split('-')[0]; // may be x.y.z-SNAPSHOT
+
+  if (kibanaVersion) {
+    url.searchParams.set('kibana.version', kibanaVersion);
+  }
+}
+
+export async function fetchCategories(
+  params?: GetCategoriesRequest['query']
+): Promise<CategorySummaryList> {
   const registryUrl = getRegistryUrl();
   const url = new URL(`${registryUrl}/categories`);
   if (params) {
     if (params.experimental) {
       url.searchParams.set('experimental', params.experimental.toString());
     }
+    if (params.include_policy_templates) {
+      url.searchParams.set('include_policy_templates', params.include_policy_templates.toString());
+    }
   }
+
+  setKibanaVersion(url);
 
   return fetchUrl(url.toString()).then(JSON.parse);
 }
 
 export async function getInfo(name: string, version: string) {
-  let packageInfo = getPackageInfo({ name, version });
-  if (!packageInfo) {
-    packageInfo = await fetchInfo(name, version);
-    setPackageInfo({ name, version, packageInfo });
-  }
-  return packageInfo as RegistryPackage;
+  return withPackageSpan('Fetch package info', async () => {
+    let packageInfo = getPackageInfo({ name, version });
+    if (!packageInfo) {
+      packageInfo = await fetchInfo(name, version);
+      // only cache registry pkg info for integration pkgs because
+      // input type packages must get their pkg info from the archive
+      if (packageInfo.type === 'integration') setPackageInfo({ name, version, packageInfo });
+    }
+    return packageInfo as RegistryPackage;
+  });
 }
 
-export async function getRegistryPackage(
+// Check that the packageInfo exists in cache
+// If not, retrieve it from the archive
+async function getPackageInfoFromArchiveOrCache(
   name: string,
-  version: string
-): Promise<{ paths: string[]; packageInfo: RegistryPackage }> {
-  const installSource = 'registry';
-  let paths = getArchiveFilelist({ name, version });
-  if (!paths || paths.length === 0) {
-    const { archiveBuffer, archivePath } = await fetchArchiveBuffer(name, version);
-    paths = await unpackBufferToCache({
-      name,
-      version,
-      installSource,
+  version: string,
+  archiveBuffer: Buffer,
+  archivePath: string
+): Promise<ArchivePackage> {
+  const cachedInfo = getPackageInfo({ name, version });
+
+  if (!cachedInfo) {
+    const { packageInfo } = await generatePackageInfoFromArchiveBuffer(
       archiveBuffer,
-      contentType: ensureContentType(archivePath),
-    });
+      ensureContentType(archivePath)
+    );
+    // set the download URL as it isn't contained in the manifest
+    // this allows us to re-download the archive during package install
+    setPackageInfo({ packageInfo: { ...packageInfo, download: archivePath }, name, version });
+    return packageInfo;
+  } else {
+    return cachedInfo;
+  }
+}
+
+export async function getPackage(
+  name: string,
+  version: string,
+  options?: { ignoreUnverified?: boolean }
+): Promise<{
+  paths: string[];
+  packageInfo: ArchivePackage;
+  verificationResult?: PackageVerificationResult;
+}> {
+  const verifyPackage = appContextService.getExperimentalFeatures().packageVerification;
+  let paths = getArchiveFilelist({ name, version });
+  let verificationResult = verifyPackage ? getVerificationResult({ name, version }) : undefined;
+
+  const {
+    archiveBuffer,
+    archivePath,
+    verificationResult: latestVerificationResult,
+  } = await withPackageSpan('Fetch package archive from archive buffer', () =>
+    fetchArchiveBuffer({
+      pkgName: name,
+      pkgVersion: version,
+      shouldVerify: verifyPackage,
+      ignoreUnverified: options?.ignoreUnverified,
+    })
+  );
+
+  if (latestVerificationResult) {
+    verificationResult = latestVerificationResult;
+    setVerificationResult({ name, version }, latestVerificationResult);
+  }
+  if (!paths || paths.length === 0) {
+    paths = await withPackageSpan('Unpack archive', () =>
+      unpackBufferToCache({
+        name,
+        version,
+        archiveBuffer,
+        contentType: ensureContentType(archivePath),
+      })
+    );
   }
 
-  const packageInfo = await getInfo(name, version);
-  return { paths, packageInfo };
+  const packageInfo = await getPackageInfoFromArchiveOrCache(
+    name,
+    version,
+    archiveBuffer,
+    archivePath
+  );
+  return { paths, packageInfo, verificationResult };
 }
 
 function ensureContentType(archivePath: string) {
@@ -195,32 +332,67 @@ function ensureContentType(archivePath: string) {
   return contentType;
 }
 
-export async function ensureCachedArchiveInfo(
-  name: string,
-  version: string,
-  installSource: InstallSource = 'registry'
-) {
-  const paths = getArchiveFilelist({ name, version });
-  if (!paths || paths.length === 0) {
-    if (installSource === 'registry') {
-      await getRegistryPackage(name, version);
-    } else {
-      throw new PackageCacheError(
-        `Package ${name}-${version} not cached. If it was uploaded, try uninstalling and reinstalling manually.`
-      );
-    }
-  }
-}
-
-async function fetchArchiveBuffer(
-  pkgName: string,
-  pkgVersion: string
-): Promise<{ archiveBuffer: Buffer; archivePath: string }> {
+export async function fetchArchiveBuffer({
+  pkgName,
+  pkgVersion,
+  shouldVerify,
+  ignoreUnverified = false,
+}: {
+  pkgName: string;
+  pkgVersion: string;
+  shouldVerify: boolean;
+  ignoreUnverified?: boolean;
+}): Promise<{
+  archiveBuffer: Buffer;
+  archivePath: string;
+  verificationResult?: PackageVerificationResult;
+}> {
+  const logger = appContextService.getLogger();
   const { download: archivePath } = await getInfo(pkgName, pkgVersion);
   const archiveUrl = `${getRegistryUrl()}${archivePath}`;
   const archiveBuffer = await getResponseStream(archiveUrl).then(streamToBuffer);
+  if (shouldVerify) {
+    const verificationResult = await verifyPackageArchiveSignature({
+      pkgName,
+      pkgVersion,
+      pkgArchiveBuffer: archiveBuffer,
+      logger,
+    });
 
+    if (verificationResult.verificationStatus === 'unverified' && !ignoreUnverified) {
+      throw new PackageFailedVerificationError(pkgName, pkgVersion);
+    }
+    return { archiveBuffer, archivePath, verificationResult };
+  }
   return { archiveBuffer, archivePath };
+}
+
+export async function getPackageArchiveSignatureOrUndefined({
+  pkgName,
+  pkgVersion,
+  logger,
+}: {
+  pkgName: string;
+  pkgVersion: string;
+  logger: Logger;
+}): Promise<string | undefined> {
+  const { signature_path: signaturePath } = await getInfo(pkgName, pkgVersion);
+
+  if (!signaturePath) {
+    logger.debug(
+      `Package ${pkgName}-${pkgVersion} does not have a signature_path, verification will not be possible.`
+    );
+    return undefined;
+  }
+
+  try {
+    const { body } = await fetchFile(signaturePath);
+
+    return streamToString(body);
+  } catch (e) {
+    logger.error(`Error retrieving package signature at '${signaturePath}' : ${e}`);
+    return undefined;
+  }
 }
 
 export function groupPathsByService(paths: string[]): AssetsGroupedByServiceByType {
@@ -245,4 +417,28 @@ export function groupPathsByService(paths: string[]): AssetsGroupedByServiceByTy
     kibana: assets.kibana,
     elasticsearch: assets.elasticsearch,
   };
+}
+
+export function getNoticePath(paths: string[]): string | undefined {
+  for (const path of paths) {
+    const parts = getPathParts(path.replace(/^\/package\//, ''));
+    if (parts.type === 'notice') {
+      const { pkgName, pkgVersion } = splitPkgKey(parts.pkgkey);
+      return `/package/${pkgName}/${pkgVersion}/${parts.file}`;
+    }
+  }
+
+  return undefined;
+}
+
+export function getLicensePath(paths: string[]): string | undefined {
+  for (const path of paths) {
+    const parts = getPathParts(path.replace(/^\/package\//, ''));
+    if (parts.type === 'license') {
+      const { pkgName, pkgVersion } = splitPkgKey(parts.pkgkey);
+      return `/package/${pkgName}/${pkgVersion}/${parts.file}`;
+    }
+  }
+
+  return undefined;
 }

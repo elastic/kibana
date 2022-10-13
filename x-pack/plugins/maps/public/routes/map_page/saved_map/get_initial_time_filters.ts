@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { QueryState } from 'src/plugins/data/public';
+import { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import { getUiSettings } from '../../../kibana_services';
+import { SerializedMapState } from './types';
 
 export function getInitialTimeFilters({
-  mapStateJSON,
+  hasSaveAndReturnConfig,
+  serializedMapState,
   globalState,
 }: {
-  mapStateJSON?: string;
-  globalState: QueryState;
+  hasSaveAndReturnConfig: boolean;
+  serializedMapState?: SerializedMapState;
+  globalState: GlobalQueryStateFromUrl;
 }) {
-  if (mapStateJSON) {
-    const mapState = JSON.parse(mapStateJSON);
-    if (mapState.timeFilters) {
-      return mapState.timeFilters;
-    }
+  if (!hasSaveAndReturnConfig && serializedMapState?.timeFilters) {
+    return serializedMapState.timeFilters;
   }
 
   const defaultTime = getUiSettings().get('timepicker:timeDefaults');

@@ -7,42 +7,58 @@
     "ml"
   ],
   "requiredPlugins": [
-    "data",
+    "aiops",
+    "charts",
     "cloud",
+    "data",
+    "dataViews",
+    "dataVisualizer",
+    "discover",
+    "embeddable",
     "features",
-    "fileDataVisualizer",
+    "fieldFormats",
     "licensing",
     "share",
-    "embeddable",
+    "taskManager",
+    "triggersActionsUi",
     "uiActions",
-    "kibanaLegacy",
-    "indexPatternManagement",
-    "discover",
-    "triggersActionsUi"
+    "unifiedSearch"
   ],
   "optionalPlugins": [
     "alerting",
+    "dashboard",
     "home",
+    "lens",
+    "licenseManagement",
+    "management",
+    "maps",
     "security",
     "spaces",
-    "management",
-    "licenseManagement",
-    "maps",
-    "lens",
-    "usageCollection"
+    "usageCollection",
+    "cases"
   ],
   "server": true,
   "ui": true,
   "requiredBundles": [
-    "esUiShared",
-    "kibanaUtils",
-    "kibanaReact",
+    "cases",
+    "charts",
     "dashboard",
+    "esUiShared",
+    "fieldFormats",
+    "kibanaReact",
+    "kibanaUtils",
+    "lens",
+    "maps",
     "savedObjects",
-    "home",
-    "maps"
+    "usageCollection",
+    "unifiedSearch"
   ],
   "extraPublicDirs": [
     "common"
-  ]
+  ],
+  "owner": {
+    "name": "Machine Learning UI",
+    "githubTeam": "ml-ui"
+  },
+  "description": "This plugin provides access to the machine learning features provided by Elastic."
 }

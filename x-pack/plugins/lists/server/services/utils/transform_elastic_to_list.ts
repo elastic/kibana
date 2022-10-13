@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { ListArraySchema } from '@kbn/securitysolution-io-ts-list-types';
+import { encodeHitVersion } from '@kbn/securitysolution-es-utils';
 
-import { ListArraySchema, SearchEsListSchema } from '../../../common/schemas';
-
-import { encodeHitVersion } from './encode_hit_version';
+import { SearchEsListSchema } from '../../schemas/elastic_response';
 
 export interface TransformElasticToListOptions {
   response: estypes.SearchResponse<SearchEsListSchema>;

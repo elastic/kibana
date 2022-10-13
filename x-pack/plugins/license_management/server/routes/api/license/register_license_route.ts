@@ -26,7 +26,7 @@ export function registerLicenseRoute({
       },
     },
     async (ctx, req, res) => {
-      const { client } = ctx.core.elasticsearch;
+      const { client } = (await ctx.core).elasticsearch;
       try {
         return res.ok({
           body: await putLicense({

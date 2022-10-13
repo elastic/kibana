@@ -19,6 +19,7 @@ interface Props {
   contextId: string;
   hostName: string | null | undefined;
   id: string;
+  isDraggable?: boolean;
   processName: string | null | undefined;
   processPid: number | null | undefined;
   registryKey: string | null | undefined;
@@ -32,6 +33,7 @@ const RegistryEventDetailsLineComponent: React.FC<Props> = ({
   contextId,
   hostName,
   id,
+  isDraggable,
   processName,
   processPid,
   registryKey,
@@ -71,6 +73,7 @@ const RegistryEventDetailsLineComponent: React.FC<Props> = ({
           contextId={contextId}
           eventId={id}
           hostName={hostName}
+          isDraggable={isDraggable}
           userDomain={userDomain}
           userName={userName}
           workingDirectory={undefined}
@@ -86,8 +89,11 @@ const RegistryEventDetailsLineComponent: React.FC<Props> = ({
                 contextId={contextId}
                 eventId={id}
                 field="registry.key"
+                isDraggable={isDraggable}
                 tooltipContent={registryKeyTooltipContent}
                 value={registryKey}
+                isAggregatable={true}
+                fieldType="keyword"
               />
             </TokensFlexItem>
           </>
@@ -103,8 +109,11 @@ const RegistryEventDetailsLineComponent: React.FC<Props> = ({
                 contextId={contextId}
                 eventId={id}
                 field="registry.path"
+                isDraggable={isDraggable}
                 tooltipContent={registryPathTooltipContent}
                 value={registryPath}
+                isAggregatable={true}
+                fieldType="keyword"
               />
             </TokensFlexItem>
           </>
@@ -120,6 +129,7 @@ const RegistryEventDetailsLineComponent: React.FC<Props> = ({
             endgamePid={undefined}
             endgameProcessName={undefined}
             eventId={id}
+            isDraggable={isDraggable}
             processPid={processPid}
             processName={processName}
             processExecutable={undefined}

@@ -7,10 +7,10 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-import { nextTick } from '@kbn/test/jest';
-import type { CoreStatus } from 'src/core/server';
-import { ServiceStatusLevels } from 'src/core/server';
-import { coreMock, loggingSystemMock } from 'src/core/server/mocks';
+import type { CoreStatus } from '@kbn/core/server';
+import { ServiceStatusLevels } from '@kbn/core/server';
+import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 import type { SecurityLicense, SecurityLicenseFeatures } from '../../common/licensing';
 import { licenseMock } from '../../common/licensing/index.mock';
@@ -38,7 +38,7 @@ describe('ElasticsearchService', () => {
     let mockStatusSubject: BehaviorSubject<CoreStatus>;
     let mockLicenseSubject: BehaviorSubject<SecurityLicenseFeatures>;
     beforeEach(() => {
-      mockLicenseSubject = new BehaviorSubject(({} as unknown) as SecurityLicenseFeatures);
+      mockLicenseSubject = new BehaviorSubject({} as unknown as SecurityLicenseFeatures);
       mockLicense = licenseMock.create();
       mockLicense.isEnabled.mockReturnValue(false);
       mockLicense.features$ = mockLicenseSubject;
@@ -134,7 +134,7 @@ describe('ElasticsearchService', () => {
       expect(mockHandler).toHaveBeenCalledTimes(4);
 
       // New changes still trigger handler once again and reset retry timer.
-      mockLicenseSubject.next(({} as unknown) as SecurityLicenseFeatures);
+      mockLicenseSubject.next({} as unknown as SecurityLicenseFeatures);
       expect(mockHandler).toHaveBeenCalledTimes(5);
 
       // Retry timer is reset.
@@ -167,7 +167,7 @@ describe('ElasticsearchService', () => {
       expect(mockHandler).toHaveBeenCalledTimes(1);
 
       // New changes should immediately call handler.
-      mockLicenseSubject.next(({} as unknown) as SecurityLicenseFeatures);
+      mockLicenseSubject.next({} as unknown as SecurityLicenseFeatures);
       expect(mockHandler).toHaveBeenCalledTimes(2);
 
       // Retry timeout should have been cancelled.

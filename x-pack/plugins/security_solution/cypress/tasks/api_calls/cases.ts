@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TestCase } from '../../objects/case';
+import type { TestCase } from '../../objects/case';
 
 export const createCase = (newCase: TestCase) =>
   cy.request({
@@ -24,6 +24,7 @@ export const createCase = (newCase: TestCase) =>
       settings: {
         syncAlerts: true,
       },
+      owner: newCase.owner,
     },
     headers: { 'kbn-xsrf': 'cypress-creds' },
   });

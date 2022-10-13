@@ -10,16 +10,20 @@ import { FtrProviderContext } from '../services';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const supertest = getService('supertest');
 
   describe('POST /api/saved_objects_tagging/tags/create', () => {
     beforeEach(async () => {
-      await esArchiver.load('functional_base');
+      await kibanaServer.importExport.load(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/functional_base/data.json'
+      );
     });
 
     afterEach(async () => {
-      await esArchiver.unload('functional_base');
+      await kibanaServer.importExport.unload(
+        'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/functional_base/data.json'
+      );
     });
 
     it('should create the tag when validation succeed', async () => {

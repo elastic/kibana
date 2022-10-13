@@ -11,26 +11,32 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
+  const esArchiver = getService('esArchiver');
 
   describe('Getting Started ', function () {
-    this.tags(['ciGroup6']);
-
     before(async function () {
       await browser.setWindowSize(1200, 800);
+      await esArchiver.loadIfNeeded(
+        'test/functional/fixtures/es_archiver/getting_started/shakespeare'
+      );
+    });
+
+    after(async function () {
+      await esArchiver.unload('test/functional/fixtures/es_archiver/getting_started/shakespeare');
     });
 
     // TODO: Remove when vislib is removed
-    describe('new charts library', function () {
+    describe('old charts library', function () {
       before(async () => {
         await kibanaServer.uiSettings.update({
-          'visualization:visualize:legacyChartsLibrary': false,
+          'visualization:visualize:legacyPieChartsLibrary': true,
         });
         await browser.refresh();
       });
 
       after(async () => {
         await kibanaServer.uiSettings.update({
-          'visualization:visualize:legacyChartsLibrary': true,
+          'visualization:visualize:legacyPieChartsLibrary': false,
         });
         await browser.refresh();
       });
@@ -38,7 +44,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./_shakespeare'));
     });
 
-    describe('', () => {
+    describe('new charts library', () => {
       loadTestFile(require.resolve('./_shakespeare'));
     });
   });

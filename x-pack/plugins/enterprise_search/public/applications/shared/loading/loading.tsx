@@ -7,18 +7,20 @@
 
 import React from 'react';
 
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingLogo, EuiLoadingSpinner } from '@elastic/eui';
 
 import './loading.scss';
 
 export const Loading: React.FC = () => (
   <div className="enterpriseSearchLoading">
-    <EuiLoadingSpinner size="xl" />
+    <EuiLoadingLogo size="xl" logo="logoEnterpriseSearch" />
   </div>
 );
 
 export const LoadingOverlay: React.FC = () => (
   <div className="enterpriseSearchLoadingOverlay">
-    <Loading />
+    <div className="enterpriseSearchLoading">
+      <EuiLoadingSpinner size="xl" />
+    </div>
   </div>
 );

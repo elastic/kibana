@@ -7,10 +7,10 @@
  */
 
 import { extname } from 'path';
-import Accept from 'accept';
+import Accept from '@hapi/accept';
 import { open } from './fs';
 
-declare module 'accept' {
+declare module '@hapi/accept' {
   // @types/accept does not include the `preferences` argument so we override the type to include it
   export function encodings(encodingHeader?: string, preferences?: string[]): string[];
 }
@@ -39,10 +39,6 @@ export async function selectCompressedFile(acceptEncodingHeader: string | undefi
     if (supportedEncodings[0] === 'br') {
       fileEncoding = 'br';
       fd = await tryToOpenFile(`${path}.br`);
-    }
-    if (!fd && supportedEncodings.includes('gzip')) {
-      fileEncoding = 'gzip';
-      fd = await tryToOpenFile(`${path}.gz`);
     }
   }
 

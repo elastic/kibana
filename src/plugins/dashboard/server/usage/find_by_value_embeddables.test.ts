@@ -6,26 +6,26 @@
  * Side Public License, v 1.
  */
 
-import { SavedDashboardPanel730ToLatest } from '../../common';
+import type { SavedDashboardPanel } from '../../common';
 import { findByValueEmbeddables } from './find_by_value_embeddables';
 
-const visualizationByValue = ({
+const visualizationByValue = {
   embeddableConfig: {
     value: 'visualization-by-value',
   },
   type: 'visualization',
-} as unknown) as SavedDashboardPanel730ToLatest;
+} as unknown as SavedDashboardPanel;
 
-const mapByValue = ({
+const mapByValue = {
   embeddableConfig: {
     value: 'map-by-value',
   },
   type: 'map',
-} as unknown) as SavedDashboardPanel730ToLatest;
+} as unknown as SavedDashboardPanel;
 
-const embeddableByRef = ({
+const embeddableByRef = {
   panelRefName: 'panel_ref_1',
-} as unknown) as SavedDashboardPanel730ToLatest;
+} as unknown as SavedDashboardPanel;
 
 describe('findByValueEmbeddables', () => {
   it('finds the by value embeddables for the given type', async () => {

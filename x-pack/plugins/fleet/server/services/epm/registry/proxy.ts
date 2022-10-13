@@ -12,7 +12,7 @@ import type {
   HttpsProxyAgent as IHttpsProxyAgent,
 } from 'https-proxy-agent';
 
-import { appContextService } from '../../index';
+import { appContextService } from '../..';
 
 export interface RegistryProxySettings {
   proxyUrl: string;

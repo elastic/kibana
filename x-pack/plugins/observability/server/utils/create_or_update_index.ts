@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { CreateIndexRequest, PutMappingRequest } from '@elastic/elasticsearch/api/types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import pRetry from 'p-retry';
-import { Logger, ElasticsearchClient } from 'src/core/server';
+import { Logger, ElasticsearchClient } from '@kbn/core/server';
 
-export type Mappings = Required<CreateIndexRequest>['body']['mappings'] &
-  Required<PutMappingRequest>['body'];
+export type Mappings = Required<estypes.IndicesCreateRequest>['body']['mappings'] &
+  Required<estypes.IndicesPutMappingRequest>['body'];
 
 export async function createOrUpdateIndex({
   index,
@@ -33,7 +33,7 @@ export async function createOrUpdateIndex({
      */
     await pRetry(
       async () => {
-        const indexExists = (await client.indices.exists({ index })).body;
+        const indexExists = await client.indices.exists({ index });
         const result = indexExists
           ? await updateExistingIndex({
               index,
@@ -46,7 +46,7 @@ export async function createOrUpdateIndex({
               mappings,
             });
 
-        if (!result.body.acknowledged) {
+        if (!result.acknowledged) {
           const bodyWithError: { body?: { error: any } } = result as any;
           const resultError = JSON.stringify(bodyWithError?.body?.error);
           throw new Error(resultError);
@@ -71,13 +71,13 @@ function createNewIndex({
 }: {
   index: string;
   client: ElasticsearchClient;
-  mappings: Required<CreateIndexRequest>['body']['mappings'];
+  mappings: Required<estypes.IndicesCreateRequest>['body']['mappings'];
 }) {
   return client.indices.create({
     index,
     body: {
       // auto_expand_replicas: Allows cluster to not have replicas for this index
-      settings: { 'index.auto_expand_replicas': '0-1' },
+      settings: { index: { auto_expand_replicas: '0-1' } },
       mappings,
     },
   });
@@ -90,7 +90,7 @@ function updateExistingIndex({
 }: {
   index: string;
   client: ElasticsearchClient;
-  mappings: PutMappingRequest['body'];
+  mappings: estypes.IndicesPutMappingRequest['body'];
 }) {
   return client.indices.putMapping({
     index,

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import datemath from '@elastic/datemath';
+import datemath from '@kbn/datemath';
 import expect from '@kbn/expect';
 import { mockIndices } from './hybrid_index_helper';
 
 export default function ({ getService, getPageObjects }) {
   const es = getService('es');
-  const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['rollup', 'common', 'security']);
   const security = getService('security');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
+  const kibanaServer = getService('kibanaServer');
 
   describe('rollup job', function () {
     //Since rollups can only be created once with the same name (even if you delete it),
@@ -71,7 +71,7 @@ export default function ({ getService, getPageObjects }) {
 
       //Delete all data indices that were created.
       await esDeleteAllIndices([targetIndexName, rollupSourceIndexPattern]);
-      await esArchiver.load('empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
       await security.testUser.restoreDefaults();
     });
   });

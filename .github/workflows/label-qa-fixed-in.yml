@@ -1,0 +1,93 @@
+name: Add QA labels to Fleet issues
+on:
+  # pull_request_target allows running actions on PRs from forks with a read/write GITHUB_TOKEN, but it will not allow
+  # running workflows defined in the PRs itself, only workflows already merged into the target branch. This avoids
+  # potential vulnerabilities that could allow someone to open a PR and retrieve secrets.
+  # It's important that this workflow never runs any checkout actions which could be used to circumvent this protection.
+  # See these links for more information:
+  # - https://github.blog/2020-08-03-github-actions-improvements-for-fork-and-pull-request-workflows/ 
+  # - https://nathandavison.com/blog/github-actions-and-the-threat-of-malicious-pull-requests
+  pull_request_target:
+    types:
+      - closed
+
+jobs:
+  fetch_issues_to_label:
+    runs-on: ubuntu-latest
+    # Only run on PRs that were merged for the Fleet team
+    if: |
+      github.event.pull_request.merged_at &&
+      contains(github.event.pull_request.labels.*.name, 'Team:Fleet')
+    outputs:
+      issue_ids: ${{ steps.issues_to_label.outputs.value }}
+      label_ids: ${{ steps.label_ids.outputs.value }}
+    steps:
+      - uses: octokit/graphql-action@v2.x
+        id: closing_issues
+        with:
+          query: |
+            query closingIssueNumbersQuery($prnumber: Int!) {
+              repository(owner: "elastic", name: "kibana") {
+                pullRequest(number: $prnumber) {
+                  closingIssuesReferences(first: 10) {
+                    nodes {
+                      id
+                      labels(first: 20) {
+                        nodes {
+                          id
+                          name
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          prnumber: ${{ github.event.number }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: sergeysova/jq-action@v2
+        id: issues_to_label
+        with:
+          # Map to the issues' node id
+          cmd: echo $CLOSING_ISSUES | jq -c '.repository.pullRequest.closingIssuesReferences.nodes | map(.id)'
+          multiline: true
+        env:
+          CLOSING_ISSUES: ${{ steps.closing_issues.outputs.data }}
+      - uses: sergeysova/jq-action@v2
+        id: label_ids
+        with:
+          # Get list of version labels on pull request and map to label's node id, append 'QA:Ready For Testing' id ("MDU6TGFiZWwyNTQ1NjcwOTI4")
+          cmd: echo $PR_LABELS | jq -c 'map(select(.name | test("v[0-9]+\\.[0-9]+\\.[0-9]+")) | .node_id) + ["MDU6TGFiZWwyNTQ1NjcwOTI4"]'
+          multiline: true
+        env:
+          PR_LABELS: ${{ toJSON(github.event.pull_request.labels) }}
+
+  label_issues:
+    needs: fetch_issues_to_label
+    runs-on: ubuntu-latest
+
+    # For each issue closed by the PR x each label to apply, run this job
+    if: |
+      fromJSON(needs.fetch_issues_to_label.outputs.issue_ids).length > 0 &&
+      fromJSON(needs.fetch_issues_to_label.outputs.label_ids).length > 0
+    strategy:
+      matrix:
+        issueId: ${{ fromJSON(needs.fetch_issues_to_label.outputs.issue_ids) }}
+        labelId: ${{ fromJSON(needs.fetch_issues_to_label.outputs.label_ids) }}
+
+    name: Label issue ${{ matrix.issueId }} with ${{ matrix.labelId }}
+    steps:
+      - uses: octokit/graphql-action@v2.x
+        id: add_labels_to_closed_issue
+        with:
+          query: |
+            mutation add_label($issueid: ID!, $labelid:ID!) {
+              addLabelsToLabelable(input: {labelableId: $issueid, labelIds: [$labelid]}) {
+                clientMutationId
+              }
+            }
+          issueid: ${{ matrix.issueId }}
+          labelid: ${{ matrix.labelId }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

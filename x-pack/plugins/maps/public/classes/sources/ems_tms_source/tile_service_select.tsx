@@ -9,15 +9,13 @@ import React, { ChangeEvent, Component } from 'react';
 import { EuiSelect, EuiSelectOption, EuiFormRow } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { EMSTMSSourceDescriptor } from '../../../../common/descriptor_types';
 import { getEmsTmsServices } from '../../../util';
 import { getEmsUnavailableMessage } from '../../../components/ems_unavailable_message';
 
-export const AUTO_SELECT = 'auto_select';
+const AUTO_SELECT = 'auto_select';
 
-export interface EmsTmsSourceConfig {
-  id: string | null;
-  isAutoSelect: boolean;
-}
+export type EmsTmsSourceConfig = Pick<EMSTMSSourceDescriptor, 'id' | 'isAutoSelect'>;
 
 interface Props {
   config?: EmsTmsSourceConfig;
@@ -47,32 +45,38 @@ export class TileServiceSelect extends Component<Props, State> {
   }
 
   _loadTmsOptions = async () => {
-    const emsTMSServices = await getEmsTmsServices();
+    try {
+      const emsTMSServices = await getEmsTmsServices();
 
-    if (!this._isMounted) {
-      return;
+      if (!this._isMounted) {
+        return;
+      }
+
+      const emsTmsOptions = emsTMSServices.map((tmsService) => {
+        return {
+          value: tmsService.getId(),
+          text: tmsService.getDisplayName() ? tmsService.getDisplayName() : tmsService.getId(),
+        };
+      });
+      emsTmsOptions.unshift({
+        value: AUTO_SELECT,
+        text: i18n.translate('xpack.maps.source.emsTile.autoLabel', {
+          defaultMessage: 'Autoselect based on Kibana theme',
+        }),
+      });
+      this.setState({ emsTmsOptions, hasLoaded: true });
+    } catch (error) {
+      if (this._isMounted) {
+        this.setState({ emsTmsOptions: [], hasLoaded: true });
+      }
     }
-
-    const emsTmsOptions = emsTMSServices.map((tmsService) => {
-      return {
-        value: tmsService.getId(),
-        text: tmsService.getDisplayName() ? tmsService.getDisplayName() : tmsService.getId(),
-      };
-    });
-    emsTmsOptions.unshift({
-      value: AUTO_SELECT,
-      text: i18n.translate('xpack.maps.source.emsTile.autoLabel', {
-        defaultMessage: 'Autoselect based on Kibana theme',
-      }),
-    });
-    this.setState({ emsTmsOptions, hasLoaded: true });
   };
 
   _onChange = (e: ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
     const isAutoSelect = value === AUTO_SELECT;
     this.props.onTileSelect({
-      id: isAutoSelect ? null : value,
+      id: isAutoSelect ? undefined : value,
       isAutoSelect,
     });
   };

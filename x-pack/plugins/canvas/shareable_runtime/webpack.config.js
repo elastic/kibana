@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+require('../../../../src/setup_node_env');
+
 const path = require('path');
 const webpack = require('webpack');
-const { stringifyRequest } = require('loader-utils'); // eslint-disable-line
+const { stringifyRequest } = require('loader-utils');
 
+const { CiStatsPlugin } = require('./webpack/ci_stats_plugin');
 const {
   KIBANA_ROOT,
   SHAREABLE_RUNTIME_OUTPUT,
@@ -18,29 +21,28 @@ const {
 
 const isProd = process.env.NODE_ENV === 'production';
 
+const nodeModulesButNotKbnPackages = (_path) => {
+  if (!_path.includes('node_modules')) {
+    return false;
+  }
+
+  return !_path.includes(`node_modules${path.sep}@kbn${path.sep}`);
+};
+
 module.exports = {
   context: KIBANA_ROOT,
   entry: {
     [SHAREABLE_RUNTIME_NAME]: require.resolve('./index.ts'),
   },
   mode: isProd ? 'production' : 'development',
-  plugins: isProd ? [new webpack.optimize.LimitChunkCountPlugin({ maxChunks: 1 })] : [],
   output: {
     path: SHAREABLE_RUNTIME_OUTPUT,
     filename: '[name].js',
     library: LIBRARY_NAME,
   },
-  // Include a require alias for legacy UI code and styles
   resolve: {
     alias: {
-      ui: path.resolve(KIBANA_ROOT, 'src/legacy/ui/public'),
-      'data/interpreter': path.resolve(
-        KIBANA_ROOT,
-        'src/plugins/data/public/expressions/interpreter'
-      ),
-      'kbn/interpreter': path.resolve(KIBANA_ROOT, 'packages/kbn-interpreter/target/common'),
-      tinymath: path.resolve(KIBANA_ROOT, 'node_modules/tinymath/lib/tinymath.es5.js'),
-      core_app_image_assets: path.resolve(KIBANA_ROOT, 'src/core/public/core_app/images'),
+      core_app_image_assets: path.resolve(KIBANA_ROOT, 'src/core/public/styles/core_app/images'),
     },
     extensions: ['.js', '.json', '.ts', '.tsx', '.scss'],
     symlinks: false,
@@ -76,8 +78,8 @@ module.exports = {
           {
             loader: 'postcss-loader',
             options: {
-              config: {
-                path: require.resolve('./postcss.config.js'),
+              postcssOptions: {
+                config: require.resolve('./postcss.config.js'),
               },
             },
           },
@@ -109,14 +111,15 @@ module.exports = {
           {
             loader: 'postcss-loader',
             options: {
-              config: {
-                path: require.resolve('@kbn/optimizer/postcss.config.js'),
+              postcssOptions: {
+                config: require.resolve('@kbn/optimizer/postcss.config.js'),
               },
             },
           },
           {
             loader: 'sass-loader',
             options: {
+              implementation: require('node-sass'),
               sourceMap: !isProd,
             },
           },
@@ -124,7 +127,7 @@ module.exports = {
       },
       {
         test: /\.scss$/,
-        exclude: [/node_modules/, /\.module\.s(a|c)ss$/],
+        exclude: [nodeModulesButNotKbnPackages, /\.module\.s(a|c)ss$/],
         use: [
           {
             loader: 'style-loader',
@@ -139,20 +142,21 @@ module.exports = {
             loader: 'postcss-loader',
             options: {
               sourceMap: !isProd,
-              config: {
-                path: require.resolve('./postcss.config'),
+              postcssOptions: {
+                config: require.resolve('./postcss.config'),
               },
             },
           },
           {
             loader: 'sass-loader',
             options: {
-              prependData(loaderContext) {
+              additionalData(content, loaderContext) {
                 return `@import ${stringifyRequest(
                   loaderContext,
-                  path.resolve(KIBANA_ROOT, 'src/core/public/core_app/styles/_globals_v7light.scss')
-                )};\n`;
+                  path.resolve(KIBANA_ROOT, 'src/core/public/styles/core_app/_globals_v8light.scss')
+                )};\n${content}`;
               },
+              implementation: require('node-sass'),
               webpackImporter: false,
               sassOptions: {
                 outputStyle: 'nested',
@@ -178,9 +182,7 @@ module.exports = {
       },
       {
         test: [
-          require.resolve('@elastic/eui/es/components/code_editor'),
           require.resolve('@elastic/eui/es/components/drag_and_drop'),
-          require.resolve('@elastic/eui/packages/react-datepicker'),
           require.resolve('highlight.js'),
         ],
         use: require.resolve('null-loader'),
@@ -191,4 +193,10 @@ module.exports = {
     fs: 'empty',
     child_process: 'empty',
   },
+  plugins: [
+    isProd ? new webpack.optimize.LimitChunkCountPlugin({ maxChunks: 1 }) : [],
+    new CiStatsPlugin({
+      entryName: SHAREABLE_RUNTIME_NAME,
+    }),
+  ].flat(),
 };

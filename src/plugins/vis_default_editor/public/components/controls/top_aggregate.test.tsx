@@ -7,14 +7,14 @@
  */
 
 import React from 'react';
-import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
+import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import {
   AggregateValueProp,
   TopAggregateParamEditor,
   TopAggregateParamEditorProps,
 } from './top_aggregate';
 import { aggParamCommonPropsMock } from './test_utils';
-import { IAggConfig } from 'src/plugins/data/public';
+import { IAggConfig } from '@kbn/data-plugin/public';
 
 describe('TopAggregateParamEditor', () => {
   let agg: IAggConfig;
@@ -51,14 +51,14 @@ describe('TopAggregateParamEditor', () => {
     aggParam = {
       options,
     };
-    agg = ({
+    agg = {
       params: {
         field: {
           type: 'number',
         },
       },
       getAggParams: jest.fn(() => [{ name: 'aggregate', options }]),
-    } as any) as IAggConfig;
+    } as any as IAggConfig;
     defaultProps = {
       ...aggParamCommonPropsMock,
       agg,

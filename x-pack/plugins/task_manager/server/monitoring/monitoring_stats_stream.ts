@@ -7,16 +7,23 @@
 
 import { merge, of, Observable } from 'rxjs';
 import { map, scan } from 'rxjs/operators';
-import { set } from '@elastic/safer-lodash-set';
-import { Logger } from 'src/core/server';
-import { JsonObject } from 'src/plugins/kibana_utils/common';
+import { set } from '@kbn/safer-lodash-set';
+import { Logger } from '@kbn/core/server';
+import { JsonObject } from '@kbn/utility-types';
 import { TaskStore } from '../task_store';
 import { TaskPollingLifecycle } from '../polling_lifecycle';
 import {
   createWorkloadAggregator,
   summarizeWorkloadStat,
+  SummarizedWorkloadStat,
   WorkloadStat,
 } from './workload_statistics';
+import {
+  EphemeralTaskStat,
+  createEphemeralTaskAggregator,
+  SummarizedEphemeralTaskStat,
+  summarizeEphemeralStat,
+} from './ephemeral_task_statistics';
 import {
   createTaskRunAggregator,
   summarizeTaskRunStat,
@@ -27,8 +34,10 @@ import { ConfigStat, createConfigurationAggregator } from './configuration_stati
 import { TaskManagerConfig } from '../config';
 import { AggregatedStatProvider } from './runtime_statistics_aggregator';
 import { ManagedConfiguration } from '../lib/create_managed_configuration';
+import { EphemeralTaskLifecycle } from '../ephemeral_task_lifecycle';
+import { CapacityEstimationStat, withCapacityEstimate } from './capacity_estimation';
 
-export { AggregatedStatProvider, AggregatedStat } from './runtime_statistics_aggregator';
+export type { AggregatedStatProvider, AggregatedStat } from './runtime_statistics_aggregator';
 
 export interface MonitoringStats {
   last_update: string;
@@ -36,6 +45,7 @@ export interface MonitoringStats {
     configuration?: MonitoredStat<ConfigStat>;
     workload?: MonitoredStat<WorkloadStat>;
     runtime?: MonitoredStat<TaskRunStat>;
+    ephemeral?: MonitoredStat<EphemeralTaskStat>;
   };
 }
 
@@ -49,7 +59,7 @@ interface MonitoredStat<T> {
   timestamp: string;
   value: T;
 }
-type RawMonitoredStat<T extends JsonObject> = MonitoredStat<T> & {
+export type RawMonitoredStat<T extends JsonObject> = MonitoredStat<T> & {
   status: HealthStatus;
 };
 
@@ -57,30 +67,48 @@ export interface RawMonitoringStats {
   last_update: string;
   stats: {
     configuration?: RawMonitoredStat<ConfigStat>;
-    workload?: RawMonitoredStat<WorkloadStat>;
+    workload?: RawMonitoredStat<SummarizedWorkloadStat>;
     runtime?: RawMonitoredStat<SummarizedTaskRunStat>;
+    ephemeral?: RawMonitoredStat<SummarizedEphemeralTaskStat>;
+    capacity_estimation?: RawMonitoredStat<CapacityEstimationStat>;
   };
 }
 
 export function createAggregators(
-  taskPollingLifecycle: TaskPollingLifecycle,
   taskStore: TaskStore,
   elasticsearchAndSOAvailability$: Observable<boolean>,
   config: TaskManagerConfig,
   managedConfig: ManagedConfiguration,
-  logger: Logger
+  logger: Logger,
+  taskPollingLifecycle?: TaskPollingLifecycle,
+  ephemeralTaskLifecycle?: EphemeralTaskLifecycle
 ): AggregatedStatProvider {
-  return merge(
+  const aggregators: AggregatedStatProvider[] = [
     createConfigurationAggregator(config, managedConfig),
-    createTaskRunAggregator(taskPollingLifecycle, config.monitored_stats_running_average_window),
+
     createWorkloadAggregator(
       taskStore,
       elasticsearchAndSOAvailability$,
       config.monitored_aggregated_stats_refresh_rate,
       config.poll_interval,
       logger
-    )
-  );
+    ),
+  ];
+  if (taskPollingLifecycle) {
+    aggregators.push(
+      createTaskRunAggregator(taskPollingLifecycle, config.monitored_stats_running_average_window)
+    );
+  }
+  if (ephemeralTaskLifecycle && ephemeralTaskLifecycle.enabled) {
+    aggregators.push(
+      createEphemeralTaskAggregator(
+        ephemeralTaskLifecycle,
+        config.monitored_stats_running_average_window,
+        config.max_workers
+      )
+    );
+  }
+  return merge(...aggregators);
 }
 
 export function createMonitoringStatsStream(
@@ -113,40 +141,51 @@ export function createMonitoringStatsStream(
 }
 
 export function summarizeMonitoringStats(
+  logger: Logger,
   {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     last_update,
-    stats: { runtime, workload, configuration },
+    stats: { runtime, workload, configuration, ephemeral },
   }: MonitoringStats,
   config: TaskManagerConfig
 ): RawMonitoringStats {
+  const summarizedStats = withCapacityEstimate(logger, {
+    ...(configuration
+      ? {
+          configuration: {
+            ...configuration,
+            status: HealthStatus.OK,
+          },
+        }
+      : {}),
+    ...(runtime
+      ? {
+          runtime: {
+            timestamp: runtime.timestamp,
+            ...summarizeTaskRunStat(logger, runtime.value, config),
+          },
+        }
+      : {}),
+    ...(workload
+      ? {
+          workload: {
+            timestamp: workload.timestamp,
+            ...summarizeWorkloadStat(workload.value),
+          },
+        }
+      : {}),
+    ...(ephemeral
+      ? {
+          ephemeral: {
+            timestamp: ephemeral.timestamp,
+            ...summarizeEphemeralStat(ephemeral.value),
+          },
+        }
+      : {}),
+  });
+
   return {
     last_update,
-    stats: {
-      ...(configuration
-        ? {
-            configuration: {
-              ...configuration,
-              status: HealthStatus.OK,
-            },
-          }
-        : {}),
-      ...(runtime
-        ? {
-            runtime: {
-              timestamp: runtime.timestamp,
-              ...summarizeTaskRunStat(runtime.value, config),
-            },
-          }
-        : {}),
-      ...(workload
-        ? {
-            workload: {
-              timestamp: workload.timestamp,
-              ...summarizeWorkloadStat(workload.value),
-            },
-          }
-        : {}),
-    },
+    stats: summarizedStats,
   };
 }

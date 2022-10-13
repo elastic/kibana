@@ -15,6 +15,12 @@ export const parsedWorkingCollector: ParsedUsageCollection = [
     collectorName: 'my_working_collector',
     schema: {
       value: {
+        interface_terms: {
+          computed_term: {
+            total: { type: 'long' },
+            type: { type: 'boolean' },
+          },
+        },
         flat: {
           type: 'keyword',
         },
@@ -98,6 +104,18 @@ export const parsedWorkingCollector: ParsedUsageCollection = [
           items: {
             kind: SyntaxKind.StringKeyword,
             type: 'StringKeyword',
+          },
+        },
+        interface_terms: {
+          computed_term: {
+            total: {
+              kind: SyntaxKind.NumberKeyword,
+              type: 'NumberKeyword',
+            },
+            type: {
+              kind: SyntaxKind.BooleanKeyword,
+              type: 'BooleanKeyword',
+            },
           },
         },
       },

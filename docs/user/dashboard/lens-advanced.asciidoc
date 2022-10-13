@@ -1,24 +1,28 @@
 [[create-a-dashboard-of-panels-with-ecommerce-data]]
-== Tutorial: Create a dashboard of panels with ecommerce sales data
+== Analyze time series data
 
-You collected sales data from your store, and you want to visualize and analyze the data on a dashboard. 
-To create dashboard panels of the data, open the *Lens* visualization builder, then  
-create the visualization panels that best display the data.
+In this tutorial, you'll use the ecommerce sample data to analyze sales trends, but you can use any type of data to complete the tutorial.
 
-When you've completed the tutorial, you'll have a dashboard that provides you with a complete overview of your ecommerce sales data.
+When you're done, you'll have a complete overview of the sample web logs data. 
 
 [role="screenshot"]
-image::images/lens_advanced_result.png[Dashboard view]
+image::images/lens_timeSeriesDataTutorialDashboard_8.3.png[Final dashboard with ecommerce sample data]
+
+Before you begin, you should be familiar with the <<kibana-concepts-analysts>>.
 
 [discrete]
 [[add-the-data-and-create-the-dashboard-advanced]]
 === Add the data and create the dashboard
 
-To create visualizations of the data from your store, add the data set, then create the dashboard.
+Add the sample ecommerce data, and create and set up the dashboard.
 
-. From the {kib} *Home* page, click *Try our sample data*.
+. On the home page, click *Try sample data*.
 
-. From *Sample eCommerce orders*, click *Add data*.
+. Click *Other sample data sets*. 
+
+. On the *Sample eCommerce orders* card, click *Add data*.
+
+Create the dashboard where you'll display the visualization panels.
 
 . Open the main menu, then click *Dashboard*.
 
@@ -26,226 +30,339 @@ To create visualizations of the data from your store, add the data set, then cre
 
 [float]
 [[open-and-set-up-lens-advanced]]
-=== Open and set up Lens
+=== Open and set up the visualization editor
 
-Open the *Lens* editor, then make sure the correct fields appear.
+Open the visualization editor, then make sure the correct fields appear.
 
-. From the dashboard, click *Create panel*.
+. On the dashboard, click *Create visualization*.
 
-. On the *New visualization* window, click *Lens*.
-+
-[role="screenshot"]
-image::images/lens_end_to_end_1_1.png[New visualization popover]
-
-. Make sure the *kibana_sample_data_ecommerce_* index appears.
+. Make sure the *Kibana Sample Data eCommerce* {data-source} appears, then set the <<set-time-filter,time filter>> to *Last 30 days*.
 
 [discrete]
-[[view-the-number-of-transactions-per-day]]
-=== View the number of transactions per hour
+[[custom-time-interval]]
+=== Create visualizations with custom time intervals
 
-To determine the number of orders made every hour, create a bar chart, then add the chart to the dashboard.
+When you create visualizations with time series data, you can use the default time interval, or increase and decrease the interval. For performance reasons, the visualization editor allows you to choose the minimum time interval, but not the exact time interval. The interval limit is controlled by the <<histogram-maxbars, `histogram:maxBars`>> setting and <<set-time-filter,time range>>. 
 
-. Set the <<set-time-filter,time filter>> to *Last 30 days*.
+To analyze the data with a custom time interval, create a bar chart that shows you how many orders were made at your store every hour:
 
-. From the *Available fields* list, drag and drop *Records* to the visualization builder.
+. From the *Available fields* list, drag *Records* to the workspace.
++
+The visualization editor creates a bar chart.
+
+. To zoom in on the data, click and drag your cursor across the bars. 
 +
 [role="screenshot"]
-image::images/lens_advanced_1_1.png[Added records to the workspace]
+image::images/lens_clickAndDragZoom_7.16.gif[Cursor clicking and dragging across the bars to zoom in on the data]
 
-. Change the *Vertical axis* title and display the number of orders per day. 
+. In the layer pane, click *Count of Records*.
 
-.. In the editor, click *Count of Records*.
-
-.. In the *Display name* field, enter `Number of orders`.
+.. In the *Name* field, enter `Number of orders`.
 
 .. Click *Add advanced options > Normalize by unit*. 
 
 .. From the *Normalize by unit* dropdown, select *per hour*, then click *Close*.
++
+*Normalize unit* converts *Average sales per 12 hours* into *Average sales per 12 hours (per hour)* by dividing the number of hours.
 
-. To hide the *Horizontal axis* label, open the *Bottom Axis* menu, then deselect *Show*.
+. To hide the *Horizontal axis* label, open the *Bottom Axis* menu, then select *None* from the *Axis title* dropdown.
+
+To identify the 75th percentile of orders, add a reference line:
+
+. In the layer pane, click *Add layer > Reference lines*.
+
+. Click *Static value*.
+
+.. Click *Quick functions*, then click *Percentile*.
+
+.. From the *Field* dropdown, select *total_quantity*.
+
+.. In the *Percentile* field, enter `75`.
+
+. Configure the display options.
+
+.. In the *Name* field, enter `75th`.
+
+.. To display the name, select *Name* from *Text decoration*.
+
+.. From the *Icon* dropdown, select *Tag*.
+
+.. In the *Color* field, enter `#E7664C`.
+
+. Click *Close*.
 +
 [role="screenshot"]
-image::images/lens_advanced_1_1_2.png[Bottom axis menu]
-+
-You have a bar chart that shows you how many orders were made at your store every hour.
-+
-[role="screenshot"]
-image::images/lens_advanced_1_2.png[Orders per day]
-
-. Click *Save and return*.
-
-[discrete]
-[[view-the-cumulative-number-of-products-sold-over-time]]
-=== View the cumulative number of products sold on weekends
-
-To determine the number of orders made only on Saturday and Sunday, create an area chart, then add it to the dashboard.
-
-. Open *Lens*.
-
-. From the *Chart Type* dropdown, select *Area*.
-+
-[role="screenshot"]
-image::images/lens_advanced_2_1_1.png[Chart type menu with Area selected]
-
-. Configure the cumulative sum of the store orders.
-
-.. From the *Available fields* list, drag and drop *Records* to the visualization builder.
-
-.. From the editor, click *Count of Records*.
-
-.. From *Select a function*, click *Cumulative sum*.
-
-.. In the *Display name* field, enter `Cumulative orders during weekend days`, then click *Close*.
-
-. Filter the results to display the data for only Saturday and Sunday.
-
-.. From the editor, click the *Drop a field or click to add* field for *Break down by*. 
-
-.. From *Select a function*, click *Filters*.
-
-.. Click *All records*.
-
-.. In the *KQL* field, enter `day_of_week : "Saturday" or day_of_week : "Sunday"`, then press Return.
-+
-The <<kuery-query,KQL filter>> displays all documents where `day_of_week` matches `Saturday` or `Sunday`.
-+
-[role="screenshot"]
-image::images/lens_advanced_2_1.png[Filter aggregation to filter weekend days]
-
-. To hide the legend, open the *Legend* menu, then click *Hide*.
-+
-[role="screenshot"]
-image::images/lens_advanced_2_2_1.png[Legend menu]
-+
-You have an area chart that shows you how many orders your store received during the weekend.
-+
-[role="screenshot"]
-image::images/lens_advanced_2_2.png[Line chart with cumulative sum of orders made on the weekend]
+image::images/lens_barChartCustomTimeInterval_8.3.png[Orders per day]
 
 . Click *Save and return*.
 
 [discrete]
 [[add-a-data-layer-advanced]]
-=== Create multiple key percentiles of product prices 
+=== Analyze multiple data series
 
-To view the price distribution of products sold over time, create a percentile chart, then add it to the dashboard.
+You can create visualizations with multiple data series within the same time interval, even when the series have similar configurations with minor differences.
 
-. Open *Lens*.
+To analyze multiple series, create a line chart that displays the price distribution of products sold over time:
 
-. From the *Chart Type* dropdown, select *Line*.
+. On the dashboard, click *Create visualization*.
 
-. From the *Available fields* list, drag and drop the data fields to the *Drop a field or click to add* fields in the editor.
+. Open the *Visualization type* dropdown, then select *Line*.
 
-* Drag and drop *products.price* to the *Vertical axis* field.
+. From the *Available fields* list, drag *products.price* to the workspace.
 
-* Drag and drop *order_date* to the *Horizontal axis* field.
+Create the 95th price distribution percentile:
 
-. Create the 95th percentile.
+. In the layer pane, click *Median of products.price*.
 
-.. In the editor, click *Median of products.price*.
+. Click the *Percentile* function.
 
-.. From *Select a function*, click *Percentile*.
+. In the *Name* field, enter `95th`, then click *Close*.
 
-.. In the *Display name* field, enter `95th`, then click *Close*.
+To copy a function, you drag it to the *Drop a field or click to add* field within the same group. To create the 90th percentile, duplicate the `95th` percentile:
 
-. To create the 90th percentile, duplicate the `95th` percentile.
-
-.. Drag and drop *95th* to *Drop a field or click to add*.
-
-.. Click *95th [1]*, then enter `90` in the *Percentile* field.
-
-.. In the *Display name* field enter `90th`, then click *Close*.
+. Drag the *95th* field to *Add or drag-and-drop a field* for *Vertical axis*.
 +
 [role="screenshot"]
-image::images/lens_advanced_3_1.gif[Easily duplicate the items with drag and drop]
+image::images/lens_advanced_2_2.gif[Easily duplicate the items with drag and drop]
 
-. Create the 50th percentile. 
+. Click *95th [1]*, then enter `90` in the *Percentile* field.
 
-.. Drag and drop *90th* to *Drop a field or click to add*.
+. In the *Name* field enter `90th`, then click *Close*.
 
-.. Click *90th [1]*, then enter `50` in the *Percentile* field.
+. To create the `50th` and `10th` percentiles, repeat the duplication steps.
 
-.. In the *Display name* field enter `50th`, then click *Close*.
-
-. Create the 10th percentile. 
-
-.. Drag and drop *50th* to *Drop a field or click to add*.
-
-.. Click *50th [1]*, then enter `10` in the *Percentile* field.
-
-.. In the *Display name* field enter `10th`, then click *Close*.
-
-. To change the left axis label, open the *Left Axis* menu, then enter `Percentiles for product prices` in the *Axis name* field.
+. Open the *Left Axis* menu, select *Custom* from the *Axis title* dropdown, then enter `Percentiles for product prices` in the *Axis title* field.
 +
 [role="screenshot"]
-image::images/lens_advanced_3_1_1.png[Left Axis menu]
-+
-You have a line chart that shows you the price distribution of products sold over time.
-+
-[role="screenshot"]
-image::images/lens_advanced_3_3.png[Percentiles for product prices chart]
+image::images/lens_lineChartMultipleDataSeries_7.16.png[Percentiles for product prices chart]
 
 . Click *Save and return*.
 
 [discrete]
-[[add-the-response-code-filters-advanced]]
-=== View the moving average of inventory prices
+[[add-a-data-layer]]
+=== Analyze multiple visualization types
 
-To view and analyze the prices of shoes, accessories, and clothing in the store inventory, create a line chart.
+With layers, you can analyze your data with multiple visualization types. When you create layered visualizations, match the data on the horizontal axis so that it uses the same scale. 
 
-. Open *Lens*.
+To analyze multiple visualization types, create an area chart that displays the average order prices, then add a line chart layer that displays the number of customers. 
 
-. From the *Chart Type* dropdown, select *Line*.
+. On the dashboard, click *Create visualization*.
 
-. From the *Available fields* list, drag and drop *products.price* to the visualization builder.
+. From the *Available fields* list, drag *products.price* to the workspace.
 
-. In the editor, click the *Drop a field or click to add* field for *Break down by*. 
+. In the layer pane, click *Median of products.price*.
 
-. From *Select a function*, click *Filters*.
+.. Click the *Average* function.
 
-. Add a filter for shoes.
+.. In the *Name* field, enter `Average price`, then click *Close*.
 
-.. Click *All records*.
+. Open the *Visualization type* dropdown, then select *Area*.
 
-.. In the *KQL* field, enter `category.keyword : *Shoes*`. 
+Add a layer to display the customer traffic:
 
-.. In the *Label* field, enter `Shoes`, then press Return.
+. In the layer pane, click *Add layer > Visualization*.
 
-. Add a filter for accessories.
+. From the *Available fields* list, drag *customer_id* to the *Vertical Axis* field in the second layer.
 
-.. Click *Add a filter*.
+. In the layer pane, click *Unique count of customer_id*.
 
-.. In the *KQL* field, enter `category.keyword : *Accessories*`. 
+.. In the *Name* field, enter `Number of customers`.
 
-.. In the *Label* field, enter `Accessories`, then press Return.
+.. In the *Series color* field, enter *#D36086*.
 
-. Add a filter for clothing.
+.. Click *Right* for the *Axis side*, then click *Close*.
 
-.. Click *Add a filter*.
+. From the *Available fields* list, drag *order_date* to the *Horizontal Axis* field in the second layer.
 
-.. In the *KQL* field, enter `category.keyword : *Clothing*`. 
-
-.. In the *Label* field, enter `Clothing`, then press Return.
-
-. Click *Close*
+. In the second layer, open the *Layer visualization type* menu, then click *Line*.
 +
 [role="screenshot"]
-image::images/lens_advanced_4_1.png[Median prices chart for different categories]
+image::images/lens_layerVisualizationTypeMenu_7.16.png[Layer visualization type menu]
+
+. To change the position of the legend, open the *Legend* menu, then select the *Alignment* arrow that points up.
++
+[role="screenshot"]
+image::images/lens_mixedXYChart_7.16.png[Layer visualization type menu]
+
+. Click *Save and return*.
 
 [discrete]
-[[add-the-moving-average]]
-==== Add the moving average
+[[percentage-stacked-area]]
+=== Compare the change in percentage over time
 
-To focus on the general trends rather than on the peaks in the data, add the moving average, then add the visualization to the dashboard.
+By default, the visualization editor displays time series data with stacked charts, which show how the different document sets change over time. 
 
-. In the editor, click the *Median of products.price*.
+To view change over time as a percentage, create an *Area percentage* chart that displays three order categories over time:
 
-. From *Select a function*, click *Moving average*.
+. On the dashboard, click *Create visualization*.
 
-. In the *Window size* field, enter `7`, then click *Close*.
+. From the *Available fields* list, drag *Records* to the workspace.
+
+. Open the *Visualization type* dropdown, then select *Area percentage*.
+
+For each order category, create a filter: 
+
+. In the layer pane, click *Add or drag-and-drop a field* for *Break down by*.
+
+. Click the *Filters* function.
+
+. Click *All records*, enter the following in the query bar, then press Return:
+
+* *KQL* &mdash; `category.keyword : *Clothing`
+
+* *Label* &mdash; `Clothing`
+
+. Click *Add a filter*, enter the following in the query bar, then press Return:
+
+* *KQL* &mdash; `category.keyword : *Shoes`
+
+* *Label* &mdash; `Shoes`
+
+. Click *Add a filter*, enter the following in the query bar, then press Return:
+
+* *KQL* &mdash; `category.keyword : *Accessories`
+
+* *Label* &mdash; `Accessories`
+
+. Click *Close*.
+
+. Open the *Legend* menu, then select the *Alignment* arrow that points up.
 +
 [role="screenshot"]
-image::images/lens_advanced_4_2.png[Moving average prices chart for different categories]
+image::images/lens_areaPercentageNumberOfOrdersByCategory_8.3.png[Prices share by category]
+
+. Click *Save and return*.
+
+[discrete]
+[[view-the-cumulative-number-of-products-sold-on-weekends]]
+=== View the cumulative number of products sold on weekends
+
+To determine the number of orders made only on Saturday and Sunday, create an area chart, then add it to the dashboard.
+
+. On the dashboard, click *Create visualization*.
+
+. Open the *Visualization type* dropdown, then select *Area*.
+
+Configure the cumulative sum of store orders:
+
+. From the *Available fields* list, drag *Records* to the workspace.
+
+. In the layer pane, click *Count of Records*.
+
+. Click the *Cumulative sum* function.
+
+. In the *Name* field, enter `Cumulative weekend orders`, then click *Close*.
+
+Filter the results to display the data for only Saturday and Sunday:
+
+. In the layer pane, click *Add or drag-and-drop a field* for *Break down by*. 
+
+. Click the *Filters* function.
+
+. Click *All records*, enter the following in the query bar, then press Return:
+
+* *KQL* &mdash; `day_of_week : "Saturday" or day_of_week : "Sunday"`
+
+* *Label* &mdash; `Saturday and Sunday`
++
+The <<kuery-query,KQL filter>> displays all documents where `day_of_week` matches `Saturday` or `Sunday`.
+
+. Open the *Legend* menu, then click *Hide* next to *Display*.
++
+[role="screenshot"]
+image::images/lens_areaChartCumulativeNumberOfSalesOnWeekend_7.16.png[Area chart with cumulative sum of orders made on the weekend]
+
+. Click *Save and return*.
+
+[discrete]
+[[compare-time-ranges]]
+=== Compare time ranges
+
+With *Time shift*, you can compare the data from different time ranges. To make sure the data correctly displays, choose a multiple of the date histogram interval when you use multiple time shifts. For example, you are unable to use a *36h* time shift for one series, and a *1d* time shift for the second series if the interval is *days*.   
+
+To compare two time ranges, create a line chart that compares the sales in the current week with sales from the previous week: 
+
+. On the dashboard, click *Create visualization*.
+
+. Open the *Visualization type* dropdown, then select *Line*.
+
+. From the *Available fields* list, drag *Records* to the workspace.
+
+. To duplicate *Count of Records*, drag *Count of Records* to *Add or drag-and-drop a field* for *Vertical axis* in the layer pane.
+
+To create a week-over-week comparison, shift *Count of Records [1]* by one week:
+
+. In the layer pane, click *Count of Records [1]*.
+
+. Click *Add advanced options > Time shift*, select *1 week ago*, then click *Close*.
++
+To use custom time shifts, enter the time value and increment, then press Enter. For example, enter *1w* to use the *1 week ago* time shift.
++
+[role="screenshot"]
+image::images/lens_time_shift.png[Line chart with week-over-week sales comparison]
+
+. Click *Save and return*.
+
+Time shifts can be used on any metric. The special shift *previous* will show the time window preceding the currently selected one in the time picker in the top right, spanning the same duration.
+For example, if *Last 7 days* is selected in the time picker, *previous* will show data from 14 days ago to 7 days ago. This mode can't be used together with date histograms.
+
+[float]
+[[compare-time-as-percent]]
+==== Analyze the percent change between time ranges
+
+With *Formula*, you can analyze the percent change in your data from different time ranges.
+
+To compare time range changes as a percent, create a bar chart that compares the sales in the current week with sales from the previous week: 
+
+. On the dashboard, click *Create visualization*.
+
+. From the *Available fields* list, drag *Records* to the workspace.
+
+. In the layer pane, click *Count of Records*.
+
+. Click *Formula*, then enter `count() / count(shift='1w') - 1`.
+
+. Open the *Value format* dropdown, select *Percent*, then enter `0` in the *Decimals* field.
+
+. In the *Name* field, enter `Percent of change`, then click *Close*.
++
+[role="screenshot"]
+image::images/lens_percent_chage.png[Bar chart with percent change in sales between the current time and the previous week]
+
+. Click *Save and return*.
+
+[discrete]
+[[view-customers-over-time-by-continents]]
+=== Analyze the data in a table
+
+With tables, you can view and compare the field values, which is useful for displaying the locations of customer orders.
+
+Create a date histogram table and group the customer count metric by category, such as the continent registered in user accounts:
+
+. On the dashboard, click *Create visualization*.
+
+. Open the *Visualization type* dropdown, then select *Table*.
+
+. From the *Available fields* list, drag *customer_id* to the *Metrics* field in the layer pane.
+
+.. In the layer pane, click *Unique count of customer_id*.
+
+.. In the *Name* field, enter `Customers`, then click *Close*.
+
+. From the *Available fields* list, drag *order_date* to the *Rows* field in the layer pane.
+
+.. In the layer pane, click the *order_date*.
+
+.. In the *Minimum interval* field, enter *1d*.
+
+.. In the *Name* field, enter `Sales`, then click *Close*.
+
+To split the metric, add columns for each continent using the *Columns* field:
+
+. From the *Available fields* list, drag *geoip.continent_name* to the *Columns* field in the layer pane.
++
+[role="screenshot"]
+image::images/lens_table_over_time.png[Date histogram table with groups for the customer count metric]
 
 . Click *Save and return*.
 
@@ -256,4 +373,11 @@ Now that you have a complete overview of your ecommerce sales data, save the das
 
 . In the toolbar, click *Save*.
 
-. On the *Save dashboard* window, enter `Ecommerce sales data`, then click *Save*.
+. On the *Save dashboard* window, enter `Ecommerce sales`, then click *Save*.
+
+. Select *Store time with dashboard*.
+
+. Click *Save*.
+
+[role="screenshot"]
+image::images/lens_timeSeriesDataTutorialDashboard_8.3.png[Final dashboard with ecommerce sample data]

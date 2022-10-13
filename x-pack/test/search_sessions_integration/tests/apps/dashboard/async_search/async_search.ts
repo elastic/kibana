@@ -15,10 +15,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'header', 'dashboard', 'visChart']);
   const dashboardPanelActions = getService('dashboardPanelActions');
   const queryBar = getService('queryBar');
+  const elasticChart = getService('elasticChart');
+  const xyChartSelector = 'xyVisChart';
+
+  const enableNewChartLibraryDebug = async () => {
+    await elasticChart.setNewChartUiDebugFlag();
+    await queryBar.submitQuery();
+  };
 
   describe('dashboard with async search', () => {
     before(async function () {
-      const { body } = await es.info();
+      const body = await es.info();
       if (!body.version.number.includes('SNAPSHOT')) {
         log.debug('Skipping because this build does not have the required shard_delay agg');
         this.skip();
@@ -29,8 +36,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.loadSavedDashboard('Not Delayed');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.missingOrFail('embeddableErrorLabel');
-      const data = await PageObjects.visChart.getBarChartData('Sum of bytes');
+      await testSubjects.missingOrFail('embeddableError');
+      await enableNewChartLibraryDebug();
+      const data = await PageObjects.visChart.getBarChartData(xyChartSelector, 'Sum of bytes');
       expect(data.length).to.be(5);
     });
 
@@ -38,8 +46,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.loadSavedDashboard('Delayed 5s');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.missingOrFail('embeddableErrorLabel');
-      const data = await PageObjects.visChart.getBarChartData('');
+      await testSubjects.missingOrFail('embeddableError');
+      await enableNewChartLibraryDebug();
+      const data = await PageObjects.visChart.getBarChartData(xyChartSelector, 'Sum of bytes');
       expect(data.length).to.be(5);
     });
 
@@ -47,7 +56,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.loadSavedDashboard('Delayed 15s');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.existOrFail('embeddableErrorLabel');
+      await testSubjects.existOrFail('embeddableError');
       await testSubjects.existOrFail('searchTimeoutError');
     });
 
@@ -55,9 +64,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.loadSavedDashboard('Multiple delayed');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.existOrFail('embeddableErrorLabel');
+      await testSubjects.existOrFail('embeddableError');
       // there should be two failed panels
-      expect((await testSubjects.findAll('embeddableErrorLabel')).length).to.be(2);
+      expect((await testSubjects.findAll('embeddableError')).length).to.be(2);
       // but only single error toast because searches are grouped
       expect((await testSubjects.findAll('searchTimeoutError')).length).to.be(1);
 

@@ -10,8 +10,7 @@ import { mlServicesMock, mlAuthzMock as mockMlAuthzFactory } from '../../../mach
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import {
   getEmptyFindResult,
-  getFindResultStatus,
-  getAlertMock,
+  getRuleMock,
   getPatchRequest,
   getFindResultWithSingleHit,
   nonRuleFindResult,
@@ -20,9 +19,18 @@ import {
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { patchRulesRoute } from './patch_rules_route';
 import { getPatchRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/patch_rules_schema.mock';
-import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
+import { getMlRuleParams, getQueryRuleParams } from '../../schemas/rule_schemas.mock';
+import { legacyMigrate } from '../../rules/utils';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
+
+jest.mock('../../rules/utils', () => {
+  const actual = jest.requireActual('../../rules/utils');
+  return {
+    ...actual,
+    legacyMigrate: jest.fn(),
+  };
+});
 
 describe('patch_rules', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -34,23 +42,31 @@ describe('patch_rules', () => {
     ({ clients, context } = requestContextMock.createTools());
     ml = mlServicesMock.createSetupContract();
 
-    clients.alertsClient.get.mockResolvedValue(getAlertMock(getQueryRuleParams())); // existing rule
-    clients.alertsClient.find.mockResolvedValue(getFindResultWithSingleHit()); // existing rule
-    clients.alertsClient.update.mockResolvedValue(getAlertMock(getQueryRuleParams())); // successful update
-    clients.savedObjectsClient.find.mockResolvedValue(getFindResultStatus()); // successful transform
+    clients.rulesClient.get.mockResolvedValue(getRuleMock(getQueryRuleParams())); // existing rule
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // existing rule
+    clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams())); // successful update
+
+    (legacyMigrate as jest.Mock).mockResolvedValue(getRuleMock(getQueryRuleParams()));
 
     patchRulesRoute(server.router, ml);
   });
 
-  describe('status codes with actionClient and alertClient', () => {
-    test('returns 200 when updating a single rule with a valid actionClient and alertClient', async () => {
-      const response = await server.inject(getPatchRequest(), context);
+  describe('status codes', () => {
+    test('returns 200', async () => {
+      const response = await server.inject(
+        getPatchRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(200);
     });
 
     test('returns 404 when updating a single rule that does not exist', async () => {
-      clients.alertsClient.find.mockResolvedValue(getEmptyFindResult());
-      const response = await server.inject(getPatchRequest(), context);
+      clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
+      (legacyMigrate as jest.Mock).mockResolvedValue(null);
+      const response = await server.inject(
+        getPatchRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({
         message: 'rule_id: "rule-1" not found',
@@ -58,16 +74,13 @@ describe('patch_rules', () => {
       });
     });
 
-    test('returns 404 if alertClient is not available on the route', async () => {
-      context.alerting!.getAlertsClient = jest.fn();
-      const response = await server.inject(getPatchRequest(), context);
-      expect(response.status).toEqual(404);
-      expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
-    });
-
     test('returns error if requesting a non-rule', async () => {
-      clients.alertsClient.find.mockResolvedValue(nonRuleFindResult());
-      const response = await server.inject(getPatchRequest(), context);
+      (legacyMigrate as jest.Mock).mockResolvedValue(null);
+      clients.rulesClient.find.mockResolvedValue(nonRuleFindResult());
+      const response = await server.inject(
+        getPatchRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(404);
       expect(response.body).toEqual({
         message: expect.stringContaining('not found'),
@@ -76,10 +89,13 @@ describe('patch_rules', () => {
     });
 
     test('catches error if update throws error', async () => {
-      clients.alertsClient.update.mockImplementation(async () => {
+      clients.rulesClient.update.mockImplementation(async () => {
         throw new Error('Test error');
       });
-      const response = await server.inject(getPatchRequest(), context);
+      const response = await server.inject(
+        getPatchRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
         message: 'Test error',
@@ -88,6 +104,12 @@ describe('patch_rules', () => {
     });
 
     test('allows ML Params to be patched', async () => {
+      clients.rulesClient.get.mockResolvedValueOnce(getRuleMock(getMlRuleParams()));
+      clients.rulesClient.find.mockResolvedValueOnce({
+        ...getFindResultWithSingleHit(),
+        data: [getRuleMock(getMlRuleParams())],
+      });
+      (legacyMigrate as jest.Mock).mockResolvedValueOnce(getRuleMock(getMlRuleParams()));
       const request = requestMock.create({
         method: 'patch',
         path: DETECTION_ENGINE_RULES_URL,
@@ -98,9 +120,9 @@ describe('patch_rules', () => {
           machine_learning_job_id: 'some_job_id',
         },
       });
-      await server.inject(request, context);
+      await server.inject(request, requestContextMock.convertContext(context));
 
-      expect(clients.alertsClient.update).toHaveBeenCalledWith(
+      expect(clients.rulesClient.update).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
             params: expect.objectContaining({
@@ -123,7 +145,7 @@ describe('patch_rules', () => {
         path: DETECTION_ENGINE_RULES_URL,
         body: typicalMlRulePayload(),
       });
-      const response = await server.inject(request, context);
+      const response = await server.inject(request, requestContextMock.convertContext(context));
 
       expect(response.status).toEqual(403);
       expect(response.body).toEqual({
@@ -144,7 +166,7 @@ describe('patch_rules', () => {
         path: DETECTION_ENGINE_RULES_URL,
         body: payloadWithoutType,
       });
-      const response = await server.inject(request, context);
+      const response = await server.inject(request, requestContextMock.convertContext(context));
 
       expect(response.status).toEqual(403);
       expect(response.body).toEqual({
@@ -161,7 +183,7 @@ describe('patch_rules', () => {
         path: DETECTION_ENGINE_RULES_URL,
         body: { ...getPatchRulesSchemaMock(), rule_id: undefined },
       });
-      const response = await server.inject(request, context);
+      const response = await server.inject(request, requestContextMock.convertContext(context));
       expect(response.body).toEqual({
         message: ['either "id" or "rule_id" must be set'],
         status_code: 400,
@@ -188,7 +210,7 @@ describe('patch_rules', () => {
       const result = server.validate(request);
 
       expect(result.badRequest).toHaveBeenCalledWith(
-        'Invalid value "unknown_type" supplied to "type"'
+        'Invalid value "unknown_type" supplied to "type",Invalid value "kuery" supplied to "language"'
       );
     });
 

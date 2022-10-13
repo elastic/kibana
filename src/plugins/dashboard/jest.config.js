@@ -11,4 +11,8 @@ module.exports = {
   rootDir: '../../..',
   roots: ['<rootDir>/src/plugins/dashboard'],
   testRunner: 'jasmine2',
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/dashboard',
+  coverageReporters: ['text', 'html'],
+  collectCoverageFrom: ['<rootDir>/src/plugins/dashboard/{common,public,server}/**/*.{ts,tsx}'],
+  setupFiles: ['<rootDir>/src/plugins/dashboard/jest_setup.ts'],
 };

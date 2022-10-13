@@ -7,7 +7,7 @@
 
 import React, { useMemo, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
@@ -16,18 +16,23 @@ import {
   EuiText,
   EuiIconTip,
   EuiSpacer,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiEmptyPrompt,
   EuiLink,
 } from '@elastic/eui';
-import { ScopedHistory } from 'kibana/public';
+import { ScopedHistory } from '@kbn/core/public';
 
 import {
+  PageLoading,
+  PageError,
+  Error,
   reactRouterNavigate,
   extractQueryParams,
   attemptToURIDecode,
+  APP_WRAPPER_CLASS,
+  useExecutionContext,
 } from '../../../../shared_imports';
 import { useAppContext } from '../../../app_context';
-import { SectionError, SectionLoading, Error } from '../../../components';
 import { useLoadDataStreams } from '../../../services/api';
 import { documentationService } from '../../../services/documentation';
 import { Section } from '../home';
@@ -52,12 +57,22 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
   const decodedDataStreamName = attemptToURIDecode(dataStreamName);
 
   const {
-    core: { getUrlForApp },
+    core: { getUrlForApp, executionContext },
     plugins: { isFleetEnabled },
   } = useAppContext();
 
+  useExecutionContext(executionContext, {
+    type: 'application',
+    page: 'indexManagementDataStreamsTab',
+  });
+
   const [isIncludeStatsChecked, setIsIncludeStatsChecked] = useState(false);
-  const { error, isLoading, data: dataStreams, resendRequest: reload } = useLoadDataStreams({
+  const {
+    error,
+    isLoading,
+    data: dataStreams,
+    resendRequest: reload,
+  } = useLoadDataStreams({
     includeStats: isIncludeStatsChecked,
   });
 
@@ -166,16 +181,16 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
 
   if (isLoading) {
     content = (
-      <SectionLoading>
+      <PageLoading>
         <FormattedMessage
           id="xpack.idxMgmt.dataStreamList.loadingDataStreamsDescription"
           defaultMessage="Loading data streams…"
         />
-      </SectionLoading>
+      </PageLoading>
     );
   } else if (error) {
     content = (
-      <SectionError
+      <PageError
         title={
           <FormattedMessage
             id="xpack.idxMgmt.dataStreamList.loadingDataStreamsErrorMessage"
@@ -252,10 +267,10 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
         data-test-subj="emptyPrompt"
       />
     );
-  } else if (Array.isArray(dataStreams) && dataStreams.length > 0) {
-    activateHiddenFilter(isSelectedDataStreamHidden(dataStreams, decodedDataStreamName));
+  } else {
+    activateHiddenFilter(isSelectedDataStreamHidden(dataStreams!, decodedDataStreamName));
     content = (
-      <>
+      <EuiPageContent hasShadow={false} paddingSize="none" data-test-subj="dataStreamList">
         {renderHeader()}
         <EuiSpacer size="l" />
 
@@ -270,12 +285,12 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
           history={history as ScopedHistory}
           includeStats={isIncludeStatsChecked}
         />
-      </>
+      </EuiPageContent>
     );
   }
 
   return (
-    <div data-test-subj="dataStreamList">
+    <div className={APP_WRAPPER_CLASS}>
       {content}
 
       {/*

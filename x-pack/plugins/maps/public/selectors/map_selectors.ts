@@ -8,29 +8,32 @@
 import { createSelector } from 'reselect';
 import { FeatureCollection } from 'geojson';
 import _ from 'lodash';
-import { Adapters } from 'src/plugins/inspector/public';
-import { TileLayer } from '../classes/layers/tile_layer/tile_layer';
-// @ts-ignore
-import { VectorTileLayer } from '../classes/layers/vector_tile_layer/vector_tile_layer';
-import { IVectorLayer, VectorLayer } from '../classes/layers/vector_layer';
-import { VectorStyle } from '../classes/styles/vector/vector_style';
-import { HeatmapLayer } from '../classes/layers/heatmap_layer';
-import { BlendedVectorLayer } from '../classes/layers/blended_vector_layer/blended_vector_layer';
-import { getTimeFilter } from '../kibana_services';
+import type { Query } from '@kbn/data-plugin/common';
+import { Filter } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
+import { RasterTileLayer } from '../classes/layers/raster_tile_layer/raster_tile_layer';
+import { EmsVectorTileLayer } from '../classes/layers/ems_vector_tile_layer/ems_vector_tile_layer';
 import {
-  getChartsPaletteServiceGetColor,
-  getInspectorAdapters,
-} from '../reducers/non_serializable_instances';
-import { TiledVectorLayer } from '../classes/layers/tiled_vector_layer/tiled_vector_layer';
+  BlendedVectorLayer,
+  IVectorLayer,
+  MvtVectorLayer,
+  GeoJsonVectorLayer,
+} from '../classes/layers/vector_layer';
+import { VectorStyle } from '../classes/styles/vector/vector_style';
+import { isLayerGroup, LayerGroup } from '../classes/layers/layer_group';
+import { HeatmapLayer } from '../classes/layers/heatmap_layer';
+import { getTimeFilter } from '../kibana_services';
+import { getChartsPaletteServiceGetColor } from '../reducers/non_serializable_instances';
 import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../reducers/copy_persistent_state';
 import { InnerJoin } from '../classes/joins/inner_join';
 import { getSourceByType } from '../classes/sources/source_registry';
 import { GeoJsonFileSource } from '../classes/sources/geojson_file_source';
 import {
+  LAYER_TYPE,
   SOURCE_DATA_REQUEST_ID,
+  SPATIAL_FILTERS_LAYER_ID,
   STYLE_TYPE,
   VECTOR_STYLES,
-  SPATIAL_FILTERS_LAYER_ID,
 } from '../../common/constants';
 // @ts-ignore
 import { extractFeaturesFromFilters } from '../../common/elasticsearch_util';
@@ -38,77 +41,93 @@ import { MapStoreState } from '../reducers/store';
 import {
   AbstractSourceDescriptor,
   DataRequestDescriptor,
+  CustomIcon,
   DrawState,
+  EMSVectorTileLayerDescriptor,
+  EditState,
   Goto,
   HeatmapLayerDescriptor,
   LayerDescriptor,
+  LayerGroupDescriptor,
   MapCenter,
   MapExtent,
-  MapQuery,
-  MapRefreshConfig,
+  MapSettings,
   TooltipState,
   VectorLayerDescriptor,
 } from '../../common/descriptor_types';
-import { MapSettings } from '../reducers/map';
-import { Filter, TimeRange } from '../../../../../src/plugins/data/public';
 import { ISource } from '../classes/sources/source';
-import { ITMSSource } from '../classes/sources/tms_source';
 import { IVectorSource } from '../classes/sources/vector_source';
 import { ESGeoGridSource } from '../classes/sources/es_geo_grid_source';
+import { EMSTMSSource } from '../classes/sources/ems_tms_source';
+import { IRasterSource } from '../classes/sources/raster_source';
 import { ILayer } from '../classes/layers/layer';
+import { getIsReadOnly } from './ui_selectors';
+
+function createJoinInstances(vectorLayerDescriptor: VectorLayerDescriptor, source: IVectorSource) {
+  return vectorLayerDescriptor.joins
+    ? vectorLayerDescriptor.joins.map((joinDescriptor) => {
+        return new InnerJoin(joinDescriptor, source);
+      })
+    : [];
+}
 
 export function createLayerInstance(
   layerDescriptor: LayerDescriptor,
-  inspectorAdapters?: Adapters,
+  customIcons: CustomIcon[],
   chartsPaletteServiceGetColor?: (value: string) => string | null
 ): ILayer {
-  const source: ISource = createSourceInstance(layerDescriptor.sourceDescriptor, inspectorAdapters);
+  if (layerDescriptor.type === LAYER_TYPE.LAYER_GROUP) {
+    return new LayerGroup({ layerDescriptor: layerDescriptor as LayerGroupDescriptor });
+  }
 
+  const source: ISource = createSourceInstance(layerDescriptor.sourceDescriptor);
   switch (layerDescriptor.type) {
-    case TileLayer.type:
-      return new TileLayer({ layerDescriptor, source: source as ITMSSource });
-    case VectorLayer.type:
-      const joins: InnerJoin[] = [];
-      const vectorLayerDescriptor = layerDescriptor as VectorLayerDescriptor;
-      if (vectorLayerDescriptor.joins) {
-        vectorLayerDescriptor.joins.forEach((joinDescriptor) => {
-          const join = new InnerJoin(joinDescriptor, source as IVectorSource);
-          joins.push(join);
-        });
-      }
-      return new VectorLayer({
-        layerDescriptor: vectorLayerDescriptor,
-        source: source as IVectorSource,
-        joins,
-        chartsPaletteServiceGetColor,
+    case LAYER_TYPE.RASTER_TILE:
+      return new RasterTileLayer({ layerDescriptor, source: source as IRasterSource });
+    case LAYER_TYPE.EMS_VECTOR_TILE:
+      return new EmsVectorTileLayer({
+        layerDescriptor: layerDescriptor as EMSVectorTileLayerDescriptor,
+        source: source as EMSTMSSource,
       });
-    case VectorTileLayer.type:
-      return new VectorTileLayer({ layerDescriptor, source: source as ITMSSource });
-    case HeatmapLayer.type:
+    case LAYER_TYPE.HEATMAP:
       return new HeatmapLayer({
         layerDescriptor: layerDescriptor as HeatmapLayerDescriptor,
         source: source as ESGeoGridSource,
       });
-    case BlendedVectorLayer.type:
+    case LAYER_TYPE.GEOJSON_VECTOR:
+      return new GeoJsonVectorLayer({
+        layerDescriptor: layerDescriptor as VectorLayerDescriptor,
+        source: source as IVectorSource,
+        joins: createJoinInstances(
+          layerDescriptor as VectorLayerDescriptor,
+          source as IVectorSource
+        ),
+        customIcons,
+        chartsPaletteServiceGetColor,
+      });
+    case LAYER_TYPE.BLENDED_VECTOR:
       return new BlendedVectorLayer({
         layerDescriptor: layerDescriptor as VectorLayerDescriptor,
         source: source as IVectorSource,
+        customIcons,
         chartsPaletteServiceGetColor,
       });
-    case TiledVectorLayer.type:
-      return new TiledVectorLayer({
+    case LAYER_TYPE.MVT_VECTOR:
+      return new MvtVectorLayer({
         layerDescriptor: layerDescriptor as VectorLayerDescriptor,
         source: source as IVectorSource,
+        joins: createJoinInstances(
+          layerDescriptor as VectorLayerDescriptor,
+          source as IVectorSource
+        ),
+        customIcons,
       });
     default:
       throw new Error(`Unrecognized layerType ${layerDescriptor.type}`);
   }
 }
 
-function createSourceInstance(
-  sourceDescriptor: AbstractSourceDescriptor | null,
-  inspectorAdapters?: Adapters
-): ISource {
+function createSourceInstance(sourceDescriptor: AbstractSourceDescriptor | null): ISource {
   if (sourceDescriptor === null) {
     throw new Error('Source-descriptor should be initialized');
   }
@@ -116,7 +135,7 @@ function createSourceInstance(
   if (!source) {
     throw new Error(`Unrecognized sourceType ${sourceDescriptor.type}`);
   }
-  return new source.ConstructorFunction(sourceDescriptor, inspectorAdapters);
+  return new source.ConstructorFunction(sourceDescriptor);
 }
 
 export const getMapSettings = ({ map }: MapStoreState): MapSettings => map.settings;
@@ -159,8 +178,6 @@ export const getLayerListRaw = ({ map }: MapStoreState): LayerDescriptor[] =>
 export const getWaitingForMapReadyLayerListRaw = ({ map }: MapStoreState): LayerDescriptor[] =>
   map.waitingForMapReadyLayerList ? map.waitingForMapReadyLayerList : [];
 
-export const getScrollZoom = ({ map }: MapStoreState): boolean => map.mapState.scrollZoom;
-
 export const getMapExtent = ({ map }: MapStoreState): MapExtent | undefined => map.mapState.extent;
 
 export const getMapBuffer = ({ map }: MapStoreState): MapExtent | undefined => map.mapState.buffer;
@@ -176,9 +193,18 @@ export const getMouseCoordinates = ({ map }: MapStoreState) => map.mapState.mous
 export const getTimeFilters = ({ map }: MapStoreState): TimeRange =>
   map.mapState.timeFilters ? map.mapState.timeFilters : getTimeFilter().getTime();
 
-export const getQuery = ({ map }: MapStoreState): MapQuery | undefined => map.mapState.query;
+export const getTimeslice = ({ map }: MapStoreState) => map.mapState.timeslice;
+
+export const getCustomIcons = ({ map }: MapStoreState): CustomIcon[] => {
+  return map.settings.customIcons;
+};
+
+export const getQuery = ({ map }: MapStoreState): Query | undefined => map.mapState.query;
 
 export const getFilters = ({ map }: MapStoreState): Filter[] => map.mapState.filters;
+
+export const getEmbeddableSearchContext = ({ map }: MapStoreState) =>
+  map.mapState.embeddableSearchContext;
 
 export const getSearchSessionId = ({ map }: MapStoreState): string | undefined =>
   map.mapState.searchSessionId;
@@ -195,26 +221,10 @@ export const isUsingSearch = (state: MapStoreState): boolean => {
 export const getDrawState = ({ map }: MapStoreState): DrawState | undefined =>
   map.mapState.drawState;
 
-export const isDrawingFilter = ({ map }: MapStoreState): boolean => {
-  return !!map.mapState.drawState;
-};
+export const getEditState = ({ map }: MapStoreState): EditState | undefined =>
+  map.mapState.editState;
 
-export const getRefreshConfig = ({ map }: MapStoreState): MapRefreshConfig => {
-  if (map.mapState.refreshConfig) {
-    return map.mapState.refreshConfig;
-  }
-
-  const refreshInterval = getTimeFilter().getRefreshInterval();
-  return {
-    isPaused: refreshInterval.pause,
-    interval: refreshInterval.value,
-  };
-};
-
-export const getRefreshTimerLastTriggeredAt = ({ map }: MapStoreState): string | undefined =>
-  map.mapState.refreshTimerLastTriggeredAt;
-
-function getLayerDescriptor(state: MapStoreState, layerId: string) {
+export function getLayerDescriptor(state: MapStoreState, layerId: string) {
   const layerListRaw = getLayerListRaw(state);
   return layerListRaw.find((layer) => layer.id === layerId);
 }
@@ -234,31 +244,37 @@ export const getDataFilters = createSelector(
   getMapBuffer,
   getMapZoom,
   getTimeFilters,
-  getRefreshTimerLastTriggeredAt,
+  getTimeslice,
   getQuery,
   getFilters,
+  getEmbeddableSearchContext,
   getSearchSessionId,
   getSearchSessionMapBuffer,
+  getIsReadOnly,
   (
     mapExtent,
     mapBuffer,
     mapZoom,
     timeFilters,
-    refreshTimerLastTriggeredAt,
+    timeslice,
     query,
     filters,
+    embeddableSearchContext,
     searchSessionId,
-    searchSessionMapBuffer
+    searchSessionMapBuffer,
+    isReadOnly
   ) => {
     return {
       extent: mapExtent,
       buffer: searchSessionId && searchSessionMapBuffer ? searchSessionMapBuffer : mapBuffer,
       zoom: mapZoom,
       timeFilters,
-      refreshTimerLastTriggeredAt,
+      timeslice,
       query,
       filters,
+      embeddableSearchContext,
       searchSessionId,
+      isReadOnly,
     };
   }
 );
@@ -276,8 +292,8 @@ export const getSpatialFiltersLayer = createSelector(
       name: 'spatialFilters',
     });
 
-    return new VectorLayer({
-      layerDescriptor: VectorLayer.createDescriptor({
+    return new GeoJsonVectorLayer({
+      layerDescriptor: GeoJsonVectorLayer.createDescriptor({
         id: SPATIAL_FILTERS_LAYER_ID,
         visible: settings.showSpatialFilters,
         alpha: settings.spatialFiltersAlpa,
@@ -303,18 +319,42 @@ export const getSpatialFiltersLayer = createSelector(
         }),
       }),
       source: new GeoJsonFileSource(geoJsonSourceDescriptor),
+      customIcons: [], // spatial filters layer does not support custom icons
     });
   }
 );
 
 export const getLayerList = createSelector(
   getLayerListRaw,
-  getInspectorAdapters,
   getChartsPaletteServiceGetColor,
-  (layerDescriptorList, inspectorAdapters, chartsPaletteServiceGetColor) => {
-    return layerDescriptorList.map((layerDescriptor) =>
-      createLayerInstance(layerDescriptor, inspectorAdapters, chartsPaletteServiceGetColor)
+  getCustomIcons,
+  (layerDescriptorList, chartsPaletteServiceGetColor, customIcons) => {
+    const layers = layerDescriptorList.map((layerDescriptor) =>
+      createLayerInstance(layerDescriptor, customIcons, chartsPaletteServiceGetColor)
     );
+
+    const childrenMap = new Map<string, ILayer[]>();
+    layers.forEach((layer) => {
+      const parent = layer.getParent();
+      if (!parent) {
+        return;
+      }
+
+      const children = childrenMap.has(parent) ? childrenMap.get(parent)! : [];
+      childrenMap.set(parent, [...children, layer]);
+    });
+
+    childrenMap.forEach((children, parent) => {
+      const parentLayer = layers.find((layer) => {
+        return layer.getId() === parent;
+      });
+      if (!parentLayer || !isLayerGroup(parentLayer)) {
+        return;
+      }
+      (parentLayer as LayerGroup).setChildren(children);
+    });
+
+    return layers;
   }
 );
 
@@ -385,7 +425,7 @@ export const getQueryableUniqueIndexPatternIds = createSelector(
 
     if (waitingForMapReadyLayerList.length) {
       waitingForMapReadyLayerList.forEach((layerDescriptor) => {
-        const layer = createLayerInstance(layerDescriptor);
+        const layer = createLayerInstance(layerDescriptor, []); // custom icons not needed, layer instance only used to get index pattern ids
         if (layer.isVisible()) {
           indexPatternIds.push(...layer.getQueryableIndexPatternIds());
         }
@@ -398,6 +438,26 @@ export const getQueryableUniqueIndexPatternIds = createSelector(
       });
     }
     return _.uniq(indexPatternIds);
+  }
+);
+
+export const getGeoFieldNames = createSelector(
+  getLayerList,
+  getWaitingForMapReadyLayerListRaw,
+  (layerList, waitingForMapReadyLayerList) => {
+    const geoFieldNames: string[] = [];
+
+    if (waitingForMapReadyLayerList.length) {
+      waitingForMapReadyLayerList.forEach((layerDescriptor) => {
+        const layer = createLayerInstance(layerDescriptor, []); // custom icons not needed, layer instance only used to get geo field names
+        geoFieldNames.push(...layer.getGeoFieldNames());
+      });
+    } else {
+      layerList.forEach((layer) => {
+        geoFieldNames.push(...layer.getGeoFieldNames());
+      });
+    }
+    return _.uniq(geoFieldNames);
   }
 );
 

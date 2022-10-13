@@ -8,15 +8,16 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiCard, EuiFlexGrid, EuiFlexItem, EuiFormRow, EuiIcon } from '@elastic/eui';
 
-import { Type } from '../../../../../common/detection_engine/schemas/common/schemas';
+import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import {
   isThresholdRule,
   isEqlRule,
   isQueryRule,
   isThreatMatchRule,
+  isNewTermsRule,
 } from '../../../../../common/detection_engine/utils';
-import { FieldHook } from '../../../../shared_imports';
+import type { FieldHook } from '../../../../shared_imports';
 import { useKibana } from '../../../../common/lib/kibana';
 import * as i18n from './translations';
 import { MlCardDescription } from './ml_card_description';
@@ -48,6 +49,7 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
   const setQuery = useCallback(() => setType('query'), [setType]);
   const setThreshold = useCallback(() => setType('threshold'), [setType]);
   const setThreatMatch = useCallback(() => setType('threat_match'), [setType]);
+  const setNewTerms = useCallback(() => setType('new_terms'), [setType]);
   const licensingUrl = useKibana().services.application.getUrlForApp('kibana', {
     path: '#/management/stack/license_management',
   });
@@ -91,6 +93,14 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
       isSelected: isThreatMatchRule(ruleType),
     }),
     [ruleType, setThreatMatch]
+  );
+
+  const newTermsSelectableConfig = useMemo(
+    () => ({
+      onClick: setNewTerms,
+      isSelected: isNewTermsRule(ruleType),
+    }),
+    [ruleType, setNewTerms]
   );
 
   return (
@@ -168,6 +178,19 @@ export const SelectRuleType: React.FC<SelectRuleTypeProps> = ({
               description={i18n.THREAT_MATCH_TYPE_DESCRIPTION}
               icon={<EuiIcon size="l" type="list" />}
               selectable={threatMatchSelectableConfig}
+              layout="horizontal"
+            />
+          </EuiFlexItem>
+        )}
+        {(!isUpdateView || newTermsSelectableConfig.isSelected) && (
+          <EuiFlexItem>
+            <EuiCard
+              data-test-subj="newTermsRuleType"
+              title={i18n.NEW_TERMS_TYPE_TITLE}
+              titleSize="xs"
+              description={i18n.NEW_TERMS_TYPE_DESCRIPTION}
+              icon={<EuiIcon size="l" type="magnifyWithPlus" />}
+              selectable={newTermsSelectableConfig}
               layout="horizontal"
             />
           </EuiFlexItem>

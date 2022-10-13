@@ -6,9 +6,11 @@
  */
 
 import { Direction } from '../../../../../../../common/search_strategy';
-import { assertUnreachable } from '../../../../../../../common/utility_types';
-import { ColumnHeaderOptions } from '../../../../../../timelines/store/timeline/model';
-import { Sort, SortDirection } from '../../sort';
+import type {
+  ColumnHeaderOptions,
+  SortDirection,
+} from '../../../../../../../common/types/timeline';
+import type { Sort } from '../../sort';
 
 interface GetNewSortDirectionOnClickParams {
   clickedHeader: ColumnHeaderOptions;
@@ -35,7 +37,7 @@ export const getNextSortDirection = (currentSort: Sort): Direction => {
     case 'none':
       return Direction.desc;
     default:
-      return assertUnreachable(currentSort.sortDirection, 'Unhandled sort direction');
+      return Direction.desc;
   }
 };
 

@@ -10,12 +10,13 @@ import React from 'react';
 import { useValues } from 'kea';
 
 import { EuiFlexGroup, EuiSpacer, EuiEmptyPrompt } from '@elastic/eui';
-// @ts-expect-error types are not available for this package yet
-import { Results, Paging, ResultsPerPage } from '@elastic/react-search-ui';
+
+import { Results } from '@elastic/react-search-ui';
+import type { SearchResult } from '@elastic/search-ui';
 import { i18n } from '@kbn/i18n';
 
+import { Loading } from '../../../../shared/loading';
 import { EngineLogic } from '../../engine';
-import { Result } from '../../result/types';
 
 import { useSearchContextState } from './hooks';
 import { Pagination } from './pagination';
@@ -26,7 +27,7 @@ export const SearchExperienceContent: React.FC = () => {
 
   const { isMetaEngine, engine } = useValues(EngineLogic);
 
-  if (!wasSearched) return null;
+  if (!wasSearched) return <Loading />;
 
   if (totalResults) {
     return (
@@ -42,7 +43,7 @@ export const SearchExperienceContent: React.FC = () => {
         <EuiSpacer />
         <Results
           titleField="id"
-          resultView={({ result }: { result: Result }) => {
+          resultView={({ result }: { result: SearchResult }) => {
             return (
               <ResultView
                 result={result}

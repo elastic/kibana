@@ -1,6 +1,0 @@
-{
-  "private": true,
-  "main": "../target/common/index.js",
-  "types": "../target/common/index.d.ts",
-  "jsnext:main": "../src/common/index.js"
-}

@@ -6,11 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { VisToExpressionAst } from 'src/plugins/visualizations/public';
-import {
-  buildExpression,
-  buildExpressionFunction,
-} from '../../../../../src/plugins/expressions/public';
+import { VisToExpressionAst } from '@kbn/visualizations-plugin/public';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import {
   SelfChangingVisExpressionFunctionDefinition,
   SelfChangingVisParams,

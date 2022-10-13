@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockValues, setMockActions, rerender } from '../../../../__mocks__';
+import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -13,9 +13,9 @@ import { shallow } from 'enzyme';
 
 import { EuiTextArea, EuiButtonEmpty, EuiButton } from '@elastic/eui';
 
-import { Errors } from '../creation_response_components';
+import { rerender } from '../../../../test_helpers';
 
-import { PasteJsonText, FlyoutHeader, FlyoutBody, FlyoutFooter } from './paste_json_text';
+import { PasteJsonTextTabContent, PasteJsonTextFooterContent } from './paste_json_text';
 
 describe('PasteJsonText', () => {
   const values = {
@@ -40,24 +40,10 @@ describe('PasteJsonText', () => {
     setMockActions(actions);
   });
 
-  it('renders', () => {
-    const wrapper = shallow(<PasteJsonText />);
-    expect(wrapper.find(FlyoutHeader)).toHaveLength(1);
-    expect(wrapper.find(FlyoutBody)).toHaveLength(1);
-    expect(wrapper.find(FlyoutFooter)).toHaveLength(1);
-  });
-
-  describe('FlyoutHeader', () => {
-    it('renders', () => {
-      const wrapper = shallow(<FlyoutHeader />);
-      expect(wrapper.find('h2').text()).toEqual('Create documents');
-    });
-  });
-
-  describe('FlyoutBody', () => {
+  describe('PasteJsonTextTabContent', () => {
     it('renders and updates the textarea value', () => {
       setMockValues({ ...values, textInput: 'lorem ipsum' });
-      const wrapper = shallow(<FlyoutBody />);
+      const wrapper = shallow(<PasteJsonTextTabContent />);
       const textarea = wrapper.find(EuiTextArea);
 
       expect(textarea.prop('value')).toEqual('lorem ipsum');
@@ -65,35 +51,25 @@ describe('PasteJsonText', () => {
       textarea.simulate('change', { target: { value: 'dolor sit amet' } });
       expect(actions.setTextInput).toHaveBeenCalledWith('dolor sit amet');
     });
-
-    it('shows an error banner and sets invalid form props if errors exist', () => {
-      const wrapper = shallow(<FlyoutBody />);
-      expect(wrapper.find(EuiTextArea).prop('isInvalid')).toBe(false);
-
-      setMockValues({ ...values, errors: ['some error'] });
-      rerender(wrapper);
-      expect(wrapper.find(EuiTextArea).prop('isInvalid')).toBe(true);
-      expect(wrapper.prop('banner').type).toEqual(Errors);
-    });
   });
 
-  describe('FlyoutFooter', () => {
+  describe('PasteJsonTextFooterContent', () => {
     it('closes the modal', () => {
-      const wrapper = shallow(<FlyoutFooter />);
+      const wrapper = shallow(<PasteJsonTextFooterContent />);
 
       wrapper.find(EuiButtonEmpty).simulate('click');
       expect(actions.closeDocumentCreation).toHaveBeenCalled();
     });
 
     it('submits json', () => {
-      const wrapper = shallow(<FlyoutFooter />);
+      const wrapper = shallow(<PasteJsonTextFooterContent />);
 
       wrapper.find(EuiButton).simulate('click');
       expect(actions.onSubmitJson).toHaveBeenCalled();
     });
 
     it('disables/enables the Continue button based on whether text has been entered', () => {
-      const wrapper = shallow(<FlyoutFooter />);
+      const wrapper = shallow(<PasteJsonTextFooterContent />);
       expect(wrapper.find(EuiButton).prop('isDisabled')).toBe(false);
 
       setMockValues({ ...values, textInput: '' });
@@ -102,7 +78,7 @@ describe('PasteJsonText', () => {
     });
 
     it('sets isLoading based on isUploading', () => {
-      const wrapper = shallow(<FlyoutFooter />);
+      const wrapper = shallow(<PasteJsonTextFooterContent />);
       expect(wrapper.find(EuiButton).prop('isLoading')).toBe(false);
 
       setMockValues({ ...values, isUploading: true });

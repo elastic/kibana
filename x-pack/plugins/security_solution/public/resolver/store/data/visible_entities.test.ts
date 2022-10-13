@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { Store, createStore } from 'redux';
-import { ResolverAction } from '../actions';
+import type { Store } from 'redux';
+import { createStore } from 'redux';
+import type { ResolverAction } from '../actions';
 import { resolverReducer } from '../reducer';
-import { ResolverState } from '../../types';
-import { ResolverNode } from '../../../../common/endpoint/types';
+import type { ResolverState } from '../../types';
+import type { ResolverNode } from '../../../../common/endpoint/types';
 import { visibleNodesAndEdgeLines } from '../selectors';
 import { mock as mockResolverTree } from '../../models/resolver_tree';
 import { mockTreeFetcherParameters } from '../../mocks/tree_fetcher_parameters';
-import { endpointSourceSchema } from './../../mocks/tree_schema';
+import { endpointSourceSchema } from '../../mocks/tree_schema';
 import { mockResolverNode } from '../../mocks/resolver_node';
 
 describe('resolver visible entities', () => {

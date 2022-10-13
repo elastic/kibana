@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Position } from '@elastic/charts';
+import type { Position } from '@elastic/charts';
 import styled from 'styled-components';
 
 import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSelect, EuiSpacer } from '@elastic/eui';
@@ -17,31 +17,42 @@ import { HeaderSection } from '../header_section';
 import { MatrixLoader } from './matrix_loader';
 import { Panel } from '../panel';
 import { getBarchartConfigs, getCustomChartData } from './utils';
-import { useMatrixHistogram } from '../../containers/matrix_histogram';
-import { MatrixHistogramProps, MatrixHistogramOption, MatrixHistogramQueryProps } from './types';
-import { InspectButtonContainer } from '../inspect';
-import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
-import {
+import { useMatrixHistogramCombined } from '../../containers/matrix_histogram';
+import type {
+  MatrixHistogramProps,
+  MatrixHistogramOption,
+  MatrixHistogramQueryProps,
   MatrixHistogramMappingTypes,
   GetTitle,
   GetSubTitle,
-} from '../../components/matrix_histogram/types';
-import { GlobalTimeArgs } from '../../containers/use_global_time';
+} from './types';
+import type { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
+import type { GlobalTimeArgs } from '../../containers/use_global_time';
 import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { InputsModelId } from '../../store/inputs/constants';
+import { HoverVisibilityContainer } from '../hover_visibility_container';
+import { HISTOGRAM_ACTIONS_BUTTON_CLASS, VisualizationActions } from '../visualization_actions';
+import type { GetLensAttributes, LensAttributes } from '../visualization_actions/types';
+import { SecurityPageName } from '../../../../common/constants';
+import { useRouteSpy } from '../../utils/route/use_route_spy';
+import { useQueryToggle } from '../../containers/query_toggle';
 
 export type MatrixHistogramComponentProps = MatrixHistogramProps &
   Omit<MatrixHistogramQueryProps, 'stackByField'> & {
     defaultStackByOption: MatrixHistogramOption;
     errorMessage: string;
+    getLensAttributes?: GetLensAttributes;
     headerChildren?: React.ReactNode;
     hideHistogramIfEmpty?: boolean;
     histogramType: MatrixHistogramType;
     id: string;
     legendPosition?: Position;
+    lensAttributes?: LensAttributes;
     mapping?: MatrixHistogramMappingTypes;
+    onError?: () => void;
     showSpacer?: boolean;
     setQuery: GlobalTimeArgs['setQuery'];
+    showInspectButton?: boolean;
     setAbsoluteRangeDatePickerTarget?: InputsModelId;
     showLegend?: boolean;
     stackByOptions: MatrixHistogramOption[];
@@ -52,10 +63,6 @@ export type MatrixHistogramComponentProps = MatrixHistogramProps &
 
 const DEFAULT_PANEL_HEIGHT = 300;
 
-const HeaderChildrenFlexItem = styled(EuiFlexItem)`
-  margin-left: 24px;
-`;
-
 const HistogramPanel = styled(Panel)<{ height?: number }>`
   display: flex;
   flex-direction: column;
@@ -65,21 +72,26 @@ const HistogramPanel = styled(Panel)<{ height?: number }>`
 export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> = ({
   chartHeight,
   defaultStackByOption,
-  docValueFields,
   endDate,
   errorMessage,
   filterQuery,
+  getLensAttributes,
   headerChildren,
   histogramType,
   hideHistogramIfEmpty = false,
   id,
   indexNames,
+  runtimeMappings,
   isPtrIncluded,
   legendPosition,
+  lensAttributes,
   mapping,
+  onError,
+  paddingSize = 'm',
   panelHeight = DEFAULT_PANEL_HEIGHT,
-  setAbsoluteRangeDatePickerTarget = 'global',
+  setAbsoluteRangeDatePickerTarget = InputsModelId.global,
   setQuery,
+  showInspectButton = false,
   showLegend,
   showSpacer = true,
   stackByOptions,
@@ -89,8 +101,10 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   title,
   titleSize,
   yTickFormatter,
+  skip,
 }) => {
   const dispatch = useDispatch();
+
   const handleBrushEnd = useCallback(
     ({ x }) => {
       if (!x) {
@@ -121,9 +135,13 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     [chartHeight, startDate, legendPosition, endDate, handleBrushEnd, yTickFormatter, showLegend]
   );
   const [isInitialLoading, setIsInitialLoading] = useState(true);
-  const [selectedStackByOption, setSelectedStackByOption] = useState<MatrixHistogramOption>(
-    defaultStackByOption
-  );
+  const [selectedStackByOption, setSelectedStackByOption] =
+    useState<MatrixHistogramOption>(defaultStackByOption);
+
+  useEffect(() => {
+    setSelectedStackByOption(defaultStackByOption);
+  }, [defaultStackByOption]);
+
   const setSelectedChartOptionCallback = useCallback(
     (event: React.ChangeEvent<HTMLSelectElement>) => {
       setSelectedStackByOption(
@@ -132,18 +150,41 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     },
     [defaultStackByOption, stackByOptions]
   );
+  const { toggleStatus, setToggleStatus } = useQueryToggle(id);
+  const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
+  useEffect(() => {
+    setQuerySkip(skip || !toggleStatus);
+  }, [skip, toggleStatus]);
+  const toggleQuery = useCallback(
+    (status: boolean) => {
+      setToggleStatus(status);
+      // toggle on = skipQuery false
+      setQuerySkip(!status);
+    },
+    [setQuerySkip, setToggleStatus]
+  );
 
-  const [loading, { data, inspect, totalCount, refetch }] = useMatrixHistogram({
+  const matrixHistogramRequest = {
     endDate,
     errorMessage,
     filterQuery,
     histogramType,
     indexNames,
+    onError,
     startDate,
     stackByField: selectedStackByOption.value,
+    runtimeMappings,
     isPtrIncluded,
-    docValueFields,
-  });
+    skip: querySkip,
+  };
+  const [loading, { data, inspect, totalCount, refetch }] =
+    useMatrixHistogramCombined(matrixHistogramRequest);
+  const [{ pageName }] = useRouteSpy();
+
+  const onHostOrNetworkOrUserPage =
+    pageName === SecurityPageName.hosts ||
+    pageName === SecurityPageName.network ||
+    pageName === SecurityPageName.users;
 
   const titleWithStackByField = useMemo(
     () => (title != null && typeof title === 'function' ? title(selectedStackByOption) : title),
@@ -160,10 +201,10 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
 
     return subtitle;
   }, [isInitialLoading, subtitle, totalCount]);
-  const hideHistogram = useMemo(() => (totalCount <= 0 && hideHistogramIfEmpty ? true : false), [
-    totalCount,
-    hideHistogramIfEmpty,
-  ]);
+  const hideHistogram = useMemo(
+    () => (totalCount <= 0 && hideHistogramIfEmpty ? true : false),
+    [totalCount, hideHistogramIfEmpty]
+  );
   const barChartData = useMemo(() => getCustomChartData(data, mapping), [data, mapping]);
 
   useEffect(() => {
@@ -186,14 +227,22 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     setIsInitialLoading,
   ]);
 
+  const timerange = useMemo(() => ({ from: startDate, to: endDate }), [startDate, endDate]);
   if (hideHistogram) {
     return null;
   }
 
   return (
     <>
-      <InspectButtonContainer show={!isInitialLoading}>
-        <HistogramPanel data-test-subj={`${id}Panel`} height={panelHeight}>
+      <HoverVisibilityContainer
+        show={!isInitialLoading}
+        targetClassNames={[HISTOGRAM_ACTIONS_BUTTON_CLASS]}
+      >
+        <HistogramPanel
+          data-test-subj={`${id}Panel`}
+          height={toggleStatus ? panelHeight : undefined}
+          paddingSize={paddingSize}
+        >
           {loading && !isInitialLoading && (
             <EuiProgress
               data-test-subj="initialLoadingPanelMatrixOverTime"
@@ -205,11 +254,31 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
 
           <HeaderSection
             id={id}
+            height={toggleStatus ? undefined : 0}
             title={titleWithStackByField}
             titleSize={titleSize}
+            toggleStatus={toggleStatus}
+            toggleQuery={toggleQuery}
             subtitle={subtitleWithCounts}
+            inspectMultiple
+            showInspectButton={showInspectButton || !onHostOrNetworkOrUserPage}
+            isInspectDisabled={filterQuery === undefined}
           >
             <EuiFlexGroup alignItems="center" gutterSize="none">
+              {onHostOrNetworkOrUserPage && (getLensAttributes || lensAttributes) && timerange && (
+                <EuiFlexItem grow={false}>
+                  <VisualizationActions
+                    className="histogram-viz-actions"
+                    getLensAttributes={getLensAttributes}
+                    isInspectButtonDisabled={filterQuery === undefined}
+                    lensAttributes={lensAttributes}
+                    queryId={id}
+                    stackByField={selectedStackByOption.value}
+                    timerange={timerange}
+                    title={title}
+                  />
+                </EuiFlexItem>
+              )}
               <EuiFlexItem grow={false}>
                 {stackByOptions.length > 1 && (
                   <EuiSelect
@@ -220,22 +289,23 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
                   />
                 )}
               </EuiFlexItem>
-              <HeaderChildrenFlexItem grow={false}>{headerChildren}</HeaderChildrenFlexItem>
+              <EuiFlexItem grow={false}>{headerChildren}</EuiFlexItem>
             </EuiFlexGroup>
           </HeaderSection>
-
-          {isInitialLoading ? (
-            <MatrixLoader />
-          ) : (
-            <BarChart
-              barChart={barChartData}
-              configs={barchartConfigs}
-              stackByField={selectedStackByOption.value}
-              timelineId={timelineId}
-            />
-          )}
+          {toggleStatus ? (
+            isInitialLoading ? (
+              <MatrixLoader />
+            ) : (
+              <BarChart
+                barChart={barChartData}
+                configs={barchartConfigs}
+                stackByField={selectedStackByOption.value}
+                timelineId={timelineId}
+              />
+            )
+          ) : null}
         </HistogramPanel>
-      </InspectButtonContainer>
+      </HoverVisibilityContainer>
       {showSpacer && <EuiSpacer data-test-subj="spacer" size="l" />}
     </>
   );

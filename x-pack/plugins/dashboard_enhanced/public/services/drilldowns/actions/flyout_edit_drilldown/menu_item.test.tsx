@@ -8,20 +8,20 @@
 import React from 'react';
 import { render, act } from '@testing-library/react';
 import { MenuItem } from './menu_item';
-import { createStateContainer } from '../../../../../../../../src/plugins/kibana_utils/public';
-import { UiActionsEnhancedDynamicActionManager as DynamicActionManager } from '../../../../../../ui_actions_enhanced/public';
-import { EnhancedEmbeddable } from '../../../../../../embeddable_enhanced/public';
+import { createStateContainer } from '@kbn/kibana-utils-plugin/public';
+import { UiActionsEnhancedDynamicActionManager as DynamicActionManager } from '@kbn/ui-actions-enhanced-plugin/public';
+import { EnhancedEmbeddable } from '@kbn/embeddable-enhanced-plugin/public';
 
 test('<MenuItem/>', () => {
   const state = createStateContainer<{ events: object[] }>({ events: [] });
   const { getByText, queryByText } = render(
     <MenuItem
       context={{
-        embeddable: ({
+        embeddable: {
           enhancements: {
-            dynamicActions: ({ state } as unknown) as DynamicActionManager,
+            dynamicActions: { state } as unknown as DynamicActionManager,
           },
-        } as unknown) as EnhancedEmbeddable,
+        } as unknown as EnhancedEmbeddable,
         trigger: {} as any,
       }}
     />

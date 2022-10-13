@@ -24,19 +24,15 @@ const removeWhiteSpaceOnArrayValues = (array: any[]) =>
   });
 
 describe('Index Templates tab', () => {
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
+  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: IndexTemplatesTabTestBed;
 
-  afterAll(() => {
-    server.restore();
-  });
-
-  describe('when there are no index templates', () => {
+  describe('when there are no index templates of either kind', () => {
     test('should display an empty prompt', async () => {
       httpRequestsMockHelpers.setLoadTemplatesResponse({ templates: [], legacyTemplates: [] });
 
       await act(async () => {
-        testBed = await setup();
+        testBed = await setup(httpSetup);
       });
       const { exists, component } = testBed;
       component.update();
@@ -46,9 +42,30 @@ describe('Index Templates tab', () => {
     });
   });
 
+  describe('when there are composable index templates but no legacy index templates', () => {
+    test('only the composable index templates table is visible', async () => {
+      httpRequestsMockHelpers.setLoadTemplatesResponse({
+        templates: [fixtures.getComposableTemplate()],
+        legacyTemplates: [],
+      });
+
+      await act(async () => {
+        testBed = await setup(httpSetup);
+      });
+      const { exists, component } = testBed;
+      component.update();
+
+      expect(exists('sectionLoading')).toBe(false);
+      expect(exists('emptyPrompt')).toBe(false);
+      expect(exists('templateTable')).toBe(true);
+      expect(exists('legacyTemplateTable')).toBe(false);
+    });
+  });
+
   describe('when there are index templates', () => {
     // Add a default loadIndexTemplate response
-    httpRequestsMockHelpers.setLoadTemplateResponse(fixtures.getTemplate());
+    const templateMock = fixtures.getTemplate();
+    httpRequestsMockHelpers.setLoadTemplateResponse(templateMock.name, templateMock);
 
     const template1 = fixtures.getTemplate({
       name: `a${getRandomString()}`,
@@ -112,7 +129,7 @@ describe('Index Templates tab', () => {
       httpRequestsMockHelpers.setLoadTemplatesResponse({ templates, legacyTemplates });
 
       await act(async () => {
-        testBed = await setup();
+        testBed = await setup(httpSetup);
       });
       testBed.component.update();
     });
@@ -174,7 +191,6 @@ describe('Index Templates tab', () => {
 
     test('should have a button to reload the index templates', async () => {
       const { exists, actions } = testBed;
-      const totalRequests = server.requests.length;
 
       expect(exists('reloadButton')).toBe(true);
 
@@ -182,9 +198,9 @@ describe('Index Templates tab', () => {
         actions.clickReloadButton();
       });
 
-      expect(server.requests.length).toBe(totalRequests + 1);
-      expect(server.requests[server.requests.length - 1].url).toBe(
-        `${API_BASE_PATH}/index_templates`
+      expect(httpSetup.get).toHaveBeenLastCalledWith(
+        `${API_BASE_PATH}/index_templates`,
+        expect.anything()
       );
     });
 
@@ -215,6 +231,7 @@ describe('Index Templates tab', () => {
       const { find, exists, actions, component } = testBed;
 
       // Composable templates
+      httpRequestsMockHelpers.setLoadTemplateResponse(templates[0].name, templates[0]);
       await actions.clickTemplateAt(0);
       expect(exists('templateList')).toBe(true);
       expect(exists('templateDetails')).toBe(true);
@@ -226,6 +243,7 @@ describe('Index Templates tab', () => {
       });
       component.update();
 
+      httpRequestsMockHelpers.setLoadTemplateResponse(legacyTemplates[0].name, legacyTemplates[0]);
       await actions.clickTemplateAt(0, true);
 
       expect(exists('templateList')).toBe(true);
@@ -360,13 +378,14 @@ describe('Index Templates tab', () => {
           confirmButton!.click();
         });
 
-        const latestRequest = server.requests[server.requests.length - 1];
-
-        expect(latestRequest.method).toBe('POST');
-        expect(latestRequest.url).toBe(`${API_BASE_PATH}/delete_index_templates`);
-        expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual({
-          templates: [{ name: templates[0].name, isLegacy }],
-        });
+        expect(httpSetup.post).toHaveBeenLastCalledWith(
+          `${API_BASE_PATH}/delete_index_templates`,
+          expect.objectContaining({
+            body: JSON.stringify({
+              templates: [{ name: templates[0].name, isLegacy }],
+            }),
+          })
+        );
       });
     });
 
@@ -422,16 +441,14 @@ describe('Index Templates tab', () => {
           confirmButton!.click();
         });
 
-        const latestRequest = server.requests[server.requests.length - 1];
-
-        expect(latestRequest.method).toBe('POST');
-        expect(latestRequest.url).toBe(`${API_BASE_PATH}/delete_index_templates`);
-
-        // Commenting as I don't find a way to make it work.
-        // It keeps on returning the composable template instead of the legacy one
-        // expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual({
-        //   templates: [{ name: templateName, isLegacy }],
-        // });
+        expect(httpSetup.post).toHaveBeenLastCalledWith(
+          `${API_BASE_PATH}/delete_index_templates`,
+          expect.objectContaining({
+            body: JSON.stringify({
+              templates: [{ name: templates[0].name, isLegacy: false }],
+            }),
+          })
+        );
       });
     });
 
@@ -443,7 +460,7 @@ describe('Index Templates tab', () => {
           isLegacy: true,
         });
 
-        httpRequestsMockHelpers.setLoadTemplateResponse(template);
+        httpRequestsMockHelpers.setLoadTemplateResponse(template.name, template);
       });
 
       test('should show details when clicking on a template', async () => {
@@ -451,6 +468,7 @@ describe('Index Templates tab', () => {
 
         expect(exists('templateDetails')).toBe(false);
 
+        httpRequestsMockHelpers.setLoadTemplateResponse(templates[0].name, templates[0]);
         await actions.clickTemplateAt(0);
 
         expect(exists('templateDetails')).toBe(true);
@@ -460,6 +478,7 @@ describe('Index Templates tab', () => {
         beforeEach(async () => {
           const { actions } = testBed;
 
+          httpRequestsMockHelpers.setLoadTemplateResponse(templates[0].name, templates[0]);
           await actions.clickTemplateAt(0);
         });
 
@@ -524,7 +543,7 @@ describe('Index Templates tab', () => {
 
           const { find, actions, exists } = testBed;
 
-          httpRequestsMockHelpers.setLoadTemplateResponse(template);
+          httpRequestsMockHelpers.setLoadTemplateResponse(templates[0].name, template);
           httpRequestsMockHelpers.setSimulateTemplateResponse({ simulateTemplate: 'response' });
 
           await actions.clickTemplateAt(0);
@@ -578,8 +597,10 @@ describe('Index Templates tab', () => {
 
           const { actions, find, exists } = testBed;
 
-          httpRequestsMockHelpers.setLoadTemplateResponse(templateWithNoOptionalFields);
-
+          httpRequestsMockHelpers.setLoadTemplateResponse(
+            templates[0].name,
+            templateWithNoOptionalFields
+          );
           await actions.clickTemplateAt(0);
 
           expect(find('templateDetails.tab').length).toBe(5);
@@ -601,13 +622,12 @@ describe('Index Templates tab', () => {
         it('should render an error message if error fetching template details', async () => {
           const { actions, exists } = testBed;
           const error = {
-            status: 404,
+            statusCode: 404,
             error: 'Not found',
             message: 'Template not found',
           };
 
-          httpRequestsMockHelpers.setLoadTemplateResponse(undefined, { body: error });
-
+          httpRequestsMockHelpers.setLoadTemplateResponse(templates[0].name, undefined, error);
           await actions.clickTemplateAt(0);
 
           expect(exists('sectionError')).toBe(true);

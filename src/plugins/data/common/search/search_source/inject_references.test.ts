@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectReference } from 'src/core/types';
-import { SearchSourceFields } from './types';
+import { SavedObjectReference } from '@kbn/core/types';
+import { SerializedSearchSourceFields } from './types';
 
 import { injectReferences } from './inject_references';
 
 describe('injectSearchSourceReferences', () => {
-  let searchSourceJSON: SearchSourceFields & { indexRefName: string };
+  let searchSourceJSON: SerializedSearchSourceFields & { indexRefName: string };
   let references: SavedObjectReference[];
 
   beforeEach(() => {

@@ -7,17 +7,19 @@
 
 import uuid from 'uuid';
 import { merge } from 'lodash';
+import type { Client } from '@elastic/elasticsearch';
 import { makeTls, TlsProps } from './make_tls';
 
-const INDEX_NAME = 'heartbeat-8-generated-test';
+const DEFAULT_INDEX_NAME = 'heartbeat-8-generated-test';
 
 export const makePing = async (
-  es: any,
+  es: Client,
   monitorId: string,
   fields: { [key: string]: any },
   mogrify: (doc: any) => any,
   refresh: boolean = true,
-  tls: boolean | TlsProps = false
+  tls: boolean | TlsProps = false,
+  customIndex?: string
 ) => {
   const timestamp = new Date();
   const baseDoc: any = {
@@ -115,7 +117,7 @@ export const makePing = async (
   const doc = mogrify(merge(baseDoc, fields));
 
   await es.index({
-    index: INDEX_NAME,
+    index: customIndex || DEFAULT_INDEX_NAME,
     refresh,
     body: doc,
   });

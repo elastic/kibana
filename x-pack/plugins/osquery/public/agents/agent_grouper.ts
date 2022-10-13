@@ -12,19 +12,18 @@ import {
   AGENT_POLICY_LABEL,
   AGENT_SELECTION_LABEL,
 } from './translations';
-import { AGENT_GROUP_KEY, Group, GroupOption, GroupedAgent } from './types';
+import type { Group, GroupOption, GroupedAgent } from './types';
+import { AGENT_GROUP_KEY } from './types';
 
 const getColor = generateColorPicker();
 
-const generateGroup = <T = Group>(label: string, groupType: AGENT_GROUP_KEY) => {
-  return {
-    label,
-    groupType,
-    color: getColor(groupType),
-    size: 0,
-    data: [] as T[],
-  };
-};
+const generateGroup = <T = Group>(label: string, groupType: AGENT_GROUP_KEY) => ({
+  label,
+  groupType,
+  color: getColor(groupType),
+  size: 0,
+  data: [] as T[],
+});
 
 export const generateAgentOption = (
   label: string,
@@ -80,12 +79,14 @@ export class AgentGrouper {
     if (!data?.length || key === AGENT_GROUP_KEY.All) {
       return;
     }
+
     const group = this.groups[key];
     if (append) {
       group.data.push(...data);
     } else {
       group.data = data;
     }
+
     group.size = data.length;
   }
 
@@ -93,6 +94,7 @@ export class AgentGrouper {
     if (total < 0) {
       return;
     }
+
     this.groups[AGENT_GROUP_KEY.All].size = total;
   }
 
@@ -126,6 +128,7 @@ export class AgentGrouper {
           break;
       }
     }
+
     return opts;
   }
 }

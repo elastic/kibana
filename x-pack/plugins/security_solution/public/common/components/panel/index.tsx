@@ -25,7 +25,7 @@ import { EuiPanel } from '@elastic/eui';
  * Ref: https://www.styled-components.com/docs/faqs#why-am-i-getting-html-attribute-warnings
  * Ref: https://reactjs.org/blog/2017/09/08/dom-attributes-in-react-16.html
  */
-export const Panel = styled(({ loading, ...props }) => <EuiPanel {...props} />)`
+export const Panel = styled(({ loading, ...props }) => <EuiPanel {...props} hasBorder />)`
   position: relative;
   ${({ loading }) =>
     loading &&

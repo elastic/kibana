@@ -56,6 +56,7 @@ export interface PublicLicense {
   /**
    * The license type, being usually one of basic, standard, gold, platinum, or trial.
    * @deprecated use 'type' instead
+   * @removeBy 8.8.0
    */
   mode: LicenseType;
 }
@@ -123,6 +124,7 @@ export interface ILicense {
   /**
    * The license type, being usually one of basic, standard, gold, platinum, or trial.
    * @deprecated use 'type' instead.
+   * @removeBy 8.8.0
    */
   mode?: LicenseType;
 

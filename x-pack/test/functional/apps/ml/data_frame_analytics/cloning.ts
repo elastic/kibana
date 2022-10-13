@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { DeepPartial } from '../../../../../plugins/ml/common/types/common';
-import { DataFrameAnalyticsConfig } from '../../../../../plugins/ml/public/application/data_frame_analytics/common';
+import { DeepPartial } from '@kbn/ml-plugin/common/types/common';
+import { DataFrameAnalyticsConfig } from '@kbn/ml-plugin/public/application/data_frame_analytics/common';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -27,7 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
       return [
         {
           suiteTitle: 'classification job supported by the form',
-          archive: 'ml/bm_classification',
+          archive: 'x-pack/test/functional/es_archives/ml/bm_classification',
           indexPattern: { name: 'ft_bank_marketing', timeField: '@timestamp' },
           job: {
             id: `bm_1_${timestamp}`,
@@ -62,7 +62,7 @@ export default function ({ getService }: FtrProviderContext) {
         },
         {
           suiteTitle: 'outlier detection job supported by the form',
-          archive: 'ml/ihp_outlier',
+          archive: 'x-pack/test/functional/es_archives/ml/ihp_outlier',
           indexPattern: { name: 'ft_ihp_outlier', timeField: '@timestamp' },
           job: {
             id: `ihp_1_${timestamp}`,
@@ -91,7 +91,7 @@ export default function ({ getService }: FtrProviderContext) {
         },
         {
           suiteTitle: 'regression job supported by the form',
-          archive: 'ml/egs_regression',
+          archive: 'x-pack/test/functional/es_archives/ml/egs_regression',
           indexPattern: { name: 'ft_egs_regression', timeField: '@timestamp' },
           job: {
             id: `egs_1_${timestamp}`,
@@ -159,6 +159,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.api.deleteIndices(testData.job.dest!.index as string);
           await ml.testResources.deleteIndexPatternByTitle(testData.job.dest!.index as string);
           await ml.testResources.deleteIndexPatternByTitle(cloneDestIndex);
+          await ml.testResources.deleteIndexPatternByTitle(testData.indexPattern.name);
         });
 
         it('opens the existing job in the data frame analytics job wizard', async () => {

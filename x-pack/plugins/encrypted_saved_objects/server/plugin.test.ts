@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { coreMock } from 'src/core/server/mocks';
+import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
 
-import { securityMock } from '../../security/server/mocks';
 import { ConfigSchema } from './config';
 import { EncryptedSavedObjectsPlugin } from './plugin';
 
@@ -28,11 +28,12 @@ describe('EncryptedSavedObjects Plugin', () => {
     });
 
     it('exposes proper contract when encryption key is set', () => {
-      const plugin = new EncryptedSavedObjectsPlugin(
-        coreMock.createPluginInitializerContext(
-          ConfigSchema.validate({ encryptionKey: 'z'.repeat(32) }, { dist: true })
-        )
+      const mockInitializerContext = coreMock.createPluginInitializerContext(
+        ConfigSchema.validate({ encryptionKey: 'z'.repeat(32) }, { dist: true })
       );
+
+      const plugin = new EncryptedSavedObjectsPlugin(mockInitializerContext);
+
       expect(plugin.setup(coreMock.createSetup(), { security: securityMock.createSetup() }))
         .toMatchInlineSnapshot(`
         Object {
@@ -41,6 +42,13 @@ describe('EncryptedSavedObjects Plugin', () => {
           "registerType": [Function],
         }
       `);
+
+      const infoLogs = loggingSystemMock.collect(mockInitializerContext.logger).info;
+
+      expect(infoLogs.length).toBe(1);
+      expect(infoLogs[0]).toEqual([
+        `Hashed 'xpack.encryptedSavedObjects.encryptionKey' for this instance: WLbjNGKEm7aA4NfJHYyW88jHUkHtyF7ENHcF0obYGBU=`,
+      ]);
     });
   });
 
@@ -60,10 +68,11 @@ describe('EncryptedSavedObjects Plugin', () => {
             `);
 
       expect(startContract.getClient()).toMatchInlineSnapshot(`
-              Object {
-                "getDecryptedAsInternalUser": [Function],
-              }
-            `);
+        Object {
+          "createPointInTimeFinderDecryptedAsInternalUser": [Function],
+          "getDecryptedAsInternalUser": [Function],
+        }
+      `);
     });
   });
 });

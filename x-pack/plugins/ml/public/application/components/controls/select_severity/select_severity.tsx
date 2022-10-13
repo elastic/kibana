@@ -8,11 +8,11 @@
 /*
  * React component for rendering a select element with threshold levels.
  */
-import React, { Fragment, FC } from 'react';
+import React, { Fragment, FC, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiHealth, EuiSpacer, EuiSuperSelect, EuiText } from '@elastic/eui';
+import { EuiHealth, EuiSpacer, EuiSuperSelect, EuiText, EuiSuperSelectProps } from '@elastic/eui';
 
 import { getSeverityColor } from '../../../../../common/util/anomaly_utils';
 import { usePageUrlState } from '../../../util/url_state';
@@ -81,8 +81,8 @@ export function optionValueToThreshold(value: number) {
 
 const TABLE_SEVERITY_DEFAULT = SEVERITY_OPTIONS[0];
 
-export const useTableSeverity = (): [TableSeverity, (v: TableSeverity) => void] => {
-  return usePageUrlState('mlSelectSeverity', TABLE_SEVERITY_DEFAULT);
+export const useTableSeverity = () => {
+  return usePageUrlState<TableSeverity>('mlSelectSeverity', TABLE_SEVERITY_DEFAULT);
 };
 
 export const getSeverityOptions = () =>
@@ -102,7 +102,7 @@ export const getSeverityOptions = () =>
         </EuiHealth>
         <EuiSpacer size="xs" />
         <EuiText size="xs" color="subdued">
-          <p className="euiTextColor--subdued">
+          <p>
             <FormattedMessage
               id="xpack.ml.controls.selectSeverity.scoreDetailsDescription"
               defaultMessage="score {value} and above"
@@ -124,23 +124,34 @@ export const SelectSeverity: FC<Props> = ({ classNames } = { classNames: '' }) =
   return <SelectSeverityUI severity={severity} onChange={setSeverity} />;
 };
 
-export const SelectSeverityUI: FC<{
-  classNames?: string;
-  severity: TableSeverity;
-  onChange: (s: TableSeverity) => void;
-}> = ({ classNames = '', severity, onChange }) => {
+export const SelectSeverityUI: FC<
+  Omit<EuiSuperSelectProps<string>, 'onChange' | 'options'> & {
+    classNames?: string;
+    severity: TableSeverity;
+    onChange: (s: TableSeverity) => void;
+  }
+> = ({ classNames = '', severity, onChange, compressed }) => {
   const handleOnChange = (valueDisplay: string) => {
     onChange(optionValueToThreshold(optionsMap[valueDisplay]));
   };
 
+  const options = useMemo(() => {
+    return getSeverityOptions();
+  }, []);
+
   return (
     <EuiSuperSelect
+      prepend={i18n.translate('xpack.ml.explorer.severityThresholdLabel', {
+        defaultMessage: 'Severity',
+      })}
+      id="severityThreshold"
       data-test-subj={'mlAnomalySeverityThresholdControls'}
       className={classNames}
       hasDividers
-      options={getSeverityOptions()}
+      options={options}
       valueOfSelected={severity.display}
       onChange={handleOnChange}
+      compressed
     />
   );
 };

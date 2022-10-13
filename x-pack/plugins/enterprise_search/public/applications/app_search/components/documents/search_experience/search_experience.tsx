@@ -10,18 +10,16 @@ import React, { useState } from 'react';
 import { useValues } from 'kea';
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-// @ts-expect-error types are not available for this package yet;
 import { SearchProvider, SearchBox, Sorting, Facet } from '@elastic/react-search-ui';
-// @ts-expect-error types are not available for this package yet
+import type { SortDirection } from '@elastic/search-ui';
 import AppSearchAPIConnector from '@elastic/search-ui-app-search-connector';
 import { i18n } from '@kbn/i18n';
 
 import './search_experience.scss';
 
-import { externalUrl } from '../../../../shared/enterprise_search_url';
+import { HttpLogic } from '../../../../shared/http';
 import { useLocalStorage } from '../../../../shared/use_local_storage';
 import { EngineLogic } from '../../engine';
-import { EmptyState } from '../components';
 
 import { buildSearchUIConfig } from './build_search_ui_config';
 import { buildSortOptions } from './build_sort_options';
@@ -32,28 +30,43 @@ import { SearchExperienceContent } from './search_experience_content';
 import { Fields, SortOption } from './types';
 import { SearchBoxView, SortingView, MultiCheckboxFacetsView } from './views';
 
-const RECENTLY_UPLOADED = i18n.translate(
-  'xpack.enterpriseSearch.appSearch.documents.search.sortBy.option.recentlyUploaded',
+const DOCUMENT_ID = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.documents.search.sortBy.option.documentId',
   {
-    defaultMessage: 'Recently Uploaded',
+    defaultMessage: 'Document ID',
   }
 );
+
+const RELEVANCE = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.documents.search.sortBy.option.relevance',
+  { defaultMessage: 'Relevance' }
+);
+
 const DEFAULT_SORT_OPTIONS: SortOption[] = [
   {
-    name: DESCENDING(RECENTLY_UPLOADED),
+    name: DESCENDING(DOCUMENT_ID),
     value: 'id',
     direction: 'desc',
   },
   {
-    name: ASCENDING(RECENTLY_UPLOADED),
+    name: ASCENDING(DOCUMENT_ID),
     value: 'id',
     direction: 'asc',
   },
 ];
 
+const RELEVANCE_SORT_OPTIONS: SortOption[] = [
+  {
+    name: RELEVANCE,
+    value: '_score',
+    direction: 'desc',
+  },
+];
+
 export const SearchExperience: React.FC = () => {
   const { engine } = useValues(EngineLogic);
-  const endpointBase = externalUrl.enterpriseSearchUrl;
+  const { http } = useValues(HttpLogic);
+  const endpointBase = http.basePath.prepend('/internal/app_search/search-ui');
 
   const [showCustomizationModal, setShowCustomizationModal] = useState(false);
   const openCustomizationModal = () => setShowCustomizationModal(true);
@@ -66,17 +79,31 @@ export const SearchExperience: React.FC = () => {
       sortFields: [],
     }
   );
+  const useRelevance = engine.type === 'elasticsearch' || engine.type === 'meta';
+  const sortOptions = useRelevance ? RELEVANCE_SORT_OPTIONS : DEFAULT_SORT_OPTIONS;
 
-  const sortingOptions = buildSortOptions(fields, DEFAULT_SORT_OPTIONS);
+  const sortingOptions = buildSortOptions(fields, sortOptions);
 
   const connector = new AppSearchAPIConnector({
     cacheResponses: false,
     endpointBase,
-    engineName: engine.name,
-    searchKey: engine.apiKey,
-  });
+    engineName: engine.name as string,
+    additionalHeaders: {
+      'kbn-xsrf': true,
+    },
+  } as ConstructorParameters<typeof AppSearchAPIConnector>[0]);
 
-  const searchProviderConfig = buildSearchUIConfig(connector, engine.schema || {}, fields);
+  const initialState = {
+    sortField: sortOptions[0].value,
+    sortDirection: 'desc' as SortDirection,
+  };
+
+  const searchProviderConfig = buildSearchUIConfig(
+    connector,
+    engine.advancedSchema || {},
+    fields,
+    initialState
+  );
 
   return (
     <div className="documentsSearchExperience">
@@ -141,11 +168,7 @@ export const SearchExperience: React.FC = () => {
             )}
           </EuiFlexItem>
           <EuiFlexItem className="documentsSearchExperience__content">
-            {engine.document_count && engine.document_count > 0 ? (
-              <SearchExperienceContent />
-            ) : (
-              <EmptyState />
-            )}
+            <SearchExperienceContent />
           </EuiFlexItem>
         </EuiFlexGroup>
       </SearchProvider>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectMigrationFn, SavedObjectUnsanitizedDoc } from 'kibana/server';
+import type { SavedObjectMigrationFn, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { cloneDeep } from 'lodash';
 
 import type { PackagePolicy } from '../../../../common';
@@ -13,9 +13,8 @@ import type { PackagePolicy } from '../../../../common';
 export const migratePackagePolicyToV7110: SavedObjectMigrationFn<PackagePolicy, PackagePolicy> = (
   packagePolicyDoc
 ) => {
-  const updatedPackagePolicyDoc: SavedObjectUnsanitizedDoc<PackagePolicy> = cloneDeep(
-    packagePolicyDoc
-  );
+  const updatedPackagePolicyDoc: SavedObjectUnsanitizedDoc<PackagePolicy> =
+    cloneDeep(packagePolicyDoc);
   if (packagePolicyDoc.attributes.package?.name === 'endpoint') {
     const input = updatedPackagePolicyDoc.attributes.inputs[0];
     const popup = {

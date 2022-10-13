@@ -6,25 +6,20 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { ConditionEntry, ConditionEntryField, OperatingSystem } from '../types';
-import { getDuplicateFields, isValidHash } from '../service/trusted_apps/validations';
-
-export const DeleteTrustedAppsRequestSchema = {
-  params: schema.object({
-    id: schema.string(),
-  }),
-};
-
-export const GetOneTrustedAppRequestSchema = {
-  params: schema.object({
-    id: schema.string(),
-  }),
-};
+import { ConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
+import type { TrustedAppConditionEntry } from '../types';
+import { getDuplicateFields, isValidHash } from '../service/artifacts/validations';
 
 export const GetTrustedAppsRequestSchema = {
   query: schema.object({
     page: schema.maybe(schema.number({ defaultValue: 1, min: 1 })),
     per_page: schema.maybe(schema.number({ defaultValue: 20, min: 1 })),
+    kuery: schema.maybe(schema.string()),
+  }),
+};
+
+export const GetTrustedAppsSummaryRequestSchema = {
+  query: schema.object({
     kuery: schema.maybe(schema.string()),
   }),
 };
@@ -87,40 +82,38 @@ const MacEntrySchema = schema.object({
   ...CommonEntrySchema,
 });
 
-/*
- * Entry Schema depending on Os type using schema.conditional.
- * If OS === WINDOWS then use Windows schema,
- * else if OS === LINUX then use Linux schema,
- * else use Mac schema
- */
-const EntrySchemaDependingOnOS = schema.conditional(
-  schema.siblingRef('os'),
-  OperatingSystem.WINDOWS,
-  WindowsEntrySchema,
-  schema.conditional(
-    schema.siblingRef('os'),
-    OperatingSystem.LINUX,
-    LinuxEntrySchema,
-    MacEntrySchema
-  )
-);
-
-/*
- * Entities array schema.
- * The validate function checks there is no duplicated entry inside the array
- */
-const EntriesSchema = schema.arrayOf(EntrySchemaDependingOnOS, {
+const entriesSchemaOptions = {
   minSize: 1,
-  validate(entries: ConditionEntry[]) {
+  validate(entries: TrustedAppConditionEntry[]) {
     return (
       getDuplicateFields(entries)
         .map((field) => `duplicatedEntry.${field}`)
         .join(', ') || undefined
     );
   },
-});
+};
 
-const getTrustedAppForOsScheme = (forUpdateFlow: boolean = false) =>
+/*
+ * Entities array schema depending on Os type using schema.conditional.
+ * If OS === WINDOWS then use Windows schema,
+ * else if OS === LINUX then use Linux schema,
+ * else use Mac schema
+ *
+ * The validate function checks there is no duplicated entry inside the array
+ */
+const EntriesSchema = schema.conditional(
+  schema.siblingRef('os'),
+  OperatingSystem.WINDOWS,
+  schema.arrayOf(WindowsEntrySchema, entriesSchemaOptions),
+  schema.conditional(
+    schema.siblingRef('os'),
+    OperatingSystem.LINUX,
+    schema.arrayOf(LinuxEntrySchema, entriesSchemaOptions),
+    schema.arrayOf(MacEntrySchema, entriesSchemaOptions)
+  )
+);
+
+const getTrustedAppForOsScheme = () =>
   schema.object({
     name: schema.string({ minLength: 1, maxLength: 256 }),
     description: schema.maybe(schema.string({ minLength: 0, maxLength: 256, defaultValue: '' })),
@@ -139,7 +132,7 @@ const getTrustedAppForOsScheme = (forUpdateFlow: boolean = false) =>
       }),
     ]),
     entries: EntriesSchema,
-    ...(forUpdateFlow ? { version: schema.maybe(schema.string()) } : {}),
+    version: schema.maybe(schema.string()),
   });
 
 export const PostTrustedAppCreateRequestSchema = {
@@ -150,5 +143,5 @@ export const PutTrustedAppUpdateRequestSchema = {
   params: schema.object({
     id: schema.string(),
   }),
-  body: getTrustedAppForOsScheme(true),
+  body: getTrustedAppForOsScheme(),
 };

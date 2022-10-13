@@ -6,7 +6,7 @@
  */
 
 import React, { Fragment, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiDescribedFormGroup,
   EuiTitle,
@@ -16,12 +16,11 @@ import {
   EuiButtonEmpty,
   EuiFieldNumber,
   EuiSelect,
-  EuiCode,
 } from '@elastic/eui';
 
 import { SlmPolicyPayload } from '../../../../../common/types';
 import { TIME_UNITS } from '../../../../../common/constants';
-import { StepProps } from './';
+import { StepProps } from '.';
 import { textService } from '../../../services/text';
 import { useCore } from '../../../app_context';
 
@@ -139,10 +138,7 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
       description={
         <FormattedMessage
           id="xpack.snapshotRestore.policyForm.stepRetention.countDescription"
-          defaultMessage="The minimum and maximum number of snapshots to store in your cluster. It should not exceed {maxNumber}."
-          values={{
-            maxNumber: <EuiCode>200</EuiCode>,
-          }}
+          defaultMessage="The minimum and maximum number of snapshots to store for the policy."
         />
       }
       fullWidth
@@ -225,13 +221,13 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
           <EuiButtonEmpty
             size="s"
             flush="right"
-            href={docLinks.links.apis.putSnapshotLifecyclePolicy}
+            href={docLinks.links.snapshotRestore.createSnapshot}
             target="_blank"
             iconType="help"
           >
             <FormattedMessage
               id="xpack.snapshotRestore.policyForm.stepRetention.docsButtonLabel"
-              defaultMessage="Snapshot retention docs"
+              defaultMessage="Snapshot docs"
             />
           </EuiButtonEmpty>
         </EuiFlexItem>

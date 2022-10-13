@@ -6,36 +6,30 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { find } from 'lodash/fp';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 
-import { GetPackagesResponse, epmRouteService } from '../../../../fleet/common';
-import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { useKibana } from '../lib/kibana';
+import { useErrorToast } from './use_error_toast';
 
-export const useOsqueryIntegration = () => {
-  const {
-    http,
-    notifications: { toasts },
-  } = useKibana().services;
+export const useOsqueryIntegrationStatus = () => {
+  const { http } = useKibana().services;
+  const setErrorToast = useErrorToast();
 
   return useQuery(
-    'integrations',
+    ['integration'],
     () =>
-      http.get(epmRouteService.getListPath(), {
-        query: {
-          experimental: true,
-        },
-      }),
+      http.get<{ name: string; version: string; title: string; install_status: string }>(
+        '/internal/osquery/status'
+      ),
     {
-      select: ({ response }: GetPackagesResponse) =>
-        find(['name', OSQUERY_INTEGRATION_NAME], response),
       onError: (error: Error) =>
-        toasts.addError(error, {
+        setErrorToast(error, {
           title: i18n.translate('xpack.osquery.osquery_integration.fetchError', {
             defaultMessage: 'Error while fetching osquery integration',
           }),
         }),
+      refetchOnReconnect: false,
+      refetchOnWindowFocus: false,
     }
   );
 };

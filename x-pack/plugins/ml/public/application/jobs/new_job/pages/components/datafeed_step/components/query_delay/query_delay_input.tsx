@@ -13,23 +13,25 @@ import { useStringifiedValue } from '../hooks';
 import { DEFAULT_QUERY_DELAY } from '../../../../../../../../../common/constants/new_job';
 
 export const QueryDelayInput: FC = () => {
-  const { jobCreator, jobCreatorUpdate, jobValidator, jobValidatorUpdated } = useContext(
-    JobCreatorContext
-  );
+  const { jobCreator, jobCreatorUpdate, jobValidator, jobValidatorUpdated } =
+    useContext(JobCreatorContext);
   const [validation, setValidation] = useState(jobValidator.queryDelay);
   const { value: queryDelay, setValue: setQueryDelay } = useStringifiedValue(jobCreator.queryDelay);
 
   useEffect(() => {
     jobCreator.queryDelay = queryDelay === '' ? null : queryDelay;
     jobCreatorUpdate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [queryDelay]);
 
   useEffect(() => {
     setQueryDelay(jobCreator.queryDelay === null ? '' : jobCreator.queryDelay);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobCreatorUpdate]);
 
   useEffect(() => {
     setValidation(jobValidator.queryDelay);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobValidatorUpdated]);
 
   return (

@@ -11,11 +11,10 @@ import {
   fetchServerSearchableTypesMock,
 } from './search_service.test.mocks';
 
-import { Observable, of } from 'rxjs';
-import { take } from 'rxjs/operators';
+import { firstValueFrom, Observable, of } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 import { duration } from 'moment';
-import { httpServiceMock } from '../../../../../src/core/public/mocks';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 import { licenseCheckerMock } from '../../common/license_checker.mock';
 import { GlobalSearchProviderResult, GlobalSearchResult } from '../../common/types';
 import { GlobalSearchFindError } from '../../common/errors';
@@ -272,6 +271,43 @@ describe('SearchService', () => {
         });
       });
 
+      it('catches errors from providers', async () => {
+        const { registerResultProvider } = service.setup({
+          config: createConfig(),
+        });
+
+        getTestScheduler().run(({ expectObservable, hot }) => {
+          registerResultProvider(
+            createProvider('A', {
+              source: hot('a---c-|', {
+                a: [providerResult('A1'), providerResult('A2')],
+                c: [providerResult('A3')],
+              }),
+            })
+          );
+          registerResultProvider(
+            createProvider('B', {
+              source: hot(
+                '-b-#  ',
+                {
+                  b: [providerResult('B1')],
+                },
+                new Error('something went bad')
+              ),
+            })
+          );
+
+          const { find } = service.start(startDeps());
+          const results = find({ term: 'foobar' }, {});
+
+          expectObservable(results).toBe('ab--c-|', {
+            a: expectedBatch('A1', 'A2'),
+            b: expectedBatch('B1'),
+            c: expectedBatch('A3'),
+          });
+        });
+      });
+
       it('return mixed server/client providers results', async () => {
         const { registerResultProvider } = service.setup({
           config: createConfig(),
@@ -300,6 +336,33 @@ describe('SearchService', () => {
             a: expectedBatch('P1'),
             b: expectedBatch('P2'),
             c: expectedBatch('S1', 'S2'),
+          });
+        });
+      });
+
+      it('catches errors from the server', async () => {
+        const { registerResultProvider } = service.setup({
+          config: createConfig(),
+        });
+
+        getTestScheduler().run(({ expectObservable, hot }) => {
+          fetchServerResultsMock.mockReturnValue(hot('#', {}, new Error('fetch error')));
+
+          registerResultProvider(
+            createProvider('A', {
+              source: hot('a-b-|', {
+                a: [providerResult('P1')],
+                b: [providerResult('P2')],
+              }),
+            })
+          );
+
+          const { find } = service.start(startDeps());
+          const results = find({ term: 'foobar' }, {});
+
+          expectObservable(results).toBe('a-b-|', {
+            a: expectedBatch('P1'),
+            b: expectedBatch('P2'),
           });
         });
       });
@@ -408,7 +471,7 @@ describe('SearchService', () => {
         registerResultProvider(provider);
 
         const { find } = service.start(startDeps());
-        const batch = await find({ term: 'foobar' }, {}).pipe(take(1)).toPromise();
+        const batch = await firstValueFrom(find({ term: 'foobar' }, {}));
 
         expect(batch.results).toHaveLength(2);
         expect(batch.results[0]).toEqual({

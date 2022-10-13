@@ -9,14 +9,12 @@ import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 
+import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { timelineActions } from '../../../store/timeline';
 import { useTimelineFullScreen } from '../../../../common/containers/use_full_screen';
-import {
-  TimelineId,
-  TimelineType,
-  TimelineTypeLiteral,
-} from '../../../../../common/types/timeline';
+import type { TimelineTypeLiteral } from '../../../../../common/types/timeline';
+import { TimelineId, TimelineType } from '../../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { inputsActions, inputsSelectors } from '../../../../common/store/inputs';
 import { sourcererActions, sourcererSelectors } from '../../../../common/store/sourcerer';
@@ -31,11 +29,10 @@ interface Props {
 
 export const useCreateTimeline = ({ timelineId, timelineType, closeGearMenu }: Props) => {
   const dispatch = useDispatch();
-  const existingIndexNamesSelector = useMemo(
-    () => sourcererSelectors.getAllExistingIndexNamesSelector(),
-    []
-  );
-  const existingIndexNames = useDeepEqualSelector<string[]>(existingIndexNamesSelector);
+  const defaultDataViewSelector = useMemo(() => sourcererSelectors.defaultDataViewSelector(), []);
+  const { id: dataViewId, patternList: selectedPatterns } =
+    useDeepEqualSelector(defaultDataViewSelector);
+
   const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
   const globalTimeRange = useDeepEqualSelector(inputsSelectors.globalTimeRangeSelector);
   const createTimeline = useCallback(
@@ -44,43 +41,52 @@ export const useCreateTimeline = ({ timelineId, timelineType, closeGearMenu }: P
         setTimelineFullScreen(false);
       }
       dispatch(
-        sourcererActions.setSelectedIndexPatterns({
+        sourcererActions.setSelectedDataView({
           id: SourcererScopeName.timeline,
-          selectedPatterns: existingIndexNames,
+          selectedDataViewId: dataViewId,
+          selectedPatterns,
         })
       );
       dispatch(
         timelineActions.createTimeline({
-          id,
           columns: defaultHeaders,
+          dataViewId,
+          id,
+          indexNames: selectedPatterns,
           show,
           timelineType,
-          indexNames: existingIndexNames,
         })
       );
-      dispatch(inputsActions.addGlobalLinkTo({ linkToId: 'timeline' }));
-      dispatch(inputsActions.addTimelineLinkTo({ linkToId: 'global' }));
+
+      dispatch(
+        timelineActions.setTimelineUpdatedAt({
+          id: TimelineId.active,
+          updated: undefined,
+        })
+      );
+      dispatch(inputsActions.addLinkTo([InputsModelId.global, InputsModelId.timeline]));
       dispatch(appActions.addNotes({ notes: [] }));
       if (globalTimeRange.kind === 'absolute') {
         dispatch(
           inputsActions.setAbsoluteRangeDatePicker({
             ...globalTimeRange,
-            id: 'timeline',
+            id: InputsModelId.timeline,
           })
         );
       } else if (globalTimeRange.kind === 'relative') {
         dispatch(
           inputsActions.setRelativeRangeDatePicker({
             ...globalTimeRange,
-            id: 'timeline',
+            id: InputsModelId.timeline,
           })
         );
       }
     },
     [
-      existingIndexNames,
       dispatch,
       globalTimeRange,
+      dataViewId,
+      selectedPatterns,
       setTimelineFullScreen,
       timelineFullScreen,
       timelineType,

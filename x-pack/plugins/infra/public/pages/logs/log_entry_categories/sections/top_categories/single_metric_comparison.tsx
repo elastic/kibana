@@ -10,7 +10,7 @@ import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
-import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
 export const SingleMetricComparison: React.FunctionComponent<{
   currentValue: number;
@@ -29,14 +29,14 @@ export const SingleMetricComparison: React.FunctionComponent<{
     return (
       <NoWrapSpan>
         <EuiIcon type="sortUp" color="success" />
-        <EuiTextColor color="secondary">{formatPercentage(changeFactor)}</EuiTextColor>
+        <EuiTextColor color="success">{formatPercentage(changeFactor)}</EuiTextColor>
       </NoWrapSpan>
     );
   } else if (changeFactor > 0 && !Number.isFinite(changeFactor)) {
     return (
       <NoWrapSpan>
         <EuiIcon type="sortUp" color="success" />
-        <EuiTextColor color="secondary">{newCategoryTrendLabel}</EuiTextColor>
+        <EuiTextColor color="success">{newCategoryTrendLabel}</EuiTextColor>
       </NoWrapSpan>
     );
   }

@@ -8,7 +8,7 @@
 import React from 'react';
 import { PainlessLang, PainlessContext } from '@kbn/monaco';
 
-import { CodeEditor } from '../../../../../../src/plugins/kibana_react/public';
+import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 
 interface Props {
   code: string;

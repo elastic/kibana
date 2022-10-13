@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Capabilities } from 'kibana/public';
+import { Capabilities } from '@kbn/core/public';
 import { ApmPluginSetupDeps } from '../../plugin';
 
 export const getAlertingCapabilities = (

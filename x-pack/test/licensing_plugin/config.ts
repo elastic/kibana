@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { services, pageObjects } from './services';
 
 const license = 'basic';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const functionalTestsConfig = await readConfigFile(require.resolve('../functional/config.js'));
+  const functionalTestsConfig = await readConfigFile(
+    require.resolve('../functional/config.base.js')
+  );
 
   const servers = {
     ...functionalTestsConfig.get('servers'),

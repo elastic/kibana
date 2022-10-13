@@ -8,8 +8,8 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { FeatureCollection } from 'geojson';
-import { Query } from 'src/plugins/data/public';
-import { SortDirection } from 'src/plugins/data/common/search';
+import type { Query } from '@kbn/es-query';
+import { SortDirection } from '@kbn/data-plugin/common/search';
 import {
   AGG_TYPE,
   GRID_RESOLUTION,
@@ -19,11 +19,6 @@ import {
   SOURCE_TYPES,
 } from '../constants';
 
-export type AttributionDescriptor = {
-  attributionText?: string;
-  attributionUrl?: string;
-};
-
 export type AbstractSourceDescriptor = {
   id?: string;
   type: string;
@@ -32,6 +27,7 @@ export type AbstractSourceDescriptor = {
 export type EMSTMSSourceDescriptor = AbstractSourceDescriptor & {
   // id: EMS TMS layer id. Used when !isAutoSelect
   isAutoSelect: boolean;
+  lightModeDefault: string;
 };
 
 export type EMSFileSourceDescriptor = AbstractSourceDescriptor & {
@@ -47,6 +43,7 @@ export type AbstractESSourceDescriptor = AbstractSourceDescriptor & {
   geoField?: string;
   applyGlobalQuery: boolean;
   applyGlobalTime: boolean;
+  applyForceRefresh: boolean;
 };
 
 type AbstractAggDescriptor = {
@@ -110,15 +107,10 @@ export type ESPewPewSourceDescriptor = AbstractESAggSourceDescriptor & {
 };
 
 export type ESTermSourceDescriptor = AbstractESAggSourceDescriptor & {
-  indexPatternTitle?: string;
   term: string; // term field name
   whereQuery?: Query;
   size?: number;
   type: SOURCE_TYPES.ES_TERM_SOURCE;
-};
-
-export type KibanaRegionmapSourceDescriptor = AbstractSourceDescriptor & {
-  name: string;
 };
 
 // This is for symmetry with other sources only.
@@ -129,14 +121,11 @@ export type WMSSourceDescriptor = AbstractSourceDescriptor & {
   serviceUrl: string;
   layers: string;
   styles: string;
-  attributionText: string;
-  attributionUrl: string;
 };
 
-export type XYZTMSSourceDescriptor = AbstractSourceDescriptor &
-  AttributionDescriptor & {
-    urlTemplate: string;
-  };
+export type XYZTMSSourceDescriptor = AbstractSourceDescriptor & {
+  urlTemplate: string;
+};
 
 export type MVTFieldDescriptor = {
   name: string;
@@ -168,6 +157,7 @@ export type TiledSingleLayerVectorSourceDescriptor = AbstractSourceDescriptor &
 
 export type InlineFieldDescriptor = {
   name: string;
+  label?: string;
   type: 'string' | 'number';
 };
 

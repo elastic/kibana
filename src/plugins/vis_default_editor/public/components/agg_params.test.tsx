@@ -9,13 +9,14 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { IndexPattern, IAggConfig, AggGroupNames } from 'src/plugins/data/public';
+import { IAggConfig, AggGroupNames } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   DefaultEditorAggParams as PureDefaultEditorAggParams,
   DefaultEditorAggParamsProps,
 } from './agg_params';
-import { KibanaContextProvider } from '../../../kibana_react/public';
-import { dataPluginMock } from '../../../data/public/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { EditorVisState } from './sidebar/state/reducers';
 
 const mockEditorConfig = {
@@ -84,7 +85,7 @@ describe('DefaultEditorAggParams component', () => {
     intervalDeserialize = jest.fn(() => 'deserialized');
 
     defaultProps = {
-      agg: ({
+      agg: {
         type: {
           params: [{ name: 'interval', deserialize: intervalDeserialize }],
         },
@@ -92,10 +93,10 @@ describe('DefaultEditorAggParams component', () => {
         schema: {
           title: '',
         },
-      } as any) as IAggConfig,
+      } as any as IAggConfig,
       groupName: AggGroupNames.Metrics,
       formIsTouched: false,
-      indexPattern: {} as IndexPattern,
+      indexPattern: {} as DataView,
       metricAggs: [],
       state: {} as EditorVisState,
       setAggParamValue,

@@ -1,7 +1,8 @@
 Within this folder is input test data for tests such as:
 
 ```ts
-security_and_spaces/tests/rule_exceptions.ts
+security_and_spaces/tests/operator_data_types
+security_and_spaces/tests/create_endpoint_exceptions.ts
 ```
 
 where these are small ECS compliant input indexes that try to express tests that exercise different parts of

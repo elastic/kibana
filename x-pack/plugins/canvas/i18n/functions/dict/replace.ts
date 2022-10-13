@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { replace } from '../../../canvas_plugin_src/functions/common/replace';
+import type { replace } from '../../../canvas_plugin_src/functions/common/replace';
 import { FunctionHelp } from '../function_help';
 import { FunctionFactory } from '../../../types';
 import { JS } from '../../constants';
@@ -27,8 +27,7 @@ export const help: FunctionHelp<FunctionFactory<typeof replace>> = {
     flags: i18n.translate('xpack.canvas.functions.replace.args.flagsHelpText', {
       defaultMessage: 'Specify flags. See {url}.',
       values: {
-        url:
-          'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp',
+        url: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp',
       },
     }),
     replacement: i18n.translate('xpack.canvas.functions.replace.args.replacementHelpText', {

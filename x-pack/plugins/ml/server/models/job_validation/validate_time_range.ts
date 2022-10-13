@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
-import { ES_FIELD_TYPES } from '../../../../../../src/plugins/data/server';
+import { IScopedClusterClient } from '@kbn/core/server';
+import { ES_FIELD_TYPES } from '@kbn/data-plugin/server';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import { validateJobObject } from './validate_job_object';
@@ -29,13 +29,16 @@ const MIN_TIME_SPAN_READABLE = '2 hours';
 
 export async function isValidTimeField({ asCurrentUser }: IScopedClusterClient, job: CombinedJob) {
   const index = job.datafeed_config.indices.join(',');
-  const timeField = job.data_description.time_field;
+  const timeField = job.data_description.time_field!;
 
   // check if time_field is of type 'date' or 'date_nanos'
-  const { body: fieldCaps } = await asCurrentUser.fieldCaps({
-    index,
-    fields: [timeField],
-  });
+  const fieldCaps = await asCurrentUser.fieldCaps(
+    {
+      index,
+      fields: [timeField],
+    },
+    { maxRetries: 0 }
+  );
 
   let fieldType = fieldCaps?.fields[timeField]?.date?.type;
   if (fieldType === undefined) {

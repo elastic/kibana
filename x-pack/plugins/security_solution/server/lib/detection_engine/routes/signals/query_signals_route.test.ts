@@ -16,47 +16,58 @@ import {
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { querySignalsRoute } from './query_signals_route';
+import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
 
 describe('query for signal', () => {
   let server: ReturnType<typeof serverMock.create>;
-  let { clients, context } = requestContextMock.createTools();
+  let { context } = requestContextMock.createTools();
+  const ruleDataClient = ruleRegistryMocks.createRuleDataClient('.alerts-security.alerts');
 
   beforeEach(() => {
     server = serverMock.create();
-    ({ clients, context } = requestContextMock.createTools());
+    ({ context } = requestContextMock.createTools());
 
-    clients.clusterClient.callAsCurrentUser.mockResolvedValue(getEmptySignalsResponse());
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ruleDataClient.getReader().search.mockResolvedValue(getEmptySignalsResponse() as any);
 
-    querySignalsRoute(server.router);
+    querySignalsRoute(server.router, ruleDataClient);
   });
 
   describe('query and agg on signals index', () => {
     test('returns 200 when using single query', async () => {
-      const response = await server.inject(getSignalsQueryRequest(), context);
+      const response = await server.inject(
+        getSignalsQueryRequest(),
+        requestContextMock.convertContext(context)
+      );
 
       expect(response.status).toEqual(200);
-      expect(clients.clusterClient.callAsCurrentUser).toHaveBeenCalledWith(
-        'search',
-        expect.objectContaining({ body: typicalSignalsQuery() })
+      expect(ruleDataClient.getReader().search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: typicalSignalsQuery(),
+        })
       );
     });
 
     test('returns 200 when using single agg', async () => {
-      const response = await server.inject(getSignalsAggsQueryRequest(), context);
+      const response = await server.inject(
+        getSignalsAggsQueryRequest(),
+        requestContextMock.convertContext(context)
+      );
 
       expect(response.status).toEqual(200);
-      expect(clients.clusterClient.callAsCurrentUser).toHaveBeenCalledWith(
-        'search',
-        expect.objectContaining({ body: typicalSignalsQueryAggs() })
+      expect(ruleDataClient.getReader().search).toHaveBeenCalledWith(
+        expect.objectContaining({ body: typicalSignalsQueryAggs(), ignore_unavailable: true })
       );
     });
 
     test('returns 200 when using aggs and query together', async () => {
-      const response = await server.inject(getSignalsAggsAndQueryRequest(), context);
+      const response = await server.inject(
+        getSignalsAggsAndQueryRequest(),
+        requestContextMock.convertContext(context)
+      );
 
       expect(response.status).toEqual(200);
-      expect(clients.clusterClient.callAsCurrentUser).toHaveBeenCalledWith(
-        'search',
+      expect(ruleDataClient.getReader().search).toHaveBeenCalledWith(
         expect.objectContaining({
           body: {
             ...typicalSignalsQuery(),
@@ -67,10 +78,11 @@ describe('query for signal', () => {
     });
 
     test('catches error if query throws error', async () => {
-      clients.clusterClient.callAsCurrentUser.mockImplementation(async () => {
-        throw new Error('Test error');
-      });
-      const response = await server.inject(getSignalsAggsQueryRequest(), context);
+      ruleDataClient.getReader().search.mockRejectedValue(new Error('Test error'));
+      const response = await server.inject(
+        getSignalsAggsQueryRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
         message: 'Test error',
@@ -120,7 +132,7 @@ describe('query for signal', () => {
         path: DETECTION_ENGINE_QUERY_SIGNALS_URL,
         body: {},
       });
-      const response = await server.inject(request, context);
+      const response = await server.inject(request, requestContextMock.convertContext(context));
       expect(response.status).toEqual(400);
       expect(response.body).toEqual({
         message: '"value" must have at least 1 children',

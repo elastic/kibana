@@ -2,25 +2,8 @@
 .ml-time-series-explorer {
   color: $euiColorDarkShade;
 
-  .results-container {
-    .panel-title {
-      font-size: $euiFontSizeM;
-      font-weight: 400;
-      color: $euiColorDarkShade;
-    }
-
-    .entity-count-text {
-      color: $euiColorSecondary;
-      font-size: $euiFontSizeS;
-    }
-  }
-
   .forecast-controls {
     float: right;
-  }
-
-  .ml-anomalies-controls {
-    padding-top: $euiSizeXS;
   }
 
   .ml-timeseries-chart {
@@ -133,9 +116,8 @@
 
     rect.scheduled-event-marker {
       stroke-width: 1px;
-      stroke: $euiColorMediumShade;
+      stroke: $euiColorDarkShade;
       fill: $euiColorLightShade;
-      pointer-events: none;
     }
 
     .forecast {

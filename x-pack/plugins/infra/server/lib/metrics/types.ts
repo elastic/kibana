@@ -35,12 +35,18 @@ export const TopMetricsTypeRT = rt.type({
   ),
 });
 
+export const MaxPeriodFilterExistsTypeRT = rt.type({
+  doc_count: rt.number,
+  period: BasicMetricValueRT,
+});
+
 export const MetricValueTypeRT = rt.union([
   BasicMetricValueRT,
   NormalizedMetricValueRT,
   PercentilesTypeRT,
   PercentilesKeyedTypeRT,
   TopMetricsTypeRT,
+  MaxPeriodFilterExistsTypeRT,
 ]);
 export type MetricValueType = rt.TypeOf<typeof MetricValueTypeRT>;
 
@@ -62,6 +68,14 @@ export const HistogramBucketRT = rt.record(
 export const HistogramResponseRT = rt.type({
   histogram: rt.type({
     buckets: rt.array(HistogramBucketRT),
+  }),
+  metricsets: rt.type({
+    buckets: rt.array(
+      rt.type({
+        key: rt.string,
+        doc_count: rt.number,
+      })
+    ),
   }),
 });
 
@@ -91,3 +105,7 @@ export type HistogramResponse = rt.TypeOf<typeof HistogramResponseRT>;
 export type GroupingResponse = rt.TypeOf<typeof GroupingResponseRT>;
 
 export type MetricsESResponse = HistogramResponse | GroupingResponse;
+
+export interface LogQueryFields {
+  indexPattern: string;
+}

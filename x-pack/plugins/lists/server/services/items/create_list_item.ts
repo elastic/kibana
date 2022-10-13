@@ -6,19 +6,19 @@
  */
 
 import uuid from 'uuid';
-import { ElasticsearchClient } from 'kibana/server';
-
+import { ElasticsearchClient } from '@kbn/core/server';
 import {
   DeserializerOrUndefined,
   IdOrUndefined,
-  IndexEsListItemSchema,
   ListItemSchema,
   MetaOrUndefined,
   SerializerOrUndefined,
   Type,
-} from '../../../common/schemas';
+} from '@kbn/securitysolution-io-ts-list-types';
+import { encodeHitVersion } from '@kbn/securitysolution-es-utils';
+
 import { transformListItemToElasticQuery } from '../utils';
-import { encodeHitVersion } from '../utils/encode_hit_version';
+import { IndexEsListItemSchema } from '../../schemas/elastic_query';
 
 export interface CreateListItemOptions {
   deserializer: DeserializerOrUndefined;
@@ -68,7 +68,7 @@ export const createListItem = async ({
       ...baseBody,
       ...elasticQuery,
     };
-    const { body: response } = await esClient.index({
+    const response = await esClient.index({
       body,
       id,
       index: listItemIndex,

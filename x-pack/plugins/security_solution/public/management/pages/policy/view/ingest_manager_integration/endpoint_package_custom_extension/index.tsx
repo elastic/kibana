@@ -5,18 +5,5 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
-import { PackageCustomExtensionComponentProps } from '../../../../../../../../fleet/public';
-import { FleetTrustedAppsCard } from './components/fleet_trusted_apps_card';
-
-export const EndpointPackageCustomExtension = memo<PackageCustomExtensionComponentProps>(
-  (props) => {
-    return (
-      <div data-test-subj="fleetEndpointPackageCustomContent">
-        <FleetTrustedAppsCard {...props} />
-      </div>
-    );
-  }
-);
-
-EndpointPackageCustomExtension.displayName = 'EndpointPackageCustomExtension';
+export { EndpointPackageCustomExtension } from './endpoint_package_custom_extension';
+export * from './translations';

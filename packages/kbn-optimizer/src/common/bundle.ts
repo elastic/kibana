@@ -12,7 +12,9 @@ import Fs from 'fs';
 import { BundleCache } from './bundle_cache';
 import { UnknownVals } from './ts_helpers';
 import { omit } from './obj_helpers';
-import { includes, ascending, entriesToObject } from './array_helpers';
+import { includes } from './array_helpers';
+import type { Hashes } from './hashes';
+import { ParsedDllManifest } from './dll_manifest';
 
 const VALID_BUNDLE_TYPES = ['plugin' as const, 'entry' as const];
 
@@ -87,14 +89,19 @@ export class Bundle {
 
   /**
    * Calculate the cache key for this bundle based from current
-   * mtime values.
+   * state determined by looking at files on disk.
    */
-  createCacheKey(files: string[], mtimes: Map<string, number | undefined>): unknown {
+  createCacheKey(
+    paths: string[],
+    hashes: Hashes,
+    dllManifest: ParsedDllManifest,
+    dllRefKeys: string[]
+  ): unknown {
     return {
       spec: omit(this.toSpec(), ['pageLoadAssetSizeLimit']),
-      mtimes: entriesToObject(
-        files.map((p) => [p, mtimes.get(p)] as const).sort(ascending((e) => e[0]))
-      ),
+      checksums: Object.fromEntries(paths.map((p) => [p, hashes.getCached(p)] as const)),
+      dllName: dllManifest.name,
+      dllRefs: Object.fromEntries(dllRefKeys.map((k) => [k, dllManifest.content[k]] as const)),
     };
   }
 
@@ -179,76 +186,74 @@ export function parseBundles(json: string) {
       throw new Error('must be an array');
     }
 
-    return specs.map(
-      (spec: UnknownVals<BundleSpec>): Bundle => {
-        if (!(spec && typeof spec === 'object')) {
-          throw new Error('`bundles[]` must be an object');
-        }
-
-        const { type } = spec;
-        if (!includes(VALID_BUNDLE_TYPES, type)) {
-          throw new Error('`bundles[]` must have a valid `type`');
-        }
-
-        const { id } = spec;
-        if (!(typeof id === 'string')) {
-          throw new Error('`bundles[]` must have a string `id` property');
-        }
-
-        const { publicDirNames } = spec;
-        if (!Array.isArray(publicDirNames) || !publicDirNames.every((d) => typeof d === 'string')) {
-          throw new Error('`bundles[]` must have an array of strings `publicDirNames` property');
-        }
-
-        const { contextDir } = spec;
-        if (!(typeof contextDir === 'string' && Path.isAbsolute(contextDir))) {
-          throw new Error('`bundles[]` must have an absolute path `contextDir` property');
-        }
-
-        const { sourceRoot } = spec;
-        if (!(typeof sourceRoot === 'string' && Path.isAbsolute(sourceRoot))) {
-          throw new Error('`bundles[]` must have an absolute path `sourceRoot` property');
-        }
-
-        const { outputDir } = spec;
-        if (!(typeof outputDir === 'string' && Path.isAbsolute(outputDir))) {
-          throw new Error('`bundles[]` must have an absolute path `outputDir` property');
-        }
-
-        const { manifestPath } = spec;
-        if (manifestPath !== undefined) {
-          if (!(typeof manifestPath === 'string' && Path.isAbsolute(manifestPath))) {
-            throw new Error('`bundles[]` must have an absolute path `manifestPath` property');
-          }
-        }
-
-        const { banner } = spec;
-        if (banner !== undefined) {
-          if (!(typeof banner === 'string')) {
-            throw new Error('`bundles[]` must have a string `banner` property');
-          }
-        }
-
-        const { pageLoadAssetSizeLimit } = spec;
-        if (pageLoadAssetSizeLimit !== undefined) {
-          if (!(typeof pageLoadAssetSizeLimit === 'number')) {
-            throw new Error('`bundles[]` must have a numeric `pageLoadAssetSizeLimit` property');
-          }
-        }
-
-        return new Bundle({
-          type,
-          id,
-          publicDirNames,
-          contextDir,
-          sourceRoot,
-          outputDir,
-          banner,
-          manifestPath,
-          pageLoadAssetSizeLimit,
-        });
+    return specs.map((spec: UnknownVals<BundleSpec>): Bundle => {
+      if (!(spec && typeof spec === 'object')) {
+        throw new Error('`bundles[]` must be an object');
       }
-    );
+
+      const { type } = spec;
+      if (!includes(VALID_BUNDLE_TYPES, type)) {
+        throw new Error('`bundles[]` must have a valid `type`');
+      }
+
+      const { id } = spec;
+      if (!(typeof id === 'string')) {
+        throw new Error('`bundles[]` must have a string `id` property');
+      }
+
+      const { publicDirNames } = spec;
+      if (!Array.isArray(publicDirNames) || !publicDirNames.every((d) => typeof d === 'string')) {
+        throw new Error('`bundles[]` must have an array of strings `publicDirNames` property');
+      }
+
+      const { contextDir } = spec;
+      if (!(typeof contextDir === 'string' && Path.isAbsolute(contextDir))) {
+        throw new Error('`bundles[]` must have an absolute path `contextDir` property');
+      }
+
+      const { sourceRoot } = spec;
+      if (!(typeof sourceRoot === 'string' && Path.isAbsolute(sourceRoot))) {
+        throw new Error('`bundles[]` must have an absolute path `sourceRoot` property');
+      }
+
+      const { outputDir } = spec;
+      if (!(typeof outputDir === 'string' && Path.isAbsolute(outputDir))) {
+        throw new Error('`bundles[]` must have an absolute path `outputDir` property');
+      }
+
+      const { manifestPath } = spec;
+      if (manifestPath !== undefined) {
+        if (!(typeof manifestPath === 'string' && Path.isAbsolute(manifestPath))) {
+          throw new Error('`bundles[]` must have an absolute path `manifestPath` property');
+        }
+      }
+
+      const { banner } = spec;
+      if (banner !== undefined) {
+        if (!(typeof banner === 'string')) {
+          throw new Error('`bundles[]` must have a string `banner` property');
+        }
+      }
+
+      const { pageLoadAssetSizeLimit } = spec;
+      if (pageLoadAssetSizeLimit !== undefined) {
+        if (!(typeof pageLoadAssetSizeLimit === 'number')) {
+          throw new Error('`bundles[]` must have a numeric `pageLoadAssetSizeLimit` property');
+        }
+      }
+
+      return new Bundle({
+        type,
+        id,
+        publicDirNames,
+        contextDir,
+        sourceRoot,
+        outputDir,
+        banner,
+        manifestPath,
+        pageLoadAssetSizeLimit,
+      });
+    });
   } catch (error) {
     throw new Error(`unable to parse bundles: ${error.message}`);
   }

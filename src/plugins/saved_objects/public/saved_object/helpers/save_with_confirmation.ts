@@ -13,7 +13,7 @@ import {
   SavedObjectsCreateOptions,
   OverlayStart,
   SavedObjectsClientContract,
-} from 'kibana/public';
+} from '@kbn/core/public';
 import { OVERWRITE_REJECTED } from '../../constants';
 import { confirmModalPromise } from './confirm_modal_promise';
 

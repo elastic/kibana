@@ -6,7 +6,18 @@
  * Side Public License, v 1.
  */
 
-export const TMS_IN_YML_ID = 'TMS in config/kibana.yml';
+export {
+  DEFAULT_EMS_FILE_API_URL,
+  DEFAULT_EMS_TILE_API_URL,
+  DEFAULT_EMS_LANDING_PAGE_URL,
+  DEFAULT_EMS_FONT_LIBRARY_URL,
+  DEFAULT_EMS_ROADMAP_ID,
+  DEFAULT_EMS_ROADMAP_DESATURATED_ID,
+  DEFAULT_EMS_DARKMAP_ID,
+  EMS_APP_NAME,
+} from './ems_defaults';
 
-export * from './ems_defaults';
-export { ORIGIN } from './origin';
+export { EMSSettings } from './ems_settings';
+export type { EMSConfig } from './ems_settings';
+
+export const LICENSE_CHECK_ID = 'maps';

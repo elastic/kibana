@@ -7,9 +7,9 @@
 
 import * as Rx from 'rxjs';
 
-import type { HttpServiceSetup, KibanaRequest, SavedObjectsRepository } from 'src/core/server';
-import { SavedObjectsErrorHelpers } from 'src/core/server';
-import { coreMock, httpServerMock } from 'src/core/server/mocks';
+import type { HttpServiceSetup, KibanaRequest, SavedObjectsRepository } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { getSpaceIdFromPath } from '../../common/lib/spaces_url_parser';
@@ -22,7 +22,7 @@ const createService = (serverBasePath: string = '') => {
 
   const coreStart = coreMock.createStart();
 
-  const respositoryMock = ({
+  const respositoryMock = {
     get: jest.fn().mockImplementation((type, id) => {
       if (type === 'space' && id === 'foo') {
         return Promise.resolve({
@@ -45,7 +45,7 @@ const createService = (serverBasePath: string = '') => {
       }
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }),
-  } as unknown) as SavedObjectsRepository;
+  } as unknown as SavedObjectsRepository;
 
   coreStart.savedObjects.createInternalRepository.mockReturnValue(respositoryMock);
   coreStart.savedObjects.createScopedRepository.mockReturnValue(respositoryMock);

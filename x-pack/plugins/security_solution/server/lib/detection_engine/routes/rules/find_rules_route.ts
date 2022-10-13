@@ -5,24 +5,25 @@
  * 2.0.
  */
 
+import { transformError } from '@kbn/securitysolution-es-utils';
+import type { Logger } from '@kbn/core/server';
 import { findRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/find_rules_type_dependents';
-import {
-  findRulesSchema,
-  FindRulesSchemaDecoded,
-} from '../../../../../common/detection_engine/schemas/request/find_rules_schema';
+import type { FindRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/find_rules_schema';
+import { findRulesSchema } from '../../../../../common/detection_engine/schemas/request/find_rules_schema';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
+import { DETECTION_ENGINE_RULES_URL_FIND } from '../../../../../common/constants';
 import { findRules } from '../../rules/find_rules';
-import { transformError, buildSiemResponse } from '../utils';
-import { getRuleActionsSavedObject } from '../../rule_actions/get_rule_actions_saved_object';
-import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
+import { buildSiemResponse } from '../utils';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { transformFindAlerts } from './utils';
 
-export const findRulesRoute = (router: SecuritySolutionPluginRouter) => {
+// eslint-disable-next-line no-restricted-imports
+import { legacyGetBulkRuleActionsSavedObject } from '../../rule_actions/legacy_get_bulk_rule_actions_saved_object';
+
+export const findRulesRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   router.get(
     {
-      path: `${DETECTION_ENGINE_RULES_URL}/_find`,
+      path: DETECTION_ENGINE_RULES_URL_FIND,
       validate: {
         query: buildRouteValidation<typeof findRulesSchema, FindRulesSchemaDecoded>(
           findRulesSchema
@@ -34,6 +35,7 @@ export const findRulesRoute = (router: SecuritySolutionPluginRouter) => {
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
+
       const validationErrors = findRuleValidateTypeDependents(request.query);
       if (validationErrors.length) {
         return siemResponse.error({ statusCode: 400, body: validationErrors });
@@ -41,16 +43,13 @@ export const findRulesRoute = (router: SecuritySolutionPluginRouter) => {
 
       try {
         const { query } = request;
-        const alertsClient = context.alerting?.getAlertsClient();
-        const savedObjectsClient = context.core.savedObjects.client;
+        const ctx = await context.resolve(['core', 'securitySolution', 'alerting']);
+        const rulesClient = ctx.alerting.getRulesClient();
+        const ruleExecutionLog = ctx.securitySolution.getRuleExecutionLog();
+        const savedObjectsClient = ctx.core.savedObjects.client;
 
-        if (!alertsClient) {
-          return siemResponse.error({ statusCode: 404 });
-        }
-
-        const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
         const rules = await findRules({
-          alertsClient,
+          rulesClient,
           perPage: query.per_page,
           page: query.page,
           sortField: query.sort_field,
@@ -59,44 +58,14 @@ export const findRulesRoute = (router: SecuritySolutionPluginRouter) => {
           fields: query.fields,
         });
 
-        // if any rules attempted to execute but failed before the rule executor is called,
-        // an execution status will be written directly onto the rule via the kibana alerting framework,
-        // which we are filtering on and will write a failure status
-        // for any rules found to be in a failing state into our rule status saved objects
-        const failingRules = rules.data.filter(
-          (rule) => rule.executionStatus != null && rule.executionStatus.status === 'error'
-        );
+        const ruleIds = rules.data.map((rule) => rule.id);
 
-        const ruleStatuses = await Promise.all(
-          rules.data.map(async (rule) => {
-            const results = await ruleStatusClient.find({
-              perPage: 1,
-              sortField: 'statusDate',
-              sortOrder: 'desc',
-              search: rule.id,
-              searchFields: ['alertId'],
-            });
-            const failingRule = failingRules.find((badRule) => badRule.id === rule.id);
-            if (failingRule != null) {
-              if (results.saved_objects.length > 0) {
-                results.saved_objects[0].attributes.status = 'failed';
-                results.saved_objects[0].attributes.lastFailureAt = failingRule.executionStatus.lastExecutionDate.toISOString();
-              }
-            }
-            return results;
-          })
-        );
-        const ruleActions = await Promise.all(
-          rules.data.map(async (rule) => {
-            const results = await getRuleActionsSavedObject({
-              savedObjectsClient,
-              ruleAlertId: rule.id,
-            });
+        const [ruleExecutionSummaries, ruleActions] = await Promise.all([
+          ruleExecutionLog.getExecutionSummariesBulk(ruleIds),
+          legacyGetBulkRuleActionsSavedObject({ alertIds: ruleIds, savedObjectsClient, logger }),
+        ]);
 
-            return results;
-          })
-        );
-        const transformed = transformFindAlerts(rules, ruleActions, ruleStatuses);
+        const transformed = transformFindAlerts(rules, ruleExecutionSummaries, ruleActions);
         if (transformed == null) {
           return siemResponse.error({ statusCode: 500, body: 'Internal error transforming' });
         } else {

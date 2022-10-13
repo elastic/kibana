@@ -8,19 +8,18 @@
 import type { FC, PropsWithChildren, PropsWithRef } from 'react';
 import React from 'react';
 
-import type { StartServicesAccessor } from 'src/core/public';
-import type { SpacesApiUiComponent } from 'src/plugins/spaces_oss/public';
+import type { StartServicesAccessor } from '@kbn/core/public';
 
+import { getCopyToSpaceFlyoutComponent } from '../copy_saved_objects_to_space';
+import { getEmbeddableLegacyUrlConflict, getLegacyUrlConflict } from '../legacy_urls';
 import type { PluginsStart } from '../plugin';
-import {
-  getLegacyUrlConflict,
-  getShareToSpaceFlyoutComponent,
-} from '../share_saved_objects_to_space';
+import { getShareToSpaceFlyoutComponent } from '../share_saved_objects_to_space';
 import { getSpaceAvatarComponent } from '../space_avatar';
 import { getSpaceListComponent } from '../space_list';
 import { getSpacesContextProviderWrapper } from '../spaces_context';
 import type { SpacesManager } from '../spaces_manager';
 import { LazyWrapper } from './lazy_wrapper';
+import type { SpacesApiUiComponent } from './types';
 
 export interface GetComponentsOptions {
   spacesManager: SpacesManager;
@@ -34,9 +33,15 @@ export const getComponents = ({
   /**
    * Returns a function that creates a lazy-loading version of a component.
    */
-  function wrapLazy<T>(fn: () => Promise<FC<T>>) {
+  function wrapLazy<T>(fn: () => Promise<FC<T>>, options: { showLoadingSpinner?: boolean } = {}) {
+    const { showLoadingSpinner } = options;
     return (props: JSX.IntrinsicAttributes & PropsWithRef<PropsWithChildren<T>>) => (
-      <LazyWrapper fn={fn} getStartServices={getStartServices} props={props} />
+      <LazyWrapper
+        fn={fn}
+        getStartServices={getStartServices}
+        props={props}
+        showLoadingSpinner={showLoadingSpinner}
+      />
     );
   }
 
@@ -44,8 +49,12 @@ export const getComponents = ({
     getSpacesContextProvider: wrapLazy(() =>
       getSpacesContextProviderWrapper({ spacesManager, getStartServices })
     ),
-    getShareToSpaceFlyout: wrapLazy(getShareToSpaceFlyoutComponent),
+    getShareToSpaceFlyout: wrapLazy(getShareToSpaceFlyoutComponent, { showLoadingSpinner: false }),
+    getCopyToSpaceFlyout: wrapLazy(getCopyToSpaceFlyoutComponent, { showLoadingSpinner: false }),
     getSpaceList: wrapLazy(getSpaceListComponent),
+    getEmbeddableLegacyUrlConflict: wrapLazy(() =>
+      getEmbeddableLegacyUrlConflict({ spacesManager, getStartServices })
+    ),
     getLegacyUrlConflict: wrapLazy(() => getLegacyUrlConflict({ getStartServices })),
     getSpaceAvatar: wrapLazy(getSpaceAvatarComponent),
   };

@@ -7,6 +7,10 @@
  */
 
 import { Duration, Moment } from 'moment';
+import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
+export interface NewsfeedPluginStartDependencies {
+  screenshotMode: ScreenshotModePluginStart;
+}
 
 // Ideally, we may want to obtain the type from the configSchema and exposeToBrowser keys...
 export interface NewsfeedPluginBrowserConfig {

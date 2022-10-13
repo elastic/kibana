@@ -129,7 +129,9 @@ Array [
       <span
         color="#000"
         data-euiicon-type="plusInCircle"
-      />
+      >
+        
+      </span>
     </div>
   </div>,
   <div
@@ -149,7 +151,9 @@ Array [
       <span
         color="#fff"
         data-euiicon-type="minusInCircle"
-      />
+      >
+        
+      </span>
     </div>
   </div>,
   <div
@@ -169,7 +173,9 @@ Array [
       <span
         color="#fff"
         data-euiicon-type="alert"
-      />
+      >
+        
+      </span>
     </div>
   </div>,
   <div
@@ -189,7 +195,9 @@ Array [
       <span
         color="#fff"
         data-euiicon-type="check"
-      />
+      >
+        
+      </span>
     </div>
   </div>,
 ]

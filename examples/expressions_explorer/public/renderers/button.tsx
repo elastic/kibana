@@ -9,7 +9,7 @@
 import ReactDOM from 'react-dom';
 import React from 'react';
 import { EuiButton } from '@elastic/eui';
-import { ExpressionRenderDefinition } from '../../../../src/plugins/expressions/common/expression_renderers';
+import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
 
 export const buttonRenderer: ExpressionRenderDefinition<any> = {
   name: 'button',
@@ -18,8 +18,8 @@ export const buttonRenderer: ExpressionRenderDefinition<any> = {
   render(domNode, config, handlers) {
     const buttonClick = () => {
       handlers.event({
-        id: 'NAVIGATE',
-        value: {
+        name: 'NAVIGATE',
+        data: {
           href: config.href,
         },
       });

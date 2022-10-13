@@ -6,104 +6,96 @@
  */
 
 import React, { useEffect } from 'react';
-import { connect } from 'react-redux';
-import { compose } from 'redux';
+
 import deepEqual from 'fast-deep-equal';
 
 import { useKibana } from '../../lib/kibana';
-import { RouteSpyState } from '../../utils/route/types';
+import type { RouteSpyState } from '../../utils/route/types';
 import { useRouteSpy } from '../../utils/route/use_route_spy';
-import { makeMapStateToProps } from '../url_state/helpers';
-import { setBreadcrumbs } from './breadcrumbs';
+import { useSetBreadcrumbs } from './breadcrumbs';
 import { TabNavigation } from './tab_navigation';
-import { SiemNavigationProps, SiemNavigationComponentProps } from './types';
+import type { TabNavigationComponentProps, SecuritySolutionTabNavigationProps } from './types';
 
-export const SiemNavigationComponent: React.FC<
-  SiemNavigationComponentProps & SiemNavigationProps & RouteSpyState
-> = ({
-  detailName,
-  display,
-  navTabs,
-  pageName,
-  pathName,
-  search,
-  tabName,
-  urlState,
-  flowTarget,
-  state,
-}) => {
-  const {
-    chrome,
-    application: { getUrlForApp },
-  } = useKibana().services;
+/**
+ * @description - This component handels all of the tab navigation seen within a Security Soluton application page, not the Security Solution primary side navigation
+ * For the primary side nav see './use_security_solution_navigation'
+ */
+export const TabNavigationComponent: React.FC<
+  RouteSpyState & SecuritySolutionTabNavigationProps & TabNavigationComponentProps
+> = React.memo(
+  ({ detailName, display, flowTarget, navTabs, pageName, pathName, search, state, tabName }) => {
+    const {
+      chrome,
+      application: { getUrlForApp, navigateToUrl },
+    } = useKibana().services;
 
-  useEffect(() => {
-    if (pathName || pageName) {
-      setBreadcrumbs(
-        {
-          detailName,
-          filters: urlState.filters,
-          flowTarget,
-          navTabs,
-          pageName,
-          pathName,
-          query: urlState.query,
-          savedQuery: urlState.savedQuery,
-          search,
-          sourcerer: urlState.sourcerer,
-          state,
-          tabName,
-          timeline: urlState.timeline,
-          timerange: urlState.timerange,
-        },
-        chrome,
-        getUrlForApp
-      );
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chrome, pageName, pathName, search, navTabs, urlState, state]);
+    const setBreadcrumbs = useSetBreadcrumbs();
 
-  return (
-    <TabNavigation
-      query={urlState.query}
-      display={display}
-      filters={urlState.filters}
-      navTabs={navTabs}
-      pageName={pageName}
-      pathName={pathName}
-      sourcerer={urlState.sourcerer}
-      savedQuery={urlState.savedQuery}
-      tabName={tabName}
-      timeline={urlState.timeline}
-      timerange={urlState.timerange}
-    />
-  );
-};
+    useEffect(() => {
+      if (pathName || pageName) {
+        setBreadcrumbs(
+          {
+            detailName,
+            flowTarget,
+            navTabs,
+            pageName,
+            pathName,
+            search,
+            state,
+            tabName,
+          },
+          chrome,
+          navigateToUrl
+        );
+      }
+    }, [
+      chrome,
+      pageName,
+      pathName,
+      search,
+      navTabs,
+      state,
+      detailName,
+      flowTarget,
+      tabName,
+      getUrlForApp,
+      navigateToUrl,
+      setBreadcrumbs,
+    ]);
 
-export const SiemNavigationRedux = compose<
-  React.ComponentClass<SiemNavigationProps & RouteSpyState>
->(connect(makeMapStateToProps))(
+    return (
+      <TabNavigation
+        display={display}
+        navTabs={navTabs}
+        pageName={pageName}
+        pathName={pathName}
+        tabName={tabName}
+      />
+    );
+  }
+);
+TabNavigationComponent.displayName = 'TabNavigationComponent';
+
+export const SecuritySolutionTabNavigationRedux = React.memo(
+  TabNavigationComponent,
+  (prevProps, nextProps) =>
+    prevProps.pathName === nextProps.pathName &&
+    prevProps.search === nextProps.search &&
+    deepEqual(prevProps.navTabs, nextProps.navTabs) &&
+    deepEqual(prevProps.state, nextProps.state)
+);
+
+export const SecuritySolutionTabNavigation: React.FC<SecuritySolutionTabNavigationProps> =
   React.memo(
-    SiemNavigationComponent,
-    (prevProps, nextProps) =>
-      prevProps.pathName === nextProps.pathName &&
-      prevProps.search === nextProps.search &&
-      deepEqual(prevProps.navTabs, nextProps.navTabs) &&
-      deepEqual(prevProps.urlState, nextProps.urlState) &&
-      deepEqual(prevProps.state, nextProps.state)
-  )
-);
+    (props) => {
+      const [routeProps] = useRouteSpy();
+      const stateNavReduxProps: RouteSpyState & SecuritySolutionTabNavigationProps = {
+        ...routeProps,
+        ...props,
+      };
 
-const SiemNavigationContainer: React.FC<SiemNavigationProps> = (props) => {
-  const [routeProps] = useRouteSpy();
-  const stateNavReduxProps: RouteSpyState & SiemNavigationProps = {
-    ...routeProps,
-    ...props,
-  };
-
-  return <SiemNavigationRedux {...stateNavReduxProps} />;
-};
-
-export const SiemNavigation = React.memo(SiemNavigationContainer, (prevProps, nextProps) =>
-  deepEqual(prevProps.navTabs, nextProps.navTabs)
-);
+      return <SecuritySolutionTabNavigationRedux {...stateNavReduxProps} />;
+    },
+    (prevProps, nextProps) => deepEqual(prevProps.navTabs, nextProps.navTabs)
+  );
+SecuritySolutionTabNavigation.displayName = 'SecuritySolutionTabNavigation';

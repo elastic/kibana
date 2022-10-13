@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { responseMock } from './response_factory';
+import type { responseMock } from './response_factory';
 
 type ResponseMock = ReturnType<typeof responseMock.create>;
 type Method = keyof ResponseMock;
@@ -17,7 +17,10 @@ interface ResponseCall {
   status: number;
 }
 
-interface Response extends ResponseCall {
+/**
+ * @internal
+ */
+export interface Response extends ResponseCall {
   calls: ResponseCall[];
 }
 
@@ -31,6 +34,11 @@ const buildResponses = (method: Method, calls: MockCall[]): ResponseCall[] => {
       return calls.map(([call]) => ({
         status: call.statusCode,
         body: JSON.parse(call.body),
+      }));
+    case 'customError':
+      return calls.map(([call]) => ({
+        status: call.statusCode,
+        body: call.body,
       }));
     default:
       throw new Error(`Encountered unexpected call to response.${method}`);

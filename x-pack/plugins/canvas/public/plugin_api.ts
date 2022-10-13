@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import {
   AnyExpressionFunctionDefinition,
   AnyExpressionTypeDefinition,
@@ -12,7 +13,6 @@ import {
   AnyRendererFactory,
 } from '../types';
 import { ElementFactory } from '../types';
-import { ExpressionsSetup } from '../../../../src/plugins/expressions/public';
 
 type SpecPromiseFn<T extends any> = () => Promise<T[]>;
 type AddToRegistry<T extends any> = (add: T[] | SpecPromiseFn<T>) => void;
@@ -22,7 +22,9 @@ export interface CanvasApi {
   addArgumentUIs: AddToRegistry<any>;
   addDatasourceUIs: AddToRegistry<any>;
   addElements: AddToRegistry<ElementFactory>;
-  addFunctions: AddSpecsToRegistry<() => AnyExpressionFunctionDefinition>;
+  addFunctions: AddSpecsToRegistry<
+    (() => AnyExpressionFunctionDefinition) | AnyExpressionFunctionDefinition
+  >;
   addModelUIs: AddToRegistry<any>;
   addRenderers: AddSpecsToRegistry<AnyRendererFactory>;
   addTagUIs: AddToRegistry<any>;
@@ -43,9 +45,10 @@ export interface SetupRegistries extends Record<string, any[]> {
   transitions: any[];
 }
 
-export function getPluginApi(
-  expressionsPluginSetup: ExpressionsSetup
-): { api: CanvasApi; registries: SetupRegistries } {
+export function getPluginApi(expressionsPluginSetup: ExpressionsSetup): {
+  api: CanvasApi;
+  registries: SetupRegistries;
+} {
   const registries: SetupRegistries = {
     elements: [],
     transformUIs: [],
@@ -84,7 +87,7 @@ export function getPluginApi(
         // There is an issue of the canvas render definition not matching the expression render definition
         // due to our handlers needing additional methods.  For now, we are going to cast to get to the proper
         // type, but we should work with AppArch to figure out how the Handlers can be genericized
-        expressionsPluginSetup.registerRenderer((r as unknown) as AnyExpressionRenderDefinition);
+        expressionsPluginSetup.registerRenderer(r as unknown as AnyExpressionRenderDefinition);
       });
     },
 

@@ -7,14 +7,13 @@
 
 import '../../../../__mocks__/shallow_useeffect.mock';
 
-import { setMockValues, setMockActions } from '../../../../__mocks__';
+import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
 import { configuredSources } from '../../../__mocks__/content_sources.mock';
 
 import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { Loading } from '../../../../shared/loading';
 import { LicenseCallout } from '../../../components/shared/license_callout';
 
 import { Connectors } from './connectors';
@@ -23,6 +22,7 @@ describe('Connectors', () => {
   const initializeConnectors = jest.fn();
 
   beforeEach(() => {
+    jest.clearAllMocks();
     setMockActions({ initializeConnectors });
     setMockValues({ connectors: configuredSources });
   });
@@ -33,14 +33,20 @@ describe('Connectors', () => {
     expect(wrapper.find('[data-test-subj="ConnectorRow"]')).toHaveLength(configuredSources.length);
   });
 
-  it('returns loading when loading', () => {
+  it('hides external connectors if they are not described', () => {
     setMockValues({
-      connectors: configuredSources,
-      dataLoading: true,
+      connectors: [
+        ...configuredSources,
+        {
+          name: 'Custom Connector Package',
+          serviceType: 'external',
+          externalConnectorServiceDescribed: false,
+        },
+      ],
     });
     const wrapper = shallow(<Connectors />);
 
-    expect(wrapper.find(Loading)).toHaveLength(1);
+    expect(wrapper.find('[data-test-subj="ConnectorRow"]')).toHaveLength(configuredSources.length);
   });
 
   it('renders LicenseCallout for restricted items', () => {

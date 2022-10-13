@@ -6,16 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { AbortError, abortSignalToPromise, defer } from '../../../kibana_utils/public';
+import { AbortError, abortSignalToPromise, defer } from '@kbn/kibana-utils-plugin/public';
 import {
   ItemBufferParams,
   TimedItemBufferParams,
   createBatchedFunction,
-  BatchResponseItem,
   ErrorLike,
+  normalizeError,
 } from '../../common';
-import { fetchStreaming, split } from '../streaming';
-import { normalizeError } from '../../common';
+import { fetchStreaming } from '../streaming';
 import { BatchedFunc, BatchItem } from './types';
 
 export interface BatchedFunctionProtocolError extends ErrorLike {
@@ -47,6 +46,11 @@ export interface StreamingBatchedFunctionParams<Payload, Result> {
    * before sending the batch request.
    */
   maxItemAge?: TimedItemBufferParams<any>['maxItemAge'];
+
+  /**
+   * Disabled zlib compression of response chunks.
+   */
+  getIsCompressionDisabled?: () => boolean;
 }
 
 /**
@@ -64,6 +68,7 @@ export const createStreamingBatchedFunction = <Payload, Result extends object>(
     fetchStreaming: fetchStreamingInjected = fetchStreaming,
     flushOnMaxItems = 25,
     maxItemAge = 10,
+    getIsCompressionDisabled = () => false,
   } = params;
   const [fn] = createBatchedFunction({
     onCall: (payload: Payload, signal?: AbortSignal) => {
@@ -82,6 +87,10 @@ export const createStreamingBatchedFunction = <Payload, Result extends object>(
           if (item.signal?.aborted) item.future.reject(new AbortError());
           return !item.signal?.aborted;
         });
+
+        if (items.length === 0) {
+          return; // all items have been aborted before a request has been sent
+        }
 
         const donePromises: Array<Promise<any>> = items.map((item) => {
           return new Promise<void>((resolve) => {
@@ -119,6 +128,7 @@ export const createStreamingBatchedFunction = <Payload, Result extends object>(
           body: JSON.stringify({ batch }),
           method: 'POST',
           signal: abortController.signal,
+          getIsCompressionDisabled,
         });
 
         const handleStreamError = (error: any) => {
@@ -127,10 +137,10 @@ export const createStreamingBatchedFunction = <Payload, Result extends object>(
           for (const { future } of items) future.reject(normalizedError);
         };
 
-        stream.pipe(split('\n')).subscribe({
+        stream.subscribe({
           next: (json: string) => {
             try {
-              const response = JSON.parse(json) as BatchResponseItem<Result, ErrorLike>;
+              const response = JSON.parse(json);
               if (response.error) {
                 items[response.id].future.reject(response.error);
               } else if (response.result !== undefined) {

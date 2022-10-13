@@ -1,122 +1,50 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<RolesGridPage /> renders permission denied if required 1`] = `
-<PermissionDenied>
-  <EuiFlexGroup
-    gutterSize="none"
+<div
+  class="euiPanel euiPanel--danger euiPanel--paddingLarge euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter emotion-euiPanel-grow-m-l-danger"
+  role="main"
+>
+  <div
+    class="euiPanel euiPanel--transparent euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge emotion-euiPanel-m-transparent"
   >
     <div
-      className="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive"
+      class="euiEmptyPrompt__main"
     >
-      <EuiPageContent
-        horizontalPosition="center"
+      <div
+        class="euiEmptyPrompt__icon"
       >
-        <EuiPanel
-          className="euiPageContent euiPageContent--horizontalCenter"
-          paddingSize="l"
-          role="main"
+        <span
+          color="subdued"
+          data-euiicon-type="securityApp"
+        />
+      </div>
+      <div
+        class="euiEmptyPrompt__content"
+      >
+        <div
+          class="euiEmptyPrompt__contentInner"
         >
-          <div
-            className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent euiPageContent--horizontalCenter"
-            role="main"
+          <h2
+            class="euiTitle emotion-euiTitle-m"
           >
-            <EuiEmptyPrompt
-              body={
-                <p
-                  data-test-subj="permissionDeniedMessage"
-                >
-                  <FormattedMessage
-                    defaultMessage="Contact your system administrator."
-                    id="xpack.security.management.roles.noPermissionToManageRolesDescription"
-                    values={Object {}}
-                  />
-                </p>
-              }
-              iconType="securityApp"
-              title={
-                <h2>
-                  <FormattedMessage
-                    defaultMessage="You need permission to manage roles"
-                    id="xpack.security.management.roles.deniedPermissionTitle"
-                    values={Object {}}
-                  />
-                </h2>
-              }
+            You need permission to manage roles
+          </h2>
+          <div
+            class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+          />
+          <div
+            class="euiText emotion-euiText-m-euiTextColor-subdued"
+          >
+            <p
+              data-test-subj="permissionDeniedMessage"
             >
-              <div
-                className="euiEmptyPrompt"
-              >
-                <EuiIcon
-                  color="subdued"
-                  size="xxl"
-                  type="securityApp"
-                >
-                  <span
-                    color="subdued"
-                    data-euiicon-type="securityApp"
-                    size="xxl"
-                  />
-                </EuiIcon>
-                <EuiSpacer
-                  size="s"
-                >
-                  <div
-                    className="euiSpacer euiSpacer--s"
-                  />
-                </EuiSpacer>
-                <EuiTextColor
-                  color="subdued"
-                >
-                  <span
-                    className="euiTextColor euiTextColor--subdued"
-                  >
-                    <EuiTitle
-                      size="m"
-                    >
-                      <h2
-                        className="euiTitle euiTitle--medium"
-                      >
-                        <FormattedMessage
-                          defaultMessage="You need permission to manage roles"
-                          id="xpack.security.management.roles.deniedPermissionTitle"
-                          values={Object {}}
-                        >
-                          You need permission to manage roles
-                        </FormattedMessage>
-                      </h2>
-                    </EuiTitle>
-                    <EuiSpacer
-                      size="m"
-                    >
-                      <div
-                        className="euiSpacer euiSpacer--m"
-                      />
-                    </EuiSpacer>
-                    <EuiText>
-                      <div
-                        className="euiText euiText--medium"
-                      >
-                        <p
-                          data-test-subj="permissionDeniedMessage"
-                        >
-                          <FormattedMessage
-                            defaultMessage="Contact your system administrator."
-                            id="xpack.security.management.roles.noPermissionToManageRolesDescription"
-                            values={Object {}}
-                          >
-                            Contact your system administrator.
-                          </FormattedMessage>
-                        </p>
-                      </div>
-                    </EuiText>
-                  </span>
-                </EuiTextColor>
-              </div>
-            </EuiEmptyPrompt>
+              Contact your system administrator.
+            </p>
           </div>
-        </EuiPanel>
-      </EuiPageContent>
+        </div>
+      </div>
     </div>
-  </EuiFlexGroup>
-</PermissionDenied>
+  </div>
+</div>
 `;

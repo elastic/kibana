@@ -6,35 +6,39 @@
  */
 
 import React, { useCallback, useEffect, useReducer } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
-import { HttpStart } from 'kibana/public';
-
-import { addIdToItem } from '../../../../common/shared_imports';
-import { AutocompleteStart, IIndexPattern } from '../../../../../../../src/plugins/data/public';
+import { HttpStart } from '@kbn/core/public';
+import { addIdToItem } from '@kbn/securitysolution-utils';
 import {
-  CreateExceptionListItemSchema,
   ExceptionListItemSchema,
   ExceptionListType,
   NamespaceType,
-  OperatorEnum,
-  OperatorTypeEnum,
+  ListOperatorEnum as OperatorEnum,
+  ListOperatorTypeEnum as OperatorTypeEnum,
+  OsTypeArray,
   entriesNested,
   exceptionListItemSchema,
-} from '../../../../common';
-import { AndOrBadge } from '../and_or_badge';
-
-import { CreateExceptionListItemBuilderSchema, ExceptionsBuilderExceptionItem } from './types';
-import { BuilderExceptionListItemComponent } from './exception_item_renderer';
-import { BuilderLogicButtons } from './logic_buttons';
-import { State, exceptionsBuilderReducer } from './reducer';
+} from '@kbn/securitysolution-io-ts-list-types';
 import {
+  CreateExceptionListItemBuilderSchema,
+  ExceptionsBuilderExceptionItem,
+  ExceptionsBuilderReturnExceptionItem,
+  OperatorOption,
   containsValueListEntry,
   filterExceptionItems,
   getDefaultEmptyEntry,
   getDefaultNestedEmptyEntry,
   getNewExceptionItem,
-} from './helpers';
+} from '@kbn/securitysolution-list-utils';
+import { DataViewBase } from '@kbn/es-query';
+import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
+
+import { AndOrBadge } from '../and_or_badge';
+
+import { BuilderExceptionListItemComponent } from './exception_item_renderer';
+import { BuilderLogicButtons } from './logic_buttons';
+import { State, exceptionsBuilderReducer } from './reducer';
 
 const MyInvisibleAndBadge = styled(EuiFlexItem)`
   visibility: hidden;
@@ -59,12 +63,14 @@ const initialState: State = {
   errorExists: 0,
   exceptions: [],
   exceptionsToDelete: [],
+  warningExists: 0,
 };
 
 export interface OnChangeProps {
   errorExists: boolean;
-  exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>;
+  exceptionItems: ExceptionsBuilderReturnExceptionItem[];
   exceptionsToDelete: ExceptionListItemSchema[];
+  warningExists: boolean;
 }
 
 export interface ExceptionBuilderProps {
@@ -72,19 +78,24 @@ export interface ExceptionBuilderProps {
   autocompleteService: AutocompleteStart;
   exceptionListItems: ExceptionsBuilderExceptionItem[];
   httpService: HttpStart;
-  indexPatterns: IIndexPattern;
+  osTypes?: OsTypeArray;
+  indexPatterns: DataViewBase;
   isAndDisabled: boolean;
   isNestedDisabled: boolean;
   isOrDisabled: boolean;
-  listId: string;
-  listNamespaceType: NamespaceType;
+  isOrHidden?: boolean;
+  listId: string | undefined;
+  listNamespaceType: NamespaceType | undefined;
   listType: ExceptionListType;
   listTypeSpecificIndexPatternFilter?: (
-    pattern: IIndexPattern,
+    pattern: DataViewBase,
     type: ExceptionListType
-  ) => IIndexPattern;
+  ) => DataViewBase;
   onChange: (arg: OnChangeProps) => void;
-  ruleName: string;
+  exceptionItemName?: string;
+  ruleName?: string;
+  isDisabled?: boolean;
+  operatorsList?: OperatorOption[];
 }
 
 export const ExceptionBuilderComponent = ({
@@ -96,12 +107,17 @@ export const ExceptionBuilderComponent = ({
   isAndDisabled,
   isNestedDisabled,
   isOrDisabled,
+  isOrHidden = false,
   listId,
   listNamespaceType,
   listType,
   listTypeSpecificIndexPatternFilter,
   onChange,
   ruleName,
+  exceptionItemName,
+  isDisabled = false,
+  osTypes,
+  operatorsList,
 }: ExceptionBuilderProps): JSX.Element => {
   const [
     {
@@ -111,6 +127,7 @@ export const ExceptionBuilderComponent = ({
       disableNested,
       disableOr,
       errorExists,
+      warningExists,
       exceptions,
       exceptionsToDelete,
     },
@@ -127,6 +144,16 @@ export const ExceptionBuilderComponent = ({
       dispatch({
         errorExists: hasErrors,
         type: 'setErrorsExist',
+      });
+    },
+    [dispatch]
+  );
+
+  const setWarningsExist = useCallback(
+    (hasWarnings: boolean): void => {
+      dispatch({
+        type: 'setWarningsExist',
+        warningExists: hasWarnings,
       });
     },
     [dispatch]
@@ -187,7 +214,6 @@ export const ExceptionBuilderComponent = ({
     (shouldAddNested: boolean): void => {
       dispatch({
         addNested: shouldAddNested,
-
         type: 'setAddNested',
       });
     },
@@ -265,10 +291,10 @@ export const ExceptionBuilderComponent = ({
     const newException = getNewExceptionItem({
       listId,
       namespaceType: listNamespaceType,
-      ruleName,
+      ruleName: exceptionItemName ?? `${ruleName ?? 'Rule'} - Exception item`,
     });
     setUpdateExceptions([...exceptions, { ...newException }]);
-  }, [setUpdateExceptions, exceptions, listId, listNamespaceType, ruleName]);
+  }, [listId, listNamespaceType, exceptionItemName, ruleName, setUpdateExceptions, exceptions]);
 
   // The builder can have existing exception items, or new exception items that have yet
   // to be created (and thus lack an id), this was creating some React bugs with relying
@@ -339,8 +365,13 @@ export const ExceptionBuilderComponent = ({
       errorExists: errorExists > 0,
       exceptionItems: filterExceptionItems(exceptions),
       exceptionsToDelete,
+      warningExists: warningExists > 0,
     });
-  }, [onChange, exceptionsToDelete, exceptions, errorExists]);
+  }, [onChange, exceptionsToDelete, exceptions, errorExists, warningExists]);
+
+  useEffect(() => {
+    setUpdateExceptions([]);
+  }, [osTypes, setUpdateExceptions]);
 
   // Defaults builder to never be sans entry, instead
   // always falls back to an empty entry if user deletes all
@@ -401,11 +432,17 @@ export const ExceptionBuilderComponent = ({
                 onDeleteExceptionItem={handleDeleteExceptionItem}
                 onlyShowListOperators={containsValueListEntry(exceptions)}
                 setErrorsExist={setErrorsExist}
+                setWarningsExist={setWarningsExist}
+                osTypes={osTypes}
+                isDisabled={isDisabled}
+                operatorsList={operatorsList}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
       ))}
+
+      <EuiSpacer size="m" />
 
       <MyButtonsContainer data-test-subj={`andOrOperatorButtons`}>
         <EuiFlexGroup gutterSize="s">
@@ -417,8 +454,9 @@ export const ExceptionBuilderComponent = ({
           <EuiFlexItem grow={1}>
             <BuilderLogicButtons
               isOrDisabled={isOrDisabled ? isOrDisabled : disableOr}
-              isAndDisabled={disableAnd}
-              isNestedDisabled={disableNested}
+              isOrHidden={isOrHidden}
+              isAndDisabled={isAndDisabled ? isAndDisabled : disableAnd}
+              isNestedDisabled={isNestedDisabled ? isNestedDisabled : disableNested}
               isNested={addNested}
               showNestedButton
               onOrClicked={handleAddNewExceptionItem}
@@ -434,3 +472,6 @@ export const ExceptionBuilderComponent = ({
 };
 
 ExceptionBuilderComponent.displayName = 'ExceptionBuilder';
+
+// eslint-disable-next-line import/no-default-export
+export default ExceptionBuilderComponent;

@@ -1,9 +1,14 @@
 {
   "id": "globalSearchBar",
-  "version": "8.0.0",
+  "owner": {
+    "name": "Kibana Core",
+    "githubTeam": "kibana-core"
+  },
+  "version": "8.2.0",
   "kibanaVersion": "kibana",
   "server": false,
   "ui": true,
+  "requiredBundles": ["kibanaReact"],
   "requiredPlugins": ["globalSearch"],
   "optionalPlugins": ["usageCollection", "savedObjectsTagging"],
   "configPath": ["xpack", "global_search_bar"]

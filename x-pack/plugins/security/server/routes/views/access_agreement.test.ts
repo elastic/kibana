@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
   HttpResources,
   HttpResourcesRequestHandler,
   RequestHandler,
   RouteConfig,
-} from 'src/core/server';
-import { kibanaResponseFactory } from 'src/core/server';
-import { httpResourcesMock, httpServerMock } from 'src/core/server/mocks';
+} from '@kbn/core/server';
+import { kibanaResponseFactory } from '@kbn/core/server';
+import { httpResourcesMock, httpServerMock } from '@kbn/core/server/mocks';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import type { SecurityLicense, SecurityLicenseFeatures } from '../../../common/licensing';
 import type { AuthenticationProvider } from '../../../common/model';
@@ -31,6 +31,7 @@ describe('Access agreement view routes', () => {
   let session: jest.Mocked<PublicMethodsOf<Session>>;
   let license: jest.Mocked<SecurityLicense>;
   let mockContext: SecurityRequestHandlerContext;
+
   beforeEach(() => {
     const routeParamsMock = routeDefinitionParamsMock.create();
     router = routeParamsMock.router;
@@ -45,11 +46,11 @@ describe('Access agreement view routes', () => {
       allowAccessAgreement: true,
     } as SecurityLicenseFeatures);
 
-    mockContext = ({
+    mockContext = {
       licensing: {
         license: { check: jest.fn().mockReturnValue({ check: 'valid' }) },
       },
-    } as unknown) as SecurityRequestHandlerContext;
+    } as unknown as SecurityRequestHandlerContext;
 
     defineAccessAgreementRoutes(routeParamsMock);
   });
@@ -138,7 +139,7 @@ describe('Access agreement view routes', () => {
       });
     });
 
-    it('returns non-empty `accessAgreement` only if it is configured.', async () => {
+    it('returns non-empty provider specific `accessAgreement` only if it is configured.', async () => {
       const request = httpServerMock.createKibanaRequest();
 
       config.authc = routeDefinitionParamsMock.create({
@@ -160,6 +161,43 @@ describe('Access agreement view routes', () => {
         [{ type: 'basic', name: 'basic1' }, ''],
         [{ type: 'saml', name: 'saml1' }, 'Some access agreement'],
         [{ type: 'unknown-type', name: 'unknown-name' }, ''],
+      ];
+
+      for (const [sessionProvider, expectedAccessAgreement] of cases) {
+        session.get.mockResolvedValue(sessionMock.createValue({ provider: sessionProvider }));
+
+        await expect(routeHandler(mockContext, request, kibanaResponseFactory)).resolves.toEqual({
+          options: { body: { accessAgreement: expectedAccessAgreement } },
+          payload: { accessAgreement: expectedAccessAgreement },
+          status: 200,
+        });
+      }
+    });
+
+    it('returns global `accessAgreement` when  provider specific `accessAgreement` is not configured', async () => {
+      const request = httpServerMock.createKibanaRequest();
+
+      config.authc = routeDefinitionParamsMock.create({
+        authc: {
+          providers: {
+            basic: { basic1: { order: 0 } },
+            saml: {
+              saml1: {
+                order: 1,
+                realm: 'realm1',
+                accessAgreement: { message: 'Some access agreement' },
+              },
+            },
+          },
+        },
+      }).config.authc;
+
+      config.accessAgreement = { message: 'Foo' };
+
+      const cases: Array<[AuthenticationProvider, string]> = [
+        [{ type: 'basic', name: 'basic1' }, 'Foo'],
+        [{ type: 'saml', name: 'saml1' }, 'Some access agreement'],
+        [{ type: 'unknown-type', name: 'unknown-name' }, 'Foo'],
       ];
 
       for (const [sessionProvider, expectedAccessAgreement] of cases) {

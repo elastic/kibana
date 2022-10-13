@@ -4,23 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
 
 import { Story, addDecorator } from '@storybook/react';
 import React from 'react';
-import { HttpStart } from 'kibana/public';
+import { HttpStart } from '@kbn/core/public';
+import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { fields, getField } from '@kbn/data-plugin/common/mocks';
 
-import { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
-import { EuiThemeProvider } from '../../../../../../../src/plugins/kibana_react/common';
-import {
-  fields,
-  getField,
-} from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
 import { getEntryMatchAnyMock } from '../../../../common/schemas/types/entry_match_any.mock';
 import { getEntryMatchMock } from '../../../../common/schemas/types/entry_match.mock';
 import { getEntryExistsMock } from '../../../../common/schemas/types/entry_exists.mock';
@@ -33,7 +24,7 @@ import {
   OnChangeProps,
 } from './exception_items_renderer';
 
-const mockHttpService: HttpStart = ({
+const mockHttpService: HttpStart = {
   addLoadingCountSource: (): void => {},
   anonymousPaths: {
     isAnonymous: (): void => {},
@@ -53,8 +44,8 @@ const mockHttpService: HttpStart = ({
   patch: (): void => {},
   post: (): void => {},
   put: (): void => {},
-} as unknown) as HttpStart;
-const mockAutocompleteService = ({
+} as unknown as HttpStart;
+const mockAutocompleteService = {
   getValueSuggestions: () =>
     new Promise((resolve) => {
       setTimeout(() => {
@@ -68,7 +59,7 @@ const mockAutocompleteService = ({
         ]);
       }, 300);
     }),
-} as unknown) as AutocompleteStart;
+} as unknown as AutocompleteStart;
 
 addDecorator((storyFn) => <EuiThemeProvider>{storyFn()}</EuiThemeProvider>);
 
@@ -119,7 +110,7 @@ export default {
     },
     indexPatterns: {
       description:
-        '`IIndexPattern` - index patterns used to populate field options and value autocomplete.',
+        '`DataViewBase` - index patterns used to populate field options and value autocomplete.',
       type: {
         required: true,
       },
@@ -201,7 +192,7 @@ export default {
     },
     listTypeSpecificIndexPatternFilter: {
       description:
-        '`(pattern: IIndexPattern, type: ExceptionListType) => IIndexPattern` - callback invoked when index patterns filtered. Optional to be used if you would only like certain fields displayed.',
+        '`(pattern: DataViewBase, type: ExceptionListType) => DataViewBase` - callback invoked when index patterns filtered. Optional to be used if you would only like certain fields displayed.',
       type: {
         required: false,
       },
@@ -245,6 +236,7 @@ Default.args = {
     errorExists: false,
     exceptionItems: [],
     exceptionsToDelete: [],
+    warningExists: false,
   }),
   ruleName: 'My awesome rule',
 };
@@ -297,6 +289,7 @@ SingleExceptionItem.args = {
     errorExists: false,
     exceptionItems: [sampleExceptionItem],
     exceptionsToDelete: [],
+    warningExists: false,
   }),
   ruleName: 'My awesome rule',
 };
@@ -322,6 +315,7 @@ MultiExceptionItems.args = {
     errorExists: false,
     exceptionItems: [sampleExceptionItem, sampleExceptionItem],
     exceptionsToDelete: [],
+    warningExists: false,
   }),
   ruleName: 'My awesome rule',
 };
@@ -347,6 +341,7 @@ WithNestedExceptionItem.args = {
     errorExists: false,
     exceptionItems: [sampleNestedExceptionItem, sampleExceptionItem],
     exceptionsToDelete: [],
+    warningExists: false,
   }),
   ruleName: 'My awesome rule',
 };

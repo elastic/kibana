@@ -9,7 +9,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import type { RouteProps } from 'react-router-dom';
 import { Redirect, Route } from 'react-router-dom';
-import type { CoreStart, AppMountParameters } from 'src/core/public';
+import type { CoreStart, AppMountParameters } from '@kbn/core/public';
 
 import type { FleetConfigType, FleetStartServices } from '../../plugin';
 
@@ -31,32 +31,34 @@ export const ProtectedRoute: React.FunctionComponent<ProtectedRouteProps> = ({
 };
 
 interface FleetAppProps {
-  basepath: string;
   startServices: FleetStartServices;
   config: FleetConfigType;
   history: AppMountParameters['history'];
   kibanaVersion: string;
   extensions: UIExtensionsStorage;
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+  theme$: AppMountParameters['theme$'];
 }
 const FleetApp = ({
-  basepath,
   startServices,
   config,
   history,
   kibanaVersion,
   extensions,
+  setHeaderActionMenu,
+  theme$,
 }: FleetAppProps) => {
   return (
     <FleetAppContext
-      basepath={basepath}
       startServices={startServices}
       config={config}
       history={history}
       kibanaVersion={kibanaVersion}
       extensions={extensions}
+      theme$={theme$}
     >
       <WithPermissionsAndSetup>
-        <AppRoutes />
+        <AppRoutes setHeaderActionMenu={setHeaderActionMenu} />
       </WithPermissionsAndSetup>
     </FleetAppContext>
   );
@@ -64,19 +66,20 @@ const FleetApp = ({
 
 export function renderApp(
   startServices: FleetStartServices,
-  { element, appBasePath, history }: AppMountParameters,
+  { element, history, setHeaderActionMenu, theme$ }: AppMountParameters,
   config: FleetConfigType,
   kibanaVersion: string,
   extensions: UIExtensionsStorage
 ) {
   ReactDOM.render(
     <FleetApp
-      basepath={appBasePath}
       startServices={startServices}
       config={config}
       history={history}
       kibanaVersion={kibanaVersion}
       extensions={extensions}
+      setHeaderActionMenu={setHeaderActionMenu}
+      theme$={theme$}
     />,
     element
   );

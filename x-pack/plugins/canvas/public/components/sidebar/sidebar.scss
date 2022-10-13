@@ -51,8 +51,12 @@
   min-width: 0;
 }
 
+.canvasSidebar__expandable {
+  width: 100%;
+}
+
 .canvasSidebar__expandable + .canvasSidebar__expandable {
-  margin-top: 0;
+  margin-top: 1px;
 
   .canvasSidebar__accordion:before {
     display: none;
@@ -86,6 +90,9 @@
   &:after {
     bottom: 0;
   }
+}
+.canvasSidebar__accordion.filtersSidebar__accordion {
+  margin: auto;
 }
 
 .canvasSidebar__accordionContent {

@@ -6,26 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { DeploymentProvider } from './deployment';
-import { LegacyEsProvider } from './legacy_es';
-import { ElasticsearchProvider } from './elasticsearch';
-import { EsArchiverProvider } from './es_archiver';
-import { KibanaServerProvider } from './kibana_server';
-import { RetryProvider } from './retry';
-import { RandomnessProvider } from './randomness';
+import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
+import { DeploymentService } from './deployment';
+import { RandomnessService } from './randomness';
 import { SecurityServiceProvider } from './security';
 import { EsDeleteAllIndicesProvider } from './es_delete_all_indices';
-import { SavedObjectInfoProvider } from './saved_object_info';
+import { SavedObjectInfoService } from './saved_object_info';
+import { IndexPatternsService } from './index_patterns';
+import { BsearchService } from './bsearch';
 
 export const services = {
-  deployment: DeploymentProvider,
-  legacyEs: LegacyEsProvider,
-  es: ElasticsearchProvider,
-  esArchiver: EsArchiverProvider,
-  kibanaServer: KibanaServerProvider,
-  retry: RetryProvider,
-  randomness: RandomnessProvider,
+  ...commonFunctionalServices,
+  deployment: DeploymentService,
+  randomness: RandomnessService,
   security: SecurityServiceProvider,
   esDeleteAllIndices: EsDeleteAllIndicesProvider,
-  savedObjectInfo: SavedObjectInfoProvider,
+  savedObjectInfo: SavedObjectInfoService,
+  indexPatterns: IndexPatternsService,
+  bsearch: BsearchService,
 };

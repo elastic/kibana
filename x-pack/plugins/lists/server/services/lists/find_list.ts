@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
-
-import {
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import { ElasticsearchClient } from '@kbn/core/server';
+import type {
   Filter,
   FoundListSchema,
   Page,
   PerPage,
-  SearchEsListSchema,
   SortFieldOrUndefined,
   SortOrderOrUndefined,
-} from '../../../common/schemas';
+} from '@kbn/securitysolution-io-ts-list-types';
+
+import { SearchEsListSchema } from '../../schemas/elastic_response';
 import {
   encodeCursor,
   getQueryFilter,
@@ -35,6 +36,7 @@ interface FindListOptions {
   sortOrder: SortOrderOrUndefined;
   esClient: ElasticsearchClient;
   listIndex: string;
+  runtimeMappings: MappingRuntimeFields | undefined;
 }
 
 export const findList = async ({
@@ -47,6 +49,7 @@ export const findList = async ({
   sortField,
   listIndex,
   sortOrder,
+  runtimeMappings,
 }: FindListOptions): Promise<FoundListSchema> => {
   const query = getQueryFilter({ filter });
 
@@ -58,14 +61,14 @@ export const findList = async ({
     index: listIndex,
     page,
     perPage,
+    runtimeMappings,
     searchAfter,
     sortField,
     sortOrder,
   });
 
-  const { body: totalCount } = await esClient.count({
+  const totalCount = await esClient.count({
     body: {
-      // @ts-expect-error GetQueryFilterReturn is not compatible with QueryContainer
       query,
     },
     ignore_unavailable: true,
@@ -76,9 +79,8 @@ export const findList = async ({
     // Note: This typing of response = await esClient<SearchResponse<SearchEsListSchema>>
     // is because when you pass in seq_no_primary_term: true it does a "fall through" type and you have
     // to explicitly define the type <T>.
-    const { body: response } = await esClient.search<SearchEsListSchema>({
+    const response = await esClient.search<SearchEsListSchema>({
       body: {
-        // @ts-expect-error GetQueryFilterReturn is not compatible with QueryContainer
         query,
         search_after: scroll.searchAfter,
         sort: getSortWithTieBreaker({ sortField, sortOrder }),

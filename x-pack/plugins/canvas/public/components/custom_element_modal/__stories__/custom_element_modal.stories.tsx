@@ -8,8 +8,9 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
+import { waitFor } from '@kbn/presentation-util-plugin/public/__stories__';
+import { getElasticLogo } from '@kbn/presentation-util-plugin/public';
 import { CustomElementModal } from '../custom_element_modal';
-import { elasticLogo } from '../../../lib/elastic_logo';
 
 storiesOf('components/Elements/CustomElementModal', module)
   .add('with title', () => (
@@ -36,11 +37,15 @@ storiesOf('components/Elements/CustomElementModal', module)
       onSave={action('onSave')}
     />
   ))
-  .add('with image', () => (
-    <CustomElementModal
-      title="Edit custom element"
-      image={elasticLogo}
-      onCancel={action('onCancel')}
-      onSave={action('onSave')}
-    />
-  ));
+  .add(
+    'with image',
+    (_, props) => (
+      <CustomElementModal
+        title="Edit custom element"
+        image={props?.elasticLogo}
+        onCancel={action('onCancel')}
+        onSave={action('onSave')}
+      />
+    ),
+    { decorators: [waitFor(getElasticLogo())] }
+  );

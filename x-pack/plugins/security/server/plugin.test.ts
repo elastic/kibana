@@ -8,11 +8,11 @@
 import { of } from 'rxjs';
 
 import { ByteSizeValue } from '@kbn/config-schema';
-import { coreMock } from 'src/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
-import { featuresPluginMock } from '../../features/server/mocks';
-import { licensingMock } from '../../licensing/server/mocks';
-import { taskManagerMock } from '../../task_manager/server/mocks';
 import { ConfigSchema } from './config';
 import type { PluginSetupDependencies, PluginStartDependencies } from './plugin';
 import { SecurityPlugin } from './plugin';
@@ -44,11 +44,11 @@ describe('Security Plugin', () => {
       protocol: 'https',
     });
 
-    mockSetupDependencies = ({
+    mockSetupDependencies = {
       licensing: { license$: of({}), featureUsage: { register: jest.fn() } },
       features: featuresPluginMock.createSetup(),
       taskManager: taskManagerMock.createSetup(),
-    } as unknown) as PluginSetupDependencies;
+    } as unknown as PluginSetupDependencies;
 
     mockCoreStart = coreMock.createStart();
 
@@ -67,7 +67,10 @@ describe('Security Plugin', () => {
         Object {
           "audit": Object {
             "asScoped": [Function],
-            "getLogger": [Function],
+            "withoutRequest": Object {
+              "enabled": false,
+              "log": [Function],
+            },
           },
           "authc": Object {
             "getCurrentUser": [Function],
@@ -82,6 +85,9 @@ describe('Security Plugin', () => {
               },
               "app": AppActions {
                 "prefix": "app:version:",
+              },
+              "cases": CasesActions {
+                "prefix": "cases:version:",
               },
               "login": "login:",
               "savedObject": SavedObjectActions {
@@ -98,26 +104,25 @@ describe('Security Plugin', () => {
             },
             "checkPrivilegesDynamicallyWithRequest": [Function],
             "checkPrivilegesWithRequest": [Function],
+            "checkSavedObjectsPrivilegesWithRequest": [Function],
             "mode": Object {
               "useRbacForRequest": [Function],
             },
           },
           "license": Object {
             "features$": Observable {
-              "_isScalar": false,
-              "operator": MapOperator {
-                "project": [Function],
-                "thisArg": undefined,
-              },
+              "operator": [Function],
               "source": Observable {
-                "_isScalar": false,
                 "_subscribe": [Function],
               },
             },
             "getFeatures": [Function],
-            "getType": [Function],
+            "hasAtLeast": [Function],
             "isEnabled": [Function],
             "isLicenseAvailable": [Function],
+          },
+          "privilegeDeprecationsService": Object {
+            "getKibanaRolesByFeatureId": [Function],
           },
         }
       `);
@@ -150,6 +155,9 @@ describe('Security Plugin', () => {
               "app": AppActions {
                 "prefix": "app:version:",
               },
+              "cases": CasesActions {
+                "prefix": "cases:version:",
+              },
               "login": "login:",
               "savedObject": SavedObjectActions {
                 "prefix": "saved_object:version:",
@@ -165,9 +173,15 @@ describe('Security Plugin', () => {
             },
             "checkPrivilegesDynamicallyWithRequest": [Function],
             "checkPrivilegesWithRequest": [Function],
+            "checkSavedObjectsPrivilegesWithRequest": [Function],
             "mode": Object {
               "useRbacForRequest": [Function],
             },
+          },
+          "userProfiles": Object {
+            "bulkGet": [Function],
+            "getCurrent": [Function],
+            "suggest": [Function],
           },
         }
       `);

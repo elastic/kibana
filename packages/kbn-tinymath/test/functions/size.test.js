@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-const { size } = require('../../src/functions/size.js');
+const { size } = require('../../src/functions/size');
 
 describe('Size (also Count)', () => {
   it('array', () => {

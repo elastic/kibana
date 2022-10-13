@@ -35,12 +35,13 @@ export const EditTagModal: FC<EditTagModalProps> = ({ tag, onSave, onClose, tagC
   const [tagAttributes, setTagAttributes] = useState<TagAttributes>(getAttributes(tag));
 
   const setField = useCallback(
-    <T extends keyof TagAttributes>(field: T) => (value: TagAttributes[T]) => {
-      setTagAttributes((current) => ({
-        ...current,
-        [field]: value,
-      }));
-    },
+    <T extends keyof TagAttributes>(field: T) =>
+      (value: TagAttributes[T]) => {
+        setTagAttributes((current) => ({
+          ...current,
+          [field]: value,
+        }));
+      },
     []
   );
 
@@ -55,7 +56,7 @@ export const EditTagModal: FC<EditTagModalProps> = ({ tag, onSave, onClose, tagC
       const createdTag = await tagClient.update(tag.id, tagAttributes);
       onSave(createdTag);
     } catch (e) {
-      // if e is HttpFetchError, actual server error payload is in e.body
+      // if e is IHttpFetchError, actual server error payload is in e.body
       if (isServerValidationError(e.body)) {
         setValidation(e.body.attributes);
       }

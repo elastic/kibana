@@ -6,8 +6,8 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { EuiButtonEmpty, EuiFlyout } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiHeaderLink, EuiFlyout } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { FlyoutHome } from './flyout_home';
 import { JobSetupScreen } from './job_setup_screen';
 import { useInfraMLCapabilities } from '../../../../../../containers/ml/infra_ml_capabilities';
@@ -50,7 +50,8 @@ export const AnomalyDetectionFlyout = () => {
 
   return (
     <>
-      <EuiButtonEmpty
+      <EuiHeaderLink
+        color="text"
         iconSide={'left'}
         iconType={'inspect'}
         onClick={openFlyout}
@@ -60,19 +61,17 @@ export const AnomalyDetectionFlyout = () => {
           id="xpack.infra.ml.anomalyDetectionButton"
           defaultMessage="Anomaly detection"
         />
-      </EuiButtonEmpty>
+      </EuiHeaderLink>
       {showFlyout && (
         <MetricHostsModuleProvider
           indexPattern={source?.configuration.metricAlias ?? ''}
           sourceId={'default'}
           spaceId={space.id}
-          timestampField={source?.configuration.fields.timestamp ?? ''}
         >
           <MetricK8sModuleProvider
             indexPattern={source?.configuration.metricAlias ?? ''}
             sourceId={'default'}
             spaceId={space.id}
-            timestampField={source?.configuration.fields.timestamp ?? ''}
           >
             <EuiFlyout onClose={closeFlyout} data-test-subj="loadMLFlyout">
               {screenName === 'home' && (

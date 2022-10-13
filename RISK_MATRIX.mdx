@@ -1,0 +1,63 @@
+# Risk consideration
+
+When merging a new feature of considerable size or modifying an existing one,
+consider adding a *Risk Matrix* section to your PR in collaboration with other
+developers on your team and the QA team.
+
+Below are some general themes to consider for the *Risk Matrix*. (Feel free to
+add to this list.)
+
+
+## General risks
+
+- What happens when your feature is used in a non-default space or a custom
+  space?
+- What happens when there are multiple Kibana nodes using the same Elasticsearch
+  cluster?
+- What happens when a plugin you depend on is disabled?
+- What happens when a feature you depend on is disabled?
+- Is your change working correctly regardless of `kibana.yml` configuration or
+  UI Setting configuration? (For example, does it support both
+  `state:storeInSessionStorage` UI setting states?)
+- What happens when a third party integration you depend on is not responding?
+- How is authentication handled with third party services?
+- Does the feature work in Elastic Cloud?
+- Does the feature create a setting that needs to be exposed, or configured
+  differently than the default, on the Elastic Cloud?
+- Is there a significant performance impact that may affect Cloud Kibana
+  instances?
+- Does your feature need to be aware of running in a container?
+- Does the feature Work with security disabled, or fails gracefully?
+- Are there performance risks associated with your feature? Does it potentially
+  access or create: (1) many fields; (2) many indices; (3) lots of data;
+  (4) lots of saved objects; (5) large saved objects.
+- Could this cause memory to leak in either the browser or server?
+- Will your feature still work if Kibana is run behind a reverse proxy?
+- Does your feature affect other plugins?
+- If you write to the file system, what happens if Kibana node goes down? What
+  happens if there are multiple Kibana nodes?
+- Are migrations handled gracefully? Does the feature affect old indices or
+  saved objects?
+- Are you using any technologies, protocols, techniques, conventions, libraries,
+  NPM modules, etc. that may be new or unprecedented in Kibana?
+
+
+## Security risks
+
+Check to ensure that best practices are used to mitigate common vulnerabilities:
+
+- Cross-site scripting (XSS)
+- Cross-site request forgery (CSRF)
+- Remote-code execution (RCE)
+- Server-side request forgery (SSRF)
+- Prototype pollution
+- Information disclosure
+- Tabnabbing
+
+In addition to these risks, in general, server-side input validation should be
+implemented as strictly as possible. Extra care should be taken when user input
+is used to construct URLs or data structures; this is a common source of
+injection attacks and other vulnerabilities. For more information on all of
+these topics, see [Security best practices][security-best-practices].
+
+[security-best-practices]: https://www.elastic.co/guide/en/kibana/master/security-best-practices.html

@@ -8,8 +8,9 @@
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import React, { Fragment, useEffect, useState } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
-import type { Space } from 'src/plugins/spaces_oss/common';
+import { FormattedMessage } from '@kbn/i18n-react';
+
+import type { Space } from '../../../../common';
 
 interface Props {
   getActiveSpace: () => Promise<Space>;
@@ -31,15 +32,13 @@ export const AdvancedSettingsSubtitle = (props: Props) => {
         color="primary"
         iconType="spacesApp"
         title={
-          <p>
-            <FormattedMessage
-              id="xpack.spaces.management.advancedSettingsSubtitle.applyingSettingsOnPageToSpaceDescription"
-              defaultMessage="The settings on this page apply to the {spaceName} space, unless otherwise specified."
-              values={{
-                spaceName: <strong>{activeSpace.name}</strong>,
-              }}
-            />
-          </p>
+          <FormattedMessage
+            id="xpack.spaces.management.advancedSettingsSubtitle.applyingSettingsOnPageToSpaceDescription"
+            defaultMessage="The settings on this page apply to the {spaceName} space, unless otherwise specified."
+            values={{
+              spaceName: <strong>{activeSpace.name}</strong>,
+            }}
+          />
         }
       />
     </Fragment>

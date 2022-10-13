@@ -17,7 +17,7 @@ export function registerResultSettingsRoutes({
 }: RouteDependencies) {
   router.get(
     {
-      path: '/api/app_search/engines/{engineName}/result_settings/details',
+      path: '/internal/app_search/engines/{engineName}/result_settings/details',
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -31,7 +31,7 @@ export function registerResultSettingsRoutes({
 
   router.put(
     skipBodyValidation({
-      path: '/api/app_search/engines/{engineName}/result_settings',
+      path: '/internal/app_search/engines/{engineName}/result_settings',
       validate: {
         params: schema.object({
           engineName: schema.string(),
@@ -40,20 +40,6 @@ export function registerResultSettingsRoutes({
     }),
     enterpriseSearchRequestHandler.createRequest({
       path: '/as/engines/:engineName/result_settings',
-    })
-  );
-
-  router.post(
-    skipBodyValidation({
-      path: '/api/app_search/engines/{engineName}/sample_response_search',
-      validate: {
-        params: schema.object({
-          engineName: schema.string(),
-        }),
-      },
-    }),
-    enterpriseSearchRequestHandler.createRequest({
-      path: '/as/engines/:engineName/sample_response_search',
     })
   );
 }

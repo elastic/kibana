@@ -7,13 +7,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { Observable } from 'rxjs';
 
-import { Datatable, ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import { buildExpressionFunction } from '@kbn/expressions-plugin/common';
 
-import { IndexPatternExpressionType } from '../../../index_patterns/expressions';
-import { IndexPatternsContract } from '../../../index_patterns/index_patterns';
+import { IndexPatternExpressionType } from '@kbn/data-views-plugin/common/expressions';
+import { DataViewsContract } from '@kbn/data-views-plugin/common';
 
-import { AggsStart, AggExpressionType } from '../../aggs';
+import { AggsStart, AggExpressionType, aggCountFnName } from '../../aggs';
 import { ISearchStartSearchSource } from '../../search_source';
 
 import { KibanaContext } from '../kibana_context_type';
@@ -22,7 +24,7 @@ import { handleRequest } from './request_handler';
 const name = 'esaggs';
 
 type Input = KibanaContext | null;
-type Output = Promise<Datatable>;
+type Output = Observable<Datatable>;
 
 interface Arguments {
   index: IndexPatternExpressionType;
@@ -42,7 +44,7 @@ export type EsaggsExpressionFunctionDefinition = ExpressionFunctionDefinition<
 /** @internal */
 export interface EsaggsStartDependencies {
   aggs: AggsStart;
-  indexPatterns: IndexPatternsContract;
+  indexPatterns: DataViewsContract;
   searchSource: ISearchStartSearchSource;
   getNow?: () => Date;
 }
@@ -60,13 +62,13 @@ export const getEsaggsMeta: () => Omit<EsaggsExpressionFunctionDefinition, 'fn'>
       types: ['index_pattern'],
       required: true,
       help: i18n.translate('data.search.functions.esaggs.index.help', {
-        defaultMessage: 'Index pattern retrieved with indexPatternLoad',
+        defaultMessage: 'Data view retrieved with indexPatternLoad',
       }),
     },
     aggs: {
       types: ['agg_type'],
       multi: true,
-      default: [],
+      default: `{${buildExpressionFunction(aggCountFnName, {}).toString()}}`,
       help: i18n.translate('data.search.functions.esaggs.aggConfigs.help', {
         defaultMessage: 'List of aggs configured with agg_type functions',
       }),
@@ -95,5 +97,5 @@ export const getEsaggsMeta: () => Omit<EsaggsExpressionFunctionDefinition, 'fn'>
   },
 });
 
-/** @internal */
 export { handleRequest as handleEsaggsRequest };
+export type { RequestHandlerParams } from './request_handler';

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { Storage } from '../../../../../src/plugins/kibana_utils/public';
-import { SecuritySubPluginWithStore } from '../app/types';
-import { NetworkRoutes } from './routes';
-import { initialNetworkState, networkReducer, NetworkState } from './store';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { SecuritySubPluginWithStore } from '../app/types';
+import { routes } from './routes';
+import type { NetworkState } from './store';
+import { initialNetworkState, networkReducer } from './store';
 import { TimelineId } from '../../common/types/timeline';
 import { getTimelinesInStorageByIds } from '../timelines/containers/local_storage';
 
@@ -17,9 +18,9 @@ export class Network {
 
   public start(storage: Storage): SecuritySubPluginWithStore<'network', NetworkState> {
     return {
-      SubPluginRoutes: NetworkRoutes,
+      routes,
       storageTimelines: {
-        timelineById: getTimelinesInStorageByIds(storage, [TimelineId.networkPageExternalAlerts]),
+        timelineById: getTimelinesInStorageByIds(storage, [TimelineId.networkPageEvents]),
       },
       store: {
         initialState: { network: initialNetworkState },

@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import { IEsSearchResponse } from '../../../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 
+import type { NetworkDnsRequestOptions } from '../../../../../../../common/search_strategy';
 import {
   Direction,
   NetworkDnsFields,
-  NetworkDnsRequestOptions,
   NetworkQueries,
 } from '../../../../../../../common/search_strategy';
 
 export const mockOptions: NetworkDnsRequestOptions = {
   defaultIndex: [
     'apm-*-transaction*',
+    'traces-apm*',
     'auditbeat-*',
     'endgame-*',
     'filebeat-*',
@@ -130,9 +131,10 @@ export const formattedSearchStrategyResponse = {
     dsl: [
       JSON.stringify(
         {
-          allowNoIndices: true,
+          allow_no_indices: true,
           index: [
             'apm-*-transaction*',
+            'traces-apm*',
             'auditbeat-*',
             'endgame-*',
             'filebeat-*',
@@ -140,7 +142,7 @@ export const formattedSearchStrategyResponse = {
             'packetbeat-*',
             'winlogbeat-*',
           ],
-          ignoreUnavailable: true,
+          ignore_unavailable: true,
           body: {
             aggregations: {
               dns_count: { cardinality: { field: 'dns.question.registered_domain' } },
@@ -187,6 +189,14 @@ export const formattedSearchStrategyResponse = {
                 must_not: [{ term: { 'dns.question.type': { value: 'PTR' } } }],
               },
             },
+            _source: false,
+            fields: [
+              'dns.question.registered_domain',
+              {
+                field: '@timestamp',
+                format: 'strict_date_optional_time',
+              },
+            ],
           },
           size: 0,
           track_total_hits: false,
@@ -201,9 +211,10 @@ export const formattedSearchStrategyResponse = {
 };
 
 export const expectedDsl = {
-  allowNoIndices: true,
+  allow_no_indices: true,
   index: [
     'apm-*-transaction*',
+    'traces-apm*',
     'auditbeat-*',
     'endgame-*',
     'filebeat-*',
@@ -211,7 +222,7 @@ export const expectedDsl = {
     'packetbeat-*',
     'winlogbeat-*',
   ],
-  ignoreUnavailable: true,
+  ignore_unavailable: true,
   body: {
     aggregations: {
       dns_count: { cardinality: { field: 'dns.question.registered_domain' } },
@@ -258,6 +269,14 @@ export const expectedDsl = {
         must_not: [{ term: { 'dns.question.type': { value: 'PTR' } } }],
       },
     },
+    _source: false,
+    fields: [
+      'dns.question.registered_domain',
+      {
+        field: '@timestamp',
+        format: 'strict_date_optional_time',
+      },
+    ],
   },
   size: 0,
   track_total_hits: false,

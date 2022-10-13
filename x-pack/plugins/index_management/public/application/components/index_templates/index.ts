@@ -5,4 +5,11 @@
  * 2.0.
  */
 
-export * from './simulate_template';
+export type { SimulateTemplateProps, SimulateTemplateFilters } from './simulate_template';
+export {
+  SimulateTemplateFlyoutContent,
+  simulateTemplateFlyoutProps,
+  SimulateTemplate,
+} from './simulate_template';
+
+export { LegacyIndexTemplatesDeprecation } from './legacy_index_template_deprecation';

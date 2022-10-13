@@ -7,22 +7,14 @@
 
 /* eslint-disable @elastic/eui/href-or-on-click */
 
-/* eslint-disable no-duplicate-imports */
-
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 /* eslint-disable react/display-name */
 
 import React, { memo, useMemo, useCallback, useContext } from 'react';
-import {
-  EuiBasicTableColumn,
-  EuiBadge,
-  EuiButtonEmpty,
-  EuiSpacer,
-  EuiInMemoryTable,
-} from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBadge, EuiButtonEmpty, EuiSpacer, EuiInMemoryTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useSelector } from 'react-redux';
 import { SideEffectContext } from '../side_effect_context';
 import { StyledPanel } from '../styles';
 import {
@@ -36,10 +28,10 @@ import * as selectors from '../../store/selectors';
 import { Breadcrumbs } from './breadcrumbs';
 import { CubeForProcess } from './cube_for_process';
 import { LimitWarning } from '../limit_warnings';
-import { ResolverState } from '../../types';
+import type { ResolverState } from '../../types';
 import { useLinkProps } from '../use_link_props';
 import { useColors } from '../use_colors';
-import { ResolverAction } from '../../store/actions';
+import type { ResolverAction } from '../../store/actions';
 import { useFormattedDate } from './use_formatted_date';
 import { CopyablePanelField } from './copyable_panel_field';
 
@@ -124,7 +116,7 @@ export const NodeList = memo(() => {
   const showWarning = children === true || ancestors === true || generations === true;
   const rowProps = useMemo(() => ({ 'data-test-subj': 'resolver:node-list:item' }), []);
   return (
-    <StyledPanel>
+    <StyledPanel hasBorder>
       <Breadcrumbs breadcrumbs={breadcrumbs} />
       {showWarning && <LimitWarning numberDisplayed={numberOfProcesses} />}
       <EuiSpacer size="l" />

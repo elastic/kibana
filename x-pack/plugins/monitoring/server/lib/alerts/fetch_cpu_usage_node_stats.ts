@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { get } from 'lodash';
 import moment from 'moment';
 import { NORMALIZED_DERIVATIVE_UNIT } from '../../../common/constants';
 import { AlertCluster, AlertCpuUsageNodeStats } from '../../../common/types/alerts';
+import { createDatasetFilter } from './create_dataset_query_filter';
+import { getIndexPatterns, getElasticsearchDataset } from '../cluster/get_index_patterns';
+import { Globals } from '../../static_globals';
+import { CCS_REMOTE_PATTERN } from '../../../common/constants';
 
 interface NodeBucketESResponse {
   key: string;
@@ -26,18 +30,24 @@ interface ClusterBucketESResponse {
 export async function fetchCpuUsageNodeStats(
   esClient: ElasticsearchClient,
   clusters: AlertCluster[],
-  index: string,
   startMs: number,
   endMs: number,
-  size: number
+  size: number,
+  filterQuery?: string
 ): Promise<AlertCpuUsageNodeStats[]> {
   // Using pure MS didn't seem to work well with the date_histogram interval
   // but minutes does
   const intervalInMinutes = moment.duration(endMs - startMs).asMinutes();
-  const filterPath = ['aggregations'];
+
+  const indexPatterns = getIndexPatterns({
+    config: Globals.app.config,
+    moduleType: 'elasticsearch',
+    dataset: 'node_stats',
+    ccs: CCS_REMOTE_PATTERN,
+  });
   const params = {
-    index,
-    filterPath,
+    index: indexPatterns,
+    filter_path: ['aggregations'],
     body: {
       size: 0,
       query: {
@@ -48,11 +58,7 @@ export async function fetchCpuUsageNodeStats(
                 cluster_uuid: clusters.map((cluster) => cluster.clusterUuid),
               },
             },
-            {
-              term: {
-                type: 'node_stats',
-              },
-            },
+            createDatasetFilter('node_stats', 'node_stats', getElasticsearchDataset('node_stats')),
             {
               range: {
                 timestamp: {
@@ -141,7 +147,16 @@ export async function fetchCpuUsageNodeStats(
     },
   };
 
-  const { body: response } = await esClient.search(params);
+  try {
+    if (filterQuery) {
+      const filterQueryObject = JSON.parse(filterQuery);
+      params.body.query.bool.filter.push(filterQueryObject);
+    }
+  } catch (e) {
+    // meh
+  }
+
+  const response = await esClient.search(params);
   const stats: AlertCpuUsageNodeStats[] = [];
   const clusterBuckets = get(
     response,

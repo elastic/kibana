@@ -8,45 +8,77 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+const policyName = 'testPolicy1';
+const repoName = 'found-snapshots'; // this repo already exists on cloud
+
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'indexLifecycleManagement']);
   const log = getService('log');
   const retry = getService('retry');
-  const testSubjects = getService('testSubjects');
+  const esClient = getService('es');
+  const security = getService('security');
+  const deployment = getService('deployment');
 
   describe('Home page', function () {
     before(async () => {
+      await security.testUser.setRoles(['manage_ilm']);
+      const isCloud = await deployment.isCloud();
+      if (!isCloud) {
+        await esClient.snapshot.createRepository({
+          name: repoName,
+          body: {
+            type: 'fs',
+            settings: {
+              // use one of the values defined in path.repo in test/functional/config.base.js
+              location: '/tmp/',
+            },
+          },
+          verify: false,
+        });
+      }
+
       await pageObjects.common.navigateToApp('indexLifecycleManagement');
+    });
+    after(async () => {
+      const isCloud = await deployment.isCloud();
+      if (!isCloud) {
+        await esClient.snapshot.deleteRepository({ name: repoName });
+      }
+      await esClient.ilm.deleteLifecycle({ name: policyName });
+      await security.testUser.restoreDefaults();
     });
 
     it('Loads the app', async () => {
-      await log.debug('Checking for section header');
-      const headerText = await pageObjects.indexLifecycleManagement.sectionHeadingText();
+      await log.debug('Checking for page header');
+      const headerText = await pageObjects.indexLifecycleManagement.pageHeaderText();
       expect(headerText).to.be('Index Lifecycle Policies');
 
       const createPolicyButton = await pageObjects.indexLifecycleManagement.createPolicyButton();
       expect(await createPolicyButton.isDisplayed()).to.be(true);
     });
 
-    it('Create new policy with Warm and Cold Phases', async () => {
-      const policyName = 'testPolicy1';
-      await pageObjects.indexLifecycleManagement.createNewPolicyAndSave(
+    it('Create new policy with all Phases', async () => {
+      await pageObjects.indexLifecycleManagement.createNewPolicyAndSave({
         policyName,
-        true,
-        true,
-        false
-      );
+        warmEnabled: true,
+        coldEnabled: true,
+        frozenEnabled: true,
+        deleteEnabled: true,
+        snapshotRepository: repoName,
+      });
 
       await retry.waitFor('navigation back to home page.', async () => {
-        return (await testSubjects.getVisibleText('sectionHeading')) === 'Index Lifecycle Policies';
+        return (
+          (await pageObjects.indexLifecycleManagement.pageHeaderText()) ===
+          'Index Lifecycle Policies'
+        );
       });
 
-      const allPolicies = await pageObjects.indexLifecycleManagement.getPolicyList();
-      const filteredPolicies = allPolicies.filter(function (policy) {
-        return policy.name === policyName;
-      });
+      await pageObjects.indexLifecycleManagement.increasePolicyListPageSize();
 
-      expect(filteredPolicies.length).to.be(1);
+      const createdPolicy = await pageObjects.indexLifecycleManagement.getPolicyRow(policyName);
+
+      expect(createdPolicy.length).to.be(1);
     });
   });
 };

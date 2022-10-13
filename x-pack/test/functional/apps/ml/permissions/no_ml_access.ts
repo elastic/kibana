@@ -13,13 +13,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'error']);
   const ml = getService('ml');
 
-  const testUsers = [
-    { user: USER.ML_UNAUTHORIZED, discoverAvailable: true },
-    { user: USER.ML_UNAUTHORIZED_SPACES, discoverAvailable: true },
-  ];
+  const testUsers = [{ user: USER.ML_UNAUTHORIZED, discoverAvailable: true }];
 
   describe('for user with no ML access', function () {
-    this.tags(['skipFirefox', 'mlqa']);
+    this.tags(['skipFirefox', 'ml']);
 
     for (const testUser of testUsers) {
       describe(`(${testUser.user})`, function () {
@@ -28,6 +25,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         after(async () => {
+          // NOTE: Logout needs to happen before anything else to avoid flaky behavior
           await ml.securityUI.logout();
         });
 
@@ -41,16 +39,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await PageObjects.error.expectForbidden();
         });
 
-        it('should not display the ML file data vis link on the Kibana home page', async () => {
-          await ml.testExecution.logTestStep('should load the Kibana home page');
-          await ml.navigation.navigateToKibanaHome();
-
-          await ml.testExecution.logTestStep('should not display the ML file data vis link');
-          await ml.commonUI.assertKibanaHomeFileDataVisLinkNotExists();
-        });
-
         it('should not display the ML entry in Kibana app menu', async () => {
           await ml.testExecution.logTestStep('should open the Kibana app menu');
+          await ml.navigation.navigateToKibanaHome();
           await ml.navigation.openKibanaNav();
 
           await ml.testExecution.logTestStep('should not display the ML nav link');

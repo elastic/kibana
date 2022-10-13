@@ -10,32 +10,29 @@ import { uniq } from 'lodash';
 import type {
   PluginSetupContract as FeaturesPluginSetup,
   KibanaFeature,
-} from '../../../../features/server';
+} from '@kbn/features-plugin/server';
+
 import type { SecurityLicense } from '../../../common/licensing';
 import type { RawKibanaPrivileges } from '../../../common/model';
 import type { Actions } from '../actions';
 import { featurePrivilegeBuilderFactory } from './feature_privilege_builder';
-import {
-  featurePrivilegeIterator,
-  subFeaturePrivilegeIterator,
-} from './feature_privilege_iterator';
 
 export interface PrivilegesService {
-  get(): RawKibanaPrivileges;
+  get(respectLicenseLevel?: boolean): RawKibanaPrivileges;
 }
 
 export function privilegesFactory(
   actions: Actions,
   featuresService: FeaturesPluginSetup,
-  licenseService: Pick<SecurityLicense, 'getFeatures' | 'getType'>
+  licenseService: Pick<SecurityLicense, 'getFeatures' | 'hasAtLeast'>
 ) {
   const featurePrivilegeBuilder = featurePrivilegeBuilderFactory(actions);
 
   return {
-    get() {
+    get(respectLicenseLevel: boolean = true) {
       const features = featuresService.getKibanaFeatures();
       const { allowSubFeaturePrivileges } = licenseService.getFeatures();
-      const licenseType = licenseService.getType()!;
+      const { hasAtLeast: licenseHasAtLeast } = licenseService;
       const basePrivilegeFeatures = features.filter(
         (feature) => !feature.excludeFromBasePrivileges
       );
@@ -44,9 +41,9 @@ export function privilegesFactory(
       let readActions: string[] = [];
 
       basePrivilegeFeatures.forEach((feature) => {
-        for (const { privilegeId, privilege } of featurePrivilegeIterator(feature, {
+        for (const { privilegeId, privilege } of featuresService.featurePrivilegeIterator(feature, {
           augmentWithSubFeaturePrivileges: true,
-          licenseType,
+          licenseHasAtLeast,
           predicate: (pId, featurePrivilege) => !featurePrivilege.excludeFromBasePrivileges,
         })) {
           const privilegeActions = featurePrivilegeBuilder.getActions(privilege, feature);
@@ -63,9 +60,9 @@ export function privilegesFactory(
       const featurePrivileges: Record<string, Record<string, string[]>> = {};
       for (const feature of features) {
         featurePrivileges[feature.id] = {};
-        for (const featurePrivilege of featurePrivilegeIterator(feature, {
+        for (const featurePrivilege of featuresService.featurePrivilegeIterator(feature, {
           augmentWithSubFeaturePrivileges: true,
-          licenseType,
+          licenseHasAtLeast,
         })) {
           featurePrivileges[feature.id][featurePrivilege.privilegeId] = [
             actions.login,
@@ -74,19 +71,25 @@ export function privilegesFactory(
           ];
         }
 
-        if (allowSubFeaturePrivileges && feature.subFeatures?.length > 0) {
-          for (const featurePrivilege of featurePrivilegeIterator(feature, {
-            augmentWithSubFeaturePrivileges: false,
-            licenseType,
-          })) {
-            featurePrivileges[feature.id][`minimal_${featurePrivilege.privilegeId}`] = [
-              actions.login,
-              actions.version,
-              ...uniq(featurePrivilegeBuilder.getActions(featurePrivilege.privilege, feature)),
-            ];
-          }
+        for (const featurePrivilege of featuresService.featurePrivilegeIterator(feature, {
+          augmentWithSubFeaturePrivileges: false,
+          licenseHasAtLeast,
+        })) {
+          featurePrivileges[feature.id][`minimal_${featurePrivilege.privilegeId}`] = [
+            actions.login,
+            actions.version,
+            ...uniq(featurePrivilegeBuilder.getActions(featurePrivilege.privilege, feature)),
+          ];
+        }
 
-          for (const subFeaturePrivilege of subFeaturePrivilegeIterator(feature, licenseType)) {
+        if (
+          (!respectLicenseLevel || allowSubFeaturePrivileges) &&
+          feature.subFeatures?.length > 0
+        ) {
+          for (const subFeaturePrivilege of featuresService.subFeaturePrivilegeIterator(
+            feature,
+            licenseHasAtLeast
+          )) {
             featurePrivileges[feature.id][subFeaturePrivilege.id] = [
               actions.login,
               actions.version,
@@ -107,6 +110,7 @@ export function privilegesFactory(
             actions.version,
             actions.api.get('decryptedTelemetry'),
             actions.api.get('features'),
+            actions.api.get('taskManager'),
             actions.space.manage,
             actions.ui.get('spaces', 'manage'),
             actions.ui.get('management', 'kibana', 'spaces'),

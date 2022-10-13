@@ -9,4 +9,9 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
   roots: ['<rootDir>/x-pack/plugins/license_management'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/license_management',
+  coverageReporters: ['text', 'html'],
+  collectCoverageFrom: [
+    '<rootDir>/x-pack/plugins/license_management/{common,public,server}/**/*.{js,ts,tsx}',
+  ],
 };

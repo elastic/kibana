@@ -10,18 +10,19 @@ import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks_
 import {
   registerOrgSettingsRoute,
   registerOrgSettingsCustomizeRoute,
+  registerOrgSettingsUploadImagesRoute,
   registerOrgSettingsOauthApplicationRoute,
 } from './settings';
 
 describe('settings routes', () => {
-  describe('GET /api/workplace_search/org/settings', () => {
+  describe('GET /internal/workplace_search/org/settings', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'get',
-        path: '/api/workplace_search/org/settings',
+        path: '/internal/workplace_search/org/settings',
       });
 
       registerOrgSettingsRoute({
@@ -37,14 +38,14 @@ describe('settings routes', () => {
     });
   });
 
-  describe('PUT /api/workplace_search/org/settings/customize', () => {
+  describe('PUT /internal/workplace_search/org/settings/customize', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'put',
-        path: '/api/workplace_search/org/settings/customize',
+        path: '/internal/workplace_search/org/settings/customize',
       });
 
       registerOrgSettingsCustomizeRoute({
@@ -67,14 +68,44 @@ describe('settings routes', () => {
     });
   });
 
-  describe('PUT /api/workplace_search/org/settings/oauth_application', () => {
+  describe('PUT /internal/workplace_search/org/settings/upload_images', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({
         method: 'put',
-        path: '/api/workplace_search/org/settings/oauth_application',
+        path: '/internal/workplace_search/org/settings/upload_images',
+      });
+
+      registerOrgSettingsUploadImagesRoute({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request handler', () => {
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/ws/org/settings/upload_images',
+      });
+    });
+
+    describe('validates', () => {
+      it('correctly', () => {
+        const request = { body: { logo: 'foo', icon: null } };
+        mockRouter.shouldValidate(request);
+      });
+    });
+  });
+
+  describe('PUT /internal/workplace_search/org/settings/oauth_application', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'put',
+        path: '/internal/workplace_search/org/settings/oauth_application',
       });
 
       registerOrgSettingsOauthApplicationRoute({

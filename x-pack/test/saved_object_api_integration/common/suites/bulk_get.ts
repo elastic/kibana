@@ -6,22 +6,19 @@
  */
 
 import expect from '@kbn/expect';
-import { SuperTest } from 'supertest';
+import { getTestDataLoader, SPACE_1, SPACE_2 } from '../../../common/lib/test_data_loader';
 import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
 import { SPACES } from '../lib/spaces';
-import {
-  createRequest,
-  expectResponses,
-  getUrlPrefix,
-  getTestTitle,
-} from '../lib/saved_object_test_utils';
+import { expectResponses, getUrlPrefix, getTestTitle } from '../lib/saved_object_test_utils';
 import { ExpectResponseBody, TestCase, TestDefinition, TestSuite } from '../lib/types';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export interface BulkGetTestDefinition extends TestDefinition {
   request: Array<{ type: string; id: string }>;
 }
 export type BulkGetTestSuite = TestSuite<BulkGetTestDefinition>;
 export interface BulkGetTestCase extends TestCase {
+  namespaces?: string[]; // used to define individual "object namespaces" string arrays, e.g., bulkGet across multiple namespaces
   failure?: 400 | 404; // only used for permitted response case
 }
 
@@ -31,27 +28,36 @@ export const TEST_CASES: Record<string, BulkGetTestCase> = Object.freeze({
   DOES_NOT_EXIST,
 });
 
-export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
+const createRequest = ({ type, id, namespaces }: BulkGetTestCase) => ({
+  type,
+  id,
+  ...(namespaces && { namespaces }), // individual "object namespaces" string array
+});
+
+export function bulkGetTestSuiteFactory(context: FtrProviderContext) {
+  const testDataLoader = getTestDataLoader(context);
+  const supertest = context.getService('supertestWithoutAuth');
+
   const expectSavedObjectForbidden = expectResponses.forbiddenTypes('bulk_get');
-  const expectResponseBody = (
-    testCases: BulkGetTestCase | BulkGetTestCase[],
-    statusCode: 200 | 403
-  ): ExpectResponseBody => async (response: Record<string, any>) => {
-    const testCaseArray = Array.isArray(testCases) ? testCases : [testCases];
-    if (statusCode === 403) {
-      const types = testCaseArray.map((x) => x.type);
-      await expectSavedObjectForbidden(types)(response);
-    } else {
-      // permitted
-      const savedObjects = response.body.saved_objects;
-      expect(savedObjects).length(testCaseArray.length);
-      for (let i = 0; i < savedObjects.length; i++) {
-        const object = savedObjects[i];
-        const testCase = testCaseArray[i];
-        await expectResponses.permitted(object, testCase);
+  const expectResponseBody =
+    (testCases: BulkGetTestCase | BulkGetTestCase[], statusCode: 200 | 403): ExpectResponseBody =>
+    async (response: Record<string, any>) => {
+      const testCaseArray = Array.isArray(testCases) ? testCases : [testCases];
+      if (statusCode === 403) {
+        const types = testCaseArray.map((x) => x.type);
+        await expectSavedObjectForbidden(types)(response);
+      } else {
+        // permitted
+        const savedObjects = response.body.saved_objects;
+        expect(savedObjects).length(testCaseArray.length);
+        for (let i = 0; i < savedObjects.length; i++) {
+          const object = savedObjects[i];
+          const testCase = testCaseArray[i];
+          await expectResponses.permitted(object, testCase);
+          // TODO: add assertions for redacted namespaces (#112455)
+        }
       }
-    }
-  };
+    };
   const createTestDefinitions = (
     testCases: BulkGetTestCase | BulkGetTestCase[],
     forbidden: boolean,
@@ -84,28 +90,49 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
     ];
   };
 
-  const makeBulkGetTest = (describeFn: Mocha.SuiteFunction) => (
-    description: string,
-    definition: BulkGetTestSuite
-  ) => {
-    const { user, spaceId = SPACES.DEFAULT.spaceId, tests } = definition;
+  const makeBulkGetTest =
+    (describeFn: Mocha.SuiteFunction) => (description: string, definition: BulkGetTestSuite) => {
+      const { user, spaceId = SPACES.DEFAULT.spaceId, tests } = definition;
 
-    describeFn(description, () => {
-      before(() => esArchiver.load('saved_objects/spaces'));
-      after(() => esArchiver.unload('saved_objects/spaces'));
-
-      for (const test of tests) {
-        it(`should return ${test.responseStatusCode} ${test.title}`, async () => {
-          await supertest
-            .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_bulk_get`)
-            .auth(user?.username, user?.password)
-            .send(test.request)
-            .expect(test.responseStatusCode)
-            .then(test.responseBody);
+      describeFn(description, () => {
+        before(async () => {
+          await testDataLoader.createFtrSpaces();
+          await testDataLoader.createFtrSavedObjectsData([
+            {
+              spaceName: null,
+              dataUrl:
+                'x-pack/test/saved_object_api_integration/common/fixtures/kbn_archiver/default_space.json',
+            },
+            {
+              spaceName: SPACE_1.id,
+              dataUrl:
+                'x-pack/test/saved_object_api_integration/common/fixtures/kbn_archiver/space_1.json',
+            },
+            {
+              spaceName: SPACE_2.id,
+              dataUrl:
+                'x-pack/test/saved_object_api_integration/common/fixtures/kbn_archiver/space_2.json',
+            },
+          ]);
         });
-      }
-    });
-  };
+
+        after(async () => {
+          await testDataLoader.deleteFtrSpaces();
+          await testDataLoader.deleteFtrSavedObjectsData();
+        });
+
+        for (const test of tests) {
+          it(`should return ${test.responseStatusCode} ${test.title}`, async () => {
+            await supertest
+              .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_bulk_get`)
+              .auth(user?.username, user?.password)
+              .send(test.request)
+              .expect(test.responseStatusCode)
+              .then(test.responseBody);
+          });
+        }
+      });
+    };
 
   const addTests = makeBulkGetTest(describe);
   // @ts-ignore

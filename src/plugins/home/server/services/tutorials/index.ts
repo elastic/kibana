@@ -12,7 +12,6 @@ export type { TutorialsRegistrySetup, TutorialsRegistryStart } from './tutorials
 export { TutorialsCategory } from './lib/tutorials_registry_types';
 
 export type {
-  ParamTypes,
   InstructionSetSchema,
   ParamsSchema,
   InstructionsSchema,
@@ -20,6 +19,7 @@ export type {
   ArtifactsSchema,
   TutorialSchema,
   TutorialProvider,
+  TutorialContext,
   TutorialContextFactory,
   ScopedTutorialContextFactory,
 } from './lib/tutorials_registry_types';

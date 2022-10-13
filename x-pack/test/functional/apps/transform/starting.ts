@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { TRANSFORM_STATE } from '../../../../plugins/transform/common/constants';
-import { getLatestTransformConfig, getPivotTransformConfig } from './index';
+import { getLatestTransformConfig, getPivotTransformConfig } from '.';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -39,7 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
     ];
 
     before(async () => {
-      await esArchiver.loadIfNeeded('ml/ecommerce');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
       await transform.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
 
       for (const testData of testDataList) {
@@ -56,6 +56,7 @@ export default function ({ getService }: FtrProviderContext) {
       }
 
       await transform.api.cleanTransformIndices();
+      await transform.testResources.deleteIndexPatternByTitle('ft_ecommerce');
     });
 
     for (const testData of testDataList) {
@@ -77,7 +78,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           await transform.testExecution.logTestStep('should start the transform');
           await transform.table.assertTransformRowActionEnabled(transformId, 'Start', true);
-          await transform.table.clickTransformRowAction('Start');
+          await transform.table.clickTransformRowAction(transformId, 'Start');
           await transform.table.confirmStartTransform();
           await transform.table.clearSearchString(testDataList.length);
 

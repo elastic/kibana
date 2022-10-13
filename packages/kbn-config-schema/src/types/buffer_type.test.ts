@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { schema } from '..';
+import { schema } from '../..';
 
 test('returns value by default', () => {
   const value = Buffer.from('Hi!');
@@ -25,6 +25,10 @@ test('includes namespace in failure', () => {
   ).toThrowErrorMatchingInlineSnapshot(
     `"[foo-namespace]: expected value of type [Buffer] but got [undefined]"`
   );
+});
+
+test('coerces strings to buffer', () => {
+  expect(schema.buffer().validate('abc')).toStrictEqual(Buffer.from('abc'));
 });
 
 describe('#defaultValue', () => {
@@ -48,9 +52,5 @@ test('returns error when not a buffer', () => {
 
   expect(() => schema.buffer().validate([1, 2, 3])).toThrowErrorMatchingInlineSnapshot(
     `"expected value of type [Buffer] but got [Array]"`
-  );
-
-  expect(() => schema.buffer().validate('abc')).toThrowErrorMatchingInlineSnapshot(
-    `"expected value of type [Buffer] but got [string]"`
   );
 });

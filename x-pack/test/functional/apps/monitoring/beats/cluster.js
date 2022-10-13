@@ -15,10 +15,12 @@ export default function ({ getService, getPageObjects }) {
     const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
     before(async () => {
-      await setup('monitoring/beats', {
+      await setup('x-pack/test/functional/es_archives/monitoring/beats', {
         from: 'Dec 19, 2017 @ 17:14:09.000',
         to: 'Dec 19, 2017 @ 18:15:09.000',
       });
+
+      await overview.closeAlertsModal();
     });
 
     after(async () => {

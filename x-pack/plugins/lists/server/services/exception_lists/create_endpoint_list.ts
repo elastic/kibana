@@ -5,17 +5,20 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import uuid from 'uuid';
-
+import { Version } from '@kbn/securitysolution-io-ts-types';
+import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 import {
   ENDPOINT_LIST_DESCRIPTION,
   ENDPOINT_LIST_ID,
   ENDPOINT_LIST_NAME,
-} from '../../../common/constants';
-import { ExceptionListSchema, ExceptionListSoSchema, Version } from '../../../common/schemas';
+} from '@kbn/securitysolution-list-constants';
 
-import { getSavedObjectType, transformSavedObjectToExceptionList } from './utils';
+import { ExceptionListSoSchema } from '../../schemas/saved_objects';
+
+import { transformSavedObjectToExceptionList } from './utils';
 
 interface CreateEndpointListOptions {
   savedObjectsClient: SavedObjectsClientContract;
@@ -61,7 +64,7 @@ export const createEndpointList = async ({
     );
     return transformSavedObjectToExceptionList({ savedObject });
   } catch (err) {
-    if (savedObjectsClient.errors.isConflictError(err)) {
+    if (SavedObjectsErrorHelpers.isConflictError(err)) {
       return null;
     } else {
       throw err;

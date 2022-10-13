@@ -11,13 +11,16 @@ import { shallow } from 'enzyme';
 import '../../mock/match_media';
 import {
   getRowItemDraggables,
-  getRowItemOverflow,
+  RowItemOverflowComponent,
   getRowItemDraggable,
   OverflowFieldComponent,
 } from './helpers';
 import { TestProviders } from '../../mock';
 import { getEmptyValue } from '../empty_value';
 import { useMountAppended } from '../../utils/use_mount_appended';
+
+jest.mock('../../lib/kibana');
+
 describe('Table Helpers', () => {
   const items = ['item1', 'item2', 'item3'];
   const mount = useMountAppended();
@@ -52,8 +55,8 @@ describe('Table Helpers', () => {
         displayCount: 0,
       });
       const wrapper = mount(<TestProviders>{rowItem}</TestProviders>);
-      expect(wrapper.find('[data-test-subj="draggable-content-attrName"]').first().text()).toBe(
-        '(Empty String)'
+      expect(wrapper.find('[data-test-subj="render-content-attrName"]').first().text()).toBe(
+        '(Empty string)'
       );
     });
 
@@ -78,7 +81,7 @@ describe('Table Helpers', () => {
         render: renderer,
       });
       const wrapper = mount(<TestProviders>{rowItem}</TestProviders>);
-      expect(wrapper.find('[data-test-subj="draggable-content-attrName"]').first().text()).toBe(
+      expect(wrapper.find('[data-test-subj="render-content-attrName"]').first().text()).toBe(
         'Hi item1 renderer'
       );
     });
@@ -113,8 +116,8 @@ describe('Table Helpers', () => {
         idPrefix: 'idPrefix',
       });
       const wrapper = mount(<TestProviders>{rowItems}</TestProviders>);
-      expect(wrapper.find('[data-test-subj="draggable-content-attrName"]').first().text()).toBe(
-        '(Empty String)'
+      expect(wrapper.find('[data-test-subj="render-content-attrName"]').first().text()).toBe(
+        '(Empty string)'
       );
     });
 
@@ -160,7 +163,7 @@ describe('Table Helpers', () => {
         displayCount: 2,
       });
       const wrapper = mount(<TestProviders>{rowItems}</TestProviders>);
-      expect(wrapper.find('[data-test-subj="draggableWrapperDiv"]').hostNodes().length).toBe(2);
+      expect(wrapper.find('[data-test-subj="withHoverActionsButton"]').hostNodes().length).toBe(2);
     });
 
     test('it uses custom renderer', () => {
@@ -172,28 +175,69 @@ describe('Table Helpers', () => {
         render: renderer,
       });
       const wrapper = mount(<TestProviders>{rowItems}</TestProviders>);
-      expect(wrapper.find('[data-test-subj="draggable-content-attrName"]').first().text()).toBe(
+      expect(wrapper.find('[data-test-subj="render-content-attrName"]').first().text()).toBe(
         'Hi item1 renderer'
       );
     });
   });
 
-  describe('#getRowItemOverflow', () => {
+  describe('#RowItemOverflow', () => {
     test('it returns correctly against snapshot', () => {
-      const rowItemOverflow = getRowItemOverflow(items, 'attrName', 1, 1);
-      const wrapper = shallow(<div>{rowItemOverflow}</div>);
+      const wrapper = shallow(
+        <RowItemOverflowComponent
+          rowItems={items}
+          attrName="attrName"
+          idPrefix="idPrefix"
+          maxOverflowItems={1}
+          overflowIndexStart={1}
+        />
+      );
       expect(wrapper).toMatchSnapshot();
     });
 
     test('it does not show "more not shown" when maxOverflowItems are not exceeded', () => {
-      const rowItemOverflow = getRowItemOverflow(items, 'attrName', 1, 5);
-      const wrapper = shallow(<div>{rowItemOverflow}</div>);
+      const wrapper = shallow(
+        <RowItemOverflowComponent
+          rowItems={items}
+          attrName="attrName"
+          idPrefix="idPrefix"
+          maxOverflowItems={5}
+          overflowIndexStart={1}
+        />
+      );
       expect(wrapper.find('[data-test-subj="popover-additional-overflow"]').length).toBe(0);
     });
 
+    test('it shows correct number of overflow items when maxOverflowItems are not exceeded', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <RowItemOverflowComponent
+            rowItems={items}
+            attrName="attrName"
+            idPrefix="idPrefix"
+            maxOverflowItems={5}
+            overflowIndexStart={1}
+          />
+        </TestProviders>
+      );
+      wrapper.find('[data-test-subj="overflow-button"]').first().find('button').simulate('click');
+
+      expect(
+        wrapper.find('[data-test-subj="overflow-items"]').last().prop<JSX.Element[]>('children')
+          ?.length
+      ).toEqual(2);
+    });
+
     test('it shows "more not shown" when maxOverflowItems are exceeded', () => {
-      const rowItemOverflow = getRowItemOverflow(items, 'attrName', 1, 1);
-      const wrapper = shallow(<div>{rowItemOverflow}</div>);
+      const wrapper = shallow(
+        <RowItemOverflowComponent
+          rowItems={items}
+          attrName="attrName"
+          idPrefix="idPrefix"
+          maxOverflowItems={1}
+          overflowIndexStart={1}
+        />
+      );
       expect(wrapper.find('[data-test-subj="popover-additional-overflow"]').length).toBe(1);
     });
   });

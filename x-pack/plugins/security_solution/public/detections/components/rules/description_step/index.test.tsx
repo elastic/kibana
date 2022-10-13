@@ -15,23 +15,20 @@ import {
   getDescriptionItem,
 } from '.';
 
-import {
-  esFilters,
-  Filter,
-  FilterManager,
-  UI_SETTINGS,
-} from '../../../../../../../../src/plugins/data/public';
+import { FilterManager, UI_SETTINGS } from '@kbn/data-plugin/public';
+import type { Filter } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
 import {
   mockAboutStepRule,
   mockDefineStepRule,
 } from '../../../pages/detection_engine/rules/all/__mocks__/mock';
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
 import * as i18n from './translations';
 
 import { schema } from '../step_about_rule/schema';
-import { ListItems } from './types';
-import { AboutStepRule } from '../../../pages/detection_engine/rules/types';
+import type { ListItems } from './types';
+import type { AboutStepRule } from '../../../pages/detection_engine/rules/types';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -85,7 +82,7 @@ describe('description_step', () => {
       const filters: Filter[] = [
         {
           $state: {
-            store: esFilters.FilterStateStore.GLOBAL_STATE,
+            store: FilterStateStore.GLOBAL_STATE,
           },
           meta: {
             alias: null,
@@ -105,7 +102,7 @@ describe('description_step', () => {
         },
         {
           $state: {
-            store: esFilters.FilterStateStore.GLOBAL_STATE,
+            store: FilterStateStore.GLOBAL_STATE,
           },
           meta: {
             alias: null,
@@ -128,7 +125,7 @@ describe('description_step', () => {
       const expected: Filter[] = [
         {
           $state: {
-            store: esFilters.FilterStateStore.GLOBAL_STATE,
+            store: FilterStateStore.GLOBAL_STATE,
           },
           meta: {
             alias: null,
@@ -148,7 +145,7 @@ describe('description_step', () => {
         },
         {
           $state: {
-            store: esFilters.FilterStateStore.GLOBAL_STATE,
+            store: FilterStateStore.GLOBAL_STATE,
           },
           meta: {
             alias: null,
@@ -211,7 +208,7 @@ describe('description_step', () => {
       const expected: Filter[] = [
         {
           $state: {
-            store: esFilters.FilterStateStore.APP_STATE,
+            store: FilterStateStore.APP_STATE,
           },
           meta: {
             alias: null,
@@ -231,7 +228,7 @@ describe('description_step', () => {
         },
         {
           $state: {
-            store: esFilters.FilterStateStore.APP_STATE,
+            store: FilterStateStore.APP_STATE,
           },
           meta: {
             alias: null,

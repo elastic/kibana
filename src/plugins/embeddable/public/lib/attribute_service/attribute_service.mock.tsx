@@ -6,25 +6,26 @@
  * Side Public License, v 1.
  */
 
-import { EmbeddableInput, SavedObjectEmbeddableInput } from '../index';
-import { coreMock } from '../../../../../core/public/mocks';
+import { EmbeddableInput, SavedObjectEmbeddableInput } from '..';
+import { coreMock } from '@kbn/core/public/mocks';
 import { AttributeServiceOptions } from './attribute_service';
-import { CoreStart } from 'src/core/public';
-import { AttributeService, ATTRIBUTE_SERVICE_KEY } from './index';
+import { CoreStart } from '@kbn/core/public';
+import { AttributeService, ATTRIBUTE_SERVICE_KEY } from '.';
 
 export const mockAttributeService = <
   A extends { title: string },
   V extends EmbeddableInput & { [ATTRIBUTE_SERVICE_KEY]: A } = EmbeddableInput & {
     [ATTRIBUTE_SERVICE_KEY]: A;
   },
-  R extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
+  R extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput,
+  M extends unknown = unknown
 >(
   type: string,
-  options: AttributeServiceOptions<A>,
+  options: AttributeServiceOptions<A, M>,
   customCore?: jest.Mocked<CoreStart>
-): AttributeService<A, V, R> => {
+): AttributeService<A, V, R, M> => {
   const core = customCore ? customCore : coreMock.createStart();
-  return new AttributeService<A, V, R>(
+  return new AttributeService<A, V, R, M>(
     type,
     jest.fn(),
     core.i18n.Context,

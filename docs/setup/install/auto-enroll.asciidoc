@@ -1,0 +1,21 @@
+[role="exclude"]
+
+If this is the first time you're starting {kib}, this command generates a 
+unique link in your terminal to enroll your {kib} instance with {es}.
+
+. In your terminal, click the generated link to open {kib} in your browser.
+
+. In your browser, paste the enrollment token that was generated in the terminal 
+when you started {es}, and then click the button to connect your {kib} instance with {es}.
+
+. Log in to {kib} as the `elastic` user with the password that was 
+generated when you started {es}.
+
+[NOTE]
+====
+If you need to reset the password for the `elastic` user or other
+built-in users, run the {ref}/reset-password.html[`elasticsearch-reset-password`] tool. To generate new enrollment tokens for 
+{kib} or {es} nodes, run the
+{ref}/create-enrollment-token.html[`elasticsearch-create-enrollment-token`] tool.
+These tools are available in the {es} `bin` directory.
+====

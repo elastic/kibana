@@ -101,7 +101,7 @@ describe('extractMappingsDefinition', () => {
     expect(extractMappingsDefinition(mappings)).toBe(mappings.myType);
   });
 
-  test('should detect that the mappings has one type at root level', () => {
+  test('should detect that the mappings has no type and is defined at root level', () => {
     const mappings = {
       _source: {
         excludes: [],
@@ -121,6 +121,10 @@ describe('extractMappingsDefinition', () => {
         title: {
           type: 'keyword',
         },
+      },
+      // Mapper-size plugin parameter
+      _size: {
+        enabled: true,
       },
     };
 

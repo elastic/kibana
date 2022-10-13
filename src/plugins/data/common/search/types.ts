@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
+import type { TransportRequestOptions } from '@elastic/elasticsearch';
+import type { KibanaExecutionContext } from '@kbn/core/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { Observable } from 'rxjs';
-import { IEsSearchRequest, IEsSearchResponse, IndexPattern } from '..';
-import type { RequestAdapter } from '../../../inspector/common';
+import { IEsSearchRequest, IEsSearchResponse } from '..';
 
 export type ISearchGeneric = <
   SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
@@ -66,6 +68,21 @@ export interface IKibanaSearchResponse<RawResponse = any> {
   isPartial?: boolean;
 
   /**
+   * Indicates whether the results returned are from the async-search index
+   */
+  isRestored?: boolean;
+
+  /**
+   * Indicates whether the search has been saved to a search-session object and long keepAlive was set
+   */
+  isStored?: boolean;
+
+  /**
+   * Optional warnings returned from Elasticsearch (for example, deprecation warnings)
+   */
+  warning?: string;
+
+  /**
    * The raw response returned by the internal search method (usually the raw ES response)
    */
   rawResponse: RawResponse;
@@ -78,13 +95,6 @@ export interface IKibanaSearchRequest<Params = any> {
   id?: string;
 
   params?: Params;
-}
-
-export interface IInspectorInfo {
-  adapter?: RequestAdapter;
-  title: string;
-  id?: string;
-  description?: string;
 }
 
 export interface ISearchOptions {
@@ -115,20 +125,31 @@ export interface ISearchOptions {
   isStored?: boolean;
 
   /**
+   * Whether the search was successfully polled after session was saved. Search was added to a session saved object and keepAlive extended.
+   */
+  isSearchStored?: boolean;
+
+  /**
    * Whether the session is restored (i.e. search requests should re-use the stored search IDs,
    * rather than starting from scratch)
    */
   isRestore?: boolean;
 
   /**
-   * Index pattern reference is used for better error messages
+   * Represents a meta-information about a Kibana entity intitating a saerch request.
    */
-  indexPattern?: IndexPattern;
+  executionContext?: KibanaExecutionContext;
 
   /**
-   * Inspector integration options
+   * Index pattern reference is used for better error messages
    */
-  inspector?: IInspectorInfo;
+  indexPattern?: DataView;
+
+  /**
+   * TransportRequestOptions, other than `signal`, to pass through to the ES client.
+   * To pass an abort signal, use {@link ISearchOptions.abortSignal}
+   */
+  transport?: Omit<TransportRequestOptions, 'signal'>;
 }
 
 /**
@@ -137,5 +158,11 @@ export interface ISearchOptions {
  */
 export type ISearchOptionsSerializable = Pick<
   ISearchOptions,
-  'strategy' | 'legacyHitsTotal' | 'sessionId' | 'isStored' | 'isRestore'
+  | 'strategy'
+  | 'legacyHitsTotal'
+  | 'sessionId'
+  | 'isStored'
+  | 'isSearchStored'
+  | 'isRestore'
+  | 'executionContext'
 >;

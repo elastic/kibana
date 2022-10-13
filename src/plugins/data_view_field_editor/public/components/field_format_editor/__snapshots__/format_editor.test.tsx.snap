@@ -1,0 +1,67 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FieldFormatEditor should render normally 1`] = `
+<Fragment>
+  <Suspense
+    fallback={
+      <div
+        style={
+          Object {
+            "marginTop": 8,
+            "minHeight": 430,
+          }
+        }
+      >
+        <EuiDelayRender
+          delay={500}
+        >
+          <EuiLoadingContent
+            lines={4}
+          />
+        </EuiDelayRender>
+      </div>
+    }
+  >
+    <lazy
+      fieldType="number"
+      format={Object {}}
+      formatParams={Object {}}
+      onChange={[Function]}
+      onError={[Function]}
+    />
+  </Suspense>
+</Fragment>
+`;
+
+exports[`FieldFormatEditor should render nothing if there is no editor for the format 1`] = `
+<Fragment>
+  <Suspense
+    fallback={
+      <div
+        style={
+          Object {
+            "marginTop": 8,
+            "minHeight": 430,
+          }
+        }
+      >
+        <EuiDelayRender
+          delay={500}
+        >
+          <EuiLoadingContent
+            lines={4}
+          />
+        </EuiDelayRender>
+      </div>
+    }
+  >
+    <lazy
+      fieldType="number"
+      format={Object {}}
+      formatParams={Object {}}
+      onChange={[Function]}
+      onError={[Function]}
+    />
+  </Suspense>
+</Fragment>
+`;

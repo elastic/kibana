@@ -1,8 +1,22 @@
 [[add-aggregation-based-visualization-panels]]
 === Aggregation-based
 
-Aggregation-based visualizations are the core {kib} panels, and are not optimized
-for a specific use case.
+Aggregation-based visualizations are the core {kib} panels, and are not optimized for a specific use case.
+
+With aggregation-based visualizations, you can:
+
+* Split charts up to three aggregation levels, which is more than *Lens* and *TSVB*
+* Create visualization with non-time series data
+* Use a <<save-open-search,saved search>> as an input
+* Sort data tables and use the summary row and percentage column features
+* Assign colors to data series
+* Extend features with plugins
+
+Aggregation-based visualizations include the following limitations:
+
+* Limited styling options
+* Math is unsupported
+* Multiple indices is unsupported
 
 [float]
 [[types-of-visualizations]]
@@ -92,17 +106,19 @@ create visual art for a specific topic.
 
 Choose the type of visualization you want to create, then use the editor to configure the options.
 
-. From the dashboard, click *Create panel*, then click *Aggregation based* on the *New visualization* window.
+. On the dashboard, click *All types > Aggregation based*.
 
-.. Click the type of visualization you want to create.
+.. Select the visualization type you want to create.
 
-.. Click the data source you want to visualize.
-
-. From the editor, add the <<aggregation-reference,aggregations>> you want to visualize, then click *Update*. 
+.. Select the data source you want to visualize.
 +
-NOTE: For the *Date Histogram* to use an *auto interval*, the date field must match the primary time field of the index pattern.
+NOTE: There is no performance impact on the data source you select. For example, *Discover* saved searches perform the same as {data-sources}. 
 
-. To change the order, drag the aggregations along the editor. 
+. Add the <<aggregation-reference,aggregations>> you want to visualize using the editor, then click *Update*. 
++
+NOTE: For the *Date Histogram* to use an *auto interval*, the date field must match the primary time field of the {data-source}.
+
+. To change the order, drag and drop the aggregations in the editor. 
 + 
 [role="screenshot"]
 image:images/bar-chart-tutorial-3.png[Option to change the order of aggregations]
@@ -124,9 +140,11 @@ a bar chart that displays the top five log traffic sources for every three hours
 
 Add the sample web logs data that you'll use to create the bar chart, then create the dashboard.
 
-. From the *Home* page, click *Try our sample data*.
+. On the home page, click *Try sample data*.
 
-. From *Sample web logs*, click *Add data*.
+. Click *Other sample data sets*. 
+
+. On the *Sample web logs* card, click *Add data*.
 
 . Open the main menu, then click *Dashboard*.
 
@@ -135,15 +153,11 @@ Add the sample web logs data that you'll use to create the bar chart, then creat
 [float]
 ===== Open and set up the aggregation-based bar chart
 
-Open the bar chart visualization builder and change the time range. 
+Open the *Aggregation based* editor and change the time range. 
 
-. On the dashboard, click *Create panel*.
+. On the dashboard, click *All types > Aggregation based*, select *Vertical bar*, then select *Kibana Sample Data Logs*.
 
-. On the *New visualization* window, click *Aggregation based > Vertical bar*.
-
-. On the *Choose a source* window, click *kibana_sample_data_logs*.
-
-. Change the <<set-time-filter, time filter>>> to *Last 7 days*.
+. Make sure the <<set-time-filter, time filter>> is *Last 7 days*.
 
 [float]
 [[tutorial-configure-the-bar-chart]]
@@ -160,7 +174,7 @@ To create the bar chart, add a <<bucket-aggregations,bucket aggregation>>, then 
 .. Click *Update*.
 +
 [role="screenshot"]
-image:images/bar-chart-tutorial-1.png[Bar chart with sample logs data]
+image:images/aggBased_barChartTutorial1_8.4.png[Bar chart with sample logs data]
 
 . To show the top five log traffic sources, add a sub-bucket aggregation.
 
@@ -175,24 +189,35 @@ TIP: Aggregation-based panels support a maximum of three *Split series*.
 .. Click *Update*.
 +
 [role="screenshot"]
-image:images/bar-chart-tutorial-2.png[Bar chart with sample logs data]
+image:images/aggBased_barChartTutorial2_8.4.png[Bar chart with sample logs data]
 
 [float]
-===== Save the panel
+[[save-the-aggregation-based-panel]]
+===== Save and add the panel
 
-Save and add the visualization panel to the dashboard.
+Save the panel to the *Visualize Library* and add it to the dashboard, or add it to the dashboard without saving.
 
-. From the toolbar, click *Save*.
+To save the panel to the *Visualize Library*:
 
-. Enter the *Title* and optional *Description*. 
+. Click *Save to library*.
 
-. From the *Tags* drop down, select any applicable tags. 
+. Enter the *Title* and add any applicable <<managing-tags,*Tags*>>.
 
-. Select *Add to Dashboard after saving*.
+. Make sure that *Add to Dashboard after saving* is selected.
 
 . Click *Save and return*.
 
+To save the panel to the dashboard:
 
+. Click *Save and return*.
+
+. Add an optional title to the panel.
+
+.. In the panel header, click *No Title*.
+
+.. On the *Customize panel* window, select *Show panel title*.
+
+.. Enter the *Panel title*, then click *Save*.
 
 
 

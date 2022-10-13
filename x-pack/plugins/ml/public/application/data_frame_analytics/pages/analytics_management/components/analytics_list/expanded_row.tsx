@@ -75,7 +75,7 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
   const dependentVariable = getDependentVar(item.config.analysis);
   const predictionFieldName = getPredictionFieldName(item.config.analysis);
   // default is 'ml'
-  const resultsField = item.config.dest.results_field;
+  const resultsField = item.config.dest.results_field ?? 'ml';
   const jobIsCompleted = isCompletedAnalyticsJob(item.stats);
   const isRegressionJob = isRegressionAnalysis(item.config.analysis);
   const analysisType = getAnalysisType(item.config.analysis);
@@ -159,6 +159,7 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
     if (jobIsCompleted && isRegressionJob) {
       loadData();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobIsCompleted]);
 
   const stateValues: any = { ...item.stats };
@@ -232,8 +233,8 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
           moment(item.config.create_time).unix() * 1000
         ),
       },
-      { title: 'model_memory_limit', description: item.config.model_memory_limit },
-      { title: 'version', description: item.config.version },
+      { title: 'model_memory_limit', description: item.config.model_memory_limit ?? '' },
+      { title: 'version', description: item.config.version ?? '' },
     ],
     position: 'left',
     dataTestSubj: 'mlAnalyticsTableRowDetailsSection stats',

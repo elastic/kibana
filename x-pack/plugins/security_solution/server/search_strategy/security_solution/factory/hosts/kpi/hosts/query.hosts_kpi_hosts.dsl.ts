@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HostsKpiHostsRequestOptions } from '../../../../../../../common/search_strategy/security_solution/hosts';
+import type { HostsKpiHostsRequestOptions } from '../../../../../../../common/search_strategy/security_solution/hosts';
 import { createQueryFilterClauses } from '../../../../../../utils/build_query';
 
 export const buildHostsKpiHostsQuery = ({
@@ -28,8 +28,8 @@ export const buildHostsKpiHostsQuery = ({
 
   const dslQuery = {
     index: defaultIndex,
-    allowNoIndices: true,
-    ignoreUnavailable: true,
+    allow_no_indices: true,
+    ignore_unavailable: true,
     track_total_hits: false,
     body: {
       aggregations: {
@@ -57,6 +57,14 @@ export const buildHostsKpiHostsQuery = ({
           filter,
         },
       },
+      _source: false,
+      fields: [
+        'host.name',
+        {
+          field: '@timestamp',
+          format: 'strict_date_optional_time',
+        },
+      ],
       size: 0,
     },
   };

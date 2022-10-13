@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { lazy, Fragment } from 'react';
+import React, { lazy } from 'react';
 import uuid from 'uuid';
 import { ActionTypeModel, ActionTypeRegistryContract } from '../types';
 
@@ -21,7 +21,7 @@ const createActionTypeRegistryMock = () => {
 
 const mockedActionParamsFields = lazy(async () => ({
   default() {
-    return React.createElement(Fragment);
+    return React.createElement(React.Fragment);
   },
 }));
 
@@ -31,7 +31,6 @@ const createMockActionTypeModel = (actionType: Partial<ActionTypeModel> = {}): A
     id,
     iconClass: `iconClass-${id}`,
     selectMessage: `selectMessage-${id}`,
-    validateConnector: jest.fn(),
     validateParams: jest.fn(),
     actionConnectorFields: null,
     actionParamsFields: mockedActionParamsFields,

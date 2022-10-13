@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SPACES } from '../../common/lib/spaces';
+import { SPACES, ALL_SPACES_ID } from '../../common/lib/spaces';
 import { testCaseFailures, getTestScenarios } from '../../common/lib/saved_object_test_utils';
 import { TestUser } from '../../common/lib/types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -61,8 +61,26 @@ const createTestCases = (overwrite: boolean, spaceId: string) => {
     { ...CASES.NEW_SINGLE_NAMESPACE_OBJ, expectedNamespaces },
     { ...CASES.NEW_MULTI_NAMESPACE_OBJ, expectedNamespaces },
     CASES.NEW_NAMESPACE_AGNOSTIC_OBJ,
+    // We test the alias conflict preflight check error case twice; once by checking the alias with "find" and once by using "bulk-get".
+    { ...CASES.ALIAS_CONFLICT_OBJ, ...fail409(spaceId !== SPACE_2_ID), expectedNamespaces }, // first try fails if this is the default space or space_1, because an alias exists in those spaces
   ];
-  const crossNamespace = [CASES.NEW_EACH_SPACE_OBJ, CASES.NEW_ALL_SPACES_OBJ];
+  const crossNamespace = [
+    { ...CASES.ALIAS_CONFLICT_OBJ, initialNamespaces: ['*'], ...fail409() }, // second try fails because an alias exists in space_x, the default space, and space_1 (but not space_y because that alias is disabled)
+    {
+      ...CASES.INITIAL_NS_SINGLE_NAMESPACE_OBJ_OTHER_SPACE,
+      initialNamespaces: ['x', 'y'],
+      ...fail400(), // cannot be created in multiple spaces
+    },
+    CASES.INITIAL_NS_SINGLE_NAMESPACE_OBJ_OTHER_SPACE, // second try creates it in a single other space, which is valid
+    {
+      ...CASES.INITIAL_NS_MULTI_NAMESPACE_ISOLATED_OBJ_OTHER_SPACE,
+      initialNamespaces: [ALL_SPACES_ID],
+      ...fail400(), // cannot be created in multiple spaces
+    },
+    CASES.INITIAL_NS_MULTI_NAMESPACE_ISOLATED_OBJ_OTHER_SPACE, // second try creates it in a single other space, which is valid
+    CASES.INITIAL_NS_MULTI_NAMESPACE_OBJ_EACH_SPACE,
+    CASES.INITIAL_NS_MULTI_NAMESPACE_OBJ_ALL_SPACES,
+  ];
   const hiddenType = [{ ...CASES.HIDDEN, ...fail400() }];
   const allTypes = normalTypes.concat(crossNamespace, hiddenType);
   return { normalTypes, crossNamespace, hiddenType, allTypes };

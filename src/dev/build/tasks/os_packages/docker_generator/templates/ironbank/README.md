@@ -31,9 +31,9 @@ You can learn more about the Elastic Community and also understand how to get mo
 visiting [Elastic Community](https://www.elastic.co/community).
 
 This software is governed by the [Elastic
-License](https://github.com/elastic/elasticsearch/blob/{{branch}}/licenses/ELASTIC-LICENSE.txt),
+License](https://github.com/elastic/kibana/blob/{{branch}}/licenses/ELASTIC-LICENSE-2.0.txt),
 and includes the full set of [free
 features](https://www.elastic.co/subscriptions).
 
 View the detailed release notes
-[here](https://www.elastic.co/guide/en/elasticsearch/reference/{{branch}}/es-release-notes.html).
+[here](https://www.elastic.co/guide/en/kibana/{{branch}}/release-notes-{{version}}.html).

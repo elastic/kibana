@@ -5,50 +5,44 @@
  * 2.0.
  */
 
-import { ILicense } from '../../../../../licensing/common/types';
-import {
+import type { CoreStart } from '@kbn/core/public';
+import type { ILicense } from '@kbn/licensing-plugin/common/types';
+import type {
+  GetAgentStatusResponse,
+  GetOnePackagePolicyResponse,
+  GetPackagePoliciesResponse,
+  UpdatePackagePolicyResponse,
+} from '@kbn/fleet-plugin/common';
+import type {
   AppLocation,
   Immutable,
   ProtectionFields,
   PolicyData,
   UIPolicyConfig,
+  MaybeImmutable,
 } from '../../../../common/endpoint/types';
-import { ServerApiError } from '../../../common/types';
-import {
-  GetAgentStatusResponse,
-  GetOnePackagePolicyResponse,
-  GetPackagePoliciesResponse,
-  GetPackagesResponse,
-  UpdatePackagePolicyResponse,
-} from '../../../../../fleet/common';
+import type { ServerApiError } from '../../../common/types';
+import type { ImmutableMiddlewareAPI } from '../../../common/store';
+import type { AppAction } from '../../../common/store/actions';
+
+export type PolicyDetailsStore = ImmutableMiddlewareAPI<PolicyDetailsState, AppAction>;
 
 /**
- * Policy list store state
+ * Function that runs Policy Details middleware
  */
-export interface PolicyListState {
-  /** Array of policy items  */
-  policyItems: PolicyData[];
-  /** Information about the latest endpoint package */
-  endpointPackageInfo?: GetPackagesResponse['response'][0];
-  /** API error if loading data failed */
-  apiError?: ServerApiError;
-  /** total number of policies */
-  total: number;
-  /** Number of policies per page */
-  pageSize: number;
-  /** page number (zero based) */
-  pageIndex: number;
-  /** data is being retrieved from server */
-  isLoading: boolean;
-  /** current location information */
-  location?: Immutable<AppLocation>;
-  /** policy is being deleted */
-  isDeleting: boolean;
-  /** Deletion status */
-  deleteStatus?: boolean;
-  /** A summary of stats for the agents associated with a given Fleet Agent Policy */
-  agentStatusSummary?: GetAgentStatusResponse['results'];
+export type MiddlewareRunner = (
+  context: MiddlewareRunnerContext,
+  store: PolicyDetailsStore,
+  action: MaybeImmutable<AppAction>
+) => Promise<void>;
+
+export interface MiddlewareRunnerContext {
+  coreStart: CoreStart;
 }
+
+export type PolicyDetailsSelector<T = unknown> = (
+  state: Immutable<PolicyDetailsState>
+) => Immutable<T>;
 
 /**
  * Policy details store state
@@ -61,6 +55,8 @@ export interface PolicyDetailsState {
   isLoading: boolean;
   /** current location of the application */
   location?: Immutable<AppLocation>;
+  /** artifacts namespace inside policy details page */
+  artifacts: PolicyArtifactsState;
   /** A summary of stats for the agents associated with a given Fleet Agent Policy */
   agentStatusSummary?: Omit<GetAgentStatusResponse['results'], 'updating'>;
   /** Status of an update to the policy  */
@@ -73,17 +69,22 @@ export interface PolicyDetailsState {
 }
 
 /**
- * The URL search params that are supported by the Policy List page view
+ * Policy artifacts store state
  */
-export interface PolicyListUrlSearchParams {
-  page_index: number;
-  page_size: number;
+export interface PolicyArtifactsState {
+  /** artifacts location params  */
+  location: PolicyDetailsArtifactsPageLocation;
 }
 
-export enum OS {
-  windows = 'windows',
-  mac = 'mac',
-  linux = 'linux',
+export interface PolicyDetailsArtifactsPageListLocationParams {
+  page: number;
+  pageSize: number;
+  filter: string;
+}
+
+export interface PolicyDetailsArtifactsPageLocation
+  extends PolicyDetailsArtifactsPageListLocationParams {
+  show?: 'list';
 }
 
 /**
@@ -114,6 +115,18 @@ export type MalwareProtectionOSes = KeysByValueCriteria<
   { malware: ProtectionFields }
 >;
 
+/** Returns an array of the policy OSes that have a memory protection field */
+export type MemoryProtectionOSes = KeysByValueCriteria<
+  UIPolicyConfig,
+  { memory_protection: ProtectionFields }
+>;
+
+/** Returns an array of the policy OSes that have a behavior protection field */
+export type BehaviorProtectionOSes = KeysByValueCriteria<
+  UIPolicyConfig,
+  { behavior_protection: ProtectionFields }
+>;
+
 /** Returns an array of the policy OSes that have a ransomware protection field */
 export type RansomwareProtectionOSes = KeysByValueCriteria<
   UIPolicyConfig,
@@ -121,10 +134,16 @@ export type RansomwareProtectionOSes = KeysByValueCriteria<
 >;
 
 export type PolicyProtection =
-  | keyof Pick<UIPolicyConfig['windows'], 'malware' | 'ransomware'>
-  | keyof Pick<UIPolicyConfig['mac'], 'malware'>;
+  | keyof Pick<
+      UIPolicyConfig['windows'],
+      'malware' | 'ransomware' | 'memory_protection' | 'behavior_protection'
+    >
+  | keyof Pick<UIPolicyConfig['mac'], 'malware' | 'behavior_protection' | 'memory_protection'>
+  | keyof Pick<UIPolicyConfig['linux'], 'malware' | 'behavior_protection' | 'memory_protection'>;
 
 export type MacPolicyProtection = keyof Pick<UIPolicyConfig['mac'], 'malware'>;
+
+export type LinuxPolicyProtection = keyof Pick<UIPolicyConfig['linux'], 'malware'>;
 
 export interface GetPolicyListResponse extends GetPackagePoliciesResponse {
   items: PolicyData[];

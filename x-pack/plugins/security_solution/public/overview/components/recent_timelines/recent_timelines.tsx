@@ -15,8 +15,9 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
+import styled from 'styled-components';
 import { RecentTimelineHeader } from './header';
-import {
+import type {
   OnOpenTimeline,
   OpenTimelineResult,
 } from '../../../timelines/components/open_timeline/types';
@@ -32,6 +33,15 @@ interface RecentTimelinesItemProps {
   isLastItem: boolean;
 }
 
+const ClampText = styled.div`
+  /* Clamp text content to 3 lines */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+`;
+
 const RecentTimelinesItem = React.memo<RecentTimelinesItemProps>(
   ({ timeline, onOpenTimeline, isLastItem }) => {
     const handleClick = useCallback(
@@ -45,13 +55,17 @@ const RecentTimelinesItem = React.memo<RecentTimelinesItemProps>(
 
     const render = useCallback(
       (showHoverContent) => (
-        <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
+        <EuiFlexGroup
+          gutterSize="none"
+          justifyContent="spaceBetween"
+          data-test-subj="overview-recent-timelines"
+        >
           <EuiFlexItem grow={false}>
             <RecentTimelineHeader onOpenTimeline={onOpenTimeline} timeline={timeline} />
             <RecentTimelineCounts timeline={timeline} />
             {timeline.description && timeline.description.length && (
               <EuiText color="subdued" size="xs">
-                {timeline.description}
+                <ClampText>{timeline.description}</ClampText>
               </EuiText>
             )}
           </EuiFlexItem>

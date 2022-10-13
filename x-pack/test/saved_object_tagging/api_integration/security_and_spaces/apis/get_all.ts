@@ -8,19 +8,27 @@
 import expect from '@kbn/expect';
 import { USERS, User, ExpectedResponse } from '../../../common/lib';
 import { FtrProviderContext } from '../services';
+import { createTestSpaces, deleteTestSpaces, createTags, deleteTags } from './test_utils';
 
 // eslint-disable-next-line import/no-default-export
-export default function ({ getService }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
-  const supertest = getService('supertestWithoutAuth');
+export default function (ftrContext: FtrProviderContext) {
+  const supertest = ftrContext.getService('supertestWithoutAuth');
 
   describe('GET /api/saved_objects_tagging/tags', () => {
     before(async () => {
-      await esArchiver.load('rbac_tags');
+      await createTestSpaces(ftrContext);
     });
 
     after(async () => {
-      await esArchiver.unload('rbac_tags');
+      await deleteTestSpaces(ftrContext);
+    });
+
+    beforeEach(async () => {
+      await createTags(ftrContext);
+    });
+
+    afterEach(async () => {
+      await deleteTags(ftrContext);
     });
 
     const responses: Record<string, ExpectedResponse> = {
@@ -46,10 +54,12 @@ export default function ({ getService }: FtrProviderContext) {
         },
       },
       unauthorized: {
-        httpCode: 200,
+        httpCode: 403,
         expectResponse: ({ body }) => {
           expect(body).to.eql({
-            tags: [],
+            error: 'Forbidden',
+            message: 'unauthorized',
+            statusCode: 403,
           });
         },
       },

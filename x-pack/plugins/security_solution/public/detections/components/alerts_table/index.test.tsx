@@ -11,7 +11,7 @@ import { shallow } from 'enzyme';
 import '../../../common/mock/match_media';
 import { TimelineId } from '../../../../common/types/timeline';
 import { TestProviders } from '../../../common/mock';
-import { AlertsTableComponent } from './index';
+import { AlertsTableComponent } from '.';
 
 describe('AlertsTableComponent', () => {
   it('renders correctly', () => {
@@ -33,15 +33,11 @@ describe('AlertsTableComponent', () => {
           loadingEventIds={[]}
           selectedEventIds={{}}
           isSelectAllChecked={false}
-          clearSelected={jest.fn()}
-          setEventsLoading={jest.fn()}
-          clearEventsLoading={jest.fn()}
-          setEventsDeleted={jest.fn()}
-          clearEventsDeleted={jest.fn()}
           showBuildingBlockAlerts={false}
           onShowBuildingBlockAlertsChanged={jest.fn()}
           showOnlyThreatIndicatorAlerts={false}
           onShowOnlyThreatIndicatorAlertsChanged={jest.fn()}
+          dispatch={jest.fn()}
         />
       </TestProviders>
     );

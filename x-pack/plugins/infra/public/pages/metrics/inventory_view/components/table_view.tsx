@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 
 import { last, first } from 'lodash';
 import React, { useState, useCallback, useEffect } from 'react';
+import { EuiPopover } from '@elastic/eui';
 import { createWaffleMapNode } from '../lib/nodes_to_wafflemap';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../lib/lib';
 import { fieldToName } from '../lib/field_to_display_name';
@@ -81,20 +82,26 @@ export const TableView = (props: Props) => {
         // as well as the node name. There is the possibility that a node can be present in two
         // different groups and be on the screen at the same time.
         const uniqueID = [...item.node.path.map((p) => p.value), item.node.name].join(':');
+        const button = (
+          <EuiToolTip content={tooltipText}>
+            <EuiButtonEmpty onClick={openPopoverFor(uniqueID)}>{value}</EuiButtonEmpty>
+          </EuiToolTip>
+        );
+
         return (
-          <NodeContextMenu
-            node={item.node}
-            nodeType={nodeType}
+          <EuiPopover
+            button={button}
+            isOpen={openPopovers.includes(uniqueID)}
             closePopover={closePopoverFor(uniqueID)}
-            currentTime={currentTime}
-            isPopoverOpen={openPopovers.includes(uniqueID)}
-            options={options}
-            popoverPosition="rightCenter"
+            anchorPosition="rightCenter"
           >
-            <EuiToolTip content={tooltipText}>
-              <EuiButtonEmpty onClick={openPopoverFor(uniqueID)}>{value}</EuiButtonEmpty>
-            </EuiToolTip>
-          </NodeContextMenu>
+            <NodeContextMenu
+              node={item.node}
+              nodeType={nodeType}
+              currentTime={currentTime}
+              options={options}
+            />
+          </EuiPopover>
         );
       },
     },

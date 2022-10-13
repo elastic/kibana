@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { IncompatibleActionError } from 'src/plugins/ui_actions/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { PanelNotFoundError, EmbeddableFactoryNotFoundError } from './errors';
 
 describe('IncompatibleActionError', () => {

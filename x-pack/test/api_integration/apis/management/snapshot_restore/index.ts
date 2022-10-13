@@ -9,6 +9,8 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Snapshot and Restore', () => {
-    loadTestFile(require.resolve('./snapshot_restore'));
+    loadTestFile(require.resolve('./policies'));
+    loadTestFile(require.resolve('./snapshots'));
+    loadTestFile(require.resolve('./repositories'));
   });
 }

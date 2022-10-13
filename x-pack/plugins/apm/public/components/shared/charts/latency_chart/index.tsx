@@ -9,25 +9,27 @@ import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { AlertType } from '../../../../../common/alert_types';
-import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
+import { isTimeComparison } from '../../time_comparison/get_comparison_options';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { useLicenseContext } from '../../../../context/license/use_license_context';
-import { useUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { useTheme } from '../../../../hooks/use_theme';
 import { useTransactionLatencyChartsFetcher } from '../../../../hooks/use_transaction_latency_chart_fetcher';
-import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
+import { TimeseriesChart } from '../timeseries_chart';
 import {
   getMaxY,
   getResponseTimeTickFormatter,
-} from '../../../shared/charts/transaction_charts/helper';
-import { MLHeader } from '../../../shared/charts/transaction_charts/ml_header';
-import * as urlHelpers from '../../../shared/Links/url_helpers';
-import { getComparisonChartTheme } from '../../time_comparison/get_time_range_comparison';
+} from '../transaction_charts/helper';
+import { MLHeader } from '../transaction_charts/ml_header';
+import * as urlHelpers from '../../links/url_helpers';
+import { getComparisonChartTheme } from '../../time_comparison/get_comparison_chart_theme';
+import { useEnvironmentsContext } from '../../../../context/environments_context/use_environments_context';
+import { ApmMlDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
+import { usePreferredServiceAnomalyTimeseries } from '../../../../hooks/use_preferred_service_anomaly_timeseries';
+import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 
 interface Props {
   height?: number;
+  kuery: string;
 }
 
 const options: Array<{ value: LatencyAggregationType; text: string }> = [
@@ -40,31 +42,38 @@ function filterNil<T>(value: T | null | undefined): value is T {
   return value != null;
 }
 
-export function LatencyChart({ height }: Props) {
+export function LatencyChart({ height, kuery }: Props) {
   const history = useHistory();
-  const theme = useTheme();
-  const comparisonChartTheme = getComparisonChartTheme(theme);
-  const { urlParams } = useUrlParams();
-  const { latencyAggregationType, comparisonEnabled } = urlParams;
+
+  const comparisonChartTheme = getComparisonChartTheme();
   const license = useLicenseContext();
 
   const {
-    latencyChartsData,
-    latencyChartsStatus,
-  } = useTransactionLatencyChartsFetcher();
+    query: { comparisonEnabled, latencyAggregationType, offset },
+  } = useAnyOfApmParams(
+    '/services/{serviceName}/overview',
+    '/services/{serviceName}/transactions',
+    '/services/{serviceName}/transactions/view'
+  );
 
-  const {
-    currentPeriod,
-    previousPeriod,
-    anomalyTimeseries,
-    mlJobId,
-  } = latencyChartsData;
+  const { environment } = useEnvironmentsContext();
 
-  const { alerts } = useApmServiceContext();
+  const { latencyChartsData, latencyChartsStatus } =
+    useTransactionLatencyChartsFetcher({
+      kuery,
+      environment,
+    });
+
+  const { currentPeriod, previousPeriod } = latencyChartsData;
+
+  const preferredAnomalyTimeseries = usePreferredServiceAnomalyTimeseries(
+    ApmMlDetectorType.txLatency
+  );
+  const anomalyTimeseriesColor = previousPeriod?.color as string;
 
   const timeseries = [
     currentPeriod,
-    comparisonEnabled ? previousPeriod : undefined,
+    comparisonEnabled && isTimeComparison(offset) ? previousPeriod : undefined,
   ].filter(filterNil);
 
   const latencyMaxY = getMaxY(timeseries);
@@ -111,7 +120,7 @@ export function LatencyChart({ height }: Props) {
           <EuiFlexItem grow={false}>
             <MLHeader
               hasValidMlLicense={license?.getFeature('ml').isAvailable}
-              mlJobId={mlJobId}
+              mlJobId={preferredAnomalyTimeseries?.jobId}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -124,12 +133,14 @@ export function LatencyChart({ height }: Props) {
           customTheme={comparisonChartTheme}
           timeseries={timeseries}
           yLabelFormat={getResponseTimeTickFormatter(latencyFormatter)}
-          anomalyTimeseries={anomalyTimeseries}
-          alerts={alerts.filter(
-            (alert) =>
-              alert['rule.id'] === AlertType.TransactionDuration ||
-              alert['rule.id'] === AlertType.TransactionDurationAnomaly
-          )}
+          anomalyTimeseries={
+            preferredAnomalyTimeseries
+              ? {
+                  ...preferredAnomalyTimeseries,
+                  color: anomalyTimeseriesColor,
+                }
+              : undefined
+          }
         />
       </EuiFlexItem>
     </EuiFlexGroup>

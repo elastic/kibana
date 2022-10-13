@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, Plugin, PluginInitializerContext } from 'kibana/public';
+import { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
 
 declare global {
   interface Window {
@@ -15,7 +15,8 @@ declare global {
 }
 
 export class CorePluginDeprecationsPlugin
-  implements Plugin<CorePluginDeprecationsPluginSetup, CorePluginDeprecationsPluginStart> {
+  implements Plugin<CorePluginDeprecationsPluginSetup, CorePluginDeprecationsPluginStart>
+{
   constructor(pluginContext: PluginInitializerContext) {
     window.env = pluginContext.env;
   }

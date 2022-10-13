@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockActions } from '../../../../__mocks__';
+import { setMockActions } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
@@ -13,7 +13,7 @@ import { shallow } from 'enzyme';
 
 import { EuiCard, EuiButton } from '@elastic/eui';
 
-import { SynonymCard, SynonymIcon } from './';
+import { SynonymCard, SynonymIcon } from '.';
 
 describe('SynonymCard', () => {
   const MOCK_SYNONYM_SET = {

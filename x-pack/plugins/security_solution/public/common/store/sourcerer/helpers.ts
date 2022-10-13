@@ -5,51 +5,108 @@
  * 2.0.
  */
 
-// eslint-disable-next-line no-restricted-imports
-import isEmpty from 'lodash/isEmpty';
-import { SourcererModel, SourcererScopeName } from './model';
-import { TimelineEventsType } from '../../../../common/types/timeline';
+import { isEmpty } from 'lodash';
+import type { SourcererDataView, SourcererModel, SourcererScopeById } from './model';
+import { SourcererScopeName } from './model';
+import type { SelectedDataViewPayload } from './actions';
+import type { sourcererModel } from '../model';
+import { ensurePatternFormat, sortWithExcludesAtEnd } from '../../../../common/utils/sourcerer';
 
-export interface Args {
-  eventType?: TimelineEventsType;
-  id: SourcererScopeName;
-  selectedPatterns: string[];
-  state: SourcererModel;
+export const getScopePatternListSelection = (
+  theDataView: SourcererDataView | undefined,
+  sourcererScope: SourcererScopeName,
+  signalIndexName: SourcererModel['signalIndexName'],
+  isDefaultDataView: boolean
+): string[] => {
+  const patternList: string[] =
+    theDataView != null && theDataView.id !== null ? theDataView.patternList : [];
+
+  if (!isDefaultDataView) {
+    return sortWithExcludesAtEnd(patternList);
+  }
+  // when our SIEM data view is set, here are the defaults
+  switch (sourcererScope) {
+    case SourcererScopeName.default:
+      return sortWithExcludesAtEnd(patternList.filter((index) => index !== signalIndexName));
+    case SourcererScopeName.detections:
+      // set to signalIndexName whether or not it exists yet in the patternList
+      return signalIndexName != null ? [signalIndexName] : [];
+    case SourcererScopeName.timeline:
+      return sortWithExcludesAtEnd(patternList);
+  }
+};
+
+export const validateSelectedPatterns = (
+  state: SourcererModel,
+  payload: SelectedDataViewPayload,
+  shouldValidateSelectedPatterns: boolean
+): Partial<SourcererScopeById> => {
+  const { id, ...rest } = payload;
+  const dataView = state.kibanaDataViews.find((p) => p.id === rest.selectedDataViewId);
+  // dedupe because these could come from a silly url or pre 8.0 timeline
+  const dedupePatterns = ensurePatternFormat(rest.selectedPatterns);
+  let missingPatterns: string[] = [];
+  // check for missing patterns against default data view only
+  if (dataView == null || dataView.id === state.defaultDataView.id) {
+    const dedupeAllDefaultPatterns = ensurePatternFormat(
+      (dataView ?? state.defaultDataView).title.split(',')
+    );
+    missingPatterns = dedupePatterns.filter(
+      (pattern) => !dedupeAllDefaultPatterns.includes(pattern)
+    );
+  }
+  const selectedPatterns =
+    // shouldValidateSelectedPatterns is false when upgrading from
+    // legacy pre-8.0 timeline index patterns to data view.
+    shouldValidateSelectedPatterns && dataView != null && missingPatterns.length === 0
+      ? dedupePatterns.filter(
+          (pattern) =>
+            (dataView != null && dataView.patternList.includes(pattern)) ||
+            // this is a hack, but sometimes signal index is deleted and is getting regenerated. it gets set before it is put in the dataView
+            state.signalIndexName == null ||
+            state.signalIndexName === pattern
+        )
+      : // don't remove non-existing patterns, they were saved in the first place in timeline
+        // but removed from the security data view
+        // or its a legacy pre-8.0 timeline
+        dedupePatterns;
+
+  return {
+    [id]: {
+      ...state.sourcererScopes[id],
+      ...rest,
+      selectedDataViewId: dataView?.id ?? null,
+      selectedPatterns,
+      missingPatterns,
+      // if in timeline, allow for empty in case pattern was deleted
+      // need flow for this
+      ...(isEmpty(selectedPatterns) && id !== SourcererScopeName.timeline
+        ? {
+            selectedPatterns: getScopePatternListSelection(
+              dataView ?? state.defaultDataView,
+              id,
+              state.signalIndexName,
+              (dataView ?? state.defaultDataView).id === state.defaultDataView.id
+            ),
+          }
+        : {}),
+      loading: false,
+    },
+  };
+};
+
+interface CheckIfIndicesExistParams {
+  patternList: sourcererModel.SourcererDataView['patternList'];
+  scopeId: sourcererModel.SourcererScopeName;
+  signalIndexName: string | null;
 }
-export const createDefaultIndexPatterns = ({ eventType, id, selectedPatterns, state }: Args) => {
-  const kibanaIndexPatterns = state.kibanaIndexPatterns.map((kip) => kip.title);
-  const newSelectedPatterns = selectedPatterns.filter(
-    (sp) =>
-      state.configIndexPatterns.includes(sp) ||
-      kibanaIndexPatterns.includes(sp) ||
-      (!isEmpty(state.signalIndexName) && state.signalIndexName === sp)
-  );
-  if (isEmpty(newSelectedPatterns)) {
-    let defaultIndexPatterns = state.configIndexPatterns;
-    if (id === SourcererScopeName.timeline && isEmpty(newSelectedPatterns)) {
-      defaultIndexPatterns = defaultIndexPatternByEventType({ state, eventType });
-    } else if (id === SourcererScopeName.detections && isEmpty(newSelectedPatterns)) {
-      defaultIndexPatterns = [state.signalIndexName ?? ''];
-    }
-    return defaultIndexPatterns;
-  }
-  return newSelectedPatterns;
-};
-
-export const defaultIndexPatternByEventType = ({
-  state,
-  eventType,
-}: {
-  state: SourcererModel;
-  eventType?: TimelineEventsType;
-}) => {
-  let defaultIndexPatterns = state.configIndexPatterns;
-  if (eventType === 'all' && !isEmpty(state.signalIndexName)) {
-    defaultIndexPatterns = [...state.configIndexPatterns, state.signalIndexName ?? ''];
-  } else if (eventType === 'raw') {
-    defaultIndexPatterns = state.configIndexPatterns;
-  } else if (!isEmpty(state.signalIndexName) && (eventType === 'signal' || eventType === 'alert')) {
-    defaultIndexPatterns = [state.signalIndexName ?? ''];
-  }
-  return defaultIndexPatterns;
-};
+export const checkIfIndicesExist = ({
+  patternList,
+  scopeId,
+  signalIndexName,
+}: CheckIfIndicesExistParams) =>
+  scopeId === SourcererScopeName.detections
+    ? patternList.includes(`${signalIndexName}`)
+    : scopeId === SourcererScopeName.default
+    ? patternList.filter((i) => i !== signalIndexName).length > 0
+    : patternList.length > 0;

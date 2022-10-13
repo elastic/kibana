@@ -6,7 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { IRouter } from 'src/core/server';
+import { IRouter, SavedObjectsType } from '@kbn/core/server';
+import { SavedObjectManagementTypeInfo } from '../../common';
+
+const convertType = (sot: SavedObjectsType): SavedObjectManagementTypeInfo => {
+  return {
+    name: sot.name,
+    namespaceType: sot.namespaceType,
+    hidden: sot.hidden,
+    displayName: sot.management?.displayName ?? sot.name,
+  };
+};
 
 export const registerGetAllowedTypesRoute = (router: IRouter) => {
   router.get(
@@ -15,9 +25,10 @@ export const registerGetAllowedTypesRoute = (router: IRouter) => {
       validate: false,
     },
     async (context, req, res) => {
-      const allowedTypes = context.core.savedObjects.typeRegistry
+      const allowedTypes = (await context.core).savedObjects.typeRegistry
         .getImportableAndExportableTypes()
-        .map((type) => type.name);
+        .filter((type) => type.management!.visibleInManagement ?? true)
+        .map(convertType);
 
       return res.ok({
         body: {

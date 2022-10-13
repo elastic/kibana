@@ -8,7 +8,7 @@
 import React, { Fragment, useState } from 'react';
 import { EuiConfirmModal, EuiCallOut, EuiCheckbox, EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { deleteTemplates } from '../services/api';
 import { notificationService } from '../services/notification';

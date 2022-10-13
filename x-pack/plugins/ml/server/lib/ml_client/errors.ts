@@ -5,7 +5,17 @@
  * 2.0.
  */
 
+/* eslint-disable max-classes-per-file */
+
 export class MLJobNotFound extends Error {
+  statusCode = 404;
+  constructor(message?: string) {
+    super(message);
+    Object.setPrototypeOf(this, new.target.prototype);
+  }
+}
+
+export class MLModelNotFound extends Error {
   statusCode = 404;
   constructor(message?: string) {
     super(message);

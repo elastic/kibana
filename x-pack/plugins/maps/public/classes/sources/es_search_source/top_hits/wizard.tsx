@@ -8,14 +8,21 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { CreateSourceEditor } from './create_source_editor';
-import { LayerWizard, RenderWizardArguments } from '../../../layers/layer_wizard_registry';
-import { VectorLayer } from '../../../layers/vector_layer';
-import { LAYER_WIZARD_CATEGORY } from '../../../../../common/constants';
-import { TopHitsLayerIcon } from '../../../layers/icons/top_hits_layer_icon';
+import { LayerWizard, RenderWizardArguments } from '../../../layers';
+import { GeoJsonVectorLayer } from '../../../layers/vector_layer';
+import {
+  LAYER_WIZARD_CATEGORY,
+  STYLE_TYPE,
+  VECTOR_STYLES,
+  WIZARD_ID,
+} from '../../../../../common/constants';
+import { TopHitsLayerIcon } from '../../../layers/wizards/icons/top_hits_layer_icon';
 import { ESSearchSourceDescriptor } from '../../../../../common/descriptor_types';
 import { ESSearchSource } from '../es_search_source';
 
 export const esTopHitsLayerWizardConfig: LayerWizard = {
+  id: WIZARD_ID.ES_TOP_HITS,
+  order: 10,
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],
   description: i18n.translate('xpack.maps.source.topHitsDescription', {
     defaultMessage:
@@ -23,14 +30,25 @@ export const esTopHitsLayerWizardConfig: LayerWizard = {
   }),
   icon: TopHitsLayerIcon,
   renderWizard: ({ previewLayers, mapColors }: RenderWizardArguments) => {
-    const onSourceConfigChange = (sourceConfig: Partial<ESSearchSourceDescriptor> | null) => {
+    const onSourceConfigChange = (
+      sourceConfig: Partial<ESSearchSourceDescriptor> | null,
+      isPointsOnly: boolean
+    ) => {
       if (!sourceConfig) {
         previewLayers([]);
         return;
       }
 
       const sourceDescriptor = ESSearchSource.createDescriptor(sourceConfig);
-      const layerDescriptor = VectorLayer.createDescriptor({ sourceDescriptor }, mapColors);
+      const layerDescriptor = GeoJsonVectorLayer.createDescriptor({ sourceDescriptor }, mapColors);
+      if (isPointsOnly) {
+        layerDescriptor.style.properties[VECTOR_STYLES.LINE_WIDTH] = {
+          type: STYLE_TYPE.STATIC,
+          options: {
+            size: 0,
+          },
+        };
+      }
       previewLayers([layerDescriptor]);
     };
     return <CreateSourceEditor onSourceConfigChange={onSourceConfigChange} />;

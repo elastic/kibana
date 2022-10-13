@@ -19,7 +19,6 @@ const paramsSchema = schema.object({
 
 export const registerUpdateRoute = ({
   router,
-  license,
   lib: { handleEsError },
 }: RouteDependencies): void => {
   router.put(
@@ -30,8 +29,8 @@ export const registerUpdateRoute = ({
         params: paramsSchema,
       },
     },
-    license.guardApiRoute(async (ctx, req, res) => {
-      const { client: clusterClient } = ctx.core.elasticsearch;
+    async (ctx, req, res) => {
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
       const { name } = req.params;
       // eslint-disable-next-line @typescript-eslint/naming-convention
       const { description, processors, version, on_failure } = req.body;
@@ -40,7 +39,7 @@ export const registerUpdateRoute = ({
         // Verify pipeline exists; ES will throw 404 if it doesn't
         await clusterClient.asCurrentUser.ingest.getPipeline({ id: name });
 
-        const { body: response } = await clusterClient.asCurrentUser.ingest.putPipeline({
+        const response = await clusterClient.asCurrentUser.ingest.putPipeline({
           id: name,
           body: {
             description,
@@ -54,6 +53,6 @@ export const registerUpdateRoute = ({
       } catch (error) {
         return handleEsError({ error, response: res });
       }
-    })
+    }
   );
 };

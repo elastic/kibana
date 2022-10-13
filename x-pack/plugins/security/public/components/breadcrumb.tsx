@@ -9,9 +9,8 @@ import type { EuiBreadcrumb } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React, { createContext, useContext, useEffect, useRef } from 'react';
 
-import type { ChromeStart } from 'src/core/public';
-
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
+import type { ChromeStart } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 interface BreadcrumbsContext {
   parents: BreadcrumbProps[];
@@ -80,11 +79,17 @@ export const BreadcrumbsProvider: FunctionComponent<BreadcrumbsProviderProps> = 
   const breadcrumbsRef = useRef<BreadcrumbProps[]>([]);
 
   const handleChange = (breadcrumbs: BreadcrumbProps[]) => {
+    const newBreadcrumbs = breadcrumbs.map((item, index) => {
+      if (index === breadcrumbs.length - 1) {
+        return { ...item, href: undefined };
+      }
+      return item;
+    });
     if (onChange) {
-      onChange(breadcrumbs);
+      onChange(newBreadcrumbs);
     } else if (services.chrome) {
       const setBreadcrumbs = createBreadcrumbsChangeHandler(services.chrome);
-      setBreadcrumbs(breadcrumbs);
+      setBreadcrumbs(newBreadcrumbs);
     }
   };
 

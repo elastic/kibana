@@ -9,7 +9,7 @@
 import { noop } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
+import { BucketAggType } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { createFilterTerms } from './create_filter/terms';
 import {
@@ -17,47 +17,49 @@ import {
   migrateIncludeExcludeFormat,
 } from './migrate_include_exclude_format';
 import { aggTermsFnName } from './terms_fn';
-import { AggConfigSerialized, BaseAggParams } from '../types';
+import { AggConfigSerialized, BaseAggParams, IAggConfig } from '../types';
 
-import { KBN_FIELD_TYPES } from '../../../../common';
+import { KBN_FIELD_TYPES } from '../../..';
 
 import {
-  buildOtherBucketAgg,
-  mergeOtherBucketAggResponse,
-  updateMissingBucket,
+  createOtherBucketPostFlightRequest,
+  constructSingleTermOtherFilter,
 } from './_terms_other_bucket_helper';
+import { termsOrderAggParamDefinition } from './_terms_order_helper';
 
-export const termsAggFilter = [
-  '!top_hits',
-  '!percentiles',
-  '!std_dev',
-  '!derivative',
-  '!moving_avg',
-  '!serial_diff',
-  '!cumulative_sum',
-  '!avg_bucket',
-  '!max_bucket',
-  '!min_bucket',
-  '!sum_bucket',
-];
+export { termsAggFilter } from './_terms_order_helper';
 
 const termsTitle = i18n.translate('data.search.aggs.buckets.termsTitle', {
   defaultMessage: 'Terms',
 });
 
-export interface AggParamsTerms extends BaseAggParams {
+export interface CommonAggParamsTerms extends BaseAggParams {
   field: string;
   orderBy: string;
-  orderAgg?: AggConfigSerialized;
-  order?: 'asc' | 'desc';
   size?: number;
+  shardSize?: number;
   missingBucket?: boolean;
   missingBucketLabel?: string;
   otherBucket?: boolean;
   otherBucketLabel?: string;
   // advanced
-  exclude?: string;
-  include?: string;
+  exclude?: string[] | string | number[];
+  include?: string[] | string | number[];
+  includeIsRegex?: boolean;
+  excludeIsRegex?: boolean;
+}
+
+export interface AggParamsTermsSerialized extends CommonAggParamsTerms {
+  orderAgg?: AggConfigSerialized;
+  order?: 'asc' | 'desc';
+}
+
+export interface AggParamsTerms extends CommonAggParamsTerms {
+  orderAgg?: IAggConfig;
+  order?: {
+    value: 'asc' | 'desc';
+    text: string;
+  };
 }
 
 export const getTermsBucketAgg = () =>
@@ -84,48 +86,8 @@ export const getTermsBucketAgg = () =>
       };
     },
     createFilter: createFilterTerms,
-    postFlightRequest: async (
-      resp,
-      aggConfigs,
-      aggConfig,
-      searchSource,
-      inspectorRequestAdapter,
-      abortSignal,
-      searchSessionId
-    ) => {
-      if (!resp.aggregations) return resp;
-      const nestedSearchSource = searchSource.createChild();
-      if (aggConfig.params.otherBucket) {
-        const filterAgg = buildOtherBucketAgg(aggConfigs, aggConfig, resp);
-        if (!filterAgg) return resp;
-
-        nestedSearchSource.setField('aggs', filterAgg);
-
-        const { rawResponse: response } = await nestedSearchSource
-          .fetch$({
-            abortSignal,
-            sessionId: searchSessionId,
-            inspector: {
-              adapter: inspectorRequestAdapter,
-              title: i18n.translate('data.search.aggs.buckets.terms.otherBucketTitle', {
-                defaultMessage: 'Other bucket',
-              }),
-              description: i18n.translate('data.search.aggs.buckets.terms.otherBucketDescription', {
-                defaultMessage:
-                  'This request counts the number of documents that fall ' +
-                  'outside the criterion of the data buckets.',
-              }),
-            },
-          })
-          .toPromise();
-
-        resp = mergeOtherBucketAggResponse(aggConfigs, resp, response, aggConfig, filterAgg());
-      }
-      if (aggConfig.params.missingBucket) {
-        resp = updateMissingBucket(resp, aggConfigs, aggConfig);
-      }
-      return resp;
-    },
+    postFlightRequest: createOtherBucketPostFlightRequest(constructSingleTermOtherFilter),
+    hasPrecisionError: (aggBucket) => Boolean(aggBucket?.doc_count_error_upper_bound),
     params: [
       {
         name: 'field',
@@ -142,58 +104,7 @@ export const getTermsBucketAgg = () =>
         name: 'orderBy',
         write: noop, // prevent default write, it's handled by orderAgg
       },
-      {
-        name: 'orderAgg',
-        type: 'agg',
-        allowedAggs: termsAggFilter,
-        default: null,
-        makeAgg(termsAgg, state = { type: 'count' }) {
-          state.schema = 'orderAgg';
-          const orderAgg = termsAgg.aggConfigs.createAggConfig<IBucketAggConfig>(state, {
-            addToAggConfigs: false,
-          });
-          orderAgg.id = termsAgg.id + '-orderAgg';
-
-          return orderAgg;
-        },
-        write(agg, output, aggs) {
-          const dir = agg.params.order.value;
-          const order: Record<string, any> = (output.params.order = {});
-
-          let orderAgg = agg.params.orderAgg || aggs!.getResponseAggById(agg.params.orderBy);
-
-          // TODO: This works around an Elasticsearch bug the always casts terms agg scripts to strings
-          // thus causing issues with filtering. This probably causes other issues since float might not
-          // be able to contain the number on the elasticsearch side
-          if (output.params.script) {
-            output.params.value_type =
-              agg.getField().type === 'number' ? 'float' : agg.getField().type;
-          }
-
-          if (agg.params.missingBucket && agg.params.field.type === 'string') {
-            output.params.missing = '__missing__';
-          }
-
-          if (!orderAgg) {
-            order[agg.params.orderBy || '_count'] = dir;
-            return;
-          }
-
-          if (orderAgg.type.name === 'count') {
-            order._count = dir;
-            return;
-          }
-
-          const orderAggPath = orderAgg.getValueBucketPath();
-
-          if (orderAgg.parentId && aggs) {
-            orderAgg = aggs.byId(orderAgg.parentId);
-          }
-
-          output.subAggs = (output.subAggs || []).concat(orderAgg);
-          order[orderAggPath] = dir;
-        },
-      },
+      termsOrderAggParamDefinition,
       {
         name: 'order',
         type: 'optioned',
@@ -217,6 +128,18 @@ export const getTermsBucketAgg = () =>
       {
         name: 'size',
         default: 5,
+      },
+      {
+        name: 'shardSize',
+        write: (aggConfig, output) => {
+          if (aggConfig.params.shardSize) {
+            output.params.shard_size = aggConfig.params.shardSize;
+          } else if (aggConfig.params.size <= 10) {
+            // 25 is the default shard size set for size:10 by Elasticsearch.
+            // Setting it to 25 for every size below 10 makes sure the shard size doesn't change for sizes 1-10, keeping the top terms stable.
+            output.params.shard_size = 25;
+          }
+        },
       },
       {
         name: 'otherBucket',
@@ -273,6 +196,16 @@ export const getTermsBucketAgg = () =>
         advanced: true,
         shouldShow: isStringOrNumberType,
         ...migrateIncludeExcludeFormat,
+      },
+      {
+        name: 'includeIsRegex',
+        default: true,
+        write: noop,
+      },
+      {
+        name: 'excludeIsRegex',
+        default: true,
+        write: noop,
       },
     ],
   });

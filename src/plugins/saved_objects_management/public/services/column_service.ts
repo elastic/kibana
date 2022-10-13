@@ -6,24 +6,26 @@
  * Side Public License, v 1.
  */
 
+import type { SpacesApi } from '@kbn/spaces-plugin/public';
+import { ShareToSpaceSavedObjectsManagementColumn } from './columns';
 import { SavedObjectsManagementColumn } from './types';
 
 export interface SavedObjectsManagementColumnServiceSetup {
   /**
    * register given column in the registry.
    */
-  register: (column: SavedObjectsManagementColumn<unknown>) => void;
+  register: (column: SavedObjectsManagementColumn) => void;
 }
 
 export interface SavedObjectsManagementColumnServiceStart {
   /**
    * return all {@link SavedObjectsManagementColumn | columns} currently registered.
    */
-  getAll: () => Array<SavedObjectsManagementColumn<unknown>>;
+  getAll: () => SavedObjectsManagementColumn[];
 }
 
 export class SavedObjectsManagementColumnService {
-  private readonly columns = new Map<string, SavedObjectsManagementColumn<unknown>>();
+  private readonly columns = new Map<string, SavedObjectsManagementColumn>();
 
   setup(): SavedObjectsManagementColumnServiceSetup {
     return {
@@ -36,9 +38,19 @@ export class SavedObjectsManagementColumnService {
     };
   }
 
-  start(): SavedObjectsManagementColumnServiceStart {
+  start(spacesApi?: SpacesApi): SavedObjectsManagementColumnServiceStart {
+    if (spacesApi) {
+      registerSpacesApiColumns(this, spacesApi);
+    }
     return {
       getAll: () => [...this.columns.values()],
     };
   }
+}
+
+function registerSpacesApiColumns(
+  service: SavedObjectsManagementColumnService,
+  spacesApi: SpacesApi
+) {
+  service.setup().register(new ShareToSpaceSavedObjectsManagementColumn(spacesApi.ui));
 }

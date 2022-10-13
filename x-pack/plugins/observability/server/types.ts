@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import type { IRouter, RequestHandlerContext } from 'src/core/server';
-import type { AlertingApiRequestHandlerContext } from '../../alerting/server';
-import type { ScopedRuleRegistryClient, FieldMapOf } from '../../rule_registry/server';
-import type { LicensingApiRequestHandlerContext } from '../../licensing/server';
-import type { ObservabilityRuleRegistry } from './plugin';
+import type {
+  IRouter,
+  CustomRequestHandlerContext,
+  CoreRequestHandlerContext,
+} from '@kbn/core/server';
+import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
+import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 
 export type {
   ObservabilityRouteCreateOptions,
@@ -22,16 +24,13 @@ export type {
 /**
  * @internal
  */
-export interface ObservabilityRequestHandlerContext extends RequestHandlerContext {
+export type ObservabilityRequestHandlerContext = CustomRequestHandlerContext<{
   licensing: LicensingApiRequestHandlerContext;
   alerting: AlertingApiRequestHandlerContext;
-}
+  core: Promise<CoreRequestHandlerContext>;
+}>;
 
 /**
  * @internal
  */
 export type ObservabilityPluginRouter = IRouter<ObservabilityRequestHandlerContext>;
-
-export type ObservabilityRuleRegistryClient = ScopedRuleRegistryClient<
-  FieldMapOf<ObservabilityRuleRegistry>
->;

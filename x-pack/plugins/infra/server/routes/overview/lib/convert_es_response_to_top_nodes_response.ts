@@ -27,16 +27,16 @@ export const convertESResponseToTopNodesResponse = (
             cpu: bucket.cpu.value,
             iowait: bucket.iowait.value,
             load: bucket.load.value,
-            rx: bucket.rx.value,
-            tx: bucket.tx.value,
+            rx: bucket.rx?.value || null,
+            tx: bucket.tx?.value || null,
           };
         }),
         cpu: node.cpu.value,
         iowait: node.iowait.value,
         load: node.load.value,
         uptime: node.uptime.value,
-        rx: node.rx.value,
-        tx: node.tx.value,
+        rx: node.rx?.value || null,
+        tx: node.tx?.value || null,
       };
     }),
   };

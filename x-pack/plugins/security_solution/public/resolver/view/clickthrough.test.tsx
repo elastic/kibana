@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
 import { noAncestorsTwoChildenInIndexCalledAwesomeIndex } from '../data_access_layer/mocks/no_ancestors_two_children_in_index_called_awesome_index';
 import { noAncestorsTwoChildren } from '../data_access_layer/mocks/no_ancestors_two_children';
 import { Simulator } from '../test_utilities/simulator';
@@ -13,9 +13,9 @@ import { Simulator } from '../test_utilities/simulator';
 import '../test_utilities/extend_jest';
 import { noAncestorsTwoChildrenWithRelatedEventsOnOrigin } from '../data_access_layer/mocks/no_ancestors_two_children_with_related_events_on_origin';
 import { urlSearch } from '../test_utilities/url_search';
-import { Vector2, AABB, TimeRange, DataAccessLayer } from '../types';
+import type { Vector2, AABB, TimeRange, DataAccessLayer } from '../types';
 import { generateTreeWithDAL } from '../data_access_layer/mocks/generator_tree';
-import { SafeResolverEvent } from '../../../common/endpoint/types';
+import type { SafeResolverEvent } from '../../../common/endpoint/types';
 
 let simulator: Simulator;
 let databaseDocumentID: string;
@@ -27,10 +27,8 @@ const resolverComponentInstanceID = 'resolverComponentInstanceID';
 describe("Resolver, when rendered with the `indices` prop set to `[]` and the `databaseDocumentID` prop set to `_id`, and when the document is found in an index called 'awesome_index'", () => {
   beforeEach(async () => {
     // create a mock data access layer
-    const {
-      metadata: dataAccessLayerMetadata,
-      dataAccessLayer,
-    } = noAncestorsTwoChildenInIndexCalledAwesomeIndex();
+    const { metadata: dataAccessLayerMetadata, dataAccessLayer } =
+      noAncestorsTwoChildenInIndexCalledAwesomeIndex();
 
     // save a reference to the entity IDs exposed by the mock data layer
     entityIDs = dataAccessLayerMetadata.entityIDs;
@@ -421,10 +419,8 @@ describe('Resolver, when using a generated tree with 20 generations, 4 children 
 describe('Resolver, when analyzing a tree that has 2 related registry and 1 related event of all other categories for the origin node', () => {
   beforeEach(async () => {
     // create a mock data access layer with related events
-    const {
-      metadata: dataAccessLayerMetadata,
-      dataAccessLayer,
-    } = noAncestorsTwoChildrenWithRelatedEventsOnOrigin();
+    const { metadata: dataAccessLayerMetadata, dataAccessLayer } =
+      noAncestorsTwoChildrenWithRelatedEventsOnOrigin();
 
     // save a reference to the entity IDs exposed by the mock data layer
     entityIDs = dataAccessLayerMetadata.entityIDs;

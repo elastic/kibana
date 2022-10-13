@@ -6,7 +6,7 @@
  */
 
 import React, { Fragment, useState, useEffect } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -25,8 +25,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import 'brace/theme/textmate';
-
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { SectionError, Error } from '../../../../../shared_imports';
 
 import { useCore, useServices } from '../../../../app_context';
@@ -52,7 +51,6 @@ import {
 } from '../../../../components';
 import { TypeDetails } from './type_details';
 
-import { reactRouterNavigate } from '../../../../../../../../../src/plugins/kibana_react/public';
 import { getRepositoryTypeDocUrl } from '../../../../lib/type_to_doc_url';
 
 interface Props {
@@ -356,21 +354,16 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
               </EuiCodeBlock>
             </div>
           ) : (
-            <EuiCallOut
-              color="danger"
-              iconType="alert"
-              title={i18n.translate('xpack.snapshotRestore.repositoryDetails.cleanupErrorTitle', {
-                defaultMessage: 'Sorry, there was an error cleaning the repository.',
-              })}
-            >
-              <p>
-                {cleanup.error
-                  ? JSON.stringify(cleanup.error)
-                  : i18n.translate('xpack.snapshotRestore.repositoryDetails.cleanupUnknownError', {
-                      defaultMessage: '503: Unknown error',
-                    })}
-              </p>
-            </EuiCallOut>
+            <SectionError
+              title={
+                <FormattedMessage
+                  id="xpack.snapshotRestore.repositoryDetails.cleanupErrorTitle"
+                  defaultMessage="Error cleaning repository"
+                />
+              }
+              error={cleanup.error as Error}
+              data-test-subj="cleanupError"
+            />
           )}
         </>
       ) : null}

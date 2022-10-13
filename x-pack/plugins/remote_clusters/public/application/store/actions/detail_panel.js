@@ -9,23 +9,25 @@ import { extractQueryParams } from '../../../shared_imports';
 import { getRouter } from '../../services';
 import { OPEN_DETAIL_PANEL, CLOSE_DETAIL_PANEL } from '../action_types';
 
-export const openDetailPanel = ({ name }) => (dispatch) => {
-  const { history } = getRouter();
-  const search = history.location.search;
-  const { cluster: clusterName } = extractQueryParams(search);
+export const openDetailPanel =
+  ({ name }) =>
+  (dispatch) => {
+    const { history } = getRouter();
+    const search = history.location.search;
+    const { cluster: clusterName } = extractQueryParams(search);
 
-  if (clusterName !== name) {
-    // Allow the user to share a deep link to this job.
-    history.replace({
-      search: `?cluster=${name}`,
+    if (clusterName !== name) {
+      // Allow the user to share a deep link to this job.
+      history.replace({
+        search: `?cluster=${name}`,
+      });
+    }
+
+    dispatch({
+      type: OPEN_DETAIL_PANEL,
+      payload: { clusterName: name },
     });
-  }
-
-  dispatch({
-    type: OPEN_DETAIL_PANEL,
-    payload: { clusterName: name },
-  });
-};
+  };
 
 export const closeDetailPanel = () => (dispatch) => {
   dispatch({

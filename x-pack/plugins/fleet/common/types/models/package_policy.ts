@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import type { RegistryRelease, ExperimentalDataStreamFeature } from './epm';
+
 export interface PackagePolicyPackage {
   name: string;
   title: string;
   version: string;
+  experimental_data_stream_features?: ExperimentalDataStreamFeature[];
 }
 
 export interface PackagePolicyConfigRecordEntry {
@@ -20,11 +23,19 @@ export interface PackagePolicyConfigRecordEntry {
 export type PackagePolicyConfigRecord = Record<string, PackagePolicyConfigRecordEntry>;
 
 export interface NewPackagePolicyInputStream {
+  id?: string;
   enabled: boolean;
+  keep_enabled?: boolean;
   data_stream: {
     dataset: string;
     type: string;
+    elasticsearch?: {
+      privileges?: {
+        indices?: string[];
+      };
+    };
   };
+  release?: RegistryRelease;
   vars?: PackagePolicyConfigRecord;
   config?: PackagePolicyConfigRecord;
 }
@@ -35,8 +46,11 @@ export interface PackagePolicyInputStream extends NewPackagePolicyInputStream {
 }
 
 export interface NewPackagePolicyInput {
+  id?: string;
   type: string;
+  policy_template?: string;
   enabled: boolean;
+  keep_enabled?: boolean;
   vars?: PackagePolicyConfigRecord;
   config?: PackagePolicyConfigRecord;
   streams: NewPackagePolicyInputStream[];
@@ -48,14 +62,21 @@ export interface PackagePolicyInput extends Omit<NewPackagePolicyInput, 'streams
 }
 
 export interface NewPackagePolicy {
+  id?: string | number;
   name: string;
   description?: string;
   namespace: string;
   enabled: boolean;
+  is_managed?: boolean;
   policy_id: string;
-  output_id: string;
   package?: PackagePolicyPackage;
   inputs: NewPackagePolicyInput[];
+  vars?: PackagePolicyConfigRecord;
+  elasticsearch?: {
+    privileges?: {
+      cluster?: string[];
+    };
+  };
 }
 
 export interface UpdatePackagePolicy extends NewPackagePolicy {
@@ -74,3 +95,8 @@ export interface PackagePolicy extends Omit<NewPackagePolicy, 'inputs'> {
 }
 
 export type PackagePolicySOAttributes = Omit<PackagePolicy, 'id' | 'version'>;
+
+export type DryRunPackagePolicy = NewPackagePolicy & {
+  errors?: Array<{ key: string | undefined; message: string }>;
+  missingVars?: string[];
+};

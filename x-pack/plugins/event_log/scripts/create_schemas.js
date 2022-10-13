@@ -9,7 +9,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { set } = require('@elastic/safer-lodash-set');
+const { set } = require('@kbn/safer-lodash-set');
 const lodash = require('lodash');
 
 const LineWriter = require('./lib/line_writer');
@@ -115,7 +115,8 @@ function writeEventLogConfigSchema(elSchema, ecsVersion) {
 }
 
 const StringTypes = new Set(['string', 'keyword', 'text', 'ip']);
-const NumberTypes = new Set(['long', 'integer', 'float']);
+const NumberTypes = new Set(['integer', 'float']);
+const StringOrNumberTypes = new Set(['long']);
 
 function augmentMappings(mappings, multiValuedProperties) {
   for (const prop of multiValuedProperties) {
@@ -145,8 +146,18 @@ function generateSchemaLines(lineWriter, prop, mappings) {
     return;
   }
 
+  if (StringOrNumberTypes.has(mappings.type)) {
+    lineWriter.addLine(`${propKey}: ecsStringOrNumber(),`);
+    return;
+  }
+
   if (mappings.type === 'date') {
     lineWriter.addLine(`${propKey}: ecsDate(),`);
+    return;
+  }
+
+  if (mappings.type === 'version') {
+    lineWriter.addLine(`${propKey}: ecsVersion(),`);
     return;
   }
 
@@ -278,6 +289,7 @@ const SchemaFileTemplate = `
 // the event log
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import semver from 'semver';
 
 type DeepWriteable<T> = { -readonly [P in keyof T]: DeepWriteable<T[P]> };
 type DeepPartial<T> = {
@@ -304,6 +316,10 @@ function ecsNumber() {
   return schema.maybe(schema.number());
 }
 
+function ecsStringOrNumber() {
+  return schema.maybe(schema.oneOf([schema.string(), schema.number()]));
+}
+
 function ecsDate() {
   return schema.maybe(schema.string({ validate: validateDate }));
 }
@@ -313,6 +329,15 @@ const ISO_DATE_PATTERN = /^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$/
 function validateDate(isoDate: string) {
   if (ISO_DATE_PATTERN.test(isoDate)) return;
   return 'string is not a valid ISO date: ' + isoDate;
+}
+
+function ecsVersion() {
+  return schema.maybe(schema.string({ validate: validateVersion }));
+}
+
+function validateVersion(version: string) {
+  if (semver.valid(version)) return;
+  return 'string is not a valid version: ' + version;
 }
 `.trim();
 

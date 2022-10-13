@@ -5,25 +5,41 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from 'src/core/server';
-import { commentsMigrations } from './migrations';
+import { SavedObjectsType } from '@kbn/core/server';
+import { CASE_COMMENT_SAVED_OBJECT } from '../../common/constants';
+import { createCommentsMigrations, CreateCommentsMigrationsDeps } from './migrations';
 
-export const CASE_COMMENT_SAVED_OBJECT = 'cases-comments';
-
-export const caseCommentSavedObjectType: SavedObjectsType = {
+export const createCaseCommentSavedObjectType = ({
+  migrationDeps,
+}: {
+  migrationDeps: CreateCommentsMigrationsDeps;
+}): SavedObjectsType => ({
   name: CASE_COMMENT_SAVED_OBJECT,
-  hidden: false,
-  namespaceType: 'single',
+  hidden: true,
+  namespaceType: 'multiple-isolated',
+  convertToMultiNamespaceTypeVersion: '8.0.0',
   mappings: {
     properties: {
-      associationType: {
-        type: 'keyword',
-      },
       comment: {
         type: 'text',
       },
+      owner: {
+        type: 'keyword',
+      },
       type: {
         type: 'keyword',
+      },
+      actions: {
+        properties: {
+          targets: {
+            type: 'nested',
+            properties: {
+              hostname: { type: 'keyword' },
+              endpointId: { type: 'keyword' },
+            },
+          },
+          type: { type: 'keyword' },
+        },
       },
       alertId: {
         type: 'keyword',
@@ -45,7 +61,38 @@ export const caseCommentSavedObjectType: SavedObjectsType = {
           email: {
             type: 'keyword',
           },
+          profile_uid: {
+            type: 'keyword',
+          },
         },
+      },
+      externalReferenceId: {
+        type: 'keyword',
+      },
+      externalReferenceStorage: {
+        dynamic: false,
+        properties: {
+          // externalReferenceStorage.type
+          type: {
+            type: 'keyword',
+          },
+        },
+      },
+      externalReferenceAttachmentTypeId: {
+        type: 'keyword',
+      },
+      externalReferenceMetadata: {
+        dynamic: false,
+        type: 'object',
+        enabled: false,
+      },
+      persistableStateAttachmentTypeId: {
+        type: 'keyword',
+      },
+      persistableStateAttachmentState: {
+        dynamic: false,
+        type: 'object',
+        enabled: false,
       },
       pushed_at: {
         type: 'date',
@@ -59,6 +106,9 @@ export const caseCommentSavedObjectType: SavedObjectsType = {
             type: 'keyword',
           },
           email: {
+            type: 'keyword',
+          },
+          profile_uid: {
             type: 'keyword',
           },
         },
@@ -87,9 +137,16 @@ export const caseCommentSavedObjectType: SavedObjectsType = {
           email: {
             type: 'keyword',
           },
+          profile_uid: {
+            type: 'keyword',
+          },
         },
       },
     },
   },
-  migrations: commentsMigrations,
-};
+  migrations: () => createCommentsMigrations(migrationDeps),
+  management: {
+    importableAndExportable: true,
+    visibleInManagement: false,
+  },
+});

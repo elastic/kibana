@@ -5,16 +5,10 @@
  * 2.0.
  */
 
-import React, {
-  FC,
-  isValidElement,
-  memo,
-  PropsWithChildren,
-  ReactElement,
-  ReactNode,
-  useMemo,
-} from 'react';
+import type { FC, PropsWithChildren, ReactElement, ReactNode } from 'react';
+import React, { isValidElement, memo, useMemo } from 'react';
 import styled from 'styled-components';
+import type { EuiButtonProps, PropsForButton } from '@elastic/eui';
 import {
   EuiPanel,
   EuiFlexGroup,
@@ -23,8 +17,6 @@ import {
   EuiDescriptionList,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
-  EuiButtonProps,
-  PropsForButton,
 } from '@elastic/eui';
 
 const OTHER_NODES = {};
@@ -57,18 +49,29 @@ const SummarySection = styled(EuiFlexItem)`
 `;
 
 const DetailsSection = styled(EuiFlexItem)`
-  padding: ${({ theme }) => theme.eui.euiSize};
+  &&& {
+    margin-left: 0;
+  }
+  padding: ${({ theme }) => theme.eui.euiSizeM} ${({ theme }) => theme.eui.euiSizeL}
+    ${({ theme }) => theme.eui.euiSizeL} 0;
+  .trustedAppsConditionsTable {
+    margin-left: ${({ theme }) => theme.eui.euiSize};
+  }
 `;
 
 const DescriptionListTitle = styled(EuiDescriptionListTitle)`
   &&& {
     width: 40%;
+    margin-top: 0;
+    margin-bottom: ${({ theme }) => theme.eui.euiSizeS};
   }
 `;
 
 const DescriptionListDescription = styled(EuiDescriptionListDescription)`
   &&& {
     width: 60%;
+    margin-top: 0;
+    margin-bottom: ${({ theme }) => theme.eui.euiSizeS};
   }
 `;
 
@@ -80,7 +83,7 @@ interface ItemDetailsPropertySummaryProps {
 export const ItemDetailsPropertySummary = memo<ItemDetailsPropertySummaryProps>(
   ({ name, value }) => (
     <>
-      <DescriptionListTitle>{name}</DescriptionListTitle>
+      <DescriptionListTitle className="eui-textTruncate">{name}</DescriptionListTitle>
       <DescriptionListDescription className="eui-textBreakWord">{value}</DescriptionListDescription>
     </>
   )
@@ -112,7 +115,7 @@ export const ItemDetailsCard = memo<ItemDetailsCardProps>(
     );
 
     return (
-      <EuiPanel paddingSize="none" data-test-subj={dataTestSubj} className={className}>
+      <EuiPanel paddingSize="none" data-test-subj={dataTestSubj} className={className} hasBorder>
         <EuiFlexGroup direction="row">
           <SummarySection grow={2}>
             <EuiDescriptionList compressed type="column">

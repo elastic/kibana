@@ -6,8 +6,11 @@
  * Side Public License, v 1.
  */
 
+export const PLUGIN_ID = 'discover';
+export const APP_ICON = 'discoverApp';
 export const DEFAULT_COLUMNS_SETTING = 'defaultColumns';
 export const SAMPLE_SIZE_SETTING = 'discover:sampleSize';
+export const SAMPLE_ROWS_PER_PAGE_SETTING = 'discover:sampleRowsPerPage';
 export const SORT_DEFAULT_ORDER_SETTING = 'discover:sort:defaultOrder';
 export const SEARCH_ON_PAGE_LOAD_SETTING = 'discover:searchOnPageLoad';
 export const DOC_HIDE_TIME_COLUMN_SETTING = 'doc_table:hideTimeColumn';
@@ -19,3 +22,11 @@ export const DOC_TABLE_LEGACY = 'doc_table:legacy';
 export const MODIFY_COLUMNS_ON_SWITCH = 'discover:modifyColumnsOnSwitch';
 export const SEARCH_FIELDS_FROM_SOURCE = 'discover:searchFieldsFromSource';
 export const MAX_DOC_FIELDS_DISPLAYED = 'discover:maxDocFieldsDisplayed';
+export const SHOW_FIELD_STATISTICS = 'discover:showFieldStatistics';
+export const SHOW_MULTIFIELDS = 'discover:showMultiFields';
+export const TRUNCATE_MAX_HEIGHT = 'truncate:maxHeight';
+export const ROW_HEIGHT_OPTION = 'discover:rowHeightOption';
+export const SEARCH_EMBEDDABLE_TYPE = 'search';
+export const HIDE_ANNOUNCEMENTS = 'hideAnnouncements';
+export const SHOW_LEGACY_FIELD_TOP_VALUES = 'discover:showLegacyFieldTopValues';
+export const ENABLE_SQL = 'discover:enableSql';

@@ -28,15 +28,30 @@ export const IndexPatternSelector: React.FC<{
     fetchIndexPatternTitles();
   }, [fetchIndexPatternTitles]);
 
-  const availableOptions = useMemo<IndexPatternOption[]>(
-    () =>
-      availableIndexPatterns.map(({ id, title }) => ({
+  const availableOptions = useMemo<IndexPatternOption[]>(() => {
+    const options = [
+      ...availableIndexPatterns.map(({ id, title }) => ({
         key: id,
         label: title,
         value: id,
       })),
-    [availableIndexPatterns]
-  );
+      ...(indexPatternId == null || availableIndexPatterns.some(({ id }) => id === indexPatternId)
+        ? []
+        : [
+            {
+              key: indexPatternId,
+              label: i18n.translate('xpack.infra.logSourceConfiguration.missingDataViewsLabel', {
+                defaultMessage: `Missing data view {indexPatternId}`,
+                values: {
+                  indexPatternId,
+                },
+              }),
+              value: indexPatternId,
+            },
+          ]),
+    ];
+    return options;
+  }, [availableIndexPatterns, indexPatternId]);
 
   const selectedOptions = useMemo<IndexPatternOption[]>(
     () => availableOptions.filter(({ key }) => key === indexPatternId),
@@ -61,13 +76,13 @@ export const IndexPatternSelector: React.FC<{
       options={availableOptions}
       placeholder={indexPatternSelectorPlaceholder}
       selectedOptions={selectedOptions}
-      singleSelection={true}
+      singleSelection={{ asPlainText: true }}
       onChange={changeSelectedIndexPatterns}
     />
   );
 };
 
 const indexPatternSelectorPlaceholder = i18n.translate(
-  'xpack.infra.logSourceConfiguration.indexPatternSelectorPlaceholder',
-  { defaultMessage: 'Choose an index pattern' }
+  'xpack.infra.logSourceConfiguration.dataViewSelectorPlaceholder',
+  { defaultMessage: 'Choose a data view' }
 );

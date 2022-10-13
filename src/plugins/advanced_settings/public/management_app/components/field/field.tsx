@@ -9,17 +9,12 @@
 import React, { PureComponent, Fragment } from 'react';
 import classNames from 'classnames';
 
-import 'brace/theme/textmate';
-import 'brace/mode/markdown';
-import 'brace/mode/json';
-
 import {
   EuiBadge,
   EuiCode,
   EuiCodeBlock,
   EuiColorPicker,
   EuiScreenReaderOnly,
-  EuiCodeEditor,
   EuiDescribedFormGroup,
   EuiFieldNumber,
   EuiFieldText,
@@ -36,22 +31,17 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { UiSettingsType, DocLinksStart, ToastsStart } from '@kbn/core/public';
+import { FieldCodeEditor } from './field_code_editor';
 import { FieldSetting, FieldState } from '../../types';
 import { isDefaultValue } from '../../lib';
-import {
-  UiSettingsType,
-  ImageValidation,
-  StringValidationRegex,
-  DocLinksStart,
-  ToastsStart,
-} from '../../../../../../core/public';
 
 interface FieldProps {
   setting: FieldSetting;
   handleChange: (name: string, value: FieldState) => void;
   enableSaving: boolean;
-  dockLinks: DocLinksStart['links'];
+  docLinks: DocLinksStart['links'];
   toasts: ToastsStart;
   clearChange?: (name: string) => void;
   unsavedChanges?: FieldState;
@@ -110,7 +100,7 @@ export class Field extends PureComponent<FieldProps> {
     if (type === 'image') {
       this.cancelChangeImage();
       return this.handleChange({
-        value: getEditableValue(type, defVal),
+        value: getEditableValue(type, defVal, defVal),
         changeImage: true,
       });
     }
@@ -136,7 +126,7 @@ export class Field extends PureComponent<FieldProps> {
     switch (type) {
       case 'json':
         const isJsonArray = Array.isArray(JSON.parse((defVal as string) || '{}'));
-        newUnsavedValue = value.trim() || (isJsonArray ? '[]' : '{}');
+        newUnsavedValue = value || (isJsonArray ? '[]' : '{}');
         try {
           JSON.parse(newUnsavedValue);
         } catch (e) {
@@ -166,7 +156,7 @@ export class Field extends PureComponent<FieldProps> {
     this.onFieldChange(e.target.value);
 
   onFieldChange = (targetValue: any) => {
-    const { type, validation, value, defVal } = this.props.setting;
+    const { type, value, defVal, options } = this.props.setting;
     let newUnsavedValue;
 
     switch (type) {
@@ -180,24 +170,19 @@ export class Field extends PureComponent<FieldProps> {
       case 'number':
         newUnsavedValue = Number(targetValue);
         break;
+      case 'select':
+        if (typeof options?.[0] === 'number') {
+          newUnsavedValue = Number(targetValue);
+        } else {
+          newUnsavedValue = targetValue;
+        }
+        break;
       default:
         newUnsavedValue = targetValue;
     }
 
-    let errorParams = {};
-
-    if ((validation as StringValidationRegex)?.regex) {
-      if (!(validation as StringValidationRegex).regex!.test(newUnsavedValue.toString())) {
-        errorParams = {
-          error: (validation as StringValidationRegex).message,
-          isInvalid: true,
-        };
-      }
-    }
-
     this.handleChange({
       value: newUnsavedValue,
-      ...errorParams,
     });
   };
 
@@ -212,30 +197,15 @@ export class Field extends PureComponent<FieldProps> {
     }
 
     const file = files[0];
-    const { maxSize } = this.props.setting.validation as ImageValidation;
     try {
       let base64Image = '';
       if (file instanceof File) {
         base64Image = (await this.getImageAsBase64(file)) as string;
       }
 
-      let errorParams = {};
-      const isInvalid = !!(maxSize?.length && base64Image.length > maxSize.length);
-      if (isInvalid) {
-        errorParams = {
-          isInvalid,
-          error: i18n.translate('advancedSettings.field.imageTooLargeErrorMessage', {
-            defaultMessage: 'Image is too large, maximum size is {maxSizeDescription}',
-            values: {
-              maxSizeDescription: maxSize.description,
-            },
-          }),
-        };
-      }
       this.handleChange({
         changeImage: true,
         value: base64Image,
-        ...errorParams,
       });
     } catch (err) {
       this.props.toasts.addDanger(
@@ -324,26 +294,13 @@ export class Field extends PureComponent<FieldProps> {
       case 'json':
         return (
           <div data-test-subj={`advancedSetting-editField-${name}`}>
-            <EuiCodeEditor
-              {...a11yProps}
-              name={`advancedSetting-editField-${name}-editor`}
-              mode={type}
-              theme="textmate"
+            <FieldCodeEditor
               value={currentValue}
               onChange={this.onCodeEditorChange}
-              width="100%"
-              height="auto"
-              minLines={6}
-              maxLines={30}
+              type={type}
               isReadOnly={isOverridden || !enableSaving}
-              setOptions={{
-                showLineNumbers: false,
-                tabSize: 2,
-              }}
-              editorProps={{
-                $blockScrolling: Infinity,
-              }}
-              showGutter={false}
+              a11yProps={a11yProps}
+              name={`advancedSetting-editField-${name}-editor`}
             />
           </div>
         );
@@ -509,7 +466,7 @@ export class Field extends PureComponent<FieldProps> {
     let deprecation;
 
     if (setting.deprecation) {
-      const links = this.props.dockLinks;
+      const links = this.props.docLinks;
 
       deprecation = (
         <>
@@ -666,9 +623,7 @@ export class Field extends PureComponent<FieldProps> {
     const isInvalid = unsavedChanges?.isInvalid;
 
     const className = classNames('mgtAdvancedSettings__field', {
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'mgtAdvancedSettings__field--unsaved': unsavedChanges,
-      // eslint-disable-next-line @typescript-eslint/naming-convention
       'mgtAdvancedSettings__field--invalid': isInvalid,
     });
     const groupId = `${setting.name}-group`;

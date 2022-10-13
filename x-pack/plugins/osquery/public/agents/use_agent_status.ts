@@ -6,9 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { useQuery } from 'react-query';
+import { useQuery } from '@tanstack/react-query';
 
-import { GetAgentStatusResponse, agentRouteService } from '../../../fleet/common';
+import type { GetAgentStatusResponse } from '@kbn/fleet-plugin/common';
+import { useErrorToast } from '../common/hooks/use_error_toast';
 import { useKibana } from '../common/lib/kibana';
 
 interface UseAgentStatus {
@@ -17,16 +18,14 @@ interface UseAgentStatus {
 }
 
 export const useAgentStatus = ({ policyId, skip }: UseAgentStatus) => {
-  const {
-    http,
-    notifications: { toasts },
-  } = useKibana().services;
+  const { http } = useKibana().services;
+  const setErrorToast = useErrorToast();
 
   return useQuery<GetAgentStatusResponse, unknown, GetAgentStatusResponse['results']>(
     ['agentStatus', policyId],
     () =>
       http.get(
-        agentRouteService.getStatusPath(),
+        `/internal/osquery/fleet_wrapper/agent_status`,
         policyId
           ? {
               query: {
@@ -38,8 +37,9 @@ export const useAgentStatus = ({ policyId, skip }: UseAgentStatus) => {
     {
       enabled: !skip,
       select: (response) => response.results,
+      onSuccess: () => setErrorToast(),
       onError: (error) =>
-        toasts.addError(error as Error, {
+        setErrorToast(error as Error, {
           title: i18n.translate('xpack.osquery.agent_status.fetchError', {
             defaultMessage: 'Error while fetching agent status',
           }),

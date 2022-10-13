@@ -6,12 +6,13 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 
 export const MetricsExplorerNoMetrics = () => {
   return (
     <EuiEmptyPrompt
+      data-test-subj="metricsExplorer-missingMetricMessage"
       iconType="stats"
       title={
         <h3>

@@ -1,12 +1,12 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "composite": true,
     "outDir": "./target/types",
     "emitDeclarationOnly": true,
     "declaration": true,
     "declarationMap": true
   },
+  "exclude": ["public/applications/**/cypress/**/*"],
   "include": [
     "common/**/*",
     "public/**/*",
@@ -16,9 +16,13 @@
   "references": [
     { "path": "../../../src/core/tsconfig.json" },
     { "path": "../../../src/plugins/charts/tsconfig.json" },
+    { "path": "../../../src/plugins/data/tsconfig.json" },
     { "path": "../../../src/plugins/home/tsconfig.json" },
+    { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
     { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
     { "path": "../cloud/tsconfig.json" },
+    { "path": "../cloud_integrations/cloud_chat/tsconfig.json" },
+    { "path": "../infra/tsconfig.json" },
     { "path": "../features/tsconfig.json" },
     { "path": "../licensing/tsconfig.json" },
     { "path": "../security/tsconfig.json" },

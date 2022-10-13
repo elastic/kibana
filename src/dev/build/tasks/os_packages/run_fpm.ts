@@ -8,7 +8,7 @@
 
 import { resolve } from 'path';
 
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 
 import { exec, Config, Build } from '../../lib';
 
@@ -28,11 +28,7 @@ export async function runFpm(
   const fromBuild = (...paths: string[]) => build.resolvePathForPlatform(linux, ...paths);
 
   const pickLicense = () => {
-    if (build.isOss()) {
-      return type === 'rpm' ? 'ASL 2.0' : 'ASL-2.0';
-    } else {
-      return type === 'rpm' ? 'Elastic License' : 'Elastic-License';
-    }
+    return type === 'rpm' ? 'Elastic License' : 'Elastic-License';
   };
 
   const envFolder = type === 'rpm' ? 'sysconfig' : 'default';
@@ -57,7 +53,7 @@ export async function runFpm(
 
     // general info about the package
     '--name',
-    build.isOss() ? 'kibana-oss' : 'kibana',
+    'kibana',
     '--description',
     'Explore and visualize your Elasticsearch data',
     '--version',
@@ -70,10 +66,6 @@ export async function runFpm(
     'Kibana Team <info@elastic.co>',
     '--license',
     pickLicense(),
-
-    // prevent installing kibana if installing kibana-oss and vice versa
-    '--conflicts',
-    build.isOss() ? 'kibana' : 'kibana-oss',
 
     // define install/uninstall scripts
     '--after-install',
@@ -93,7 +85,7 @@ export async function runFpm(
 
     // tell fpm about the config file so that it is called out in the package definition
     '--config-files',
-    `/etc/kibana/kibana.yml`,
+    `/etc/kibana`,
 
     // define template values that will be injected into the install/uninstall
     // scripts, also causes scripts to be processed with erb
@@ -121,6 +113,8 @@ export async function runFpm(
     '--exclude',
     `usr/share/kibana/data`,
     '--exclude',
+    `usr/share/kibana/logs`,
+    '--exclude',
     'run/kibana/.gitempty',
 
     // flags specific to the package we are building, supplied by tasks below
@@ -131,10 +125,14 @@ export async function runFpm(
     `${resolveWithTrailingSlash(fromBuild('.'))}=/usr/share/kibana/`,
 
     // copy the config directory to /etc/kibana
+    `${config.resolveFromRepo('build/os_packages/config/kibana.yml')}=/etc/kibana/kibana.yml`,
     `${resolveWithTrailingSlash(fromBuild('config'))}=/etc/kibana/`,
 
     // copy the data directory at /var/lib/kibana
     `${resolveWithTrailingSlash(fromBuild('data'))}=/var/lib/kibana/`,
+
+    // copy the logs directory at /var/log/kibana
+    `${resolveWithTrailingSlash(fromBuild('logs'))}=/var/log/kibana/`,
 
     // copy package configurations
     `${resolveWithTrailingSlash(__dirname, 'service_templates/systemd/')}=/`,

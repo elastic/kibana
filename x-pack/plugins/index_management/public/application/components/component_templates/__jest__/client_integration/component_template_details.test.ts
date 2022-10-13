@@ -32,19 +32,18 @@ const COMPONENT_TEMPLATE_ONLY_REQUIRED_FIELDS: ComponentTemplateDeserialized = {
 };
 
 describe('<ComponentTemplateDetails />', () => {
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
+  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: ComponentTemplateDetailsTestBed;
-
-  afterAll(() => {
-    server.restore();
-  });
 
   describe('With component template details', () => {
     beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadComponentTemplateResponse(COMPONENT_TEMPLATE);
+      httpRequestsMockHelpers.setLoadComponentTemplateResponse(
+        COMPONENT_TEMPLATE.name,
+        COMPONENT_TEMPLATE
+      );
 
       await act(async () => {
-        testBed = setup({
+        testBed = setup(httpSetup, {
           componentTemplateName: COMPONENT_TEMPLATE.name,
           onClose: () => {},
         });
@@ -104,11 +103,12 @@ describe('<ComponentTemplateDetails />', () => {
   describe('With only required component template fields', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadComponentTemplateResponse(
+        COMPONENT_TEMPLATE_ONLY_REQUIRED_FIELDS.name,
         COMPONENT_TEMPLATE_ONLY_REQUIRED_FIELDS
       );
 
       await act(async () => {
-        testBed = setup({
+        testBed = setup(httpSetup, {
           componentTemplateName: COMPONENT_TEMPLATE_ONLY_REQUIRED_FIELDS.name,
           onClose: () => {},
         });
@@ -156,10 +156,13 @@ describe('<ComponentTemplateDetails />', () => {
 
   describe('With actions', () => {
     beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadComponentTemplateResponse(COMPONENT_TEMPLATE);
+      httpRequestsMockHelpers.setLoadComponentTemplateResponse(
+        COMPONENT_TEMPLATE.name,
+        COMPONENT_TEMPLATE
+      );
 
       await act(async () => {
-        testBed = setup({
+        testBed = setup(httpSetup, {
           componentTemplateName: COMPONENT_TEMPLATE.name,
           onClose: () => {},
           actions: [
@@ -197,16 +200,20 @@ describe('<ComponentTemplateDetails />', () => {
 
   describe('Error handling', () => {
     const error = {
-      status: 500,
+      statusCode: 500,
       error: 'Internal server error',
       message: 'Internal server error',
     };
 
     beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadComponentTemplateResponse(undefined, { body: error });
+      httpRequestsMockHelpers.setLoadComponentTemplateResponse(
+        COMPONENT_TEMPLATE.name,
+        undefined,
+        error
+      );
 
       await act(async () => {
-        testBed = setup({
+        testBed = setup(httpSetup, {
           componentTemplateName: COMPONENT_TEMPLATE.name,
           onClose: () => {},
         });

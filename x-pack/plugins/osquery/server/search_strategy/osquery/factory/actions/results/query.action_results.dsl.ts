@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { ISearchRequestParams } from '../../../../../../../../../src/plugins/data/common';
-import { ActionResultsRequestOptions } from '../../../../../../common/search_strategy';
+import type { ISearchRequestParams } from '@kbn/data-plugin/common';
+import { AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
+import { ACTION_RESPONSES_INDEX } from '../../../../../../common/constants';
+import type { ActionResultsRequestOptions } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../../common/utils/build_query';
 
 export const buildActionResultsQuery = ({
@@ -14,6 +16,7 @@ export const buildActionResultsQuery = ({
   filterQuery,
   // pagination: { activePage, querySize },
   sort,
+  componentTemplateExists,
 }: ActionResultsRequestOptions): ISearchRequestParams => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
@@ -25,9 +28,11 @@ export const buildActionResultsQuery = ({
   ];
 
   const dslQuery = {
-    allowNoIndices: true,
-    index: '.fleet-actions-results*',
-    ignoreUnavailable: true,
+    allow_no_indices: true,
+    index: componentTemplateExists
+      ? `${ACTION_RESPONSES_INDEX}-default*`
+      : `${AGENT_ACTIONS_RESULTS_INDEX}*`,
+    ignore_unavailable: true,
     body: {
       aggs: {
         aggs: {
@@ -46,13 +51,18 @@ export const buildActionResultsQuery = ({
                 },
               },
               aggs: {
+                rows_count: {
+                  sum: {
+                    field: 'action_response.osquery.count',
+                  },
+                },
                 responses: {
                   terms: {
                     script: {
                       lang: 'painless',
                       source:
                         "if (doc['error.keyword'].size()==0) { return 'success' } else { return 'error' }",
-                    },
+                    } as const,
                   },
                 },
               },

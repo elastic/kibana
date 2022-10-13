@@ -5,129 +5,31 @@
  * 2.0.
  */
 
-import {
-  normalizeMachineLearningJobIds,
-  normalizeThresholdObject,
-} from '../../../../common/detection_engine/utils';
-import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
-import { SanitizedAlert } from '../../../../../alerting/common';
-import { SERVER_APP_ID, SIGNALS_ID } from '../../../../common/constants';
-import { CreateRulesOptions } from './types';
-import { addTags } from './add_tags';
-import { PartialFilter, RuleTypeParams } from '../types';
+import type { SanitizedRule } from '@kbn/alerting-plugin/common';
+import { NOTIFICATION_THROTTLE_NO_ACTIONS } from '../../../../common/constants';
+import type { CreateRulesOptions } from './types';
+import { convertCreateAPIToInternalSchema } from '../schemas/rule_converters';
+import type { RuleParams } from '../schemas/rule_schemas';
 
 export const createRules = async ({
-  alertsClient,
-  anomalyThreshold,
-  author,
-  buildingBlockType,
-  description,
-  enabled,
-  eventCategoryOverride,
-  falsePositives,
-  from,
-  query,
-  language,
-  license,
-  savedId,
-  timelineId,
-  timelineTitle,
-  meta,
-  machineLearningJobId,
-  filters,
-  ruleId,
-  immutable,
-  index,
-  interval,
-  maxSignals,
-  riskScore,
-  riskScoreMapping,
-  ruleNameOverride,
-  outputIndex,
-  name,
-  severity,
-  severityMapping,
-  tags,
-  threat,
-  threatFilters,
-  threatIndex,
-  threatIndicatorPath,
-  threatLanguage,
-  concurrentSearches,
-  itemsPerSearch,
-  threatQuery,
-  threatMapping,
-  threshold,
-  timestampOverride,
-  to,
-  type,
-  references,
-  note,
-  version,
-  exceptionsList,
-  actions,
-}: CreateRulesOptions): Promise<SanitizedAlert<RuleTypeParams>> => {
-  return alertsClient.create<RuleTypeParams>({
-    data: {
-      name,
-      tags: addTags(tags, ruleId, immutable),
-      alertTypeId: SIGNALS_ID,
-      consumer: SERVER_APP_ID,
-      params: {
-        anomalyThreshold,
-        author,
-        buildingBlockType,
-        description,
-        ruleId,
-        index,
-        eventCategoryOverride,
-        falsePositives,
-        from,
-        immutable,
-        query,
-        language,
-        license,
-        outputIndex,
-        savedId,
-        timelineId,
-        timelineTitle,
-        meta,
-        machineLearningJobId: machineLearningJobId
-          ? normalizeMachineLearningJobIds(machineLearningJobId)
-          : undefined,
-        filters,
-        maxSignals,
-        riskScore,
-        riskScoreMapping,
-        ruleNameOverride,
-        severity,
-        severityMapping,
-        threat,
-        threshold: threshold ? normalizeThresholdObject(threshold) : undefined,
-        /**
-         * TODO: Fix typing inconsistancy between `RuleTypeParams` and `CreateRulesOptions`
-         */
-        threatFilters: threatFilters as PartialFilter[] | undefined,
-        threatIndex,
-        threatIndicatorPath,
-        threatQuery,
-        concurrentSearches,
-        itemsPerSearch,
-        threatMapping,
-        threatLanguage,
-        timestampOverride,
-        to,
-        type,
-        references,
-        note,
-        version,
-        exceptionsList,
-      },
-      schedule: { interval },
-      enabled,
-      actions: actions.map(transformRuleToAlertAction),
-      throttle: null,
-      notifyWhen: null,
+  rulesClient,
+  params,
+  id,
+  immutable = false,
+  defaultEnabled = true,
+}: CreateRulesOptions): Promise<SanitizedRule<RuleParams>> => {
+  const internalRule = convertCreateAPIToInternalSchema(params, immutable, defaultEnabled);
+  const rule = await rulesClient.create<RuleParams>({
+    options: {
+      id,
     },
+    data: internalRule,
   });
+
+  // Mute the rule if it is first created with the explicit no actions
+  if (params.throttle === NOTIFICATION_THROTTLE_NO_ACTIONS) {
+    await rulesClient.muteAll({ id: rule.id });
+  }
+
+  return rule;
 };

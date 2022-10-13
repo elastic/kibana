@@ -1,0 +1,27 @@
+{
+    "extends": "../../../../tsconfig.base.json",
+    "compilerOptions": {
+      "outDir": "./target/types",
+      "emitDeclarationOnly": true,
+      "declaration": true,
+      "declarationMap": true
+    },
+    "include": [
+      "common/**/*",
+      "public/**/*",
+      "server/**/*",
+      "*.ts"
+    ],
+    "references": [
+      { "path": "../../../core/tsconfig.json" },
+      { "path": "../../charts/tsconfig.json" },
+      { "path": "../../data/tsconfig.json" },
+      { "path": "../../expressions/tsconfig.json" },
+      { "path": "../../chart_expressions/expression_gauge/tsconfig.json" },
+      { "path": "../../visualizations/tsconfig.json" },
+      { "path": "../../usage_collection/tsconfig.json" },
+      { "path": "../../vis_default_editor/tsconfig.json" },
+      { "path": "../../field_formats/tsconfig.json" },
+      { "path": "../../chart_expressions/expression_partition_vis/tsconfig.json" }
+    ]
+  }

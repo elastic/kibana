@@ -7,81 +7,65 @@
 
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
-import { catchError, map, mergeMap, takeUntil } from 'rxjs/operators';
-import { PDF_JOB_TYPE } from '../../../../common/constants';
+import { catchError, map, mergeMap, takeUntil, tap } from 'rxjs/operators';
+import { REPORTING_TRANSACTION_TYPE } from '../../../../common/constants';
 import { TaskRunResult } from '../../../lib/tasks';
 import { RunTaskFn, RunTaskFnFactory } from '../../../types';
-import {
-  decryptJobHeaders,
-  getConditionalHeaders,
-  getFullUrls,
-  omitBlockedHeaders,
-} from '../../common';
-import { generatePdfObservableFactory } from '../lib/generate_pdf';
-import { getCustomLogo } from '../lib/get_custom_logo';
+import { decryptJobHeaders, getCustomLogo, getFullUrls } from '../../common';
+import { generatePdfObservable } from '../lib/generate_pdf';
 import { TaskPayloadPDF } from '../types';
 
-export const runTaskFnFactory: RunTaskFnFactory<
-  RunTaskFn<TaskPayloadPDF>
-> = function executeJobFactoryFn(reporting, parentLogger) {
-  const config = reporting.getConfig();
-  const encryptionKey = config.get('encryptionKey');
+export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPDF>> =
+  function executeJobFactoryFn(reporting, parentLogger) {
+    const config = reporting.getConfig();
+    const encryptionKey = config.get('encryptionKey');
 
-  return async function runTask(jobId, job, cancellationToken) {
-    const jobLogger = parentLogger.clone([PDF_JOB_TYPE, 'execute-job', jobId]);
-    const apmTrans = apm.startTransaction('reporting execute_job pdf', 'reporting');
-    const apmGetAssets = apmTrans?.startSpan('get_assets', 'setup');
-    let apmGeneratePdf: { end: () => void } | null | undefined;
+    return async function runTask(jobId, job, cancellationToken, stream) {
+      const jobLogger = parentLogger.get(`execute-job:${jobId}`);
+      const apmTrans = apm.startTransaction('execute-job-pdf', REPORTING_TRANSACTION_TYPE);
+      const apmGetAssets = apmTrans?.startSpan('get-assets', 'setup');
+      let apmGeneratePdf: { end: () => void } | null | undefined;
 
-    const generatePdfObservable = await generatePdfObservableFactory(reporting);
+      const process$: Rx.Observable<TaskRunResult> = Rx.of(1).pipe(
+        mergeMap(() => decryptJobHeaders(encryptionKey, job.headers, jobLogger)),
+        mergeMap((headers) => getCustomLogo(reporting, headers, job.spaceId, jobLogger)),
+        mergeMap(({ headers, logo }) => {
+          const urls = getFullUrls(config, job);
 
-    const process$: Rx.Observable<TaskRunResult> = Rx.of(1).pipe(
-      mergeMap(() => decryptJobHeaders(encryptionKey, job.headers, jobLogger)),
-      map((decryptedHeaders) => omitBlockedHeaders(decryptedHeaders)),
-      map((filteredHeaders) => getConditionalHeaders(config, filteredHeaders)),
-      mergeMap((conditionalHeaders) =>
-        getCustomLogo(reporting, conditionalHeaders, job.spaceId, jobLogger)
-      ),
-      mergeMap(({ logo, conditionalHeaders }) => {
-        const urls = getFullUrls(config, job);
+          const { browserTimezone, layout, title } = job;
+          apmGetAssets?.end();
 
-        const { browserTimezone, layout, title } = job;
-        if (apmGetAssets) apmGetAssets.end();
-
-        apmGeneratePdf = apmTrans?.startSpan('generate_pdf_pipeline', 'execute');
-        return generatePdfObservable(
-          jobLogger,
-          title,
-          urls,
-          browserTimezone,
-          conditionalHeaders,
-          layout,
-          logo
-        );
-      }),
-      map(({ buffer, warnings }) => {
-        if (apmGeneratePdf) apmGeneratePdf.end();
-
-        const apmEncode = apmTrans?.startSpan('encode_pdf', 'output');
-        const content = buffer?.toString('base64') || null;
-        if (apmEncode) apmEncode.end();
-
-        return {
+          apmGeneratePdf = apmTrans?.startSpan('generate-pdf-pipeline', 'execute');
+          return generatePdfObservable(reporting, {
+            format: 'pdf',
+            title,
+            logo,
+            urls,
+            browserTimezone,
+            headers,
+            layout,
+          });
+        }),
+        tap(({ buffer }) => {
+          apmGeneratePdf?.end();
+          if (buffer) {
+            stream.write(buffer);
+          }
+        }),
+        map(({ metrics, warnings }) => ({
           content_type: 'application/pdf',
-          content,
-          size: buffer?.byteLength || 0,
+          metrics: { pdf: metrics },
           warnings,
-        };
-      }),
-      catchError((err) => {
-        jobLogger.error(err);
-        return Rx.throwError(err);
-      })
-    );
+        })),
+        catchError((err) => {
+          jobLogger.error(err);
+          return Rx.throwError(err);
+        })
+      );
 
-    const stop$ = Rx.fromEventPattern(cancellationToken.on);
+      const stop$ = Rx.fromEventPattern(cancellationToken.on);
 
-    if (apmTrans) apmTrans.end();
-    return process$.pipe(takeUntil(stop$)).toPromise();
+      apmTrans?.end();
+      return Rx.lastValueFrom(process$.pipe(takeUntil(stop$)));
+    };
   };
-};
