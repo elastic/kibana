@@ -75,7 +75,7 @@ export const UseCaseCard = ({ useCase, title, description, footer }: UseCaseProp
       <h4>
         <strong>{title}</strong>
       </h4>
-    </EuiTitle>
+    </EuiText>
   );
   const descriptionElement = (
     <EuiText color="subdued" size="xs">
