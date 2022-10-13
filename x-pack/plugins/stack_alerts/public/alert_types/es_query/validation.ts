@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { defaultsDeep } from 'lodash';
+import { defaultsDeep, isNil } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { ValidationResult, builtInComparators } from '@kbn/triggers-actions-ui-plugin/public';
 import { EsQueryAlertParams, ExpressionErrors } from './types';
@@ -63,7 +63,7 @@ export const validateExpression = (ruleParams: EsQueryAlertParams): ValidationRe
     );
   }
 
-  if (!size) {
+  if (isNil(size)) {
     errors.size.push(
       i18n.translate('xpack.stackAlerts.esQuery.ui.validation.error.requiredSizeText', {
         defaultMessage: 'Size is required.',

@@ -686,10 +686,25 @@ export class DiscoverPageObject extends FtrService {
 
   public async getCurrentDataViewId() {
     const currentUrl = await this.browser.getCurrentUrl();
-    const matchResult = currentUrl.match(/index:[^,]*/);
-    const indexSubstring = matchResult ? matchResult[0] : '';
-    const dataViewId = decodeURIComponent(indexSubstring).replace('index:', '').replaceAll("'", '');
-    return dataViewId;
+    const matches = currentUrl.matchAll(/index:[^,]*/g);
+    const indexes = [];
+    for (const matchEntry of matches) {
+      const [index] = matchEntry;
+      indexes.push(decodeURIComponent(index).replace('index:', '').replaceAll("'", ''));
+    }
+
+    const first = indexes[0];
+    if (first) {
+      const allEqual = indexes.every((val) => val === first);
+      if (allEqual) {
+        return first;
+      } else {
+        throw new Error(
+          'Discover URL state contains different index references. They should be all the same.'
+        );
+      }
+    }
+    throw new Error("Discover URL state doesn't contain an index reference.");
   }
 
   public async addRuntimeField(name: string, script: string) {
