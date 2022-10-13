@@ -44,7 +44,7 @@ const createTestCases = (currentSpace: string, crossSpaceSearch?: string[]) => {
     normalTypes,
     badRequestTypes,
     hiddenAndUnknownTypes,
-};
+  };
 };
 
 export default function ({ getService }: FtrProviderContext) {
@@ -96,14 +96,14 @@ export default function ({ getService }: FtrProviderContext) {
         );
 
     const currentSpaceDefinitions = isUserAuthorizedAtSpace(user, spaceId)
-        ? [
+      ? [
           createTestDefinitions(currentSpaceCases.normalTypes, false, { user }),
           createTestDefinitions(
             currentSpaceCases.hiddenAndUnknownTypes,
             { statusCode: 200, reason: 'unauthorized' },
             { user }
           ),
-          ].flat()
+        ].flat()
       : createTestDefinitions(
           [currentSpaceCases.normalTypes, currentSpaceCases.hiddenAndUnknownTypes].flat(),
           { statusCode: 200, reason: 'unauthorized' },
