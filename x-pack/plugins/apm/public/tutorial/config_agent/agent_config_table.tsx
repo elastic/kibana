@@ -37,7 +37,11 @@ export function AgentConfigurationTable({
       name: i18n.translate('xpack.apm.tutorial.agent.column.configValue', {
         defaultMessage: 'Configuration value',
       }),
-      render: (_, { value }) => <EuiText color="accent">{value}</EuiText>,
+      render: (_, { value }) => (
+        <EuiText size="s" color="accent">
+          {value}
+        </EuiText>
+      ),
     },
   ];
 
