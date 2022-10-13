@@ -12,7 +12,10 @@ export const i18nTexts = {
     defaultMessage: 'Select a file',
   }),
   loadingFilesErrorTitle: i18n.translate('xpack.fileUpload.filePicker.error.loadingTitle', {
-    defaultMessage: 'Something went wrong',
+    defaultMessage: 'Could not load files',
+  }),
+  retryButtonLabel: i18n.translate('xpack.fileUpload.filePicker.error.retryButtonLabel', {
+    defaultMessage: 'Retry',
   }),
   emptyStatePrompt: i18n.translate('xpack.fileUpload.filePicker.emptyStatePrompt', {
     defaultMessage: 'No files found',

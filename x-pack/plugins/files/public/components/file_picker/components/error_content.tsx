@@ -9,6 +9,8 @@ import React from 'react';
 import type { FunctionComponent } from 'react';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { i18nTexts } from '../i18n_texts';
+import { useFilePickerContext } from '../context';
+import { useBehaviorSubject } from '../../use_behavior_subject';
 
 interface Props {
   error: Error;
@@ -16,16 +18,18 @@ interface Props {
 }
 
 export const ErrorContent: FunctionComponent<Props> = ({ error, onRetry }) => {
+  const { state } = useFilePickerContext();
+  const isLoading = useBehaviorSubject(state.isLoading$);
   return (
     <EuiEmptyPrompt
       iconType="alert"
-      color="danger"
-      titleSize="s"
+      iconColor="danger"
+      titleSize="xs"
       title={<h3>{i18nTexts.loadingFilesErrorTitle}</h3>}
       body={error.message}
       actions={
-        <EuiButton onClick={onRetry} color="danger">
-          Retry
+        <EuiButton disabled={isLoading} onClick={onRetry}>
+          {i18nTexts.retryButtonLabel}
         </EuiButton>
       }
     />
