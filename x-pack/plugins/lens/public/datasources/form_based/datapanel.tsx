@@ -33,7 +33,7 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import {
   ExistenceFetchStatus,
   FieldsGroupNames,
-  FieldList,
+  FieldListGrouped,
   type FieldListProps,
   useExistingFieldsFetcher,
   useGroupedFields,
@@ -602,7 +602,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
           </EuiFormControlLayout>
         </EuiFlexItem>
         <EuiFlexItem>
-          <FieldList
+          <FieldListGrouped
             fieldGroups={fieldGroups}
             hasSyncedExistingFields={fieldsExistenceStatus !== ExistenceFetchStatus.unknown}
             filter={filter}

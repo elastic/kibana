@@ -7,6 +7,6 @@
  */
 
 export {
-  FieldListGrouped as FieldList,
+  FieldListGrouped,
   type FieldListGroupedProps as FieldListProps,
-} from './field_list';
+} from './field_list_grouped';
