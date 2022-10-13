@@ -22,7 +22,7 @@ export default function torqTest({ getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const configService = getService('config');
 
-  describe.only('Torq action', () => {
+  describe('Torq action', () => {
     let simulatedActionId = '';
     let torqSimulatorURL: string = '';
     let proxyServer: httpProxy | undefined;
