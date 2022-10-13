@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import type { CriteriaWithPagination, Direction } from '@elastic/eui';
+import type { CriteriaWithPagination, Direction, Query } from '@elastic/eui';
 
 import type { SortColumnField } from './components';
 

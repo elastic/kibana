@@ -156,7 +156,7 @@ export function Table<T extends UserContentCommonSchema>({
       message={noItemsMessage}
       selection={selection}
       search={search}
-      executeQueryOptions={{ disabled: true }}
+      executeQueryOptions={{ enabled: false }}
       sorting={tableSort ? { sort: tableSort as PropertySort } : undefined}
       onChange={onTableChange}
       data-test-subj="itemsInMemTable"
