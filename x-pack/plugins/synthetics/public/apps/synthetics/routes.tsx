@@ -7,17 +7,24 @@
 
 import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 import React, { FC, useEffect } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLink, useEuiTheme } from '@elastic/eui';
-import { Route, Switch, useHistory } from 'react-router-dom';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLink,
+  EuiPageHeaderProps,
+  useEuiTheme,
+} from '@elastic/eui';
+import { Route, Switch, useHistory, useRouteMatch } from 'react-router-dom';
 import { OutPortal } from 'react-reverse-portal';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useInspectorContext } from '@kbn/observability-plugin/public';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-plugin/public';
 import { MonitorAddPage } from './components/monitor_add_edit/monitor_add_page';
 import { MonitorEditPage } from './components/monitor_add_edit/monitor_edit_page';
-import { MonitorDetailsPageHeader } from './components/monitor_details/monitor_details_page_header';
 import { MonitorDetailsPageTitle } from './components/monitor_details/monitor_details_page_title';
 import { MonitorDetailsPage } from './components/monitor_details/monitor_details_page';
 import { GettingStartedPage } from './components/getting_started/getting_started_page';
@@ -31,15 +38,25 @@ import {
   MonitorDetailsLinkPortalNode,
 } from './components/monitor_add_edit/portals';
 import {
+  GETTING_STARTED_ROUTE,
+  MONITORS_ROUTE,
   MONITOR_ADD_ROUTE,
   MONITOR_EDIT_ROUTE,
-  MONITORS_ROUTE,
-  OVERVIEW_ROUTE,
-  GETTING_STARTED_ROUTE,
+  MONITOR_ERRORS_ROUTE,
+  MONITOR_HISTORY_ROUTE,
   MONITOR_ROUTE,
+  OVERVIEW_ROUTE,
 } from '../../../common/constants';
+import { PLUGIN } from '../../../common/constants/plugin';
 import { MonitorPage } from './components/monitors_page/monitor_page';
 import { apiService } from '../../utils/api_service';
+import { RunTestManually } from './components/monitor_details/run_test_manually';
+import { MonitorDetailsStatus } from './components/monitor_details/monitor_details_status';
+import { MonitorDetailsLocation } from './components/monitor_details/monitor_details_location';
+import { MonitorDetailsLastRun } from './components/monitor_details/monitor_details_last_run';
+import { MonitorSummary } from './components/monitor_details/monitor_summary/monitor_summary';
+import { MonitorHistory } from './components/monitor_details/monitor_history/monitor_history';
+import { MonitorErrors } from './components/monitor_details/monitor_errors/monitor_errors';
 
 type RouteProps = LazyObservabilityPageTemplateProps & {
   path: string;
@@ -61,7 +78,8 @@ export const MONITOR_MANAGEMENT_LABEL = i18n.translate(
 
 const getRoutes = (
   euiTheme: EuiThemeComputed,
-  history: ReturnType<typeof useHistory>
+  history: ReturnType<typeof useHistory>,
+  syntheticsPath: string
 ): RouteProps[] => {
   return [
     {
@@ -83,13 +101,41 @@ const getRoutes = (
         values: { baseTitle },
       }),
       path: MONITOR_ROUTE,
-      component: () => <MonitorDetailsPage />,
+      component: () => (
+        <MonitorDetailsPage>
+          <MonitorSummary />
+        </MonitorDetailsPage>
+      ),
       dataTestSubj: 'syntheticsMonitorDetailsPage',
-      pageHeader: {
-        children: <MonitorDetailsPageHeader />,
-        pageTitle: <MonitorDetailsPageTitle />,
-        // rightSideItems: [<RunTestManually />],
-      },
+      pageHeader: getMonitorSummaryHeader(history, syntheticsPath, 'summary'),
+    },
+    {
+      title: i18n.translate('xpack.synthetics.monitorHistory.title', {
+        defaultMessage: 'Synthetics Monitor History | {baseTitle}',
+        values: { baseTitle },
+      }),
+      path: MONITOR_HISTORY_ROUTE,
+      component: () => (
+        <MonitorDetailsPage>
+          <MonitorHistory />
+        </MonitorDetailsPage>
+      ),
+      dataTestSubj: 'syntheticsMonitorHistoryPage',
+      pageHeader: getMonitorSummaryHeader(history, syntheticsPath, 'history'),
+    },
+    {
+      title: i18n.translate('xpack.synthetics.monitorErrors.title', {
+        defaultMessage: 'Synthetics Monitor Errors | {baseTitle}',
+        values: { baseTitle },
+      }),
+      path: MONITOR_ERRORS_ROUTE,
+      component: () => (
+        <MonitorDetailsPage>
+          <MonitorErrors />
+        </MonitorDetailsPage>
+      ),
+      dataTestSubj: 'syntheticsMonitorHistoryPage',
+      pageHeader: getMonitorSummaryHeader(history, syntheticsPath, 'errors'),
     },
     {
       title: i18n.translate('xpack.synthetics.overviewRoute.title', {
@@ -130,10 +176,7 @@ const getRoutes = (
                 defaultMessage="Management"
               />
             ),
-            onClick: () =>
-              history.push({
-                pathname: MONITORS_ROUTE,
-              }),
+            href: `${syntheticsPath}${MONITORS_ROUTE}`,
           },
         ],
       },
@@ -162,10 +205,7 @@ const getRoutes = (
                 defaultMessage="Overview"
               />
             ),
-            onClick: () =>
-              history.push({
-                pathname: OVERVIEW_ROUTE,
-              }),
+            href: `${syntheticsPath}${OVERVIEW_ROUTE}`,
           },
           {
             label: (
@@ -246,6 +286,72 @@ const getRoutes = (
   ];
 };
 
+const getMonitorSummaryHeader = (
+  history: ReturnType<typeof useHistory>,
+  syntheticsPath: string,
+  selectedTab: 'summary' | 'history' | 'errors'
+): EuiPageHeaderProps => {
+  // Not a component, but it doesn't matter. Hooks are just functions
+  const match = useRouteMatch<{ monitorId: string }>(MONITOR_ROUTE); // eslint-disable-line react-hooks/rules-of-hooks
+
+  if (!match) {
+    return {};
+  }
+
+  const search = history.location.search;
+  const monitorId = match.params.monitorId;
+
+  return {
+    pageTitle: <MonitorDetailsPageTitle />,
+    breadcrumbs: [
+      {
+        text: (
+          <>
+            <EuiIcon size="s" type="arrowLeft" />{' '}
+            <FormattedMessage
+              id="xpack.synthetics.monitorSummaryRoute.monitorBreadcrumb"
+              defaultMessage="Monitors"
+            />
+          </>
+        ),
+        color: 'primary',
+        'aria-current': false,
+        href: `${syntheticsPath}${MONITORS_ROUTE}`,
+      },
+    ],
+    rightSideItems: [
+      <RunTestManually />,
+      <MonitorDetailsLastRun />,
+      <MonitorDetailsStatus />,
+      <MonitorDetailsLocation />,
+    ],
+    tabs: [
+      {
+        label: i18n.translate('xpack.synthetics.monitorSummaryTab.title', {
+          defaultMessage: 'Summary',
+        }),
+        isSelected: selectedTab === 'summary',
+        href: `${syntheticsPath}${MONITOR_ROUTE.replace(':monitorId?', monitorId)}${search}`,
+      },
+      {
+        label: i18n.translate('xpack.synthetics.monitorHistoryTab.title', {
+          defaultMessage: 'History',
+        }),
+        isSelected: selectedTab === 'history',
+        href: `${syntheticsPath}${MONITOR_HISTORY_ROUTE.replace(':monitorId', monitorId)}${search}`,
+      },
+      {
+        label: i18n.translate('xpack.synthetics.monitorErrorsTab.title', {
+          defaultMessage: 'Errors',
+        }),
+        prepend: <EuiIcon type="alert" color="danger" />,
+        isSelected: selectedTab === 'errors',
+        href: `${syntheticsPath}${MONITOR_ERRORS_ROUTE.replace(':monitorId', monitorId)}${search}`,
+      },
+    ],
+  };
+};
+
 const RouteInit: React.FC<Pick<RouteProps, 'path' | 'title'>> = ({ path, title }) => {
   useEffect(() => {
     document.title = title;
@@ -254,10 +360,15 @@ const RouteInit: React.FC<Pick<RouteProps, 'path' | 'title'>> = ({ path, title }
 };
 
 export const PageRouter: FC = () => {
+  const { services } = useKibana();
   const { addInspectorRequest } = useInspectorContext();
   const { euiTheme } = useEuiTheme();
   const history = useHistory();
-  const routes = getRoutes(euiTheme, history);
+  const routes = getRoutes(
+    euiTheme,
+    history,
+    services.application!.getUrlForApp(PLUGIN.SYNTHETICS_PLUGIN_ID)
+  );
 
   apiService.addInspectorRequest = addInspectorRequest;
 

@@ -16,7 +16,7 @@ import {
 } from './stored_scripts';
 
 const DEFAULT_ALERTS_INDEX = '.alerts-security.alerts' as const;
-export const getAlertsIndex = (spaceId = 'default') => `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
+const getAlertsIndex = (spaceId = 'default') => `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
 
 export const getRiskScorePivotTransformId = (
   riskScoreEntity: RiskScoreEntity,
@@ -76,7 +76,7 @@ export const createTransform = (transformId: string, options: string | Record<st
   });
 };
 
-export const deleteTransform = (transformId: string) => {
+const deleteTransform = (transformId: string) => {
   return cy.request({
     method: 'post',
     url: `${TRANSFORMS_URL}/delete_transforms`,

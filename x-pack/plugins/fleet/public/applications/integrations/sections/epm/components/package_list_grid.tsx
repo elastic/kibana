@@ -34,6 +34,8 @@ import type { IntegrationCardItem } from '../../../../../../common/types/models'
 
 import type { ExtendedIntegrationCategory, CategoryFacet } from '../screens/home/category_facets';
 
+import { promoteFeaturedIntegrations } from './utils';
+
 import { PackageCard } from './package_card';
 
 export interface Props {
@@ -41,7 +43,6 @@ export interface Props {
   controls?: ReactNode | ReactNode[];
   title?: string;
   list: IntegrationCardItem[];
-  featuredList?: JSX.Element | null;
   initialSearch?: string;
   selectedCategory: ExtendedIntegrationCategory;
   setSelectedCategory: (category: string) => void;
@@ -63,7 +64,6 @@ export const PackageListGrid: FunctionComponent<Props> = ({
   setSelectedCategory,
   categories,
   showMissingIntegrationMessage = false,
-  featuredList = null,
   callout,
   showCardLabels = true,
 }) => {
@@ -99,16 +99,18 @@ export const PackageListGrid: FunctionComponent<Props> = ({
     ? categories.find((category) => category.id === selectedCategory)?.title
     : undefined;
 
-  const filteredList = useMemo(() => {
+  const filteredPromotedList = useMemo(() => {
     if (isLoading) return [];
-    return searchTerm
+    const filteredList = searchTerm
       ? list.filter((item) =>
           (localSearchRef.current!.search(searchTerm) as IntegrationCardItem[])
             .map((match) => match[searchIdField])
             .includes(item[searchIdField])
         )
       : list;
-  }, [isLoading, list, localSearchRef, searchTerm]);
+
+    return promoteFeaturedIntegrations(filteredList, selectedCategory);
+  }, [isLoading, list, localSearchRef, searchTerm, selectedCategory]);
 
   const controlsContent = <ControlsColumn title={title} controls={controls} sticky={isSticky} />;
   let gridContent: JSX.Element;
@@ -118,7 +120,7 @@ export const PackageListGrid: FunctionComponent<Props> = ({
   } else {
     gridContent = (
       <GridColumn
-        list={filteredList}
+        list={filteredPromotedList}
         showMissingIntegrationMessage={showMissingIntegrationMessage}
         showCardLabels={showCardLabels}
       />
@@ -127,7 +129,6 @@ export const PackageListGrid: FunctionComponent<Props> = ({
 
   return (
     <>
-      {featuredList}
       <div ref={menuRef}>
         <EuiFlexGroup
           alignItems="flexStart"
