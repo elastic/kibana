@@ -24,8 +24,9 @@ import {
 } from '@elastic/eui';
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import styled from 'styled-components';
-
+import { Status } from '@kbn/cases-components';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+
 import type { Case } from '../../../common/ui/types';
 import type { ActionConnector } from '../../../common/api';
 import { CaseStatuses, CaseSeverity } from '../../../common/api';
@@ -47,7 +48,6 @@ import { getUsernameDataTestSubj } from '../user_profiles/data_test_subject';
 import type { CurrentUserProfile } from '../types';
 import { SmallUserAvatar } from '../user_profiles/small_user_avatar';
 import { useCasesFeatures } from '../../common/use_cases_features';
-import { Status } from '../status';
 
 type CasesColumns =
   | EuiTableActionsColumnType<Case>
@@ -305,7 +305,7 @@ export const useCasesColumns = ({
           return getEmptyTagValue();
         }
 
-        return <Status type={theCase.status} />;
+        return <Status status={theCase.status} />;
       },
     },
     {
