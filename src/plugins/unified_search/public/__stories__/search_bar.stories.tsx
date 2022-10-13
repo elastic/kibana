@@ -162,6 +162,11 @@ const services = {
       ],
     },
   },
+  dataViewEditor: {
+    userPermissions: {
+      editDataView: action('editDataView'),
+    },
+  },
 };
 
 setIndexPatterns({
@@ -173,7 +178,6 @@ function wrapSearchBarInContext(testProps: SearchBarProps<Query>) {
     appName: 'test',
     timeHistory: mockTimeHistory,
     intl: null as any,
-    showQueryBar: true,
     showFilterBar: true,
     showDatePicker: true,
     showAutoRefreshOnly: false,

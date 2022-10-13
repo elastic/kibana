@@ -17,7 +17,6 @@ export const sampleAreaVis = {
     stage: 'production',
     options: {
       showTimePicker: true,
-      showQueryBar: true,
       showFilterBar: true,
       showIndexSelection: true,
       hierarchicalData: false,

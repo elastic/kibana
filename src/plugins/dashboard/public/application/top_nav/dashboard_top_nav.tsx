@@ -512,7 +512,6 @@ export function DashboardTopNav({
     return {
       badges,
       screenTitle,
-      showQueryBar,
       showSearchBar,
       showFilterBar,
       showSaveQuery,
