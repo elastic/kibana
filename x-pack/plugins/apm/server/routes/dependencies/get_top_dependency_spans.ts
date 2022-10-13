@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   kqlQuery,
   rangeQuery,
   termQuery,
   termsQuery,
 } from '@kbn/observability-plugin/server';
-import { compact, keyBy } from 'lodash';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { keyBy } from 'lodash';
 import {
   AGENT_NAME,
   EVENT_OUTCOME,
@@ -20,6 +20,7 @@ import {
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
   SPAN_DURATION,
+  SPAN_ID,
   SPAN_NAME,
   TRACE_ID,
   TRANSACTION_ID,
@@ -29,6 +30,7 @@ import {
 import { Environment } from '../../../common/environment_rt';
 import { EventOutcome } from '../../../common/event_outcome';
 import { environmentQuery } from '../../../common/utils/environment_query';
+import { maybe } from '../../../common/utils/maybe';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { Setup } from '../../lib/helpers/setup_request';
 
@@ -36,11 +38,12 @@ const MAX_NUM_SPANS = 1000;
 
 export interface DependencySpan {
   '@timestamp': number;
+  spanId: string;
   spanName: string;
   serviceName: string;
   agentName: AgentName;
   traceId: string;
-  transactionId?: string;
+  transactionId: string;
   transactionType?: string;
   transactionName?: string;
   duration: number;
@@ -86,6 +89,7 @@ export async function getTopDependencySpans({
               ...kqlQuery(kuery),
               ...termQuery(SPAN_DESTINATION_SERVICE_RESOURCE, dependencyName),
               ...termQuery(SPAN_NAME, spanName),
+              { exists: { field: TRANSACTION_ID } },
               ...((sampleRangeFrom ?? 0) >= 0 && (sampleRangeTo ?? 0) > 0
                 ? [
                     {
@@ -102,6 +106,7 @@ export async function getTopDependencySpans({
           },
         },
         _source: [
+          SPAN_ID,
           TRACE_ID,
           TRANSACTION_ID,
           SPAN_NAME,
@@ -116,7 +121,7 @@ export async function getTopDependencySpans({
     })
   ).hits.hits.map((hit) => hit._source);
 
-  const transactionIds = compact(spans.map((span) => span.transaction?.id));
+  const transactionIds = spans.map((span) => span.transaction!.id);
 
   const transactions = (
     await apmEventClient.search('get_transactions_for_dependency_spans', {
@@ -145,19 +150,18 @@ export async function getTopDependencySpans({
   );
 
   return spans.map((span): DependencySpan => {
-    const transaction = span.transaction
-      ? transactionsById[span.transaction.id]
-      : undefined;
+    const transaction = maybe(transactionsById[span.transaction!.id]);
 
     return {
       '@timestamp': new Date(span['@timestamp']).getTime(),
+      spanId: span.span.id,
       spanName: span.span.name,
       serviceName: span.service.name,
       agentName: span.agent.name,
       duration: span.span.duration.us,
       traceId: span.trace.id,
       outcome: (span.event?.outcome || EventOutcome.unknown) as EventOutcome,
-      transactionId: transaction?.transaction.id,
+      transactionId: span.transaction!.id,
       transactionType: transaction?.transaction.type,
       transactionName: transaction?.transaction.name,
     };

@@ -33,7 +33,8 @@ interface Props {
 export function StickySpanProperties({ span, transaction }: Props) {
   const { query } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
-    '/traces/explorer'
+    '/traces/explorer',
+    '/dependencies/operation'
   );
   const { environment, comparisonEnabled, offset } = query;
 

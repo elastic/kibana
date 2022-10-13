@@ -11,9 +11,9 @@ import React from 'react';
 import { Route } from 'react-router-dom';
 import { DefaultTheme, ThemeProvider } from 'styled-components';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import {
   KibanaContextProvider,
-  RedirectAppLinks,
   useUiSetting$,
 } from '@kbn/kibana-react-plugin/public';
 import {
@@ -21,6 +21,7 @@ import {
   InspectorContextProvider,
 } from '@kbn/observability-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { EuiErrorBoundary } from '@elastic/eui';
 import { ScrollToTopOnPathChange } from '../app/main/scroll_to_top_on_path_change';
 import { AnomalyDetectionJobsContextProvider } from '../../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
 import {
@@ -56,10 +57,9 @@ export function ApmAppRoot({
 
   return (
     <RedirectAppLinks
-      application={core.application}
+      coreStart={core}
       className={APP_WRAPPER_CLASS}
       data-test-subj="apmMainContainer"
-      role="main"
     >
       <ApmPluginContext.Provider value={apmPluginContextValue}>
         <KibanaContextProvider services={{ ...core, ...pluginsStart, storage }}>

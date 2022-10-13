@@ -18,25 +18,25 @@ import React, { useEffect, useState } from 'react';
 import { LoadingStatePrompt } from '../../../shared/loading_state_prompt';
 import { TransactionSummary } from '../../../shared/summary/transaction_summary';
 import { TransactionActionMenu } from '../../../shared/transaction_action_menu/transaction_action_menu';
-import type { TraceSample } from '../../../../hooks/use_transaction_trace_samples_fetcher';
 import { MaybeViewTraceLink } from './maybe_view_trace_link';
 import { TransactionTab, TransactionTabs } from './transaction_tabs';
 import { IWaterfall } from './waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 import { Environment } from '../../../../../common/environment_rt';
 
-interface Props {
+interface Props<TSample extends {}> {
   waterfall: IWaterfall;
   isLoading: boolean;
-  traceSamples: TraceSample[];
+  traceSamples: TSample[];
   environment: Environment;
-  onSampleClick: (sample: { transactionId: string; traceId: string }) => void;
-  onTabClick: (tab: string) => void;
+  onSampleClick: (sample: TSample) => void;
+  onTabClick: (tab: TransactionTab) => void;
   serviceName?: string;
   waterfallItemId?: string;
   detailTab?: TransactionTab;
+  selectedSample?: TSample | null;
 }
 
-export function WaterfallWithSummary({
+export function WaterfallWithSummary<TSample extends {}>({
   waterfall,
   isLoading,
   traceSamples,
@@ -46,18 +46,31 @@ export function WaterfallWithSummary({
   serviceName,
   waterfallItemId,
   detailTab,
-}: Props) {
+  selectedSample,
+}: Props<TSample>) {
   const [sampleActivePage, setSampleActivePage] = useState(0);
 
+  const isControlled = selectedSample !== undefined;
+
   useEffect(() => {
-    setSampleActivePage(0);
-  }, [traceSamples]);
+    if (!isControlled) {
+      setSampleActivePage(0);
+    }
+  }, [traceSamples, isControlled]);
 
   const goToSample = (index: number) => {
-    setSampleActivePage(index);
     const sample = traceSamples[index];
+    if (!isControlled) {
+      setSampleActivePage(index);
+    }
     onSampleClick(sample);
   };
+
+  const samplePageIndex = isControlled
+    ? selectedSample
+      ? traceSamples.indexOf(selectedSample)
+      : 0
+    : sampleActivePage;
 
   const { entryWaterfallTransaction } = waterfall;
 
@@ -94,7 +107,7 @@ export function WaterfallWithSummary({
           {traceSamples.length > 0 && (
             <EuiPagination
               pageCount={traceSamples.length}
-              activePage={sampleActivePage}
+              activePage={samplePageIndex}
               onPageClick={goToSample}
               compressed
             />
