@@ -22,16 +22,7 @@ import { TimelineId } from '../../../common/types';
 import { userNameExistsFilter } from './details/helpers';
 
 export const UsersTabs = memo<UsersTabsProps>(
-  ({
-    deleteQuery,
-    filterQuery,
-    from,
-    indexNames,
-    isInitializing,
-    setQuery,
-    to,
-    type,
-  }) => {
+  ({ deleteQuery, filterQuery, from, indexNames, isInitializing, setQuery, to, type }) => {
     const tabProps = {
       deleteQuery,
       endDate: to,
