@@ -145,6 +145,13 @@ export class FilePickerState {
   public dispose = (): void => {
     for (const sub of this.subscriptions) sub.unsubscribe();
   };
+
+  watchFileSelected$ = (id: string): Observable<boolean> => {
+    return this.selectedFileIds$.pipe(
+      map(() => this.fileSet.has(id)),
+      distinctUntilChanged()
+    );
+  };
 }
 
 interface CreateFilePickerArgs {

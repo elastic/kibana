@@ -8,6 +8,7 @@
 import React from 'react';
 import type { FunctionComponent } from 'react';
 import numeral from '@elastic/numeral';
+import useObservable from 'react-use/lib/useObservable';
 import { EuiCard, EuiText, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FileJSON } from '../../../../common';
@@ -17,7 +18,6 @@ import { useFilesContext } from '../../context';
 import { useFilePickerContext } from '../context';
 
 import './file_card.scss';
-import { useBehaviorSubject } from '../../use_behavior_subject';
 
 interface Props {
   file: FileJSON;
@@ -29,8 +29,8 @@ export const FileCard: FunctionComponent<Props> = ({ file }) => {
   const { euiTheme } = useEuiTheme();
   const displayImage = isImage({ type: file.mimeType });
 
-  useBehaviorSubject(state.selectedFileIds$);
-  const isSelected = state.isFileIdSelected(file.id);
+  const isSelected = useObservable(state.watchFileSelected$(file.id), false);
+
   const imageHeight = `calc(${euiTheme.size.xxxl} * 2)`;
   return (
     <EuiCard
