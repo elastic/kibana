@@ -50,7 +50,7 @@ export class LoadEndpointsScreen extends ScreenBaseClass {
   private runInfo: LoadOptions | undefined = undefined;
   private choices: ChoiceMenuFormatter = new ChoiceMenuFormatter([
     {
-      title: 'Load',
+      title: 'Run',
       key: '1',
     },
     {
