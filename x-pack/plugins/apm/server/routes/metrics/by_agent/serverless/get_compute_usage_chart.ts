@@ -31,7 +31,7 @@ import { GenericMetricsChart } from '../../fetch_and_transform_metrics';
  * But to calculate the overall cost AWS uses GB-second, so we need to convert the result to this unit.
  */
 const GB = 1024 ** 3;
-export function calculateComputeUsageGBSeconds({
+function calculateComputeUsageGBSeconds({
   faasBilledDuration,
   totalMemory,
 }: {

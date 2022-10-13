@@ -157,10 +157,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               BILLED_DURATION_MS
             );
           });
-          it('returns correct estimate costs avg', () => {
-            // TODO: caue fix it
-            expect(serverlessMetrics.serverlessSummary.estimatedCostsAvg).to.eql(0);
-          });
         });
 
         describe('serverless functions overview', () => {

@@ -16,8 +16,6 @@ import {
   defaultApmServiceEnvironment,
   enableComparisonByDefault,
   enableInspectEsQueries,
-  apmAWSLambdaPriceFactor,
-  apmAWSLambdaArchitecture,
 } from '@kbn/observability-plugin/common';
 import { isEmpty } from 'lodash';
 import React from 'react';
@@ -32,8 +30,6 @@ const apmSettingsKeys = [
   apmServiceGroupMaxNumberOfServices,
   enableInspectEsQueries,
   apmLabsButton,
-  apmAWSLambdaArchitecture,
-  apmAWSLambdaPriceFactor,
 ];
 
 export function GeneralSettings() {

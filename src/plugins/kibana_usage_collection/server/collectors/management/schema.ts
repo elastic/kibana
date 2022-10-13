@@ -534,14 +534,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'observability:apmAWSLambdaArchitecture': {
-    type: 'keyword',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'observability:apmAWSLambdaPriceFactor': {
-    type: 'keyword',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'observability:apmServiceGroupMaxNumberOfServices': {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },

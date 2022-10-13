@@ -5,10 +5,7 @@
  * 2.0.
  */
 import { ESFilter } from '@kbn/es-types';
-import {
-  ProcessorEvent,
-  AwsLambdaPriceFactor,
-} from '@kbn/observability-plugin/common';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import {
   FAAS_BILLED_DURATION,
@@ -25,23 +22,6 @@ import {
   percentCgroupMemoryUsedScript,
   percentSystemMemoryUsedScript,
 } from '../shared/memory';
-import { calculateComputeUsageGBSeconds } from './get_compute_usage_chart';
-
-function calculateEstimatedCost({
-  priceFactor,
-  totalMemory,
-  faasBilledDuration,
-}: {
-  priceFactor: AwsLambdaPriceFactor;
-  totalMemory?: number | null;
-  faasBilledDuration?: number | null;
-}) {
-  const computeUsage = calculateComputeUsageGBSeconds({
-    faasBilledDuration,
-    totalMemory,
-  });
-  return 0;
-}
 
 export async function getServerlessSummary({
   end,
@@ -50,7 +30,6 @@ export async function getServerlessSummary({
   serviceName,
   setup,
   start,
-  awsLambdaPriceFactor,
 }: {
   environment: string;
   kuery: string;
@@ -58,7 +37,6 @@ export async function getServerlessSummary({
   serviceName: string;
   start: number;
   end: number;
-  awsLambdaPriceFactor: AwsLambdaPriceFactor;
 }) {
   const { apmEventClient } = setup;
 
@@ -143,10 +121,5 @@ export async function getServerlessSummary({
     serverlessFunctionsTotal: response.aggregations?.totalFunctions.value,
     serverlessDurationAvg: response.aggregations?.faasDurationAvg.value,
     billedDurationAvg: response.aggregations?.faasBilledDurationAvg.value,
-    estimatedCostsAvg: calculateEstimatedCost({
-      priceFactor: awsLambdaPriceFactor,
-      totalMemory: response.aggregations?.avgTotalMemory.value,
-      faasBilledDuration: response.aggregations?.faasBilledDurationAvg.value,
-    }),
   };
 }
