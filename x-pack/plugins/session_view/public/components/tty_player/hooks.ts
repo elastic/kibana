@@ -32,11 +32,6 @@ import {
   TTY_LINE_SPLITTER_REGEX,
   TTY_LINES_PRE_SEEK,
 } from '../../../common/constants';
-import {
-  VIEW_POLICIES,
-  PROCESS_DATA_LIMIT_EXCEEDED,
-  PROCESS_DATA_LIMIT_EXCEEDED_2,
-} from './translations';
 
 export const useFetchIOEvents = (sessionEntityId: string) => {
   const { http } = useKibana<CoreStart>().services;
