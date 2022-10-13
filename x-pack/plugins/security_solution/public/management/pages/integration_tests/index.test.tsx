@@ -14,7 +14,7 @@ import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { endpointPageHttpMock } from '../endpoint_hosts/mocks';
 
-jest.mock('../../common/components/user_privileges');
+jest.mock('../../../common/components/user_privileges');
 
 describe('when in the Administration tab', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
