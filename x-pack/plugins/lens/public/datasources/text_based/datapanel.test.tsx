@@ -30,7 +30,6 @@ import { createIndexPatternServiceMock } from '../../mocks/data_views_service_mo
 import { createMockFramePublicAPI } from '../../mocks';
 import { createMockedDragDropContext } from './mocks';
 import { DataViewsState } from '../../state_management';
-import { ExistingFieldsMap, IndexPattern } from '../../types';
 
 const fieldsFromQuery = [
   {
@@ -101,18 +100,6 @@ const fieldsOne = [
   },
 ];
 
-function getExistingFields(indexPatterns: Record<string, IndexPattern>) {
-  const existingFields: ExistingFieldsMap = {};
-  for (const { title, fields } of Object.values(indexPatterns)) {
-    const fieldsMap: Record<string, boolean> = {};
-    for (const { displayName, name } of fields) {
-      fieldsMap[displayName ?? name] = true;
-    }
-    existingFields[title] = fieldsMap;
-  }
-  return existingFields;
-}
-
 const initialState: TextBasedPrivateState = {
   layers: {
     first: {
@@ -130,8 +117,27 @@ const initialState: TextBasedPrivateState = {
   fieldList: fieldsFromQuery,
 };
 
-function getFrameAPIMock({ indexPatterns, existingFields, ...rest }: Partial<DataViewsState> = {}) {
+function getFrameAPIMock({
+  indexPatterns,
+  ...rest
+}: Partial<DataViewsState> & { indexPatterns: DataViewsState['indexPatterns'] }) {
   const frameAPI = createMockFramePublicAPI();
+  return {
+    ...frameAPI,
+    dataViews: {
+      ...frameAPI.dataViews,
+      indexPatterns,
+      ...rest,
+    },
+  };
+}
+
+// @ts-expect-error Portal mocks are notoriously difficult to type
+ReactDOM.createPortal = jest.fn((element) => element);
+
+describe('TextBased Query Languages Data Panel', () => {
+  let core: ReturnType<typeof coreMock['createStart']>;
+  let dataViews: DataViewPublicStart;
   const defaultIndexPatterns = {
     '1': {
       id: '1',
@@ -144,27 +150,10 @@ function getFrameAPIMock({ indexPatterns, existingFields, ...rest }: Partial<Dat
       spec: {},
     },
   };
-  return {
-    ...frameAPI,
-    dataViews: {
-      ...frameAPI.dataViews,
-      indexPatterns: indexPatterns ?? defaultIndexPatterns,
-      existingFields: existingFields ?? getExistingFields(indexPatterns ?? defaultIndexPatterns),
-      isFirstExistenceFetch: false,
-      ...rest,
-    },
-  };
-}
-
-// @ts-expect-error Portal mocks are notoriously difficult to type
-ReactDOM.createPortal = jest.fn((element) => element);
-
-describe('TextBased Query Languages Data Panel', () => {
-  let core: ReturnType<typeof coreMock['createStart']>;
-  let dataViews: DataViewPublicStart;
 
   let defaultProps: TextBasedDataPanelProps;
   const dataViewsMock = dataViewPluginMocks.createStartContract();
+
   beforeEach(() => {
     core = coreMock.createStart();
     dataViews = dataViewPluginMocks.createStartContract();
@@ -194,7 +183,7 @@ describe('TextBased Query Languages Data Panel', () => {
       hasSuggestionForField: jest.fn(() => false),
       uiActions: uiActionsPluginMock.createStartContract(),
       indexPatternService: createIndexPatternServiceMock({ core, dataViews }),
-      frame: getFrameAPIMock(),
+      frame: getFrameAPIMock({ indexPatterns: defaultIndexPatterns }),
       state: initialState,
       setState: jest.fn(),
       onChangeIndexPattern: jest.fn(),
