@@ -27,12 +27,12 @@ import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
 import styled from 'styled-components';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-
 import type { Dispatch } from 'redux';
 import { isTab } from '@kbn/timelines-plugin/public';
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { tableDefaults } from '../../../../../common/store/data_table/defaults';
 import { dataTableActions, dataTableSelectors } from '../../../../../common/store/data_table';
+import { isMlRule } from '../../../../../../common/machine_learning/helpers';
 import { SecuritySolutionTabNavigation } from '../../../../../common/components/navigation';
 import { InputsModelId } from '../../../../../common/store/inputs/constants';
 import {
@@ -596,32 +596,40 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   );
 
   const editRule = useMemo(() => {
-    if (!hasActionsPrivileges) {
-      return (
-        <EuiToolTip position="top" content={ruleI18n.EDIT_RULE_SETTINGS_TOOLTIP}>
-          <LinkButton
-            onClick={goToEditRule}
-            iconType="controlsHorizontal"
-            isDisabled={true}
-            href={formatUrl(getEditRuleUrl(ruleId ?? ''))}
-          >
-            {ruleI18n.EDIT_RULE_SETTINGS}
-          </LinkButton>
-        </EuiToolTip>
-      );
-    }
-    return (
+    const renderEditRuleSettingButtonLink = (disabled: boolean) => (
       <LinkButton
-        data-test-subj="editRuleSettingsLink"
+        data-test-subj={disabled ? undefined : 'editRuleSettingsLink'}
         onClick={goToEditRule}
         iconType="controlsHorizontal"
-        isDisabled={!isExistingRule || !userHasPermissions(canUserCRUD)}
+        isDisabled={disabled}
         href={formatUrl(getEditRuleUrl(ruleId ?? ''))}
       >
         {ruleI18n.EDIT_RULE_SETTINGS}
       </LinkButton>
     );
-  }, [isExistingRule, canUserCRUD, formatUrl, goToEditRule, hasActionsPrivileges, ruleId]);
+
+    if (!hasActionsPrivileges || (isMlRule(rule?.type) && !hasMlPermissions)) {
+      return (
+        <EuiToolTip
+          position="top"
+          content={getToolTipContent(rule, hasMlPermissions, hasActionsPrivileges)}
+        >
+          {renderEditRuleSettingButtonLink(true)}
+        </EuiToolTip>
+      );
+    }
+
+    return renderEditRuleSettingButtonLink(!isExistingRule || !userHasPermissions(canUserCRUD));
+  }, [
+    isExistingRule,
+    canUserCRUD,
+    formatUrl,
+    goToEditRule,
+    hasActionsPrivileges,
+    ruleId,
+    rule,
+    hasMlPermissions,
+  ]);
 
   const onShowBuildingBlockAlertsChangedCallback = useCallback(
     (newShowBuildingBlockAlerts: boolean) => {
