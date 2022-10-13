@@ -43,6 +43,8 @@ export const COUNT_WIDGET_KEY_PODS = 'CountPodsWidgets';
 export const COUNT_WIDGET_KEY_CONTAINER_IMAGES = 'CountContainerImagesWidgets';
 
 export const DEFAULT_QUERY = '{"bool":{"must":[],"filter":[],"should":[],"must_not":[]}}';
+export const DEFAULT_KUBERNETES_FILTER_QUERY =
+  '{"bool":{"must":[],"filter":[{"bool": {"should": [{"exists": {"field": "orchestrator.cluster.id"}}]}}],"should":[],"must_not":[]}}';
 export const DEFAULT_FILTER_QUERY =
   '{"bool":{"must":[],"filter":[{"bool": {"should": [{"exists": {"field": "process.entry_leader.entity_id"}}]}}],"should":[],"must_not":[]}}';
 export const DEFAULT_FILTER = {

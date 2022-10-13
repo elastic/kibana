@@ -88,6 +88,8 @@ export const heatmapRenderer: (
             renderComplete={renderComplete}
             uiState={handlers.uiState as PersistedState}
             interactive={isInteractive()}
+            chartsActiveCursorService={plugins.charts.activeCursor}
+            syncTooltips={config.syncTooltips}
           />
         </div>
       </KibanaThemeProvider>,
