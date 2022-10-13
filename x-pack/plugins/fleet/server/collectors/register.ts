@@ -19,7 +19,7 @@ import type { PackageUsage } from './package_collectors';
 import { getFleetServerUsage } from './fleet_server_collector';
 import type { FleetServerUsage } from './fleet_server_collector';
 
-interface Usage {
+export interface Usage {
   agents_enabled: boolean;
   agents: AgentUsage;
   packages: PackageUsage[];

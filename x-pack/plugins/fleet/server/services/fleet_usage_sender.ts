@@ -14,6 +14,8 @@ import type { CoreSetup } from '@kbn/core/server';
 
 import { ElasticV3ServerShipper } from '@kbn/analytics-shippers-elastic-v3-server';
 
+import type { Usage } from '../collectors/register';
+
 import { appContextService } from './app_context';
 
 export class FleetShipper extends ElasticV3ServerShipper {
@@ -28,7 +30,7 @@ export class FleetUsageSender {
   constructor(
     taskManager: TaskManagerSetupContract,
     core: CoreSetup,
-    fetchUsage: Function,
+    fetchUsage: () => Promise<Usage>,
     kibanaVersion: string,
     isProductionMode: boolean
   ) {
@@ -42,9 +44,15 @@ export class FleetUsageSender {
             async run() {
               appContextService.getLogger().info('Running Fleet Usage telemetry send task');
 
-              const usageData = await fetchUsage();
-              appContextService.getLogger().debug(JSON.stringify(usageData));
-              core.analytics.reportEvent('Fleet Usage', usageData);
+              try {
+                const usageData = await fetchUsage();
+                appContextService.getLogger().debug(JSON.stringify(usageData));
+                core.analytics.reportEvent('Fleet Usage', usageData);
+              } catch (error) {
+                appContextService
+                  .getLogger()
+                  .error('Error occurred while sending Fleet Usage telemetry: ' + error);
+              }
             },
 
             async cancel() {},
