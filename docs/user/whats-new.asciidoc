@@ -196,10 +196,7 @@ for any anomalies where the source data contains geo fields,
 even if the analysis does not use the location field directly.
 View the anomaly on the map by following the link.
 For example, view the location of a client making an unusually high number of
-requests that failed with a ‘page not found’ 404 error.
-
-[role="screenshot"]
-image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt6af384c924ab4f13/634453fe4a80ba11acd3c9c1/highlights-ml-lens.gif[Viewing anomalies on a map]
+requests that failed with a `page not found` 404 error.
 
 [discrete]
 [[highlights-8.5-security]]
@@ -253,6 +250,6 @@ The user search UI includes auto-complete and search highlights.
 image::images/highlights-cases-user-search.png[User search view with auto-complete, highlights, user avatars, user email, width="75%"]
 
 User search adheres to {kib} role-based access control. Users who do not have access to *Cases* within the
-space will not surface in the results. For more details, go to <<setup-cases>>.
+space will not surface in the results. For more details, go to {kibana-ref}/setup-cases.html[Configure access to cases].
 
 // end::notable-highlights[]
