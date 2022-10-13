@@ -8,6 +8,7 @@
 import { MockRouter, mockDependencies } from '../../__mocks__';
 
 import { RequestHandlerContext } from '@kbn/core/server';
+import { MlTrainedModels } from '@kbn/ml-plugin/server';
 
 import { ErrorCode } from '../../../common/types/error_codes';
 
@@ -39,6 +40,7 @@ import { createAndReferenceMlInferencePipeline } from '../../utils/create_ml_inf
 import { ElasticsearchResponseError } from '../../utils/identify_exceptions';
 
 import { registerIndexRoutes } from './indices';
+import { SharedServices } from '@kbn/ml-plugin/server/shared_services';
 
 describe('Enterprise Search Managed Indices', () => {
   let mockRouter: MockRouter;
@@ -51,9 +53,9 @@ describe('Enterprise Search Managed Indices', () => {
       search: jest.fn(),
     },
   };
-
   const mockCore = {
     elasticsearch: { client: mockClient },
+    savedObjects: { client: {} },
   };
 
   describe('GET /internal/enterprise_search/indices/{indexName}/ml_inference/errors', () => {
@@ -115,6 +117,9 @@ describe('Enterprise Search Managed Indices', () => {
   });
 
   describe('GET /internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors', () => {
+    let mockMl: SharedServices;
+    let mockTrainedModelsProvider: MlTrainedModels;
+
     beforeEach(() => {
       const context = {
         core: Promise.resolve(mockCore),
@@ -126,9 +131,19 @@ describe('Enterprise Search Managed Indices', () => {
         path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors',
       });
 
+      mockTrainedModelsProvider = {
+        getTrainedModels: jest.fn(),
+        getTrainedModelsStats: jest.fn(),
+      } as MlTrainedModels;
+
+      mockMl = {
+        trainedModelsProvider: () => Promise.resolve(mockTrainedModelsProvider)
+      } as unknown as jest.Mocked<SharedServices>;
+
       registerIndexRoutes({
         ...mockDependencies,
         router: mockRouter.router,
+        ml: mockMl,
       });
     });
 
@@ -157,6 +172,7 @@ describe('Enterprise Search Managed Indices', () => {
 
       expect(fetchMlInferencePipelineProcessors).toHaveBeenCalledWith(
         mockClient.asCurrentUser,
+        mockTrainedModelsProvider,
         'search-index-name'
       );
 
