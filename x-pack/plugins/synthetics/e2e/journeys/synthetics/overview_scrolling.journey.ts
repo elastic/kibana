@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { before, expect, journey, step } from '@elastic/synthetics';
+import { before, after, expect, journey, step } from '@elastic/synthetics';
 import {
   addTestMonitor,
   cleanTestMonitors,
@@ -25,6 +25,10 @@ journey('Overview Scrolling', async ({ page, params }) => {
     }
 
     await syntheticsApp.waitForLoadingToFinish();
+  });
+
+  after(async () => {
+    await cleanTestMonitors(params);
   });
 
   step('Go to overview', async () => {
