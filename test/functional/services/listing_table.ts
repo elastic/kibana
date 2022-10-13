@@ -50,14 +50,15 @@ export class ListingTableService extends FtrService {
     this.log.debug(`Found ${visualizationNames.length} visualizations on current page`);
     return visualizationNames;
   }
-  /**
-   * public implementation of getAllItemsNamesOnCurrentPage, needed for saved object tagging tests
-   */
-  public async getAllItemsNamesSkipPagination(): Promise<string[]> {
-    let visualizationOnCurrentPageNames: string[] = [];
-    const visualizationNames = await this.getAllItemsNamesOnCurrentPage();
-    visualizationOnCurrentPageNames = visualizationOnCurrentPageNames.concat(visualizationNames);
-    return visualizationOnCurrentPageNames;
+
+  private async getAllSelectableItemsNamesOnCurrentPage(): Promise<string[]> {
+    const visualizationNames = [];
+    const links = await this.find.allByCssSelector('.euiTableRow-isSelectable .euiLink');
+    for (let i = 0; i < links.length; i++) {
+      visualizationNames.push(await links[i].getVisibleText());
+    }
+    this.log.debug(`Found ${visualizationNames.length} selectable visualizations on current page`);
+    return visualizationNames;
   }
 
   public async waitUntilTableIsLoaded() {
@@ -72,6 +73,29 @@ export class ListingTableService extends FtrService {
         throw new Error('Waiting');
       }
     });
+  }
+
+  /**
+   * Navigates through all pages on Landing page and returns array of items names that are selectable
+   * Added for visualize_integration saved object tagging tests
+   */
+  public async getAllSelectableItemsNames(): Promise<string[]> {
+    this.log.debug('ListingTable.getAllItemsNames');
+    let morePages = true;
+    let visualizationNames: string[] = [];
+    while (morePages) {
+      visualizationNames = visualizationNames.concat(
+        await this.getAllSelectableItemsNamesOnCurrentPage()
+      );
+      morePages = !(
+        (await this.testSubjects.getAttribute('pagination-button-next', 'disabled')) === 'true'
+      );
+      if (morePages) {
+        await this.testSubjects.click('pagerNextButton');
+        await this.header.waitUntilLoadingHasFinished();
+      }
+    }
+    return visualizationNames;
   }
 
   /**

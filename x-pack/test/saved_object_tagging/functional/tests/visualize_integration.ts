@@ -19,10 +19,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const retry = getService('retry');
   const PageObjects = getPageObjects([
     'visualize',
-    'header',
     'tagManagement',
     'visEditor',
     'common',
+    'header',
   ]);
 
   /**
@@ -54,7 +54,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     }
     await testSubjects.click('savedObjectTitle');
   };
-  // note: I need to refactor to allow for multiple tags
+  // creates a simple markdown vis with a tag provided.
   const createSimpleMarkdownVis = async (opts: Record<string, string>) => {
     const { visName, visText, tagName } = opts;
     await PageObjects.visualize.navigateToNewVisualization();
@@ -68,8 +68,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       saveAsNew: false,
       redirectToOrigin: true,
     });
-
-    await selectSavedObjectTags(tagName);
+    if (tagName) {
+      await selectSavedObjectTags(tagName);
+    }
 
     await testSubjects.click('confirmSaveSavedObjectButton');
     await retry.waitForWithTimeout('Save modal to disappear', 5000, () =>
@@ -82,10 +83,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     await PageObjects.header.waitUntilLoadingHasFinished();
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/89958
   describe('visualize integration', () => {
     before(async () => {
-      await kibanaServer.savedObjects.clean({ types: ['visualization'] });
+      // clean up any left-over visualizations and tags from tests that didn't clean up after themselves
+      await kibanaServer.savedObjects.clean({ types: ['tag', 'visualization'] });
+
       await kibanaServer.importExport.load(
         'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/visualize/data.json'
       );
@@ -97,118 +99,68 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await kibanaServer.importExport.unload(
         'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/visualize/data.json'
       );
-
+      // clean up after test suite
+      await kibanaServer.savedObjects.clean({ types: ['tag', 'visualization'] });
       await esArchiver.unload(
         'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/logstash_functional'
       );
     });
 
     describe('listing', () => {
-      before(async function () {
-        // delete all loaded visualizations (in case create ran first)
-        await PageObjects.visualize.gotoVisualizationLandingPage();
-        await PageObjects.visualize.deleteAllVisualizations();
-        // create two visualizations with tags
-        let selectedTagName = 'tag-1';
-        let newVisName = 'Visualization 1';
-        await createSimpleMarkdownVis({
-          visName: newVisName,
-          visText: 'Just some markdown 1',
-          tagName: selectedTagName,
-        });
-        await PageObjects.visualize.gotoVisualizationLandingPage();
-        await listingTable.waitUntilTableIsLoaded();
-        selectedTagName = 'tag-2';
-        newVisName = 'Visualization 2';
-        await createSimpleMarkdownVis({
-          visName: newVisName,
-          visText: 'Just some markdown 2',
-          tagName: selectedTagName,
-        });
-        await PageObjects.visualize.gotoVisualizationLandingPage();
-        await listingTable.waitUntilTableIsLoaded();
-        selectedTagName = 'tag-1';
-        newVisName = 'Visualization 3';
-        await createSimpleMarkdownVis({
-          visName: newVisName,
-          visText: 'Just some markdown 3',
-          tagName: selectedTagName,
-        });
+      beforeEach(async () => {
         await PageObjects.visualize.gotoVisualizationLandingPage();
         await listingTable.waitUntilTableIsLoaded();
       });
 
       it('allows to manually type tag filter query', async () => {
-        await PageObjects.visualize.gotoVisualizationLandingPage();
         await listingTable.searchForItemWithName('tag:(tag-1)', { escape: false });
         await listingTable.expectItemsCount('visualize', 2);
-        const itemNames = await listingTable.getAllItemsNames();
-        expect(itemNames).to.contain('Visualization 1');
-        expect(itemNames).to.contain('Visualization 3');
+        const itemNames = await listingTable.getAllSelectableItemsNames();
+        expect(itemNames).to.eql(['Visualization 1 (tag-1)', 'Visualization 3 (tag-1 + tag-3)']);
       });
 
       it('allows to filter by selecting a tag in the filter menu', async () => {
-        await PageObjects.visualize.gotoVisualizationLandingPage();
         await selectFilterTags('tag-1');
 
         await listingTable.expectItemsCount('visualize', 2);
-        const itemNames = await listingTable.getAllItemsNames();
-        expect(itemNames).to.contain('Visualization 1');
-        expect(itemNames).to.contain('Visualization 3');
+        const itemNames = await listingTable.getAllSelectableItemsNames();
+        expect(itemNames).to.eql(['Visualization 1 (tag-1)', 'Visualization 3 (tag-1 + tag-3)']);
       });
 
       it('allows to filter by multiple tags', async () => {
-        await PageObjects.visualize.gotoVisualizationLandingPage();
-        await selectFilterTags('tag-2', 'tag-1');
+        await selectFilterTags('tag-2', 'tag-3');
 
-        await listingTable.expectItemsCount('visualize', 3);
-        const itemNames = await listingTable.getAllItemsNames();
-        expect(itemNames).to.contain('Visualization 2');
-        expect(itemNames).to.contain('Visualization 1');
-        expect(itemNames).to.contain('Visualization 3');
+        await listingTable.expectItemsCount('visualize', 2);
+        const itemNames = await listingTable.getAllSelectableItemsNames();
+        expect(itemNames).to.eql(['Visualization 2 (tag-2)', 'Visualization 3 (tag-1 + tag-3)']);
       });
     });
 
     describe('creating', () => {
       before(async () => {
         await PageObjects.visualize.gotoVisualizationLandingPage();
+        // delete all visualizations to create new ones explicitly
         await PageObjects.visualize.deleteAllVisualizations();
       });
-      after(async () => {
-        await PageObjects.visualize.deleteAllVisualizations();
-      });
-
       it('allows to assign tags to the new visualization', async () => {
-        const selectedTagName = 'tag-1';
-        const newVisName = 'My new markdown viz';
+        await PageObjects.visualize.navigateToNewVisualization();
         await createSimpleMarkdownVis({
-          visName: newVisName,
           visText: 'Just some markdown',
-          tagName: selectedTagName,
+          visName: 'My new markdown viz',
+          tagName: 'myextratag',
         });
+
         await PageObjects.visualize.gotoVisualizationLandingPage();
         await listingTable.waitUntilTableIsLoaded();
 
-        // open the filter dropdown
-        const filterButton = await find.byCssSelector(
-          '.euiFilterGroup .euiPopover:nth-child(2) .euiFilterButton'
-        );
-        await filterButton.click();
-        await testSubjects.click(
-          `tag-searchbar-option-${PageObjects.tagManagement.testSubjFriendly(selectedTagName)}`
-        );
-        // click elsewhere to close the filter dropdown
-        const searchFilter = await find.byCssSelector('.euiPageTemplate .euiFieldSearch');
-        await searchFilter.click();
-        // wait until the table refreshes
-        await listingTable.waitUntilTableIsLoaded();
-        const itemNames = await listingTable.getAllItemsNames();
-        expect(itemNames).to.contain(newVisName);
+        await selectFilterTags('myextratag');
+        const itemNames = await listingTable.getAllSelectableItemsNames();
+        expect(itemNames).to.contain('My new markdown viz');
       });
 
       it('allows to create a tag from the tag selector', async () => {
-        const newTagName = 'my-new-tag';
-        const newVisName = 'vis-with-new-tag';
+        const { tagModal } = PageObjects.tagManagement;
+
         await PageObjects.visualize.navigateToNewVisualization();
 
         await PageObjects.visualize.clickMarkdownWidget();
@@ -216,7 +168,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.visEditor.clickGo();
 
         await PageObjects.visualize.ensureSavePanelOpen();
-        await PageObjects.visualize.setSaveModalValues(newVisName, {
+        await PageObjects.visualize.setSaveModalValues('vis-with-new-tag', {
           saveAsNew: false,
           redirectToOrigin: true,
         });
@@ -224,9 +176,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await testSubjects.click('savedObjectTagSelector');
         await testSubjects.click(`tagSelectorOption-action__create`);
 
-        expect(await PageObjects.tagManagement.tagModal.isOpened()).to.be(true);
+        expect(await tagModal.isOpened()).to.be(true);
 
-        await PageObjects.tagManagement.tagModal.fillForm(
+        await tagModal.fillForm(
           {
             name: 'my-new-tag',
             color: '#FFCC33',
@@ -237,35 +189,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           }
         );
 
-        expect(await PageObjects.tagManagement.tagModal.isOpened()).to.be(false);
-        await testSubjects.click('confirmSaveSavedObjectButton');
-        await retry.waitForWithTimeout('Save modal to disappear', 5000, () =>
-          testSubjects
-            .missingOrFail('confirmSaveSavedObjectButton')
-            .then(() => true)
-            .catch(() => false)
-        );
-        await PageObjects.visualize.gotoVisualizationLandingPage();
-        await listingTable.waitUntilTableIsLoaded();
-
-        await selectFilterTags(newTagName);
-        const itemNames = await listingTable.getAllItemsNamesSkipPagination();
-        expect(itemNames).to.contain(newVisName);
-      });
-    });
-
-    // FLAKY: https://github.com/elastic/kibana/issues/88639
-    describe.skip('editing', () => {
-      beforeEach(async () => {
-        await PageObjects.visualize.gotoVisualizationLandingPage();
-        await listingTable.waitUntilTableIsLoaded();
-      });
-
-      it('allows to assign tags to an existing visualization', async () => {
-        await listingTable.clickItemLink('visualize', 'Visualization 1 (tag-1)');
-
-        await PageObjects.visualize.ensureSavePanelOpen();
-        await selectSavedObjectTags('tag-2');
+        expect(await tagModal.isOpened()).to.be(false);
 
         await testSubjects.click('confirmSaveSavedObjectButton');
         await PageObjects.common.waitForSaveModalToClose();
@@ -273,9 +197,44 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.visualize.gotoVisualizationLandingPage();
         await listingTable.waitUntilTableIsLoaded();
 
-        await selectFilterTags('tag-2');
-        const itemNames = await listingTable.getAllItemsNames();
-        expect(itemNames).to.contain('Visualization 1 (tag-1)');
+        await selectFilterTags('my-new-tag');
+        const itemNames = await listingTable.getAllSelectableItemsNames();
+        expect(itemNames).to.contain('vis-with-new-tag');
+      });
+    });
+
+    describe('editing', () => {
+      before(async () => {
+        await PageObjects.visualize.gotoVisualizationLandingPage();
+        await PageObjects.visualize.deleteAllVisualizations();
+        // create a vis to add a tag to during edit
+        await PageObjects.visualize.navigateToNewVisualization();
+        await createSimpleMarkdownVis({
+          visText: 'Edit me!',
+          visName: 'MarkdownViz',
+        });
+      });
+
+      it('allows to assign tags to an existing visualization', async () => {
+        await PageObjects.visualize.gotoVisualizationLandingPage();
+        await listingTable.waitUntilTableIsLoaded();
+        await listingTable.clickItemLink('visualize', 'MarkdownViz');
+        await PageObjects.visualize.ensureSavePanelOpen();
+        await selectSavedObjectTags(...['myextratag']);
+        await testSubjects.click('confirmSaveSavedObjectButton');
+        await retry.waitForWithTimeout('Save modal to disappear', 5000, () =>
+          testSubjects
+            .missingOrFail('confirmSaveSavedObjectButton')
+            .then(() => true)
+            .catch(() => false)
+        );
+
+        await PageObjects.visualize.gotoVisualizationLandingPage();
+        await listingTable.waitUntilTableIsLoaded();
+
+        await selectFilterTags('myextratag');
+        const itemNames = await listingTable.getAllSelectableItemsNames();
+        expect(itemNames).to.contain('MarkdownViz');
       });
     });
   });
