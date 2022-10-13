@@ -21,7 +21,6 @@ import {
   InspectorContextProvider,
 } from '@kbn/observability-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { EuiErrorBoundary } from '@elastic/eui';
 import { ScrollToTopOnPathChange } from '../app/main/scroll_to_top_on_path_change';
 import { AnomalyDetectionJobsContextProvider } from '../../context/anomaly_detection_jobs/anomaly_detection_jobs_context';
 import {
