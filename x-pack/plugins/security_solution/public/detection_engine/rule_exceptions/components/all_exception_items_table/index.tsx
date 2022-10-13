@@ -36,7 +36,7 @@ import { EditExceptionFlyout } from '../edit_exception_flyout';
 import { AddExceptionFlyout } from '../add_exception_flyout';
 import * as i18n from './translations';
 import { useFindExceptionListReferences } from '../../logic/use_find_references';
-import type { Rule } from '../../../../detections/containers/detection_engine/rules/types';
+import type { Rule } from '../../../rule_management/logic/types';
 
 const StyledText = styled(EuiText)`
   font-style: italic;

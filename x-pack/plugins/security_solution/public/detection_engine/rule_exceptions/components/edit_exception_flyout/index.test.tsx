@@ -23,9 +23,9 @@ import {
   getRulesEqlSchemaMock,
   getRulesSchemaMock,
 } from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
-import { useRuleAsync } from '../../../../detections/containers/detection_engine/rules/use_rule_async';
 import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
+import { useRule } from '../../../rule_management/logic/use_rule';
 
 const mockTheme = getMockTheme({
   eui: {
@@ -42,7 +42,7 @@ jest.mock('../../logic/use_add_exception');
 jest.mock('../../../../common/containers/source');
 jest.mock('../../logic/use_fetch_or_create_rule_exception_list');
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_signal_index');
-jest.mock('../../../../detections/containers/detection_engine/rules/use_rule_async');
+jest.mock('../../../rule_management/logic/use_rule_async');
 jest.mock('@kbn/lists-plugin/public');
 
 const mockGetExceptionBuilderComponentLazy = getExceptionBuilderComponentLazy as jest.Mock<
@@ -54,7 +54,7 @@ const mockUseAddOrUpdateException = useAddOrUpdateException as jest.Mock<
 >;
 const mockUseFetchIndex = useFetchIndex as jest.Mock;
 const mockUseCurrentUser = useCurrentUser as jest.Mock<Partial<ReturnType<typeof useCurrentUser>>>;
-const mockUseRuleAsync = useRuleAsync as jest.Mock;
+const mockUseRule = useRule as jest.Mock;
 
 describe('When the edit exception modal is opened', () => {
   const ruleName = 'test rule';
@@ -88,8 +88,8 @@ describe('When the edit exception modal is opened', () => {
       },
     ]);
     mockUseCurrentUser.mockReturnValue({ username: 'test-username' });
-    mockUseRuleAsync.mockImplementation(() => ({
-      rule: getRulesSchemaMock(),
+    mockUseRule.mockImplementation(() => ({
+      data: getRulesSchemaMock(),
     }));
   });
 

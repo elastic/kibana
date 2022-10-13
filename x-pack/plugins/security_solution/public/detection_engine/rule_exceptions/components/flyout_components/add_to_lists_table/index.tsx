@@ -11,7 +11,7 @@ import { EuiText, EuiSpacer, EuiInMemoryTable, EuiPanel, EuiLoadingContent } fro
 import type { ExceptionListSchema, ListArray } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
-import type { FindRulesReferencedByExceptionsListProp } from '../../../../../detections/containers/detection_engine/rules';
+import type { FindRulesReferencedByExceptionsListProp } from '../../../../rule_management/logic';
 import * as i18n from './translations';
 import { getSharedListsTableColumns } from '../utils';
 import { useFindExceptionListReferences } from '../../../logic/use_find_references';

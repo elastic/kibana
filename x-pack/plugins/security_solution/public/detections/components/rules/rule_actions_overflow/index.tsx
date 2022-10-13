@@ -24,12 +24,15 @@ import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { useKibana } from '../../../../common/lib/kibana';
 import { getToolTipContent } from '../../../../common/utils/privileges';
-import type { Rule } from '../../../containers/detection_engine/rules';
+import type { Rule } from '../../../../detection_engine/rule_management/logic';
 import {
-  executeRulesBulkAction,
+  downloadExportedRules,
+  useBulkExport,
+} from '../../../../detection_engine/rule_management/logic/bulk_actions/use_bulk_export';
+import {
   goToRuleEditPage,
-  bulkExportRules,
-} from '../../../pages/detection_engine/rules/all/actions';
+  useExecuteBulkAction,
+} from '../../../../detection_engine/rule_management/logic/bulk_actions/use_execute_bulk_action';
 import * as i18nActions from '../../../pages/detection_engine/rules/translations';
 import * as i18n from './translations';
 
@@ -62,6 +65,8 @@ const RuleActionsOverflowComponent = ({
   const { navigateToApp } = useKibana().services.application;
   const toasts = useAppToasts();
   const { startTransaction } = useStartTransaction();
+  const { executeBulkAction } = useExecuteBulkAction();
+  const { bulkExport } = useBulkExport();
 
   const onRuleDeletedCallback = useCallback(() => {
     navigateToApp(APP_UI_ID, {
@@ -82,11 +87,10 @@ const RuleActionsOverflowComponent = ({
               onClick={async () => {
                 startTransaction({ name: SINGLE_RULE_ACTIONS.DUPLICATE });
                 closePopover();
-                const result = await executeRulesBulkAction({
+                const result = await executeBulkAction({
                   action: BulkAction.duplicate,
                   onSuccess: noop,
                   search: { ids: [rule.id] },
-                  toasts,
                 });
                 const createdRules = result?.attributes.results.created;
                 if (createdRules?.length) {
@@ -109,11 +113,13 @@ const RuleActionsOverflowComponent = ({
               onClick={async () => {
                 startTransaction({ name: SINGLE_RULE_ACTIONS.EXPORT });
                 closePopover();
-                await bulkExportRules({
-                  action: BulkAction.export,
-                  search: { ids: [rule.id] },
-                  toasts,
-                });
+                const response = await bulkExport({ search: { ids: [rule.id] } });
+                if (response) {
+                  await downloadExportedRules({
+                    response,
+                    toasts,
+                  });
+                }
               }}
             >
               {i18nActions.EXPORT_RULE}
@@ -126,11 +132,10 @@ const RuleActionsOverflowComponent = ({
               onClick={async () => {
                 startTransaction({ name: SINGLE_RULE_ACTIONS.DELETE });
                 closePopover();
-                await executeRulesBulkAction({
+                await executeBulkAction({
                   action: BulkAction.delete,
                   onSuccess: onRuleDeletedCallback,
                   search: { ids: [rule.id] },
-                  toasts,
                 });
               }}
             >
@@ -139,8 +144,10 @@ const RuleActionsOverflowComponent = ({
           ]
         : [],
     [
+      bulkExport,
       canDuplicateRuleWithActions,
       closePopover,
+      executeBulkAction,
       navigateToApp,
       onRuleDeletedCallback,
       rule,

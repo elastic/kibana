@@ -13,7 +13,7 @@ import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 import { TestProviders } from '../../../../common/mock';
 import '../../../../common/mock/match_media';
-import { getPrePackagedRulesStatus } from '../../../containers/detection_engine/rules/api';
+import { getPrePackagedRulesStatus } from '../../../../detection_engine/rule_management/api/api';
 import { PrePackagedRulesPrompt } from './load_empty_prompt';
 
 jest.mock('react-router-dom', () => {

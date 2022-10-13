@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Rule } from '../../../detections/containers/detection_engine/rules';
+import type { Rule } from '../../../detection_engine/rule_management/logic';
 import * as i18n from '../../../detections/pages/detection_engine/rules/translations';
 import { isMlRule } from '../../../../common/machine_learning/helpers';
 import * as detectionI18n from '../../../detections/pages/detection_engine/translations';

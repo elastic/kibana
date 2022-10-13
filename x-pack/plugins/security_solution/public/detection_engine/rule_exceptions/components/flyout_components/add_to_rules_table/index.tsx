@@ -11,8 +11,8 @@ import { EuiSpacer, EuiPanel, EuiText, EuiInMemoryTable, EuiLoadingContent } fro
 import { i18n } from '@kbn/i18n';
 
 import * as myI18n from './translations';
-import type { Rule } from '../../../../../detections/containers/detection_engine/rules/types';
-import { useFindRules } from '../../../../../detections/pages/detection_engine/rules/all/rules_table/use_find_rules';
+import type { Rule } from '../../../../rule_management/logic/types';
+import { useFindRules } from '../../../../rule_management_ui/components/rules_table/rules_table/use_find_rules';
 import { getRulesTableColumn } from '../utils';
 
 interface ExceptionsAddToRulesComponentProps {

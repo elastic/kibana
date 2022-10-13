@@ -9,8 +9,8 @@ import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 import { EQL_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 
 import { SERVER_APP_ID } from '../../../../../common/constants';
-import type { EqlRuleParams } from '../../schemas/rule_schemas';
-import { eqlRuleParams } from '../../schemas/rule_schemas';
+import type { EqlRuleParams } from '../../rule_schema';
+import { eqlRuleParams } from '../../rule_schema';
 import { eqlExecutor } from '../../signals/executors/eql';
 import type { CreateRuleOptions, SecurityAlertType } from '../types';
 import { validateIndexPatterns } from '../utils';

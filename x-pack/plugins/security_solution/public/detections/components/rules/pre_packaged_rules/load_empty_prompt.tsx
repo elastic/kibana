@@ -15,8 +15,7 @@ import { useInstalledSecurityJobs } from '../../../../common/components/ml/hooks
 import * as i18n from './translations';
 import { SecuritySolutionLinkButton } from '../../../../common/components/links';
 import { SecurityPageName } from '../../../../app/types';
-import { usePrePackagedRules } from '../../../containers/detection_engine/rules';
-import { useUserData } from '../../user_info';
+import { usePrePackagedRules } from '../../../../detection_engine/rule_management/logic';
 
 const EmptyPrompt = styled(EuiEmptyPrompt)`
   align-self: center; /* Corrects horizontal centering in IE11 */
@@ -35,20 +34,11 @@ const PrePackagedRulesPromptComponent: React.FC<PrePackagedRulesPromptProps> = (
   loading = false,
   userHasPermissions = false,
 }) => {
-  const [{ isSignalIndexExists, isAuthenticated, hasEncryptionKey, canUserCRUD, hasIndexWrite }] =
-    useUserData();
-
   const { loading: loadingJobs, jobs } = useInstalledSecurityJobs();
   const legacyJobsInstalled = jobs.filter((job) => affectedJobIds.includes(job.id));
   const [isUpgradeModalVisible, setIsUpgradeModalVisible] = useState(false);
 
-  const { getLoadPrebuiltRulesAndTemplatesButton } = usePrePackagedRules({
-    canUserCRUD,
-    hasIndexWrite,
-    isSignalIndexExists,
-    isAuthenticated,
-    hasEncryptionKey,
-  });
+  const { getLoadPrebuiltRulesAndTemplatesButton } = usePrePackagedRules();
 
   // Wrapper to add confirmation modal for users who may be running older ML Jobs that would
   // be overridden by updating their rules. For details, see: https://github.com/elastic/kibana/issues/128121

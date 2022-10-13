@@ -7,9 +7,12 @@
 
 import { capitalize } from 'lodash';
 import semver from 'semver';
+
 import type {
   InstalledIntegration,
   InstalledIntegrationArray,
+} from '../../../../../common/detection_engine/fleet_integrations';
+import type {
   RelatedIntegration,
   RelatedIntegrationArray,
 } from '../../../../../common/detection_engine/schemas/common';

@@ -8,9 +8,9 @@
 import { useEffect, useRef, useState } from 'react';
 
 import type { ExceptionListRuleReferencesSchema } from '../../../../common/detection_engine/schemas/response';
-import { findRuleExceptionReferences } from '../../../detections/containers/detection_engine/rules/api';
+import { findRuleExceptionReferences } from '../../rule_management/api/api';
 import { useToasts } from '../../../common/lib/kibana';
-import type { FindRulesReferencedByExceptionsListProp } from '../../../detections/containers/detection_engine/rules/types';
+import type { FindRulesReferencedByExceptionsListProp } from '../../rule_management/logic/types';
 import * as i18n from '../utils/translations';
 
 export interface RuleReferences {

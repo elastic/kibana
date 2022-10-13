@@ -32,7 +32,7 @@ import {
   getUnprocessedExceptionsWarnings,
 } from '../utils';
 import { buildReasonMessageForEqlAlert } from '../reason_formatters';
-import type { CompleteRule, EqlRuleParams } from '../../schemas/rule_schemas';
+import type { CompleteRule, EqlRuleParams } from '../../rule_schema';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type {
   BaseFieldsLatest,

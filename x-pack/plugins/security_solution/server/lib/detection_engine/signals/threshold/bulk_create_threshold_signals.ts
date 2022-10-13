@@ -17,7 +17,7 @@ import type { GenericBulkCreateResponse } from '../../rule_types/factories/bulk_
 import { calculateThresholdSignalUuid } from '../utils';
 import { buildReasonMessageForThresholdAlert } from '../reason_formatters';
 import type { ThresholdSignalHistory, BulkCreate, WrapHits } from '../types';
-import type { CompleteRule, ThresholdRuleParams } from '../../schemas/rule_schemas';
+import type { CompleteRule, ThresholdRuleParams } from '../../rule_schema';
 import type { BaseFieldsLatest } from '../../../../../common/detection_engine/schemas/alerts';
 import type { ThresholdBucket } from './types';
 import { createEnrichEventsFunction } from '../enrichments';

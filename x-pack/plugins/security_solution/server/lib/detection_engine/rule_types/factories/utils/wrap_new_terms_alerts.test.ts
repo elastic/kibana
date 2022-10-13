@@ -7,7 +7,7 @@
 
 import { ALERT_UUID } from '@kbn/rule-data-utils';
 import { ALERT_NEW_TERMS } from '../../../../../../common/field_maps/field_names';
-import { getCompleteRuleMock, getNewTermsRuleParams } from '../../../schemas/rule_schemas.mock';
+import { getCompleteRuleMock, getNewTermsRuleParams } from '../../../rule_schema/mocks';
 import { sampleDocNoSortIdWithTimestamp } from '../../../signals/__mocks__/es_results';
 import { wrapNewTermsAlerts } from './wrap_new_terms_alerts';
 

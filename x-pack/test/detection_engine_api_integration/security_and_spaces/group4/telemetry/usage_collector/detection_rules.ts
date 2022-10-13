@@ -1303,7 +1303,7 @@ export default ({ getService }: FtrProviderContext) => {
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
           // Rule id of "9a1a2dae-0b5f-4c3d-8305-a268d404c306" is from the file:
-          // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/elastic_endpoint_security.json
+          // x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/content/prepackaged_rules/elastic_endpoint_security.json
           // We have to search by "rule_name" since the "rule_id" it is storing is the Saved Object ID and not the rule_id
           const foundRule = stats.detection_rules.detection_rule_detail.find(
             (rule) => rule.rule_id === '9a1a2dae-0b5f-4c3d-8305-a268d404c306'
@@ -1334,7 +1334,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should show "notifications_disabled" to be "1", "has_notification" to be "true, "has_legacy_notification" to be "false" for rule that has at least "1" action(s) and the alert is "disabled"/"in-active"', async () => {
         await installPrePackagedRules(supertest, log);
         // Rule id of "9a1a2dae-0b5f-4c3d-8305-a268d404c306" is from the file:
-        // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/elastic_endpoint_security.json
+        // x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/content/prepackaged_rules/elastic_endpoint_security.json
         const immutableRule = await getRule(supertest, log, '9a1a2dae-0b5f-4c3d-8305-a268d404c306');
         const hookAction = await createNewAction(supertest, log);
         const newRuleToUpdate = getSimpleRule(immutableRule.rule_id);
@@ -1388,7 +1388,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should show "notifications_enabled" to be "1", "has_notification" to be "true, "has_legacy_notification" to be "false" for rule that has at least "1" action(s) and the alert is "enabled"/"active"', async () => {
         await installPrePackagedRules(supertest, log);
         // Rule id of "9a1a2dae-0b5f-4c3d-8305-a268d404c306" is from the file:
-        // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/elastic_endpoint_security.json
+        // x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/content/prepackaged_rules/elastic_endpoint_security.json
         const immutableRule = await getRule(supertest, log, '9a1a2dae-0b5f-4c3d-8305-a268d404c306');
         const hookAction = await createNewAction(supertest, log);
         const newRuleToUpdate = getSimpleRule(immutableRule.rule_id);
@@ -1442,7 +1442,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should show "legacy_notifications_disabled" to be "1", "has_notification" to be "false, "has_legacy_notification" to be "true" for rule that has at least "1" action(s) and the alert is "disabled"/"in-active"', async () => {
         await installPrePackagedRules(supertest, log);
         // Rule id of "9a1a2dae-0b5f-4c3d-8305-a268d404c306" is from the file:
-        // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/elastic_endpoint_security.json
+        // x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/content/prepackaged_rules/elastic_endpoint_security.json
         const immutableRule = await getRule(supertest, log, '9a1a2dae-0b5f-4c3d-8305-a268d404c306');
         const hookAction = await createNewAction(supertest, log);
         const newRuleToUpdate = getSimpleRule(immutableRule.rule_id, false);
@@ -1496,7 +1496,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should show "legacy_notifications_enabled" to be "1", "has_notification" to be "false, "has_legacy_notification" to be "true" for rule that has at least "1" action(s) and the alert is "enabled"/"active"', async () => {
         await installPrePackagedRules(supertest, log);
         // Rule id of "9a1a2dae-0b5f-4c3d-8305-a268d404c306" is from the file:
-        // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/elastic_endpoint_security.json
+        // x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/content/prepackaged_rules/elastic_endpoint_security.json
         const immutableRule = await getRule(supertest, log, '9a1a2dae-0b5f-4c3d-8305-a268d404c306');
         const hookAction = await createNewAction(supertest, log);
         const newRuleToUpdate = getSimpleRule(immutableRule.rule_id, true);
