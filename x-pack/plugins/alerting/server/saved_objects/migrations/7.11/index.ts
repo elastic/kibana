@@ -63,8 +63,6 @@ function restructureConnectorsThatSupportIncident(
     ) {
       // Future developer, we needed to do that because when we created this migration
       // we forget to think about user already using 7.11.0 and having an incident attribute build the right way
-      // IMPORTANT -> if you change this code please do the same inside of this file
-      // x-pack/plugins/alerting/server/saved_objects/migrations.ts
       const subActionParamsIncident =
         (action.params?.subActionParams as SavedObjectAttributes)?.incident ?? null;
       if (subActionParamsIncident != null && !isEmptyObject(subActionParamsIncident)) {
@@ -187,14 +185,14 @@ function restructureConnectorsThatSupportIncident(
   };
 }
 
-export const getMigrationsM7m11p0 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) =>
+export const getMigrations7110 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) =>
   createEsoMigration(
     encryptedSavedObjects,
     (doc): doc is SavedObjectUnsanitizedDoc<RawRule> => true,
     pipeMigrations(setAlertUpdatedAtDate, setNotifyWhen)
   );
 
-export const getMigrationsM7m11p2 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) =>
+export const getMigrations7112 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) =>
   createEsoMigration(
     encryptedSavedObjects,
     (doc): doc is SavedObjectUnsanitizedDoc<RawRule> => isAnyActionSupportIncidents(doc),

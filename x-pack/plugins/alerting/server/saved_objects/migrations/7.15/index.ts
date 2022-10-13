@@ -107,7 +107,7 @@ function addExceptionListsToReferences(
   }
 }
 
-export const getMigrationsM7m15p0 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) =>
+export const getMigrations7150 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) =>
   createEsoMigration(
     encryptedSavedObjects,
     (doc): doc is SavedObjectUnsanitizedDoc<RawRule> => isSiemSignalsRuleType(doc),

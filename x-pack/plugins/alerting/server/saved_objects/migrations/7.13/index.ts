@@ -79,7 +79,7 @@ function removeNullsFromSecurityRules(
   };
 }
 
-export const getMigrationsM7m13p0 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) =>
+export const getMigrations7130 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) =>
   createEsoMigration(
     encryptedSavedObjects,
     (doc): doc is SavedObjectUnsanitizedDoc<RawRule> => isSiemSignalsRuleType(doc),

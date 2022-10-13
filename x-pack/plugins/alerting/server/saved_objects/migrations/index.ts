@@ -17,17 +17,17 @@ import { MigrateFunctionsObject, MigrateFunction } from '@kbn/kibana-utils-plugi
 import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
 import { isSerializedSearchSource, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { RawRule } from '../../types';
-import { getMigrationsM7m10p0 } from './7.10';
-import { getMigrationsM7m11p0, getMigrationsM7m11p2 } from './7.11';
-import { getMigrationsM7m13p0 } from './7.13';
-import { getMigrationsM7m14p0 } from './7.14';
-import { getMigrationsM7m15p0 } from './7.15';
-import { getMigrationsM7m16p0 } from './7.16';
-import { getMigrationsM8m0p0, getMigrationsM8m0p1 } from './8.0';
-import { getMigrationsM8m2p0 } from './8.2';
-import { getMigrationsM8m3p0 } from './8.3';
-import { getMigrationsM8m4p1 } from './8.4';
-import { getMigrationsM8m5p0 } from './8.5';
+import { getMigrations7100 } from './7.10';
+import { getMigrations7110, getMigrations7112 } from './7.11';
+import { getMigrations7130 } from './7.13';
+import { getMigrations7140 } from './7.14';
+import { getMigrations7150 } from './7.15';
+import { getMigrations7160 } from './7.16';
+import { getMigrations800, getMigrations801 } from './8.0';
+import { getMigrations820 } from './8.2';
+import { getMigrations830 } from './8.3';
+import { getMigrations841 } from './8.4';
+import { getMigrations850 } from './8.5';
 import { AlertLogMeta, AlertMigration } from './types';
 import { MINIMUM_SS_MIGRATION_VERSION } from './constants';
 import { createEsoMigration, isEsQueryRuleType, pipeMigrations } from './utils';
@@ -42,57 +42,39 @@ export function getMigrations(
   return mergeSavedObjectMigrationMaps(
     {
       '7.10.0': executeMigrationWithErrorHandling(
-        getMigrationsM7m10p0(encryptedSavedObjects),
+        getMigrations7100(encryptedSavedObjects),
         '7.10.0'
       ),
       '7.11.0': executeMigrationWithErrorHandling(
-        getMigrationsM7m11p0(encryptedSavedObjects),
+        getMigrations7110(encryptedSavedObjects),
         '7.11.0'
       ),
       '7.11.2': executeMigrationWithErrorHandling(
-        getMigrationsM7m11p2(encryptedSavedObjects),
+        getMigrations7112(encryptedSavedObjects),
         '7.11.2'
       ),
       '7.13.0': executeMigrationWithErrorHandling(
-        getMigrationsM7m13p0(encryptedSavedObjects),
+        getMigrations7130(encryptedSavedObjects),
         '7.13.0'
       ),
       '7.14.1': executeMigrationWithErrorHandling(
-        getMigrationsM7m14p0(encryptedSavedObjects),
+        getMigrations7140(encryptedSavedObjects),
         '7.14.1'
       ),
       '7.15.0': executeMigrationWithErrorHandling(
-        getMigrationsM7m15p0(encryptedSavedObjects),
+        getMigrations7150(encryptedSavedObjects),
         '7.15.0'
       ),
       '7.16.0': executeMigrationWithErrorHandling(
-        getMigrationsM7m16p0(encryptedSavedObjects, isPreconfigured),
+        getMigrations7160(encryptedSavedObjects, isPreconfigured),
         '7.16.0'
       ),
-      '8.0.0': executeMigrationWithErrorHandling(
-        getMigrationsM8m0p0(encryptedSavedObjects),
-        '8.0.0'
-      ),
-      '8.0.1': executeMigrationWithErrorHandling(
-        getMigrationsM8m0p1(encryptedSavedObjects),
-        '8.0.1'
-      ),
-      '8.2.0': executeMigrationWithErrorHandling(
-        getMigrationsM8m2p0(encryptedSavedObjects),
-        '8.2.0'
-      ),
-      '8.3.0': executeMigrationWithErrorHandling(
-        getMigrationsM8m3p0(encryptedSavedObjects),
-        '8.3.0'
-      ),
-      '8.4.1': executeMigrationWithErrorHandling(
-        getMigrationsM8m4p1(encryptedSavedObjects),
-        '8.4.1'
-      ),
-      '8.5.0': executeMigrationWithErrorHandling(
-        getMigrationsM8m5p0(encryptedSavedObjects),
-        '8.5.0'
-      ),
+      '8.0.0': executeMigrationWithErrorHandling(getMigrations800(encryptedSavedObjects), '8.0.0'),
+      '8.0.1': executeMigrationWithErrorHandling(getMigrations801(encryptedSavedObjects), '8.0.1'),
+      '8.2.0': executeMigrationWithErrorHandling(getMigrations820(encryptedSavedObjects), '8.2.0'),
+      '8.3.0': executeMigrationWithErrorHandling(getMigrations830(encryptedSavedObjects), '8.3.0'),
+      '8.4.1': executeMigrationWithErrorHandling(getMigrations841(encryptedSavedObjects), '8.4.1'),
+      '8.5.0': executeMigrationWithErrorHandling(getMigrations850(encryptedSavedObjects), '8.5.0'),
     },
     getSearchSourceMigrations(encryptedSavedObjects, searchSourceMigrations)
   );

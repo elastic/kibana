@@ -88,7 +88,7 @@ function convertSnoozes(
   };
 }
 
-export const getMigrationsM8m3p0 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) =>
+export const getMigrations830 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) =>
   createEsoMigration(
     encryptedSavedObjects,
     (doc: SavedObjectUnsanitizedDoc<RawRule>): doc is SavedObjectUnsanitizedDoc<RawRule> => true,

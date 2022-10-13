@@ -143,7 +143,7 @@ function addRuleIdsToLegacyNotificationReferences(
   }
 }
 
-export const getMigrationsM7m16p0 = (
+export const getMigrations7160 = (
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
   isPreconfigured: (connectorId: string) => boolean
 ) =>

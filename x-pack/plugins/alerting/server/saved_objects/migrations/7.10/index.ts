@@ -83,7 +83,7 @@ function initializeExecutionStatus(
   };
 }
 
-export const getMigrationsM7m10p0 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) =>
+export const getMigrations7100 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) =>
   createEsoMigration(
     encryptedSavedObjects,
     // migrate all documents in 7.10 in order to add the "meta" RBAC field

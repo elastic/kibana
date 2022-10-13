@@ -57,7 +57,7 @@ function stripOutRuntimeFieldsInOldESQuery(
   return doc;
 }
 
-export const getMigrationsM8m5p0 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) =>
+export const getMigrations850 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) =>
   createEsoMigration(
     encryptedSavedObjects,
     (doc): doc is SavedObjectUnsanitizedDoc<RawRule> => isEsQueryRuleType(doc),

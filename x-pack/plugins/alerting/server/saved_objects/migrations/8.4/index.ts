@@ -22,7 +22,7 @@ function removeIsSnoozedUntil(
   };
 }
 
-export const getMigrationsM8m4p1 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) =>
+export const getMigrations841 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) =>
   createEsoMigration(
     encryptedSavedObjects,
     (doc: SavedObjectUnsanitizedDoc<RawRule>): doc is SavedObjectUnsanitizedDoc<RawRule> => true,
