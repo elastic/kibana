@@ -16,7 +16,7 @@ export interface BuildReasonMessageArgs {
 }
 
 export interface BuildReasonMessageUtilArgs extends BuildReasonMessageArgs {
-  type?: 'eql' | 'ml' | 'query' | 'threatMatch' | 'threshold' | 'new_terms';
+  type?: 'eql' | 'ml' | 'query' | 'threatMatch' | 'threshold' | 'new_terms' | 'risk_score';
 }
 
 export type BuildReasonMessage = (args: BuildReasonMessageArgs) => string;
@@ -137,3 +137,6 @@ export const buildReasonMessageForThresholdAlert = (args: BuildReasonMessageArgs
 
 export const buildReasonMessageForNewTermsAlert = (args: BuildReasonMessageArgs) =>
   buildReasonMessageUtil({ ...args, type: 'new_terms' });
+
+export const buildReasonMessageForRiskAlert = (args: BuildReasonMessageArgs) =>
+  buildReasonMessageUtil({ ...args, type: 'risk_score' });

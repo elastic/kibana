@@ -36,6 +36,7 @@ import {
   createMlAlertType,
   createNewTermsAlertType,
   createQueryAlertType,
+  createRiskAlertType,
   createSavedQueryAlertType,
   createThresholdAlertType,
 } from './lib/detection_engine/rule_types';
@@ -273,6 +274,11 @@ export class Plugin implements ISecuritySolutionPlugin {
     );
     plugins.alerting.registerType(securityRuleTypeWrapper(createThresholdAlertType(ruleOptions)));
     plugins.alerting.registerType(securityRuleTypeWrapper(createNewTermsAlertType(ruleOptions)));
+    plugins.alerting.registerType(
+      securityRuleTypeWrapper(
+        createRiskAlertType({ ...ruleOptions, ...queryRuleAdditionalOptions })
+      )
+    );
 
     // TODO We need to get the endpoint routes inside of initRoutes
     initRoutes(
