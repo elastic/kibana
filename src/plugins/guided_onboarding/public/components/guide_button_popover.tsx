@@ -7,7 +7,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { EuiPopover, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiPopover, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import React from 'react';
 
 interface GuideButtonPopoverProps {
@@ -48,6 +48,7 @@ export const GuideButtonPopover = ({
           <h3>{title}</h3>
         </EuiTitle>
       )}
+      <EuiSpacer />
       <EuiText style={{ width: 300 }}>{description && <p>{description}</p>}</EuiText>
     </EuiPopover>
   );
