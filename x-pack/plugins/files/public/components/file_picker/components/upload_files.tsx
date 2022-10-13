@@ -32,7 +32,10 @@ export const UploadFilesPrompt: FunctionComponent<Props> = ({ kind }) => {
         <UploadFile
           kind={kind}
           immediate
-          onDone={(file) => state.selectFile(file.map(({ id }) => id))}
+          onDone={(file) => {
+            state.selectFile(file.map(({ id }) => id));
+            state.loadFiles();
+          }}
         />,
       ]}
     />
