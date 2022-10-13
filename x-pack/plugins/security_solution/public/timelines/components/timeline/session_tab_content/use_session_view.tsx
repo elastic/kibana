@@ -35,6 +35,7 @@ import {
 } from '../../../store/timeline/actions';
 import { detectionsTimelineIds } from '../../../containers/helpers';
 import * as i18n from './translations';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 export interface SessionViewConfig {
   sessionEntityId: string;
@@ -224,6 +225,8 @@ export const useSessionView = ({
   const { globalFullScreen } = useGlobalFullScreen();
   const { timelineFullScreen } = useTimelineFullScreen();
 
+  const { canAccessEndpointManagement } = useUserPrivileges().endpointPrivileges;
+
   const { sessionViewConfig, activeTab } = useDeepEqualSelector(
     (state) => getTimeline(state, timelineId) ?? timelineDefaults
   );
@@ -259,9 +262,17 @@ export const useSessionView = ({
           loadAlertDetails: openDetailsPanel,
           isFullScreen: fullScreen,
           height: heightMinusSearchBar,
+          canAccessEndpointManagement,
         })
       : null;
-  }, [fullScreen, openDetailsPanel, sessionView, sessionViewConfig, height]);
+  }, [
+    height,
+    sessionViewConfig,
+    sessionView,
+    openDetailsPanel,
+    fullScreen,
+    canAccessEndpointManagement,
+  ]);
 
   return {
     openDetailsPanel,

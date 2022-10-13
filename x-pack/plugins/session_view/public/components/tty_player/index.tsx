@@ -35,6 +35,7 @@ export interface TTYPlayerDeps {
   isFullscreen: boolean;
   onJumpToEvent(event: ProcessEvent): void;
   autoSeekToEntityId?: string;
+  canAccessEndpointManagement?: boolean;
 }
 
 export const TTYPlayer = ({
@@ -44,6 +45,7 @@ export const TTYPlayer = ({
   isFullscreen,
   onJumpToEvent,
   autoSeekToEntityId,
+  canAccessEndpointManagement,
 }: TTYPlayerDeps) => {
   const ref = useRef<HTMLDivElement>(null);
   const { ref: scrollRef, height: containerHeight = 1 } = useResizeObserver<HTMLDivElement>({});
@@ -64,6 +66,7 @@ export const TTYPlayer = ({
     hasNextPage,
     fetchNextPage,
     isFetching,
+    canAccessEndpointManagement,
   });
 
   const currentProcessEvent = lines[Math.min(lines.length - 1, currentLine)]?.event;

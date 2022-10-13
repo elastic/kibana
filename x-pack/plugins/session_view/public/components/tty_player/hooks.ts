@@ -30,10 +30,14 @@ import {
   DEFAULT_TTY_COLS,
   TTY_LINE_SPLITTER_REGEX,
   TTY_LINES_PRE_SEEK,
-  ENDPOINTS_PAGE_PATH,
-  SESSION_VIEW_PLUGIN_ID,
+  POLICIES_PAGE_PATH,
+  SECURITY_APP_ID,
 } from '../../../common/constants';
-import { PROCESS_DATA_LIMIT_EXCEEDED, PROCESS_DATA_LIMIT_EXCEEDED_2 } from './translations';
+import {
+  VIEW_POLICIES,
+  PROCESS_DATA_LIMIT_EXCEEDED,
+  PROCESS_DATA_LIMIT_EXCEEDED_2,
+} from './translations';
 
 export const useFetchIOEvents = (sessionEntityId: string) => {
   const { http } = useKibana<CoreStart>().services;
@@ -161,6 +165,7 @@ export interface XtermPlayerDeps {
   hasNextPage?: boolean;
   fetchNextPage?: () => void;
   isFetching?: boolean;
+  canAccessEndpointManagement?: boolean;
 }
 
 export const useXtermPlayer = ({
@@ -172,6 +177,7 @@ export const useXtermPlayer = ({
   hasNextPage,
   fetchNextPage,
   isFetching,
+  canAccessEndpointManagement,
 }: XtermPlayerDeps) => {
   const { euiTheme } = useEuiTheme();
   const { font, colors } = euiTheme;
@@ -180,7 +186,10 @@ export const useXtermPlayer = ({
   const [playSpeed] = useState(DEFAULT_TTY_PLAYSPEED_MS); // potentially configurable
   const tty = lines?.[currentLine]?.event.process?.tty;
   const processName = lines?.[currentLine]?.event.process?.name;
-  const settingsUrl = getUrlForApp(SESSION_VIEW_PLUGIN_ID, { path: ENDPOINTS_PAGE_PATH });
+  const settingsUrl = useMemo(
+    () => getUrlForApp(SECURITY_APP_ID, { path: POLICIES_PAGE_PATH }),
+    [getUrlForApp]
+  );
   const [terminal, searchAddon] = useMemo(() => {
     const term = new Terminal({
       theme: {
@@ -194,6 +203,7 @@ export const useXtermPlayer = ({
       convertEol: true,
       rows: DEFAULT_TTY_ROWS,
       cols: DEFAULT_TTY_COLS,
+      allowProposedApi: true,
     });
 
     const searchInstance = new SearchAddon();
@@ -225,16 +235,19 @@ export const useXtermPlayer = ({
   const renderTruncatedMsg = useCallback(() => {
     if (tty?.columns) {
       const lineBreak = '-'.repeat(tty.columns);
-      return `
+      const message = `${PROCESS_DATA_LIMIT_EXCEEDED} \x1b[1m${processName}.\x1b[22m ${PROCESS_DATA_LIMIT_EXCEEDED_2}`;
+      const link = canAccessEndpointManagement
+        ? `\x1b[${Math.min(
+            message.length + 2,
+            tty.columns - VIEW_POLICIES.length - 4
+          )}G\x1b[1m\x1b]8;;${settingsUrl}\x1b\\[ ${VIEW_POLICIES} ]\x1b]8;;\x1b\\\x1b[22m`
+        : '';
 
-\x1b[33m${lineBreak}
-${PROCESS_DATA_LIMIT_EXCEEDED} ${processName}\x1b[1mlinux.advanced.tty_io.max_kilobytes_per_process\x1b[22m${PROCESS_DATA_LIMIT_EXCEEDED_2}
-\x1b]8;;${settingsUrl}\x1b\\[ GO TO SETTINGS ]\x1b]8;;\e\\\n
-${lineBreak}\x1b[0m
+      return `\n\n\x1b[33m${lineBreak}\n${message}${link}\n${lineBreak}\x1b[0m
 
 `;
     }
-  }, [processName, settingsUrl, tty.columns]);
+  }, [canAccessEndpointManagement, processName, settingsUrl, tty?.columns]);
 
   const render = useCallback(
     (lineNumber: number, clear: boolean) => {
