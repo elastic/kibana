@@ -17,6 +17,7 @@ import {
   LOGOUT_PROVIDER_QUERY_STRING_PARAMETER,
   LOGOUT_REASON_QUERY_STRING_PARAMETER,
   NEXT_URL_QUERY_STRING_PARAMETER,
+  SESSION_ERROR_REASON_HEADER,
 } from '../../common/constants';
 import { shouldProviderUseLoginForm } from '../../common/model';
 import type { AuditServiceSetup } from '../audit';
@@ -455,7 +456,7 @@ export class Authenticator {
       const options = requestIsRedirectable
         ? undefined
         : {
-            authResponseHeaders: { ['kbn-session-error-reason']: existingSessionValueRaw.code },
+            authResponseHeaders: { [SESSION_ERROR_REASON_HEADER]: existingSessionValueRaw.code },
           };
       return AuthenticationResult.failed(existingSessionValueRaw, options);
     } else {

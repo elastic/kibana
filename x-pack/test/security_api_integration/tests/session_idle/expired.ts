@@ -9,6 +9,7 @@ import { parse as parseCookie } from 'tough-cookie';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import expect from '@kbn/expect';
 import { adminTestUser } from '@kbn/test';
+import { SESSION_ERROR_REASON_HEADER } from '@kbn/security-plugin/common/constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -31,7 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
       await esDeleteAllIndices('.kibana_security_session*');
     });
 
-    it('return kbn-session-error-reason header if session is expired', async function () {
+    it(`return ${SESSION_ERROR_REASON_HEADER} header if session is expired`, async function () {
       this.timeout(100000);
 
       log.debug(`Log in as ${basicUsername} using ${basicPassword} password.`);
@@ -70,7 +71,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('Cookie', sessionCookie.cookieString())
         .expect(401);
 
-      expect(resp.headers['kbn-session-error-reason']).to.be('SESSION_EXPIRED');
+      expect(resp.headers[SESSION_ERROR_REASON_HEADER]).to.be('SESSION_EXPIRED');
     });
   });
 }

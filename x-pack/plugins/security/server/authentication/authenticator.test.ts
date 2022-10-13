@@ -24,6 +24,7 @@ import type { SecurityLicenseFeatures } from '../../common';
 import {
   AUTH_PROVIDER_HINT_QUERY_STRING_PARAMETER,
   AUTH_URL_HASH_QUERY_STRING_PARAMETER,
+  SESSION_ERROR_REASON_HEADER,
 } from '../../common/constants';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
@@ -1337,7 +1338,7 @@ describe('Authenticator', () => {
 
       await expect(authenticator.authenticate(request)).resolves.toEqual(
         AuthenticationResult.failed(failureReason, {
-          authResponseHeaders: { 'kbn-session-error-reason': 'SESSION_EXPIRED' },
+          authResponseHeaders: { [SESSION_ERROR_REASON_HEADER]: 'SESSION_EXPIRED' },
         })
       );
       expect(auditLogger.log).not.toHaveBeenCalled();
@@ -1363,7 +1364,7 @@ describe('Authenticator', () => {
 
       await expect(authenticator.authenticate(request)).resolves.toEqual(
         AuthenticationResult.failed(failureReason, {
-          authResponseHeaders: { 'kbn-session-error-reason': 'UNEXPECTED_SESSION_ERROR' },
+          authResponseHeaders: { [SESSION_ERROR_REASON_HEADER]: 'UNEXPECTED_SESSION_ERROR' },
         })
       );
       expect(auditLogger.log).not.toHaveBeenCalled();

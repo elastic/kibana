@@ -45,6 +45,8 @@ export const LOGOUT_PROVIDER_QUERY_STRING_PARAMETER = 'provider';
 export const LOGOUT_REASON_QUERY_STRING_PARAMETER = 'msg';
 export const NEXT_URL_QUERY_STRING_PARAMETER = 'next';
 
+export const SESSION_ERROR_REASON_HEADER = 'kbn-session-error-reason';
+
 /**
  * Matches valid usernames and role names.
  *
