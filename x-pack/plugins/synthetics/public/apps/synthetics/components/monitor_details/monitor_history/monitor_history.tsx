@@ -7,6 +7,6 @@
 import { EuiText } from '@elastic/eui';
 import React from 'react';
 
-export const HistoryTabContent = () => {
+export const MonitorHistory = () => {
   return <EuiText>Monitor history tab content</EuiText>;
 };
