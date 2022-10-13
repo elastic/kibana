@@ -69,7 +69,7 @@ describe('OpsgenieParamFields', () => {
     expect(screen.getByText('Alias')).toBeInTheDocument();
     expect(screen.getByTestId('opsgenie-subActionSelect'));
 
-    expect(screen.getByText('hello')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('hello')).toBeInTheDocument();
     expect(screen.getByDisplayValue('123')).toBeInTheDocument();
   });
 
@@ -80,15 +80,15 @@ describe('OpsgenieParamFields', () => {
     expect(screen.getByText('Alias')).toBeInTheDocument();
     expect(screen.getByTestId('opsgenie-subActionSelect'));
 
-    expect(screen.queryByText('hello')).not.toBeInTheDocument();
-    expect(screen.queryByText('123')).not.toBeInTheDocument();
+    expect(screen.queryByDisplayValue('hello')).not.toBeInTheDocument();
+    expect(screen.queryByDisplayValue('123')).not.toBeInTheDocument();
     expect(screen.getByDisplayValue('456')).toBeInTheDocument();
   });
 
   it('calls editAction when the message field is changed', async () => {
     render(<OpsgenieParamFields {...defaultCreateAlertProps} />);
 
-    fireEvent.change(screen.getByText('hello'), { target: { value: 'a new message' } });
+    fireEvent.change(screen.getByDisplayValue('hello'), { target: { value: 'a new message' } });
 
     expect(editAction).toBeCalledTimes(1);
     expect(editAction.mock.calls[0]).toMatchInlineSnapshot(`
@@ -97,6 +97,27 @@ describe('OpsgenieParamFields', () => {
         Object {
           "alias": "123",
           "message": "a new message",
+        },
+        0,
+      ]
+    `);
+  });
+
+  it('calls editAction when the description field is changed', async () => {
+    render(<OpsgenieParamFields {...defaultCreateAlertProps} />);
+
+    fireEvent.change(screen.getByTestId('descriptionTextArea'), {
+      target: { value: 'a new description' },
+    });
+
+    expect(editAction).toBeCalledTimes(1);
+    expect(editAction.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "subActionParams",
+        Object {
+          "alias": "123",
+          "description": "a new description",
+          "message": "hello",
         },
         0,
       ]
@@ -130,7 +151,7 @@ describe('OpsgenieParamFields', () => {
   it('preserves the previous alias value when switching between the create and close alert event actions', async () => {
     const { rerender } = render(<OpsgenieParamFields {...defaultCreateAlertProps} />);
 
-    expect(screen.getByText('hello')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('hello')).toBeInTheDocument();
     expect(screen.getByDisplayValue('123')).toBeInTheDocument();
 
     fireEvent.change(screen.getByDisplayValue('123'), { target: { value: 'a new alias' } });
@@ -150,7 +171,7 @@ describe('OpsgenieParamFields', () => {
       />
     );
 
-    expect(screen.queryByText('hello')).not.toBeInTheDocument();
+    expect(screen.queryByDisplayValue('hello')).not.toBeInTheDocument();
 
     expect(editAction).toBeCalledTimes(2);
 
@@ -168,7 +189,7 @@ describe('OpsgenieParamFields', () => {
   it('only preserves the previous alias value when switching between the create and close alert event actions', async () => {
     const { rerender } = render(<OpsgenieParamFields {...defaultCreateAlertProps} />);
 
-    expect(screen.getByText('hello')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('hello')).toBeInTheDocument();
     expect(screen.getByDisplayValue('123')).toBeInTheDocument();
 
     fireEvent.change(screen.getByDisplayValue('123'), { target: { value: 'a new alias' } });
@@ -189,7 +210,7 @@ describe('OpsgenieParamFields', () => {
       />
     );
 
-    expect(screen.queryByText('hello')).not.toBeInTheDocument();
+    expect(screen.queryByDisplayValue('hello')).not.toBeInTheDocument();
 
     expect(editAction).toBeCalledTimes(2);
 

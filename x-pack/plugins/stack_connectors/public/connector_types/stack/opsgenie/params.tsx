@@ -35,16 +35,36 @@ const CreateAlertComponent: React.FC<SubActionProps<OpsgenieCreateAlertParams>> 
   messageVariables,
   subActionParams,
 }) => {
+  const isMessageInvalid =
+    errors['subActionParams.message'] !== undefined &&
+    errors['subActionParams.message'].length > 0 &&
+    subActionParams?.message !== undefined;
+
   return (
     <>
+      <EuiFormRow
+        data-test-subj="opsgenie-message-row"
+        fullWidth
+        error={errors['subActionParams.message']}
+        label={i18n.MESSAGE_FIELD_LABEL}
+        isInvalid={isMessageInvalid}
+      >
+        <TextFieldWithMessageVariables
+          index={index}
+          editAction={editSubAction}
+          messageVariables={messageVariables}
+          paramsProperty={'message'}
+          inputTargetValue={subActionParams?.message}
+          errors={errors['subActionParams.message'] as string[]}
+        />
+      </EuiFormRow>
       <TextAreaWithMessageVariables
         index={index}
         editAction={editSubAction}
         messageVariables={messageVariables}
-        paramsProperty={'message'}
-        inputTargetValue={subActionParams?.message}
-        errors={errors['subActionParams.message'] as string[]}
-        label={i18n.MESSAGE_FIELD_LABEL}
+        paramsProperty={'description'}
+        inputTargetValue={subActionParams?.description}
+        label={i18n.DESCRIPTION_FIELD_LABEL}
       />
       <EuiFormRow data-test-subj="opsgenie-alias-row" fullWidth label={i18n.ALIAS_FIELD_LABEL}>
         <TextFieldWithMessageVariables
@@ -91,6 +111,14 @@ const CloseAlertComponent: React.FC<SubActionProps<OpsgenieCloseAlertParams>> = 
           errors={errors['subActionParams.alias'] as string[]}
         />
       </EuiFormRow>
+      <TextAreaWithMessageVariables
+        index={index}
+        editAction={editSubAction}
+        messageVariables={messageVariables}
+        paramsProperty={'note'}
+        inputTargetValue={subActionParams?.note}
+        label={i18n.NOTE_FIELD_LABEL}
+      />
     </>
   );
 };

@@ -49,6 +49,20 @@ export const MESSAGE_FIELD_LABEL = i18n.translate(
   }
 );
 
+export const NOTE_FIELD_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.opsgenie.noteLabel',
+  {
+    defaultMessage: 'Note (optional)',
+  }
+);
+
+export const DESCRIPTION_FIELD_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.opsgenie.descriptionLabel',
+  {
+    defaultMessage: 'Description (optional)',
+  }
+);
+
 export const MESSAGE_IS_REQUIRED = i18n.translate(
   'xpack.stackConnectors.components.opsgenie.requiredMessageTextField',
   {
