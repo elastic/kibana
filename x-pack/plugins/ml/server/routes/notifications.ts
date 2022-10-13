@@ -28,7 +28,11 @@ export function notificationsRoutes({ router, routeGuard }: RouteInitialization)
         query: getNotificationsQuerySchema,
       },
       options: {
-        tags: ['access:ml:canGetNotifications'],
+        tags: [
+          'access:ml:canGetJobs',
+          'access:ml:canGetDataFrameAnalytics',
+          'access:ml:canGetTrainedModels',
+        ],
       },
     },
     routeGuard.fullLicenseAPIGuard(async ({ client, request, response, mlSavedObjectService }) => {
@@ -60,7 +64,11 @@ export function notificationsRoutes({ router, routeGuard }: RouteInitialization)
         query: getNotificationsCountQuerySchema,
       },
       options: {
-        tags: ['access:ml:canGetNotifications'],
+        tags: [
+          'access:ml:canGetJobs',
+          'access:ml:canGetDataFrameAnalytics',
+          'access:ml:canGetTrainedModels',
+        ],
       },
     },
     routeGuard.fullLicenseAPIGuard(async ({ client, mlSavedObjectService, request, response }) => {

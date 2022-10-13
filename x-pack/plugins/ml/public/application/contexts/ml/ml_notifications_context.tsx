@@ -11,7 +11,7 @@ import { switchMap, map, tap, retry } from 'rxjs/operators';
 import moment from 'moment';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import useMount from 'react-use/lib/useMount';
-import { useMlApiContext, useMlKibana } from '../kibana';
+import { useMlApiContext } from '../kibana';
 import { useStorage } from '../storage';
 import { ML_NOTIFICATIONS_LAST_CHECKED_AT } from '../../../../common/types/storage';
 import { useAsObservable } from '../../hooks';
@@ -36,14 +36,6 @@ export const MlNotificationsContext = React.createContext<{
 });
 
 export const MlNotificationsContextProvider: FC = ({ children }) => {
-  const {
-    services: {
-      application: { capabilities },
-    },
-  } = useMlKibana();
-
-  const canGetNotifications = capabilities.ml.canGetNotifications as boolean;
-
   const mlApiServices = useMlApiContext();
 
   const [lastCheckedAt, setLastCheckedAt] = useStorage(ML_NOTIFICATIONS_LAST_CHECKED_AT);
@@ -55,8 +47,6 @@ export const MlNotificationsContextProvider: FC = ({ children }) => {
     useState<NotificationsCountResponse>(defaultCounts);
 
   useMount(function startPollingNotifications() {
-    if (!canGetNotifications) return;
-
     const subscription = combineLatest([lastCheckedAt$, timer(0, NOTIFICATIONS_CHECK_INTERVAL)])
       .pipe(
         // Use the latest check time or 7 days ago by default.
