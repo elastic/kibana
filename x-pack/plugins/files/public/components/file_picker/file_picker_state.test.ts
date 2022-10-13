@@ -14,17 +14,24 @@ jest.mock('rxjs', () => {
 });
 
 import { TestScheduler } from 'rxjs/testing';
-import { merge, tap } from 'rxjs';
+import { merge, tap, of } from 'rxjs';
 import { FileJSON } from '../../../common';
-import { FilePickerState } from './file_picker_state';
+import { FilePickerState, createFilePickerState } from './file_picker_state';
+import { createMockFilesClient } from '../../mocks';
 
 const getTestScheduler = () =>
   new TestScheduler((actual, expected) => expect(actual).toEqual(expected));
 
 describe('FilePickerState', () => {
   let filePickerState: FilePickerState;
+  let filesClient: ReturnType<typeof createMockFilesClient>;
   beforeEach(() => {
-    filePickerState = new FilePickerState(100);
+    filesClient = createMockFilesClient();
+    filePickerState = createFilePickerState({
+      client: filesClient,
+      pageSize: 20,
+      kind: 'test',
+    });
   });
   it('starts off empty', () => {
     expect(filePickerState.hasFilesSelected()).toBe(false);
@@ -90,26 +97,30 @@ describe('FilePickerState', () => {
       expect(filePickerState.getSelectedFileIds()).toEqual(['a', 'b']);
     });
   });
-  it('filters files', () => {
-    getTestScheduler().run(({ expectObservable, cold, time }) => {
-      const files = [
-        { id: 'a', name: 'a' },
-        { id: 'b', name: 'b' },
-      ] as FileJSON[];
-      filePickerState.setFiles(files);
-      const inputMarble = '-a-b-c-l|';
+  it('loads and filters files', () => {
+    const files = [
+      { id: 'a', name: 'a' },
+      { id: 'b', name: 'b' },
+    ] as FileJSON[];
+    filesClient.list.mockImplementation(() => of({ files }) as any);
+    getTestScheduler().run(({ expectObservable, cold }) => {
+      const loadFiles$ = cold('a|').pipe(tap(() => filePickerState.loadFiles()));
+      expectObservable(loadFiles$).toBe('a|');
+      expectObservable(filePickerState.isLoading$).toBe('(010)-', [false, true, false]);
+      const inputMarble = '-----a--b--c--l|';
       const query$ = cold(inputMarble).pipe(
         tap((q) => {
           filePickerState.setQuery(q === 'l' ? '' : q);
         })
       );
       expectObservable(query$).toBe(inputMarble);
-      expectObservable(filePickerState.files$).toBe('ab-c-d-e-', {
-        a: files, // unfiltered
-        b: [files[0]], // filtered on "a"
-        c: [files[1]], // filtered on "b"
-        d: [], // filtered on "c"
-        e: files, // filtered on "", which should be unfiltered
+      expectObservable(filePickerState.files$).toBe('(ab)-c--d--e--f', {
+        a: [], // init
+        b: files, // unfiltered
+        c: [files[0]], // filtered on "a"
+        d: [files[1]], // filtered on "b"
+        e: [], // filtered on "c"
+        f: files, // filtered on "", which should be unfiltered
       });
     });
   });

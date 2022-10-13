@@ -76,10 +76,9 @@ export class FilePickerState {
           // capture total pages after filtering
           tap((files) => this.totalPages$.next(Math.ceil(files.length / this.pageSize))),
           // then paginate
-          combineLatestWith(this.currentPage$),
-          map(([files, page]) => {
-            return files.slice(page * this.pageSize, (page + 1) * this.pageSize);
-          })
+          combineLatestWith(this.currentPage$.pipe(distinctUntilChanged())),
+          map(([files, page]) => files.slice(page * this.pageSize, (page + 1) * this.pageSize)),
+          shareReplay()
         )
         .subscribe(this.files$),
     ];
@@ -95,7 +94,13 @@ export class FilePickerState {
   };
 
   private sendRequest = (): Observable<void> => {
-    return from(this.client.list({ kind: this.kind, page: 1, perPage: 1000 })).pipe(
+    return from(
+      this.client.list({
+        kind: this.kind,
+        page: 1,
+        perPage: 1000 /* TODO: we should filter server side */,
+      })
+    ).pipe(
       map(({ files }) => {
         this.unfilteredFiles$.next(files);
       }),
@@ -130,7 +135,7 @@ export class FilePickerState {
   public setQuery = (query: undefined | string): void => {
     if (query) this.query$.next(query);
     else this.query$.next(undefined);
-    this.currentPage$.next(1);
+    this.currentPage$.next(0);
   };
 
   public setPage = (page: number): void => {
@@ -145,12 +150,12 @@ export class FilePickerState {
 interface CreateFilePickerArgs {
   client: FilesClient;
   kind: string;
-  initialPageSize: number;
+  pageSize: number;
 }
 export const createFilePickerState = ({
-  initialPageSize,
+  pageSize,
   client,
   kind,
 }: CreateFilePickerArgs): FilePickerState => {
-  return new FilePickerState(client, kind, initialPageSize);
+  return new FilePickerState(client, kind, pageSize);
 };

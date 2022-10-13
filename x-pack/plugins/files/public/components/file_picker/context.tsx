@@ -30,7 +30,7 @@ export const FilePickerContext: FunctionComponent<FilePickerContextProps> = ({
 }) => {
   const { client } = useFilesContext();
   const state = useMemo(
-    () => createFilePickerState({ initialPageSize: pageSize, client, kind }),
+    () => createFilePickerState({ pageSize: pageSize, client, kind }),
     [pageSize, client, kind]
   );
   useEffect(() => state.dispose, [state]);

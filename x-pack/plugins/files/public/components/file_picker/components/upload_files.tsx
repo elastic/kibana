@@ -28,6 +28,7 @@ export const UploadFilesPrompt: FunctionComponent<Props> = ({ kind }) => {
       }
       titleSize="s"
       actions={[
+        // TODO: We can remove this once the entire modal is an upload area
         <UploadFile
           kind={kind}
           immediate
