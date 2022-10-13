@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { IndicatorsFiltersContext } from '../../../../containers/indicators_filters';
+import { IndicatorsFiltersContext } from '../../../../containers/filters';
 import { StoryProvidersComponent } from '../../../../../../common/mocks/story_providers';
 import { generateMockIndicator } from '../../../../../../../common/types/indicator';
 import { IndicatorBlock } from '.';

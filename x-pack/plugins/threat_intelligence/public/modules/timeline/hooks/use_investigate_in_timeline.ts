@@ -10,8 +10,7 @@ import moment from 'moment';
 import { DataProvider } from '@kbn/timelines-plugin/common';
 import { generateDataProvider } from '../utils/data_provider';
 import { SecuritySolutionContext } from '../../../containers/security_solution_context';
-import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../indicators/utils/field_value';
-import { unwrapValue } from '../../indicators/utils/unwrap_value';
+import { fieldAndValueValid, getIndicatorFieldAndValue, unwrapValue } from '../../indicators';
 import {
   Indicator,
   IndicatorFieldEventEnrichmentMap,

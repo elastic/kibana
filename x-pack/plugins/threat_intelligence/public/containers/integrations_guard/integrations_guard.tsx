@@ -6,10 +6,9 @@
  */
 
 import { EuiLoadingLogo } from '@elastic/eui';
-import React from 'react';
-import { FC } from 'react';
+import React, { FC } from 'react';
 import { EmptyPage } from '../../modules/empty_page';
-import { useIndicatorsTotalCount } from '../../modules/indicators/hooks/use_indicators_total_count';
+import { useIndicatorsTotalCount } from '../../modules/indicators';
 import { SecuritySolutionPluginTemplateWrapper } from '../security_solution_plugin_template_wrapper';
 
 /**

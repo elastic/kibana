@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export * from './indicators_filters';
-
-export * from './context';
+export * from './field_label';

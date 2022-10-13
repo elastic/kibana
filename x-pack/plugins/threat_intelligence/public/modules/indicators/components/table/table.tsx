@@ -27,8 +27,8 @@ import { IndicatorsTableContext, IndicatorsTableContextValue } from './contexts'
 import { IndicatorsFlyout } from '../flyout';
 import { ColumnSettingsValue, useToolbarOptions } from './hooks';
 import { useFieldTypes } from '../../../../hooks/use_field_types';
-import { getFieldSchema } from '../../utils/get_field_schema';
-import { Pagination } from '../../services/fetch_indicators';
+import { getFieldSchema } from '../../utils';
+import { Pagination } from '../../services';
 
 export interface IndicatorsTableProps {
   indicators: Indicator[];

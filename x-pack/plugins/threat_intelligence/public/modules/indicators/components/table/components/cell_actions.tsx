@@ -11,8 +11,8 @@ import { Indicator } from '../../../../../../common/types/indicator';
 import { AddToTimelineCellAction } from '../../../../timeline/components/add_to_timeline';
 import { FilterInCellAction } from '../../../../query_bar/components/filter_in';
 import { FilterOutCellAction } from '../../../../query_bar/components/filter_out';
-import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../../utils/field_value';
-import type { Pagination } from '../../../services/fetch_indicators';
+import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../../utils';
+import type { Pagination } from '../../../services';
 
 export const CELL_TIMELINE_BUTTON_TEST_ID = 'tiIndicatorsTableCellTimelineButton';
 export const CELL_FILTER_IN_BUTTON_TEST_ID = 'tiIndicatorsTableCellFilterInButton';

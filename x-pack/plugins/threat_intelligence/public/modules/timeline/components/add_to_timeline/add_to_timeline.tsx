@@ -17,10 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { generateDataProvider } from '../../utils/data_provider';
-import {
-  fieldAndValueValid,
-  getIndicatorFieldAndValue,
-} from '../../../indicators/utils/field_value';
+import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../../indicators';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { Indicator } from '../../../../../common/types/indicator';
 import { useStyles } from './styles';
