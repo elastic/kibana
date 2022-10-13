@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import classnames from 'classnames';
 import React, { useEffect } from 'react';
 import type { FunctionComponent } from 'react';
 import {
@@ -15,6 +14,7 @@ import {
   EuiModalFooter,
   EuiLoadingSpinner,
   EuiSpacer,
+  EuiFlexGroup,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
@@ -27,6 +27,7 @@ import { UploadFilesPrompt } from './components/upload_files';
 import { FileGrid } from './components/file_grid';
 import { SearchField } from './components/search_field';
 import { SelectButton } from './components/select_button';
+import { Pagination } from './components/pagination';
 
 import './file_picker.scss';
 import { ClearFilterButton } from './components/clear_filter_button';
@@ -58,15 +59,11 @@ const Component: FunctionComponent<Props> = ({ onClose, onDone }) => {
   const error = useBehaviorSubject(state.loadingError$);
 
   useEffect(() => {
-    state.load();
+    state.loadFiles();
   }, [state]);
 
   return (
-    <EuiModal
-      className={classnames('filesFilePicker', { ['filesFilePicker--fixed']: hasFiles })}
-      maxWidth="75vw"
-      onClose={onClose}
-    >
+    <EuiModal className="filesFilePicker filesFilePicker--fixed" maxWidth="75vw" onClose={onClose}>
       <EuiModalHeader>
         <Title />
         {hasFiles && <SearchField />}
@@ -85,7 +82,7 @@ const Component: FunctionComponent<Props> = ({ onClose, onDone }) => {
             place-self: center stretch;
           `}
         >
-          <ErrorContent onRetry={state.load} error={error as Error} />
+          <ErrorContent onRetry={state.loadFiles} error={error as Error} />
         </EuiModalBody>
       ) : !hasFiles ? (
         <EuiModalBody>
@@ -99,7 +96,10 @@ const Component: FunctionComponent<Props> = ({ onClose, onDone }) => {
             <ClearFilterButton onClick={() => state.setQuery(undefined)} />
           </EuiModalBody>
           <EuiModalFooter>
-            <SelectButton onClick={onDone} />
+            <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" alignItems="center">
+              <Pagination />
+              <SelectButton onClick={onDone} />
+            </EuiFlexGroup>
           </EuiModalFooter>
         </>
       )}
@@ -108,7 +108,7 @@ const Component: FunctionComponent<Props> = ({ onClose, onDone }) => {
 };
 
 export const FilePicker: FunctionComponent<Props> = (props) => (
-  <FilePickerContext pageSize={props.pageSize ?? 100} kind={props.kind}>
+  <FilePickerContext pageSize={props.pageSize ?? 20} kind={props.kind}>
     <Component {...props} />
   </FilePickerContext>
 );

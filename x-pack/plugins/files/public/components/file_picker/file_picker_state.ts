@@ -5,30 +5,29 @@
  * 2.0.
  */
 import {
+  tap,
   map,
+  from,
+  finalize,
+  Observable,
+  shareReplay,
   debounceTime,
   Subscription,
   combineLatest,
   BehaviorSubject,
   distinctUntilChanged,
-  Observable,
-  from,
-  finalize,
-  shareReplay,
+  combineLatestWith,
 } from 'rxjs';
 import { FileJSON } from '../../../common';
 import { FilesClient } from '../../types';
 
-const filterFiles = (files: FileJSON[], filter?: string) => {
+const filterFiles = (files: FileJSON[], filter: undefined | string) => {
   if (!filter) return files;
   const lowerFilter = filter.toLowerCase();
   return files.filter((file) => {
     return file.name.toLowerCase().includes(lowerFilter);
   });
 };
-
-const getFilteredCount = (unfilteredCount: number, filteredCount: number) =>
-  unfilteredCount - filteredCount;
 
 export class FilePickerState {
   /**
@@ -47,8 +46,9 @@ export class FilePickerState {
   public readonly loadingError$ = new BehaviorSubject<undefined | Error>(undefined);
   public readonly hasFiles$ = new BehaviorSubject<boolean>(false);
   public readonly query$ = new BehaviorSubject<undefined | string>(undefined);
+  public readonly currentPage$ = new BehaviorSubject<number>(0);
+  public readonly totalPages$ = new BehaviorSubject<undefined | number>(undefined);
 
-  private pageSize$: BehaviorSubject<number>;
   /**
    * This is how we keep a deduplicated list of file ids representing files a user
    * has selected
@@ -60,9 +60,8 @@ export class FilePickerState {
   constructor(
     private readonly client: FilesClient,
     private readonly kind: string,
-    private readonly initialPageSize: number
+    public readonly pageSize: number
   ) {
-    this.pageSize$ = new BehaviorSubject<number>(this.initialPageSize);
     this.subscriptions = [
       this.unfilteredFiles$
         .pipe(
@@ -72,7 +71,16 @@ export class FilePickerState {
         .subscribe(this.hasFiles$),
 
       combineLatest([this.unfilteredFiles$, this.query$.pipe(debounceTime(100))])
-        .pipe(map(([files, query]) => filterFiles(files, query)))
+        .pipe(
+          map(([files, query]) => filterFiles(files, query)),
+          // capture total pages after filtering
+          tap((files) => this.totalPages$.next(Math.ceil(files.length / this.pageSize))),
+          // then paginate
+          combineLatestWith(this.currentPage$),
+          map(([files, page]) => {
+            return files.slice(page * this.pageSize, (page + 1) * this.pageSize);
+          })
+        )
         .subscribe(this.files$),
     ];
   }
@@ -86,28 +94,21 @@ export class FilePickerState {
     this.sendNextSelectedFiles();
   };
 
-  private loadFiles = (pageSize: number): Observable<void> => {
-    return from(this.client.list({ kind: this.kind, page: 1, perPage: pageSize })).pipe(
+  private sendRequest = (): Observable<void> => {
+    return from(this.client.list({ kind: this.kind, page: 1, perPage: 1000 })).pipe(
       map(({ files }) => {
         this.unfilteredFiles$.next(files);
-        this.pageSize$.next(pageSize);
       }),
       shareReplay()
     );
   };
 
-  public load = (): Observable<void> => {
+  public loadFiles = (): Observable<void> => {
     this.isLoading$.next(true);
     this.loadingError$.next(undefined);
-    const request$ = this.loadFiles(this.initialPageSize).pipe(
-      finalize(() => this.isLoading$.next(false))
-    );
+    const request$ = this.sendRequest().pipe(finalize(() => this.isLoading$.next(false)));
     request$.subscribe({ error: (e) => this.loadingError$.next(e) });
     return request$;
-  };
-
-  public loadMore = (): Observable<void> => {
-    return this.loadFiles(this.pageSize$.getValue() + this.initialPageSize);
   };
 
   public hasFilesSelected = (): boolean => {
@@ -129,6 +130,11 @@ export class FilePickerState {
   public setQuery = (query: undefined | string): void => {
     if (query) this.query$.next(query);
     else this.query$.next(undefined);
+    this.currentPage$.next(1);
+  };
+
+  public setPage = (page: number): void => {
+    this.currentPage$.next(page);
   };
 
   public dispose = (): void => {
