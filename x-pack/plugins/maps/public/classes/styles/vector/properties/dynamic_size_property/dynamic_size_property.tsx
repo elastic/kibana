@@ -112,9 +112,14 @@ export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions
       this.getStyleName() === VECTOR_STYLES.ICON_SIZE && this._isSymbolizedAsIcon
         ? this._options.minSize / HALF_MAKI_ICON_SIZE
         : this._options.minSize;
+    const invert = this._options.invert === undefined ? false : this._options.invert;
     const stops =
       rangeFieldMeta.min === rangeFieldMeta.max
-        ? [maxValueStopInput, maxRangeStopOutput]
+        ? invert
+          ? [maxValueStopInput, minRangeStopOutput]
+          : [maxValueStopInput, maxRangeStopOutput]
+        : invert
+        ? [minValueStopInput, maxRangeStopOutput, maxValueStopInput, minRangeStopOutput]
         : [minValueStopInput, minRangeStopOutput, maxValueStopInput, maxRangeStopOutput];
 
     const valueExpression = makeMbClampedNumberExpression({
@@ -122,7 +127,7 @@ export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions
       maxValue: rangeFieldMeta.max,
       minValue: rangeFieldMeta.min,
       fieldName: this.getMbFieldName(),
-      fallback: rangeFieldMeta.min,
+      fallback: invert ? rangeFieldMeta.max : rangeFieldMeta.min,
     });
     const valueShiftExpression =
       rangeFieldMeta.min < 1 ? ['+', valueExpression, valueShift] : valueExpression;
