@@ -111,6 +111,7 @@ function getDataLayers(
   series: SeriesParam[],
   vis: Vis<VisParams>
 ): XYDataLayerConfig[] {
+  const overwriteColors: Record<string, string> = vis.uiState.get('vis.colors', {});
   return layers.map((layer) => {
     const xColumn = layer.columns.find((c) => c.isBucketed && !c.isSplit);
     const splitAccessor = layer.columns.find(
@@ -133,6 +134,7 @@ function getDataLayers(
       isHorizontal,
       isPercentage
     );
+
     return {
       layerId: layer.layerId,
       accessors: layer.metrics,
@@ -150,6 +152,8 @@ function getDataLayers(
         return {
           forAccessor: metricId,
           axisMode: getYAxisPosition(yAxis?.position ?? 'left'),
+          color:
+            !splitAccessor && serie?.data.label ? overwriteColors[serie?.data.label] : undefined,
         };
       }),
       xScaleType: getXScaleType(xColumn),
