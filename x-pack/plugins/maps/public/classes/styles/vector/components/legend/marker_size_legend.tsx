@@ -139,14 +139,17 @@ export class MarkerSizeLegend extends Component<Props, State> {
       // This function mirrors output of maplibre expression created from DynamicSizeProperty.getMbSizeExpression
       const scaledWidth = Math.pow(percentage * Math.sqrt(fieldMeta!.delta), 2);
       const value = invert ? fieldMeta!.max - scaledWidth : scaledWidth + fieldMeta!.min;
-      //const value = Math.pow(percentage * Math.sqrt(fieldMeta!.delta), 2) + fieldMeta!.min;
+      // const value = Math.pow(percentage * Math.sqrt(fieldMeta!.delta), 2) + fieldMeta!.min;
       return fieldMeta!.delta > 3 ? Math.round(value) : value;
     }
 
     const markers = [];
 
     if (fieldMeta.delta > 0) {
-      const smallestMarker = makeMarker(options.minSize, this._formatValue(invert ? fieldMeta.max : fieldMeta.min));
+      const smallestMarker = makeMarker(
+        options.minSize,
+        this._formatValue(invert ? fieldMeta.max : fieldMeta.min)
+      );
       markers.push(smallestMarker);
 
       const markerDelta = options.maxSize - options.minSize;
@@ -159,7 +162,10 @@ export class MarkerSizeLegend extends Component<Props, State> {
       }
     }
 
-    const largestMarker = makeMarker(options.maxSize, this._formatValue(invert ? fieldMeta.min : fieldMeta.max));
+    const largestMarker = makeMarker(
+      options.maxSize,
+      this._formatValue(invert ? fieldMeta.min : fieldMeta.max)
+    );
     markers.push(largestMarker);
 
     return (

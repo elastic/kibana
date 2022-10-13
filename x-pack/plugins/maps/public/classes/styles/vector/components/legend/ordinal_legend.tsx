@@ -138,6 +138,9 @@ export class OrdinalLegend extends Component<Props, State> {
         this.props.style.isFieldMetaEnabled() && fieldMeta.isMaxOutsideStdRange ? `> ${max}` : max;
     }
 
+    const options = this.props.style.getOptions();
+    const invert = options.invert === undefined ? false : options.invert;
+
     return (
       <RangedStyleLegendRow
         header={header}
@@ -145,6 +148,7 @@ export class OrdinalLegend extends Component<Props, State> {
         maxLabel={maxLabel}
         propertyLabel={this.props.style.getDisplayStyleName()}
         fieldLabel={this.state.label}
+        invert={invert}
       />
     );
   }
