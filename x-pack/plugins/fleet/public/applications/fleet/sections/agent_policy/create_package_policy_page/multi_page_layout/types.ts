@@ -27,7 +27,7 @@ export interface MultiPageStepLayoutProps {
   enrollmentAPIKey?: EnrollmentAPIKey;
   packageInfo: PackageInfo;
   integrationInfo?: RegistryPolicyTemplate;
-  cancelClickHandler: React.ReactEventHandler;
+  cancelClickHandler?: React.ReactEventHandler;
   onBack: React.ReactEventHandler;
   cancelUrl: string;
   steps: MultiPageStep[];

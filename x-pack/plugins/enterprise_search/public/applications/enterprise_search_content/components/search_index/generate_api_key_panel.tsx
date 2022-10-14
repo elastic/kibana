@@ -27,7 +27,7 @@ import { OverviewLogic } from './overview.logic';
 
 export const GenerateApiKeyPanel: React.FC = () => {
   const { apiKey, isGenerateModalOpen } = useValues(OverviewLogic);
-  const { indexName } = useValues(IndexViewLogic);
+  const { indexName, ingestionMethod } = useValues(IndexViewLogic);
   const { closeGenerateModal } = useActions(OverviewLogic);
   const { defaultPipeline } = useValues(SettingsLogic);
 
@@ -58,6 +58,7 @@ export const GenerateApiKeyPanel: React.FC = () => {
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiSwitch
+                      data-telemetry-id={`entSearchContent-${ingestionMethod}-overview-generateApiKey-optimizedRequest`}
                       onChange={(event) => setOptimizedRequest(event.target.checked)}
                       label={i18n.translate(
                         'xpack.enterpriseSearch.content.overview.optimizedRequest.label',

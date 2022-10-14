@@ -31,11 +31,17 @@ import {
   AlertsTableConfigurationRegistryContract,
   RuleTypeRegistryContract,
 } from '../types';
-import { Section, routeToRuleDetails, legacyRouteToRuleDetails } from './constants';
+import {
+  Section,
+  routeToRuleDetails,
+  legacyRouteToRuleDetails,
+  routeToConnectors,
+} from './constants';
 
 import { setDataViewsService } from '../common/lib/data_apis';
 import { KibanaContextProvider, useKibana } from '../common/lib/kibana';
 import { ConnectorProvider } from './context/connector_context';
+import { CONNECTORS_PLUGIN_ID } from '../common/constants';
 
 const TriggersActionsUIHome = lazy(() => import('./home'));
 const RuleDetailsRoute = lazy(
@@ -73,7 +79,7 @@ export const renderApp = (deps: TriggersAndActionsUiServices) => {
 
 export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
   const { dataViews, uiSettings, theme$ } = deps;
-  const sections: Section[] = ['rules', 'connectors', 'logs', 'alerts'];
+  const sections: Section[] = ['rules', 'logs', 'alerts'];
   const isDarkMode = useObservable<boolean>(uiSettings.get$('theme:darkMode'));
 
   const sectionsRegex = sections.join('|');
@@ -96,6 +102,7 @@ export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
 export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) => {
   const {
     actions: { validateEmailAddresses },
+    application: { navigateToApp },
   } = useKibana().services;
 
   return (
@@ -114,6 +121,15 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
           path={legacyRouteToRuleDetails}
           render={({ match }) => <Redirect to={`/rule/${match.params.alertId}`} />}
         />
+        <Route
+          exact
+          path={routeToConnectors}
+          render={() => {
+            navigateToApp(`management/insightsAndAlerting/${CONNECTORS_PLUGIN_ID}`);
+            return null;
+          }}
+        />
+
         <Redirect from={'/'} to="rules" />
         <Redirect from={'/alerts'} to="rules" />
       </Switch>
