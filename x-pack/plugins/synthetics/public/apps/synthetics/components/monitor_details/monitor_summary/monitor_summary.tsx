@@ -48,7 +48,7 @@ export const MonitorSummary = () => {
             <EuiTitle size="xs">
               <h3 css={{ margin: euiTheme.size.s, marginBottom: 0 }}>{LAST_30DAYS_LABEL}</h3>
             </EuiTitle>
-            <EuiFlexGroup gutterSize="none">
+            <EuiFlexGroup gutterSize="s">
               <EuiFlexItem>
                 <AvailabilityPanel />
               </EuiFlexItem>
