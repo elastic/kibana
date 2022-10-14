@@ -226,29 +226,43 @@ const excludeLinks = (linkIds: SecurityPageName[]) => ({
   links: links.links?.filter((link) => !linkIds.includes(link.id)),
 });
 
+const getHostIsolationExceptionTotal = async (http: CoreStart['http']) => {
+  const hostIsolationExceptionsApiClientInstance =
+    HostIsolationExceptionsApiClient.getInstance(http);
+  const summaryResponse = await hostIsolationExceptionsApiClientInstance.summary();
+  return summaryResponse.total;
+};
+
 export const getManagementFilteredLinks = async (
   core: CoreStart,
   plugins: StartPlugins
 ): Promise<LinkItem> => {
   try {
     const currentUserResponse = await plugins.security.authc.getCurrentUser();
-    const privileges = calculateEndpointAuthz(
-      licenseService,
-      plugins.fleet?.authz,
-      currentUserResponse.roles
-    );
-    if (!privileges.canAccessEndpointManagement) {
+    const { canAccessEndpointManagement, canIsolateHost, canAccessResponseActionsHistory } =
+      calculateEndpointAuthz(licenseService, plugins.fleet?.authz, currentUserResponse.roles);
+
+    if (!canAccessEndpointManagement) {
       return excludeLinks([
         SecurityPageName.hostIsolationExceptions,
         SecurityPageName.responseActionsHistory,
       ]);
     }
-    if (!privileges.canIsolateHost || !privileges.canAccessResponseActionsHistory) {
-      const hostIsolationExceptionsApiClientInstance = HostIsolationExceptionsApiClient.getInstance(
-        core.http
-      );
-      const summaryResponse = await hostIsolationExceptionsApiClientInstance.summary();
-      if (!summaryResponse.total) {
+
+    if (!canAccessResponseActionsHistory) {
+      // <= enterprise license
+      const hostExceptionCount = await getHostIsolationExceptionTotal(core.http);
+      if (!canIsolateHost && !hostExceptionCount) {
+        return excludeLinks([
+          SecurityPageName.hostIsolationExceptions,
+          SecurityPageName.responseActionsHistory,
+        ]);
+      }
+      return excludeLinks([SecurityPageName.responseActionsHistory]);
+    } else if (!canIsolateHost) {
+      const hostExceptionCount = await getHostIsolationExceptionTotal(core.http);
+      if (!hostExceptionCount) {
+        // <= platinum so exclude also links that require enterprise
         return excludeLinks([
           SecurityPageName.hostIsolationExceptions,
           SecurityPageName.responseActionsHistory,
