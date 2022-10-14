@@ -63,9 +63,9 @@ export const useLogFilterState = ({ indexPattern }: { indexPattern: DataViewBase
     [parseQuery, queryString]
   );
 
-  const [logFilterState, setLogFilterState] = useState<ILogFilterState>({
+  const [logFilterState, setLogFilterState] = useState<ILogFilterState>(() => ({
     filterQuery: getLogFilterQuery(queryString.getQuery()) || null,
-  });
+  }));
 
   const applyLogFilterQuery = useCallback(
     (filterQuery: Query | AggregateQuery) => {
