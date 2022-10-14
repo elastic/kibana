@@ -183,7 +183,6 @@ describe('useFailedTransactionsCorrelations', () => {
         });
         expect(result.current.response).toEqual({
           ccsWarning: false,
-          fieldStats: undefined,
           errorHistogram: undefined,
           failedTransactionsCorrelations: undefined,
           overallHistogram: [
@@ -205,7 +204,6 @@ describe('useFailedTransactionsCorrelations', () => {
         });
         expect(result.current.response).toEqual({
           ccsWarning: false,
-          fieldStats: undefined,
           errorHistogram: [
             {
               doc_count: 1234,
@@ -244,7 +242,6 @@ describe('useFailedTransactionsCorrelations', () => {
 
         expect(result.current.response).toEqual({
           ccsWarning: false,
-          fieldStats: undefined,
           errorHistogram: [
             {
               doc_count: 1234,
@@ -285,10 +282,6 @@ describe('useFailedTransactionsCorrelations', () => {
 
         expect(result.current.response).toEqual({
           ccsWarning: false,
-          fieldStats: [
-            { fieldName: 'field-name-1', count: 123 },
-            { fieldName: 'field-name-2', count: 1111 },
-          ],
           errorHistogram: [
             {
               doc_count: 1234,

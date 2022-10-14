@@ -164,7 +164,6 @@ describe('useLatencyCorrelations', () => {
         });
         expect(result.current.response).toEqual({
           ccsWarning: false,
-          fieldStats: undefined,
           latencyCorrelations: undefined,
           overallHistogram: [
             {
@@ -208,7 +207,6 @@ describe('useLatencyCorrelations', () => {
 
         expect(result.current.response).toEqual({
           ccsWarning: false,
-          fieldStats: undefined,
           latencyCorrelations: [
             {
               fieldName: 'field-name-1',
@@ -228,9 +226,6 @@ describe('useLatencyCorrelations', () => {
         });
 
         jest.advanceTimersByTime(100);
-        await waitFor(() =>
-          expect(result.current.response.fieldStats).toBeDefined()
-        );
 
         expect(result.current.progress).toEqual({
           error: undefined,
@@ -240,10 +235,6 @@ describe('useLatencyCorrelations', () => {
 
         expect(result.current.response).toEqual({
           ccsWarning: false,
-          fieldStats: [
-            { fieldName: 'field-name-1', count: 123 },
-            { fieldName: 'field-name-2', count: 1111 },
-          ],
           latencyCorrelations: [
             {
               fieldName: 'field-name-1',

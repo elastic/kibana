@@ -73,7 +73,6 @@ export function useFailedTransactionsCorrelations() {
       overallHistogram: undefined,
       totalDocCount: undefined,
       errorHistogram: undefined,
-      fieldStats: undefined,
     });
     setResponse.flush();
 
@@ -251,20 +250,6 @@ export function useFailedTransactionsCorrelations() {
 
       setResponse.flush();
 
-      const { stats } = await callApmApi(
-        'POST /internal/apm/correlations/field_stats/transactions',
-        {
-          signal: abortCtrl.current.signal,
-          params: {
-            body: {
-              ...fetchParams,
-              fieldsToSample: [...fieldsToSample],
-            },
-          },
-        }
-      );
-
-      responseUpdate.fieldStats = stats;
       setResponse({
         ...responseUpdate,
         fallbackResult,

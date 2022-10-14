@@ -28,7 +28,6 @@ import {
 import { fetchFieldValueFieldStats } from './queries/field_stats/fetch_field_value_field_stats';
 import { fetchFieldValuePairs } from './queries/fetch_field_value_pairs';
 import { fetchSignificantCorrelations } from './queries/fetch_significant_correlations';
-import { fetchFieldsStats } from './queries/field_stats/fetch_fields_stats';
 import { fetchPValues } from './queries/fetch_p_values';
 
 const INVALID_LICENSE = i18n.translate('xpack.apm.correlations.license.text', {
@@ -88,74 +87,6 @@ const fieldCandidatesTransactionsRoute = createApmServerRoute({
         },
       },
       setup,
-    });
-  },
-});
-
-const fieldStatsTransactionsRoute = createApmServerRoute({
-  endpoint: 'POST /internal/apm/correlations/field_stats/transactions',
-  params: t.type({
-    body: t.intersection([
-      t.partial({
-        serviceName: t.string,
-        transactionName: t.string,
-        transactionType: t.string,
-      }),
-      t.type({
-        fieldsToSample: t.array(t.string),
-      }),
-      environmentRt,
-      kueryRt,
-      rangeRt,
-    ]),
-  }),
-  options: { tags: ['access:apm'] },
-  handler: async (
-    resources
-  ): Promise<{
-    stats: Array<
-      import('./../../../common/correlations/field_stats_types').FieldStats
-    >;
-    errors: any[];
-  }> => {
-    const { context } = resources;
-    const { license } = await context.licensing;
-    if (!isActivePlatinumLicense(license)) {
-      throw Boom.forbidden(INVALID_LICENSE);
-    }
-
-    const setup = await setupRequest(resources);
-
-    const {
-      body: {
-        serviceName,
-        transactionName,
-        transactionType,
-        start,
-        end,
-        environment,
-        kuery,
-        fieldsToSample,
-      },
-    } = resources.params;
-
-    return fetchFieldsStats({
-      setup,
-      eventType: ProcessorEvent.transaction,
-      start,
-      end,
-      environment,
-      kuery,
-      query: {
-        bool: {
-          filter: [
-            ...termQuery(SERVICE_NAME, serviceName),
-            ...termQuery(TRANSACTION_TYPE, transactionType),
-            ...termQuery(TRANSACTION_NAME, transactionName),
-          ],
-        },
-      },
-      fieldsToSample,
     });
   },
 });

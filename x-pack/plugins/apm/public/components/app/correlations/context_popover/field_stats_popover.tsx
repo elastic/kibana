@@ -23,8 +23,17 @@ import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plug
 import { useFetchParams } from '../use_fetch_params';
 import { ApmPluginStartDeps } from '../../../../plugin';
 import { useApmDataView } from '../../../../hooks/use_apm_data_view';
-import { OnAddFilter } from './top_values';
 import { useTheme } from '../../../../hooks/use_theme';
+
+export type OnAddFilter = ({
+  fieldName,
+  fieldValue,
+  include,
+}: {
+  fieldName: string;
+  fieldValue: string | number;
+  include: boolean;
+}) => void;
 
 const defaultFilters: Filter[] = [];
 

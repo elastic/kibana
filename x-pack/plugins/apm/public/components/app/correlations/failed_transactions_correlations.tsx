@@ -35,7 +35,6 @@ import {
   asPreciseDecimal,
 } from '../../../../common/utils/formatters';
 import { FailedTransactionsCorrelation } from '../../../../common/correlations/failed_transactions_correlations/types';
-import { FieldStats } from '../../../../common/correlations/field_stats_types';
 
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useLocalStorage } from '../../../hooks/use_local_storage';
@@ -51,7 +50,7 @@ import { DurationDistributionChart } from '../../shared/charts/duration_distribu
 import { CorrelationsEmptyStatePrompt } from './empty_state_prompt';
 import { CrossClusterSearchCompatibilityWarning } from './cross_cluster_search_warning';
 import { CorrelationsProgressControls } from './progress_controls';
-import { OnAddFilter } from './context_popover/top_values';
+import { OnAddFilter } from './context_popover/field_stats_popover';
 
 import { useFailedTransactionsCorrelations } from './use_failed_transactions_correlations';
 import { getTransactionDistributionChartData } from './get_transaction_distribution_chart_data';
@@ -73,13 +72,6 @@ export function FailedTransactionsCorrelations({
 
   const { progress, response, startFetch, cancelFetch } =
     useFailedTransactionsCorrelations();
-
-  const fieldStats: Record<string, FieldStats> | undefined = useMemo(() => {
-    return response.fieldStats?.reduce((obj, field) => {
-      obj[field.fieldName] = field;
-      return obj;
-    }, {} as Record<string, FieldStats>);
-  }, [response?.fieldStats]);
 
   const { overallHistogram, hasData, status } = getOverallHistogram(
     response,
@@ -362,7 +354,7 @@ export function FailedTransactionsCorrelations({
         ],
       },
     ] as Array<EuiBasicTableColumn<FailedTransactionsCorrelation>>;
-  }, [fieldStats, onAddFilter, showStats]);
+  }, [onAddFilter, showStats]);
 
   useEffect(() => {
     if (progress.error) {
