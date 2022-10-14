@@ -40,6 +40,7 @@ interface IngestPipelineModalProps {
   createCustomPipelines: () => void;
   displayOnly: boolean;
   indexName: string;
+  ingestionMethod: string;
   isGated: boolean;
   isLoading: boolean;
   pipeline: IngestPipelineParams;
@@ -53,6 +54,7 @@ export const IngestPipelineModal: React.FC<IngestPipelineModalProps> = ({
   createCustomPipelines,
   displayOnly,
   indexName,
+  ingestionMethod,
   isGated,
   isLoading,
   pipeline,
@@ -160,7 +162,11 @@ export const IngestPipelineModal: React.FC<IngestPipelineModalProps> = ({
                 </EuiText>
               </EuiFormRow>
               <EuiFormRow fullWidth>
-                <PipelineSettingsForm pipeline={pipeline} setPipeline={setPipeline} />
+                <PipelineSettingsForm
+                  ingestionMethod={ingestionMethod}
+                  pipeline={pipeline}
+                  setPipeline={setPipeline}
+                />
               </EuiFormRow>
             </EuiForm>
             <EuiSpacer />
@@ -206,6 +212,7 @@ export const IngestPipelineModal: React.FC<IngestPipelineModalProps> = ({
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup justifyContent="flexStart">
                   <EuiButtonEmpty
+                    data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-ingestPipelines-copyAndCustomize`}
                     disabled={isGated}
                     iconType={isGated ? 'lock' : undefined}
                     onClick={createCustomPipelines}
