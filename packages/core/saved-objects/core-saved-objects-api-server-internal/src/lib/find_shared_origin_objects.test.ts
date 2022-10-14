@@ -10,6 +10,8 @@ import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import type { CreatePointInTimeFinderFn, PointInTimeFinder } from './point_in_time_finder';
 import { savedObjectsPointInTimeFinderMock } from '../mocks/point_in_time_finder.mock';
 import { findSharedOriginObjects } from './find_shared_origin_objects';
+import { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
+import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 interface MockFindResultParams {
   type: string;
@@ -19,15 +21,12 @@ interface MockFindResultParams {
 }
 
 describe('findSharedOriginObjects', () => {
-  let savedObjectsMock: ReturnType<typeof savedObjectsPointInTimeFinderMock.createClient>;
+  let savedObjectsMock: jest.Mocked<ISavedObjectsRepository>;
   let pointInTimeFinder: DeeplyMockedKeys<PointInTimeFinder>;
   let createPointInTimeFinder: jest.MockedFunction<CreatePointInTimeFinderFn>;
 
   beforeEach(() => {
-    savedObjectsMock = savedObjectsPointInTimeFinderMock.createClient();
-    savedObjectsMock.openPointInTimeForType.mockResolvedValueOnce({
-      id: 'abc123',
-    });
+    savedObjectsMock = savedObjectsRepositoryMock.create();
     savedObjectsMock.find.mockResolvedValue({
       pit_id: 'foo',
       saved_objects: [],
@@ -79,21 +78,23 @@ describe('findSharedOriginObjects', () => {
     const result = await findSharedOriginObjects(createPointInTimeFinder, objects);
     expect(createPointInTimeFinder).toHaveBeenCalledTimes(1);
     expect(createPointInTimeFinder).toHaveBeenCalledWith(
-      expect.objectContaining({ type: ['type-1', 'type-2', 'type-3', 'type-4'] }) // filter assertions are below
+      expect.objectContaining({ type: ['type-1', 'type-2', 'type-3', 'type-4'] }), // filter assertions are below
+      undefined,
+      { disableExtensions: true }
     );
     const kueryFilterArgs = createPointInTimeFinder.mock.calls[0][0].filter.arguments;
     expect(kueryFilterArgs).toHaveLength(8); // 2 for each object
     [obj1, obj2, obj3].forEach(({ type, origin }, i) => {
       expect(kueryFilterArgs[i * 2].arguments).toEqual(
         expect.arrayContaining([
-          { type: 'literal', value: `${type}.id`, isQuoted: false },
-          { type: 'literal', value: `${type}:${origin}`, isQuoted: false },
+          { isQuoted: false, type: 'literal', value: `${type}.id` },
+          { isQuoted: false, type: 'literal', value: `${type}:${origin}` },
         ])
       );
       expect(kueryFilterArgs[i * 2 + 1].arguments).toEqual(
         expect.arrayContaining([
-          { type: 'literal', value: `${type}.originId`, isQuoted: false },
-          { type: 'literal', value: origin, isQuoted: false },
+          { isQuoted: false, type: 'literal', value: `${type}.originId` },
+          { isQuoted: false, type: 'literal', value: origin },
         ])
       );
     });
@@ -119,7 +120,11 @@ describe('findSharedOriginObjects', () => {
     const objects = [obj1, obj2, obj3];
     await findSharedOriginObjects(createPointInTimeFinder, objects, 999);
     expect(createPointInTimeFinder).toHaveBeenCalledTimes(1);
-    expect(createPointInTimeFinder).toHaveBeenCalledWith(expect.objectContaining({ perPage: 999 }));
+    expect(createPointInTimeFinder).toHaveBeenCalledWith(
+      expect.objectContaining({ perPage: 999 }),
+      undefined,
+      { disableExtensions: true }
+    );
   });
 
   it('does not create a PointInTimeFinder if no objects are passed in', async () => {

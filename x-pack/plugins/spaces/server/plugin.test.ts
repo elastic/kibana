@@ -54,7 +54,7 @@ describe('Spaces plugin', () => {
       expect(core.capabilities.registerSwitcher).toHaveBeenCalledTimes(1);
     });
 
-    it('registers the usage collector', () => {
+    it('registers the usage collector if the usageCollection plugin is enabled', () => {
       const initializerContext = coreMock.createPluginInitializerContext({});
       const core = coreMock.createSetup() as CoreSetup<PluginsStart>;
       const features = featuresPluginMock.createSetup();

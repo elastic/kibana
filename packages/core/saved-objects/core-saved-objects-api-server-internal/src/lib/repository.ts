@@ -2730,7 +2730,7 @@ export class SavedObjectsRepository implements ISavedObjectsRepository {
       logger: this._logger,
       client: this,
       ...dependencies,
-      /* internalOptions,*/
+      internalOptions,
     });
   }
 

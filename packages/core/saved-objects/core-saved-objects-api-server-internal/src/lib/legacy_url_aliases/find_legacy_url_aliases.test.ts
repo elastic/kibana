@@ -15,14 +15,16 @@ import {
 import type { CreatePointInTimeFinderFn, PointInTimeFinder } from '../point_in_time_finder';
 import { findLegacyUrlAliases } from './find_legacy_url_aliases';
 import { savedObjectsPointInTimeFinderMock } from '../../mocks';
+import { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
+import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
 
 describe('findLegacyUrlAliases', () => {
-  let savedObjectsMock: ReturnType<typeof savedObjectsPointInTimeFinderMock.createClient>;
+  let savedObjectsMock: jest.Mocked<ISavedObjectsRepository>;
   let pointInTimeFinder: DeeplyMockedKeys<PointInTimeFinder>;
   let createPointInTimeFinder: jest.MockedFunction<CreatePointInTimeFinderFn>;
 
   beforeEach(() => {
-    savedObjectsMock = savedObjectsPointInTimeFinderMock.createClient();
+    savedObjectsMock = savedObjectsRepositoryMock.create();
     savedObjectsMock.find.mockResolvedValue({
       pit_id: 'foo',
       saved_objects: [],
@@ -30,9 +32,6 @@ describe('findLegacyUrlAliases', () => {
       total: 0,
       page: 1,
       per_page: 100,
-    });
-    savedObjectsMock.openPointInTimeForType.mockResolvedValueOnce({
-      id: 'abc123',
     });
     pointInTimeFinder = savedObjectsPointInTimeFinderMock.create({ savedObjectsMock })(); // PIT finder mock uses the actual implementation, but it doesn't need to be created with real params because the SOR is mocked too
     createPointInTimeFinder = jest.fn().mockReturnValue(pointInTimeFinder);
@@ -74,10 +73,14 @@ describe('findLegacyUrlAliases', () => {
     const objects = [obj1, obj2, obj3];
     const result = await findLegacyUrlAliases(createPointInTimeFinder, objects);
     expect(createPointInTimeFinder).toHaveBeenCalledTimes(1);
-    expect(createPointInTimeFinder).toHaveBeenCalledWith({
-      type: LEGACY_URL_ALIAS_TYPE,
-      filter: expect.any(Object), // assertions are below
-    });
+    expect(createPointInTimeFinder).toHaveBeenCalledWith(
+      {
+        type: LEGACY_URL_ALIAS_TYPE,
+        filter: expect.any(Object), // assertions are below
+      },
+      undefined,
+      { disableExtensions: true }
+    );
     const kueryFilterArgs = createPointInTimeFinder.mock.calls[0][0].filter.arguments;
     expect(kueryFilterArgs).toHaveLength(2);
     const typeAndIdFilters = kueryFilterArgs[1].arguments;
@@ -86,10 +89,10 @@ describe('findLegacyUrlAliases', () => {
       const typeAndIdFilter = typeAndIdFilters[i].arguments;
       expect(typeAndIdFilter).toEqual([
         expect.objectContaining({
-          arguments: expect.arrayContaining([{ type: 'literal', value: type, isQuoted: false }]),
+          arguments: expect.arrayContaining([{ isQuoted: false, type: 'literal', value: type }]),
         }),
         expect.objectContaining({
-          arguments: expect.arrayContaining([{ type: 'literal', value: id, isQuoted: false }]),
+          arguments: expect.arrayContaining([{ isQuoted: false, type: 'literal', value: id }]),
         }),
       ]);
     });
@@ -107,11 +110,15 @@ describe('findLegacyUrlAliases', () => {
     const objects = [obj1, obj2, obj3];
     await findLegacyUrlAliases(createPointInTimeFinder, objects, 999);
     expect(createPointInTimeFinder).toHaveBeenCalledTimes(1);
-    expect(createPointInTimeFinder).toHaveBeenCalledWith({
-      type: LEGACY_URL_ALIAS_TYPE,
-      perPage: 999,
-      filter: expect.any(Object),
-    });
+    expect(createPointInTimeFinder).toHaveBeenCalledWith(
+      {
+        type: LEGACY_URL_ALIAS_TYPE,
+        perPage: 999,
+        filter: expect.any(Object),
+      },
+      undefined,
+      { disableExtensions: true }
+    );
   });
 
   it('does not create a PointInTimeFinder if no objects are passed in', async () => {

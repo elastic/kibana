@@ -118,7 +118,7 @@ export function bulkGetTestSuiteFactory(context: FtrProviderContext) {
 
         after(async () => {
           await testDataLoader.deleteFtrSpaces();
-          await testDataLoader.deleteFtrSavedObjectsData();
+          await testDataLoader.deleteFtrSavedObjectsData(); // Should these just be called in the opposite order?
         });
 
         for (const test of tests) {

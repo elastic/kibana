@@ -31,7 +31,8 @@ export interface PointInTimeFinderDependencies
  */
 export type CreatePointInTimeFinderFn = <T = unknown, A = unknown>(
   findOptions: SavedObjectsCreatePointInTimeFinderOptions,
-  dependencies?: SavedObjectsCreatePointInTimeFinderDependencies
+  dependencies?: SavedObjectsCreatePointInTimeFinderDependencies,
+  internalOptions?: SavedObjectsFindInternalOptions
 ) => ISavedObjectsPointInTimeFinder<T, A>;
 
 /**
