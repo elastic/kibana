@@ -779,13 +779,7 @@
           "description": [],
           "signature": [
             "{ getRelatedCases: (alertId: string, query: { owner?: string | string[] | undefined; }) => Promise<{ id: string; title: string; }[]>; cases: { find: (query: { tags?: string | string[] | undefined; status?: ",
-            {
-              "pluginId": "cases",
-              "scope": "common",
-              "docId": "kibCasesPluginApi",
-              "section": "def-common.CaseStatuses",
-              "text": "CaseStatuses"
-            },
+            "CaseStatuses",
             " | undefined; severity?: ",
             "CaseSeverity",
             " | undefined; assignees?: string | string[] | undefined; reporters?: string | string[] | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; fields?: string | string[] | undefined; from?: string | undefined; page?: number | undefined; perPage?: number | undefined; search?: string | undefined; searchFields?: string | string[] | undefined; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; to?: string | undefined; owner?: string | string[] | undefined; }, signal?: AbortSignal | undefined) => Promise<",
@@ -1475,7 +1469,10 @@
         "tags": [],
         "label": "CaseStatuses",
         "description": [],
-        "path": "x-pack/plugins/cases/common/api/cases/status.ts",
+        "signature": [
+          "CaseStatuses"
+        ],
+        "path": "node_modules/@types/kbn__cases-components/index.d.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1515,13 +1512,7 @@
         "description": [],
         "signature": [
           "Omit<{ description: string; status: ",
-          {
-            "pluginId": "cases",
-            "scope": "common",
-            "docId": "kibCasesPluginApi",
-            "section": "def-common.CaseStatuses",
-            "text": "CaseStatuses"
-          },
+          "CaseStatuses",
           "; tags: string[]; title: string; connector: { id: string; type: ",
           "ConnectorTypes",
           ".casesWebhook; fields: null; name: string; } | { id: string; type: ",

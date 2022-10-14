@@ -198,6 +198,7 @@ export class CasePlugin {
       lensEmbeddableFactory: this.lensEmbeddableFactory!,
       persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
       externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
+      publicBaseUrl: core.http.basePath.publicBaseUrl,
     });
 
     const client = core.elasticsearch.client;
