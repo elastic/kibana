@@ -120,7 +120,6 @@ interface PackQueriesStatusTableProps {
   data?: PackQueryStatusItem[];
   startDate?: string;
   expirationDate?: string;
-  hideAddToCases?: boolean;
   showResultsHeader?: boolean;
 }
 
@@ -131,7 +130,6 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   data,
   startDate,
   expirationDate,
-  hideAddToCases = false,
   showResultsHeader,
 }) => {
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<Record<string, unknown>>({});
@@ -206,7 +204,6 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
                   endDate={expirationDate}
                   agentIds={agentIds}
                   failedAgentsCount={item?.failed ?? 0}
-                  hideAddToCases={hideAddToCases}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -216,7 +213,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         return itemIdToExpandedRowMapValues;
       });
     },
-    [actionId, startDate, expirationDate, agentIds, hideAddToCases]
+    [actionId, startDate, expirationDate, agentIds]
   );
 
   const renderToggleResultsAction = useCallback(
@@ -252,7 +249,6 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
         {
           render: (item: { action_id: string }) => (
             <AddToCaseWrapper
-              hideAddToCases={hideAddToCases}
               actionId={actionId}
               agentIds={agentIds}
               queryId={item.action_id}
@@ -265,7 +261,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
 
       return resultActions.map((action) => action.render(row));
     },
-    [actionId, agentIds, hideAddToCases, renderDiscoverResultsAction, renderLensResultsAction]
+    [actionId, agentIds, renderDiscoverResultsAction, renderLensResultsAction]
   );
   const columns = useMemo(
     () => [

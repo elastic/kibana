@@ -7,8 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const OSQUERY_APP_NAME = 'Osquery';
-
 export const generateEmptyDataMessage = (agentsResponded: number): string =>
   i18n.translate('xpack.osquery.results.multipleAgentsResponded', {
     defaultMessage:

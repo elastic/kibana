@@ -26,7 +26,6 @@ export interface AddToCaseButtonProps {
   isIcon?: boolean;
   isDisabled?: boolean;
   iconProps?: Record<string, string>;
-  hideAddToCases?: boolean;
 }
 
 export const AddToCaseButton: React.FC<AddToCaseButtonProps> = ({

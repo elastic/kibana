@@ -20,7 +20,6 @@ interface ResultTabsProps {
   failedAgentsCount?: number;
   endDate?: string;
   liveQueryActionId?: string;
-  hideAddToCases?: boolean;
 }
 
 const ResultTabsComponent: React.FC<ResultTabsProps> = ({
@@ -31,7 +30,6 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
   failedAgentsCount,
   startDate,
   liveQueryActionId,
-  hideAddToCases = false,
 }) => {
   const tabs = useMemo(
     () => [
@@ -46,7 +44,6 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
             startDate={startDate}
             endDate={endDate}
             liveQueryActionId={liveQueryActionId}
-            hideAddToCases={hideAddToCases}
           />
         ),
       },
@@ -63,16 +60,7 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
         ) : null,
       },
     ],
-    [
-      actionId,
-      agentIds,
-      ecsMapping,
-      startDate,
-      endDate,
-      liveQueryActionId,
-      hideAddToCases,
-      failedAgentsCount,
-    ]
+    [actionId, agentIds, ecsMapping, startDate, endDate, liveQueryActionId, failedAgentsCount]
   );
 
   return (

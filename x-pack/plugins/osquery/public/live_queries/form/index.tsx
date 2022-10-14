@@ -12,6 +12,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useForm as useHookForm, FormProvider } from 'react-hook-form';
 import { isEmpty, find, pickBy } from 'lodash';
 
+import { PLUGIN_NAME as OSQUERY_PLUGIN_NAME } from '../../../common';
 import { QueryPackSelectable } from './query_pack_selectable';
 import type { SavedQuerySOFormData } from '../../saved_queries/form/use_saved_query_form';
 import { useKibana } from '../../common/lib/kibana';
@@ -25,7 +26,6 @@ import { LiveQueryQueryField } from './live_query_query_field';
 import { AgentsTableField } from './agents_table_field';
 import { savedQueryDataSerializer } from '../../saved_queries/form/use_saved_query_form';
 import { PackFieldWrapper } from '../../shared_components/osquery_response_action_type/pack_field_wrapper';
-import { OSQUERY_APP_NAME } from '../../results/translations';
 
 export interface LiveQueryFormFields {
   alertIds?: string[];
@@ -323,7 +323,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
 
       {showSavedQueryFlyout ? (
         <SavedQueryFlyout
-          isExternal={appName !== OSQUERY_APP_NAME}
+          isExternal={appName !== OSQUERY_PLUGIN_NAME}
           onClose={handleCloseSaveQueryFlyout}
           defaultValue={serializedData}
         />

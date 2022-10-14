@@ -28,20 +28,20 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { createContext, useEffect, useState, useCallback, useContext, useMemo } from 'react';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
-import { AddToTimelineButton, SECURITY_APP_NAME } from '../timelines/add_to_timeline_button';
+import { AddToTimelineButton } from '../timelines/add_to_timeline_button';
 import { useAllResults } from './use_all_results';
 import type { ResultEdges } from '../../common/search_strategy';
 import { Direction } from '../../common/search_strategy';
 import { useKibana } from '../common/lib/kibana';
 import { useActionResults } from '../action_results/use_action_results';
-import { generateEmptyDataMessage, OSQUERY_APP_NAME } from './translations';
+import { generateEmptyDataMessage } from './translations';
 import {
   ViewResultsInDiscoverAction,
   ViewResultsInLensAction,
   ViewResultsActionButtonType,
 } from '../packs/pack_queries_status_table';
 import { useActionResultsPrivileges } from '../action_results/use_action_privileges';
-import { OSQUERY_INTEGRATION_NAME } from '../../common';
+import { OSQUERY_INTEGRATION_NAME, PLUGIN_NAME as OSQUERY_PLUGIN_NAME } from '../../common';
 import { AddToCaseWrapper } from '../cases/add_to_cases';
 
 const DataContext = createContext<ResultEdges>([]);
@@ -54,7 +54,6 @@ export interface ResultsTableComponentProps {
   endDate?: string;
   startDate?: string;
   liveQueryActionId?: string;
-  hideAddToCases: boolean;
 }
 
 const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
@@ -64,7 +63,6 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   startDate,
   endDate,
   liveQueryActionId,
-  hideAddToCases,
 }) => {
   const [isLive, setIsLive] = useState(true);
   const { data: hasActionResultsPrivileges } = useActionResultsPrivileges();
@@ -86,6 +84,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   const {
     application: { getUrlForApp },
     appName,
+    timelines,
   } = useKibana().services;
 
   const getFleetAppUrl = useCallback(
@@ -309,7 +308,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 
   const leadingControlColumns: EuiDataGridControlColumn[] = useMemo(() => {
     const data = allResultsData?.edges;
-    if (appName === SECURITY_APP_NAME && data) {
+    if (timelines && data) {
       return [
         {
           id: 'timeline',
@@ -328,12 +327,12 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     }
 
     return [];
-  }, [allResultsData?.edges, appName]);
+  }, [allResultsData?.edges, timelines]);
 
   const toolbarVisibility = useMemo(
     () => ({
       showDisplaySelector: false,
-      showFullScreenSelector: appName === OSQUERY_APP_NAME,
+      showFullScreenSelector: appName === OSQUERY_PLUGIN_NAME,
       additionalControls: (
         <>
           <ViewResultsInDiscoverAction
@@ -349,16 +348,11 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
             startDate={startDate}
           />
           <AddToTimelineButton field="action_id" value={actionId} />
-          <AddToCaseWrapper
-            actionId={liveQueryActionId}
-            queryId={actionId}
-            agentIds={agentIds}
-            hideAddToCases={hideAddToCases}
-          />
+          <AddToCaseWrapper actionId={liveQueryActionId} queryId={actionId} agentIds={agentIds} />
         </>
       ),
     }),
-    [actionId, agentIds, appName, endDate, hideAddToCases, liveQueryActionId, startDate]
+    [actionId, agentIds, appName, endDate, liveQueryActionId, startDate]
   );
 
   useEffect(

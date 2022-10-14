@@ -28,49 +28,53 @@ const StyledIconsList = styled(EuiFlexItem)`
   padding-left: 10px;
 `;
 
-export const PackResultsHeader = ({ actionId, agentIds, queryIds }: PackResultsHeadersProps) => {
-  const iconProps = useMemo(() => ({ color: 'text', size: 'xs', iconSize: 'l' }), []);
+export const PackResultsHeader = React.memo(
+  ({ actionId, agentIds, queryIds }: PackResultsHeadersProps) => {
+    const iconProps = useMemo(() => ({ color: 'text', size: 'xs', iconSize: 'l' }), []);
 
-  return (
-    <>
-      <EuiSpacer size={'l'} />
-      <EuiFlexGroup direction="row" gutterSize="m">
-        <StyledResultsHeading grow={false}>
-          <EuiText>
-            <h2>
-              <FormattedMessage
-                id="xpack.osquery.liveQueryActionResults.results"
-                defaultMessage="Results"
-              />
-            </h2>
-          </EuiText>
-        </StyledResultsHeading>
-        <StyledIconsList grow={false}>
-          <span>
-            {actionId && (
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  <AddToCaseWrapper
-                    actionId={actionId}
-                    agentIds={agentIds}
-                    isIcon={true}
-                    iconProps={iconProps}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <AddToTimelineButton
-                    field="action_id"
-                    value={queryIds}
-                    isIcon={true}
-                    iconProps={iconProps}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            )}
-          </span>
-        </StyledIconsList>
-      </EuiFlexGroup>
-      <EuiSpacer size={'l'} />
-    </>
-  );
-};
+    return (
+      <>
+        <EuiSpacer size={'l'} />
+        <EuiFlexGroup direction="row" gutterSize="m">
+          <StyledResultsHeading grow={false}>
+            <EuiText>
+              <h2>
+                <FormattedMessage
+                  id="xpack.osquery.liveQueryActionResults.results"
+                  defaultMessage="Results"
+                />
+              </h2>
+            </EuiText>
+          </StyledResultsHeading>
+          <StyledIconsList grow={false}>
+            <span>
+              {actionId && (
+                <EuiFlexGroup>
+                  <EuiFlexItem>
+                    <AddToCaseWrapper
+                      actionId={actionId}
+                      agentIds={agentIds}
+                      isIcon={true}
+                      iconProps={iconProps}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <AddToTimelineButton
+                      field="action_id"
+                      value={queryIds}
+                      isIcon={true}
+                      iconProps={iconProps}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              )}
+            </span>
+          </StyledIconsList>
+        </EuiFlexGroup>
+        <EuiSpacer size={'l'} />
+      </>
+    );
+  }
+);
+
+PackResultsHeader.displayName = 'PackResultsHeader';

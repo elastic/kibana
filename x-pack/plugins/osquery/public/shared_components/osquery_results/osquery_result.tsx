@@ -20,30 +20,32 @@ interface OsqueryResultProps extends Omit<OsqueryActionResultsProps, 'alertId'> 
   startDate: string;
 }
 
-export const OsqueryResult = ({ actionId, ruleName, agentIds, startDate }: OsqueryResultProps) => {
-  const { data } = useLiveQueryDetails({
-    actionId,
-  });
+export const OsqueryResult = React.memo(
+  ({ actionId, ruleName, agentIds, startDate }: OsqueryResultProps) => {
+    const { data } = useLiveQueryDetails({
+      actionId,
+    });
 
-  return (
-    <div>
-      <EuiSpacer size="s" />
-      <EuiComment
-        username={ruleName && ruleName[0]}
-        timestamp={<FormattedRelative value={startDate} />}
-        event={ATTACHED_QUERY}
-        data-test-subj={'osquery-results-comment'}
-      >
-        <PackQueriesStatusTable
-          actionId={actionId}
-          // queryId={queryId}
-          data={data?.queries}
-          startDate={data?.['@timestamp']}
-          expirationDate={data?.expiration}
-          agentIds={agentIds}
-        />
-      </EuiComment>
-      <EuiSpacer size="s" />
-    </div>
-  );
-};
+    return (
+      <div>
+        <EuiSpacer size="s" />
+        <EuiComment
+          username={ruleName && ruleName[0]}
+          timestamp={<FormattedRelative value={startDate} />}
+          event={ATTACHED_QUERY}
+          data-test-subj={'osquery-results-comment'}
+        >
+          <PackQueriesStatusTable
+            actionId={actionId}
+            // queryId={queryId}
+            data={data?.queries}
+            startDate={data?.['@timestamp']}
+            expirationDate={data?.expiration}
+            agentIds={agentIds}
+          />
+        </EuiComment>
+        <EuiSpacer size="s" />
+      </div>
+    );
+  }
+);

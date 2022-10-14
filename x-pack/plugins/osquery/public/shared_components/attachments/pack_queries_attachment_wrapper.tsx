@@ -33,14 +33,17 @@ export const PackQueriesAttachmentWrapper = ({
   }, [data?.status]);
 
   return (
-    <PackQueriesStatusTable
-      actionId={actionId}
-      queryId={queryId}
-      data={data?.queries}
-      startDate={data?.['@timestamp']}
-      expirationDate={data?.expiration}
-      agentIds={agentIds}
-      hideAddToCases={true}
-    />
+    <CasesAttachmentWrapperContext.Provider value={true}>
+      <PackQueriesStatusTable
+        actionId={actionId}
+        queryId={queryId}
+        data={data?.queries}
+        startDate={data?.['@timestamp']}
+        expirationDate={data?.expiration}
+        agentIds={agentIds}
+      />
+    </CasesAttachmentWrapperContext.Provider>
   );
 };
+
+export const CasesAttachmentWrapperContext = React.createContext(false);
