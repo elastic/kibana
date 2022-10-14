@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { EuiIcon, useEuiTheme } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
+import { difference } from 'lodash';
 import { useUpdateCases } from '../../../containers/use_bulk_update_case';
 import { Case } from '../../../../common';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { UseActionProps } from '../types';
 import * as i18n from './translations';
+import { TagsSelectionState } from './types';
 
 export const useTagsAction = ({ onAction, onActionSuccess, isDisabled }: UseActionProps) => {
-  const euiTheme = useEuiTheme();
   const { mutate: updateCases } = useUpdateCases();
   const { permissions } = useCasesContext();
   const [isFlyoutOpen, setIsFlyoutOpen] = useState<boolean>(false);
@@ -32,24 +33,30 @@ export const useTagsAction = ({ onAction, onActionSuccess, isDisabled }: UseActi
     [onAction]
   );
 
-  const handleUpdateCaseTags = useCallback(
-    (selectedCases: Case[], tags: Case['tags']) => {
+  const onSaveTags = useCallback(
+    (tagsSelection: TagsSelectionState) => {
       onAction();
-      const casesToUpdate = selectedCases.map((theCase) => ({
-        tags,
-        id: theCase.id,
-        version: theCase.version,
-      }));
+      onFlyoutClosed();
+      const casesToUpdate = selectedCasesToEditTags.map((theCase) => {
+        const tags = difference(theCase.tags, tagsSelection.unSelectedTags);
+        const uniqueTags = new Set([...tags, ...tagsSelection.selectedTags]);
+
+        return {
+          tags: Array.from(uniqueTags.values()),
+          id: theCase.id,
+          version: theCase.version,
+        };
+      });
 
       updateCases(
         {
           cases: casesToUpdate,
-          successToasterTitle: '',
+          successToasterTitle: i18n.EDITED_TAGS(selectedCasesToEditTags.length),
         },
         { onSuccess: onActionSuccess }
       );
     },
-    [onAction, onActionSuccess]
+    [onAction, onActionSuccess, onFlyoutClosed, selectedCasesToEditTags, updateCases]
   );
 
   const getAction = (selectedCases: Case[]) => {
@@ -62,6 +69,8 @@ export const useTagsAction = ({ onAction, onActionSuccess, isDisabled }: UseActi
       key: 'cases-bulk-action-tags',
     };
   };
+
+  return { getAction, isFlyoutOpen, onFlyoutClosed, onSaveTags };
 };
 
 export type UseTagsAction = ReturnType<typeof useTagsAction>;
