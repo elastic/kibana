@@ -88,7 +88,7 @@ export function AlertDetails() {
         />
       </EuiPanel>
     );
-  const AlertDetailsAppSection = ruleTypeModel?.alertDetailsAppSection;
+  const AlertDetailsAppSection = ruleTypeModel ? ruleTypeModel.alertDetailsAppSection : null;
   return (
     <ObservabilityPageTemplate
       pageHeader={{
@@ -107,7 +107,7 @@ export function AlertDetails() {
       data-test-subj="alertDetails"
     >
       <AlertSummary alert={alert} />
-      <AlertDetailsAppSection alert={alert} />
+      {AlertDetailsAppSection && <AlertDetailsAppSection alert={alert} />}
     </ObservabilityPageTemplate>
   );
 }

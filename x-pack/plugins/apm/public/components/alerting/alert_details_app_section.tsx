@@ -7,8 +7,10 @@
 
 import { TopAlert } from '@kbn/observability-plugin/public/pages/alerts';
 import React from 'react';
-
-function AlertDetailsAppSection({ alert }: { alert: TopAlert }) {
+export interface AlertDetailsAppSectionProps {
+  alert: TopAlert;
+}
+export function AlertDetailsAppSection({ alert }: AlertDetailsAppSectionProps) {
   return <h1>Alert Context: {alert.reason}</h1>;
 }
 
