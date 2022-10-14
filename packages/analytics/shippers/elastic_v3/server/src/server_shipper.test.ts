@@ -36,9 +36,6 @@ describe('ElasticV3ServerShipper', () => {
 
   let shipper: ElasticV3ServerShipper;
 
-  // eslint-disable-next-line dot-notation
-  const setLastBatchSent = (ms: number) => (shipper['lastBatchSent'] = ms);
-
   beforeEach(() => {
     jest.useFakeTimers();
 
@@ -47,7 +44,7 @@ describe('ElasticV3ServerShipper', () => {
       initContext
     );
     // eslint-disable-next-line dot-notation
-    shipper['firstTimeOffline'] = null; // The tests think connectivity is OK initially for easier testing.
+    shipper['firstTimeOffline$'].next(null); // The tests think connectivity is OK initially for easier testing.
   });
 
   afterEach(() => {
@@ -122,7 +119,6 @@ describe('ElasticV3ServerShipper', () => {
       shipper.reportEvents(events);
       shipper.optIn(true);
       const counter = firstValueFrom(shipper.telemetryCounter$);
-      setLastBatchSent(Date.now() - 10 * MINUTES);
       advance(10 * MINUTES);
       expect(fetchMock).toHaveBeenCalledWith(
         'https://telemetry-staging.elastic.co/v3/send/test-channel',
@@ -154,7 +150,6 @@ describe('ElasticV3ServerShipper', () => {
     fakeSchedulers((advance) => {
       shipper.reportEvents(events);
       shipper.optIn(false);
-      setLastBatchSent(Date.now() - 10 * MINUTES);
       advance(10 * MINUTES);
       expect(fetchMock).not.toHaveBeenCalled();
     })
@@ -198,10 +193,9 @@ describe('ElasticV3ServerShipper', () => {
         initContext
       );
       // eslint-disable-next-line dot-notation
-      shipper['firstTimeOffline'] = null;
+      shipper['firstTimeOffline$'].next(null);
       shipper.reportEvents(events);
       shipper.optIn(true);
-      setLastBatchSent(Date.now() - 10 * MINUTES);
       advance(10 * MINUTES);
       expect(fetchMock).toHaveBeenCalledWith(
         'https://telemetry-staging.elastic.co/v3/send/test-channel',
@@ -221,15 +215,14 @@ describe('ElasticV3ServerShipper', () => {
   test(
     'sends when the queue overflows the 10kB leaky bucket one batch every 10s',
     fakeSchedulers(async (advance) => {
-      expect.assertions(2 * 9 + 2);
+      expect.assertions(2 * 8 + 2);
 
       shipper.reportEvents(new Array(1000).fill(events[0]));
       shipper.optIn(true);
 
-      // Due to the size of the test events, it matches 9 rounds.
-      for (let i = 0; i < 9; i++) {
+      // Due to the size of the test events, it matches 8 rounds.
+      for (let i = 0; i < 8; i++) {
         const counter = firstValueFrom(shipper.telemetryCounter$);
-        setLastBatchSent(Date.now() - 10 * SECONDS);
         advance(10 * SECONDS);
         expect(fetchMock).toHaveBeenNthCalledWith(
           i + 1,
@@ -277,7 +270,6 @@ describe('ElasticV3ServerShipper', () => {
       shipper.reportEvents(events);
       shipper.optIn(true);
       const counter = firstValueFrom(shipper.telemetryCounter$);
-      setLastBatchSent(Date.now() - 10 * MINUTES);
       advance(10 * MINUTES);
       expect(fetchMock).toHaveBeenCalledWith(
         'https://telemetry-staging.elastic.co/v3/send/test-channel',
@@ -315,7 +307,6 @@ describe('ElasticV3ServerShipper', () => {
       shipper.reportEvents(events);
       shipper.optIn(true);
       const counter = firstValueFrom(shipper.telemetryCounter$);
-      setLastBatchSent(Date.now() - 10 * MINUTES);
       advance(10 * MINUTES);
       expect(fetchMock).toHaveBeenCalledWith(
         'https://telemetry-staging.elastic.co/v3/send/test-channel',
@@ -371,7 +362,7 @@ describe('ElasticV3ServerShipper', () => {
     describe('connectivity check with initial unknown state of the connectivity', () => {
       beforeEach(() => {
         // eslint-disable-next-line dot-notation
-        shipper['firstTimeOffline'] = undefined; // Initial unknown state of the connectivity
+        shipper['firstTimeOffline$'].next(undefined); // Initial unknown state of the connectivity
       });
 
       test.each([undefined, false])('does not run for opt-in %p', (optInValue) =>
@@ -412,7 +403,7 @@ describe('ElasticV3ServerShipper', () => {
     describe('connectivity check with the connectivity confirmed to be faulty', () => {
       beforeEach(() => {
         // eslint-disable-next-line dot-notation
-        shipper['firstTimeOffline'] = 100; // Failed at some point
+        shipper['firstTimeOffline$'].next(100); // Failed at some point
       });
 
       test.each([undefined, false])('does not run for opt-in %p', (optInValue) =>
@@ -458,7 +449,6 @@ describe('ElasticV3ServerShipper', () => {
           shipper.reportEvents(events);
           shipper.optIn(true);
           const counter = firstValueFrom(shipper.telemetryCounter$);
-          setLastBatchSent(Date.now() - 10 * MINUTES);
           advance(10 * MINUTES);
           expect(fetchMock).toHaveBeenNthCalledWith(
             1,
@@ -516,7 +506,7 @@ describe('ElasticV3ServerShipper', () => {
         // eslint-disable-next-line dot-notation
         expect(shipper['internalQueue'].length).toBe(1);
         // eslint-disable-next-line dot-notation
-        shipper['firstTimeOffline'] = 100;
+        shipper['firstTimeOffline$'].next(100);
       });
 
       test(
@@ -567,7 +557,7 @@ describe('ElasticV3ServerShipper', () => {
             { method: 'OPTIONS' }
           );
           // eslint-disable-next-line dot-notation
-          expect(shipper['firstTimeOffline']).toBe(null);
+          expect(shipper['firstTimeOffline$'].value).toBe(null);
 
           advance(10 * MINUTES);
           await nextTick();

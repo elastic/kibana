@@ -14,8 +14,6 @@ import {
   interval,
   concatMap,
   merge,
-  from,
-  firstValueFrom,
   timer,
   retryWhen,
   tap,
@@ -68,8 +66,6 @@ export class ElasticV3ServerShipper implements IShipper {
 
   private readonly url: string;
 
-  private lastBatchSent = Date.now();
-
   private clusterUuid: string = 'UNKNOWN';
   private licenseId?: string;
 
@@ -80,7 +76,7 @@ export class ElasticV3ServerShipper implements IShipper {
    * - `number` means it's offline since that time
    * @private
    */
-  private firstTimeOffline?: number | null;
+  private readonly firstTimeOffline$ = new BehaviorSubject<undefined | number | null>(undefined);
 
   /**
    * Creates a new instance of the {@link ElasticV3ServerShipper}.
@@ -130,9 +126,10 @@ export class ElasticV3ServerShipper implements IShipper {
    * @param events batched events {@link Event}
    */
   public reportEvents(events: Event[]) {
+    // If opted out OR offline for longer than 24 hours, skip processing any events.
     if (
       this.isOptedIn$.value === false ||
-      (this.firstTimeOffline && Date.now() - this.firstTimeOffline > 24 * HOUR)
+      (this.firstTimeOffline$.value && Date.now() - this.firstTimeOffline$.value > 24 * HOUR)
     ) {
       return;
     }
@@ -160,6 +157,7 @@ export class ElasticV3ServerShipper implements IShipper {
     this.shutdown$.next();
     this.shutdown$.complete();
     this.isOptedIn$.complete();
+    this.firstTimeOffline$.complete();
   }
 
   /**
@@ -180,7 +178,7 @@ export class ElasticV3ServerShipper implements IShipper {
     )
       .pipe(
         takeUntil(this.shutdown$),
-        filter(() => this.isOptedIn$.value === true && this.firstTimeOffline !== null),
+        filter(() => this.isOptedIn$.value === true && this.firstTimeOffline$.value !== null),
         // Using exhaustMap here because one request at a time is enough to check the connectivity.
         exhaustMap(async () => {
           const { ok } = await fetch(this.url, {
@@ -191,16 +189,16 @@ export class ElasticV3ServerShipper implements IShipper {
             throw new Error(`Failed to connect to ${this.url}`);
           }
 
-          this.firstTimeOffline = null;
+          this.firstTimeOffline$.next(null);
           backoff = 1 * MINUTE;
         }),
         retryWhen((errors) =>
           errors.pipe(
             takeUntil(this.shutdown$),
             tap(() => {
-              if (!this.firstTimeOffline) {
-                this.firstTimeOffline = Date.now();
-              } else if (Date.now() - this.firstTimeOffline > 24 * HOUR) {
+              if (!this.firstTimeOffline$.value) {
+                this.firstTimeOffline$.next(Date.now());
+              } else if (Date.now() - this.firstTimeOffline$.value > 24 * HOUR) {
                 this.internalQueue.length = 0;
               }
               backoff = backoff * 2;
@@ -216,34 +214,26 @@ export class ElasticV3ServerShipper implements IShipper {
   }
 
   private setInternalSubscriber() {
-    // Check the status of the queues every 1 second.
     merge(
-      interval(1000).pipe(takeUntil(this.shutdown$)),
-      // Using a promise because complete does not emit through the pipe.
-      from(firstValueFrom(this.shutdown$, { defaultValue: true }))
+      // Attempt to send every 10 seconds
+      interval(10 * SECOND).pipe(takeUntil(this.shutdown$)),
+      // React to opt in changes. The filter below stops if not opted-in.
+      this.isOptedIn$,
+      // React to connectivity changes. The filter below stops if not online.
+      this.firstTimeOffline$,
+      // Attempt to send one last time on shutdown
+      this.shutdown$
     )
       .pipe(
-        // Only move ahead if it's opted-in and online.
-        filter(() => this.isOptedIn$.value === true && this.firstTimeOffline === null),
-
-        // Send the events now if (validations sorted from cheapest to most CPU expensive):
-        // - We are shutting down.
-        // - There are some events in the queue, and we didn't send anything in the last 10 seconds.
+        // Only move ahead if it's opted-in and online, and there are some events in the queue
         filter(
           () =>
-            this.shutdown$.isStopped ||
-            (this.internalQueue.length > 0 && Date.now() - this.lastBatchSent >= 10 * SECOND)
+            this.isOptedIn$.value === true &&
+            this.firstTimeOffline$.value === null &&
+            this.internalQueue.length > 0
         ),
-
-        // Send the events:
-        // 1. Set lastBatchSent and retrieve the events to send (clearing the queue) in a synchronous operation to avoid race conditions.
-        map(() => {
-          this.lastBatchSent = Date.now();
-          return this.getEventsToSend();
-        }),
-        // 2. Skip empty buffers
-        filter((events) => events.length > 0),
-        // 3. Actually send the events
+        // Retrieve the events to send (clearing the queue) in a synchronous operation to avoid race conditions.
+        map(() => this.getEventsToSend()),
         // Using `concatMap` here because we want to send events whenever the emitter says so. Otherwise, it'd skip sending some events.
         concatMap(async (eventsToSend) => await this.sendEvents(eventsToSend))
       )
@@ -302,7 +292,7 @@ export class ElasticV3ServerShipper implements IShipper {
       this.initContext.logger.debug(`Failed to report ${events.length} events...`);
       this.initContext.logger.debug(error);
       this.reportTelemetryCounters(events, { code: error.code, error });
-      this.firstTimeOffline = undefined;
+      this.firstTimeOffline$.next(undefined);
     }
   }
 
