@@ -124,6 +124,7 @@ interface ApiActionUpdateLoadingState {
     loaded: number;
     loadingState: string;
     remainingFieldCandidates?: string[];
+    groupsMissing?: boolean;
   };
 }
 

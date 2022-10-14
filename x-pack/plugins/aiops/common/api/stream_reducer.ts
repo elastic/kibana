@@ -17,6 +17,7 @@ interface StreamState {
   loaded: number;
   loadingState: string;
   remainingFieldCandidatesChunks?: string[][];
+  groupsMissing?: boolean;
 }
 
 export const initialState: StreamState = {

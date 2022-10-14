@@ -195,11 +195,7 @@ export const defineExplainLogRateSpikesRoute = (
           let sampleProbability = 1;
           let totalDocCount = 0;
 
-          if (request.body.overrides?.fieldCandidates) {
-            logDebugMessage('Use field candidates overrides.');
-            fieldCandidates = request.body.overrides?.fieldCandidates;
-            fieldCandidatesCount = fieldCandidates.length;
-          } else {
+          if (!request.body.overrides?.remainingFieldCandidates) {
             logDebugMessage('Fetch index information.');
             push(
               updateLoadingStateAction({
@@ -252,19 +248,21 @@ export const defineExplainLogRateSpikesRoute = (
                 ),
               })
             );
-          }
 
-          if (fieldCandidatesCount === 0) {
-            endWithUpdatedLoadingState();
-          } else if (shouldStop) {
-            logDebugMessage('shouldStop after fetching field candidates.');
-            end();
-            return;
+            if (fieldCandidatesCount === 0) {
+              endWithUpdatedLoadingState();
+            } else if (shouldStop) {
+              logDebugMessage('shouldStop after fetching field candidates.');
+              end();
+              return;
+            }
           }
 
           // Step 2: Significant Terms
 
-          const changePoints: ChangePoint[] = [];
+          const changePoints: ChangePoint[] = request.body.overrides?.changePoints
+            ? request.body.overrides?.changePoints
+            : [];
           const fieldsToSample = new Set<string>();
 
           // Don't use more than 10 here otherwise Kibana will emit an error
@@ -428,8 +426,13 @@ export const defineExplainLogRateSpikesRoute = (
                     defaultMessage: 'Transforming significant field/value pairs into groups.',
                   }
                 ),
+                groupsMissing: true,
               })
             );
+
+            // if (request.body.overrides === undefined) {
+            //   throw new Error('simulate error');
+            // }
 
             // To optimize the `frequent_items` query, we identify duplicate change points by count attributes.
             // Note this is a compromise and not 100% accurate because there could be change points that

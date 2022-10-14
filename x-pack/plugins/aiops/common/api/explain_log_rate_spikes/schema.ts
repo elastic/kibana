@@ -30,6 +30,7 @@ export const aiopsExplainLogRateSpikesSchema = schema.object({
       loaded: schema.maybe(schema.number()),
       fieldCandidates: schema.maybe(schema.arrayOf(schema.string())),
       remainingFieldCandidates: schema.maybe(schema.arrayOf(schema.string())),
+      changePoints: schema.maybe(schema.arrayOf(schema.any())),
     })
   ),
 });
