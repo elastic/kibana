@@ -69,7 +69,8 @@ export const useGroupedFields = ({
       setDataView(await services.dataViews.get(dataViewId));
     };
     getDataView();
-  }, [dataViewId, services.dataViews, setDataView]);
+    // if field existence information changed, reload the data view too
+  }, [dataViewId, services.dataViews, setDataView, hasFieldData]);
 
   const unfilteredFieldGroups: FieldListGroups = useMemo(() => {
     const containsData = (field: DataViewField) => {
