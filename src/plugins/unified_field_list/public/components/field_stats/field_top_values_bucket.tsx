@@ -21,8 +21,7 @@ import type { IFieldSubTypeMulti } from '@kbn/es-query';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { AddFieldFilterHandler } from '../../types';
 
-export interface FieldTopValuesBucketProps {
-  type?: 'normal' | 'other';
+export interface FieldTopValuesBucketParams {
   field: DataViewField;
   fieldValue: unknown;
   formattedFieldValue?: string;
@@ -30,22 +29,42 @@ export interface FieldTopValuesBucketProps {
   progressValue: number;
   count: number;
   color: string;
+  type?: 'normal' | 'other';
+}
+
+export type OverrideFieldTopValueBarCallback = (
+  params: FieldTopValuesBucketParams
+) => Partial<FieldTopValuesBucketParams>;
+
+export interface FieldTopValuesBucketProps extends FieldTopValuesBucketParams {
   'data-test-subj': string;
   onAddFilter?: AddFieldFilterHandler;
+  /**
+   * Optional callback to allow overriding props on bucket level
+   */
+  overrideFieldTopValueBar?: OverrideFieldTopValueBarCallback;
 }
 
 export const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
-  type = 'normal',
-  field,
-  fieldValue,
-  formattedFieldValue,
-  formattedPercentage,
-  progressValue,
-  count,
-  color,
   'data-test-subj': dataTestSubject,
   onAddFilter,
+  overrideFieldTopValueBar,
+  ...fieldTopValuesBucketOverridableProps
 }) => {
+  const overrides = overrideFieldTopValueBar
+    ? overrideFieldTopValueBar(fieldTopValuesBucketOverridableProps)
+    : ({} as FieldTopValuesBucketParams);
+
+  const {
+    field,
+    type,
+    fieldValue,
+    formattedFieldValue,
+    formattedPercentage,
+    progressValue,
+    count,
+    color,
+  } = { ...fieldTopValuesBucketOverridableProps, ...overrides };
   const fieldLabel = (field?.subType as IFieldSubTypeMulti)?.multi?.parent ?? field.name;
 
   return (
@@ -69,7 +88,7 @@ export const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
           >
             {(formattedFieldValue?.length ?? 0) > 0 ? (
               <EuiToolTip content={formattedFieldValue} delay="long">
-                <EuiText size="xs" className="eui-textTruncate" color="subdued">
+                <EuiText size="xs" className="eui-textTruncate" color={color}>
                   {formattedFieldValue}
                 </EuiText>
               </EuiToolTip>

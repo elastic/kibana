@@ -34,6 +34,7 @@ import {
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { buildEsQuery, Query, Filter, AggregateQuery } from '@kbn/es-query';
+import { OverrideFieldTopValueBarCallback } from './field_top_values_bucket';
 import type { BucketedAggregation } from '../../../common/types';
 import { canProvideStatsForField } from '../../../common/utils/field_stats_utils';
 import { loadFieldStats } from '../../services/field_stats';
@@ -67,7 +68,9 @@ export interface FieldStatsProps {
   services: FieldStatsServices;
   query: Query | AggregateQuery;
   filters: Filter[];
+  /** ISO formatted date string **/
   fromDate: string;
+  /** ISO formatted date string **/
   toDate: string;
   dataViewOrDataViewId: DataView | string;
   field: DataViewField;
@@ -83,6 +86,7 @@ export interface FieldStatsProps {
     sampledDocuments?: number;
   }) => JSX.Element;
   onAddFilter?: AddFieldFilterHandler;
+  overrideFieldTopValueBar?: OverrideFieldTopValueBarCallback;
 }
 
 const FieldStatsComponent: React.FC<FieldStatsProps> = ({
@@ -98,6 +102,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   overrideMissingContent,
   overrideFooter,
   onAddFilter,
+  overrideFieldTopValueBar,
 }) => {
   const { fieldFormats, uiSettings, charts, dataViews, data } = services;
   const [state, changeState] = useState<State>({
@@ -169,7 +174,6 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
         topValues: results.topValues,
       }));
     } catch (e) {
-      // console.error(e);
       setState((s) => ({ ...s, isLoading: false }));
     }
   }
@@ -492,6 +496,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
         color={color}
         data-test-subj={dataTestSubject}
         onAddFilter={onAddFilter}
+        overrideFieldTopValueBar={overrideFieldTopValueBar}
       />
     );
   }
@@ -508,10 +513,6 @@ class ErrorBoundary extends React.Component<{}, { hasError: boolean }> {
   static getDerivedStateFromError() {
     return { hasError: true };
   }
-
-  // componentDidCatch(error, errorInfo) {
-  //   console.log(error, errorInfo);
-  // }
 
   render() {
     if (this.state.hasError) {

@@ -17,6 +17,8 @@ import {
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { Filter } from '@kbn/es-query';
 import { DataViewField } from '@kbn/data-views-plugin/common';
+import type { FieldTopValuesBucketParams } from '@kbn/unified-field-list-plugin/public/types';
+import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useFetchParams } from '../use_fetch_params';
 import { ApmPluginStartDeps } from '../../../../plugin';
@@ -24,10 +26,6 @@ import { useApmDataView } from '../../../../hooks/use_apm_data_view';
 import { OnAddFilter } from './top_values';
 import { useTheme } from '../../../../hooks/use_theme';
 
-const defaultQuery = {
-  query: '',
-  language: 'kuery',
-};
 const defaultFilters: Filter[] = [];
 
 export function FieldStatsPopover({
@@ -39,6 +37,14 @@ export function FieldStatsPopover({
   fieldValue: string | number;
   onAddFilter: OnAddFilter;
 }) {
+  const {
+    query: { kuery: kueryStr },
+  } = useApmParams('/services/{serviceName}');
+
+  const fieldStatsQuery = {
+    query: kueryStr,
+    language: 'kuery',
+  };
   const { start, end } = useFetchParams();
 
   const {
@@ -109,6 +115,17 @@ export function FieldStatsPopover({
     </EuiToolTip>
   );
 
+  const overrideFieldTopValueBar = (
+    fieldTopValuesBucketParams: FieldTopValuesBucketParams
+  ) => {
+    if (fieldTopValuesBucketParams.type === 'other') {
+      return { color: 'primary' };
+    }
+    return fieldValue === fieldTopValuesBucketParams.fieldValue
+      ? { color: 'accent' }
+      : {};
+  };
+
   return (
     <FieldPopover
       isOpen={infoIsOpen}
@@ -123,11 +140,12 @@ export function FieldStatsPopover({
             services={fieldStatsServices as FieldStatsServices}
             field={field}
             dataViewOrDataViewId={dataView}
-            query={defaultQuery}
+            query={fieldStatsQuery}
             filters={defaultFilters}
             fromDate={start}
             toDate={end}
             onAddFilter={addFilter}
+            overrideFieldTopValueBar={overrideFieldTopValueBar}
           />
         </>
       )}

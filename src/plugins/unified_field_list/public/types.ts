@@ -7,7 +7,7 @@
  */
 
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-
+export type { FieldTopValuesBucketParams } from './components/field_stats/field_top_values_bucket';
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface UnifiedFieldListPluginSetup {}
 
