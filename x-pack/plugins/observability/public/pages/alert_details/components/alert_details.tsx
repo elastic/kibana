@@ -53,6 +53,11 @@ export function AlertDetails() {
     return <CenterJustifiedSpinner />;
   }
 
+  // Redirect to the the 404 page when the user hit the page url directly in the browser while the feature flag is off.
+  if (!isAlertDetailsEnabledPerApp(alert, config)) {
+    return <PageNotFound />;
+  }
+
   if (!isLoading && !alert)
     return (
       <EuiPanel data-test-subj="alertDetailsError">
@@ -76,11 +81,6 @@ export function AlertDetails() {
         />
       </EuiPanel>
     );
-
-  // Redirect to the the 404 page when the user hit the page url directly in the browser while the feature flag is off.
-  if (!isAlertDetailsEnabledPerApp(alert, config)) {
-    return <PageNotFound />;
-  }
 
   return (
     <ObservabilityPageTemplate
