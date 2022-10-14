@@ -72,9 +72,6 @@ export function buildNumberColumn(sourceField: string) {
     dataType: 'number' as DataType,
     isBucketed: false,
     scale: 'ratio' as OperationMetadata['scale'],
-    params: {
-      emptyAsNull: true,
-    },
   };
 }
 
@@ -387,6 +384,12 @@ export class LensAttributes {
             }),
       filter: columnFilter,
       operationType,
+      params:
+        operationType === 'unique_count'
+          ? {
+              emptyAsNull: true,
+            }
+          : {},
     };
   }
 
