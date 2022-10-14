@@ -219,7 +219,7 @@ export const useXtermPlayer = ({
     // even though we set scrollback: 0 above, xterm steals the wheel events and prevents the outer container from scrolling
     // this handler fixes that
     const onScroll = (event: WheelEvent) => {
-      if ((event?.target as HTMLDivElement)?.className === 'xterm-cursor-layer') {
+      if ((event?.target as HTMLDivElement)?.offsetParent?.classList.contains('xterm-screen')) {
         event.stopImmediatePropagation();
       }
     };
