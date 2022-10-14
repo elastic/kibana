@@ -56,7 +56,7 @@ export const testNowMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
 
     const testRunId = uuidv4();
 
-    const errors = await syntheticsService.triggerConfigs(request, [
+    const errors = await syntheticsService.runOnceConfigs([
       formatHeartbeatRequest({
         // making it enabled, even if it's disabled in the UI
         monitor: { ...normalizedMonitor.attributes, enabled: true },

@@ -157,23 +157,6 @@ describe('SyntheticsService', () => {
   });
 
   describe('pushConfigs', () => {
-    it('does not include the isEdit flag on normal push requests', async () => {
-      const { service, locations } = getMockedService();
-
-      (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
-
-      const payload = getFakePayload([locations[0]]);
-
-      await service.pushConfigs([payload] as HeartbeatConfig[]);
-
-      expect(axios).toHaveBeenCalledTimes(1);
-      expect(axios).toHaveBeenCalledWith(
-        expect.objectContaining({
-          data: expect.objectContaining({ is_edit: false }),
-        })
-      );
-    });
-
     it('includes the isEdit flag on edit requests', async () => {
       const { service, locations } = getMockedService();
 
@@ -181,7 +164,7 @@ describe('SyntheticsService', () => {
 
       const payload = getFakePayload([locations[0]]);
 
-      await service.pushConfigs([payload] as HeartbeatConfig[], true);
+      await service.editConfig([payload] as HeartbeatConfig[]);
 
       expect(axios).toHaveBeenCalledTimes(1);
       expect(axios).toHaveBeenCalledWith(
