@@ -56,6 +56,7 @@ export const timestamp_field = t.string;
 export const timestampFieldOrUndefined = t.union([timestamp_field, t.undefined]);
 
 export const false_positives = t.array(t.string);
+export type FalsePositives = t.TypeOf<typeof false_positives>;
 
 export const file_name = t.string;
 export type FileName = t.TypeOf<typeof file_name>;

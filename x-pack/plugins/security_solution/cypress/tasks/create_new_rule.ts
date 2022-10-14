@@ -6,6 +6,12 @@
  */
 
 import type {
+  From,
+  Threat,
+  ThreatSubtechnique,
+  ThreatTechnique,
+} from '@kbn/securitysolution-io-ts-alerting-types';
+import type {
   CustomRule,
   MachineLearningRule,
   OverrideRule,
@@ -97,6 +103,7 @@ import {
   NEW_TERMS_HISTORY_TIME_TYPE,
   NEW_TERMS_INPUT_AREA,
   ACTIONS_THROTTLE_INPUT,
+  CONTINUE_BUTTON,
 } from '../screens/create_new_rule';
 import {
   INDEX_SELECTOR,
@@ -109,6 +116,20 @@ import { SERVER_SIDE_EVENT_COUNT } from '../screens/timeline';
 import { TIMELINE } from '../screens/timelines';
 import { refreshPage } from './security_header';
 import { EUI_FILTER_SELECT_ITEM, COMBO_BOX_INPUT } from '../screens/common/controls';
+import {
+  getDescription,
+  getFalsePositives,
+  getFrom,
+  getNote,
+  getReferenceUrls,
+  getRiskScore,
+  getRuleName,
+  getSeverity,
+  getTags,
+  getThreat,
+  getThreatSubtechnique,
+  getThreatTechnique,
+} from '../data/detection_engine';
 
 export const createAndEnableRule = () => {
   cy.get(CREATE_AND_ENABLE_BTN).click({ force: true });
@@ -149,11 +170,15 @@ export const fillAboutRule = (
   }
 };
 
-const fillNote = (note: string) => {
+export const expandAdvancedSettings = () => {
+  cy.get(ADVANCED_SETTINGS_BTN).click({ force: true });
+};
+
+export const fillNote = (note: string = getNote()) => {
   cy.get(INVESTIGATION_NOTES_TEXTAREA).clear({ force: true }).type(note, { force: true });
 };
 
-const fillMitre = (mitreAttacks: Mitre[]) => {
+export const fillMitre = (mitreAttacks: Mitre[]) => {
   let techniqueIndex = 0;
   let subtechniqueInputIndex = 0;
   mitreAttacks.forEach((mitre, tacticIndex) => {
@@ -180,7 +205,26 @@ const fillMitre = (mitreAttacks: Mitre[]) => {
   });
 };
 
-const fillFalsePositiveExamples = (falsePositives: string[]) => {
+export const fillThreat = (threat: Threat = getThreat()) => {
+  cy.get(MITRE_ATTACK_TACTIC_DROPDOWN).first().click({ force: true });
+  cy.contains(MITRE_TACTIC, threat.tactic.name).click();
+};
+
+export const fillThreatTechnique = (technique: ThreatTechnique = getThreatTechnique()) => {
+  cy.get(MITRE_ATTACK_ADD_TECHNIQUE_BUTTON).first().click({ force: true });
+  cy.get(MITRE_ATTACK_TECHNIQUE_DROPDOWN).first().click({ force: true });
+  cy.contains(MITRE_TACTIC, technique.name).click();
+};
+
+export const fillThreatSubtechnique = (
+  subtechnique: ThreatSubtechnique = getThreatSubtechnique()
+) => {
+  cy.get(MITRE_ATTACK_ADD_SUBTECHNIQUE_BUTTON).first().click({ force: true });
+  cy.get(MITRE_ATTACK_SUBTECHNIQUE_DROPDOWN).first().click({ force: true });
+  cy.contains(MITRE_TACTIC, subtechnique.name).click();
+};
+
+export const fillFalsePositiveExamples = (falsePositives: string[] = getFalsePositives()) => {
   falsePositives.forEach((falsePositive, index) => {
     cy.get(FALSE_POSITIVES_INPUT)
       .eq(index)
@@ -190,22 +234,30 @@ const fillFalsePositiveExamples = (falsePositives: string[]) => {
   });
 };
 
-const fillSeverity = (severity: string) => {
+export const fillRuleName = (ruleName: string = getRuleName()) => {
+  cy.get(RULE_NAME_INPUT).clear({ force: true }).type(ruleName, { force: true });
+};
+
+export const fillDescription = (description: string = getDescription()) => {
+  cy.get(RULE_DESCRIPTION_INPUT).clear({ force: true }).type(description, { force: true });
+};
+
+export const fillSeverity = (severity: string = getSeverity()) => {
   cy.get(SEVERITY_DROPDOWN).click({ force: true });
   cy.get(`#${severity.toLowerCase()}`).click();
 };
 
-const fillRiskScore = (riskScore: string) => {
+export const fillRiskScore = (riskScore: string = getRiskScore().toString()) => {
   cy.get(DEFAULT_RISK_SCORE_INPUT).type(`{selectall}${riskScore}`, { force: true });
 };
 
-const fillRuleTags = (tags: string[]) => {
+export const fillRuleTags = (tags: string[] = getTags()) => {
   tags.forEach((tag) => {
     cy.get(TAGS_INPUT).type(`${tag}{enter}`, { force: true });
   });
 };
 
-const fillReferenceUrls = (referenceUrls: string[]) => {
+export const fillReferenceUrls = (referenceUrls: string[] = getReferenceUrls()) => {
   referenceUrls.forEach((url, index) => {
     cy.get(REFERENCE_URLS_INPUT).eq(index).clear({ force: true }).type(url, { force: true });
     cy.get(ADD_REFERENCE_URL_BTN).click({ force: true });
@@ -286,6 +338,16 @@ const fillCustomQuery = (rule: CustomRule | OverrideRule) => {
   }
 };
 
+export const continueWithNextSection = () => {
+  cy.get(CONTINUE_BUTTON).should('exist').click();
+};
+
+export const importSavedQuery = (timelineId: string) => {
+  cy.get(IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK).click();
+  cy.get(TIMELINE(timelineId)).click();
+  cy.get(CUSTOM_QUERY_INPUT).should('not.be.empty');
+};
+
 export const fillDefineCustomRuleAndContinue = (rule: CustomRule | OverrideRule) => {
   if (rule.dataSource.type === 'dataView') {
     cy.get(DATA_VIEW_OPTION).click();
@@ -306,6 +368,13 @@ export const fillScheduleRuleAndContinue = (rule: CustomRule | MachineLearningRu
     cy.get(LOOK_BACK_TIME_TYPE).select(rule.lookBack.timeType);
   }
   cy.get(SCHEDULE_CONTINUE_BUTTON).click({ force: true });
+};
+
+export const fillFrom = (from: From = getFrom()) => {
+  const value = from.slice(0, from.length - 1);
+  const type = from.slice(from.length - 1);
+  cy.get(LOOK_BACK_INTERVAL).type('{selectAll}').type(value);
+  cy.get(LOOK_BACK_TIME_TYPE).select(type);
 };
 
 export const fillRuleAction = (rule: CustomRule) => {
