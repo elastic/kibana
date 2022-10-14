@@ -27,7 +27,7 @@ import {
   toSentenceCase,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { compact, debounce, isEmpty, isEqual, isFunction } from 'lodash';
+import { compact, debounce, groupBy, isEmpty, isEqual, isFunction } from 'lodash';
 import { CoreStart, DocLinksStart, Toast } from '@kbn/core/public';
 import type { Query } from '@kbn/es-query';
 import { DataPublicPluginStart, getQueryLog } from '@kbn/data-plugin/public';
@@ -64,7 +64,7 @@ export interface QueryStringInputDependencies {
 }
 
 export interface QueryStringInputProps {
-  indexPatterns: Array<DataView | string>;
+  indexPatterns: Array<DataView | string | { type: 'title' | 'id'; value: string }>;
   query: Query;
   disableAutoFocus?: boolean;
   screenTitle?: string;
@@ -179,12 +179,21 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
   };
 
   private fetchIndexPatterns = debounce(async () => {
-    const stringPatterns = this.props.indexPatterns.filter(
-      (indexPattern) => typeof indexPattern === 'string'
-    ) as string[];
-    const objectPatterns = this.props.indexPatterns.filter(
-      (indexPattern) => typeof indexPattern !== 'string'
-    ) as DataView[];
+    const { stringPatterns = [], objectPatterns = [] } = groupBy(
+      this.props.indexPatterns || [],
+      (indexPattern) => {
+        if (typeof indexPattern === 'string') {
+          return 'stringPatterns';
+        }
+        if ('type' in indexPattern && 'value' in indexPattern) {
+          return `stringPatterns`;
+        }
+        return 'objectPatterns';
+      }
+    );
+    const idOrTitlePatterns = stringPatterns.map((sp) =>
+      typeof sp === 'string' ? { type: 'title', value: sp } : sp
+    ) as Array<{ type: 'title' | 'id'; value: string }>;
 
     // abort the previous fetch to avoid overriding with outdated data
     // issue https://github.com/elastic/kibana/issues/80831
@@ -194,12 +203,12 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
 
     const objectPatternsFromStrings = (await fetchIndexPatterns(
       this.props.deps.data.indexPatterns,
-      stringPatterns
+      idOrTitlePatterns
     )) as DataView[];
 
     if (!currentAbortController.signal.aborted) {
       this.setState({
-        indexPatterns: [...objectPatterns, ...objectPatternsFromStrings],
+        indexPatterns: [...(objectPatterns as DataView[]), ...objectPatternsFromStrings],
       });
 
       this.updateSuggestions();

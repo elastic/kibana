@@ -11,17 +11,30 @@ import { DataViewsContract } from '@kbn/data-views-plugin/public';
 
 export async function fetchIndexPatterns(
   indexPatternsService: DataViewsContract,
-  indexPatternStrings: string[]
+  indexPatternStrings: Array<{ type: 'title' | 'id'; value: string }>
 ) {
   if (!indexPatternStrings || isEmpty(indexPatternStrings)) {
     return [];
   }
 
-  const searchString = indexPatternStrings.map((string) => `"${string}"`).join(' | ');
+  const searchStringList: string[] = [];
+  const searchIdsList: string[] = [];
+  for (const { type, value } of indexPatternStrings) {
+    if (type === 'title') {
+      searchStringList.push(value);
+    } else {
+      searchIdsList.push(value);
+    }
+  }
 
-  const exactMatches = (await indexPatternsService.find(searchString)).filter((ip) =>
-    indexPatternStrings.includes(ip.title)
-  );
+  const searchString = searchStringList.map((value) => `"${value}"`).join(' | ');
+
+  const exactMatches = await Promise.all([
+    (
+      await indexPatternsService.find(searchString)
+    ).filter((ip) => searchStringList.includes(ip.title)),
+    ...searchIdsList.map((id) => indexPatternsService.get(id)),
+  ]);
 
   const allMatches =
     exactMatches.length === indexPatternStrings.length
