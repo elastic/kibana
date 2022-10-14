@@ -193,13 +193,13 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
     setSelectedRuleIds(!isAllSelected ? rules.map(({ id }) => id) : []);
   }, [rules, isAllSelected, setIsAllSelected, setSelectedRuleIds]);
 
-  const shouldShowRulesTable = !isPrepackagedStatusLoading && !isLoading;
-
   // TODO move inside a child component that shows the prepackaged rules update callout
   const isTableEmpty =
     !isPrepackagedStatusLoading &&
     prePackagedRulesStatus?.rulesCustomInstalled === 0 &&
     prePackagedRulesStatus.rulesInstalled === 0;
+
+  const shouldShowRulesTable = !isPrepackagedStatusLoading && !isLoading && !isTableEmpty;
 
   const tableProps =
     selectedTab === AllRulesTabs.rules
