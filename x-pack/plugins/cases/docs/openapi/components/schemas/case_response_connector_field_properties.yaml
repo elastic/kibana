@@ -20,9 +20,11 @@ properties:
     type: string
   issueTypes:
     description: The type of incident for IBM Resilient connectors.
-    type: array
-    items:
-      type: number
+    oneOf:
+      - type: string
+      - type: array
+        items:
+          type: string
   malwareHash:
     description: A comma-separated list of malware hashes for ServiceNow SecOps connectors. 
     type: string

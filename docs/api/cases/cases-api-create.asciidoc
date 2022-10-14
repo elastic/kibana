@@ -51,7 +51,7 @@ specify `null` as its value.
 For {ibm-r} connectors, specify:
 
 `issueTypes`:::
-(Required, array of numbers) The type of the incident.
+(Required, string or array of strings) The type of the incident.
 
 `severityCode`:::
 (Required, number) The severity code of the incident.

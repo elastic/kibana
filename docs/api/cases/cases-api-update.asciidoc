@@ -57,7 +57,7 @@ connector, specify `null`. If you want to omit any individual field, specify
 For {ibm-r} connectors, specify:
 
 `issueTypes`:::
-(Required, array of numbers) The issue types of the issue.
+(Required, string or array of strings) The issue types of the issue.
 
 `severityCode`:::
 (Required, number) The severity code of the issue.
