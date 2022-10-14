@@ -17,7 +17,7 @@ import {
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { Filter } from '@kbn/es-query';
 import { DataViewField } from '@kbn/data-views-plugin/common';
-import type { FieldTopValuesBucketParams } from '@kbn/unified-field-list-plugin/public/types';
+import type { FieldTopValuesBucketParams } from '@kbn/unified-field-list-plugin/public';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useFetchParams } from '../use_fetch_params';

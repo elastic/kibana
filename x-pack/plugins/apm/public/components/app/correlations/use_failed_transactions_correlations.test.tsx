@@ -68,13 +68,6 @@ function wrapper({
               },
             ],
           };
-        case 'POST /internal/apm/correlations/field_stats/transactions':
-          return {
-            stats: [
-              { fieldName: 'field-name-1', count: 123 },
-              { fieldName: 'field-name-2', count: 1111 },
-            ],
-          };
         default:
           return {};
       }

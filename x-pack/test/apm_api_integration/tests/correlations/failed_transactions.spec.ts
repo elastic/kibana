@@ -183,16 +183,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
       }
 
-      const failedtransactionsFieldStats = await apmApiClient.readUser({
-        endpoint: 'POST /internal/apm/correlations/field_stats/transactions',
-        params: {
-          body: {
-            ...getOptions(),
-            fieldsToSample: [...fieldsToSample],
-          },
-        },
-      });
-
       const finalRawResponse: FailedTransactionsCorrelationsResponse = {
         ccsWarning: failedTransactionsCorrelationsResponse.body?.ccsWarning,
         percentileThresholdValue: overallDistributionResponse.body?.percentileThresholdValue,
@@ -200,13 +190,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         errorHistogram: errorDistributionResponse.body?.overallHistogram,
         failedTransactionsCorrelations:
           failedTransactionsCorrelationsResponse.body?.failedTransactionsCorrelations,
-        fieldStats: failedtransactionsFieldStats.body?.stats,
       };
 
       expect(finalRawResponse?.percentileThresholdValue).to.be(1309695.875);
       expect(finalRawResponse?.errorHistogram?.length).to.be(101);
       expect(finalRawResponse?.overallHistogram?.length).to.be(101);
-      expect(finalRawResponse?.fieldStats?.length).to.be(fieldsToSample.size);
 
       expect(finalRawResponse?.failedTransactionsCorrelations?.length).to.eql(
         30,
@@ -228,13 +216,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       expect(typeof correlation?.normalizedScore).to.be('number');
       expect(typeof correlation?.failurePercentage).to.be('number');
       expect(typeof correlation?.successPercentage).to.be('number');
-
-      const fieldStats = finalRawResponse?.fieldStats?.[0];
-      expect(typeof fieldStats).to.be('object');
-      expect(Array.isArray(fieldStats?.topValues) && fieldStats?.topValues?.length).to.greaterThan(
-        0
-      );
-      expect(fieldStats?.topValuesSampleSize).to.greaterThan(0);
     });
   });
 }

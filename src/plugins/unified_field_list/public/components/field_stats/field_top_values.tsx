@@ -11,7 +11,7 @@ import { euiPaletteColorBlind, EuiSpacer } from '@elastic/eui';
 import { DataView, DataViewField } from '@kbn/data-plugin/common';
 import type { BucketedAggregation } from '../../../common/types';
 import type { AddFieldFilterHandler } from '../../types';
-import { FieldTopValuesBucket, FieldTopValuesBucketCustomRender } from './field_top_values_bucket';
+import { FieldTopValuesBucket, OverrideFieldTopValueBarCallback } from './field_top_values_bucket';
 
 export interface FieldTopValuesProps {
   buckets: BucketedAggregation<number | string>['buckets'];
@@ -21,7 +21,7 @@ export interface FieldTopValuesProps {
   color?: string;
   'data-test-subj': string;
   onAddFilter?: AddFieldFilterHandler;
-  overrideFieldTopValueBar?: FieldTopValuesBucketCustomRender;
+  overrideFieldTopValueBar?: OverrideFieldTopValueBarCallback;
 }
 
 export const FieldTopValues: React.FC<FieldTopValuesProps> = ({

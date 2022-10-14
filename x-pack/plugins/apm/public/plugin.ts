@@ -17,7 +17,10 @@ import {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
-import type { DataPublicPluginSetup } from '@kbn/data-plugin/public';
+import type {
+  DataPublicPluginSetup,
+  DataPublicPluginStart,
+} from '@kbn/data-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
@@ -82,6 +85,7 @@ export interface ApmPluginSetupDeps {
 export interface ApmPluginStartDeps {
   alerting?: AlertingPluginPublicStart;
   charts?: ChartsPluginStart;
+  data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
   home: void;
   inspector: InspectorPluginStart;

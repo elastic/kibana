@@ -7,7 +7,7 @@
  */
 
 import { UnifiedFieldListPlugin } from './plugin';
-
+export type { FieldTopValuesBucketParams } from './components/field_stats/field_top_values_bucket';
 export type {
   FieldStatsResponse,
   BucketedAggregation,

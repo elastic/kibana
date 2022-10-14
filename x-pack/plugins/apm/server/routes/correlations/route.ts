@@ -374,7 +374,6 @@ const pValuesTransactionsRoute = createApmServerRoute({
 
 export const correlationsRouteRepository = {
   ...fieldCandidatesTransactionsRoute,
-  ...fieldStatsTransactionsRoute,
   ...fieldValueStatsTransactionsRoute,
   ...fieldValuePairsTransactionsRoute,
   ...significantCorrelationsTransactionsRoute,
