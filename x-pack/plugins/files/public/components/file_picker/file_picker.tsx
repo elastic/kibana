@@ -112,3 +112,6 @@ export const FilePicker: FunctionComponent<Props> = (props) => (
     <Component {...props} />
   </FilePickerContext>
 );
+
+/* eslint-disable import/no-default-export */
+export default FilePicker;

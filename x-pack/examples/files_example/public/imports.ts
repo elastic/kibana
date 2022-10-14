@@ -12,5 +12,6 @@ export {
   UploadFile,
   FilesContext,
   ScopedFilesClient,
+  FilePicker,
   Image,
 } from '@kbn/files-plugin/public';
