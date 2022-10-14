@@ -210,7 +210,7 @@ function AlertsPage() {
     >
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
-          {/*<SearchBar appName={'observability_alerts'} onQueryChange={onQueryChange} />*/}
+          {/* <SearchBar appName={'observability_alerts'} onQueryChange={onQueryChange} />*/}
           <AlertsSearchBar
             featureIds={observabilityAlertFeatureIds}
             rangeFrom={rangeFrom}
