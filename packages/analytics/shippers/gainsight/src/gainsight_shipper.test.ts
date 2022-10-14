@@ -29,7 +29,7 @@ describe('gainsightShipper', () => {
 
   describe('extendContext', () => {
     describe('identify', () => {
-      test('calls `identify` when the userId is provided', () => {
+      test('calls `identify` when the clusterName is provided', () => {
         const userId = 'test-user-id';
         const clusterName = '123654';
         gainsightShipper.extendContext({ userId, cluster_name: clusterName });
@@ -39,7 +39,7 @@ describe('gainsightShipper', () => {
         });
       });
 
-      test('calls `identify` again only if the userId changes', () => {
+      test('calls `identify` again only if the clusterName changes', () => {
         const userId = 'test-user-id';
         const clusterName = '123654';
         gainsightShipper.extendContext({ userId, cluster_name: clusterName });
@@ -52,7 +52,7 @@ describe('gainsightShipper', () => {
         gainsightShipper.extendContext({ userId, cluster_name: clusterName });
         expect(gainsightApiMock).toHaveBeenCalledTimes(2);
 
-        gainsightShipper.extendContext({ userId: `${userId}-1`, cluster_name: clusterName });
+        gainsightShipper.extendContext({ userId, cluster_name: `${clusterName}-1`});
         expect(gainsightApiMock).toHaveBeenCalledTimes(4); // called again because the user changed
       });
     });

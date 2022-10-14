@@ -11,5 +11,5 @@
   "ui": true,
   "configPath": ["xpack", "cloud_integrations", "gain_sight"],
   "requiredPlugins": ["cloud"],
-  "optionalPlugins": ["security"]
+  "optionalPlugins": []
 }
