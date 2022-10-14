@@ -7,9 +7,12 @@
 
 import React, { forwardRef, useMemo } from 'react';
 import styled from 'styled-components';
-import { EuiMarkdownEditorProps, EuiFormRow, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
-import { FieldHook, getFieldValidityAndErrorMessage } from '../../common/shared_imports';
-import { MarkdownEditor, MarkdownEditorRef } from './editor';
+import type { EuiMarkdownEditorProps } from '@elastic/eui';
+import { EuiFormRow, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import type { FieldHook } from '../../common/shared_imports';
+import { getFieldValidityAndErrorMessage } from '../../common/shared_imports';
+import type { MarkdownEditorRef } from './editor';
+import { MarkdownEditor } from './editor';
 import { CommentEditorContext } from './context';
 
 type MarkdownEditorFormProps = EuiMarkdownEditorProps & {

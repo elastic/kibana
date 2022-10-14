@@ -7,28 +7,20 @@
 
 import { isEmpty } from 'lodash';
 import React, { memo, useCallback, useState } from 'react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFormRow,
   EuiLink,
   EuiSelectableListItem,
   EuiTextColor,
 } from '@elastic/eui';
-import {
-  UserProfileWithAvatar,
-  UserAvatar,
-  getUserDisplayName,
-  UserProfile,
-} from '@kbn/user-profile-components';
+import type { UserProfileWithAvatar, UserProfile } from '@kbn/user-profile-components';
+import { UserAvatar, getUserDisplayName } from '@kbn/user-profile-components';
 import { MAX_ASSIGNEES_PER_CASE } from '../../../common/constants';
-import { CaseAssignees } from '../../../common/api';
-import {
-  UseField,
-  FieldConfig,
-  FieldHook,
-  getFieldValidityAndErrorMessage,
-} from '../../common/shared_imports';
+import type { CaseAssignees } from '../../../common/api';
+import type { FieldConfig, FieldHook } from '../../common/shared_imports';
+import { UseField, getFieldValidityAndErrorMessage } from '../../common/shared_imports';
 import { useSuggestUserProfiles } from '../../containers/user_profiles/use_suggest_user_profiles';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';

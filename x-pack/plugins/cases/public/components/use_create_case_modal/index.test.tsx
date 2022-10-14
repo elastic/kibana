@@ -10,7 +10,8 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import { render, act as reactAct } from '@testing-library/react';
 
 import { useKibana } from '../../common/lib/kibana';
-import { useCreateCaseModal, UseCreateCaseModalProps, UseCreateCaseModalReturnedValues } from '.';
+import type { UseCreateCaseModalProps, UseCreateCaseModalReturnedValues } from '.';
+import { useCreateCaseModal } from '.';
 import { TestProviders } from '../../common/mock';
 
 jest.mock('../../common/lib/kibana');

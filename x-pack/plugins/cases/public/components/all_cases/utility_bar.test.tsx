@@ -8,10 +8,10 @@
 import { act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
+import type { AppMockRenderer } from '../../common/mock';
 import {
   noCasesPermissions,
   onlyDeleteCasesPermission,
-  AppMockRenderer,
   createAppMockRenderer,
   writeCasesPermissions,
 } from '../../common/mock';

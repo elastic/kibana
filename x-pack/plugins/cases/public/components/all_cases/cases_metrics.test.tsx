@@ -7,7 +7,8 @@
 
 import { waitFor, within } from '@testing-library/react';
 import React from 'react';
-import { AppMockRenderer, createAppMockRenderer } from '../../common/mock';
+import type { AppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer } from '../../common/mock';
 import { CasesMetrics } from './cases_metrics';
 
 jest.mock('../../api');

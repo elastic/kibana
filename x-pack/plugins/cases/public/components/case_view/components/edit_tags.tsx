@@ -19,13 +19,13 @@ import {
 import styled, { css } from 'styled-components';
 import { isEqual } from 'lodash/fp';
 import * as i18n from '../../tags/translations';
+import type { FormSchema } from '../../../common/shared_imports';
 import {
   Form,
   FormDataProvider,
   useForm,
   getUseField,
   Field,
-  FormSchema,
 } from '../../../common/shared_imports';
 import { useGetTags } from '../../../containers/use_get_tags';
 import { Tags } from '../../tags/tags';

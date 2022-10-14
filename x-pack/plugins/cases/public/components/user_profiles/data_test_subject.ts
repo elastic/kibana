@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Assignee } from './types';
+import type { Assignee } from './types';
 
 export const getUsernameDataTestSubj = (assignee: Assignee) => {
   return assignee.profile?.user.username ?? assignee.uid;

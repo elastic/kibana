@@ -14,12 +14,12 @@ import { useCasesFeatures } from '../../../common/use_cases_features';
 import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_get_current_user_profile';
 import { useBulkGetUserProfiles } from '../../../containers/user_profiles/use_bulk_get_user_profiles';
 import { useGetConnectors } from '../../../containers/configure/use_connectors';
-import { CaseSeverity } from '../../../../common/api';
+import type { CaseSeverity } from '../../../../common/api';
 import { useCaseViewNavigation } from '../../../common/navigation';
-import { UseFetchAlertData } from '../../../../common/ui/types';
-import { Case, CaseStatuses } from '../../../../common';
+import type { UseFetchAlertData } from '../../../../common/ui/types';
+import type { Case, CaseStatuses } from '../../../../common';
 import { EditConnector } from '../../edit_connector';
-import { CasesNavigation } from '../../links';
+import type { CasesNavigation } from '../../links';
 import { StatusActionButton } from '../../status/button';
 import { EditTags } from './edit_tags';
 import { UserActions } from '../../user_actions';
@@ -32,7 +32,7 @@ import { getConnectorById } from '../../utils';
 import { SeveritySidebarSelector } from '../../severity/sidebar_selector';
 import { useGetCaseUserActions } from '../../../containers/use_get_case_user_actions';
 import { AssignUsers } from './assign_users';
-import { Assignee } from '../../user_profiles/types';
+import type { Assignee } from '../../user_profiles/types';
 
 export const CaseViewActivity = ({
   ruleDetailsNavigation,

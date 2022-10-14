@@ -6,12 +6,12 @@
  */
 
 import { useCallback } from 'react';
-import { CaseAttachmentsWithoutOwner } from '../../../types';
+import type { CaseAttachmentsWithoutOwner } from '../../../types';
 import { useCasesToast } from '../../../common/use_cases_toast';
-import { Case } from '../../../containers/types';
+import type { Case } from '../../../containers/types';
 import { CasesContextStoreActionsList } from '../../cases_context/cases_context_reducer';
 import { useCasesContext } from '../../cases_context/use_cases_context';
-import { CreateCaseFlyoutProps } from './create_case_flyout';
+import type { CreateCaseFlyoutProps } from './create_case_flyout';
 
 type AddToNewCaseFlyoutProps = Omit<CreateCaseFlyoutProps, 'attachments'> & {
   toastTitle?: string;

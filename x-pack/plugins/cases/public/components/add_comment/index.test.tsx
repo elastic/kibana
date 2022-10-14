@@ -15,10 +15,11 @@ import { noCreateCasesPermissions, TestProviders } from '../../common/mock';
 import { CommentType } from '../../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
-import { AddComment, AddCommentProps, AddCommentRefObject } from '.';
+import type { AddCommentProps, AddCommentRefObject } from '.';
+import { AddComment } from '.';
 import { CasesTimelineIntegrationProvider } from '../timeline_context';
 import { timelineIntegrationMock } from '../__mock__/timeline';
-import { CaseAttachmentWithoutOwner } from '../../types';
+import type { CaseAttachmentWithoutOwner } from '../../types';
 
 jest.mock('../../containers/use_create_attachments');
 

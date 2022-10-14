@@ -7,8 +7,9 @@
 
 import React, { useMemo } from 'react';
 
-import { EuiFlexItem, EuiFlexGroup, EuiProgress, EuiFlyoutSize } from '@elastic/eui';
-import { Case } from '../../../../common';
+import type { EuiFlyoutSize } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiProgress } from '@elastic/eui';
+import type { Case } from '../../../../common';
 import { useKibana } from '../../../common/lib/kibana';
 import { getManualAlertIds, getRegistrationContextFromAlerts } from './helpers';
 import { useGetFeatureIds } from '../../../containers/use_get_feature_ids';

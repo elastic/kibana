@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import {
+import type {
   ActionLicense,
   Cases,
   Case,
   CasesStatus,
   CaseUserActions,
   FetchCasesProps,
-  SortFieldCase,
 } from '../types';
+import { SortFieldCase } from '../types';
 import {
   actionLicenses,
   allCases,
@@ -27,16 +27,17 @@ import {
   pushedCase,
   tags,
 } from '../mock';
-import { CaseUpdateRequest, ResolvedCase, SeverityAll } from '../../../common/ui/types';
-import {
+import type { CaseUpdateRequest, ResolvedCase } from '../../../common/ui/types';
+import { SeverityAll } from '../../../common/ui/types';
+import type {
   CasePatchRequest,
   CasePostRequest,
   CommentRequest,
-  CaseStatuses,
   SingleCaseMetricsResponse,
 } from '../../../common/api';
+import { CaseStatuses } from '../../../common/api';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
-import { UserProfile } from '@kbn/security-plugin/common';
+import type { UserProfile } from '@kbn/security-plugin/common';
 import { userProfiles } from '../user_profiles/api.mock';
 
 export const getCase = async (

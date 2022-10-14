@@ -8,7 +8,8 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { UserActionMarkdown } from './markdown_form';
-import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../common/mock';
+import type { AppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer, TestProviders } from '../../common/mock';
 import { waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 const onChangeEditable = jest.fn();

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { renderHook } from '@testing-library/react-hooks';
 import { userProfiles, userProfilesMap } from './api.mock';
 import { useAssignees } from './use_assignees';

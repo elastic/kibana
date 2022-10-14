@@ -6,19 +6,20 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { UserProfilesPopover, UserProfileWithAvatar } from '@kbn/user-profile-components';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { UserProfilesPopover } from '@kbn/user-profile-components';
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import { useSuggestUserProfiles } from '../../../containers/user_profiles/use_suggest_user_profiles';
 import { useCasesContext } from '../../cases_context/use_cases_context';
-import { AssigneeWithProfile } from '../../user_profiles/types';
+import type { AssigneeWithProfile } from '../../user_profiles/types';
 import * as i18n from '../translations';
 import { bringCurrentUserToFrontAndSort } from '../../user_profiles/sort';
 import { SelectedStatusMessage } from '../../user_profiles/selected_status_message';
 import { EmptyMessage } from '../../user_profiles/empty_message';
 import { NoMatches } from '../../user_profiles/no_matches';
-import { CurrentUserProfile } from '../../types';
+import type { CurrentUserProfile } from '../../types';
 
 const PopoverButton: React.FC<{ togglePopover: () => void; isDisabled: boolean }> = ({
   togglePopover,

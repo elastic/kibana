@@ -8,13 +8,13 @@
 import React from 'react';
 import classNames from 'classnames';
 
-import { CommentResponseUserType } from '../../../../common/api';
+import type { CommentResponseUserType } from '../../../../common/api';
 import { UserActionTimestamp } from '../timestamp';
-import { SnakeToCamelCase } from '../../../../common/types';
+import type { SnakeToCamelCase } from '../../../../common/types';
 import { UserActionMarkdown } from '../markdown_form';
 import { UserActionContentToolbar } from '../content_toolbar';
 import * as i18n from '../translations';
-import { UserActionBuilderArgs, UserActionBuilder } from '../types';
+import type { UserActionBuilderArgs, UserActionBuilder } from '../types';
 import { HoverableUsernameResolver } from '../../user_profiles/hoverable_username_resolver';
 import { HoverableAvatarResolver } from '../../user_profiles/hoverable_avatar_resolver';
 

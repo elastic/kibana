@@ -6,8 +6,10 @@
  */
 
 import React from 'react';
-import { mount, ReactWrapper } from 'enzyme';
-import { UserActionContentToolbar, UserActionContentToolbarProps } from './content_toolbar';
+import type { ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
+import type { UserActionContentToolbarProps } from './content_toolbar';
+import { UserActionContentToolbar } from './content_toolbar';
 import { TestProviders } from '../../common/mock';
 
 jest.mock('../../common/navigation/hooks');

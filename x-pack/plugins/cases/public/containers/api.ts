@@ -8,16 +8,14 @@
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
 import { isEmpty } from 'lodash';
-import {
+import type {
   Cases,
   CaseUpdateRequest,
   FetchCasesProps,
   ResolvedCase,
-  SeverityAll,
-  SortFieldCase,
-  StatusAll,
 } from '../../common/ui/types';
-import {
+import { SeverityAll, SortFieldCase, StatusAll } from '../../common/ui/types';
+import type {
   BulkCreateCommentRequest,
   CasePatchRequest,
   CasePostRequest,
@@ -26,16 +24,18 @@ import {
   CasesResponse,
   CaseUserActionsResponse,
   CommentRequest,
+  User,
+  SingleCaseMetricsResponse,
+  CasesFindResponse,
+} from '../../common/api';
+import {
   CommentType,
   getCaseCommentsUrl,
   getCaseDetailsUrl,
   getCaseDetailsMetricsUrl,
   getCasePushUrl,
   getCaseUserActionUrl,
-  User,
   getCaseCommentDeleteUrl,
-  SingleCaseMetricsResponse,
-  CasesFindResponse,
 } from '../../common/api';
 import {
   CASE_REPORTERS_URL,
@@ -57,7 +57,7 @@ import {
   convertCaseResolveToCamelCase,
 } from '../api/utils';
 
-import {
+import type {
   ActionLicense,
   Case,
   SingleCaseMetrics,

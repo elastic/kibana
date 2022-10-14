@@ -17,7 +17,8 @@ import Fields from './case_fields';
 import { waitFor } from '@testing-library/dom';
 import { useGetSingleIssue } from './use_get_single_issue';
 import { useGetIssues } from './use_get_issues';
-import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
 
 jest.mock('./use_get_issue_types');
 jest.mock('./use_get_fields_by_issue_type');

@@ -10,10 +10,11 @@ import { isEqual } from 'lodash/fp';
 import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiFilterGroup, EuiButton } from '@elastic/eui';
 
-import { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { StatusAll, CaseStatusWithAllStatus, CaseSeverityWithAll } from '../../../common/ui/types';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import type { CaseStatusWithAllStatus, CaseSeverityWithAll } from '../../../common/ui/types';
+import { StatusAll } from '../../../common/ui/types';
 import { CaseStatuses } from '../../../common/api';
-import { FilterOptions } from '../../containers/types';
+import type { FilterOptions } from '../../containers/types';
 import { FilterPopover } from '../filter_popover';
 import { StatusFilter } from './status_filter';
 import * as i18n from './translations';
@@ -21,7 +22,7 @@ import { SeverityFilter } from './severity_filter';
 import { useGetTags } from '../../containers/use_get_tags';
 import { DEFAULT_FILTER_OPTIONS } from '../../containers/use_get_cases';
 import { AssigneesFilterPopover } from './assignees_filter';
-import { CurrentUserProfile } from '../types';
+import type { CurrentUserProfile } from '../types';
 import { useCasesFeatures } from '../../common/use_cases_features';
 
 interface CasesTableFiltersProps {

@@ -15,17 +15,17 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 
-import { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { CasesPermissions } from '../../../../common';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import type { CasesPermissions } from '../../../../common';
 import { useAssignees } from '../../../containers/user_profiles/use_assignees';
-import { CaseAssignees } from '../../../../common/api/cases/assignee';
+import type { CaseAssignees } from '../../../../common/api/cases/assignee';
 import * as i18n from '../translations';
 import { SidebarTitle } from './sidebar_title';
 import { RemovableUser } from '../../user_profiles/removable_user';
 import { useCasesContext } from '../../cases_context/use_cases_context';
-import { Assignee } from '../../user_profiles/types';
+import type { Assignee } from '../../user_profiles/types';
 import { SuggestUsersPopover } from './suggest_users_popover';
-import { CurrentUserProfile } from '../../types';
+import type { CurrentUserProfile } from '../../types';
 
 interface AssigneesListProps {
   assignees: Assignee[];

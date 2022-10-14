@@ -9,7 +9,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { createGlobalStyle } from '@kbn/kibana-react-plugin/common';
-import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { useKibana } from '../../../../common/lib/kibana';
 import { LENS_VISUALIZATION_HEIGHT } from './constants';
 

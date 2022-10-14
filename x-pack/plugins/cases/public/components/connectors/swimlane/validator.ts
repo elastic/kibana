@@ -6,8 +6,8 @@
  */
 
 import { SwimlaneConnectorType } from '../../../../common/api';
-import { ValidationConfig } from '../../../common/shared_imports';
-import { CaseActionConnector } from '../../types';
+import type { ValidationConfig } from '../../../common/shared_imports';
+import type { CaseActionConnector } from '../../types';
 
 const casesRequiredFields = [
   'caseIdConfig',

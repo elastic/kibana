@@ -6,13 +6,14 @@
  */
 
 import React from 'react';
-import { mount, ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
 import { waitFor, act, render, screen } from '@testing-library/react';
 import { EuiSelect } from '@elastic/eui';
 
 import { useKibana } from '../../../common/lib/kibana';
 import { connector, choices as mockChoices } from '../mock';
-import { Choice } from './types';
+import type { Choice } from './types';
 import Fields from './servicenow_sir_case_fields';
 
 let onChoicesSuccess = (_c: Choice[]) => {};

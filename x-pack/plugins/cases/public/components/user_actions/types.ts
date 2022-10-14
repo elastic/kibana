@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { EuiCommentProps } from '@elastic/eui';
-import { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { SnakeToCamelCase } from '../../../common/types';
-import { ActionTypes, UserActionWithResponse } from '../../../common/api';
-import { Case, CaseUserActions, Comment, UseFetchAlertData } from '../../containers/types';
-import { CaseServices } from '../../containers/use_get_case_user_actions';
-import { AddCommentRefObject } from '../add_comment';
-import { UserActionMarkdownRefObject } from './markdown_form';
-import { CasesNavigation } from '../links';
-import { UNSUPPORTED_ACTION_TYPES } from './constants';
+import type { EuiCommentProps } from '@elastic/eui';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import type { SnakeToCamelCase } from '../../../common/types';
+import type { ActionTypes, UserActionWithResponse } from '../../../common/api';
+import type { Case, CaseUserActions, Comment, UseFetchAlertData } from '../../containers/types';
+import type { CaseServices } from '../../containers/use_get_case_user_actions';
+import type { AddCommentRefObject } from '../add_comment';
+import type { UserActionMarkdownRefObject } from './markdown_form';
+import type { CasesNavigation } from '../links';
+import type { UNSUPPORTED_ACTION_TYPES } from './constants';
 import type { OnUpdateFields } from '../case_view/types';
-import { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
-import { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
-import { CurrentUserProfile } from '../types';
+import type { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
+import type { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
+import type { CurrentUserProfile } from '../types';
 
 export interface UserActionTreeProps {
   caseServices: CaseServices;

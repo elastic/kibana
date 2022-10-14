@@ -7,7 +7,7 @@
 
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { ElasticUser } from '../../containers/types';
+import type { ElasticUser } from '../../containers/types';
 import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
 import { HoverableUserWithAvatarResolver } from './hoverable_user_with_avatar_resolver';
 

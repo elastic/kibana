@@ -6,24 +6,24 @@
  */
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { EuiProgress, EuiBasicTable, EuiTableSelectionType } from '@elastic/eui';
+import type { EuiBasicTable, EuiTableSelectionType } from '@elastic/eui';
+import { EuiProgress } from '@elastic/eui';
 import { difference, head, isEmpty } from 'lodash/fp';
 import styled, { css } from 'styled-components';
 
-import {
+import type {
   Case,
   CaseStatusWithAllStatus,
   FilterOptions,
   QueryParams,
-  SortFieldCase,
-  StatusAll,
 } from '../../../common/ui/types';
+import { SortFieldCase, StatusAll } from '../../../common/ui/types';
 import { CaseStatuses, caseStatuses } from '../../../common/api';
 
 import { useAvailableCasesOwners } from '../app/use_available_owners';
 import { useCasesColumns } from './use_cases_columns';
 import { CasesTableFilters } from './table_filters';
-import { EuiBasicTableOnChange } from './types';
+import type { EuiBasicTableOnChange } from './types';
 
 import { CasesTable } from './table';
 import { useCasesContext } from '../cases_context/use_cases_context';

@@ -12,7 +12,7 @@ import { mount } from 'enzyme';
 
 import { useKibana } from '../../../common/lib/kibana';
 import { connector, choices as mockChoices } from '../mock';
-import { Choice } from './types';
+import type { Choice } from './types';
 import Fields from './servicenow_itsm_case_fields';
 
 let onChoicesSuccess = (c: Choice[]) => {};

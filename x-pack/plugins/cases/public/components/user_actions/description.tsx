@@ -7,7 +7,7 @@
 
 import React from 'react';
 import classNames from 'classnames';
-import { EuiCommentProps } from '@elastic/eui';
+import type { EuiCommentProps } from '@elastic/eui';
 
 import type { UserActionBuilder, UserActionBuilderArgs, UserActionTreeProps } from './types';
 import { createCommonUpdateUserActionBuilder } from './common';

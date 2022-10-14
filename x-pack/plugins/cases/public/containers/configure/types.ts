@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ElasticUser } from '../types';
-import {
+import type { ElasticUser } from '../types';
+import type {
   ActionConnector,
   ActionTypeConnector,
   ActionType,

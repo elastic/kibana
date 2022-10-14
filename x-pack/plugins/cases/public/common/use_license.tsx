@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ILicense, LicenseType } from '@kbn/licensing-plugin/public';
+import type { ILicense, LicenseType } from '@kbn/licensing-plugin/public';
 import { useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';

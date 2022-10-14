@@ -10,15 +10,12 @@ import { mount } from 'enzyme';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
 import '../../common/mock/match_media';
-import { ExternalServiceColumn, GetCasesColumn, useCasesColumns } from './use_cases_columns';
+import type { GetCasesColumn } from './use_cases_columns';
+import { ExternalServiceColumn, useCasesColumns } from './use_cases_columns';
 import { useGetCasesMockState } from '../../containers/mock';
 import { connectors } from '../configure_cases/__mock__';
-import {
-  AppMockRenderer,
-  createAppMockRenderer,
-  readCasesPermissions,
-  TestProviders,
-} from '../../common/mock';
+import type { AppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer, readCasesPermissions, TestProviders } from '../../common/mock';
 import { renderHook } from '@testing-library/react-hooks';
 import { CaseStatuses } from '../../../common';
 import { userProfilesMap, userProfiles } from '../../containers/user_profiles/api.mock';

@@ -11,7 +11,8 @@ import styled from 'styled-components';
 
 import * as i18n from '../case_view/translations';
 import { Form, useForm, UseField } from '../../common/shared_imports';
-import { schema, Content } from './schema';
+import type { Content } from './schema';
+import { schema } from './schema';
 import { MarkdownRenderer, MarkdownEditorForm } from '../markdown_editor';
 
 export const ContentWrapper = styled.div`

@@ -12,7 +12,7 @@ import styled from 'styled-components';
 import { FieldMappingRowStatic } from './field_mapping_row_static';
 import * as i18n from './translations';
 
-import { CaseConnectorMapping } from '../../containers/configure/types';
+import type { CaseConnectorMapping } from '../../containers/configure/types';
 
 const FieldRowWrapper = styled.div`
   margin: 10px 0;

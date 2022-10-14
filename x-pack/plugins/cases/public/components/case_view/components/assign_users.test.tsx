@@ -10,12 +10,10 @@ import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_
 import { userProfiles, userProfilesMap } from '../../../containers/user_profiles/api.mock';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import {
-  AppMockRenderer,
-  createAppMockRenderer,
-  noUpdateCasesPermissions,
-} from '../../../common/mock';
-import { AssignUsers, AssignUsersProps } from './assign_users';
+import type { AppMockRenderer } from '../../../common/mock';
+import { createAppMockRenderer, noUpdateCasesPermissions } from '../../../common/mock';
+import type { AssignUsersProps } from './assign_users';
+import { AssignUsers } from './assign_users';
 import { waitForEuiPopoverClose, waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 jest.mock('../../../containers/user_profiles/use_suggest_user_profiles');

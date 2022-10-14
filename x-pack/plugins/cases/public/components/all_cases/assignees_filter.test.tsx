@@ -8,8 +8,10 @@
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { screen, fireEvent, waitFor, within } from '@testing-library/react';
-import { AppMockRenderer, createAppMockRenderer } from '../../common/mock';
-import { AssigneesFilterPopover, AssigneesFilterPopoverProps } from './assignees_filter';
+import type { AppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer } from '../../common/mock';
+import type { AssigneesFilterPopoverProps } from './assignees_filter';
+import { AssigneesFilterPopover } from './assignees_filter';
 import { userProfiles } from '../../containers/user_profiles/api.mock';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 

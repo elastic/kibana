@@ -18,9 +18,10 @@ import {
   getCaseClosedInfo,
 } from './helpers';
 import * as i18n from './translations';
-import { CaseConnector, ActionConnector, CaseStatuses } from '../../../common/api';
-import { CaseServices } from '../../containers/use_get_case_user_actions';
-import { ErrorMessage } from './callout/types';
+import type { CaseConnector, ActionConnector } from '../../../common/api';
+import { CaseStatuses } from '../../../common/api';
+import type { CaseServices } from '../../containers/use_get_case_user_actions';
+import type { ErrorMessage } from './callout/types';
 import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { useCasesContext } from '../cases_context/use_cases_context';

@@ -11,10 +11,11 @@ import React from 'react';
 import styled from 'styled-components';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { isValidOwner } from '../../common/utils/owner';
-import { Case, CommentType } from '../../common';
+import type { Case } from '../../common';
+import { CommentType } from '../../common';
 import { useKibana, useToasts } from './lib/kibana';
 import { generateCaseViewPath } from './navigation';
-import { CaseAttachmentsWithoutOwner, ServerError } from '../types';
+import type { CaseAttachmentsWithoutOwner, ServerError } from '../types';
 import {
   CASE_ALERT_SUCCESS_SYNC_TEXT,
   CASE_ALERT_SUCCESS_TOAST,

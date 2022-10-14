@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { FIELD_TYPES, fieldValidators, FormSchema } from '../../common/shared_imports';
+import type { FormSchema } from '../../common/shared_imports';
+import { FIELD_TYPES, fieldValidators } from '../../common/shared_imports';
 import * as i18n from '../../common/translations';
 
 const { emptyField } = fieldValidators;

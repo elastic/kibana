@@ -7,7 +7,8 @@
 
 import { CaseSeverity } from '../../../common/api';
 import React from 'react';
-import { AppMockRenderer, createAppMockRenderer } from '../../common/mock';
+import type { AppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer } from '../../common/mock';
 import userEvent from '@testing-library/user-event';
 import { waitFor } from '@testing-library/dom';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';

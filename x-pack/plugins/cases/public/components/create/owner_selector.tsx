@@ -21,7 +21,8 @@ import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
 import { OWNER_INFO } from '../../../common/constants';
 
-import { FieldHook, getFieldValidityAndErrorMessage, UseField } from '../../common/shared_imports';
+import type { FieldHook } from '../../common/shared_imports';
+import { getFieldValidityAndErrorMessage, UseField } from '../../common/shared_imports';
 import * as i18n from './translations';
 
 interface OwnerSelectorProps {
