@@ -80,11 +80,12 @@ export const getMlModelConfigsForModelIds = async (
     client.ml.getTrainedModels({ model_id: trainedModelNames.join() }),
     client.ml.getTrainedModelsStats({ model_id: trainedModelNames.join() }),
     trainedModelsProvider.getTrainedModels({}), // Get all models from current space; note we can't
-                                                // use exact model name matching, that returns an
-                                                // error for models that cannot be found
+    // use exact model name matching, that returns an
+    // error for models that cannot be found
   ]);
-  const modelNamesInCurrentSpace = trainedModelsInCurrentSpace.trained_model_configs
-    .map((modelConfig) => modelConfig.model_id);
+  const modelNamesInCurrentSpace = trainedModelsInCurrentSpace.trained_model_configs.map(
+    (modelConfig) => modelConfig.model_id
+  );
 
   const modelConfigs: Record<string, InferencePipelineData> = {};
   trainedModels.trained_model_configs.forEach((trainedModelData) => {
@@ -139,7 +140,11 @@ export const fetchAndAddTrainedModelData = async (
   const trainedModelNames = Array.from(
     new Set(pipelineProcessorData.map((pipeline) => pipeline.trainedModelName))
   );
-  const modelConfigs = await getMlModelConfigsForModelIds(client, trainedModelsProvider, trainedModelNames);
+  const modelConfigs = await getMlModelConfigsForModelIds(
+    client,
+    trainedModelsProvider,
+    trainedModelNames
+  );
 
   return pipelineProcessorData.map((data) => {
     const model = modelConfigs[data.trainedModelName];
@@ -186,7 +191,11 @@ export const fetchMlInferencePipelineProcessors = async (
   // inference processors, return early to avoid fetching all of the possible trained model data.
   if (pipelineProcessorInferenceData.length === 0) return [] as InferencePipeline[];
 
-  const pipelines = await fetchAndAddTrainedModelData(client, trainedModelsProvider, pipelineProcessorInferenceData);
+  const pipelines = await fetchAndAddTrainedModelData(
+    client,
+    trainedModelsProvider,
+    pipelineProcessorInferenceData
+  );
 
   // Due to restrictions with Kibana spaces we do not want to return the trained model name
   // to the UI. So we remove it from the data structure here.

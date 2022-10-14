@@ -20,7 +20,7 @@ export const mockRequestHandler = {
 
 export const mockMl = {
   trainedModelsProvider: jest.fn(),
-}
+};
 
 export const mockConfig = {
   host: 'http://localhost:3002',

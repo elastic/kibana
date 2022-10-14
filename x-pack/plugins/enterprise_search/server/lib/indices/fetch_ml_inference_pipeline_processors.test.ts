@@ -184,7 +184,7 @@ const mockGetTrainedModelsData = {
       model_id: 'trained-model-id-4',
       model_type: 'pytorch',
       tags: [],
-    }
+    },
   ],
 };
 
@@ -239,7 +239,7 @@ const mockTrainedModelsInCurrentSpace = {
   trained_model_configs: [
     ...mockGetTrainedModelsData.trained_model_configs.slice(0, 3), // Remove 4th element
     mockGetTrainedModelsData.trained_model_configs[4],
-  ]
+  ],
 };
 
 const trainedModelDataObject: Record<string, InferencePipeline> = {
@@ -578,11 +578,13 @@ describe('fetchMlInferencePipelineProcessors lib function', () => {
 
   describe('when Machine Learning is disabled in the current space', () => {
     it('should throw an eror', () => {
-      expect(() => fetchMlInferencePipelineProcessors(
-        mockClient as unknown as ElasticsearchClient,
-        undefined,
-        'some-index'
-      )).rejects.toThrowError('Machine Learning is not enabled');
+      expect(() =>
+        fetchMlInferencePipelineProcessors(
+          mockClient as unknown as ElasticsearchClient,
+          undefined,
+          'some-index'
+        )
+      ).rejects.toThrowError('Machine Learning is not enabled');
     });
   });
 
