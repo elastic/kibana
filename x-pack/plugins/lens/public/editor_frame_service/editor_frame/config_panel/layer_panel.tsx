@@ -18,6 +18,7 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import { LayerActions } from './layer_actions';
 import { IndexPatternServiceAPI } from '../../../data_views_service/service';
 import { NativeRenderer } from '../../../native_renderer';
@@ -617,6 +618,31 @@ export function LayerPanel(
                       })}
                     </ReorderProvider>
                   ) : null}
+
+                  {group.fakeFinalAccessor && (
+                    <div
+                      className="lnsLayerPanel__dimension lnsDragDrop-isDraggable"
+                      css={css`
+                        cursor: default !important;
+                        border-color: #0000 !important;
+                        margin-top: ${group.accessors.length ? 8 : 0}px !important;
+                      `}
+                    >
+                      <EuiText
+                        size="s"
+                        className="lnsLayerPanel__triggerText"
+                        data-test-subj="lns-fakeDimension"
+                      >
+                        <EuiFlexItem grow={true}>
+                          <span>
+                            <span className="lnsLayerPanel__triggerTextLabel">
+                              {group.fakeFinalAccessor.label}
+                            </span>
+                          </span>
+                        </EuiFlexItem>
+                      </EuiText>
+                    </div>
+                  )}
 
                   {group.supportsMoreColumns ? (
                     <EmptyDimensionButton

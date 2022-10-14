@@ -171,17 +171,30 @@ export const getPieVisualization = ({
       }
 
       const primaryGroupConfigBaseProps = {
-        requiredMinDimensionCount: 1,
+        requiredMinDimensionCount: layer.allowMultipleMetrics ? 0 : 1,
         groupId: 'primaryGroups',
         accessors,
         enableDimensionEditor: true,
         filterOperations: bucketedOperations,
       };
 
-      const totalNonCollapsedAccessors = accessors.reduce(
-        (total, { columnId }) => total + (isCollapsed(columnId, layer) ? 0 : 1),
-        0
-      );
+      const totalNonCollapsedAccessors =
+        accessors.reduce(
+          (total, { columnId }) => total + (isCollapsed(columnId, layer) ? 0 : 1),
+          0
+        ) + (layer.metrics.length > 1 ? 1 : 0);
+
+      const fakeFinalAccessor =
+        layer.metrics.length > 1
+          ? {
+              label: i18n.translate('xpack.lens.pie.multiMetricAccessorLabel', {
+                defaultMessage: '{number} metrics',
+                values: {
+                  number: layer.metrics.length,
+                },
+              }),
+            }
+          : undefined;
 
       switch (state.shape) {
         case 'donut':
@@ -194,6 +207,7 @@ export const getPieVisualization = ({
             dimensionEditorGroupLabel: i18n.translate('xpack.lens.pie.sliceDimensionGroupLabel', {
               defaultMessage: 'Slice',
             }),
+            fakeFinalAccessor,
             supportsMoreColumns: totalNonCollapsedAccessors < PartitionChartsMeta.pie.maxBuckets,
             dimensionsTooMany: totalNonCollapsedAccessors - PartitionChartsMeta.pie.maxBuckets,
             dataTestSubj: 'lnsPie_sliceByDimensionPanel',
@@ -220,6 +234,7 @@ export const getPieVisualization = ({
             dimensionEditorGroupLabel: i18n.translate('xpack.lens.pie.treemapDimensionGroupLabel', {
               defaultMessage: 'Group',
             }),
+            fakeFinalAccessor,
             supportsMoreColumns:
               totalNonCollapsedAccessors < PartitionChartsMeta[state.shape].maxBuckets,
             dimensionsTooMany:
@@ -477,12 +492,15 @@ export const getPieVisualization = ({
 
   getErrorMessages(state) {
     const hasTooManyBucketDimensions = state.layers
-      .map(
-        (layer) =>
+      .map((layer) => {
+        const totalBucketDimensions =
           Array.from(new Set([...layer.primaryGroups, ...(layer.secondaryGroups ?? [])])).filter(
             (columnId) => !isCollapsed(columnId, layer)
-          ).length > PartitionChartsMeta[state.shape].maxBuckets
-      )
+          ).length +
+          // multiple metrics counts as a dimension
+          (layer.metrics.length > 1 ? 1 : 0);
+        return totalBucketDimensions > PartitionChartsMeta[state.shape].maxBuckets;
+      })
       .some(Boolean);
 
     return hasTooManyBucketDimensions

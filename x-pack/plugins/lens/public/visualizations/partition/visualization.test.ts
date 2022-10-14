@@ -75,11 +75,22 @@ describe('pie_visualization', () => {
       });
 
       it("doesn't count collapsed dimensions", () => {
-        state.layers[0].collapseFns = {
+        const localState = cloneDeep(state);
+        localState.layers[0].collapseFns = {
           [colIds[0]]: 'some-fn',
         };
 
-        expect(pieVisualization.getErrorMessages(state)).toHaveLength(0);
+        expect(pieVisualization.getErrorMessages(localState)).toHaveLength(0);
+      });
+
+      it('counts multiple metrics as an extra bucket dimension', () => {
+        const localState = cloneDeep(state);
+        localState.layers[0].primaryGroups.pop();
+        expect(pieVisualization.getErrorMessages(localState)).toHaveLength(0);
+
+        localState.layers[0].metrics.push('one-metric', 'another-metric');
+
+        expect(pieVisualization.getErrorMessages(localState)).toHaveLength(1);
       });
     });
   });
@@ -271,5 +282,47 @@ describe('pie_visualization', () => {
 
       expect(getConfig(stateWithCollapsed).groups[0].supportsMoreColumns).toBeTruthy();
     });
+
+    it('counts multiple metrics toward the dimension limits', () => {
+      const colIds = new Array(PartitionChartsMeta.pie.maxBuckets - 1)
+        .fill(undefined)
+        .map((_, i) => String(i + 1));
+
+      const frame = mockFrame();
+      frame.datasourceLayers[LAYER_ID]!.getTableSpec = () =>
+        colIds.map((id) => ({ columnId: id, fields: [] }));
+
+      const state = getExampleState();
+      state.layers[0].primaryGroups = colIds;
+
+      const getConfig = (_state: PieVisualizationState) =>
+        pieVisualization.getConfiguration({
+          state: _state,
+          frame,
+          layerId: state.layers[0].layerId,
+        });
+
+      expect(getConfig(state).groups[0].supportsMoreColumns).toBeTruthy();
+
+      const stateWithMultipleMetrics = cloneDeep(state);
+      stateWithMultipleMetrics.layers[0].metrics.push('1', '2');
+
+      expect(getConfig(stateWithMultipleMetrics).groups[0].supportsMoreColumns).toBeFalsy();
+    });
+
+    it.each(Object.values(PieChartTypes).filter((type) => type !== 'mosaic'))(
+      '%s adds fake dimension',
+      (type) => {
+        const state = { ...getExampleState(), type };
+        state.layers[0].metrics.push('1', '2');
+        expect(
+          pieVisualization.getConfiguration({
+            state,
+            frame: mockFrame(),
+            layerId: state.layers[0].layerId,
+          }).groups[0].fakeFinalAccessor
+        ).toEqual({ label: '2 metrics' });
+      }
+    );
   });
 });
