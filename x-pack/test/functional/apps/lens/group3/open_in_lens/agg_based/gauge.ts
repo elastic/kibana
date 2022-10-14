@@ -11,8 +11,6 @@ import { FtrProviderContext } from '../../../../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { visualize, lens, timePicker } = getPageObjects(['visualize', 'lens', 'timePicker']);
 
-  const testSubjects = getService('testSubjects');
-
   describe('Gauge', function describeIndexTests() {
     const isNewChartsLibraryEnabled = true;
 
@@ -28,13 +26,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should show the "Edit Visualization in Lens" menu item', async () => {
-      const button = await testSubjects.exists('visualizeEditInLensButton');
-      expect(button).to.eql(true);
+      expect(await visualize.hasNavigateToLensButton()).to.eql(true);
     });
 
     it('should convert to Lens', async () => {
-      const button = await testSubjects.find('visualizeEditInLensButton');
-      await button.click();
+      await visualize.navigateToLensFromAnotherVisulization();
       await lens.waitForVisualization('gaugeChart');
     });
   });

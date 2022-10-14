@@ -148,6 +148,15 @@ export class VisualizePageObject extends FtrService {
     await this.waitForVisualizationSelectPage();
   }
 
+  public async navigateToLensFromAnotherVisulization() {
+    const button = await this.testSubjects.find('visualizeEditInLensButton');
+    await button.click();
+  }
+
+  public async hasNavigateToLensButton() {
+    return await this.testSubjects.exists('visualizeEditInLensButton');
+  }
+
   public async hasVisType(type: string) {
     return await this.testSubjects.exists(`visType-${type}`);
   }

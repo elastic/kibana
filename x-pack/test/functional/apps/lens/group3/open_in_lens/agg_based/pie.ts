@@ -17,7 +17,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'header',
   ]);
 
-  const testSubjects = getService('testSubjects');
   const pieChart = getService('pieChart');
 
   describe('Pie', function describeIndexTests() {
@@ -35,8 +34,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should hide the "Edit Visualization in Lens" menu item if no split slices were defined', async () => {
-      const button = await testSubjects.exists('visualizeEditInLensButton');
-      expect(button).to.eql(false);
+      expect(await visualize.hasNavigateToLensButton()).to.eql(false);
     });
 
     it('should show the "Edit Visualization in Lens" menu item', async () => {
@@ -46,8 +44,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
       await visEditor.clickGo(isNewChartsLibraryEnabled);
 
-      const button = await testSubjects.exists('visualizeEditInLensButton');
-      expect(button).to.eql(true);
+      expect(await visualize.hasNavigateToLensButton()).to.eql(true);
     });
 
     it('should convert to Lens', async () => {
@@ -58,8 +55,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
       await visEditor.clickGo(isNewChartsLibraryEnabled);
 
-      const button = await testSubjects.find('visualizeEditInLensButton');
-      await button.click();
+      await visualize.navigateToLensFromAnotherVisulization();
       await lens.waitForVisualization('partitionVisChart');
 
       await pieChart.expectPieChartLabels(expectedTableData, isNewChartsLibraryEnabled);
