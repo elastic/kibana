@@ -147,7 +147,12 @@ export class VisualizeEditorPageObject extends FtrService {
     await this.testSubjects.click('visEditorAddFilterButton');
   }
 
-  public async selectField(fieldValue: string, groupName = 'buckets', isChildAggregation = false) {
+  public async selectField(
+    fieldValue: string,
+    groupName = 'buckets',
+    isChildAggregation = false,
+    aggregationIndex = 0
+  ) {
     this.log.debug(`selectField ${fieldValue}`);
     const selector = `
         [data-test-subj="${groupName}AggGroup"]
@@ -156,8 +161,8 @@ export class VisualizeEditorPageObject extends FtrService {
         ${isChildAggregation ? '.visEditorAgg__subAgg' : ''}
         [data-test-subj="visDefaultEditorField"]
       `;
-    const fieldEl = await this.find.byCssSelector(selector);
-    await this.comboBox.setElement(fieldEl, fieldValue);
+    const fieldEls = await this.find.allByCssSelector(selector);
+    await this.comboBox.setElement(fieldEls[aggregationIndex], fieldValue);
   }
 
   public async selectOrderByMetric(aggNth: number, metric: string) {
@@ -175,16 +180,17 @@ export class VisualizeEditorPageObject extends FtrService {
   public async selectAggregation(
     aggValue: string,
     groupName = 'buckets',
-    isChildAggregation = false
+    isChildAggregation = false,
+    aggregationIndex = 0
   ) {
-    const comboBoxElement = await this.find.byCssSelector(`
+    const comboBoxElements = await this.find.allByCssSelector(`
         [data-test-subj="${groupName}AggGroup"]
         [data-test-subj^="visEditorAggAccordion"].euiAccordion-isOpen
         ${isChildAggregation ? '.visEditorAgg__subAgg' : ''}
         [data-test-subj="defaultEditorAggSelect"]
       `);
 
-    await this.comboBox.setElement(comboBoxElement, aggValue);
+    await this.comboBox.setElement(comboBoxElements[aggregationIndex], aggValue);
     await this.common.sleep(500);
   }
 

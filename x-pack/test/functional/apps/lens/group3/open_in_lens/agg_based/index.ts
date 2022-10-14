@@ -14,5 +14,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./xy'));
     loadTestFile(require.resolve('./gauge'));
     loadTestFile(require.resolve('./goal'));
+    loadTestFile(require.resolve('./table'));
   });
 }
