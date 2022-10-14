@@ -35,7 +35,7 @@ import {
   OptionsListEmbeddableInput,
   OPTIONS_LIST_CONTROL,
 } from '../..';
-import { optionsListReducers } from '../options_list_reducers';
+import { getDefaultComponentState, optionsListReducers } from '../options_list_reducers';
 import { OptionsListControl } from '../components/options_list_control';
 import { ControlsDataViewsService } from '../../services/data_views/types';
 import { ControlsOptionsListService } from '../../services/options_list/types';
@@ -105,6 +105,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     >({
       embeddable: this,
       reducers: optionsListReducers,
+      initialComponentState: getDefaultComponentState(),
     });
 
     this.initialize();
@@ -277,73 +278,87 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     } = getState();
 
     dispatch(setLoading(true));
+    if (searchString.valid) {
+      // need to get filters, query, ignoreParentSettings, and timeRange from input for inheritance
+      const {
+        ignoreParentSettings,
+        filters,
+        query,
+        timeRange: globalTimeRange,
+        timeslice,
+      } = this.getInput();
 
-    // need to get filters, query, ignoreParentSettings, and timeRange from input for inheritance
-    const {
-      ignoreParentSettings,
-      filters,
-      query,
-      timeRange: globalTimeRange,
-      timeslice,
-    } = this.getInput();
+      if (this.abortController) this.abortController.abort();
+      this.abortController = new AbortController();
+      const timeRange =
+        timeslice !== undefined
+          ? {
+              from: new Date(timeslice[0]).toISOString(),
+              to: new Date(timeslice[1]).toISOString(),
+              mode: 'absolute' as 'absolute',
+            }
+          : globalTimeRange;
+      const { suggestions, invalidSelections, totalCardinality } =
+        await this.optionsListService.runOptionsListRequest(
+          {
+            field,
+            query,
+            filters,
+            dataView,
+            timeRange,
+            searchString: searchString.value,
+            runPastTimeout,
+            selectedOptions,
+          },
+          this.abortController.signal
+        );
+      if (
+        !selectedOptions ||
+        isEmpty(invalidSelections) ||
+        ignoreParentSettings?.ignoreValidations
+      ) {
+        dispatch(
+          updateQueryResults({
+            availableOptions: suggestions,
+            invalidSelections: undefined,
+            validSelections: selectedOptions,
+            totalCardinality,
+          })
+        );
+      } else {
+        const valid: string[] = [];
+        const invalid: string[] = [];
 
-    if (this.abortController) this.abortController.abort();
-    this.abortController = new AbortController();
-    const timeRange =
-      timeslice !== undefined
-        ? {
-            from: new Date(timeslice[0]).toISOString(),
-            to: new Date(timeslice[1]).toISOString(),
-            mode: 'absolute' as 'absolute',
-          }
-        : globalTimeRange;
-    const { suggestions, invalidSelections, totalCardinality } =
-      await this.optionsListService.runOptionsListRequest(
-        {
-          field,
-          query,
-          filters,
-          dataView,
-          timeRange,
-          searchString,
-          runPastTimeout,
-          selectedOptions,
-        },
-        this.abortController.signal
-      );
-    if (!selectedOptions || isEmpty(invalidSelections) || ignoreParentSettings?.ignoreValidations) {
-      dispatch(
-        updateQueryResults({
-          availableOptions: suggestions,
-          invalidSelections: undefined,
-          validSelections: selectedOptions,
-          totalCardinality,
-        })
-      );
-    } else {
-      const valid: string[] = [];
-      const invalid: string[] = [];
-
-      for (const selectedOption of selectedOptions) {
-        if (invalidSelections?.includes(selectedOption)) invalid.push(selectedOption);
-        else valid.push(selectedOption);
+        for (const selectedOption of selectedOptions) {
+          if (invalidSelections?.includes(selectedOption)) invalid.push(selectedOption);
+          else valid.push(selectedOption);
+        }
+        dispatch(
+          updateQueryResults({
+            availableOptions: suggestions,
+            invalidSelections: invalid,
+            validSelections: valid,
+            totalCardinality,
+          })
+        );
       }
-      dispatch(
-        updateQueryResults({
-          availableOptions: suggestions,
-          invalidSelections: invalid,
-          validSelections: valid,
-          totalCardinality,
-        })
-      );
-    }
 
-    // publish filter
-    const newFilters = await this.buildFilter();
-    batch(() => {
-      dispatch(setLoading(false));
-      dispatch(publishFilters(newFilters));
-    });
+      // publish filter
+      const newFilters = await this.buildFilter();
+      batch(() => {
+        dispatch(setLoading(false));
+        dispatch(publishFilters(newFilters));
+      });
+    } else {
+      batch(() => {
+        dispatch(
+          updateQueryResults({
+            availableOptions: [],
+          })
+        );
+        dispatch(setLoading(false));
+      });
+    }
   };
 
   private buildFilter = async () => {

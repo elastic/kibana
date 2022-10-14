@@ -62,6 +62,12 @@ describe('getFormulaEquivalent', () => {
     mode: 'upper',
   };
 
+  const variance: Metric = {
+    id: 'some-random-value',
+    type: TSVB_METRIC_TYPES.VARIANCE,
+    field: 'test-1',
+  };
+
   const sibblingPipelineMetric: Metric[] = [
     {
       id: 'test-1',
@@ -140,6 +146,11 @@ describe('getFormulaEquivalent', () => {
       'correct formula if metric is standart deviation with upper mode',
       [stdDeviationMetricWithUpperMode, [stdDeviationMetricWithUpperMode], {}],
       'average(test-1) + 1.5 * standard_deviation(test-1)',
+    ],
+    [
+      'correct formula if metric is variance',
+      [variance, [variance], {}],
+      'pow(standard_deviation(test-1), 2)',
     ],
     [
       'correct formula if metric is supported',
