@@ -184,7 +184,7 @@ export class NotificationsService {
 
     const res = await Promise.all(
       entityIdsPerType.map(async (v) => {
-        const responseBody = await this.scopedClusterClient.asInternalUser.search<unknown, any>({
+        const responseBody = await this.scopedClusterClient.asInternalUser.search({
           size: 0,
           index: ML_NOTIFICATION_INDEX_PATTERN,
           body: {
