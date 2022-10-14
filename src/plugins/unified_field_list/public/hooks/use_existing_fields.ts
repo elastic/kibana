@@ -9,7 +9,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { CoreStart } from '@kbn/core/public';
-import { AggregateQuery, buildEsQuery, EsQueryConfig, Filter, Query } from '@kbn/es-query';
+import type { AggregateQuery, EsQueryConfig, Filter, Query } from '@kbn/es-query';
 import {
   DataPublicPluginStart,
   DataViewsContract,
@@ -18,6 +18,8 @@ import {
 import { type DataView } from '@kbn/data-plugin/common';
 import { loadFieldExisting } from '../services/field_existing';
 import { ExistenceFetchStatus } from '../types';
+
+const getBuildEsQueryAsync = async () => (await import('@kbn/es-query')).buildEsQuery;
 
 export interface ExistingFieldsInfo {
   fetchStatus: ExistenceFetchStatus;
@@ -113,7 +115,12 @@ export const useExistingFieldsFetcher = (
         } else {
           // console.log('requesting data');
           const result = await loadFieldExisting({
-            dslQuery: buildSafeEsQuery(dataView, query, filters, getEsQueryConfig(core.uiSettings)),
+            dslQuery: await buildSafeEsQuery(
+              dataView,
+              query,
+              filters,
+              getEsQueryConfig(core.uiSettings)
+            ),
             fromDate,
             toDate,
             timeFieldName: dataView.timeFieldName,
@@ -324,12 +331,13 @@ function getDataViewsHash(dataViews: DataView[]): string {
 
 // Wrapper around buildEsQuery, handling errors (e.g. because a query can't be parsed) by
 // returning a query dsl object not matching anything
-function buildSafeEsQuery(
+async function buildSafeEsQuery(
   dataView: DataView,
   query: Query | AggregateQuery,
   filters: Filter[],
   queryConfig: EsQueryConfig
 ) {
+  const buildEsQuery = await getBuildEsQueryAsync();
   try {
     return buildEsQuery(dataView, query, filters, queryConfig);
   } catch (e) {
