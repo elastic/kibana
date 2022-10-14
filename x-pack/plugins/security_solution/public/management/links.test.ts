@@ -70,23 +70,40 @@ describe('links', () => {
     expect(filteredLinks).toEqual(links);
   });
 
-  it('it returns all links without filtering when not having isolation permissions but has at least one host isolation exceptions entry', async () => {
+  it('it returns all but response actions history link when not having isolation permissions but has at least one host isolation exceptions entry', async () => {
+    (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(false);
     fakeHttpServices.get.mockResolvedValue({ total: 1 });
     const filteredLinks = await getManagementFilteredLinks(
       coreMockStarted,
       getPlugins(['superuser'])
     );
-    (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(false);
-    expect(filteredLinks).toEqual(links);
+    expect(filteredLinks).toEqual({
+      ...links,
+      links: links.links?.filter((link) => link.id !== SecurityPageName.responseActionsHistory),
+    });
   });
 
   it('it returns all but response actions history when no access privilege to either response actions history or HIE but have at least one HIE entry', async () => {
     fakeHttpServices.get.mockResolvedValue({ total: 1 });
+    (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(false);
     const filteredLinks = await getManagementFilteredLinks(
       coreMockStarted,
       getPlugins(['superuser'])
     );
-    (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(false);
+
+    expect(filteredLinks).toEqual({
+      ...links,
+      links: links.links?.filter((link) => link.id !== SecurityPageName.responseActionsHistory),
+    });
+  });
+
+  it('it returns all but response actions history when no enterprise license', async () => {
+    (licenseService.isEnterprise as jest.Mock).mockReturnValue(false);
+    const filteredLinks = await getManagementFilteredLinks(
+      coreMockStarted,
+      getPlugins(['superuser'])
+    );
+
     expect(filteredLinks).toEqual({
       ...links,
       links: links.links?.filter((link) => link.id !== SecurityPageName.responseActionsHistory),
