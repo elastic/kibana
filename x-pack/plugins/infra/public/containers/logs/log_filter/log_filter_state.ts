@@ -6,6 +6,7 @@
  */
 
 import { useMemo } from 'react';
+import { of, merge } from 'rxjs';
 import { buildEsQuery, DataViewBase, Query, AggregateQuery, isOfQueryType } from '@kbn/es-query';
 import createContainer from 'constate';
 import { useCallback, useState } from 'react';
@@ -59,9 +60,11 @@ export const useLogFilterState = ({ indexPattern }: { indexPattern: DataViewBase
     [parseQuery, queryString]
   );
 
-  const [logFilterState, setLogFilterState] = useState<ILogFilterState>(() => ({
-    filterQuery: getLogFilterQuery(queryString.getQuery()) || null,
-  }));
+  const [logFilterState, setLogFilterState] = useState<ILogFilterState>(() => {
+    return {
+      filterQuery: getLogFilterQuery(queryString.getQuery()) || null,
+    };
+  });
 
   const applyLogFilterQuery = useCallback(
     (filterQuery: Query | AggregateQuery) => {
@@ -77,7 +80,9 @@ export const useLogFilterState = ({ indexPattern }: { indexPattern: DataViewBase
   );
 
   useSubscription(
-    useMemo(() => queryString.getUpdates$(), [queryString]),
+    useMemo(() => {
+      return merge(of(undefined), queryString.getUpdates$()); // The internal useEffect will subscribe afer the initial emit from the Observable, and there is no replay.
+    }, [queryString]),
     useMemo(() => {
       return {
         next: () => {
