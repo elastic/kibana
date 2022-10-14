@@ -18,7 +18,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
-  const find = getService('find');
 
   describe('Metric', function describeIndexTests() {
     before(async () => {
@@ -35,13 +34,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should show the "Edit Visualization in Lens" menu item', async () => {
-      const button = await testSubjects.exists('visualizeEditInLensButton');
-      expect(button).to.eql(true);
+      expect(await visualize.hasNavigateToLensButton()).to.eql(true);
     });
 
     it('should convert to Lens', async () => {
-      const button = await testSubjects.find('visualizeEditInLensButton');
-      await button.click();
+      await visualize.navigateToLensFromAnotherVisulization();
       await lens.waitForVisualization('mtrVis');
 
       const metricData = await lens.getMetricVisualizationData();
@@ -54,12 +51,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await header.waitUntilLoadingHasFinished();
 
-      const button = await testSubjects.find('visualizeEditInLensButton');
-      await button.click();
+      await visualize.navigateToLensFromAnotherVisulization();
       await lens.waitForVisualization('mtrVis');
       await retry.try(async () => {
-        const layers = await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`);
-        expect(layers).to.have.length(1);
+        expect(await lens.getLayerCount()).to.be(1);
 
         const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
         expect(dimensions).to.have.length(1);
@@ -73,12 +68,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await header.waitUntilLoadingHasFinished();
 
-      const button = await testSubjects.find('visualizeEditInLensButton');
-      await button.click();
+      await visualize.navigateToLensFromAnotherVisulization();
       await lens.waitForVisualization('mtrVis');
       await retry.try(async () => {
-        const layers = await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`);
-        expect(layers).to.have.length(1);
+        expect(await lens.getLayerCount()).to.be(1);
 
         const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
         expect(dimensions).to.have.length(1);
@@ -92,15 +85,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await header.waitUntilLoadingHasFinished();
 
-      const canEdit = await testSubjects.exists('visualizeEditInLensButton');
-      expect(canEdit).to.be(false);
+      expect(await visualize.hasNavigateToLensButton()).to.be(false);
     });
 
     it('should not allow converting of not valid panel', async () => {
       await visualBuilder.selectAggType('Value Count');
       await header.waitUntilLoadingHasFinished();
-      const canEdit = await testSubjects.exists('visualizeEditInLensButton');
-      expect(canEdit).to.be(false);
+      expect(await visualize.hasNavigateToLensButton()).to.be(false);
     });
 
     it('should convert color ranges', async () => {
@@ -110,8 +101,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visualBuilder.setColorPickerValue('#54B399');
 
       await header.waitUntilLoadingHasFinished();
-      const button = await testSubjects.find('visualizeEditInLensButton');
-      await button.click();
+      await visualize.navigateToLensFromAnotherVisulization();
 
       await lens.waitForVisualization('mtrVis');
       await retry.try(async () => {

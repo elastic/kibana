@@ -34,9 +34,9 @@ import {
   defaultUseGetCaseUserActions,
 } from './mocks';
 import type { CaseViewPageProps } from './types';
-import { CASE_VIEW_PAGE_TABS } from './types';
 import { userProfiles } from '../../containers/user_profiles/api.mock';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 
 jest.mock('../../containers/use_get_action_license');
 jest.mock('../../containers/use_update_case');
