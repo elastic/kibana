@@ -46,7 +46,7 @@ export class CustomRasterSource implements IRasterSource {
     return true;
   }
 
-  renderLegendDetails(): ReactElement<any>{
+  renderLegendDetails(): ReactElement<any> | null {
     return (<div style={{height: "1em",background: "linear-gradient(267deg, rgb(34, 84, 61) 0%, rgb(55, 124, 89) 12.67%, rgb(104, 211, 145) 38%, rgb(109, 219, 195) 46.67%, rgb(190, 227, 248) 64%, rgb(123, 197, 244) 76%, rgb(49, 130, 206) 100%)"}}>
       <span style={{position:"absolute",left:"0"}}>less</span> <span style={{position:"absolute",right:"0"}}>more</span>
       </div>);
