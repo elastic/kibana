@@ -462,18 +462,6 @@ export class AlertingPlugin {
     scheduleAlertingHealthCheck(this.logger, this.config, plugins.taskManager);
     scheduleApiKeyInvalidatorTask(this.telemetryLogger, this.config, plugins.taskManager);
 
-    plugins.actions.getUnsecuredActionsClient().then((unsecuredActionsClient) => {
-      unsecuredActionsClient.bulkEnqueueExecution('alerting', [
-        {
-          id: 'gmail',
-          params: {
-            to: ['xxxxxx'],
-            subject: 'hello from Kibana!',
-            message: 'does this work??',
-          },
-        },
-      ]);
-    });
     return {
       listTypes: ruleTypeRegistry!.list.bind(this.ruleTypeRegistry!),
       getAlertingAuthorizationWithRequest,
