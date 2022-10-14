@@ -74,11 +74,15 @@ describe('convertToLens', () => {
     expect(result).toBeNull();
   });
 
-  test('should return null if defined several metrics with terms split series which uses one of the metrics as order agg', async () => {
+  test('should return null if defined several layers with terms split series which uses one of the metrics as order agg', async () => {
     mockGetColumnsFromVis.mockReturnValue([
       {
         buckets: { all: ['1'], customBuckets: { metric1: '2' } },
         columns: [{ isSplit: true, params: { orderBy: { type: 'column' } } }],
+      },
+      {
+        buckets: { all: ['2'], customBuckets: { metric1: '2' } },
+        columns: [{}],
       },
     ]);
     mockGetVisSchemas.mockReturnValue({
