@@ -8,7 +8,6 @@ import {
   map,
   tap,
   from,
-  finalize,
   switchMap,
   Observable,
   shareReplay,
