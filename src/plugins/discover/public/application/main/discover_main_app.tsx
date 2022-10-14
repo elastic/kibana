@@ -17,6 +17,7 @@ import { useUrl } from './hooks/use_url';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { DataTableRecord } from '../../types';
 import { useSavedSearchAliasMatchRedirect } from '../../hooks/saved_search_alias_match_redirect';
+import { DiscoverAppStateProvider } from './services/discover_app_state_container';
 
 const DiscoverLayoutMemoized = React.memo(DiscoverLayout);
 
@@ -100,25 +101,27 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   useSavedSearchAliasMatchRedirect({ savedSearch, spaces, history });
 
   return (
-    <DiscoverLayoutMemoized
-      dataView={dataView}
-      dataViewList={dataViewList}
-      inspectorAdapters={inspectorAdapters}
-      expandedDoc={expandedDoc}
-      onChangeDataView={onChangeDataView}
-      onUpdateQuery={onUpdateQuery}
-      resetSavedSearch={resetCurrentSavedSearch}
-      setExpandedDoc={setExpandedDoc}
-      navigateTo={navigateTo}
-      savedSearch={savedSearch}
-      savedSearchData$={data$}
-      savedSearchRefetch$={refetch$}
-      searchSource={searchSource}
-      state={state}
-      stateContainer={stateContainer}
-      persistDataView={persistDataView}
-      updateAdHocDataViewId={updateAdHocDataViewId}
-      adHocDataViewList={adHocDataViewList}
-    />
+    <DiscoverAppStateProvider value={stateContainer.appStateContainer}>
+      <DiscoverLayoutMemoized
+        dataView={dataView}
+        dataViewList={dataViewList}
+        inspectorAdapters={inspectorAdapters}
+        expandedDoc={expandedDoc}
+        onChangeDataView={onChangeDataView}
+        onUpdateQuery={onUpdateQuery}
+        resetSavedSearch={resetCurrentSavedSearch}
+        setExpandedDoc={setExpandedDoc}
+        navigateTo={navigateTo}
+        savedSearch={savedSearch}
+        savedSearchData$={data$}
+        savedSearchRefetch$={refetch$}
+        searchSource={searchSource}
+        state={state}
+        stateContainer={stateContainer}
+        persistDataView={persistDataView}
+        updateAdHocDataViewId={updateAdHocDataViewId}
+        adHocDataViewList={adHocDataViewList}
+      />
+    </DiscoverAppStateProvider>
   );
 }

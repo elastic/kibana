@@ -31,7 +31,7 @@ export const getContextHash = (columns: string[], filterManager: FilterManager) 
   const globalFilters = filterManager.getGlobalFilters();
   const appFilters = filterManager.getAppFilters();
 
-  const hash = stringify(
+  return stringify(
     url.encodeQuery({
       _g: rison.encode({
         filters: globalFilters || [],
@@ -43,8 +43,6 @@ export const getContextHash = (columns: string[], filterManager: FilterManager) 
     }),
     { encode: false, sort: false }
   );
-
-  return hash;
 };
 
 /**
@@ -85,14 +83,13 @@ export const useNavigationProps = ({
     () => getCurrentBreadcrumb(history?.location?.search),
     [history?.location?.search]
   );
-  const contextSearchHash = useMemo(
-    () => getContextHash(columns, filterManager),
-    [columns, filterManager]
-  );
 
   const singleDocHref = addBasePath(
     `/app/discover#/doc/${dataViewId}/${rowIndex}?id=${encodeURIComponent(rowId)}`
   );
+
+  const contextSearchHash = getContextHash(columns, filterManager);
+
   const surDocsHref = addBasePath(
     `/app/discover#/context/${encodeURIComponent(dataViewId)}/${encodeURIComponent(
       rowId
@@ -101,7 +98,7 @@ export const useNavigationProps = ({
 
   /**
    * When history can be accessed via hooks,
-   * it is discover main or context route.
+   * it's used by discover main or context route.
    */
   if (!!history) {
     const isContextRoute = matchPath(history.location.pathname, {

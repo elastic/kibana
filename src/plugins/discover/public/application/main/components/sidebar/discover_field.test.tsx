@@ -19,6 +19,8 @@ import { DiscoverField, DiscoverFieldProps } from './discover_field';
 import { DataViewField } from '@kbn/data-views-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { stubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import { DiscoverAppStateProvider } from '../../services/discover_app_state_container';
+import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 
 jest.mock('@kbn/unified-field-list-plugin/public/services/field_stats', () => ({
   loadFieldStats: jest.fn().mockResolvedValue({
@@ -88,10 +90,6 @@ async function getComponent({
     onRemoveField: jest.fn(),
     showFieldStats,
     selected,
-    state: {
-      query: { query: '', language: 'lucene' },
-      filters: [],
-    },
     contextualFields: [],
   };
   const services = {
@@ -135,9 +133,16 @@ async function getComponent({
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
     charts: chartPluginMock.createSetupContract(),
   };
+  const appStateContainer = getDiscoverStateMock({ isTimeBased: true }).appStateContainer;
+  appStateContainer.set({
+    query: { query: '', language: 'lucene' },
+    filters: [],
+  });
   const comp = await mountWithIntl(
     <KibanaContextProvider services={services}>
-      <DiscoverField {...props} />
+      <DiscoverAppStateProvider value={appStateContainer}>
+        <DiscoverField {...props} />
+      </DiscoverAppStateProvider>
     </KibanaContextProvider>
   );
   // wait for lazy modules
