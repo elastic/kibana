@@ -1771,15 +1771,14 @@ export class RulesClient {
 
     const buckets = aggregations?.alertTypeId.buckets;
 
-    if (buckets === undefined) {
-      throw Error('No rules found for bulk delete');
+    if (buckets === undefined || (buckets && buckets.length === 0)) {
+      throw Boom.badRequest(`No rules found for bulk delete`);
     }
 
     await pMap(
       buckets,
       async ({ key: [ruleType, consumer] }) => {
         this.ruleTypeRegistry.ensureRuleTypeEnabled(ruleType);
-
         try {
           await this.authorization.ensureAuthorized({
             ruleTypeId: ruleType,
