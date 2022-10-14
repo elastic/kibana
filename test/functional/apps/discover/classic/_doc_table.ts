@@ -201,7 +201,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await docTable.clickRowToggle({ isAnchorRow: false, rowIndex: rowToInspect - 1 });
 
             // add columns
-            const fields = ['_id', '_index', 'agent'];
+            const fields = ['_id', '@message', 'agent'];
             for (const field of fields) {
               await testSubjects.click(`toggleColumnButton-${field}`);
             }
