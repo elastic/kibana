@@ -110,7 +110,7 @@ pageLoadAssetSize:
   share: 71239
   snapshotRestore: 79032
   spaces: 57868
-  stackAlerts: 29684
+  stackAlerts: 58316
   stackConnectors: 36314
   synthetics: 40958
   telemetry: 51957
@@ -140,6 +140,6 @@ pageLoadAssetSize:
   visTypeTimeseries: 55203
   visTypeVega: 153573
   visTypeVislib: 242838
-  visTypeXy: 30000
+  visTypeXy: 31800
   visualizations: 90000
   watcher: 43598

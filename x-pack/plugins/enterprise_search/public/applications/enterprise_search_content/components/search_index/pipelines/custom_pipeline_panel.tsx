@@ -15,9 +15,10 @@ import { EuiButtonEmptyTo } from '../../../../shared/react_router_helpers';
 
 export const CustomPipelinePanel: React.FC<{
   indexName: string;
+  ingestionMethod: string;
   pipelineSuffix: string;
   processorsCount: number;
-}> = ({ indexName, pipelineSuffix, processorsCount }) => {
+}> = ({ indexName, ingestionMethod, pipelineSuffix, processorsCount }) => {
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
       <EuiFlexItem>
@@ -29,6 +30,7 @@ export const CustomPipelinePanel: React.FC<{
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmptyTo
+              data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-customPipeline-editPipeline`}
               to={`/app/management/ingest/ingest_pipelines/?pipeline=${indexName}@${pipelineSuffix}`}
               shouldNotCreateHref
             >
