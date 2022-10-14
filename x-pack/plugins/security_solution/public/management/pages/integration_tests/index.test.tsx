@@ -16,6 +16,7 @@ import { useCanSeeHostIsolationExceptionsMenu } from '../host_isolation_exceptio
 import { endpointPageHttpMock } from '../endpoint_hosts/mocks';
 
 jest.mock('../../../common/components/user_privileges');
+jest.mock('../host_isolation_exceptions/view/hooks');
 
 const useUserPrivilegesMock = useUserPrivileges as jest.Mock;
 const useCanSeeHostIsolationExceptionsMenuMock = useCanSeeHostIsolationExceptionsMenu as jest.Mock;
@@ -100,7 +101,7 @@ describe('when in the Administration tab', () => {
   });
 
   describe('when the user has permissions', () => {
-    it.skip('should display the Management view if user has privileges', async () => {
+    it('should display the Management view if user has privileges', async () => {
       useUserPrivilegesMock.mockReturnValue({
         endpointPrivileges: { loading: false, canAccessEndpointManagement: true },
       });
