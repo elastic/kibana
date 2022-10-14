@@ -56,7 +56,7 @@ describe('links', () => {
       } as unknown as StartPlugins);
   });
 
-  it('should return all links without filtering when having isolate permissions', async () => {
+  it('should return all links without filtering when having isolate permission', async () => {
     (calculateEndpointAuthz as jest.Mock).mockReturnValue({
       canAccessEndpointManagement: true,
       canIsolateHost: true,
@@ -97,6 +97,7 @@ describe('links', () => {
       canIsolateHost: true,
       canReadActionsLogManagement: false,
     });
+    fakeHttpServices.get.mockResolvedValue({ total: 0 });
 
     const filteredLinks = await getManagementFilteredLinks(
       coreMockStarted,
@@ -108,7 +109,7 @@ describe('links', () => {
     });
   });
 
-  it('should return all but response action link when not having isolation permissions but has at least one host isolation exceptions entry', async () => {
+  it('should return all but response action link when NOg isolation permission but HAS at least one host isolation exceptions entry', async () => {
     (calculateEndpointAuthz as jest.Mock).mockReturnValue({
       canAccessEndpointManagement: true,
       canIsolateHost: false,
@@ -126,7 +127,7 @@ describe('links', () => {
     });
   });
 
-  it('should return all but response actions history when no access privilege to either response actions history or HIE but has one HIE entry', async () => {
+  it('should return all but response actions history when NO access privilege to either response actions history or HIE but HAS one HIE entry', async () => {
     (calculateEndpointAuthz as jest.Mock).mockReturnValue({
       canAccessEndpointManagement: true,
       canIsolateHost: false,
@@ -144,7 +145,7 @@ describe('links', () => {
     });
   });
 
-  it('should return all but HIE and response actions history links when not having isolation permissions and no host isolation exceptions entry', async () => {
+  it('should return all but HIE and response actions history links NO isolation permission and NO host isolation exceptions entry', async () => {
     (calculateEndpointAuthz as jest.Mock).mockReturnValue({
       canAccessEndpointManagement: false,
       canIsolateHost: false,
