@@ -181,6 +181,18 @@ describe('Enterprise Search Managed Indices', () => {
         headers: { 'content-type': 'application/json' },
       });
     });
+
+    it('returns a generic error if an error is thrown from the called service', async () => {
+      (fetchMlInferencePipelineProcessors as jest.Mock).mockImplementationOnce(() => {
+        return Promise.reject(new Error('something went wrong'));
+      });
+
+      await mockRouter.callRoute({
+        params: { indexName: 'search-index-name' },
+      });
+
+      expect(mockRouter.response.customError).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('POST /internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors', () => {
