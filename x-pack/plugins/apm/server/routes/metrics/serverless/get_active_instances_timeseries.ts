@@ -11,6 +11,7 @@ import {
   SERVICE_NODE_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
 import { environmentQuery } from '../../../../common/utils/environment_query';
+import { Coordinate } from '../../../../typings/timeseries';
 import { getMetricsDateHistogramParams } from '../../../lib/helpers/metrics';
 import { Setup } from '../../../lib/helpers/setup_request';
 import {
@@ -34,7 +35,7 @@ export async function getActiveInstancesTimeseries({
   start: number;
   end: number;
   searchAggregatedTransactions: boolean;
-}) {
+}): Promise<Coordinate[]> {
   const { apmEventClient, config } = setup;
 
   const aggs = {

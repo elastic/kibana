@@ -24,8 +24,6 @@ import { calcMemoryUsed } from './helper';
 interface ActiveInstanceTimeseries {
   serverlessDuration: Coordinate[];
   billedDuration: Coordinate[];
-  avgMemoryUsed: Coordinate[];
-  memorySize: Coordinate[];
 }
 
 export interface ActiveInstanceOverview {
@@ -64,9 +62,6 @@ export async function getServerlessActiveInstancesOverview({
   const aggs = {
     faasDurationAvg: { avg: { field: FAAS_DURATION } },
     faasBilledDurationAvg: { avg: { field: FAAS_BILLED_DURATION } },
-    maxTotalMemory: { max: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
-    avgTotalMemory: { avg: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
-    avgFreeMemory: { avg: { field: METRIC_SYSTEM_FREE_MEMORY } },
   };
 
   const params = {
@@ -93,7 +88,16 @@ export async function getServerlessActiveInstancesOverview({
             serverlessFunctions: {
               terms: { field: FAAS_NAME },
               aggs: {
-                ...aggs,
+                ...{
+                  ...aggs,
+                  maxTotalMemory: {
+                    max: { field: METRIC_SYSTEM_TOTAL_MEMORY },
+                  },
+                  avgTotalMemory: {
+                    avg: { field: METRIC_SYSTEM_TOTAL_MEMORY },
+                  },
+                  avgFreeMemory: { avg: { field: METRIC_SYSTEM_FREE_MEMORY } },
+                },
                 timeseries: {
                   date_histogram: {
                     field: '@timestamp',
@@ -145,30 +149,11 @@ export async function getServerlessActiveInstancesOverview({
                         y: timeseriesCurr.faasBilledDurationAvg.value,
                       },
                     ],
-                    avgMemoryUsed: [
-                      ...timeseriesAcc.avgMemoryUsed,
-                      {
-                        x: timeseriesCurr.key,
-                        y: calcMemoryUsed({
-                          memoryFree: timeseriesCurr.avgFreeMemory.value,
-                          memoryTotal: timeseriesCurr.avgTotalMemory.value,
-                        }),
-                      },
-                    ],
-                    memorySize: [
-                      ...timeseriesAcc.memorySize,
-                      {
-                        x: timeseriesCurr.key,
-                        y: timeseriesCurr.maxTotalMemory.value,
-                      },
-                    ],
                   };
                 },
                 {
                   serverlessDuration: [],
                   billedDuration: [],
-                  avgMemoryUsed: [],
-                  memorySize: [],
                 }
               );
             return [
