@@ -113,7 +113,7 @@ describe('Dashboard state diff function', () => {
           useMargins: true,
           syncColors: undefined,
           syncTooltips: undefined,
-          syncCursor: undefined,
+          syncCursor: true,
         } as unknown as DashboardOptions,
       })
     ).toEqual([]);
