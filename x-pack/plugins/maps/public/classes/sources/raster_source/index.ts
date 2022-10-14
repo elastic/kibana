@@ -17,5 +17,5 @@ export interface IRasterSource extends ITMSSource {
   canSkipSourceUpdate(dataRequest: DataRequest, nextRequestMeta: DataRequestMeta): Promise<boolean>;
   isSourceStale(mbSource: RasterTileSource, sourceData: RasterTileSourceData): boolean;
   hasLegendDetails(): Promise<boolean>;
-  renderLegendDetails(): ReactElement<any>;
+  renderLegendDetails(): ReactElement<any> | null;
 }
