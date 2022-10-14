@@ -68,8 +68,8 @@ export interface LifecycleAlertServices<
   ActionGroupIds extends string = never
 > {
   alertWithLifecycle: LifecycleAlertService<InstanceState, InstanceContext, ActionGroupIds>;
-  getAlertStartedDate: (alertId: string) => string | null;
-  getAlertUuid: (alertId: string) => string | null;
+  getAlertStartedDate: (alertInstanceId: string) => string | null;
+  getAlertUuid: (alertInstanceId: string) => string | null;
 }
 
 export type LifecycleRuleExecutor<
@@ -90,7 +90,7 @@ export type LifecycleRuleExecutor<
 ) => Promise<State | void>;
 
 const trackedAlertStateRt = rt.type({
-  alertId: rt.string,
+  alertId: rt.string, // Todo: change to alertInstanceId.
   alertUuid: rt.string,
   started: rt.string,
 });
