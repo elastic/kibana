@@ -164,7 +164,9 @@ export const FilesExampleApp = ({ files, notifications }: FilesExampleAppDeps) =
           }}
         />
       )}
-      {showFilePickerModal && <MyFilePicker onClose={() => {}} onDone={() => {}} />}
+      {showFilePickerModal && (
+        <MyFilePicker onClose={() => setShowFilePickerModal(false)} onDone={() => {}} />
+      )}
     </>
   );
 };

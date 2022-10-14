@@ -26,7 +26,12 @@ export const Modal: FunctionComponent<Props> = ({ onDismiss, onUploaded, client 
         </EuiText>
       </EuiModalHeader>
       <EuiModalBody>
-        <UploadFile kind={exampleFileKind.id} onDone={onUploaded} meta={{ custom: 'meta' }} />
+        <UploadFile
+          multiple
+          kind={exampleFileKind.id}
+          onDone={onUploaded}
+          meta={{ custom: 'meta' }}
+        />
       </EuiModalBody>
     </EuiModal>
   );
