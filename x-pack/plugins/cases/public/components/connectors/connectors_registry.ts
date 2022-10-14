@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CaseConnector, CaseConnectorsRegistry } from './types';
+import type { CaseConnector, CaseConnectorsRegistry } from './types';
 
 export const createCaseConnectorsRegistry = (): CaseConnectorsRegistry => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
