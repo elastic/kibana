@@ -61,8 +61,8 @@ export class XYZTMSSource extends AbstractSource implements IRasterSource {
     return false;
   }
 
-  renderLegendDetails(): ReactElement<any> {
-    return <div />;
+  renderLegendDetails(): ReactElement<any> | null {
+    return null;
   }
   isSourceStale(mbSource: RasterTileSource, sourceData: RasterTileSourceData): boolean {
     if (!sourceData.url) {
