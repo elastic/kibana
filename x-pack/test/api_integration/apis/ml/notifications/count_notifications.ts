@@ -16,40 +16,57 @@ export default ({ getService }: FtrProviderContext) => {
   const ml = getService('ml');
 
   describe('GET notifications count', () => {
-    before(async () => {
-      await ml.api.initSavedObjects();
-      await ml.testResources.setKibanaTimeZoneToUTC();
+    describe('when no ML entities present', () => {
+      it('return a default response', async () => {
+        const { body, status } = await supertest
+          .get(`/api/ml/notifications/count`)
+          .query({ lastCheckedAt: moment().subtract(7, 'd').valueOf() })
+          .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
+          .set(COMMON_REQUEST_HEADERS);
+        ml.api.assertResponseStatusCode(200, status, body);
 
-      const adJobConfig = ml.commonConfig.getADFqSingleMetricJobConfig('fq_job');
-      await ml.api.createAnomalyDetectionJob(adJobConfig);
-
-      await ml.api.waitForJobNotificationsToIndex('fq_job');
+        expect(body.info).to.eql(0);
+        expect(body.warning).to.eql(0);
+        expect(body.error).to.eql(0);
+      });
     });
 
-    after(async () => {
-      await ml.api.cleanMlIndices();
-      await ml.testResources.cleanMLSavedObjects();
-    });
+    describe('when ML entities exist', () => {
+      before(async () => {
+        await ml.api.initSavedObjects();
+        await ml.testResources.setKibanaTimeZoneToUTC();
 
-    it('return notifications count by level', async () => {
-      const { body, status } = await supertest
-        .get(`/api/ml/notifications/count`)
-        .query({ lastCheckedAt: moment().subtract(7, 'd').valueOf() })
-        .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(COMMON_REQUEST_HEADERS);
-      ml.api.assertResponseStatusCode(200, status, body);
+        const adJobConfig = ml.commonConfig.getADFqSingleMetricJobConfig('fq_job');
+        await ml.api.createAnomalyDetectionJob(adJobConfig);
 
-      expect(body.info).to.eql(1);
-      expect(body.warning).to.eql(0);
-      expect(body.error).to.eql(0);
-    });
+        await ml.api.waitForJobNotificationsToIndex('fq_job');
+      });
 
-    it('returns an error for unauthorized user', async () => {
-      const { body, status } = await supertest
-        .get(`/api/ml/notifications/count`)
-        .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-        .set(COMMON_REQUEST_HEADERS);
-      ml.api.assertResponseStatusCode(403, status, body);
+      after(async () => {
+        await ml.api.cleanMlIndices();
+        await ml.testResources.cleanMLSavedObjects();
+      });
+
+      it('return notifications count by level', async () => {
+        const { body, status } = await supertest
+          .get(`/api/ml/notifications/count`)
+          .query({ lastCheckedAt: moment().subtract(7, 'd').valueOf() })
+          .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
+          .set(COMMON_REQUEST_HEADERS);
+        ml.api.assertResponseStatusCode(200, status, body);
+
+        expect(body.info).to.eql(1);
+        expect(body.warning).to.eql(0);
+        expect(body.error).to.eql(0);
+      });
+
+      it('returns an error for unauthorized user', async () => {
+        const { body, status } = await supertest
+          .get(`/api/ml/notifications/count`)
+          .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
+          .set(COMMON_REQUEST_HEADERS);
+        ml.api.assertResponseStatusCode(403, status, body);
+      });
     });
   });
 };
