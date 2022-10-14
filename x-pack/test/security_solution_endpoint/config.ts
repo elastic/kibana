@@ -6,7 +6,7 @@
  */
 
 import { resolve } from 'path';
-import { FtrConfigProviderContext, getKibanaCliLoggers } from '@kbn/test';
+import { FtrConfigProviderContext } from '@kbn/test';
 import { pageObjects } from './page_objects';
 import { services } from './services';
 import {
@@ -51,16 +51,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.fleet.packages.0.version=latest`,
         // set the packagerTaskInterval to 5s in order to speed up test executions when checking fleet artifacts
         '--xpack.securitySolution.packagerTaskInterval=5s',
-        `--logging.loggers=${JSON.stringify([
-          ...getKibanaCliLoggers(xpackFunctionalConfig.get('kbnTestServer.serverArgs')),
-
-          // Enable debug fleet logs by default
-          {
-            name: 'plugins.fleet',
-            level: 'debug',
-            appenders: ['default'],
-          },
-        ])}`,
       ],
     },
     layout: {
