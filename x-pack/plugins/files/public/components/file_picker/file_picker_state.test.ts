@@ -129,6 +129,7 @@ describe('FilePickerState', () => {
         name: undefined,
         page: 1,
         perPage: 20,
+        status: ['READY'],
       });
       expect(filesClient.list).toHaveBeenNthCalledWith(2, {
         abortSignal: expect.any(AbortSignal),
@@ -136,6 +137,7 @@ describe('FilePickerState', () => {
         name: ['*a*'],
         page: 1,
         perPage: 20,
+        status: ['READY'],
       });
       expect(filesClient.list).toHaveBeenNthCalledWith(3, {
         abortSignal: expect.any(AbortSignal),
@@ -143,6 +145,7 @@ describe('FilePickerState', () => {
         name: ['*b*'],
         page: 1,
         perPage: 20,
+        status: ['READY'],
       });
       expect(filesClient.list).toHaveBeenNthCalledWith(4, {
         abortSignal: expect.any(AbortSignal),
@@ -150,6 +153,7 @@ describe('FilePickerState', () => {
         name: ['*b*'],
         page: 3,
         perPage: 20,
+        status: ['READY'],
       });
     });
   });

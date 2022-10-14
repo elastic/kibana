@@ -116,6 +116,7 @@ export class FilePickerState {
         kind: this.kind,
         name: query ? [naivelyFuzzify(query)] : undefined,
         page: page + 1,
+        status: ['READY'],
         perPage: this.pageSize,
         abortSignal: abortController.signal,
       })
