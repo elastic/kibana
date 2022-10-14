@@ -82,10 +82,6 @@ export interface Dimensions {
   y: Dimension;
 }
 
-// @ts-ignore
-// eslint-disable-next-line @typescript-eslint/naming-convention
-type buildChartData = typeof import('./chart/build_chart_data').buildChartData;
-
 /**
  * The chartData object returned by {@link buildChartData} that
  * should be used to set {@link UnifiedHistogramChartContext.data}
