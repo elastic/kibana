@@ -22,7 +22,7 @@ export interface PrebuiltRulesStatusResponse {
 
 export const PREBUILT_RULES_STATUS_QUERY_KEY = 'prePackagedRulesStatus';
 
-export const usePrebuiltRulesStatusQuery = (
+export const useFetchPrebuiltRulesStatusQuery = (
   options: UseQueryOptions<PrebuiltRulesStatusResponse>
 ) => {
   return useQuery<PrebuiltRulesStatusResponse>(
@@ -56,7 +56,7 @@ export const usePrebuiltRulesStatusQuery = (
  *
  * @returns A rules cache invalidation callback
  */
-export const useInvalidatePrebuiltRulesStatus = () => {
+export const useInvalidateFetchPrebuiltRulesStatusQuery = () => {
   const queryClient = useQueryClient();
 
   return useCallback(() => {

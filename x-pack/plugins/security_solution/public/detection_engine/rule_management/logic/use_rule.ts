@@ -6,7 +6,7 @@
  */
 
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
-import { useRuleQuery } from '../api/hooks/use_rule_query';
+import { useFetchRuleByIdQuery } from '../api/hooks/use_fetch_rule_by_id_query';
 import * as i18n from './translations';
 
 /**
@@ -18,7 +18,7 @@ import * as i18n from './translations';
 export const useRule = (id: string) => {
   const { addError } = useAppToasts();
 
-  return useRuleQuery(id, {
+  return useFetchRuleByIdQuery(id, {
     onError: (error) => {
       addError(error, { title: i18n.RULE_AND_TIMELINE_FETCH_FAILURE });
     },

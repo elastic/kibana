@@ -12,25 +12,25 @@ import type {
 } from '../../../../../common/detection_engine/schemas/request';
 import { transformOutput } from '../../../../detections/containers/detection_engine/rules/transforms';
 import { createRule } from '../api';
-import { useInvalidatePrebuiltRulesStatus } from './use_prebuilt_rules_status_query';
-import { useInvalidateRules } from './use_rules_query';
-import { useInvalidateTags } from './use_tags_query';
+import { useInvalidateFetchPrebuiltRulesStatusQuery } from './use_fetch_prebuilt_rules_status_query';
+import { useInvalidateFetchTagsQuery } from './use_fetch_tags_query';
+import { useInvalidateFindRulesQuery } from './use_find_rules_query';
 
 export const useCreateRuleMutation = (
   options?: UseMutationOptions<FullResponseSchema, Error, CreateRulesSchema>
 ) => {
-  const invalidateRules = useInvalidateRules();
-  const invalidateTags = useInvalidateTags();
-  const invalidatePrePackagedRulesStatus = useInvalidatePrebuiltRulesStatus();
+  const invalidateFindRulesQuery = useInvalidateFindRulesQuery();
+  const invalidateFetchTagsQuery = useInvalidateFetchTagsQuery();
+  const invalidateFetchPrePackagedRulesStatusQuery = useInvalidateFetchPrebuiltRulesStatusQuery();
 
   return useMutation<FullResponseSchema, Error, CreateRulesSchema>(
     (rule: CreateRulesSchema) => createRule({ rule: transformOutput(rule) }),
     {
       ...options,
       onSuccess: (...args) => {
-        invalidatePrePackagedRulesStatus();
-        invalidateRules();
-        invalidateTags();
+        invalidateFetchPrePackagedRulesStatusQuery();
+        invalidateFindRulesQuery();
+        invalidateFetchTagsQuery();
 
         if (options?.onSuccess) {
           options.onSuccess(...args);

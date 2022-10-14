@@ -12,22 +12,25 @@ import type {
 } from '../../../../../common/detection_engine/schemas/request';
 import { transformOutput } from '../../../../detections/containers/detection_engine/rules/transforms';
 import { updateRule } from '../api';
-import { useInvalidateRules } from './use_rules_query';
-import { useInvalidateTags } from './use_tags_query';
+import { useInvalidateFindRulesQuery } from './use_find_rules_query';
+import { useInvalidateFetchTagsQuery } from './use_fetch_tags_query';
+import { useInvalidateFetchRuleByIdQuery } from './use_fetch_rule_by_id_query';
 
 export const useUpdateRuleMutation = (
   options?: UseMutationOptions<FullResponseSchema, Error, UpdateRulesSchema>
 ) => {
-  const invalidateRules = useInvalidateRules();
-  const invalidateTags = useInvalidateTags();
+  const invalidateFindRulesQuery = useInvalidateFindRulesQuery();
+  const invalidateFetchTagsQuery = useInvalidateFetchTagsQuery();
+  const invalidateFetchRuleByIdQuery = useInvalidateFetchRuleByIdQuery();
 
   return useMutation<FullResponseSchema, Error, UpdateRulesSchema>(
     (rule: UpdateRulesSchema) => updateRule({ rule: transformOutput(rule) }),
     {
       ...options,
       onSuccess: (...args) => {
-        invalidateRules();
-        invalidateTags();
+        invalidateFindRulesQuery();
+        invalidateFetchRuleByIdQuery();
+        invalidateFetchTagsQuery();
 
         if (options?.onSuccess) {
           options.onSuccess(...args);

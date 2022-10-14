@@ -31,7 +31,7 @@ import {
   userHasPermissions,
 } from '../../../../detections/pages/detection_engine/rules/helpers';
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
-import { useInvalidateRules } from '../../../rule_management/api/hooks/use_rules_query';
+import { useInvalidateFindRulesQuery } from '../../../rule_management/api/hooks/use_find_rules_query';
 import { importRules } from '../../../rule_management/logic';
 import { usePrePackagedRulesInstallationStatus } from '../../../rule_management/logic/use_pre_packaged_rules_installation_status';
 import { usePrePackagedTimelinesInstallationStatus } from '../../../rule_management/logic/use_pre_packaged_timelines_installation_status';
@@ -42,7 +42,7 @@ const RulesPageComponent: React.FC = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
   const [isValueListFlyoutVisible, showValueListFlyout, hideValueListFlyout] = useBoolState();
   const { navigateToApp } = useKibana().services.application;
-  const invalidateRules = useInvalidateRules();
+  const invalidateFindRulesQuery = useInvalidateFindRulesQuery();
 
   const [
     {
@@ -89,7 +89,7 @@ const RulesPageComponent: React.FC = () => {
         description={i18n.SELECT_RULE}
         errorMessage={i18n.IMPORT_FAILED}
         failedDetailed={i18n.IMPORT_FAILED_DETAILED}
-        importComplete={invalidateRules}
+        importComplete={invalidateFindRulesQuery}
         importData={importRules}
         successMessage={i18n.SUCCESSFULLY_IMPORTED_RULES}
         showModal={isImportModalVisible}

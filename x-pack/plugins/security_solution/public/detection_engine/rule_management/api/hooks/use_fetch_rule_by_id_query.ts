@@ -23,7 +23,7 @@ const FIND_ONE_RULE_QUERY_KEY = 'findOneRule';
  * @param options - react-query options
  * @returns useQuery result
  */
-export const useRuleQuery = (id: string, options: UseQueryOptions<Rule>) => {
+export const useFetchRuleByIdQuery = (id: string, options: UseQueryOptions<Rule>) => {
   return useQuery<Rule>(
     [FIND_ONE_RULE_QUERY_KEY, id],
     async ({ signal }) => {
@@ -45,7 +45,7 @@ export const useRuleQuery = (id: string, options: UseQueryOptions<Rule>) => {
  *
  * @returns A rules cache invalidation callback
  */
-export const useInvalidateRule = () => {
+export const useInvalidateFetchRuleByIdQuery = () => {
   const queryClient = useQueryClient();
 
   return useCallback(() => {

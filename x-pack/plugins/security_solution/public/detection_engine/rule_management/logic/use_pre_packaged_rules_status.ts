@@ -5,13 +5,13 @@
  * 2.0.
  */
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
-import { usePrebuiltRulesStatusQuery } from '../api/hooks/use_prebuilt_rules_status_query';
+import { useFetchPrebuiltRulesStatusQuery } from '../api/hooks/use_fetch_prebuilt_rules_status_query';
 import * as i18n from './translations';
 
 export const usePrePackagedRulesStatus = () => {
   const { addError } = useAppToasts();
 
-  return usePrebuiltRulesStatusQuery({
+  return useFetchPrebuiltRulesStatusQuery({
     onError: (err) => {
       addError(err, { title: i18n.RULE_AND_TIMELINE_FETCH_FAILURE });
     },

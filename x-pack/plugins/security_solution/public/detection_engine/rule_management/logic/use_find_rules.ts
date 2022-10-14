@@ -7,8 +7,8 @@
 
 import type { UseQueryOptions } from '@tanstack/react-query';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
-import type { FindRulesQueryArgs } from '../api/hooks/use_rules_query';
-import { useRulesQuery } from '../api/hooks/use_rules_query';
+import type { FindRulesQueryArgs } from '../api/hooks/use_find_rules_query';
+import { useFindRulesQuery } from '../api/hooks/use_find_rules_query';
 import * as i18n from './translations';
 import type { Rule } from './types';
 
@@ -25,13 +25,13 @@ export interface RulesQueryData {
  * @param options - react-query options
  * @returns useQuery result
  */
-export const useFindRulesQuery = (
+export const useFindRules = (
   requestArgs: FindRulesQueryArgs,
   options: UseQueryOptions<RulesQueryData, Error, RulesQueryData, [...string[], FindRulesQueryArgs]>
 ) => {
   const { addError } = useAppToasts();
 
-  return useRulesQuery(requestArgs, {
+  return useFindRulesQuery(requestArgs, {
     onError: (error: Error) => addError(error, { title: i18n.RULE_AND_TIMELINE_FETCH_FAILURE }),
     ...options,
   });

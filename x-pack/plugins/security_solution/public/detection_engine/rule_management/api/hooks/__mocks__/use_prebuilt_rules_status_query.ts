@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PrebuiltRulesStatusResponse } from '../use_prebuilt_rules_status_query';
+import type { PrebuiltRulesStatusResponse } from '../use_fetch_prebuilt_rules_status_query';
 import { mockReactQueryResponse } from './mock_react_query_response';
 
 export const usePrebuiltRulesStatusQuery = jest.fn(() =>

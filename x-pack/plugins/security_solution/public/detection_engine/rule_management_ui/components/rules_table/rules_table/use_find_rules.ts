@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { FindRulesQueryArgs } from '../../../../rule_management/api/hooks/use_rules_query';
-import { useFindRulesQuery } from '../../../../rule_management/logic/use_find_rules_query';
+import type { FindRulesQueryArgs } from '../../../../rule_management/api/hooks/use_find_rules_query';
+import { useFindRules } from '../../../../rule_management/logic/use_find_rules';
 
 interface UseFindRulesArgs extends FindRulesQueryArgs {
   isInMemorySorting: boolean;
@@ -27,7 +27,7 @@ export const useFindRules = (args: UseFindRulesArgs) => {
   const { pagination, filterOptions, sortingOptions, isInMemorySorting, refetchInterval } = args;
 
   // Use this query result when isInMemorySorting = true
-  const allRules = useFindRulesQuery(
+  const allRules = useFindRules(
     { pagination: { page: 1, perPage: MAX_RULES_PER_PAGE }, filterOptions },
     {
       refetchInterval,
@@ -37,7 +37,7 @@ export const useFindRules = (args: UseFindRulesArgs) => {
   );
 
   // Use this query result when isInMemorySorting = false
-  const pagedRules = useFindRulesQuery(
+  const pagedRules = useFindRules(
     { pagination, filterOptions, sortingOptions },
     {
       refetchInterval,

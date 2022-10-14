@@ -10,7 +10,7 @@ import { shallow } from 'enzyme';
 
 import { UpdatePrePackagedRulesCallOut } from './update_callout';
 import { useKibana } from '../../../../common/lib/kibana';
-import { usePrebuiltRulesStatusQuery } from '../../../../detection_engine/rule_management/api/hooks/use_prebuilt_rules_status_query';
+import { useFetchPrebuiltRulesStatusQuery } from '../../../../detection_engine/rule_management/api/hooks/use_fetch_prebuilt_rules_status_query';
 import { mockReactQueryResponse } from '../../../../detection_engine/rule_management/api/hooks/__mocks__/mock_react_query_response';
 
 jest.mock('../../../../common/lib/kibana');
@@ -33,7 +33,7 @@ describe.skip('UpdatePrePackagedRulesCallOut', () => {
   });
 
   it('renders correctly', () => {
-    (usePrebuiltRulesStatusQuery as jest.Mock).mockReturnValue(
+    (useFetchPrebuiltRulesStatusQuery as jest.Mock).mockReturnValue(
       mockReactQueryResponse({
         data: {
           rulesCustomInstalled: 0,
@@ -52,7 +52,7 @@ describe.skip('UpdatePrePackagedRulesCallOut', () => {
   });
 
   it('renders callOutMessage correctly: numberOfUpdatedRules > 0 and numberOfUpdatedTimelines = 0', () => {
-    (usePrebuiltRulesStatusQuery as jest.Mock).mockReturnValue(
+    (useFetchPrebuiltRulesStatusQuery as jest.Mock).mockReturnValue(
       mockReactQueryResponse({
         data: {
           rulesCustomInstalled: 0,
@@ -74,7 +74,7 @@ describe.skip('UpdatePrePackagedRulesCallOut', () => {
   });
 
   it('renders buttonTitle correctly: numberOfUpdatedRules > 0 and numberOfUpdatedTimelines = 0', () => {
-    (usePrebuiltRulesStatusQuery as jest.Mock).mockReturnValue(
+    (useFetchPrebuiltRulesStatusQuery as jest.Mock).mockReturnValue(
       mockReactQueryResponse({
         data: {
           rulesCustomInstalled: 0,
@@ -96,7 +96,7 @@ describe.skip('UpdatePrePackagedRulesCallOut', () => {
   });
 
   it('renders callOutMessage correctly: numberOfUpdatedRules = 0 and numberOfUpdatedTimelines > 0', () => {
-    (usePrebuiltRulesStatusQuery as jest.Mock).mockReturnValue(
+    (useFetchPrebuiltRulesStatusQuery as jest.Mock).mockReturnValue(
       mockReactQueryResponse({
         data: {
           rulesCustomInstalled: 0,
@@ -118,7 +118,7 @@ describe.skip('UpdatePrePackagedRulesCallOut', () => {
   });
 
   it('renders buttonTitle correctly: numberOfUpdatedRules = 0 and numberOfUpdatedTimelines > 0', () => {
-    (usePrebuiltRulesStatusQuery as jest.Mock).mockReturnValue(
+    (useFetchPrebuiltRulesStatusQuery as jest.Mock).mockReturnValue(
       mockReactQueryResponse({
         data: {
           rulesCustomInstalled: 0,
@@ -140,7 +140,7 @@ describe.skip('UpdatePrePackagedRulesCallOut', () => {
   });
 
   it('renders callOutMessage correctly: numberOfUpdatedRules > 0 and numberOfUpdatedTimelines > 0', () => {
-    (usePrebuiltRulesStatusQuery as jest.Mock).mockReturnValue(
+    (useFetchPrebuiltRulesStatusQuery as jest.Mock).mockReturnValue(
       mockReactQueryResponse({
         data: {
           rulesCustomInstalled: 0,
@@ -162,7 +162,7 @@ describe.skip('UpdatePrePackagedRulesCallOut', () => {
   });
 
   it('renders buttonTitle correctly: numberOfUpdatedRules > 0 and numberOfUpdatedTimelines > 0', () => {
-    (usePrebuiltRulesStatusQuery as jest.Mock).mockReturnValue(
+    (useFetchPrebuiltRulesStatusQuery as jest.Mock).mockReturnValue(
       mockReactQueryResponse({
         data: {
           rulesCustomInstalled: 0,

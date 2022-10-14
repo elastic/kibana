@@ -18,7 +18,6 @@ export interface FindRulesQueryArgs {
   pagination?: Pick<PaginationOptions, 'page' | 'perPage'>;
 }
 
-// TODO organize query keys for reusability
 const FIND_RULES_QUERY_KEY = 'findRules';
 
 export interface RulesQueryResponse {
@@ -36,7 +35,7 @@ export interface RulesQueryResponse {
  * @param queryOptions - react-query options
  * @returns useQuery result
  */
-export const useRulesQuery = (
+export const useFindRulesQuery = (
   queryArgs: FindRulesQueryArgs,
   queryOptions: UseQueryOptions<
     RulesQueryResponse,
@@ -66,7 +65,7 @@ export const useRulesQuery = (
  *
  * @returns A rules cache invalidation callback
  */
-export const useInvalidateRules = () => {
+export const useInvalidateFindRulesQuery = () => {
   const queryClient = useQueryClient();
 
   return useCallback(() => {
@@ -98,7 +97,7 @@ export const useUpdateRulesCache = () => {
    */
   return useCallback(
     (newRules: Rule[]) => {
-      queryClient.setQueriesData<ReturnType<typeof useRulesQuery>['data']>(
+      queryClient.setQueriesData<ReturnType<typeof useFindRulesQuery>['data']>(
         [FIND_RULES_QUERY_KEY],
         (currentData) =>
           currentData

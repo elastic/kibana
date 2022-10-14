@@ -6,7 +6,7 @@
  */
 
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
-import { useTagsQuery } from '../api/hooks/use_tags_query';
+import { useFetchTagsQuery } from '../api/hooks/use_fetch_tags_query';
 import * as i18n from './translations';
 
 /**
@@ -16,7 +16,7 @@ import * as i18n from './translations';
 export const useTags = () => {
   const { addError } = useAppToasts();
 
-  return useTagsQuery({
+  return useFetchTagsQuery({
     onError: (err) => {
       addError(err, { title: i18n.TAG_FETCH_FAILURE });
     },
