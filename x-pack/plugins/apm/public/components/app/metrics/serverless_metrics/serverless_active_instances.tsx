@@ -25,8 +25,6 @@ import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { ListMetric } from '../../../shared/list_metric';
-import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
-import { ListMetric } from '../../../shared/list_metric';
 
 type ServerlessActiveInstances =
   APIReturnType<'GET /internal/apm/services/{serviceName}/metrics/serverless/active_instances'>;
