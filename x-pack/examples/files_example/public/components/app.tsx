@@ -165,7 +165,16 @@ export const FilesExampleApp = ({ files, notifications }: FilesExampleAppDeps) =
         />
       )}
       {showFilePickerModal && (
-        <MyFilePicker onClose={() => setShowFilePickerModal(false)} onDone={() => {}} />
+        <MyFilePicker
+          onClose={() => setShowFilePickerModal(false)}
+          onDone={(ids) => {
+            notifications.toasts.addSuccess({
+              title: 'Selected files!',
+              text: 'IDS:' + JSON.stringify(ids, null, 2),
+            });
+            setShowFilePickerModal(false);
+          }}
+        />
       )}
     </>
   );
