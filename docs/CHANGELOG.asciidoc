@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.4.x releases.
 
+* <<release-notes-8.4.3>>
 * <<release-notes-8.4.2>>
 * <<release-notes-8.4.1>>
 * <<release-notes-8.4.0>>
@@ -35,6 +36,52 @@ Review important information about the {kib} 8.4.x releases.
 
 --
 
+[[release-notes-8.4.3]]
+== {kib} 8.4.3
+
+Review the following information about the {kib} 8.4.3 release.
+
+[float]
+[[breaking-changes-8.4.3]]
+=== Breaking change
+
+Breaking changes can prevent your application from optimal operation and performance.
+Before you upgrade, review the breaking change, then mitigate the impact to your application.
+
+// tag::notable-breaking-changes[]
+There are no breaking changes in {kib} 8.4.3.
+// end::notable-breaking-changes[]
+
+To review the breaking changes in previous versions, refer to the following:
+
+{kibana-ref-all}/8.3/release-notes-8.3.0.html#breaking-changes-8.3.0[8.3.0] | {kibana-ref-all}/8.2/release-notes-8.2.0.html#breaking-changes-8.2.0[8.2.0] | {kibana-ref-all}/8.1/release-notes-8.1.0.html#breaking-changes-8.1.0[8.1.0] | {kibana-ref-all}/8.0/release-notes-8.0.0.html#breaking-changes-8.0.0[8.0.0] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc2.html#breaking-changes-8.0.0-rc2[8.0.0-rc2] | {kibana-ref-all}/8.0/release-notes-8.0.0-rc1.html#breaking-changes-8.0.0-rc1[8.0.0-rc1] | {kibana-ref-all}/8.0/release-notes-8.0.0-beta1.html#breaking-changes-8.0.0-beta1[8.0.0-beta1] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha2.html#breaking-changes-8.0.0-alpha2[8.0.0-alpha2] | {kibana-ref-all}/8.0/release-notes-8.0.0-alpha1.html#breaking-changes-8.0.0-alpha1[8.0.0-alpha1]
+
+[float]
+[[fixes-v8.4.3]]
+=== Bug fixes
+Cases::
+Fixes an issue where the recent cases widget shows cases from other solutions {kibana-pull}141221[#141221]
+
+Discover::
+* Fixes scrolling prevented by saved search embeddable on touch devices {kibana-pull}141718[#141718]
+* Fixes columns management for saved search embeddable {kibana-pull}140799[#140799]
+
+Elastic Security::
+For the Elastic Security 8.4.3 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+
+Graph::
+* Fixes the position of Add fields popover {kibana-pull}141040[#141040]
+* Fixes responsive styles of field manager {kibana-pull}140948[#140948]
+
+Machine Learning::
+Fixes an issue where Data visualizer was unable to update distribution when changing shard size, forbidden error with recognize modules on basic license {kibana-pull}141313[#141313]
+
+Management::
+Fixes the removal of a single field formatter {kibana-pull}141078[#141078]
+
+Observability::
+Fixes an alert summary widget issue in non-default space {kibana-pull}140842[#140842]
+
 [[release-notes-8.4.2]]
 == {kib} 8.4.2
 
@@ -47,9 +94,7 @@ Review the following information about the {kib} 8.4.2 release.
 Breaking changes can prevent your application from optimal operation and performance.
 Before you upgrade, review the breaking change, then mitigate the impact to your application.
 
-// tag::notable-breaking-changes[]
 There are no breaking changes in {kib} 8.4.2.
-// end::notable-breaking-changes[]
 
 To review the breaking changes in previous versions, refer to the following:
 
