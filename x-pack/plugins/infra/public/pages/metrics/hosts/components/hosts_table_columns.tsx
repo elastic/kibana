@@ -7,6 +7,7 @@
 
 import { EuiBasicTableColumn } from '@elastic/eui';
 import React from 'react';
+import { EuiText } from '@elastic/eui';
 import { scaleUpPercentage } from '../../../../components/infrastructure_node_metrics_tables/shared/hooks';
 import { SnapshotNodeMetric } from '../../../../../common/http_api/snapshot_api';
 import { NumberCell } from '../../../../components/infrastructure_node_metrics_tables/shared/components';
@@ -29,12 +30,12 @@ export const HostsTableColumns: Array<EuiBasicTableColumn<HostNodeRow>> = [
     name: 'Name',
     field: 'label',
     truncateText: true,
-    render: (name: string) => <div>{name}</div>,
+    render: (name: string) => <EuiText size="s">{name}</EuiText>,
   },
   {
     name: 'Operating System',
     field: 'os',
-    render: (os: string) => <div>{os}</div>,
+    render: (os: string) => <EuiText size="s">{os ?? '-'}</EuiText>,
   },
   {
     name: '# of CPUs',
