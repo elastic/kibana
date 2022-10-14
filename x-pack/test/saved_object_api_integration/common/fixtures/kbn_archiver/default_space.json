@@ -93,6 +93,16 @@
 
 {
   "attributes": {
+    "title": "A shared saved-object in the default and space_2 spaces"
+  },
+  "id": "default_and_space_2",
+  "type": "sharedtype",
+  "updated_at": "2017-09-21T18:59:16.270Z",
+  "version": "WzQ4OCwxXQ=="
+}
+
+{
+  "attributes": {
     "title": "A sharedtype saved-object with id: conflict_1"
   },
   "id": "conflict_1",
