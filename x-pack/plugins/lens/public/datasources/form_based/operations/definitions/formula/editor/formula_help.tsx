@@ -543,27 +543,30 @@ export function getFunctionSignatureLabel(
   }
   if (operationDefinitionMap[name]) {
     const def = operationDefinitionMap[name];
-    let extraArgs = '';
+    const extraArgs: string[] = [];
     if (def.filterable) {
-      extraArgs += ',';
-      extraArgs += i18n.translate('xpack.lens.formula.kqlExtraArguments', {
-        defaultMessage: '[kql]?: string, [lucene]?: string',
-      });
-    }
-    if (def.filterable && def.shiftable) {
-      extraArgs += ', ';
+      extraArgs.push(
+        i18n.translate('xpack.lens.formula.kqlExtraArguments', {
+          defaultMessage: '[kql]?: string, [lucene]?: string',
+        })
+      );
     }
     if (def.shiftable) {
-      extraArgs += i18n.translate('xpack.lens.formula.shiftExtraArguments', {
-        defaultMessage: '[shift]?: string',
-      });
+      extraArgs.push(
+        i18n.translate('xpack.lens.formula.shiftExtraArguments', {
+          defaultMessage: '[shift]?: string',
+        })
+      );
     }
     if (def.canReduceTimeRange) {
-      extraArgs += i18n.translate('xpack.lens.formula.reducedTimeRangeExtraArguments', {
-        defaultMessage: '[reducedTimeRange]?: string',
-      });
+      extraArgs.push(
+        i18n.translate('xpack.lens.formula.reducedTimeRangeExtraArguments', {
+          defaultMessage: '[reducedTimeRange]?: string',
+        })
+      );
     }
-    return `${name}(${def.documentation?.signature}${extraArgs})`;
+    const extraComma = extraArgs.length ? ', ' : '';
+    return `${name}(${def.documentation?.signature}${extraComma}${extraArgs.join(', ')})`;
   }
   return '';
 }
