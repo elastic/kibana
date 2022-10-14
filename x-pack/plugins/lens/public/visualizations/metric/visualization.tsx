@@ -19,6 +19,7 @@ import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { IconChartMetric } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { LayerType } from '../../../common';
+import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import { getSuggestions } from './suggestions';
 import {
   Visualization,
@@ -32,7 +33,6 @@ import { DimensionEditor } from './dimension_editor';
 import { Toolbar } from './toolbar';
 import { generateId } from '../../id_generator';
 import { FormatSelectorOptions } from '../../datasources/form_based/dimension_panel/format_selector';
-import { FormBasedLayer } from '../../datasources/form_based/types';
 
 export const DEFAULT_MAX_COLUMNS = 3;
 
@@ -55,16 +55,6 @@ export interface MetricVisualizationState {
   color?: string;
   palette?: PaletteOutput<CustomPaletteParams>;
   maxCols?: number;
-}
-
-interface MetricDatasourceState {
-  [prop: string]: unknown;
-  layers: FormBasedLayer[];
-}
-
-export interface MetricSuggestion extends Suggestion {
-  datasourceState: MetricDatasourceState;
-  visualizationState: MetricVisualizationState;
 }
 
 export const supportedDataTypes = new Set(['number']);
@@ -503,15 +493,17 @@ export const getMetricVisualization = ({
   },
 
   getSuggestionFromConvertToLensContext({ suggestions, context }) {
-    const allSuggestions = suggestions as MetricSuggestion[];
-    return {
+    const allSuggestions = suggestions as Array<
+      Suggestion<MetricVisualizationState, FormBasedPersistedState>
+    >;
+    const suggestion: Suggestion<MetricVisualizationState, FormBasedPersistedState> = {
       ...allSuggestions[0],
       datasourceState: {
         ...allSuggestions[0].datasourceState,
         layers: allSuggestions.reduce(
           (acc, s) => ({
             ...acc,
-            ...s.datasourceState.layers,
+            ...s.datasourceState?.layers,
           }),
           {}
         ),
@@ -521,5 +513,6 @@ export const getMetricVisualization = ({
         ...context.configuration,
       },
     };
+    return suggestion;
   },
 });
