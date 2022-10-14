@@ -38,6 +38,7 @@ import {
 import { DistributiveOmit } from '@elastic/eui';
 import type { VisualizationType, Suggestion } from '../../types';
 import type { ValueLabelConfig } from '../../../common/types';
+import type { FormBasedLayer } from '../../datasources/form_based/types';
 
 export const YAxisModes = {
   AUTO: 'auto',
@@ -277,9 +278,9 @@ export const visualizationTypes: VisualizationType[] = [
 
 interface XYStateWithLayers {
   [prop: string]: unknown;
-  layers: XYLayerConfig[];
+  layers: Record<string, FormBasedLayer>;
 }
 export interface XYSuggestion extends Suggestion {
   datasourceState: XYStateWithLayers;
-  visualizationState: XYStateWithLayers;
+  visualizationState: XYState;
 }

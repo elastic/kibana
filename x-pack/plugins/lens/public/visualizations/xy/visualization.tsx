@@ -810,7 +810,7 @@ export const getXyVisualization = ({
 
   getSuggestionFromConvertToLensContext({ suggestions, context }) {
     const allSuggestions = suggestions as XYSuggestion[];
-    return {
+    const suggestion: XYSuggestion = {
       ...allSuggestions[0],
       datasourceState: {
         ...allSuggestions[0].datasourceState,
@@ -824,9 +824,10 @@ export const getXyVisualization = ({
       },
       visualizationState: {
         ...allSuggestions[0].visualizationState,
-        ...context.configuration,
+        ...(context.configuration as XYSuggestion['visualizationState']),
       },
     };
+    return suggestion;
   },
 });
 

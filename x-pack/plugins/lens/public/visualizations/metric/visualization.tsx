@@ -59,7 +59,7 @@ export interface MetricVisualizationState {
 
 interface MetricDatasourceState {
   [prop: string]: unknown;
-  layers: FormBasedLayer[];
+  layers: Record<string, FormBasedLayer>;
 }
 
 export interface MetricSuggestion extends Suggestion {
@@ -504,7 +504,7 @@ export const getMetricVisualization = ({
 
   getSuggestionFromConvertToLensContext({ suggestions, context }) {
     const allSuggestions = suggestions as MetricSuggestion[];
-    return {
+    const suggestion: MetricSuggestion = {
       ...allSuggestions[0],
       datasourceState: {
         ...allSuggestions[0].datasourceState,
@@ -521,5 +521,6 @@ export const getMetricVisualization = ({
         ...context.configuration,
       },
     };
+    return suggestion;
   },
 });

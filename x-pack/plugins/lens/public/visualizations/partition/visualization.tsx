@@ -41,7 +41,7 @@ import type { FormBasedLayer } from '../..';
 
 interface DatatableDatasourceState {
   [prop: string]: unknown;
-  layers: FormBasedLayer[];
+  layers: Record<string, FormBasedLayer>;
 }
 
 export interface PartitionSuggestion extends Suggestion {
@@ -465,13 +465,14 @@ export const getPieVisualization = ({
     if (!suggestionByShape) {
       return;
     }
-    return {
+    const suggestion: PartitionSuggestion = {
       ...suggestionByShape,
       visualizationState: {
         ...suggestionByShape.visualizationState,
         ...context.configuration,
       },
     };
+    return suggestion;
   },
 
   getErrorMessages(state) {

@@ -45,7 +45,7 @@ export interface DatatableVisualizationState {
 
 interface DatatableDatasourceState {
   [prop: string]: unknown;
-  layers: FormBasedLayer[];
+  layers: Record<string, FormBasedLayer>;
 }
 
 export interface DatatableSuggestion extends Suggestion {
@@ -606,7 +606,7 @@ export const getDatatableVisualization = ({
   },
   getSuggestionFromConvertToLensContext({ suggestions, context }) {
     const allSuggestions = suggestions as DatatableSuggestion[];
-    return {
+    const suggestion: DatatableSuggestion = {
       ...allSuggestions[0],
       datasourceState: {
         ...allSuggestions[0].datasourceState,
@@ -623,6 +623,7 @@ export const getDatatableVisualization = ({
         ...context.configuration,
       },
     };
+    return suggestion;
   },
 });
 

@@ -50,7 +50,7 @@ interface GaugeVisualizationDeps {
 
 interface GaugeDatasourceState {
   [prop: string]: unknown;
-  layers: FormBasedLayer[];
+  layers: Record<string, FormBasedLayer>;
 }
 
 export interface GaugeSuggestion extends Suggestion {
@@ -557,7 +557,7 @@ export const getGaugeVisualization = ({
 
   getSuggestionFromConvertToLensContext({ suggestions, context }) {
     const allSuggestions = suggestions as GaugeSuggestion[];
-    return {
+    const suggestion: GaugeSuggestion = {
       ...allSuggestions[0],
       datasourceState: {
         ...allSuggestions[0].datasourceState,
@@ -571,8 +571,9 @@ export const getGaugeVisualization = ({
       },
       visualizationState: {
         ...allSuggestions[0].visualizationState,
-        ...context.configuration,
+        ...(context.configuration as GaugeVisualizationState),
       },
     };
+    return suggestion;
   },
 });
