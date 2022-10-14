@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiSelectable,
   EuiSpacer,
@@ -17,8 +17,10 @@ import {
   EuiIcon,
   EuiSelectableOption,
   EuiHighlight,
+  EuiSelectableListItem,
 } from '@elastic/eui';
 
+import { FormattedMessage } from '@kbn/i18n-react';
 import { Case } from '../../../../common';
 import * as i18n from './translations';
 import { TagsSelectionState } from './types';
@@ -107,6 +109,23 @@ const initTagsState = ({
   return { options, dirtyTags, selectedTags };
 };
 
+const NoMatchesMessage: React.FC<{ searchValue: string; onClick: (newTag: string) => void }> =
+  React.memo(({ searchValue, onClick }) => {
+    const onNewTagClick = useCallback(() => onClick(searchValue), [onClick, searchValue]);
+
+    return (
+      <EuiSelectableListItem onFocusBadge showIcons={false} onClick={onNewTagClick}>
+        <FormattedMessage
+          id="xpack.cases.actions.tags.newTagMessage"
+          defaultMessage="Add {searchValue} as a tag"
+          values={{ searchValue: <b>{searchValue}</b> }}
+        />
+      </EuiSelectableListItem>
+    );
+  });
+
+NoMatchesMessage.displayName = 'NoMatchesMessage';
+
 const EditTagsSelectableComponent: React.FC<Props> = ({
   selectedCases,
   tags,
@@ -121,8 +140,9 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
 
   const [dirtyTags, setDirtyTags] = useState<Record<string, boolean>>(initialState.dirtyTags);
   const [options, setOptions] = useState<EuiSelectableOption[]>(initialState.options);
+  const [searchValue, setSearchValue] = useState<string>();
 
-  const renderOption = (option: EuiSelectableOption, searchValue: string) => {
+  const renderOption = (option: EuiSelectableOption, search: string) => {
     return (
       <>
         {getSelectionIcon({
@@ -131,40 +151,74 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
           tagCounterMap,
           dirtyTags,
         })}
-        <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
+        <EuiHighlight search={search}>{option.label}</EuiHighlight>
       </>
     );
   };
 
-  const onChange = (newOptions: EuiSelectableOption[]) => {
-    const selectedTags: string[] = [];
-    const unSelectedTags: string[] = [];
+  const onChange = useCallback(
+    (newOptions: EuiSelectableOption[]) => {
+      const selectedTags: string[] = [];
+      const unSelectedTags: string[] = [];
 
-    for (const option of newOptions) {
-      if (option.checked === 'on') {
-        selectedTags.push(option.label);
+      for (const option of newOptions) {
+        if (option.checked === 'on') {
+          selectedTags.push(option.label);
+        }
+
+        if (!option.checked && dirtyTags[option.label]) {
+          unSelectedTags.push(option.label);
+        }
       }
 
-      if (!option.checked && dirtyTags[option.label]) {
-        unSelectedTags.push(option.label);
-      }
-    }
+      const newDirtyTags = selectedTags.reduce((acc, tag) => ({ ...acc, [tag]: true }), {});
 
-    const newDirtyTags = selectedTags.reduce((acc, tag) => ({ ...acc, [tag]: true }), {});
+      setDirtyTags((dirtyTagsRec) => ({ ...dirtyTagsRec, ...newDirtyTags }));
+      onChangeTags({ selectedTags, unSelectedTags });
+      setOptions(newOptions);
+    },
+    [dirtyTags, onChangeTags]
+  );
+
+  const onNewItem = useCallback(
+    (newTag: string) => {
+      setSearchValue(undefined);
+      onChange([{ label: newTag, checked: 'on', key: newTag }, ...options]);
+    },
+    [onChange, options]
+  );
+
+  const onSelectAll = useCallback(() => {
+    onChange(options.map((option) => ({ ...option, checked: 'on' })));
+  }, [onChange, options]);
+
+  const onSelectNone = useCallback(() => {
+    // TODO: Fix it
+    const newDirtyTags = options.reduce((acc, option) => ({ ...acc, [option.label]: true }), {});
 
     setDirtyTags((dirtyTagsRec) => ({ ...dirtyTagsRec, ...newDirtyTags }));
-    onChangeTags({ selectedTags, unSelectedTags });
-    setOptions(newOptions);
-  };
+    onChange(
+      options.map((option) => {
+        const { checked, ...rest } = option;
+        return rest;
+      })
+    );
+  }, [onChange, options]);
 
   return (
     <EuiSelectable
       options={options}
       searchable
-      searchProps={{ placeholder: i18n.SEARCH_PLACEHOLDER, isLoading, isClearable: !isLoading }}
+      searchProps={{
+        placeholder: i18n.SEARCH_PLACEHOLDER,
+        isLoading,
+        isClearable: !isLoading,
+        onChange: setSearchValue,
+      }}
       renderOption={renderOption}
       listProps={{ showIcons: false }}
       onChange={onChange}
+      noMatchesMessage={<NoMatchesMessage searchValue={searchValue ?? ''} onClick={onNewItem} />}
     >
       {(list, search) => (
         <>
@@ -178,10 +232,10 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiFlexGroup responsive={false}>
-                <EuiButtonEmpty size="xs" flush="right">
+                <EuiButtonEmpty size="xs" flush="right" onClick={onSelectAll}>
                   {i18n.SELECT_ALL}
                 </EuiButtonEmpty>
-                <EuiButtonEmpty size="xs" flush="right">
+                <EuiButtonEmpty size="xs" flush="right" onClick={onSelectNone}>
                   {i18n.SELECT_NONE}
                 </EuiButtonEmpty>
               </EuiFlexGroup>
