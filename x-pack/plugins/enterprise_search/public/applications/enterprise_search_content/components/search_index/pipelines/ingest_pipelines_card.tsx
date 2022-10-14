@@ -111,7 +111,7 @@ export const IngestPipelinesCard: React.FC = () => {
                       data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-ingestPipelines-viewCurlRequest`}
                       buttonContent={i18n.translate(
                         'xpack.enterpriseSearch.content.indices.pipelines.ingestPipelinesCard.accordion.label',
-                        { defaultMessage: 'View sample cURL request' }
+                        { defaultMessage: 'Ingest a document using cURL' }
                       )}
                       id="ingestPipelinesCurlAccordion"
                     >
