@@ -169,7 +169,6 @@ export const TTYPlayer = ({
               seekToLine={seekToLine}
               xTermSearchFn={search}
               setIsPlaying={setIsPlaying}
-              currentLine={currentLine}
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
             />
