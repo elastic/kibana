@@ -14,6 +14,7 @@ Learn how to perform common APM app tasks.
 * <<machine-learning-integration>>
 * <<apm-lambda>>
 * <<advanced-queries>>
+* <<storage-explorer>>
 * <<transactions-annotations>>
 
 
@@ -34,5 +35,7 @@ include::machine-learning.asciidoc[]
 include::lambda.asciidoc[]
 
 include::advanced-queries.asciidoc[]
+
+include::storage-explorer.asciidoc[]
 
 include::deployment-annotations.asciidoc[]
