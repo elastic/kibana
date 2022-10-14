@@ -1586,5 +1586,21 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         throw new Error(`Warning with text "${warningText}" not found`);
       }
     },
+
+    async getPaletteColorStops() {
+      const stops = await find.allByCssSelector(
+        `[data-test-subj^="lnsPalettePanel_dynamicColoring_range_value_"]`
+      );
+      const colorsElements = await testSubjects.findAll('euiColorPickerAnchor');
+      const colors = await Promise.all(
+        colorsElements.map((c) => c.getComputedStyle('background-color'))
+      );
+
+      return await Promise.all(
+        stops.map(async (stop, index) => {
+          return { stop: await stop.getAttribute('value'), color: colors[index] };
+        })
+      );
+    },
   });
 }
