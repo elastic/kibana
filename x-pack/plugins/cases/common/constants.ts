@@ -179,6 +179,7 @@ export const PUSH_CASES_CAPABILITY = 'push_cases' as const;
 
 export const DEFAULT_USER_SIZE = 10;
 export const MAX_ASSIGNEES_PER_CASE = 10;
+export const NO_ASSIGNEES_FILTERING_KEYWORD = 'none';
 
 /**
  * Delays

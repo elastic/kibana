@@ -42,6 +42,7 @@ import {
   CASE_TAGS_URL,
   CASES_URL,
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
+  NO_ASSIGNEES_FILTERING_KEYWORD,
 } from '../../common/constants';
 import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
 
@@ -182,7 +183,9 @@ export const getCases = async ({
   const query = {
     ...(filterOptions.status !== StatusAll ? { status: filterOptions.status } : {}),
     ...(filterOptions.severity !== SeverityAll ? { severity: filterOptions.severity } : {}),
-    assignees: filterOptions.assignees?.map((assignee) => (assignee === null ? 'null' : assignee)),
+    assignees: filterOptions.assignees?.map((assignee) =>
+      assignee === null ? NO_ASSIGNEES_FILTERING_KEYWORD : assignee
+    ),
     ...(filterOptions.reporters.length > 0
       ? { reporters: constructReportersFilter(filterOptions.reporters) }
       : {}),

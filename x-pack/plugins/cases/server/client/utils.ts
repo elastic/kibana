@@ -17,7 +17,7 @@ import {
   isCommentRequestTypeExternalReference,
   isCommentRequestTypePersistableState,
 } from '../../common/utils/attachments';
-import { CASE_SAVED_OBJECT } from '../../common/constants';
+import { CASE_SAVED_OBJECT, NO_ASSIGNEES_FILTERING_KEYWORD } from '../../common/constants';
 import {
   OWNER_FIELD,
   AlertCommentRequestRt,
@@ -334,21 +334,19 @@ export const buildAssigneesFilter = ({
     return;
   }
 
-  /**
-   * URLSearchParams converts null values to a literal string 'null'.
-   * For that reason, we need to check for 'null'.
-   */
-  const isNotNull = (value: string | null): value is string => value !== null && value !== 'null';
+  const assigneesWithoutNone = assigneesAsArray.filter(
+    (assignee) => assignee !== NO_ASSIGNEES_FILTERING_KEYWORD
+  );
+  const hasNoneAssignee =
+    assigneesAsArray.find((assignee) => assignee === NO_ASSIGNEES_FILTERING_KEYWORD) !== undefined
+      ? true
+      : false;
 
-  const assigneesWithoutNull = assigneesAsArray.filter<string>(isNotNull);
-  const hasNullAssignee =
-    assigneesAsArray.find((assignee) => !isNotNull(assignee)) !== undefined ? true : false;
-
-  const assigneesFilter = assigneesWithoutNull.map((filter) =>
+  const assigneesFilter = assigneesWithoutNone.map((filter) =>
     nodeBuilder.is(`${CASE_SAVED_OBJECT}.attributes.assignees.uid`, escapeKuery(filter))
   );
 
-  if (!hasNullAssignee) {
+  if (!hasNoneAssignee) {
     return nodeBuilder.or(assigneesFilter);
   }
 

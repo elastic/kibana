@@ -185,9 +185,9 @@ export const CasesFindRequestRt = rt.partial({
    */
   severity: CaseSeverityRt,
   /**
-   * The uids of the user profiles to filter by. If null all cases with no assignees will be returned
+   * The uids of the user profiles to filter by.
    */
-  assignees: rt.union([rt.array(rt.string), rt.string, rt.null]),
+  assignees: rt.union([rt.array(rt.string), rt.string]),
   /**
    * The reporters to filter by
    */
