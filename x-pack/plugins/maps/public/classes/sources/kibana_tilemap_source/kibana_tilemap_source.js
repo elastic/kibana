@@ -47,7 +47,7 @@ export class KibanaTilemapSource extends AbstractSource {
   }
 
   renderLegendDetails() {
-    return React.createElement('div', null, '');
+    return null;
   }
   isSourceStale(mbSource, sourceData) {
     if (!sourceData.url) {
