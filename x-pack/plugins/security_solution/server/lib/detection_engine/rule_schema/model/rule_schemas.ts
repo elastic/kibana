@@ -8,15 +8,21 @@
 import * as t from 'io-ts';
 
 import {
-  actionsCamel,
-  machine_learning_job_id_normalized,
-  threat_mapping,
-  threat_index,
-  threat_query,
   concurrentSearchesOrUndefined,
   itemsPerSearchOrUndefined,
+  machine_learning_job_id_normalized,
+  RiskScore,
+  RiskScoreMapping,
+  RuleActionArrayCamel,
+  RuleActionThrottle,
+  RuleIntervalFrom,
+  RuleIntervalTo,
+  Severity,
+  SeverityMapping,
+  threat_index,
+  threat_mapping,
+  threat_query,
   threatIndicatorPathOrUndefined,
-  throttleOrNull,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import {
   SIGNALS_ID,
@@ -44,14 +50,10 @@ import {
   MaxSignals,
   RelatedIntegrationArray,
   RequiredFieldArray,
-  RiskScore,
-  RiskScoreMapping,
   RuleAuthorArray,
   RuleDescription,
   RuleFalsePositiveArray,
   RuleFilterArray,
-  RuleIntervalFrom,
-  RuleIntervalTo,
   RuleLicense,
   RuleMetadata,
   RuleName,
@@ -62,8 +64,6 @@ import {
   RuleTagArray,
   RuleVersion,
   SetupGuide,
-  Severity,
-  SeverityMapping,
   ThreatArray,
   TiebreakerField,
   TimelineTemplateId,
@@ -283,9 +283,9 @@ export const internalRuleCreate = t.type({
     interval: t.string,
   }),
   enabled: IsRuleEnabled,
-  actions: actionsCamel,
+  actions: RuleActionArrayCamel,
   params: ruleParams,
-  throttle: throttleOrNull,
+  throttle: t.union([RuleActionThrottle, t.null]),
   notifyWhen,
 });
 export type InternalRuleCreate = t.TypeOf<typeof internalRuleCreate>;
@@ -296,9 +296,9 @@ export const internalRuleUpdate = t.type({
   schedule: t.type({
     interval: t.string,
   }),
-  actions: actionsCamel,
+  actions: RuleActionArrayCamel,
   params: ruleParams,
-  throttle: throttleOrNull,
+  throttle: t.union([RuleActionThrottle, t.null]),
   notifyWhen,
 });
 export type InternalRuleUpdate = t.TypeOf<typeof internalRuleUpdate>;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Severity, SeverityMapping } from '../../../../../common/detection_engine/rule_schema';
+import type { Severity, SeverityMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import { sampleDocSeverity } from '../__mocks__/es_results';
 import type { BuildSeverityFromMappingReturn } from './build_severity_from_mapping';
 import { buildSeverityFromMapping } from './build_severity_from_mapping';

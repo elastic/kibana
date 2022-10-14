@@ -8,6 +8,9 @@
 import type { List } from '@kbn/securitysolution-io-ts-list-types';
 
 import type {
+  RiskScoreMapping,
+  Severity,
+  SeverityMapping,
   ThreatIndex,
   ThreatMapping,
   Threats,
@@ -25,13 +28,10 @@ import type {
   BuildingBlockType,
   RelatedIntegrationArray,
   RequiredFieldArray,
-  RiskScoreMapping,
   RuleAuthorArray,
   RuleLicense,
   RuleNameOverride,
   SetupGuide,
-  Severity,
-  SeverityMapping,
   TimestampOverride,
 } from '../../../../../common/detection_engine/rule_schema';
 import type { SortOrder } from '../../../../../common/detection_engine/schemas/common';

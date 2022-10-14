@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Actions } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { RuleActionArray } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import type {
   CustomRule,
@@ -258,7 +258,7 @@ export const createCustomRuleEnabled = (
   ruleId = '1',
   interval = '100m',
   maxSignals = 500,
-  actions?: Actions
+  actions?: RuleActionArray
 ) => {
   const riskScore = rule.riskScore != null ? parseInt(rule.riskScore, 10) : undefined;
   const severity = rule.severity != null ? rule.severity.toLocaleLowerCase() : undefined;

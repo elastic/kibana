@@ -7,7 +7,7 @@
 
 import { Readable } from 'stream';
 import { createPromiseFromStreams } from '@kbn/utils';
-import type { Action, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { RuleAction, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import {
   getIdError,
@@ -645,7 +645,7 @@ describe('utils', () => {
   });
 
   describe('swapActionIds', () => {
-    const mockAction: Action = {
+    const mockAction: RuleAction = {
       group: 'group string',
       id: 'some-7.x-id',
       action_type_id: '.slack',
@@ -706,7 +706,7 @@ describe('utils', () => {
   });
 
   describe('migrateLegacyActionsIds', () => {
-    const mockAction: Action = {
+    const mockAction: RuleAction = {
       group: 'group string',
       id: 'some-7.x-id',
       action_type_id: '.slack',

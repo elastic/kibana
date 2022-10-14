@@ -6,27 +6,26 @@
  * Side Public License, v 1.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
-
 import * as t from 'io-ts';
 
 import { operator } from '@kbn/securitysolution-io-ts-types';
-import { severity } from '../severity';
+import { Severity } from '../severity';
 
-export const severity_mapping_field = t.string;
-export const severity_mapping_value = t.string;
-export const severity_mapping_item = t.exact(
+/**
+ * TODO: https://github.com/elastic/kibana/pull/142950 Add description
+ */
+export type SeverityMappingItem = t.TypeOf<typeof SeverityMappingItem>;
+export const SeverityMappingItem = t.exact(
   t.type({
-    field: severity_mapping_field,
+    field: t.string,
     operator,
-    value: severity_mapping_value,
-    severity,
+    value: t.string,
+    severity: Severity,
   })
 );
-export type SeverityMappingItem = t.TypeOf<typeof severity_mapping_item>;
 
-export const severity_mapping = t.array(severity_mapping_item);
-export type SeverityMapping = t.TypeOf<typeof severity_mapping>;
-
-export const severityMappingOrUndefined = t.union([severity_mapping, t.undefined]);
-export type SeverityMappingOrUndefined = t.TypeOf<typeof severityMappingOrUndefined>;
+/**
+ * TODO: https://github.com/elastic/kibana/pull/142950 Add description
+ */
+export type SeverityMapping = t.TypeOf<typeof SeverityMapping>;
+export const SeverityMapping = t.array(SeverityMappingItem);

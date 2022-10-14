@@ -6,25 +6,25 @@
  * Side Public License, v 1.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
-
 import * as t from 'io-ts';
 import { operator } from '@kbn/securitysolution-io-ts-types';
-import { riskScoreOrUndefined } from '../risk_score';
+import { RiskScore } from '../risk_score';
 
-export const risk_score_mapping_field = t.string;
-export const risk_score_mapping_value = t.string;
-export const risk_score_mapping_item = t.exact(
+/**
+ * TODO: https://github.com/elastic/kibana/pull/142950 Add description
+ */
+export type RiskScoreMappingItem = t.TypeOf<typeof RiskScoreMappingItem>;
+export const RiskScoreMappingItem = t.exact(
   t.type({
-    field: risk_score_mapping_field,
-    value: risk_score_mapping_value,
+    field: t.string,
+    value: t.string,
     operator,
-    risk_score: riskScoreOrUndefined,
+    risk_score: t.union([RiskScore, t.undefined]),
   })
 );
 
-export const risk_score_mapping = t.array(risk_score_mapping_item);
-export type RiskScoreMapping = t.TypeOf<typeof risk_score_mapping>;
-
-export const riskScoreMappingOrUndefined = t.union([risk_score_mapping, t.undefined]);
-export type RiskScoreMappingOrUndefined = t.TypeOf<typeof riskScoreMappingOrUndefined>;
+/**
+ * TODO: https://github.com/elastic/kibana/pull/142950 Add description
+ */
+export type RiskScoreMapping = t.TypeOf<typeof RiskScoreMapping>;
+export const RiskScoreMapping = t.array(RiskScoreMappingItem);

@@ -6,42 +6,68 @@
  * Side Public License, v 1.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
-
 import * as t from 'io-ts';
 import { saved_object_attributes } from '../saved_object_attributes';
+
+/**
+ * TODO: https://github.com/elastic/kibana/pull/142950 Add description
+ */
+export type RuleActionGroup = t.TypeOf<typeof RuleActionGroup>;
+export const RuleActionGroup = t.string;
+
+/**
+ * TODO: https://github.com/elastic/kibana/pull/142950 Add description
+ */
+export type RuleActionId = t.TypeOf<typeof RuleActionId>;
+export const RuleActionId = t.string;
+
+/**
+ * TODO: https://github.com/elastic/kibana/pull/142950 Add description
+ */
+export type RuleActionTypeId = t.TypeOf<typeof RuleActionTypeId>;
+export const RuleActionTypeId = t.string;
 
 /**
  * Params is an "object", since it is a type of RuleActionParams which is action templates.
  * @see x-pack/plugins/alerting/common/rule.ts
  */
-export const action_group = t.string;
-export const action_id = t.string;
-export const action_action_type_id = t.string;
-export const action_params = saved_object_attributes;
+export type RuleActionParams = t.TypeOf<typeof RuleActionParams>;
+export const RuleActionParams = saved_object_attributes;
 
-export const action = t.exact(
+/**
+ * TODO: https://github.com/elastic/kibana/pull/142950 Add description
+ */
+export type RuleAction = t.TypeOf<typeof RuleAction>;
+export const RuleAction = t.exact(
   t.type({
-    group: action_group,
-    id: action_id,
-    action_type_id: action_action_type_id,
-    params: action_params,
+    group: RuleActionGroup,
+    id: RuleActionId,
+    action_type_id: RuleActionTypeId,
+    params: RuleActionParams,
   })
 );
 
-export type Action = t.TypeOf<typeof action>;
+/**
+ * TODO: https://github.com/elastic/kibana/pull/142950 Add description
+ */
+export type RuleActionArray = t.TypeOf<typeof RuleActionArray>;
+export const RuleActionArray = t.array(RuleAction);
 
-export const actions = t.array(action);
-export type Actions = t.TypeOf<typeof actions>;
-
-export const actionsCamel = t.array(
-  t.exact(
-    t.type({
-      group: action_group,
-      id: action_id,
-      actionTypeId: action_action_type_id,
-      params: action_params,
-    })
-  )
+/**
+ * TODO: https://github.com/elastic/kibana/pull/142950 Add description
+ */
+export type RuleActionCamel = t.TypeOf<typeof RuleActionCamel>;
+export const RuleActionCamel = t.exact(
+  t.type({
+    group: RuleActionGroup,
+    id: RuleActionId,
+    actionTypeId: RuleActionTypeId,
+    params: RuleActionParams,
+  })
 );
-export type ActionsCamel = t.TypeOf<typeof actions>;
+
+/**
+ * TODO: https://github.com/elastic/kibana/pull/142950 Add description
+ */
+export type RuleActionArrayCamel = t.TypeOf<typeof RuleActionArrayCamel>;
+export const RuleActionArrayCamel = t.array(RuleActionCamel);

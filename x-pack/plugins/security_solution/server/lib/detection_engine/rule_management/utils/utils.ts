@@ -7,7 +7,7 @@
 
 import { countBy, partition } from 'lodash/fp';
 import uuid from 'uuid';
-import type { Action } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { RuleAction } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import pMap from 'p-map';
 
@@ -192,12 +192,12 @@ const createQuery = (type: string, id: string) =>
  * @returns
  */
 export const swapActionIds = async (
-  action: Action,
+  action: RuleAction,
   savedObjectsClient: SavedObjectsClientContract
-): Promise<Action | Error> => {
+): Promise<RuleAction | Error> => {
   try {
     const search = createQuery('action', action.id);
-    const foundAction = await savedObjectsClient.find<Action>({
+    const foundAction = await savedObjectsClient.find<RuleAction>({
       type: 'action',
       search,
       rootSearchFields: ['_id', 'originId'],
@@ -258,14 +258,14 @@ export const migrateLegacyActionsIds = async (
       if (isImportRule(rule)) {
         // can we swap the pre 8.0 action connector(s) id with the new,
         // post-8.0 action id (swap the originId for the new _id?)
-        const newActions: Array<Action | Error> = await pMap(
+        const newActions: Array<RuleAction | Error> = await pMap(
           rule.actions ?? [],
-          (action: Action) => swapActionIds(action, savedObjectsClient),
+          (action: RuleAction) => swapActionIds(action, savedObjectsClient),
           { concurrency: MAX_CONCURRENT_SEARCHES }
         );
 
         // were there any errors discovered while trying to migrate and swap the action connector ids?
-        const [actionMigrationErrors, newlyMigratedActions] = partition<Action | Error, Error>(
+        const [actionMigrationErrors, newlyMigratedActions] = partition<RuleAction | Error, Error>(
           (item): item is Error => item instanceof Error
         )(newActions);
 

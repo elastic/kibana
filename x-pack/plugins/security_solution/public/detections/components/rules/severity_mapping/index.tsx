@@ -26,12 +26,12 @@ import {
   FieldComponent,
   AutocompleteFieldMatchComponent,
 } from '@kbn/securitysolution-autocomplete';
-
 import type {
   Severity,
   SeverityMapping,
   SeverityMappingItem,
-} from '../../../../../common/detection_engine/rule_schema';
+} from '@kbn/securitysolution-io-ts-alerting-types';
+
 import type { SeverityOptionItem } from '../step_about_rule/data';
 import type { AboutStepSeverity } from '../../../pages/detection_engine/rules/types';
 import { useKibana } from '../../../../common/lib/kibana';

@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-import { NonEmptyString } from '@kbn/securitysolution-io-ts-types';
+// import * as t from 'io-ts';
+// import { NonEmptyString } from '@kbn/securitysolution-io-ts-types';
 
 // -------------------------------------------------------------------------------------------------
 // Attributes specific to Indicator Match rules
-

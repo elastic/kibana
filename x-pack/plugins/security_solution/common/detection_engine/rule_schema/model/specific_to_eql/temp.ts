@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { NonEmptyString } from '@kbn/securitysolution-io-ts-types';
+// import { NonEmptyString } from '@kbn/securitysolution-io-ts-types';
 
 // -------------------------------------------------------------------------------------------------
 // Attributes specific to EQL rules

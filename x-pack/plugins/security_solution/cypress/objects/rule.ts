@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Throttle } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { RuleActionThrottle } from '@kbn/securitysolution-io-ts-alerting-types';
 import { getMockThreatData } from '../../public/detections/mitre/mitre_tactics_techniques';
 import type { CompleteTimeline } from './timeline';
 import { getTimeline, getIndicatorMatchTimelineTemplate } from './timeline';
@@ -36,7 +36,7 @@ interface Interval {
 }
 
 export interface Actions {
-  throttle: Throttle;
+  throttle: RuleActionThrottle;
   connectors: Connectors[];
 }
 

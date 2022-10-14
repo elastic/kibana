@@ -9,9 +9,9 @@ import * as t from 'io-ts';
 
 import { NonEmptyArray, TimeDuration, enumeration } from '@kbn/securitysolution-io-ts-types';
 import {
-  action_group as actionGroup,
-  action_params as actionParams,
-  action_id as actionId,
+  RuleActionGroup,
+  RuleActionId,
+  RuleActionParams,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import {
@@ -101,9 +101,9 @@ export type BulkActionEditPayloadTimeline = t.TypeOf<typeof bulkActionEditPayloa
  */
 const normalizedRuleAction = t.exact(
   t.type({
-    group: actionGroup,
-    id: actionId,
-    params: actionParams,
+    group: RuleActionGroup,
+    id: RuleActionId,
+    params: RuleActionParams,
   })
 );
 
