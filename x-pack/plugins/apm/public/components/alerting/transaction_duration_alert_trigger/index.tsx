@@ -128,7 +128,7 @@ export function TransactionDurationAlertTrigger(props: Props) {
 
   const latencyChartPreview = data?.latencyChartPreview ?? [];
 
-  const maxY = getMaxY([{ data: latencyChartPreview }]);
+  const maxY = getMaxY(latencyChartPreview);
   const formatter = getDurationFormatter(maxY);
   const yTickFormat = getResponseTimeTickFormatter(formatter);
 
@@ -137,7 +137,7 @@ export function TransactionDurationAlertTrigger(props: Props) {
 
   const chartPreview = (
     <ChartPreview
-      data={latencyChartPreview}
+      multiData={latencyChartPreview}
       threshold={thresholdMs}
       yTickFormat={yTickFormat}
       uiSettings={services.uiSettings}

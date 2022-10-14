@@ -80,7 +80,10 @@ const transactionDurationChartPreview = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{
-    latencyChartPreview: Array<{ x: number; y: number | null }>;
+    latencyChartPreview: Array<{
+      name: string;
+      data: Array<{ x: number; y: number | null }>;
+    }>;
   }> => {
     const setup = await setupRequest(resources);
 
