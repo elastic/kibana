@@ -101,7 +101,6 @@ describe('bulkExecute()', () => {
         attributes: {
           actionId: '123',
           params: { baz: false },
-          executionId: '123abc',
           apiKey: null,
         },
         references: [],
@@ -111,7 +110,6 @@ describe('bulkExecute()', () => {
         attributes: {
           actionId: '123',
           params: { baz: true },
-          executionId: '234xyz',
           apiKey: null,
         },
         references: [],
@@ -211,7 +209,6 @@ describe('bulkExecute()', () => {
         attributes: {
           actionId: '123',
           params: { baz: false },
-          executionId: '123abc',
           apiKey: null,
         },
         references: [
@@ -227,7 +224,6 @@ describe('bulkExecute()', () => {
         attributes: {
           actionId: '123',
           params: { baz: true },
-          executionId: '234xyz',
           apiKey: null,
         },
         references: [],
@@ -340,7 +336,6 @@ describe('bulkExecute()', () => {
         attributes: {
           actionId: '123',
           params: { baz: false },
-          executionId: '123abc',
           apiKey: null,
         },
         references: [
@@ -356,7 +351,6 @@ describe('bulkExecute()', () => {
         attributes: {
           actionId: '123',
           params: { baz: true },
-          executionId: '234xyz',
           apiKey: null,
           relatedSavedObjects: [
             {
