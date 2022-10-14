@@ -234,21 +234,28 @@ export const getManagementFilteredLinks = async (
     const currentUserResponse = await plugins.security.authc.getCurrentUser();
     const { canAccessEndpointManagement, canIsolateHost, canAccessResponseActionsHistory } =
       calculateEndpointAuthz(licenseService, plugins.fleet?.authz, currentUserResponse.roles);
+
     if (!canAccessEndpointManagement) {
       return excludeLinks([
         SecurityPageName.hostIsolationExceptions,
         SecurityPageName.responseActionsHistory,
       ]);
     }
+    const hostIsolationExceptionsApiClientInstance = HostIsolationExceptionsApiClient.getInstance(
+      core.http
+    );
+    const summaryResponse = await hostIsolationExceptionsApiClientInstance.summary();
 
     if (!canAccessResponseActionsHistory) {
       // <= enterprise license
+      if (!canIsolateHost && !summaryResponse.total) {
+        return excludeLinks([
+          SecurityPageName.hostIsolationExceptions,
+          SecurityPageName.responseActionsHistory,
+        ]);
+      }
       return excludeLinks([SecurityPageName.responseActionsHistory]);
     } else if (!canIsolateHost) {
-      const hostIsolationExceptionsApiClientInstance = HostIsolationExceptionsApiClient.getInstance(
-        core.http
-      );
-      const summaryResponse = await hostIsolationExceptionsApiClientInstance.summary();
       if (!summaryResponse.total) {
         // <= platinum so exclude also links that require enterprise
         return excludeLinks([
