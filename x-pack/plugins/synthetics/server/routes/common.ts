@@ -24,7 +24,6 @@ const querySchema = schema.object({
   locations: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
   status: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
   fields: schema.maybe(schema.arrayOf(schema.string())),
-  aggs: schema.any(),
   searchAfter: schema.maybe(schema.arrayOf(schema.string())),
 });
 
@@ -46,7 +45,6 @@ export const getMonitors = (
     locations,
     filter = '',
     fields,
-    aggs,
     searchAfter,
   } = request as MonitorsQuery;
 
@@ -67,7 +65,6 @@ export const getMonitors = (
     search: query ? `${query}*` : undefined,
     filter: filters + filter,
     fields,
-    aggs,
     searchAfter,
   });
 };

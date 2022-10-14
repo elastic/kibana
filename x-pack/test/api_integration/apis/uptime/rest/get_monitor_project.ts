@@ -10,6 +10,7 @@ import { format as formatUrl } from 'url';
 import {
   ProjectMonitorsRequest,
   ProjectMonitor,
+  ProjectMonitorMetaData,
 } from '@kbn/synthetics-plugin/common/runtime_types';
 import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -62,7 +63,7 @@ export default function ({ getService }: FtrProviderContext) {
       icmpProjectMonitors = setUniqueIds(getFixtureJson('project_icmp_monitor'));
     });
 
-    it('project monitors - handles browser monitors', async () => {
+    it('project monitors - fetches all monitors - browser', async () => {
       const monitors = [];
       const project = 'test-brower-suite';
       for (let i = 0; i < 600; i++) {
@@ -89,23 +90,22 @@ export default function ({ getService }: FtrProviderContext) {
           .send()
           .expect(200);
 
-        const firstPageProjectMonitors = firstPageResponse.text.split(`\n`);
-        expect(firstPageProjectMonitors.length).to.eql(500);
-        const afterId = JSON.parse(
-          firstPageProjectMonitors[firstPageProjectMonitors.length - 1]
-        ).afterKey.join(',');
+        const { monitors: firstPageMonitors, total, after_key: afterKey } = firstPageResponse.body;
+        expect(firstPageMonitors.length).to.eql(500);
+        expect(total).to.eql(600);
+        expect(afterKey).to.eql(firstPageMonitors[firstPageMonitors.length - 1].afterKey.join(','));
 
         const secondPageResponse = await supertest
           .get(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
           .set('kbn-xsrf', 'true')
           .query({
-            after_id: afterId,
+            search_after: afterKey,
           })
           .send()
           .expect(200);
-        const secondPageProjectMonitors = secondPageResponse.text.split(`\n`);
-        expect(secondPageProjectMonitors.length).to.eql(100);
-        checkFields([...firstPageProjectMonitors, ...secondPageProjectMonitors], monitors);
+        const { monitors: secondPageMonitors } = secondPageResponse.body;
+        expect(secondPageMonitors.length).to.eql(100);
+        checkFields([...firstPageMonitors, ...secondPageMonitors], monitors);
       } finally {
         await parseStreamApiResponse(
           projectMonitorEndpoint,
@@ -146,21 +146,26 @@ export default function ({ getService }: FtrProviderContext) {
           .send()
           .expect(200);
 
-        const firstPageProjectMonitors = firstPageResponse.text.split(`\n`);
+        const {
+          monitors: firstPageProjectMonitors,
+          after_key: afterKey,
+          total,
+        } = firstPageResponse.body;
         expect(firstPageProjectMonitors.length).to.eql(500);
-        const afterId = JSON.parse(
-          firstPageProjectMonitors[firstPageProjectMonitors.length - 1]
-        ).afterKey.join(',');
+        expect(total).to.eql(600);
+        expect(afterKey).to.eql(
+          firstPageProjectMonitors[firstPageProjectMonitors.length - 1].afterKey.join(',')
+        );
 
         const secondPageResponse = await supertest
           .get(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
           .set('kbn-xsrf', 'true')
           .query({
-            after_id: afterId,
+            search_after: afterKey,
           })
           .send()
           .expect(200);
-        const secondPageProjectMonitors = secondPageResponse.text.split(`\n`);
+        const { monitors: secondPageProjectMonitors } = secondPageResponse.body;
         expect(secondPageProjectMonitors.length).to.eql(100);
         checkFields([...firstPageProjectMonitors, ...secondPageProjectMonitors], monitors);
       } finally {
@@ -203,21 +208,26 @@ export default function ({ getService }: FtrProviderContext) {
           .send()
           .expect(200);
 
-        const firstPageProjectMonitors = firstPageResponse.text.split(`\n`);
+        const {
+          monitors: firstPageProjectMonitors,
+          after_key: afterKey,
+          total,
+        } = firstPageResponse.body;
         expect(firstPageProjectMonitors.length).to.eql(500);
-        const afterId = JSON.parse(
-          firstPageProjectMonitors[firstPageProjectMonitors.length - 1]
-        ).afterKey.join(',');
+        expect(total).to.eql(600);
+        expect(afterKey).to.eql(
+          firstPageProjectMonitors[firstPageProjectMonitors.length - 1].afterKey.join(',')
+        );
 
         const secondPageResponse = await supertest
           .get(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
           .set('kbn-xsrf', 'true')
           .query({
-            after_id: afterId,
+            search_after: afterKey,
           })
           .send()
           .expect(200);
-        const secondPageProjectMonitors = secondPageResponse.text.split(`\n`);
+        const { monitors: secondPageProjectMonitors } = secondPageResponse.body;
         expect(secondPageProjectMonitors.length).to.eql(100);
         checkFields([...firstPageProjectMonitors, ...secondPageProjectMonitors], monitors);
       } finally {
@@ -260,21 +270,26 @@ export default function ({ getService }: FtrProviderContext) {
           .send()
           .expect(200);
 
-        const firstPageProjectMonitors = firstPageResponse.text.split(`\n`);
+        const {
+          monitors: firstPageProjectMonitors,
+          after_key: afterKey,
+          total,
+        } = firstPageResponse.body;
         expect(firstPageProjectMonitors.length).to.eql(500);
-        const afterId = JSON.parse(
-          firstPageProjectMonitors[firstPageProjectMonitors.length - 1]
-        ).afterKey.join(',');
+        expect(total).to.eql(600);
+        expect(afterKey).to.eql(
+          firstPageProjectMonitors[firstPageProjectMonitors.length - 1].afterKey.join(',')
+        );
 
         const secondPageResponse = await supertest
           .get(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
           .set('kbn-xsrf', 'true')
           .query({
-            after_id: afterId,
+            search_after: afterKey,
           })
           .send()
           .expect(200);
-        const secondPageProjectMonitors = secondPageResponse.text.split(`\n`);
+        const { monitors: secondPageProjectMonitors } = secondPageResponse.body;
         expect(secondPageProjectMonitors.length).to.eql(100);
 
         checkFields([...firstPageProjectMonitors, ...secondPageProjectMonitors], monitors);
@@ -321,11 +336,16 @@ export default function ({ getService }: FtrProviderContext) {
           .send()
           .expect(200);
 
-        const firstPageProjectMonitors = firstPageResponse.text.split(`\n`);
+        const {
+          monitors: firstPageProjectMonitors,
+          after_key: afterKey,
+          total,
+        } = firstPageResponse.body;
         expect(firstPageProjectMonitors.length).to.eql(500);
-        const afterId = JSON.parse(
-          firstPageProjectMonitors[firstPageProjectMonitors.length - 1]
-        ).afterKey.join(',');
+        expect(total).to.eql(600);
+        expect(afterKey).to.eql(
+          firstPageProjectMonitors[firstPageProjectMonitors.length - 1].afterKey.join(',')
+        );
 
         const secondPageResponse = await supertest
           .get(
@@ -333,11 +353,11 @@ export default function ({ getService }: FtrProviderContext) {
           )
           .set('kbn-xsrf', 'true')
           .query({
-            after_id: afterId,
+            search_after: afterKey,
           })
           .send()
           .expect(200);
-        const secondPageProjectMonitors = secondPageResponse.text.split(`\n`);
+        const { monitors: secondPageProjectMonitors } = secondPageResponse.body;
         expect(secondPageProjectMonitors.length).to.eql(100);
 
         checkFields([...firstPageProjectMonitors, ...secondPageProjectMonitors], monitors);
@@ -354,9 +374,9 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
-    it('project monitors - handles size parameter', async () => {
+    it('project monitors - handles per_page parameter', async () => {
       const monitors = [];
-      const size = 250;
+      const perPage = 250;
       for (let i = 0; i < 600; i++) {
         monitors.push({
           ...icmpProjectMonitors.monitors[0],
@@ -384,23 +404,25 @@ export default function ({ getService }: FtrProviderContext) {
             .get(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', 'test-suite'))
             .set('kbn-xsrf', 'true')
             .query({
-              size,
-              after_id: afterId,
+              per_page: perPage,
+              search_after: afterId,
             })
             .send()
             .expect(200);
 
-          monitorResponse = response.text.split('\n') as string[];
-          count = monitorResponse.length;
-          fullResponse.push(...monitorResponse);
+          const { monitors: monitorsResponse, after_key: afterKey, total } = response.body;
+          expect(total).to.eql(600);
+          expect(afterKey).to.eql(monitorsResponse[monitorsResponse.length - 1].afterKey.join(','));
+          count = monitorsResponse.length;
+          fullResponse.push(...monitorsResponse);
           if (page < 3) {
-            expect(count).to.eql(size);
+            expect(count).to.eql(perPage);
           } else {
             expect(count).to.eql(100);
           }
           page++;
 
-          afterId = JSON.parse(monitorResponse[monitorResponse.length - 1]).afterKey.join(',');
+          afterId = afterKey;
         }
         expect(fullResponse.length).to.eql(600);
         checkFields(fullResponse, monitors);
@@ -418,8 +440,7 @@ export default function ({ getService }: FtrProviderContext) {
   });
 }
 
-const checkFields = (response: string[], monitors: ProjectMonitor[]) => {
-  const monitorMetaData = response.map((item) => JSON.parse(item));
+const checkFields = (monitorMetaData: ProjectMonitorMetaData[], monitors: ProjectMonitor[]) => {
   monitors.forEach((monitor) => {
     const configIsCorrect = monitorMetaData.some((ndjson: Record<string, unknown>) => {
       return ndjson.journey_id === monitor.id && ndjson.hash === monitor.hash;

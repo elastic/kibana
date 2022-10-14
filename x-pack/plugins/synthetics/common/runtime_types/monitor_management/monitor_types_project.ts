@@ -50,8 +50,24 @@ export const ProjectMonitorsRequestCodec = t.interface({
   monitors: t.array(ProjectMonitorCodec),
 });
 
+export const ProjectMonitorMetaDataCodec = t.interface({
+  hash: t.string,
+  after_key: t.array(t.string, t.number),
+  journey_id: t.string,
+});
+
+export const ProjectMonitorsResponseCodec = t.interface({
+  total: t.number,
+  after_key: t.string,
+  monitors: t.array(ProjectMonitorMetaDataCodec),
+});
+
 export type ProjectMonitorThrottlingConfig = t.TypeOf<typeof ProjectMonitorThrottlingConfigCodec>;
 
 export type ProjectMonitor = t.TypeOf<typeof ProjectMonitorCodec>;
 
 export type ProjectMonitorsRequest = t.TypeOf<typeof ProjectMonitorsRequestCodec>;
+
+export type ProjectMonitorsResponse = t.TypeOf<typeof ProjectMonitorsResponseCodec>;
+
+export type ProjectMonitorMetaData = t.TypeOf<typeof ProjectMonitorsMetaDataCodec>;
