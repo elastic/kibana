@@ -34,7 +34,7 @@ export interface ExecuteOptions extends Pick<ActionExecutorOptions, 'params' | '
   relatedSavedObjects?: RelatedSavedObjects;
 }
 
-export interface ActionTaskParams extends Pick<ActionExecutorOptions, 'params'> {
+interface ActionTaskParams extends Pick<ActionExecutorOptions, 'params'> {
   actionId: string;
   apiKey: string | null;
   executionId: string;

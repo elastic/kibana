@@ -59,12 +59,10 @@ describe('bulkExecute()', () => {
       {
         id: '123',
         params: { baz: false },
-        executionId: '123abc',
       },
       {
         id: '123',
         params: { baz: true },
-        executionId: '234xyz',
       },
     ]);
     expect(mockTaskManager.bulkSchedule).toHaveBeenCalledTimes(1);
@@ -170,13 +168,11 @@ describe('bulkExecute()', () => {
       {
         id: '123',
         params: { baz: false },
-        executionId: '123abc',
         source: asSavedObjectExecutionSource(source),
       },
       {
         id: '123',
         params: { baz: true },
-        executionId: '234xyz',
       },
     ]);
     expect(mockTaskManager.bulkSchedule).toHaveBeenCalledTimes(1);
@@ -294,13 +290,11 @@ describe('bulkExecute()', () => {
       {
         id: '123',
         params: { baz: false },
-        executionId: '123abc',
         source: asSavedObjectExecutionSource(source),
       },
       {
         id: '123',
         params: { baz: true },
-        executionId: '234xyz',
         relatedSavedObjects: [
           {
             id: 'some-id',
@@ -404,12 +398,10 @@ describe('bulkExecute()', () => {
         {
           id: '123',
           params: { baz: false },
-          executionId: '123abc',
         },
         {
           id: 'not-preconfigured',
           params: { baz: true },
-          executionId: '234xyz',
         },
       ])
     ).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -443,12 +435,10 @@ describe('bulkExecute()', () => {
         {
           id: '123',
           params: { baz: false },
-          executionId: '123abc',
         },
         {
           id: '123',
           params: { baz: true },
-          executionId: '234xyz',
         },
       ])
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail"`);
@@ -484,12 +474,10 @@ describe('bulkExecute()', () => {
         {
           id: '123',
           params: { baz: false },
-          executionId: '123abc',
         },
         {
           id: '456',
           params: { baz: true },
-          executionId: '234xyz',
         },
       ])
     ).rejects.toThrowErrorMatchingInlineSnapshot(

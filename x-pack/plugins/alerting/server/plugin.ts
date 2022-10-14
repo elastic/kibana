@@ -219,8 +219,6 @@ export class AlertingPlugin {
     this.eventLogService = plugins.eventLog;
     plugins.eventLog.registerProviderActions(EVENT_LOG_PROVIDER, Object.values(EVENT_LOG_ACTIONS));
 
-    plugins.actions.registerUnsecuredActionsClientAccess('alerting');
-
     const ruleTypeRegistry = new RuleTypeRegistry({
       logger: this.logger,
       taskManager: plugins.taskManager,
@@ -473,7 +471,6 @@ export class AlertingPlugin {
             subject: 'hello from Kibana!',
             message: 'does this work??',
           },
-          executionId: 'abc',
         },
       ]);
     });
