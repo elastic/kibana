@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export * from './use_filters';
+export * from './components/filter_in/filter_in';
+export * from './components/filter_out/filter_out';
+export * from './hooks/use_filters';
