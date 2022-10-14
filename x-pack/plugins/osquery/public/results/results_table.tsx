@@ -28,7 +28,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React, { createContext, useEffect, useState, useCallback, useContext, useMemo } from 'react';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
-import { AddToTimelineButton } from '../timelines/add_to_timeline_button';
+import { AddToTimelineButton, SECURITY_APP_NAME } from '../timelines/add_to_timeline_button';
 import { useAllResults } from './use_all_results';
 import type { ResultEdges } from '../../common/search_strategy';
 import { Direction } from '../../common/search_strategy';
@@ -309,7 +309,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 
   const leadingControlColumns: EuiDataGridControlColumn[] = useMemo(() => {
     const data = allResultsData?.edges;
-    if (data) {
+    if (appName === SECURITY_APP_NAME && data) {
       return [
         {
           id: 'timeline',
@@ -328,7 +328,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     }
 
     return [];
-  }, [allResultsData?.edges]);
+  }, [allResultsData?.edges, appName]);
 
   const toolbarVisibility = useMemo(
     () => ({
