@@ -23,7 +23,7 @@ const MAX_RULES_PER_PAGE = 10000;
  * @param args - find rules arguments
  * @returns rules query result
  */
-export const useFindRules = (args: UseFindRulesArgs) => {
+export const useFindRulesInMemory = (args: UseFindRulesArgs) => {
   const { pagination, filterOptions, sortingOptions, isInMemorySorting, refetchInterval } = args;
 
   // Use this query result when isInMemorySorting = true

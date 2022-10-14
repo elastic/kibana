@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 
 import * as myI18n from './translations';
 import type { Rule } from '../../../../rule_management/logic/types';
-import { useFindRules } from '../../../../rule_management_ui/components/rules_table/rules_table/use_find_rules';
+import { useFindRulesInMemory } from '../../../../rule_management_ui/components/rules_table/rules_table/use_find_rules_in_memory';
 import { getRulesTableColumn } from '../utils';
 
 interface ExceptionsAddToRulesComponentProps {
@@ -24,7 +24,7 @@ const ExceptionsAddToRulesTableComponent: React.FC<ExceptionsAddToRulesComponent
   initiallySelectedRules,
   onRuleSelectionChange,
 }) => {
-  const { data: { rules } = { rules: [], total: 0 }, isFetched } = useFindRules({
+  const { data: { rules } = { rules: [], total: 0 }, isFetched } = useFindRulesInMemory({
     isInMemorySorting: true,
     filterOptions: {
       filter: '',

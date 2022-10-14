@@ -23,7 +23,7 @@ import type {
   Rule,
   SortingOptions,
 } from '../../../../rule_management/logic/types';
-import { useFindRules } from './use_find_rules';
+import { useFindRulesInMemory } from './use_find_rules_in_memory';
 import { getRulesComparator } from './utils';
 
 export interface RulesTableState {
@@ -121,7 +121,7 @@ export interface LoadingRules {
 }
 
 export interface RulesTableActions {
-  reFetchRules: ReturnType<typeof useFindRules>['refetch'];
+  reFetchRules: ReturnType<typeof useFindRulesInMemory>['refetch'];
   setFilterOptions: (newFilter: Partial<FilterOptions>) => void;
   setIsAllSelected: React.Dispatch<React.SetStateAction<boolean>>;
   setIsInMemorySorting: (value: boolean) => void;
@@ -239,7 +239,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     isFetching,
     isLoading,
     isRefetching,
-  } = useFindRules({
+  } = useFindRulesInMemory({
     isInMemorySorting,
     filterOptions,
     sortingOptions,

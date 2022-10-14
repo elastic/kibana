@@ -10,7 +10,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { ExceptionsAddToRulesTable } from '.';
 import { TestProviders } from '../../../../../common/mock';
-import { useFindRules } from '../../../../rule_management_ui/components/rules_table/rules_table/use_find_rules';
+import { useFindRulesInMemory } from '../../../../rule_management_ui/components/rules_table/rules_table/use_find_rules_in_memory';
 import { getRulesSchemaMock } from '../../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 import type { Rule } from '../../../../rule_management/logic/types';
 
@@ -18,7 +18,7 @@ jest.mock('../../../../rule_management_ui/components/rules_table/rules_table/use
 
 describe('ExceptionsAddToRulesTable', () => {
   it('it displays loading state while fetching rules', () => {
-    (useFindRules as jest.Mock).mockReturnValue({
+    (useFindRulesInMemory as jest.Mock).mockReturnValue({
       data: { rules: [], total: 0 },
       isFetched: false,
     });
@@ -34,7 +34,7 @@ describe('ExceptionsAddToRulesTable', () => {
   });
 
   it('it displays fetched rules', () => {
-    (useFindRules as jest.Mock).mockReturnValue({
+    (useFindRulesInMemory as jest.Mock).mockReturnValue({
       data: {
         rules: [getRulesSchemaMock(), { ...getRulesSchemaMock(), id: '345', name: 'My rule' }],
         total: 0,
