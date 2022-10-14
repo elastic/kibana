@@ -134,3 +134,41 @@ export const bulkSetSchedule = {
     />
   ),
 };
+
+export const bulkDuplicateRuleActions = {
+  MODAL_TITLE: i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicate.exceptionsConfirmation.modalTitle',
+    {
+      defaultMessage: 'Duplicate exceptions?',
+    }
+  ),
+
+  MODAL_TEXT: i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicate.exceptionsConfirmation.modalBody',
+    {
+      defaultMessage:
+        'Rules you are duplicating may contain exceptions. Please select how you would like exceptions to be treated:',
+    }
+  ),
+
+  DUPLICATE_EXCEPTIONS_TEXT: i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicate.exceptionsConfirmation.checkboxText',
+    {
+      defaultMessage: 'Duplicate rule with exceptions',
+    }
+  ),
+
+  CONTINUE_BUTTON: i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicate.exceptionsConfirmation.continueButton',
+    {
+      defaultMessage: 'Confirm and duplicate',
+    }
+  ),
+
+  CANCEL_BUTTON: i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.duplicate.exceptionsConfirmation.cancelButton',
+    {
+      defaultMessage: 'Cancel',
+    }
+  ),
+};

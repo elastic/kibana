@@ -201,6 +201,7 @@ export const pureFetchRuleById = async ({
  * @param query filter query to select rules to perform bulk action with
  * @param ids string[] rule ids to select rules to perform bulk action with
  * @param edit BulkEditActionPayload edit action payload
+ * @param duplicate BulkDuplicateActionPayload duplicate action payload
  * @param action bulk action to perform
  * @param isDryRun enables dry run mode for bulk actions
  *
@@ -210,6 +211,7 @@ export const performBulkAction = async <Action extends BulkAction>({
   action,
   query,
   edit,
+  duplicate,
   ids,
   isDryRun,
 }: BulkActionProps<Action>): Promise<BulkActionResponseMap<Action>> =>
@@ -220,6 +222,7 @@ export const performBulkAction = async <Action extends BulkAction>({
       body: JSON.stringify({
         action,
         ...(edit ? { edit } : {}),
+        ...(duplicate ? { duplicate } : {}),
         ...(ids ? { ids } : {}),
         ...(query !== undefined ? { query } : {}),
       }),

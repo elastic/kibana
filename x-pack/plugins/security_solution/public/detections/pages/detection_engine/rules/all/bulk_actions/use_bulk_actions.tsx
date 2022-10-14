@@ -51,6 +51,7 @@ interface UseBulkActionsArgs {
     result: DryRunResult | undefined,
     action: BulkActionForConfirmation
   ) => Promise<boolean>;
+  showBulkDuplicateConfirmation: () => Promise<boolean>;
   completeBulkEditForm: (
     bulkActionEditType: BulkActionEditType
   ) => Promise<BulkActionEditPayload | null>;
@@ -62,6 +63,7 @@ export const useBulkActions = ({
   filterOptions,
   confirmDeletion,
   showBulkActionConfirmation,
+  showBulkDuplicateConfirmation,
   completeBulkEditForm,
   reFetchTags,
   executeBulkActionsDryRun,
@@ -155,9 +157,12 @@ export const useBulkActions = ({
         startTransaction({ name: BULK_RULE_ACTIONS.DUPLICATE });
         closePopover();
 
+        const duplicateExceptions = await showBulkDuplicateConfirmation();
+
         await executeRulesBulkAction({
           visibleRuleIds: selectedRuleIds,
           action: BulkAction.duplicate,
+          payload: { duplicate: { include_exceptions: duplicateExceptions } },
           setLoadingRules,
           toasts,
           search: isAllSelected ? { query: filterQuery } : { ids: selectedRuleIds },
@@ -491,6 +496,7 @@ export const useBulkActions = ({
       toasts,
       filterQuery,
       updateRulesCache,
+      showBulkDuplicateConfirmation,
       invalidateRules,
       invalidatePrePackagedRulesStatus,
       clearRulesSelection,

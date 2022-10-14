@@ -505,7 +505,8 @@ export const performBulkActionRoute = (
 
                 const duplicateRuleToCreate = await duplicateRule(
                   migratedRule,
-                  body.duplicate.include_exceptions
+                  body.duplicate.include_exceptions,
+                  exceptionsClient
                 );
 
                 const createdRule = await rulesClient.create({

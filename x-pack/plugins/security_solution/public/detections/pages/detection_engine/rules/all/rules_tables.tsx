@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable complexity */
+
 import {
   EuiBasicTable,
   EuiConfirmModal,
@@ -38,6 +40,8 @@ import { useBulkEditFormFlyout } from './bulk_actions/use_bulk_edit_form_flyout'
 import { BulkActionDryRunConfirmation } from './bulk_actions/bulk_action_dry_run_confirmation';
 import { BulkEditFlyout } from './bulk_actions/bulk_edit_flyout';
 import { useBulkActions } from './bulk_actions/use_bulk_actions';
+import { useBulkDuplicateExceptionsConfirmation } from './bulk_actions/use_bulk_duplicate_confirmation';
+import { BulkActionDuplicateExceptionsConfirmation } from './bulk_actions/bulk_duplicate_exceptions_confirmation';
 
 const INITIAL_SORT_FIELD = 'enabled';
 
@@ -137,6 +141,13 @@ export const RulesTables = React.memo<RulesTableProps>(
     } = useBulkActionsConfirmation();
 
     const {
+      isBulkDuplicateConfirmationVisible,
+      showBulkDuplicateConfirmation,
+      cancelRuleDuplication,
+      confirmRuleDuplication,
+    } = useBulkDuplicateExceptionsConfirmation();
+
+    const {
       bulkEditActionType,
       isBulkEditFlyoutVisible,
       handleBulkEditFormConfirm,
@@ -152,6 +163,7 @@ export const RulesTables = React.memo<RulesTableProps>(
       filterOptions,
       confirmDeletion,
       showBulkActionConfirmation,
+      showBulkDuplicateConfirmation,
       completeBulkEditForm,
       reFetchTags,
       executeBulkActionsDryRun,
@@ -179,8 +191,14 @@ export const RulesTables = React.memo<RulesTableProps>(
       [setPage, setPerPage, setSortingOptions]
     );
 
-    const rulesColumns = useRulesColumns({ hasPermissions });
-    const monitoringColumns = useMonitoringColumns({ hasPermissions });
+    const rulesColumns = useRulesColumns({
+      hasPermissions,
+      showExceptionsDuplicateConfirmation: showBulkDuplicateConfirmation,
+    });
+    const monitoringColumns = useMonitoringColumns({
+      hasPermissions,
+      showExceptionsDuplicateConfirmation: showBulkDuplicateConfirmation,
+    });
 
     const handleCreatePrePackagedRules = useCallback(async () => {
       if (createPrePackagedRules != null) {
@@ -325,6 +343,12 @@ export const RulesTables = React.memo<RulesTableProps>(
             result={bulkActionsDryRunResult}
             onCancel={cancelBulkActionConfirmation}
             onConfirm={approveBulkActionConfirmation}
+          />
+        )}
+        {isBulkDuplicateConfirmationVisible && (
+          <BulkActionDuplicateExceptionsConfirmation
+            onCancel={cancelRuleDuplication}
+            onConfirm={confirmRuleDuplication}
           />
         )}
         {isBulkEditFlyoutVisible && bulkEditActionType !== undefined && (

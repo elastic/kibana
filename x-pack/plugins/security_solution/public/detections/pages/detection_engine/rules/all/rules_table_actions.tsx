@@ -29,6 +29,7 @@ export const getRulesTableActions = ({
   actionsPrivileges,
   setLoadingRules,
   startTransaction,
+  showExceptionsDuplicateConfirmation,
 }: {
   toasts: UseAppToasts;
   navigateToApp: NavigateToApp;
@@ -37,6 +38,7 @@ export const getRulesTableActions = ({
   actionsPrivileges: boolean;
   setLoadingRules: RulesTableActions['setLoadingRules'];
   startTransaction: ReturnType<typeof useStartTransaction>['startTransaction'];
+  showExceptionsDuplicateConfirmation: () => Promise<boolean>;
 }): Array<DefaultItemAction<Rule>> => [
   {
     type: 'icon',
@@ -68,8 +70,11 @@ export const getRulesTableActions = ({
     enabled: (rule: Rule) => canEditRuleWithActions(rule, actionsPrivileges),
     onClick: async (rule: Rule) => {
       startTransaction({ name: SINGLE_RULE_ACTIONS.DUPLICATE });
+      const duplicateExceptions = await showExceptionsDuplicateConfirmation();
+
       const result = await executeRulesBulkAction({
         action: BulkAction.duplicate,
+        payload: { duplicate: { include_exceptions: duplicateExceptions } },
         setLoadingRules,
         visibleRuleIds: [rule.id],
         toasts,

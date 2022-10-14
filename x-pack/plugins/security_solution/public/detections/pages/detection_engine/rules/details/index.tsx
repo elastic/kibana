@@ -132,6 +132,8 @@ import { useSignalHelpers } from '../../../../../common/containers/sourcerer/use
 import { HeaderPage } from '../../../../../common/components/header_page';
 import { ExceptionsViewer } from '../../../../../detection_engine/rule_exceptions/components/all_exception_items_table';
 import type { NavTab } from '../../../../../common/components/navigation/types';
+import { useBulkDuplicateExceptionsConfirmation } from '../all/bulk_actions/use_bulk_duplicate_confirmation';
+import { BulkActionDuplicateExceptionsConfirmation } from '../all/bulk_actions/bulk_duplicate_exceptions_confirmation';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -661,6 +663,13 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
   );
 
+  const {
+    isBulkDuplicateConfirmationVisible,
+    showBulkDuplicateConfirmation,
+    cancelRuleDuplication,
+    confirmRuleDuplication,
+  } = useBulkDuplicateExceptionsConfirmation();
+
   if (
     redirectToDetections(
       isSignalIndexExists,
@@ -682,6 +691,12 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     <>
       <NeedAdminForUpdateRulesCallOut />
       <MissingPrivilegesCallOut />
+      {isBulkDuplicateConfirmationVisible && (
+        <BulkActionDuplicateExceptionsConfirmation
+          onCancel={cancelRuleDuplication}
+          onConfirm={confirmRuleDuplication}
+        />
+      )}
       <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
         <EuiWindowEvent event="resize" handler={noop} />
         <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
@@ -751,6 +766,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                             rule,
                             hasActionsPrivileges
                           )}
+                          showBulkDuplicateExceptionsConfirmation={showBulkDuplicateConfirmation}
                         />
                       </EuiFlexItem>
                     </EuiFlexGroup>

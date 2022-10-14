@@ -30,6 +30,7 @@ import type { SortOrder } from '../../../../../common/detection_engine/schemas/c
 import type {
   BulkActionEditPayload,
   BulkAction,
+  BulkActionDuplicatePayload,
 } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 import {
   alias_purpose as savedObjectResolveAliasPurpose,
@@ -238,6 +239,7 @@ export interface BulkActionProps<Action extends BulkAction> {
   query?: string;
   ids?: string[];
   edit?: BulkActionEditPayload[];
+  duplicate?: BulkActionDuplicatePayload;
   isDryRun?: boolean;
 }
 

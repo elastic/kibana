@@ -48,6 +48,7 @@ interface RuleActionsOverflowComponentProps {
   rule: Rule | null;
   userHasPermissions: boolean;
   canDuplicateRuleWithActions: boolean;
+  showBulkDuplicateExceptionsConfirmation: () => Promise<boolean>;
 }
 
 /**
@@ -57,6 +58,7 @@ const RuleActionsOverflowComponent = ({
   rule,
   userHasPermissions,
   canDuplicateRuleWithActions,
+  showBulkDuplicateExceptionsConfirmation,
 }: RuleActionsOverflowComponentProps) => {
   const [isPopoverOpen, , closePopover, togglePopover] = useBoolState();
   const { navigateToApp } = useKibana().services.application;
@@ -82,8 +84,12 @@ const RuleActionsOverflowComponent = ({
               onClick={async () => {
                 startTransaction({ name: SINGLE_RULE_ACTIONS.DUPLICATE });
                 closePopover();
+
+                const duplicateExceptions = await showBulkDuplicateExceptionsConfirmation();
+
                 const result = await executeRulesBulkAction({
                   action: BulkAction.duplicate,
+                  payload: { duplicate: { include_exceptions: duplicateExceptions } },
                   onSuccess: noop,
                   search: { ids: [rule.id] },
                   toasts,
@@ -144,6 +150,7 @@ const RuleActionsOverflowComponent = ({
       navigateToApp,
       onRuleDeletedCallback,
       rule,
+      showBulkDuplicateExceptionsConfirmation,
       startTransaction,
       toasts,
       userHasPermissions,

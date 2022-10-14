@@ -7,7 +7,10 @@
 
 import type { NavigateToAppOptions } from '@kbn/core/public';
 import { APP_UI_ID } from '../../../../../../common/constants';
-import type { BulkActionEditPayload } from '../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
+import type {
+  BulkActionDuplicatePayload,
+  BulkActionEditPayload,
+} from '../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 import { BulkAction } from '../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
 import type { HTTPError } from '../../../../../../common/detection_engine/types';
 import { SecurityPageName } from '../../../../../app/types';
@@ -46,7 +49,7 @@ interface BaseRulesBulkActionArgs {
   visibleRuleIds?: string[];
   toasts: UseAppToasts;
   search: { query: string } | { ids: string[] };
-  payload?: { edit?: BulkActionEditPayload[] };
+  payload?: { edit?: BulkActionEditPayload[]; duplicate?: BulkActionDuplicatePayload };
   onError?: OnActionErrorCallback;
   onFinish?: () => void;
   onSuccess?: OnActionSuccessCallback;
@@ -85,7 +88,12 @@ export async function executeRulesBulkAction({
       // on successToast for export handles separately outside of action execution method
       response = await performBulkAction({ ...search, action });
     } else {
-      response = await performBulkAction({ ...search, action, edit: payload?.edit });
+      response = await performBulkAction({
+        ...search,
+        action,
+        edit: payload?.edit,
+        duplicate: payload?.duplicate,
+      });
       sendTelemetry(action, response);
       onSuccess(toasts, action, response.attributes.summary);
     }

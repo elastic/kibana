@@ -51,6 +51,10 @@ interface ColumnsProps {
   hasPermissions: boolean;
 }
 
+interface ActionColumnsProps {
+  showExceptionsDuplicateConfirmation: () => Promise<boolean>;
+}
+
 const useEnabledColumn = ({ hasPermissions }: ColumnsProps): TableColumn => {
   const hasMlPermissions = useHasMlPermissions();
   const hasActionsPrivileges = useHasActionsPrivileges();
@@ -161,7 +165,9 @@ const INTEGRATIONS_COLUMN: TableColumn = {
   truncateText: true,
 };
 
-const useActionsColumn = (): EuiTableActionsColumnType<Rule> => {
+const useActionsColumn = ({
+  showExceptionsDuplicateConfirmation,
+}: ActionColumnsProps): EuiTableActionsColumnType<Rule> => {
   const { navigateToApp } = useKibana().services.application;
   const hasActionsPrivileges = useHasActionsPrivileges();
   const toasts = useAppToasts();
@@ -180,6 +186,7 @@ const useActionsColumn = (): EuiTableActionsColumnType<Rule> => {
         actionsPrivileges: hasActionsPrivileges,
         setLoadingRules,
         startTransaction,
+        showExceptionsDuplicateConfirmation,
       }),
       width: '40px',
     }),
@@ -189,14 +196,20 @@ const useActionsColumn = (): EuiTableActionsColumnType<Rule> => {
       invalidateRules,
       navigateToApp,
       setLoadingRules,
+      showExceptionsDuplicateConfirmation,
       startTransaction,
       toasts,
     ]
   );
 };
 
-export const useRulesColumns = ({ hasPermissions }: ColumnsProps): TableColumn[] => {
-  const actionsColumn = useActionsColumn();
+export interface UseColumnsProps extends ColumnsProps, ActionColumnsProps {}
+
+export const useRulesColumns = ({
+  hasPermissions,
+  showExceptionsDuplicateConfirmation,
+}: UseColumnsProps): TableColumn[] => {
+  const actionsColumn = useActionsColumn({ showExceptionsDuplicateConfirmation });
   const enabledColumn = useEnabledColumn({ hasPermissions });
   const ruleNameColumn = useRuleNameColumn();
   const { isInMemorySorting } = useRulesTableContext().state;
@@ -305,9 +318,12 @@ export const useRulesColumns = ({ hasPermissions }: ColumnsProps): TableColumn[]
   );
 };
 
-export const useMonitoringColumns = ({ hasPermissions }: ColumnsProps): TableColumn[] => {
+export const useMonitoringColumns = ({
+  hasPermissions,
+  showExceptionsDuplicateConfirmation,
+}: UseColumnsProps): TableColumn[] => {
   const docLinks = useKibana().services.docLinks;
-  const actionsColumn = useActionsColumn();
+  const actionsColumn = useActionsColumn({ showExceptionsDuplicateConfirmation });
   const enabledColumn = useEnabledColumn({ hasPermissions });
   const ruleNameColumn = useRuleNameColumn();
   const { isInMemorySorting } = useRulesTableContext().state;

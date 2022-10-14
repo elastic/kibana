@@ -30,6 +30,7 @@ export const bulkCreateExceptionListItems = async ({
   tieBreaker,
   user,
 }: BulkCreateExceptionListItemsOptions): Promise<ExceptionListItemSchema[]> => {
+  console.log('BULK ITEMS', { items });
   const formattedItems = items.map((item) => {
     const savedObjectType = getSavedObjectType({ namespaceType: item.namespace_type ?? 'single' });
     const dateNow = new Date().toISOString();
@@ -57,9 +58,11 @@ export const bulkCreateExceptionListItems = async ({
       type: savedObjectType,
     };
   });
-  const { savedObjects } = await savedObjectsClient.bulkCreate<ExceptionListSoSchema>(
-    formattedItems
-  );
+  console.log({ formattedItems: JSON.stringify(formattedItems) });
+
+  const { saved_objects: savedObjects } =
+    await savedObjectsClient.bulkCreate<ExceptionListSoSchema>(formattedItems);
+
   return savedObjects.map<ExceptionListSoSchema>((so) =>
     transformSavedObjectToExceptionListItem({ savedObject: so })
   );

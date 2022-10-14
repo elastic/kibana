@@ -149,6 +149,14 @@ export type BulkActionEditForRuleParams =
   | BulkActionEditPayloadTimeline
   | BulkActionEditPayloadSchedule;
 
+const bulkActionDuplicatePayload = t.exact(
+  t.type({
+    include_exceptions: t.boolean,
+  })
+);
+
+export type BulkActionDuplicatePayload = t.TypeOf<typeof bulkActionDuplicatePayload>;
+
 export const performBulkActionSchema = t.intersection([
   t.exact(
     t.type({
