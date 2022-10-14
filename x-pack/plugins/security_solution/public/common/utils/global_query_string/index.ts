@@ -5,20 +5,15 @@
  * 2.0.
  */
 
-import type * as H from 'history';
-import type { ParsedQuery } from 'query-string';
-import { parse, stringify } from 'query-string';
 import { useCallback, useEffect, useMemo } from 'react';
-
-import { url } from '@kbn/kibana-utils-plugin/public';
-import { isEmpty, pickBy } from 'lodash/fp';
-import { useHistory } from 'react-router-dom';
+import { difference, isEmpty, pickBy } from 'lodash/fp';
 import { useDispatch } from 'react-redux';
+import usePrevious from 'react-use/lib/usePrevious';
 import {
-  decodeRisonUrlState,
+  encodeQueryString,
   encodeRisonUrlState,
-  getParamFromQueryString,
-  getQueryStringFromLocation,
+  useGetInitialUrlParamValue,
+  useReplaceUrlParams,
 } from './helpers';
 import { useShallowEqualSelector } from '../../hooks/use_selector';
 import { globalUrlParamActions, globalUrlParamSelectors } from '../../store/global_url_param';
@@ -43,13 +38,10 @@ export const useInitializeUrlParam = <State>(
 ) => {
   const dispatch = useDispatch();
 
+  const getInitialUrlParamValue = useGetInitialUrlParamValue<State>(urlParamKey);
+
   useEffect(() => {
-    // window.location.search provides the most updated representation of the url search.
-    // It also guarantees that we don't overwrite URL param managed outside react-router.
-    const initialValue = getParamFromQueryString(
-      getQueryStringFromLocation(window.location.search),
-      urlParamKey
-    );
+    const { param: initialValue, decodedParam: decodedInitialValue } = getInitialUrlParamValue();
 
     dispatch(
       globalUrlParamActions.registerUrlParam({
@@ -59,7 +51,7 @@ export const useInitializeUrlParam = <State>(
     );
 
     // execute consumer initialization
-    onInitialize(decodeRisonUrlState<State>(initialValue ?? undefined));
+    onInitialize(decodedInitialValue);
 
     return () => {
       dispatch(globalUrlParamActions.deregisterUrlParam({ key: urlParamKey }));
@@ -103,9 +95,16 @@ export const useGlobalQueryString = (): string => {
  * - It updates the URL when globalUrlParam store updates.
  */
 export const useSyncGlobalQueryString = () => {
-  const history = useHistory();
   const [{ pageName }] = useRouteSpy();
   const globalUrlParam = useShallowEqualSelector(globalUrlParamSelectors.selectGlobalUrlParam);
+  const previousGlobalUrlParams = usePrevious(globalUrlParam);
+  const replaceUrlParams = useReplaceUrlParams();
+
+  // Url params that got deleted from GlobalUrlParams
+  const unregisteredKeys = useMemo(
+    () => difference(Object.keys(previousGlobalUrlParams ?? {}), Object.keys(globalUrlParam)),
+    [previousGlobalUrlParams, globalUrlParam]
+  );
 
   useEffect(() => {
     const linkInfo = getLinkInfo(pageName) ?? { skipUrlState: true };
@@ -114,36 +113,16 @@ export const useSyncGlobalQueryString = () => {
       value: linkInfo.skipUrlState ? null : value,
     }));
 
+    // Delete unregistered Url params
+    unregisteredKeys.forEach((key) => {
+      params.push({
+        key,
+        value: null,
+      });
+    });
+
     if (params.length > 0) {
-      // window.location.search provides the most updated representation of the url search.
-      // It prevents unnecessary re-renders which useLocation would create because 'replaceUrlParams' does update the location.
-      // window.location.search also guarantees that we don't overwrite URL param managed outside react-router.
-      replaceUrlParams(params, history, window.location.search);
+      replaceUrlParams(params);
     }
-  }, [globalUrlParam, pageName, history]);
-};
-
-const encodeQueryString = (urlParams: ParsedQuery<string>): string =>
-  stringify(url.encodeQuery(urlParams), { sort: false, encode: false });
-
-const replaceUrlParams = (
-  params: Array<{ key: string; value: string | null }>,
-  history: H.History,
-  search: string
-) => {
-  const urlParams = parse(search, { sort: false });
-
-  params.forEach(({ key, value }) => {
-    if (value == null || value === '') {
-      delete urlParams[key];
-    } else {
-      urlParams[key] = value;
-    }
-  });
-
-  const newSearch = encodeQueryString(urlParams);
-
-  if (getQueryStringFromLocation(search) !== newSearch) {
-    history.replace({ search: newSearch });
-  }
+  }, [globalUrlParam, pageName, unregisteredKeys, replaceUrlParams]);
 };

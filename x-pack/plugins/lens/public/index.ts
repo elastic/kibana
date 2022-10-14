@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { LensPlugin } from './plugin';
 
 export type {
@@ -43,7 +44,7 @@ export type { DatatableVisualizationState } from './visualizations/datatable/vis
 export type { HeatmapVisualizationState } from './visualizations/heatmap/types';
 export type { GaugeVisualizationState } from './visualizations/gauge/constants';
 export type {
-  IndexPatternPersistedState,
+  FormBasedPersistedState,
   PersistedIndexPatternLayer,
   OperationType,
   IncompleteColumn,
@@ -74,8 +75,8 @@ export type {
   FormulaPublicApi,
   StaticValueIndexPatternColumn,
   TimeScaleIndexPatternColumn,
-  IndexPatternLayer,
-} from './indexpattern_datasource/types';
+  FormBasedLayer,
+} from './datasources/form_based/types';
 export type {
   XYArgs,
   XYRender,
@@ -101,9 +102,11 @@ export type {
   ReferenceLineLayerArgs,
   ReferenceLineLayerConfig,
 } from '@kbn/expression-xy-plugin/common';
+
 export type { LensEmbeddableInput, LensSavedObjectAttributes, Embeddable } from './embeddable';
 
-export { layerTypes } from '../common';
+/** @deprecated  Please use LayerTypes from @kbn/expression-xy-plugin **/
+export const layerTypes = LayerTypes;
 
 export type { LensPublicStart, LensPublicSetup } from './plugin';
 

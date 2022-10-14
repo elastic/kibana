@@ -38,7 +38,7 @@ export interface CountResponse {
   indices: string;
 }
 
-export type UptimeESClient = ReturnType<typeof createUptimeESClient>;
+export type UptimeEsClient = ReturnType<typeof createUptimeESClient>;
 
 export const inspectableEsQueriesMap = new WeakMap<KibanaRequest, InspectResponse>();
 

@@ -39,11 +39,21 @@ import {
 } from '../../../../hooks';
 import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
 import { ExperimentalFeaturesService } from '../../../../services';
-import { useGetPackageInfoByKey, useLink, useAgentPolicyContext } from '../../../../hooks';
+import {
+  useGetPackageInfoByKey,
+  useLink,
+  useAgentPolicyContext,
+  useIsGuidedOnboardingActive,
+} from '../../../../hooks';
 import { pkgKeyFromPackageInfo } from '../../../../services';
 import type { DetailViewPanelName, PackageInfo } from '../../../../types';
 import { InstallStatus } from '../../../../types';
-import { Error, Loading, HeaderReleaseBadge } from '../../../../components';
+import {
+  Error,
+  Loading,
+  HeaderReleaseBadge,
+  WithGuidedOnboardingTour,
+} from '../../../../components';
 import type { WithHeaderLayoutProps } from '../../../../layouts';
 import { WithHeaderLayout } from '../../../../layouts';
 
@@ -114,6 +124,7 @@ export function Detail() {
   const { createPackagePolicyMultiPageLayout: isExperimentalAddIntegrationPageEnabled } =
     ExperimentalFeaturesService.get();
   const agentPolicyIdFromContext = getAgentPolicyId();
+  const isOverviewPage = panel === 'overview';
 
   // Package info state
   const [packageInfo, setPackageInfo] = useState<PackageInfo | null>(null);
@@ -154,6 +165,7 @@ export function Detail() {
 
   const { isFirstTimeAgentUser = false, isLoading: firstTimeUserLoading } =
     useIsFirstTimeAgentUser();
+  const isGuidedOnboardingActive = useIsGuidedOnboardingActive(pkgName);
 
   // Refresh package info when status change
   const [oldPackageInstallStatus, setOldPackageStatus] = useState(packageInstallStatus);
@@ -292,6 +304,7 @@ export function Detail() {
         isCloud,
         isExperimentalAddIntegrationPageEnabled,
         isFirstTimeAgentUser,
+        isGuidedOnboardingActive,
         pkgkey,
       });
 
@@ -305,6 +318,7 @@ export function Detail() {
       isCloud,
       isExperimentalAddIntegrationPageEnabled,
       isFirstTimeAgentUser,
+      isGuidedOnboardingActive,
       pathname,
       pkgkey,
       search,
@@ -349,19 +363,26 @@ export function Detail() {
               { isDivider: true },
               {
                 content: (
-                  <AddIntegrationButton
-                    userCanInstallPackages={userCanInstallPackages}
-                    href={getHref('add_integration_to_policy', {
-                      pkgkey,
-                      ...(integration ? { integration } : {}),
-                      ...(agentPolicyIdFromContext
-                        ? { agentPolicyId: agentPolicyIdFromContext }
-                        : {}),
-                    })}
-                    missingSecurityConfiguration={missingSecurityConfiguration}
-                    packageName={integrationInfo?.title || packageInfo.title}
-                    onClick={handleAddIntegrationPolicyClick}
-                  />
+                  <WithGuidedOnboardingTour
+                    packageKey={pkgkey}
+                    tourType={'addIntegrationButton'}
+                    isTourVisible={isOverviewPage && isGuidedOnboardingActive}
+                    tourOffset={10}
+                  >
+                    <AddIntegrationButton
+                      userCanInstallPackages={userCanInstallPackages}
+                      href={getHref('add_integration_to_policy', {
+                        pkgkey,
+                        ...(integration ? { integration } : {}),
+                        ...(agentPolicyIdFromContext
+                          ? { agentPolicyId: agentPolicyIdFromContext }
+                          : {}),
+                      })}
+                      missingSecurityConfiguration={missingSecurityConfiguration}
+                      packageName={integrationInfo?.title || packageInfo.title}
+                      onClick={handleAddIntegrationPolicyClick}
+                    />
+                  </WithGuidedOnboardingTour>
                 ),
               },
             ].map((item, index) => (
@@ -385,9 +406,11 @@ export function Detail() {
       packageInfo,
       updateAvailable,
       isInstalled,
+      pkgkey,
+      isOverviewPage,
+      isGuidedOnboardingActive,
       userCanInstallPackages,
       getHref,
-      pkgkey,
       integration,
       agentPolicyIdFromContext,
       missingSecurityConfiguration,

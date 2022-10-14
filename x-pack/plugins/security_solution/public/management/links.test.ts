@@ -80,13 +80,30 @@ describe('links', () => {
     expect(filteredLinks).toEqual(links);
   });
 
+  it('it returns all but response actions history when no access privilege to either response actions history or HIE but have at least one HIE entry', async () => {
+    fakeHttpServices.get.mockResolvedValue({ total: 1 });
+    const filteredLinks = await getManagementFilteredLinks(
+      coreMockStarted,
+      getPlugins(['superuser'])
+    );
+    (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(false);
+    expect(filteredLinks).toEqual({
+      ...links,
+      links: links.links?.filter((link) => link.id !== SecurityPageName.responseActionsHistory),
+    });
+  });
+
   it('it returns filtered links when not having isolation permissions and no host isolation exceptions entry', async () => {
     fakeHttpServices.get.mockResolvedValue({ total: 0 });
     (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(false);
     const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins([]));
     expect(filteredLinks).toEqual({
       ...links,
-      links: links.links?.filter((link) => link.id !== SecurityPageName.hostIsolationExceptions),
+      links: links.links?.filter(
+        (link) =>
+          link.id !== SecurityPageName.hostIsolationExceptions &&
+          link.id !== SecurityPageName.responseActionsHistory
+      ),
     });
   });
 });

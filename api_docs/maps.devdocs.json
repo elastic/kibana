@@ -2184,6 +2184,149 @@
       },
       {
         "parentPluginId": "maps",
+        "id": "def-public.IRasterSource",
+        "type": "Interface",
+        "tags": [],
+        "label": "IRasterSource",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "maps",
+            "scope": "public",
+            "docId": "kibMapsPluginApi",
+            "section": "def-public.IRasterSource",
+            "text": "IRasterSource"
+          },
+          " extends ",
+          {
+            "pluginId": "maps",
+            "scope": "public",
+            "docId": "kibMapsPluginApi",
+            "section": "def-public.ITMSSource",
+            "text": "ITMSSource"
+          }
+        ],
+        "path": "x-pack/plugins/maps/public/classes/sources/raster_source/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.IRasterSource.canSkipSourceUpdate",
+            "type": "Function",
+            "tags": [],
+            "label": "canSkipSourceUpdate",
+            "description": [],
+            "signature": [
+              "(dataRequest: ",
+              {
+                "pluginId": "maps",
+                "scope": "public",
+                "docId": "kibMapsPluginApi",
+                "section": "def-public.DataRequest",
+                "text": "DataRequest"
+              },
+              ", nextRequestMeta: ",
+              "DataRequestMeta",
+              ") => Promise<boolean>"
+            ],
+            "path": "x-pack/plugins/maps/public/classes/sources/raster_source/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "maps",
+                "id": "def-public.IRasterSource.canSkipSourceUpdate.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "dataRequest",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "maps",
+                    "scope": "public",
+                    "docId": "kibMapsPluginApi",
+                    "section": "def-public.DataRequest",
+                    "text": "DataRequest"
+                  }
+                ],
+                "path": "x-pack/plugins/maps/public/classes/sources/raster_source/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "maps",
+                "id": "def-public.IRasterSource.canSkipSourceUpdate.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "nextRequestMeta",
+                "description": [],
+                "signature": [
+                  "DataRequestMeta"
+                ],
+                "path": "x-pack/plugins/maps/public/classes/sources/raster_source/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.IRasterSource.isSourceStale",
+            "type": "Function",
+            "tags": [],
+            "label": "isSourceStale",
+            "description": [],
+            "signature": [
+              "(mbSource: maplibregl.RasterTileSource, sourceData: ",
+              "RasterTileSourceData",
+              ") => boolean"
+            ],
+            "path": "x-pack/plugins/maps/public/classes/sources/raster_source/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "maps",
+                "id": "def-public.IRasterSource.isSourceStale.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "mbSource",
+                "description": [],
+                "signature": [
+                  "maplibregl.RasterTileSource"
+                ],
+                "path": "x-pack/plugins/maps/public/classes/sources/raster_source/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "maps",
+                "id": "def-public.IRasterSource.isSourceStale.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "sourceData",
+                "description": [],
+                "signature": [
+                  "RasterTileSourceData"
+                ],
+                "path": "x-pack/plugins/maps/public/classes/sources/raster_source/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "maps",
         "id": "def-public.ITMSSource",
         "type": "Interface",
         "tags": [],
@@ -4327,7 +4470,7 @@
           "StyleDescriptor",
           " | null | undefined; query?: ",
           "Query",
-          " | undefined; includeInFitToBounds?: boolean | undefined; }"
+          " | undefined; includeInFitToBounds?: boolean | undefined; parent?: string | undefined; }"
         ],
         "path": "x-pack/plugins/maps/common/descriptor_types/layer_descriptor_types.ts",
         "deprecated": false,

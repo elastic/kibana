@@ -52,5 +52,5 @@ export const journey = new Journey({
     await page.click(subj('launchSampleDataSetecommerce'));
     await page.click(subj('viewSampleDataSetecommerce-dashboard'));
 
-    await waitForVisualizations(page, 13);
+    await waitForVisualizations(page, 12);
   });
