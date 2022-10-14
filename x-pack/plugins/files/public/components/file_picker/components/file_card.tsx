@@ -36,7 +36,7 @@ export const FileCard: FunctionComponent<Props> = ({ file }) => {
     <EuiCard
       title=""
       css={css`
-        place-self: center;
+        place-self: stretch;
       `}
       paddingSize="s"
       selectable={{
@@ -49,6 +49,7 @@ export const FileCard: FunctionComponent<Props> = ({ file }) => {
             display: grid;
             place-items: center;
             height: ${imageHeight};
+            margin: ${euiTheme.size.m};
           `}
         >
           {displayImage ? (
@@ -60,7 +61,15 @@ export const FileCard: FunctionComponent<Props> = ({ file }) => {
               src={client.getDownloadHref({ id: file.id, fileKind: kind })}
             />
           ) : (
-            <EuiIcon type="filebeatApp" size="xl" />
+            <div
+              css={css`
+                display: grid;
+                place-items: center;
+                height: ${imageHeight};
+              `}
+            >
+              <EuiIcon type="filebeatApp" size="xl" />
+            </div>
           )}
         </div>
       }
