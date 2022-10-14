@@ -13,7 +13,7 @@ import { getMemoryChartData } from '../shared/memory';
 import { getComputeUsageChart } from './get_compute_usage_chart';
 import { getActiveInstancesChart } from './get_active_instances_chart';
 import { getColdStartCountChart } from './get_cold_start_count_chart';
-import { getSearchAggregatedTransactions } from '../../../../lib/helpers/transactions';
+import { getSearchTransactionsEvents } from '../../../../lib/helpers/transactions';
 
 export function getServerlessAgentMetricsCharts({
   environment,
@@ -31,7 +31,7 @@ export function getServerlessAgentMetricsCharts({
   end: number;
 }) {
   return withApmSpan('get_serverless_agent_metric_charts', async () => {
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+    const searchAggregatedTransactions = await getSearchTransactionsEvents({
       ...setup,
       kuery,
       start,

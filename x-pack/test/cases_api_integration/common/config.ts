@@ -18,6 +18,7 @@ interface CreateTestConfigOptions {
   disabledPlugins?: string[];
   ssl?: boolean;
   testFiles?: string[];
+  publicBaseUrl?: boolean;
 }
 
 const enabledActionTypes = [
@@ -115,6 +116,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         ...xPackApiIntegrationTestsConfig.get('kbnTestServer'),
         serverArgs: [
           ...xPackApiIntegrationTestsConfig.get('kbnTestServer.serverArgs'),
+          ...(options.publicBaseUrl ? ['--server.publicBaseUrl=https://localhost:5601'] : []),
           `--xpack.actions.allowedHosts=${JSON.stringify(['localhost', 'some.non.existent.com'])}`,
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
           '--xpack.eventLog.logEntries=true',
