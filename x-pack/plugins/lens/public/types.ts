@@ -282,6 +282,8 @@ export interface Datasource<T = unknown, P = unknown> {
     }
   ) => T;
 
+  getSelectedFields?: (state: T) => string[];
+
   renderLayerSettings?: (
     domElement: Element,
     props: DatasourceLayerSettingsProps<T>

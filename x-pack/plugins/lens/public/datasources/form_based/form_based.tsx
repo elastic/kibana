@@ -265,6 +265,19 @@ export function getFormBasedDatasource({
       });
     },
 
+    getSelectedFields(state) {
+      const fields: string[] = [];
+      Object.values(state?.layers)?.forEach((l) => {
+        const { columns } = l;
+        Object.values(columns).forEach((c) => {
+          if ('sourceField' in c) {
+            fields.push(c.sourceField);
+          }
+        });
+      });
+      return fields;
+    },
+
     toExpression: (state, layerId, indexPatterns) =>
       toExpression(state, layerId, indexPatterns, uiSettings),
 
@@ -296,6 +309,8 @@ export function getFormBasedDatasource({
 
     renderDataPanel(domElement: Element, props: DatasourceDataPanelProps<FormBasedPrivateState>) {
       const { onChangeIndexPattern, ...otherProps } = props;
+      const layerFields = formBasedDatasource?.getSelectedFields?.(props.state);
+
       render(
         <KibanaThemeProvider theme$={core.theme.theme$}>
           <I18nProvider>
@@ -320,6 +335,7 @@ export function getFormBasedDatasource({
                 core={core}
                 uiActions={uiActions}
                 onIndexPatternRefresh={onRefreshIndexPattern}
+                layerFields={layerFields}
               />
             </KibanaContextProvider>
           </I18nProvider>
