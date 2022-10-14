@@ -29,6 +29,7 @@ describe('layeredXyVis', () => {
         syncColors: false,
         syncTooltips: false,
         syncCursor: true,
+        canNavigateToLens: false,
       },
     });
   });

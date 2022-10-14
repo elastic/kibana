@@ -19,6 +19,7 @@ export interface XYChartProps {
   syncTooltips: boolean;
   syncCursor: boolean;
   syncColors: boolean;
+  canNavigateToLens?: boolean;
 }
 
 export interface XYRender {
