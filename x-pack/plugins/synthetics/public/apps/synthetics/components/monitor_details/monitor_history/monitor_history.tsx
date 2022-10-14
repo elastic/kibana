@@ -4,37 +4,63 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSuperDatePicker, EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { MonitorDurationTrend } from '../monitor_summary/duration_trend';
+import { TestRunsTable } from '../monitor_summary/test_runs_table';
 
 export const MonitorHistory = () => {
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
-      <EuiFlexItem>Date picker</EuiFlexItem>
+      <EuiFlexItem>
+        <EuiSuperDatePicker
+          width="full"
+          onTimeChange={(...args) => console.log(args)}
+          updateButtonProps={{ fill: false }}
+        />
+      </EuiFlexItem>
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="m">
-          <EuiFlexItem>
+          <EuiFlexItem grow={1}>
             <EuiPanel hasShadow={false} hasBorder={true}>
-              Stats
+              <EuiTitle size="xs">
+                <h3>{STATS_LABEL}</h3>
+              </EuiTitle>
             </EuiPanel>
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem grow={2}>
             <EuiPanel hasShadow={false} hasBorder={true}>
-              Duration trend
+              <EuiTitle size="xs">
+                <h3>{DURATION_TREND_LABEL}</h3>
+              </EuiTitle>
+              <MonitorDurationTrend />
             </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiPanel hasShadow={false} hasBorder={true}>
-          Status
+          <EuiTitle size="xs">
+            <h3>{STATUS_LABEL}</h3>
+          </EuiTitle>
         </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiPanel hasShadow={false} hasBorder={true}>
-          Test runs
-        </EuiPanel>
+        <TestRunsTable from={dateRangeStart} to={dateRangeEnd} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
+
+const STATS_LABEL = i18n.translate('xpack.synthetics.historyPanel.stats', {
+  defaultMessage: 'Stats',
+});
+
+const DURATION_TREND_LABEL = i18n.translate('xpack.synthetics.historyPanel.durationTrends', {
+  defaultMessage: 'Duration trends',
+});
+
+const STATUS_LABEL = i18n.translate('xpack.synthetics.historyPanel.status', {
+  defaultMessage: 'Status',
+});
