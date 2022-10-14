@@ -255,7 +255,7 @@ include::./tab-widgets/storage-explorer-user/widget.asciidoc[]
 --
 
 . Assign the `storage-explorer_user` created previously, and the roles and privileges necessary to create
-a <<apm-app-reader-full,full>> or <<apm-app-reader-partial,partial>> APM reader to any users that need to view **Storage explorer** in the APM app
+a <<apm-app-reader-full,full>> or <<apm-app-reader-partial,partial>> APM reader to any users that need to view **Storage explorer** in the APM app.
 
 ////
 ***********************************  ***********************************
