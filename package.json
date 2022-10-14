@@ -1370,7 +1370,7 @@
     "jest-snapshot": "^26.6.2",
     "jest-specific-snapshot": "^4.0.0",
     "jest-styled-components": "^7.0.3",
-    "jsdom": "^16.4.0",
+    "jsdom": "^16.7.0",
     "json-schema-typed": "^8.0.1",
     "json5": "^1.0.1",
     "jsondiffpatch": "0.4.1",
