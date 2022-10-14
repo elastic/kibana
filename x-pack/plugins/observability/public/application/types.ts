@@ -25,6 +25,7 @@ import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { CasesUiStart } from '@kbn/cases-plugin/public';
 import { TimelinesUIStart } from '@kbn/timelines-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
 export interface ObservabilityAppServices {
   application: ApplicationStart;
@@ -44,6 +45,7 @@ export interface ObservabilityAppServices {
   theme: ThemeServiceStart;
   timelines: TimelinesUIStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   uiSettings: IUiSettingsClient;
   isDev?: boolean;
 }

@@ -56,8 +56,13 @@ function AlertsPage() {
     data: {
       query: {
         timefilter: { timefilter: timeFilterService },
+        // queryString,
+        // filterManager,
       },
     },
+    // unifiedSearch: {
+    //   ui: { SearchBar },
+    // },
   } = useKibana<ObservabilityAppServices>().services;
 
   const [ruleStatsLoading, setRuleStatsLoading] = useState<boolean>(false);
@@ -128,7 +133,8 @@ function AlertsPage() {
   };
 
   const onQueryChange = useCallback(
-    ({ dateRange, query }) => {
+    ({ dateRange, query, filters }) => {
+      console.log('Query changed:', dateRange, query, filters);
       if (rangeFrom === dateRange.from && rangeTo === dateRange.to && kuery === (query ?? '')) {
         return onRefresh();
       }
@@ -204,6 +210,7 @@ function AlertsPage() {
     >
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
+          {/*<SearchBar appName={'observability_alerts'} onQueryChange={onQueryChange} />*/}
           <AlertsSearchBar
             featureIds={observabilityAlertFeatureIds}
             rangeFrom={rangeFrom}

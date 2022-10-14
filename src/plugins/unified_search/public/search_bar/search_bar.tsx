@@ -122,6 +122,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
   State<QT | Query>
 > {
   public static defaultProps = {
+    indexPatterns: [],
     showQueryBar: true,
     showFilterBar: true,
     showDatePicker: true,

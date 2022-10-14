@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { BehaviorSubject, from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import {
@@ -67,6 +68,8 @@ export interface ObservabilityPublicPluginsSetup {
 }
 
 export interface ObservabilityPublicPluginsStart {
+  // Add unified search
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   usageCollection: UsageCollectionSetup;
   cases: CasesUiStart;
   embeddable: EmbeddableStart;
@@ -275,6 +278,9 @@ export class Plugin
 
   public start(coreStart: CoreStart, pluginsStart: ObservabilityPublicPluginsStart) {
     const { application } = coreStart;
+    // access unified search > ui > SearchBar
+    // const { unifiedSearch } = pluginsStart;
+    // Provide it via context
 
     updateGlobalNavigation({
       capabilities: application.capabilities,

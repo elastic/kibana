@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
-import { TimeHistory } from '@kbn/data-plugin/public';
-import { SearchBar } from '@kbn/unified-search-plugin/public';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+// import { createSearchBar } from '@kbn/unified-search-plugin/public/search_bar';
+import React, { useState } from 'react';
+// import { TimeHistory } from '@kbn/data-plugin/public';
+// import { SearchBar } from '@kbn/unified-search-plugin/public';
+// import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
+import { ObservabilityAppServices } from '../../../application/types';
 import { translations } from '../../../config';
 import { useAlertDataView } from '../../../hooks/use_alert_data_view';
 
@@ -29,30 +32,58 @@ export function AlertsSearchBar({
   onQueryChange: ({}: {
     dateRange: { from: string; to: string; mode?: 'absolute' | 'relative' };
     query?: string;
+    // filter?: Filter;
   }) => void;
 }) {
-  const timeHistory = useMemo(() => {
-    return new TimeHistory(new Storage(localStorage));
-  }, []);
+  const {
+    unifiedSearch: {
+      ui: { SearchBar },
+    },
+  } = useKibana<ObservabilityAppServices>().services;
+  // const timeHistory = useMemo(() => {
+  //   return new TimeHistory(new Storage(localStorage));
+  // }, []);
   const [queryLanguage, setQueryLanguage] = useState<QueryLanguageType>('kuery');
   const { value: dataView, loading, error } = useAlertDataView(featureIds);
 
+  // const SearchBar = createSearchBar({
+  //   core,
+  //   data: dataServices,
+  //   storage: this.storage,
+  //   usageCollection: this.usageCollection,
+  // });
   return (
     <SearchBar
+      appName={'observability-alerts'}
       indexPatterns={loading || error ? [] : [dataView!]}
       placeholder={translations.alertsSearchBar.placeholder}
       query={{ query: query ?? '', language: queryLanguage }}
-      timeHistory={timeHistory}
+      // timeHistory={timeHistory}
       dateRangeFrom={rangeFrom}
       dateRangeTo={rangeTo}
-      onQuerySubmit={({ dateRange, query: nextQuery }) => {
+      onQueryChange={(props) => {
+        console.log('onQueryChange:', props);
+        const { dateRange, query: nextQuery } = props;
         onQueryChange({
           dateRange,
           query: typeof nextQuery?.query === 'string' ? nextQuery.query : '',
         });
         setQueryLanguage((nextQuery?.language ?? 'kuery') as QueryLanguageType);
       }}
+      onQuerySubmit={(props) => {
+        console.log('onQuerySubmit:', props);
+        const { dateRange, query: nextQuery } = props;
+        onQueryChange({
+          dateRange,
+          query: typeof nextQuery?.query === 'string' ? nextQuery.query : '',
+        });
+        setQueryLanguage((nextQuery?.language ?? 'kuery') as QueryLanguageType);
+      }}
+      // onFiltersUpdated={(filter) => {
+      //   console.log('filter:', filter);
+      // }}
       displayStyle="inPage"
+      showFilterBar={true}
     />
   );
 }
