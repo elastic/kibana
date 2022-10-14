@@ -159,6 +159,13 @@ const useFetchAlerts = ({
     if ((prevAlertRequest.current?.pagination?.pageIndex ?? 0) !== 0) {
       dispatch({ type: 'resetPagination' });
     } else {
+      console.log(`=============>calling refetch.current()`);
+      searchSubscription$.current.unsubscribe();
+      abortCtrl.current.abort();
+      console.log(
+        `=============>abortCtrl.current.signal.aborted in refetchGrid`,
+        abortCtrl.current.signal.aborted
+      );
       refetch.current();
     }
   }, []);
@@ -171,15 +178,14 @@ const useFetchAlerts = ({
 
       const asyncSearch = async () => {
         prevAlertRequest.current = request;
+        console.log(
+          `=============>abortCtrl.current.signal.aborted in asyncSearch`,
+          abortCtrl.current.signal.aborted
+        );
         abortCtrl.current = new AbortController();
         if (data && data.search) {
           console.log(`=============>loading set to true`);
           dispatch({ type: 'loading', loading: true });
-          console.log(
-            `=============>abortCtrl.current.signal.aborted`,
-            abortCtrl.current.signal.aborted
-          );
-          searchSubscription$.current.unsubscribe();
           searchSubscription$.current = data.search
             .search<RuleRegistrySearchRequest, RuleRegistrySearchResponse>(
               { ...request, featureIds, fields: undefined, query },
@@ -190,6 +196,7 @@ const useFetchAlerts = ({
             )
             .subscribe({
               next: (response) => {
+                console.log(`=============>request:`, JSON.stringify(request));
                 console.log(`=============>response:`, JSON.stringify(response));
                 if (isCompleteResponse(response)) {
                   const { rawResponse } = response;
@@ -242,6 +249,10 @@ const useFetchAlerts = ({
 
       searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
+      console.log(
+        `=============>abortCtrl.current.signal.aborted in fetchAlerts`,
+        abortCtrl.current.signal.aborted
+      );
       asyncSearch();
       refetch.current = asyncSearch;
     },
@@ -272,11 +283,11 @@ const useFetchAlerts = ({
 
   useEffect(() => {
     if (alertRequest.featureIds.length > 0 && !deepEqual(alertRequest, prevAlertRequest.current)) {
-      console.log(`=============>alertRequest`, JSON.stringify(alertRequest));
       console.log(
         `=============>prevAlertRequest.current`,
         JSON.stringify(prevAlertRequest.current)
       );
+      console.log(`=============>alertRequest`, JSON.stringify(alertRequest));
       fetchAlerts(alertRequest);
     }
   }, [alertRequest, fetchAlerts]);
