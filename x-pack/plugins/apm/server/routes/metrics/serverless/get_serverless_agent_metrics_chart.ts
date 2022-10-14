@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import { withApmSpan } from '../../../../utils/with_apm_span';
-import { Setup } from '../../../../lib/helpers/setup_request';
+import { withApmSpan } from '../../../utils/with_apm_span';
+import { Setup } from '../../../lib/helpers/setup_request';
 import { getServerlessFunctionLatencyChart } from './get_serverless_function_latency_chart';
 import { getColdStartDurationChart } from './get_cold_start_duration_chart';
-import { getMemoryChartData } from '../shared/memory';
+import { getMemoryChartData } from '../by_agent/shared/memory';
 import { getComputeUsageChart } from './get_compute_usage_chart';
-import { getActiveInstancesChart } from './get_active_instances_chart';
 import { getColdStartCountChart } from './get_cold_start_count_chart';
-import { getSearchTransactionsEvents } from '../../../../lib/helpers/transactions';
+import { getSearchTransactionsEvents } from '../../../lib/helpers/transactions';
 
 export function getServerlessAgentMetricsCharts({
   environment,
@@ -55,7 +54,6 @@ export function getServerlessAgentMetricsCharts({
       getColdStartDurationChart(options),
       getColdStartCountChart(options),
       getComputeUsageChart(options),
-      getActiveInstancesChart({ ...options, searchAggregatedTransactions }),
     ]);
   });
 }

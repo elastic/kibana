@@ -7,17 +7,17 @@
 
 import { i18n } from '@kbn/i18n';
 import { euiLightVars as theme } from '@kbn/ui-theme';
-import { FAAS_BILLED_DURATION } from '../../../../../common/elasticsearch_fieldnames';
-import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
-import { isFiniteNumber } from '../../../../../common/utils/is_finite_number';
-import { getVizColorForIndex } from '../../../../../common/viz_colors';
-import { Setup } from '../../../../lib/helpers/setup_request';
-import { getLatencyTimeseries } from '../../../transactions/get_latency_charts';
+import { FAAS_BILLED_DURATION } from '../../../../common/elasticsearch_fieldnames';
+import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
+import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
+import { getVizColorForIndex } from '../../../../common/viz_colors';
+import { Setup } from '../../../lib/helpers/setup_request';
+import { getLatencyTimeseries } from '../../transactions/get_latency_charts';
 import {
   fetchAndTransformMetrics,
   GenericMetricsChart,
-} from '../../fetch_and_transform_metrics';
-import { ChartBase } from '../../types';
+} from '../fetch_and_transform_metrics';
+import { ChartBase } from '../types';
 
 const billedDurationAvg = {
   title: i18n.translate('xpack.apm.agentMetrics.serverless.billedDurationAvg', {

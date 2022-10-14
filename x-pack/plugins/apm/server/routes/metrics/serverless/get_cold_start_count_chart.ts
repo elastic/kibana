@@ -11,10 +11,10 @@ import { euiLightVars as theme } from '@kbn/ui-theme';
 import {
   FAAS_COLDSTART,
   METRICSET_NAME,
-} from '../../../../../common/elasticsearch_fieldnames';
-import { Setup } from '../../../../lib/helpers/setup_request';
-import { fetchAndTransformMetrics } from '../../fetch_and_transform_metrics';
-import { ChartBase } from '../../types';
+} from '../../../../common/elasticsearch_fieldnames';
+import { Setup } from '../../../lib/helpers/setup_request';
+import { fetchAndTransformMetrics } from '../fetch_and_transform_metrics';
+import { ChartBase } from '../types';
 
 const chartBase: ChartBase = {
   title: i18n.translate('xpack.apm.agentMetrics.serverless.coldStart', {

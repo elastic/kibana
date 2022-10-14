@@ -18,12 +18,12 @@ import {
   METRICSET_NAME,
   METRIC_SYSTEM_TOTAL_MEMORY,
   SERVICE_NAME,
-} from '../../../../../common/elasticsearch_fieldnames';
-import { environmentQuery } from '../../../../../common/utils/environment_query';
-import { isFiniteNumber } from '../../../../../common/utils/is_finite_number';
-import { getMetricsDateHistogramParams } from '../../../../lib/helpers/metrics';
-import { Setup } from '../../../../lib/helpers/setup_request';
-import { GenericMetricsChart } from '../../fetch_and_transform_metrics';
+} from '../../../../common/elasticsearch_fieldnames';
+import { environmentQuery } from '../../../../common/utils/environment_query';
+import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
+import { getMetricsDateHistogramParams } from '../../../lib/helpers/metrics';
+import { Setup } from '../../../lib/helpers/setup_request';
+import { GenericMetricsChart } from '../fetch_and_transform_metrics';
 
 /**
  * To calculate the compute usage we need to multiply the "system.memory.total" by "faas.billed_duration".

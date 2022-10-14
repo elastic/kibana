@@ -14,11 +14,11 @@ import {
   METRIC_SYSTEM_TOTAL_MEMORY,
   SERVICE_NAME,
   SERVICE_NODE_NAME,
-} from '../../../../../common/elasticsearch_fieldnames';
-import { environmentQuery } from '../../../../../common/utils/environment_query';
-import { Coordinate } from '../../../../../typings/timeseries';
-import { getBucketSize } from '../../../../lib/helpers/get_bucket_size';
-import { Setup } from '../../../../lib/helpers/setup_request';
+} from '../../../../common/elasticsearch_fieldnames';
+import { environmentQuery } from '../../../../common/utils/environment_query';
+import { Coordinate } from '../../../../typings/timeseries';
+import { getBucketSize } from '../../../lib/helpers/get_bucket_size';
+import { Setup } from '../../../lib/helpers/setup_request';
 import { calcMemoryUsed } from './helper';
 
 interface ActiveInstanceTimeseries {

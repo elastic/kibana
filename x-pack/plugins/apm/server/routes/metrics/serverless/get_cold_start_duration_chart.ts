@@ -7,11 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { euiLightVars as theme } from '@kbn/ui-theme';
-import { FAAS_COLDSTART_DURATION } from '../../../../../common/elasticsearch_fieldnames';
-import { Setup } from '../../../../lib/helpers/setup_request';
-import { fetchAndTransformMetrics } from '../../fetch_and_transform_metrics';
-import { ChartBase } from '../../types';
-import { isFiniteNumber } from '../../../../../common/utils/is_finite_number';
+import { FAAS_COLDSTART_DURATION } from '../../../../common/elasticsearch_fieldnames';
+import { Setup } from '../../../lib/helpers/setup_request';
+import { fetchAndTransformMetrics } from '../fetch_and_transform_metrics';
+import { ChartBase } from '../types';
+import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
 
 const chartBase: ChartBase = {
   title: i18n.translate('xpack.apm.agentMetrics.serverless.coldStartDuration', {

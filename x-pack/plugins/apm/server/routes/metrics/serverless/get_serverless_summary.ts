@@ -13,9 +13,9 @@ import {
   METRIC_SYSTEM_FREE_MEMORY,
   METRIC_SYSTEM_TOTAL_MEMORY,
   SERVICE_NAME,
-} from '../../../../../common/elasticsearch_fieldnames';
-import { environmentQuery } from '../../../../../common/utils/environment_query';
-import { Setup } from '../../../../lib/helpers/setup_request';
+} from '../../../../common/elasticsearch_fieldnames';
+import { environmentQuery } from '../../../../common/utils/environment_query';
+import { Setup } from '../../../lib/helpers/setup_request';
 import { calcMemoryUsedRate } from './helper';
 
 export async function getServerlessSummary({
@@ -47,7 +47,7 @@ export async function getServerlessSummary({
       events: [ProcessorEvent.metric],
     },
     body: {
-      track_total_hits: 1,
+      track_total_hits: false,
       size: 0,
       query: {
         bool: {

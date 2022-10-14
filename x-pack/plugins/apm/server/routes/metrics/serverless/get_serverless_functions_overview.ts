@@ -14,10 +14,9 @@ import {
   METRIC_SYSTEM_FREE_MEMORY,
   METRIC_SYSTEM_TOTAL_MEMORY,
   SERVICE_NAME,
-} from '../../../../../common/elasticsearch_fieldnames';
-import { environmentQuery } from '../../../../../common/utils/environment_query';
-import { Setup } from '../../../../lib/helpers/setup_request';
-import { getMemoryInfo } from '../shared/memory';
+} from '../../../../common/elasticsearch_fieldnames';
+import { environmentQuery } from '../../../../common/utils/environment_query';
+import { Setup } from '../../../lib/helpers/setup_request';
 import { calcMemoryUsed } from './helper';
 
 export async function getServerlessFunctionsOverview({
@@ -42,7 +41,7 @@ export async function getServerlessFunctionsOverview({
       events: [ProcessorEvent.metric],
     },
     body: {
-      track_total_hits: 1,
+      track_total_hits: false,
       size: 0,
       query: {
         bool: {
@@ -69,8 +68,6 @@ export async function getServerlessFunctionsOverview({
       },
     },
   };
-
-  getMemoryInfo({ end, environment, kuery, serviceName, setup, start });
 
   const response = await apmEventClient.search(
     'ger_serverless_functions_overview',

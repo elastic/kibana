@@ -18,12 +18,16 @@ import { JvmMetricsOverview } from './jvm_metrics_overview';
 
 export function Metrics() {
   const { agentName, runtimeName } = useApmServiceContext();
+  const isServerless = isServerlessAgent(runtimeName);
 
-  if (isJavaAgentName(agentName) || isJRubyAgent(agentName, runtimeName)) {
+  if (
+    !isServerless &&
+    (isJavaAgentName(agentName) || isJRubyAgent(agentName, runtimeName))
+  ) {
     return <JvmMetricsOverview />;
   }
 
-  if (isServerlessAgent(runtimeName)) {
+  if (isServerless) {
     return <ServerLessMetrics />;
   }
 
