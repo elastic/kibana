@@ -10,7 +10,7 @@ import React from 'react';
 
 import { getExceptionListItemSchemaMock } from '../../test_helpers/exception_list_item_schema.mock';
 import * as i18n from '../translations';
-import { ExceptionItemCardHeader } from './header';
+import { ExceptionItemCardHeader } from '.';
 import { fireEvent, render } from '@testing-library/react';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 

@@ -33,6 +33,7 @@ export const ExceptionItemCardHeader = memo<ExceptionItemCardHeaderProps>(
             actions={actions}
             aria-label="Exception item actions menu"
             dataTestSubj={dataTestSubj}
+            anchorPosition="downCenter"
           />
         </EuiFlexItem>
       </EuiFlexGroup>

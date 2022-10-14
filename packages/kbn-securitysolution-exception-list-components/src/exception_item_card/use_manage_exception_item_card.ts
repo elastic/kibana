@@ -27,7 +27,7 @@ interface UseExceptionItemCardProps {
   onEditException: (item: ExceptionListItemSchema) => void;
 }
 
-export const useExceptionItemCard = ({
+export const useManageExceptionItemCard = ({
   listType,
   editActionLabel,
   deleteActionLabel,

@@ -9,14 +9,14 @@
 import React, { FC } from 'react';
 import { EuiButtonIcon } from '@elastic/eui';
 import { Interpolation, Theme } from '@emotion/react';
-import { textWithEditContainerCss } from '../exception_list_header/exception_list_header.styles';
+import { textWithEditContainerCss } from '../list_header/list_header.styles';
 
 interface TextWithEditProps {
   isReadonly: boolean;
   dataTestSubj?: string;
   text: string;
-  onEdit: () => void;
   textCss?: Interpolation<Theme>;
+  onEdit: () => void;
 }
 
 const TextWithEditComponent: FC<TextWithEditProps> = ({
@@ -36,7 +36,7 @@ const TextWithEditComponent: FC<TextWithEditProps> = ({
           data-test-subj={`${dataTestSubj || ''}EditTitleIcon`}
           aria-label="Edit Text List Header"
           iconType="pencil"
-          onClick={onEdit}
+          onClick={() => (typeof onEdit === 'function' ? onEdit() : null)}
         />
       )}
     </div>

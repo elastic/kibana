@@ -8,9 +8,14 @@
 
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
+
+export const headerCss = css`
+  margin: ${euiThemeVars.euiSize};
+`;
+
 export const headerMenuCss = css`
   border-right: 1px solid #d3dae6;
-  padding: ${euiThemeVars.euiSizeXS} ${euiThemeVars.euiSizeM} ${euiThemeVars.euiSizeXS} 0;
+  padding: ${euiThemeVars.euiSizeXS} ${euiThemeVars.euiSizeL} ${euiThemeVars.euiSizeXS} 0;
 `;
 export const textWithEditContainerCss = css`
   display: flex;
@@ -25,4 +30,8 @@ export const textCss = css`
   font-size: ${euiThemeVars.euiFontSize};
   color: ${euiThemeVars.euiTextSubduedColor};
   margin-left: ${euiThemeVars.euiSizeXS};
+`;
+export const descriptionContainerCss = css`
+  margin-top: -${euiThemeVars.euiSizeL};
+  margin-bottom: -${euiThemeVars.euiSizeL};
 `;

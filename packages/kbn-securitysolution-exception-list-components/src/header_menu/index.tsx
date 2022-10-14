@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useMemo, useState } from 'react';
+import React, { FC, ReactElement, useMemo, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
-  EuiContextMenuPanelProps,
   EuiFlexGroup,
   EuiPopover,
   IconType,
+  PanelPaddingSize,
   PopoverAnchorPosition,
 } from '@elastic/eui';
 import { ButtonContentIconSide } from '@elastic/eui/src/components/button/_button_content_deprecated';
@@ -31,31 +31,33 @@ interface HeaderMenuComponentProps {
   text?: string;
   iconType?: IconType;
   iconSide?: ButtonContentIconSide;
-  actions: Action[] | EuiContextMenuPanelProps['items'];
+  actions: Action[] | ReactElement[] | null;
   dataTestSubj?: string;
   emptyButton?: boolean;
   useCustomActions?: boolean;
   anchorPosition?: PopoverAnchorPosition;
+  panelPaddingSize?: PanelPaddingSize;
 }
 
 const HeaderMenuComponent: FC<HeaderMenuComponentProps> = ({
   text,
   dataTestSubj,
-  iconType,
-  iconSide,
   actions,
   disableActions,
   emptyButton,
   useCustomActions,
-  anchorPosition,
+  iconType = 'boxesHorizontal',
+  iconSide = 'left',
+  anchorPosition = 'downCenter',
+  panelPaddingSize = 's',
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const onAffectedRulesClick = () => setIsPopoverOpen((isOpen) => !isOpen);
   const onClosePopover = () => setIsPopoverOpen(false);
 
-  const itemActions = useMemo((): EuiContextMenuPanelProps['items'] => {
-    if (useCustomActions) return actions as EuiContextMenuPanelProps['items'];
+  const itemActions = useMemo(() => {
+    if (useCustomActions) return actions;
     return (actions as Action[]).map((action) => (
       <EuiContextMenuItem
         data-test-subj={`${dataTestSubj || ''}ActionItem${action.key}`}
@@ -71,6 +73,7 @@ const HeaderMenuComponent: FC<HeaderMenuComponentProps> = ({
       </EuiContextMenuItem>
     ));
   }, [actions, dataTestSubj, useCustomActions]);
+
   return (
     <EuiFlexGroup responsive>
       <EuiPopover
@@ -79,8 +82,8 @@ const HeaderMenuComponent: FC<HeaderMenuComponentProps> = ({
             <EuiButtonEmpty
               isDisabled={disableActions}
               onClick={onAffectedRulesClick}
-              iconType={iconType || 'boxesHorizontal'}
-              iconSide={iconSide || 'left'}
+              iconType={iconType}
+              iconSide={iconSide}
               data-test-subj={`${dataTestSubj || ''}EmptyButton`}
               aria-label="Header menu Button Empty"
             >
@@ -90,7 +93,7 @@ const HeaderMenuComponent: FC<HeaderMenuComponentProps> = ({
             <EuiButtonIcon
               isDisabled={disableActions}
               onClick={onAffectedRulesClick}
-              iconType={iconType || 'boxesHorizontal'}
+              iconType={iconType}
               data-test-subj={`${dataTestSubj || ''}ButtonIcon`}
               aria-label="Header menu Button Icon"
             >
@@ -98,17 +101,19 @@ const HeaderMenuComponent: FC<HeaderMenuComponentProps> = ({
             </EuiButtonIcon>
           )
         }
-        panelPaddingSize="none"
+        panelPaddingSize={panelPaddingSize}
         isOpen={isPopoverOpen}
         closePopover={onClosePopover}
-        anchorPosition={anchorPosition || 'downCenter'}
+        anchorPosition={anchorPosition}
         data-test-subj={`${dataTestSubj || ''}Items`}
       >
-        <EuiContextMenuPanel
-          data-test-subj={`${dataTestSubj || ''}MenuPanel`}
-          size="s"
-          items={itemActions}
-        />
+        {!itemActions ? null : (
+          <EuiContextMenuPanel
+            data-test-subj={`${dataTestSubj || ''}MenuPanel`}
+            size="s"
+            items={itemActions as ReactElement[]}
+          />
+        )}
       </EuiPopover>
     </EuiFlexGroup>
   );
