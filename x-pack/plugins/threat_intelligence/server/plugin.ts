@@ -7,6 +7,7 @@
 
 import type { PluginInitializerContext, Logger } from '@kbn/core/server';
 import { THREAT_INTELLIGENCE_SEARCH_STRATEGY_NAME } from '../common/constants';
+import { registerBackgroundTask, scheduleBackgroundTask } from './matcher';
 import {
   IThreatIntelligencePlugin,
   ThreatIntelligencePluginCoreSetupDependencies,
@@ -27,17 +28,39 @@ export class ThreatIntelligencePlugin implements IThreatIntelligencePlugin {
   ) {
     this.logger.debug('setup');
 
-    core.getStartServices().then(([_, { data: dataStartService }]) => {
-      const threatIntelligenceSearchStrategy =
-        threatIntelligenceSearchStrategyProvider(dataStartService);
+    const router = core.http.createRouter();
 
-      plugins.data.search.registerSearchStrategy(
-        THREAT_INTELLIGENCE_SEARCH_STRATEGY_NAME,
-        threatIntelligenceSearchStrategy
-      );
+    router.get(
+      {
+        path: '/api/threat_intelligence/install',
+        validate: false,
+      },
+      async (context, request, response) => {
+        return response.ok({
+          body: { result: 'everything is alright' },
+        });
+      }
+    );
 
-      this.logger.debug(`search strategy "${THREAT_INTELLIGENCE_SEARCH_STRATEGY_NAME}" registered`);
-    });
+    registerBackgroundTask({ core, taskManager: plugins.taskManager, logger: this.logger });
+
+    core
+      .getStartServices()
+      .then(([_, { data: dataStartService, taskManager: taskManagerStart }]) => {
+        const threatIntelligenceSearchStrategy =
+          threatIntelligenceSearchStrategyProvider(dataStartService);
+
+        plugins.data.search.registerSearchStrategy(
+          THREAT_INTELLIGENCE_SEARCH_STRATEGY_NAME,
+          threatIntelligenceSearchStrategy
+        );
+
+        this.logger.debug(
+          `search strategy "${THREAT_INTELLIGENCE_SEARCH_STRATEGY_NAME}" registered`
+        );
+
+        scheduleBackgroundTask(taskManagerStart);
+      });
 
     return {};
   }

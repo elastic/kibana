@@ -8,13 +8,19 @@
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 
 import { DataPluginSetup, DataPluginStart } from '@kbn/data-plugin/server/plugin';
+import {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 
 export interface ThreatIntelligencePluginSetupDependencies {
   data: DataPluginSetup;
+  taskManager: TaskManagerSetupContract;
 }
 
 export interface ThreatIntelligencePluginStartDependencies {
   data: DataPluginStart;
+  taskManager: TaskManagerStartContract;
 }
 
 export type ThreatIntelligencePluginCoreSetupDependencies = CoreSetup<

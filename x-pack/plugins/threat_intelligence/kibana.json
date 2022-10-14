@@ -16,7 +16,8 @@
     "navigation",
     "kibanaReact",
     "triggersActionsUi",
-    "inspector"
+    "inspector",
+    "taskManager"
   ],
   "requiredBundles": ["data", "kibanaUtils", "kibanaReact"]
 }
