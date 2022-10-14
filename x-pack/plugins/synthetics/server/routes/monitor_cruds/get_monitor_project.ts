@@ -55,6 +55,7 @@ export const getSyntheticsProjectMonitorsRoute: SyntheticsRestApiRouteFactory = 
           return JSON.stringify({
             journey_id: monitor.attributes[ConfigKey.JOURNEY_ID],
             hash: monitor.attributes[ConfigKey.CONFIG_HASH] || '',
+            monitor_id: monitor.id,
             afterKey: monitor.sort,
           });
         })
