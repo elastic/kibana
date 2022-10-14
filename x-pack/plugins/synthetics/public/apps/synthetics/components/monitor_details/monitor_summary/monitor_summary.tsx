@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { MonitorErrorSparklines } from './monitor_error_sparklines';
 import { DurationSparklines } from './duration_sparklines';
 import { MonitorDurationTrend } from './duration_trend';
 import { StepDurationPanel } from './step_duration_panel';
@@ -63,7 +64,9 @@ export const MonitorSummary = () => {
               <EuiFlexItem>
                 <MonitorErrorsCount />
               </EuiFlexItem>
-              <EuiFlexItem>{/* TODO: Add error sparkline*/}</EuiFlexItem>
+              <EuiFlexItem>
+                <MonitorErrorSparklines />
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
           <EuiSpacer size="l" />
