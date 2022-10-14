@@ -47,7 +47,7 @@ describe('ElasticV3ServerShipper', () => {
       initContext
     );
     // eslint-disable-next-line dot-notation
-    shipper['firstTimeOffline$'].next(null); // The tests think connectivity is OK initially for easier testing.
+    shipper['firstTimeOffline'] = null; // The tests think connectivity is OK initially for easier testing.
   });
 
   afterEach(() => {
@@ -198,7 +198,7 @@ describe('ElasticV3ServerShipper', () => {
         initContext
       );
       // eslint-disable-next-line dot-notation
-      shipper['firstTimeOffline$'].next(null);
+      shipper['firstTimeOffline'] = null;
       shipper.reportEvents(events);
       shipper.optIn(true);
       setLastBatchSent(Date.now() - 10 * SECONDS);
@@ -371,7 +371,7 @@ describe('ElasticV3ServerShipper', () => {
     describe('connectivity check with initial unknown state of the connectivity', () => {
       beforeEach(() => {
         // eslint-disable-next-line dot-notation
-        shipper['firstTimeOffline$'].next(undefined); // Initial unknown state of the connectivity
+        shipper['firstTimeOffline'] = undefined; // Initial unknown state of the connectivity
       });
 
       test.each([undefined, false])('does not run for opt-in %p', (optInValue) =>
@@ -412,7 +412,7 @@ describe('ElasticV3ServerShipper', () => {
     describe('connectivity check with the connectivity confirmed to be faulty', () => {
       beforeEach(() => {
         // eslint-disable-next-line dot-notation
-        shipper['firstTimeOffline$'].next(100); // Failed at some point
+        shipper['firstTimeOffline'] = 100; // Failed at some point
       });
 
       test.each([undefined, false])('does not run for opt-in %p', (optInValue) =>
@@ -516,7 +516,7 @@ describe('ElasticV3ServerShipper', () => {
         // eslint-disable-next-line dot-notation
         expect(shipper['internalQueue'].length).toBe(1);
         // eslint-disable-next-line dot-notation
-        shipper['firstTimeOffline$'].next(100);
+        shipper['firstTimeOffline'] = 100;
       });
 
       test(
@@ -567,7 +567,7 @@ describe('ElasticV3ServerShipper', () => {
             { method: 'OPTIONS' }
           );
           // eslint-disable-next-line dot-notation
-          expect(shipper['firstTimeOffline$'].value).toBe(null);
+          expect(shipper['firstTimeOffline']).toBe(null);
 
           advance(10 * MINUTES);
           await nextTick();

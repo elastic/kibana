@@ -78,7 +78,7 @@ export class ElasticV3ServerShipper implements IShipper {
    * - `number` means it's offline since that time
    * @private
    */
-  private readonly firstTimeOffline$ = new BehaviorSubject<undefined | number | null>(undefined);
+  private firstTimeOffline?: number | null;
 
   /**
    * Creates a new instance of the {@link ElasticV3ServerShipper}.
@@ -131,7 +131,7 @@ export class ElasticV3ServerShipper implements IShipper {
     // If opted out OR offline for longer than 24 hours, skip processing any events.
     if (
       this.isOptedIn$.value === false ||
-      (this.firstTimeOffline$.value && Date.now() - this.firstTimeOffline$.value > 24 * HOUR)
+      (this.firstTimeOffline && Date.now() - this.firstTimeOffline > 24 * HOUR)
     ) {
       return;
     }
@@ -159,7 +159,6 @@ export class ElasticV3ServerShipper implements IShipper {
     this.shutdown$.next();
     this.shutdown$.complete();
     this.isOptedIn$.complete();
-    this.firstTimeOffline$.complete();
   }
 
   /**
@@ -180,7 +179,7 @@ export class ElasticV3ServerShipper implements IShipper {
     )
       .pipe(
         takeUntil(this.shutdown$),
-        filter(() => this.isOptedIn$.value === true && this.firstTimeOffline$.value !== null),
+        filter(() => this.isOptedIn$.value === true && this.firstTimeOffline !== null),
         // Using exhaustMap here because one request at a time is enough to check the connectivity.
         exhaustMap(async () => {
           const { ok } = await fetch(this.url, {
@@ -191,16 +190,16 @@ export class ElasticV3ServerShipper implements IShipper {
             throw new Error(`Failed to connect to ${this.url}`);
           }
 
-          this.firstTimeOffline$.next(null);
+          this.firstTimeOffline = null;
           backoff = 1 * MINUTE;
         }),
         retryWhen((errors) =>
           errors.pipe(
             takeUntil(this.shutdown$),
             tap(() => {
-              if (!this.firstTimeOffline$.value) {
-                this.firstTimeOffline$.next(Date.now());
-              } else if (Date.now() - this.firstTimeOffline$.value > 24 * HOUR) {
+              if (!this.firstTimeOffline) {
+                this.firstTimeOffline = Date.now();
+              } else if (Date.now() - this.firstTimeOffline > 24 * HOUR) {
                 this.internalQueue.length = 0;
               }
               backoff = backoff * 2;
@@ -216,15 +215,13 @@ export class ElasticV3ServerShipper implements IShipper {
   }
 
   private setInternalSubscriber() {
+    // Create an emitter that emits when 10s have passed since the last time we sent the data
+    const atLeast10secondsSinceLastSent$ = interval(SECOND).pipe(
+      filter(() => Date.now() - this.lastBatchSent >= 10 * SECOND)
+    );
+
     merge(
-      merge(
-        // Attempt to send every 10 seconds
-        interval(10 * SECOND).pipe(takeUntil(this.shutdown$)),
-        // React to opt in changes. The filter below stops if not opted-in.
-        this.isOptedIn$,
-        // React to connectivity changes. The filter below stops if not online.
-        this.firstTimeOffline$
-      ).pipe(filter(() => Date.now() - this.lastBatchSent >= 10 * SECOND)),
+      atLeast10secondsSinceLastSent$.pipe(takeUntil(this.shutdown$)),
       // Attempt to send one last time on shutdown
       this.shutdown$
     )
@@ -233,7 +230,7 @@ export class ElasticV3ServerShipper implements IShipper {
         filter(
           () =>
             this.isOptedIn$.value === true &&
-            this.firstTimeOffline$.value === null &&
+            this.firstTimeOffline === null &&
             this.internalQueue.length > 0
         ),
         // Retrieve the events to send (clearing the queue) in a synchronous operation to avoid race conditions.
@@ -299,7 +296,7 @@ export class ElasticV3ServerShipper implements IShipper {
       this.initContext.logger.debug(`Failed to report ${events.length} events...`);
       this.initContext.logger.debug(error);
       this.reportTelemetryCounters(events, { code: error.code, error });
-      this.firstTimeOffline$.next(undefined);
+      this.firstTimeOffline = undefined;
     }
   }
 
