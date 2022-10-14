@@ -31,8 +31,8 @@ class MockTileSource extends AbstractSource implements IRasterSource {
     return false;
   }
 
-  renderLegendDetails(): ReactElement<any> {
-    return <div />;
+  renderLegendDetails(): ReactElement<any> | null {
+    return null;
   }
   async canSkipSourceUpdate(
     dataRequest: DataRequest,
