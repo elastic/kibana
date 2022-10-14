@@ -35,7 +35,7 @@ describe('SingleMetricAttributes', () => {
   const layerConfig: LayerConfig = {
     seriesConfig: reportViewConfig,
     operationType: 'median',
-    indexPattern: mockDataView,
+    dataView: mockDataView,
     reportDefinitions: {},
     time: { from: 'now-15m', to: 'now' },
     color: 'green',
@@ -188,7 +188,7 @@ describe('SingleMetricAttributes', () => {
     const layerConfigFormula: LayerConfig = {
       seriesConfig: reportViewConfigFormula,
       operationType: 'median',
-      indexPattern: mockDataView,
+      dataView: mockDataView,
       reportDefinitions: {},
       time: { from: 'now-15m', to: 'now' },
       color: 'green',

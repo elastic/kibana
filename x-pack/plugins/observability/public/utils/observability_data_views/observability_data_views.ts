@@ -12,6 +12,7 @@ import type {
   DataView,
   DataViewSpec,
 } from '@kbn/data-views-plugin/public';
+import { getApmDataViewTitle } from '../../components/shared/exploratory_view/utils/utils';
 import { rumFieldFormats } from '../../components/shared/exploratory_view/configurations/rum/field_formats';
 import { syntheticsFieldFormats } from '../../components/shared/exploratory_view/configurations/synthetics/field_formats';
 import {
@@ -65,6 +66,22 @@ const getAppDataViewId = (app: AppDataType, indices: string) => {
   return `${dataViewList?.[app] ?? app}_${postfix}`;
 };
 
+export async function getDataTypeIndices(dataType: AppDataType) {
+  switch (dataType) {
+    case 'mobile':
+    case 'ux':
+    case 'apm':
+      const resultApm = await getDataHandler('apm')?.hasData();
+      return {
+        hasData: Boolean(resultApm?.hasData),
+        indices: getApmDataViewTitle(resultApm?.indices),
+      };
+    default:
+      const resultUx = await getDataHandler(dataType)?.hasData();
+      return { hasData: Boolean(resultUx?.hasData), indices: resultUx?.indices as string };
+  }
+}
+
 export function isParamsSame(param1: IFieldFormat['_params'], param2?: FieldFormatParams) {
   const isSame =
     param1?.inputFormat === param2?.inputFormat &&
@@ -80,18 +97,27 @@ export function isParamsSame(param1: IFieldFormat['_params'], param2?: FieldForm
 }
 
 export class ObservabilityDataViews {
-  dataViews?: DataViewsPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
+  adHocDataViews: boolean = false;
 
-  constructor(dataViews: DataViewsPublicPluginStart) {
+  constructor(dataViews: DataViewsPublicPluginStart, adHocDataViews?: boolean) {
     this.dataViews = dataViews;
+    this.adHocDataViews = adHocDataViews ?? false;
   }
 
   async createDataView(app: AppDataType, indices: string) {
-    if (!this.dataViews) {
-      throw new Error('data is not defined');
-    }
-
     const appIndicesPattern = getAppIndicesWithPattern(app, indices);
+    return await this.dataViews.create({
+      title: appIndicesPattern,
+      id: getAppDataViewId(app, indices),
+      timeFieldName: '@timestamp',
+      fieldFormats: this.getFieldFormats(app),
+    });
+  }
+
+  async createAndSavedDataView(app: AppDataType, indices: string) {
+    const appIndicesPattern = getAppIndicesWithPattern(app, indices);
+
     return await this.dataViews.createAndSave({
       title: appIndicesPattern,
       id: getAppDataViewId(app, indices),
@@ -131,26 +157,10 @@ export class ObservabilityDataViews {
     return fieldFormatMap;
   }
 
-  async getDataTypeIndices(dataType: AppDataType) {
-    switch (dataType) {
-      case 'ux':
-      case 'synthetics':
-        const resultUx = await getDataHandler(dataType)?.hasData();
-        return resultUx?.indices;
-      case 'apm':
-      case 'mobile':
-        const resultApm = await getDataHandler('apm')?.hasData();
-        return resultApm?.indices.transaction;
-    }
-  }
-
   async getDataView(app: AppDataType, indices?: string): Promise<DataView | undefined> {
-    if (!this.dataViews) {
-      throw new Error('data is not defined');
-    }
     let appIndices = indices;
     if (!appIndices) {
-      appIndices = await this.getDataTypeIndices(app);
+      appIndices = (await getDataTypeIndices(app)).indices;
     }
 
     if (appIndices) {
@@ -158,11 +168,16 @@ export class ObservabilityDataViews {
         const dataViewId = getAppDataViewId(app, appIndices);
         const dataViewTitle = getAppIndicesWithPattern(app, appIndices);
         // we will get the data view by id
+
+        if (this.adHocDataViews) {
+          return await this.createDataView(app, appIndices);
+        }
+
         const dataView = await this.dataViews?.get(dataViewId);
 
         // and make sure title matches, otherwise, we will need to create it
         if (dataView.title !== dataViewTitle) {
-          return await this.createDataView(app, appIndices);
+          return await this.createAndSavedDataView(app, appIndices);
         }
 
         // this is intentional a non blocking call, so no await clause

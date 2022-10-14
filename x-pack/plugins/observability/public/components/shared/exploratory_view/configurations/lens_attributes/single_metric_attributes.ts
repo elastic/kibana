@@ -47,7 +47,7 @@ export class SingleMetricLensAttributes extends LensAttributes {
   }
 
   getSingleMetricLayer() {
-    const { seriesConfig, selectedMetricField, operationType, indexPattern } = this.layerConfigs[0];
+    const { seriesConfig, selectedMetricField, operationType, dataView } = this.layerConfigs[0];
 
     const {
       columnFilter,
@@ -62,7 +62,7 @@ export class SingleMetricLensAttributes extends LensAttributes {
     this.metricStateOptions = metricStateOptions;
 
     if (columnType === FORMULA_COLUMN && formula) {
-      return this.getFormulaLayer({ formula, label: columnLabel, dataView: indexPattern, format });
+      return this.getFormulaLayer({ formula, label: columnLabel, dataView, format });
     }
 
     const getSourceField = () => {
