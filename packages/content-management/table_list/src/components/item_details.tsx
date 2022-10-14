@@ -10,6 +10,7 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiText, EuiLink, EuiTitle, EuiSpacer, EuiHighlight } from '@elastic/eui';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
+import type { Tag } from '../types';
 import { useServices } from '../services';
 import type { UserContentCommonSchema, Props as TableListViewProps } from '../table_list_view';
 
@@ -20,7 +21,7 @@ type InheritedProps<T extends UserContentCommonSchema> = Pick<
 interface Props<T extends UserContentCommonSchema> extends InheritedProps<T> {
   item: T;
   searchTerm?: string;
-  onClickTag: (tag: { name: string }) => void;
+  onClickTag: (tag: Tag) => void;
 }
 
 /**

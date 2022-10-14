@@ -14,6 +14,7 @@ import {
   updateTagsReferences,
   convertTagNameToId,
   getTag,
+  byNameTagSorter,
 } from '../utils';
 import { getComponents } from './components';
 import { buildGetTableColumnDefinition } from './get_table_column_definition';
@@ -39,10 +40,12 @@ export const getUiApi = ({
 }: GetUiApiOptions): SavedObjectsTaggingApiUi => {
   const components = getComponents({ cache, capabilities, overlays, theme, tagClient: client });
 
+  const getTagList = () => cache.getState().sort(byNameTagSorter);
+
   return {
     components,
     getTableColumnDefinition: buildGetTableColumnDefinition({ components, cache }),
-    getSearchBarFilter: buildGetSearchBarFilter({ cache }),
+    getSearchBarFilter: buildGetSearchBarFilter({ getTagList }),
     parseSearchQuery: buildParseSearchQuery({ cache }),
     convertNameToReference: buildConvertNameToReference({ cache }),
     hasTagDecoration,
@@ -50,5 +53,6 @@ export const getUiApi = ({
     getTagIdFromName: (tagName: string) => convertTagNameToId(tagName, cache.getState()),
     updateTagsReferences,
     getTag: (tagId: string) => getTag(tagId, cache.getState()),
+    getTagList,
   };
 };

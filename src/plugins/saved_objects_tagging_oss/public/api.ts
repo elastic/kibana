@@ -66,6 +66,10 @@ export interface SavedObjectsTaggingApiUi {
    * @param tagId
    */
   getTag(tagId: string): Tag | undefined;
+  /**
+   * Return a list of available tags
+   */
+  getTagList(): Tag[];
 
   /**
    * Type-guard to safely manipulate tag-enhanced `SavedObject` from the `savedObject` plugin.

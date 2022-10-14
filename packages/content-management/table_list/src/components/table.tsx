@@ -27,6 +27,8 @@ import type {
   UserContentCommonSchema,
 } from '../table_list_view';
 import { TableSortSelect } from './table_sort_select';
+import { TagFilterPanel } from './tag_filter_panel';
+import type { Props as TagFilterPanelProps } from './tag_filter_panel';
 import type { SortColumnField } from './table_sort_select';
 
 type State<T extends UserContentCommonSchema> = Pick<
@@ -34,7 +36,12 @@ type State<T extends UserContentCommonSchema> = Pick<
   'items' | 'selectedIds' | 'searchQuery' | 'tableSort' | 'pagination'
 >;
 
-interface Props<T extends UserContentCommonSchema> extends State<T> {
+interface Props<T extends UserContentCommonSchema>
+  extends State<T>,
+    Pick<
+      TagFilterPanelProps,
+      'addOrRemoveIncludeTagFilter' | 'addOrRemoveExcludeTagFilter' | 'tagsToTableItemMap'
+    > {
   dispatch: Dispatch<Action<T>>;
   entityName: string;
   entityNamePlural: string;
@@ -59,12 +66,15 @@ export function Table<T extends UserContentCommonSchema>({
   hasUpdatedAtMetadata,
   entityName,
   entityNamePlural,
+  tagsToTableItemMap,
   deleteItems,
   tableCaption,
   onTableChange,
   onSortChange,
+  addOrRemoveExcludeTagFilter,
+  addOrRemoveIncludeTagFilter,
 }: Props<T>) {
-  const { getSearchBarFilters } = useServices();
+  const { getTagList } = useServices();
 
   const renderToolsLeft = useCallback(() => {
     if (!deleteItems || selectedIds.length === 0) {
@@ -120,10 +130,32 @@ export function Table<T extends UserContentCommonSchema>({
       },
     };
 
-    return getSearchBarFilters
-      ? [tableSortSelectFilter, ...getSearchBarFilters()]
-      : [tableSortSelectFilter];
-  }, [onSortChange, hasUpdatedAtMetadata, tableSort, getSearchBarFilters]);
+    const tagFilterPanel: SearchFilterConfig = {
+      type: 'custom_component',
+      component: () => {
+        return (
+          <TagFilterPanel
+            query={searchQuery.query}
+            getTagList={getTagList}
+            tagsToTableItemMap={tagsToTableItemMap}
+            addOrRemoveIncludeTagFilter={addOrRemoveIncludeTagFilter}
+            addOrRemoveExcludeTagFilter={addOrRemoveExcludeTagFilter}
+          />
+        );
+      },
+    };
+
+    return [tableSortSelectFilter, tagFilterPanel];
+  }, [
+    onSortChange,
+    hasUpdatedAtMetadata,
+    tableSort,
+    getTagList,
+    searchQuery.query,
+    tagsToTableItemMap,
+    addOrRemoveIncludeTagFilter,
+    addOrRemoveExcludeTagFilter,
+  ]);
 
   const search = useMemo(() => {
     return {
