@@ -21,6 +21,7 @@ import {
   map,
   BehaviorSubject,
   exhaustMap,
+  mergeMap,
 } from 'rxjs';
 import type {
   AnalyticsClientInitContext,
@@ -44,6 +45,7 @@ const HOUR = 60 * MINUTE;
 const KIB = 1024;
 const MAX_NUMBER_OF_EVENTS_IN_INTERNAL_QUEUE = 1000;
 const MIN_TIME_SINCE_LAST_SEND = 10 * SECOND;
+const FLUSH = Symbol('flush');
 
 /**
  * Elastic V3 shipper to use on the server side.
@@ -61,7 +63,7 @@ export class ElasticV3ServerShipper implements IShipper {
   );
 
   private readonly internalQueue: Event[] = [];
-  private readonly shutdown$ = new ReplaySubject<void>(1);
+  private readonly shutdown$ = new ReplaySubject<typeof FLUSH>(1);
   private readonly isOptedIn$ = new BehaviorSubject<boolean | undefined>(undefined);
 
   private readonly url: string;
@@ -156,7 +158,7 @@ export class ElasticV3ServerShipper implements IShipper {
    * Triggers a flush of the internal queue to attempt to send any events held in the queue.
    */
   public shutdown() {
-    this.shutdown$.next();
+    this.shutdown$.next(FLUSH);
     this.shutdown$.complete();
     this.isOptedIn$.complete();
   }
@@ -235,16 +237,16 @@ export class ElasticV3ServerShipper implements IShipper {
 
         // Send the events:
         // 1. Set lastBatchSent and retrieve the events to send (clearing the queue) in a synchronous operation to avoid race conditions.
-        map(() => {
+        map((action) => {
           this.lastBatchSent = Date.now();
-          return this.getEventsToSend();
+          return this.getEventsToSend(action === FLUSH);
         }),
         // 2. Skip empty buffers (just to be sure)
         filter((events) => events.length > 0),
         // 3. Actually send the events
-        // Using `map` here because we want to send events whenever the emitter says so:
+        // Using `mergeMap` here because we want to send events whenever the emitter says so:
         //   We don't want to skip emissions (exhaustMap) or enqueue them (concatMap).
-        map((eventsToSend) => this.sendEvents(eventsToSend))
+        mergeMap((eventsToSend) => this.sendEvents(eventsToSend))
       )
       .subscribe();
   }
@@ -271,13 +273,13 @@ export class ElasticV3ServerShipper implements IShipper {
   }
 
   /**
-   * Returns a queue of events of up-to 10kB.
+   * Returns a queue of events of up-to 10kB. Or all events in the queue if it's a FLUSH action.
    * @remarks It mutates the internal queue by removing from it the events returned by this method.
    * @private
    */
-  private getEventsToSend(): Event[] {
-    // If the internal queue is already smaller than the minimum batch size, do a direct assignment.
-    if (this.getQueueByteSize(this.internalQueue) < 10 * KIB) {
+  private getEventsToSend(isFlushAction: boolean): Event[] {
+    // If the internal queue is already smaller than the minimum batch size, or it's a flush action, do a direct assignment.
+    if (isFlushAction || this.getQueueByteSize(this.internalQueue) < 10 * KIB) {
       return this.internalQueue.splice(0, this.internalQueue.length);
     }
     // Otherwise, we'll feed the events to the leaky bucket queue until we reach 10kB.
