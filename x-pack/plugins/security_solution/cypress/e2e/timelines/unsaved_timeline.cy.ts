@@ -160,6 +160,7 @@ describe('Save Timeline Prompts', () => {
     openKibanaNavigation();
     navigateFromKibanaCollapsibleTo(OBSERVABILITY_ALERTS_PAGE);
     // should not be manage page i.e. successfull navigation
+    cy.get(TIMELINE_SAVE_MODAL).should('not.exist');
     cy.url().should('not.contain', MANAGE_URL);
   });
 });
