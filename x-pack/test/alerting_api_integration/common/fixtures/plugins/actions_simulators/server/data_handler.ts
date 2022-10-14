@@ -7,8 +7,8 @@
 
 import http from 'http';
 
-export const getDataFromPostRequest = async (request: http.IncomingMessage) => {
-  if (request.method !== 'POST') {
+export const getDataFromRequest = async (request: http.IncomingMessage) => {
+  if (request.method !== 'POST' && request.method !== 'PATCH') {
     return {};
   }
 

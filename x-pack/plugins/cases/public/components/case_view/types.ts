@@ -39,8 +39,3 @@ export interface OnUpdateFields {
   onSuccess?: () => void;
   onError?: () => void;
 }
-
-export enum CASE_VIEW_PAGE_TABS {
-  ALERTS = 'alerts',
-  ACTIVITY = 'activity',
-}

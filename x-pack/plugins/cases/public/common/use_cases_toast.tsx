@@ -10,6 +10,7 @@ import { EuiButtonEmpty, EuiText } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { isValidOwner } from '../../common/utils/owner';
 import { Case, CommentType } from '../../common';
 import { useKibana, useToasts } from './lib/kibana';
 import { generateCaseViewPath } from './navigation';
@@ -95,9 +96,6 @@ function getToastContent({
   }
   return undefined;
 }
-
-const isValidOwner = (owner: string): owner is keyof typeof OWNER_INFO =>
-  Object.keys(OWNER_INFO).includes(owner);
 
 const isServerError = (error: Error | ServerError): error is ServerError =>
   Object.hasOwn(error, 'body');

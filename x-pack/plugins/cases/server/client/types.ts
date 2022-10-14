@@ -11,6 +11,7 @@ import { ActionsClient } from '@kbn/actions-plugin/server';
 import { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import { KueryNode } from '@kbn/es-query';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { IBasePath } from '@kbn/core-http-browser';
 import { CaseSeverity, CaseStatuses, User } from '../../common/api';
 import { Authorization } from '../authorization/authorization';
 import {
@@ -49,6 +50,7 @@ export interface CasesClientArgs {
   readonly persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   readonly externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   readonly securityStartPlugin: SecurityPluginStart;
+  readonly publicBaseUrl?: IBasePath['publicBaseUrl'];
 }
 
 export interface ConstructQueryParams {

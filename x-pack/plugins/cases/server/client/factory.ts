@@ -11,6 +11,7 @@ import {
   Logger,
   ElasticsearchClient,
   SavedObjectsClientContract,
+  IBasePath,
 } from '@kbn/core/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
@@ -46,6 +47,7 @@ interface CasesClientFactoryArgs {
   lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
+  publicBaseUrl?: IBasePath['publicBaseUrl'];
 }
 
 /**
@@ -126,6 +128,7 @@ export class CasesClientFactory {
       persistableStateAttachmentTypeRegistry: this.options.persistableStateAttachmentTypeRegistry,
       externalReferenceAttachmentTypeRegistry: this.options.externalReferenceAttachmentTypeRegistry,
       securityStartPlugin: this.options.securityPluginStart,
+      publicBaseUrl: this.options.publicBaseUrl,
     });
   }
 

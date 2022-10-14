@@ -22,10 +22,11 @@ import {
   OWNER_FIELD,
   CommentType,
   CommentRequestAlertType,
+  CommentAttributes,
 } from '../../../common/api';
 import { CASE_COMMENT_SAVED_OBJECT } from '../../../common/constants';
 
-import { createIncident, getCommentContextFromAttributes, getDurationInSeconds } from './utils';
+import { createIncident, getDurationInSeconds } from './utils';
 import { createCaseError } from '../../common/error';
 import {
   createAlertUpdateRequest,
@@ -114,6 +115,7 @@ export const push = async (
     logger,
     authorization,
     securityStartPlugin,
+    publicBaseUrl,
   } = clientArgs;
 
   try {
@@ -139,32 +141,17 @@ export const push = async (
     }
 
     const alertsInfo = getAlertInfoFromComments(theCase?.comments);
-
     const alerts = await getAlerts(alertsInfo, clientArgs);
-
-    const getMappingsResponse = await casesClientInternal.configuration.getMappings({
-      connector: theCase.connector,
-    });
-
-    const mappings =
-      getMappingsResponse.length === 0
-        ? await casesClientInternal.configuration.createMappings({
-            connector: theCase.connector,
-            owner: theCase.owner,
-          })
-        : getMappingsResponse[0].attributes.mappings;
-
     const profiles = await getProfiles(theCase, securityStartPlugin);
 
     const externalServiceIncident = await createIncident({
-      actionsClient,
       theCase,
       userActions,
       connector: connector as ActionConnector,
-      mappings,
       alerts,
       casesConnectors,
       userProfiles: profiles,
+      publicBaseUrl,
     });
 
     const pushRes = await actionsClient.execute({
@@ -308,8 +295,7 @@ export const push = async (
             attributes: {
               ...origComment.attributes,
               ...updatedComment?.attributes,
-              ...getCommentContextFromAttributes(origComment.attributes),
-            },
+            } as CommentAttributes,
             version: updatedComment?.version ?? origComment.version,
             references: origComment?.references ?? [],
           };

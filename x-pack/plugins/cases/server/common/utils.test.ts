@@ -7,7 +7,7 @@
 
 import { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
 import { makeLensEmbeddableFactory } from '@kbn/lens-plugin/server/embeddable/make_lens_embeddable_factory';
-import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
+import { OWNER_INFO, SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import {
   CaseConnector,
   CaseResponse,
@@ -33,8 +33,11 @@ import {
   getOrUpdateLensReferences,
   asArray,
   transformNewCase,
+  getApplicationRoute,
+  getCaseViewPath,
 } from './utils';
 import { newCase } from '../routes/api/__mocks__/request_responses';
+import { CASE_VIEW_PAGE_TABS } from '../../common/types';
 
 interface CommentReference {
   ids: string[];
@@ -1182,6 +1185,100 @@ describe('common utils', () => {
 
     it('returns an array of one item when passed a number', () => {
       expect(asArray(100)).toEqual([100]);
+    });
+  });
+
+  describe('getApplicationRoute', () => {
+    const owners = Object.keys(OWNER_INFO) as Array<keyof typeof OWNER_INFO>;
+
+    it.each(owners)('returns the correct appRoute for owner: %s', (owner) => {
+      expect(getApplicationRoute(OWNER_INFO, owner)).toEqual(OWNER_INFO[owner].appRoute);
+    });
+
+    it('return the stack management app route if the owner info is not valid', () => {
+      // @ts-expect-error
+      expect(getApplicationRoute({ test: { appRoute: 'no-slash' } }, 'test')).toEqual(
+        '/app/management/insightsAndAlerting'
+      );
+    });
+
+    it('return the stack management app route if the owner is not valid', () => {
+      expect(getApplicationRoute(OWNER_INFO, 'not-valid')).toEqual(
+        '/app/management/insightsAndAlerting'
+      );
+    });
+  });
+
+  describe('getCaseViewPath', () => {
+    const publicBaseUrl = 'https://example.com';
+    const caseId = 'my-case-id';
+    const commentId = 'my-comment-id';
+
+    it('returns the case view path correctly', () => {
+      expect(getCaseViewPath({ publicBaseUrl, caseId, owner: SECURITY_SOLUTION_OWNER })).toBe(
+        'https://example.com/app/security/cases/my-case-id'
+      );
+    });
+
+    it('removes the ending slash from the publicBaseUrl correctly', () => {
+      expect(
+        getCaseViewPath({
+          publicBaseUrl: 'https://example.com/',
+          caseId,
+          owner: SECURITY_SOLUTION_OWNER,
+        })
+      ).toBe('https://example.com/app/security/cases/my-case-id');
+    });
+
+    it('remove the extra trailing slashes from case view path correctly', () => {
+      expect(
+        getCaseViewPath({ publicBaseUrl, caseId: '/my-case-id', owner: SECURITY_SOLUTION_OWNER })
+      ).toBe('https://example.com/app/security/cases/my-case-id');
+    });
+
+    it('returns the case view path correctly with invalid owner', () => {
+      expect(getCaseViewPath({ publicBaseUrl, caseId, owner: 'invalid' })).toBe(
+        'https://example.com/app/management/insightsAndAlerting/cases/my-case-id'
+      );
+    });
+
+    it('returns the case comment path correctly', () => {
+      expect(
+        getCaseViewPath({ publicBaseUrl, caseId, owner: SECURITY_SOLUTION_OWNER, commentId })
+      ).toBe('https://example.com/app/security/cases/my-case-id/my-comment-id');
+    });
+
+    it('remove the extra trailing slashes from case comment path correctly', () => {
+      expect(
+        getCaseViewPath({
+          publicBaseUrl,
+          caseId: '/my-case-id',
+          owner: SECURITY_SOLUTION_OWNER,
+          commentId: '/my-comment-id',
+        })
+      ).toBe('https://example.com/app/security/cases/my-case-id/my-comment-id');
+    });
+
+    it('returns the case tab path correctly', () => {
+      expect(
+        getCaseViewPath({
+          publicBaseUrl,
+          caseId,
+          owner: SECURITY_SOLUTION_OWNER,
+          tabId: CASE_VIEW_PAGE_TABS.ALERTS,
+        })
+      ).toBe('https://example.com/app/security/cases/my-case-id/?tabId=alerts');
+    });
+
+    it('remove the extra trailing slashes from case tab path correctly', () => {
+      expect(
+        getCaseViewPath({
+          publicBaseUrl,
+          caseId: '/my-case-id',
+          owner: SECURITY_SOLUTION_OWNER,
+          tabId: CASE_VIEW_PAGE_TABS.ALERTS,
+        })
+      ).toBe('https://example.com/app/security/cases/my-case-id/?tabId=alerts');
     });
   });
 });
