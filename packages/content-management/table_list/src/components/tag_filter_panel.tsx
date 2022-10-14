@@ -22,6 +22,7 @@ import {
   EuiSpacer,
   EuiLink,
   useEuiTheme,
+  EuiBadge,
 } from '@elastic/eui';
 import type { EuiSelectableProps, ExclusiveUnion, FieldValueOptionType } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -48,7 +49,12 @@ export interface Props {
   addOrRemoveExcludeTagFilter: (tag: Tag) => void;
 }
 
-export const TagFilterPanel: FC<Props> = ({ query, getTagList, addOrRemoveIncludeTagFilter }) => {
+export const TagFilterPanel: FC<Props> = ({
+  query,
+  getTagList,
+  tagsToTableItemMap,
+  addOrRemoveIncludeTagFilter,
+}) => {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [options, setOptions] = useState<TagOptionItem[]>([]);
@@ -117,25 +123,33 @@ export const TagFilterPanel: FC<Props> = ({ query, getTagList, addOrRemoveInclud
     setOptions(
       tags.map((tag) => {
         const { name, id, color } = tag;
+
         return {
           name,
           label: name,
           value: id,
           tag,
           view: (
-            <EuiHealth
-              color={color}
-              data-test-subj={`tag-searchbar-option-${testSubjFriendly(name)}`}
-            >
-              <span>
-                <EuiText>{name}</EuiText>
-              </span>
-            </EuiHealth>
+            <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween">
+              <EuiFlexItem>
+                <EuiHealth
+                  color={color}
+                  data-test-subj={`tag-searchbar-option-${testSubjFriendly(name)}`}
+                >
+                  <span>
+                    <EuiText>{name}</EuiText>
+                  </span>
+                </EuiHealth>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiBadge>{tagsToTableItemMap[id]?.length ?? 0}</EuiBadge>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           ),
         };
       })
     );
-  }, [getTagList]);
+  }, [getTagList, tagsToTableItemMap]);
 
   useEffect(() => {
     updateTagList();

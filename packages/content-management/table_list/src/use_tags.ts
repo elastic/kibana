@@ -32,10 +32,12 @@ export function useTags({
       const tagReferences = item.references.filter((ref) => ref.type === 'tag');
 
       if (tagReferences.length > 0) {
-        if (!acc[item.id]) {
-          acc[item.id] = [];
-        }
-        acc[item.id].push(item.id);
+        tagReferences.forEach((ref) => {
+          if (!acc[ref.id]) {
+            acc[ref.id] = [];
+          }
+          acc[ref.id].push(item.id);
+        });
       }
 
       return acc;
