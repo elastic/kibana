@@ -252,22 +252,18 @@ export const getManagementFilteredLinks = async (
         )
       : getEndpointAuthzInitialState();
 
-    // exclude links based on privileges
-    if (!canAccessEndpointManagement || !canReadActionsLogManagement) {
-      if (!canAccessEndpointManagement && !canReadActionsLogManagement) {
-        return excludeLinks([
-          SecurityPageName.hostIsolationExceptions,
-          SecurityPageName.responseActionsHistory,
-        ]);
-      } else if (!canAccessEndpointManagement) {
-        return excludeLinks([SecurityPageName.hostIsolationExceptions]);
-      } else if (!canReadActionsLogManagement) {
-        return excludeLinks([SecurityPageName.responseActionsHistory]);
-      }
+    // exclude links based on canAccessEndpointManagement
+    if (!canAccessEndpointManagement) {
+      return excludeLinks([
+        SecurityPageName.hostIsolationExceptions,
+        SecurityPageName.responseActionsHistory,
+      ]);
     }
 
     // exclude links based on privileges and HIE entries
-    if (!canIsolateHost || !canReadActionsLogManagement) {
+    if (!canReadActionsLogManagement) {
+      return excludeLinks([SecurityPageName.responseActionsHistory]);
+    } else if (!canIsolateHost) {
       const hostIsolationExceptionsApiClientInstance = HostIsolationExceptionsApiClient.getInstance(
         core.http
       );
@@ -278,9 +274,8 @@ export const getManagementFilteredLinks = async (
           SecurityPageName.hostIsolationExceptions,
           SecurityPageName.responseActionsHistory,
         ]);
-      } else if (!canReadActionsLogManagement) {
-        return excludeLinks([SecurityPageName.responseActionsHistory]);
       }
+      return excludeLinks([SecurityPageName.responseActionsHistory]);
     }
   } catch {
     return excludeLinks([SecurityPageName.hostIsolationExceptions]);

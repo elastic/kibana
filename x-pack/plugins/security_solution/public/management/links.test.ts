@@ -70,11 +70,11 @@ describe('links', () => {
     expect(filteredLinks).toEqual(links);
   });
 
-  it('should return all but HIE and response actions history links when neither management access nor can access actions log', async () => {
+  it('should return all but HIE and response actions history links when neither management access', async () => {
     (calculateEndpointAuthz as jest.Mock).mockReturnValue({
       canAccessEndpointManagement: false,
       canIsolateHost: true,
-      canReadActionsLogManagement: false,
+      canReadActionsLogManagement: true,
     });
 
     const filteredLinks = await getManagementFilteredLinks(
@@ -88,23 +88,6 @@ describe('links', () => {
           link.id !== SecurityPageName.hostIsolationExceptions &&
           link.id !== SecurityPageName.responseActionsHistory
       ),
-    });
-  });
-
-  it('should return all but HIE link when no management access', async () => {
-    (calculateEndpointAuthz as jest.Mock).mockReturnValue({
-      canAccessEndpointManagement: false,
-      canIsolateHost: true,
-      canReadActionsLogManagement: true,
-    });
-
-    const filteredLinks = await getManagementFilteredLinks(
-      coreMockStarted,
-      getPlugins(['superuser'])
-    );
-    expect(filteredLinks).toEqual({
-      ...links,
-      links: links.links?.filter((link) => link.id !== SecurityPageName.hostIsolationExceptions),
     });
   });
 
@@ -125,7 +108,7 @@ describe('links', () => {
     });
   });
 
-  it('should return all links without filtering when not having isolation permissions but has at least one host isolation exceptions entry', async () => {
+  it('should return all but response action link when not having isolation permissions but has at least one host isolation exceptions entry', async () => {
     (calculateEndpointAuthz as jest.Mock).mockReturnValue({
       canAccessEndpointManagement: true,
       canIsolateHost: false,
@@ -137,7 +120,10 @@ describe('links', () => {
       coreMockStarted,
       getPlugins(['superuser'])
     );
-    expect(filteredLinks).toEqual(links);
+    expect(filteredLinks).toEqual({
+      ...links,
+      links: links.links?.filter((link) => link.id !== SecurityPageName.responseActionsHistory),
+    });
   });
 
   it('should return all but response actions history when no access privilege to either response actions history or HIE but has one HIE entry', async () => {
