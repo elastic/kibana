@@ -59,8 +59,16 @@ export const getListHandler: RequestHandler = async (context, request, response)
       getPackageSavedObjects(savedObjects.client),
     ]);
 
-    const dataStreamsInfoByName = keyBy<ESDataStreamInfo>(dataStreamsInfo, 'name');
-    const dataStreamsStatsByName = keyBy(dataStreamStats, 'data_stream');
+    const filteredDataStreamsInfo = dataStreamsInfo.filter(
+      (ds) => ds?._meta?.managed_by === 'fleet'
+    );
+
+    const dataStreamsInfoByName = keyBy<ESDataStreamInfo>(filteredDataStreamsInfo, 'name');
+
+    const filteredDataStreamsStats = dataStreamStats.filter(
+      (dss) => !!dataStreamsInfoByName[dss.data_stream]
+    );
+    const dataStreamsStatsByName = keyBy(filteredDataStreamsStats, 'data_stream');
 
     // Combine data stream info
     const dataStreams = merge(dataStreamsInfoByName, dataStreamsStatsByName);
