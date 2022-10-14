@@ -14,7 +14,6 @@ import type {
 } from '@kbn/analytics-client';
 import type { GainsightApi } from './types';
 import type { GainsightSnippetConfig } from './load_snippet';
-import { formatPayload } from './format_payload';
 import { loadSnippet } from './load_snippet';
 
 /**
@@ -91,7 +90,7 @@ export class GainsightShipper implements IShipper {
     this.initContext.logger.debug(`Reporting ${events.length} events to gainsight`);
     events.forEach((event) => {
       // We only read event.properties and discard the rest because the context is already sent in the other APIs.
-      this.gainsightApi('track', event.event_type, formatPayload(event.properties));
+      this.gainsightApi('track', event.event_type, event.properties);
     });
   }
 

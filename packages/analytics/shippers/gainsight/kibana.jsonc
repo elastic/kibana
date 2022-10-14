@@ -1,7 +1,6 @@
 {
-  "type": "shared-common",
+  "type": "shared-browser",
   "id": "@kbn/analytics-shippers-gainsight",
   "owner": "@elastic/kibana-core",
-  "runtimeDeps": [],
-  "typeDeps": []
+  "runtimeDeps": []
 }
