@@ -67,6 +67,7 @@ export const useExistingFieldsFetcher = (
   const mountedRef = useRef<boolean>(true);
   const [activeRequests, setActiveRequests] = useState<number>(0);
   const isProcessing = activeRequests > 0;
+  // const prevParamsRef = useRef<any[]>([]);
 
   const fetchFieldsExistenceInfo = useCallback(
     async ({
@@ -159,6 +160,23 @@ export const useExistingFieldsFetcher = (
   const dataViewsHash = getDataViewsHash(params.dataViews);
   const refetchFieldsExistenceInfo = useCallback(
     async (dataViewId?: string) => {
+      // const currentParams = [
+      //   fetchFieldsExistenceInfo,
+      //   dataViewsHash,
+      //   params.query,
+      //   params.filters,
+      //   params.fromDate,
+      //   params.toDate,
+      // ];
+      //
+      // currentParams.forEach((param, index) => {
+      //   if (param !== prevParamsRef.current[index]) {
+      //     console.log('different param', param, prevParamsRef.current[index]);
+      //   }
+      // });
+      //
+      // prevParamsRef.current = currentParams;
+      // console.log('refetch triggered', { dataViewId });
       lastFetchRequestedAtTimestamp = Date.now();
       // refetch only for the specified data view
       if (dataViewId) {
@@ -291,9 +309,17 @@ export const resetFieldsExistenceCache = () => {
 };
 
 function getDataViewsHash(dataViews: DataView[]): string {
-  return dataViews
-    .map((dataView) => `${dataView.id}:${dataView.title}:${dataView.timeFieldName}`)
-    .join(',');
+  return (
+    dataViews
+      // From Lens it's coming as IndexPattern type and not the real DataView type
+      .map(
+        (dataView) =>
+          `${dataView.id}:${dataView.title}:${dataView.timeFieldName}:${
+            dataView.fields?.length ?? 0 // adding a field will also trigger a refetch of fields existence data
+          }`
+      )
+      .join(',')
+  );
 }
 
 // Wrapper around buildEsQuery, handling errors (e.g. because a query can't be parsed) by

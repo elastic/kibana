@@ -383,7 +383,6 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
     };
   }, []);
 
-  // TODO: when should we refresh fields existence info?
   const refreshFieldList = useCallback(async () => {
     if (currentIndexPattern) {
       const newlyMappedIndexPattern = await indexPatternService.loadIndexPatterns({
@@ -516,8 +515,6 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
       uiActions,
     ]
   );
-
-  // console.log(fieldGroups);
 
   return (
     <ChildDragDropProvider {...dragDropContext}>
