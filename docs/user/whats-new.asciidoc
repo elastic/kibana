@@ -18,8 +18,8 @@ Previous versions: {kibana-ref-all}/8.4/whats-new.html[8.4] | {kibana-ref-all}/8
 [discrete]
 ==== Data views &mdash; use without saving
 
-What if you could use explore your data or create a visualization without first creating a {data-source}?
-Now you can do just that with by selecting *Use without saving* in the *Create {data-source}* form.
+What if you could explore your data or create a visualization without first creating a {data-source}?
+Now you can do just that by selecting *Use without saving* in the *Create {data-source}* form.
 This enables you to quickly explore your data in *Discover*, *Lens*, and *Maps*
 right after ingesting it.
 You can save the {data-source} later
@@ -34,7 +34,7 @@ image::images/highlights-data-view.png[Create data view form showing Use without
 === Discover
 
 [discrete]
-==== Re-sizable date histogram
+==== Resize the date histogram
 
 In addition to toggling the display of the histogram, you can now change its height.
 Your preferences are saved locally in your browser.
@@ -50,7 +50,7 @@ more data, making it similar to the field popovers in *Lens* and *Fields Statist
 
 * Statistics are based on a sample of 5000 records per shard. Previously the sample size was 500 records.
 * The popover shows up to top 10 values, instead of just 5.
-* The “exist” filter appears at the top of the pop-over for better visibility.
+* The “exist” filter appears at the top of the popover for better visibility.
 * The distribution of values is available for aggregatable fields.
 
 [role="screenshot"]
@@ -142,7 +142,7 @@ image::images/highlights-vis-time.png[Visualization showing a red line that indi
 
 Let’s say you’re creating a partition chart with sampled data, such as metrics,
 and want to break down the last values from each reporting dimension, such as hosts.
-You can now use the new *Collapse by* option to break down and summarize the
+You can use the new *Collapse by* option to break down and summarize the
 result of each last value from hosts without displaying the detailed reporting dimension.
 
 [role="screenshot"]
@@ -153,7 +153,7 @@ image::images/highlights-vis-collapse.png[Collapse by option for breaking down a
 === Maps &mdash; hide tooltips
 
 Tooltips display when you hover over a document or cluster in a map.
-Don't want to show them? Turn them off with
+Don't want to display them? Turn them off with
 the new *Show tooltips* toggle in *Layer settings*.
 
 [role="screenshot"]
@@ -167,7 +167,7 @@ image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt553f1d516
 [discrete]
 ==== Anomaly detection jobs from Lens
 
-You can now create anomaly detection jobs from the flyout of a Lens visualization.
+You can now create anomaly detection jobs from the flyout of a *Lens* visualization.
 Enter a job ID before creating the job, so it starts automatically after saving.
 For a more advanced configuration, follow the link that takes you to the ML job wizard.
 
@@ -229,7 +229,7 @@ Avatars add visual help in easily identifying and disambiguating users.
 
 The assignees and their avatars show up in each case.
 They also now appear in the central *Cases* view that lists all existing
-cases in Observability, Elastic Security, and Stack Management.
+cases in *Observability*, *Elastic Security*, and *Stack Management*.
 On this view, you can easily filter through the cases assigned to you and all other users.
 
 [role="screenshot"]
@@ -240,8 +240,7 @@ image::images/highlights-cases-view.png[Cases view listing that lists all assign
 
 You can now search for users by their full name,
 username, or email as part of the case assignment flow.
-{kib} users from all authentication realms are searchable, if
-they accessed {kib} at least once. On first access,
+{kib} users from all authentication realms are searchable. On first access,
 {kib} creates a user profile and surfaces it in the user search results.
 
 The user search UI includes auto-complete and search highlights.
