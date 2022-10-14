@@ -40,6 +40,7 @@ describe('xyVis', () => {
         },
         syncColors: false,
         syncTooltips: false,
+        syncCursor: true,
       },
     });
   });
@@ -348,6 +349,7 @@ describe('xyVis', () => {
         },
         syncColors: false,
         syncTooltips: false,
+        syncCursor: true,
       },
     });
   });

@@ -63,6 +63,7 @@ export const layeredXyVisFn: LayeredXyVisFn['fn'] = async (data, args, handlers)
       },
       syncColors: handlers?.isSyncColorsEnabled?.() ?? false,
       syncTooltips: handlers?.isSyncTooltipsEnabled?.() ?? false,
+      syncCursor: handlers?.isSyncCursorEnabled?.() ?? true,
     },
   };
 };
