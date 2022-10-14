@@ -384,7 +384,7 @@ export interface InventoryModel {
   fields: {
     id: string;
     name: string;
-    os: string;
+    os?: string;
     ip?: string;
   };
   crosslinkSupport: {
