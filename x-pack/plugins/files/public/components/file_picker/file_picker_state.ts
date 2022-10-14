@@ -21,6 +21,10 @@ import {
 import { FileJSON } from '../../../common';
 import { FilesClient } from '../../types';
 
+function naivelyFuzzify(query: string): string {
+  return query.includes('*') ? query : `*${query}*`;
+}
+
 export class FilePickerState {
   /**
    * Files the user has selected
@@ -30,6 +34,7 @@ export class FilePickerState {
   public readonly isLoading$ = new BehaviorSubject<boolean>(true);
   public readonly loadingError$ = new BehaviorSubject<undefined | Error>(undefined);
   public readonly hasFiles$ = new BehaviorSubject<boolean>(false);
+  public readonly hasQuery$ = new BehaviorSubject<boolean>(false);
   public readonly query$ = new BehaviorSubject<undefined | string>(undefined);
   public readonly currentPage$ = new BehaviorSubject<number>(0);
   public readonly totalPages$ = new BehaviorSubject<undefined | number>(undefined);
@@ -47,7 +52,14 @@ export class FilePickerState {
     private readonly kind: string,
     public readonly pageSize: number
   ) {
-    this.subscriptions = [];
+    this.subscriptions = [
+      this.query$
+        .pipe(
+          map((query) => Boolean(query)),
+          distinctUntilChanged()
+        )
+        .subscribe(this.hasQuery$),
+    ];
   }
 
   /**
@@ -93,19 +105,23 @@ export class FilePickerState {
 
     const abortController = new AbortController();
     this.abort = () => {
-      abortController.abort();
+      try {
+        abortController.abort();
+      } catch (e) {
+        // ignore
+      }
     };
 
     const request$ = from(
       this.client.list({
         kind: this.kind,
-        name: query ? [query] : undefined,
+        name: query ? [naivelyFuzzify(query)] : undefined,
         page: page + 1,
         perPage: this.pageSize,
         abortSignal: abortController.signal,
       })
     ).pipe(
-      finalize(() => {
+      tap(() => {
         this.isLoading$.next(false);
         this.abort = undefined;
       }),
@@ -113,7 +129,10 @@ export class FilePickerState {
     );
 
     request$.subscribe({
-      error: (e) => this.loadingError$.next(e),
+      error: (e: Error) => {
+        if (e.name === 'AbortError') return;
+        this.loadingError$.next(e);
+      },
     });
 
     return request$;

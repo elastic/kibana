@@ -55,6 +55,7 @@ const Component: FunctionComponent<Props> = ({ onClose, onDone }) => {
   const { state, kind } = useFilePickerContext();
 
   const hasFiles = useBehaviorSubject(state.hasFiles$);
+  const hasQuery = useBehaviorSubject(state.hasQuery$);
   const isLoading = useBehaviorSubject(state.isLoading$);
   const error = useBehaviorSubject(state.loadingError$);
 
@@ -67,7 +68,7 @@ const Component: FunctionComponent<Props> = ({ onClose, onDone }) => {
     <EuiModal className="filesFilePicker filesFilePicker--fixed" maxWidth="75vw" onClose={onClose}>
       <EuiModalHeader>
         <Title />
-        {hasFiles && <SearchField />}
+        <SearchField />
       </EuiModalHeader>
       {isLoading ? (
         <EuiModalBody>
@@ -84,7 +85,7 @@ const Component: FunctionComponent<Props> = ({ onClose, onDone }) => {
         <EuiModalBody>
           <ErrorContent error={error as Error} />
         </EuiModalBody>
-      ) : !hasFiles ? (
+      ) : !hasFiles && !hasQuery ? (
         <EuiModalBody>
           <UploadFilesPrompt kind={kind} />
         </EuiModalBody>

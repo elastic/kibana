@@ -76,20 +76,29 @@ export const FileCard: FunctionComponent<Props> = ({ file }) => {
       description={
         <>
           <EuiText
-            size="xs"
+            size="s"
             css={css`
               overflow: hidden;
               white-space: nowrap;
               text-overflow: ellipsis;
             `}
           >
-            <strong>
-              {file.name}.{file.extension}
-            </strong>
+            <strong>{file.name}</strong>
           </EuiText>
           <EuiText color="subdued" size="xs">
             {numeral(file.size).format('0[.]0 b')}
           </EuiText>
+          {file.extension ? (
+            <EuiText
+              css={css`
+                text-transform: uppercase;
+              `}
+              color="subdued"
+              size="xs"
+            >
+              {file.extension}
+            </EuiText>
+          ) : null}
         </>
       }
       hasBorder

@@ -133,21 +133,21 @@ describe('FilePickerState', () => {
       expect(filesClient.list).toHaveBeenNthCalledWith(2, {
         abortSignal: expect.any(AbortSignal),
         kind: 'test',
-        name: ['a'],
+        name: ['*a*'],
         page: 1,
         perPage: 20,
       });
       expect(filesClient.list).toHaveBeenNthCalledWith(3, {
         abortSignal: expect.any(AbortSignal),
         kind: 'test',
-        name: ['b'],
+        name: ['*b*'],
         page: 1,
         perPage: 20,
       });
       expect(filesClient.list).toHaveBeenNthCalledWith(4, {
         abortSignal: expect.any(AbortSignal),
         kind: 'test',
-        name: ['b'],
+        name: ['*b*'],
         page: 3,
         perPage: 20,
       });
