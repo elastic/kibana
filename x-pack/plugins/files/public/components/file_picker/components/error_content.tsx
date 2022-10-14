@@ -14,10 +14,9 @@ import { useBehaviorSubject } from '../../use_behavior_subject';
 
 interface Props {
   error: Error;
-  onRetry: () => void;
 }
 
-export const ErrorContent: FunctionComponent<Props> = ({ error, onRetry }) => {
+export const ErrorContent: FunctionComponent<Props> = ({ error }) => {
   const { state } = useFilePickerContext();
   const isLoading = useBehaviorSubject(state.isLoading$);
   return (
@@ -28,7 +27,7 @@ export const ErrorContent: FunctionComponent<Props> = ({ error, onRetry }) => {
       title={<h3>{i18nTexts.loadingFilesErrorTitle}</h3>}
       body={error.message}
       actions={
-        <EuiButton disabled={isLoading} onClick={onRetry}>
+        <EuiButton disabled={isLoading} onClick={state.retry}>
           {i18nTexts.retryButtonLabel}
         </EuiButton>
       }

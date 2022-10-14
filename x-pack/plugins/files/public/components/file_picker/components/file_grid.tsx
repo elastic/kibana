@@ -9,8 +9,8 @@ import React from 'react';
 import type { FunctionComponent } from 'react';
 import { useEuiTheme, EuiEmptyPrompt } from '@elastic/eui';
 import { css } from '@emotion/react';
+import useObservable from 'react-use/lib/useObservable';
 
-import { useBehaviorSubject } from '../../use_behavior_subject';
 import { i18nTexts } from '../i18n_texts';
 import { useFilePickerContext } from '../context';
 import { FileCard } from './file_card';
@@ -18,7 +18,7 @@ import { FileCard } from './file_card';
 export const FileGrid: FunctionComponent = () => {
   const { state } = useFilePickerContext();
   const { euiTheme } = useEuiTheme();
-  const files = useBehaviorSubject(state.files$);
+  const files = useObservable(state.files$, []);
   if (!files.length) {
     return <EuiEmptyPrompt title={<h3>{i18nTexts.emptyFileGridPrompt}</h3>} titleSize="s" />;
   }

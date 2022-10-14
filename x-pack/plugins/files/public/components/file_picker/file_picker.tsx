@@ -17,6 +17,7 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 
+import { css } from '@emotion/react';
 import { useBehaviorSubject } from '../use_behavior_subject';
 import { useFilePickerContext, FilePickerContext } from './context';
 
@@ -58,7 +59,8 @@ const Component: FunctionComponent<Props> = ({ onClose, onDone }) => {
   const error = useBehaviorSubject(state.loadingError$);
 
   useEffect(() => {
-    state.loadFiles();
+    const sub = state.files$.subscribe();
+    return () => sub.unsubscribe();
   }, [state]);
 
   return (
@@ -69,11 +71,18 @@ const Component: FunctionComponent<Props> = ({ onClose, onDone }) => {
       </EuiModalHeader>
       {isLoading ? (
         <EuiModalBody>
-          <EuiLoadingSpinner size="xl" />
+          <div
+            css={css`
+              display: grid;
+              place-items: center;
+            `}
+          >
+            <EuiLoadingSpinner size="xl" />
+          </div>
         </EuiModalBody>
       ) : Boolean(error) ? (
         <EuiModalBody>
-          <ErrorContent onRetry={state.loadFiles} error={error as Error} />
+          <ErrorContent error={error as Error} />
         </EuiModalBody>
       ) : !hasFiles ? (
         <EuiModalBody>

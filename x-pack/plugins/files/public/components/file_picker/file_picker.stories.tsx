@@ -39,6 +39,7 @@ export default {
             create: () => Promise.reject(new Error('not so fast buster!')),
             list: async (): Promise<FilesClientResponses['list']> => ({
               files: [],
+              total: 0,
             }),
           } as unknown as FilesClient
         }
@@ -83,6 +84,7 @@ BasicOne.decorators = [
           getDownloadHref: () => `data:image/png;base64,${base64dLogo}`,
           list: async (): Promise<FilesClientResponses['list']> => ({
             files: [createFileJSON()],
+            total: 1,
           }),
         } as unknown as FilesClient
       }
@@ -94,28 +96,33 @@ BasicOne.decorators = [
 
 export const BasicMany = Template.bind({});
 BasicMany.decorators = [
-  (Story) => (
-    <FilesContext
-      client={
-        {
-          getDownloadHref: () => `data:image/png;base64,${base64dLogo}`,
-          list: async (): Promise<FilesClientResponses['list']> => ({
-            files: [
-              createFileJSON({ name: 'abc' }),
-              createFileJSON({ name: 'def' }),
-              createFileJSON({ name: 'efg' }),
-              createFileJSON({ name: 'foo' }),
-              createFileJSON({ name: 'bar' }),
-              createFileJSON(),
-              createFileJSON(),
-            ],
-          }),
-        } as unknown as FilesClient
-      }
-    >
-      <Story />
-    </FilesContext>
-  ),
+  (Story) => {
+    const files = [
+      createFileJSON({ name: 'abc' }),
+      createFileJSON({ name: 'def' }),
+      createFileJSON({ name: 'efg' }),
+      createFileJSON({ name: 'foo' }),
+      createFileJSON({ name: 'bar' }),
+      createFileJSON(),
+      createFileJSON(),
+    ];
+
+    return (
+      <FilesContext
+        client={
+          {
+            getDownloadHref: () => `data:image/png;base64,${base64dLogo}`,
+            list: async (): Promise<FilesClientResponses['list']> => ({
+              files,
+              total: files.length,
+            }),
+          } as unknown as FilesClient
+        }
+      >
+        <Story />
+      </FilesContext>
+    );
+  },
 ];
 
 export const BasicManyMany = Template.bind({});
@@ -130,6 +137,7 @@ BasicManyMany.decorators = [
             getDownloadHref: () => `data:image/png;base64,${base64dLogo}`,
             list: async (): Promise<FilesClientResponses['list']> => ({
               files: array,
+              total: array.length,
             }),
           } as unknown as FilesClient
         }

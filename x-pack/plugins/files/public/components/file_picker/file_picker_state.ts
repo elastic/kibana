@@ -27,33 +27,19 @@ export class FilePickerState {
    */
   public readonly selectedFileIds$ = new BehaviorSubject<string[]>([]);
 
-  public readonly isLoading$ = new BehaviorSubject<boolean>(false);
+  public readonly isLoading$ = new BehaviorSubject<boolean>(true);
   public readonly loadingError$ = new BehaviorSubject<undefined | Error>(undefined);
   public readonly hasFiles$ = new BehaviorSubject<boolean>(false);
   public readonly query$ = new BehaviorSubject<undefined | string>(undefined);
   public readonly currentPage$ = new BehaviorSubject<number>(0);
   public readonly totalPages$ = new BehaviorSubject<undefined | number>(undefined);
-  /**
-   * File objects we have loaded on the front end, stored here so that it can
-   * easily be passed to all relevant UI.
-   *
-   * @note This is not explicitly kept in sync with the selected files!
-   */
-  public readonly files$ = combineLatest([
-    this.currentPage$.pipe(distinctUntilChanged()),
-    this.query$.pipe(distinctUntilChanged(), debounceTime(100)),
-  ]).pipe(
-    switchMap(([page, query]) => this.sendRequest(page, query)),
-    tap(({ total }) => this.updateTotalPages({ total })),
-    map(({ files }) => files),
-    shareReplay()
-  );
 
   /**
    * This is how we keep a deduplicated list of file ids representing files a user
    * has selected
    */
   private readonly fileSet = new Set<string>();
+  private readonly retry$ = new BehaviorSubject<void>(undefined);
   private readonly subscriptions: Subscription[] = [];
 
   constructor(
@@ -63,6 +49,25 @@ export class FilePickerState {
   ) {
     this.subscriptions = [];
   }
+
+  /**
+   * File objects we have loaded on the front end, stored here so that it can
+   * easily be passed to all relevant UI.
+   *
+   * @note This is not explicitly kept in sync with the selected files!
+   * @note This is not explicitly kept in sync with the selected files!
+   */
+  public readonly files$ = combineLatest([
+    this.currentPage$.pipe(distinctUntilChanged()),
+    this.query$.pipe(distinctUntilChanged(), debounceTime(100)),
+    this.retry$,
+  ]).pipe(
+    switchMap(([page, query]) => this.sendRequest(page, query)),
+    tap(({ total }) => this.updateTotalPages({ total })),
+    tap(({ total }) => this.hasFiles$.next(Boolean(total))),
+    map(({ files }) => files),
+    shareReplay()
+  );
 
   private updateTotalPages = ({ total }: { total: number }): void => {
     this.totalPages$.next(Math.ceil(total / this.pageSize));
@@ -107,7 +112,15 @@ export class FilePickerState {
       shareReplay()
     );
 
+    request$.subscribe({
+      error: (e) => this.loadingError$.next(e),
+    });
+
     return request$;
+  };
+
+  public retry = (): void => {
+    this.retry$.next();
   };
 
   public hasFilesSelected = (): boolean => {
