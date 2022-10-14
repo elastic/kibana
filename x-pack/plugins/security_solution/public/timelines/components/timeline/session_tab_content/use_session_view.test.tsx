@@ -162,6 +162,7 @@ describe('useSessionView with active timeline and a session id and graph event i
       height: 1000,
       sessionEntityId: 'test',
       loadAlertDetails: mockDetails,
+      canAccessEndpointManagement: false,
     });
   });
 
