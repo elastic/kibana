@@ -10,6 +10,8 @@ import { MockRouter, mockDependencies } from '../../__mocks__';
 import { RequestHandlerContext } from '@kbn/core/server';
 import { MlTrainedModels } from '@kbn/ml-plugin/server';
 
+import { SharedServices } from '@kbn/ml-plugin/server/shared_services';
+
 import { ErrorCode } from '../../../common/types/error_codes';
 
 jest.mock('../../lib/indices/fetch_ml_inference_pipeline_history', () => ({
@@ -40,7 +42,6 @@ import { createAndReferenceMlInferencePipeline } from '../../utils/create_ml_inf
 import { ElasticsearchResponseError } from '../../utils/identify_exceptions';
 
 import { registerIndexRoutes } from './indices';
-import { SharedServices } from '@kbn/ml-plugin/server/shared_services';
 
 describe('Enterprise Search Managed Indices', () => {
   let mockRouter: MockRouter;
@@ -137,7 +138,7 @@ describe('Enterprise Search Managed Indices', () => {
       } as MlTrainedModels;
 
       mockMl = {
-        trainedModelsProvider: () => Promise.resolve(mockTrainedModelsProvider)
+        trainedModelsProvider: () => Promise.resolve(mockTrainedModelsProvider),
       } as unknown as jest.Mocked<SharedServices>;
 
       registerIndexRoutes({
