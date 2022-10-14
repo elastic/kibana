@@ -261,13 +261,13 @@ export function convertToMultiMetricJob(
   jobCreator.createdBy = CREATED_BY_LABEL.MULTI_METRIC;
   jobCreator.modelPlot = false;
   stashJobForCloning(jobCreator, true, true);
-  navigateToPath(`jobs/new_job/${JOB_TYPE.MULTI_METRIC}`, true);
+  navigateToPath(`jobs/new_job/convert_to_${JOB_TYPE.MULTI_METRIC}`, true);
 }
 
 export function convertToAdvancedJob(jobCreator: JobCreatorType, navigateToPath: NavigateToPath) {
   jobCreator.createdBy = null;
   stashJobForCloning(jobCreator, true, true);
-  navigateToPath(`jobs/new_job/${JOB_TYPE.ADVANCED}`, true);
+  navigateToPath(`jobs/new_job/convert_to_${JOB_TYPE.ADVANCED}`, true);
 }
 
 export function resetAdvancedJob(jobCreator: JobCreatorType, navigateToPath: NavigateToPath) {
