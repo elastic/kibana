@@ -120,7 +120,7 @@ export const SearchIndexPipelines: React.FC = () => {
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.indices.pipelines.mlInferencePipelines.docLink',
                   {
-                    defaultMessage: 'Learn more about deploying ML models in Elastic',
+                    defaultMessage: 'Learn more about deploying Machine Learning models in Elastic',
                   }
                 )}
               </EuiLink>
@@ -130,7 +130,7 @@ export const SearchIndexPipelines: React.FC = () => {
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.indices.pipelines.mlInferencePipelines.title',
                   {
-                    defaultMessage: 'ML Inference pipelines',
+                    defaultMessage: 'Machine Learning Inference Pipelines',
                   }
                 )}
               </h2>
