@@ -30,7 +30,7 @@ interface EmbeddableQueryInput extends EmbeddableInput {
   timeRange?: TimeRange;
 }
 
-export const getDiscoverHelpersAsync = async () => await import('./open_in_discover_helpers');
+export const getDiscoverHelpersAsync = async () => await import('../async_services');
 
 /** @internal */
 export type EmbeddableWithQueryInput = IEmbeddable<EmbeddableQueryInput>;
