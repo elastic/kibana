@@ -30,7 +30,7 @@ export async function fetchIndexPatterns(
   const searchString = searchStringList.map((value) => `"${value}"`).join(' | ');
 
   const exactMatches = await Promise.all([
-    (
+    ...(
       await indexPatternsService.find(searchString)
     ).filter((ip) => searchStringList.includes(ip.title)),
     ...searchIdsList.map((id) => indexPatternsService.get(id)),
