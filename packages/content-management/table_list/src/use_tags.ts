@@ -5,25 +5,45 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { Query, Ast } from '@elastic/eui';
 
-import type { State } from './table_list_view';
+import type { Tag } from './types';
+import type { State, UserContentCommonSchema } from './table_list_view';
 
 export function useTags({
   searchQuery,
   updateQuery,
+  items,
 }: {
   searchQuery: State['searchQuery'];
   updateQuery: (query: Query) => void;
+  items: UserContentCommonSchema[];
 }) {
   const initializeQuery = useCallback(() => {
     const ast = Ast.create([]);
     return new Query(ast, undefined, searchQuery.text);
   }, [searchQuery]);
 
+  // Return a map of tag.id to an array of saved object ids having that tag
+  // { 'abc-123': ['saved_object_id_1', 'saved_object_id_2', ...] }
+  const tagsToTableItemMap = useMemo(() => {
+    return items.reduce((acc, item) => {
+      const tagReferences = item.references.filter((ref) => ref.type === 'tag');
+
+      if (tagReferences.length > 0) {
+        if (!acc[item.id]) {
+          acc[item.id] = [];
+        }
+        acc[item.id].push(item.id);
+      }
+
+      return acc;
+    }, {} as { [tagId: string]: string[] });
+  }, [items]);
+
   const addIncludeTagFilter = useCallback(
-    (tag: { name: string }) => {
+    (tag: Tag) => {
       const query = searchQuery.query ?? initializeQuery();
       const updatedQuery = query.addOrFieldValue('tag', tag.name, true, 'eq');
       updateQuery(updatedQuery);
@@ -41,7 +61,7 @@ export function useTags({
   );
 
   const addOrRemoveIncludeTagFilter = useCallback(
-    (tag: { name: string }) => {
+    (tag: Tag) => {
       const query = searchQuery.query ?? initializeQuery();
       const tagsClauses = query.ast.getFieldClauses('tag');
 
@@ -63,7 +83,7 @@ export function useTags({
   );
 
   const addExcludeTagFilter = useCallback(
-    (tag: { name: string }) => {
+    (tag: Tag) => {
       const query = searchQuery.query ?? initializeQuery();
 
       const updatedQuery = query.addOrFieldValue('tag', tag.name, false, 'eq');
@@ -73,7 +93,7 @@ export function useTags({
   );
 
   const removeExcludeTagFilter = useCallback(
-    (tag: { name: string }) => {
+    (tag: Tag) => {
       const query = searchQuery.query ?? initializeQuery();
       const updatedQuery = query.removeOrFieldValue('tag', tag.name);
       updateQuery(updatedQuery);
@@ -82,7 +102,7 @@ export function useTags({
   );
 
   const addOrRemoveExcludeTagFilter = useCallback(
-    (tag: { name: string }) => {
+    (tag: Tag) => {
       const query = searchQuery.query ?? initializeQuery();
       const tagsClauses = query.ast.getFieldClauses('tag');
 
@@ -106,5 +126,6 @@ export function useTags({
   return {
     addOrRemoveIncludeTagFilter,
     addOrRemoveExcludeTagFilter,
+    tagsToTableItemMap,
   };
 }

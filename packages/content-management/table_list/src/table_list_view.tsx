@@ -202,9 +202,10 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     });
   }, []);
 
-  const { addOrRemoveIncludeTagFilter } = useTags({
+  const { addOrRemoveIncludeTagFilter, addOrRemoveExcludeTagFilter, tagsToTableItemMap } = useTags({
     searchQuery,
     updateQuery,
+    items,
   });
 
   const tableColumns = useMemo(() => {
@@ -521,10 +522,13 @@ function TableListViewComp<T extends UserContentCommonSchema>({
           selectedIds={selectedIds}
           entityName={entityName}
           entityNamePlural={entityNamePlural}
+          tagsToTableItemMap={tagsToTableItemMap}
           deleteItems={deleteItems}
           tableCaption={tableListTitle}
           onTableChange={onTableChange}
           onSortChange={onSortChange}
+          addOrRemoveIncludeTagFilter={addOrRemoveIncludeTagFilter}
+          addOrRemoveExcludeTagFilter={addOrRemoveExcludeTagFilter}
         />
 
         {/* Delete modal */}
