@@ -48,7 +48,8 @@ export const createGridColumns = (
   alignments: Record<string, 'left' | 'right' | 'center'>,
   headerRowHeight: 'auto' | 'single' | 'custom',
   headerRowLines: number,
-  closeCellPopover?: Function
+  closeCellPopover?: Function,
+  columnFilterable?: boolean[]
 ) => {
   const columnsReverseLookup = table.columns.reduce<
     Record<string, { name: string; index: number; meta?: DatatableColumnMeta }>
@@ -56,8 +57,6 @@ export const createGridColumns = (
     memo[id] = { name, index: i, meta };
     return memo;
   }, {});
-
-  const bucketLookup = new Set(bucketColumns);
 
   const getContentData = ({
     rowIndex,
@@ -73,8 +72,8 @@ export const createGridColumns = (
   };
 
   return visibleColumns.map((field) => {
-    const filterable = bucketLookup.has(field);
     const { name, index: colIndex } = columnsReverseLookup[field];
+    const filterable = columnFilterable?.[colIndex] || false;
 
     const columnArgs = columnConfig.columns.find(({ columnId }) => columnId === field);
 

@@ -201,6 +201,7 @@ describe('DatatableComponent', () => {
         uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
         interactive
         renderComplete={renderComplete}
+        columnFilterable={[true, true, true]}
       />
     );
 
@@ -241,6 +242,7 @@ describe('DatatableComponent', () => {
         uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
         interactive
         renderComplete={renderComplete}
+        columnFilterable={[true, true, true]}
       />
     );
 
@@ -316,6 +318,7 @@ describe('DatatableComponent', () => {
         uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
         interactive
         renderComplete={renderComplete}
+        columnFilterable={[true, true, true]}
       />
     );
 
@@ -356,6 +359,7 @@ describe('DatatableComponent', () => {
         uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
         interactive={false}
         renderComplete={renderComplete}
+        columnFilterable={[true, true, true]}
       />
     );
 
