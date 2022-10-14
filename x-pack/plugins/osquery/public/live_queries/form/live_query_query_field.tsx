@@ -101,8 +101,7 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
     () =>
       !(
         permissions.writeLiveQueries ||
-        permissions.runSavedQueries ||
-        permissions.readSavedQueries
+        (permissions.runSavedQueries && permissions.readSavedQueries)
       ),
     [permissions.readSavedQueries, permissions.runSavedQueries, permissions.writeLiveQueries]
   );
