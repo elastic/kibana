@@ -12,7 +12,6 @@ import {
   Subject,
   ReplaySubject,
   interval,
-  concatMap,
   merge,
   timer,
   retryWhen,
@@ -44,6 +43,7 @@ const MINUTE = 60 * SECOND;
 const HOUR = 60 * MINUTE;
 const KIB = 1024;
 const MAX_NUMBER_OF_EVENTS_IN_INTERNAL_QUEUE = 1000;
+const MIN_TIME_SINCE_LAST_SEND = 10 * SECOND;
 
 /**
  * Elastic V3 shipper to use on the server side.
@@ -215,15 +215,14 @@ export class ElasticV3ServerShipper implements IShipper {
   }
 
   private setInternalSubscriber() {
-    // Create an emitter that emits when 10s have passed since the last time we sent the data
-    const atLeast10secondsSinceLastSent$ = interval(SECOND).pipe(
-      filter(() => Date.now() - this.lastBatchSent >= 10 * SECOND)
+    // Create an emitter that emits when MIN_TIME_SINCE_LAST_SEND have passed since the last time we sent the data
+    const minimumTimeSinceLastSent$ = interval(SECOND).pipe(
+      filter(() => Date.now() - this.lastBatchSent >= MIN_TIME_SINCE_LAST_SEND)
     );
 
     merge(
-      atLeast10secondsSinceLastSent$.pipe(takeUntil(this.shutdown$)),
-      // Attempt to send one last time on shutdown
-      this.shutdown$
+      minimumTimeSinceLastSent$.pipe(takeUntil(this.shutdown$)),
+      this.shutdown$ // Attempt to send one last time on shutdown
     )
       .pipe(
         // Only move ahead if it's opted-in and online, and there are some events in the queue
@@ -233,13 +232,19 @@ export class ElasticV3ServerShipper implements IShipper {
             this.firstTimeOffline === null &&
             this.internalQueue.length > 0
         ),
-        // Retrieve the events to send (clearing the queue) in a synchronous operation to avoid race conditions.
+
+        // Send the events:
+        // 1. Set lastBatchSent and retrieve the events to send (clearing the queue) in a synchronous operation to avoid race conditions.
         map(() => {
           this.lastBatchSent = Date.now();
           return this.getEventsToSend();
         }),
-        // Using `concatMap` here because we want to send events whenever the emitter says so. Otherwise, it'd skip sending some events.
-        concatMap(async (eventsToSend) => await this.sendEvents(eventsToSend))
+        // 2. Skip empty buffers (just to be sure)
+        filter((events) => events.length > 0),
+        // 3. Actually send the events
+        // Using `map` here because we want to send events whenever the emitter says so:
+        //   We don't want to skip emissions (exhaustMap) or enqueue them (concatMap).
+        map((eventsToSend) => this.sendEvents(eventsToSend))
       )
       .subscribe();
   }

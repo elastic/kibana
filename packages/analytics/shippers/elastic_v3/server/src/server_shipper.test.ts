@@ -117,13 +117,13 @@ describe('ElasticV3ServerShipper', () => {
   );
 
   test(
-    'calls to reportEvents call `fetch` after 10 minutes when optIn value is set to true',
+    'calls to reportEvents call `fetch` after 10 seconds when optIn value is set to true',
     fakeSchedulers(async (advance) => {
       shipper.reportEvents(events);
       shipper.optIn(true);
       const counter = firstValueFrom(shipper.telemetryCounter$);
       setLastBatchSent(Date.now() - 10 * SECONDS);
-      advance(10 * MINUTES);
+      advance(1 * SECONDS); // Moving 1 second should be enough to trigger the logic
       expect(fetchMock).toHaveBeenCalledWith(
         'https://telemetry-staging.elastic.co/v3/send/test-channel',
         {
@@ -150,12 +150,12 @@ describe('ElasticV3ServerShipper', () => {
   );
 
   test(
-    'calls to reportEvents do not call `fetch` after 10 minutes when optIn value is set to false',
+    'calls to reportEvents do not call `fetch` after 10 seconds when optIn value is set to false',
     fakeSchedulers((advance) => {
       shipper.reportEvents(events);
       shipper.optIn(false);
       setLastBatchSent(Date.now() - 10 * SECONDS);
-      advance(10 * MINUTES);
+      advance(1 * SECONDS); // Moving 1 second should be enough to trigger the logic
       expect(fetchMock).not.toHaveBeenCalled();
     })
   );
@@ -202,7 +202,7 @@ describe('ElasticV3ServerShipper', () => {
       shipper.reportEvents(events);
       shipper.optIn(true);
       setLastBatchSent(Date.now() - 10 * SECONDS);
-      advance(10 * MINUTES);
+      advance(1 * SECONDS); // Moving 1 second should be enough to trigger the logic
       expect(fetchMock).toHaveBeenCalledWith(
         'https://telemetry-staging.elastic.co/v3/send/test-channel',
         {
@@ -230,7 +230,7 @@ describe('ElasticV3ServerShipper', () => {
       for (let i = 0; i < 9; i++) {
         const counter = firstValueFrom(shipper.telemetryCounter$);
         setLastBatchSent(Date.now() - 10 * SECONDS);
-        advance(10 * SECONDS);
+        advance(1 * SECONDS); // Moving 1 second should be enough to trigger the logic
         expect(fetchMock).toHaveBeenNthCalledWith(
           i + 1,
           'https://telemetry-staging.elastic.co/v3/send/test-channel',
@@ -278,7 +278,7 @@ describe('ElasticV3ServerShipper', () => {
       shipper.optIn(true);
       const counter = firstValueFrom(shipper.telemetryCounter$);
       setLastBatchSent(Date.now() - 10 * SECONDS);
-      advance(10 * MINUTES);
+      advance(1 * SECONDS); // Moving 1 second should be enough to trigger the logic
       expect(fetchMock).toHaveBeenCalledWith(
         'https://telemetry-staging.elastic.co/v3/send/test-channel',
         {
@@ -316,7 +316,7 @@ describe('ElasticV3ServerShipper', () => {
       shipper.optIn(true);
       const counter = firstValueFrom(shipper.telemetryCounter$);
       setLastBatchSent(Date.now() - 10 * SECONDS);
-      advance(10 * MINUTES);
+      advance(1 * SECONDS); // Moving 1 second should be enough to trigger the logic
       expect(fetchMock).toHaveBeenCalledWith(
         'https://telemetry-staging.elastic.co/v3/send/test-channel',
         {
@@ -459,7 +459,7 @@ describe('ElasticV3ServerShipper', () => {
           shipper.optIn(true);
           const counter = firstValueFrom(shipper.telemetryCounter$);
           setLastBatchSent(Date.now() - 10 * SECONDS);
-          advance(10 * MINUTES);
+          advance(1 * SECONDS); // Moving 1 second should be enough to trigger the logic
           expect(fetchMock).toHaveBeenNthCalledWith(
             1,
             'https://telemetry-staging.elastic.co/v3/send/test-channel',
