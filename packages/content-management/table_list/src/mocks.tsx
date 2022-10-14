@@ -10,6 +10,7 @@ import { from } from 'rxjs';
 import { EuiBadgeGroup, EuiBadge } from '@elastic/eui';
 
 import { Services } from './services';
+import { Tag } from './types';
 
 /**
  * Parameters drawn from the Storybook arguments collection that customize a component story.
@@ -22,16 +23,18 @@ const tags = [
     name: 'elastic',
     color: '#8dc4de',
     description: 'elastic tag',
+    id: '1',
   },
   {
     name: 'cloud',
     color: '#f5ed14',
     description: 'cloud tag',
+    id: '2',
   },
 ];
 
 interface Props {
-  onClick?: (tag: { name: string }) => void;
+  onClick?: (tag: Tag) => void;
   tags?: typeof tags | null;
 }
 
@@ -82,6 +85,7 @@ export const getStoryServices = (params: Params, action: ActionFn = () => {}) =>
     currentAppId$: from('mockedApp'),
     navigateToUrl: () => undefined,
     TagList,
+    getTagList: () => [],
     itemHasTags: () => true,
     ...params,
   };
