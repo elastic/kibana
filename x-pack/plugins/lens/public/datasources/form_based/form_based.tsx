@@ -828,6 +828,6 @@ function blankLayer(indexPatternId: string) {
     indexPatternId,
     columns: {},
     columnOrder: [],
-    sampling: 4,
+    sampling: 1,
   };
 }

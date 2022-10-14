@@ -114,6 +114,10 @@ export class AggConfigs {
     return { probability: this.opts.probability, seed: this.opts.samplerSeed };
   }
 
+  isSamplingEnabled() {
+    return isSamplingEnabled(this.opts.probability);
+  }
+
   setTimeFields(timeFields: string[] | undefined) {
     this.timeFields = timeFields;
   }
@@ -236,7 +240,7 @@ export class AggConfigs {
     let dslLvlCursor: Record<string, any>;
     let nestedMetrics: Array<{ config: AggConfig; dsl: Record<string, any> }> | [];
 
-    if (isSamplingEnabled(this.opts.probability)) {
+    if (this.isSamplingEnabled()) {
       dslTopLvl.sampling = createSamplerAgg({
         probability: this.opts.probability,
         seed: this.opts.samplerSeed,
@@ -273,7 +277,7 @@ export class AggConfigs {
         // start at the top level
         dslLvlCursor = dslTopLvl;
         // when sampling jump directly to the aggs
-        if (isSamplingEnabled(this.opts.probability)) {
+        if (this.isSamplingEnabled()) {
           dslLvlCursor = dslLvlCursor.sampling.aggs;
         }
       } else {
@@ -470,7 +474,12 @@ export class AggConfigs {
         doc_count: response.rawResponse.hits?.total as estypes.AggregationsAggregate,
       };
     }
-    const aggCursor = transformedRawResponse.aggregations!;
+    const aggCursor = this.isSamplingEnabled()
+      ? (transformedRawResponse.aggregations!.sampling! as Record<
+          string,
+          estypes.AggregationsAggregate
+        >)
+      : transformedRawResponse.aggregations!;
 
     mergeTimeShifts(this, aggCursor);
     return {

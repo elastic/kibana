@@ -139,6 +139,7 @@ export const buildOtherBucketAgg = (
   const index = bucketAggs.findIndex((agg) => agg.id === aggWithOtherBucket.id);
   const aggs = aggConfigs.toDsl();
   const indexPattern = aggWithOtherBucket.aggConfigs.indexPattern;
+  const hasSampling = aggConfigs.isSamplingEnabled();
 
   // create filters aggregation
   const filterAgg = aggConfigs.createAggConfig(
@@ -234,7 +235,13 @@ export const buildOtherBucketAgg = (
       bool: buildQueryFromFilters(filters, indexPattern),
     };
   };
-  walkBucketTree(0, response.aggregations, bucketAggs[0].id, [], '');
+  walkBucketTree(
+    0,
+    hasSampling ? response.aggregations.sampling : response.aggregations,
+    bucketAggs[0].id,
+    [],
+    ''
+  );
 
   // bail if there were no bucket results
   if (noAggBucketResults || exhaustiveBuckets) {
