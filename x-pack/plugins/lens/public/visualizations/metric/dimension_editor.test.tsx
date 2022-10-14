@@ -8,7 +8,7 @@
 /* eslint-disable max-classes-per-file */
 
 import React, { FormEvent } from 'react';
-import { VisualizationDimensionEditorProps } from '../../types';
+import { OperationDescriptor, VisualizationDimensionEditorProps } from '../../types';
 import { CustomPaletteParams, PaletteOutput, PaletteRegistry } from '@kbn/coloring';
 
 import { MetricVisualizationState } from './visualization';
@@ -91,6 +91,9 @@ describe('dimension editor', () => {
       state: fullState,
       datasource: {
         hasDefaultTimeField: jest.fn(),
+        getOperationForColumnId: jest.fn(() => ({
+          hasReducedTimeRange: false,
+        })),
       } as unknown as DatasourcePublicAPI,
       removeLayer: jest.fn(),
       addLayer: jest.fn(),
@@ -305,14 +308,35 @@ describe('dimension editor', () => {
           expect(
             getHarnessWithState(stateWOTrend, {
               hasDefaultTimeField: () => false,
+              getOperationForColumnId: (id) => ({} as OperationDescriptor),
             } as DatasourcePublicAPI).isDisabled('trendline')
           ).toBeTruthy();
           expect(
             getHarnessWithState(stateWOTrend, {
               hasDefaultTimeField: () => true,
+              getOperationForColumnId: (id) => ({} as OperationDescriptor),
             } as DatasourcePublicAPI).isDisabled('trendline')
           ).toBeFalsy();
         });
+      });
+
+      it('should disable trendline when a metric dimension has a reduced time range', () => {
+        expect(
+          getHarnessWithState(stateWOTrend, {
+            hasDefaultTimeField: () => true,
+            getOperationForColumnId: (id) =>
+              ({ hasReducedTimeRange: id === stateWOTrend.metricAccessor } as OperationDescriptor),
+          } as DatasourcePublicAPI).isDisabled('trendline')
+        ).toBeTruthy();
+        expect(
+          getHarnessWithState(stateWOTrend, {
+            hasDefaultTimeField: () => true,
+            getOperationForColumnId: (id) =>
+              ({
+                hasReducedTimeRange: id === stateWOTrend.secondaryMetricAccessor,
+              } as OperationDescriptor),
+          } as DatasourcePublicAPI).isDisabled('trendline')
+        ).toBeTruthy();
       });
 
       describe('responding to buttons', () => {

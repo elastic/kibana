@@ -693,6 +693,7 @@ export interface OperationMetadata {
  */
 export interface OperationDescriptor extends Operation {
   hasTimeShift: boolean;
+  hasReducedTimeRange: boolean;
 }
 
 export interface VisualizationConfigProps<T = unknown> {

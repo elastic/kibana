@@ -263,26 +263,52 @@ function PrimaryMetricEditor(props: SubProps) {
 
   const togglePalette = () => setIsPaletteOpen(!isPaletteOpen);
 
-  const hasDefaultTimeField = props.datasource?.hasDefaultTimeField();
   const supportingVisLabel = i18n.translate('xpack.lens.metric.supportingVis.label', {
     defaultMessage: 'Supporting visualization',
   });
 
-  const supportingVisHelpText =
-    !hasDefaultTimeField && !state.maxAccessor
-      ? i18n.translate('xpack.lens.metric.supportingVis.needBoth', {
-          defaultMessage:
-            'Use a data view with a default time field to enable trendlines. Add a maximum dimension to enable the progress bar',
-        })
-      : !hasDefaultTimeField
-      ? i18n.translate('xpack.lens.metric.supportingVis.needDefaultTimeField', {
-          defaultMessage: 'Use a data view with a default time field to enable trendlines.',
-        })
-      : !state.maxAccessor
-      ? i18n.translate('xpack.lens.metric.summportingVis.needMaxDimension', {
-          defaultMessage: 'Add a maximum dimension to enable the progress bar.',
-        })
-      : null;
+  const hasDefaultTimeField = props.datasource?.hasDefaultTimeField();
+  const metricHasReducedTimeRange = Boolean(
+    state.metricAccessor &&
+      props.datasource?.getOperationForColumnId(state.metricAccessor)?.hasReducedTimeRange
+  );
+  const secondaryMetricHasReducedTimeRange = Boolean(
+    state.secondaryMetricAccessor &&
+      props.datasource?.getOperationForColumnId(state.secondaryMetricAccessor)?.hasReducedTimeRange
+  );
+
+  const supportingVisHelpTexts: string[] = [];
+
+  const supportsTrendline =
+    hasDefaultTimeField && !metricHasReducedTimeRange && !secondaryMetricHasReducedTimeRange;
+
+  if (!supportsTrendline) {
+    supportingVisHelpTexts.push(
+      !hasDefaultTimeField
+        ? i18n.translate('xpack.lens.metric.supportingVis.needDefaultTimeField', {
+            defaultMessage: 'Use a data view with a default time field to enable trend lines.',
+          })
+        : metricHasReducedTimeRange
+        ? i18n.translate('xpack.lens.metric.supportingVis.metricHasReducedTimeRange', {
+            defaultMessage:
+              'Remove the reduced time range on this dimension to enable trend lines.',
+          })
+        : secondaryMetricHasReducedTimeRange
+        ? i18n.translate('xpack.lens.metric.supportingVis.secondaryMetricHasReducedTimeRange', {
+            defaultMessage:
+              'Remove the reduced time range on the secondary metric dimension to enable trend lines.',
+          })
+        : ''
+    );
+  }
+
+  if (!state.maxAccessor) {
+    supportingVisHelpTexts.push(
+      i18n.translate('xpack.lens.metric.summportingVis.needMaxDimension', {
+        defaultMessage: 'Add a maximum dimension to enable the progress bar.',
+      })
+    );
+  }
 
   const buttonIdPrefix = `${idPrefix}--`;
 
@@ -292,7 +318,9 @@ function PrimaryMetricEditor(props: SubProps) {
         display="columnCompressed"
         fullWidth
         label={supportingVisLabel}
-        helpText={supportingVisHelpText}
+        helpText={supportingVisHelpTexts.map((text) => (
+          <div>{text}</div>
+        ))}
       >
         <EuiButtonGroup
           isFullWidth
@@ -312,7 +340,7 @@ function PrimaryMetricEditor(props: SubProps) {
               label: i18n.translate('xpack.lens.metric.supportingVisualization.trendline', {
                 defaultMessage: 'Trend line',
               }),
-              isDisabled: !hasDefaultTimeField,
+              isDisabled: !supportsTrendline,
               'data-test-subj': 'lnsMetric_supporting_visualization_trendline',
             },
             {

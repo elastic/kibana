@@ -1868,6 +1868,7 @@ describe('IndexPattern Data Source', () => {
           isBucketed: true,
           isStaticValue: false,
           hasTimeShift: false,
+          hasReducedTimeRange: false,
         } as OperationDescriptor);
       });
 

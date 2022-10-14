@@ -105,7 +105,7 @@ export function columnToOperation(
   uniqueLabel?: string,
   dataView?: IndexPattern
 ): OperationDescriptor {
-  const { dataType, label, isBucketed, scale, operationType, timeShift } = column;
+  const { dataType, label, isBucketed, scale, operationType, timeShift, reducedTimeRange } = column;
   const fieldTypes =
     'sourceField' in column ? dataView?.getFieldByName(column.sourceField)?.esTypes : undefined;
   return {
@@ -119,6 +119,7 @@ export function columnToOperation(
         ? 'version'
         : undefined,
     hasTimeShift: Boolean(timeShift),
+    hasReducedTimeRange: Boolean(reducedTimeRange),
     interval: isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', column)
       ? column.params.interval
       : undefined,

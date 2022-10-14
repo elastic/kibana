@@ -587,6 +587,7 @@ export function getTextBasedDatasource({
               label: columnLabelMap[columnId] ?? column?.fieldName,
               isBucketed: Boolean(column?.meta?.type !== 'number'),
               hasTimeShift: false,
+              hasReducedTimeRange: false,
             };
           }
           return null;

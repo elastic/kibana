@@ -75,6 +75,7 @@ describe('getLayerMetaInfo', () => {
         isStaticValue: false,
         sortingHint: undefined,
         hasTimeShift: true,
+        hasReducedTimeRange: true,
       })),
       getTableSpec: jest.fn(),
       getVisualDefaults: jest.fn(),
