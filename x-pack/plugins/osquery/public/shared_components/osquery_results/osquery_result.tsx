@@ -20,8 +20,8 @@ interface OsqueryResultProps extends Omit<OsqueryActionResultsProps, 'alertId'> 
   startDate: string;
 }
 
-export const OsqueryResult = React.memo(
-  ({ actionId, ruleName, agentIds, startDate }: OsqueryResultProps) => {
+export const OsqueryResult = React.memo<OsqueryResultProps>(
+  ({ actionId, ruleName, agentIds, startDate }) => {
     const { data } = useLiveQueryDetails({
       actionId,
     });

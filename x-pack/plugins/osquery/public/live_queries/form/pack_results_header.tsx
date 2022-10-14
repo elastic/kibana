@@ -28,8 +28,8 @@ const StyledIconsList = styled(EuiFlexItem)`
   padding-left: 10px;
 `;
 
-export const PackResultsHeader = React.memo(
-  ({ actionId, agentIds, queryIds }: PackResultsHeadersProps) => {
+export const PackResultsHeader = React.memo<PackResultsHeadersProps>(
+  ({ actionId, agentIds, queryIds }) => {
     const iconProps = useMemo(() => ({ color: 'text', size: 'xs', iconSize: 'l' }), []);
 
     return (

@@ -116,7 +116,7 @@ type PackQueryStatusItem = Partial<{
 interface PackQueriesStatusTableProps {
   agentIds?: string[];
   queryId?: string;
-  actionId?: string;
+  actionId: string | undefined;
   data?: PackQueryStatusItem[];
   startDate?: string;
   expirationDate?: string;
@@ -247,15 +247,16 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
           ),
         },
         {
-          render: (item: { action_id: string }) => (
-            <AddToCaseWrapper
-              actionId={actionId}
-              agentIds={agentIds}
-              queryId={item.action_id}
-              isIcon={true}
-              isDisabled={!item.action_id}
-            />
-          ),
+          render: (item: { action_id: string }) =>
+            actionId && (
+              <AddToCaseWrapper
+                actionId={actionId}
+                agentIds={agentIds}
+                queryId={item.action_id}
+                isIcon={true}
+                isDisabled={!item.action_id}
+              />
+            ),
         },
       ];
 
