@@ -17,4 +17,4 @@ export interface AssigneeWithProfile extends Assignee {
 }
 
 export type UserInfoWithAvatar = Partial<Pick<UserProfileWithAvatar, 'user' | 'data'>>;
-export type AssigneesFilteringSelection = Array<UserProfileWithAvatar | null>;
+export type AssigneesFilteringSelection = UserProfileWithAvatar | null;

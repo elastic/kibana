@@ -17,14 +17,24 @@ import { EmptyMessage } from '../user_profiles/empty_message';
 import { NoMatches } from '../user_profiles/no_matches';
 import { SelectedStatusMessage } from '../user_profiles/selected_status_message';
 import { bringCurrentUserToFrontAndSort } from '../user_profiles/sort';
+import { AssigneesFilteringSelection } from '../user_profiles/types';
 import * as i18n from './translations';
 
+export const NO_ASSIGNEES_VALUE = null;
+
 export interface AssigneesFilterPopoverProps {
-  selectedAssignees: UserProfileWithAvatar[];
+  selectedAssignees: AssigneesFilteringSelection[];
   currentUserProfile: CurrentUserProfile;
   isLoading: boolean;
-  onSelectionChange: (users: UserProfileWithAvatar[]) => void;
+  onSelectionChange: (users: AssigneesFilteringSelection[]) => void;
 }
+
+const removeNoAssigneesSelection = (
+  assignees: AssigneesFilteringSelection[]
+): UserProfileWithAvatar[] =>
+  assignees.filter<UserProfileWithAvatar>(
+    (assignee): assignee is UserProfileWithAvatar => assignee !== NO_ASSIGNEES_VALUE
+  );
 
 const AssigneesFilterPopoverComponent: React.FC<AssigneesFilterPopoverProps> = ({
   selectedAssignees,
@@ -41,9 +51,17 @@ const AssigneesFilterPopoverComponent: React.FC<AssigneesFilterPopoverProps> = (
   const togglePopover = useCallback(() => setIsPopoverOpen((value) => !value), []);
 
   const onChange = useCallback(
-    (users: UserProfileWithAvatar[]) => {
-      const sortedUsers = bringCurrentUserToFrontAndSort(currentUserProfile, users);
-      onSelectionChange(sortedUsers ?? []);
+    (users: AssigneesFilteringSelection[]) => {
+      const usersWithNoAssigneeSelection = removeNoAssigneesSelection(users);
+      const sortedUsers =
+        bringCurrentUserToFrontAndSort(currentUserProfile, usersWithNoAssigneeSelection) ?? [];
+
+      const hasNoAssigneesSelection = users.find((user) => user === NO_ASSIGNEES_VALUE);
+
+      const sortedUsersWithNoAssigneeIfExisted =
+        hasNoAssigneesSelection !== undefined ? [NO_ASSIGNEES_VALUE, ...sortedUsers] : sortedUsers;
+
+      onSelectionChange(sortedUsersWithNoAssigneeIfExisted);
     },
     [currentUserProfile, onSelectionChange]
   );
@@ -77,7 +95,7 @@ const AssigneesFilterPopoverComponent: React.FC<AssigneesFilterPopoverProps> = (
   });
 
   const searchResultProfiles = useMemo(
-    () => bringCurrentUserToFrontAndSort(currentUserProfile, userProfiles),
+    () => [null, ...(bringCurrentUserToFrontAndSort(currentUserProfile, userProfiles) ?? [])],
     [userProfiles, currentUserProfile]
   );
 

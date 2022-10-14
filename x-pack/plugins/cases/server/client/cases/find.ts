@@ -88,6 +88,7 @@ export const find = async (
       status: undefined,
       authorizationFilter,
     });
+
     const caseQueryOptions = constructQueryOptions({ ...queryArgs, authorizationFilter });
 
     const [cases, statusStats] = await Promise.all([

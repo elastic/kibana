@@ -341,23 +341,15 @@ export const buildAssigneesFilter = ({
   const isNotNull = (value: string | null): value is string => value !== null && value !== 'null';
 
   const assigneesWithoutNull = assigneesAsArray.filter<string>(isNotNull);
-  /**
-   * assigneesWithoutNull contains all assignees without the null value.
-   * assigneesAsArray contains all assignees with the null value.
-   * By doing a length comparison we can detect if there is the null value
-   * in the assigneesAsArray array. If there is we need to filter for cases
-   * without assignees.
-   */
-  const filterCasesWithoutAssignees = assigneesAsArray.length > assigneesWithoutNull.length;
+  const hasNullAssignee =
+    assigneesAsArray.find((assignee) => !isNotNull(assignee)) !== undefined ? true : false;
 
-  const assigneesFilter = nodeBuilder.or(
-    assigneesWithoutNull.map((filter) =>
-      nodeBuilder.is(`${CASE_SAVED_OBJECT}.attributes.assignees.uid`, escapeKuery(filter))
-    )
+  const assigneesFilter = assigneesWithoutNull.map((filter) =>
+    nodeBuilder.is(`${CASE_SAVED_OBJECT}.attributes.assignees.uid`, escapeKuery(filter))
   );
 
-  if (!filterCasesWithoutAssignees) {
-    return assigneesFilter;
+  if (!hasNullAssignee) {
+    return nodeBuilder.or(assigneesFilter);
   }
 
   const filterCasesWithoutAssigneesKueryNode = stringToKueryNode(
@@ -365,10 +357,10 @@ export const buildAssigneesFilter = ({
   );
 
   if (!filterCasesWithoutAssigneesKueryNode) {
-    return assigneesFilter;
+    return nodeBuilder.or(assigneesFilter);
   }
 
-  return nodeBuilder.or([assigneesFilter, filterCasesWithoutAssigneesKueryNode]);
+  return nodeBuilder.or([...assigneesFilter, filterCasesWithoutAssigneesKueryNode]);
 };
 
 export const constructQueryOptions = ({
