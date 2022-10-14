@@ -39,8 +39,8 @@ export class WMSSource extends AbstractSource implements IRasterSource {
     return false;
   }
 
-  renderLegendDetails(): ReactElement<any> {
-    return <div />;
+  renderLegendDetails(): ReactElement<any> | null {
+    return null;
   }
 
   isSourceStale(mbSource: RasterTileSource, sourceData: RasterTileSourceData) {
