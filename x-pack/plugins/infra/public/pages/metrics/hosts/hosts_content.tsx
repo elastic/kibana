@@ -42,7 +42,6 @@ export const HostsContent: React.FunctionComponent = () => {
     { type: 'memory' },
     { type: 'cpuCores' },
     { type: 'memoryTotal' },
-    // add others
   ];
 
   const { loading, nodes, reload } = useSnapshot(
@@ -51,10 +50,16 @@ export const HostsContent: React.FunctionComponent = () => {
     [],
     'host',
     sourceId,
-    1665482950000, // currentTime.  need to add support for TimeRange?
+    1665748800000, // currentTime.  need to add support for TimeRange?
     '',
     '',
-    true
+    true,
+    {
+      from: 1665748800000, // dynamic time range needs to be supported
+      interval: '1m',
+      lookbackSize: 5,
+      to: 1665752400000,
+    }
   );
 
   const noData = !loading && nodes && nodes.length === 0;
@@ -94,12 +99,7 @@ export const HostsContent: React.FunctionComponent = () => {
               onQuerySubmit={onQuerySubmit}
             />
             <EuiSpacer />
-            <HostsTable
-              dataView={metricsDataView}
-              timeRange={dateRange}
-              query={query}
-              nodes={nodes}
-            />
+            <HostsTable nodes={nodes} />
           </>
         )
       ) : hasFailedCreatingDataView || hasFailedFetchingDataView ? (
