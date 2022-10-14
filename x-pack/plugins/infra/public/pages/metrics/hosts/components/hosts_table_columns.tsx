@@ -7,6 +7,7 @@
 
 import { EuiBasicTableColumn } from '@elastic/eui';
 import React from 'react';
+import { scaleUpPercentage } from '../../../../components/infrastructure_node_metrics_tables/shared/hooks';
 import { SnapshotNodeMetric } from '../../../../../common/http_api/snapshot_api';
 import { NumberCell } from '../../../../components/infrastructure_node_metrics_tables/shared/components';
 
@@ -70,6 +71,8 @@ export const HostsTableColumns: Array<EuiBasicTableColumn<HostNodeRow>> = [
   {
     name: 'Memory usage (avg.)',
     field: 'memory',
-    render: (memory: { avg: number }) => <NumberCell value={memory.avg} unit="%" />,
+    render: (memory: { avg: number }) => (
+      <NumberCell value={scaleUpPercentage(memory.avg)} unit="%" />
+    ),
   },
 ];
