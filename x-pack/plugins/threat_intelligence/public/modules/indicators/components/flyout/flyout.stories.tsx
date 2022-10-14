@@ -14,7 +14,7 @@ import { mockUiSettingsService } from '../../../../common/mocks/mock_kibana_ui_s
 import { mockKibanaTimelinesService } from '../../../../common/mocks/mock_kibana_timelines_service';
 import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
 import { IndicatorsFlyout } from '.';
-import { IndicatorsFiltersContext } from '../../containers/indicators_filters';
+import { IndicatorsFiltersContext } from '../../containers/filters';
 
 export default {
   component: IndicatorsFlyout,
