@@ -49,6 +49,8 @@ export const Markdown = ({
       value={value}
       onChange={setValue}
       height={height}
-    />
+    >
+      {markdownContent}
+    </EuiMarkdownEditor>
   );
 };
