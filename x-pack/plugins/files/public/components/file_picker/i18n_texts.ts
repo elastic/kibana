@@ -32,7 +32,7 @@ export const i18nTexts = {
       values: { nrOfFiles },
     }),
   searchFieldPlaceholder: i18n.translate('xpack.files.filePicker.searchFieldPlaceholder', {
-    defaultMessage: 'Filter by name',
+    defaultMessage: 'my-file-*',
   }),
   emptyFileGridPrompt: i18n.translate('xpack.files.filePicker.emptyGridPrompt', {
     defaultMessage: 'No files matched filter',
