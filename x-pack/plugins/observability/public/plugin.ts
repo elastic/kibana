@@ -68,7 +68,6 @@ export interface ObservabilityPublicPluginsSetup {
 }
 
 export interface ObservabilityPublicPluginsStart {
-  // Add unified search
   unifiedSearch: UnifiedSearchPublicPluginStart;
   usageCollection: UsageCollectionSetup;
   cases: CasesUiStart;
@@ -278,9 +277,6 @@ export class Plugin
 
   public start(coreStart: CoreStart, pluginsStart: ObservabilityPublicPluginsStart) {
     const { application } = coreStart;
-    // access unified search > ui > SearchBar
-    // const { unifiedSearch } = pluginsStart;
-    // Provide it via context
 
     updateGlobalNavigation({
       capabilities: application.capabilities,
