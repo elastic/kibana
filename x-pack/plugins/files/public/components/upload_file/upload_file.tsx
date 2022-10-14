@@ -75,6 +75,11 @@ export interface Props<Kind extends string = string> {
    * Called when an error occurs during upload
    */
   onError?: (e: Error) => void;
+
+  /**
+   * Allow upload more than one file at a time
+   */
+  multiple?: boolean;
 }
 
 /**
@@ -90,6 +95,7 @@ export const UploadFile = <Kind extends string = string>({
   fullWidth,
   allowClear,
   kind: kindId,
+  multiple = false,
   initialPromptText,
   immediate = false,
   allowRepeatedUploads = false,
@@ -133,6 +139,7 @@ export const UploadFile = <Kind extends string = string>({
         allowClear={allowClear}
         fullWidth={fullWidth}
         initialFilePromptText={initialPromptText}
+        multiple={multiple}
       />
     </context.Provider>
   );

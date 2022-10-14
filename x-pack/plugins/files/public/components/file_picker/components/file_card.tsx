@@ -11,7 +11,7 @@ import numeral from '@elastic/numeral';
 import useObservable from 'react-use/lib/useObservable';
 import { EuiCard, EuiText, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { FileJSON } from '../../../../common';
+import { FileImageMetadata, FileJSON } from '../../../../common';
 import { Image } from '../../image';
 import { isImage } from '../../util';
 import { useFilesContext } from '../../context';
@@ -58,6 +58,7 @@ export const FileCard: FunctionComponent<Props> = ({ file }) => {
               css={css`
                 max-height: ${imageHeight};
               `}
+              meta={file.meta as FileImageMetadata}
               src={client.getDownloadHref({ id: file.id, fileKind: kind })}
             />
           ) : (

@@ -25,6 +25,7 @@ import { useUploadState } from './context';
 export interface Props {
   meta?: unknown;
   accept?: string;
+  multiple?: boolean;
   fullWidth?: boolean;
   immediate?: boolean;
   allowClear?: boolean;
@@ -34,7 +35,10 @@ export interface Props {
 const { euiFormMaxWidth, euiButtonHeightSmall } = euiThemeVars;
 
 export const UploadFile = React.forwardRef<EuiFilePicker, Props>(
-  ({ meta, accept, immediate, allowClear = false, initialFilePromptText, fullWidth }, ref) => {
+  (
+    { meta, accept, immediate, allowClear = false, multiple, initialFilePromptText, fullWidth },
+    ref
+  ) => {
     const uploadState = useUploadState();
     const uploading = useBehaviorSubject(uploadState.uploading$);
     const error = useBehaviorSubject(uploadState.error$);
@@ -61,7 +65,7 @@ export const UploadFile = React.forwardRef<EuiFilePicker, Props>(
             uploadState.setFiles(Array.from(fs ?? []));
             if (immediate) uploadState.upload(meta);
           }}
-          multiple={false}
+          multiple={multiple}
           initialPromptText={initialFilePromptText}
           isLoading={uploading}
           isInvalid={isInvalid}

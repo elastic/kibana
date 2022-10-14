@@ -64,6 +64,15 @@ const Component: FunctionComponent<Props> = ({ onClose, onDone }) => {
     return () => sub.unsubscribe();
   }, [state]);
 
+  const renderFooter = () => (
+    <EuiModalFooter>
+      <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" alignItems="center">
+        <Pagination />
+        <SelectButton onClick={onDone} />
+      </EuiFlexGroup>
+    </EuiModalFooter>
+  );
+
   return (
     <EuiModal className="filesFilePicker filesFilePicker--fixed" maxWidth="75vw" onClose={onClose}>
       <EuiModalHeader>
@@ -71,16 +80,19 @@ const Component: FunctionComponent<Props> = ({ onClose, onDone }) => {
         <SearchField />
       </EuiModalHeader>
       {isLoading ? (
-        <EuiModalBody>
-          <div
-            css={css`
-              display: grid;
-              place-items: center;
-            `}
-          >
-            <EuiLoadingSpinner size="xl" />
-          </div>
-        </EuiModalBody>
+        <>
+          <EuiModalBody>
+            <div
+              css={css`
+                display: grid;
+                place-items: center;
+              `}
+            >
+              <EuiLoadingSpinner size="xl" />
+            </div>
+          </EuiModalBody>
+          {renderFooter()}
+        </>
       ) : Boolean(error) ? (
         <EuiModalBody>
           <ErrorContent error={error as Error} />
@@ -96,12 +108,7 @@ const Component: FunctionComponent<Props> = ({ onClose, onDone }) => {
             <EuiSpacer />
             <ClearFilterButton onClick={() => state.setQuery(undefined)} />
           </EuiModalBody>
-          <EuiModalFooter>
-            <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" alignItems="center">
-              <Pagination />
-              <SelectButton onClick={onDone} />
-            </EuiFlexGroup>
-          </EuiModalFooter>
+          {renderFooter()}
         </>
       )}
     </EuiModal>
