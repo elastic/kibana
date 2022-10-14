@@ -36,9 +36,8 @@ import {
 } from '@kbn/chart-icons';
 
 import { DistributiveOmit } from '@elastic/eui';
-import type { VisualizationType, Suggestion } from '../../types';
+import type { VisualizationType } from '../../types';
 import type { ValueLabelConfig } from '../../../common/types';
-import type { FormBasedLayer } from '../../datasources/form_based/types';
 
 export const YAxisModes = {
   AUTO: 'auto',
@@ -275,12 +274,3 @@ export const visualizationTypes: VisualizationType[] = [
     sortPriority: 2,
   },
 ];
-
-interface XYStateWithLayers {
-  [prop: string]: unknown;
-  layers: Record<string, FormBasedLayer>;
-}
-export interface XYSuggestion extends Suggestion {
-  datasourceState: XYStateWithLayers;
-  visualizationState: XYState;
-}

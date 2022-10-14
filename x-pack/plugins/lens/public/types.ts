@@ -754,9 +754,9 @@ export interface VisualizationDimensionChangeProps<T> {
   frame: FramePublicAPI;
 }
 
-export interface Suggestion<T = unknown> {
+export interface Suggestion<T = unknown, V = unknown> {
   visualizationId: string;
-  datasourceState?: unknown;
+  datasourceState?: V;
   datasourceId?: string;
   columns: number;
   score: number;
