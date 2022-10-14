@@ -853,6 +853,7 @@ packages/home/sample_data_card @elastic/shared-ux
 packages/home/sample_data_tab @elastic/shared-ux
 packages/home/sample_data_types @elastic/shared-ux
 packages/kbn-ace @elastic/platform-deployment-management
+packages/kbn-adhoc-profiler @elastic/apm-ui
 packages/kbn-alerts @elastic/security-solution
 packages/kbn-ambient-storybook-types @elastic/kibana-operations
 packages/kbn-ambient-ui-types @elastic/kibana-operations
