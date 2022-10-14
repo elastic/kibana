@@ -180,7 +180,7 @@ export const IngestPipelineModal: React.FC<IngestPipelineModalProps> = ({
                     {i18n.translate(
                       'xpack.enterpriseSearch.content.index.pipelines.ingestModal.curlHeader',
                       {
-                        defaultMessage: 'Sample cURL request',
+                        defaultMessage: 'Sample cURL request to ingest a document',
                       }
                     )}
                   </strong>
