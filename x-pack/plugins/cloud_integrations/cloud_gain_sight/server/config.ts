@@ -18,9 +18,9 @@ const configSchema = schema.object({
   ),
 });
 
-export type CloudGainSightConfigType = TypeOf<typeof configSchema>;
+export type CloudGainsightConfigType = TypeOf<typeof configSchema>;
 
-export const config: PluginConfigDescriptor<CloudGainSightConfigType> = {
+export const config: PluginConfigDescriptor<CloudGainsightConfigType> = {
   exposeToBrowser: {
     org_id: true,
   },

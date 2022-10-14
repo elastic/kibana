@@ -9,29 +9,29 @@ import type { PluginInitializerContext, CoreSetup, Plugin } from '@kbn/core/serv
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 
 import {
-  registerGainSightRoute,
-  registerGainSightStyleRoute,
-  registerGainSightWidgetRoute,
+  registerGainsightRoute,
+  registerGainsightStyleRoute,
+  registerGainsightWidgetRoute,
 } from './routes';
 
-interface CloudGainSightSetupDeps {
+interface CloudGainsightSetupDeps {
   cloud: CloudSetup;
 }
 
-export class CloudGainSightPlugin implements Plugin {
+export class CloudGainsightPlugin implements Plugin {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, { cloud }: CloudGainSightSetupDeps) {
+  public setup(core: CoreSetup, { cloud }: CloudGainsightSetupDeps) {
     if (cloud.isCloudEnabled) {
-      registerGainSightRoute({
+      registerGainsightRoute({
         httpResources: core.http.resources,
         packageInfo: this.initializerContext.env.packageInfo,
       });
-      registerGainSightWidgetRoute({
+      registerGainsightWidgetRoute({
         httpResources: core.http.resources,
         packageInfo: this.initializerContext.env.packageInfo,
       });
-      registerGainSightStyleRoute({
+      registerGainsightStyleRoute({
         httpResources: core.http.resources,
         packageInfo: this.initializerContext.env.packageInfo,
       });

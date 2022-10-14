@@ -6,29 +6,29 @@
  * Side Public License, v 1.
  */
 
-import type { GainSightApi } from './types';
+import type { GainsightApi } from './types';
 
 /**
- * gainSight basic configuration.
+ * gainsight basic configuration.
  */
-export interface GainSightSnippetConfig {
+export interface GainsightSnippetConfig {
   /**
-   * The gainSight account id.
+   * The gainsight account id.
    */
-  gainSightOrgId: string;
+  gainsightOrgId: string;
   /**
-   * The URL to load the gainSight client from. Falls back to `web-sdk.aptrinsic.com` if not specified.
+   * The URL to load the gainsight client from. Falls back to `web-sdk.aptrinsic.com` if not specified.
    */
   scriptUrl?: string;
   cssFileEndpoint?: string;
   widgetFileEndpoint?: string;
 }
 export function loadSnippet({
-  gainSightOrgId,
+  gainsightOrgId,
   scriptUrl = 'web-sdk.aptrinsic.com/api/aptrinsic.js',
   cssFileEndpoint = 'web-sdk.aptrinsic.com/style.css',
   widgetFileEndpoint = 'web-sdk.aptrinsic.com/widget/aptrinsic-widget.js ',
-}: GainSightSnippetConfig): GainSightApi {
+}: GainsightSnippetConfig): GainsightApi {
   /* eslint-disable no-var,dot-notation,prefer-rest-params,@typescript-eslint/no-unused-expressions */
   (function (n, t, a, e, co) {
     var i = 'aptrinsic';
@@ -49,16 +49,16 @@ export function loadSnippet({
     var c = t.getElementsByTagName('script')[0];
     // @ts-expect-error
     c.parentNode.insertBefore(r, c);
-  })(window, document, scriptUrl, gainSightOrgId, {
+  })(window, document, scriptUrl, gainsightOrgId, {
     cssFileEndpoint,
     widgetFileEndpoint,
   });
 
-  const gainSightApi = window['aptrinsic'];
+  const gainsightApi = window['aptrinsic'];
 
-  if (!gainSightApi) {
-    throw new Error('GainSight snippet failed to load. Check browser logs for more information.');
+  if (!gainsightApi) {
+    throw new Error('Gainsight snippet failed to load. Check browser logs for more information.');
   }
 
-  return gainSightApi;
+  return gainsightApi;
 }

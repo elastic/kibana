@@ -6,8 +6,8 @@
  */
 
 import type { PluginInitializerContext } from '@kbn/core/public';
-import { CloudGainSightPlugin } from './plugin';
+import { CloudGainsightPlugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
-  return new CloudGainSightPlugin(initializerContext);
+  return new CloudGainsightPlugin(initializerContext);
 }

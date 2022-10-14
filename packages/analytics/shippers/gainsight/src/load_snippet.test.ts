@@ -32,8 +32,8 @@ describe('loadSnippet', () => {
     });
   });
 
-  it('should return the gainSight API', () => {
-    const gainSightApi = loadSnippet({ gainSightOrgId: 'foo' });
-    expect(gainSightApi).toBeDefined();
+  it('should return the gainsight API', () => {
+    const gainsightApi = loadSnippet({ gainsightOrgId: 'foo' });
+    expect(gainsightApi).toBeDefined();
   });
 });

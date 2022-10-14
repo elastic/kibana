@@ -7,9 +7,9 @@
  */
 
 /**
- * Definition of the gainSight API.
+ * Definition of the gainsight API.
  */
-export interface GainSightApi {
+export interface GainsightApi {
   init?: boolean;
   (functionId: keyof Mapping, ...options: any): void;
 }
@@ -24,6 +24,6 @@ interface Mapping {
 
 declare global {
   interface Window {
-    aptrinsic: GainSightApi;
+    aptrinsic: GainsightApi;
   }
 }

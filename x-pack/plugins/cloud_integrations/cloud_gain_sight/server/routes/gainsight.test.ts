@@ -6,12 +6,12 @@
  */
 
 jest.mock('fs/promises');
-import { renderGainSightLibraryFactory, GAINSIGHT_LIBRARY_PATH } from './gainsight';
+import { renderGainsightLibraryFactory, GAINSIGHT_LIBRARY_PATH } from './gainsight';
 import fs from 'fs/promises';
 
 const fsMock = fs as jest.Mocked<typeof fs>;
 
-describe('renderGainSightLibraryFactory', () => {
+describe('renderGainsightLibraryFactory', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     fsMock.readFile.mockResolvedValue(Buffer.from('fake fs src'));
@@ -19,7 +19,7 @@ describe('renderGainSightLibraryFactory', () => {
   afterAll(() => jest.restoreAllMocks());
 
   it('successfully returns file contents', async () => {
-    const render = renderGainSightLibraryFactory();
+    const render = renderGainsightLibraryFactory();
 
     const { body } = await render();
     expect(fsMock.readFile).toHaveBeenCalledWith(GAINSIGHT_LIBRARY_PATH);
@@ -27,14 +27,14 @@ describe('renderGainSightLibraryFactory', () => {
   });
 
   it('only reads from file system once callback is invoked', async () => {
-    const render = renderGainSightLibraryFactory();
+    const render = renderGainsightLibraryFactory();
     expect(fsMock.readFile).not.toHaveBeenCalled();
     await render();
     expect(fsMock.readFile).toHaveBeenCalledTimes(1);
   });
 
   it('does not read from filesystem on subsequent calls', async () => {
-    const render = renderGainSightLibraryFactory();
+    const render = renderGainsightLibraryFactory();
     await render();
     expect(fsMock.readFile).toHaveBeenCalledTimes(1);
     await render();
@@ -44,7 +44,7 @@ describe('renderGainSightLibraryFactory', () => {
   });
 
   it('returns max-age cache-control in dist', async () => {
-    const render = renderGainSightLibraryFactory(true);
+    const render = renderGainsightLibraryFactory(true);
     const { headers } = await render();
     expect(headers).toEqual({
       'cache-control': 'max-age=31536000',
@@ -52,7 +52,7 @@ describe('renderGainSightLibraryFactory', () => {
   });
 
   it('returns must-revalidate cache-control and sha1 etag in dev', async () => {
-    const render = renderGainSightLibraryFactory(false);
+    const render = renderGainsightLibraryFactory(false);
     const { headers } = await render();
     expect(headers).toEqual({
       'cache-control': 'must-revalidate',

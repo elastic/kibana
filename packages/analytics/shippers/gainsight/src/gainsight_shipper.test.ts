@@ -7,17 +7,17 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import { gainSightApiMock } from './gainsight_shipper.test.mocks';
-import { GainSightShipper } from './gainsight_shipper';
+import { gainsightApiMock } from './gainsight_shipper.test.mocks';
+import { GainsightShipper } from './gainsight_shipper';
 
-describe('gainSightShipper', () => {
-  let gainSightShipper: GainSightShipper;
+describe('gainsightShipper', () => {
+  let gainsightShipper: GainsightShipper;
 
   beforeEach(() => {
     jest.resetAllMocks();
-    gainSightShipper = new GainSightShipper(
+    gainsightShipper = new GainsightShipper(
       {
-        gainSightOrgId: 'test-org-id',
+        gainsightOrgId: 'test-org-id',
       },
       {
         logger: loggerMock.create(),
@@ -32,8 +32,8 @@ describe('gainSightShipper', () => {
       test('calls `identify` when the userId is provided', () => {
         const userId = 'test-user-id';
         const clusterName = '123654';
-        gainSightShipper.extendContext({ userId, cluster_name: clusterName });
-        expect(gainSightApiMock).toHaveBeenCalledWith('identify', {
+        gainsightShipper.extendContext({ userId, cluster_name: clusterName });
+        expect(gainsightApiMock).toHaveBeenCalledWith('identify', {
           id: clusterName,
           userType: 'deployment',
         });
@@ -42,37 +42,37 @@ describe('gainSightShipper', () => {
       test('calls `identify` again only if the userId changes', () => {
         const userId = 'test-user-id';
         const clusterName = '123654';
-        gainSightShipper.extendContext({ userId, cluster_name: clusterName });
-        expect(gainSightApiMock).toHaveBeenCalledTimes(2);
-        expect(gainSightApiMock).toHaveBeenCalledWith('identify', {
+        gainsightShipper.extendContext({ userId, cluster_name: clusterName });
+        expect(gainsightApiMock).toHaveBeenCalledTimes(2);
+        expect(gainsightApiMock).toHaveBeenCalledWith('identify', {
           id: clusterName,
           userType: 'deployment',
         });
 
-        gainSightShipper.extendContext({ userId, cluster_name: clusterName });
-        expect(gainSightApiMock).toHaveBeenCalledTimes(2);
+        gainsightShipper.extendContext({ userId, cluster_name: clusterName });
+        expect(gainsightApiMock).toHaveBeenCalledTimes(2);
 
-        gainSightShipper.extendContext({ userId: `${userId}-1`, cluster_name: clusterName });
-        expect(gainSightApiMock).toHaveBeenCalledTimes(4); // called again because the user changed
+        gainsightShipper.extendContext({ userId: `${userId}-1`, cluster_name: clusterName });
+        expect(gainsightApiMock).toHaveBeenCalledTimes(4); // called again because the user changed
       });
     });
   });
 
   describe('optIn', () => {
     test('should call consent true and restart when isOptIn: true', () => {
-      gainSightShipper.optIn(true);
-      expect(gainSightApiMock).toHaveBeenCalledWith('config', 'enableTag', true);
+      gainsightShipper.optIn(true);
+      expect(gainsightApiMock).toHaveBeenCalledWith('config', 'enableTag', true);
     });
 
     test('should call consent false and shutdown when isOptIn: false', () => {
-      gainSightShipper.optIn(false);
-      expect(gainSightApiMock).toHaveBeenCalledWith('config', 'enableTag', false);
+      gainsightShipper.optIn(false);
+      expect(gainsightApiMock).toHaveBeenCalledWith('config', 'enableTag', false);
     });
   });
 
   describe('reportEvents', () => {
     test('calls the API once per event in the array with the properties transformed', () => {
-      gainSightShipper.reportEvents([
+      gainsightShipper.reportEvents([
         {
           event_type: 'test-event-1',
           timestamp: '2020-01-01T00:00:00.000Z',
@@ -87,11 +87,11 @@ describe('gainSightShipper', () => {
         },
       ]);
 
-      expect(gainSightApiMock).toHaveBeenCalledTimes(2);
-      expect(gainSightApiMock).toHaveBeenCalledWith('track', 'test-event-1', {
+      expect(gainsightApiMock).toHaveBeenCalledTimes(2);
+      expect(gainsightApiMock).toHaveBeenCalledWith('track', 'test-event-1', {
         test_str: 'test-1',
       });
-      expect(gainSightApiMock).toHaveBeenCalledWith('track', 'test-event-2', {
+      expect(gainsightApiMock).toHaveBeenCalledWith('track', 'test-event-2', {
         other_property_str: 'test-2',
       });
     });

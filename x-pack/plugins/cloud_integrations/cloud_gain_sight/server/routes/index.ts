@@ -6,7 +6,7 @@
  */
 
 export {
-  registerGainSightRoute,
-  registerGainSightStyleRoute,
-  registerGainSightWidgetRoute,
+  registerGainsightRoute,
+  registerGainsightStyleRoute,
+  registerGainsightWidgetRoute,
 } from './gainsight';

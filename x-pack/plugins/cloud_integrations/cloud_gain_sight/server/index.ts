@@ -6,10 +6,10 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/server';
-import { CloudGainSightPlugin } from './plugin';
+import { CloudGainsightPlugin } from './plugin';
 
 export { config } from './config';
 
 export function plugin(initializerContext: PluginInitializerContext) {
-  return new CloudGainSightPlugin(initializerContext);
+  return new CloudGainsightPlugin(initializerContext);
 }

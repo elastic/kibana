@@ -29,7 +29,7 @@ export function formatPayload(context: object): Record<string, unknown> {
       .filter(
         ([, value]) => typeof value !== 'undefined' && (!Array.isArray(value) || value.length > 0)
       )
-      // Transform key names according to the gainSight needs
+      // Transform key names according to the gainsight needs
       .map(([key, value]) => {
         if (GAINSIGHT_RESERVED_PROPERTIES.includes(key)) {
           return [key, value];
@@ -37,14 +37,14 @@ export function formatPayload(context: object): Record<string, unknown> {
         if (isRecord(value)) {
           return [key, formatPayload(value)];
         }
-        const valueType = getGainSightType(value);
+        const valueType = getGainsightType(value);
         const formattedKey = valueType ? `${key}_${valueType}` : key;
         return [formattedKey, value];
       })
   );
 }
 
-function getGainSightType(value: unknown) {
+function getGainsightType(value: unknown) {
   // For arrays, make the decision based on the first element
   const isArray = Array.isArray(value);
   const v = isArray ? value[0] : value;

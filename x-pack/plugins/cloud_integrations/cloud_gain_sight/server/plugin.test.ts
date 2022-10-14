@@ -7,27 +7,27 @@
 
 import { coreMock } from '@kbn/core/server/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
-import { registerGainSightRouteMock } from './plugin.test.mock';
-import { CloudGainSightPlugin } from './plugin';
+import { registerGainsightRouteMock } from './plugin.test.mock';
+import { CloudGainsightPlugin } from './plugin';
 
-describe('Cloud GainSight plugin', () => {
-  let plugin: CloudGainSightPlugin;
+describe('Cloud Gainsight plugin', () => {
+  let plugin: CloudGainsightPlugin;
   beforeEach(() => {
-    registerGainSightRouteMock.mockReset();
-    plugin = new CloudGainSightPlugin(coreMock.createPluginInitializerContext());
+    registerGainsightRouteMock.mockReset();
+    plugin = new CloudGainsightPlugin(coreMock.createPluginInitializerContext());
   });
 
   test('registers route when cloud is enabled', () => {
     plugin.setup(coreMock.createSetup(), {
       cloud: { ...cloudMock.createSetup(), isCloudEnabled: true },
     });
-    expect(registerGainSightRouteMock).toHaveBeenCalledTimes(1);
+    expect(registerGainsightRouteMock).toHaveBeenCalledTimes(1);
   });
 
   test('does not register the route when cloud is disabled', () => {
     plugin.setup(coreMock.createSetup(), {
       cloud: { ...cloudMock.createSetup(), isCloudEnabled: false },
     });
-    expect(registerGainSightRouteMock).not.toHaveBeenCalled();
+    expect(registerGainsightRouteMock).not.toHaveBeenCalled();
   });
 });

@@ -21,7 +21,7 @@ export const GAINSIGHT_WIDGET_PATH = path.join(__dirname, '..', 'assets', 'gains
 export const GAINSIGHT_STYLE_PATH = path.join(__dirname, '..', 'assets', 'gainsight_style.css');
 
 /** @internal exported for testing */
-export const renderGainSightLibraryFactory = (dist = true, filePath = GAINSIGHT_LIBRARY_PATH) =>
+export const renderGainsightLibraryFactory = (dist = true, filePath = GAINSIGHT_LIBRARY_PATH) =>
   once(
     async (): Promise<{
       body: Buffer;
@@ -42,14 +42,14 @@ export const renderGainSightLibraryFactory = (dist = true, filePath = GAINSIGHT_
     }
   );
 
-export const registerGainSightRoute = ({
+export const registerGainsightRoute = ({
   httpResources,
   packageInfo,
 }: {
   httpResources: HttpResources;
   packageInfo: Readonly<PackageInfo>;
 }) => {
-  const renderGainSightLibrary = renderGainSightLibraryFactory(
+  const renderGainsightLibrary = renderGainsightLibraryFactory(
     packageInfo.dist,
     GAINSIGHT_LIBRARY_PATH
   );
@@ -68,10 +68,10 @@ export const registerGainSightRoute = ({
     },
     async (context, req, res) => {
       try {
-        return res.renderJs(await renderGainSightLibrary());
+        return res.renderJs(await renderGainsightLibrary());
       } catch (e) {
         return res.customError({
-          body: `Could not load GainSight library from disk due to error: ${e.toString()}`,
+          body: `Could not load Gainsight library from disk due to error: ${e.toString()}`,
           statusCode: 500,
         });
       }
@@ -79,14 +79,14 @@ export const registerGainSightRoute = ({
   );
 };
 
-export const registerGainSightStyleRoute = ({
+export const registerGainsightStyleRoute = ({
   httpResources,
   packageInfo,
 }: {
   httpResources: HttpResources;
   packageInfo: Readonly<PackageInfo>;
 }) => {
-  const renderGainSightLibrary = renderGainSightLibraryFactory(
+  const renderGainsightLibrary = renderGainsightLibraryFactory(
     packageInfo.dist,
     GAINSIGHT_STYLE_PATH
   );
@@ -105,10 +105,10 @@ export const registerGainSightStyleRoute = ({
     },
     async (context, req, res) => {
       try {
-        return res.renderCss(await renderGainSightLibrary());
+        return res.renderCss(await renderGainsightLibrary());
       } catch (e) {
         return res.customError({
-          body: `Could not load GainSight library from disk due to error: ${e.toString()}`,
+          body: `Could not load Gainsight library from disk due to error: ${e.toString()}`,
           statusCode: 500,
         });
       }
@@ -116,14 +116,14 @@ export const registerGainSightStyleRoute = ({
   );
 };
 
-export const registerGainSightWidgetRoute = ({
+export const registerGainsightWidgetRoute = ({
   httpResources,
   packageInfo,
 }: {
   httpResources: HttpResources;
   packageInfo: Readonly<PackageInfo>;
 }) => {
-  const renderGainSightLibrary = renderGainSightLibraryFactory(
+  const renderGainsightLibrary = renderGainsightLibraryFactory(
     packageInfo.dist,
     GAINSIGHT_WIDGET_PATH
   );
@@ -142,10 +142,10 @@ export const registerGainSightWidgetRoute = ({
     },
     async (context, req, res) => {
       try {
-        return res.renderJs(await renderGainSightLibrary());
+        return res.renderJs(await renderGainsightLibrary());
       } catch (e) {
         return res.customError({
-          body: `Could not load GainSight library from disk due to error: ${e.toString()}`,
+          body: `Could not load Gainsight library from disk due to error: ${e.toString()}`,
           statusCode: 500,
         });
       }

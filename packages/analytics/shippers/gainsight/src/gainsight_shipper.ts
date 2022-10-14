@@ -12,31 +12,31 @@ import type {
   Event,
   IShipper,
 } from '@kbn/analytics-client';
-import type { GainSightApi } from './types';
-import type { GainSightSnippetConfig } from './load_snippet';
+import type { GainsightApi } from './types';
+import type { GainsightSnippetConfig } from './load_snippet';
 import { formatPayload } from './format_payload';
 import { loadSnippet } from './load_snippet';
 
 /**
- * gainSight shipper.
+ * gainsight shipper.
  */
-export class GainSightShipper implements IShipper {
+export class GainsightShipper implements IShipper {
   /** Shipper's unique name */
   public static shipperName = 'Gainsight';
   private lastUserId: string | undefined;
-  private readonly gainSightApi: GainSightApi;
+  private readonly gainsightApi: GainsightApi;
 
   /**
-   * Creates a new instance of the gainSightShipper.
-   * @param config {@link GainSightSnippetConfig}
+   * Creates a new instance of the gainsightShipper.
+   * @param config {@link GainsightSnippetConfig}
    * @param initContext {@link AnalyticsClientInitContext}
    */
   constructor(
-    config: GainSightSnippetConfig,
+    config: GainsightSnippetConfig,
     private readonly initContext: AnalyticsClientInitContext
   ) {
     const { ...snippetConfig } = config;
-    this.gainSightApi = loadSnippet(snippetConfig);
+    this.gainsightApi = loadSnippet(snippetConfig);
   }
 
   /**
@@ -46,20 +46,20 @@ export class GainSightShipper implements IShipper {
   public extendContext(newContext: EventContext): void {
     this.initContext.logger.debug(`Received context ${JSON.stringify(newContext)}`);
 
-    // gainSight requires different APIs for different type of contexts.
+    // gainsight requires different APIs for different type of contexts.
     const { userId, cluster_name: clusterName } = newContext;
 
     if (userId && userId !== this.lastUserId && clusterName) {
       this.initContext.logger.debug(`Calling identify with userId ${userId}`);
       // We need to call the API for every new userId (restarting the session).
-      this.gainSightApi('identify', {
+      this.gainsightApi('identify', {
         id: clusterName,
         userType: 'deployment',
       });
-      this.gainSightApi('set', 'globalContext', {
+      this.gainsightApi('set', 'globalContext', {
         kibanaUserId: userId,
       });
-      if (this.gainSightApi.init) {
+      if (this.gainsightApi.init) {
         this.lastUserId = userId;
       }
     } else {
@@ -77,9 +77,9 @@ export class GainSightShipper implements IShipper {
     this.initContext.logger.debug(`Setting gainsight to optIn ${isOptedIn}`);
 
     if (isOptedIn) {
-      this.gainSightApi('config', 'enableTag', true);
+      this.gainsightApi('config', 'enableTag', true);
     } else {
-      this.gainSightApi('config', 'enableTag', false);
+      this.gainsightApi('config', 'enableTag', false);
     }
   }
 
@@ -91,7 +91,7 @@ export class GainSightShipper implements IShipper {
     this.initContext.logger.debug(`Reporting ${events.length} events to gainsight`);
     events.forEach((event) => {
       // We only read event.properties and discard the rest because the context is already sent in the other APIs.
-      this.gainSightApi('track', event.event_type, formatPayload(event.properties));
+      this.gainsightApi('track', event.event_type, formatPayload(event.properties));
     });
   }
 

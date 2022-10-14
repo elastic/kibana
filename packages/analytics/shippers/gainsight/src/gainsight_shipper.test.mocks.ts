@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import type { GainSightApi } from './types';
+import type { GainsightApi } from './types';
 
-export const gainSightApiMock: GainSightApi = jest.fn();
-gainSightApiMock.init = true;
+export const gainsightApiMock: GainsightApi = jest.fn();
+gainsightApiMock.init = true;
 
 jest.doMock('./load_snippet', () => {
   return {
-    loadSnippet: () => gainSightApiMock,
+    loadSnippet: () => gainsightApiMock,
   };
 });
