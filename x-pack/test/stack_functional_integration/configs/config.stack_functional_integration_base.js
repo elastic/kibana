@@ -13,7 +13,7 @@ import chalk from 'chalk';
 import { esTestConfig, kbnTestConfig } from '@kbn/test';
 import { TriggersActionsPageProvider } from '../../functional_with_es_ssl/page_objects/triggers_actions_ui_page';
 import { ReportingAPIProvider } from '../../upgrade/services/reporting_upgrade_services';
-import { MapsHelper } from '../../upgrade//services/maps_upgrade_services';
+import { MapsHelper } from '../../upgrade/services/maps_upgrade_services';
 import { RulesHelper } from '../../upgrade/services/rules_upgrade_services';
 
 const log = new ToolingLog({
