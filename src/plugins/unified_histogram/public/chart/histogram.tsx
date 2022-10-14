@@ -46,7 +46,7 @@ export function Histogram({
       ],
       state: {
         datasourceStates: {
-          indexpattern: {
+          formBased: {
             layers: {
               layer1: {
                 columnOrder: ['col1', 'col2'],
