@@ -8,7 +8,7 @@
 
 export const addLog = (function () {
   // @ts-expect-error
-  if (window.ELASTIC_DISCOVER_LOGGER) {
+  if (window?.ELASTIC_DISCOVER_LOGGER) {
     // console.log(message, payload);
     // eslint-disable-next-line no-console
     return Function.prototype.bind.call(console.log, console);
