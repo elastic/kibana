@@ -12,9 +12,7 @@ import { useHistory } from 'react-router-dom';
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 
-import type { TabContentProps } from '../types';
 import { useWaterfallFetcher } from '../use_waterfall_fetcher';
 import { WaterfallWithSummary } from '../waterfall_with_summary';
 
@@ -26,21 +24,20 @@ import { HeightRetainer } from '../../../shared/height_retainer';
 import { fromQuery, toQuery } from '../../../shared/links/url_helpers';
 import { TransactionTab } from '../waterfall_with_summary/transaction_tabs';
 import { useTransactionDistributionChartData } from './use_transaction_distribution_chart_data';
+import { TraceSamplesFetchResult } from '../../../../hooks/use_transaction_trace_samples_fetcher';
 
 interface TransactionDistributionProps {
   onChartSelection: (event: XYBrushEvent) => void;
   onClearSelection: () => void;
   selection?: [number, number];
-  traceSamples: TabContentProps['traceSamples'];
-  traceSamplesStatus: FETCH_STATUS;
+  traceSamplesFetchResult: TraceSamplesFetchResult;
 }
 
 export function TransactionDistribution({
   onChartSelection,
   onClearSelection,
   selection,
-  traceSamples,
-  traceSamplesStatus,
+  traceSamplesFetchResult,
 }: TransactionDistributionProps) {
   const { urlParams } = useLegacyUrlParams();
   const { traceId, transactionId } = urlParams;
@@ -52,7 +49,7 @@ export function TransactionDistribution({
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const history = useHistory();
-  const { waterfall, status: waterfallStatus } = useWaterfallFetcher({
+  const waterfallFetchResult = useWaterfallFetcher({
     traceId,
     transactionId,
     start,
@@ -65,15 +62,10 @@ export function TransactionDistribution({
   } = useApmParams('/services/{serviceName}/transactions/view');
 
   const { serviceName } = useApmServiceContext();
-  const isLoading =
-    waterfallStatus === FETCH_STATUS.LOADING ||
-    traceSamplesStatus === FETCH_STATUS.LOADING;
-  const isNotInitiated =
-    waterfallStatus === FETCH_STATUS.NOT_INITIATED ||
-    traceSamplesStatus === FETCH_STATUS.NOT_INITIATED;
 
   const markerCurrentEvent =
-    waterfall.entryWaterfallTransaction?.doc.transaction.duration.us;
+    waterfallFetchResult.waterfall.entryWaterfallTransaction?.doc.transaction
+      .duration.us;
 
   const {
     chartData,
@@ -124,10 +116,8 @@ export function TransactionDistribution({
           serviceName={serviceName}
           waterfallItemId={waterfallItemId}
           detailTab={detailTab as TransactionTab | undefined}
-          waterfall={waterfall}
-          isNotInitiated={isNotInitiated}
-          isLoading={isLoading}
-          traceSamples={traceSamples}
+          waterfallFetchResult={waterfallFetchResult}
+          traceSamplesFetchResult={traceSamplesFetchResult}
         />
       </div>
     </HeightRetainer>

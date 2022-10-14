@@ -18,17 +18,16 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { TransactionSummary } from '../../../shared/summary/transaction_summary';
 import { TransactionActionMenu } from '../../../shared/transaction_action_menu/transaction_action_menu';
-import type { TraceSample } from '../../../../hooks/use_transaction_trace_samples_fetcher';
 import { MaybeViewTraceLink } from './maybe_view_trace_link';
 import { TransactionTab, TransactionTabs } from './transaction_tabs';
-import { IWaterfall } from './waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 import { Environment } from '../../../../../common/environment_rt';
+import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { TraceSamplesFetchResult } from '../../../../hooks/use_transaction_trace_samples_fetcher';
+import { WaterfallFetchResult } from '../use_waterfall_fetcher';
 
 interface Props {
-  waterfall: IWaterfall;
-  isLoading: boolean;
-  isNotInitiated?: boolean;
-  traceSamples: TraceSample[];
+  waterfallFetchResult: WaterfallFetchResult;
+  traceSamplesFetchResult: TraceSamplesFetchResult;
   environment: Environment;
   onSampleClick: (sample: { transactionId: string; traceId: string }) => void;
   onTabClick: (tab: string) => void;
@@ -38,10 +37,8 @@ interface Props {
 }
 
 export function WaterfallWithSummary({
-  waterfall,
-  isLoading,
-  isNotInitiated,
-  traceSamples,
+  waterfallFetchResult,
+  traceSamplesFetchResult,
   environment,
   onSampleClick,
   onTabClick,
@@ -53,21 +50,26 @@ export function WaterfallWithSummary({
 
   useEffect(() => {
     setSampleActivePage(0);
-  }, [traceSamples]);
+  }, [traceSamplesFetchResult.data.traceSamples]);
 
   const goToSample = (index: number) => {
     setSampleActivePage(index);
-    const sample = traceSamples[index];
+    const sample = traceSamplesFetchResult.data.traceSamples[index];
     onSampleClick(sample);
   };
 
-  const { entryWaterfallTransaction } = waterfall;
+  const { entryWaterfallTransaction } = waterfallFetchResult.waterfall;
+  const isLoading =
+    waterfallFetchResult.status === FETCH_STATUS.LOADING ||
+    traceSamplesFetchResult.status === FETCH_STATUS.LOADING;
+  const isSucceded =
+    waterfallFetchResult.status === FETCH_STATUS.SUCCESS &&
+    traceSamplesFetchResult.status === FETCH_STATUS.SUCCESS;
 
   if (
     !entryWaterfallTransaction &&
-    traceSamples.length === 0 &&
-    !isLoading &&
-    isNotInitiated
+    traceSamplesFetchResult.data.traceSamples.length === 0 &&
+    isSucceded
   ) {
     return (
       <EuiEmptyPrompt
@@ -98,9 +100,9 @@ export function WaterfallWithSummary({
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem>
-          {traceSamples.length > 0 && (
+          {traceSamplesFetchResult.data.traceSamples.length > 0 && (
             <EuiPagination
-              pageCount={traceSamples.length}
+              pageCount={traceSamplesFetchResult.data.traceSamples.length}
               activePage={sampleActivePage}
               onPageClick={goToSample}
               compressed
@@ -119,7 +121,7 @@ export function WaterfallWithSummary({
               <MaybeViewTraceLink
                 isLoading={isLoading}
                 transaction={entryTransaction}
-                waterfall={waterfall}
+                waterfall={waterfallFetchResult.waterfall}
                 environment={environment}
               />
             </EuiFlexItem>
@@ -136,8 +138,13 @@ export function WaterfallWithSummary({
         </>
       ) : (
         <TransactionSummary
-          errorCount={waterfall.apiResponse.errorDocs.length}
-          totalDuration={waterfall.rootTransaction?.transaction.duration.us}
+          errorCount={
+            waterfallFetchResult.waterfall.apiResponse.errorDocs.length
+          }
+          totalDuration={
+            waterfallFetchResult.waterfall.rootTransaction?.transaction.duration
+              .us
+          }
           transaction={entryTransaction}
         />
       )}
@@ -150,7 +157,7 @@ export function WaterfallWithSummary({
         serviceName={serviceName}
         waterfallItemId={waterfallItemId}
         onTabClick={onTabClick}
-        waterfall={waterfall}
+        waterfall={waterfallFetchResult.waterfall}
         isLoading={isLoading}
       />
     </>
