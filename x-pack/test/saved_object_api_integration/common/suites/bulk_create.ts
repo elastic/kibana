@@ -204,8 +204,8 @@ export function bulkCreateTestSuiteFactory(context: FtrProviderContext, useEsArc
               'x-pack/test/saved_object_api_integration/common/fixtures/es_archiver/saved_objects/spaces'
             );
           } else {
+            await testDataLoader.deleteAllSavedObjectsFromKibanaIndex();
             await testDataLoader.deleteFtrSpaces();
-            await testDataLoader.deleteFtrSavedObjectsData();
           }
         });
 

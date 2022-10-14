@@ -60,6 +60,7 @@ export function getTestDataLoader({ getService }) {
   const kbnServer = getService('kibanaServer');
   const supertest = getService('supertest');
   const log = getService('log');
+  const es = getService('es');
 
   return {
     createFtrSpaces: async () => {
@@ -71,8 +72,11 @@ export function getTestDataLoader({ getService }) {
     },
 
     deleteFtrSpaces: async () => {
-      log.debug('Attempting to delete Space 1 and Space 2');
-      await Promise.all([spacesService.delete(SPACE_1.id), spacesService.delete(SPACE_2.id)]);
+      log.debug('Attempting to delete Space 1');
+      await spacesService.delete(SPACE_1.id);
+
+      log.debug('Attempting to delete Space 2');
+      await spacesService.delete(SPACE_2.id);
     },
 
     createFtrSavedObjectsData: async (
@@ -116,12 +120,38 @@ export function getTestDataLoader({ getService }) {
       ];
 
       log.debug(`Attempting to remove data from the following spaces: ${allSpacesIds.join(', ')}`);
-
       for (const spaceId of allSpacesIds) {
         log.debug(`Attempting to remove data from ${spaceId}`);
         await kbnServer.savedObjects.cleanStandardList({ space: spaceId, force: true });
-        await kbnServer.savedObjects.clean({ space: spaceId, types: ['sharedtype'], force: true });
+        await kbnServer.savedObjects.clean({
+          space: spaceId,
+          types: ['sharedtype'],
+          force: true,
+        });
       }
+    },
+
+    deleteAllSavedObjectsFromKibanaIndex: async () => {
+      await es.deleteByQuery({
+        index: '.kibana',
+        wait_for_completion: true,
+        body: {
+          conflicts: 'proceed',
+          query: {
+            bool: {
+              must_not: [
+                {
+                  term: {
+                    type: {
+                      value: 'space',
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        },
+      });
     },
   };
 }
