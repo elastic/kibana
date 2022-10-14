@@ -75,7 +75,14 @@ export const FileCard: FunctionComponent<Props> = ({ file }) => {
       }
       description={
         <>
-          <EuiText size="s">
+          <EuiText
+            size="xs"
+            css={css`
+              overflow: hidden;
+              white-space: nowrap;
+              text-overflow: ellipsis;
+            `}
+          >
             <strong>
               {file.name}.{file.extension}
             </strong>

@@ -26,7 +26,7 @@ export const FileGrid: FunctionComponent = () => {
     <div
       css={css`
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(calc(${euiTheme.size.xxxxl} * 2.5), 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(calc(${euiTheme.size.xxxxl} * 3), 1fr));
         gap: ${euiTheme.size.m};
       `}
     >
