@@ -41,6 +41,8 @@ import {
   getTokenInfo,
   offsetToRowColumn,
   monacoPositionToOffset,
+  createEditOperation,
+  MARKER,
 } from './math_completion';
 import { LANGUAGE_ID } from './math_tokenization';
 import { MemoizedFormulaHelp } from './formula_help';
@@ -48,7 +50,7 @@ import { MemoizedFormulaHelp } from './formula_help';
 import './formula.scss';
 import { FormulaIndexPatternColumn } from '../formula';
 import { insertOrReplaceFormulaColumn } from '../parse';
-import { filterByVisibleOperation } from '../util';
+import { filterByVisibleOperation, nonNullable } from '../util';
 import { getColumnTimeShiftWarnings, getDateHistogramInterval } from '../../../../time_shift_utils';
 
 function tableHasData(
@@ -84,6 +86,8 @@ export const WrappedFormulaEditor = ({
 };
 
 const MemoizedFormulaEditor = React.memo(FormulaEditor);
+
+const namedArgumentsTypes = new Set(['kql', 'lucene', 'shift', 'reducedTimeRange']);
 
 export function FormulaEditor({
   layer,
@@ -363,7 +367,7 @@ export function FormulaEditor({
             }
             return newWarnings;
           })
-          .filter((marker) => marker);
+          .filter(nonNullable);
         setWarnings(markers.map(({ severity, message }) => ({ severity, message })));
         monaco.editor.setModelMarkers(editorModel.current, 'LENS', markers);
       }
@@ -533,47 +537,44 @@ export function FormulaEditor({
           const isSingleQuoteCase = /'LENS_MATH_MARKER/;
           // Make sure that we are only adding kql='' or lucene='', and also
           // check that the = sign isn't inside the KQL expression like kql='='
-          if (
-            !tokenInfo ||
-            typeof tokenInfo.ast === 'number' ||
-            tokenInfo.ast.type !== 'namedArgument' ||
-            (tokenInfo.ast.name !== 'kql' &&
-              tokenInfo.ast.name !== 'lucene' &&
-              tokenInfo.ast.name !== 'shift' &&
-              tokenInfo.ast.name !== 'reducedTimeRange') ||
-            (tokenInfo.ast.value !== 'LENS_MATH_MARKER' &&
-              !isSingleQuoteCase.test(tokenInfo.ast.value))
-          ) {
-            return;
+          if (tokenInfo) {
+            if (
+              typeof tokenInfo.ast === 'number' ||
+              tokenInfo.ast.type !== 'namedArgument' ||
+              !namedArgumentsTypes.has(tokenInfo.ast.name) ||
+              (tokenInfo.ast.value !== MARKER && !isSingleQuoteCase.test(tokenInfo.ast.value))
+            ) {
+              return;
+            }
           }
 
           let editOperation: monaco.editor.IIdentifiedSingleEditOperation | null = null;
+
           const cursorOffset = 2;
           if (char === '=') {
-            editOperation = {
-              range: {
-                ...currentPosition,
-                // Insert after the current char
-                startColumn: currentPosition.startColumn + 1,
-                endColumn: currentPosition.startColumn + 1,
-              },
-              text: `''`,
-            };
+            // check also the previous char whether it was already a =
+            // to avoid infinite loops
+            if (!tokenInfo && currentText.charAt(offset - 1) !== '=') {
+              editOperation = createEditOperation('=', currentPosition, 1);
+            }
+            if (tokenInfo) {
+              editOperation = createEditOperation(`''`, currentPosition, 1);
+            }
           }
+
+          if (!tokenInfo && !editOperation) {
+            return;
+          }
+
           if (
             char === "'" &&
+            tokenInfo?.ast &&
+            typeof tokenInfo.ast !== 'number' &&
+            'name' in tokenInfo.ast &&
             tokenInfo.ast.name !== 'shift' &&
             tokenInfo.ast.name !== 'reducedTimeRange'
           ) {
-            editOperation = {
-              range: {
-                ...currentPosition,
-                // Insert after the current char
-                startColumn: currentPosition.startColumn,
-                endColumn: currentPosition.startColumn + 1,
-              },
-              text: `\\'`,
-            };
+            editOperation = createEditOperation(`\\'`, currentPosition);
           }
 
           if (editOperation) {
