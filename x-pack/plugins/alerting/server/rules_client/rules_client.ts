@@ -1806,8 +1806,7 @@ export class RulesClient {
       kueryNodeFilterWithAuth
     );
 
-    if (taskIdsToDelete) {
-      // can be taskIdsToDelete false?
+    if (taskIdsToDelete.length > 0) {
       this.taskManager.bulkRemoveIfExist(taskIdsToDelete);
     }
 
