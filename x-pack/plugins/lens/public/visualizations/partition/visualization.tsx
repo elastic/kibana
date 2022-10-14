@@ -529,7 +529,7 @@ export const getPieVisualization = ({
   getSupportedActionsForLayer(layerId, state) {
     const layerInQuestion = state.layers.find((layer) => layer.layerId === layerId);
 
-    if (!layerInQuestion) {
+    if (!layerInQuestion || state.shape === PieChartTypes.MOSAIC) {
       return [];
     }
 

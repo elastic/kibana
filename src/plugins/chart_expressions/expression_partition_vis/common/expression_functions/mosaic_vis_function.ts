@@ -25,11 +25,10 @@ export const mosaicVisFunction = (): MosaicVisExpressionFunctionDefinition => ({
   inputTypes: ['datatable'],
   help: strings.getPieVisFunctionName(),
   args: {
-    metrics: {
+    metric: {
       types: ['string', 'vis_dimension'],
       help: strings.getMetricArgHelp(),
       required: true,
-      multi: true,
     },
     buckets: {
       types: ['string', 'vis_dimension'],
@@ -118,8 +117,7 @@ export const mosaicVisFunction = (): MosaicVisExpressionFunctionDefinition => ({
       throw new Error(errors.splitRowAndSplitColumnAreSpecifiedError());
     }
 
-    args.metrics.forEach((accessor) => validateAccessor(accessor, context.columns));
-
+    validateAccessor(args.metric, context.columns);
     if (args.buckets) {
       args.buckets.forEach((bucket) => validateAccessor(bucket, context.columns));
     }
@@ -138,7 +136,7 @@ export const mosaicVisFunction = (): MosaicVisExpressionFunctionDefinition => ({
         handlers.getExecutionContext?.()?.description,
       palette: args.palette,
       dimensions: {
-        metrics: args.metrics,
+        metrics: [args.metric],
         buckets: args.buckets,
         splitColumn: args.splitColumn,
         splitRow: args.splitRow,
@@ -152,7 +150,7 @@ export const mosaicVisFunction = (): MosaicVisExpressionFunctionDefinition => ({
       const logTable = prepareLogTable(
         context,
         [
-          [args.metrics, strings.getSliceSizeHelp()],
+          [[args.metric], strings.getSliceSizeHelp()],
           [args.buckets, strings.getSliceHelp()],
           [args.splitColumn, strings.getColumnSplitHelp()],
           [args.splitRow, strings.getRowSplitHelp()],

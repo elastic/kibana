@@ -58,7 +58,6 @@ interface VisCommonParams {
 }
 
 interface VisCommonConfig extends VisCommonParams {
-  metrics: Array<ExpressionValueVisDimension | string>;
   splitColumn?: Array<ExpressionValueVisDimension | string>;
   splitRow?: Array<ExpressionValueVisDimension | string>;
   labels: ExpressionValuePartitionLabels;
@@ -79,6 +78,7 @@ export interface PartitionVisParams extends VisCommonParams {
 }
 
 export interface PieVisConfig extends VisCommonConfig {
+  metrics: Array<ExpressionValueVisDimension | string>;
   buckets?: Array<ExpressionValueVisDimension | string>;
   partitionByColumn?: boolean;
   isDonut: boolean;
@@ -90,16 +90,19 @@ export interface PieVisConfig extends VisCommonConfig {
 }
 
 export interface TreemapVisConfig extends VisCommonConfig {
+  metrics: Array<ExpressionValueVisDimension | string>;
   buckets?: Array<ExpressionValueVisDimension | string>;
   nestedLegend: boolean;
 }
 
 export interface MosaicVisConfig extends VisCommonConfig {
+  metric: ExpressionValueVisDimension | string;
   buckets?: Array<ExpressionValueVisDimension | string>;
   nestedLegend: boolean;
 }
 
 export interface WaffleVisConfig extends VisCommonConfig {
+  metrics: Array<ExpressionValueVisDimension | string>;
   bucket?: ExpressionValueVisDimension | string;
   showValuesInLegend: boolean;
 }

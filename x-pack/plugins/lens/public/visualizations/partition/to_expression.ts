@@ -212,24 +212,28 @@ const generateTreemapVisAst: GenerateExpressionAstFunction = (...rest) => {
   };
 };
 
-const generateMosaicVisAst: GenerateExpressionAstFunction = (...rest) => ({
-  type: 'expression',
-  chain: [
-    {
-      type: 'function',
-      function: 'mosaicVis',
-      arguments: {
-        ...generateCommonArguments(...rest),
-        // flip order of bucket dimensions so the rows are fetched before the columns to keep them stable
-        buckets: rest[2]
-          .filter(({ columnId }) => !isCollapsed(columnId, rest[3]))
-          .reverse()
-          .map((o) => o.columnId)
-          .map(prepareDimension),
+const generateMosaicVisAst: GenerateExpressionAstFunction = (...rest) => {
+  const { metrics, ...args } = generateCommonArguments(...rest);
+  return {
+    type: 'expression',
+    chain: [
+      {
+        type: 'function',
+        function: 'mosaicVis',
+        arguments: {
+          metric: metrics,
+          // flip order of bucket dimensions so the rows are fetched before the columns to keep them stable
+          buckets: rest[2]
+            .filter(({ columnId }) => !isCollapsed(columnId, rest[3]))
+            .reverse()
+            .map((o) => o.columnId)
+            .map(prepareDimension),
+          ...args,
+        },
       },
-    },
-  ],
-});
+    ],
+  };
+};
 
 const generateWaffleVisAst: GenerateExpressionAstFunction = (...rest) => {
   const { buckets, nestedLegend, ...args } = generateCommonArguments(...rest);
