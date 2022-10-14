@@ -232,7 +232,7 @@ A pre-aggregated document where `_doc_count` is the number of transaction events
 
 ```
 {
-  "_doc_count": 2,
+  "_doc_count": 627,
   "@timestamp": "2021-09-01T10:00:00.000Z",
   "processor.event": "metric",
   "metricset.name": "service",
@@ -243,7 +243,7 @@ A pre-aggregated document where `_doc_count` is the number of transaction events
   "transaction": {
     "duration.summary": {
         "sum": 376492831,
-        "value_count": 775
+        "value_count": 627
     },
     "success_count": 476,
     "failure_count": 151,
