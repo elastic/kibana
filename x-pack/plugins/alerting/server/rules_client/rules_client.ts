@@ -1790,7 +1790,7 @@ export class RulesClient {
         } catch (error) {
           this.auditLogger?.log(
             ruleAuditEvent({
-              action: RuleAuditAction.BULK_EDIT,
+              action: RuleAuditAction.BULK_DELETE,
               error,
             })
           );
