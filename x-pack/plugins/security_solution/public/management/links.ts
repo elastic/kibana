@@ -226,6 +226,13 @@ const excludeLinks = (linkIds: SecurityPageName[]) => ({
   links: links.links?.filter((link) => !linkIds.includes(link.id)),
 });
 
+const getHostIsolationExceptionTotal = async (http: CoreStart['http']) => {
+  const hostIsolationExceptionsApiClientInstance =
+    HostIsolationExceptionsApiClient.getInstance(http);
+  const summaryResponse = await hostIsolationExceptionsApiClientInstance.summary();
+  return summaryResponse.total;
+};
+
 export const getManagementFilteredLinks = async (
   core: CoreStart,
   plugins: StartPlugins
@@ -241,14 +248,11 @@ export const getManagementFilteredLinks = async (
         SecurityPageName.responseActionsHistory,
       ]);
     }
-    const hostIsolationExceptionsApiClientInstance = HostIsolationExceptionsApiClient.getInstance(
-      core.http
-    );
-    const summaryResponse = await hostIsolationExceptionsApiClientInstance.summary();
 
     if (!canAccessResponseActionsHistory) {
       // <= enterprise license
-      if (!canIsolateHost && !summaryResponse.total) {
+      const hostExceptionCount = await getHostIsolationExceptionTotal(core.http);
+      if (!canIsolateHost && !hostExceptionCount) {
         return excludeLinks([
           SecurityPageName.hostIsolationExceptions,
           SecurityPageName.responseActionsHistory,
@@ -256,7 +260,8 @@ export const getManagementFilteredLinks = async (
       }
       return excludeLinks([SecurityPageName.responseActionsHistory]);
     } else if (!canIsolateHost) {
-      if (!summaryResponse.total) {
+      const hostExceptionCount = await getHostIsolationExceptionTotal(core.http);
+      if (!hostExceptionCount) {
         // <= platinum so exclude also links that require enterprise
         return excludeLinks([
           SecurityPageName.hostIsolationExceptions,
