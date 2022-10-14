@@ -9,7 +9,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 
-import { EmptyViewerState } from './empty_viewer_state';
+import { EmptyViewerState } from '.';
 import { ListTypeText, ViewerStatus } from '../types';
 
 describe('EmptyViewerState', () => {

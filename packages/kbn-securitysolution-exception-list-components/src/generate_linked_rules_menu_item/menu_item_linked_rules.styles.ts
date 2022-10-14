@@ -5,9 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
 
-export * from './conditions';
-export * from './header';
-export * from './meta';
-export * from './comments';
-export * from './exception_item_card';
+export const containerCss = css`
+  border-bottom: 1px solid ${euiThemeVars.euiColorLightShade};
+`;
+
+export const itemContentCss = css`
+  color: ${euiThemeVars.euiColorPrimary};
+  flex-basis: content;
+`;

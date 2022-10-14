@@ -26,7 +26,7 @@ const euiBadgeFontFamily = css`
 export const MetaInfoDetails = memo<MetaInfoDetailsProps>(
   ({ label, lastUpdate, lastUpdateValue, dataTestSubj }) => {
     return (
-      <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false} responsive={false}>
+      <EuiFlexGroup alignItems="center" gutterSize="s" wrap responsive>
         <EuiFlexItem grow={false}>
           <EuiText size="xs" css={euiBadgeFontFamily}>
             {label}
@@ -43,7 +43,7 @@ export const MetaInfoDetails = memo<MetaInfoDetailsProps>(
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false} data-test-subj={`${dataTestSubj}lastUpdateValue`}>
-          <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center" wrap={false}>
+          <EuiFlexGroup responsive gutterSize="xs" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiBadge color="hollow" css={euiBadgeFontFamily}>
                 {lastUpdateValue}

@@ -11,7 +11,7 @@ import React from 'react';
 import { getExceptionListItemSchemaMock } from '../test_helpers/exception_list_item_schema.mock';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
-import { ExceptionItems } from './exception_items';
+import { ExceptionItems } from '.';
 
 import { ViewerStatus } from '../types';
 import { render } from '@testing-library/react';

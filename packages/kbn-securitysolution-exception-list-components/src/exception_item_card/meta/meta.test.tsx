@@ -10,10 +10,10 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { getExceptionListItemSchemaMock } from '../../test_helpers/exception_list_item_schema.mock';
 
-import { ExceptionItemCardMetaInfo } from './meta';
-import { RuleReference } from '../../types';
+import { ExceptionItemCardMetaInfo } from '.';
+import { Rule } from '../../types';
 
-const ruleReferences = [
+const ruleReferences: Rule[] = [
   {
     exception_lists: [
       {
@@ -39,7 +39,7 @@ describe('ExceptionItemCardMetaInfo', () => {
     const wrapper = render(
       <ExceptionItemCardMetaInfo
         item={getExceptionListItemSchemaMock()}
-        references={ruleReferences as unknown as RuleReference[]}
+        rules={ruleReferences}
         dataTestSubj="exceptionItemMeta"
         securityLinkAnchorComponent={() => null}
         formattedDateComponent={({ fieldName, value }) => (
@@ -62,7 +62,7 @@ describe('ExceptionItemCardMetaInfo', () => {
     const wrapper = render(
       <ExceptionItemCardMetaInfo
         item={getExceptionListItemSchemaMock()}
-        references={ruleReferences as unknown as RuleReference[]}
+        rules={ruleReferences}
         dataTestSubj="exceptionItemMeta"
         securityLinkAnchorComponent={() => null}
         formattedDateComponent={({ fieldName, value }) => (
@@ -84,71 +84,67 @@ describe('ExceptionItemCardMetaInfo', () => {
     const wrapper = render(
       <ExceptionItemCardMetaInfo
         item={getExceptionListItemSchemaMock()}
-        references={ruleReferences as unknown as RuleReference[]}
+        rules={ruleReferences}
         dataTestSubj="exceptionItemMeta"
         securityLinkAnchorComponent={() => null}
         formattedDateComponent={() => null}
       />
     );
 
-    expect(wrapper.getByTestId('exceptionItemMetaAffectedRulesButton')).toHaveTextContent(
-      'Affects 1 rule'
-    );
+    expect(wrapper.getByTestId('exceptionItemMetaEmptyButton')).toHaveTextContent('Affects 1 rule');
   });
 
-  it('it renders references info when multiple references exist', () => {
+  it('it should render references info when multiple references exist', () => {
     const wrapper = render(
       <ExceptionItemCardMetaInfo
         item={getExceptionListItemSchemaMock()}
-        references={
-          [
-            {
-              exception_lists: [
-                {
-                  id: '123',
-                  list_id: 'i_exist',
-                  namespace_type: 'single',
-                  type: 'detection',
-                },
-                {
-                  id: '456',
-                  list_id: 'i_exist_2',
-                  namespace_type: 'single',
-                  type: 'detection',
-                },
-              ],
-              id: '1a2b3c',
-              name: 'Simple Rule Query',
-              rule_id: 'rule-2',
-            },
-            {
-              exceptionLists: [
-                {
-                  id: '123',
-                  list_id: 'i_exist',
-                  namespace_type: 'single',
-                  type: 'detection',
-                },
-                {
-                  id: '456',
-                  list_id: 'i_exist_2',
-                  namespace_type: 'single',
-                  type: 'detection',
-                },
-              ],
-              id: 'aaa',
-              name: 'Simple Rule Query 2',
-              rule_id: 'rule-3',
-            },
-          ] as unknown as RuleReference[]
-        }
+        rules={[
+          {
+            exception_lists: [
+              {
+                id: '123',
+                list_id: 'i_exist',
+                namespace_type: 'single',
+                type: 'detection',
+              },
+              {
+                id: '456',
+                list_id: 'i_exist_2',
+                namespace_type: 'single',
+                type: 'detection',
+              },
+            ],
+            id: '1a2b3c',
+            name: 'Simple Rule Query',
+            rule_id: 'rule-2',
+          },
+          {
+            exception_lists: [
+              {
+                id: '123',
+                list_id: 'i_exist',
+                namespace_type: 'single',
+                type: 'detection',
+              },
+              {
+                id: '456',
+                list_id: 'i_exist_2',
+                namespace_type: 'single',
+                type: 'detection',
+              },
+            ],
+            id: 'aaa',
+            name: 'Simple Rule Query 2',
+            rule_id: 'rule-3',
+          },
+        ]}
         dataTestSubj="exceptionItemMeta"
         securityLinkAnchorComponent={() => null}
         formattedDateComponent={() => null}
       />
     );
 
-    expect(wrapper.getByTestId('exceptionItemMetaAffectedRulesButton')).toHaveTextContent(
+    expect(wrapper.getByTestId('exceptionItemMetaEmptyButton')).toHaveTextContent(
       'Affects 2 rules'
     );
   });
