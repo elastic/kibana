@@ -142,7 +142,7 @@ describe('Layout', () => {
     });
 
     it('should pass undefined for onResetChartHeight to Chart when panels mode is PANELS_MODE.FIXED', async () => {
-      const component = await mountComponent();
+      const component = await mountComponent({ topPanelHeight: 123 });
       expect(component.find(Chart).prop('onResetChartHeight')).toBeDefined();
       setBreakpoint(component, 's');
       expect(component.find(Chart).prop('onResetChartHeight')).toBeUndefined();
@@ -176,19 +176,14 @@ describe('Layout', () => {
 
     it('should pass undefined for onResetChartHeight to Chart when the chart is the default height', async () => {
       const component = await mountComponent({
+        topPanelHeight: 123,
         onTopPanelHeightChange: jest.fn((topPanelHeight) => {
           component.setProps({ topPanelHeight });
         }),
       });
-      const defaultTopPanelHeight = component.find(Panels).prop('topPanelHeight');
-      const newTopPanelHeight = 123;
-      act(() => {
-        component.find(Panels).prop('onTopPanelHeightChange')!(newTopPanelHeight);
-      });
-      component.update();
       expect(component.find(Chart).prop('onResetChartHeight')).toBeDefined();
       act(() => {
-        component.find(Panels).prop('onTopPanelHeightChange')!(defaultTopPanelHeight);
+        component.find(Chart).prop('onResetChartHeight')!();
       });
       component.update();
       expect(component.find(Chart).prop('onResetChartHeight')).toBeUndefined();

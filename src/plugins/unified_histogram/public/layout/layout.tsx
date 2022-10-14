@@ -105,11 +105,13 @@ export const UnifiedHistogramLayout = ({
         : PANELS_MODE.RESIZABLE
       : PANELS_MODE.SINGLE;
 
+  const currentTopPanelHeight = topPanelHeight ?? defaultTopPanelHeight;
+
   const onResetChartHeight = useMemo(() => {
-    return topPanelHeight !== defaultTopPanelHeight && panelsMode === PANELS_MODE.RESIZABLE
+    return currentTopPanelHeight !== defaultTopPanelHeight && panelsMode === PANELS_MODE.RESIZABLE
       ? () => onTopPanelHeightChange?.(undefined)
       : undefined;
-  }, [defaultTopPanelHeight, onTopPanelHeightChange, panelsMode, topPanelHeight]);
+  }, [currentTopPanelHeight, defaultTopPanelHeight, onTopPanelHeightChange, panelsMode]);
 
   return (
     <>
@@ -132,7 +134,7 @@ export const UnifiedHistogramLayout = ({
         className={className}
         mode={panelsMode}
         resizeRef={resizeRef}
-        topPanelHeight={topPanelHeight ?? defaultTopPanelHeight}
+        topPanelHeight={currentTopPanelHeight}
         minTopPanelHeight={minTopPanelHeight}
         minMainPanelHeight={minMainPanelHeight}
         topPanel={<OutPortal node={topPanelNode} />}
