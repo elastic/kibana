@@ -69,7 +69,7 @@ export function streamFactory<T = unknown>(
   headers: Headers,
   logger: Logger,
   compressOverride: boolean = true,
-  flushFix: boolean = false
+  flushFix: boolean = true
 ): StreamFactoryReturnType<T> {
   let streamType: StreamType;
   const isCompressed = compressOverride && acceptCompression(headers);
