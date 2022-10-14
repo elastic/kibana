@@ -22,6 +22,7 @@ interface CloudUsage {
 
 export function createCloudUsageCollector(usageCollection: UsageCollectionSetup, config: Config) {
   const { isCloudEnabled, trialEndDate, isElasticStaffOwned } = config;
+  const trialEndDateMs = trialEndDate ? new Date(trialEndDate).getTime() : undefined;
   return usageCollection.makeUsageCollector<CloudUsage>({
     type: 'cloud',
     isReady: () => true,
@@ -36,7 +37,7 @@ export function createCloudUsageCollector(usageCollection: UsageCollectionSetup,
         isCloudEnabled,
         isElasticStaffOwned,
         trialEndDate,
-        ...(trialEndDate ? { inTrial: Date.now() <= new Date(trialEndDate).getTime() } : {}),
+        ...(trialEndDateMs ? { inTrial: Date.now() <= trialEndDateMs } : {}),
       };
     },
   });
