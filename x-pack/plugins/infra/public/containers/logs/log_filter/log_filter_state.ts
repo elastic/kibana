@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { buildEsQuery, DataViewBase, Query, AggregateQuery } from '@kbn/es-query';
+import { buildEsQuery, DataViewBase, Query, AggregateQuery, isOfQueryType } from '@kbn/es-query';
 import createContainer from 'constate';
 import { useCallback, useState } from 'react';
 import { useKibanaQuerySettings } from '../../../utils/use_kibana_query_settings';
@@ -35,15 +35,11 @@ export const useLogFilterState = ({ indexPattern }: { indexPattern: DataViewBase
     [indexPattern, kibanaQuerySettings]
   );
 
-  function isQuery(value: Query | AggregateQuery): value is Query {
-    return value.hasOwnProperty('query');
-  }
-
   const getLogFilterQuery = useCallback(
     (filterQuery: Query | AggregateQuery) => {
       try {
         // NOTE: We sync with the QueryString manager - and therefore other solutions - but we don't support SQL syntax.
-        if (!isQuery(filterQuery)) {
+        if (!isOfQueryType(filterQuery)) {
           throw new Error('Only Query types are supported');
         }
         const parsedQuery = parseQuery(filterQuery);
@@ -82,12 +78,14 @@ export const useLogFilterState = ({ indexPattern }: { indexPattern: DataViewBase
 
   useSubscription(
     useMemo(() => queryString.getUpdates$(), [queryString]),
-    {
-      next: useCallback(() => {
-        const esQuery = queryString.getQuery();
-        applyLogFilterQuery(esQuery);
-      }, [applyLogFilterQuery, queryString]),
-    }
+    useMemo(() => {
+      return {
+        next: () => {
+          const esQuery = queryString.getQuery();
+          applyLogFilterQuery(esQuery);
+        },
+      };
+    }, [applyLogFilterQuery, queryString])
   );
 
   return {
