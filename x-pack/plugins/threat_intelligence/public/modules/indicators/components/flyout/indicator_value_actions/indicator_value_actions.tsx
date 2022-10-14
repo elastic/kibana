@@ -15,10 +15,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Indicator } from '../../../../../../common/types/indicator';
-import { FilterInButtonIcon } from '../../../../query_bar/components/filter_in';
-import { FilterOutButtonIcon } from '../../../../query_bar/components/filter_out';
+import { FilterInButtonIcon, FilterOutButtonIcon } from '../../../../query_bar';
 import { AddToTimelineContextMenu } from '../../../../timeline/components/add_to_timeline';
-import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../../utils/field_value';
+import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../../utils';
 import { CopyToClipboardContextMenu } from '../../copy_to_clipboard';
 
 export const TIMELINE_BUTTON_TEST_ID = 'TimelineButton';
