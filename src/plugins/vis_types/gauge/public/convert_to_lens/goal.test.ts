@@ -104,31 +104,37 @@ describe('convertToLens', () => {
   });
 
   test('should return null if metrics count is more than 1', async () => {
-    mockGetColumnsFromVis.mockReturnValue({
-      metrics: ['1', '2'],
-      columns: [{ columnId: '2' }, { columnId: '1' }],
-    });
+    mockGetColumnsFromVis.mockReturnValue([
+      {
+        metrics: ['1', '2'],
+        columns: [{ columnId: '2' }, { columnId: '1' }],
+      },
+    ]);
     const result = await convertToLens(vis, timefilter);
     expect(mockGetColumnsFromVis).toBeCalledTimes(1);
     expect(result).toBeNull();
   });
   test('should return null if buckets count is more than 1', async () => {
-    mockGetColumnsFromVis.mockReturnValue({
-      metrics: [],
-      buckets: ['1', '2'],
-      columns: [{ columnId: '2' }, { columnId: '1' }],
-    });
+    mockGetColumnsFromVis.mockReturnValue([
+      {
+        metrics: [],
+        buckets: { all: ['1', '2'] },
+        columns: [{ columnId: '2' }, { columnId: '1' }],
+      },
+    ]);
     const result = await convertToLens(vis, timefilter);
     expect(mockGetColumnsFromVis).toBeCalledTimes(1);
     expect(result).toBeNull();
   });
 
   test('should return null if metric column data type is different from number', async () => {
-    mockGetColumnsFromVis.mockReturnValue({
-      metrics: ['1'],
-      buckets: ['2'],
-      columns: [{ columnId: '2' }, { columnId: '1', dataType: 'string' }],
-    });
+    mockGetColumnsFromVis.mockReturnValue([
+      {
+        metrics: ['1'],
+        buckets: { all: ['2'] },
+        columns: [{ columnId: '2' }, { columnId: '1', dataType: 'string' }],
+      },
+    ]);
     const result = await convertToLens(vis, timefilter);
     expect(mockGetColumnsFromVis).toBeCalledTimes(1);
     expect(result).toBeNull();
@@ -139,15 +145,17 @@ describe('convertToLens', () => {
       metricAccessor: '1',
     };
 
-    mockGetColumnsFromVis.mockReturnValue({
-      metrics: ['1'],
-      buckets: ['2'],
-      columns: [{ columnId: '2' }, { columnId: '1', dataType: 'number' }],
-      columnsWithoutReferenced: [
-        { columnId: '1', meta: { aggId: 'agg-1' } },
-        { columnId: '2', meta: { aggId: 'agg-2' } },
-      ],
-    });
+    mockGetColumnsFromVis.mockReturnValue([
+      {
+        metrics: ['1'],
+        buckets: { all: ['2'] },
+        columns: [{ columnId: '2' }, { columnId: '1', dataType: 'number' }],
+        columnsWithoutReferenced: [
+          { columnId: '1', meta: { aggId: 'agg-1' } },
+          { columnId: '2', meta: { aggId: 'agg-2' } },
+        ],
+      },
+    ]);
     mockGetConfiguration.mockReturnValue(config);
 
     const result = await convertToLens(vis, timefilter);

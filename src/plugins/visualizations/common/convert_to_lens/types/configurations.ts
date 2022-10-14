@@ -162,6 +162,7 @@ export interface XYConfiguration {
   fillOpacity?: number;
   hideEndzones?: boolean;
   valuesInLegend?: boolean;
+  showCurrentTimeMarker?: boolean;
 }
 
 export interface SortingState {

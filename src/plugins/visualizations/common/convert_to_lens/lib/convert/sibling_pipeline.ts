@@ -13,7 +13,7 @@ import { convertToSchemaConfig } from '../../../vis_schemas';
 export const convertToSiblingPipelineColumns = (
   columnConverterArgs: ExtendedColumnConverterArgs<SiblingPipelineMetric>
 ): AggBasedColumn | null => {
-  const { aggParams, label } = columnConverterArgs.agg;
+  const { aggParams, label, aggId } = columnConverterArgs.agg;
   if (!aggParams) {
     return null;
   }
@@ -23,7 +23,7 @@ export const convertToSiblingPipelineColumns = (
   }
 
   const customMetricColumn = convertMetricToColumns(
-    { ...convertToSchemaConfig(aggParams.customMetric), label },
+    { ...convertToSchemaConfig(aggParams.customMetric), label, aggId },
     columnConverterArgs.dataView,
     columnConverterArgs.aggs
   );

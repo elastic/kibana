@@ -22,14 +22,22 @@ export const getConfiguration = (
     bucketCollapseFn,
   }: {
     metrics: string[];
-    buckets: string[];
+    buckets: {
+      all: string[];
+      customBuckets: Record<string, string>;
+    };
     maxAccessor: string;
     columnsWithoutReferenced: Column[];
-    bucketCollapseFn?: Record<string, string | undefined>;
+    bucketCollapseFn?: Record<string, string[]>;
   }
 ): MetricVisConfiguration => {
   const [metricAccessor] = metrics;
-  const [breakdownByAccessor] = buckets;
+  const [breakdownByAccessor] = buckets.all;
+  const collapseFn = bucketCollapseFn
+    ? Object.keys(bucketCollapseFn).find((key) =>
+        bucketCollapseFn[key].includes(breakdownByAccessor)
+      )
+    : undefined;
   return {
     layerId,
     layerType: 'data',
@@ -37,7 +45,7 @@ export const getConfiguration = (
     metricAccessor,
     breakdownByAccessor,
     maxAccessor,
-    collapseFn: Object.values(bucketCollapseFn ?? {})[0],
+    collapseFn,
     subtitle: gauge.labels.show && gauge.style.subText ? gauge.style.subText : undefined,
   };
 };

@@ -7,10 +7,11 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { METRIC_TYPES } from '@kbn/data-plugin/public';
+import { IAggConfig, METRIC_TYPES } from '@kbn/data-plugin/public';
 import { AggBasedColumn, SchemaConfig, SupportedAggregation } from '../../common';
 import { convertBucketToColumns } from '../../common/convert_to_lens/lib/buckets';
 import { isSiblingPipeline } from '../../common/convert_to_lens/lib/utils';
+import { BucketColumn } from '../../common/convert_to_lens/lib';
 import { Schemas } from '../vis_schemas';
 
 export const isReferenced = (columnId: string, references: string[]) =>
@@ -25,14 +26,31 @@ export const getColumnsWithoutReferenced = (columns: AggBasedColumn[]) => {
 
 export const getBucketCollapseFn = (
   metrics: Array<SchemaConfig<SupportedAggregation>>,
-  customBucketColumns: AggBasedColumn[]
+  customBucketColumns: AggBasedColumn[],
+  customBucketsMap: Record<string, string>,
+  metricColumns: AggBasedColumn[]
 ) => {
-  const collapseFn = metrics.find((m) => isSiblingPipeline(m))?.aggType.split('_')[0];
-  return customBucketColumns.length
-    ? {
-        [customBucketColumns[0].columnId]: collapseFn,
+  const collapseFnMap: Record<string, string[]> = {
+    min: [],
+    max: [],
+    sum: [],
+    avg: [],
+  };
+  customBucketColumns.forEach((bucket) => {
+    const metricColumnsIds = Object.keys(customBucketsMap).filter(
+      (key) => customBucketsMap[key] === bucket.columnId
+    );
+    metricColumnsIds.forEach((metricColumnsId) => {
+      const metricColumn = metricColumns.find((c) => c.columnId === metricColumnsId)!;
+      const collapseFn = metrics
+        .find((m) => m.aggId === metricColumn.meta.aggId)
+        ?.aggType.split('_')[0];
+      if (collapseFn) {
+        collapseFnMap[collapseFn].push(bucket.columnId);
       }
-    : {};
+    });
+  });
+  return collapseFnMap;
 };
 
 export const getBucketColumns = (
@@ -67,7 +85,7 @@ export const getBucketColumns = (
   return columns;
 };
 
-export const isValidVis = (visSchemas: Schemas) => {
+export const isValidVis = (visSchemas: Schemas, supportMixedSiblingPipelineAggs?: boolean) => {
   const { metric } = visSchemas;
   const siblingPipelineAggs = metric.filter((m) => isSiblingPipeline(m));
 
@@ -76,7 +94,10 @@ export const isValidVis = (visSchemas: Schemas) => {
   }
 
   // doesn't support mixed sibling pipeline aggregations
-  if (siblingPipelineAggs.some((agg) => agg.aggType !== siblingPipelineAggs[0].aggType)) {
+  if (
+    siblingPipelineAggs.some((agg) => agg.aggType !== siblingPipelineAggs[0].aggType) &&
+    !supportMixedSiblingPipelineAggs
+  ) {
     return false;
   }
 
@@ -103,7 +124,8 @@ export const sortColumns = (
         ...acc,
         ...(key === 'metric' ? metricsWithoutDuplicates : visSchemas[key])?.reduce(
           (newAcc, schema) => {
-            newAcc[schema.aggId] = schema.accessor;
+            // metrics should always have sort more than buckets
+            newAcc[schema.aggId] = key === 'metric' ? schema.accessor : 1000 + schema.accessor;
             return newAcc;
           },
           {}
@@ -121,3 +143,36 @@ export const sortColumns = (
 };
 
 export const getColumnIds = (columns: AggBasedColumn[]) => columns.map(({ columnId }) => columnId);
+
+export const getCustomBucketColumns = (
+  customBucketsWithMetricIds: Array<{
+    customBucket: IAggConfig;
+    metricIds: string[];
+  }>,
+  metricColumns: AggBasedColumn[],
+  dataView: DataView,
+  aggs: Array<SchemaConfig<METRIC_TYPES>>,
+  dropEmptyRowsInDateHistogram?: boolean
+) => {
+  const customBucketColumns: Array<BucketColumn | null> = [];
+  const customBucketsMap: Record<string, string> = {};
+  customBucketsWithMetricIds.forEach((customBucketWithMetricIds) => {
+    const customBucketColumn = convertBucketToColumns(
+      { agg: customBucketWithMetricIds.customBucket, dataView, metricColumns, aggs },
+      true,
+      dropEmptyRowsInDateHistogram
+    );
+    customBucketColumns.push(customBucketColumn);
+    if (customBucketColumn) {
+      customBucketWithMetricIds.metricIds.forEach((metricAggId) => {
+        const metricColumnId = metricColumns.find(
+          (metricColumn) => metricColumn?.meta.aggId === metricAggId
+        )?.columnId;
+        if (metricColumnId) {
+          customBucketsMap[metricColumnId] = customBucketColumn.columnId;
+        }
+      });
+    }
+  });
+  return { customBucketColumns, customBucketsMap };
+};
