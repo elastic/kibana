@@ -101,7 +101,6 @@ import { createSubActionConnectorFramework } from './sub_action_framework';
 import { IServiceAbstract, SubActionConnectorType } from './sub_action_framework/types';
 import { SubActionConnector } from './sub_action_framework/sub_action_connector';
 import { CaseConnector } from './sub_action_framework/case';
-import { UnsecuredActionsClientAccessRegistry } from './unsecured_actions_client/unsecured_actions_client_access_registry';
 import { UnsecuredActionsClient } from './unsecured_actions_client/unsecured_actions_client';
 import { createBulkUnsecuredExecutionEnqueuerFunction } from './create_unsecured_execute_function';
 
@@ -120,7 +119,6 @@ export interface PluginSetupContract {
   >(
     connector: SubActionConnectorType<Config, Secrets>
   ): void;
-  registerUnsecuredActionsClientAccess(featureId: string): void;
   isPreconfiguredConnector(connectorId: string): boolean;
   getSubActionConnectorClass: <Config, Secrets>() => IServiceAbstract<Config, Secrets>;
   getCaseConnectorClass: <Config, Secrets>() => IServiceAbstract<Config, Secrets>;
@@ -194,7 +192,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
   private readonly preconfiguredActions: PreConfiguredAction[];
   private inMemoryMetrics: InMemoryMetrics;
   private kibanaIndex?: string;
-  private unsecuredActionsClientAccessRegistry?: UnsecuredActionsClientAccessRegistry;
 
   constructor(initContext: PluginInitializerContext) {
     this.logger = initContext.logger.get();
@@ -272,8 +269,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
     this.actionTypeRegistry = actionTypeRegistry;
     this.actionExecutor = actionExecutor;
     this.security = plugins.security;
-
-    this.unsecuredActionsClientAccessRegistry = new UnsecuredActionsClientAccessRegistry();
 
     setupSavedObjects(
       core.savedObjects,
@@ -369,9 +364,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         connector: SubActionConnectorType<Config, Secrets>
       ) => {
         subActionFramework.registerConnector(connector);
-      },
-      registerUnsecuredActionsClientAccess: (featureId: string) => {
-        this.unsecuredActionsClientAccessRegistry?.register(featureId);
       },
       isPreconfiguredConnector: (connectorId: string): boolean => {
         return !!this.preconfiguredActions.find(
@@ -471,7 +463,6 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
 
       return new UnsecuredActionsClient({
         internalSavedObjectsRepository,
-        unsecuredActionsClientAccessRegistry: this.unsecuredActionsClientAccessRegistry!,
         executionEnqueuer: createBulkUnsecuredExecutionEnqueuerFunction({
           taskManager: plugins.taskManager,
           connectorTypeRegistry: actionTypeRegistry!,

@@ -27,7 +27,6 @@ interface CreateBulkUnsecuredExecuteFunctionOptions {
 export interface ExecuteOptions extends Pick<ActionExecutorOptions, 'params' | 'source'> {
   id: string;
   executionId: string;
-  consumer?: string;
   relatedSavedObjects?: RelatedSavedObjects;
 }
 
@@ -35,7 +34,6 @@ export interface ActionTaskParams extends Pick<ActionExecutorOptions, 'params'> 
   actionId: string;
   apiKey: string | null;
   executionId: string;
-  consumer?: string;
   relatedSavedObjects?: RelatedSavedObjects;
 }
 
@@ -117,7 +115,6 @@ export function createBulkUnsecuredExecutionEnqueuerFunction({
             params: actionToExecute.params,
             apiKey: null,
             executionId: actionToExecute.executionId,
-            consumer: actionToExecute.consumer,
             relatedSavedObjects: relatedSavedObjectWithRefs,
           },
           references: taskReferences,
