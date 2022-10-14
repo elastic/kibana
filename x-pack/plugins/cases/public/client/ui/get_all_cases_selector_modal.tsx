@@ -7,8 +7,9 @@
 
 import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { AllCasesSelectorModalProps } from '../../components/all_cases/selector_modal';
-import { CasesProvider, CasesContextProps } from '../../components/cases_context';
+import type { AllCasesSelectorModalProps } from '../../components/all_cases/selector_modal';
+import type { CasesContextProps } from '../../components/cases_context';
+import { CasesProvider } from '../../components/cases_context';
 
 type GetAllCasesSelectorModalPropsInternal = AllCasesSelectorModalProps & CasesContextProps;
 export type GetAllCasesSelectorModalProps = Omit<
