@@ -5,10 +5,11 @@
  * 2.0.
  */
 import {
-  tap,
   map,
+  tap,
   from,
   finalize,
+  switchMap,
   Observable,
   shareReplay,
   debounceTime,
@@ -16,18 +17,9 @@ import {
   combineLatest,
   BehaviorSubject,
   distinctUntilChanged,
-  combineLatestWith,
 } from 'rxjs';
 import { FileJSON } from '../../../common';
 import { FilesClient } from '../../types';
-
-const filterFiles = (files: FileJSON[], filter: undefined | string) => {
-  if (!filter) return files;
-  const lowerFilter = filter.toLowerCase();
-  return files.filter((file) => {
-    return file.name.toLowerCase().includes(lowerFilter);
-  });
-};
 
 export class FilePickerState {
   /**
@@ -35,26 +27,33 @@ export class FilePickerState {
    */
   public readonly selectedFileIds$ = new BehaviorSubject<string[]>([]);
 
-  /**
-   * File objects we have loaded on the front end, stored here so that it can
-   * easily be passed to all relevant UI.
-   *
-   * @note This is not explicitly kept in sync with the selected files!
-   */
-  public readonly files$ = new BehaviorSubject<FileJSON[]>([]);
   public readonly isLoading$ = new BehaviorSubject<boolean>(false);
   public readonly loadingError$ = new BehaviorSubject<undefined | Error>(undefined);
   public readonly hasFiles$ = new BehaviorSubject<boolean>(false);
   public readonly query$ = new BehaviorSubject<undefined | string>(undefined);
   public readonly currentPage$ = new BehaviorSubject<number>(0);
   public readonly totalPages$ = new BehaviorSubject<undefined | number>(undefined);
+  /**
+   * File objects we have loaded on the front end, stored here so that it can
+   * easily be passed to all relevant UI.
+   *
+   * @note This is not explicitly kept in sync with the selected files!
+   */
+  public readonly files$ = combineLatest([
+    this.currentPage$.pipe(distinctUntilChanged()),
+    this.query$.pipe(distinctUntilChanged(), debounceTime(100)),
+  ]).pipe(
+    switchMap(([page, query]) => this.sendRequest(page, query)),
+    tap(({ total }) => this.updateTotalPages({ total })),
+    map(({ files }) => files),
+    shareReplay()
+  );
 
   /**
    * This is how we keep a deduplicated list of file ids representing files a user
    * has selected
    */
   private readonly fileSet = new Set<string>();
-  private readonly unfilteredFiles$ = new BehaviorSubject<FileJSON[]>([]);
   private readonly subscriptions: Subscription[] = [];
 
   constructor(
@@ -62,27 +61,12 @@ export class FilePickerState {
     private readonly kind: string,
     public readonly pageSize: number
   ) {
-    this.subscriptions = [
-      this.unfilteredFiles$
-        .pipe(
-          map((files) => files.length > 0),
-          distinctUntilChanged()
-        )
-        .subscribe(this.hasFiles$),
-
-      combineLatest([this.unfilteredFiles$, this.query$.pipe(debounceTime(100))])
-        .pipe(
-          map(([files, query]) => filterFiles(files, query)),
-          // capture total pages after filtering
-          tap((files) => this.totalPages$.next(Math.ceil(files.length / this.pageSize))),
-          // then paginate
-          combineLatestWith(this.currentPage$.pipe(distinctUntilChanged())),
-          map(([files, page]) => files.slice(page * this.pageSize, (page + 1) * this.pageSize)),
-          shareReplay()
-        )
-        .subscribe(this.files$),
-    ];
+    this.subscriptions = [];
   }
+
+  private updateTotalPages = ({ total }: { total: number }): void => {
+    this.totalPages$.next(Math.ceil(total / this.pageSize));
+  };
 
   private sendNextSelectedFiles() {
     this.selectedFileIds$.next(this.getSelectedFileIds());
@@ -93,26 +77,36 @@ export class FilePickerState {
     this.sendNextSelectedFiles();
   };
 
-  private sendRequest = (): Observable<void> => {
-    return from(
+  private abort: undefined | (() => void) = undefined;
+  private sendRequest = (
+    page: number,
+    query: undefined | string
+  ): Observable<{ files: FileJSON[]; total: number }> => {
+    if (this.abort) this.abort();
+    this.isLoading$.next(true);
+    this.loadingError$.next(undefined);
+
+    const abortController = new AbortController();
+    this.abort = () => {
+      abortController.abort();
+    };
+
+    const request$ = from(
       this.client.list({
         kind: this.kind,
-        page: 1,
-        perPage: 1000 /* TODO: we should filter server side */,
+        name: query ? [query] : undefined,
+        page: page + 1,
+        perPage: this.pageSize,
+        abortSignal: abortController.signal,
       })
     ).pipe(
-      map(({ files }) => {
-        this.unfilteredFiles$.next(files);
+      finalize(() => {
+        this.isLoading$.next(false);
+        this.abort = undefined;
       }),
       shareReplay()
     );
-  };
 
-  public loadFiles = (): Observable<void> => {
-    this.isLoading$.next(true);
-    this.loadingError$.next(undefined);
-    const request$ = this.sendRequest().pipe(finalize(() => this.isLoading$.next(false)));
-    request$.subscribe({ error: (e) => this.loadingError$.next(e) });
     return request$;
   };
 

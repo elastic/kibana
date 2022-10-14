@@ -97,30 +97,59 @@ describe('FilePickerState', () => {
       expect(filePickerState.getSelectedFileIds()).toEqual(['a', 'b']);
     });
   });
-  it('loads and filters files', () => {
-    const files = [
-      { id: 'a', name: 'a' },
-      { id: 'b', name: 'b' },
-    ] as FileJSON[];
-    filesClient.list.mockImplementation(() => of({ files }) as any);
-    getTestScheduler().run(({ expectObservable, cold }) => {
-      const loadFiles$ = cold('a|').pipe(tap(() => filePickerState.loadFiles()));
-      expectObservable(loadFiles$).toBe('a|');
-      expectObservable(filePickerState.isLoading$).toBe('(010)-', [false, true, false]);
-      const inputMarble = '-----a--b--c--l|';
-      const query$ = cold(inputMarble).pipe(
-        tap((q) => {
-          filePickerState.setQuery(q === 'l' ? '' : q);
-        })
-      );
-      expectObservable(query$).toBe(inputMarble);
-      expectObservable(filePickerState.files$).toBe('(ab)-c--d--e--f', {
-        a: [], // init
-        b: files, // unfiltered
-        c: [files[0]], // filtered on "a"
-        d: [files[1]], // filtered on "b"
-        e: [], // filtered on "c"
-        f: files, // filtered on "", which should be unfiltered
+  it('calls the API with the expected args', () => {
+    getTestScheduler().run(({ expectObservable, cold, flush }) => {
+      const files = [
+        { id: 'a', name: 'a' },
+        { id: 'b', name: 'b' },
+      ] as FileJSON[];
+      filesClient.list.mockImplementation(() => of({ files }) as any);
+
+      const inputQuery = '-------a---b|';
+      const inputPage = ' ---------------2|';
+
+      const query$ = cold(inputQuery).pipe(tap((q) => filePickerState.setQuery(q)));
+      expectObservable(query$).toBe(inputQuery);
+
+      const page$ = cold(inputPage).pipe(tap((p) => filePickerState.setPage(+p)));
+      expectObservable(page$).toBe(inputPage);
+
+      expectObservable(filePickerState.files$, '----^').toBe('----a--b---c---d', {
+        a: files,
+        b: files,
+        c: files,
+        d: files,
+      });
+
+      flush();
+      expect(filesClient.list).toHaveBeenCalledTimes(4);
+      expect(filesClient.list).toHaveBeenNthCalledWith(1, {
+        abortSignal: expect.any(AbortSignal),
+        kind: 'test',
+        name: undefined,
+        page: 1,
+        perPage: 20,
+      });
+      expect(filesClient.list).toHaveBeenNthCalledWith(2, {
+        abortSignal: expect.any(AbortSignal),
+        kind: 'test',
+        name: ['a'],
+        page: 1,
+        perPage: 20,
+      });
+      expect(filesClient.list).toHaveBeenNthCalledWith(3, {
+        abortSignal: expect.any(AbortSignal),
+        kind: 'test',
+        name: ['b'],
+        page: 1,
+        perPage: 20,
+      });
+      expect(filesClient.list).toHaveBeenNthCalledWith(4, {
+        abortSignal: expect.any(AbortSignal),
+        kind: 'test',
+        name: ['b'],
+        page: 3,
+        perPage: 20,
       });
     });
   });
