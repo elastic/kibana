@@ -15,7 +15,7 @@ import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
 import { createAnomalyDetectionJobs } from '../../../lib/anomaly_detection/create_anomaly_detection_jobs';
 import { setupRequest } from '../../../lib/helpers/setup_request';
 import { getAllEnvironments } from '../../environments/get_all_environments';
-import { getSearchAggregatedTransactions } from '../../../lib/helpers/transactions';
+import { getSearchTransactionsEvents } from '../../../lib/helpers/transactions';
 import { notifyFeatureUsage } from '../../../feature';
 import { updateToV3 } from './update_to_v3';
 import { environmentStringRt } from '../../../../common/environment_rt';
@@ -97,7 +97,7 @@ const anomalyDetectionEnvironmentsRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
     const coreContext = await resources.context.core;
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+    const searchAggregatedTransactions = await getSearchTransactionsEvents({
       apmEventClient: setup.apmEventClient,
       config: setup.config,
       kuery: '',

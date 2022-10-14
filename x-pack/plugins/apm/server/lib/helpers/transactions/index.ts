@@ -17,7 +17,7 @@ import {
 import { APMConfig } from '../../..';
 import { APMEventClient } from '../create_es_client/create_apm_event_client';
 
-export async function getHasAggregatedTransactions({
+export async function getHasTransactionsEvents({
   start,
   end,
   apmEventClient,
@@ -54,7 +54,7 @@ export async function getHasAggregatedTransactions({
   return response.hits.total.value > 0;
 }
 
-export async function getSearchAggregatedTransactions({
+export async function getSearchTransactionsEvents({
   config,
   start,
   end,
@@ -70,11 +70,11 @@ export async function getSearchAggregatedTransactions({
   switch (config.searchAggregatedTransactions) {
     case SearchAggregatedTransactionSetting.always:
       return kuery
-        ? getHasAggregatedTransactions({ start, end, apmEventClient, kuery })
+        ? getHasTransactionsEvents({ start, end, apmEventClient, kuery })
         : true;
 
     case SearchAggregatedTransactionSetting.auto:
-      return getHasAggregatedTransactions({
+      return getHasTransactionsEvents({
         start,
         end,
         apmEventClient,

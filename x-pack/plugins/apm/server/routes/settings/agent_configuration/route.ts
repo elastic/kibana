@@ -23,7 +23,7 @@ import {
   serviceRt,
   agentConfigurationIntakeRt,
 } from '../../../../common/agent_configuration/runtime_types/agent_configuration_intake_rt';
-import { getSearchAggregatedTransactions } from '../../../lib/helpers/transactions';
+import { getSearchTransactionsEvents } from '../../../lib/helpers/transactions';
 import { syncAgentConfigsToApmPackagePolicies } from '../../fleet/sync_agent_configs_to_apm_package_policies';
 
 // get list of configurations
@@ -274,7 +274,7 @@ const listAgentConfigurationEnvironmentsRoute = createApmServerRoute({
     const coreContext = await context.core;
 
     const { serviceName, start, end } = params.query;
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+    const searchAggregatedTransactions = await getSearchTransactionsEvents({
       apmEventClient: setup.apmEventClient,
       config: setup.config,
       kuery: '',

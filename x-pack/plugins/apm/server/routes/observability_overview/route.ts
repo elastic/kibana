@@ -12,7 +12,7 @@ import { getServiceCount } from './get_service_count';
 import { getTransactionsPerMinute } from './get_transactions_per_minute';
 import { getHasData } from './has_data';
 import { rangeRt } from '../default_api_types';
-import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
+import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 
@@ -50,7 +50,7 @@ const observabilityOverviewRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
     const { bucketSize, intervalString, start, end } = resources.params.query;
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+    const searchAggregatedTransactions = await getSearchTransactionsEvents({
       apmEventClient: setup.apmEventClient,
       config: setup.config,
       start,

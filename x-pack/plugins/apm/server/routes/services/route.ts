@@ -19,7 +19,7 @@ import { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
 import { Annotation } from '@kbn/observability-plugin/common/annotations';
 import { apmServiceGroupMaxNumberOfServices } from '@kbn/observability-plugin/common';
 import { latencyAggregationTypeRt } from '../../../common/latency_aggregation_types';
-import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
+import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { getServiceInventorySearchSource } from '../../lib/helpers/get_service_inventory_search_source';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { getServiceAnnotations } from './annotations';
@@ -280,7 +280,7 @@ const serviceMetadataDetailsRoute = createApmServerRoute({
     const { serviceName } = params.path;
     const { start, end } = params.query;
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+    const searchAggregatedTransactions = await getSearchTransactionsEvents({
       apmEventClient: setup.apmEventClient,
       config: setup.config,
       start,
@@ -326,7 +326,7 @@ const serviceMetadataIconsRoute = createApmServerRoute({
     const { serviceName } = params.path;
     const { start, end } = params.query;
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+    const searchAggregatedTransactions = await getSearchTransactionsEvents({
       apmEventClient: setup.apmEventClient,
       config: setup.config,
       start,
@@ -391,7 +391,7 @@ const serviceTransactionTypesRoute = createApmServerRoute({
     return getServiceTransactionTypes({
       serviceName,
       setup,
-      searchAggregatedTransactions: await getSearchAggregatedTransactions({
+      searchAggregatedTransactions: await getSearchTransactionsEvents({
         apmEventClient: setup.apmEventClient,
         config: setup.config,
         start,
@@ -465,7 +465,7 @@ const serviceAnnotationsRoute = createApmServerRoute({
                 observability.setup.getScopedAnnotationsClient(context, request)
             )
           : undefined,
-        getSearchAggregatedTransactions({
+        getSearchTransactionsEvents({
           apmEventClient: setup.apmEventClient,
           config: setup.config,
           start,
@@ -598,7 +598,7 @@ const serviceThroughputRoute = createApmServerRoute({
       start,
       end,
     } = params.query;
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+    const searchAggregatedTransactions = await getSearchTransactionsEvents({
       ...setup,
       kuery,
       start,
@@ -693,7 +693,7 @@ const serviceInstancesMainStatisticsRoute = createApmServerRoute({
       end,
     } = params.query;
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+    const searchAggregatedTransactions = await getSearchTransactionsEvents({
       ...setup,
       kuery,
       start,
@@ -815,7 +815,7 @@ const serviceInstancesDetailedStatisticsRoute = createApmServerRoute({
       end,
     } = params.query;
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+    const searchAggregatedTransactions = await getSearchTransactionsEvents({
       ...setup,
       kuery,
       start,

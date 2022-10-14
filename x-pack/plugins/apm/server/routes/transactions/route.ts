@@ -11,7 +11,7 @@ import {
   LatencyAggregationType,
   latencyAggregationTypeRt,
 } from '../../../common/latency_aggregation_types';
-import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
+import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { getServiceTransactionGroups } from '../services/get_service_transaction_groups';
 import { getServiceTransactionGroupDetailedStatisticsPeriods } from '../services/get_service_transaction_group_detailed_statistics';
@@ -70,7 +70,7 @@ const transactionGroupsMainStatisticsRoute = createApmServerRoute({
       },
     } = params;
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+    const searchAggregatedTransactions = await getSearchTransactionsEvents({
       ...setup,
       kuery,
       start,
@@ -157,7 +157,7 @@ const transactionGroupsDetailedStatisticsRoute = createApmServerRoute({
       },
     } = params;
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+    const searchAggregatedTransactions = await getSearchTransactionsEvents({
       ...setup,
       kuery,
       start,
@@ -236,7 +236,7 @@ const transactionLatencyChartsRoute = createApmServerRoute({
       offset,
     } = params.query;
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+    const searchAggregatedTransactions = await getSearchTransactionsEvents({
       ...setup,
       kuery,
       start,
@@ -430,7 +430,7 @@ const transactionChartsErrorRateRoute = createApmServerRoute({
       offset,
     } = params.query;
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+    const searchAggregatedTransactions = await getSearchTransactionsEvents({
       ...setup,
       kuery,
       start,
@@ -497,7 +497,7 @@ const transactionChartsColdstartRateRoute = createApmServerRoute({
     const { environment, kuery, transactionType, start, end, offset } =
       params.query;
 
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+    const searchAggregatedTransactions = await getSearchTransactionsEvents({
       ...setup,
       kuery,
       start,
@@ -571,13 +571,12 @@ const transactionChartsColdstartRateByTransactionNameRoute =
         offset,
       } = params.query;
 
-      const searchAggregatedTransactions =
-        await getSearchAggregatedTransactions({
-          ...setup,
-          kuery,
-          start,
-          end,
-        });
+      const searchAggregatedTransactions = await getSearchTransactionsEvents({
+        ...setup,
+        kuery,
+        start,
+        end,
+      });
 
       return getColdstartRatePeriods({
         environment,

@@ -7,7 +7,7 @@
 
 import * as t from 'io-ts';
 import { maxSuggestions } from '@kbn/observability-plugin/common';
-import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
+import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { getEnvironments } from './get_environments';
 import { rangeRt } from '../default_api_types';
@@ -39,7 +39,7 @@ const environmentsRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
     const { context, params } = resources;
     const { serviceName, start, end } = params.query;
-    const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+    const searchAggregatedTransactions = await getSearchTransactionsEvents({
       apmEventClient: setup.apmEventClient,
       config: setup.config,
       start,
