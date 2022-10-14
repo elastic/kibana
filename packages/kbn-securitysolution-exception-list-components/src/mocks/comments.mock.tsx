@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import type { Comment, CommentsArray } from '@kbn/securitysolution-io-ts-list-types';
 
 export const getCommentsMock = (): Comment => ({
@@ -16,3 +17,9 @@ export const getCommentsMock = (): Comment => ({
 });
 
 export const getCommentsArrayMock = (): CommentsArray => [getCommentsMock(), getCommentsMock()];
+
+export const mockGetFormattedComments = () =>
+  getCommentsArrayMock().map((comment) => ({
+    username: comment.created_by,
+    children: <p>{comment.comment}</p>,
+  }));

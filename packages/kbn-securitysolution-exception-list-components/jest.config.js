@@ -14,6 +14,11 @@ module.exports = {
   collectCoverageFrom: [
     '<rootDir>/packages/kbn-securitysolution-exception-list-components/**/*.{ts,tsx}',
     '!<rootDir>/packages/kbn-securitysolution-exception-list-components/**/*.test',
+    '!<rootDir>/packages/kbn-securitysolution-exception-list-components/**/types/*',
+    '!<rootDir>/packages/kbn-securitysolution-exception-list-components/**/*.type',
+    '!<rootDir>/packages/kbn-securitysolution-exception-list-components/**/*.styles',
+    '!<rootDir>/packages/kbn-securitysolution-exception-list-components/**/mocks/*',
+    '!<rootDir>/packages/kbn-securitysolution-exception-list-components/**/*.config',
   ],
   setupFilesAfterEnv: [
     '<rootDir>/packages/kbn-securitysolution-exception-list-components/setup_test.ts',

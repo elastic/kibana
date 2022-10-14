@@ -8,7 +8,7 @@
 
 import React from 'react';
 
-import { getExceptionListItemSchemaMock } from '../../test_helpers/exception_list_item_schema.mock';
+import { getExceptionListItemSchemaMock } from '../../mocks/exception_list_item_schema.mock';
 import * as i18n from '../translations';
 import { ExceptionItemCardHeader } from '.';
 import { fireEvent, render } from '@testing-library/react';
@@ -52,7 +52,6 @@ describe('ExceptionItemCardHeader', () => {
       />
     );
 
-    // click on popover
     fireEvent.click(wrapper.getByTestId('exceptionItemHeaderButtonIcon'));
     fireEvent.click(wrapper.getByTestId('exceptionItemHeaderActionItemedit'));
     expect(handleEdit).toHaveBeenCalled();

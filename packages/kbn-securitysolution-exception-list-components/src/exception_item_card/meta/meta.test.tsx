@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { getExceptionListItemSchemaMock } from '../../test_helpers/exception_list_item_schema.mock';
+import { getExceptionListItemSchemaMock } from '../../mocks/exception_list_item_schema.mock';
 
 import { ExceptionItemCardMetaInfo } from '.';
 import { Rule } from '../../types';

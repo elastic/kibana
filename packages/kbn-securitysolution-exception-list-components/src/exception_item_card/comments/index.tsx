@@ -29,7 +29,7 @@ export const ExceptionItemCardComments = memo<ExceptionItemCardCommentsProps>(
         <EuiAccordion
           id="exceptionItemCardComments"
           buttonContent={
-            <EuiText size="s" css={accordionCss}>
+            <EuiText size="s" css={accordionCss} data-test-subj={`${dataTestSubj || ''}TextButton`}>
               {i18n.exceptionItemCardCommentsAccordion(comments.length)}
             </EuiText>
           }

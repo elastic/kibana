@@ -10,8 +10,8 @@ import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 
 import { ExceptionItemCard } from '.';
-import { getExceptionListItemSchemaMock } from '../test_helpers/exception_list_item_schema.mock';
-import { getCommentsArrayMock } from '../test_helpers/comments.mock';
+import { getExceptionListItemSchemaMock } from '../mocks/exception_list_item_schema.mock';
+import { getCommentsArrayMock, mockGetFormattedComments } from '../mocks/comments.mock';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { Rule } from '../types';
 
@@ -36,11 +36,6 @@ const ruleReferences: Rule[] = [
     rule_id: 'rule-2',
   },
 ];
-const mockGetFormattedComments = () =>
-  getCommentsArrayMock().map((comment) => ({
-    username: comment.created_by,
-    children: <p>{comment.comment}</p>,
-  }));
 
 describe('ExceptionItemCard', () => {
   it('it renders header, item meta information and conditions', () => {

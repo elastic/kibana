@@ -14,7 +14,7 @@ import { OS_LABELS } from '../conditions.config';
 import * as i18n from '../../translations';
 
 export interface OsConditionsProps {
-  dataTestSubj: string;
+  dataTestSubj?: string;
   os: ExceptionListItemSchema['os_types'];
 }
 
@@ -25,8 +25,12 @@ export const OsCondition = memo<OsConditionsProps>(({ os, dataTestSubj }) => {
   return osLabel ? (
     <div data-test-subj={`${dataTestSubj || ''}Os`}>
       <strong>
-        <EuiExpression description="" value={i18n.CONDITION_OS} />
-        <EuiExpression description={i18n.CONDITION_OPERATOR_TYPE_MATCH} value={osLabel} />
+        <EuiExpression data-test-subj="osLabel" description="" value={i18n.CONDITION_OS} />
+        <EuiExpression
+          data-test-subj="osValue"
+          description={i18n.CONDITION_OPERATOR_TYPE_MATCH}
+          value={osLabel}
+        />
       </strong>
     </div>
   ) : null;
