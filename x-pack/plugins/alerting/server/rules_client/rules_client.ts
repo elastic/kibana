@@ -398,6 +398,7 @@ export interface GetGlobalExecutionKPIParams {
   dateStart: string;
   dateEnd?: string;
   filter?: string;
+  allNamespaces?: boolean;
 }
 
 export interface GetGlobalExecutionLogParams {
@@ -931,7 +932,7 @@ export class RulesClient {
     page,
     perPage,
     sort,
-    allNamespaces,
+    allNamespaces = true,
   }: GetGlobalExecutionLogParams): Promise<IExecutionLogResult> {
     this.logger.debug(`getGlobalExecutionLogWithAuth(): getting global execution log`);
 
@@ -1069,6 +1070,7 @@ export class RulesClient {
     dateStart,
     dateEnd,
     filter,
+    allNamespaces = true,
   }: GetGlobalExecutionKPIParams) {
     this.logger.debug(`getGlobalExecutionLogWithAuth(): getting global execution log`);
 
@@ -1114,7 +1116,8 @@ export class RulesClient {
           start: parsedDateStart.toISOString(),
           end: parsedDateEnd.toISOString(),
           aggs: getExecutionKPIAggregation(filter),
-        }
+        },
+        allNamespaces
       );
 
       return formatExecutionKPIResult(aggResult);

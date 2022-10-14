@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import moment from 'moment';
+import { SpacesData } from '@kbn/spaces-plugin/public';
 import { EuiLink } from '@elastic/eui';
 import { RuleAlertingOutcome } from '@kbn/alerting-plugin/common';
 import { useHistory } from 'react-router-dom';
 import { routeToRuleDetails } from '../../../constants';
 import { formatRuleAlertCount } from '../../../../common/lib/format_rule_alert_count';
+import { useKibana } from '../../../../common/lib/kibana';
 import { RuleEventLogListStatus } from './rule_event_log_list_status';
 import { RuleDurationFormat } from '../../rules_list/components/rule_duration_format';
 import {
@@ -27,14 +29,33 @@ export type ColumnId = typeof RULE_EXECUTION_LOG_COLUMN_IDS[number];
 interface RuleEventLogListCellRendererProps {
   columnId: ColumnId;
   version?: string;
-  value?: string;
+  value?: string | string[];
   dateFormat?: string;
   ruleId?: string;
+  spaceIds?: string[];
 }
 
 export const RuleEventLogListCellRenderer = (props: RuleEventLogListCellRendererProps) => {
-  const { columnId, value, version, dateFormat = DEFAULT_DATE_FORMAT, ruleId } = props;
+  const { columnId, value, version, dateFormat = DEFAULT_DATE_FORMAT, ruleId, spaceIds } = props;
+  const [spacesData, setSpacesData] = useState<SpacesData | undefined>(undefined);
+  const { spaces } = useKibana().services;
+  const spacesService = spaces?.ui.useSpaces();
+
+  useEffect(() => {
+    if (columnId === 'rule_name' || columnId === 'space_ids') {
+      (async () => {
+        const result = await spacesService?.spacesDataPromise;
+        setSpacesData(result);
+      })();
+    }
+  }, [spaces, columnId, spacesService, setSpacesData]);
+
   const history = useHistory();
+
+  const activeSpace = useMemo(
+    () => spacesData?.spacesMap.get(spacesData?.activeSpaceId),
+    [spacesData]
+  );
 
   const onClickRuleName = useCallback(
     () => ruleId && history.push(routeToRuleDetails.replace(':ruleId', ruleId)),
@@ -54,15 +75,21 @@ export const RuleEventLogListCellRenderer = (props: RuleEventLogListCellRenderer
   }
 
   if (columnId === 'rule_name' && ruleId) {
+    if (activeSpace && !spaceIds?.includes(activeSpace.id)) return <>{value}</>;
     return <EuiLink onClick={onClickRuleName}>{value}</EuiLink>;
   }
 
+  if (columnId === 'space_ids') {
+    if (activeSpace && value.includes(activeSpace.id)) return <>{activeSpace.name}</>;
+    if (spacesData) return <>{spacesData.spacesMap.get(value[0])?.name ?? value[0]}</>;
+  }
+
   if (RULE_EXECUTION_LOG_ALERT_COUNT_COLUMNS.includes(columnId)) {
-    return <>{formatRuleAlertCount(value, version)}</>;
+    return <>{formatRuleAlertCount(value as string, version)}</>;
   }
 
   if (RULE_EXECUTION_LOG_DURATION_COLUMNS.includes(columnId)) {
-    return <RuleDurationFormat duration={parseInt(value, 10)} />;
+    return <RuleDurationFormat duration={parseInt(value as string, 10)} />;
   }
 
   return <>{value}</>;

@@ -20,6 +20,7 @@ import {
   OnTimeChangeProps,
 } from '@elastic/eui';
 import { IExecutionLog } from '@kbn/alerting-plugin/common';
+import { SpacesContextProps } from '@kbn/spaces-plugin/public';
 import { useKibana } from '../../../../common/lib/kibana';
 import {
   RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS,
@@ -37,6 +38,8 @@ import {
   ComponentOpts as RuleApis,
   withBulkRuleOperations,
 } from '../../common/components/with_bulk_rule_api_operations';
+
+const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
 
 const getParsedDate = (date: string) => {
   if (date.includes('now')) {
@@ -84,6 +87,7 @@ export type RuleEventLogListCommonProps = {
   overrideLoadExecutionLogAggregations?: RuleApis['loadExecutionLogAggregations'];
   overrideLoadGlobalExecutionLogAggregations?: RuleApis['loadGlobalExecutionLogAggregations'];
   hasRuleNames?: boolean;
+  hasSpaceNames?: boolean;
 } & Pick<RuleApis, 'loadExecutionLogAggregations' | 'loadGlobalExecutionLogAggregations'>;
 
 export type RuleEventLogListTableProps<T extends RuleEventLogListOptions = 'default'> =
@@ -106,9 +110,16 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
     overrideLoadExecutionLogAggregations,
     initialPageSize = 10,
     hasRuleNames = false,
+    hasSpaceNames = true,
   } = props;
 
-  const { uiSettings, notifications } = useKibana().services;
+  const { uiSettings, notifications, spaces } = useKibana().services;
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const SpacesContextWrapper = useCallback(
+    spaces ? spaces.ui.components.getSpacesContextProvider : getEmptyFunctionComponent,
+    [spaces]
+  );
 
   const [searchText, setSearchText] = useState<string>('');
   const [search, setSearch] = useState<string>('');
@@ -299,21 +310,24 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
         {isLoading && (
           <EuiProgress size="xs" color="accent" data-test-subj="ruleEventLogListProgressBar" />
         )}
-        <RuleEventLogDataGrid
-          logs={logs}
-          pagination={pagination}
-          sortingColumns={sortingColumns}
-          visibleColumns={visibleColumns}
-          dateFormat={dateFormat}
-          selectedRunLog={selectedRunLog}
-          showRuleNameAndIdColumns={hasRuleNames}
-          onChangeItemsPerPage={onChangeItemsPerPage}
-          onChangePage={onChangePage}
-          onFlyoutOpen={onFlyoutOpen}
-          onFilterChange={setFilter}
-          setVisibleColumns={setVisibleColumns}
-          setSortingColumns={setSortingColumns}
-        />
+        <SpacesContextWrapper feature="triggersActions">
+          <RuleEventLogDataGrid
+            logs={logs}
+            pagination={pagination}
+            sortingColumns={sortingColumns}
+            visibleColumns={visibleColumns}
+            dateFormat={dateFormat}
+            selectedRunLog={selectedRunLog}
+            showRuleNameAndIdColumns={hasRuleNames}
+            showSpaceColumns={hasSpaceNames}
+            onChangeItemsPerPage={onChangeItemsPerPage}
+            onChangePage={onChangePage}
+            onFlyoutOpen={onFlyoutOpen}
+            onFilterChange={setFilter}
+            setVisibleColumns={setVisibleColumns}
+            setSortingColumns={setSortingColumns}
+          />
+        </SpacesContextWrapper>
       </>
     );
   };
