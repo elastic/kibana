@@ -29,7 +29,7 @@ describe('streamFactory', () => {
   let mockLogger: Logger;
 
   beforeEach(() => {
-    mockLogger = { error: jest.fn() } as unknown as Logger;
+    mockLogger = { debug: jest.fn(), error: jest.fn(), info: jest.fn() } as unknown as Logger;
   });
 
   it('should encode and receive an uncompressed string based stream', async () => {
