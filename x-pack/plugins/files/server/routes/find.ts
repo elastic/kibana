@@ -14,8 +14,13 @@ const method = 'post' as const;
 const string64 = schema.string({ maxLength: 64 });
 const string256 = schema.string({ maxLength: 256 });
 
-const stringOrArrayOfStrings = schema.oneOf([string64, schema.arrayOf(string64)]);
-const nameStringOrArrayOfNameStrings = schema.oneOf([string256, schema.arrayOf(string256)]);
+export const stringOrArrayOfStrings = schema.oneOf([string64, schema.arrayOf(string64)]);
+export const nameStringOrArrayOfNameStrings = schema.oneOf([string256, schema.arrayOf(string256)]);
+
+export function toArrayOrUndefined(val?: string | string[]): undefined | string[] {
+  if (val == null) return undefined;
+  return Array.isArray(val) ? val : [val];
+}
 
 const rt = {
   body: schema.object({
@@ -31,11 +36,7 @@ const rt = {
   }),
 };
 
-export type Endpoint = CreateRouteDefinition<typeof rt, { files: FileJSON[] }>;
-
-function toArray(val: string | string[]) {
-  return Array.isArray(val) ? val : [val];
-}
+export type Endpoint = CreateRouteDefinition<typeof rt, { files: FileJSON[]; total: number }>;
 
 const handler: CreateHandler<Endpoint> = async ({ files }, req, res) => {
   const { fileService } = await files;
@@ -44,15 +45,18 @@ const handler: CreateHandler<Endpoint> = async ({ files }, req, res) => {
     query,
   } = req;
 
+  const { files: results, total } = await fileService.asCurrentUser().find({
+    kind: toArrayOrUndefined(kind),
+    name: toArrayOrUndefined(name),
+    status: toArrayOrUndefined(status),
+    extension: toArrayOrUndefined(extension),
+    meta,
+    ...query,
+  });
+
   const body: Endpoint['output'] = {
-    files: await fileService.asCurrentUser().find({
-      kind: kind ? toArray(kind) : undefined,
-      name: name ? toArray(name) : undefined,
-      status: status ? toArray(status) : undefined,
-      extension: extension ? toArray(extension) : undefined,
-      meta,
-      ...query,
-    }),
+    total,
+    files: results,
   };
   return res.ok({
     body,

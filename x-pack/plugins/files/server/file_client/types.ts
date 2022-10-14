@@ -94,18 +94,11 @@ export interface FileClient {
   delete(arg: DeleteArgs): Promise<void>;
 
   /**
-   * See {@link FileMetadataClient.list}
-   *
-   * @param arg - Argument to list files
-   */
-  list(arg?: P1<FileMetadataClient['list']>): Promise<File[]>;
-
-  /**
    * See {@link FileMetadataClient.find}.
    *
    * @param arg - Argument to find files
    */
-  find: (arg: P1<FileMetadataClient['find']>) => Promise<File[]>;
+  find: (arg?: P1<FileMetadataClient['find']>) => Promise<{ files: File[]; total: number }>;
 
   /**
    * Create a file share instance for this file.

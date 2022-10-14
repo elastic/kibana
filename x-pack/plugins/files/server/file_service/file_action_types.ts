@@ -66,16 +66,6 @@ export interface DeleteFileArgs {
 }
 
 /**
- * Arguments list files.
- */
-export interface ListFilesArgs extends Pagination {
-  /**
-   * File kind, must correspond to a registered {@link FileKind}.
-   */
-  fileKind: string;
-}
-
-/**
  * Arguments to get a file by ID.
  */
 export interface GetByIdArgs {

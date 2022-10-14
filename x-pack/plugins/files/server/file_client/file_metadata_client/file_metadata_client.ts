@@ -72,13 +72,6 @@ export interface DeleteArg {
   id: string;
 }
 
-export interface ListArg extends Pagination {
-  /**
-   * The file kind to scope this query to
-   */
-  fileKind?: string;
-}
-
 export interface FindArg extends Pagination {
   /**
    * The file kind to scope this query to
@@ -117,17 +110,11 @@ export interface FileMetadataClient {
    */
   delete(arg: DeleteArg): Promise<void>;
   /**
-   * List all instances of metadata for a file kind.
-   *
-   * @param arg - Arguments to list file metadata
-   */
-  list(arg?: ListArg): Promise<FileDescriptor[]>;
-  /**
    * Search for a set of file kind instances that match the filters.
    *
    * @param arg - Filters and other settings to match against
    */
-  find(arg: FindFileArgs): Promise<FileDescriptor[]>;
+  find(arg?: FindFileArgs): Promise<{ total: number; files: FileDescriptor[] }>;
   /**
    * Prepare a set of metrics based on the file metadata.
    *

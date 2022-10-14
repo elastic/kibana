@@ -154,12 +154,16 @@ export class FileClientImpl implements FileClient {
     await this.internalUpdate(id, payload);
   }
 
-  public async find<M = unknown>(arg: P1<FileMetadataClient['find']>): Promise<Array<File<M>>> {
-    return this.metadataClient
-      .find(arg)
-      .then((r) =>
-        r.map(({ id, metadata }) => this.instantiateFile(id, metadata as FileMetadata<M>))
-      );
+  public async find<M = unknown>(
+    arg: P1<FileMetadataClient['find']>
+  ): Promise<{ files: File[]; total: number }> {
+    const result = await this.metadataClient.find(arg);
+    return {
+      total: result.total,
+      files: result.files.map(({ id, metadata }) =>
+        this.instantiateFile(id, metadata as FileMetadata<M>)
+      ),
+    };
   }
 
   public async delete({ id, hasContent = true }: DeleteArgs) {
@@ -191,12 +195,6 @@ export class FileClientImpl implements FileClient {
   public deleteContent: BlobStorageClient['delete'] = (arg) => {
     return this.blobStorageClient.delete(arg);
   };
-
-  public async list(arg?: P1<FileMetadataClient['list']>): Promise<File[]> {
-    return this.metadataClient
-      .list(arg)
-      .then((r) => r.map(({ id, metadata }) => this.instantiateFile(id, metadata)));
-  }
 
   /**
    * Upload a blob
