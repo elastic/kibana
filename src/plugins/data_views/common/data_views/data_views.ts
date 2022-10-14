@@ -164,8 +164,13 @@ export interface DataViewsServicePublicMethods {
    * Save data view
    * @param dataView - Data view instance to save.
    * @param override - If true, save over existing data view
+   * @param displayErrors - If set false, API consumer is responsible for displaying and handling errors.
    */
-  createSavedObject: (indexPattern: DataView, override?: boolean) => Promise<DataView>;
+  createSavedObject: (
+    indexPattern: DataView,
+    override?: boolean,
+    displayErrors?: boolean
+  ) => Promise<DataView>;
   /**
    * Delete data view
    * @param indexPatternId - Id of the data view to delete.
@@ -187,8 +192,9 @@ export interface DataViewsServicePublicMethods {
   /**
    * Get data view by id.
    * @param id - Id of the data view to get.
+   * @param displayErrors - If set false, API consumer is responsible for displaying and handling errors.
    */
-  get: (id: string) => Promise<DataView>;
+  get: (id: string, displayErrors?: boolean) => Promise<DataView>;
   /**
    * Get populated data view saved object cache.
    */
@@ -199,8 +205,9 @@ export interface DataViewsServicePublicMethods {
   getCanSave: () => Promise<boolean>;
   /**
    * Get default data view as data view instance.
+   * @param displayErrors - If set false, API consumer is responsible for displaying and handling errors.
    */
-  getDefault: () => Promise<DataView | null>;
+  getDefault: (displayErrors?: boolean) => Promise<DataView | null>;
   /**
    * Get default data view id.
    */
@@ -265,11 +272,13 @@ export interface DataViewsServicePublicMethods {
    * @param indexPattern - data view instance
    * @param saveAttempts - number of times to try saving
    * @oaram ignoreErrors - if true, do not throw error on failure
+   * @param displayErrors - If set false, API consumer is responsible for displaying and handling errors.
    */
   updateSavedObject: (
     indexPattern: DataView,
     saveAttempts?: number,
-    ignoreErrors?: boolean
+    ignoreErrors?: boolean,
+    displayErrors?: boolean
   ) => Promise<DataView | void | Error>;
 }
 
@@ -443,6 +452,7 @@ export class DataViewsService {
 
   /**
    * Get default index pattern
+   * @param displayErrors - If set false, API consumer is responsible for displaying and handling errors.
    */
   getDefault = async (displayErrors: boolean = true) => {
     const defaultIndexPatternId = await this.getDefaultId();
@@ -813,7 +823,7 @@ export class DataViewsService {
       ? JSON.parse(savedObject.attributes.fieldFormatMap)
       : {};
 
-    const indexPattern = await this.create(spec, true);
+    const indexPattern = await this.create(spec, true, displayErrors);
     indexPattern.matchedIndices = indices;
     indexPattern.resetOriginalSavedObjectBody();
     return indexPattern;
@@ -866,6 +876,7 @@ export class DataViewsService {
   /**
    * Get an index pattern by id, cache optimized.
    * @param id
+   * @param displayErrors - If set false, API consumer is responsible for displaying and handling errors.
    */
   get = async (id: string, displayErrors: boolean = true): Promise<DataView> => {
     const indexPatternPromise =
@@ -884,6 +895,7 @@ export class DataViewsService {
    * Create a new data view instance.
    * @param spec data view spec
    * @param skipFetchFields if true, will not fetch fields
+   * @param displayErrors - If set false, API consumer is responsible for displaying and handling errors.
    * @returns DataView
    */
   async create(
