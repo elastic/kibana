@@ -87,15 +87,18 @@ export const useNavigationProps = ({
   const singleDocHref = addBasePath(
     `/app/discover#/doc/${dataViewId}/${rowIndex}?id=${encodeURIComponent(rowId)}`
   );
+
+  const contextSearchHash = getContextHash(columns, filterManager);
+
   const surDocsHref = addBasePath(
     `/app/discover#/context/${encodeURIComponent(dataViewId)}/${encodeURIComponent(
       rowId
-    )}?${getContextHash(columns, filterManager)}`
+    )}?${contextSearchHash}`
   );
 
   /**
    * When history can be accessed via hooks,
-   * it is discover main or context route.
+   * it's used by discover main or context route.
    */
   if (!!history) {
     const isContextRoute = matchPath(history.location.pathname, {
@@ -120,7 +123,7 @@ export const useNavigationProps = ({
 
       history.push({
         pathname: `/context/${encodeURIComponent(dataViewId)}/${encodeURIComponent(String(rowId))}`,
-        search: `?${getContextHash(columns, filterManager)}&breadcrumb=${currentBreadcrumb}`,
+        search: `?${contextSearchHash}&breadcrumb=${currentBreadcrumb}`,
       });
     };
 
