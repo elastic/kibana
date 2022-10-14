@@ -6,6 +6,5 @@
  */
 
 export * from './pagination';
-export * from './rule_params';
 export * from './schemas';
 export * from './sorting';

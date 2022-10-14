@@ -6,12 +6,11 @@
  */
 
 import * as t from 'io-ts';
-
-import { id } from '../common/schemas';
+import { RuleObjectId } from '../../rule_schema';
 
 export const queryRuleByIdSchema = t.exact(
   t.type({
-    id,
+    id: RuleObjectId,
   })
 );
 

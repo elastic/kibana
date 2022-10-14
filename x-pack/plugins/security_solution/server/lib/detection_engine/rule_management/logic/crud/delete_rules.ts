@@ -6,11 +6,11 @@
  */
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import type { Id } from '../../../../../../common/detection_engine/schemas/common';
+import type { RuleObjectId } from '../../../../../../common/detection_engine/rule_schema';
 import type { IRuleExecutionLogForRoutes } from '../../../rule_monitoring';
 
 export interface DeleteRuleOptions {
-  ruleId: Id;
+  ruleId: RuleObjectId;
   rulesClient: RulesClient;
   ruleExecutionLog: IRuleExecutionLogForRoutes;
 }

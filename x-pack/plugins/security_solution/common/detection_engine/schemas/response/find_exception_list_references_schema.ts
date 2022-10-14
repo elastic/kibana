@@ -9,13 +9,13 @@ import * as t from 'io-ts';
 
 import { exceptionListSchema, listArray, list_id } from '@kbn/securitysolution-io-ts-list-types';
 
-import { rule_id, id, name } from '../common/schemas';
+import { RuleName, RuleObjectId, RuleSignatureId } from '../../rule_schema';
 
 export const ruleReferenceRuleInfoSchema = t.exact(
   t.type({
-    name,
-    id,
-    rule_id,
+    name: RuleName,
+    id: RuleObjectId,
+    rule_id: RuleSignatureId,
     exception_lists: listArray,
   })
 );

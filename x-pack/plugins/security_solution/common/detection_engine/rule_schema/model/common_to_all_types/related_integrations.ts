@@ -8,9 +8,6 @@
 import * as t from 'io-ts';
 import { NonEmptyString } from '@kbn/securitysolution-io-ts-types';
 
-// -------------------------------------------------------------------------------------------------
-// Related integrations
-
 /**
  * Related integration is a potential dependency of a rule. It's assumed that if the user installs
  * one of the related integrations of a rule, the rule might start to work properly because it will
@@ -74,72 +71,3 @@ export const RelatedIntegration = t.exact(
  */
 export type RelatedIntegrationArray = t.TypeOf<typeof RelatedIntegrationArray>;
 export const RelatedIntegrationArray = t.array(RelatedIntegration);
-
-// -------------------------------------------------------------------------------------------------
-// Required fields
-
-/**
- * Almost all types of Security rules check source event documents for a match to some kind of
- * query or filter. If a document has certain field with certain values, then it's a match and
- * the rule will generate an alert.
- *
- * Required field is an event field that must be present in the source indices of a given rule.
- *
- * @example
- * const standardEcsField: RequiredField = {
- *   name: 'event.action',
- *   type: 'keyword',
- *   ecs: true,
- * };
- *
- * @example
- * const nonEcsField: RequiredField = {
- *   name: 'winlog.event_data.AttributeLDAPDisplayName',
- *   type: 'keyword',
- *   ecs: false,
- * };
- */
-export const RequiredField = t.exact(
-  t.type({
-    name: NonEmptyString,
-    type: NonEmptyString,
-    ecs: t.boolean,
-  })
-);
-
-/**
- * Array of event fields that must be present in the source indices of a given rule.
- *
- * @example
- * const x: RequiredFieldArray = [
- *   {
- *     name: 'event.action',
- *     type: 'keyword',
- *     ecs: true,
- *   },
- *   {
- *     name: 'event.code',
- *     type: 'keyword',
- *     ecs: true,
- *   },
- *   {
- *     name: 'winlog.event_data.AttributeLDAPDisplayName',
- *     type: 'keyword',
- *     ecs: false,
- *   },
- * ];
- */
-export type RequiredFieldArray = t.TypeOf<typeof RequiredFieldArray>;
-export const RequiredFieldArray = t.array(RequiredField);
-
-// -------------------------------------------------------------------------------------------------
-// Setup guide
-
-/**
- * Any instructions for the user for setting up their environment in order to start receiving
- * source events for a given rule.
- *
- * It's a multiline text. Markdown is supported.
- */
-export type SetupGuide = t.TypeOf<typeof SetupGuide>;
-export const SetupGuide = t.string;

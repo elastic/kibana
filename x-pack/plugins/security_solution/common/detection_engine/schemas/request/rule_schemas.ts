@@ -8,11 +8,7 @@
 import * as t from 'io-ts';
 
 import {
-  actions,
-  from,
-  risk_score,
   machine_learning_job_id,
-  risk_score_mapping,
   threat_filters,
   threat_query,
   threat_mapping,
@@ -20,64 +16,70 @@ import {
   threat_indicator_path,
   concurrent_searches,
   items_per_search,
-  threats,
-  severity_mapping,
-  severity,
-  max_signals,
-  throttle,
 } from '@kbn/securitysolution-io-ts-alerting-types';
-import { listArray } from '@kbn/securitysolution-io-ts-list-types';
-import { version } from '@kbn/securitysolution-io-ts-types';
 
 import { RuleExecutionSummary } from '../../rule_monitoring';
+import { ResponseActionArray } from '../../rule_response_actions/schemas';
 import {
-  id,
-  index,
-  data_view_id,
-  filters,
-  timestamp_field,
-  event_category_override,
-  tiebreaker_field,
-  building_block_type,
-  note,
-  license,
-  timeline_id,
-  timeline_title,
-  meta,
-  rule_name_override,
-  timestamp_override,
-  timestamp_override_fallback_disabled,
-  author,
-  description,
-  false_positives,
-  rule_id,
-  immutable,
-  output_index,
-  query,
-  to,
-  references,
+  AlertsIndex,
+  AlertsIndexNamespace,
+  BuildingBlockType,
+  DataViewId,
+  EventCategoryOverride,
+  ExceptionListArray,
+  IndexPatternArray,
+  InvestigationGuide,
+  IsRuleEnabled,
+  IsRuleImmutable,
+  MaxSignals,
+  RelatedIntegrationArray,
+  RequiredFieldArray,
+  RiskScore,
+  RiskScoreMapping,
+  RuleActionArray,
+  RuleActionThrottle,
+  RuleAuthorArray,
+  RuleDescription,
+  RuleFalsePositiveArray,
+  RuleFilterArray,
+  RuleInterval,
+  RuleIntervalFrom,
+  RuleIntervalTo,
+  RuleLicense,
+  RuleMetadata,
+  RuleName,
+  RuleNameOverride,
+  RuleObjectId,
+  RuleQuery,
+  RuleReferenceArray,
+  RuleSignatureId,
+  RuleTagArray,
+  RuleVersion,
+  SavedObjectResolveAliasPurpose,
+  SavedObjectResolveAliasTargetId,
+  SavedObjectResolveOutcome,
+  SetupGuide,
+  Severity,
+  SeverityMapping,
+  ThreatArray,
+  TiebreakerField,
+  TimelineTemplateId,
+  TimelineTemplateTitle,
+  TimestampField,
+  TimestampOverride,
+  TimestampOverrideFallbackDisabled,
+} from '../../rule_schema';
+import {
   saved_id,
   threshold,
   anomaly_threshold,
-  name,
-  tags,
-  interval,
-  enabled,
-  outcome,
-  alias_target_id,
-  alias_purpose,
   updated_at,
   updated_by,
   created_at,
   created_by,
-  namespace,
-  RelatedIntegrationArray,
-  RequiredFieldArray,
-  SetupGuide,
   newTermsFields,
   historyWindowStart,
 } from '../common';
-import { ResponseActionArray } from '../../rule_response_actions/schemas';
 
 export const createSchema = <
   Required extends t.Props,
@@ -163,45 +165,58 @@ interface APIParams<
 
 const baseParams = {
   required: {
-    name,
-    description,
-    risk_score,
-    severity,
+    // Main attributes
+    name: RuleName,
+    description: RuleDescription,
+    // Severity and risk score
+    severity: Severity,
+    risk_score: RiskScore,
   },
   optional: {
-    building_block_type,
-    note,
-    license,
-    outcome,
-    alias_target_id,
-    alias_purpose,
-    output_index,
-    timeline_id,
-    timeline_title,
-    meta,
-    rule_name_override,
-    timestamp_override,
-    timestamp_override_fallback_disabled,
-    namespace,
+    // Main attributes
+    meta: RuleMetadata,
+    // Field overrides
+    rule_name_override: RuleNameOverride,
+    timestamp_override: TimestampOverride,
+    timestamp_override_fallback_disabled: TimestampOverrideFallbackDisabled,
+    // Timeline template
+    timeline_id: TimelineTemplateId,
+    timeline_title: TimelineTemplateTitle,
+    // Atributes related to SavedObjectsClient.resolve API
+    outcome: SavedObjectResolveOutcome,
+    alias_target_id: SavedObjectResolveAliasTargetId,
+    alias_purpose: SavedObjectResolveAliasPurpose,
+    // Misc attributes
+    license: RuleLicense,
+    note: InvestigationGuide,
+    building_block_type: BuildingBlockType,
+    output_index: AlertsIndex,
+    namespace: AlertsIndexNamespace,
   },
   defaultable: {
-    tags,
-    interval,
-    enabled,
-    throttle,
-    actions,
-    author,
-    false_positives,
-    from,
+    // Main attributes
+    version: RuleVersion,
+    tags: RuleTagArray,
+    enabled: IsRuleEnabled,
+    // Field overrides
+    risk_score_mapping: RiskScoreMapping,
+    severity_mapping: SeverityMapping,
+    // Rule schedule
+    interval: RuleInterval,
+    from: RuleIntervalFrom,
+    to: RuleIntervalTo,
+    // Rule actions
+    actions: RuleActionArray,
+    throttle: RuleActionThrottle,
+    // Rule exceptions
+    exceptions_list: ExceptionListArray,
+    // Misc attributes
+    author: RuleAuthorArray,
+    false_positives: RuleFalsePositiveArray,
+    references: RuleReferenceArray,
     // maxSignals not used in ML rules but probably should be used
-    max_signals,
-    risk_score_mapping,
-    severity_mapping,
-    threat: threats,
-    to,
-    references,
-    version,
-    exceptions_list: listArray,
+    max_signals: MaxSignals,
+    threat: ThreatArray,
   },
 };
 const {
@@ -216,20 +231,20 @@ export { baseCreateParams };
 // to create the full schema for each route.
 export const sharedCreateSchema = t.intersection([
   baseCreateParams,
-  t.exact(t.partial({ rule_id })),
+  t.exact(t.partial({ rule_id: RuleSignatureId })),
 ]);
 export type SharedCreateSchema = t.TypeOf<typeof sharedCreateSchema>;
 
 export const sharedUpdateSchema = t.intersection([
   baseCreateParams,
-  t.exact(t.partial({ rule_id })),
-  t.exact(t.partial({ id })),
+  t.exact(t.partial({ rule_id: RuleSignatureId })),
+  t.exact(t.partial({ id: RuleObjectId })),
 ]);
 export type SharedUpdateSchema = t.TypeOf<typeof sharedUpdateSchema>;
 
 export const sharedPatchSchema = t.intersection([
   basePatchParams,
-  t.exact(t.partial({ rule_id, id })),
+  t.exact(t.partial({ rule_id: RuleSignatureId, id: RuleObjectId })),
 ]);
 
 // START type specific parameter definitions
@@ -238,15 +253,15 @@ const eqlRuleParams = {
   required: {
     type: t.literal('eql'),
     language: t.literal('eql'),
-    query,
+    query: RuleQuery,
   },
   optional: {
-    index,
-    data_view_id,
-    filters,
-    timestamp_field,
-    event_category_override,
-    tiebreaker_field,
+    index: IndexPatternArray,
+    data_view_id: DataViewId,
+    filters: RuleFilterArray,
+    event_category_override: EventCategoryOverride,
+    timestamp_field: TimestampField,
+    tiebreaker_field: TiebreakerField,
   },
   defaultable: {},
 };
@@ -260,15 +275,15 @@ export { eqlCreateParams, eqlResponseParams };
 const threatMatchRuleParams = {
   required: {
     type: t.literal('threat_match'),
-    query,
+    query: RuleQuery,
     threat_query,
     threat_mapping,
     threat_index,
   },
   optional: {
-    index,
-    data_view_id,
-    filters,
+    index: IndexPatternArray,
+    data_view_id: DataViewId,
+    filters: RuleFilterArray,
     saved_id,
     threat_filters,
     threat_indicator_path,
@@ -292,14 +307,14 @@ const queryRuleParams = {
     type: t.literal('query'),
   },
   optional: {
-    index,
-    data_view_id,
-    filters,
+    index: IndexPatternArray,
+    data_view_id: DataViewId,
+    filters: RuleFilterArray,
     saved_id,
     response_actions: ResponseActionArray,
   },
   defaultable: {
-    query,
+    query: RuleQuery,
     language: t.keyof({ kuery: null, lucene: null }),
   },
 };
@@ -319,10 +334,10 @@ const savedQueryRuleParams = {
   optional: {
     // Having language, query, and filters possibly defined adds more code confusion and probably user confusion
     // if the saved object gets deleted for some reason
-    index,
-    data_view_id,
-    query,
-    filters,
+    index: IndexPatternArray,
+    data_view_id: DataViewId,
+    query: RuleQuery,
+    filters: RuleFilterArray,
     response_actions: ResponseActionArray,
   },
   defaultable: {
@@ -340,13 +355,13 @@ export { savedQueryCreateParams, savedQueryResponseParams };
 const thresholdRuleParams = {
   required: {
     type: t.literal('threshold'),
-    query,
+    query: RuleQuery,
     threshold,
   },
   optional: {
-    index,
-    data_view_id,
-    filters,
+    index: IndexPatternArray,
+    data_view_id: DataViewId,
+    filters: RuleFilterArray,
     saved_id,
   },
   defaultable: {
@@ -381,14 +396,14 @@ export { machineLearningCreateParams, machineLearningResponseParams };
 const newTermsRuleParams = {
   required: {
     type: t.literal('new_terms'),
-    query,
+    query: RuleQuery,
     new_terms_fields: newTermsFields,
     history_window_start: historyWindowStart,
   },
   optional: {
-    index,
-    data_view_id,
-    filters,
+    index: IndexPatternArray,
+    data_view_id: DataViewId,
+    filters: RuleFilterArray,
   },
   defaultable: {
     language: t.keyof({ kuery: null, lucene: null }),
@@ -485,9 +500,9 @@ export const updateRulesSchema = t.intersection([createTypeSpecific, sharedUpdat
 export type UpdateRulesSchema = t.TypeOf<typeof updateRulesSchema>;
 
 const responseRequiredFields = {
-  id,
-  rule_id,
-  immutable,
+  id: RuleObjectId,
+  rule_id: RuleSignatureId,
+  immutable: IsRuleImmutable,
   updated_at,
   updated_by,
   created_at,

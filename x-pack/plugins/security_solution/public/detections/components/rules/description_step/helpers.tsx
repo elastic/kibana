@@ -35,10 +35,8 @@ import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import * as i18nSeverity from '../severity_mapping/translations';
 import * as i18nRiskScore from '../risk_score_mapping/translations';
-import type {
-  RequiredFieldArray,
-  Threshold,
-} from '../../../../../common/detection_engine/schemas/common';
+import type { RequiredFieldArray } from '../../../../../common/detection_engine/rule_schema';
+import type { Threshold } from '../../../../../common/detection_engine/schemas/common';
 import {
   subtechniquesOptions,
   tacticsOptions,

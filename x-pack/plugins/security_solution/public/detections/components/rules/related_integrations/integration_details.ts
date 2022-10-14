@@ -15,7 +15,7 @@ import type {
 import type {
   RelatedIntegration,
   RelatedIntegrationArray,
-} from '../../../../../common/detection_engine/schemas/common';
+} from '../../../../../common/detection_engine/rule_schema';
 
 export interface IntegrationDetails {
   packageName: string;

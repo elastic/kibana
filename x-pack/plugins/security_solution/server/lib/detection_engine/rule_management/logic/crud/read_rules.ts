@@ -9,9 +9,9 @@ import type { ResolvedSanitizedRule, SanitizedRule } from '@kbn/alerting-plugin/
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 
 import type {
-  IdOrUndefined,
-  RuleIdOrUndefined,
-} from '../../../../../../common/detection_engine/schemas/common';
+  RuleObjectId,
+  RuleSignatureId,
+} from '../../../../../../common/detection_engine/rule_schema';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import type { RuleParams } from '../../../rule_schema';
 import { isAlertType } from '../../../rule_schema';
@@ -19,8 +19,8 @@ import { findRules } from '../search/find_rules';
 
 export interface ReadRuleOptions {
   rulesClient: RulesClient;
-  id: IdOrUndefined;
-  ruleId: RuleIdOrUndefined;
+  id: RuleObjectId | undefined;
+  ruleId: RuleSignatureId | undefined;
 }
 
 /**

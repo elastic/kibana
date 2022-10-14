@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type {
-  Severity,
-  SeverityMappingOrUndefined,
-} from '@kbn/securitysolution-io-ts-alerting-types';
-
+import type { Severity, SeverityMapping } from '../../../../../common/detection_engine/rule_schema';
 import { sampleDocSeverity } from '../__mocks__/es_results';
 import type { BuildSeverityFromMappingReturn } from './build_severity_from_mapping';
 import { buildSeverityFromMapping } from './build_severity_from_mapping';
@@ -141,7 +137,7 @@ interface TestCase {
   fieldName?: string;
   fieldValue: unknown;
   severityDefault: Severity;
-  severityMapping: SeverityMappingOrUndefined;
+  severityMapping: SeverityMapping | undefined;
   expected: BuildSeverityFromMappingReturn;
 }
 

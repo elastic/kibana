@@ -7,8 +7,8 @@
 
 import type {
   RiskScore,
-  RiskScoreMappingOrUndefined,
-} from '@kbn/securitysolution-io-ts-alerting-types';
+  RiskScoreMapping,
+} from '../../../../../common/detection_engine/rule_schema';
 import { sampleDocRiskScore } from '../__mocks__/es_results';
 import type { BuildRiskScoreFromMappingReturn } from './build_risk_score_from_mapping';
 import { buildRiskScoreFromMapping } from './build_risk_score_from_mapping';
@@ -187,7 +187,7 @@ describe('buildRiskScoreFromMapping', () => {
 interface TestCase {
   fieldValue: unknown;
   scoreDefault: RiskScore;
-  scoreMapping: RiskScoreMappingOrUndefined;
+  scoreMapping: RiskScoreMapping | undefined;
   expected: BuildRiskScoreFromMappingReturn;
 }
 

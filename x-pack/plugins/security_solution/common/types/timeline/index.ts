@@ -14,8 +14,11 @@ import { NoteSavedObjectToReturnRuntimeType } from './note';
 import type { PinnedEvent } from './pinned_event';
 import { PinnedEventToReturnSavedObjectRuntimeType } from './pinned_event';
 import {
-  alias_purpose as savedObjectResolveAliasPurpose,
-  outcome as savedObjectResolveOutcome,
+  SavedObjectResolveAliasPurpose,
+  SavedObjectResolveAliasTargetId,
+  SavedObjectResolveOutcome,
+} from '../../detection_engine/rule_schema';
+import {
   success,
   success_count as successCount,
 } from '../../detection_engine/schemas/common/schemas';
@@ -373,11 +376,11 @@ export type SingleTimelineResponse = runtimeTypes.TypeOf<typeof SingleTimelineRe
 export const ResolvedTimelineSavedObjectToReturnObjectRuntimeType = runtimeTypes.intersection([
   runtimeTypes.type({
     timeline: TimelineSavedToReturnObjectRuntimeType,
-    outcome: savedObjectResolveOutcome,
+    outcome: SavedObjectResolveOutcome,
   }),
   runtimeTypes.partial({
-    alias_target_id: runtimeTypes.string,
-    alias_purpose: savedObjectResolveAliasPurpose,
+    alias_target_id: SavedObjectResolveAliasTargetId,
+    alias_purpose: SavedObjectResolveAliasPurpose,
   }),
 ]);
 

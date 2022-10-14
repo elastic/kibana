@@ -38,12 +38,13 @@ import type {
   NewTermsSpecificRuleParams,
 } from '../../rule_schema';
 import { assertUnreachable } from '../../../../../common/utility_types';
+
+import type { RuleExecutionSummary } from '../../../../../common/detection_engine/rule_monitoring';
 import type {
   RelatedIntegrationArray,
   RequiredFieldArray,
   SetupGuide,
-} from '../../../../../common/detection_engine/schemas/common';
-import type { RuleExecutionSummary } from '../../../../../common/detection_engine/rule_monitoring';
+} from '../../../../../common/detection_engine/rule_schema';
 import {
   eqlPatchParams,
   machineLearningPatchParams,

@@ -18,11 +18,8 @@ import type {
 } from '@kbn/alerting-plugin/server';
 import type { Filter } from '@kbn/es-query';
 import { assertUnreachable } from '../../../../common/utility_types';
-import type {
-  QueryOrUndefined,
-  SavedIdOrUndefined,
-  IndexOrUndefined,
-} from '../../../../common/detection_engine/schemas/common/schemas';
+import type { IndexPatternArray, RuleQuery } from '../../../../common/detection_engine/rule_schema';
+import type { SavedIdOrUndefined } from '../../../../common/detection_engine/schemas/common/schemas';
 import type { PartialFilter } from '../types';
 import { withSecuritySpan } from '../../../utils/with_security_span';
 import type { ESBoolQuery } from '../../../../common/typed_json';
@@ -32,10 +29,10 @@ interface GetFilterArgs {
   type: Type;
   filters: unknown | undefined;
   language: LanguageOrUndefined;
-  query: QueryOrUndefined;
+  query: RuleQuery | undefined;
   savedId: SavedIdOrUndefined;
   services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
-  index: IndexOrUndefined;
+  index: IndexPatternArray | undefined;
   exceptionFilter: Filter | undefined;
 }
 

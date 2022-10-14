@@ -18,7 +18,7 @@ import { buildRelatedIntegrationsDescription } from '../related_integrations/int
 import type {
   RelatedIntegrationArray,
   RequiredFieldArray,
-} from '../../../../../common/detection_engine/schemas/common';
+} from '../../../../../common/detection_engine/rule_schema';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';
 import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
 import { useKibana } from '../../../../common/lib/kibana';

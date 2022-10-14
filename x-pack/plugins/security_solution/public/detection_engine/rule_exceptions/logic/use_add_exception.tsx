@@ -21,7 +21,7 @@ import {
   buildAlertStatusesFilter,
 } from '../../../detections/components/alerts_table/default_config';
 import { getEsQueryFilter } from '../../../detections/containers/detection_engine/exceptions/get_es_query_filter';
-import type { Index } from '../../../../common/detection_engine/schemas/common/schemas';
+import type { IndexPatternArray } from '../../../../common/detection_engine/rule_schema';
 import { formatExceptionItemForUpdate, prepareExceptionItemsForBulkClose } from '../utils/helpers';
 import { useKibana } from '../../../common/lib/kibana';
 
@@ -38,7 +38,7 @@ export type AddOrUpdateExceptionItemsFunc = (
   ruleStaticId: string,
   exceptionItemsToAddOrUpdate: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
   alertIdToClose?: string,
-  bulkCloseIndex?: Index
+  bulkCloseIndex?: IndexPatternArray
 ) => Promise<void>;
 
 export type ReturnUseAddOrUpdateException = [

@@ -9,7 +9,13 @@ import * as t from 'io-ts';
 
 import { version } from '@kbn/securitysolution-io-ts-types';
 
-import { rule_id, RelatedIntegrationArray, RequiredFieldArray, SetupGuide } from '../common';
+import {
+  RelatedIntegrationArray,
+  RequiredFieldArray,
+  SetupGuide,
+  RuleSignatureId,
+} from '../../rule_schema';
+
 import { baseCreateParams, createTypeSpecific } from './rule_schemas';
 
 /**
@@ -22,7 +28,12 @@ export const addPrepackagedRulesSchema = t.intersection([
   createTypeSpecific,
   // version is required in addPrepackagedRulesSchema, so this supercedes the defaultable
   // version in baseParams
-  t.exact(t.type({ rule_id, version })),
+  t.exact(
+    t.type({
+      rule_id: RuleSignatureId,
+      version,
+    })
+  ),
   t.exact(
     t.partial({
       related_integrations: RelatedIntegrationArray,

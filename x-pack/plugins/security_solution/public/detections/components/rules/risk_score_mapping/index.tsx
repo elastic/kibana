@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import React, { useCallback, useMemo } from 'react';
+import styled from 'styled-components';
+import { noop } from 'lodash/fp';
 import {
   EuiFormRow,
   EuiCheckbox,
@@ -16,15 +19,14 @@ import {
   EuiSpacer,
   EuiRange,
 } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
-import styled from 'styled-components';
-import { noop } from 'lodash/fp';
-import type { RiskScoreMapping } from '@kbn/securitysolution-io-ts-alerting-types';
+
 import { FieldComponent } from '@kbn/securitysolution-autocomplete';
 import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import * as i18n from './translations';
+
+import type { RiskScoreMapping } from '../../../../../common/detection_engine/rule_schema';
 import type { AboutStepRiskScore } from '../../../pages/detection_engine/rules/types';
+import * as i18n from './translations';
 
 const NestedContent = styled.div`
   margin-left: 24px;

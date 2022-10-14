@@ -6,13 +6,12 @@
  */
 
 import * as t from 'io-ts';
-
-import { rule_id, id } from '../common/schemas';
+import { RuleObjectId, RuleSignatureId } from '../../rule_schema';
 
 export const queryRulesSchema = t.exact(
   t.partial({
-    rule_id,
-    id,
+    rule_id: RuleSignatureId,
+    id: RuleObjectId,
   })
 );
 

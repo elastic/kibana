@@ -9,16 +9,13 @@ import * as t from 'io-ts';
 
 import { OnlyFalseAllowed } from '@kbn/securitysolution-io-ts-types';
 import {
-  rule_id,
-  id,
-  created_at,
-  updated_at,
-  created_by,
-  updated_by,
   RelatedIntegrationArray,
   RequiredFieldArray,
+  RuleObjectId,
+  RuleSignatureId,
   SetupGuide,
-} from '../common';
+} from '../../rule_schema';
+import { created_at, updated_at, created_by, updated_by } from '../common';
 import { baseCreateParams, createTypeSpecific } from './rule_schemas';
 
 /**
@@ -34,10 +31,10 @@ import { baseCreateParams, createTypeSpecific } from './rule_schemas';
 export const importRulesSchema = t.intersection([
   baseCreateParams,
   createTypeSpecific,
-  t.exact(t.type({ rule_id })),
+  t.exact(t.type({ rule_id: RuleSignatureId })),
   t.exact(
     t.partial({
-      id,
+      id: RuleObjectId,
       immutable: OnlyFalseAllowed,
       updated_at,
       updated_by,

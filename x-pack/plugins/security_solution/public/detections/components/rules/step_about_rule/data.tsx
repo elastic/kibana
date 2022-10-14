@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import React from 'react';
 import styled from 'styled-components';
 import { EuiHealth } from '@elastic/eui';
 import { euiLightVars } from '@kbn/ui-theme';
-import React from 'react';
 
-import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { Severity } from '../../../../../common/detection_engine/rule_schema';
 import * as I18n from './translations';
 
 export interface SeverityOptionItem {
