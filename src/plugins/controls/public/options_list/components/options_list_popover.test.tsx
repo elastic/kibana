@@ -98,7 +98,7 @@ describe('Options list popover', () => {
     });
   });
 
-  test('should default to negate = false', () => {
+  test('should default to exclude = false', () => {
     const popover = mountComponent();
     const includeButton = findTestSubject(popover, 'optionsList__includeResults');
     const excludeButton = findTestSubject(popover, 'optionsList__excludeResults');
@@ -106,9 +106,9 @@ describe('Options list popover', () => {
     expect(excludeButton.prop('checked')).toBeFalsy();
   });
 
-  test('if negated, select appropriate button in button group', () => {
+  test('if exclude = true, select appropriate button in button group', () => {
     const popover = mountComponent({
-      explicitInput: { negate: true },
+      explicitInput: { exclude: true },
     });
     const includeButton = findTestSubject(popover, 'optionsList__includeResults');
     const excludeButton = findTestSubject(popover, 'optionsList__excludeResults');

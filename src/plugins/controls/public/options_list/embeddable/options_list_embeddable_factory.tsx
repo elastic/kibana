@@ -68,12 +68,6 @@ export class OptionsListEmbeddableFactory
 
   public isEditable = () => Promise.resolve(false);
 
-  public getDefaultInput(): Partial<OptionsListEmbeddableInput> {
-    return {
-      negate: false,
-    };
-  }
-
   public getDisplayName = () =>
     i18n.translate('controls.optionsList.displayName', {
       defaultMessage: 'Options list',

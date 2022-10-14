@@ -90,16 +90,16 @@ export const OptionsListStrings = {
           '{selectedOptions} selected {selectedOptions, plural, one {option} other {options}} {selectedOptions, plural, one {is} other {are}} ignored because {selectedOptions, plural, one {it is} other {they are}} no longer in the data.',
         values: { selectedOptions },
       }),
-    getExcludeLabel: () =>
-      i18n.translate('controls.optionsList.popover.excludeLabel', {
-        defaultMessage: 'Exclude',
-      }),
     getIncludeLabel: () =>
       i18n.translate('controls.optionsList.popover.includeLabel', {
         defaultMessage: 'Include',
       }),
-    getNegationLegend: () =>
-      i18n.translate('controls.optionsList.popover.negateOptionsLegend', {
+    getExcludeLabel: () =>
+      i18n.translate('controls.optionsList.popover.excludeLabel', {
+        defaultMessage: 'Exclude',
+      }),
+    getIncludeExcludeLegend: () =>
+      i18n.translate('controls.optionsList.popover.excludeOptionsLegend', {
         defaultMessage: 'Include or exclude selections',
       }),
   },

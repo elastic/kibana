@@ -135,7 +135,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
         timeslice: newInput.timeslice,
         filters: newInput.filters,
         query: newInput.query,
-        negate: newInput.negate,
+        exclude: newInput.exclude,
       })),
       distinctUntilChanged(diffDataFetchProps)
     );
@@ -157,21 +157,19 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
       this.getInput$()
         .pipe(
           distinctUntilChanged(
-            (a, b) => isEqual(a.selectedOptions, b.selectedOptions) && a.negate === b.negate
+            (a, b) => isEqual(a.selectedOptions, b.selectedOptions) && a.exclude === b.exclude
           )
         )
-        .subscribe(async ({ selectedOptions: newSelectedOptions, negate }) => {
+        .subscribe(async ({ selectedOptions: newSelectedOptions }) => {
           const {
             actions: {
               clearValidAndInvalidSelections,
               setValidAndInvalidSelections,
               publishFilters,
-              setNegate,
             },
             dispatch,
           } = this.reduxEmbeddableTools;
 
-          dispatch(setNegate(negate));
           if (!newSelectedOptions || isEmpty(newSelectedOptions)) {
             dispatch(clearValidAndInvalidSelections({}));
           } else {
@@ -372,7 +370,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
   private buildFilter = async () => {
     const { getState } = this.reduxEmbeddableTools;
     const { validSelections } = getState().componentState ?? {};
-    const { negate } = this.getInput();
+    const { exclude } = this.getInput();
 
     if (!validSelections || isEmpty(validSelections)) {
       return [];
@@ -388,7 +386,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     }
 
     newFilter.meta.key = field?.name;
-    if (negate) newFilter.meta.negate = true;
+    if (exclude) newFilter.meta.negate = true;
     return [newFilter];
   };
 

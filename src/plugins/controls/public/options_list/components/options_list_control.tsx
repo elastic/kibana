@@ -49,9 +49,9 @@ export const OptionsListControl = ({ typeaheadSubject }: { typeaheadSubject: Sub
   const controlStyle = select((state) => state.explicitInput.controlStyle);
   const singleSelect = select((state) => state.explicitInput.singleSelect);
   const id = select((state) => state.explicitInput.id);
+  const exclude = select((state) => state.explicitInput.exclude);
 
   const loading = select((state) => state.output.loading);
-  const negate = select((state) => state.explicitInput.negate);
 
   // debounce loading state so loading doesn't flash when user types
   const [buttonLoading, setButtonLoading] = useState(true);
@@ -82,7 +82,7 @@ export const OptionsListControl = ({ typeaheadSubject }: { typeaheadSubject: Sub
       validSelectionsCount: validSelections?.length,
       selectionDisplayNode: (
         <>
-          {negate && (
+          {exclude && (
             <EuiTextColor color="danger">
               <b>{OptionsListStrings.control.getNegate()}</b>{' '}
             </EuiTextColor>
@@ -98,7 +98,7 @@ export const OptionsListControl = ({ typeaheadSubject }: { typeaheadSubject: Sub
         </>
       ),
     };
-  }, [negate, validSelections, invalidSelections]);
+  }, [exclude, validSelections, invalidSelections]);
 
   const button = (
     <div className="optionsList--filterBtnWrapper" ref={resizeRef}>

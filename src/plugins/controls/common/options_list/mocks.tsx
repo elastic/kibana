@@ -19,7 +19,6 @@ const mockOptionsListComponentState = {
   invalidSelections: [],
   validSelections: [],
   searchString: { value: '', valid: true },
-  exclude: false,
 } as OptionsListComponentState;
 
 const mockOptionsListEmbeddableInput = {
@@ -29,7 +28,7 @@ const mockOptionsListEmbeddableInput = {
   selectedOptions: [],
   runPastTimeout: false,
   singleSelect: false,
-  negate: false,
+  exclude: false,
 } as OptionsListEmbeddableInput;
 
 const mockOptionsListOutput = {

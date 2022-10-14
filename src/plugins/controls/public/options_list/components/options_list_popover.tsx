@@ -54,7 +54,7 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
   const {
     useEmbeddableDispatch,
     useEmbeddableSelector: select,
-    actions: { selectOption, deselectOption, clearSelections, replaceSelection, setNegate },
+    actions: { selectOption, deselectOption, clearSelections, replaceSelection, setExclude },
   } = useReduxEmbeddableContext<OptionsListReduxState, typeof optionsListReducers>();
 
   const dispatch = useEmbeddableDispatch();
@@ -69,9 +69,9 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
   const selectedOptions = select((state) => state.explicitInput.selectedOptions);
   const singleSelect = select((state) => state.explicitInput.singleSelect);
   const title = select((state) => state.explicitInput.title);
+  const exclude = select((state) => state.explicitInput.exclude);
 
   const loading = select((state) => state.output.loading);
-  const negate = select((state) => state.explicitInput.negate);
 
   // track selectedOptions and invalidSelections in sets for more efficient lookup
   const selectedOptionsSet = useMemo(() => new Set<string>(selectedOptions), [selectedOptions]);
@@ -259,11 +259,11 @@ export const OptionsListPopover = ({ width, updateSearchString }: OptionsListPop
         <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButtonGroup
-              legend={OptionsListStrings.popover.getNegationLegend()}
+              legend={OptionsListStrings.popover.getIncludeExcludeLegend()}
               options={aggregationToggleButtons}
-              idSelected={negate ? 'optionsList__excludeResults' : 'optionsList__includeResults'}
+              idSelected={exclude ? 'optionsList__excludeResults' : 'optionsList__includeResults'}
               onChange={(optionId) =>
-                dispatch(setNegate(optionId === 'optionsList__excludeResults'))
+                dispatch(setExclude(optionId === 'optionsList__excludeResults'))
               }
               buttonSize="compressed"
               data-test-subj="optionsList__includeExcludeButtonGroup"

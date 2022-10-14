@@ -16,7 +16,6 @@ import { getIpRangeQuery } from '../../common/options_list/ip_search';
 
 export const getDefaultComponentState = (): OptionsListReduxState['componentState'] => ({
   searchString: { value: '', valid: true },
-  exclude: false,
 });
 
 export const optionsListReducers = {
@@ -65,6 +64,10 @@ export const optionsListReducers = {
   clearSelections: (state: WritableDraft<OptionsListReduxState>) => {
     if (state.explicitInput.selectedOptions) state.explicitInput.selectedOptions = [];
   },
+  setExclude: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<boolean>) => {
+    // console.log('set exclude', action.payload);
+    state.explicitInput.exclude = action.payload;
+  },
   clearValidAndInvalidSelections: (state: WritableDraft<OptionsListReduxState>) => {
     state.componentState.invalidSelections = [];
     state.componentState.validSelections = [];
@@ -85,9 +88,6 @@ export const optionsListReducers = {
     action: PayloadAction<OptionsListField | undefined>
   ) => {
     state.componentState.field = action.payload;
-  },
-  setNegate: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<boolean>) => {
-    state.explicitInput.negate = action.payload;
   },
   updateQueryResults: (
     state: WritableDraft<OptionsListReduxState>,
