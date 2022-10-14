@@ -247,7 +247,7 @@ export interface DataViewsServicePublicMethods {
    * Refresh fields for data view instance
    * @params dataView - Data view instance
    */
-  refreshFields: (indexPattern: DataView, displayErrors: boolean) => Promise<void>;
+  refreshFields: (indexPattern: DataView, displayErrors?: boolean) => Promise<void>;
   /**
    * Converts data view saved object to spec
    * @params savedObject - Data view saved object
