@@ -60,7 +60,7 @@ describe('getConfiguration', () => {
     const metricAccessor = 'metric-id';
     const breakdownByAccessor = 'bucket-id';
     const metrics = [metricAccessor];
-    const buckets = [breakdownByAccessor];
+    const buckets = { all: [breakdownByAccessor], customBuckets: {} };
     const maxAccessor = 'max-accessor-id';
     const collapseFn = 'sum';
     expect(
@@ -69,7 +69,7 @@ describe('getConfiguration', () => {
         buckets,
         maxAccessor,
         columnsWithoutReferenced: [],
-        bucketCollapseFn: { [metricAccessor]: collapseFn },
+        bucketCollapseFn: { [collapseFn]: [breakdownByAccessor] },
       })
     ).toEqual({
       breakdownByAccessor,

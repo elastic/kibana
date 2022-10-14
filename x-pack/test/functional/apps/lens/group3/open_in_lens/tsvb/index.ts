@@ -13,5 +13,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./gauge'));
     loadTestFile(require.resolve('./timeseries'));
     loadTestFile(require.resolve('./dashboard'));
+    loadTestFile(require.resolve('./top_n'));
   });
 }
