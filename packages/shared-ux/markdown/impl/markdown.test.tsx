@@ -18,7 +18,7 @@ describe('shared ux markdown component', () => {
 
   it('renders for displaying a readonly message', () => {
     const component = render(<Markdown readOnly markdownContent="error message" />);
-    expect(component).toMatchSnapshot();
+    expect(component.text()).toContain('error message');
   });
 
   it('will not render EuiMarkdownFormat when readOnly false and markdownContent specified', () => {
