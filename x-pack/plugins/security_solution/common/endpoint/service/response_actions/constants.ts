@@ -29,7 +29,7 @@ export const ENDPOINT_CAPABILITIES = [
   'kill_process',
   'suspend_process',
   'running_processes',
-  // TODO: add 'get_file' when in-context Response Console capabilities are enabled
+  'get_file',
 ] as const;
 
 export type EndpointCapabilities = typeof ENDPOINT_CAPABILITIES[number];
