@@ -6,7 +6,7 @@
  */
 
 import { AbstractSource } from '../source';
-import React, { ReactElement } from 'react';
+import { ReactElement } from 'react';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters';
 // @ts-ignore

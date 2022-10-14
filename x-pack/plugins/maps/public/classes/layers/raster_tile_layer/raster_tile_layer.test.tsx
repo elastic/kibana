@@ -6,7 +6,7 @@
  */
 
 import { RasterTileLayer } from './raster_tile_layer';
-import React, { ReactElement } from 'react';
+import { ReactElement } from 'react';
 import { SOURCE_TYPES } from '../../../../common/constants';
 import { DataRequestMeta, XYZTMSSourceDescriptor } from '../../../../common/descriptor_types';
 import { AbstractSource } from '../../sources/source';
