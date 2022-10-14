@@ -32,3 +32,7 @@ export const ALERTS_URL = (url: string) =>
     defaultMessage: 'Alerts URL: {url}',
     values: { url },
   });
+
+export const UNKNOWN = i18n.translate('xpack.cases.server.unknown', {
+  defaultMessage: 'Unknown',
+});

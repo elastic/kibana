@@ -313,7 +313,7 @@ export const getEntity = (
   return (
     getDisplayName(entity.updatedBy, userProfiles) ??
     getDisplayName(entity.createdBy, userProfiles) ??
-    'Unknown'
+    i18n.UNKNOWN
   );
 };
 
@@ -336,7 +336,7 @@ const getDisplayName = (
     }
   }
 
-  return validOrUndefined(user.full_name) ?? validOrUndefined(user.username) ?? 'Unknown';
+  return validOrUndefined(user.full_name) ?? validOrUndefined(user.username) ?? i18n.UNKNOWN;
 };
 
 const validOrUndefined = (value: string | undefined | null): string | undefined => {

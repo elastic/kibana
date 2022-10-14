@@ -874,7 +874,7 @@ describe('utils', () => {
       ).toEqual('createdBy_username');
     });
 
-    it('returns an empty string with neither updatedBy or createdBy are defined', () => {
+    it('returns Unknown with neither updatedBy or createdBy are defined', () => {
       expect(
         getEntity({
           // @ts-expect-error
@@ -884,7 +884,7 @@ describe('utils', () => {
       ).toEqual('Unknown');
     });
 
-    it('returns an empty string when createdBy fields are all null', () => {
+    it('returns Unknown when createdBy fields are all null', () => {
       expect(
         getEntity({
           createdBy: { email: null, full_name: null, username: null },
@@ -911,7 +911,7 @@ describe('utils', () => {
       ).toEqual('updatedBy_username');
     });
 
-    it('returns an empty string when updatedBy username is null', () => {
+    it('returns Unknown when updatedBy username is null', () => {
       expect(
         getEntity({
           createdBy: { email: null, full_name: null, username: 'createdBy_username' },
