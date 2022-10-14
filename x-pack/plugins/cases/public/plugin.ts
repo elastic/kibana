@@ -67,7 +67,7 @@ export class CasesUiPlugin
     plugins.management.sections.section.insightsAndAlerting.registerApp({
       id: APP_ID,
       title: APP_TITLE,
-      order: 0,
+      order: 1,
       async mount(params: ManagementAppMountParams) {
         const [coreStart, pluginsStart] = (await core.getStartServices()) as [
           CoreStart,
