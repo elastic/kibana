@@ -224,7 +224,7 @@ GET apm-*-metric-*,metrics-apm*/_search?terminate_after=1000
 
 # Transactions in service inventory page
 
-A new aggregated metric document introduced and holds latency and throughput metrics pivoted by `service.name+service.environment+transaction.type`
+Service metrics is an aggregated metric document that holds latency and throughput metrics pivoted by `service.name + service.environment + transaction.type`
 
 The decision to use service metrics aggregation or not is determined in [getServiceInventorySearchSource](https://github.com/elastic/kibana/blob/5d585ea375be551a169a0bea49b011819b9ac669/x-pack/plugins/apm/server/lib/helpers/get_service_inventory_search_source.ts#L12) and [getSearchServiceMetrics](https://github.com/elastic/kibana/blob/5d585ea375be551a169a0bea49b011819b9ac669/x-pack/plugins/apm/server/lib/helpers/service_metrics/index.ts#L38)
 
