@@ -34,6 +34,13 @@ export const PROCESS_ANCESTRY_ERROR = i18n.translate(
   }
 );
 
+export const PROCESS_ANCESTRY_FILTER = i18n.translate(
+  'xpack.securitySolution.alertDetails.overview.insights.processAncestryFilter',
+  {
+    defaultMessage: 'Process Ancestry Alert IDs',
+  }
+);
+
 export const PROCESS_ANCESTRY_EMPTY = i18n.translate(
   'xpack.securitySolution.alertDetails.overview.insights.related_alerts_by_process_ancestry_empty',
   {
