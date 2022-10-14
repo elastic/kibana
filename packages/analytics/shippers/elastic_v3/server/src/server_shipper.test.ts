@@ -36,6 +36,9 @@ describe('ElasticV3ServerShipper', () => {
 
   let shipper: ElasticV3ServerShipper;
 
+  // eslint-disable-next-line dot-notation
+  const setLastBatchSent = (ms: number) => (shipper['lastBatchSent'] = ms);
+
   beforeEach(() => {
     jest.useFakeTimers();
 
@@ -119,6 +122,7 @@ describe('ElasticV3ServerShipper', () => {
       shipper.reportEvents(events);
       shipper.optIn(true);
       const counter = firstValueFrom(shipper.telemetryCounter$);
+      setLastBatchSent(Date.now() - 10 * SECONDS);
       advance(10 * MINUTES);
       expect(fetchMock).toHaveBeenCalledWith(
         'https://telemetry-staging.elastic.co/v3/send/test-channel',
@@ -150,6 +154,7 @@ describe('ElasticV3ServerShipper', () => {
     fakeSchedulers((advance) => {
       shipper.reportEvents(events);
       shipper.optIn(false);
+      setLastBatchSent(Date.now() - 10 * SECONDS);
       advance(10 * MINUTES);
       expect(fetchMock).not.toHaveBeenCalled();
     })
@@ -196,6 +201,7 @@ describe('ElasticV3ServerShipper', () => {
       shipper['firstTimeOffline$'].next(null);
       shipper.reportEvents(events);
       shipper.optIn(true);
+      setLastBatchSent(Date.now() - 10 * SECONDS);
       advance(10 * MINUTES);
       expect(fetchMock).toHaveBeenCalledWith(
         'https://telemetry-staging.elastic.co/v3/send/test-channel',
@@ -215,14 +221,15 @@ describe('ElasticV3ServerShipper', () => {
   test(
     'sends when the queue overflows the 10kB leaky bucket one batch every 10s',
     fakeSchedulers(async (advance) => {
-      expect.assertions(2 * 8 + 2);
+      expect.assertions(2 * 9 + 2);
 
       shipper.reportEvents(new Array(1000).fill(events[0]));
       shipper.optIn(true);
 
       // Due to the size of the test events, it matches 8 rounds.
-      for (let i = 0; i < 8; i++) {
+      for (let i = 0; i < 9; i++) {
         const counter = firstValueFrom(shipper.telemetryCounter$);
+        setLastBatchSent(Date.now() - 10 * SECONDS);
         advance(10 * SECONDS);
         expect(fetchMock).toHaveBeenNthCalledWith(
           i + 1,
@@ -270,6 +277,7 @@ describe('ElasticV3ServerShipper', () => {
       shipper.reportEvents(events);
       shipper.optIn(true);
       const counter = firstValueFrom(shipper.telemetryCounter$);
+      setLastBatchSent(Date.now() - 10 * SECONDS);
       advance(10 * MINUTES);
       expect(fetchMock).toHaveBeenCalledWith(
         'https://telemetry-staging.elastic.co/v3/send/test-channel',
@@ -307,6 +315,7 @@ describe('ElasticV3ServerShipper', () => {
       shipper.reportEvents(events);
       shipper.optIn(true);
       const counter = firstValueFrom(shipper.telemetryCounter$);
+      setLastBatchSent(Date.now() - 10 * SECONDS);
       advance(10 * MINUTES);
       expect(fetchMock).toHaveBeenCalledWith(
         'https://telemetry-staging.elastic.co/v3/send/test-channel',
@@ -449,6 +458,7 @@ describe('ElasticV3ServerShipper', () => {
           shipper.reportEvents(events);
           shipper.optIn(true);
           const counter = firstValueFrom(shipper.telemetryCounter$);
+          setLastBatchSent(Date.now() - 10 * SECONDS);
           advance(10 * MINUTES);
           expect(fetchMock).toHaveBeenNthCalledWith(
             1,

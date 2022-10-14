@@ -66,6 +66,8 @@ export class ElasticV3ServerShipper implements IShipper {
 
   private readonly url: string;
 
+  private lastBatchSent = Date.now();
+
   private clusterUuid: string = 'UNKNOWN';
   private licenseId?: string;
 
@@ -215,12 +217,14 @@ export class ElasticV3ServerShipper implements IShipper {
 
   private setInternalSubscriber() {
     merge(
-      // Attempt to send every 10 seconds
-      interval(10 * SECOND).pipe(takeUntil(this.shutdown$)),
-      // React to opt in changes. The filter below stops if not opted-in.
-      this.isOptedIn$,
-      // React to connectivity changes. The filter below stops if not online.
-      this.firstTimeOffline$,
+      merge(
+        // Attempt to send every 10 seconds
+        interval(10 * SECOND).pipe(takeUntil(this.shutdown$)),
+        // React to opt in changes. The filter below stops if not opted-in.
+        this.isOptedIn$,
+        // React to connectivity changes. The filter below stops if not online.
+        this.firstTimeOffline$
+      ).pipe(filter(() => Date.now() - this.lastBatchSent >= 10 * SECOND)),
       // Attempt to send one last time on shutdown
       this.shutdown$
     )
@@ -233,7 +237,10 @@ export class ElasticV3ServerShipper implements IShipper {
             this.internalQueue.length > 0
         ),
         // Retrieve the events to send (clearing the queue) in a synchronous operation to avoid race conditions.
-        map(() => this.getEventsToSend()),
+        map(() => {
+          this.lastBatchSent = Date.now();
+          return this.getEventsToSend();
+        }),
         // Using `concatMap` here because we want to send events whenever the emitter says so. Otherwise, it'd skip sending some events.
         concatMap(async (eventsToSend) => await this.sendEvents(eventsToSend))
       )
