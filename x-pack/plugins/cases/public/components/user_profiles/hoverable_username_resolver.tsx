@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import React from 'react';
-import { ElasticUser } from '../../containers/types';
-import { HoverableUserWithAvatarProps } from './hoverable_user_with_avatar';
+import type { ElasticUser } from '../../containers/types';
+import type { HoverableUserWithAvatarProps } from './hoverable_user_with_avatar';
 import { Username } from './username';
 import { convertToUserInfo } from './user_converter';
 import { UserToolTip } from './user_tooltip';
