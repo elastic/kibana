@@ -343,11 +343,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await toasts.getToastCount()).to.be(2);
       const firstContent = await toasts.getToastContent(1);
       expect(firstContent).to.equal(
-        `Alert rule has changed\nThe displayed documents might not match the documents that triggered the alert because the rule configuration changed.`
+        `Data View has changed\nData view has been updated after the last update of the alert rule.`
       );
       const secondContent = await toasts.getToastContent(2);
       expect(secondContent).to.equal(
-        `Data View has changed\nData view has been updated after the last update of the alert rule.`
+        `Alert rule has changed\nThe displayed documents might not match the documents that triggered the alert because the rule configuration changed.`
       );
 
       expect(await dataGrid.getDocCount()).to.be(1);

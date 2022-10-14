@@ -14,6 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const toasts = getService('toasts');
   const esArchiver = getService('esArchiver');
   const filterBar = getService('filterBar');
+  const fieldEditor = getService('fieldEditor');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');

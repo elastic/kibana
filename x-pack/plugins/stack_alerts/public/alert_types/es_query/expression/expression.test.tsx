@@ -100,6 +100,8 @@ const searchSourceFieldsMock = {
     id: '90943e30-9a47-11e8-b64d-95841ca0b247',
     title: 'kibana_sample_data_logs',
     fields: [],
+    getName: () => 'kibana_sample_data_logs',
+    isPersisted: () => true,
   },
 };
 
