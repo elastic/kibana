@@ -21,7 +21,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { InvestigateInTimelineButton } from '../../../timeline/components/investigate_in_timeline';
+import { InvestigateInTimelineButton } from '../../../timeline';
 import { DateFormatter } from '../../../../components/date_formatter/date_formatter';
 import { Indicator, RawIndicatorFieldId } from '../../../../../common/types/indicator';
 import { IndicatorsFlyoutJson } from './json_tab';
