@@ -19,7 +19,7 @@ import { SyntheticsDatePicker } from '../../common/date_picker/synthetics_date_p
 import { MonitorErrorsCount } from '../monitor_summary/monitor_errors_count';
 import { ErrorsList } from './errors_list';
 
-export const ErrorsTabContent = () => {
+export const MonitorErrors = () => {
   const { euiTheme } = useEuiTheme();
 
   const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
