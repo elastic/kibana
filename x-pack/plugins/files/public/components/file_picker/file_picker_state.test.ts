@@ -14,7 +14,7 @@ jest.mock('rxjs', () => {
 });
 
 import { TestScheduler } from 'rxjs/testing';
-import { merge, tap, of } from 'rxjs';
+import { merge, tap, of, NEVER } from 'rxjs';
 import { FileJSON } from '../../../common';
 import { FilePickerState, createFilePickerState } from './file_picker_state';
 import { createMockFilesClient } from '../../mocks';
@@ -151,6 +151,17 @@ describe('FilePickerState', () => {
         page: 3,
         perPage: 20,
       });
+    });
+  });
+  it('cancels in flight requests', () => {
+    getTestScheduler().run(({ expectObservable, cold }) => {
+      filesClient.list.mockImplementationOnce(() => NEVER as any);
+      filesClient.list.mockImplementationOnce(() => of({ files: [], total: 0 }) as any);
+      const inputQuery = '------a|';
+      const input$ = cold(inputQuery).pipe(tap((q) => filePickerState.setQuery(q)));
+      expectObservable(input$).toBe(inputQuery);
+      expectObservable(filePickerState.files$, '--^').toBe('------a-', { a: [] });
+      expectObservable(filePickerState.loadingError$).toBe('a-b---c-', {});
     });
   });
 });
