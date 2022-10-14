@@ -70,4 +70,4 @@ export type ProjectMonitorsRequest = t.TypeOf<typeof ProjectMonitorsRequestCodec
 
 export type ProjectMonitorsResponse = t.TypeOf<typeof ProjectMonitorsResponseCodec>;
 
-export type ProjectMonitorMetaData = t.TypeOf<typeof ProjectMonitorsMetaDataCodec>;
+export type ProjectMonitorMetaData = t.TypeOf<typeof ProjectMonitorMetaDataCodec>;
