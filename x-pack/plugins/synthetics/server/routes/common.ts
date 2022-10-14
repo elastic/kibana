@@ -24,7 +24,6 @@ const querySchema = schema.object({
   locations: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
   status: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
   fields: schema.maybe(schema.arrayOf(schema.string())),
-  aggs: schema.any(),
   searchAfter: schema.maybe(schema.arrayOf(schema.string())),
 });
 
