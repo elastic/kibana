@@ -328,7 +328,7 @@ export function registerIndexRoutes({
         elasticsearch: { client },
         savedObjects: { client: savedObjectsClient }
       } = await context.core;
-      const trainedModelsProvider = await ml.trainedModelsProvider(request, savedObjectsClient);
+      const trainedModelsProvider = ml ? await ml.trainedModelsProvider(request, savedObjectsClient) : undefined;
 
       const mlInferencePipelineProcessorConfigs = await fetchMlInferencePipelineProcessors(
         client.asCurrentUser,

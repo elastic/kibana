@@ -576,6 +576,16 @@ describe('fetchMlInferencePipelineProcessors lib function', () => {
     jest.clearAllMocks();
   });
 
+  describe('when Machine Learning is disabled in the current space', () => {
+    it('should throw an eror', () => {
+      expect(() => fetchMlInferencePipelineProcessors(
+        mockClient as unknown as ElasticsearchClient,
+        undefined,
+        'some-index'
+      )).rejects.toThrowError('Machine Learning is not enabled');
+    });
+  });
+
   describe('when using an index that does not have an ml-inference pipeline', () => {
     it('should return an empty array', async () => {
       mockClient.ingest.getPipeline.mockImplementation(() => Promise.reject({}));

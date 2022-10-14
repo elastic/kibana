@@ -159,9 +159,13 @@ export const fetchAndAddTrainedModelData = async (
 
 export const fetchMlInferencePipelineProcessors = async (
   client: ElasticsearchClient,
-  trainedModelsProvider: MlTrainedModels,
+  trainedModelsProvider: MlTrainedModels | undefined,
   indexName: string
 ): Promise<InferencePipeline[]> => {
+  if (!trainedModelsProvider) {
+    return Promise.reject(new Error('Machine Learning is not enabled'));
+  }
+
   const mlInferencePipelineProcessorNames = await fetchMlInferencePipelineProcessorNames(
     client,
     indexName

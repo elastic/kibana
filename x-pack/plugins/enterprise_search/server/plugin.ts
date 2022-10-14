@@ -71,7 +71,7 @@ interface PluginsSetup {
   features: FeaturesPluginSetup;
   infra: InfraPluginSetup;
   customIntegrations?: CustomIntegrationsPluginSetup;
-  ml: MlPluginSetup;
+  ml?: MlPluginSetup;
 }
 
 interface PluginsStart {
@@ -85,7 +85,7 @@ export interface RouteDependencies {
   log: Logger;
   enterpriseSearchRequestHandler: IEnterpriseSearchRequestHandler;
   getSavedObjectsService?(): SavedObjectsServiceStart;
-  ml: MlPluginSetup;
+  ml?: MlPluginSetup;
 }
 
 export class EnterpriseSearchPlugin implements Plugin {
