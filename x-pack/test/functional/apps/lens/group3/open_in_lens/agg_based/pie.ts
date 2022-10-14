@@ -18,6 +18,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   ]);
 
   const pieChart = getService('pieChart');
+  const testSubjects = getService('testSubjects');
 
   describe('Pie', function describeIndexTests() {
     const isNewChartsLibraryEnabled = true;
@@ -37,6 +38,23 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(await visualize.hasNavigateToLensButton()).to.eql(false);
     });
 
+    it('should hide the "Edit Visualization in Lens" menu item if more than 3 split slices were defined', async () => {
+      await visEditor.clickBucket('Split slices');
+      await visEditor.selectAggregation('Terms');
+      await visEditor.selectField('machine.os.raw');
+      await visEditor.clickBucket('Split slices');
+      await visEditor.selectAggregation('Terms', 'buckets', false, 1);
+      await visEditor.selectField('bytes', 'buckets', false, 1);
+      await visEditor.clickBucket('Split slices');
+      await visEditor.selectAggregation('Terms', 'buckets', false, 2);
+      await visEditor.selectField('bytes', 'buckets', false, 2);
+      await visEditor.clickBucket('Split slices');
+      await visEditor.selectAggregation('Terms', 'buckets', false, 3);
+      await visEditor.selectField('bytes', 'buckets', false, 3);
+      await header.waitUntilLoadingHasFinished();
+      expect(await visualize.hasNavigateToLensButton()).to.eql(false);
+    });
+
     it('should show the "Edit Visualization in Lens" menu item', async () => {
       await visEditor.clickBucket('Split slices');
       await visEditor.selectAggregation('Terms');
@@ -47,18 +65,82 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(await visualize.hasNavigateToLensButton()).to.eql(true);
     });
 
-    it('should convert to Lens', async () => {
-      const expectedTableData = ['ios', 'osx', 'win 7', 'win 8', 'win xp'];
+    it('should convert aggregation with params', async () => {
+      await visEditor.clickMetricEditor();
+      await visEditor.selectAggregation('Sum', 'metrics');
+      await visEditor.selectField('machine.ram', 'metrics');
       await visEditor.clickBucket('Split slices');
       await visEditor.selectAggregation('Terms');
       await visEditor.selectField('machine.os.raw');
+      await visEditor.clickGo();
       await header.waitUntilLoadingHasFinished();
-      await visEditor.clickGo(isNewChartsLibraryEnabled);
 
       await visualize.navigateToLensFromAnotherVisulization();
       await lens.waitForVisualization('partitionVisChart');
 
+      expect(await lens.getLayerCount()).to.be(1);
+
+      const sliceByText = await lens.getDimensionTriggerText('lnsPie_sliceByDimensionPanel', 0);
+      const sizeByText = await lens.getDimensionTriggerText('lnsPie_sizeByDimensionPanel', 0);
+
+      const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
+      expect(dimensions).to.have.length(2);
+      expect(sliceByText).to.be('machine.os.raw: Descending');
+      expect(sizeByText).to.be('Sum of machine.ram');
+    });
+
+    it('should convert terms to slice by', async () => {
+      const expectedTableData = ['ios', 'osx', 'win 7', 'win 8', 'win xp'];
+      await visEditor.clickBucket('Split slices');
+      await visEditor.selectAggregation('Terms');
+      await visEditor.selectField('machine.os.raw');
+      await visEditor.clickGo(isNewChartsLibraryEnabled);
+      await header.waitUntilLoadingHasFinished();
+
+      await visualize.navigateToLensFromAnotherVisulization();
+      await lens.waitForVisualization('partitionVisChart');
+
+      const sliceByText = await lens.getDimensionTriggerText('lnsPie_sliceByDimensionPanel', 0);
+      const sizeByText = await lens.getDimensionTriggerText('lnsPie_sizeByDimensionPanel', 0);
+
+      const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
+      expect(dimensions).to.have.length(2);
+      expect(sliceByText).to.be('machine.os.raw: Descending');
+      expect(sizeByText).to.be('Count');
+
       await pieChart.expectPieChartLabels(expectedTableData, isNewChartsLibraryEnabled);
+    });
+
+    it('should convert types correctly', async () => {
+      await visEditor.clickBucket('Split slices');
+      await visEditor.selectAggregation('Terms');
+      await visEditor.selectField('machine.os.raw');
+
+      await visEditor.clickGo(isNewChartsLibraryEnabled);
+      await header.waitUntilLoadingHasFinished();
+
+      await visualize.navigateToLensFromAnotherVisulization();
+      await lens.waitForVisualization('partitionVisChart');
+
+      let chartSwitcher = await testSubjects.find('lnsChartSwitchPopover');
+      let type = await chartSwitcher.getVisibleText();
+      expect(type).to.be('Donut');
+
+      const goBackBtn = await testSubjects.find('lnsApp_goBackToAppButton');
+      goBackBtn.click();
+
+      await visEditor.clickOptionsTab();
+      const isDonutButton = await testSubjects.find('visTypePieIsDonut');
+      await isDonutButton.click();
+      await visEditor.clickGo(isNewChartsLibraryEnabled);
+      await header.waitUntilLoadingHasFinished();
+
+      await visualize.navigateToLensFromAnotherVisulization();
+      await lens.waitForVisualization('partitionVisChart');
+
+      chartSwitcher = await testSubjects.find('lnsChartSwitchPopover');
+      type = await chartSwitcher.getVisibleText();
+      expect(type).to.be('Pie');
     });
   });
 }
