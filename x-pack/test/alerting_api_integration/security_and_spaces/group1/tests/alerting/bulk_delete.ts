@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { UserAtSpaceScenarios } from '../../../scenarios';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
+import { getUrlPrefix, getTestRuleData } from '../../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -16,14 +16,10 @@ export default ({ getService }: FtrProviderContext) => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
   describe('bulkDelete', () => {
-    const objectRemover = new ObjectRemover(supertest);
-
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
 
       describe(scenario.id, () => {
-        after(() => objectRemover.removeAll());
-
         it('should handle bulk delete of one rule appropriately based on id', async () => {
           const { body: createdRule1 } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
@@ -114,7 +110,7 @@ export default ({ getService }: FtrProviderContext) => {
           }
         });
 
-        it.skip('should handle bulk delete of several rules ids appropriately based on filter', async () => {
+        it('should handle bulk delete of several rules ids appropriately based on filter', async () => {
           await Promise.all(
             Array.from({ length: 3 }).map(() =>
               supertest
@@ -194,13 +190,13 @@ export default ({ getService }: FtrProviderContext) => {
 
         it('shouldn not delete rule from another space', async () => {
           const { body: createdRule } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+            .post(`${getUrlPrefix('space2')}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
             .send(getTestRuleData())
             .expect(200);
 
           const response = await supertestWithoutAuth
-            .patch(`${getUrlPrefix('other')}/internal/alerting/rules/_bulk_delete`)
+            .patch(`${getUrlPrefix('space2')}/internal/alerting/rules/_bulk_delete`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send({ ids: [createdRule.id] });
