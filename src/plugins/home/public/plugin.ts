@@ -104,7 +104,7 @@ export class HomePublicPlugin
           addDataService: this.addDataService,
           featureCatalogue: this.featuresCatalogueRegistry,
           welcomeService: this.welcomeService,
-          guideOnboardingService: guidedOnboarding.guidedOnboardingApi,
+          guidedOnboardingService: guidedOnboarding.guidedOnboardingApi,
         });
         coreStart.chrome.docTitle.change(
           i18n.translate('home.pageTitle', { defaultMessage: 'Home' })

@@ -50,7 +50,7 @@ export interface HomeKibanaServices {
   tutorialService: TutorialService;
   addDataService: AddDataService;
   welcomeService: WelcomeService;
-  guideOnboardingService?: GuidedOnboardingApi;
+  guidedOnboardingService?: GuidedOnboardingApi;
 }
 
 let services: HomeKibanaServices | null = null;

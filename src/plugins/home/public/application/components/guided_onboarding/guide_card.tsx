@@ -182,9 +182,9 @@ const getCardFooter = (
   );
 };
 export const GuideCard = ({ useCase, guides }: { useCase: UseCase; guides: GuideState[] }) => {
-  const { guideOnboardingService } = getServices();
+  const { guidedOnboardingService } = getServices();
 
-  const footer = getCardFooter(guides, useCase, guideOnboardingService);
+  const footer = getCardFooter(guides, useCase, guidedOnboardingService);
   return (
     <UseCaseCard
       useCase={useCase}
