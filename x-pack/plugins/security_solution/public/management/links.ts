@@ -232,23 +232,25 @@ export const getManagementFilteredLinks = async (
 ): Promise<LinkItem> => {
   try {
     const currentUserResponse = await plugins.security.authc.getCurrentUser();
-    const privileges = calculateEndpointAuthz(
-      licenseService,
-      plugins.fleet?.authz,
-      currentUserResponse.roles
-    );
-    if (!privileges.canAccessEndpointManagement) {
+    const { canAccessEndpointManagement, canIsolateHost, canAccessResponseActionsHistory } =
+      calculateEndpointAuthz(licenseService, plugins.fleet?.authz, currentUserResponse.roles);
+    if (!canAccessEndpointManagement) {
       return excludeLinks([
         SecurityPageName.hostIsolationExceptions,
         SecurityPageName.responseActionsHistory,
       ]);
     }
-    if (!privileges.canIsolateHost || !privileges.canAccessResponseActionsHistory) {
+
+    if (!canAccessResponseActionsHistory) {
+      // <= enterprise license
+      return excludeLinks([SecurityPageName.responseActionsHistory]);
+    } else if (!canIsolateHost) {
       const hostIsolationExceptionsApiClientInstance = HostIsolationExceptionsApiClient.getInstance(
         core.http
       );
       const summaryResponse = await hostIsolationExceptionsApiClientInstance.summary();
       if (!summaryResponse.total) {
+        // <= platinum so exclude also links that require enterprise
         return excludeLinks([
           SecurityPageName.hostIsolationExceptions,
           SecurityPageName.responseActionsHistory,
