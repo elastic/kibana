@@ -25,6 +25,7 @@ import {
   convertMetricAggregationColumnWithoutSpecialParams,
   convertToCounterRateColumn,
   convertToStandartDeviationColumn,
+  convertVarianceToFormulaColumn,
 } from '../convert';
 import { getValidColumns } from './columns';
 
@@ -118,6 +119,10 @@ export const getMetricsColumns = (
     }
     case 'top_hit': {
       const column = convertToLastValueColumn(columnsConverterArgs, reducedTimeRange);
+      return getValidColumns(column);
+    }
+    case 'variance': {
+      const column = convertVarianceToFormulaColumn(columnsConverterArgs, reducedTimeRange);
       return getValidColumns(column);
     }
     case 'static': {
