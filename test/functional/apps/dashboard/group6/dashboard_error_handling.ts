@@ -56,9 +56,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.loadSavedDashboard('dashboard with missing index pattern');
         await PageObjects.header.waitUntilLoadingHasFinished();
-        const errorEmbeddable = await testSubjects.find('visualization-missed-data-view-error');
+        const embeddableError = await testSubjects.find('embeddableError');
+        const link = await embeddableError.findByPartialLinkText('click here to re-create it');
 
-        expect(await errorEmbeddable.isDisplayed()).to.be(true);
+        expect(await link.isDisplayed()).to.be(true);
       });
     });
   });

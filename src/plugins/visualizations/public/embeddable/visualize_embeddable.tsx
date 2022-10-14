@@ -503,7 +503,7 @@ export class VisualizeEmbeddable
         const { error } = this.getOutput();
 
         if (error) {
-          render(this.catchError(error), this.domNode);
+          render(this.renderError(error), this.domNode);
         }
       })
     );
@@ -511,7 +511,7 @@ export class VisualizeEmbeddable
     await this.updateHandler();
   }
 
-  public catchError(error: ErrorLike | string) {
+  private renderError(error: ErrorLike | string) {
     if (isFallbackDataView(this.vis.data.indexPattern)) {
       return (
         <VisualizationMissedSavedObjectError
