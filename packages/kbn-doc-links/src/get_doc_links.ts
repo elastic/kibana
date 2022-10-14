@@ -50,7 +50,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       overview: `${APM_DOCS}guide/${DOC_LINK_VERSION}/apm-overview.html`,
       tailSamplingPolicies: `${APM_DOCS}guide/${DOC_LINK_VERSION}/configure-tail-based-sampling.html`,
       elasticAgent: `${APM_DOCS}guide/${DOC_LINK_VERSION}/upgrade-to-apm-integration.html`,
-      storageExplorer: `${KIBANA_DOCS}apm-getting-started.html`,
+      storageExplorer: `${KIBANA_DOCS}storage-explorer.html`,
       spanCompression: `${APM_DOCS}guide/${DOC_LINK_VERSION}/span-compression.html`,
       transactionSampling: `${APM_DOCS}guide/${DOC_LINK_VERSION}/sampling.html`,
       dataModelErrors: `${APM_DOCS}guide/${DOC_LINK_VERSION}/data-model-errors.html`,
