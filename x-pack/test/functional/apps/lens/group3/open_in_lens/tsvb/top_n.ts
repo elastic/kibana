@@ -38,8 +38,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('should not allow converting of not valid panel', async () => {
       await visualBuilder.selectAggType('Max');
       await header.waitUntilLoadingHasFinished();
-      const canEdit = await testSubjects.exists('visualizeEditInLensButton');
-      expect(canEdit).to.be(false);
+      expect(await visualize.hasNavigateToLensButton()).to.be(false);
     });
 
     it('should not allow converting of unsupported aggregations', async () => {
@@ -47,8 +46,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visualBuilder.setFieldForAggregation('machine.ram');
 
       await header.waitUntilLoadingHasFinished();
-      const canEdit = await testSubjects.exists('visualizeEditInLensButton');
-      expect(canEdit).to.be(false);
+      expect(await visualize.hasNavigateToLensButton()).to.be(false);
     });
 
     it('should hide the "Edit Visualization in Lens" menu item for a sibling pipeline aggregations', async () => {
@@ -57,8 +55,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visualBuilder.selectAggType('Overall Average', 1);
       await visualBuilder.setFieldForAggregation('Count', 1);
       await header.waitUntilLoadingHasFinished();
-      const canEdit = await testSubjects.exists('visualizeEditInLensButton');
-      expect(canEdit).to.be(false);
+      expect(await visualize.hasNavigateToLensButton()).to.be(false);
     });
 
     it('should hide the "Edit Visualization in Lens" menu item for a parent pipeline aggregations', async () => {
@@ -70,20 +67,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visualBuilder.selectAggType('Cumulative Sum', 1);
       await visualBuilder.setFieldForAggregation('Count', 1);
       await header.waitUntilLoadingHasFinished();
-      const canEdit = await testSubjects.exists('visualizeEditInLensButton');
-      expect(canEdit).to.be(false);
+      expect(await visualize.hasNavigateToLensButton()).to.be(false);
     });
 
     it('should show the "Edit Visualization in Lens" menu item for a count aggregation', async () => {
-      const canEdit = await testSubjects.exists('visualizeEditInLensButton');
-      expect(canEdit).to.be(true);
+      expect(await visualize.hasNavigateToLensButton()).to.be(true);
     });
 
     it('should convert to horizontal bar', async () => {
       await visualBuilder.selectAggType('Max');
       await visualBuilder.setFieldForAggregation('memory', 0);
-      const button = await testSubjects.find('visualizeEditInLensButton');
-      await button.click();
+      await visualize.navigateToLensFromAnotherVisulization();
       await lens.waitForVisualization('xyVisChart');
       const chartSwitcher = await testSubjects.find('lnsChartSwitchPopover');
       const type = await chartSwitcher.getVisibleText();
@@ -100,8 +94,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('should convert group by to vertical axis', async () => {
       await visualBuilder.setMetricsGroupByTerms('extension.raw');
       await header.waitUntilLoadingHasFinished();
-      const button = await testSubjects.find('visualizeEditInLensButton');
-      await button.click();
+      await visualize.navigateToLensFromAnotherVisulization();
       await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
         const layerCount = await lens.getLayerCount();
@@ -121,8 +114,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visualBuilder.clickDataTab('topN');
       await header.waitUntilLoadingHasFinished();
 
-      const button = await testSubjects.find('visualizeEditInLensButton');
-      await button.click();
+      await visualize.navigateToLensFromAnotherVisulization();
       await lens.waitForVisualization('xyVisChart');
       await lens.openDimensionEditor('lnsXY_yDimensionPanel > lns-dimensionTrigger');
       await testSubjects.click('indexPattern-advanced-accordion');
@@ -143,8 +135,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await header.waitUntilLoadingHasFinished();
 
-      const button = await testSubjects.find('visualizeEditInLensButton');
-      await button.click();
+      await visualize.navigateToLensFromAnotherVisulization();
       await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
         const layerCount = await lens.getLayerCount();
@@ -157,8 +148,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('visualizes field to Lens and loads fields to the dimesion editor', async () => {
-      const button = await testSubjects.find('visualizeEditInLensButton');
-      await button.click();
+      await visualize.navigateToLensFromAnotherVisulization();
       await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
         const yDimensionText = await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 0);
@@ -167,8 +157,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('navigates back to TSVB when the Back button is clicked', async () => {
-      const button = await testSubjects.find('visualizeEditInLensButton');
-      await button.click();
+      await visualize.navigateToLensFromAnotherVisulization();
       await lens.waitForVisualization('xyVisChart');
       const goBackBtn = await testSubjects.find('lnsApp_goBackToAppButton');
       goBackBtn.click();
@@ -178,25 +167,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('should preserve app filters in lens', async () => {
       await filterBar.addFilter('extension', 'is', 'css');
       await header.waitUntilLoadingHasFinished();
-      const button = await testSubjects.find('visualizeEditInLensButton');
-      await button.click();
+      await visualize.navigateToLensFromAnotherVisulization();
       await lens.waitForVisualization('xyVisChart');
 
       expect(await filterBar.hasFilter('extension', 'css')).to.be(true);
     });
 
     it('should preserve query in lens', async () => {
-      let button = await testSubjects.find('visualizeEditInLensButton');
-      await button.click();
-      await lens.waitForVisualization('xyVisChart');
-      const goBackBtn = await testSubjects.find('lnsApp_goBackToAppButton');
-      goBackBtn.click();
-      await visualBuilder.checkTopNTabIsPresent();
       await queryBar.setQuery('machine.os : ios');
       await queryBar.submitQuery();
       await header.waitUntilLoadingHasFinished();
-      button = await testSubjects.find('visualizeEditInLensButton');
-      await button.click();
+      await visualize.navigateToLensFromAnotherVisulization();
       await lens.waitForVisualization('xyVisChart');
 
       expect(await queryBar.getQueryString()).to.equal('machine.os : ios');
