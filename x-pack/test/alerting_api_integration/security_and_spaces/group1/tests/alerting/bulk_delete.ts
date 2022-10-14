@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { SuperuserAtSpace1 } from '../../../scenarios';
+import { UserAtSpaceScenarios } from '../../../scenarios';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 
@@ -19,9 +19,10 @@ export default ({ getService }: FtrProviderContext) => {
     const objectRemover = new ObjectRemover(supertest);
     after(() => objectRemover.removeAll());
 
+    const { user, space } =
+      UserAtSpaceScenarios.find((uass) => uass.id === 'superuser at space1') ||
+      UserAtSpaceScenarios[1];
     it('should handle bulk delete of one rule appropriately based on id', async () => {
-      const { user, space } = SuperuserAtSpace1;
-
       const { body: createdRule1 } = await supertest
         .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
@@ -29,7 +30,7 @@ export default ({ getService }: FtrProviderContext) => {
         .expect(200);
 
       const response = await supertestWithoutAuth
-        .patch(`${getUrlPrefix(space.id)}/api/alerting/rules/_bulk_delete`)
+        .patch(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_delete`)
         .set('kbn-xsrf', 'foo')
         .send({ ids: [createdRule1.id] })
         .auth(user.username, user.password);
@@ -39,8 +40,6 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should handle bulk delete of several rules ids appropriately based on ids', async () => {
-      const { user, space } = SuperuserAtSpace1;
-
       const rules = await Promise.all(
         Array.from({ length: 3 }).map(() =>
           supertest
@@ -52,7 +51,7 @@ export default ({ getService }: FtrProviderContext) => {
       );
 
       const response = await supertestWithoutAuth
-        .patch(`${getUrlPrefix(space.id)}/api/alerting/rules/_bulk_delete`)
+        .patch(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_delete`)
         .set('kbn-xsrf', 'foo')
         .send({ ids: rules.map((rule) => rule.body.id) })
         .auth(user.username, user.password);
@@ -62,8 +61,6 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should handle bulk delete of several rules ids appropriately based on filter', async () => {
-      const { user, space } = SuperuserAtSpace1;
-
       await Promise.all(
         Array.from({ length: 3 }).map(() =>
           supertest
@@ -75,7 +72,7 @@ export default ({ getService }: FtrProviderContext) => {
       );
 
       const response = await supertestWithoutAuth
-        .patch(`${getUrlPrefix(space.id)}/api/alerting/rules/_bulk_delete`)
+        .patch(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_delete`)
         .set('kbn-xsrf', 'foo')
         .send({ filter: `alert.attributes.tags: "multiple-rules-edit"` })
         .auth(user.username, user.password);
@@ -85,8 +82,6 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should throw an error when bulk delete of rules when both ids and filter supplied in payload', async () => {
-      const { user, space } = SuperuserAtSpace1;
-
       const { body: createdRule1 } = await supertest
         .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
@@ -94,7 +89,7 @@ export default ({ getService }: FtrProviderContext) => {
         .expect(200);
 
       const response = await supertestWithoutAuth
-        .patch(`${getUrlPrefix(space.id)}/api/alerting/rules/_bulk_delete`)
+        .patch(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_delete`)
         .set('kbn-xsrf', 'foo')
         .send({ filter: 'fake_filter', ids: [createdRule1.id] })
         .auth(user.username, user.password);
@@ -106,8 +101,6 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should handle bulk delete of rules when one of deletions throw an error', async () => {
-      const { user, space } = SuperuserAtSpace1;
-
       const rules = await Promise.all(
         Array.from({ length: 3 }).map(() =>
           supertest
@@ -119,7 +112,7 @@ export default ({ getService }: FtrProviderContext) => {
       );
 
       const response = await supertestWithoutAuth
-        .patch(`${getUrlPrefix(space.id)}/api/alerting/rules/_bulk_delete`)
+        .patch(`${getUrlPrefix(space.id)}/internal/alerting/rules/_bulk_delete`)
         .set('kbn-xsrf', 'foo')
         .send({ ids: rules.map((rule) => rule.body.id) })
         .auth(user.username, user.password);
@@ -129,26 +122,24 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('shouldn not update rule from another space', async () => {
-      const { user, space } = SuperuserAtSpace1;
-
       const { body: createdRule } = await supertest
-        .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+        .post(`${getUrlPrefix('space2')}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
         .send(getTestRuleData())
         .expect(200);
 
       const response = await supertestWithoutAuth
-        .post(`${getUrlPrefix('other')}/internal/alerting/rules/_bulk_edit`)
+        .post(`${getUrlPrefix('space2')}/internal/alerting/rules/_bulk_delete`)
         .set('kbn-xsrf', 'foo')
         .auth(user.username, user.password)
         .send({ ids: [createdRule.id] });
 
       expect(response.body).to.eql({
-        error: 'Forbidden',
-        message: 'Unauthorized to find rules for any rule types',
-        statusCode: 403,
+        error: 'Not Found',
+        message: 'Not Found',
+        statusCode: 404,
       });
-      expect(response.statusCode).to.eql(403);
+      expect(response.statusCode).to.eql(404);
     });
   });
 };
