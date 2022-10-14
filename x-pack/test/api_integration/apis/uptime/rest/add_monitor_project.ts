@@ -2083,7 +2083,7 @@ type StreamApiFunction<T = unknown> = (
  * This helps the test file have DRY code when it comes to calling
  * the same streaming endpoint over and over by defining some selective defaults.
  */
-const parseStreamApiResponse: StreamApiFunction<Promise<any[]>> = async (
+export const parseStreamApiResponse: StreamApiFunction<Promise<any[]>> = async (
   url: string,
   body?: BodyInit,
   extraHeaders?: HeadersInit,
