@@ -7,6 +7,7 @@
 
 import { EuiBasicTableColumn } from '@elastic/eui';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
 import { scaleUpPercentage } from '../../../../components/infrastructure_node_metrics_tables/shared/hooks';
 import { SnapshotNodeMetric } from '../../../../../common/http_api/snapshot_api';
@@ -27,50 +28,69 @@ export interface HostMetics {
 
 export const HostsTableColumns: Array<EuiBasicTableColumn<HostNodeRow>> = [
   {
-    name: 'Name',
+    name: i18n.translate('xpack.infra.hostsTable.nameColumnHeader', {
+      defaultMessage: 'Name',
+    }),
     field: 'label',
     truncateText: true,
+    textOnly: true,
     render: (name: string) => <EuiText size="s">{name}</EuiText>,
   },
   {
-    name: 'Operating System',
+    name: i18n.translate('xpack.infra.hostsTable.operatingSystemColumnHeader', {
+      defaultMessage: 'Operating System',
+    }),
     field: 'os',
     render: (os: string) => <EuiText size="s">{os ?? '-'}</EuiText>,
   },
   {
-    name: '# of CPUs',
+    name: i18n.translate('xpack.infra.hostsTable.numberOfCpusColumnHeader', {
+      defaultMessage: '# of CPUs',
+    }),
     field: 'cpuCores',
     render: (cpuCores: { value: number }) => <NumberCell value={cpuCores.value} />,
   },
   {
-    name: 'Disk Latency',
+    name: i18n.translate('xpack.infra.hostsTable.diskLatencyColumnHeader', {
+      defaultMessage: 'Disk Latency',
+    }),
     field: 'cpuCores',
     render: (ds: number) => <NumberCell value={ds} unit=" ms" />,
   },
   {
-    name: 'TX (avg.)',
+    name: i18n.translate('xpack.infra.hostsTable.averageTxColumnHeader', {
+      defaultMessage: 'TX (avg.)',
+    }),
     field: 'tx',
     render: (tx: { avg: number }) => <NumberCell value={tx.avg} />,
   },
   {
-    name: 'RX (avg.)',
+    name: i18n.translate('xpack.infra.hostsTable.averageRxColumnHeader', {
+      defaultMessage: 'RX (avg.)',
+    }),
     field: 'rx',
     render: (rx: { avg: number }) => <NumberCell value={rx.avg} />,
   },
   {
-    name: 'Memory total (avg.)',
+    name: i18n.translate('xpack.infra.hostsTable.averageMemoryTotalColumnHeader', {
+      defaultMessage: 'Memory total (avg.)',
+    }),
     field: 'memoryTotal',
     render: (memoryTotal: { avg: number }) => (
       <NumberCell value={Math.floor(memoryTotal.avg)} unit=" MB" />
     ),
   },
   {
-    name: 'Services on Host',
+    name: i18n.translate('xpack.infra.hostsTable.servicesOnHostColumnHeader', {
+      defaultMessage: 'Services on Host',
+    }),
     field: 'servicesOnHost',
     render: (servicesOnHost: number) => <NumberCell value={servicesOnHost} />,
   },
   {
-    name: 'Memory usage (avg.)',
+    name: i18n.translate('xpack.infra.hostsTable.averageMemoryUsageColumnHeader', {
+      defaultMessage: 'Memory usage (avg.)',
+    }),
     field: 'memory',
     render: (memory: { avg: number }) => (
       <NumberCell value={scaleUpPercentage(memory.avg)} unit="%" />
