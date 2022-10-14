@@ -41,7 +41,11 @@ import {
   InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
 } from '@kbn/security-plugin/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import { TaskManagerStartContract, TaskStatus } from '@kbn/task-manager-plugin/server';
+import {
+  ConcreteTaskInstance,
+  TaskManagerStartContract,
+  TaskStatus,
+} from '@kbn/task-manager-plugin/server';
 import {
   IEvent,
   IEventLogClient,
@@ -731,9 +735,11 @@ export class RulesClient {
   public async resolve<Params extends RuleTypeParams = never>({
     id,
     includeLegacyId,
+    includeSnoozeData = false,
   }: {
     id: string;
     includeLegacyId?: boolean;
+    includeSnoozeData?: boolean;
   }): Promise<ResolvedSanitizedRule<Params>> {
     const { saved_object: result, ...resolveResponse } =
       await this.unsecuredSavedObjectsClient.resolve<RawRule>('alert', id);
@@ -766,7 +772,9 @@ export class RulesClient {
       result.attributes.alertTypeId,
       result.attributes,
       result.references,
-      includeLegacyId
+      includeLegacyId,
+      false,
+      includeSnoozeData
     );
 
     return {
@@ -3170,9 +3178,27 @@ export class RulesClient {
 
     this.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
-    const taskDoc = attributes.scheduledTaskId
-      ? await this.taskManager.get(attributes.scheduledTaskId)
-      : null;
+    // Check that the rule is enabled
+    if (!attributes.enabled) {
+      return i18n.translate('xpack.alerting.rulesClient.runSoon.disabledRuleError', {
+        defaultMessage: 'Error running rule: rule is disabled',
+      });
+    }
+
+    let taskDoc: ConcreteTaskInstance | null = null;
+    try {
+      taskDoc = attributes.scheduledTaskId
+        ? await this.taskManager.get(attributes.scheduledTaskId)
+        : null;
+    } catch (err) {
+      return i18n.translate('xpack.alerting.rulesClient.runSoon.getTaskError', {
+        defaultMessage: 'Error running rule: {errMessage}',
+        values: {
+          errMessage: err.message,
+        },
+      });
+    }
+
     if (
       taskDoc &&
       (taskDoc.status === TaskStatus.Claiming || taskDoc.status === TaskStatus.Running)
@@ -3182,7 +3208,16 @@ export class RulesClient {
       });
     }
 
-    await this.taskManager.runSoon(id);
+    try {
+      await this.taskManager.runSoon(attributes.scheduledTaskId ? attributes.scheduledTaskId : id);
+    } catch (err) {
+      return i18n.translate('xpack.alerting.rulesClient.runSoon.runSoonError', {
+        defaultMessage: 'Error running rule: {errMessage}',
+        values: {
+          errMessage: err.message,
+        },
+      });
+    }
   }
 
   public async listAlertTypes() {

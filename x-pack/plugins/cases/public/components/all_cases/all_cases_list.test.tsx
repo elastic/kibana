@@ -14,10 +14,11 @@ import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 import '../../common/mock/match_media';
+import type { AppMockRenderer } from '../../common/mock';
 import {
-  AppMockRenderer,
   createAppMockRenderer,
   noDeleteCasesPermissions,
+  readCasesPermissions,
   TestProviders,
 } from '../../common/mock';
 import { useGetCasesMockState, connectorsMock } from '../../containers/mock';
@@ -28,7 +29,8 @@ import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { getEmptyTagValue } from '../empty_value';
 import { useKibana } from '../../common/lib/kibana';
 import { AllCasesList } from './all_cases_list';
-import { CasesColumns, GetCasesColumn, useCasesColumns } from './columns';
+import type { GetCasesColumn, UseCasesColumnsReturnValue } from './use_cases_columns';
+import { useCasesColumns } from './use_cases_columns';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { registerConnectorsToMockActionRegistry } from '../../common/mock/register_connectors';
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
@@ -97,10 +99,6 @@ describe('AllCasesListGeneric', () => {
   };
 
   const defaultColumnArgs = {
-    caseDetailsNavigation: {
-      href: jest.fn(),
-      onClick: jest.fn(),
-    },
     filterStatus: CaseStatuses.open,
     handleIsLoading: jest.fn(),
     isLoadingCases: [],
@@ -160,10 +158,6 @@ describe('AllCasesListGeneric', () => {
           .childAt(0)
           .prop('value')
       ).toBe(useGetCasesMockState.data.cases[0].createdAt);
-
-      expect(
-        wrapper.find(`[data-test-subj="case-table-column-severity"]`).first().text().toLowerCase()
-      ).toBe(useGetCasesMockState.data.cases[0].severity);
 
       expect(wrapper.find(`[data-test-subj="case-table-case-count"]`).first().text()).toEqual(
         'Showing 10 cases'
@@ -236,7 +230,7 @@ describe('AllCasesListGeneric', () => {
       expect(column.find('span').text()).toEqual(emptyTag);
     };
 
-    const { result } = renderHook<GetCasesColumn, CasesColumns[]>(
+    const { result } = renderHook<GetCasesColumn, UseCasesColumnsReturnValue>(
       () => useCasesColumns(defaultColumnArgs),
       {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
@@ -244,23 +238,9 @@ describe('AllCasesListGeneric', () => {
     );
 
     await waitFor(() => {
-      result.current.map(
-        (i, key) =>
-          i.name != null &&
-          !Object.prototype.hasOwnProperty.call(i, 'actions') &&
-          checkIt(`${i.name}`, key)
+      result.current.columns.map(
+        (i, key) => i.name != null && i.name !== 'Actions' && checkIt(`${i.name}`, key)
       );
-    });
-  });
-
-  it('should render delete actions for case', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <AllCasesList />
-      </TestProviders>
-    );
-    await waitFor(() => {
-      expect(wrapper.find('[data-test-subj="action-delete"]').first().props().disabled).toBeFalsy();
     });
   });
 
@@ -285,27 +265,16 @@ describe('AllCasesListGeneric', () => {
     });
   });
 
-  it('Updates status when status context menu is updated', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <AllCasesList />
-      </TestProviders>
-    );
-    wrapper.find(`[data-test-subj="case-view-status-dropdown"] button`).first().simulate('click');
-    wrapper
-      .find(`[data-test-subj="case-view-status-dropdown-closed"] button`)
-      .first()
-      .simulate('click');
+  it('renders the status column', async () => {
+    const res = appMockRenderer.render(<AllCasesList />);
 
-    await waitFor(() => {
-      const firstCase = useGetCasesMockState.data.cases[0];
-      expect(updateCaseProperty).toHaveBeenCalledWith({
-        caseData: firstCase,
-        updateKey: 'status',
-        updateValue: CaseStatuses.closed,
-        onSuccess: expect.anything(),
-      });
-    });
+    expect(res.getByTestId('tableHeaderCell_Status_6')).toBeInTheDocument();
+  });
+
+  it('renders the severity column', async () => {
+    const res = appMockRenderer.render(<AllCasesList />);
+
+    expect(res.getByTestId('tableHeaderCell_Severity_7')).toBeInTheDocument();
   });
 
   it('should render the case stats', () => {
@@ -315,133 +284,6 @@ describe('AllCasesListGeneric', () => {
       </TestProviders>
     );
     expect(wrapper.find('[data-test-subj="cases-count-stats"]')).toBeTruthy();
-  });
-
-  it('Bulk delete', async () => {
-    const deleteCasesSpy = jest.spyOn(api, 'deleteCases');
-    const result = appMockRenderer.render(<AllCasesList />);
-
-    act(() => {
-      userEvent.click(result.getByTestId('checkboxSelectAll'));
-    });
-
-    act(() => {
-      userEvent.click(result.getByText('Bulk actions'));
-    });
-
-    await waitForEuiPopoverOpen();
-
-    act(() => {
-      userEvent.click(result.getByTestId('cases-bulk-delete-button'), undefined, {
-        skipPointerEventsCheck: true,
-      });
-    });
-
-    await waitFor(() => {
-      expect(result.getByTestId('confirm-delete-case-modal')).toBeInTheDocument();
-    });
-
-    act(() => {
-      userEvent.click(result.getByTestId('confirmModalConfirmButton'));
-    });
-
-    await waitFor(() => {
-      expect(deleteCasesSpy).toHaveBeenCalledWith(
-        [
-          'basic-case-id',
-          '1',
-          '2',
-          '3',
-          '4',
-          'case-with-alerts-id',
-          'case-with-alerts-syncoff-id',
-          'case-with-registered-attachment',
-        ],
-        expect.anything()
-      );
-    });
-  });
-
-  it('Renders only bulk delete on status all', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <AllCasesList />
-      </TestProviders>
-    );
-
-    wrapper.find('[data-test-subj*="checkboxSelectRow-"]').first().simulate('click');
-    wrapper.find('[data-test-subj="case-table-bulk-actions"] button').first().simulate('click');
-
-    await waitFor(() => {
-      expect(wrapper.find('[data-test-subj="cases-bulk-open-button"]').exists()).toEqual(false);
-      expect(wrapper.find('[data-test-subj="cases-bulk-in-progress-button"]').exists()).toEqual(
-        false
-      );
-      expect(wrapper.find('[data-test-subj="cases-bulk-close-button"]').exists()).toEqual(false);
-      expect(
-        wrapper.find('[data-test-subj="cases-bulk-delete-button"]').first().props().disabled
-      ).toEqual(true);
-    });
-  });
-
-  it('Bulk close status update', async () => {
-    const updateCasesSpy = jest.spyOn(api, 'updateCases');
-
-    const result = appMockRenderer.render(<AllCasesList />);
-    const theCase = useGetCasesMockState.data.cases[0];
-    userEvent.click(result.getByTestId('case-status-filter'));
-    await waitForEuiPopoverOpen();
-    userEvent.click(result.getByTestId('case-status-filter-in-progress'));
-    userEvent.click(result.getByTestId(`checkboxSelectRow-${theCase.id}`));
-    userEvent.click(result.getByText('Bulk actions'));
-    await waitForEuiPopoverOpen();
-    userEvent.click(result.getByTestId('cases-bulk-close-button'));
-    await waitFor(() => {});
-
-    expect(updateCasesSpy).toBeCalledWith(
-      [{ id: theCase.id, version: theCase.version, status: CaseStatuses.closed }],
-      expect.anything()
-    );
-  });
-
-  it('Bulk open status update', async () => {
-    const updateCasesSpy = jest.spyOn(api, 'updateCases');
-
-    const result = appMockRenderer.render(<AllCasesList />);
-    const theCase = useGetCasesMockState.data.cases[0];
-    userEvent.click(result.getByTestId('case-status-filter'));
-    await waitForEuiPopoverOpen();
-    userEvent.click(result.getByTestId('case-status-filter-closed'));
-    userEvent.click(result.getByTestId(`checkboxSelectRow-${theCase.id}`));
-    userEvent.click(result.getByText('Bulk actions'));
-    await waitForEuiPopoverOpen();
-    userEvent.click(result.getByTestId('cases-bulk-open-button'));
-    await waitFor(() => {});
-
-    expect(updateCasesSpy).toBeCalledWith(
-      [{ id: theCase.id, version: theCase.version, status: CaseStatuses.open }],
-      expect.anything()
-    );
-  });
-
-  it('Bulk in-progress status update', async () => {
-    const updateCasesSpy = jest.spyOn(api, 'updateCases');
-
-    const result = appMockRenderer.render(<AllCasesList />);
-    const theCase = useGetCasesMockState.data.cases[0];
-    userEvent.click(result.getByTestId('case-status-filter'));
-    await waitForEuiPopoverOpen();
-    userEvent.click(result.getByTestId('case-status-filter-closed'));
-    userEvent.click(result.getByTestId(`checkboxSelectRow-${theCase.id}`));
-    userEvent.click(result.getByText('Bulk actions'));
-    await waitForEuiPopoverOpen();
-    userEvent.click(result.getByTestId('cases-bulk-in-progress-button'));
-    await waitFor(() => {});
-
-    expect(updateCasesSpy).toBeCalledWith(
-      [{ id: theCase.id, version: theCase.version, status: CaseStatuses['in-progress'] }],
-      expect.anything()
-    );
   });
 
   it('should not render table utility bar when isSelectorView=true', async () => {
@@ -522,60 +364,21 @@ describe('AllCasesListGeneric', () => {
   });
 
   it('should call onRowClick when clicking a case with modal=true', async () => {
+    const theCase = defaultGetCases.data.cases[0];
+
     const wrapper = mount(
       <TestProviders>
         <AllCasesList isSelectorView={true} onRowClick={onRowClick} />
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="cases-table-row-select-1"]').first().simulate('click');
+    wrapper
+      .find(`[data-test-subj="cases-table-row-select-${theCase.id}"]`)
+      .first()
+      .simulate('click');
+
     await waitFor(() => {
-      expect(onRowClick).toHaveBeenCalledWith({
-        assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }],
-        closedAt: null,
-        closedBy: null,
-        comments: [],
-        connector: { fields: null, id: '123', name: 'My Connector', type: '.jira' },
-        createdAt: '2020-02-19T23:06:33.798Z',
-        createdBy: {
-          email: 'leslie.knope@elastic.co',
-          fullName: 'Leslie Knope',
-          username: 'lknope',
-        },
-        description: 'Security banana Issue',
-        severity: CaseSeverity.LOW,
-        duration: null,
-        externalService: {
-          connectorId: '123',
-          connectorName: 'connector name',
-          externalId: 'external_id',
-          externalTitle: 'external title',
-          externalUrl: 'basicPush.com',
-          pushedAt: '2020-02-20T15:02:57.995Z',
-          pushedBy: {
-            email: 'leslie.knope@elastic.co',
-            fullName: 'Leslie Knope',
-            username: 'lknope',
-          },
-        },
-        id: '1',
-        owner: SECURITY_SOLUTION_OWNER,
-        status: 'open',
-        tags: ['coke', 'pepsi'],
-        title: 'Another horrible breach!!',
-        totalAlerts: 0,
-        totalComment: 0,
-        updatedAt: '2020-02-20T15:02:57.995Z',
-        updatedBy: {
-          email: 'leslie.knope@elastic.co',
-          fullName: 'Leslie Knope',
-          username: 'lknope',
-        },
-        version: 'WzQ3LDFd',
-        settings: {
-          syncAlerts: true,
-        },
-      });
+      expect(onRowClick).toHaveBeenCalledWith(theCase);
     });
   });
 
@@ -591,7 +394,7 @@ describe('AllCasesListGeneric', () => {
     });
   });
 
-  it('should change the status to closed', async () => {
+  it('should filter by status: closed', async () => {
     const result = appMockRenderer.render(<AllCasesList isSelectorView={false} />);
     userEvent.click(result.getByTestId('case-status-filter'));
     await waitForEuiPopoverOpen();
@@ -610,7 +413,7 @@ describe('AllCasesListGeneric', () => {
     });
   });
 
-  it('should change the status to in-progress', async () => {
+  it('should filter by status: in-progress', async () => {
     const result = appMockRenderer.render(<AllCasesList isSelectorView={false} />);
     userEvent.click(result.getByTestId('case-status-filter'));
     await waitForEuiPopoverOpen();
@@ -629,7 +432,7 @@ describe('AllCasesListGeneric', () => {
     });
   });
 
-  it('should change the status to open', async () => {
+  it('should filter by status: open', async () => {
     const result = appMockRenderer.render(<AllCasesList isSelectorView={false} />);
     userEvent.click(result.getByTestId('case-status-filter'));
     await waitForEuiPopoverOpen();
@@ -668,41 +471,14 @@ describe('AllCasesListGeneric', () => {
     });
   });
 
-  it('should not render status when isSelectorView=true', async () => {
-    const wrapper = mount(
-      <TestProviders>
-        <AllCasesList isSelectorView={true} />
-      </TestProviders>
-    );
-
-    const { result } = renderHook<GetCasesColumn, CasesColumns[]>(
-      () =>
-        useCasesColumns({
-          ...defaultColumnArgs,
-          isSelectorView: true,
-        }),
-      {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-      }
-    );
-
-    expect(result.current.find((i) => i.name === 'Status')).toBeFalsy();
-
-    await waitFor(() => {
-      expect(wrapper.find('[data-test-subj="cases-table"]').exists()).toBeTruthy();
-    });
-
-    expect(wrapper.find('[data-test-subj="case-view-status-dropdown"]').exists()).toBeFalsy();
-  });
-
-  it.skip('renders the first available status when hiddenStatus is given', async () => {
+  it('renders the first available status when hiddenStatus is given', async () => {
     const wrapper = mount(
       <TestProviders>
         <AllCasesList hiddenStatuses={[StatusAll, CaseStatuses.open]} isSelectorView={true} />
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="status-badge-in-progress"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="case-status-badge-in-progress"]').exists()).toBeTruthy();
   });
 
   it('shows Solution column if there are no set owners', async () => {
@@ -923,6 +699,338 @@ describe('AllCasesListGeneric', () => {
           owner: ['securitySolution'],
         },
         queryParams: { page: 1, perPage: 5, sortField: 'createdAt', sortOrder: 'desc' },
+      });
+    });
+  });
+
+  describe('Actions', () => {
+    const updateCasesSpy = jest.spyOn(api, 'updateCases');
+    const deleteCasesSpy = jest.spyOn(api, 'deleteCases');
+
+    describe('Bulk actions', () => {
+      it('Renders bulk action', async () => {
+        const result = appMockRenderer.render(<AllCasesList />);
+
+        act(() => {
+          userEvent.click(result.getByTestId('checkboxSelectAll'));
+        });
+
+        act(() => {
+          userEvent.click(result.getByText('Bulk actions'));
+        });
+
+        await waitForEuiPopoverOpen();
+
+        expect(result.getByTestId('case-bulk-action-status')).toBeInTheDocument();
+        expect(result.getByTestId('cases-bulk-action-delete')).toBeInTheDocument();
+      });
+
+      it.each([[CaseStatuses.open], [CaseStatuses['in-progress']], [CaseStatuses.closed]])(
+        'Bulk update status: %s',
+        async (status) => {
+          const result = appMockRenderer.render(<AllCasesList />);
+
+          act(() => {
+            userEvent.click(result.getByTestId('checkboxSelectAll'));
+          });
+
+          act(() => {
+            userEvent.click(result.getByText('Bulk actions'));
+          });
+
+          await waitForEuiPopoverOpen();
+
+          act(() => {
+            userEvent.click(result.getByTestId('case-bulk-action-status'));
+          });
+
+          await waitFor(() => {
+            expect(result.getByTestId(`cases-bulk-action-status-${status}`)).toBeInTheDocument();
+          });
+
+          act(() => {
+            userEvent.click(result.getByTestId(`cases-bulk-action-status-${status}`));
+          });
+
+          await waitForComponentToUpdate();
+
+          expect(updateCasesSpy).toBeCalledWith(
+            useGetCasesMockState.data.cases.map(({ id, version }) => ({
+              id,
+              version,
+              status,
+            })),
+            expect.anything()
+          );
+        }
+      );
+
+      it.each([
+        [CaseSeverity.LOW],
+        [CaseSeverity.MEDIUM],
+        [CaseSeverity.HIGH],
+        [CaseSeverity.CRITICAL],
+      ])('Bulk update severity: %s', async (severity) => {
+        const result = appMockRenderer.render(<AllCasesList />);
+
+        act(() => {
+          userEvent.click(result.getByTestId('checkboxSelectAll'));
+        });
+
+        act(() => {
+          userEvent.click(result.getByText('Bulk actions'));
+        });
+
+        await waitForEuiPopoverOpen();
+
+        act(() => {
+          userEvent.click(result.getByTestId('case-bulk-action-severity'));
+        });
+
+        await waitFor(() => {
+          expect(result.getByTestId(`cases-bulk-action-severity-${severity}`)).toBeInTheDocument();
+        });
+
+        act(() => {
+          userEvent.click(result.getByTestId(`cases-bulk-action-severity-${severity}`));
+        });
+
+        await waitForComponentToUpdate();
+
+        expect(updateCasesSpy).toBeCalledWith(
+          useGetCasesMockState.data.cases.map(({ id, version }) => ({
+            id,
+            version,
+            severity,
+          })),
+          expect.anything()
+        );
+      });
+
+      it('Bulk delete', async () => {
+        const result = appMockRenderer.render(<AllCasesList />);
+
+        act(() => {
+          userEvent.click(result.getByTestId('checkboxSelectAll'));
+        });
+
+        act(() => {
+          userEvent.click(result.getByText('Bulk actions'));
+        });
+
+        await waitForEuiPopoverOpen();
+
+        act(() => {
+          userEvent.click(result.getByTestId('cases-bulk-action-delete'), undefined, {
+            skipPointerEventsCheck: true,
+          });
+        });
+
+        await waitFor(() => {
+          expect(result.getByTestId('confirm-delete-case-modal')).toBeInTheDocument();
+        });
+
+        act(() => {
+          userEvent.click(result.getByTestId('confirmModalConfirmButton'));
+        });
+
+        await waitFor(() => {
+          expect(deleteCasesSpy).toHaveBeenCalledWith(
+            [
+              'basic-case-id',
+              '1',
+              '2',
+              '3',
+              '4',
+              'case-with-alerts-id',
+              'case-with-alerts-syncoff-id',
+              'case-with-registered-attachment',
+            ],
+            expect.anything()
+          );
+        });
+      });
+
+      it('should disable the checkboxes when the user has read only permissions', async () => {
+        appMockRenderer = createAppMockRenderer({ permissions: readCasesPermissions() });
+        const res = appMockRenderer.render(<AllCasesList />);
+
+        expect(res.getByTestId('checkboxSelectAll')).toBeDisabled();
+
+        await waitFor(() => {
+          for (const theCase of defaultGetCases.data.cases) {
+            expect(res.getByTestId(`checkboxSelectRow-${theCase.id}`)).toBeDisabled();
+          }
+        });
+      });
+    });
+
+    describe('Row actions', () => {
+      const statusTests = [
+        [CaseStatuses.open],
+        [CaseStatuses['in-progress']],
+        [CaseStatuses.closed],
+      ];
+
+      const severityTests = [
+        [CaseSeverity.LOW],
+        [CaseSeverity.MEDIUM],
+        [CaseSeverity.HIGH],
+        [CaseSeverity.CRITICAL],
+      ];
+
+      it('should render row actions', async () => {
+        const res = appMockRenderer.render(<AllCasesList />);
+
+        await waitFor(() => {
+          for (const theCase of defaultGetCases.data.cases) {
+            expect(res.getByTestId(`case-action-popover-button-${theCase.id}`)).toBeInTheDocument();
+          }
+        });
+      });
+
+      it.each(statusTests)('update the status of a case: %s', async (status) => {
+        const res = appMockRenderer.render(<AllCasesList />);
+        const openCase = useGetCasesMockState.data.cases[0];
+        const inProgressCase = useGetCasesMockState.data.cases[1];
+        const theCase = status === CaseStatuses.open ? inProgressCase : openCase;
+
+        await waitFor(() => {
+          expect(res.getByTestId(`case-action-popover-button-${theCase.id}`)).toBeInTheDocument();
+        });
+
+        act(() => {
+          userEvent.click(res.getByTestId(`case-action-popover-button-${theCase.id}`));
+        });
+
+        await waitFor(() => {
+          expect(res.getByTestId(`case-action-status-panel-${theCase.id}`)).toBeInTheDocument();
+        });
+
+        act(() => {
+          userEvent.click(res.getByTestId(`case-action-status-panel-${theCase.id}`), undefined, {
+            skipPointerEventsCheck: true,
+          });
+        });
+
+        await waitFor(() => {
+          expect(res.getByTestId(`cases-bulk-action-status-${status}`)).toBeInTheDocument();
+        });
+
+        act(() => {
+          userEvent.click(res.getByTestId(`cases-bulk-action-status-${status}`));
+        });
+
+        await waitFor(() => {
+          expect(updateCasesSpy).toHaveBeenCalledWith(
+            [{ id: theCase.id, status, version: theCase.version }],
+            expect.anything()
+          );
+        });
+      });
+
+      it.each(severityTests)('update the status of a case: %s', async (severity) => {
+        const res = appMockRenderer.render(<AllCasesList />);
+        const lowCase = useGetCasesMockState.data.cases[0];
+        const mediumCase = useGetCasesMockState.data.cases[1];
+        const theCase = severity === CaseSeverity.LOW ? mediumCase : lowCase;
+
+        await waitFor(() => {
+          expect(res.getByTestId(`case-action-popover-button-${theCase.id}`)).toBeInTheDocument();
+        });
+
+        act(() => {
+          userEvent.click(res.getByTestId(`case-action-popover-button-${theCase.id}`));
+        });
+
+        await waitFor(() => {
+          expect(res.getByTestId(`case-action-severity-panel-${theCase.id}`)).toBeInTheDocument();
+        });
+
+        act(() => {
+          userEvent.click(res.getByTestId(`case-action-severity-panel-${theCase.id}`), undefined, {
+            skipPointerEventsCheck: true,
+          });
+        });
+
+        await waitFor(() => {
+          expect(res.getByTestId(`cases-bulk-action-severity-${severity}`)).toBeInTheDocument();
+        });
+
+        act(() => {
+          userEvent.click(res.getByTestId(`cases-bulk-action-severity-${severity}`));
+        });
+
+        await waitFor(() => {
+          expect(updateCasesSpy).toHaveBeenCalledWith(
+            [{ id: theCase.id, severity, version: theCase.version }],
+            expect.anything()
+          );
+        });
+      });
+
+      it('should delete a case', async () => {
+        const res = appMockRenderer.render(<AllCasesList />);
+        const theCase = defaultGetCases.data.cases[0];
+
+        await waitFor(() => {
+          expect(res.getByTestId(`case-action-popover-button-${theCase.id}`)).toBeInTheDocument();
+        });
+
+        act(() => {
+          userEvent.click(res.getByTestId(`case-action-popover-button-${theCase.id}`));
+        });
+
+        await waitFor(() => {
+          expect(res.getByTestId('cases-bulk-action-delete')).toBeInTheDocument();
+        });
+
+        act(() => {
+          userEvent.click(res.getByTestId('cases-bulk-action-delete'), undefined, {
+            skipPointerEventsCheck: true,
+          });
+        });
+
+        await waitFor(() => {
+          expect(res.getByTestId('confirm-delete-case-modal')).toBeInTheDocument();
+        });
+
+        act(() => {
+          userEvent.click(res.getByTestId('confirmModalConfirmButton'));
+        });
+
+        await waitFor(() => {
+          expect(deleteCasesSpy).toHaveBeenCalledWith(['basic-case-id'], expect.anything());
+        });
+      });
+
+      it('should disable row actions when bulk selecting all cases', async () => {
+        const res = appMockRenderer.render(<AllCasesList />);
+
+        act(() => {
+          userEvent.click(res.getByTestId('checkboxSelectAll'));
+        });
+
+        await waitFor(() => {
+          for (const theCase of defaultGetCases.data.cases) {
+            expect(res.getByTestId(`case-action-popover-button-${theCase.id}`)).toBeDisabled();
+          }
+        });
+      });
+
+      it('should disable row actions when selecting a case', async () => {
+        const res = appMockRenderer.render(<AllCasesList />);
+        const caseToSelect = defaultGetCases.data.cases[0];
+
+        act(() => {
+          userEvent.click(res.getByTestId(`checkboxSelectRow-${caseToSelect.id}`));
+        });
+
+        await waitFor(() => {
+          for (const theCase of defaultGetCases.data.cases) {
+            expect(res.getByTestId(`case-action-popover-button-${theCase.id}`)).toBeDisabled();
+          }
+        });
       });
     });
   });

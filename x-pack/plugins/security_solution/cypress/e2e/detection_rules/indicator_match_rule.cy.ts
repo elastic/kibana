@@ -6,6 +6,7 @@
  */
 
 import { formatMitreAttackDescription } from '../../helpers/rules';
+import type { Mitre } from '../../objects/rule';
 import {
   getIndexPatterns,
   getNewThreatIndicatorRule,
@@ -109,10 +110,11 @@ const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d/d"';
 
 describe('indicator match', () => {
   describe('Detection rules, Indicator Match', () => {
-    const expectedUrls = getNewThreatIndicatorRule().referenceUrls.join('');
-    const expectedFalsePositives = getNewThreatIndicatorRule().falsePositivesExamples.join('');
-    const expectedTags = getNewThreatIndicatorRule().tags.join('');
-    const expectedMitre = formatMitreAttackDescription(getNewThreatIndicatorRule().mitre);
+    const expectedUrls = getNewThreatIndicatorRule().referenceUrls?.join('');
+    const expectedFalsePositives = getNewThreatIndicatorRule().falsePositivesExamples?.join('');
+    const expectedTags = getNewThreatIndicatorRule().tags?.join('');
+    const mitreAttack = getNewThreatIndicatorRule().mitre as Mitre[];
+    const expectedMitre = formatMitreAttackDescription(mitreAttack);
     const expectedNumberOfRules = 1;
     const expectedNumberOfAlerts = '1 alert';
 
@@ -479,11 +481,11 @@ describe('indicator match', () => {
         cy.get(SCHEDULE_DETAILS).within(() => {
           getDetails(RUNS_EVERY_DETAILS).should(
             'have.text',
-            `${rule.runsEvery.interval}${rule.runsEvery.type}`
+            `${rule.runsEvery?.interval}${rule.runsEvery?.type}`
           );
           getDetails(ADDITIONAL_LOOK_BACK_DETAILS).should(
             'have.text',
-            `${rule.lookBack.interval}${rule.lookBack.type}`
+            `${rule.lookBack?.interval}${rule.lookBack?.type}`
           );
         });
 
@@ -492,7 +494,7 @@ describe('indicator match', () => {
 
         cy.get(NUMBER_OF_ALERTS).should('have.text', expectedNumberOfAlerts);
         cy.get(ALERT_RULE_NAME).first().should('have.text', rule.name);
-        cy.get(ALERT_SEVERITY).first().should('have.text', rule.severity.toLowerCase());
+        cy.get(ALERT_SEVERITY).first().should('have.text', rule.severity?.toLowerCase());
         cy.get(ALERT_RISK_SCORE).first().should('have.text', rule.riskScore);
       });
 

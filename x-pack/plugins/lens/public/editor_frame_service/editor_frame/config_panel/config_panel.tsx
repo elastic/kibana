@@ -250,7 +250,7 @@ export function LayerPanels(
                 usedDataViews: layerDatasource
                   .getLayers(layerDatasourceState)
                   .map((layer) => layerDatasource.getUsedDataView(layerDatasourceState, layer)),
-                defaultDataView: layerDatasource.getCurrentIndexPatternId(layerDatasourceState),
+                defaultDataView: layerDatasource.getUsedDataView(layerDatasourceState),
               } as ActionExecutionContext);
             }
 

@@ -101,11 +101,16 @@ export const diffDashboardState = async ({
     getEmbeddable
   );
   const optionsAreEqual = getOptionsAreEqual(originalState.options, newState.options);
-  const filtersAreEqual = getFiltersAreEqual(originalState.filters, newState.filters, true);
   const controlGroupIsEqual = persistableControlGroupInputIsEqual(
     originalState.controlGroupInput,
     newState.controlGroupInput
   );
+
+  const filterStateDiff = getFiltersAreEqual(originalState.filters, newState.filters, true)
+    ? {}
+    : {
+        filters: newState.filters.filter((f) => !isFilterPinned(f)),
+      };
 
   const timeStatediff = getTimeSettingsAreEqual({
     currentTimeRestore: newState.timeRestore,
@@ -117,9 +122,9 @@ export const diffDashboardState = async ({
   return {
     ...commonStateDiff,
     ...(panelsAreEqual ? {} : { panels: newState.panels }),
-    ...(filtersAreEqual ? {} : { filters: newState.filters }),
     ...(optionsAreEqual ? {} : { options: newState.options }),
     ...(controlGroupIsEqual ? {} : { controlGroupInput: newState.controlGroupInput }),
+    ...filterStateDiff,
     ...timeStatediff,
   };
 };
@@ -174,7 +179,7 @@ const getFiltersAreEqual = (
   ignorePinned?: boolean
 ): boolean => {
   return compareFilters(
-    filtersA,
+    ignorePinned ? filtersA.filter((f) => !isFilterPinned(f)) : filtersA,
     ignorePinned ? filtersB.filter((f) => !isFilterPinned(f)) : filtersB,
     COMPARE_ALL_OPTIONS
   );

@@ -11,18 +11,7 @@ import { useLocation, useHistory, useParams } from 'react-router-dom';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiHorizontalRule,
-  EuiFlexItem,
-  EuiFlexGrid,
-  EuiSpacer,
-  EuiCard,
-  EuiIcon,
-  EuiCallOut,
-  EuiLink,
-} from '@elastic/eui';
-
-import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
+import { EuiHorizontalRule, EuiFlexItem, EuiCallOut, EuiLink } from '@elastic/eui';
 
 import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
 
@@ -253,27 +242,35 @@ export const AvailablePackages: React.FC<{
   );
   const { value: replacementCustomIntegrations } = useGetReplacementCustomIntegrations();
 
+  const { loading: isLoadingAppendCustomIntegrations, value: appendCustomIntegrations } =
+    useGetAppendCustomIntegrations();
+
   const mergedEprPackages: Array<PackageListItem | CustomIntegration> =
     useMergeEprPackagesWithReplacements(
       preference === 'beats' ? [] : eprIntegrationList,
       preference === 'agent' ? [] : replacementCustomIntegrations || []
     );
+  const cards: IntegrationCardItem[] = useMemo(() => {
+    const eprAndCustomPackages = [...mergedEprPackages, ...(appendCustomIntegrations || [])];
 
-  const { loading: isLoadingAppendCustomIntegrations, value: appendCustomIntegrations } =
-    useGetAppendCustomIntegrations();
+    return eprAndCustomPackages
+      .map((item) => {
+        return mapToCard({ getAbsolutePath, getHref, item, addBasePath });
+      })
+      .sort((a, b) => a.title.localeCompare(b.title));
+  }, [addBasePath, appendCustomIntegrations, getAbsolutePath, getHref, mergedEprPackages]);
 
-  const eprAndCustomPackages: Array<CustomIntegration | PackageListItem> = [
-    ...mergedEprPackages,
-    ...(appendCustomIntegrations || []),
-  ];
+  const filteredCards = useMemo(
+    () =>
+      cards.filter((c) => {
+        if (category === '') {
+          return true;
+        }
 
-  const cards: IntegrationCardItem[] = eprAndCustomPackages.map((item) => {
-    return mapToCard({ getAbsolutePath, getHref, item, addBasePath });
-  });
-
-  cards.sort((a, b) => {
-    return a.title.localeCompare(b.title);
-  });
+        return c.categories.includes(category);
+      }),
+    [cards, category]
+  );
 
   const {
     data: eprCategories,
@@ -331,73 +328,6 @@ export const AvailablePackages: React.FC<{
     ];
   }
 
-  const filteredCards = cards.filter((c) => {
-    if (category === '') {
-      return true;
-    }
-
-    return c.categories.includes(category);
-  });
-
-  // TODO: Remove this hard coded list of integrations with a suggestion service
-  const featuredList = (
-    <>
-      <EuiFlexGrid columns={3}>
-        <EuiFlexItem>
-          <TrackApplicationView viewId="integration-card:epr:web_crawler:featured">
-            <EuiCard
-              data-test-subj="integration-card:epr:web_crawler:featured"
-              icon={<EuiIcon type="logoEnterpriseSearch" size="xxl" />}
-              href={addBasePath(
-                '/app/enterprise_search/content/search_indices/new_index?method=crawler'
-              )}
-              title={i18n.translate('xpack.fleet.featuredSearchTitle', {
-                defaultMessage: 'Web crawler',
-              })}
-              description={i18n.translate('xpack.fleet.featuredSearchDesc', {
-                defaultMessage:
-                  'Add search to your website with the Enterprise Search web crawler.',
-              })}
-            />
-          </TrackApplicationView>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <TrackApplicationView viewId="integration-card:epr:apm:featured">
-            <EuiCard
-              data-test-subj="integration-card:epr:apm:featured"
-              title={i18n.translate('xpack.fleet.featuredObsTitle', {
-                defaultMessage: 'Elastic APM',
-              })}
-              description={i18n.translate('xpack.fleet.featuredObsDesc', {
-                defaultMessage:
-                  'Monitor, detect, and diagnose complex application performance issues.',
-              })}
-              href={addBasePath('/app/home#/tutorial/apm')}
-              icon={<EuiIcon type="logoObservability" size="xxl" />}
-            />
-          </TrackApplicationView>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <TrackApplicationView viewId="integration-card:epr:endpoint:featured">
-            <EuiCard
-              data-test-subj="integration-card:epr:endpoint:featured"
-              icon={<EuiIcon type="logoSecurity" size="xxl" />}
-              href={addBasePath('/app/integrations/detail/endpoint/')}
-              title={i18n.translate('xpack.fleet.featuredSecurityTitle', {
-                defaultMessage: 'Elastic Defend',
-              })}
-              description={i18n.translate('xpack.fleet.featuredSecurityDesc', {
-                defaultMessage:
-                  'Protect your hosts and cloud workloads with threat prevention, detection, and deep security data visibility.',
-              })}
-            />
-          </TrackApplicationView>
-        </EuiFlexItem>
-      </EuiFlexGrid>
-      <EuiSpacer size="xl" />
-    </>
-  );
-
   let noEprCallout;
   if (eprPackageLoadingError || eprCategoryLoadingError) {
     const error = eprPackageLoadingError || eprCategoryLoadingError;
@@ -406,8 +336,7 @@ export const AvailablePackages: React.FC<{
 
   return (
     <PackageListGrid
-      featuredList={featuredList}
-      isLoading={isLoadingAllPackages}
+      isLoading={isLoadingAllPackages || isLoadingAppendCustomIntegrations}
       controls={controls}
       initialSearch={searchParam}
       list={filteredCards}

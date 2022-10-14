@@ -7,6 +7,7 @@
  */
 
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -86,5 +87,7 @@ export interface IUnifiedSearchPluginServices extends Partial<CoreStart> {
   storage: IStorageWrapper;
   docLinks: DocLinksStart;
   data: DataPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
+  dataViewEditor: DataViewEditorStart;
   usageCollection?: UsageCollectionStart;
 }

@@ -8,7 +8,7 @@
 import { Locations, LocationStatus, PrivateLocation } from '../../../../common/runtime_types';
 import { normalizeProjectMonitors } from '.';
 
-describe('http normalizers', () => {
+describe('tcp normalizers', () => {
   describe('normalize push monitors', () => {
     const projectId = 'test-project-id';
     const locations: Locations = [
@@ -83,7 +83,7 @@ describe('http normalizers', () => {
       },
     ];
 
-    it('properly normalizes http monitors', () => {
+    it('properly normalizes tcp monitors', () => {
       const actual = normalizeProjectMonitors({
         locations,
         privateLocations,
@@ -106,6 +106,7 @@ describe('http normalizers', () => {
             enabled: true,
             form_monitor_type: 'tcp',
             hosts: 'smtp.gmail.com:587',
+            'url.port': null,
             journey_id: 'gmail-smtp',
             locations: [
               {
@@ -141,6 +142,8 @@ describe('http normalizers', () => {
             tags: ['service:smtp', 'org:google'],
             timeout: '16',
             type: 'tcp',
+            id: '',
+            urls: '',
           },
           unsupportedKeys: [],
         },
@@ -157,6 +160,7 @@ describe('http normalizers', () => {
             enabled: true,
             form_monitor_type: 'tcp',
             hosts: 'localhost:18278',
+            'url.port': null,
             journey_id: 'always-down',
             locations: [
               {
@@ -192,6 +196,8 @@ describe('http normalizers', () => {
             tags: ['tag1', 'tag2'],
             timeout: '16',
             type: 'tcp',
+            id: '',
+            urls: '',
           },
           unsupportedKeys: [],
         },
@@ -221,6 +227,7 @@ describe('http normalizers', () => {
             enabled: true,
             form_monitor_type: 'tcp',
             hosts: 'localhost',
+            'url.port': null,
             journey_id: 'always-down',
             locations: [
               {
@@ -256,6 +263,8 @@ describe('http normalizers', () => {
             tags: ['tag1', 'tag2'],
             timeout: '16',
             type: 'tcp',
+            id: '',
+            urls: '',
           },
           unsupportedKeys: ['ports', 'unsupportedKey.nestedUnsupportedKey'],
         },

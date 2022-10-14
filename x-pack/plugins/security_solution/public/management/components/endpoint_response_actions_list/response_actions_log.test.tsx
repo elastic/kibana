@@ -20,6 +20,7 @@ import { MANAGEMENT_PATH } from '../../../../common/constants';
 import { getActionListMock } from './mocks';
 import { useGetEndpointsList } from '../../hooks/endpoint/use_get_endpoints_list';
 import uuid from 'uuid';
+import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../../../../common/endpoint/service/response_actions/constants';
 
 let mockUseGetEndpointActionList: {
   isFetched?: boolean;
@@ -344,26 +345,20 @@ describe('Response actions history', () => {
       );
 
       // should have 4 pages each of size 10.
-      expect(renderResult.getByTestId('pagination-button-0')).toHaveAttribute(
-        'aria-label',
-        'Page 1 of 4'
-      );
+      expect(getByTestId('pagination-button-0')).toHaveAttribute('aria-label', 'Page 1 of 4');
 
       // toggle page size popover
-      userEvent.click(renderResult.getByTestId('tablePaginationPopoverButton'));
+      userEvent.click(getByTestId('tablePaginationPopoverButton'));
       await waitForEuiPopoverOpen();
       // click size 20
-      userEvent.click(renderResult.getByTestId('tablePagination-20-rows'));
+      userEvent.click(getByTestId('tablePagination-20-rows'));
 
-      expect(renderResult.getByTestId(`${testPrefix}-endpointListTableTotal`)).toHaveTextContent(
+      expect(getByTestId(`${testPrefix}-endpointListTableTotal`)).toHaveTextContent(
         'Showing 1-20 of 33 response actions'
       );
 
       // should have only 2 pages each of size 20
-      expect(renderResult.getByTestId('pagination-button-0')).toHaveAttribute(
-        'aria-label',
-        'Page 1 of 2'
-      );
+      expect(getByTestId('pagination-button-0')).toHaveAttribute('aria-label', 'Page 1 of 2');
     });
 
     it('should show 1-1 record label when only 1 record', async () => {
@@ -408,6 +403,7 @@ describe('Response actions history', () => {
           'Execution completed',
           'Input',
           'Parameters',
+          'Comment',
           'Output:',
         ]
       );
@@ -544,8 +540,10 @@ describe('Response actions history', () => {
 
     it('should have a search bar', () => {
       render();
-      userEvent.click(renderResult.getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
-      const searchBar = renderResult.getByTestId(`${testPrefix}-${filterPrefix}-search`);
+
+      const { getByTestId } = renderResult;
+      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      const searchBar = getByTestId(`${testPrefix}-${filterPrefix}-search`);
       expect(searchBar).toBeTruthy();
       expect(searchBar.querySelector('input')?.getAttribute('placeholder')).toEqual(
         'Search actions'
@@ -559,10 +557,12 @@ describe('Response actions history', () => {
       userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const filterList = getByTestId(`${testPrefix}-${filterPrefix}-popoverList`);
       expect(filterList).toBeTruthy();
-      expect(filterList.querySelectorAll('ul>li').length).toEqual(5);
+      expect(filterList.querySelectorAll('ul>li').length).toEqual(
+        RESPONSE_ACTION_API_COMMANDS_NAMES.length
+      );
       expect(
         Array.from(filterList.querySelectorAll('ul>li')).map((option) => option.textContent)
-      ).toEqual(['isolate', 'release', 'kill-process', 'suspend-process', 'processes']);
+      ).toEqual(['isolate', 'release', 'kill-process', 'suspend-process', 'processes', 'get-file']);
     });
 
     it('should have `clear all` button `disabled` when no selected values', () => {
@@ -594,10 +594,10 @@ describe('Response actions history', () => {
     it('should have `clear all` button `disabled` when no selected values', () => {
       render();
 
-      userEvent.click(renderResult.getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
-      const clearAllButton = renderResult.getByTestId(
-        `${testPrefix}-${filterPrefix}-clearAllButton`
-      );
+      const { getByTestId } = renderResult;
+
+      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      const clearAllButton = getByTestId(`${testPrefix}-${filterPrefix}-clearAllButton`);
       expect(clearAllButton.hasAttribute('disabled')).toBeTruthy();
     });
   });

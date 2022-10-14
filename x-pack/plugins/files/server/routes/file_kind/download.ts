@@ -40,7 +40,7 @@ export const handler: CreateHandler<Endpoint> = async ({ files, fileKind }, req,
     const body: Response = await file.downloadContent();
     return res.ok({
       body,
-      headers: getDownloadHeadersForFile(file, fileName),
+      headers: getDownloadHeadersForFile({ file, fileName }),
     });
   } catch (e) {
     if (e instanceof fileErrors.NoDownloadAvailableError) {
