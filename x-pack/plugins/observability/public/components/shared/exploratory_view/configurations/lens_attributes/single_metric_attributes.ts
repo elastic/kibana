@@ -180,12 +180,16 @@ export class SingleMetricLensAttributes extends LensAttributes {
 
     const visualization = this.getMetricState();
 
+    const { internalReferences, adHocDataViews } = this.getReferences();
+
     return {
       title: 'Prefilled from exploratory view app',
       description: String(refresh),
       visualizationType: 'lnsLegacyMetric',
-      references: this.getReferences(),
+      references: [],
       state: {
+        internalReferences,
+        adHocDataViews,
         visualization,
         datasourceStates: {
           formBased: {
