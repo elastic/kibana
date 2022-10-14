@@ -155,7 +155,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           expect(javaSpans.length + goSpans.length).to.eql(spans.length);
 
-          expect(omit(javaSpans[0], 'traceId', 'transactionId')).to.eql({
+          expect(omit(javaSpans[0], 'spanId', 'traceId', 'transactionId')).to.eql({
             '@timestamp': 1609459200000,
             agentName: 'java',
             duration: 100000,
@@ -166,7 +166,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             outcome: 'success',
           });
 
-          expect(omit(goSpans[0], 'traceId', 'transactionId')).to.eql({
+          expect(omit(goSpans[0], 'spanId', 'traceId', 'transactionId')).to.eql({
             '@timestamp': 1609459200000,
             agentName: 'go',
             duration: 50000,
