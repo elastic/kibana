@@ -24,23 +24,24 @@ properties:
         type: string
         nullable: true
       destIp:
-        description: A comma-separated list of destination IPs.
-        type: string
+        description: Indicates whether cases will send a comma-separated list of destination IPs.
+        type: boolean
+        nullable: true
       malwareHash:
-        description: A comma-separated list of malware hashes. 
-        type: string
+        description: Indicates whether cases will send a comma-separated list of malware hashes. 
+        type: boolean
         nullable: true
       malwareUrl:
-        description: A comma-separated list of malware URLs. 
-        type: string
+        description: Indicates whether cases will send a comma-separated list of malware URLs. 
+        type: boolean
         nullable: true
       priority:
         description: The priority of the issue.
         type: string
         nullable: true
       sourceIp:
-        description: A comma-separated list of source IPs.
-        type: string
+        description: Indicates whether cases will send a comma-separated list of source IPs.
+        type: boolean
         nullable: true
       subcategory:
         description: The subcategory of the incident.

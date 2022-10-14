@@ -17,14 +17,12 @@ properties:
     properties:
       issueTypes:
         description: The type of incident.
-        oneOf:
-          - type: string
-          - type: array
-            items:
-              type: string
+        type: array
+        items:
+          type: string
       severityCode:
         description: The severity code of the incident.
-        type: number
+        type: string
   id:
     description: The identifier for the connector.
     type: string

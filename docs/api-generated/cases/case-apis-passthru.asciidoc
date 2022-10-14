@@ -987,8 +987,8 @@ Any modifications made to this file will be overwritten.
     <h3><a name="connector_properties_resilient_fields"><code>connector_properties_resilient_fields</code> - </a> <a class="up" href="#__Models">Up</a></h3>
     <div class='model-description'>An object containing the connector fields. If you want to omit any individual field, specify null as its value.</div>
     <div class="field-items">
-      <div class="param">issueTypes </div><div class="param-desc"><span class="param-type"><a href="#number">array[BigDecimal]</a></span> The type of incident. </div>
-<div class="param">severityCode </div><div class="param-desc"><span class="param-type"><a href="#number">BigDecimal</a></span> The severity code of the incident. </div>
+      <div class="param">issueTypes </div><div class="param-desc"><span class="param-type"><a href="#string">array[String]</a></span> The type of incident. </div>
+<div class="param">severityCode </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The severity code of the incident. </div>
     </div>  <!-- field-items -->
   </div>
   <div class="model">
@@ -1031,11 +1031,11 @@ Any modifications made to this file will be overwritten.
     <div class='model-description'>An object containing the connector fields. If you want to omit any individual field, specify null as its value.</div>
     <div class="field-items">
       <div class="param">category </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The category of the incident. </div>
-<div class="param">destIp </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A comma-separated list of destination IPs. </div>
-<div class="param">malwareHash </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A comma-separated list of malware hashes. </div>
-<div class="param">malwareUrl </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A comma-separated list of malware URLs. </div>
+<div class="param">destIp </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether cases will send a comma-separated list of destination IPs. </div>
+<div class="param">malwareHash </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether cases will send a comma-separated list of malware hashes. </div>
+<div class="param">malwareUrl </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether cases will send a comma-separated list of malware URLs. </div>
 <div class="param">priority </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The priority of the issue. </div>
-<div class="param">sourceIp </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> A comma-separated list of source IPs. </div>
+<div class="param">sourceIp </div><div class="param-desc"><span class="param-type"><a href="#boolean">Boolean</a></span> Indicates whether cases will send a comma-separated list of source IPs. </div>
 <div class="param">subcategory </div><div class="param-desc"><span class="param-type"><a href="#string">String</a></span> The subcategory of the incident. </div>
     </div>  <!-- field-items -->
   </div>

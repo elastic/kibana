@@ -709,21 +709,14 @@
             "properties": {
               "issueTypes": {
                 "description": "The type of incident.",
-                "oneOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  }
-                ]
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
               },
               "severityCode": {
                 "description": "The severity code of the incident.",
-                "type": "number"
+                "type": "string"
               }
             }
           },
@@ -924,17 +917,18 @@
                 "nullable": true
               },
               "destIp": {
-                "description": "A comma-separated list of destination IPs.",
-                "type": "string"
+                "description": "Indicates whether cases will send a comma-separated list of destination IPs.",
+                "type": "boolean",
+                "nullable": true
               },
               "malwareHash": {
-                "description": "A comma-separated list of malware hashes.",
-                "type": "string",
+                "description": "Indicates whether cases will send a comma-separated list of malware hashes.",
+                "type": "boolean",
                 "nullable": true
               },
               "malwareUrl": {
-                "description": "A comma-separated list of malware URLs.",
-                "type": "string",
+                "description": "Indicates whether cases will send a comma-separated list of malware URLs.",
+                "type": "boolean",
                 "nullable": true
               },
               "priority": {
@@ -943,8 +937,8 @@
                 "nullable": true
               },
               "sourceIp": {
-                "description": "A comma-separated list of source IPs.",
-                "type": "string",
+                "description": "Indicates whether cases will send a comma-separated list of source IPs.",
+                "type": "boolean",
                 "nullable": true
               },
               "subcategory": {
