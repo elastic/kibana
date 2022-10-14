@@ -119,12 +119,12 @@ export function ChartPreview({
           domain={{ max: yMax, min: NaN }}
         />
         {multiData ? (
-          multiData.map(({ name, data }) => (
+          multiData.map((dataSet) => (
             <BarSeries
               timeZone={timeZone}
-              data={data}
-              id={`chart_preview_bar_series_${name}`}
-              name={name}
+              data={dataSet.data}
+              id={`chart_preview_bar_series_${dataSet.name}`}
+              name={dataSet.name}
               xAccessor="x"
               xScaleType={ScaleType.Time}
               yAccessors={['y']}

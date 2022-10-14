@@ -125,15 +125,15 @@ export async function getTransactionDurationChartPreview({
     (acc, bucket) => {
       const x = bucket.key;
       bucket.environment.buckets.forEach((environmentBucket) => {
-        const environment = environmentBucket.key as string;
+        const env = environmentBucket.key as string;
         const y =
           'avgLatency' in environmentBucket
             ? environmentBucket.avgLatency.value
             : environmentBucket.pctLatency.values[0].value;
-        if (acc[environment]) {
-          acc[environment].push({ x, y });
+        if (acc[env]) {
+          acc[env].push({ x, y });
         } else {
-          acc[environment] = [{ x, y }];
+          acc[env] = [{ x, y }];
         }
       });
 
@@ -142,8 +142,8 @@ export async function getTransactionDurationChartPreview({
     {} as Record<string, Array<{ x: number; y: number | null }>>
   );
 
-  return Object.keys(environmentDataMap).map((environment) => ({
-    name: getEnvironmentLabel(environment),
-    data: environmentDataMap[environment],
+  return Object.keys(environmentDataMap).map((env) => ({
+    name: getEnvironmentLabel(env),
+    data: environmentDataMap[env],
   }));
 }
