@@ -13,14 +13,18 @@ const MANAGE_DRILLDOWNS_FLYOUT_DATA_TEST_SUBJ = 'editDrilldownFlyout';
 const DESTINATION_DASHBOARD_SELECT = 'dashboardDrilldownSelectDashboard';
 const DRILLDOWN_WIZARD_SUBMIT = 'drilldownWizardSubmit';
 
-export function DashboardDrilldownsManageProvider({ getService }: FtrProviderContext) {
+export function DashboardDrilldownsManageProvider({
+  getService,
+  getPageObjects,
+}: FtrProviderContext) {
   const log = getService('log');
   const testSubjects = getService('testSubjects');
   const flyout = getService('flyout');
   const comboBox = getService('comboBox');
-  const find = getService('find');
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
+  const monacoEditor = getService('monacoEditor');
+
   return new (class DashboardDrilldownsManage {
     readonly DASHBOARD_WITH_PIE_CHART_NAME = 'Dashboard with Pie Chart';
     readonly DASHBOARD_WITH_AREA_CHART_NAME = 'Dashboard With Area Chart';
@@ -111,10 +115,7 @@ export function DashboardDrilldownsManageProvider({ getService }: FtrProviderCon
     }
 
     async fillInURLTemplate(destinationURLTemplate: string) {
-      const monaco = await find.byCssSelector('.urlTemplateEditor__container .monaco-editor');
-      await monaco.clickMouseButton();
-      await this.eraseInput(300);
-      await browser.pressKeys(destinationURLTemplate);
+      await monacoEditor.setCodeEditorValue(destinationURLTemplate);
     }
 
     async saveChanges() {
