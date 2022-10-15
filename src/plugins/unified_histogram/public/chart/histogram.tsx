@@ -64,8 +64,9 @@ export function Histogram({
                     isBucketed: true,
                     label: dataView.timeFieldName ?? '',
                     operationType: 'date_histogram',
-                    interval: timeInterval ?? 'auto',
-                    params: {},
+                    params: {
+                      interval: timeInterval ?? 'auto',
+                    },
                     scale: 'interval',
                     sourceField: dataView.timeFieldName,
                   },
