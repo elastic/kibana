@@ -190,7 +190,7 @@
           "Headers",
           ", logger: ",
           "Logger",
-          ", flushFix: boolean | undefined) => StreamFactoryReturnType<T>"
+          ", compressOverride: boolean | undefined, flushFix: boolean | undefined) => StreamFactoryReturnType<T>"
         ],
         "path": "x-pack/packages/ml/aiops_utils/src/stream_factory.ts",
         "deprecated": false,
@@ -219,7 +219,9 @@
             "type": "Object",
             "tags": [],
             "label": "logger",
-            "description": [],
+            "description": [
+              "- Kibana logger."
+            ],
             "signature": [
               "Logger"
             ],
@@ -233,8 +235,27 @@
             "id": "def-common.streamFactory.$3",
             "type": "CompoundType",
             "tags": [],
+            "label": "compressOverride",
+            "description": [
+              "- Optional flag to override header based compression setting."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/packages/ml/aiops_utils/src/stream_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/aiops-utils",
+            "id": "def-common.streamFactory.$4",
+            "type": "CompoundType",
+            "tags": [],
             "label": "flushFix",
-            "description": [],
+            "description": [
+              "- Adds an attribute with a random string payload to overcome buffer flushing with certain proxy configurations."
+            ],
             "signature": [
               "boolean | undefined"
             ],
@@ -263,7 +284,7 @@
           "Headers",
           ", logger: ",
           "Logger",
-          ", flushFix: boolean) => StreamFactoryReturnType<T>"
+          ", compressOverride: boolean, flushFix: boolean) => StreamFactoryReturnType<T>"
         ],
         "path": "x-pack/packages/ml/aiops_utils/src/stream_factory.ts",
         "deprecated": false,
@@ -292,7 +313,9 @@
             "type": "Object",
             "tags": [],
             "label": "logger",
-            "description": [],
+            "description": [
+              "- Kibana logger."
+            ],
             "signature": [
               "Logger"
             ],
@@ -306,8 +329,27 @@
             "id": "def-common.streamFactory.$3",
             "type": "boolean",
             "tags": [],
+            "label": "compressOverride",
+            "description": [
+              "- Optional flag to override header based compression setting."
+            ],
+            "signature": [
+              "boolean"
+            ],
+            "path": "x-pack/packages/ml/aiops_utils/src/stream_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/aiops-utils",
+            "id": "def-common.streamFactory.$4",
+            "type": "boolean",
+            "tags": [],
             "label": "flushFix",
-            "description": [],
+            "description": [
+              "- Adds an attribute with a random string payload to overcome buffer flushing with certain proxy configurations."
+            ],
             "signature": [
               "boolean"
             ],
