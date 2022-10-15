@@ -24,7 +24,7 @@ describe('entry_content.helper', () => {
     });
     it('should return the correct labels for OPERATOR_TYPE_LABELS_INCLUDED when operator is included', () => {
       const allKeys = Object.keys(OPERATOR_TYPE_LABELS_INCLUDED);
-      const [nested, ...withoutNested] = allKeys;
+      const [, ...withoutNested] = allKeys;
       withoutNested.forEach((key) => {
         const result = getEntryOperator(key as ListOperatorTypeEnum, 'included');
         const expectedLabel = OPERATOR_TYPE_LABELS_INCLUDED[key as ListOperatorTypeEnum];
@@ -33,7 +33,7 @@ describe('entry_content.helper', () => {
     });
     it('should return the correct labels for OPERATOR_TYPE_LABELS_EXCLUDED when operator is excluded', () => {
       const allKeys = Object.keys(OPERATOR_TYPE_LABELS_EXCLUDED);
-      const [nested, ...withoutNested] = allKeys;
+      const [, ...withoutNested] = allKeys;
       withoutNested.forEach((key) => {
         const result = getEntryOperator(key as ListOperatorTypeEnum, 'excluded');
         const expectedLabel =
