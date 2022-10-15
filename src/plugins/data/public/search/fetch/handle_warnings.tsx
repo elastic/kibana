@@ -24,7 +24,12 @@ import {
 import { extractWarnings } from './extract_warnings';
 
 const getDebouncedWarning = () => {
-  const addWarning = () => debounce(getNotifications().toasts.addWarning, 10000, { leading: true });
+  const addWarning = () => {
+    const { toasts } = getNotifications();
+    return debounce(toasts.addWarning.bind(toasts), 10000, {
+      leading: true,
+    });
+  };
   const memory: Record<string, ReturnType<typeof addWarning>> = {};
 
   return (
