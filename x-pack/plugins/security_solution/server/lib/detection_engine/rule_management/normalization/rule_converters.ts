@@ -67,7 +67,7 @@ import type {
   ThreatMatchPatchParams,
   ThresholdPatchParams,
 } from '../../../../../common/detection_engine/schemas/request';
-import type { PatchRulesSchema } from '../../../../../common/detection_engine/schemas/request/patch_rules_schema';
+import type { PatchRulesSchema } from '../../../../../common/detection_engine/rule_management/api/rules/patch_rule/patch_rules_schema';
 import {
   DEFAULT_INDICATOR_SOURCE_PATH,
   DEFAULT_MAX_SIGNALS,

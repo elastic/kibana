@@ -7,7 +7,7 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { updateRulesSchema } from '../../../../../../../common/detection_engine/schemas/request';
-import { updateRuleValidateTypeDependents } from '../../../../../../../common/detection_engine/schemas/request/update_rules_type_dependents';
+import { updateRuleValidateTypeDependents } from '../../../../../../../common/detection_engine/rule_management/api/rules/update_rule/update_rules_type_dependents';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
 import type { SetupPlugins } from '../../../../../../plugin';

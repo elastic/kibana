@@ -115,29 +115,16 @@ export const historyWindowStart = NonEmptyString;
 export type HistoryWindowStart = t.TypeOf<typeof historyWindowStart>;
 
 export const created_at = IsoDateString;
-
 export const updated_at = IsoDateString;
-
+export const created_by = t.string;
 export const updated_by = t.string;
 
-export const created_by = t.string;
-
-export const rules_installed = PositiveInteger;
-export const rules_updated = PositiveInteger;
 export const status_code = PositiveInteger;
 export const message = t.string;
 export const perPage = PositiveInteger;
 export const total = PositiveInteger;
 export const success = t.boolean;
 export const success_count = PositiveInteger;
-export const rules_custom_installed = PositiveInteger;
-export const rules_not_installed = PositiveInteger;
-export const rules_not_updated = PositiveInteger;
-
-export const timelines_installed = PositiveInteger;
-export const timelines_updated = PositiveInteger;
-export const timelines_not_installed = PositiveInteger;
-export const timelines_not_updated = PositiveInteger;
 
 export const indexRecord = t.record(
   t.string,

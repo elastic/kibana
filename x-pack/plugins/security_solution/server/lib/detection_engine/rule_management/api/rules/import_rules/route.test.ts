@@ -27,7 +27,7 @@ import {
   getImportRulesWithIdSchemaMock,
   ruleIdsToNdJsonString,
   rulesToNdJsonString,
-} from '../../../../../../../common/detection_engine/schemas/request/import_rules_schema.mock';
+} from '../../../../../../../common/detection_engine/rule_management/api/rules/import_rules/import_rules_schema.mock';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
 

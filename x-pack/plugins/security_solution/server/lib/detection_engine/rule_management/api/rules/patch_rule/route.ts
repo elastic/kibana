@@ -6,9 +6,9 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { patchRuleValidateTypeDependents } from '../../../../../../../common/detection_engine/schemas/request/patch_rules_type_dependents';
+import { patchRuleValidateTypeDependents } from '../../../../../../../common/detection_engine/rule_management/api/rules/patch_rule/patch_rules_type_dependents';
 import { buildRouteValidationNonExact } from '../../../../../../utils/build_validation/route_validation';
-import { patchRulesSchema } from '../../../../../../../common/detection_engine/schemas/request/patch_rules_schema';
+import { patchRulesSchema } from '../../../../../../../common/detection_engine/rule_management/api/rules/patch_rule/patch_rules_schema';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
 import type { SetupPlugins } from '../../../../../../plugin';

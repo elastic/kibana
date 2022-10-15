@@ -7,7 +7,7 @@
 
 import { useCallback } from 'react';
 import type { BulkActionResponse, BulkActionSummary } from '..';
-import { BulkAction } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
+import { BulkAction } from '../../../../../common/detection_engine/rule_management';
 import type { HTTPError } from '../../../../../common/detection_engine/types';
 import type { UseAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';

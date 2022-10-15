@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { BulkActionEditPayload } from '../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
-import { BulkActionEditType } from '../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
+import type { BulkActionEditPayload } from '../../../../../../common/detection_engine/rule_management';
+import { BulkActionEditType } from '../../../../../../common/detection_engine/rule_management';
 
 import { splitBulkEditActions } from './split_bulk_edit_actions';
 

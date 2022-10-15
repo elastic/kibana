@@ -6,17 +6,15 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SavedObjectsFindResponse, SavedObjectsFindResult } from '@kbn/core/server';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
-
-import type { SavedObjectsFindResponse, SavedObjectsFindResult } from '@kbn/core/server';
 
 import {
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_SIGNALS_STATUS_URL,
   DETECTION_ENGINE_PRIVILEGES_URL,
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
-  DETECTION_ENGINE_PREPACKAGED_URL,
   DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL,
   DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL,
   DETECTION_ENGINE_RULES_BULK_ACTION,
@@ -25,6 +23,12 @@ import {
   DETECTION_ENGINE_RULES_BULK_CREATE,
   DETECTION_ENGINE_RULES_URL_FIND,
 } from '../../../../../common/constants';
+
+import {
+  PREBUILT_RULES_STATUS_URL,
+  PREBUILT_RULES_URL,
+} from '../../../../../common/detection_engine/prebuilt_rules';
+
 import type { RuleAlertType, RuleParams } from '../../rule_schema';
 import { requestMock } from './request';
 import type { QuerySignalsSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/query_signals_index_schema';
@@ -37,13 +41,13 @@ import { getQueryRuleParams } from '../../rule_schema/mocks';
 import {
   getPerformBulkActionSchemaMock,
   getPerformBulkActionEditSchemaMock,
-} from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema.mock';
+} from '../../../../../common/detection_engine/rule_management/mocks';
+import type { HapiReadableStream } from '../../rule_management/logic/import/hapi_readable_stream';
 // eslint-disable-next-line no-restricted-imports
 import type {
   LegacyRuleNotificationAlertType,
   LegacyIRuleActionsAttributes,
 } from '../../rule_actions_legacy';
-import type { HapiReadableStream } from '../../rule_management/logic/import/hapi_readable_stream';
 
 export const typicalSetStatusSignalByIdsPayload = (): SetSignalsStatusSchemaDecoded => ({
   signal_ids: ['somefakeid1', 'somefakeid2'],
@@ -175,13 +179,13 @@ export const getPrivilegeRequest = (options: { auth?: { isAuthenticated: boolean
 export const addPrepackagedRulesRequest = () =>
   requestMock.create({
     method: 'put',
-    path: DETECTION_ENGINE_PREPACKAGED_URL,
+    path: PREBUILT_RULES_URL,
   });
 
 export const getPrepackagedRulesStatusRequest = () =>
   requestMock.create({
     method: 'get',
-    path: `${DETECTION_ENGINE_PREPACKAGED_URL}/_status`,
+    path: PREBUILT_RULES_STATUS_URL,
   });
 
 export interface FindHit<T = RuleAlertType> {

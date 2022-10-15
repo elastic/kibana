@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getImportRulesSchemaMock } from '../../../../../../common/detection_engine/schemas/request/import_rules_schema.mock';
+import { getImportRulesSchemaMock } from '../../../../../../common/detection_engine/rule_management/api/rules/import_rules/import_rules_schema.mock';
 import { checkRuleExceptionReferences } from './check_rule_exception_references';
 import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
 

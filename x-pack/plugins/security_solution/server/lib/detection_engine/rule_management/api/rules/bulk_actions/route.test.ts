@@ -27,7 +27,7 @@ import { performBulkActionRoute } from './route';
 import {
   getPerformBulkActionEditSchemaMock,
   getPerformBulkActionSchemaMock,
-} from '../../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema.mock';
+} from '../../../../../../../common/detection_engine/rule_management/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { readRules } from '../../../logic/crud/read_rules';
 // eslint-disable-next-line no-restricted-imports
@@ -45,7 +45,7 @@ jest.mock('../../../logic/rule_actions/legacy_action_migration', () => {
   };
 });
 
-describe('perform_bulk_action', () => {
+describe('Perform bulk action route', () => {
   const readRulesMock = readRules as jest.Mock;
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();

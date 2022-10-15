@@ -9,14 +9,14 @@ import type { ConfigType } from '../../../../config';
 import type { SetupPlugins } from '../../../../plugin_contract';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 
-import { addPrepackedRulesRoute } from './add_prepackaged_rules/route';
-import { getPrepackagedRulesStatusRoute } from './get_prepackaged_rules_status/route';
+import { getPrebuiltRulesAndTimelinesStatusRoute } from './get_prebuilt_rules_and_timelines_status/route';
+import { installPrebuiltRulesAndTimelinesRoute } from './install_prebuilt_rules_and_timelines/route';
 
 export const registerPrebuiltRulesRoutes = (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
   security: SetupPlugins['security']
 ) => {
-  addPrepackedRulesRoute(router);
-  getPrepackagedRulesStatusRoute(router, config, security);
+  getPrebuiltRulesAndTimelinesStatusRoute(router, config, security);
+  installPrebuiltRulesAndTimelinesRoute(router);
 };

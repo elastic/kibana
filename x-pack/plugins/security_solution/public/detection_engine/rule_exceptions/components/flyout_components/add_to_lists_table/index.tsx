@@ -15,7 +15,7 @@ import type { FindRulesReferencedByExceptionsListProp } from '../../../../rule_m
 import * as i18n from './translations';
 import { getSharedListsTableColumns } from '../utils';
 import { useFindExceptionListReferences } from '../../../logic/use_find_references';
-import type { ExceptionListRuleReferencesSchema } from '../../../../../../common/detection_engine/schemas/response';
+import type { ExceptionListRuleReferencesSchema } from '../../../../../../common/detection_engine/rule_exceptions';
 
 interface ExceptionsAddToListsComponentProps {
   /**

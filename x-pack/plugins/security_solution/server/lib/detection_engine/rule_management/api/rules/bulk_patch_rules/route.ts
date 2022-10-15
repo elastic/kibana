@@ -7,7 +7,7 @@
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import type { Logger } from '@kbn/core/server';
-import { patchRulesBulkSchema } from '../../../../../../../common/detection_engine/schemas/request/patch_rules_bulk_schema';
+import { patchRulesBulkSchema } from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_patch_rules/patch_rules_bulk_schema';
 import { buildRouteValidationNonExact } from '../../../../../../utils/build_validation/route_validation';
 import { rulesBulkSchema } from '../../../../../../../common/detection_engine/schemas/response/rules_bulk_schema';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';

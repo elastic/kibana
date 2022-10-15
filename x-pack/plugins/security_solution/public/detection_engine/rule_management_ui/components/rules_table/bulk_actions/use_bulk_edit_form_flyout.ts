@@ -10,7 +10,7 @@ import { useAsyncConfirmation } from '../rules_table/use_async_confirmation';
 import type {
   BulkActionEditPayload,
   BulkActionEditType,
-} from '../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
+} from '../../../../../../common/detection_engine/rule_management';
 import { useBoolState } from '../../../../../common/hooks/use_bool_state';
 
 export const useBulkEditFormFlyout = () => {

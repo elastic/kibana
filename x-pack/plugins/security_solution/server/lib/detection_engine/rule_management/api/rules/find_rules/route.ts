@@ -7,9 +7,9 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { Logger } from '@kbn/core/server';
-import { findRuleValidateTypeDependents } from '../../../../../../../common/detection_engine/schemas/request/find_rules_type_dependents';
-import type { FindRulesSchemaDecoded } from '../../../../../../../common/detection_engine/schemas/request/find_rules_schema';
-import { findRulesSchema } from '../../../../../../../common/detection_engine/schemas/request/find_rules_schema';
+import { findRuleValidateTypeDependents } from '../../../../../../../common/detection_engine/rule_management/api/rules/find_rules/find_rules_type_dependents';
+import type { FindRulesSchemaDecoded } from '../../../../../../../common/detection_engine/rule_management/api/rules/find_rules/find_rules_schema';
+import { findRulesSchema } from '../../../../../../../common/detection_engine/rule_management/api/rules/find_rules/find_rules_schema';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { DETECTION_ENGINE_RULES_URL_FIND } from '../../../../../../../common/constants';
 import { findRules } from '../../../logic/search/find_rules';

@@ -9,7 +9,7 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { PluginStartContract as AlertsStartContract } from '@kbn/alerting-plugin/server';
 import { createDetectionIndex } from '../../lib/detection_engine/routes/index/create_index_route';
-import { createPrepackagedRules } from '../../lib/detection_engine/prebuilt_rules/api/add_prepackaged_rules/route';
+import { createPrepackagedRules } from '../../lib/detection_engine/prebuilt_rules';
 import type { SecuritySolutionApiRequestHandlerContext } from '../../types';
 
 export interface InstallPrepackagedRulesProps {

@@ -5,3 +5,6 @@
  * 2.0.
  */
 
+export * from './api/rules/bulk_actions/request_schema';
+export * from './api/rules/bulk_create_rules/request_schema';
+// export * from './api/urls';

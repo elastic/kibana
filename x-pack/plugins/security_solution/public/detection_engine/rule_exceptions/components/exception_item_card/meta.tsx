@@ -24,7 +24,7 @@ import styled from 'styled-components';
 import * as i18n from './translations';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { SecurityPageName } from '../../../../../common/constants';
-import type { ExceptionListRuleReferencesSchema } from '../../../../../common/detection_engine/schemas/response';
+import type { ExceptionListRuleReferencesSchema } from '../../../../../common/detection_engine/rule_exceptions';
 import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
 import { RuleDetailTabs } from '../../../rule_details_ui/pages/rule_details';
 import { getRuleDetailsTabUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';

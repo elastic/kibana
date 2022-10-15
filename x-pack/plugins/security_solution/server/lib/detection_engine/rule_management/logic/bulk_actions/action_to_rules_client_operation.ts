@@ -7,8 +7,8 @@
 
 import type { BulkEditOperation } from '@kbn/alerting-plugin/server';
 
-import type { BulkActionEditForRuleAttributes } from '../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
-import { BulkActionEditType } from '../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
+import type { BulkActionEditForRuleAttributes } from '../../../../../../common/detection_engine/rule_management';
+import { BulkActionEditType } from '../../../../../../common/detection_engine/rule_management';
 import { assertUnreachable } from '../../../../../../common/utility_types';
 
 import { transformToAlertThrottle, transformToNotifyWhen } from '../../normalization/rule_actions';

@@ -25,7 +25,7 @@ import {
   performBulkActionSchema,
   performBulkActionQuerySchema,
   BulkAction,
-} from '../../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
+} from '../../../../../../../common/detection_engine/rule_management';
 import type { SetupPlugins } from '../../../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';

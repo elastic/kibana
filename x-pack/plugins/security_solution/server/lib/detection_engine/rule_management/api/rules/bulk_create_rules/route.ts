@@ -7,8 +7,8 @@
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import type { Logger } from '@kbn/core/server';
-import { createRuleValidateTypeDependents } from '../../../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
-import { createRulesBulkSchema } from '../../../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
+import { createRuleValidateTypeDependents } from '../../../../../../../common/detection_engine/rule_management/api/rules/create_rule/create_rules_type_dependents';
+import { createRulesBulkSchema } from '../../../../../../../common/detection_engine/rule_management';
 import { rulesBulkSchema } from '../../../../../../../common/detection_engine/schemas/response/rules_bulk_schema';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { DETECTION_ENGINE_RULES_BULK_CREATE } from '../../../../../../../common/constants';

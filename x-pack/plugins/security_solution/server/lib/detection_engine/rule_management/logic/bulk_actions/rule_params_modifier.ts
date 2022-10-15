@@ -10,8 +10,8 @@
 import moment from 'moment';
 import { parseInterval } from '@kbn/data-plugin/common/search/aggs/utils/date_interval_utils';
 import type { RuleAlertType } from '../../../rule_schema';
-import type { BulkActionEditForRuleParams } from '../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
-import { BulkActionEditType } from '../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
+import type { BulkActionEditForRuleParams } from '../../../../../../common/detection_engine/rule_management';
+import { BulkActionEditType } from '../../../../../../common/detection_engine/rule_management';
 import { invariant } from '../../../../../../common/utils/invariant';
 
 export const addItemsToArray = <T>(arr: T[], items: T[]): T[] =>

@@ -7,9 +7,9 @@
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import type { Logger } from '@kbn/core/server';
-import { updateRuleValidateTypeDependents } from '../../../../../../../common/detection_engine/schemas/request/update_rules_type_dependents';
+import { updateRuleValidateTypeDependents } from '../../../../../../../common/detection_engine/rule_management/api/rules/update_rule/update_rules_type_dependents';
 import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
-import { updateRulesBulkSchema } from '../../../../../../../common/detection_engine/schemas/request/update_rules_bulk_schema';
+import { updateRulesBulkSchema } from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_update_rules/update_rules_bulk_schema';
 import { rulesBulkSchema } from '../../../../../../../common/detection_engine/schemas/response/rules_bulk_schema';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { DETECTION_ENGINE_RULES_BULK_UPDATE } from '../../../../../../../common/constants';

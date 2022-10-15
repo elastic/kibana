@@ -5,3 +5,4 @@
  * 2.0.
  */
 
+export * from './api/rules/bulk_actions/request_schema.mock';

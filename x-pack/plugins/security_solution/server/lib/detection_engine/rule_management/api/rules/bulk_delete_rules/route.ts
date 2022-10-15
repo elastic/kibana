@@ -8,10 +8,10 @@
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 
 import type { RouteConfig, RequestHandler, Logger } from '@kbn/core/server';
-import { queryRuleValidateTypeDependents } from '../../../../../../../common/detection_engine/schemas/request/query_rules_type_dependents';
+import { queryRuleValidateTypeDependents } from '../../../../../../../common/detection_engine/rule_management/api/rules/read_rule/query_rules_type_dependents';
 import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
-import type { QueryRulesBulkSchemaDecoded } from '../../../../../../../common/detection_engine/schemas/request/query_rules_bulk_schema';
-import { queryRulesBulkSchema } from '../../../../../../../common/detection_engine/schemas/request/query_rules_bulk_schema';
+import type { QueryRulesBulkSchemaDecoded } from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_delete_rules/query_rules_bulk_schema';
+import { queryRulesBulkSchema } from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_delete_rules/query_rules_bulk_schema';
 import { rulesBulkSchema } from '../../../../../../../common/detection_engine/schemas/response/rules_bulk_schema';
 import type {
   SecuritySolutionPluginRouter,

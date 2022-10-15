@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { AddPrepackagedRulesSchema } from '../../../../../common/detection_engine/schemas/request';
+import type { PrebuiltRuleToInstall } from '../../../../../common/detection_engine/prebuilt_rules';
 import type { RuleAlertType } from '../../rule_schema';
 
 /**
- * Converts an array of prepackaged rules to a Map with rule IDs as keys
+ * Converts an array of prebuilt rules to a Map with rule IDs as keys
  *
- * @param rules Array of prepackaged rules
+ * @param rules Array of prebuilt rules
  * @returns Map
  */
-export const prepackagedRulesToMap = (rules: AddPrepackagedRulesSchema[]) =>
+export const prebuiltRulesToMap = (rules: PrebuiltRuleToInstall[]) =>
   new Map(rules.map((rule) => [rule.rule_id, rule]));
 
 /**

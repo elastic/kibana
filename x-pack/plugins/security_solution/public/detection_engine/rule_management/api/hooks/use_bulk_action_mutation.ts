@@ -6,7 +6,7 @@
  */
 import type { UseMutationOptions } from '@tanstack/react-query';
 import { useMutation } from '@tanstack/react-query';
-import { BulkAction } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
+import { BulkAction } from '../../../../../common/detection_engine/rule_management';
 import type { BulkActionProps, BulkActionResponse } from '../api';
 import { performBulkAction } from '../api';
 import { useInvalidateFetchPrebuiltRulesStatusQuery } from './use_fetch_prebuilt_rules_status_query';

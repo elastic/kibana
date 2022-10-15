@@ -9,7 +9,7 @@ import { Readable } from 'stream';
 import { createPromiseFromStreams } from '@kbn/utils';
 import { createRulesAndExceptionsStreamFromNdJson } from './create_rules_stream_from_ndjson';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
-import type { ImportRulesSchema } from '../../../../../../common/detection_engine/schemas/request/import_rules_schema';
+import type { ImportRulesSchema } from '../../../../../../common/detection_engine/rule_management/api/rules/import_rules/import_rules_schema';
 import {
   getOutputDetailsSample,
   getSampleDetailsAsNdjson,

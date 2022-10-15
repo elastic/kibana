@@ -11,7 +11,7 @@ import { useMutation } from '@tanstack/react-query';
 import type {
   BulkAction,
   BulkActionEditType,
-} from '../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
+} from '../../../../../../common/detection_engine/rule_management';
 import type { BulkActionResponse } from '../../../../rule_management/logic';
 import { performBulkAction } from '../../../../rule_management/logic';
 import { computeDryRunPayload } from './utils/compute_dry_run_payload';

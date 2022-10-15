@@ -23,9 +23,9 @@ import type {
   ImportExceptionsListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { has } from 'lodash/fp';
-import { importRuleValidateTypeDependents } from '../../../../../../common/detection_engine/schemas/request/import_rules_type_dependents';
-import type { ImportRulesSchema } from '../../../../../../common/detection_engine/schemas/request/import_rules_schema';
-import { importRulesSchema } from '../../../../../../common/detection_engine/schemas/request/import_rules_schema';
+import { importRuleValidateTypeDependents } from '../../../../../../common/detection_engine/rule_management/api/rules/import_rules/import_rules_type_dependents';
+import type { ImportRulesSchema } from '../../../../../../common/detection_engine/rule_management/api/rules/import_rules/import_rules_schema';
+import { importRulesSchema } from '../../../../../../common/detection_engine/rule_management/api/rules/import_rules/import_rules_schema';
 import {
   parseNdjsonStrings,
   createRulesLimitStream,

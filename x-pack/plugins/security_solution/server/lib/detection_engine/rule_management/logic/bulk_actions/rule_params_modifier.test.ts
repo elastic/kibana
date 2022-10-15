@@ -6,7 +6,7 @@
  */
 
 import { addItemsToArray, deleteItemsFromArray, ruleParamsModifier } from './rule_params_modifier';
-import { BulkActionEditType } from '../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
+import { BulkActionEditType } from '../../../../../../common/detection_engine/rule_management';
 import type { RuleAlertType } from '../../../rule_schema';
 
 describe('addItemsToArray', () => {

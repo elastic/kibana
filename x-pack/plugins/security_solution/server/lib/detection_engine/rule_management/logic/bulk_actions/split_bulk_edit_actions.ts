@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { BulkActionEditType } from '../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
+import { BulkActionEditType } from '../../../../../../common/detection_engine/rule_management';
 import type {
   BulkActionEditPayload,
   BulkActionEditForRuleAttributes,
   BulkActionEditForRuleParams,
-} from '../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
+} from '../../../../../../common/detection_engine/rule_management';
 
 /**
  * Split bulk edit actions in 2 chunks: actions applied to params and

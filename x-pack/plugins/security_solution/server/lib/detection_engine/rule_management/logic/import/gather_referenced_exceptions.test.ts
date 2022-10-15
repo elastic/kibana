@@ -11,7 +11,7 @@ import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { findExceptionList } from '@kbn/lists-plugin/server/services/exception_lists/find_exception_list';
 import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
 import { getReferencedExceptionLists } from './gather_referenced_exceptions';
-import { getImportRulesSchemaMock } from '../../../../../../common/detection_engine/schemas/request/import_rules_schema.mock';
+import { getImportRulesSchemaMock } from '../../../../../../common/detection_engine/rule_management/api/rules/import_rules/import_rules_schema.mock';
 
 jest.mock('@kbn/lists-plugin/server/services/exception_lists/find_exception_list');
 

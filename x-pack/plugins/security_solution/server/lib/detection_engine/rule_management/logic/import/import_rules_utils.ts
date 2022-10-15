@@ -21,7 +21,7 @@ import { createBulkErrorObject } from '../../../routes/utils';
 import { createRules } from '../crud/create_rules';
 import { readRules } from '../crud/read_rules';
 import { patchRules } from '../crud/patch_rules';
-import type { ImportRulesSchema } from '../../../../../../common/detection_engine/schemas/request/import_rules_schema';
+import type { ImportRulesSchema } from '../../../../../../common/detection_engine/rule_management/api/rules/import_rules/import_rules_schema';
 import type { MlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
 import { checkRuleExceptionReferences } from './check_rule_exception_references';

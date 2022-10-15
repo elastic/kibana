@@ -36,7 +36,7 @@ import type { RuleExceptionsPromiseFromStreams } from '../../../logic/import/imp
 import { importRules as importRulesHelper } from '../../../logic/import/import_rules_utils';
 import { getReferencedExceptionLists } from '../../../logic/import/gather_referenced_exceptions';
 import { importRuleExceptions } from '../../../logic/import/import_rule_exceptions';
-import type { ImportRulesSchema } from '../../../../../../../common/detection_engine/schemas/request/import_rules_schema';
+import type { ImportRulesSchema } from '../../../../../../../common/detection_engine/rule_management/api/rules/import_rules/import_rules_schema';
 import type { HapiReadableStream } from '../../../logic/import/hapi_readable_stream';
 
 const CHUNK_PARSED_OBJECT_SIZE = 50;

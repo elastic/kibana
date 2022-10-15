@@ -5,4 +5,5 @@
  * 2.0.
  */
 
+export { createPrepackagedRules } from './api/install_prebuilt_rules_and_timelines/route';
 export * from './api/register_routes';

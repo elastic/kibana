@@ -22,11 +22,11 @@ import {
   getUseField,
   Field,
 } from '../../../../../../shared_imports';
-import { BulkActionEditType } from '../../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
+import { BulkActionEditType } from '../../../../../../../common/detection_engine/rule_management';
 import type {
   BulkActionEditPayload,
   ThrottleForBulkActions,
-} from '../../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
+} from '../../../../../../../common/detection_engine/rule_management';
 import { NOTIFICATION_THROTTLE_RULE } from '../../../../../../../common/constants';
 
 import { BulkEditFormWrapper } from './bulk_edit_form_wrapper';

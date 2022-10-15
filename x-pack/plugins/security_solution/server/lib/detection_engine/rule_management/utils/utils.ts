@@ -13,9 +13,10 @@ import pMap from 'p-map';
 
 import type { PartialRule, FindResult } from '@kbn/alerting-plugin/server';
 import type { ActionsClient, FindActionResult } from '@kbn/actions-plugin/server';
+import type { CreateRulesBulkSchema } from '../../../../../common/detection_engine/rule_management';
 import type { RuleExecutionSummary } from '../../../../../common/detection_engine/rule_monitoring';
-import type { ImportRulesSchema } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
-import type { CreateRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
+import type { FullResponseSchema } from '../../../../../common/detection_engine/schemas/request';
+import type { ImportRulesSchema } from '../../../../../common/detection_engine/rule_management/api/rules/import_rules/import_rules_schema';
 import type { RuleAlertType, RuleParams } from '../../rule_schema';
 import { isAlertType } from '../../rule_schema';
 import type { BulkError, OutputError } from '../../routes/utils';
@@ -25,7 +26,6 @@ import { internalRuleToAPIResponse } from '../normalization/rule_converters';
 // eslint-disable-next-line no-restricted-imports
 import type { LegacyRulesActionsSavedObject } from '../../rule_actions_legacy';
 import type { RuleExecutionSummariesByRuleId } from '../../rule_monitoring';
-import type { FullResponseSchema } from '../../../../../common/detection_engine/schemas/request';
 
 type PromiseFromStreams = ImportRulesSchema | Error;
 const MAX_CONCURRENT_SEARCHES = 10;

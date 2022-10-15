@@ -12,11 +12,11 @@ import type { Toast } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
 import React, { useCallback } from 'react';
-import type { BulkActionEditPayload } from '../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
+import type { BulkActionEditPayload } from '../../../../../../common/detection_engine/rule_management';
 import {
   BulkAction,
   BulkActionEditType,
-} from '../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
+} from '../../../../../../common/detection_engine/rule_management';
 import { isMlRule } from '../../../../../../common/machine_learning/helpers';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { BULK_RULE_ACTIONS } from '../../../../../common/lib/apm/user_actions';

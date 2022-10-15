@@ -7,7 +7,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 
-import type { ExceptionListRuleReferencesSchema } from '../../../../common/detection_engine/schemas/response';
+import type { ExceptionListRuleReferencesSchema } from '../../../../common/detection_engine/rule_exceptions';
 import { findRuleExceptionReferences } from '../../rule_management/api/api';
 import { useToasts } from '../../../common/lib/kibana';
 import type { FindRulesReferencedByExceptionsListProp } from '../../rule_management/logic/types';

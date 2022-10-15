@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { BulkActionEditPayload } from '../../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
+import type { BulkActionEditPayload } from '../../../../../../../common/detection_engine/rule_management';
 import {
   BulkAction,
   BulkActionEditType,
-} from '../../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
+} from '../../../../../../../common/detection_engine/rule_management';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
 
 /**

@@ -27,7 +27,7 @@ import { buildMlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
 import { buildRouteValidation } from '../../../../../utils/build_validation/route_validation';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
-import { createRuleValidateTypeDependents } from '../../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
+import { createRuleValidateTypeDependents } from '../../../../../../common/detection_engine/rule_management/api/rules/create_rule/create_rules_type_dependents';
 import {
   DEFAULT_PREVIEW_INDEX,
   DETECTION_ENGINE_RULES_PREVIEW,

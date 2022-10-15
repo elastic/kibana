@@ -28,7 +28,7 @@ import { PopoverItems } from '../../../../common/components/popover_items';
 import type {
   ExceptionListRuleReferencesInfoSchema,
   ExceptionListRuleReferencesSchema,
-} from '../../../../../common/detection_engine/schemas/response';
+} from '../../../../../common/detection_engine/rule_exceptions';
 import type { Rule } from '../../../rule_management/logic/types';
 import * as i18n from './translations';
 

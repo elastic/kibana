@@ -6,7 +6,7 @@
  */
 
 import type { BulkActionsDryRunErrCode } from '../../../../../../common/constants';
-import type { BulkAction } from '../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
+import type { BulkAction } from '../../../../../../common/detection_engine/rule_management';
 
 /**
  * Only 2 bulk actions are supported for for confirmation dry run modal:

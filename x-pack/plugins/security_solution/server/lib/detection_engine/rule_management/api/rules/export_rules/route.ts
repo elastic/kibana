@@ -10,11 +10,11 @@ import type { Logger } from '@kbn/core/server';
 import type {
   ExportRulesQuerySchemaDecoded,
   ExportRulesSchemaDecoded,
-} from '../../../../../../../common/detection_engine/schemas/request/export_rules_schema';
+} from '../../../../../../../common/detection_engine/rule_management/api/rules/export_rules/export_rules_schema';
 import {
   exportRulesQuerySchema,
   exportRulesSchema,
-} from '../../../../../../../common/detection_engine/schemas/request/export_rules_schema';
+} from '../../../../../../../common/detection_engine/rule_management/api/rules/export_rules/export_rules_schema';
 import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';

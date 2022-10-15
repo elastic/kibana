@@ -17,7 +17,7 @@ import { buildSiemResponse } from '../../../../routes/utils';
 
 import { createRulesSchema } from '../../../../../../../common/detection_engine/schemas/request';
 import { transformValidate } from '../../../utils/validate';
-import { createRuleValidateTypeDependents } from '../../../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
+import { createRuleValidateTypeDependents } from '../../../../../../../common/detection_engine/rule_management/api/rules/create_rule/create_rules_type_dependents';
 import { createRules } from '../../../logic/crud/create_rules';
 import { checkDefaultRuleExceptionListReferences } from '../../../logic/exceptions/check_for_default_rule_exception_list';
 

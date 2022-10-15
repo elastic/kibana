@@ -13,7 +13,7 @@ import {
   getFindResultWithSingleHit,
 } from '../../../routes/__mocks__/request_responses';
 import { getQueryRuleParams } from '../../../rule_schema/mocks';
-import { getImportRulesSchemaMock } from '../../../../../../common/detection_engine/schemas/request/import_rules_schema.mock';
+import { getImportRulesSchemaMock } from '../../../../../../common/detection_engine/rule_management/api/rules/import_rules/import_rules_schema.mock';
 import { createRules } from '../crud/create_rules';
 import { patchRules } from '../crud/patch_rules';
 

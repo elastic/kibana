@@ -17,7 +17,7 @@ import * as i18n from './translations';
 import { ExceptionItemCardHeader } from './header';
 import { ExceptionItemCardConditions } from './conditions';
 import { ExceptionItemCardMetaInfo } from './meta';
-import type { ExceptionListRuleReferencesSchema } from '../../../../../common/detection_engine/schemas/response';
+import type { ExceptionListRuleReferencesSchema } from '../../../../../common/detection_engine/rule_exceptions';
 import { ExceptionItemCardComments } from './comments';
 
 export interface ExceptionItemProps {

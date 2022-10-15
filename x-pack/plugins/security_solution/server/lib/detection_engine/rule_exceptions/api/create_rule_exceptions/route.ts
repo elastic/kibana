@@ -27,35 +27,38 @@ import { formatErrors, validate } from '@kbn/securitysolution-io-ts-utils';
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+
 import type {
-  CreateRuleExceptionSchemaDecoded,
-  QueryRuleByIdSchemaDecoded,
-} from '../../../../../../common/detection_engine/schemas/request';
+  CreateRuleExceptionsRequestBodyDecoded,
+  CreateRuleExceptionsRequestParamsDecoded,
+} from '../../../../../../common/detection_engine/rule_exceptions';
 import {
-  createRuleExceptionsSchema,
-  queryRuleByIdSchema,
-} from '../../../../../../common/detection_engine/schemas/request';
-import type { SecuritySolutionPluginRouter } from '../../../../../types';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../../../common/constants';
-import { buildSiemResponse } from '../../../routes/utils';
-import { patchRules } from '../../../rule_management/logic/crud/patch_rules';
-import { buildRouteValidation } from '../../../../../utils/build_validation/route_validation';
+  CREATE_RULE_EXCEPTIONS_URL,
+  CreateRuleExceptionsRequestBody,
+  CreateRuleExceptionsRequestParams,
+} from '../../../../../../common/detection_engine/rule_exceptions';
+
 import { readRules } from '../../../rule_management/logic/crud/read_rules';
-import type { RuleParams } from '../../../rule_schema';
+import { patchRules } from '../../../rule_management/logic/crud/patch_rules';
 import { checkDefaultRuleExceptionListReferences } from '../../../rule_management/logic/exceptions/check_for_default_rule_exception_list';
+import type { RuleParams } from '../../../rule_schema';
+import type { SecuritySolutionPluginRouter } from '../../../../../types';
+import { buildSiemResponse } from '../../../routes/utils';
+import { buildRouteValidation } from '../../../../../utils/build_validation/route_validation';
 
 export const createRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) => {
   router.post(
     {
-      path: `${DETECTION_ENGINE_RULES_URL}/{id}/exceptions`,
+      path: CREATE_RULE_EXCEPTIONS_URL,
       validate: {
-        params: buildRouteValidation<typeof queryRuleByIdSchema, QueryRuleByIdSchemaDecoded>(
-          queryRuleByIdSchema
-        ),
+        params: buildRouteValidation<
+          typeof CreateRuleExceptionsRequestParams,
+          CreateRuleExceptionsRequestParamsDecoded
+        >(CreateRuleExceptionsRequestParams),
         body: buildRouteValidation<
-          typeof createRuleExceptionsSchema,
-          CreateRuleExceptionSchemaDecoded
-        >(createRuleExceptionsSchema),
+          typeof CreateRuleExceptionsRequestBody,
+          CreateRuleExceptionsRequestBodyDecoded
+        >(CreateRuleExceptionsRequestBody),
       },
       options: {
         tags: ['access:securitySolution'],

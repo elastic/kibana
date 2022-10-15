@@ -14,8 +14,8 @@ import * as i18n from '../../../../../../detections/pages/detection_engine/rules
 import { DEFAULT_INDEX_KEY } from '../../../../../../../common/constants';
 import { useKibana } from '../../../../../../common/lib/kibana';
 
-import { BulkActionEditType } from '../../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
-import type { BulkActionEditPayload } from '../../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
+import { BulkActionEditType } from '../../../../../../../common/detection_engine/rule_management';
+import type { BulkActionEditPayload } from '../../../../../../../common/detection_engine/rule_management';
 
 import type { FormSchema } from '../../../../../../shared_imports';
 import {

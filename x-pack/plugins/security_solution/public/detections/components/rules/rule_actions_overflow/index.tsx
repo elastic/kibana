@@ -16,7 +16,7 @@ import { noop } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { APP_UI_ID, SecurityPageName } from '../../../../../common/constants';
-import { BulkAction } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
+import { BulkAction } from '../../../../../common/detection_engine/rule_management';
 import { getRulesUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';

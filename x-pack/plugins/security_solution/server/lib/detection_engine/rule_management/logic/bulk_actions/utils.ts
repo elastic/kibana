@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { BulkActionEditType } from '../../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema';
+import { BulkActionEditType } from '../../../../../../common/detection_engine/rule_management';
 
 /**
  * helper utility that defines whether bulk edit action is related to index patterns, i.e. one of:

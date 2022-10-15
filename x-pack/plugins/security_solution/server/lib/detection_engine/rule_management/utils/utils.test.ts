@@ -30,9 +30,9 @@ import type { PartialRule } from '@kbn/alerting-plugin/server';
 // TODO: https://github.com/elastic/kibana/pull/142950
 import { createRulesAndExceptionsStreamFromNdJson } from '../logic/import/create_rules_stream_from_ndjson';
 import type { RuleAlertType } from '../../rule_schema';
-import type { ImportRulesSchema } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
+import type { CreateRulesBulkSchema } from '../../../../../common/detection_engine/rule_management';
+import type { ImportRulesSchema } from '../../../../../common/detection_engine/rule_management/api/rules/import_rules/import_rules_schema';
 import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
-import type { CreateRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request';
 import { getMlRuleParams, getQueryRuleParams, getThreatRuleParams } from '../../rule_schema/mocks';
 // TODO: https://github.com/elastic/kibana/pull/142950
 import { internalRuleToAPIResponse } from '../normalization/rule_converters';
