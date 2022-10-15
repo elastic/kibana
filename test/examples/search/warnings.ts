@@ -112,7 +112,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // toasts
       const toasts = await find.allByCssSelector(toastsSelector);
-      expect(toasts.length).to.be(1);
+      expect(toasts.length).to.be(2);
       const expects = ['2 of 4 shards failed', 'Query result'];
       await asyncForEach(toasts, async (t, index) => {
         expect(await t.getVisibleText()).to.eql(expects[index]);
@@ -157,7 +157,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       let toasts: WebElementWrapper[] = [];
       await retry.try(async () => {
         toasts = await find.allByCssSelector(toastsSelector);
-        expect(toasts.length).to.be(1);
+        expect(toasts.length).to.be(2);
       });
       const expects = ['2 of 4 shards failed', 'Query result'];
       await asyncForEach(toasts, async (t, index) => {
