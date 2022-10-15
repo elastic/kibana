@@ -104,6 +104,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
     function onFlyoutChange() {
       reset();
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [showFlyout]
   );
 
@@ -170,6 +171,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
     } catch (error) {
       displayErrorToast(error);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const onImport = useCallback(async () => {
@@ -191,6 +193,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
 
     setImporting(false);
     setShowFlyout(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobType, jobIdObjects, adJobs, dfaJobs]);
 
   const bulkCreateADJobs = useCallback(async (jobs: ImportedAdJob[]) => {
@@ -219,6 +222,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
       displayImportErrorToast(errors, failedJobIds.size);
       mlUsageCollection.count('import_failed_anomaly_detector_jobs', failedJobIds.size);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const bulkCreateDfaJobs = useCallback(async (jobs: DataFrameAnalyticsConfig[]) => {
@@ -240,6 +244,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
       displayImportErrorToast(errors, errors.length);
       mlUsageCollection.count('import_failed_data_frame_analytics_jobs', errors.length);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const displayImportSuccessToast = useCallback((count: number) => {
@@ -248,6 +253,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
       values: { count },
     });
     displaySuccessToast(title);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const displayImportErrorToast = useCallback((errors: ErrorType[], failureCount: number) => {
@@ -258,6 +264,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
 
     const errorList = errors.map(extractErrorProperties);
     displayErrorToast(errorList as unknown as ErrorType, title);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const deleteJob = useCallback(
@@ -279,6 +286,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
       setIdsMash(ids);
       setValidatingJobs(true);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [jobIdObjects, adJobs, dfaJobs]
   );
 
@@ -306,6 +314,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
       setIdsMash(ids);
       setValidatingJobs(true);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [jobIdObjects]
   );
 
@@ -321,6 +330,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
       setIdsMash(ids);
       setValidatingJobs(true);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [jobIdObjects]
   );
 

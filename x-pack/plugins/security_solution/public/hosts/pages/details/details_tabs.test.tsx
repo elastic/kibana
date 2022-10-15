@@ -70,7 +70,6 @@ jest.mock('../../../common/components/visualization_actions', () => ({
 describe('body', () => {
   const scenariosMap = {
     [HostsTableType.authentications]: 'AuthenticationsQueryTabBody',
-    [HostsTableType.hosts]: 'HostsQueryTabBody',
     [HostsTableType.uncommonProcesses]: 'UncommonProcessQueryTabBody',
     [HostsTableType.anomalies]: 'AnomaliesQueryTabBody',
     [HostsTableType.events]: 'EventsQueryTabBody',

@@ -121,7 +121,9 @@ describe('Toaster', () => {
       wrapper.find('[data-test-subj="add-toast"]').simulate('click');
 
       expect(wrapper.find('.euiGlobalToastList').exists()).toBe(true);
-      expect(wrapper.find('.euiToastHeader__title').text()).toBe('Test & Test');
+      expect(wrapper.find('[data-test-subj="euiToastHeader__title"]').at(1).text()).toBe(
+        'Test & Test'
+      );
     });
 
     test('Render an error toaster', () => {
@@ -153,7 +155,9 @@ describe('Toaster', () => {
       wrapper.find('[data-test-subj="add-toast"]').simulate('click');
 
       expect(wrapper.find('.euiGlobalToastList').exists()).toBe(true);
-      expect(wrapper.find('.euiToastHeader__title').text()).toBe('Test & Test ERROR');
+      expect(wrapper.find('[data-test-subj="euiToastHeader__title"]').at(1).text()).toBe(
+        'Test & Test ERROR'
+      );
       expect(wrapper.find('button[data-test-subj="toaster-show-all-error-modal"]').exists()).toBe(
         true
       );
@@ -198,10 +202,14 @@ describe('Toaster', () => {
       wrapper.find('[data-test-subj="add-toast"]').simulate('click');
 
       expect(wrapper.find('button[data-test-subj="toastCloseButton"]').length).toBe(1);
-      expect(wrapper.find('.euiToastHeader__title').text()).toBe('Test & Test');
+      expect(wrapper.find('[data-test-subj="euiToastHeader__title"]').at(1).text()).toBe(
+        'Test & Test'
+      );
       wrapper.find('button[data-test-subj="delete-toast"]').simulate('click');
-      expect(wrapper.find('.euiToast').length).toBe(1);
-      expect(wrapper.find('.euiToastHeader__title').text()).toBe('Test & Test II');
+      expect(wrapper.find('div.euiToast').length).toBe(1);
+      expect(wrapper.find('[data-test-subj="euiToastHeader__title"]').at(1).text()).toBe(
+        'Test & Test II'
+      );
     });
 
     test('Do not show anymore toaster when modal error is open', () => {
@@ -270,14 +278,18 @@ describe('Toaster', () => {
         </ManageGlobalToaster>
       );
       wrapper.find('[data-test-subj="add-toast"]').simulate('click');
-      expect(wrapper.find('.euiToastHeader__title').text()).toBe('Test & Test II');
+      expect(wrapper.find('[data-test-subj="euiToastHeader__title"]').at(1).text()).toBe(
+        'Test & Test II'
+      );
 
       wrapper.find('button[data-test-subj="toaster-show-all-error-modal"]').simulate('click');
       expect(wrapper.find('.euiToast').length).toBe(0);
 
       wrapper.find('button[data-test-subj="modal-all-errors-close"]').simulate('click');
-      expect(wrapper.find('.euiToast').length).toBe(1);
-      expect(wrapper.find('.euiToastHeader__title').text()).toBe('Test & Test');
+      expect(wrapper.find('div.euiToast').length).toBe(1);
+      expect(wrapper.find('[data-test-subj="euiToastHeader__title"]').at(1).text()).toBe(
+        'Test & Test'
+      );
     });
   });
 

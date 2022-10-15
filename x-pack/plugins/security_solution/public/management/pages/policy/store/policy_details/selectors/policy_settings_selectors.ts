@@ -105,7 +105,7 @@ export const license = (state: Immutable<PolicyDetailsState>) => {
 
 /** Returns the policyId from the url */
 export const policyIdFromParams: (state: Immutable<PolicyDetailsState>) => string = createSelector(
-  (state) => state.location,
+  (state: Immutable<PolicyDetailsState>) => state.location,
   (location: PolicyDetailsState['location']) => {
     return (
       matchPath<ManagementRoutePolicyDetailsParams>(location?.pathname ?? '', {

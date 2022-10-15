@@ -45,7 +45,6 @@ export default ({ getService }: FtrProviderContext) => {
     const logThresholdRuleName = 'error-log';
 
     before(async () => {
-      await observability.users.restoreDefaultTestUserRole();
       const uptimeRule = {
         params: {
           search: '',
@@ -82,6 +81,7 @@ export default ({ getService }: FtrProviderContext) => {
       uptimeRuleId = await createRule(uptimeRule);
       logThresholdRuleId = await createRule(logThresholdRule);
     });
+
     after(async () => {
       await deleteRuleById(uptimeRuleId);
       await deleteRuleById(logThresholdRuleId);
@@ -144,6 +144,9 @@ export default ({ getService }: FtrProviderContext) => {
     describe('User permissions', () => {
       before(async () => {
         await observability.alerts.common.navigateToRuleDetailsByRuleId(logThresholdRuleId);
+      });
+      after(async () => {
+        await observability.users.restoreDefaultTestUserRole();
       });
       it('should show the actions button if user has permissions', async () => {
         await retry.waitFor(

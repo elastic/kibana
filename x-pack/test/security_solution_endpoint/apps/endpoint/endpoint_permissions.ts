@@ -76,20 +76,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expect(endpointSummary['Policy status']).not.be('—');
           expect(endpointSummary['Agent status']).not.to.be('—');
         });
-
-        // FIXME: this area (detections) is unstable and due to time, skipping it.
-        //        The page does not always (its intermittent) display with the created roles. Sometimes you get a
-        //        "not enought priviliges" and others the data shows up.
-        it.skip('should display endpoint data on Alert Details', async () => {
-          await PageObjects.detections.navigateToAlerts();
-          await PageObjects.detections.openFirstAlertDetailsForHostName(
-            indexedData.hosts[0].host.name
-          );
-
-          const hostAgentStatus = await testSubjects.getVisibleText('rowHostStatus');
-
-          expect(hostAgentStatus).to.eql('Healthy');
-        });
       });
     }
   });

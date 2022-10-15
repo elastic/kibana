@@ -179,7 +179,7 @@ export const aggs: Agg[] = [
     },
   },
   {
-    id: TSVB_METRIC_TYPES.VALUE_COUNT,
+    id: METRIC_TYPES.VALUE_COUNT,
     meta: {
       ...aggDefaultMeta,
       isFilterRatioSupported: true,

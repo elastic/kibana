@@ -45,18 +45,19 @@ limit 1000;`;
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  describe('Packs', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/133259
+  describe.skip('Packs', () => {
     let packId: string = '';
     let hostedPolicy: Record<string, any>;
     let packagePolicyId: string;
     before(async () => {
-      await getService('esArchiver').load('x-pack/test/functional/es_archives/empty_kibana');
+      await getService('kibanaServer').savedObjects.cleanStandardList();
       await getService('esArchiver').load(
         'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
       );
     });
     after(async () => {
-      await getService('esArchiver').unload('x-pack/test/functional/es_archives/empty_kibana');
+      await getService('kibanaServer').savedObjects.cleanStandardList();
       await getService('esArchiver').unload(
         'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
       );
@@ -93,7 +94,6 @@ export default function ({ getService }: FtrProviderContext) {
           },
           inputs: [],
           namespace: 'default',
-          output_id: '',
           policy_id: hostedPolicy.id,
           name: 'TEST',
           description: '123',

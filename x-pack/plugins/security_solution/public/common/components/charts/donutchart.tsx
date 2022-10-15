@@ -44,9 +44,8 @@ export interface DonutChartProps {
   data: DonutChartData[] | null | undefined;
   fillColor: FillColor;
   height?: number;
-  label: string;
+  label: React.ReactElement | string;
   legendItems?: LegendItem[] | null | undefined;
-  link?: string | null;
   title: React.ReactElement | string | number | null;
   totalCount: number | null | undefined;
 }
@@ -71,7 +70,6 @@ export const DonutChart = ({
   height = 90,
   label,
   legendItems,
-  link,
   title,
   totalCount,
 }: DonutChartProps) => {

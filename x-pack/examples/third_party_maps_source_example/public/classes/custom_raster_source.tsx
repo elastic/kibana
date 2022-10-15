@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import _ from 'lodash';
 import { ReactElement } from 'react';
 import { calculateBounds } from '@kbn/data-plugin/common';
 import { FieldFormatter, MIN_ZOOM, MAX_ZOOM } from '@kbn/maps-plugin/common';
@@ -16,15 +17,18 @@ import type {
   Timeslice,
 } from '@kbn/maps-plugin/common/descriptor_types';
 import type {
+  DataRequest,
   IField,
   ImmutableSourceProperty,
-  ITMSSource,
+  IRasterSource,
   SourceEditorArgs,
 } from '@kbn/maps-plugin/public';
+import { RasterTileSourceData } from '@kbn/maps-plugin/public/classes/sources/raster_source';
+import { RasterTileSource } from 'maplibre-gl';
 
 type CustomRasterSourceDescriptor = AbstractSourceDescriptor;
 
-export class CustomRasterSource implements ITMSSource {
+export class CustomRasterSource implements IRasterSource {
   static type = 'CUSTOM_RASTER';
 
   readonly _descriptor: CustomRasterSourceDescriptor;
@@ -37,6 +41,25 @@ export class CustomRasterSource implements ITMSSource {
 
   constructor(sourceDescriptor: CustomRasterSourceDescriptor) {
     this._descriptor = sourceDescriptor;
+  }
+
+  async canSkipSourceUpdate(
+    dataRequest: DataRequest,
+    nextRequestMeta: DataRequestMeta
+  ): Promise<boolean> {
+    const prevMeta = dataRequest.getMeta();
+    if (!prevMeta) {
+      return Promise.resolve(false);
+    }
+
+    return Promise.resolve(_.isEqual(prevMeta.timeslice, nextRequestMeta.timeslice));
+  }
+
+  isSourceStale(mbSource: RasterTileSource, sourceData: RasterTileSourceData): boolean {
+    if (!sourceData.url) {
+      return false;
+    }
+    return mbSource.tiles?.[0] !== sourceData.url;
   }
 
   cloneDescriptor(): CustomRasterSourceDescriptor {

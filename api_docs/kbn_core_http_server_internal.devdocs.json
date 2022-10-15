@@ -32,6 +32,7 @@
         ],
         "path": "packages/core/http/core-http-server-internal/src/csp/csp_config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-http-server-internal",
@@ -50,7 +51,8 @@
               }
             ],
             "path": "packages/core/http/core-http-server-internal/src/csp/csp_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-http-server-internal",
@@ -63,7 +65,8 @@
               "CspDirectives"
             ],
             "path": "packages/core/http/core-http-server-internal/src/csp/csp_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-http-server-internal",
@@ -73,7 +76,8 @@
             "label": "strict",
             "description": [],
             "path": "packages/core/http/core-http-server-internal/src/csp/csp_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-http-server-internal",
@@ -83,7 +87,8 @@
             "label": "warnLegacyBrowsers",
             "description": [],
             "path": "packages/core/http/core-http-server-internal/src/csp/csp_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-http-server-internal",
@@ -93,7 +98,8 @@
             "label": "disableEmbedding",
             "description": [],
             "path": "packages/core/http/core-http-server-internal/src/csp/csp_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-http-server-internal",
@@ -103,7 +109,8 @@
             "label": "header",
             "description": [],
             "path": "packages/core/http/core-http-server-internal/src/csp/csp_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -130,6 +137,7 @@
         ],
         "path": "packages/core/http/core-http-server-internal/src/external_url/external_url_config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-http-server-internal",
@@ -148,7 +156,8 @@
               }
             ],
             "path": "packages/core/http/core-http-server-internal/src/external_url/external_url_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-http-server-internal",
@@ -162,7 +171,8 @@
               "[]"
             ],
             "path": "packages/core/http/core-http-server-internal/src/external_url/external_url_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -187,6 +197,7 @@
         ],
         "path": "packages/core/http/core-http-server-internal/src/http_config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-http-server-internal",
@@ -196,7 +207,8 @@
             "label": "name",
             "description": [],
             "path": "packages/core/http/core-http-server-internal/src/http_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-http-server-internal",
@@ -206,7 +218,8 @@
             "label": "autoListen",
             "description": [],
             "path": "packages/core/http/core-http-server-internal/src/http_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-http-server-internal",
@@ -216,7 +229,8 @@
             "label": "host",
             "description": [],
             "path": "packages/core/http/core-http-server-internal/src/http_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-http-server-internal",
@@ -226,7 +240,8 @@
             "label": "keepaliveTimeout",
             "description": [],
             "path": "packages/core/http/core-http-server-internal/src/http_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-http-server-internal",
@@ -236,7 +251,8 @@
             "label": "socketTimeout",
             "description": [],
             "path": "packages/core/http/core-http-server-internal/src/http_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-http-server-internal",
@@ -246,7 +262,8 @@
             "label": "port",
             "description": [],
             "path": "packages/core/http/core-http-server-internal/src/http_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-http-server-internal",
@@ -259,7 +276,8 @@
               "{ enabled: boolean; allowCredentials: boolean; allowOrigin: string[]; }"
             ],
             "path": "packages/core/http/core-http-server-internal/src/http_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-http-server-internal",
@@ -272,7 +290,8 @@
               "{ [x: string]: string | string[]; }"
             ],
             "path": "packages/core/http/core-http-server-internal/src/http_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-http-server-internal",
@@ -285,7 +304,8 @@
               "{ [x: string]: string | string[]; }"
             ],
             "path": "packages/core/http/core-http-server-internal/src/http_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-http-server-internal",
@@ -298,7 +318,8 @@
               "ByteSizeValue"
             ],
             "path": "packages/core/http/core-http-server-internal/src/http_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-http-server-internal",
@@ -311,7 +332,8 @@
               "string | undefined"
             ],
             "path": "packages/core/http/core-http-server-internal/src/http_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-http-server-internal",
@@ -324,7 +346,8 @@
               "string | undefined"
             ],
             "path": "packages/core/http/core-http-server-internal/src/http_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-http-server-internal",
@@ -334,7 +357,8 @@
             "label": "rewriteBasePath",
             "description": [],
             "path": "packages/core/http/core-http-server-internal/src/http_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-http-server-internal",
@@ -347,7 +371,8 @@
               "SslConfig"
             ],
             "path": "packages/core/http/core-http-server-internal/src/http_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-http-server-internal",
@@ -360,7 +385,8 @@
               "{ enabled: boolean; referrerWhitelist?: string[] | undefined; }"
             ],
             "path": "packages/core/http/core-http-server-internal/src/http_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-http-server-internal",
@@ -373,7 +399,8 @@
               "ICspConfig"
             ],
             "path": "packages/core/http/core-http-server-internal/src/http_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-http-server-internal",
@@ -386,7 +413,8 @@
               "IExternalUrlConfig"
             ],
             "path": "packages/core/http/core-http-server-internal/src/http_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-http-server-internal",
@@ -399,7 +427,8 @@
               "{ disableProtection: boolean; allowlist: string[]; }"
             ],
             "path": "packages/core/http/core-http-server-internal/src/http_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-http-server-internal",
@@ -412,7 +441,8 @@
               "{ allowFromAnyIp: boolean; ipAllowlist: string[]; }"
             ],
             "path": "packages/core/http/core-http-server-internal/src/http_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-http-server-internal",
@@ -425,7 +455,8 @@
               "moment.Duration"
             ],
             "path": "packages/core/http/core-http-server-internal/src/http_config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -439,6 +470,7 @@
         "description": [],
         "path": "packages/core/http/core-http-server-internal/src/http_server.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-http-server-internal",
@@ -452,6 +484,7 @@
             ],
             "path": "packages/core/http/core-http-server-internal/src/http_server.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-http-server-internal",
@@ -465,6 +498,7 @@
                 ],
                 "path": "packages/core/http/core-http-server-internal/src/http_server.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -479,6 +513,7 @@
                 ],
                 "path": "packages/core/http/core-http-server-internal/src/http_server.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -494,6 +529,7 @@
                 ],
                 "path": "packages/core/http/core-http-server-internal/src/http_server.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -511,6 +547,7 @@
             ],
             "path": "packages/core/http/core-http-server-internal/src/http_server.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -538,6 +575,7 @@
             ],
             "path": "packages/core/http/core-http-server-internal/src/http_server.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-http-server-internal",
@@ -557,6 +595,7 @@
                 ],
                 "path": "packages/core/http/core-http-server-internal/src/http_server.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -572,6 +611,7 @@
                 ],
                 "path": "packages/core/http/core-http-server-internal/src/http_server.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -589,6 +629,7 @@
             ],
             "path": "packages/core/http/core-http-server-internal/src/http_server.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -604,6 +645,7 @@
             ],
             "path": "packages/core/http/core-http-server-internal/src/http_server.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -634,6 +676,7 @@
         ],
         "path": "packages/core/http/core-http-server-internal/src/cookie_session_storage.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-http-server-internal",
@@ -647,6 +690,7 @@
             ],
             "path": "packages/core/http/core-http-server-internal/src/cookie_session_storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -663,6 +707,7 @@
             ],
             "path": "packages/core/http/core-http-server-internal/src/cookie_session_storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -680,6 +725,7 @@
             ],
             "path": "packages/core/http/core-http-server-internal/src/cookie_session_storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -694,6 +740,7 @@
             ],
             "path": "packages/core/http/core-http-server-internal/src/cookie_session_storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -712,12 +759,13 @@
         "label": "HttpConfigType",
         "description": [],
         "signature": [
-          "{ readonly basePath?: string | undefined; readonly uuid?: string | undefined; readonly publicBaseUrl?: string | undefined; readonly host: string; readonly name: string; readonly ssl: Readonly<{ key?: string | undefined; certificateAuthorities?: string | string[] | undefined; certificate?: string | undefined; keyPassphrase?: string | undefined; redirectHttpFromPort?: number | undefined; } & { enabled: boolean; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; cipherSuites: string[]; supportedProtocols: string[]; clientAuthentication: \"optional\" | \"none\" | \"required\"; }>; readonly port: number; readonly compression: Readonly<{ referrerWhitelist?: string[] | undefined; } & { enabled: boolean; }>; readonly cors: Readonly<{} & { enabled: boolean; allowCredentials: boolean; allowOrigin: string[] | \"*\"[]; }>; readonly autoListen: boolean; readonly shutdownTimeout: moment.Duration; readonly securityResponseHeaders: Readonly<{} & { referrerPolicy: \"origin\" | \"no-referrer\" | \"no-referrer-when-downgrade\" | \"origin-when-cross-origin\" | \"same-origin\" | \"strict-origin\" | \"strict-origin-when-cross-origin\" | \"unsafe-url\" | null; disableEmbedding: boolean; strictTransportSecurity: string | null; xContentTypeOptions: \"nosniff\" | null; permissionsPolicy: string | null; }>; readonly customResponseHeaders: Record<string, any>; readonly maxPayload: ",
+          "{ readonly basePath?: string | undefined; readonly uuid?: string | undefined; readonly publicBaseUrl?: string | undefined; readonly name: string; readonly host: string; readonly compression: Readonly<{ referrerWhitelist?: string[] | undefined; } & { enabled: boolean; }>; readonly ssl: Readonly<{ key?: string | undefined; certificateAuthorities?: string | string[] | undefined; certificate?: string | undefined; keyPassphrase?: string | undefined; redirectHttpFromPort?: number | undefined; } & { enabled: boolean; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; cipherSuites: string[]; supportedProtocols: string[]; clientAuthentication: \"optional\" | \"none\" | \"required\"; }>; readonly port: number; readonly cors: Readonly<{} & { enabled: boolean; allowCredentials: boolean; allowOrigin: string[] | \"*\"[]; }>; readonly autoListen: boolean; readonly shutdownTimeout: moment.Duration; readonly securityResponseHeaders: Readonly<{} & { referrerPolicy: \"origin\" | \"no-referrer\" | \"no-referrer-when-downgrade\" | \"origin-when-cross-origin\" | \"same-origin\" | \"strict-origin\" | \"strict-origin-when-cross-origin\" | \"unsafe-url\" | null; disableEmbedding: boolean; strictTransportSecurity: string | null; xContentTypeOptions: \"nosniff\" | null; permissionsPolicy: string | null; }>; readonly customResponseHeaders: Record<string, any>; readonly maxPayload: ",
           "ByteSizeValue",
           "; readonly rewriteBasePath: boolean; readonly keepaliveTimeout: number; readonly socketTimeout: number; readonly xsrf: Readonly<{} & { disableProtection: boolean; allowlist: string[]; }>; readonly requestId: Readonly<{} & { allowFromAnyIp: boolean; ipAllowlist: string[]; }>; }"
         ],
         "path": "packages/core/http/core-http-server-internal/src/http_config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -731,6 +779,7 @@
         "description": [],
         "path": "packages/core/http/core-http-server-internal/src/csp/config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-http-server-internal",
@@ -742,7 +791,8 @@
               "// TODO: Move this to server.csp using config deprecations\n// ? https://github.com/elastic/kibana/pull/52251"
             ],
             "path": "packages/core/http/core-http-server-internal/src/csp/config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-http-server-internal",
@@ -786,7 +836,8 @@
               "<boolean>; }>"
             ],
             "path": "packages/core/http/core-http-server-internal/src/csp/config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -800,6 +851,7 @@
         "description": [],
         "path": "packages/core/http/core-http-server-internal/src/external_url/config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-http-server-internal",
@@ -809,7 +861,8 @@
             "label": "path",
             "description": [],
             "path": "packages/core/http/core-http-server-internal/src/external_url/config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-http-server-internal",
@@ -827,7 +880,8 @@
               "[]>; }>"
             ],
             "path": "packages/core/http/core-http-server-internal/src/external_url/config.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

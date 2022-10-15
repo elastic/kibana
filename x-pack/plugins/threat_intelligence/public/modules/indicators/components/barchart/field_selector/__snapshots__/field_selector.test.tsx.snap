@@ -1,0 +1,387 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<IndicatorsFieldSelector /> should display all unique fields from a DataView[] 1`] = `
+Object {
+  "asFragment": [Function],
+  "baseElement": <body>
+    <div>
+      <div
+        class="euiComboBox euiComboBox--prepended css-18y0wn9"
+        data-test-subj="tiIndicatorFieldSelectorDropdown"
+      >
+        <div
+          class="euiFormControlLayout euiFormControlLayout--group"
+        >
+          <label
+            class="euiFormLabel euiFormControlLayout__prepend"
+            for="generated-id__eui-combobox-id"
+          >
+            Stack by
+          </label>
+          <div
+            class="euiFormControlLayout__childrenWrapper"
+          >
+            <div
+              class="euiComboBox__inputWrap euiComboBox__inputWrap--noWrap euiComboBox__inputWrap--inGroup"
+              data-test-subj="comboBoxInput"
+              tabindex="-1"
+            >
+              <span
+                class="euiComboBoxPill euiComboBoxPill--plainText"
+              >
+                threat.feed.name
+              </span>
+              <div
+                class="euiComboBox__input"
+                style="font-size: 14px; display: inline-block;"
+              >
+                <input
+                  aria-autocomplete="list"
+                  aria-controls=""
+                  aria-expanded="false"
+                  data-test-subj="comboBoxSearchInput"
+                  id="generated-id__eui-combobox-id"
+                  role="combobox"
+                  style="box-sizing: content-box; width: 2px;"
+                  value=""
+                />
+                <div
+                  style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
+                />
+              </div>
+            </div>
+            <div
+              class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+            >
+              <button
+                aria-label="Open list of options"
+                class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
+                data-test-subj="comboBoxToggleListButton"
+                tabindex="-1"
+                type="button"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiFormControlLayoutCustomIcon__icon"
+                  data-euiicon-type="arrowDown"
+                />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      class="euiComboBox euiComboBox--prepended css-18y0wn9"
+      data-test-subj="tiIndicatorFieldSelectorDropdown"
+    >
+      <div
+        class="euiFormControlLayout euiFormControlLayout--group"
+      >
+        <label
+          class="euiFormLabel euiFormControlLayout__prepend"
+          for="generated-id__eui-combobox-id"
+        >
+          Stack by
+        </label>
+        <div
+          class="euiFormControlLayout__childrenWrapper"
+        >
+          <div
+            class="euiComboBox__inputWrap euiComboBox__inputWrap--noWrap euiComboBox__inputWrap--inGroup"
+            data-test-subj="comboBoxInput"
+            tabindex="-1"
+          >
+            <span
+              class="euiComboBoxPill euiComboBoxPill--plainText"
+            >
+              threat.feed.name
+            </span>
+            <div
+              class="euiComboBox__input"
+              style="font-size: 14px; display: inline-block;"
+            >
+              <input
+                aria-autocomplete="list"
+                aria-controls=""
+                aria-expanded="false"
+                data-test-subj="comboBoxSearchInput"
+                id="generated-id__eui-combobox-id"
+                role="combobox"
+                style="box-sizing: content-box; width: 2px;"
+                value=""
+              />
+              <div
+                style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
+              />
+            </div>
+          </div>
+          <div
+            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+          >
+            <button
+              aria-label="Open list of options"
+              class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
+              data-test-subj="comboBoxToggleListButton"
+              tabindex="-1"
+              type="button"
+            >
+              <span
+                aria-hidden="true"
+                class="euiFormControlLayoutCustomIcon__icon"
+                data-euiicon-type="arrowDown"
+              />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>,
+  "debug": [Function],
+  "findAllByAltText": [Function],
+  "findAllByDisplayValue": [Function],
+  "findAllByLabelText": [Function],
+  "findAllByPlaceholderText": [Function],
+  "findAllByRole": [Function],
+  "findAllByTestId": [Function],
+  "findAllByText": [Function],
+  "findAllByTitle": [Function],
+  "findByAltText": [Function],
+  "findByDisplayValue": [Function],
+  "findByLabelText": [Function],
+  "findByPlaceholderText": [Function],
+  "findByRole": [Function],
+  "findByTestId": [Function],
+  "findByText": [Function],
+  "findByTitle": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;
+
+exports[`<IndicatorsFieldSelector /> should handle empty array of indexPatterns 1`] = `
+Object {
+  "asFragment": [Function],
+  "baseElement": <body>
+    <div>
+      <div
+        class="euiComboBox euiComboBox--prepended css-18y0wn9"
+        data-test-subj="tiIndicatorFieldSelectorDropdown"
+      >
+        <div
+          class="euiFormControlLayout euiFormControlLayout--group"
+        >
+          <label
+            class="euiFormLabel euiFormControlLayout__prepend"
+            for="generated-id__eui-combobox-id"
+          >
+            Stack by
+          </label>
+          <div
+            class="euiFormControlLayout__childrenWrapper"
+          >
+            <div
+              class="euiComboBox__inputWrap euiComboBox__inputWrap--noWrap euiComboBox__inputWrap--inGroup"
+              data-test-subj="comboBoxInput"
+              tabindex="-1"
+            >
+              <span
+                class="euiComboBoxPill euiComboBoxPill--plainText"
+              >
+                threat.feed.name
+              </span>
+              <div
+                class="euiComboBox__input"
+                style="font-size: 14px; display: inline-block;"
+              >
+                <input
+                  aria-autocomplete="list"
+                  aria-controls=""
+                  aria-expanded="false"
+                  data-test-subj="comboBoxSearchInput"
+                  id="generated-id__eui-combobox-id"
+                  role="combobox"
+                  style="box-sizing: content-box; width: 2px;"
+                  value=""
+                />
+                <div
+                  style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
+                />
+              </div>
+            </div>
+            <div
+              class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+            >
+              <button
+                aria-label="Open list of options"
+                class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
+                data-test-subj="comboBoxToggleListButton"
+                tabindex="-1"
+                type="button"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiFormControlLayoutCustomIcon__icon"
+                  data-euiicon-type="arrowDown"
+                />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      class="euiComboBox euiComboBox--prepended css-18y0wn9"
+      data-test-subj="tiIndicatorFieldSelectorDropdown"
+    >
+      <div
+        class="euiFormControlLayout euiFormControlLayout--group"
+      >
+        <label
+          class="euiFormLabel euiFormControlLayout__prepend"
+          for="generated-id__eui-combobox-id"
+        >
+          Stack by
+        </label>
+        <div
+          class="euiFormControlLayout__childrenWrapper"
+        >
+          <div
+            class="euiComboBox__inputWrap euiComboBox__inputWrap--noWrap euiComboBox__inputWrap--inGroup"
+            data-test-subj="comboBoxInput"
+            tabindex="-1"
+          >
+            <span
+              class="euiComboBoxPill euiComboBoxPill--plainText"
+            >
+              threat.feed.name
+            </span>
+            <div
+              class="euiComboBox__input"
+              style="font-size: 14px; display: inline-block;"
+            >
+              <input
+                aria-autocomplete="list"
+                aria-controls=""
+                aria-expanded="false"
+                data-test-subj="comboBoxSearchInput"
+                id="generated-id__eui-combobox-id"
+                role="combobox"
+                style="box-sizing: content-box; width: 2px;"
+                value=""
+              />
+              <div
+                style="position: absolute; top: 0px; left: 0px; visibility: hidden; height: 0px; overflow: scroll; white-space: pre; font-family: -webkit-small-control; letter-spacing: normal; text-transform: none;"
+              />
+            </div>
+          </div>
+          <div
+            class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+          >
+            <button
+              aria-label="Open list of options"
+              class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
+              data-test-subj="comboBoxToggleListButton"
+              tabindex="-1"
+              type="button"
+            >
+              <span
+                aria-hidden="true"
+                class="euiFormControlLayoutCustomIcon__icon"
+                data-euiicon-type="arrowDown"
+              />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>,
+  "debug": [Function],
+  "findAllByAltText": [Function],
+  "findAllByDisplayValue": [Function],
+  "findAllByLabelText": [Function],
+  "findAllByPlaceholderText": [Function],
+  "findAllByRole": [Function],
+  "findAllByTestId": [Function],
+  "findAllByText": [Function],
+  "findAllByTitle": [Function],
+  "findByAltText": [Function],
+  "findByDisplayValue": [Function],
+  "findByLabelText": [Function],
+  "findByPlaceholderText": [Function],
+  "findByRole": [Function],
+  "findByTestId": [Function],
+  "findByText": [Function],
+  "findByTitle": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;

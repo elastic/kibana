@@ -57,7 +57,12 @@ const StyledEuiFlexGroup = styled(EuiFlexGroup)`
 `;
 
 const StyledEuiFlexGrid = styled(EuiFlexGrid)`
-  max-width: 50%;
+  @media only screen and (min-width: ${(props) => props.theme.eui.euiBreakpoints.l}) {
+    max-width: 75%;
+  }
+  @media only screen and (min-width: ${(props) => props.theme.eui.euiBreakpoints.xl}) {
+    max-width: 50%;
+  }
 `;
 
 const StyledEuiBadge = styled(EuiBadge)`
@@ -76,6 +81,8 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
   const getTestId = useTestIdGenerator(useDataTestSubj());
   const dispatch = useConsoleStateDispatch();
   const { docLinks } = useKibana().services;
+
+  const allowedCommands = commands.filter((command) => command.helpHidden !== true);
 
   const footerMessage = useMemo(() => {
     return (
@@ -128,7 +135,7 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
   );
 
   const commandsByGroups = useMemo(() => {
-    return Object.values(groupBy(commands, 'helpGroupLabel')).reduce<CommandDefinition[][]>(
+    return Object.values(groupBy(allowedCommands, 'helpGroupLabel')).reduce<CommandDefinition[][]>(
       (acc, current) => {
         if (current[0].helpGroupPosition !== undefined) {
           // If it already exists just move it to the end
@@ -144,13 +151,13 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
       },
       []
     );
-  }, [commands]);
+  }, [allowedCommands]);
 
   const getTableItems = useCallback(
     (
       commandsByGroup: CommandDefinition[]
     ): Array<{
-      [key: string]: { name: string; about: React.ElementType | string };
+      [key: string]: { name: string; about: React.ReactNode | string };
     }> => {
       if (commandsByGroup[0].helpGroupLabel === HELP_GROUPS.supporting.label) {
         return [...COMMON_ARGS, ...commandsByGroup].map((command) => ({
@@ -193,18 +200,27 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
                   />
                 </EuiFlexItem>
                 {command.helpGroupLabel !== HELP_GROUPS.supporting.label &&
+                  command.helpHidden !== true &&
                   command.RenderComponent && (
                     <EuiFlexItem grow={false}>
                       <EuiToolTip
-                        content={i18n.translate(
-                          'xpack.securitySolution.console.commandList.addButtonTooltip',
-                          { defaultMessage: 'Add to text bar' }
-                        )}
+                        content={
+                          command.helpDisabled === true
+                            ? i18n.translate(
+                                'xpack.securitySolution.console.commandList.disabledButtonTooltip',
+                                { defaultMessage: 'Unsupported command' }
+                              )
+                            : i18n.translate(
+                                'xpack.securitySolution.console.commandList.addButtonTooltip',
+                                { defaultMessage: 'Add to text bar' }
+                              )
+                        }
                       >
                         <EuiButtonIcon
                           iconType="plusInCircle"
                           aria-label={`updateTextInputCommand-${command.name}`}
                           onClick={updateInputText(`${commandNameWithArgs} `)}
+                          isDisabled={command.helpDisabled === true}
                         />
                       </EuiToolTip>
                     </EuiFlexItem>
@@ -304,6 +320,7 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
             direction="column"
           >
             {filteredCommands.map((command) => {
+              const commandNameWithArgs = getCommandNameWithArgs(command);
               return (
                 <EuiFlexItem key={command.name}>
                   <EuiDescriptionList
@@ -311,11 +328,13 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
                     listItems={[
                       {
                         title: (
-                          <StyledEuiBadge>
-                            <ConsoleCodeBlock inline bold>
-                              {getCommandNameWithArgs(command)}{' '}
-                            </ConsoleCodeBlock>
-                          </StyledEuiBadge>
+                          <EuiToolTip content={commandNameWithArgs}>
+                            <StyledEuiBadge>
+                              <ConsoleCodeBlock inline bold>
+                                {commandNameWithArgs}
+                              </ConsoleCodeBlock>
+                            </StyledEuiBadge>
+                          </EuiToolTip>
                         ),
                         description: (
                           <EuiText color="subdued" size="xs">

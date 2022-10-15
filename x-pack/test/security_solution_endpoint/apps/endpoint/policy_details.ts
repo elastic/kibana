@@ -13,7 +13,6 @@ import { PolicyTestResourceInfo } from '../../services/endpoint_policy';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const browser = getService('browser');
-  const retryService = getService('retry');
   const pageObjects = getPageObjects([
     'common',
     'endpoint',
@@ -26,12 +25,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const policyTestResources = getService('policyTestResources');
   const endpointTestResources = getService('endpointTestResources');
 
-  describe('When on the Endpoint Policy Details Page', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/138776
+  describe.skip('When on the Endpoint Policy Details Page', function () {
     let indexedData: IndexedHostsAndAlertsResponse;
 
     before(async () => {
-      const endpointPackage = await policyTestResources.getEndpointPackage();
-      await endpointTestResources.setMetadataTransformFrequency('1s', endpointPackage.version);
       indexedData = await endpointTestResources.loadEndpointData();
       await browser.refresh();
     });
@@ -184,7 +182,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.policy.confirmAndSave();
 
         await testSubjects.existOrFail('policyDetailsSuccessMessage');
-        await testSubjects.waitForHidden('toastCloseButton');
+        await testSubjects.waitForDeleted('toastCloseButton');
 
         const agentFullPolicy = await policyTestResources.getFullAgentPolicy(
           policyInfo.agentPolicy.id
@@ -209,7 +207,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.policy.confirmAndSave();
 
         await testSubjects.existOrFail('policyDetailsSuccessMessage');
-        await testSubjects.waitForHidden('toastCloseButton');
 
         const agentFullPolicy = await policyTestResources.getFullAgentPolicy(
           policyInfo.agentPolicy.id
@@ -224,7 +221,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await advancedPolicyField.clearValueWithKeyboard();
 
         // Make sure the toast button closes so the save button on the sticky footer is visible
-        await testSubjects.waitForHidden('toastCloseButton');
+        await testSubjects.waitForDeleted('toastCloseButton');
         await pageObjects.policy.confirmAndSave();
 
         await testSubjects.existOrFail('policyDetailsSuccessMessage');
@@ -268,35 +265,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(await winDnsEventingCheckbox.isSelected()).to.be(true);
         await pageObjects.endpointPageUtils.clickOnEuiCheckbox('policyWindowsEvent_dns');
         await pageObjects.policy.waitForCheckboxSelectionChange('policyWindowsEvent_dns', false);
-      });
-
-      // Failing: See https://github.com/elastic/kibana/issues/100236
-      it.skip('should preserve updates done from the Fleet form', async () => {
-        // Fleet has its  own form inputs, like description. When those are updated, the changes
-        // are also dispatched to the embedded endpoint Policy form. Update to the Endpoint Policy
-        // form after that should preserve the changes done on the Fleet form
-        // NOTE: A few delays were added below due to sporadic failures of this test case (see #100236)
-        const sleep = (ms = 100) => new Promise((resolve) => setTimeout(resolve, ms));
-
-        // Wait for the endpoint form to load and then update the policy description
-        await testSubjects.existOrFail('endpointIntegrationPolicyForm');
-        await sleep(); // Allow forms to sync
-        await pageObjects.ingestManagerCreatePackagePolicy.setPackagePolicyDescription(
-          'protect everything'
-        );
-        await sleep(); // Allow forms to sync
-
-        const winDnsEventingCheckbox = await testSubjects.find('policyWindowsEvent_dns');
-        await pageObjects.ingestManagerCreatePackagePolicy.scrollToCenterOfWindow(
-          winDnsEventingCheckbox
-        );
-        await pageObjects.endpointPageUtils.clickOnEuiCheckbox('policyWindowsEvent_dns');
-
-        await retryService.try(async () => {
-          expect(
-            await pageObjects.ingestManagerCreatePackagePolicy.getPackagePolicyDescriptionValue()
-          ).to.be('protect everything');
-        });
       });
 
       it('should include updated endpoint data when saved', async () => {

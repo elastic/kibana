@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import {
+import type {
   ActionLicense,
   Cases,
-  BulkUpdateStatus,
   Case,
   CasesStatus,
   CaseUserActions,
   FetchCasesProps,
-  SortFieldCase,
 } from '../types';
+import { SortFieldCase } from '../types';
 import {
   actionLicenses,
   allCases,
@@ -26,19 +25,20 @@ import {
   casesStatus,
   caseUserActions,
   pushedCase,
-  respReporters,
   tags,
 } from '../mock';
-import { ResolvedCase, SeverityAll } from '../../../common/ui/types';
-import {
+import type { CaseUpdateRequest, ResolvedCase } from '../../../common/ui/types';
+import { SeverityAll } from '../../../common/ui/types';
+import type {
   CasePatchRequest,
   CasePostRequest,
   CommentRequest,
-  User,
-  CaseStatuses,
   SingleCaseMetricsResponse,
 } from '../../../common/api';
+import { CaseStatuses } from '../../../common/api';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
+import type { UserProfile } from '@kbn/security-plugin/common';
+import { userProfiles } from '../user_profiles/api.mock';
 
 export const getCase = async (
   caseId: string,
@@ -62,8 +62,7 @@ export const getCasesStatus = async (signal: AbortSignal): Promise<CasesStatus> 
 
 export const getTags = async (signal: AbortSignal): Promise<string[]> => Promise.resolve(tags);
 
-export const getReporters = async (signal: AbortSignal): Promise<User[]> =>
-  Promise.resolve(respReporters);
+export const findAssignees = async (): Promise<UserProfile[]> => userProfiles;
 
 export const getCaseUserActions = async (
   caseId: string,
@@ -75,6 +74,7 @@ export const getCases = async ({
     severity: SeverityAll,
     search: '',
     searchFields: [],
+    assignees: [],
     reporters: [],
     status: CaseStatuses.open,
     tags: [],
@@ -99,8 +99,8 @@ export const patchCase = async (
   signal: AbortSignal
 ): Promise<Case[]> => Promise.resolve([basicCase]);
 
-export const patchCasesStatus = async (
-  cases: BulkUpdateStatus[],
+export const updateCases = async (
+  cases: CaseUpdateRequest[],
   signal: AbortSignal
 ): Promise<Case[]> => Promise.resolve(allCases.cases);
 

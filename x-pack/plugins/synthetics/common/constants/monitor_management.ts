@@ -11,6 +11,7 @@ export enum ConfigKey {
   CUSTOM_HEARTBEAT_ID = 'custom_heartbeat_id',
   CONFIG_ID = 'config_id',
   ENABLED = 'enabled',
+  FORM_MONITOR_TYPE = 'form_monitor_type',
   HOSTS = 'hosts',
   IGNORE_HTTPS_ERRORS = 'ignore_https_errors',
   MONITOR_SOURCE_TYPE = 'origin',
@@ -53,6 +54,7 @@ export enum ConfigKey {
   SOURCE_ZIP_PROXY_URL = 'source.zip_url.proxy_url',
   PROJECT_ID = 'project_id',
   SYNTHETICS_ARGS = 'synthetics_args',
+  TEXT_ASSERTION = 'playwright_text_assertion',
   TLS_CERTIFICATE_AUTHORITIES = 'ssl.certificate_authorities',
   TLS_CERTIFICATE = 'ssl.certificate',
   TLS_KEY = 'ssl.key',
@@ -75,6 +77,9 @@ export enum ConfigKey {
   ZIP_URL_TLS_KEY_PASSPHRASE = 'source.zip_url.ssl.key_passphrase',
   ZIP_URL_TLS_VERIFICATION_MODE = 'source.zip_url.ssl.verification_mode',
   ZIP_URL_TLS_VERSION = 'source.zip_url.ssl.supported_protocols',
+
+  // deprecated, slated to be removed in a future version
+  ID = 'id',
 }
 
 export const secretKeys = [

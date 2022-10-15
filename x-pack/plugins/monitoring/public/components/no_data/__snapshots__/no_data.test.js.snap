@@ -2,7 +2,7 @@
 
 exports[`NoData should show a default message if reason is unknown 1`] = `
 <div
-  class="euiPage euiPage--paddingMedium euiPage--grow"
+  class="euiPage emotion-euiPage-row-grow"
   data-test-subj="noDataContainer"
 >
   <h1
@@ -11,7 +11,7 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
     No monitoring data found.
   </h1>
   <div
-    class="euiPageBody euiPageBody--borderRadiusNone euiPageBody--restrictWidth-custom"
+    class="euiPageBody emotion-euiPageBody-restrictWidth"
     style="max-width:600px"
   >
     <div
@@ -39,7 +39,7 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
           Have you set up monitoring yet? If so, make sure that the selected time period in the upper right includes monitoring data.
         </p>
         <p>
-          If you have configured monitoring data to be sent to a dedicated monitoring  cluster you should access that data with the Kibana instance attached to the monitoring cluster.
+          If you have configured monitoring data to be sent to a dedicated monitoring cluster you should access that data with the Kibana instance attached to the monitoring cluster.
         </p>
       </div>
       <div
@@ -97,7 +97,7 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
 
 exports[`NoData should show text next to the spinner while checking a setting 1`] = `
 <div
-  class="euiPage euiPage--paddingMedium euiPage--grow"
+  class="euiPage emotion-euiPage-row-grow"
   data-test-subj="noDataContainer"
 >
   <h1
@@ -106,7 +106,7 @@ exports[`NoData should show text next to the spinner while checking a setting 1`
     No monitoring data found.
   </h1>
   <div
-    class="euiPageBody euiPageBody--borderRadiusNone euiPageBody--restrictWidth-custom"
+    class="euiPageBody emotion-euiPageBody-restrictWidth"
     style="max-width:600px"
   >
     <div
@@ -134,7 +134,7 @@ exports[`NoData should show text next to the spinner while checking a setting 1`
           Have you set up monitoring yet? If so, make sure that the selected time period in the upper right includes monitoring data.
         </p>
         <p>
-          If you have configured monitoring data to be sent to a dedicated monitoring  cluster you should access that data with the Kibana instance attached to the monitoring cluster.
+          If you have configured monitoring data to be sent to a dedicated monitoring cluster you should access that data with the Kibana instance attached to the monitoring cluster.
         </p>
       </div>
       <div

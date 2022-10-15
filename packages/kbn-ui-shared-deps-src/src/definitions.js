@@ -12,7 +12,7 @@ const Path = require('path');
 /**
  * Absolute path to the distributable directory
  */
-const distDir = Path.resolve(__dirname, '../shared_built_assets');
+const distDir = Path.resolve(__dirname, '../../shared_built_assets');
 
 /**
  * Filename of the main bundle file in the distributable directory

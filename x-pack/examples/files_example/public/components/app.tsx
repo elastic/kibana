@@ -10,8 +10,6 @@ import { useQuery } from '@tanstack/react-query';
 import type { FileJSON } from '@kbn/files-plugin/common';
 import type { FilesClientResponses } from '@kbn/files-plugin/public';
 
-const names = ['foo', 'bar', 'baz'];
-
 import {
   EuiPageTemplate,
   EuiInMemoryTable,
@@ -23,54 +21,32 @@ import {
 } from '@elastic/eui';
 
 import { CoreStart } from '@kbn/core/public';
-import { DetailsFlyout } from './details_flyout';
+import type { MyImageMetadata } from '../../common';
 import type { FileClients } from '../types';
+import { DetailsFlyout } from './details_flyout';
 import { ConfirmButtonIcon } from './confirm_button';
-// @ts-ignore
-import imageBase64 from '!!raw-loader!../assets/image.png.base64';
+import { Modal } from './modal';
 
 interface FilesExampleAppDeps {
   files: FileClients;
   notifications: CoreStart['notifications'];
 }
 
-type ListResponse = FilesClientResponses['list'];
+type ListResponse = FilesClientResponses<MyImageMetadata>['list'];
 
 export const FilesExampleApp = ({ files, notifications }: FilesExampleAppDeps) => {
   const { data, isLoading, error, refetch } = useQuery<ListResponse>(['files'], () =>
     files.example.list()
   );
-  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [showUploadModal, setShowUploadModal] = useState(false);
   const [isDeletingFile, setIsDeletingFile] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<undefined | FileJSON>();
-
-  const uploadImage = async () => {
-    try {
-      setIsUploadingImage(true);
-      const { file } = await files.example.create({
-        name: names[Math.floor(Math.random() * names.length)],
-        alt: 'My image',
-        meta: { myValue: 'test' },
-        mimeType: 'image/png',
-      });
-      await refetch();
-      const blob = new Blob([Uint8Array.from(atob(imageBase64), (c) => c.charCodeAt(0))], {
-        type: 'image/png',
-      });
-      await files.example.upload({ id: file.id, body: blob });
-      await refetch();
-      notifications.toasts.addSuccess('Sucessfully uploaded image');
-    } finally {
-      setIsUploadingImage(false);
-    }
-  };
+  const [selectedItem, setSelectedItem] = useState<undefined | FileJSON<MyImageMetadata>>();
 
   const renderToolsRight = () => {
     return [
       <EuiButton
-        onClick={uploadImage}
-        isDisabled={isUploadingImage || isLoading || isDeletingFile}
-        isLoading={isUploadingImage}
+        onClick={() => setShowUploadModal(true)}
+        isDisabled={isLoading || isDeletingFile}
         iconType="exportAction"
       >
         Upload image
@@ -80,11 +56,15 @@ export const FilesExampleApp = ({ files, notifications }: FilesExampleAppDeps) =
 
   const items = [...(data?.files ?? [])].reverse();
 
-  const columns: EuiInMemoryTableProps<FileJSON>['columns'] = [
+  const columns: EuiInMemoryTableProps<FileJSON<MyImageMetadata>>['columns'] = [
     {
       field: 'name',
       name: 'Name',
-      render: (name, item) => <EuiLink onClick={() => setSelectedItem(item)}>{name}</EuiLink>,
+      render: (name, item) => (
+        <EuiLink disabled={isDeletingFile} onClick={() => setSelectedItem(item)}>
+          {name}
+        </EuiLink>
+      ),
     },
     {
       field: 'status',
@@ -107,6 +87,7 @@ export const FilesExampleApp = ({ files, notifications }: FilesExampleAppDeps) =
           isPrimary: true,
           render: (item) => (
             <EuiButtonIcon
+              disabled={isDeletingFile}
               aria-label="View file details"
               iconType="eye"
               onClick={() => setSelectedItem(item)}
@@ -139,29 +120,39 @@ export const FilesExampleApp = ({ files, notifications }: FilesExampleAppDeps) =
 
   return (
     <>
-      <EuiPageTemplate
-        pageHeader={{
-          pageTitle: 'Files example',
-        }}
-      >
-        <EuiInMemoryTable
-          columns={columns}
-          items={items}
-          itemId="id"
-          loading={isLoading || isDeletingFile}
-          error={error ? JSON.stringify(error) : undefined}
-          sorting
-          search={{
-            toolsRight: renderToolsRight(),
-          }}
-          pagination
-        />
+      <EuiPageTemplate restrictWidth>
+        <EuiPageTemplate.Header pageTitle="Files example" />
+        <EuiPageTemplate.Section>
+          <EuiInMemoryTable
+            columns={columns}
+            items={items}
+            itemId="id"
+            loading={isLoading || isDeletingFile}
+            error={error ? JSON.stringify(error) : undefined}
+            sorting
+            search={{
+              toolsRight: renderToolsRight(),
+            }}
+            pagination
+          />
+        </EuiPageTemplate.Section>
       </EuiPageTemplate>
       {selectedItem && (
         <DetailsFlyout
           files={files}
           file={selectedItem}
           onDismiss={() => setSelectedItem(undefined)}
+        />
+      )}
+      {showUploadModal && (
+        <Modal
+          client={files.unscoped}
+          onDismiss={() => setShowUploadModal(false)}
+          onUploaded={() => {
+            notifications.toasts.addSuccess('Uploaded file!');
+            refetch();
+            setShowUploadModal(false);
+          }}
         />
       )}
     </>

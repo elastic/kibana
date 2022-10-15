@@ -29,8 +29,8 @@ import { AppStatus, AppUpdater, DEFAULT_APP_CATEGORIES } from '@kbn/core/public'
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
-import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
-import type { SecurityPluginSetup } from '@kbn/security-plugin/public';
+import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 
 import type { MapsStartApi, MapsSetupApi } from '@kbn/maps-plugin/public';
 import {
@@ -38,12 +38,12 @@ import {
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/public';
-import type { AiopsPluginStart } from '@kbn/aiops-plugin/public';
 import type { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DashboardSetup, DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { CasesUiSetup, CasesUiStart } from '@kbn/cases-plugin/public';
 import { registerManagementSection } from './application/management';
 import { MlLocatorDefinition, MlLocator } from './locator';
 import { setDependencyCache } from './application/util/dependency_cache';
@@ -54,6 +54,7 @@ import { PLUGIN_ICON_SOLUTION, PLUGIN_ID } from '../common/constants/app';
 export interface MlStartDependencies {
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  licensing: LicensingPluginStart;
   share: SharePluginStart;
   uiActions: UiActionsStart;
   spaces?: SpacesPluginStart;
@@ -61,15 +62,15 @@ export interface MlStartDependencies {
   maps?: MapsStartApi;
   triggersActionsUi?: TriggersAndActionsUIPublicPluginStart;
   dataVisualizer: DataVisualizerPluginStart;
-  aiops: AiopsPluginStart;
   fieldFormats: FieldFormatsStart;
   dashboard: DashboardStart;
   charts: ChartsPluginStart;
   lens?: LensPublicStart;
+  cases?: CasesUiStart;
+  security: SecurityPluginStart;
 }
 
 export interface MlSetupDependencies {
-  security?: SecurityPluginSetup;
   maps?: MapsSetupApi;
   licensing: LicensingPluginSetup;
   management?: ManagementSetup;
@@ -84,6 +85,7 @@ export interface MlSetupDependencies {
   usageCollection?: UsageCollectionSetup;
   fieldFormats: FieldFormatsSetup;
   dashboard: DashboardSetup;
+  cases?: CasesUiSetup;
 }
 
 export type MlCoreSetup = CoreSetup<MlStartDependencies, MlPluginStart>;
@@ -118,8 +120,8 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             unifiedSearch: pluginsStart.unifiedSearch,
             dashboard: pluginsStart.dashboard,
             share: pluginsStart.share,
-            security: pluginsSetup.security,
-            licensing: pluginsSetup.licensing,
+            security: pluginsStart.security,
+            licensing: pluginsStart.licensing,
             management: pluginsSetup.management,
             licenseManagement: pluginsSetup.licenseManagement,
             home: pluginsSetup.home,
@@ -129,10 +131,10 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             kibanaVersion,
             triggersActionsUi: pluginsStart.triggersActionsUi,
             dataVisualizer: pluginsStart.dataVisualizer,
-            aiops: pluginsStart.aiops,
             usageCollection: pluginsSetup.usageCollection,
             fieldFormats: pluginsStart.fieldFormats,
             lens: pluginsStart.lens,
+            cases: pluginsStart.cases,
           },
           params
         );
@@ -151,7 +153,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
     const licensing = pluginsSetup.licensing.license$.pipe(take(1));
     licensing.subscribe(async (license) => {
-      const [coreStart] = await core.getStartServices();
+      const [coreStart, pluginStart] = await core.getStartServices();
       const { capabilities } = coreStart.application;
 
       if (isMlEnabled(license)) {
@@ -174,6 +176,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         registerSearchLinks,
         registerMlAlerts,
         registerMapExtension,
+        registerCasesAttachments,
       } = await import('./register_helper');
 
       const mlEnabled = isMlEnabled(license);
@@ -192,6 +195,10 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         if (fullLicense) {
           registerEmbeddables(pluginsSetup.embeddable, core);
           registerMlUiActions(pluginsSetup.uiActions, core);
+
+          if (pluginsSetup.cases) {
+            registerCasesAttachments(pluginsSetup.cases, coreStart, pluginStart);
+          }
 
           const canUseMlAlerts = capabilities.ml?.canUseMlAlerts;
           if (pluginsSetup.triggersActionsUi && canUseMlAlerts) {

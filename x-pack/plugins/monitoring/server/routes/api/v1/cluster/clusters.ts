@@ -10,7 +10,6 @@ import {
   postClustersResponsePayloadRT,
 } from '../../../../../common/http_api/cluster';
 import { getClustersFromRequest } from '../../../../lib/cluster/get_clusters_from_request';
-import { getIndexPatterns } from '../../../../lib/cluster/get_index_patterns';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 import { verifyMonitoringAuth } from '../../../../lib/elasticsearch/verify_monitoring_auth';
 import { handleError } from '../../../../lib/errors';
@@ -32,17 +31,13 @@ export function clustersRoute(server: MonitoringCore) {
       body: validateBody,
     },
     handler: async (req) => {
-      const config = server.config;
-
       // NOTE using try/catch because checkMonitoringAuth is expected to throw
       // an error when current logged-in user doesn't have permission to read
       // the monitoring data. `try/catch` makes it a little more explicit.
       try {
         await verifyMonitoringAuth(req);
-        const indexPatterns = getIndexPatterns(config, {
-          filebeatIndexPattern: config.ui.logs.index,
-        });
-        const clusters = await getClustersFromRequest(req, indexPatterns, {
+
+        const clusters = await getClustersFromRequest(req, {
           codePaths: req.payload.codePaths,
         });
         return postClustersResponsePayloadRT.encode(clusters);

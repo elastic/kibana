@@ -311,9 +311,8 @@ PUT _ingest/pipeline/tri_met_tracks
 . Click *Create data view*.
 . Give the data view a name: *tri_met_tracks**.
 . Set the index pattern as: *tri_met_tracks**.
-. Click *Next step*.
-. Set the *Time field* to *trimet.time*.
-. Click *Create data view*.
+. Set the *Timestamp field* to *trimet.time*.
+. Click *Save data view to Kibana*.
 
 {kib} shows the fields in your data view.
 

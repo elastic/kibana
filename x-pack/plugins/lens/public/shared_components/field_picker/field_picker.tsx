@@ -101,7 +101,7 @@ export function FieldPicker<T extends FieldOptionValue = FieldOptionValue>({
         isClearable={false}
         data-test-subj={dataTestSub ?? 'indexPattern-dimension-field'}
         placeholder={i18n.translate('xpack.lens.fieldPicker.fieldPlaceholder', {
-          defaultMessage: 'Field',
+          defaultMessage: 'Select a field',
         })}
         options={styledOptions}
         isInvalid={fieldIsInvalid}

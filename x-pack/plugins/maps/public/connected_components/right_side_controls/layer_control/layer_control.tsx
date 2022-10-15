@@ -31,6 +31,8 @@ export interface Props {
   showAddLayerWizard: () => Promise<void>;
   closeLayerTOC: () => void;
   openLayerTOC: () => void;
+  hideAllLayers: () => void;
+  showAllLayers: () => void;
 }
 
 function renderExpandButton({
@@ -81,6 +83,8 @@ export function LayerControl({
   openLayerTOC,
   layerList,
   isFlyoutOpen,
+  hideAllLayers,
+  showAllLayers,
 }: Props) {
   if (!isLayerTOCOpen) {
     if (isScreenshotMode()) {
@@ -151,6 +155,40 @@ export function LayerControl({
                   />
                 </h2>
               </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                delay="long"
+                content={i18n.translate('xpack.maps.layerControl.hideAllLayersButton', {
+                  defaultMessage: 'Hide all layers',
+                })}
+              >
+                <EuiButtonIcon
+                  onClick={hideAllLayers}
+                  iconType="eyeClosed"
+                  color="text"
+                  aria-label={i18n.translate('xpack.maps.layerControl.hideAllLayersButton', {
+                    defaultMessage: 'Hide all layers',
+                  })}
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                delay="long"
+                content={i18n.translate('xpack.maps.layerControl.showAllLayersButton', {
+                  defaultMessage: 'Show all layers',
+                })}
+              >
+                <EuiButtonIcon
+                  onClick={showAllLayers}
+                  iconType="eye"
+                  color="text"
+                  aria-label={i18n.translate('xpack.maps.layerControl.showAllLayersButton', {
+                    defaultMessage: 'Show all layers',
+                  })}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiToolTip

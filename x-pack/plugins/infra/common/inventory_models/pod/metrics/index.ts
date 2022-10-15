@@ -17,6 +17,12 @@ import { podMemoryUsage } from './tsvb/pod_memory_usage';
 import { podNetworkTraffic } from './tsvb/pod_network_traffic';
 import { InventoryMetrics } from '../../types';
 
+const podSnapshotMetrics = { cpu, memory, rx, tx };
+
+export const podSnapshotMetricTypes = Object.keys(podSnapshotMetrics) as Array<
+  keyof typeof podSnapshotMetrics
+>;
+
 export const metrics: InventoryMetrics = {
   tsvb: {
     podOverview,
@@ -25,7 +31,7 @@ export const metrics: InventoryMetrics = {
     podNetworkTraffic,
     podMemoryUsage,
   },
-  snapshot: { cpu, memory, rx, tx },
+  snapshot: podSnapshotMetrics,
   defaultSnapshot: 'cpu',
   defaultTimeRangeInSeconds: 3600, // 1 hour
 };

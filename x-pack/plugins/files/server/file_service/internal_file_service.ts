@@ -12,7 +12,7 @@ import { BlobStorageService } from '../blob_storage_service';
 import { InternalFileShareService } from '../file_share_service';
 import { FileMetadata, File as IFile, FileKind, FileJSON, FilesMetrics } from '../../common';
 import { File, toJSON } from '../file';
-import { FileKindsRegistry } from '../file_kinds_registry';
+import { FileKindsRegistry } from '../../common/file_kinds_registry';
 import { FileNotFoundError } from './errors';
 import type { FileMetadataClient } from '../file_client';
 import type {
@@ -21,7 +21,6 @@ import type {
   DeleteFileArgs,
   FindFileArgs,
   GetByIdArgs,
-  ListFilesArgs,
 } from './file_action_types';
 import { createFileClient, FileClientImpl } from '../file_client/file_client';
 /**
@@ -88,28 +87,16 @@ export class InternalFileService {
     return file;
   }
 
-  public async list({
-    fileKind: fileKindId,
-    page = 1,
-    perPage = 100,
-  }: ListFilesArgs): Promise<IFile[]> {
-    const fileKind = this.getFileKind(fileKindId);
-    const result = await this.metadataClient.list({
-      fileKind: fileKind.id,
-      page,
-      perPage,
-    });
-    const fileClient = this.createFileClient(fileKind.id);
-    return result.map((file) => this.toFile(file.id, file.metadata, fileKind.id, fileClient));
-  }
-
   public getFileKind(id: string): FileKind {
     return this.fileKindRegistry.get(id);
   }
 
-  public async findFilesJSON(args: FindFileArgs): Promise<FileJSON[]> {
-    const result = await this.metadataClient.find(args);
-    return result.map((r) => toJSON(r.id, r.metadata));
+  public async findFilesJSON(args: FindFileArgs): Promise<{ files: FileJSON[]; total: number }> {
+    const { total, files } = await this.metadataClient.find(args);
+    return {
+      total,
+      files: files.map(({ id, metadata }) => toJSON(id, metadata)),
+    };
   }
 
   public async getUsageMetrics(): Promise<FilesMetrics> {

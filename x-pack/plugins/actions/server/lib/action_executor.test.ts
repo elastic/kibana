@@ -270,9 +270,11 @@ test('throws an error when config is invalid', async () => {
     minimumLicenseRequired: 'basic',
     supportedFeatureIds: ['alerting'],
     validate: {
-      config: schema.object({
-        param1: schema.string(),
-      }),
+      config: {
+        schema: schema.object({
+          param1: schema.string(),
+        }),
+      },
     },
     executor: jest.fn(),
   };
@@ -352,9 +354,11 @@ test('throws an error when params is invalid', async () => {
     minimumLicenseRequired: 'basic',
     supportedFeatureIds: ['alerting'],
     validate: {
-      params: schema.object({
-        param1: schema.string(),
-      }),
+      params: {
+        schema: schema.object({
+          param1: schema.string(),
+        }),
+      },
     },
     executor: jest.fn(),
   };

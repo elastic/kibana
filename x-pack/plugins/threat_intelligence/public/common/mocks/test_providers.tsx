@@ -7,18 +7,28 @@
 
 import moment from 'moment/moment';
 import React, { FC } from 'react';
+import { BehaviorSubject } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { IStorage } from '@kbn/kibana-utils-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { BehaviorSubject } from 'rxjs';
-import { getSecuritySolutionContextMock } from './mock_security_context';
-import { mockUiSetting } from './mock_kibana_ui_setting';
+import { createTGridMocks } from '@kbn/timelines-plugin/public/mock';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { MemoryRouter } from 'react-router-dom';
 import { KibanaContext } from '../../hooks/use_kibana';
 import { SecuritySolutionPluginContext } from '../../types';
+import { getSecuritySolutionContextMock } from './mock_security_context';
+import { mockUiSetting } from './mock_kibana_ui_settings_service';
 import { SecuritySolutionContext } from '../../containers/security_solution_context';
+import { IndicatorsFiltersContext } from '../../modules/indicators';
+import { mockIndicatorsFiltersContext } from './mock_indicators_filters_context';
+import { FieldTypesContext } from '../../containers/field_types_provider';
+import { generateFieldTypeMap } from './mock_field_type_map';
+import { InspectorContext } from '../../containers/inspector';
 
 export const localStorageMock = (): IStorage => {
   let store: Record<string, unknown> = {};
@@ -90,6 +100,8 @@ const dataServiceMock = {
   },
 };
 
+const timelinesServiceMock = createTGridMocks();
+
 const core = coreMock.createStart();
 const coreServiceMock = {
   ...core,
@@ -106,21 +118,45 @@ export const mockedServices = {
   triggersActionsUi: {
     getFieldBrowser: jest.fn().mockReturnValue(null),
   },
+  timelines: timelinesServiceMock,
+  securityLayout: {
+    getPluginWrapper:
+      () =>
+      ({ children }: any) => {
+        return <>{children}</>;
+      },
+  },
 };
 
 export const TestProvidersComponent: FC = ({ children }) => (
-  <SecuritySolutionContext.Provider value={mockSecurityContext}>
-    <KibanaContext.Provider value={{ services: mockedServices } as any}>
-      <I18nProvider>{children}</I18nProvider>
-    </KibanaContext.Provider>
-  </SecuritySolutionContext.Provider>
+  <MemoryRouter>
+    <InspectorContext.Provider value={{ requests: new RequestAdapter() }}>
+      <QueryClientProvider client={new QueryClient()}>
+        <FieldTypesContext.Provider value={generateFieldTypeMap()}>
+          <EuiThemeProvider>
+            <SecuritySolutionContext.Provider value={mockSecurityContext}>
+              <KibanaContext.Provider value={{ services: mockedServices } as any}>
+                <I18nProvider>
+                  <IndicatorsFiltersContext.Provider value={mockIndicatorsFiltersContext}>
+                    {children}
+                  </IndicatorsFiltersContext.Provider>
+                </I18nProvider>
+              </KibanaContext.Provider>
+            </SecuritySolutionContext.Provider>
+          </EuiThemeProvider>
+        </FieldTypesContext.Provider>
+      </QueryClientProvider>
+    </InspectorContext.Provider>
+  </MemoryRouter>
 );
 
 export type MockedSearch = jest.Mocked<typeof mockedServices.data.search>;
 export type MockedTimefilter = jest.Mocked<typeof mockedServices.data.query.timefilter>;
 export type MockedTriggersActionsUi = jest.Mocked<typeof mockedServices.triggersActionsUi>;
+export type MockedQueryService = jest.Mocked<typeof mockedServices.data.query>;
 
 export const mockedSearchService = mockedServices.data.search as MockedSearch;
+export const mockedQueryService = mockedServices.data.query as MockedQueryService;
 export const mockedTimefilterService = mockedServices.data.query.timefilter as MockedTimefilter;
 export const mockedTriggersActionsUiService =
   mockedServices.triggersActionsUi as MockedTriggersActionsUi;

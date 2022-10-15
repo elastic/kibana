@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import { RESPONDER_CAPABILITIES } from '../../../../common/endpoint/constants';
+import { ENDPOINT_CAPABILITIES } from '../../../../common/endpoint/service/response_actions/constants';
 import type { HostMetadata, MaybeImmutable } from '../../../../common/endpoint/types';
 
 export const useDoesEndpointSupportResponder = (
   endpointMetadata: MaybeImmutable<HostMetadata> | undefined
 ): boolean => {
-  return RESPONDER_CAPABILITIES.every((capability) =>
-    endpointMetadata?.Endpoint.capabilities?.includes(capability)
-  );
+  if (endpointMetadata) {
+    return ENDPOINT_CAPABILITIES.every((capability) =>
+      endpointMetadata?.Endpoint.capabilities?.includes(capability)
+    );
+  }
+  return false;
 };

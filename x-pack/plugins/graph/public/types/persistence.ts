@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SavedObjectReference } from '@kbn/core/public';
 import { AdvancedSettings, UrlTemplate, WorkspaceField } from './app_state';
 import { WorkspaceNode, WorkspaceEdge } from './workspace_state';
 
@@ -32,6 +33,8 @@ export interface GraphWorkspaceSavedObject {
   // Only set for legacy saved objects.
   legacyIndexPatternRef?: string;
   _source: Record<string, unknown>;
+  updatedAt?: string;
+  references: SavedObjectReference[];
 }
 
 export interface SerializedWorkspaceState {

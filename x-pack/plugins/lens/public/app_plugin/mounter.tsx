@@ -68,6 +68,7 @@ export async function getLensServices(
     fieldFormats,
     spaces,
     discover,
+    unifiedSearch,
   } = startDependencies;
 
   const storage = new Storage(localStorage);
@@ -86,6 +87,7 @@ export async function getLensServices(
     attributeService,
     executionContext: coreStart.executionContext,
     http: coreStart.http,
+    uiActions: startDependencies.uiActions,
     chrome: coreStart.chrome,
     overlays: coreStart.overlays,
     uiSettings: coreStart.uiSettings,
@@ -107,6 +109,8 @@ export async function getLensServices(
     dashboardFeatureFlag: startDependencies.dashboard.dashboardFeatureFlagConfig,
     spaces,
     discover,
+    unifiedSearch,
+    docLinks: coreStart.docLinks,
   };
 }
 
@@ -202,13 +206,20 @@ export async function mountApp(
       });
     }
   };
-  // get state from location, used for nanigating from Visualize/Discover to Lens
+  // get state from location, used for navigating from Visualize/Discover to Lens
   const initialContext =
     historyLocationState &&
     (historyLocationState.type === ACTION_VISUALIZE_LENS_FIELD ||
       historyLocationState.type === ACTION_CONVERT_TO_LENS)
       ? historyLocationState.payload
       : undefined;
+
+  if (historyLocationState && historyLocationState.type === ACTION_VISUALIZE_LENS_FIELD) {
+    // remove originatingApp from context when visualizing a field in Lens
+    // so Lens does not try to return to the original app on Save
+    // see https://github.com/elastic/kibana/issues/128695
+    delete initialContext?.originatingApp;
+  }
 
   if (embeddableEditorIncomingState?.searchSessionId) {
     data.search.session.continue(embeddableEditorIncomingState.searchSessionId);
@@ -294,7 +305,6 @@ export async function mountApp(
                 initCallback();
               }}
             />
-            ;
           </AnalyticsNoDataPageKibanaProvider>
         );
       }
@@ -376,5 +386,6 @@ export async function mountApp(
     lensServices.inspector.close();
     unlistenParentHistory();
     lensStore.dispatch(navigateAway());
+    stateTransfer.clearEditorState?.(APP_ID);
   };
 }

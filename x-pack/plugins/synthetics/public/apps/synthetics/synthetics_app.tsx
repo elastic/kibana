@@ -71,7 +71,15 @@ const Application = (props: SyntheticsAppProps) => {
   return (
     <EuiErrorBoundary>
       <i18nCore.Context>
-        <KibanaThemeProvider theme$={props.appMountParameters.theme$}>
+        <KibanaThemeProvider
+          theme$={props.appMountParameters.theme$}
+          modify={{
+            breakpoint: {
+              xxl: 1600,
+              xxxl: 2000,
+            },
+          }}
+        >
           <ReduxProvider store={store}>
             <KibanaContextProvider
               services={{
@@ -83,6 +91,7 @@ const Application = (props: SyntheticsAppProps) => {
                 triggersActionsUi: startPlugins.triggersActionsUi,
                 observability: startPlugins.observability,
                 cases: startPlugins.cases,
+                spaces: startPlugins.spaces,
               }}
             >
               <Router history={appMountParameters.history}>

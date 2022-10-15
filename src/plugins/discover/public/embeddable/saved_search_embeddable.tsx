@@ -15,7 +15,7 @@ import {
   FilterStateStore,
 } from '@kbn/es-query';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM, { unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -76,7 +76,7 @@ export type SearchProps = Partial<DiscoverGridProps> &
     onUpdateRowsPerPage?: (rowsPerPage?: number) => void;
   };
 
-interface SearchEmbeddableConfig {
+export interface SearchEmbeddableConfig {
   savedSearch: SavedSearch;
   editUrl: string;
   editPath: string;
@@ -153,9 +153,9 @@ export class SavedSearchEmbeddable
         this.searchProps &&
         (titleChanged ||
           this.isFetchRequired(this.searchProps) ||
-          this.isInputChangedAndRerenderRequired(this.searchProps))
+          this.isRerenderRequired(this.searchProps))
       ) {
-        this.pushContainerStateParamsToProps(this.searchProps);
+        this.reload();
       }
     });
   }
@@ -377,8 +377,9 @@ export class SavedSearchEmbeddable
 
     const timeRangeSearchSource = searchSource.create();
     timeRangeSearchSource.setField('filter', () => {
-      if (!this.searchProps || !this.input.timeRange) return;
-      return this.services.timefilter.createFilter(dataView, this.input.timeRange);
+      const timeRange = this.getTimeRange();
+      if (!this.searchProps || !timeRange) return;
+      return this.services.timefilter.createFilter(dataView, timeRange);
     });
 
     this.filtersSearchSource = searchSource.create();
@@ -386,13 +387,23 @@ export class SavedSearchEmbeddable
 
     searchSource.setParent(this.filtersSearchSource);
 
-    this.pushContainerStateParamsToProps(props);
+    this.load(props);
 
     props.isLoading = true;
 
     if (this.savedSearch.grid) {
       props.settings = this.savedSearch.grid;
     }
+  }
+
+  private getTimeRange() {
+    return this.input.timeslice !== undefined
+      ? {
+          from: new Date(this.input.timeslice[0]).toISOString(),
+          to: new Date(this.input.timeslice[1]).toISOString(),
+          mode: 'absolute' as 'absolute',
+        }
+      : this.input.timeRange;
   }
 
   private isFetchRequired(searchProps?: SearchProps) {
@@ -403,17 +414,20 @@ export class SavedSearchEmbeddable
     return (
       !onlyDisabledFiltersChanged(this.input.filters, this.prevFilters) ||
       !isEqual(this.prevQuery, this.input.query) ||
-      !isEqual(this.prevTimeRange, this.input.timeRange) ||
+      !isEqual(this.prevTimeRange, this.getTimeRange()) ||
       !isEqual(this.prevSort, this.input.sort) ||
       this.prevSearchSessionId !== this.input.searchSessionId
     );
   }
 
-  private isInputChangedAndRerenderRequired(searchProps?: SearchProps) {
+  private isRerenderRequired(searchProps?: SearchProps) {
     if (!searchProps) {
       return false;
     }
-    return this.input.rowsPerPage !== searchProps.rowsPerPageState;
+    return (
+      this.input.rowsPerPage !== searchProps.rowsPerPageState ||
+      (this.input.columns && !isEqual(this.input.columns, searchProps.columns))
+    );
   }
 
   private async pushContainerStateParamsToProps(
@@ -447,17 +461,13 @@ export class SavedSearchEmbeddable
 
       this.prevFilters = this.input.filters;
       this.prevQuery = this.input.query;
-      this.prevTimeRange = this.input.timeRange;
+      this.prevTimeRange = this.getTimeRange();
       this.prevSearchSessionId = this.input.searchSessionId;
       this.prevSort = this.input.sort;
       this.searchProps = searchProps;
       await this.fetch();
     } else if (this.searchProps && this.node) {
       this.searchProps = searchProps;
-    }
-
-    if (this.node) {
-      this.renderReactComponent(this.node, this.searchProps!);
     }
   }
 
@@ -469,10 +479,10 @@ export class SavedSearchEmbeddable
     if (!this.searchProps) {
       throw new Error('Search props not defined');
     }
-    if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
-    }
+
     this.node = domNode;
+
+    this.renderReactComponent(this.node, this.searchProps!);
   }
 
   private renderReactComponent(domNode: HTMLElement, searchProps: SearchProps) {
@@ -532,9 +542,17 @@ export class SavedSearchEmbeddable
     });
   }
 
+  private async load(searchProps: SearchProps, forceFetch = false) {
+    await this.pushContainerStateParamsToProps(searchProps, { forceFetch });
+
+    if (this.node) {
+      this.render(this.node);
+    }
+  }
+
   public reload() {
     if (this.searchProps) {
-      this.pushContainerStateParamsToProps(this.searchProps, { forceFetch: true });
+      this.load(this.searchProps, true);
     }
   }
 
@@ -570,6 +588,9 @@ export class SavedSearchEmbeddable
     super.destroy();
     if (this.searchProps) {
       delete this.searchProps;
+    }
+    if (this.node) {
+      unmountComponentAtNode(this.node);
     }
     this.subscription?.unsubscribe();
 

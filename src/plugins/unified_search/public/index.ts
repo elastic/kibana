@@ -12,7 +12,11 @@ export type { IndexPatternSelectProps } from './index_pattern_select';
 export type { QueryStringInputProps } from './query_string_input';
 export { QueryStringInput } from './query_string_input';
 export type { StatefulSearchBarProps, SearchBarProps } from './search_bar';
-export type { UnifiedSearchPublicPluginStart, UnifiedSearchPluginSetup } from './types';
+export type {
+  UnifiedSearchPublicPluginStart,
+  UnifiedSearchPluginSetup,
+  IUnifiedSearchPluginServices,
+} from './types';
 export { SearchBar } from './search_bar';
 export type { FilterItemsProps } from './filter_bar';
 export { FilterLabel, FilterItem, FilterItems } from './filter_bar';

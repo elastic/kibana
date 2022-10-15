@@ -7,15 +7,15 @@
 
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
-import {
+import { isEmpty } from 'lodash';
+import type {
   Cases,
+  CaseUpdateRequest,
   FetchCasesProps,
   ResolvedCase,
-  SeverityAll,
-  SortFieldCase,
-  StatusAll,
 } from '../../common/ui/types';
-import {
+import { SeverityAll, SortFieldCase, StatusAll } from '../../common/ui/types';
+import type {
   BulkCreateCommentRequest,
   CasePatchRequest,
   CasePostRequest,
@@ -24,16 +24,18 @@ import {
   CasesResponse,
   CaseUserActionsResponse,
   CommentRequest,
+  User,
+  SingleCaseMetricsResponse,
+  CasesFindResponse,
+} from '../../common/api';
+import {
   CommentType,
   getCaseCommentsUrl,
   getCaseDetailsUrl,
   getCaseDetailsMetricsUrl,
   getCasePushUrl,
   getCaseUserActionUrl,
-  User,
   getCaseCommentDeleteUrl,
-  SingleCaseMetricsResponse,
-  CasesFindResponse,
 } from '../../common/api';
 import {
   CASE_REPORTERS_URL,
@@ -55,9 +57,8 @@ import {
   convertCaseResolveToCamelCase,
 } from '../api/utils';
 
-import {
+import type {
   ActionLicense,
-  BulkUpdateStatus,
   Case,
   SingleCaseMetrics,
   SingleCaseMetricsFeature,
@@ -164,6 +165,7 @@ export const getCases = async ({
     search: '',
     searchFields: [],
     severity: SeverityAll,
+    assignees: [],
     reporters: [],
     status: StatusAll,
     tags: [],
@@ -180,7 +182,8 @@ export const getCases = async ({
   const query = {
     ...(filterOptions.status !== StatusAll ? { status: filterOptions.status } : {}),
     ...(filterOptions.severity !== SeverityAll ? { severity: filterOptions.severity } : {}),
-    reporters: filterOptions.reporters.map((r) => r.username ?? '').filter((r) => r !== ''),
+    assignees: filterOptions.assignees,
+    reporters: constructReportersFilter(filterOptions.reporters),
     tags: filterOptions.tags,
     ...(filterOptions.search.length > 0 ? { search: filterOptions.search } : {}),
     ...(filterOptions.searchFields.length > 0 ? { searchFields: filterOptions.searchFields } : {}),
@@ -195,6 +198,18 @@ export const getCases = async ({
   });
 
   return convertAllCasesToCamel(decodeCasesFindResponse(response));
+};
+
+export const constructReportersFilter = (reporters: User[]) => {
+  return reporters
+    .map((reporter) => {
+      if (reporter.profile_uid != null) {
+        return reporter.profile_uid;
+      }
+
+      return reporter.username ?? '';
+    })
+    .filter((reporterID) => !isEmpty(reporterID));
 };
 
 export const postCase = async (newCase: CasePostRequest, signal: AbortSignal): Promise<Case> => {
@@ -223,8 +238,8 @@ export const patchCase = async (
   return convertCasesToCamelCase(decodeCasesResponse(response));
 };
 
-export const patchCasesStatus = async (
-  cases: BulkUpdateStatus[],
+export const updateCases = async (
+  cases: CaseUpdateRequest[],
   signal: AbortSignal
 ): Promise<Case[]> => {
   const response = await KibanaServices.get().http.fetch<CasesResponse>(CASES_URL, {

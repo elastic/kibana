@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createMockDataViewsState } from '../data_views_service/mocks';
 import { FramePublicAPI, FrameDatasourceAPI } from '../types';
 export { mockDataPlugin } from './data_plugin_mock';
 export {
@@ -29,28 +30,36 @@ export { lensPluginMock } from './lens_plugin_mock';
 
 export type FrameMock = jest.Mocked<FramePublicAPI>;
 
-export const createMockFramePublicAPI = (): FrameMock => ({
-  datasourceLayers: {},
-  dateRange: { fromDate: '2022-03-17T08:25:00.000Z', toDate: '2022-04-17T08:25:00.000Z' },
-  dataViews: {
-    indexPatterns: {},
-    indexPatternRefs: [],
-    isFirstExistenceFetch: true,
-    existingFields: {},
+export const createMockFramePublicAPI = ({
+  datasourceLayers,
+  dateRange,
+  dataViews,
+  activeData,
+}: Partial<FramePublicAPI> = {}): FrameMock => ({
+  datasourceLayers: datasourceLayers ?? {},
+  dateRange: dateRange ?? {
+    fromDate: '2022-03-17T08:25:00.000Z',
+    toDate: '2022-04-17T08:25:00.000Z',
   },
+  dataViews: createMockDataViewsState(dataViews),
+  activeData,
 });
 
 export type FrameDatasourceMock = jest.Mocked<FrameDatasourceAPI>;
 
-export const createMockFrameDatasourceAPI = (): FrameDatasourceMock => ({
-  datasourceLayers: {},
-  dateRange: { fromDate: '2022-03-17T08:25:00.000Z', toDate: '2022-04-17T08:25:00.000Z' },
-  query: { query: '', language: 'lucene' },
-  filters: [],
-  dataViews: {
-    indexPatterns: {},
-    indexPatternRefs: [],
-    isFirstExistenceFetch: true,
-    existingFields: {},
+export const createMockFrameDatasourceAPI = ({
+  datasourceLayers,
+  dateRange,
+  dataViews,
+  query,
+  filters,
+}: Partial<FrameDatasourceAPI> = {}): FrameDatasourceMock => ({
+  datasourceLayers: datasourceLayers ?? {},
+  dateRange: dateRange ?? {
+    fromDate: '2022-03-17T08:25:00.000Z',
+    toDate: '2022-04-17T08:25:00.000Z',
   },
+  query: query ?? { query: '', language: 'lucene' },
+  filters: filters ?? [],
+  dataViews: createMockDataViewsState(dataViews),
 });

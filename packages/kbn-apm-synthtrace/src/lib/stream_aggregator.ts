@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { Client } from '@elastic/elasticsearch';
-import { ApmFields, Fields } from '..';
+import { ApmFields, Fields } from '../..';
 
 export interface StreamAggregator<TFields extends Fields = ApmFields> {
   name: string;

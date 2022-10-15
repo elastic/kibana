@@ -14,6 +14,7 @@ import { parse } from 'query-string';
 
 import { Capabilities } from '@kbn/core/public';
 import { TopNavMenuData } from '@kbn/navigation-plugin/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import {
   showSaveModal,
   SavedObjectSaveModalOrigin,
@@ -27,23 +28,19 @@ import {
 import { unhashUrl } from '@kbn/kibana-utils-plugin/public';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { saveVisualization } from '../../utils/saved_visualize_utils';
-import {
-  VISUALIZE_EMBEDDABLE_TYPE,
-  VisualizeInput,
-  getFullPath,
-  NavigateToLensContext,
-} from '../..';
+import { VISUALIZE_EMBEDDABLE_TYPE, VisualizeInput, getFullPath } from '../..';
 
 import {
   VisualizeServices,
   VisualizeAppStateContainer,
   VisualizeEditorVisInstance,
 } from '../types';
+import { NavigateToLensContext } from '../../../common';
 import { VisualizeConstants } from '../../../common/constants';
 import { getEditBreadcrumbs } from './breadcrumbs';
 import { VISUALIZE_APP_LOCATOR, VisualizeLocatorParams } from '../../../common/locator';
 import { getUiActions } from '../../services';
-import { VISUALIZE_EDITOR_TRIGGER } from '../../triggers';
+import { VISUALIZE_EDITOR_TRIGGER, AGG_BASED_VISUALIZATION_TRIGGER } from '../../triggers';
 import { getVizEditorOriginatingAppUrl } from './utils';
 
 import './visualize_navigation.scss';
@@ -122,6 +119,7 @@ export const getTopNavConfig = (
     presentationUtil,
     getKibanaVersion,
     savedObjects,
+    theme,
   }: VisualizeServices
 ) => {
   const { vis, embeddableHandler } = visInstance;
@@ -313,7 +311,13 @@ export const getTopNavConfig = (
               if (editInLensConfig) {
                 hideLensBadge();
                 setNavigateToLens(true);
-                getUiActions().getTrigger(VISUALIZE_EDITOR_TRIGGER).exec(updatedWithMeta);
+                getUiActions()
+                  .getTrigger(
+                    visInstance.vis.type.group === 'aggbased'
+                      ? AGG_BASED_VISUALIZATION_TRIGGER
+                      : VISUALIZE_EDITOR_TRIGGER
+                  )
+                  .exec(updatedWithMeta);
               }
             },
           },
@@ -588,11 +592,18 @@ export const getTopNavConfig = (
                 );
               }
 
-              showSaveModal(
-                saveModal,
-                I18nContext,
-                !originatingApp ? presentationUtil.ContextProvider : React.Fragment
-              );
+              const WrapperComponent = ({ children }: { children?: React.ReactNode }) => {
+                const ContextProvider = !originatingApp
+                  ? presentationUtil.ContextProvider
+                  : React.Fragment;
+                return (
+                  <KibanaThemeProvider theme$={theme.theme$}>
+                    <ContextProvider>{children}</ContextProvider>
+                  </KibanaThemeProvider>
+                );
+              };
+
+              showSaveModal(saveModal, I18nContext, WrapperComponent);
             },
           },
         ]

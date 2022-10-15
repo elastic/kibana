@@ -25,6 +25,7 @@ import type { ParsedCommandInterface } from '../../../service/parsed_command_inp
 import { parseCommandInput } from '../../../service/parsed_command_input';
 import { UnknownCommand } from '../../unknown_comand';
 import { BadArgument } from '../../bad_argument';
+import { ValidationError } from '../../validation_error';
 import type { Command, CommandDefinition, CommandExecutionComponentProps } from '../../../types';
 
 const toCliArgumentOption = (argName: string) => `--${argName}`;
@@ -188,7 +189,11 @@ export const handleExecuteCommand: ConsoleStoreReducer<
   if (parsedInput.hasArgs) {
     // Show command help
     if (parsedInput.hasArg('help')) {
-      if (Object.keys(parsedInput.args).length > 1 || parsedInput.args.help.length) {
+      if (
+        Object.keys(parsedInput.args).length > 1 ||
+        parsedInput.args.help.length > 1 ||
+        parsedInput.args.help[0] !== true
+      ) {
         return updateStateWithNewCommandHistoryItem(
           state,
           createCommandHistoryEntry(
@@ -444,12 +449,11 @@ export const handleExecuteCommand: ConsoleStoreReducer<
   // if the Command definition has a `validate()` callback, then call it now
   if (commandDefinition.validate) {
     const validationResult = commandDefinition.validate(command);
-
     if (validationResult !== true) {
       return updateStateWithNewCommandHistoryItem(
         state,
         createCommandHistoryEntry(
-          cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
+          cloneCommandDefinitionWithNewRenderComponent(command, ValidationError),
           createCommandExecutionState({
             errorMessage: validationResult,
           }),

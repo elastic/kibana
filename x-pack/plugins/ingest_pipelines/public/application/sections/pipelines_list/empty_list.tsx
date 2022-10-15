@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiEmptyPrompt,
   EuiLink,
-  EuiPageContent,
+  EuiPageContent_Deprecated as EuiPageContent,
   EuiButton,
   EuiPopover,
   EuiContextMenu,

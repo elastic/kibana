@@ -129,8 +129,8 @@ export const importRules = async ({
                   });
                   await patchRules({
                     rulesClient,
-                    rule: migratedRule,
-                    params: {
+                    existingRule: migratedRule,
+                    nextParams: {
                       ...parsedRule,
                       exceptions_list: [...exceptions],
                     },

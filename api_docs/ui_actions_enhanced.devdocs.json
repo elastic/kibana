@@ -22,6 +22,7 @@
         ],
         "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -37,7 +38,8 @@
               "<void>, \"next\">"
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -51,6 +53,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -74,6 +77,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -87,6 +91,7 @@
                 ],
                 "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -112,6 +117,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -131,6 +137,7 @@
                 ],
                 "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -156,6 +163,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -175,6 +183,7 @@
                 ],
                 "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -192,6 +201,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -205,6 +215,7 @@
                 ],
                 "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -230,6 +241,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -287,6 +299,7 @@
         ],
         "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -296,7 +309,8 @@
             "label": "id",
             "description": [],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -306,7 +320,8 @@
             "label": "isBeta",
             "description": [],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -319,7 +334,8 @@
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -332,7 +348,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -342,7 +359,8 @@
             "label": "order",
             "description": [],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -370,7 +388,8 @@
               "<FactoryContext>> | undefined"
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -391,7 +410,8 @@
               "<FactoryContext>> | undefined"
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -421,6 +441,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -444,6 +465,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -457,7 +479,8 @@
                   "P & { children?: React.ReactNode; }"
                 ],
                 "path": "node_modules/@types/react/index.d.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -470,7 +493,8 @@
                   "any"
                 ],
                 "path": "node_modules/@types/react/index.d.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -486,6 +510,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -499,7 +524,8 @@
                   "FactoryContext"
                 ],
                 "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -515,6 +541,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -528,7 +555,8 @@
                   "Config"
                 ],
                 "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -541,7 +569,8 @@
                   "FactoryContext"
                 ],
                 "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -570,7 +599,8 @@
               }
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -584,6 +614,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -604,6 +635,7 @@
                 ],
                 "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -618,6 +650,7 @@
                 ],
                 "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -635,6 +668,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -648,6 +682,7 @@
                 ],
                 "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -665,6 +700,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -678,6 +714,7 @@
                 ],
                 "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -695,6 +732,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -708,6 +746,7 @@
                 ],
                 "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -725,6 +764,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -738,6 +778,7 @@
                 ],
                 "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -757,6 +798,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -788,6 +830,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -809,6 +852,7 @@
                 ],
                 "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -826,6 +870,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -849,6 +894,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -868,6 +914,7 @@
                 ],
                 "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -882,6 +929,7 @@
                 ],
                 "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -917,6 +965,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -936,6 +985,7 @@
                 ],
                 "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -970,6 +1020,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -989,6 +1040,7 @@
                 ],
                 "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1004,6 +1056,7 @@
                 ],
                 "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1028,13 +1081,7 @@
             "text": "AdvancedUiActionsPublicPlugin"
           },
           " implements ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.Plugin",
-            "text": "Plugin"
-          },
+          "Plugin",
           "<",
           {
             "pluginId": "uiActionsEnhanced",
@@ -1057,6 +1104,7 @@
         ],
         "path": "src/plugins/ui_actions_enhanced/public/plugin.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -1072,7 +1120,8 @@
               " | undefined>"
             ],
             "path": "src/plugins/ui_actions_enhanced/public/plugin.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -1086,6 +1135,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -1095,17 +1145,12 @@
                 "label": "initializerContext",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.PluginInitializerContext",
-                    "text": "PluginInitializerContext"
-                  },
+                  "PluginInitializerContext",
                   "<object>"
                 ],
                 "path": "src/plugins/ui_actions_enhanced/public/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1120,13 +1165,7 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreSetup",
-                "text": "CoreSetup"
-              },
+              "CoreSetup",
               "<",
               "StartDependencies",
               ", unknown>, { embeddable, uiActions, licensing }: SetupDependencies) => ",
@@ -1140,6 +1179,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -1149,19 +1189,14 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.CoreSetup",
-                    "text": "CoreSetup"
-                  },
+                  "CoreSetup",
                   "<",
                   "StartDependencies",
                   ", unknown>"
                 ],
                 "path": "src/plugins/ui_actions_enhanced/public/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1176,6 +1211,7 @@
                 ],
                 "path": "src/plugins/ui_actions_enhanced/public/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1190,13 +1226,7 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              },
+              "CoreStart",
               ", { uiActions, licensing }: ",
               "StartDependencies",
               ") => ",
@@ -1210,6 +1240,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -1219,16 +1250,11 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.CoreStart",
-                    "text": "CoreStart"
-                  }
+                  "CoreStart"
                 ],
                 "path": "src/plugins/ui_actions_enhanced/public/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1243,6 +1269,7 @@
                 ],
                 "path": "src/plugins/ui_actions_enhanced/public/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1260,6 +1287,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -1275,6 +1303,7 @@
         "description": [],
         "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -1284,7 +1313,8 @@
             "label": "idPrefixCounter",
             "description": [],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -1312,7 +1342,8 @@
               ">"
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -1326,6 +1357,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -1345,6 +1377,7 @@
                 ],
                 "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1369,6 +1402,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -1382,6 +1416,7 @@
                 ],
                 "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1401,6 +1436,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -1414,6 +1450,7 @@
                 ],
                 "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1439,6 +1476,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -1458,6 +1496,7 @@
                 ],
                 "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1483,6 +1522,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -1502,6 +1542,7 @@
                 ],
                 "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1529,7 +1570,8 @@
               ", object, {}>"
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -1545,6 +1587,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1562,6 +1605,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1589,6 +1633,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -1613,6 +1658,7 @@
                 ],
                 "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1629,6 +1675,7 @@
                 ],
                 "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1658,6 +1705,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -1673,6 +1721,7 @@
                 ],
                 "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1698,6 +1747,7 @@
                 ],
                 "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -1714,6 +1764,7 @@
                 ],
                 "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1733,6 +1784,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -1748,6 +1800,7 @@
                 ],
                 "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1767,6 +1820,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -1782,6 +1836,7 @@
                 ],
                 "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1818,6 +1873,7 @@
         ],
         "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -1831,6 +1887,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -1852,6 +1909,7 @@
                 ],
                 "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1879,6 +1937,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -1902,6 +1961,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -1921,6 +1981,7 @@
                 ],
                 "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1946,6 +2007,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -1965,6 +2027,7 @@
                 ],
                 "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -1982,6 +2045,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -1995,6 +2059,7 @@
                 ],
                 "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_storage.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2017,6 +2082,7 @@
         ],
         "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_template.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -2030,6 +2096,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_template.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -2044,6 +2111,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_template.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -2058,6 +2126,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_template.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2083,6 +2152,7 @@
         ],
         "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_drilldown_global_scope.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -2096,6 +2166,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_drilldown_global_scope.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2116,6 +2187,7 @@
         ],
         "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/components/url_drilldown_collect_config/lazy.tsx",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -2131,6 +2203,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/components/url_drilldown_collect_config/lazy.tsx",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2149,6 +2222,7 @@
         ],
         "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_validation.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -2162,6 +2236,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_validation.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2188,6 +2263,7 @@
         ],
         "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_validation.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -2201,6 +2277,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_validation.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -2222,6 +2299,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/url_validation.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -2283,6 +2361,7 @@
         ],
         "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -2294,7 +2373,8 @@
               "\nUnique ID of the action factory. This ID is used to identify this action\nfactory in the registry as well as to construct actions of this type and\nidentify this action factory when presenting it to the user in UI."
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -2309,7 +2389,8 @@
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -2324,7 +2405,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -2339,7 +2421,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -2371,6 +2454,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -2392,6 +2476,7 @@
                 ],
                 "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2409,6 +2494,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/action_factory_definition.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -2426,6 +2512,7 @@
         ],
         "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -2438,7 +2525,8 @@
               "string[]"
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2480,6 +2568,7 @@
         ],
         "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -2491,7 +2580,8 @@
               "\nGlobally unique identifier for this drilldown."
             ],
             "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -2506,7 +2596,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -2521,7 +2612,8 @@
               "\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined"
             ],
             "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -2536,7 +2628,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -2551,7 +2644,8 @@
               "number | undefined"
             ],
             "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -2567,6 +2661,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -2580,7 +2675,8 @@
                   "Context"
                 ],
                 "path": "src/plugins/kibana_utils/public/ui/configurable.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -2614,6 +2710,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": []
           },
@@ -2631,6 +2728,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
@@ -2644,7 +2742,8 @@
                   "Config"
                 ],
                 "path": "src/plugins/kibana_utils/public/ui/configurable.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               },
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -2657,7 +2756,8 @@
                   "Context"
                 ],
                 "path": "src/plugins/kibana_utils/public/ui/configurable.ts",
-                "deprecated": false
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           },
@@ -2675,6 +2775,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -2688,6 +2789,7 @@
                 ],
                 "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2706,7 +2808,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -2715,15 +2818,55 @@
             "tags": [],
             "label": "getDisplayName",
             "description": [
-              "\nShould return an internationalized name of the drilldown, which will be\ndisplayed to the user."
+              "\nShould return an internationalized name of the drilldown, which will be\ndisplayed to the user as the name of drilldown factory when configuring a drilldown."
             ],
             "signature": [
               "() => string"
             ],
             "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "uiActionsEnhanced",
+            "id": "def-public.DrilldownDefinition.actionMenuItem",
+            "type": "Function",
+            "tags": [],
+            "label": "actionMenuItem",
+            "description": [
+              "\nName of the drilldown instance displayed to the user at the moment of\ndrilldown execution. Should be internationalized."
+            ],
+            "signature": [
+              {
+                "pluginId": "kibanaUtils",
+                "scope": "common",
+                "docId": "kibKibanaUtilsPluginApi",
+                "section": "def-common.UiComponent",
+                "text": "UiComponent"
+              },
+              "<{ config: Omit<",
+              {
+                "pluginId": "uiActionsEnhanced",
+                "scope": "common",
+                "docId": "kibUiActionsEnhancedPluginApi",
+                "section": "def-common.SerializedAction",
+                "text": "SerializedAction"
+              },
+              "<Config>, \"factoryId\">; context: ExecutionContext | ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionExecutionContext",
+                "text": "ActionExecutionContext"
+              },
+              "<ExecutionContext>; }> | undefined"
+            ],
+            "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -2747,6 +2890,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -2760,6 +2904,7 @@
                 ],
                 "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -2782,6 +2927,7 @@
                 ],
                 "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2809,6 +2955,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -2824,6 +2971,7 @@
                 ],
                 "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -2848,6 +2996,7 @@
                 ],
                 "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2875,6 +3024,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -2888,6 +3038,7 @@
                 ],
                 "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -2910,6 +3061,7 @@
                 ],
                 "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -2929,6 +3081,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_definition.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           }
@@ -2946,6 +3099,7 @@
         ],
         "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_manager/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -2957,7 +3111,8 @@
               "\nA string that uniquely identifies this item in a list of `DrilldownTemplate[]`."
             ],
             "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_manager/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -2972,7 +3127,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_manager/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -2984,7 +3140,8 @@
               "\nA user facing text that provides information about the source of this template."
             ],
             "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_manager/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -2996,7 +3153,8 @@
               "\nDrilldown type, dynamic action factory ID."
             ],
             "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_manager/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -3008,7 +3166,8 @@
               "\nSuggested new name of the cloned drilldown. If a drilldown with such suggested\nname already exists at current place, a suffix like \" (copy 1)\" will be added."
             ],
             "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_manager/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -3023,7 +3182,8 @@
               "string[]"
             ],
             "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_manager/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -3038,7 +3198,8 @@
               "unknown"
             ],
             "path": "src/plugins/ui_actions_enhanced/public/drilldowns/drilldown_manager/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3052,6 +3213,7 @@
         "description": [],
         "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -3064,7 +3226,8 @@
               "ActionStorage"
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -3113,7 +3276,8 @@
               ">; readonly hasActionFactory: (actionFactoryId: string) => boolean; }"
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -3127,6 +3291,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -3140,6 +3305,7 @@
                 ],
                 "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3159,6 +3325,7 @@
         ],
         "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -3168,7 +3335,8 @@
             "label": "kibanaUrl",
             "description": [],
             "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3201,6 +3369,7 @@
         ],
         "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -3215,7 +3384,8 @@
               "ContextScope | undefined"
             ],
             "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -3230,7 +3400,8 @@
               "EventScope | undefined"
             ],
             "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3250,6 +3421,7 @@
         ],
         "path": "src/plugins/ui_actions_enhanced/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3264,6 +3436,7 @@
         ],
         "path": "src/plugins/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3286,6 +3459,7 @@
         ],
         "path": "src/plugins/ui_actions_enhanced/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3300,6 +3474,7 @@
         ],
         "path": "src/plugins/ui_actions_enhanced/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3326,6 +3501,7 @@
         ],
         "path": "src/plugins/ui_actions_enhanced/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3340,6 +3516,7 @@
         ],
         "path": "src/plugins/ui_actions_enhanced/public/drilldowns/url_drilldown/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -3373,6 +3550,7 @@
       ],
       "path": "src/plugins/ui_actions_enhanced/public/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [],
       "lifecycle": "setup",
       "initialIsOpen": true
@@ -3406,6 +3584,7 @@
       ],
       "path": "src/plugins/ui_actions_enhanced/public/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "uiActionsEnhanced",
@@ -3421,6 +3600,7 @@
           ],
           "path": "src/plugins/ui_actions_enhanced/public/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "returnComment": [],
           "children": [
             {
@@ -3434,7 +3614,8 @@
                 "P & { children?: React.ReactNode; }"
               ],
               "path": "node_modules/@types/react/index.d.ts",
-              "deprecated": false
+              "deprecated": false,
+              "trackAdoption": false
             },
             {
               "parentPluginId": "uiActionsEnhanced",
@@ -3447,7 +3628,8 @@
                 "any"
               ],
               "path": "node_modules/@types/react/index.d.ts",
-              "deprecated": false
+              "deprecated": false,
+              "trackAdoption": false
             }
           ]
         }
@@ -3493,6 +3675,7 @@
         ],
         "path": "src/plugins/ui_actions_enhanced/server/plugin.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -3521,7 +3704,8 @@
               ">>"
             ],
             "path": "src/plugins/ui_actions_enhanced/server/plugin.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -3535,6 +3719,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/server/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -3574,6 +3759,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/server/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -3594,6 +3780,7 @@
                 ],
                 "path": "src/plugins/ui_actions_enhanced/server/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -3608,6 +3795,7 @@
                 ],
                 "path": "src/plugins/ui_actions_enhanced/server/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3625,6 +3813,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/server/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -3640,6 +3829,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/server/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -3673,6 +3863,7 @@
             ],
             "path": "src/plugins/ui_actions_enhanced/server/plugin.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "uiActionsEnhanced",
@@ -3701,6 +3892,7 @@
                 ],
                 "path": "src/plugins/ui_actions_enhanced/server/plugin.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -3739,6 +3931,7 @@
         ],
         "path": "src/plugins/ui_actions_enhanced/server/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -3748,7 +3941,8 @@
             "label": "id",
             "description": [],
             "path": "src/plugins/ui_actions_enhanced/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3780,6 +3974,7 @@
         ],
         "path": "src/plugins/ui_actions_enhanced/server/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "uiActionsEnhanced",
@@ -3789,7 +3984,8 @@
             "label": "id",
             "description": [],
             "path": "src/plugins/ui_actions_enhanced/server/types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3809,6 +4005,7 @@
         ],
         "path": "src/plugins/ui_actions_enhanced/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3831,6 +4028,7 @@
         ],
         "path": "src/plugins/ui_actions_enhanced/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3845,6 +4043,7 @@
         ],
         "path": "src/plugins/ui_actions_enhanced/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -3871,6 +4070,7 @@
         ],
         "path": "src/plugins/ui_actions_enhanced/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -3884,6 +4084,7 @@
       "description": [],
       "path": "src/plugins/ui_actions_enhanced/server/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "children": [
         {
           "parentPluginId": "uiActionsEnhanced",
@@ -3913,6 +4114,7 @@
           ],
           "path": "src/plugins/ui_actions_enhanced/server/plugin.ts",
           "deprecated": false,
+          "trackAdoption": false,
           "children": [
             {
               "parentPluginId": "uiActionsEnhanced",
@@ -3941,6 +4143,7 @@
               ],
               "path": "src/plugins/ui_actions_enhanced/server/plugin.ts",
               "deprecated": false,
+              "trackAdoption": false,
               "isRequired": true
             }
           ],
@@ -3962,6 +4165,7 @@
       ],
       "path": "src/plugins/ui_actions_enhanced/server/plugin.ts",
       "deprecated": false,
+      "trackAdoption": false,
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -3984,6 +4188,7 @@
         ],
         "path": "src/plugins/ui_actions_enhanced/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4006,6 +4211,7 @@
         ],
         "path": "src/plugins/ui_actions_enhanced/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4020,6 +4226,7 @@
         ],
         "path": "src/plugins/ui_actions_enhanced/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4046,6 +4253,7 @@
         ],
         "path": "src/plugins/ui_actions_enhanced/common/types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

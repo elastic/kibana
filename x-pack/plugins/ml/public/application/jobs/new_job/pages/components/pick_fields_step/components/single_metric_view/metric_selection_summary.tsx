@@ -48,6 +48,7 @@ export const SingleMetricDetectorsSummary: FC = () => {
     return () => {
       subscription.unsubscribe();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function loadChart() {

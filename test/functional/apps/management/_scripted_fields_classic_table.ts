@@ -48,7 +48,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.setWindowSize(1200, 800);
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       await kibanaServer.uiSettings.replace({});
-      await kibanaServer.uiSettings.update({ 'doc_table:legacy': true });
+      await kibanaServer.uiSettings.update({
+        'doc_table:legacy': true,
+        'discover:showLegacyFieldTopValues': true,
+      });
     });
 
     after(async function afterAll() {

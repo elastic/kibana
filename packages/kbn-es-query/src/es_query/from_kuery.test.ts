@@ -10,7 +10,7 @@ import { buildQueryFromKuery } from './from_kuery';
 import { fromKueryExpression, toElasticsearchQuery } from '../kuery';
 import { fields } from '../filters/stubs';
 import { DataViewBase } from './types';
-import { Query } from '..';
+import { Query } from '../..';
 
 jest.mock('../kuery/grammar');
 

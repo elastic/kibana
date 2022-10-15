@@ -23,19 +23,21 @@ import { Tags } from './tags';
 import { Connector } from './connector';
 import * as i18n from './translations';
 import { SyncAlertsToggle } from './sync_alerts_toggle';
-import { ActionConnector } from '../../../common/api';
-import { Case } from '../../containers/types';
-import { CasesTimelineIntegration, CasesTimelineIntegrationProvider } from '../timeline_context';
+import type { ActionConnector } from '../../../common/api';
+import type { Case } from '../../containers/types';
+import type { CasesTimelineIntegration } from '../timeline_context';
+import { CasesTimelineIntegrationProvider } from '../timeline_context';
 import { InsertTimeline } from '../insert_timeline';
-import { UseCreateAttachments } from '../../containers/use_create_attachments';
+import type { UseCreateAttachments } from '../../containers/use_create_attachments';
 import { SubmitCaseButton } from './submit_button';
 import { FormContext } from './form_context';
-import { useCasesFeatures } from '../cases_context/use_cases_features';
+import { useCasesFeatures } from '../../common/use_cases_features';
 import { CreateCaseOwnerSelector } from './owner_selector';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
-import { CaseAttachmentsWithoutOwner } from '../../types';
+import type { CaseAttachmentsWithoutOwner } from '../../types';
 import { Severity } from './severity';
+import { Assignees } from './assignees';
 
 interface ContainerProps {
   big?: boolean;
@@ -74,7 +76,7 @@ const empty: ActionConnector[] = [];
 export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.memo(
   ({ connectors, isLoadingConnectors, withSteps }) => {
     const { isSubmitting } = useFormContext();
-    const { isSyncAlertsEnabled } = useCasesFeatures();
+    const { isSyncAlertsEnabled, caseAssignmentAuthorized } = useCasesFeatures();
 
     const { owner } = useCasesContext();
     const availableOwners = useAvailableCasesOwners();
@@ -86,6 +88,11 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
         children: (
           <>
             <Title isLoading={isSubmitting} />
+            {caseAssignmentAuthorized ? (
+              <Container>
+                <Assignees isLoading={isSubmitting} />
+              </Container>
+            ) : null}
             <Container>
               <Tags isLoading={isSubmitting} />
             </Container>
@@ -107,7 +114,7 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
           </>
         ),
       }),
-      [isSubmitting, canShowCaseSolutionSelection, availableOwners]
+      [isSubmitting, caseAssignmentAuthorized, canShowCaseSolutionSelection, availableOwners]
     );
 
     const secondStep = useMemo(

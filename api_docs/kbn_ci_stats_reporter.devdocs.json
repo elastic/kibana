@@ -21,6 +21,7 @@
         ],
         "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
@@ -45,6 +46,7 @@
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/ci-stats-reporter",
@@ -58,6 +60,7 @@
                 ],
                 "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -75,6 +78,7 @@
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/ci-stats-reporter",
@@ -89,6 +93,7 @@
                 ],
                 "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               },
               {
@@ -103,6 +108,7 @@
                 ],
                 "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -122,6 +128,7 @@
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -139,6 +146,7 @@
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [],
             "returnComment": []
           },
@@ -164,6 +172,7 @@
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/ci-stats-reporter",
@@ -183,6 +192,7 @@
                 ],
                 "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -218,6 +228,7 @@
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/ci-stats-reporter",
@@ -238,6 +249,7 @@
                 ],
                 "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               },
               {
@@ -259,6 +271,7 @@
                 ],
                 "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -286,6 +299,7 @@
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/ci-stats-reporter",
@@ -305,6 +319,7 @@
                 ],
                 "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -324,6 +339,7 @@
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/ci-stats-reporter",
@@ -337,6 +353,7 @@
                 ],
                 "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -361,6 +378,7 @@
         ],
         "path": "packages/kbn-ci-stats-reporter/src/report_time.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
@@ -374,6 +392,7 @@
             ],
             "path": "packages/kbn-ci-stats-reporter/src/report_time.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -388,6 +407,7 @@
             ],
             "path": "packages/kbn-ci-stats-reporter/src/report_time.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           }
         ],
@@ -407,6 +427,7 @@
         ],
         "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
@@ -418,7 +439,8 @@
               "Top-level categorization for the metric, e.g. \"page load bundle size\""
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
@@ -430,7 +452,8 @@
               "Specific sub-set of the \"group\", e.g. \"dashboard\""
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
@@ -442,7 +465,8 @@
               "integer value recorded as the value of this metric"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
@@ -457,7 +481,8 @@
               "number | undefined"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
@@ -466,13 +491,14 @@
             "tags": [],
             "label": "limitConfigPath",
             "description": [
-              "\npath, relative to the repo, where the config file contianing limits\nis kept. Linked from PR comments instructing contributors how to fix\ntheir PRs."
+              "\npath, relative to the repo, where the config file containing limits\nis kept. Linked from PR comments instructing contributors how to fix\ntheir PRs."
             ],
             "signature": [
               "string | undefined"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
@@ -488,7 +514,8 @@
               " | undefined"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -504,6 +531,7 @@
         ],
         "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
@@ -524,7 +552,8 @@
               }
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
@@ -546,7 +575,8 @@
               "[]"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -560,6 +590,7 @@
         "description": [],
         "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
@@ -571,7 +602,8 @@
               "\nISO-8601 formatted datetime representing when the group of tests started running"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
@@ -583,7 +615,8 @@
               "\nThe number of miliseconds that the tests ran for"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
@@ -595,7 +628,8 @@
               "\nThe type of tests run in this group, any value is valid but test groups are groupped by type in the UI so use something consistent"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
@@ -607,7 +641,8 @@
               "\nThe name of this specific group (within the \"type\")"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
@@ -619,10 +654,11 @@
               "\nOverall result of this test group"
             ],
             "signature": [
-              "\"fail\" | \"pass\" | \"skip\""
+              "\"skip\" | \"fail\" | \"pass\""
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
@@ -637,7 +673,8 @@
               "CiStatsMetadata"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -651,6 +688,7 @@
         "description": [],
         "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
@@ -662,7 +700,8 @@
               "\nISO-8601 formatted datetime representing when the tests started running"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
@@ -674,7 +713,8 @@
               "\nDuration of the tests in milliseconds"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
@@ -686,7 +726,8 @@
               "\nA sequence number, this is used to order the tests in a specific test run"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
@@ -701,7 +742,8 @@
               "\"after all hook\" | \"after each hook\" | \"before all hook\" | \"before each hook\" | \"test\""
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
@@ -713,10 +755,11 @@
               "\n\"fail\", \"pass\" or \"skip\", the result of the tests"
             ],
             "signature": [
-              "\"fail\" | \"pass\" | \"skip\""
+              "\"skip\" | \"fail\" | \"pass\""
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
@@ -731,7 +774,8 @@
               "string[]"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
@@ -743,7 +787,8 @@
               "\nThe name of this specific test run"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
@@ -755,7 +800,8 @@
               "\nRelative path from the root of the repo contianing this test"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
@@ -770,7 +816,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
@@ -785,7 +832,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
@@ -800,7 +848,8 @@
               "{ name: string; base64Png: string; }[] | undefined"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -816,6 +865,7 @@
         ],
         "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
@@ -827,7 +877,8 @@
               "Top-level categorization for the timing, e.g. \"scripts/foo\", process type, etc."
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
@@ -839,7 +890,8 @@
               "Specific timing (witin the \"group\" being tracked) e.g. \"total\""
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
@@ -851,7 +903,8 @@
               "time in milliseconds which should be recorded"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
@@ -867,7 +920,8 @@
               " | undefined"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -883,6 +937,7 @@
         ],
         "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
@@ -898,7 +953,8 @@
               " | undefined"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -914,6 +970,7 @@
         ],
         "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
@@ -935,7 +992,8 @@
               "[]"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
@@ -950,7 +1008,8 @@
               "string | undefined"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ci-stats-reporter",
@@ -965,7 +1024,8 @@
               "string | null | undefined"
             ],
             "path": "packages/kbn-ci-stats-reporter/src/ci_stats_reporter.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -981,10 +1041,11 @@
         "label": "CiStatsTestResult",
         "description": [],
         "signature": [
-          "\"fail\" | \"pass\" | \"skip\""
+          "\"skip\" | \"fail\" | \"pass\""
         ],
         "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -999,6 +1060,7 @@
         ],
         "path": "packages/kbn-ci-stats-reporter/src/ci_stats_test_group_types.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

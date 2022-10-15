@@ -196,6 +196,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
   // Holds the container height for previously fetched data
   const containerHeightRef = useRef<number>();
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const resizeHandler = useCallback(
     throttle((e: { width: number; height: number }) => {
       const resultNewWidth = e.width - SWIM_LANE_LABEL_WIDTH;
@@ -253,6 +254,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
         rowsCount * (CELL_HEIGHT + BORDER_WIDTH * 2) +
           (showLegend ? LEGEND_HEIGHT : 0) +
           (showTimeline ? X_AXIS_HEIGHT : 0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading, rowsCount]);
 
   useEffect(() => {
@@ -275,6 +277,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
     }
 
     return { x: selection.times.map((v) => v * 1000), y: selection.lanes };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selection, swimlaneData, swimlaneType]);
 
   const showBrush = !!onCellsSelection;
@@ -330,6 +333,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
     };
 
     return theme;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     showSwimlane,
     swimlaneType,

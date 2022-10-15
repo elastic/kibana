@@ -6,16 +6,25 @@
  * Side Public License, v 1.
  */
 
+import {
+  MetricVisConfiguration,
+  NavigateToLensContext,
+  XYConfiguration,
+} from '@kbn/visualizations-plugin/common';
 import { TimeRange } from '@kbn/data-plugin/common';
-import { NavigateToLensContext } from '@kbn/visualizations-plugin/public';
 import type { Panel } from '../../common/types';
 
 export type ConvertTsvbToLensVisualization = (
   model: Panel,
   timeRange?: TimeRange
-) => Promise<NavigateToLensContext | null>;
+) => Promise<NavigateToLensContext<XYConfiguration | MetricVisConfiguration> | null>;
 
 export interface Filter {
   kql?: string | { [key: string]: any } | undefined;
   lucene?: string | { [key: string]: any } | undefined;
+}
+
+export interface AdditionalArgs {
+  reducedTimeRange?: string;
+  timeShift?: string;
 }

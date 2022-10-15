@@ -7,9 +7,8 @@
  */
 
 import type { Query, TimeRange, AggregateQuery } from '@kbn/es-query';
-import type { SavedObject } from '@kbn/data-plugin/public';
-import type { DataView, DataViewAttributes } from '@kbn/data-views-plugin/public';
-import { ISearchSource } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { DataViewListItem, ISearchSource } from '@kbn/data-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { DataTableRecord } from '../../../../types';
@@ -18,7 +17,7 @@ import { DataRefetch$, SavedSearchData } from '../../hooks/use_saved_search';
 
 export interface DiscoverLayoutProps {
   dataView: DataView;
-  dataViewList: Array<SavedObject<DataViewAttributes>>;
+  dataViewList: DataViewListItem[];
   inspectorAdapters: { requests: RequestAdapter };
   navigateTo: (url: string) => void;
   onChangeDataView: (id: string) => void;
@@ -35,4 +34,7 @@ export interface DiscoverLayoutProps {
   searchSource: ISearchSource;
   state: AppState;
   stateContainer: GetStateReturn;
+  persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
+  updateAdHocDataViewId: (dataView: DataView) => Promise<DataView>;
+  adHocDataViewList: DataView[];
 }

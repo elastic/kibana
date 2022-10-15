@@ -6,15 +6,20 @@
  */
 
 import React, { lazy, Suspense } from 'react';
+import ServicesWrapper from './services_wrapper';
+import type { ServicesWrapperProps } from './services_wrapper';
+import type { OsqueryActionProps } from './osquery_action';
 
-// @ts-expect-error update types
-// eslint-disable-next-line react/display-name
-export const getLazyOsqueryAction = (services) => (props) => {
-  const OsqueryAction = lazy(() => import('./osquery_action'));
+export const getLazyOsqueryAction =
+  // eslint-disable-next-line react/display-name
+  (services: ServicesWrapperProps['services']) => (props: OsqueryActionProps) => {
+    const OsqueryAction = lazy(() => import('./osquery_action'));
 
-  return (
-    <Suspense fallback={null}>
-      <OsqueryAction services={services} {...props} />
-    </Suspense>
-  );
-};
+    return (
+      <Suspense fallback={null}>
+        <ServicesWrapper services={services}>
+          <OsqueryAction {...props} />
+        </ServicesWrapper>
+      </Suspense>
+    );
+  };

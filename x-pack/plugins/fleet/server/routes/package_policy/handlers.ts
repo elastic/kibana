@@ -36,9 +36,12 @@ import type {
   UpgradePackagePolicyResponse,
 } from '../../../common/types';
 import { installationStatuses } from '../../../common/constants';
-import { defaultIngestErrorHandler, PackagePolicyNotFoundError } from '../../errors';
-import { getInstallations } from '../../services/epm/packages';
+import { defaultFleetErrorHandler, PackagePolicyNotFoundError } from '../../errors';
+import { getInstallations, getPackageInfo } from '../../services/epm/packages';
 import { PACKAGES_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../constants';
+import { simplifiedPackagePolicytoNewPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
+
+import type { SimplifiedPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
 
 export const getPackagePoliciesHandler: RequestHandler<
   undefined,
@@ -59,7 +62,7 @@ export const getPackagePoliciesHandler: RequestHandler<
       },
     });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -87,7 +90,7 @@ export const bulkGetPackagePoliciesHandler: RequestHandler<
       });
     }
 
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -114,7 +117,7 @@ export const getOnePackagePolicyHandler: RequestHandler<
     if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
       return notFoundResponse();
     } else {
-      return defaultIngestErrorHandler({ error, response });
+      return defaultFleetErrorHandler({ error, response });
     }
   }
 };
@@ -159,9 +162,20 @@ export const getOrphanedPackagePolicies: RequestHandler<undefined, undefined> = 
       },
     });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
+
+function isSimplifiedCreatePackagePolicyRequest(
+  body: Omit<TypeOf<typeof CreatePackagePolicyRequestSchema.body>, 'force' | 'package'>
+): body is SimplifiedPackagePolicy {
+  // If `inputs` is not defined or if it's a non-array, the request body is using the new simplified API
+  if (body.inputs && Array.isArray(body.inputs)) {
+    return false;
+  }
+
+  return true;
+}
 
 export const createPackagePolicyHandler: FleetRequestHandler<
   undefined,
@@ -173,13 +187,33 @@ export const createPackagePolicyHandler: FleetRequestHandler<
   const soClient = fleetContext.epm.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurity()?.authc.getCurrentUser(request) || undefined;
-  const { force, ...newPolicy } = request.body;
+  const { force, package: pkg, ...newPolicy } = request.body;
+  if ('output_id' in newPolicy) {
+    // TODO Remove deprecated APIs https://github.com/elastic/kibana/issues/121485
+    delete newPolicy.output_id;
+  }
   const spaceId = fleetContext.spaceId;
   try {
-    const newPackagePolicy = await packagePolicyService.enrichPolicyWithDefaultsFromPackage(
-      soClient,
-      newPolicy as NewPackagePolicy
-    );
+    let newPackagePolicy: NewPackagePolicy;
+    if (isSimplifiedCreatePackagePolicyRequest(newPolicy)) {
+      if (!pkg) {
+        throw new Error('Package is required');
+      }
+      const pkgInfo = await getPackageInfo({
+        savedObjectsClient: soClient,
+        pkgName: pkg.name,
+        pkgVersion: pkg.version,
+        ignoreUnverified: force,
+      });
+      newPackagePolicy = simplifiedPackagePolicytoNewPackagePolicy(newPolicy, pkgInfo, {
+        experimental_data_stream_features: pkg.experimental_data_stream_features,
+      });
+    } else {
+      newPackagePolicy = await packagePolicyService.enrichPolicyWithDefaultsFromPackage(soClient, {
+        ...newPolicy,
+        package: pkg,
+      } as NewPackagePolicy);
+    }
 
     const newData = await packagePolicyService.runExternalCallbacks(
       'packagePolicyCreate',
@@ -189,11 +223,16 @@ export const createPackagePolicyHandler: FleetRequestHandler<
     );
 
     // Create package policy
-    const packagePolicy = await packagePolicyService.create(soClient, esClient, newData, {
-      user,
-      force,
-      spaceId,
-    });
+    const packagePolicy = await fleetContext.packagePolicyService.asCurrentUser.create(
+      soClient,
+      esClient,
+      newData,
+      {
+        user,
+        force,
+        spaceId,
+      }
+    );
 
     const enrichedPackagePolicy = await packagePolicyService.runExternalCallbacks(
       'packagePolicyPostCreate',
@@ -214,7 +253,7 @@ export const createPackagePolicyHandler: FleetRequestHandler<
         body: { message: error.message },
       });
     }
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -233,35 +272,59 @@ export const updatePackagePolicyHandler: RequestHandler<
     throw Boom.notFound('Package policy not found');
   }
 
-  const { force, ...body } = request.body;
-  // removed fields not recognized by schema
-  const packagePolicyInputs = packagePolicy.inputs.map((input) => {
-    const newInput = {
-      ...input,
-      streams: input.streams.map((stream) => {
-        const newStream = { ...stream };
-        delete newStream.compiled_stream;
-        return newStream;
-      }),
-    };
-    delete newInput.compiled_input;
-    return newInput;
-  });
-  // listing down accepted properties, because loaded packagePolicy contains some that are not accepted in update
-  let newData = {
-    ...body,
-    name: body.name ?? packagePolicy.name,
-    description: body.description ?? packagePolicy.description,
-    namespace: body.namespace ?? packagePolicy.namespace,
-    policy_id: body.policy_id ?? packagePolicy.policy_id,
-    enabled: body.enabled ?? packagePolicy.enabled,
-    output_id: body.output_id ?? packagePolicy.output_id,
-    package: body.package ?? packagePolicy.package,
-    inputs: body.inputs ?? packagePolicyInputs,
-    vars: body.vars ?? packagePolicy.vars,
-  } as NewPackagePolicy;
-
   try {
+    const { force, package: pkg, ...body } = request.body;
+    // TODO Remove deprecated APIs https://github.com/elastic/kibana/issues/121485
+    if ('output_id' in body) {
+      delete body.output_id;
+    }
+
+    let newData: NewPackagePolicy;
+
+    if (
+      body.inputs &&
+      isSimplifiedCreatePackagePolicyRequest(body as unknown as SimplifiedPackagePolicy)
+    ) {
+      if (!pkg) {
+        throw new Error('package is required');
+      }
+      const pkgInfo = await getPackageInfo({
+        savedObjectsClient: soClient,
+        pkgName: pkg.name,
+        pkgVersion: pkg.version,
+      });
+      newData = simplifiedPackagePolicytoNewPackagePolicy(
+        body as unknown as SimplifiedPackagePolicy,
+        pkgInfo,
+        { experimental_data_stream_features: pkg.experimental_data_stream_features }
+      );
+    } else {
+      // removed fields not recognized by schema
+      const packagePolicyInputs = packagePolicy.inputs.map((input) => {
+        const newInput = {
+          ...input,
+          streams: input.streams.map((stream) => {
+            const newStream = { ...stream };
+            delete newStream.compiled_stream;
+            return newStream;
+          }),
+        };
+        delete newInput.compiled_input;
+        return newInput;
+      });
+      // listing down accepted properties, because loaded packagePolicy contains some that are not accepted in update
+      newData = {
+        ...body,
+        name: body.name ?? packagePolicy.name,
+        description: body.description ?? packagePolicy.description,
+        namespace: body.namespace ?? packagePolicy.namespace,
+        policy_id: body.policy_id ?? packagePolicy.policy_id,
+        enabled: 'enabled' in body ? body.enabled ?? packagePolicy.enabled : packagePolicy.enabled,
+        package: pkg ?? packagePolicy.package,
+        inputs: body.inputs ?? packagePolicyInputs,
+        vars: body.vars ?? packagePolicy.vars,
+      } as NewPackagePolicy;
+    }
     newData = await packagePolicyService.runExternalCallbacks(
       'packagePolicyUpdate',
       newData,
@@ -281,7 +344,7 @@ export const updatePackagePolicyHandler: RequestHandler<
       body: { item: updatedPackagePolicy },
     });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -317,7 +380,7 @@ export const deletePackagePolicyHandler: RequestHandler<
       body,
     });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -364,7 +427,7 @@ export const deleteOnePackagePolicyHandler: RequestHandler<
       body: { id: request.params.packagePolicyId },
     });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -397,7 +460,7 @@ export const upgradePackagePolicyHandler: RequestHandler<
       body,
     });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -429,6 +492,6 @@ export const dryRunUpgradePackagePolicyHandler: RequestHandler<
       body,
     });
   } catch (error) {
-    return defaultIngestErrorHandler({ error, response });
+    return defaultFleetErrorHandler({ error, response });
   }
 };

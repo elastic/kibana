@@ -24,8 +24,9 @@
         "signature": [
           "\".index-threshold\""
         ],
-        "path": "x-pack/plugins/stack_alerts/server/alert_types/index_threshold/alert_type.ts",
+        "path": "x-pack/plugins/stack_alerts/server/alert_types/index_threshold/rule_type.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -49,6 +50,7 @@
         ],
         "path": "x-pack/plugins/stack_alerts/common/config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -61,8 +63,9 @@
         "signature": [
           "\"stackAlerts\""
         ],
-        "path": "x-pack/plugins/stack_alerts/common/index.ts",
+        "path": "x-pack/plugins/stack_alerts/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -80,6 +83,7 @@
         ],
         "path": "x-pack/plugins/stack_alerts/common/config.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ]

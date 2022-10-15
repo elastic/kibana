@@ -29,8 +29,11 @@ import {
   findExceptionListRoute,
   findListItemRoute,
   findListRoute,
+  findListsBySizeRoute,
+  getExceptionFilterRoute,
   importExceptionsRoute,
   importListItemRoute,
+  internalCreateExceptionListRoute,
   patchListItemRoute,
   patchListRoute,
   readEndpointListItemRoute,
@@ -57,6 +60,7 @@ export const initRoutes = (router: ListsPluginRouter, config: ConfigType): void 
   patchListRoute(router);
   findListRoute(router);
   readPrivilegesRoute(router);
+  findListsBySizeRoute(router);
 
   // list items
   createListItemRoute(router);
@@ -91,6 +95,9 @@ export const initRoutes = (router: ListsPluginRouter, config: ConfigType): void 
   deleteExceptionListItemRoute(router);
   findExceptionListItemRoute(router);
 
+  // exception filter
+  getExceptionFilterRoute(router);
+
   // endpoint list
   createEndpointListRoute(router);
 
@@ -103,4 +110,7 @@ export const initRoutes = (router: ListsPluginRouter, config: ConfigType): void 
 
   // exception list items summary
   summaryExceptionListRoute(router);
+
+  // internal routes
+  internalCreateExceptionListRoute(router);
 };

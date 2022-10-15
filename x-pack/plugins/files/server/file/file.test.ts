@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { of } from 'rxjs';
 import type { ElasticsearchClient, ISavedObjectsRepository } from '@kbn/core/server';
 import { createSandbox } from 'sinon';
 import {
   elasticsearchServiceMock,
   loggingSystemMock,
   savedObjectsServiceMock,
-  httpServiceMock,
 } from '@kbn/core/server/mocks';
 import { Readable } from 'stream';
 import { promisify } from 'util';
@@ -23,7 +23,7 @@ import {
   FileKindsRegistryImpl,
   getFileKindsRegistry,
   setFileKindsRegistry,
-} from '../file_kinds_registry';
+} from '../../common/file_kinds_registry';
 import { InternalFileShareService } from '../file_share_service';
 import { FileMetadataClient } from '../file_client';
 import { SavedObjectsFileMetadataClient } from '../file_client/file_metadata_client/adapters/saved_objects';
@@ -40,7 +40,7 @@ describe('File', () => {
   const fileKind = 'fileKind';
 
   beforeAll(() => {
-    setFileKindsRegistry(new FileKindsRegistryImpl(httpServiceMock.createRouter()));
+    setFileKindsRegistry(new FileKindsRegistryImpl());
     getFileKindsRegistry().register({ http: {}, id: fileKind });
   });
 
@@ -91,5 +91,21 @@ describe('File', () => {
     const file = await fileService.createFile({ name: 'test', fileKind });
     await file.uploadContent(Readable.from(['test']));
     expect(file.data.status).toBe('READY');
+  });
+
+  it('sets file status and deletes content if aborted', async () => {
+    const createBlobSpy = sandbox.spy(blobStorageService, 'createBlobStorageClient');
+    const fileSO = { attributes: { Status: 'AWAITING_UPLOAD' } };
+    (soClient.create as jest.Mock).mockResolvedValue(fileSO);
+    (soClient.update as jest.Mock).mockResolvedValue(fileSO);
+    const file = await fileService.createFile({ name: 'test', fileKind });
+    const [{ returnValue: blobStore }] = createBlobSpy.getCalls();
+    const blobStoreSpy = sandbox.spy(blobStore, 'delete');
+
+    const abort$ = of('boom!');
+    await expect(file.uploadContent(Readable.from(['test']), abort$)).rejects.toThrow(/Abort/);
+    await setImmediate();
+    expect(file.data.status).toBe('UPLOAD_ERROR');
+    expect(blobStoreSpy.calledOnce).toBe(true);
   });
 });

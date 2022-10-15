@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import moment from 'moment';
-import type { EcsEventOutcome } from '@kbn/core/server';
+import { EuiLink } from '@elastic/eui';
+import { RuleAlertingOutcome } from '@kbn/alerting-plugin/common';
+import { useHistory } from 'react-router-dom';
+import { routeToRuleDetails } from '../../../constants';
 import { formatRuleAlertCount } from '../../../../common/lib/format_rule_alert_count';
 import { RuleEventLogListStatus } from './rule_event_log_list_status';
 import { RuleDurationFormat } from '../../rules_list/components/rule_duration_format';
@@ -26,21 +29,32 @@ interface RuleEventLogListCellRendererProps {
   version?: string;
   value?: string;
   dateFormat?: string;
+  ruleId?: string;
 }
 
 export const RuleEventLogListCellRenderer = (props: RuleEventLogListCellRendererProps) => {
-  const { columnId, value, version, dateFormat = DEFAULT_DATE_FORMAT } = props;
+  const { columnId, value, version, dateFormat = DEFAULT_DATE_FORMAT, ruleId } = props;
+  const history = useHistory();
+
+  const onClickRuleName = useCallback(
+    () => ruleId && history.push(routeToRuleDetails.replace(':ruleId', ruleId)),
+    [ruleId, history]
+  );
 
   if (typeof value === 'undefined') {
     return null;
   }
 
   if (columnId === 'status') {
-    return <RuleEventLogListStatus status={value as EcsEventOutcome} />;
+    return <RuleEventLogListStatus status={value as RuleAlertingOutcome} />;
   }
 
   if (columnId === 'timestamp') {
     return <>{moment(value).format(dateFormat)}</>;
+  }
+
+  if (columnId === 'rule_name' && ruleId) {
+    return <EuiLink onClick={onClickRuleName}>{value}</EuiLink>;
   }
 
   if (RULE_EXECUTION_LOG_ALERT_COUNT_COLUMNS.includes(columnId)) {

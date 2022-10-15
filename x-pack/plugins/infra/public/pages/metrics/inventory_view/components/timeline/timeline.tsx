@@ -38,9 +38,8 @@ import { useWaffleTimeContext } from '../../hooks/use_waffle_time';
 import { useWaffleFiltersContext } from '../../hooks/use_waffle_filters';
 import { MetricExplorerSeriesChart } from '../../../metrics_explorer/components/series_chart';
 import { MetricsExplorerChartType } from '../../../metrics_explorer/hooks/use_metrics_explorer_options';
-import { getTimelineChartTheme } from '../../../metrics_explorer/components/helpers/get_chart_theme';
+import { getTimelineChartTheme } from '../../../../../utils/get_chart_theme';
 import { calculateDomain } from '../../../metrics_explorer/components/helpers/calculate_domain';
-
 import { InfraFormatter } from '../../../../../lib/lib';
 import { useMetricsHostsAnomaliesResults } from '../../hooks/use_metrics_hosts_anomalies';
 import { useMetricsK8sAnomaliesResults } from '../../hooks/use_metrics_k8s_anomalies';

@@ -9,10 +9,10 @@ import { kea, MakeLogicType } from 'kea';
 
 import { Actions } from '../../../shared/api_logic/create_api_logic';
 import {
-  AddConnectorPackageApiLogic,
-  AddConnectorPackageApiLogicArgs,
-  AddConnectorPackageApiLogicResponse,
-} from '../../api/connector_package/add_connector_package_api_logic';
+  AddConnectorApiLogic,
+  AddConnectorApiLogicArgs,
+  AddConnectorApiLogicResponse,
+} from '../../api/connector/add_connector_api_logic';
 import {
   CreateCrawlerIndexApiLogic,
   CreateCrawlerIndexArgs,
@@ -56,13 +56,12 @@ type NewSearchIndexActions = Pick<
     CreateApiIndexApiLogicResponse
   >['apiSuccess'];
   connectorIndexCreated: Actions<
-    AddConnectorPackageApiLogicArgs,
-    AddConnectorPackageApiLogicResponse
+    AddConnectorApiLogicArgs,
+    AddConnectorApiLogicResponse
   >['apiSuccess'];
   crawlerIndexCreated: Actions<CreateCrawlerIndexArgs, CreateCrawlerIndexResponse>['apiSuccess'];
   setLanguageSelectValue(language: string): { language: string };
   setRawName(rawName: string): { rawName: string };
-  showIndexCreatedCallout: () => void;
 };
 
 export const NewSearchIndexLogic = kea<MakeLogicType<NewSearchIndexValues, NewSearchIndexActions>>({
@@ -72,7 +71,7 @@ export const NewSearchIndexLogic = kea<MakeLogicType<NewSearchIndexValues, NewSe
   },
   connect: {
     actions: [
-      AddConnectorPackageApiLogic,
+      AddConnectorApiLogic,
       ['apiSuccess as connectorIndexCreated'],
       CreateApiIndexApiLogic,
       ['apiSuccess as apiIndexCreated'],

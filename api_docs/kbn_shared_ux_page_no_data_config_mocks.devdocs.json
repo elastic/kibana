@@ -43,6 +43,7 @@
         ],
         "path": "packages/shared-ux/page/no_data_config/mocks/src/storybook.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-page-no-data-config-mocks",
@@ -53,6 +54,7 @@
             "description": [],
             "path": "packages/shared-ux/page/no_data_config/mocks/src/storybook.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-page-no-data-config-mocks",
@@ -63,6 +65,7 @@
                 "description": [],
                 "path": "packages/shared-ux/page/no_data_config/mocks/src/storybook.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/shared-ux-page-no-data-config-mocks",
@@ -72,7 +75,8 @@
                     "label": "control",
                     "description": [],
                     "path": "packages/shared-ux/page/no_data_config/mocks/src/storybook.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/shared-ux-page-no-data-config-mocks",
@@ -82,7 +86,8 @@
                     "label": "defaultValue",
                     "description": [],
                     "path": "packages/shared-ux/page/no_data_config/mocks/src/storybook.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               },
@@ -95,6 +100,7 @@
                 "description": [],
                 "path": "packages/shared-ux/page/no_data_config/mocks/src/storybook.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/shared-ux-page-no-data-config-mocks",
@@ -105,6 +111,7 @@
                     "description": [],
                     "path": "packages/shared-ux/page/no_data_config/mocks/src/storybook.ts",
                     "deprecated": false,
+                    "trackAdoption": false,
                     "children": [
                       {
                         "parentPluginId": "@kbn/shared-ux-page-no-data-config-mocks",
@@ -114,7 +121,8 @@
                         "label": "type",
                         "description": [],
                         "path": "packages/shared-ux/page/no_data_config/mocks/src/storybook.ts",
-                        "deprecated": false
+                        "deprecated": false,
+                        "trackAdoption": false
                       }
                     ]
                   },
@@ -129,7 +137,8 @@
                       "(string | undefined)[]"
                     ],
                     "path": "packages/shared-ux/page/no_data_config/mocks/src/storybook.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/shared-ux-page-no-data-config-mocks",
@@ -142,7 +151,8 @@
                       "undefined"
                     ],
                     "path": "packages/shared-ux/page/no_data_config/mocks/src/storybook.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               },
@@ -155,6 +165,7 @@
                 "description": [],
                 "path": "packages/shared-ux/page/no_data_config/mocks/src/storybook.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/shared-ux-page-no-data-config-mocks",
@@ -164,7 +175,8 @@
                     "label": "control",
                     "description": [],
                     "path": "packages/shared-ux/page/no_data_config/mocks/src/storybook.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/shared-ux-page-no-data-config-mocks",
@@ -174,7 +186,8 @@
                     "label": "defaultValue",
                     "description": [],
                     "path": "packages/shared-ux/page/no_data_config/mocks/src/storybook.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               },
@@ -187,6 +200,7 @@
                 "description": [],
                 "path": "packages/shared-ux/page/no_data_config/mocks/src/storybook.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/shared-ux-page-no-data-config-mocks",
@@ -196,7 +210,8 @@
                     "label": "control",
                     "description": [],
                     "path": "packages/shared-ux/page/no_data_config/mocks/src/storybook.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/shared-ux-page-no-data-config-mocks",
@@ -206,7 +221,8 @@
                     "label": "defaultValue",
                     "description": [],
                     "path": "packages/shared-ux/page/no_data_config/mocks/src/storybook.ts",
-                    "deprecated": false
+                    "deprecated": false,
+                    "trackAdoption": false
                   }
                 ]
               }
@@ -221,6 +237,7 @@
             "description": [],
             "path": "packages/shared-ux/page/no_data_config/mocks/src/storybook.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": []
           },
           {
@@ -235,7 +252,8 @@
               "[]"
             ],
             "path": "packages/shared-ux/page/no_data_config/mocks/src/storybook.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/shared-ux-page-no-data-config-mocks",
@@ -258,6 +276,7 @@
             ],
             "path": "packages/shared-ux/page/no_data_config/mocks/src/storybook.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-page-no-data-config-mocks",
@@ -278,6 +297,7 @@
                 ],
                 "path": "packages/shared-ux/page/no_data_config/mocks/src/storybook.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": false
               }
             ],
@@ -304,6 +324,7 @@
             ],
             "path": "packages/shared-ux/page/no_data_config/mocks/src/storybook.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-page-no-data-config-mocks",
@@ -323,6 +344,7 @@
                 ],
                 "path": "packages/shared-ux/page/no_data_config/mocks/src/storybook.ts",
                 "deprecated": false,
+                "trackAdoption": false,
                 "isRequired": true
               }
             ],
@@ -346,6 +368,7 @@
         ],
         "path": "packages/shared-ux/page/no_data_config/mocks/src/jest.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -372,6 +395,7 @@
         ],
         "path": "packages/shared-ux/page/no_data_config/mocks/src/storybook.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

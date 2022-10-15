@@ -8,7 +8,7 @@
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const ml = getService('ml');
 
   const fleetPackages = ['apache', 'nginx'];
@@ -16,8 +16,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
   describe('modules', function () {
     before(async () => {
-      // use empty_kibana to make sure the fleet setup is removed correctly after the tests
-      await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
+      // use await kibanaServer.savedObjects.cleanStandardList(); to make sure the fleet setup is removed correctly after the tests
+      await kibanaServer.savedObjects.cleanStandardList();
 
       // Fleet need to be setup to be able to setup packages
       await ml.testResources.setupFleet();
@@ -32,11 +32,12 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       for (const fleetPackage of installedPackages) {
         await ml.testResources.removeFleetPackage(fleetPackage.pkgName, fleetPackage.version);
       }
-      await esArchiver.unload('x-pack/test/functional/es_archives/empty_kibana');
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     loadTestFile(require.resolve('./get_module'));
     loadTestFile(require.resolve('./recognize_module'));
     loadTestFile(require.resolve('./setup_module'));
+    loadTestFile(require.resolve('./jobs_exist'));
   });
 }

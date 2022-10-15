@@ -4,59 +4,59 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { schema, TypeOf } from '@kbn/config-schema';
-import type { Ensure } from '@kbn/utility-types';
-import type { FilesRouter } from './types';
-
-import { FindFilesHttpEndpoint, FILES_API_ROUTES } from './api_routes';
-import type { FilesRequestHandler } from './types';
+import { schema } from '@kbn/config-schema';
+import type { CreateHandler, FilesRouter } from './types';
+import { FileJSON } from '../../common';
+import { FILES_API_ROUTES, CreateRouteDefinition } from './api_routes';
 
 const method = 'post' as const;
 
 const string64 = schema.string({ maxLength: 64 });
 const string256 = schema.string({ maxLength: 256 });
 
-const stringOrArrayOfStrings = schema.oneOf([string64, schema.arrayOf(string64)]);
-const nameStringOrArrayOfNameStrings = schema.oneOf([string256, schema.arrayOf(string256)]);
+export const stringOrArrayOfStrings = schema.oneOf([string64, schema.arrayOf(string64)]);
+export const nameStringOrArrayOfNameStrings = schema.oneOf([string256, schema.arrayOf(string256)]);
 
-const bodySchema = schema.object({
-  kind: schema.maybe(stringOrArrayOfStrings),
-  status: schema.maybe(stringOrArrayOfStrings),
-  name: schema.maybe(nameStringOrArrayOfNameStrings),
-  meta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
-});
-
-const querySchema = schema.object({
-  page: schema.maybe(schema.number()),
-  perPage: schema.maybe(schema.number({ defaultValue: 100 })),
-});
-
-type Body = Ensure<FindFilesHttpEndpoint['inputs']['body'], TypeOf<typeof bodySchema>>;
-
-type Query = Ensure<FindFilesHttpEndpoint['inputs']['query'], TypeOf<typeof querySchema>>;
-
-type Response = FindFilesHttpEndpoint['output'];
-
-function toArray(val: string | string[]) {
+export function toArrayOrUndefined(val?: string | string[]): undefined | string[] {
+  if (val == null) return undefined;
   return Array.isArray(val) ? val : [val];
 }
 
-const handler: FilesRequestHandler<unknown, Query, Body> = async ({ files }, req, res) => {
+const rt = {
+  body: schema.object({
+    kind: schema.maybe(stringOrArrayOfStrings),
+    status: schema.maybe(stringOrArrayOfStrings),
+    extension: schema.maybe(stringOrArrayOfStrings),
+    name: schema.maybe(nameStringOrArrayOfNameStrings),
+    meta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+  }),
+  query: schema.object({
+    page: schema.maybe(schema.number()),
+    perPage: schema.maybe(schema.number({ defaultValue: 100 })),
+  }),
+};
+
+export type Endpoint = CreateRouteDefinition<typeof rt, { files: FileJSON[]; total: number }>;
+
+const handler: CreateHandler<Endpoint> = async ({ files }, req, res) => {
   const { fileService } = await files;
   const {
     body: { meta, extension, kind, name, status },
     query,
   } = req;
 
-  const body: Response = {
-    files: await fileService.asCurrentUser().find({
-      kind: kind && toArray(kind),
-      name: name && toArray(name),
-      status: status && toArray(status),
-      extension: extension && toArray(extension),
-      meta,
-      ...query,
-    }),
+  const { files: results, total } = await fileService.asCurrentUser().find({
+    kind: toArrayOrUndefined(kind),
+    name: toArrayOrUndefined(name),
+    status: toArrayOrUndefined(status),
+    extension: toArrayOrUndefined(extension),
+    meta,
+    ...query,
+  });
+
+  const body: Endpoint['output'] = {
+    total,
+    files: results,
   };
   return res.ok({
     body,
@@ -72,9 +72,7 @@ export function register(router: FilesRouter) {
   router[method](
     {
       path: FILES_API_ROUTES.find,
-      validate: {
-        body: bodySchema,
-      },
+      validate: { ...rt },
     },
     handler
   );

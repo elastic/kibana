@@ -48,7 +48,8 @@ export const createGridColumns = (
   alignments: Record<string, 'left' | 'right' | 'center'>,
   headerRowHeight: 'auto' | 'single' | 'custom',
   headerRowLines: number,
-  closeCellPopover?: Function
+  closeCellPopover?: Function,
+  columnFilterable?: boolean[]
 ) => {
   const columnsReverseLookup = table.columns.reduce<
     Record<string, { name: string; index: number; meta?: DatatableColumnMeta }>
@@ -57,13 +58,12 @@ export const createGridColumns = (
     return memo;
   }, {});
 
-  const bucketLookup = new Set(bucketColumns);
-
   const getContentData = ({
     rowIndex,
     columnId,
   }: Pick<EuiDataGridColumnCellActionProps, 'rowIndex' | 'columnId'>) => {
-    const rowValue = table.rows[rowIndex][columnId];
+    // incoming data might change and put the current page out of bounds - check whether row actually exists
+    const rowValue = table.rows[rowIndex]?.[columnId];
     const column = columnsReverseLookup?.[columnId];
     const contentsIsDefined = rowValue != null;
 
@@ -72,11 +72,13 @@ export const createGridColumns = (
   };
 
   return visibleColumns.map((field) => {
-    const filterable = bucketLookup.has(field);
     const { name, index: colIndex } = columnsReverseLookup[field];
+    const filterable = columnFilterable?.[colIndex] || false;
+
+    const columnArgs = columnConfig.columns.find(({ columnId }) => columnId === field);
 
     const cellActions =
-      filterable && handleFilterClick
+      filterable && handleFilterClick && !columnArgs?.oneClickFilter
         ? [
             ({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => {
               const { rowValue, contentsIsDefined, cellContent } = getContentData({
@@ -157,7 +159,6 @@ export const createGridColumns = (
           ]
         : undefined;
 
-    const columnArgs = columnConfig.columns.find(({ columnId }) => columnId === field);
     const isTransposed = Boolean(columnArgs?.originalColumnId);
     const initialWidth = columnArgs?.width;
     const isHidden = columnArgs?.hidden;

@@ -20,7 +20,13 @@ export function CasesSingleViewServiceProvider({ getService, getPageObject }: Ft
 
   return {
     async deleteCase() {
-      await common.clickAndValidate('property-actions-ellipses', 'property-actions-trash');
+      const caseActions = await testSubjects.findDescendant(
+        'property-actions-ellipses',
+        await testSubjects.find('case-view-actions')
+      );
+
+      await caseActions.click();
+      await testSubjects.existOrFail('property-actions-trash');
       await common.clickAndValidate('property-actions-trash', 'confirmModalConfirmButton');
       await testSubjects.click('confirmModalConfirmButton');
       await header.waitUntilLoadingHasFinished();
@@ -85,6 +91,41 @@ export function CasesSingleViewServiceProvider({ getService, getPageObject }: Ft
       );
       await addVisualizationButton.moveMouseTo();
       await new Promise((resolve) => setTimeout(resolve, 500)); // give tooltip time to open
+    },
+
+    async assertCaseTitle(expectedTitle: string) {
+      const actionTitle = await testSubjects.getVisibleText('header-page-title');
+      expect(actionTitle).to.eql(
+        expectedTitle,
+        `Expected case title to be '${expectedTitle}' (got '${actionTitle}')`
+      );
+    },
+
+    async assertCaseDescription(expectedDescription: string) {
+      const desc = await find.byCssSelector(
+        '[data-test-subj="description-action"] [data-test-subj="user-action-markdown"]'
+      );
+
+      const actualDescription = await desc.getVisibleText();
+
+      expect(expectedDescription).to.eql(
+        actualDescription,
+        `Expected case description to be '${expectedDescription}' (got '${actualDescription}')`
+      );
+    },
+
+    async openAssigneesPopover() {
+      await common.clickAndValidate('case-view-assignees-edit-button', 'euiSelectableList');
+      await header.waitUntilLoadingHasFinished();
+    },
+
+    async closeAssigneesPopover() {
+      await retry.try(async () => {
+        // Click somewhere outside the popover
+        await testSubjects.click('header-page-title');
+        await header.waitUntilLoadingHasFinished();
+        await testSubjects.missingOrFail('euiSelectableList');
+      });
     },
   };
 }

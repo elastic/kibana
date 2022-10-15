@@ -17,8 +17,11 @@ import {
   EuiText,
   EuiSpacer,
   EuiButtonEmpty,
+  EuiTitle,
 } from '@elastic/eui';
 import { useRouteMatch } from 'react-router-dom';
+
+import { getRegistryDataStreamAssetBaseName } from '../../../../../../../../../common/services';
 
 import type {
   NewPackagePolicy,
@@ -27,6 +30,7 @@ import type {
   RegistryStream,
   RegistryVarsEntry,
 } from '../../../../../../types';
+import { InlineReleaseBadge } from '../../../../../../components';
 import type { PackagePolicyConfigValidationResults } from '../../../services';
 import { isAdvancedVar, validationHasErrors } from '../../../services';
 import { PackagePolicyEditorDatastreamPipelines } from '../../datastream_pipelines';
@@ -43,20 +47,24 @@ const ScrollAnchor = styled.div`
   scroll-margin-top: ${(props) => parseFloat(props.theme.eui.euiHeaderHeightCompensation) * 2}px;
 `;
 
-export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
+interface Props {
   packagePolicy: NewPackagePolicy;
   packageInputStream: RegistryStream & { data_stream: { dataset: string; type: string } };
   packageInfo: PackageInfo;
   packagePolicyInputStream: NewPackagePolicyInputStream;
+  updatePackagePolicy: (updatedPackagePolicy: Partial<NewPackagePolicy>) => void;
   updatePackagePolicyInputStream: (updatedStream: Partial<NewPackagePolicyInputStream>) => void;
   inputStreamValidationResults: PackagePolicyConfigValidationResults;
   forceShowErrors?: boolean;
-}> = memo(
+}
+
+export const PackagePolicyInputStreamConfig = memo<Props>(
   ({
     packagePolicy,
     packageInputStream,
     packageInfo,
     packagePolicyInputStream,
+    updatePackagePolicy,
     updatePackagePolicyInputStream,
     inputStreamValidationResults,
     forceShowErrors,
@@ -111,68 +119,83 @@ export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
     );
 
     return (
-      <EuiFlexGrid columns={2} id={isDefaultDatstream ? 'test123' : 'asas'}>
-        <ScrollAnchor ref={containerRef} />
-        <EuiFlexItem>
-          <EuiFlexGroup gutterSize="none" alignItems="flexStart">
-            <EuiFlexItem grow={1} />
-            <EuiFlexItem grow={5}>
-              <EuiSwitch
-                label={packageInputStream.title}
-                disabled={packagePolicyInputStream.keep_enabled}
-                checked={packagePolicyInputStream.enabled}
-                onChange={(e) => {
-                  const enabled = e.target.checked;
-                  updatePackagePolicyInputStream({
-                    enabled,
-                  });
-                }}
-              />
-              {packageInputStream.description ? (
-                <Fragment>
-                  <EuiSpacer size="s" />
-                  <EuiText size="s" color="subdued">
-                    <ReactMarkdown>{packageInputStream.description}</ReactMarkdown>
-                  </EuiText>
-                </Fragment>
-              ) : null}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <FlexItemWithMaxWidth>
-          <EuiFlexGroup direction="column" gutterSize="m">
-            {requiredVars.map((varDef) => {
-              if (!packagePolicyInputStream?.vars) return null;
-              const { name: varName, type: varType } = varDef;
-              const varConfigEntry = packagePolicyInputStream.vars?.[varName];
-              const value = varConfigEntry?.value;
-              const frozen = varConfigEntry?.frozen ?? false;
+      <>
+        <EuiFlexGrid columns={2} id={isDefaultDatstream ? 'test123' : 'asas'}>
+          <ScrollAnchor ref={containerRef} />
+          <EuiFlexItem>
+            <EuiFlexGroup gutterSize="none" alignItems="flexStart">
+              <EuiFlexItem grow={1} />
+              <EuiFlexItem grow={5}>
+                <EuiFlexGroup
+                  gutterSize="none"
+                  alignItems="flexStart"
+                  justifyContent="spaceBetween"
+                >
+                  {packageInfo.type !== 'input' && (
+                    <EuiFlexItem grow={false}>
+                      <EuiSwitch
+                        label={packageInputStream.title}
+                        disabled={packagePolicyInputStream.keep_enabled}
+                        checked={packagePolicyInputStream.enabled}
+                        onChange={(e) => {
+                          const enabled = e.target.checked;
+                          updatePackagePolicyInputStream({
+                            enabled,
+                          });
+                        }}
+                      />
+                    </EuiFlexItem>
+                  )}
+                  {packagePolicyInputStream.release && packagePolicyInputStream.release !== 'ga' ? (
+                    <EuiFlexItem grow={false}>
+                      <InlineReleaseBadge release={packagePolicyInputStream.release} />
+                    </EuiFlexItem>
+                  ) : null}
+                </EuiFlexGroup>
+                {packageInfo.type !== 'input' && packageInputStream.description ? (
+                  <Fragment>
+                    <EuiSpacer size="s" />
+                    <EuiText size="s" color="subdued">
+                      <ReactMarkdown>{packageInputStream.description}</ReactMarkdown>
+                    </EuiText>
+                  </Fragment>
+                ) : null}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <FlexItemWithMaxWidth>
+            <EuiFlexGroup direction="column" gutterSize="m">
+              {requiredVars.map((varDef) => {
+                if (!packagePolicyInputStream?.vars) return null;
+                const { name: varName, type: varType } = varDef;
+                const varConfigEntry = packagePolicyInputStream.vars?.[varName];
+                const value = varConfigEntry?.value;
+                const frozen = varConfigEntry?.frozen ?? false;
 
-              return (
-                <EuiFlexItem key={varName}>
-                  <PackagePolicyInputVarField
-                    varDef={varDef}
-                    value={value}
-                    frozen={frozen}
-                    onChange={(newValue: any) => {
-                      updatePackagePolicyInputStream({
-                        vars: {
-                          ...packagePolicyInputStream.vars,
-                          [varName]: {
-                            type: varType,
-                            value: newValue,
+                return (
+                  <EuiFlexItem key={varName}>
+                    <PackagePolicyInputVarField
+                      varDef={varDef}
+                      value={value}
+                      frozen={frozen}
+                      onChange={(newValue: any) => {
+                        updatePackagePolicyInputStream({
+                          vars: {
+                            ...packagePolicyInputStream.vars,
+                            [varName]: {
+                              type: varType,
+                              value: newValue,
+                            },
                           },
-                        },
-                      });
-                    }}
-                    errors={inputStreamValidationResults?.vars![varName]}
-                    forceShowErrors={forceShowErrors}
-                  />
-                </EuiFlexItem>
-              );
-            })}
-            {/* Advanced section */}
-            {(isPackagePolicyEdit || !!advancedVars.length) && (
+                        });
+                      }}
+                      errors={inputStreamValidationResults?.vars![varName]}
+                      forceShowErrors={forceShowErrors}
+                    />
+                  </EuiFlexItem>
+                );
+              })}
+              {/* Advanced section - always shown since we display experimental indexing settings here */}
               <Fragment>
                 <EuiFlexItem>
                   <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -248,13 +271,102 @@ export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
                         </EuiFlexItem>
                       </>
                     )}
+                    {/* Experimental index/datastream settings e.g. synthetic source */}
+                    <EuiFlexItem>
+                      <EuiFlexGroup direction="column" gutterSize="xs">
+                        <EuiFlexItem grow={false}>
+                          <EuiTitle size="xxxs">
+                            <h5>
+                              <FormattedMessage
+                                id="xpack.fleet.packagePolicyEditor.experimentalSettings.title"
+                                defaultMessage="Indexing settings (experimental)"
+                              />
+                            </h5>
+                          </EuiTitle>
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <EuiText color="subdued" size="xs">
+                            <FormattedMessage
+                              id="xpack.fleet.createPackagePolicy.stepConfigure.experimentalFeaturesDescription"
+                              defaultMessage="Select data streams to configure indexing options. This is an {experimentalFeature} and may have effects on other properties."
+                              values={{
+                                experimentalFeature: (
+                                  <strong>
+                                    <FormattedMessage
+                                      id="xpack.fleet.createPackagePolicy.experimentalFeatureText"
+                                      defaultMessage="experimental feature"
+                                    />
+                                  </strong>
+                                ),
+                              }}
+                            />
+                          </EuiText>
+                        </EuiFlexItem>
+                        <EuiSpacer size="s" />
+                        <EuiFlexItem>
+                          <EuiSwitch
+                            checked={
+                              packagePolicy.package?.experimental_data_stream_features?.some(
+                                ({ data_stream: dataStream, features }) =>
+                                  dataStream ===
+                                    getRegistryDataStreamAssetBaseName(
+                                      packagePolicyInputStream.data_stream
+                                    ) && features.synthetic_source
+                              ) ?? false
+                            }
+                            label={
+                              <FormattedMessage
+                                id="xpack.fleet.createPackagePolicy.experimentalFeatures.syntheticSourceLabel"
+                                defaultMessage="Synthetic source"
+                              />
+                            }
+                            onChange={(e) => {
+                              if (!packagePolicy.package) {
+                                return;
+                              }
+
+                              const newExperimentalDataStreamFeatures = [
+                                ...(packagePolicy.package.experimental_data_stream_features ?? []),
+                              ];
+
+                              const dataStream = getRegistryDataStreamAssetBaseName(
+                                packagePolicyInputStream.data_stream
+                              );
+
+                              const existingSettingRecord = newExperimentalDataStreamFeatures.find(
+                                (x) => x.data_stream === dataStream
+                              );
+
+                              if (existingSettingRecord) {
+                                existingSettingRecord.features.synthetic_source = e.target.checked;
+                              } else {
+                                newExperimentalDataStreamFeatures.push({
+                                  data_stream: dataStream,
+                                  features: {
+                                    synthetic_source: e.target.checked,
+                                  },
+                                });
+                              }
+
+                              updatePackagePolicy({
+                                package: {
+                                  ...packagePolicy.package,
+                                  experimental_data_stream_features:
+                                    newExperimentalDataStreamFeatures,
+                                },
+                              });
+                            }}
+                          />
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiFlexItem>
                   </>
                 ) : null}
               </Fragment>
-            )}
-          </EuiFlexGroup>
-        </FlexItemWithMaxWidth>
-      </EuiFlexGrid>
+            </EuiFlexGroup>
+          </FlexItemWithMaxWidth>
+        </EuiFlexGrid>
+      </>
     );
   }
 );

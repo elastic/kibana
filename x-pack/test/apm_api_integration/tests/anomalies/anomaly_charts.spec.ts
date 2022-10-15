@@ -18,7 +18,6 @@ import { createAndRunApmMlJob } from '../../common/utils/create_and_run_apm_ml_j
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
-
   const apmApiClient = getService('apmApiClient');
   const ml = getService('ml');
 
@@ -70,7 +69,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when(
     'fetching service anomalies with a basic license',
-    { config: 'basic', archives: ['apm_mappings_only_8.0.0'] },
+    { config: 'basic', archives: [] },
     () => {
       it('returns a 501', async () => {
         const status = await statusOf(
@@ -90,7 +89,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when(
     'fetching service anomalies with a trial license',
-    { config: 'trial', archives: ['apm_mappings_only_8.0.0'] },
+    { config: 'trial', archives: [] },
     () => {
       const start = '2021-01-01T00:00:00.000Z';
       const end = '2021-01-08T00:15:00.000Z';
@@ -102,9 +101,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const NORMAL_RATE = 1;
 
       before(async () => {
-        const serviceA = apm.service('a', 'production', 'java').instance('a');
+        const serviceA = apm
+          .service({ name: 'a', environment: 'production', agentName: 'java' })
+          .instance('a');
 
-        const serviceB = apm.service('b', 'development', 'go').instance('b');
+        const serviceB = apm
+          .service({ name: 'b', environment: 'development', agentName: 'go' })
+          .instance('b');
 
         const events = timerange(new Date(start).getTime(), new Date(end).getTime())
           .interval('1m')
@@ -118,13 +121,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             return [
               ...range(0, count).flatMap((_) =>
                 serviceA
-                  .transaction('tx', 'request')
+                  .transaction({ transactionName: 'tx', transactionType: 'request' })
                   .timestamp(timestamp)
                   .duration(duration)
                   .outcome(outcome)
               ),
               serviceB
-                .transaction('tx', 'Worker')
+                .transaction({ transactionName: 'tx', transactionType: 'Worker' })
                 .timestamp(timestamp)
                 .duration(duration)
                 .success(),

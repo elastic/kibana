@@ -31,6 +31,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionGauge",
@@ -51,6 +52,7 @@
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           },
           {
@@ -72,6 +74,7 @@
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -108,6 +111,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionGauge",
@@ -128,6 +132,7 @@
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           },
           {
@@ -149,6 +154,7 @@
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           },
           {
@@ -164,6 +170,7 @@
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           },
           {
@@ -178,6 +185,7 @@
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -214,6 +222,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionGauge",
@@ -234,6 +243,7 @@
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           },
           {
@@ -255,6 +265,7 @@
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           },
           {
@@ -270,6 +281,7 @@
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           },
           {
@@ -284,6 +296,7 @@
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -310,6 +323,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionGauge",
@@ -323,6 +337,7 @@
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": true
           },
           {
@@ -344,6 +359,7 @@
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/public/components/utils/accessors.ts",
             "deprecated": false,
+            "trackAdoption": false,
             "isRequired": false
           }
         ],
@@ -386,6 +402,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_gauge/common/expression_functions/gauge_function.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [],
         "returnComment": [],
         "initialIsOpen": false
@@ -401,6 +418,7 @@
         "description": [],
         "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionGauge",
@@ -413,7 +431,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionGauge",
@@ -426,7 +445,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionGauge",
@@ -439,7 +459,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionGauge",
@@ -452,7 +473,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -466,6 +488,7 @@
         "description": [],
         "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionGauge",
@@ -484,7 +507,8 @@
               }
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionGauge",
@@ -524,7 +548,19 @@
               "> | undefined; ariaLabel?: string | undefined; }"
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressionGauge",
+            "id": "def-common.GaugeExpressionProps.canNavigateToLens",
+            "type": "boolean",
+            "tags": [],
+            "label": "canNavigateToLens",
+            "description": [],
+            "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -538,6 +574,7 @@
         "description": [],
         "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "expressionGauge",
@@ -558,7 +595,8 @@
               " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionGauge",
@@ -579,7 +617,8 @@
               " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionGauge",
@@ -600,7 +639,8 @@
               " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionGauge",
@@ -621,7 +661,8 @@
               " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionGauge",
@@ -634,7 +675,8 @@
               "\"auto\" | \"hidden\" | \"bands\""
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionGauge",
@@ -647,7 +689,8 @@
               "\"none\" | \"auto\" | \"custom\""
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionGauge",
@@ -660,7 +703,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionGauge",
@@ -673,7 +717,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionGauge",
@@ -687,7 +732,8 @@
               " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionGauge",
@@ -700,7 +746,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionGauge",
@@ -714,7 +761,8 @@
               " | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionGauge",
@@ -730,7 +778,8 @@
               "> | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionGauge",
@@ -743,7 +792,8 @@
               "\"horizontalBullet\" | \"verticalBullet\" | \"arc\" | \"circle\""
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionGauge",
@@ -759,6 +809,7 @@
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
             "deprecated": true,
+            "trackAdoption": false,
             "references": [
               {
                 "plugin": "visTypeGauge",
@@ -777,7 +828,8 @@
               "boolean | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           },
           {
             "parentPluginId": "expressionGauge",
@@ -790,7 +842,8 @@
               "string | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -810,6 +863,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_gauge/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -841,6 +895,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
@@ -863,7 +918,8 @@
               "> | undefined"
             ],
             "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_renderers.ts",
-            "deprecated": false
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -907,6 +963,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -978,6 +1035,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -992,6 +1050,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1033,6 +1092,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_renderers.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1047,6 +1107,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1061,6 +1122,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_gauge/common/types/expression_functions.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1075,6 +1137,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_gauge/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1089,6 +1152,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_gauge/common/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -1105,6 +1169,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_gauge/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1119,6 +1184,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_gauge/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1133,6 +1199,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_gauge/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -1147,6 +1214,7 @@
         ],
         "path": "src/plugins/chart_expressions/expression_gauge/common/constants.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ]

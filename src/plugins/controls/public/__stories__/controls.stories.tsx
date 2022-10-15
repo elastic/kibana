@@ -30,12 +30,12 @@ import {
 import { decorators } from './decorators';
 import { ControlsPanels } from '../control_group/types';
 import { ControlGroupContainer } from '../control_group';
-import { pluginServices, registry } from '../services/storybook';
-import { injectStorybookDataView } from '../services/storybook/data_views';
-import { replaceOptionsListMethod } from '../services/storybook/options_list';
+import { pluginServices, registry } from '../services/plugin_services.story';
+import { injectStorybookDataView } from '../services/data_views/data_views.story';
+import { replaceOptionsListMethod } from '../services/options_list/options_list.story';
 import { populateStorybookControlFactories } from './storybook_control_factories';
-import { replaceValueSuggestionMethod } from '../services/storybook/unified_search';
-import { OptionsListResponse, OptionsListRequest } from '../options_list/types';
+import { replaceValueSuggestionMethod } from '../services/unified_search/unified_search.story';
+import { OptionsListResponse, OptionsListRequest } from '../../common/options_list/types';
 
 export default {
   title: 'Controls',

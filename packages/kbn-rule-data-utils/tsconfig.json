@@ -6,7 +6,6 @@
     "emitDeclarationOnly": true,
     "incremental": false,
     "outDir": "./target_types",
-    "rootDir": "src",
     "stripInternal": false,
     "types": [
       "jest",
@@ -14,6 +13,6 @@
     ]
   },
   "include": [
-    "src/**/*.ts"
+    "**/*.ts"
   ]
 }

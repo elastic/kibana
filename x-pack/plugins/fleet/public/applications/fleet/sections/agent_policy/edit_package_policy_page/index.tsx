@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
-import { pick } from 'lodash';
+import { pick, omit } from 'lodash';
 import { useRouteMatch } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -40,7 +40,13 @@ import {
   useBreadcrumbs as useIntegrationsBreadcrumbs,
   useGetOnePackagePolicy,
 } from '../../../../integrations/hooks';
-import { Loading, Error, ExtensionWrapper, EuiButtonWithTooltip } from '../../../components';
+import {
+  Loading,
+  Error,
+  ExtensionWrapper,
+  EuiButtonWithTooltip,
+  DevtoolsRequestFlyoutButton,
+} from '../../../components';
 import { ConfirmDeployAgentPolicyModal } from '../components';
 import { CreatePackagePolicySinglePageLayout } from '../create_package_policy_page/single_page_layout/components';
 import type { PackagePolicyValidationResults } from '../create_package_policy_page/services';
@@ -57,8 +63,10 @@ import type {
   GetOnePackagePolicyResponse,
   UpgradePackagePolicyDryRunResponse,
 } from '../../../../../../common/types/rest_spec';
+import { HIDDEN_API_REFERENCE_PACKAGES } from '../../../../../../common/constants';
 import type { PackagePolicyEditExtensionComponentProps } from '../../../types';
-import { pkgKeyFromPackageInfo } from '../../../services';
+import { ExperimentalFeaturesService, pkgKeyFromPackageInfo } from '../../../services';
+import { generateUpdatePackagePolicyDevToolsRequest } from '../services';
 
 import { fixApmDurationVars, hasUpgradeAvailable } from './utils';
 import { useHistoryBlock } from './hooks';
@@ -110,7 +118,6 @@ export const EditPackagePolicyForm = memo<{
     namespace: '',
     policy_id: '',
     enabled: true,
-    output_id: '',
     inputs: [],
     version: '',
   });
@@ -571,6 +578,22 @@ export const EditPackagePolicyForm = memo<{
     ]
   );
 
+  const { showDevtoolsRequest: isShowDevtoolRequestExperimentEnabled } =
+    ExperimentalFeaturesService.get();
+
+  const showDevtoolsRequest =
+    !HIDDEN_API_REFERENCE_PACKAGES.includes(packageInfo?.name ?? '') &&
+    isShowDevtoolRequestExperimentEnabled;
+
+  const devtoolRequest = useMemo(
+    () =>
+      generateUpdatePackagePolicyDevToolsRequest(
+        packagePolicyId,
+        omit(packagePolicy, 'elasticsearch')
+      ),
+    [packagePolicyId, packagePolicy]
+  );
+
   return (
     <CreatePackagePolicySinglePageLayout {...layoutProps} data-test-subj="editPackagePolicy">
       <EuiErrorBoundary>
@@ -639,6 +662,23 @@ export const EditPackagePolicyForm = memo<{
                         />
                       </EuiButtonEmpty>
                     </EuiFlexItem>
+                    {showDevtoolsRequest ? (
+                      <EuiFlexItem grow={false}>
+                        <DevtoolsRequestFlyoutButton
+                          isDisabled={formState !== 'VALID'}
+                          btnProps={{
+                            color: 'ghost',
+                          }}
+                          description={i18n.translate(
+                            'xpack.fleet.editPackagePolicy.devtoolsRequestDescription',
+                            {
+                              defaultMessage: 'This Kibana request updates a package policy.',
+                            }
+                          )}
+                          request={devtoolRequest}
+                        />
+                      </EuiFlexItem>
+                    ) : null}
                     <EuiFlexItem grow={false}>
                       <EuiButtonWithTooltip
                         onClick={onSubmit}

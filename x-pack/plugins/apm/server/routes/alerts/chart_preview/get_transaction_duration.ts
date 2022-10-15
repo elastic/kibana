@@ -14,7 +14,7 @@ import {
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { AlertParams } from '../route';
 import {
-  getSearchAggregatedTransactions,
+  getSearchTransactionsEvents,
   getDocumentTypeFilterForTransactions,
   getDurationFieldForTransactions,
   getProcessorEventForTransactions,
@@ -38,7 +38,7 @@ export async function getTransactionDurationChartPreview({
     start,
     end,
   } = alertParams;
-  const searchAggregatedTransactions = await getSearchAggregatedTransactions({
+  const searchAggregatedTransactions = await getSearchTransactionsEvents({
     ...setup,
     kuery: '',
   });
@@ -87,7 +87,7 @@ export async function getTransactionDurationChartPreview({
     apm: {
       events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
     },
-    body: { size: 0, query, aggs },
+    body: { size: 0, track_total_hits: false, query, aggs },
   };
   const resp = await apmEventClient.search(
     'get_transaction_duration_chart_preview',

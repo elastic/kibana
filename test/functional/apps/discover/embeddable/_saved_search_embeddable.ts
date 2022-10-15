@@ -77,5 +77,30 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await dataGrid.checkCurrentRowsPerPageToBe(10);
     });
+
+    it('should control columns correctly', async () => {
+      await PageObjects.dashboard.switchToEditMode();
+
+      const cell = await dataGrid.getCellElement(0, 2);
+      expect(await cell.getVisibleText()).to.be('Sep 22, 2015 @ 23:50:13.253');
+      await dataGrid.clickMoveColumnLeft('agent');
+
+      const cellAfter = await dataGrid.getCellElement(0, 2);
+      expect(await cellAfter.getVisibleText()).to.be(
+        'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322)'
+      );
+
+      await dataGrid.clickRemoveColumn('agent');
+      expect(await cell.getVisibleText()).to.be('Sep 22, 2015 @ 23:50:13.253');
+    });
+
+    it('should render duplicate saved search embeddables', async () => {
+      await addSearchEmbeddableToDashboard();
+      const [firstGridCell, secondGridCell] = await dataGrid.getAllCellElements();
+      const firstGridCellContent = await firstGridCell.getVisibleText();
+      const secondGridCellContent = await secondGridCell.getVisibleText();
+
+      expect(firstGridCellContent).to.be.equal(secondGridCellContent);
+    });
   });
 }

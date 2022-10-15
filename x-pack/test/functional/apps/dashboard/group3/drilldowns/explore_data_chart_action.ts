@@ -47,7 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('navigates to Discover app on action click carrying over pie slice filter', async () => {
-        await testSubjects.clickWhenNotDisabled(ACTION_TEST_SUBJ);
+        await testSubjects.clickWhenNotDisabledWithoutRetry(ACTION_TEST_SUBJ);
         await discover.waitForDiscoverAppOnScreen();
         await filterBar.hasFilter('memory', '160,000 to 200,000');
         const filterCount = await filterBar.getFilterCount();
@@ -88,7 +88,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('navigates to Discover on click carrying over brushed time range', async () => {
-        await testSubjects.clickWhenNotDisabled(ACTION_TEST_SUBJ);
+        await testSubjects.clickWhenNotDisabledWithoutRetry(ACTION_TEST_SUBJ);
         await discover.waitForDiscoverAppOnScreen();
         const newTimeRangeDurationHours = await timePicker.getTimeDurationInHours();
 

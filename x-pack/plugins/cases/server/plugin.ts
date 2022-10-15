@@ -30,6 +30,7 @@ import {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { APP_ID } from '../common/constants';
 
 import {
@@ -52,12 +53,14 @@ import { getInternalRoutes } from './routes/api/get_internal_routes';
 import { PersistableStateAttachmentTypeRegistry } from './attachment_framework/persistable_state_registry';
 import { ExternalReferenceAttachmentTypeRegistry } from './attachment_framework/external_reference_registry';
 import { UserProfileService } from './services';
+import { LICENSING_CASE_ASSIGNMENT_FEATURE } from './common/constants';
 
 export interface PluginsSetup {
   actions: ActionsPluginSetup;
   lens: LensServerPluginSetup;
   features: FeaturesPluginSetup;
-  security?: SecurityPluginSetup;
+  security: SecurityPluginSetup;
+  licensing: LicensingPluginSetup;
   taskManager?: TaskManagerSetupContract;
   usageCollection?: UsageCollectionSetup;
 }
@@ -65,8 +68,9 @@ export interface PluginsSetup {
 export interface PluginsStart {
   actions: ActionsPluginStart;
   features: FeaturesPluginStart;
+  licensing: LicensingPluginStart;
   taskManager?: TaskManagerStartContract;
-  security?: SecurityPluginStart;
+  security: SecurityPluginStart;
   spaces: SpacesPluginStart;
 }
 
@@ -147,6 +151,8 @@ export class CasePlugin {
       telemetryUsageCounter,
     });
 
+    plugins.licensing.featureUsage.register(LICENSING_CASE_ASSIGNMENT_FEATURE, 'platinum');
+
     return {
       attachmentFramework: {
         registerExternalReference: (externalReferenceAttachmentType) => {
@@ -168,16 +174,22 @@ export class CasePlugin {
 
     this.userProfileService.initialize({
       spaces: plugins.spaces,
-      securityPluginSetup: this.securityPluginSetup,
+      // securityPluginSetup will be set to a defined value in the setup() function
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      securityPluginSetup: this.securityPluginSetup!,
       securityPluginStart: plugins.security,
+      licensingPluginStart: plugins.licensing,
     });
 
     this.clientFactory.initialize({
-      securityPluginSetup: this.securityPluginSetup,
+      // securityPluginSetup will be set to a defined value in the setup() function
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      securityPluginSetup: this.securityPluginSetup!,
       securityPluginStart: plugins.security,
       spacesPluginStart: plugins.spaces,
       featuresPluginStart: plugins.features,
       actionsPluginStart: plugins.actions,
+      licensingPluginStart: plugins.licensing,
       /**
        * Lens will be always defined as
        * it is declared as required plugin in kibana.json
@@ -186,6 +198,7 @@ export class CasePlugin {
       lensEmbeddableFactory: this.lensEmbeddableFactory!,
       persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
       externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
+      publicBaseUrl: core.http.basePath.publicBaseUrl,
     });
 
     const client = core.elasticsearch.client;

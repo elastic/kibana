@@ -37,6 +37,7 @@ export const useMapAction = () => {
 
       await navigateToPath(path, false);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [globalState]
   );
 

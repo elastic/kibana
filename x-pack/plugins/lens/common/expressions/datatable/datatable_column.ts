@@ -9,7 +9,7 @@ import type { Direction } from '@elastic/eui';
 import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
 import type { CustomPaletteState } from '@kbn/charts-plugin/common';
 import type { ExpressionFunctionDefinition, DatatableColumn } from '@kbn/expressions-plugin/common';
-import { SortingHint } from '../..';
+import type { SortingHint } from '../..';
 
 export type LensGridDirection = 'none' | Direction;
 
@@ -30,6 +30,7 @@ export interface ColumnState {
   columnId: string;
   width?: number;
   hidden?: boolean;
+  oneClickFilter?: boolean;
   isTransposed?: boolean;
   // These flags are necessary to transpose columns and map them back later
   // They are set automatically and are not user-editable
@@ -63,6 +64,7 @@ export const datatableColumn: ExpressionFunctionDefinition<
     alignment: { types: ['string'], help: '' },
     sortingHint: { types: ['string'], help: '' },
     hidden: { types: ['boolean'], help: '' },
+    oneClickFilter: { types: ['boolean'], help: '' },
     width: { types: ['number'], help: '' },
     isTransposed: { types: ['boolean'], help: '' },
     transposable: { types: ['boolean'], help: '' },

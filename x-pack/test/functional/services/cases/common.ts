@@ -6,9 +6,12 @@
  */
 
 import expect from '@kbn/expect';
+import { ProvidedType } from '@kbn/test';
 import { CaseStatuses } from '@kbn/cases-plugin/common';
 import { CaseSeverity } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../ftr_provider_context';
+
+export type CasesCommon = ProvidedType<typeof CasesCommonServiceProvider>;
 
 export function CasesCommonServiceProvider({ getService, getPageObject }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -16,6 +19,7 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
   const header = getPageObject('header');
   const common = getPageObject('common');
   const toasts = getService('toasts');
+  const retry = getService('retry');
 
   return {
     /**
@@ -35,7 +39,7 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
       this.openCaseSetStatusDropdown();
       await testSubjects.click(`case-view-status-dropdown-${status}`);
       await header.waitUntilLoadingHasFinished();
-      await testSubjects.existOrFail(`status-badge-${status}`);
+      await testSubjects.existOrFail(`case-status-badge-popover-button-${status}`);
     },
 
     async openCaseSetStatusDropdown() {
@@ -74,6 +78,37 @@ export function CasesCommonServiceProvider({ getService, getPageObject }: FtrPro
       const toast = await toasts.getToastElement(1);
       expect(await toast.getVisibleText()).to.contain(content);
       await toasts.dismissAllToasts();
+    },
+
+    async assertCaseModalVisible(expectVisible = true) {
+      await retry.tryForTime(5000, async () => {
+        if (expectVisible) {
+          await testSubjects.existOrFail('all-cases-modal');
+        } else {
+          await testSubjects.missingOrFail('all-cases-modal');
+        }
+      });
+    },
+
+    async setSearchTextInAssigneesPopover(text: string) {
+      await (
+        await (await find.byClassName('euiContextMenuPanel')).findByClassName('euiFieldSearch')
+      ).type(text);
+      await header.waitUntilLoadingHasFinished();
+    },
+
+    async selectFirstRowInAssigneesPopover() {
+      await (await find.byClassName('euiSelectableListItem__content')).click();
+      await header.waitUntilLoadingHasFinished();
+    },
+
+    async selectAllRowsInAssigneesPopover() {
+      const rows = await find.allByCssSelector('.euiSelectableListItem__content');
+      for (const row of rows) {
+        await row.click();
+      }
+
+      await header.waitUntilLoadingHasFinished();
     },
   };
 }

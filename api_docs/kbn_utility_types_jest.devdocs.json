@@ -32,8 +32,9 @@
           },
           "<T[P]>; } & T"
         ],
-        "path": "packages/kbn-utility-types-jest/src/index.ts",
+        "path": "packages/kbn-utility-types-jest/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -46,8 +47,9 @@
         "signature": [
           "{ [P in keyof T]: jest.Mocked<T[P]>; }"
         ],
-        "path": "packages/kbn-utility-types-jest/src/index.ts",
+        "path": "packages/kbn-utility-types-jest/index.ts",
         "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

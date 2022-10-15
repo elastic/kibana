@@ -7,7 +7,7 @@
  */
 
 import { XyVisFn } from '../types';
-import { XY_VIS, REFERENCE_LINE, ANNOTATION_LAYER } from '../constants';
+import { XY_VIS, REFERENCE_LINE } from '../constants';
 import { strings } from '../i18n';
 import { commonXYArgs } from './common_xy_args';
 import { commonDataLayerArgs } from './common_data_layer_args';
@@ -37,11 +37,6 @@ export const xyVisFunction: XyVisFn = {
     referenceLines: {
       types: [REFERENCE_LINE],
       help: strings.getReferenceLinesHelp(),
-      multi: true,
-    },
-    annotationLayers: {
-      types: [ANNOTATION_LAYER],
-      help: strings.getAnnotationLayerHelp(),
       multi: true,
     },
     splitColumnAccessor: {

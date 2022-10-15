@@ -6,7 +6,7 @@
  */
 
 import { FieldDescriptor, IndexPatternsFetcher } from '@kbn/data-plugin/server';
-import { UptimeESClient } from '../lib';
+import { UptimeEsClient } from '../lib';
 import { savedObjectsAdapter } from '../saved_objects/saved_objects';
 
 export interface IndexPatternTitleAndFields {
@@ -17,7 +17,7 @@ export interface IndexPatternTitleAndFields {
 export const getUptimeIndexPattern = async ({
   uptimeEsClient,
 }: {
-  uptimeEsClient: UptimeESClient;
+  uptimeEsClient: UptimeEsClient;
 }): Promise<IndexPatternTitleAndFields | undefined> => {
   const indexPatternsFetcher = new IndexPatternsFetcher(uptimeEsClient.baseESClient);
 
@@ -29,7 +29,7 @@ export const getUptimeIndexPattern = async ({
   // we have to catch errors here to avoid all endpoints returning 500 for users without APM data
   // (would be a bad first time experience)
   try {
-    const fields = await indexPatternsFetcher.getFieldsForWildcard({
+    const { fields } = await indexPatternsFetcher.getFieldsForWildcard({
       pattern: dynamicSettings.heartbeatIndices,
     });
 

@@ -16,7 +16,7 @@ import { VisualizationContainer } from '../../../visualization_container';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { IconChartDatatable } from '@kbn/chart-icons';
 import { DataContext, DatatableComponent } from './table_basic';
-import { DatatableProps } from '../../../../common/expressions';
+import type { DatatableProps } from '../../../../common/expressions';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { Datatable, RenderMode } from '@kbn/expressions-plugin/common';
@@ -143,6 +143,27 @@ describe('DatatableComponent', () => {
     ).toMatchSnapshot();
   });
 
+  test('it renders custom row height if set to another value than 1', () => {
+    const { data, args } = sampleArgs();
+
+    expect(
+      shallow(
+        <DatatableComponent
+          data={data}
+          args={{ ...args, rowHeightLines: 5 }}
+          formatFactory={(x) => x as unknown as IFieldFormat}
+          dispatchEvent={onDispatchEvent}
+          getType={jest.fn()}
+          paletteService={chartPluginMock.createPaletteRegistry()}
+          uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+          renderMode="edit"
+          interactive
+          renderComplete={renderComplete}
+        />
+      )
+    ).toMatchSnapshot();
+  });
+
   test('it should render hide, reset, and sort actions on header even when it is in read only mode', () => {
     const { data, args } = sampleArgs();
 
@@ -180,6 +201,7 @@ describe('DatatableComponent', () => {
         uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
         interactive
         renderComplete={renderComplete}
+        columnFilterable={[true, true, true]}
       />
     );
 
@@ -220,6 +242,7 @@ describe('DatatableComponent', () => {
         uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
         interactive
         renderComplete={renderComplete}
+        columnFilterable={[true, true, true]}
       />
     );
 
@@ -295,6 +318,7 @@ describe('DatatableComponent', () => {
         uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
         interactive
         renderComplete={renderComplete}
+        columnFilterable={[true, true, true]}
       />
     );
 
@@ -335,6 +359,7 @@ describe('DatatableComponent', () => {
         uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
         interactive={false}
         renderComplete={renderComplete}
+        columnFilterable={[true, true, true]}
       />
     );
 
@@ -739,7 +764,9 @@ describe('DatatableComponent', () => {
     it('enables pagination', async () => {
       const { data, args } = sampleArgs();
 
-      args.pageSize = 10;
+      data.rows = new Array(10).fill({ a: 'shoes', b: 1588024800000, c: 3 });
+
+      args.pageSize = 2;
 
       const wrapper = mount(
         <DatatableComponent
@@ -770,6 +797,57 @@ describe('DatatableComponent', () => {
       expect(updatedConfig).toBeTruthy();
       expect(updatedConfig?.pageIndex).toBe(newIndex);
       expect(updatedConfig?.pageSize).toBe(args.pageSize);
+    });
+
+    it('resets page position if rows change so page will be empty', async () => {
+      const { data, args } = sampleArgs();
+
+      data.rows = new Array(10).fill({ a: 'shoes', b: 1588024800000, c: 3 });
+
+      args.pageSize = 2;
+
+      const wrapper = mount(
+        <DatatableComponent
+          data={data}
+          args={args}
+          formatFactory={(x) => x as unknown as IFieldFormat}
+          dispatchEvent={onDispatchEvent}
+          getType={jest.fn()}
+          paletteService={chartPluginMock.createPaletteRegistry()}
+          uiSettings={{ get: jest.fn() } as unknown as IUiSettingsClient}
+          renderMode="edit"
+          interactive
+          renderComplete={renderComplete}
+        />
+      );
+      const newIndex = 3;
+      act(() => wrapper.find(EuiDataGrid).prop('pagination')?.onChangePage(newIndex));
+      wrapper.update();
+
+      expect(wrapper.find(EuiDataGrid).prop('pagination')?.pageIndex).toBe(newIndex);
+
+      wrapper.setProps({
+        data: {
+          ...data,
+          rows: new Array(20).fill({ a: 'shoes', b: 1588024800000, c: 3 }),
+        },
+      });
+
+      await waitForWrapperUpdate(wrapper);
+
+      // keeps existing page if more data is added
+      expect(wrapper.find(EuiDataGrid).prop('pagination')?.pageIndex).toBe(newIndex);
+
+      wrapper.setProps({
+        data: {
+          ...data,
+          rows: new Array(3).fill({ a: 'shoes', b: 1588024800000, c: 3 }),
+        },
+      });
+
+      await waitForWrapperUpdate(wrapper);
+      // resets to the last page if the current page becomes out of bounds
+      expect(wrapper.find(EuiDataGrid).prop('pagination')?.pageIndex).toBe(1);
     });
 
     it('disables pagination by default', async () => {

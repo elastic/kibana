@@ -14,7 +14,7 @@ import { ID as OverviewHostQueryId } from '../../containers/overview_host';
 import { OverviewHost } from '../overview_host';
 import { OverviewNetwork } from '../overview_network';
 import { useKibana } from '../../../common/lib/kibana';
-import { convertToBuildEsQuery } from '../../../common/lib/keury';
+import { convertToBuildEsQuery } from '../../../common/lib/kuery';
 import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import {

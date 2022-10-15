@@ -7,11 +7,12 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 
+import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../common/constants';
 import { ElasticsearchIndexWithIngestion } from '../../../common/types/indices';
 import { fetchConnectorByIndexName } from '../connectors/fetch_connectors';
 import { fetchCrawlerByIndexName } from '../crawler/fetch_crawlers';
 
-import { mapIndexStats } from './fetch_indices';
+import { mapIndexStats } from './utils/map_index_stats';
 
 export const fetchIndex = async (
   client: IScopedClusterClient,
@@ -33,7 +34,7 @@ export const fetchIndex = async (
   };
 
   const connector = await fetchConnectorByIndexName(client, index);
-  if (connector) {
+  if (connector && connector.service_type !== ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE) {
     return {
       ...indexResult,
       connector,
@@ -42,7 +43,7 @@ export const fetchIndex = async (
 
   const crawler = await fetchCrawlerByIndexName(client, index);
   if (crawler) {
-    return { ...indexResult, crawler };
+    return { ...indexResult, connector, crawler };
   }
 
   return indexResult;

@@ -41,6 +41,7 @@ export type {
   SavedObjectsCreatePointInTimeFinderOptions,
   SavedObjectsCreatePointInTimeFinderDependencies,
   ISavedObjectsPointInTimeFinder,
+  SavedObjectsPointInTimeFinderClient,
 } from './create_point_in_time_finder';
 export type { SavedObjectsDeleteOptions } from './delete';
 export type { SavedObjectsDeleteByNamespaceOptions } from './delete_by_namespace';
@@ -71,3 +72,9 @@ export type {
   SavedObjectsUpdateObjectsSpacesOptions,
   SavedObjectsUpdateObjectsSpacesResponseObject,
 } from './update_objects_spaces';
+export type {
+  SavedObjectsBulkDeleteObject,
+  SavedObjectsBulkDeleteOptions,
+  SavedObjectsBulkDeleteStatus,
+  SavedObjectsBulkDeleteResponse,
+} from './bulk_delete';

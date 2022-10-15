@@ -6,6 +6,9 @@
  */
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { InputsModelId } from '../../common/store/inputs/constants';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { SocTrends } from '../components/detection_response/soc_trends';
 import { SiemSearchBar } from '../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
@@ -55,7 +58,7 @@ const DetectionResponseComponent = () => {
   const { hasKibanaREAD, hasIndexRead } = useAlertsPrivileges();
   const canReadCases = useGetUserCasesPermissions().read;
   const canReadAlerts = hasKibanaREAD && hasIndexRead;
-
+  const isSocTrendsEnabled = useIsExperimentalFeatureEnabled('socTrendsEnabled');
   if (!canReadAlerts && !canReadCases) {
     return <NoPrivilegePage />;
   }
@@ -66,7 +69,12 @@ const DetectionResponseComponent = () => {
         <>
           <SecuritySolutionPageWrapper data-test-subj="detectionResponsePage">
             <HeaderPage title={i18n.DETECTION_RESPONSE_TITLE}>
-              <SiemSearchBar id="global" indexPattern={indexPattern} hideFilterBar hideQueryInput />
+              <SiemSearchBar
+                id={InputsModelId.global}
+                indexPattern={indexPattern}
+                hideFilterBar
+                hideQueryInput
+              />
             </HeaderPage>
 
             {isSourcererLoading ? (
@@ -88,17 +96,29 @@ const DetectionResponseComponent = () => {
                   </EuiFlexGroup>
                 </EuiFlexItem>
 
-                {canReadAlerts && (
-                  <EuiFlexItem>
-                    <RuleAlertsTable signalIndexName={signalIndexName} />
-                  </EuiFlexItem>
-                )}
-
-                {canReadCases && (
-                  <EuiFlexItem>
-                    <CasesTable />
-                  </EuiFlexItem>
-                )}
+                <EuiFlexItem>
+                  <EuiFlexGroup>
+                    <EuiFlexItem>
+                      <EuiFlexGroup direction="column">
+                        {canReadAlerts && (
+                          <EuiFlexItem>
+                            <RuleAlertsTable signalIndexName={signalIndexName} />
+                          </EuiFlexItem>
+                        )}
+                        {canReadCases && (
+                          <EuiFlexItem>
+                            <CasesTable />
+                          </EuiFlexItem>
+                        )}
+                      </EuiFlexGroup>
+                    </EuiFlexItem>
+                    {isSocTrendsEnabled && (
+                      <EuiFlexItem grow={false}>
+                        <SocTrends signalIndexName={signalIndexName} />
+                      </EuiFlexItem>
+                    )}
+                  </EuiFlexGroup>
+                </EuiFlexItem>
 
                 {canReadAlerts && (
                   <EuiFlexItem>

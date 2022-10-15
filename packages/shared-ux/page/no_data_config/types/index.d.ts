@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiPageTemplateProps } from '@elastic/eui';
+import { ReactNode } from 'react';
+import { EuiPageTemplateProps, EuiPageSidebarProps } from '@elastic/eui';
 
 import type {
   NoDataPageProps,
@@ -20,8 +21,13 @@ export type NoDataConfig = NoDataPageProps;
 
 export type NoDataConfigPageProps = EuiPageTemplateProps & {
   /**
-   * Accepts a configuration object, that when provided, ignores pageHeader and children and instead
+   * Accepts a configuration object, that when provided, ignores `pageHeader` and `children` and instead
    * displays Agent, Beats, and custom cards to direct users to the right ingest location
    */
   noDataConfig?: NoDataConfig;
+  /**
+   * BWC Props from old EUI template
+   */
+  pageSideBar?: ReactNode;
+  pageSideBarProps?: EuiPageSidebarProps;
 };

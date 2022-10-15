@@ -12,7 +12,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger, ElasticsearchClient } from '@kbn/core/server';
 import util from 'util';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { fromKueryExpression, toElasticsearchQuery, KueryNode, nodeBuilder } from '@kbn/es-query';
 import { IEvent, IValidatedEvent, SAVED_OBJECT_REL_PRIMARY } from '../types';
 import { AggregateOptionsType, FindOptionsType, QueryOptionsType } from '../event_log_client';
 import { ParsedIndexAlias } from './init';
@@ -48,6 +48,14 @@ interface QueryOptionsEventsBySavedObjectFilter {
   type: string;
   ids: string[];
   legacyIds?: string[];
+}
+
+export interface AggregateEventsWithAuthFilter {
+  index: string;
+  namespace: string | undefined;
+  type: string;
+  authFilter: KueryNode;
+  aggregateOptions: AggregateOptionsType;
 }
 
 export type FindEventsOptionsBySavedObjectFilter = QueryOptionsEventsBySavedObjectFilter & {
@@ -415,6 +423,126 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
       );
     }
   }
+
+  public async aggregateEventsWithAuthFilter(
+    queryOptions: AggregateEventsWithAuthFilter
+  ): Promise<AggregateEventsBySavedObjectResult> {
+    const { index, type, aggregateOptions } = queryOptions;
+    const { aggs } = aggregateOptions;
+
+    const esClient = await this.elasticsearchClientPromise;
+
+    const query = getQueryBodyWithAuthFilter(
+      this.logger,
+      queryOptions,
+      pick(queryOptions.aggregateOptions, ['start', 'end', 'filter'])
+    );
+
+    const body: estypes.SearchRequest['body'] = {
+      size: 0,
+      query,
+      aggs,
+    };
+
+    try {
+      const { aggregations } = await esClient.search<IValidatedEvent>({
+        index,
+        body,
+      });
+      return {
+        aggregations,
+      };
+    } catch (err) {
+      throw new Error(
+        `querying for Event Log by for type "${type}" and auth filter failed with: ${err.message}`
+      );
+    }
+  }
+}
+
+export function getQueryBodyWithAuthFilter(
+  logger: Logger,
+  opts: AggregateEventsWithAuthFilter,
+  queryOptions: QueryOptionsType
+) {
+  const { namespace, type, authFilter } = opts;
+  const { start, end, filter } = queryOptions ?? {};
+
+  const namespaceQuery = getNamespaceQuery(namespace);
+  let dslFilterQuery: estypes.QueryDslBoolQuery['filter'];
+  try {
+    const filterKueryNode = filter ? fromKueryExpression(filter) : null;
+    const queryFilter = filterKueryNode
+      ? nodeBuilder.and([filterKueryNode, authFilter as KueryNode])
+      : authFilter;
+    dslFilterQuery = queryFilter ? toElasticsearchQuery(queryFilter) : undefined;
+  } catch (err) {
+    logger.debug(
+      `esContext: Invalid kuery syntax for the filter (${filter}) error: ${JSON.stringify({
+        message: err.message,
+        statusCode: err.statusCode,
+      })}`
+    );
+    throw err;
+  }
+
+  const savedObjectsQueryMust: estypes.QueryDslQueryContainer[] = [
+    {
+      term: {
+        'kibana.saved_objects.rel': {
+          value: SAVED_OBJECT_REL_PRIMARY,
+        },
+      },
+    },
+    {
+      term: {
+        'kibana.saved_objects.type': {
+          value: type,
+        },
+      },
+    },
+    // @ts-expect-error undefined is not assignable as QueryDslTermQuery value
+    namespaceQuery,
+  ];
+
+  const musts: estypes.QueryDslQueryContainer[] = [
+    {
+      nested: {
+        path: 'kibana.saved_objects',
+        query: {
+          bool: {
+            must: reject(savedObjectsQueryMust, isUndefined),
+          },
+        },
+      },
+    },
+  ];
+
+  if (start) {
+    musts.push({
+      range: {
+        '@timestamp': {
+          gte: start,
+        },
+      },
+    });
+  }
+  if (end) {
+    musts.push({
+      range: {
+        '@timestamp': {
+          lte: end,
+        },
+      },
+    });
+  }
+
+  return {
+    bool: {
+      ...(dslFilterQuery ? { filter: dslFilterQuery } : {}),
+      must: reject(musts, isUndefined),
+    },
+  };
 }
 
 function getNamespaceQuery(namespace?: string) {
@@ -446,9 +574,15 @@ export function getQueryBody(
   const { start, end, filter } = queryOptions ?? {};
 
   const namespaceQuery = getNamespaceQuery(namespace);
+  let filterKueryNode;
+  try {
+    filterKueryNode = JSON.parse(filter ?? '');
+  } catch (e) {
+    filterKueryNode = filter ? fromKueryExpression(filter) : null;
+  }
   let dslFilterQuery: estypes.QueryDslBoolQuery['filter'];
   try {
-    dslFilterQuery = filter ? toElasticsearchQuery(fromKueryExpression(filter)) : undefined;
+    dslFilterQuery = filterKueryNode ? toElasticsearchQuery(filterKueryNode) : undefined;
   } catch (err) {
     logger.debug(
       `esContext: Invalid kuery syntax for the filter (${filter}) error: ${JSON.stringify({
@@ -492,6 +626,7 @@ export function getQueryBody(
   ];
 
   const shouldQuery = [];
+
   shouldQuery.push({
     bool: {
       must: [

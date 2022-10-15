@@ -89,6 +89,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
     sortField: sorting?.field,
     sortOrder: sorting?.direction,
     kuery: search,
+    full: true,
   });
 
   // Some policies retrieved, set up table props

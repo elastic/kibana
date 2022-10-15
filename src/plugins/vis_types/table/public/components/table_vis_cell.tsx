@@ -15,9 +15,10 @@ import { FormattedColumns } from '../types';
 export const createTableVisCell =
   (rows: DatatableRow[], formattedColumns: FormattedColumns, autoFitRowToContent?: boolean) =>
   ({ rowIndex, columnId }: EuiDataGridCellValueElementProps) => {
-    const rowValue = rows[rowIndex][columnId];
+    // incoming data might change and put the current page out of bounds - check whether row actually exists
+    const rowValue = rows[rowIndex]?.[columnId];
     const column = formattedColumns[columnId];
-    const content = column.formatter.convert(rowValue, 'html');
+    const content = column?.formatter.convert(rowValue, 'html');
 
     const cellContent = (
       <div

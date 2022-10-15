@@ -37,7 +37,7 @@ export function getOperatorOptions(field: DataViewField) {
 }
 
 export function validateParams(params: any, field: DataViewField) {
-  switch (field.type) {
+  switch (field?.type) {
     case 'date':
       const moment = typeof params === 'string' ? dateMath.parse(params) : null;
       return Boolean(typeof params === 'string' && moment && moment.isValid());

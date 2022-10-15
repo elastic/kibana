@@ -1,0 +1,2313 @@
+{
+  "id": "unifiedFieldList",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "unifiedFieldList",
+        "id": "def-public.FieldPopover",
+        "type": "Function",
+        "tags": [],
+        "label": "FieldPopover",
+        "description": [],
+        "signature": [
+          "({ isOpen, closePopover, renderHeader, renderContent, ...otherPopoverProps }: React.PropsWithChildren<",
+          {
+            "pluginId": "unifiedFieldList",
+            "scope": "public",
+            "docId": "kibUnifiedFieldListPluginApi",
+            "section": "def-public.FieldPopoverProps",
+            "text": "FieldPopoverProps"
+          },
+          ">) => JSX.Element"
+        ],
+        "path": "src/plugins/unified_field_list/public/components/field_popover/field_popover.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldPopover.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  isOpen,\n  closePopover,\n  renderHeader,\n  renderContent,\n  ...otherPopoverProps\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              {
+                "pluginId": "unifiedFieldList",
+                "scope": "public",
+                "docId": "kibUnifiedFieldListPluginApi",
+                "section": "def-public.FieldPopoverProps",
+                "text": "FieldPopoverProps"
+              },
+              ">"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_popover/field_popover.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedFieldList",
+        "id": "def-public.FieldPopoverHeader",
+        "type": "Function",
+        "tags": [],
+        "label": "FieldPopoverHeader",
+        "description": [],
+        "signature": [
+          "({ field, closePopover, buttonAddFieldToWorkspaceProps, buttonAddFilterProps, buttonEditFieldProps, buttonDeleteFieldProps, onAddFieldToWorkspace, onAddFilter, onEditField, onDeleteField, }: React.PropsWithChildren<",
+          {
+            "pluginId": "unifiedFieldList",
+            "scope": "public",
+            "docId": "kibUnifiedFieldListPluginApi",
+            "section": "def-public.FieldPopoverHeaderProps",
+            "text": "FieldPopoverHeaderProps"
+          },
+          ">) => JSX.Element | null"
+        ],
+        "path": "src/plugins/unified_field_list/public/components/field_popover/field_popover_header.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldPopoverHeader.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  field,\n  closePopover,\n  buttonAddFieldToWorkspaceProps,\n  buttonAddFilterProps,\n  buttonEditFieldProps,\n  buttonDeleteFieldProps,\n  onAddFieldToWorkspace,\n  onAddFilter,\n  onEditField,\n  onDeleteField,\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              {
+                "pluginId": "unifiedFieldList",
+                "scope": "public",
+                "docId": "kibUnifiedFieldListPluginApi",
+                "section": "def-public.FieldPopoverHeaderProps",
+                "text": "FieldPopoverHeaderProps"
+              },
+              ">"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_popover/field_popover_header.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedFieldList",
+        "id": "def-public.FieldPopoverVisualize",
+        "type": "Function",
+        "tags": [],
+        "label": "FieldPopoverVisualize",
+        "description": [],
+        "signature": [
+          "(props: React.PropsWithChildren<",
+          {
+            "pluginId": "unifiedFieldList",
+            "scope": "public",
+            "docId": "kibUnifiedFieldListPluginApi",
+            "section": "def-public.FieldPopoverVisualizeProps",
+            "text": "FieldPopoverVisualizeProps"
+          },
+          ">) => JSX.Element"
+        ],
+        "path": "src/plugins/unified_field_list/public/components/field_popover/field_popover_visualize.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldPopoverVisualize.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<",
+              {
+                "pluginId": "unifiedFieldList",
+                "scope": "public",
+                "docId": "kibUnifiedFieldListPluginApi",
+                "section": "def-public.FieldPopoverVisualizeProps",
+                "text": "FieldPopoverVisualizeProps"
+              },
+              ">"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_popover/field_popover_visualize.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedFieldList",
+        "id": "def-public.FieldStats",
+        "type": "Function",
+        "tags": [],
+        "label": "FieldStats",
+        "description": [],
+        "signature": [
+          "React.FunctionComponent<",
+          {
+            "pluginId": "unifiedFieldList",
+            "scope": "public",
+            "docId": "kibUnifiedFieldListPluginApi",
+            "section": "def-public.FieldStatsProps",
+            "text": "FieldStatsProps"
+          },
+          ">"
+        ],
+        "path": "src/plugins/unified_field_list/public/components/field_stats/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldStats.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P & { children?: React.ReactNode; }"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldStats.$2",
+            "type": "Any",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedFieldList",
+        "id": "def-public.FieldVisualizeButton",
+        "type": "Function",
+        "tags": [],
+        "label": "FieldVisualizeButton",
+        "description": [],
+        "signature": [
+          "React.FunctionComponent<",
+          {
+            "pluginId": "unifiedFieldList",
+            "scope": "public",
+            "docId": "kibUnifiedFieldListPluginApi",
+            "section": "def-public.FieldVisualizeButtonProps",
+            "text": "FieldVisualizeButtonProps"
+          },
+          ">"
+        ],
+        "path": "src/plugins/unified_field_list/public/components/field_visualize_button/field_visualize_button.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldVisualizeButton.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P & { children?: React.ReactNode; }"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldVisualizeButton.$2",
+            "type": "Any",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedFieldList",
+        "id": "def-public.getVisualizeInformation",
+        "type": "Function",
+        "tags": [],
+        "label": "getVisualizeInformation",
+        "description": [
+          "\nReturns the field name and potentially href of the field or the first multi-field\nthat has a compatible visualize uiAction."
+        ],
+        "signature": [
+          "(uiActions: ",
+          {
+            "pluginId": "uiActions",
+            "scope": "public",
+            "docId": "kibUiActionsPluginApi",
+            "section": "def-public.UiActionsStart",
+            "text": "UiActionsStart"
+          },
+          ", field: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewField",
+            "text": "DataViewField"
+          },
+          ", dataView: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          " | undefined, contextualFields: string[], multiFields: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewField",
+            "text": "DataViewField"
+          },
+          "[]) => Promise<",
+          {
+            "pluginId": "unifiedFieldList",
+            "scope": "public",
+            "docId": "kibUnifiedFieldListPluginApi",
+            "section": "def-public.VisualizeInformation",
+            "text": "VisualizeInformation"
+          },
+          " | undefined>"
+        ],
+        "path": "src/plugins/unified_field_list/public/components/field_visualize_button/visualize_trigger_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.getVisualizeInformation.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "uiActions",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.UiActionsStart",
+                "text": "UiActionsStart"
+              }
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_visualize_button/visualize_trigger_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.getVisualizeInformation.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              }
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_visualize_button/visualize_trigger_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.getVisualizeInformation.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_visualize_button/visualize_trigger_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.getVisualizeInformation.$4",
+            "type": "Array",
+            "tags": [],
+            "label": "contextualFields",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_visualize_button/visualize_trigger_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.getVisualizeInformation.$5",
+            "type": "Array",
+            "tags": [],
+            "label": "multiFields",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              },
+              "[]"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_visualize_button/visualize_trigger_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedFieldList",
+        "id": "def-public.loadFieldExisting",
+        "type": "Function",
+        "tags": [],
+        "label": "loadFieldExisting",
+        "description": [],
+        "signature": [
+          "({\n  data,\n  dslQuery,\n  fromDate,\n  toDate,\n  timeFieldName,\n  dataViewsService,\n  uiSettingsClient,\n  dataView,\n}: FetchFieldExistenceParams) => Promise<{ indexPatternTitle: string; existingFieldNames: string[]; }>"
+        ],
+        "path": "src/plugins/unified_field_list/public/services/field_existing/load_field_existing.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.loadFieldExisting.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  data,\n  dslQuery,\n  fromDate,\n  toDate,\n  timeFieldName,\n  dataViewsService,\n  uiSettingsClient,\n  dataView,\n}",
+            "description": [],
+            "signature": [
+              "FetchFieldExistenceParams"
+            ],
+            "path": "src/plugins/unified_field_list/public/services/field_existing/load_field_existing.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedFieldList",
+        "id": "def-public.loadFieldStats",
+        "type": "Function",
+        "tags": [],
+        "label": "loadFieldStats",
+        "description": [],
+        "signature": [
+          "(params: FetchFieldStatsParams) => Promise<",
+          "FieldStatsResponse",
+          "<string | number>>"
+        ],
+        "path": "src/plugins/unified_field_list/public/services/field_stats/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.loadFieldStats.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "FetchFieldStatsParams"
+            ],
+            "path": "src/plugins/unified_field_list/public/services/field_stats/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedFieldList",
+        "id": "def-public.triggerVisualizeActions",
+        "type": "Function",
+        "tags": [],
+        "label": "triggerVisualizeActions",
+        "description": [],
+        "signature": [
+          "(uiActions: ",
+          {
+            "pluginId": "uiActions",
+            "scope": "public",
+            "docId": "kibUiActionsPluginApi",
+            "section": "def-public.UiActionsStart",
+            "text": "UiActionsStart"
+          },
+          ", field: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewField",
+            "text": "DataViewField"
+          },
+          ", contextualFields: string[], originatingApp: string, dataView: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          " | undefined) => void"
+        ],
+        "path": "src/plugins/unified_field_list/public/components/field_visualize_button/visualize_trigger_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.triggerVisualizeActions.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "uiActions",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.UiActionsStart",
+                "text": "UiActionsStart"
+              }
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_visualize_button/visualize_trigger_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.triggerVisualizeActions.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              }
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_visualize_button/visualize_trigger_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.triggerVisualizeActions.$3",
+            "type": "Array",
+            "tags": [],
+            "label": "contextualFields",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_visualize_button/visualize_trigger_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.triggerVisualizeActions.$4",
+            "type": "string",
+            "tags": [],
+            "label": "originatingApp",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_visualize_button/visualize_trigger_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.triggerVisualizeActions.$5",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_visualize_button/visualize_trigger_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedFieldList",
+        "id": "def-public.triggerVisualizeActionsTextBasedLanguages",
+        "type": "Function",
+        "tags": [],
+        "label": "triggerVisualizeActionsTextBasedLanguages",
+        "description": [],
+        "signature": [
+          "(uiActions: ",
+          {
+            "pluginId": "uiActions",
+            "scope": "public",
+            "docId": "kibUiActionsPluginApi",
+            "section": "def-public.UiActionsStart",
+            "text": "UiActionsStart"
+          },
+          ", contextualFields: string[], originatingApp: string, dataView: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          " | undefined, query: ",
+          "AggregateQuery",
+          " | undefined) => void"
+        ],
+        "path": "src/plugins/unified_field_list/public/components/field_visualize_button/visualize_trigger_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.triggerVisualizeActionsTextBasedLanguages.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "uiActions",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.UiActionsStart",
+                "text": "UiActionsStart"
+              }
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_visualize_button/visualize_trigger_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.triggerVisualizeActionsTextBasedLanguages.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "contextualFields",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_visualize_button/visualize_trigger_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.triggerVisualizeActionsTextBasedLanguages.$3",
+            "type": "string",
+            "tags": [],
+            "label": "originatingApp",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_visualize_button/visualize_trigger_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.triggerVisualizeActionsTextBasedLanguages.$4",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_visualize_button/visualize_trigger_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.triggerVisualizeActionsTextBasedLanguages.$5",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "AggregateQuery",
+              " | undefined"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_visualize_button/visualize_trigger_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "unifiedFieldList",
+        "id": "def-public.BucketedAggregation",
+        "type": "Interface",
+        "tags": [],
+        "label": "BucketedAggregation",
+        "description": [],
+        "signature": [
+          "BucketedAggregation",
+          "<KeyType>"
+        ],
+        "path": "src/plugins/unified_field_list/common/types/stats.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.BucketedAggregation.buckets",
+            "type": "Array",
+            "tags": [],
+            "label": "buckets",
+            "description": [],
+            "signature": [
+              "{ key: KeyType; count: number; }[]"
+            ],
+            "path": "src/plugins/unified_field_list/common/types/stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedFieldList",
+        "id": "def-public.FieldPopoverHeaderProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "FieldPopoverHeaderProps",
+        "description": [],
+        "path": "src/plugins/unified_field_list/public/components/field_popover/field_popover_header.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldPopoverHeaderProps.field",
+            "type": "Object",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              }
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_popover/field_popover_header.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldPopoverHeaderProps.closePopover",
+            "type": "Function",
+            "tags": [],
+            "label": "closePopover",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_popover/field_popover_header.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldPopoverHeaderProps.buttonAddFieldToWorkspaceProps",
+            "type": "Object",
+            "tags": [],
+            "label": "buttonAddFieldToWorkspaceProps",
+            "description": [],
+            "signature": [
+              "Partial<",
+              "EuiButtonIconProps",
+              "> | undefined"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_popover/field_popover_header.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldPopoverHeaderProps.buttonAddFilterProps",
+            "type": "Object",
+            "tags": [],
+            "label": "buttonAddFilterProps",
+            "description": [],
+            "signature": [
+              "Partial<",
+              "EuiButtonIconProps",
+              "> | undefined"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_popover/field_popover_header.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldPopoverHeaderProps.buttonEditFieldProps",
+            "type": "Object",
+            "tags": [],
+            "label": "buttonEditFieldProps",
+            "description": [],
+            "signature": [
+              "Partial<",
+              "EuiButtonIconProps",
+              "> | undefined"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_popover/field_popover_header.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldPopoverHeaderProps.buttonDeleteFieldProps",
+            "type": "Object",
+            "tags": [],
+            "label": "buttonDeleteFieldProps",
+            "description": [],
+            "signature": [
+              "Partial<",
+              "EuiButtonIconProps",
+              "> | undefined"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_popover/field_popover_header.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldPopoverHeaderProps.onAddFieldToWorkspace",
+            "type": "Function",
+            "tags": [],
+            "label": "onAddFieldToWorkspace",
+            "description": [],
+            "signature": [
+              "((field: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              },
+              ") => unknown) | undefined"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_popover/field_popover_header.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "unifiedFieldList",
+                "id": "def-public.FieldPopoverHeaderProps.onAddFieldToWorkspace.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "field",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataViewField",
+                    "text": "DataViewField"
+                  }
+                ],
+                "path": "src/plugins/unified_field_list/public/components/field_popover/field_popover_header.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldPopoverHeaderProps.onAddFilter",
+            "type": "Function",
+            "tags": [],
+            "label": "onAddFilter",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "unifiedFieldList",
+                "scope": "public",
+                "docId": "kibUnifiedFieldListPluginApi",
+                "section": "def-public.AddFieldFilterHandler",
+                "text": "AddFieldFilterHandler"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_popover/field_popover_header.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldPopoverHeaderProps.onEditField",
+            "type": "Function",
+            "tags": [],
+            "label": "onEditField",
+            "description": [],
+            "signature": [
+              "((fieldName: string) => unknown) | undefined"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_popover/field_popover_header.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "unifiedFieldList",
+                "id": "def-public.FieldPopoverHeaderProps.onEditField.$1",
+                "type": "string",
+                "tags": [],
+                "label": "fieldName",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/unified_field_list/public/components/field_popover/field_popover_header.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldPopoverHeaderProps.onDeleteField",
+            "type": "Function",
+            "tags": [],
+            "label": "onDeleteField",
+            "description": [],
+            "signature": [
+              "((fieldName: string) => unknown) | undefined"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_popover/field_popover_header.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "unifiedFieldList",
+                "id": "def-public.FieldPopoverHeaderProps.onDeleteField.$1",
+                "type": "string",
+                "tags": [],
+                "label": "fieldName",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/unified_field_list/public/components/field_popover/field_popover_header.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedFieldList",
+        "id": "def-public.FieldPopoverProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "FieldPopoverProps",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "unifiedFieldList",
+            "scope": "public",
+            "docId": "kibUnifiedFieldListPluginApi",
+            "section": "def-public.FieldPopoverProps",
+            "text": "FieldPopoverProps"
+          },
+          " extends ",
+          "EuiPopoverProps"
+        ],
+        "path": "src/plugins/unified_field_list/public/components/field_popover/field_popover.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldPopoverProps.renderHeader",
+            "type": "Function",
+            "tags": [],
+            "label": "renderHeader",
+            "description": [],
+            "signature": [
+              "(() => React.ReactNode) | undefined"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_popover/field_popover.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldPopoverProps.renderContent",
+            "type": "Function",
+            "tags": [],
+            "label": "renderContent",
+            "description": [],
+            "signature": [
+              "(() => React.ReactNode) | undefined"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_popover/field_popover.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedFieldList",
+        "id": "def-public.FieldStatsProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "FieldStatsProps",
+        "description": [],
+        "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldStatsProps.services",
+            "type": "Object",
+            "tags": [],
+            "label": "services",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "unifiedFieldList",
+                "scope": "public",
+                "docId": "kibUnifiedFieldListPluginApi",
+                "section": "def-public.FieldStatsServices",
+                "text": "FieldStatsServices"
+              }
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldStatsProps.query",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "Query",
+              " | ",
+              "AggregateQuery"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldStatsProps.filters",
+            "type": "Array",
+            "tags": [],
+            "label": "filters",
+            "description": [],
+            "signature": [
+              "Filter",
+              "[]"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldStatsProps.fromDate",
+            "type": "string",
+            "tags": [],
+            "label": "fromDate",
+            "description": [],
+            "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldStatsProps.toDate",
+            "type": "string",
+            "tags": [],
+            "label": "toDate",
+            "description": [],
+            "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldStatsProps.dataViewOrDataViewId",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "dataViewOrDataViewId",
+            "description": [],
+            "signature": [
+              "string | ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              }
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldStatsProps.field",
+            "type": "Object",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              }
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldStatsProps.color",
+            "type": "string",
+            "tags": [],
+            "label": "color",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldStatsProps.datatestsubj",
+            "type": "string",
+            "tags": [],
+            "label": "'data-test-subj'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldStatsProps.overrideMissingContent",
+            "type": "Function",
+            "tags": [],
+            "label": "overrideMissingContent",
+            "description": [],
+            "signature": [
+              "((params: { element: JSX.Element; noDataFound?: boolean | undefined; }) => JSX.Element | null) | undefined"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "unifiedFieldList",
+                "id": "def-public.FieldStatsProps.overrideMissingContent.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "unifiedFieldList",
+                    "id": "def-public.FieldStatsProps.overrideMissingContent.$1.element",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "element",
+                    "description": [],
+                    "signature": [
+                      "JSX.Element"
+                    ],
+                    "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "unifiedFieldList",
+                    "id": "def-public.FieldStatsProps.overrideMissingContent.$1.noDataFound",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "noDataFound",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldStatsProps.overrideFooter",
+            "type": "Function",
+            "tags": [],
+            "label": "overrideFooter",
+            "description": [],
+            "signature": [
+              "((params: { element: JSX.Element; totalDocuments?: number | undefined; sampledDocuments?: number | undefined; }) => JSX.Element) | undefined"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "unifiedFieldList",
+                "id": "def-public.FieldStatsProps.overrideFooter.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "unifiedFieldList",
+                    "id": "def-public.FieldStatsProps.overrideFooter.$1.element",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "element",
+                    "description": [],
+                    "signature": [
+                      "JSX.Element"
+                    ],
+                    "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "unifiedFieldList",
+                    "id": "def-public.FieldStatsProps.overrideFooter.$1.totalDocuments",
+                    "type": "number",
+                    "tags": [],
+                    "label": "totalDocuments",
+                    "description": [],
+                    "signature": [
+                      "number | undefined"
+                    ],
+                    "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "unifiedFieldList",
+                    "id": "def-public.FieldStatsProps.overrideFooter.$1.sampledDocuments",
+                    "type": "number",
+                    "tags": [],
+                    "label": "sampledDocuments",
+                    "description": [],
+                    "signature": [
+                      "number | undefined"
+                    ],
+                    "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldStatsProps.onAddFilter",
+            "type": "Function",
+            "tags": [],
+            "label": "onAddFilter",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "unifiedFieldList",
+                "scope": "public",
+                "docId": "kibUnifiedFieldListPluginApi",
+                "section": "def-public.AddFieldFilterHandler",
+                "text": "AddFieldFilterHandler"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedFieldList",
+        "id": "def-public.FieldStatsResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "FieldStatsResponse",
+        "description": [],
+        "signature": [
+          "FieldStatsResponse",
+          "<KeyType>"
+        ],
+        "path": "src/plugins/unified_field_list/common/types/stats.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldStatsResponse.totalDocuments",
+            "type": "number",
+            "tags": [],
+            "label": "totalDocuments",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/unified_field_list/common/types/stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldStatsResponse.sampledDocuments",
+            "type": "number",
+            "tags": [],
+            "label": "sampledDocuments",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/unified_field_list/common/types/stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldStatsResponse.sampledValues",
+            "type": "number",
+            "tags": [],
+            "label": "sampledValues",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/unified_field_list/common/types/stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldStatsResponse.histogram",
+            "type": "Object",
+            "tags": [],
+            "label": "histogram",
+            "description": [],
+            "signature": [
+              "BucketedAggregation",
+              "<KeyType> | undefined"
+            ],
+            "path": "src/plugins/unified_field_list/common/types/stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldStatsResponse.topValues",
+            "type": "Object",
+            "tags": [],
+            "label": "topValues",
+            "description": [],
+            "signature": [
+              "BucketedAggregation",
+              "<KeyType> | undefined"
+            ],
+            "path": "src/plugins/unified_field_list/common/types/stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedFieldList",
+        "id": "def-public.FieldStatsServices",
+        "type": "Interface",
+        "tags": [],
+        "label": "FieldStatsServices",
+        "description": [],
+        "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldStatsServices.uiSettings",
+            "type": "Object",
+            "tags": [],
+            "label": "uiSettings",
+            "description": [],
+            "signature": [
+              "IUiSettingsClient"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldStatsServices.dataViews",
+            "type": "Object",
+            "tags": [],
+            "label": "dataViews",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "public",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-public.DataViewsServicePublic",
+                "text": "DataViewsServicePublic"
+              }
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldStatsServices.data",
+            "type": "Object",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataPluginApi",
+                "section": "def-public.DataPublicPluginStart",
+                "text": "DataPublicPluginStart"
+              }
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldStatsServices.fieldFormats",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "fieldFormats",
+            "description": [],
+            "signature": [
+              "Omit<",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.FieldFormatsRegistry",
+                "text": "FieldFormatsRegistry"
+              },
+              ", \"init\" | \"register\"> & { deserialize: ",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.FormatFactory",
+                "text": "FormatFactory"
+              },
+              "; }"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldStatsServices.charts",
+            "type": "Object",
+            "tags": [],
+            "label": "charts",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "charts",
+                "scope": "public",
+                "docId": "kibChartsPluginApi",
+                "section": "def-public.ChartsPluginSetup",
+                "text": "ChartsPluginSetup"
+              }
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_stats/field_stats.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedFieldList",
+        "id": "def-public.FieldVisualizeButtonProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "FieldVisualizeButtonProps",
+        "description": [],
+        "path": "src/plugins/unified_field_list/public/components/field_visualize_button/field_visualize_button.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldVisualizeButtonProps.field",
+            "type": "Object",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              }
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_visualize_button/field_visualize_button.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldVisualizeButtonProps.dataView",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              }
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_visualize_button/field_visualize_button.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldVisualizeButtonProps.originatingApp",
+            "type": "string",
+            "tags": [],
+            "label": "originatingApp",
+            "description": [],
+            "path": "src/plugins/unified_field_list/public/components/field_visualize_button/field_visualize_button.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldVisualizeButtonProps.uiActions",
+            "type": "Object",
+            "tags": [],
+            "label": "uiActions",
+            "description": [],
+            "signature": [
+              "{ readonly clear: () => void; readonly addTriggerAction: (triggerId: string, action: ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
+              },
+              "<object>) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly registerAction: <A extends ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
+              },
+              "<object>>(definition: A) => ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Action",
+                "text": "Action"
+              },
+              "<",
+              "ActionContext",
+              "<A>>; readonly registerTrigger: (trigger: ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Trigger",
+                "text": "Trigger"
+              },
+              ") => void; readonly unregisterAction: (actionId: string) => void; readonly getTrigger: (triggerId: string) => ",
+              "TriggerContract",
+              "<object>; readonly hasAction: (actionId: string) => boolean; readonly getAction: <T extends ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
+              },
+              "<object>>(id: string) => ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Action",
+                "text": "Action"
+              },
+              "<",
+              "ActionContext",
+              "<T>>; readonly getTriggerActions: (triggerId: string) => ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Action",
+                "text": "Action"
+              },
+              "<object>[]; readonly getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Action",
+                "text": "Action"
+              },
+              "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly fork: () => ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.UiActionsService",
+                "text": "UiActionsService"
+              },
+              "; }"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_visualize_button/field_visualize_button.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldVisualizeButtonProps.multiFields",
+            "type": "Array",
+            "tags": [],
+            "label": "multiFields",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_visualize_button/field_visualize_button.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldVisualizeButtonProps.contextualFields",
+            "type": "Array",
+            "tags": [],
+            "label": "contextualFields",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_visualize_button/field_visualize_button.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldVisualizeButtonProps.trackUiMetric",
+            "type": "Function",
+            "tags": [],
+            "label": "trackUiMetric",
+            "description": [],
+            "signature": [
+              "((metricType: string, eventName: string | string[]) => void) | undefined"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_visualize_button/field_visualize_button.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "unifiedFieldList",
+                "id": "def-public.FieldVisualizeButtonProps.trackUiMetric.$1",
+                "type": "string",
+                "tags": [],
+                "label": "metricType",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/unified_field_list/public/components/field_visualize_button/field_visualize_button.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "unifiedFieldList",
+                "id": "def-public.FieldVisualizeButtonProps.trackUiMetric.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "eventName",
+                "description": [],
+                "signature": [
+                  "string | string[]"
+                ],
+                "path": "src/plugins/unified_field_list/public/components/field_visualize_button/field_visualize_button.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldVisualizeButtonProps.buttonProps",
+            "type": "Object",
+            "tags": [],
+            "label": "buttonProps",
+            "description": [],
+            "signature": [
+              "Partial<",
+              "EuiButtonProps",
+              "> | undefined"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_visualize_button/field_visualize_button.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.FieldVisualizeButtonProps.wrapInContainer",
+            "type": "Function",
+            "tags": [],
+            "label": "wrapInContainer",
+            "description": [],
+            "signature": [
+              "((element: React.ReactElement<any, string | React.JSXElementConstructor<any>>) => React.ReactElement<any, string | React.JSXElementConstructor<any>>) | undefined"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_visualize_button/field_visualize_button.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "unifiedFieldList",
+                "id": "def-public.FieldVisualizeButtonProps.wrapInContainer.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "element",
+                "description": [],
+                "signature": [
+                  "React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+                ],
+                "path": "src/plugins/unified_field_list/public/components/field_visualize_button/field_visualize_button.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedFieldList",
+        "id": "def-public.NumberStatsResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "NumberStatsResult",
+        "description": [],
+        "path": "src/plugins/unified_field_list/common/types/stats.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.NumberStatsResult.count",
+            "type": "number",
+            "tags": [],
+            "label": "count",
+            "description": [],
+            "path": "src/plugins/unified_field_list/common/types/stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.NumberStatsResult.histogram",
+            "type": "Object",
+            "tags": [],
+            "label": "histogram",
+            "description": [],
+            "signature": [
+              "BucketedAggregation",
+              "<number>"
+            ],
+            "path": "src/plugins/unified_field_list/common/types/stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.NumberStatsResult.topValues",
+            "type": "Object",
+            "tags": [],
+            "label": "topValues",
+            "description": [],
+            "signature": [
+              "BucketedAggregation",
+              "<number>"
+            ],
+            "path": "src/plugins/unified_field_list/common/types/stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedFieldList",
+        "id": "def-public.TopValuesResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "TopValuesResult",
+        "description": [],
+        "path": "src/plugins/unified_field_list/common/types/stats.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.TopValuesResult.count",
+            "type": "number",
+            "tags": [],
+            "label": "count",
+            "description": [],
+            "path": "src/plugins/unified_field_list/common/types/stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.TopValuesResult.topValues",
+            "type": "Object",
+            "tags": [],
+            "label": "topValues",
+            "description": [],
+            "signature": [
+              "BucketedAggregation",
+              "<string>"
+            ],
+            "path": "src/plugins/unified_field_list/common/types/stats.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedFieldList",
+        "id": "def-public.VisualizeInformation",
+        "type": "Interface",
+        "tags": [],
+        "label": "VisualizeInformation",
+        "description": [],
+        "path": "src/plugins/unified_field_list/public/components/field_visualize_button/visualize_trigger_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.VisualizeInformation.field",
+            "type": "Object",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              }
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_visualize_button/visualize_trigger_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.VisualizeInformation.href",
+            "type": "string",
+            "tags": [],
+            "label": "href",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/unified_field_list/public/components/field_visualize_button/visualize_trigger_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "unifiedFieldList",
+        "id": "def-public.AddFieldFilterHandler",
+        "type": "Type",
+        "tags": [],
+        "label": "AddFieldFilterHandler",
+        "description": [],
+        "signature": [
+          "(field: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewField",
+            "text": "DataViewField"
+          },
+          " | \"_exists_\", value: unknown, type: \"+\" | \"-\") => void"
+        ],
+        "path": "src/plugins/unified_field_list/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.AddFieldFilterHandler.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              },
+              " | \"_exists_\""
+            ],
+            "path": "src/plugins/unified_field_list/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.AddFieldFilterHandler.$2",
+            "type": "Unknown",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/plugins/unified_field_list/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-public.AddFieldFilterHandler.$3",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"+\" | \"-\""
+            ],
+            "path": "src/plugins/unified_field_list/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedFieldList",
+        "id": "def-public.FieldPopoverVisualizeProps",
+        "type": "Type",
+        "tags": [],
+        "label": "FieldPopoverVisualizeProps",
+        "description": [],
+        "signature": [
+          "{ field: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewField",
+            "text": "DataViewField"
+          },
+          "; dataView: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          "; originatingApp: string; uiActions: ",
+          {
+            "pluginId": "uiActions",
+            "scope": "public",
+            "docId": "kibUiActionsPluginApi",
+            "section": "def-public.UiActionsStart",
+            "text": "UiActionsStart"
+          },
+          "; multiFields?: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewField",
+            "text": "DataViewField"
+          },
+          "[] | undefined; contextualFields?: string[] | undefined; trackUiMetric?: ((metricType: string, eventName: string | string[]) => void) | undefined; buttonProps?: Partial<",
+          "EuiButtonProps",
+          "> | undefined; }"
+        ],
+        "path": "src/plugins/unified_field_list/public/components/field_popover/field_popover_visualize.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "unifiedFieldList",
+      "id": "def-public.UnifiedFieldListPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "UnifiedFieldListPluginSetup",
+      "description": [],
+      "path": "src/plugins/unified_field_list/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "unifiedFieldList",
+      "id": "def-public.UnifiedFieldListPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "UnifiedFieldListPluginStart",
+      "description": [],
+      "path": "src/plugins/unified_field_list/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "unifiedFieldList",
+        "id": "def-server.PluginSetup",
+        "type": "Interface",
+        "tags": [],
+        "label": "PluginSetup",
+        "description": [],
+        "path": "src/plugins/unified_field_list/server/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedFieldList",
+        "id": "def-server.PluginStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "PluginStart",
+        "description": [],
+        "path": "src/plugins/unified_field_list/server/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "unifiedFieldList",
+            "id": "def-server.PluginStart.dataViews",
+            "type": "Object",
+            "tags": [],
+            "label": "dataViews",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "server",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-server.DataViewsServerPluginStart",
+                "text": "DataViewsServerPluginStart"
+              }
+            ],
+            "path": "src/plugins/unified_field_list/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "unifiedFieldList",
+      "id": "def-server.UnifiedFieldListServerPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "UnifiedFieldListServerPluginSetup",
+      "description": [],
+      "path": "src/plugins/unified_field_list/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "unifiedFieldList",
+      "id": "def-server.UnifiedFieldListServerPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "UnifiedFieldListServerPluginStart",
+      "description": [],
+      "path": "src/plugins/unified_field_list/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "unifiedFieldList",
+        "id": "def-common.FIELD_EXISTENCE_SETTING",
+        "type": "string",
+        "tags": [],
+        "label": "FIELD_EXISTENCE_SETTING",
+        "description": [],
+        "signature": [
+          "\"lens:useFieldExistenceSampling\""
+        ],
+        "path": "src/plugins/unified_field_list/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "unifiedFieldList",
+        "id": "def-common.PLUGIN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_ID",
+        "description": [],
+        "signature": [
+          "\"unifiedFieldList\""
+        ],
+        "path": "src/plugins/unified_field_list/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

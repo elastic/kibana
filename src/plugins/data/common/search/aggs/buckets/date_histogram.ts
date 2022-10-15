@@ -220,7 +220,7 @@ export const getDateHistogramBucketAgg = ({
             return;
           }
 
-          const shouldForceFixedInterval: boolean = agg.params.field?.meta?.fixed_interval?.length;
+          const shouldForceFixedInterval: boolean = agg.params.field?.fixedInterval?.length;
 
           output.params = {
             ...output.params,
@@ -276,7 +276,7 @@ export const getDateHistogramBucketAgg = ({
             aggExecutionContext
           );
 
-          const shouldForceTimeZone = agg.params.field?.meta?.time_zone?.includes('UTC');
+          const shouldForceTimeZone = agg.params.field?.timeZone?.includes('UTC');
 
           output.params.time_zone = shouldForceTimeZone ? 'UTC' : tz;
         },

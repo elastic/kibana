@@ -26,6 +26,8 @@ import { getTraceSampleIds } from './get_trace_sample_ids';
 import { transformServiceMapResponses } from './transform_service_map_responses';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
+import { ServiceGroup } from '../../../common/service_groups';
+import { serviceGroupQuery } from '../../lib/service_group_query';
 
 export interface IEnvOptions {
   setup: Setup;
@@ -35,6 +37,7 @@ export interface IEnvOptions {
   logger: Logger;
   start: number;
   end: number;
+  serviceGroup: ServiceGroup | null;
 }
 
 async function getConnectionData({
@@ -43,6 +46,7 @@ async function getConnectionData({
   environment,
   start,
   end,
+  serviceGroup,
 }: IEnvOptions) {
   return withApmSpan('get_service_map_connections', async () => {
     const { traceIds } = await getTraceSampleIds({
@@ -51,6 +55,7 @@ async function getConnectionData({
       environment,
       start,
       end,
+      serviceGroup,
     });
 
     const chunks = chunk(traceIds, setup.config.serviceMapMaxTracesPerRequest);
@@ -100,6 +105,7 @@ async function getServicesData(
     start,
     end,
     maxNumberOfServices,
+    serviceGroup,
   } = options;
   const params = {
     apm: {
@@ -110,6 +116,7 @@ async function getServicesData(
       ],
     },
     body: {
+      track_total_hits: false,
       size: 0,
       query: {
         bool: {
@@ -117,6 +124,7 @@ async function getServicesData(
             ...rangeQuery(start, end),
             ...environmentQuery(environment),
             ...termsQuery(SERVICE_NAME, ...(options.serviceNames ?? [])),
+            ...serviceGroupQuery(serviceGroup),
           ],
         },
       },

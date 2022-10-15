@@ -28,12 +28,14 @@ import {
   Direction,
   XYChartElementEvent,
 } from '@elastic/charts';
+import { partition } from 'lodash';
 import { IconType } from '@elastic/eui';
 import { PaletteRegistry } from '@kbn/coloring';
 import { Datatable, RenderMode } from '@kbn/expressions-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { EmptyPlaceholder, LegendToggle } from '@kbn/charts-plugin/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import { PointEventAnnotationRow } from '@kbn/event-annotation-plugin/common';
 import { ChartsPluginSetup, ChartsPluginStart, useActiveCursor } from '@kbn/charts-plugin/public';
 import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
 import {
@@ -56,7 +58,6 @@ import type {
 } from '../../common/types';
 import {
   isHorizontalChart,
-  getAnnotationsLayers,
   getDataLayers,
   AxisConfiguration,
   getAxisPosition,
@@ -87,7 +88,7 @@ import { SplitChart } from './split_chart';
 import {
   Annotations,
   getAnnotationsGroupedByInterval,
-  getRangeAnnotations,
+  isRangeAnnotation,
   OUTSIDE_RECT_ANNOTATION_WIDTH,
   OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION,
 } from './annotations';
@@ -109,7 +110,7 @@ declare global {
   }
 }
 
-export type XYChartRenderProps = XYChartProps & {
+export type XYChartRenderProps = Omit<XYChartProps, 'canNavigateToLens'> & {
   chartsThemeService: ChartsPluginSetup['theme'];
   chartsActiveCursorService: ChartsPluginStart['activeCursor'];
   data: DataPublicPluginStart;
@@ -127,6 +128,7 @@ export type XYChartRenderProps = XYChartProps & {
   eventAnnotationService: EventAnnotationServiceType;
   renderComplete: () => void;
   uiState?: PersistedState;
+  timeFormat: string;
 };
 
 function getValueLabelsStyling(isHorizontal: boolean): {
@@ -200,6 +202,7 @@ export function XYChart({
   useLegacyTimeAxis,
   renderComplete,
   uiState,
+  timeFormat,
 }: XYChartRenderProps) {
   const {
     legend,
@@ -215,6 +218,7 @@ export function XYChart({
     splitColumnAccessor,
     splitRowAccessor,
     singleTable,
+    annotations,
   } = args;
   const chartRef = useRef<Chart>(null);
   const chartTheme = chartsThemeService.useChartsTheme();
@@ -395,21 +399,17 @@ export function XYChart({
   };
 
   const referenceLineLayers = getReferenceLayers(layers);
-
-  const annotationsLayers = getAnnotationsLayers(layers);
-  const firstTable = dataLayers[0]?.table;
-
-  const columnId = dataLayers[0]?.xAccessor
-    ? getColumnByAccessor(dataLayers[0]?.xAccessor, firstTable.columns)?.id
-    : null;
+  const [rangeAnnotations, lineAnnotations] = isTimeViz
+    ? partition(annotations?.datatable.rows, isRangeAnnotation)
+    : [[], []];
 
   const groupedLineAnnotations = getAnnotationsGroupedByInterval(
-    annotationsLayers,
-    minInterval,
-    columnId ? firstTable.rows[0]?.[columnId] : undefined,
-    xAxisFormatter
+    lineAnnotations as PointEventAnnotationRow[],
+    annotations?.layers.flatMap((l) => l.annotations),
+    annotations?.datatable.columns,
+    formatFactory,
+    timeFormat
   );
-  const rangeAnnotations = getRangeAnnotations(annotationsLayers);
 
   const visualConfigs = [
     ...referenceLineLayers
@@ -426,7 +426,10 @@ export function XYChart({
     ...groupedLineAnnotations,
   ].filter(Boolean);
 
-  const shouldHideDetails = annotationsLayers.length > 0 ? annotationsLayers[0].simpleView : false;
+  const shouldHideDetails =
+    annotations?.layers && annotations.layers.length > 0
+      ? annotations?.layers[0].simpleView
+      : false;
   const linesPaddings = !shouldHideDetails
     ? getLinesCausedPaddings(visualConfigs, yAxesMap, shouldRotate)
     : {};
@@ -870,7 +873,7 @@ export function XYChart({
             style={xAxisStyle}
             showOverlappingLabels={xAxisConfig?.showOverlappingLabels}
             showDuplicatedTicks={xAxisConfig?.showDuplicates}
-            timeAxisLayerCount={shouldUseNewTimeAxis ? 3 : 0}
+            timeAxisLayerCount={shouldUseNewTimeAxis ? 2 : 0}
           />
           {isSplitChart && splitTable && (
             <SplitChart
@@ -956,7 +959,7 @@ export function XYChart({
               yAxesMap={yAxesMap}
             />
           ) : null}
-          {rangeAnnotations.length || groupedLineAnnotations.length ? (
+          {(rangeAnnotations.length || lineAnnotations.length) && isTimeViz ? (
             <Annotations
               rangeAnnotations={rangeAnnotations}
               groupedLineAnnotations={groupedLineAnnotations}
@@ -965,7 +968,7 @@ export function XYChart({
               paddingMap={linesPaddings}
               isBarChart={filteredBarLayers.length > 0}
               minInterval={minInterval}
-              simpleView={annotationsLayers?.[0].simpleView}
+              simpleView={shouldHideDetails}
               outsideDimension={
                 rangeAnnotations.length && shouldHideDetails
                   ? OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION

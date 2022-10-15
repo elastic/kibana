@@ -23,7 +23,6 @@ interface CreateAlertEventLogRecordParams {
   message?: string;
   state?: AlertInstanceState;
   group?: string;
-  subgroup?: string;
   namespace?: string;
   timestamp?: string;
   task?: {
@@ -48,18 +47,16 @@ export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecor
     task,
     ruleId,
     group,
-    subgroup,
     namespace,
     consumer,
     spaceId,
   } = params;
   const alerting =
-    params.instanceId || group || subgroup
+    params.instanceId || group
       ? {
           alerting: {
             ...(params.instanceId ? { instance_id: params.instanceId } : {}),
             ...(group ? { action_group_id: group } : {}),
-            ...(subgroup ? { action_subgroup: subgroup } : {}),
           },
         }
       : undefined;

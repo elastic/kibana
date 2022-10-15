@@ -6,19 +6,11 @@
  * Side Public License, v 1.
  */
 
-import {
-  map,
-  skip,
-  switchMap,
-  catchError,
-  debounceTime,
-  distinctUntilChanged,
-} from 'rxjs/operators';
+import { skip, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import deepEqual from 'fast-deep-equal';
 import { Filter, uniqFilters } from '@kbn/es-query';
-import { EMPTY, merge, pipe, Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, merge, Subject, Subscription } from 'rxjs';
 import { EuiContextMenuPanel } from '@elastic/eui';
 
 import {
@@ -29,7 +21,6 @@ import {
 import { OverlayRef } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { Container, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-
 import {
   ControlGroupInput,
   ControlGroupOutput,
@@ -50,6 +41,8 @@ import { ControlGroup } from '../component/control_group_component';
 import { controlGroupReducers } from '../state/control_group_reducers';
 import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
 import { CreateControlButton, CreateControlButtonTypes } from '../editor/create_control';
+import { CreateTimeSliderControlButton } from '../editor/create_time_slider_control';
+import { TIME_SLIDER_CONTROL } from '../../time_slider';
 
 let flyoutRef: OverlayRef | undefined;
 export const setFlyoutRef = (newRef: OverlayRef | undefined) => {
@@ -62,11 +55,13 @@ export class ControlGroupContainer extends Container<
   ControlGroupOutput
 > {
   public readonly type = CONTROL_GROUP_TYPE;
+  public readonly anyControlOutputConsumerLoading$: Subject<boolean> = new Subject();
+
+  private initialized$ = new BehaviorSubject(false);
 
   private subscriptions: Subscription = new Subscription();
   private domNode?: HTMLElement;
   private recalculateFilters$: Subject<null>;
-
   private relevantDataViewId?: string;
   private lastUsedDataViewId?: string;
 
@@ -124,6 +119,21 @@ export class ControlGroupContainer extends Container<
     );
   };
 
+  public getCreateTimeSliderControlButton = (closePopover?: () => void) => {
+    const childIds = this.getChildIds();
+    const hasTimeSliderControl = childIds.some((id) => {
+      const child = this.getChild(id);
+      return child.type === TIME_SLIDER_CONTROL;
+    });
+    return (
+      <CreateTimeSliderControlButton
+        addNewEmbeddable={(type, input) => this.addNewEmbeddable(type, input)}
+        closePopover={closePopover}
+        hasTimeSliderControl={hasTimeSliderControl}
+      />
+    );
+  };
+
   private getEditControlGroupButton = (closePopover: () => void) => {
     const ControlsServicesProvider = pluginServices.getContextProvider();
 
@@ -152,6 +162,7 @@ export class ControlGroupContainer extends Container<
           <EuiContextMenuPanel
             items={[
               this.getCreateControlButton('toolbar', closePopover),
+              this.getCreateTimeSliderControlButton(closePopover),
               this.getEditControlGroupButton(closePopover),
             ]}
           />
@@ -185,10 +196,11 @@ export class ControlGroupContainer extends Container<
     });
 
     // when all children are ready setup subscriptions
-    this.untilReady().then(() => {
+    this.untilAllChildrenReady().then(() => {
       this.recalculateDataViews();
       this.recalculateFilters();
       this.setupSubscriptions();
+      this.initialized$.next(true);
     });
   }
 
@@ -211,43 +223,18 @@ export class ControlGroupContainer extends Container<
     );
 
     /**
-     * Create a pipe that outputs the child's ID, any time any child's output changes.
-     */
-    const anyChildChangePipe = pipe(
-      map(() => this.getChildIds()),
-      distinctUntilChanged(deepEqual),
-
-      // children may change, so make sure we subscribe/unsubscribe with switchMap
-      switchMap((newChildIds: string[]) =>
-        merge(
-          ...newChildIds.map((childId) =>
-            this.getChild(childId)
-              .getOutput$()
-              .pipe(
-                // Embeddables often throw errors into their output streams.
-                catchError(() => EMPTY),
-                map(() => childId)
-              )
-          )
-        )
-      )
-    );
-
-    /**
      * run OnChildOutputChanged when any child's output has changed
      */
     this.subscriptions.add(
-      this.getOutput$()
-        .pipe(anyChildChangePipe)
-        .subscribe((childOutputChangedId) => {
-          this.recalculateDataViews();
-          ControlGroupChainingSystems[this.getInput().chainingSystem].onChildChange({
-            childOutputChangedId,
-            childOrder: cachedChildEmbeddableOrder(this.getInput().panels),
-            getChild: (id) => this.getChild(id),
-            recalculateFilters$: this.recalculateFilters$,
-          });
-        })
+      this.getAnyChildOutputChange$().subscribe((childOutputChangedId) => {
+        this.recalculateDataViews();
+        ControlGroupChainingSystems[this.getInput().chainingSystem].onChildChange({
+          childOutputChangedId,
+          childOrder: cachedChildEmbeddableOrder(this.getInput().panels),
+          getChild: (id) => this.getChild(id),
+          recalculateFilters$: this.recalculateFilters$,
+        });
+      })
     );
 
     /**
@@ -264,11 +251,15 @@ export class ControlGroupContainer extends Container<
 
   private recalculateFilters = () => {
     const allFilters: Filter[] = [];
+    let timeslice;
     Object.values(this.children).map((child) => {
       const childOutput = child.getOutput() as ControlOutput;
       allFilters.push(...(childOutput?.filters ?? []));
+      if (childOutput.timeslice) {
+        timeslice = childOutput.timeslice;
+      }
     });
-    this.updateOutput({ filters: uniqFilters(allFilters) });
+    this.updateOutput({ filters: uniqFilters(allFilters), timeslice });
   };
 
   private recalculateDataViews = () => {
@@ -295,8 +286,9 @@ export class ControlGroupContainer extends Container<
     }
     return {
       order: nextOrder,
-      width: this.getInput().defaultControlWidth,
-      grow: this.getInput().defaultControlGrow,
+      width:
+        panelState.type === TIME_SLIDER_CONTROL ? 'large' : this.getInput().defaultControlWidth,
+      grow: panelState.type === TIME_SLIDER_CONTROL ? true : this.getInput().defaultControlGrow,
       ...panelState,
     } as ControlPanelState<TEmbeddableInput>;
   }
@@ -326,18 +318,19 @@ export class ControlGroupContainer extends Container<
     });
     const allFilters = [
       ...(ignoreParentSettings?.ignoreFilters ? [] : filters ?? []),
-      ...(precedingFilters ?? []),
+      ...(precedingFilters?.filters ?? []),
     ];
     return {
       ignoreParentSettings,
       filters: allFilters,
       query: ignoreParentSettings?.ignoreQuery ? undefined : query,
       timeRange: ignoreParentSettings?.ignoreTimerange ? undefined : timeRange,
+      timeslice: ignoreParentSettings?.ignoreTimerange ? undefined : precedingFilters?.timeslice,
       id,
     };
   }
 
-  public untilReady = () => {
+  public untilAllChildrenReady = () => {
     const panelsLoading = () =>
       Object.keys(this.getInput().panels).some(
         (panelId) => !this.getOutput().embeddableLoaded[panelId]
@@ -350,6 +343,24 @@ export class ControlGroupContainer extends Container<
             reject();
           }
           if (!panelsLoading()) {
+            subscription.unsubscribe();
+            resolve();
+          }
+        });
+      });
+    }
+    return Promise.resolve();
+  };
+
+  public untilInitialized = () => {
+    if (this.initialized$.value === false) {
+      return new Promise<void>((resolve, reject) => {
+        const subscription = this.initialized$.subscribe((isInitialized) => {
+          if (this.destroyed) {
+            subscription.unsubscribe();
+            reject();
+          }
+          if (isInitialized) {
             subscription.unsubscribe();
             resolve();
           }

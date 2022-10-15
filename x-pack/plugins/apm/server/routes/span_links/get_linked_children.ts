@@ -49,6 +49,7 @@ async function fetchLinkedChildrenOfSpan({
       },
       _source: [SPAN_LINKS, TRACE_ID, SPAN_ID, PROCESSOR_EVENT, TRANSACTION_ID],
       body: {
+        track_total_hits: false,
         size: 1000,
         query: {
           bool: {

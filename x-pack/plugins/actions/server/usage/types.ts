@@ -22,6 +22,7 @@ export interface ActionsUsage {
   count_actions_executions_by_type_per_day: Record<string, number>;
   count_actions_executions_failed_per_day: number;
   count_actions_executions_failed_by_type_per_day: Record<string, number>;
+  count_connector_types_by_action_run_outcome_per_day: Record<string, Record<string, number>>;
   avg_execution_time_per_day: number;
   avg_execution_time_by_type_per_day: Record<string, number>;
 }

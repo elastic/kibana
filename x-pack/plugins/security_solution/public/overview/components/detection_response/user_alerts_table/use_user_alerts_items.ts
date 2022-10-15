@@ -11,6 +11,7 @@ import { useQueryInspector } from '../../../../common/components/page/manage_que
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import type { GenericBuckets } from '../../../../../common/search_strategy';
 import { useQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/use_query';
+import { ALERTS_QUERY_NAMES } from '../../../../detections/containers/detection_engine/alerts/constants';
 import { getPageCount, ITEMS_PER_PAGE } from '../utils';
 
 const USERS_BY_SEVERITY_AGG = 'usersBySeverity';
@@ -73,6 +74,7 @@ export const useUserAlertsItems: UseUserAlertsItems = ({ skip, queryId, signalIn
     }),
     indexName: signalIndexName,
     skip,
+    queryName: ALERTS_QUERY_NAMES.VULNERABLE_USERS,
   });
 
   useEffect(() => {

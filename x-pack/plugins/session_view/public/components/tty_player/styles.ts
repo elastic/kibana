@@ -7,24 +7,25 @@
 
 import { useMemo } from 'react';
 import { CSSObject, css } from '@emotion/react';
-import { transparentize, useEuiScrollBar } from '@elastic/eui';
+import { transparentize } from '@elastic/eui';
 import { useEuiTheme } from '../../hooks';
+import { Teletype } from '../../../common/types/process_tree';
 
-export const useStyles = () => {
-  const { euiTheme } = useEuiTheme();
-  const euiScrollBar = useEuiScrollBar();
-
+export const useStyles = (tty?: Teletype, show?: boolean) => {
+  const { euiTheme, euiVars } = useEuiTheme();
   const cached = useMemo(() => {
-    const { size, colors, border } = euiTheme;
+    const { size, font, colors, border } = euiTheme;
 
     const container: CSSObject = {
       position: 'absolute',
       top: 0,
+      opacity: show ? 1 : 0,
+      transition: 'opacity .2s',
+      pointerEvents: show ? 'auto' : 'none',
       width: '100%',
       height: '100%',
       overflow: 'hidden',
-      borderRadius: size.s,
-      backgroundColor: colors.ink,
+      zIndex: 10,
       '.euiRangeLevel--warning': {
         backgroundColor: transparentize(colors.warning, 0.8),
       },
@@ -36,20 +37,62 @@ export const useStyles = () => {
       },
     };
 
+    const header: CSSObject = {
+      visibility: show ? 'visible' : 'hidden',
+      backgroundColor: `${euiVars.euiFormBackgroundDisabledColor}`,
+      padding: `${size.m} ${size.base}`,
+    };
+
+    const windowBoundsColor = transparentize(colors.ghost, 0.6);
+
     const terminal: CSSObject = {
-      width: '100%',
-      height: 'calc(100% - 142px)',
-      '.xterm-viewport': css`
-        ${euiScrollBar}
+      minHeight: '100%',
+      '.xterm': css`
+        display: inline-block;
       `,
-      border: border.thin,
+      '.xterm-screen': css`
+        overflow-y: visible;
+        border: ${border.width.thin} dotted ${windowBoundsColor};
+        border-top: 0;
+        border-left: 0;
+        box-sizing: content-box;
+      `,
+    };
+
+    if (tty?.rows) {
+      terminal['.xterm-screen:after'] = css`
+        position: absolute;
+        right: ${size.s};
+        top: ${size.s};
+        content: '${tty?.columns}x${tty?.rows}';
+        color: ${windowBoundsColor};
+        font-family: ${font.familyCode};
+        font-size: ${size.m};
+      `;
+    }
+
+    const scrollPane: CSSObject = {
+      position: 'relative',
+      transform: `translateY(${show ? 0 : '100%'})`,
+      transition: 'transform .2s ease-in-out',
+      width: '100%',
+      height: 'calc(100% - 112px)',
+      overflow: 'auto',
+      backgroundColor: colors.ink,
+    };
+
+    const betaBadge: CSSObject = {
+      backgroundColor: `${colors.emptyShade}`,
     };
 
     return {
       container,
+      header,
       terminal,
+      scrollPane,
+      betaBadge,
     };
-  }, [euiScrollBar, euiTheme]);
+  }, [euiTheme, show, euiVars.euiFormBackgroundDisabledColor, tty?.rows, tty?.columns]);
 
   return cached;
 };

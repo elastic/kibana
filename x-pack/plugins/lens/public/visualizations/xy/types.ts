@@ -35,7 +35,8 @@ import {
   IconChartBarHorizontal,
 } from '@kbn/chart-icons';
 
-import type { VisualizationType, Suggestion } from '../../types';
+import { DistributiveOmit } from '@elastic/eui';
+import type { VisualizationType } from '../../types';
 import type { ValueLabelConfig } from '../../../common/types';
 
 export const YAxisModes = {
@@ -81,7 +82,7 @@ export interface YConfig {
   color?: string;
   icon?: string;
   lineWidth?: number;
-  lineStyle?: LineStyle;
+  lineStyle?: Exclude<LineStyle, 'dot-dashed'>;
   fill?: FillStyle;
   iconPosition?: IconPosition;
   textVisibility?: boolean;
@@ -115,7 +116,10 @@ export interface XYAnnotationLayerConfig {
   layerId: string;
   layerType: 'annotations';
   annotations: EventAnnotationConfig[];
+  hide?: boolean;
+  indexPatternId: string;
   simpleView?: boolean;
+  ignoreGlobalFilters: boolean;
 }
 
 export type XYLayerConfig =
@@ -154,10 +158,17 @@ export interface XYState {
   curveType?: XYCurveType;
   fillOpacity?: number;
   hideEndzones?: boolean;
+  showCurrentTimeMarker?: boolean;
   valuesInLegend?: boolean;
 }
 
 export type State = XYState;
+
+export type XYPersistedState = Omit<XYState, 'layers'> & {
+  layers: Array<DistributiveOmit<XYLayerConfig, 'indexPatternId'>>;
+};
+
+export type PersistedState = XYPersistedState;
 
 const groupLabelForBar = i18n.translate('xpack.lens.xyVisualization.barGroupLabel', {
   defaultMessage: 'Bar',
@@ -263,12 +274,3 @@ export const visualizationTypes: VisualizationType[] = [
     sortPriority: 2,
   },
 ];
-
-interface XYStateWithLayers {
-  [prop: string]: unknown;
-  layers: XYLayerConfig[];
-}
-export interface XYSuggestion extends Suggestion {
-  datasourceState: XYStateWithLayers;
-  visualizationState: XYStateWithLayers;
-}

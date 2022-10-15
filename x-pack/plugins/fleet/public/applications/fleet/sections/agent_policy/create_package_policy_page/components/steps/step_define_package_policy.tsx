@@ -112,7 +112,6 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
             packageToPackagePolicy(
               packageInfo,
               agentPolicy?.id || '',
-              packagePolicy.output_id,
               packagePolicy.namespace,
               packagePolicy.name,
               packagePolicy.description,
@@ -134,7 +133,6 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
           packageToPackagePolicy(
             packageInfo,
             agentPolicy?.id || '',
-            packagePolicy.output_id,
             packagePolicy.namespace,
             packagePolicy.name || incrementedName,
             packagePolicy.description,

@@ -110,6 +110,7 @@ export const ExpandableSectionAnalytics: FC<ExpandableSectionAnalyticsProps> = (
 
   useEffect(() => {
     fetchStats();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobId]);
 
   const analyticsSectionHeaderItems = getAnalyticsSectionHeaderItems(expandedRowItem);
