@@ -24,11 +24,11 @@ const fixer = (a) => {
  * fix([1.8, 2.9, -3.7, -4.6]) // returns [1, 2, -3, -4]
  */
 
-module.exports = { fix };
-
 function fix(a) {
   if (Array.isArray(a)) {
     return a.map((a) => fixer(a));
   }
   return fixer(a);
 }
+
+module.exports = { fix };
