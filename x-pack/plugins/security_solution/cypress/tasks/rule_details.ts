@@ -157,7 +157,7 @@ export const goBackToAllRulesTable = () => {
 };
 
 export const getDetails = (title: string | RegExp) =>
-  cy.get(DETAILS_TITLE).contains(title).next(DETAILS_DESCRIPTION);
+  cy.contains(DETAILS_TITLE, title).next(DETAILS_DESCRIPTION);
 
 export const assertDetailsNotExist = (title: string | RegExp) =>
   cy.get(DETAILS_TITLE).contains(title).should('not.exist');

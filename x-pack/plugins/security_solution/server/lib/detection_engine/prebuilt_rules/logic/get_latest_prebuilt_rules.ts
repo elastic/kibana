@@ -64,9 +64,7 @@ export const getFilesystemRules = (
  * that they are adding incorrect schema rules. Also this will auto-flush in all the default
  * aspects such as default interval of 5 minutes, default arrays, etc...
  */
-const validateFilesystemRules = (
-  rules: PrebuiltRuleToInstall[]
-): PrebuiltRuleToInstall[] => {
+const validateFilesystemRules = (rules: PrebuiltRuleToInstall[]): PrebuiltRuleToInstall[] => {
   return rules.map((rule) => {
     const decoded = PrebuiltRuleToInstall.decode(rule);
     const checked = exactCheck(rule, decoded);

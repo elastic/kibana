@@ -14,7 +14,9 @@ import { useFindRulesInMemory } from '../../../../rule_management_ui/components/
 import { getRulesSchemaMock } from '../../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 import type { Rule } from '../../../../rule_management/logic/types';
 
-jest.mock('../../../../rule_management_ui/components/rules_table/rules_table/use_find_rules');
+jest.mock(
+  '../../../../rule_management_ui/components/rules_table/rules_table/use_find_rules_in_memory'
+);
 
 describe('ExceptionsAddToRulesTable', () => {
   it('it displays loading state while fetching rules', () => {

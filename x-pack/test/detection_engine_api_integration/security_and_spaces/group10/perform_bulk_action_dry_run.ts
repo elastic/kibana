@@ -4,25 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import expect from 'expect';
-
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_URL,
 } from '@kbn/security-solution-plugin/common/constants';
+import expect from 'expect';
 import {
   BulkAction,
   BulkActionEditType,
-} from '@kbn/security-solution-plugin/common/detection_engine/schemas/request/perform_bulk_action_schema';
+} from '@kbn/security-solution-plugin/common/detection_engine/rule_management';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createRule,
   createSignalsIndex,
   deleteAllAlerts,
   deleteSignalsIndex,
+  getSimpleMlRule,
   getSimpleRule,
   installPrePackagedRules,
-  getSimpleMlRule,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export

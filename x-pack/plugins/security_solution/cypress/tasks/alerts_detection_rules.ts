@@ -18,7 +18,7 @@ import {
   RULES_TABLE_REFRESH_INDICATOR,
   RULES_TABLE_AUTOREFRESH_INDICATOR,
   PAGINATION_POPOVER_BTN,
-  RELOAD_PREBUILT_RULES_BTN,
+  LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN,
   RULE_CHECKBOX,
   RULE_NAME,
   RULE_SWITCH,
@@ -194,7 +194,7 @@ export const openIntegrationsPopover = () => {
 };
 
 export const reloadDeletedRules = () => {
-  cy.get(RELOAD_PREBUILT_RULES_BTN).click({ force: true });
+  cy.get(LOAD_PREBUILT_RULES_ON_PAGE_HEADER_BTN).click({ force: true });
 };
 
 /**

@@ -18,7 +18,7 @@ import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../detections/containers/detection_engine/lists/use_lists_config');
-jest.mock('../../../rule_management/logic/use_find_rules_query');
+jest.mock('../../../rule_management/logic/use_find_rules');
 jest.mock('../../../../common/components/link_to');
 jest.mock('../../../../detections/components/user_info');
 jest.mock('react-router-dom', () => {
