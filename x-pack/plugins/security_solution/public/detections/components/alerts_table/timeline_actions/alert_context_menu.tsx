@@ -102,7 +102,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   const isAgentEndpoint = useMemo(() => ecsRowData.agent?.type?.includes('endpoint'), [ecsRowData]);
 
   const isEndpointEvent = useMemo(() => isEvent && isAgentEndpoint, [isEvent, isAgentEndpoint]);
-  const timelineIdAllowsAddEndpointEventFilter = useMemo(
+  const scopeIdAllowsAddEndpointEventFilter = useMemo(
     () => scopeId === TableId.hostsPageEvents || scopeId === TableId.usersPageEvents,
     [scopeId]
   );
@@ -192,8 +192,8 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   const { eventFilterActionItems } = useEventFilterAction({
     onAddEventFilterClick: handleOnAddEventFilterClick,
     disabled:
-      !isEndpointEvent || !canCreateEndpointEventFilters || !timelineIdAllowsAddEndpointEventFilter,
-    tooltipMessage: !timelineIdAllowsAddEndpointEventFilter
+      !isEndpointEvent || !canCreateEndpointEventFilters || !scopeIdAllowsAddEndpointEventFilter,
+    tooltipMessage: !scopeIdAllowsAddEndpointEventFilter
       ? i18n.ACTION_ADD_EVENT_FILTER_DISABLED_TOOLTIP
       : undefined,
   });

@@ -57,6 +57,10 @@ export const useHoverActions = ({
   const [closePopOverTrigger, setClosePopOverTrigger] = useState(false);
   const [showTopN, setShowTopN] = useState<boolean>(false);
   const [hoverActionsOwnFocus, setHoverActionsOwnFocus] = useState<boolean>(false);
+  const id = useMemo(
+    () => (!scopeId ? timelineIdFind ?? tableIdFind : scopeId),
+    [scopeId, tableIdFind, timelineIdFind]
+  );
 
   const handleClosePopOverTrigger = useCallback(() => {
     setClosePopOverTrigger((prevClosePopOverTrigger) => !prevClosePopOverTrigger);
@@ -116,7 +120,7 @@ export const useHoverActions = ({
         ownFocus={hoverActionsOwnFocus}
         showOwnFocus={false}
         showTopN={showTopN}
-        scopeId={!scopeId ? timelineIdFind ?? tableIdFind : scopeId}
+        scopeId={id}
         toggleTopN={toggleTopN}
         values={
           typeof dataProvider.queryMatch.value !== 'number'
@@ -126,21 +130,19 @@ export const useHoverActions = ({
       />
     );
   }, [
-    closeTopN,
-    dataProvider,
-    fieldType,
-    handleClosePopOverTrigger,
-    hideTopN,
     hoverActionsOwnFocus,
-    isAggregatable,
-    isDraggable,
-    onFilterAdded,
-    render,
     showTopN,
-    scopeId,
+    dataProvider,
+    render,
+    closeTopN,
+    handleClosePopOverTrigger,
+    isDraggable,
+    isAggregatable,
+    fieldType,
+    hideTopN,
+    onFilterAdded,
+    id,
     toggleTopN,
-    timelineIdFind,
-    tableIdFind,
   ]);
 
   const setContainerRef = useCallback((e: HTMLDivElement) => {
