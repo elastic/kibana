@@ -26,7 +26,11 @@ export const taggableTypes = [
   'map',
   'lens',
   'search',
+  // Duplicated types are needed for Fleet integration assets
   'osquery_pack',
   'osquery_pack_asset',
   'osquery_saved_query',
+  'osquery-pack',
+  'osquery-pack-asset',
+  'osquery-saved-query',
 ];
