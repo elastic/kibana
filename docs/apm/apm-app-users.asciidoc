@@ -28,6 +28,7 @@ Select your use-case to get started:
 * <<apm-app-reader>>
 * <<apm-app-annotation-user-create>>
 * <<apm-app-central-config-user>>
+* <<apm-app-storage-explorer-user-create>>
 * <<apm-app-api-user>>
 
 ////
@@ -53,11 +54,12 @@ To create an APM reader user:
 . Create a new role, named something like `read-apm`, and assign the following privileges:
 +
 --
+:apm-read-view:
+:apm-monitor:
 include::./tab-widgets/apm-app-reader/widget.asciidoc[]
+:!apm-read-view:
+:!apm-monitor:
 --
-+
-TIP: Using the deprecated APM Server binaries?
-Add the privileges under the **Classic APM indices** tab above.
 
 . Assign the `read-apm` role created in the previous step, and the following built-in roles to
 any APM reader users:
@@ -83,9 +85,6 @@ In some instances, you may wish to restrict certain Kibana apps that a user has 
 --
 include::./tab-widgets/apm-app-reader/widget.asciidoc[]
 --
-+
-TIP: Using the deprecated APM Server binaries?
-Add the privileges under the **Classic APM indices** tab above.
 
 . Assign feature privileges to any Kibana feature that the user needs access to.
 Here are two examples:
@@ -230,6 +229,33 @@ and the following Kibana feature privileges to anyone who needs to read central 
 ==== Central configuration API
 
 See <<apm-app-api-user>>.
+
+////
+***********************************  ***********************************
+////
+
+[role="xpack"]
+[[apm-app-storage-explorer-user-create]]
+=== APM app storage explorer user
+
+++++
+<titleabbrev>Create a storage explorer user</titleabbrev>
+++++
+
+[[apm-app-storage-explorer-user]]
+==== Storage explorer user
+
+View the **Storage explorer** in the APM app.
+
+. Create a new role, named something like `storage-explorer_user`,
+and assign the following privileges:
++
+--
+include::./tab-widgets/storage-explorer-user/widget.asciidoc[]
+--
+
+. Assign the `storage-explorer_user` created previously, and the roles and privileges necessary to create
+a <<apm-app-reader-full,full>> or <<apm-app-reader-partial,partial>> APM reader to any users that need to view **Storage explorer** in the APM app.
 
 ////
 ***********************************  ***********************************
