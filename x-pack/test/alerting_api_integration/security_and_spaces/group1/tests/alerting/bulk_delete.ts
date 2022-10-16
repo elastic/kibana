@@ -21,12 +21,13 @@ export default ({ getService }: FtrProviderContext) => {
 
     after(() => objectRemover.removeAll());
 
-    async function getScheduledTask(id: string) {
+    const getScheduledTask = async (id: string) => {
       return await es.get({
         id: `task:${id}`,
         index: '.kibana_task_manager',
       });
-    }
+    };
+
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
 
