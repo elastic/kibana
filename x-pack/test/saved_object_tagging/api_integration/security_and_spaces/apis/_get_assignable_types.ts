@@ -32,7 +32,19 @@ export default function (ftrContext: FtrProviderContext) {
     });
 
     const assignablePerUser = {
-      [USERS.SUPERUSER.username]: ['dashboard', 'visualization', 'map', 'lens', 'search'],
+      [USERS.SUPERUSER.username]: [
+        'dashboard',
+        'visualization',
+        'map',
+        'lens',
+        'search',
+        'osquery_pack',
+        'osquery_pack_asset',
+        'osquery_saved_query',
+        'osquery-pack',
+        'osquery-pack-asset',
+        'osquery-saved-query',
+      ],
       [USERS.DEFAULT_SPACE_SO_TAGGING_READ_USER.username]: [],
       [USERS.DEFAULT_SPACE_READ_USER.username]: [],
       [USERS.DEFAULT_SPACE_ADVANCED_SETTINGS_READ_USER.username]: [],
