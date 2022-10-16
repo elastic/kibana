@@ -6,10 +6,11 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { updateRulesSchema } from '../../../../../../../common/detection_engine/schemas/request';
-import { updateRuleValidateTypeDependents } from '../../../../../../../common/detection_engine/rule_management/api/rules/update_rule/update_rules_type_dependents';
-import type { SecuritySolutionPluginRouter } from '../../../../../../types';
+
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
+import { validateUpdateRuleSchema } from '../../../../../../../common/detection_engine/rule_management';
+import { updateRulesSchema } from '../../../../../../../common/detection_engine/schemas/request';
+import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import type { SetupPlugins } from '../../../../../../plugin';
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../../machine_learning/validation';
@@ -24,7 +25,7 @@ import { legacyMigrate } from '../../../logic/rule_actions/legacy_action_migrati
 import { readRules } from '../../../logic/crud/read_rules';
 import { checkDefaultRuleExceptionListReferences } from '../../../logic/exceptions/check_for_default_rule_exception_list';
 
-export const updateRulesRoute = (router: SecuritySolutionPluginRouter, ml: SetupPlugins['ml']) => {
+export const updateRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupPlugins['ml']) => {
   router.put(
     {
       path: DETECTION_ENGINE_RULES_URL,
@@ -37,7 +38,7 @@ export const updateRulesRoute = (router: SecuritySolutionPluginRouter, ml: Setup
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
-      const validationErrors = updateRuleValidateTypeDependents(request.body);
+      const validationErrors = validateUpdateRuleSchema(request.body);
       if (validationErrors.length) {
         return siemResponse.error({ statusCode: 400, body: validationErrors });
       }

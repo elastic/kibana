@@ -16,7 +16,7 @@ import {
   getRuleMock,
 } from '../../../../routes/__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../../../../routes/__mocks__';
-import { deleteRulesRoute } from './route';
+import { deleteRuleRoute } from './route';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
 // eslint-disable-next-line no-restricted-imports
 import { legacyMigrate } from '../../../logic/rule_actions/legacy_action_migration';
@@ -29,7 +29,7 @@ jest.mock('../../../logic/rule_actions/legacy_action_migration', () => {
   };
 });
 
-describe('delete_rules', () => {
+describe('Delete rule route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
 
@@ -42,7 +42,7 @@ describe('delete_rules', () => {
 
     (legacyMigrate as jest.Mock).mockResolvedValue(getRuleMock(getQueryRuleParams()));
 
-    deleteRulesRoute(server.router);
+    deleteRuleRoute(server.router);
   });
 
   describe('status codes with actionClient and alertClient', () => {

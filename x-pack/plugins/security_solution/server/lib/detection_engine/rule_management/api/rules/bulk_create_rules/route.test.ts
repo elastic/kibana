@@ -21,7 +21,7 @@ import {
   getBasicNoShardsSearchResponse,
 } from '../../../../routes/__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../../../../routes/__mocks__';
-import { createRulesBulkRoute } from './route';
+import { bulkCreateRulesRoute } from './route';
 import { getCreateRulesSchemaMock } from '../../../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
@@ -29,7 +29,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 jest.mock('../../../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 
-describe('create_rules_bulk', () => {
+describe('Bulk create rules route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
@@ -46,7 +46,7 @@ describe('create_rules_bulk', () => {
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())
     );
-    createRulesBulkRoute(server.router, ml, logger);
+    bulkCreateRulesRoute(server.router, ml, logger);
   });
 
   describe('status codes', () => {

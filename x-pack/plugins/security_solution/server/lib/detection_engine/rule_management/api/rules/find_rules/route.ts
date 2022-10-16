@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import { transformError } from '@kbn/securitysolution-es-utils';
 import type { Logger } from '@kbn/core/server';
-import { findRuleValidateTypeDependents } from '../../../../../../../common/detection_engine/rule_management/api/rules/find_rules/find_rules_type_dependents';
-import type { FindRulesSchemaDecoded } from '../../../../../../../common/detection_engine/rule_management/api/rules/find_rules/find_rules_schema';
-import { findRulesSchema } from '../../../../../../../common/detection_engine/rule_management/api/rules/find_rules/find_rules_schema';
-import type { SecuritySolutionPluginRouter } from '../../../../../../types';
+import { transformError } from '@kbn/securitysolution-es-utils';
+
 import { DETECTION_ENGINE_RULES_URL_FIND } from '../../../../../../../common/constants';
+import type { FindRulesRequestQueryDecoded } from '../../../../../../../common/detection_engine/rule_management';
+import {
+  FindRulesRequestQuery,
+  validateFindRulesRequestQuery,
+} from '../../../../../../../common/detection_engine/rule_management';
+
+import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { findRules } from '../../../logic/search/find_rules';
 import { buildSiemResponse } from '../../../../routes/utils';
 import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
@@ -25,8 +29,8 @@ export const findRulesRoute = (router: SecuritySolutionPluginRouter, logger: Log
     {
       path: DETECTION_ENGINE_RULES_URL_FIND,
       validate: {
-        query: buildRouteValidation<typeof findRulesSchema, FindRulesSchemaDecoded>(
-          findRulesSchema
+        query: buildRouteValidation<typeof FindRulesRequestQuery, FindRulesRequestQueryDecoded>(
+          FindRulesRequestQuery
         ),
       },
       options: {
@@ -36,7 +40,7 @@ export const findRulesRoute = (router: SecuritySolutionPluginRouter, logger: Log
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
 
-      const validationErrors = findRuleValidateTypeDependents(request.query);
+      const validationErrors = validateFindRulesRequestQuery(request.query);
       if (validationErrors.length) {
         return siemResponse.error({ statusCode: 400, body: validationErrors });
       }

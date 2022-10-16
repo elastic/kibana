@@ -5,19 +5,18 @@
  * 2.0.
  */
 
-import type { CreateRulesBulkSchema } from './request_schema';
-import { createRulesBulkSchema } from './request_schema';
+import { BulkCreateRulesRequestBody } from './request_schema';
 import { exactCheck, foldLeftRight, formatErrors } from '@kbn/securitysolution-io-ts-utils';
 import { getCreateRulesSchemaMock } from '../../../../schemas/request/rule_schemas.mock';
 
 // only the basics of testing are here.
 // see: rule_schemas.test.ts for the bulk of the validation tests
 // this just wraps createRulesSchema in an array
-describe('create_rules_bulk_schema', () => {
+describe('Bulk create rules request schema', () => {
   test('can take an empty array and validate it', () => {
-    const payload: CreateRulesBulkSchema = [];
+    const payload: BulkCreateRulesRequestBody = [];
 
-    const decoded = createRulesBulkSchema.decode(payload);
+    const decoded = BulkCreateRulesRequestBody.decode(payload);
     const checked = exactCheck(payload, decoded);
     const output = foldLeftRight(checked);
     expect(output.errors).toEqual([]);
@@ -27,7 +26,7 @@ describe('create_rules_bulk_schema', () => {
   test('made up values do not validate for a single element', () => {
     const payload: Array<{ madeUp: string }> = [{ madeUp: 'hi' }];
 
-    const decoded = createRulesBulkSchema.decode(payload);
+    const decoded = BulkCreateRulesRequestBody.decode(payload);
     const checked = exactCheck(payload, decoded);
     const output = foldLeftRight(checked);
     expect(formatErrors(output.errors)).toContain(
@@ -44,9 +43,9 @@ describe('create_rules_bulk_schema', () => {
   });
 
   test('single array element does validate', () => {
-    const payload: CreateRulesBulkSchema = [getCreateRulesSchemaMock()];
+    const payload: BulkCreateRulesRequestBody = [getCreateRulesSchemaMock()];
 
-    const decoded = createRulesBulkSchema.decode(payload);
+    const decoded = BulkCreateRulesRequestBody.decode(payload);
     const checked = exactCheck(payload, decoded);
     const output = foldLeftRight(checked);
     expect(formatErrors(output.errors)).toEqual([]);
@@ -54,9 +53,12 @@ describe('create_rules_bulk_schema', () => {
   });
 
   test('two array elements do validate', () => {
-    const payload: CreateRulesBulkSchema = [getCreateRulesSchemaMock(), getCreateRulesSchemaMock()];
+    const payload: BulkCreateRulesRequestBody = [
+      getCreateRulesSchemaMock(),
+      getCreateRulesSchemaMock(),
+    ];
 
-    const decoded = createRulesBulkSchema.decode(payload);
+    const decoded = BulkCreateRulesRequestBody.decode(payload);
     const checked = exactCheck(payload, decoded);
     const output = foldLeftRight(checked);
     expect(formatErrors(output.errors)).toEqual([]);
@@ -67,9 +69,9 @@ describe('create_rules_bulk_schema', () => {
     const singleItem = getCreateRulesSchemaMock();
     // @ts-expect-error
     delete singleItem.risk_score;
-    const payload: CreateRulesBulkSchema = [singleItem];
+    const payload: BulkCreateRulesRequestBody = [singleItem];
 
-    const decoded = createRulesBulkSchema.decode(payload);
+    const decoded = BulkCreateRulesRequestBody.decode(payload);
     const checked = exactCheck(payload, decoded);
     const output = foldLeftRight(checked);
     expect(formatErrors(output.errors)).toEqual([
@@ -83,9 +85,9 @@ describe('create_rules_bulk_schema', () => {
     const secondItem = getCreateRulesSchemaMock();
     // @ts-expect-error
     delete secondItem.risk_score;
-    const payload: CreateRulesBulkSchema = [singleItem, secondItem];
+    const payload: BulkCreateRulesRequestBody = [singleItem, secondItem];
 
-    const decoded = createRulesBulkSchema.decode(payload);
+    const decoded = BulkCreateRulesRequestBody.decode(payload);
     const checked = exactCheck(payload, decoded);
     const output = foldLeftRight(checked);
     expect(formatErrors(output.errors)).toEqual([
@@ -99,9 +101,9 @@ describe('create_rules_bulk_schema', () => {
     const secondItem = getCreateRulesSchemaMock();
     // @ts-expect-error
     delete singleItem.risk_score;
-    const payload: CreateRulesBulkSchema = [singleItem, secondItem];
+    const payload: BulkCreateRulesRequestBody = [singleItem, secondItem];
 
-    const decoded = createRulesBulkSchema.decode(payload);
+    const decoded = BulkCreateRulesRequestBody.decode(payload);
     const checked = exactCheck(payload, decoded);
     const output = foldLeftRight(checked);
     expect(formatErrors(output.errors)).toEqual([
@@ -117,9 +119,9 @@ describe('create_rules_bulk_schema', () => {
     delete singleItem.risk_score;
     // @ts-expect-error
     delete secondItem.risk_score;
-    const payload: CreateRulesBulkSchema = [singleItem, secondItem];
+    const payload: BulkCreateRulesRequestBody = [singleItem, secondItem];
 
-    const decoded = createRulesBulkSchema.decode(payload);
+    const decoded = BulkCreateRulesRequestBody.decode(payload);
     const checked = exactCheck(payload, decoded);
     const output = foldLeftRight(checked);
     expect(formatErrors(output.errors)).toEqual([
@@ -134,9 +136,9 @@ describe('create_rules_bulk_schema', () => {
       madeUpValue: 'something',
     };
     const secondItem = getCreateRulesSchemaMock();
-    const payload: CreateRulesBulkSchema = [singleItem, secondItem];
+    const payload: BulkCreateRulesRequestBody = [singleItem, secondItem];
 
-    const decoded = createRulesBulkSchema.decode(payload);
+    const decoded = BulkCreateRulesRequestBody.decode(payload);
     const checked = exactCheck(payload, decoded);
     const output = foldLeftRight(checked);
     expect(formatErrors(output.errors)).toEqual(['invalid keys "madeUpValue"']);
@@ -149,9 +151,9 @@ describe('create_rules_bulk_schema', () => {
       ...getCreateRulesSchemaMock(),
       madeUpValue: 'something',
     };
-    const payload: CreateRulesBulkSchema = [singleItem, secondItem];
+    const payload: BulkCreateRulesRequestBody = [singleItem, secondItem];
 
-    const decoded = createRulesBulkSchema.decode(payload);
+    const decoded = BulkCreateRulesRequestBody.decode(payload);
     const checked = exactCheck(payload, decoded);
     const output = foldLeftRight(checked);
     expect(formatErrors(output.errors)).toEqual(['invalid keys "madeUpValue"']);
@@ -167,9 +169,9 @@ describe('create_rules_bulk_schema', () => {
       ...getCreateRulesSchemaMock(),
       madeUpValue: 'something',
     };
-    const payload: CreateRulesBulkSchema = [singleItem, secondItem];
+    const payload: BulkCreateRulesRequestBody = [singleItem, secondItem];
 
-    const decoded = createRulesBulkSchema.decode(payload);
+    const decoded = BulkCreateRulesRequestBody.decode(payload);
     const checked = exactCheck(payload, decoded);
     const output = foldLeftRight(checked);
     expect(formatErrors(output.errors)).toEqual(['invalid keys "madeUpValue,madeUpValue"']);
@@ -180,7 +182,7 @@ describe('create_rules_bulk_schema', () => {
     const badSeverity = { ...getCreateRulesSchemaMock(), severity: 'madeup' };
     const payload = [badSeverity];
 
-    const decoded = createRulesBulkSchema.decode(payload);
+    const decoded = BulkCreateRulesRequestBody.decode(payload);
     const checked = exactCheck(payload, decoded);
     const output = foldLeftRight(checked);
     expect(formatErrors(output.errors)).toEqual(['Invalid value "madeup" supplied to "severity"']);
@@ -188,11 +190,11 @@ describe('create_rules_bulk_schema', () => {
   });
 
   test('You can set "note" to a string', () => {
-    const payload: CreateRulesBulkSchema = [
+    const payload: BulkCreateRulesRequestBody = [
       { ...getCreateRulesSchemaMock(), note: '# test markdown' },
     ];
 
-    const decoded = createRulesBulkSchema.decode(payload);
+    const decoded = BulkCreateRulesRequestBody.decode(payload);
     const checked = exactCheck(payload, decoded);
     const output = foldLeftRight(checked);
     expect(formatErrors(output.errors)).toEqual([]);
@@ -200,9 +202,9 @@ describe('create_rules_bulk_schema', () => {
   });
 
   test('You can set "note" to an empty string', () => {
-    const payload: CreateRulesBulkSchema = [{ ...getCreateRulesSchemaMock(), note: '' }];
+    const payload: BulkCreateRulesRequestBody = [{ ...getCreateRulesSchemaMock(), note: '' }];
 
-    const decoded = createRulesBulkSchema.decode(payload);
+    const decoded = BulkCreateRulesRequestBody.decode(payload);
     const checked = exactCheck(payload, decoded);
     const output = foldLeftRight(checked);
     expect(formatErrors(output.errors)).toEqual([]);
@@ -219,7 +221,7 @@ describe('create_rules_bulk_schema', () => {
       },
     ];
 
-    const decoded = createRulesBulkSchema.decode(payload);
+    const decoded = BulkCreateRulesRequestBody.decode(payload);
     const checked = exactCheck(payload, decoded);
     const output = foldLeftRight(checked);
     expect(formatErrors(output.errors)).toEqual([

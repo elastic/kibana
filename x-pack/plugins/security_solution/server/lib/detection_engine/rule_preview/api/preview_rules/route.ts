@@ -17,6 +17,16 @@ import type {
 import { parseDuration } from '@kbn/alerting-plugin/common';
 import type { ExecutorType } from '@kbn/alerting-plugin/server/types';
 import type { Alert } from '@kbn/alerting-plugin/server';
+
+import {
+  DEFAULT_PREVIEW_INDEX,
+  DETECTION_ENGINE_RULES_PREVIEW,
+} from '../../../../../../common/constants';
+import { validateCreateRuleSchema } from '../../../../../../common/detection_engine/rule_management';
+import { RuleExecutionStatus } from '../../../../../../common/detection_engine/rule_monitoring';
+import type { RulePreviewLogs } from '../../../../../../common/detection_engine/schemas/request';
+import { previewRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
+
 import type { StartPlugins, SetupPlugins } from '../../../../../plugin';
 import { buildSiemResponse } from '../../../routes/utils';
 import { convertCreateAPIToInternalSchema } from '../../../rule_management';
@@ -27,14 +37,7 @@ import { buildMlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
 import { buildRouteValidation } from '../../../../../utils/build_validation/route_validation';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
-import { createRuleValidateTypeDependents } from '../../../../../../common/detection_engine/rule_management/api/rules/create_rule/create_rules_type_dependents';
-import {
-  DEFAULT_PREVIEW_INDEX,
-  DETECTION_ENGINE_RULES_PREVIEW,
-} from '../../../../../../common/constants';
-import type { RulePreviewLogs } from '../../../../../../common/detection_engine/schemas/request';
-import { previewRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
-import { RuleExecutionStatus } from '../../../../../../common/detection_engine/rule_monitoring';
+
 import type { RuleExecutionContext, StatusChangeArgs } from '../../../rule_monitoring';
 
 import type { ConfigType } from '../../../../../config';
@@ -82,7 +85,7 @@ export const previewRulesRoute = async (
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
-      const validationErrors = createRuleValidateTypeDependents(request.body);
+      const validationErrors = validateCreateRuleSchema(request.body);
       const coreContext = await context.core;
       if (validationErrors.length) {
         return siemResponse.error({ statusCode: 400, body: validationErrors });

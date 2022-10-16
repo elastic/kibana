@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import { validate } from '@kbn/securitysolution-io-ts-utils';
 import type { Logger } from '@kbn/core/server';
-import { updateRuleValidateTypeDependents } from '../../../../../../../common/detection_engine/rule_management/api/rules/update_rule/update_rules_type_dependents';
-import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
-import { updateRulesBulkSchema } from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_update_rules/update_rules_bulk_schema';
+import { validate } from '@kbn/securitysolution-io-ts-utils';
+
+import {
+  BulkUpdateRulesRequestBody,
+  validateUpdateRuleSchema,
+} from '../../../../../../../common/detection_engine/rule_management';
 import { rulesBulkSchema } from '../../../../../../../common/detection_engine/schemas/response/rules_bulk_schema';
+
+import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { DETECTION_ENGINE_RULES_BULK_UPDATE } from '../../../../../../../common/constants';
 import type { SetupPlugins } from '../../../../../../plugin';
@@ -32,7 +36,7 @@ import { getDeprecatedBulkEndpointHeader, logDeprecatedBulkEndpoint } from '../.
 /**
  * @deprecated since version 8.2.0. Use the detection_engine/rules/_bulk_action API instead
  */
-export const updateRulesBulkRoute = (
+export const bulkUpdateRulesRoute = (
   router: SecuritySolutionPluginRouter,
   ml: SetupPlugins['ml'],
   logger: Logger
@@ -41,7 +45,7 @@ export const updateRulesBulkRoute = (
     {
       path: DETECTION_ENGINE_RULES_BULK_UPDATE,
       validate: {
-        body: buildRouteValidation(updateRulesBulkSchema),
+        body: buildRouteValidation(BulkUpdateRulesRequestBody),
       },
       options: {
         tags: ['access:securitySolution'],
@@ -69,7 +73,7 @@ export const updateRulesBulkRoute = (
         request.body.map(async (payloadRule) => {
           const idOrRuleIdOrUnknown = payloadRule.id ?? payloadRule.rule_id ?? '(unknown id)';
           try {
-            const validationErrors = updateRuleValidateTypeDependents(payloadRule);
+            const validationErrors = validateUpdateRuleSchema(payloadRule);
             if (validationErrors.length) {
               return createBulkErrorObject({
                 ruleId: payloadRule.rule_id,

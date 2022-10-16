@@ -15,10 +15,11 @@ import { validate } from '@kbn/securitysolution-io-ts-utils';
 import type { ImportQuerySchemaDecoded } from '@kbn/securitysolution-io-ts-types';
 import { importQuerySchema } from '@kbn/securitysolution-io-ts-types';
 
-import type { ImportRulesSchema as ImportRulesResponseSchema } from '../../../../../../../common/detection_engine/schemas/response/import_rules_schema';
-import { importRulesSchema as importRulesResponseSchema } from '../../../../../../../common/detection_engine/schemas/response/import_rules_schema';
-import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
+import type { RuleToImport } from '../../../../../../../common/detection_engine/rule_management';
+import { ImportRulesResponse } from '../../../../../../../common/detection_engine/rule_management';
+
+import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import type { ConfigType } from '../../../../../../config';
 import type { SetupPlugins } from '../../../../../../plugin';
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
@@ -36,7 +37,6 @@ import type { RuleExceptionsPromiseFromStreams } from '../../../logic/import/imp
 import { importRules as importRulesHelper } from '../../../logic/import/import_rules_utils';
 import { getReferencedExceptionLists } from '../../../logic/import/gather_referenced_exceptions';
 import { importRuleExceptions } from '../../../logic/import/import_rule_exceptions';
-import type { ImportRulesSchema } from '../../../../../../../common/detection_engine/rule_management/api/rules/import_rules/import_rules_schema';
 import type { HapiReadableStream } from '../../../logic/import/hapi_readable_stream';
 
 const CHUNK_PARSED_OBJECT_SIZE = 50;
@@ -131,9 +131,7 @@ export const importRulesRoute = (
 
         let parsedRules;
         let actionErrors: BulkError[] = [];
-        const actualRules = rules.filter(
-          (rule): rule is ImportRulesSchema => !(rule instanceof Error)
-        );
+        const actualRules = rules.filter((rule): rule is RuleToImport => !(rule instanceof Error));
 
         if (actualRules.some((rule) => rule.actions && rule.actions.length > 0)) {
           const [nonExistentActionErrors, uniqueParsedObjects] = await getInvalidConnectors(
@@ -173,7 +171,7 @@ export const importRulesRoute = (
             return false;
           }
         });
-        const importRules: ImportRulesResponseSchema = {
+        const importRules: ImportRulesResponse = {
           success: errorsResp.length === 0,
           success_count: successes.length,
           rules_count: rules.length,
@@ -183,7 +181,7 @@ export const importRulesRoute = (
           exceptions_success_count: exceptionsSuccessCount,
         };
 
-        const [validated, errors] = validate(importRules, importRulesResponseSchema);
+        const [validated, errors] = validate(importRules, ImportRulesResponse);
         if (errors != null) {
           return siemResponse.error({ statusCode: 500, body: errors });
         } else {

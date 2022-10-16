@@ -5,6 +5,22 @@
  * 2.0.
  */
 
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+
+import {
+  getImportRulesWithIdSchemaMock,
+  ruleIdsToNdJsonString,
+  rulesToNdJsonString,
+} from '../../../../../../../common/detection_engine/rule_management/mocks';
+
+import { buildMlAuthz } from '../../../../../machine_learning/authz';
+import {
+  mlServicesMock,
+  mlAuthzMock as mockMlAuthzFactory,
+} from '../../../../../machine_learning/mocks';
+
+import type { requestMock } from '../../../../routes/__mocks__';
+import { createMockConfig, requestContextMock, serverMock } from '../../../../routes/__mocks__';
 import { buildHapiStream } from '../../../../routes/__mocks__/utils';
 import {
   getImportRulesRequest,
@@ -14,26 +30,14 @@ import {
   getFindResultWithSingleHit,
   getBasicEmptySearchResponse,
 } from '../../../../routes/__mocks__/request_responses';
-import type { requestMock } from '../../../../routes/__mocks__';
-import { createMockConfig, requestContextMock, serverMock } from '../../../../routes/__mocks__';
-import {
-  mlServicesMock,
-  mlAuthzMock as mockMlAuthzFactory,
-} from '../../../../../machine_learning/mocks';
-import { buildMlAuthz } from '../../../../../machine_learning/authz';
-import { importRulesRoute } from './route';
+
 import * as createRulesAndExceptionsStreamFromNdJson from '../../../logic/import/create_rules_stream_from_ndjson';
-import {
-  getImportRulesWithIdSchemaMock,
-  ruleIdsToNdJsonString,
-  rulesToNdJsonString,
-} from '../../../../../../../common/detection_engine/rule_management/api/rules/import_rules/import_rules_schema.mock';
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
+import { importRulesRoute } from './route';
 
 jest.mock('../../../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 
-describe('import_rules_route', () => {
+describe('Import rules route', () => {
   let config: ReturnType<typeof createMockConfig>;
   let server: ReturnType<typeof serverMock.create>;
   let request: ReturnType<typeof requestMock.create>;

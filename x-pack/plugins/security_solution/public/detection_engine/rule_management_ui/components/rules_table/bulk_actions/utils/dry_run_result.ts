@@ -6,7 +6,7 @@
  */
 
 import { BulkActionsDryRunErrCode } from '../../../../../../../common/constants';
-import type { ExportRulesDetails } from '../../../../../../../common/detection_engine/schemas/response/export_rules_details_schema';
+import type { ExportRulesDetails } from '../../../../../../../common/detection_engine/rule_management';
 import type { BulkActionResponse } from '../../../../../rule_management/logic';
 
 import type { DryRunResult } from '../types';

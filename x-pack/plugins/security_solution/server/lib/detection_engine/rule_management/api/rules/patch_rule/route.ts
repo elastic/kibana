@@ -6,24 +6,29 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { patchRuleValidateTypeDependents } from '../../../../../../../common/detection_engine/rule_management/api/rules/patch_rule/patch_rules_type_dependents';
-import { buildRouteValidationNonExact } from '../../../../../../utils/build_validation/route_validation';
-import { patchRulesSchema } from '../../../../../../../common/detection_engine/rule_management/api/rules/patch_rule/patch_rules_schema';
-import type { SecuritySolutionPluginRouter } from '../../../../../../types';
+
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
+import {
+  PatchRuleRequestBody,
+  validatePatchRuleRequestBody,
+} from '../../../../../../../common/detection_engine/rule_management';
+
+import { buildRouteValidationNonExact } from '../../../../../../utils/build_validation/route_validation';
+import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import type { SetupPlugins } from '../../../../../../plugin';
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../../machine_learning/validation';
-import { patchRules } from '../../../logic/crud/patch_rules';
 import { buildSiemResponse } from '../../../../routes/utils';
-import { checkDefaultRuleExceptionListReferences } from '../../../logic/exceptions/check_for_default_rule_exception_list';
-import { getIdError } from '../../../utils/utils';
-import { transformValidate } from '../../../utils/validate';
+
 import { readRules } from '../../../logic/crud/read_rules';
+import { patchRules } from '../../../logic/crud/patch_rules';
+import { checkDefaultRuleExceptionListReferences } from '../../../logic/exceptions/check_for_default_rule_exception_list';
 // eslint-disable-next-line no-restricted-imports
 import { legacyMigrate } from '../../../logic/rule_actions/legacy_action_migration';
+import { getIdError } from '../../../utils/utils';
+import { transformValidate } from '../../../utils/validate';
 
-export const patchRulesRoute = (router: SecuritySolutionPluginRouter, ml: SetupPlugins['ml']) => {
+export const patchRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupPlugins['ml']) => {
   router.patch(
     {
       path: DETECTION_ENGINE_RULES_URL,
@@ -31,7 +36,7 @@ export const patchRulesRoute = (router: SecuritySolutionPluginRouter, ml: SetupP
         // Use non-exact validation because everything is optional in patch - since everything is optional,
         // io-ts can't find the right schema from the type specific union and the exact check breaks.
         // We do type specific validation after fetching the existing rule so we know the rule type.
-        body: buildRouteValidationNonExact<typeof patchRulesSchema>(patchRulesSchema),
+        body: buildRouteValidationNonExact(PatchRuleRequestBody),
       },
       options: {
         tags: ['access:securitySolution'],
@@ -39,7 +44,7 @@ export const patchRulesRoute = (router: SecuritySolutionPluginRouter, ml: SetupP
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
-      const validationErrors = patchRuleValidateTypeDependents(request.body);
+      const validationErrors = validatePatchRuleRequestBody(request.body);
       if (validationErrors.length) {
         return siemResponse.error({ statusCode: 400, body: validationErrors });
       }

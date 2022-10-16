@@ -8,6 +8,18 @@
 import { buildEsQuery } from '@kbn/es-query';
 import { KibanaServices } from '../../../common/lib/kibana';
 
+import { DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL } from '../../../../common/detection_engine/rule_exceptions';
+import { getPatchRulesSchemaMock } from '../../../../common/detection_engine/rule_management/mocks';
+
+import {
+  getCreateRulesSchemaMock,
+  getUpdateRulesSchemaMock,
+} from '../../../../common/detection_engine/schemas/request/rule_schemas.mock';
+import { getRulesSchemaMock } from '../../../../common/detection_engine/schemas/response/rules_schema.mocks';
+
+import { rulesMock } from '../logic/mock';
+import type { FindRulesReferencedByExceptionsListProp } from '../logic/types';
+
 import {
   createRule,
   updateRule,
@@ -22,15 +34,6 @@ import {
   previewRule,
   findRuleExceptionReferences,
 } from './api';
-import { getRulesSchemaMock } from '../../../../common/detection_engine/schemas/response/rules_schema.mocks';
-import {
-  getCreateRulesSchemaMock,
-  getUpdateRulesSchemaMock,
-} from '../../../../common/detection_engine/schemas/request/rule_schemas.mock';
-import { DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL } from '../../../../common/detection_engine/rule_exceptions';
-import { getPatchRulesSchemaMock } from '../../../../common/detection_engine/rule_management/api/rules/patch_rule/patch_rules_schema.mock';
-import { rulesMock } from '../logic/mock';
-import type { FindRulesReferencedByExceptionsListProp } from '../logic/types';
 
 const abortCtrl = new AbortController();
 const mockKibanaServices = KibanaServices.get as jest.Mock;

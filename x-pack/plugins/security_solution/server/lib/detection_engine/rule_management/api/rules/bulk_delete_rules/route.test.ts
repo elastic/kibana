@@ -16,10 +16,10 @@ import {
   getEmptySavedObjectsResponse,
 } from '../../../../routes/__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../../../../routes/__mocks__';
-import { deleteRulesBulkRoute } from './route';
+import { bulkDeleteRulesRoute } from './route';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
-describe('delete_rules', () => {
+describe('Bulk delete rules route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
 
@@ -32,7 +32,7 @@ describe('delete_rules', () => {
     clients.rulesClient.delete.mockResolvedValue({}); // successful deletion
     clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse()); // rule status request
 
-    deleteRulesBulkRoute(server.router, logger);
+    bulkDeleteRulesRoute(server.router, logger);
   });
 
   describe('status codes with actionClient and alertClient', () => {

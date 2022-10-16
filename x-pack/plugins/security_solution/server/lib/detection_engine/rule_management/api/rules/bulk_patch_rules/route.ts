@@ -7,11 +7,13 @@
 
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import type { Logger } from '@kbn/core/server';
-import { patchRulesBulkSchema } from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_patch_rules/patch_rules_bulk_schema';
-import { buildRouteValidationNonExact } from '../../../../../../utils/build_validation/route_validation';
-import { rulesBulkSchema } from '../../../../../../../common/detection_engine/schemas/response/rules_bulk_schema';
-import type { SecuritySolutionPluginRouter } from '../../../../../../types';
+
 import { DETECTION_ENGINE_RULES_BULK_UPDATE } from '../../../../../../../common/constants';
+import { BulkPatchRulesRequestBody } from '../../../../../../../common/detection_engine/rule_management';
+import { rulesBulkSchema } from '../../../../../../../common/detection_engine/schemas/response/rules_bulk_schema';
+
+import { buildRouteValidationNonExact } from '../../../../../../utils/build_validation/route_validation';
+import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import type { SetupPlugins } from '../../../../../../plugin';
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../../machine_learning/validation';
@@ -27,7 +29,7 @@ import { getDeprecatedBulkEndpointHeader, logDeprecatedBulkEndpoint } from '../.
 /**
  * @deprecated since version 8.2.0. Use the detection_engine/rules/_bulk_action API instead
  */
-export const patchRulesBulkRoute = (
+export const bulkPatchRulesRoute = (
   router: SecuritySolutionPluginRouter,
   ml: SetupPlugins['ml'],
   logger: Logger
@@ -36,7 +38,7 @@ export const patchRulesBulkRoute = (
     {
       path: DETECTION_ENGINE_RULES_BULK_UPDATE,
       validate: {
-        body: buildRouteValidationNonExact<typeof patchRulesBulkSchema>(patchRulesBulkSchema),
+        body: buildRouteValidationNonExact(BulkPatchRulesRequestBody),
       },
       options: {
         tags: ['access:securitySolution'],

@@ -6,7 +6,7 @@
  */
 
 import type { Query } from '@elastic/eui';
-import type { ExportRulesDetails } from '../../../../../common/detection_engine/schemas/response/export_rules_details_schema';
+import type { ExportRulesDetails } from '../../../../../common/detection_engine/rule_management';
 import type { BulkActionSummary } from '../../../rule_management/logic';
 
 export const caseInsensitiveSort = (tags: string[]): string[] => {

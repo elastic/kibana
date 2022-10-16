@@ -8,7 +8,7 @@ import type { ExceptionListSchema, ListArray } from '@kbn/securitysolution-io-ts
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { ExceptionListQueryInfo } from '@kbn/lists-plugin/server/services/exception_lists/utils/import/find_all_exception_list_types';
 import { getAllListTypes } from '@kbn/lists-plugin/server/services/exception_lists/utils/import/find_all_exception_list_types';
-import type { ImportRulesSchema } from '../../../../../../common/detection_engine/rule_management/api/rules/import_rules/import_rules_schema';
+import type { RuleToImport } from '../../../../../../common/detection_engine/rule_management';
 
 /**
  * Helper that takes rules, goes through their referenced exception lists and
@@ -21,7 +21,7 @@ export const getReferencedExceptionLists = async ({
   rules,
   savedObjectsClient,
 }: {
-  rules: Array<ImportRulesSchema | Error>;
+  rules: Array<RuleToImport | Error>;
   savedObjectsClient: SavedObjectsClientContract;
 }): Promise<Record<string, ExceptionListSchema>> => {
   const [lists] = rules.reduce<ListArray[]>((acc, rule) => {

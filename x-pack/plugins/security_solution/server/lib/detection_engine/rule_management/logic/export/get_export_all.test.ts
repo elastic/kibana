@@ -18,7 +18,7 @@ import { getThreatMock } from '../../../../../../common/detection_engine/schemas
 import {
   getOutputDetailsSampleWithExceptions,
   getSampleDetailsAsNdjson,
-} from '../../../../../../common/detection_engine/schemas/response/export_rules_details_schema.mock';
+} from '../../../../../../common/detection_engine/rule_management/mocks';
 
 import { getQueryRuleParams } from '../../../rule_schema/mocks';
 import { getExceptionListClientMock } from '@kbn/lists-plugin/server/services/exception_lists/exception_list_client.mock';

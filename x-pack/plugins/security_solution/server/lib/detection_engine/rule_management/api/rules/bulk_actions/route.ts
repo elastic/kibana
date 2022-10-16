@@ -22,9 +22,9 @@ import {
   RULES_TABLE_MAX_PAGE_SIZE,
 } from '../../../../../../../common/constants';
 import {
-  performBulkActionSchema,
-  performBulkActionQuerySchema,
   BulkAction,
+  PerformBulkActionRequestBody,
+  PerformBulkActionRequestQuery,
 } from '../../../../../../../common/detection_engine/rule_management';
 import type { SetupPlugins } from '../../../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
@@ -267,10 +267,8 @@ export const performBulkActionRoute = (
     {
       path: DETECTION_ENGINE_RULES_BULK_ACTION,
       validate: {
-        body: buildRouteValidation<typeof performBulkActionSchema>(performBulkActionSchema),
-        query: buildRouteValidation<typeof performBulkActionQuerySchema>(
-          performBulkActionQuerySchema
-        ),
+        body: buildRouteValidation(PerformBulkActionRequestBody),
+        query: buildRouteValidation(PerformBulkActionRequestQuery),
       },
       options: {
         tags: ['access:securitySolution', routeLimitedConcurrencyTag(MAX_ROUTE_CONCURRENCY)],

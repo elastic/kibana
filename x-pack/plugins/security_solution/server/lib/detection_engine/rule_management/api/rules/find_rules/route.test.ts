@@ -17,7 +17,7 @@ import {
 } from '../../../../routes/__mocks__/request_responses';
 import { findRulesRoute } from './route';
 
-describe('find_rules', () => {
+describe('Find rules route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;

@@ -8,7 +8,7 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
-import { readRulesRoute } from './route';
+import { readRuleRoute } from './route';
 import {
   getEmptyFindResult,
   getReadRequest,
@@ -21,7 +21,7 @@ import {
 import { requestMock, requestContextMock, serverMock } from '../../../../routes/__mocks__';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
 
-describe('read_rules', () => {
+describe('Read rule route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
@@ -41,7 +41,7 @@ describe('read_rules', () => {
       }),
       id: myFakeId,
     });
-    readRulesRoute(server.router, logger);
+    readRuleRoute(server.router, logger);
   });
 
   describe('status codes', () => {

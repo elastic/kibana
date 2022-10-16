@@ -6,15 +6,15 @@
  */
 
 import { BulkAction, BulkActionEditType } from './request_schema';
-import type { PerformBulkActionSchema } from './request_schema';
+import type { PerformBulkActionRequestBody } from './request_schema';
 
-export const getPerformBulkActionSchemaMock = (): PerformBulkActionSchema => ({
+export const getPerformBulkActionSchemaMock = (): PerformBulkActionRequestBody => ({
   query: '',
   ids: undefined,
   action: BulkAction.disable,
 });
 
-export const getPerformBulkActionEditSchemaMock = (): PerformBulkActionSchema => ({
+export const getPerformBulkActionEditSchemaMock = (): PerformBulkActionRequestBody => ({
   query: '',
   ids: undefined,
   action: BulkAction.edit,

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type { Transform } from 'stream';
-import type * as t from 'io-ts';
+import { has } from 'lodash/fp';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
+import type * as t from 'io-ts';
+import type { Transform } from 'stream';
 import {
   createSplitStream,
   createMapStream,
@@ -16,16 +17,17 @@ import {
   createReduceStream,
 } from '@kbn/utils';
 
-import { exactCheck, formatErrors } from '@kbn/securitysolution-io-ts-utils';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
+import { exactCheck, formatErrors } from '@kbn/securitysolution-io-ts-utils';
 import type {
   ImportExceptionListItemSchema,
   ImportExceptionsListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import { has } from 'lodash/fp';
-import { importRuleValidateTypeDependents } from '../../../../../../common/detection_engine/rule_management/api/rules/import_rules/import_rules_type_dependents';
-import type { ImportRulesSchema } from '../../../../../../common/detection_engine/rule_management/api/rules/import_rules/import_rules_schema';
-import { importRulesSchema } from '../../../../../../common/detection_engine/rule_management/api/rules/import_rules/import_rules_schema';
+
+import {
+  RuleToImport,
+  validateRuleToImport,
+} from '../../../../../../common/detection_engine/rule_management';
 import {
   parseNdjsonStrings,
   createRulesLimitStream,
@@ -38,25 +40,23 @@ import {
 export const validateRulesStream = (): Transform => {
   return createMapStream<{
     exceptions: Array<ImportExceptionsListSchema | ImportExceptionListItemSchema | Error>;
-    rules: Array<ImportRulesSchema | Error>;
+    rules: Array<RuleToImport | Error>;
   }>((items) => ({
     exceptions: items.exceptions,
     rules: validateRules(items.rules),
   }));
 };
 
-export const validateRules = (
-  rules: Array<ImportRulesSchema | Error>
-): Array<ImportRulesSchema | Error> => {
-  return rules.map((obj: ImportRulesSchema | Error) => {
+export const validateRules = (rules: Array<RuleToImport | Error>): Array<RuleToImport | Error> => {
+  return rules.map((obj: RuleToImport | Error) => {
     if (!(obj instanceof Error)) {
-      const decoded = importRulesSchema.decode(obj);
+      const decoded = RuleToImport.decode(obj);
       const checked = exactCheck(obj, decoded);
-      const onLeft = (errors: t.Errors): BadRequestError | ImportRulesSchema => {
+      const onLeft = (errors: t.Errors): BadRequestError | RuleToImport => {
         return new BadRequestError(formatErrors(errors).join());
       };
-      const onRight = (schema: ImportRulesSchema): BadRequestError | ImportRulesSchema => {
-        const validationErrors = importRuleValidateTypeDependents(schema);
+      const onRight = (schema: RuleToImport): BadRequestError | RuleToImport => {
+        const validationErrors = validateRuleToImport(schema);
         if (validationErrors.length) {
           return new BadRequestError(validationErrors.join());
         } else {
@@ -79,7 +79,7 @@ export const validateRules = (
 export const sortImports = (): Transform => {
   return createReduceStream<{
     exceptions: Array<ImportExceptionsListSchema | ImportExceptionListItemSchema | Error>;
-    rules: Array<ImportRulesSchema | Error>;
+    rules: Array<RuleToImport | Error>;
   }>(
     (acc, importItem) => {
       if (has('list_id', importItem) || has('item_id', importItem) || has('entries', importItem)) {

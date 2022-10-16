@@ -6,8 +6,10 @@
  */
 
 import * as t from 'io-ts';
-
 import { createRulesSchema } from '../../../../schemas/request/rule_schemas';
 
-export const createRulesBulkSchema = t.array(createRulesSchema);
-export type CreateRulesBulkSchema = t.TypeOf<typeof createRulesBulkSchema>;
+/**
+ * Request body parameters of the API route.
+ */
+export type BulkCreateRulesRequestBody = t.TypeOf<typeof BulkCreateRulesRequestBody>;
+export const BulkCreateRulesRequestBody = t.array(createRulesSchema);

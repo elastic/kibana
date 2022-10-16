@@ -6,9 +6,8 @@
  */
 
 import type { ExportExceptionDetails } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExportRulesDetails } from '../../../../../../common/detection_engine/rule_management';
 import type { FullResponseSchema } from '../../../../../../common/detection_engine/schemas/request';
-
-import type { ExportRulesDetails } from '../../../../../../common/detection_engine/schemas/response/export_rules_details_schema';
 
 export const getExportDetailsNdjson = (
   rules: FullResponseSchema[],

@@ -20,14 +20,14 @@ import {
 } from '../../../../../machine_learning/mocks';
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
 import { requestContextMock, serverMock, requestMock } from '../../../../routes/__mocks__';
-import { createRulesRoute } from './route';
+import { createRuleRoute } from './route';
 import { getCreateRulesSchemaMock } from '../../../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
 
 jest.mock('../../../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 
-describe('create_rules', () => {
+describe('Create rule route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
@@ -43,7 +43,7 @@ describe('create_rules', () => {
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())
     );
-    createRulesRoute(server.router, ml);
+    createRuleRoute(server.router, ml);
   });
 
   describe('status codes', () => {

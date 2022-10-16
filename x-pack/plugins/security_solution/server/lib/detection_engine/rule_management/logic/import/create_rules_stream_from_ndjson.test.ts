@@ -9,14 +9,15 @@ import { Readable } from 'stream';
 import { createPromiseFromStreams } from '@kbn/utils';
 import { createRulesAndExceptionsStreamFromNdJson } from './create_rules_stream_from_ndjson';
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
-import type { ImportRulesSchema } from '../../../../../../common/detection_engine/rule_management/api/rules/import_rules/import_rules_schema';
+
+import type { RuleToImport } from '../../../../../../common/detection_engine/rule_management';
 import {
   getOutputDetailsSample,
   getSampleDetailsAsNdjson,
-} from '../../../../../../common/detection_engine/schemas/response/export_rules_details_schema.mock';
+} from '../../../../../../common/detection_engine/rule_management/mocks';
 import type { RuleExceptionsPromiseFromStreams } from './import_rules_utils';
 
-export const getOutputSample = (): Partial<ImportRulesSchema> => ({
+export const getOutputSample = (): Partial<RuleToImport> => ({
   rule_id: 'rule-1',
   output_index: '.siem-signals',
   risk_score: 50,
@@ -30,7 +31,7 @@ export const getOutputSample = (): Partial<ImportRulesSchema> => ({
   type: 'query',
 });
 
-export const getSampleAsNdjson = (sample: Partial<ImportRulesSchema>): string => {
+export const getSampleAsNdjson = (sample: Partial<RuleToImport>): string => {
   return `${JSON.stringify(sample)}\n`;
 };
 

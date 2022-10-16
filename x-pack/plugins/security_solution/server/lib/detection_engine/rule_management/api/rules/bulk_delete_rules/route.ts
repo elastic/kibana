@@ -5,19 +5,22 @@
  * 2.0.
  */
 
+import type { RouteConfig, RequestHandler, Logger } from '@kbn/core/server';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 
-import type { RouteConfig, RequestHandler, Logger } from '@kbn/core/server';
-import { queryRuleValidateTypeDependents } from '../../../../../../../common/detection_engine/rule_management/api/rules/read_rule/query_rules_type_dependents';
-import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
-import type { QueryRulesBulkSchemaDecoded } from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_delete_rules/query_rules_bulk_schema';
-import { queryRulesBulkSchema } from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_delete_rules/query_rules_bulk_schema';
+import { DETECTION_ENGINE_RULES_BULK_DELETE } from '../../../../../../../common/constants';
+import {
+  BulkDeleteRulesRequestBody,
+  validateQueryRuleByIds,
+} from '../../../../../../../common/detection_engine/rule_management';
 import { rulesBulkSchema } from '../../../../../../../common/detection_engine/schemas/response/rules_bulk_schema';
+
+import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
 import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
 } from '../../../../../../types';
-import { DETECTION_ENGINE_RULES_BULK_DELETE } from '../../../../../../../common/constants';
+
 import { getIdBulkError } from '../../../utils/utils';
 import { transformValidateBulkError } from '../../../utils/validate';
 import {
@@ -31,11 +34,11 @@ import { readRules } from '../../../logic/crud/read_rules';
 import { legacyMigrate } from '../../../logic/rule_actions/legacy_action_migration';
 import { getDeprecatedBulkEndpointHeader, logDeprecatedBulkEndpoint } from '../../deprecation';
 
-type Config = RouteConfig<unknown, unknown, QueryRulesBulkSchemaDecoded, 'delete' | 'post'>;
+type Config = RouteConfig<unknown, unknown, BulkDeleteRulesRequestBody, 'delete' | 'post'>;
 type Handler = RequestHandler<
   unknown,
   unknown,
-  QueryRulesBulkSchemaDecoded,
+  BulkDeleteRulesRequestBody,
   SecuritySolutionRequestHandlerContext,
   'delete' | 'post'
 >;
@@ -43,12 +46,10 @@ type Handler = RequestHandler<
 /**
  * @deprecated since version 8.2.0. Use the detection_engine/rules/_bulk_action API instead
  */
-export const deleteRulesBulkRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
+export const bulkDeleteRulesRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   const config: Config = {
     validate: {
-      body: buildRouteValidation<typeof queryRulesBulkSchema, QueryRulesBulkSchemaDecoded>(
-        queryRulesBulkSchema
-      ),
+      body: buildRouteValidation(BulkDeleteRulesRequestBody),
     },
     path: DETECTION_ENGINE_RULES_BULK_DELETE,
     options: {
@@ -70,7 +71,7 @@ export const deleteRulesBulkRoute = (router: SecuritySolutionPluginRouter, logge
       request.body.map(async (payloadRule) => {
         const { id, rule_id: ruleId } = payloadRule;
         const idOrRuleIdOrUnknown = id ?? ruleId ?? '(unknown id)';
-        const validationErrors = queryRuleValidateTypeDependents(payloadRule);
+        const validationErrors = validateQueryRuleByIds(payloadRule);
         if (validationErrors.length) {
           return createBulkErrorObject({
             ruleId: idOrRuleIdOrUnknown,

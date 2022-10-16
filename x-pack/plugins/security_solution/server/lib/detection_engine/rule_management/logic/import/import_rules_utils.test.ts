@@ -5,17 +5,19 @@
  * 2.0.
  */
 
+import { getImportRulesSchemaMock } from '../../../../../../common/detection_engine/rule_management/mocks';
+import { getQueryRuleParams } from '../../../rule_schema/mocks';
+
 import { requestContextMock } from '../../../routes/__mocks__';
-import { importRules } from './import_rules_utils';
 import {
   getRuleMock,
   getEmptyFindResult,
   getFindResultWithSingleHit,
 } from '../../../routes/__mocks__/request_responses';
-import { getQueryRuleParams } from '../../../rule_schema/mocks';
-import { getImportRulesSchemaMock } from '../../../../../../common/detection_engine/rule_management/api/rules/import_rules/import_rules_schema.mock';
+
 import { createRules } from '../crud/create_rules';
 import { patchRules } from '../crud/patch_rules';
+import { importRules } from './import_rules_utils';
 
 jest.mock('../crud/create_rules');
 jest.mock('../crud/patch_rules');

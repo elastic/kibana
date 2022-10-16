@@ -19,7 +19,7 @@ import {
   typicalMlRulePayload,
 } from '../../../../routes/__mocks__/request_responses';
 import { serverMock, requestContextMock, requestMock } from '../../../../routes/__mocks__';
-import { updateRulesBulkRoute } from './route';
+import { bulkUpdateRulesRoute } from './route';
 import type { BulkError } from '../../../../routes/utils';
 import { getCreateRulesSchemaMock } from '../../../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
@@ -37,7 +37,7 @@ jest.mock('../../../logic/rule_actions/legacy_action_migration', () => {
   };
 });
 
-describe('update_rules_bulk', () => {
+describe('Bulk update rules route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
@@ -55,7 +55,7 @@ describe('update_rules_bulk', () => {
 
     (legacyMigrate as jest.Mock).mockResolvedValue(getRuleMock(getQueryRuleParams()));
 
-    updateRulesBulkRoute(server.router, ml, logger);
+    bulkUpdateRulesRoute(server.router, ml, logger);
   });
 
   describe('status codes', () => {

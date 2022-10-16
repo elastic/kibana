@@ -8,37 +8,17 @@
 import uuid from 'uuid';
 
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
-import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
-
+import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import type { ResolvedSanitizedRule, SanitizedRule } from '@kbn/alerting-plugin/common';
-import {
-  normalizeMachineLearningJobIds,
-  normalizeThresholdObject,
-} from '../../../../../common/detection_engine/utils';
-import type {
-  InternalRuleCreate,
-  RuleParams,
-  TypeSpecificRuleParams,
-  BaseRuleParams,
-  EqlRuleParams,
-  EqlSpecificRuleParams,
-  ThreatRuleParams,
-  ThreatSpecificRuleParams,
-  QueryRuleParams,
-  QuerySpecificRuleParams,
-  SavedQuerySpecificRuleParams,
-  SavedQueryRuleParams,
-  ThresholdRuleParams,
-  ThresholdSpecificRuleParams,
-  MachineLearningRuleParams,
-  MachineLearningSpecificRuleParams,
-  InternalRuleUpdate,
-  NewTermsRuleParams,
-  NewTermsSpecificRuleParams,
-} from '../../rule_schema';
-import { assertUnreachable } from '../../../../../common/utility_types';
 
+import {
+  DEFAULT_INDICATOR_SOURCE_PATH,
+  DEFAULT_MAX_SIGNALS,
+  SERVER_APP_ID,
+} from '../../../../../common/constants';
+
+import type { PatchRuleRequestBody } from '../../../../../common/detection_engine/rule_management';
 import type { RuleExecutionSummary } from '../../../../../common/detection_engine/rule_monitoring';
 import type {
   RelatedIntegrationArray,
@@ -67,20 +47,44 @@ import type {
   ThreatMatchPatchParams,
   ThresholdPatchParams,
 } from '../../../../../common/detection_engine/schemas/request';
-import type { PatchRulesSchema } from '../../../../../common/detection_engine/rule_management/api/rules/patch_rule/patch_rules_schema';
-import {
-  DEFAULT_INDICATOR_SOURCE_PATH,
-  DEFAULT_MAX_SIGNALS,
-  SERVER_APP_ID,
-} from '../../../../../common/constants';
+
 import {
   transformAlertToRuleResponseAction,
   transformRuleToAlertAction,
   transformRuleToAlertResponseAction,
 } from '../../../../../common/detection_engine/transform_actions';
+
+import {
+  normalizeMachineLearningJobIds,
+  normalizeThresholdObject,
+} from '../../../../../common/detection_engine/utils';
+
+import { assertUnreachable } from '../../../../../common/utility_types';
+
 // eslint-disable-next-line no-restricted-imports
 import type { LegacyRuleActions } from '../../rule_actions_legacy';
 import { mergeRuleExecutionSummary } from '../../rule_monitoring';
+import type {
+  InternalRuleCreate,
+  RuleParams,
+  TypeSpecificRuleParams,
+  BaseRuleParams,
+  EqlRuleParams,
+  EqlSpecificRuleParams,
+  ThreatRuleParams,
+  ThreatSpecificRuleParams,
+  QueryRuleParams,
+  QuerySpecificRuleParams,
+  SavedQuerySpecificRuleParams,
+  SavedQueryRuleParams,
+  ThresholdRuleParams,
+  ThresholdSpecificRuleParams,
+  MachineLearningRuleParams,
+  MachineLearningSpecificRuleParams,
+  InternalRuleUpdate,
+  NewTermsRuleParams,
+  NewTermsSpecificRuleParams,
+} from '../../rule_schema';
 import {
   transformActions,
   transformFromAlertThrottle,
@@ -323,7 +327,7 @@ const parseValidationError = (error: string | null): BadRequestError => {
 };
 
 export const patchTypeSpecificSnakeToCamel = (
-  params: PatchRulesSchema,
+  params: PatchRuleRequestBody,
   existingRule: RuleParams
 ): TypeSpecificRuleParams => {
   // Here we do the validation of patch params by rule type to ensure that the fields that are
@@ -388,7 +392,7 @@ export const patchTypeSpecificSnakeToCamel = (
 };
 
 const versionExcludedKeys = ['enabled', 'id', 'rule_id'];
-const incrementVersion = (nextParams: PatchRulesSchema, existingRule: RuleParams) => {
+const incrementVersion = (nextParams: PatchRuleRequestBody, existingRule: RuleParams) => {
   // The the version from nextParams if it's provided
   if (nextParams.version) {
     return nextParams.version;
@@ -410,7 +414,7 @@ const incrementVersion = (nextParams: PatchRulesSchema, existingRule: RuleParams
 
 // eslint-disable-next-line complexity
 export const convertPatchAPIToInternalSchema = (
-  nextParams: PatchRulesSchema & {
+  nextParams: PatchRuleRequestBody & {
     related_integrations?: RelatedIntegrationArray;
     required_fields?: RequiredFieldArray;
     setup?: SetupGuide;

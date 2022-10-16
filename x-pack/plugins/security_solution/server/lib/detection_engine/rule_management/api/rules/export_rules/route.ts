@@ -7,17 +7,16 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { Logger } from '@kbn/core/server';
-import type {
-  ExportRulesQuerySchemaDecoded,
-  ExportRulesSchemaDecoded,
-} from '../../../../../../../common/detection_engine/rule_management/api/rules/export_rules/export_rules_schema';
+
+import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
+import type { ExportRulesRequestQueryDecoded } from '../../../../../../../common/detection_engine/rule_management';
 import {
-  exportRulesQuerySchema,
-  exportRulesSchema,
-} from '../../../../../../../common/detection_engine/rule_management/api/rules/export_rules/export_rules_schema';
+  ExportRulesRequestBody,
+  ExportRulesRequestQuery,
+} from '../../../../../../../common/detection_engine/rule_management';
+
 import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
 import type { ConfigType } from '../../../../../../config';
 import { getNonPackagedRulesCount } from '../../../logic/search/get_existing_prepackaged_rules';
 import { getExportByObjectIds } from '../../../logic/export/get_export_by_object_ids';
@@ -33,12 +32,10 @@ export const exportRulesRoute = (
     {
       path: `${DETECTION_ENGINE_RULES_URL}/_export`,
       validate: {
-        query: buildRouteValidation<typeof exportRulesQuerySchema, ExportRulesQuerySchemaDecoded>(
-          exportRulesQuerySchema
+        query: buildRouteValidation<typeof ExportRulesRequestQuery, ExportRulesRequestQueryDecoded>(
+          ExportRulesRequestQuery
         ),
-        body: buildRouteValidation<typeof exportRulesSchema, ExportRulesSchemaDecoded>(
-          exportRulesSchema
-        ),
+        body: buildRouteValidation(ExportRulesRequestBody),
       },
       options: {
         tags: ['access:securitySolution'],

@@ -20,7 +20,7 @@ import {
 } from '../../../../routes/__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../../../../routes/__mocks__';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
-import { updateRulesRoute } from './route';
+import { updateRuleRoute } from './route';
 import { getUpdateRulesSchemaMock } from '../../../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
 // eslint-disable-next-line no-restricted-imports
@@ -36,7 +36,7 @@ jest.mock('../../../logic/rule_actions/legacy_action_migration', () => {
   };
 });
 
-describe('update_rules', () => {
+describe('Update rule route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
@@ -53,7 +53,7 @@ describe('update_rules', () => {
 
     (legacyMigrate as jest.Mock).mockResolvedValue(getRuleMock(getQueryRuleParams()));
 
-    updateRulesRoute(server.router, ml);
+    updateRuleRoute(server.router, ml);
   });
 
   describe('status codes', () => {

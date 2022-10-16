@@ -6,28 +6,29 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { queryRuleValidateTypeDependents } from '../../../../../../../common/detection_engine/rule_management/api/rules/read_rule/query_rules_type_dependents';
-import type { QueryRulesSchemaDecoded } from '../../../../../../../common/detection_engine/rule_management/api/rules/read_rule/query_rules_schema';
-import { queryRulesSchema } from '../../../../../../../common/detection_engine/rule_management/api/rules/read_rule/query_rules_schema';
-import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
-import type { SecuritySolutionPluginRouter } from '../../../../../../types';
+
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
-import { deleteRules } from '../../../logic/crud/delete_rules';
-import { getIdError, transform } from '../../../utils/utils';
+import {
+  QueryRuleByIds,
+  validateQueryRuleByIds,
+} from '../../../../../../../common/detection_engine/rule_management';
+
+import type { SecuritySolutionPluginRouter } from '../../../../../../types';
+import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../../../routes/utils';
 
+import { deleteRules } from '../../../logic/crud/delete_rules';
 import { readRules } from '../../../logic/crud/read_rules';
 // eslint-disable-next-line no-restricted-imports
 import { legacyMigrate } from '../../../logic/rule_actions/legacy_action_migration';
+import { getIdError, transform } from '../../../utils/utils';
 
-export const deleteRulesRoute = (router: SecuritySolutionPluginRouter) => {
+export const deleteRuleRoute = (router: SecuritySolutionPluginRouter) => {
   router.delete(
     {
       path: DETECTION_ENGINE_RULES_URL,
       validate: {
-        query: buildRouteValidation<typeof queryRulesSchema, QueryRulesSchemaDecoded>(
-          queryRulesSchema
-        ),
+        query: buildRouteValidation(QueryRuleByIds),
       },
       options: {
         tags: ['access:securitySolution'],
@@ -35,7 +36,7 @@ export const deleteRulesRoute = (router: SecuritySolutionPluginRouter) => {
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
-      const validationErrors = queryRuleValidateTypeDependents(request.query);
+      const validationErrors = validateQueryRuleByIds(request.query);
       if (validationErrors.length) {
         return siemResponse.error({ statusCode: 400, body: validationErrors });
       }

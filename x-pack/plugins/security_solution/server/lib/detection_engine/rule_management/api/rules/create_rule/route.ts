@@ -6,8 +6,12 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
+
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
+import { validateCreateRuleSchema } from '../../../../../../../common/detection_engine/rule_management';
+import { createRulesSchema } from '../../../../../../../common/detection_engine/schemas/request';
+
+import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
 import type { SetupPlugins } from '../../../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
@@ -15,13 +19,11 @@ import { throwAuthzError } from '../../../../../machine_learning/validation';
 import { readRules } from '../../../logic/crud/read_rules';
 import { buildSiemResponse } from '../../../../routes/utils';
 
-import { createRulesSchema } from '../../../../../../../common/detection_engine/schemas/request';
-import { transformValidate } from '../../../utils/validate';
-import { createRuleValidateTypeDependents } from '../../../../../../../common/detection_engine/rule_management/api/rules/create_rule/create_rules_type_dependents';
 import { createRules } from '../../../logic/crud/create_rules';
 import { checkDefaultRuleExceptionListReferences } from '../../../logic/exceptions/check_for_default_rule_exception_list';
+import { transformValidate } from '../../../utils/validate';
 
-export const createRulesRoute = (
+export const createRuleRoute = (
   router: SecuritySolutionPluginRouter,
   ml: SetupPlugins['ml']
 ): void => {
@@ -37,7 +39,7 @@ export const createRulesRoute = (
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
-      const validationErrors = createRuleValidateTypeDependents(request.body);
+      const validationErrors = validateCreateRuleSchema(request.body);
       if (validationErrors.length) {
         return siemResponse.error({ statusCode: 400, body: validationErrors });
       }

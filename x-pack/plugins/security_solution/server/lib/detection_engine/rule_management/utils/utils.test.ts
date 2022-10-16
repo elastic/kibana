@@ -5,9 +5,14 @@
  * 2.0.
  */
 
+import { partition } from 'lodash/fp';
 import { Readable } from 'stream';
 import { createPromiseFromStreams } from '@kbn/utils';
 import type { RuleAction, ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { PartialRule } from '@kbn/alerting-plugin/server';
+
+import type { RuleToImport } from '../../../../../common/detection_engine/rule_management';
+import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
 
 import {
   getIdError,
@@ -15,7 +20,6 @@ import {
   transform,
   getIdBulkError,
   transformAlertsToRules,
-  getDuplicates,
   getTupleDuplicateErrorsAndUniqueRules,
   getInvalidConnectors,
   swapActionIds,
@@ -26,13 +30,11 @@ import type { PartialFilter } from '../../types';
 import type { BulkError } from '../../routes/utils';
 import { createBulkErrorObject } from '../../routes/utils';
 import { getOutputRuleAlertForRest } from '../../routes/__mocks__/utils';
-import type { PartialRule } from '@kbn/alerting-plugin/server';
+
 // TODO: https://github.com/elastic/kibana/pull/142950
 import { createRulesAndExceptionsStreamFromNdJson } from '../logic/import/create_rules_stream_from_ndjson';
 import type { RuleAlertType } from '../../rule_schema';
-import type { CreateRulesBulkSchema } from '../../../../../common/detection_engine/rule_management';
-import type { ImportRulesSchema } from '../../../../../common/detection_engine/rule_management/api/rules/import_rules/import_rules_schema';
-import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
+
 import { getMlRuleParams, getQueryRuleParams, getThreatRuleParams } from '../../rule_schema/mocks';
 // TODO: https://github.com/elastic/kibana/pull/142950
 import { internalRuleToAPIResponse } from '../normalization/rule_converters';
@@ -45,9 +47,8 @@ import type {
 } from '../../rule_actions_legacy';
 // TODO: https://github.com/elastic/kibana/pull/142950
 import type { RuleExceptionsPromiseFromStreams } from '../logic/import/import_rules_utils';
-import { partition } from 'lodash/fp';
 
-type PromiseFromStreams = ImportRulesSchema | Error;
+type PromiseFromStreams = RuleToImport | Error;
 
 const createMockImportRule = async (rule: ReturnType<typeof getCreateRulesSchemaMock>) => {
   const ndJsonStream = new Readable({
@@ -489,39 +490,6 @@ describe('utils', () => {
       expected2.id = 'some other id';
       expected2.rule_id = 'some other id';
       expect(transformed).toEqual([expected1, expected2]);
-    });
-  });
-
-  describe('getDuplicates', () => {
-    test("returns array of ruleIds showing the duplicate keys of 'value2' and 'value3'", () => {
-      const output = getDuplicates(
-        [
-          { rule_id: 'value1' },
-          { rule_id: 'value2' },
-          { rule_id: 'value2' },
-          { rule_id: 'value3' },
-          { rule_id: 'value3' },
-          {},
-          {},
-        ] as CreateRulesBulkSchema,
-        'rule_id'
-      );
-      const expected = ['value2', 'value3'];
-      expect(output).toEqual(expected);
-    });
-    test('returns null when given a map of no duplicates', () => {
-      const output = getDuplicates(
-        [
-          { rule_id: 'value1' },
-          { rule_id: 'value2' },
-          { rule_id: 'value3' },
-          {},
-          {},
-        ] as CreateRulesBulkSchema,
-        'rule_id'
-      );
-      const expected: string[] = [];
-      expect(output).toEqual(expected);
     });
   });
 

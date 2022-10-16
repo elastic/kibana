@@ -46,7 +46,8 @@ export enum BulkActionEditType {
   'set_schedule' = 'set_schedule',
 }
 
-export const throttleForBulkActions = t.union([
+export type ThrottleForBulkActions = t.TypeOf<typeof ThrottleForBulkActions>;
+export const ThrottleForBulkActions = t.union([
   t.literal('rule'),
   TimeDuration({
     allowedDurations: [
@@ -56,9 +57,9 @@ export const throttleForBulkActions = t.union([
     ],
   }),
 ]);
-export type ThrottleForBulkActions = t.TypeOf<typeof throttleForBulkActions>;
 
-const bulkActionEditPayloadTags = t.type({
+type BulkActionEditPayloadTags = t.TypeOf<typeof BulkActionEditPayloadTags>;
+const BulkActionEditPayloadTags = t.type({
   type: t.union([
     t.literal(BulkActionEditType.add_tags),
     t.literal(BulkActionEditType.delete_tags),
@@ -67,9 +68,8 @@ const bulkActionEditPayloadTags = t.type({
   value: RuleTagArray,
 });
 
-export type BulkActionEditPayloadTags = t.TypeOf<typeof bulkActionEditPayloadTags>;
-
-const bulkActionEditPayloadIndexPatterns = t.intersection([
+type BulkActionEditPayloadIndexPatterns = t.TypeOf<typeof BulkActionEditPayloadIndexPatterns>;
+const BulkActionEditPayloadIndexPatterns = t.intersection([
   t.type({
     type: t.union([
       t.literal(BulkActionEditType.add_index_patterns),
@@ -81,11 +81,8 @@ const bulkActionEditPayloadIndexPatterns = t.intersection([
   t.exact(t.partial({ overwrite_data_views: t.boolean })),
 ]);
 
-export type BulkActionEditPayloadIndexPatterns = t.TypeOf<
-  typeof bulkActionEditPayloadIndexPatterns
->;
-
-const bulkActionEditPayloadTimeline = t.type({
+type BulkActionEditPayloadTimeline = t.TypeOf<typeof BulkActionEditPayloadTimeline>;
+const BulkActionEditPayloadTimeline = t.type({
   type: t.literal(BulkActionEditType.set_timeline),
   value: t.type({
     timeline_id: TimelineTemplateId,
@@ -93,13 +90,12 @@ const bulkActionEditPayloadTimeline = t.type({
   }),
 });
 
-export type BulkActionEditPayloadTimeline = t.TypeOf<typeof bulkActionEditPayloadTimeline>;
-
 /**
  * per rulesClient.bulkEdit rules actions operation contract (x-pack/plugins/alerting/server/rules_client/rules_client.ts)
  * normalized rule action object is expected (NormalizedAlertAction) as value for the edit operation
  */
-const normalizedRuleAction = t.exact(
+type NormalizedRuleAction = t.TypeOf<typeof NormalizedRuleAction>;
+const NormalizedRuleAction = t.exact(
   t.type({
     group: RuleActionGroup,
     id: RuleActionId,
@@ -107,37 +103,35 @@ const normalizedRuleAction = t.exact(
   })
 );
 
-const bulkActionEditPayloadRuleActions = t.type({
+export type BulkActionEditPayloadRuleActions = t.TypeOf<typeof BulkActionEditPayloadRuleActions>;
+export const BulkActionEditPayloadRuleActions = t.type({
   type: t.union([
     t.literal(BulkActionEditType.add_rule_actions),
     t.literal(BulkActionEditType.set_rule_actions),
   ]),
   value: t.type({
-    throttle: throttleForBulkActions,
-    actions: t.array(normalizedRuleAction),
+    throttle: ThrottleForBulkActions,
+    actions: t.array(NormalizedRuleAction),
   }),
 });
 
-export type BulkActionEditPayloadRuleActions = t.TypeOf<typeof bulkActionEditPayloadRuleActions>;
-
-const bulkActionEditPayloadSchedule = t.type({
+export type BulkActionEditPayloadSchedule = t.TypeOf<typeof BulkActionEditPayloadSchedule>;
+export const BulkActionEditPayloadSchedule = t.type({
   type: t.literal(BulkActionEditType.set_schedule),
   value: t.type({
     interval: TimeDuration({ allowedUnits: ['s', 'm', 'h'] }),
     lookback: TimeDuration({ allowedUnits: ['s', 'm', 'h'] }),
   }),
 });
-export type BulkActionEditPayloadSchedule = t.TypeOf<typeof bulkActionEditPayloadSchedule>;
 
-export const bulkActionEditPayload = t.union([
-  bulkActionEditPayloadTags,
-  bulkActionEditPayloadIndexPatterns,
-  bulkActionEditPayloadTimeline,
-  bulkActionEditPayloadRuleActions,
-  bulkActionEditPayloadSchedule,
+export type BulkActionEditPayload = t.TypeOf<typeof BulkActionEditPayload>;
+export const BulkActionEditPayload = t.union([
+  BulkActionEditPayloadTags,
+  BulkActionEditPayloadIndexPatterns,
+  BulkActionEditPayloadTimeline,
+  BulkActionEditPayloadRuleActions,
+  BulkActionEditPayloadSchedule,
 ]);
-
-export type BulkActionEditPayload = t.TypeOf<typeof bulkActionEditPayload>;
 
 /**
  * actions that modify rules attributes
@@ -155,7 +149,11 @@ export type BulkActionEditForRuleParams =
   | BulkActionEditPayloadTimeline
   | BulkActionEditPayloadSchedule;
 
-export const performBulkActionSchema = t.intersection([
+/**
+ * Request body parameters of the API route.
+ */
+export type PerformBulkActionRequestBody = t.TypeOf<typeof PerformBulkActionRequestBody>;
+export const PerformBulkActionRequestBody = t.intersection([
   t.exact(
     t.type({
       query: t.union([RuleQuery, t.undefined]),
@@ -177,16 +175,18 @@ export const performBulkActionSchema = t.intersection([
     t.exact(
       t.type({
         action: t.literal(BulkAction.edit),
-        [BulkAction.edit]: NonEmptyArray(bulkActionEditPayload),
+        [BulkAction.edit]: NonEmptyArray(BulkActionEditPayload),
       })
     ),
   ]),
 ]);
 
-export const performBulkActionQuerySchema = t.exact(
+/**
+ * Query string parameters of the API route.
+ */
+export type PerformBulkActionRequestQuery = t.TypeOf<typeof PerformBulkActionRequestQuery>;
+export const PerformBulkActionRequestQuery = t.exact(
   t.partial({
     dry_run: t.union([t.literal('true'), t.literal('false')]),
   })
 );
-
-export type PerformBulkActionSchema = t.TypeOf<typeof performBulkActionSchema>;

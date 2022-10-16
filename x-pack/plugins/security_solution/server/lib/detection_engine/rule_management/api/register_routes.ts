@@ -11,18 +11,18 @@ import type { SetupPlugins } from '../../../../plugin_contract';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 
 import { performBulkActionRoute } from './rules/bulk_actions/route';
-import { createRulesBulkRoute } from './rules/bulk_create_rules/route';
-import { deleteRulesBulkRoute } from './rules/bulk_delete_rules/route';
-import { patchRulesBulkRoute } from './rules/bulk_patch_rules/route';
-import { updateRulesBulkRoute } from './rules/bulk_update_rules/route';
-import { createRulesRoute } from './rules/create_rule/route';
-import { deleteRulesRoute } from './rules/delete_rule/route';
+import { bulkCreateRulesRoute } from './rules/bulk_create_rules/route';
+import { bulkDeleteRulesRoute } from './rules/bulk_delete_rules/route';
+import { bulkPatchRulesRoute } from './rules/bulk_patch_rules/route';
+import { bulkUpdateRulesRoute } from './rules/bulk_update_rules/route';
+import { createRuleRoute } from './rules/create_rule/route';
+import { deleteRuleRoute } from './rules/delete_rule/route';
 import { exportRulesRoute } from './rules/export_rules/route';
 import { findRulesRoute } from './rules/find_rules/route';
 import { importRulesRoute } from './rules/import_rules/route';
-import { patchRulesRoute } from './rules/patch_rule/route';
-import { readRulesRoute } from './rules/read_rule/route';
-import { updateRulesRoute } from './rules/update_rule/route';
+import { patchRuleRoute } from './rules/patch_rule/route';
+import { readRuleRoute } from './rules/read_rule/route';
+import { updateRuleRoute } from './rules/update_rule/route';
 import { readTagsRoute } from './tags/read_tags/route';
 
 export const registerRuleManagementRoutes = (
@@ -32,17 +32,17 @@ export const registerRuleManagementRoutes = (
   logger: Logger
 ) => {
   // Rules CRUD
-  createRulesRoute(router, ml);
-  readRulesRoute(router, logger);
-  updateRulesRoute(router, ml);
-  patchRulesRoute(router, ml);
-  deleteRulesRoute(router);
+  createRuleRoute(router, ml);
+  readRuleRoute(router, logger);
+  updateRuleRoute(router, ml);
+  patchRuleRoute(router, ml);
+  deleteRuleRoute(router);
 
   // Rules bulk CRUD
-  createRulesBulkRoute(router, ml, logger);
-  updateRulesBulkRoute(router, ml, logger);
-  patchRulesBulkRoute(router, ml, logger);
-  deleteRulesBulkRoute(router, logger);
+  bulkCreateRulesRoute(router, ml, logger);
+  bulkUpdateRulesRoute(router, ml, logger);
+  bulkPatchRulesRoute(router, ml, logger);
+  bulkDeleteRulesRoute(router, logger);
 
   // Rules bulk actions
   performBulkActionRoute(router, ml, logger);
