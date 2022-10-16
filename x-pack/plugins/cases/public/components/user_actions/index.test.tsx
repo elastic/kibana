@@ -21,7 +21,8 @@ import {
   hostReleaseComment,
 } from '../../containers/mock';
 import { UserActions } from '.';
-import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../common/mock';
+import type { AppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer, TestProviders } from '../../common/mock';
 import { Actions } from '../../../common/api';
 import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
 

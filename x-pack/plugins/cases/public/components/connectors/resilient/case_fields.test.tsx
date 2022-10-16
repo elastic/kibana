@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
 import { waitFor } from '@testing-library/react';
 
 import { connector } from '../mock';
