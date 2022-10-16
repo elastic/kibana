@@ -13,8 +13,56 @@ import type { ColumnHeaderOptions, TableIdLiteral } from '../../../../common/typ
 import type { TGridModel } from '../../../common/store/data_table/model';
 
 export const LOCAL_STORAGE_TABLE_KEY = 'securityDataTable';
+const LOCAL_STORAGE_TIMELINE_KEY_LEGACY = 'timelines';
 const EMPTY_TABLE = {} as {
   [K in TableIdLiteral]: TGridModel;
+};
+
+/**
+ * Migrates the values of the data table from the legacy timelines key to the securityDataTable key
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const migrateLegacyTimelinesToSecurityDataTable = (legacyTimelineTables: any) => {
+  if (!legacyTimelineTables) {
+    return EMPTY_TABLE;
+  }
+
+  return Object.keys(legacyTimelineTables).reduce((acc, timelineTableId) => {
+    const timelineModel = legacyTimelineTables[timelineTableId];
+    return {
+      ...acc,
+      [timelineTableId]: {
+        defaultColumns: timelineModel.defaultColumns,
+        dataViewId: timelineModel.dataViewId,
+        excludedRowRendererIds: timelineModel.excludedRowRendererIds,
+        filters: timelineModel.filters,
+        indexNames: timelineModel.indexNames,
+        loadingEventIds: timelineModel.loadingEventIds,
+        isSelectAllChecked: timelineModel.isSelectAllChecked,
+        itemsPerPage: timelineModel.itemsPerPage,
+        itemsPerPageOptions: timelineModel.itemsPerPageOptions,
+        showCheckboxes: timelineModel.showCheckboxes,
+        graphEventId: timelineModel.graphEventId,
+        sessionViewConfig: timelineModel.sessionViewConfig,
+        selectAll: timelineModel.selectAll,
+        id: timelineModel.id,
+        title: timelineModel.title,
+        initialized: timelineModel.initialized,
+        updated: timelineModel.updated,
+        sort: timelineModel.sort,
+        selectedEventIds: timelineModel.selectedEventIds,
+        deletedEventIds: timelineModel.deletedEventIds,
+        expandedDetail: timelineModel.expandedDetail,
+        ...(Array.isArray(timelineModel.columns)
+          ? {
+              columns: timelineModel.columns
+                .map(migrateColumnWidthToInitialWidth)
+                .map(migrateColumnLabelToDisplayAsText),
+            }
+          : {}),
+      },
+    };
+  }, {} as { [K in TableIdLiteral]: TGridModel });
 };
 
 /**
@@ -25,10 +73,11 @@ export const migrateColumnWidthToInitialWidth = (
   column: ColumnHeaderOptions & { width?: number }
 ) => ({
   ...column,
-  initialWidth:
-    Number.isInteger(column.width) && !Number.isInteger(column.initialWidth)
-      ? column.width
-      : column.initialWidth,
+  ...(Number.isInteger(column.width) && !Number.isInteger(column.initialWidth)
+    ? { initialWidth: column.width }
+    : column.initialWidth
+    ? { initialWidth: column.initialWidth }
+    : {}),
 });
 
 /**
@@ -39,15 +88,23 @@ export const migrateColumnLabelToDisplayAsText = (
   column: ColumnHeaderOptions & { label?: string }
 ) => ({
   ...column,
-  displayAsText:
-    !isEmpty(column.label) && column.displayAsText == null ? column.label : column.displayAsText,
+  ...(!isEmpty(column.label) && column.displayAsText == null
+    ? { displayAsText: column.label }
+    : column.displayAsText
+    ? { displayAsText: column.displayAsText }
+    : {}),
 });
 
 export const getDataTablesInStorageByIds = (storage: Storage, tableIds: TableIdLiteral[]) => {
-  const allDataTables = storage.get(LOCAL_STORAGE_TABLE_KEY);
+  let allDataTables = storage.get(LOCAL_STORAGE_TABLE_KEY);
+  const legacyTimelineTables = storage.get(LOCAL_STORAGE_TIMELINE_KEY_LEGACY);
 
   if (!allDataTables) {
-    return EMPTY_TABLE;
+    if (legacyTimelineTables) {
+      allDataTables = migrateLegacyTimelinesToSecurityDataTable(legacyTimelineTables);
+    } else {
+      return EMPTY_TABLE;
+    }
   }
 
   return tableIds.reduce((acc, tableId) => {
@@ -65,23 +122,26 @@ export const getDataTablesInStorageByIds = (storage: Storage, tableIds: TableIdL
         ...(tableModel.sort != null && !Array.isArray(tableModel.sort)
           ? { sort: [tableModel.sort] }
           : {}),
-        ...(Array.isArray(tableModel.columns)
-          ? {
-              columns: tableModel.columns
-                .map(migrateColumnWidthToInitialWidth)
-                .map(migrateColumnLabelToDisplayAsText),
-            }
-          : {}),
       },
     };
   }, {} as { [K in TableIdLiteral]: TGridModel });
 };
 
-export const getAllDataTablesInStorage = (storage: Storage) =>
-  storage.get(LOCAL_STORAGE_TABLE_KEY) ?? {};
+export const getAllDataTablesInStorage = (storage: Storage) => {
+  let allDataTables = storage.get(LOCAL_STORAGE_TABLE_KEY);
+  const legacyTimelineTables = storage.get(LOCAL_STORAGE_TIMELINE_KEY_LEGACY);
+  if (!allDataTables) {
+    if (legacyTimelineTables) {
+      allDataTables = migrateLegacyTimelinesToSecurityDataTable(legacyTimelineTables);
+    } else {
+      return EMPTY_TABLE;
+    }
+  }
+  return allDataTables;
+};
 
 export const addTableInStorage = (storage: Storage, id: TableIdLiteral, table: TGridModel) => {
-  const tableToStore = cleanStorageDataTable(table);
+  const tableToStore = getSerializingTableToStore(table);
   const tables = getAllDataTablesInStorage(storage);
   storage.set(LOCAL_STORAGE_TABLE_KEY, {
     ...tables,
@@ -89,7 +149,7 @@ export const addTableInStorage = (storage: Storage, id: TableIdLiteral, table: T
   });
 };
 
-const cleanStorageDataTable = (table: TGridModel) => {
+const getSerializingTableToStore = (table: TGridModel) => {
   // discard unneeded fields to make sure the object serialization works
   const { isLoading, loadingText, queryFields, unit, ...tableToStore } = table;
   return tableToStore;

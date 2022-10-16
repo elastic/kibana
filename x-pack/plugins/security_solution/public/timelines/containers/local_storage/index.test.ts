@@ -40,17 +40,17 @@ describe('SiemLocalStorage', () => {
 
   describe('addDataTable', () => {
     it('adds a timeline when storage is empty', () => {
-      const timelineStorage = useDataTablesStorage();
-      timelineStorage.addDataTable(TableId.hostsPageEvents, mockTGridModel);
+      const tablesStorage = useDataTablesStorage();
+      tablesStorage.addDataTable(TableId.hostsPageEvents, mockTGridModel);
       expect(JSON.parse(localStorage.getItem(LOCAL_STORAGE_TABLE_KEY))).toEqual({
         [TableId.hostsPageEvents]: timelineToStore,
       });
     });
 
     it('adds a timeline when storage contains another timelines', () => {
-      const timelineStorage = useDataTablesStorage();
-      timelineStorage.addDataTable(TableId.hostsPageEvents, mockTGridModel);
-      timelineStorage.addDataTable(TableId.usersPageEvents, mockTGridModel);
+      const tablesStorage = useDataTablesStorage();
+      tablesStorage.addDataTable(TableId.hostsPageEvents, mockTGridModel);
+      tablesStorage.addDataTable(TableId.usersPageEvents, mockTGridModel);
       expect(JSON.parse(localStorage.getItem(LOCAL_STORAGE_TABLE_KEY))).toEqual({
         [TableId.hostsPageEvents]: timelineToStore,
         [TableId.usersPageEvents]: timelineToStore,
@@ -60,10 +60,10 @@ describe('SiemLocalStorage', () => {
 
   describe('getAllDataTables', () => {
     it('gets all timelines correctly', () => {
-      const timelineStorage = useDataTablesStorage();
-      timelineStorage.addDataTable(TableId.hostsPageEvents, mockTGridModel);
-      timelineStorage.addDataTable(TableId.usersPageEvents, mockTGridModel);
-      const timelines = timelineStorage.getAllDataTables();
+      const tablesStorage = useDataTablesStorage();
+      tablesStorage.addDataTable(TableId.hostsPageEvents, mockTGridModel);
+      tablesStorage.addDataTable(TableId.usersPageEvents, mockTGridModel);
+      const timelines = tablesStorage.getAllDataTables();
       expect(timelines).toEqual({
         [TableId.hostsPageEvents]: timelineToStore,
         [TableId.usersPageEvents]: timelineToStore,
@@ -71,26 +71,31 @@ describe('SiemLocalStorage', () => {
     });
 
     it('returns an empty object if there is no timelines', () => {
-      const timelineStorage = useDataTablesStorage();
-      const timelines = timelineStorage.getAllDataTables();
+      const tablesStorage = useDataTablesStorage();
+      const timelines = tablesStorage.getAllDataTables();
       expect(timelines).toEqual({});
     });
   });
 
   describe('getDataTablesById', () => {
     it('gets a timeline by id', () => {
-      const timelineStorage = useDataTablesStorage();
-      timelineStorage.addDataTable(TableId.hostsPageEvents, mockTGridModel);
-      const timeline = timelineStorage.getDataTablesById(TableId.hostsPageEvents);
+      const tablesStorage = useDataTablesStorage();
+      tablesStorage.addDataTable(TableId.hostsPageEvents, mockTGridModel);
+      const timeline = tablesStorage.getDataTablesById(TableId.hostsPageEvents);
       expect(timeline).toEqual(timelineToStore);
     });
   });
 
   describe('getDataTablesInStorageByIds', () => {
+    storage.set('timelines', {
+      [TableId.hostsPageEvents]: mockTGridModel,
+      [TableId.usersPageEvents]: mockTGridModel,
+    });
+
     it('gets timelines correctly', () => {
-      const timelineStorage = useDataTablesStorage();
-      timelineStorage.addDataTable(TableId.hostsPageEvents, mockTGridModel);
-      timelineStorage.addDataTable(TableId.usersPageEvents, mockTGridModel);
+      const tablesStorage = useDataTablesStorage();
+      tablesStorage.addDataTable(TableId.hostsPageEvents, mockTGridModel);
+      tablesStorage.addDataTable(TableId.usersPageEvents, mockTGridModel);
       const timelines = getDataTablesInStorageByIds(storage, [
         TableId.hostsPageEvents,
         TableId.usersPageEvents,
@@ -107,22 +112,22 @@ describe('SiemLocalStorage', () => {
     });
 
     it('returns empty timelime when there is no ids', () => {
-      const timelineStorage = useDataTablesStorage();
-      timelineStorage.addDataTable(TableId.hostsPageEvents, mockTGridModel);
+      const tablesStorage = useDataTablesStorage();
+      tablesStorage.addDataTable(TableId.hostsPageEvents, mockTGridModel);
       const timelines = getDataTablesInStorageByIds(storage, []);
       expect(timelines).toEqual({});
     });
 
     it('returns empty timelime when a specific timeline does not exists', () => {
-      const timelineStorage = useDataTablesStorage();
-      timelineStorage.addDataTable(TableId.hostsPageEvents, mockTGridModel);
+      const tablesStorage = useDataTablesStorage();
+      tablesStorage.addDataTable(TableId.hostsPageEvents, mockTGridModel);
       const timelines = getDataTablesInStorageByIds(storage, [TableId.usersPageEvents]);
       expect(timelines).toEqual({});
     });
 
     it('returns timelines correctly when one exist and another not', () => {
-      const timelineStorage = useDataTablesStorage();
-      timelineStorage.addDataTable(TableId.hostsPageEvents, mockTGridModel);
+      const tablesStorage = useDataTablesStorage();
+      tablesStorage.addDataTable(TableId.hostsPageEvents, mockTGridModel);
       const timelines = getDataTablesInStorageByIds(storage, [
         TableId.hostsPageEvents,
         TableId.usersPageEvents,
@@ -133,7 +138,7 @@ describe('SiemLocalStorage', () => {
     });
 
     it('migrates columns saved to localstorage with a `width` to `initialWidth`', () => {
-      const timelineStorage = useDataTablesStorage();
+      const tablesStorage = useDataTablesStorage();
 
       // create a mock that mimics a column saved to localstoarge in the "old" format, with `width` instead of `initialWidth`
       const unmigratedmockTGridModel = {
@@ -144,8 +149,11 @@ describe('SiemLocalStorage', () => {
           initialWidth: undefined, // `initialWidth` must be undefined, otherwise the migration will not occur
         })),
       };
-      timelineStorage.addDataTable(TableId.hostsPageEvents, unmigratedmockTGridModel);
-      timelineStorage.addDataTable(TableId.usersPageEvents, mockTGridModel);
+      storage.set('timelines', {
+        [TableId.hostsPageEvents]: unmigratedmockTGridModel,
+      });
+      tablesStorage.addDataTable(TableId.usersPageEvents, mockTGridModel);
+
       const timelines = getDataTablesInStorageByIds(storage, [
         TableId.hostsPageEvents,
         TableId.usersPageEvents,
@@ -157,7 +165,6 @@ describe('SiemLocalStorage', () => {
           ...timelineToStore,
           columns: timelineToStore.columns.map((c) => ({
             ...c,
-            displayAsText: undefined,
             initialWidth: 98765,
             width: 98765,
           })),
@@ -170,7 +177,7 @@ describe('SiemLocalStorage', () => {
     });
 
     it('does NOT migrate columns saved to localstorage with a `width` to `initialWidth` when `initialWidth` is valid', () => {
-      const timelineStorage = useDataTablesStorage();
+      const tablesStorage = useDataTablesStorage();
 
       // create a mock that mimics a column saved to localstoarge in the "old" format, with `width` instead of `initialWidth`
       const unmigratedmockTGridModel = {
@@ -180,8 +187,10 @@ describe('SiemLocalStorage', () => {
           width: 98765, // create a legacy `width` column
         })),
       };
-      timelineStorage.addDataTable(TableId.hostsPageEvents, unmigratedmockTGridModel);
-      timelineStorage.addDataTable(TableId.usersPageEvents, mockTGridModel);
+      storage.set('timelines', {
+        [TableId.hostsPageEvents]: unmigratedmockTGridModel,
+      });
+      tablesStorage.addDataTable(TableId.usersPageEvents, mockTGridModel);
       const timelines = getDataTablesInStorageByIds(storage, [
         TableId.hostsPageEvents,
         TableId.usersPageEvents,
@@ -192,7 +201,6 @@ describe('SiemLocalStorage', () => {
           ...timelineToStore,
           columns: timelineToStore.columns.map((c) => ({
             ...c,
-            displayAsText: undefined,
             initialWidth: c.initialWidth, // initialWidth is unchanged
             width: 98765,
           })),
@@ -205,7 +213,7 @@ describe('SiemLocalStorage', () => {
     });
 
     it('migrates columns saved to localstorage with a `label` to `displayAsText`', () => {
-      const timelineStorage = useDataTablesStorage();
+      const tablesStorage = useDataTablesStorage();
 
       // create a mock that mimics a column saved to localstoarge in the "old" format, with `label` instead of `displayAsText`
       const unmigratedmockTGridModel = {
@@ -215,8 +223,10 @@ describe('SiemLocalStorage', () => {
           label: `A legacy label ${i}`, // create a legacy `label` column
         })),
       };
-      timelineStorage.addDataTable(TableId.hostsPageEvents, unmigratedmockTGridModel);
-      timelineStorage.addDataTable(TableId.usersPageEvents, mockTGridModel);
+      storage.set('timelines', {
+        [TableId.hostsPageEvents]: unmigratedmockTGridModel,
+      });
+      tablesStorage.addDataTable(TableId.usersPageEvents, mockTGridModel);
       const timelines = getDataTablesInStorageByIds(storage, [
         TableId.hostsPageEvents,
         TableId.usersPageEvents,
@@ -240,7 +250,7 @@ describe('SiemLocalStorage', () => {
     });
 
     it('does NOT migrate columns saved to localstorage with a `label` to `displayAsText` when `displayAsText` is valid', () => {
-      const timelineStorage = useDataTablesStorage();
+      const tablesStorage = useDataTablesStorage();
 
       // create a mock that mimics a column saved to localstoarge in the "old" format, with `label` instead of `displayAsText`
       const unmigratedmockTGridModel = {
@@ -252,8 +262,8 @@ describe('SiemLocalStorage', () => {
           label: `A legacy label ${i}`, // create a legacy `label` column
         })),
       };
-      timelineStorage.addDataTable(TableId.hostsPageEvents, unmigratedmockTGridModel);
-      timelineStorage.addDataTable(TableId.usersPageEvents, mockTGridModel);
+      tablesStorage.addDataTable(TableId.hostsPageEvents, unmigratedmockTGridModel);
+      tablesStorage.addDataTable(TableId.usersPageEvents, mockTGridModel);
       const timelines = getDataTablesInStorageByIds(storage, [
         TableId.hostsPageEvents,
         TableId.usersPageEvents,
@@ -277,17 +287,17 @@ describe('SiemLocalStorage', () => {
     });
 
     it('does NOT migrate `columns` when `columns` is not an array', () => {
-      const timelineStorage = useDataTablesStorage();
+      const tablesStorage = useDataTablesStorage();
 
       const invalidColumnsmockTGridModel = {
         ...cloneDeep(mockTGridModel),
         columns: 'this is NOT an array',
       };
-      timelineStorage.addDataTable(
+      tablesStorage.addDataTable(
         TableId.hostsPageEvents,
         invalidColumnsmockTGridModel as unknown as TGridModel
       );
-      timelineStorage.addDataTable(TableId.usersPageEvents, mockTGridModel);
+      tablesStorage.addDataTable(TableId.usersPageEvents, mockTGridModel);
       const timelines = getDataTablesInStorageByIds(storage, [
         TableId.hostsPageEvents,
         TableId.usersPageEvents,
@@ -304,13 +314,343 @@ describe('SiemLocalStorage', () => {
         },
       });
     });
+
+    it('migrates legacy timeline tables saved in localstorage to the new key securityDataTable and schema for TGridModel', () => {
+      const detectionsPageLegacyTable = {
+        id: 'detections-page',
+        columns: [
+          {
+            columnHeaderType: 'not-filtered',
+            id: '@timestamp',
+            initialWidth: 200,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'ecs.version',
+            initialWidth: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'tags',
+            initialWidth: 180,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Rule',
+            id: 'kibana.alert.rule.name',
+            initialWidth: 180,
+            linkField: 'kibana.alert.rule.uuid',
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Severity',
+            id: 'kibana.alert.severity',
+            initialWidth: 105,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Risk Score',
+            id: 'kibana.alert.risk_score',
+            initialWidth: 100,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Reason',
+            id: 'kibana.alert.reason',
+            initialWidth: 450,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'host.name',
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'user.name',
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'process.name',
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'file.name',
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'source.ip',
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'destination.ip',
+          },
+        ],
+        defaultColumns: [
+          {
+            columnHeaderType: 'not-filtered',
+            id: '@timestamp',
+            initialWidth: 200,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Rule',
+            id: 'kibana.alert.rule.name',
+            initialWidth: 180,
+            linkField: 'kibana.alert.rule.uuid',
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Severity',
+            id: 'kibana.alert.severity',
+            initialWidth: 105,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Risk Score',
+            id: 'kibana.alert.risk_score',
+            initialWidth: 100,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Reason',
+            id: 'kibana.alert.reason',
+            initialWidth: 450,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'host.name',
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'user.name',
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'process.name',
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'file.name',
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'source.ip',
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'destination.ip',
+          },
+        ],
+        dataViewId: 'security-solution-default',
+        dateRange: {
+          start: '2022-10-16T07:00:00.000Z',
+          end: '2022-10-17T06:59:59.999Z',
+        },
+        deletedEventIds: [],
+        excludedRowRendererIds: [
+          'alert',
+          'alerts',
+          'auditd',
+          'auditd_file',
+          'library',
+          'netflow',
+          'plain',
+          'registry',
+          'suricata',
+          'system',
+          'system_dns',
+          'system_endgame_process',
+          'system_file',
+          'system_fim',
+          'system_security_event',
+          'system_socket',
+          'threat_match',
+          'zeek',
+        ],
+        expandedDetail: {},
+        filters: [],
+        kqlQuery: {
+          filterQuery: null,
+        },
+        indexNames: ['.alerts-security.alerts-default'],
+        isSelectAllChecked: false,
+        itemsPerPage: 25,
+        itemsPerPageOptions: [10, 25, 50, 100],
+        loadingEventIds: [],
+        selectedEventIds: {},
+        showCheckboxes: true,
+        sort: [
+          {
+            columnId: '@timestamp',
+            columnType: 'date',
+            esTypes: ['date'],
+            sortDirection: 'desc',
+          },
+        ],
+        savedObjectId: null,
+        version: null,
+        footerText: 'alerts',
+        title: '',
+        activeTab: 'query',
+        prevActiveTab: 'query',
+        dataProviders: [],
+        description: '',
+        eqlOptions: {
+          eventCategoryField: 'event.category',
+          tiebreakerField: '',
+          timestampField: '@timestamp',
+          query: '',
+          size: 100,
+        },
+        eventType: 'all',
+        eventIdToNoteIds: {},
+        highlightedDropAndProviderId: '',
+        historyIds: [],
+        isFavorite: false,
+        isLive: false,
+        isSaving: false,
+        kqlMode: 'filter',
+        timelineType: 'default',
+        templateTimelineId: null,
+        templateTimelineVersion: null,
+        noteIds: [],
+        pinnedEventIds: {},
+        pinnedEventsSaveObject: {},
+        sessionViewConfig: null,
+        show: false,
+        status: 'draft',
+        initialized: true,
+        updated: 1665943295913,
+      };
+      storage.set('timelines', { [TableId.detectionsPage]: detectionsPageLegacyTable });
+      const detectionsPage = {
+        columns: [
+          { columnHeaderType: 'not-filtered', id: '@timestamp', initialWidth: 200 },
+          {
+            columnHeaderType: 'not-filtered',
+            id: 'ecs.version',
+            initialWidth: 180,
+          },
+          { columnHeaderType: 'not-filtered', id: 'tags', initialWidth: 180 },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Rule',
+            id: 'kibana.alert.rule.name',
+            initialWidth: 180,
+            linkField: 'kibana.alert.rule.uuid',
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Severity',
+            id: 'kibana.alert.severity',
+            initialWidth: 105,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Risk Score',
+            id: 'kibana.alert.risk_score',
+            initialWidth: 100,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Reason',
+            id: 'kibana.alert.reason',
+            initialWidth: 450,
+          },
+          { columnHeaderType: 'not-filtered', id: 'host.name' },
+          { columnHeaderType: 'not-filtered', id: 'user.name' },
+          { columnHeaderType: 'not-filtered', id: 'process.name' },
+          { columnHeaderType: 'not-filtered', id: 'file.name' },
+          { columnHeaderType: 'not-filtered', id: 'source.ip' },
+          { columnHeaderType: 'not-filtered', id: 'destination.ip' },
+        ],
+        defaultColumns: [
+          { columnHeaderType: 'not-filtered', id: '@timestamp', initialWidth: 200 },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Rule',
+            id: 'kibana.alert.rule.name',
+            initialWidth: 180,
+            linkField: 'kibana.alert.rule.uuid',
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Severity',
+            id: 'kibana.alert.severity',
+            initialWidth: 105,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Risk Score',
+            id: 'kibana.alert.risk_score',
+            initialWidth: 100,
+          },
+          {
+            columnHeaderType: 'not-filtered',
+            displayAsText: 'Reason',
+            id: 'kibana.alert.reason',
+            initialWidth: 450,
+          },
+          { columnHeaderType: 'not-filtered', id: 'host.name' },
+          { columnHeaderType: 'not-filtered', id: 'user.name' },
+          { columnHeaderType: 'not-filtered', id: 'process.name' },
+          { columnHeaderType: 'not-filtered', id: 'file.name' },
+          { columnHeaderType: 'not-filtered', id: 'source.ip' },
+          { columnHeaderType: 'not-filtered', id: 'destination.ip' },
+        ],
+        dataViewId: 'security-solution-default',
+        deletedEventIds: [],
+        excludedRowRendererIds: [
+          'alert',
+          'alerts',
+          'auditd',
+          'auditd_file',
+          'library',
+          'netflow',
+          'plain',
+          'registry',
+          'suricata',
+          'system',
+          'system_dns',
+          'system_endgame_process',
+          'system_file',
+          'system_fim',
+          'system_security_event',
+          'system_socket',
+          'threat_match',
+          'zeek',
+        ],
+        expandedDetail: {},
+        filters: [],
+        indexNames: ['.alerts-security.alerts-default'],
+        isSelectAllChecked: false,
+        itemsPerPage: 25,
+        itemsPerPageOptions: [10, 25, 50, 100],
+        loadingEventIds: [],
+        showCheckboxes: true,
+        sort: [
+          { columnId: '@timestamp', columnType: 'date', esTypes: ['date'], sortDirection: 'desc' },
+        ],
+        graphEventId: undefined,
+        selectedEventIds: {},
+        sessionViewConfig: null,
+        selectAll: undefined,
+        id: 'detections-page',
+        title: '',
+        initialized: true,
+        updated: 1665943295913,
+      };
+      const dataTables = getDataTablesInStorageByIds(storage, [TableId.detectionsPage]);
+      expect(dataTables).toStrictEqual({
+        [TableId.detectionsPage]: detectionsPage,
+      });
+    });
   });
 
   describe('getAllDataTablesInStorage', () => {
     it('gets timelines correctly', () => {
-      const timelineStorage = useDataTablesStorage();
-      timelineStorage.addDataTable(TableId.hostsPageEvents, mockTGridModel);
-      timelineStorage.addDataTable(TableId.usersPageEvents, mockTGridModel);
+      const tablesStorage = useDataTablesStorage();
+      tablesStorage.addDataTable(TableId.hostsPageEvents, mockTGridModel);
+      tablesStorage.addDataTable(TableId.usersPageEvents, mockTGridModel);
       const timelines = getAllDataTablesInStorage(storage);
       expect(timelines).toEqual({
         [TableId.hostsPageEvents]: timelineToStore,
@@ -404,7 +744,6 @@ describe('SiemLocalStorage', () => {
 
       expect(migrateColumnLabelToDisplayAsText(column)).toStrictEqual({
         columnHeaderType: 'not-filtered',
-        displayAsText: undefined, // undefined, because there is no `label` to migrate
         id: '@timestamp',
         initialWidth: 190,
       });

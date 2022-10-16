@@ -10,8 +10,6 @@ import {
   EuiLoadingSpinner,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonEmpty,
-  EuiSpacer,
   EuiLink,
   EuiText,
   EuiIcon,
@@ -23,7 +21,7 @@ import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 
 import { isEmpty } from 'lodash/fp';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 import { FieldIcon } from '@kbn/react-field';
 
@@ -42,28 +40,12 @@ import type {
 import * as i18n from './translations';
 import type { BuildQueryBarDescription, BuildThreatDescription, ListItems } from './types';
 import { SeverityBadge } from '../severity_badge';
-import ListTreeIcon from './assets/list_tree_icon.svg';
 import type {
   AboutStepRiskScore,
   AboutStepSeverity,
 } from '../../../pages/detection_engine/rules/types';
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
-import type {
-  MitreSubtechniquesOptions,
-  MitreTacticsOptions,
-  MitreTechniquesOptions,
-} from '../../../mitre/types';
-
-const lazyMitreConfiguration = () => {
-  /**
-   * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
-   * See https://webpack.js.org/api/module-methods/#magic-comments
-   */
-  return import(
-    /* webpackChunkName: "lazy_mitre_configuration" */
-    '../../../mitre/mitre_tactics_techniques'
-  );
-};
+import { ThreatEuiFlexGroup } from './threat_description';
 
 const NoteDescriptionContainer = styled(EuiFlexItem)`
   height: 105px;
@@ -179,119 +161,12 @@ export const buildEqlOptionsDescription = (eqlOptions: EqlOptionsSelected): List
   return items;
 };
 
-const ThreatEuiFlexGroup = styled(EuiFlexGroup)`
-  .euiFlexItem {
-    margin-bottom: 0px;
-  }
-`;
-
-const SubtechniqueFlexItem = styled(EuiFlexItem)`
-  margin-left: ${({ theme }) => theme.eui.euiSizeM};
-`;
-
-const TechniqueLinkItem = styled(EuiButtonEmpty)`
-  .euiIcon {
-    width: 8px;
-    height: 8px;
-  }
-  align-self: flex-start;
-`;
-
 export const buildThreatDescription = ({ label, threat }: BuildThreatDescription): ListItems[] => {
   if (threat.length > 0) {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const [techniquesOptions, setTechniquesOptions] = useState<MitreTechniquesOptions[]>([]);
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const [tacticsOptions, setTacticsOptions] = useState<MitreTacticsOptions[]>([]);
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const [subtechniquesOptions, setSubtechniquesOptions] = useState<MitreSubtechniquesOptions[]>(
-      []
-    );
-
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    useEffect(() => {
-      async function getMitre() {
-        const mitreConfig = await lazyMitreConfiguration();
-        setSubtechniquesOptions(mitreConfig.subtechniquesOptions);
-        setTechniquesOptions(mitreConfig.techniquesOptions);
-        setTacticsOptions(mitreConfig.tacticsOptions);
-      }
-      getMitre();
-    }, []);
     return [
       {
         title: label,
-        description: (
-          <ThreatEuiFlexGroup direction="column">
-            {threat.map((singleThreat, index) => {
-              const tactic = tacticsOptions.find((t) => t.id === singleThreat.tactic.id);
-              return (
-                <EuiFlexItem key={`${singleThreat.tactic.name}-${index}`}>
-                  <EuiLink
-                    data-test-subj="threatTacticLink"
-                    href={singleThreat.tactic.reference}
-                    target="_blank"
-                  >
-                    {tactic != null
-                      ? tactic.text
-                      : `${singleThreat.tactic.name} (${singleThreat.tactic.id})`}
-                  </EuiLink>
-                  <EuiFlexGroup gutterSize="none" alignItems="flexStart" direction="column">
-                    {singleThreat.technique &&
-                      singleThreat.technique.map((technique, techniqueIndex) => {
-                        const myTechnique = techniquesOptions.find((t) => t.id === technique.id);
-                        return (
-                          <EuiFlexItem key={myTechnique?.id ?? techniqueIndex}>
-                            <TechniqueLinkItem
-                              data-test-subj="threatTechniqueLink"
-                              href={technique.reference}
-                              target="_blank"
-                              iconType={ListTreeIcon}
-                              size="xs"
-                            >
-                              {myTechnique != null
-                                ? myTechnique.label
-                                : `${technique.name} (${technique.id})`}
-                            </TechniqueLinkItem>
-                            <EuiFlexGroup
-                              gutterSize="none"
-                              alignItems="flexStart"
-                              direction="column"
-                            >
-                              {technique.subtechnique != null &&
-                                technique.subtechnique.map((subtechnique, subtechniqueIndex) => {
-                                  const mySubtechnique = subtechniquesOptions.find(
-                                    (t) => t.id === subtechnique.id
-                                  );
-                                  return (
-                                    <SubtechniqueFlexItem
-                                      key={mySubtechnique?.id ?? subtechniqueIndex}
-                                    >
-                                      <TechniqueLinkItem
-                                        data-test-subj="threatSubtechniqueLink"
-                                        href={subtechnique.reference}
-                                        target="_blank"
-                                        iconType={ListTreeIcon}
-                                        size="xs"
-                                      >
-                                        {mySubtechnique != null
-                                          ? mySubtechnique.label
-                                          : `${subtechnique.name} (${subtechnique.id})`}
-                                      </TechniqueLinkItem>
-                                    </SubtechniqueFlexItem>
-                                  );
-                                })}
-                            </EuiFlexGroup>
-                          </EuiFlexItem>
-                        );
-                      })}
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              );
-            })}
-            <EuiSpacer />
-          </ThreatEuiFlexGroup>
-        ),
+        description: <ThreatEuiFlexGroup label={label} threat={threat} />,
       },
     ];
   }
