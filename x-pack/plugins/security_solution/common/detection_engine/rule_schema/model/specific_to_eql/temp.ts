@@ -6,25 +6,15 @@
  */
 
 import * as t from 'io-ts';
-// import { NonEmptyString } from '@kbn/securitysolution-io-ts-types';
 
 // -------------------------------------------------------------------------------------------------
 // Attributes specific to EQL rules
 
-/**
- * TODO: https://github.com/elastic/kibana/pull/142950 Add description
- */
 export type EventCategoryOverride = t.TypeOf<typeof EventCategoryOverride>;
 export const EventCategoryOverride = t.string; // should be non-empty string?
 
-/**
- * TODO: https://github.com/elastic/kibana/pull/142950 Add description
- */
 export type TimestampField = t.TypeOf<typeof TimestampField>;
 export const TimestampField = t.string; // should be non-empty string?
 
-/**
- * TODO: https://github.com/elastic/kibana/pull/142950 Add description
- */
 export type TiebreakerField = t.TypeOf<typeof TiebreakerField>;
 export const TiebreakerField = t.string; // should be non-empty string?

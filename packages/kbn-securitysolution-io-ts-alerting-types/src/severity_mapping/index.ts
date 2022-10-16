@@ -11,9 +11,6 @@ import * as t from 'io-ts';
 import { operator } from '@kbn/securitysolution-io-ts-types';
 import { Severity } from '../severity';
 
-/**
- * TODO: https://github.com/elastic/kibana/pull/142950 Add description
- */
 export type SeverityMappingItem = t.TypeOf<typeof SeverityMappingItem>;
 export const SeverityMappingItem = t.exact(
   t.type({
@@ -24,8 +21,5 @@ export const SeverityMappingItem = t.exact(
   })
 );
 
-/**
- * TODO: https://github.com/elastic/kibana/pull/142950 Add description
- */
 export type SeverityMapping = t.TypeOf<typeof SeverityMapping>;
 export const SeverityMapping = t.array(SeverityMappingItem);

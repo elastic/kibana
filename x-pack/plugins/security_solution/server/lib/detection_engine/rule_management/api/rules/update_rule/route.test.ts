@@ -21,7 +21,7 @@ import {
 import { requestContextMock, serverMock, requestMock } from '../../../../routes/__mocks__';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
 import { updateRuleRoute } from './route';
-import { getUpdateRulesSchemaMock } from '../../../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
+import { getUpdateRulesSchemaMock } from '../../../../../../../common/detection_engine/rule_schema/mocks';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
 // eslint-disable-next-line no-restricted-imports
 import { legacyMigrate } from '../../../logic/rule_actions/legacy_action_migration';

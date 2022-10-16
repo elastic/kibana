@@ -12,8 +12,10 @@ import type { RuleAction, ThreatMapping } from '@kbn/securitysolution-io-ts-aler
 import type { PartialRule } from '@kbn/alerting-plugin/server';
 
 import type { RuleToImport } from '../../../../../common/detection_engine/rule_management';
-import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
+import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/rule_schema/mocks';
 
+import { requestContextMock } from '../../routes/__mocks__';
+import { getOutputRuleAlertForRest } from '../../routes/__mocks__/utils';
 import {
   getIdError,
   transformFindAlerts,
@@ -29,24 +31,19 @@ import { getRuleMock } from '../../routes/__mocks__/request_responses';
 import type { PartialFilter } from '../../types';
 import type { BulkError } from '../../routes/utils';
 import { createBulkErrorObject } from '../../routes/utils';
-import { getOutputRuleAlertForRest } from '../../routes/__mocks__/utils';
 
-// TODO: https://github.com/elastic/kibana/pull/142950
-import { createRulesAndExceptionsStreamFromNdJson } from '../logic/import/create_rules_stream_from_ndjson';
 import type { RuleAlertType } from '../../rule_schema';
-
 import { getMlRuleParams, getQueryRuleParams, getThreatRuleParams } from '../../rule_schema/mocks';
-// TODO: https://github.com/elastic/kibana/pull/142950
-import { internalRuleToAPIResponse } from '../normalization/rule_converters';
-import { requestContextMock } from '../../routes/__mocks__';
 
 // eslint-disable-next-line no-restricted-imports
 import type {
   LegacyRuleAlertAction,
   LegacyRulesActionsSavedObject,
 } from '../../rule_actions_legacy';
-// TODO: https://github.com/elastic/kibana/pull/142950
+
+import { createRulesAndExceptionsStreamFromNdJson } from '../logic/import/create_rules_stream_from_ndjson';
 import type { RuleExceptionsPromiseFromStreams } from '../logic/import/import_rules_utils';
+import { internalRuleToAPIResponse } from '../normalization/rule_converters';
 
 type PromiseFromStreams = RuleToImport | Error;
 

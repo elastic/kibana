@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { UpdateRulesSchema } from '../../../../schemas/request/rule_schemas';
-import { getUpdateRulesSchemaMock } from '../../../../schemas/request/rule_schemas.mock';
+import type { UpdateRulesSchema } from '../../../../../rule_schema';
+import { getUpdateRulesSchemaMock } from '../../../../../rule_schema/mocks';
 import { validateUpdateRuleSchema } from './request_schema_validation';
 
 describe('Update rule request schema, additional validation', () => {

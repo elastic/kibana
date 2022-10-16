@@ -10,7 +10,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { ExceptionsConditions } from '.';
 import { TestProviders, mockIndexPattern } from '../../../../../common/mock';
-import { getRulesEqlSchemaMock } from '../../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
+import { getRulesEqlSchemaMock } from '../../../../../../common/detection_engine/rule_schema/mocks';
 import type { Rule } from '../../../../rule_management/logic/types';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';

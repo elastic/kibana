@@ -9,8 +9,10 @@ import { validate } from '@kbn/securitysolution-io-ts-utils';
 import type { Logger } from '@kbn/core/server';
 
 import { DETECTION_ENGINE_RULES_BULK_UPDATE } from '../../../../../../../common/constants';
-import { BulkPatchRulesRequestBody } from '../../../../../../../common/detection_engine/rule_management';
-import { rulesBulkSchema } from '../../../../../../../common/detection_engine/schemas/response/rules_bulk_schema';
+import {
+  BulkPatchRulesRequestBody,
+  BulkCrudRulesResponse,
+} from '../../../../../../../common/detection_engine/rule_management';
 
 import { buildRouteValidationNonExact } from '../../../../../../utils/build_validation/route_validation';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
@@ -104,7 +106,7 @@ export const bulkPatchRulesRoute = (
         })
       );
 
-      const [validated, errors] = validate(rules, rulesBulkSchema);
+      const [validated, errors] = validate(rules, BulkCrudRulesResponse);
       if (errors != null) {
         return siemResponse.error({
           statusCode: 500,

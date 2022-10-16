@@ -16,16 +16,16 @@ import type { ActionsClient, FindActionResult } from '@kbn/actions-plugin/server
 
 import type { RuleToImport } from '../../../../../common/detection_engine/rule_management';
 import type { RuleExecutionSummary } from '../../../../../common/detection_engine/rule_monitoring';
-import type { FullResponseSchema } from '../../../../../common/detection_engine/schemas/request';
+import type { FullResponseSchema } from '../../../../../common/detection_engine/rule_schema';
+
+// eslint-disable-next-line no-restricted-imports
+import type { LegacyRulesActionsSavedObject } from '../../rule_actions_legacy';
+import type { RuleExecutionSummariesByRuleId } from '../../rule_monitoring';
 import type { RuleAlertType, RuleParams } from '../../rule_schema';
 import { isAlertType } from '../../rule_schema';
 import type { BulkError, OutputError } from '../../routes/utils';
 import { createBulkErrorObject } from '../../routes/utils';
-// TODO: https://github.com/elastic/kibana/pull/142950
 import { internalRuleToAPIResponse } from '../normalization/rule_converters';
-// eslint-disable-next-line no-restricted-imports
-import type { LegacyRulesActionsSavedObject } from '../../rule_actions_legacy';
-import type { RuleExecutionSummariesByRuleId } from '../../rule_monitoring';
 
 type PromiseFromStreams = RuleToImport | Error;
 const MAX_CONCURRENT_SEARCHES = 10;
@@ -89,7 +89,6 @@ export const getIdBulkError = ({
   }
 };
 
-// TODO: https://github.com/elastic/kibana/pull/142950
 export const transformAlertsToRules = (
   rules: RuleAlertType[],
   legacyRuleActions: Record<string, LegacyRulesActionsSavedObject>
@@ -97,7 +96,6 @@ export const transformAlertsToRules = (
   return rules.map((rule) => internalRuleToAPIResponse(rule, null, legacyRuleActions[rule.id]));
 };
 
-// TODO: https://github.com/elastic/kibana/pull/142950
 export const transformFindAlerts = (
   ruleFindResults: FindResult<RuleParams>,
   ruleExecutionSummariesByRuleId: RuleExecutionSummariesByRuleId,
@@ -119,7 +117,6 @@ export const transformFindAlerts = (
   };
 };
 
-// TODO: https://github.com/elastic/kibana/pull/142950
 export const transform = (
   rule: PartialRule<RuleParams>,
   ruleExecutionSummary?: RuleExecutionSummary | null,

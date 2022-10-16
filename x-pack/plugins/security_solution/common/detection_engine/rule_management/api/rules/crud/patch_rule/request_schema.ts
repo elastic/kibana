@@ -10,7 +10,7 @@ import {
   patchTypeSpecific,
   sharedPatchSchema,
   thresholdPatchParams,
-} from '../../../../schemas/request/rule_schemas';
+} from '../../../../../rule_schema';
 
 /**
  * Request body parameters of the API route.

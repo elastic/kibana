@@ -18,8 +18,8 @@ import {
   getCreateThresholdRulesSchemaMock,
   getCreateRulesSchemaMockWithDataView,
   getCreateMachineLearningRulesSchemaMock,
-} from './rule_schemas.mock';
-import { getListArrayMock } from '../types/lists.mock';
+} from './rule_request_schema.mock';
+import { getListArrayMock } from '../../schemas/types/lists.mock';
 
 describe('rules schema', () => {
   test('empty objects do not validate', () => {

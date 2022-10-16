@@ -8,8 +8,5 @@
 
 import * as t from 'io-ts';
 
-/**
- * TODO: https://github.com/elastic/kibana/pull/142950 Add description
- */
 export type Severity = t.TypeOf<typeof Severity>;
 export const Severity = t.keyof({ low: null, medium: null, high: null, critical: null });

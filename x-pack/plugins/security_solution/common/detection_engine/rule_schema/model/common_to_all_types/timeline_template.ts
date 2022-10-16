@@ -7,14 +7,8 @@
 
 import * as t from 'io-ts';
 
-/**
- * TODO: https://github.com/elastic/kibana/pull/142950 Add description
- */
 export type TimelineTemplateId = t.TypeOf<typeof TimelineTemplateId>;
 export const TimelineTemplateId = t.string; // should be non-empty string?
 
-/**
- * TODO: https://github.com/elastic/kibana/pull/142950 Add description
- */
 export type TimelineTemplateTitle = t.TypeOf<typeof TimelineTemplateTitle>;
 export const TimelineTemplateTitle = t.string; // should be non-empty string?

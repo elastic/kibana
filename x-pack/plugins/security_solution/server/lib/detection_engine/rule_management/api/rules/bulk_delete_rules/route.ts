@@ -12,8 +12,8 @@ import { DETECTION_ENGINE_RULES_BULK_DELETE } from '../../../../../../../common/
 import {
   BulkDeleteRulesRequestBody,
   validateQueryRuleByIds,
+  BulkCrudRulesResponse,
 } from '../../../../../../../common/detection_engine/rule_management';
-import { rulesBulkSchema } from '../../../../../../../common/detection_engine/schemas/response/rules_bulk_schema';
 
 import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
 import type {
@@ -109,7 +109,7 @@ export const bulkDeleteRulesRoute = (router: SecuritySolutionPluginRouter, logge
         }
       })
     );
-    const [validated, errors] = validate(rules, rulesBulkSchema);
+    const [validated, errors] = validate(rules, BulkCrudRulesResponse);
     if (errors != null) {
       return siemResponse.error({
         statusCode: 500,

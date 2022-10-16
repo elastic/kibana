@@ -6,12 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { TimeDuration } from '@kbn/securitysolution-io-ts-types';
 import * as t from 'io-ts';
+import { TimeDuration } from '@kbn/securitysolution-io-ts-types';
 
-/**
- * TODO: https://github.com/elastic/kibana/pull/142950 Add description
- */
 export type RuleActionThrottle = t.TypeOf<typeof RuleActionThrottle>;
 export const RuleActionThrottle = t.union([
   t.literal('no_actions'),

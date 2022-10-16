@@ -10,9 +10,6 @@ import * as t from 'io-ts';
 import { operator } from '@kbn/securitysolution-io-ts-types';
 import { RiskScore } from '../risk_score';
 
-/**
- * TODO: https://github.com/elastic/kibana/pull/142950 Add description
- */
 export type RiskScoreMappingItem = t.TypeOf<typeof RiskScoreMappingItem>;
 export const RiskScoreMappingItem = t.exact(
   t.type({
@@ -23,8 +20,5 @@ export const RiskScoreMappingItem = t.exact(
   })
 );
 
-/**
- * TODO: https://github.com/elastic/kibana/pull/142950 Add description
- */
 export type RiskScoreMapping = t.TypeOf<typeof RiskScoreMapping>;
 export const RiskScoreMapping = t.array(RiskScoreMappingItem);

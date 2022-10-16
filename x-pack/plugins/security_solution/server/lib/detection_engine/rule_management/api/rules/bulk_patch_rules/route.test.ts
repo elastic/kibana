@@ -23,7 +23,7 @@ import {
 } from '../../../../routes/__mocks__/request_responses';
 import { serverMock, requestContextMock, requestMock } from '../../../../routes/__mocks__';
 import { bulkPatchRulesRoute } from './route';
-import { getCreateRulesSchemaMock } from '../../../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
+import { getCreateRulesSchemaMock } from '../../../../../../../common/detection_engine/rule_schema/mocks';
 import { getMlRuleParams, getQueryRuleParams } from '../../../../rule_schema/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 // eslint-disable-next-line no-restricted-imports

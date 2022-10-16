@@ -4,3 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+export * from './model/rule_request_schema.mock';
+export * from './model/rule_response_schema.mock';

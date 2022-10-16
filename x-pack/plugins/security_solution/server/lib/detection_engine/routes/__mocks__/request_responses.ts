@@ -9,6 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SavedObjectsFindResponse, SavedObjectsFindResult } from '@kbn/core/server';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
+import type { SanitizedRule, ResolvedSanitizedRule } from '@kbn/alerting-plugin/common';
 
 import {
   DETECTION_ENGINE_RULES_URL,
@@ -28,26 +29,26 @@ import {
   PREBUILT_RULES_STATUS_URL,
   PREBUILT_RULES_URL,
 } from '../../../../../common/detection_engine/prebuilt_rules';
-
-import type { RuleAlertType, RuleParams } from '../../rule_schema';
-import { requestMock } from './request';
-import type { QuerySignalsSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/query_signals_index_schema';
-import type { SetSignalsStatusSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/set_signal_status_schema';
-import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
-import { getFinalizeSignalsMigrationSchemaMock } from '../../../../../common/detection_engine/schemas/request/finalize_signals_migration_schema.mock';
-import { getSignalsMigrationStatusSchemaMock } from '../../../../../common/detection_engine/schemas/request/get_signals_migration_status_schema.mock';
-import type { SanitizedRule, ResolvedSanitizedRule } from '@kbn/alerting-plugin/common';
-import { getQueryRuleParams } from '../../rule_schema/mocks';
 import {
   getPerformBulkActionSchemaMock,
   getPerformBulkActionEditSchemaMock,
 } from '../../../../../common/detection_engine/rule_management/mocks';
-import type { HapiReadableStream } from '../../rule_management/logic/import/hapi_readable_stream';
+import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/rule_schema/mocks';
+import type { QuerySignalsSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/query_signals_index_schema';
+import type { SetSignalsStatusSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/set_signal_status_schema';
+import { getFinalizeSignalsMigrationSchemaMock } from '../../../../../common/detection_engine/schemas/request/finalize_signals_migration_schema.mock';
+import { getSignalsMigrationStatusSchemaMock } from '../../../../../common/detection_engine/schemas/request/get_signals_migration_status_schema.mock';
+
 // eslint-disable-next-line no-restricted-imports
 import type {
   LegacyRuleNotificationAlertType,
   LegacyIRuleActionsAttributes,
 } from '../../rule_actions_legacy';
+import type { HapiReadableStream } from '../../rule_management/logic/import/hapi_readable_stream';
+import type { RuleAlertType, RuleParams } from '../../rule_schema';
+import { getQueryRuleParams } from '../../rule_schema/mocks';
+
+import { requestMock } from './request';
 
 export const typicalSetStatusSignalByIdsPayload = (): SetSignalsStatusSchemaDecoded => ({
   signal_ids: ['somefakeid1', 'somefakeid2'],

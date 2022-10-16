@@ -7,14 +7,14 @@
 
 import type { PartialRule, RulesClient } from '@kbn/alerting-plugin/server';
 
-import type { PatchRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
+import type { PatchRuleRequestBody } from '../../../../../../common/detection_engine/rule_management';
 import type { RuleAlertType, RuleParams } from '../../../rule_schema';
 import { convertPatchAPIToInternalSchema } from '../../normalization/rule_converters';
 import { maybeMute } from '../rule_actions/muting';
 
 export interface PatchRulesOptions {
   rulesClient: RulesClient;
-  nextParams: PatchRulesSchema;
+  nextParams: PatchRuleRequestBody;
   existingRule: RuleAlertType | null | undefined;
 }
 

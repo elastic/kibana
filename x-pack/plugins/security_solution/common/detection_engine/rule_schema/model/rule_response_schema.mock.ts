@@ -13,8 +13,8 @@ import type {
   SavedQueryResponseSchema,
   SharedResponseSchema,
   ThreatMatchResponseSchema,
-} from '../request';
-import { getListArrayMock } from '../types/lists.mock';
+} from '../../schemas/request';
+import { getListArrayMock } from '../../schemas/types/lists.mock';
 
 export const ANCHOR_DATE = '2020-02-20T03:57:54.037Z';
 

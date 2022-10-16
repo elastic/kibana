@@ -68,7 +68,7 @@ import {
   TimestampField,
   TimestampOverride,
   TimestampOverrideFallbackDisabled,
-} from '../../rule_schema';
+} from '..';
 import {
   saved_id,
   threshold,
@@ -79,7 +79,7 @@ import {
   created_by,
   newTermsFields,
   historyWindowStart,
-} from '../common';
+} from '../../schemas/common';
 
 export const createSchema = <
   Required extends t.Props,

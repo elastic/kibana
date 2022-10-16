@@ -10,7 +10,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { ExceptionsLinkedToRule } from '.';
 import { TestProviders } from '../../../../../common/mock';
-import { getRulesSchemaMock } from '../../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
+import { getRulesSchemaMock } from '../../../../../../common/detection_engine/rule_schema/mocks';
 import type { Rule } from '../../../../rule_management/logic/types';
 
 jest.mock('../../../../rule_management/logic/use_find_rules_query');

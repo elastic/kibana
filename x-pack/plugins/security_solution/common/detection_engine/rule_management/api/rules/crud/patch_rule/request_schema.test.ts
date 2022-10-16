@@ -9,7 +9,7 @@ import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
-import { getListArrayMock } from '../../../../schemas/types/lists.mock';
+import { getListArrayMock } from '../../../../../schemas/types/lists.mock';
 import { PatchRuleRequestBody } from './request_schema';
 import { getPatchRulesSchemaMock } from './request_schema.mock';
 

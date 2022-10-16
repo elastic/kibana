@@ -10,12 +10,11 @@ import { KibanaServices } from '../../../common/lib/kibana';
 
 import { DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL } from '../../../../common/detection_engine/rule_exceptions';
 import { getPatchRulesSchemaMock } from '../../../../common/detection_engine/rule_management/mocks';
-
 import {
   getCreateRulesSchemaMock,
   getUpdateRulesSchemaMock,
-} from '../../../../common/detection_engine/schemas/request/rule_schemas.mock';
-import { getRulesSchemaMock } from '../../../../common/detection_engine/schemas/response/rules_schema.mocks';
+  getRulesSchemaMock,
+} from '../../../../common/detection_engine/rule_schema/mocks';
 
 import { rulesMock } from '../logic/mock';
 import type { FindRulesReferencedByExceptionsListProp } from '../logic/types';

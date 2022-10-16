@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from './rules_bulk_schema';
 export * from './error_schema';

@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { PatchRuleRequestBody } from '../patch_rule/request_schema';
+import { PatchRuleRequestBody } from '../../crud/patch_rule/request_schema';
 
 /**
  * Request body parameters of the API route.

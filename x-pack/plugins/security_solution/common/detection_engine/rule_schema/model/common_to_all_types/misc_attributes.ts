@@ -7,33 +7,18 @@
 
 import * as t from 'io-ts';
 
-/**
- * TODO: https://github.com/elastic/kibana/pull/142950 Add description
- */
 export type RuleLicense = t.TypeOf<typeof RuleLicense>;
 export const RuleLicense = t.string; // should be non-empty string?
 
-/**
- * TODO: https://github.com/elastic/kibana/pull/142950 Add description
- */
 export type RuleAuthorArray = t.TypeOf<typeof RuleAuthorArray>;
 export const RuleAuthorArray = t.array(t.string); // should be non-empty strings?
 
-/**
- * TODO: https://github.com/elastic/kibana/pull/142950 Add description
- */
 export type RuleFalsePositiveArray = t.TypeOf<typeof RuleFalsePositiveArray>;
 export const RuleFalsePositiveArray = t.array(t.string); // should be non-empty strings?
 
-/**
- * TODO: https://github.com/elastic/kibana/pull/142950 Add description
- */
 export type RuleReferenceArray = t.TypeOf<typeof RuleReferenceArray>;
 export const RuleReferenceArray = t.array(t.string); // should be non-empty strings?
 
-/**
- * TODO: https://github.com/elastic/kibana/pull/142950 Add description
- */
 export type InvestigationGuide = t.TypeOf<typeof InvestigationGuide>;
 export const InvestigationGuide = t.string;
 

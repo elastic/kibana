@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-// TODO: https://github.com/elastic/kibana/pull/142950 delete this whole index file?
-
-// TODO: https://github.com/elastic/kibana/pull/142950 delete this re-export
+// TODO: https://github.com/elastic/kibana/pull/142950 delete this whole index file
+// TODO: https://github.com/elastic/kibana/pull/142950 delete api re-export
 export * from '../api/api';
 export * from './use_update_rule';
 export * from './use_create_rule';

@@ -28,7 +28,7 @@ import { TestProviders } from '../../../../common/mock';
 import {
   getRulesEqlSchemaMock,
   getRulesSchemaMock,
-} from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
+} from '../../../../../common/detection_engine/rule_schema/mocks';
 import { useRule } from '../../../rule_management/logic/use_rule';
 import type { AlertData } from '../../utils/types';
 

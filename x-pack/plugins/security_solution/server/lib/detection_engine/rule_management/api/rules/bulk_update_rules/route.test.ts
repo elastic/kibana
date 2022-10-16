@@ -21,7 +21,7 @@ import {
 import { serverMock, requestContextMock, requestMock } from '../../../../routes/__mocks__';
 import { bulkUpdateRulesRoute } from './route';
 import type { BulkError } from '../../../../routes/utils';
-import { getCreateRulesSchemaMock } from '../../../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
+import { getCreateRulesSchemaMock } from '../../../../../../../common/detection_engine/rule_schema/mocks';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 // eslint-disable-next-line no-restricted-imports

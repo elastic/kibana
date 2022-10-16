@@ -7,19 +7,19 @@
 
 import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
-
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
+
+import type { FullResponseSchema } from './rule_schemas';
+import { fullResponseSchema } from './rule_schemas';
 import {
   getRulesSchemaMock,
   getRulesMlSchemaMock,
   getSavedQuerySchemaMock,
   getThreatMatchingSchemaMock,
   getRulesEqlSchemaMock,
-} from './rules_schema.mocks';
-import { fullResponseSchema } from '../request';
-import type { FullResponseSchema } from '../request';
+} from './rule_response_schema.mock';
 
-describe('rules_schema', () => {
+describe('Rule response schema', () => {
   test('it should validate a type of "query" without anything extra', () => {
     const payload = getRulesSchemaMock();
 

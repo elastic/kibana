@@ -11,8 +11,8 @@ import { validate } from '@kbn/securitysolution-io-ts-utils';
 import {
   BulkUpdateRulesRequestBody,
   validateUpdateRuleSchema,
+  BulkCrudRulesResponse,
 } from '../../../../../../../common/detection_engine/rule_management';
-import { rulesBulkSchema } from '../../../../../../../common/detection_engine/schemas/response/rules_bulk_schema';
 
 import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
@@ -113,7 +113,7 @@ export const bulkUpdateRulesRoute = (
         })
       );
 
-      const [validated, errors] = validate(rules, rulesBulkSchema);
+      const [validated, errors] = validate(rules, BulkCrudRulesResponse);
       if (errors != null) {
         return siemResponse.error({
           statusCode: 500,

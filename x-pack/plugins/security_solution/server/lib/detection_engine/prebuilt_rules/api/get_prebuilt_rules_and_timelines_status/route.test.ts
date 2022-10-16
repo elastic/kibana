@@ -20,7 +20,7 @@ import {
   mockCheckTimelinesStatusAfterInstallResult,
 } from '../../../../timeline/__mocks__/import_timelines';
 
-jest.mock('../../logic/get_prepackaged_rules', () => {
+jest.mock('../../logic/get_latest_prebuilt_rules', () => {
   return {
     getLatestPrepackagedRules: async () => {
       return [

@@ -22,7 +22,7 @@ import type { EntriesArray } from '@kbn/securitysolution-io-ts-list-types';
 import {
   getRulesEqlSchemaMock,
   getRulesSchemaMock,
-} from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
+} from '../../../../../common/detection_engine/rule_schema/mocks';
 import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import { useRule } from '../../../rule_management/logic/use_rule';

@@ -9,20 +9,13 @@
 import * as t from 'io-ts';
 import { From } from '../from';
 
-/**
- * TODO: https://github.com/elastic/kibana/pull/142950 Add description
- */
 export type RuleInterval = t.TypeOf<typeof RuleInterval>;
 export const RuleInterval = t.string; // we need a more specific schema
 
-/**
- * TODO: https://github.com/elastic/kibana/pull/142950 Add description
- */
 export type RuleIntervalFrom = t.TypeOf<typeof RuleIntervalFrom>;
 export const RuleIntervalFrom = From;
 
 /**
- * TODO: https://github.com/elastic/kibana/pull/142950 Add description
  * TODO: Create a regular expression type or custom date math part type here
  */
 export type RuleIntervalTo = t.TypeOf<typeof RuleIntervalTo>;

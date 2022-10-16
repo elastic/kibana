@@ -9,8 +9,8 @@ import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 
 import type { PartialRule } from '@kbn/alerting-plugin/server';
 import type { RuleExecutionSummary } from '../../../../../common/detection_engine/rule_monitoring';
-import type { FullResponseSchema } from '../../../../../common/detection_engine/schemas/request';
-import { fullResponseSchema } from '../../../../../common/detection_engine/schemas/request';
+import type { FullResponseSchema } from '../../../../../common/detection_engine/rule_schema';
+import { fullResponseSchema } from '../../../../../common/detection_engine/rule_schema';
 import type { RuleParams } from '../../rule_schema';
 import { isAlertType } from '../../rule_schema';
 import type { BulkError } from '../../routes/utils';
@@ -18,10 +18,8 @@ import { createBulkErrorObject } from '../../routes/utils';
 import { transform } from './utils';
 // eslint-disable-next-line no-restricted-imports
 import type { LegacyRulesActionsSavedObject } from '../../rule_actions_legacy';
-// TODO: https://github.com/elastic/kibana/pull/142950
 import { internalRuleToAPIResponse } from '../normalization/rule_converters';
 
-// TODO: https://github.com/elastic/kibana/pull/142950
 export const transformValidate = (
   rule: PartialRule<RuleParams>,
   ruleExecutionSummary: RuleExecutionSummary | null,
@@ -35,7 +33,6 @@ export const transformValidate = (
   }
 };
 
-// TODO: https://github.com/elastic/kibana/pull/142950
 export const transformValidateBulkError = (
   ruleId: string,
   rule: PartialRule<RuleParams>,

@@ -24,17 +24,6 @@ import type {
   RelatedIntegrationArray,
   RequiredFieldArray,
   SetupGuide,
-} from '../../../../../common/detection_engine/rule_schema';
-import {
-  eqlPatchParams,
-  machineLearningPatchParams,
-  newTermsPatchParams,
-  queryPatchParams,
-  savedQueryPatchParams,
-  threatMatchPatchParams,
-  thresholdPatchParams,
-} from '../../../../../common/detection_engine/schemas/request';
-import type {
   CreateRulesSchema,
   CreateTypeSpecific,
   EqlPatchParams,
@@ -46,7 +35,16 @@ import type {
   SavedQueryPatchParams,
   ThreatMatchPatchParams,
   ThresholdPatchParams,
-} from '../../../../../common/detection_engine/schemas/request';
+} from '../../../../../common/detection_engine/rule_schema';
+import {
+  eqlPatchParams,
+  machineLearningPatchParams,
+  newTermsPatchParams,
+  queryPatchParams,
+  savedQueryPatchParams,
+  threatMatchPatchParams,
+  thresholdPatchParams,
+} from '../../../../../common/detection_engine/rule_schema';
 
 import {
   transformAlertToRuleResponseAction,

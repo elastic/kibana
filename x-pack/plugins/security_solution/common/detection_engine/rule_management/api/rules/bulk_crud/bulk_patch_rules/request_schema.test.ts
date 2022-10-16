@@ -6,7 +6,7 @@
  */
 
 import { exactCheck, formatErrors, foldLeftRight } from '@kbn/securitysolution-io-ts-utils';
-import type { PatchRuleRequestBody } from '../patch_rule/request_schema';
+import type { PatchRuleRequestBody } from '../../crud/patch_rule/request_schema';
 import { BulkPatchRulesRequestBody } from './request_schema';
 
 // only the basics of testing are here.

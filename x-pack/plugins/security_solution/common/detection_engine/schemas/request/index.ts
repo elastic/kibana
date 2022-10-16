@@ -5,7 +5,5 @@
  * 2.0.
  */
 
-// TODO: https://github.com/elastic/kibana/pull/142950 Delete re-exports
-export * from './rule_schemas';
 export * from './query_signals_index_schema';
 export * from './set_signal_status_schema';

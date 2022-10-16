@@ -6,17 +6,18 @@
  */
 
 import * as t from 'io-ts';
-
 import { OnlyFalseAllowed } from '@kbn/securitysolution-io-ts-types';
+
 import {
   RelatedIntegrationArray,
   RequiredFieldArray,
   RuleObjectId,
   RuleSignatureId,
   SetupGuide,
+  baseCreateParams,
+  createTypeSpecific,
 } from '../../../rule_schema';
 import { created_at, updated_at, created_by, updated_by } from '../../../schemas/common';
-import { baseCreateParams, createTypeSpecific } from '../../../schemas/request/rule_schemas';
 
 /**
  * Differences from this and the createRulesSchema are

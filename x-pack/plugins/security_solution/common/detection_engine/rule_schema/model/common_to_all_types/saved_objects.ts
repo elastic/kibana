@@ -8,7 +8,6 @@
 import * as t from 'io-ts';
 
 /**
- * TODO: https://github.com/elastic/kibana/pull/142950 Add description
  * Outcome is a property of the saved object resolve api
  * will tell us info about the rule after 8.0 migrations
  */
@@ -19,15 +18,9 @@ export const SavedObjectResolveOutcome = t.union([
   t.literal('conflict'),
 ]);
 
-/**
- * TODO: https://github.com/elastic/kibana/pull/142950 Add description
- */
 export type SavedObjectResolveAliasTargetId = t.TypeOf<typeof SavedObjectResolveAliasTargetId>;
 export const SavedObjectResolveAliasTargetId = t.string;
 
-/**
- * TODO: https://github.com/elastic/kibana/pull/142950 Add description
- */
 export type SavedObjectResolveAliasPurpose = t.TypeOf<typeof SavedObjectResolveAliasPurpose>;
 export const SavedObjectResolveAliasPurpose = t.union([
   t.literal('savedObjectConversion'),

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { CreateRulesSchema } from '../../../../schemas/request/rule_schemas';
+import type { CreateRulesSchema } from '../../../../../rule_schema';
 import {
   getCreateRulesSchemaMock,
   getCreateThreatMatchRulesSchemaMock,
-} from '../../../../schemas/request/rule_schemas.mock';
+} from '../../../../../rule_schema/mocks';
 import { validateCreateRuleSchema } from './request_schema_validation';
 
 describe('Create rule request schema, additional validation', () => {

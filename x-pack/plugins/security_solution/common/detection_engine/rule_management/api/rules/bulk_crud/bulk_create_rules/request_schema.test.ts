@@ -7,7 +7,7 @@
 
 import { BulkCreateRulesRequestBody } from './request_schema';
 import { exactCheck, foldLeftRight, formatErrors } from '@kbn/securitysolution-io-ts-utils';
-import { getCreateRulesSchemaMock } from '../../../../schemas/request/rule_schemas.mock';
+import { getCreateRulesSchemaMock } from '../../../../../rule_schema/mocks';
 
 // only the basics of testing are here.
 // see: rule_schemas.test.ts for the bulk of the validation tests

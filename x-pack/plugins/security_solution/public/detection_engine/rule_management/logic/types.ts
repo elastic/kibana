@@ -68,13 +68,13 @@ import {
   TimestampOverrideFallbackDisabled,
 } from '../../../../common/detection_engine/rule_schema';
 
-import type { SortOrder } from '../../../../common/detection_engine/schemas/common';
-import { threshold } from '../../../../common/detection_engine/schemas/common';
+import type { PatchRuleRequestBody } from '../../../../common/detection_engine/rule_management';
 import type {
   CreateRulesSchema,
-  PatchRulesSchema,
   UpdateRulesSchema,
-} from '../../../../common/detection_engine/schemas/request';
+} from '../../../../common/detection_engine/rule_schema';
+import type { SortOrder } from '../../../../common/detection_engine/schemas/common';
+import { threshold } from '../../../../common/detection_engine/schemas/common';
 
 /**
  * Params is an "record", since it is a type of RuleActionParams which is action templates.
@@ -106,7 +106,7 @@ export interface UpdateRulesProps {
 }
 
 export interface PatchRuleProps {
-  ruleProperties: PatchRulesSchema;
+  ruleProperties: PatchRuleRequestBody;
   signal?: AbortSignal;
 }
 

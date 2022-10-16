@@ -11,7 +11,7 @@ import { waitFor } from '@testing-library/react';
 
 import { performBulkAction } from '../../../../detection_engine/rule_management/api/api';
 import { RuleSwitchComponent } from '.';
-import { getRulesSchemaMock } from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
+import { getRulesSchemaMock } from '../../../../../common/detection_engine/rule_schema/mocks';
 import { useRulesTableContextOptional } from '../../../../detection_engine/rule_management_ui/components/rules_table/rules_table/rules_table_context';
 import { useRulesTableContextMock } from '../../../../detection_engine/rule_management_ui/components/rules_table/rules_table/__mocks__/rules_table_context';
 import { TestProviders } from '../../../../common/mock';

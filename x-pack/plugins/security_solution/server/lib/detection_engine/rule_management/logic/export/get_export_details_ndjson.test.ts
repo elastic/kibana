@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { getRulesSchemaMock } from '../../../../../../common/detection_engine/rule_schema/mocks';
 import { getExportDetailsNdjson } from './get_export_details_ndjson';
-import { getRulesSchemaMock } from '../../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
 
 describe('getExportDetailsNdjson', () => {
   test('it ends with a new line character', () => {

@@ -6,16 +6,15 @@
  */
 
 import * as t from 'io-ts';
-
 import {
   RelatedIntegrationArray,
   RequiredFieldArray,
   SetupGuide,
   RuleSignatureId,
   RuleVersion,
+  baseCreateParams,
+  createTypeSpecific,
 } from '../../rule_schema';
-
-import { baseCreateParams, createTypeSpecific } from '../../schemas/request/rule_schemas';
 
 /**
  * Big differences between this schema and the createRulesSchema

@@ -5,31 +5,21 @@
  * 2.0.
  */
 
-import type { UpdateRulesSchema } from '../../../../schemas/request/rule_schemas';
+import type { CreateRulesSchema } from '../../../../../rule_schema';
 
 /**
  * Additional validation that is implemented outside of the schema itself.
  */
-export const validateUpdateRuleSchema = (rule: UpdateRulesSchema): string[] => {
+export const validateCreateRuleSchema = (rule: CreateRulesSchema): string[] => {
   return [
-    ...validateId(rule),
     ...validateTimelineId(rule),
     ...validateTimelineTitle(rule),
+    ...validateThreatMapping(rule),
     ...validateThreshold(rule),
   ];
 };
 
-const validateId = (rule: UpdateRulesSchema): string[] => {
-  if (rule.id != null && rule.rule_id != null) {
-    return ['both "id" and "rule_id" cannot exist, choose one or the other'];
-  } else if (rule.id == null && rule.rule_id == null) {
-    return ['either "id" or "rule_id" must be set'];
-  } else {
-    return [];
-  }
-};
-
-const validateTimelineId = (rule: UpdateRulesSchema): string[] => {
+const validateTimelineId = (rule: CreateRulesSchema): string[] => {
   if (rule.timeline_id != null) {
     if (rule.timeline_title == null) {
       return ['when "timeline_id" exists, "timeline_title" must also exist'];
@@ -42,7 +32,7 @@ const validateTimelineId = (rule: UpdateRulesSchema): string[] => {
   return [];
 };
 
-const validateTimelineTitle = (rule: UpdateRulesSchema): string[] => {
+const validateTimelineTitle = (rule: CreateRulesSchema): string[] => {
   if (rule.timeline_title != null) {
     if (rule.timeline_id == null) {
       return ['when "timeline_title" exists, "timeline_id" must also exist'];
@@ -55,7 +45,20 @@ const validateTimelineTitle = (rule: UpdateRulesSchema): string[] => {
   return [];
 };
 
-const validateThreshold = (rule: UpdateRulesSchema): string[] => {
+const validateThreatMapping = (rule: CreateRulesSchema): string[] => {
+  const errors: string[] = [];
+  if (rule.type === 'threat_match') {
+    if (rule.concurrent_searches != null && rule.items_per_search == null) {
+      errors.push('when "concurrent_searches" exists, "items_per_search" must also exist');
+    }
+    if (rule.concurrent_searches == null && rule.items_per_search != null) {
+      errors.push('when "items_per_search" exists, "concurrent_searches" must also exist');
+    }
+  }
+  return errors;
+};
+
+const validateThreshold = (rule: CreateRulesSchema): string[] => {
   const errors: string[] = [];
   if (rule.type === 'threshold') {
     if (!rule.threshold) {

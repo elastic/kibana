@@ -13,6 +13,7 @@ export * from './model/common_to_all_types/required_fields';
 export * from './model/common_to_all_types/saved_objects';
 export * from './model/common_to_all_types/timeline_template';
 
+// TODO: https://github.com/elastic/kibana/pull/142950
 // export * from './model/common_to_some_types/temp';
 
 export * from './model/specific_to_eql/temp';
@@ -21,4 +22,5 @@ export * from './model/specific_to_eql/temp';
 // export * from './model/specific_to_query/temp';
 // export * from './model/specific_to_threshold/temp';
 
+export * from './model/rule_schemas';
 export * from './model/temp';

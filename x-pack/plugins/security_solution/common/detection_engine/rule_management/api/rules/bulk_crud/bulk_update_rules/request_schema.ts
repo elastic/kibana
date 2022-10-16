@@ -6,12 +6,10 @@
  */
 
 import * as t from 'io-ts';
-import { RuleObjectId, RuleSignatureId } from '../../../../rule_schema';
+import { updateRulesSchema } from '../../../../../rule_schema';
 
-export type QueryRuleByIds = t.TypeOf<typeof QueryRuleByIds>;
-export const QueryRuleByIds = t.exact(
-  t.partial({
-    rule_id: RuleSignatureId,
-    id: RuleObjectId,
-  })
-);
+/**
+ * Request body parameters of the API route.
+ */
+export type BulkUpdateRulesRequestBody = t.TypeOf<typeof BulkUpdateRulesRequestBody>;
+export const BulkUpdateRulesRequestBody = t.array(updateRulesSchema);

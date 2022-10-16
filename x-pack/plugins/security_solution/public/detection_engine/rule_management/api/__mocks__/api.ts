@@ -7,7 +7,7 @@
 
 import type { FullResponseSchema } from '../../../../../common/detection_engine/schemas/request';
 
-import { getRulesSchemaMock } from '../../../../../common/detection_engine/schemas/response/rules_schema.mocks';
+import { getRulesSchemaMock } from '../../../../../common/detection_engine/rule_schema/mocks';
 import { savedRuleMock, rulesMock } from '../../logic/mock';
 
 import type {
