@@ -20,4 +20,13 @@ export const tagManagementSectionId = 'tags';
 /**
  * The list of saved object types that are currently supporting tagging.
  */
-export const taggableTypes = ['dashboard', 'visualization', 'map', 'lens', 'search'];
+export const taggableTypes = [
+  'dashboard',
+  'visualization',
+  'map',
+  'lens',
+  'search',
+  'osquery_pack',
+  'osquery_pack_asset',
+  'osquery_saved_query',
+];
