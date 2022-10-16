@@ -23,8 +23,8 @@ export const tagUsageCollectorSchema: MakeSchemaFrom<TaggingUsageData> = {
     visualization: perTypeSchema,
     map: perTypeSchema,
     search: perTypeSchema,
-    osquery_pack: perTypeSchema,
-    osquery_pack_asset: perTypeSchema,
-    osquery_saved_query: perTypeSchema,
+    'osquery-pack': perTypeSchema,
+    'osquery-pack-asset': perTypeSchema,
+    'osquery-saved-query': perTypeSchema,
   },
 };
