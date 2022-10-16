@@ -9,7 +9,7 @@ import React, { memo, useMemo } from 'react';
 import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { ConnectorTypes } from '../../../common/api';
+import type { ConnectorTypes } from '../../../common/api';
 import { useKibana } from '../../common/lib/kibana';
 import { getConnectorIcon } from '../utils';
 
