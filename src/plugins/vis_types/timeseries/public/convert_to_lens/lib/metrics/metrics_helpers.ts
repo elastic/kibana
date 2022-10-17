@@ -144,6 +144,12 @@ export const getFormulaEquivalent = (
     case 'static': {
       return `${currentMetric.value}`;
     }
+    case 'variance': {
+      return `${aggFormula}(standard_deviation(${currentMetric.field}${addAdditionalArgs({
+        reducedTimeRange,
+        timeShift,
+      })}), 2)`;
+    }
     case 'std_deviation': {
       if (currentMetric.mode === 'lower') {
         return `average(${currentMetric.field}${addAdditionalArgs({

@@ -7,7 +7,7 @@
 
 import { DataProvider } from '@kbn/timelines-plugin/common';
 import { AddToTimelineButtonProps } from '@kbn/timelines-plugin/public';
-import { generateDataProvider } from '../utils/data_provider';
+import { generateDataProvider } from '../utils';
 import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../indicators';
 import { Indicator } from '../../../../common/types/indicator';
 

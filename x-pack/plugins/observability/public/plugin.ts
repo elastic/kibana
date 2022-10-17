@@ -55,7 +55,20 @@ import getAppDataView from './utils/observability_data_views/get_app_data_view';
 
 export interface ConfigSchema {
   unsafe: {
-    alertDetails: { enabled: boolean };
+    alertDetails: {
+      apm: {
+        enabled: boolean;
+      };
+      metrics: {
+        enabled: boolean;
+      };
+      logs: {
+        enabled: boolean;
+      };
+      uptime: {
+        enabled: boolean;
+      };
+    };
   };
 }
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;

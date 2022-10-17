@@ -3,7 +3,7 @@
   "version": "kibana",
   "ui": true,
   "server": true,
-  "requiredPlugins": ["charts", "visualizations", "data", "expressions"],
+  "requiredPlugins": ["charts", "visualizations", "data", "expressions", "dataViews"],
   "requiredBundles": ["kibanaUtils", "visDefaultEditor"],
   "extraPublicDirs": ["common/index"],
   "owner": {

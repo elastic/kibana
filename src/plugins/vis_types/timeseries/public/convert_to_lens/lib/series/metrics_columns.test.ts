@@ -23,6 +23,7 @@ const mockConvertToStaticValueColumn = jest.fn();
 const mockConvertStaticValueToFormulaColumn = jest.fn();
 const mockConvertToStandartDeviationColumn = jest.fn();
 const mockConvertMetricAggregationColumnWithoutSpecialParams = jest.fn();
+const mockConvertVarianceToFormulaColumn = jest.fn();
 
 jest.mock('../convert', () => ({
   convertMathToFormulaColumn: jest.fn(() => mockConvertMathToFormulaColumn()),
@@ -38,6 +39,7 @@ jest.mock('../convert', () => ({
   convertMetricAggregationColumnWithoutSpecialParams: jest.fn(() =>
     mockConvertMetricAggregationColumnWithoutSpecialParams()
   ),
+  convertVarianceToFormulaColumn: jest.fn(() => mockConvertVarianceToFormulaColumn()),
 }));
 
 describe('getMetricsColumns', () => {
@@ -162,6 +164,11 @@ describe('getMetricsColumns', () => {
         1,
       ],
       mockConvertToStandartDeviationColumn,
+    ],
+    [
+      'call convertVarianceToFormulaColumn if metric type is variance',
+      [createSeries({ metrics: [{ type: TSVB_METRIC_TYPES.VARIANCE, id: '1' }] }), dataView, 1],
+      mockConvertVarianceToFormulaColumn,
     ],
     [
       'call convertMetricAggregationColumnWithoutSpecialParams if metric type is another supported type',
