@@ -58,11 +58,6 @@ export function AlertDetails() {
     },
   ]);
 
-  // Redirect to the the 404 page when the user hit the page url directly in the browser while the feature flag is off.
-  if (!config.unsafe.alertDetails.enabled) {
-    return <PageNotFound />;
-  }
-
   if (isLoading) {
     return <CenterJustifiedSpinner />;
   }
