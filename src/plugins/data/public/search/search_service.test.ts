@@ -36,7 +36,7 @@ describe('Search service', () => {
     mockCoreSetup = coreMock.createSetup();
     mockCoreStart = coreMock.createStart();
     searchService = new SearchService(initializerContext);
-    jest.advanceTimersByTime(10000);
+    jest.advanceTimersByTime(30000);
   });
 
   describe('setup()', () => {

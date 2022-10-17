@@ -55,7 +55,7 @@ describe('Filtering and showing warnings', () => {
     const request = { body: {} };
     beforeEach(() => {
       jest.resetAllMocks();
-      jest.advanceTimersByTime(10000);
+      jest.advanceTimersByTime(30000);
       setNotifications(notifications);
       (notifications.toasts.addWarning as jest.Mock).mockReset();
       (extract.extractWarnings as jest.Mock).mockImplementation(() => warnings);
