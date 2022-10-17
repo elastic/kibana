@@ -1,0 +1,70 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { useParams } from 'react-router-dom';
+import { useTrackPageview } from '@kbn/observability-plugin/public';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiPanel } from '@elastic/eui';
+import { StepImage } from './components/step_image';
+import { useJourneySteps } from '../monitor_details/hooks/use_journey_steps';
+import { MonitorDetailsLinkPortal } from '../monitor_add_edit/monitor_details_portal';
+
+export const StepDetailPage = () => {
+  const { checkGroupId } = useParams<{ checkGroupId: string; stepIndex: string }>();
+
+  useTrackPageview({ app: 'synthetics', path: 'stepDetail' });
+  useTrackPageview({ app: 'synthetics', path: 'stepDetail', delay: 15000 });
+
+  const { data } = useJourneySteps(checkGroupId);
+
+  return (
+    <>
+      {data?.details?.journey && (
+        <MonitorDetailsLinkPortal
+          id={data.details.journey.monitor.id}
+          name={data.details.journey.monitor.name!}
+        />
+      )}
+      <EuiFlexGroup>
+        <EuiFlexItem grow={1}>
+          <EuiPanel>
+            {data?.details?.journey && <StepImage ping={data?.details?.journey} />}
+          </EuiPanel>
+        </EuiFlexItem>
+        <EuiFlexItem grow={2}>
+          <EuiPanel>
+            <EuiFlexGroup>
+              <EuiFlexItem grow={1}>
+                {/* TODO: Add breakdown of network timings donut*/}
+              </EuiFlexItem>
+              <EuiFlexItem grow={2} css={{ height: 150 }}>
+                {/* TODO: Add breakdown of network events*/}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiFlexGroup>
+        <EuiFlexItem grow={1}>
+          <EuiPanel>{/* TODO: Add step metrics*/} </EuiPanel>
+        </EuiFlexItem>
+        <EuiFlexItem grow={2}>
+          <EuiPanel>
+            <EuiFlexGroup>
+              <EuiFlexItem grow={1} css={{ height: 150 }}>
+                {/* TODO: Add breakdown of object list*/}
+              </EuiFlexItem>
+              <EuiFlexItem grow={1}>{/* TODO: Add breakdown of object weight*/}</EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiHorizontalRule margin="s" />
+      <EuiPanel css={{ height: 500 }}>{/* TODO: Add breakdown of network events*/}</EuiPanel>
+    </>
+  );
+};

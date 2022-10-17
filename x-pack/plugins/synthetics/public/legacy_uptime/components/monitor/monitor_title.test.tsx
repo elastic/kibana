@@ -42,6 +42,7 @@ describe('MonitorTitle component', () => {
       id: defaultMonitorId,
       status: 'up',
       type: 'http',
+      check_group: 'test-group',
     },
     url: {
       full: 'https://www.elastic.co/',
@@ -58,6 +59,7 @@ describe('MonitorTitle component', () => {
       id: 'browser',
       status: 'up',
       type: 'browser',
+      check_group: 'test-group',
     },
     url: {
       full: 'https://www.elastic.co/',

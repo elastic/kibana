@@ -77,7 +77,9 @@ export const LastTenTestRuns = () => {
             align: 'left',
             field: 'timestamp',
             name: SCREENSHOT_LABEL,
-            render: (_timestamp: string, item) => <JourneyScreenshot ping={item} />,
+            render: (_timestamp: string, item) => (
+              <JourneyScreenshot checkGroupId={item.monitor.check_group} />
+            ),
           },
         ]
       : []) as Array<EuiBasicTableColumn<Ping>>),
@@ -164,8 +166,8 @@ export const LastTenTestRuns = () => {
   );
 };
 
-const JourneyScreenshot = ({ ping }: { ping: Ping }) => {
-  const { data: stepsData, loading: stepsLoading } = useJourneySteps(ping?.monitor?.check_group);
+export const JourneyScreenshot = ({ checkGroupId }: { checkGroupId: string }) => {
+  const { data: stepsData, loading: stepsLoading } = useJourneySteps(checkGroupId);
   const stepEnds: JourneyStep[] = (stepsData?.steps ?? []).filter(isStepEnd);
   const stepLabels = stepEnds.map((stepEnd) => stepEnd?.synthetics?.step?.name ?? '');
 

@@ -9,10 +9,12 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { EuiImage, EuiPopover, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useRouteMatch } from 'react-router-dom';
 import { ScreenshotRefImageData } from '../../../../../../common/runtime_types';
 import { useCompositeImage } from '../../../hooks/use_composite_image';
 
 import { EmptyThumbnail, thumbnailStyle } from './empty_thumbnail';
+import { STEP_DETAIL_ROUTE } from '../../../../../../common/constants';
 
 const POPOVER_IMG_HEIGHT = 360;
 const POPOVER_IMG_WIDTH = 640;
@@ -39,7 +41,7 @@ const ScreenshotThumbnail: React.FC<ScreenshotImageProps & { imageData?: string 
       data-test-subj="stepScreenshotThumbnail"
       hasShadow
       url={imageData}
-      size="s"
+      size="l"
       className="syntheticsStepImage"
     />
   ) : (
@@ -158,12 +160,16 @@ export const JourneyStepImagePopover: React.FC<StepImagePopoverProps> = ({
 
   const isImageLoading = isLoading || (!!imgRef && !imageData);
 
+  const isStepDetailPage = useRouteMatch(STEP_DETAIL_ROUTE)?.isExact;
+
+  const thumbnailS = isStepDetailPage ? null : thumbnailStyle;
+
   return (
     <EuiPopover
       css={css`
         figure {
           img {
-            ${thumbnailStyle};
+            ${thumbnailS};
             border: ${euiTheme.border.thin};
             ${isStepFailed ? `border-color: ${euiTheme.colors.danger}` : ``};
           }
