@@ -53,7 +53,7 @@ Before you upgrade to 8.5.0, review the breaking changes, then mitigate the impa
 // tag::notable-breaking-changes[]
 [discrete]
 [[breaking-141757]]
-.Updates bulk action API to return actionId instead of agents success for consistency
+.Updates bulk action API to return actionId instead of agent success
 [%collapsible]
 ====
 *Details* +
