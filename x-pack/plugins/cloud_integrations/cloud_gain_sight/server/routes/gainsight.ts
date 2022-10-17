@@ -28,19 +28,22 @@ export const renderGainsightLibraryFactory = (dist = true, filePath = GAINSIGHT_
       headers: HttpResponseOptions['headers'];
     }> => {
       const srcBuffer = await fs.readFile(filePath);
-      const hash = createHash('sha1');
-      hash.update(srcBuffer);
-      const hashDigest = hash.digest('hex');
 
       return {
         body: srcBuffer,
         // In dist mode, return a long max-age, otherwise use etag + must-revalidate
         headers: dist
           ? { 'cache-control': `max-age=${DAY * 365}` }
-          : { 'cache-control': 'must-revalidate', etag: hashDigest },
+          : { 'cache-control': 'must-revalidate', etag: calculateHash(srcBuffer) },
       };
     }
   );
+
+function calculateHash(srcBuffer: Buffer) {
+  const hash = createHash('sha1');
+  hash.update(srcBuffer);
+  return hash.digest('hex');
+}
 
 export const registerGainsightRoute = ({
   httpResources,

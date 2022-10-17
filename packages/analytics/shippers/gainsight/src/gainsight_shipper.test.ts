@@ -48,6 +48,9 @@ describe('gainsightShipper', () => {
           id: clusterName,
           userType: 'deployment',
         });
+        expect(gainsightApiMock).toHaveBeenCalledWith('set', 'globalContext', {
+          kibanaUserId: userId,
+        });
 
         gainsightShipper.extendContext({ userId, cluster_name: clusterName });
         expect(gainsightApiMock).toHaveBeenCalledTimes(2);
@@ -89,10 +92,10 @@ describe('gainsightShipper', () => {
 
       expect(gainsightApiMock).toHaveBeenCalledTimes(2);
       expect(gainsightApiMock).toHaveBeenCalledWith('track', 'test-event-1', {
-        test_str: 'test-1',
+        test: 'test-1',
       });
       expect(gainsightApiMock).toHaveBeenCalledWith('track', 'test-event-2', {
-        other_property_str: 'test-2',
+        other_property: 'test-2',
       });
     });
   });
