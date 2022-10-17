@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiContextMenuItem } from '@elastic/eui';
+import { EuiContextMenuItem, EuiButton } from '@elastic/eui';
 import type { ReactNode } from 'react';
 import React, { memo, useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -90,11 +90,10 @@ export const ResponderContextMenuItem = memo<ResponderContextMenuItemProps>(
     }, [endpointHostInfo, onClick, showEndpointResponseActionsConsole]);
 
     return (
-      <EuiContextMenuItem
+      <EuiButton
         key="endpointResponseActions-action-item"
         data-test-subj="endpointResponseActions-action-item"
         disabled={isDisabled}
-        toolTipContent={tooltip}
         size="s"
         onClick={handleResponseActionsClick}
       >
@@ -102,8 +101,24 @@ export const ResponderContextMenuItem = memo<ResponderContextMenuItemProps>(
           id="xpack.securitySolution.endpoint.detections.takeAction.responseActionConsole.buttonLabel"
           defaultMessage="Respond"
         />
-      </EuiContextMenuItem>
+      </EuiButton>
     );
+
+    // return (
+    //   <EuiContextMenuItem
+    //     key="endpointResponseActions-action-item"
+    //     data-test-subj="endpointResponseActions-action-item"
+    //     disabled={isDisabled}
+    //     toolTipContent={tooltip}
+    //     size="s"
+    //     onClick={handleResponseActionsClick}
+    //   >
+    //     <FormattedMessage
+    //       id="xpack.securitySolution.endpoint.detections.takeAction.responseActionConsole.buttonLabel"
+    //       defaultMessage="Respond"
+    //     />
+    //   </EuiContextMenuItem>
+    // );
   }
 );
 ResponderContextMenuItem.displayName = 'ResponderContextMenuItem';

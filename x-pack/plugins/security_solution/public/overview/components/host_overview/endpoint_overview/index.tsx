@@ -18,6 +18,7 @@ import type { EndpointFields } from '../../../../../common/search_strategy/secur
 import { HostPolicyResponseActionStatus } from '../../../../../common/search_strategy/security_solution/hosts';
 import { AgentStatus } from '../../../../common/components/endpoint/agent_status';
 import { EndpointHostIsolationStatus } from '../../../../common/components/endpoint/host_isolation';
+import { ResponderContextMenuItem } from '../../../../detections/components/endpoint_responder/responder_context_menu_item';
 
 interface Props {
   contextID?: string;
@@ -25,6 +26,7 @@ interface Props {
 }
 
 export const EndpointOverview = React.memo<Props>(({ contextID, data }) => {
+  console.log('data in Host details', data);
   const getDefaultRenderer = useCallback(
     (fieldName: string, fieldData: EndpointFields, attrName: string) => (
       <DefaultFieldRenderer
@@ -90,6 +92,7 @@ export const EndpointOverview = React.memo<Props>(({ contextID, data }) => {
                     pendingRunningProcesses: data.pendingActions?.['running-processes'] ?? 0,
                   }}
                 />
+                { data.fleetAgentId && <ResponderContextMenuItem endpointId={data.fleetAgentId} /> }
               </>
             ) : (
               getEmptyTagValue()

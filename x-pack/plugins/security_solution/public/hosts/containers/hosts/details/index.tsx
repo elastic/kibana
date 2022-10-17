@@ -58,6 +58,8 @@ export const useHostDetails = ({
     abort: skip,
   });
 
+  console.log('response', response);
+
   const hostDetailsResponse = useMemo(
     () => ({
       endDate,

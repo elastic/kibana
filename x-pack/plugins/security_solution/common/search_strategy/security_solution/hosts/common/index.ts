@@ -32,6 +32,7 @@ export interface EndpointFields {
   /** A count of pending endpoint actions against the host */
   pendingActions?: Maybe<EndpointPendingActions['pending_actions']>;
   elasticAgentStatus?: Maybe<HostStatus>;
+  fleetAgentId?: Maybe<string>;
   id?: Maybe<string>;
 }
 
