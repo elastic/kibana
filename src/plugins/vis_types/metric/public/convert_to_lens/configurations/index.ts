@@ -21,19 +21,27 @@ export const getConfiguration = (
     bucketCollapseFn,
   }: {
     metrics: string[];
-    buckets: string[];
+    buckets: {
+      all: string[];
+      customBuckets: Record<string, string>;
+    };
     columnsWithoutReferenced: Column[];
-    bucketCollapseFn?: Record<string, string | undefined>;
+    bucketCollapseFn?: Record<string, string[]>;
   }
 ): MetricVisConfiguration => {
   const [metricAccessor] = metrics;
-  const [breakdownByAccessor] = buckets;
+  const [breakdownByAccessor] = buckets.all;
+  const collapseFn = bucketCollapseFn
+    ? Object.keys(bucketCollapseFn).find((key) =>
+        bucketCollapseFn[key].includes(breakdownByAccessor)
+      )
+    : undefined;
   return {
     layerId,
     layerType: 'data',
     palette: params.metric.metricColorMode !== 'None' ? palette : undefined,
     metricAccessor,
     breakdownByAccessor,
-    collapseFn: Object.values(bucketCollapseFn ?? {})[0],
+    collapseFn,
   };
 };

@@ -6,6 +6,13 @@
  */
 import { i18n } from '@kbn/i18n';
 
+export const nodeVariables = {
+  apmServiceName: 'serviceName',
+  secretToken: 'secretToken',
+  apmServerUrl: 'serverUrl',
+  apmEnvironment: 'environment',
+};
+
 export const node = `// ${i18n.translate(
   'xpack.apm.tutorial.nodeClient.configure.commands.addThisToTheFileTopComment',
   {
@@ -27,7 +34,7 @@ var apm = require('elastic-apm-node').start({
     defaultMessage: 'Allowed characters: a-z, A-Z, 0-9, -, _, and space',
   }
 )}
-serviceName: '',
+${nodeVariables.apmServiceName}: '{{{apmServiceName}}}',
 
 // ${i18n.translate(
   'xpack.apm.tutorial.nodeClient.configure.commands.useIfApmRequiresTokenComment',
@@ -35,7 +42,7 @@ serviceName: '',
     defaultMessage: 'Use if APM Server requires a secret token',
   }
 )}
-secretToken: '{{{secretToken}}}',
+${nodeVariables.secretToken}: '{{{secretToken}}}',
 
 // ${i18n.translate(
   'xpack.apm.tutorial.nodeClient.configure.commands.setCustomApmServerUrlComment',
@@ -45,7 +52,7 @@ secretToken: '{{{secretToken}}}',
     values: { defaultApmServerUrl: 'http://localhost:8200' },
   }
 )}
-serverUrl: '{{{apmServerUrl}}}',
+${nodeVariables.apmServerUrl}: '{{{apmServerUrl}}}',
 
 // ${i18n.translate(
   'xpack.apm.tutorial.nodeClient.configure.commands.setCustomServiceEnvironmentComment',
@@ -53,5 +60,5 @@ serverUrl: '{{{apmServerUrl}}}',
     defaultMessage: 'Set the service environment',
   }
 )}
-environment: 'production'
+${nodeVariables.apmEnvironment}: '{{{apmEnvironment}}}'
 })`;
