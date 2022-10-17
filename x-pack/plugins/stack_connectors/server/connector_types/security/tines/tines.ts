@@ -155,12 +155,13 @@ class Tines extends SubActionConnector<TinesConfig, TinesSecrets> {
   }
 
   protected getResponseErrorMessage(error: AxiosError): string {
-    if (error.response?.status === 401) {
-      throw new Error('Unauthorized API Request');
+    if (error.response?.status) {
+      throw new Error('Unknown API Error');
     }
-    throw new Error(
-      `Unexpected API Error: (${error.response?.status}) ${error.response?.statusText}`
-    );
+    if (error.response.status === 401) {
+      throw new Error('Unauthorized API Error');
+    }
+    throw new Error(`API Error: (${error.response?.status}) ${error.response?.statusText}`);
   }
 
   public async getStories(): Promise<TinesStoriesActionResponse> {

@@ -16,6 +16,7 @@ import {
   getSlackConnectorType,
   getTeamsConnectorType,
   getWebhookConnectorType,
+  getOpsgenieConnectorType,
   getXmattersConnectorType,
 } from './stack';
 import {
@@ -47,6 +48,7 @@ export {
   SlackConnectorTypeId,
   TeamsConnectorTypeId,
   WebhookConnectorTypeId,
+  OpsgenieConnectorTypeId,
   XmattersConnectorTypeId,
 } from './stack';
 export type {
@@ -91,4 +93,5 @@ export function registerConnectorTypes({
   actions.registerType(getTeamsConnectorType({ logger }));
 
   actions.registerSubActionConnectorType(getTinesConnectorType());
+  actions.registerSubActionConnectorType(getOpsgenieConnectorType());
 }

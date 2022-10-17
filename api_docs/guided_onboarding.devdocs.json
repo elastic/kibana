@@ -94,7 +94,7 @@
             "label": "id",
             "description": [],
             "signature": [
-              "\"add_data\" | \"view_dashboard\" | \"tour_observability\" | \"rules\" | \"alerts\" | \"cases\" | \"browse_docs\" | \"search_experience\""
+              "\"add_data\" | \"view_dashboard\" | \"tour_observability\" | \"rules\" | \"alertsCases\" | \"browse_docs\" | \"search_experience\""
             ],
             "path": "src/plugins/guided_onboarding/common/types.ts",
             "deprecated": false,
@@ -108,7 +108,7 @@
             "label": "status",
             "description": [],
             "signature": [
-              "\"complete\" | \"in_progress\" | \"inactive\" | \"active\""
+              "\"complete\" | \"in_progress\" | \"ready_to_complete\" | \"inactive\" | \"active\""
             ],
             "path": "src/plugins/guided_onboarding/common/types.ts",
             "deprecated": false,
@@ -143,7 +143,7 @@
         "label": "GuideStepIds",
         "description": [],
         "signature": [
-          "\"add_data\" | \"view_dashboard\" | \"tour_observability\" | \"rules\" | \"alerts\" | \"cases\" | \"browse_docs\" | \"search_experience\""
+          "\"add_data\" | \"view_dashboard\" | \"tour_observability\" | \"rules\" | \"alertsCases\" | \"browse_docs\" | \"search_experience\""
         ],
         "path": "src/plugins/guided_onboarding/common/types.ts",
         "deprecated": false,
@@ -242,7 +242,7 @@
           "label": "guidedOnboardingApi",
           "description": [],
           "signature": [
-            "ApiService",
+            "GuidedOnboardingApi",
             " | undefined"
           ],
           "path": "src/plugins/guided_onboarding/public/types.ts",

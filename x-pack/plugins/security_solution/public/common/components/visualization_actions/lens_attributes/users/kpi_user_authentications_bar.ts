@@ -104,7 +104,7 @@ export const kpiUserAuthenticationsBarLensAttributes: LensAttributes = {
       },
     ],
     datasourceStates: {
-      indexpattern: {
+      formBased: {
         layers: {
           '31213ae3-905b-4e88-b987-0cccb1f3209f': {
             columnOrder: [
