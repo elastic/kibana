@@ -118,6 +118,7 @@ export default function ({ getService, getPageObjects }) {
         });
       }
 
+      await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.selectIndexPattern('logstash-*');
       await queryBar.setQuery('php* OR *jpg OR *css*');
       await testSubjects.click('querySubmitButton');
