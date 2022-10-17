@@ -7,12 +7,13 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { useKibana, useToasts } from './lib/kibana';
-import { AppMockRenderer, createAppMockRenderer, TestProviders } from './mock';
+import type { AppMockRenderer } from './mock';
+import { createAppMockRenderer, TestProviders } from './mock';
 import { CaseToastSuccessContent, useCasesToast } from './use_cases_toast';
 import { alertComment, basicComment, mockCase } from '../containers/mock';
 import React from 'react';
 import userEvent from '@testing-library/user-event';
-import { SupportedCaseAttachment } from '../types';
+import type { SupportedCaseAttachment } from '../types';
 import { getByTestId } from '@testing-library/dom';
 import { OWNER_INFO } from '../../common/constants';
 
