@@ -1881,7 +1881,7 @@ export class RulesClient {
         });
       }
     });
-    return { apiKeysToInvalidate, result, errors, taskIdsToDelete };
+    return { apiKeysToInvalidate, errors, taskIdsToDelete };
   };
 
   public async bulkEdit<Params extends RuleTypeParams>(
