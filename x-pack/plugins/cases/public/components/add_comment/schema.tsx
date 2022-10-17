@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { CommentRequestUserType } from '../../../common/api';
-import { FIELD_TYPES, fieldValidators, FormSchema } from '../../common/shared_imports';
+import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { FIELD_TYPES } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import type { CommentRequestUserType } from '../../../common/api';
 import * as i18n from './translations';
 
 const { emptyField } = fieldValidators;

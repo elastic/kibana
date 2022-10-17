@@ -23,7 +23,7 @@ export const getFilter = ({
   }
 
   if (outcomeFilter && outcomeFilter.length) {
-    filter.push(`event.outcome: ${outcomeFilter.join(' or ')}`);
+    filter.push(getOutcomeFilter(outcomeFilter));
   }
 
   if (runId) {
@@ -32,3 +32,13 @@ export const getFilter = ({
 
   return filter;
 };
+
+function getOutcomeFilter(outcomeFilter: string[]) {
+  const filterMapping: Record<string, string> = {
+    failure: 'event.outcome: failure',
+    warning: 'kibana.alerting.outcome: warning',
+    success:
+      'kibana.alerting.outcome:success OR (event.outcome: success AND NOT kibana.alerting.outcome:*)',
+  };
+  return `${outcomeFilter.map((f) => filterMapping[f]).join(' OR ')}`;
+}

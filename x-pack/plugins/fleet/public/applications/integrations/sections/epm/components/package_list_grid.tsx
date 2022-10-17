@@ -34,8 +34,6 @@ import type { IntegrationCardItem } from '../../../../../../common/types/models'
 
 import type { ExtendedIntegrationCategory, CategoryFacet } from '../screens/home/category_facets';
 
-import { ExperimentalFeaturesService } from '../../../services';
-
 import { promoteFeaturedIntegrations } from './utils';
 
 import { PackageCard } from './package_card';
@@ -45,7 +43,6 @@ export interface Props {
   controls?: ReactNode | ReactNode[];
   title?: string;
   list: IntegrationCardItem[];
-  featuredList?: JSX.Element | null;
   initialSearch?: string;
   selectedCategory: ExtendedIntegrationCategory;
   setSelectedCategory: (category: string) => void;
@@ -67,7 +64,6 @@ export const PackageListGrid: FunctionComponent<Props> = ({
   setSelectedCategory,
   categories,
   showMissingIntegrationMessage = false,
-  featuredList = null,
   callout,
   showCardLabels = true,
 }) => {
@@ -77,7 +73,7 @@ export const PackageListGrid: FunctionComponent<Props> = ({
   const [isSticky, setIsSticky] = useState(false);
   const [windowScrollY] = useState(window.scrollY);
   const { euiTheme } = useEuiTheme();
-  const { noLargeFeaturedIntegrations } = ExperimentalFeaturesService.get();
+
   useEffect(() => {
     const menuRefCurrent = menuRef.current;
     const onScroll = () => {
@@ -113,10 +109,8 @@ export const PackageListGrid: FunctionComponent<Props> = ({
         )
       : list;
 
-    return noLargeFeaturedIntegrations
-      ? promoteFeaturedIntegrations(filteredList, selectedCategory)
-      : filteredList;
-  }, [isLoading, list, localSearchRef, noLargeFeaturedIntegrations, searchTerm, selectedCategory]);
+    return promoteFeaturedIntegrations(filteredList, selectedCategory);
+  }, [isLoading, list, localSearchRef, searchTerm, selectedCategory]);
 
   const controlsContent = <ControlsColumn title={title} controls={controls} sticky={isSticky} />;
   let gridContent: JSX.Element;
@@ -135,7 +129,6 @@ export const PackageListGrid: FunctionComponent<Props> = ({
 
   return (
     <>
-      {!noLargeFeaturedIntegrations && featuredList}
       <div ref={menuRef}>
         <EuiFlexGroup
           alignItems="flexStart"

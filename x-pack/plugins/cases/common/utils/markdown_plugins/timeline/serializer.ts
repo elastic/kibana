@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Plugin } from 'unified';
+import type { Plugin } from 'unified';
 export interface TimelineSerializerProps {
   match: string;
 }
