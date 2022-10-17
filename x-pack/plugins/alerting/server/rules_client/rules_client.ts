@@ -179,7 +179,7 @@ export interface RuleAggregation {
   };
 }
 
-export interface RuleBulkEditAggregation {
+export interface RuleBulkOperationAggregation {
   alertTypeId: {
     buckets: Array<{
       key: string[];
@@ -1753,7 +1753,7 @@ export class RulesClient {
 
     const { aggregations, total } = await this.unsecuredSavedObjectsClient.find<
       RawRule,
-      RuleBulkEditAggregation
+      RuleBulkOperationAggregation
     >({
       filter: kueryNodeFilterWithAuth,
       page: 1,
@@ -1837,7 +1837,7 @@ export class RulesClient {
         }
       );
 
-    const rules: Array<SavedObjectsBulkUpdateObject<RawRule>> = []; // right type?
+    const rules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
     const apiKeysToInvalidate: string[] = [];
     const taskIdsToDelete: string[] = [];
     const errors: BulkDeleteError[] = [];
@@ -1864,7 +1864,7 @@ export class RulesClient {
       );
     }
 
-    const result = await this.unsecuredSavedObjectsClient.bulkDelete(rules); // do we need force/refresh options here?
+    const result = await this.unsecuredSavedObjectsClient.bulkDelete(rules);
 
     result.statuses.forEach((status) => {
       if (status.error === undefined) {
@@ -1930,7 +1930,7 @@ export class RulesClient {
 
     const { aggregations, total } = await this.unsecuredSavedObjectsClient.find<
       RawRule,
-      RuleBulkEditAggregation
+      RuleBulkOperationAggregation
     >({
       filter: qNodeFilterWithAuth,
       page: 1,
