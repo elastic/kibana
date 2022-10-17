@@ -6,4 +6,26 @@
  * Side Public License, v 1.
  */
 
-export { FieldListGrouped, type FieldListGroupedProps } from './field_list_grouped';
+import React, { Fragment } from 'react';
+import { type DataViewField } from '@kbn/data-views-plugin/common';
+import type { FieldListGroupedProps, GenericFieldListGrouped } from './field_list_grouped';
+import { type FieldListItem } from '../../types';
+
+const Fallback = () => <Fragment />;
+
+const LazyFieldListGrouped = React.lazy(
+  () => import('./field_list_grouped')
+) as GenericFieldListGrouped;
+
+function WrappedFieldListGrouped<T extends FieldListItem = DataViewField>(
+  props: FieldListGroupedProps<T>
+) {
+  return (
+    <React.Suspense fallback={<Fallback />}>
+      <LazyFieldListGrouped<T> {...props} />
+    </React.Suspense>
+  );
+}
+
+export const FieldListGrouped = WrappedFieldListGrouped;
+export type { FieldListGroupedProps };

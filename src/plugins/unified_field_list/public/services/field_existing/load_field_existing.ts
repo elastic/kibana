@@ -24,7 +24,12 @@ interface FetchFieldExistenceParams {
   uiSettingsClient: IUiSettingsClient;
 }
 
-export async function loadFieldExisting({
+export type LoadFieldExistingHandler = (params: FetchFieldExistenceParams) => Promise<{
+  existingFieldNames: string[];
+  indexPatternTitle: string;
+}>;
+
+export const loadFieldExisting: LoadFieldExistingHandler = async ({
   data,
   dslQuery,
   fromDate,
@@ -33,7 +38,7 @@ export async function loadFieldExisting({
   dataViewsService,
   uiSettingsClient,
   dataView,
-}: FetchFieldExistenceParams) {
+}) => {
   const includeFrozen = uiSettingsClient.get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN);
   const useSampling = uiSettingsClient.get(FIELD_EXISTENCE_SETTING);
   const metaFields = uiSettingsClient.get(UI_SETTINGS.META_FIELDS);
@@ -53,4 +58,4 @@ export async function loadFieldExisting({
       return response.rawResponse;
     },
   });
-}
+};

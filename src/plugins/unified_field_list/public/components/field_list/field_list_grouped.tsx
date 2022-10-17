@@ -227,4 +227,9 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
   );
 }
 
-export const FieldListGrouped = React.memo(InnerFieldListGrouped) as typeof InnerFieldListGrouped;
+export type GenericFieldListGrouped = typeof InnerFieldListGrouped;
+const FieldListGrouped = React.memo(InnerFieldListGrouped) as GenericFieldListGrouped;
+
+// Necessary for React.lazy
+// eslint-disable-next-line import/no-default-export
+export default FieldListGrouped;

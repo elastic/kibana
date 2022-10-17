@@ -136,6 +136,20 @@ function getFrameAPIMock({
 // @ts-expect-error Portal mocks are notoriously difficult to type
 ReactDOM.createPortal = jest.fn((element) => element);
 
+async function mountAndWaitForLazyModules(component: React.ReactElement): Promise<ReactWrapper> {
+  let inst: ReactWrapper;
+  await act(async () => {
+    inst = await mountWithIntl(component);
+    // wait for lazy modules
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    inst.update();
+  });
+
+  await inst!.update();
+
+  return inst!;
+}
+
 describe('TextBased Query Languages Data Panel', () => {
   let core: ReturnType<typeof coreMock['createStart']>;
   let dataViews: DataViewPublicStart;
@@ -192,27 +206,16 @@ describe('TextBased Query Languages Data Panel', () => {
   });
 
   it('should render a search box', async () => {
-    let wrapper: ReactWrapper;
-    await act(async () => {
-      wrapper = await mountWithIntl(<TextBasedDataPanel {...defaultProps} />);
-      wrapper.update();
-    });
+    const wrapper = await mountAndWaitForLazyModules(<TextBasedDataPanel {...defaultProps} />);
 
-    await wrapper!.update();
-    expect(wrapper!.find('[data-test-subj="lnsTextBasedLanguagesFieldSearch"]').length).toEqual(1);
+    expect(wrapper.find('[data-test-subj="lnsTextBasedLanguagesFieldSearch"]').length).toEqual(1);
   });
 
   it('should list all supported fields in the pattern', async () => {
-    let wrapper: ReactWrapper;
-    await act(async () => {
-      wrapper = await mountWithIntl(<TextBasedDataPanel {...defaultProps} />);
-      wrapper.update();
-    });
-
-    await wrapper!.update();
+    const wrapper = await mountAndWaitForLazyModules(<TextBasedDataPanel {...defaultProps} />);
 
     expect(
-      wrapper!
+      wrapper
         .find('[data-test-subj="fieldListGroupedAvailableFields"]')
         .find(FieldButton)
         .map((fieldItem) => fieldItem.prop('fieldName'))
@@ -220,14 +223,9 @@ describe('TextBased Query Languages Data Panel', () => {
   });
 
   it('should not display the selected fields accordion if there are no fields displayed', async () => {
-    let wrapper: ReactWrapper;
-    await act(async () => {
-      wrapper = await mountWithIntl(<TextBasedDataPanel {...defaultProps} />);
-      wrapper.update();
-    });
+    const wrapper = await mountAndWaitForLazyModules(<TextBasedDataPanel {...defaultProps} />);
 
-    await wrapper!.update();
-    expect(wrapper!.find('[data-test-subj="fieldListGroupedSelectedFields"]').length).toEqual(0);
+    expect(wrapper.find('[data-test-subj="fieldListGroupedSelectedFields"]').length).toEqual(0);
   });
 
   it('should display the selected fields accordion if there are fields displayed', async () => {
@@ -235,27 +233,15 @@ describe('TextBased Query Languages Data Panel', () => {
       ...defaultProps,
       layerFields: ['memory'],
     };
-    let wrapper: ReactWrapper;
-    await act(async () => {
-      wrapper = await mountWithIntl(<TextBasedDataPanel {...props} />);
-      wrapper.update();
-    });
+    const wrapper = await mountAndWaitForLazyModules(<TextBasedDataPanel {...props} />);
 
-    await wrapper!.update();
-    expect(wrapper!.find('[data-test-subj="fieldListGroupedSelectedFields"]').length).not.toEqual(
-      0
-    );
+    expect(wrapper.find('[data-test-subj="fieldListGroupedSelectedFields"]').length).not.toEqual(0);
   });
 
   it('should list all supported fields in the pattern that match the search input', async () => {
-    let wrapper: ReactWrapper;
-    await act(async () => {
-      wrapper = await mountWithIntl(<TextBasedDataPanel {...defaultProps} />);
-      wrapper.update();
-    });
+    const wrapper = await mountAndWaitForLazyModules(<TextBasedDataPanel {...defaultProps} />);
 
-    await wrapper!.update();
-    const searchBox = wrapper!.find('[data-test-subj="lnsTextBasedLanguagesFieldSearch"]');
+    const searchBox = wrapper.find('[data-test-subj="lnsTextBasedLanguagesFieldSearch"]');
 
     act(() => {
       searchBox.prop('onChange')!({
@@ -263,9 +249,9 @@ describe('TextBased Query Languages Data Panel', () => {
       } as React.ChangeEvent<HTMLInputElement>);
     });
 
-    await wrapper!.update();
+    await wrapper.update();
     expect(
-      wrapper!
+      wrapper
         .find('[data-test-subj="fieldListGroupedAvailableFields"]')
         .find(FieldButton)
         .map((fieldItem) => fieldItem.prop('fieldName'))
