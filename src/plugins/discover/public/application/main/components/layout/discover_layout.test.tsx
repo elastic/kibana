@@ -45,15 +45,6 @@ import { act } from 'react-dom/test-utils';
 
 jest.mock('@kbn/unified-histogram-plugin/public', () => {
   const originalModule = jest.requireActual('@kbn/unified-histogram-plugin/public');
-function getAppStateContainer() {
-  const appStateContainer = getDiscoverStateMock({ isTimeBased: true }).appStateContainer;
-  appStateContainer.set({
-    query: { query: '', language: 'lucene' },
-    filters: [],
-  });
-  return appStateContainer;
-}
-
 
   const chartData = {
     xAxisOrderedValues: [
@@ -106,6 +97,15 @@ function getAppStateContainer() {
     })),
   };
 });
+
+function getAppStateContainer() {
+  const appStateContainer = getDiscoverStateMock({ isTimeBased: true }).appStateContainer;
+  appStateContainer.set({
+    query: { query: '', language: 'lucene' },
+    filters: [],
+  });
+  return appStateContainer;
+}
 
 setHeaderActionMenuMounter(jest.fn());
 
