@@ -23,7 +23,7 @@ export interface FilterBadgeProps {
 
 const rootLevelConditionType = ConditionTypes.AND;
 
-function FilterBadge({ filters, dataViews, iconOnClick, onClick }: FilterBadgeProps) {
+function FilterBadge({ filters, dataViews, iconOnClick, onClick, ...rest }: FilterBadgeProps) {
   const { euiTheme } = useEuiTheme();
 
   const badgePading = useMemo(
@@ -48,6 +48,7 @@ function FilterBadge({ filters, dataViews, iconOnClick, onClick }: FilterBadgePr
       iconOnClickAriaLabel="Remove filter"
       onClick={onClick}
       title=""
+      {...rest} 
     >
       <EuiFlexGroup wrap responsive={false} gutterSize="xs">
         <FilterBadgeGroup

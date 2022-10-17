@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { EuiBadgeProps, EuiToolTip, useInnerText } from '@elastic/eui';
+import { EuiBadge, EuiBadgeProps, EuiToolTip, useInnerText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { FC, MouseEvent } from 'react';
 import { Filter, isFilterPinned, isCombinedFilter } from '@kbn/es-query';
 import { DataView } from '@kbn/data-views-plugin/common';
 import type { FilterLabelStatus } from '../filter_item/filter_item';
 import { FilterBadge } from '../../filter_badge';
+import FilterLabel from '../filter_label/filter_label';
 
 interface Props {
   filter: Filter;
@@ -96,25 +97,27 @@ export const FilterView: FC<Props> = ({
         ),
       };
 
-  const FilterPill = () => (
-    <>
-      <FilterBadge
-        filters={isCombinedFilter(filter) ? filter.meta.params : [filter]}
-        dataViews={dataViews}
-        {...badgeProps}
-        {...rest}
-      />
-      {/* <EuiBadge {...badgeProps} {...rest}>
-        <FilterLabel
-          filter={filter}
-          valueLabel={valueLabel}
-          fieldLabel={fieldLabel}
-          filterLabelStatus={filterLabelStatus}
-          hideAlias={hideAlias}
+  const FilterPill = () => {
+    return (
+      <>
+        <FilterBadge
+          filters={isCombinedFilter(filter) ? filter.meta.params : [filter]}
+          dataViews={dataViews}
+          {...badgeProps}
+          {...rest}
         />
-      </EuiBadge> */}
-    </>
-  );
+        {/* <EuiBadge {...badgeProps} {...rest}>
+          <FilterLabel
+            filter={filter}
+            valueLabel={valueLabel}
+            fieldLabel={fieldLabel}
+            filterLabelStatus={filterLabelStatus}
+            hideAlias={hideAlias}
+          />
+        </EuiBadge> */}
+      </>
+    );
+  };
 
   return readOnly ? (
     <EuiToolTip position="bottom" content={title}>
