@@ -33,6 +33,7 @@ export type IndexFieldSearch = (param: {
   scopeId?: SourcererScopeName;
   needToBeInit?: boolean;
   cleanCache?: boolean;
+  skipScopeUpdate?: boolean;
 }) => Promise<void>;
 
 type DangerCastForBrowserFieldsMutation = Record<
@@ -102,6 +103,7 @@ export const useDataView = (): {
       scopeId = SourcererScopeName.default,
       needToBeInit = false,
       cleanCache = false,
+      skipScopeUpdate = false,
     }) => {
       const unsubscribe = () => {
         searchSubscription$.current[dataViewId]?.unsubscribe();
@@ -123,11 +125,7 @@ export const useDataView = (): {
             dataViewId,
             abortCtrl.current[dataViewId].signal
           );
-          dispatch(
-            sourcererActions.updateSourcererDataViews({
-              dataView: dataViewToUpdate,
-            })
-          );
+          dispatch(sourcererActions.setDataView(dataViewToUpdate));
         }
 
         return new Promise<void>((resolve) => {
@@ -148,7 +146,7 @@ export const useDataView = (): {
                   endTracking('success');
 
                   const patternString = response.indicesExist.sort().join();
-                  if (needToBeInit && scopeId) {
+                  if (needToBeInit && scopeId && !skipScopeUpdate) {
                     dispatch(
                       sourcererActions.setSelectedDataView({
                         id: scopeId,
