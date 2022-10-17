@@ -14,7 +14,7 @@ export function asNumber(value: number): string {
   if (value < 0.01 && value > -0.01) {
     return '~0.00';
   }
-  if (value < 1e3 && value > -1e3 ) {
+  if (value < 1e3 && value > -1e3) {
     return value.toString();
   }
 
