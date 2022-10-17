@@ -9,11 +9,11 @@ import { EuiIcon } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import { difference } from 'lodash';
 import { useUpdateCases } from '../../../containers/use_bulk_update_case';
-import { Case } from '../../../../common';
+import type { Case } from '../../../../common';
 import { useCasesContext } from '../../cases_context/use_cases_context';
-import { UseActionProps } from '../types';
+import type { UseActionProps } from '../types';
 import * as i18n from './translations';
-import { TagsSelectionState } from './types';
+import type { TagsSelectionState } from './types';
 
 export const useTagsAction = ({ onAction, onActionSuccess, isDisabled }: UseActionProps) => {
   const { mutate: updateCases } = useUpdateCases();

@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useReducer, useState } from 'react';
+import type { EuiSelectableOption, IconType } from '@elastic/eui';
 import {
   EuiSelectable,
   EuiSpacer,
@@ -15,17 +16,15 @@ import {
   EuiButtonEmpty,
   EuiHorizontalRule,
   EuiIcon,
-  EuiSelectableOption,
   EuiHighlight,
   EuiSelectableListItem,
-  IconType,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { assertNever } from '@kbn/std';
-import { Case } from '../../../../common';
+import type { Case } from '../../../../common';
 import * as i18n from './translations';
-import { TagsSelectionState } from './types';
+import type { TagsSelectionState } from './types';
 
 interface Props {
   selectedCases: Case[];
@@ -33,6 +32,8 @@ interface Props {
   isLoading: boolean;
   onChangeTags: (args: TagsSelectionState) => void;
 }
+
+type TagSelectableOption = EuiSelectableOption<{ tagIcon: IconType }>;
 
 const enum TagState {
   CHECKED = 'checked',
@@ -55,14 +56,36 @@ type Action =
   | { type: Actions.CHECK_TAG; payload: string[] }
   | { type: Actions.UNCHECK_TAG; payload: string[] };
 
-type State = Record<string, { tagState: TagState; dirty: boolean; icon: IconType }>;
+interface Tag {
+  tagState: TagState;
+  dirty: boolean;
+  icon: IconType;
+}
+
+interface State {
+  tags: Record<string, Tag>;
+  tagCounterMap: Map<string, number>;
+}
 
 const tagsReducer: React.Reducer<State, Action> = (state: State, action): State => {
   switch (action.type) {
     case Actions.CHECK_TAG:
-      return state;
+      const selectedTags: State['tags'] = {};
+
+      for (const tag of action.payload) {
+        selectedTags[tag] = { tagState: TagState.CHECKED, dirty: true, icon: ICONS.CHECKED };
+      }
+
+      return { ...state, tags: { ...state.tags, ...selectedTags } };
+
     case Actions.UNCHECK_TAG:
-      return state;
+      const unselectedTags: State['tags'] = {};
+
+      for (const tag of action.payload) {
+        unselectedTags[tag] = { tagState: TagState.UNCHECKED, dirty: true, icon: ICONS.UNCHECKED };
+      }
+
+      return { ...state, tags: { ...state.tags, ...unselectedTags } };
 
     default:
       assertNever(action);
@@ -78,7 +101,8 @@ const getInitialTagsState = ({
 }): State => {
   const tagCounterMap = createTagsCounterMapping(selectedCases);
   const totalCases = selectedCases.length;
-  const state: State = {};
+  const tagsRecord: State['tags'] = {};
+  const state = { tags: tagsRecord, tagCounterMap };
 
   for (const tag of tags) {
     const tagCounter = tagCounterMap.get(tag) ?? 0;
@@ -90,11 +114,9 @@ const getInitialTagsState = ({
       ? TagState.PARTIAL
       : TagState.UNCHECKED;
 
-    const icon = isCheckedTag ? ICONS.CHECKED : isPartialTag ? ICONS.PARTIAL : ICONS.UNCHECKED;
+    const icon = getSelectionIcon(tagState);
 
-    state[tag] = { tagState, dirty: isCheckedTag, icon };
-
-    return state;
+    tagsRecord[tag] = { tagState, dirty: isCheckedTag, icon };
   }
 
   return state;
@@ -114,75 +136,35 @@ const createTagsCounterMapping = (selectedCases: Case[]) => {
   return counterMap;
 };
 
-const getSelectionIcon = ({
-  option,
-  totalCases,
-  tagCounterMap,
-  dirtyTags,
-}: {
-  option: EuiSelectableOption;
-  totalCases: number;
-  tagCounterMap: Map<string, number>;
-  dirtyTags: Record<string, boolean>;
-}) => {
-  const tagCounter = tagCounterMap.get(option.label) ?? 0;
+const stateToOptions = (tagsState: State['tags']): TagSelectableOption[] => {
+  const tags = Object.keys(tagsState);
 
-  if (totalCases === 0) {
-    return <EuiIcon type="empty" />;
-  }
-
-  if (dirtyTags[option.label]) {
-    return <EuiIcon type={option.checked === 'on' ? 'check' : 'empty'} />;
-  }
-
-  if (tagCounter === totalCases) {
-    return <EuiIcon type="check" />;
-  }
-
-  if (tagCounter < totalCases && tagCounter !== 0) {
-    return <EuiIcon type="asterisk" />;
-  }
-
-  return <EuiIcon type="empty" />;
+  return tags.map((tag): EuiSelectableOption => {
+    return {
+      key: tag,
+      label: tag,
+      ...(tagsState[tag].tagState === TagState.CHECKED ? { checked: 'on' } : {}),
+      data: { tagIcon: tagsState[tag].icon },
+    };
+  }) as TagSelectableOption[];
 };
 
-const initTagsState = ({
-  tags,
-  totalCases,
-  tagCounterMap,
-}: {
-  tags: string[];
-  totalCases: number;
-  tagCounterMap: Map<string, number>;
-}): {
-  options: EuiSelectableOption[];
-  dirtyTags: Record<string, boolean>;
-  selectedTags: string[];
-} => {
-  const options: EuiSelectableOption[] = [];
-  const dirtyTags: Record<string, boolean> = {};
-  const selectedTags: string[] = [];
-
-  for (const tag of tags) {
-    const tagCounter = tagCounterMap.get(tag) ?? 0;
-    const isTagsInAllCases = tagCounter === totalCases;
-    options.push({ label: tag, key: tag, ...(isTagsInAllCases ? { checked: 'on' } : {}) });
-
-    if (isTagsInAllCases) {
-      dirtyTags[tag] = true;
-      selectedTags.push(tag);
-    }
-  }
-
-  return { options, dirtyTags, selectedTags };
+const getSelectionIcon = (tagState: TagState) => {
+  return tagState === TagState.CHECKED
+    ? ICONS.CHECKED
+    : tagState === TagState.PARTIAL
+    ? ICONS.PARTIAL
+    : ICONS.UNCHECKED;
 };
 
 const NoMatchesMessage: React.FC<{ searchValue: string; onClick: (newTag: string) => void }> =
   React.memo(({ searchValue, onClick }) => {
-    const onNewTagClick = useCallback(() => onClick(searchValue), [onClick, searchValue]);
+    const onNewTagClick = useCallback(() => {
+      onClick(searchValue);
+    }, [onClick, searchValue]);
 
     return (
-      <EuiSelectableListItem onFocusBadge showIcons={false} onClick={onNewTagClick}>
+      <EuiSelectableListItem isFocused={false} showIcons={false} onClick={onNewTagClick}>
         <FormattedMessage
           id="xpack.cases.actions.tags.newTagMessage"
           defaultMessage="Add {searchValue} as a tag"
@@ -200,30 +182,19 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
   isLoading,
   onChangeTags,
 }) => {
-  const [state, dispatch] = useReducer(tagsReducer, getInitialTagsState({ tags, selectedCases }));
-  const tagCounterMap = useMemo(() => createTagsCounterMapping(selectedCases), [selectedCases]);
-  const initialState = useMemo(
-    () => initTagsState({ tags, totalCases: selectedCases.length, tagCounterMap }),
-    [selectedCases.length, tagCounterMap, tags]
-  );
-
-  const [dirtyTags, setDirtyTags] = useState<Record<string, boolean>>(initialState.dirtyTags);
-  const [options, setOptions] = useState<EuiSelectableOption[]>(initialState.options);
+  const [state, dispatch] = useReducer(tagsReducer, { tags, selectedCases }, getInitialTagsState);
   const [searchValue, setSearchValue] = useState<string>();
 
-  const renderOption = (option: EuiSelectableOption, search: string) => {
+  const options: TagSelectableOption[] = useMemo(() => stateToOptions(state.tags), [state.tags]);
+
+  const renderOption = useCallback((option: TagSelectableOption, search: string) => {
     return (
       <>
-        {getSelectionIcon({
-          option,
-          totalCases: selectedCases.length,
-          tagCounterMap,
-          dirtyTags,
-        })}
+        <EuiIcon type={option.tagIcon} />
         <EuiHighlight search={search}>{option.label}</EuiHighlight>
       </>
     );
-  };
+  }, []);
 
   const onChange = useCallback(
     (newOptions: EuiSelectableOption[]) => {
@@ -235,18 +206,16 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
           selectedTags.push(option.label);
         }
 
-        if (!option.checked && dirtyTags[option.label]) {
+        if (!option.checked && state.tags[option.label].dirty) {
           unSelectedTags.push(option.label);
         }
       }
 
-      const newDirtyTags = selectedTags.reduce((acc, tag) => ({ ...acc, [tag]: true }), {});
-
-      setDirtyTags((dirtyTagsRec) => ({ ...dirtyTagsRec, ...newDirtyTags }));
+      dispatch({ type: Actions.CHECK_TAG, payload: selectedTags });
+      dispatch({ type: Actions.UNCHECK_TAG, payload: unSelectedTags });
       onChangeTags({ selectedTags, unSelectedTags });
-      setOptions(newOptions);
     },
-    [dirtyTags, onChangeTags]
+    [onChangeTags, state.tags]
   );
 
   const onNewItem = useCallback(
@@ -258,21 +227,22 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
   );
 
   const onSelectAll = useCallback(() => {
-    onChange(options.map((option) => ({ ...option, checked: 'on' })));
-  }, [onChange, options]);
+    dispatch({ type: Actions.CHECK_TAG, payload: Object.keys(state.tags) });
+    onChangeTags({ selectedTags: Object.keys(state.tags), unSelectedTags: [] });
+  }, [onChangeTags, state.tags]);
 
   const onSelectNone = useCallback(() => {
-    // TODO: Fix it
-    const newDirtyTags = options.reduce((acc, option) => ({ ...acc, [option.label]: true }), {});
+    const unSelectedTags = [];
 
-    setDirtyTags((dirtyTagsRec) => ({ ...dirtyTagsRec, ...newDirtyTags }));
-    onChange(
-      options.map((option) => {
-        const { checked, ...rest } = option;
-        return rest;
-      })
-    );
-  }, [onChange, options]);
+    for (const [label, tag] of Object.entries(state.tags)) {
+      if (tag.tagState === TagState.CHECKED || tag.tagState === TagState.PARTIAL) {
+        unSelectedTags.push(label);
+      }
+    }
+
+    dispatch({ type: Actions.UNCHECK_TAG, payload: unSelectedTags });
+    onChangeTags({ selectedTags: [], unSelectedTags });
+  }, [state.tags, onChangeTags]);
 
   return (
     <EuiSelectable
@@ -283,6 +253,7 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
         isLoading,
         isClearable: !isLoading,
         onChange: setSearchValue,
+        value: searchValue,
       }}
       renderOption={renderOption}
       listProps={{ showIcons: false }}

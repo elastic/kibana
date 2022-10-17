@@ -18,11 +18,11 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { Case } from '../../../../common';
+import type { Case } from '../../../../common';
 import { useGetTags } from '../../../containers/use_get_tags';
 import { EditTagsSelectable } from './edit_tags_selectable';
 import * as i18n from './translations';
-import { TagsSelectionState } from './types';
+import type { TagsSelectionState } from './types';
 
 interface Props {
   selectedCases: Case[];
