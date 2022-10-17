@@ -136,7 +136,9 @@ export class TaskRunner<
     inMemoryMetrics: InMemoryMetrics
   ) {
     this.context = context;
-    this.logger = context.logger;
+    const loggerId = ruleType.id.startsWith('.') ? ruleType.id.substring(1)
+      : ruleType.id;
+    this.logger = context.logger.get(loggerId);
     this.usageCounter = context.usageCounter;
     this.ruleType = ruleType;
     this.ruleConsumer = null;
@@ -283,10 +285,6 @@ export class TaskRunner<
     const ruleType = this.ruleTypeRegistry.get(ruleTypeId);
 
     const ruleLabel = `${this.ruleType.id}:${ruleId}: '${name}'`;
-    const loggerId = rule.alertTypeId.startsWith('.')
-      ? rule.alertTypeId.substring(1)
-      : rule.alertTypeId;
-    const runRuleLogger = this.logger.get(loggerId);
 
     const wrappedClientOptions = {
       rule: {
@@ -295,7 +293,7 @@ export class TaskRunner<
         id: rule.id,
         spaceId,
       },
-      logger: runRuleLogger,
+      logger: this.logger,
       abortController: this.searchAbortController,
     };
     const scopedClusterClient = this.context.elasticsearch.client.asScoped(fakeRequest);
@@ -325,7 +323,7 @@ export class TaskRunner<
           WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
         >({
           alerts: this.alerts,
-          logger: runRuleLogger,
+          logger: this.logger,
           maxAlerts: this.maxAlerts,
           canSetRecoveryContext: ruleType.doesSetRecoveryContext ?? false,
         });
@@ -333,7 +331,7 @@ export class TaskRunner<
         const checkHasReachedAlertLimit = () => {
           const reachedLimit = alertFactory.hasReachedAlertLimit();
           if (reachedLimit) {
-            runRuleLogger.warn(
+            this.logger.warn(
               `rule execution generated greater than ${this.maxAlerts} alerts: ${ruleLabel}`
             );
             ruleRunMetricsStore.setHasReachedAlertLimit(true);
@@ -396,7 +394,7 @@ export class TaskRunner<
                 throttle,
                 notifyWhen,
               },
-              logger: runRuleLogger,
+              logger: this.logger,
             })
           );
 
@@ -452,7 +450,7 @@ export class TaskRunner<
         });
 
         logAlerts({
-          logger: runRuleLogger,
+          logger: this.logger,
           alertingEventLogger: this.alertingEventLogger,
           newAlerts: processedAlertsNew,
           activeAlerts: processedAlertsActive,
@@ -496,7 +494,7 @@ export class TaskRunner<
           recoveredAlerts,
           executionHandler,
           mutedAlertIdsSet,
-          logger: runRuleLogger,
+          logger: this.logger,
           ruleLabel,
           ruleRunMetricsStore,
           throttle,
@@ -504,10 +502,10 @@ export class TaskRunner<
         });
       } else {
         if (ruleIsSnoozed) {
-          runRuleLogger.debug(`no scheduling of actions for rule ${ruleLabel}: rule is snoozed.`);
+          this.logger.debug(`no scheduling of actions for rule ${ruleLabel}: rule is snoozed.`);
         }
         if (!this.shouldLogAndScheduleActionsForAlerts()) {
-          runRuleLogger.debug(
+          this.logger.debug(
             `no scheduling of actions for rule ${ruleLabel}: rule execution has been cancelled.`
           );
           // Usage counter for telemetry
