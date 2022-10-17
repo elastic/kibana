@@ -61,6 +61,9 @@ export const dashboardStateSlice = createSlice({
     setSyncColors: (state, action: PayloadAction<boolean>) => {
       state.options.syncColors = action.payload;
     },
+    setSyncCursor: (state, action: PayloadAction<boolean>) => {
+      state.options.syncCursor = action.payload;
+    },
     setSyncTooltips: (state, action: PayloadAction<boolean>) => {
       state.options.syncTooltips = action.payload;
     },
@@ -128,6 +131,7 @@ export const {
   setTimeRange,
   setSyncColors,
   setSyncTooltips,
+  setSyncCursor,
   setUseMargins,
   setViewMode,
   setFilters,
