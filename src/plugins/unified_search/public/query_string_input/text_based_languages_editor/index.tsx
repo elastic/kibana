@@ -24,7 +24,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonIcon,
-  EuiPopover,
   EuiResizeObserver,
   EuiOutsideClickDetector,
   EuiToolTip,
@@ -104,7 +103,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [isCompactFocused, setIsCompactFocused] = useState(isCodeEditorExpanded);
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
   const [isWordWrapped, setIsWordWrapped] = useState(true);
-  const [isHelpOpen, setIsHelpOpen] = useState<boolean>(false);
   const [editorErrors, setEditorErrors] = useState<
     Array<{ startLineNumber: number; message: string }>
   >([]);
@@ -308,10 +306,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     [language, onTextLangQueryChange]
   );
 
-  const toggleDocumentationPopover = useCallback(() => {
-    setIsHelpOpen(!isHelpOpen);
-  }, [isHelpOpen]);
-
   useEffect(() => {
     async function getDocumentation() {
       const sections = await getDocumentationSections(language);
@@ -443,45 +437,20 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                 </EuiToolTip>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiPopover
-                  panelClassName="documentation__docs--overlay"
-                  panelPaddingSize="none"
-                  isOpen={isHelpOpen}
-                  closePopover={() => setIsHelpOpen(false)}
-                  ownFocus={false}
-                  button={
-                    <EuiToolTip
-                      position="top"
-                      content={i18n.translate(
-                        'unifiedSearch.query.textBasedLanguagesEditor.documentationTooltip',
-                        {
-                          defaultMessage: '{lang} reference',
-                          values: {
-                            lang: String(language).toUpperCase(),
-                          },
-                        }
-                      )}
-                    >
-                      <EuiButtonIcon
-                        iconType="documentation"
-                        color="text"
-                        data-test-subj="unifiedTextLangEditor-documentation"
-                        aria-label={i18n.translate(
-                          'unifiedSearch.query.textBasedLanguagesEditor.documentationLabel',
-                          {
-                            defaultMessage: 'Documentation',
-                          }
-                        )}
-                        onClick={toggleDocumentationPopover}
-                      />
-                    </EuiToolTip>
-                  }
-                >
-                  <LanguageDocumentationPopover
-                    language={language}
-                    sections={documentationSections}
-                  />
-                </EuiPopover>
+                <LanguageDocumentationPopover
+                  language={language}
+                  sections={documentationSections}
+                  buttonProps={{
+                    color: 'text',
+                    'data-test-subj': 'unifiedTextLangEditor-documentation',
+                    'aria-label': i18n.translate(
+                      'unifiedSearch.query.textBasedLanguagesEditor.documentationLabel',
+                      {
+                        defaultMessage: 'Documentation',
+                      }
+                    ),
+                  }}
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
@@ -580,48 +549,28 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                 </EuiToolTip>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiPopover
-                  panelClassName="documentation__docs--overlay"
-                  panelPaddingSize="none"
-                  isOpen={isHelpOpen}
-                  closePopover={() => setIsHelpOpen(false)}
-                  ownFocus={false}
-                  button={
-                    <EuiToolTip
-                      position="top"
-                      content={i18n.translate(
-                        'unifiedSearch.query.textBasedLanguagesEditor.documentationTooltip',
-                        {
-                          defaultMessage: '{lang} reference',
-                          values: {
-                            lang: String(language).toUpperCase(),
-                          },
-                        }
-                      )}
-                    >
-                      <EuiButtonIcon
-                        display="empty"
-                        iconType="documentation"
-                        size="m"
-                        aria-label="Documentation"
-                        data-test-subj="unifiedTextLangEditor-inline-documentation"
-                        onClick={toggleDocumentationPopover}
-                        css={{
-                          borderTopLeftRadius: 0,
-                          borderBottomLeftRadius: 0,
-                          backgroundColor: isDark ? euiTheme.colors.lightestShade : '#e9edf3',
-                          border: '1px solid rgb(17 43 134 / 10%) !important',
-                          borderLeft: 'transparent !important',
-                        }}
-                      />
-                    </EuiToolTip>
-                  }
-                >
-                  <LanguageDocumentationPopover
-                    language={language}
-                    sections={documentationSections}
-                  />
-                </EuiPopover>
+                <LanguageDocumentationPopover
+                  language={language}
+                  sections={documentationSections}
+                  buttonProps={{
+                    display: 'empty',
+                    'data-test-subj': 'unifiedTextLangEditor-inline-documentation',
+                    'aria-label': i18n.translate(
+                      'unifiedSearch.query.textBasedLanguagesEditor.documentationLabel',
+                      {
+                        defaultMessage: 'Documentation',
+                      }
+                    ),
+                    size: 'm',
+                    css: {
+                      borderTopLeftRadius: 0,
+                      borderBottomLeftRadius: 0,
+                      backgroundColor: isDark ? euiTheme.colors.lightestShade : '#e9edf3',
+                      border: '1px solid rgb(17 43 134 / 10%) !important',
+                      borderLeft: 'transparent !important',
+                    },
+                  }}
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

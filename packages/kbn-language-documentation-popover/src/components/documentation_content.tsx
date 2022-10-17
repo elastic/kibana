@@ -37,7 +37,7 @@ interface DocumentationProps {
   sections?: LanguageDocumentationSections;
 }
 
-function Documentation({ language, sections }: DocumentationProps) {
+function DocumentationContent({ language, sections }: DocumentationProps) {
   const [selectedSection, setSelectedSection] = useState<string | undefined>();
   const scrollTargets = useRef<Record<string, HTMLElement>>({});
 
@@ -74,7 +74,7 @@ function Documentation({ language, sections }: DocumentationProps) {
         paddingSize="m"
         data-test-subj="language-documentation-title"
       >
-        {i18n.translate('unifiedSearch.query.textBasedLanguagesEditor.documentation.header', {
+        {i18n.translate('languageDocumentationPopover.header', {
           defaultMessage: '{language} reference',
           values: { language: language.toUpperCase() },
         })}
@@ -99,12 +99,9 @@ function Documentation({ language, sections }: DocumentationProps) {
                   setSearchText(e.target.value);
                 }}
                 data-test-subj="language-documentation-navigation-search"
-                placeholder={i18n.translate(
-                  'unifiedSearch.query.textBasedLanguagesEditor.documentation.searchPlaceholder',
-                  {
-                    defaultMessage: 'Search',
-                  }
-                )}
+                placeholder={i18n.translate('languageDocumentationPopover.searchPlaceholder', {
+                  defaultMessage: 'Search',
+                })}
               />
             </EuiFlexItem>
             <EuiFlexItem className="documentation__docsNav">
@@ -205,4 +202,4 @@ function Documentation({ language, sections }: DocumentationProps) {
   );
 }
 
-export const LanguageDocumentationPopover = React.memo(Documentation);
+export const LanguageDocumentationPopoverContent = React.memo(DocumentationContent);

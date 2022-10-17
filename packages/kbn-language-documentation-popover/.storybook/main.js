@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { LanguageDocumentationPopover } from './src/components/documentation_popover';
-export type { LanguageDocumentationSections } from './src/components/documentation_content';
+module.exports = require('@kbn/storybook').defaultConfig;

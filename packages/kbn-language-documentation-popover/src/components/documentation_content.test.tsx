@@ -9,9 +9,9 @@
 import React from 'react';
 import { mountWithIntl, findTestSubject } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
-import { LanguageDocumentationPopover } from './documentation';
+import { LanguageDocumentationPopoverContent } from './documentation_content';
 
-describe('###Documentation popover', () => {
+describe('###Documentation popover content', () => {
   const sections = {
     groups: [
       {
@@ -36,14 +36,14 @@ describe('###Documentation popover', () => {
     initialSection: <span>Here is the initial section</span>,
   };
   test('Documentation component has a header element referring to the language given', () => {
-    const component = mountWithIntl(<LanguageDocumentationPopover language="test" />);
+    const component = mountWithIntl(<LanguageDocumentationPopoverContent language="test" />);
     const title = findTestSubject(component, 'language-documentation-title');
     expect(title.text()).toEqual('TEST reference');
   });
 
   test('Documentation component has a sidebar navigation list with all the section labels', () => {
     const component = mountWithIntl(
-      <LanguageDocumentationPopover language="test" sections={sections} />
+      <LanguageDocumentationPopoverContent language="test" sections={sections} />
     );
     const sectionsLabels = findTestSubject(component, 'language-documentation-navigation-title');
     expect(sectionsLabels.length).toBe(2);
@@ -54,7 +54,7 @@ describe('###Documentation popover', () => {
 
   test('Documentation component should list all sections that match the search input', () => {
     const component = mountWithIntl(
-      <LanguageDocumentationPopover language="test" sections={sections} />
+      <LanguageDocumentationPopoverContent language="test" sections={sections} />
     );
     const searchBox = component.find('[data-test-subj="language-documentation-navigation-search"]');
     act(() => {
