@@ -19,6 +19,7 @@
     { "path": "../spaces/tsconfig.json" },
     { "path": "../security/tsconfig.json" },
     { "path": "../licensing/tsconfig.json" },
+    { "path": "../rule_registry/tsconfig.json" },
     { "path": "../task_manager/tsconfig.json" },
     { "path": "../event_log/tsconfig.json" },
     { "path": "../encrypted_saved_objects/tsconfig.json" },

@@ -18,6 +18,7 @@ import {
   SavedObjectAttributes,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
+import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
@@ -169,6 +170,7 @@ export interface RuleType<
   ruleTaskTimeout?: string;
   cancelAlertsOnRuleTimeout?: boolean;
   doesSetRecoveryContext?: boolean;
+  ruleDataClient?: IRuleDataClient;
 }
 export type UntypedRuleType = RuleType<
   RuleTypeParams,
