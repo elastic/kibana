@@ -11,7 +11,7 @@ import { IndicatorsBarChartWrapper } from '../components/barchart';
 import { IndicatorsTable } from '../components/table';
 import { useIndicators } from '../hooks/use_indicators';
 import { DefaultPageLayout } from '../../../components/layout';
-import { useFilters } from '../../query_bar/hooks/use_filters';
+import { useFilters } from '../../query_bar';
 import { FiltersGlobal } from '../../../containers/filters_global';
 import { useSourcererDataView } from '../hooks/use_sourcerer_data_view';
 import { FieldTypesProvider } from '../../../containers/field_types_provider';
