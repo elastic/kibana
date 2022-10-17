@@ -8,7 +8,7 @@
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { Operations } from '.';
 import { AuthorizationAuditLogger } from './audit_logger';
-import { ReadOperations } from './types';
+import type { ReadOperations } from './types';
 
 describe('audit_logger', () => {
   it('creates a failure message without any owners', () => {
