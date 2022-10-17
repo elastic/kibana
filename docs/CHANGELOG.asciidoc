@@ -117,7 +117,7 @@ For the Elastic Security 8.5.0 release information, refer to {security-guide}/re
 
 Fleet::
 * Agent activity {kibana-pull}140510[#140510]
-* Config options added to policy {kibana-pull}139421[#139421]
+* Adds a new event toggle to capture terminal output in endpoint {kibana-pull}139421[#139421]
 * Moving action batching to async {kibana-pull}138870[#138870]
 * Tagging of integration assets {kibana-pull}137184[#137184]
 
