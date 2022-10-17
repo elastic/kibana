@@ -13,12 +13,12 @@ import type { ApplicationStart } from '@kbn/core/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { CollectConfigProps as CollectConfigPropsBase } from '@kbn/kibana-utils-plugin/public';
 import { reactToUiComponent } from '@kbn/kibana-react-plugin/public';
-import {
+import type {
   UiActionsEnhancedDrilldownDefinition as Drilldown,
   UiActionsEnhancedBaseActionFactoryContext as BaseActionFactoryContext,
 } from '@kbn/ui-actions-enhanced-plugin/public';
 import { EuiFormRow, EuiSwitch } from '@elastic/eui';
-import type { DiscoverSetup } from '@kbn/discover-plugin/public';
+import type { DiscoverAppLocator } from '@kbn/discover-plugin/public';
 import type { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { DataViewsService } from '@kbn/data-views-plugin/public';
@@ -36,7 +36,7 @@ export const getDiscoverHelpersAsync = async () => await import('../async_servic
 export type EmbeddableWithQueryInput = IEmbeddable<EmbeddableQueryInput>;
 
 interface UrlDrilldownDeps {
-  discover: Pick<DiscoverSetup, 'locator'>;
+  locator: () => DiscoverAppLocator | undefined;
   dataViews: () => Pick<DataViewsService, 'get'>;
   hasDiscoverAccess: () => boolean;
   application: () => ApplicationStart;
@@ -106,7 +106,7 @@ export class OpenInDiscoverDrilldown
     const { isCompatible } = await getDiscoverHelpersAsync();
 
     return isCompatible({
-      discover: this.deps.discover,
+      locator: this.deps.locator(),
       dataViews: this.deps.dataViews(),
       hasDiscoverAccess: this.deps.hasDiscoverAccess(),
       ...context,
@@ -122,7 +122,7 @@ export class OpenInDiscoverDrilldown
     const { getHref } = await getDiscoverHelpersAsync();
 
     return getHref({
-      discover: this.deps.discover,
+      locator: this.deps.locator(),
       dataViews: this.deps.dataViews(),
       hasDiscoverAccess: this.deps.hasDiscoverAccess(),
       ...context,
@@ -137,7 +137,7 @@ export class OpenInDiscoverDrilldown
       const { getLocation } = await getDiscoverHelpersAsync();
 
       const { app, path, state } = await getLocation({
-        discover: this.deps.discover,
+        locator: this.deps.locator(),
         dataViews: this.deps.dataViews(),
         hasDiscoverAccess: this.deps.hasDiscoverAccess(),
         ...context,
