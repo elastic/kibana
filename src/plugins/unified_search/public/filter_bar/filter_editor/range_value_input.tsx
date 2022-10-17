@@ -37,12 +37,13 @@ export function isRangeParams(params: any): params is RangeParams {
 
 function RangeValueInputUI(props: Props) {
   const kibana = useKibana();
-  const tzConfig = kibana.services.uiSettings!.get('dateFormat:tz');
 
   const formatDateChange = (value: string | number | boolean) => {
     if (typeof value !== 'string' && typeof value !== 'number') return value;
 
-    const momentParsedValue = moment(value).tz(tzConfig);
+    const tzConfig = kibana.services.uiSettings!.get('dateFormat:tz');
+    const tz = !tzConfig || tzConfig === 'Browser' ? moment.tz.guess() : tzConfig;
+    const momentParsedValue = moment(value).tz(tz);
     if (momentParsedValue.isValid()) return momentParsedValue?.format('YYYY-MM-DDTHH:mm:ss.SSSZ');
 
     return value;
