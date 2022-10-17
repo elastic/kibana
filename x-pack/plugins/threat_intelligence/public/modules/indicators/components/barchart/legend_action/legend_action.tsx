@@ -9,9 +9,8 @@ import React, { useState, VFC } from 'react';
 import { EuiButtonIcon, EuiContextMenuPanel, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { CopyToClipboardContextMenu } from '../../copy_to_clipboard';
-import { FilterInContextMenu } from '../../../../query_bar/components/filter_in';
-import { FilterOutContextMenu } from '../../../../query_bar/components/filter_out';
-import { AddToTimelineContextMenu } from '../../../../timeline/components/add_to_timeline';
+import { FilterInContextMenu, FilterOutContextMenu } from '../../../../query_bar';
+import { AddToTimelineContextMenu } from '../../../../timeline';
 
 export const POPOVER_BUTTON_TEST_ID = 'tiBarchartPopoverButton';
 export const TIMELINE_BUTTON_TEST_ID = 'tiBarchartTimelineButton';

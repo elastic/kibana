@@ -30,8 +30,9 @@ jest.mock('../../../lib/rule_api/load_global_execution_kpi_aggregations', () => 
 
 const mockKpiResponse = {
   success: 4,
-  unknown: 10,
+  unknown: 0,
   failure: 60,
+  warning: 10,
   activeAlerts: 100,
   newAlerts: 40,
   recoveredAlerts: 30,
@@ -70,7 +71,7 @@ describe('rule_event_log_list_kpi', () => {
     ).toEqual('--');
     expect(
       wrapper
-        .find('[data-test-subj="ruleEventLogKpi-unknownOutcome"] .euiStat__title')
+        .find('[data-test-subj="ruleEventLogKpi-warningOutcome"] .euiStat__title')
         .first()
         .text()
     ).toEqual('--');
@@ -129,10 +130,10 @@ describe('rule_event_log_list_kpi', () => {
     ).toEqual(`${mockKpiResponse.success}`);
     expect(
       wrapper
-        .find('[data-test-subj="ruleEventLogKpi-unknownOutcome"] .euiStat__title')
+        .find('[data-test-subj="ruleEventLogKpi-warningOutcome"] .euiStat__title')
         .first()
         .text()
-    ).toEqual(`${mockKpiResponse.unknown}`);
+    ).toEqual(`${mockKpiResponse.warning}`);
     expect(
       wrapper
         .find('[data-test-subj="ruleEventLogKpi-failureOutcome"] .euiStat__title')
