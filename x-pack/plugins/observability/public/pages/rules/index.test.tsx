@@ -36,7 +36,12 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public', () => ({
 
 const config = {
   unsafe: {
-    alertDetails: { enabled: false },
+    alertDetails: {
+      apm: { enabled: false },
+      logs: { enabled: false },
+      metrics: { enabled: false },
+      uptime: { enabled: false },
+    },
   },
 } as ConfigSchema;
 

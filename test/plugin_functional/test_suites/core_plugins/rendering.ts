@@ -219,7 +219,10 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.trigger_actions_ui.enableGeoTrackingThresholdAlert (boolean)',
         'xpack.upgrade_assistant.readonly (boolean)',
         'xpack.upgrade_assistant.ui.enabled (boolean)',
-        'xpack.observability.unsafe.alertDetails.enabled (boolean)',
+        'xpack.observability.unsafe.alertDetails.apm.enabled (boolean)',
+        'xpack.observability.unsafe.alertDetails.metrics.enabled (boolean)',
+        'xpack.observability.unsafe.alertDetails.logs.enabled (boolean)',
+        'xpack.observability.unsafe.alertDetails.uptime.enabled (boolean)',
         'xpack.observability.unsafe.slo.enabled (boolean)',
       ];
       // We don't assert that actualExposedConfigKeys and expectedExposedConfigKeys are equal, because test failure messages with large
