@@ -89,7 +89,7 @@ describe('esaggs expression function - public', () => {
     expect(startDependencies.aggs.createAggConfigs).toHaveBeenCalledWith(
       {},
       args.aggs.map((agg) => agg.value),
-      { hierarchical: true, partialRows: false }
+      { hierarchical: true, partialRows: false, probability: 1, samplerSeed: undefined }
     );
   });
 
@@ -99,6 +99,8 @@ describe('esaggs expression function - public', () => {
     expect(startDependencies.aggs.createAggConfigs).toHaveBeenCalledWith({}, [], {
       hierarchical: true,
       partialRows: false,
+      probability: 1,
+      samplerSeed: undefined,
     });
   });
 
