@@ -305,7 +305,7 @@ Lens & Visualizations::
 * Adds back ticks on bands in *Lens* {kibana-pull}142702[#142702]
 * Fixes guidance panel appearing for a moment when saving Graph {kibana-pull}141228[#141228]
 * Fixes pie filter without slice {kibana-pull}141227[#141227]
-* Fixes and issue where using annotations from different data views than the visualizations created panel breaks in *TSVB* {kibana-pull}141104[#141104]
+* Fixes an issue where using annotations from different data views than the visualizations created panel breaks in *TSVB* {kibana-pull}141104[#141104]
 * Fixes drilldown url templates for sample data {kibana-pull}141079[#141079]
 * Fixes time shift with reduced time range tabification in *Lens* {kibana-pull}141076[#141076]
 * Fixes the time shifted pipeline agg in *Lens* {kibana-pull}140723[#140723]
