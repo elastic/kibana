@@ -6,7 +6,7 @@
  */
 
 import { isWriteOperation, Operations } from '.';
-import { OperationDetails } from './types';
+import type { OperationDetails } from './types';
 
 describe('index tests', () => {
   it('should identify a write operation', () => {

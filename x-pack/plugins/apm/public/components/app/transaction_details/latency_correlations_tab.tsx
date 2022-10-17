@@ -18,8 +18,7 @@ import { useLicenseContext } from '../../../context/license/use_license_context'
 import { LicensePrompt } from '../../shared/license_prompt';
 
 import { LatencyCorrelations } from '../correlations/latency_correlations';
-
-import type { TabContentProps } from './types';
+import { TabContentProps } from './transaction_details_tabs';
 
 function LatencyCorrelationsTab({ onFilter }: TabContentProps) {
   const license = useLicenseContext();
