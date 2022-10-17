@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CaseStatuses } from '../../../common/api';
-import { AlertInfo } from '../../common/types';
+import type { CaseStatuses } from '../../../common/api';
+import type { AlertInfo } from '../../common/types';
 
 interface Alert {
   id: string;

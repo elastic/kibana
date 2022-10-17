@@ -140,7 +140,7 @@ export interface PluginStartContract {
 
   preconfiguredActions: PreConfiguredAction[];
 
-  getUnsecuredActionsClient(): Promise<PublicMethodsOf<UnsecuredActionsClient>>;
+  getUnsecuredActionsClient(): PublicMethodsOf<UnsecuredActionsClient>;
 
   renderActionParameterTemplates<Params extends ActionTypeParams = ActionTypeParams>(
     actionTypeId: string,
@@ -456,7 +456,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       });
     };
 
-    const getUnsecuredActionsClient = async () => {
+    const getUnsecuredActionsClient = () => {
       const internalSavedObjectsRepository = core.savedObjects.createInternalRepository([
         ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
       ]);

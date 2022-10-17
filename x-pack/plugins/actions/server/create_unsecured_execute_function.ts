@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { compact } from 'lodash';
 import { ISavedObjectsRepository, SavedObjectsBulkResponse } from '@kbn/core/server';
 import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import {
@@ -17,7 +16,9 @@ import { ExecuteOptions as ActionExecutorOptions } from './lib/action_executor';
 import { extractSavedObjectReferences, isSavedObjectExecutionSource } from './lib';
 import { RelatedSavedObjects } from './lib/related_saved_objects';
 
-const ALLOWED_CONNECTOR_TYPE_IDS = ['.email', '.slack'];
+// This allowlist should only contain connector types that don't require API keys for
+// execution.
+const ALLOWED_CONNECTOR_TYPE_IDS = ['.email'];
 interface CreateBulkUnsecuredExecuteFunctionOptions {
   taskManager: TaskManagerStartContract;
   connectorTypeRegistry: ConnectorTypeRegistryContract;
@@ -65,11 +66,11 @@ export function createBulkUnsecuredExecutionEnqueuerFunction({
       );
     }
 
-    const connectors: PreconfiguredConnector[] = compact(
-      connectorIds.map((connectorId) =>
+    const connectors: PreconfiguredConnector[] = connectorIds
+      .map((connectorId) =>
         preconfiguredConnectors.find((pConnector) => pConnector.id === connectorId)
       )
-    );
+      .filter(Boolean) as PreconfiguredConnector[];
 
     connectors.forEach((connector) => {
       const { id, actionTypeId } = connector;
