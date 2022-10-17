@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { getUserDisplayName, UserProfileUserInfo } from '@kbn/user-profile-components';
+import type { UserProfileUserInfo } from '@kbn/user-profile-components';
+import { getUserDisplayName } from '@kbn/user-profile-components';
 import { isEmpty } from 'lodash';
 import * as i18n from './translations';
 

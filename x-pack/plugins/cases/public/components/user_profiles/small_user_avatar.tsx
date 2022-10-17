@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { CaseUserAvatar, CaseUserAvatarProps } from './user_avatar';
+import type { CaseUserAvatarProps } from './user_avatar';
+import { CaseUserAvatar } from './user_avatar';
 
 const SmallUserAvatarComponent: React.FC<Pick<CaseUserAvatarProps, 'userInfo'>> = ({
   userInfo,
