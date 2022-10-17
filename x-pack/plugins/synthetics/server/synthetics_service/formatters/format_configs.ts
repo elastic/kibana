@@ -27,6 +27,7 @@ const UI_KEYS_TO_SKIP = [
   ConfigKey.CUSTOM_HEARTBEAT_ID,
   ConfigKey.FORM_MONITOR_TYPE,
   ConfigKey.TEXT_ASSERTION,
+  ConfigKey.CONFIG_HASH,
   'secrets',
 ];
 

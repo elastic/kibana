@@ -19,7 +19,7 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsStreamingRouteFactory =
   libs: UMServerLibs
 ) => ({
   method: 'PUT',
-  path: API_URLS.SYNTHETICS_MONITORS_PROJECT,
+  path: API_URLS.SYNTHETICS_MONITORS_PROJECT_LEGACY,
   validate: {
     body: schema.object({
       project: schema.string(),
