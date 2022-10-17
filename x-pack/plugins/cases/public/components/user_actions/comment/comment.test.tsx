@@ -26,7 +26,8 @@ import {
   hostIsolationComment,
   persistableStateAttachment,
 } from '../../../containers/mock';
-import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../../common/mock';
+import type { AppMockRenderer } from '../../../common/mock';
+import { createAppMockRenderer, TestProviders } from '../../../common/mock';
 import { createCommentUserActionBuilder } from './comment';
 import { getMockBuilderArgs } from '../mock';
 import { useCaseViewParams } from '../../../common/navigation';

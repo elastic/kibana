@@ -11,7 +11,6 @@ export type {
   DeleteFileArgs,
   FindFileArgs,
   GetByIdArgs,
-  ListFilesArgs,
   UpdateFileArgs,
 } from './file_action_types';
 export type { FileServiceStart } from './file_service';
