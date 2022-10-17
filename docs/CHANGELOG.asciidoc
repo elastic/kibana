@@ -81,7 +81,7 @@ Filters associated with unknown data views now display a warning message instead
 [%collapsible]
 ====
 *Details* +
-The bi directionnal foreign key between agent policy and package policy has been removed. For more information, refer to {kibana-pull}138677[#138677].
+The bidirectional foreign key between agent policy and package policy has been removed. For more information, refer to {kibana-pull}138677[#138677].
 
 *Impact* +
 The agent policy saved object no longer includes the `package_policies` field.
