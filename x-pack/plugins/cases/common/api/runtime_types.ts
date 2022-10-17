@@ -10,7 +10,7 @@ import { either, fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { JsonArray, JsonObject, JsonValue } from '@kbn/utility-types';
+import type { JsonArray, JsonObject, JsonValue } from '@kbn/utility-types';
 import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
 
 type ErrorFactory = (message: string) => Error;
