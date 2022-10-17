@@ -31,9 +31,6 @@ export default function ({ getService }: FtrProviderContext) {
     const projectMonitorEndpoint = kibanaServerUrl + API_URLS.SYNTHETICS_MONITORS_PROJECT_LEGACY;
 
     let projectMonitors: ProjectMonitorsRequest;
-    let httpProjectMonitors: ProjectMonitorsRequest;
-    let tcpProjectMonitors: ProjectMonitorsRequest;
-    let icmpProjectMonitors: ProjectMonitorsRequest;
 
     let testPolicyId = '';
     const testPrivateLocations = new PrivateLocationTestService(getService);
@@ -61,9 +58,6 @@ export default function ({ getService }: FtrProviderContext) {
 
     beforeEach(() => {
       projectMonitors = setUniqueIds(getFixtureJson('project_browser_monitor'));
-      httpProjectMonitors = setUniqueIds(getFixtureJson('project_http_monitor'));
-      tcpProjectMonitors = setUniqueIds(getFixtureJson('project_tcp_monitor'));
-      icmpProjectMonitors = setUniqueIds(getFixtureJson('project_icmp_monitor'));
     });
 
     it('only allows 250 requests at a time', async () => {
@@ -405,8 +399,8 @@ export default function ({ getService }: FtrProviderContext) {
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
             savedObjectsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] +
-              '-' +
-              testPolicyId
+            '-' +
+            testPolicyId
         );
         expect(packagePolicy.policy_id).to.be(testPolicyId);
 
@@ -437,8 +431,8 @@ export default function ({ getService }: FtrProviderContext) {
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
             savedObjectsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] +
-              '-' +
-              testPolicyId
+            '-' +
+            testPolicyId
         );
         expect(packagePolicy2).to.be(undefined);
       } finally {
