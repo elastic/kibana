@@ -118,7 +118,7 @@ export const LastTenTestRuns = () => {
     },
   ];
 
-  const historyIdParam = monitor?.custom_heartbeat_id ?? monitor?.id;
+  const historyIdParam = monitor?.[ConfigKey.CUSTOM_HEARTBEAT_ID] ?? monitor?.[ConfigKey.ID];
   return (
     <EuiPanel hasShadow={false} hasBorder css={{ minHeight: 200 }}>
       <EuiFlexGroup alignItems="center" gutterSize="s">
