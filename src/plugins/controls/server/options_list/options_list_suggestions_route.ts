@@ -95,9 +95,12 @@ export const setupOptionsListSuggestionsRoute = (
     const suggestionBuilder = getSuggestionAggregationBuilder(request);
     const validationBuilder = getValidationAggregationBuilder();
 
-    const suggestionAggregations = {
-      suggestions: suggestionBuilder.buildAggregation(request),
-    };
+    const builtSuggestionAggregation = suggestionBuilder.buildAggregation(request);
+    const suggestionAggregation = builtSuggestionAggregation
+      ? {
+          suggestions: builtSuggestionAggregation,
+        }
+      : {};
     const builtValidationAggregation = validationBuilder.buildAggregation(request);
     const validationAggregations = builtValidationAggregation
       ? {
@@ -114,7 +117,7 @@ export const setupOptionsListSuggestionsRoute = (
         },
       },
       aggs: {
-        ...suggestionAggregations,
+        ...suggestionAggregation,
         ...validationAggregations,
         unique_terms: {
           cardinality: {
