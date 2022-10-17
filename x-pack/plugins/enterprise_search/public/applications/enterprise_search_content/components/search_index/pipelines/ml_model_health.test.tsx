@@ -24,6 +24,7 @@ describe('TrainedModelHealth', () => {
   });
 
   const commonModelData: InferencePipeline = {
+    modelId: 'sample-bert-ner-model',
     modelState: TrainedModelState.NotDeployed,
     pipelineName: 'Sample Processor',
     types: ['pytorch'],

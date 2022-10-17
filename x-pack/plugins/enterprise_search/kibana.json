@@ -4,7 +4,7 @@
   "kibanaVersion": "kibana",
   "requiredPlugins": ["features", "spaces", "security", "licensing", "data", "charts", "infra", "cloud", "esUiShared"],
   "configPath": ["enterpriseSearch"],
-  "optionalPlugins": ["usageCollection", "home", "customIntegrations"],
+  "optionalPlugins": ["usageCollection", "home", "customIntegrations", "ml"],
   "server": true,
   "ui": true,
   "requiredBundles": ["kibanaReact", "cloudChat"],

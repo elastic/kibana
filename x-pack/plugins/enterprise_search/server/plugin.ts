@@ -18,6 +18,7 @@ import {
 import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { InfraPluginSetup } from '@kbn/infra-plugin/server';
+import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
@@ -70,6 +71,7 @@ interface PluginsSetup {
   features: FeaturesPluginSetup;
   infra: InfraPluginSetup;
   customIntegrations?: CustomIntegrationsPluginSetup;
+  ml?: MlPluginSetup;
 }
 
 interface PluginsStart {
@@ -83,6 +85,7 @@ export interface RouteDependencies {
   log: Logger;
   enterpriseSearchRequestHandler: IEnterpriseSearchRequestHandler;
   getSavedObjectsService?(): SavedObjectsServiceStart;
+  ml?: MlPluginSetup;
 }
 
 export class EnterpriseSearchPlugin implements Plugin {
@@ -96,7 +99,7 @@ export class EnterpriseSearchPlugin implements Plugin {
 
   public setup(
     { capabilities, http, savedObjects, getStartServices, uiSettings }: CoreSetup<PluginsStart>,
-    { usageCollection, security, features, infra, customIntegrations }: PluginsSetup
+    { usageCollection, security, features, infra, customIntegrations, ml }: PluginsSetup
   ) {
     const config = this.config;
     const log = this.logger;
@@ -142,7 +145,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     capabilities.registerSwitcher(async (request: KibanaRequest) => {
       const [, { spaces }] = await getStartServices();
 
-      const dependencies = { config, security, spaces, request, log };
+      const dependencies = { config, security, spaces, request, log, ml };
 
       const { hasAppSearchAccess, hasWorkplaceSearchAccess } = await checkAccess(dependencies);
       const showEnterpriseSearch = hasAppSearchAccess || hasWorkplaceSearchAccess;
@@ -172,7 +175,7 @@ export class EnterpriseSearchPlugin implements Plugin {
      */
     const router = http.createRouter();
     const enterpriseSearchRequestHandler = new EnterpriseSearchRequestHandler({ config, log });
-    const dependencies = { router, config, log, enterpriseSearchRequestHandler };
+    const dependencies = { router, config, log, enterpriseSearchRequestHandler, ml };
 
     registerConfigDataRoute(dependencies);
     registerAppSearchRoutes(dependencies);
