@@ -52,4 +52,8 @@ describe('getCloudEnterpriseSearchHost', () => {
   it('is undefined with an undefined cloud id', () => {
     expect(getCloudEnterpriseSearchHost(noCloud)).toBe(undefined);
   });
+
+  it('is undefined when cloud is undefined', () => {
+    expect(getCloudEnterpriseSearchHost(undefined)).toBe(undefined);
+  });
 });

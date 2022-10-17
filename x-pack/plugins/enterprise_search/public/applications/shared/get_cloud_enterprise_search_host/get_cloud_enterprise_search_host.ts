@@ -9,7 +9,7 @@ import { CloudSetup } from '@kbn/cloud-plugin/public';
 
 import { decodeCloudId } from '../decode_cloud_id';
 
-export function getCloudEnterpriseSearchHost(cloud: CloudSetup): string | undefined {
+export function getCloudEnterpriseSearchHost(cloud: CloudSetup | undefined): string | undefined {
   if (cloud && cloud.isCloudEnabled && cloud.cloudId) {
     const deploymentId = getDeploymentId(cloud.cloudId);
     const res = decodeCloudId(cloud.cloudId);
