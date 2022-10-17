@@ -60,7 +60,8 @@ export const RuleEventLogListCellRenderer = (props: RuleEventLogListCellRenderer
       const newPathname = `${spacePath}${window.location.pathname
         .replace(/^\/s\/([^/])+/, '')
         .replace(historyPathname, ruleRoute)}`;
-      window.location.pathname = newPathname;
+      const newUrl = window.location.href.replace(window.location.pathname, newPathname);
+      window.open(newUrl, '_blank');
       return;
     }
     history.push(ruleRoute);
