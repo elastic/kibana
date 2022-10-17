@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { IExecutionLog } from '@kbn/alerting-plugin/common';
 import { SpacesContextProps } from '@kbn/spaces-plugin/public';
-import { useKibana } from '../../../../common/lib/kibana';
+import { useKibana, useSpacesData } from '../../../../common/lib/kibana';
 import {
   RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS,
   GLOBAL_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS,
@@ -121,13 +121,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
     hasAllSpaceSwitch = false,
   } = props;
 
-  const { uiSettings, notifications, spaces } = useKibana().services;
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const SpacesContextWrapper = useCallback(
-    spaces ? spaces.ui.components.getSpacesContextProvider : getEmptyFunctionComponent,
-    [spaces]
-  );
+  const { uiSettings, notifications } = useKibana().services;
 
   const [searchText, setSearchText] = useState<string>('');
   const [search, setSearch] = useState<string>('');
@@ -173,6 +167,20 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
     );
   });
 
+  const spacesData = useSpacesData();
+  const accessibleSpaceIds = useMemo(
+    () => (spacesData ? [...spacesData.spacesMap.values()].map((e) => e.id) : []),
+    [spacesData]
+  );
+  const areMultipleSpacesAccessible = useMemo(
+    () => accessibleSpaceIds.length > 1,
+    [accessibleSpaceIds]
+  );
+  const namespaces = useMemo(
+    () => (showFromAllSpaces && spacesData ? accessibleSpaceIds : undefined),
+    [showFromAllSpaces, spacesData, accessibleSpaceIds]
+  );
+
   const isInitialized = useRef(false);
 
   const isOnLastPage = useMemo(() => {
@@ -217,7 +225,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
         dateEnd: getParsedDate(dateEnd),
         page: pagination.pageIndex,
         perPage: pagination.pageSize,
-        allNamespaces: showFromAllSpaces,
+        namespaces,
       });
       setLogs(result.data);
       setPagination({
@@ -324,24 +332,22 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
         {isLoading && (
           <EuiProgress size="xs" color="accent" data-test-subj="ruleEventLogListProgressBar" />
         )}
-        <SpacesContextWrapper feature="triggersActions">
-          <RuleEventLogDataGrid
-            logs={logs}
-            pagination={pagination}
-            sortingColumns={sortingColumns}
-            visibleColumns={visibleColumns}
-            dateFormat={dateFormat}
-            selectedRunLog={selectedRunLog}
-            showRuleNameAndIdColumns={hasRuleNames}
-            showSpaceColumns={showFromAllSpaces}
-            onChangeItemsPerPage={onChangeItemsPerPage}
-            onChangePage={onChangePage}
-            onFlyoutOpen={onFlyoutOpen}
-            onFilterChange={setFilter}
-            setVisibleColumns={setVisibleColumns}
-            setSortingColumns={setSortingColumns}
-          />
-        </SpacesContextWrapper>
+        <RuleEventLogDataGrid
+          logs={logs}
+          pagination={pagination}
+          sortingColumns={sortingColumns}
+          visibleColumns={visibleColumns}
+          dateFormat={dateFormat}
+          selectedRunLog={selectedRunLog}
+          showRuleNameAndIdColumns={hasRuleNames}
+          showSpaceColumns={showFromAllSpaces}
+          onChangeItemsPerPage={onChangeItemsPerPage}
+          onChangePage={onChangePage}
+          onFlyoutOpen={onFlyoutOpen}
+          onFilterChange={setFilter}
+          setVisibleColumns={setVisibleColumns}
+          setSortingColumns={setSortingColumns}
+        />
       </>
     );
   };
@@ -407,7 +413,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
               updateButtonProps={updateButtonProps}
             />
           </EuiFlexItem>
-          {hasAllSpaceSwitch && (
+          {hasAllSpaceSwitch && areMultipleSpacesAccessible && (
             <EuiFlexItem>
               <EuiSwitch
                 label={ALL_SPACES_LABEL}
@@ -427,6 +433,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
           outcomeFilter={filter}
           message={searchText}
           refreshToken={internalRefreshToken}
+          namespaces={namespaces}
         />
         <EuiSpacer />
       </EuiFlexItem>
@@ -451,7 +458,22 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
   );
 };
 
-export const RuleEventLogListTableWithApi = withBulkRuleOperations(RuleEventLogListTable);
+const RuleEventLogListTableWithSpaces: React.FC<RuleEventLogListTableProps> = (props) => {
+  const { spaces } = useKibana().services;
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const SpacesContextWrapper = useCallback(
+    spaces ? spaces.ui.components.getSpacesContextProvider : getEmptyFunctionComponent,
+    [spaces]
+  );
+  return (
+    <SpacesContextWrapper feature="triggersActions">
+      <RuleEventLogListTable {...props} />
+    </SpacesContextWrapper>
+  );
+};
+
+export const RuleEventLogListTableWithApi = withBulkRuleOperations(RuleEventLogListTableWithSpaces);
 
 // eslint-disable-next-line import/no-default-export
 export { RuleEventLogListTableWithApi as default };

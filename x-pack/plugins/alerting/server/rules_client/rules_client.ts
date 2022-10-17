@@ -398,7 +398,7 @@ export interface GetGlobalExecutionKPIParams {
   dateStart: string;
   dateEnd?: string;
   filter?: string;
-  allNamespaces?: boolean;
+  namespaces?: Array<string | undefined>;
 }
 
 export interface GetGlobalExecutionLogParams {
@@ -408,7 +408,7 @@ export interface GetGlobalExecutionLogParams {
   page: number;
   perPage: number;
   sort: estypes.Sort;
-  allNamespaces?: boolean;
+  namespaces?: Array<string | undefined>;
 }
 
 export interface GetActionErrorLogByIdParams {
@@ -932,7 +932,7 @@ export class RulesClient {
     page,
     perPage,
     sort,
-    allNamespaces,
+    namespaces,
   }: GetGlobalExecutionLogParams): Promise<IExecutionLogResult> {
     this.logger.debug(`getGlobalExecutionLogWithAuth(): getting global execution log`);
 
@@ -984,7 +984,7 @@ export class RulesClient {
             sort,
           }),
         },
-        allNamespaces
+        namespaces
       );
 
       return formatExecutionLogResult(aggResult);
@@ -1070,7 +1070,7 @@ export class RulesClient {
     dateStart,
     dateEnd,
     filter,
-    allNamespaces,
+    namespaces,
   }: GetGlobalExecutionKPIParams) {
     this.logger.debug(`getGlobalExecutionLogWithAuth(): getting global execution log`);
 
@@ -1117,7 +1117,7 @@ export class RulesClient {
           end: parsedDateEnd.toISOString(),
           aggs: getExecutionKPIAggregation(filter),
         },
-        allNamespaces
+        namespaces
       );
 
       return formatExecutionKPIResult(aggResult);

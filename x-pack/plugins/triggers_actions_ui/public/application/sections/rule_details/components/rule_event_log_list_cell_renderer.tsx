@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, useEffect, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import moment from 'moment';
-import { SpacesData } from '@kbn/spaces-plugin/public';
 import { EuiLink } from '@elastic/eui';
 import { RuleAlertingOutcome } from '@kbn/alerting-plugin/common';
 import { useHistory } from 'react-router-dom';
 import { routeToRuleDetails } from '../../../constants';
 import { formatRuleAlertCount } from '../../../../common/lib/format_rule_alert_count';
-import { useKibana } from '../../../../common/lib/kibana';
+import { useSpacesData } from '../../../../common/lib/kibana';
 import { RuleEventLogListStatus } from './rule_event_log_list_status';
 import { RuleDurationFormat } from '../../rules_list/components/rule_duration_format';
 import {
@@ -37,18 +36,7 @@ interface RuleEventLogListCellRendererProps {
 
 export const RuleEventLogListCellRenderer = (props: RuleEventLogListCellRendererProps) => {
   const { columnId, value, version, dateFormat = DEFAULT_DATE_FORMAT, ruleId, spaceIds } = props;
-  const [spacesData, setSpacesData] = useState<SpacesData | undefined>(undefined);
-  const { spaces } = useKibana().services;
-  const spacesService = spaces?.ui.useSpaces();
-
-  useEffect(() => {
-    if (columnId === 'rule_name' || columnId === 'space_ids') {
-      (async () => {
-        const result = await spacesService?.spacesDataPromise;
-        setSpacesData(result);
-      })();
-    }
-  }, [spaces, columnId, spacesService, setSpacesData]);
+  const spacesData = useSpacesData();
 
   const history = useHistory();
 

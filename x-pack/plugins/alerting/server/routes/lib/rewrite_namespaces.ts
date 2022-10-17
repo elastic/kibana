@@ -5,5 +5,7 @@
  * 2.0.
  */
 
-export * from './kibana_react';
-export * from './use_spaces_data';
+export const rewriteNamespaces = (namespaces?: Array<string | undefined>) =>
+  namespaces
+    ? namespaces.map((id: string | undefined) => (id === 'default' ? undefined : id))
+    : undefined;

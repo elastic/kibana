@@ -67,7 +67,7 @@ export interface IEventLogClient {
     type: string,
     authFilter: KueryNode,
     options?: Partial<AggregateOptionsType>,
-    allNamespaces?: boolean
+    namespaces?: Array<string | undefined>
   ): Promise<AggregateEventsBySavedObjectResult>;
 }
 

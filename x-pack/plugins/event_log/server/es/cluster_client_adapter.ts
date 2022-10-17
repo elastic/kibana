@@ -52,7 +52,7 @@ interface QueryOptionsEventsBySavedObjectFilter {
 
 export interface AggregateEventsWithAuthFilter {
   index: string;
-  namespace: string | undefined;
+  namespaces: Array<string | undefined>;
   type: string;
   authFilter: KueryNode;
   aggregateOptions: AggregateOptionsType;
@@ -465,10 +465,10 @@ export function getQueryBodyWithAuthFilter(
   opts: AggregateEventsWithAuthFilter,
   queryOptions: QueryOptionsType
 ) {
-  const { namespace, type, authFilter } = opts;
+  const { namespaces, type, authFilter } = opts;
   const { start, end, filter } = queryOptions ?? {};
 
-  const namespaceQuery = namespace !== '*' ? getNamespaceQuery(namespace) : undefined;
+  const namespaceQuery = namespaces.map((namespace) => getNamespaceQuery(namespace));
   let dslFilterQuery: estypes.QueryDslBoolQuery['filter'];
   try {
     const filterKueryNode = filter ? fromKueryExpression(filter) : null;
@@ -501,8 +501,12 @@ export function getQueryBodyWithAuthFilter(
         },
       },
     },
-    // @ts-expect-error undefined is not assignable as QueryDslTermQuery value
-    namespaceQuery,
+    {
+      bool: {
+        // @ts-expect-error undefined is not assignable as QueryDslTermQuery value
+        should: namespaceQuery,
+      },
+    },
   ];
 
   const musts: estypes.QueryDslQueryContainer[] = [

@@ -62,7 +62,7 @@ export interface LoadExecutionLogAggregationsProps {
 export type LoadGlobalExecutionLogAggregationsProps = Omit<
   LoadExecutionLogAggregationsProps,
   'id'
-> & { allNamespaces?: boolean };
+> & { namespaces?: Array<string | undefined> };
 
 export const loadExecutionLogAggregations = async ({
   id,
@@ -106,7 +106,7 @@ export const loadGlobalExecutionLogAggregations = async ({
   perPage = 10,
   page = 0,
   sort = [],
-  allNamespaces = false,
+  namespaces,
 }: LoadGlobalExecutionLogAggregationsProps & { http: HttpSetup }) => {
   const sortField: any[] = sort;
   const filter = getFilter({ outcomeFilter, message });
@@ -123,7 +123,7 @@ export const loadGlobalExecutionLogAggregations = async ({
         // whereas data grid sorts are 0 indexed.
         page: page + 1,
         sort: sortField.length ? JSON.stringify(sortField) : undefined,
-        all_namespaces: allNamespaces,
+        namespaces: namespaces ? JSON.stringify(namespaces) : namespaces,
       },
     }
   );
