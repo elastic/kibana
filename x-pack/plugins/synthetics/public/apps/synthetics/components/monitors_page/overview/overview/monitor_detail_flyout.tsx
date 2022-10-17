@@ -35,7 +35,7 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { FETCH_STATUS, useFetcher } from '@kbn/observability-plugin/public';
 import moment from 'moment';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { capitalize } from 'lodash';
 import { ClientPluginsStart } from '../../../../../../plugin';
@@ -53,6 +53,7 @@ interface Props {
   location: string;
   onClose: () => void;
   onEnabledChange: () => void;
+  onLocationChange: (id: string, location: string) => void;
   currentDurationChartFrom?: string;
   currentDurationChartTo?: string;
   previousDurationChartFrom?: string;
@@ -111,6 +112,7 @@ function DetailFlyoutDurationChart({
           dataType: 'synthetics',
           selectedMetricField: 'monitor.duration.us',
           name: 'All monitors response duration',
+          operationType: 'last_value',
         },
         {
           seriesType: 'line',
@@ -132,6 +134,7 @@ function DetailFlyoutDurationChart({
           dataType: 'synthetics',
           selectedMetricField: 'monitor.duration.us',
           name: 'Previous period',
+          operationType: 'last_value',
         },
       ]}
     />
@@ -151,7 +154,7 @@ function LocationSelect({
   id: string;
   monitor: EncryptedSyntheticsMonitor;
   onEnabledChange: () => void;
-  setCurrentLocation: React.Dispatch<string>;
+  setCurrentLocation: (location: string) => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const { locations } = locationData;
@@ -224,7 +227,7 @@ function LocationSelect({
 }
 
 export function MonitorDetailFlyout(props: Props) {
-  const { id } = props;
+  const { id, onLocationChange } = props;
   const state = useSelector(selectOverviewState);
 
   const monitor: MonitorOverviewItem | null = useMemo(() => {
@@ -237,7 +240,11 @@ export function MonitorDetailFlyout(props: Props) {
     return null;
   }, [id, state.data]);
 
-  const [location, setLocation] = useState<string>(props.location);
+  const setLocation = useCallback(
+    (location: string) => onLocationChange(id, location),
+    [id, onLocationChange]
+  );
+
   const detailLink = useMonitorDetailLocator({
     monitorId: id,
   });
@@ -251,7 +258,7 @@ export function MonitorDetailFlyout(props: Props) {
   );
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
 
-  const monitorDetail = useMonitorDetail(id, location);
+  const monitorDetail = useMonitorDetail(id, props.location);
   const locationStatuses = useStatusByLocation(id);
   const locations = locationStatuses.locations?.filter((l: any) => !!l?.observer?.geo?.name) ?? [];
   return (
@@ -282,7 +289,7 @@ export function MonitorDetailFlyout(props: Props) {
             <EuiSpacer size="s" />
 
             <LocationSelect
-              currentLocation={location}
+              currentLocation={props.location}
               locationData={{ locations }}
               setCurrentLocation={setLocation}
               id={id}
@@ -294,7 +301,7 @@ export function MonitorDetailFlyout(props: Props) {
             <EuiTitle size="xs">
               <h3>{DURATION_HEADER_TEXT}</h3>
             </EuiTitle>
-            <DetailFlyoutDurationChart {...props} location={location} />
+            <DetailFlyoutDurationChart {...props} location={props.location} />
             <EuiSpacer />
             <EuiTitle size="xs">
               <h3>{MONITOR_DETAILS_HEADER_TEXT}</h3>

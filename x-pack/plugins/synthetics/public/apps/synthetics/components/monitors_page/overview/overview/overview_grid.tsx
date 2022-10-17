@@ -91,6 +91,7 @@ export const OverviewGrid = () => {
           location={flyoutConfig.location}
           onClose={hideFlyout}
           onEnabledChange={forceRefreshCallback}
+          onLocationChange={setFlyoutConfigCallback}
         />
       )}
     </>
