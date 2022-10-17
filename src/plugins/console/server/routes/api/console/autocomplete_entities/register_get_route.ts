@@ -7,6 +7,7 @@
  */
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { parse } from 'query-string';
+import type { IncomingMessage } from 'http';
 import type { RouteDependencies } from '../../..';
 import { API_BASE_PATH } from '../../../../../common/constants';
 
@@ -17,9 +18,41 @@ interface Settings {
   dataStreams: boolean;
 }
 
+const RESPONSE_SIZE_LIMIT = 10 * 1024 * 1024;
+
+function streamToString(stream: IncomingMessage, limit: number) {
+  return new Promise<string>((resolve, reject) => {
+    const chunks: Buffer[] = [];
+    stream.on('data', (chunk) => {
+      chunks.push(chunk);
+      if (Buffer.byteLength(Buffer.concat(chunks)) > limit) {
+        stream.destroy();
+        reject(new Error('Response size limit exceeded'));
+      }
+    });
+    stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
+    stream.on('error', reject);
+  });
+}
+
+async function limitEntityResponseSize(esClient: IScopedClusterClient, entity: string) {
+  const stream = await esClient.asInternalUser.transport.request(
+    {
+      method: 'GET',
+      path: `/${entity}`,
+    },
+    { asStream: true }
+  );
+
+  // Limit the response size to 10MB, because the response can be very large and sending it to the client
+  // can cause the browser to hang.
+  const body = await streamToString(stream as unknown as IncomingMessage, RESPONSE_SIZE_LIMIT);
+  return JSON.parse(body);
+}
+
 async function getMappings(esClient: IScopedClusterClient, settings: Settings) {
   if (settings.fields) {
-    return esClient.asInternalUser.indices.getMapping();
+    return limitEntityResponseSize(esClient, '_mapping');
   }
   // If the user doesn't want autocomplete suggestions, then clear any that exist.
   return Promise.resolve({});
@@ -27,7 +60,7 @@ async function getMappings(esClient: IScopedClusterClient, settings: Settings) {
 
 async function getAliases(esClient: IScopedClusterClient, settings: Settings) {
   if (settings.indices) {
-    return esClient.asInternalUser.indices.getAlias();
+    return limitEntityResponseSize(esClient, '_alias');
   }
   // If the user doesn't want autocomplete suggestions, then clear any that exist.
   return Promise.resolve({});
@@ -35,7 +68,7 @@ async function getAliases(esClient: IScopedClusterClient, settings: Settings) {
 
 async function getDataStreams(esClient: IScopedClusterClient, settings: Settings) {
   if (settings.dataStreams) {
-    return esClient.asInternalUser.indices.getDataStream();
+    return limitEntityResponseSize(esClient, '_data_stream');
   }
   // If the user doesn't want autocomplete suggestions, then clear any that exist.
   return Promise.resolve({});
@@ -44,9 +77,9 @@ async function getDataStreams(esClient: IScopedClusterClient, settings: Settings
 async function getTemplates(esClient: IScopedClusterClient, settings: Settings) {
   if (settings.templates) {
     return Promise.all([
-      esClient.asInternalUser.indices.getTemplate(),
-      esClient.asInternalUser.indices.getIndexTemplate(),
-      esClient.asInternalUser.cluster.getComponentTemplate(),
+      limitEntityResponseSize(esClient, '_template'),
+      limitEntityResponseSize(esClient, '_component_template'),
+      limitEntityResponseSize(esClient, '_index_template'),
     ]);
   }
   // If the user doesn't want autocomplete suggestions, then clear any that exist.
@@ -71,11 +104,26 @@ export function registerGetRoute({ router, lib: { handleEsError } }: RouteDepend
         }
 
         const esClient = (await ctx.core).elasticsearch.client;
-        const mappings = await getMappings(esClient, settings);
-        const aliases = await getAliases(esClient, settings);
-        const dataStreams = await getDataStreams(esClient, settings);
-        const [legacyTemplates = {}, indexTemplates = {}, componentTemplates = {}] =
-          await getTemplates(esClient, settings);
+
+        // Wait for all requests to complete, in case one of them fails return the successfull ones
+        const results = await Promise.allSettled([
+          getMappings(esClient, settings),
+          getAliases(esClient, settings),
+          getDataStreams(esClient, settings),
+          getTemplates(esClient, settings),
+        ]);
+
+        const [
+          mappings,
+          aliases,
+          dataStreams,
+          [legacyTemplates = {}, indexTemplates = {}, componentTemplates = {}],
+        ] = results.map((result) => {
+          if (result.status === 'fulfilled') {
+            return result.value;
+          }
+          return {};
+        });
 
         return response.ok({
           body: {
