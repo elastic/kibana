@@ -69,6 +69,7 @@ import {
   AggParamsPercentileRanks,
   AggParamsPercentiles,
   AggParamsRange,
+  AggParamsRate,
   AggParamsSerialDiff,
   AggParamsSignificantTerms,
   AggParamsStdDeviation,
@@ -209,6 +210,7 @@ interface SerializedAggParamsMapping {
   [METRIC_TYPES.MOVING_FN]: AggParamsMovingAvgSerialized;
   [METRIC_TYPES.PERCENTILE_RANKS]: AggParamsPercentileRanks;
   [METRIC_TYPES.PERCENTILES]: AggParamsPercentiles;
+  [METRIC_TYPES.RATE]: AggParamsRate;
   [METRIC_TYPES.SERIAL_DIFF]: AggParamsSerialDiffSerialized;
   [METRIC_TYPES.TOP_HITS]: AggParamsTopHitSerialized;
   [METRIC_TYPES.TOP_METRICS]: AggParamsTopMetricsSerialized;
