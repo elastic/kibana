@@ -12,13 +12,13 @@ import { syntheticsMonitorType } from '../../legacy_uptime/lib/saved_objects/syn
 import { getMonitors } from '../common';
 
 const querySchema = schema.object({
-  after_id: schema.maybe(schema.string()),
-  size: schema.maybe(schema.number()),
+  search_after: schema.maybe(schema.string()),
+  per_page: schema.maybe(schema.number()),
 });
 
 export const getSyntheticsProjectMonitorsRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
-  path: API_URLS.SYNTHETICS_MONITORS_PROJECT_LEGACY,
+  path: API_URLS.SYNTHETICS_MONITORS_PROJECT,
   validate: {
     params: schema.object({
       projectName: schema.string(),
@@ -33,40 +33,33 @@ export const getSyntheticsProjectMonitorsRoute: SyntheticsRestApiRouteFactory = 
     syntheticsMonitorClient,
   }): Promise<any> => {
     const { projectName } = request.params;
-    const { size = 500, after_id: afterId } = request.query;
+    const { per_page: perPage = 500, search_after: searchAfter } = request.query;
     const decodedProjectName = decodeURI(projectName);
-    const decodedAfterId = afterId ? decodeURI(afterId) : undefined;
+    const decodedSearchAfter = searchAfter ? decodeURI(searchAfter) : undefined;
 
     try {
-      const { saved_objects: monitors } = await getMonitors(
+      const { saved_objects: monitors, total } = await getMonitors(
         {
           filter: `${syntheticsMonitorType}.attributes.${ConfigKey.PROJECT_ID}: "${decodedProjectName}"`,
           fields: [ConfigKey.JOURNEY_ID, ConfigKey.CONFIG_HASH],
-          perPage: size,
+          perPage,
           sortField: ConfigKey.JOURNEY_ID,
           sortOrder: 'asc',
-          searchAfter: decodedAfterId ? [...decodedAfterId.split(',')] : undefined,
+          searchAfter: decodedSearchAfter ? [...decodedSearchAfter.split(',')] : undefined,
         },
         syntheticsMonitorClient.syntheticsService,
         savedObjectsClient
       );
-      const projectMonitors = monitors
-        .map((monitor) => {
-          return JSON.stringify({
-            journey_id: monitor.attributes[ConfigKey.JOURNEY_ID],
-            hash: monitor.attributes[ConfigKey.CONFIG_HASH] || '',
-            monitor_id: monitor.id,
-            afterKey: monitor.sort,
-          });
-        })
-        .join('\n');
+      const projectMonitors = monitors.map((monitor) => ({
+        journey_id: monitor.attributes[ConfigKey.JOURNEY_ID],
+        hash: monitor.attributes[ConfigKey.CONFIG_HASH] || '',
+      }));
 
-      return response.ok({
-        body: projectMonitors,
-        headers: {
-          'Content-Type': 'application/ndjson',
-        },
-      });
+      return {
+        total,
+        after_key: monitors.length ? monitors[monitors.length - 1].sort?.join(',') : null,
+        monitors: projectMonitors,
+      };
     } catch (error) {
       logger.error(error);
     }
