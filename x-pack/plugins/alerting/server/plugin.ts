@@ -219,8 +219,6 @@ export class AlertingPlugin {
     this.eventLogService = plugins.eventLog;
     plugins.eventLog.registerProviderActions(EVENT_LOG_PROVIDER, Object.values(EVENT_LOG_ACTIONS));
 
-    plugins.actions.registerUnsecuredActionsClientAccess('alerting');
-
     const ruleTypeRegistry = new RuleTypeRegistry({
       logger: this.logger,
       taskManager: plugins.taskManager,
@@ -464,19 +462,6 @@ export class AlertingPlugin {
     scheduleAlertingHealthCheck(this.logger, this.config, plugins.taskManager);
     scheduleApiKeyInvalidatorTask(this.telemetryLogger, this.config, plugins.taskManager);
 
-    plugins.actions.getUnsecuredActionsClient().then((unsecuredActionsClient) => {
-      unsecuredActionsClient.bulkEnqueueExecution('alerting', [
-        {
-          id: 'gmail',
-          params: {
-            to: ['xxxxxx'],
-            subject: 'hello from Kibana!',
-            message: 'does this work??',
-          },
-          executionId: 'abc',
-        },
-      ]);
-    });
     return {
       listTypes: ruleTypeRegistry!.list.bind(this.ruleTypeRegistry!),
       getAlertingAuthorizationWithRequest,

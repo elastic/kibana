@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { set } from 'lodash';
+import { isEmpty, set } from 'lodash';
 import { IEvent, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { RelatedSavedObjects } from './related_saved_objects';
 
@@ -38,6 +38,17 @@ export function createActionEventLogRecordObject(params: CreateActionEventLogRec
   const { action, message, task, namespace, executionId, spaceId, consumer, relatedSavedObjects } =
     params;
 
+  const kibanaAlertRule = {
+    ...(consumer ? { consumer } : {}),
+    ...(executionId
+      ? {
+          execution: {
+            uuid: executionId,
+          },
+        }
+      : {}),
+  };
+
   const event: Event = {
     ...(params.timestamp ? { '@timestamp': params.timestamp } : {}),
     event: {
@@ -45,18 +56,7 @@ export function createActionEventLogRecordObject(params: CreateActionEventLogRec
       kind: 'action',
     },
     kibana: {
-      alert: {
-        rule: {
-          ...(consumer ? { consumer } : {}),
-          ...(executionId
-            ? {
-                execution: {
-                  uuid: executionId,
-                },
-              }
-            : {}),
-        },
-      },
+      ...(!isEmpty(kibanaAlertRule) ? { alert: { rule: kibanaAlertRule } } : {}),
       saved_objects: params.savedObjects.map((so) => ({
         ...(so.relation ? { rel: so.relation } : {}),
         type: so.type,
