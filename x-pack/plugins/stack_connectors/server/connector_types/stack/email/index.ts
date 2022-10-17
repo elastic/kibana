@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import nodemailerGetService from 'nodemailer/lib/well-known';
 import SMTPConnection from 'nodemailer/lib/smtp-connection';
-import { Logger } from '@kbn/core/server';
 import type {
   ActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
@@ -192,7 +191,6 @@ function validateParams(paramsObject: unknown, validatorServices: ValidatorServi
 }
 
 interface GetConnectorTypeParams {
-  logger: Logger;
   publicBaseUrl?: string;
 }
 
@@ -218,7 +216,7 @@ function validateConnector(
 // connector type definition
 export const ConnectorTypeId = '.email';
 export function getConnectorType(params: GetConnectorTypeParams): EmailConnectorType {
-  const { logger, publicBaseUrl } = params;
+  const { publicBaseUrl } = params;
   return {
     id: ConnectorTypeId,
     minimumLicenseRequired: 'gold',
@@ -245,7 +243,7 @@ export function getConnectorType(params: GetConnectorTypeParams): EmailConnector
       connector: validateConnector,
     },
     renderParameterTemplates,
-    executor: curry(executor)({ logger, publicBaseUrl }),
+    executor: curry(executor)({ publicBaseUrl }),
   };
 }
 
@@ -265,20 +263,15 @@ function renderParameterTemplates(
 
 async function executor(
   {
-    logger,
     publicBaseUrl,
   }: {
-    logger: GetConnectorTypeParams['logger'];
     publicBaseUrl: GetConnectorTypeParams['publicBaseUrl'];
   },
   execOptions: EmailConnectorTypeExecutorOptions
 ): Promise<ConnectorTypeExecutorResult<unknown>> {
-  const actionId = execOptions.actionId;
-  const config = execOptions.config;
-  const secrets = execOptions.secrets;
-  const params = execOptions.params;
-  const configurationUtilities = execOptions.configurationUtilities;
-  const connectorTokenClient = execOptions.services.connectorTokenClient;
+  const { actionId, config, secrets, params, configurationUtilities, services, logger } =
+    execOptions;
+  const connectorTokenClient = services.connectorTokenClient;
 
   const emails = params.to.concat(params.cc).concat(params.bcc);
   let invalidEmailsMessage = configurationUtilities.validateEmailAddresses(emails);

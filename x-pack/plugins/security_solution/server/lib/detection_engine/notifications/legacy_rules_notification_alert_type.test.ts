@@ -70,6 +70,7 @@ describe('legacyRules_notification_alert_type', () => {
         throttle: null,
         notifyWhen: null,
       },
+      logger,
     };
 
     alert = legacyRulesNotificationAlertType({

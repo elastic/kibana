@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
 import { AlertingSetup, StackAlertsStartDeps } from '../../types';
 import { getRuleType } from './rule_type';
 
@@ -15,12 +14,11 @@ export const MAX_GROUPS = 1000;
 export const DEFAULT_GROUPS = 100;
 
 interface RegisterParams {
-  logger: Logger;
   data: Promise<StackAlertsStartDeps['triggersActionsUi']['data']>;
   alerting: AlertingSetup;
 }
 
 export function register(params: RegisterParams) {
-  const { logger, data, alerting } = params;
-  alerting.registerType(getRuleType(logger, data));
+  const { data, alerting } = params;
+  alerting.registerType(getRuleType(data));
 }

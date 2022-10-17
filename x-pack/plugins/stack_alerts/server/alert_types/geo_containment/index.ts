@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
 import { AlertingSetup } from '../../types';
 import {
   GeoContainmentState,
@@ -19,12 +18,11 @@ import {
 import { GeoContainmentExtractedParams, GeoContainmentParams } from './alert_type';
 
 interface RegisterParams {
-  logger: Logger;
   alerting: AlertingSetup;
 }
 
 export function register(params: RegisterParams) {
-  const { logger, alerting } = params;
+  const { alerting } = params;
   alerting.registerType<
     GeoContainmentParams,
     GeoContainmentExtractedParams,
@@ -33,5 +31,5 @@ export function register(params: RegisterParams) {
     GeoContainmentInstanceContext,
     typeof ActionGroupId,
     typeof RecoveryActionGroupId
-  >(getAlertType(logger));
+  >(getAlertType());
 }

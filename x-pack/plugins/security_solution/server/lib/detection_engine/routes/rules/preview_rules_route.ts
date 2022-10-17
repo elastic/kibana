@@ -7,7 +7,7 @@
 import moment from 'moment';
 import uuid from 'uuid';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { StartServicesAccessor } from '@kbn/core/server';
+import type { Logger, StartServicesAccessor } from '@kbn/core/server';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type {
   AlertInstanceContext,
@@ -64,7 +64,8 @@ export const previewRulesRoute = async (
   ruleOptions: CreateRuleOptions,
   securityRuleTypeOptions: CreateSecurityRuleTypeWrapperProps,
   previewRuleDataClient: IRuleDataClient,
-  getStartServices: StartServicesAccessor<StartPlugins>
+  getStartServices: StartServicesAccessor<StartPlugins>,
+  logger: Logger
 ) => {
   router.post(
     {
@@ -251,6 +252,7 @@ export const previewRulesRoute = async (
               state: statePreview,
               tags: [],
               updatedBy: rule.updatedBy,
+              logger,
             })) as TState;
 
             const errors = loggedStatusChanges

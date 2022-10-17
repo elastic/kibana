@@ -65,6 +65,7 @@ describe('Executor', () => {
       secrets,
       services,
       configurationUtilities: mockedActionsConfig,
+      logger,
     });
 
     expect(res).toEqual({
@@ -86,6 +87,7 @@ describe('Executor', () => {
       secrets,
       services,
       configurationUtilities: mockedActionsConfig,
+      logger,
     });
 
     expect(res).toEqual({
@@ -107,6 +109,7 @@ describe('Executor', () => {
       secrets,
       services,
       configurationUtilities: mockedActionsConfig,
+      logger,
     });
 
     expect(res).toEqual({
@@ -126,6 +129,7 @@ describe('Executor', () => {
       secrets,
       services,
       configurationUtilities: mockedActionsConfig,
+      logger,
     });
 
     expect(res).toEqual({
@@ -146,6 +150,7 @@ describe('Executor', () => {
         secrets,
         services,
         configurationUtilities: mockedActionsConfig,
+        logger,
       })
     ).rejects.toThrowError('You should register at least one subAction for your connector type');
   });
@@ -161,6 +166,7 @@ describe('Executor', () => {
         secrets,
         services,
         configurationUtilities: mockedActionsConfig,
+        logger,
       })
     ).rejects.toThrowError(
       'Sub action "not-exist" is not registered. Connector id: test-action-id. Connector name: Test. Connector type: .test'
@@ -178,6 +184,7 @@ describe('Executor', () => {
         secrets,
         services,
         configurationUtilities: mockedActionsConfig,
+        logger,
       })
     ).rejects.toThrowError(
       'Method "not-exist" does not exists in service. Sub action: "testUrl". Connector id: test-action-id. Connector name: Test. Connector type: .test'
@@ -195,6 +202,7 @@ describe('Executor', () => {
         secrets,
         services,
         configurationUtilities: mockedActionsConfig,
+        logger,
       })
     ).rejects.toThrowError(
       'Method "notAFunction" must be a function. Connector id: test-action-id. Connector name: Test. Connector type: .test'
@@ -212,6 +220,7 @@ describe('Executor', () => {
         secrets,
         services,
         configurationUtilities: mockedActionsConfig,
+        logger,
       })
     ).rejects.toThrowError(
       'Request validation failed (Error: [id]: expected value of type [string] but got [undefined])'
