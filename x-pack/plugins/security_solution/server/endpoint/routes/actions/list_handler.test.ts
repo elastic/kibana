@@ -97,16 +97,13 @@ describe(' Action List Handler', () => {
 
   describe('Internals', () => {
     it('should return `notFound` when actions index does not exist', async () => {
-      mockDoesLogsEndpointActionsIndexExist.mockResolvedValue(false);
       await actionListHandler({ pageSize: 10, page: 1 });
-      expect(mockResponse.notFound).toHaveBeenCalledWith({
-        body: 'index_not_found_exception',
-      });
-    });
-
-    it('should return `ok` when actions index exists', async () => {
-      await actionListHandler({ pageSize: 10, page: 1 });
-      expect(mockResponse.ok).toHaveBeenCalled();
+      expect(mockGetActionList).toHaveBeenCalledWith(
+        expect.objectContaining({
+          pageSize: 10,
+          page: 1,
+        })
+      );
     });
 
     it('should call `getActionListByStatus` when statuses filter values are provided', async () => {
