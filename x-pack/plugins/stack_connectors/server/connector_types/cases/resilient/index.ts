@@ -67,7 +67,6 @@ export function getConnectorType(
       CasesConnectorFeatureId,
       SecurityConnectorFeatureId,
     ],
-    maxAttempts: 3,
     validate: {
       config: {
         schema: ExternalIncidentServiceConfigurationSchema,

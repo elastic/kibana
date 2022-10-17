@@ -68,7 +68,6 @@ export function getConnectorType({ logger }: { logger: Logger }): XmattersConnec
       defaultMessage: 'xMatters',
     }),
     supportedFeatureIds: [AlertingConnectorFeatureId],
-    maxAttempts: 3,
     validate: {
       config: {
         schema: ConfigSchema,

@@ -351,6 +351,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
         actionType: ActionType<Config, Secrets, Params, ExecutorResultData>
       ) => {
         ensureSufficientLicense(actionType);
+        actionType.maxAttempts = actionType.maxAttempts ?? 3;
         actionTypeRegistry.register(actionType);
       },
       registerSubActionConnectorType: <

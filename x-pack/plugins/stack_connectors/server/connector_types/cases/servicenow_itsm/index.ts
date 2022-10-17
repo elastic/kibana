@@ -84,7 +84,6 @@ export function getServiceNowITSMConnectorType(
       UptimeConnectorFeatureId,
       SecurityConnectorFeatureId,
     ],
-    maxAttempts: 3,
     validate: {
       config: {
         schema: ExternalIncidentServiceConfigurationSchema,

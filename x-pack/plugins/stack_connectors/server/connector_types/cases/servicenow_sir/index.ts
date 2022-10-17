@@ -82,7 +82,6 @@ export function getServiceNowSIRConnectorType(
       CasesConnectorFeatureId,
       SecurityConnectorFeatureId,
     ],
-    maxAttempts: 3,
     validate: {
       config: {
         schema: ExternalIncidentServiceConfigurationSchema,

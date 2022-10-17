@@ -230,7 +230,6 @@ export function getConnectorType(params: GetConnectorTypeParams): EmailConnector
       UptimeConnectorFeatureId,
       SecurityConnectorFeatureId,
     ],
-    maxAttempts: 3,
     validate: {
       config: {
         schema: ConfigSchema,

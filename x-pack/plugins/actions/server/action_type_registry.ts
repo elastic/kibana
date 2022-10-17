@@ -151,7 +151,7 @@ export class ActionTypeRegistry {
     this.taskManager.registerTaskDefinitions({
       [`actions:${actionType.id}`]: {
         title: actionType.name,
-        maxAttempts: actionType.maxAttempts || 1,
+        maxAttempts: actionType.maxAttempts || 3,
         getRetry(attempts: number, error: unknown) {
           if (error instanceof ExecutorError) {
             return error.retry == null ? false : error.retry;

@@ -82,7 +82,6 @@ export function getConnectorType({
       UptimeConnectorFeatureId,
       SecurityConnectorFeatureId,
     ],
-    maxAttempts: 3,
     validate: {
       secrets: {
         schema: SecretsSchema,

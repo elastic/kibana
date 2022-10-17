@@ -71,7 +71,6 @@ export function getConnectorType({ logger }: { logger: Logger }): TeamsConnector
       UptimeConnectorFeatureId,
       SecurityConnectorFeatureId,
     ],
-    maxAttempts: 3,
     validate: {
       secrets: {
         schema: SecretsSchema,

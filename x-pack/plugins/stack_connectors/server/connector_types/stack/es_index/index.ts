@@ -82,7 +82,6 @@ export function getConnectorType({ logger }: { logger: Logger }): ESIndexConnect
       UptimeConnectorFeatureId,
       SecurityConnectorFeatureId,
     ],
-    maxAttempts: 3,
     validate: {
       config: {
         schema: ConfigSchema,
