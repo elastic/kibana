@@ -932,7 +932,7 @@ export class RulesClient {
     page,
     perPage,
     sort,
-    allNamespaces = true,
+    allNamespaces,
   }: GetGlobalExecutionLogParams): Promise<IExecutionLogResult> {
     this.logger.debug(`getGlobalExecutionLogWithAuth(): getting global execution log`);
 
@@ -1070,7 +1070,7 @@ export class RulesClient {
     dateStart,
     dateEnd,
     filter,
-    allNamespaces = true,
+    allNamespaces,
   }: GetGlobalExecutionKPIParams) {
     this.logger.debug(`getGlobalExecutionLogWithAuth(): getting global execution log`);
 

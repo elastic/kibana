@@ -18,6 +18,7 @@ import {
   Pagination,
   EuiSuperDatePicker,
   OnTimeChangeProps,
+  EuiSwitch,
 } from '@elastic/eui';
 import { IExecutionLog } from '@kbn/alerting-plugin/common';
 import { SpacesContextProps } from '@kbn/spaces-plugin/public';
@@ -69,6 +70,13 @@ const getDefaultColumns = (columns: string[]) => {
   return [...LOCKED_COLUMNS, ...columnsWithoutLockedColumn];
 };
 
+const ALL_SPACES_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.ruleEventLogList.showAllSpacesToggle',
+  {
+    defaultMessage: 'Show rules from all spaces',
+  }
+);
+
 const updateButtonProps = {
   iconOnly: true,
   fill: false,
@@ -87,7 +95,7 @@ export type RuleEventLogListCommonProps = {
   overrideLoadExecutionLogAggregations?: RuleApis['loadExecutionLogAggregations'];
   overrideLoadGlobalExecutionLogAggregations?: RuleApis['loadGlobalExecutionLogAggregations'];
   hasRuleNames?: boolean;
-  hasSpaceNames?: boolean;
+  hasAllSpaceSwitch?: boolean;
 } & Pick<RuleApis, 'loadExecutionLogAggregations' | 'loadGlobalExecutionLogAggregations'>;
 
 export type RuleEventLogListTableProps<T extends RuleEventLogListOptions = 'default'> =
@@ -110,7 +118,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
     overrideLoadExecutionLogAggregations,
     initialPageSize = 10,
     hasRuleNames = false,
-    hasSpaceNames = true,
+    hasAllSpaceSwitch = false,
   } = props;
 
   const { uiSettings, notifications, spaces } = useKibana().services;
@@ -128,6 +136,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
   const [internalRefreshToken, setInternalRefreshToken] = useState<number | undefined>(
     refreshToken
   );
+  const [showFromAllSpaces, setShowFromAllSpaces] = useState(false);
 
   // Data grid states
   const [logs, setLogs] = useState<IExecutionLog[]>();
@@ -208,6 +217,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
         dateEnd: getParsedDate(dateEnd),
         page: pagination.pageIndex,
         perPage: pagination.pageSize,
+        allNamespaces: showFromAllSpaces,
       });
       setLogs(result.data);
       setPagination({
@@ -301,6 +311,10 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
     [search, setSearchText]
   );
 
+  const onShowAllSpacesChange = useCallback(() => {
+    setShowFromAllSpaces(!showFromAllSpaces);
+  }, [showFromAllSpaces, setShowFromAllSpaces]);
+
   const renderList = () => {
     if (!logs) {
       return <CenterJustifiedSpinner />;
@@ -319,7 +333,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
             dateFormat={dateFormat}
             selectedRunLog={selectedRunLog}
             showRuleNameAndIdColumns={hasRuleNames}
-            showSpaceColumns={hasSpaceNames}
+            showSpaceColumns={showFromAllSpaces}
             onChangeItemsPerPage={onChangeItemsPerPage}
             onChangePage={onChangePage}
             onFlyoutOpen={onFlyoutOpen}
@@ -343,6 +357,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
     pagination.pageIndex,
     pagination.pageSize,
     searchText,
+    showFromAllSpaces,
   ]);
 
   useEffect(() => {
@@ -364,7 +379,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
   return (
     <EuiFlexGroup gutterSize="none" direction="column">
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup>
+        <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiFieldSearch
               fullWidth
@@ -392,6 +407,15 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
               updateButtonProps={updateButtonProps}
             />
           </EuiFlexItem>
+          {hasAllSpaceSwitch && (
+            <EuiFlexItem>
+              <EuiSwitch
+                label={ALL_SPACES_LABEL}
+                checked={showFromAllSpaces}
+                onChange={onShowAllSpacesChange}
+              />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
         <EuiSpacer />
       </EuiFlexItem>
