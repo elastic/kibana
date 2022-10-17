@@ -530,8 +530,9 @@ function getEmptyLayerSuggestionsForField(
   }
 
   // copy the sampling rate to the new layer
+  // or just default to 1
   if (newLayer) {
-    newLayer.sampling = state.layers[layerId].sampling;
+    newLayer.sampling = state.layers[layerId]?.sampling ?? 1;
   }
 
   const newLayerSuggestions = newLayer

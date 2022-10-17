@@ -176,6 +176,7 @@ function testInitialState(): FormBasedPrivateState {
     currentIndexPatternId: '1',
     layers: {
       first: {
+        sampling: 1,
         indexPatternId: '1',
         columnOrder: ['col1'],
         columns: {

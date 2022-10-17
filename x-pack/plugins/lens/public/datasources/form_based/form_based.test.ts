@@ -487,6 +487,12 @@ describe('IndexPattern Data Source', () => {
                 "partialRows": Array [
                   false,
                 ],
+                "probability": Array [
+                  1,
+                ],
+                "samplerSeed": Array [
+                  453225886,
+                ],
                 "timeFields": Array [
                   "timestamp",
                 ],
@@ -1631,6 +1637,7 @@ describe('IndexPattern Data Source', () => {
           },
         },
         currentIndexPatternId: '1',
+        sampling: 1,
       };
       expect(FormBasedDatasource.insertLayer(state, 'newLayer')).toEqual({
         ...state,
@@ -1640,6 +1647,7 @@ describe('IndexPattern Data Source', () => {
             indexPatternId: '1',
             columnOrder: [],
             columns: {},
+            sampling: 1,
           },
         },
       });
