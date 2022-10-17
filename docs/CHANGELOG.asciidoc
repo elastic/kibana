@@ -295,7 +295,7 @@ Enterprise Search::
 For the Elastic Enterprise Search 8.5.0 release information, refer to {enterprise-search-ref}/changelog.html[_Elastic Enterprise Search Documentation Release notes_].
 
 Fleet::
-* Bugfix: Refresh search results when clearing category filter {kibana-pull}142853[#142853]
+* Refresh search results when clearing category filter {kibana-pull}142853[#142853]
 * Respect `default_field: false` when generating index settings {kibana-pull}142277[#142277]
 * Fixes repeated debug logs when bundled package directory does not exist {kibana-pull}141660[#141660]
 
