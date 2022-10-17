@@ -10,6 +10,7 @@ import { parse } from 'query-string';
 import type { IncomingMessage } from 'http';
 import type { RouteDependencies } from '../../..';
 import { API_BASE_PATH } from '../../../../../common/constants';
+import { streamToString } from '../../../../lib/utils';
 
 interface Settings {
   indices: boolean;
@@ -19,21 +20,6 @@ interface Settings {
 }
 
 const RESPONSE_SIZE_LIMIT = 10 * 1024 * 1024;
-
-function streamToString(stream: IncomingMessage, limit: number) {
-  return new Promise<string>((resolve, reject) => {
-    const chunks: Buffer[] = [];
-    stream.on('data', (chunk) => {
-      chunks.push(chunk);
-      if (Buffer.byteLength(Buffer.concat(chunks)) > limit) {
-        stream.destroy();
-        reject(new Error('Response size limit exceeded'));
-      }
-    });
-    stream.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
-    stream.on('error', reject);
-  });
-}
 
 async function limitEntityResponseSize(esClient: IScopedClusterClient, entity: string) {
   const stream = await esClient.asInternalUser.transport.request(
