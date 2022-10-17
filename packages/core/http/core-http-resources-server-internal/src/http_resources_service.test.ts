@@ -301,7 +301,6 @@ describe('HttpResources service', () => {
           });
         });
       });
-
     }
 
     runRegisterTestSuite(
