@@ -118,7 +118,7 @@ For the Elastic Security 8.5.0 release information, refer to {security-guide}/re
 Fleet::
 * Adds agent activity flyout {kibana-pull}140510[#140510]
 * Adds a new event toggle to capture terminal output in endpoint {kibana-pull}139421[#139421]
-* Moving action batching to async {kibana-pull}138870[#138870]
+* Makes batch actions asynchronous {kibana-pull}138870[#138870]
 * Adds ability to tag integration assets {kibana-pull}137184[#137184]
 
 Infrastructure::
