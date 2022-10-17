@@ -6,13 +6,14 @@
  */
 
 import { EuiFilterButton } from '@elastic/eui';
-import { UserProfilesPopover, UserProfileWithAvatar } from '@kbn/user-profile-components';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { UserProfilesPopover } from '@kbn/user-profile-components';
 import { isEmpty } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useSuggestUserProfiles } from '../../containers/user_profiles/use_suggest_user_profiles';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
 import { useCasesContext } from '../cases_context/use_cases_context';
-import { CurrentUserProfile } from '../types';
+import type { CurrentUserProfile } from '../types';
 import { EmptyMessage } from '../user_profiles/empty_message';
 import { NoMatches } from '../user_profiles/no_matches';
 import { SelectedStatusMessage } from '../user_profiles/selected_status_message';
