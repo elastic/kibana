@@ -11,7 +11,8 @@ import { waitFor } from '@testing-library/react';
 
 import { useForm, Form } from '../../common/shared_imports';
 import { SubmitCaseButton } from './submit_button';
-import { schema, FormProps } from './schema';
+import type { FormProps } from './schema';
+import { schema } from './schema';
 
 describe('SubmitCaseButton', () => {
   const onSubmit = jest.fn();
