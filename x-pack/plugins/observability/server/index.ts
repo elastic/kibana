@@ -32,7 +32,18 @@ const configSchema = schema.object({
       enabled: schema.boolean({ defaultValue: false }),
     }),
     alertDetails: schema.object({
-      enabled: schema.boolean({ defaultValue: false }),
+      apm: schema.object({
+        enabled: schema.boolean({ defaultValue: false }),
+      }),
+      metrics: schema.object({
+        enabled: schema.boolean({ defaultValue: false }),
+      }),
+      logs: schema.object({
+        enabled: schema.boolean({ defaultValue: false }),
+      }),
+      uptime: schema.object({
+        enabled: schema.boolean({ defaultValue: false }),
+      }),
     }),
   }),
 });

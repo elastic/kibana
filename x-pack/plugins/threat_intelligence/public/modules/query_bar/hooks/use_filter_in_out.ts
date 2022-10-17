@@ -12,7 +12,7 @@ import {
   getIndicatorFieldAndValue,
   useIndicatorsFiltersContext,
 } from '../../indicators';
-import { FilterIn, FilterOut, updateFiltersArray } from '../utils/filter';
+import { FilterIn, FilterOut, updateFiltersArray } from '../utils';
 import { Indicator } from '../../../../common/types/indicator';
 
 export interface UseFilterInParam {
