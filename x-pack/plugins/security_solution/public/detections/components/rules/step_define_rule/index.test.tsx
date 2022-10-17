@@ -10,6 +10,7 @@ import { shallow } from 'enzyme';
 
 import { StepDefineRule, aggregatableFields } from '.';
 import { stepDefineDefaultValue } from '../../../pages/detection_engine/rules/utils';
+import { mockBrowserFields } from '../../../../common/containers/source/mock';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/hooks/use_selector', () => {
@@ -19,6 +20,11 @@ jest.mock('../../../../common/hooks/use_selector', () => {
     useDeepEqualSelector: () => ({
       kibanaDataViews: [{ id: 'world' }],
       sourcererScope: 'my-selected-dataview-id',
+      selectedDataView: {
+        id: 'security-solution',
+        browserFields: mockBrowserFields,
+        patternList: [],
+      },
     }),
   };
 });

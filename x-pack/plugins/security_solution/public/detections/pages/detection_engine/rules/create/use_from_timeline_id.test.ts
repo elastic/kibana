@@ -79,7 +79,11 @@ const fromTimeline = {
 describe('useFromTimelineId', () => {
   beforeEach(() => {
     (useDeepEqualSelector as jest.Mock).mockReturnValue({
-      selectedDataView: 'cool-data-view-id',
+      selectedDataView: {
+        id: 'not-the one',
+        browserFields: mockBrowserFields,
+        patternList: [],
+      },
       sourcererScope: {
         selectedDataViewId: 'cool-data-view-id',
         selectedPatterns: ['auditbeat-*'],
