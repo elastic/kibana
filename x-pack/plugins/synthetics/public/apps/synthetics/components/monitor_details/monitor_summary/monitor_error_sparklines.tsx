@@ -38,6 +38,7 @@ export const MonitorErrorSparklines = () => {
           selectedMetricField: 'state.id',
           name: 'Monitor errors',
           color: euiTheme.colors.danger,
+          operationType: 'unique_count',
         },
       ]}
     />
