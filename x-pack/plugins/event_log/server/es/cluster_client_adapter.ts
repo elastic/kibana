@@ -52,7 +52,7 @@ interface QueryOptionsEventsBySavedObjectFilter {
 
 export interface AggregateEventsWithAuthFilter {
   index: string;
-  namespaces: Array<string | undefined>;
+  namespaces?: Array<string | undefined>;
   type: string;
   authFilter: KueryNode;
   aggregateOptions: AggregateOptionsType;
@@ -468,7 +468,9 @@ export function getQueryBodyWithAuthFilter(
   const { namespaces, type, authFilter } = opts;
   const { start, end, filter } = queryOptions ?? {};
 
-  const namespaceQuery = namespaces.map((namespace) => getNamespaceQuery(namespace));
+  const namespaceQuery = (namespaces ?? [undefined]).map((namespace) =>
+    getNamespaceQuery(namespace)
+  );
   let dslFilterQuery: estypes.QueryDslBoolQuery['filter'];
   try {
     const filterKueryNode = filter ? fromKueryExpression(filter) : null;
