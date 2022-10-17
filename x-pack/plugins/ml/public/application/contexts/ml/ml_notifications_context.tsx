@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import React, { FC, useContext, useEffect, useState } from 'react';
-import { combineLatest, of, timer } from 'rxjs';
-import { catchError, switchMap, map, tap } from 'rxjs/operators';
+import React, { FC, useContext, useState } from 'react';
+import { combineLatest, timer } from 'rxjs';
+import { switchMap, map, tap, retry } from 'rxjs/operators';
 import moment from 'moment';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import useMount from 'react-use/lib/useMount';
 import { useMlKibana } from '../kibana';
 import { useStorage } from '../storage';
 import { ML_NOTIFICATIONS_LAST_CHECKED_AT } from '../../../../common/types/storage';
@@ -16,6 +18,8 @@ import { useAsObservable } from '../../hooks';
 import type { NotificationsCountResponse } from '../../../../common/types/notifications';
 
 const NOTIFICATIONS_CHECK_INTERVAL = 60000;
+
+const defaultCounts = { info: 0, error: 0, warning: 0 };
 
 export const MlNotificationsContext = React.createContext<{
   notificationsCounts: NotificationsCountResponse;
@@ -25,7 +29,7 @@ export const MlNotificationsContext = React.createContext<{
   latestRequestedAt: number | null;
   setLastCheckedAt: (v: number) => void;
 }>({
-  notificationsCounts: { info: 0, error: 0, warning: 0 },
+  notificationsCounts: defaultCounts,
   lastCheckedAt: null,
   latestRequestedAt: null,
   setLastCheckedAt: () => {},
@@ -35,21 +39,26 @@ export const MlNotificationsContextProvider: FC = ({ children }) => {
   const {
     services: {
       mlServices: { mlApiServices },
+      application: { capabilities },
     },
   } = useMlKibana();
+  const canGetJobs = capabilities.ml.canGetJobs as boolean;
+  const canGetDataFrameAnalytics = capabilities.ml.canGetDataFrameAnalytics as boolean;
+  const canGetTrainedModels = capabilities.ml.canGetTrainedModels as boolean;
+
+  const canGetNotifications = canGetJobs && canGetDataFrameAnalytics && canGetTrainedModels;
 
   const [lastCheckedAt, setLastCheckedAt] = useStorage(ML_NOTIFICATIONS_LAST_CHECKED_AT);
   const lastCheckedAt$ = useAsObservable(lastCheckedAt);
 
   /** Holds the value used for the actual request */
   const [latestRequestedAt, setLatestRequestedAt] = useState<number | null>(null);
-  const [notificationsCounts, setNotificationsCounts] = useState<NotificationsCountResponse>({
-    info: 0,
-    error: 0,
-    warning: 0,
-  });
+  const [notificationsCounts, setNotificationsCounts] =
+    useState<NotificationsCountResponse>(defaultCounts);
 
-  useEffect(function startPollingNotifications() {
+  useMount(function startPollingNotifications() {
+    if (!canGetNotifications) return;
+
     const subscription = combineLatest([lastCheckedAt$, timer(0, NOTIFICATIONS_CHECK_INTERVAL)])
       .pipe(
         // Use the latest check time or 7 days ago by default.
@@ -62,20 +71,16 @@ export const MlNotificationsContextProvider: FC = ({ children }) => {
             lastCheckedAt: lastCheckedAtQuery,
           })
         ),
-        catchError((error) => {
-          // Fail silently for now
-          return of({} as NotificationsCountResponse);
-        })
+        retry({ delay: NOTIFICATIONS_CHECK_INTERVAL })
       )
       .subscribe((response) => {
-        setNotificationsCounts(response);
+        setNotificationsCounts(isPopulatedObject(response) ? response : defaultCounts);
       });
 
     return () => {
       subscription.unsubscribe();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  });
 
   return (
     <MlNotificationsContext.Provider

@@ -92,6 +92,7 @@ export const ConnectorSchedulingComponent: React.FC = () => {
           </EuiText>
           <EuiSpacer size="s" />
           <EuiButtonTo
+            data-telemetry-id="entSearchContent-connector-scheduling-configure"
             to={generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
               indexName: index.name,
               tabId: SearchIndexTabId.CONFIGURATION,
@@ -161,6 +162,7 @@ export const ConnectorSchedulingComponent: React.FC = () => {
           </EuiFlexItem>
           <EuiFlexItem>
             <CronEditor
+              data-telemetry-id="entSearchContent-connector-scheduling-editSchedule"
               fieldToPreferredValueMap={fieldToPreferredValueMap}
               cronExpression={simpleCron.expression}
               frequency={simpleCron.frequency}
@@ -184,6 +186,7 @@ export const ConnectorSchedulingComponent: React.FC = () => {
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
+                  data-telemetry-id="entSearchContent-connector-scheduling-resetSchedule"
                   disabled={!hasChanges || status === Status.LOADING}
                   onClick={() => {
                     setScheduling(schedulingInput);
@@ -204,6 +207,7 @@ export const ConnectorSchedulingComponent: React.FC = () => {
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
+                  data-telemetry-id="entSearchContent-connector-scheduling-saveSchedule"
                   disabled={!hasChanges || status === Status.LOADING}
                   onClick={() => makeRequest({ connectorId: index.connector.id, scheduling })}
                 >
