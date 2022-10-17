@@ -11,9 +11,9 @@ import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiText, EuiBadge } from '@elastic
 
 import { i18n } from '@kbn/i18n';
 
-import { EuiButtonEmptyTo } from '../../../../shared/react_router_helpers';
+import { EuiButtonEmptyTo } from '../../../../../shared/react_router_helpers';
 
-export const CustomPipelinePanel: React.FC<{
+export const CustomPipelineItem: React.FC<{
   indexName: string;
   ingestionMethod: string;
   pipelineSuffix: string;

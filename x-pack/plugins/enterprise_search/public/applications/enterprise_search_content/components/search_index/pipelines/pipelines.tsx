@@ -27,7 +27,7 @@ import { isApiIndex } from '../../../utils/indices';
 
 import { InferenceErrors } from './inference_errors';
 import { InferenceHistory } from './inference_history';
-import { IngestPipelinesCard } from './ingest_pipelines_card';
+import { IngestPipelinesCard } from './ingest_pipelines/ingest_pipelines_card';
 import { AddMLInferencePipelineButton } from './ml_inference/add_ml_inference_button';
 import { AddMLInferencePipelineModal } from './ml_inference/add_ml_inference_pipeline_modal';
 import { MlInferencePipelineProcessorsCard } from './ml_inference_pipeline_processors_card';

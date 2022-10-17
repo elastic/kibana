@@ -27,13 +27,13 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { DEFAULT_PIPELINE_NAME } from '../../../../../../common/constants';
+import { DEFAULT_PIPELINE_NAME } from '../../../../../../../common/constants';
 
-import { IngestPipelineParams } from '../../../../../../common/types/connectors';
+import { IngestPipelineParams } from '../../../../../../../common/types/connectors';
 
-import { CurlRequest } from '../components/curl_request/curl_request';
+import { CurlRequest } from '../../components/curl_request/curl_request';
 
-import { PipelineSettingsForm } from './pipeline_settings_form';
+import { PipelineSettingsForm } from '../pipeline_settings_form';
 
 interface IngestPipelineModalProps {
   closeModal: () => void;
@@ -46,7 +46,6 @@ interface IngestPipelineModalProps {
   pipeline: IngestPipelineParams;
   savePipeline: () => void;
   setPipeline: (pipeline: IngestPipelineParams) => void;
-  showModal: boolean;
 }
 
 export const IngestPipelineModal: React.FC<IngestPipelineModalProps> = ({
@@ -60,14 +59,13 @@ export const IngestPipelineModal: React.FC<IngestPipelineModalProps> = ({
   pipeline,
   savePipeline,
   setPipeline,
-  showModal,
 }) => {
   const { name } = pipeline;
 
   // can't customize if you already have a custom pipeline!
   const canCustomize = name === DEFAULT_PIPELINE_NAME;
 
-  return showModal ? (
+  return (
     <EuiModal onClose={closeModal} maxWidth={'40rem'}>
       <EuiModalHeader>
         <EuiFlexGroup direction="column" gutterSize="none">
@@ -260,7 +258,5 @@ export const IngestPipelineModal: React.FC<IngestPipelineModalProps> = ({
         )}
       </EuiModalFooter>
     </EuiModal>
-  ) : (
-    <></>
   );
 };
