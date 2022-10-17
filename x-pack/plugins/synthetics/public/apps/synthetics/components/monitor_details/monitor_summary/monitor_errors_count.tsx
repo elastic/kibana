@@ -27,7 +27,7 @@ export const MonitorErrorsCount = () => {
         attributes={[
           {
             time: {
-              from: 'now-1h',
+              from: 'now-30d/d',
               to: 'now',
             },
             reportDefinitions: { config_id: [monitorId] },
