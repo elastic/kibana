@@ -53,13 +53,11 @@ export const getSyntheticsProjectMonitorsRoute: SyntheticsRestApiRouteFactory = 
       const projectMonitors = monitors.map((monitor) => ({
         journey_id: monitor.attributes[ConfigKey.JOURNEY_ID],
         hash: monitor.attributes[ConfigKey.CONFIG_HASH] || '',
-        monitor_id: monitor.id,
-        afterKey: monitor.sort,
       }));
 
       return {
         total,
-        after_key: projectMonitors[projectMonitors.length - 1].afterKey.join(','),
+        after_key: monitors.length ? monitors[monitors.length - 1].sort?.join(',') : null,
         monitors: projectMonitors,
       };
     } catch (error) {

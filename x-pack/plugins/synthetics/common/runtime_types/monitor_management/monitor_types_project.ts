@@ -52,15 +52,18 @@ export const ProjectMonitorsRequestCodec = t.interface({
 
 export const ProjectMonitorMetaDataCodec = t.interface({
   hash: t.string,
-  after_key: t.array(t.string, t.number),
   journey_id: t.string,
 });
 
-export const ProjectMonitorsResponseCodec = t.interface({
-  total: t.number,
-  after_key: t.string,
-  monitors: t.array(ProjectMonitorMetaDataCodec),
-});
+export const ProjectMonitorsResponseCodec = t.intersection([
+  t.interface({
+    total: t.number,
+    monitors: t.array(ProjectMonitorMetaDataCodec),
+  }),
+  t.partial({
+    after_key: t.string,
+  }),
+]);
 
 export type ProjectMonitorThrottlingConfig = t.TypeOf<typeof ProjectMonitorThrottlingConfigCodec>;
 
