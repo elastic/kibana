@@ -39,6 +39,7 @@ export interface ExpressionWrapperProps {
   renderMode?: RenderMode;
   syncColors?: boolean;
   syncTooltips?: boolean;
+  syncCursor?: boolean;
   hasCompatibleActions?: ReactExpressionRendererProps['hasCompatibleActions'];
   style?: React.CSSProperties;
   className?: string;
@@ -113,6 +114,7 @@ export function ExpressionWrapper({
   renderMode,
   syncColors,
   syncTooltips,
+  syncCursor,
   hasCompatibleActions,
   style,
   className,
@@ -143,6 +145,7 @@ export function ExpressionWrapper({
             renderMode={renderMode}
             syncColors={syncColors}
             syncTooltips={syncTooltips}
+            syncCursor={syncCursor}
             executionContext={executionContext}
             renderError={(errorMessage, error) => {
               onRuntimeError();

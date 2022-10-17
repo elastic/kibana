@@ -90,6 +90,7 @@ export const heatmapRenderer: (
             interactive={isInteractive()}
             chartsActiveCursorService={plugins.charts.activeCursor}
             syncTooltips={config.syncTooltips}
+            syncCursor={config.syncCursor}
           />
         </div>
       </KibanaThemeProvider>,

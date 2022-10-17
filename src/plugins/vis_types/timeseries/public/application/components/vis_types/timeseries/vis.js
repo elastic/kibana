@@ -163,6 +163,7 @@ class TimeseriesVisualization extends Component {
       onFilterClick,
       syncColors,
       syncTooltips,
+      syncCursor,
       palettesService,
       fieldFormatMap,
       getConfig,
@@ -275,6 +276,7 @@ class TimeseriesVisualization extends Component {
             annotations={this.prepareAnnotations()}
             syncColors={syncColors}
             syncTooltips={syncTooltips}
+            syncCursor={syncCursor}
             palettesService={palettesService}
             interval={interval}
             initialRender={initialRender}

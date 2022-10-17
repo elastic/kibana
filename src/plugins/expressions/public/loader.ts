@@ -114,6 +114,7 @@ export class ExpressionLoader {
       renderMode: params?.renderMode,
       syncColors: params?.syncColors,
       syncTooltips: params?.syncTooltips,
+      syncCursor: params?.syncCursor,
       hasCompatibleActions: params?.hasCompatibleActions,
       executionContext: params?.executionContext,
     });
@@ -199,6 +200,7 @@ export class ExpressionLoader {
       searchSessionId: params.searchSessionId,
       debug: params.debug,
       syncColors: params.syncColors,
+      syncCursor: params?.syncCursor,
       syncTooltips: params.syncTooltips,
       executionContext: params.executionContext,
     });
@@ -238,6 +240,7 @@ export class ExpressionLoader {
       this.params.searchSessionId = params.searchSessionId;
     }
     this.params.syncColors = params.syncColors;
+    this.params.syncCursor = params.syncCursor;
     this.params.syncTooltips = params.syncTooltips;
     this.params.debug = Boolean(params.debug);
     this.params.partial = Boolean(params.partial);

@@ -39,6 +39,7 @@ import {
   setStateFromSaveModal,
   setSyncColors,
   setSyncTooltips,
+  setSyncCursor,
   setUseMargins,
   setViewMode,
   useDashboardDispatch,
@@ -401,6 +402,10 @@ export function DashboardTopNav({
         syncColors: Boolean(currentState.options.syncColors),
         onSyncColorsChange: (isChecked: boolean) => {
           dispatchDashboardStateChange(setSyncColors(isChecked));
+        },
+        syncCursor: currentState.options.syncCursor ?? true,
+        onSyncCursorChange: (isChecked: boolean) => {
+          dispatchDashboardStateChange(setSyncCursor(isChecked));
         },
         syncTooltips: Boolean(currentState.options.syncTooltips),
         onSyncTooltipsChange: (isChecked: boolean) => {

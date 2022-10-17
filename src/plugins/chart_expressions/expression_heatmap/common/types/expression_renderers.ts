@@ -39,5 +39,6 @@ export type HeatmapRenderProps = HeatmapExpressionProps & {
   uiState: PersistedState;
   interactive: boolean;
   syncTooltips: boolean;
+  syncCursor: boolean;
   renderComplete: IInterpreterRenderHandlers['done'];
 };

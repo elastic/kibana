@@ -110,6 +110,7 @@ export class VisualizeEmbeddable
   private searchSessionId?: string;
   private syncColors?: boolean;
   private syncTooltips?: boolean;
+  private syncCursor?: boolean;
   private embeddableTitle?: string;
   private visCustomizations?: Pick<VisualizeInput, 'vis' | 'table'>;
   private subscriptions: Subscription[] = [];
@@ -154,6 +155,7 @@ export class VisualizeEmbeddable
     this.timefilter = timefilter;
     this.syncColors = this.input.syncColors;
     this.syncTooltips = this.input.syncTooltips;
+    this.syncCursor = this.input.syncCursor;
     this.searchSessionId = this.input.searchSessionId;
     this.query = this.input.query;
     this.embeddableTitle = this.getTitle();
@@ -319,6 +321,11 @@ export class VisualizeEmbeddable
 
     if (this.syncTooltips !== this.input.syncTooltips) {
       this.syncTooltips = this.input.syncTooltips;
+      dirty = true;
+    }
+
+    if (this.syncCursor !== this.input.syncCursor) {
+      this.syncCursor = this.input.syncCursor;
       dirty = true;
     }
 
@@ -574,6 +581,7 @@ export class VisualizeEmbeddable
       searchSessionId: this.input.searchSessionId,
       syncColors: this.input.syncColors,
       syncTooltips: this.input.syncTooltips,
+      syncCursor: this.input.syncCursor,
       uiState: this.vis.uiState,
       interactive: !this.input.disableTriggers,
       inspectorAdapters: this.inspectorAdapters,

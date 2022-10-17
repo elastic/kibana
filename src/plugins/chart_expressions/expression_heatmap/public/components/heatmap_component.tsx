@@ -146,6 +146,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
     uiState,
     interactive,
     syncTooltips,
+    syncCursor,
     renderComplete,
   }) => {
     const chartRef = useRef<Chart>(null);
@@ -576,7 +577,7 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
               noResults={
                 <EmptyPlaceholder icon={IconChartHeatmap} renderComplete={onRenderChange} />
               }
-              onPointerUpdate={handleCursorUpdate}
+              onPointerUpdate={syncCursor ? handleCursorUpdate : undefined}
               externalPointerEvents={{
                 tooltip: { visible: syncTooltips },
               }}

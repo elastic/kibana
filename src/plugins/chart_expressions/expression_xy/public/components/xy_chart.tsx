@@ -125,6 +125,7 @@ export type XYChartRenderProps = Omit<XYChartProps, 'canNavigateToLens'> & {
   renderMode: RenderMode;
   syncColors: boolean;
   syncTooltips: boolean;
+  syncCursor: boolean;
   eventAnnotationService: EventAnnotationServiceType;
   renderComplete: () => void;
   uiState?: PersistedState;
@@ -199,6 +200,7 @@ export function XYChart({
   interactive = true,
   syncColors,
   syncTooltips,
+  syncCursor,
   useLegacyTimeAxis,
   renderComplete,
   uiState,
@@ -753,7 +755,7 @@ export function XYChart({
               />
             }
             onRenderChange={onRenderChange}
-            onPointerUpdate={handleCursorUpdate}
+            onPointerUpdate={syncCursor ? handleCursorUpdate : undefined}
             externalPointerEvents={{
               tooltip: { visible: syncTooltips, placement: Placement.Right },
             }}
