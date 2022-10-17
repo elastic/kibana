@@ -8,7 +8,7 @@
 import React, { ElementType, ReactElement } from 'react';
 import { EuiContextMenuItem, EuiFlexGroup, EuiFlexItem, EuiIcon, IconType } from '@elastic/eui';
 import { Rule } from '../types';
-import { itemContentCss, containerCss } from './menu_item_linked_rules.styles';
+import { itemContentCss, containerCss } from './menu_link.styles';
 
 interface MenuItemLinkedRulesProps {
   leftIcon?: IconType;
