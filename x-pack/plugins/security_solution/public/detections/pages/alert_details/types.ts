@@ -9,6 +9,7 @@ import type { NavTab } from '../../../common/components/navigation/types';
 
 export enum AlertDetailRouteType {
   summary = 'summary',
+  visualize = 'visualize',
 }
 
 export type AlertDetailNavTabs = Record<`${AlertDetailRouteType}`, NavTab>;

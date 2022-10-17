@@ -15,6 +15,7 @@ import * as i18n from '../translations';
 
 const TabNameMappedToI18nKey: Record<AlertDetailRouteType, string> = {
   [AlertDetailRouteType.summary]: i18n.SUMMARY_PAGE_TITLE,
+  [AlertDetailRouteType.visualize]: i18n.VISUALIZE_PAGE_TITLE,
 };
 
 export const getTrailingBreadcrumbs = (

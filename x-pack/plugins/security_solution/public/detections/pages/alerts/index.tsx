@@ -45,6 +45,7 @@ const AlertsContainerComponent: React.FC = () => {
           {/* Redirect to the summary page if only the detail name is provided  */}
           <Route
             path={`${ALERTS_PATH}/:detailName`}
+            exact
             render={({
               match: {
                 params: { detailName },

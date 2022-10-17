@@ -29,6 +29,7 @@ import { AlertDetailsLoadingPage } from './components/loading_page';
 import { AlertDetailsErrorPage } from './components/error_page';
 import { AlertDetailsHeader } from './components/header';
 import { DetailsSummaryTab } from './tabs/summary';
+import { AlertDetailsVisualizeTab } from './tabs/visualize';
 
 export const AlertDetailsPage = memo(() => {
   const { detailName: eventId } = useParams<{ detailName: string }>();
@@ -80,6 +81,9 @@ export const AlertDetailsPage = memo(() => {
                 detailsData={detailsData}
                 sourcererDataView={sourcererDataView}
               />
+            </Route>
+            <Route exact path={getAlertDetailsTabUrl(eventId, AlertDetailRouteType.visualize)}>
+              <AlertDetailsVisualizeTab data={detailsData} id={eventId} searchHit={searchHit} />
             </Route>
           </Switch>
         </>

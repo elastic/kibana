@@ -14,6 +14,13 @@ export const SUMMARY_PAGE_TITLE = i18n.translate(
   }
 );
 
+export const VISUALIZE_PAGE_TITLE = i18n.translate(
+  'xpack.securitySolution.alerts.alertDetails.navigation.visualize',
+  {
+    defaultMessage: 'Visualize',
+  }
+);
+
 export const BACK_TO_ALERTS_LINK = i18n.translate(
   'xpack.securitySolution.alerts.alertDetails.header.backToAlerts',
   {

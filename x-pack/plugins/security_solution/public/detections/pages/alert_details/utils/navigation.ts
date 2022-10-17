@@ -20,4 +20,10 @@ export const getAlertDetailsNavTabs = (alertId: string): AlertDetailNavTabs => (
     href: getAlertDetailsTabUrl(alertId, AlertDetailRouteType.summary),
     disabled: false,
   },
+  [AlertDetailRouteType.visualize]: {
+    id: AlertDetailRouteType.visualize,
+    name: i18n.VISUALIZE_PAGE_TITLE,
+    href: getAlertDetailsTabUrl(alertId, AlertDetailRouteType.visualize),
+    disabled: false,
+  },
 });
