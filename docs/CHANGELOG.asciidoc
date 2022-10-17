@@ -94,7 +94,7 @@ The agent policy saved object no longer includes the `package_policies` field.
 {kib} 8.5.0 adds the following new and notable features.
 
 Alerting::
-* 137988 browser fields UI {kibana-pull}140516[#140516]
+* Adds dynamic field selection to the alerts table {kibana-pull}140516[#140516]
 * Show alerts count {kibana-pull}140473[#140473]
 * Adds the ability to allows users to assign other users to cases {kibana-pull}140208[#140208]
 * Ability run a rule on-demand {kibana-pull}139848[#139848]
