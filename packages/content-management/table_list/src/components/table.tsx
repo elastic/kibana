@@ -36,12 +36,15 @@ type State<T extends UserContentCommonSchema> = Pick<
   'items' | 'selectedIds' | 'searchQuery' | 'tableSort' | 'pagination'
 >;
 
-interface Props<T extends UserContentCommonSchema>
-  extends State<T>,
-    Pick<
-      TagFilterPanelProps,
-      'addOrRemoveIncludeTagFilter' | 'addOrRemoveExcludeTagFilter' | 'tagsToTableItemMap'
-    > {
+type TagManagementProps = Pick<
+  TagFilterPanelProps,
+  | 'clearTagSelection'
+  | 'addOrRemoveIncludeTagFilter'
+  | 'addOrRemoveExcludeTagFilter'
+  | 'tagsToTableItemMap'
+>;
+
+interface Props<T extends UserContentCommonSchema> extends State<T>, TagManagementProps {
   dispatch: Dispatch<Action<T>>;
   entityName: string;
   entityNamePlural: string;
@@ -73,6 +76,7 @@ export function Table<T extends UserContentCommonSchema>({
   onSortChange,
   addOrRemoveExcludeTagFilter,
   addOrRemoveIncludeTagFilter,
+  clearTagSelection,
 }: Props<T>) {
   const { getTagList } = useServices();
 
@@ -140,6 +144,7 @@ export function Table<T extends UserContentCommonSchema>({
             tagsToTableItemMap={tagsToTableItemMap}
             addOrRemoveIncludeTagFilter={addOrRemoveIncludeTagFilter}
             addOrRemoveExcludeTagFilter={addOrRemoveExcludeTagFilter}
+            clearTagSelection={clearTagSelection}
           />
         );
       },
@@ -155,6 +160,7 @@ export function Table<T extends UserContentCommonSchema>({
     tagsToTableItemMap,
     addOrRemoveIncludeTagFilter,
     addOrRemoveExcludeTagFilter,
+    clearTagSelection,
   ]);
 
   const search = useMemo(() => {

@@ -202,7 +202,12 @@ function TableListViewComp<T extends UserContentCommonSchema>({
     });
   }, []);
 
-  const { addOrRemoveIncludeTagFilter, addOrRemoveExcludeTagFilter, tagsToTableItemMap } = useTags({
+  const {
+    addOrRemoveIncludeTagFilter,
+    addOrRemoveExcludeTagFilter,
+    clearTagSelection,
+    tagsToTableItemMap,
+  } = useTags({
     searchQuery,
     updateQuery,
     items,
@@ -529,6 +534,7 @@ function TableListViewComp<T extends UserContentCommonSchema>({
           onSortChange={onSortChange}
           addOrRemoveIncludeTagFilter={addOrRemoveIncludeTagFilter}
           addOrRemoveExcludeTagFilter={addOrRemoveExcludeTagFilter}
+          clearTagSelection={clearTagSelection}
         />
 
         {/* Delete modal */}

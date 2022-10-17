@@ -125,9 +125,18 @@ export function useTags({
     [searchQuery.query, initializeQuery, addExcludeTagFilter, removeExcludeTagFilter]
   );
 
+  const clearTagSelection = useCallback(() => {
+    if (!searchQuery.query) {
+      return;
+    }
+    const updatedQuery = searchQuery.query.removeOrFieldClauses('tag');
+    updateQuery(updatedQuery);
+  }, [searchQuery.query, updateQuery]);
+
   return {
     addOrRemoveIncludeTagFilter,
     addOrRemoveExcludeTagFilter,
+    clearTagSelection,
     tagsToTableItemMap,
   };
 }

@@ -41,10 +41,15 @@ interface TagOptionItem extends FieldValueOptionType {
   tag: Tag;
 }
 
+interface TagSelection {
+  [tagId: string]: 'include' | 'exclude' | undefined;
+}
+
 export interface Props {
   query: Query | null;
   tagsToTableItemMap: { [tagId: string]: string[] };
   getTagList: () => Tag[];
+  clearTagSelection: () => void;
   addOrRemoveIncludeTagFilter: (tag: Tag) => void;
   addOrRemoveExcludeTagFilter: (tag: Tag) => void;
 }
@@ -53,14 +58,13 @@ export const TagFilterPanel: FC<Props> = ({
   query,
   getTagList,
   tagsToTableItemMap,
+  clearTagSelection,
   addOrRemoveIncludeTagFilter,
 }) => {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [options, setOptions] = useState<TagOptionItem[]>([]);
-  const [tagSelection, setTagSelection] = useState<{
-    [tagId: string]: 'include' | 'exclude' | undefined;
-  }>({});
+  const [tagSelection, setTagSelection] = useState<TagSelection>({});
 
   const isSearchVisible = options.length > 10;
   const totalActiveFilters = Object.keys(tagSelection).length;
@@ -166,7 +170,7 @@ export const TagFilterPanel: FC<Props> = ({
       const clauseInclude = query.ast.getOrFieldClause('tag', undefined, true, 'eq');
       const clauseExclude = query.ast.getOrFieldClause('tag', undefined, false, 'eq');
 
-      const updatedTagSelection: typeof tagSelection = {};
+      const updatedTagSelection: TagSelection = {};
 
       if (clauseInclude) {
         toArray(clauseInclude.value).forEach((tagName) => {
@@ -206,7 +210,7 @@ export const TagFilterPanel: FC<Props> = ({
         anchorPosition="downCenter"
         panelClassName="euiFilterGroup__popoverPanel"
       >
-        <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiFlexGroup direction="column" gutterSize="none">
           <EuiFlexItem>
             <EuiSelectable<any>
               singleSelection={false}
@@ -231,16 +235,20 @@ export const TagFilterPanel: FC<Props> = ({
             </EuiSelectable>
           </EuiFlexItem>
           <EuiFlexItem css={footerCSS}>
-            {totalActiveFilters > 0 ? (
-              <EuiButtonEmpty iconType="crossInACircleFilled" color="danger">
+            {totalActiveFilters > 0 && (
+              <EuiButtonEmpty
+                iconType="crossInACircleFilled"
+                color="danger"
+                onClick={clearTagSelection}
+              >
                 Clear selection
               </EuiButtonEmpty>
-            ) : (
-              <EuiSpacer size="s" />
             )}
+            <EuiSpacer size="s" />
             <EuiText size="xs">
               <EuiTextColor color="dimgrey">Ctrl + click to filter out tags</EuiTextColor>
             </EuiText>
+            <EuiSpacer size="s" />
           </EuiFlexItem>
           <EuiFlexItem css={bottomBarCSS}>
             <span>
