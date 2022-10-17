@@ -112,7 +112,7 @@ function DetailFlyoutDurationChart({
           dataType: 'synthetics',
           selectedMetricField: 'monitor.duration.us',
           name: 'All monitors response duration',
-          operationType: 'last_value',
+          operationType: 'average',
         },
         {
           seriesType: 'line',
@@ -134,7 +134,7 @@ function DetailFlyoutDurationChart({
           dataType: 'synthetics',
           selectedMetricField: 'monitor.duration.us',
           name: 'Previous period',
-          operationType: 'last_value',
+          operationType: 'average',
         },
       ]}
     />
