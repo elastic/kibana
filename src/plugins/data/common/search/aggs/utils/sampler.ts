@@ -13,7 +13,7 @@ export function createSamplerAgg({
 }: {
   type?: string;
   probability: number;
-  seed?: number;
+  seed?: string;
 }) {
   return {
     [type]: {
@@ -24,6 +24,6 @@ export function createSamplerAgg({
   };
 }
 
-export function isSamplingEnabled(probability: number) {
-  return probability !== 1;
+export function isSamplingEnabled(probability: number | undefined) {
+  return probability != null && probability !== 1;
 }

@@ -26,7 +26,6 @@ export interface TabbedResponseWriterOptions {
   metricsAtAllLevels: boolean;
   partialRows: boolean;
   timeRange?: TimeRangeInformation;
-  samplerConfig: { probability: number; seed?: number };
 }
 
 /** @internal */

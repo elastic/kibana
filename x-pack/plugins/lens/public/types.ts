@@ -347,7 +347,8 @@ export interface Datasource<T = unknown, P = unknown> {
   toExpression: (
     state: T,
     layerId: string,
-    indexPatterns: IndexPatternMap
+    indexPatterns: IndexPatternMap,
+    searchSessionId?: string
   ) => ExpressionAstExpression | string | null;
 
   getDatasourceSuggestionsForField: (
@@ -450,7 +451,7 @@ export interface Datasource<T = unknown, P = unknown> {
     layerId: string,
     state: T,
     setState: StateSetter<T>,
-    openLayerSettings: () => void
+    openLayerSettings?: () => void
   ) => LayerAction[];
 }
 
@@ -1009,7 +1010,7 @@ export interface Visualization<T = unknown, P = unknown> {
     layerId: string,
     state: T,
     setState: StateSetter<T>,
-    openLayerSettings: () => void
+    openLayerSettings?: () => void
   ) => LayerAction[];
   /** returns the type string of the given layer */
   getLayerType: (layerId: string, state?: T) => LayerType | undefined;

@@ -56,8 +56,8 @@ export interface AggConfigsOptions {
   hierarchical?: boolean;
   aggExecutionContext?: AggTypesDependencies['aggExecutionContext'];
   partialRows?: boolean;
-  probability: number;
-  samplerSeed?: number;
+  probability?: number;
+  samplerSeed?: string;
 }
 
 export type CreateAggConfigParams = Assign<AggConfigSerialized, { type: string | IAggType }>;
@@ -242,7 +242,7 @@ export class AggConfigs {
 
     if (this.isSamplingEnabled()) {
       dslTopLvl.sampling = createSamplerAgg({
-        probability: this.opts.probability,
+        probability: this.opts.probability!,
         seed: this.opts.samplerSeed,
       });
     }

@@ -162,6 +162,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   const changesApplied = useLensSelector(selectChangesApplied);
   const triggerApply = useLensSelector(selectTriggerApplyChanges);
   const datasourceLayers = useLensSelector((state) => selectDatasourceLayers(state, datasourceMap));
+  const searchSessionId = useLensSelector(selectSearchSessionId);
 
   const [localState, setLocalState] = useState<WorkspaceState>({
     expressionBuildError: undefined,
@@ -317,6 +318,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
           datasourceStates,
           datasourceLayers,
           indexPatterns: dataViews.indexPatterns,
+          searchSessionId,
         });
 
         if (ast) {
@@ -349,16 +351,17 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       }));
     }
   }, [
-    activeVisualization,
-    visualization.state,
-    datasourceMap,
-    datasourceStates,
-    datasourceLayers,
     configurationValidationError?.length,
     missingRefsErrors.length,
     unknownVisError,
+    activeVisualization,
+    visualization.state,
     visualization.activeId,
+    datasourceMap,
+    datasourceStates,
+    datasourceLayers,
     dataViews.indexPatterns,
+    searchSessionId,
   ]);
 
   useEffect(() => {

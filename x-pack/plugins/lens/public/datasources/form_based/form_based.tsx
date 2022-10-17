@@ -278,8 +278,8 @@ export function getFormBasedDatasource({
       return fields;
     },
 
-    toExpression: (state, layerId, indexPatterns) =>
-      toExpression(state, layerId, indexPatterns, uiSettings),
+    toExpression: (state, layerId, indexPatterns, searchSessionId) =>
+      toExpression(state, layerId, indexPatterns, uiSettings, searchSessionId),
 
     renderLayerSettings(
       domElement: Element,
@@ -482,6 +482,9 @@ export function getFormBasedDatasource({
     getDropProps,
     onDrop,
     getSupportedActionsForLayer(layerId, state, _, openLayerSettings) {
+      if (!openLayerSettings) {
+        return [];
+      }
       return [
         {
           displayName: i18n.translate('xpack.lens.indexPattern.layerSettingsAction', {
