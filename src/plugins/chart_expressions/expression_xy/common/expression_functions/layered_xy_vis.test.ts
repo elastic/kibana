@@ -28,6 +28,7 @@ describe('layeredXyVis', () => {
         args: { ...rest, layers: [sampleExtendedLayer] },
         syncColors: false,
         syncTooltips: false,
+        canNavigateToLens: false,
       },
     });
   });
