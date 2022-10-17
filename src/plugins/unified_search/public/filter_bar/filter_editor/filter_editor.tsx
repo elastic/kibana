@@ -38,6 +38,7 @@ import { XJsonLang } from '@kbn/monaco';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { getIndexPatternFromFilter } from '@kbn/data-plugin/public';
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { css, cx } from '@emotion/css';
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
 import {
   getFieldFromFilter,
@@ -51,6 +52,13 @@ import { PhrasesValuesInput } from './phrases_values_input';
 import { RangeValueInput } from './range_value_input';
 import { getFieldValidityAndErrorMessage } from './lib/helpers';
 import { FiltersBuilder } from '../../filters_builder';
+
+/** The default max-height of the Add/Edit Filter popover used to show "+n More" filters (e.g. `+5 More`) */
+export const DEFAULT_MAX_HEIGHT = '227px';
+
+const filtersBuilderMaxHeight = css`
+  max-height: ${DEFAULT_MAX_HEIGHT};
+`;
 
 export interface FilterEditorProps {
   filter: Filter;
@@ -273,13 +281,15 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
 
   private renderFilterBuilderEditor() {
     const { selectedIndexPattern, filters } = this.state;
+
     return (
-      <FiltersBuilder
-        filters={filters}
-        dataView={selectedIndexPattern}
-        onChange={(filters: Filter[]) => this.setState({ filters })}
-        hideOr={true}
-      />
+      <div role="region" aria-label="" className={cx(filtersBuilderMaxHeight, 'eui-yScroll')}>
+        <FiltersBuilder
+          filters={filters}
+          dataView={selectedIndexPattern}
+          onChange={(filters: Filter[]) => this.setState({ filters })}
+        />
+      </div>
     );
   }
 
@@ -568,22 +578,28 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
       const filter = buildCustomFilter(newIndex, body, disabled, negate, alias, $state.store);
       this.props.onSubmit(filter);
     } else if (indexPattern) {
-      const filters = this.state.filters.map((filter: Filter) =>
-        buildFilter(
-          indexPattern,
-          getFieldFromFilter(filter, indexPattern)!,
-          getOperatorFromFilter(filter)?.type!,
-          getOperatorFromFilter(filter)?.negate!,
-          filter.meta.disabled ?? false,
-          getFilterParams(filter) ?? '',
-          alias,
-          filter?.$state?.store
-        )
-      );
+      const builderFilter = (filter: Filter) => {
+        if (isCombinedFilter(filter)) {
+          return buildCombinedFilter(
+            filter.meta.params.map((item: Filter) => builderFilter(item)),
+            indexPattern?.id
+          );
+        } else {
+          return buildFilter(
+            indexPattern,
+            getFieldFromFilter(filter, indexPattern)!,
+            getOperatorFromFilter(filter)?.type!,
+            getOperatorFromFilter(filter)?.negate!,
+            filter.meta.disabled ?? false,
+            getFilterParams(filter) ?? '',
+            alias,
+            filter?.$state?.store
+          );
+        }
+      };
+      const filters = this.state.filters.map((filter: Filter) => builderFilter(filter));
 
-      this.props.onSubmit(
-        filters.length === 1 ? filters[0] : buildCombinedFilter([filters], indexPattern?.id)
-      );
+      this.props.onSubmit(filters.length === 1 ? filters[0] : filters);
     }
   };
 }
