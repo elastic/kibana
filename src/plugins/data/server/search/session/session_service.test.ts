@@ -762,7 +762,13 @@ describe('SearchSessionService', () => {
         expect(savedObjectsClient.update).toHaveBeenCalledTimes(2); // 3 trackIds calls batched into 2 update calls (2 different sessions)
         expect(savedObjectsClient.create).not.toHaveBeenCalled();
 
-        const [type1, id1, callAttributes1] = savedObjectsClient.update.mock.calls[0];
+        const sessionId1UpdateCallArgs = savedObjectsClient.update.mock.calls.find(
+          (args) => args[1] === sessionId1
+        );
+
+        expect(sessionId1UpdateCallArgs).toBeDefined();
+
+        const [type1, id1, callAttributes1] = sessionId1UpdateCallArgs!;
         expect(type1).toBe(SEARCH_SESSION_TYPE);
         expect(id1).toBe(sessionId1);
         expect(callAttributes1).toHaveProperty('idMapping', {
@@ -776,7 +782,11 @@ describe('SearchSessionService', () => {
           },
         });
 
-        const [type2, id2, callAttributes2] = savedObjectsClient.update.mock.calls[1];
+        const sessionId2UpdateCallArgs = savedObjectsClient.update.mock.calls.find(
+          (args) => args[1] === sessionId2
+        );
+        expect(sessionId2UpdateCallArgs).toBeDefined();
+        const [type2, id2, callAttributes2] = sessionId2UpdateCallArgs!;
         expect(type2).toBe(SEARCH_SESSION_TYPE);
         expect(id2).toBe(sessionId2);
         expect(callAttributes2).toHaveProperty('idMapping', {
