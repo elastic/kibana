@@ -7,7 +7,7 @@
  */
 
 import { Agent, IncomingMessage } from 'http';
-import { pick } from 'lodash';
+import { pick, trimStart } from 'lodash';
 import { SemVer } from 'semver';
 
 import { KibanaRequest, RequestHandler } from '@kbn/core/server';
@@ -27,6 +27,8 @@ import { RouteDependencies } from '../../..';
 
 import { Body, Query } from './validation_config';
 import { toURL } from '../../../../lib/utils';
+
+const isPathToReindex = (path: string) => path === trimStart('_reindex', '/');
 
 function filterHeaders(originalHeaders: object, headersToKeep: string[]): object {
   const normalizeHeader = function (header: string) {
@@ -156,6 +158,16 @@ export const createHandler =
           rejectUnauthorized,
           agent,
         });
+
+        // check if the request is to the _reindex endpoint and the response is a 401
+        // if so, we need to return a 403 to the user to prevent them from being logged out
+        // this is due to the http interceptor in kibana that will log the user out if they receive a 401
+        // see https://github.com/elastic/kibana/issues/140536
+        if (isPathToReindex(path) && esIncomingMessage.statusCode === 401) {
+          return response.forbidden({
+            body: 'Unable to reindex. Please check your credentials and try again.',
+          });
+        }
 
         break;
       } catch (e) {
