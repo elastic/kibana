@@ -16,6 +16,8 @@ import { ExecuteOptions as ActionExecutorOptions } from './lib/action_executor';
 import { extractSavedObjectReferences, isSavedObjectExecutionSource } from './lib';
 import { RelatedSavedObjects } from './lib/related_saved_objects';
 
+// This allowlist should only contain connector types that don't require API keys for
+// execution.
 const ALLOWED_CONNECTOR_TYPE_IDS = ['.email'];
 interface CreateBulkUnsecuredExecuteFunctionOptions {
   taskManager: TaskManagerStartContract;
