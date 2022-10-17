@@ -8,6 +8,7 @@
 import { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 
 export interface InferencePipeline {
+  modelId: string | undefined;
   modelState: TrainedModelState;
   modelStateReason?: string;
   pipelineName: string;
