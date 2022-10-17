@@ -7,7 +7,7 @@
  */
 
 import { EuiMarkdownEditor, EuiMarkdownEditorProps, EuiMarkdownFormat } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { ReactNode, useState } from 'react';
 
 export type MarkdownProps = Partial<
   Omit<EuiMarkdownEditorProps, 'editorId' | 'uiPlugins' | 'markdownFormatProps'>
@@ -22,21 +22,23 @@ export type MarkdownProps = Partial<
   /** Eui allows the height of the markdown component to be set */
   height?: number | 'full';
   placeholder?: string | undefined;
+  children?: string;
 };
 
 export const Markdown = ({
   ariaLabelContent,
   readOnly,
   markdownContent,
+  children,
   placeholder = '',
   height = 'full',
 }: MarkdownProps) => {
   const [value, setValue] = useState(placeholder);
 
-  if (readOnly && markdownContent) {
+  if (readOnly && markdownContent || readOnly && children) {
     return (
       <EuiMarkdownFormat aria-label={ariaLabelContent ?? 'markdown component'}>
-        {markdownContent}
+        {children ?? markdownContent}
       </EuiMarkdownFormat>
     );
   }
@@ -50,7 +52,6 @@ export const Markdown = ({
       onChange={setValue}
       height={height}
     >
-      {markdownContent}
     </EuiMarkdownEditor>
   );
 };
