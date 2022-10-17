@@ -19,6 +19,9 @@ import React from 'react';
 import { enterConsoleCommand } from '../../console/mocks';
 import { waitFor } from '@testing-library/react';
 import { GET_FILE_ROUTE } from '../../../../../common/endpoint/constants';
+import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz/mocks';
+import type { EndpointPrivileges } from '../../../../../common/endpoint/types';
+import { INSUFFICIENT_PRIVILEGES_FOR_COMMAND } from '../../../../common/translations';
 
 describe('When using get-file aciton from response actions console', () => {
   let render: (
@@ -29,11 +32,13 @@ describe('When using get-file aciton from response actions console', () => {
   let consoleManagerMockAccess: ReturnType<
     typeof getConsoleManagerMockRenderResultQueriesAndActions
   >;
+  let endpointPrivileges: EndpointPrivileges;
 
   beforeEach(() => {
     const mockedContext = createAppRootMockRenderer();
 
     apiMocks = responseActionsHttpMocks(mockedContext.coreStart.http);
+    endpointPrivileges = { ...getEndpointAuthzInitialStateMock(), loading: false };
 
     render = async (capabilities: EndpointCapabilities[] = [...ENDPOINT_CAPABILITIES]) => {
       renderResult = mockedContext.render(
@@ -45,6 +50,7 @@ describe('When using get-file aciton from response actions console', () => {
                 commands: getEndpointResponseActionsConsoleCommands({
                   endpointAgentId: 'a.b.c',
                   endpointCapabilities: [...capabilities],
+                  endpointPrivileges,
                 }),
               },
             };
@@ -70,7 +76,17 @@ describe('When using get-file aciton from response actions console', () => {
     );
   });
 
-  it('should show an error if `get_file` is entered without `--path` argument', async () => {
+  it('should show an error if the `get-file` is not authorized', async () => {
+    endpointPrivileges.canWriteFileOperations = false;
+    await render();
+    enterConsoleCommand(renderResult, 'get-file --path="one/two"');
+
+    expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
+      INSUFFICIENT_PRIVILEGES_FOR_COMMAND
+    );
+  });
+
+  it('should show an error if `get-file` is entered without `--path` argument', async () => {
     await render([]);
     enterConsoleCommand(renderResult, 'get-file');
 
