@@ -187,6 +187,10 @@ export async function executor(
     })
   );
 
+  if (result == null) {
+    return errorResultUnexpectedNullResponse(actionId);
+  }
+
   if (isOk(result)) {
     const {
       value: { status, statusText },
@@ -280,6 +284,20 @@ function errorResultUnexpectedError(actionId: string): ConnectorTypeExecutorResu
     status: 'error',
     message: errMessage,
     actionId,
+  };
+}
+
+function errorResultUnexpectedNullResponse(actionId: string): ConnectorTypeExecutorResult<void> {
+  const message = i18n.translate(
+    'xpack.stackConnectors.webhook.unexpectedNullResponseErrorMessage',
+    {
+      defaultMessage: 'unexpected null response from webhook',
+    }
+  );
+  return {
+    status: 'error',
+    actionId,
+    message,
   };
 }
 
