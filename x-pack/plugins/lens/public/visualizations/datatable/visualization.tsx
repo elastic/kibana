@@ -15,17 +15,20 @@ import { ThemeServiceStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { IconChartDatatable } from '@kbn/chart-icons';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import type {
   SuggestionRequest,
   Visualization,
   VisualizationSuggestion,
   DatasourceLayers,
+  Suggestion,
 } from '../../types';
 import { TableDimensionEditor } from './components/dimension_editor';
 import { TableDimensionEditorAdditionalSection } from './components/dimension_editor_addtional_section';
-import { LayerType, layerTypes } from '../../../common';
-import { getDefaultSummaryLabel, PagingState } from '../../../common/expressions';
-import type { ColumnState, SortingState } from '../../../common/expressions';
+import type { LayerType } from '../../../common';
+import { getDefaultSummaryLabel } from '../../../common/expressions/datatable/summary';
+import type { ColumnState, SortingState, PagingState } from '../../../common/expressions';
 import { DataTableToolbar } from './components/toolbar';
 
 export interface DatatableVisualizationState {
@@ -96,7 +99,7 @@ export const getDatatableVisualization = ({
       state || {
         columns: [],
         layerId: addNewLayer(),
-        layerType: layerTypes.DATA,
+        layerType: LayerTypes.DATA,
       }
     );
   },
@@ -149,15 +152,23 @@ export const getDatatableVisualization = ({
             },
           });
 
+    const changeType = table.changeType;
+    const changeFactor =
+      changeType === 'reduced' || changeType === 'layers'
+        ? 0.3
+        : changeType === 'unchanged'
+        ? 0.5
+        : 1;
+
     return [
       {
         title,
         // table with >= 10 columns will have a score of 0.4, fewer columns reduce score
-        score: (Math.min(table.columns.length, 10) / 10) * 0.4,
+        score: (Math.min(table.columns.length, 10) / 10) * 0.4 * changeFactor,
         state: {
           ...(state || {}),
           layerId: table.layerId,
-          layerType: layerTypes.DATA,
+          layerType: LayerTypes.DATA,
           columns: table.columns.map((col, columnIndex) => ({
             ...(oldColumnSettings[col.columnId] || {}),
             isTransposed: usesTransposing && columnIndex < lastTransposedColumnIndex,
@@ -265,12 +276,12 @@ export const getDatatableVisualization = ({
             .filter((c) => !datasource!.getOperationForColumnId(c)?.isBucketed)
             .map((accessor) => {
               const columnConfig = columnMap[accessor];
-              const stops = columnConfig.palette?.params?.stops;
-              const hasColoring = Boolean(columnConfig.colorMode !== 'none' && stops);
+              const stops = columnConfig?.palette?.params?.stops;
+              const hasColoring = Boolean(columnConfig?.colorMode !== 'none' && stops);
 
               return {
                 columnId: accessor,
-                triggerIcon: columnConfig.hidden
+                triggerIcon: columnConfig?.hidden
                   ? 'invisible'
                   : hasColoring
                   ? 'colorBy'
@@ -280,7 +291,7 @@ export const getDatatableVisualization = ({
             }),
           supportsMoreColumns: true,
           filterOperations: (op) => !op.isBucketed,
-          required: true,
+          requiredMinDimensionCount: 1,
           dataTestSubj: 'lnsDatatable_metrics',
           enableDimensionEditor: true,
         },
@@ -342,7 +353,7 @@ export const getDatatableVisualization = ({
   getSupportedLayers() {
     return [
       {
-        type: layerTypes.DATA,
+        type: LayerTypes.DATA,
         label: i18n.translate('xpack.lens.datatable.addLayer', {
           defaultMessage: 'Visualization',
         }),
@@ -582,6 +593,29 @@ export const getDatatableVisualization = ({
       default:
         return state;
     }
+  },
+  getSuggestionFromConvertToLensContext({ suggestions, context }) {
+    const allSuggestions = suggestions as Array<
+      Suggestion<DatatableVisualizationState, FormBasedPersistedState>
+    >;
+    const suggestion: Suggestion<DatatableVisualizationState, FormBasedPersistedState> = {
+      ...allSuggestions[0],
+      datasourceState: {
+        ...allSuggestions[0].datasourceState,
+        layers: allSuggestions.reduce(
+          (acc, s) => ({
+            ...acc,
+            ...s.datasourceState?.layers,
+          }),
+          {}
+        ),
+      },
+      visualizationState: {
+        ...allSuggestions[0].visualizationState,
+        ...context.configuration,
+      },
+    };
+    return suggestion;
   },
 });
 

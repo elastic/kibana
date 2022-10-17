@@ -75,7 +75,7 @@ export const resolveRuleRoute = (
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = (await context.alerting).getRulesClient();
         const { id } = req.params;
-        const rule = await rulesClient.resolve({ id });
+        const rule = await rulesClient.resolve({ id, includeSnoozeData: true });
         return res.ok({
           body: rewriteBodyRes(rule),
         });

@@ -19,20 +19,20 @@ import { Query, Filter, TimeRange, AggregateQuery, isOfQueryType } from '@kbn/es
 import { withKibana, KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
 import type { TimeHistoryContract, SavedQuery } from '@kbn/data-plugin/public';
 import type { SavedQueryAttributes } from '@kbn/data-plugin/common';
-import { IDataPluginServices } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 
+import type { IUnifiedSearchPluginServices } from '../types';
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
 import { SavedQueryManagementList } from '../saved_query_management';
 import { QueryBarMenu, QueryBarMenuProps } from '../query_string_input/query_bar_menu';
 import type { DataViewPickerProps, OnSaveTextLanguageQueryProps } from '../dataview_picker';
-import QueryBarTopRow from '../query_string_input/query_bar_top_row';
+import QueryBarTopRow, { QueryBarTopRowProps } from '../query_string_input/query_bar_top_row';
 import { FilterBar, FilterItems } from '../filter_bar';
 import type { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { searchBarStyles } from './search_bar.styles';
 
 export interface SearchBarInjectedDeps {
-  kibana: KibanaReactContextValue<IDataPluginServices>;
+  kibana: KibanaReactContextValue<IUnifiedSearchPluginServices>;
   intl: InjectedIntl;
   timeHistory?: TimeHistoryContract;
   // Filter bar
@@ -93,6 +93,7 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   textBasedLanguageModeErrors?: Error[];
   onTextBasedSavedAndExit?: ({ onSave }: OnSaveTextLanguageQueryProps) => void;
   showSubmitButton?: boolean;
+  submitButtonStyle?: QueryBarTopRowProps['submitButtonStyle'];
   // defines size of suggestions query popover
   suggestionsSize?: SuggestionsListSize;
   isScreenshotMode?: boolean;
@@ -352,7 +353,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
       () => {
         if (this.props.onQuerySubmit) {
           this.props.onQuerySubmit({
-            query: this.state.query,
+            query: query as QT,
             dateRange: {
               from: this.state.dateRangeFrom,
               to: this.state.dateRangeTo,
@@ -544,6 +545,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
             this.props.customSubmitButton ? this.props.customSubmitButton : undefined
           }
           showSubmitButton={this.props.showSubmitButton}
+          submitButtonStyle={this.props.submitButtonStyle}
           dataTestSubj={this.props.dataTestSubj}
           indicateNoData={this.props.indicateNoData}
           placeholder={this.props.placeholder}

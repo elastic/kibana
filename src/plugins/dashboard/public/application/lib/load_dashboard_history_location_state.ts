@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { ForwardedDashboardState } from '../../locator';
 import { DashboardState } from '../../types';
-import { convertSavedPanelsToPanelMap } from './convert_dashboard_panels';
+import { ForwardedDashboardState } from '../../locator';
+import { convertSavedPanelsToPanelMap } from '../../../common';
 
 export const loadDashboardHistoryLocationState = (
   state?: ForwardedDashboardState

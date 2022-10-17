@@ -27,6 +27,8 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
     connector: {
       api_key_id: null,
       configuration: { foo: { label: 'bar', value: 'barbar' } },
+      description: null,
+      error: null,
       id: '2',
       index_name: 'connector',
       is_native: false,
@@ -75,6 +77,8 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
     connector: {
       api_key_id: null,
       configuration: { foo: { label: 'bar', value: 'barbar' } },
+      description: null,
+      error: null,
       id: '4',
       index_name: 'connector-crawler',
       is_native: true,

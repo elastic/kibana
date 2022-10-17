@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { DESTINATION_CHART_LABEL, SOURCE_CHART_LABEL } from '../../translations';
 import type { LensAttributes } from '../../types';
 
 export const kpiUniquePrivateIpsAreaLensAttributes: LensAttributes = {
@@ -81,7 +82,7 @@ export const kpiUniquePrivateIpsAreaLensAttributes: LensAttributes = {
     },
     filters: [],
     datasourceStates: {
-      indexpattern: {
+      formBased: {
         layers: {
           '38aa6532-6bf9-4c8f-b2a6-da8d32f7d0d7': {
             columns: {
@@ -97,7 +98,7 @@ export const kpiUniquePrivateIpsAreaLensAttributes: LensAttributes = {
                 },
               },
               '5f317308-cfbb-4ee5-bfb9-07653184fabf': {
-                label: 'Src.',
+                label: SOURCE_CHART_LABEL,
                 dataType: 'number',
                 operationType: 'unique_count',
                 scale: 'ratio',
@@ -131,7 +132,7 @@ export const kpiUniquePrivateIpsAreaLensAttributes: LensAttributes = {
                 },
               },
               'ac1eb80c-ddde-46c4-a90c-400261926762': {
-                label: 'Dest.',
+                label: DESTINATION_CHART_LABEL,
                 dataType: 'number',
                 operationType: 'unique_count',
                 scale: 'ratio',

@@ -34,12 +34,5 @@ export const getSchema = ({
         defaultMessage: 'Actions frequency',
       }
     ),
-    helpText: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepRuleActions.fieldThrottleHelpText',
-      {
-        defaultMessage:
-          'Select when automated actions should be performed if a rule evaluates as true.',
-      }
-    ),
   },
 });

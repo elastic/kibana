@@ -30,21 +30,19 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 import type {
+  CreateExceptionListItemSchema,
+  ExceptionListItemSchema,
   ExceptionListType,
   OsTypeArray,
-  ExceptionListItemSchema,
-  CreateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import type { ExceptionsBuilderExceptionItem } from '@kbn/securitysolution-list-utils';
+import type {
+  ExceptionsBuilderExceptionItem,
+  ExceptionsBuilderReturnExceptionItem,
+} from '@kbn/securitysolution-list-utils';
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import type { DataViewBase } from '@kbn/es-query';
 import { useRuleIndices } from '../../../../detections/containers/detection_engine/rules/use_rule_indices';
-import {
-  hasEqlSequenceQuery,
-  isEqlRule,
-  isNewTermsRule,
-  isThresholdRule,
-} from '../../../../../common/detection_engine/utils';
+import { hasEqlSequenceQuery, isEqlRule } from '../../../../../common/detection_engine/utils';
 import type { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
 import * as i18nCommon from '../../../../common/translations';
 import * as i18n from './translations';
@@ -71,6 +69,7 @@ import type { ErrorInfo } from '../error_callout';
 import { ErrorCallout } from '../error_callout';
 import type { AlertData } from '../../utils/types';
 import { useFetchIndex } from '../../../../common/containers/source';
+import { ruleTypesThatAllowLargeValueLists } from '../../utils/constants';
 
 export interface AddExceptionFlyoutProps {
   ruleName: string;
@@ -150,7 +149,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   const [shouldBulkCloseAlert, setShouldBulkCloseAlert] = useState(false);
   const [shouldDisableBulkClose, setShouldDisableBulkClose] = useState(false);
   const [exceptionItemsToAdd, setExceptionItemsToAdd] = useState<
-    Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
+    ExceptionsBuilderReturnExceptionItem[]
   >([]);
   const [fetchOrCreateListError, setFetchOrCreateListError] = useState<ErrorInfo | null>(null);
   const { addError, addSuccess, addWarning } = useAppToasts();
@@ -194,7 +193,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       exceptionItems,
       errorExists,
     }: {
-      exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>;
+      exceptionItems: ExceptionsBuilderReturnExceptionItem[];
       errorExists: boolean;
     }) => {
       setExceptionItemsToAdd(exceptionItems);
@@ -341,10 +340,8 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     return hasAlertData ? retrieveAlertOsTypes(alertData) : selectedOs ? [...selectedOs] : [];
   }, [hasAlertData, alertData, selectedOs]);
 
-  const enrichExceptionItems = useCallback((): Array<
-    ExceptionListItemSchema | CreateExceptionListItemSchema
-  > => {
-    let enriched: Array<ExceptionListItemSchema | CreateExceptionListItemSchema> = [];
+  const enrichExceptionItems = useCallback((): ExceptionsBuilderReturnExceptionItem[] => {
+    let enriched: ExceptionsBuilderReturnExceptionItem[] = [];
     enriched =
       comment !== ''
         ? enrichNewExceptionItemsWithComments(exceptionItemsToAdd, [{ comment }])
@@ -363,7 +360,9 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
         shouldBulkCloseAlert && signalIndexName != null ? [signalIndexName] : undefined;
       addOrUpdateExceptionItems(
         maybeRule?.rule_id ?? '',
-        enrichExceptionItems(),
+        // This is being rewritten in https://github.com/elastic/kibana/pull/140643
+        // As of now, flyout cannot yet create item of type CreateRuleExceptionListItemSchema
+        enrichExceptionItems() as Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
         alertIdToClose,
         bulkCloseIndex
       );
@@ -443,6 +442,11 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   const isExceptionBuilderFormDisabled = useMemo(() => {
     return hasOsSelection && selectedOs === undefined;
   }, [hasOsSelection, selectedOs]);
+
+  const allowLargeValueLists = useMemo(
+    () => (maybeRule != null ? ruleTypesThatAllowLargeValueLists.includes(maybeRule.type) : false),
+    [maybeRule]
+  );
 
   return (
     <EuiFlyout
@@ -524,10 +528,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
                 </>
               )}
               {getExceptionBuilderComponentLazy({
-                allowLargeValueLists:
-                  !isEqlRule(maybeRule?.type) &&
-                  !isThresholdRule(maybeRule?.type) &&
-                  !isNewTermsRule(maybeRule?.type),
+                allowLargeValueLists,
                 httpService: http,
                 autocompleteService: unifiedSearch.autocomplete,
                 exceptionListItems: initialExceptionItems,

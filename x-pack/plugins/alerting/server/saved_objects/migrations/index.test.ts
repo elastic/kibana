@@ -7,12 +7,13 @@
 
 import sinon from 'sinon';
 import uuid from 'uuid';
-import { getMigrations, isAnyActionSupportIncidents } from './migrations';
-import { RawRule } from '../types';
+import { getMigrations } from '.';
+import { RawRule } from '../../types';
 import { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { migrationMocks } from '@kbn/core/server/mocks';
 import { RuleType, ruleTypeMappings } from '@kbn/securitysolution-rules';
+import { isAnyActionSupportIncidents } from './7.11';
 
 const migrationContext = migrationMocks.createContext();
 const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
@@ -2737,7 +2738,6 @@ describe('handles errors during migrations', () => {
   });
 });
 
-
 function getUpdatedAt(): string {
   const updatedAt = new Date();
   updatedAt.setHours(updatedAt.getHours() + 2);
@@ -2784,4 +2784,3 @@ function getMockData(
     type: 'alert',
   };
 }
-

@@ -10,6 +10,7 @@ export enum ConfigKey {
   APM_SERVICE_NAME = 'service.name',
   CUSTOM_HEARTBEAT_ID = 'custom_heartbeat_id',
   CONFIG_ID = 'config_id',
+  CONFIG_HASH = 'hash',
   ENABLED = 'enabled',
   FORM_MONITOR_TYPE = 'form_monitor_type',
   HOSTS = 'hosts',
@@ -77,6 +78,9 @@ export enum ConfigKey {
   ZIP_URL_TLS_KEY_PASSPHRASE = 'source.zip_url.ssl.key_passphrase',
   ZIP_URL_TLS_VERIFICATION_MODE = 'source.zip_url.ssl.verification_mode',
   ZIP_URL_TLS_VERSION = 'source.zip_url.ssl.supported_protocols',
+
+  // deprecated, slated to be removed in a future version
+  ID = 'id',
 }
 
 export const secretKeys = [

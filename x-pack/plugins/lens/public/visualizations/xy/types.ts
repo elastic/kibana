@@ -36,7 +36,7 @@ import {
 } from '@kbn/chart-icons';
 
 import { DistributiveOmit } from '@elastic/eui';
-import type { VisualizationType, Suggestion } from '../../types';
+import type { VisualizationType } from '../../types';
 import type { ValueLabelConfig } from '../../../common/types';
 
 export const YAxisModes = {
@@ -82,7 +82,7 @@ export interface YConfig {
   color?: string;
   icon?: string;
   lineWidth?: number;
-  lineStyle?: LineStyle;
+  lineStyle?: Exclude<LineStyle, 'dot-dashed'>;
   fill?: FillStyle;
   iconPosition?: IconPosition;
   textVisibility?: boolean;
@@ -119,6 +119,7 @@ export interface XYAnnotationLayerConfig {
   hide?: boolean;
   indexPatternId: string;
   simpleView?: boolean;
+  ignoreGlobalFilters: boolean;
 }
 
 export type XYLayerConfig =
@@ -273,12 +274,3 @@ export const visualizationTypes: VisualizationType[] = [
     sortPriority: 2,
   },
 ];
-
-interface XYStateWithLayers {
-  [prop: string]: unknown;
-  layers: XYLayerConfig[];
-}
-export interface XYSuggestion extends Suggestion {
-  datasourceState: XYStateWithLayers;
-  visualizationState: XYStateWithLayers;
-}

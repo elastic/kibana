@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { KibanaFeatureConfig } from '@kbn/features-plugin/common';
+import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 
 import { APP_ID, FEATURE_ID } from '../common/constants';
@@ -55,7 +55,7 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
         ui: capabilities.all,
       },
       read: {
-        api: ['bulkGetUserProfiles'],
+        api: ['casesSuggestUserProfiles', 'bulkGetUserProfiles'],
         cases: {
           read: [APP_ID],
         },

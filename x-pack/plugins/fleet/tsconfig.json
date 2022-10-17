@@ -6,8 +6,9 @@
     "declaration": true,
     "declarationMap": true,
   },
+  "exclude": ["cypress.config.ts"],
   "include": [
-    // add all the folders containg files to be compiled
+    // add all the folders containing files to be compiled
     ".storybook/**/*",
     "common/**/*",
     "public/**/*",
@@ -15,6 +16,7 @@
     "server/**/*.json",
     "scripts/**/*",
     "package.json",
+    "cypress.config.ts",
     "../../../typings/**/*"
   ],
   "references": [
@@ -25,6 +27,7 @@
     { "path": "../licensing/tsconfig.json" },
     { "path": "../../../src/plugins/data/tsconfig.json" },
     { "path": "../encrypted_saved_objects/tsconfig.json" },
+    {"path":  "../../../src/plugins/guided_onboarding/tsconfig.json"},
 
     // optionalPlugins from ./kibana.json
     { "path": "../security/tsconfig.json" },
@@ -34,6 +37,7 @@
     { "path": "../../../src/plugins/home/tsconfig.json" },
 
     // requiredBundles from ./kibana.json
+    { "path": "../cloud_integrations/cloud_chat/tsconfig.json" },
     { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
     { "path": "../../../src/plugins/es_ui_shared/tsconfig.json" },
     { "path": "../infra/tsconfig.json" },

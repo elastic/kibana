@@ -7,7 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { ESFilter } from '@kbn/core/types/elasticsearch';
+import type { ESFilter } from '@kbn/es-types';
 
 import type { AiopsExplainLogRateSpikesSchema } from '../../../common/api/explain_log_rate_spikes';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Ast } from '@kbn/interpreter';
+import type { Ast, AstFunction } from '@kbn/interpreter';
 import { Position } from '@elastic/charts';
 import type { PaletteOutput, PaletteRegistry } from '@kbn/coloring';
 
@@ -23,6 +23,7 @@ import {
   LegendDisplay,
 } from '../../../common';
 import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
+import { isCollapsed } from './visualization';
 
 interface Attributes {
   isPreview: boolean;
@@ -142,7 +143,10 @@ const generateCommonArguments: GenerateExpressionAstArguments = (
 ) => {
   return {
     labels: generateCommonLabelsAstArgs(state, attributes, layer),
-    buckets: operations.map((o) => o.columnId).map(prepareDimension),
+    buckets: operations
+      .filter(({ columnId }) => !isCollapsed(columnId, layer))
+      .map(({ columnId }) => columnId)
+      .map(prepareDimension),
     metric: layer.metric ? [prepareDimension(layer.metric)] : [],
     legendDisplay: [attributes.isPreview ? LegendDisplay.HIDE : layer.legendDisplay],
     legendPosition: [layer.legendPosition || Position.Right],
@@ -218,6 +222,7 @@ const generateMosaicVisAst: GenerateExpressionAstFunction = (...rest) => ({
         ...generateCommonArguments(...rest),
         // flip order of bucket dimensions so the rows are fetched before the columns to keep them stable
         buckets: rest[2]
+          .filter(({ columnId }) => !isCollapsed(columnId, rest[3]))
           .reverse()
           .map((o) => o.columnId)
           .map(prepareDimension),
@@ -298,6 +303,19 @@ function expressionHelper(
     type: 'expression',
     chain: [
       ...(datasourceAst ? datasourceAst.chain : []),
+      ...groups
+        .filter((columnId) => layer.collapseFns?.[columnId])
+        .map((columnId) => {
+          return {
+            type: 'function',
+            function: 'lens_collapse',
+            arguments: {
+              by: groups.filter((chk) => chk !== columnId),
+              metric: [layer.metric],
+              fn: [layer.collapseFns![columnId]!],
+            },
+          } as AstFunction;
+        }),
       ...(visualizationAst ? visualizationAst.chain : []),
     ],
   };

@@ -186,9 +186,11 @@
           "\nOverload to set up a string based response stream with support\nfor gzip compression depending on provided request headers.\n"
         ],
         "signature": [
-          "(headers: Headers, logger: ",
+          "(headers: ",
+          "Headers",
+          ", logger: ",
           "Logger",
-          ") => StreamFactoryReturnType<T>"
+          ", compressOverride: boolean | undefined, flushFix: boolean | undefined) => StreamFactoryReturnType<T>"
         ],
         "path": "x-pack/packages/ml/aiops_utils/src/stream_factory.ts",
         "deprecated": false,
@@ -197,7 +199,7 @@
           {
             "parentPluginId": "@kbn/aiops-utils",
             "id": "def-common.streamFactory.$1",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "headers",
             "description": [
@@ -217,7 +219,9 @@
             "type": "Object",
             "tags": [],
             "label": "logger",
-            "description": [],
+            "description": [
+              "- Kibana logger."
+            ],
             "signature": [
               "Logger"
             ],
@@ -225,6 +229,40 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/aiops-utils",
+            "id": "def-common.streamFactory.$3",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "compressOverride",
+            "description": [
+              "- Optional flag to override header based compression setting."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/packages/ml/aiops_utils/src/stream_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/aiops-utils",
+            "id": "def-common.streamFactory.$4",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "flushFix",
+            "description": [
+              "- Adds an attribute with a random string payload to overcome buffer flushing with certain proxy configurations."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/packages/ml/aiops_utils/src/stream_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [
@@ -242,9 +280,11 @@
           "\nSets up a response stream with support for gzip compression depending on provided\nrequest headers. Any non-string data pushed to the stream will be stream as NDJSON.\n"
         ],
         "signature": [
-          "(headers: Headers, logger: ",
+          "(headers: ",
+          "Headers",
+          ", logger: ",
           "Logger",
-          ") => StreamFactoryReturnType<T>"
+          ", compressOverride: boolean, flushFix: boolean) => StreamFactoryReturnType<T>"
         ],
         "path": "x-pack/packages/ml/aiops_utils/src/stream_factory.ts",
         "deprecated": false,
@@ -253,7 +293,7 @@
           {
             "parentPluginId": "@kbn/aiops-utils",
             "id": "def-common.streamFactory.$1",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "headers",
             "description": [
@@ -273,9 +313,45 @@
             "type": "Object",
             "tags": [],
             "label": "logger",
-            "description": [],
+            "description": [
+              "- Kibana logger."
+            ],
             "signature": [
               "Logger"
+            ],
+            "path": "x-pack/packages/ml/aiops_utils/src/stream_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/aiops-utils",
+            "id": "def-common.streamFactory.$3",
+            "type": "boolean",
+            "tags": [],
+            "label": "compressOverride",
+            "description": [
+              "- Optional flag to override header based compression setting."
+            ],
+            "signature": [
+              "boolean"
+            ],
+            "path": "x-pack/packages/ml/aiops_utils/src/stream_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/aiops-utils",
+            "id": "def-common.streamFactory.$4",
+            "type": "boolean",
+            "tags": [],
+            "label": "flushFix",
+            "description": [
+              "- Adds an attribute with a random string payload to overcome buffer flushing with certain proxy configurations."
+            ],
+            "signature": [
+              "boolean"
             ],
             "path": "x-pack/packages/ml/aiops_utils/src/stream_factory.ts",
             "deprecated": false,

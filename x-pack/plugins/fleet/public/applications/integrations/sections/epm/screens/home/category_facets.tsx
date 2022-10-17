@@ -64,6 +64,7 @@ export function CategoryFacets({
         categories.map((category) => {
           return (
             <EuiFacetButton
+              data-test-subj={`epmList.categories.${category.id}`}
               isSelected={category.id === selectedCategory}
               key={category.id}
               id={category.id}

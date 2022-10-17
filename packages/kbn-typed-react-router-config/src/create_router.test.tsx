@@ -10,6 +10,7 @@ import * as t from 'io-ts';
 import { toNumberRt } from '@kbn/io-ts-utils';
 import { createRouter } from './create_router';
 import { createMemoryHistory } from 'history';
+import { last } from 'lodash';
 
 describe('createRouter', () => {
   const routes = {
@@ -380,6 +381,14 @@ describe('createRouter', () => {
       expect(href).toEqual(
         '/traces?aggregationType=avg&kuery=service.name%3A%22metricbeat%22&rangeFrom=now-30m&rangeTo=now'
       );
+    });
+  });
+
+  describe('getRoutePath', () => {
+    it('returns the correct route path', () => {
+      expect(
+        router.getRoutePath(last(router.getRoutesToMatch('/services/opbeans-java/errors'))!)
+      ).toBe('/services/{serviceName}/errors');
     });
   });
 });

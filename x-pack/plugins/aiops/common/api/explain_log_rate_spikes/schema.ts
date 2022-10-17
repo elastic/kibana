@@ -13,6 +13,7 @@ export const aiopsExplainLogRateSpikesSchema = schema.object({
   searchQuery: schema.string(),
   timeFieldName: schema.string(),
   includeFrozen: schema.maybe(schema.boolean()),
+  grouping: schema.maybe(schema.boolean()),
   /** Analysis selection time ranges */
   baselineMin: schema.number(),
   baselineMax: schema.number(),
@@ -20,6 +21,9 @@ export const aiopsExplainLogRateSpikesSchema = schema.object({
   deviationMax: schema.number(),
   /** The index to query for log rate spikes */
   index: schema.string(),
+  /** Settings to override headers derived compression and flush fix */
+  compressResponse: schema.maybe(schema.boolean()),
+  flushFix: schema.maybe(schema.boolean()),
 });
 
 export type AiopsExplainLogRateSpikesSchema = TypeOf<typeof aiopsExplainLogRateSpikesSchema>;

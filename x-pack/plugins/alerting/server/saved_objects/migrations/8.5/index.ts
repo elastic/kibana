@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from "@kbn/core-saved-objects-server";
+import {
+  SavedObjectMigrationContext,
+  SavedObjectUnsanitizedDoc,
+} from '@kbn/core-saved-objects-server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import { isSerializedSearchSource } from '@kbn/data-plugin/common';
-import { pick } from "lodash";
-import { RawRule } from "../../../types";
-import { createEsoMigration, isEsQueryRuleType, pipeMigrations } from "../utils";
-import { AlertLogMeta } from "../types";
-
-
+import { pick } from 'lodash';
+import { RawRule } from '../../../types';
+import { createEsoMigration, isEsQueryRuleType, pipeMigrations } from '../utils';
+import { AlertLogMeta } from '../types';
 
 function stripOutRuntimeFieldsInOldESQuery(
   doc: SavedObjectUnsanitizedDoc<RawRule>,
@@ -30,15 +31,15 @@ function stripOutRuntimeFieldsInOldESQuery(
       const hasFieldsOtherThanQuery = Object.keys(parsedQuery).some((key) => key !== 'query');
       return hasFieldsOtherThanQuery
         ? {
-          ...doc,
-          attributes: {
-            ...doc.attributes,
-            params: {
-              ...doc.attributes.params,
-              esQuery: JSON.stringify(pick(parsedQuery, 'query'), null, 4),
+            ...doc,
+            attributes: {
+              ...doc.attributes,
+              params: {
+                ...doc.attributes.params,
+                esQuery: JSON.stringify(pick(parsedQuery, 'query'), null, 4),
+              },
             },
-          },
-        }
+          }
         : doc;
     } catch (err) {
       // Instead of failing the upgrade when an unparsable rule is encountered, we log that the rule caouldn't be migrated and
@@ -56,9 +57,9 @@ function stripOutRuntimeFieldsInOldESQuery(
   return doc;
 }
 
-
-export const getMigrations_8_5_0 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) => createEsoMigration(
-  encryptedSavedObjects,
-  (doc): doc is SavedObjectUnsanitizedDoc<RawRule> => isEsQueryRuleType(doc),
-  pipeMigrations(stripOutRuntimeFieldsInOldESQuery)
-);
+export const getMigrations850 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) =>
+  createEsoMigration(
+    encryptedSavedObjects,
+    (doc): doc is SavedObjectUnsanitizedDoc<RawRule> => isEsQueryRuleType(doc),
+    pipeMigrations(stripOutRuntimeFieldsInOldESQuery)
+  );

@@ -7,18 +7,19 @@
 
 import React from 'react';
 import { get, isEmpty } from 'lodash';
-import { EuiCommentProps, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { EuiCommentProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 
-import { CommentResponseAlertsType } from '../../../../common/api';
-import { UserActionBuilder, UserActionBuilderArgs } from '../types';
+import type { CommentResponseAlertsType } from '../../../../common/api';
+import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
 import { UserActionTimestamp } from '../timestamp';
-import { SnakeToCamelCase } from '../../../../common/types';
-import { UserActionUsernameWithAvatar } from '../avatar_username';
+import type { SnakeToCamelCase } from '../../../../common/types';
 import { MultipleAlertsCommentEvent, SingleAlertCommentEvent } from './alert_event';
 import { UserActionCopyLink } from '../copy_link';
 import { UserActionShowAlert } from './show_alert';
 import { ShowAlertTableLink } from './show_alert_table_link';
+import { HoverableUserWithAvatarResolver } from '../../user_profiles/hoverable_user_with_avatar_resolver';
 
 type BuilderArgs = Pick<
   UserActionBuilderArgs,
@@ -28,10 +29,12 @@ type BuilderArgs = Pick<
   | 'onRuleDetailsClick'
   | 'loadingAlertData'
   | 'onShowAlertDetails'
+  | 'userProfiles'
 > & { comment: SnakeToCamelCase<CommentResponseAlertsType> };
 
 const getSingleAlertUserAction = ({
   userAction,
+  userProfiles,
   comment,
   alertData,
   getRuleDetailsHref,
@@ -53,10 +56,7 @@ const getSingleAlertUserAction = ({
   return [
     {
       username: (
-        <UserActionUsernameWithAvatar
-          username={userAction.createdBy.username}
-          fullName={userAction.createdBy.fullName}
-        />
+        <HoverableUserWithAvatarResolver user={userAction.createdBy} userProfiles={userProfiles} />
       ),
       className: 'comment-alert',
       event: (
@@ -93,6 +93,7 @@ const getSingleAlertUserAction = ({
 
 const getMultipleAlertsUserAction = ({
   userAction,
+  userProfiles,
   comment,
   alertData,
   getRuleDetailsHref,
@@ -109,10 +110,7 @@ const getMultipleAlertsUserAction = ({
   return [
     {
       username: (
-        <UserActionUsernameWithAvatar
-          username={userAction.createdBy.username}
-          fullName={userAction.createdBy.fullName}
-        />
+        <HoverableUserWithAvatarResolver user={userAction.createdBy} userProfiles={userProfiles} />
       ),
       className: 'comment-alert',
       event: (

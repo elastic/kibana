@@ -37,6 +37,22 @@ describe('Popularize field', () => {
     expect(result).toBeUndefined();
   });
 
+  test('do not updates saved object if data view is not persisted', async () => {
+    const dataView = {
+      id: 'id',
+      fields: {
+        getByName: () => ({ count: 0 }),
+      },
+      isPersisted: () => false,
+    } as unknown as DataView;
+    const updateSavedObjectMock = jest.fn();
+    const dataViewsService = {
+      updateSavedObject: updateSavedObjectMock,
+    } as unknown as DataViewsContract;
+    await popularizeField(dataView, '@timestamp', dataViewsService, capabilities);
+    expect(updateSavedObjectMock).not.toHaveBeenCalled();
+  });
+
   test('returns undefined if successful', async () => {
     const field = {
       count: 0,
@@ -46,13 +62,16 @@ describe('Popularize field', () => {
       fields: {
         getByName: () => field,
       },
+      isPersisted: () => true,
     } as unknown as DataView;
     const fieldName = '@timestamp';
+    const updateSavedObjectMock = jest.fn();
     const dataViewsService = {
-      updateSavedObject: async () => {},
+      updateSavedObject: updateSavedObjectMock,
     } as unknown as DataViewsContract;
     const result = await popularizeField(dataView, fieldName, dataViewsService, capabilities);
     expect(result).toBeUndefined();
+    expect(updateSavedObjectMock).toHaveBeenCalled();
     expect(field.count).toEqual(1);
   });
 
@@ -65,6 +84,7 @@ describe('Popularize field', () => {
       fields: {
         getByName: () => field,
       },
+      isPersisted: () => true,
     } as unknown as DataView;
     const fieldName = '@timestamp';
     const dataViewsService = {

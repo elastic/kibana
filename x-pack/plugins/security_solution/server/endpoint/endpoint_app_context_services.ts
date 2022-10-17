@@ -22,6 +22,7 @@ import {
   getPackagePolicyCreateCallback,
   getPackagePolicyUpdateCallback,
   getPackagePolicyDeleteCallback,
+  getPackagePolicyPostCreateCallback,
 } from '../fleet_integration/fleet_integration';
 import type { ManifestManager } from './services/artifacts';
 import type { ConfigType } from '../config';
@@ -39,8 +40,13 @@ import type {
 } from './services/fleet/endpoint_fleet_services_factory';
 import { registerListsPluginEndpointExtensionPoints } from '../lists_integration';
 import type { EndpointAuthz } from '../../common/endpoint/types/authz';
-import { calculateEndpointAuthz } from '../../common/endpoint/service/authz';
+import {
+  calculateEndpointAuthz,
+  calculatePermissionsFromPrivileges,
+  defaultEndpointPermissions,
+} from '../../common/endpoint/service/authz';
 import type { FeatureUsageService } from './services/feature_usage/service';
+import type { ExperimentalFeatures } from '../../common/experimental_features';
 
 export interface EndpointAppContextServiceSetupContract {
   securitySolutionRequestContextFactory: IRequestContextFactory;
@@ -66,6 +72,7 @@ export type EndpointAppContextServiceStartContract = Partial<
   exceptionListsClient: ExceptionListClient | undefined;
   cases: CasesPluginStartContract | undefined;
   featureUsageService: FeatureUsageService;
+  experimentalFeatures: ExperimentalFeatures;
 };
 
 /**
@@ -120,6 +127,11 @@ export class EndpointAppContextService {
       );
 
       registerIngestCallback(
+        'packagePolicyPostCreate',
+        getPackagePolicyPostCreateCallback(logger, exceptionListsClient)
+      );
+
+      registerIngestCallback(
         'packagePolicyUpdate',
         getPackagePolicyUpdateCallback(
           logger,
@@ -154,9 +166,28 @@ export class EndpointAppContextService {
 
   public async getEndpointAuthz(request: KibanaRequest): Promise<EndpointAuthz> {
     const fleetAuthz = await this.getFleetAuthzService().fromRequest(request);
-    const userRoles = this.startDependencies?.security.authc.getCurrentUser(request)?.roles ?? [];
+    const userRoles = this.security?.authc.getCurrentUser(request)?.roles ?? [];
+    const isEndpointRbacEnabled = this.experimentalFeatures.endpointRbacEnabled;
 
-    return calculateEndpointAuthz(this.getLicenseService(), fleetAuthz, userRoles);
+    let endpointPermissions = defaultEndpointPermissions();
+    if (this.security) {
+      const checkPrivileges = this.security.authz.checkPrivilegesDynamicallyWithRequest(request);
+      const { privileges } = await checkPrivileges({
+        kibana: [
+          this.security.authz.actions.ui.get('siem', 'crud'),
+          this.security.authz.actions.ui.get('siem', 'show'),
+        ],
+      });
+      endpointPermissions = calculatePermissionsFromPrivileges(privileges.kibana);
+    }
+
+    return calculateEndpointAuthz(
+      this.getLicenseService(),
+      fleetAuthz,
+      userRoles,
+      isEndpointRbacEnabled,
+      endpointPermissions
+    );
   }
 
   public getEndpointMetadataService(): EndpointMetadataService {
@@ -215,5 +246,13 @@ export class EndpointAppContextService {
       throw new EndpointAppContentServicesNotStartedError();
     }
     return this.startDependencies.featureUsageService;
+  }
+
+  public get experimentalFeatures(): ExperimentalFeatures {
+    if (this.startDependencies == null) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    return this.startDependencies.experimentalFeatures;
   }
 }

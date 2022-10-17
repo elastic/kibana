@@ -41,6 +41,7 @@ import { timelineDefaults } from '../../../../store/timeline/defaults';
 import { isInvestigateInResolverActionEnabled } from '../../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 import { useStartTransaction } from '../../../../../common/lib/apm/use_start_transaction';
 import { ALERTS_ACTIONS } from '../../../../../common/lib/apm/user_actions';
+import { useLicense } from '../../../../../common/hooks/use_license';
 
 export const isAlert = (eventType: TimelineEventsType | Omit<TimelineEventsType, 'all'>): boolean =>
   eventType === 'signal';
@@ -74,6 +75,8 @@ const ActionsComponent: React.FC<ActionProps> = ({
   const emptyNotes: string[] = [];
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const { startTransaction } = useStartTransaction();
+
+  const isEnterprisePlus = useLicense().isEnterprise();
 
   const onPinEvent: OnPinEvent = useCallback(
     (evtId) => dispatch(timelineActions.pinEvent({ id: timelineId, eventId: evtId })),
@@ -286,7 +289,8 @@ const ActionsComponent: React.FC<ActionProps> = ({
             </EventsTdContent>
           </div>
         ) : null}
-        {sessionViewConfig !== null ? (
+        {sessionViewConfig !== null &&
+        (isEnterprisePlus || timelineId === TimelineId.kubernetesPageSessions) ? (
           <div>
             <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
               <EuiToolTip data-test-subj="expand-event-tool-tip" content={i18n.OPEN_SESSION_VIEW}>

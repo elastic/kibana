@@ -86,9 +86,9 @@ export const LicensingCallout: React.FC<{ feature: LICENSING_FEATURE }> = ({ fea
           </EuiLink>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiLink href="https://www.elastic.co/cloud/elasticsearch-service/signup" external>
+          <EuiLink href="https://www.elastic.co/subscriptions/cloud" external>
             {i18n.translate('xpack.enterpriseSearch.content.licensingCallout.contentCloudTrial', {
-              defaultMessage: 'Sign up for a free 14-day Elastic Cloud trial.',
+              defaultMessage: 'Explore Enterprise Search on Elastic Cloud ',
             })}
           </EuiLink>
         </EuiFlexItem>

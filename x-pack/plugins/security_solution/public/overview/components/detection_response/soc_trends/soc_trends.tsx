@@ -21,7 +21,7 @@ import styled from 'styled-components';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { SocTrendsDatePickerLock } from './date_picker_lock';
 import { SuperDatePicker } from '../../../../common/components/super_date_picker';
-import { LastUpdatedAt } from '../utils';
+import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { HeaderSection } from '../../../../common/components/header_section';
 import * as i18n from './translations';

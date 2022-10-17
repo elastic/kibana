@@ -22,6 +22,7 @@ import {
   getSimpleMlRuleOutput,
   getSimpleRuleUpdate,
   getSimpleMlRuleUpdate,
+  getSimpleSavedQueryRule,
   createRule,
   getSimpleRule,
   createLegacyRuleAction,
@@ -82,6 +83,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         const outputRule = getSimpleMlRuleOutput();
+        // @ts-expect-error type narrowing is lost due to Omit<>
         outputRule.machine_learning_job_id = ['legacy_job_id'];
         outputRule.version = 2;
         const bodyToCompare = removeServerGeneratedProperties(body);
@@ -218,7 +220,7 @@ export default ({ getService }: FtrProviderContext) => {
         updatedRule.rule_id = createRuleBody.rule_id;
         updatedRule.name = 'some other name';
         updatedRule.actions = [action1];
-        updatedRule.throttle = '1m';
+        updatedRule.throttle = '1d';
         delete updatedRule.id;
 
         const { body } = await supertest
@@ -241,7 +243,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           },
         ];
-        outputRule.throttle = '1m';
+        outputRule.throttle = '1d';
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body);
         expect(bodyToCompare).to.eql(outputRule);
       });
@@ -518,6 +520,53 @@ export default ({ getService }: FtrProviderContext) => {
             message: ['Cardinality of a field that is being aggregated on is always 1'],
             status_code: 400,
           });
+        });
+      });
+
+      describe('saved_query and query rule type', () => {
+        it('should allow to save a query rule type as a saved_query rule type', async () => {
+          const ruleId = 'rule-1';
+          const savedQueryRule = getSimpleSavedQueryRule(ruleId);
+          await createRule(supertest, log, getSimpleRule(ruleId));
+
+          const { body: outputRule } = await supertest
+            .put(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .send(savedQueryRule)
+            .expect(200);
+
+          expect(outputRule.type).to.be('saved_query');
+          expect(outputRule.saved_id).to.be(savedQueryRule.saved_id);
+        });
+
+        it('should allow to save a query rule type as a saved_query rule type with undefined query', async () => {
+          const ruleId = 'rule-1';
+          const savedQueryRule = { ...getSimpleSavedQueryRule(ruleId), query: undefined };
+          await createRule(supertest, log, getSimpleRule(ruleId));
+
+          const { body: outputRule } = await supertest
+            .put(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .send(savedQueryRule)
+            .expect(200);
+
+          expect(outputRule.type).to.be('saved_query');
+          expect(outputRule.saved_id).to.be(savedQueryRule.saved_id);
+        });
+
+        it('should allow to save a saved_query rule type as a query rule type', async () => {
+          const ruleId = 'rule-1';
+          const queryRule = getSimpleRule(ruleId);
+          await createRule(supertest, log, getSimpleSavedQueryRule(ruleId));
+
+          const { body: outputRule } = await supertest
+            .put(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .send(queryRule)
+            .expect(200);
+
+          expect(outputRule.type).to.be('query');
+          expect(outputRule.saved_id).to.be(undefined);
         });
       });
     });

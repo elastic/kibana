@@ -363,7 +363,7 @@
             "label": "invokeChain",
             "description": [],
             "signature": [
-              "<ChainOutput = unknown>(chainArr: ",
+              "<ChainOutput = unknown>([head, ...tail]: ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -373,7 +373,15 @@
               },
               "[], input: unknown) => ",
               "Observable",
-              "<ChainOutput>"
+              "<",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionValueError",
+                "text": "ExpressionValueError"
+              },
+              " | ChainOutput>"
             ],
             "path": "src/plugins/expressions/common/execution/execution.ts",
             "deprecated": false,
@@ -384,7 +392,7 @@
                 "id": "def-public.Execution.invokeChain.$1",
                 "type": "Array",
                 "tags": [],
-                "label": "chainArr",
+                "label": "[head, ...tail]",
                 "description": [],
                 "signature": [
                   {
@@ -3867,13 +3875,7 @@
             "text": "ExpressionsPublicPlugin"
           },
           " implements ",
-          {
-            "pluginId": "core",
-            "scope": "public",
-            "docId": "kibCorePluginApi",
-            "section": "def-public.Plugin",
-            "text": "Plugin"
-          },
+          "Plugin",
           "<",
           {
             "pluginId": "expressions",
@@ -3918,13 +3920,7 @@
                 "label": "initializerContext",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.PluginInitializerContext",
-                    "text": "PluginInitializerContext"
-                  },
+                  "PluginInitializerContext",
                   "<object>"
                 ],
                 "path": "src/plugins/expressions/public/plugin.ts",
@@ -3944,13 +3940,7 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreSetup",
-                "text": "CoreSetup"
-              },
+              "CoreSetup",
               "<object, unknown>) => ",
               {
                 "pluginId": "expressions",
@@ -3972,13 +3962,7 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.CoreSetup",
-                    "text": "CoreSetup"
-                  },
+                  "CoreSetup",
                   "<object, unknown>"
                 ],
                 "path": "src/plugins/expressions/public/plugin.ts",
@@ -3998,13 +3982,7 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "core",
-                "scope": "public",
-                "docId": "kibCorePluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              },
+              "CoreStart",
               ") => ",
               {
                 "pluginId": "expressions",
@@ -4026,13 +4004,7 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.CoreStart",
-                    "text": "CoreStart"
-                  }
+                  "CoreStart"
                 ],
                 "path": "src/plugins/expressions/public/plugin.ts",
                 "deprecated": false,
@@ -11543,7 +11515,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"null\" | \"ip\" | \"nested\" | \"conflict\" | \"_source\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"histogram\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"null\" | \"ip\" | \"nested\" | \"_source\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"histogram\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
         "deprecated": false,
@@ -13405,7 +13377,7 @@
             "label": "invokeChain",
             "description": [],
             "signature": [
-              "<ChainOutput = unknown>(chainArr: ",
+              "<ChainOutput = unknown>([head, ...tail]: ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -13415,7 +13387,15 @@
               },
               "[], input: unknown) => ",
               "Observable",
-              "<ChainOutput>"
+              "<",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionValueError",
+                "text": "ExpressionValueError"
+              },
+              " | ChainOutput>"
             ],
             "path": "src/plugins/expressions/common/execution/execution.ts",
             "deprecated": false,
@@ -13426,7 +13406,7 @@
                 "id": "def-server.Execution.invokeChain.$1",
                 "type": "Array",
                 "tags": [],
-                "label": "chainArr",
+                "label": "[head, ...tail]",
                 "description": [],
                 "signature": [
                   {
@@ -21073,7 +21053,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"null\" | \"ip\" | \"nested\" | \"conflict\" | \"_source\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"histogram\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"null\" | \"ip\" | \"nested\" | \"_source\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"histogram\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
         "deprecated": false,
@@ -22194,7 +22174,7 @@
             "label": "invokeChain",
             "description": [],
             "signature": [
-              "<ChainOutput = unknown>(chainArr: ",
+              "<ChainOutput = unknown>([head, ...tail]: ",
               {
                 "pluginId": "expressions",
                 "scope": "common",
@@ -22204,7 +22184,15 @@
               },
               "[], input: unknown) => ",
               "Observable",
-              "<ChainOutput>"
+              "<",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionValueError",
+                "text": "ExpressionValueError"
+              },
+              " | ChainOutput>"
             ],
             "path": "src/plugins/expressions/common/execution/execution.ts",
             "deprecated": false,
@@ -22215,7 +22203,7 @@
                 "id": "def-common.Execution.invokeChain.$1",
                 "type": "Array",
                 "tags": [],
-                "label": "chainArr",
+                "label": "[head, ...tail]",
                 "description": [],
                 "signature": [
                   {
@@ -29246,7 +29234,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"null\" | \"ip\" | \"nested\" | \"conflict\" | \"_source\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"histogram\""
+              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"null\" | \"ip\" | \"nested\" | \"_source\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"histogram\""
             ],
             "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
             "deprecated": false,
@@ -35262,7 +35250,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"null\" | \"ip\" | \"nested\" | \"conflict\" | \"_source\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"histogram\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"date\" | \"null\" | \"ip\" | \"nested\" | \"_source\" | \"attachment\" | \"geo_point\" | \"geo_shape\" | \"murmur3\" | \"unknown\" | \"conflict\" | \"histogram\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
         "deprecated": false,
@@ -38020,7 +38008,9 @@
                 "section": "def-common.SerializedDatatable",
                 "text": "SerializedDatatable"
               },
-              ") => { rows: _.Dictionary<string>[]; type: \"datatable\"; columns: ",
+              ") => { rows: ",
+              "Dictionary",
+              "<string>[]; type: \"datatable\"; columns: ",
               {
                 "pluginId": "expressions",
                 "scope": "common",

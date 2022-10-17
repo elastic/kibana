@@ -202,6 +202,7 @@ describe('Task Runner', () => {
 
     alertingEventLogger.getStartAndDuration.mockImplementation(() => ({ start: new Date() }));
     (AlertingEventLogger as jest.Mock).mockImplementation(() => alertingEventLogger);
+    logger.get.mockImplementation(() => logger);
   });
 
   test('successfully executes the task', async () => {
@@ -312,9 +313,7 @@ describe('Task Runner', () => {
           AlertInstanceContext,
           string
         >) => {
-          executorServices.alertFactory
-            .create('1')
-            .scheduleActionsWithSubGroup('default', 'subDefault');
+          executorServices.alertFactory.create('1').scheduleActions('default');
         }
       );
       const taskRunner = new TaskRunner(
@@ -360,7 +359,6 @@ describe('Task Runner', () => {
         generateAlertOpts({
           action: EVENT_LOG_ACTIONS.newInstance,
           group: 'default',
-          subgroup: 'subDefault',
           state: { start: DATE_1970, duration: '0' },
         })
       );
@@ -369,14 +367,10 @@ describe('Task Runner', () => {
         generateAlertOpts({
           action: EVENT_LOG_ACTIONS.activeInstance,
           group: 'default',
-          subgroup: 'subDefault',
           state: { start: DATE_1970, duration: '0' },
         })
       );
-      expect(alertingEventLogger.logAction).toHaveBeenNthCalledWith(
-        1,
-        generateActionOpts({ subgroup: 'subDefault' })
-      );
+      expect(alertingEventLogger.logAction).toHaveBeenNthCalledWith(1, generateActionOpts());
 
       expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
     }
@@ -853,90 +847,6 @@ describe('Task Runner', () => {
         })
       );
       expect(alertingEventLogger.logAction).toHaveBeenNthCalledWith(1, generateActionOpts({}));
-
-      expect(enqueueFunction).toHaveBeenCalledTimes(1);
-      expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
-    }
-  );
-
-  test.each(ephemeralTestParams)(
-    'actionsPlugin.execute is called when notifyWhen=onActionGroupChange and alert state subgroup has changed %s',
-    async (nameExtension, customTaskRunnerFactoryInitializerParams, enqueueFunction) => {
-      customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(
-        true
-      );
-
-      customTaskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(
-        true
-      );
-      ruleType.executor.mockImplementation(
-        async ({
-          services: executorServices,
-        }: RuleExecutorOptions<
-          RuleTypeParams,
-          RuleTypeState,
-          AlertInstanceState,
-          AlertInstanceContext,
-          string
-        >) => {
-          executorServices.alertFactory
-            .create('1')
-            .scheduleActionsWithSubGroup('default', 'subgroup1');
-        }
-      );
-      const taskRunner = new TaskRunner(
-        ruleType,
-        {
-          ...mockedTaskInstance,
-          state: {
-            ...mockedTaskInstance.state,
-            alertInstances: {
-              '1': {
-                meta: {
-                  lastScheduledActions: {
-                    group: 'default',
-                    subgroup: 'newSubgroup',
-                    date: new Date().toISOString(),
-                  },
-                },
-                state: { bar: false },
-              },
-            },
-          },
-        },
-        customTaskRunnerFactoryInitializerParams,
-        inMemoryMetrics
-      );
-      expect(AlertingEventLogger).toHaveBeenCalled();
-
-      rulesClient.get.mockResolvedValue({
-        ...mockedRuleTypeSavedObject,
-        notifyWhen: 'onActionGroupChange',
-      });
-      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(SAVED_OBJECT);
-      await taskRunner.run();
-
-      testAlertingEventLogCalls({
-        activeAlerts: 1,
-        triggeredActions: 1,
-        generatedActions: 1,
-        status: 'active',
-        logAlert: 1,
-        logAction: 1,
-      });
-      expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(
-        1,
-        generateAlertOpts({
-          action: EVENT_LOG_ACTIONS.activeInstance,
-          state: { bar: false },
-          group: 'default',
-          subgroup: 'subgroup1',
-        })
-      );
-      expect(alertingEventLogger.logAction).toHaveBeenNthCalledWith(
-        1,
-        generateActionOpts({ subgroup: 'subgroup1' })
-      );
 
       expect(enqueueFunction).toHaveBeenCalledTimes(1);
       expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();

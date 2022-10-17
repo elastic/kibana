@@ -83,6 +83,41 @@ For more information, refer to <<index-action-type>>.
 For more information, refer to <<jira-action-type>>.
 =====
 
+.{sn-itom}, {sn-itsm}, and {sn-sir} connectors
+[%collapsible%open]
+=====
+`apiUrl`::
+(Required, string) The {sn} instance URL.
+
+`clientId`::
+(Required^*^, string) The client ID assigned to your OAuth application. This
+property is required when `isOAuth` is `true`.
+
+`isOAuth`::
+(Optional, string) The type of authentication to use. The default value is
+`false`, which means basic authentication is used instead of open authorization
+(OAuth).
+
+`jwtKeyId`::
+(Required^*^, string) The key identifier assigned to the JWT verifier map of
+your OAuth application. This property is required when `isOAuth` is `true`.
+
+`userIdentifierValue`::
+(Required^*^, string) The identifier to use for OAuth authentication. This
+identifier should be the user field you selected when you created an OAuth
+JWT API endpoint for external clients in your {sn} instance. For example, if
+the selected user field is `Email`, the user identifier should be the user's
+email address. This property is required when `isOAuth` is `true`.
+
+`usesTableApi`::
+(Optional, string) Determines whether the connector uses the Table API or the
+Import Set API. This property is supported only for {sn-itsm} and {sn-sir}
+connectors.
++
+NOTE: If this property is set to false, the Elastic application should be
+installed in {sn}.
+=====
+
 .{swimlane} connectors
 [%collapsible%open]
 =====
@@ -373,7 +408,7 @@ For more configuration properties, refer to <<action-types>>.
 
 `connector_type_id`::
 (Required, string) The connector type ID for the connector. For example,
-`.cases-webhook`, `.index`, `.jira`, or `.server-log`.
+`.cases-webhook`, `.index`, `.jira`, `.server-log`, or `.servicenow-itom`.
 
 `name`::
 (Required, string) The display name for the connector.
@@ -410,6 +445,31 @@ authentication.
 
 `email`::
 (Required, string) The account email for HTTP Basic authentication.
+=====
+
+.{sn-itom}, {sn-itsm}, and {sn-sir} connectors
+[%collapsible%open]
+=====
+`clientSecret`::
+(Required^*^, string) The client secret assigned to your OAuth application. This
+property is required when `isOAuth` is `true`.
+
+`password`::
+(Required^*^, string) The password for HTTP basic authentication. This property
+is required when `isOAuth` is `false`.
+
+`privateKey`::
+(Required^*^, string) The RSA private key that you created for use in {sn}. This
+property is required when `isOAuth` is `true`.
+
+privateKeyPassword::
+(Required^*^, string) The password for the RSA private key. This property is
+required when `isOAuth` is `true` and you set a password on your private key.
+
+`username`::
+(Required^*^, string) The username for HTTP basic authentication. This property
+is required when `isOAuth` is `false`.
+
 =====
 
 .{swimlane} connectors
@@ -511,6 +571,29 @@ POST api/actions/connector
   "secrets": {
     "apiKeyId": "myKey",
     "apiKeySecret": "myToken"
+  }
+}
+--------------------------------------------------
+// KIBANA
+
+Create an {sn-itom} connector that uses open authorization:
+
+[source,sh]
+--------------------------------------------------
+POST api/actions/connector
+{
+  "name": "my-itom-connector",
+  "connector_type_id": ".servicenow-itom",
+  "config": {
+    "apiUrl": "https://exmaple.service-now.com/",
+    "clientId": "abcdefghijklmnopqrstuvwxyzabcdef",
+    "isOAuth": "true",
+    "jwtKeyId": "fedcbazyxwvutsrqponmlkjihgfedcba",
+    "userIdentifierValue": "testuser@email.com"
+  },
+  "secrets": {
+    "clientSecret": "secretsecret",
+    "privateKey": "-----BEGIN RSA PRIVATE KEY-----\nprivatekeyhere\n-----END RSA PRIVATE KEY-----"
   }
 }
 --------------------------------------------------

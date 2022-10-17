@@ -6,9 +6,10 @@
  */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiInMemoryTable, Pagination, Direction, useEuiTheme } from '@elastic/eui';
+import { BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { getFieldColumns, getFieldItems, isActionsColumn } from '../field_items';
 import { CATEGORY_TABLE_CLASS_NAME, TABLE_HEIGHT } from '../../helpers';
-import type { BrowserFields, FieldBrowserProps, GetFieldTableColumns } from '../../types';
+import type { FieldBrowserProps, GetFieldTableColumns } from '../../types';
 import { FieldTableHeader } from './field_table_header';
 import { styles } from './field_table.styles';
 

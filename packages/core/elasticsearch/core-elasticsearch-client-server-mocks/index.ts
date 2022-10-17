@@ -15,3 +15,4 @@ export type {
   DeeplyMockedApi,
   ElasticsearchClientMock,
 } from './src/mocks';
+export { createAgentStoreMock } from './src/agent_manager.mocks';

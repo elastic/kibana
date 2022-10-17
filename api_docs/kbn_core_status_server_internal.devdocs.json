@@ -1,0 +1,440 @@
+{
+  "id": "@kbn/core-status-server-internal",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/core-status-server-internal",
+        "id": "def-server.StatusService",
+        "type": "Class",
+        "tags": [],
+        "label": "StatusService",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-status-server-internal",
+            "scope": "server",
+            "docId": "kibKbnCoreStatusServerInternalPluginApi",
+            "section": "def-server.StatusService",
+            "text": "StatusService"
+          },
+          " implements ",
+          "CoreService",
+          "<",
+          "InternalStatusServiceSetup",
+          ", void>"
+        ],
+        "path": "packages/core/status/core-status-server-internal/src/status_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-status-server-internal",
+            "id": "def-server.StatusService.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/core/status/core-status-server-internal/src/status_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-status-server-internal",
+                "id": "def-server.StatusService.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "coreContext",
+                "description": [],
+                "signature": [
+                  "CoreContext"
+                ],
+                "path": "packages/core/status/core-status-server-internal/src/status_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-status-server-internal",
+            "id": "def-server.StatusService.setup",
+            "type": "Function",
+            "tags": [],
+            "label": "setup",
+            "description": [],
+            "signature": [
+              "({ analytics, elasticsearch, pluginDependencies, http, metrics, savedObjects, environment, coreUsageData, }: ",
+              {
+                "pluginId": "@kbn/core-status-server-internal",
+                "scope": "server",
+                "docId": "kibKbnCoreStatusServerInternalPluginApi",
+                "section": "def-server.StatusServiceSetupDeps",
+                "text": "StatusServiceSetupDeps"
+              },
+              ") => Promise<{ core$: ",
+              "Observable",
+              "<",
+              "CoreStatus",
+              ">; coreOverall$: ",
+              "Observable",
+              "<",
+              "ServiceStatus",
+              "<unknown>>; overall$: ",
+              "Observable",
+              "<",
+              "ServiceStatus",
+              "<unknown>>; plugins: { set: (plugin: string, status$: ",
+              "Observable",
+              "<",
+              "ServiceStatus",
+              "<unknown>>) => void; getDependenciesStatus$: (plugin: string) => ",
+              "Observable",
+              "<Record<string, ",
+              "ServiceStatus",
+              "<unknown>>>; getDerivedStatus$: (plugin: string) => ",
+              "Observable",
+              "<",
+              "ServiceStatus",
+              "<unknown>>; }; isStatusPageAnonymous: () => boolean; }>"
+            ],
+            "path": "packages/core/status/core-status-server-internal/src/status_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-status-server-internal",
+                "id": "def-server.StatusService.setup.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{\n    analytics,\n    elasticsearch,\n    pluginDependencies,\n    http,\n    metrics,\n    savedObjects,\n    environment,\n    coreUsageData,\n  }",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-status-server-internal",
+                    "scope": "server",
+                    "docId": "kibKbnCoreStatusServerInternalPluginApi",
+                    "section": "def-server.StatusServiceSetupDeps",
+                    "text": "StatusServiceSetupDeps"
+                  }
+                ],
+                "path": "packages/core/status/core-status-server-internal/src/status_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-status-server-internal",
+            "id": "def-server.StatusService.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "packages/core/status/core-status-server-internal/src/status_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-status-server-internal",
+            "id": "def-server.StatusService.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "packages/core/status/core-status-server-internal/src/status_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-status-server-internal",
+        "id": "def-server.registerStatusRoute",
+        "type": "Function",
+        "tags": [],
+        "label": "registerStatusRoute",
+        "description": [],
+        "signature": [
+          "({ router, config, metrics, status, incrementUsageCounter, }: Deps) => void"
+        ],
+        "path": "packages/core/status/core-status-server-internal/src/routes/status.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-status-server-internal",
+            "id": "def-server.registerStatusRoute.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  router,\n  config,\n  metrics,\n  status,\n  incrementUsageCounter,\n}",
+            "description": [],
+            "signature": [
+              "Deps"
+            ],
+            "path": "packages/core/status/core-status-server-internal/src/routes/status.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-status-server-internal",
+        "id": "def-server.StatusServiceSetupDeps",
+        "type": "Interface",
+        "tags": [],
+        "label": "StatusServiceSetupDeps",
+        "description": [],
+        "path": "packages/core/status/core-status-server-internal/src/status_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-status-server-internal",
+            "id": "def-server.StatusServiceSetupDeps.analytics",
+            "type": "Object",
+            "tags": [],
+            "label": "analytics",
+            "description": [],
+            "signature": [
+              "{ optIn: (optInConfig: ",
+              "OptInConfig",
+              ") => void; reportEvent: <EventTypeData extends object>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
+              "Observable",
+              "<",
+              "TelemetryCounter",
+              ">; registerEventType: <EventTypeData>(eventTypeOps: ",
+              "EventTypeOpts",
+              "<EventTypeData>) => void; registerShipper: <Shipper extends ",
+              "IShipper",
+              ", ShipperConfig>(Shipper: ",
+              "ShipperClassConstructor",
+              "<Shipper, ShipperConfig>, shipperConfig: ShipperConfig, opts?: ",
+              "RegisterShipperOpts",
+              " | undefined) => void; registerContextProvider: <Context>(contextProviderOpts: ",
+              "ContextProviderOpts",
+              "<Context>) => void; removeContextProvider: (contextProviderName: string) => void; }"
+            ],
+            "path": "packages/core/status/core-status-server-internal/src/status_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-status-server-internal",
+            "id": "def-server.StatusServiceSetupDeps.elasticsearch",
+            "type": "Object",
+            "tags": [],
+            "label": "elasticsearch",
+            "description": [],
+            "signature": [
+              "{ status$: ",
+              "Observable",
+              "<",
+              "ServiceStatus",
+              "<",
+              "ElasticsearchStatusMeta",
+              ">>; }"
+            ],
+            "path": "packages/core/status/core-status-server-internal/src/status_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-status-server-internal",
+            "id": "def-server.StatusServiceSetupDeps.environment",
+            "type": "Object",
+            "tags": [],
+            "label": "environment",
+            "description": [],
+            "signature": [
+              "InternalEnvironmentServicePreboot"
+            ],
+            "path": "packages/core/status/core-status-server-internal/src/status_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-status-server-internal",
+            "id": "def-server.StatusServiceSetupDeps.pluginDependencies",
+            "type": "Object",
+            "tags": [],
+            "label": "pluginDependencies",
+            "description": [],
+            "signature": [
+              "ReadonlyMap<string, string[]>"
+            ],
+            "path": "packages/core/status/core-status-server-internal/src/status_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-status-server-internal",
+            "id": "def-server.StatusServiceSetupDeps.http",
+            "type": "Object",
+            "tags": [],
+            "label": "http",
+            "description": [],
+            "signature": [
+              "InternalHttpServiceSetup"
+            ],
+            "path": "packages/core/status/core-status-server-internal/src/status_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-status-server-internal",
+            "id": "def-server.StatusServiceSetupDeps.metrics",
+            "type": "Object",
+            "tags": [],
+            "label": "metrics",
+            "description": [],
+            "signature": [
+              "MetricsServiceSetup"
+            ],
+            "path": "packages/core/status/core-status-server-internal/src/status_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-status-server-internal",
+            "id": "def-server.StatusServiceSetupDeps.savedObjects",
+            "type": "Object",
+            "tags": [],
+            "label": "savedObjects",
+            "description": [],
+            "signature": [
+              "{ status$: ",
+              "Observable",
+              "<",
+              "ServiceStatus",
+              "<",
+              "SavedObjectStatusMeta",
+              ">>; }"
+            ],
+            "path": "packages/core/status/core-status-server-internal/src/status_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-status-server-internal",
+            "id": "def-server.StatusServiceSetupDeps.coreUsageData",
+            "type": "Object",
+            "tags": [],
+            "label": "coreUsageData",
+            "description": [],
+            "signature": [
+              "{ incrementUsageCounter: ",
+              "CoreIncrementUsageCounter",
+              "; }"
+            ],
+            "path": "packages/core/status/core-status-server-internal/src/status_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-status-server-internal",
+        "id": "def-server.StatusConfigType",
+        "type": "Type",
+        "tags": [],
+        "label": "StatusConfigType",
+        "description": [],
+        "signature": [
+          "{ readonly allowAnonymous: boolean; }"
+        ],
+        "path": "packages/core/status/core-status-server-internal/src/status_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-status-server-internal",
+        "id": "def-server.statusConfig",
+        "type": "Object",
+        "tags": [],
+        "label": "statusConfig",
+        "description": [],
+        "path": "packages/core/status/core-status-server-internal/src/status_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-status-server-internal",
+            "id": "def-server.statusConfig.path",
+            "type": "string",
+            "tags": [],
+            "label": "path",
+            "description": [],
+            "path": "packages/core/status/core-status-server-internal/src/status_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-status-server-internal",
+            "id": "def-server.statusConfig.schema",
+            "type": "Object",
+            "tags": [],
+            "label": "schema",
+            "description": [],
+            "signature": [
+              "ObjectType",
+              "<{ allowAnonymous: ",
+              "Type",
+              "<boolean>; }>"
+            ],
+            "path": "packages/core/status/core-status-server-internal/src/status_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

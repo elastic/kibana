@@ -50,20 +50,25 @@ export const mapToCard = ({
   getAbsolutePath,
   getHref,
   item,
+  addBasePath,
   packageVerificationKeyId,
   selectedCategory,
 }: {
   getAbsolutePath: (p: string) => string;
   getHref: (page: StaticPage | DynamicPage, values?: DynamicPagePathValues) => string;
+  addBasePath: (url: string) => string;
   item: CustomIntegration | PackageListItem;
   packageVerificationKeyId?: string;
   selectedCategory?: string;
 }): IntegrationCardItem => {
-  let uiInternalPathUrl;
+  let uiInternalPathUrl: string;
 
   let isUnverified = false;
+
   if (item.type === 'ui_link') {
-    uiInternalPathUrl = item.uiExternalLink || getAbsolutePath(item.uiInternalPath);
+    uiInternalPathUrl = item.id.includes('language_client.')
+      ? addBasePath(item.uiInternalPath)
+      : item.uiExternalLink || getAbsolutePath(item.uiInternalPath);
   } else {
     let urlVersion = item.version;
     if ('savedObject' in item) {
@@ -94,7 +99,7 @@ export const mapToCard = ({
     url: uiInternalPathUrl,
     fromIntegrations: selectedCategory,
     integration: 'integration' in item ? item.integration || '' : '',
-    name: 'name' in item ? item.name || '' : '',
+    name: 'name' in item ? item.name : item.id,
     version: 'version' in item ? item.version || '' : '',
     release,
     categories: ((item.categories || []) as string[]).filter((c: string) => !!c),

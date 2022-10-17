@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import {
-  KibanaRequest,
+import type {
   Logger,
   SavedObject,
   SavedObjectsClientContract,
@@ -20,15 +19,15 @@ import {
 } from '@kbn/core/server';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { nodeBuilder, KueryNode } from '@kbn/es-query';
+import type { KueryNode } from '@kbn/es-query';
+import { nodeBuilder } from '@kbn/es-query';
 
-import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   MAX_DOCS_PER_PAGE,
 } from '../../../common/constants';
-import {
+import type {
   GetCaseIdsByAlertIdAggs,
   CaseResponse,
   CasesFindRequest,
@@ -36,9 +35,9 @@ import {
   User,
   CaseAttributes,
   CaseStatuses,
-  caseStatuses,
 } from '../../../common/api';
-import { SavedObjectFindOptionsKueryNode } from '../../common/types';
+import { caseStatuses } from '../../../common/api';
+import type { SavedObjectFindOptionsKueryNode } from '../../common/types';
 import { defaultSortField, flattenCaseSavedObject } from '../../common/utils';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';
 import { combineFilters } from '../../client/utils';
@@ -51,11 +50,11 @@ import {
   transformBulkResponseToExternalModel,
   transformFindResponseToExternalModel,
 } from './transform';
-import { ESCaseAttributes } from './types';
-import { AttachmentService } from '../attachments';
-import { AggregationBuilder, AggregationResponse } from '../../client/metrics/types';
+import type { ESCaseAttributes } from './types';
+import type { AttachmentService } from '../attachments';
+import type { AggregationBuilder, AggregationResponse } from '../../client/metrics/types';
 import { createCaseError } from '../../common/error';
-import { IndexRefresh } from '../types';
+import type { IndexRefresh } from '../types';
 
 interface GetCaseIdsByAlertIdArgs {
   alertId: string;
@@ -104,10 +103,6 @@ interface PatchCasesArgs extends IndexRefresh {
   cases: Array<Omit<PatchCase, 'refresh'>>;
 }
 
-interface GetUserArgs {
-  request: KibanaRequest;
-}
-
 interface CasesMapWithPageInfo {
   casesMap: Map<string, CaseResponse>;
   page: number;
@@ -129,23 +124,19 @@ interface GetReportersArgs {
 
 export class CasesService {
   private readonly log: Logger;
-  private readonly authentication?: SecurityPluginSetup['authc'];
   private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
   private readonly attachmentService: AttachmentService;
 
   constructor({
     log,
-    authentication,
     unsecuredSavedObjectsClient,
     attachmentService,
   }: {
     log: Logger;
-    authentication?: SecurityPluginSetup['authc'];
     unsecuredSavedObjectsClient: SavedObjectsClientContract;
     attachmentService: AttachmentService;
   }) {
     this.log = log;
-    this.authentication = authentication;
     this.unsecuredSavedObjectsClient = unsecuredSavedObjectsClient;
     this.attachmentService = attachmentService;
   }
@@ -503,6 +494,8 @@ export class CasesService {
             username,
             full_name: user.full_name ?? null,
             email: user.email ?? null,
+            // TODO: verify that adding a new field is ok, shouldn't be a breaking change
+            profile_uid: user.profile_uid,
           };
         }) ?? []
       );
@@ -538,31 +531,6 @@ export class CasesService {
       return results?.aggregations?.tags?.buckets.map(({ key }) => key) ?? [];
     } catch (error) {
       this.log.error(`Error on GET tags: ${error}`);
-      throw error;
-    }
-  }
-
-  public getUser({ request }: GetUserArgs) {
-    try {
-      this.log.debug(`Attempting to authenticate a user`);
-      if (this.authentication != null) {
-        const user = this.authentication.getCurrentUser(request);
-        if (!user) {
-          return {
-            username: null,
-            full_name: null,
-            email: null,
-          };
-        }
-        return user;
-      }
-      return {
-        username: null,
-        full_name: null,
-        email: null,
-      };
-    } catch (error) {
-      this.log.error(`Error on GET user: ${error}`);
       throw error;
     }
   }

@@ -163,7 +163,7 @@ describe('EmbeddableAnomalyChartsContainer', () => {
   });
 
   test('should render an error in case it could not fetch the ML charts data', async () => {
-    (useAnomalyChartsInputResolver as jest.Mock).mockReturnValueOnce({
+    (useAnomalyChartsInputResolver as jest.Mock).mockReturnValue({
       chartsData: undefined,
       isLoading: false,
       error: 'No anomalies',

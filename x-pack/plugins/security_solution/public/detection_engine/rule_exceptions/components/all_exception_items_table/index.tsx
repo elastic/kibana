@@ -5,21 +5,22 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useEffect, useReducer, useState } from 'react';
-import { EuiPanel, EuiSpacer } from '@elastic/eui';
+import React, { useCallback, useMemo, useEffect, useReducer } from 'react';
+import { EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 
 import type {
   ExceptionListItemSchema,
   UseExceptionListItemsSuccess,
   Pagination,
-  ExceptionListTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { transformInput } from '@kbn/securitysolution-list-hooks';
 
 import {
   deleteExceptionListItemById,
   fetchExceptionListsItemsByListIds,
 } from '@kbn/securitysolution-list-api';
+import styled from 'styled-components';
 import { DEFAULT_INDEX_PATTERN } from '../../../../../common/constants';
 import { useUserData } from '../../../../detections/components/user_info';
 import { useKibana, useToasts } from '../../../../common/lib/kibana';
@@ -37,6 +38,10 @@ import * as i18n from './translations';
 import { useFindExceptionListReferences } from '../../logic/use_find_references';
 import type { Rule } from '../../../../detections/containers/detection_engine/rules/types';
 
+const StyledText = styled(EuiText)`
+  font-style: italic;
+`;
+
 const STATES_SEARCH_HIDDEN: ViewerState[] = ['error', 'empty'];
 const STATES_PAGINATION_UTILITY_HIDDEN: ViewerState[] = [
   'loading',
@@ -51,12 +56,14 @@ const initialState: State = {
     pageIndex: 0,
     pageSize: 25,
     totalItemCount: 0,
-    pageSizeOptions: [1, 5, 10, 25, 50, 100, 200, 300],
+    pageSizeOptions: [5, 10, 25, 50, 100, 200, 300],
   },
   exceptions: [],
   exceptionToEdit: null,
   currenFlyout: null,
   viewerState: 'loading',
+  isReadOnly: true,
+  lastUpdated: Date.now(),
 };
 
 export interface GetExceptionItemProps {
@@ -68,19 +75,20 @@ export interface GetExceptionItemProps {
 interface ExceptionsViewerProps {
   rule: Rule | null;
   listType: ExceptionListTypeEnum;
+  /* Used for when displaying exceptions for a rule that has since been deleted, forcing read only view */
+  isViewReadOnly: boolean;
   onRuleChange?: () => void;
 }
 
 const ExceptionsViewerComponent = ({
   rule,
   listType,
+  isViewReadOnly,
   onRuleChange,
 }: ExceptionsViewerProps): JSX.Element => {
   const { services } = useKibana();
   const toasts = useToasts();
   const [{ canUserCRUD, hasIndexWrite }] = useUserData();
-  const [isReadOnly, setReadOnly] = useState(true);
-  const [lastUpdated, setLastUpdated] = useState<null | string | number>(null);
   const exceptionListsToQuery = useMemo(
     () =>
       rule != null && rule.exceptions_list != null
@@ -90,12 +98,24 @@ const ExceptionsViewerComponent = ({
   );
 
   // Reducer state
-  const [{ exceptions, pagination, currenFlyout, exceptionToEdit, viewerState }, dispatch] =
-    useReducer(allExceptionItemsReducer(), {
-      ...initialState,
-    });
+  const [
+    { exceptions, pagination, currenFlyout, exceptionToEdit, viewerState, isReadOnly, lastUpdated },
+    dispatch,
+  ] = useReducer(allExceptionItemsReducer(), {
+    ...initialState,
+  });
 
   // Reducer actions
+  const setLastUpdated = useCallback(
+    (lastUpdate: string | number): void => {
+      dispatch({
+        type: 'setLastUpdateTime',
+        lastUpdate,
+      });
+    },
+    [dispatch]
+  );
+
   const setExceptions = useCallback(
     ({
       exceptions: newExceptions,
@@ -109,7 +129,7 @@ const ExceptionsViewerComponent = ({
         pagination: newPagination,
       });
     },
-    [dispatch]
+    [dispatch, setLastUpdated]
   );
 
   const setViewerState = useCallback(
@@ -132,7 +152,37 @@ const ExceptionsViewerComponent = ({
     [dispatch]
   );
 
-  const [_, allReferences] = useFindExceptionListReferences(exceptionListsToQuery);
+  const setReadOnly = useCallback(
+    (readOnly: boolean): void => {
+      dispatch({
+        type: 'setIsReadOnly',
+        readOnly,
+      });
+    },
+    [dispatch]
+  );
+
+  const [isLoadingReferences, isFetchReferencesError, allReferences, fetchReferences] =
+    useFindExceptionListReferences();
+
+  useEffect(() => {
+    if (fetchReferences != null && exceptionListsToQuery.length) {
+      const listsToQuery = exceptionListsToQuery.map(
+        ({ id, list_id: listId, namespace_type: namespaceType }) => ({ id, listId, namespaceType })
+      );
+      fetchReferences(listsToQuery);
+    }
+  }, [exceptionListsToQuery, fetchReferences]);
+
+  useEffect(() => {
+    if (isFetchReferencesError) {
+      setViewerState('error');
+    } else if (viewerState == null && isLoadingReferences) {
+      setViewerState('loading');
+    } else if (viewerState === 'loading' && !isLoadingReferences) {
+      setViewerState(null);
+    }
+  }, [isLoadingReferences, isFetchReferencesError, setViewerState, viewerState]);
 
   const handleFetchItems = useCallback(
     async (options?: GetExceptionItemProps) => {
@@ -173,7 +223,7 @@ const ExceptionsViewerComponent = ({
         signal: abortCtrl.signal,
       });
 
-      // Please see `x-pack/plugins/lists/public/exceptions/transforms.ts` doc notes
+      // Please see `kbn-securitysolution-list-hooks/src/transforms/index.test.ts` doc notes
       // for context around the temporary `id`
       const transformedData = data.map((item) => transformInput(item));
 
@@ -190,11 +240,7 @@ const ExceptionsViewerComponent = ({
   const handleGetExceptionListItems = useCallback(
     async (options?: GetExceptionItemProps) => {
       try {
-        setViewerState('loading');
-
         const { pageIndex, itemsPerPage, total, data } = await handleFetchItems(options);
-
-        setViewerState(total > 0 ? null : 'empty');
 
         setExceptions({
           exceptions: data,
@@ -204,6 +250,8 @@ const ExceptionsViewerComponent = ({
             total,
           },
         });
+
+        setViewerState(total > 0 ? null : 'empty');
       } catch (e) {
         setViewerState('error');
 
@@ -301,8 +349,8 @@ const ExceptionsViewerComponent = ({
 
   // User privileges checks
   useEffect((): void => {
-    setReadOnly(!canUserCRUD || !hasIndexWrite);
-  }, [setReadOnly, canUserCRUD, hasIndexWrite]);
+    setReadOnly(isViewReadOnly || !canUserCRUD || !hasIndexWrite);
+  }, [setReadOnly, isViewReadOnly, canUserCRUD, hasIndexWrite]);
 
   useEffect(() => {
     if (exceptionListsToQuery.length > 0) {
@@ -345,6 +393,12 @@ const ExceptionsViewerComponent = ({
 
       <EuiPanel hasBorder={false} hasShadow={false}>
         <>
+          <StyledText size="s">
+            {listType === ExceptionListTypeEnum.ENDPOINT
+              ? i18n.ENDPOINT_EXCEPTIONS_TAB_ABOUT
+              : i18n.EXCEPTIONS_TAB_ABOUT}
+          </StyledText>
+          <EuiSpacer size="l" />
           {!STATES_SEARCH_HIDDEN.includes(viewerState) && (
             <ExceptionsViewerSearchBar
               canAddException={isReadOnly}

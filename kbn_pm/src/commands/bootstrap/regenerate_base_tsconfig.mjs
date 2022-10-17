@@ -7,7 +7,7 @@
  */
 
 import Path from 'path';
-import Fs from 'fs';
+import Fsp from 'fs/promises';
 
 import { REPO_ROOT } from '../../lib/paths.mjs';
 import { convertPluginIdToPackageId } from './plugins.mjs';
@@ -16,9 +16,9 @@ import { normalizePath } from './normalize_path.mjs';
 /**
  * @param {import('@kbn/plugin-discovery').KibanaPlatformPlugin[]} plugins
  */
-export function regenerateBaseTsconfig(plugins) {
+export async function regenerateBaseTsconfig(plugins) {
   const tsconfigPath = Path.resolve(REPO_ROOT, 'tsconfig.base.json');
-  const lines = Fs.readFileSync(tsconfigPath, 'utf-8').split('\n');
+  const lines = (await Fsp.readFile(tsconfigPath, 'utf-8')).split('\n');
 
   const packageMap = plugins
     .slice()
@@ -32,7 +32,7 @@ export function regenerateBaseTsconfig(plugins) {
   const start = lines.findIndex((l) => l.trim() === '// START AUTOMATED PACKAGE LISTING');
   const end = lines.findIndex((l) => l.trim() === '// END AUTOMATED PACKAGE LISTING');
 
-  Fs.writeFileSync(
+  await Fsp.writeFile(
     tsconfigPath,
     [...lines.slice(0, start + 1), ...packageMap, ...lines.slice(end)].join('\n')
   );

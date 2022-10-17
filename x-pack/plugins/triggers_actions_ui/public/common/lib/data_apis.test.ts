@@ -38,7 +38,7 @@ describe('Data API', () => {
       http.post.mockResolvedValueOnce(mockFields);
       const fields = await getESIndexFields({ indexes, http });
 
-      expect(http.post).toHaveBeenCalledWith('/api/triggers_actions_ui/data/_fields', {
+      expect(http.post).toHaveBeenCalledWith('/internal/triggers_actions_ui/data/_fields', {
         body: `{"indexPatterns":${JSON.stringify(indexes)}}`,
       });
       expect(fields).toEqual(mockFields.fields);
@@ -50,7 +50,7 @@ describe('Data API', () => {
       http.post.mockResolvedValueOnce(mockIndices);
       const indices = await getMatchingIndices({ pattern, http });
 
-      expect(http.post).toHaveBeenCalledWith('/api/triggers_actions_ui/data/_indices', {
+      expect(http.post).toHaveBeenCalledWith('/internal/triggers_actions_ui/data/_indices', {
         body: `{"pattern":"*${mockPattern}*"}`,
       });
       expect(indices).toEqual(mockIndices.indices);

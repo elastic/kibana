@@ -33,7 +33,7 @@ export function entSearchOverviewRoute(server: MonitoringCore) {
       try {
         const [stats, metrics] = await Promise.all([
           getStats(req, clusterUuid),
-          getMetrics(req, 'enterprisesearch', metricSet, [], {
+          getMetrics(req, 'enterprise_search', metricSet, [], {
             skipClusterUuidFilter: true,
           }),
         ]);

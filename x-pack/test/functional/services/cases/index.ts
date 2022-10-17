@@ -20,7 +20,7 @@ export function CasesServiceProvider(context: FtrProviderContext) {
   return {
     api: CasesAPIServiceProvider(context),
     common: casesCommon,
-    casesTable: CasesTableServiceProvider(context),
+    casesTable: CasesTableServiceProvider(context, casesCommon),
     create: CasesCreateViewServiceProvider(context, casesCommon),
     navigation: CasesNavigationProvider(context),
     singleCase: CasesSingleViewServiceProvider(context),

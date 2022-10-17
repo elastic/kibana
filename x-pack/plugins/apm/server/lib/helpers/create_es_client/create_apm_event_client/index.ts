@@ -14,14 +14,10 @@ import type {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ValuesType } from 'utility-types';
 import { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
-import {
-  ESSearchRequest,
-  InferSearchResponseOf,
-} from '@kbn/core/types/elasticsearch';
+import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import { unwrapEsResponse } from '@kbn/observability-plugin/server';
 import { omit } from 'lodash';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { Profile } from '../../../../../typings/es_schemas/ui/profile';
 import { withApmSpan } from '../../../../utils/with_apm_span';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { Metric } from '../../../../../typings/es_schemas/ui/metric';
@@ -38,7 +34,6 @@ import {
   unpackProcessorEvents,
   processorEventsToIndex,
 } from './unpack_processor_events';
-import { fakeSyntheticSource } from './fake_synthetic_source';
 
 export type APMEventESSearchRequest = Omit<ESSearchRequest, 'index'> & {
   apm: {
@@ -47,6 +42,7 @@ export type APMEventESSearchRequest = Omit<ESSearchRequest, 'index'> & {
   };
   body: {
     size: number;
+    track_total_hits: boolean | number;
   };
 };
 
@@ -69,7 +65,6 @@ type TypeOfProcessorEvent<T extends ProcessorEvent> = {
   transaction: Transaction;
   span: Span;
   metric: Metric;
-  profile: Profile;
 }[T];
 
 type TypedSearchResponse<TParams extends APMEventESSearchRequest> =
@@ -163,48 +158,9 @@ export class APMEventClient {
 
     return this.callAsyncWithDebug({
       cb: (opts) =>
-        (
-          this.esClient.search(searchParams, opts) as unknown as Promise<{
-            body: TypedSearchResponse<TParams>;
-          }>
-        ).then((response) => {
-          // ensure metric data is compatible with synthetic source
-          // enabled
-          const metricEventsOnly = params.apm.events.every(
-            (event) => event === ProcessorEvent.metric
-          );
-
-          if (!response.body?.hits?.hits) {
-            return response;
-          }
-
-          const hits = response.body.hits.hits.map((hit) => {
-            if (
-              metricEventsOnly ||
-              // take filter_path etc into account
-              (hit._source &&
-                'processor' in hit._source &&
-                hit._source.processor?.event === ProcessorEvent.metric)
-            ) {
-              return {
-                ...hit,
-                _source: fakeSyntheticSource(hit._source),
-              };
-            }
-            return hit;
-          });
-
-          return {
-            ...response,
-            body: {
-              ...response.body,
-              hits: {
-                ...response.body.hits,
-                hits,
-              },
-            },
-          };
-        }),
+        this.esClient.search(searchParams, opts) as unknown as Promise<{
+          body: TypedSearchResponse<TParams>;
+        }>,
       operationName,
       params: searchParams,
       requestType: 'search',

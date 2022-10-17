@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { SavedObjectUnsanitizedDoc } from "@kbn/core-saved-objects-server";
+import { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
-import { omit } from "lodash";
-import { RawRule } from "../../../types";
-import { createEsoMigration, pipeMigrations } from "../utils";
-
-
+import { omit } from 'lodash';
+import { RawRule } from '../../../types';
+import { createEsoMigration, pipeMigrations } from '../utils';
 
 function removeIsSnoozedUntil(
   doc: SavedObjectUnsanitizedDoc<RawRule>
@@ -24,8 +22,9 @@ function removeIsSnoozedUntil(
   };
 }
 
-export const getMigrations_8_4_1 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) => createEsoMigration(
-  encryptedSavedObjects,
-  (doc: SavedObjectUnsanitizedDoc<RawRule>): doc is SavedObjectUnsanitizedDoc<RawRule> => true,
-  pipeMigrations(removeIsSnoozedUntil)
-);
+export const getMigrations841 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) =>
+  createEsoMigration(
+    encryptedSavedObjects,
+    (doc: SavedObjectUnsanitizedDoc<RawRule>): doc is SavedObjectUnsanitizedDoc<RawRule> => true,
+    pipeMigrations(removeIsSnoozedUntil)
+  );

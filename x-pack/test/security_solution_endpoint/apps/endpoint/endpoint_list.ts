@@ -34,13 +34,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       'Actions',
     ],
     [
-      'Host-nyierkw2gu',
+      'Host-dpu1a2r2yi',
       'x',
       'x',
-      'Failure',
-      'Windows',
-      '10.180.151.227, 10.44.18.210',
-      '7.1.9',
+      'Warning',
+      'Linux',
+      '10.2.17.24, 10.56.215.200,10.254.196.130',
+      '8.5.0',
       'x',
       '',
     ],
@@ -48,10 +48,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       'Host-rs9wp4o6l9',
       'x',
       'x',
-      'Warning',
-      'Windows',
-      '10.218.38.118, 10.80.35.162',
-      '8.0.8',
+      'Success',
+      'Linux',
+      '10.138.79.131, 10.170.160.154',
+      '8.5.0',
       'x',
       '',
     ],
@@ -62,7 +62,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       'Warning',
       'Linux',
       '10.87.11.145, 10.117.106.109,10.242.136.97',
-      '7.13.1',
+      '8.5.0',
       'x',
       '',
     ],
@@ -96,7 +96,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('when there is data,', () => {
+    // Version specific: https://github.com/elastic/kibana/issues/141298
+    describe.skip('when there is data,', () => {
       before(async () => {
         indexedData = await endpointTestResources.loadEndpointData({ numHosts: 3 });
         await pageObjects.endpoint.navigateToEndpointList();

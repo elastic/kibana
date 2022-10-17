@@ -54,7 +54,20 @@ import getAppDataView from './utils/observability_data_views/get_app_data_view';
 
 export interface ConfigSchema {
   unsafe: {
-    alertDetails: { enabled: boolean };
+    alertDetails: {
+      apm: {
+        enabled: boolean;
+      };
+      metrics: {
+        enabled: boolean;
+      };
+      logs: {
+        enabled: boolean;
+      };
+      uptime: {
+        enabled: boolean;
+      };
+    };
   };
 }
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
@@ -294,7 +307,10 @@ export class Plugin
       const { getO11yAlertsTableConfiguration } = await import(
         './config/register_alerts_table_configuration'
       );
-      return getO11yAlertsTableConfiguration(this.observabilityRuleTypeRegistry);
+      return getO11yAlertsTableConfiguration(
+        this.observabilityRuleTypeRegistry,
+        this.initContext.config.get()
+      );
     };
 
     const { alertsTableConfigurationRegistry } = pluginsStart.triggersActionsUi;

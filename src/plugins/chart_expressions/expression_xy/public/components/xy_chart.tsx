@@ -110,7 +110,7 @@ declare global {
   }
 }
 
-export type XYChartRenderProps = XYChartProps & {
+export type XYChartRenderProps = Omit<XYChartProps, 'canNavigateToLens'> & {
   chartsThemeService: ChartsPluginSetup['theme'];
   chartsActiveCursorService: ChartsPluginStart['activeCursor'];
   data: DataPublicPluginStart;
@@ -125,9 +125,11 @@ export type XYChartRenderProps = XYChartProps & {
   renderMode: RenderMode;
   syncColors: boolean;
   syncTooltips: boolean;
+  syncCursor: boolean;
   eventAnnotationService: EventAnnotationServiceType;
   renderComplete: () => void;
   uiState?: PersistedState;
+  timeFormat: string;
 };
 
 function getValueLabelsStyling(isHorizontal: boolean): {
@@ -198,9 +200,11 @@ export function XYChart({
   interactive = true,
   syncColors,
   syncTooltips,
+  syncCursor,
   useLegacyTimeAxis,
   renderComplete,
   uiState,
+  timeFormat,
 }: XYChartRenderProps) {
   const {
     legend,
@@ -397,18 +401,16 @@ export function XYChart({
   };
 
   const referenceLineLayers = getReferenceLayers(layers);
-  const [rangeAnnotations, lineAnnotations] = partition(
-    annotations?.datatable.rows,
-    isRangeAnnotation
-  );
-
-  const annotationsConfigs = annotations?.layers.flatMap((l) => l.annotations);
+  const [rangeAnnotations, lineAnnotations] = isTimeViz
+    ? partition(annotations?.datatable.rows, isRangeAnnotation)
+    : [[], []];
 
   const groupedLineAnnotations = getAnnotationsGroupedByInterval(
     lineAnnotations as PointEventAnnotationRow[],
-    annotationsConfigs,
+    annotations?.layers.flatMap((l) => l.annotations),
     annotations?.datatable.columns,
-    formatFactory
+    formatFactory,
+    timeFormat
   );
 
   const visualConfigs = [
@@ -753,7 +755,7 @@ export function XYChart({
               />
             }
             onRenderChange={onRenderChange}
-            onPointerUpdate={handleCursorUpdate}
+            onPointerUpdate={syncCursor ? handleCursorUpdate : undefined}
             externalPointerEvents={{
               tooltip: { visible: syncTooltips, placement: Placement.Right },
             }}
@@ -959,7 +961,7 @@ export function XYChart({
               yAxesMap={yAxesMap}
             />
           ) : null}
-          {rangeAnnotations.length || groupedLineAnnotations.length ? (
+          {(rangeAnnotations.length || lineAnnotations.length) && isTimeViz ? (
             <Annotations
               rangeAnnotations={rangeAnnotations}
               groupedLineAnnotations={groupedLineAnnotations}

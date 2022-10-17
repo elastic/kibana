@@ -13,7 +13,7 @@
   "license": "Elastic License v2",
   "name": "Suspicious Explorer Child Process",
   "note": "",
-  "query": "process where event.type in (\"start\", \"process_started\") and\n  (\n   process.name : (\"cscript.exe\", \"wscript.exe\", \"powershell.exe\", \"rundll32.exe\", \"cmd.exe\", \"mshta.exe\", \"regsvr32.exe\") or\n   process.pe.original_file_name in (\"cscript.exe\", \"wscript.exe\", \"PowerShell.EXE\", \"RUNDLL32.EXE\", \"Cmd.Exe\", \"MSHTA.EXE\", \"REGSVR32.EXE\")\n  ) and\n  /* Explorer started via DCOM */\n  process.parent.name : \"explorer.exe\" and process.parent.args : \"-Embedding\" and\n  not process.parent.args:\n          (\n            /* Noisy CLSID_SeparateSingleProcessExplorerHost Explorer COM Class IDs   */\n            \"/factory,{5BD95610-9434-43C2-886C-57852CC8A120}\",\n            \"/factory,{ceff45ee-c862-41de-aee2-a022c81eda92}\"\n          )\n",
+  "query": "process where event.type == \"start\" and\n  (\n   process.name : (\"cscript.exe\", \"wscript.exe\", \"powershell.exe\", \"rundll32.exe\", \"cmd.exe\", \"mshta.exe\", \"regsvr32.exe\") or\n   process.pe.original_file_name in (\"cscript.exe\", \"wscript.exe\", \"PowerShell.EXE\", \"RUNDLL32.EXE\", \"Cmd.Exe\", \"MSHTA.EXE\", \"REGSVR32.EXE\")\n  ) and\n  /* Explorer started via DCOM */\n  process.parent.name : \"explorer.exe\" and process.parent.args : \"-Embedding\" and\n  not process.parent.args:\n          (\n            /* Noisy CLSID_SeparateSingleProcessExplorerHost Explorer COM Class IDs   */\n            \"/factory,{5BD95610-9434-43C2-886C-57852CC8A120}\",\n            \"/factory,{ceff45ee-c862-41de-aee2-a022c81eda92}\"\n          )\n",
   "required_fields": [
     {
       "ecs": true,
@@ -83,5 +83,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 7
+  "version": 101
 }

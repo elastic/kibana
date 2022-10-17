@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { SavedObjectAttributes } from "@kbn/core-saved-objects-common";
-import { SavedObjectUnsanitizedDoc } from "@kbn/core-saved-objects-server";
+import { SavedObjectAttributes } from '@kbn/core-saved-objects-common';
+import { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
-import { RawRule, RawRuleAction } from "../../../types";
-import { createEsoMigration, pipeMigrations } from "../utils";
+import { RawRule, RawRuleAction } from '../../../types';
+import { createEsoMigration, pipeMigrations } from '../utils';
 
 const SUPPORT_INCIDENTS_ACTION_TYPES = ['.servicenow', '.jira', '.resilient'];
 export const isAnyActionSupportIncidents = (doc: SavedObjectUnsanitizedDoc<RawRule>): boolean =>
@@ -26,6 +26,32 @@ function isEmptyObject(obj: {}) {
   return true;
 }
 
+function setAlertUpdatedAtDate(
+  doc: SavedObjectUnsanitizedDoc<RawRule>
+): SavedObjectUnsanitizedDoc<RawRule> {
+  const updatedAt = doc.updated_at || doc.attributes.createdAt;
+  return {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      updatedAt,
+    },
+  };
+}
+
+function setNotifyWhen(
+  doc: SavedObjectUnsanitizedDoc<RawRule>
+): SavedObjectUnsanitizedDoc<RawRule> {
+  const notifyWhen = doc.attributes.throttle ? 'onThrottleInterval' : 'onActiveAlert';
+  return {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      notifyWhen,
+    },
+  };
+}
+
 function restructureConnectorsThatSupportIncident(
   doc: SavedObjectUnsanitizedDoc<RawRule>
 ): SavedObjectUnsanitizedDoc<RawRule> {
@@ -37,8 +63,6 @@ function restructureConnectorsThatSupportIncident(
     ) {
       // Future developer, we needed to do that because when we created this migration
       // we forget to think about user already using 7.11.0 and having an incident attribute build the right way
-      // IMPORTANT -> if you change this code please do the same inside of this file
-      // x-pack/plugins/alerting/server/saved_objects/migrations.ts
       const subActionParamsIncident =
         (action.params?.subActionParams as SavedObjectAttributes)?.incident ?? null;
       if (subActionParamsIncident != null && !isEmptyObject(subActionParamsIncident)) {
@@ -121,13 +145,13 @@ function restructureConnectorsThatSupportIncident(
       } else if (action.actionTypeId === '.resilient') {
         const { title, comments, description, incidentTypes, severityCode, name } = action.params
           .subActionParams as {
-            title: string;
-            description: string;
-            incidentTypes?: number[];
-            severityCode?: number;
-            comments?: unknown[];
-            name?: string;
-          };
+          title: string;
+          description: string;
+          incidentTypes?: number[];
+          severityCode?: number;
+          comments?: unknown[];
+          name?: string;
+        };
         return [
           ...acc,
           {
@@ -161,14 +185,16 @@ function restructureConnectorsThatSupportIncident(
   };
 }
 
-export const getMigrations_7_11_0 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) => createEsoMigration(
-  encryptedSavedObjects,
-  (doc): doc is SavedObjectUnsanitizedDoc<RawRule> => isAnyActionSupportIncidents(doc),
-  pipeMigrations(restructureConnectorsThatSupportIncident)
-);
+export const getMigrations7110 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) =>
+  createEsoMigration(
+    encryptedSavedObjects,
+    (doc): doc is SavedObjectUnsanitizedDoc<RawRule> => true,
+    pipeMigrations(setAlertUpdatedAtDate, setNotifyWhen)
+  );
 
-export const getMigrations_7_11_2 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) => createEsoMigration(
-  encryptedSavedObjects,
-  (doc): doc is SavedObjectUnsanitizedDoc<RawRule> => isAnyActionSupportIncidents(doc),
-  pipeMigrations(restructureConnectorsThatSupportIncident)
-);
+export const getMigrations7112 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) =>
+  createEsoMigration(
+    encryptedSavedObjects,
+    (doc): doc is SavedObjectUnsanitizedDoc<RawRule> => isAnyActionSupportIncidents(doc),
+    pipeMigrations(restructureConnectorsThatSupportIncident)
+  );

@@ -6,9 +6,9 @@ The TriggersActionsUi plugin's Data Apis back the functionality needed by the In
 
 The following endpoints are provided for this alert type:
 
-- `POST /api/triggers_actions_ui/data/_indices`
-- `POST /api/triggers_actions_ui/data/_fields`
-- `POST /api/triggers_actions_ui/data/_time_series_query`
+- `POST /internal/triggers_actions_ui/data/_indices`
+- `POST /internal/triggers_actions_ui/data/_fields`
+- `POST /internal/triggers_actions_ui/data/_time_series_query`
 
 ### `POST .../_indices`
 
@@ -79,7 +79,7 @@ provide a "preview" of the alert during creation/editing based on recent data,
 and could be used to show a "simulation" of the the alert over an arbitrary
 range of time.
 
-The endpoint is `POST /api/triggers_actions_ui/data/_time_series_query`.
+The endpoint is `POST /internal/triggers_actions_ui/data/_time_series_query`.
 The request and response bodies are specifed in 
 [`lib/core_query_types.ts`][it-core-query]
 and
@@ -93,7 +93,7 @@ for the last 10 seconds.
 This example uses [now-iso][] to generate iso date strings.
 
 ```console
-curl -k  "https://elastic:changeme@localhost:5601/api/triggers_actions_ui/data/_time_series_query" \
+curl -k  "https://elastic:changeme@localhost:5601/internal/triggers_actions_ui/data/_time_series_query" \
     -H "kbn-xsrf: foo" -H "content-type: application/json"   -d "{
     \"index\":           \"es-hb-sim\",
     \"timeField\":       \"@timestamp\",
@@ -136,7 +136,7 @@ curl -k  "https://elastic:changeme@localhost:5601/api/triggers_actions_ui/data/_
 To get the current value of the calculated metric, you can leave off the date:
 
 ```
-curl -k  "https://elastic:changeme@localhost:5601/api/triggers_actions_ui/data/_time_series_query" \
+curl -k  "https://elastic:changeme@localhost:5601/internal/triggers_actions_ui/data/_time_series_query" \
     -H "kbn-xsrf: foo" -H "content-type: application/json"   -d '{
     "index":           "es-hb-sim",
     "timeField":       "@timestamp",
@@ -169,7 +169,7 @@ curl -k  "https://elastic:changeme@localhost:5601/api/triggers_actions_ui/data/_
 ## service functions
 
 A single service function is available that provides the functionality
-of the http endpoint `POST /api/triggers_actions_ui/data/_time_series_query`,
+of the http endpoint `POST /internal/triggers_actions_ui/data/_time_series_query`,
 but as an API for Kibana plugins.  The function is available as
 `triggersActionsUi.data.timeSeriesQuery()` on the plugin's _Start_ contract
 

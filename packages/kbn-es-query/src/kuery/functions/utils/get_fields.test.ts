@@ -74,10 +74,13 @@ describe('getFields', () => {
       const fieldNameNode = nodeTypes.wildcard.buildNode('machine*');
       const results = getFields(fieldNameNode, indexPattern);
 
-      expect(Array.isArray(results)).toBeTruthy();
-      expect(results).toHaveLength(2);
-      expect(results!.find((field) => field.name === 'machine.os')).toBeDefined();
-      expect(results!.find((field) => field.name === 'machine.os.raw')).toBeDefined();
+      expect(results).toEqual(expect.any(Array));
+      expect(results).toHaveLength(3);
+      expect(results).toEqual([
+        expect.objectContaining({ name: 'machine.os' }),
+        expect.objectContaining({ name: 'machine.os.raw' }),
+        expect.objectContaining({ name: 'machine.os.keyword' }),
+      ]);
     });
   });
 });

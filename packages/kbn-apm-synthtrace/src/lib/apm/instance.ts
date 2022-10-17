@@ -13,8 +13,20 @@ import { Span } from './span';
 import { Transaction } from './transaction';
 import { ApmApplicationMetricFields, ApmFields } from './apm_fields';
 
+export type SpanParams = {
+  spanName: string;
+  spanType: string;
+  spanSubtype?: string;
+} & ApmFields;
+
 export class Instance extends Entity<ApmFields> {
-  transaction(transactionName: string, transactionType = 'request') {
+  transaction({
+    transactionName,
+    transactionType = 'request',
+  }: {
+    transactionName: string;
+    transactionType?: string;
+  }) {
     return new Transaction({
       ...this.fields,
       'transaction.name': transactionName,
@@ -22,7 +34,7 @@ export class Instance extends Entity<ApmFields> {
     });
   }
 
-  span(spanName: string, spanType: string, spanSubtype?: string, apmFields?: ApmFields) {
+  span({ spanName, spanType, spanSubtype, ...apmFields }: SpanParams) {
     return new Span({
       ...this.fields,
       ...apmFields,
@@ -32,7 +44,15 @@ export class Instance extends Entity<ApmFields> {
     });
   }
 
-  error(message: string, type?: string, groupingName?: string) {
+  error({
+    message,
+    type,
+    groupingName,
+  }: {
+    message: string;
+    type?: string;
+    groupingName?: string;
+  }) {
     return new ApmError({
       ...this.fields,
       'error.exception': [{ message, ...(type ? { type } : {}) }],

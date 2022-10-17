@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { SavedObjectUnsanitizedDoc } from "@kbn/core-saved-objects-server";
+import { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
-import { RawRule, RawRuleExecutionStatus } from "../../../types";
-import { LEGACY_LAST_MODIFIED_VERSION, SIEM_APP_ID, SIEM_SERVER_APP_ID } from "../constants";
-import { createEsoMigration, pipeMigrations } from "../utils";
+import { RawRule, RawRuleExecutionStatus } from '../../../types';
+import { LEGACY_LAST_MODIFIED_VERSION, SIEM_APP_ID, SIEM_SERVER_APP_ID } from '../constants';
+import { createEsoMigration, pipeMigrations } from '../utils';
 
 const consumersToChange: Map<string, string> = new Map(
   Object.entries({
@@ -48,19 +48,19 @@ function setAlertIdAsDefaultDedupkeyOnPagerDutyActions(
       ...attributes,
       ...(attributes.actions
         ? {
-          actions: attributes.actions.map((action) => {
-            if (action.actionTypeId !== '.pagerduty' || action.params.eventAction === 'trigger') {
-              return action;
-            }
-            return {
-              ...action,
-              params: {
-                ...action.params,
-                dedupKey: action.params.dedupKey ?? '{{alertId}}',
-              },
-            };
-          }),
-        }
+            actions: attributes.actions.map((action) => {
+              if (action.actionTypeId !== '.pagerduty' || action.params.eventAction === 'trigger') {
+                return action;
+              }
+              return {
+                ...action,
+                params: {
+                  ...action.params,
+                  dedupKey: action.params.dedupKey ?? '{{alertId}}',
+                },
+              };
+            }),
+          }
         : {}),
     },
   };
@@ -83,14 +83,14 @@ function initializeExecutionStatus(
   };
 }
 
-export const getMigrations_7_10_0 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) => createEsoMigration(
-  encryptedSavedObjects,
-  // migrate all documents in 7.10 in order to add the "meta" RBAC field
-  (doc): doc is SavedObjectUnsanitizedDoc<RawRule> => true,
-  pipeMigrations(
-    markAsLegacyAndChangeConsumer,
-    setAlertIdAsDefaultDedupkeyOnPagerDutyActions,
-    initializeExecutionStatus
-  )
-);
-
+export const getMigrations7100 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) =>
+  createEsoMigration(
+    encryptedSavedObjects,
+    // migrate all documents in 7.10 in order to add the "meta" RBAC field
+    (doc): doc is SavedObjectUnsanitizedDoc<RawRule> => true,
+    pipeMigrations(
+      markAsLegacyAndChangeConsumer,
+      setAlertIdAsDefaultDedupkeyOnPagerDutyActions,
+      initializeExecutionStatus
+    )
+  );

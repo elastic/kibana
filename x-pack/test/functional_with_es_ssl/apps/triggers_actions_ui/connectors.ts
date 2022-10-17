@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { findIndex } from 'lodash';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { ObjectRemover } from '../../lib/object_remover';
 import { generateUniqueKey, getTestActionData } from '../../lib/get_test_data';
@@ -15,21 +16,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
   const find = getService('find');
   const retry = getService('retry');
-  const comboBox = getService('comboBox');
   const supertest = getService('supertest');
+  const objectRemover = new ObjectRemover(supertest);
+  const browser = getService('browser');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/88796
-  describe.skip('Connectors', function () {
-    const objectRemover = new ObjectRemover(supertest);
-
+  describe('Connectors', function () {
     before(async () => {
       const { body: createdAction } = await supertest
         .post(`/api/actions/connector`)
         .set('kbn-xsrf', 'foo')
         .send(getTestActionData())
         .expect(200);
-      await pageObjects.common.navigateToApp('triggersActions');
-      await testSubjects.click('connectorsTab');
+      await pageObjects.common.navigateToApp('triggersActionsConnectors');
       objectRemover.add(createdAction.id, 'action', 'actions');
     });
 
@@ -44,7 +42,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('.index-card');
 
-      await find.clickByCssSelector('[data-test-subj="backButton"]');
+      await find.clickByCssSelector('[data-test-subj="create-connector-flyout-back-btn"]');
 
       await testSubjects.click('.slack-card');
 
@@ -68,12 +66,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           actionType: 'Slack',
         },
       ]);
+      const connector = await getConnector(connectorName);
+      objectRemover.add(connector.id, 'action', 'actions');
     });
 
     it('should edit a connector', async () => {
       const connectorName = generateUniqueKey();
       const updatedConnectorName = `${connectorName}updated`;
-      await createConnector(connectorName);
+      const createdAction = await createConnector(connectorName);
+      objectRemover.add(createdAction.id, 'action', 'actions');
+      await browser.refresh();
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
@@ -87,11 +89,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.setValue('slackWebhookUrlInput', 'https://test.com');
 
       await find.clickByCssSelector(
-        '[data-test-subj="edit-connector-flyout-save-close-btn"]:not(disabled)'
+        '[data-test-subj="edit-connector-flyout-save-btn"]:not(disabled)'
       );
 
       const toastTitle = await pageObjects.common.closeToast();
       expect(toastTitle).to.eql(`Updated '${updatedConnectorName}'`);
+
+      await testSubjects.click('euiFlyoutCloseButton');
 
       await pageObjects.triggersActionsUI.searchConnectors(updatedConnectorName);
 
@@ -107,7 +111,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     it('should test a connector and display a successful result', async () => {
       const connectorName = generateUniqueKey();
       const indexName = generateUniqueKey();
-      await createIndexConnector(connectorName, indexName);
+      const createdAction = await createIndexConnector(connectorName, indexName);
+      objectRemover.add(createdAction.id, 'action', 'actions');
+      await browser.refresh();
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
@@ -119,7 +125,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await find.clickByCssSelector('[data-test-subj="testConnectorTab"]');
 
       // test success
-      await testSubjects.setValue('documentsJsonEditor', '{ "key": "value" }');
+      await find.setValueByClass('kibanaCodeEditor', '{ "key": "value" }');
 
       await find.clickByCssSelector('[data-test-subj="executeActionButton"]:not(disabled)');
 
@@ -128,14 +134,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       await find.clickByCssSelector(
-        '[data-test-subj="cancelSaveEditedConnectorButton"]:not(disabled)'
+        '[data-test-subj="edit-connector-flyout-close-btn"]:not(disabled)'
       );
     });
 
     it('should test a connector and display a failure result', async () => {
       const connectorName = generateUniqueKey();
       const indexName = generateUniqueKey();
-      await createIndexConnector(connectorName, indexName);
+      const createdAction = await createIndexConnector(connectorName, indexName);
+      objectRemover.add(createdAction.id, 'action', 'actions');
+      await browser.refresh();
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
@@ -146,25 +154,25 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await find.clickByCssSelector('[data-test-subj="testConnectorTab"]');
 
-      await testSubjects.setValue('documentsJsonEditor', '{ "": "value" }');
+      await find.setValueByClass('kibanaCodeEditor', '"test"');
 
       await find.clickByCssSelector('[data-test-subj="executeActionButton"]:not(disabled)');
 
       await retry.try(async () => {
-        const executionFailureResultCallout = await testSubjects.find('executionFailureResult');
-        expect(await executionFailureResultCallout.getVisibleText()).to.match(
-          /error indexing documents/
-        );
+        await testSubjects.find('executionFailureResult');
       });
 
       await find.clickByCssSelector(
-        '[data-test-subj="cancelSaveEditedConnectorButton"]:not(disabled)'
+        '[data-test-subj="edit-connector-flyout-close-btn"]:not(disabled)'
       );
     });
 
     it('should reset connector when canceling an edit', async () => {
       const connectorName = generateUniqueKey();
-      await createConnector(connectorName);
+      const createdAction = await createConnector(connectorName);
+      objectRemover.add(createdAction.id, 'action', 'actions');
+      await browser.refresh();
+
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
       const searchResultsBeforeEdit = await pageObjects.triggersActionsUI.getConnectorsList();
@@ -173,9 +181,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await find.clickByCssSelector('[data-test-subj="connectorsTableCell-name"] button');
 
       await testSubjects.setValue('nameInput', 'some test name to cancel');
-      await testSubjects.click('cancelSaveEditedConnectorButton');
+      await testSubjects.click('edit-connector-flyout-close-btn');
+      await testSubjects.click('confirmModalConfirmButton');
 
-      await find.waitForDeletedByCssSelector('[data-test-subj="cancelSaveEditedConnectorButton"]');
+      await find.waitForDeletedByCssSelector('[data-test-subj="edit-connector-flyout-close-btn"]');
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
@@ -189,8 +198,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     it('should delete a connector', async () => {
       const connectorName = generateUniqueKey();
       await createConnector(connectorName);
-
-      await createConnector(generateUniqueKey());
+      const createdAction = await createConnector(generateUniqueKey());
+      objectRemover.add(createdAction.id, 'action', 'actions');
+      await browser.refresh();
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
@@ -214,8 +224,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     it('should bulk delete connectors', async () => {
       const connectorName = generateUniqueKey();
       await createConnector(connectorName);
-
-      await createConnector(generateUniqueKey());
+      const createdAction = await createConnector(generateUniqueKey());
+      objectRemover.add(createdAction.id, 'action', 'actions');
+      await browser.refresh();
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
@@ -264,47 +275,49 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await find.clickByCssSelector('[data-test-subj="connectorsTableCell-name"] button');
 
       expect(await testSubjects.exists('preconfiguredBadge')).to.be(true);
-      expect(await testSubjects.exists('edit-connector-flyout-save-close-btn')).to.be(false);
+      expect(await testSubjects.exists('edit-connector-flyout-save-btn')).to.be(false);
     });
   });
 
   async function createConnector(connectorName: string) {
-    await pageObjects.triggersActionsUI.clickCreateConnectorButton();
-
-    await testSubjects.click('.slack-card');
-
-    await testSubjects.setValue('nameInput', connectorName);
-
-    await testSubjects.setValue('slackWebhookUrlInput', 'https://test.com');
-
-    await find.clickByCssSelector(
-      '[data-test-subj="create-connector-flyout-save-btn"]:not(disabled)'
-    );
-    await pageObjects.common.closeToast();
+    const { body: createdAction } = await supertest
+      .post(`/api/actions/connector`)
+      .set('kbn-xsrf', 'foo')
+      .send({
+        name: connectorName,
+        config: {},
+        secrets: {
+          webhookUrl: 'https://test.com',
+        },
+        connector_type_id: '.slack',
+      })
+      .expect(200);
+    return createdAction;
   }
 
   async function createIndexConnector(connectorName: string, indexName: string) {
-    await pageObjects.triggersActionsUI.clickCreateConnectorButton();
+    const { body: createdAction } = await supertest
+      .post(`/api/actions/connector`)
+      .set('kbn-xsrf', 'foo')
+      .send({
+        config: {
+          index: indexName,
+          refresh: false,
+        },
+        connector_type_id: '.index',
+        name: connectorName,
+        secrets: {},
+      })
+      .expect(200);
+    return createdAction;
+  }
 
-    await testSubjects.click('.index-card');
-
-    await testSubjects.setValue('nameInput', connectorName);
-
-    await retry.try(async () => {
-      // At times we find the driver controlling the ComboBox in tests
-      // can select the wrong item, this ensures we always select the correct index
-      await comboBox.set('connectorIndexesComboBox', indexName);
-      expect(
-        await comboBox.isOptionSelected(
-          await testSubjects.find('connectorIndexesComboBox'),
-          indexName
-        )
-      ).to.be(true);
-    });
-
-    await find.clickByCssSelector(
-      '[data-test-subj="create-connector-flyout-save-btn"]:not(disabled)'
-    );
-    await pageObjects.common.closeToast();
+  async function getConnector(name: string) {
+    const { body } = await supertest
+      .get(`/api/actions/connectors`)
+      .set('kbn-xsrf', 'foo')
+      .expect(200);
+    const i = findIndex(body, (c: any) => c.name === name);
+    return body[i];
   }
 };

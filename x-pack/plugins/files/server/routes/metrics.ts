@@ -6,16 +6,17 @@
  */
 import type { FilesRouter } from './types';
 
-import { FilesMetricsHttpEndpoint, FILES_API_ROUTES } from './api_routes';
+import { FilesMetrics } from '../../common';
+import { CreateRouteDefinition, FILES_API_ROUTES } from './api_routes';
 import type { FilesRequestHandler } from './types';
 
 const method = 'get' as const;
 
-type Response = FilesMetricsHttpEndpoint['output'];
+export type Endpoint = CreateRouteDefinition<{}, FilesMetrics>;
 
 const handler: FilesRequestHandler = async ({ files }, req, res) => {
   const { fileService } = await files;
-  const body: Response = await fileService.asCurrentUser().getUsageMetrics();
+  const body: Endpoint['output'] = await fileService.asCurrentUser().getUsageMetrics();
   return res.ok({
     body,
   });

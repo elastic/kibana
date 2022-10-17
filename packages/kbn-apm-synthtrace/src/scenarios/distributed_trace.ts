@@ -23,23 +23,27 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
       const transactionName = '240rpm/75% 1000ms';
       const successfulTimestamps = range.interval('1s').rate(3);
 
-      const opbeansRum = apm.service('opbeans-rum', ENVIRONMENT, 'rum-js').instance('my-instance');
-      const opbeansNode = apm
-        .service('opbeans-node', ENVIRONMENT, 'nodejs')
+      const opbeansRum = apm
+        .service({ name: 'opbeans-rum', environment: ENVIRONMENT, agentName: 'rum-js' })
         .instance('my-instance');
-      const opbeansGo = apm.service('opbeans-go', ENVIRONMENT, 'go').instance('my-instance');
+      const opbeansNode = apm
+        .service({ name: 'opbeans-node', environment: ENVIRONMENT, agentName: 'nodejs' })
+        .instance('my-instance');
+      const opbeansGo = apm
+        .service({ name: 'opbeans-go', environment: ENVIRONMENT, agentName: 'go' })
+        .instance('my-instance');
 
       const traces = successfulTimestamps.generator((timestamp) => {
         // opbeans-rum
         return opbeansRum
-          .transaction(transactionName)
+          .transaction({ transactionName })
           .duration(400)
           .timestamp(timestamp)
           .children(
             // opbeans-rum -> opbeans-node
             opbeansRum
               .span(
-                ...httpExitSpan({
+                httpExitSpan({
                   spanName: 'GET /api/products/top',
                   destinationUrl: 'http://opbeans-node:3000',
                 })
@@ -50,14 +54,14 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
               .children(
                 // opbeans-node
                 opbeansNode
-                  .transaction('Initial transaction in opbeans-node')
+                  .transaction({ transactionName: 'Initial transaction in opbeans-node' })
                   .duration(300)
                   .timestamp(timestamp)
                   .children(
                     opbeansNode
                       // opbeans-node -> opbeans-go
                       .span(
-                        ...httpExitSpan({
+                        httpExitSpan({
                           spanName: 'GET opbeans-go:3000',
                           destinationUrl: 'http://opbeans-go:3000',
                         })
@@ -69,12 +73,12 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
                         // opbeans-go
                         opbeansGo
 
-                          .transaction('Initial transaction in opbeans-go')
+                          .transaction({ transactionName: 'Initial transaction in opbeans-go' })
                           .timestamp(timestamp)
                           .duration(200)
                           .children(
                             opbeansGo
-                              .span('custom_operation', 'custom')
+                              .span({ spanName: 'custom_operation', spanType: 'custom' })
                               .timestamp(timestamp)
                               .duration(100)
                               .success()

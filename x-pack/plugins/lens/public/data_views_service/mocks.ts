@@ -6,11 +6,11 @@
  */
 
 import { DataViewsContract } from '@kbn/data-views-plugin/common';
-import { documentField } from '../indexpattern_datasource/document_field';
+import { documentField } from '../datasources/form_based/document_field';
 import {
   createMockedIndexPattern,
   createMockedRestrictedIndexPattern,
-} from '../indexpattern_datasource/mocks';
+} from '../datasources/form_based/mocks';
 import { DataViewsState } from '../state_management';
 import { ExistingFieldsMap, IndexPattern } from '../types';
 import { getFieldByNameFactory } from './loader';
@@ -59,6 +59,7 @@ const indexPattern1 = {
   timeFieldName: 'timestamp',
   hasRestrictions: false,
   isPersisted: () => true,
+  toSpec: () => ({}),
   fields: [
     {
       name: 'timestamp',
@@ -145,6 +146,7 @@ const indexPattern2 = {
   timeFieldName: 'timestamp',
   hasRestrictions: true,
   isPersisted: () => true,
+  toSpec: () => ({}),
   fieldFormatMap: { bytes: { id: 'bytes', params: { pattern: '0.0' } } },
   fields: [
     {
@@ -220,6 +222,7 @@ export function mockDataViewsService() {
         ...sampleIndexPatternsFromService[id],
         metaFields: [],
         isPersisted: () => true,
+        toSpec: () => ({}),
       };
       if (!result.fields) {
         result.fields = [];

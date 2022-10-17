@@ -8,7 +8,6 @@
 import { cloneDeep } from 'lodash';
 import moment from 'moment';
 import rison, { RisonValue } from 'rison-node';
-import { escapeKuery } from '@kbn/es-query';
 import React, { FC, useEffect, useMemo, useState } from 'react';
 import { APP_ID as MAPS_APP_ID } from '@kbn/maps-plugin/common';
 import {
@@ -32,7 +31,7 @@ import {
 } from '../../../../common/util/date_utils';
 import { parseInterval } from '../../../../common/util/parse_interval';
 import { ml } from '../../services/ml_api_service';
-import { replaceStringTokens } from '../../util/string_utils';
+import { escapeKueryForFieldValuePair, replaceStringTokens } from '../../util/string_utils';
 import { getUrlForRecord, openCustomUrlWindow } from '../../util/custom_url_utils';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../../../common/constants/locator';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../common/constants/search';
@@ -54,6 +53,7 @@ import { useMlKibana } from '../../contexts/kibana';
 import { getFieldTypeFromMapping } from '../../services/mapping_service';
 import type { AnomaliesTableRecord } from '../../../../common/types/anomalies';
 import { getQueryStringForInfluencers } from './get_query_string_for_influencers';
+import { getFiltersForDSLQuery } from '../../../../common/util/job_utils';
 interface LinksMenuProps {
   anomaly: AnomaliesTableRecord;
   bounds: TimeRangeBounds;
@@ -79,7 +79,14 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     services: { data, share, application },
   } = kibana;
 
+  const job = useMemo(() => {
+    return mlJobService.getJob(props.anomaly.jobId);
+  }, [props.anomaly.jobId]);
+
   const getAnomaliesMapsLink = async (anomaly: AnomaliesTableRecord) => {
+    const index = job.datafeed_config.indices[0];
+    const dataViewId = await getDataViewIdFromName(index);
+
     const initialLayers = getInitialAnomaliesLayers(anomaly.jobId);
     const anomalyBucketStartMoment = moment(anomaly.source.timestamp).tz(getDateFormatTz());
     const anomalyBucketStart = anomalyBucketStartMoment.toISOString();
@@ -101,10 +108,14 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
         ? {
             query: {
               language: SEARCH_QUERY_LANGUAGE.KUERY,
-              query: `${escapeKuery(anomaly.entityName)}:${escapeKuery(anomaly.entityValue)}`,
+              query: escapeKueryForFieldValuePair(anomaly.entityName, anomaly.entityValue),
             },
           }
         : {}),
+      filters:
+        dataViewId === null
+          ? []
+          : getFiltersForDSLQuery(job.datafeed_config.query, dataViewId, job.job_id),
     });
     return location;
   };
@@ -113,6 +124,9 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     anomaly: AnomaliesTableRecord,
     sourceIndicesWithGeoFields: SourceIndicesWithGeoFields
   ) => {
+    const index = job.datafeed_config.indices[0];
+    const dataViewId = await getDataViewIdFromName(index);
+
     // Create a layer for each of the geoFields
     const initialLayers = getInitialSourceIndexFieldLayers(
       sourceIndicesWithGeoFields[anomaly.jobId]
@@ -139,15 +153,22 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     );
 
     const locator = share.url.locators.get(MAPS_APP_LOCATOR);
+    const filtersFromDatafeedQuery =
+      dataViewId === null
+        ? []
+        : getFiltersForDSLQuery(job.datafeed_config.query, dataViewId, job.job_id);
     const location = await locator?.getLocation({
       initialLayers,
       timeRange,
-      filters: data.query.filterManager.getFilters(),
+      filters:
+        filtersFromDatafeedQuery.length > 0
+          ? filtersFromDatafeedQuery
+          : data.query.filterManager.getFilters(),
       ...(anomaly.entityName && anomaly.entityValue
         ? {
             query: {
               language: SEARCH_QUERY_LANGUAGE.KUERY,
-              query: `${escapeKuery(anomaly.entityName)}:${escapeKuery(anomaly.entityValue)}${
+              query: `${escapeKueryForFieldValuePair(anomaly.entityName, anomaly.entityValue)}${
                 influencersQueryString !== '' ? ` and (${influencersQueryString})` : ''
               }`,
             },
@@ -176,7 +197,6 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     }
 
     const getDataViewId = async () => {
-      const job = mlJobService.getJob(props.anomaly.jobId);
       const index = job.datafeed_config.indices[0];
 
       const dataViewId = await getDataViewIdFromName(index);
@@ -247,6 +267,10 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
           language: 'kuery',
           query: kqlQuery,
         },
+        filters:
+          dataViewId === null
+            ? []
+            : getFiltersForDSLQuery(job.datafeed_config.query, dataViewId, job.job_id),
         sort: [['timestamp, asc']],
       });
 
@@ -441,7 +465,6 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     const categoryId = props.anomaly.entityValue;
     const record = props.anomaly.source;
 
-    const job = mlJobService.getJob(props.anomaly.jobId);
     if (job === undefined) {
       // eslint-disable-next-line no-console
       console.log(`viewExamples(): no job found with ID: ${props.anomaly.jobId}`);
@@ -546,7 +569,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
 
           const appStateProps: RisonValue = {
             index: dataViewId,
-            filters: [],
+            filters: getFiltersForDSLQuery(job.datafeed_config.query, dataViewId, job.job_id),
           };
           if (query !== null) {
             appStateProps.query = query;

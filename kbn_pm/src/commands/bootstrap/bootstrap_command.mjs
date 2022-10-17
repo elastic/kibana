@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { spawnSync } from '../../lib/spawn.mjs';
+import { run } from '../../lib/spawn.mjs';
 import * as Bazel from '../../lib/bazel.mjs';
 import { haveNodeModulesBeenManuallyDeleted, removeYarnIntegrityFileIfExists } from './yarn.mjs';
 import { setupRemoteCache } from './setup_remote_cache.mjs';
@@ -56,15 +56,15 @@ export const command = {
     // our custom logic have determined there is a chance node_modules have been manually deleted and as such bazel
     // tracking mechanism is no longer valid
     const forceInstall =
-      args.getBooleanValue('force-install') ?? haveNodeModulesBeenManuallyDeleted();
+      args.getBooleanValue('force-install') ?? (await haveNodeModulesBeenManuallyDeleted());
 
-    Bazel.tryRemovingBazeliskFromYarnGlobal(log);
+    await Bazel.tryRemovingBazeliskFromYarnGlobal(log);
 
     // Install bazel machinery tools if needed
-    Bazel.ensureInstalled(log);
+    await Bazel.ensureInstalled(log);
 
     // Setup remote cache settings in .bazelrc.cache if needed
-    setupRemoteCache(log);
+    await setupRemoteCache(log);
 
     // Bootstrap process for Bazel packages
     // Bazel is now managing dependencies so yarn install
@@ -76,32 +76,30 @@ export const command = {
     // That is only intended during the migration process while non Bazel projects are not removed at all.
     if (forceInstall) {
       await time('force install dependencies', async () => {
-        removeYarnIntegrityFileIfExists();
+        await removeYarnIntegrityFileIfExists();
         await Bazel.expungeCache(log, { quiet });
         await Bazel.installYarnDeps(log, { offline, quiet });
       });
     }
 
     const plugins = await time('plugin discovery', async () => {
-      return pluginDiscovery();
+      return await pluginDiscovery();
     });
 
     // generate the synthetic package map which powers several other features, needed
     // as an input to the package build
     await time('regenerate synthetic package map', async () => {
-      regenerateSyntheticPackageMap(plugins);
+      await regenerateSyntheticPackageMap(plugins);
     });
 
-    // build packages
     await time('build packages', async () => {
       await Bazel.buildPackages(log, { offline, quiet });
     });
-
     await time('sort package json', async () => {
       await sortPackageJson();
     });
     await time('regenerate tsconfig.base.json', async () => {
-      regenerateBaseTsconfig(plugins);
+      await regenerateBaseTsconfig(plugins);
     });
 
     if (validate) {
@@ -118,7 +116,7 @@ export const command = {
     if (vscodeConfig) {
       await time('update vscode config', async () => {
         // Update vscode settings
-        spawnSync('node', ['scripts/update_vscode_config']);
+        await run('node', ['scripts/update_vscode_config']);
 
         log.success('vscode config updated');
       });
