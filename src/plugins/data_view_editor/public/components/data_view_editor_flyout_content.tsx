@@ -214,7 +214,8 @@ const IndexPatternEditorFlyoutContentComponent = ({
 
     dataViewEditorService.loadDataViewNames(title).then((names) => {
       if (isCancelled) return;
-      existingDataViewNames$.current.next(names);
+      const filteredNames = editData ? names.filter((name) => name !== editData?.name) : names;
+      existingDataViewNames$.current.next(filteredNames);
       isLoadingDataViewNames$.current.next(false);
     });
 
