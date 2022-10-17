@@ -304,7 +304,7 @@ Infrastructure::
 
 Lens & Visualizations::
 * Fixes the detailed tooltip wrap problem {kibana-pull}142818[#142818]
-* Fixes and issue where columns normalized by unit were unable to display properly on Dashboards for *Lens* metric visualizations {kibana-pull}142741[#142741]
+* Fixes an issue where columns normalized by unit were unable to display properly on Dashboards for *Lens* metric visualizations {kibana-pull}142741[#142741]
 * Adds back ticks on bands in *Lens* {kibana-pull}142702[#142702]
 * Fixes guidance panel appearing for a moment when saving Graph {kibana-pull}141228[#141228]
 * Fixes pie filter without slice {kibana-pull}141227[#141227]
