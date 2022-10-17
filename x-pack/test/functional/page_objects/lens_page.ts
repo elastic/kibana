@@ -543,9 +543,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param dimension - the selector of the dimension panel to open
      * @param layerIndex - the index of the layer
      */
-    async openDimensionEditor(dimension: string, layerIndex = 0) {
+    async openDimensionEditor(dimension: string, layerIndex = 0, dimensionIndex = 0) {
       await retry.try(async () => {
-        await testSubjects.click(`lns-layerPanel-${layerIndex} > ${dimension}`);
+        const dimensionEditor = (
+          await testSubjects.findAll(`lns-layerPanel-${layerIndex} > ${dimension}`)
+        )[dimensionIndex];
+        await dimensionEditor.click();
       });
     },
 
