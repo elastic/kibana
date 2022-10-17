@@ -9,28 +9,30 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import { SavedObject, SavedObjectsResolveResponse } from '@kbn/core/server';
-import {
-  CaseResponseRt,
+import type { SavedObject, SavedObjectsResolveResponse } from '@kbn/core/server';
+import type {
   CaseResponse,
-  CaseResolveResponseRt,
   CaseResolveResponse,
   User,
   AllTagsFindRequest,
+  AllReportersFindRequest,
+  CasesByAlertIDRequest,
+  CasesByAlertId,
+  CaseAttributes,
+} from '../../../common/api';
+import {
+  CaseResponseRt,
+  CaseResolveResponseRt,
   AllTagsFindRequestRt,
   excess,
   throwErrors,
   AllReportersFindRequestRt,
-  AllReportersFindRequest,
-  CasesByAlertIDRequest,
   CasesByAlertIDRequestRt,
-  CasesByAlertId,
   CasesByAlertIdRt,
-  CaseAttributes,
 } from '../../../common/api';
 import { createCaseError } from '../../common/error';
 import { countAlertsForID, flattenCaseSavedObject } from '../../common/utils';
-import { CasesClientArgs } from '..';
+import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import { combineAuthorizedAndOwnerFilter } from '../utils';
 import { CasesService } from '../../services';

@@ -76,7 +76,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     );
   };
 
-  describe.skip('Response Actions Responder', function () {
+  describe('Response Actions Responder', function () {
     let indexedData: IndexedHostsAndAlertsResponse;
     let endpointAgentId: string;
 

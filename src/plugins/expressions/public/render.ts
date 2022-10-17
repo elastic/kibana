@@ -30,6 +30,7 @@ export interface ExpressionRenderHandlerParams {
   onRenderError?: RenderErrorHandlerFnType;
   renderMode?: RenderMode;
   syncColors?: boolean;
+  syncCursor?: boolean;
   syncTooltips?: boolean;
   interactive?: boolean;
   hasCompatibleActions?: (event: ExpressionRendererEvent) => Promise<boolean>;
@@ -59,6 +60,7 @@ export class ExpressionRenderHandler {
       renderMode,
       syncColors,
       syncTooltips,
+      syncCursor,
       interactive,
       hasCompatibleActions = async () => false,
       executionContext,
@@ -105,6 +107,9 @@ export class ExpressionRenderHandler {
       },
       isSyncTooltipsEnabled: () => {
         return syncTooltips || false;
+      },
+      isSyncCursorEnabled: () => {
+        return syncCursor || true;
       },
       isInteractive: () => {
         return interactive ?? true;

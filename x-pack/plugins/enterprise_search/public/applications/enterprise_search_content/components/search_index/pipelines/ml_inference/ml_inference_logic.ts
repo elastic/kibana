@@ -47,14 +47,11 @@ import {
 } from '../../../../api/pipelines/simulate_ml_inference_pipeline_processors';
 
 import { isConnectorIndex } from '../../../../utils/indices';
+import { isSupportedMLModel, sortSourceFields } from '../../../shared/ml_inference/utils';
 
 import { AddInferencePipelineFormErrors, InferencePipelineConfiguration } from './types';
 
-import {
-  isSupportedMLModel,
-  sortSourceFields,
-  validateInferencePipelineConfiguration,
-} from './utils';
+import { validateInferencePipelineConfiguration } from './utils';
 
 export const EMPTY_PIPELINE_CONFIGURATION: InferencePipelineConfiguration = {
   destinationField: '',
