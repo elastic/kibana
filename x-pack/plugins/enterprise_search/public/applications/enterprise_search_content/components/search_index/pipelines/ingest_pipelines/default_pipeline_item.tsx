@@ -39,7 +39,7 @@ export const DefaultPipelineItem: React.FC<{
           <EuiFlexItem>
             <EuiTitle size="xs">
               <h4>{pipelineName}</h4>
-            </EuiTitle>{' '}
+            </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
@@ -62,7 +62,7 @@ export const DefaultPipelineItem: React.FC<{
                 data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-ingestPipelines-viewCurlRequest`}
                 buttonContent={i18n.translate(
                   'xpack.enterpriseSearch.content.indices.pipelines.ingestPipelinesCard.accordion.label',
-                  { defaultMessage: 'View sample cURL request' }
+                  { defaultMessage: 'Ingest a document using cURL' }
                 )}
                 id="ingestPipelinesCurlAccordion"
               >
