@@ -37,8 +37,19 @@ import { LocalStorageMock } from '../../../../__mocks__/local_storage_mock';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { DiscoverServices } from '../../../../build_services';
 import { buildDataTableRecord } from '../../../../utils/build_data_record';
+import { DiscoverAppStateProvider } from '../../services/discover_app_state_container';
+import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 
 setHeaderActionMenuMounter(jest.fn());
+
+function getAppStateContainer() {
+  const appStateContainer = getDiscoverStateMock({ isTimeBased: true }).appStateContainer;
+  appStateContainer.set({
+    query: { query: '', language: 'lucene' },
+    filters: [],
+  });
+  return appStateContainer;
+}
 
 function mountComponent(
   dataView: DataView,
@@ -167,7 +178,9 @@ function mountComponent(
 
   return mountWithIntl(
     <KibanaContextProvider services={services}>
-      <DiscoverLayout {...(props as DiscoverLayoutProps)} />
+      <DiscoverAppStateProvider value={getAppStateContainer()}>
+        <DiscoverLayout {...(props as DiscoverLayoutProps)} />
+      </DiscoverAppStateProvider>
     </KibanaContextProvider>,
     mountOptions
   );
