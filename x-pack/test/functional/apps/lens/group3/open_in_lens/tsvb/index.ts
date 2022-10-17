@@ -10,7 +10,9 @@ import { FtrProviderContext } from '../../../../../ftr_provider_context';
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('TSVB to Lens', function () {
     loadTestFile(require.resolve('./metric'));
+    loadTestFile(require.resolve('./gauge'));
     loadTestFile(require.resolve('./timeseries'));
     loadTestFile(require.resolve('./dashboard'));
+    loadTestFile(require.resolve('./top_n'));
   });
 }

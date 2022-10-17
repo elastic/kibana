@@ -20,6 +20,7 @@ import { MANAGEMENT_PATH } from '../../../../common/constants';
 import { getActionListMock } from './mocks';
 import { useGetEndpointsList } from '../../hooks/endpoint/use_get_endpoints_list';
 import uuid from 'uuid';
+import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../../../../common/endpoint/service/response_actions/constants';
 
 let mockUseGetEndpointActionList: {
   isFetched?: boolean;
@@ -556,10 +557,12 @@ describe('Response actions history', () => {
       userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
       const filterList = getByTestId(`${testPrefix}-${filterPrefix}-popoverList`);
       expect(filterList).toBeTruthy();
-      expect(filterList.querySelectorAll('ul>li').length).toEqual(5);
+      expect(filterList.querySelectorAll('ul>li').length).toEqual(
+        RESPONSE_ACTION_API_COMMANDS_NAMES.length
+      );
       expect(
         Array.from(filterList.querySelectorAll('ul>li')).map((option) => option.textContent)
-      ).toEqual(['isolate', 'release', 'kill-process', 'suspend-process', 'processes']);
+      ).toEqual(['isolate', 'release', 'kill-process', 'suspend-process', 'processes', 'get-file']);
     });
 
     it('should have `clear all` button `disabled` when no selected values', () => {

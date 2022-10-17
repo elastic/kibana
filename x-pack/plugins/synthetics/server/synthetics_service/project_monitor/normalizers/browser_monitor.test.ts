@@ -18,6 +18,7 @@ import { normalizeProjectMonitors } from '.';
 
 describe('browser normalizers', () => {
   describe('normalize push monitors', () => {
+    const testHash = 'ljlkj';
     const playwrightOptions = {
       headless: true,
     };
@@ -67,6 +68,7 @@ describe('browser normalizers', () => {
         locations: ['us_central'],
         tags: ['tag1', 'tag2'],
         ignoreHTTPSErrors: true,
+        hash: testHash,
       } as ProjectMonitor, // test that normalizers defaults to browser when type is omitted
       {
         id: 'test-id-2',
@@ -85,6 +87,7 @@ describe('browser normalizers', () => {
         tags: ['tag3', 'tag4'],
         ignoreHTTPSErrors: false,
         type: DataStream.BROWSER,
+        hash: testHash,
       },
       {
         id: 'test-id-3',
@@ -104,6 +107,7 @@ describe('browser normalizers', () => {
         tags: ['tag3', 'tag4'],
         ignoreHTTPSErrors: false,
         type: DataStream.BROWSER,
+        hash: testHash,
       },
     ];
 
@@ -157,6 +161,8 @@ describe('browser normalizers', () => {
             original_space: 'test-space',
             custom_heartbeat_id: 'test-id-1-test-project-id-test-space',
             timeout: null,
+            id: '',
+            hash: testHash,
           },
           unsupportedKeys: [],
           errors: [],
@@ -213,6 +219,8 @@ describe('browser normalizers', () => {
             original_space: 'test-space',
             custom_heartbeat_id: 'test-id-2-test-project-id-test-space',
             timeout: null,
+            id: '',
+            hash: testHash,
           },
           unsupportedKeys: [],
           errors: [],
@@ -276,6 +284,8 @@ describe('browser normalizers', () => {
             original_space: 'test-space',
             custom_heartbeat_id: 'test-id-3-test-project-id-test-space',
             timeout: null,
+            id: '',
+            hash: testHash,
           },
           unsupportedKeys: [],
           errors: [],

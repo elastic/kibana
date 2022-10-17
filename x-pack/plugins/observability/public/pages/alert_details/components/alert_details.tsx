@@ -9,22 +9,36 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useParams } from 'react-router-dom';
 import { EuiEmptyPrompt, EuiPanel } from '@elastic/eui';
+
+import { isAlertDetailsEnabledPerApp } from '../../../utils/is_alert_details_enabled';
 import { useKibana } from '../../../utils/kibana_react';
-import { ObservabilityAppServices } from '../../../application/types';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
-import { paths } from '../../../config/paths';
-import { AlertDetailsPathParams } from '../types';
-import { CenterJustifiedSpinner } from '../../rule_details/components/center_justified_spinner';
-import { AlertSummary } from '.';
-import PageNotFound from '../../404';
 import { useFetchAlertDetail } from '../../../hooks/use_fetch_alert_detail';
 
+import { AlertSummary, HeaderActions, PageTitle } from '.';
+import { CenterJustifiedSpinner } from '../../rule_details/components/center_justified_spinner';
+import PageNotFound from '../../404';
+
+import { ObservabilityAppServices } from '../../../application/types';
+import { AlertDetailsPathParams } from '../types';
+import { observabilityFeatureId } from '../../../../common';
+import { paths } from '../../../config/paths';
+
 export function AlertDetails() {
-  const { http } = useKibana<ObservabilityAppServices>().services;
+  const {
+    http,
+    cases: {
+      helpers: { canUseCases },
+      ui: { getCasesContext },
+    },
+  } = useKibana<ObservabilityAppServices>().services;
   const { ObservabilityPageTemplate, config } = usePluginContext();
   const { alertId } = useParams<AlertDetailsPathParams>();
   const [isLoading, alert] = useFetchAlertDetail(alertId);
+
+  const CasesContext = getCasesContext();
+  const userCasesPermissions = canUseCases();
 
   useBreadcrumbs([
     {
@@ -35,13 +49,13 @@ export function AlertDetails() {
     },
   ]);
 
-  // Redirect to the the 404 page when the user hit the page url directly in the browser while the feature flag is off.
-  if (!config.unsafe.alertDetails.enabled) {
-    return <PageNotFound />;
-  }
-
   if (isLoading) {
     return <CenterJustifiedSpinner />;
+  }
+
+  // Redirect to the the 404 page when the user hit the page url directly in the browser while the feature flag is off.
+  if (alert && !isAlertDetailsEnabledPerApp(alert, config)) {
+    return <PageNotFound />;
   }
 
   if (!isLoading && !alert)
@@ -69,7 +83,22 @@ export function AlertDetails() {
     );
 
   return (
-    <ObservabilityPageTemplate data-test-subj="alertDetails">
+    <ObservabilityPageTemplate
+      pageHeader={{
+        pageTitle: <PageTitle title={alert?.reason} active={Boolean(alert?.active)} />,
+        rightSideItems: [
+          <CasesContext
+            owner={[observabilityFeatureId]}
+            permissions={userCasesPermissions}
+            features={{ alerts: { sync: false } }}
+          >
+            <HeaderActions alert={alert} />
+          </CasesContext>,
+        ],
+        bottomBorder: false,
+      }}
+      data-test-subj="alertDetails"
+    >
       <AlertSummary alert={alert} />
     </ObservabilityPageTemplate>
   );

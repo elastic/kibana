@@ -69,7 +69,7 @@ import type {
 } from './types';
 import { TriggersActionsUiConfigType } from '../common/types';
 import { registerAlertsTableConfiguration } from './application/sections/alerts_table/alerts_page/register_alerts_table_configuration';
-import { PLUGIN_ID } from './common/constants';
+import { PLUGIN_ID, CONNECTORS_PLUGIN_ID } from './common/constants';
 import type { AlertsTableStateProps } from './application/sections/alerts_table/alerts_table_state';
 import { getAlertsTableStateLazy } from './common/get_alerts_table_state';
 import { ActionAccordionFormProps } from './application/sections/action_connector_form/action_form';
@@ -78,6 +78,8 @@ import { getRuleDefinitionLazy } from './common/get_rule_definition';
 import { RuleStatusPanelProps } from './application/sections/rule_details/components/rule_status_panel';
 import { RuleAlertsSummaryProps } from './application/sections/rule_details/components/alert_summary';
 import { getRuleAlertsSummaryLazy } from './common/get_rule_alerts_summary';
+import { RuleSnoozeModalProps } from './application/sections/rules_list/components/rule_snooze_modal';
+import { getRuleSnoozeModalLazy } from './common/get_rule_snooze_modal';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
@@ -123,6 +125,7 @@ export interface TriggersAndActionsUIPublicPluginStart {
   getRuleDefinition: (props: RuleDefinitionProps) => ReactElement<RuleDefinitionProps>;
   getRuleStatusPanel: (props: RuleStatusPanelProps) => ReactElement<RuleStatusPanelProps>;
   getRuleAlertsSummary: (props: RuleAlertsSummaryProps) => ReactElement<RuleAlertsSummaryProps>;
+  getRuleSnoozeModal: (props: RuleSnoozeModalProps) => ReactElement<RuleSnoozeModalProps>;
 }
 
 interface PluginsSetup {
@@ -179,12 +182,24 @@ export class Plugin
     ExperimentalFeaturesService.init({ experimentalFeatures: this.experimentalFeatures });
 
     const featureTitle = i18n.translate('xpack.triggersActionsUI.managementSection.displayName', {
-      defaultMessage: 'Rules and Connectors',
+      defaultMessage: 'Rules',
     });
     const featureDescription = i18n.translate(
       'xpack.triggersActionsUI.managementSection.displayDescription',
       {
-        defaultMessage: 'Detect conditions using rules, and take actions using connectors.',
+        defaultMessage: 'Detect conditions using rules.',
+      }
+    );
+    const connectorsFeatureTitle = i18n.translate(
+      'xpack.triggersActionsUI.managementSection.connectors.displayName',
+      {
+        defaultMessage: 'Connectors',
+      }
+    );
+    const connectorsFeatureDescription = i18n.translate(
+      'xpack.triggersActionsUI.managementSection.connectors.displayDescription',
+      {
+        defaultMessage: 'Connect third-party software with your alerting data.',
       }
     );
 
@@ -193,6 +208,15 @@ export class Plugin
         id: PLUGIN_ID,
         title: featureTitle,
         description: featureDescription,
+        icon: 'watchesApp',
+        path: '/app/management/insightsAndAlerting/triggersActions',
+        showOnHomePage: false,
+        category: 'admin',
+      });
+      plugins.home.featureCatalogue.register({
+        id: CONNECTORS_PLUGIN_ID,
+        title: connectorsFeatureTitle,
+        description: connectorsFeatureDescription,
         icon: 'watchesApp',
         path: '/app/management/insightsAndAlerting/triggersActions',
         showOnHomePage: false,
@@ -212,6 +236,53 @@ export class Plugin
         ];
 
         const { renderApp } = await import('./application/app');
+
+        // The `/api/features` endpoint requires the "Global All" Kibana privilege. Users with a
+        // subset of this privilege are not authorized to access this endpoint and will receive a 404
+        // error that causes the Alerting view to fail to load.
+        let kibanaFeatures: KibanaFeature[];
+        try {
+          kibanaFeatures = await pluginsStart.features.getFeatures();
+        } catch (err) {
+          kibanaFeatures = [];
+        }
+
+        return renderApp({
+          ...coreStart,
+          actions: plugins.actions,
+          data: pluginsStart.data,
+          dataViews: pluginsStart.dataViews,
+          dataViewEditor: pluginsStart.dataViewEditor,
+          charts: pluginsStart.charts,
+          alerting: pluginsStart.alerting,
+          spaces: pluginsStart.spaces,
+          unifiedSearch: pluginsStart.unifiedSearch,
+          isCloud: Boolean(plugins.cloud?.isCloudEnabled),
+          element: params.element,
+          theme$: params.theme$,
+          storage: new Storage(window.localStorage),
+          setBreadcrumbs: params.setBreadcrumbs,
+          history: params.history,
+          actionTypeRegistry,
+          ruleTypeRegistry,
+          alertsTableConfigurationRegistry,
+          kibanaFeatures,
+        });
+      },
+    });
+
+    plugins.management.sections.section.insightsAndAlerting.registerApp({
+      id: CONNECTORS_PLUGIN_ID,
+      title: connectorsFeatureTitle,
+      order: 2,
+      async mount(params: ManagementAppMountParams) {
+        const [coreStart, pluginsStart] = (await core.getStartServices()) as [
+          CoreStart,
+          PluginsStart,
+          unknown
+        ];
+
+        const { renderApp } = await import('./application/connectors_app');
 
         // The `/api/features` endpoint requires the "Global All" Kibana privilege. Users with a
         // subset of this privilege are not authorized to access this endpoint and will receive a 404
@@ -351,6 +422,9 @@ export class Plugin
       },
       getRuleAlertsSummary: (props: RuleAlertsSummaryProps) => {
         return getRuleAlertsSummaryLazy(props);
+      },
+      getRuleSnoozeModal: (props: RuleSnoozeModalProps) => {
+        return getRuleSnoozeModalLazy(props);
       },
     };
   }

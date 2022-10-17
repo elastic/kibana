@@ -22,7 +22,7 @@ export const DEFAULT_PAGE_SIZE = PAGE_SIZES[1];
 export interface UseIndicatorsParams {
   filterQuery: Query;
   filters: Filter[];
-  timeRange?: TimeRange;
+  timeRange: TimeRange;
   sorting: EuiDataGridSorting['columns'];
 }
 
@@ -47,6 +47,8 @@ export interface UseIndicatorsValue {
    * Data loading is in progress (see docs on `isFetching` here: https://tanstack.com/query/v4/docs/guides/queries)
    */
   isFetching: boolean;
+
+  dataUpdatedAt: number;
 }
 
 export const useIndicators = ({
@@ -95,7 +97,7 @@ export const useIndicators = ({
     [inspectorAdapters, searchService]
   );
 
-  const { isLoading, isFetching, data, refetch } = useQuery(
+  const { isLoading, isFetching, data, refetch, dataUpdatedAt } = useQuery(
     [
       'indicatorsTable',
       {
@@ -132,5 +134,6 @@ export const useIndicators = ({
     isLoading,
     isFetching,
     handleRefresh,
+    dataUpdatedAt,
   };
 };

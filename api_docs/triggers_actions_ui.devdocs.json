@@ -3139,7 +3139,7 @@
             "description": [],
             "signature": [
               "BasicFields",
-              " & { tags?: string[] | undefined; kibana?: string[] | undefined; \"@timestamp\"?: string[] | undefined; \"kibana.alert.rule.rule_type_id\"?: string[] | undefined; \"kibana.alert.rule.consumer\"?: string[] | undefined; \"event.action\"?: string[] | undefined; \"kibana.alert.rule.execution.uuid\"?: string[] | undefined; \"kibana.alert.rule.parameters\"?: string[] | undefined; \"kibana.alert.rule.producer\"?: string[] | undefined; \"kibana.space_ids\"?: string[] | undefined; \"kibana.alert.uuid\"?: string[] | undefined; \"kibana.alert.instance.id\"?: string[] | undefined; \"kibana.alert.start\"?: string[] | undefined; \"kibana.alert.end\"?: string[] | undefined; \"kibana.alert.duration.us\"?: string[] | undefined; \"kibana.alert.severity\"?: string[] | undefined; \"kibana.alert.status\"?: string[] | undefined; \"kibana.version\"?: string[] | undefined; \"ecs.version\"?: string[] | undefined; \"kibana.alert.risk_score\"?: string[] | undefined; \"kibana.alert.workflow_status\"?: string[] | undefined; \"kibana.alert.workflow_user\"?: string[] | undefined; \"kibana.alert.workflow_reason\"?: string[] | undefined; \"kibana.alert.system_status\"?: string[] | undefined; \"kibana.alert.action_group\"?: string[] | undefined; \"kibana.alert.reason\"?: string[] | undefined; \"kibana.alert.rule.author\"?: string[] | undefined; \"kibana.alert.rule.category\"?: string[] | undefined; \"kibana.alert.rule.uuid\"?: string[] | undefined; \"kibana.alert.rule.created_at\"?: string[] | undefined; \"kibana.alert.rule.created_by\"?: string[] | undefined; \"kibana.alert.rule.description\"?: string[] | undefined; \"kibana.alert.rule.enabled\"?: string[] | undefined; \"kibana.alert.rule.from\"?: string[] | undefined; \"kibana.alert.rule.interval\"?: string[] | undefined; \"kibana.alert.rule.license\"?: string[] | undefined; \"kibana.alert.rule.name\"?: string[] | undefined; \"kibana.alert.rule.note\"?: string[] | undefined; \"kibana.alert.rule.references\"?: string[] | undefined; \"kibana.alert.rule.rule_id\"?: string[] | undefined; \"kibana.alert.rule.rule_name_override\"?: string[] | undefined; \"kibana.alert.rule.tags\"?: string[] | undefined; \"kibana.alert.rule.to\"?: string[] | undefined; \"kibana.alert.rule.type\"?: string[] | undefined; \"kibana.alert.rule.updated_at\"?: string[] | undefined; \"kibana.alert.rule.updated_by\"?: string[] | undefined; \"kibana.alert.rule.version\"?: string[] | undefined; \"event.kind\"?: string[] | undefined; \"event.module\"?: string[] | undefined; \"kibana.alert.evaluation.threshold\"?: string[] | undefined; \"kibana.alert.evaluation.value\"?: string[] | undefined; \"kibana.alert.building_block_type\"?: string[] | undefined; \"kibana.alert.rule.exceptions_list\"?: string[] | undefined; \"kibana.alert.rule.namespace\"?: string[] | undefined; \"kibana.alert\"?: string[] | undefined; \"kibana.alert.rule\"?: string[] | undefined; } & { [x: string]: unknown[]; }"
+              " & { tags?: string[] | undefined; kibana?: string[] | undefined; \"@timestamp\"?: string[] | undefined; \"kibana.alert.rule.rule_type_id\"?: string[] | undefined; \"kibana.alert.rule.consumer\"?: string[] | undefined; \"event.action\"?: string[] | undefined; \"kibana.alert.rule.execution.uuid\"?: string[] | undefined; \"kibana.alert.rule.parameters\"?: string[] | undefined; \"kibana.alert.rule.producer\"?: string[] | undefined; \"kibana.space_ids\"?: string[] | undefined; \"kibana.alert.uuid\"?: string[] | undefined; \"kibana.alert.instance.id\"?: string[] | undefined; \"kibana.alert.start\"?: string[] | undefined; \"kibana.alert.time_range\"?: string[] | undefined; \"kibana.alert.end\"?: string[] | undefined; \"kibana.alert.duration.us\"?: string[] | undefined; \"kibana.alert.severity\"?: string[] | undefined; \"kibana.alert.status\"?: string[] | undefined; \"kibana.version\"?: string[] | undefined; \"ecs.version\"?: string[] | undefined; \"kibana.alert.risk_score\"?: string[] | undefined; \"kibana.alert.workflow_status\"?: string[] | undefined; \"kibana.alert.workflow_user\"?: string[] | undefined; \"kibana.alert.workflow_reason\"?: string[] | undefined; \"kibana.alert.system_status\"?: string[] | undefined; \"kibana.alert.action_group\"?: string[] | undefined; \"kibana.alert.reason\"?: string[] | undefined; \"kibana.alert.rule.author\"?: string[] | undefined; \"kibana.alert.rule.category\"?: string[] | undefined; \"kibana.alert.rule.uuid\"?: string[] | undefined; \"kibana.alert.rule.created_at\"?: string[] | undefined; \"kibana.alert.rule.created_by\"?: string[] | undefined; \"kibana.alert.rule.description\"?: string[] | undefined; \"kibana.alert.rule.enabled\"?: string[] | undefined; \"kibana.alert.rule.from\"?: string[] | undefined; \"kibana.alert.rule.interval\"?: string[] | undefined; \"kibana.alert.rule.license\"?: string[] | undefined; \"kibana.alert.rule.name\"?: string[] | undefined; \"kibana.alert.rule.note\"?: string[] | undefined; \"kibana.alert.rule.references\"?: string[] | undefined; \"kibana.alert.rule.rule_id\"?: string[] | undefined; \"kibana.alert.rule.rule_name_override\"?: string[] | undefined; \"kibana.alert.rule.tags\"?: string[] | undefined; \"kibana.alert.rule.to\"?: string[] | undefined; \"kibana.alert.rule.type\"?: string[] | undefined; \"kibana.alert.rule.updated_at\"?: string[] | undefined; \"kibana.alert.rule.updated_by\"?: string[] | undefined; \"kibana.alert.rule.version\"?: string[] | undefined; \"event.kind\"?: string[] | undefined; \"event.module\"?: string[] | undefined; \"kibana.alert.evaluation.threshold\"?: string[] | undefined; \"kibana.alert.evaluation.value\"?: string[] | undefined; \"kibana.alert.building_block_type\"?: string[] | undefined; \"kibana.alert.rule.exceptions_list\"?: string[] | undefined; \"kibana.alert.rule.namespace\"?: string[] | undefined; \"kibana.alert\"?: string[] | undefined; \"kibana.alert.rule\"?: string[] | undefined; } & { [x: string]: unknown[]; }"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
@@ -3938,6 +3938,22 @@
             "signature": [
               "GetFieldTableColumns",
               " | undefined"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/field_browser/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.FieldBrowserOptions.preselectedCategoryIds",
+            "type": "Array",
+            "tags": [],
+            "label": "preselectedCategoryIds",
+            "description": [
+              "\nCategories that should be selected initially"
+            ],
+            "signature": [
+              "string[] | undefined"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/field_browser/types.ts",
             "deprecated": false,
@@ -8025,6 +8041,42 @@
             }
           ],
           "returnComment": []
+        },
+        {
+          "parentPluginId": "triggersActionsUi",
+          "id": "def-public.TriggersAndActionsUIPublicPluginStart.getRuleSnoozeModal",
+          "type": "Function",
+          "tags": [],
+          "label": "getRuleSnoozeModal",
+          "description": [],
+          "signature": [
+            "(props: ",
+            "RuleSnoozeModalProps",
+            ") => React.ReactElement<",
+            "RuleSnoozeModalProps",
+            ", string | React.JSXElementConstructor<any>>"
+          ],
+          "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "triggersActionsUi",
+              "id": "def-public.TriggersAndActionsUIPublicPluginStart.getRuleSnoozeModal.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "props",
+              "description": [],
+              "signature": [
+                "RuleSnoozeModalProps"
+              ],
+              "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
         }
       ],
       "lifecycle": "start",
@@ -8112,7 +8164,7 @@
         "label": "CoreQueryParams",
         "description": [],
         "signature": [
-          "{ readonly aggField?: string | undefined; readonly termSize?: number | undefined; readonly termField?: string | undefined; readonly index: string | string[]; readonly timeField: string; readonly aggType: string; readonly timeWindowSize: number; readonly timeWindowUnit: string; readonly groupBy: string; }"
+          "{ readonly aggField?: string | undefined; readonly termSize?: number | undefined; readonly termField?: string | undefined; readonly filterKuery?: string | undefined; readonly index: string | string[]; readonly timeField: string; readonly aggType: string; readonly timeWindowSize: number; readonly timeWindowUnit: string; readonly groupBy: string; }"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
         "deprecated": false,
@@ -8166,13 +8218,25 @@
       },
       {
         "parentPluginId": "triggersActionsUi",
+        "id": "def-server.TIME_SERIES_BUCKET_SELECTOR_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "TIME_SERIES_BUCKET_SELECTOR_FIELD",
+        "description": [],
+        "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/time_series_query.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
         "id": "def-server.TimeSeriesQuery",
         "type": "Type",
         "tags": [],
         "label": "TimeSeriesQuery",
         "description": [],
         "signature": [
-          "{ readonly interval?: string | undefined; readonly aggField?: string | undefined; readonly termSize?: number | undefined; readonly termField?: string | undefined; readonly dateStart?: string | undefined; readonly dateEnd?: string | undefined; readonly index: string | string[]; readonly timeField: string; readonly aggType: string; readonly timeWindowSize: number; readonly timeWindowUnit: string; readonly groupBy: string; }"
+          "{ readonly interval?: string | undefined; readonly aggField?: string | undefined; readonly termSize?: number | undefined; readonly termField?: string | undefined; readonly dateStart?: string | undefined; readonly dateEnd?: string | undefined; readonly filterKuery?: string | undefined; readonly index: string | string[]; readonly timeField: string; readonly aggType: string; readonly timeWindowSize: number; readonly timeWindowUnit: string; readonly groupBy: string; }"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/time_series_types.ts",
         "deprecated": false,
@@ -8285,6 +8349,23 @@
             "label": "termField",
             "description": [
               "// field to group on (for groupBy: top)"
+            ],
+            "signature": [
+              "Type",
+              "<string | undefined>"
+            ],
+            "path": "x-pack/plugins/triggers_actions_ui/server/data/lib/core_query_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-server.CoreQueryParamsSchemaProperties.filterKuery",
+            "type": "Object",
+            "tags": [],
+            "label": "filterKuery",
+            "description": [
+              "// filter field"
             ],
             "signature": [
               "Type",
@@ -8542,6 +8623,17 @@
               },
               "[]"
             ],
+            "path": "x-pack/plugins/triggers_actions_ui/common/data/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-common.TimeSeriesResult.truncated",
+            "type": "boolean",
+            "tags": [],
+            "label": "truncated",
+            "description": [],
             "path": "x-pack/plugins/triggers_actions_ui/common/data/index.ts",
             "deprecated": false,
             "trackAdoption": false

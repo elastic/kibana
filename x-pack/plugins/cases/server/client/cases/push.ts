@@ -7,37 +7,40 @@
 
 import Boom from '@hapi/boom';
 import { nodeBuilder } from '@kbn/es-query';
-import { SavedObjectsFindResponse } from '@kbn/core/server';
+import type { SavedObjectsFindResponse } from '@kbn/core/server';
 
-import { UserProfile } from '@kbn/security-plugin/common';
-import { SecurityPluginStart } from '@kbn/security-plugin/server';
-import {
+import type { UserProfile } from '@kbn/security-plugin/common';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type {
   ActionConnector,
-  CaseResponseRt,
   CaseResponse,
-  CaseStatuses,
   ExternalServiceResponse,
   CasesConfigureAttributes,
+  CommentRequestAlertType,
+  CommentAttributes,
+} from '../../../common/api';
+import {
+  CaseResponseRt,
+  CaseStatuses,
   ActionTypes,
   OWNER_FIELD,
   CommentType,
-  CommentRequestAlertType,
 } from '../../../common/api';
 import { CASE_COMMENT_SAVED_OBJECT } from '../../../common/constants';
 
-import { createIncident, getCommentContextFromAttributes, getDurationInSeconds } from './utils';
+import { createIncident, getDurationInSeconds } from './utils';
 import { createCaseError } from '../../common/error';
 import {
   createAlertUpdateRequest,
   flattenCaseSavedObject,
   getAlertInfoFromComments,
 } from '../../common/utils';
-import { CasesClient, CasesClientArgs, CasesClientInternal } from '..';
+import type { CasesClient, CasesClientArgs, CasesClientInternal } from '..';
 import { Operations } from '../../authorization';
 import { casesConnectors } from '../../connectors';
 import { getAlerts } from '../alerts/get';
 import { buildFilter } from '../utils';
-import { ICaseResponse } from '../typedoc_interfaces';
+import type { ICaseResponse } from '../typedoc_interfaces';
 
 /**
  * Returns true if the case should be closed based on the configuration settings.
@@ -114,6 +117,7 @@ export const push = async (
     logger,
     authorization,
     securityStartPlugin,
+    publicBaseUrl,
   } = clientArgs;
 
   try {
@@ -139,32 +143,17 @@ export const push = async (
     }
 
     const alertsInfo = getAlertInfoFromComments(theCase?.comments);
-
     const alerts = await getAlerts(alertsInfo, clientArgs);
-
-    const getMappingsResponse = await casesClientInternal.configuration.getMappings({
-      connector: theCase.connector,
-    });
-
-    const mappings =
-      getMappingsResponse.length === 0
-        ? await casesClientInternal.configuration.createMappings({
-            connector: theCase.connector,
-            owner: theCase.owner,
-          })
-        : getMappingsResponse[0].attributes.mappings;
-
     const profiles = await getProfiles(theCase, securityStartPlugin);
 
     const externalServiceIncident = await createIncident({
-      actionsClient,
       theCase,
       userActions,
       connector: connector as ActionConnector,
-      mappings,
       alerts,
       casesConnectors,
       userProfiles: profiles,
+      publicBaseUrl,
     });
 
     const pushRes = await actionsClient.execute({
@@ -308,8 +297,7 @@ export const push = async (
             attributes: {
               ...origComment.attributes,
               ...updatedComment?.attributes,
-              ...getCommentContextFromAttributes(origComment.attributes),
-            },
+            } as CommentAttributes,
             version: updatedComment?.version ?? origComment.version,
             references: origComment?.references ?? [],
           };

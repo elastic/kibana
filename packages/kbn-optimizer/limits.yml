@@ -10,7 +10,10 @@ pageLoadAssetSize:
   cases: 144442
   charts: 55000
   cloud: 21076
+  cloudChat: 19894
   cloudExperiments: 59358
+  cloudFullStory: 18493
+  cloudLinks: 17629
   cloudSecurityPosture: 19109
   console: 46091
   controls: 40000
@@ -46,7 +49,7 @@ pageLoadAssetSize:
   expressions: 140958
   expressionShape: 34008
   expressionTagcloud: 27505
-  expressionXY: 38000
+  expressionXY: 38500
   features: 21723
   fieldFormats: 65209
   files: 22673
@@ -107,7 +110,7 @@ pageLoadAssetSize:
   share: 71239
   snapshotRestore: 79032
   spaces: 57868
-  stackAlerts: 29684
+  stackAlerts: 58316
   stackConnectors: 36314
   synthetics: 40958
   telemetry: 51957
@@ -137,6 +140,6 @@ pageLoadAssetSize:
   visTypeTimeseries: 55203
   visTypeVega: 153573
   visTypeVislib: 242838
-  visTypeXy: 30000
+  visTypeXy: 31800
   visualizations: 90000
   watcher: 43598

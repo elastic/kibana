@@ -32,6 +32,10 @@ export const commonFormatters: CommonFormatMap = {
   [ConfigKey.PROJECT_ID]: null,
   [ConfigKey.CUSTOM_HEARTBEAT_ID]: null,
   [ConfigKey.ORIGINAL_SPACE]: null,
+  [ConfigKey.CONFIG_HASH]: null,
+
+  // Deprecated, slated to be removed in a later release
+  [ConfigKey.ID]: null,
 };
 
 export const arrayToJsonFormatter = (value: string[] = []) =>

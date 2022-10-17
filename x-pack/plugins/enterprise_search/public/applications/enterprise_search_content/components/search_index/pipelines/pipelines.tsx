@@ -9,23 +9,60 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiPanel,
+  EuiSpacer,
+  EuiTabbedContent,
+  EuiTabbedContentTab,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import { DataPanel } from '../../../../shared/data_panel/data_panel';
 import { docLinks } from '../../../../shared/doc_links';
+import { isApiIndex } from '../../../utils/indices';
 
-import { IngestPipelinesCard } from './ingest_pipelines_card';
+import { InferenceErrors } from './inference_errors';
+import { InferenceHistory } from './inference_history';
+import { IngestPipelinesCard } from './ingest_pipelines/ingest_pipelines_card';
 import { AddMLInferencePipelineButton } from './ml_inference/add_ml_inference_button';
 import { AddMLInferencePipelineModal } from './ml_inference/add_ml_inference_pipeline_modal';
 import { MlInferencePipelineProcessorsCard } from './ml_inference_pipeline_processors_card';
+import { PipelinesJSONConfigurations } from './pipelines_json_configurations';
 import { PipelinesLogic } from './pipelines_logic';
 
 export const SearchIndexPipelines: React.FC = () => {
-  const { showAddMlInferencePipelineModal } = useValues(PipelinesLogic);
+  const { showAddMlInferencePipelineModal, hasIndexIngestionPipeline, index, pipelineName } =
+    useValues(PipelinesLogic);
   const { closeAddMlInferencePipelineModal, openAddMlInferencePipelineModal } =
     useActions(PipelinesLogic);
+  const apiIndex = isApiIndex(index);
+
+  const pipelinesTabs: EuiTabbedContentTab[] = [
+    {
+      content: <InferenceHistory />,
+      id: 'inference-history',
+      name: i18n.translate(
+        'xpack.enterpriseSearch.content.indices.pipelines.tabs.inferenceHistory',
+        {
+          defaultMessage: 'Inference history',
+        }
+      ),
+    },
+    {
+      content: <PipelinesJSONConfigurations />,
+      id: 'json-configurations',
+      name: i18n.translate(
+        'xpack.enterpriseSearch.content.indices.pipelines.tabs.jsonConfigurations',
+        {
+          defaultMessage: 'JSON configurations',
+        }
+      ),
+    },
+  ];
 
   return (
     <>
@@ -54,26 +91,36 @@ export const SearchIndexPipelines: React.FC = () => {
                 )}
               </h2>
             }
-            subtitle={i18n.translate(
-              'xpack.enterpriseSearch.content.indices.pipelines.ingestionPipeline.subtitle',
-              {
-                defaultMessage: 'Ingest pipelines optimize your index for search applications',
-              }
-            )}
+            subtitle={
+              apiIndex
+                ? i18n.translate(
+                    'xpack.enterpriseSearch.content.indices.pipelines.ingestionPipeline.apiIndexSubtitle',
+                    {
+                      defaultMessage:
+                        "Ingest pipelines optimize your index for search applications. If you'd like to use these pipelines in your API-based index, you'll need to reference them explicitly in your API requests.",
+                    }
+                  )
+                : i18n.translate(
+                    'xpack.enterpriseSearch.content.indices.pipelines.ingestionPipeline.subtitle',
+                    {
+                      defaultMessage:
+                        'Ingest pipelines optimize your index for search applications',
+                    }
+                  )
+            }
             iconType="logstashInput"
           >
             <IngestPipelinesCard />
           </DataPanel>
-        </EuiFlexItem>
-        <EuiFlexItem grow={5}>
+          <EuiSpacer />
           <DataPanel
             hasBorder
             footerDocLink={
-              <EuiLink href="" external color="subdued">
+              <EuiLink href={docLinks.deployTrainedModels} target="_blank" color="subdued">
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.indices.pipelines.mlInferencePipelines.docLink',
                   {
-                    defaultMessage: 'Learn more about deploying ML models in Elastic',
+                    defaultMessage: 'Learn more about deploying Machine Learning models in Elastic',
                   }
                 )}
               </EuiLink>
@@ -83,18 +130,31 @@ export const SearchIndexPipelines: React.FC = () => {
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.indices.pipelines.mlInferencePipelines.title',
                   {
-                    defaultMessage: 'ML Inference pipelines',
+                    defaultMessage: 'Machine Learning Inference Pipelines',
                   }
                 )}
               </h2>
             }
-            subtitle={i18n.translate(
-              'xpack.enterpriseSearch.content.indices.pipelines.mlInferencePipelines.subtitle',
-              {
-                defaultMessage:
-                  'Inference pipelines will be run as processors from the Enterprise Search Ingest Pipeline',
-              }
-            )}
+            subtitle={
+              apiIndex && hasIndexIngestionPipeline
+                ? i18n.translate(
+                    'xpack.enterpriseSearch.content.indices.pipelines.mlInferencePipelines.subtitleAPIindex',
+                    {
+                      defaultMessage:
+                        "Inference pipelines will be run as processors from the Enterprise Search Ingest Pipeline. In order to use these pipelines on API-based indices you'll need to reference the {pipelineName} pipeline in your API requests.",
+                      values: {
+                        pipelineName,
+                      },
+                    }
+                  )
+                : i18n.translate(
+                    'xpack.enterpriseSearch.content.indices.pipelines.mlInferencePipelines.subtitle',
+                    {
+                      defaultMessage:
+                        'Inference pipelines will be run as processors from the Enterprise Search Ingest Pipeline',
+                    }
+                  )
+            }
             iconType="compute"
             action={
               <AddMLInferencePipelineButton onClick={() => openAddMlInferencePipelineModal()} />
@@ -103,7 +163,17 @@ export const SearchIndexPipelines: React.FC = () => {
             <MlInferencePipelineProcessorsCard />
           </DataPanel>
         </EuiFlexItem>
+        <EuiFlexItem grow={5}>
+          <EuiPanel color="subdued">
+            <EuiTabbedContent
+              tabs={pipelinesTabs}
+              initialSelectedTab={pipelinesTabs[0]}
+              autoFocus="selected"
+            />
+          </EuiPanel>
+        </EuiFlexItem>
       </EuiFlexGroup>
+      <InferenceErrors />
       {showAddMlInferencePipelineModal && (
         <AddMLInferencePipelineModal onClose={closeAddMlInferencePipelineModal} />
       )}

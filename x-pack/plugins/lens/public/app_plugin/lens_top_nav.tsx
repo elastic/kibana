@@ -259,7 +259,6 @@ export const LensTopNavMenu = ({
     [dispatch]
   );
   const [indexPatterns, setIndexPatterns] = useState<DataView[]>([]);
-  const [dataViewsList, setDataViewsList] = useState<DataView[]>([]);
   const [currentIndexPattern, setCurrentIndexPattern] = useState<DataView>();
   const [isOnTextBasedMode, setIsOnTextBasedMode] = useState(false);
   const [rejectedIndexPatterns, setRejectedIndexPatterns] = useState<string[]>([]);
@@ -289,7 +288,8 @@ export const LensTopNavMenu = ({
     ]
   );
 
-  const canEditDataView = Boolean(dataViewEditor?.userPermissions.editDataView());
+  const canEditDataView =
+    Boolean(dataViewEditor?.userPermissions.editDataView()) || !currentIndexPattern?.isPersisted();
   const closeFieldEditor = useRef<() => void | undefined>();
   const closeDataViewEditor = useRef<() => void | undefined>();
 
@@ -357,27 +357,18 @@ export const LensTopNavMenu = ({
   ]);
 
   useEffect(() => {
-    if (activeDatasourceId && datasourceStates[activeDatasourceId].state) {
-      const dataViewId = datasourceMap[activeDatasourceId].getUsedDataView(
-        datasourceStates[activeDatasourceId].state
-      );
-      const dataView = dataViewsList.find((pattern) => pattern.id === dataViewId);
-      setCurrentIndexPattern(dataView ?? indexPatterns[0]);
-    }
-  }, [activeDatasourceId, datasourceMap, datasourceStates, indexPatterns, dataViewsList]);
-
-  useEffect(() => {
-    const fetchDataViews = async () => {
-      const totalDataViewsList = [];
-      const dataViewsIds = await data.dataViews.getIds();
-      for (let i = 0; i < dataViewsIds.length; i++) {
-        const d = await data.dataViews.get(dataViewsIds[i]);
-        totalDataViewsList.push(d);
+    const setCurrentPattern = async () => {
+      if (activeDatasourceId && datasourceStates[activeDatasourceId].state) {
+        const dataViewId = datasourceMap[activeDatasourceId].getUsedDataView(
+          datasourceStates[activeDatasourceId].state
+        );
+        const dataView = await data.dataViews.get(dataViewId);
+        setCurrentIndexPattern(dataView ?? indexPatterns[0]);
       }
-      setDataViewsList(totalDataViewsList);
     };
-    fetchDataViews();
-  }, [data]);
+
+    setCurrentPattern();
+  }, [activeDatasourceId, datasourceMap, datasourceStates, indexPatterns, data.dataViews]);
 
   useEffect(() => {
     if (typeof query === 'object' && query !== null && isOfAggregateQueryType(query)) {
@@ -583,7 +574,7 @@ export const LensTopNavMenu = ({
             dataViewSpec: dataViews.indexPatterns[meta.id]?.spec,
             timeRange: data.query.timefilter.timefilter.getTime(),
             filters: newFilters,
-            query: newQuery,
+            query: isOnTextBasedMode ? query : newQuery,
             columns: meta.columns,
           });
         },
@@ -626,6 +617,7 @@ export const LensTopNavMenu = ({
     indexPatterns,
     dataViews.indexPatterns,
     data.query.timefilter.timefilter,
+    isOnTextBasedMode,
     lensStore,
     theme$,
   ]);
@@ -652,7 +644,7 @@ export const LensTopNavMenu = ({
             setIsOnTextBasedMode(true);
             dispatch(
               switchAndCleanDatasource({
-                newDatasourceId: 'textBasedLanguages',
+                newDatasourceId: 'textBased',
                 visualizationId: visualization?.activeId,
                 currentIndexPatternId: currentIndexPattern?.id,
               })
@@ -765,39 +757,32 @@ export const LensTopNavMenu = ({
     [editField, canEditDataView]
   );
 
-  const createNewDataView = useMemo(
-    () =>
-      canEditDataView
-        ? () => {
-            closeDataViewEditor.current = dataViewEditor.openEditor({
-              onSave: async (dataView) => {
-                if (dataView.id) {
-                  if (isOnTextBasedMode) {
-                    dispatch(
-                      switchAndCleanDatasource({
-                        newDatasourceId: 'indexpattern',
-                        visualizationId: visualization?.activeId,
-                        currentIndexPatternId: dataView?.id,
-                      })
-                    );
-                  }
-                  dispatchChangeIndexPattern(dataView);
-                  setCurrentIndexPattern(dataView);
-                }
-              },
-              allowAdHocDataView: true,
-            });
+  const createNewDataView = useCallback(() => {
+    closeDataViewEditor.current = dataViewEditor.openEditor({
+      onSave: async (dataView) => {
+        if (dataView.id) {
+          if (isOnTextBasedMode) {
+            dispatch(
+              switchAndCleanDatasource({
+                newDatasourceId: 'formBased',
+                visualizationId: visualization?.activeId,
+                currentIndexPatternId: dataView?.id,
+              })
+            );
           }
-        : undefined,
-    [
-      canEditDataView,
-      dataViewEditor,
-      dispatch,
-      dispatchChangeIndexPattern,
-      isOnTextBasedMode,
-      visualization?.activeId,
-    ]
-  );
+          dispatchChangeIndexPattern(dataView);
+          setCurrentIndexPattern(dataView);
+        }
+      },
+      allowAdHocDataView: true,
+    });
+  }, [
+    dataViewEditor,
+    dispatch,
+    dispatchChangeIndexPattern,
+    isOnTextBasedMode,
+    visualization?.activeId,
+  ]);
 
   const onCreateDefaultAdHocDataView = useCallback(
     async (pattern: string) => {
@@ -810,7 +795,7 @@ export const LensTopNavMenu = ({
       if (isOnTextBasedMode) {
         dispatch(
           switchAndCleanDatasource({
-            newDatasourceId: 'indexpattern',
+            newDatasourceId: 'formBased',
             visualizationId: visualization?.activeId,
             currentIndexPatternId: dataView?.id,
           })
@@ -846,21 +831,52 @@ export const LensTopNavMenu = ({
     onDataViewCreated: createNewDataView,
     onCreateDefaultAdHocDataView,
     adHocDataViews: indexPatterns.filter((pattern) => !pattern.isPersisted()),
-    onChangeDataView: (newIndexPatternId: string) => {
-      const currentDataView = dataViewsList.find(
-        (indexPattern) => indexPattern.id === newIndexPatternId
-      );
+    onChangeDataView: async (newIndexPatternId: string) => {
+      const currentDataView = await data.dataViews.get(newIndexPatternId);
       setCurrentIndexPattern(currentDataView);
       dispatchChangeIndexPattern(newIndexPatternId);
       if (isOnTextBasedMode) {
         dispatch(
           switchAndCleanDatasource({
-            newDatasourceId: 'indexpattern',
+            newDatasourceId: 'formBased',
             visualizationId: visualization?.activeId,
             currentIndexPatternId: newIndexPatternId,
           })
         );
         setIsOnTextBasedMode(false);
+      }
+    },
+    onEditDataView: async (updatedDataViewStub) => {
+      if (!currentIndexPattern) return;
+      if (currentIndexPattern.isPersisted()) {
+        // clear instance cache and fetch again to make sure fields are up to date (in case pattern changed)
+        dataViewsService.clearInstanceCache(currentIndexPattern.id);
+        const updatedCurrentIndexPattern = await dataViewsService.get(currentIndexPattern.id!);
+        // if the data view was persisted, reload it from cache
+        const updatedCache = {
+          ...dataViews.indexPatterns,
+        };
+        delete updatedCache[currentIndexPattern.id!];
+        const newIndexPatterns = await indexPatternService.ensureIndexPattern({
+          id: updatedCurrentIndexPattern.id!,
+          cache: updatedCache,
+        });
+        dispatch(
+          changeIndexPattern({
+            dataViews: { indexPatterns: newIndexPatterns },
+            indexPatternId: updatedCurrentIndexPattern.id!,
+          })
+        );
+        // Renew session id to make sure the request is done again
+        dispatchSetState({
+          searchSessionId: data.search.session.start(),
+          resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
+        });
+        // update list of index patterns to pick up mutations in the changed data view
+        setCurrentIndexPattern(updatedCurrentIndexPattern);
+      } else {
+        // if it was an ad-hoc data view, we need to switch to a new data view anyway
+        indexPatternService.replaceDataViewId(updatedDataViewStub);
       }
     },
     textBasedLanguages: supportedTextBasedLanguages as DataViewPickerProps['textBasedLanguages'],

@@ -11,3 +11,5 @@ export * from './transform_manager';
 export * from './create_slo';
 export * from './delete_slo';
 export * from './get_slo';
+export * from './update_slo';
+export * from './sli_client';
