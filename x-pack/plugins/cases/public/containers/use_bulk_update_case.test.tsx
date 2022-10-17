@@ -10,7 +10,8 @@ import { useUpdateCases } from './use_bulk_update_case';
 import { allCases } from './mock';
 import { useToasts } from '../common/lib/kibana';
 import * as api from './api';
-import { createAppMockRenderer, AppMockRenderer } from '../common/mock';
+import type { AppMockRenderer } from '../common/mock';
+import { createAppMockRenderer } from '../common/mock';
 import { casesQueriesKeys } from './constants';
 
 jest.mock('./api');
