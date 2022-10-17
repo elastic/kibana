@@ -51,7 +51,7 @@ export const Markdown = ({
       </EuiMarkdownFormat>
     );
   }
-  
+
   // Otherwise render the Markdown Editor
   return (
     <EuiMarkdownEditor
