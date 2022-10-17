@@ -243,12 +243,7 @@ export class RemoteClusterTable extends Component {
         dataTestSubj: 'remoteClustersAddress',
         truncateText: true,
         render: (mode, { seeds, proxyAddress }) => {
-          let clusterAddressString;
-          if (mode === PROXY_MODE) {
-            clusterAddressString = proxyAddress;
-          } else {
-            clusterAddressString = seeds.join(', ');
-          }
+          const clusterAddressString = mode === PROXY_MODE ? proxyAddress : seeds.join(', ');
           const connectionMode = (
             <EuiFlexItem grow={false} className="remoteClustersConnectionAddress__message">
               <EuiText data-test-subj="remoteClusterConnectionAddressMessage" size="s">
@@ -270,12 +265,8 @@ export class RemoteClusterTable extends Component {
         sortable: true,
         width: '160px',
         render: (mode, { connectedNodesCount, connectedSocketsCount }) => {
-          let remoteNodesCount;
-          if (mode === PROXY_MODE) {
-            remoteNodesCount = connectedSocketsCount;
-          } else {
-            remoteNodesCount = connectedNodesCount;
-          }
+          const remoteNodesCount =
+            mode === PROXY_MODE ? connectedSocketsCount : connectedNodesCount;
           const connectionMode = (
             <EuiFlexItem grow={false} className="remoteClustersNodeCount__message">
               <EuiText data-test-subj="remoteClusterNodeCountMessage" size="s">

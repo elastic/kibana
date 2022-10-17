@@ -29,6 +29,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...functionalConfig.get('security'),
       remoteEsRoles: {
         ccs_remote_search: {
+          cluster: ['manage', 'manage_ccr'],
           indices: [
             {
               names: ['*'],

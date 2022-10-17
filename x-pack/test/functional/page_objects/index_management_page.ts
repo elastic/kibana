@@ -43,9 +43,8 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
 
     async performIndexActionInDetailPanel(action: string) {
       await this.clickContextMenuInDetailPanel();
-      switch (action) {
-        case 'flush':
-          await testSubjects.click('flushIndexMenuButton');
+      if (action === 'flush') {
+        await testSubjects.click('flushIndexMenuButton');
       }
     },
 

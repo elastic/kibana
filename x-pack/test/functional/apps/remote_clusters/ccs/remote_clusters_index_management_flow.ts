@@ -19,12 +19,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const remoteEs = getService('remoteEs' as 'es');
+  const localEs = getService('es');
 
-  describe('CCS Remote Clusters > Index Management', function () {
+  describe.only('CCS Remote Clusters > Index Management', function () {
     const leaderName = 'my-index';
     const followerName = 'my-follower';
     before(async () => {
-      await security.testUser.setRoles(['global_ccr_role', 'follower_index_user']);
+      await security.testUser.setRoles(['follower_index_user']);
     });
 
     describe('Remote Clusters', function () {
@@ -32,7 +33,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.common.navigateToApp('remoteClusters');
       });
 
-      it('Verify ftr-remote in remote clusters', async () => {
+      it('Verify "ftr-remote" remote cluster exists', async () => {
         await retry.waitFor('table to be visible', async () => {
           return await testSubjects.isDisplayed('remoteClusterListTable');
         });
@@ -49,7 +50,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     describe('Cross Cluster Replication', function () {
       before(async () => {
         await remoteEs.indices.create({
-          index: 'my-index',
+          index: leaderName,
           body: {
             settings: { number_of_shards: 1, soft_deletes: { enabled: true } },
           },
@@ -71,12 +72,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
     describe('Index Management', function () {
       before(async () => {
-        await pageObjects.common.navigateToApp('indexManagement');
-        await retry.waitForWithTimeout('indice table to be visible', 15000, async () => {
-          return await testSubjects.isDisplayed('indicesList');
-        });
         await remoteEs.index({
-          index: 'my-index',
+          index: leaderName,
           body: { a: 'b' },
         });
         await pageObjects.common.navigateToApp('indexManagement');
@@ -84,7 +81,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           return await testSubjects.isDisplayed('indicesList');
         });
       });
-      it('Made it this far', async () => {
+      it('Verify that the follower index is duplicating from the remote.', async () => {
         await pageObjects.indexManagement.clickIndiceAt(0);
         await pageObjects.indexManagement.performIndexActionInDetailPanel('flush');
         await testSubjects.click('euiFlyoutCloseButton');
@@ -101,6 +98,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     after(async () => {
+      await localEs.indices.delete({
+        index: followerName,
+      });
+      await remoteEs.indices.delete({
+        index: leaderName,
+      });
       await security.testUser.restoreDefaults();
     });
   });
