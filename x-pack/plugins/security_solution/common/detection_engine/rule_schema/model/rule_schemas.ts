@@ -95,8 +95,8 @@ const baseSchema = buildRuleSchemas({
   required: {
     name: RuleName,
     description: RuleDescription,
-    severity: Severity,
     risk_score: RiskScore,
+    severity: Severity,
   },
   optional: {
     // Field overrides
@@ -216,8 +216,8 @@ const eqlSchema = buildRuleSchemas({
     index: IndexPatternArray,
     data_view_id: DataViewId,
     filters: RuleFilterArray,
-    event_category_override: EventCategoryOverride,
     timestamp_field: TimestampField,
+    event_category_override: EventCategoryOverride,
     tiebreaker_field: TiebreakerField,
   },
   defaultable: {},

@@ -22,7 +22,7 @@ import {
 
 jest.mock('../../logic/get_latest_prebuilt_rules', () => {
   return {
-    getLatestPrepackagedRules: async () => {
+    getLatestPrebuiltRules: async () => {
       return [
         {
           rule_id: 'rule-1',
