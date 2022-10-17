@@ -14,16 +14,19 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   asDynamicBytes,
+  asInteger,
   asMillisecondDuration,
 } from '../../../../../common/utils/formatters';
+import { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
 import { ListMetric } from '../../../shared/list_metric';
 
 type ServerlessActiveInstances =
@@ -112,7 +115,7 @@ export function ServerlessActiveInstances() {
           <ListMetric
             isLoading={status === FETCH_STATUS.LOADING}
             series={timeseries.billedDuration}
-            color={palette[3]}
+            color={palette[2]}
             valueLabel={asMillisecondDuration(billedDurationAvg)}
           />
         );
@@ -142,9 +145,20 @@ export function ServerlessActiveInstances() {
     },
   ];
 
-  // const max = getMaxY([{ data: data.timeseries }]);
-  // const durationFormatter = getDurationFormatter(max);
-  // const getYTickFormatter = getResponseTimeTickFormatter(durationFormatter);
+  const charts: Array<TimeSeries<Coordinate>> = useMemo(
+    () => [
+      {
+        title: i18n.translate(
+          'xpack.apm.serverlessMetrics.activeInstances.title',
+          { defaultMessage: 'Active instances' }
+        ),
+        data: data.timeseries,
+        type: 'bar',
+        color: palette[2],
+      },
+    ],
+    [data.timeseries]
+  );
 
   return (
     <EuiPanel hasBorder={true}>
@@ -159,7 +173,14 @@ export function ServerlessActiveInstances() {
             </h2>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem>chart goes here</EuiFlexItem>
+        <EuiFlexItem>
+          <TimeseriesChart
+            timeseries={charts}
+            id="activeInstances"
+            fetchStatus={status}
+            yLabelFormat={asInteger}
+          />
+        </EuiFlexItem>
         <EuiFlexItem>
           <EuiInMemoryTable
             items={data.activeInstances}

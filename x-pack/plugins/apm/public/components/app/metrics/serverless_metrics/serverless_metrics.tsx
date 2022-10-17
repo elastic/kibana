@@ -4,10 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGrid, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
-import React from 'react';
+import {
+  EuiFlexGrid,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+} from '@elastic/eui';
+import { isEmpty, keyBy } from 'lodash';
+import React, { useMemo } from 'react';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
-import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
@@ -45,23 +51,60 @@ export function ServerlessMetrics() {
     [kuery, environment, serviceName, start, end]
   );
 
+  const { firstLineCharts, secondLineCharts } = useMemo(() => {
+    const chartsByKey = keyBy(data.charts, 'key');
+    if (isEmpty(chartsByKey)) {
+      return { firstLineCharts: [], secondLineCharts: [] };
+    }
+
+    return {
+      firstLineCharts: [
+        chartsByKey.avg_duration,
+        chartsByKey.cold_start_duration,
+        chartsByKey.cold_start_count,
+      ],
+      secondLineCharts: [
+        chartsByKey.compute_usage,
+        chartsByKey.memory_usage_chart,
+      ],
+    };
+  }, [data]);
+
   return (
-    <ChartPointerEventContextProvider>
-      <EuiFlexGrid columns={2} gutterSize="s">
-        {data.charts.map((chart) => (
-          <EuiFlexItem key={chart.key}>
-            <EuiPanel hasBorder={true}>
-              <MetricsChart
-                start={start}
-                end={end}
-                chart={chart}
-                fetchStatus={status}
-              />
-            </EuiPanel>
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGrid>
+    <EuiFlexGroup direction="column">
+      <EuiFlexItem>
+        <EuiFlexGrid columns={3} gutterSize="s">
+          {firstLineCharts.map((chart) => (
+            <EuiFlexItem key={chart.key}>
+              <EuiPanel hasBorder={true}>
+                <MetricsChart
+                  start={start}
+                  end={end}
+                  chart={chart}
+                  fetchStatus={status}
+                />
+              </EuiPanel>
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGrid>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiFlexGrid columns={2} gutterSize="s">
+          {secondLineCharts.map((chart) => (
+            <EuiFlexItem key={chart.key}>
+              <EuiPanel hasBorder={true}>
+                <MetricsChart
+                  start={start}
+                  end={end}
+                  chart={chart}
+                  fetchStatus={status}
+                />
+              </EuiPanel>
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGrid>
+      </EuiFlexItem>
       <EuiSpacer size="xxl" />
-    </ChartPointerEventContextProvider>
+    </EuiFlexGroup>
   );
 }

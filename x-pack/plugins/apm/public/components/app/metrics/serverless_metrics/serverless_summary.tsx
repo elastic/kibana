@@ -7,6 +7,7 @@
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiStat,
@@ -68,9 +69,11 @@ export function ServerlessSummary() {
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          {i18n.translate('xpack.apm.serverlessMetrics.summary.feedback', {
-            defaultMessage: 'Send feedback',
-          })}
+          <EuiLink href="https://ela.st/feedback-aws-lambda" target="_blank">
+            {i18n.translate('xpack.apm.serverlessMetrics.summary.feedback', {
+              defaultMessage: 'Send feedback',
+            })}
+          </EuiLink>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />

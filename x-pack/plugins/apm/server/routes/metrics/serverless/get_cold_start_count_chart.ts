@@ -18,7 +18,7 @@ import { ChartBase } from '../types';
 
 const chartBase: ChartBase = {
   title: i18n.translate('xpack.apm.agentMetrics.serverless.coldStart', {
-    defaultMessage: 'Cold start',
+    defaultMessage: 'Cold starts',
   }),
   key: 'cold_start_count',
   type: 'bar',

@@ -10,6 +10,7 @@ import { ServerlessFunctions } from './serverless_functions';
 import { ServerlessSummary } from './serverless_summary';
 import { ServerlessActiveInstances } from './serverless_active_instances';
 import { ServerlessMetrics } from './serverless_metrics';
+import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
 
 export function ServerLessMetrics() {
   return (
@@ -20,12 +21,14 @@ export function ServerLessMetrics() {
       <EuiFlexItem>
         <ServerlessFunctions />
       </EuiFlexItem>
-      <EuiFlexItem>
-        <ServerlessMetrics />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <ServerlessActiveInstances />
-      </EuiFlexItem>
+      <ChartPointerEventContextProvider>
+        <EuiFlexItem>
+          <ServerlessMetrics />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <ServerlessActiveInstances />
+        </EuiFlexItem>
+      </ChartPointerEventContextProvider>
     </EuiFlexGroup>
   );
 }

@@ -27,7 +27,7 @@ const billedDurationAvg = {
 
 const chartBase: ChartBase = {
   title: i18n.translate('xpack.apm.agentMetrics.serverless.avgDuration', {
-    defaultMessage: 'Avg. Duration',
+    defaultMessage: 'Lambda Duration',
   }),
   key: 'avg_duration',
   type: 'linemark',
