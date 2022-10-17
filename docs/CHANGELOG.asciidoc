@@ -181,8 +181,6 @@ Dashboard::
 Adds the ability to view panel-level filters and queries {kibana-pull}136655[#136655]
 
 Discover::
-* Adds the ability to only show reset height button when current height is not the default {kibana-pull}143013[#143013]
-* Adds the ability to persist histogram height to local storage {kibana-pull}140997[#140997]
 * Enables `Explore in Discover` for adhoc data views in *Lens* {kibana-pull}140726[#140726]
 * Adds the ability to show actions inline in the Expanded Document view for quick access {kibana-pull}140085[#140085]
 * Updates the layout for unified histogram {kibana-pull}139446[#139446]
