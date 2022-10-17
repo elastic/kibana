@@ -6,7 +6,7 @@
  */
 
 import { firstValueFrom } from 'rxjs';
-import { registerCloudDeploymentIdAnalyticsContext } from './register_cloud_deployment_id_analytics_context';
+import { registerCloudDeploymentMetadataAnalyticsContext } from './register_cloud_deployment_id_analytics_context';
 
 describe('registerCloudDeploymentIdAnalyticsContext', () => {
   let analytics: { registerContextProvider: jest.Mock };
@@ -17,14 +17,16 @@ describe('registerCloudDeploymentIdAnalyticsContext', () => {
   });
 
   test('it does not register the context provider if cloudId not provided', () => {
-    registerCloudDeploymentIdAnalyticsContext(analytics);
+    registerCloudDeploymentMetadataAnalyticsContext(analytics, {});
     expect(analytics.registerContextProvider).not.toHaveBeenCalled();
   });
 
   test('it registers the context provider and emits the cloudId', async () => {
-    registerCloudDeploymentIdAnalyticsContext(analytics, 'cloud_id');
+    registerCloudDeploymentMetadataAnalyticsContext(analytics, { id: 'cloud_id' });
     expect(analytics.registerContextProvider).toHaveBeenCalledTimes(1);
     const [{ context$ }] = analytics.registerContextProvider.mock.calls[0];
-    await expect(firstValueFrom(context$)).resolves.toEqual({ cloudId: 'cloud_id' });
+    await expect(firstValueFrom(context$)).resolves.toEqual({
+      cloudId: 'cloud_id',
+    });
   });
 });

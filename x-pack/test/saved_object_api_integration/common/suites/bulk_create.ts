@@ -219,7 +219,7 @@ export function bulkCreateTestSuiteFactory(context: FtrProviderContext) {
         });
 
         after(async () => {
-          await testDataLoader.deleteFtrSavedObjectsData();
+          await testDataLoader.deleteAllSavedObjectsFromKibanaIndex();
           await testDataLoader.deleteFtrSpaces();
         });
 
