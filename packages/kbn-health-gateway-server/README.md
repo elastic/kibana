@@ -25,11 +25,22 @@ Here is a sample configuration file recommended for use in development:
 server:
   port: 3000
   host: 'localhost'
+  ssl:
+    enabled: true
+    # Using Kibana test certs
+    key: /path/to/packages/kbn-dev-utils/certs/kibana.key
+    certificate: /path/to/packages/kbn-dev-utils/certs/kibana.crt
+    certificateAuthorities: /path/to/packages/kbn-dev-utils/certs/ca.crt
  
 kibana:
   hosts:
-    - 'http://localhost:5605'
-    - 'http://localhost:5606'
+    - 'https://localhost:5605'
+    - 'https://localhost:5606'
+  ssl:
+    # Using Kibana test certs
+    certificate: /path/to/packages/kbn-dev-utils/certs/kibana.crt
+    certificateAuthorities: /path/to/packages/kbn-dev-utils/certs/ca.crt
+    verificationMode: certificate
 
 logging:
   root:
@@ -43,22 +54,24 @@ all of the same appenders.
 ## Development & Testing
 
 To run this locally, first you need to create a `config/gateway.yml` file. There's a
-script included for development that uses `docker-compose` to run Elasticsearch and
-two different Kibana instances for testing:
+`docker-compose.yml` intended for development, which will run Elasticsearch and
+two different Kibana instances for testing. Before using it, you'll want to create
+a `.env` file:
 
 ```bash
-# From the /packages/kbn-health-gateway-server directory
-$ ./scripts/dev.sh 8.4.0
+# From the /packages/kbn-health-gateway-server/scripts directory
+$ cp .env.example .env
+# (modify the .env settings if desired)
+$ docker-compose up
 ```
 
-The script will automatically run Kibana on the ports from the sample `gateway.yml`
-above (5605-5606). Note that you need to pass a stack version to the script so it
-knows which docker images to pull.
+This will automatically run Kibana on the ports from the sample `gateway.yml`
+above (5605-5606).
 
-Once you have your `gateway.yml` and have started the dev script, you can run the
+Once you have your `gateway.yml` and have started docker-compose, you can run the
 server from the `/packages/kbn-health-gateway-server` directory with `yarn start`. Then you should
 be able to make requests to the `/api/status` endpoint:
 
 ```bash
-$ curl "http://localhost:3000/api/status"
+$ curl "https://localhost:3000/api/status"
 ```

@@ -52,6 +52,7 @@ TYPES_DEPS = [
   "@npm//@types/jest",
   "@npm//@types/hapi__hapi",
   "@npm//@types/node-fetch",
+  "@npm//moment",
   "//packages/core/base/core-base-server-internal:npm_module_types",
   "//packages/core/logging/core-logging-server-internal:npm_module_types",
   "//packages/kbn-config:npm_module_types",
