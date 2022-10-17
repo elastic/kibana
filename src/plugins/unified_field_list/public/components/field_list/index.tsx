@@ -6,7 +6,4 @@
  * Side Public License, v 1.
  */
 
-export {
-  FieldListGrouped,
-  type FieldListGroupedProps as FieldListProps,
-} from './field_list_grouped';
+export { FieldListGrouped, type FieldListGroupedProps } from './field_list_grouped';

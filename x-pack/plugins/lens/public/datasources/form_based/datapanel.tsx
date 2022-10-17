@@ -34,7 +34,7 @@ import {
   ExistenceFetchStatus,
   FieldsGroupNames,
   FieldListGrouped,
-  type FieldListProps,
+  type FieldListGroupedProps,
   useExistingFieldsFetcher,
   useGroupedFields,
   useExistingFieldsReader,
@@ -327,17 +327,9 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
     [localState]
   );
 
-  const { fieldGroups } = useGroupedFields({
-    dataViewId: currentIndexPatternId,
-    allFields: allFields as unknown as DataViewField[],
-    services: {
-      dataViews,
-    },
-    fieldsExistenceReader,
-    onFilterField,
-    onSupportedFieldFilter,
-    onSelectedFieldFilter,
-    onOverrideFieldGroupDetails: (groupName) => {
+  const hasFilters = Boolean(filters.length);
+  const onOverrideFieldGroupDetails = useCallback(
+    (groupName) => {
       if (groupName === FieldsGroupNames.AvailableFields) {
         const isUsingSampling = core.uiSettings.get('lens:useFieldExistenceSampling');
 
@@ -351,15 +343,29 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
                 defaultMessage:
                   'Drag and drop available fields to the workspace and create visualizations. To change the available fields, select a different data view, edit your queries, or use a different time range. Some field types cannot be visualized in Lens, including full text and geographic fields.',
               }),
-          isAffectedByGlobalFilter: !!filters.length,
+          isAffectedByGlobalFilter: hasFilters,
         };
       }
       if (groupName === FieldsGroupNames.SelectedFields) {
         return {
-          isAffectedByGlobalFilter: !!filters.length,
+          isAffectedByGlobalFilter: hasFilters,
         };
       }
     },
+    [core.uiSettings, hasFilters]
+  );
+
+  const { fieldGroups } = useGroupedFields({
+    dataViewId: currentIndexPatternId,
+    allFields: allFields as unknown as DataViewField[],
+    services: {
+      dataViews,
+    },
+    fieldsExistenceReader,
+    onFilterField,
+    onSupportedFieldFilter,
+    onSelectedFieldFilter,
+    onOverrideFieldGroupDetails,
   });
 
   const closeFieldEditor = useRef<() => void | undefined>();
@@ -461,7 +467,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
     ]
   );
 
-  const renderFieldItem: FieldListProps['renderFieldItem'] = useCallback(
+  const renderFieldItem: FieldListGroupedProps['renderFieldItem'] = useCallback(
     ({ field, itemIndex, groupIndex, hideDetails }) => (
       <FieldItem
         field={field}
@@ -611,7 +617,6 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
         </EuiFlexItem>
         <EuiFlexItem>
           <FieldListGrouped
-            dataViewId={currentIndexPatternId}
             fieldGroups={fieldGroups}
             hasSyncedExistingFields={fieldsExistenceStatus !== ExistenceFetchStatus.unknown}
             existenceFetchFailed={fieldsExistenceStatus === ExistenceFetchStatus.failed}

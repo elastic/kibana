@@ -32,12 +32,12 @@ const defaultFieldGroups: {
 };
 
 export interface GroupedFieldsParams {
-  dataViewId: string;
+  dataViewId: string | null; // `null` is for text-based queries
   allFields: DataViewField[];
   services: {
     dataViews: DataViewsContract;
   };
-  fieldsExistenceReader: ExistingFieldsReader;
+  fieldsExistenceReader?: ExistingFieldsReader;
   onOverrideFieldGroupDetails?: (
     groupName: FieldsGroupNames
   ) => Partial<FieldsGroupDetails> | undefined | null;
@@ -61,33 +61,42 @@ export const useGroupedFields = ({
   onFilterField,
 }: GroupedFieldsParams): GroupedFieldsResult => {
   const [dataView, setDataView] = useState<DataView | null>(null);
-  const { hasFieldData, isFieldsExistenceInfoUnavailable } = fieldsExistenceReader;
-  const fieldsExistenceInfoUnavailable = isFieldsExistenceInfoUnavailable(dataViewId);
+  const fieldsExistenceInfoUnavailable: boolean =
+    dataViewId && fieldsExistenceReader
+      ? fieldsExistenceReader.isFieldsExistenceInfoUnavailable(dataViewId)
+      : false;
+  const hasFieldDataHandler =
+    dataViewId && fieldsExistenceReader
+      ? fieldsExistenceReader.hasFieldData
+      : hasFieldDataByDefault;
 
   useEffect(() => {
     const getDataView = async () => {
-      setDataView(await services.dataViews.get(dataViewId));
+      if (dataViewId) {
+        setDataView(await services.dataViews.get(dataViewId));
+      }
     };
     getDataView();
     // if field existence information changed, reload the data view too
-  }, [dataViewId, services.dataViews, setDataView, hasFieldData]);
+  }, [dataViewId, services.dataViews, setDataView, hasFieldDataHandler]);
 
   const unfilteredFieldGroups: FieldListGroups = useMemo(() => {
     const containsData = (field: DataViewField) => {
-      const overallField = dataView?.getFieldByName?.(field.name);
-      return Boolean(overallField && hasFieldData(dataViewId, overallField.name));
+      if (!dataViewId || !dataView) {
+        return true;
+      }
+      const overallField = dataView.getFieldByName?.(field.name);
+      return Boolean(overallField && hasFieldDataHandler(dataViewId, overallField.name));
     };
 
+    const fields = allFields || [];
     const allSupportedTypesFields = onSupportedFieldFilter
-      ? allFields.filter(onSupportedFieldFilter)
-      : allFields;
-    const selectedFields = onSelectedFieldFilter
-      ? allSupportedTypesFields.filter(onSelectedFieldFilter)
-      : allSupportedTypesFields;
-    const sorted = allSupportedTypesFields.sort(sortFields);
+      ? fields.filter(onSupportedFieldFilter)
+      : fields;
+    const sortedFields = [...allSupportedTypesFields].sort(sortFields);
     const groupedFields = {
       ...defaultFieldGroups,
-      ...groupBy(sorted, (field) => {
+      ...groupBy(sortedFields, (field) => {
         if (field.type === 'document') {
           return 'specialFields';
         } else if (dataView?.metaFields?.includes(field.name)) {
@@ -97,6 +106,7 @@ export const useGroupedFields = ({
         } else return 'emptyFields';
       }),
     };
+    const selectedFields = onSelectedFieldFilter ? sortedFields.filter(onSelectedFieldFilter) : [];
 
     let fieldGroupDefinitions: FieldListGroups = {
       SpecialFields: {
@@ -220,7 +230,7 @@ export const useGroupedFields = ({
     onOverrideFieldGroupDetails,
     dataView,
     dataViewId,
-    hasFieldData,
+    hasFieldDataHandler,
     fieldsExistenceInfoUnavailable,
   ]);
 
@@ -246,5 +256,15 @@ export const useGroupedFields = ({
 };
 
 function sortFields(fieldA: DataViewField, fieldB: DataViewField) {
-  return fieldA.displayName.localeCompare(fieldB.displayName, undefined, { sensitivity: 'base' });
+  return (fieldA.displayName || fieldA.name).localeCompare(
+    fieldB.displayName || fieldB.name,
+    undefined,
+    {
+      sensitivity: 'base',
+    }
+  );
+}
+
+function hasFieldDataByDefault(): boolean {
+  return true;
 }

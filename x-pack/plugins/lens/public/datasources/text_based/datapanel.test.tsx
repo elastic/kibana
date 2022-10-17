@@ -8,6 +8,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { act } from 'react-dom/test-utils';
+import { ReactWrapper } from 'enzyme';
 import type { Query } from '@kbn/es-query';
 
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -191,23 +192,42 @@ describe('TextBased Query Languages Data Panel', () => {
   });
 
   it('should render a search box', async () => {
-    const wrapper = mountWithIntl(<TextBasedDataPanel {...defaultProps} />);
-    expect(wrapper.find('[data-test-subj="lnsTextBasedLangugesFieldSearch"]').length).toEqual(1);
+    let wrapper: ReactWrapper;
+    await act(async () => {
+      wrapper = await mountWithIntl(<TextBasedDataPanel {...defaultProps} />);
+      wrapper.update();
+    });
+
+    await wrapper!.update();
+    expect(wrapper!.find('[data-test-subj="lnsTextBasedLanguagesFieldSearch"]').length).toEqual(1);
   });
 
   it('should list all supported fields in the pattern', async () => {
-    const wrapper = mountWithIntl(<TextBasedDataPanel {...defaultProps} />);
+    let wrapper: ReactWrapper;
+    await act(async () => {
+      wrapper = await mountWithIntl(<TextBasedDataPanel {...defaultProps} />);
+      wrapper.update();
+    });
+
+    await wrapper!.update();
+
     expect(
-      wrapper
-        .find('[data-test-subj="lnsTextBasedLanguagesPanelFields"]')
+      wrapper!
+        .find('[data-test-subj="fieldListGroupedAvailableFields"]')
         .find(FieldButton)
         .map((fieldItem) => fieldItem.prop('fieldName'))
-    ).toEqual(['timestamp', 'bytes', 'memory']);
+    ).toEqual(['bytes', 'memory', 'timestamp']);
   });
 
   it('should not display the selected fields accordion if there are no fields displayed', async () => {
-    const wrapper = mountWithIntl(<TextBasedDataPanel {...defaultProps} />);
-    expect(wrapper.find('[data-test-subj="lnsSelectedFieldsTextBased"]').length).toEqual(0);
+    let wrapper: ReactWrapper;
+    await act(async () => {
+      wrapper = await mountWithIntl(<TextBasedDataPanel {...defaultProps} />);
+      wrapper.update();
+    });
+
+    await wrapper!.update();
+    expect(wrapper!.find('[data-test-subj="fieldListGroupedSelectedFields"]').length).toEqual(0);
   });
 
   it('should display the selected fields accordion if there are fields displayed', async () => {
@@ -215,13 +235,27 @@ describe('TextBased Query Languages Data Panel', () => {
       ...defaultProps,
       layerFields: ['memory'],
     };
-    const wrapper = mountWithIntl(<TextBasedDataPanel {...props} />);
-    expect(wrapper.find('[data-test-subj="lnsSelectedFieldsTextBased"]').length).not.toEqual(0);
+    let wrapper: ReactWrapper;
+    await act(async () => {
+      wrapper = await mountWithIntl(<TextBasedDataPanel {...props} />);
+      wrapper.update();
+    });
+
+    await wrapper!.update();
+    expect(wrapper!.find('[data-test-subj="fieldListGroupedSelectedFields"]').length).not.toEqual(
+      0
+    );
   });
 
   it('should list all supported fields in the pattern that match the search input', async () => {
-    const wrapper = mountWithIntl(<TextBasedDataPanel {...defaultProps} />);
-    const searchBox = wrapper.find('[data-test-subj="lnsTextBasedLangugesFieldSearch"]');
+    let wrapper: ReactWrapper;
+    await act(async () => {
+      wrapper = await mountWithIntl(<TextBasedDataPanel {...defaultProps} />);
+      wrapper.update();
+    });
+
+    await wrapper!.update();
+    const searchBox = wrapper!.find('[data-test-subj="lnsTextBasedLanguagesFieldSearch"]');
 
     act(() => {
       searchBox.prop('onChange')!({
@@ -229,10 +263,10 @@ describe('TextBased Query Languages Data Panel', () => {
       } as React.ChangeEvent<HTMLInputElement>);
     });
 
-    wrapper.update();
+    await wrapper!.update();
     expect(
-      wrapper
-        .find('[data-test-subj="lnsTextBasedLanguagesPanelFields"]')
+      wrapper!
+        .find('[data-test-subj="fieldListGroupedAvailableFields"]')
         .find(FieldButton)
         .map((fieldItem) => fieldItem.prop('fieldName'))
     ).toEqual(['memory']);

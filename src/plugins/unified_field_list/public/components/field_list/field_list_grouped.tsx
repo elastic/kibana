@@ -7,7 +7,7 @@
  */
 
 import { partition, throttle } from 'lodash';
-import React, { useState, Fragment, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, Fragment, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiScreenReaderOnly, EuiSpacer } from '@elastic/eui';
 import { NoFieldsCallout } from './no_fields_callout';
@@ -27,7 +27,6 @@ function getDisplayedFieldsLength(
 }
 
 export interface FieldListGroupedProps {
-  dataViewId: string;
   fieldGroups: FieldListGroups;
   hasSyncedExistingFields: boolean;
   existenceFetchFailed?: boolean;
@@ -39,7 +38,6 @@ export interface FieldListGroupedProps {
 
 export const FieldListGrouped: React.FC<FieldListGroupedProps> = React.memo(
   function InnerFieldListGrouped({
-    dataViewId,
     fieldGroups,
     existenceFetchFailed,
     existenceFetchTimeout,
@@ -59,14 +57,6 @@ export const FieldListGrouped: React.FC<FieldListGroupedProps> = React.memo(
         fieldGroupsToShow.map(([key, { isInitiallyOpen }]) => [key, isInitiallyOpen])
       )
     );
-
-    useEffect(() => {
-      // Reset the scroll if we have made material changes to the field list
-      if (scrollContainer) {
-        scrollContainer.scrollTop = 0;
-        setPageSize(PAGINATION_SIZE);
-      }
-    }, [dataViewId, scrollContainer]);
 
     const lazyScroll = useCallback(() => {
       if (scrollContainer) {
@@ -121,14 +111,15 @@ export const FieldListGrouped: React.FC<FieldListGroupedProps> = React.memo(
                 data-test-subj="unifiedFieldList__fieldListGroupedDescription"
               >
                 {[
-                  fieldGroups.SelectedFields?.fields &&
+                  (!fieldGroups.SelectedFields?.hideIfEmpty ||
+                    fieldGroups.SelectedFields?.fields?.length > 0) &&
                     i18n.translate(
                       'unifiedFieldList.fieldListGrouped.fieldSearchForSelectedFieldsLiveRegion',
                       {
                         defaultMessage:
                           '{selectedFields} selected {selectedFields, plural, one {field} other {fields}}.',
                         values: {
-                          selectedFields: fieldGroups.SelectedFields.fields.length,
+                          selectedFields: fieldGroups.SelectedFields?.fields?.length || 0,
                         },
                       }
                     ),
@@ -143,25 +134,27 @@ export const FieldListGrouped: React.FC<FieldListGroupedProps> = React.memo(
                         },
                       }
                     ),
-                  fieldGroups.EmptyFields?.fields &&
+                  (!fieldGroups.EmptyFields?.hideIfEmpty ||
+                    fieldGroups.EmptyFields?.fields?.length > 0) &&
                     i18n.translate(
                       'unifiedFieldList.fieldListGrouped.fieldSearchForEmptyFieldsLiveRegion',
                       {
                         defaultMessage:
                           '{emptyFields} empty {emptyFields, plural, one {field} other {fields}}.',
                         values: {
-                          emptyFields: fieldGroups.EmptyFields.fields.length,
+                          emptyFields: fieldGroups.EmptyFields?.fields?.length || 0,
                         },
                       }
                     ),
-                  fieldGroups.MetaFields?.fields &&
+                  (!fieldGroups.MetaFields?.hideIfEmpty ||
+                    fieldGroups.MetaFields?.fields?.length > 0) &&
                     i18n.translate(
                       'unifiedFieldList.fieldListGrouped.fieldSearchForMetaFieldsLiveRegion',
                       {
                         defaultMessage:
                           '{metaFields} meta {metaFields, plural, one {field} other {fields}}.',
                         values: {
-                          metaFields: fieldGroups.MetaFields.fields.length,
+                          metaFields: fieldGroups.MetaFields?.fields?.length || 0,
                         },
                       }
                     ),

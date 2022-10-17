@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormControlLayout, htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import usePrevious from 'react-use/lib/usePrevious';
@@ -14,13 +14,22 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import { DatatableColumn, ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import {
+  FieldListGrouped,
+  FieldListGroupedProps,
+  FieldsGroupNames,
+  useGroupedFields,
+} from '@kbn/unified-field-list-plugin/public';
+import { FieldButton } from '@kbn/react-field';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
 import type { DatasourceDataPanelProps } from '../../types';
 import type { TextBasedPrivateState } from './types';
 import { getStateFromAggregateQuery } from './utils';
-import { ChildDragDropProvider } from '../../drag_drop';
-import { FieldsAccordion } from './fields_accordion';
+import { ChildDragDropProvider, DragDrop } from '../../drag_drop';
+import { DataType, IndexPatternField } from '../../types';
+import { LensFieldIcon } from '../../shared_components';
 
 export type TextBasedDataPanelProps = DatasourceDataPanelProps<TextBasedPrivateState> & {
   data: DataPublicPluginStart;
@@ -67,8 +76,16 @@ export function TextBasedDataPanel({
   }, [data, dataViews, expressions, prevQuery, query, setState, state]);
 
   const { fieldList } = state;
-  const filteredFields = useMemo(() => {
-    return fieldList.filter((field) => {
+
+  const onSelectedFieldFilter = useCallback(
+    (field: IndexPatternField | DataViewField): boolean => {
+      return Boolean(layerFields?.includes(field.name));
+    },
+    [layerFields]
+  );
+
+  const onFilterField = useCallback(
+    (field: IndexPatternField | DataViewField) => {
       if (
         localState.nameFilter &&
         !field.name.toLowerCase().includes(localState.nameFilter.toLowerCase())
@@ -76,9 +93,63 @@ export function TextBasedDataPanel({
         return false;
       }
       return true;
-    });
-  }, [fieldList, localState.nameFilter]);
-  const usedByLayersFields = fieldList.filter((field) => layerFields?.includes(field.name));
+    },
+    [localState]
+  );
+
+  const onOverrideFieldGroupDetails = useCallback((groupName) => {
+    if (groupName === FieldsGroupNames.AvailableFields) {
+      return {
+        helpText: i18n.translate('xpack.lens.indexPattern.allFieldsForTextBasedLabelHelp', {
+          defaultMessage:
+            'Drag and drop available fields to the workspace and create visualizations. To change the available fields, edit your query.',
+        }),
+      };
+    }
+    if (groupName === FieldsGroupNames.EmptyFields || groupName === FieldsGroupNames.MetaFields) {
+      return {
+        hideIfEmpty: true,
+      };
+    }
+  }, []);
+
+  const { fieldGroups } = useGroupedFields({
+    dataViewId: null,
+    allFields: fieldList as unknown as DataViewField[],
+    services: {
+      dataViews,
+    },
+    onFilterField,
+    onSelectedFieldFilter,
+    onOverrideFieldGroupDetails,
+  });
+
+  const renderFieldItem: FieldListGroupedProps['renderFieldItem'] = useCallback(
+    ({ field, itemIndex, groupIndex, hideDetails }) => {
+      const lensField = field as unknown as DatatableColumn;
+      return (
+        <DragDrop
+          draggable
+          order={[itemIndex]}
+          value={{
+            field: lensField?.name,
+            id: lensField.id,
+            humanData: { label: lensField?.name },
+          }}
+          dataTestSubj={`lnsFieldListPanelField-${lensField.name}`}
+        >
+          <FieldButton
+            className={`lnsFieldItem lnsFieldItem--${lensField?.meta?.type}`}
+            isActive={false}
+            onClick={() => {}}
+            fieldIcon={<LensFieldIcon type={lensField?.meta.type as DataType} />}
+            fieldName={field?.name}
+          />
+        </DragDrop>
+      );
+    },
+    []
+  );
 
   return (
     <KibanaContextProvider
@@ -111,7 +182,7 @@ export function TextBasedDataPanel({
             >
               <input
                 className="euiFieldText euiFieldText--fullWidth lnsInnerIndexPatternDataPanel__textField"
-                data-test-subj="lnsTextBasedLangugesFieldSearch"
+                data-test-subj="lnsTextBasedLanguagesFieldSearch"
                 placeholder={i18n.translate('xpack.lens.indexPatterns.filterByNameLabel', {
                   defaultMessage: 'Search field names',
                   description: 'Search the list of fields in the data view for the provided text',
@@ -129,33 +200,15 @@ export function TextBasedDataPanel({
             </EuiFormControlLayout>
           </EuiFlexItem>
           <EuiFlexItem>
-            {/* TODO: Refactor to use shared components from UnifiedFieldList instead of their classes */}
-            <div className="unifiedFieldList__fieldListGrouped">
-              <div className="unifiedFieldList__fieldListGrouped__container">
-                {usedByLayersFields.length > 0 && (
-                  <FieldsAccordion
-                    initialIsOpen={true}
-                    hasLoaded={dataHasLoaded}
-                    isFiltered={Boolean(localState.nameFilter)}
-                    fields={usedByLayersFields}
-                    id="lnsSelectedFieldsTextBased"
-                    label={i18n.translate('xpack.lens.textBased.selectedFieldsLabel', {
-                      defaultMessage: 'Selected fields',
-                    })}
-                  />
-                )}
-                <FieldsAccordion
-                  initialIsOpen={true}
-                  hasLoaded={dataHasLoaded}
-                  isFiltered={Boolean(localState.nameFilter)}
-                  fields={filteredFields}
-                  id="lnsAvailableFieldsTextBased"
-                  label={i18n.translate('xpack.lens.textBased.availableFieldsLabel', {
-                    defaultMessage: 'Available fields',
-                  })}
-                />
-              </div>
-            </div>
+            <FieldListGrouped
+              fieldGroups={fieldGroups}
+              hasSyncedExistingFields={dataHasLoaded}
+              existenceFetchFailed={false}
+              existenceFetchTimeout={false}
+              existFieldsInIndex={!!fieldList.length}
+              renderFieldItem={renderFieldItem}
+              screenReaderDescriptionForSearchInputId={fieldSearchDescriptionId}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </ChildDragDropProvider>

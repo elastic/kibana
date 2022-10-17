@@ -453,7 +453,7 @@ describe('FormBased Data Panel', () => {
           .find('[data-test-subj="unifiedFieldList__fieldListGroupedDescription"]')
           .first()
           .text()
-      ).toBe('0 selected fields. 2 available fields. 3 empty fields. 0 meta fields.');
+      ).toBe('2 available fields. 3 empty fields. 0 meta fields.');
     });
 
     it('loads existence data for current index pattern id', async () => {
@@ -488,7 +488,7 @@ describe('FormBased Data Panel', () => {
           .find('[data-test-subj="unifiedFieldList__fieldListGroupedDescription"]')
           .first()
           .text()
-      ).toBe('0 selected fields. 1 available field. 2 empty fields. 0 meta fields.');
+      ).toBe('1 available field. 2 empty fields. 0 meta fields.');
     });
 
     it('does not load existence data if date and index pattern ids are unchanged', async () => {
@@ -631,7 +631,7 @@ describe('FormBased Data Panel', () => {
           .find('[data-test-subj="unifiedFieldList__fieldListGroupedDescription"]')
           .first()
           .text()
-      ).toBe('0 selected fields. 2 available fields. 3 empty fields. 0 meta fields.');
+      ).toBe('2 available fields. 3 empty fields. 0 meta fields.');
 
       await act(async () => {
         await inst!.setProps({
@@ -666,7 +666,7 @@ describe('FormBased Data Panel', () => {
           .find('[data-test-subj="unifiedFieldList__fieldListGroupedDescription"]')
           .first()
           .text()
-      ).toBe('0 selected fields. 1 available field. 2 empty fields. 0 meta fields.');
+      ).toBe('1 available field. 2 empty fields. 0 meta fields.');
     });
 
     it('shows a loading indicator when loading', async () => {
@@ -695,7 +695,7 @@ describe('FormBased Data Panel', () => {
           .find('[data-test-subj="unifiedFieldList__fieldListGroupedDescription"]')
           .first()
           .text()
-      ).toBe('0 selected fields. 3 available fields. 0 empty fields. 0 meta fields.');
+      ).toBe('3 available fields. 0 empty fields. 0 meta fields.');
 
       await act(() => {
         resolveFunction!({
@@ -710,7 +710,7 @@ describe('FormBased Data Panel', () => {
           .find('[data-test-subj="unifiedFieldList__fieldListGroupedDescription"]')
           .first()
           .text()
-      ).toBe('0 selected fields. 1 available field. 2 empty fields. 0 meta fields.');
+      ).toBe('1 available field. 2 empty fields. 0 meta fields.');
     });
 
     it("should trigger showNoDataPopover if fields don't have data", async () => {
@@ -740,7 +740,7 @@ describe('FormBased Data Panel', () => {
           .find('[data-test-subj="unifiedFieldList__fieldListGroupedDescription"]')
           .first()
           .text()
-      ).toBe('0 selected fields. 0 available fields. 5 empty fields. 0 meta fields.');
+      ).toBe('0 available fields. 5 empty fields. 0 meta fields.');
     });
 
     it("should default to empty dsl if query can't be parsed", async () => {
@@ -786,7 +786,7 @@ describe('FormBased Data Panel', () => {
           .find('[data-test-subj="unifiedFieldList__fieldListGroupedDescription"]')
           .first()
           .text()
-      ).toBe('0 selected fields. 2 available fields. 3 empty fields. 0 meta fields.');
+      ).toBe('2 available fields. 3 empty fields. 0 meta fields.');
     });
   });
 
@@ -1084,7 +1084,7 @@ describe('FormBased Data Panel', () => {
         .simulate('click');
 
       expect(wrapper!.find('[aria-live="polite"]').at(1).text()).toEqual(
-        '0 selected fields. 1 available field. 1 empty field. 0 meta fields.'
+        '1 available field. 1 empty field. 0 meta fields.'
       );
     });
 
