@@ -34,6 +34,7 @@ const enabledActionTypes = [
   '.cases-webhook',
   '.email',
   '.index',
+  '.opsgenie',
   '.pagerduty',
   '.swimlane',
   '.server-log',
