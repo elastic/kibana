@@ -26,7 +26,10 @@ import {
   GaugeLabelMajorModes,
   GaugeColorModes,
   GaugeCentralMajorModes,
+  CollapseFunctions,
 } from '../constants';
+
+export type CollapseFunction = typeof CollapseFunctions[number];
 
 export type FillType = $Values<typeof FillTypes>;
 export type SeriesType = $Values<typeof SeriesTypes>;
@@ -42,8 +45,6 @@ export type GaugeShape = $Values<typeof GaugeShapes>;
 export type GaugeLabelMajorMode = $Values<typeof GaugeLabelMajorModes>;
 export type GaugeCentralMajorMode = $Values<typeof GaugeCentralMajorModes>;
 export type GaugeTicksPosition = $Values<typeof GaugeTicksPositions>;
-
-type CollapseFunction = 'sum' | 'avg' | 'min' | 'max';
 
 export interface AxisExtentConfig {
   mode: 'full' | 'custom' | 'dataBounds';
