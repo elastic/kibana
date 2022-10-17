@@ -30,7 +30,7 @@ export function registerPolicyRoutes(router: IRouter, endpointAppContext: Endpoi
       options: { authRequired: true },
     },
     withEndpointAuthz(
-      { all: ['canAccessEndpointManagement'] },
+      { any: ['canReadSecuritySolution', 'canAccessFleet'] },
       logger,
       getHostPolicyResponseHandler()
     )

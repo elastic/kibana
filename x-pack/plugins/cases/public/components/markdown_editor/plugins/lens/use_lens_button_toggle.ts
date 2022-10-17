@@ -9,9 +9,9 @@
 
 import { some } from 'lodash';
 import useDebounce from 'react-use/lib/useDebounce';
-import { ContextShape } from '@elastic/eui/src/components/markdown_editor/markdown_context';
+import type { ContextShape } from '@elastic/eui/src/components/markdown_editor/markdown_context';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { EuiMarkdownAstNode, EuiMarkdownEditorUiPlugin } from '@elastic/eui';
+import type { EuiMarkdownAstNode, EuiMarkdownEditorUiPlugin } from '@elastic/eui';
 import { VISUALIZATION } from './translations';
 import { PREFIX } from './constants';
 

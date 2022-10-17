@@ -6,7 +6,8 @@
  */
 
 import http from 'http';
-import { getDataFromPostRequest } from './data_handler';
+import { isEmpty } from 'lodash';
+import { getDataFromRequest } from './data_handler';
 
 /**
  * This server records the data from a create incident request. It only saves the most recent request. When building tests,
@@ -15,6 +16,7 @@ import { getDataFromPostRequest } from './data_handler';
 export class RecordingServiceNowSimulator {
   private _incident: Record<string, unknown> | undefined;
   private _server: http.Server | undefined;
+  private _allRequestData: Array<Record<string, unknown>> = [];
 
   private constructor() {}
 
@@ -29,11 +31,15 @@ export class RecordingServiceNowSimulator {
   }
 
   private handler = async (request: http.IncomingMessage, response: http.ServerResponse) => {
-    const data = await getDataFromPostRequest(request);
+    const data = await getDataFromRequest(request);
     const pathName = request.url!;
 
     if (isCreateRequest(pathName)) {
       this._incident = data;
+    }
+
+    if (!isEmpty(data)) {
+      this._allRequestData.push(data);
     }
 
     return handleSendingResponse(request, response, data);
@@ -45,6 +51,10 @@ export class RecordingServiceNowSimulator {
 
   public get server() {
     return this._server!;
+  }
+
+  public get allRequestData() {
+    return this._allRequestData!;
   }
 }
 
@@ -63,7 +73,7 @@ const sendResponse = (response: http.ServerResponse, data: any) => {
 };
 
 const requestHandler = async (request: http.IncomingMessage, response: http.ServerResponse) => {
-  const data: Record<string, unknown> = await getDataFromPostRequest(request);
+  const data: Record<string, unknown> = await getDataFromRequest(request);
 
   return handleSendingResponse(request, response, data);
 };
