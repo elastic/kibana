@@ -7,6 +7,7 @@
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import { AggregationType } from '../../../../common/alert_types';
 import {
   SERVICE_NAME,
   SERVICE_ENVIRONMENT,
@@ -25,6 +26,7 @@ import {
   ENVIRONMENT_NOT_DEFINED,
   getEnvironmentLabel,
 } from '../../../../common/environment_filter_values';
+import { averageOrPercentileAgg } from '../average_or_percentile_agg';
 
 export async function getTransactionDurationChartPreview({
   alertParams,
@@ -64,9 +66,6 @@ export async function getTransactionDurationChartPreview({
     searchAggregatedTransactions
   );
 
-  const isAggTypeAvg = aggregationType === 'avg';
-  const aggTypePercentile = aggregationType === '95th' ? 95 : 99;
-
   const aggs = {
     timeseries: {
       date_histogram: {
@@ -85,23 +84,17 @@ export async function getTransactionDurationChartPreview({
             missing: ENVIRONMENT_NOT_DEFINED.value,
             size: 10,
             order: {
-              [isAggTypeAvg ? 'avgLatency' : `pctLatency.${aggTypePercentile}`]:
-                'desc',
+              [aggregationType === AggregationType.Avg
+                ? 'avgLatency'
+                : `pctLatency.${
+                    aggregationType === AggregationType.P95 ? 95 : 99
+                  }`]: 'desc',
             } as Record<string, 'desc'>,
           },
-          aggs: {
-            ...(isAggTypeAvg
-              ? { avgLatency: { avg: { field: transactionDurationField } } }
-              : {
-                  pctLatency: {
-                    percentiles: {
-                      field: transactionDurationField,
-                      percents: [aggTypePercentile],
-                      keyed: false as const,
-                    },
-                  },
-                }),
-          },
+          aggs: averageOrPercentileAgg({
+            aggregationType: aggregationType || AggregationType.Avg,
+            transactionDurationField,
+          }),
         },
       },
     },

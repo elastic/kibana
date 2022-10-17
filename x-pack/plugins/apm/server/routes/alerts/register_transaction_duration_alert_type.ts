@@ -20,6 +20,7 @@ import { getAlertUrlTransaction } from '../../../common/utils/formatters';
 import { SearchAggregatedTransactionSetting } from '../../../common/aggregated_transactions';
 import {
   AlertType,
+  AggregationType,
   ALERT_TYPES_CONFIG,
   APM_SERVER_FEATURE_ID,
   formatTransactionDurationReason,
@@ -45,6 +46,7 @@ import { getApmIndices } from '../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from './action_variables';
 import { alertingEsClient } from './alerting_es_client';
 import { RegisterRuleDependencies } from './register_apm_alerts';
+import { averageOrPercentileAgg } from './average_or_percentile_agg';
 
 const paramsSchema = schema.object({
   serviceName: schema.string(),
@@ -53,9 +55,9 @@ const paramsSchema = schema.object({
   windowUnit: schema.string(),
   threshold: schema.number(),
   aggregationType: schema.oneOf([
-    schema.literal('avg'),
-    schema.literal('95th'),
-    schema.literal('99th'),
+    schema.literal(AggregationType.Avg),
+    schema.literal(AggregationType.P95),
+    schema.literal(AggregationType.P99),
   ]),
   environment: schema.string(),
 });
@@ -153,21 +155,10 @@ export function registerTransactionDurationAlertType({
                 field: SERVICE_ENVIRONMENT,
                 missing: ENVIRONMENT_NOT_DEFINED.value,
               },
-              aggs: {
-                ...(ruleParams.aggregationType === 'avg'
-                  ? { avgLatency: { avg: { field } } }
-                  : {
-                      pctLatency: {
-                        percentiles: {
-                          field,
-                          percents: [
-                            ruleParams.aggregationType === '95th' ? 95 : 99,
-                          ],
-                          keyed: false as const,
-                        },
-                      },
-                    }),
-              },
+              aggs: averageOrPercentileAgg({
+                aggregationType: ruleParams.aggregationType,
+                transactionDurationField: field,
+              }),
             },
           },
         },
