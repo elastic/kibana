@@ -1067,7 +1067,7 @@ export class LensAttributes {
 
     const referenceLineIndexReferences = Object.entries(this.seriesReferenceLines).map(
       ([id, { dataView }]) => {
-        adHocDataViews[dataView.id!] = dataView.toSpec();
+        adHocDataViews[dataView.id!] = dataView.toSpec(false);
         return {
           id: dataView.id!,
           name: getLayerReferenceName(id),
@@ -1083,7 +1083,7 @@ export class LensAttributes {
         type: 'index-pattern',
       })),
       ...this.layerConfigs.map(({ dataView }, index) => {
-        adHocDataViews[dataView.id!] = dataView.toSpec();
+        adHocDataViews[dataView.id!] = dataView.toSpec(false);
 
         return {
           id: dataView.id!,

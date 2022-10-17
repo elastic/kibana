@@ -4,28 +4,31 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { mockDataView } from '../../rtl_helpers';
 import { RECORDS_FIELD } from '../constants';
 
 export const sampleAttribute = {
   description: '',
-  references: [
-    {
-      id: 'apm-*',
-      name: 'indexpattern-datasource-current-indexpattern',
-      type: 'index-pattern',
-    },
-    {
-      id: 'apm-*',
-      name: 'indexpattern-datasource-layer-layer0',
-      type: 'index-pattern',
-    },
-    {
-      id: 'apm-*',
-      name: 'indexpattern-datasource-layer-layer0-reference-lines',
-      type: 'index-pattern',
-    },
-  ],
+  references: [],
   state: {
+    internalReferences: [
+      {
+        id: 'apm-*',
+        name: 'indexpattern-datasource-current-indexpattern',
+        type: 'index-pattern',
+      },
+      {
+        id: 'apm-*',
+        name: 'indexpattern-datasource-layer-layer0',
+        type: 'index-pattern',
+      },
+      {
+        id: 'apm-*',
+        name: 'indexpattern-datasource-layer-layer0-reference-lines',
+        type: 'index-pattern',
+      },
+    ],
+    adHocDataViews: { [mockDataView.title]: mockDataView.toSpec(false) },
     datasourceStates: {
       formBased: {
         layers: {
