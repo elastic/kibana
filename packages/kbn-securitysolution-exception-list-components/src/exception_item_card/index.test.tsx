@@ -13,29 +13,7 @@ import { ExceptionItemCard } from '.';
 import { getExceptionListItemSchemaMock } from '../mocks/exception_list_item_schema.mock';
 import { getCommentsArrayMock, mockGetFormattedComments } from '../mocks/comments.mock';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import { Rule } from '../types';
-
-const ruleReferences: Rule[] = [
-  {
-    exception_lists: [
-      {
-        id: '123',
-        list_id: 'i_exist',
-        namespace_type: 'single',
-        type: 'detection',
-      },
-      {
-        id: '456',
-        list_id: 'i_exist_2',
-        namespace_type: 'single',
-        type: 'detection',
-      },
-    ],
-    id: '1a2b3c',
-    name: 'Simple Rule Query',
-    rule_id: 'rule-2',
-  },
-];
+import { rules } from '../mocks/rule_references.mock';
 
 describe('ExceptionItemCard', () => {
   it('it renders header, item meta information and conditions', () => {
@@ -45,7 +23,7 @@ describe('ExceptionItemCard', () => {
       <ExceptionItemCard
         exceptionItem={exceptionItem}
         listType={ExceptionListTypeEnum.DETECTION}
-        ruleReferences={ruleReferences}
+        ruleReferences={rules}
         dataTestSubj="item"
         onDeleteException={jest.fn()}
         onEditException={jest.fn()}
@@ -69,7 +47,7 @@ describe('ExceptionItemCard', () => {
         exceptionItem={exceptionItem}
         dataTestSubj="item"
         listType={ExceptionListTypeEnum.DETECTION}
-        ruleReferences={ruleReferences}
+        ruleReferences={rules}
         onDeleteException={jest.fn()}
         onEditException={jest.fn()}
         securityLinkAnchorComponent={() => null}
@@ -95,7 +73,7 @@ describe('ExceptionItemCard', () => {
         exceptionItem={exceptionItem}
         dataTestSubj="item"
         listType={ExceptionListTypeEnum.DETECTION}
-        ruleReferences={ruleReferences}
+        ruleReferences={rules}
         securityLinkAnchorComponent={() => null}
         formattedDateComponent={() => null}
         getFormattedComments={() => []}
@@ -113,7 +91,7 @@ describe('ExceptionItemCard', () => {
         exceptionItem={exceptionItem}
         dataTestSubj="exceptionItemCardHeader"
         listType={ExceptionListTypeEnum.DETECTION}
-        ruleReferences={ruleReferences}
+        ruleReferences={rules}
         onDeleteException={jest.fn()}
         onEditException={mockOnEditException}
         securityLinkAnchorComponent={() => null}
@@ -136,7 +114,7 @@ describe('ExceptionItemCard', () => {
         exceptionItem={exceptionItem}
         dataTestSubj="exceptionItemCardHeader"
         listType={ExceptionListTypeEnum.DETECTION}
-        ruleReferences={ruleReferences}
+        ruleReferences={rules}
         onEditException={jest.fn()}
         onDeleteException={mockOnDeleteException}
         securityLinkAnchorComponent={() => null}
@@ -162,7 +140,7 @@ describe('ExceptionItemCard', () => {
         exceptionItem={exceptionItem}
         dataTestSubj="exceptionItemCardHeader"
         listType={ExceptionListTypeEnum.DETECTION}
-        ruleReferences={ruleReferences}
+        ruleReferences={rules}
         onEditException={jest.fn()}
         onDeleteException={jest.fn()}
         securityLinkAnchorComponent={() => null}

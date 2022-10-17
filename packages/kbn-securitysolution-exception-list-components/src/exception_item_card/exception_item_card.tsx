@@ -63,7 +63,13 @@ const ExceptionItemCardComponent: FC<ExceptionItemProps> = ({
     onDeleteException,
   });
   return (
-    <EuiPanel paddingSize="l" data-test-subj={dataTestSubj} hasBorder hasShadow={false}>
+    <EuiPanel
+      key={`${exceptionItem.id}exceptionItemPanel`}
+      paddingSize="l"
+      data-test-subj={dataTestSubj || ''}
+      hasBorder
+      hasShadow={false}
+    >
       <EuiFlexGroup responsive gutterSize="m" direction="column">
         <EuiFlexItem data-test-subj="exceptionItemCardHeaderContainer">
           <ExceptionItemCardHeader

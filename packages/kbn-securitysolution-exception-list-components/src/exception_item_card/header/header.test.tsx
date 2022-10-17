@@ -9,27 +9,10 @@
 import React from 'react';
 
 import { getExceptionListItemSchemaMock } from '../../mocks/exception_list_item_schema.mock';
-import * as i18n from '../translations';
 import { ExceptionItemCardHeader } from '.';
 import { fireEvent, render } from '@testing-library/react';
-import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import { actions, handleDelete, handleEdit } from '../../mocks/header.mock';
 
-const handleEdit = jest.fn();
-const handleDelete = jest.fn();
-const actions = [
-  {
-    key: 'edit',
-    icon: 'pencil',
-    label: i18n.exceptionItemCardEditButton(ExceptionListTypeEnum.DETECTION),
-    onClick: handleEdit,
-  },
-  {
-    key: 'delete',
-    icon: 'trash',
-    label: i18n.exceptionItemCardDeleteButton(ExceptionListTypeEnum.DETECTION),
-    onClick: handleDelete,
-  },
-];
 describe('ExceptionItemCardHeader', () => {
   it('it should render item name', () => {
     const wrapper = render(

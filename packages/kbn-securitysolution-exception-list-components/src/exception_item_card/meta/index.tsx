@@ -50,10 +50,13 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
           <>
             <EuiFlexItem css={itemCss} grow={false}>
               <MetaInfoDetails
-                fieldName="created_by"
                 label={i18n.EXCEPTION_ITEM_CARD_CREATED_LABEL}
                 lastUpdate={
-                  <FormattedDateComponent fieldName="created_at" value={item.created_at} />
+                  <FormattedDateComponent
+                    data-test-subj={`{dataTestSubj||''}formattedDateComponentCreatedBy`}
+                    fieldName="created_at"
+                    value={item.created_at}
+                  />
                 }
                 lastUpdateValue={item.created_by}
                 dataTestSubj={`${dataTestSubj || ''}CreatedBy`}
@@ -62,10 +65,13 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
 
             <EuiFlexItem css={itemCss} grow={false}>
               <MetaInfoDetails
-                fieldName="updated_by"
                 label={i18n.EXCEPTION_ITEM_CARD_UPDATED_LABEL}
                 lastUpdate={
-                  <FormattedDateComponent fieldName="updated_at" value={item.updated_at} />
+                  <FormattedDateComponent
+                    data-test-subj={`{dataTestSubj||''}formattedDateComponentUpdatedBy`}
+                    fieldName="updated_at"
+                    value={item.updated_at}
+                  />
                 }
                 lastUpdateValue={item.updated_by}
                 dataTestSubj={`${dataTestSubj || ''}UpdatedBy`}

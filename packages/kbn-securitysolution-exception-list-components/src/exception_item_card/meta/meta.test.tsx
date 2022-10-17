@@ -11,35 +11,14 @@ import { render } from '@testing-library/react';
 import { getExceptionListItemSchemaMock } from '../../mocks/exception_list_item_schema.mock';
 
 import { ExceptionItemCardMetaInfo } from '.';
-import { Rule } from '../../types';
+import { rules } from '../../mocks/rule_references.mock';
 
-const ruleReferences: Rule[] = [
-  {
-    exception_lists: [
-      {
-        id: '123',
-        list_id: 'i_exist',
-        namespace_type: 'single',
-        type: 'detection',
-      },
-      {
-        id: '456',
-        list_id: 'i_exist_2',
-        namespace_type: 'single',
-        type: 'detection',
-      },
-    ],
-    id: '1a2b3c',
-    name: 'Simple Rule Query',
-    rule_id: 'rule-2',
-  },
-];
 describe('ExceptionItemCardMetaInfo', () => {
   it('it should render creation info with sending custom formattedDateComponent', () => {
     const wrapper = render(
       <ExceptionItemCardMetaInfo
         item={getExceptionListItemSchemaMock()}
-        rules={ruleReferences}
+        rules={rules}
         dataTestSubj="exceptionItemMeta"
         securityLinkAnchorComponent={() => null}
         formattedDateComponent={({ fieldName, value }) => (
@@ -62,7 +41,7 @@ describe('ExceptionItemCardMetaInfo', () => {
     const wrapper = render(
       <ExceptionItemCardMetaInfo
         item={getExceptionListItemSchemaMock()}
-        rules={ruleReferences}
+        rules={rules}
         dataTestSubj="exceptionItemMeta"
         securityLinkAnchorComponent={() => null}
         formattedDateComponent={({ fieldName, value }) => (
@@ -84,7 +63,7 @@ describe('ExceptionItemCardMetaInfo', () => {
     const wrapper = render(
       <ExceptionItemCardMetaInfo
         item={getExceptionListItemSchemaMock()}
-        rules={ruleReferences}
+        rules={rules}
         dataTestSubj="exceptionItemMeta"
         securityLinkAnchorComponent={() => null}
         formattedDateComponent={() => null}
