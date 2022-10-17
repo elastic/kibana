@@ -131,6 +131,7 @@ function createRule(shouldWriteAlerts: boolean = true) {
         updatedBy: 'updatedBy',
         namespace: 'namespace',
         executionId: 'b33f65d7-6e8b-4aae-8d20-c93613dec9f9',
+        logger: loggerMock.create(),
       })) ?? {}) as Record<string, any>;
 
       previousStartedAt = startedAt;
