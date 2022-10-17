@@ -45,7 +45,6 @@ const HOUR = 60 * MINUTE;
 const KIB = 1024;
 const MAX_NUMBER_OF_EVENTS_IN_INTERNAL_QUEUE = 1000;
 const MIN_TIME_SINCE_LAST_SEND = 10 * SECOND;
-const FLUSH = Symbol('flush');
 
 /**
  * Elastic V3 shipper to use on the server side.
@@ -63,7 +62,7 @@ export class ElasticV3ServerShipper implements IShipper {
   );
 
   private readonly internalQueue: Event[] = [];
-  private readonly shutdown$ = new ReplaySubject<typeof FLUSH>(1);
+  private readonly shutdown$ = new ReplaySubject<void>(1);
   private readonly isOptedIn$ = new BehaviorSubject<boolean | undefined>(undefined);
 
   private readonly url: string;
@@ -158,7 +157,7 @@ export class ElasticV3ServerShipper implements IShipper {
    * Triggers a flush of the internal queue to attempt to send any events held in the queue.
    */
   public shutdown() {
-    this.shutdown$.next(FLUSH);
+    this.shutdown$.next();
     this.shutdown$.complete();
     this.isOptedIn$.complete();
   }
@@ -223,8 +222,12 @@ export class ElasticV3ServerShipper implements IShipper {
     );
 
     merge(
-      minimumTimeSinceLastSent$.pipe(takeUntil(this.shutdown$)),
-      this.shutdown$ // Attempt to send one last time on shutdown
+      minimumTimeSinceLastSent$.pipe(
+        takeUntil(this.shutdown$),
+        map(() => ({ shouldFlush: false }))
+      ),
+      // Attempt to send one last time on shutdown, flushing the queue
+      this.shutdown$.pipe(map(() => ({ shouldFlush: true })))
     )
       .pipe(
         // Only move ahead if it's opted-in and online, and there are some events in the queue
@@ -237,9 +240,9 @@ export class ElasticV3ServerShipper implements IShipper {
 
         // Send the events:
         // 1. Set lastBatchSent and retrieve the events to send (clearing the queue) in a synchronous operation to avoid race conditions.
-        map((action) => {
+        map(({ shouldFlush }) => {
           this.lastBatchSent = Date.now();
-          return this.getEventsToSend(action === FLUSH);
+          return this.getEventsToSend(shouldFlush);
         }),
         // 2. Skip empty buffers (just to be sure)
         filter((events) => events.length > 0),
@@ -277,9 +280,9 @@ export class ElasticV3ServerShipper implements IShipper {
    * @remarks It mutates the internal queue by removing from it the events returned by this method.
    * @private
    */
-  private getEventsToSend(isFlushAction: boolean): Event[] {
+  private getEventsToSend(shouldFlush: boolean): Event[] {
     // If the internal queue is already smaller than the minimum batch size, or it's a flush action, do a direct assignment.
-    if (isFlushAction || this.getQueueByteSize(this.internalQueue) < 10 * KIB) {
+    if (shouldFlush || this.getQueueByteSize(this.internalQueue) < 10 * KIB) {
       return this.internalQueue.splice(0, this.internalQueue.length);
     }
     // Otherwise, we'll feed the events to the leaky bucket queue until we reach 10kB.
