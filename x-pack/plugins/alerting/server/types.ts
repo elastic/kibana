@@ -17,6 +17,7 @@ import {
   IScopedClusterClient,
   SavedObjectAttributes,
   SavedObjectsClientContract,
+  Logger,
 } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
@@ -103,6 +104,7 @@ export interface RuleExecutorOptions<
   tags: string[];
   createdBy: string | null;
   updatedBy: string | null;
+  logger: Logger;
 }
 
 export interface RuleParamsAndRefs<Params extends RuleTypeParams> {
