@@ -169,13 +169,13 @@ Alerting::
 * The ES Query Rule Type now supports Runtime Mappings and the Fields parameters when using an Elasticsearch DSL query {kibana-pull}138427[#138427]
 
 APM::
-* Service metrics on inventory page {kibana-pull}140868[#140868]
-* Sort trace samples {kibana-pull}140589[#140589]
-* Setting for tail sampling storage limit in Fleet integration {kibana-pull}140567[#140567]
-* Adds AWS Lambda metrics to "Metrics" tab UI {kibana-pull}140550[#140550]
-* Adds Experimental Mode for APM UI {kibana-pull}139553[#139553]
-* Rename JVMs to Metrics {kibana-pull}138437[#138437]
-* Display partial data buckets differently and message in the chart tooltips {kibana-pull}137533[#137533]
+* Adds option to power APM inventory with service metrics {kibana-pull}140868[#140868]
+* Adds a sort order to the trace samples on the transaction details page {kibana-pull}140589[#140589]
+* Adds a tail-based sampling storage limit (APM integration) {kibana-pull}140567[#140567]
+* Adds AWS Lambda metrics to the "Metrics" tab {kibana-pull}140550[#140550]
+* Adds an experimental mode to the APM app {kibana-pull}139553[#139553]
+* Renames JVMs to Metrics {kibana-pull}138437[#138437]
+* Changes how partial data buckets are displayed {kibana-pull}137533[#137533]
 
 Dashboard::
 Adds the ability to view panel-level filters and queries {kibana-pull}136655[#136655]
