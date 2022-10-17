@@ -16,7 +16,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const endpointTestResources = getService('endpointTestResources');
   const policyTestResources = getService('policyTestResources');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/114309
   describe('When on the Trusted Apps list', function () {
     let indexedData: IndexedHostsAndAlertsResponse;
     before(async () => {
