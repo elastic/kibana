@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { IconType } from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
 import { ConnectorTypes } from '../../common/api';
-import { FieldConfig, ValidationConfig } from '../common/shared_imports';
-import { CasesPluginStart } from '../types';
+import type { FieldConfig, ValidationConfig } from '../common/shared_imports';
+import type { CasesPluginStart } from '../types';
 import { connectorValidator as swimlaneConnectorValidator } from './connectors/swimlane/validator';
-import { CaseActionConnector } from './types';
+import type { CaseActionConnector } from './types';
 
 export const getConnectorById = (
   id: string,

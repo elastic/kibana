@@ -71,6 +71,7 @@ export type LayerDescriptor = {
   style?: StyleDescriptor | null;
   query?: Query;
   includeInFitToBounds?: boolean;
+  parent?: string;
 };
 
 export type VectorLayerDescriptor = LayerDescriptor & {
@@ -88,4 +89,11 @@ export type HeatmapLayerDescriptor = LayerDescriptor & {
 export type EMSVectorTileLayerDescriptor = LayerDescriptor & {
   type: LAYER_TYPE.EMS_VECTOR_TILE;
   style: EMSVectorTileStyleDescriptor;
+};
+
+export type LayerGroupDescriptor = LayerDescriptor & {
+  type: LAYER_TYPE.LAYER_GROUP;
+  label: string;
+  sourceDescriptor: null;
+  visible: boolean;
 };
