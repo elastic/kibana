@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
+import { EuiSpacer, EuiTab, EuiTabs, EuiLoadingContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { LogStream } from '@kbn/infra-plugin/public';
 import React from 'react';
@@ -15,7 +15,8 @@ import { WaterfallContainer } from './waterfall_container';
 import { IWaterfall } from './waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 
 interface Props {
-  transaction: Transaction;
+  transaction?: Transaction;
+  isLoading: boolean;
   waterfall: IWaterfall;
   detailTab?: TransactionTab;
   serviceName?: string;
@@ -26,6 +27,7 @@ interface Props {
 export function TransactionTabs({
   transaction,
   waterfall,
+  isLoading,
   detailTab,
   waterfallItemId,
   serviceName,
@@ -36,7 +38,7 @@ export function TransactionTabs({
   const TabContent = currentTab.component;
 
   return (
-    <React.Fragment>
+    <>
       <EuiTabs>
         {tabs.map(({ key, label }) => {
           return (
@@ -54,14 +56,17 @@ export function TransactionTabs({
       </EuiTabs>
 
       <EuiSpacer />
-
-      <TabContent
-        waterfallItemId={waterfallItemId}
-        serviceName={serviceName}
-        waterfall={waterfall}
-        transaction={transaction}
-      />
-    </React.Fragment>
+      {isLoading || !transaction ? (
+        <EuiLoadingContent lines={3} data-test-sub="loading-content" />
+      ) : (
+        <TabContent
+          waterfallItemId={waterfallItemId}
+          serviceName={serviceName}
+          waterfall={waterfall}
+          transaction={transaction}
+        />
+      )}
+    </>
   );
 }
 

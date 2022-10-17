@@ -169,14 +169,14 @@ const findTracesRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{
-    samples: Array<{ traceId: string; transactionId: string }>;
+    traceSamples: Array<{ traceId: string; transactionId: string }>;
   }> => {
     const { start, end, environment, query, type } = resources.params.query;
 
     const setup = await setupRequest(resources);
 
     return {
-      samples: await getTraceSamplesByQuery({
+      traceSamples: await getTraceSamplesByQuery({
         setup,
         start,
         end,
