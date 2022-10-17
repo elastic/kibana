@@ -12,6 +12,7 @@ import { EuiEmptyPrompt, EuiPanel } from '@elastic/eui';
 
 import { ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
+import { isAlertDetailsEnabledPerApp } from '../../../utils/is_alert_details_enabled';
 import { useKibana } from '../../../utils/kibana_react';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
@@ -56,6 +57,7 @@ export function AlertDetails() {
       }),
     },
   ]);
+
   // Redirect to the the 404 page when the user hit the page url directly in the browser while the feature flag is off.
   if (!config.unsafe.alertDetails.enabled) {
     return <PageNotFound />;
@@ -63,6 +65,11 @@ export function AlertDetails() {
 
   if (isLoading) {
     return <CenterJustifiedSpinner />;
+  }
+
+  // Redirect to the the 404 page when the user hit the page url directly in the browser while the feature flag is off.
+  if (alert && !isAlertDetailsEnabledPerApp(alert, config)) {
+    return <PageNotFound />;
   }
 
   if (!isLoading && !alert)
