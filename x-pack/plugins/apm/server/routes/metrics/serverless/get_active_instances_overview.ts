@@ -5,7 +5,11 @@
  * 2.0.
  */
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import {
+  kqlQuery,
+  rangeQuery,
+  termQuery,
+} from '@kbn/observability-plugin/server';
 import {
   FAAS_BILLED_DURATION,
   FAAS_DURATION,
@@ -43,6 +47,7 @@ export async function getServerlessActiveInstancesOverview({
   serviceName,
   setup,
   start,
+  serverlessFunctionName,
 }: {
   environment: string;
   kuery: string;
@@ -50,6 +55,7 @@ export async function getServerlessActiveInstancesOverview({
   serviceName: string;
   start: number;
   end: number;
+  serverlessFunctionName?: string;
 }) {
   const { apmEventClient } = setup;
 
@@ -78,6 +84,7 @@ export async function getServerlessActiveInstancesOverview({
             ...rangeQuery(start, end),
             ...environmentQuery(environment),
             ...kqlQuery(kuery),
+            ...termQuery(FAAS_NAME, serverlessFunctionName),
           ],
         },
       },
@@ -129,7 +136,7 @@ export async function getServerlessActiveInstancesOverview({
       const serverlessFunctionsDetails =
         bucket.serverlessFunctions.buckets.reduce<ActiveInstanceOverview[]>(
           (acc, curr) => {
-            const serverlessFunctionName = curr.key as string;
+            const functionName = curr.key as string;
 
             const timeseries =
               curr.timeseries.buckets.reduce<ActiveInstanceTimeseries>(
@@ -160,7 +167,7 @@ export async function getServerlessActiveInstancesOverview({
               ...acc,
               {
                 activeInstanceName,
-                serverlessFunctionName,
+                serverlessFunctionName: functionName,
                 timeseries,
                 serverlessDurationAvg: curr.faasDurationAvg.value,
                 billedDurationAvg: curr.faasBilledDurationAvg.value,

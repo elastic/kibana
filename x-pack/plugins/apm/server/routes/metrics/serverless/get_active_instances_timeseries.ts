@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import {
+  kqlQuery,
+  rangeQuery,
+  termQuery,
+} from '@kbn/observability-plugin/server';
+import {
+  FAAS_NAME,
   SERVICE_NAME,
   SERVICE_NODE_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
@@ -27,6 +32,7 @@ export async function getActiveInstancesTimeseries({
   start,
   end,
   searchAggregatedTransactions,
+  serverlessFunctionName,
 }: {
   environment: string;
   kuery: string;
@@ -35,6 +41,7 @@ export async function getActiveInstancesTimeseries({
   start: number;
   end: number;
   searchAggregatedTransactions: boolean;
+  serverlessFunctionName?: string;
 }): Promise<Coordinate[]> {
   const { apmEventClient, config } = setup;
 
@@ -63,6 +70,7 @@ export async function getActiveInstancesTimeseries({
             ...getDocumentTypeFilterForTransactions(
               searchAggregatedTransactions
             ),
+            ...termQuery(FAAS_NAME, serverlessFunctionName),
           ],
         },
       },

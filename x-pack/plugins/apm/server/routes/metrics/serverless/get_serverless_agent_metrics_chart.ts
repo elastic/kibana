@@ -21,6 +21,7 @@ export function getServerlessAgentMetricsCharts({
   serviceName,
   start,
   end,
+  serverlessFunctionName,
 }: {
   environment: string;
   kuery: string;
@@ -28,6 +29,7 @@ export function getServerlessAgentMetricsCharts({
   serviceName: string;
   start: number;
   end: number;
+  serverlessFunctionName?: string;
 }) {
   return withApmSpan('get_serverless_agent_metric_charts', async () => {
     const searchAggregatedTransactions = await getSearchTransactionsEvents({
@@ -44,6 +46,7 @@ export function getServerlessAgentMetricsCharts({
       serviceName,
       start,
       end,
+      serverlessFunctionName,
     };
     return await Promise.all([
       getServerlessFunctionLatencyChart({

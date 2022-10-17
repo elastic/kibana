@@ -7,7 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { euiLightVars as theme } from '@kbn/ui-theme';
-import { FAAS_BILLED_DURATION } from '../../../../common/elasticsearch_fieldnames';
+import { termQuery } from '@kbn/observability-plugin/server';
+import {
+  FAAS_BILLED_DURATION,
+  FAAS_NAME,
+} from '../../../../common/elasticsearch_fieldnames';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
 import { getVizColorForIndex } from '../../../../common/viz_colors';
@@ -50,6 +54,7 @@ async function getServerlessLantecySeries({
   start,
   end,
   searchAggregatedTransactions,
+  serverlessFunctionName,
 }: {
   environment: string;
   kuery: string;
@@ -58,6 +63,7 @@ async function getServerlessLantecySeries({
   start: number;
   end: number;
   searchAggregatedTransactions: boolean;
+  serverlessFunctionName?: string;
 }): Promise<GenericMetricsChart['series']> {
   const transactionLatency = await getLatencyTimeseries({
     environment,
@@ -93,6 +99,7 @@ export async function getServerlessFunctionLatencyChart({
   start,
   end,
   searchAggregatedTransactions,
+  serverlessFunctionName,
 }: {
   environment: string;
   kuery: string;
@@ -101,6 +108,7 @@ export async function getServerlessFunctionLatencyChart({
   start: number;
   end: number;
   searchAggregatedTransactions: boolean;
+  serverlessFunctionName?: string;
 }): Promise<GenericMetricsChart> {
   const options = {
     environment,
@@ -118,10 +126,19 @@ export async function getServerlessFunctionLatencyChart({
       aggs: {
         billedDurationAvg: { avg: { field: FAAS_BILLED_DURATION } },
       },
-      additionalFilters: [{ exists: { field: FAAS_BILLED_DURATION } }],
+      additionalFilters: [
+        {
+          exists: { field: FAAS_BILLED_DURATION },
+          ...termQuery(FAAS_NAME, serverlessFunctionName),
+        },
+      ],
       operationName: 'get_billed_duration',
     }),
-    getServerlessLantecySeries({ ...options, searchAggregatedTransactions }),
+    getServerlessLantecySeries({
+      ...options,
+      searchAggregatedTransactions,
+      serverlessFunctionName,
+    }),
   ]);
 
   const [series] = billedDurationMetrics.series;

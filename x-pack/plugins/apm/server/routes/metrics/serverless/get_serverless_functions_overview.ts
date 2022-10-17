@@ -5,7 +5,11 @@
  * 2.0.
  */
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import {
+  termQuery,
+  kqlQuery,
+  rangeQuery,
+} from '@kbn/observability-plugin/server';
 import {
   FAAS_BILLED_DURATION,
   FAAS_COLDSTART,
@@ -26,6 +30,7 @@ export async function getServerlessFunctionsOverview({
   serviceName,
   setup,
   start,
+  serverlessFunctionName,
 }: {
   environment: string;
   kuery: string;
@@ -33,6 +38,7 @@ export async function getServerlessFunctionsOverview({
   serviceName: string;
   start: number;
   end: number;
+  serverlessFunctionName?: string;
 }) {
   const { apmEventClient } = setup;
 
@@ -50,6 +56,7 @@ export async function getServerlessFunctionsOverview({
             ...rangeQuery(start, end),
             ...environmentQuery(environment),
             ...kqlQuery(kuery),
+            ...termQuery(FAAS_NAME, serverlessFunctionName),
           ],
         },
       },

@@ -15,6 +15,7 @@ import {
 import { euiLightVars as theme } from '@kbn/ui-theme';
 import {
   FAAS_BILLED_DURATION,
+  FAAS_NAME,
   METRICSET_NAME,
   METRIC_SYSTEM_TOTAL_MEMORY,
   SERVICE_NAME,
@@ -54,6 +55,7 @@ export async function getComputeUsageChart({
   serviceName,
   start,
   end,
+  serverlessFunctionName,
 }: {
   environment: string;
   kuery: string;
@@ -61,6 +63,7 @@ export async function getComputeUsageChart({
   serviceName: string;
   start: number;
   end: number;
+  serverlessFunctionName?: string;
 }): Promise<GenericMetricsChart> {
   const { apmEventClient, config } = setup;
 
@@ -85,6 +88,7 @@ export async function getComputeUsageChart({
             ...kqlQuery(kuery),
             { exists: { field: FAAS_BILLED_DURATION } },
             ...termQuery(METRICSET_NAME, 'app'),
+            ...termQuery(FAAS_NAME, serverlessFunctionName),
           ],
         },
       },

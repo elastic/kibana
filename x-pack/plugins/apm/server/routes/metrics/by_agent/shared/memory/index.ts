@@ -9,8 +9,13 @@ import type { ESFilter } from '@kbn/es-types';
 import { euiLightVars as theme } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import {
+  kqlQuery,
+  rangeQuery,
+  termQuery,
+} from '@kbn/observability-plugin/server';
+import {
+  FAAS_NAME,
   METRIC_CGROUP_MEMORY_LIMIT_BYTES,
   METRIC_CGROUP_MEMORY_USAGE_BYTES,
   METRIC_SYSTEM_FREE_MEMORY,
@@ -156,6 +161,7 @@ export async function getMemoryInfo({
   serviceNodeName,
   start,
   end,
+  serverlessFunctionName,
 }: {
   environment: string;
   kuery: string;
@@ -164,6 +170,7 @@ export async function getMemoryInfo({
   serviceNodeName?: string;
   start: number;
   end: number;
+  serverlessFunctionName?: string;
 }) {
   return withApmSpan('get_memory_info', async () => {
     const options = {
@@ -179,6 +186,7 @@ export async function getMemoryInfo({
       ...options,
       additionalFilters: [
         { exists: { field: METRIC_CGROUP_MEMORY_USAGE_BYTES } },
+        ...termQuery(FAAS_NAME, serverlessFunctionName),
       ],
       script: percentCgroupMemoryUsedScript,
     });
@@ -189,6 +197,7 @@ export async function getMemoryInfo({
         additionalFilters: [
           { exists: { field: METRIC_SYSTEM_FREE_MEMORY } },
           { exists: { field: METRIC_SYSTEM_TOTAL_MEMORY } },
+          ...termQuery(FAAS_NAME, serverlessFunctionName),
         ],
         script: percentSystemMemoryUsedScript,
       });
@@ -205,6 +214,7 @@ export async function getMemoryChartData({
   serviceNodeName,
   start,
   end,
+  serverlessFunctionName,
 }: {
   environment: string;
   kuery: string;
@@ -213,6 +223,7 @@ export async function getMemoryChartData({
   serviceNodeName?: string;
   start: number;
   end: number;
+  serverlessFunctionName?: string;
 }): Promise<FetchAndTransformMetrics> {
   return withApmSpan('get_memory_metrics_charts', async () => {
     const memoryInfo = await getMemoryInfo({
@@ -223,6 +234,7 @@ export async function getMemoryChartData({
       serviceNodeName,
       start,
       end,
+      serverlessFunctionName,
     });
 
     return {

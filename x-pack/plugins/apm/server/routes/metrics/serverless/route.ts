@@ -22,7 +22,12 @@ const serverlessMetricsRoute = createApmServerRoute({
     path: t.type({
       serviceName: t.string,
     }),
-    query: t.intersection([environmentRt, kueryRt, rangeRt]),
+    query: t.intersection([
+      environmentRt,
+      kueryRt,
+      rangeRt,
+      t.partial({ serverlessFunctionName: t.string }),
+    ]),
   }),
   options: { tags: ['access:apm'] },
   handler: async (
@@ -34,17 +39,18 @@ const serverlessMetricsRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
 
     const { serviceName } = params.path;
-    const { environment, kuery, start, end } = params.query;
-    const options = {
+    const { environment, kuery, start, end, serverlessFunctionName } =
+      params.query;
+
+    const charts = await getServerlessAgentMetricsCharts({
       environment,
       start,
       end,
       kuery,
       setup,
       serviceName,
-    };
-
-    const charts = await getServerlessAgentMetricsCharts(options);
+      serverlessFunctionName,
+    });
     return { charts };
   },
 });
@@ -56,7 +62,12 @@ const serverlessMetricsActiveInstancesRoute = createApmServerRoute({
     path: t.type({
       serviceName: t.string,
     }),
-    query: t.intersection([environmentRt, kueryRt, rangeRt]),
+    query: t.intersection([
+      environmentRt,
+      kueryRt,
+      rangeRt,
+      t.partial({ serverlessFunctionName: t.string }),
+    ]),
   }),
   options: { tags: ['access:apm'] },
   handler: async (
@@ -71,7 +82,8 @@ const serverlessMetricsActiveInstancesRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
 
     const { serviceName } = params.path;
-    const { environment, kuery, start, end } = params.query;
+    const { environment, kuery, start, end, serverlessFunctionName } =
+      params.query;
 
     const searchAggregatedTransactions = await getSearchTransactionsEvents({
       ...setup,
@@ -86,6 +98,7 @@ const serverlessMetricsActiveInstancesRoute = createApmServerRoute({
       kuery,
       setup,
       serviceName,
+      serverlessFunctionName,
     };
 
     const [activeInstances, timeseries] = await Promise.all([
@@ -106,7 +119,12 @@ const serverlessMetricsFunctionsOverviewRoute = createApmServerRoute({
     path: t.type({
       serviceName: t.string,
     }),
-    query: t.intersection([environmentRt, kueryRt, rangeRt]),
+    query: t.intersection([
+      environmentRt,
+      kueryRt,
+      rangeRt,
+      t.partial({ serverlessFunctionName: t.string }),
+    ]),
   }),
   options: { tags: ['access:apm'] },
   handler: async (
@@ -120,7 +138,8 @@ const serverlessMetricsFunctionsOverviewRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
 
     const { serviceName } = params.path;
-    const { environment, kuery, start, end } = params.query;
+    const { environment, kuery, start, end, serverlessFunctionName } =
+      params.query;
 
     const serverlessFunctionsOverview = await getServerlessFunctionsOverview({
       environment,
@@ -129,6 +148,7 @@ const serverlessMetricsFunctionsOverviewRoute = createApmServerRoute({
       kuery,
       setup,
       serviceName,
+      serverlessFunctionName,
     });
     return { serverlessFunctionsOverview };
   },
@@ -141,7 +161,12 @@ const serverlessMetricsSummaryRoute = createApmServerRoute({
     path: t.type({
       serviceName: t.string,
     }),
-    query: t.intersection([environmentRt, kueryRt, rangeRt]),
+    query: t.intersection([
+      environmentRt,
+      kueryRt,
+      rangeRt,
+      t.partial({ serverlessFunctionName: t.string }),
+    ]),
   }),
   options: { tags: ['access:apm'] },
   handler: async (
@@ -151,7 +176,8 @@ const serverlessMetricsSummaryRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
 
     const { serviceName } = params.path;
-    const { environment, kuery, start, end } = params.query;
+    const { environment, kuery, start, end, serverlessFunctionName } =
+      params.query;
 
     return getServerlessSummary({
       environment,
@@ -160,6 +186,7 @@ const serverlessMetricsSummaryRoute = createApmServerRoute({
       kuery,
       setup,
       serviceName,
+      serverlessFunctionName,
     });
   },
 });

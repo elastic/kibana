@@ -10,6 +10,7 @@ import { termQuery } from '@kbn/observability-plugin/server';
 import { euiLightVars as theme } from '@kbn/ui-theme';
 import {
   FAAS_COLDSTART,
+  FAAS_NAME,
   METRICSET_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
 import { Setup } from '../../../lib/helpers/setup_request';
@@ -40,6 +41,7 @@ export function getColdStartCountChart({
   serviceName,
   start,
   end,
+  serverlessFunctionName,
 }: {
   environment: string;
   kuery: string;
@@ -47,6 +49,7 @@ export function getColdStartCountChart({
   serviceName: string;
   start: number;
   end: number;
+  serverlessFunctionName?: string;
 }) {
   return fetchAndTransformMetrics({
     environment,
@@ -60,6 +63,7 @@ export function getColdStartCountChart({
     additionalFilters: [
       ...termQuery(FAAS_COLDSTART, true),
       ...termQuery(METRICSET_NAME, 'transaction'),
+      ...termQuery(FAAS_NAME, serverlessFunctionName),
     ],
     operationName: 'get_cold_start_count',
   });
