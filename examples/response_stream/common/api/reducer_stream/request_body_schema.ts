@@ -13,5 +13,7 @@ export const reducerStreamRequestBodySchema = schema.object({
   simulateErrors: schema.maybe(schema.boolean()),
   /** Maximum timeout between streaming messages. */
   timeout: schema.maybe(schema.number()),
+  /** Setting to override headers derived compression */
+  compressResponse: schema.maybe(schema.boolean()),
 });
 export type ReducerStreamRequestBodySchema = TypeOf<typeof reducerStreamRequestBodySchema>;

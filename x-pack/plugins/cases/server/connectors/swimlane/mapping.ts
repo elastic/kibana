@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GetMapping } from './types';
+import type { GetMapping } from './types';
 
 export const getMapping: GetMapping = () => {
   return [

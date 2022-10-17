@@ -8,7 +8,6 @@
 import { wrapErrorAndRejectPromise } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/utils';
 import {
   AGENT_POLICY_SUMMARY_ROUTE,
-  BASE_POLICY_RESPONSE_ROUTE,
   GET_PROCESSES_ROUTE,
   ISOLATE_HOST_ROUTE,
   ISOLATE_HOST_ROUTE_V2,
@@ -47,11 +46,6 @@ export default function ({ getService }: FtrProviderContext) {
       {
         method: 'get',
         path: '/api/endpoint/action_log/one?start_date=2021-12-01&end_date=2021-12-04',
-        body: undefined,
-      },
-      {
-        method: 'get',
-        path: `${BASE_POLICY_RESPONSE_ROUTE}?agentId=1`,
         body: undefined,
       },
       {
