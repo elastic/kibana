@@ -26,7 +26,7 @@ export const getFileDownloadStream = async (
   esClient: ElasticsearchClient,
   logger: Logger,
   fileId: string
-): Promise<Readable> => {
+): Promise<{ stream: Readable; fileName: string; mimeType?: string }> => {
   const fileClient = createEsFileClient({
     metadataIndex: FILE_STORAGE_METADATA_INDEX,
     blobStorageIndex: FILE_STORAGE_DATA_INDEX,
@@ -36,7 +36,13 @@ export const getFileDownloadStream = async (
 
   try {
     const file = await fileClient.get({ id: fileId });
-    return file.downloadContent();
+    const { name: fileName, mimeType } = file.data;
+
+    return {
+      stream: await file.downloadContent(),
+      fileName,
+      mimeType,
+    };
   } catch (error) {
     if (error instanceof errors.ResponseError) {
       const statusCode = error.statusCode;
