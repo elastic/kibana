@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import { isEqual } from 'lodash';
+import { merge } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
 import { AggregateQuery, COMPARE_ALL_OPTIONS, compareFilters, Filter, Query } from '@kbn/es-query';
@@ -316,10 +317,25 @@ export function getDiscoverStateContainer({
             services,
           })
         );
+
+        const filterUnsubscribe = merge(
+          services.data.query.queryString.getUpdates$(),
+          services.filterManager.getFetches$()
+        ).subscribe(async () => {
+          await savedSearchContainer.update(
+            internalStateContainer.getState().dataView,
+            appStateContainer.getState(),
+            false,
+            true
+          );
+          dataStateContainer.refetch$.next(undefined);
+        });
+
         return () => {
           stopSync();
           unsubscribe();
           unsubscribeData();
+          filterUnsubscribe.unsubscribe();
         };
       },
     },

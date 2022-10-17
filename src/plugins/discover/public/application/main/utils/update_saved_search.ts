@@ -10,7 +10,6 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { AppState } from '../services/discover_app_state_container';
 import { DiscoverServices } from '../../../build_services';
-import { addLog } from '../../../utils/addLog';
 import { updateSearchSource } from './update_search_source';
 
 export function updateSavedSearch(
@@ -27,7 +26,6 @@ export function updateSavedSearch(
   },
   initial: boolean = false
 ) {
-  addLog('💾 [savedSearch] updateSavedSearch start', savedSearch, state);
   if (!initial) {
     updateSearchSource(savedSearch.searchSource, {
       dataView,
@@ -79,6 +77,5 @@ export function updateSavedSearch(
     savedSearch.timeRestore || savedSearch.refreshInterval
       ? { value: refreshInterval.value, pause: refreshInterval.pause }
       : undefined;
-  addLog('💾 [savedSearch] updateSavedSearch finished', savedSearch);
   return savedSearch;
 }

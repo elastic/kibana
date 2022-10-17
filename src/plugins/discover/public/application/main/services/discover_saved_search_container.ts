@@ -35,7 +35,8 @@ export interface SavedSearchContainer {
   update: (
     nextDataView: DataView | undefined,
     nextState: AppState,
-    resetSavedSearch?: boolean
+    resetSavedSearch?: boolean,
+    filterAndQuery?: boolean
   ) => SavedSearch;
   reset: (id: string | undefined) => Promise<SavedSearch>;
   resetUrl: (id: string | SavedSearch) => Promise<SavedSearch>;
@@ -162,7 +163,8 @@ export function getSavedSearchContainer({
   const update = (
     nextDataView: DataView | undefined,
     nextState: AppState,
-    resetPersisted: boolean = false
+    resetPersisted: boolean = false,
+    filterAndQuery: boolean = false
   ) => {
     addLog('🔎 [savedSearch] update', { nextDataView, nextState, resetPersisted });
 
@@ -175,7 +177,7 @@ export function getSavedSearchContainer({
         state: nextState,
         services,
       },
-      true
+      !filterAndQuery
     );
     if (resetPersisted) {
       set(nextSavedSearch);

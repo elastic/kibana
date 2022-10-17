@@ -128,7 +128,7 @@ export function getDataStateContainer({
   const refetch$ = new Subject<DataRefetchMsg>();
   const shouldSearchOnPageLoad =
     services.uiSettings.get<boolean>(SEARCH_ON_PAGE_LOAD_SETTING) ||
-    savedSearchContainer.savedSearch$.getValue().id !== undefined ||
+    savedSearchContainer.get().id !== undefined ||
     !services.timefilter.getRefreshInterval().pause ||
     searchSessionManager.hasSearchSessionIdInURL();
   const initialFetchStatus = shouldSearchOnPageLoad
@@ -181,7 +181,7 @@ export function getDataStateContainer({
 
       await fetchAll(
         dataSubjects,
-        savedSearchContainer.savedSearch$.getValue(),
+        savedSearchContainer.get(),
         val === 'reset',
         appStateContainer.getState(),
         {

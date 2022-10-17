@@ -17,7 +17,6 @@ import {
   RecordRawType,
   SavedSearchData,
 } from '../services/discover_data_state_container';
-import { updateSavedSearch } from './update_saved_search';
 import { AppState } from '../services/discover_app_state_container';
 import { updateVolatileSearchSource } from './update_search_source';
 import { getRawRecordType } from './get_raw_record_type';
@@ -98,7 +97,6 @@ export function fetchAll(
 
     const isChartVisible =
       !hideChart && dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP;
-    updateSavedSearch({ savedSearch, dataView, state: appState, services });
     const volatileSearchSource = searchSource.createChild();
     updateVolatileSearchSource(volatileSearchSource, {
       dataView: searchSource.getField('index')!,

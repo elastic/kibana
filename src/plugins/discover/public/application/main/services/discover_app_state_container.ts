@@ -16,7 +16,7 @@ import {
 } from '@kbn/kibana-utils-plugin/public';
 import { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { cloneDeep, isEqual } from 'lodash';
+import { cloneDeep, differenceWith, isEqual, toPairs } from 'lodash';
 import { connectToQueryState, syncQueryStateWithUrl } from '@kbn/data-plugin/public';
 import { FilterStateStore } from '@kbn/es-query';
 import { DiscoverGridSettings } from '../../../components/discover_grid/types';
@@ -129,6 +129,16 @@ export const getDiscoverAppStateContainer = (
     },
     set: (value: AppState | null) => {
       if (value) {
+        const savedSearchDiff = differenceWith(
+          toPairs(value),
+          toPairs(appStateContainer.getState()),
+          isEqual
+        ).filter((pair) => {
+          return pair[1] !== undefined;
+        });
+        if (!savedSearchDiff.length) {
+          return;
+        }
         previousAppState = { ...appStateContainer.getState() };
         addLog('🔗 [appState] set', { prev: previousAppState, next: value });
         appStateContainer.set(value);

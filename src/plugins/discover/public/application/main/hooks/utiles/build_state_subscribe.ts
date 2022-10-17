@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { isEqual } from 'lodash';
+import { differenceWith, isEqual, toPairs } from 'lodash';
 import { SavedSearchContainer } from '../../services/discover_saved_search_container';
 import { AppState, AppStateContainer } from '../../services/discover_app_state_container';
 import { DiscoverServices } from '../../../../build_services';
@@ -31,6 +31,15 @@ export const buildStateSubscribe =
   }) =>
   async (nextState: AppState) => {
     const prevState = appStateContainer.getPrevious();
+    const savedSearchDiff = differenceWith(toPairs(prevState), toPairs(nextState), isEqual).filter(
+      (pair) => {
+        return pair[0] !== 'filter' && pair[1] !== undefined;
+      }
+    );
+    if (savedSearchDiff.length === 0) {
+      addLog('📦 AppStateContainer.subscribe update ignored');
+      return;
+    }
 
     addLog('📦 AppStateContainer.subscribe update', nextState);
     const { hideChart, interval, sort, index } = prevState;
@@ -69,7 +78,6 @@ export const buildStateSubscribe =
       dataStateContainer.reset();
       internalStateContainer.transitions.setDataView(nextDataView);
     }
-
     savedSearchContainer.update(nextDataView, nextState);
 
     if (dataViewChanged && dataStateContainer.initialFetchStatus === FetchStatus.UNINITIALIZED) {

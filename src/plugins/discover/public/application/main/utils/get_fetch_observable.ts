@@ -22,20 +22,16 @@ export function getFetch$({
   main$,
   refetch$,
   searchSessionManager,
-  initialFetchStatus,
 }: {
   setAutoRefreshDone: (val: AutoRefreshDoneFn | undefined) => void;
   data: DataPublicPluginStart;
   main$: DataMain$;
   refetch$: DataRefetch$;
   searchSessionManager: DiscoverSearchSessionManager;
-  initialFetchStatus: FetchStatus;
 }) {
   const { timefilter } = data.query.timefilter;
-  const { filterManager } = data.query;
   const fetch$ = merge(
     refetch$,
-    filterManager.getFetches$(),
     timefilter.getFetch$(),
     timefilter.getAutoRefreshFetch$().pipe(
       tap((done) => {
@@ -52,7 +48,6 @@ export function getFetch$({
         );
       })
     ),
-    data.query.queryString.getUpdates$(),
     searchSessionManager.newSearchSessionIdFromURL$.pipe(filter((sessionId) => !!sessionId))
   )
     .pipe(tap(() => addLog('👁️ fetch$ triggered')))
