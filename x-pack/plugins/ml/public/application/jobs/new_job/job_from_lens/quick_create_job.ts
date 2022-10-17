@@ -108,16 +108,21 @@ export class QuickJobCreator {
 
     // calculate model memory limit
     try {
-      if (start !== undefined && end !== undefined && datafeedConfig.indices.length > 0) {
+      if (
+        start !== undefined &&
+        end !== undefined &&
+        job.data_description.time_field !== undefined &&
+        datafeedConfig.indices.length > 0
+      ) {
         const { modelMemoryLimit } = await firstValueFrom(
           this.mlApiServices.calculateModelMemoryLimit$({
             datafeedConfig: datafeed,
             analysisConfig: job.analysis_config,
             indexPattern: datafeedConfig.indices[0],
             query: datafeedConfig.query,
-            timeFieldName: job.data_description.time_field!,
-            earliestMs: start!,
-            latestMs: end!,
+            timeFieldName: job.data_description.time_field,
+            earliestMs: start,
+            latestMs: end,
           })
         );
         if (job.analysis_limits === undefined) {
