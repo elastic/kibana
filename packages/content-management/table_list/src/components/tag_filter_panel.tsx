@@ -58,14 +58,12 @@ export const TagFilterPanel: FC<Props> = ({
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [options, setOptions] = useState<TagOptionItem[]>([]);
+  const [tagSelection, setTagSelection] = useState<{
+    [tagId: string]: 'include' | 'exclude' | undefined;
+  }>({});
 
   const isSearchVisible = options.length > 10;
-  const totalActiveFilters = options.reduce((acc, option) => {
-    if (option.checked !== undefined) {
-      acc += 1;
-    }
-    return acc;
-  }, 0);
+  const totalActiveFilters = Object.keys(tagSelection).length;
 
   const footerCSS = css`
     border-top: ${euiTheme.border.thin};
@@ -100,7 +98,13 @@ export const TagFilterPanel: FC<Props> = ({
   }
 
   const togglePopOver = () => {
-    setIsPopoverOpen((prev) => !prev);
+    setIsPopoverOpen((prev) => {
+      if (prev === false) {
+        // Refresh the tag list whenever we open the pop over
+        updateTagList();
+      }
+      return !prev;
+    });
   };
 
   const closePopover = () => {
@@ -123,12 +127,16 @@ export const TagFilterPanel: FC<Props> = ({
     setOptions(
       tags.map((tag) => {
         const { name, id, color } = tag;
-
+        let checked;
+        if (tagSelection[name]) {
+          checked = tagSelection[name] === 'include' ? ('on' as const) : ('off' as const);
+        }
         return {
           name,
           label: name,
           value: id,
           tag,
+          checked,
           view: (
             <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween">
               <EuiFlexItem>
@@ -142,43 +150,37 @@ export const TagFilterPanel: FC<Props> = ({
                 </EuiHealth>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiBadge>{tagsToTableItemMap[id]?.length ?? 0}</EuiBadge>
+                <EuiBadge color={checked !== undefined ? 'accent' : undefined}>
+                  {tagsToTableItemMap[id]?.length ?? 0}
+                </EuiBadge>
               </EuiFlexItem>
             </EuiFlexGroup>
           ),
         };
       })
     );
-  }, [getTagList, tagsToTableItemMap]);
-
-  useEffect(() => {
-    updateTagList();
-  }, [updateTagList]);
+  }, [getTagList, tagsToTableItemMap, tagSelection]);
 
   useEffect(() => {
     if (query) {
-      const items: { [key: string]: TagOptionItem[] } = {
-        on: [],
-        off: [],
-        rest: [],
-      };
-
       const clauseInclude = query.ast.getOrFieldClause('tag', undefined, true, 'eq');
-      const clausesExclude = query.ast.getOrFieldClause('tag', undefined, false, 'eq');
+      const clauseExclude = query.ast.getOrFieldClause('tag', undefined, false, 'eq');
 
-      setOptions((prev) => {
-        prev.forEach((op) => {
-          if (clauseInclude && toArray(clauseInclude.value).includes(op.name)) {
-            items.on.push({ ...op, checked: 'on' as const });
-          } else if (clausesExclude && toArray(clausesExclude.value).includes(op.name)) {
-            items.on.push({ ...op, checked: 'off' as const });
-          } else {
-            items.on.push({ ...op, checked: undefined });
-          }
+      const updatedTagSelection: typeof tagSelection = {};
+
+      if (clauseInclude) {
+        toArray(clauseInclude.value).forEach((tagName) => {
+          updatedTagSelection[tagName] = 'include';
         });
+      }
 
-        return [...items.on, ...items.off, ...items.rest];
-      });
+      if (clauseExclude) {
+        toArray(clauseExclude.value).forEach((tagName) => {
+          updatedTagSelection[tagName] = 'exclude';
+        });
+      }
+
+      setTagSelection(updatedTagSelection);
     }
   }, [query]);
 
