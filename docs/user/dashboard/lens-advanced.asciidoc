@@ -61,7 +61,7 @@ image::images/lens_clickAndDragZoom_7.16.gif[Cursor clicking and dragging across
 
 .. From the *Normalize by unit* dropdown, select *per hour*, then click *Close*.
 +
-*Normalize unit* converts `Average sales per 12 hours` into `Average sales per 12 hours (per hour)` by dividing the number of hours.
+*Normalize by unit* converts `Count of Records` into `Count of records per hour` by dividing by 24.
 
 .. In the *Name* field, enter `Number of orders`.
 
