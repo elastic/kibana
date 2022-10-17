@@ -9,7 +9,7 @@ import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mock
 import { createAuthorizationMock } from '../../../authorization/mock';
 import { createCaseServiceMock } from '../../../services/mocks';
 import { createCasesClientMock } from '../../mocks';
-import { CasesClientArgs } from '../../types';
+import type { CasesClientArgs } from '../../types';
 
 export function createMockClient() {
   const client = createCasesClientMock();
