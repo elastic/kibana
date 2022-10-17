@@ -36,7 +36,7 @@ export enum TableId {
   networkPageEvents = 'network-page-events',
   hostsPageSessions = 'hosts-page-sessions-v2',
   alertsOnRuleDetailsPage = 'alerts-rules-details-page',
-  detectionsPage = 'alerts-page',
+  alertsOnAlertsPage = 'alerts-page',
   casePage = 'timeline-case',
   test = 'table-test', // Reserved for testing purposes
   alternateTest = 'alternateTest',
