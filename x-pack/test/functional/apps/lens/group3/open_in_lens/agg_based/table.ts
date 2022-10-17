@@ -45,8 +45,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should show the "Edit Visualization in Lens" menu item', async () => {
-      const button = await testSubjects.exists('visualizeEditInLensButton');
-      expect(button).to.eql(true);
+      expect(await visualize.hasNavigateToLensButton()).to.eql(true);
     });
 
     it('should convert aggregation with params', async () => {
@@ -56,8 +55,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickGo();
       await header.waitUntilLoadingHasFinished();
 
-      const button = await testSubjects.find('visualizeEditInLensButton');
-      await button.click();
+      await visualize.navigateToLensFromAnotherVisulization();
       await lens.waitForVisualization('lnsDataTable');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -77,8 +75,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickGo();
       await header.waitUntilLoadingHasFinished();
 
-      const button = await testSubjects.find('visualizeEditInLensButton');
-      await button.click();
+      await visualize.navigateToLensFromAnotherVisulization();
       await lens.waitForVisualization('lnsDataTable');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -98,8 +95,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickGo();
       await header.waitUntilLoadingHasFinished();
 
-      const button = await testSubjects.find('visualizeEditInLensButton');
-      await button.click();
+      await visualize.navigateToLensFromAnotherVisulization();
       await lens.waitForVisualization('lnsDataTable');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -121,8 +117,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickGo();
       await header.waitUntilLoadingHasFinished();
 
-      const button = await testSubjects.find('visualizeEditInLensButton');
-      await button.click();
+      await visualize.navigateToLensFromAnotherVisulization();
       await lens.waitForVisualization('lnsDataTable');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -145,8 +140,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickGo();
       await header.waitUntilLoadingHasFinished();
 
-      const button = await testSubjects.find('visualizeEditInLensButton');
-      await button.click();
+      await visualize.navigateToLensFromAnotherVisulization();
       await lens.waitForVisualization('lnsDataTable');
 
       expect(await lens.getLayerCount()).to.be(1);
@@ -168,8 +162,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickGo();
       await header.waitUntilLoadingHasFinished();
 
-      const button = await testSubjects.find('visualizeEditInLensButton');
-      await button.click();
+      await visualize.navigateToLensFromAnotherVisulization();
       await lens.waitForVisualization('lnsDataTable');
 
       expect(await lens.getLayerCount()).to.be(1);

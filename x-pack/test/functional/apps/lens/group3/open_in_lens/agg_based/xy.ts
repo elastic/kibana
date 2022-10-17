@@ -36,8 +36,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should show the "Edit Visualization in Lens" menu item', async () => {
-      const button = await testSubjects.exists('visualizeEditInLensButton');
-      expect(button).to.eql(true);
+      expect(await visualize.hasNavigateToLensButton()).to.eql(true);
     });
 
     it('should hide the "Edit Visualization in Lens" menu item if dot size aggregation is defined', async () => {
@@ -45,8 +44,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.selectAggregation('Max', 'metrics');
       await visEditor.selectField('memory', 'metrics');
       await visEditor.clickGo(isNewChartsLibraryEnabled);
-      const button = await testSubjects.exists('visualizeEditInLensButton');
-      expect(button).to.eql(false);
+      expect(await visualize.hasNavigateToLensButton()).to.eql(false);
     });
 
     it('should convert to Lens', async () => {
@@ -57,8 +55,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visEditor.clickGo(isNewChartsLibraryEnabled);
       const expectedData = await visChart.getLegendEntriesXYCharts('xyVisChart');
 
-      const button = await testSubjects.find('visualizeEditInLensButton');
-      await button.click();
+      await visualize.navigateToLensFromAnotherVisulization();
       await lens.waitForVisualization('xyVisChart');
       const data = await lens.getCurrentChartDebugState('xyVisChart');
       await retry.try(async () => {
