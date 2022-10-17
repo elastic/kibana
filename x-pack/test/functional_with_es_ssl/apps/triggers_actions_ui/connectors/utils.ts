@@ -83,7 +83,6 @@ export const createConnector = async ({
 }) => {
   const common = getPageObject('common');
   const supertest = getService('supertest');
-  const testSubjects = getService('testSubjects');
 
   const { body: createdAction } = await supertest
     .post(`/api/actions/connector`)
@@ -96,8 +95,7 @@ export const createConnector = async ({
     })
     .expect(200);
 
-  await common.navigateToApp('triggersActions');
-  await testSubjects.click('connectorsTab');
+  await common.navigateToApp('triggersActionsConnectors');
 
   return createdAction;
 };
