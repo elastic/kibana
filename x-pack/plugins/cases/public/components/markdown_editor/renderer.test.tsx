@@ -9,7 +9,8 @@ import React from 'react';
 
 import { removeExternalLinkText } from '../../common/test_utils';
 import { MarkdownRenderer } from './renderer';
-import { AppMockRenderer, createAppMockRenderer } from '../../common/mock';
+import type { AppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer } from '../../common/mock';
 
 describe('Markdown', () => {
   let appMockRender: AppMockRenderer;
