@@ -6,12 +6,17 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   convertKueryToElasticSearchQuery,
   updateIsLoading as dispatchUpdateIsLoading,
 } from '@kbn/timelines-plugin/public';
 import { useDispatch } from 'react-redux';
+import { EuiLink } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { getTimelineUrl, useFormatUrl } from '../../../../../common/components/link_to';
+import { SecurityPageName } from '../../../../../../common/constants';
+import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { sourcererActions } from '../../../../../common/store/sourcerer';
 import { sourcererSelectors } from '../../../../../common/store';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
@@ -25,6 +30,7 @@ import { useGetInitialUrlParamValue } from '../../../../../common/utils/global_q
 import { buildGlobalQuery } from '../../../../../timelines/components/timeline/helpers';
 import { getDataProviderFilter } from '../../../../../timelines/components/timeline/query_bar';
 import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
+import * as i18n from './translations';
 
 export const FROM_TIMELINE_ID_URL_PARAM = 'createRuleFromTimelineId';
 
@@ -42,7 +48,7 @@ interface FromTimelineId {
 
 export const useFromTimelineId = (initialState: UseFromTimelineId): FromTimelineId => {
   const dispatch = useDispatch();
-
+  const toasts = useAppToasts();
   const [loading, setLoading] = useState(true);
   const [fromTimeline, setFromTimeline] = useState<TimelineModel | null>(null);
   const [ruleData, setRuleData] = useState<{
@@ -64,11 +70,40 @@ export const useFromTimelineId = (initialState: UseFromTimelineId): FromTimeline
     sourcererScopeSelector(state, SourcererScopeName.timeline)
   );
   const [ogDataView] = useState({ selectedDataView, sourcererScope });
-
+  const { formatUrl } = useFormatUrl(SecurityPageName.timelines);
+  const getTimelineLink = useCallback(
+    (id: string) =>
+      formatUrl(getTimelineUrl(id), {
+        absolute: true,
+        skipSearch: true,
+      }),
+    [formatUrl]
+  );
   const selectedDataViewBrowserFields = useMemo(() => {
     if (selectedDataView == null) {
+      // the timeline data view is deleted, user must fix timeline to use with rule
       setLoading(false);
-      throw Error('timeline data view has been deleted, update timeline to fix this error');
+      toasts.addError('whoops', {
+        title: i18n.FROM_TIMELINE_ERROR_TITLE,
+        toastMessage: (
+          <>
+            <FormattedMessage
+              id="xpack.securitySolution.detectionEngine.createRule.fromTimelineErrorTitle"
+              defaultMessage="There is an issue with the data view used with this saved timeline. To create a rule from this timeline, you must {link}."
+              values={{
+                link: fromTimelineId ? (
+                  <EuiLink href={getTimelineLink(fromTimelineId)}>
+                    {i18n.FROM_TIMELINE_ERROR_ACTION}
+                  </EuiLink>
+                ) : (
+                  i18n.FROM_TIMELINE_ERROR_ACTION
+                ),
+              }}
+            />
+          </>
+        ) as unknown as string,
+      });
+      return null;
     }
 
     if (
@@ -84,7 +119,7 @@ export const useFromTimelineId = (initialState: UseFromTimelineId): FromTimeline
     }
 
     return selectedDataView.browserFields;
-  }, [selectedDataView, fromTimeline]);
+  }, [selectedDataView, fromTimeline, toasts, fromTimelineId, getTimelineLink]);
 
   useEffect(() => {
     if (selectedDataViewBrowserFields != null) {

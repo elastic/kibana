@@ -28,14 +28,6 @@ export const RULE_PREVIEW_TITLE = i18n.translate(
   }
 );
 
-export const RULE_PREVIEW_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.rulePreviewDescription',
-  {
-    defaultMessage:
-      'Rule preview reflects the current configuration of your rule settings and exceptions, click refresh icon to see the updated preview.',
-  }
-);
-
 export const CANCEL_BUTTON_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.cancelButtonLabel',
   {
@@ -58,3 +50,17 @@ export const SUCCESSFULLY_CREATED_RULES = (ruleName: string) =>
       defaultMessage: '{ruleName} was created',
     }
   );
+
+export const FROM_TIMELINE_ERROR_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.fromTimelineErrorTitle',
+  {
+    defaultMessage: 'Error creating rule from saved timeline',
+  }
+);
+
+export const FROM_TIMELINE_ERROR_ACTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.fromTimelineErrorAction',
+  {
+    defaultMessage: "update the timeline's data view",
+  }
+);
