@@ -9,7 +9,7 @@ import type { RuleActionThrottle } from '@kbn/securitysolution-io-ts-alerting-ty
 import { getMockThreatData } from '../../public/detections/mitre/mitre_tactics_techniques';
 import type { CompleteTimeline } from './timeline';
 import { getTimeline, getIndicatorMatchTimelineTemplate } from './timeline';
-import type { FullResponseSchema } from '../../common/detection_engine/schemas/request';
+import type { RuleResponse } from '../../common/detection_engine/rule_schema';
 import type { Connectors } from './connector';
 
 const ccsRemoteName: string = Cypress.env('CCS_REMOTE_NAME');
@@ -507,7 +507,7 @@ export const getEditedRule = (): CustomRule => ({
 });
 
 export const expectedExportedRule = (
-  ruleResponse: Cypress.Response<FullResponseSchema>
+  ruleResponse: Cypress.Response<RuleResponse>
 ): string => {
   const {
     id,
@@ -531,7 +531,7 @@ export const expectedExportedRule = (
   // NOTE: Order of the properties in this object matters for the tests to work.
   // TODO: Follow up https://github.com/elastic/kibana/pull/137628 and add an explicit type to this object
   // without using Partial
-  const rule: Partial<FullResponseSchema> = {
+  const rule: Partial<RuleResponse> = {
     id,
     updated_at: updatedAt,
     updated_by: updatedBy,

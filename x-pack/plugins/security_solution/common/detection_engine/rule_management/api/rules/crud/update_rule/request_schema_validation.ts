@@ -5,35 +5,35 @@
  * 2.0.
  */
 
-import type { UpdateRulesSchema } from '../../../../../rule_schema';
+import type { RuleUpdateProps } from '../../../../../rule_schema';
 
 /**
  * Additional validation that is implemented outside of the schema itself.
  */
-export const validateUpdateRuleSchema = (rule: UpdateRulesSchema): string[] => {
+export const validateUpdateRuleProps = (props: RuleUpdateProps): string[] => {
   return [
-    ...validateId(rule),
-    ...validateTimelineId(rule),
-    ...validateTimelineTitle(rule),
-    ...validateThreshold(rule),
+    ...validateId(props),
+    ...validateTimelineId(props),
+    ...validateTimelineTitle(props),
+    ...validateThreshold(props),
   ];
 };
 
-const validateId = (rule: UpdateRulesSchema): string[] => {
-  if (rule.id != null && rule.rule_id != null) {
+const validateId = (props: RuleUpdateProps): string[] => {
+  if (props.id != null && props.rule_id != null) {
     return ['both "id" and "rule_id" cannot exist, choose one or the other'];
-  } else if (rule.id == null && rule.rule_id == null) {
+  } else if (props.id == null && props.rule_id == null) {
     return ['either "id" or "rule_id" must be set'];
   } else {
     return [];
   }
 };
 
-const validateTimelineId = (rule: UpdateRulesSchema): string[] => {
-  if (rule.timeline_id != null) {
-    if (rule.timeline_title == null) {
+const validateTimelineId = (props: RuleUpdateProps): string[] => {
+  if (props.timeline_id != null) {
+    if (props.timeline_title == null) {
       return ['when "timeline_id" exists, "timeline_title" must also exist'];
-    } else if (rule.timeline_id === '') {
+    } else if (props.timeline_id === '') {
       return ['"timeline_id" cannot be an empty string'];
     } else {
       return [];
@@ -42,11 +42,11 @@ const validateTimelineId = (rule: UpdateRulesSchema): string[] => {
   return [];
 };
 
-const validateTimelineTitle = (rule: UpdateRulesSchema): string[] => {
-  if (rule.timeline_title != null) {
-    if (rule.timeline_id == null) {
+const validateTimelineTitle = (props: RuleUpdateProps): string[] => {
+  if (props.timeline_title != null) {
+    if (props.timeline_id == null) {
       return ['when "timeline_title" exists, "timeline_id" must also exist'];
-    } else if (rule.timeline_title === '') {
+    } else if (props.timeline_title === '') {
       return ['"timeline_title" cannot be an empty string'];
     } else {
       return [];
@@ -55,19 +55,19 @@ const validateTimelineTitle = (rule: UpdateRulesSchema): string[] => {
   return [];
 };
 
-const validateThreshold = (rule: UpdateRulesSchema): string[] => {
+const validateThreshold = (props: RuleUpdateProps): string[] => {
   const errors: string[] = [];
-  if (rule.type === 'threshold') {
-    if (!rule.threshold) {
+  if (props.type === 'threshold') {
+    if (!props.threshold) {
       errors.push('when "type" is "threshold", "threshold" is required');
     } else {
       if (
-        rule.threshold.cardinality?.length &&
-        rule.threshold.field.includes(rule.threshold.cardinality[0].field)
+        props.threshold.cardinality?.length &&
+        props.threshold.field.includes(props.threshold.cardinality[0].field)
       ) {
         errors.push('Cardinality of a field that is being aggregated on is always 1');
       }
-      if (Array.isArray(rule.threshold.field) && rule.threshold.field.length > 3) {
+      if (Array.isArray(props.threshold.field) && props.threshold.field.length > 3) {
         errors.push('Number of fields must be 3 or less');
       }
     }

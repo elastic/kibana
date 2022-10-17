@@ -9,8 +9,7 @@ import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 
 import type { PartialRule } from '@kbn/alerting-plugin/server';
 import type { RuleExecutionSummary } from '../../../../../common/detection_engine/rule_monitoring';
-import type { FullResponseSchema } from '../../../../../common/detection_engine/rule_schema';
-import { fullResponseSchema } from '../../../../../common/detection_engine/rule_schema';
+import { RuleResponse } from '../../../../../common/detection_engine/rule_schema';
 import type { RuleParams } from '../../rule_schema';
 import { isAlertType } from '../../rule_schema';
 import type { BulkError } from '../../routes/utils';
@@ -24,12 +23,12 @@ export const transformValidate = (
   rule: PartialRule<RuleParams>,
   ruleExecutionSummary: RuleExecutionSummary | null,
   legacyRuleActions?: LegacyRulesActionsSavedObject | null
-): [FullResponseSchema | null, string | null] => {
+): [RuleResponse | null, string | null] => {
   const transformed = transform(rule, ruleExecutionSummary, legacyRuleActions);
   if (transformed == null) {
     return [null, 'Internal error transforming'];
   } else {
-    return validateNonExact(transformed, fullResponseSchema);
+    return validateNonExact(transformed, RuleResponse);
   }
 };
 
@@ -37,10 +36,10 @@ export const transformValidateBulkError = (
   ruleId: string,
   rule: PartialRule<RuleParams>,
   ruleExecutionSummary: RuleExecutionSummary | null
-): FullResponseSchema | BulkError => {
+): RuleResponse | BulkError => {
   if (isAlertType(rule)) {
     const transformed = internalRuleToAPIResponse(rule, ruleExecutionSummary);
-    const [validated, errors] = validateNonExact(transformed, fullResponseSchema);
+    const [validated, errors] = validateNonExact(transformed, RuleResponse);
     if (errors != null || validated == null) {
       return createBulkErrorObject({
         ruleId,

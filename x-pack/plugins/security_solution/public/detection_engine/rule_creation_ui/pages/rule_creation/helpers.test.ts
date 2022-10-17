@@ -6,7 +6,7 @@
  */
 
 import type { List } from '@kbn/securitysolution-io-ts-list-types';
-import type { CreateRulesSchema } from '../../../../../common/detection_engine/schemas/request';
+import type { RuleCreateProps } from '../../../../../common/detection_engine/rule_schema';
 import type { Rule } from '../../../rule_management/logic';
 import {
   getListMock,
@@ -958,7 +958,7 @@ describe('helpers', () => {
           saved_id: '',
         },
       };
-      const result = formatRule<CreateRulesSchema>(
+      const result = formatRule<RuleCreateProps>(
         mockDefineStepRuleWithoutSavedId,
         mockAbout,
         mockSchedule,
@@ -969,14 +969,9 @@ describe('helpers', () => {
     });
 
     test('returns rule without id if ruleId does not exist', () => {
-      const result = formatRule<CreateRulesSchema>(
-        mockDefine,
-        mockAbout,
-        mockSchedule,
-        mockActions
-      );
+      const result = formatRule<RuleCreateProps>(mockDefine, mockAbout, mockSchedule, mockActions);
 
-      expect(result).not.toHaveProperty<CreateRulesSchema>('id');
+      expect(result).not.toHaveProperty<RuleCreateProps>('id');
     });
   });
 

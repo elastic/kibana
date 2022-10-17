@@ -35,7 +35,7 @@ import type {
   WrappedFieldsLatest,
 } from '../../../../common/detection_engine/schemas/alerts';
 import type { IRuleExecutionLogForExecutors } from '../rule_monitoring';
-import type { FullResponseSchema } from '../../../../common/detection_engine/schemas/request';
+import type { RuleResponse } from '../../../../common/detection_engine/rule_schema';
 import type { EnrichEvents } from './enrichments/types';
 
 export interface ThresholdResult {
@@ -187,7 +187,7 @@ export interface Signal {
   _meta?: {
     version: number;
   };
-  rule: FullResponseSchema;
+  rule: RuleResponse;
   /**
    * @deprecated Use "parents" instead of "parent"
    */

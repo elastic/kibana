@@ -12,7 +12,7 @@ import {
   NOTIFICATION_THROTTLE_RULE,
 } from '../../../../../common/constants';
 
-import type { FullResponseSchema } from '../../../../../common/detection_engine/schemas/request';
+import type { RuleResponse } from '../../../../../common/detection_engine/rule_schema';
 import { transformAlertToRuleAction } from '../../../../../common/detection_engine/transform_actions';
 // eslint-disable-next-line no-restricted-imports
 import type { LegacyRuleActions } from '../../rule_actions_legacy';
@@ -92,12 +92,12 @@ export const transformFromAlertThrottle = (
  * be removed.
  * @param alertAction The alert action form a "alerting" Saved Object (SO).
  * @param legacyRuleActions Legacy "side car" rule actions that if it detects it being passed it in will transform using it.
- * @returns The actions of the FullResponseSchema
+ * @returns The actions of the RuleResponse
  */
 export const transformActions = (
   alertAction: RuleAction[] | undefined,
   legacyRuleActions: LegacyRuleActions | null | undefined
-): FullResponseSchema['actions'] => {
+): RuleResponse['actions'] => {
   if (alertAction != null && alertAction.length !== 0) {
     return alertAction.map((action) => transformAlertToRuleAction(action));
   } else if (legacyRuleActions != null) {

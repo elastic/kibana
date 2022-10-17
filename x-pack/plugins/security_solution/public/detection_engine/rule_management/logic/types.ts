@@ -70,8 +70,8 @@ import {
 
 import type { PatchRuleRequestBody } from '../../../../common/detection_engine/rule_management';
 import type {
-  CreateRulesSchema,
-  UpdateRulesSchema,
+  RuleCreateProps,
+  RuleUpdateProps,
 } from '../../../../common/detection_engine/rule_schema';
 import type { SortOrder } from '../../../../common/detection_engine/schemas/common';
 import { threshold } from '../../../../common/detection_engine/schemas/common';
@@ -91,17 +91,17 @@ export const action = t.exact(
 );
 
 export interface CreateRulesProps {
-  rule: CreateRulesSchema;
+  rule: RuleCreateProps;
   signal?: AbortSignal;
 }
 
 export interface PreviewRulesProps {
-  rule: CreateRulesSchema & { invocationCount: number; timeframeEnd: string };
+  rule: RuleCreateProps & { invocationCount: number; timeframeEnd: string };
   signal?: AbortSignal;
 }
 
 export interface UpdateRulesProps {
-  rule: UpdateRulesSchema;
+  rule: RuleUpdateProps;
   signal?: AbortSignal;
 }
 

@@ -9,8 +9,7 @@ import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
-import type { FullResponseSchema } from './rule_schemas';
-import { fullResponseSchema } from './rule_schemas';
+import { RuleResponse } from './rule_schemas';
 import {
   getRulesSchemaMock,
   getRulesMlSchemaMock,
@@ -23,7 +22,7 @@ describe('Rule response schema', () => {
   test('it should validate a type of "query" without anything extra', () => {
     const payload = getRulesSchemaMock();
 
-    const decoded = fullResponseSchema.decode(payload);
+    const decoded = RuleResponse.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     const expected = getRulesSchemaMock();
@@ -33,10 +32,10 @@ describe('Rule response schema', () => {
   });
 
   test('it should NOT validate a type of "query" when it has extra data', () => {
-    const payload: FullResponseSchema & { invalid_extra_data?: string } = getRulesSchemaMock();
+    const payload: RuleResponse & { invalid_extra_data?: string } = getRulesSchemaMock();
     payload.invalid_extra_data = 'invalid_extra_data';
 
-    const decoded = fullResponseSchema.decode(payload);
+    const decoded = RuleResponse.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
 
@@ -45,10 +44,10 @@ describe('Rule response schema', () => {
   });
 
   test('it should NOT validate invalid_data for the type', () => {
-    const payload: Omit<FullResponseSchema, 'type'> & { type: string } = getRulesSchemaMock();
+    const payload: Omit<RuleResponse, 'type'> & { type: string } = getRulesSchemaMock();
     payload.type = 'invalid_data';
 
-    const decoded = fullResponseSchema.decode(payload);
+    const decoded = RuleResponse.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
 
@@ -57,11 +56,11 @@ describe('Rule response schema', () => {
   });
 
   test('it should validate a type of "query" with a saved_id together', () => {
-    const payload: FullResponseSchema & { saved_id?: string } = getRulesSchemaMock();
+    const payload: RuleResponse & { saved_id?: string } = getRulesSchemaMock();
     payload.type = 'query';
     payload.saved_id = 'save id 123';
 
-    const decoded = fullResponseSchema.decode(payload);
+    const decoded = RuleResponse.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
 
@@ -72,7 +71,7 @@ describe('Rule response schema', () => {
   test('it should validate a type of "saved_query" with a "saved_id" dependent', () => {
     const payload = getSavedQuerySchemaMock();
 
-    const decoded = fullResponseSchema.decode(payload);
+    const decoded = RuleResponse.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     const expected = getSavedQuerySchemaMock();
@@ -82,11 +81,11 @@ describe('Rule response schema', () => {
   });
 
   test('it should NOT validate a type of "saved_query" without a "saved_id" dependent', () => {
-    const payload: FullResponseSchema & { saved_id?: string } = getSavedQuerySchemaMock();
+    const payload: RuleResponse & { saved_id?: string } = getSavedQuerySchemaMock();
     // @ts-expect-error
     delete payload.saved_id;
 
-    const decoded = fullResponseSchema.decode(payload);
+    const decoded = RuleResponse.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
 
@@ -97,11 +96,11 @@ describe('Rule response schema', () => {
   });
 
   test('it should NOT validate a type of "saved_query" when it has extra data', () => {
-    const payload: FullResponseSchema & { saved_id?: string; invalid_extra_data?: string } =
+    const payload: RuleResponse & { saved_id?: string; invalid_extra_data?: string } =
       getSavedQuerySchemaMock();
     payload.invalid_extra_data = 'invalid_extra_data';
 
-    const decoded = fullResponseSchema.decode(payload);
+    const decoded = RuleResponse.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
 
@@ -114,7 +113,7 @@ describe('Rule response schema', () => {
     payload.timeline_id = 'some timeline id';
     payload.timeline_title = 'some timeline title';
 
-    const decoded = fullResponseSchema.decode(payload);
+    const decoded = RuleResponse.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     const expected = getRulesSchemaMock();
@@ -126,12 +125,12 @@ describe('Rule response schema', () => {
   });
 
   test('it should NOT validate a type of "timeline_id" if there is "timeline_title" dependent when it has extra invalid data', () => {
-    const payload: FullResponseSchema & { invalid_extra_data?: string } = getRulesSchemaMock();
+    const payload: RuleResponse & { invalid_extra_data?: string } = getRulesSchemaMock();
     payload.timeline_id = 'some timeline id';
     payload.timeline_title = 'some timeline title';
     payload.invalid_extra_data = 'invalid_extra_data';
 
-    const decoded = fullResponseSchema.decode(payload);
+    const decoded = RuleResponse.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
 
@@ -143,7 +142,7 @@ describe('Rule response schema', () => {
     test('it should validate an empty array for "exceptions_list"', () => {
       const payload = getRulesSchemaMock();
       payload.exceptions_list = [];
-      const decoded = fullResponseSchema.decode(payload);
+      const decoded = RuleResponse.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       const expected = getRulesSchemaMock();
@@ -153,11 +152,11 @@ describe('Rule response schema', () => {
     });
 
     test('it should NOT validate when "exceptions_list" is not expected type', () => {
-      const payload: Omit<FullResponseSchema, 'exceptions_list'> & {
+      const payload: Omit<RuleResponse, 'exceptions_list'> & {
         exceptions_list?: string;
       } = { ...getRulesSchemaMock(), exceptions_list: 'invalid_data' };
 
-      const decoded = fullResponseSchema.decode(payload);
+      const decoded = RuleResponse.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
 
@@ -172,7 +171,7 @@ describe('Rule response schema', () => {
     test('it should validate a type of "query" with "data_view_id" defined', () => {
       const payload = { ...getRulesSchemaMock(), data_view_id: 'logs-*' };
 
-      const decoded = fullResponseSchema.decode(payload);
+      const decoded = RuleResponse.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       const expected = { ...getRulesSchemaMock(), data_view_id: 'logs-*' };
@@ -182,14 +181,14 @@ describe('Rule response schema', () => {
     });
 
     test('it should validate a type of "saved_query" with "data_view_id" defined', () => {
-      const payload: FullResponseSchema & { saved_id?: string; data_view_id?: string } =
+      const payload: RuleResponse & { saved_id?: string; data_view_id?: string } =
         getSavedQuerySchemaMock();
       payload.data_view_id = 'logs-*';
 
-      const decoded = fullResponseSchema.decode(payload);
+      const decoded = RuleResponse.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
-      const expected: FullResponseSchema & { saved_id?: string; data_view_id?: string } =
+      const expected: RuleResponse & { saved_id?: string; data_view_id?: string } =
         getSavedQuerySchemaMock();
 
       expected.data_view_id = 'logs-*';
@@ -201,7 +200,7 @@ describe('Rule response schema', () => {
     test('it should validate a type of "eql" with "data_view_id" defined', () => {
       const payload = { ...getRulesEqlSchemaMock(), data_view_id: 'logs-*' };
 
-      const decoded = fullResponseSchema.decode(payload);
+      const decoded = RuleResponse.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       const expected = { ...getRulesEqlSchemaMock(), data_view_id: 'logs-*' };
@@ -213,7 +212,7 @@ describe('Rule response schema', () => {
     test('it should validate a type of "threat_match" with "data_view_id" defined', () => {
       const payload = { ...getThreatMatchingSchemaMock(), data_view_id: 'logs-*' };
 
-      const decoded = fullResponseSchema.decode(payload);
+      const decoded = RuleResponse.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       const expected = { ...getThreatMatchingSchemaMock(), data_view_id: 'logs-*' };
@@ -225,7 +224,7 @@ describe('Rule response schema', () => {
     test('it should NOT validate a type of "machine_learning" with "data_view_id" defined', () => {
       const payload = { ...getRulesMlSchemaMock(), data_view_id: 'logs-*' };
 
-      const decoded = fullResponseSchema.decode(payload);
+      const decoded = RuleResponse.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
 

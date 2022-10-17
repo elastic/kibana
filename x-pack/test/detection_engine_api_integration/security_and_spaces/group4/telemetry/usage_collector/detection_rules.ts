@@ -8,9 +8,9 @@
 import expect from '@kbn/expect';
 import type { DetectionMetrics } from '@kbn/security-solution-plugin/server/usage/detections/types';
 import type {
-  ThreatMatchCreateSchema,
-  ThresholdCreateSchema,
-} from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+  ThreatMatchRuleCreateProps,
+  ThresholdRuleCreateProps,
+} from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import { getInitialDetectionMetrics } from '@kbn/security-solution-plugin/server/usage/detections/get_initial_usage';
 import { getInitialEventLogUsage } from '@kbn/security-solution-plugin/server/usage/detections/rules/get_initial_usage';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -512,7 +512,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('"threshold" rule type', () => {
       it('should show "notifications_enabled", "notifications_disabled" "legacy_notifications_enabled", "legacy_notifications_disabled", all to be "0" for "disabled"/"in-active" rule that does not have any actions', async () => {
-        const rule: ThresholdCreateSchema = {
+        const rule: ThresholdRuleCreateProps = {
           ...getThresholdRuleForSignalTesting(['telemetry'], 'rule-1', false),
           threshold: {
             field: 'keyword',
@@ -552,7 +552,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should show "notifications_enabled", "notifications_disabled" "legacy_notifications_enabled", "legacy_notifications_disabled", all to be "0" for "enabled"/"active" rule that does not have any actions', async () => {
-        const rule: ThresholdCreateSchema = {
+        const rule: ThresholdRuleCreateProps = {
           ...getThresholdRuleForSignalTesting(['telemetry']),
           threshold: {
             field: 'keyword',
@@ -600,7 +600,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should show "notifications_disabled" to be "1" for rule that has at least "1" action(s) and the alert is "disabled"/"in-active"', async () => {
-        const rule: ThresholdCreateSchema = {
+        const rule: ThresholdRuleCreateProps = {
           ...getThresholdRuleForSignalTesting(['telemetry'], 'rule-1', false),
           threshold: {
             field: 'keyword',
@@ -641,7 +641,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should show "notifications_enabled" to be "1" for rule that has at least "1" action(s) and the alert is "enabled"/"active"', async () => {
-        const rule: ThresholdCreateSchema = {
+        const rule: ThresholdRuleCreateProps = {
           ...getThresholdRuleForSignalTesting(['telemetry']),
           threshold: {
             field: 'keyword',
@@ -686,7 +686,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should show "legacy_notifications_disabled" to be "1" for rule that has at least "1" legacy action(s) and the alert is "disabled"/"in-active"', async () => {
-        const rule: ThresholdCreateSchema = {
+        const rule: ThresholdRuleCreateProps = {
           ...getThresholdRuleForSignalTesting(['telemetry'], 'rule-1', false),
           threshold: {
             field: 'keyword',
@@ -727,7 +727,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should show "legacy_notifications_enabled" to be "1" for rule that has at least "1" legacy action(s) and the alert is "enabled"/"active"', async () => {
-        const rule: ThresholdCreateSchema = {
+        const rule: ThresholdRuleCreateProps = {
           ...getThresholdRuleForSignalTesting(['telemetry']),
           threshold: {
             field: 'keyword',
@@ -1029,7 +1029,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should show "notifications_enabled", "notifications_disabled" "legacy_notifications_enabled", "legacy_notifications_disabled", all to be "0" for "enabled"/"active" rule that does not have any actions', async () => {
-        const rule: ThreatMatchCreateSchema = {
+        const rule: ThreatMatchRuleCreateProps = {
           ...getSimpleThreatMatch('rule-1', true),
           index: ['telemetry'],
           threat_index: ['telemetry'],
@@ -1121,7 +1121,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should show "notifications_enabled" to be "1" for rule that has at least "1" action(s) and the alert is "enabled"/"active"', async () => {
-        const rule: ThreatMatchCreateSchema = {
+        const rule: ThreatMatchRuleCreateProps = {
           ...getSimpleThreatMatch('rule-1', true),
           index: ['telemetry'],
           threat_index: ['telemetry'],
@@ -1210,7 +1210,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should show "legacy_notifications_enabled" to be "1" for rule that has at least "1" legacy action(s) and the alert is "enabled"/"active"', async () => {
-        const rule: ThreatMatchCreateSchema = {
+        const rule: ThreatMatchRuleCreateProps = {
           ...getSimpleThreatMatch('rule-1', true),
           index: ['telemetry'],
           threat_index: ['telemetry'],

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedQueryCreateSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import type { SavedQueryRuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 
 /**
  * This is a typical simple saved_query rule for e2e testing
@@ -15,7 +15,7 @@ import type { SavedQueryCreateSchema } from '@kbn/security-solution-plugin/commo
 export const getSimpleSavedQueryRule = (
   ruleId = 'rule-1',
   enabled = false
-): SavedQueryCreateSchema => ({
+): SavedQueryRuleCreateProps => ({
   name: 'Simple Saved Query Rule',
   description: 'Simple Saved Query Rule',
   enabled,

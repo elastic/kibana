@@ -12,8 +12,8 @@ import {
   SetupGuide,
   RuleSignatureId,
   RuleVersion,
-  baseCreateParams,
-  createTypeSpecific,
+  BaseCreateProps,
+  TypeSpecificCreateProps,
 } from '../../rule_schema';
 
 /**
@@ -23,8 +23,8 @@ import {
  */
 export type PrebuiltRuleToInstall = t.TypeOf<typeof PrebuiltRuleToInstall>;
 export const PrebuiltRuleToInstall = t.intersection([
-  baseCreateParams,
-  createTypeSpecific,
+  BaseCreateProps,
+  TypeSpecificCreateProps,
   // version is required in PrebuiltRuleToInstall, so this supercedes the defaultable
   // version in baseParams
   t.exact(

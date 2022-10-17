@@ -16,7 +16,7 @@ import type { ActionsClient, FindActionResult } from '@kbn/actions-plugin/server
 
 import type { RuleToImport } from '../../../../../common/detection_engine/rule_management';
 import type { RuleExecutionSummary } from '../../../../../common/detection_engine/rule_monitoring';
-import type { FullResponseSchema } from '../../../../../common/detection_engine/rule_schema';
+import type { RuleResponse } from '../../../../../common/detection_engine/rule_schema';
 
 // eslint-disable-next-line no-restricted-imports
 import type { LegacyRulesActionsSavedObject } from '../../rule_actions_legacy';
@@ -92,7 +92,7 @@ export const getIdBulkError = ({
 export const transformAlertsToRules = (
   rules: RuleAlertType[],
   legacyRuleActions: Record<string, LegacyRulesActionsSavedObject>
-): FullResponseSchema[] => {
+): RuleResponse[] => {
   return rules.map((rule) => internalRuleToAPIResponse(rule, null, legacyRuleActions[rule.id]));
 };
 
@@ -104,7 +104,7 @@ export const transformFindAlerts = (
   page: number;
   perPage: number;
   total: number;
-  data: Array<Partial<FullResponseSchema>>;
+  data: Array<Partial<RuleResponse>>;
 } | null => {
   return {
     page: ruleFindResults.page,
@@ -121,7 +121,7 @@ export const transform = (
   rule: PartialRule<RuleParams>,
   ruleExecutionSummary?: RuleExecutionSummary | null,
   legacyRuleActions?: LegacyRulesActionsSavedObject | null
-): FullResponseSchema | null => {
+): RuleResponse | null => {
   if (isAlertType(rule)) {
     return internalRuleToAPIResponse(rule, ruleExecutionSummary, legacyRuleActions);
   }

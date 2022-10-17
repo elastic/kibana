@@ -10,7 +10,7 @@ import { validate } from '@kbn/securitysolution-io-ts-utils';
 
 import {
   BulkUpdateRulesRequestBody,
-  validateUpdateRuleSchema,
+  validateUpdateRuleProps,
   BulkCrudRulesResponse,
 } from '../../../../../../../common/detection_engine/rule_management';
 
@@ -73,7 +73,7 @@ export const bulkUpdateRulesRoute = (
         request.body.map(async (payloadRule) => {
           const idOrRuleIdOrUnknown = payloadRule.id ?? payloadRule.rule_id ?? '(unknown id)';
           try {
-            const validationErrors = validateUpdateRuleSchema(payloadRule);
+            const validationErrors = validateUpdateRuleProps(payloadRule);
             if (validationErrors.length) {
               return createBulkErrorObject({
                 ruleId: payloadRule.rule_id,

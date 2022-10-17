@@ -9,7 +9,7 @@ import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
-import type { FullResponseSchema } from '../../../../rule_schema';
+import type { RuleResponse } from '../../../../rule_schema';
 import { getRulesSchemaMock } from '../../../../rule_schema/mocks';
 import type { ErrorSchema } from '../../../../schemas/response/error_schema';
 import { getErrorSchemaMock } from '../../../../schemas/response/error_schema.mocks';
@@ -79,7 +79,7 @@ describe('Bulk CRUD rules response schema', () => {
   });
 
   test('it should NOT validate a type of "query" when it has extra data', () => {
-    const rule: FullResponseSchema & { invalid_extra_data?: string } = getRulesSchemaMock();
+    const rule: RuleResponse & { invalid_extra_data?: string } = getRulesSchemaMock();
     rule.invalid_extra_data = 'invalid_extra_data';
     const payload: BulkCrudRulesResponse = [rule];
     const decoded = BulkCrudRulesResponse.decode(payload);
@@ -91,7 +91,7 @@ describe('Bulk CRUD rules response schema', () => {
   });
 
   test('it should NOT validate a type of "query" when it has extra data next to a valid error', () => {
-    const rule: FullResponseSchema & { invalid_extra_data?: string } = getRulesSchemaMock();
+    const rule: RuleResponse & { invalid_extra_data?: string } = getRulesSchemaMock();
     rule.invalid_extra_data = 'invalid_extra_data';
     const payload: BulkCrudRulesResponse = [getErrorSchemaMock(), rule];
     const decoded = BulkCrudRulesResponse.decode(payload);

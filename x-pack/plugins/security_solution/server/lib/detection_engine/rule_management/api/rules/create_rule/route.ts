@@ -8,8 +8,8 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
-import { validateCreateRuleSchema } from '../../../../../../../common/detection_engine/rule_management';
-import { createRulesSchema } from '../../../../../../../common/detection_engine/schemas/request';
+import { validateCreateRuleProps } from '../../../../../../../common/detection_engine/rule_management';
+import { RuleCreateProps } from '../../../../../../../common/detection_engine/rule_schema';
 
 import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
 import type { SetupPlugins } from '../../../../../../plugin';
@@ -31,7 +31,7 @@ export const createRuleRoute = (
     {
       path: DETECTION_ENGINE_RULES_URL,
       validate: {
-        body: buildRouteValidation(createRulesSchema),
+        body: buildRouteValidation(RuleCreateProps),
       },
       options: {
         tags: ['access:securitySolution'],
@@ -39,7 +39,7 @@ export const createRuleRoute = (
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
-      const validationErrors = validateCreateRuleSchema(request.body);
+      const validationErrors = validateCreateRuleProps(request.body);
       if (validationErrors.length) {
         return siemResponse.error({ statusCode: 400, body: validationErrors });
       }

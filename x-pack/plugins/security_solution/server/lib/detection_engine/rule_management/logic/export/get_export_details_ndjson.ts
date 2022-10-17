@@ -7,10 +7,10 @@
 
 import type { ExportExceptionDetails } from '@kbn/securitysolution-io-ts-list-types';
 import type { ExportRulesDetails } from '../../../../../../common/detection_engine/rule_management';
-import type { FullResponseSchema } from '../../../../../../common/detection_engine/schemas/request';
+import type { RuleResponse } from '../../../../../../common/detection_engine/rule_schema';
 
 export const getExportDetailsNdjson = (
-  rules: FullResponseSchema[],
+  rules: RuleResponse[],
   missingRules: Array<{ rule_id: string }> = [],
   exceptionDetails?: ExportExceptionDetails
 ): string => {

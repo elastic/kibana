@@ -8,7 +8,7 @@
 /* eslint-disable complexity */
 import type { PartialRule, RulesClient } from '@kbn/alerting-plugin/server';
 import { DEFAULT_MAX_SIGNALS } from '../../../../../../common/constants';
-import type { UpdateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
+import type { RuleUpdateProps } from '../../../../../../common/detection_engine/rule_schema';
 import { transformRuleToAlertAction } from '../../../../../../common/detection_engine/transform_actions';
 
 import type { InternalRuleUpdate, RuleParams, RuleAlertType } from '../../../rule_schema';
@@ -19,7 +19,7 @@ import { maybeMute } from '../rule_actions/muting';
 export interface UpdateRulesOptions {
   rulesClient: RulesClient;
   existingRule: RuleAlertType | null | undefined;
-  ruleUpdate: UpdateRulesSchema;
+  ruleUpdate: RuleUpdateProps;
 }
 
 export const updateRules = async ({

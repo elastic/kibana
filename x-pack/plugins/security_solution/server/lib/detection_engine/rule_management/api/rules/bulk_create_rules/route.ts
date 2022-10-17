@@ -11,7 +11,7 @@ import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { DETECTION_ENGINE_RULES_BULK_CREATE } from '../../../../../../../common/constants';
 import {
   BulkCreateRulesRequestBody,
-  validateCreateRuleSchema,
+  validateCreateRuleProps,
   BulkCrudRulesResponse,
 } from '../../../../../../../common/detection_engine/rule_management';
 
@@ -90,7 +90,7 @@ export const bulkCreateRulesRoute = (
             }
 
             try {
-              const validationErrors = validateCreateRuleSchema(payloadRule);
+              const validationErrors = validateCreateRuleProps(payloadRule);
               if (validationErrors.length) {
                 return createBulkErrorObject({
                   ruleId: payloadRule.rule_id,

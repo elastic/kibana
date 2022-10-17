@@ -12,9 +12,9 @@ import { ruleExecutionSummaryMock } from '../../../../../common/detection_engine
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import { getThreatMock } from '../../../../../common/detection_engine/schemas/types/threat.mock';
 import { getQueryRuleParams } from '../../rule_schema/mocks';
-import type { FullResponseSchema } from '../../../../../common/detection_engine/schemas/request';
+import type { RuleResponse } from '../../../../../common/detection_engine/rule_schema';
 
-export const ruleOutput = (): FullResponseSchema => ({
+export const ruleOutput = (): RuleResponse => ({
   actions: [],
   author: ['Elastic'],
   building_block_type: 'default',
@@ -124,7 +124,7 @@ describe('validate', () => {
       const rule = getRuleMock(getQueryRuleParams());
       const ruleExecutionSumary = ruleExecutionSummaryMock.getSummarySucceeded();
       const validatedOrError = transformValidateBulkError('rule-1', rule, ruleExecutionSumary);
-      const expected: FullResponseSchema = {
+      const expected: RuleResponse = {
         ...ruleOutput(),
         execution_summary: ruleExecutionSumary,
       };

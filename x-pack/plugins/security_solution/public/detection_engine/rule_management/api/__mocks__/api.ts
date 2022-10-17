@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { FullResponseSchema } from '../../../../../common/detection_engine/schemas/request';
-
+import type { RuleResponse } from '../../../../../common/detection_engine/rule_schema';
 import { getRulesSchemaMock } from '../../../../../common/detection_engine/rule_schema/mocks';
 import { savedRuleMock, rulesMock } from '../../logic/mock';
 
@@ -22,16 +21,16 @@ import type {
   FetchRulesProps,
 } from '../../logic/types';
 
-export const updateRule = async ({ rule, signal }: UpdateRulesProps): Promise<FullResponseSchema> =>
+export const updateRule = async ({ rule, signal }: UpdateRulesProps): Promise<RuleResponse> =>
   Promise.resolve(getRulesSchemaMock());
 
-export const createRule = async ({ rule, signal }: CreateRulesProps): Promise<FullResponseSchema> =>
+export const createRule = async ({ rule, signal }: CreateRulesProps): Promise<RuleResponse> =>
   Promise.resolve(getRulesSchemaMock());
 
 export const patchRule = async ({
   ruleProperties,
   signal,
-}: PatchRuleProps): Promise<FullResponseSchema> => Promise.resolve(getRulesSchemaMock());
+}: PatchRuleProps): Promise<RuleResponse> => Promise.resolve(getRulesSchemaMock());
 
 export const getPrePackagedRulesStatus = async ({
   signal,

@@ -8,8 +8,8 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
-import { validateUpdateRuleSchema } from '../../../../../../../common/detection_engine/rule_management';
-import { updateRulesSchema } from '../../../../../../../common/detection_engine/schemas/request';
+import { validateUpdateRuleProps } from '../../../../../../../common/detection_engine/rule_management';
+import { RuleUpdateProps } from '../../../../../../../common/detection_engine/rule_schema';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import type { SetupPlugins } from '../../../../../../plugin';
 import { buildMlAuthz } from '../../../../../machine_learning/authz';
@@ -30,7 +30,7 @@ export const updateRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupP
     {
       path: DETECTION_ENGINE_RULES_URL,
       validate: {
-        body: buildRouteValidation(updateRulesSchema),
+        body: buildRouteValidation(RuleUpdateProps),
       },
       options: {
         tags: ['access:securitySolution'],
@@ -38,7 +38,7 @@ export const updateRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupP
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
-      const validationErrors = validateUpdateRuleSchema(request.body);
+      const validationErrors = validateUpdateRuleProps(request.body);
       if (validationErrors.length) {
         return siemResponse.error({ statusCode: 400, body: validationErrors });
       }

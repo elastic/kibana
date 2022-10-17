@@ -6,10 +6,10 @@
  */
 
 import * as t from 'io-ts';
-import { updateRulesSchema } from '../../../../../rule_schema';
+import { RuleUpdateProps } from '../../../../../rule_schema';
 
 /**
  * Request body parameters of the API route.
  */
 export type BulkUpdateRulesRequestBody = t.TypeOf<typeof BulkUpdateRulesRequestBody>;
-export const BulkUpdateRulesRequestBody = t.array(updateRulesSchema);
+export const BulkUpdateRulesRequestBody = t.array(UpdateRuleProps);

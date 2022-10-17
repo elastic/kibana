@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FullResponseSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import { RuleResponse } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 
 import {
   DETECTION_ENGINE_RULES_URL,
@@ -158,7 +158,7 @@ export default ({ getService }: FtrProviderContext) => {
         updatedRule2.throttle = '1d';
 
         // update both rule names
-        const { body }: { body: FullResponseSchema[] } = await supertest
+        const { body }: { body: RuleResponse[] } = await supertest
           .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
           .send([updatedRule1, updatedRule2])
@@ -220,7 +220,7 @@ export default ({ getService }: FtrProviderContext) => {
         updatedRule2.name = 'some other name';
 
         // update both rule names
-        const { body }: { body: FullResponseSchema[] } = await supertest
+        const { body }: { body: RuleResponse[] } = await supertest
           .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
           .set('kbn-xsrf', 'true')
           .send([updatedRule1, updatedRule2])

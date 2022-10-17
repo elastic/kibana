@@ -7,18 +7,18 @@
 
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../constants';
 import type {
-  MachineLearningCreateSchema,
-  MachineLearningUpdateSchema,
-  QueryCreateSchema,
-  QueryUpdateSchema,
-  SavedQueryCreateSchema,
-  ThreatMatchCreateSchema,
-  ThresholdCreateSchema,
-  NewTermsCreateSchema,
-  NewTermsUpdateSchema,
+  MachineLearningRuleCreateProps,
+  MachineLearningRuleUpdateProps,
+  QueryRuleCreateProps,
+  QueryRuleUpdateProps,
+  SavedQueryRuleCreateProps,
+  ThreatMatchRuleCreateProps,
+  ThresholdRuleCreateProps,
+  NewTermsRuleCreateProps,
+  NewTermsRuleUpdateProps,
 } from './rule_schemas';
 
-export const getCreateRulesSchemaMock = (ruleId = 'rule-1'): QueryCreateSchema => ({
+export const getCreateRulesSchemaMock = (ruleId = 'rule-1'): QueryRuleCreateProps => ({
   description: 'Detecting root and admin users',
   name: 'Query with a rule id',
   query: 'user.name: root or user.name: admin',
@@ -29,7 +29,7 @@ export const getCreateRulesSchemaMock = (ruleId = 'rule-1'): QueryCreateSchema =
   rule_id: ruleId,
 });
 
-export const getCreateRulesSchemaMockWithDataView = (ruleId = 'rule-1'): QueryCreateSchema => ({
+export const getCreateRulesSchemaMockWithDataView = (ruleId = 'rule-1'): QueryRuleCreateProps => ({
   data_view_id: 'logs-*',
   description: 'Detecting root and admin users',
   name: 'Query with a rule id',
@@ -41,7 +41,9 @@ export const getCreateRulesSchemaMockWithDataView = (ruleId = 'rule-1'): QueryCr
   rule_id: ruleId,
 });
 
-export const getCreateSavedQueryRulesSchemaMock = (ruleId = 'rule-1'): SavedQueryCreateSchema => ({
+export const getCreateSavedQueryRulesSchemaMock = (
+  ruleId = 'rule-1'
+): SavedQueryRuleCreateProps => ({
   description: 'Detecting root and admin users',
   name: 'Query with a rule id',
   query: 'user.name: root or user.name: admin',
@@ -56,7 +58,7 @@ export const getCreateSavedQueryRulesSchemaMock = (ruleId = 'rule-1'): SavedQuer
 export const getCreateThreatMatchRulesSchemaMock = (
   ruleId = 'rule-1',
   enabled = false
-): ThreatMatchCreateSchema => ({
+): ThreatMatchRuleCreateProps => ({
   description: 'Detecting root and admin users',
   enabled,
   index: ['auditbeat-*'],
@@ -105,7 +107,7 @@ export const getCreateThreatMatchRulesSchemaMock = (
 
 export const getCreateMachineLearningRulesSchemaMock = (
   ruleId = 'rule-1'
-): MachineLearningCreateSchema => ({
+): MachineLearningRuleCreateProps => ({
   description: 'Detecting root and admin users',
   name: 'Query with a rule id',
   severity: 'high',
@@ -116,7 +118,7 @@ export const getCreateMachineLearningRulesSchemaMock = (
   machine_learning_job_id: 'typical-ml-job-id',
 });
 
-export const getCreateThresholdRulesSchemaMock = (ruleId = 'rule-1'): ThresholdCreateSchema => ({
+export const getCreateThresholdRulesSchemaMock = (ruleId = 'rule-1'): ThresholdRuleCreateProps => ({
   description: 'Detecting root and admin users',
   name: 'Query with a rule id',
   severity: 'high',
@@ -133,7 +135,7 @@ export const getCreateThresholdRulesSchemaMock = (ruleId = 'rule-1'): ThresholdC
 export const getCreateNewTermsRulesSchemaMock = (
   ruleId = 'rule-1',
   enabled = false
-): NewTermsCreateSchema => ({
+): NewTermsRuleCreateProps => ({
   description: 'Detecting root and admin users',
   enabled,
   index: ['auditbeat-*'],
@@ -152,7 +154,7 @@ export const getCreateNewTermsRulesSchemaMock = (
 
 export const getUpdateRulesSchemaMock = (
   id = '04128c15-0d1b-4716-a4c5-46997ac7f3bd'
-): QueryUpdateSchema => ({
+): QueryRuleUpdateProps => ({
   description: 'Detecting root and admin users',
   name: 'Query with a rule id',
   query: 'user.name: root or user.name: admin',
@@ -165,7 +167,7 @@ export const getUpdateRulesSchemaMock = (
 
 export const getUpdateMachineLearningSchemaMock = (
   id = '04128c15-0d1b-4716-a4c5-46997ac7f3bd'
-): MachineLearningUpdateSchema => ({
+): MachineLearningRuleUpdateProps => ({
   description: 'Detecting root and admin users',
   name: 'Query with a rule id',
   severity: 'high',
@@ -178,7 +180,7 @@ export const getUpdateMachineLearningSchemaMock = (
 
 export const getUpdateNewTermsSchemaMock = (
   id = '04128c15-0d1b-4716-a4c5-46997ac7f3bd'
-): NewTermsUpdateSchema => ({
+): NewTermsRuleUpdateProps => ({
   description: 'Detecting root and admin users',
   index: ['auditbeat-*'],
   name: 'Query with a rule id',

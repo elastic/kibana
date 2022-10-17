@@ -5,22 +5,14 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-import {
-  patchTypeSpecific,
-  sharedPatchSchema,
-  thresholdPatchParams,
-} from '../../../../../rule_schema';
+import { RulePatchProps, ThresholdRulePatchProps } from '../../../../../rule_schema';
 
 /**
  * Request body parameters of the API route.
  * All of the patch elements should default to undefined if not set.
  */
-export type PatchRuleRequestBody = t.TypeOf<typeof PatchRuleRequestBody>;
-export const PatchRuleRequestBody = t.intersection([patchTypeSpecific, sharedPatchSchema]);
+export type PatchRuleRequestBody = RulePatchProps;
+export const PatchRuleRequestBody = RulePatchProps;
 
-export type ThresholdPatchRuleRequestBody = t.TypeOf<typeof ThresholdPatchRuleRequestBody>;
-export const ThresholdPatchRuleRequestBody = t.intersection([
-  thresholdPatchParams,
-  sharedPatchSchema,
-]);
+export type ThresholdPatchRuleRequestBody = ThresholdRulePatchProps;
+export const ThresholdPatchRuleRequestBody = ThresholdRulePatchProps;

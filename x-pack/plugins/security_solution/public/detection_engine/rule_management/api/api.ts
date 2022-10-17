@@ -28,9 +28,9 @@ import type { BulkActionEditPayload } from '../../../../common/detection_engine/
 import { BulkAction } from '../../../../common/detection_engine/rule_management';
 
 import type {
-  FullResponseSchema,
+  RuleResponse,
   PreviewResponse,
-} from '../../../../common/detection_engine/schemas/request';
+} from '../../../../common/detection_engine/rule_schema';
 
 import { KibanaServices } from '../../../common/lib/kibana';
 import * as i18n from '../../../detections/pages/detection_engine/rules/translations';
@@ -54,13 +54,13 @@ import { convertRulesFilterToKQL } from '../logic/utils';
 /**
  * Create provided Rule
  *
- * @param rule CreateRulesSchema to add
+ * @param rule RuleCreateProps to add
  * @param signal to cancel request
  *
  * @throws An error if response is not OK
  */
-export const createRule = async ({ rule, signal }: CreateRulesProps): Promise<FullResponseSchema> =>
-  KibanaServices.get().http.fetch<FullResponseSchema>(DETECTION_ENGINE_RULES_URL, {
+export const createRule = async ({ rule, signal }: CreateRulesProps): Promise<RuleResponse> =>
+  KibanaServices.get().http.fetch<RuleResponse>(DETECTION_ENGINE_RULES_URL, {
     method: 'POST',
     body: JSON.stringify(rule),
     signal,
@@ -69,13 +69,13 @@ export const createRule = async ({ rule, signal }: CreateRulesProps): Promise<Fu
 /**
  * Update provided Rule using PUT
  *
- * @param rule UpdateRulesSchema to be updated
+ * @param rule RuleUpdateProps to be updated
  * @param signal to cancel request
  *
  * @throws An error if response is not OK
  */
-export const updateRule = async ({ rule, signal }: UpdateRulesProps): Promise<FullResponseSchema> =>
-  KibanaServices.get().http.fetch<FullResponseSchema>(DETECTION_ENGINE_RULES_URL, {
+export const updateRule = async ({ rule, signal }: UpdateRulesProps): Promise<RuleResponse> =>
+  KibanaServices.get().http.fetch<RuleResponse>(DETECTION_ENGINE_RULES_URL, {
     method: 'PUT',
     body: JSON.stringify(rule),
     signal,
@@ -95,8 +95,8 @@ export const updateRule = async ({ rule, signal }: UpdateRulesProps): Promise<Fu
 export const patchRule = async ({
   ruleProperties,
   signal,
-}: PatchRuleProps): Promise<FullResponseSchema> =>
-  KibanaServices.get().http.fetch<FullResponseSchema>(DETECTION_ENGINE_RULES_URL, {
+}: PatchRuleProps): Promise<RuleResponse> =>
+  KibanaServices.get().http.fetch<RuleResponse>(DETECTION_ENGINE_RULES_URL, {
     method: 'PATCH',
     body: JSON.stringify(ruleProperties),
     signal,
@@ -105,7 +105,7 @@ export const patchRule = async ({
 /**
  * Preview provided Rule
  *
- * @param rule CreateRulesSchema to add
+ * @param rule RuleCreateProps to add
  * @param signal to cancel request
  *
  * @throws An error if response is not OK

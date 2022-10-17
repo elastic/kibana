@@ -9,9 +9,9 @@ import type SuperTest from 'supertest';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import type {
-  CreateRulesSchema,
-  FullResponseSchema,
-} from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+  RuleCreateProps,
+  RuleResponse,
+} from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 
 /**
  * Helper to cut down on the noise in some of the tests.
@@ -20,9 +20,9 @@ import type {
  */
 export const createRuleWithAuth = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
-  rule: CreateRulesSchema,
+  rule: RuleCreateProps,
   auth: { user: string; pass: string }
-): Promise<FullResponseSchema> => {
+): Promise<RuleResponse> => {
   const { body } = await supertest
     .post(DETECTION_ENGINE_RULES_URL)
     .set('kbn-xsrf', 'true')

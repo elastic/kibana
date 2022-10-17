@@ -6,7 +6,7 @@
  */
 
 import { exactCheck, formatErrors, foldLeftRight } from '@kbn/securitysolution-io-ts-utils';
-import type { UpdateRulesSchema } from '../../../../../rule_schema';
+import type { RuleUpdateProps } from '../../../../../rule_schema';
 import { getUpdateRulesSchemaMock } from '../../../../../rule_schema/mocks';
 import { BulkUpdateRulesRequestBody } from './request_schema';
 
@@ -132,7 +132,7 @@ describe('Bulk update rules request schema', () => {
   });
 
   test('two array elements where the first is invalid (extra key and value) but the second is valid will not validate', () => {
-    const singleItem: UpdateRulesSchema & { madeUpValue: string } = {
+    const singleItem: RuleUpdateProps & { madeUpValue: string } = {
       ...getUpdateRulesSchemaMock(),
       madeUpValue: 'something',
     };
@@ -147,8 +147,8 @@ describe('Bulk update rules request schema', () => {
   });
 
   test('two array elements where the second is invalid (extra key and value) but the first is valid will not validate', () => {
-    const singleItem: UpdateRulesSchema = getUpdateRulesSchemaMock();
-    const secondItem: UpdateRulesSchema & { madeUpValue: string } = {
+    const singleItem: RuleUpdateProps = getUpdateRulesSchemaMock();
+    const secondItem: RuleUpdateProps & { madeUpValue: string } = {
       ...getUpdateRulesSchemaMock(),
       madeUpValue: 'something',
     };
@@ -162,11 +162,11 @@ describe('Bulk update rules request schema', () => {
   });
 
   test('two array elements where both are invalid (extra key and value) will not validate', () => {
-    const singleItem: UpdateRulesSchema & { madeUpValue: string } = {
+    const singleItem: RuleUpdateProps & { madeUpValue: string } = {
       ...getUpdateRulesSchemaMock(),
       madeUpValue: 'something',
     };
-    const secondItem: UpdateRulesSchema & { madeUpValue: string } = {
+    const secondItem: RuleUpdateProps & { madeUpValue: string } = {
       ...getUpdateRulesSchemaMock(),
       madeUpValue: 'something',
     };

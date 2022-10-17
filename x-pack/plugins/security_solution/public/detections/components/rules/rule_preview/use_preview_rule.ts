@@ -10,8 +10,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import type {
   PreviewResponse,
-  CreateRulesSchema,
-} from '../../../../../common/detection_engine/schemas/request';
+  RuleCreateProps,
+} from '../../../../../common/detection_engine/rule_schema';
 
 import { previewRule } from '../../../../detection_engine/rule_management/api/api';
 import * as i18n from '../../../../detection_engine/rule_management/logic/translations';
@@ -30,7 +30,7 @@ export const usePreviewRule = ({
 }: {
   timeframeOptions: TimeframePreviewOptions;
 }) => {
-  const [rule, setRule] = useState<CreateRulesSchema | null>(null);
+  const [rule, setRule] = useState<RuleCreateProps | null>(null);
   const [response, setResponse] = useState<PreviewResponse>(emptyPreviewRule);
   const [isLoading, setIsLoading] = useState(false);
   const { addError } = useAppToasts();

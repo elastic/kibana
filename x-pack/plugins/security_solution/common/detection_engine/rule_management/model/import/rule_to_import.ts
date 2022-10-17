@@ -14,8 +14,8 @@ import {
   RuleObjectId,
   RuleSignatureId,
   SetupGuide,
-  baseCreateParams,
-  createTypeSpecific,
+  BaseCreateProps,
+  TypeSpecificCreateProps,
 } from '../../../rule_schema';
 import { created_at, updated_at, created_by, updated_by } from '../../../schemas/common';
 
@@ -31,8 +31,8 @@ import { created_at, updated_at, created_by, updated_by } from '../../../schemas
  */
 export type RuleToImport = t.TypeOf<typeof RuleToImport>;
 export const RuleToImport = t.intersection([
-  baseCreateParams,
-  createTypeSpecific,
+  BaseCreateProps,
+  TypeSpecificCreateProps,
   t.exact(t.type({ rule_id: RuleSignatureId })),
   t.exact(
     t.partial({

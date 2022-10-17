@@ -12,7 +12,7 @@ import {
   NOTIFICATION_THROTTLE_NO_ACTIONS,
   NOTIFICATION_THROTTLE_RULE,
 } from '@kbn/security-solution-plugin/common/constants';
-import type { FullResponseSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import type { RuleResponse } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import {
   BulkAction,
   BulkActionEditType,
@@ -372,7 +372,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(rulesResponse.total).to.eql(2);
 
-      rulesResponse.data.forEach((rule: FullResponseSchema) => {
+      rulesResponse.data.forEach((rule: RuleResponse) => {
         expect(rule.actions).to.eql([
           {
             action_type_id: '.slack',

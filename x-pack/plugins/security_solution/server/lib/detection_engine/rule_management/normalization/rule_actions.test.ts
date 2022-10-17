@@ -12,7 +12,7 @@ import {
   NOTIFICATION_THROTTLE_RULE,
 } from '../../../../../common/constants';
 
-import type { FullResponseSchema } from '../../../../../common/detection_engine/schemas/request';
+import type { RuleResponse } from '../../../../../common/detection_engine/rule_schema';
 // eslint-disable-next-line no-restricted-imports
 import type { LegacyRuleActions } from '../../rule_actions_legacy';
 import type { RuleAlertType } from '../../rule_schema';
@@ -279,7 +279,7 @@ describe('Rule actions normalization', () => {
       ];
 
       const transformed = transformActions(alertAction, null);
-      expect(transformed).toEqual<FullResponseSchema['actions']>([
+      expect(transformed).toEqual<RuleResponse['actions']>([
         {
           id: 'id_1',
           group: 'group',
@@ -324,7 +324,7 @@ describe('Rule actions normalization', () => {
         ],
       };
       const transformed = transformActions(alertAction, legacyRuleActions);
-      expect(transformed).toEqual<FullResponseSchema['actions']>([
+      expect(transformed).toEqual<RuleResponse['actions']>([
         {
           id: 'id_1',
           group: 'group',
@@ -356,7 +356,7 @@ describe('Rule actions normalization', () => {
         ],
       };
       const transformed = transformActions(alertAction, legacyRuleActions);
-      expect(transformed).toEqual<FullResponseSchema['actions']>([
+      expect(transformed).toEqual<RuleResponse['actions']>([
         {
           id: 'id_2',
           group: 'group',
@@ -381,7 +381,7 @@ describe('Rule actions normalization', () => {
         ],
       };
       const transformed = transformActions(undefined, legacyRuleActions);
-      expect(transformed).toEqual<FullResponseSchema['actions']>([
+      expect(transformed).toEqual<RuleResponse['actions']>([
         {
           id: 'id_2',
           group: 'group',

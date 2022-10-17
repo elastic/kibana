@@ -43,7 +43,7 @@ import type {
   RuleStep,
 } from '../../../../detections/pages/detection_engine/rules/types';
 import { DataSourceType } from '../../../../detections/pages/detection_engine/rules/types';
-import type { CreateRulesSchema } from '../../../../../common/detection_engine/schemas/request';
+import type { RuleCreateProps } from '../../../../../common/detection_engine/rule_schema';
 import { stepActionsDefaultValue } from '../../../../detections/components/rules/step_rule_actions';
 
 export const getTimeTypeValue = (time: string): { unit: Unit; value: number } => {
@@ -568,7 +568,7 @@ export const formatActionsStepData = (actionsStepData: ActionsStepRule): Actions
 
 // Used to format form data in rule edit and
 // create flows so "T" here would likely
-// either be CreateRulesSchema or Rule
+// either be RuleCreateProps or Rule
 export const formatRule = <T>(
   defineStepData: DefineStepRule,
   aboutStepData: AboutStepRule,
@@ -593,14 +593,14 @@ export const formatPreviewRule = ({
   aboutRuleData: AboutStepRule;
   scheduleRuleData: ScheduleStepRule;
   exceptionsList?: List[];
-}): CreateRulesSchema => {
+}): RuleCreateProps => {
   const aboutStepData = {
     ...aboutRuleData,
     name: 'Preview Rule',
     description: 'Preview Rule',
   };
   return {
-    ...formatRule<CreateRulesSchema>(
+    ...formatRule<RuleCreateProps>(
       defineRuleData,
       aboutStepData,
       scheduleRuleData,

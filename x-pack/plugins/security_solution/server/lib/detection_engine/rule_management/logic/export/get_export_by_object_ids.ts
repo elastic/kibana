@@ -21,11 +21,11 @@ import { getRuleExceptionsForExport } from './get_export_rule_exceptions';
 // eslint-disable-next-line no-restricted-imports
 import { legacyGetBulkRuleActionsSavedObject } from '../../../rule_actions_legacy';
 import { internalRuleToAPIResponse } from '../../normalization/rule_converters';
-import type { FullResponseSchema } from '../../../../../../common/detection_engine/schemas/request';
+import type { RuleResponse } from '../../../../../../common/detection_engine/rule_schema';
 
 interface ExportSuccessRule {
   statusCode: 200;
-  rule: FullResponseSchema;
+  rule: RuleResponse;
 }
 
 interface ExportFailedRule {
@@ -36,7 +36,7 @@ interface ExportFailedRule {
 export interface RulesErrors {
   exportedCount: number;
   missingRules: Array<{ rule_id: string }>;
-  rules: FullResponseSchema[];
+  rules: RuleResponse[];
 }
 
 export const getExportByObjectIds = async (

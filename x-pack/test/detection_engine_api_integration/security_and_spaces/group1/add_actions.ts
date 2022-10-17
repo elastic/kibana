@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { CreateRulesSchema } from '@kbn/security-solution-plugin/common/detection_engine/schemas/request';
+import { RuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -86,7 +86,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         // create a rule with the action attached and a meta field
-        const ruleWithAction: CreateRulesSchema = {
+        const ruleWithAction: RuleCreateProps = {
           ...getRuleWithWebHookAction(hookAction.id, true),
           meta: {},
         };

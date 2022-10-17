@@ -7,9 +7,9 @@
 import type { UseMutationOptions } from '@tanstack/react-query';
 import { useMutation } from '@tanstack/react-query';
 import type {
-  FullResponseSchema,
-  UpdateRulesSchema,
-} from '../../../../../common/detection_engine/schemas/request';
+  RuleResponse,
+  RuleUpdateProps,
+} from '../../../../../common/detection_engine/rule_schema';
 import { transformOutput } from '../../../../detections/containers/detection_engine/rules/transforms';
 import { updateRule } from '../api';
 import { useInvalidateFindRulesQuery } from './use_find_rules_query';
@@ -17,14 +17,14 @@ import { useInvalidateFetchTagsQuery } from './use_fetch_tags_query';
 import { useInvalidateFetchRuleByIdQuery } from './use_fetch_rule_by_id_query';
 
 export const useUpdateRuleMutation = (
-  options?: UseMutationOptions<FullResponseSchema, Error, UpdateRulesSchema>
+  options?: UseMutationOptions<RuleResponse, Error, RuleUpdateProps>
 ) => {
   const invalidateFindRulesQuery = useInvalidateFindRulesQuery();
   const invalidateFetchTagsQuery = useInvalidateFetchTagsQuery();
   const invalidateFetchRuleByIdQuery = useInvalidateFetchRuleByIdQuery();
 
-  return useMutation<FullResponseSchema, Error, UpdateRulesSchema>(
-    (rule: UpdateRulesSchema) => updateRule({ rule: transformOutput(rule) }),
+  return useMutation<RuleResponse, Error, RuleUpdateProps>(
+    (rule: RuleUpdateProps) => updateRule({ rule: transformOutput(rule) }),
     {
       ...options,
       onSuccess: (...args) => {

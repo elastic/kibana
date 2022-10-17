@@ -24,26 +24,19 @@ import type {
   RelatedIntegrationArray,
   RequiredFieldArray,
   SetupGuide,
-  CreateRulesSchema,
-  CreateTypeSpecific,
+  RuleCreateProps,
+  RuleResponse,
+  TypeSpecificCreateProps,
+  TypeSpecificResponse,
+} from '../../../../../common/detection_engine/rule_schema';
+import {
   EqlPatchParams,
-  FullResponseSchema,
   MachineLearningPatchParams,
   NewTermsPatchParams,
   QueryPatchParams,
-  ResponseTypeSpecific,
   SavedQueryPatchParams,
   ThreatMatchPatchParams,
   ThresholdPatchParams,
-} from '../../../../../common/detection_engine/rule_schema';
-import {
-  eqlPatchParams,
-  machineLearningPatchParams,
-  newTermsPatchParams,
-  queryPatchParams,
-  savedQueryPatchParams,
-  threatMatchPatchParams,
-  thresholdPatchParams,
 } from '../../../../../common/detection_engine/rule_schema';
 
 import {
@@ -98,7 +91,9 @@ import {
 // Converts params from the snake case API format to the internal camel case format AND applies default values where needed.
 // Notice that params.language is possibly undefined for most rule types in the API but we default it to kuery to match
 // the legacy API behavior
-export const typeSpecificSnakeToCamel = (params: CreateTypeSpecific): TypeSpecificRuleParams => {
+export const typeSpecificSnakeToCamel = (
+  params: TypeSpecificCreateProps
+): TypeSpecificRuleParams => {
   switch (params.type) {
     case 'eql': {
       return {
@@ -335,49 +330,49 @@ export const patchTypeSpecificSnakeToCamel = (
   // but would be assignable to the other rule types since they don't specify `event_category_override`.
   switch (existingRule.type) {
     case 'eql': {
-      const [validated, error] = validateNonExact(params, eqlPatchParams);
+      const [validated, error] = validateNonExact(params, EqlPatchParams);
       if (validated == null) {
         throw parseValidationError(error);
       }
       return patchEqlParams(validated, existingRule);
     }
     case 'threat_match': {
-      const [validated, error] = validateNonExact(params, threatMatchPatchParams);
+      const [validated, error] = validateNonExact(params, ThreatMatchPatchParams);
       if (validated == null) {
         throw parseValidationError(error);
       }
       return patchThreatMatchParams(validated, existingRule);
     }
     case 'query': {
-      const [validated, error] = validateNonExact(params, queryPatchParams);
+      const [validated, error] = validateNonExact(params, QueryPatchParams);
       if (validated == null) {
         throw parseValidationError(error);
       }
       return patchQueryParams(validated, existingRule);
     }
     case 'saved_query': {
-      const [validated, error] = validateNonExact(params, savedQueryPatchParams);
+      const [validated, error] = validateNonExact(params, SavedQueryPatchParams);
       if (validated == null) {
         throw parseValidationError(error);
       }
       return patchSavedQueryParams(validated, existingRule);
     }
     case 'threshold': {
-      const [validated, error] = validateNonExact(params, thresholdPatchParams);
+      const [validated, error] = validateNonExact(params, ThresholdPatchParams);
       if (validated == null) {
         throw parseValidationError(error);
       }
       return patchThresholdParams(validated, existingRule);
     }
     case 'machine_learning': {
-      const [validated, error] = validateNonExact(params, machineLearningPatchParams);
+      const [validated, error] = validateNonExact(params, MachineLearningPatchParams);
       if (validated == null) {
         throw parseValidationError(error);
       }
       return patchMachineLearningParams(validated, existingRule);
     }
     case 'new_terms': {
-      const [validated, error] = validateNonExact(params, newTermsPatchParams);
+      const [validated, error] = validateNonExact(params, NewTermsPatchParams);
       if (validated == null) {
         throw parseValidationError(error);
       }
@@ -476,7 +471,7 @@ export const convertPatchAPIToInternalSchema = (
 
 // eslint-disable-next-line complexity
 export const convertCreateAPIToInternalSchema = (
-  input: CreateRulesSchema & {
+  input: RuleCreateProps & {
     related_integrations?: RelatedIntegrationArray;
     required_fields?: RequiredFieldArray;
     setup?: SetupGuide;
@@ -533,7 +528,7 @@ export const convertCreateAPIToInternalSchema = (
 };
 
 // Converts the internal rule data structure to the response API schema
-export const typeSpecificCamelToSnake = (params: TypeSpecificRuleParams): ResponseTypeSpecific => {
+export const typeSpecificCamelToSnake = (params: TypeSpecificRuleParams): TypeSpecificResponse => {
   switch (params.type) {
     case 'eql': {
       return {
@@ -669,7 +664,7 @@ export const internalRuleToAPIResponse = (
   rule: SanitizedRule<RuleParams> | ResolvedSanitizedRule<RuleParams>,
   ruleExecutionSummary?: RuleExecutionSummary | null,
   legacyRuleActions?: LegacyRuleActions | null
-): FullResponseSchema => {
+): RuleResponse => {
   const mergedExecutionSummary = mergeRuleExecutionSummary(
     rule.executionStatus,
     ruleExecutionSummary ?? null

@@ -7,18 +7,18 @@
 
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../constants';
 import type {
-  EqlResponseSchema,
-  MachineLearningResponseSchema,
-  QueryResponseSchema,
-  SavedQueryResponseSchema,
-  SharedResponseSchema,
-  ThreatMatchResponseSchema,
-} from '../../schemas/request';
+  EqlRule,
+  MachineLearningRule,
+  QueryRule,
+  SavedQueryRule,
+  SharedResponseProps,
+  ThreatMatchRule,
+} from './rule_schemas';
 import { getListArrayMock } from '../../schemas/types/lists.mock';
 
 export const ANCHOR_DATE = '2020-02-20T03:57:54.037Z';
 
-const getResponseBaseParams = (anchorDate: string = ANCHOR_DATE): SharedResponseSchema => ({
+const getResponseBaseParams = (anchorDate: string = ANCHOR_DATE): SharedResponseProps => ({
   author: [],
   id: '7a7065d7-6e8b-4aae-8d20-c93613dec9f9',
   created_at: new Date(anchorDate).toISOString(),
@@ -65,7 +65,7 @@ const getResponseBaseParams = (anchorDate: string = ANCHOR_DATE): SharedResponse
   namespace: undefined,
 });
 
-export const getRulesSchemaMock = (anchorDate: string = ANCHOR_DATE): QueryResponseSchema => ({
+export const getRulesSchemaMock = (anchorDate: string = ANCHOR_DATE): QueryRule => ({
   ...getResponseBaseParams(anchorDate),
   query: 'user.name: root or user.name: admin',
   type: 'query',
@@ -76,9 +76,8 @@ export const getRulesSchemaMock = (anchorDate: string = ANCHOR_DATE): QueryRespo
   saved_id: undefined,
   response_actions: undefined,
 });
-export const getSavedQuerySchemaMock = (
-  anchorDate: string = ANCHOR_DATE
-): SavedQueryResponseSchema => ({
+
+export const getSavedQuerySchemaMock = (anchorDate: string = ANCHOR_DATE): SavedQueryRule => ({
   ...getResponseBaseParams(anchorDate),
   query: 'user.name: root or user.name: admin',
   type: 'saved_query',
@@ -90,9 +89,7 @@ export const getSavedQuerySchemaMock = (
   response_actions: undefined,
 });
 
-export const getRulesMlSchemaMock = (
-  anchorDate: string = ANCHOR_DATE
-): MachineLearningResponseSchema => {
+export const getRulesMlSchemaMock = (anchorDate: string = ANCHOR_DATE): MachineLearningRule => {
   return {
     ...getResponseBaseParams(anchorDate),
     type: 'machine_learning',
@@ -101,9 +98,7 @@ export const getRulesMlSchemaMock = (
   };
 };
 
-export const getThreatMatchingSchemaMock = (
-  anchorDate: string = ANCHOR_DATE
-): ThreatMatchResponseSchema => {
+export const getThreatMatchingSchemaMock = (anchorDate: string = ANCHOR_DATE): ThreatMatchRule => {
   return {
     ...getResponseBaseParams(anchorDate),
     type: 'threat_match',
@@ -145,9 +140,7 @@ export const getThreatMatchingSchemaMock = (
  * Useful for e2e backend tests where it doesn't have date time and other
  * server side properties attached to it.
  */
-export const getThreatMatchingSchemaPartialMock = (
-  enabled = false
-): Partial<ThreatMatchResponseSchema> => {
+export const getThreatMatchingSchemaPartialMock = (enabled = false): Partial<ThreatMatchRule> => {
   return {
     author: [],
     created_by: 'elastic',
@@ -216,7 +209,7 @@ export const getThreatMatchingSchemaPartialMock = (
   };
 };
 
-export const getRulesEqlSchemaMock = (anchorDate: string = ANCHOR_DATE): EqlResponseSchema => {
+export const getRulesEqlSchemaMock = (anchorDate: string = ANCHOR_DATE): EqlRule => {
   return {
     ...getResponseBaseParams(anchorDate),
     language: 'eql',

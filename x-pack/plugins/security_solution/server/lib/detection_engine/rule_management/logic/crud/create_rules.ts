@@ -8,12 +8,12 @@
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 
-import type { CreateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
+import type { RuleCreateProps } from '../../../../../../common/detection_engine/rule_schema';
 import { NOTIFICATION_THROTTLE_NO_ACTIONS } from '../../../../../../common/constants';
 import { convertCreateAPIToInternalSchema } from '../../normalization/rule_converters';
 import type { RuleParams } from '../../../rule_schema';
 
-export interface CreateRulesOptions<T extends CreateRulesSchema = CreateRulesSchema> {
+export interface CreateRulesOptions<T extends RuleCreateProps = RuleCreateProps> {
   rulesClient: RulesClient;
   params: T;
   id?: string;
