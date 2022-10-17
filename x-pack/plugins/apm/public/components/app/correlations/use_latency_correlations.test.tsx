@@ -194,34 +194,6 @@ describe('useLatencyCorrelations', () => {
 
         expect(result.current.progress).toEqual({
           error: undefined,
-          isRunning: true,
-          loaded: 1,
-        });
-
-        expect(result.current.response).toEqual({
-          ccsWarning: false,
-          latencyCorrelations: [
-            {
-              fieldName: 'field-name-1',
-              fieldValue: 'field-value-1',
-              correlation: 0.5,
-              histogram: [{ key: 'the-key', doc_count: 123 }],
-              ksTest: 0.001,
-            },
-          ],
-          overallHistogram: [
-            {
-              doc_count: 1234,
-              key: 'the-key',
-            },
-          ],
-          percentileThresholdValue: 1.234,
-        });
-
-        jest.advanceTimersByTime(100);
-
-        expect(result.current.progress).toEqual({
-          error: undefined,
           isRunning: false,
           loaded: 1,
         });
