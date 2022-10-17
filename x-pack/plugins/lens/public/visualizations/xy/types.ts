@@ -37,7 +37,7 @@ import {
 
 import { DistributiveOmit } from '@elastic/eui';
 import { CollapseFunction } from '../../../common/expressions';
-import type { VisualizationType, Suggestion } from '../../types';
+import type { VisualizationType } from '../../types';
 import type { ValueLabelConfig } from '../../../common/types';
 
 export const YAxisModes = {
