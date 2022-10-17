@@ -95,6 +95,8 @@ export const sampleAttributeKpi = {
         isVisible: true,
         showSingleSeries: true,
         position: 'right',
+        legendSize: 'large',
+        shouldTruncate: false,
       },
       preferredSeriesType: 'line',
       tickLabelsVisibilitySettings: {

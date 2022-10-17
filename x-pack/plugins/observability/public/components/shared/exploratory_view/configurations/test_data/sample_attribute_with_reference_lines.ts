@@ -322,6 +322,8 @@ export const sampleAttributeWithReferenceLines = {
         isVisible: true,
         position: 'right',
         showSingleSeries: true,
+        legendSize: 'large',
+        shouldTruncate: false,
       },
       preferredSeriesType: 'line',
       tickLabelsVisibilitySettings: {
