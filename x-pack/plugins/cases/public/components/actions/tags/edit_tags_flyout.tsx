@@ -15,6 +15,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 
@@ -38,6 +39,9 @@ const EditTagsFlyoutComponent: React.FC<Props> = ({ selectedCases, onClose, onSa
     unSelectedTags: [],
   });
 
+  const headerSubtitle =
+    selectedCases.length > 1 ? i18n.SELECTED_CASES(selectedCases.length) : selectedCases[0].title;
+
   return (
     <EuiFlyout
       ownFocus
@@ -51,6 +55,9 @@ const EditTagsFlyoutComponent: React.FC<Props> = ({ selectedCases, onClose, onSa
         <EuiTitle size="m">
           <h2 data-test-subj="cases-edit-tags-flyout-title">{i18n.EDIT_TAGS}</h2>
         </EuiTitle>
+        <EuiText color="subdued">
+          <p>{headerSubtitle}</p>
+        </EuiText>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EditTagsSelectable

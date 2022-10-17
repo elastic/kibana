@@ -264,20 +264,35 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
         <>
           {search}
           <EuiSpacer size="s" />
-          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
-            <EuiFlexItem grow={false}>
+          <EuiFlexGroup
+            alignItems="center"
+            justifyContent="spaceBetween"
+            responsive={false}
+            direction="row"
+          >
+            <EuiFlexItem>
               <EuiText size="xs" color="subdued">
-                {i18n.TOTAL_TAGS(0)}
+                {i18n.TOTAL_TAGS(tags.length)}
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup responsive={false}>
-                <EuiButtonEmpty size="xs" flush="right" onClick={onSelectAll}>
-                  {i18n.SELECT_ALL}
-                </EuiButtonEmpty>
-                <EuiButtonEmpty size="xs" flush="right" onClick={onSelectNone}>
-                  {i18n.SELECT_NONE}
-                </EuiButtonEmpty>
+              <EuiFlexGroup
+                responsive={false}
+                direction="row"
+                alignItems="center"
+                justifyContent="flexEnd"
+                gutterSize="xs"
+              >
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty size="xs" flush="right" onClick={onSelectAll}>
+                    {i18n.SELECT_ALL}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty size="xs" flush="right" onClick={onSelectNone}>
+                    {i18n.SELECT_NONE}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>

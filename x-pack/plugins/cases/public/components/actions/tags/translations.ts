@@ -39,3 +39,9 @@ export const EDITED_TAGS = (totalCases: number) =>
     values: { totalCases },
     defaultMessage: 'Edited {totalCases, plural, =1 {case} other {{totalCases} cases}}',
   });
+
+export const SELECTED_CASES = (totalCases: number) =>
+  i18n.translate('xpack.cases.actions.tags.headerSubtitle', {
+    values: { totalCases },
+    defaultMessage: 'Selected cases: {totalCases}',
+  });
