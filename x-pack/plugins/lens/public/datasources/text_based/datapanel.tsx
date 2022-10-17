@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormControlLayout, htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import usePrevious from 'react-use/lib/usePrevious';
@@ -17,6 +17,7 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { DatatableColumn, ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
+  ExistenceFetchStatus,
   FieldListGrouped,
   FieldListGroupedProps,
   FieldsGroupNames,
@@ -200,10 +201,10 @@ export function TextBasedDataPanel({
           <EuiFlexItem>
             <FieldListGrouped<DatatableColumn>
               fieldGroups={fieldGroups}
-              hasSyncedExistingFields={dataHasLoaded}
-              existenceFetchFailed={false}
-              existenceFetchTimeout={false}
-              existFieldsInIndex={!!fieldList.length}
+              fieldsExistenceStatus={
+                dataHasLoaded ? ExistenceFetchStatus.succeeded : ExistenceFetchStatus.unknown
+              }
+              existFieldsInIndex={Boolean(fieldList.length)}
               renderFieldItem={renderFieldItem}
               screenReaderDescriptionForSearchInputId={fieldSearchDescriptionId}
             />

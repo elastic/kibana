@@ -14,6 +14,7 @@ import { type DataViewField } from '@kbn/data-views-plugin/common';
 import { NoFieldsCallout } from './no_fields_callout';
 import { FieldsAccordion, type FieldsAccordionProps } from './fields_accordion';
 import type { FieldListGroups, FieldListItem } from '../../types';
+import { ExistenceFetchStatus } from '../../types';
 import './field_list_grouped.scss';
 
 const PAGINATION_SIZE = 50;
@@ -29,9 +30,7 @@ function getDisplayedFieldsLength<T extends FieldListItem>(
 
 export interface FieldListGroupedProps<T extends FieldListItem> {
   fieldGroups: FieldListGroups<T>;
-  hasSyncedExistingFields: boolean;
-  existenceFetchFailed?: boolean;
-  existenceFetchTimeout?: boolean;
+  fieldsExistenceStatus: ExistenceFetchStatus;
   existFieldsInIndex: boolean;
   renderFieldItem: FieldsAccordionProps<T>['renderFieldItem'];
   screenReaderDescriptionForSearchInputId?: string;
@@ -39,13 +38,14 @@ export interface FieldListGroupedProps<T extends FieldListItem> {
 
 function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
   fieldGroups,
-  existenceFetchFailed,
-  existenceFetchTimeout,
-  hasSyncedExistingFields,
+  fieldsExistenceStatus,
   existFieldsInIndex,
   renderFieldItem,
   screenReaderDescriptionForSearchInputId,
 }: FieldListGroupedProps<T>) {
+  const hasSyncedExistingFields =
+    fieldsExistenceStatus && fieldsExistenceStatus !== ExistenceFetchStatus.unknown;
+
   const [fieldGroupsToShow, fieldGroupsToCollapse] = partition(
     Object.entries(fieldGroups),
     ([, { showInAccordion }]) => showInAccordion
@@ -187,7 +187,7 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
                 label={fieldGroup.title}
                 helpTooltip={fieldGroup.helpText}
                 hideDetails={fieldGroup.hideDetails}
-                hasLoaded={!!hasSyncedExistingFields}
+                hasLoaded={hasSyncedExistingFields}
                 fieldsCount={fieldGroup.fields.length}
                 isFiltered={fieldGroup.fieldCount !== fieldGroup.fields.length}
                 paginatedFields={paginatedFields[key]}
@@ -205,8 +205,8 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
                     Math.max(PAGINATION_SIZE, Math.min(pageSize * 1.5, displayedFieldLength))
                   );
                 }}
-                showExistenceFetchError={existenceFetchFailed}
-                showExistenceFetchTimeout={existenceFetchTimeout}
+                showExistenceFetchError={fieldsExistenceStatus === ExistenceFetchStatus.failed}
+                showExistenceFetchTimeout={fieldsExistenceStatus === ExistenceFetchStatus.failed} // TODO: deprecate timeout logic?
                 renderCallout={() => (
                   <NoFieldsCallout
                     isAffectedByGlobalFilter={fieldGroup.isAffectedByGlobalFilter}

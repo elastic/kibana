@@ -31,7 +31,6 @@ import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin
 import { VISUALIZE_GEO_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import {
-  ExistenceFetchStatus,
   FieldsGroupNames,
   FieldListGrouped,
   type FieldListGroupedProps,
@@ -618,9 +617,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
         <EuiFlexItem>
           <FieldListGrouped<IndexPatternField>
             fieldGroups={fieldGroups}
-            hasSyncedExistingFields={fieldsExistenceStatus !== ExistenceFetchStatus.unknown}
-            existenceFetchFailed={fieldsExistenceStatus === ExistenceFetchStatus.failed}
-            existenceFetchTimeout={fieldsExistenceStatus === ExistenceFetchStatus.failed} // TODO: deprecate?
+            fieldsExistenceStatus={fieldsExistenceStatus}
             existFieldsInIndex={!!allFields.length}
             renderFieldItem={renderFieldItem}
             screenReaderDescriptionForSearchInputId={fieldSearchDescriptionId}
