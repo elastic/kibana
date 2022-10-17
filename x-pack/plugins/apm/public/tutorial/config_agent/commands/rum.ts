@@ -7,6 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const rumVariables = {
+  apmServiceName: 'serviceName',
+  apmServerUrl: 'serverUrl',
+  apmServiceVersion: 'serviceVersion',
+  apmEnvironment: 'environment',
+};
+
 export const rum = `import { init as initApm } from '@elastic/apm-rum'
 var apm = initApm({
 
@@ -17,7 +24,7 @@ var apm = initApm({
         'Set required service name (allowed characters: a-z, A-Z, 0-9, -, _, and space)',
     }
   )}
-  serviceName: 'your-app-name',
+  ${rumVariables.apmServiceName}: '{{{apmServiceName}}}',
 
   // ${i18n.translate(
     'xpack.apm.tutorial.jsClient.installDependency.commands.setCustomApmServerUrlComment',
@@ -27,7 +34,7 @@ var apm = initApm({
       values: { defaultApmServerUrl: 'http://localhost:8200' },
     }
   )}
-  serverUrl: '{{{apmServerUrl}}}',
+  ${rumVariables.apmServerUrl}: '{{{apmServerUrl}}}',
 
   // ${i18n.translate(
     'xpack.apm.tutorial.jsClient.installDependency.commands.setServiceVersionComment',
@@ -44,15 +51,15 @@ var apm = initApm({
       defaultMessage: 'Set the service environment',
     }
   )}
-  environment: 'production'
+  ${rumVariables.apmEnvironment}: '{{{apmEnvironment}}}'
 })`;
 
 export const rumScript = `\
 <script src="https://your-cdn-host.com/path/to/elastic-apm-rum.umd.min.js" crossorigin></script>
 <script>
   elasticApm.init({
-    serviceName: 'your-app-name',
-    serverUrl: '{{{apmServerUrl}}}',
+    ${rumVariables.apmServiceName}: '{{{apmServiceName}}}',
+    ${rumVariables.apmServerUrl}: '{{{apmServerUrl}}}',
   })
 </script>
 `;

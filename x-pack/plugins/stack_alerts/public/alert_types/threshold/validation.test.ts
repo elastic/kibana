@@ -94,4 +94,21 @@ describe('expression params validation', () => {
     expect(validateExpression(initialParams).errors.threshold1.length).toBeGreaterThan(0);
     expect(validateExpression(initialParams).errors.threshold1[0]).toBe('Threshold1 is required.');
   });
+
+  test('if filterKuery is invalid should return proper error message', () => {
+    const initialParams: IndexThresholdAlertParams = {
+      index: ['test'],
+      aggType: 'count',
+      groupBy: 'top',
+      threshold: [1],
+      timeWindowSize: 1,
+      timeWindowUnit: 's',
+      thresholdComparator: 'between',
+      filterKuery: 'group:',
+    };
+    expect(validateExpression(initialParams).errors.filterKuery.length).toBeGreaterThan(0);
+    expect(validateExpression(initialParams).errors.filterKuery[0]).toBe(
+      'Filter query is invalid.'
+    );
+  });
 });

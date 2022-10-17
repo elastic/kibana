@@ -11,7 +11,8 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { basicCase, caseUserActions, getAlertUserAction } from '../../containers/mock';
-import { CaseActionBar, CaseActionBarProps } from '.';
+import type { CaseActionBarProps } from '.';
+import { CaseActionBar } from '.';
 import {
   allCasesPermissions,
   noDeleteCasesPermissions,
