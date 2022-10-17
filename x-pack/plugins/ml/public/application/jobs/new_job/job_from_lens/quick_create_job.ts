@@ -108,7 +108,7 @@ export class QuickJobCreator {
 
     // calculate model memory limit
     try {
-      if (start !== undefined && end !== undefined) {
+      if (start !== undefined && end !== undefined && datafeedConfig.indices.length > 0) {
         const { modelMemoryLimit } = await firstValueFrom(
           this.mlApiServices.calculateModelMemoryLimit$({
             datafeedConfig: datafeed,
