@@ -46,6 +46,10 @@ encourage users to run the same versions of Kibana and Elasticsearch down to
 the patch version.
 --
 
+:leveloffset: +1
+include::{kib-repo-dir}/user/production-considerations/production.asciidoc[]
+:leveloffset: 0
+
 include::{kib-repo-dir}/setup/install.asciidoc[]
 
 include::{kib-repo-dir}/setup/settings.asciidoc[]
@@ -72,3 +76,4 @@ include::monitoring/viewing-metrics.asciidoc[leveloffset=+2]
 include::monitoring/monitoring-kibana.asciidoc[leveloffset=+2]
 
 include::commands/cli-commands.asciidoc[]
+:leveloffset: 0

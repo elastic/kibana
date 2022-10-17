@@ -116,3 +116,10 @@ The option accepts a limit in MB:
 --------
 --max-old-space-size=2048
 --------
+
+include::security-production-considerations.asciidoc[]
+include::alerting-production-considerations.asciidoc[]
+include::reporting-production-considerations.asciidoc[]
+include::task-manager-production-considerations.asciidoc[]
+include::task-manager-health-monitoring.asciidoc[]
+include::task-manager-troubleshooting.asciidoc[]

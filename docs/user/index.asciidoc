@@ -1,30 +1,17 @@
 include::introduction.asciidoc[]
+:leveloffset: +1
+include::{kib-repo-dir}/concepts/index.asciidoc[]
+:leveloffset: 0
 
 include::whats-new.asciidoc[]
 
-include::{kib-repo-dir}/concepts/index.asciidoc[]
 
-include::{kib-repo-dir}/getting-started/quick-start-guide.asciidoc[]
+// Since 8.4, the product no longer encourages adding sample data, and the docs now have other entry points for starting to use Elastic.
+//include::{kib-repo-dir}/getting-started/quick-start-guide.asciidoc[]
 
 include::setup.asciidoc[]
 
-include::production-considerations/index.asciidoc[]
-
-include::discover.asciidoc[]
-
-include::dashboard/dashboard.asciidoc[]
-
-include::canvas.asciidoc[]
-
-include::{kib-repo-dir}/maps/index.asciidoc[]
-
-include::reporting/index.asciidoc[]
-
-include::ml/index.asciidoc[]
-
-include::graph/index.asciidoc[]
-
-include::alerting/index.asciidoc[]
+include::discover-visualize-share.asciidoc[]
 
 include::{kib-repo-dir}/observability/index.asciidoc[]
 

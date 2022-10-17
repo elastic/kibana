@@ -1,0 +1,34 @@
+= Discover, visualize, analyze
+
+*Explore.* With <<discover,*Discover*>>, you can search your data for hidden
+insights and relationships. Ask your questions, and then filter the results to just the data you want.
+You can limit your results to the most recent documents added to {es}.
+
+*Visualize.* {kib} provides many options to create visualizations of your data, from
+aggregation-based data to time series data to geo data.
+<<dashboard, *Dashboard*>> is your starting point to create visualizations,
+and then pulling them together to show your data from multiple perspectives.
+Use <<canvas, *Canvas*>>,
+to give your data
+the “wow” factor for display on a big screen. Use *Graph* to explore patterns and relationships.
+
+*Share.* Ready to <<reporting-getting-started, share>> your findings with a larger audience? {kib} offers many options&mdash;embed
+a dashboard, share a link, export to PDF, and more.
+
+:leveloffset: +1
+include::discover.asciidoc[]
+
+include::dashboard/dashboard.asciidoc[]
+
+include::canvas.asciidoc[]
+
+include::{kib-repo-dir}/maps/index.asciidoc[]
+
+include::reporting/index.asciidoc[]
+
+include::ml/index.asciidoc[]
+
+include::graph/index.asciidoc[]
+
+include::alerting/index.asciidoc[]
+:leveloffset: 0
