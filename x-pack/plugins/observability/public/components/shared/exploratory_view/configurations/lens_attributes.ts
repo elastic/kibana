@@ -389,13 +389,15 @@ export class LensAttributes {
     | CardinalityIndexPatternColumn {
     return {
       ...buildNumberColumn(sourceField),
-      label: i18n.translate('xpack.observability.expView.columns.operation.label', {
-        defaultMessage: '{operationType} of {sourceField}',
-        values: {
-          sourceField: label || seriesConfig.labels[sourceField],
-          operationType: capitalize(operationType),
-        },
-      }),
+      label:
+        label ??
+        i18n.translate('xpack.observability.expView.columns.operation.label', {
+          defaultMessage: '{operationType} of {sourceField}',
+          values: {
+            sourceField: seriesConfig.labels[sourceField],
+            operationType: capitalize(operationType),
+          },
+        }),
       filter: columnFilter,
       operationType,
     };
@@ -552,7 +554,7 @@ export class LensAttributes {
     const { type: fieldType } = fieldMeta ?? {};
 
     if (columnType === TERMS_COLUMN) {
-      return this.getTermsColumn(fieldName, columnLabel || label);
+      return this.getTermsColumn(fieldName, label || columnLabel);
     }
 
     if (fieldName === RECORDS_FIELD || columnType === FILTER_RECORDS) {
@@ -584,14 +586,14 @@ export class LensAttributes {
         columnType,
         columnFilter: columnFilters?.[0],
         operationType,
-        label: columnLabel || label,
+        label: label || columnLabel,
         seriesConfig: layerConfig.seriesConfig,
       });
     }
     if (operationType === 'unique_count') {
       return this.getCardinalityColumn({
         sourceField: fieldName,
-        label: columnLabel || label,
+        label: label || columnLabel,
         seriesConfig: layerConfig.seriesConfig,
       });
     }
@@ -646,8 +648,18 @@ export class LensAttributes {
 
   getMainYAxis(layerConfig: LayerConfig, layerId: string, columnFilter: string) {
     const { breakdown } = layerConfig;
-    const { sourceField, operationType, label, timeScale } =
-      layerConfig.seriesConfig.yAxisColumns[0];
+    const {
+      sourceField,
+      operationType,
+      label: colLabel,
+      timeScale,
+    } = layerConfig.seriesConfig.yAxisColumns[0];
+
+    let label = layerConfig.name || colLabel;
+
+    if (layerConfig.seriesConfig.reportType === ReportTypes.CORE_WEB_VITAL) {
+      label = colLabel;
+    }
 
     if (sourceField === RECORDS_PERCENTAGE_FIELD) {
       return getDistributionInPercentageColumn({
@@ -923,7 +935,13 @@ export class LensAttributes {
 
   getXyState(): XYState {
     return {
-      legend: { isVisible: true, showSingleSeries: true, position: 'right' },
+      legend: {
+        isVisible: true,
+        showSingleSeries: true,
+        position: 'right',
+        legendSize: 'large',
+        shouldTruncate: false,
+      },
       valueLabels: 'hide',
       fittingFunction: 'Linear',
       curveType: 'CURVE_MONOTONE_X' as XYCurveType,

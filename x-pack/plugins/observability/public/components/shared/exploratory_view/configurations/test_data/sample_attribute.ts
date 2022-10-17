@@ -67,7 +67,7 @@ export const sampleAttribute = {
                     'transaction.type: page-load and processor.event: transaction and transaction.type : *',
                 },
                 isBucketed: false,
-                label: 'Pages loaded',
+                label: 'test-series',
                 operationType: 'formula',
                 params: {
                   format: {

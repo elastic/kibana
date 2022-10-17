@@ -45,7 +45,7 @@ export const sampleAttributeKpi = {
                   query: 'transaction.type: page-load and processor.event: transaction',
                 },
                 isBucketed: false,
-                label: 'Page views',
+                label: 'test-series',
                 operationType: 'count',
                 scale: 'ratio',
                 sourceField: RECORDS_FIELD,
