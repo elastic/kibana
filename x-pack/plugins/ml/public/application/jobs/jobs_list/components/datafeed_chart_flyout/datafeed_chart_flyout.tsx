@@ -523,7 +523,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                           key={'job-results'}
                           color={euiTheme.euiColorAccentText}
                           id={i18n.translate('xpack.ml.jobsList.datafeedChart.bucketSeriesId', {
-                            defaultMessage: 'Count of documents read by datafeed',
+                            defaultMessage: 'Datafeed document count',
                           })}
                           xScaleType={ScaleType.Time}
                           yScaleType={ScaleType.Linear}
