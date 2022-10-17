@@ -12,28 +12,31 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { nodeBuilder, fromKueryExpression, KueryNode, escapeKuery } from '@kbn/es-query';
+import type { KueryNode } from '@kbn/es-query';
+import { nodeBuilder, fromKueryExpression, escapeKuery } from '@kbn/es-query';
 import {
   isCommentRequestTypeExternalReference,
   isCommentRequestTypePersistableState,
 } from '../../common/utils/attachments';
 import { CASE_SAVED_OBJECT, NO_ASSIGNEES_FILTERING_KEYWORD } from '../../common/constants';
+import type {
+  CaseStatuses,
+  CommentRequest,
+  CaseSeverity,
+  CommentRequestExternalReferenceType,
+  CasesFindQueryParams,
+} from '../../common/api';
 import {
   OWNER_FIELD,
   AlertCommentRequestRt,
   ActionsCommentRequestRt,
-  CaseStatuses,
-  CommentRequest,
   ContextTypeUserRt,
   excess,
   throwErrors,
-  CaseSeverity,
   ExternalReferenceStorageType,
   ExternalReferenceSORt,
-  CommentRequestExternalReferenceType,
   ExternalReferenceNoSORt,
   PersistableStateAttachmentRt,
-  CasesFindQueryParams,
 } from '../../common/api';
 import { combineFilterWithAuthorizationFilter } from '../authorization/utils';
 import {
@@ -43,7 +46,7 @@ import {
   isCommentRequestTypeActions,
   assertUnreachable,
 } from '../common/utils';
-import { SavedObjectFindOptionsKueryNode } from '../common/types';
+import type { SavedObjectFindOptionsKueryNode } from '../common/types';
 
 export const decodeCommentRequest = (comment: CommentRequest) => {
   if (isCommentRequestTypeUser(comment)) {

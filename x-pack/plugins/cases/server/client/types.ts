@@ -6,14 +6,14 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { SavedObjectsClientContract, Logger } from '@kbn/core/server';
-import { ActionsClient } from '@kbn/actions-plugin/server';
-import { LensServerPluginSetup } from '@kbn/lens-plugin/server';
-import { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { IBasePath } from '@kbn/core-http-browser';
-import { User } from '../../common/api';
-import { Authorization } from '../authorization/authorization';
-import {
+import type { SavedObjectsClientContract, Logger } from '@kbn/core/server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { IBasePath } from '@kbn/core-http-browser';
+import type { User } from '../../common/api';
+import type { Authorization } from '../authorization/authorization';
+import type {
   CaseConfigureService,
   CasesService,
   CaseUserActionService,
@@ -21,9 +21,9 @@ import {
   AttachmentService,
   AlertService,
 } from '../services';
-import { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
-import { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
-import { LicensingService } from '../services/licensing';
+import type { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
+import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
+import type { LicensingService } from '../services/licensing';
 
 export interface CasesServices {
   alertsService: AlertService;
