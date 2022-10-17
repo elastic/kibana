@@ -126,15 +126,15 @@ export class SyntheticsMonitorClient {
     savedObjectsClient: SavedObjectsClientContract,
     spaceId: string
   ) {
+    /* Type cast encrypted saved objects to decrypted saved objects for delete flow only.
+     * Deletion does not require all monitor fields */
     const privateDeletePromise = this.privateLocationAPI.deleteMonitors(
-      monitors,
+      monitors as SyntheticsMonitorWithId[],
       request,
       savedObjectsClient,
       spaceId
     );
 
-    /* Type cast encrypted saved objects to decrypted saved objects for delete flow only.
-     * Deletion does not require all monitor fields */
     const publicDeletePromise = this.syntheticsService.deleteConfigs(
       monitors as SyntheticsMonitorWithId[]
     );
