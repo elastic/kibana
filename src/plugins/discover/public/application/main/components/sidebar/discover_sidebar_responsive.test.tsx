@@ -28,6 +28,8 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import { DiscoverAppStateProvider } from '../../services/discover_app_state_container';
 
 jest.mock('@kbn/unified-field-list-plugin/public/services/field_stats', () => ({
   loadFieldStats: jest.fn().mockResolvedValue({
@@ -166,10 +168,6 @@ function getCompProps(): DiscoverSidebarResponsiveProps {
     onAddField: jest.fn(),
     onRemoveField: jest.fn(),
     selectedDataView: dataView,
-    state: {
-      query: { query: '', language: 'lucene' },
-      filters: [],
-    },
     trackUiMetric: jest.fn(),
     onFieldEdited: jest.fn(),
     viewMode: VIEW_MODE.DOCUMENT_LEVEL,
@@ -185,9 +183,17 @@ describe('discover responsive sidebar', function () {
   beforeAll(async () => {
     props = getCompProps();
     await act(async () => {
+      const appStateContainer = getDiscoverStateMock({ isTimeBased: true }).appStateContainer;
+      appStateContainer.set({
+        query: { query: '', language: 'lucene' },
+        filters: [],
+      });
+
       comp = await mountWithIntl(
         <KibanaContextProvider services={mockServices}>
-          <DiscoverSidebarResponsive {...props} />
+          <DiscoverAppStateProvider value={appStateContainer}>
+            <DiscoverSidebarResponsive {...props} />
+          </DiscoverAppStateProvider>
         </KibanaContextProvider>
       );
       // wait for lazy modules
@@ -262,14 +268,16 @@ describe('discover responsive sidebar', function () {
         recordRawType: RecordRawType.PLAIN,
         result: getDataTableRecords(stubLogstashDataView),
       }) as DataDocuments$,
-      state: {
-        ...initialProps.state,
-        query: { sql: 'SELECT * FROM `index`' },
-      },
     };
+    const appStateContainer = getDiscoverStateMock({ isTimeBased: true }).appStateContainer;
+    appStateContainer.set({
+      query: { sql: 'SELECT * FROM `index`' },
+    });
     const compInViewerMode = mountWithIntl(
       <KibanaContextProvider services={mockServices}>
-        <DiscoverSidebarResponsive {...propsWithTextBasedMode} />
+        <DiscoverAppStateProvider value={appStateContainer}>
+          <DiscoverSidebarResponsive {...propsWithTextBasedMode} />
+        </DiscoverAppStateProvider>
       </KibanaContextProvider>
     );
     expect(findTestSubject(compInViewerMode, 'indexPattern-add-field_btn').length).toBe(0);
@@ -286,9 +294,16 @@ describe('discover responsive sidebar', function () {
         },
       },
     };
+    const appStateContainer = getDiscoverStateMock({ isTimeBased: true }).appStateContainer;
+    appStateContainer.set({
+      query: { query: '', language: 'lucene' },
+      filters: [],
+    });
     const compInViewerMode = mountWithIntl(
       <KibanaContextProvider services={mockedServicesInViewerMode}>
-        <DiscoverSidebarResponsive {...props} />
+        <DiscoverAppStateProvider value={appStateContainer}>
+          <DiscoverSidebarResponsive {...props} />
+        </DiscoverAppStateProvider>
       </KibanaContextProvider>
     );
     expect(

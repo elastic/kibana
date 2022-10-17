@@ -10,27 +10,29 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { ToastInputFields } from '@kbn/core/public';
-import {
+import type { ToastInputFields } from '@kbn/core/public';
+import type {
   CaseResponse,
-  CaseResponseRt,
   CasesResponse,
-  CasesResponseRt,
-  throwErrors,
   CasesConfigurationsResponse,
-  CaseConfigurationsResponseRt,
   CasesConfigureResponse,
-  CaseConfigureResponseRt,
   CaseUserActionsResponse,
-  CaseUserActionsResponseRt,
-  CommentType,
   CasePatchRequest,
   CaseResolveResponse,
-  CaseResolveResponseRt,
   SingleCaseMetricsResponse,
+} from '../../common/api';
+import {
+  CaseResponseRt,
+  CasesResponseRt,
+  throwErrors,
+  CaseConfigurationsResponseRt,
+  CaseConfigureResponseRt,
+  CaseUserActionsResponseRt,
+  CommentType,
+  CaseResolveResponseRt,
   SingleCaseMetricsResponseRt,
 } from '../../common/api';
-import { Case, UpdateByKey } from './types';
+import type { Case, UpdateByKey } from './types';
 import * as i18n from './translations';
 
 export const getTypedPayload = <T>(a: unknown): T => a as T;
