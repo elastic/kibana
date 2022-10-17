@@ -38,6 +38,7 @@ export const getRateMetricAgg = () => {
       {
         name: 'field',
         type: 'field',
+        required: false,
         filterFieldTypes: [KBN_FIELD_TYPES.NUMBER, KBN_FIELD_TYPES.HISTOGRAM],
       },
       {
