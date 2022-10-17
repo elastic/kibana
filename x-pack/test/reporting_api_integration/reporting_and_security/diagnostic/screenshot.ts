@@ -9,6 +9,13 @@ import expect from '@kbn/expect';
 import assert from 'assert';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+interface ScreenshotResponse {
+  logs: string[];
+  capture: string;
+  help: string[];
+  success: true;
+}
+
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
@@ -18,7 +25,7 @@ export default function ({ getService }: FtrProviderContext) {
     const username = 'elastic';
     const password = process.env.TEST_KIBANA_PASS || 'changeme';
 
-    let body: any;
+    let body: ScreenshotResponse;
     let status: number;
 
     before(async () => {

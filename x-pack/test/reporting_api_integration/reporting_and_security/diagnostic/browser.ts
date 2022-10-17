@@ -17,7 +17,7 @@ export default function ({ getService }: FtrProviderContext) {
     const username = 'elastic';
     const password = process.env.TEST_KIBANA_PASS || 'changeme';
 
-    let body: any;
+    let body: { logs: string[] };
     let status: number;
 
     before(async () => {
