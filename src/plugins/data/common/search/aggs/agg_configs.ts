@@ -115,7 +115,10 @@ export class AggConfigs {
   }
 
   isSamplingEnabled() {
-    return isSamplingEnabled(this.opts.probability);
+    return (
+      isSamplingEnabled(this.opts.probability) &&
+      this.getRequestAggs().filter((agg) => !agg.type.hasNoDsl).length > 0
+    );
   }
 
   setTimeFields(timeFields: string[] | undefined) {
@@ -240,13 +243,6 @@ export class AggConfigs {
     let dslLvlCursor: Record<string, any>;
     let nestedMetrics: Array<{ config: AggConfig; dsl: Record<string, any> }> | [];
 
-    if (this.isSamplingEnabled()) {
-      dslTopLvl.sampling = createSamplerAgg({
-        probability: this.opts.probability ?? 1,
-        seed: this.opts.samplerSeed,
-      });
-    }
-
     const timeShifts = this.getTimeShifts();
     const hasMultipleTimeShifts = Object.keys(timeShifts).length > 1;
 
@@ -271,6 +267,13 @@ export class AggConfigs {
     const timeSplitIndex = this.getAll().findIndex(
       (config) => 'splitForTimeShift' in config.type && config.type.splitForTimeShift(config, this)
     );
+
+    if (this.isSamplingEnabled()) {
+      dslTopLvl.sampling = createSamplerAgg({
+        probability: this.opts.probability ?? 1,
+        seed: this.opts.samplerSeed,
+      });
+    }
 
     requestAggs.forEach((config: AggConfig, i: number, list) => {
       if (!dslLvlCursor) {
