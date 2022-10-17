@@ -8,21 +8,21 @@
 import { isEmpty } from 'lodash/fp';
 import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { getAllConnectorTypesUrl } from '../../../common/utils/connectors_api';
-import {
+import type {
   ActionConnector,
   ActionTypeConnector,
   CasesConfigurePatch,
   CasesConfigureRequest,
   CasesConfigureResponse,
   CasesConfigurationsResponse,
-  getCaseConfigurationDetailsUrl,
 } from '../../../common/api';
+import { getCaseConfigurationDetailsUrl } from '../../../common/api';
 import { CASE_CONFIGURE_CONNECTORS_URL, CASE_CONFIGURE_URL } from '../../../common/constants';
 import { KibanaServices } from '../../common/lib/kibana';
 import { convertToCamelCase, convertArrayToCamelCase } from '../../api/utils';
-import { ApiProps } from '../types';
+import type { ApiProps } from '../types';
 import { decodeCaseConfigurationsResponse, decodeCaseConfigureResponse } from '../utils';
-import { CaseConfigure } from './types';
+import type { CaseConfigure } from './types';
 
 export const fetchConnectors = async ({ signal }: ApiProps): Promise<ActionConnector[]> => {
   const response = await KibanaServices.get().http.fetch<ActionConnector[]>(
