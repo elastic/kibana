@@ -37,6 +37,7 @@ export const Markdown = ({
 }: MarkdownProps) => {
   const [value, setValue] = useState(defaultValue);
 
+  // Render EuiMarkdownFormat
   if (readOnly && children) {
     return (
       <EuiMarkdownFormat aria-label={ariaLabelContent ?? 'markdown component'}>
@@ -50,7 +51,8 @@ export const Markdown = ({
       </EuiMarkdownFormat>
     );
   }
-
+  
+  // Otherwise render the Markdown Editor
   return (
     <EuiMarkdownEditor
       readOnly={readOnly}
