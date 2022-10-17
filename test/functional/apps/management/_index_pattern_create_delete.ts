@@ -132,7 +132,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.settings.editIndexPattern(
           'logstash-*,hello_world*',
           '@timestamp',
-          'Logstash Star'
+          'Logstash Star',
+          true
         );
 
         await retry.try(async () => {
