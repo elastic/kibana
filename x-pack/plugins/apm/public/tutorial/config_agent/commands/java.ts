@@ -8,7 +8,7 @@
 export const javaVariables = {
   apmServiceName: 'Delastic.apm.service_name',
   secretToken: 'Delastic.apm.secret_token',
-  apmServerUrl: 'Delastic.apm.server_urls',
+  apmServerUrl: 'Delastic.apm.server_url',
   apmEnvironment: 'Delastic.apm.environment',
 };
 

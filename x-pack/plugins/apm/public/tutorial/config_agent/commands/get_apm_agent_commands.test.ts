@@ -36,7 +36,7 @@ describe('getCommands', () => {
         "java -javaagent:/path/to/elastic-apm-agent-<version>.jar \\\\
         -Delastic.apm.service_name=my-service-name \\\\
         -Delastic.apm.secret_token= \\\\
-        -Delastic.apm.server_urls= \\\\
+        -Delastic.apm.server_url= \\\\
         -Delastic.apm.environment=production \\\\
         -Delastic.apm.application_packages=org.example \\\\
         -jar my-service-name.jar"
@@ -56,7 +56,7 @@ describe('getCommands', () => {
         "java -javaagent:/path/to/elastic-apm-agent-<version>.jar \\\\
         -Delastic.apm.service_name=my-service-name \\\\
         -Delastic.apm.secret_token=foobar \\\\
-        -Delastic.apm.server_urls=localhost:8220 \\\\
+        -Delastic.apm.server_url=localhost:8220 \\\\
         -Delastic.apm.environment=production \\\\
         -Delastic.apm.application_packages=org.example \\\\
         -jar my-service-name.jar"
