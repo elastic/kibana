@@ -7,6 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { setupServer } from '@kbn/core/server/test_utils';
+import * as Rx from 'rxjs';
 import supertest from 'supertest';
 import { ReportingCore } from '../../..';
 import { generatePngObservable } from '../../../export_types/common';
@@ -17,7 +18,6 @@ import {
 } from '../../../test_helpers';
 import type { ReportingRequestHandlerContext } from '../../../types';
 import { registerDiagnoseScreenshot } from '../screenshot';
-import { defer } from 'rxjs';
 
 jest.mock('../../../export_types/common/generate_png');
 
@@ -32,7 +32,7 @@ describe('POST /diagnose/screenshot', () => {
   const setScreenshotResponse = (resp: object | Error) => {
     const generateMock = {
       pipe: () =>
-        defer(() => (resp instanceof Error ? Promise.reject(resp) : Promise.resolve(resp))),
+        Rx.defer(() => (resp instanceof Error ? Promise.reject(resp) : Promise.resolve(resp))),
     };
     (generatePngObservable as jest.Mock).mockReturnValue(generateMock);
   };

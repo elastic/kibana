@@ -61,22 +61,21 @@ export const registerDiagnoseScreenshot = (reporting: ReportingCore, logger: Log
             request: req,
             browserTimezone: 'UTC',
             urls: [hashUrl],
-          })
+          }).pipe()
         );
-
-        assert(result, 'PNG result is undefined');
-        assert(result.buffer, 'PNG result buffer is undefined');
 
         logs = result.logs$ ? await lastValueFrom(result.logs$.pipe(toArray())) : [];
 
-        if (result.warnings.length) {
+        if (result.warnings?.length) {
           response.success = false;
           response.logs = result.warnings.concat(logs);
         } else {
           response.logs = logs;
         }
 
-        response.capture = result.buffer.toString('base64');
+        response.capture = result.buffer?.toString('base64');
+        assert(result, 'PNG result is undefined');
+        assert(result.buffer, 'PNG result buffer is undefined');
       } catch (err) {
         response = {
           success: false,

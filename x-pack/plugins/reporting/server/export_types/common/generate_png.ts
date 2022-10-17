@@ -15,9 +15,9 @@ import type { PngMetrics } from '../../../common/types';
 import type { PngScreenshotOptions } from '../../types';
 
 interface PngResult {
-  buffer: Buffer;
+  buffer?: Buffer;
   metrics?: PngMetrics;
-  warnings: string[];
+  warnings?: string[];
   logs$?: Rx.Observable<string>;
 }
 
