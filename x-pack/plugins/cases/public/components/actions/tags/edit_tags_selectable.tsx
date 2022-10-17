@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useReducer, useState } from 'react';
 import {
   EuiSelectable,
   EuiSpacer,
@@ -18,9 +18,11 @@ import {
   EuiSelectableOption,
   EuiHighlight,
   EuiSelectableListItem,
+  IconType,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { assertNever } from '@kbn/std';
 import { Case } from '../../../../common';
 import * as i18n from './translations';
 import { TagsSelectionState } from './types';
@@ -31,6 +33,72 @@ interface Props {
   isLoading: boolean;
   onChangeTags: (args: TagsSelectionState) => void;
 }
+
+const enum TagState {
+  CHECKED = 'checked',
+  PARTIAL = 'partial',
+  UNCHECKED = 'unchecked',
+}
+
+const enum Actions {
+  CHECK_TAG,
+  UNCHECK_TAG,
+}
+
+const enum ICONS {
+  CHECKED = 'check',
+  PARTIAL = 'asterisk',
+  UNCHECKED = 'empty',
+}
+
+type Action =
+  | { type: Actions.CHECK_TAG; payload: string[] }
+  | { type: Actions.UNCHECK_TAG; payload: string[] };
+
+type State = Record<string, { tagState: TagState; dirty: boolean; icon: IconType }>;
+
+const tagsReducer: React.Reducer<State, Action> = (state: State, action): State => {
+  switch (action.type) {
+    case Actions.CHECK_TAG:
+      return state;
+    case Actions.UNCHECK_TAG:
+      return state;
+
+    default:
+      assertNever(action);
+  }
+};
+
+const getInitialTagsState = ({
+  tags,
+  selectedCases,
+}: {
+  tags: string[];
+  selectedCases: Case[];
+}): State => {
+  const tagCounterMap = createTagsCounterMapping(selectedCases);
+  const totalCases = selectedCases.length;
+  const state: State = {};
+
+  for (const tag of tags) {
+    const tagCounter = tagCounterMap.get(tag) ?? 0;
+    const isCheckedTag = tagCounter === totalCases;
+    const isPartialTag = tagCounter < totalCases && tagCounter !== 0;
+    const tagState = isCheckedTag
+      ? TagState.CHECKED
+      : isPartialTag
+      ? TagState.PARTIAL
+      : TagState.UNCHECKED;
+
+    const icon = isCheckedTag ? ICONS.CHECKED : isPartialTag ? ICONS.PARTIAL : ICONS.UNCHECKED;
+
+    state[tag] = { tagState, dirty: isCheckedTag, icon };
+
+    return state;
+  }
+
+  return state;
+};
 
 const createTagsCounterMapping = (selectedCases: Case[]) => {
   const counterMap = new Map<string, number>();
@@ -132,6 +200,7 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
   isLoading,
   onChangeTags,
 }) => {
+  const [state, dispatch] = useReducer(tagsReducer, getInitialTagsState({ tags, selectedCases }));
   const tagCounterMap = useMemo(() => createTagsCounterMapping(selectedCases), [selectedCases]);
   const initialState = useMemo(
     () => initTagsState({ tags, totalCases: selectedCases.length, tagCounterMap }),
