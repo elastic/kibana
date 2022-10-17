@@ -72,6 +72,17 @@ const getLogCategorizationBreadcrumbs = (navigateToPath: NavigateToPath, basePat
   },
 ];
 
+const getChangePointDetectionBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string) => [
+  getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
+  getBreadcrumbWithUrlForApp('AIOPS_BREADCRUMB_CHANGE_POINT_DETECTION', navigateToPath, basePath),
+  getBreadcrumbWithUrlForApp('CHANGE_POINT_DETECTION', navigateToPath, basePath),
+  {
+    text: i18n.translate('xpack.ml.aiopsBreadcrumbs.selectDateViewLabel', {
+      defaultMessage: 'Select Data View',
+    }),
+  },
+];
+
 export const indexOrSearchRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
@@ -146,6 +157,26 @@ export const logCategorizationIndexOrSearchRouteFactory = (
     />
   ),
   breadcrumbs: getLogCategorizationBreadcrumbs(navigateToPath, basePath),
+});
+
+export const changePointDetectionIndexOrSearchRouteFactory = (
+  navigateToPath: NavigateToPath,
+  basePath: string
+): MlRoute => ({
+  id: 'data_view_change_point_detection',
+  path: '/aiops/change_point_detection_index_select',
+  title: i18n.translate('xpack.ml.selectDataViewLabel', {
+    defaultMessage: 'Select Data View',
+  }),
+  render: (props, deps) => (
+    <PageWrapper
+      {...props}
+      nextStepPath="aiops/change_point_detection"
+      deps={deps}
+      mode={MODE.DATAVISUALIZER}
+    />
+  ),
+  breadcrumbs: getChangePointDetectionBreadcrumbs(navigateToPath, basePath),
 });
 
 const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, deps, mode }) => {

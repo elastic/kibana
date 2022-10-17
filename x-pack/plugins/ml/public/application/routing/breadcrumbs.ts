@@ -71,7 +71,7 @@ export const AIOPS_BREADCRUMB_LOG_PATTERN_ANALYSIS: ChromeBreadcrumb = Object.fr
   href: '/aiops/log_categorization_index_select',
 });
 
-export const AIOPS_CHANGE_POINT_DETECTION: ChromeBreadcrumb = Object.freeze({
+export const AIOPS_BREADCRUMB_CHANGE_POINT_DETECTION: ChromeBreadcrumb = Object.freeze({
   text: i18n.translate('xpack.ml.aiopsBreadcrumbLabel', {
     defaultMessage: 'AIOps Labs',
   }),
@@ -88,6 +88,13 @@ export const EXPLAIN_LOG_RATE_SPIKES: ChromeBreadcrumb = Object.freeze({
 export const LOG_PATTERN_ANALYSIS: ChromeBreadcrumb = Object.freeze({
   text: i18n.translate('xpack.ml.aiops.logPatternAnalysisBreadcrumbLabel', {
     defaultMessage: 'Log Pattern Analysis',
+  }),
+  href: '/aiops/log_categorization_index_select',
+});
+
+export const CHANGE_POINT_DETECTION: ChromeBreadcrumb = Object.freeze({
+  text: i18n.translate('xpack.ml.aiops.changePointDetectionBreadcrumbLabel', {
+    defaultMessage: 'Change Point Detection',
   }),
   href: '/aiops/log_categorization_index_select',
 });
@@ -122,9 +129,10 @@ const breadcrumbs = {
   DATA_VISUALIZER_BREADCRUMB,
   AIOPS_BREADCRUMB_EXPLAIN_LOG_RATE_SPIKES,
   AIOPS_BREADCRUMB_LOG_PATTERN_ANALYSIS,
-  AIOPS_CHANGE_POINT_DETECTION,
+  AIOPS_BREADCRUMB_CHANGE_POINT_DETECTION,
   EXPLAIN_LOG_RATE_SPIKES,
   LOG_PATTERN_ANALYSIS,
+  CHANGE_POINT_DETECTION,
   CREATE_JOB_BREADCRUMB,
   CALENDAR_MANAGEMENT_BREADCRUMB,
   FILTER_LISTS_BREADCRUMB,
