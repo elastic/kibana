@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SwimlaneFieldsType } from '../../../common/api';
-import { ICasesConnector } from '../types';
+import type { SwimlaneFieldsType } from '../../../common/api';
+import type { ICasesConnector } from '../types';
 
 export type SwimlaneCaseConnector = ICasesConnector<SwimlaneFieldsType>;
 export type Format = ICasesConnector<SwimlaneFieldsType>['format'];

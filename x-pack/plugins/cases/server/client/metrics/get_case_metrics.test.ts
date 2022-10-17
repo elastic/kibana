@@ -6,12 +6,14 @@
  */
 
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { SavedObject } from '@kbn/core/server';
+import type { SavedObject } from '@kbn/core/server';
 
 import { getCaseMetrics } from './get_case_metrics';
-import { CaseAttributes, CaseResponse, CaseStatuses } from '../../../common/api';
-import { CasesClientMock, createCasesClientMock } from '../mocks';
-import { CasesClientArgs } from '../types';
+import type { CaseAttributes, CaseResponse } from '../../../common/api';
+import { CaseStatuses } from '../../../common/api';
+import type { CasesClientMock } from '../mocks';
+import { createCasesClientMock } from '../mocks';
+import type { CasesClientArgs } from '../types';
 import { createAuthorizationMock } from '../../authorization/mock';
 import {
   createAttachmentServiceMock,

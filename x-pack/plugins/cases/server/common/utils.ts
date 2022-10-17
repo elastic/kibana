@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   SavedObjectsFindResult,
   SavedObjectsFindResponse,
   SavedObject,
@@ -13,7 +13,7 @@ import {
   IBasePath,
 } from '@kbn/core/server';
 import { flatMap, uniqWith, xorWith } from 'lodash';
-import { LensServerPluginSetup } from '@kbn/lens-plugin/server';
+import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import { isValidOwner } from '../../common/utils/owner';
 import {
   CASE_VIEW_COMMENT_PATH,
@@ -22,16 +22,14 @@ import {
   GENERAL_CASES_OWNER,
   OWNER_INFO,
 } from '../../common/constants';
-import { CASE_VIEW_PAGE_TABS } from '../../common/types';
-import { AlertInfo } from './types';
+import type { CASE_VIEW_PAGE_TABS } from '../../common/types';
+import type { AlertInfo } from './types';
 
-import {
+import type {
   CaseAttributes,
   CasePostRequest,
   CaseResponse,
-  CaseSeverity,
   CasesFindResponse,
-  CaseStatuses,
   CommentAttributes,
   CommentRequest,
   CommentRequestActionsType,
@@ -40,12 +38,16 @@ import {
   CommentRequestUserType,
   CommentResponse,
   CommentsResponse,
+  User,
+} from '../../common/api';
+import {
+  CaseSeverity,
+  CaseStatuses,
   CommentType,
   ConnectorTypes,
   ExternalReferenceStorageType,
-  User,
 } from '../../common/api';
-import { UpdateAlertRequest } from '../client/alerts/types';
+import type { UpdateAlertRequest } from '../client/alerts/types';
 import {
   parseCommentString,
   getLensVisualizations,

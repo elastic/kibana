@@ -13,10 +13,10 @@
  * connector.id.
  */
 
-import { CaseAttributes, CaseConnector, CaseFullExternalService } from '../../../common/api';
+import type { CaseAttributes, CaseConnector, CaseFullExternalService } from '../../../common/api';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import {
+import type {
   SavedObject,
   SavedObjectReference,
   SavedObjectsCreateOptions,
@@ -30,17 +30,17 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
 import { getNoneCaseConnector } from '../../common/utils';
 import { CasesService } from '.';
+import type { ESCaseConnectorWithId } from '../test_utils';
 import {
   createESJiraConnector,
   createJiraConnector,
-  ESCaseConnectorWithId,
   createExternalService,
   createSavedObjectReferences,
   createCaseSavedObjectResponse,
   basicCaseFields,
   createSOFindResponse,
 } from '../test_utils';
-import { ESCaseAttributes } from './types';
+import type { ESCaseAttributes } from './types';
 import { AttachmentService } from '../attachments';
 import { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 

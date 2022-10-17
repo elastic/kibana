@@ -6,33 +6,35 @@
  */
 import Boom from '@hapi/boom';
 
-import {
+import type {
   SavedObject,
   SavedObjectReference,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
-import {
+import type {
   CaseResponse,
-  CaseResponseRt,
-  CaseStatuses,
   CommentAttributes,
   CommentPatchRequest,
   CommentRequest,
-  CommentType,
   CommentRequestUserType,
   CaseAttributes,
+  CommentRequestAlertType,
+} from '../../../common/api';
+import {
+  CaseResponseRt,
+  CaseStatuses,
+  CommentType,
   ActionTypes,
   Actions,
-  CommentRequestAlertType,
 } from '../../../common/api';
 import {
   CASE_SAVED_OBJECT,
   MAX_ALERTS_PER_CASE,
   MAX_DOCS_PER_PAGE,
 } from '../../../common/constants';
-import { CasesClientArgs } from '../../client';
-import { RefreshSetting } from '../../services/types';
+import type { CasesClientArgs } from '../../client';
+import type { RefreshSetting } from '../../services/types';
 import { createCaseError } from '../error';
 import {
   countAlertsForID,

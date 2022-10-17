@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EcsEventType } from '@kbn/core/server';
+import type { EcsEventType } from '@kbn/core/server';
 import type { KueryNode } from '@kbn/es-query';
-import { CasesSupportedOperations } from '@kbn/security-plugin/server';
+import type { CasesSupportedOperations } from '@kbn/security-plugin/server';
 
 /**
  * The tenses for describing the action performed by a API route

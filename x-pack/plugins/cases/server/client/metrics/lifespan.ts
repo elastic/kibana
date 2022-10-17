@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import { SavedObject } from '@kbn/core/server';
-import {
-  CaseStatuses,
+import type { SavedObject } from '@kbn/core/server';
+import type {
   CaseUserActionResponse,
   SingleCaseMetricsResponse,
   StatusInfo,
   StatusUserAction,
-  StatusUserActionRt,
   UserActionWithResponse,
 } from '../../../common/api';
+import { CaseStatuses, StatusUserActionRt } from '../../../common/api';
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
 import { SingleCaseBaseHandler } from './single_case_base_handler';
-import { SingleCaseBaseHandlerCommonOptions } from './types';
+import type { SingleCaseBaseHandlerCommonOptions } from './types';
 
 export class Lifespan extends SingleCaseBaseHandler {
   constructor(options: SingleCaseBaseHandlerCommonOptions) {

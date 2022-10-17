@@ -7,7 +7,7 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import {
+import type {
   SavedObjectMigrationContext,
   SavedObjectSanitizedDoc,
   SavedObjectsMigrationLogger,
@@ -24,7 +24,7 @@ import {
   createJiraConnector,
 } from '../../../services/test_utils';
 import { userActionsConnectorIdMigration } from './connector_id';
-import { UserActions } from './types';
+import type { UserActions } from './types';
 
 interface Pre810UserActionAttributes {
   new_value?: string;

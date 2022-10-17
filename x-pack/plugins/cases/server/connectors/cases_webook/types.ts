@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ICasesConnector } from '../types';
+import type { ICasesConnector } from '../types';
 
 export type CasesWebhookCaseConnector = ICasesConnector;
 export type Format = ICasesConnector['format'];

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UserProfileService } from '../../../services';
+import type { UserProfileService } from '../../../services';
 import { INTERNAL_SUGGEST_USER_PROFILES_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';

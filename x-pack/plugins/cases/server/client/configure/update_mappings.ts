@@ -6,10 +6,10 @@
  */
 
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
-import { ConnectorMappingsAttributes } from '../../../common/api';
+import type { ConnectorMappingsAttributes } from '../../../common/api';
 import { createCaseError } from '../../common/error';
-import { CasesClientArgs } from '..';
-import { UpdateMappingsArgs } from './types';
+import type { CasesClientArgs } from '..';
+import type { UpdateMappingsArgs } from './types';
 import { casesConnectors } from '../../connectors';
 
 export const updateMappings = async (

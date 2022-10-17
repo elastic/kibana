@@ -7,9 +7,10 @@
 
 import { uniqBy } from 'lodash';
 import { extractPersistableStateReferencesFromSO } from '../../../attachment_framework/so_references';
-import { ActionTypes, Actions, CommentUserAction } from '../../../../common/api';
+import type { CommentUserAction } from '../../../../common/api';
+import { ActionTypes, Actions } from '../../../../common/api';
 import { UserActionBuilder } from '../abstract_builder';
-import { UserActionParameters, BuilderReturnValue } from '../types';
+import type { UserActionParameters, BuilderReturnValue } from '../types';
 import { getAttachmentSOExtractor } from '../../so_references';
 
 export class CommentUserActionBuilder extends UserActionBuilder {

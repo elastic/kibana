@@ -7,7 +7,11 @@
 
 import { CASE_USER_ACTION_SAVED_OBJECT } from '../../../common/constants';
 import { buildFilter } from '../../client/utils';
-import { CasesTelemetry, CollectTelemetryDataParams, MaxBucketOnCaseAggregation } from '../types';
+import type {
+  CasesTelemetry,
+  CollectTelemetryDataParams,
+  MaxBucketOnCaseAggregation,
+} from '../types';
 import { getMaxBucketOnCaseAggregationQuery } from './utils';
 
 export const getPushedTelemetryData = async ({

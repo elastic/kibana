@@ -5,19 +5,17 @@
  * 2.0.
  */
 
-import { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
+import type { SavedObject, SavedObjectsFindResponse } from '@kbn/core/server';
 import { makeLensEmbeddableFactory } from '@kbn/lens-plugin/server/embeddable/make_lens_embeddable_factory';
 import { OWNER_INFO, SECURITY_SOLUTION_OWNER } from '../../common/constants';
-import {
+import type {
   CaseConnector,
   CaseResponse,
-  CaseSeverity,
   CommentAttributes,
   CommentRequest,
   CommentRequestUserType,
-  CommentType,
-  ConnectorTypes,
 } from '../../common/api';
+import { CaseSeverity, CommentType, ConnectorTypes } from '../../common/api';
 import { mockCaseComments, mockCases } from '../routes/api/__fixtures__/mock_saved_objects';
 import {
   flattenCaseSavedObject,

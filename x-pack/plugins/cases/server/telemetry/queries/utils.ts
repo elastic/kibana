@@ -6,14 +6,14 @@
  */
 
 import { get } from 'lodash';
-import { KueryNode } from '@kbn/es-query';
-import { ISavedObjectsRepository } from '@kbn/core/server';
+import type { KueryNode } from '@kbn/es-query';
+import type { ISavedObjectsRepository } from '@kbn/core/server';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
 } from '../../../common/constants';
-import {
+import type {
   CaseAggregationResult,
   Buckets,
   CasesTelemetry,
@@ -21,7 +21,7 @@ import {
   SolutionTelemetry,
 } from '../types';
 import { buildFilter } from '../../client/utils';
-import { OWNERS } from '../constants';
+import type { OWNERS } from '../constants';
 
 export const getCountsAggregationQuery = (savedObjectType: string) => ({
   counts: {
