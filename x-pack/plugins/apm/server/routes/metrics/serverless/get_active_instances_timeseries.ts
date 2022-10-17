@@ -10,6 +10,7 @@ import {
   rangeQuery,
   termQuery,
 } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   FAAS_NAME,
   SERVICE_NAME,
@@ -19,10 +20,6 @@ import { environmentQuery } from '../../../../common/utils/environment_query';
 import { Coordinate } from '../../../../typings/timeseries';
 import { getMetricsDateHistogramParams } from '../../../lib/helpers/metrics';
 import { Setup } from '../../../lib/helpers/setup_request';
-import {
-  getDocumentTypeFilterForTransactions,
-  getProcessorEventForTransactions,
-} from '../../../lib/helpers/transactions';
 
 export async function getActiveInstancesTimeseries({
   environment,
@@ -31,7 +28,6 @@ export async function getActiveInstancesTimeseries({
   serviceName,
   start,
   end,
-  searchAggregatedTransactions,
   serverlessFunctionName,
 }: {
   environment: string;
@@ -40,7 +36,6 @@ export async function getActiveInstancesTimeseries({
   serviceName: string;
   start: number;
   end: number;
-  searchAggregatedTransactions: boolean;
   serverlessFunctionName?: string;
 }): Promise<Coordinate[]> {
   const { apmEventClient, config } = setup;
@@ -55,7 +50,7 @@ export async function getActiveInstancesTimeseries({
 
   const params = {
     apm: {
-      events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
+      events: [ProcessorEvent.metric],
     },
     body: {
       track_total_hits: false,
@@ -67,9 +62,6 @@ export async function getActiveInstancesTimeseries({
             ...rangeQuery(start, end),
             ...environmentQuery(environment),
             ...kqlQuery(kuery),
-            ...getDocumentTypeFilterForTransactions(
-              searchAggregatedTransactions
-            ),
             ...termQuery(FAAS_NAME, serverlessFunctionName),
           ],
         },

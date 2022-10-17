@@ -127,10 +127,8 @@ export async function getServerlessFunctionLatencyChart({
         billedDurationAvg: { avg: { field: FAAS_BILLED_DURATION } },
       },
       additionalFilters: [
-        {
-          exists: { field: FAAS_BILLED_DURATION },
-          ...termQuery(FAAS_NAME, serverlessFunctionName),
-        },
+        { exists: { field: FAAS_BILLED_DURATION } },
+        ...termQuery(FAAS_NAME, serverlessFunctionName),
       ],
       operationName: 'get_billed_duration',
     }),

@@ -69,17 +69,15 @@ export async function getColdStartDurationChart({
     chartBase,
     aggs: { coldStart: { avg: { field: FAAS_COLDSTART_DURATION } } },
     additionalFilters: [
-      {
-        exists: { field: FAAS_COLDSTART_DURATION },
-        ...termQuery(FAAS_NAME, serverlessFunctionName),
-      },
+      { exists: { field: FAAS_COLDSTART_DURATION } },
+      ...termQuery(FAAS_NAME, serverlessFunctionName),
     ],
     operationName: 'get_cold_start_duration',
   });
 
   const [series] = coldStartDurationMetric.series;
 
-  const data = series.data.map(({ x, y }) => ({
+  const data = series?.data?.map(({ x, y }) => ({
     x,
     // Cold start duration duration is stored in ms, convert it to microseconds so it uses the same unit as the other charts
     y: isFiniteNumber(y) ? y * 1000 : y,
@@ -87,13 +85,15 @@ export async function getColdStartDurationChart({
 
   return {
     ...coldStartDurationMetric,
-    series: [
-      {
-        ...series,
-        // Cold start duration duration is stored in ms, convert it to microseconds
-        overallValue: series.overallValue * 1000,
-        data,
-      },
-    ],
+    series: series
+      ? [
+          {
+            ...series,
+            // Cold start duration duration is stored in ms, convert it to microseconds
+            overallValue: series.overallValue * 1000,
+            data,
+          },
+        ]
+      : [],
   };
 }

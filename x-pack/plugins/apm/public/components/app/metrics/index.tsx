@@ -12,7 +12,7 @@ import {
   isServerlessAgent,
 } from '../../../../common/agent_name';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
-import { ServerLessMetrics } from './serverless_metrics';
+import { ServerlessMetrics } from './serverless_metrics';
 import { ServiceMetrics } from './service_metrics';
 import { JvmMetricsOverview } from './jvm_metrics_overview';
 
@@ -28,7 +28,7 @@ export function Metrics() {
   }
 
   if (isServerless) {
-    return <ServerLessMetrics />;
+    return <ServerlessMetrics />;
   }
 
   return <ServiceMetrics />;

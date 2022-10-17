@@ -14,7 +14,6 @@ import { getServerlessActiveInstancesOverview } from './get_active_instances_ove
 import { getServerlessFunctionsOverview } from './get_serverless_functions_overview';
 import { getServerlessSummary } from './get_serverless_summary';
 import { getActiveInstancesTimeseries } from './get_active_instances_timeseries';
-import { getSearchTransactionsEvents } from '../../../lib/helpers/transactions';
 
 const serverlessMetricsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/metrics/serverless',
@@ -85,12 +84,6 @@ const serverlessMetricsActiveInstancesRoute = createApmServerRoute({
     const { environment, kuery, start, end, serverlessFunctionName } =
       params.query;
 
-    const searchAggregatedTransactions = await getSearchTransactionsEvents({
-      ...setup,
-      kuery,
-      start,
-      end,
-    });
     const options = {
       environment,
       start,
@@ -103,10 +96,7 @@ const serverlessMetricsActiveInstancesRoute = createApmServerRoute({
 
     const [activeInstances, timeseries] = await Promise.all([
       getServerlessActiveInstancesOverview(options),
-      getActiveInstancesTimeseries({
-        ...options,
-        searchAggregatedTransactions,
-      }),
+      getActiveInstancesTimeseries(options),
     ]);
     return { activeInstances, timeseries };
   },
@@ -119,12 +109,7 @@ const serverlessMetricsFunctionsOverviewRoute = createApmServerRoute({
     path: t.type({
       serviceName: t.string,
     }),
-    query: t.intersection([
-      environmentRt,
-      kueryRt,
-      rangeRt,
-      t.partial({ serverlessFunctionName: t.string }),
-    ]),
+    query: t.intersection([environmentRt, kueryRt, rangeRt]),
   }),
   options: { tags: ['access:apm'] },
   handler: async (
@@ -138,8 +123,7 @@ const serverlessMetricsFunctionsOverviewRoute = createApmServerRoute({
     const setup = await setupRequest(resources);
 
     const { serviceName } = params.path;
-    const { environment, kuery, start, end, serverlessFunctionName } =
-      params.query;
+    const { environment, kuery, start, end } = params.query;
 
     const serverlessFunctionsOverview = await getServerlessFunctionsOverview({
       environment,
@@ -148,7 +132,6 @@ const serverlessMetricsFunctionsOverviewRoute = createApmServerRoute({
       kuery,
       setup,
       serviceName,
-      serverlessFunctionName,
     });
     return { serverlessFunctionsOverview };
   },

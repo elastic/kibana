@@ -9,24 +9,34 @@ import React from 'react';
 import { ServerlessFunctions } from './serverless_functions';
 import { ServerlessSummary } from './serverless_summary';
 import { ServerlessActiveInstances } from './serverless_active_instances';
-import { ServerlessMetrics } from './serverless_metrics';
+import { ServerlessMetricsCharts } from './serverless_metrics_charts';
 import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
 
-export function ServerLessMetrics() {
+interface Props {
+  serverlessFunctionName?: string;
+}
+
+export function ServerlessMetrics({ serverlessFunctionName }: Props) {
   return (
-    <EuiFlexGroup direction="column">
+    <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem>
-        <ServerlessSummary />
+        <ServerlessSummary serverlessFunctionName={serverlessFunctionName} />
       </EuiFlexItem>
-      <EuiFlexItem>
-        <ServerlessFunctions />
-      </EuiFlexItem>
+      {!serverlessFunctionName && (
+        <EuiFlexItem>
+          <ServerlessFunctions />
+        </EuiFlexItem>
+      )}
       <ChartPointerEventContextProvider>
         <EuiFlexItem>
-          <ServerlessMetrics />
+          <ServerlessMetricsCharts
+            serverlessFunctionName={serverlessFunctionName}
+          />
         </EuiFlexItem>
         <EuiFlexItem>
-          <ServerlessActiveInstances />
+          <ServerlessActiveInstances
+            serverlessFunctionName={serverlessFunctionName}
+          />
         </EuiFlexItem>
       </ChartPointerEventContextProvider>
     </EuiFlexGroup>

@@ -24,7 +24,11 @@ import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 
-export function ServerlessSummary() {
+interface Props {
+  serverlessFunctionName?: string;
+}
+
+export function ServerlessSummary({ serverlessFunctionName }: Props) {
   const {
     query: { environment, kuery, rangeFrom, rangeTo },
   } = useApmParams('/services/{serviceName}/metrics');
@@ -48,12 +52,13 @@ export function ServerlessSummary() {
               environment,
               start,
               end,
+              serverlessFunctionName,
             },
           },
         }
       );
     },
-    [kuery, environment, serviceName, start, end]
+    [kuery, environment, serviceName, start, end, serverlessFunctionName]
   );
 
   return (

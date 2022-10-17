@@ -28,13 +28,18 @@ import { useTimeRange } from '../../../../hooks/use_time_range';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
 import { ListMetric } from '../../../shared/list_metric';
+import { ServerlessFunctionNameLink } from './serverless_function_name_link';
 
 type ServerlessActiveInstances =
   APIReturnType<'GET /internal/apm/services/{serviceName}/metrics/serverless/active_instances'>;
 
 const palette = euiPaletteColorBlind({ rotations: 2 });
 
-export function ServerlessActiveInstances() {
+interface Props {
+  serverlessFunctionName?: string;
+}
+
+export function ServerlessActiveInstances({ serverlessFunctionName }: Props) {
   const {
     query: { environment, kuery, rangeFrom, rangeTo },
   } = useApmParams('/services/{serviceName}/metrics');
@@ -58,12 +63,13 @@ export function ServerlessActiveInstances() {
               environment,
               start,
               end,
+              serverlessFunctionName,
             },
           },
         }
       );
     },
-    [kuery, environment, serviceName, start, end]
+    [kuery, environment, serviceName, start, end, serverlessFunctionName]
   );
 
   const columns: Array<
@@ -77,6 +83,13 @@ export function ServerlessActiveInstances() {
       ),
       sortable: true,
       truncateText: true,
+      render: (_, item) => {
+        return (
+          <ServerlessFunctionNameLink
+            serverlessFunctionName={item.serverlessFunctionName}
+          />
+        );
+      },
     },
     {
       field: 'activeInstanceName',

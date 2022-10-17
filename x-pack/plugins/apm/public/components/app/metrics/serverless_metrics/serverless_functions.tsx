@@ -4,8 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
-import { i18n } from '@kbn/i18n';
 import {
   EuiBasicTableColumn,
   EuiFlexGroup,
@@ -15,15 +13,18 @@ import {
   EuiPanel,
   EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React from 'react';
+import {
+  asDynamicBytes,
+  asMillisecondDuration,
+} from '../../../../../common/utils/formatters';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
-import {
-  asDynamicBytes,
-  asMillisecondDuration,
-} from '../../../../../common/utils/formatters';
+import { ServerlessFunctionNameLink } from './serverless_function_name_link';
 
 type ServerlessFunctionOverview =
   APIReturnType<'GET /internal/apm/services/{serviceName}/metrics/serverless/functions_overview'>['serverlessFunctionsOverview'][0];
@@ -32,6 +33,7 @@ export function ServerlessFunctions() {
   const {
     query: { environment, kuery, rangeFrom, rangeTo },
   } = useApmParams('/services/{serviceName}/metrics');
+
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const { serviceName } = useApmServiceContext();
 
@@ -69,6 +71,13 @@ export function ServerlessFunctions() {
       ),
       sortable: true,
       truncateText: true,
+      render: (_, item) => {
+        return (
+          <ServerlessFunctionNameLink
+            serverlessFunctionName={item.serverlessFunctionName}
+          />
+        );
+      },
     },
     {
       field: 'serverlessDurationAvg',

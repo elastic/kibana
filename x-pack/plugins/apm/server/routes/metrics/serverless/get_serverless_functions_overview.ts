@@ -5,11 +5,7 @@
  * 2.0.
  */
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import {
-  termQuery,
-  kqlQuery,
-  rangeQuery,
-} from '@kbn/observability-plugin/server';
+import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import {
   FAAS_BILLED_DURATION,
   FAAS_COLDSTART,
@@ -30,7 +26,6 @@ export async function getServerlessFunctionsOverview({
   serviceName,
   setup,
   start,
-  serverlessFunctionName,
 }: {
   environment: string;
   kuery: string;
@@ -38,7 +33,6 @@ export async function getServerlessFunctionsOverview({
   serviceName: string;
   start: number;
   end: number;
-  serverlessFunctionName?: string;
 }) {
   const { apmEventClient } = setup;
 
@@ -56,7 +50,6 @@ export async function getServerlessFunctionsOverview({
             ...rangeQuery(start, end),
             ...environmentQuery(environment),
             ...kqlQuery(kuery),
-            ...termQuery(FAAS_NAME, serverlessFunctionName),
           ],
         },
       },
@@ -84,7 +77,7 @@ export async function getServerlessFunctionsOverview({
   const serverlessFunctionsOverview =
     response.aggregations?.serverlessFunctions.buckets.map((bucket) => {
       return {
-        serverlessFunctionName: bucket.key,
+        serverlessFunctionName: bucket.key as string,
         serverlessDurationAvg: bucket.faasDurationAvg.value,
         billedDurationAvg: bucket.faasBilledDurationAvg.value,
         coldStartCount: bucket.coldStartCount.value,
