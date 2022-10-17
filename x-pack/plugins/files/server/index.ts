@@ -13,7 +13,6 @@ export type {
   FileDescriptor,
   GetMetadataArg,
   FindMetadataArg,
-  ListMetadataArg,
   UpdateMetadataArg,
   DeleteMetedataArg,
   FileMetadataClient,
@@ -35,7 +34,6 @@ export type {
 export type {
   GetByIdArgs,
   FindFileArgs,
-  ListFilesArgs,
   CreateFileArgs,
   DeleteFileArgs,
   UpdateFileArgs,
