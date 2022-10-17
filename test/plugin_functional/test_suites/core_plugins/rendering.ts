@@ -91,6 +91,9 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'unifiedSearch.autocomplete.valueSuggestions.tiers (array)',
         'unifiedSearch.autocomplete.valueSuggestions.timeout (duration)',
         'data.search.aggs.shardDelay.enabled (boolean)',
+        'data.search.asyncSearch.batchedReduceSize (number)',
+        'data.search.asyncSearch.keepAlive (duration)',
+        'data.search.asyncSearch.waitForCompletion (duration)',
         'data.search.sessions.defaultExpiration (duration)',
         'data.search.sessions.enabled (boolean)',
         'data.search.sessions.management.expiresSoonWarning (duration)',
@@ -167,12 +170,16 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.cloud.base_url (string)',
         'xpack.cloud.cname (string)',
         'xpack.cloud.deployment_url (string)',
+        'xpack.cloud.is_elastic_staff_owned (boolean)',
+        'xpack.cloud.trial_end_date (string)',
         'xpack.cloud_integrations.chat.chatURL (string)',
         // No PII. This is an escape patch to override LaunchDarkly's flag resolution mechanism for testing or quick fix.
         'xpack.cloud_integrations.experiments.flag_overrides (record)',
         // Commented because it's inside a schema conditional, and the test is not able to resolve it. But it's shared.
         // Added here for documentation purposes.
         // 'xpack.cloud_integrations.experiments.launch_darkly.client_id (string)',
+        // 'xpack.cloud_integrations.experiments.launch_darkly.client_log_level (string)',
+        'xpack.cloud_integrations.experiments.metadata_refresh_interval (duration)',
         'xpack.cloud_integrations.full_story.org_id (any)',
         // No PII. Just the list of event types we want to forward to FullStory.
         'xpack.cloud_integrations.full_story.eventTypesAllowlist (array)',
@@ -216,7 +223,10 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.trigger_actions_ui.enableGeoTrackingThresholdAlert (boolean)',
         'xpack.upgrade_assistant.readonly (boolean)',
         'xpack.upgrade_assistant.ui.enabled (boolean)',
-        'xpack.observability.unsafe.alertDetails.enabled (boolean)',
+        'xpack.observability.unsafe.alertDetails.apm.enabled (boolean)',
+        'xpack.observability.unsafe.alertDetails.metrics.enabled (boolean)',
+        'xpack.observability.unsafe.alertDetails.logs.enabled (boolean)',
+        'xpack.observability.unsafe.alertDetails.uptime.enabled (boolean)',
         'xpack.observability.unsafe.slo.enabled (boolean)',
       ];
       // We don't assert that actualExposedConfigKeys and expectedExposedConfigKeys are equal, because test failure messages with large

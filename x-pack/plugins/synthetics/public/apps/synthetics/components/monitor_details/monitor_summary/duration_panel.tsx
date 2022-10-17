@@ -8,10 +8,10 @@
 import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ReportTypes } from '@kbn/observability-plugin/public';
-import { useParams } from 'react-router-dom';
 import { ClientPluginsStart } from '../../../../../plugin';
 
 import { KpiWrapper } from './kpi_wrapper';
+import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
 
 export const DurationPanel = () => {
   const {
@@ -19,7 +19,7 @@ export const DurationPanel = () => {
       observability: { ExploratoryViewEmbeddable },
     },
   } = useKibana<ClientPluginsStart>();
-  const { monitorId } = useParams<{ monitorId: string }>();
+  const monitorId = useMonitorQueryId();
 
   return (
     <KpiWrapper>
