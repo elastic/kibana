@@ -15,7 +15,8 @@ import {
 } from '@kbn/core-usage-data-server-mocks';
 import { savedObjectsExporterMock } from '@kbn/core-saved-objects-import-export-server-mocks';
 import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
-import { setupServer, createExportableType } from './test_utils';
+import { createExportableType } from './test_utils';
+import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import {
   registerExportRoute,
   type InternalSavedObjectsRequestHandlerContext,

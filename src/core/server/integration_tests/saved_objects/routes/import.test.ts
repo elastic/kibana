@@ -22,7 +22,8 @@ import {
   registerImportRoute,
   type InternalSavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server-internal';
-import { setupServer, createExportableType } from './test_utils';
+import { createExportableType } from './test_utils';
+import { setupServer } from '@kbn/core-test-helpers-test-utils';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 

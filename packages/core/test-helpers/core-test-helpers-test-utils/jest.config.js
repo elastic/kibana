@@ -6,18 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsType } from '@kbn/core-saved-objects-server';
-
-export const createExportableType = (name: string): SavedObjectsType => {
-  return {
-    name,
-    hidden: false,
-    namespaceType: 'single',
-    mappings: {
-      properties: {},
-    },
-    management: {
-      importableAndExportable: true,
-    },
-  };
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/core/test-helpers/core-test-helpers-test-utils'],
 };
