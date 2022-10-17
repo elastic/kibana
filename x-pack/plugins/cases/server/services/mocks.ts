@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { PublicMethodsOf } from '@kbn/utility-types';
-import {
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type {
   AlertService,
   CaseConfigureService,
   CasesService,
