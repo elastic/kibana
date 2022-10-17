@@ -484,14 +484,14 @@ export function registerIndexRoutes({
 
   router.post(
     {
-      path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors/_simulate',
+      path: '/internal/enterprise_search/indices/{indexName}/ml_inference/pipeline_processors/simulate',
       validate: {
         body: schema.object({
+          docs: schema.arrayOf(schema.any()),
           pipeline: schema.object({
             description: schema.maybe(schema.string()),
             processors: schema.arrayOf(schema.any()),
           }),
-          docs: schema.arrayOf(schema.any()),
         }),
         params: schema.object({
           indexName: schema.string(),
