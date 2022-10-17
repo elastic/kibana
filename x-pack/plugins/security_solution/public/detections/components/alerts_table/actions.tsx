@@ -358,7 +358,9 @@ const buildEventsDataProviderById = (
       kqlQuery: '',
       queryMatch: {
         field: key,
+        // @ts-ignore till https://github.com/elastic/kibana/pull/142436 is merged
         value: singleId ? eventIds[0] : eventIds,
+        // @ts-ignore till https://github.com/elastic/kibana/pull/142436 is merged
         operator: singleId ? ':' : 'includes',
       },
     },
