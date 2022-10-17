@@ -11,7 +11,7 @@ export function asNumber(value: number): string {
   }
 
   value = Math.round(value * 100) / 100;
-  if (value < 0.01) {
+  if (value < 0.01 && value > -0.01) {
     return '~0.00';
   }
   if (value < 1e3) {
