@@ -68,6 +68,7 @@ import {
 import { ChartTypes } from '../../common/types';
 import { filterOutConfig } from '../utils/filter_out_config';
 import { FilterEvent, StartDeps } from '../types';
+import { getCellValueEventData } from '../utils/filter_helpers';
 
 declare global {
   interface Window {
@@ -187,6 +188,18 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
           ...event.data,
           negate,
         },
+      });
+    },
+    [props]
+  );
+
+  // handles legend cell value action event data
+  const getCellValueActionHandler = useCallback(
+    (vData: Datatable) => (series: SeriesIdentifier) => {
+      const data = getCellValueEventData(vData, series);
+      props.fireEvent({
+        name: 'cellValue',
+        data,
       });
     },
     [props]
@@ -417,6 +430,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                   canFilter,
                   getLegendActionEventData(visData),
                   handleLegendAction,
+                  getCellValueActionHandler(visData),
                   visParams,
                   visData,
                   services.data.actions,

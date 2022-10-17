@@ -9,7 +9,7 @@
 import { LayerValue, SeriesIdentifier } from '@elastic/charts';
 import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { ValueClickContext } from '@kbn/embeddable-plugin/public';
+import { CellValueContext, ValueClickContext } from '@kbn/embeddable-plugin/public';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { BucketColumns } from '../../common/types';
 import { FilterEvent } from '../types';
@@ -88,4 +88,14 @@ export const getFilterEventData = (
 
     return acc;
   }, []);
+};
+
+export const getCellValueEventData = (
+  visData: Datatable,
+  series: SeriesIdentifier
+): CellValueContext['data'] => {
+  const column = visData.columns[0]; // TODO, get first column only by now
+  const { field, type } = column.meta;
+  const value = series.key;
+  return { field: field!, type, value };
 };

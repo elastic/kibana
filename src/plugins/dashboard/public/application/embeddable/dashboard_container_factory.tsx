@@ -87,7 +87,7 @@ export class DashboardContainerFactoryDefinition
       ControlGroupOutput,
       ControlGroupContainer
     >(CONTROL_GROUP_TYPE);
-    console.log({ initialInput });
+    // console.log({ initialInput });
     const { filters, query, timeRange, viewMode, controlGroupInput, id } = initialInput;
     const controlGroup = await controlsGroupFactory?.create({
       id: `control_group_${id ?? 'new_dashboard'}`,

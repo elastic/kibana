@@ -10,7 +10,6 @@ import {
   CONTEXT_MENU_TRIGGER,
   PANEL_BADGE_TRIGGER,
   PANEL_NOTIFICATION_TRIGGER,
-  CELL_VALUE_TRIGGER,
 } from '@kbn/embeddable-plugin/public';
 import { CoreStart } from '@kbn/core/public';
 import { getSavedObjectFinder } from '@kbn/saved-objects-plugin/public';
@@ -24,7 +23,6 @@ import { AddToLibraryAction } from './add_to_library_action';
 import { CopyToDashboardAction } from './copy_to_dashboard_action';
 import { UnlinkFromLibraryAction } from './unlink_from_library_action';
 import { FiltersNotificationBadge } from './filters_notification_badge';
-// import { AddToTimelineAction } from './add_to_timeline_action';
 import { LibraryNotificationAction } from './library_notification_action';
 
 interface BuildAllDashboardActionsProps {
@@ -57,10 +55,6 @@ export const buildAllDashboardActions = async ({
   const expandPanelAction = new ExpandPanelAction();
   uiActions.registerAction(expandPanelAction);
   uiActions.attachAction(CONTEXT_MENU_TRIGGER, expandPanelAction.id);
-
-  // const addToTimelineAction = new AddToTimelineAction();
-  // uiActions.registerAction(addToTimelineAction);
-  // uiActions.attachAction(CELL_VALUE_TRIGGER, addToTimelineAction.id);
 
   if (share) {
     const ExportCSVPlugin = new ExportCSVAction();

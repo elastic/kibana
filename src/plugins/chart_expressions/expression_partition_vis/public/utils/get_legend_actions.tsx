@@ -25,6 +25,7 @@ export const getLegendActions = (
   ) => Promise<boolean>,
   getFilterEventData: (series: SeriesIdentifier) => FilterEvent | null,
   onFilter: (data: FilterEvent, negate?: any) => void,
+  onCellValueAction: (series: SeriesIdentifier) => void,
   visParams: PartitionVisParams,
   visData: Datatable,
   actions: DataPublicPluginStart['actions'],
@@ -81,6 +82,17 @@ export const getLegendActions = (
             onClick: () => {
               setPopoverOpen(false);
               onFilter(filterData, true);
+            },
+          },
+          {
+            name: i18n.translate('expressionPartitionVis.legend.filterOutValueButtonAriaLabel', {
+              defaultMessage: 'Add to Timeline',
+            }),
+            'data-test-subj': `legend-${title}-addToTimeline`,
+            icon: <EuiIcon type="timeline" size="m" />,
+            onClick: () => {
+              setPopoverOpen(false);
+              onCellValueAction(pieSeries);
             },
           },
         ],

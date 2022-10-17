@@ -14,7 +14,7 @@ import type { IAggType } from '@kbn/data-plugin/public';
 import { IUiSettingsClient, ThemeServiceStart } from '@kbn/core/public';
 import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+// import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import { DatatableComponent } from './components/table_basic';
 
@@ -27,7 +27,7 @@ export const getDatatableRenderer = (dependencies: {
   getType: Promise<(name: string) => IAggType>;
   paletteService: PaletteRegistry;
   uiSettings: IUiSettingsClient;
-  uiActions: UiActionsStart;
+  // uiActions: UiActionsStart;
   theme: ThemeServiceStart;
 }): ExpressionRenderDefinition<DatatableProps> => ({
   name: 'lens_datatable_renderer',
@@ -91,7 +91,6 @@ export const getDatatableRenderer = (dependencies: {
             rowHasRowClickTriggerActions={rowHasRowClickTriggerActions}
             interactive={isInteractive()}
             uiSettings={dependencies.uiSettings}
-            // uiActions={dependencies.uiActions}
             renderComplete={renderComplete}
           />
         </I18nProvider>

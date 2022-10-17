@@ -9,7 +9,6 @@
 import React from 'react';
 import type { LegendAction, XYChartSeriesIdentifier } from '@elastic/charts';
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
-import { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import type { CellValueEvent, FilterEvent } from '../types';
 import type { CommonXYDataLayerConfig } from '../../common';
 import { LegendActionPopover } from './legend_action_popover';
@@ -71,7 +70,7 @@ export const getLegendAction = (
         cellValueActionData = {
           value: table.rows[rowIndex][accessor],
           field: columnData?.meta.field!,
-          type: columnData?.meta.type as DatatableColumnType,
+          type: columnData?.meta.type!,
         };
       }
     });

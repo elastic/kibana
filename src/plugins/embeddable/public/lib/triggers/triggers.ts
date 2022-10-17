@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Datatable, DatatableColumnType } from '@kbn/expressions-plugin/common';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import { Trigger, RowClickContext } from '@kbn/ui-actions-plugin/public';
 import { IEmbeddable } from '..';
 
@@ -33,7 +33,7 @@ export interface CellValueContext<T extends IEmbeddable = IEmbeddable> {
   embeddable: T;
   data: {
     field: string;
-    type: DatatableColumnType;
+    type: string;
     value: any;
   };
 }

@@ -14,7 +14,10 @@ import { DASHBOARD_CONTAINER_TYPE } from '@kbn/dashboard-plugin/public';
 import type { DashboardContainer } from '@kbn/dashboard-plugin/public/application';
 import { KibanaServices } from '../../common/lib/kibana';
 import { APP_UI_ID } from '../../../common/constants';
-import { SecurityAppStore } from '../../common/store/store';
+import type { SecurityAppStore } from '../../common/store/store';
+import { addProvider, showTimeline } from '../../timelines/store/timeline/actions';
+import { TimelineId } from '../../../common/types';
+import { createDataProviders } from './data_provider';
 
 export const ACTION_ADD_TO_TIMELINE = 'addToTimeline';
 
@@ -64,10 +67,8 @@ export class AddToTimelineAction implements Action<AddToTimelineActionContext> {
       return false;
     }
     const currentAppId = await new Promise((resolve) => {
-      const subscription = this.applicationService.currentAppId$.subscribe(resolve);
-      subscription.unsubscribe();
+      this.applicationService.currentAppId$.subscribe(resolve).unsubscribe();
     });
-    // const currentAppId = await this.applicationService.currentAppId$.toPromise();
     return currentAppId === APP_UI_ID;
   }
 
@@ -75,15 +76,25 @@ export class AddToTimelineAction implements Action<AddToTimelineActionContext> {
     if (!(await this.isCompatible({ embeddable, data }))) {
       throw new IncompatibleActionError();
     }
-    // const filters = await embeddable.getFilters();
-    // console.log(filters);
-    console.log('addToTimeline exec', { data });
-    // const newValue = isExpanded(embeddable) ? undefined : embeddable.id;
-    // embeddable.parent.updateInput({
-    //   expandedPanelId: newValue,
-    // });
-    
-    // this.store.dispatch();
+    const { field, value, type } = data;
 
+    const dataProviders = createDataProviders({
+      contextId: TimelineId.active,
+      fieldType: type,
+      values: value,
+      field,
+    });
+
+    if (dataProviders) {
+      this.store.dispatch(
+        addProvider({
+          id: TimelineId.active,
+          providers: dataProviders,
+        })
+      );
+      this.store.dispatch(showTimeline({ id: TimelineId.active, show: true }));
+    } else {
+      // TODO
+    }
   }
 }

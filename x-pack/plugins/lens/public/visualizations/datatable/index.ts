@@ -33,7 +33,7 @@ export class DatatableVisualization {
       const { getDatatableRenderer, getDatatableVisualization } = await import(
         '../../async_services'
       );
-      const [, { uiActions }] = await core.getStartServices();
+      // const [, { uiActions }] = await core.getStartServices();
       const palettes = await charts.palettes.getPalettes();
       expressions.registerRenderer(() =>
         getDatatableRenderer({
@@ -44,7 +44,7 @@ export class DatatableVisualization {
             .then(([_, { data: dataStart }]) => dataStart.search.aggs.types.get),
           paletteService: palettes,
           uiSettings: core.uiSettings,
-          uiActions,
+          // uiActions,
         })
       );
 
