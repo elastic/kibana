@@ -17,7 +17,7 @@ interface Context {
   embeddable: IEmbeddable;
 }
 
-export const getDiscoverHelpersAsync = async () => await import('./open_in_discover_helpers');
+export const getDiscoverHelpersAsync = async () => await import('../async_services');
 
 export const createOpenInDiscoverAction = (
   discover: Pick<DiscoverStart, 'locator'>,
