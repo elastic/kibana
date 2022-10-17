@@ -83,3 +83,44 @@ export const ALIAS_IS_REQUIRED = i18n.translate(
     defaultMessage: 'Alias is required.',
   }
 );
+
+export const ADVANCED_JSON_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.opsgenie.jsonEditorLabel',
+  {
+    defaultMessage: 'Alert fields',
+  }
+);
+
+export const ADVANCED_JSON_ARIA = i18n.translate(
+  'xpack.stackConnectors.components.opsgenie.jsonEditorAriaLabel',
+  {
+    defaultMessage: 'Alert fields JSON editor',
+  }
+);
+
+export const ADVANCED_EDITOR_FORBIDDEN_KEYS = (keys: string[]) =>
+  i18n.translate('xpack.stackConnectors.components.opsgenie.jsonEditorError', {
+    defaultMessage: 'Forbidden {numKeys, plural, =1 {key} other {keys}}: {forbiddenKeys}',
+    values: { numKeys: keys.length, forbiddenKeys: keys.join(', ') },
+  });
+
+export const ADVANCED_OPTIONS = i18n.translate(
+  'xpack.stackConnectors.components.opsgenie.advancedOptions',
+  {
+    defaultMessage: 'Advanced Options',
+  }
+);
+
+export const SOURCE_FIELD_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.opsgenie.sourceLabel',
+  {
+    defaultMessage: 'Source',
+  }
+);
+
+export const USER_FIELD_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.opsgenie.userLabel',
+  {
+    defaultMessage: 'User',
+  }
+);

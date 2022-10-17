@@ -6,124 +6,14 @@
  */
 
 import React, { useCallback, useEffect, useRef } from 'react';
-import {
-  ActionParamsProps,
-  TextAreaWithMessageVariables,
-  TextFieldWithMessageVariables,
-} from '@kbn/triggers-actions-ui-plugin/public';
-import { EuiFormRow, EuiSelect, RecursivePartial } from '@elastic/eui';
+import { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { EuiFormRow, EuiSelect } from '@elastic/eui';
+import { isEmpty, unset, cloneDeep } from 'lodash';
 import { OpsgenieSubActions } from '../../../../common';
-import type {
-  OpsgenieActionParams,
-  OpsgenieCloseAlertParams,
-  OpsgenieCreateAlertParams,
-} from '../../../../server/connector_types/stack';
+import type { OpsgenieActionParams } from '../../../../server/connector_types/stack';
 import * as i18n from './translations';
-
-type SubActionProps<SubActionParams> = Omit<
-  ActionParamsProps<OpsgenieActionParams>,
-  'actionParams' | 'editAction'
-> & {
-  subActionParams?: RecursivePartial<SubActionParams>;
-  editSubAction: ActionParamsProps<OpsgenieActionParams>['editAction'];
-};
-
-const CreateAlertComponent: React.FC<SubActionProps<OpsgenieCreateAlertParams>> = ({
-  editSubAction,
-  errors,
-  index,
-  messageVariables,
-  subActionParams,
-}) => {
-  const isMessageInvalid =
-    errors['subActionParams.message'] !== undefined &&
-    errors['subActionParams.message'].length > 0 &&
-    subActionParams?.message !== undefined;
-
-  return (
-    <>
-      <EuiFormRow
-        data-test-subj="opsgenie-message-row"
-        fullWidth
-        error={errors['subActionParams.message']}
-        label={i18n.MESSAGE_FIELD_LABEL}
-        isInvalid={isMessageInvalid}
-      >
-        <TextFieldWithMessageVariables
-          index={index}
-          editAction={editSubAction}
-          messageVariables={messageVariables}
-          paramsProperty={'message'}
-          inputTargetValue={subActionParams?.message}
-          errors={errors['subActionParams.message'] as string[]}
-        />
-      </EuiFormRow>
-      <TextAreaWithMessageVariables
-        index={index}
-        editAction={editSubAction}
-        messageVariables={messageVariables}
-        paramsProperty={'description'}
-        inputTargetValue={subActionParams?.description}
-        label={i18n.DESCRIPTION_FIELD_LABEL}
-      />
-      <EuiFormRow data-test-subj="opsgenie-alias-row" fullWidth label={i18n.ALIAS_FIELD_LABEL}>
-        <TextFieldWithMessageVariables
-          index={index}
-          editAction={editSubAction}
-          messageVariables={messageVariables}
-          paramsProperty={'alias'}
-          inputTargetValue={subActionParams?.alias}
-        />
-      </EuiFormRow>
-    </>
-  );
-};
-
-CreateAlertComponent.displayName = 'CreateAlertComponent';
-
-const CloseAlertComponent: React.FC<SubActionProps<OpsgenieCloseAlertParams>> = ({
-  editSubAction,
-  errors,
-  index,
-  messageVariables,
-  subActionParams,
-}) => {
-  const isAliasInvalid =
-    errors['subActionParams.alias'] !== undefined &&
-    errors['subActionParams.alias'].length > 0 &&
-    subActionParams?.alias !== undefined;
-
-  return (
-    <>
-      <EuiFormRow
-        data-test-subj="opsgenie-alias-row"
-        fullWidth
-        error={errors['subActionParams.alias']}
-        isInvalid={isAliasInvalid}
-        label={i18n.ALIAS_FIELD_LABEL}
-      >
-        <TextFieldWithMessageVariables
-          index={index}
-          editAction={editSubAction}
-          messageVariables={messageVariables}
-          paramsProperty={'alias'}
-          inputTargetValue={subActionParams?.alias}
-          errors={errors['subActionParams.alias'] as string[]}
-        />
-      </EuiFormRow>
-      <TextAreaWithMessageVariables
-        index={index}
-        editAction={editSubAction}
-        messageVariables={messageVariables}
-        paramsProperty={'note'}
-        inputTargetValue={subActionParams?.note}
-        label={i18n.NOTE_FIELD_LABEL}
-      />
-    </>
-  );
-};
-
-CloseAlertComponent.displayName = 'CloseAlertComponent';
+import { CreateAlert } from './create_alert';
+import { CloseAlert } from './close_alert';
 
 const OpsgenieParamFields: React.FC<ActionParamsProps<OpsgenieActionParams>> = ({
   actionParams,
@@ -131,6 +21,7 @@ const OpsgenieParamFields: React.FC<ActionParamsProps<OpsgenieActionParams>> = (
   errors,
   index,
   messageVariables,
+  testMode,
 }) => {
   const { subAction, subActionParams } = actionParams;
 
@@ -152,6 +43,20 @@ const OpsgenieParamFields: React.FC<ActionParamsProps<OpsgenieActionParams>> = (
       editAction('subAction', event.target.value, index);
     },
     [editAction, index]
+  );
+
+  const editOptionalSubAction = useCallback(
+    (key, value) => {
+      if (isEmpty(value)) {
+        const paramsCopy = cloneDeep(subActionParams);
+        unset(paramsCopy, key);
+        editAction('subActionParams', paramsCopy, index);
+        return;
+      }
+
+      editAction('subActionParams', { ...subActionParams, [key]: value }, index);
+    },
+    [editAction, index, subActionParams]
   );
 
   const editSubAction = useCallback(
@@ -191,9 +96,11 @@ const OpsgenieParamFields: React.FC<ActionParamsProps<OpsgenieActionParams>> = (
       </EuiFormRow>
 
       {subAction != null && subAction === OpsgenieSubActions.CreateAlert && (
-        <CreateAlertComponent
+        <CreateAlert
           subActionParams={subActionParams}
+          editAction={editAction}
           editSubAction={editSubAction}
+          editOptionalSubAction={editOptionalSubAction}
           errors={errors}
           index={index}
           messageVariables={messageVariables}
@@ -201,9 +108,10 @@ const OpsgenieParamFields: React.FC<ActionParamsProps<OpsgenieActionParams>> = (
       )}
 
       {subAction != null && subAction === OpsgenieSubActions.CloseAlert && (
-        <CloseAlertComponent
+        <CloseAlert
           subActionParams={subActionParams}
           editSubAction={editSubAction}
+          editOptionalSubAction={editOptionalSubAction}
           errors={errors}
           index={index}
           messageVariables={messageVariables}

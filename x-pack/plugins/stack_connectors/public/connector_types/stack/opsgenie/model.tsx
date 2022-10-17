@@ -11,7 +11,6 @@ import {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { RecursivePartial } from '@elastic/eui';
 import { OpsgenieSubActions } from '../../../../common';
 import type {
   OpsgenieActionConfig,
@@ -19,6 +18,7 @@ import type {
   OpsgenieActionSecrets,
 } from '../../../../server/connector_types/stack';
 import { DEFAULT_ALIAS } from './constants';
+import { ValidationParams } from './types';
 
 const SELECT_MESSAGE = i18n.translate(
   'xpack.stackConnectors.components.opsgenie.selectMessageText',
@@ -42,23 +42,29 @@ export const getConnectorType = (): ConnectorTypeModel<
     selectMessage: SELECT_MESSAGE,
     actionTypeTitle: TITLE,
     validateParams: async (
-      actionParams: RecursivePartial<OpsgenieActionParams>
+      actionParams: ValidationParams
     ): Promise<GenericValidationResult<unknown>> => {
       const translations = await import('./translations');
       const errors = {
         'subActionParams.message': new Array<string>(),
         'subActionParams.alias': new Array<string>(),
+        'subActionParams.advancedEditor': new Array<string>(),
       };
 
       const validationResult = {
         errors,
       };
 
-      if (
-        actionParams.subAction === OpsgenieSubActions.CreateAlert &&
-        !actionParams?.subActionParams?.message?.length
-      ) {
-        errors['subActionParams.message'].push(translations.MESSAGE_IS_REQUIRED);
+      if (actionParams.subAction === OpsgenieSubActions.CreateAlert) {
+        if (!actionParams?.subActionParams?.message?.length) {
+          errors['subActionParams.message'].push(translations.MESSAGE_IS_REQUIRED);
+        }
+
+        if (actionParams.subActionParams?.advancedEditor?.length) {
+          errors['subActionParams.advancedEditor'].push(
+            translations.ADVANCED_EDITOR_FORBIDDEN_KEYS(actionParams.subActionParams.advancedEditor)
+          );
+        }
       }
 
       if (
