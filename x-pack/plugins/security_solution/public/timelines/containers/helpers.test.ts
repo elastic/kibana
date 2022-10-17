@@ -22,9 +22,9 @@ describe('skipQueryForDetectionsPage', () => {
   });
 
   test('Make sure to SKIP the query when it is a timeline from a detection pages without the siem-signals', () => {
-    expect(skipQueryForDetectionsPage(TableId.alertsOnAlertsPage, ['auditbeat-*', 'filebeat-*'])).toBe(
-      true
-    );
+    expect(
+      skipQueryForDetectionsPage(TableId.alertsOnAlertsPage, ['auditbeat-*', 'filebeat-*'])
+    ).toBe(true);
     expect(
       skipQueryForDetectionsPage(TableId.alertsOnRuleDetailsPage, ['auditbeat-*', 'filebeat-*'])
     ).toBe(true);
