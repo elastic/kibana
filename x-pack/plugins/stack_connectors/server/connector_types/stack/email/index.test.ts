@@ -42,9 +42,7 @@ let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
 beforeEach(() => {
   jest.resetAllMocks();
   configurationUtilities = actionsConfigMock.create();
-  connectorType = getConnectorType({
-    logger: mockedLogger,
-  });
+  connectorType = getConnectorType({});
 });
 
 describe('connector registration', () => {
@@ -522,6 +520,7 @@ describe('execute()', () => {
     secrets,
     services,
     configurationUtilities: actionsConfigMock.create(),
+    logger: mockedLogger,
   };
 
   test('ensure parameters are as expected', async () => {
@@ -741,7 +740,6 @@ describe('execute()', () => {
 
   test('provides a footer link to Kibana when publicBaseUrl is defined', async () => {
     const connectorTypeWithPublicUrl = getConnectorType({
-      logger: mockedLogger,
       publicBaseUrl: 'https://localhost:1234/foo/bar',
     });
 
@@ -760,7 +758,6 @@ describe('execute()', () => {
 
   test('allows to generate a deep link into Kibana when publicBaseUrl is defined', async () => {
     const connectorTypeWithPublicUrl = getConnectorType({
-      logger: mockedLogger,
       publicBaseUrl: 'https://localhost:1234/foo/bar',
     });
 
