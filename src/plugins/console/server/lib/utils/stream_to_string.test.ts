@@ -7,7 +7,7 @@
  */
 
 import { Readable } from 'stream';
-import { streamToString } from './streamToString';
+import { streamToString } from './stream_to_string';
 import type { IncomingMessage } from 'http';
 
 describe('streamToString', () => {
