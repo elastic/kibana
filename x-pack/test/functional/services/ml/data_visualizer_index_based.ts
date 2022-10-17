@@ -244,20 +244,22 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
         | 'dvRandomSamplerOptionOff',
       expectedProbability?: number
     ) {
-      await retry.tryForTime(2000, async () => {
+      await retry.tryForTime(20000, async () => {
         await browser.pressKeys(browser.keys.ESCAPE);
         await testSubjects.clickWhenNotDisabled('dvRandomSamplerOptionsButton');
         await testSubjects.existOrFail('dvRandomSamplerOptionsPopover');
 
         if (expectedOption === 'dvRandomSamplerOptionOff') {
-          await testSubjects.existOrFail('dvRandomSamplerOptionOff');
-          await testSubjects.missingOrFail('dvRandomSamplerProbabilityRange');
-          await testSubjects.missingOrFail('dvRandomSamplerAutomaticProbabilityMsg');
+          await testSubjects.existOrFail('dvRandomSamplerOptionOff', { timeout: 1000 });
+          await testSubjects.missingOrFail('dvRandomSamplerProbabilityRange', { timeout: 1000 });
+          await testSubjects.missingOrFail('dvRandomSamplerAutomaticProbabilityMsg', {
+            timeout: 1000,
+          });
         }
 
         if (expectedOption === 'dvRandomSamplerOptionOnManual') {
-          await testSubjects.existOrFail('dvRandomSamplerOptionOnManual');
-          await testSubjects.existOrFail('dvRandomSamplerProbabilityRange');
+          await testSubjects.existOrFail('dvRandomSamplerOptionOnManual', { timeout: 1000 });
+          await testSubjects.existOrFail('dvRandomSamplerProbabilityRange', { timeout: 1000 });
           if (expectedProbability !== undefined) {
             const probability = await testSubjects.getAttribute(
               'dvRandomSamplerProbabilityRange',
@@ -271,8 +273,10 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
         }
 
         if (expectedOption === 'dvRandomSamplerOptionOnAutomatic') {
-          await testSubjects.existOrFail('dvRandomSamplerOptionOnAutomatic');
-          await testSubjects.existOrFail('dvRandomSamplerAutomaticProbabilityMsg');
+          await testSubjects.existOrFail('dvRandomSamplerOptionOnAutomatic', { timeout: 1000 });
+          await testSubjects.existOrFail('dvRandomSamplerAutomaticProbabilityMsg', {
+            timeout: 1000,
+          });
 
           if (expectedProbability !== undefined) {
             const probabilityText = await testSubjects.getVisibleText(
@@ -293,18 +297,18 @@ export function MachineLearningDataVisualizerIndexBasedProvider({
         | 'dvRandomSamplerOptionOnManual'
         | 'dvRandomSamplerOptionOff'
     ) {
-      await retry.tryForTime(2000, async () => {
+      await retry.tryForTime(20000, async () => {
         // escape popover
         await browser.pressKeys(browser.keys.ESCAPE);
         await this.assertRandomSamplingOptionsButtonExists();
         await testSubjects.clickWhenNotDisabled('dvRandomSamplerOptionsButton');
-        await testSubjects.existOrFail('dvRandomSamplerOptionsPopover');
+        await testSubjects.existOrFail('dvRandomSamplerOptionsPopover', { timeout: 1000 });
 
         await testSubjects.clickWhenNotDisabled('dvRandomSamplerOptionsSelect');
 
-        await testSubjects.existOrFail('dvRandomSamplerOptionOff');
-        await testSubjects.existOrFail('dvRandomSamplerOptionOnManual');
-        await testSubjects.existOrFail('dvRandomSamplerOptionOnAutomatic');
+        await testSubjects.existOrFail('dvRandomSamplerOptionOff', { timeout: 1000 });
+        await testSubjects.existOrFail('dvRandomSamplerOptionOnManual', { timeout: 1000 });
+        await testSubjects.existOrFail('dvRandomSamplerOptionOnAutomatic', { timeout: 1000 });
 
         await testSubjects.click(option);
 
