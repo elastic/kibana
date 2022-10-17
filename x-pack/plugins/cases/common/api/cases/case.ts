@@ -185,7 +185,7 @@ export const CasesFindRequestRt = rt.partial({
    */
   severity: CaseSeverityRt,
   /**
-   * The uids of the user profiles to filter by.
+   * The uids of the user profiles to filter by
    */
   assignees: rt.union([rt.array(rt.string), rt.string]),
   /**

@@ -95,10 +95,15 @@ const AssigneesFilterPopoverComponent: React.FC<AssigneesFilterPopoverProps> = (
     onDebounce,
   });
 
-  const searchResultProfiles = useMemo(
-    () => [null, ...(bringCurrentUserToFrontAndSort(currentUserProfile, userProfiles) ?? [])],
-    [userProfiles, currentUserProfile]
-  );
+  const searchResultProfiles = useMemo(() => {
+    const sortedUsers = bringCurrentUserToFrontAndSort(currentUserProfile, userProfiles) ?? [];
+
+    if (isEmpty(searchTerm)) {
+      return [null, ...sortedUsers];
+    }
+
+    return sortedUsers;
+  }, [currentUserProfile, userProfiles, searchTerm]);
 
   const isLoadingData = isLoading || isLoadingSuggest;
 

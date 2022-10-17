@@ -183,9 +183,14 @@ export const getCases = async ({
   const query = {
     ...(filterOptions.status !== StatusAll ? { status: filterOptions.status } : {}),
     ...(filterOptions.severity !== SeverityAll ? { severity: filterOptions.severity } : {}),
-    assignees: filterOptions.assignees?.map((assignee) =>
-      assignee === null ? NO_ASSIGNEES_FILTERING_KEYWORD : assignee
-    ),
+    ...(filterOptions.assignees === null || filterOptions.assignees.length > 0
+      ? {
+          assignees:
+            filterOptions.assignees?.map((assignee) =>
+              assignee === null ? NO_ASSIGNEES_FILTERING_KEYWORD : assignee
+            ) ?? NO_ASSIGNEES_FILTERING_KEYWORD,
+        }
+      : {}),
     ...(filterOptions.reporters.length > 0
       ? { reporters: constructReportersFilter(filterOptions.reporters) }
       : {}),
