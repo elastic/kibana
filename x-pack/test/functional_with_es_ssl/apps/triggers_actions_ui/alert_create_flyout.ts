@@ -134,6 +134,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('onThrottleInterval');
       await testSubjects.setValue('throttleInput', '10');
 
+      // filterKuery validation
+      await testSubjects.setValue('filterKuery', 'group:');
+      const filterKueryInput = await testSubjects.find('filterKuery');
+      expect(await filterKueryInput.elementHasClass('euiFieldSearch-isInvalid')).to.eql(true);
+      await testSubjects.setValue('filterKuery', 'group: group-0');
+      expect(await filterKueryInput.elementHasClass('euiFieldSearch-isInvalid')).to.eql(false);
+
       await testSubjects.click('.slack-alerting-ActionTypeSelectOption');
       await testSubjects.click('addNewActionConnectorButton-.slack');
       const slackConnectorName = generateUniqueKey();

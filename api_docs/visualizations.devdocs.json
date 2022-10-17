@@ -11791,6 +11791,20 @@
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.XYConfiguration.showCurrentTimeMarker",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showCurrentTimeMarker",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -12142,7 +12156,7 @@
             "label": "lineStyle",
             "description": [],
             "signature": [
-              "\"solid\" | \"dashed\" | \"dotted\" | \"dot-dashed\" | undefined"
+              "\"solid\" | \"dashed\" | \"dotted\" | undefined"
             ],
             "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -12670,6 +12684,14 @@
             "docId": "kibVisualizationsPluginApi",
             "section": "def-common.MetricVisConfiguration",
             "text": "MetricVisConfiguration"
+          },
+          " | ",
+          {
+            "pluginId": "visualizations",
+            "scope": "common",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-common.GaugeVisConfiguration",
+            "text": "GaugeVisConfiguration"
           }
         ],
         "path": "src/plugins/visualizations/common/convert_to_lens/types/configurations.ts",
