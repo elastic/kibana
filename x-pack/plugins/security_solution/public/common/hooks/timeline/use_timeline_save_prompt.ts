@@ -117,5 +117,11 @@ export const useTimelineSavePrompt = (
         return actions.default();
       }
     });
+
+    return () => {
+      // removing app leave handler for timeline when
+      // components containing timeline unmounts
+      onAppLeave((actions) => actions.default());
+    };
   });
 };
