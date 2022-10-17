@@ -121,7 +121,6 @@ export class ActionExecutor {
       },
       async (span) => {
         const {
-          logger,
           spaces,
           getServices,
           encryptedSavedObjectsClient,
@@ -144,6 +143,9 @@ export class ActionExecutor {
         );
 
         const { actionTypeId, name, config, secrets } = actionInfo;
+        const loggerId = actionTypeId.startsWith('.') ? actionTypeId.substring(1) : actionTypeId;
+        let { logger } = this.actionExecutorContext!;
+        logger = logger.get(loggerId);
 
         if (!this.actionInfo || this.actionInfo.actionId !== actionId) {
           this.actionInfo = actionInfo;
@@ -218,7 +220,6 @@ export class ActionExecutor {
             },
             { configurationUtilities }
           );
-          const loggerId = actionTypeId.startsWith('.') ? actionTypeId.substring(1) : actionTypeId;
 
           rawResult = await actionType.executor({
             actionId,
@@ -229,7 +230,7 @@ export class ActionExecutor {
             isEphemeral,
             taskInfo,
             configurationUtilities,
-            logger: logger.get(loggerId),
+            logger,
           });
         } catch (err) {
           if (err.reason === ActionExecutionErrorReason.Validation) {
