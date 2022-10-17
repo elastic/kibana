@@ -7,6 +7,7 @@
 
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { ConfigKey } from '../../../../../../common/runtime_types';
 import { getMonitorRecentPingsAction, selectLatestPing, selectPingsLoading } from '../../../state';
 import { useSelectedLocation } from './use_selected_location';
 import { useSelectedMonitor } from './use_selected_monitor';
@@ -28,10 +29,14 @@ export const useMonitorLatestPing = (params?: UseMonitorLatestPingParams) => {
   const latestPing = useSelector(selectLatestPing);
   const pingsLoading = useSelector(selectPingsLoading);
 
-  const isUpToDate =
-    latestPing &&
-    latestPing.monitor.id === monitorId &&
-    latestPing.observer?.geo?.name === locationLabel;
+  const latestPingId = latestPing?.monitor.id;
+
+  const isIdSame =
+    latestPingId === monitorId || latestPingId === monitor?.[ConfigKey.CUSTOM_HEARTBEAT_ID];
+
+  const isLocationSame = latestPing?.observer?.geo?.name === locationLabel;
+
+  const isUpToDate = isIdSame && isLocationSame;
 
   useEffect(() => {
     if (monitorId && locationLabel && !isUpToDate) {
@@ -47,7 +52,7 @@ export const useMonitorLatestPing = (params?: UseMonitorLatestPingParams) => {
     return { loading: pingsLoading, latestPing: null };
   }
 
-  if (latestPing.monitor.id !== monitorId || latestPing.observer?.geo?.name !== locationLabel) {
+  if (!isIdSame || !isLocationSame) {
     return { loading: pingsLoading, latestPing: null };
   }
 
