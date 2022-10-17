@@ -99,39 +99,49 @@ export class OptionsMenu extends Component<Props, State> {
             data-test-subj="dashboardPanelTitlesCheckbox"
           />
         </EuiFormRow>
-
-        <EuiFormRow>
-          <EuiSwitch
-            label={i18n.translate('dashboard.topNav.options.syncColorsBetweenPanelsSwitchLabel', {
-              defaultMessage: 'Sync color palettes across panels',
-            })}
-            checked={this.state.syncColors}
-            onChange={this.handleSyncColorsChange}
-            data-test-subj="dashboardSyncColorsCheckbox"
-          />
-        </EuiFormRow>
-
-        <EuiFormRow>
-          <EuiSwitch
-            label={i18n.translate('dashboard.topNav.options.syncCursorBetweenPanelsSwitchLabel', {
-              defaultMessage: 'Sync cursor across panels',
-            })}
-            checked={this.state.syncCursor}
-            onChange={this.handleSyncCursorChange}
-            data-test-subj="dashboardSyncCursorCheckbox"
-          />
-        </EuiFormRow>
-
-        <EuiFormRow>
-          <EuiSwitch
-            label={i18n.translate('dashboard.topNav.options.syncTooltipsBetweenPanelsSwitchLabel', {
-              defaultMessage: 'Sync tooltips across panels',
-            })}
-            checked={this.state.syncTooltips}
-            disabled={!Boolean(this.state.syncCursor)}
-            onChange={this.handleSyncTooltipsChange}
-            data-test-subj="dashboardSyncTooltipsCheckbox"
-          />
+        <EuiFormRow label="Sync across panels">
+          <>
+            <EuiFormRow>
+              <EuiSwitch
+                label={i18n.translate(
+                  'dashboard.topNav.options.syncColorsBetweenPanelsSwitchLabel',
+                  {
+                    defaultMessage: 'Sync color palettes across panels',
+                  }
+                )}
+                checked={this.state.syncColors}
+                onChange={this.handleSyncColorsChange}
+                data-test-subj="dashboardSyncColorsCheckbox"
+              />
+            </EuiFormRow>
+            <EuiFormRow>
+              <EuiSwitch
+                label={i18n.translate(
+                  'dashboard.topNav.options.syncCursorBetweenPanelsSwitchLabel',
+                  {
+                    defaultMessage: 'Sync cursor across panels',
+                  }
+                )}
+                checked={this.state.syncCursor}
+                onChange={this.handleSyncCursorChange}
+                data-test-subj="dashboardSyncCursorCheckbox"
+              />
+            </EuiFormRow>
+            <EuiFormRow>
+              <EuiSwitch
+                label={i18n.translate(
+                  'dashboard.topNav.options.syncTooltipsBetweenPanelsSwitchLabel',
+                  {
+                    defaultMessage: 'Sync tooltips across panels',
+                  }
+                )}
+                checked={this.state.syncTooltips}
+                disabled={!Boolean(this.state.syncCursor)}
+                onChange={this.handleSyncTooltipsChange}
+                data-test-subj="dashboardSyncTooltipsCheckbox"
+              />
+            </EuiFormRow>
+          </>
         </EuiFormRow>
       </EuiForm>
     );
