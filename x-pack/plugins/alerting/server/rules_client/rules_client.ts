@@ -1846,22 +1846,18 @@ export class RulesClient {
     const ruleNameToRuleIdMapping: Record<string, string> = {};
 
     for await (const response of rulesFinder.find()) {
-      pMap(
-        response.saved_objects,
-        (rule) => {
-          if (rule.attributes.apiKey) {
-            apiKeyToRuleIdMapping[rule.id] = rule.attributes.apiKey;
-          }
-          if (rule.attributes.name) {
-            ruleNameToRuleIdMapping[rule.id] = rule.attributes.name;
-          }
-          if (rule.attributes.scheduledTaskId) {
-            taskIdToRuleIdMapping[rule.id] = rule.attributes.scheduledTaskId;
-          }
-          rules.push(rule);
-        },
-        { concurrency: API_KEY_GENERATE_CONCURRENCY }
-      );
+      for (const rule of response.saved_objects) {
+        if (rule.attributes.apiKey) {
+          apiKeyToRuleIdMapping[rule.id] = rule.attributes.apiKey;
+        }
+        if (rule.attributes.name) {
+          ruleNameToRuleIdMapping[rule.id] = rule.attributes.name;
+        }
+        if (rule.attributes.scheduledTaskId) {
+          taskIdToRuleIdMapping[rule.id] = rule.attributes.scheduledTaskId;
+        }
+        rules.push(rule);
+      }
     }
 
     const result = await this.unsecuredSavedObjectsClient.bulkDelete(rules);
