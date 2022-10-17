@@ -13,112 +13,29 @@ import { css } from '@emotion/react';
 import React, { useCallback, useMemo } from 'react';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import type { UnifiedHistogramChartContext, UnifiedHistogramServices } from '../types';
+import type {
+  UnifiedHistogramBreakdownContext,
+  UnifiedHistogramChartContext,
+  UnifiedHistogramServices,
+} from '../types';
+import { getLensAttributes } from './get_lens_attributes';
 
 export interface HistogramProps {
   services: UnifiedHistogramServices;
   dataView: DataView;
   chart: UnifiedHistogramChartContext;
+  breakdown?: UnifiedHistogramBreakdownContext;
 }
 
 export function Histogram({
   services: { data, lens, uiSettings },
   dataView,
   chart: { timeInterval, bucketInterval, data: chartData },
+  breakdown: { field: breakdownField } = {},
 }: HistogramProps) {
-  const filters = data.query.filterManager.getFilters();
-  const query = data.query.queryString.getQuery();
-  const attributes = useMemo<TypedLensByValueInput['attributes']>(
-    () => ({
-      title: '',
-      references: [
-        {
-          id: dataView.id ?? '',
-          name: 'indexpattern-datasource-current-indexpattern',
-          type: 'index-pattern',
-        },
-        {
-          id: dataView.id ?? '',
-          name: 'indexpattern-datasource-layer-layer1',
-          type: 'index-pattern',
-        },
-      ],
-      state: {
-        datasourceStates: {
-          formBased: {
-            layers: {
-              layer1: {
-                columnOrder: ['col1', 'col2'],
-                columns: {
-                  col2: {
-                    dataType: 'number',
-                    isBucketed: false,
-                    label: 'Count of records',
-                    operationType: 'count',
-                    scale: 'ratio',
-                    sourceField: '___records___',
-                  },
-                  col1: {
-                    dataType: 'date',
-                    isBucketed: true,
-                    label: dataView.timeFieldName ?? '',
-                    operationType: 'date_histogram',
-                    params: {
-                      interval: timeInterval ?? 'auto',
-                    },
-                    scale: 'interval',
-                    sourceField: dataView.timeFieldName,
-                  },
-                },
-              },
-            },
-          },
-        },
-        filters,
-        query: 'language' in query ? query : { language: 'kuery', query: '' },
-        visualization: {
-          axisTitlesVisibilitySettings: {
-            x: false,
-            yLeft: false,
-            yRight: true,
-          },
-          fittingFunction: 'None',
-          gridlinesVisibilitySettings: {
-            x: true,
-            yLeft: true,
-            yRight: true,
-          },
-          layers: [
-            {
-              accessors: ['col2'],
-              layerId: 'layer1',
-              layerType: 'data',
-              seriesType: 'bar_stacked',
-              xAccessor: 'col1',
-              yConfig: [
-                {
-                  forAccessor: 'col2',
-                },
-              ],
-            },
-          ],
-          legend: {
-            isVisible: true,
-            position: 'right',
-          },
-          preferredSeriesType: 'bar_stacked',
-          tickLabelsVisibilitySettings: {
-            x: true,
-            yLeft: true,
-            yRight: true,
-          },
-          valueLabels: 'hide',
-        },
-      },
-      visualizationType: 'lnsXY',
-    }),
-    [dataView.id, dataView.timeFieldName, filters, query, timeInterval]
+  const attributes = useMemo(
+    () => getLensAttributes({ data, dataView, timeInterval, breakdownField }),
+    [breakdownField, data, dataView, timeInterval]
   );
 
   const { timefilter } = data.query.timefilter;

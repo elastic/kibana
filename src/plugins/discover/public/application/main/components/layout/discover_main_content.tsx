@@ -109,6 +109,7 @@ export const DiscoverMainContent = ({
       dataView={dataView}
       hits={hits}
       chart={chart}
+      breakdown={{ field: dataView.fields.getByName('DestWeather') }}
       resizeRef={resizeRef}
       topPanelHeight={topPanelHeight}
       appendHitsCounter={

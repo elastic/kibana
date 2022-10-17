@@ -18,6 +18,7 @@ import type {
   UnifiedHistogramChartContext,
   UnifiedHistogramServices,
   UnifiedHistogramHitsContext,
+  UnifiedHistogramBreakdownContext,
 } from '../types';
 
 export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> {
@@ -32,6 +33,10 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    * Context object for the chart -- leave undefined to hide the chart
    */
   chart?: UnifiedHistogramChartContext;
+  /**
+   * Context object for the breakdown -- leave undefined to hide the breakdown
+   */
+  breakdown?: UnifiedHistogramBreakdownContext;
   /**
    * Ref to the element wrapping the layout which will be used for resize calculations
    */
@@ -68,6 +73,7 @@ export const UnifiedHistogramLayout = ({
   dataView,
   hits,
   chart,
+  breakdown,
   resizeRef,
   topPanelHeight,
   appendHitsCounter,
@@ -125,6 +131,7 @@ export const UnifiedHistogramLayout = ({
           dataView={dataView}
           hits={hits}
           chart={chart}
+          breakdown={breakdown}
           appendHitsCounter={appendHitsCounter}
           appendHistogram={showFixedPanels ? <EuiSpacer size="s" /> : <EuiSpacer size="l" />}
           onEditVisualization={onEditVisualization}

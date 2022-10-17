@@ -14,6 +14,7 @@ import type { Duration, Moment } from 'moment';
 import type { Unit } from '@kbn/datemath';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
 
 /**
  * The fetch status of a unified histogram request
@@ -153,4 +154,14 @@ export interface UnifiedHistogramChartContext {
    * Error from failed chart request
    */
   error?: Error;
+}
+
+/**
+ * Context object for the histogram breakdown
+ */
+export interface UnifiedHistogramBreakdownContext {
+  /**
+   * The field used for the breakdown
+   */
+  field?: DataViewField;
 }

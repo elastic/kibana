@@ -10,6 +10,8 @@ import type { ReactElement } from 'react';
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import {
   EuiButtonIcon,
+  EuiComboBox,
+  EuiComboBoxOptionOption,
   EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
@@ -25,6 +27,7 @@ import { HitsCounter } from '../hits_counter';
 import { Histogram } from './histogram';
 import { useChartPanels } from './use_chart_panels';
 import type {
+  UnifiedHistogramBreakdownContext,
   UnifiedHistogramChartContext,
   UnifiedHistogramHitsContext,
   UnifiedHistogramServices,
@@ -36,6 +39,7 @@ export interface ChartProps {
   dataView: DataView;
   hits?: UnifiedHistogramHitsContext;
   chart?: UnifiedHistogramChartContext;
+  breakdown?: UnifiedHistogramBreakdownContext;
   appendHitsCounter?: ReactElement;
   appendHistogram?: ReactElement;
   onEditVisualization?: () => void;
@@ -52,6 +56,7 @@ export function Chart({
   dataView,
   hits,
   chart,
+  breakdown,
   appendHitsCounter,
   appendHistogram,
   onEditVisualization,
@@ -122,6 +127,16 @@ export function Chart({
     }
   `;
 
+  const options = dataView.fields
+    .filter((field) => field.aggregatable)
+    .map((field) => ({ label: field.name }));
+
+  const [selectedOptions, setSelectedOptions] = useState<EuiComboBoxOptionOption[]>();
+
+  const onChange = (newOptions: EuiComboBoxOptionOption[]) => {
+    setSelectedOptions(newOptions);
+  };
+
   return (
     <EuiFlexGroup
       className={className}
@@ -142,6 +157,19 @@ export function Chart({
           {chart && (
             <EuiFlexItem grow={false} css={resultCountToggleCss}>
               <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiComboBox
+                    prepend="Breakdown by"
+                    singleSelection={{ asPlainText: true }}
+                    options={options}
+                    selectedOptions={selectedOptions}
+                    onChange={onChange}
+                    compressed
+                    css={css`
+                      width: ${euiTheme.base * 22}px;
+                    `}
+                  />
+                </EuiFlexItem>
                 {onEditVisualization && (
                   <EuiFlexItem grow={false}>
                     <EuiToolTip
@@ -204,7 +232,14 @@ export function Chart({
             })}
             css={timechartCss}
           >
-            <HistogramMemoized services={services} dataView={dataView} chart={chart} />
+            <HistogramMemoized
+              services={services}
+              dataView={dataView}
+              chart={chart}
+              breakdown={{
+                field: dataView.fields.find((field) => field.name === selectedOptions?.[0]?.label),
+              }}
+            />
           </section>
           {appendHistogram}
         </EuiFlexItem>
