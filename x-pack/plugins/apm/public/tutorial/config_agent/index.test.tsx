@@ -89,7 +89,7 @@ describe('TutorialConfigAgent', () => {
         "java -javaagent:/path/to/elastic-apm-agent-&lt;version&gt;.jar \\\\
         -Delastic.apm.service_name=my-service-name \\\\
         -Delastic.apm.secret_token= \\\\
-        -Delastic.apm.server_urls=http://localhost:8200 \\\\
+        -Delastic.apm.server_url=http://localhost:8200 \\\\
         -Delastic.apm.environment=production \\\\
         -Delastic.apm.application_packages=org.example \\\\
         -jar my-service-name.jar"
@@ -103,7 +103,7 @@ describe('TutorialConfigAgent', () => {
         "java -javaagent:/path/to/elastic-apm-agent-&lt;version&gt;.jar \\\\
         -Delastic.apm.service_name=my-service-name \\\\
         -Delastic.apm.secret_token=foo token \\\\
-        -Delastic.apm.server_urls=foo url \\\\
+        -Delastic.apm.server_url=foo url \\\\
         -Delastic.apm.environment=production \\\\
         -Delastic.apm.application_packages=org.example \\\\
         -jar my-service-name.jar"
@@ -140,7 +140,7 @@ describe('TutorialConfigAgent', () => {
           "java -javaagent:/path/to/elastic-apm-agent-&lt;version&gt;.jar \\\\
           -Delastic.apm.service_name=my-service-name \\\\
           -Delastic.apm.secret_token= \\\\
-          -Delastic.apm.server_urls=http://localhost:8200 \\\\
+          -Delastic.apm.server_url=http://localhost:8200 \\\\
           -Delastic.apm.environment=production \\\\
           -Delastic.apm.application_packages=org.example \\\\
           -jar my-service-name.jar"
@@ -176,7 +176,7 @@ describe('TutorialConfigAgent', () => {
           "java -javaagent:/path/to/elastic-apm-agent-&lt;version&gt;.jar \\\\
           -Delastic.apm.service_name=my-service-name \\\\
           -Delastic.apm.secret_token= \\\\
-          -Delastic.apm.server_urls=http://localhost:8200 \\\\
+          -Delastic.apm.server_url=http://localhost:8200 \\\\
           -Delastic.apm.environment=production \\\\
           -Delastic.apm.application_packages=org.example \\\\
           -jar my-service-name.jar"
@@ -218,7 +218,7 @@ describe('TutorialConfigAgent', () => {
           "java -javaagent:/path/to/elastic-apm-agent-&lt;version&gt;.jar \\\\
           -Delastic.apm.service_name=my-service-name \\\\
           -Delastic.apm.secret_token=cloud_token \\\\
-          -Delastic.apm.server_urls=cloud_url \\\\
+          -Delastic.apm.server_url=cloud_url \\\\
           -Delastic.apm.environment=production \\\\
           -Delastic.apm.application_packages=org.example \\\\
           -jar my-service-name.jar"
@@ -257,7 +257,7 @@ describe('TutorialConfigAgent', () => {
           "java -javaagent:/path/to/elastic-apm-agent-&lt;version&gt;.jar \\\\
           -Delastic.apm.service_name=my-service-name \\\\
           -Delastic.apm.secret_token=apm_cloud_token \\\\
-          -Delastic.apm.server_urls=apm_cloud_url \\\\
+          -Delastic.apm.server_url=apm_cloud_url \\\\
           -Delastic.apm.environment=production \\\\
           -Delastic.apm.application_packages=org.example \\\\
           -jar my-service-name.jar"
@@ -289,7 +289,7 @@ describe('TutorialConfigAgent', () => {
           "java -javaagent:/path/to/elastic-apm-agent-&lt;version&gt;.jar \\\\
           -Delastic.apm.service_name=my-service-name \\\\
           -Delastic.apm.secret_token= \\\\
-          -Delastic.apm.server_urls=http://localhost:8200 \\\\
+          -Delastic.apm.server_url=http://localhost:8200 \\\\
           -Delastic.apm.environment=production \\\\
           -Delastic.apm.application_packages=org.example \\\\
           -jar my-service-name.jar"
@@ -352,7 +352,7 @@ describe('TutorialConfigAgent', () => {
         "java -javaagent:/path/to/elastic-apm-agent-&lt;version&gt;.jar \\\\
         -Delastic.apm.service_name=my-service-name \\\\
         -Delastic.apm.secret_token= \\\\
-        -Delastic.apm.server_urls=http://localhost:8200 \\\\
+        -Delastic.apm.server_url=http://localhost:8200 \\\\
         -Delastic.apm.environment=production \\\\
         -Delastic.apm.application_packages=org.example \\\\
         -jar my-service-name.jar"
@@ -389,7 +389,7 @@ describe('TutorialConfigAgent', () => {
         "java -javaagent:/path/to/elastic-apm-agent-&lt;version&gt;.jar \\\\
         -Delastic.apm.service_name=my-service-name \\\\
         -Delastic.apm.secret_token=cloud_token \\\\
-        -Delastic.apm.server_urls=cloud_url \\\\
+        -Delastic.apm.server_url=cloud_url \\\\
         -Delastic.apm.environment=production \\\\
         -Delastic.apm.application_packages=org.example \\\\
         -jar my-service-name.jar"
