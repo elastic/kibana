@@ -11,6 +11,10 @@ import classNames from 'classnames';
 import { EsqlLang, monaco } from '@kbn/monaco';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getAggregateQueryMode } from '@kbn/es-query';
+import {
+  LanguageDocumentationSections,
+  LanguageDocumentationPopover,
+} from '@kbn/language-documentation-popover';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import { i18n } from '@kbn/i18n';
@@ -35,7 +39,6 @@ import {
   EDITOR_MAX_HEIGHT,
   EDITOR_MIN_HEIGHT,
 } from './text_based_languages_editor.styles';
-import { MemoizedDocumentation, DocumentationSections } from './documentation';
 import {
   useDebounceWithOptions,
   parseErrors,
@@ -105,7 +108,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [editorErrors, setEditorErrors] = useState<
     Array<{ startLineNumber: number; message: string }>
   >([]);
-  const [documentationSections, setDocumentationSections] = useState<DocumentationSections>();
+  const [documentationSections, setDocumentationSections] =
+    useState<LanguageDocumentationSections>();
   const kibana = useKibana<IUnifiedSearchPluginServices>();
   const { uiSettings } = kibana.services;
 
@@ -473,7 +477,10 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                     </EuiToolTip>
                   }
                 >
-                  <MemoizedDocumentation language={language} sections={documentationSections} />
+                  <LanguageDocumentationPopover
+                    language={language}
+                    sections={documentationSections}
+                  />
                 </EuiPopover>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -610,7 +617,10 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                     </EuiToolTip>
                   }
                 >
-                  <MemoizedDocumentation language={language} sections={documentationSections} />
+                  <LanguageDocumentationPopover
+                    language={language}
+                    sections={documentationSections}
+                  />
                 </EuiPopover>
               </EuiFlexItem>
             </EuiFlexGroup>

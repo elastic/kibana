@@ -3537,6 +3537,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/language-documentation-popover@link:bazel-bin/packages/kbn-language-documentation-popover":
+  version "0.0.0"
+  uid ""
+
 "@kbn/logging-mocks@link:bazel-bin/packages/kbn-logging-mocks":
   version "0.0.0"
   uid ""
@@ -7686,6 +7690,10 @@
   uid ""
 
 "@types/kbn__kibana-manifest-schema@link:bazel-bin/packages/kbn-kibana-manifest-schema/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__language-documentation-popover@link:bazel-bin/packages/kbn-language-documentation-popover/npm_module_types":
   version "0.0.0"
   uid ""
 

@@ -23,7 +23,7 @@ import {
 
 import './documentation.scss';
 
-export interface DocumentationSections {
+export interface LanguageDocumentationSections {
   groups: Array<{
     label: string;
     description?: string;
@@ -34,7 +34,7 @@ export interface DocumentationSections {
 
 interface DocumentationProps {
   language: string;
-  sections?: DocumentationSections;
+  sections?: LanguageDocumentationSections;
 }
 
 function Documentation({ language, sections }: DocumentationProps) {
@@ -69,7 +69,11 @@ function Documentation({ language, sections }: DocumentationProps) {
 
   return (
     <>
-      <EuiPopoverTitle className="documentation__docsHeader" paddingSize="m">
+      <EuiPopoverTitle
+        className="documentation__docsHeader"
+        paddingSize="m"
+        data-test-subj="language-documentation-title"
+      >
         {i18n.translate('unifiedSearch.query.textBasedLanguagesEditor.documentation.header', {
           defaultMessage: '{language} reference',
           values: { language: language.toUpperCase() },
@@ -94,6 +98,7 @@ function Documentation({ language, sections }: DocumentationProps) {
                 onChange={(e) => {
                   setSearchText(e.target.value);
                 }}
+                data-test-subj="language-documentation-navigation-search"
                 placeholder={i18n.translate(
                   'unifiedSearch.query.textBasedLanguagesEditor.documentation.searchPlaceholder',
                   {
@@ -106,7 +111,7 @@ function Documentation({ language, sections }: DocumentationProps) {
               {filteredGroups?.map((helpGroup, index) => {
                 return (
                   <nav className="documentation__docsNavGroup" key={helpGroup.label}>
-                    <EuiTitle size="xxs">
+                    <EuiTitle size="xxs" data-test-subj="language-documentation-navigation-title">
                       <h6>
                         <EuiLink
                           className="documentation__docsNavGroupLink"
@@ -200,4 +205,4 @@ function Documentation({ language, sections }: DocumentationProps) {
   );
 }
 
-export const MemoizedDocumentation = React.memo(Documentation);
+export const LanguageDocumentationPopover = React.memo(Documentation);
