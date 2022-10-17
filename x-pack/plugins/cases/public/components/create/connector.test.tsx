@@ -11,8 +11,8 @@ import { act, waitFor } from '@testing-library/react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
 
-import type { FormHook } from '../../common/shared_imports';
-import { useForm, Form } from '../../common/shared_imports';
+import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { connectorsMock } from '../../containers/mock';
 import { Connector } from './connector';
 import { useGetIncidentTypes } from '../connectors/resilient/use_get_incident_types';

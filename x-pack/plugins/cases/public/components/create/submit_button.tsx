@@ -8,7 +8,7 @@
 import React, { memo } from 'react';
 import { EuiButton } from '@elastic/eui';
 
-import { useFormContext } from '../../common/shared_imports';
+import { useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import * as i18n from './translations';
 
 const SubmitCaseButtonComponent: React.FC = () => {
