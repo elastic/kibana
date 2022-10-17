@@ -37,6 +37,7 @@ import {
 } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { PersistableFilter } from '@kbn/lens-plugin/common';
+import { LegendSize } from '@kbn/visualizations-plugin/common';
 import { urlFiltersToKueryString } from '../utils/stringify_kueries';
 import {
   FILTER_RECORDS,
@@ -939,7 +940,7 @@ export class LensAttributes {
         isVisible: true,
         showSingleSeries: true,
         position: 'right',
-        legendSize: 'large',
+        legendSize: LegendSize.LARGE,
         shouldTruncate: false,
       },
       valueLabels: 'hide',
