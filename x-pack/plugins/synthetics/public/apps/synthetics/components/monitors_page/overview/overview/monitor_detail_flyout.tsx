@@ -142,14 +142,14 @@ function DetailFlyoutDurationChart({
 }
 
 function LocationSelect({
-  locationData,
+  locations,
   currentLocation,
   id,
   setCurrentLocation,
   monitor,
   onEnabledChange,
 }: {
-  locationData: Pick<ReturnType<typeof useStatusByLocation>, 'locations'>;
+  locations: ReturnType<typeof useStatusByLocation>['locations'];
   currentLocation: string;
   id: string;
   monitor: EncryptedSyntheticsMonitor;
@@ -157,7 +157,6 @@ function LocationSelect({
   setCurrentLocation: (location: string) => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
-  const { locations } = locationData;
   const isDown = !!locations.find((l) => l.observer?.geo?.name === currentLocation)?.summary?.down;
   return (
     <EuiFlexGroup gutterSize="xs">
@@ -228,17 +227,16 @@ function LocationSelect({
 
 export function MonitorDetailFlyout(props: Props) {
   const { id, onLocationChange } = props;
-  const state = useSelector(selectOverviewState);
+  const {
+    data: { pages },
+  } = useSelector(selectOverviewState);
 
-  const monitor: MonitorOverviewItem | null = useMemo(() => {
-    const { pages } = state.data;
-    const pageKeys = Object.keys(pages);
-    for (const key of pageKeys) {
-      const overviewItem = pages[key].filter(({ id: itemId }) => itemId === id)[0];
+  const monitor: MonitorOverviewItem | undefined = useMemo(() => {
+    for (const key of Object.keys(pages)) {
+      const overviewItem = pages[key].filter(({ id: overviewItemId }) => overviewItemId === id)[0];
       if (overviewItem) return overviewItem;
     }
-    return null;
-  }, [id, state.data]);
+  }, [id, pages]);
 
   const setLocation = useCallback(
     (location: string) => onLocationChange(id, location),
@@ -248,6 +246,7 @@ export function MonitorDetailFlyout(props: Props) {
   const detailLink = useMonitorDetailLocator({
     monitorId: id,
   });
+
   const {
     data: monitorSavedObject,
     error,
@@ -256,11 +255,13 @@ export function MonitorDetailFlyout(props: Props) {
     () => fetchSyntheticsMonitor(id),
     [id]
   );
+
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
 
   const monitorDetail = useMonitorDetail(id, props.location);
   const locationStatuses = useStatusByLocation(id);
   const locations = locationStatuses.locations?.filter((l: any) => !!l?.observer?.geo?.name) ?? [];
+
   return (
     <EuiFlyout size="s" type="push" onClose={props.onClose}>
       {status === FETCH_STATUS.FAILURE && <EuiErrorBoundary>{error?.message}</EuiErrorBoundary>}
@@ -287,10 +288,9 @@ export function MonitorDetailFlyout(props: Props) {
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer size="s" />
-
             <LocationSelect
               currentLocation={props.location}
-              locationData={{ locations }}
+              locations={locations}
               setCurrentLocation={setLocation}
               id={id}
               monitor={monitorSavedObject.attributes}
@@ -313,19 +313,11 @@ export function MonitorDetailFlyout(props: Props) {
               listItems={[
                 {
                   title: LAST_RUN_HEADER_TEXT,
-                  description: monitorDetail.data?.timestamp ? (
-                    <Time timestamp={monitorDetail.data?.timestamp} />
-                  ) : (
-                    ''
-                  ),
+                  description: <Time timestamp={monitorDetail.data?.timestamp} />,
                 },
                 {
                   title: LAST_MODIFIED_HEADER_TEXT,
-                  description: monitorSavedObject.updated_at ? (
-                    <Time timestamp={monitorSavedObject.updated_at} />
-                  ) : (
-                    ''
-                  ),
+                  description: <Time timestamp={monitorSavedObject.updated_at} />,
                 },
                 {
                   title: MONITOR_ID_ITEM_TEXT,
@@ -406,9 +398,10 @@ function dateFmtString(timestamp: string) {
   return dateString + ' @ HH:mm:ss';
 }
 
-const Time = ({ timestamp }: { timestamp: string }) => (
-  <time dateTime={timestamp}>{moment(timestamp).format(dateFmtString(timestamp))}</time>
-);
+const Time = ({ timestamp }: { timestamp?: string }) =>
+  timestamp ? (
+    <time dateTime={timestamp}>{moment(timestamp).format(dateFmtString(timestamp))}</time>
+  ) : null;
 
 function unitToString(unit: string, n: number) {
   switch (unit) {

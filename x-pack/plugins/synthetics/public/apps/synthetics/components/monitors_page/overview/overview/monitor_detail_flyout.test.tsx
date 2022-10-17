@@ -53,6 +53,7 @@ describe('Monitor Detail Flyout', () => {
         location="US East"
         onClose={onCloseMock}
         onEnabledChange={jest.fn()}
+        onLocationChange={jest.fn()}
       />
     );
     const closeButton = getByLabelText('Close this dialog');
@@ -74,6 +75,7 @@ describe('Monitor Detail Flyout', () => {
         location="US East"
         onClose={jest.fn()}
         onEnabledChange={jest.fn()}
+        onLocationChange={jest.fn()}
       />
     );
     getByText(testErrorText);
@@ -91,6 +93,7 @@ describe('Monitor Detail Flyout', () => {
         location="US East"
         onClose={jest.fn()}
         onEnabledChange={jest.fn()}
+        onLocationChange={jest.fn()}
       />
     );
 
@@ -124,6 +127,7 @@ describe('Monitor Detail Flyout', () => {
         location="US East"
         onClose={jest.fn()}
         onEnabledChange={jest.fn()}
+        onLocationChange={jest.fn()}
       />
     );
 
