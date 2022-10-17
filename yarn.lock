@@ -1460,10 +1460,10 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@50.0.1":
-  version "50.0.1"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-50.0.1.tgz#a0ee66668c857be7cfea2e134e0b84930d1564c5"
-  integrity sha512-O1L8rot0dycTQo/0eW7aD2P4K3Bh1LtzMgRBXYZAtIpbzdxveRkl8fOlIkGxeeHE4YNvntUJaJWeyT+ngGg7QA==
+"@elastic/charts@50.0.2":
+  version "50.0.2"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-50.0.2.tgz#45d37544d57af8d67a1033bbd78ebe3f58d9f662"
+  integrity sha512-Q2fPS/bwKCYfTE7/dFO9OdlFtQQ7NMhflbl4WnHjpBcDeqUsqE/6cHd8XyvY/+WFhH9fkyCzBlO/eRBA3KatmA==
   dependencies:
     "@popperjs/core" "^2.4.0"
     bezier-easing "^2.1.0"
@@ -2702,6 +2702,10 @@
   uid ""
 
 "@kbn/bazel-runner@link:bazel-bin/packages/kbn-bazel-runner":
+  version "0.0.0"
+  uid ""
+
+"@kbn/cases-components@link:bazel-bin/packages/kbn-cases-components":
   version "0.0.0"
   uid ""
 
@@ -6870,6 +6874,10 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__cases-components@link:bazel-bin/packages/kbn-cases-components/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__chart-icons@link:bazel-bin/packages/kbn-chart-icons/npm_module_types":
   version "0.0.0"
   uid ""
@@ -9512,10 +9520,10 @@
     object.fromentries "^2.0.0"
     prop-types "^15.7.0"
 
-"@xmldom/xmldom@^0.7.0":
-  version "0.7.4"
-  resolved "https://registry.yarnpkg.com/@xmldom/xmldom/-/xmldom-0.7.4.tgz#93b2f9486c88b6464e97f76c9ab49b0a548fbe57"
-  integrity sha512-wdxC79cvO7PjSM34jATd/RYZuYWQ8y/R7MidZl1NYYlbpFn1+spfjkiR3ZsJfcaTs2IyslBN7VwBBJwrYKM+zw==
+"@xmldom/xmldom@^0.8.3":
+  version "0.8.3"
+  resolved "https://registry.yarnpkg.com/@xmldom/xmldom/-/xmldom-0.8.3.tgz#beaf980612532aa9a3004aff7e428943aeaa0711"
+  integrity sha512-Lv2vySXypg4nfa51LY1nU8yDAGo/5YwF+EY/rUZgIbfvwVARcd67ttCM8SMsTeJy51YhHYavEq+FS6R0hW9PFQ==
 
 "@xobotyi/scrollbar-width@1.9.5":
   version "1.9.5"
@@ -12239,10 +12247,10 @@ core-js@^2.4.0, core-js@^2.5.0, core-js@^2.6.9:
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-2.6.9.tgz#6b4b214620c834152e179323727fc19741b084f2"
   integrity sha512-HOpZf6eXmnl7la+cUdMnLvUxKNqLUzJvgIziQ0DiF3JwSImNphIqdGqzj6hIKyX04MmV0poclQ7+wjWvxQyR2A==
 
-core-js@^3.0.4, core-js@^3.25.1, core-js@^3.6.5, core-js@^3.8.2, core-js@^3.8.3:
-  version "3.25.1"
-  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.25.1.tgz#5818e09de0db8956e16bf10e2a7141e931b7c69c"
-  integrity sha512-sr0FY4lnO1hkQ4gLDr24K0DGnweGO1QwSj5BpfQjpSJPdqWalja4cTps29Y/PJVG/P7FYlPDkH3hO+Tr0CvDgQ==
+core-js@^3.0.4, core-js@^3.25.5, core-js@^3.6.5, core-js@^3.8.2, core-js@^3.8.3:
+  version "3.25.5"
+  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.25.5.tgz#e86f651a2ca8a0237a5f064c2fe56cef89646e27"
+  integrity sha512-nbm6eZSjm+ZuBQxCUPQKQCoUEfFOXjUZ8dTTyikyKaWrTYmAVbykQfwsKE5dBK88u3QCkCrzsx/PPlKfhsvgpw==
 
 core-util-is@1.0.2, core-util-is@^1.0.2, core-util-is@~1.0.0:
   version "1.0.2"
@@ -23585,10 +23593,10 @@ react-grid-layout@^1.3.4:
     react-draggable "^4.0.0"
     react-resizable "^3.0.4"
 
-react-hook-form@^7.36.1:
-  version "7.36.1"
-  resolved "https://registry.yarnpkg.com/react-hook-form/-/react-hook-form-7.36.1.tgz#82a311fe8cbe75e689fd4529f083b7c983da6520"
-  integrity sha512-EbYYkCG2p8ywe7ikOH2l02lAFMrrrslZi1I8fqd8ifDGNAkhomHZQzQsP6ksvzrWBKntRe8b5L5L7Zsd+Gm02Q==
+react-hook-form@^7.37.0:
+  version "7.37.0"
+  resolved "https://registry.yarnpkg.com/react-hook-form/-/react-hook-form-7.37.0.tgz#4d1738f092d3d8a3ade34ee892d97350b1032b19"
+  integrity sha512-6NFTxsnw+EXSpNNvLr5nFMjPdYKRryQcelTHg7zwBB6vAzfPIcZq4AExP4heVlwdzntepQgwiOQW4z7Mr99Lsg==
 
 react-input-autosize@^3.0.0:
   version "3.0.0"
@@ -29113,12 +29121,12 @@ xdg-basedir@^4.0.0:
   resolved "https://registry.yarnpkg.com/xdg-basedir/-/xdg-basedir-4.0.0.tgz#4bc8d9984403696225ef83a1573cbbcb4e79db13"
   integrity sha512-PSNhEJDejZYV7h50BohL09Er9VaIefr2LMAf3OEmpCkjOi34eYyQYAXUTjEQtZJTKcF0E2UKTh+osDLsgNim9Q==
 
-xml-crypto@^2.1.4:
-  version "2.1.4"
-  resolved "https://registry.yarnpkg.com/xml-crypto/-/xml-crypto-2.1.4.tgz#85b3c62fa0debc4956ee72cb2dfee65651e865b5"
-  integrity sha512-ModFeGOy67L/XXHcuepnYGF7DASEDw7fhvy+qIs1ORoH55G1IIr+fN0kaMtttwvmNFFMskD9AHro8wx352/mUg==
+xml-crypto@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/xml-crypto/-/xml-crypto-3.0.0.tgz#e3342f9c9a94455d4700431ac9803493bf51cf81"
+  integrity sha512-vdmZOsWgjnFxYGY7OwCgxs+HLWzwvLgX2n0NSYWh3gudckQyNOmtJTT6ooOWEvDZSpC9qRjRs2bEXqKFi1oCHw==
   dependencies:
-    "@xmldom/xmldom" "^0.7.0"
+    "@xmldom/xmldom" "^0.8.3"
     xpath "0.0.32"
 
 xml-name-validator@^3.0.0:

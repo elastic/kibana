@@ -7,10 +7,10 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiHealth } from '@elastic/eui';
 import React from 'react';
-import { SeverityUserAction } from '../../../common/api/cases/user_actions/severity';
+import type { SeverityUserAction } from '../../../common/api/cases/user_actions/severity';
 import { SET_SEVERITY_TO } from '../create/translations';
 import { createCommonUpdateUserActionBuilder } from './common';
-import { UserActionBuilder, UserActionResponse } from './types';
+import type { UserActionBuilder, UserActionResponse } from './types';
 import { severities } from '../severity/config';
 
 const getLabelTitle = (userAction: UserActionResponse<SeverityUserAction>) => {
