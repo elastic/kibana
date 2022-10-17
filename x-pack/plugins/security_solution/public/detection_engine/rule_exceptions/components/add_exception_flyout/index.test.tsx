@@ -286,7 +286,7 @@ describe('When the add exception modal is opened', () => {
     let wrapper: ReactWrapper;
     beforeEach(async () => {
       mockUseRuleAsync.mockImplementation(() => ({
-        rule: {
+        data: {
           ...getRulesEqlSchemaMock(),
           query:
             'sequence [process where process.name = "test.exe"] [process where process.name = "explorer.exe"]',
