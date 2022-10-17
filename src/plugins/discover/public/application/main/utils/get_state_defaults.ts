@@ -19,7 +19,7 @@ import {
 } from '../../../../common';
 
 import { AppState } from '../services/discover_state';
-import { CHART_HIDDEN_KEY } from '../components/chart/discover_chart';
+import { CHART_HIDDEN_KEY } from '../components/layout/use_discover_histogram';
 
 function getDefaultColumns(savedSearch: SavedSearch, uiSettings: IUiSettingsClient) {
   if (savedSearch.columns && savedSearch.columns.length > 0) {

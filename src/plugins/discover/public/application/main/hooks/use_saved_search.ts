@@ -12,12 +12,12 @@ import { ISearchSource } from '@kbn/data-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { AggregateQuery, Query } from '@kbn/es-query';
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { getRawRecordType } from '../utils/get_raw_record_type';
 import { DiscoverServices } from '../../../build_services';
 import { DiscoverSearchSessionManager } from '../services/discover_search_session';
 import { GetStateReturn } from '../services/discover_state';
 import { validateTimeRange } from '../utils/validate_time_range';
-import { Chart } from '../components/chart/point_series';
 import { useSingleton } from './use_singleton';
 import { FetchStatus } from '../../types';
 import { fetchAll } from '../utils/fetch_all';
@@ -32,12 +32,6 @@ export interface SavedSearchData {
   totalHits$: DataTotalHits$;
   charts$: DataCharts$;
   availableFields$: AvailableFields$;
-}
-
-export interface TimechartBucketInterval {
-  scaled?: boolean;
-  description?: string;
-  scale?: number;
 }
 
 export type DataMain$ = BehaviorSubject<DataMainMsg>;
@@ -90,8 +84,7 @@ export interface DataTotalHitsMsg extends DataMsg {
 }
 
 export interface DataChartsMessage extends DataMsg {
-  bucketInterval?: TimechartBucketInterval;
-  chartData?: Chart;
+  response?: SearchResponse;
 }
 
 export interface DataAvailableFieldsMsg extends DataMsg {

@@ -311,6 +311,10 @@ In general this plugin provides:
 |This Kibana plugin contains components and services for field list UI (as in fields sidebar on Discover and Lens pages).
 
 
+|{kib-repo}blob/{branch}/src/plugins/unified_histogram/README.md[unifiedHistogram]
+|The unifiedHistogram plugin provides UI components to create a layout including a resizable histogram and a main display.
+
+
 |{kib-repo}blob/{branch}/src/plugins/unified_search/README.md[unifiedSearch]
 |Contains all the components of Kibana's unified search experience. Specifically:
 

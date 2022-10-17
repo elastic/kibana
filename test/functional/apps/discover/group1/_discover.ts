@@ -347,9 +347,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('resizable layout panels', () => {
       it('should allow resizing the layout panels', async () => {
         const resizeDistance = 100;
-        const topPanel = await testSubjects.find('dscResizablePanelTop');
-        const mainPanel = await testSubjects.find('dscResizablePanelMain');
-        const resizeButton = await testSubjects.find('dsc-resizable-button');
+        const topPanel = await testSubjects.find('unifiedHistogramResizablePanelTop');
+        const mainPanel = await testSubjects.find('unifiedHistogramResizablePanelMain');
+        const resizeButton = await testSubjects.find('unifiedHistogramResizableButton');
         const topPanelSize = (await topPanel.getPosition()).height;
         const mainPanelSize = (await mainPanel.getPosition()).height;
         await browser.dragAndDrop(
