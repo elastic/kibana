@@ -35,7 +35,7 @@ export const generateLinedRulesMenuItems = ({
       >
         <EuiFlexGroup gutterSize="s" css={itemContentCss}>
           {leftIcon ? (
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem data-test-subj={`${dataTestSubj || ''}LeftIcon`} grow={false}>
               <EuiIcon type={leftIcon} />
             </EuiFlexItem>
           ) : null}
