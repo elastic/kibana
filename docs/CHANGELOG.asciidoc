@@ -105,7 +105,7 @@ Alerting::
 
 APM::
 * Support Input Packages {kibana-pull}140035[#140035]
-* Display kubernetes metadata in service icons popup and instance accordion {kibana-pull}139612[#139612]
+* Adds Kubernetes metadata to service icons and instance accordion {kibana-pull}139612[#139612]
 * AWS lambda metrics api {kibana-pull}139041[#139041]
 
 Discover::
