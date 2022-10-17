@@ -246,6 +246,7 @@ export async function getInfo(name: string, version: string) {
       // input type packages must get their pkg info from the archive
       if (packageInfo.type === 'integration') setPackageInfo({ name, version, packageInfo });
     }
+
     return packageInfo as RegistryPackage;
   });
 }
@@ -265,7 +266,9 @@ async function getPackageInfoFromArchiveOrCache(
       archiveBuffer,
       ensureContentType(archivePath)
     );
-    setPackageInfo({ packageInfo, name, version });
+    // set the download URL as it isn't contained in the manifest
+    // this allows us to re-download the archive during package install
+    setPackageInfo({ packageInfo: { ...packageInfo, download: archivePath }, name, version });
     return packageInfo;
   } else {
     return cachedInfo;
@@ -346,9 +349,17 @@ export async function fetchArchiveBuffer({
   verificationResult?: PackageVerificationResult;
 }> {
   const logger = appContextService.getLogger();
-  const { download: archivePath } = await getInfo(pkgName, pkgVersion);
+  let { download: archivePath } = await getInfo(pkgName, pkgVersion);
+
+  // Bundled packages don't have a download path when they're installed, as they're
+  // ArchivePackage objects - so we fake the download path here instead
+  if (!archivePath) {
+    archivePath = `/epr/${pkgName}/${pkgName}-${pkgVersion}.zip`;
+  }
+
   const archiveUrl = `${getRegistryUrl()}${archivePath}`;
   const archiveBuffer = await getResponseStream(archiveUrl).then(streamToBuffer);
+
   if (shouldVerify) {
     const verificationResult = await verifyPackageArchiveSignature({
       pkgName,
