@@ -48,7 +48,7 @@ function FilterBadge({ filters, dataViews, iconOnClick, onClick, ...rest }: Filt
       iconOnClickAriaLabel="Remove filter"
       onClick={onClick}
       title=""
-      {...rest} 
+      {...rest}
     >
       <EuiFlexGroup wrap responsive={false} gutterSize="xs">
         <FilterBadgeGroup
