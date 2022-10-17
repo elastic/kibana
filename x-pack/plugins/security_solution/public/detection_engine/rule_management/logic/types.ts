@@ -60,6 +60,7 @@ import {
   SavedObjectResolveOutcome,
   SetupGuide,
   ThreatArray,
+  Threshold,
   TiebreakerField,
   TimelineTemplateId,
   TimelineTemplateTitle,
@@ -74,7 +75,6 @@ import type {
   RuleUpdateProps,
 } from '../../../../common/detection_engine/rule_schema';
 import type { SortOrder } from '../../../../common/detection_engine/schemas/common';
-import { threshold } from '../../../../common/detection_engine/schemas/common';
 
 /**
  * Params is an "record", since it is a type of RuleActionParams which is action templates.
@@ -172,7 +172,7 @@ export const RuleSchema = t.intersection([
     query: RuleQuery,
     rule_name_override: RuleNameOverride,
     saved_id: t.string,
-    threshold,
+    threshold: Threshold,
     threat_query,
     threat_filters,
     threat_index,

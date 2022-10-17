@@ -7,7 +7,6 @@
 
 import * as t from 'io-ts';
 
-// -------------------------------------------------------------------------------------------------
 // Attributes specific to EQL rules
 
 export type EventCategoryOverride = t.TypeOf<typeof EventCategoryOverride>;

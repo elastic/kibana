@@ -12,7 +12,7 @@ import type {
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
-import type { ThresholdNormalized } from '../../../../../common/detection_engine/schemas/common/schemas';
+import type { ThresholdNormalized } from '../../../../../common/detection_engine/rule_schema';
 import type { GenericBulkCreateResponse } from '../../rule_types/factories/bulk_create_factory';
 import { calculateThresholdSignalUuid } from '../utils';
 import { buildReasonMessageForThresholdAlert } from '../reason_formatters';

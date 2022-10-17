@@ -5,22 +5,15 @@
  * 2.0.
  */
 
-export * from './model/common_to_all_types/field_overrides';
-export * from './model/common_to_all_types/main_attributes';
-export * from './model/common_to_all_types/misc_attributes';
-export * from './model/common_to_all_types/related_integrations';
-export * from './model/common_to_all_types/required_fields';
-export * from './model/common_to_all_types/saved_objects';
-export * from './model/common_to_all_types/timeline_template';
+export * from './model/common_attributes/field_overrides';
+export * from './model/common_attributes/misc_attributes';
+export * from './model/common_attributes/related_integrations';
+export * from './model/common_attributes/required_fields';
+export * from './model/common_attributes/saved_objects';
+export * from './model/common_attributes/timeline_template';
 
-// TODO: https://github.com/elastic/kibana/pull/142950
-// export * from './model/common_to_some_types/temp';
-
-export * from './model/specific_to_eql/temp';
-// export * from './model/specific_to_indicator_match/temp';
-// export * from './model/specific_to_new_terms/temp';
-// export * from './model/specific_to_query/temp';
-// export * from './model/specific_to_threshold/temp';
+export * from './model/specific_attributes/eql_attributes';
+export * from './model/specific_attributes/new_terms_attributes';
+export * from './model/specific_attributes/threshold_attributes';
 
 export * from './model/rule_schemas';
-export * from './model/temp';

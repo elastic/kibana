@@ -8,7 +8,7 @@
 import type {
   ThresholdNormalized,
   ThresholdWithCardinality,
-} from '../../../../../common/detection_engine/schemas/common';
+} from '../../../../../common/detection_engine/rule_schema';
 
 export const shouldFilterByCardinality = (
   threshold: ThresholdNormalized

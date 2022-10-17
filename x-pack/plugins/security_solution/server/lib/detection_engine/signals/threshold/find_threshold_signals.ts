@@ -14,8 +14,10 @@ import type {
 } from '@kbn/alerting-plugin/server';
 import type { ESBoolQuery } from '../../../../../common/typed_json';
 
-import type { TimestampOverride } from '../../../../../common/detection_engine/rule_schema';
-import type { ThresholdNormalized } from '../../../../../common/detection_engine/schemas/common/schemas';
+import type {
+  ThresholdNormalized,
+  TimestampOverride,
+} from '../../../../../common/detection_engine/rule_schema';
 import { singleSearchAfter } from '../single_search_after';
 import {
   buildThresholdMultiBucketAggregation,

@@ -8,13 +8,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import * as t from 'io-ts';
-import {
-  IsoDateString,
-  NonEmptyString,
-  PositiveInteger,
-  PositiveIntegerGreaterThanZero,
-  LimitedSizeArray,
-} from '@kbn/securitysolution-io-ts-types';
+import { IsoDateString, PositiveInteger } from '@kbn/securitysolution-io-ts-types';
 
 export const file_name = t.string;
 export type FileName = t.TypeOf<typeof file_name>;
@@ -55,64 +49,6 @@ export const fields = t.array(t.string);
 export type Fields = t.TypeOf<typeof fields>;
 export const fieldsOrUndefined = t.union([fields, t.undefined]);
 export type FieldsOrUndefined = t.TypeOf<typeof fieldsOrUndefined>;
-
-export const thresholdField = t.exact(
-  t.type({
-    field: t.union([t.string, t.array(t.string)]), // Covers pre- and post-7.12
-    value: PositiveIntegerGreaterThanZero,
-  })
-);
-
-export const thresholdFieldNormalized = t.exact(
-  t.type({
-    field: t.array(t.string),
-    value: PositiveIntegerGreaterThanZero,
-  })
-);
-
-export const thresholdCardinalityField = t.exact(
-  t.type({
-    field: t.string,
-    value: PositiveInteger,
-  })
-);
-
-export const threshold = t.intersection([
-  thresholdField,
-  t.exact(
-    t.partial({
-      cardinality: t.array(thresholdCardinalityField),
-    })
-  ),
-]);
-export type Threshold = t.TypeOf<typeof threshold>;
-
-export const thresholdNormalized = t.intersection([
-  thresholdFieldNormalized,
-  t.exact(
-    t.partial({
-      cardinality: t.array(thresholdCardinalityField),
-    })
-  ),
-]);
-export type ThresholdNormalized = t.TypeOf<typeof thresholdNormalized>;
-
-export const thresholdWithCardinality = t.intersection([
-  thresholdFieldNormalized,
-  t.exact(
-    t.type({
-      cardinality: t.array(thresholdCardinalityField),
-    })
-  ),
-]);
-export type ThresholdWithCardinality = t.TypeOf<typeof thresholdWithCardinality>;
-
-// New terms rule type currently only supports a single term, but should support more in the future
-export const newTermsFields = LimitedSizeArray({ codec: t.string, minSize: 1, maxSize: 1 });
-export type NewTermsFields = t.TypeOf<typeof newTermsFields>;
-
-export const historyWindowStart = NonEmptyString;
-export type HistoryWindowStart = t.TypeOf<typeof historyWindowStart>;
 
 export const created_at = IsoDateString;
 export const updated_at = IsoDateString;

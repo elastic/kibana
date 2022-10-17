@@ -43,11 +43,13 @@ import {
   DataViewId,
   EventCategoryOverride,
   ExceptionListArray,
+  HistoryWindowStart,
   IndexPatternArray,
   InvestigationGuide,
   IsRuleEnabled,
   IsRuleImmutable,
   MaxSignals,
+  NewTermsFields,
   RelatedIntegrationArray,
   RequiredFieldArray,
   RuleAuthorArray,
@@ -65,6 +67,7 @@ import {
   RuleVersion,
   SetupGuide,
   ThreatArray,
+  ThresholdNormalized,
   TiebreakerField,
   TimelineTemplateId,
   TimelineTemplateTitle,
@@ -75,10 +78,7 @@ import {
 import {
   savedIdOrUndefined,
   saved_id,
-  thresholdNormalized,
   anomaly_threshold,
-  newTermsFields,
-  historyWindowStart,
 } from '../../../../../common/detection_engine/schemas/common';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 import { ResponseActionRuleParamsOrUndefined } from '../../../../../common/detection_engine/rule_response_actions/schemas';
@@ -203,7 +203,7 @@ const thresholdSpecificRuleParams = t.type({
   query: RuleQuery,
   filters: t.union([RuleFilterArray, t.undefined]),
   savedId: savedIdOrUndefined,
-  threshold: thresholdNormalized,
+  threshold: ThresholdNormalized,
   dataViewId: t.union([DataViewId, t.undefined]),
 });
 export const thresholdRuleParams = t.intersection([baseRuleParams, thresholdSpecificRuleParams]);
@@ -225,8 +225,8 @@ export type MachineLearningRuleParams = t.TypeOf<typeof machineLearningRuleParam
 const newTermsSpecificRuleParams = t.type({
   type: t.literal('new_terms'),
   query: RuleQuery,
-  newTermsFields,
-  historyWindowStart,
+  newTermsFields: NewTermsFields,
+  historyWindowStart: HistoryWindowStart,
   index: t.union([IndexPatternArray, t.undefined]),
   filters: t.union([RuleFilterArray, t.undefined]),
   language: nonEqlLanguages,

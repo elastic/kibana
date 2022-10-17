@@ -36,11 +36,13 @@ import {
   DataViewId,
   EventCategoryOverride,
   ExceptionListArray,
+  HistoryWindowStart,
   IndexPatternArray,
   InvestigationGuide,
   IsRuleEnabled,
   IsRuleImmutable,
   MaxSignals,
+  NewTermsFields,
   RelatedIntegrationArray,
   RequiredFieldArray,
   RuleAuthorArray,
@@ -62,6 +64,7 @@ import {
   SavedObjectResolveOutcome,
   SetupGuide,
   ThreatArray,
+  Threshold,
   TiebreakerField,
   TimelineTemplateId,
   TimelineTemplateTitle,
@@ -71,14 +74,11 @@ import {
 } from '..';
 import {
   saved_id,
-  threshold,
   anomaly_threshold,
   updated_at,
   updated_by,
   created_at,
   created_by,
-  newTermsFields,
-  historyWindowStart,
 } from '../../schemas/common';
 
 import { buildRuleSchemas } from './build_rule_schemas';
@@ -369,7 +369,7 @@ const thresholdSchema = buildRuleSchemas({
   required: {
     type: t.literal('threshold'),
     query: RuleQuery,
-    threshold,
+    threshold: Threshold,
   },
   optional: {
     index: IndexPatternArray,
@@ -444,8 +444,8 @@ const newTermsSchema = buildRuleSchemas({
   required: {
     type: t.literal('new_terms'),
     query: RuleQuery,
-    new_terms_fields: newTermsFields,
-    history_window_start: historyWindowStart,
+    new_terms_fields: NewTermsFields,
+    history_window_start: HistoryWindowStart,
   },
   optional: {
     index: IndexPatternArray,
