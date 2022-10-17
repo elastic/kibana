@@ -43,8 +43,7 @@ export const Markdown = ({
         {children}
       </EuiMarkdownFormat>
     );
-  }
-  else if (readOnly && markdownContent) {
+  } else if (readOnly && markdownContent) {
     return (
       <EuiMarkdownFormat aria-label={ariaLabelContent ?? 'markdown component'}>
         {markdownContent}
@@ -60,7 +59,6 @@ export const Markdown = ({
       value={value}
       onChange={setValue}
       height={height}
-    >
-    </EuiMarkdownEditor>
+    />
   );
 };
