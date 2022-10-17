@@ -14,7 +14,7 @@ import type {
   RouteValidatorConfig,
 } from '@kbn/core/server';
 
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { CasesRequestHandlerContext, CasesRouter } from '../../types';
 
 type TelemetryUsageCounter = ReturnType<UsageCollectionSetup['createUsageCounter']>;
