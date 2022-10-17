@@ -7,6 +7,7 @@
 
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { partition, uniq } from 'lodash';
+import seedrandom from 'seedrandom';
 import {
   AggFunctionsMapping,
   EsaggsExpressionFunctionDefinition,
@@ -394,7 +395,7 @@ function getExpressionForLayer(
           partialRows: false,
           timeFields: allDateHistogramFields,
           probability: layer.sampling || 1,
-          samplerSeed: searchSessionId,
+          samplerSeed: seedrandom(searchSessionId).int32(),
         }).toAst(),
         {
           type: 'function',

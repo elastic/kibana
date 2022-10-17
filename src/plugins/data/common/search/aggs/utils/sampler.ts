@@ -13,7 +13,7 @@ export function createSamplerAgg({
 }: {
   type?: string;
   probability: number;
-  seed?: string;
+  seed?: number;
 }) {
   return {
     [type]: {

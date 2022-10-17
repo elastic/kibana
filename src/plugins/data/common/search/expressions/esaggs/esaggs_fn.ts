@@ -33,7 +33,7 @@ interface Arguments {
   partialRows?: boolean;
   timeFields?: string[];
   probability?: number;
-  samplerSeed?: string;
+  samplerSeed?: number;
 }
 
 export type EsaggsExpressionFunctionDefinition = ExpressionFunctionDefinition<
@@ -105,7 +105,7 @@ export const getEsaggsMeta: () => Omit<EsaggsExpressionFunctionDefinition, 'fn'>
       }),
     },
     samplerSeed: {
-      types: ['string'],
+      types: ['number'],
       help: i18n.translate('data.search.functions.esaggs.samplerSeed.help', {
         defaultMessage:
           'The seed to generate the random sampling of documents. Uses random sampler.',
