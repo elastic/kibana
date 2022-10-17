@@ -178,6 +178,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       ENHANCED_ES_SEARCH_STRATEGY,
       enhancedEsSearchStrategyProvider(
         this.initializerContext.config.legacy.globalConfig$,
+        this.initializerContext.config.get().search,
         this.logger,
         usage
       )
@@ -189,13 +190,20 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     // for example use case
     this.searchAsInternalUser = enhancedEsSearchStrategyProvider(
       this.initializerContext.config.legacy.globalConfig$,
+      this.initializerContext.config.get().search,
       this.logger,
       usage,
       true
     );
 
-    this.registerSearchStrategy(EQL_SEARCH_STRATEGY, eqlSearchStrategyProvider(this.logger));
-    this.registerSearchStrategy(SQL_SEARCH_STRATEGY, sqlSearchStrategyProvider(this.logger));
+    this.registerSearchStrategy(
+      EQL_SEARCH_STRATEGY,
+      eqlSearchStrategyProvider(this.initializerContext.config.get().search, this.logger)
+    );
+    this.registerSearchStrategy(
+      SQL_SEARCH_STRATEGY,
+      sqlSearchStrategyProvider(this.initializerContext.config.get().search, this.logger)
+    );
 
     registerBsearchRoute(
       bfetch,
