@@ -18,7 +18,9 @@ export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory 
   method: 'POST',
   path: API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE,
   validate: {
-    body: schema.any(),
+    body: schema.object({
+      monitors: schema.arrayOf(schema.string()),
+    }),
     params: schema.object({
       projectName: schema.string(),
     }),
@@ -36,22 +38,18 @@ export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory 
     if (monitorsToDelete.length > 250) {
       return response.badRequest({
         body: {
-          message: i18n.translate('xpack.synthetics.server.project.delete.toolarge', {
-            defaultMessage:
-              'Delete request payload is too large. Please send a max of 250 monitors to delete per request',
-          }),
+          message: REQUEST_TOO_LARGE,
         },
       });
     }
 
     const { saved_objects: monitors } = await getMonitors(
       {
-        filter: `${syntheticsMonitorType}.attributes.${
-          ConfigKey.PROJECT_ID
-        }: "${decodedProjectName}" AND ${getFilter(
-          'journey_id',
-          monitorsToDelete.map((id) => `"${id}"`)
-        )}`,
+        filter: `${syntheticsMonitorType}.attributes.${ConfigKey.PROJECT_ID
+          }: "${decodedProjectName}" AND ${getFilter(
+            'journey_id',
+            monitorsToDelete.map((id: string) => `"${id}"`)
+          )}`,
         fields: [],
         perPage: 500,
       },
@@ -69,11 +67,13 @@ export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory 
 
     if (!writeIntegrationPolicies && hasPrivateMonitor) {
       return response.forbidden({
-        message: INSUFFICIENT_FLEET_PERMISSIONS,
+        body: {
+          message: INSUFFICIENT_FLEET_PERMISSIONS,
+        },
       });
     }
 
-    const errors = await deleteMonitorBulk({
+    await deleteMonitorBulk({
       monitors,
       server,
       savedObjectsClient,
@@ -81,16 +81,13 @@ export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory 
       request,
     });
 
-    if (errors) {
-      throw new Error({
-        message: i18n.translate('xpack.synthetics.server.project.delete.error', {
-          defaultMessage: 'Error deleting monitors',
-        }),
-      });
-    }
-
     return {
       deleted_monitors: monitorsToDelete,
     };
   },
+});
+
+export const REQUEST_TOO_LARGE = i18n.translate('xpack.synthetics.server.project.delete.toolarge', {
+  defaultMessage:
+    'Delete request payload is too large. Please send a max of 250 monitors to delete per request',
 });

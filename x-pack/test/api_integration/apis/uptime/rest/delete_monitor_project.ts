@@ -12,8 +12,11 @@ import {
   ProjectMonitorsRequest,
   ProjectMonitor,
 } from '@kbn/synthetics-plugin/common/runtime_types';
+import { INSUFFICIENT_FLEET_PERMISSIONS } from '@kbn/synthetics-plugin/server/synthetics_service/project_monitor/project_monitor_formatter';
+import { REQUEST_TOO_LARGE } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/delete_monitor_project';
 import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { syntheticsMonitorType } from '@kbn/synthetics-plugin/server/legacy_uptime/lib/saved_objects/synthetics_monitor';
+import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
 import { PrivateLocationTestService } from './services/private_location_test_service';
@@ -25,7 +28,10 @@ export default function ({ getService }: FtrProviderContext) {
 
     const supertest = getService('supertest');
     const config = getService('config');
+    const supertestWithoutAuth = getService('supertestWithoutAuth');
+    const security = getService('security');
     const kibanaServerUrl = formatUrl(config.get('servers.kibana'));
+    const kibanaServer = getService('kibanaServer');
     const projectMonitorEndpoint = kibanaServerUrl + API_URLS.SYNTHETICS_MONITORS_PROJECT_LEGACY;
 
     let projectMonitors: ProjectMonitorsRequest;
@@ -64,7 +70,56 @@ export default function ({ getService }: FtrProviderContext) {
       icmpProjectMonitors = setUniqueIds(getFixtureJson('project_icmp_monitor'));
     });
 
-    // it('only allows 250 requests at a time', async () => { });
+    it('only allows 250 requests at a time', async () => {
+      const project = 'test-brower-suite';
+      const monitors = [];
+      for (let i = 0; i < 251; i++) {
+        monitors.push({
+          ...projectMonitors.monitors[0],
+          id: `test-id-${i}`,
+          name: `test-name-${i}`,
+        });
+      }
+
+      try {
+        await parseStreamApiResponse(
+          projectMonitorEndpoint,
+          JSON.stringify({
+            ...projectMonitors,
+            project,
+            monitors,
+          })
+        );
+
+        const savedObjectsResponse = await supertest
+          .get(API_URLS.SYNTHETICS_MONITORS)
+          .query({
+            filter: `${syntheticsMonitorType}.attributes.project_id: "${project}"`,
+          })
+          .set('kbn-xsrf', 'true');
+        const { total } = savedObjectsResponse.body;
+        expect(total).to.eql(251);
+        const monitorsToDelete = monitors.map((monitor) => monitor.id);
+
+        const response = await supertest
+          .post(API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace('{projectName}', project))
+          .set('kbn-xsrf', 'true')
+          .send({ monitors: monitorsToDelete })
+          .expect(400);
+        const { message } = response.body;
+        expect(message).to.eql(REQUEST_TOO_LARGE);
+      } finally {
+        await parseStreamApiResponse(
+          projectMonitorEndpoint,
+          JSON.stringify({
+            ...projectMonitors,
+            project,
+            keep_stale: false,
+            monitors: [],
+          })
+        );
+      }
+    });
 
     it('project monitors - handles browser monitors', async () => {
       const monitorToDelete = 'second-monitor-id';
@@ -220,6 +275,107 @@ export default function ({ getService }: FtrProviderContext) {
       }
     });
 
+    it('does not delete monitors from the same project in a different space project', async () => {
+      const monitors = [...projectMonitors.monitors];
+      const project = 'test-brower-suite';
+      const SPACE_ID = `test-space-${uuid.v4()}`;
+      const SPACE_NAME = `test-space-name ${uuid.v4()}`;
+      const secondSpaceProjectMonitorApiRoute = `${kibanaServerUrl}/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS_PROJECT_LEGACY}`;
+      await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
+
+      try {
+        await parseStreamApiResponse(
+          projectMonitorEndpoint,
+          JSON.stringify({
+            ...projectMonitors,
+            project,
+            monitors,
+          })
+        );
+
+        await parseStreamApiResponse(
+          secondSpaceProjectMonitorApiRoute,
+          JSON.stringify({
+            ...projectMonitors,
+            project,
+            monitors,
+          })
+        );
+
+        const savedObjectsResponse = await supertest
+          .get(API_URLS.SYNTHETICS_MONITORS)
+          .query({
+            filter: `${syntheticsMonitorType}.attributes.project_id: "${project}"`,
+          })
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+        const secondSpaceProjectSavedObjectResponse = await supertest
+          .get(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}`)
+          .query({
+            filter: `${syntheticsMonitorType}.attributes.project_id: "${project}"`,
+          })
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+        const { total } = savedObjectsResponse.body;
+        const { total: secondSpaceTotal } = secondSpaceProjectSavedObjectResponse.body;
+
+        expect(total).to.eql(monitors.length);
+        expect(secondSpaceTotal).to.eql(monitors.length);
+        const monitorsToDelete = monitors.map((monitor) => monitor.id);
+
+        const response = await supertest
+          .post(
+            `/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace(
+              '{projectName}',
+              project
+            )}`
+          )
+          .set('kbn-xsrf', 'true')
+          .send({ monitors: monitorsToDelete })
+          .expect(200);
+
+        expect(response.body.deleted_monitors).to.eql(monitorsToDelete);
+
+        const responseAfterDeletion = await supertest
+          .get(API_URLS.SYNTHETICS_MONITORS)
+          .query({
+            filter: `${syntheticsMonitorType}.attributes.project_id: "${project}"`,
+          })
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+        const secondSpaceResponseAfterDeletion = await supertest
+          .get(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS}`)
+          .query({
+            filter: `${syntheticsMonitorType}.attributes.project_id: "${project}"`,
+          })
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+        const { total: totalAfterDeletion } = responseAfterDeletion.body;
+        const { total: secondProjectTotalAfterDeletion } = secondSpaceResponseAfterDeletion.body;
+        expect(totalAfterDeletion).to.eql(monitors.length);
+        expect(secondProjectTotalAfterDeletion).to.eql(0);
+      } finally {
+        await parseStreamApiResponse(
+          projectMonitorEndpoint,
+          JSON.stringify({
+            ...projectMonitors,
+            project,
+            keep_stale: false,
+            monitors: [],
+          })
+        );
+        await parseStreamApiResponse(
+          secondSpaceProjectMonitorApiRoute,
+          JSON.stringify({
+            ...projectMonitors,
+            project,
+            keep_stale: false,
+            monitors: [],
+          })
+        );
+      }
+    });
+
     it('deletes integration policies when project monitors are deleted', async () => {
       const monitors = [
         { ...projectMonitors.monitors[0], privateLocations: ['Test private location 0'] },
@@ -253,8 +409,8 @@ export default function ({ getService }: FtrProviderContext) {
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
             savedObjectsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] +
-              '-' +
-              testPolicyId
+            '-' +
+            testPolicyId
         );
         expect(packagePolicy.policy_id).to.be(testPolicyId);
 
@@ -285,8 +441,8 @@ export default function ({ getService }: FtrProviderContext) {
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
             savedObjectsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] +
-              '-' +
-              testPolicyId
+            '-' +
+            testPolicyId
         );
         expect(packagePolicy2).to.be(undefined);
       } finally {
@@ -301,15 +457,78 @@ export default function ({ getService }: FtrProviderContext) {
         );
       }
     });
+
+    it('returns 403 when a user without fleet permissions attempts to delete a project monitor with a private location', async () => {
+      const project = 'test-brower-suite';
+      const secondMonitor = {
+        ...projectMonitors.monitors[0],
+        id: 'test-id-2',
+        privateLocations: ['Test private location 0'],
+      };
+      const testMonitors = [projectMonitors.monitors[0], secondMonitor];
+      const monitorsToDelete = testMonitors.map((monitor) => monitor.id);
+      const username = 'admin';
+      const roleName = 'uptime read only';
+      const password = `${username} - password`;
+      try {
+        await security.role.create(roleName, {
+          kibana: [
+            {
+              feature: {
+                uptime: ['all'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        });
+        await security.user.create(username, {
+          password,
+          roles: [roleName],
+          full_name: 'a kibana user',
+        });
+
+        await parseStreamApiResponse(
+          projectMonitorEndpoint,
+          JSON.stringify({
+            ...projectMonitors,
+            project,
+            keep_stale: false,
+            monitors: testMonitors,
+          })
+        );
+
+        const savedObjectsResponse = await supertest
+          .get(API_URLS.SYNTHETICS_MONITORS)
+          .query({
+            filter: `${syntheticsMonitorType}.attributes.project_id: "${project}"`,
+          })
+          .set('kbn-xsrf', 'true')
+          .expect(200);
+        const { total } = savedObjectsResponse.body;
+        expect(total).to.eql(2);
+
+        const {
+          body: { message },
+        } = await supertestWithoutAuth
+          .post(API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace('{projectName}', project))
+          .set('kbn-xsrf', 'true')
+          .auth(username, password)
+          .send({ monitors: monitorsToDelete })
+          .expect(403);
+        expect(message).to.eql(INSUFFICIENT_FLEET_PERMISSIONS);
+      } finally {
+        await parseStreamApiResponse(
+          projectMonitorEndpoint,
+          JSON.stringify({
+            ...projectMonitors,
+            project,
+            keep_stale: false,
+            monitors: [],
+          })
+        );
+        await security.user.delete(username);
+        await security.role.delete(roleName);
+      }
+    });
   });
 }
-
-const checkFields = (response: string[], monitors: ProjectMonitor[]) => {
-  const monitorMetaData = response.map((item) => JSON.parse(item));
-  monitors.forEach((monitor) => {
-    const configIsCorrect = monitorMetaData.some((ndjson: Record<string, unknown>) => {
-      return ndjson.journey_id === monitor.id && ndjson.hash === monitor.hash;
-    });
-    expect(configIsCorrect).to.eql(true);
-  });
-};
