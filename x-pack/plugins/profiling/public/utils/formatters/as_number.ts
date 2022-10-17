@@ -14,15 +14,15 @@ export function asNumber(value: number): string {
   if (value < 0.01 && value > -0.01) {
     return '~0.00';
   }
-  if (value < 1e3) {
+  if (value < 1e3 && value > -1e3 ) {
     return value.toString();
   }
 
-  if (value < 1e6) {
+  if (value < 1e6 && value > -1e6) {
     return `${asNumber(value / 1e3)}k`;
   }
 
-  if (value < 1e9) {
+  if (value < 1e9 && value > -1e9) {
     return `${asNumber(value / 1e6)}m`;
   }
 
