@@ -23,7 +23,7 @@ export function registerManagementSection(
     title: i18n.translate('xpack.ml.management.jobsListTitle', {
       defaultMessage: 'Machine Learning',
     }),
-    order: 2,
+    order: 4,
     async mount(params: ManagementAppMountParams) {
       const { mountApp } = await import('./jobs_list');
       return mountApp(core, params, deps);
