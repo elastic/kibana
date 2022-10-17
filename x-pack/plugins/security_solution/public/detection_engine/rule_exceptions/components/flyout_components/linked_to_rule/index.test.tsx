@@ -13,7 +13,7 @@ import { TestProviders } from '../../../../../common/mock';
 import { getRulesSchemaMock } from '../../../../../../common/detection_engine/rule_schema/mocks';
 import type { Rule } from '../../../../rule_management/logic/types';
 
-jest.mock('../../../../rule_management/logic/use_find_rules_query');
+jest.mock('../../../../rule_management/logic/use_find_rules');
 
 describe('ExceptionsLinkedToRule', () => {
   it('it displays rule name and link', () => {

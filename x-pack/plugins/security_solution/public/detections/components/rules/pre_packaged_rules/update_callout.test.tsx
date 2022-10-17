@@ -14,7 +14,9 @@ import { useFetchPrebuiltRulesStatusQuery } from '../../../../detection_engine/r
 import { mockReactQueryResponse } from '../../../../detection_engine/rule_management/api/hooks/__mocks__/mock_react_query_response';
 
 jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../detection_engine/rule_management/api/hooks/use_prebuilt_rules_status_query');
+jest.mock(
+  '../../../../detection_engine/rule_management/api/hooks/use_fetch_prebuilt_rules_status_query'
+);
 
 // TODO: https://github.com/elastic/kibana/pull/142950 Fix and unskip
 describe.skip('UpdatePrePackagedRulesCallOut', () => {
