@@ -56,7 +56,13 @@ export function createEsFileClient(arg: CreateEsFileClientArgs): FileClient {
       maxSizeBytes,
     },
     new EsIndexFilesMetadataClient(metadataIndex, elasticsearchClient, logger),
-    new ElasticsearchBlobStorageClient(elasticsearchClient, blobStorageIndex, undefined, logger),
+    new ElasticsearchBlobStorageClient(
+      elasticsearchClient,
+      blobStorageIndex,
+      undefined,
+      undefined,
+      logger
+    ),
     undefined,
     undefined,
     logger

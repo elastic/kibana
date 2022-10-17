@@ -27,6 +27,7 @@ describe('ElasticsearchBlobStorageClient', () => {
       esClient,
       undefined,
       undefined,
+      undefined,
       loggingSystemMock.createLogger(),
       semaphore
     );

@@ -32,6 +32,7 @@ export class BlobStorageService {
       this.esClient,
       index,
       chunkSize,
+      MAX_BLOB_STORE_SIZE_BYTES,
       this.logger.get('elasticsearch-blob-storage')
     );
   }

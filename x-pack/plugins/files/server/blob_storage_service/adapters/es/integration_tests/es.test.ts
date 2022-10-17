@@ -37,11 +37,15 @@ describe('Elasticsearch blob storage', () => {
     await manageES.stop();
   });
 
-  const createEsBlobStorage = ({ chunkSize }: { chunkSize?: string } = {}) =>
+  const createEsBlobStorage = ({
+    chunkSize,
+    maxSize,
+  }: { chunkSize?: string; maxSize?: number } = {}) =>
     new ElasticsearchBlobStorageClient(
       esClient,
       undefined,
       chunkSize,
+      maxSize,
       manageKbn.root.logger.get('es-blob-test')
     );
 
@@ -159,5 +163,13 @@ describe('Elasticsearch blob storage', () => {
       chunks.push(chunk);
     }
     expect(chunks.join('')).toEqual(fileBuffer.toString('utf-8'));
+  });
+
+  it('throws if we have exceeded the max size limit', async () => {
+    esBlobStorage = createEsBlobStorage({ maxSize: 0 });
+    const fileBuffer = Buffer.alloc(1024, 'a');
+    await expect(esBlobStorage.upload(Readable.from([fileBuffer]))).rejects.toThrowError(
+      'File size exceeds maximum size limit'
+    );
   });
 });

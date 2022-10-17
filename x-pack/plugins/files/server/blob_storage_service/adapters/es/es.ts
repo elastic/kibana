@@ -6,6 +6,7 @@
  */
 
 import assert from 'assert';
+import { i18n } from '@kbn/i18n';
 import { once } from 'lodash';
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
@@ -42,6 +43,7 @@ export class ElasticsearchBlobStorageClient implements BlobStorageClient {
     private readonly esClient: ElasticsearchClient,
     private readonly index: string = BLOB_STORAGE_SYSTEM_INDEX_NAME,
     private readonly chunkSize: undefined | string,
+    private readonly maxSize = MAX_BLOB_STORE_SIZE_BYTES,
     private readonly logger: Logger,
     /**
      * Override the default concurrent upload limit by passing in a different
@@ -88,11 +90,34 @@ export class ElasticsearchBlobStorageClient implements BlobStorageClient {
     }
   });
 
+  /**
+   * This is not intended to be accurate to the byte, but rather a way to prevent
+   * the index from growing indefinitely.
+   */
+  private async throwIfReachedMaxSize() {
+    const { indices } = await this.esClient.indices.stats({ metric: 'store' });
+    if (!indices?.[this.index]) {
+      this.logger.warn(`Could not get size stats for ${this.index}!`);
+    } else {
+      const index = indices[this.index];
+      if (index.total!.store!.size_in_bytes >= this.maxSize) {
+        throw new Error(
+          i18n.translate('xpack.files.storage.es.maxSizeReachedMessage', {
+            defaultMessage:
+              'The maximum byte size of {size} has been exceeded. Please delete some files before uploading again.',
+            values: { size: this.maxSize },
+          })
+        );
+      }
+    }
+  }
+
   public async upload(
     src: Readable,
     { transforms, id }: { transforms?: Transform[]; id?: string } = {}
   ): Promise<{ id: string; size: number }> {
     await this.createIndexIfNotExists();
+    await this.throwIfReachedMaxSize();
 
     const processUpload = async () => {
       try {
