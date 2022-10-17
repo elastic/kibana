@@ -598,8 +598,13 @@ class FilterEditorUI extends Component<FilterEditorProps, State> {
         }
       };
       const filters = this.state.filters.map((filter: Filter) => builderFilter(filter));
+      const builedFilter = buildCombinedFilter(filters, indexPattern?.id);
 
-      this.props.onSubmit(filters.length === 1 ? filters[0] : filters);
+      this.props.onSubmit(
+        filters.length === 1
+          ? filters[0]
+          : { ...builedFilter, meta: { ...builedFilter.meta, alias: alias } }
+      );
     }
   };
 }

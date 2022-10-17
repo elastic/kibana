@@ -101,8 +101,11 @@ export const FilterView: FC<Props> = ({
     return (
       <>
         <FilterBadge
-          filters={isCombinedFilter(filter) ? filter.meta.params : [filter]}
+          filter={filter}
           dataViews={dataViews}
+          valueLabel={valueLabel}
+          filterLabelStatus={filterLabelStatus}          
+          hideAlias={hideAlias}
           {...badgeProps}
           {...rest}
         />

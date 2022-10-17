@@ -7,23 +7,37 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiBadge, EuiFlexGroup, useEuiTheme } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiTextColor, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { Filter } from '@kbn/es-query';
+import { Filter, isCombinedFilter } from '@kbn/es-query';
 import { FilterBadgeGroup } from './filter_badge_group';
 import { ConditionTypes } from '../utils';
+import { FilterLabelStatus } from '../filter_bar/filter_item/filter_item';
+import { i18n } from '@kbn/i18n';
 
 export interface FilterBadgeProps {
-  filters: Filter[];
+  filter: Filter;
   dataViews: DataView[];
   iconOnClick: () => void;
   onClick: () => void;
+  valueLabel?: string;
+  hideAlias?: boolean;
+  filterLabelStatus?: FilterLabelStatus;
 }
 
 const rootLevelConditionType = ConditionTypes.AND;
 
-function FilterBadge({ filters, dataViews, iconOnClick, onClick, ...rest }: FilterBadgeProps) {
+function FilterBadge({
+  filter,
+  dataViews,
+  iconOnClick,
+  onClick,
+  valueLabel,
+  hideAlias,
+  filterLabelStatus,
+  ...rest
+}: FilterBadgeProps) {
   const { euiTheme } = useEuiTheme();
 
   const badgePading = useMemo(
@@ -36,6 +50,22 @@ function FilterBadge({ filters, dataViews, iconOnClick, onClick, ...rest }: Filt
   if (!dataViews.length) {
     return null;
   }
+
+  const prefixText = filter.meta.negate
+    ? ` ${i18n.translate('unifiedSearch.filter.filterBar.negatedFilterPrefix', {
+        defaultMessage: 'NOT ',
+      })}`
+    : '';
+  const prefix =
+    filter.meta.negate && !filter.meta.disabled ? (
+      <EuiTextColor color="danger">{prefixText}</EuiTextColor>
+    ) : (
+      prefixText
+    );
+
+  const getValue = (text?: string) => {
+    return <span className="globalFilterLabel__value">{text}</span>;
+  };
 
   return (
     <EuiBadge
@@ -50,14 +80,22 @@ function FilterBadge({ filters, dataViews, iconOnClick, onClick, ...rest }: Filt
       title=""
       {...rest}
     >
-      <EuiFlexGroup wrap responsive={false} gutterSize="xs">
-        <FilterBadgeGroup
-          filters={filters}
-          dataViews={dataViews}
-          conditionType={rootLevelConditionType}
-          isRootLevel={true}
-        />
-      </EuiFlexGroup>
+      {!hideAlias && filter.meta.alias !== null ? (
+        <>
+          {prefix}
+          {filter.meta.alias}
+          {filterLabelStatus && <>: {getValue(valueLabel)}</>}
+        </>
+      ) : (
+        <EuiFlexGroup wrap responsive={false} gutterSize="xs">
+          <FilterBadgeGroup
+            filters={isCombinedFilter(filter) ? filter.meta.params : [filter]}
+            dataViews={dataViews}
+            conditionType={rootLevelConditionType}
+            isRootLevel={true}
+          />
+        </EuiFlexGroup>
+      )}
     </EuiBadge>
   );
 }
