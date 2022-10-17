@@ -21,11 +21,6 @@ import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
-import {
-  UPDATE_FILTER_REFERENCES_ACTION,
-  UPDATE_FILTER_REFERENCES_TRIGGER,
-} from '@kbn/unified-search-plugin/public';
-import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { DOC_TABLE_LEGACY, SEARCH_FIELDS_FROM_SOURCE } from '../../../common';
 import { ContextErrorMessage } from './components/context_error_message';
 import { LoadingStatus } from './services/context_query_state';
@@ -40,9 +35,7 @@ import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getRootBreadcrumbs } from '../../utils/breadcrumbs';
 import { ContextHistoryLocationState } from './services/locator';
-import { getUiActions } from '../../kibana_services';
 import { useRootBreadcrumb } from '../../hooks/use_root_breadcrumb';
-import { replaceContextLocation } from './utils/replace_context_location';
 
 const ContextAppContentMemoized = memo(ContextAppContent);
 
@@ -177,61 +170,6 @@ export const ContextApp = ({ dataView, anchorId, locationState }: ContextAppProp
     [filterManager, dataViews, dataView, capabilities]
   );
 
-  const updateAdHocDataViewId = useCallback(
-    async (dataViewToUpdate: DataView) => {
-      const updatedDataView = await dataViews.create({
-        ...dataViewToUpdate.toSpec(),
-        id: undefined,
-      });
-      dataViews.clearInstanceCache(dataViewToUpdate.id);
-      return updatedDataView;
-    },
-    [dataViews]
-  );
-
-  const onAdHocDataViewChange = useCallback(async () => {
-    const updatedDataView = await updateAdHocDataViewId(dataView);
-
-    const uiActions = await getUiActions();
-    const trigger = uiActions.getTrigger(UPDATE_FILTER_REFERENCES_TRIGGER);
-    const action = uiActions.getAction(UPDATE_FILTER_REFERENCES_ACTION);
-
-    action?.execute({
-      trigger,
-      fromDataView: dataView.id,
-      toDataView: updatedDataView.id,
-      usedDataViews: [],
-    } as ActionExecutionContext);
-
-    // get just updated filters, line order is important here
-    const updatedFilters = [...filterManager.getGlobalFilters(), ...filterManager.getAppFilters()];
-    replaceContextLocation(services.contextLocator, {
-      rowId: anchorId,
-      dataViewSpec: updatedDataView.toSpec(false),
-      columns,
-      filters: updatedFilters,
-      timeRange: locationState.timeRange,
-      query: locationState.query,
-    });
-  }, [
-    anchorId,
-    columns,
-    dataView,
-    filterManager,
-    locationState.query,
-    locationState.timeRange,
-    services.contextLocator,
-    updateAdHocDataViewId,
-  ]);
-
-  const onFieldEdited = useCallback(async () => {
-    if (!dataView.isPersisted()) {
-      onAdHocDataViewChange();
-    } else {
-      fetchAllRows();
-    }
-  }, [dataView, fetchAllRows, onAdHocDataViewChange]);
-
   const TopNavMenu = navigation.ui.AggregateQueryTopNavMenu;
   const getNavBarProps = () => {
     return {
@@ -302,7 +240,6 @@ export const ContextApp = ({ dataView, anchorId, locationState }: ContextAppProp
                 anchorStatus={fetchedState.anchorStatus.value}
                 predecessorsStatus={fetchedState.predecessorsStatus.value}
                 successorsStatus={fetchedState.successorsStatus.value}
-                onFieldEdited={onFieldEdited}
               />
             </EuiPageContent>
           </EuiPage>
