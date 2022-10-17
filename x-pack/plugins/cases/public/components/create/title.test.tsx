@@ -9,8 +9,8 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { act } from '@testing-library/react';
 
-import type { FormHook } from '../../common/shared_imports';
-import { useForm, Form } from '../../common/shared_imports';
+import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Title } from './title';
 import type { FormProps } from './schema';
 import { schema } from './schema';
