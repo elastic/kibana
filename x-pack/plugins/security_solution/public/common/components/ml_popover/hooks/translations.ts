@@ -7,21 +7,21 @@
 import { i18n } from '@kbn/i18n';
 
 export const START_JOB_FAILURE = i18n.translate(
-  'xpack.securitySolution.components.mlPopup.errors.startJobFailureTitle',
+  'xpack.securitySolution.components.mlPopup.hooks.errors.startJobFailureTitle',
   {
     defaultMessage: 'Start job failure',
   }
 );
 
 export const STOP_JOB_FAILURE = i18n.translate(
-  'xpack.securitySolution.containers.errors.stopJobFailureTitle',
+  'xpack.securitySolution.components.hooks.errors.stopJobFailureTitle',
   {
     defaultMessage: 'Stop job failure',
   }
 );
 
 export const CREATE_JOB_FAILURE = i18n.translate(
-  'xpack.securitySolution.components.mlPopup.errors.createJobFailureTitle',
+  'xpack.securitySolution.components.mlPopup.hooks.errors.createJobFailureTitle',
   {
     defaultMessage: 'Create job failure',
   }

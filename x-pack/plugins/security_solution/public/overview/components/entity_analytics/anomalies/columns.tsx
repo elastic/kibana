@@ -99,7 +99,7 @@ const EnableJob = ({
   const { isLoading, enableDatafeed } = useEnableDataFeed();
 
   const handleJobStateChange = useCallback(async () => {
-    const result = await enableDatafeed(job, job.latestTimestampMs || 0, false);
+    const result = await enableDatafeed(job, job.latestTimestampMs || 0, true);
     refreshJobs();
     return result;
   }, [enableDatafeed, job, refreshJobs]);

@@ -74,7 +74,7 @@ export const useEnableDataFeed = () => {
 
     // Max start time for job is no more than two weeks ago to ensure job performance
     const date = new Date();
-    const maxStartTime = date.setDate(date.getDate() - 14); // TODO test me
+    const maxStartTime = date.setDate(date.getDate() - 14);
 
     dispatch({ type: 'loading' });
     if (enable) {
