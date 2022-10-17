@@ -1092,7 +1092,9 @@ describe('alert actions', () => {
           kqlQuery: '',
           queryMatch: {
             field: '_id',
+            // @ts-ignore till https://github.com/elastic/kibana/pull/142436 is merged
             value: eventIds,
+            // @ts-ignore till https://github.com/elastic/kibana/pull/142436 is merged
             operator: 'includes',
           },
         },
