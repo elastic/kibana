@@ -75,7 +75,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    it.only('query return results with valid scripted field', async function () {
+    it('query return results with valid scripted field', async function () {
       if (false) {
         /* the skipped steps below were used to create the scripted fields in the logstash-* index pattern
         which are now saved in the esArchive.
