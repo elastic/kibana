@@ -159,7 +159,7 @@ export class EventLogClient implements IEventLogClient {
 
     return await this.esContext.esAdapter.aggregateEventsWithAuthFilter({
       index: this.esContext.esNames.indexPattern,
-      namespace: allNamespaces ? undefined : await this.getNamespace(),
+      namespace: allNamespaces ? '*' : await this.getNamespace(),
       type,
       authFilter,
       aggregateOptions: { ...aggregateOptions, aggs } as AggregateOptionsType,

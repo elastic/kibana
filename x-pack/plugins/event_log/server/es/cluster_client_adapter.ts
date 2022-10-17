@@ -468,7 +468,7 @@ export function getQueryBodyWithAuthFilter(
   const { namespace, type, authFilter } = opts;
   const { start, end, filter } = queryOptions ?? {};
 
-  const namespaceQuery = namespace ? getNamespaceQuery(namespace) : undefined;
+  const namespaceQuery = namespace !== '*' ? getNamespaceQuery(namespace) : undefined;
   let dslFilterQuery: estypes.QueryDslBoolQuery['filter'];
   try {
     const filterKueryNode = filter ? fromKueryExpression(filter) : null;
