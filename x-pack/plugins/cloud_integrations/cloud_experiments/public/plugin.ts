@@ -131,11 +131,17 @@ export class CloudExperimentsPlugin
     defaultValue: Data
   ): Promise<Data> => {
     const configKey = FEATURE_FLAG_NAMES[featureFlagName];
+
     // Apply overrides if they exist without asking LaunchDarkly.
     if (this.flagOverrides && has(this.flagOverrides, configKey)) {
       return get(this.flagOverrides, configKey, defaultValue) as Data;
     }
-    if (!this.launchDarklyClient) return defaultValue; // Skip any action if no LD Client is defined
+
+    // Skip any action if no LD Client is defined
+    if (!this.launchDarklyClient) {
+      return defaultValue;
+    }
+
     return await this.launchDarklyClient.getVariation(configKey, defaultValue);
   };
 
