@@ -166,10 +166,10 @@ describe('Elasticsearch blob storage', () => {
   });
 
   it('throws if we have exceeded the max size limit', async () => {
-    esBlobStorage = createEsBlobStorage({ maxSize: 0 });
+    esBlobStorage = createEsBlobStorage({ maxSize: -Infinity });
     const fileBuffer = Buffer.alloc(1024, 'a');
     await expect(esBlobStorage.upload(Readable.from([fileBuffer]))).rejects.toThrowError(
-      'File size exceeds maximum size limit'
+      /The maximum byte size/
     );
   });
 });

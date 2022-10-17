@@ -95,12 +95,12 @@ export class ElasticsearchBlobStorageClient implements BlobStorageClient {
    * the index from growing indefinitely.
    */
   private async throwIfReachedMaxSize() {
-    const { indices } = await this.esClient.indices.stats({ metric: 'store' });
+    const { indices } = await this.esClient.indices.stats({ index: this.index, metric: 'store' });
     if (!indices?.[this.index]) {
       this.logger.warn(`Could not get size stats for ${this.index}!`);
     } else {
-      const index = indices[this.index];
-      if (index.total!.store!.size_in_bytes >= this.maxSize) {
+      const currentSize = indices[this.index].total!.store!.size_in_bytes;
+      if (currentSize >= this.maxSize) {
         throw new Error(
           i18n.translate('xpack.files.storage.es.maxSizeReachedMessage', {
             defaultMessage:
