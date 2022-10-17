@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+export * from '../translations';
 
 export const ATTACHMENT_NOT_REGISTERED_ERROR = i18n.translate(
   'xpack.cases.userActions.attachmentNotRegisteredErrorMsg',
@@ -20,3 +21,30 @@ export const DEFAULT_EVENT_ATTACHMENT_TITLE = i18n.translate(
     defaultMessage: 'added an attachment of type',
   }
 );
+
+export const DELETE_ATTACHMENT = i18n.translate(
+  'xpack.cases.userActions.defaultEventAttachmentTitle',
+  {
+    defaultMessage: 'Delete attachment',
+  }
+);
+
+export const REMOVE_ALERTS = (totalAlerts: number): string =>
+  i18n.translate('xpack.cases.caseView.alerts.remove', {
+    values: { totalAlerts },
+    defaultMessage: 'Remove {totalAlerts, plural, =1 {alert} other {alerts}}',
+  });
+
+export const REMOVE = i18n.translate('xpack.cases.caseView.alerts.remove', {
+  defaultMessage: 'Remove',
+});
+
+export const ONE_ALERT = i18n.translate('xpack.cases.caseView.alerts.oneAlert', {
+  defaultMessage: 'one alert',
+});
+
+export const MULTIPLE_ALERTS = (totalAlerts: number): string =>
+  i18n.translate('xpack.cases.caseView.alerts.multipleAlerts', {
+    values: { totalAlerts },
+    defaultMessage: '{totalAlerts} {totalAlerts, plural, =1 {alert} other {alerts}}',
+  });

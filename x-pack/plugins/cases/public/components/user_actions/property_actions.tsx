@@ -31,6 +31,8 @@ export interface UserActionPropertyActionsProps {
   editLabel?: string;
   deleteLabel?: string;
   deleteConfirmTitle?: string;
+  deleteButtonText?: string;
+  deleteIcon?: string;
   quoteLabel?: string;
   isLoading: boolean;
   onEdit?: (id: string) => void;
@@ -45,7 +47,9 @@ const UserActionPropertyActionsComponent = ({
   editLabel = '',
   quoteLabel = '',
   deleteLabel = '',
+  deleteIcon,
   deleteConfirmTitle,
+  deleteButtonText,
   isLoading,
   onEdit = noop,
   onDelete,
@@ -103,7 +107,7 @@ const UserActionPropertyActionsComponent = ({
       ...(showTrashIcon
         ? [
             {
-              iconType: 'trash',
+              iconType: deleteIcon ? deleteIcon : 'trash',
               label: deleteLabel,
               onClick: onDeleteClick,
             },
@@ -131,6 +135,7 @@ const UserActionPropertyActionsComponent = ({
     actionConfig,
     editLabel,
     onEditClick,
+    deleteIcon,
     onDeleteClick,
     quoteLabel,
     onQuoteClick,
@@ -150,7 +155,7 @@ const UserActionPropertyActionsComponent = ({
           onCancel={onDeleteCancelClick}
           onConfirm={onDeleteConfirmClick}
           cancelButtonText={CANCEL_BUTTON}
-          confirmButtonText={CONFIRM_BUTTON}
+          confirmButtonText={deleteButtonText ?? CONFIRM_BUTTON}
           buttonColor="danger"
           defaultFocusedButton="confirm"
           data-test-subj="property-actions-confirm-modal"

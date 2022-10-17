@@ -23,7 +23,7 @@ import { UserActionTimestamp } from '../timestamp';
 import type { SnakeToCamelCase } from '../../../../common/types';
 import { ATTACHMENT_NOT_REGISTERED_ERROR, DEFAULT_EVENT_ATTACHMENT_TITLE } from './translations';
 import { UserActionContentToolbar } from '../content_toolbar';
-import * as i18n from '../translations';
+import * as i18n from './translations';
 import { HoverableUserWithAvatarResolver } from '../../user_profiles/hoverable_user_with_avatar_resolver';
 
 type BuilderArgs<C, R> = Pick<
@@ -127,7 +127,7 @@ export const createRegisteredAttachmentUserActionBuilder = <
             <UserActionContentToolbar
               actions={['delete']}
               id={comment.id}
-              deleteLabel={i18n.DELETE_COMMENT}
+              deleteLabel={i18n.DELETE_ATTACHMENT}
               deleteConfirmTitle={i18n.DELETE_COMMENT_TITLE}
               isLoading={isLoading}
               onDelete={() => handleDeleteComment(comment.id)}

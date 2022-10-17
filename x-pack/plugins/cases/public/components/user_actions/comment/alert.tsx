@@ -20,6 +20,8 @@ import { UserActionCopyLink } from '../copy_link';
 import { UserActionShowAlert } from './show_alert';
 import { ShowAlertTableLink } from './show_alert_table_link';
 import { HoverableUserWithAvatarResolver } from '../../user_profiles/hoverable_user_with_avatar_resolver';
+import { UserActionContentToolbar } from '../content_toolbar';
+import * as i18n from './translations';
 
 type BuilderArgs = Pick<
   UserActionBuilderArgs,
@@ -30,6 +32,8 @@ type BuilderArgs = Pick<
   | 'loadingAlertData'
   | 'onShowAlertDetails'
   | 'userProfiles'
+  | 'handleDeleteComment'
+  | 'loadingCommentIds'
 > & { comment: SnakeToCamelCase<CommentResponseAlertsType> };
 
 const getSingleAlertUserAction = ({
@@ -37,10 +41,12 @@ const getSingleAlertUserAction = ({
   userProfiles,
   comment,
   alertData,
-  getRuleDetailsHref,
   loadingAlertData,
+  loadingCommentIds,
+  getRuleDetailsHref,
   onRuleDetailsClick,
   onShowAlertDetails,
+  handleDeleteComment,
 }: BuilderArgs): EuiCommentProps[] => {
   const alertId = getNonEmptyField(comment.alertId);
   const alertIndex = getNonEmptyField(comment.index);
@@ -85,6 +91,19 @@ const getSingleAlertUserAction = ({
               onShowAlertDetails={onShowAlertDetails}
             />
           </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <UserActionContentToolbar
+              actions={['delete']}
+              id={comment.id}
+              deleteLabel={i18n.REMOVE_ALERTS(1)}
+              isLoading={loadingCommentIds.includes(comment.id)}
+              withCopyLinkAction={false}
+              deleteConfirmTitle={i18n.REMOVE_ALERTS(1)}
+              deleteButtonText={i18n.REMOVE}
+              deleteIcon="minusInCircle"
+              onDelete={() => handleDeleteComment(comment.id)}
+            />
+          </EuiFlexItem>
         </EuiFlexGroup>
       ),
     },
@@ -96,9 +115,11 @@ const getMultipleAlertsUserAction = ({
   userProfiles,
   comment,
   alertData,
-  getRuleDetailsHref,
   loadingAlertData,
+  loadingCommentIds,
+  getRuleDetailsHref,
   onRuleDetailsClick,
+  handleDeleteComment,
 }: BuilderArgs): EuiCommentProps[] => {
   if (!Array.isArray(comment.alertId)) {
     return [];
@@ -134,6 +155,19 @@ const getMultipleAlertsUserAction = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <ShowAlertTableLink />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <UserActionContentToolbar
+              actions={['delete']}
+              id={comment.id}
+              deleteLabel={i18n.REMOVE_ALERTS(totalAlerts)}
+              isLoading={loadingCommentIds.includes(comment.id)}
+              withCopyLinkAction={false}
+              deleteConfirmTitle={i18n.REMOVE_ALERTS(totalAlerts)}
+              deleteButtonText={i18n.REMOVE}
+              deleteIcon="minusInCircle"
+              onDelete={() => handleDeleteComment(comment.id)}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       ),

@@ -16,12 +16,15 @@ import { UserActionPropertyActions } from './property_actions';
 export interface UserActionContentToolbarProps {
   commentMarkdown?: string;
   id: string;
+  isLoading: boolean;
+  withCopyLinkAction?: boolean;
   actions?: Actions;
   editLabel?: string;
   deleteLabel?: string;
+  deleteIcon?: string;
   deleteConfirmTitle?: string;
+  deleteButtonText?: string;
   quoteLabel?: string;
-  isLoading: boolean;
   extraActions?: EuiCommentProps['actions'];
   onEdit?: (id: string) => void;
   onQuote?: (id: string) => void;
@@ -35,17 +38,22 @@ const UserActionContentToolbarComponent = ({
   editLabel,
   deleteLabel,
   deleteConfirmTitle,
+  deleteButtonText,
+  deleteIcon,
   quoteLabel,
   isLoading,
   extraActions,
+  withCopyLinkAction = true,
   onEdit,
   onQuote,
   onDelete,
 }: UserActionContentToolbarProps) => (
   <EuiFlexGroup responsive={false} alignItems="center">
-    <EuiFlexItem grow={false}>
-      <UserActionCopyLink id={id} />
-    </EuiFlexItem>
+    {withCopyLinkAction ? (
+      <EuiFlexItem grow={false}>
+        <UserActionCopyLink id={id} />
+      </EuiFlexItem>
+    ) : null}
     <EuiFlexItem grow={false}>
       <UserActionPropertyActions
         id={id}
@@ -53,7 +61,9 @@ const UserActionContentToolbarComponent = ({
         editLabel={editLabel}
         quoteLabel={quoteLabel}
         deleteLabel={deleteLabel}
+        deleteIcon={deleteIcon}
         deleteConfirmTitle={deleteConfirmTitle}
+        deleteButtonText={deleteButtonText}
         isLoading={isLoading}
         onEdit={onEdit}
         onQuote={onQuote}
