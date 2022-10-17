@@ -43,6 +43,8 @@ export type GaugeLabelMajorMode = $Values<typeof GaugeLabelMajorModes>;
 export type GaugeCentralMajorMode = $Values<typeof GaugeCentralMajorModes>;
 export type GaugeTicksPosition = $Values<typeof GaugeTicksPositions>;
 
+type CollapseFunction = 'sum' | 'avg' | 'min' | 'max';
+
 export interface AxisExtentConfig {
   mode: 'full' | 'custom' | 'dataBounds';
   lowerBound?: number;
@@ -72,7 +74,7 @@ export interface XYDataLayerConfig {
   yConfig?: YConfig[];
   splitAccessor?: string;
   palette?: PaletteOutput;
-  collapseFn?: string;
+  collapseFn?: CollapseFunction;
   xScaleType?: 'time' | 'linear' | 'ordinal';
   isHistogram?: boolean;
   columnToLabel?: string;
@@ -179,7 +181,7 @@ export interface ColumnState {
   columnId: string;
   summaryRow?: 'none' | 'sum' | 'avg' | 'count' | 'min' | 'max';
   alignment?: 'left' | 'right' | 'center';
-  collapseFn?: string;
+  collapseFn?: CollapseFunction;
 }
 
 export interface TableVisConfiguration {
@@ -203,7 +205,7 @@ export interface MetricVisConfiguration {
   breakdownByAccessor?: string;
   // the dimensions can optionally be single numbers
   // computed by collapsing all rows
-  collapseFn?: string;
+  collapseFn?: CollapseFunction;
   subtitle?: string;
   secondaryPrefix?: string;
   progressDirection?: LayoutDirection;
@@ -219,7 +221,7 @@ export interface PartitionLayerState {
   primaryGroups: string[];
   secondaryGroups?: string[];
   metric?: string;
-  collapseFns?: Record<string, string>;
+  collapseFns?: Record<string, CollapseFunction>;
   numberDisplay: NumberDisplayType;
   categoryDisplay: CategoryDisplayType;
   legendDisplay: LegendDisplayType;
