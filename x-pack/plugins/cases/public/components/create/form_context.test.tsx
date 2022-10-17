@@ -121,7 +121,8 @@ const fillFormReactTestingLib = async (renderResult: RenderResult) => {
   }
 };
 
-describe('Create case', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/142283
+describe.skip('Create case', () => {
   const refetch = jest.fn();
   const onFormSubmitSuccess = jest.fn();
   const afterCaseCreated = jest.fn();

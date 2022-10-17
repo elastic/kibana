@@ -6,7 +6,8 @@
  */
 
 import { remove, uniq } from 'lodash';
-import { nodeBuilder, KueryNode } from '@kbn/es-query';
+import type { KueryNode } from '@kbn/es-query';
+import { nodeBuilder } from '@kbn/es-query';
 import { OWNER_FIELD } from '../../common/api';
 
 export const getOwnersFilter = (

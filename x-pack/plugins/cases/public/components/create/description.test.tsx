@@ -9,8 +9,8 @@ import React from 'react';
 import { waitFor } from '@testing-library/react';
 import userEvent, { specialChars } from '@testing-library/user-event';
 
-import type { FormHook } from '../../common/shared_imports';
-import { useForm, Form } from '../../common/shared_imports';
+import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Description } from './description';
 import type { FormProps } from './schema';
 import { schema } from './schema';
