@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { DataViewField } from '@kbn/data-views-plugin/common';
-import { SupportedMetric } from './lib/convert/supported_metrics';
-import { Layer, XYAnnotationsLayerConfig, XYLayerConfig } from './types';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { SupportedMetric } from './lib/convert/supported_metrics';
+import type { Layer, XYAnnotationsLayerConfig, XYLayerConfig } from './types';
 
 export const isAnnotationsLayer = (
   layer: Pick<XYLayerConfig, 'layerType'>
