@@ -5,12 +5,27 @@
  * 2.0.
  */
 
-export interface IEmailService {
-  sendPlainTextEmail(payload: PlainTextEmail): Promise<void>;
-}
+import type { UnsecuredActionsClient } from '@kbn/actions-plugin/server/unsecured_actions_client/unsecured_actions_client';
+import type { IEmailService, PlainTextEmail } from './types';
 
-export interface PlainTextEmail extends Record<string, unknown> {
-  to: string[];
-  subject: string;
-  message: string;
+export class EmailService implements IEmailService {
+  constructor(
+    private requesterId: string,
+    private connectorId: string,
+    private actionsClient: UnsecuredActionsClient
+  ) {}
+
+  async sendPlainTextEmail(params: PlainTextEmail): Promise<void> {
+    const actions = params.to.map((to) => ({
+      id: this.connectorId,
+      spaceId: 'default', // TODO should be space agnostic?
+      apiKey: null, // not needed for Email connector
+      executionId: '???',
+      params: {
+        ...params,
+        to,
+      },
+    }));
+    return await this.actionsClient.bulkEnqueueExecution(this.requesterId, actions);
+  }
 }

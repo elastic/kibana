@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export type { IEmailService, PlainTextEmail } from './email_service';
-export { EmailService } from './email';
+export type { IEmailService, PlainTextEmail } from './types';
+export { EmailService } from './email_service';

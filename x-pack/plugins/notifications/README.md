@@ -29,7 +29,7 @@ To use the exposed plugin start and setup contracts:
 // <plugin>/kibana.json
 {
 "id": "...",
-"optionalPlugins": ["notifications"]
+"requiredPlugins": ["notifications"]
 }
 ```
 
@@ -48,7 +48,7 @@ class MyPlugin {
     core: CoreStart,
     { notifications }: MyPluginStartDeps
   ) {
-    const emailService = await notifications?.email;
+    const emailService = await notifications.email;
     emailService.sendPlainTextEmail({
         to: 'foo@bar.com',
         subject: 'Some subject',
@@ -61,7 +61,7 @@ class MyPlugin {
 
 ### Requirements
 
-- This plugin currently depends on the `'actions'` plugin, as it uses `Connectors` under the hood. Please make sure the `'actions'` plugin is included in your deployment.
+- This plugin currently depends on the `'actions'` plugin, as it uses `Connectors` under the hood.
 - Note also that for each notification channel the corresponding connector must be preconfigured. E.g. to enable email notifications, an `Email` connector must exist in the system.
 - Once the appropriate connectors are preconfigured in `kibana.yaml`, you can configure the `'notifications'` plugin by adding:
 

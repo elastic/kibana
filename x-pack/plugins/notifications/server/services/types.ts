@@ -5,5 +5,12 @@
  * 2.0.
  */
 
-export type { ResolvablePromise } from './promise_utils';
-export { getResolvablePromise } from './promise_utils';
+export interface IEmailService {
+  sendPlainTextEmail(payload: PlainTextEmail): Promise<void>;
+}
+
+export interface PlainTextEmail {
+  to: string[];
+  subject: string;
+  message: string;
+}
