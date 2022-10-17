@@ -28,13 +28,10 @@ import { CreateMlInferencePipelineApiLogic } from '../../../../api/ml_models/cre
 import { MLModelsApiLogic } from '../../../../api/ml_models/ml_models_logic';
 
 import { isConnectorIndex } from '../../../../utils/indices';
+import { isSupportedMLModel, sortSourceFields } from '../../../shared/ml_inference/utils';
 
 import { AddInferencePipelineFormErrors, InferencePipelineConfiguration } from './types';
-import {
-  isSupportedMLModel,
-  sortSourceFields,
-  validateInferencePipelineConfiguration,
-} from './utils';
+import { validateInferencePipelineConfiguration } from './utils';
 
 export const EMPTY_PIPELINE_CONFIGURATION: InferencePipelineConfiguration = {
   destinationField: '',
@@ -153,6 +150,7 @@ export const MLInferenceLogic = kea<
       actions.makeMappingRequest({ indexName });
     },
   }),
+  path: ['enterprise_search', 'content', 'pipelines_add_ml_inference_pipeline'],
   reducers: {
     addInferencePipelineModal: [
       {
