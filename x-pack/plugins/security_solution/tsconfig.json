@@ -37,6 +37,7 @@
     { "path": "../encrypted_saved_objects/tsconfig.json" },
     { "path": "../features/tsconfig.json" },
     { "path": "../fleet/tsconfig.json" },
+    { "path": "../graph/tsconfig.json" },
     { "path": "../kubernetes_security/tsconfig.json" },
     { "path": "../licensing/tsconfig.json" },
     { "path": "../lists/tsconfig.json" },

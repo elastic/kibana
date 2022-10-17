@@ -70,7 +70,7 @@ export const AlertDetailsPage = memo(() => {
       {loading && <AlertDetailsLoadingPage eventId={eventId} />}
       {dataNotFound && <AlertDetailsErrorPage eventId={eventId} />}
       {hasData && (
-        <>
+        <div style={{ height: '100%' }}>
           <AlertDetailsHeader loading={loading} ruleName={ruleName} timestamp={timestamp} />
           <SecuritySolutionTabNavigation navTabs={getAlertDetailsNavTabs(eventId)} />
           <EuiSpacer size="l" />
@@ -86,7 +86,7 @@ export const AlertDetailsPage = memo(() => {
               <AlertDetailsVisualizeTab data={detailsData} id={eventId} searchHit={searchHit} />
             </Route>
           </Switch>
-        </>
+        </div>
       )}
       <SpyRoute pageName={SecurityPageName.alerts} state={{ ruleName }} />
     </>

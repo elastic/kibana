@@ -13,6 +13,7 @@ import { Route } from '@kbn/kibana-react-plugin/public';
 import { NotFoundPage } from './404';
 import { SecurityApp } from './app';
 import type { RenderAppProps } from './types';
+import('./font_awesome');
 
 export const renderApp = ({
   element,

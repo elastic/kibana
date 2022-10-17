@@ -16,6 +16,7 @@ import { useSourcererDataView } from '../../../../../common/containers/sourcerer
 import { JsonView } from '../../../../../common/components/event_details/json_view';
 import { EventFieldsBrowser } from '../../../../../common/components/event_details/event_fields_browser';
 import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
+import { AlertDetailsVisualizeGraph } from './graph';
 
 export const AlertDetailsVisualizeTab = React.memo(
   ({
@@ -45,6 +46,10 @@ export const AlertDetailsVisualizeTab = React.memo(
         id: 'json',
         label: 'JSON',
       },
+      {
+        id: 'graph',
+        label: 'Graph',
+      },
     ];
     const onChange = (optionId: string) => {
       setVisiblePage(optionId);
@@ -63,7 +68,7 @@ export const AlertDetailsVisualizeTab = React.memo(
               options={toggleButtons}
             />
             <EuiSpacer size="xl" />
-            <EuiFlexGroup direction="column">
+            <EuiFlexGroup direction="column" style={{ height: '100%' }}>
               {visiblePage === 'event' && (
                 <>
                   <EuiSpacer size="m" />
@@ -100,6 +105,7 @@ export const AlertDetailsVisualizeTab = React.memo(
                   />
                 </>
               )}
+              {visiblePage === 'graph' && <AlertDetailsVisualizeGraph id={id} />}
             </EuiFlexGroup>
           </>
         )}

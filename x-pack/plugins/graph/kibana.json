@@ -4,6 +4,7 @@
   "kibanaVersion": "kibana",
   "server": true,
   "ui": true,
+  "extraPublicDirs": ["public/components/graph_visualization", "public/services/workspace"],
   "requiredPlugins": [
     "licensing",
     "data",

@@ -1,0 +1,139 @@
+@font-face {
+    font-family: 'FontAwesome';
+    src: url('~font-awesome/fonts/fontawesome-webfont.eot?v=4.7.0');
+    src: url('~font-awesome/fonts/fontawesome-webfont.eot?#iefix&v=4.7.0') format('embedded-opentype'),
+      url('~font-awesome/fonts/fontawesome-webfont.woff2?v=4.7.0') format('woff2'),
+      url('~font-awesome/fonts/fontawesome-webfont.woff?v=4.7.0') format('woff'),
+      url('~font-awesome/fonts/fontawesome-webfont.ttf?v=4.7.0') format('truetype'),
+      url('~font-awesome/fonts/fontawesome-webfont.svg?v=4.7.0#fontawesomeregular') format('svg');
+    font-weight: normal;
+    font-style: normal;
+  }
+  
+  @import 'font-awesome/scss/variables';
+  @import 'font-awesome/scss/core';
+  @import 'font-awesome/scss/icons';
+  
+  // new file icon
+  .#{$fa-css-prefix}-file-new-o:before { content: $fa-var-file-o; }
+  .#{$fa-css-prefix}-file-new-o:after { content: $fa-var-plus; position: relative; margin-left: -1.0em; font-size: .5em; }
+  
+  // alias for alert types - allows class="fa fa-{{alertType}}"
+  .fa-success:before { content: $fa-var-check; }
+  .fa-danger:before { content: $fa-var-exclamation-circle; }
+  
+  /**
+ * THE SVG Graph
+ * 1. Calculated px values come from the open/closed state of the global nav sidebar
+ */
+
+ #graphBasic {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+.gphGraph__container {
+  display: flex;
+  flex-direction: column;
+  background: $euiColorEmptyShade;
+  position: relative;
+  flex: 1;
+}
+
+.gphGraph__menus {
+  margin: $euiSizeS;
+}
+
+.gphGraph__flexGroup {
+  display: flex;
+  width: 100%;
+}
+
+.gphGraph__flexGroupFiller {
+  flex: 1 1 auto;
+}
+
+@mixin gphSvgText() {
+  font-family: $euiFontFamily;
+  font-size: $euiSizeS;
+  line-height: $euiSizeM;
+  fill: $euiColorDarkShade;
+  color: $euiColorDarkShade;
+}
+
+.gphVisualization {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.gphGraph {
+  flex: 1;
+  overflow: hidden;
+}
+
+.gphEdge {
+  fill: $euiColorMediumShade;
+  stroke: $euiColorMediumShade;
+  stroke-width: 2;
+  stroke-opacity: .5;
+
+  &--selected {
+    stroke: $euiColorDarkShade;
+    stroke-opacity: .95;
+  }
+}
+
+.gphEdge--clickable {
+  fill: transparent;
+  opacity: 0;
+}
+
+.gphEdge--wrapper:hover {
+  .gphEdge {
+    stroke-opacity: .95;
+    cursor: pointer;
+  }
+}
+
+.gphNode {
+  cursor: pointer;
+}
+
+.gphNode__label {
+  @include gphSvgText;
+  cursor: pointer;
+  &--html {
+    @include euiTextTruncate;
+    text-align: center;
+  }
+}
+
+.gphNode__markerCircle {
+  fill: $euiColorDarkShade;
+  stroke: $euiColorEmptyShade;
+}
+
+.gphNode__markerText {
+  @include gphSvgText;
+  font-size: $euiSizeS - 2px;
+  fill: $euiColorEmptyShade;
+}
+
+.gphNode__circle {
+  fill: $euiColorMediumShade;
+  &--selected {
+    stroke-width: $euiSizeXS;
+    stroke: transparentize($euiColorPrimary, .25);
+  }
+}
+
+.gphNode__text {
+  fill: $euiColorInk;
+
+  &--inverse {
+    fill: $euiColorGhost;
+  }
+}

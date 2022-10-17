@@ -522,6 +522,7 @@ function GraphWorkspace(options) {
     const visibleNodes = self.nodes.filter(function (n) {
       return n.parent === undefined;
     });
+    console.log("VISIBLE NODES: ", visibleNodes);
     //reset then roll-up all the counts
     const allNodes = self.nodes;
     allNodes.forEach((node) => {
@@ -890,6 +891,7 @@ function GraphWorkspace(options) {
       self.addUndoLogEntry(lastOps);
     }
 
+    console.log("MERGED!!: ", this);
     this.runLayout();
   };
 

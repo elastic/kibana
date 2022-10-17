@@ -19,6 +19,7 @@
     "embeddable",
     "eventLog",
     "features",
+    "graph",
     "inspector",
     "kubernetesSecurity",
     "lens",
