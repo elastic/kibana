@@ -12,4 +12,4 @@ import { RuleCreateProps } from '../../../../../rule_schema';
  * Request body parameters of the API route.
  */
 export type BulkCreateRulesRequestBody = t.TypeOf<typeof BulkCreateRulesRequestBody>;
-export const BulkCreateRulesRequestBody = t.array(CreateRuleProps);
+export const BulkCreateRulesRequestBody = t.array(RuleCreateProps);

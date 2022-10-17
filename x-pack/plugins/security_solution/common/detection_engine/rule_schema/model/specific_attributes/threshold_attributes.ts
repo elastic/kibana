@@ -8,6 +8,8 @@
 import * as t from 'io-ts';
 import { PositiveInteger, PositiveIntegerGreaterThanZero } from '@kbn/securitysolution-io-ts-types';
 
+// Attributes specific to Threshold rules
+
 const thresholdField = t.exact(
   t.type({
     field: t.union([t.string, t.array(t.string)]), // Covers pre- and post-7.12

@@ -30,49 +30,6 @@ import {
 import { RuleExecutionSummary } from '../../rule_monitoring';
 import { ResponseActionArray } from '../../rule_response_actions/schemas';
 import {
-  AlertsIndex,
-  AlertsIndexNamespace,
-  BuildingBlockType,
-  DataViewId,
-  EventCategoryOverride,
-  ExceptionListArray,
-  HistoryWindowStart,
-  IndexPatternArray,
-  InvestigationGuide,
-  IsRuleEnabled,
-  IsRuleImmutable,
-  MaxSignals,
-  NewTermsFields,
-  RelatedIntegrationArray,
-  RequiredFieldArray,
-  RuleAuthorArray,
-  RuleDescription,
-  RuleFalsePositiveArray,
-  RuleFilterArray,
-  RuleLicense,
-  RuleMetadata,
-  RuleName,
-  RuleNameOverride,
-  RuleObjectId,
-  RuleQuery,
-  RuleReferenceArray,
-  RuleSignatureId,
-  RuleTagArray,
-  RuleVersion,
-  SavedObjectResolveAliasPurpose,
-  SavedObjectResolveAliasTargetId,
-  SavedObjectResolveOutcome,
-  SetupGuide,
-  ThreatArray,
-  Threshold,
-  TiebreakerField,
-  TimelineTemplateId,
-  TimelineTemplateTitle,
-  TimestampField,
-  TimestampOverride,
-  TimestampOverrideFallbackDisabled,
-} from '..';
-import {
   saved_id,
   anomaly_threshold,
   updated_at,
@@ -80,6 +37,54 @@ import {
   created_at,
   created_by,
 } from '../../schemas/common';
+
+import {
+  AlertsIndex,
+  AlertsIndexNamespace,
+  BuildingBlockType,
+  DataViewId,
+  ExceptionListArray,
+  IndexPatternArray,
+  InvestigationGuide,
+  IsRuleEnabled,
+  IsRuleImmutable,
+  MaxSignals,
+  RuleAuthorArray,
+  RuleDescription,
+  RuleFalsePositiveArray,
+  RuleFilterArray,
+  RuleLicense,
+  RuleMetadata,
+  RuleName,
+  RuleObjectId,
+  RuleQuery,
+  RuleReferenceArray,
+  RuleSignatureId,
+  RuleTagArray,
+  RuleVersion,
+  SetupGuide,
+  ThreatArray,
+} from './common_attributes/misc_attributes';
+import {
+  RuleNameOverride,
+  TimestampOverride,
+  TimestampOverrideFallbackDisabled,
+} from './common_attributes/field_overrides';
+import {
+  SavedObjectResolveAliasPurpose,
+  SavedObjectResolveAliasTargetId,
+  SavedObjectResolveOutcome,
+} from './common_attributes/saved_objects';
+import { RelatedIntegrationArray } from './common_attributes/related_integrations';
+import { RequiredFieldArray } from './common_attributes/required_fields';
+import { TimelineTemplateId, TimelineTemplateTitle } from './common_attributes/timeline_template';
+import {
+  EventCategoryOverride,
+  TiebreakerField,
+  TimestampField,
+} from './specific_attributes/eql_attributes';
+import { Threshold } from './specific_attributes/threshold_attributes';
+import { HistoryWindowStart, NewTermsFields } from './specific_attributes/new_terms_attributes';
 
 import { buildRuleSchemas } from './build_rule_schemas';
 

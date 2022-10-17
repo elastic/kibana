@@ -506,9 +506,7 @@ export const getEditedRule = (): CustomRule => ({
   tags: [...(getExistingRule().tags || []), 'edited'],
 });
 
-export const expectedExportedRule = (
-  ruleResponse: Cypress.Response<RuleResponse>
-): string => {
+export const expectedExportedRule = (ruleResponse: Cypress.Response<RuleResponse>): string => {
   const {
     id,
     updated_at: updatedAt,
