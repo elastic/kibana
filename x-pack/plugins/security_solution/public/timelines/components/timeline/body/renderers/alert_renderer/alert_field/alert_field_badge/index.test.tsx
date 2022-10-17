@@ -27,7 +27,7 @@ describe('AlertFieldBadge', () => {
           field={field}
           isDraggable={false}
           showSeparator={false}
-          scopeId={TableId.detectionsPage}
+          scopeId={TableId.alertsOnAlertsPage}
           value={value}
         />
       </TestProviders>
@@ -47,7 +47,7 @@ describe('AlertFieldBadge', () => {
           field={field}
           isDraggable={false}
           showSeparator={showSeparator}
-          scopeId={TableId.detectionsPage}
+          scopeId={TableId.alertsOnAlertsPage}
           value={value}
         />
       </TestProviders>
@@ -67,7 +67,7 @@ describe('AlertFieldBadge', () => {
           field={field}
           isDraggable={false}
           showSeparator={showSeparator}
-          scopeId={TableId.detectionsPage}
+          scopeId={TableId.alertsOnAlertsPage}
           value={value}
         />
       </TestProviders>

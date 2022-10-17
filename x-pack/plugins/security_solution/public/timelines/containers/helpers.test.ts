@@ -22,23 +22,23 @@ describe('skipQueryForDetectionsPage', () => {
   });
 
   test('Make sure to SKIP the query when it is a timeline from a detection pages without the siem-signals', () => {
-    expect(skipQueryForDetectionsPage(TableId.detectionsPage, ['auditbeat-*', 'filebeat-*'])).toBe(
+    expect(skipQueryForDetectionsPage(TableId.alertsOnAlertsPage, ['auditbeat-*', 'filebeat-*'])).toBe(
       true
     );
     expect(
-      skipQueryForDetectionsPage(TableId.detectionsRulesDetailsPage, ['auditbeat-*', 'filebeat-*'])
+      skipQueryForDetectionsPage(TableId.alertsOnRuleDetailsPage, ['auditbeat-*', 'filebeat-*'])
     ).toBe(true);
   });
 
   test('Make sure to NOT skip the query when it is a timeline from a detection pages with the siem-signals', () => {
     expect(
-      skipQueryForDetectionsPage(TableId.detectionsPage, [
+      skipQueryForDetectionsPage(TableId.alertsOnAlertsPage, [
         'auditbeat-*',
         '.siem-signals-rainbow-butterfly',
       ])
     ).toBe(false);
     expect(
-      skipQueryForDetectionsPage(TableId.detectionsRulesDetailsPage, [
+      skipQueryForDetectionsPage(TableId.alertsOnRuleDetailsPage, [
         '.siem-signals-rainbow-butterfly',
       ])
     ).toBe(false);

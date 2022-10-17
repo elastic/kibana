@@ -168,7 +168,7 @@ export const addFieldToTimelineColumns = ({
   const allColumns = getAllFieldsByName(browserFields);
   const column = allColumns[fieldId];
   const initColumnHeader =
-    timelineId === TableId.detectionsPage || timelineId === TableId.detectionsRulesDetailsPage
+    timelineId === TableId.alertsOnAlertsPage || timelineId === TableId.alertsOnRuleDetailsPage
       ? defaultsHeader.find((c) => c.id === fieldId) ?? {}
       : {};
 

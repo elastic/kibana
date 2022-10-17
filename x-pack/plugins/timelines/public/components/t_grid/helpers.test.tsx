@@ -648,7 +648,7 @@ describe('Combined Queries', () => {
       null,
     ];
 
-    const selectableViews: TableId[] = [TableId.detectionsPage, TableId.detectionsRulesDetailsPage];
+    const selectableViews: TableId[] = [TableId.alertsOnAlertsPage, TableId.alertsOnRuleDetailsPage];
 
     const exampleNonSelectableViews: string[] = [
       TableId.hostsPageEvents,

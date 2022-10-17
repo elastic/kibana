@@ -37,7 +37,7 @@ const EMPTY_RISK_SCORE = {
 
 describe('ThreatSummaryView', () => {
   const eventId = '5d1d53da502f56aacc14c3cb5c669363d102b31f99822e5d369d4804ed370a31';
-  const scopeId = 'detections-page';
+  const scopeId = 'alerts-page';
   const data = mockAlertDetailsData as TimelineEventsDetailsItem[];
   const browserFields = mockBrowserFields;
 

@@ -8,7 +8,7 @@
 import { DEFAULT_ALERTS_INDEX } from '../../../common/constants';
 import { TableId } from '../../../common/types/timeline';
 
-export const detectionsTimelineIds = [TableId.detectionsPage, TableId.detectionsRulesDetailsPage];
+export const detectionsTimelineIds = [TableId.alertsOnAlertsPage, TableId.alertsOnRuleDetailsPage];
 
 // TODO: Once we are past experimental phase `useRuleRegistry` should be removed
 export const skipQueryForDetectionsPage = (

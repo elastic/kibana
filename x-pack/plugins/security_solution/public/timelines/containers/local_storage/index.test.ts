@@ -317,7 +317,7 @@ describe('SiemLocalStorage', () => {
 
     it('migrates legacy timeline tables saved in localstorage to the new key securityDataTable and schema for TGridModel', () => {
       const detectionsPageLegacyTable = {
-        id: 'detections-page',
+        id: 'alerts-page',
         columns: [
           {
             columnHeaderType: 'not-filtered',
@@ -521,7 +521,7 @@ describe('SiemLocalStorage', () => {
         initialized: true,
         updated: 1665943295913,
       };
-      storage.set('timelines', { [TableId.detectionsPage]: detectionsPageLegacyTable });
+      storage.set('timelines', { [TableId.alertsOnAlertsPage]: detectionsPageLegacyTable });
       const detectionsPage = {
         columns: [
           { columnHeaderType: 'not-filtered', id: '@timestamp', initialWidth: 200 },
@@ -634,14 +634,14 @@ describe('SiemLocalStorage', () => {
         selectedEventIds: {},
         sessionViewConfig: null,
         selectAll: undefined,
-        id: 'detections-page',
+        id: 'alerts-page',
         title: '',
         initialized: true,
         updated: 1665943295913,
       };
-      const dataTables = getDataTablesInStorageByIds(storage, [TableId.detectionsPage]);
+      const dataTables = getDataTablesInStorageByIds(storage, [TableId.alertsOnAlertsPage]);
       expect(dataTables).toStrictEqual({
-        [TableId.detectionsPage]: detectionsPage,
+        [TableId.alertsOnAlertsPage]: detectionsPage,
       });
     });
   });

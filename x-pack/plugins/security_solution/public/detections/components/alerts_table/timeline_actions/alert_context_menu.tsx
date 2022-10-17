@@ -77,7 +77,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   const alertId = ecsRowData?.kibana?.alert ? ecsRowData?._id : null;
   const ruleId = get(0, ecsRowData?.kibana?.alert?.rule?.uuid);
   const ruleName = get(0, ecsRowData?.kibana?.alert?.rule?.name);
-  const isInDetections = [TableId.detectionsPage, TableId.detectionsRulesDetailsPage].includes(
+  const isInDetections = [TableId.alertsOnAlertsPage, TableId.alertsOnRuleDetailsPage].includes(
     scopeId as TableId
   );
 

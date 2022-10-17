@@ -218,7 +218,7 @@ export const TakeActionDropdown = React.memo(
       ]
     );
 
-    const isInDetections = [TableId.detectionsPage, TableId.detectionsRulesDetailsPage].includes(
+    const isInDetections = [TableId.alertsOnAlertsPage, TableId.alertsOnRuleDetailsPage].includes(
       scopeId as TableId
     );
 

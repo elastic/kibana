@@ -97,13 +97,13 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
   const graphEventId = useShallowEqualSelector(
-    (state) => (getTable(state, TableId.detectionsPage) ?? tableDefaults).graphEventId
+    (state) => (getTable(state, TableId.alertsOnAlertsPage) ?? tableDefaults).graphEventId
   );
   const updatedAt = useShallowEqualSelector(
-    (state) => (getTable(state, TableId.detectionsPage) ?? tableDefaults).updated
+    (state) => (getTable(state, TableId.alertsOnAlertsPage) ?? tableDefaults).updated
   );
   const isAlertsLoading = useShallowEqualSelector(
-    (state) => (getTable(state, TableId.detectionsPage) ?? tableDefaults).isLoading
+    (state) => (getTable(state, TableId.alertsOnAlertsPage) ?? tableDefaults).isLoading
   );
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
@@ -196,7 +196,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   // Callback for when open/closed filter changes
   const onFilterGroupChangedCallback = useCallback(
     (newFilterGroup: Status) => {
-      const timelineId = TableId.detectionsPage;
+      const timelineId = TableId.alertsOnAlertsPage;
       clearEventsLoading({ id: timelineId });
       clearEventsDeleted({ id: timelineId });
       setFilterGroup(newFilterGroup);
@@ -377,7 +377,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
               <EuiSpacer size="l" />
             </Display>
             <AlertsTable
-              tableId={TableId.detectionsPage}
+              tableId={TableId.alertsOnAlertsPage}
               loading={loading}
               hasIndexWrite={hasIndexWrite ?? false}
               hasIndexMaintenance={hasIndexMaintenance ?? false}

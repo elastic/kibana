@@ -118,7 +118,7 @@ export const getOptions = (activeTimelineEventsType?: TimelineEventsType): TopNO
 
 /** returns true if the specified timelineId is a detections alert table */
 export const isDetectionsAlertsTable = (tableId: string | undefined): boolean =>
-  tableId === TableId.detectionsPage || tableId === TableId.detectionsRulesDetailsPage;
+  tableId === TableId.alertsOnAlertsPage || tableId === TableId.alertsOnRuleDetailsPage;
 
 /**
  * The following fields are used to filter alerts tables, (i.e. tables in the

@@ -42,7 +42,7 @@ import { getSearchTransactionName, useStartTransaction } from '../lib/apm/use_st
 
 export type InspectResponse = Inspect & { response: string[] };
 
-export const detectionsTimelineIds = [TableId.detectionsPage, TableId.detectionsRulesDetailsPage];
+export const detectionsTimelineIds = [TableId.alertsOnAlertsPage, TableId.alertsOnRuleDetailsPage];
 
 export type Refetch = () => void;
 

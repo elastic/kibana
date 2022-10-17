@@ -113,7 +113,7 @@ describe('helpers', () => {
         <TestProviders>
           <AlertFieldFlexGroup
             data-test-subj="test"
-            $scopeId={TableId.detectionsPage} // <-- the alerts page
+            $scopeId={TableId.alertsOnAlertsPage} // <-- the alerts page
           />
         </TestProviders>
       );

@@ -186,13 +186,13 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const containerElement = useRef<HTMLDivElement | null>(null);
   const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
   const graphEventId = useShallowEqualSelector(
-    (state) => (getTable(state, TableId.detectionsRulesDetailsPage) ?? tableDefaults).graphEventId
+    (state) => (getTable(state, TableId.alertsOnRuleDetailsPage) ?? tableDefaults).graphEventId
   );
   const updatedAt = useShallowEqualSelector(
-    (state) => (getTable(state, TableId.detectionsRulesDetailsPage) ?? tableDefaults).updated
+    (state) => (getTable(state, TableId.alertsOnRuleDetailsPage) ?? tableDefaults).updated
   );
   const isAlertsLoading = useShallowEqualSelector(
-    (state) => (getTable(state, TableId.detectionsPage) ?? tableDefaults).isLoading
+    (state) => (getTable(state, TableId.alertsOnAlertsPage) ?? tableDefaults).isLoading
   );
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
@@ -487,7 +487,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   // Callback for when open/closed filter changes
   const onFilterGroupChangedCallback = useCallback(
     (newFilterGroup: Status) => {
-      const tableId = TableId.detectionsRulesDetailsPage;
+      const tableId = TableId.alertsOnRuleDetailsPage;
       clearEventsLoading({ id: tableId });
       clearEventsDeleted({ id: tableId });
       clearSelected({ id: tableId });
@@ -845,7 +845,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                     {ruleId != null && (
                       <AlertsTable
                         filterGroup={filterGroup}
-                        tableId={TableId.detectionsRulesDetailsPage}
+                        tableId={TableId.alertsOnRuleDetailsPage}
                         defaultFilters={alertsTableDefaultFilters}
                         hasIndexWrite={hasIndexWrite ?? false}
                         hasIndexMaintenance={hasIndexMaintenance ?? false}

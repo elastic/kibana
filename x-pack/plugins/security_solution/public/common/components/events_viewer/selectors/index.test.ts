@@ -12,7 +12,7 @@ import { eventsViewerSelector } from '.';
 describe('selectors', () => {
   describe('eventsViewerSelector', () => {
     it('returns the expected results', () => {
-      const id = 'detections-page';
+      const id = 'alerts-page';
 
       expect(eventsViewerSelector(mockState, id)).toEqual({
         filters: mockState.inputs.global.filters,

@@ -22,7 +22,7 @@ import {
 import { SourcererScopeName } from '../../store/sourcerer/model';
 
 /** the following `TimelineId`s are detection alert tables */
-const detectionAlertsTimelines = [TableId.detectionsPage, TableId.detectionsRulesDetailsPage];
+const detectionAlertsTimelines = [TableId.alertsOnAlertsPage, TableId.alertsOnRuleDetailsPage];
 
 /** the following `TimelineId`s are NOT detection alert tables */
 const otherTimelines = [

@@ -365,7 +365,7 @@ describe('StatefulTopN', () => {
     test(`defaults to the 'Alert events' option when rendering in a NON-active timeline context (e.g. the Alerts table on the Detections page) when 'documentType' from 'useTimelineTypeContext()' is 'alerts'`, async () => {
       testProps = {
         ...testProps,
-        scopeId: TableId.detectionsPage,
+        scopeId: TableId.alertsOnAlertsPage,
       };
       const wrapper = mount(
         <TestProviders store={store}>

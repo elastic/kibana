@@ -252,7 +252,7 @@ export const tableHasFocus = (containerElement: HTMLElement | null): boolean =>
   );
 
 export const isSelectableView = (timelineId: string): boolean =>
-  timelineId === TableId.detectionsPage || timelineId === TableId.detectionsRulesDetailsPage;
+  timelineId === TableId.alertsOnAlertsPage || timelineId === TableId.alertsOnRuleDetailsPage;
 
 export const isViewSelection = (value: unknown): value is ViewSelection =>
   value === 'gridView' || value === 'eventRenderedView';

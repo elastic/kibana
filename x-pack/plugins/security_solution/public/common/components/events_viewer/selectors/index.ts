@@ -19,7 +19,7 @@ import {
 /**
  * This selector is invoked with two arguments:
  * @param state - the state of the store as defined by State in common/store/types.ts
- * @param id - a timeline id e.g. `detections-page`
+ * @param id - a timeline id e.g. `alerts-page`
  *
  * Example:
  *  `useSelector((state: State) => eventsViewerSelector(state, id))`

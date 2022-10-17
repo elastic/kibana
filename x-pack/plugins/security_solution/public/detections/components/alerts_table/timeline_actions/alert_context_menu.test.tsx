@@ -44,7 +44,7 @@ const props = {
   disabled: false,
   ecsRowData,
   refetch: jest.fn(),
-  timelineId: 'detections-page',
+  timelineId: 'alerts-page',
 };
 
 jest.mock('../../../../common/lib/kibana', () => ({
@@ -85,8 +85,8 @@ const markAsClosedButton = '[data-test-subj="close-alert-status"]';
 const addEndpointEventFilterButton = '[data-test-subj="add-event-filter-menu-item"]';
 
 describe('InvestigateInResolverAction', () => {
-  test('it render AddToCase context menu item if timelineId === TableId.detectionsPage', () => {
-    const wrapper = mount(<AlertContextMenu {...props} scopeId={TableId.detectionsPage} />, {
+  test('it render AddToCase context menu item if timelineId === TableId.alertsOnAlertsPage', () => {
+    const wrapper = mount(<AlertContextMenu {...props} scopeId={TableId.alertsOnAlertsPage} />, {
       wrappingComponent: TestProviders,
     });
 
@@ -95,9 +95,9 @@ describe('InvestigateInResolverAction', () => {
     expect(wrapper.find(addToNewCaseButton).first().exists()).toEqual(true);
   });
 
-  test('it render AddToCase context menu item if timelineId === TableId.detectionsRulesDetailsPage', () => {
+  test('it render AddToCase context menu item if timelineId === TableId.alertsOnRuleDetailsPage', () => {
     const wrapper = mount(
-      <AlertContextMenu {...props} scopeId={TableId.detectionsRulesDetailsPage} />,
+      <AlertContextMenu {...props} scopeId={TableId.alertsOnRuleDetailsPage} />,
       {
         wrappingComponent: TestProviders,
       }

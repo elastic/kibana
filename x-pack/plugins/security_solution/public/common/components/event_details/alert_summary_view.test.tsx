@@ -30,7 +30,7 @@ const props = {
   data: mockAlertDetailsData as TimelineEventsDetailsItem[],
   browserFields: mockBrowserFields,
   eventId: '5d1d53da502f56aacc14c3cb5c669363d102b31f99822e5d369d4804ed370a31',
-  scopeId: 'detections-page',
+  scopeId: 'alerts-page',
   title: '',
   goToTable: jest.fn(),
 };

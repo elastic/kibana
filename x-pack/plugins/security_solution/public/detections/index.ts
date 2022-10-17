@@ -13,8 +13,8 @@ import { routes } from './routes';
 import type { SecuritySubPlugin } from '../app/types';
 
 export const DETECTIONS_TABLE_IDS: TableIdLiteral[] = [
-  TableId.detectionsRulesDetailsPage,
-  TableId.detectionsPage,
+  TableId.alertsOnRuleDetailsPage,
+  TableId.alertsOnAlertsPage,
 ];
 
 export class Detections {

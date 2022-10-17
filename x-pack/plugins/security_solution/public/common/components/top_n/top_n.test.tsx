@@ -137,7 +137,7 @@ describe('TopN', () => {
   });
 
   describe('view selection', () => {
-    const detectionAlertsTimelines = [TableId.detectionsPage, TableId.detectionsRulesDetailsPage];
+    const detectionAlertsTimelines = [TableId.alertsOnAlertsPage, TableId.alertsOnRuleDetailsPage];
 
     const nonDetectionAlertTables = [
       TableId.hostsPageEvents,
