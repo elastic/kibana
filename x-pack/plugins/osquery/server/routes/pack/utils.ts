@@ -18,9 +18,7 @@ export const convertPackQueriesToSO = (queries) =>
       const ecsMapping = value.ecs_mapping && convertECSMappingToArray(value.ecs_mapping);
       acc.push({
         id: key,
-        ...pick(value, ['name', 'query', 'interval', 'platform', 'version']),
-        ...(value.snapshot !== undefined ? { snapshot: value.snapshot } : {}),
-        ...(value.removed !== undefined ? { removed: value.removed } : {}),
+        ...pick(value, ['name', 'query', 'interval', 'platform', 'version', 'snapshot', 'removed']),
         ...(ecsMapping ? { ecs_mapping: ecsMapping } : {}),
       });
 
@@ -40,7 +38,11 @@ export const convertPackQueriesToSO = (queries) =>
 export const convertSOQueriesToPack = (
   // @ts-expect-error update types
   queries,
-  options?: { removeMultiLines?: boolean; removeResultType?: boolean }
+  options?: {
+    removeMultiLines?: boolean;
+    removeResultType?: boolean;
+    returnAll?: boolean;
+  }
 ) =>
   reduce(
     queries,
@@ -59,6 +61,8 @@ export const convertSOQueriesToPack = (
         ...(platform === DEFAULT_PLATFORM || platform === undefined ? {} : { platform }),
         ...(options?.removeResultType
           ? resultType
+          : options?.returnAll
+          ? { snapshot, removed }
           : { ...(snapshot ? { snapshot } : {}), ...(removed ? { removed } : {}) }),
       };
 

@@ -97,12 +97,8 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
                 draft.ecs_mapping = updatedQuery.ecs_mapping;
               }
 
-              if (updatedQuery.snapshot === false) {
-                draft.snapshot = updatedQuery.snapshot;
-                if (updatedQuery.removed !== undefined) {
-                  draft.removed = updatedQuery.removed;
-                }
-              }
+              draft.snapshot = updatedQuery.snapshot;
+              draft.removed = updatedQuery.removed;
 
               return draft;
             })

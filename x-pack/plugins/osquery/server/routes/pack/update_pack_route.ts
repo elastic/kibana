@@ -170,7 +170,9 @@ export const updatePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
         queries: Record<string, unknown>;
       }>(packSavedObjectType, request.params.id);
 
-      updatedPackSO.attributes.queries = convertSOQueriesToPack(updatedPackSO.attributes.queries);
+      updatedPackSO.attributes.queries = convertSOQueriesToPack(updatedPackSO.attributes.queries, {
+        returnAll: true,
+      });
 
       if (enabled == null && !currentPackSO.attributes.enabled) {
         return response.ok({ body: updatedPackSO });
