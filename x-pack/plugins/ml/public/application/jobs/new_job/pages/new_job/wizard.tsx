@@ -7,7 +7,6 @@
 
 import React, { FC, useReducer, useState, useEffect } from 'react';
 import { useModelMemoryEstimator } from '../../common/job_creator/util/model_memory_estimator';
-
 import { WIZARD_STEPS } from '../components/step_types';
 
 import { TimeBuckets } from '../../../../util/time_buckets';
@@ -89,7 +88,7 @@ export const Wizard: FC<Props> = ({
       return subscription.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [jobValidator]);
 
   useEffect(() => {
     jobValidator.validate(() => {

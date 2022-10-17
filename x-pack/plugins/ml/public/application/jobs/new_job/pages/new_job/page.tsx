@@ -50,6 +50,7 @@ export interface PageProps {
 
 export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
   const mlContext = useMlContext();
+
   const jobCreator = useMemo(
     () =>
       jobCreatorFactory(jobType)(
@@ -60,6 +61,8 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [jobType]
   );
+
+  const jobValidator = useMemo(() => new JobValidator(jobCreator), [jobCreator]);
 
   const { displayErrorToast } = useToastNotificationService();
 
@@ -192,8 +195,6 @@ export const Page: FC<PageProps> = ({ existingJobsAndGroups, jobType }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
-
-  const jobValidator = useMemo(() => new JobValidator(jobCreator), [jobCreator]);
 
   const resultsLoader = useMemo(
     () => new ResultsLoader(jobCreator, chartInterval, chartLoader),
