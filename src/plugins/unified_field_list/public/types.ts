@@ -26,6 +26,12 @@ export enum ExistenceFetchStatus {
   unknown = 'unknown',
 }
 
+export interface FieldListItem {
+  name: DataViewField['name'];
+  type?: DataViewField['type'];
+  displayName?: DataViewField['displayName'];
+}
+
 export enum FieldsGroupNames {
   SpecialFields = 'SpecialFields',
   SelectedFields = 'SelectedFields',
@@ -46,11 +52,11 @@ export interface FieldsGroupDetails {
   hideIfEmpty?: boolean;
 }
 
-export interface FieldsGroup extends FieldsGroupDetails {
-  fields: DataViewField[];
+export interface FieldsGroup<T extends FieldListItem> extends FieldsGroupDetails {
+  fields: T[];
   fieldCount: number;
 }
 
-export type FieldListGroups = {
-  [key in FieldsGroupNames]?: FieldsGroup;
+export type FieldListGroups<T extends FieldListItem> = {
+  [key in FieldsGroupNames]?: FieldsGroup<T>;
 };

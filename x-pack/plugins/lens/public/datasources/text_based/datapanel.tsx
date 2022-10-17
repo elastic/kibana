@@ -23,12 +23,11 @@ import {
   useGroupedFields,
 } from '@kbn/unified-field-list-plugin/public';
 import { FieldButton } from '@kbn/react-field';
-import type { DataViewField } from '@kbn/data-views-plugin/public';
 import type { DatasourceDataPanelProps } from '../../types';
 import type { TextBasedPrivateState } from './types';
 import { getStateFromAggregateQuery } from './utils';
 import { ChildDragDropProvider, DragDrop } from '../../drag_drop';
-import { DataType, IndexPatternField } from '../../types';
+import { DataType } from '../../types';
 import { LensFieldIcon } from '../../shared_components';
 
 export type TextBasedDataPanelProps = DatasourceDataPanelProps<TextBasedPrivateState> & {
@@ -78,14 +77,14 @@ export function TextBasedDataPanel({
   const { fieldList } = state;
 
   const onSelectedFieldFilter = useCallback(
-    (field: IndexPatternField | DataViewField): boolean => {
+    (field: DatatableColumn): boolean => {
       return Boolean(layerFields?.includes(field.name));
     },
     [layerFields]
   );
 
   const onFilterField = useCallback(
-    (field: IndexPatternField | DataViewField) => {
+    (field: DatatableColumn) => {
       if (
         localState.nameFilter &&
         !field.name.toLowerCase().includes(localState.nameFilter.toLowerCase())
@@ -113,9 +112,9 @@ export function TextBasedDataPanel({
     }
   }, []);
 
-  const { fieldGroups } = useGroupedFields({
+  const { fieldGroups } = useGroupedFields<DatatableColumn>({
     dataViewId: null,
-    allFields: fieldList as unknown as DataViewField[],
+    allFields: fieldList,
     services: {
       dataViews,
     },
@@ -124,25 +123,24 @@ export function TextBasedDataPanel({
     onOverrideFieldGroupDetails,
   });
 
-  const renderFieldItem: FieldListGroupedProps['renderFieldItem'] = useCallback(
+  const renderFieldItem: FieldListGroupedProps<DatatableColumn>['renderFieldItem'] = useCallback(
     ({ field, itemIndex, groupIndex, hideDetails }) => {
-      const lensField = field as unknown as DatatableColumn;
       return (
         <DragDrop
           draggable
           order={[itemIndex]}
           value={{
-            field: lensField?.name,
-            id: lensField.id,
-            humanData: { label: lensField?.name },
+            field: field?.name,
+            id: field.id,
+            humanData: { label: field?.name },
           }}
-          dataTestSubj={`lnsFieldListPanelField-${lensField.name}`}
+          dataTestSubj={`lnsFieldListPanelField-${field.name}`}
         >
           <FieldButton
-            className={`lnsFieldItem lnsFieldItem--${lensField?.meta?.type}`}
+            className={`lnsFieldItem lnsFieldItem--${field?.meta?.type}`}
             isActive={false}
             onClick={() => {}}
-            fieldIcon={<LensFieldIcon type={lensField?.meta.type as DataType} />}
+            fieldIcon={<LensFieldIcon type={field?.meta.type as DataType} />}
             fieldName={field?.name}
           />
         </DragDrop>
@@ -200,7 +198,7 @@ export function TextBasedDataPanel({
             </EuiFormControlLayout>
           </EuiFlexItem>
           <EuiFlexItem>
-            <FieldListGrouped
+            <FieldListGrouped<DatatableColumn>
               fieldGroups={fieldGroups}
               hasSyncedExistingFields={dataHasLoaded}
               existenceFetchFailed={false}

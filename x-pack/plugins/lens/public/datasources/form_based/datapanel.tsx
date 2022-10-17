@@ -25,7 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { type DataView, type DataViewField } from '@kbn/data-plugin/common';
+import { type DataView } from '@kbn/data-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { VISUALIZE_GEO_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/public';
@@ -106,7 +106,7 @@ const fieldTypeNames: Record<DataType, string> = {
   murmur3: i18n.translate('xpack.lens.datatypes.murmur3', { defaultMessage: 'murmur3' }),
 };
 
-function onSupportedFieldFilter(field: DataViewField): boolean {
+function onSupportedFieldFilter(field: IndexPatternField): boolean {
   return supportedFieldTypes.has(field.type);
 }
 
@@ -304,14 +304,14 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
     indexPatternFieldEditor.userPermissions.editIndexPattern() || !currentIndexPattern.isPersisted;
 
   const onSelectedFieldFilter = useCallback(
-    (field: IndexPatternField | DataViewField): boolean => {
+    (field: IndexPatternField): boolean => {
       return Boolean(layerFields?.includes(field.name));
     },
     [layerFields]
   );
 
   const onFilterField = useCallback(
-    (field: IndexPatternField | DataViewField) => {
+    (field: IndexPatternField) => {
       if (
         localState.nameFilter.length &&
         !field.name.toLowerCase().includes(localState.nameFilter.toLowerCase()) &&
@@ -355,9 +355,9 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
     [core.uiSettings, hasFilters]
   );
 
-  const { fieldGroups } = useGroupedFields({
+  const { fieldGroups } = useGroupedFields<IndexPatternField>({
     dataViewId: currentIndexPatternId,
-    allFields: allFields as unknown as DataViewField[],
+    allFields,
     services: {
       dataViews,
     },
@@ -467,7 +467,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
     ]
   );
 
-  const renderFieldItem: FieldListGroupedProps['renderFieldItem'] = useCallback(
+  const renderFieldItem: FieldListGroupedProps<IndexPatternField>['renderFieldItem'] = useCallback(
     ({ field, itemIndex, groupIndex, hideDetails }) => (
       <FieldItem
         field={field}
@@ -616,7 +616,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
           </EuiFormControlLayout>
         </EuiFlexItem>
         <EuiFlexItem>
-          <FieldListGrouped
+          <FieldListGrouped<IndexPatternField>
             fieldGroups={fieldGroups}
             hasSyncedExistingFields={fieldsExistenceStatus !== ExistenceFetchStatus.unknown}
             existenceFetchFailed={fieldsExistenceStatus === ExistenceFetchStatus.failed}

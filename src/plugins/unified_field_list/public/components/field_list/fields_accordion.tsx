@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { memo, useMemo, Fragment } from 'react';
+import React, { useMemo, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiText,
@@ -18,9 +18,10 @@ import {
 } from '@elastic/eui';
 import classNames from 'classnames';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
+import type { FieldListItem } from '../../types';
 import './fields_accordion.scss';
 
-export interface FieldsAccordionProps {
+export interface FieldsAccordionProps<T extends FieldListItem> {
   initialIsOpen: boolean;
   onToggle: (open: boolean) => void;
   id: string;
@@ -31,9 +32,9 @@ export interface FieldsAccordionProps {
   hideDetails?: boolean;
   isFiltered: boolean;
   groupIndex: number;
-  paginatedFields: DataViewField[];
+  paginatedFields: T[];
   renderFieldItem: (params: {
-    field: DataViewField;
+    field: T;
     hideDetails?: boolean;
     itemIndex: number;
     groupIndex: number;
@@ -43,7 +44,7 @@ export interface FieldsAccordionProps {
   showExistenceFetchTimeout?: boolean;
 }
 
-export const FieldsAccordion: React.FC<FieldsAccordionProps> = memo(function InnerFieldsAccordion({
+function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
   initialIsOpen,
   onToggle,
   id,
@@ -59,7 +60,7 @@ export const FieldsAccordion: React.FC<FieldsAccordionProps> = memo(function Inn
   renderCallout,
   showExistenceFetchError,
   showExistenceFetchTimeout,
-}) {
+}: FieldsAccordionProps<T>) {
   const renderButton = useMemo(() => {
     const titleClassname = classNames({
       // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -151,4 +152,6 @@ export const FieldsAccordion: React.FC<FieldsAccordionProps> = memo(function Inn
         ))}
     </EuiAccordion>
   );
-});
+}
+
+export const FieldsAccordion = React.memo(InnerFieldsAccordion) as typeof InnerFieldsAccordion;

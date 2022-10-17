@@ -15,25 +15,14 @@ import {
   type FieldListGroups,
   type FieldsGroupDetails,
   type FieldsGroup,
+  type FieldListItem,
   FieldsGroupNames,
 } from '../types';
 import { type ExistingFieldsReader } from './use_existing_fields';
 
-const defaultFieldGroups: {
-  specialFields: DataViewField[];
-  availableFields: DataViewField[];
-  emptyFields: DataViewField[];
-  metaFields: DataViewField[];
-} = {
-  specialFields: [],
-  availableFields: [],
-  emptyFields: [],
-  metaFields: [],
-};
-
-export interface GroupedFieldsParams {
+export interface GroupedFieldsParams<T extends FieldListItem> {
   dataViewId: string | null; // `null` is for text-based queries
-  allFields: DataViewField[];
+  allFields: T[];
   services: {
     dataViews: DataViewsContract;
   };
@@ -41,16 +30,16 @@ export interface GroupedFieldsParams {
   onOverrideFieldGroupDetails?: (
     groupName: FieldsGroupNames
   ) => Partial<FieldsGroupDetails> | undefined | null;
-  onSupportedFieldFilter?: (field: DataViewField) => boolean;
-  onSelectedFieldFilter?: (field: DataViewField) => boolean;
-  onFilterField?: (field: DataViewField) => boolean;
+  onSupportedFieldFilter?: (field: T) => boolean;
+  onSelectedFieldFilter?: (field: T) => boolean;
+  onFilterField?: (field: T) => boolean;
 }
 
-export interface GroupedFieldsResult {
-  fieldGroups: FieldListGroups;
+export interface GroupedFieldsResult<T extends FieldListItem> {
+  fieldGroups: FieldListGroups<T>;
 }
 
-export const useGroupedFields = ({
+export function useGroupedFields<T extends FieldListItem = DataViewField>({
   dataViewId,
   allFields,
   services,
@@ -59,7 +48,7 @@ export const useGroupedFields = ({
   onSupportedFieldFilter,
   onSelectedFieldFilter,
   onFilterField,
-}: GroupedFieldsParams): GroupedFieldsResult => {
+}: GroupedFieldsParams<T>): GroupedFieldsResult<T> {
   const [dataView, setDataView] = useState<DataView | null>(null);
   const fieldsExistenceInfoUnavailable: boolean =
     dataViewId && fieldsExistenceReader
@@ -80,8 +69,8 @@ export const useGroupedFields = ({
     // if field existence information changed, reload the data view too
   }, [dataViewId, services.dataViews, setDataView, hasFieldDataHandler]);
 
-  const unfilteredFieldGroups: FieldListGroups = useMemo(() => {
-    const containsData = (field: DataViewField) => {
+  const unfilteredFieldGroups: FieldListGroups<T> = useMemo(() => {
+    const containsData = (field: T) => {
       if (!dataViewId || !dataView) {
         return true;
       }
@@ -95,7 +84,7 @@ export const useGroupedFields = ({
       : fields;
     const sortedFields = [...allSupportedTypesFields].sort(sortFields);
     const groupedFields = {
-      ...defaultFieldGroups,
+      ...getDefaultFieldGroups(),
       ...groupBy(sortedFields, (field) => {
         if (field.type === 'document') {
           return 'specialFields';
@@ -108,7 +97,7 @@ export const useGroupedFields = ({
     };
     const selectedFields = onSelectedFieldFilter ? sortedFields.filter(onSelectedFieldFilter) : [];
 
-    let fieldGroupDefinitions: FieldListGroups = {
+    let fieldGroupDefinitions: FieldListGroups<T> = {
       SpecialFields: {
         fields: groupedFields.specialFields,
         fieldCount: groupedFields.specialFields.length,
@@ -206,10 +195,10 @@ export const useGroupedFields = ({
     }
 
     if (onOverrideFieldGroupDetails) {
-      fieldGroupDefinitions = Object.keys(fieldGroupDefinitions).reduce<FieldListGroups>(
+      fieldGroupDefinitions = Object.keys(fieldGroupDefinitions).reduce<FieldListGroups<T>>(
         (definitions, name) => {
           const groupName = name as FieldsGroupNames;
-          const group: FieldsGroup | undefined = fieldGroupDefinitions[groupName];
+          const group: FieldsGroup<T> | undefined = fieldGroupDefinitions[groupName];
           if (group) {
             definitions[groupName] = {
               ...group,
@@ -218,7 +207,7 @@ export const useGroupedFields = ({
           }
           return definitions;
         },
-        {} as FieldListGroups
+        {} as FieldListGroups<T>
       );
     }
 
@@ -234,7 +223,7 @@ export const useGroupedFields = ({
     fieldsExistenceInfoUnavailable,
   ]);
 
-  const fieldGroups: FieldListGroups = useMemo(() => {
+  const fieldGroups: FieldListGroups<T> = useMemo(() => {
     if (!onFilterField) {
       return unfilteredFieldGroups;
     }
@@ -244,7 +233,7 @@ export const useGroupedFields = ({
         name,
         { ...group, fields: group.fields.filter(onFilterField) },
       ])
-    ) as FieldListGroups;
+    ) as FieldListGroups<T>;
   }, [unfilteredFieldGroups, onFilterField]);
 
   return useMemo(
@@ -253,9 +242,9 @@ export const useGroupedFields = ({
     }),
     [fieldGroups]
   );
-};
+}
 
-function sortFields(fieldA: DataViewField, fieldB: DataViewField) {
+function sortFields<T extends FieldListItem>(fieldA: T, fieldB: T) {
   return (fieldA.displayName || fieldA.name).localeCompare(
     fieldB.displayName || fieldB.name,
     undefined,
@@ -267,4 +256,13 @@ function sortFields(fieldA: DataViewField, fieldB: DataViewField) {
 
 function hasFieldDataByDefault(): boolean {
   return true;
+}
+
+function getDefaultFieldGroups() {
+  return {
+    specialFields: [],
+    availableFields: [],
+    emptyFields: [],
+    metaFields: [],
+  };
 }
