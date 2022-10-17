@@ -9,10 +9,11 @@
 import React, { ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSpacer } from '@elastic/eui';
-import { GuideId, GuideState } from '@kbn/guided-onboarding-plugin/common/types';
-import { GuidedOnboardingApi } from '@kbn/guided-onboarding-plugin/public';
-import { getServices } from '../../kibana_services';
+
+import type { HttpStart } from '@kbn/core-http-browser';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { UseCase, UseCaseCard } from './use_case_card';
+import { GuideId, GuideState } from '../../types';
 
 type GuideCardConstants = {
   [key in UseCase]: {
@@ -73,13 +74,9 @@ const constants: GuideCardConstants = {
 const getCardFooter = (
   guides: GuideState[],
   useCase: UseCase,
-  guidedOnboardingService?: GuidedOnboardingApi
+  activateGuide: (useCase: UseCase, guideState?: GuideState) => void
 ): ReactNode => {
   const guideState = guides.find((guide) => guide.guideId === (useCase as GuideId));
-  const activateGuide = async () => {
-    await guidedOnboardingService?.activateGuide(useCase as GuideId, guideState);
-    // TODO error handling
-  };
   const viewGuideButton = (
     <EuiFlexGroup justifyContent="center">
       <EuiFlexItem grow={false}>
@@ -87,7 +84,7 @@ const getCardFooter = (
           // Used for FS tracking
           data-test-subj={`onboarding--guideCard--view--${useCase}`}
           fill
-          onClick={activateGuide}
+          onClick={() => activateGuide(useCase, guideState)}
         >
           {i18n.translate('home.guidedOnboarding.gettingStarted.guideCard.startGuide.buttonLabel', {
             defaultMessage: 'View guide',
@@ -131,7 +128,7 @@ const getCardFooter = (
               // Used for FS tracking
               data-test-subj={`onboarding--guideCard--view--${useCase}`}
               fill
-              onClick={activateGuide}
+              onClick={() => activateGuide(useCase, guideState)}
             >
               {i18n.translate(
                 'home.guidedOnboarding.gettingStarted.guideCard.startGuide.buttonLabel',
@@ -167,7 +164,7 @@ const getCardFooter = (
             // Used for FS tracking
             data-test-subj={`onboarding--guideCard--continue--${useCase}`}
             fill
-            onClick={activateGuide}
+            onClick={() => activateGuide(useCase, guideState)}
           >
             {i18n.translate(
               'home.guidedOnboarding.gettingStarted.guideCard.continueGuide.buttonLabel',
@@ -181,16 +178,28 @@ const getCardFooter = (
     </>
   );
 };
-export const GuideCard = ({ useCase, guides }: { useCase: UseCase; guides: GuideState[] }) => {
-  const { guidedOnboardingService } = getServices();
-
-  const footer = getCardFooter(guides, useCase, guidedOnboardingService);
+export const GuideCard = ({
+  useCase,
+  guides,
+  activateGuide,
+  http,
+  uiSettings,
+}: {
+  useCase: UseCase;
+  guides: GuideState[];
+  activateGuide: (useCase: UseCase, guide?: GuideState) => Promise<void>;
+  http: HttpStart;
+  uiSettings: IUiSettingsClient;
+}) => {
+  const footer = getCardFooter(guides, useCase, activateGuide);
   return (
     <UseCaseCard
       useCase={useCase}
       title={constants[useCase].i18nTexts.title}
       description={constants[useCase].i18nTexts.description}
       footer={footer}
+      http={http}
+      uiSettings={uiSettings}
     />
   );
 };

@@ -8,10 +8,10 @@
 
 import React, { ReactNode } from 'react';
 import { EuiCard, EuiText, EuiImage } from '@elastic/eui';
-
+import type { HttpStart } from '@kbn/core-http-browser';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { i18n } from '@kbn/i18n';
-
-import { getServices } from '../../kibana_services';
+import { GuideId } from '../../types';
 
 type UseCaseConstants = {
   [key in UseCase]: {
@@ -51,15 +51,22 @@ const constants: UseCaseConstants = {
 
 export type UseCase = 'search' | 'observability' | 'security';
 export interface UseCaseProps {
-  useCase: UseCase;
+  useCase: GuideId;
   title: string;
   description: string;
   footer: ReactNode;
+  http: HttpStart;
+  uiSettings: IUiSettingsClient;
 }
 
-export const UseCaseCard = ({ useCase, title, description, footer }: UseCaseProps) => {
-  const { uiSettings, http } = getServices();
-
+export const UseCaseCard = ({
+  useCase,
+  title,
+  description,
+  footer,
+  http,
+  uiSettings,
+}: UseCaseProps) => {
   const isDarkTheme = uiSettings.get('theme:darkMode');
 
   const getImageUrl = (imageName: UseCase) => {

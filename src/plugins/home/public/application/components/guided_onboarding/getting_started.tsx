@@ -24,12 +24,11 @@ import { css } from '@emotion/react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import type { GuideState, GuideId, UseCase } from '@kbn/guided-onboarding';
+import { GuideCard, LinkCard } from '@kbn/guided-onboarding';
 
-import { GuideState } from '@kbn/guided-onboarding-plugin/common/types';
 import { getServices } from '../../kibana_services';
 import { KEY_ENABLE_WELCOME } from '../home';
-import { GuideCard } from './guide_card';
-import { LinkCard } from './link_card';
 
 const homeBreadcrumb = i18n.translate('home.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
 const gettingStartedBreadcrumb = i18n.translate('home.breadcrumbs.gettingStartedTitle', {
@@ -47,7 +46,8 @@ const skipText = i18n.translate('home.guidedOnboarding.gettingStarted.skip.butto
 });
 
 export const GettingStarted = () => {
-  const { application, trackUiMetric, chrome, guidedOnboardingService } = getServices();
+  const { application, trackUiMetric, chrome, guidedOnboardingService, http, uiSettings } =
+    getServices();
   const [guidesState, setGuidesState] = useState<GuideState[]>([]);
 
   useEffect(() => {
@@ -86,6 +86,10 @@ export const GettingStarted = () => {
   const paddingCss = css`
     padding: calc(${euiTheme.size.base}*3) calc(${euiTheme.size.base}*4);
   `;
+  const activateGuide = async (useCase: UseCase, guideState?: GuideState) => {
+    await guidedOnboardingService?.activateGuide(useCase as GuideId, guideState);
+    // TODO error handling
+  };
   return (
     <KibanaPageTemplate panelled={false} grow>
       <EuiPageTemplate.Section alignment="center">
@@ -101,16 +105,34 @@ export const GettingStarted = () => {
           <EuiSpacer size="xxl" />
           <EuiFlexGrid columns={4} gutterSize="l">
             <EuiFlexItem>
-              <GuideCard useCase="search" guides={guidesState} />
+              <GuideCard
+                useCase="search"
+                guides={guidesState}
+                activateGuide={activateGuide}
+                http={http}
+                uiSettings={uiSettings}
+              />
             </EuiFlexItem>
             <EuiFlexItem>
-              <GuideCard useCase="observability" guides={guidesState} />
+              <GuideCard
+                useCase="observability"
+                guides={guidesState}
+                activateGuide={activateGuide}
+                http={http}
+                uiSettings={uiSettings}
+              />
             </EuiFlexItem>
             <EuiFlexItem>
-              <LinkCard />
+              <LinkCard application={application} http={http} uiSettings={uiSettings} />
             </EuiFlexItem>
             <EuiFlexItem>
-              <GuideCard useCase="security" guides={guidesState} />
+              <GuideCard
+                useCase="security"
+                guides={guidesState}
+                activateGuide={activateGuide}
+                http={http}
+                uiSettings={uiSettings}
+              />
             </EuiFlexItem>
           </EuiFlexGrid>
           <EuiSpacer />

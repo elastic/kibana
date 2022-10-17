@@ -8,7 +8,7 @@
 
 import { Observable } from 'rxjs';
 import { HttpSetup } from '@kbn/core/public';
-import { GuideId, GuideState, GuideStepIds, StepStatus } from '../common/types';
+import { GuideState } from '@kbn/guided-onboarding';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface GuidedOnboardingPluginSetup {}

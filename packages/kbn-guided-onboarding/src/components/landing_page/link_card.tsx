@@ -9,7 +9,9 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { getServices } from '../../kibana_services';
+import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { HttpStart } from '@kbn/core-http-browser';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { UseCaseCard } from './use_case_card';
 
 interface LinkCardConstants {
@@ -41,8 +43,15 @@ const constants: LinkCardConstants = {
   },
 };
 
-export const LinkCard = () => {
-  const { application } = getServices();
+export const LinkCard = ({
+  application,
+  http,
+  uiSettings,
+}: {
+  application: ApplicationStart;
+  http: HttpStart;
+  uiSettings: IUiSettingsClient;
+}) => {
   const navigateToIntegrations = () => {
     application.navigateToApp('integrations', {
       path: '/browse/infrastructure',
@@ -70,6 +79,8 @@ export const LinkCard = () => {
       title={constants.observability.i18nTexts.title}
       description={constants.observability.i18nTexts.description}
       footer={button}
+      http={http}
+      uiSettings={uiSettings}
     />
   );
 };

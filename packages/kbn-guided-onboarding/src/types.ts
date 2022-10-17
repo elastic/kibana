@@ -14,6 +14,13 @@ export type SearchStepIds = 'add_data' | 'browse_docs' | 'search_experience';
 
 export type GuideStepIds = ObservabilityStepIds | SecurityStepIds | SearchStepIds;
 
+export interface GuideState {
+  guideId: GuideId;
+  status: GuideStatus;
+  isActive?: boolean; // Drives the current guide shown in the dropdown panel
+  steps: GuideStep[];
+}
+
 /**
  * Allowed states for a guide:
  *  not_started: Guide has not been started
@@ -36,11 +43,4 @@ export type StepStatus = 'inactive' | 'active' | 'in_progress' | 'ready_to_compl
 export interface GuideStep {
   id: GuideStepIds;
   status: StepStatus;
-}
-
-export interface GuideState {
-  guideId: GuideId;
-  status: GuideStatus;
-  isActive?: boolean; // Drives the current guide shown in the dropdown panel
-  steps: GuideStep[];
 }
