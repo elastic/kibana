@@ -8,10 +8,11 @@
 import Boom from '@hapi/boom';
 import pMap from 'p-map';
 
-import { SavedObject } from '@kbn/core/server';
-import { Actions, ActionTypes, CommentAttributes } from '../../../common/api';
+import type { SavedObject } from '@kbn/core/server';
+import type { CommentAttributes } from '../../../common/api';
+import { Actions, ActionTypes } from '../../../common/api';
 import { CASE_SAVED_OBJECT, MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
-import { CasesClientArgs } from '../types';
+import type { CasesClientArgs } from '../types';
 import { createCaseError } from '../../common/error';
 import { Operations } from '../../authorization';
 

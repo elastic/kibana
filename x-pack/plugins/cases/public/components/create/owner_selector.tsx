@@ -16,13 +16,15 @@ import {
   EuiKeyPadMenuItem,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-
+import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import {
+  getFieldValidityAndErrorMessage,
+  UseField,
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { SECURITY_SOLUTION_OWNER } from '../../../common';
 import { OWNER_INFO } from '../../../common/constants';
 
-import type { FieldHook } from '../../common/shared_imports';
-import { getFieldValidityAndErrorMessage, UseField } from '../../common/shared_imports';
 import * as i18n from './translations';
 
 interface OwnerSelectorProps {
