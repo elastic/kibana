@@ -34,7 +34,7 @@ describe('CreateMlInferencePipelineApiLogic', () => {
       expect(http.post).toHaveBeenCalledWith(
         '/internal/enterprise_search/indices/unit-test-index/ml_inference/pipeline_processors',
         {
-          body: '{"pipeline_name":"unit-test","model_id":"test-model","source_field":"body"}',
+          body: '{"model_id":"test-model","pipeline_name":"unit-test","source_field":"body"}',
         }
       );
       expect(result).toEqual({

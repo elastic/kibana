@@ -8,11 +8,11 @@ import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
 export interface CreateMlInferencePipelineApiLogicArgs {
-  indexName: string;
-  pipelineName: string;
-  modelId: string;
-  sourceField: string;
   destinationField?: string;
+  indexName: string;
+  modelId: string;
+  pipelineName: string;
+  sourceField: string;
 }
 
 export interface CreateMlInferencePipelineResponse {
@@ -24,10 +24,10 @@ export const createMlInferencePipeline = async (
 ): Promise<CreateMlInferencePipelineResponse> => {
   const route = `/internal/enterprise_search/indices/${args.indexName}/ml_inference/pipeline_processors`;
   const params = {
-    pipeline_name: args.pipelineName,
-    model_id: args.modelId,
-    source_field: args.sourceField,
     destination_field: args.destinationField,
+    model_id: args.modelId,
+    pipeline_name: args.pipelineName,
+    source_field: args.sourceField,
   };
   return await HttpLogic.values.http.post<CreateMlInferencePipelineResponse>(route, {
     body: JSON.stringify(params),
