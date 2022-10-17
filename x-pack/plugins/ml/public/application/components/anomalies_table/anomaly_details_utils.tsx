@@ -407,7 +407,8 @@ export const AnomalyExplanationDetails: FC<{ anomaly: AnomaliesTableRecord }> = 
           content={i18n.translate(
             'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.anomalyCharacteristicsTooltip',
             {
-              defaultMessage: 'Anomaly characteristics impact blah blah blah',
+              defaultMessage:
+                'Impact of the statistical properties of the detected anomalous interval',
             }
           )}
         >
@@ -432,7 +433,8 @@ export const AnomalyExplanationDetails: FC<{ anomaly: AnomaliesTableRecord }> = 
           content={i18n.translate(
             'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.singleBucketTooltip',
             {
-              defaultMessage: 'Single bucket impact blah blah blah',
+              defaultMessage:
+                'The impact of the difference between actual and typical values in this bucket on the score.',
             }
           )}
         >
@@ -456,7 +458,8 @@ export const AnomalyExplanationDetails: FC<{ anomaly: AnomaliesTableRecord }> = 
           content={i18n.translate(
             'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.multiBucketTooltip',
             {
-              defaultMessage: 'Multi bucket impact blah blah blah',
+              defaultMessage:
+                'The impact of the difference between actual and typical values in the past 12 buckets on the score.',
             }
           )}
         >
@@ -480,7 +483,8 @@ export const AnomalyExplanationDetails: FC<{ anomaly: AnomaliesTableRecord }> = 
           content={i18n.translate(
             'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.highVarianceTooltip',
             {
-              defaultMessage: 'High variance interval blah blah blah',
+              defaultMessage:
+                'Indicates reduction of anomaly score for the bucket with large confidence intervals. If a bucket has large confidence intervals, the score is reduced.',
             }
           )}
         >
@@ -504,7 +508,8 @@ export const AnomalyExplanationDetails: FC<{ anomaly: AnomaliesTableRecord }> = 
           content={i18n.translate(
             'xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanationDetails.incompleteBucketTooltip',
             {
-              defaultMessage: 'Incomplete bucket blah blah blah',
+              defaultMessage:
+                'If the bucket contains fewer samples than expected, the score is reduced. If the bucket contains fewer samples than expected, the score is reduced.',
             }
           )}
         >
