@@ -26,7 +26,7 @@ import { extractWarnings } from './extract_warnings';
 const getDebouncedWarning = () => {
   const addWarning = () => {
     const { toasts } = getNotifications();
-    return debounce(toasts.addWarning.bind(toasts), 10000, {
+    return debounce(toasts.addWarning.bind(toasts), 30000, {
       leading: true,
     });
   };
