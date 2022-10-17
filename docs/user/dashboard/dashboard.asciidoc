@@ -1,8 +1,6 @@
 [[dashboard]]
 = Dashboard and visualizations
 
-[partintro]
---
 **_Visualize your data with dashboards._**
 
 The best way to understand your data is to visualize it. With dashboards, you can turn your data from one or more <<data-views, data views>> into a collection of panels 
@@ -403,7 +401,6 @@ To share the dashboard with a larger audience, click *Share* in the toolbar. For
 
 To automate {kib}, you can export dashboards as NDJSON using the <<saved-objects-api-export, Export objects API>>. It is important to export dashboards with all necessary references.
 
---
 include::tutorial-create-a-dashboard-of-lens-panels.asciidoc[]
 
 include::lens-advanced.asciidoc[]

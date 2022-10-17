@@ -2,8 +2,6 @@
 [[xpack-ml]]
 = {ml-cap}
 
-[partintro]
---
 As data sets increase in size and complexity, the human effort required to
 inspect dashboards or maintain rules for spotting infrastructure problems,
 cyber attacks, or business issues becomes impractical. Elastic {ml-features}
@@ -28,8 +26,6 @@ privileges to use {ml-features}. Refer to
 
 NOTE: There are limitations in {ml-features} that affect {kib}. For more 
 information, refer to {ml-docs}/ml-limitations.html[{ml-cap}].
-
---
 
 [[xpack-ml-anomalies]]
 == {anomaly-detect-cap}

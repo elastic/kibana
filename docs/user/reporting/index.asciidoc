@@ -2,9 +2,6 @@
 [[reporting-getting-started]]
 = Reporting and sharing
 
-[partintro]
-
---
 
 :keywords: analyst, concept, task, reporting
 :description: {kib} provides you with several options to share *Discover* saved searches, dashboards, *Visualize Library* visualizations, and *Canvas* workpads with others, or on a website.
@@ -169,7 +166,6 @@ NOTE: *Public URL* is available only when anonymous access is configured and you
 
 . Click *Copy iFrame code*.
 
---
 
 include::automating-report-generation.asciidoc[]
 include::reporting-troubleshooting.asciidoc[]

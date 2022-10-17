@@ -1,8 +1,6 @@
 [[discover]]
 = Discover
 
-[partintro]
---
 You have questions about your data.
 What pages on your website contain a
 specific word or phrase? What events were logged most recently?
@@ -307,8 +305,6 @@ For more about this and other rules provided in {alert-features}, go to <<alerti
 
 * <<document-explorer, Configure the chart and document table>> to better meet your needs.
 
-
---
 include::{kib-repo-dir}/discover/document-explorer.asciidoc[]
 
 include::{kib-repo-dir}/discover/search-for-relevance.asciidoc[]
