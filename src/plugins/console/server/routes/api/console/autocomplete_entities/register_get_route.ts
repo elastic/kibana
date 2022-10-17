@@ -99,17 +99,27 @@ export function registerGetRoute({ router, lib: { handleEsError } }: RouteDepend
           getTemplates(esClient, settings),
         ]);
 
+        const map = results.map((result, idx) => {
+          // If the request was successful, return the result
+          if (result.status === 'fulfilled') {
+            return result.value;
+          }
+
+          // getTemplates returns an array of results, so we need to handle it in case of failure
+          if (idx === results.length - 1) {
+            return [];
+          }
+
+          // If the request failed, return an empty object
+          return {};
+        });
+
         const [
           mappings,
           aliases,
           dataStreams,
           [legacyTemplates = {}, indexTemplates = {}, componentTemplates = {}],
-        ] = results.map((result) => {
-          if (result.status === 'fulfilled') {
-            return result.value;
-          }
-          return {};
-        });
+        ] = map;
 
         return response.ok({
           body: {
