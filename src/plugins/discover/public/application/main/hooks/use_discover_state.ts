@@ -89,7 +89,6 @@ export function useDiscoverState({
   }, [dataView, stateContainer]);
 
   return {
-    dataView,
     stateContainer,
     adHocDataViewList,
     persistDataView,

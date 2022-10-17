@@ -11,7 +11,6 @@ import { DataTableRecord } from '../../../../types';
 import { DiscoverStateContainer } from '../../services/discover_state';
 
 export interface DiscoverLayoutProps {
-  dataView: DataView;
   navigateTo: (url: string) => void;
   expandedDoc?: DataTableRecord;
   setExpandedDoc: (doc?: DataTableRecord) => void;

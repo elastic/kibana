@@ -40,7 +40,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   /**
    * State related logic
    */
-  const { dataView, persistDataView, updateAdHocDataViewId, adHocDataViewList } = useDiscoverState({
+  const { persistDataView, updateAdHocDataViewId, adHocDataViewList } = useDiscoverState({
     services,
     setExpandedDoc,
     stateContainer,
@@ -74,7 +74,6 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
 
   return (
     <DiscoverLayoutMemoized
-      dataView={dataView}
       expandedDoc={expandedDoc}
       setExpandedDoc={setExpandedDoc}
       navigateTo={navigateTo}

@@ -29,6 +29,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 import { DataViewField, getFieldSubtypeMulti } from '@kbn/data-views-plugin/public';
 import { triggerVisualizeActionsTextBasedLanguages } from '@kbn/unified-field-list-plugin/public';
+import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -110,7 +111,6 @@ export function DiscoverSidebarComponent({
   onAddField,
   onAddFilter,
   onRemoveField,
-  selectedDataView,
   setFieldFilter,
   trackUiMetric,
   useNewFieldsApi = false,
@@ -125,6 +125,7 @@ export function DiscoverSidebarComponent({
 }: DiscoverSidebarProps) {
   const { uiSettings, dataViewFieldEditor } = useDiscoverServices();
   const query = useAppStateSelector((state) => state.query);
+  const selectedDataView = useInternalStateSelector((state) => state.dataView!);
 
   const [fields, setFields] = useState<DataViewField[] | null>(null);
   const [scrollContainer, setScrollContainer] = useState<Element | null>(null);
@@ -539,7 +540,9 @@ export function DiscoverSidebarComponent({
             <EuiButton
               iconType="indexOpen"
               data-test-subj="dataView-add-field_btn"
-              onClick={() => editField()}
+              onClick={() => {
+                editField();
+              }}
               size="s"
             >
               {i18n.translate('discover.fieldChooser.addField.label', {

@@ -11,6 +11,7 @@ import { DataViewType, DataView } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import { ENABLE_SQL } from '../../../../../common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverLayoutProps } from '../layout/types';
@@ -19,7 +20,7 @@ import { getHeaderActionMenuMounter } from '../../../../kibana_services';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { onSaveSearch } from './on_save_search';
 
-export type DiscoverTopNavProps = Pick<DiscoverLayoutProps, 'dataView' | 'navigateTo'> & {
+export type DiscoverTopNavProps = Pick<DiscoverLayoutProps, 'navigateTo'> & {
   onOpenInspector: () => void;
   query?: Query | AggregateQuery;
   savedQuery?: string;
@@ -33,7 +34,6 @@ export type DiscoverTopNavProps = Pick<DiscoverLayoutProps, 'dataView' | 'naviga
 };
 
 export const DiscoverTopNav = ({
-  dataView,
   onOpenInspector,
   query,
   savedQuery,
@@ -54,6 +54,7 @@ export const DiscoverTopNav = ({
     stateContainer.savedSearchContainer.hasChanged$,
     stateContainer.savedSearchContainer.hasChanged$.getValue()
   );
+  const dataView = useInternalStateSelector((state) => state.dataView!);
 
   const showDatePicker = useMemo(
     () => dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP,

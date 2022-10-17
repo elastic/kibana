@@ -23,6 +23,7 @@ import { isOfQueryType } from '@kbn/es-query';
 import classNames from 'classnames';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
+import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import { DataMainMsg, RecordRawType } from '../../services/discover_data_state_container';
 import { useSavedSearch } from '../../services/discover_state';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
@@ -56,7 +57,6 @@ const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
 
 export function DiscoverLayout({
-  dataView,
   expandedDoc,
   navigateTo,
   setExpandedDoc,
@@ -85,7 +85,7 @@ export function DiscoverLayout({
     state.columns,
     state.sort,
   ]);
-
+  const dataView = useInternalStateSelector((state) => state.dataView!);
   const savedSearch = useSavedSearch();
   const dataState: DataMainMsg = useDataState(stateContainer.dataStateContainer.data$.main$);
 
@@ -215,7 +215,6 @@ export function DiscoverLayout({
             })}
       </h1>
       <TopNavMemoized
-        dataView={dataView}
         onOpenInspector={onOpenInspector}
         query={query}
         navigateTo={navigateTo}

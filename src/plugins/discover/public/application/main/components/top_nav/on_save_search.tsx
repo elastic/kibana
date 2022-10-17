@@ -131,10 +131,11 @@ export async function onSaveSearch({
       isTitleDuplicateConfirmed,
     };
 
-    const updatedDataView =
-      !dataView.isPersisted() && newCopyOnSave ? await updateAdHocDataViewId(dataView) : dataView;
-
     const navigateOrReloadSavedSearch = !Boolean(onSaveCb);
+    const shouldUpdateDataView = !dataView.isPersisted() && newCopyOnSave;
+
+    const updatedDataView = shouldUpdateDataView ? await updateAdHocDataViewId(dataView) : dataView;
+
     try {
       const response = await saveDataSource({
         dataView: updatedDataView,
