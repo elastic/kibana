@@ -7,11 +7,7 @@
 import uuid from 'uuid';
 import expect from '@kbn/expect';
 import { format as formatUrl } from 'url';
-import {
-  ConfigKey,
-  ProjectMonitorsRequest,
-  ProjectMonitor,
-} from '@kbn/synthetics-plugin/common/runtime_types';
+import { ConfigKey, ProjectMonitorsRequest } from '@kbn/synthetics-plugin/common/runtime_types';
 import { INSUFFICIENT_FLEET_PERMISSIONS } from '@kbn/synthetics-plugin/server/synthetics_service/project_monitor/project_monitor_formatter';
 import { REQUEST_TOO_LARGE } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/delete_monitor_project';
 import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
@@ -409,8 +405,8 @@ export default function ({ getService }: FtrProviderContext) {
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
             savedObjectsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] +
-            '-' +
-            testPolicyId
+              '-' +
+              testPolicyId
         );
         expect(packagePolicy.policy_id).to.be(testPolicyId);
 
@@ -441,8 +437,8 @@ export default function ({ getService }: FtrProviderContext) {
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
             savedObjectsResponse.body.monitors[0].attributes[ConfigKey.CUSTOM_HEARTBEAT_ID] +
-            '-' +
-            testPolicyId
+              '-' +
+              testPolicyId
         );
         expect(packagePolicy2).to.be(undefined);
       } finally {
