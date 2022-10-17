@@ -6,13 +6,15 @@
  */
 
 import React from 'react';
-import { AppMockRenderer, createAppMockRenderer } from '../../../common/mock';
+import type { AppMockRenderer } from '../../../common/mock';
+import { createAppMockRenderer } from '../../../common/mock';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
-import { SuggestUsersPopoverProps, SuggestUsersPopover } from './suggest_users_popover';
+import type { SuggestUsersPopoverProps } from './suggest_users_popover';
+import { SuggestUsersPopover } from './suggest_users_popover';
 import { userProfiles } from '../../../containers/user_profiles/api.mock';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import { UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { AssigneeWithProfile } from '../../user_profiles/types';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import type { AssigneeWithProfile } from '../../user_profiles/types';
 
 jest.mock('../../../containers/user_profiles/api');
 
