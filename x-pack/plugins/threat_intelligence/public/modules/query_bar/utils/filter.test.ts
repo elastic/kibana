@@ -6,7 +6,7 @@
  */
 
 import { Filter } from '@kbn/es-query';
-import { FilterIn, FilterOut, updateFiltersArray } from './filter';
+import { FilterIn, FilterOut, updateFiltersArray } from '.';
 
 describe('updateFiltersArray', () => {
   it('should add new filter', () => {
