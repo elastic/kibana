@@ -275,12 +275,3 @@ export const visualizationTypes: VisualizationType[] = [
     sortPriority: 2,
   },
 ];
-
-interface XYStateWithLayers {
-  [prop: string]: unknown;
-  layers: XYLayerConfig[];
-}
-export interface XYSuggestion extends Suggestion {
-  datasourceState: XYStateWithLayers;
-  visualizationState: XYStateWithLayers;
-}

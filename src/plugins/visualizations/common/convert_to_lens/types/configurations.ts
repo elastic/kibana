@@ -55,7 +55,7 @@ export interface YConfig {
   color?: string;
   icon?: string;
   lineWidth?: number;
-  lineStyle?: 'solid' | 'dashed' | 'dotted' | 'dot-dashed';
+  lineStyle?: 'solid' | 'dashed' | 'dotted';
   fill?: FillType;
   iconPosition?: 'auto' | 'left' | 'right' | 'above' | 'below';
   textVisibility?: boolean;
@@ -277,4 +277,5 @@ export type Configuration =
   | XYConfiguration
   | TableVisConfiguration
   | PartitionVisConfiguration
-  | MetricVisConfiguration;
+  | MetricVisConfiguration
+  | GaugeVisConfiguration;

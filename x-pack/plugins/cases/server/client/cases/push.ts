@@ -7,22 +7,24 @@
 
 import Boom from '@hapi/boom';
 import { nodeBuilder } from '@kbn/es-query';
-import { SavedObjectsFindResponse } from '@kbn/core/server';
+import type { SavedObjectsFindResponse } from '@kbn/core/server';
 
-import { UserProfile } from '@kbn/security-plugin/common';
-import { SecurityPluginStart } from '@kbn/security-plugin/server';
-import {
+import type { UserProfile } from '@kbn/security-plugin/common';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type {
   ActionConnector,
-  CaseResponseRt,
   CaseResponse,
-  CaseStatuses,
   ExternalServiceResponse,
   CasesConfigureAttributes,
+  CommentRequestAlertType,
+  CommentAttributes,
+} from '../../../common/api';
+import {
+  CaseResponseRt,
+  CaseStatuses,
   ActionTypes,
   OWNER_FIELD,
   CommentType,
-  CommentRequestAlertType,
-  CommentAttributes,
 } from '../../../common/api';
 import { CASE_COMMENT_SAVED_OBJECT } from '../../../common/constants';
 
@@ -33,12 +35,12 @@ import {
   flattenCaseSavedObject,
   getAlertInfoFromComments,
 } from '../../common/utils';
-import { CasesClient, CasesClientArgs, CasesClientInternal } from '..';
+import type { CasesClient, CasesClientArgs, CasesClientInternal } from '..';
 import { Operations } from '../../authorization';
 import { casesConnectors } from '../../connectors';
 import { getAlerts } from '../alerts/get';
 import { buildFilter } from '../utils';
-import { ICaseResponse } from '../typedoc_interfaces';
+import type { ICaseResponse } from '../typedoc_interfaces';
 
 /**
  * Returns true if the case should be closed based on the configuration settings.

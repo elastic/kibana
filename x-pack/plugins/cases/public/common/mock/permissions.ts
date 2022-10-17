@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CasesCapabilities, CasesPermissions } from '../../containers/types';
+import type { CasesCapabilities, CasesPermissions } from '../../containers/types';
 
 export const allCasesPermissions = () => buildCasesPermissions();
 export const noCasesPermissions = () =>

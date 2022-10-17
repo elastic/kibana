@@ -19,6 +19,7 @@ import { IconChartMetric } from '@kbn/chart-icons';
 import { CollapseFunction } from '../../../common/expressions';
 import type { LayerType } from '../../../common';
 import { layerTypes } from '../../../common/layer_types';
+import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import { getSuggestions } from './suggestions';
 import {
   Visualization,
@@ -70,16 +71,6 @@ export interface MetricVisualizationState {
   trendlineMetricAccessor?: string;
   trendlineSecondaryMetricAccessor?: string;
   trendlineBreakdownByAccessor?: string;
-}
-
-interface MetricDatasourceState {
-  [prop: string]: unknown;
-  layers: FormBasedLayer[];
-}
-
-export interface MetricSuggestion extends Suggestion {
-  datasourceState: MetricDatasourceState;
-  visualizationState: MetricVisualizationState;
 }
 
 export const supportedDataTypes = new Set(['number']);
@@ -639,15 +630,17 @@ export const getMetricVisualization = ({
   },
 
   getSuggestionFromConvertToLensContext({ suggestions, context }) {
-    const allSuggestions = suggestions as MetricSuggestion[];
-    return {
+    const allSuggestions = suggestions as Array<
+      Suggestion<MetricVisualizationState, FormBasedPersistedState>
+    >;
+    const suggestion: Suggestion<MetricVisualizationState, FormBasedPersistedState> = {
       ...allSuggestions[0],
       datasourceState: {
         ...allSuggestions[0].datasourceState,
         layers: allSuggestions.reduce(
           (acc, s) => ({
             ...acc,
-            ...s.datasourceState.layers,
+            ...s.datasourceState?.layers,
           }),
           {}
         ),
@@ -657,5 +650,6 @@ export const getMetricVisualization = ({
         ...context.configuration,
       },
     };
+    return suggestion;
   },
 });
