@@ -104,8 +104,7 @@ Alerting::
 * Index threshold alert UI does not fill index picker with data streams {kibana-pull}137584[#137584]
 
 APM::
-* Support Input Packages {kibana-pull}140035[#140035]
-* Adds Kubernetes metadata to service icons and instance accordion {kibana-pull}139612[#139612]
+* Display kubernetes metadata in service icons popup and instance accordion {kibana-pull}139612[#139612]
 * AWS lambda metrics api {kibana-pull}139041[#139041]
 
 Discover::
@@ -120,12 +119,14 @@ Fleet::
 * Adds a new event toggle to capture terminal output in endpoint {kibana-pull}139421[#139421]
 * Makes batch actions asynchronous {kibana-pull}138870[#138870]
 * Adds ability to tag integration assets {kibana-pull}137184[#137184]
+* Adds support for input only packages {kibana-pull}140035[#140035]
 
 Infrastructure::
 Inital hosts page {kibana-pull}138173[#138173]
 
 Lens & Visualizations::
-Adds the ability to duplicate layers in *Lens* {kibana-pull}140603[#140603]
+* Adds the ability to duplicate layers in *Lens* {kibana-pull}140603[#140603]
+* Updates the AggConfig for nested sibling pipeline aggs {kibana-pull}140650[#140650]
 
 Machine Learning::
 * Notifications page {kibana-pull}140613[#140613]
@@ -136,7 +137,6 @@ Machine Learning::
 * Attach the anomaly swim lane embeddable to Case {kibana-pull}138994[#138994]
 
 Management::
-* Updates the AggConfig for nested sibling pipeline aggs {kibana-pull}140650[#140650]
 * Adds the ability to allow variables in URL Drilldown titles {kibana-pull}140076[#140076]
 * Enables time series downsampling action in ILM configurations {kibana-pull}138748[#138748]
 * Adds the composite runtime field editor {kibana-pull}136954[#136954]
@@ -203,7 +203,6 @@ Infrastructure::
 * Adds the inital hosts page {kibana-pull}138173[#138173]
 
 Lens & Visualizations::
-* Adds support for noPadding option to Lens embeddable {kibana-pull}140442[#140442]
 * Adds the Collapse by option for partition charts in *Lens* {kibana-pull}140336[#140336]
 * Adds the ability to show the metric name if there are multiple layers with breakdowns in *Lens* {kibana-pull}140314[#140314]
 * Adds time scaling without date histogram in *Lens* {kibana-pull}140107[#140107]
@@ -212,7 +211,6 @@ Lens & Visualizations::
 * Adds the ability to make sure shard size stays stable for low number of sizes in *TSVB*, *Lens*, and Agg based visualizations {kibana-pull}139791[#139791]
 * Adds the one click filter to the *Lens* table {kibana-pull}139701[#139701]
 * Improves the metric palette behavior in *Lens* {kibana-pull}139596[#139596]
-* Moves field existence from *Lens* to UnifiedFieldList plugin in *Lens* {kibana-pull}139453[#139453]
 * Adds separate dimension groups for mosaic rows and columns in *Lens* {kibana-pull}139214[#139214]
 * Adds display-infinity option to custom palette editor in *Lens* {kibana-pull}139061[#139061]
 * Adds TSDB support for *Lens*, *TSVB* and *Timelion* {kibana-pull}139020[#139020]
@@ -279,7 +277,7 @@ Dashboard::
 Fixes pinned filters that backed up in Session Storage {kibana-pull}142262[#142262]
 
 Discover::
-* Fixes query bar autocomplete {kibana-pull}140963[#140963]
+* Fixes an issue where histogram does not fill its container when time interval is not auto {kibana-pull}143004[#143004]
 * Adds support for line breaks in Document explorer {kibana-pull}139449[#139449]
 * Cancelled request errors for embeddables are now hidden {kibana-pull}137690[#137690]
 * Fixes legacy sort saved search stored in Dashboard saved objects {kibana-pull}137488[#137488]
@@ -295,6 +293,9 @@ Fleet::
 * Refresh search results when clearing category filter {kibana-pull}142853[#142853]
 * Respect `default_field: false` when generating index settings {kibana-pull}142277[#142277]
 * Fixes repeated debug logs when bundled package directory does not exist {kibana-pull}141660[#141660]
+
+Graph::
+Fixes query bar autocomplete {kibana-pull}140963[#140963]
 
 Infrastructure::
 * Adds support for Logstash datastream in standalone query {kibana-pull}138689[#138689]
