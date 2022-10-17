@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { CASE_VIEW_PAGE_TABS } from './types';
-import { CasesFeaturesAllRequired } from './ui/types';
+import type { CasesFeaturesAllRequired } from './ui/types';
 
 export const DEFAULT_DATE_FORMAT = 'dateFormat' as const;
 export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz' as const;

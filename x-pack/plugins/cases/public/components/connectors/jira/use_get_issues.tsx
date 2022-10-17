@@ -7,10 +7,10 @@
 
 import { isEmpty, debounce } from 'lodash/fp';
 import { useState, useEffect, useRef } from 'react';
-import { HttpSetup, ToastsApi } from '@kbn/core/public';
-import { ActionConnector } from '../../../../common/api';
+import type { HttpSetup, ToastsApi } from '@kbn/core/public';
+import type { ActionConnector } from '../../../../common/api';
 import { getIssues } from './api';
-import { Issues } from './types';
+import type { Issues } from './types';
 import * as i18n from './translations';
 
 interface Props {
