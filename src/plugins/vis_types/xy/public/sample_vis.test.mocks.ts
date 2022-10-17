@@ -8,6 +8,8 @@
 
 import { LegendSize } from '@kbn/visualizations-plugin/common';
 
+const mockUiStateGet = jest.fn().mockReturnValue(() => false);
+
 export const sampleAreaVis = {
   type: {
     name: 'area',
@@ -1917,5 +1919,10 @@ export const sampleAreaVis = {
     },
   },
   isHierarchical: () => false,
-  uiState: {},
+  uiState: {
+    vis: {
+      legendOpen: false,
+    },
+    get: mockUiStateGet,
+  },
 };

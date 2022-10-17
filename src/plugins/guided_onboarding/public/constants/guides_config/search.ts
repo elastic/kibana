@@ -25,8 +25,8 @@ export const searchConfig: GuideConfig = {
         'Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
       ],
       location: {
-        appID: 'guidedOnboardingExample',
-        path: 'stepOne',
+        appID: 'enterpriseSearch',
+        path: '',
       },
     },
     {

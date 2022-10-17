@@ -110,14 +110,17 @@ describe('File kind HTTP API', () => {
 
     const {
       body: { files },
-    } = await request.get(root, `/api/files/files/${fileKind}/list`).expect(200);
+    } = await request.post(root, `/api/files/files/${fileKind}/list`).send({}).expect(200);
 
     expect(files).toHaveLength(nrOfFiles);
     expect(files[0]).toEqual(expect.objectContaining({ name: 'test' }));
 
     const {
       body: { files: files2 },
-    } = await request.get(root, `/api/files/files/${fileKind}/list?page=1&perPage=5`).expect(200);
+    } = await request
+      .post(root, `/api/files/files/${fileKind}/list?page=1&perPage=5`)
+      .send({})
+      .expect(200);
     expect(files2).toHaveLength(5);
   });
 

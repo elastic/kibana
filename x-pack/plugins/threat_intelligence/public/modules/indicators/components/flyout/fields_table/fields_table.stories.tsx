@@ -10,7 +10,7 @@ import { mockIndicatorsFiltersContext } from '../../../../../common/mocks/mock_i
 import { IndicatorFieldsTable } from '.';
 import { generateMockIndicator } from '../../../../../../common/types/indicator';
 import { StoryProvidersComponent } from '../../../../../common/mocks/story_providers';
-import { IndicatorsFiltersContext } from '../../../containers/indicators_filters';
+import { IndicatorsFiltersContext } from '../../../containers/filters';
 
 export default {
   component: IndicatorFieldsTable,
