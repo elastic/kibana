@@ -27,7 +27,7 @@ import usePrevious from 'react-use/lib/usePrevious';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import type { DataViewBase } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useFromTimelineId } from '../../../pages/detection_engine/rules/create/use_from_timeline_id_v2';
+import { useFromTimelineId } from '../../../pages/detection_engine/rules/create/use_from_timeline_id';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';

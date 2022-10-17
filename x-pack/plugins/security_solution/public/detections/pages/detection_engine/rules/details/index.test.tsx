@@ -29,6 +29,31 @@ import { mockHistory, Router } from '../../../../../common/mock/router';
 
 import { fillEmptySeverityMappings } from '../helpers';
 
+jest.mock('@kbn/es-ui-shared-plugin/static/forms/hook_form_lib', () => {
+  const original = jest.requireActual('@kbn/es-ui-shared-plugin/static/forms/hook_form_lib');
+  return {
+    ...original,
+    useFormData: () => [
+      {
+        ruleType: 'query',
+        isQueryBarValid: false,
+        isThreatQueryBarValid: false,
+        index: ['index-1'],
+        dataViewId: undefined,
+        dataSourceType: 'indexPatterns',
+        threatIndex: [],
+        threatMapping: undefined,
+        machineLearningJobId: [],
+        queryBar: {
+          query: { query: 'some query', language: '' },
+          filters: [],
+          saved_id: null,
+        },
+        newTermsFields: undefined,
+      },
+    ],
+  };
+});
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
 jest.mock('../../../../../common/components/search_bar', () => ({
@@ -134,6 +159,7 @@ jest.mock('../../../../../common/lib/kibana', () => {
         },
       },
     }),
+    // }),
   };
 });
 
