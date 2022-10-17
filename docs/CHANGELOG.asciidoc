@@ -105,7 +105,7 @@ To review the breaking changes in previous versions, refer to the following:
 [[enhancement-v7.17.7]]
 === Enhancement
 Security::
-When you start {kib}, the hashed encryption key is now logged to help you solve conflicting encryptionKey configurations {kibana-pull}139874[#139874]
+When you start {kib}, the hashed saved object encryption key is now logged to help you solve conflicting `xpack.encryptedSavedObjects.encryptionKey` configurations {kibana-pull}139874[#139874]
 
 [float]
 [[fixes-v7.17.7]]
