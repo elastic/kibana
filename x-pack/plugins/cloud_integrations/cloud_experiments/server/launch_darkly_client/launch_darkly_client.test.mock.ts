@@ -13,7 +13,6 @@ export function createLaunchDarklyClientMock(): jest.Mocked<LDClient> {
     variation: jest.fn(),
     allFlagsState: jest.fn(),
     track: jest.fn(),
-    identify: jest.fn(),
     flush: jest.fn(),
   } as unknown as jest.Mocked<LDClient>; // Using casting because we only use these APIs. No need to declare everything.
 }

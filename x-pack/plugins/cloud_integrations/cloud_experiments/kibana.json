@@ -10,6 +10,6 @@
   "server": true,
   "ui": true,
   "configPath": ["xpack", "cloud_integrations", "experiments"],
-  "requiredPlugins": ["cloud"],
+  "requiredPlugins": ["cloud", "dataViews"],
   "optionalPlugins": ["usageCollection"]
 }

@@ -13,11 +13,14 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import { get, has } from 'lodash';
-import LaunchDarkly, { type LDClient, type LDUser } from 'launchdarkly-node-server-sdk';
 import { createSHA256Hash } from '@kbn/crypto';
 import type { LogMeta } from '@kbn/logging';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server/types';
+import { filter, map } from 'rxjs';
+import { MetadataService } from '../common/metadata_service';
+import { LaunchDarklyClient } from './launch_darkly_client';
 import { registerUsageCollector } from './usage';
 import type { CloudExperimentsConfigType } from './config';
 import type {
@@ -32,17 +35,26 @@ interface CloudExperimentsPluginSetupDeps {
   usageCollection?: UsageCollectionSetup;
 }
 
+interface CloudExperimentsPluginStartDeps {
+  dataViews: DataViewsServerPluginStart;
+}
+
 export class CloudExperimentsPlugin
   implements Plugin<void, CloudExperimentsPluginStart, CloudExperimentsPluginSetupDeps>
 {
   private readonly logger: Logger;
-  private readonly launchDarklyClient?: LDClient;
+  private readonly launchDarklyClient?: LaunchDarklyClient;
   private readonly flagOverrides?: Record<string, unknown>;
-  private launchDarklyUser: LDUser | undefined;
+  private readonly metadataService: MetadataService;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     const config = initializerContext.config.get<CloudExperimentsConfigType>();
+
+    this.metadataService = new MetadataService({
+      metadata_refresh_interval: config.metadata_refresh_interval,
+    });
+
     if (config.flag_overrides) {
       this.flagOverrides = config.flag_overrides;
     }
@@ -55,17 +67,12 @@ export class CloudExperimentsPlugin
       );
     }
     if (ldConfig) {
-      this.launchDarklyClient = LaunchDarkly.init(ldConfig.sdk_key, {
-        application: { id: `kibana-server`, version: initializerContext.env.packageInfo.version },
-        logger: LaunchDarkly.basicLogger({ level: ldConfig.client_log_level }),
-        // For some reason, the stream API does not work in Kibana. `.waitForInitialization()` hangs forever (doesn't throw, neither logs any errors).
-        // Using polling for now until we resolve that issue.
-        // Relevant issue: https://github.com/launchdarkly/node-server-sdk/issues/132
-        stream: false,
-      });
-      this.launchDarklyClient.waitForInitialization().then(
-        () => this.logger.debug('LaunchDarkly is initialized!'),
-        (err) => this.logger.warn(`Error initializing LaunchDarkly: ${err}`)
+      this.launchDarklyClient = new LaunchDarklyClient(
+        {
+          ...ldConfig,
+          kibana_version: initializerContext.env.packageInfo.version,
+        },
+        this.logger.get('launch_darkly')
       );
     }
   }
@@ -74,24 +81,33 @@ export class CloudExperimentsPlugin
     if (deps.usageCollection) {
       registerUsageCollector(deps.usageCollection, () => ({
         launchDarklyClient: this.launchDarklyClient,
-        launchDarklyUser: this.launchDarklyUser,
       }));
     }
 
     if (deps.cloud.isCloudEnabled && deps.cloud.cloudId) {
-      this.launchDarklyUser = {
+      this.metadataService.setup({
         // We use the Cloud ID as the userId in the Cloud Experiments
-        key: createSHA256Hash(deps.cloud.cloudId),
-        custom: {
-          // This list of deployment metadata will likely grow in future versions
-          kibanaVersion: this.initializerContext.env.packageInfo.version,
-        },
-      };
-      this.launchDarklyClient?.identify(this.launchDarklyUser);
+        userId: createSHA256Hash(deps.cloud.cloudId),
+        kibanaVersion: this.initializerContext.env.packageInfo.version,
+        trial_end_date: deps.cloud.trialEndDate?.toISOString(),
+        is_elastic_staff_owned: deps.cloud.isElasticStaffOwned,
+      });
+
+      // We only subscribe to the user metadata updates if Cloud is enabled.
+      // This way, since the user is not identified, it cannot retrieve Feature Flags from LaunchDarkly when not running on Cloud.
+      this.metadataService.userMetadata$
+        .pipe(
+          filter(Boolean), // Filter out undefined
+          map((userMetadata) => this.launchDarklyClient?.updateUserMetadata(userMetadata))
+        )
+        .subscribe(); // This subscription will stop on when the metadataService stops because it completes the Observable
     }
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart, deps: CloudExperimentsPluginStartDeps) {
+    this.metadataService.start({
+      hasDataFetcher: async () => await this.addHasDataMetadata(core, deps.dataViews),
+    });
     return {
       getVariation: this.getVariation,
       reportMetric: this.reportMetric,
@@ -99,7 +115,8 @@ export class CloudExperimentsPlugin
   }
 
   public stop() {
-    this.launchDarklyClient?.flush().catch((err) => this.logger.error(err));
+    this.launchDarklyClient?.stop();
+    this.metadataService.stop();
   }
 
   private getVariation = async <Data>(
@@ -111,15 +128,13 @@ export class CloudExperimentsPlugin
     if (this.flagOverrides && has(this.flagOverrides, configKey)) {
       return get(this.flagOverrides, configKey, defaultValue) as Data;
     }
-    if (!this.launchDarklyUser) return defaultValue; // Skip any action if no LD User is defined
-    await this.launchDarklyClient?.waitForInitialization();
-    return await this.launchDarklyClient?.variation(configKey, this.launchDarklyUser, defaultValue);
+    if (!this.launchDarklyClient) return defaultValue;
+    return await this.launchDarklyClient.getVariation(configKey, defaultValue);
   };
 
   private reportMetric = <Data>({ name, meta, value }: CloudExperimentsMetric<Data>): void => {
     const metricName = METRIC_NAMES[name];
-    if (!this.launchDarklyUser) return; // Skip any action if no LD User is defined
-    this.launchDarklyClient?.track(metricName, this.launchDarklyUser, meta, value);
+    this.launchDarklyClient?.reportMetric(metricName, meta, value);
     this.logger.debug<{ experimentationMetric: CloudExperimentsMetric<Data> } & LogMeta>(
       `Reported experimentation metric ${metricName}`,
       {
@@ -127,4 +142,19 @@ export class CloudExperimentsPlugin
       }
     );
   };
+
+  private async addHasDataMetadata(
+    core: CoreStart,
+    dataViews: DataViewsServerPluginStart
+  ): Promise<{ has_data: boolean }> {
+    const dataViewsService = await dataViews.dataViewsServiceFactory(
+      core.savedObjects.createInternalRepository(),
+      core.elasticsearch.client.asInternalUser,
+      void 0, // No Kibana Request to scope the check
+      true // Ignore capabilities checks
+    );
+    return {
+      has_data: await dataViewsService.hasUserDataView(),
+    };
+  }
 }

@@ -4970,6 +4970,15 @@
       "properties": {
         "isCloudEnabled": {
           "type": "boolean"
+        },
+        "trialEndDate": {
+          "type": "date"
+        },
+        "inTrial": {
+          "type": "boolean"
+        },
+        "isElasticStaffOwned": {
+          "type": "boolean"
         }
       }
     },

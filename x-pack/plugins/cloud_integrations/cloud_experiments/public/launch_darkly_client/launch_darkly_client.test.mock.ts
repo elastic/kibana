@@ -9,16 +9,19 @@ import type { LDClient } from 'launchdarkly-js-client-sdk';
 
 export function createLaunchDarklyClientMock(): jest.Mocked<LDClient> {
   return {
+    identify: jest.fn(),
     waitForInitialization: jest.fn(),
     variation: jest.fn(),
     track: jest.fn(),
-    identify: jest.fn(),
     flush: jest.fn(),
   } as unknown as jest.Mocked<LDClient>; // Using casting because we only use these APIs. No need to declare everything.
 }
 
 export const ldClientMock = createLaunchDarklyClientMock();
 
-jest.doMock('launchdarkly-js-client-sdk', () => ({
-  initialize: () => ldClientMock,
-}));
+export const launchDarklyLibraryMock = {
+  initialize: jest.fn(),
+  basicLogger: jest.fn(),
+};
+
+jest.doMock('launchdarkly-js-client-sdk', () => launchDarklyLibraryMock);
