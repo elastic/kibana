@@ -15,19 +15,18 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import { FieldButton } from '@kbn/react-field';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { DatasourceDataPanelProps, DataType } from '../../types';
+import type { DatasourceDataPanelProps } from '../../types';
 import type { TextBasedPrivateState } from './types';
 import { getStateFromAggregateQuery } from './utils';
-import { DragDrop } from '../../drag_drop';
-import { LensFieldIcon } from '../../shared_components';
 import { ChildDragDropProvider } from '../../drag_drop';
+import { FieldsAccordion } from './fields_accordion';
 
 export type TextBasedDataPanelProps = DatasourceDataPanelProps<TextBasedPrivateState> & {
   data: DataPublicPluginStart;
   expressions: ExpressionsStart;
   dataViews: DataViewsPublicPluginStart;
+  layerFields?: string[];
 };
 const htmlId = htmlIdGenerator('datapanel-text-based-languages');
 const fieldSearchDescriptionId = htmlId();
@@ -43,9 +42,11 @@ export function TextBasedDataPanel({
   dateRange,
   expressions,
   dataViews,
+  layerFields,
 }: TextBasedDataPanelProps) {
   const prevQuery = usePrevious(query);
   const [localState, setLocalState] = useState({ nameFilter: '' });
+  const [dataHasLoaded, setDataHasLoaded] = useState(false);
   const clearLocalState = () => setLocalState((s) => ({ ...s, nameFilter: '' }));
   useEffect(() => {
     async function fetchData() {
@@ -58,6 +59,7 @@ export function TextBasedDataPanel({
           expressions
         );
 
+        setDataHasLoaded(true);
         setState(stateFromQuery);
       }
     }
@@ -76,6 +78,7 @@ export function TextBasedDataPanel({
       return true;
     });
   }, [fieldList, localState.nameFilter]);
+  const usedByLayersFields = fieldList.filter((field) => layerFields?.includes(field.name));
 
   return (
     <KibanaContextProvider
@@ -128,34 +131,28 @@ export function TextBasedDataPanel({
           <EuiFlexItem>
             <div className="lnsIndexPatternFieldList">
               <div className="lnsIndexPatternFieldList__accordionContainer">
-                <ul
-                  className="lnsInnerIndexPatternDataPanel__fieldItems"
-                  data-test-subj="lnsTextBasedLanguagesPanelFields"
-                >
-                  {filteredFields.length > 0 &&
-                    filteredFields.map((field, index) => (
-                      <li key={field?.name}>
-                        <DragDrop
-                          draggable
-                          order={[index]}
-                          value={{
-                            field: field?.name,
-                            id: field.id,
-                            humanData: { label: field?.name },
-                          }}
-                          dataTestSubj={`lnsFieldListPanelField-${field.name}`}
-                        >
-                          <FieldButton
-                            className={`lnsFieldItem lnsFieldItem--${field?.meta?.type}`}
-                            isActive={false}
-                            onClick={() => {}}
-                            fieldIcon={<LensFieldIcon type={field?.meta.type as DataType} />}
-                            fieldName={field?.name}
-                          />
-                        </DragDrop>
-                      </li>
-                    ))}
-                </ul>
+                {usedByLayersFields.length > 0 && (
+                  <FieldsAccordion
+                    initialIsOpen={true}
+                    hasLoaded={dataHasLoaded}
+                    isFiltered={Boolean(localState.nameFilter)}
+                    fields={usedByLayersFields}
+                    id="lnsSelectedFieldsTextBased"
+                    label={i18n.translate('xpack.lens.textBased.selectedFieldsLabel', {
+                      defaultMessage: 'Selected fields',
+                    })}
+                  />
+                )}
+                <FieldsAccordion
+                  initialIsOpen={true}
+                  hasLoaded={dataHasLoaded}
+                  isFiltered={Boolean(localState.nameFilter)}
+                  fields={filteredFields}
+                  id="lnsAvailableFieldsTextBased"
+                  label={i18n.translate('xpack.lens.textBased.availableFieldsLabel', {
+                    defaultMessage: 'Available fields',
+                  })}
+                />
               </div>
             </div>
           </EuiFlexItem>

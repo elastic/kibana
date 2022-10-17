@@ -14,11 +14,13 @@ import { IngestPipelineParams } from '../../../../../../common/types/connectors'
 import { SettingsCheckableCard } from '../../shared/settings_checkable_card/settings_checkable_card';
 
 interface PipelineSettingsFormProps {
+  ingestionMethod: string;
   pipeline: IngestPipelineParams;
   setPipeline: (pipeline: IngestPipelineParams) => void;
 }
 
 export const PipelineSettingsForm: React.FC<PipelineSettingsFormProps> = ({
+  ingestionMethod,
   setPipeline,
   pipeline,
 }) => {
@@ -31,6 +33,7 @@ export const PipelineSettingsForm: React.FC<PipelineSettingsFormProps> = ({
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
         <SettingsCheckableCard
+          data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-ingestPipelines-extractBinaryContent`}
           description={i18n.translate(
             'xpack.enterpriseSearch.content.index.pipelines.settings.extractBinaryDescription',
             {
@@ -55,6 +58,7 @@ export const PipelineSettingsForm: React.FC<PipelineSettingsFormProps> = ({
       </EuiFlexItem>
       <EuiFlexItem>
         <SettingsCheckableCard
+          data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-ingestPipelines-reduceWhitespace`}
           id="ingestPipelineReduceWhitespace"
           checked={reduceWhitespace}
           description={i18n.translate(
@@ -76,6 +80,7 @@ export const PipelineSettingsForm: React.FC<PipelineSettingsFormProps> = ({
       </EuiFlexItem>
       <EuiFlexItem>
         <SettingsCheckableCard
+          data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-ingestPipelines-runMlInference`}
           id="ingestPipelineRunMlInference"
           checked={runMLInference}
           description={i18n.translate(

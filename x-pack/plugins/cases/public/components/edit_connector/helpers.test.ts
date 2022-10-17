@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { Actions, ConnectorTypes, ConnectorUserAction } from '../../../common/api';
-import { CaseUserActions } from '../../containers/types';
+import type { ConnectorUserAction } from '../../../common/api';
+import { Actions, ConnectorTypes } from '../../../common/api';
+import type { CaseUserActions } from '../../containers/types';
 import { getConnectorFieldsFromUserActions } from './helpers';
 
 const defaultJiraFields = {
