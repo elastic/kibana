@@ -871,6 +871,7 @@ packages/kbn-ci-stats-performance-metrics @elastic/kibana-operations
 packages/kbn-ci-stats-reporter @elastic/kibana-operations
 packages/kbn-cli-dev-mode @elastic/kibana-operations
 packages/kbn-coloring @elastic/kibana-vis-editors
+packages/kbn-language-documentation-popover @elastic/kibana-vis-editors
 packages/kbn-config @elastic/kibana-core
 packages/kbn-config-mocks @elastic/kibana-core
 packages/kbn-config-schema @elastic/kibana-core

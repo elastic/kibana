@@ -12,7 +12,7 @@ import { EsqlLang, monaco } from '@kbn/monaco';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getAggregateQueryMode } from '@kbn/es-query';
 import {
-  LanguageDocumentationSections,
+  type LanguageDocumentationSections,
   LanguageDocumentationPopover,
 } from '@kbn/language-documentation-popover';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
