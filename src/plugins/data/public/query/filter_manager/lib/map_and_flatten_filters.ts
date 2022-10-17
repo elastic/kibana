@@ -7,21 +7,36 @@
  */
 
 import { compact, flatten } from 'lodash';
-import { buildCombinedFilter, Filter, isCombinedFilter, migrateFilter } from '@kbn/es-query';
+import {
+  buildCombinedFilter,
+  FilterItem,
+  Filter,
+  isCombinedFilter,
+  migrateFilter,
+} from '@kbn/es-query';
 import { mapFilter } from './map_filter';
 
-export const mapAndFlattenFilters = (filters: Filter[]) => {
+export const mapAndFlattenFilters = (filters: FilterItem[]) => {
   return compact(flatten(filters))
-    .map((filter) => {
+    .map((filter: FilterItem) => {
+      debugger;
       if (isCombinedFilter(filter) && Array.isArray(filter.meta.params)) {
-        return buildCombinedFilter([mapAndFlattenFilters(filter.meta.params)], filter.meta.index);
+        return buildCombinedFilter(
+          [mapAndFlattenFilters(filter.meta.params)],
+          filter.meta.index,
+          filter.meta.alias
+        );
       } else {
         return migrateFilter(filter, filter.meta.index);
       }
     })
     .map((item: Filter) => {
       if (isCombinedFilter(item) && Array.isArray(item.meta.params)) {
-        return buildCombinedFilter([mapAndFlattenFilters(item.meta.params)], item.meta.index);
+        return buildCombinedFilter(
+          [mapAndFlattenFilters(item.meta.params)],
+          item.meta.index,
+          item.meta.alias
+        );
       } else {
         return mapFilter(item);
       }
