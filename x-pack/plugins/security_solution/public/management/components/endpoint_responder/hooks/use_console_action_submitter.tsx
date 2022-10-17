@@ -246,7 +246,7 @@ export const useConsoleActionSubmitter = <
       return (
         <ResultComponent showAs="failure" data-test-subj={getTestId('apiFailure')}>
           <FormattedMessage
-            id="xpack.securitySolution.endpointResponseActions.killProcess.performApiErrorMessage"
+            id="xpack.securitySolution.endpointResponseActions.actionSubmitter.apiErrorDetails"
             defaultMessage="The following error was encountered:"
           />
           <FormattedError error={apiError} data-test-subj={getTestId('apiErrorDetails')} />
