@@ -152,6 +152,8 @@ export interface ExpressionExecutionParams {
 
   syncColors?: boolean;
 
+  syncCursor?: boolean;
+
   syncTooltips?: boolean;
 
   inspectorAdapters?: Adapters;

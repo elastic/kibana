@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ReactNode } from 'react';
-import { SettingsUserAction } from '../../../common/api';
-import { UserActionBuilder, UserActionResponse } from './types';
+import type { ReactNode } from 'react';
+import type { SettingsUserAction } from '../../../common/api';
+import type { UserActionBuilder, UserActionResponse } from './types';
 
 import { createCommonUpdateUserActionBuilder } from './common';
 import { DISABLED_SETTING, ENABLED_SETTING, SYNC_ALERTS_LC } from './translations';
