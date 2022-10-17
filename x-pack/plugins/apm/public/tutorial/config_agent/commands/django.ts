@@ -7,6 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const djangoVariables = {
+  apmServiceName: 'SERVICE_NAME',
+  apmServerUrl: 'SERVER_URL',
+  secretToken: 'SECRET_TOKEN',
+  apmEnvironment: 'ENVIRONMENT',
+};
+
 export const django = `# ${i18n.translate(
   'xpack.apm.tutorial.djangoClient.configure.commands.addAgentComment',
   {
@@ -31,7 +38,7 @@ ELASTIC_APM = {
     defaultMessage: 'a-z, A-Z, 0-9, -, _, and space',
   }
 )}
-#'SERVICE_NAME': 'unknown-python-service',
+#'${djangoVariables.apmServiceName}': '{{{apmServiceName}}}',
 
 # ${i18n.translate(
   'xpack.apm.tutorial.djangoClient.configure.commands.useIfApmServerRequiresTokenComment',
@@ -39,7 +46,7 @@ ELASTIC_APM = {
     defaultMessage: 'Use if APM Server requires a secret token',
   }
 )}
-'SECRET_TOKEN': '{{{secretToken}}}',
+'${djangoVariables.secretToken}': '{{{secretToken}}}',
 
 # ${i18n.translate(
   'xpack.apm.tutorial.djangoClient.configure.commands.setCustomApmServerUrlComment',
@@ -49,7 +56,7 @@ ELASTIC_APM = {
     values: { defaultApmServerUrl: 'http://localhost:8200' },
   }
 )}
-'SERVER_URL': '{{{apmServerUrl}}}',
+'${djangoVariables.apmServerUrl}': '{{{apmServerUrl}}}',
 
 # ${i18n.translate(
   'xpack.apm.tutorial.djangoClient.configure.commands.setServiceEnvironmentComment',
@@ -57,7 +64,7 @@ ELASTIC_APM = {
     defaultMessage: 'Set the service environment',
   }
 )}
-'ENVIRONMENT': 'production',
+'${djangoVariables.apmEnvironment}': '{{{apmEnvironment}}}',
 }
 
 # ${i18n.translate(
