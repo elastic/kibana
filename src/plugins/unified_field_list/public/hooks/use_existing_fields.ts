@@ -289,7 +289,7 @@ export const useExistingFieldsReader: () => ExistingFieldsReader = () => {
     (dataViewId: string): boolean => {
       const info = getFieldsExistenceInfo(dataViewId);
       return Boolean(
-        info?.fetchStatus !== ExistenceFetchStatus.succeeded || info?.hasDataViewRestrictions
+        info?.fetchStatus === ExistenceFetchStatus.failed || info?.hasDataViewRestrictions
       );
     },
     [getFieldsExistenceInfo]

@@ -303,16 +303,6 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
   const editPermission =
     indexPatternFieldEditor.userPermissions.editIndexPattern() || !currentIndexPattern.isPersisted;
 
-  const { nameFilter, typeFilter } = localState;
-
-  const filter = useMemo(
-    () => ({
-      nameFilter,
-      typeFilter,
-    }),
-    [nameFilter, typeFilter]
-  );
-
   const onSelectedFieldFilter = useCallback(
     (field: IndexPatternField | DataViewField): boolean => {
       return Boolean(layerFields?.includes(field.name));
@@ -621,10 +611,9 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
         </EuiFlexItem>
         <EuiFlexItem>
           <FieldListGrouped
+            dataViewId={currentIndexPatternId}
             fieldGroups={fieldGroups}
             hasSyncedExistingFields={fieldsExistenceStatus !== ExistenceFetchStatus.unknown}
-            filter={filter}
-            dataViewId={currentIndexPatternId}
             existenceFetchFailed={fieldsExistenceStatus === ExistenceFetchStatus.failed}
             existenceFetchTimeout={fieldsExistenceStatus === ExistenceFetchStatus.failed} // TODO: deprecate?
             existFieldsInIndex={!!allFields.length}
