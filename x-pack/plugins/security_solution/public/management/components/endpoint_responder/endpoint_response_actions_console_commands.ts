@@ -71,6 +71,7 @@ const getRbacControl = ({
     ['kill-process', privileges.canKillProcess],
     ['suspend-process', privileges.canSuspendProcess],
     ['processes', privileges.canGetRunningProcesses],
+    ['get-file', privileges.canWriteFileOperations],
   ]);
   return commandToPrivilegeMap.get(commandName as ConsoleResponseActionCommands) ?? false;
 };
@@ -376,10 +377,11 @@ export const getEndpointResponseActionsConsoleCommands = ({
       meta: {
         endpointId: endpointAgentId,
         capabilities: endpointCapabilities,
+        privileges: endpointPrivileges,
       },
       exampleUsage: 'get-file path="/full/path/to/file.txt"',
       exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
-      validate: capabilitiesValidator,
+      validate: capabilitiesAndPrivilegesValidator,
       args: {
         path: {
           required: true,
@@ -402,8 +404,12 @@ export const getEndpointResponseActionsConsoleCommands = ({
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,
       helpGroupPosition: HELP_GROUPS.responseActions.position,
-      helpCommandPosition: 3,
-      helpDisabled: doesEndpointSupportCommand('get-file') === false,
+      helpCommandPosition: 6,
+      helpDisabled: !doesEndpointSupportCommand('get-file'),
+      helpHidden: !getRbacControl({
+        commandName: 'get-file',
+        privileges: endpointPrivileges,
+      }),
     },
   ];
 };
