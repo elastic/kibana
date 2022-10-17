@@ -38,10 +38,10 @@ export const MarkdownStoryComponent = (params: MarkdownStorybookParams) => {
     {/* if wanting text as markdown */}
     <Markdown
     readOnly={true}
-    markdownContent={"My content in **markdown** format"} />
+    markdownContent={"My content in **markdown** format in the markdownContent"} />
     <Markdown
     readOnly={true}>
-    {"My content in **markdown** format"}
+    {"My content in **markdown** format as a child"}
     </Markdown>
     </EuiFlexGroup>
   );
