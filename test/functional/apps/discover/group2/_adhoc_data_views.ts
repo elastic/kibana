@@ -65,24 +65,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await PageObjects.discover.clickFieldListItemToggle('_bytes-runtimefield');
 
+      const second = await PageObjects.discover.getCurrentDataViewId();
+      expect(first).not.to.equal(second);
+
       // navigate to context view
       await dataGrid.clickRowToggle({ rowIndex: 0 });
       const [, surrDocs] = await dataGrid.getRowActions({ rowIndex: 0 });
       await surrDocs.click();
       await PageObjects.context.waitUntilContextLoadingHasFinished();
 
-      // trigger data view id update
-      await dataGrid.clickEditField('_bytes-runtimefield');
-      await fieldEditor.setName('_bytes-runtimefield-edited', true);
-      await fieldEditor.save();
-      await fieldEditor.confirmSave();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-
       await find.clickByCssSelector(`[data-test-subj="breadcrumb first"]`);
       await PageObjects.header.waitUntilLoadingHasFinished();
-
-      const second = await PageObjects.discover.getCurrentDataViewId();
-      expect(first).not.to.equal(second);
 
       expect(await PageObjects.discover.getCurrentlySelectedDataView()).to.be('logstash*');
 
