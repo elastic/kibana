@@ -227,6 +227,7 @@ test('successfully executes with preconfigured connector', async () => {
       apiKey: 'abc',
     },
     params: { foo: true },
+    logger: loggerMock,
   });
 
   expect(loggerMock.debug).toBeCalledWith('executing action test:preconfigured: Preconfigured');
@@ -678,6 +679,7 @@ test('should not throw error if action is preconfigured and isESOCanEncrypt is f
       apiKey: 'abc',
     },
     params: { foo: true },
+    logger: loggerMock,
   });
 
   expect(loggerMock.debug).toBeCalledWith('executing action test:preconfigured: Preconfigured');
