@@ -157,11 +157,11 @@ const getSelectionIcon = (tagState: TagState) => {
     : ICONS.UNCHECKED;
 };
 
-const NoMatchesMessage: React.FC<{ searchValue: string; onClick: (newTag: string) => void }> =
-  React.memo(({ searchValue, onClick }) => {
+const NoMatchesMessage: React.FC<{ searchValue: string; onNewItem: (newTag: string) => void }> =
+  React.memo(({ searchValue, onNewItem }) => {
     const onNewTagClick = useCallback(() => {
-      onClick(searchValue);
-    }, [onClick, searchValue]);
+      onNewItem(searchValue);
+    }, [onNewItem, searchValue]);
 
     return (
       <EuiSelectableListItem isFocused={false} showIcons={false} onClick={onNewTagClick}>
@@ -218,13 +218,10 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
     [onChangeTags, state.tags]
   );
 
-  const onNewItem = useCallback(
-    (newTag: string) => {
-      setSearchValue(undefined);
-      onChange([{ label: newTag, checked: 'on', key: newTag }, ...options]);
-    },
-    [onChange, options]
-  );
+  const onNewItem = useCallback((newTag: string) => {
+    dispatch({ type: Actions.CHECK_TAG, payload: [newTag] });
+    setSearchValue('');
+  }, []);
 
   const onSelectAll = useCallback(() => {
     dispatch({ type: Actions.CHECK_TAG, payload: Object.keys(state.tags) });
@@ -258,7 +255,7 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
       renderOption={renderOption}
       listProps={{ showIcons: false }}
       onChange={onChange}
-      noMatchesMessage={<NoMatchesMessage searchValue={searchValue ?? ''} onClick={onNewItem} />}
+      noMatchesMessage={<NoMatchesMessage searchValue={searchValue ?? ''} onNewItem={onNewItem} />}
     >
       {(list, search) => (
         <>
