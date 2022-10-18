@@ -52,7 +52,7 @@ export function FilterExpressionBadge({
   if (!conditionalOperationType) {
     label = getValueLabel(filter, dataViews);
   }
-  
+
   return conditionalOperationType ? (
     <>
       {!isRootLevel ? (
