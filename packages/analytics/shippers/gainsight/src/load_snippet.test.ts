@@ -13,7 +13,11 @@ describe('loadSnippet', () => {
     // Define necessary window and document global variables for the tests
     Object.defineProperty(global, 'window', {
       writable: true,
-      value: {},
+      value: {
+        aptrinsic: {
+          init: true,
+        },
+      },
     });
 
     Object.defineProperty(global, 'document', {
@@ -28,7 +32,9 @@ describe('loadSnippet', () => {
 
     Object.defineProperty(global, 'aptrinsic', {
       writable: true,
-      value: '',
+      value: {
+        init: true,
+      },
     });
   });
 
