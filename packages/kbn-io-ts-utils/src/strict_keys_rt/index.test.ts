@@ -7,27 +7,17 @@
  */
 
 import * as t from 'io-ts';
-import { isRight, isLeft, either } from 'fp-ts/lib/Either';
+import { isRight, isLeft } from 'fp-ts/lib/Either';
 import { strictKeysRt } from '.';
 import { jsonRt } from '../json_rt';
 import { PathReporter } from 'io-ts/lib/PathReporter';
+import { isoToEpochRt } from '../iso_to_epoch_rt';
 
 describe('strictKeysRt', () => {
   it('correctly and deeply validates object keys', () => {
-    const dateType = new t.Type<Date, string, unknown>(
-      'DateType',
-      (input: unknown): input is Date => input instanceof Date,
-      (input: unknown, context: t.Context) =>
-        either.chain(t.string.validate(input, context), (value: string) => {
-          const decoded = new Date(value);
-          return isNaN(decoded.getTime()) ? t.failure(input, context) : t.success(decoded);
-        }),
-      (date: Date): string => date.toISOString()
-    );
-
     const timeWindowRt = t.union([
       t.type({ duration: t.string }),
-      t.type({ start_time: dateType }),
+      t.type({ start_time: isoToEpochRt }),
     ]);
 
     const metricQueryRt = t.union(
