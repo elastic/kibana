@@ -92,7 +92,7 @@ export default function ({ getService }: FtrProviderContext) {
         const monitorsToDelete = monitors.map((monitor) => monitor.id);
 
         const response = await supertest
-          .post(API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace('{projectName}', project))
+          .delete(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
           .set('kbn-xsrf', 'true')
           .send({ monitors: monitorsToDelete })
           .expect(400);
@@ -144,7 +144,7 @@ export default function ({ getService }: FtrProviderContext) {
         const monitorsToDelete = [monitorToDelete];
 
         const response = await supertest
-          .post(API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace('{projectName}', project))
+          .delete(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
           .set('kbn-xsrf', 'true')
           .send({ monitors: monitorsToDelete })
           .expect(200);
@@ -218,7 +218,7 @@ export default function ({ getService }: FtrProviderContext) {
         const monitorsToDelete = monitors.map((monitor) => monitor.id);
 
         const response = await supertest
-          .post(API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace('{projectName}', project))
+          .delete(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
           .set('kbn-xsrf', 'true')
           .send({ monitors: monitorsToDelete })
           .expect(200);
@@ -314,8 +314,8 @@ export default function ({ getService }: FtrProviderContext) {
         const monitorsToDelete = monitors.map((monitor) => monitor.id);
 
         const response = await supertest
-          .post(
-            `/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace(
+          .delete(
+            `/s/${SPACE_ID}${API_URLS.SYNTHETICS_MONITORS_PROJECT.replace(
               '{projectName}',
               project
             )}`
@@ -407,7 +407,7 @@ export default function ({ getService }: FtrProviderContext) {
         const monitorsToDelete = monitors.map((monitor) => monitor.id);
 
         const response = await supertest
-          .post(API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace('{projectName}', project))
+          .delete(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
           .set('kbn-xsrf', 'true')
           .send({ monitors: monitorsToDelete })
           .expect(200);
@@ -500,7 +500,7 @@ export default function ({ getService }: FtrProviderContext) {
         const {
           body: { message },
         } = await supertestWithoutAuth
-          .post(API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace('{projectName}', project))
+          .delete(API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
           .set('kbn-xsrf', 'true')
           .auth(username, password)
           .send({ monitors: monitorsToDelete })

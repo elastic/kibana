@@ -49,6 +49,5 @@ export enum API_URLS {
 
   // Project monitor public endpoint
   SYNTHETICS_MONITORS_PROJECT = '/api/synthetics/project/{projectName}/monitors',
-  SYNTHETICS_MONITORS_PROJECT_DELETE = '/api/synthetics/project/{projectName}/monitors/_delete',
   SYNTHETICS_MONITORS_PROJECT_LEGACY = '/api/synthetics/service/project/monitors',
 }

@@ -15,8 +15,8 @@ import { INSUFFICIENT_FLEET_PERMISSIONS } from '../../synthetics_service/project
 import { deleteMonitorBulk } from './bulk_cruds/delete_monitor_bulk';
 
 export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory = () => ({
-  method: 'POST',
-  path: API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE,
+  method: 'DELETE',
+  path: API_URLS.SYNTHETICS_MONITORS_PROJECT,
   validate: {
     body: schema.object({
       monitors: schema.arrayOf(schema.string()),
@@ -45,12 +45,11 @@ export const deleteSyntheticsMonitorProjectRoute: SyntheticsRestApiRouteFactory 
 
     const { saved_objects: monitors } = await getMonitors(
       {
-        filter: `${syntheticsMonitorType}.attributes.${
-          ConfigKey.PROJECT_ID
-        }: "${decodedProjectName}" AND ${getFilter(
-          'journey_id',
-          monitorsToDelete.map((id: string) => `"${id}"`)
-        )}`,
+        filter: `${syntheticsMonitorType}.attributes.${ConfigKey.PROJECT_ID
+          }: "${decodedProjectName}" AND ${getFilter(
+            'journey_id',
+            monitorsToDelete.map((id: string) => `"${id}"`)
+          )}`,
         fields: [],
         perPage: 500,
       },
