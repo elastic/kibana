@@ -280,6 +280,7 @@ describe('getExecutionLogAggregation', () => {
                           'error.message',
                           'kibana.version',
                           'rule.id',
+                          'kibana.space_ids',
                           'rule.name',
                           'kibana.alerting.outcome',
                         ],
@@ -486,6 +487,7 @@ describe('getExecutionLogAggregation', () => {
                           'error.message',
                           'kibana.version',
                           'rule.id',
+                          'kibana.space_ids',
                           'rule.name',
                           'kibana.alerting.outcome',
                         ],
@@ -692,6 +694,7 @@ describe('getExecutionLogAggregation', () => {
                           'error.message',
                           'kibana.version',
                           'rule.id',
+                          'kibana.space_ids',
                           'rule.name',
                           'kibana.alerting.outcome',
                         ],
@@ -954,6 +957,7 @@ describe('formatExecutionLogResult', () => {
           schedule_delay_ms: 3074,
           rule_id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
           rule_name: 'rule_name',
+          space_ids: [],
         },
         {
           id: '41b2755e-765a-4044-9745-b03875d5e79a',
@@ -976,6 +980,7 @@ describe('formatExecutionLogResult', () => {
           schedule_delay_ms: 3126,
           rule_id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
           rule_name: 'rule_name',
+          space_ids: [],
         },
       ],
     });
@@ -1203,6 +1208,7 @@ describe('formatExecutionLogResult', () => {
           schedule_delay_ms: 3074,
           rule_id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
           rule_name: 'rule_name',
+          space_ids: [],
         },
         {
           id: '41b2755e-765a-4044-9745-b03875d5e79a',
@@ -1225,6 +1231,7 @@ describe('formatExecutionLogResult', () => {
           schedule_delay_ms: 3126,
           rule_id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
           rule_name: 'rule_name',
+          space_ids: [],
         },
       ],
     });
@@ -1444,6 +1451,7 @@ describe('formatExecutionLogResult', () => {
           schedule_delay_ms: 3074,
           rule_id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
           rule_name: 'rule_name',
+          space_ids: [],
         },
         {
           id: '41b2755e-765a-4044-9745-b03875d5e79a',
@@ -1466,6 +1474,7 @@ describe('formatExecutionLogResult', () => {
           schedule_delay_ms: 3126,
           rule_id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
           rule_name: 'rule_name',
+          space_ids: [],
         },
       ],
     });
@@ -1690,6 +1699,7 @@ describe('formatExecutionLogResult', () => {
           schedule_delay_ms: 3126,
           rule_id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
           rule_name: 'rule_name',
+          space_ids: [],
         },
         {
           id: '61bb867b-661a-471f-bf92-23471afa10b3',
@@ -1712,6 +1722,7 @@ describe('formatExecutionLogResult', () => {
           schedule_delay_ms: 3133,
           rule_id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
           rule_name: 'rule_name',
+          space_ids: [],
         },
       ],
     });

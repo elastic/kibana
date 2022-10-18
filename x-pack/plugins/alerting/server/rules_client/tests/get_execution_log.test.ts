@@ -385,6 +385,7 @@ describe('getExecutionLogForRule()', () => {
           schedule_delay_ms: 3126,
           rule_id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
           rule_name: 'rule-name',
+          space_ids: [],
         },
         {
           id: '41b2755e-765a-4044-9745-b03875d5e79a',
@@ -407,6 +408,7 @@ describe('getExecutionLogForRule()', () => {
           schedule_delay_ms: 3345,
           rule_id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
           rule_name: 'rule-name',
+          space_ids: [],
         },
       ],
     });
@@ -719,6 +721,7 @@ describe('getGlobalExecutionLogWithAuth()', () => {
           schedule_delay_ms: 3126,
           rule_id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
           rule_name: 'rule-name',
+          space_ids: [],
         },
         {
           id: '41b2755e-765a-4044-9745-b03875d5e79a',
@@ -741,6 +744,7 @@ describe('getGlobalExecutionLogWithAuth()', () => {
           schedule_delay_ms: 3345,
           rule_id: 'a348a740-9e2c-11ec-bd64-774ed95c43ef',
           rule_name: 'rule-name',
+          space_ids: [],
         },
       ],
     });
