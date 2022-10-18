@@ -41,6 +41,7 @@ export const testMobileKPIAttr = {
                 isBucketed: false,
                 label: 'Median of System memory usage',
                 operationType: 'median',
+                params: {},
                 scale: 'ratio',
                 sourceField: 'system.memory.usage',
                 dataType: 'number',
