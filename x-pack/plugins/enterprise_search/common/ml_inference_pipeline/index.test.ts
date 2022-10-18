@@ -157,7 +157,6 @@ describe('generateMlInferencePipelineBody lib function', () => {
       sourceField: 'my-source-field',
     });
 
-    expect(actual.processors?.length).toEqual(3);
     expect(actual).toEqual(expected);
   });
 
@@ -174,7 +173,21 @@ describe('generateMlInferencePipelineBody lib function', () => {
       sourceField: 'my-source-field',
     });
 
-    // includes the extra set processor
-    expect(actual.processors?.length).toEqual(4);
+    expect(actual).toEqual(
+      expect.objectContaining({
+        description: expect.any(String),
+        processors: expect.arrayContaining([
+          expect.objectContaining({
+            set: {
+              copy_from: 'ml.inference.my-destination-field.predicted_value',
+              description:
+                "Copy the predicted_value to 'my-destination-field' if the prediction_probability is greater than 0.5",
+              field: 'my-destination-field',
+              if: 'ml.inference.my-destination-field.prediction_probability > 0.5',
+            },
+          }),
+        ]),
+      })
+    );
   });
 });
