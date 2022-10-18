@@ -7,6 +7,7 @@
 
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import React, { useMemo } from 'react';
+import { useTourContext } from '../../../common/components/guided_onboarding';
 import { getTourAnchor } from '../../../common/components/guided_onboarding/tour_config';
 import { SIGNAL_RULE_NAME_FIELD_NAME } from '../../../timelines/components/timeline/body/renderers/constants';
 import { TimelineId } from '../../../../common/types';
@@ -43,15 +44,23 @@ export const RenderCellValue: React.FC<
   timelineId,
   truncate,
 }) => {
-  const anchorTarget = useMemo(
-    () =>
+  const { activeStep, incrementStep, isTourShown } = useTourContext();
+  const anchorTarget = useMemo(() => {
+    if (
       columnId === SIGNAL_RULE_NAME_FIELD_NAME &&
       timelineId === TimelineId.detectionsPage &&
       rowIndex === 0
-        ? getTourAnchor(1)
-        : '',
-    [columnId, rowIndex, timelineId]
-  );
+    ) {
+      // This alleviates a race condition where the active step attempts to mount before the tour anchor is mounted
+      if (isTourShown && activeStep === 0) {
+        setTimeout(() => {
+          incrementStep(1);
+        }, 500);
+      }
+      return getTourAnchor(1);
+    }
+    return '';
+  }, [activeStep, columnId, incrementStep, isTourShown, rowIndex, timelineId]);
 
   return (
     <span tour-step={anchorTarget}>

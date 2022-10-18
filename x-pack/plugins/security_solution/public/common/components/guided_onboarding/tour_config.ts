@@ -46,13 +46,13 @@ export const tourConfig: TourConfig = [
   {
     step: 2,
     title: i18n.translate('xpack.securitySolution.guided_onboarding.tour.openFlyout.tourTitle', {
-      defaultMessage: 'Open the flyout',
+      defaultMessage: 'Review the alert details',
     }),
     content: i18n.translate(
       'xpack.securitySolution.guided_onboarding.tour.openFlyout.tourContent',
       {
         defaultMessage:
-          'We show minimal information in the table. You can see more details in the flyout. Click the icon to open the flyout.',
+          "Some information is provided at-a-glance in the table, but for full details, you'll want to open the alert.",
       }
     ),
     anchor: `[tour-step="${getTourAnchor(2)}"]`,
@@ -66,14 +66,14 @@ export const tourConfig: TourConfig = [
     title: i18n.translate(
       'xpack.securitySolution.guided_onboarding.tour.flyoutOverview.tourTitle',
       {
-        defaultMessage: 'Flyout overview',
+        defaultMessage: 'Explore alert details',
       }
     ),
     content: i18n.translate(
       'xpack.securitySolution.guided_onboarding.tour.flyoutOverview.tourContent',
       {
         defaultMessage:
-          'This alert was created by a rule we automatically enabled in the previous step so that we can show you how to triage alerts.',
+          'Learn more about alerts by checking out all the information available on each tab.',
       }
     ),
     anchor: `[tour-step="${getTourAnchor(3)}"]`,
@@ -86,7 +86,7 @@ export const tourConfig: TourConfig = [
       defaultMessage: 'Create a case',
     }),
     content: i18n.translate('xpack.securitySolution.guided_onboarding.tour.addToCase.tourContent', {
-      defaultMessage: 'Click the button and select add to a new case',
+      defaultMessage: 'From the Take action menu, add the alert to a new case.',
     }),
     anchor: `[tour-step="${getTourAnchor(4)}"]`,
     anchorPosition: 'upRight',
@@ -96,16 +96,17 @@ export const tourConfig: TourConfig = [
   {
     step: 5,
     title: i18n.translate('xpack.securitySolution.guided_onboarding.tour.createCase.tourTitle', {
-      defaultMessage: `Complete the case details`,
+      defaultMessage: `Add details`,
     }),
     content: i18n.translate(
       'xpack.securitySolution.guided_onboarding.tour.createCase.tourContent',
       {
-        defaultMessage: `The alert will be added to the case...`,
+        defaultMessage: `In addition to the alert, you can add any relevant information you need to the case.`,
       }
     ),
     anchor: `[data-test-subj="create-case-flyout"]`,
     anchorPosition: 'leftUp',
     dataTestSubj: 'tourStep-alerts-5',
+    hideNextButton: true,
   },
 ];

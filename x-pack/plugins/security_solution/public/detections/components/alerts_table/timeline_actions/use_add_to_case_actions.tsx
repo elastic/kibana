@@ -53,24 +53,36 @@ export const useAddToCaseActions = ({
       : [];
   }, [casesUi.helpers, ecsData, nonEcsData]);
 
+  const { activeStep, endTour, incrementStep, isTourShown } = useTourContext();
+
+  const onCreateCaseSuccess = useCallback(async () => {
+    if (onSuccess) {
+      await onSuccess();
+      // onSuccess only passed on alert take action dropdown, which is a trigger for tour steps
+      if (isTourShown) {
+        endTour();
+      }
+    }
+  }, [endTour, isTourShown, onSuccess]);
+
   const createCaseFlyout = casesUi.hooks.getUseCasesAddToNewCaseFlyout({
     onClose: onMenuItemClick,
-    onSuccess,
+    onSuccess: onCreateCaseSuccess,
   });
 
   const selectCaseModal = casesUi.hooks.getUseCasesAddToExistingCaseModal({
     onClose: onMenuItemClick,
     onRowClick: onSuccess,
   });
-  const { activeStep, incrementStep, isTourShown } = useTourContext();
   const handleAddToNewCaseClick = useCallback(() => {
     // TODO rename this, this is really `closePopover()`
     onMenuItemClick();
     createCaseFlyout.open({ attachments: caseAttachments });
+    // This alleviates a race condition where the active step attempts to mount before the tour anchor is mounted
     if (isTourShown && activeStep === 4) {
       setTimeout(() => {
         incrementStep(5);
-      }, 3000);
+      }, 500);
     }
   }, [onMenuItemClick, createCaseFlyout, caseAttachments, isTourShown, activeStep, incrementStep]);
 

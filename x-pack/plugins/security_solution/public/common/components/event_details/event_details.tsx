@@ -189,10 +189,7 @@ const EventDetailsComponent: React.FC<Props> = ({
   );
 
   useEffect(() => {
-    // yes this is strange
-    // however, step 3 is in this flyout and therefore cannot be detected by
-    // the EuiTourStep anchor prop before it is mounted
-    // At mount, we can tell the tour to continue to step 3
+    // This alleviates a race condition where the active step attempts to mount before the tour anchor is mounted
     if (activeStep === 2 && isTourShown) {
       incrementStep(3);
     }
