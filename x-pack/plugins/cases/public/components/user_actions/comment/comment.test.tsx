@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiCommentList } from '@elastic/eui';
+import type { RenderResult } from '@testing-library/react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
@@ -20,6 +21,7 @@ import {
   getExternalReferenceAttachment,
   getExternalReferenceUserAction,
   getHostIsolationUserAction,
+  getMultipleAlertsUserAction,
   getPersistableStateAttachment,
   getPersistableStateUserAction,
   getUserAction,
@@ -30,7 +32,7 @@ import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer, TestProviders } from '../../../common/mock';
 import { createCommentUserActionBuilder } from './comment';
 import { getMockBuilderArgs } from '../mock';
-import { useCaseViewParams } from '../../../common/navigation';
+import { useCaseViewNavigation, useCaseViewParams } from '../../../common/navigation';
 import { ExternalReferenceAttachmentTypeRegistry } from '../../../client/attachment_framework/external_reference_registry';
 import { PersistableStateAttachmentTypeRegistry } from '../../../client/attachment_framework/persistable_state_registry';
 import { userProfiles } from '../../../containers/user_profiles/api.mock';
@@ -39,66 +41,231 @@ jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/navigation/hooks');
 
 const useCaseViewParamsMock = useCaseViewParams as jest.Mock;
+const useCaseViewNavigationMock = useCaseViewNavigation as jest.Mock;
+const navigateToCaseView = jest.fn();
 
 describe('createCommentUserActionBuilder', () => {
   const builderArgs = getMockBuilderArgs();
 
   beforeEach(() => {
     jest.clearAllMocks();
+    useCaseViewNavigationMock.mockReturnValue({ navigateToCaseView });
   });
 
-  it('renders correctly when editing a comment', async () => {
-    const userAction = getUserAction('comment', Actions.update);
-    const builder = createCommentUserActionBuilder({
-      ...builderArgs,
-      userAction,
+  describe('edits', () => {
+    it('renders correctly when editing a comment', async () => {
+      const userAction = getUserAction('comment', Actions.update);
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      render(
+        <TestProviders>
+          <EuiCommentList comments={createdUserAction} />
+        </TestProviders>
+      );
+
+      expect(screen.getByText('edited comment')).toBeInTheDocument();
     });
-
-    const createdUserAction = builder.build();
-    render(
-      <TestProviders>
-        <EuiCommentList comments={createdUserAction} />
-      </TestProviders>
-    );
-
-    expect(screen.getByText('edited comment')).toBeInTheDocument();
   });
 
-  it('renders correctly when deleting a comment', async () => {
-    const userAction = getUserAction('comment', Actions.delete);
-    const builder = createCommentUserActionBuilder({
-      ...builderArgs,
-      userAction,
+  describe('deletions', () => {
+    it('renders correctly when deleting a comment', async () => {
+      const userAction = getUserAction('comment', Actions.delete);
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      render(
+        <TestProviders>
+          <EuiCommentList comments={createdUserAction} />
+        </TestProviders>
+      );
+
+      expect(screen.getByText('removed comment')).toBeInTheDocument();
     });
 
-    const createdUserAction = builder.build();
-    render(
-      <TestProviders>
-        <EuiCommentList comments={createdUserAction} />
-      </TestProviders>
-    );
+    it('renders correctly when deleting a single alert', async () => {
+      const userAction = getAlertUserAction({ action: Actions.delete });
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        userAction,
+      });
 
-    expect(screen.getByText('removed comment')).toBeInTheDocument();
+      const createdUserAction = builder.build();
+      render(
+        <TestProviders>
+          <EuiCommentList comments={createdUserAction} />
+        </TestProviders>
+      );
+
+      expect(screen.getByText('removed one alert')).toBeInTheDocument();
+    });
+
+    it('renders correctly when deleting multiple alerts', async () => {
+      const userAction = getMultipleAlertsUserAction({ action: Actions.delete });
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      render(
+        <TestProviders>
+          <EuiCommentList comments={createdUserAction} />
+        </TestProviders>
+      );
+
+      expect(screen.getByText('removed 2 alerts')).toBeInTheDocument();
+    });
+
+    it('renders correctly when deleting an external reference attachment', async () => {
+      const userAction = getExternalReferenceUserAction({ action: Actions.delete });
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      render(
+        <TestProviders>
+          <EuiCommentList comments={createdUserAction} />
+        </TestProviders>
+      );
+
+      expect(screen.getByText('removed attachment')).toBeInTheDocument();
+    });
+
+    it('renders correctly when deleting a persistable state attachment', async () => {
+      const userAction = getPersistableStateUserAction({ action: Actions.delete });
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      render(
+        <TestProviders>
+          <EuiCommentList comments={createdUserAction} />
+        </TestProviders>
+      );
+
+      expect(screen.getByText('removed attachment')).toBeInTheDocument();
+    });
   });
 
-  it('renders correctly a user comment', async () => {
-    const userAction = getUserAction('comment', Actions.create, {
-      commentId: basicCase.comments[0].id,
+  describe('user comments', () => {
+    it('renders correctly a user comment', async () => {
+      const userAction = getUserAction('comment', Actions.create, {
+        commentId: basicCase.comments[0].id,
+      });
+
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      render(
+        <TestProviders>
+          <EuiCommentList comments={createdUserAction} />
+        </TestProviders>
+      );
+
+      expect(screen.getByText('Solve this fast!')).toBeInTheDocument();
     });
 
-    const builder = createCommentUserActionBuilder({
-      ...builderArgs,
-      userAction,
+    it('deletes a user comment correctly', async () => {
+      const userAction = getUserAction('comment', Actions.create, {
+        commentId: basicCase.comments[0].id,
+      });
+
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      const result = render(
+        <TestProviders>
+          <EuiCommentList comments={createdUserAction} />
+        </TestProviders>
+      );
+
+      expect(result.getByText('Solve this fast!')).toBeInTheDocument();
+
+      await deleteAttachment(result, 'trash', 'Delete');
+
+      await waitFor(() => {
+        expect(builderArgs.handleDeleteComment).toHaveBeenCalledWith('basic-comment-id');
+      });
     });
 
-    const createdUserAction = builder.build();
-    render(
-      <TestProviders>
-        <EuiCommentList comments={createdUserAction} />
-      </TestProviders>
-    );
+    it('edits a user comment correctly', async () => {
+      const userAction = getUserAction('comment', Actions.create, {
+        commentId: basicCase.comments[0].id,
+      });
 
-    expect(screen.getByText('Solve this fast!')).toBeInTheDocument();
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      const result = render(
+        <TestProviders>
+          <EuiCommentList comments={createdUserAction} />
+        </TestProviders>
+      );
+
+      expect(result.getByText('Solve this fast!')).toBeInTheDocument();
+      expect(result.getByTestId('property-actions')).toBeInTheDocument();
+
+      userEvent.click(result.getByTestId('property-actions-ellipses'));
+      await waitForEuiPopoverOpen();
+
+      expect(result.queryByTestId('property-actions-pencil')).toBeInTheDocument();
+      userEvent.click(result.getByTestId('property-actions-pencil'));
+
+      await waitFor(() => {
+        expect(builderArgs.handleManageMarkdownEditId).toHaveBeenCalledWith('basic-comment-id');
+      });
+    });
+
+    it('quotes a user comment correctly', async () => {
+      const userAction = getUserAction('comment', Actions.create, {
+        commentId: basicCase.comments[0].id,
+      });
+
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      const result = render(
+        <TestProviders>
+          <EuiCommentList comments={createdUserAction} />
+        </TestProviders>
+      );
+
+      expect(result.getByText('Solve this fast!')).toBeInTheDocument();
+      expect(result.getByTestId('property-actions')).toBeInTheDocument();
+
+      userEvent.click(result.getByTestId('property-actions-ellipses'));
+      await waitForEuiPopoverOpen();
+
+      expect(result.queryByTestId('property-actions-quote')).toBeInTheDocument();
+      userEvent.click(result.getByTestId('property-actions-quote'));
+
+      await waitFor(() => {
+        expect(builderArgs.handleManageQuote).toHaveBeenCalledWith('basic-comment-id');
+      });
+    });
   });
 
   describe('Single alert', () => {
@@ -125,9 +292,72 @@ describe('createCommentUserActionBuilder', () => {
         'added an alert from Awesome rule'
       );
     });
+
+    it('deletes a single alert correctly', async () => {
+      const userAction = getAlertUserAction();
+
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        caseData: {
+          ...builderArgs.caseData,
+          comments: [alertComment],
+        },
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      const res = render(
+        <TestProviders>
+          <EuiCommentList comments={createdUserAction} />
+        </TestProviders>
+      );
+
+      expect(res.getByTestId('single-alert-user-action-alert-action-id')).toHaveTextContent(
+        'added an alert from Awesome rule'
+      );
+
+      await deleteAttachment(res, 'minusInCircle', 'Remove');
+
+      await waitFor(() => {
+        expect(builderArgs.handleDeleteComment).toHaveBeenCalledWith('alert-comment-id');
+      });
+    });
+
+    it('views an alert correctly', async () => {
+      const userAction = getAlertUserAction();
+
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        caseData: {
+          ...builderArgs.caseData,
+          comments: [alertComment],
+        },
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      const result = render(
+        <TestProviders>
+          <EuiCommentList comments={createdUserAction} />
+        </TestProviders>
+      );
+
+      expect(result.getByTestId('comment-action-show-alert-alert-action-id')).toBeInTheDocument();
+      userEvent.click(result.getByTestId('comment-action-show-alert-alert-action-id'));
+
+      await waitFor(() => {
+        expect(builderArgs.onShowAlertDetails).toHaveBeenCalledWith('alert-id-1', 'alert-index-1');
+      });
+    });
   });
 
   describe('Multiple alerts', () => {
+    let appMockRender: AppMockRenderer;
+
+    beforeEach(() => {
+      appMockRender = createAppMockRenderer();
+    });
+
     it('renders correctly multiple alerts with a link to the alerts table', async () => {
       useCaseViewParamsMock.mockReturnValue({ detailName: '1234' });
       const userAction = getAlertUserAction();
@@ -148,16 +378,74 @@ describe('createCommentUserActionBuilder', () => {
       });
 
       const createdUserAction = builder.build();
-      render(
-        <TestProviders>
-          <EuiCommentList comments={createdUserAction} />
-        </TestProviders>
+      const res = appMockRender.render(<EuiCommentList comments={createdUserAction} />);
+
+      expect(res.getByTestId('multiple-alerts-user-action-alert-action-id')).toHaveTextContent(
+        'added 2 alerts from Awesome rule'
       );
+      expect(res.getByTestId('comment-action-show-alerts-1234'));
+    });
+
+    it('deletes multiple alerts correctly', async () => {
+      const userAction = getAlertUserAction();
+
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        caseData: {
+          ...builderArgs.caseData,
+          comments: [
+            {
+              ...alertComment,
+              alertId: ['alert-id-1', 'alert-id-2'],
+              index: ['alert-index-1', 'alert-index-2'],
+            },
+          ],
+        },
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      const res = appMockRender.render(<EuiCommentList comments={createdUserAction} />);
 
       expect(screen.getByTestId('multiple-alerts-user-action-alert-action-id')).toHaveTextContent(
         'added 2 alerts from Awesome rule'
       );
-      expect(screen.getByTestId('comment-action-show-alerts-1234'));
+
+      await deleteAttachment(res, 'minusInCircle', 'Remove');
+
+      await waitFor(() => {
+        expect(builderArgs.handleDeleteComment).toHaveBeenCalledWith('alert-comment-id');
+      });
+    });
+
+    it('views multiple alerts correctly', async () => {
+      useCaseViewParamsMock.mockReturnValue({ detailName: '1234' });
+      const userAction = getAlertUserAction();
+
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        caseData: {
+          ...builderArgs.caseData,
+          comments: [
+            {
+              ...alertComment,
+              alertId: ['alert-id-1', 'alert-id-2'],
+              index: ['alert-index-1', 'alert-index-2'],
+            },
+          ],
+        },
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      const res = appMockRender.render(<EuiCommentList comments={createdUserAction} />);
+
+      expect(res.getByTestId('comment-action-show-alerts-1234'));
+      userEvent.click(res.getByTestId('comment-action-show-alerts-1234'));
+
+      await waitFor(() => {
+        expect(navigateToCaseView).toHaveBeenCalledWith({ detailName: '1234', tabId: 'alerts' });
+      });
     });
   });
 
@@ -297,20 +585,8 @@ describe('createCommentUserActionBuilder', () => {
       const result = appMockRender.render(<EuiCommentList comments={createdUserAction} />);
 
       expect(result.getByTestId('comment-externalReference-.test')).toBeInTheDocument();
-      expect(result.getByTestId('property-actions')).toBeInTheDocument();
 
-      userEvent.click(result.getByTestId('property-actions-ellipses'));
-      await waitForEuiPopoverOpen();
-
-      expect(result.queryByTestId('property-actions-trash')).toBeInTheDocument();
-
-      userEvent.click(result.getByTestId('property-actions-trash'));
-
-      await waitFor(() => {
-        expect(result.queryByTestId('property-actions-confirm-modal')).toBeInTheDocument();
-      });
-
-      userEvent.click(result.getByText('Delete'));
+      await deleteAttachment(result, 'trash', 'Delete');
 
       await waitFor(() => {
         expect(builderArgs.handleDeleteComment).toHaveBeenCalledWith(
@@ -480,20 +756,8 @@ describe('createCommentUserActionBuilder', () => {
       const result = appMockRender.render(<EuiCommentList comments={createdUserAction} />);
 
       expect(result.getByTestId('comment-persistableState-.test')).toBeInTheDocument();
-      expect(result.getByTestId('property-actions')).toBeInTheDocument();
 
-      userEvent.click(result.getByTestId('property-actions-ellipses'));
-      await waitForEuiPopoverOpen();
-
-      expect(result.queryByTestId('property-actions-trash')).toBeInTheDocument();
-
-      userEvent.click(result.getByTestId('property-actions-trash'));
-
-      await waitFor(() => {
-        expect(result.queryByTestId('property-actions-confirm-modal')).toBeInTheDocument();
-      });
-
-      userEvent.click(result.getByText('Delete'));
+      await deleteAttachment(result, 'trash', 'Delete');
 
       await waitFor(() => {
         expect(builderArgs.handleDeleteComment).toHaveBeenCalledWith(
@@ -503,3 +767,20 @@ describe('createCommentUserActionBuilder', () => {
     });
   });
 });
+
+const deleteAttachment = async (result: RenderResult, deleteIcon: string, buttonLabel: string) => {
+  expect(result.getByTestId('property-actions')).toBeInTheDocument();
+
+  userEvent.click(result.getByTestId('property-actions-ellipses'));
+  await waitForEuiPopoverOpen();
+
+  expect(result.queryByTestId(`property-actions-${deleteIcon}`)).toBeInTheDocument();
+
+  userEvent.click(result.getByTestId(`property-actions-${deleteIcon}`));
+
+  await waitFor(() => {
+    expect(result.queryByTestId('property-actions-confirm-modal')).toBeInTheDocument();
+  });
+
+  userEvent.click(result.getByText(buttonLabel));
+};
