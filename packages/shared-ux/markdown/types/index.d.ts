@@ -21,4 +21,5 @@ export type MarkdownProps = Partial<
   /** Eui allows the height of the markdown component to be set */
   height?: number | 'full';
   placeholder?: string | undefined;
+  openLinksInNewTab?: boolean;
 };
