@@ -68,6 +68,7 @@ export function getTestDataLoader({ getService }) {
   const kbnServer = getService('kibanaServer');
   const supertest = getService('supertest');
   const log = getService('log');
+  const es = getService('es');
 
   return {
     createFtrSpaces: async () => {
@@ -123,6 +124,29 @@ export function getTestDataLoader({ getService }) {
           kbnServer.savedObjects.clean({ space: spaceId, types: ['sharedtype', 'isolatedtype'] }),
         ])
       );
+    },
+
+    deleteAllSavedObjectsFromKibanaIndex: async () => {
+      await es.deleteByQuery({
+        index: '.kibana',
+        wait_for_completion: true,
+        body: {
+          conflicts: 'proceed',
+          query: {
+            bool: {
+              must_not: [
+                {
+                  term: {
+                    type: {
+                      value: 'space',
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        },
+      });
     },
   };
 }

@@ -195,11 +195,7 @@ export const usePickIndexPatterns = ({
           // constantly getting destroy and re-init
           const pickedDataViewData = await getSourcererDataView(newSelectedDataViewId);
           if (isHookAlive.current) {
-            dispatch(
-              sourcererActions.updateSourcererDataViews({
-                dataView: pickedDataViewData,
-              })
-            );
+            dispatch(sourcererActions.setDataView(pickedDataViewData));
             setSelectedOptions(
               isOnlyDetectionAlerts
                 ? alertsOptions
