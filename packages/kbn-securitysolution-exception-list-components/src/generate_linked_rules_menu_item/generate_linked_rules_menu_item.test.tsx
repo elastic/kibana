@@ -12,7 +12,7 @@ import { generateLinedRulesMenuItems } from '.';
 import { rules } from '../mocks/rule_references.mock';
 import {
   getSecurityLinkAction,
-  securityLinkAnchorComponent,
+  securityLinkAnchorComponentMock,
 } from '../mocks/security_link_component.mock';
 
 const dataTestSubj = 'generateLinedRulesMenuItemsTest';
@@ -23,7 +23,7 @@ describe('generateLinedRulesMenuItems', () => {
     const result = generateLinedRulesMenuItems({
       dataTestSubj,
       linkedRules: [],
-      securityLinkAnchorComponent,
+      securityLinkAnchorComponent: securityLinkAnchorComponentMock,
     });
     expect(result).toBeNull();
   });
@@ -39,7 +39,7 @@ describe('generateLinedRulesMenuItems', () => {
     const result: ReactElement[] = generateLinedRulesMenuItems({
       dataTestSubj,
       linkedRules,
-      securityLinkAnchorComponent,
+      securityLinkAnchorComponent: securityLinkAnchorComponentMock,
       leftIcon: 'check',
     }) as ReactElement[];
 

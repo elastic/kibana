@@ -1,0 +1,484 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ExceptionListHeader should render the List Header with name, default Description and disabled actions  because of the ReadOnly mode 1`] = `
+Object {
+  "asFragment": [Function],
+  "baseElement": <body>
+    <div>
+      <div
+        css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+      >
+        <header
+          class="euiPageHeader emotion-euiPageHeader"
+          data-test-subj="PageHeader"
+        >
+          <div
+            class="euiPageHeaderContent emotion-euiPageHeaderContent-border-l"
+          >
+            <nav
+              aria-label="Breadcrumbs"
+              class="euiBreadcrumbs"
+            >
+              <ol
+                class="euiBreadcrumbs__list emotion-euiBreadcrumbs__list-isTruncated"
+              >
+                <li
+                  class="euiBreadcrumb emotion-euiBreadcrumb-page-isTruncated"
+                >
+                  <button
+                    aria-current="false"
+                    class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast"
+                    title="Rule exceptions"
+                    type="button"
+                  >
+                    <span
+                      data-test-subj="Breadcrumb"
+                    >
+                      <span
+                        data-euiicon-type="arrowLeft"
+                      />
+                      Rule exceptions
+                    </span>
+                  </button>
+                </li>
+              </ol>
+            </nav>
+            <div
+              class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+            />
+            <div
+              class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive euiPageHeaderContent__top"
+            >
+              <div
+                class="euiFlexItem"
+              >
+                <div
+                  class="euiPageHeaderContent__bottom"
+                >
+                  <div
+                    class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+                  />
+                  <div
+                    class="euiPageHeaderSection"
+                  >
+                    <div
+                      css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+                    >
+                      <span
+                        data-test-subj="TitleText"
+                      >
+                        List Name
+                      </span>
+                    </div>
+                    <div
+                      css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+                    >
+                      <h1
+                        class="euiTitle emotion-euiTitle-l"
+                      >
+                        <div
+                          css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+                        >
+                          <span
+                            css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+                            data-test-subj="DescriptionText"
+                          >
+                            Add a description
+                          </span>
+                        </div>
+                      </h1>
+                      <div
+                        css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+                        data-test-subj="ListID"
+                      >
+                        <div
+                          class="euiText emotion-EuiText"
+                        >
+                          List ID
+                          :
+                        </div>
+                        <div
+                          class="euiText emotion-EuiText"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <div
+                  class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRowReverse euiFlexGroup--wrap"
+                >
+                  <div
+                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                  >
+                    <div
+                      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                      data-test-subj="RightSideMenuItemsContainer"
+                    >
+                      <div
+                        class="euiFlexItem emotion-EuiFlexItem"
+                      >
+                        <div
+                          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                        >
+                          <div
+                            class="euiPopover emotion-euiPopover"
+                            data-test-subj="Items"
+                          >
+                            <div
+                              class="euiPopover__anchor css-16vtueo-render"
+                            >
+                              <button
+                                aria-label="Header menu Button Empty"
+                                class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty-isDisabled"
+                                data-test-subj="EmptyButton"
+                                disabled=""
+                                type="button"
+                              >
+                                <span
+                                  class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                                >
+                                  <span
+                                    class="euiButtonContent__icon"
+                                    color="inherit"
+                                    data-euiicon-type="arrowDown"
+                                  />
+                                  <span
+                                    class="euiButtonEmpty__text"
+                                  >
+                                    Linked to 0 rules
+                                  </span>
+                                </span>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div
+                        class="euiFlexItem"
+                      >
+                        <button
+                          class="euiButton euiButton--primary euiButton--fill"
+                          data-test-subj="RightSideMenuItemsManageRulesButton"
+                          type="button"
+                        >
+                          <span
+                            class="euiButtonContent euiButton__content"
+                          >
+                            <span
+                              class="euiButton__text"
+                            >
+                              Manage rules
+                            </span>
+                          </span>
+                        </button>
+                      </div>
+                      <div
+                        class="euiFlexItem"
+                      >
+                        <div
+                          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                        >
+                          <div
+                            class="euiPopover emotion-euiPopover"
+                            data-test-subj="Items"
+                          >
+                            <div
+                              class="euiPopover__anchor css-16vtueo-render"
+                            >
+                              <button
+                                aria-label="Header menu Button Icon"
+                                class="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+                                data-test-subj="ButtonIcon"
+                                disabled=""
+                                type="button"
+                              >
+                                <span
+                                  aria-hidden="true"
+                                  class="euiButtonIcon__icon"
+                                  color="inherit"
+                                  data-euiicon-type="boxesHorizontal"
+                                />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </header>
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+    >
+      <header
+        class="euiPageHeader emotion-euiPageHeader"
+        data-test-subj="PageHeader"
+      >
+        <div
+          class="euiPageHeaderContent emotion-euiPageHeaderContent-border-l"
+        >
+          <nav
+            aria-label="Breadcrumbs"
+            class="euiBreadcrumbs"
+          >
+            <ol
+              class="euiBreadcrumbs__list emotion-euiBreadcrumbs__list-isTruncated"
+            >
+              <li
+                class="euiBreadcrumb emotion-euiBreadcrumb-page-isTruncated"
+              >
+                <button
+                  aria-current="false"
+                  class="euiLink euiBreadcrumb__content emotion-euiLink-primary-euiBreadcrumb__content-page-isTruncatedLast"
+                  title="Rule exceptions"
+                  type="button"
+                >
+                  <span
+                    data-test-subj="Breadcrumb"
+                  >
+                    <span
+                      data-euiicon-type="arrowLeft"
+                    />
+                    Rule exceptions
+                  </span>
+                </button>
+              </li>
+            </ol>
+          </nav>
+          <div
+            class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+          />
+          <div
+            class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive euiPageHeaderContent__top"
+          >
+            <div
+              class="euiFlexItem"
+            >
+              <div
+                class="euiPageHeaderContent__bottom"
+              >
+                <div
+                  class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+                />
+                <div
+                  class="euiPageHeaderSection"
+                >
+                  <div
+                    css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+                  >
+                    <span
+                      data-test-subj="TitleText"
+                    >
+                      List Name
+                    </span>
+                  </div>
+                  <div
+                    css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+                  >
+                    <h1
+                      class="euiTitle emotion-euiTitle-l"
+                    >
+                      <div
+                        css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+                      >
+                        <span
+                          css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+                          data-test-subj="DescriptionText"
+                        >
+                          Add a description
+                        </span>
+                      </div>
+                    </h1>
+                    <div
+                      css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+                      data-test-subj="ListID"
+                    >
+                      <div
+                        class="euiText emotion-EuiText"
+                      >
+                        List ID
+                        :
+                      </div>
+                      <div
+                        class="euiText emotion-EuiText"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <div
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRowReverse euiFlexGroup--wrap"
+              >
+                <div
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                >
+                  <div
+                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    data-test-subj="RightSideMenuItemsContainer"
+                  >
+                    <div
+                      class="euiFlexItem emotion-EuiFlexItem"
+                    >
+                      <div
+                        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                      >
+                        <div
+                          class="euiPopover emotion-euiPopover"
+                          data-test-subj="Items"
+                        >
+                          <div
+                            class="euiPopover__anchor css-16vtueo-render"
+                          >
+                            <button
+                              aria-label="Header menu Button Empty"
+                              class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty-isDisabled"
+                              data-test-subj="EmptyButton"
+                              disabled=""
+                              type="button"
+                            >
+                              <span
+                                class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                              >
+                                <span
+                                  class="euiButtonContent__icon"
+                                  color="inherit"
+                                  data-euiicon-type="arrowDown"
+                                />
+                                <span
+                                  class="euiButtonEmpty__text"
+                                >
+                                  Linked to 0 rules
+                                </span>
+                              </span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      class="euiFlexItem"
+                    >
+                      <button
+                        class="euiButton euiButton--primary euiButton--fill"
+                        data-test-subj="RightSideMenuItemsManageRulesButton"
+                        type="button"
+                      >
+                        <span
+                          class="euiButtonContent euiButton__content"
+                        >
+                          <span
+                            class="euiButton__text"
+                          >
+                            Manage rules
+                          </span>
+                        </span>
+                      </button>
+                    </div>
+                    <div
+                      class="euiFlexItem"
+                    >
+                      <div
+                        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                      >
+                        <div
+                          class="euiPopover emotion-euiPopover"
+                          data-test-subj="Items"
+                        >
+                          <div
+                            class="euiPopover__anchor css-16vtueo-render"
+                          >
+                            <button
+                              aria-label="Header menu Button Icon"
+                              class="euiButtonIcon euiButtonIcon-isDisabled euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+                              data-test-subj="ButtonIcon"
+                              disabled=""
+                              type="button"
+                            >
+                              <span
+                                aria-hidden="true"
+                                class="euiButtonIcon__icon"
+                                color="inherit"
+                                data-euiicon-type="boxesHorizontal"
+                              />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+    </div>
+  </div>,
+  "debug": [Function],
+  "findAllByAltText": [Function],
+  "findAllByDisplayValue": [Function],
+  "findAllByLabelText": [Function],
+  "findAllByPlaceholderText": [Function],
+  "findAllByRole": [Function],
+  "findAllByTestId": [Function],
+  "findAllByText": [Function],
+  "findAllByTitle": [Function],
+  "findByAltText": [Function],
+  "findByDisplayValue": [Function],
+  "findByLabelText": [Function],
+  "findByPlaceholderText": [Function],
+  "findByRole": [Function],
+  "findByTestId": [Function],
+  "findByText": [Function],
+  "findByTitle": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;

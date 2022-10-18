@@ -47,7 +47,7 @@ const MenuItemsComponent: FC<MenuItemsProps> = ({
       alignItems="baseline"
       justifyContent="center"
       responsive
-      data-test-subj={`${dataTestSubj || ''}MenuItems`}
+      data-test-subj={`${dataTestSubj || ''}Container`}
       gutterSize="l"
     >
       <EuiFlexItem css={headerMenuCss}>
@@ -78,6 +78,7 @@ const MenuItemsComponent: FC<MenuItemsProps> = ({
 
       <EuiFlexItem>
         <HeaderMenu
+          data-test-subj={`${dataTestSubj || ''}MenuActions`}
           actions={[
             {
               key: '1',

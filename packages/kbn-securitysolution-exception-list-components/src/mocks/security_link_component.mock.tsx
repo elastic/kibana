@@ -8,7 +8,7 @@
 import React, { ReactElement } from 'react';
 import { generateLinedRulesMenuItems } from '../generate_linked_rules_menu_item';
 import { rules } from './rule_references.mock';
-export const securityLinkAnchorComponent = ({
+export const securityLinkAnchorComponentMock = ({
   referenceName,
   referenceId,
 }: {
@@ -32,5 +32,5 @@ export const getSecurityLinkAction = (dataTestSubj: string) =>
         rule_id: 'rule-2',
       },
     ],
-    securityLinkAnchorComponent,
+    securityLinkAnchorComponent: securityLinkAnchorComponentMock,
   }) as ReactElement[];
