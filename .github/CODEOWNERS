@@ -990,6 +990,9 @@ packages/shared-ux/card/no_data/types @elastic/shared-ux
 packages/shared-ux/link/redirect_app/impl @elastic/shared-ux
 packages/shared-ux/link/redirect_app/mocks @elastic/shared-ux
 packages/shared-ux/link/redirect_app/types @elastic/shared-ux
+packages/shared-ux/markdown/impl @elastic/shared-ux
+packages/shared-ux/markdown/mocks @elastic/shared-ux
+packages/shared-ux/markdown/types @elastic/shared-ux
 packages/shared-ux/page/analytics_no_data/impl @elastic/shared-ux
 packages/shared-ux/page/analytics_no_data/mocks @elastic/shared-ux
 packages/shared-ux/page/analytics_no_data/types @elastic/shared-ux

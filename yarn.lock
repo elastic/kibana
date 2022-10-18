@@ -3745,6 +3745,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/shared-ux-markdown-mocks@link:bazel-bin/packages/shared-ux/markdown/mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-markdown-types@link:bazel-bin/packages/shared-ux/markdown/types":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-markdown@link:bazel-bin/packages/shared-ux/markdown/impl":
+  version "0.0.0"
+  uid ""
+
 "@kbn/shared-ux-page-analytics-no-data-mocks@link:bazel-bin/packages/shared-ux/page/analytics_no_data/mocks":
   version "0.0.0"
   uid ""
@@ -7894,6 +7906,18 @@
   uid ""
 
 "@types/kbn__shared-ux-link-redirect-app@link:bazel-bin/packages/shared-ux/link/redirect_app/impl/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-markdown-mocks@link:bazel-bin/packages/shared-ux/markdown/mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-markdown-types@link:bazel-bin/packages/shared-ux/markdown/types/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-markdown@link:bazel-bin/packages/shared-ux/markdown/impl/npm_module_types":
   version "0.0.0"
   uid ""
 
