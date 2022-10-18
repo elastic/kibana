@@ -56,7 +56,7 @@ export function loadSnippet({
 
   const gainsightApi = window['aptrinsic'];
 
-  if (!gainsightApi) {
+  if (!gainsightApi || !gainsightApi.init) {
     throw new Error('Gainsight snippet failed to load. Check browser logs for more information.');
   }
 

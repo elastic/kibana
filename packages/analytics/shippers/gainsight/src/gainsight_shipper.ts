@@ -58,9 +58,7 @@ export class GainsightShipper implements IShipper {
       this.gainsightApi('set', 'globalContext', {
         kibanaUserId: userId,
       });
-      if (this.gainsightApi.init) {
-        this.lastClusterName = clusterName;
-      }
+      this.lastClusterName = clusterName;
     } else {
       this.initContext.logger.debug(
         `Identify has already been called with ${userId} and ${clusterName}`
