@@ -7118,6 +7118,7 @@
     "xpack.apm.correlations.failedTransactions.panelTitle": "失敗したトランザクションの遅延分布",
     "xpack.apm.correlations.failedTransactions.tableTitle": "相関関係",
     "xpack.apm.correlations.fieldContextPopover.descriptionTooltipContent": "上位10フィールド値を表示",
+    "xpack.apm.correlations.fieldContextPopover.notTopTenValueMessage": "選択した用語は上位10件にありません",
     "xpack.apm.correlations.fieldContextPopover.topFieldValuesAriaLabel": "上位10フィールド値を表示",
     "xpack.apm.correlations.highImpactText": "高",
     "xpack.apm.correlations.latencyCorrelations.advancedStatisticsLabel": "詳細統計情報",

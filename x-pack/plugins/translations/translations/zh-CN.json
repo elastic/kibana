@@ -7134,6 +7134,7 @@
     "xpack.apm.correlations.failedTransactions.panelTitle": "失败事务延迟分布",
     "xpack.apm.correlations.failedTransactions.tableTitle": "相关性",
     "xpack.apm.correlations.fieldContextPopover.descriptionTooltipContent": "显示排名前 10 字段值",
+    "xpack.apm.correlations.fieldContextPopover.notTopTenValueMessage": "选定的词未排名前 10",
     "xpack.apm.correlations.fieldContextPopover.topFieldValuesAriaLabel": "显示排名前 10 字段值",
     "xpack.apm.correlations.highImpactText": "高",
     "xpack.apm.correlations.latencyCorrelations.advancedStatisticsLabel": "高级统计信息",

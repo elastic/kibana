@@ -7130,6 +7130,7 @@
     "xpack.apm.correlations.failedTransactions.panelTitle": "Distribution de la latence des transactions ayant échoué",
     "xpack.apm.correlations.failedTransactions.tableTitle": "Corrélations",
     "xpack.apm.correlations.fieldContextPopover.descriptionTooltipContent": "Afficher le top 10 des valeurs de champ",
+    "xpack.apm.correlations.fieldContextPopover.notTopTenValueMessage": "Le terme sélectionné n'est pas dans le top 10",
     "xpack.apm.correlations.fieldContextPopover.topFieldValuesAriaLabel": "Afficher le top 10 des valeurs de champ",
     "xpack.apm.correlations.highImpactText": "Élevé",
     "xpack.apm.correlations.latencyCorrelations.advancedStatisticsLabel": "Statistiques avancées",
