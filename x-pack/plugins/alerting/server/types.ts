@@ -126,8 +126,9 @@ export interface RuleTypeParamsValidator<Params extends RuleTypeParams> {
   validateMutatedParams?: (mutatedOject: Params, origObject?: Params) => Params;
 }
 
-export type RuleDataSearcher = <TSearchRequest extends ESSearchRequest>(
-  request: TSearchRequest,
+export type GetSummarizedAlertsFn = <TSearchRequest extends ESSearchRequest>(
+  start: Date,
+  end: Date,
   spaceId: string
 ) => Promise<ESSearchResponse<Partial<unknown>, TSearchRequest>>;
 
@@ -175,7 +176,7 @@ export interface RuleType<
   ruleTaskTimeout?: string;
   cancelAlertsOnRuleTimeout?: boolean;
   doesSetRecoveryContext?: boolean;
-  ruleDataSearcher?: RuleDataSearcher;
+  getSummarizedAlerts?: GetSummarizedAlertsFn;
 }
 export type UntypedRuleType = RuleType<
   RuleTypeParams,

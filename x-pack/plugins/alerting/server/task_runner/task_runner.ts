@@ -305,8 +305,8 @@ export class TaskRunner<
       searchSourceClient,
     });
 
-    if (this.ruleType.ruleDataSearcher) {
-      this.ruleType.ruleDataSearcher({}, spaceId);
+    if (this.ruleType.getSummarizedAlerts) {
+      this.ruleType.getSummarizedAlerts(new Date(), new Date(), spaceId);
     }
 
     const { updatedRuleTypeState, hasReachedAlertLimit, originalAlerts } =

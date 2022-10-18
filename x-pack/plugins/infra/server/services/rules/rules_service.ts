@@ -8,7 +8,7 @@
 import { CoreSetup, Logger } from '@kbn/core/server';
 import {
   createLifecycleExecutor,
-  createRuleDataSearchWrapper,
+  createGetSummarizedAlertsFn,
 } from '@kbn/rule-registry-plugin/server';
 import { InfraFeatureId } from '../../../common/constants';
 import { createRuleDataClient } from './rule_data_client';
@@ -40,14 +40,14 @@ export class RulesService {
     });
 
     const createLifecycleRuleExecutor = createLifecycleExecutor(this.logger, ruleDataClient);
-    const ruleDataSearchWrapper = createRuleDataSearchWrapper({
+    const createGetSummarizedAlerts = createGetSummarizedAlertsFn({
       ruleDataClient,
       useNamespace: false,
     });
 
     return {
       createLifecycleRuleExecutor,
-      ruleDataSearchWrapper,
+      createGetSummarizedAlerts,
       ruleDataClient,
     };
   }
