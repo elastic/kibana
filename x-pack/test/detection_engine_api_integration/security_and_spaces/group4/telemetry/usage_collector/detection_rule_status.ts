@@ -46,7 +46,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   // Note: We don't actually find signals well with ML tests at the moment so there are not tests for ML rule type for telemetry
   // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/132856
-  describe.skip('Detection rule status telemetry', async () => {
+  describe('Detection rule status telemetry', async () => {
     before(async () => {
       // Just in case other tests do not clean up the event logs, let us clear them now and here only once.
       await deleteAllEventLogExecutionEvents(es, log);
@@ -209,7 +209,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(stats?.detection_rules.detection_rule_status.custom_rules.query.succeeded).to.eql(1);
       });
 
-      it('should have non zero values for "succeeded", "index_duration", and "search_duration"', () => {
+      it('should have non zero values for "succeeded", "index_duration", "search_duration" and "enrichment_duration"', () => {
         expect(
           stats?.detection_rules.detection_rule_status.custom_rules.query.index_duration.max
         ).to.be.above(1);
@@ -228,6 +228,15 @@ export default ({ getService }: FtrProviderContext) => {
         expect(
           stats?.detection_rules.detection_rule_status.custom_rules.query.search_duration.min
         ).to.be.above(1);
+        expect(
+          stats?.detection_rules.detection_rule_status.custom_rules.query.enrichment_duration.max
+        ).to.be.above(0);
+        expect(
+          stats?.detection_rules.detection_rule_status.custom_rules.query.enrichment_duration.avg
+        ).to.be.above(0);
+        expect(
+          stats?.detection_rules.detection_rule_status.custom_rules.query.enrichment_duration.min
+        ).to.be.above(0);
       });
 
       it('should have a total value for "detection_rule_status.custom_rules" rule ', () => {
@@ -387,7 +396,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(stats?.detection_rules.detection_rule_status.custom_rules.eql.succeeded).to.eql(1);
       });
 
-      it('should have non zero values for "succeeded", "index_duration", and "search_duration"', () => {
+      it('should have non zero values for "succeeded", "index_duration", "search_duration" and "enrichment_duration"', () => {
         expect(
           stats?.detection_rules.detection_rule_status.custom_rules.eql.index_duration.max
         ).to.be.above(1);
@@ -406,6 +415,15 @@ export default ({ getService }: FtrProviderContext) => {
         expect(
           stats?.detection_rules.detection_rule_status.custom_rules.eql.search_duration.min
         ).to.be.above(1);
+        expect(
+          stats?.detection_rules.detection_rule_status.custom_rules.eql.enrichment_duration.max
+        ).to.be.above(0);
+        expect(
+          stats?.detection_rules.detection_rule_status.custom_rules.eql.enrichment_duration.avg
+        ).to.be.above(0);
+        expect(
+          stats?.detection_rules.detection_rule_status.custom_rules.eql.enrichment_duration.min
+        ).to.be.above(0);
       });
 
       it('should have a total value for "detection_rule_status.custom_rules" rule ', () => {
@@ -575,7 +593,7 @@ export default ({ getService }: FtrProviderContext) => {
         ).to.eql(1);
       });
 
-      it('should have non zero values for "succeeded", "index_duration", and "search_duration"', () => {
+      it('should have non zero values for "succeeded", "index_duration", "search_duration" and "enrichment_duration"', () => {
         expect(
           stats?.detection_rules.detection_rule_status.custom_rules.threshold.index_duration.max
         ).to.be.above(1);
@@ -594,6 +612,18 @@ export default ({ getService }: FtrProviderContext) => {
         expect(
           stats?.detection_rules.detection_rule_status.custom_rules.threshold.search_duration.min
         ).to.be.above(1);
+        expect(
+          stats?.detection_rules.detection_rule_status.custom_rules.threshold.enrichment_duration
+            .max
+        ).to.be.above(0);
+        expect(
+          stats?.detection_rules.detection_rule_status.custom_rules.threshold.enrichment_duration
+            .avg
+        ).to.be.above(0);
+        expect(
+          stats?.detection_rules.detection_rule_status.custom_rules.threshold.enrichment_duration
+            .min
+        ).to.be.above(0);
       });
 
       it('should have a total value for "detection_rule_status.custom_rules" rule ', () => {
@@ -772,7 +802,7 @@ export default ({ getService }: FtrProviderContext) => {
         ).to.eql(1);
       });
 
-      it('should have non zero values for "succeeded", "index_duration", and "search_duration"', () => {
+      it('should have non zero values for "succeeded", "index_duration", "search_duration" and "enrichment_duration"', () => {
         expect(
           stats?.detection_rules.detection_rule_status.custom_rules.threat_match.index_duration.max
         ).to.be.above(1);
@@ -791,6 +821,18 @@ export default ({ getService }: FtrProviderContext) => {
         expect(
           stats?.detection_rules.detection_rule_status.custom_rules.threat_match.search_duration.min
         ).to.be.above(1);
+        expect(
+          stats?.detection_rules.detection_rule_status.custom_rules.threat_match.enrichment_duration
+            .max
+        ).to.be.above(0);
+        expect(
+          stats?.detection_rules.detection_rule_status.custom_rules.threat_match.enrichment_duration
+            .avg
+        ).to.be.above(0);
+        expect(
+          stats?.detection_rules.detection_rule_status.custom_rules.threat_match.enrichment_duration
+            .min
+        ).to.be.above(0);
       });
 
       it('should have a total value for "detection_rule_status.custom_rules" rule ', () => {
