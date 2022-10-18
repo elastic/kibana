@@ -8,22 +8,23 @@ import { schema } from '@kbn/config-schema';
 import { UMServerLibs } from '../../legacy_uptime/lib/lib';
 import { ProjectMonitor } from '../../../common/runtime_types';
 
-import { SyntheticsStreamingRouteFactory } from '../../legacy_uptime/routes/types';
+import { SyntheticsRestApiRouteFactory } from '../../legacy_uptime/routes/types';
 import { API_URLS } from '../../../common/constants';
 import { getAllLocations } from '../../synthetics_service/get_all_locations';
-import { ProjectMonitorFormatterLegacy } from '../../synthetics_service/project_monitor/project_monitor_formatter_legacy';
+import { ProjectMonitorFormatter } from '../../synthetics_service/project_monitor/project_monitor_formatter';
 
 const MAX_PAYLOAD_SIZE = 1048576 * 20; // 20MiB
 
-export const addSyntheticsProjectMonitorRouteLegacy: SyntheticsStreamingRouteFactory = (
+export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
   libs: UMServerLibs
 ) => ({
   method: 'PUT',
-  path: API_URLS.SYNTHETICS_MONITORS_PROJECT_LEGACY,
+  path: API_URLS.SYNTHETICS_MONITORS_PROJECT,
   validate: {
+    params: schema.object({
+      projectName: schema.string(),
+    }),
     body: schema.object({
-      project: schema.string(),
-      keep_stale: schema.boolean(),
       monitors: schema.arrayOf(schema.any()),
     }),
   },
@@ -42,7 +43,8 @@ export const addSyntheticsProjectMonitorRouteLegacy: SyntheticsStreamingRouteFac
     try {
       const monitors = (request.body?.monitors as ProjectMonitor[]) || [];
       const spaceId = server.spaces.spacesService.getSpaceId(request);
-      const { keep_stale: keepStale, project: projectId } = request.body || {};
+      const { projectName } = request.params;
+      const decodedProjectName = decodeURI(projectName);
       const { publicLocations, privateLocations } = await getAllLocations(
         server,
         syntheticsMonitorClient,
@@ -50,10 +52,9 @@ export const addSyntheticsProjectMonitorRouteLegacy: SyntheticsStreamingRouteFac
       );
       const encryptedSavedObjectsClient = server.encryptedSavedObjects.getClient();
 
-      const pushMonitorFormatter = new ProjectMonitorFormatterLegacy({
-        projectId,
+      const pushMonitorFormatter = new ProjectMonitorFormatter({
+        projectId: decodedProjectName,
         spaceId,
-        keepStale,
         locations: publicLocations,
         privateLocations,
         encryptedSavedObjectsClient,
@@ -62,19 +63,15 @@ export const addSyntheticsProjectMonitorRouteLegacy: SyntheticsStreamingRouteFac
         server,
         syntheticsMonitorClient,
         request,
-        subject,
       });
 
       await pushMonitorFormatter.configureAllProjectMonitors();
 
-      subject?.next({
+      return {
         createdMonitors: pushMonitorFormatter.createdMonitors,
         updatedMonitors: pushMonitorFormatter.updatedMonitors,
-        staleMonitors: pushMonitorFormatter.staleMonitors,
-        deletedMonitors: pushMonitorFormatter.deletedMonitors,
         failedMonitors: pushMonitorFormatter.failedMonitors,
-        failedStaleMonitors: pushMonitorFormatter.failedStaleMonitors,
-      });
+      };
     } catch (error) {
       subject?.error(error);
     } finally {
