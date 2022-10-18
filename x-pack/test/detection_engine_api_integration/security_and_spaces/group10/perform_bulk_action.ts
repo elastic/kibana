@@ -16,7 +16,7 @@ import type { RuleResponse } from '@kbn/security-solution-plugin/common/detectio
 import {
   BulkAction,
   BulkActionEditType,
-} from '@kbn/security-solution-plugin/common/detection_engine/rule_management';
+} from '@kbn/security-solution-plugin/common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   binaryToString,

@@ -24,8 +24,8 @@ import {
 import type { RulesReferencedByExceptionListsSchema } from '../../../../common/detection_engine/rule_exceptions';
 import { DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL } from '../../../../common/detection_engine/rule_exceptions';
 
-import type { BulkActionEditPayload } from '../../../../common/detection_engine/rule_management';
-import { BulkAction } from '../../../../common/detection_engine/rule_management';
+import type { BulkActionEditPayload } from '../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import { BulkAction } from '../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 
 import type {
   RuleResponse,

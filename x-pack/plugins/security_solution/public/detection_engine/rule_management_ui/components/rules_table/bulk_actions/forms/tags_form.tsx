@@ -9,8 +9,8 @@ import { EuiCallOut, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 
-import type { BulkActionEditPayload } from '../../../../../../../common/detection_engine/rule_management';
-import { BulkActionEditType } from '../../../../../../../common/detection_engine/rule_management';
+import type { BulkActionEditPayload } from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import { BulkActionEditType } from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import * as i18n from '../../../../../../detections/pages/detection_engine/rules/translations';
 import { caseInsensitiveSort } from '../../helpers';
 

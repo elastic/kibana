@@ -16,8 +16,8 @@ import {
 import type {
   BulkActionEditPayload,
   BulkActionEditPayloadRuleActions,
-} from '../../../../../../common/detection_engine/rule_management';
-import { BulkActionEditType } from '../../../../../../common/detection_engine/rule_management';
+} from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import { BulkActionEditType } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 
 import type { MlAuthz } from '../../../../machine_learning/authz';
 

@@ -7,7 +7,7 @@
 
 import * as t from 'io-ts';
 
-import { NonEmptyArray, TimeDuration, enumeration } from '@kbn/securitysolution-io-ts-types';
+import { NonEmptyArray, TimeDuration } from '@kbn/securitysolution-io-ts-types';
 import {
   RuleActionGroup,
   RuleActionId,
@@ -30,8 +30,6 @@ export enum BulkAction {
   'duplicate' = 'duplicate',
   'edit' = 'edit',
 }
-
-export const bulkAction = enumeration('BulkAction', BulkAction);
 
 export enum BulkActionEditType {
   'add_tags' = 'add_tags',
@@ -115,8 +113,8 @@ export const BulkActionEditPayloadRuleActions = t.type({
   }),
 });
 
-export type BulkActionEditPayloadSchedule = t.TypeOf<typeof BulkActionEditPayloadSchedule>;
-export const BulkActionEditPayloadSchedule = t.type({
+type BulkActionEditPayloadSchedule = t.TypeOf<typeof BulkActionEditPayloadSchedule>;
+const BulkActionEditPayloadSchedule = t.type({
   type: t.literal(BulkActionEditType.set_schedule),
   value: t.type({
     interval: TimeDuration({ allowedUnits: ['s', 'm', 'h'] }),

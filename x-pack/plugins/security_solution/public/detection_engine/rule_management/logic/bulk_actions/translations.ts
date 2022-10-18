@@ -6,7 +6,7 @@
  */
 
 import type { ErrorToastOptions } from '@kbn/core-notifications-browser';
-import { BulkAction } from '../../../../../common/detection_engine/rule_management';
+import { BulkAction } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
 import type { BulkActionSummary } from '../../api/api';
 

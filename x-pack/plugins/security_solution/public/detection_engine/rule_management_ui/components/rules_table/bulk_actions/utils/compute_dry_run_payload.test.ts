@@ -8,7 +8,7 @@
 import {
   BulkAction,
   BulkActionEditType,
-} from '../../../../../../../common/detection_engine/rule_management';
+} from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
 
 import { computeDryRunPayload } from './compute_dry_run_payload';
 
