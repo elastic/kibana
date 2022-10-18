@@ -8,6 +8,7 @@
 import type { KbnClient } from '@kbn/test';
 import type { Client } from '@elastic/elasticsearch';
 import { AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
+import * as cborx from 'cbor-x';
 import { getFileDownloadId } from '../../../../common/endpoint/service/response_actions/get_file_download_id';
 import type { UploadedFile } from '../../../../common/endpoint/types/file_storage';
 import { checkInFleetAgent } from '../../common/fleet_services';
@@ -201,16 +202,29 @@ export const sendEndpointActionResponse = async (
     });
 
     // Index the file content (just one chunk)
-    await esClient.index({
-      index: FILE_STORAGE_DATA_INDEX,
-      id: `${fileMeta._id}.0`,
-      body: {
-        bid: fileMeta._id,
-        last: true,
-        data: 'UEsDBBQACAAIAFVeRFUAAAAAAAAAABMAAAAMACAAYmFkX2ZpbGUudHh0VVQNAAdTVjxjU1Y8Y1NWPGN1eAsAAQT1AQAABBQAAAArycgsVgCiRIWkxBSFtMycVC4AUEsHCKkCwMsTAAAAEwAAAFBLAQIUAxQACAAIAFVeRFWpAsDLEwAAABMAAAAMACAAAAAAAAAAAACkgQAAAABiYWRfZmlsZS50eHRVVA0AB1NWPGNTVjxjU1Y8Y3V4CwABBPUBAAAEFAAAAFBLBQYAAAAAAQABAFoAAABtAAAAAAA=',
+    // call to `.index()` copied from File plugin here:
+    // https://github.com/elastic/kibana/blob/main/x-pack/plugins/files/server/blob_storage_service/adapters/es/content_stream/content_stream.ts#L195
+    await esClient.index(
+      {
+        index: FILE_STORAGE_DATA_INDEX,
+        id: `${fileMeta._id}.0`,
+        document: cborx.encode({
+          bid: fileMeta._id,
+          last: true,
+          data: Buffer.from(
+            'UEsDBBQACAAIAFVeRFUAAAAAAAAAABMAAAAMACAAYmFkX2ZpbGUudHh0VVQNAAdTVjxjU1Y8Y1NWPGN1eAsAAQT1AQAABBQAAAArycgsVgCiRIWkxBSFtMycVC4AUEsHCKkCwMsTAAAAEwAAAFBLAQIUAxQACAAIAFVeRFWpAsDLEwAAABMAAAAMACAAAAAAAAAAAACkgQAAAABiYWRfZmlsZS50eHRVVA0AB1NWPGNTVjxjU1Y8Y3V4CwABBPUBAAAEFAAAAFBLBQYAAAAAAQABAFoAAABtAAAAAAA=',
+            'base64'
+          ),
+        }),
+        refresh: 'wait_for',
       },
-      refresh: 'wait_for',
-    });
+      {
+        headers: {
+          'content-type': 'application/cbor',
+          accept: 'application/json',
+        },
+      }
+    );
   }
 
   return endpointResponse;
