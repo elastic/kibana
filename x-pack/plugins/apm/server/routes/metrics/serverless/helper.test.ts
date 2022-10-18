@@ -6,14 +6,14 @@
  */
 import { calcMemoryUsed, calcMemoryUsedRate } from './helper';
 describe('calcMemoryUsed', () => {
-  it('returns zero when memory values are no a number', () => {
+  it('returns undefined when memory values are no a number', () => {
     [
       { memoryFree: null, memoryTotal: null },
       { memoryFree: undefined, memoryTotal: undefined },
       { memoryFree: 100, memoryTotal: undefined },
       { memoryFree: undefined, memoryTotal: 100 },
     ].forEach(({ memoryFree, memoryTotal }) => {
-      expect(calcMemoryUsed({ memoryFree, memoryTotal })).toBe(0);
+      expect(calcMemoryUsed({ memoryFree, memoryTotal })).toBeUndefined();
     });
   });
 
@@ -23,14 +23,14 @@ describe('calcMemoryUsed', () => {
 });
 
 describe('calcMemoryUsedRate', () => {
-  it('returns zero when memory values are no a number', () => {
+  it('returns undefined when memory values are no a number', () => {
     [
       { memoryFree: null, memoryTotal: null },
       { memoryFree: undefined, memoryTotal: undefined },
       { memoryFree: 100, memoryTotal: undefined },
       { memoryFree: undefined, memoryTotal: 100 },
     ].forEach(({ memoryFree, memoryTotal }) => {
-      expect(calcMemoryUsedRate({ memoryFree, memoryTotal })).toBe(0);
+      expect(calcMemoryUsedRate({ memoryFree, memoryTotal })).toBeUndefined();
     });
   });
 
