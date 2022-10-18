@@ -6,14 +6,13 @@
  * Side Public License, v 1.
  */
 import type { Query, AggregateQuery } from '@kbn/es-query';
-import { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { Chart } from '../components/chart/point_series';
 import { DataTableRecord } from '../../../types';
 import { AppState } from './discover_app_state_container';
-import { SavedSearchContainer } from './discover_saved_search_container';
 import { DiscoverServices } from '../../../build_services';
 import { DiscoverSearchSessionManager } from './discover_search_session';
 import { getRawRecordType } from '../utils/get_raw_record_type';
@@ -108,17 +107,17 @@ export interface DataStateContainer {
 export function getDataStateContainer({
   services,
   searchSessionManager,
-  appStateContainer,
-  savedSearchContainer,
+  getAppState,
+  getSavedSearch,
 }: {
   services: DiscoverServices;
   searchSessionManager: DiscoverSearchSessionManager;
-  appStateContainer: ReduxLikeStateContainer<AppState>;
-  savedSearchContainer: SavedSearchContainer;
+  getAppState: () => AppState;
+  getSavedSearch: () => SavedSearch;
 }): DataStateContainer {
   const { data } = services;
   const inspectorAdapters = { requests: new RequestAdapter() };
-  const appState = appStateContainer.getState();
+  const appState = getAppState();
   const recordRawType = getRawRecordType(appState.query);
   /**
    * The observable to trigger data fetching in UI
@@ -128,7 +127,7 @@ export function getDataStateContainer({
   const refetch$ = new Subject<DataRefetchMsg>();
   const shouldSearchOnPageLoad =
     services.uiSettings.get<boolean>(SEARCH_ON_PAGE_LOAD_SETTING) ||
-    savedSearchContainer.get().id !== undefined ||
+    getSavedSearch().id !== undefined ||
     !services.timefilter.getRefreshInterval().pause ||
     searchSessionManager.hasSearchSessionIdInURL();
   const initialFetchStatus = shouldSearchOnPageLoad
@@ -178,20 +177,14 @@ export function getDataStateContainer({
       abortController = new AbortController();
       const prevAutoRefreshDone = autoRefreshDone;
 
-      await fetchAll(
-        dataSubjects,
-        savedSearchContainer.get(),
-        val === 'reset',
-        appStateContainer.getState(),
-        {
-          abortController,
-          data,
-          initialFetchStatus,
-          inspectorAdapters,
-          searchSessionId: searchSessionManager.getNextSearchSessionId(),
-          services,
-        }
-      );
+      await fetchAll(dataSubjects, getSavedSearch(), val === 'reset', getAppState(), {
+        abortController,
+        data,
+        initialFetchStatus,
+        inspectorAdapters,
+        searchSessionId: searchSessionManager.getNextSearchSessionId(),
+        services,
+      });
 
       // If the autoRefreshCallback is still the same as when we started i.e. there was no newer call
       // replacing this current one, call it to make sure we tell that the auto refresh is done

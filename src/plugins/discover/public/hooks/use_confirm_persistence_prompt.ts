@@ -93,7 +93,7 @@ export const useConfirmPersistencePrompt = (
 
   const updateSavedSearch = useCallback(
     ({ savedSearch, dataView }: { savedSearch: SavedSearch; dataView: DataView }) => {
-      return stateContainer.savedSearchContainer.persist(
+      return stateContainer.savedSearchState.persist(
         savedSearch,
         {
           onSuccess: (id) => onUpdateSuccess(id, savedSearch),
@@ -103,7 +103,7 @@ export const useConfirmPersistencePrompt = (
         dataView
       );
     },
-    [onUpdateError, onUpdateSuccess, stateContainer.savedSearchContainer]
+    [onUpdateError, onUpdateSuccess, stateContainer.savedSearchState]
   );
 
   return { openConfirmSavePrompt, updateSavedSearch };

@@ -29,7 +29,7 @@ import { buildStateSubscribe } from '../hooks/utiles/build_state_subscribe';
 import { loadDataViewBySavedSearch } from '../load_data_view_by_saved_search';
 import { addLog } from '../../../utils/addLog';
 import {
-  DiscoverInternalState,
+  InternalStateContainer,
   getInternalStateContainer,
 } from './discover_internal_state_container';
 import {
@@ -70,13 +70,13 @@ export interface DiscoverStateContainer {
   /**
    * App state, the _a part of the URL
    */
-  appStateContainer: AppStateContainer;
+  appState: AppStateContainer;
 
-  internalStateContainer: DiscoverInternalState;
+  internalState: InternalStateContainer;
 
-  savedSearchContainer: SavedSearchContainer;
+  savedSearchState: SavedSearchContainer;
 
-  dataStateContainer: DataStateContainer;
+  dataState: DataStateContainer;
   /**
    * Set app state to with a partial new app state
    */
@@ -107,8 +107,8 @@ export interface DiscoverStateContainer {
      * @param reset
      */
     fetch: (reset?: boolean) => void;
-    changeDataView: (id: string) => void;
-    changeDataViewId: (id: string) => void;
+    changeDataView: (id: string, replace?: boolean) => void;
+    loadSavedSearchList: () => Promise<void>;
     loadSavedSearch: (
       id: string,
       dataViewSpec: DataViewSpec | undefined,
@@ -179,18 +179,18 @@ export function getDiscoverStateContainer({
   const dataStateContainer = getDataStateContainer({
     services,
     searchSessionManager,
-    appStateContainer,
-    savedSearchContainer,
+    getAppState: appStateContainer.getState,
+    getSavedSearch: savedSearchContainer.get,
   });
 
   const internalStateContainer = getInternalStateContainer();
   let unsubscribeSync: (() => void) | undefined;
 
   return {
-    appStateContainer,
-    internalStateContainer,
-    dataStateContainer,
-    savedSearchContainer,
+    appState: appStateContainer,
+    internalState: internalStateContainer,
+    dataState: dataStateContainer,
+    savedSearchState: savedSearchContainer,
     setAppState,
     flushToUrl: () => stateStorage.kbnUrlControls.flush(),
     actions: {
@@ -236,12 +236,13 @@ export function getDiscoverStateContainer({
         const msg = reset ? 'reset' : undefined;
         dataStateContainer.refetch$.next(msg);
       },
-      changeDataView: async (id: string) => {
-        setAppState({ index: id });
+      changeDataView: async (id: string, replaceURL = false) => {
+        setAppState({ index: id }, replaceURL);
         return;
       },
-      changeDataViewId: async (id: string) => {
-        await setAppState({ index: id }, true);
+      loadSavedSearchList: async () => {
+        const dataViewList = await services.dataViews.getIdsWithTitle();
+        internalStateContainer.transitions.setDataViews(dataViewList);
       },
       loadSavedSearch: async (
         id: string,
@@ -359,8 +360,8 @@ function createStateHelpers() {
   const useSavedSearch = () => {
     const container = useContainer();
     return useObservable<SavedSearch>(
-      container!.savedSearchContainer.savedSearch$,
-      container!.savedSearchContainer.savedSearch$.getValue()
+      container!.savedSearchState.savedSearch$,
+      container!.savedSearchState.savedSearch$.getValue()
     );
   };
   return {

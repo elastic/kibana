@@ -28,7 +28,7 @@ export function useSearchSession({
   useEffect(() => {
     data.search.session.enableStorage(
       createSearchSessionRestorationDataProvider({
-        appStateContainer: stateContainer.appStateContainer,
+        appStateContainer: stateContainer.appState,
         data,
         getSavedSearch: () => savedSearch,
       }),
@@ -42,10 +42,5 @@ export function useSearchSession({
               },
       }
     );
-  }, [
-    capabilities.discover.storeSearchSession,
-    data,
-    savedSearch,
-    stateContainer.appStateContainer,
-  ]);
+  }, [capabilities.discover.storeSearchSession, data, savedSearch, stateContainer.appState]);
 }

@@ -34,7 +34,7 @@ const DiscoverLayoutStory = (layoutProps: DiscoverLayoutProps) => {
       state={state}
       stateContainer={{
         ...layoutProps.stateContainer,
-        appStateContainer: { ...layoutProps.stateContainer.appStateContainer, getState },
+        appState: { ...layoutProps.stateContainer.appState, getState },
         setAppState,
       }}
     />

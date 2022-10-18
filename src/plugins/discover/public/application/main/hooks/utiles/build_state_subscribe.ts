@@ -13,7 +13,7 @@ import { addLog } from '../../../../utils/addLog';
 import { loadDataView, resolveDataView } from '../../utils/resolve_data_view';
 import { FetchStatus } from '../../../types';
 import { DataStateContainer } from '../../services/discover_data_state_container';
-import { DiscoverInternalState } from '../../services/discover_internal_state_container';
+import { InternalStateContainer } from '../../services/discover_internal_state_container';
 
 export const buildStateSubscribe =
   ({
@@ -26,7 +26,7 @@ export const buildStateSubscribe =
     appStateContainer: AppStateContainer;
     savedSearchContainer: SavedSearchContainer;
     dataStateContainer: DataStateContainer;
-    internalStateContainer: DiscoverInternalState;
+    internalStateContainer: InternalStateContainer;
     services: DiscoverServices;
   }) =>
   async (nextState: AppState) => {
@@ -58,8 +58,8 @@ export const buildStateSubscribe =
        *  The following line of code catches this, but should be improved
        */
       const nextDataViewObj = await loadDataView(
-        services.dataViews,
-        services.uiSettings,
+        internalStateContainer.getState().dataViews,
+        services,
         nextState.index
       );
 

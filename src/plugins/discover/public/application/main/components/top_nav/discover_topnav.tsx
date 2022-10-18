@@ -47,12 +47,12 @@ export const DiscoverTopNav = ({
   adHocDataViewList,
 }: DiscoverTopNavProps) => {
   const savedSearch = useObservable<SavedSearch>(
-    stateContainer.savedSearchContainer.savedSearch$,
-    stateContainer.savedSearchContainer.savedSearch$.getValue()
+    stateContainer.savedSearchState.savedSearch$,
+    stateContainer.savedSearchState.savedSearch$.getValue()
   );
   const hasChanged = useObservable(
-    stateContainer.savedSearchContainer.hasChanged$,
-    stateContainer.savedSearchContainer.hasChanged$.getValue()
+    stateContainer.savedSearchState.hasChanged$,
+    stateContainer.savedSearchState.hasChanged$.getValue()
   );
   const dataView = useInternalStateSelector((state) => state.dataView!);
 
@@ -87,7 +87,7 @@ export const DiscoverTopNav = ({
     () =>
       canEditDataView
         ? async (fieldName?: string, uiAction: 'edit' | 'add' = 'edit') => {
-            const dataViewInstance = stateContainer.internalStateContainer.getState().dataView;
+            const dataViewInstance = stateContainer.internalState.getState().dataView;
             if (dataViewInstance?.id) {
               closeFieldEditor.current = dataViewFieldEditor.openEditor({
                 ctx: {

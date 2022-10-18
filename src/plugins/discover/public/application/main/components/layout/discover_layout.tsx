@@ -87,7 +87,7 @@ export function DiscoverLayout({
   ]);
   const dataView = useInternalStateSelector((state) => state.dataView!);
   const savedSearch = useSavedSearch();
-  const dataState: DataMainMsg = useDataState(stateContainer.dataStateContainer.data$.main$);
+  const dataState: DataMainMsg = useDataState(stateContainer.dataState.data$.main$);
 
   const currentViewMode = useMemo(() => {
     if (uiSettings.get(SHOW_FIELD_STATISTICS) !== true) return VIEW_MODE.DOCUMENT_LEVEL;
@@ -123,7 +123,7 @@ export function DiscoverLayout({
   const onOpenInspector = useInspector({
     setExpandedDoc,
     inspector,
-    inspectorAdapters: stateContainer.dataStateContainer.inspectorAdapters,
+    inspectorAdapters: stateContainer.dataState.inspectorAdapters,
     savedSearch,
   });
 
@@ -160,7 +160,7 @@ export function DiscoverLayout({
       const usedDataView = nextDataView || (await dataViews.get(dataView.id!));
       if (nextDataView) {
         savedSearch.searchSource.setField('index', usedDataView);
-        stateContainer.internalStateContainer.transitions.setDataView(usedDataView);
+        stateContainer.internalState.transitions.setDataView(usedDataView);
         stateContainer.actions.fetch(true);
       }
     },
@@ -245,7 +245,7 @@ export function DiscoverLayout({
           <EuiFlexItem grow={false}>
             <SidebarMemoized
               columns={currentColumns}
-              documents$={stateContainer.dataStateContainer.data$.documents$}
+              documents$={stateContainer.dataState.data$.documents$}
               onAddField={onAddColumn}
               onAddFilter={!isPlainRecord ? onAddFilter : undefined}
               onRemoveField={onRemoveColumn}
@@ -256,7 +256,7 @@ export function DiscoverLayout({
               onFieldEdited={onFieldEdited}
               viewMode={currentViewMode}
               onDataViewCreated={onDataViewCreated}
-              availableFields$={stateContainer.dataStateContainer.data$.availableFields$}
+              availableFields$={stateContainer.dataState.data$.availableFields$}
               stateContainer={stateContainer}
             />
           </EuiFlexItem>
@@ -302,9 +302,7 @@ export function DiscoverLayout({
                 />
               )}
               {resultState === 'uninitialized' && (
-                <DiscoverUninitialized
-                  onRefresh={() => stateContainer.dataStateContainer.fetch()}
-                />
+                <DiscoverUninitialized onRefresh={() => stateContainer.dataState.fetch()} />
               )}
               {resultState === 'loading' && <LoadingSpinner />}
               {resultState === 'ready' && (
@@ -315,7 +313,7 @@ export function DiscoverLayout({
                   expandedDoc={expandedDoc}
                   setExpandedDoc={setExpandedDoc}
                   savedSearch={savedSearch}
-                  savedSearchData$={stateContainer.dataStateContainer.data$}
+                  savedSearchData$={stateContainer.dataState.data$}
                   stateContainer={stateContainer}
                   isTimeBased={isTimeBased}
                   viewMode={currentViewMode}

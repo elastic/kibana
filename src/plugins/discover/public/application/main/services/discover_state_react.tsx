@@ -20,10 +20,8 @@ export const DiscoverMainProvider = ({
 }) => {
   return (
     <DiscoverStateProvider value={value}>
-      <AppStateProvider value={value.appStateContainer}>
-        <InternalStateProvider value={value.internalStateContainer}>
-          {children}
-        </InternalStateProvider>
+      <AppStateProvider value={value.appState}>
+        <InternalStateProvider value={value.internalState}>{children}</InternalStateProvider>
       </AppStateProvider>
     </DiscoverStateProvider>
   );

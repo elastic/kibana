@@ -77,7 +77,7 @@ export const getTopNavLinks = ({
           anchorElement,
           searchSource: savedSearch.searchSource,
           services,
-          savedQueryId: stateContainer.appStateContainer.getState().savedQuery,
+          savedQueryId: stateContainer.appState.getState().savedQuery,
         });
       }
     },
@@ -156,7 +156,7 @@ export const getTopNavLinks = ({
       }
       const sharingData = await getSharingData(
         savedSearch.searchSource,
-        stateContainer.appStateContainer.getState(),
+        stateContainer.appState.getState(),
         services
       );
 
@@ -176,7 +176,7 @@ export const getTopNavLinks = ({
               defaultMessage: 'Untitled discover search',
             }),
         },
-        isDirty: !savedSearch.id || stateContainer.savedSearchContainer.hasChanged$.getValue(),
+        isDirty: !savedSearch.id || stateContainer.savedSearchState.hasChanged$.getValue(),
         showPublicUrlSwitch,
         onClose: () => {
           anchorElement?.focus();

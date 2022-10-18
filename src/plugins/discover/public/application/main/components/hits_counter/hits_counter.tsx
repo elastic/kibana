@@ -43,8 +43,8 @@ export function HitsCounter({
 }: HitsCounterProps) {
   const data: DataTotalHitsMsg = useDataState(savedSearchData$);
   const hasChanged = useObservable(
-    stateContainer.savedSearchContainer.hasChanged$,
-    stateContainer.savedSearchContainer.hasChanged$.getValue()
+    stateContainer.savedSearchState.hasChanged$,
+    stateContainer.savedSearchState.hasChanged$.getValue()
   );
 
   const hits = data.result || 0;
@@ -103,7 +103,7 @@ export function HitsCounter({
           <EuiButtonEmpty
             iconType="refresh"
             data-test-subj="resetSavedSearch"
-            onClick={() => stateContainer.savedSearchContainer.undo()}
+            onClick={() => stateContainer.savedSearchState.undo()}
             size="s"
             aria-label={i18n.translate('discover.reloadSavedSearchButton', {
               defaultMessage: 'Reset search',

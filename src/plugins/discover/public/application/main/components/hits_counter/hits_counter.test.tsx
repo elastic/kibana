@@ -22,7 +22,7 @@ describe('hits counter', function () {
 
   beforeAll(() => {
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-    stateContainer.savedSearchContainer.hasChanged$ = new BehaviorSubject<boolean>(true);
+    stateContainer.savedSearchState.hasChanged$ = new BehaviorSubject<boolean>(true);
     props = {
       showResetButton: true,
       savedSearchData$: new BehaviorSubject({
@@ -64,7 +64,7 @@ describe('hits counter', function () {
   it('should reset query', function () {
     component = mountWithIntl(<HitsCounter {...props} />);
     const undo = jest.fn();
-    props.stateContainer.savedSearchContainer.undo = undo;
+    props.stateContainer.savedSearchState.undo = undo;
     findTestSubject(component, 'resetSavedSearch').simulate('click');
     expect(undo).toHaveBeenCalled();
   });

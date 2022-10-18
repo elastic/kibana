@@ -7,14 +7,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type {
-  DataView,
-  DataViewListItem,
-  DataViewsContract,
-  DataViewSpec,
-} from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewListItem, DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { ISearchSource } from '@kbn/data-plugin/public';
-import type { IUiSettingsClient, ToastsStart } from '@kbn/core/public';
+import type { ToastsStart } from '@kbn/core/public';
+import { DiscoverServices } from '../../../build_services';
 interface DataViewData {
   /**
    * List of existing data views
@@ -78,12 +74,11 @@ export function getDataViewId(
  * Function to load the given data view by id, providing a fallback if it doesn't exist
  */
 export async function loadDataView(
-  dataViews: DataViewsContract,
-  config: IUiSettingsClient,
+  dataViewList: DataViewListItem[],
+  services: DiscoverServices,
   id?: string,
   dataViewSpec?: DataViewSpec
 ): Promise<DataViewData> {
-  const dataViewList = await dataViews.getIdsWithTitle();
   let fetchId: string | undefined = id;
 
   /**
@@ -92,7 +87,7 @@ export async function loadDataView(
   if (dataViewSpec) {
     const isPersisted = dataViewList.find(({ id: currentId }) => currentId === dataViewSpec.id);
     if (!isPersisted) {
-      const createdAdHocDataView = await dataViews.create(dataViewSpec);
+      const createdAdHocDataView = await services.dataViews.create(dataViewSpec);
       return {
         list: dataViewList || [],
         loaded: createdAdHocDataView,
@@ -106,7 +101,7 @@ export async function loadDataView(
 
   // try to fetch adhoc data view first
   try {
-    const fetchedDataView = fetchId ? await dataViews.get(fetchId) : undefined;
+    const fetchedDataView = fetchId ? await services.dataViews.get(fetchId) : undefined;
     if (fetchedDataView && !fetchedDataView.isPersisted()) {
       return {
         list: dataViewList || [],
@@ -122,10 +117,10 @@ export async function loadDataView(
   } catch (e) {}
 
   // fetch persisted data view
-  const actualId = getDataViewId(fetchId, dataViewList, config.get('defaultIndex'));
+  const actualId = getDataViewId(fetchId, dataViewList, services.uiSettings.get('defaultIndex'));
   return {
     list: dataViewList || [],
-    loaded: await dataViews.get(actualId),
+    loaded: await services.dataViews.get(actualId),
     stateVal: fetchId,
     stateValFound: !!fetchId && actualId === fetchId,
   };
@@ -162,7 +157,7 @@ export function resolveDataView(
         text: i18n.translate('discover.showingSavedDataViewWarningDescription', {
           defaultMessage: 'Showing the saved data view: "{ownDataViewTitle}" ({ownDataViewId})',
           values: {
-            ownDataViewTitle: ownDataView.title,
+            ownDataViewTitle: ownDataView.getIndexPattern(),
             ownDataViewId: ownDataView.id,
           },
         }),
@@ -177,7 +172,7 @@ export function resolveDataView(
         defaultMessage:
           'Showing the default data view: "{loadedDataViewTitle}" ({loadedDataViewId})',
         values: {
-          loadedDataViewTitle: loadedDataView.title,
+          loadedDataViewTitle: loadedDataView.getIndexPattern(),
           loadedDataViewId: loadedDataView.id,
         },
       }),

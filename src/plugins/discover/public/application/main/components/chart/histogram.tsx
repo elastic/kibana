@@ -130,7 +130,7 @@ export function DiscoverHistogram({
       defaultMessage: '(interval: {value})',
       values: {
         value: `${
-          stateContainer.appStateContainer.getState().interval === 'auto'
+          stateContainer.appState.getState().interval === 'auto'
             ? `${i18n.translate('discover.histogramTimeRangeIntervalAuto', {
                 defaultMessage: 'Auto',
               })} - `

@@ -52,7 +52,7 @@ export function useDiscoverState({
    * State changes (data view, columns), when a text base query result is returned
    */
   useTextBasedQueryLanguage({
-    documents$: stateContainer.dataStateContainer.data$.documents$,
+    documents$: stateContainer.dataState.data$.documents$,
     dataViews,
     stateContainer,
     dataViewList,
@@ -68,14 +68,14 @@ export function useDiscoverState({
    * Trigger data fetching on dataView or savedSearch changes
    */
   useEffect(() => {
-    if (dataView && stateContainer.dataStateContainer.initialFetchStatus === FetchStatus.LOADING) {
-      stateContainer.dataStateContainer.refetch$.next(undefined);
+    if (dataView && stateContainer.dataState.initialFetchStatus === FetchStatus.LOADING) {
+      stateContainer.dataState.refetch$.next(undefined);
     }
   }, [
     dataView,
     savedSearch.id,
-    stateContainer.dataStateContainer.initialFetchStatus,
-    stateContainer.dataStateContainer.refetch$,
+    stateContainer.dataState.initialFetchStatus,
+    stateContainer.dataState.refetch$,
   ]);
 
   /**

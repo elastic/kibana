@@ -97,6 +97,7 @@ export function DiscoverMainRoute(props: Props) {
     try {
       const isNewSavedSearch = !Boolean(id);
       stateContainer.actions.stopSyncSubscribe();
+      await stateContainer.actions.loadSavedSearchList();
       if (isNewSavedSearch) {
         addLog('[Main route] load new saved search');
         await stateContainer.actions.loadNewSavedSearch(

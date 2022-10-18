@@ -33,7 +33,7 @@ describe('Test discover state', () => {
       history,
     });
     await state.setAppState({}, true);
-    const { start, stop } = state.appStateContainer.syncState();
+    const { start, stop } = state.appState.syncState();
     start();
     stopSync = stop;
   });
@@ -51,7 +51,7 @@ describe('Test discover state', () => {
 
   test('changing URL to be propagated to appState', async () => {
     history.push('/#?_a=(index:modified)');
-    expect(state.appStateContainer.getState()).toMatchInlineSnapshot(`
+    expect(state.appState.getState()).toMatchInlineSnapshot(`
       Object {
         "index": "modified",
       }
@@ -60,16 +60,16 @@ describe('Test discover state', () => {
   test('URL navigation to url without _a, state should not change', async () => {
     history.push('/#?_a=(index:modified)');
     history.push('/');
-    expect(state.appStateContainer.getState()).toEqual({
+    expect(state.appState.getState()).toEqual({
       index: 'modified',
     });
   });
 
   test('getPreviousAppState returns the state before the current', async () => {
     state.setAppState({ index: 'first' });
-    const stateA = state.appStateContainer.getState();
+    const stateA = state.appState.getState();
     state.setAppState({ index: 'second' });
-    expect(state.appStateContainer.getPrevious()).toEqual(stateA);
+    expect(state.appState.getPrevious()).toEqual(stateA);
   });
 
   test('pauseAutoRefreshInterval sets refreshInterval.pause to true', async () => {
@@ -90,8 +90,8 @@ describe('Test discover initial state sort handling', () => {
       history,
     });
     await state.setAppState({}, true);
-    const stopSync = state.appStateContainer.syncState().stop;
-    expect(state.appStateContainer.getState().sort).toEqual([['order_date', 'desc']]);
+    const stopSync = state.appState.syncState().stop;
+    expect(state.appState.getState().sort).toEqual([['order_date', 'desc']]);
     stopSync();
   });
   test('Empty sort in URL should use saved search sort for state', async () => {
@@ -104,8 +104,8 @@ describe('Test discover initial state sort handling', () => {
       history,
     });
     await state.setAppState({}, true);
-    const stopSync = state.appStateContainer.syncState().stop;
-    expect(state.appStateContainer.getState().sort).toEqual([['bytes', 'desc']]);
+    const stopSync = state.appState.syncState().stop;
+    expect(state.appState.getState().sort).toEqual([['bytes', 'desc']]);
     stopSync();
   });
   test('Empty sort in URL and saved search should sort by timestamp', async () => {
@@ -117,8 +117,8 @@ describe('Test discover initial state sort handling', () => {
       history,
     });
     await state.setAppState({}, true);
-    const stopSync = state.appStateContainer.syncState().stop;
-    expect(state.appStateContainer.getState().sort).toEqual([['timestamp', 'desc']]);
+    const stopSync = state.appState.syncState().stop;
+    expect(state.appState.getState().sort).toEqual([['timestamp', 'desc']]);
     stopSync();
   });
 });
@@ -134,7 +134,7 @@ describe('Test discover state with legacy migration', () => {
       services: discoverServiceMock,
       history,
     });
-    expect(state.appStateContainer.getState().query).toMatchInlineSnapshot(`
+    expect(state.appState.getState().query).toMatchInlineSnapshot(`
       Object {
         "language": "lucene",
         "query": Object {
@@ -157,7 +157,7 @@ describe('createSearchSessionRestorationDataProvider', () => {
       savedSearch: savedSearchMock,
       services: discoverServiceMock,
       history,
-    }).appStateContainer,
+    }).appState,
     getSavedSearch: () => mockSavedSearch,
   });
 

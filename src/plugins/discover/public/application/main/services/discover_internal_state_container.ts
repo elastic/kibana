@@ -27,7 +27,7 @@ interface InternalStateTransitions {
   setSavedSearchLoading: (state: InternalState) => (isLoading: boolean) => InternalState;
 }
 
-export type DiscoverInternalState = ReduxLikeStateContainer<
+export type InternalStateContainer = ReduxLikeStateContainer<
   InternalState,
   InternalStateTransitions
 >;

@@ -11,10 +11,10 @@ import { AppState } from '../services/discover_app_state_container';
 import { DiscoverStateContainer } from '../services/discover_state';
 
 export function useStateContainer(stateContainer: DiscoverStateContainer, filterProps?: string[]) {
-  const [state, setState] = useState<AppState>(stateContainer.appStateContainer.getState());
+  const [state, setState] = useState<AppState>(stateContainer.appState.getState());
 
   useEffect(() => {
-    const unsubscribe = stateContainer.appStateContainer.subscribe((next) => {
+    const unsubscribe = stateContainer.appState.subscribe((next) => {
       const nextState = getFilteredProps(next, filterProps);
       if (!isEqual(state, nextState)) {
         // @ts-expect-error

@@ -59,7 +59,7 @@ export function useTextBasedQueryLanguage({
       if (!query || next.fetchStatus === FetchStatus.ERROR) {
         return;
       }
-      const { columns: stateColumns, index } = stateContainer.appStateContainer.getState();
+      const { columns: stateColumns, index } = stateContainer.appState.getState();
       let nextColumns: string[] = [];
       const isTextBasedQueryLang =
         recordRawType === 'plain' && isOfAggregateQueryType(query) && 'sql' in query;

@@ -8,26 +8,22 @@
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { AppStateContainer } from './services/discover_app_state_container';
-import { DiscoverInternalState } from './services/discover_internal_state_container';
+import { InternalStateContainer } from './services/discover_internal_state_container';
 import { DiscoverServices } from '../../build_services';
 import { loadDataView, resolveDataView } from './utils/resolve_data_view';
 
 export const loadDataViewBySavedSearch = async (
   nextSavedSearch: SavedSearch,
   appStateContainer: AppStateContainer,
-  internalStateContainer: DiscoverInternalState,
+  internalStateContainer: InternalStateContainer,
   services: DiscoverServices,
   onError: (e: Error) => void,
   dataViewSpec?: DataViewSpec
 ) => {
   try {
     const { index } = appStateContainer.getState();
-    const ip = await loadDataView(
-      services.data.dataViews,
-      services.uiSettings,
-      index,
-      dataViewSpec
-    );
+    const dataViewList = internalStateContainer.getState().dataViews;
+    const ip = await loadDataView(dataViewList, services, index, dataViewSpec);
     const ipList = ip.list;
     internalStateContainer.transitions.setDataViews(ipList);
     const dataViewData = resolveDataView(

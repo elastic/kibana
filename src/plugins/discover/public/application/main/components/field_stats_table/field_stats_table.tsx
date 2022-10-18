@@ -115,8 +115,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
   const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
 
   const showPreviewByDefault = useMemo(
-    () =>
-      stateContainer ? !stateContainer.appStateContainer.getState().hideAggregatedPreview : true,
+    () => (stateContainer ? !stateContainer.appState.getState().hideAggregatedPreview : true),
     [stateContainer]
   );
 
@@ -127,7 +126,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
       }
     });
 
-    const refetch = stateContainer?.dataStateContainer.refetch$.subscribe(() => {
+    const refetch = stateContainer?.dataState.refetch$.subscribe(() => {
       if (embeddable && !isErrorEmbeddable(embeddable)) {
         embeddable.updateInput({ lastReloadRequestTime: Date.now() });
       }

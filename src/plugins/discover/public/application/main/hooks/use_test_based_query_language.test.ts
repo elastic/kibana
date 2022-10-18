@@ -211,7 +211,7 @@ describe('useTextBasedQueryLanguage', () => {
   test('it should not overwrite existing state columns on initial fetch', async () => {
     const replaceUrlAppState = jest.fn();
     const props = getHookProps(replaceUrlAppState, query);
-    props.stateContainer.appStateContainer.getState = jest.fn(() => {
+    props.stateContainer.appState.getState = jest.fn(() => {
       return { columns: ['field1'], index: 'the-data-view-id' };
     });
     const { documents$ } = props;
@@ -251,7 +251,7 @@ describe('useTextBasedQueryLanguage', () => {
   test('it should not overwrite state column when successfully fetching after an error fetch', async () => {
     const replaceUrlAppState = jest.fn();
     const props = getHookProps(replaceUrlAppState, query);
-    props.stateContainer.appStateContainer.getState = jest.fn(() => {
+    props.stateContainer.appState.getState = jest.fn(() => {
       return { columns: [], index: 'the-data-view-id' };
     });
     const { documents$ } = props;
@@ -276,7 +276,7 @@ describe('useTextBasedQueryLanguage', () => {
       query: { sql: 'SELECT * from the-data-view-title WHERE field1=2' },
     });
     await waitFor(() => expect(replaceUrlAppState).toHaveBeenCalledTimes(1));
-    props.stateContainer.appStateContainer.getState = jest.fn(() => {
+    props.stateContainer.appState.getState = jest.fn(() => {
       return { columns: ['field1', 'field2'], index: 'the-data-view-id' };
     });
     replaceUrlAppState.mockReset();

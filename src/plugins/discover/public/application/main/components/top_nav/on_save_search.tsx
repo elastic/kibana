@@ -50,7 +50,7 @@ async function saveDataSource({
           navigateTo(`/view/${encodeURIComponent(id)}`);
         } else {
           // Update defaults so that "reload saved query" functions correctly
-          stateContainer.savedSearchContainer.resetUrl(savedSearch.id || '');
+          stateContainer.savedSearchState.resetUrl(savedSearch.id || '');
         }
       }
     }
@@ -67,7 +67,7 @@ async function saveDataSource({
       text: error.message,
     });
   }
-  return stateContainer.savedSearchContainer.persist(savedSearch, {
+  return stateContainer.savedSearchState.persist(savedSearch, {
     onError,
     onSuccess,
     saveOptions,
@@ -121,7 +121,7 @@ export async function onSaveSearch({
     savedSearch.timeRestore = newTimeRestore;
     savedSearch.rowsPerPage = uiSettings.get(DOC_TABLE_LEGACY)
       ? currentRowsPerPage
-      : stateContainer.appStateContainer.getState().rowsPerPage;
+      : stateContainer.appState.getState().rowsPerPage;
     if (savedObjectsTagging) {
       savedSearch.tags = newTags;
     }

@@ -35,8 +35,8 @@ describe('DiscoverMainApp', () => {
     const component = mountWithIntl(
       <Router history={history}>
         <KibanaContextProvider services={discoverServiceMock}>
-          <AppStateProvider value={props.stateContainer.appStateContainer}>
-            <InternalStateProvider value={props.stateContainer.internalStateContainer}>
+          <AppStateProvider value={props.stateContainer.appState}>
+            <InternalStateProvider value={props.stateContainer.internalState}>
               <DiscoverMainApp {...props} />
             </InternalStateProvider>
           </AppStateProvider>
