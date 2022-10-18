@@ -7,7 +7,7 @@
 
 import { CloudSetup } from '@kbn/cloud-plugin/public';
 
-import { decodeCloudId } from '../decode_cloud_id';
+import { decodeCloudId } from '../decode_cloud_id/decode_cloud_id';
 
 export function getCloudEnterpriseSearchHost(cloud: CloudSetup | undefined): string | undefined {
   if (cloud && cloud.isCloudEnabled && cloud.cloudId) {
