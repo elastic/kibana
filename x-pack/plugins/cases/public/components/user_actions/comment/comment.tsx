@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { EuiCommentProps } from '@elastic/eui';
+import type { EuiCommentProps } from '@elastic/eui';
 
-import { CommentUserAction, Actions, CommentType } from '../../../../common/api';
-import { UserActionBuilder, UserActionBuilderArgs, UserActionResponse } from '../types';
+import type { CommentUserAction } from '../../../../common/api';
+import { Actions, CommentType } from '../../../../common/api';
+import type { UserActionBuilder, UserActionBuilderArgs, UserActionResponse } from '../types';
 import { createCommonUpdateUserActionBuilder } from '../common';
-import { Comment } from '../../../containers/types';
+import type { Comment } from '../../../containers/types';
 import * as i18n from '../translations';
 import { createUserAttachmentUserActionBuilder } from './user';
 import { createAlertAttachmentUserActionBuilder } from './alert';
