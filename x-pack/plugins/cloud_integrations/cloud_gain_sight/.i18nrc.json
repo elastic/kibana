@@ -1,7 +1,0 @@
-{
-  "prefix": "cloudGainsight",
-  "paths": {
-    "cloudGainsight": "."
-  },
-  "translations": ["translations/ja-JP.json"]
-}

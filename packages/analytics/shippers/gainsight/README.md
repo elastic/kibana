@@ -7,8 +7,8 @@ gainsight implementation as a shipper for the `@kbn/analytics-client`.
 This module is intended to be used **on the browser only**. It does not support server-side events.
 
 ```typescript
-import { gainsightShipper } from "@kbn/analytics-shippers-gainsight";
+import { GainsightShipper } from "@kbn/analytics-shippers-gainsight";
 
-analytics.registerShipper(gainsightShipper, { gainsightOrgId: '12345' })
+analytics.registerShipper(GainsightShipper, { gainsightOrgId: '12345' })
 ```
 

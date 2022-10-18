@@ -48,15 +48,16 @@ export class GainsightShipper implements IShipper {
     // gainsight requires different APIs for different type of contexts.
     const { userId, cluster_name: clusterName } = newContext;
 
+    this.gainsightApi('set', 'globalContext', {
+      kibanaUserId: userId,
+    });
+
     if (clusterName && clusterName !== this.lastClusterName) {
       this.initContext.logger.debug(`Calling identify with userId ${userId}`);
       // We need to call the API for every new userId (restarting the session).
       this.gainsightApi('identify', {
         id: clusterName,
         userType: 'deployment',
-      });
-      this.gainsightApi('set', 'globalContext', {
-        kibanaUserId: userId,
       });
       this.lastClusterName = clusterName;
     } else {
