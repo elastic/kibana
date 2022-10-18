@@ -17,6 +17,7 @@ export const observabilityConfig: GuideConfig = {
   description: i18n.translate('guidedOnboarding.observabilityGuide.description', {
     defaultMessage: `We'll help you quickly gain visibility into your Kubernetes environment using Elastic's out-of-the-box integration. Gain deep insights from your logs, metrics, and traces, and proactively detect issues and take action to resolve issues.`,
   }),
+  guideName: 'Kubernetes',
   docs: {
     text: i18n.translate('guidedOnboarding.observabilityGuide.documentationLink', {
       defaultMessage: 'Kubernetes documentation',
