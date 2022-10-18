@@ -19,7 +19,7 @@ import * as i18n from './translations';
 
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { RiskScoreOverTime } from '../risk_score_over_time';
-import { TopRiskScoreContributors } from '../../../common/components/top_risk_score_contributors';
+import { TopRiskScoreContributors } from '../top_risk_score_contributors';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 import { HostRiskScoreQueryId, UserRiskScoreQueryId, useRiskScore } from '../../containers';
 import type { HostRiskScore, UserRiskScore } from '../../../../common/search_strategy';
