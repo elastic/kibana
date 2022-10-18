@@ -222,7 +222,7 @@ export const RuleEventLogDataGrid = (props: RuleEventLogDataGrid) => {
             {
               id: 'space_ids',
               displayAsText: i18n.translate(
-                'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.ruleName',
+                'xpack.triggersActionsUI.sections.ruleDetails.eventLogColumn.spaceIds',
                 {
                   defaultMessage: 'Space',
                 }
