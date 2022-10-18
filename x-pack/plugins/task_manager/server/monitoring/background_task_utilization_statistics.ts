@@ -46,7 +46,7 @@ interface RecurringTaskStat extends TaskStat {
   tasks_per_min: number[];
 }
 
-interface SummarizedBackgroundTaskUtilizationStat extends JsonObject {
+export interface SummarizedBackgroundTaskUtilizationStat extends JsonObject {
   process_uuid: string; // unique identifier of the process that created these metrics
   adhoc: {
     created: {
@@ -249,7 +249,5 @@ function getServiceTimeStats(timing: TaskTiming) {
 }
 
 function calculateSum(arr: number[]) {
-  const sum = 0;
-  arr.reduce((acc, s) => (acc += s), sum);
-  return sum;
+  return arr.reduce((acc, s) => (acc += s), 0);
 }
