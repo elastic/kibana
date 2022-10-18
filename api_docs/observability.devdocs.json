@@ -7759,7 +7759,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { id: string; name: string; description: string; indicator: { type: string; params: { environment: string; service: string; transaction_type: string; transaction_name: string; 'threshold.us': number; }; } | { type: string; params: { environment: string; service: string; transaction_type: string; transaction_name: string; } & { good_status_codes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; }; }; time_window: { duration: string; is_rolling: boolean; }; budgeting_method: \"occurrences\"; objective: { target: number; }; revision: number; created_at: Date; updated_at: Date; }, ",
+          ", { id: string; name: string; description: string; indicator: { type: string; params: { environment: string; service: string; transaction_type: string; transaction_name: string; 'threshold.us': number; }; } | { type: string; params: { environment: string; service: string; transaction_type: string; transaction_name: string; } & { good_status_codes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; }; }; time_window: { duration: string; is_rolling: boolean; }; budgeting_method: \"occurrences\"; objective: { target: number; }; summary: { sli_value: number; error_budget: { initial: number; consumed: number; remaining: number; }; }; revision: number; created_at: Date; updated_at: Date; }, ",
           {
             "pluginId": "observability",
             "scope": "server",
@@ -8054,7 +8054,7 @@
         "label": "ObservabilityConfig",
         "description": [],
         "signature": [
-          "{ readonly unsafe: Readonly<{} & { slo: Readonly<{} & { enabled: boolean; }>; alertDetails: Readonly<{} & { enabled: boolean; }>; }>; readonly annotations: Readonly<{} & { enabled: boolean; index: string; }>; }"
+          "{ readonly unsafe: Readonly<{} & { slo: Readonly<{} & { enabled: boolean; }>; alertDetails: Readonly<{} & { apm: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; uptime: Readonly<{} & { enabled: boolean; }>; }>; }>; readonly annotations: Readonly<{} & { enabled: boolean; index: string; }>; }"
         ],
         "path": "x-pack/plugins/observability/server/index.ts",
         "deprecated": false,
@@ -8109,7 +8109,7 @@
             "section": "def-server.ObservabilityRouteHandlerResources",
             "text": "ObservabilityRouteHandlerResources"
           },
-          ", { id: string; name: string; description: string; indicator: { type: string; params: { environment: string; service: string; transaction_type: string; transaction_name: string; 'threshold.us': number; }; } | { type: string; params: { environment: string; service: string; transaction_type: string; transaction_name: string; } & { good_status_codes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; }; }; time_window: { duration: string; is_rolling: boolean; }; budgeting_method: \"occurrences\"; objective: { target: number; }; revision: number; created_at: Date; updated_at: Date; }, ",
+          ", { id: string; name: string; description: string; indicator: { type: string; params: { environment: string; service: string; transaction_type: string; transaction_name: string; 'threshold.us': number; }; } | { type: string; params: { environment: string; service: string; transaction_type: string; transaction_name: string; } & { good_status_codes?: (\"2xx\" | \"3xx\" | \"4xx\" | \"5xx\")[] | undefined; }; }; time_window: { duration: string; is_rolling: boolean; }; budgeting_method: \"occurrences\"; objective: { target: number; }; summary: { sli_value: number; error_budget: { initial: number; consumed: number; remaining: number; }; }; revision: number; created_at: Date; updated_at: Date; }, ",
           {
             "pluginId": "observability",
             "scope": "server",

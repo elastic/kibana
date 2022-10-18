@@ -63,6 +63,7 @@ export const DeduplicationPanel: React.FC = () => {
       }
       action={
         <EuiButton
+          data-telemetry-id="entSearchContent-crawler-domainDetail-deduplication-reset"
           color="warning"
           iconType="refresh"
           size="s"
@@ -99,7 +100,13 @@ export const DeduplicationPanel: React.FC = () => {
       }
     >
       <EuiSwitch
-        label="Prevent duplicate documents"
+        data-telemetry-id="entSearchContent-crawler-domainDetail-deduplication-preventDuplicates"
+        label={i18n.translate(
+          'xpack.enterpriseSearch.crawler.deduplicationPanel.preventDuplicateLabel',
+          {
+            defaultMessage: 'Prevent duplicate documents',
+          }
+        )}
         checked={deduplicationEnabled}
         onChange={() =>
           deduplicationEnabled
@@ -125,6 +132,7 @@ export const DeduplicationPanel: React.FC = () => {
                   <EuiPopover
                     button={
                       <EuiButtonEmpty
+                        data-telemetry-id="entSearchContent-crawler-domainDetail-deduplication-selectFields"
                         size="xs"
                         iconType="arrowDown"
                         iconSide="right"
@@ -155,6 +163,7 @@ export const DeduplicationPanel: React.FC = () => {
                     <EuiContextMenuPanel
                       items={[
                         <EuiContextMenuItem
+                          data-telemetry-id="entSearchContent-crawler-domainDetail-deduplication-showAllFields"
                           key="all fields"
                           icon={showAllFields ? 'check' : 'empty'}
                           onClick={() => {
@@ -170,6 +179,7 @@ export const DeduplicationPanel: React.FC = () => {
                           )}
                         </EuiContextMenuItem>,
                         <EuiContextMenuItem
+                          data-telemetry-id="entSearchContent-crawler-domainDetail-deduplication-showSelectedFields"
                           key="selected fields"
                           icon={showAllFields ? 'empty' : 'check'}
                           onClick={() => {

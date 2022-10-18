@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SavedObjectReference } from '@kbn/core/server';
-import { CaseAssignees } from '../../../common/api/cases/assignee';
-import {
+import type { SavedObjectReference } from '@kbn/core/server';
+import type { CaseAssignees } from '../../../common/api/cases/assignee';
+import type {
   CasePostRequest,
   CaseSettings,
   CaseSeverity,
@@ -19,7 +19,7 @@ import {
   UserAction,
   UserActionTypes,
 } from '../../../common/api';
-import { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
+import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 
 export interface BuilderParameters {
   title: {
