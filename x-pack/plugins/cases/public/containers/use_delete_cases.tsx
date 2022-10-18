@@ -8,7 +8,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import * as i18n from './translations';
 import { deleteCases } from './api';
-import { ServerError } from '../types';
+import type { ServerError } from '../types';
 import { casesQueriesKeys, casesMutationsKeys } from './constants';
 import { useCasesToast } from '../common/use_cases_toast';
 

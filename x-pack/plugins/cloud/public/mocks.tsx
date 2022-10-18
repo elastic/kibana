@@ -18,6 +18,8 @@ function createSetupMock() {
     deploymentUrl: 'deployment-url',
     profileUrl: 'profile-url',
     organizationUrl: 'organization-url',
+    isElasticStaffOwned: true,
+    trialEndDate: new Date('2020-10-01T14:13:12Z'),
     registerCloudService: jest.fn(),
   };
 }
