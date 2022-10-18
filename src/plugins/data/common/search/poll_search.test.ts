@@ -121,7 +121,7 @@ describe('pollSearch', () => {
     expect(cancelFn).toBeCalledTimes(1);
   });
 
-  describe('backoff interval', () => {
+  describe('default backoff interval', () => {
     let dateNowSpy: jest.SpyInstance;
     let now = Date.now();
     const advanceTimersBy = (by: number) => {

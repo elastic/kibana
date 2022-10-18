@@ -15,11 +15,12 @@ import { isErrorResponse, isPartialResponse } from '..';
 export const pollSearch = <Response extends IKibanaSearchResponse>(
   search: () => Promise<Response>,
   cancel?: () => void,
-  { pollInterval = 'backoff', abortSignal }: IAsyncSearchOptions = {}
+  { pollInterval, abortSignal }: IAsyncSearchOptions = {}
 ): Observable<Response> => {
   const getPollInterval = (elapsedTime: number): number => {
     if (typeof pollInterval === 'number') return pollInterval;
-    else if (pollInterval === 'backoff') {
+    else {
+      // if static pollInterval is not provided, then use default back-off logic
       switch (true) {
         case elapsedTime < 5000:
           return 1000;
@@ -28,8 +29,6 @@ export const pollSearch = <Response extends IKibanaSearchResponse>(
         default:
           return 5000;
       }
-    } else {
-      throw new Error(`pollSearch: unsupported pollInterval option "${pollInterval}"`);
     }
   };
 
