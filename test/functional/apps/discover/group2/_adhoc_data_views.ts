@@ -260,7 +260,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await toasts.dismissAllToasts();
 
       await browser.goBack();
-      await PageObjects.header.waitUntilLoadingHasFinished();
 
       const firstToast = await toasts.getToastContent(1);
       expect(firstToast).to.equal(
