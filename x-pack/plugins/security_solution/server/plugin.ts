@@ -20,6 +20,7 @@ import {
 import type { Logger } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { registerEvents as registerSubscriptionEvents } from '@kbn/subscription-tracking';
 
 import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/rule-registry-plugin/common/assets';
 import type { FieldMap } from '@kbn/rule-registry-plugin/common/field_map';
@@ -197,6 +198,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
 
     this.telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
+
+    registerSubscriptionEvents(core.analytics);
 
     const { ruleDataService } = plugins.ruleRegistry;
     let ruleDataClient: IRuleDataClient | null = null;

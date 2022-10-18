@@ -19,7 +19,7 @@ import type { RouteProps } from 'react-router-dom';
 import type { AppMountParameters } from '@kbn/core/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { TableState } from '@kbn/timelines-plugin/public';
-
+import type { Services as SubscriptionTrackingServices } from '@kbn/subscription-tracking';
 import type { StartServices } from '../types';
 
 /**
@@ -29,6 +29,7 @@ export interface RenderAppProps extends AppMountParameters {
   services: StartServices;
   store: Store<State, Action>;
   subPluginRoutes: RouteProps[];
+  subscriptionTrackingServices: SubscriptionTrackingServices;
   usageCollection?: UsageCollectionSetup;
 }
 

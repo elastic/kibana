@@ -9,6 +9,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Switch } from 'react-router-dom';
 import { Route } from '@kbn/kibana-react-plugin/public';
+import { SubscriptionTrackingProvider } from '@kbn/subscription-tracking';
 
 import { NotFoundPage } from './404';
 import { SecurityApp } from './app';
@@ -24,6 +25,7 @@ export const renderApp = ({
   usageCollection,
   subPluginRoutes,
   theme$,
+  subscriptionTrackingServices,
 }: RenderAppProps): (() => void) => {
   const ApplicationUsageTrackingProvider =
     usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
@@ -37,14 +39,19 @@ export const renderApp = ({
       theme$={theme$}
     >
       <ApplicationUsageTrackingProvider>
-        <Switch>
-          {subPluginRoutes.map((route, index) => {
-            return <Route key={`route-${index}`} {...route} />;
-          })}
-          <Route>
-            <NotFoundPage />
-          </Route>
-        </Switch>
+        <SubscriptionTrackingProvider
+          analyticsClient={subscriptionTrackingServices.analyticsClient}
+          navigateToApp={subscriptionTrackingServices.navigateToApp}
+        >
+          <Switch>
+            {subPluginRoutes.map((route, index) => {
+              return <Route key={`route-${index}`} {...route} />;
+            })}
+            <Route>
+              <NotFoundPage />
+            </Route>
+          </Switch>
+        </SubscriptionTrackingProvider>
       </ApplicationUsageTrackingProvider>
     </SecurityApp>,
     element

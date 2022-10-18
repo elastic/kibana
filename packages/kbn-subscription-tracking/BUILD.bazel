@@ -47,7 +47,8 @@ NPM_MODULE_EXTRA_FILES = [
 #    "@npm//name-of-package"
 #    eg. "@npm//lodash"
 RUNTIME_DEPS = [
-  "@npm//react"
+  "@npm//react",
+  "@npm//@elastic/eui",
 ]
 
 # In this array place dependencies necessary to build the types, which will include the
@@ -60,9 +61,12 @@ RUNTIME_DEPS = [
 #
 #  References to NPM packages work the same as RUNTIME_DEPS
 TYPES_DEPS = [
+  "//packages/analytics/client:npm_module_types",
+  "@npm//@elastic/eui",
   "@npm//@types/node",
   "@npm//@types/jest",
-  "@npm//@types/react"
+  "@npm//@types/react",
+  "@npm//tslib",
 ]
 
 jsts_transpiler(

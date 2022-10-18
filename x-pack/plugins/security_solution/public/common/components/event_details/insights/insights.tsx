@@ -39,7 +39,7 @@ export const Insights = React.memo<Props>(
     const isRelatedAlertsByProcessAncestryEnabled = useIsExperimentalFeatureEnabled(
       'insightsRelatedAlertsByProcessAncestry'
     );
-    const hasAtLeastPlatinum = useLicense().isPlatinumPlus();
+    const hasAtLeastPlatinum = false && useLicense().isPlatinumPlus();
     const originalDocumentId = find(
       { category: 'kibana', field: 'kibana.alert.ancestors.id' },
       data

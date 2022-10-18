@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-export * from './subscription_elements';
+import { SubscriptionContext } from './types';
 
-export * from './server';
-
-export { SubscriptionTrackingContext, SubscriptionTrackingProvider } from './services';
+const sourceStringRegEx = /[\w-_]+::[\w-_]+/;
+export function isValidContext(context: SubscriptionContext): boolean {
+  return context.feature.length > 0 && sourceStringRegEx.test(context.source);
+}

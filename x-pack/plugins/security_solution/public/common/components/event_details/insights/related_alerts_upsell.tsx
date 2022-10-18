@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiIcon, EuiText } from '@elastic/eui';
+import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
+import { SubscriptionLink, SubscriptionContext } from '@kbn/subscription-tracking';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { INSIGHTS_UPSELL } from './translations';
@@ -22,15 +23,13 @@ const StyledIcon = euiStyled(EuiIcon)`
   margin-right: 10px;
 `;
 
+const subscriptionContext: SubscriptionContext = {
+  feature: 'alert-details-insights',
+  source: 'security::alert-details-flyout',
+};
+
 export const RelatedAlertsUpsell = React.memo(() => {
   const { getAppUrl, navigateTo } = useNavigation();
-  const subscriptionUrl = getAppUrl({
-    appId: 'management',
-    path: 'stack/license_management',
-  });
-  const goToSubscription = useCallback(() => {
-    navigateTo({ url: subscriptionUrl });
-  }, [navigateTo, subscriptionUrl]);
 
   return (
     <UpsellContainer>
@@ -40,9 +39,13 @@ export const RelatedAlertsUpsell = React.memo(() => {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText size="s">
-            <EuiLink color="subdued" onClick={goToSubscription} target="_blank">
+            <SubscriptionLink
+              color="subdued"
+              target="_blank"
+              subscriptionContext={subscriptionContext}
+            >
               {INSIGHTS_UPSELL}
-            </EuiLink>
+            </SubscriptionLink>
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>

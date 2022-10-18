@@ -160,6 +160,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
         const [coreStart, startPlugins] = await core.getStartServices();
         const subPlugins = await this.startSubPlugins(this.storage, coreStart, startPlugins);
+
+        const subscriptionTrackingServices = {
+          analyticsClient: coreStart.analytics,
+          navigateToApp: coreStart.application.navigateToApp,
+        };
         const { renderApp } = await this.lazyApplicationDependencies();
         const { getSubPluginRoutesByCapabilities } = await this.lazyHelpersForRoutes();
         return renderApp({
@@ -171,6 +176,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             subPlugins,
             coreStart.application.capabilities
           ),
+          subscriptionTrackingServices,
         });
       },
     });
