@@ -147,8 +147,7 @@ describe('GuidedOnboarding ApiService', () => {
     it('activates a new guide', async () => {
       await apiService.activateGuide(searchGuide);
 
-      // once to deactivate the current guide and once to activate the new guide
-      expect(httpClient.put).toHaveBeenCalledTimes(2);
+      expect(httpClient.put).toHaveBeenCalledTimes(1);
       expect(httpClient.put).toHaveBeenCalledWith(`${API_BASE_PATH}/state`, {
         body: JSON.stringify({
           isActive: true,
@@ -175,8 +174,7 @@ describe('GuidedOnboarding ApiService', () => {
     it('reactivates a guide that has already been started', async () => {
       await apiService.activateGuide(searchGuide, searchAddDataActiveState);
 
-      // once to deactivate the current guide and once to activate the new guide
-      expect(httpClient.put).toHaveBeenCalledTimes(2);
+      expect(httpClient.put).toHaveBeenCalledTimes(1);
       expect(httpClient.put).toHaveBeenCalledWith(`${API_BASE_PATH}/state`, {
         body: JSON.stringify(searchAddDataActiveState),
       });
