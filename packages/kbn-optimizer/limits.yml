@@ -49,7 +49,7 @@ pageLoadAssetSize:
   expressions: 140958
   expressionShape: 34008
   expressionTagcloud: 27505
-  expressionXY: 38000
+  expressionXY: 38500
   features: 21723
   fieldFormats: 65209
   files: 22673
@@ -74,7 +74,7 @@ pageLoadAssetSize:
   kibanaUsageCollection: 16463
   kibanaUtils: 79713
   kubernetesSecurity: 77234
-  lens: 36500
+  lens: 37000
   licenseManagement: 41817
   licensing: 29004
   lists: 22900
@@ -110,7 +110,7 @@ pageLoadAssetSize:
   share: 71239
   snapshotRestore: 79032
   spaces: 57868
-  stackAlerts: 29684
+  stackAlerts: 58316
   stackConnectors: 36314
   synthetics: 40958
   telemetry: 51957
@@ -122,6 +122,7 @@ pageLoadAssetSize:
   uiActions: 35121
   uiActionsEnhanced: 38494
   unifiedFieldList: 65500
+  unifiedHistogram: 19928
   unifiedSearch: 71059
   upgradeAssistant: 81241
   urlDrilldown: 30063
@@ -140,6 +141,6 @@ pageLoadAssetSize:
   visTypeTimeseries: 55203
   visTypeVega: 153573
   visTypeVislib: 242838
-  visTypeXy: 30000
+  visTypeXy: 31800
   visualizations: 90000
   watcher: 43598
