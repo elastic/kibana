@@ -10,6 +10,11 @@ import type { GuideConfig } from '../../types';
 
 export const securityConfig: GuideConfig = {
   title: 'Get started with SIEM',
+  guideName: 'Security',
+  completedGuideRedirectLocation: {
+    appID: 'security',
+    path: '/app/security/dashboards',
+  },
   description:
     'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ligula enim, malesuada a finibus vel, cursus sed risus. Vivamus pretium, elit dictum lacinia aliquet, libero nibh dictum enim, a rhoncus leo magna in sapien.',
   steps: [
