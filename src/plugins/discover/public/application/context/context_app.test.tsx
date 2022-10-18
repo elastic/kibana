@@ -65,7 +65,7 @@ describe('ContextApp test', () => {
     filterManager: mockFilterManager,
     uiSettings: uiSettingsMock,
     storage: new LocalStorageMock({}),
-    locator: { getUrl: jest.fn() },
+    locator: { getUrl: jest.fn(() => Promise.resolve('mock-url')) },
     chrome: { setBreadcrumbs: jest.fn() },
   } as unknown as DiscoverServices;
 

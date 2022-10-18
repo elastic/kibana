@@ -57,6 +57,7 @@ async function mountDoc(update = false) {
     id: '1',
     index: 'index1',
     dataView: dataViewMock,
+    locationState: { dataViewSpec: { id: '1', title: 'index1' } },
   } as DocProps;
   let comp!: ReactWrapper;
   const services = {
@@ -82,7 +83,7 @@ async function mountDoc(update = false) {
         }
       },
     },
-    locator: { getUrl: jest.fn() },
+    locator: { getUrl: jest.fn(() => Promise.resolve('mock-url')) },
     chrome: { setBreadcrumbs: jest.fn() },
   };
   await act(async () => {

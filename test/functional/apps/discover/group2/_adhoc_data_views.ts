@@ -260,14 +260,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await toasts.dismissAllToasts();
 
       await browser.goBack();
+      await PageObjects.header.waitUntilLoadingHasFinished();
 
-      const firstToast = await toasts.getToastContent(1);
-      expect(firstToast).to.equal(
+      const [firstToast, secondToast] = await toasts.getAllToastElements();
+      expect(await firstToast.getVisibleText()).to.equal(
         `"${first}" is not a configured data view ID\nShowing the saved data view: "logstas*" (${second})`
       );
 
-      const secondToast = await toasts.getToastContent(2);
-      expect(secondToast).to.equal(
+      expect(await secondToast.getVisibleText()).to.equal(
         `Different index references\nData view id references in some of the applied filters differ from the current data view.`
       );
     });
