@@ -10,12 +10,14 @@ import { act, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { ConnectorTypes } from '../../../common/api';
-import { AppMockRenderer, createAppMockRenderer } from '../../common/mock';
+import type { AppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer } from '../../common/mock';
 import '../../common/mock/match_media';
 import { useCaseViewNavigation, useUrlParams } from '../../common/navigation/hooks';
 import { useGetConnectors } from '../../containers/configure/use_connectors';
 import { basicCaseClosed, connectorsMock } from '../../containers/mock';
-import { useGetCase, UseGetCase } from '../../containers/use_get_case';
+import type { UseGetCase } from '../../containers/use_get_case';
+import { useGetCase } from '../../containers/use_get_case';
 import { useGetCaseMetrics } from '../../containers/use_get_case_metrics';
 import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
 import { useGetTags } from '../../containers/use_get_tags';
@@ -31,7 +33,7 @@ import {
   defaultUpdateCaseState,
   defaultUseGetCaseUserActions,
 } from './mocks';
-import { CaseViewPageProps } from './types';
+import type { CaseViewPageProps } from './types';
 import { userProfiles } from '../../containers/user_profiles/api.mock';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
