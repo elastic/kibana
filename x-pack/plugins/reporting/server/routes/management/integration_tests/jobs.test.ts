@@ -10,7 +10,7 @@ jest.mock('../../../lib/content_stream', () => ({
 }));
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { BehaviorSubject } from 'rxjs';
-import { setupServer } from '@kbn/core/server/test_utils';
+import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import { Readable } from 'stream';
 import supertest from 'supertest';
 import { ReportingCore } from '../../..';

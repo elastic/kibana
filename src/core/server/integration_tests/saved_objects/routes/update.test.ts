@@ -13,7 +13,7 @@ import {
   coreUsageStatsClientMock,
   coreUsageDataServiceMock,
 } from '@kbn/core-usage-data-server-mocks';
-import { setupServer } from './test_utils';
+import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import {
   registerUpdateRoute,
   type InternalSavedObjectsRequestHandlerContext,

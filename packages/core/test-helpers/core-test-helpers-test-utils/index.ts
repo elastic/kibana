@@ -6,9 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { createHttpServer } from '@kbn/core-http-server-mocks';
-export { setupServer } from './integration_tests/saved_objects/routes/test_utils';
-export {
-  getDeprecationsFor,
-  getDeprecationsForGlobalSettings,
-} from '@kbn/core-test-helpers-deprecations-getters';
+export { setupServer } from './src/setup_server';
+export { createExportableType } from './src/create_exportable_type';

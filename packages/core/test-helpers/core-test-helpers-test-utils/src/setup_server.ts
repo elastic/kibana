@@ -9,11 +9,36 @@
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { ContextService } from '@kbn/core-http-context-server-internal';
 import { createHttpServer, createCoreContext } from '@kbn/core-http-server-mocks';
-import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
-import { contextServiceMock, coreMock } from '../../../mocks';
+import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
+import { deprecationsServiceMock } from '@kbn/core-deprecations-server-mocks';
 
 const defaultCoreId = Symbol('core');
 
+function createCoreServerRequestHandlerContextMock() {
+  return {
+    savedObjects: {
+      client: savedObjectsClientMock.create(),
+      typeRegistry: typeRegistryMock.create(),
+      getClient: savedObjectsClientMock.create,
+      getExporter: savedObjectsServiceMock.createExporter,
+      getImporter: savedObjectsServiceMock.createImporter,
+    },
+    elasticsearch: {
+      client: elasticsearchServiceMock.createScopedClusterClient(),
+    },
+    uiSettings: {
+      client: uiSettingsServiceMock.createClient(),
+    },
+    deprecations: {
+      client: deprecationsServiceMock.createClient(),
+    },
+  };
+}
 export const setupServer = async (coreId: symbol = defaultCoreId) => {
   const coreContext = createCoreContext({ coreId });
   const contextService = new ContextService(coreContext);
@@ -24,7 +49,7 @@ export const setupServer = async (coreId: symbol = defaultCoreId) => {
     context: contextService.setup({ pluginDependencies: new Map() }),
     executionContext: executionContextServiceMock.createInternalSetupContract(),
   });
-  const handlerContext = coreMock.createRequestHandlerContext();
+  const handlerContext = createCoreServerRequestHandlerContextMock();
 
   httpSetup.registerRouteHandlerContext<any, 'core'>(coreId, 'core', (ctx, req, res) => {
     return handlerContext;
@@ -34,19 +59,5 @@ export const setupServer = async (coreId: symbol = defaultCoreId) => {
     server,
     httpSetup,
     handlerContext,
-  };
-};
-
-export const createExportableType = (name: string): SavedObjectsType => {
-  return {
-    name,
-    hidden: false,
-    namespaceType: 'single',
-    mappings: {
-      properties: {},
-    },
-    management: {
-      importableAndExportable: true,
-    },
   };
 };
