@@ -188,15 +188,45 @@ export interface AnomalyRecordDoc {
    * An explanation for the anomaly score
    */
   anomaly_score_explanation?: {
+    /**
+     * Type of the detected anomaly: spike or dip.
+     */
     anomaly_type?: 'dip' | 'spike';
+    /**
+     * Length of the detected anomaly in the number of buckets.
+     */
     anomaly_length?: number;
+    /**
+     * Impact of the deviation between actual and typical in the current bucket.
+     */
     single_bucket_impact?: number;
+    /**
+     * Impact of the deviation between actual and typical in the past 12 buckets.
+     */
     multi_bucket_impact?: number;
+    /**
+     * Impact of the statistical properties of the detected anomalous interval.
+     */
     anomaly_characteristics_impact?: number;
+    /**
+     * Lower bound of the 95% confidence interval.
+     */
     lower_confidence_bound?: number;
+    /**
+     * Typical (expected) value for this bucket.
+     */
     typical_value?: number;
+    /**
+     * Upper bound of the 95% confidence interval.
+     */
     upper_confidence_bound?: number;
+    /**
+     * Indicates a reduction of anomaly score for the bucket with large confidence intervals.
+     */
     high_variance_penalty?: boolean;
+    /**
+     * Indicates a reduction of anomaly score if the bucket contains fewer samples than historically expected.
+     */
     incomplete_bucket_penalty?: boolean;
   };
 }
