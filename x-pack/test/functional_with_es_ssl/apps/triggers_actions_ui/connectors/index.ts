@@ -8,7 +8,7 @@
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext) => {
-  describe('Connectors', function () {
+  describe.only('Connectors', function () {
     loadTestFile(require.resolve('./general'));
     loadTestFile(require.resolve('./opsgenie'));
   });
