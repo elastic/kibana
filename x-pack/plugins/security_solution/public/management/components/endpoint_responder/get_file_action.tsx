@@ -6,14 +6,12 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty } from '@elastic/eui';
-import { getHostActionFileDownloadUrl } from '../../services/response_actions/get_host_action_file_download_url';
 import { useSendGetFileRequest } from '../../hooks/endpoint/use_send_get_file_request';
 import type { ResponseActionGetFileRequestBody } from '../../../../common/endpoint/schema/actions';
 import { useConsoleActionSubmitter } from './hooks/use_console_action_submitter';
 import type { ActionRequestComponentProps } from './types';
+import { ResponseActionFileDownloadLink } from '../response_action_file_download_link';
 
 export const GetFileActionResult = memo<
   ActionRequestComponentProps<{
@@ -58,18 +56,7 @@ export const GetFileActionResult = memo<
           { defaultMessage: 'File retrieved from the host.' }
         )}
       >
-        <EuiButtonEmpty
-          href={getHostActionFileDownloadUrl(actionDetails)}
-          iconType="download"
-          data-test-subj="fileDownloadLink"
-          flush="both"
-          download
-        >
-          <FormattedMessage
-            id="xpack.securitySolution.endpointResponseActions.getFileAction.downloadLink"
-            defaultMessage="Click here to download"
-          />
-        </EuiButtonEmpty>
+        <ResponseActionFileDownloadLink action={actionDetails} />
       </ResultComponent>
     );
   }
