@@ -94,6 +94,20 @@ export function getSyntheticsKPIConfig({ dataView }: ConfigProps): SeriesConfig 
         formula: "1- (count(kql='summary.down > 0') / count())",
       },
       {
+        label: 'Monitor Errors',
+        id: 'state.id',
+        // columnType: FORMULA_COLUMN,
+        // formula: "unique_count(state.id, kql='status.up: 0')",
+        field: 'state.id',
+        columnType: OPERATION_COLUMN,
+        columnFilters: [
+          {
+            language: 'kuery',
+            query: `state.id: * and state.up: 0`,
+          },
+        ],
+      },
+      {
         field: SUMMARY_UP,
         id: SUMMARY_UP,
         label: UP_LABEL,
