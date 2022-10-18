@@ -37,7 +37,7 @@ export async function getTransactionDurationChartPreview({
 }) {
   const { apmEventClient } = setup;
   const {
-    aggregationType,
+    aggregationType = AggregationType.Avg,
     environment,
     serviceName,
     transactionType,
@@ -92,7 +92,7 @@ export async function getTransactionDurationChartPreview({
             } as Record<string, 'desc'>,
           },
           aggs: averageOrPercentileAgg({
-            aggregationType: aggregationType || AggregationType.Avg,
+            aggregationType,
             transactionDurationField,
           }),
         },
