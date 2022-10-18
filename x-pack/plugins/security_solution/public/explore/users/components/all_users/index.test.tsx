@@ -10,7 +10,7 @@ import React from 'react';
 import '../../../common/mock/match_media';
 import { TestProviders } from '../../../../common/mock';
 
-import { UsersTable } from './index';
+import { UsersTable } from '.';
 import { usersModel } from '../../store';
 import { Direction, RiskSeverity } from '../../../../../common/search_strategy';
 import { UsersFields } from '../../../../../common/search_strategy/security_solution/users/common';

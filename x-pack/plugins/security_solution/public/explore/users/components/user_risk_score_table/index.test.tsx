@@ -8,7 +8,7 @@
 import { render } from '@testing-library/react';
 import { noop } from 'lodash';
 import React from 'react';
-import { UserRiskScoreTable } from './index';
+import { UserRiskScoreTable } from '.';
 import type { UserRiskScore } from '../../../../../common/search_strategy';
 import { RiskSeverity } from '../../../../../common/search_strategy';
 import { TestProviders } from '../../../../common/mock';

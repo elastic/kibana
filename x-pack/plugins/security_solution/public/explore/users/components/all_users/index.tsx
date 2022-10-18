@@ -11,7 +11,10 @@ import { useDispatch } from 'react-redux';
 import { EuiIcon, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 import { UserDetailsLink } from '../../../../common/components/links';
-import { getEmptyTagValue, getOrEmptyTagFromValue } from '../../../../common/components/empty_value';
+import {
+  getEmptyTagValue,
+  getOrEmptyTagFromValue,
+} from '../../../../common/components/empty_value';
 
 import type { Columns, Criteria, ItemsPerRow } from '../../../../common/components/paginated_table';
 import { PaginatedTable } from '../../../../common/components/paginated_table';

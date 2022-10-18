@@ -10,7 +10,7 @@ import { useQueryToggle } from '../../../../../common/containers/query_toggle';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../../common/mock';
 import React from 'react';
-import { UsersKpiAuthentications } from './index';
+import { UsersKpiAuthentications } from '.';
 
 jest.mock('../../../../common/containers/query_toggle');
 jest.mock('../../../containers/users/authentications');

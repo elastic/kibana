@@ -16,7 +16,7 @@ import { getEmptyTagValue } from '../../../../common/components/empty_value';
 
 import { IS_OPERATOR } from '../../../../timelines/components/timeline/data_providers/data_provider';
 import { Provider } from '../../../../timelines/components/timeline/data_providers/provider';
-import type { UserRiskScoreColumns } from './index';
+import type { UserRiskScoreColumns } from '.';
 
 import * as i18n from './translations';
 import { RiskScore } from '../../../../common/components/severity/common';

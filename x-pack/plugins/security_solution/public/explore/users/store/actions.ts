@@ -6,7 +6,7 @@
  */
 
 import actionCreatorFactory from 'typescript-fsa';
-import type { usersModel } from './index';
+import type { usersModel } from '.';
 import type { RiskScoreSortField, RiskSeverity } from '../../../../common/search_strategy';
 import type { SortUsersField } from '../../../../common/search_strategy/security_solution/users/common';
 

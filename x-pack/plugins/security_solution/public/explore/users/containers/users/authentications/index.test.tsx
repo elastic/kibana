@@ -7,7 +7,7 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../../../../common/mock';
-import { useUsersKpiAuthentications } from './index';
+import { useUsersKpiAuthentications } from '.';
 
 describe('kpi users - authentications', () => {
   it('skip = true will cancel any running request', () => {

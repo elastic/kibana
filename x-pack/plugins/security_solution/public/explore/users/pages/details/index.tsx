@@ -49,7 +49,10 @@ import { timelineSelectors } from '../../../../timelines/store/timeline';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
-import { useDeepEqualSelector, useShallowEqualSelector } from '../../../../common/hooks/use_selector';
+import {
+  useDeepEqualSelector,
+  useShallowEqualSelector,
+} from '../../../../common/hooks/use_selector';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';
 import { LastEventTime } from '../../../../common/components/last_event_time';
 import { LastEventIndexKey } from '../../../../../common/search_strategy';
