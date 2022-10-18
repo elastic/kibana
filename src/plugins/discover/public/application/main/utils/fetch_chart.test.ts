@@ -107,8 +107,7 @@ describe('test fetchCharts', () => {
 
     const result = await fetchChart(savedSearchMockWithTimeField.searchSource, getDeps());
     expect(result).toHaveProperty('totalHits', 42);
-    expect(result).toHaveProperty('bucketInterval.description', '0 milliseconds');
-    expect(result).toHaveProperty('chartData');
+    expect(result).toHaveProperty('response');
   });
 
   test('rejects promise on query failure', async () => {
