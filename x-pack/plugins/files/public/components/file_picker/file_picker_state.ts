@@ -131,6 +131,7 @@ export class FilePickerState {
     request$.subscribe({
       error: (e: Error) => {
         if (e.name === 'AbortError') return;
+        this.isLoading$.next(false);
         this.loadingError$.next(e);
       },
     });
