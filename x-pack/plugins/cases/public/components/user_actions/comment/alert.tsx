@@ -8,7 +8,7 @@
 import React from 'react';
 import { get, isEmpty } from 'lodash';
 import type { EuiCommentProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
 import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 
 import type { CommentResponseAlertsType } from '../../../../common/api';
@@ -16,12 +16,11 @@ import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
 import { UserActionTimestamp } from '../timestamp';
 import type { SnakeToCamelCase } from '../../../../common/types';
 import { MultipleAlertsCommentEvent, SingleAlertCommentEvent } from './alert_event';
-import { UserActionCopyLink } from '../copy_link';
 import { UserActionShowAlert } from './show_alert';
 import { ShowAlertTableLink } from './show_alert_table_link';
 import { HoverableUserWithAvatarResolver } from '../../user_profiles/hoverable_user_with_avatar_resolver';
 import { UserActionContentToolbar } from '../content_toolbar';
-import * as i18n from './translations';
+import { AlertPropertyActions } from '../property_actions/alert_property_actions';
 
 type BuilderArgs = Pick<
   UserActionBuilderArgs,
@@ -79,10 +78,7 @@ const getSingleAlertUserAction = ({
       timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
       timelineAvatar: 'bell',
       actions: (
-        <EuiFlexGroup responsive={false}>
-          <EuiFlexItem grow={false}>
-            <UserActionCopyLink id={userAction.actionId} />
-          </EuiFlexItem>
+        <UserActionContentToolbar id={comment.id}>
           <EuiFlexItem grow={false}>
             <UserActionShowAlert
               id={userAction.actionId}
@@ -91,20 +87,12 @@ const getSingleAlertUserAction = ({
               onShowAlertDetails={onShowAlertDetails}
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <UserActionContentToolbar
-              actions={['delete']}
-              id={comment.id}
-              deleteLabel={i18n.REMOVE_ALERTS(1)}
-              isLoading={loadingCommentIds.includes(comment.id)}
-              withCopyLinkAction={false}
-              deleteConfirmTitle={i18n.REMOVE_ALERTS(1)}
-              deleteButtonText={i18n.REMOVE}
-              deleteIcon="minusInCircle"
-              onDelete={() => handleDeleteComment(comment.id)}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+          <AlertPropertyActions
+            onDelete={() => handleDeleteComment(comment.id)}
+            isLoading={loadingCommentIds.includes(comment.id)}
+            totalAlerts={1}
+          />
+        </UserActionContentToolbar>
       ),
     },
   ];
@@ -149,27 +137,16 @@ const getMultipleAlertsUserAction = ({
       timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
       timelineAvatar: 'bell',
       actions: (
-        <EuiFlexGroup responsive={false}>
-          <EuiFlexItem grow={false}>
-            <UserActionCopyLink id={userAction.actionId} />
-          </EuiFlexItem>
+        <UserActionContentToolbar id={comment.id}>
           <EuiFlexItem grow={false}>
             <ShowAlertTableLink />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <UserActionContentToolbar
-              actions={['delete']}
-              id={comment.id}
-              deleteLabel={i18n.REMOVE_ALERTS(totalAlerts)}
-              isLoading={loadingCommentIds.includes(comment.id)}
-              withCopyLinkAction={false}
-              deleteConfirmTitle={i18n.REMOVE_ALERTS(totalAlerts)}
-              deleteButtonText={i18n.REMOVE}
-              deleteIcon="minusInCircle"
-              onDelete={() => handleDeleteComment(comment.id)}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+          <AlertPropertyActions
+            onDelete={() => handleDeleteComment(comment.id)}
+            isLoading={loadingCommentIds.includes(comment.id)}
+            totalAlerts={totalAlerts}
+          />
+        </UserActionContentToolbar>
       ),
     },
   ];

@@ -32,6 +32,13 @@ const getDeleteLabelTitle = (userAction: UserActionResponse<CommentUserAction>) 
     return `${i18n.REMOVED_FIELD} ${alertLabel}`;
   }
 
+  if (
+    comment.type === CommentType.externalReference ||
+    comment.type === CommentType.persistableState
+  ) {
+    return `${i18n.REMOVED_FIELD} ${i18n.ATTACHMENT.toLowerCase()}`;
+  }
+
   return `${i18n.REMOVED_FIELD} ${i18n.COMMENT.toLowerCase()}`;
 };
 

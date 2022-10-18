@@ -29,16 +29,6 @@ export const DELETE_ATTACHMENT = i18n.translate(
   }
 );
 
-export const REMOVE_ALERTS = (totalAlerts: number): string =>
-  i18n.translate('xpack.cases.caseView.alerts.remove', {
-    values: { totalAlerts },
-    defaultMessage: 'Remove {totalAlerts, plural, =1 {alert} other {alerts}}',
-  });
-
-export const REMOVE = i18n.translate('xpack.cases.caseView.alerts.remove', {
-  defaultMessage: 'Remove',
-});
-
 export const ONE_ALERT = i18n.translate('xpack.cases.caseView.alerts.oneAlert', {
   defaultMessage: 'one alert',
 });
@@ -48,3 +38,7 @@ export const MULTIPLE_ALERTS = (totalAlerts: number): string =>
     values: { totalAlerts },
     defaultMessage: '{totalAlerts} {totalAlerts, plural, =1 {alert} other {alerts}}',
   });
+
+export const ATTACHMENT = i18n.translate('xpack.cases.userActions.attachment', {
+  defaultMessage: 'Attachment',
+});
