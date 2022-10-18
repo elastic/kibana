@@ -101,11 +101,6 @@ export function getRumErrorsProjection({
             ...rangeQuery(start, end),
             { term: { [AGENT_NAME]: 'rum-js' } },
             {
-              term: {
-                [SERVICE_LANGUAGE_NAME]: 'javascript',
-              },
-            },
-            {
               terms: {
                 [PROCESSOR_EVENT]: [ProcessorEvent.error],
               },
