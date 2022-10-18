@@ -16,7 +16,7 @@ component
     use_component.ts <-- for logic if the Presentational Component has logic
     index.test.tsx
     use_component.test.tsx
-    index.md <-- if exists, to show how the UI of the component looks like and what are the component's props
+  
 ```
 # Testing 
 
