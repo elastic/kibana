@@ -88,7 +88,7 @@ export const useFromTimelineId = (initialState: UseFromTimelineId): FromTimeline
         toastMessage: (
           <>
             <FormattedMessage
-              id="xpack.securitySolution.detectionEngine.createRule.fromTimelineErrorTitle"
+              id="xpack.securitySolution.detectionEngine.createRule.fromTimelineErrorToast"
               defaultMessage="There is an issue with the data view used with this saved timeline. To create a rule from this timeline, you must {link}."
               values={{
                 link: fromTimelineId ? (

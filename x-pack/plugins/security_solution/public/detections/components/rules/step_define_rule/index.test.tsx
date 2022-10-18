@@ -28,6 +28,16 @@ jest.mock('../../../../common/hooks/use_selector', () => {
     }),
   };
 });
+jest.mock('../../../../common/components/link_to', () => {
+  const originalModule = jest.requireActual('../../../../common/components/link_to');
+  return {
+    ...originalModule,
+    getTimelineUrl: jest.fn(),
+    useFormatUrl: jest.fn().mockReturnValue({
+      formatUrl: jest.fn().mockImplementation((path: string) => path),
+    }),
+  };
+});
 jest.mock('../../../../common/containers/sourcerer', () => {
   const actual = jest.requireActual('../../../../common/containers/sourcerer');
   return {

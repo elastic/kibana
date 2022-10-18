@@ -13,6 +13,20 @@ import { useGetInitialUrlParamValue } from '../../../../../common/utils/global_q
 import { resolveTimeline } from '../../../../../timelines/containers/api';
 import { mockTimeline } from '../../../../../../server/lib/timeline/__mocks__/create_timelines';
 import { mockBrowserFields } from '../../../../../common/containers/source/mock';
+import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
+import { useAppToastsMock } from '../../../../../common/hooks/use_app_toasts.mock';
+
+jest.mock('../../../../../common/components/link_to', () => {
+  const originalModule = jest.requireActual('../../../../../common/components/link_to');
+  return {
+    ...originalModule,
+    getTimelineUrl: jest.fn(),
+    useFormatUrl: jest.fn().mockReturnValue({
+      formatUrl: jest.fn().mockImplementation((path: string) => path),
+    }),
+  };
+});
+
 const mockDispatch = jest.fn();
 
 jest.mock('react-redux', () => {
@@ -25,6 +39,7 @@ jest.mock('react-redux', () => {
 
 jest.mock('../../../../../common/utils/global_query_string/helpers');
 jest.mock('../../../../../common/hooks/use_selector');
+jest.mock('../../../../../common/hooks/use_app_toasts');
 jest.mock('../../../../../timelines/containers/api');
 
 const defaults = {
@@ -77,7 +92,12 @@ const fromTimeline = {
   },
 };
 describe('useFromTimelineId', () => {
+  let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
+
   beforeEach(() => {
+    jest.clearAllMocks();
+    appToastsMock = useAppToastsMock.create();
+    (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
     (useDeepEqualSelector as jest.Mock).mockReturnValue({
       selectedDataView: {
         id: 'not-the one',
@@ -93,7 +113,6 @@ describe('useFromTimelineId', () => {
       decodedParam: 'eb2781c0-1df5-11eb-8589-2f13958b79f7',
     }));
     (resolveTimeline as jest.Mock).mockResolvedValue(fromTimeline);
-    jest.clearAllMocks();
   });
 
   it('if no from timeline id, update false and loading false', async () => {
