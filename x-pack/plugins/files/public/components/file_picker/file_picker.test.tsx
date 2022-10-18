@@ -4,13 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { promisify } from 'util';
 import React from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { act } from 'react-dom/test-utils';
 import { registerTestBed } from '@kbn/test-jest-helpers';
-
-const pImmediate = promisify(global.setImmediate);
 
 import { createMockFilesClient } from '../../mocks';
 import { FilesContext } from '../context';
