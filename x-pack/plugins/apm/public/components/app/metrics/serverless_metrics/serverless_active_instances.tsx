@@ -175,7 +175,7 @@ export function ServerlessActiveInstances({ serverlessFunctionName }: Props) {
 
   return (
     <EuiPanel hasBorder={true}>
-      <EuiFlexGroup direction="column">
+      <EuiFlexGroup direction="column" gutterSize="xs">
         <EuiFlexItem>
           <EuiTitle size="xs">
             <h2>

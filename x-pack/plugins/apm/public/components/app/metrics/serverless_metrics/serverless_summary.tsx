@@ -15,12 +15,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import styled from 'styled-components';
 import {
   asMillisecondDuration,
   asPercent,
 } from '../../../../../common/utils/formatters';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useBreakpoints } from '../../../../hooks/use_breakpoints';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 
@@ -28,7 +30,26 @@ interface Props {
   serverlessFunctionName?: string;
 }
 
+const CentralizedContainer = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+const Border = styled.div`
+  height: 55px;
+  border-right: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
+`;
+
+function VerticalRule() {
+  return (
+    <CentralizedContainer>
+      <Border />
+    </CentralizedContainer>
+  );
+}
+
 export function ServerlessSummary({ serverlessFunctionName }: Props) {
+  const breakpoints = useBreakpoints();
   const {
     query: { environment, kuery, rangeFrom, rangeTo },
   } = useApmParams('/services/{serviceName}/metrics');
@@ -60,6 +81,8 @@ export function ServerlessSummary({ serverlessFunctionName }: Props) {
     },
     [kuery, environment, serviceName, start, end, serverlessFunctionName]
   );
+
+  const showVerticalRule = !breakpoints.isSmall;
 
   return (
     <EuiPanel hasBorder={true}>
@@ -100,6 +123,7 @@ export function ServerlessSummary({ serverlessFunctionName }: Props) {
             reverse
           />
         </EuiFlexItem>
+        {showVerticalRule && <VerticalRule />}
         <EuiFlexItem grow={false}>
           <EuiStat
             title={asMillisecondDuration(data?.serverlessDurationAvg)}
@@ -133,6 +157,7 @@ export function ServerlessSummary({ serverlessFunctionName }: Props) {
             reverse
           />
         </EuiFlexItem>
+        {showVerticalRule && <VerticalRule />}
       </EuiFlexGroup>
     </EuiPanel>
   );

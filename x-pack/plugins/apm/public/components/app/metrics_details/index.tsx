@@ -8,7 +8,7 @@ import React from 'react';
 import { isServerlessAgent } from '../../../../common/agent_name';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { ServerlessMetrics } from '../metrics/serverless_metrics';
+import { ServerlessMetricsDetails } from './serverless_metrics_details';
 import { ServiceNodeMetrics } from './service_node_metrics';
 
 export function MetricsDetails() {
@@ -18,7 +18,7 @@ export function MetricsDetails() {
   const { runtimeName } = useApmServiceContext();
 
   if (isServerlessAgent(runtimeName)) {
-    return <ServerlessMetrics serverlessFunctionName={id} />;
+    return <ServerlessMetricsDetails serverlessFunctionName={id} />;
   }
 
   return <ServiceNodeMetrics serviceNodeName={id} />;

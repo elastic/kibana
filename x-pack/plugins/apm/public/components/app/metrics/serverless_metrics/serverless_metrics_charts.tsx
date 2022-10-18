@@ -4,13 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  EuiFlexGrid,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { isEmpty, keyBy } from 'lodash';
 import React, { useMemo } from 'react';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
@@ -76,9 +70,9 @@ export function ServerlessMetricsCharts({ serverlessFunctionName }: Props) {
   }, [data]);
 
   return (
-    <EuiFlexGroup direction="column">
+    <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem>
-        <EuiFlexGrid columns={3} gutterSize="s">
+        <EuiFlexGrid columns={3} gutterSize="m">
           {firstLineCharts.map((chart) => (
             <EuiFlexItem key={chart.key}>
               <EuiPanel hasBorder={true}>
@@ -94,7 +88,7 @@ export function ServerlessMetricsCharts({ serverlessFunctionName }: Props) {
         </EuiFlexGrid>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiFlexGrid columns={2} gutterSize="s">
+        <EuiFlexGrid columns={2} gutterSize="m">
           {secondLineCharts.map((chart) => (
             <EuiFlexItem key={chart.key}>
               <EuiPanel hasBorder={true}>
@@ -109,7 +103,6 @@ export function ServerlessMetricsCharts({ serverlessFunctionName }: Props) {
           ))}
         </EuiFlexGrid>
       </EuiFlexItem>
-      <EuiSpacer size="xxl" />
     </EuiFlexGroup>
   );
 }
