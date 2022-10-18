@@ -3317,6 +3317,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-test-helpers-test-utils@link:bazel-bin/packages/core/test-helpers/core-test-helpers-test-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-theme-browser-internal@link:bazel-bin/packages/core/theme/core-theme-browser-internal":
   version "0.0.0"
   uid ""
@@ -3738,6 +3742,18 @@
   uid ""
 
 "@kbn/shared-ux-link-redirect-app@link:bazel-bin/packages/shared-ux/link/redirect_app/impl":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-markdown-mocks@link:bazel-bin/packages/shared-ux/markdown/mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-markdown-types@link:bazel-bin/packages/shared-ux/markdown/types":
+  version "0.0.0"
+  uid ""
+
+"@kbn/shared-ux-markdown@link:bazel-bin/packages/shared-ux/markdown/impl":
   version "0.0.0"
   uid ""
 
@@ -7485,6 +7501,10 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__core-test-helpers-test-utils@link:bazel-bin/packages/core/test-helpers/core-test-helpers-test-utils/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__core-theme-browser-internal@link:bazel-bin/packages/core/theme/core-theme-browser-internal/npm_module_types":
   version "0.0.0"
   uid ""
@@ -7886,6 +7906,18 @@
   uid ""
 
 "@types/kbn__shared-ux-link-redirect-app@link:bazel-bin/packages/shared-ux/link/redirect_app/impl/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-markdown-mocks@link:bazel-bin/packages/shared-ux/markdown/mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-markdown-types@link:bazel-bin/packages/shared-ux/markdown/types/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__shared-ux-markdown@link:bazel-bin/packages/shared-ux/markdown/impl/npm_module_types":
   version "0.0.0"
   uid ""
 
