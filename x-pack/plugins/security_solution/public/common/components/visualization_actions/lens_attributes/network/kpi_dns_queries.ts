@@ -64,7 +64,7 @@ export const kpiDnsQueriesLensAttributes: LensAttributes = {
       },
     ],
     datasourceStates: {
-      indexpattern: {
+      formBased: {
         layers: {
           'cea37c70-8f91-43bf-b9fe-72d8c049f6a3': {
             columns: {

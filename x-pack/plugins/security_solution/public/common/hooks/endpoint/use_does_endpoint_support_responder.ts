@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-import { RESPONDER_CAPABILITIES } from '../../../../common/endpoint/constants';
+import { ENDPOINT_CAPABILITIES } from '../../../../common/endpoint/service/response_actions/constants';
 import type { HostMetadata, MaybeImmutable } from '../../../../common/endpoint/types';
 
 export const useDoesEndpointSupportResponder = (
   endpointMetadata: MaybeImmutable<HostMetadata> | undefined
 ): boolean => {
   if (endpointMetadata) {
-    return RESPONDER_CAPABILITIES.every((capability) =>
-      endpointMetadata?.Endpoint.capabilities?.includes(capability)
-    );
+    return ENDPOINT_CAPABILITIES.every((capability) => {
+      // TODO: remove this temporary bypass when in-context Response Console capabilities are enabled
+      const temporaryBypass = capability === 'get_file';
+
+      return endpointMetadata?.Endpoint.capabilities?.includes(capability) || temporaryBypass;
+    });
   }
   return false;
 };

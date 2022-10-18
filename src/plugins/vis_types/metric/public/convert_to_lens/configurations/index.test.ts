@@ -7,14 +7,10 @@
  */
 
 import { ColorSchemas } from '@kbn/charts-plugin/common';
-import { getConfiguration, getPercentageModeConfig } from '.';
+import { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+import { CollapseFunction } from '@kbn/visualizations-plugin/common';
+import { getConfiguration } from '.';
 import { VisParams } from '../../types';
-
-const mockGetPalette = jest.fn();
-
-jest.mock('./palette', () => ({
-  getPalette: jest.fn(() => mockGetPalette()),
-}));
 
 const params: VisParams = {
   addTooltip: false,
@@ -38,25 +34,12 @@ const params: VisParams = {
   type: 'metric',
 };
 
-describe('getPercentageModeConfig', () => {
-  test('should return falsy percentage mode if percentage mode is off', () => {
-    expect(getPercentageModeConfig(params)).toEqual({ isPercentageMode: false });
-  });
-
-  test('should return percentage mode config', () => {
-    expect(
-      getPercentageModeConfig({ ...params, metric: { ...params.metric, percentageMode: true } })
-    ).toEqual({ isPercentageMode: true, min: 0, max: 300 });
-  });
-});
-
 describe('getConfiguration', () => {
-  const palette = { name: 'custom', params: { name: 'custom' }, type: 'palette' };
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-    mockGetPalette.mockReturnValue(palette);
-  });
+  const palette = {
+    name: 'custom',
+    params: { name: 'custom' },
+    type: 'palette',
+  } as PaletteOutput<CustomPaletteParams>;
 
   test('shourd return correct configuration', () => {
     const layerId = 'layer-id';
@@ -64,11 +47,11 @@ describe('getConfiguration', () => {
     const bucket = 'bucket-id';
     const collapseFn = 'sum';
     expect(
-      getConfiguration(layerId, params, {
+      getConfiguration(layerId, params, palette, {
         metrics: [metric],
-        buckets: [bucket],
+        buckets: { all: [bucket], customBuckets: { metric: bucket } },
         columnsWithoutReferenced: [],
-        bucketCollapseFn: { [metric]: collapseFn },
+        bucketCollapseFn: { [collapseFn]: [bucket] } as Record<CollapseFunction, string[]>,
       })
     ).toEqual({
       breakdownByAccessor: bucket,
@@ -78,6 +61,5 @@ describe('getConfiguration', () => {
       metricAccessor: metric,
       palette,
     });
-    expect(mockGetPalette).toBeCalledTimes(1);
   });
 });
