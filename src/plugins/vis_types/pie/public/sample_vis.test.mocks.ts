@@ -20,7 +20,6 @@ export const samplePieVis = {
     stage: 'production',
     options: {
       showTimePicker: true,
-      showQueryBar: true,
       showFilterBar: true,
       showIndexSelection: true,
       hierarchicalData: false,

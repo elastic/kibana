@@ -211,7 +211,6 @@ describe('SearchBar', () => {
         screenTitle: 'test screen',
         onQuerySubmit: noop,
         query: kqlQuery,
-        showQueryBar: false,
         showQueryInput: false,
       })
     );

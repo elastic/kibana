@@ -145,7 +145,6 @@ export const ContextApp = ({ dataView, anchorId }: ContextAppProps) => {
     return {
       appName: 'context',
       showSearchBar: true,
-      showQueryBar: true,
       showQueryInput: false,
       showFilterBar: true,
       showSaveQuery: false,

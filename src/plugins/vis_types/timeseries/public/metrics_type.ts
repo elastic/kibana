@@ -157,7 +157,6 @@ export const metricsVisDefinition: VisTypeDefinition<
     editor: TSVB_EDITOR_NAME,
   },
   options: {
-    showQueryBar: true,
     showFilterBar: true,
     showIndexSelection: false,
   },
