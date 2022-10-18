@@ -65,7 +65,6 @@ export const optionsListReducers = {
     if (state.explicitInput.selectedOptions) state.explicitInput.selectedOptions = [];
   },
   setExclude: (state: WritableDraft<OptionsListReduxState>, action: PayloadAction<boolean>) => {
-    // console.log('set exclude', action.payload);
     state.explicitInput.exclude = action.payload;
   },
   clearValidAndInvalidSelections: (state: WritableDraft<OptionsListReduxState>) => {

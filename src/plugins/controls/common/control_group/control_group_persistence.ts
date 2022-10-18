@@ -21,7 +21,7 @@ import {
   PersistableControlGroupInput,
   RawControlGroupAttributes,
 } from './types';
-import { ControlPanelDiffSystems } from './control_group_diff_system';
+import { ControlPanelDiffSystems } from './control_group_panel_diff_system';
 
 const safeJSONParse = <OutType>(jsonString?: string): OutType | undefined => {
   if (!jsonString && typeof jsonString !== 'string') return;
