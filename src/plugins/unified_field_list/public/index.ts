@@ -7,14 +7,22 @@
  */
 
 import { UnifiedFieldListPlugin } from './plugin';
-export type { FieldTopValuesBucketParams } from './components/field_stats/field_top_values_bucket';
 export type {
   FieldStatsResponse,
   BucketedAggregation,
   NumberStatsResult,
   TopValuesResult,
 } from '../common/types';
-export type { FieldStatsProps, FieldStatsServices } from './components/field_stats';
+export {
+  FieldTopValuesBucket,
+  FieldTopValuesBucketProps,
+  FieldTopValuesBucketParams,
+} from './components/field_stats';
+export type {
+  FieldStatsProps,
+  FieldStatsServices,
+  FieldStatsState,
+} from './components/field_stats';
 export { FieldStats } from './components/field_stats';
 export {
   FieldPopover,

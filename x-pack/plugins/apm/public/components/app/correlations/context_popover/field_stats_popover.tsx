@@ -13,17 +13,31 @@ import {
   FieldStats,
   FieldPopoverHeader,
   FieldStatsServices,
+  FieldStatsProps,
+  FieldStatsState,
 } from '@kbn/unified-field-list-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { Filter } from '@kbn/es-query';
-import { DataViewField } from '@kbn/data-views-plugin/common';
+import type { Filter } from '@kbn/es-query';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
+import { FieldTopValuesBucket } from '@kbn/unified-field-list-plugin/public';
+
 import type { FieldTopValuesBucketParams } from '@kbn/unified-field-list-plugin/public';
+import { css } from '@emotion/react';
+import {
+  EuiHorizontalRule,
+  EuiText,
+  EuiSpacer,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { asPercent } from '../../../../../common/utils/formatters';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useFetchParams } from '../use_fetch_params';
-import { ApmPluginStartDeps } from '../../../../plugin';
+import type { ApmPluginStartDeps } from '../../../../plugin';
 import { useApmDataView } from '../../../../hooks/use_apm_data_view';
 import { useTheme } from '../../../../hooks/use_theme';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 
 export type OnAddFilter = ({
   fieldName,
@@ -37,6 +51,124 @@ export type OnAddFilter = ({
 
 const defaultFilters: Filter[] = [];
 
+interface FieldStatsPopoverContentProps extends FieldStatsProps {
+  fieldName: string;
+  fieldValue: string | number;
+}
+
+export function FieldStatsPopoverContent({
+  fieldName,
+  fieldValue,
+  services,
+  field,
+  dataViewOrDataViewId,
+  query,
+  filters,
+  fromDate,
+  toDate,
+  onAddFilter,
+  overrideFieldTopValueBar,
+}: FieldStatsPopoverContentProps) {
+  const [needToFetchIndividualStat, setNeedToFetchIndividualStat] =
+    useState(false);
+
+  const onStateChange = useCallback(
+    (nextState: FieldStatsState) => {
+      const { topValues } = nextState;
+      const idxToHighlight = Array.isArray(topValues)
+        ? topValues.findIndex((value) => value.key === fieldValue)
+        : null;
+
+      setNeedToFetchIndividualStat(
+        idxToHighlight === -1 &&
+          fieldName !== undefined &&
+          fieldValue !== undefined
+      );
+    },
+    [fieldName, fieldValue]
+  );
+
+  const params = useFetchParams();
+  const { data: fieldValueStats, status } = useFetcher(
+    (callApmApi) => {
+      if (needToFetchIndividualStat) {
+        return callApmApi(
+          'GET /internal/apm/correlations/field_value_stats/transactions',
+          {
+            params: {
+              query: {
+                ...params,
+                fieldName,
+                fieldValue,
+              },
+            },
+          }
+        );
+      }
+    },
+    [params, fieldName, fieldValue, needToFetchIndividualStat]
+  );
+  const progressBarMax = fieldValueStats?.topValuesSampleSize;
+
+  return (
+    <>
+      <FieldStats
+        services={services}
+        field={field}
+        dataViewOrDataViewId={dataViewOrDataViewId}
+        query={query}
+        filters={filters}
+        fromDate={fromDate}
+        toDate={toDate}
+        onAddFilter={onAddFilter}
+        overrideFieldTopValueBar={overrideFieldTopValueBar}
+        onStateChange={onStateChange}
+      />
+      {needToFetchIndividualStat ? (
+        <>
+          <EuiHorizontalRule margin="s" />
+          <EuiText size="xs" color="subdued">
+            <FormattedMessage
+              id="xpack.apm.correlations.fieldContextPopover.notTopTenValueMessage"
+              defaultMessage="Selected term is not in the top 10"
+            />
+          </EuiText>
+          <EuiSpacer size="s" />
+          {status === FETCH_STATUS.SUCCESS &&
+          Array.isArray(fieldValueStats?.topValues) ? (
+            fieldValueStats?.topValues.map((value) => {
+              const valueText =
+                progressBarMax !== undefined
+                  ? asPercent(value.doc_count, progressBarMax)
+                  : // @todo: be careful, check for 'other' render condition
+                    '';
+
+              if (progressBarMax === undefined || valueText === '') return null;
+              return (
+                <FieldTopValuesBucket
+                  field={field}
+                  fieldValue={fieldValue}
+                  formattedPercentage={valueText}
+                  formattedFieldValue={fieldValue.toString()}
+                  progressValue={value.doc_count / progressBarMax}
+                  count={value.doc_count}
+                  onAddFilter={onAddFilter}
+                  overrideFieldTopValueBar={overrideFieldTopValueBar}
+                  color={'accent'}
+                  {...{ 'data-test-subj': 'apmNotInTopTenFieldTopValueBucket' }}
+                />
+              );
+            })
+          ) : (
+            <EuiText textAlign="center">
+              <EuiLoadingSpinner />
+            </EuiText>
+          )}
+        </>
+      ) : null}
+    </>
+  );
+}
 export function FieldStatsPopover({
   fieldName,
   fieldValue,
@@ -112,7 +244,14 @@ export function FieldStatsPopover({
         return { color: 'primary' };
       }
       return fieldValue === fieldTopValuesBucketParams.fieldValue
-        ? { color: 'accent' }
+        ? {
+            color: 'accent',
+            textProps: {
+              css: css`
+                font-weight: bold;
+              `,
+            },
+          }
         : {};
     },
     [fieldValue]
@@ -156,7 +295,9 @@ export function FieldStatsPopover({
       )}
       renderContent={() => (
         <>
-          <FieldStats
+          <FieldStatsPopoverContent
+            fieldName={fieldName}
+            fieldValue={fieldValue}
             services={fieldStatsServices as FieldStatsServices}
             field={field}
             dataViewOrDataViewId={dataView}
@@ -166,6 +307,7 @@ export function FieldStatsPopover({
             toDate={end}
             onAddFilter={addFilter}
             overrideFieldTopValueBar={overrideFieldTopValueBar}
+            // onStateChange={onStateChange}
           />
         </>
       )}

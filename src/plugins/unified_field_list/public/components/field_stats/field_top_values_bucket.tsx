@@ -45,7 +45,7 @@ export interface FieldTopValuesBucketProps extends FieldTopValuesBucketParams {
   overrideFieldTopValueBar?: OverrideFieldTopValueBarCallback;
 }
 
-export const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
+const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
   'data-test-subj': dataTestSubject,
   onAddFilter,
   overrideFieldTopValueBar,
@@ -64,6 +64,7 @@ export const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
     progressValue,
     count,
     color,
+    textProps = {},
   } = { ...fieldTopValuesBucketOverridableProps, ...overrides };
   const fieldLabel = (field?.subType as IFieldSubTypeMulti)?.multi?.parent ?? field.name;
 
@@ -88,7 +89,7 @@ export const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
           >
             {(formattedFieldValue?.length ?? 0) > 0 ? (
               <EuiToolTip content={formattedFieldValue} delay="long">
-                <EuiText size="xs" className="eui-textTruncate" color="subdued">
+                <EuiText size="xs" className="eui-textTruncate" color={'subdued'} {...textProps}>
                   {formattedFieldValue}
                 </EuiText>
               </EuiToolTip>
@@ -194,3 +195,7 @@ export const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
     </EuiFlexGroup>
   );
 };
+
+// Necessary for React.lazy
+// eslint-disable-next-line import/no-default-export
+export default FieldTopValuesBucket;

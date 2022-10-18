@@ -47,7 +47,7 @@ import {
 } from './field_top_values';
 import { FieldSummaryMessage } from './field_summary_message';
 
-interface State {
+export interface FieldStatsState {
   isLoading: boolean;
   totalDocuments?: number;
   sampledDocuments?: number;
@@ -87,6 +87,7 @@ export interface FieldStatsProps {
   }) => JSX.Element;
   onAddFilter?: AddFieldFilterHandler;
   overrideFieldTopValueBar?: OverrideFieldTopValueBarCallback;
+  onStateChange?: (s: FieldStatsState) => void;
 }
 
 const FieldStatsComponent: React.FC<FieldStatsProps> = ({
@@ -103,9 +104,10 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   overrideFooter,
   onAddFilter,
   overrideFieldTopValueBar,
+  onStateChange,
 }) => {
   const { fieldFormats, uiSettings, charts, dataViews, data } = services;
-  const [state, changeState] = useState<State>({
+  const [state, changeState] = useState<FieldStatsState>({
     isLoading: false,
   });
   const [dataView, changeDataView] = useState<DataView | null>(null);
@@ -119,6 +121,15 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
       }
     },
     [changeState, isCanceledRef]
+  );
+
+  useEffect(
+    function broadcastOnStateChange() {
+      if (onStateChange) {
+        onStateChange(state);
+      }
+    },
+    [onStateChange, state]
   );
 
   const setDataView: typeof changeDataView = useCallback(
