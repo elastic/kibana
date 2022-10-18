@@ -121,10 +121,6 @@ export const ExceptionListsTable = React.memo(() => {
     ({ id, listId, namespaceType }: { id: string; listId: string; namespaceType: NamespaceType }) =>
       async () => {
         try {
-          if (refreshExceptions != null) {
-            refreshExceptions();
-          }
-
           if (exceptionsListsRef[id] != null && exceptionsListsRef[id].rules.length === 0) {
             await deleteExceptionList({
               id,
