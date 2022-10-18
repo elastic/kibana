@@ -11,10 +11,13 @@ import { act, render } from '@testing-library/react';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
 import { NONE_CONNECTOR_ID } from '../../../common/api';
-import { useForm, Form, FormHook } from '../../common/shared_imports';
+import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { connectorsMock } from '../../containers/mock';
-import { schema, FormProps } from './schema';
-import { CreateCaseForm, CreateCaseFormProps } from './form';
+import type { FormProps } from './schema';
+import { schema } from './schema';
+import type { CreateCaseFormProps } from './form';
+import { CreateCaseForm } from './form';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
 import { useCaseConfigureResponse } from '../configure_cases/__mock__';
 import { TestProviders } from '../../common/mock';

@@ -17,6 +17,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { MonitorErrorSparklines } from './monitor_error_sparklines';
+import { DurationSparklines } from './duration_sparklines';
 import { MonitorDurationTrend } from './duration_trend';
 import { StepDurationPanel } from './step_duration_panel';
 import { AvailabilityPanel } from './availability_panel';
@@ -46,7 +48,7 @@ export const MonitorSummary = () => {
             <EuiTitle size="xs">
               <h3 css={{ margin: euiTheme.size.s, marginBottom: 0 }}>{LAST_30DAYS_LABEL}</h3>
             </EuiTitle>
-            <EuiFlexGroup gutterSize="none">
+            <EuiFlexGroup gutterSize="s">
               <EuiFlexItem>
                 <AvailabilityPanel />
               </EuiFlexItem>
@@ -56,11 +58,15 @@ export const MonitorSummary = () => {
               <EuiFlexItem>
                 <DurationPanel />
               </EuiFlexItem>
-              <EuiFlexItem>{/* TODO: Add duration metric sparkline*/}</EuiFlexItem>
+              <EuiFlexItem>
+                <DurationSparklines />
+              </EuiFlexItem>
               <EuiFlexItem>
                 <MonitorErrorsCount />
               </EuiFlexItem>
-              <EuiFlexItem>{/* TODO: Add error sparkline*/}</EuiFlexItem>
+              <EuiFlexItem>
+                <MonitorErrorSparklines />
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
           <EuiSpacer size="l" />
