@@ -44,6 +44,8 @@ export const dataViewsServiceFactory: DataViewsServiceFactory = ({ startPlugins 
   getDefaultDataView: async () => {
     const dataView = await startPlugins.data.dataViews.getDefaultDataView();
 
-    return dataView ? { id: dataView.id, name: dataView.name, title: dataView.title } : undefined;
+    return dataView
+      ? { id: dataView.id, name: dataView.name, title: dataView.getIndexPattern() }
+      : undefined;
   },
 });
