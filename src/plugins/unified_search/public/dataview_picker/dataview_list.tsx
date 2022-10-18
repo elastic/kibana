@@ -7,13 +7,18 @@
  */
 
 import React from 'react';
-import { EuiSelectable, EuiSelectableProps, EuiPanel } from '@elastic/eui';
+import { EuiSelectable, EuiSelectableProps, EuiPanel, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { DataViewListItem } from '@kbn/data-views-plugin/public';
+import adhoc from './assets/adhoc.svg';
+
+export interface DataViewsListItemEnhanced extends DataViewListItem {
+  isAdhoc?: boolean;
+}
 
 export interface DataViewsListProps {
-  dataViewsList: DataViewListItem[];
+  dataViewsList: DataViewsListItemEnhanced[];
   onChangeDataView: (newId: string) => void;
   isTextBasedLangSelected?: boolean;
   currentDataViewId?: string;
@@ -40,11 +45,12 @@ export function DataViewsList({
       data-test-subj="indexPattern-switcher"
       searchable
       singleSelection="always"
-      options={dataViewsList?.map(({ title, id, name }) => ({
+      options={dataViewsList?.map(({ title, id, name, isAdhoc }) => ({
         key: id,
         label: name ? name : title,
         value: id,
         checked: id === currentDataViewId && !Boolean(isTextBasedLangSelected) ? 'on' : undefined,
+        prepend: isAdhoc ? <EuiIcon type={adhoc} color="text" /> : null,
       }))}
       onChange={(choices) => {
         const choice = choices.find(({ checked }) => checked) as unknown as {
