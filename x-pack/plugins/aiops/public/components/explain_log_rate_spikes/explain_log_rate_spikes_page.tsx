@@ -237,11 +237,7 @@ export const ExplainLogRateSpikesPage: FC<ExplainLogRateSpikesPageProps> = ({
                   brushSelectionUpdateHandler={setWindowParameters}
                   clearSelectionHandler={clearSelection}
                   documentCountStats={documentCountStats}
-                  documentCountStatsSplit={
-                    currentSelectedChangePoint || currentSelectedGroup
-                      ? documentCountStatsCompare
-                      : undefined
-                  }
+                  documentCountStatsSplit={documentCountStatsCompare}
                   documentCountStatsSplitLabel={getDocumentCountStatsSplitLabel(
                     currentSelectedChangePoint,
                     currentSelectedGroup
