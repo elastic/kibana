@@ -23,7 +23,7 @@ import {
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useBreakpoints } from '../../../../hooks/use_breakpoints';
-import { useFetcher } from '../../../../hooks/use_fetcher';
+import { useFetcher, FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 
 interface Props {
@@ -83,6 +83,7 @@ export function ServerlessSummary({ serverlessFunctionName }: Props) {
   );
 
   const showVerticalRule = !breakpoints.isSmall;
+  const isLoading = status === FETCH_STATUS.LOADING;
 
   return (
     <EuiPanel hasBorder={true}>
@@ -108,6 +109,7 @@ export function ServerlessSummary({ serverlessFunctionName }: Props) {
       <EuiFlexGroup gutterSize="xl">
         <EuiFlexItem grow={false}>
           <EuiStat
+            isLoading={isLoading}
             title={data?.serverlessFunctionsTotal}
             titleSize="s"
             description={i18n.translate(
@@ -126,6 +128,7 @@ export function ServerlessSummary({ serverlessFunctionName }: Props) {
         {showVerticalRule && <VerticalRule />}
         <EuiFlexItem grow={false}>
           <EuiStat
+            isLoading={isLoading}
             title={asMillisecondDuration(data?.serverlessDurationAvg)}
             titleSize="s"
             description={i18n.translate(
@@ -137,6 +140,7 @@ export function ServerlessSummary({ serverlessFunctionName }: Props) {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiStat
+            isLoading={isLoading}
             title={asMillisecondDuration(data?.billedDurationAvg)}
             titleSize="s"
             description={i18n.translate(
@@ -148,6 +152,7 @@ export function ServerlessSummary({ serverlessFunctionName }: Props) {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiStat
+            isLoading={isLoading}
             title={asPercent(data?.memoryUsageAvgRate, 1)}
             titleSize="s"
             description={i18n.translate(

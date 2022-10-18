@@ -12,6 +12,7 @@ import {
   euiPaletteColorBlind,
   EuiPanel,
   EuiTitle,
+  PropertySort,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
@@ -72,6 +73,8 @@ export function ServerlessActiveInstances({ serverlessFunctionName }: Props) {
     [kuery, environment, serviceName, start, end, serverlessFunctionName]
   );
 
+  const isLoading = status === FETCH_STATUS.LOADING;
+
   const columns: Array<
     EuiBasicTableColumn<ServerlessActiveInstances['activeInstances'][0]>
   > = [
@@ -108,7 +111,7 @@ export function ServerlessActiveInstances({ serverlessFunctionName }: Props) {
       render: (_, { serverlessDurationAvg, timeseries }) => {
         return (
           <ListMetric
-            isLoading={status === FETCH_STATUS.LOADING}
+            isLoading={isLoading}
             series={timeseries.serverlessDuration}
             color={palette[1]}
             valueLabel={asMillisecondDuration(serverlessDurationAvg)}
@@ -126,7 +129,7 @@ export function ServerlessActiveInstances({ serverlessFunctionName }: Props) {
       render: (_, { billedDurationAvg, timeseries }) => {
         return (
           <ListMetric
-            isLoading={status === FETCH_STATUS.LOADING}
+            isLoading={isLoading}
             series={timeseries.billedDuration}
             color={palette[2]}
             valueLabel={asMillisecondDuration(billedDurationAvg)}
@@ -157,6 +160,16 @@ export function ServerlessActiveInstances({ serverlessFunctionName }: Props) {
       },
     },
   ];
+
+  const sorting = useMemo(
+    () => ({
+      sort: {
+        field: 'serverlessDurationAvg',
+        direction: 'desc',
+      } as PropertySort,
+    }),
+    []
+  );
 
   const charts: Array<TimeSeries<Coordinate>> = useMemo(
     () => [
@@ -196,10 +209,11 @@ export function ServerlessActiveInstances({ serverlessFunctionName }: Props) {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiInMemoryTable
+            loading={isLoading}
             items={data.activeInstances}
             columns={columns}
             pagination={{ showPerPageOptions: false, pageSize: 5 }}
-            // sorting={sorting}
+            sorting={sorting}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

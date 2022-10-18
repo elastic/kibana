@@ -8,20 +8,20 @@ import {
   EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIconTip,
   EuiInMemoryTable,
   EuiPanel,
   EuiTitle,
+  PropertySort,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   asDynamicBytes,
   asMillisecondDuration,
 } from '../../../../../common/utils/formatters';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
-import { useFetcher } from '../../../../hooks/use_fetcher';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { ServerlessFunctionNameLink } from './serverless_function_name_link';
@@ -133,6 +133,18 @@ export function ServerlessFunctions() {
     },
   ];
 
+  const isLoading = status === FETCH_STATUS.LOADING;
+
+  const sorting = useMemo(
+    () => ({
+      sort: {
+        field: 'serverlessDurationAvg',
+        direction: 'desc',
+      } as PropertySort,
+    }),
+    []
+  );
+
   return (
     <EuiPanel hasBorder={true}>
       <EuiFlexGroup direction="column">
@@ -148,24 +160,15 @@ export function ServerlessFunctions() {
                 </h2>
               </EuiTitle>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiIconTip
-                content={i18n.translate(
-                  'xpack.apm.serverlessMetrics.serverlessFunctions.description',
-                  { defaultMessage: 'TBD' }
-                )}
-                position="top"
-                type="questionInCircle"
-              />
-            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiInMemoryTable
+            loading={isLoading}
             items={data.serverlessFunctionsOverview}
             columns={columns}
             pagination={{ showPerPageOptions: false, pageSize: 5 }}
-            // sorting={sorting}
+            sorting={sorting}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
