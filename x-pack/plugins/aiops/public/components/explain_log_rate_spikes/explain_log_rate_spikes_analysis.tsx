@@ -75,6 +75,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   const [overrides, setOverrides] = useState<
     ApiExplainLogRateSpikes['body']['overrides'] | undefined
   >(undefined);
+  const [shouldStart, setShouldStart] = useState(false);
 
   const onSwitchToggle = (e: { target: { checked: React.SetStateAction<boolean> } }) => {
     setGroupResults(e.target.checked);
@@ -137,8 +138,19 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
     clearAllRowState();
 
     setCurrentAnalysisWindowParameters(windowParameters);
-    start();
+
+    // We trigger hooks updates above so we cannot directly call `start()` here
+    // because it would be run with stale arguments.
+    setShouldStart(true);
   }
+
+  useEffect(() => {
+    if (shouldStart) {
+      start();
+      setShouldStart(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shouldStart]);
 
   useEffect(() => {
     setCurrentAnalysisWindowParameters(windowParameters);
@@ -195,7 +207,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
         progress={data.loaded}
         progressMessage={data.loadingState ?? ''}
         isRunning={isRunning}
-        onRefresh={startHandler}
+        onRefresh={() => startHandler(false)}
         onCancel={cancel}
         shouldRerunAnalysis={shouldRerunAnalysis}
       />
