@@ -20,9 +20,7 @@ let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
 
 beforeEach(() => {
   configurationUtilities = actionsConfigMock.create();
-  connectorType = getConnectorType({
-    logger: mockedLogger,
-  });
+  connectorType = getConnectorType();
 });
 
 describe('connectorType', () => {
@@ -108,6 +106,7 @@ describe('execute()', () => {
       config: {},
       secrets: {},
       configurationUtilities,
+      logger: mockedLogger,
     };
     await connectorType.executor(executorOptions);
     expect(mockedLogger.info).toHaveBeenCalledWith('Server log: message text here');
