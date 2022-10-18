@@ -83,7 +83,7 @@ export const createScopedLogger = (
   };
 };
 
-export const getViewInAppUrl = (basePath: IBasePath, relativeViewInAppUrl: string) =>
+export const getUrl = (basePath: IBasePath, relativeViewInAppUrl: string) =>
   basePath.publicBaseUrl
     ? new URL(basePath.prepend(relativeViewInAppUrl), basePath.publicBaseUrl).toString()
     : relativeViewInAppUrl;
@@ -105,7 +105,7 @@ export const getViewInAppUrlInventory = (
   };
 
   const relativeViewInAppUrl = getInventoryViewInAppUrl(parseTechnicalFields(fields, true));
-  return getViewInAppUrl(basePath, relativeViewInAppUrl);
+  return getUrl(basePath, relativeViewInAppUrl);
 };
 
 export const LINK_TO_ALERT_DETAIL = '/app/observability/alerts';

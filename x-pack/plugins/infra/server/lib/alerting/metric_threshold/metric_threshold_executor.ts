@@ -28,7 +28,7 @@ import {
 } from '../common/messages';
 import {
   createScopedLogger,
-  getViewInAppUrl,
+  getUrl,
   LINK_TO_ALERT_DETAIL,
   UNGROUPED_FACTORY_KEY,
 } from '../common/utils';
@@ -112,14 +112,14 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         const alertUuid = getAlertUuid(UNGROUPED_FACTORY_KEY);
 
         alert.scheduleActions(actionGroupId, {
-          alertDetailsUrl: getViewInAppUrl(libs.basePath, `${LINK_TO_ALERT_DETAIL}/${alertUuid}`),
+          alertDetailsUrl: getUrl(libs.basePath, `${LINK_TO_ALERT_DETAIL}/${alertUuid}`),
           alertState: stateToAlertMessage[AlertStates.ERROR],
           group: UNGROUPED_FACTORY_KEY,
           metric: mapToConditionsLookup(criteria, (c) => c.metric),
           reason,
           timestamp,
           value: null,
-          viewInAppUrl: getViewInAppUrl(libs.basePath, LINK_TO_METRICS_EXPLORER),
+          viewInAppUrl: getUrl(libs.basePath, LINK_TO_METRICS_EXPLORER),
         });
 
         return {
@@ -247,7 +247,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
         scheduledActionsCount++;
 
         alert.scheduleActions(actionGroupId, {
-          alertDetailsUrl: getViewInAppUrl(libs.basePath, `${LINK_TO_ALERT_DETAIL}/${alertUuid}`),
+          alertDetailsUrl: getUrl(libs.basePath, `${LINK_TO_ALERT_DETAIL}/${alertUuid}`),
           alertState: stateToAlertMessage[nextState],
           group: alertInstanceId,
           metric: mapToConditionsLookup(criteria, (c) => c.metric),
@@ -261,7 +261,7 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
             alertResults,
             (result) => formatAlertResult(result[alertInstanceId]).currentValue
           ),
-          viewInAppUrl: getViewInAppUrl(libs.basePath, LINK_TO_METRICS_EXPLORER),
+          viewInAppUrl: getUrl(libs.basePath, LINK_TO_METRICS_EXPLORER),
         });
       }
     }
@@ -271,11 +271,11 @@ export const createMetricThresholdExecutor = (libs: InfraBackendLibs) =>
 
     for (const alert of recoveredAlerts) {
       const recoveredAlertInstanceId = alert.getId();
-      const viewInAppUrl = getViewInAppUrl(libs.basePath, LINK_TO_METRICS_EXPLORER);
+      const viewInAppUrl = getUrl(libs.basePath, LINK_TO_METRICS_EXPLORER);
       const alertUuid = getAlertUuid(recoveredAlertInstanceId);
 
       const context = {
-        alertDetailsUrl: getViewInAppUrl(libs.basePath, `${LINK_TO_ALERT_DETAIL}/${alertUuid}`),
+        alertDetailsUrl: getUrl(libs.basePath, `${LINK_TO_ALERT_DETAIL}/${alertUuid}`),
         alertState: stateToAlertMessage[AlertStates.OK],
         group: recoveredAlertInstanceId,
         metric: mapToConditionsLookup(criteria, (c) => c.metric),

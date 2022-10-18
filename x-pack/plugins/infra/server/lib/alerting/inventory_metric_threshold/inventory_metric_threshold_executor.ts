@@ -33,7 +33,7 @@ import {
 import {
   createScopedLogger,
   getViewInAppUrlInventory,
-  getViewInAppUrl,
+  getUrl,
   LINK_TO_ALERT_DETAIL,
   UNGROUPED_FACTORY_KEY,
 } from '../common/utils';
@@ -109,7 +109,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
         );
 
         alert.scheduleActions(actionGroupId, {
-          alertDetailsUrl: getViewInAppUrl(libs.basePath, `${LINK_TO_ALERT_DETAIL}/${alertUuid}`),
+          alertDetailsUrl: getUrl(libs.basePath, `${LINK_TO_ALERT_DETAIL}/${alertUuid}`),
           alertState: stateToAlertMessage[AlertStates.ERROR],
           group: UNGROUPED_FACTORY_KEY,
           metric: mapToConditionsLookup(criteria, (c) => c.metric),
@@ -228,7 +228,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
         scheduledActionsCount++;
 
         const context = {
-          alertDetailsUrl: getViewInAppUrl(libs.basePath, `${LINK_TO_ALERT_DETAIL}/${alertUuid}`),
+          alertDetailsUrl: getUrl(libs.basePath, `${LINK_TO_ALERT_DETAIL}/${alertUuid}`),
           alertState: stateToAlertMessage[nextState],
           group: instanceId,
           reason,
@@ -261,7 +261,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
       );
 
       const context = {
-        alertDetailsUrl: getViewInAppUrl(libs.basePath, `${LINK_TO_ALERT_DETAIL}/${alertUuid}`),
+        alertDetailsUrl: getUrl(libs.basePath, `${LINK_TO_ALERT_DETAIL}/${alertUuid}`),
         alertState: stateToAlertMessage[AlertStates.OK],
         group: recoveredAlertInstanceId,
         metric: mapToConditionsLookup(criteria, (c) => c.metric),
