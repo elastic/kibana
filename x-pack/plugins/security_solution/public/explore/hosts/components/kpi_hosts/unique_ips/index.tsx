@@ -7,7 +7,7 @@
 
 import React, { useEffect, useState } from 'react';
 
-import type { StatItems } from '../../../../../common/components/stat_items';
+import type { StatItems } from '../../../../components/stat_items';
 import { kpiUniqueIpsAreaLensAttributes } from '../../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_unique_ips_area';
 import { kpiUniqueIpsBarLensAttributes } from '../../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_unique_ips_bar';
 import { kpiUniqueIpsDestinationMetricLensAttributes } from '../../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_unique_ips_destination_metric';

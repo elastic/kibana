@@ -18,40 +18,40 @@ import {
   addValueToBarChart,
   useKpiMatrixStatus,
 } from '.';
-import { BarChart } from '../charts/barchart';
-import { AreaChart } from '../charts/areachart';
+import { BarChart } from '../../../common/components/charts/barchart';
+import { AreaChart } from '../../../common/components/charts/areachart';
 import { EuiHorizontalRule } from '@elastic/eui';
-import { fieldsMapping as fieldTitleChartMapping } from '../../../explore/network/components/kpi_network/unique_private_ips';
+import { fieldsMapping as fieldTitleChartMapping } from '../../network/components/kpi_network/unique_private_ips';
 import {
   mockData,
   mockEnableChartsData,
   mockNoChartMappings,
   mockUpdateDateRange,
-} from '../../../explore/network/components/kpi_network/mock';
+} from '../../network/components/kpi_network/mock';
 import {
   createSecuritySolutionStorageMock,
   kibanaObservable,
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
-} from '../../mock';
-import type { State } from '../../store';
-import { createStore } from '../../store';
+} from '../../../common/mock';
+import type { State } from '../../../common/store';
+import { createStore } from '../../../common/store';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import type {
   HostsKpiStrategyResponse,
   NetworkKpiStrategyResponse,
 } from '../../../../common/search_strategy';
-import { getMockTheme } from '../../lib/kibana/kibana_react.mock';
-import * as module from '../../containers/query_toggle';
+import { getMockTheme } from '../../../common/lib/kibana/kibana_react.mock';
+import * as module from '../../../common/containers/query_toggle';
 
 const from = '2019-06-15T06:00:00.000Z';
 const to = '2019-06-18T06:00:00.000Z';
 
-jest.mock('../charts/areachart', () => {
+jest.mock('../../../common/components/charts/areachart', () => {
   return { AreaChart: () => <div className="areachart" /> };
 });
 
-jest.mock('../charts/barchart', () => {
+jest.mock('../../../common/components/charts/barchart', () => {
   return { BarChart: () => <div className="barchart" /> };
 });
 

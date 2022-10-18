@@ -22,28 +22,31 @@ import { get, getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
-import { useQueryToggle } from '../../containers/query_toggle';
+import { useQueryToggle } from '../../../common/containers/query_toggle';
 
 import type {
   HostsKpiStrategyResponse,
   NetworkKpiStrategyResponse,
 } from '../../../../common/search_strategy';
-import { AreaChart } from '../charts/areachart';
-import { BarChart } from '../charts/barchart';
+import { AreaChart } from '../../../common/components/charts/areachart';
+import { BarChart } from '../../../common/components/charts/barchart';
 import type {
   ChartSeriesData,
   ChartData,
   ChartSeriesConfigs,
   UpdateDateRange,
-} from '../charts/common';
-import { histogramDateTimeFormatter } from '../utils';
-import { getEmptyTagValue } from '../empty_value';
+} from '../../../common/components/charts/common';
+import { histogramDateTimeFormatter } from '../../../common/components/utils';
+import { getEmptyTagValue } from '../../../common/components/empty_value';
 
-import { InspectButton } from '../inspect';
-import { VisualizationActions, HISTOGRAM_ACTIONS_BUTTON_CLASS } from '../visualization_actions';
-import { HoverVisibilityContainer } from '../hover_visibility_container';
-import type { LensAttributes } from '../visualization_actions/types';
-import * as i18n from '../../containers/query_toggle/translations';
+import { InspectButton } from '../../../common/components/inspect';
+import {
+  VisualizationActions,
+  HISTOGRAM_ACTIONS_BUTTON_CLASS,
+} from '../../../common/components/visualization_actions';
+import { HoverVisibilityContainer } from '../../../common/components/hover_visibility_container';
+import type { LensAttributes } from '../../../common/components/visualization_actions/types';
+import * as i18n from '../../../common/containers/query_toggle/translations';
 import type { UserskKpiStrategyResponse } from '../../../../common/search_strategy/security_solution/users';
 const FlexGroup = styled(EuiFlexGroup)`
   .no-margin {
