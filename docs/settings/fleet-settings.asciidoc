@@ -38,6 +38,10 @@ Refer to {fleet-guide}/air-gapped.html[Air-gapped environments] for details.
 
 `xpack.fleet.agents.fleet_server.hosts`::
 Hostnames used by {agent} for accessing {fleet-server}.
++
+If configured in your `kibana.yml`, this setting is grayed out and unavailable
+in the {fleet} UI. To make this setting editable in the UI, do not configure it
+in the configuration file. 
 
 `xpack.fleet.agents.elasticsearch.hosts`::
 Hostnames used by {agent} for accessing {es}.
@@ -51,6 +55,9 @@ Hash pin used for certificate verification. The pin is a base64-encoded string o
 
 Use these settings to pre-define integrations and agent policies that you
 want {fleet} to load up by default.
+
+NOTE: These settings are not supported to pre-configure the Endpoint and Cloud
+Security integration.
 
 `xpack.fleet.packages`::
 List of integrations that are installed when the {fleet} app starts up for the first time.
@@ -126,7 +133,11 @@ List of agent policies that are configured when the {fleet} app starts.
 =====
 
 `xpack.fleet.outputs`::
-List of outputs that are configured when the {fleet} app starts. 
+List of outputs that are configured when the {fleet} app starts.
++
+If configured in your `kibana.yml`, output settings are grayed out and
+unavailable in the {fleet} UI. To make these settings editable in the UI, do not
+configure them in the configuration file. 
 +
 .Required properties of `xpack.fleet.outputs`
 [%collapsible%open]
