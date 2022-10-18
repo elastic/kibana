@@ -8,33 +8,33 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 
-import { GuideCard } from './guide_card';
+import { GuideCard, GuideCardProps } from './guide_card';
 
-jest.mock('../../kibana_services', () => {
-  const { uiSettingsServiceMock, httpServiceMock } = jest.requireActual('@kbn/core/public/mocks');
-  return {
-    getServices: () => ({
-      uiSettings: uiSettingsServiceMock.createStartContract(),
-      http: httpServiceMock.createStartContract(),
-      guidedOnboardingService: jest.fn(),
-    }),
-  };
-});
+const defaultProps: GuideCardProps = {
+  useCase: 'search',
+  guides: [],
+  activateGuide: jest.fn(),
+  http: httpServiceMock.createStartContract(),
+  uiSettings: uiSettingsServiceMock.createStartContract(),
+};
+
 describe('guide card', () => {
   describe('snapshots', () => {
     test('should render use case card component for search', async () => {
-      const component = await shallow(<GuideCard useCase="search" guides={[]} />);
+      const component = await shallow(<GuideCard {...defaultProps} useCase="search" />);
 
       expect(component).toMatchSnapshot();
     });
     test('should render use case card component for observability', async () => {
-      const component = await shallow(<GuideCard useCase="observability" guides={[]} />);
+      const component = await shallow(<GuideCard {...defaultProps} useCase="observability" />);
 
       expect(component).toMatchSnapshot();
     });
     test('should render use case card component for security', async () => {
-      const component = await shallow(<GuideCard useCase="security" guides={[]} />);
+      const component = await shallow(<GuideCard {...defaultProps} useCase="security" />);
 
       expect(component).toMatchSnapshot();
     });

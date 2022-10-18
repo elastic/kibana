@@ -178,19 +178,14 @@ const getCardFooter = (
     </>
   );
 };
-export const GuideCard = ({
-  useCase,
-  guides,
-  activateGuide,
-  http,
-  uiSettings,
-}: {
+export interface GuideCardProps {
   useCase: UseCase;
   guides: GuideState[];
   activateGuide: (useCase: UseCase, guide?: GuideState) => Promise<void>;
   http: HttpStart;
   uiSettings: IUiSettingsClient;
-}) => {
+}
+export const GuideCard = ({ useCase, guides, activateGuide, http, uiSettings }: GuideCardProps) => {
   const footer = getCardFooter(guides, useCase, activateGuide);
   return (
     <UseCaseCard

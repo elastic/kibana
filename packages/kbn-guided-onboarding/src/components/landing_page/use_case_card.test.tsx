@@ -9,35 +9,32 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { UseCaseCard } from './use_case_card';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 
-jest.mock('../../kibana_services', () => {
-  const { uiSettingsServiceMock, httpServiceMock } = jest.requireActual('@kbn/core/public/mocks');
-  return {
-    getServices: () => ({
-      uiSettings: uiSettingsServiceMock.createStartContract(),
-      http: httpServiceMock.createStartContract(),
-    }),
-  };
-});
+import { UseCaseCard, UseCaseProps } from './use_case_card';
+
 describe('use case card', () => {
-  const testProps = {
+  const defaultProps: UseCaseProps = {
+    useCase: 'search',
     title: 'testTitle',
     description: 'testDescription',
     footer: <span>testFooter</span>,
+    http: httpServiceMock.createStartContract(),
+    uiSettings: uiSettingsServiceMock.createStartContract(),
   };
   test('should render use case card component for search', async () => {
-    const component = await shallow(<UseCaseCard useCase="search" {...testProps} />);
+    const component = await shallow(<UseCaseCard {...defaultProps} useCase="search" />);
 
     expect(component).toMatchSnapshot();
   });
   test('should render use case card component for observability', async () => {
-    const component = await shallow(<UseCaseCard useCase="observability" {...testProps} />);
+    const component = await shallow(<UseCaseCard {...defaultProps} useCase="observability" />);
 
     expect(component).toMatchSnapshot();
   });
   test('should render use case card component for security', async () => {
-    const component = await shallow(<UseCaseCard useCase="security" {...testProps} />);
+    const component = await shallow(<UseCaseCard {...defaultProps} useCase="security" />);
 
     expect(component).toMatchSnapshot();
   });
