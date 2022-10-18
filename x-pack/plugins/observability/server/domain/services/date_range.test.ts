@@ -19,6 +19,16 @@ const NOW = new Date('2022-08-11T08:31:00.000Z');
 
 describe('toDateRange', () => {
   describe('for calendar aligned time window', () => {
+    it('throws when start_time is in the future', () => {
+      const futureDate = new Date();
+      futureDate.setFullYear(futureDate.getFullYear() + 1);
+
+      const timeWindow = aCalendarTimeWindow(WEEKLY, futureDate);
+      expect(() => toDateRange(timeWindow, NOW)).toThrow(
+        'Cannot compute date range with future starting time'
+      );
+    });
+
     describe("with 'weekly' duration", () => {
       it('computes the date range when starting the same day', () => {
         const timeWindow = aCalendarTimeWindow(WEEKLY, new Date('2022-08-11T08:30:00.000Z'));
