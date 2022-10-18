@@ -142,17 +142,7 @@ export function ServicesTable() {
   const initialSortDirection =
     initialSortField === StorageExplorerFieldName.ServiceName ? 'asc' : 'desc';
 
-  let loading: boolean;
-  if (useOptimizedSorting) {
-    loading =
-      // ensures table is usable when sorted and filtered services have loaded
-      sortedAndFilteredServicesFetch.status === FETCH_STATUS.LOADING ||
-      (sortedAndFilteredServicesFetch.status === FETCH_STATUS.SUCCESS &&
-        sortedAndFilteredServicesFetch.data?.services.length === 0 &&
-        serviceStatisticsFetch.status === FETCH_STATUS.LOADING);
-  } else {
-    loading = serviceStatisticsFetch.status === FETCH_STATUS.LOADING;
-  }
+  const loading = serviceStatisticsFetch.status === FETCH_STATUS.LOADING;
 
   const items = joinByKey(
     [
