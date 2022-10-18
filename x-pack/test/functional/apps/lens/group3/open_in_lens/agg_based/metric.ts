@@ -50,6 +50,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           value: '14.01K',
           color: 'rgba(245, 247, 250, 1)',
           showingBar: false,
+          showingTrendline: false,
         },
       ]);
     });
@@ -78,6 +79,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           value: '13.1B',
           color: 'rgba(245, 247, 250, 1)',
           showingBar: false,
+          showingTrendline: false,
         },
       ]);
     });
@@ -106,6 +108,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           value: '1.44K',
           color: 'rgba(245, 247, 250, 1)',
           showingBar: false,
+          showingTrendline: false,
         },
       ]);
     });
@@ -159,6 +162,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           value: '13.23B',
           color: 'rgba(245, 247, 250, 1)',
           showingBar: false,
+          showingTrendline: false,
         },
         {
           title: 'win 7',
@@ -167,6 +171,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           value: '13.19B',
           color: 'rgba(245, 247, 250, 1)',
           showingBar: false,
+          showingTrendline: false,
         },
         {
           title: 'win xp',
@@ -175,6 +180,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           value: '13.07B',
           color: 'rgba(245, 247, 250, 1)',
           showingBar: false,
+          showingTrendline: false,
         },
         {
           title: 'win 8',
@@ -183,6 +189,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           value: '13.03B',
           color: 'rgba(245, 247, 250, 1)',
           showingBar: false,
+          showingTrendline: false,
         },
         {
           title: 'ios',
@@ -191,6 +198,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           value: '13.01B',
           color: 'rgba(245, 247, 250, 1)',
           showingBar: false,
+          showingTrendline: false,
         },
         {
           title: undefined,
@@ -199,6 +207,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           value: undefined,
           color: 'rgba(0, 0, 0, 0)',
           showingBar: false,
+          showingTrendline: false,
         },
       ]);
 
