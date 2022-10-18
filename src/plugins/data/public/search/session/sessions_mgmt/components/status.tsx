@@ -120,7 +120,7 @@ const getStatusAttributes = ({
           defaultMessage: 'Error: {error}',
           values: {
             error:
-              session.errors && session.errors?.length > 0 ? session.errors.join('\n') : 'unknown',
+              session.errors && session.errors.length > 0 ? session.errors.join('\n') : 'unknown',
           },
         }),
       };
