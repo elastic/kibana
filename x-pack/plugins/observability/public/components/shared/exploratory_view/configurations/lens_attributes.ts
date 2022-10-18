@@ -258,23 +258,6 @@ export class LensAttributes {
     };
   }
 
-  getCardinalityColumn({
-    sourceField,
-    label,
-    seriesConfig,
-  }: {
-    sourceField: string;
-    label?: string;
-    seriesConfig: SeriesConfig;
-  }) {
-    return this.getNumberOperationColumn({
-      sourceField,
-      operationType: 'unique_count',
-      label,
-      seriesConfig,
-    });
-  }
-
   getFiltersColumn({
     label,
     paramFilters,
@@ -401,6 +384,12 @@ export class LensAttributes {
         }),
       filter: columnFilter,
       operationType,
+      params:
+        operationType === 'unique_count'
+          ? {
+              emptyAsNull: true,
+            }
+          : {},
     };
   }
 
@@ -591,11 +580,13 @@ export class LensAttributes {
         seriesConfig: layerConfig.seriesConfig,
       });
     }
-    if (operationType === 'unique_count') {
-      return this.getCardinalityColumn({
+    if (operationType === 'unique_count' || fieldType === 'string') {
+      return this.getNumberOperationColumn({
         sourceField: fieldName,
+        operationType: 'unique_count',
         label: label || columnLabel,
         seriesConfig: layerConfig.seriesConfig,
+        columnFilter: columnFilters?.[0],
       });
     }
 

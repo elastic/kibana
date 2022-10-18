@@ -41,6 +41,7 @@ export const testMobileKPIAttr = {
                 isBucketed: false,
                 label: 'test-series',
                 operationType: 'median',
+                params: {},
                 scale: 'ratio',
                 sourceField: 'system.memory.usage',
                 dataType: 'number',
