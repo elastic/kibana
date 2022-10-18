@@ -14,21 +14,13 @@ export function ActionsCommonServiceProvider({ getService, getPageObject }: FtrP
   const testSubjects = getService('testSubjects');
 
   return {
-    async clickCreateFirstConnectorButton() {
-      const createBtn = await testSubjects.find('createFirstActionButton');
-      const createBtnIsVisible = await createBtn.isDisplayed();
-      if (createBtnIsVisible) {
-        await createBtn.click();
-      }
-    },
-
     async openNewConnectorForm(name: string) {
       const createBtn = await testSubjects.find('createActionButton');
       const createBtnIsVisible = await createBtn.isDisplayed();
       if (createBtnIsVisible) {
         await createBtn.click();
       } else {
-        await this.clickCreateFirstConnectorButton();
+        await testSubjects.click('createFirstActionButton');
       }
 
       await testSubjects.click(`.${name}-card`);

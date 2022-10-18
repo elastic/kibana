@@ -9,7 +9,11 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { ObjectRemover } from '../../../lib/object_remover';
 import { generateUniqueKey } from '../../../lib/get_test_data';
-import { getConnector, createConnectorAndObjectRemover, createSlackConnector } from './utils';
+import {
+  getConnectorByName,
+  createSlackConnectorAndObjectRemover,
+  createSlackConnector,
+} from './utils';
 
 export default ({ getPageObjects, getPageObject, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
@@ -22,7 +26,11 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
 
   describe('General connector functionality', function () {
     before(async () => {
-      objectRemover = await createConnectorAndObjectRemover({ getPageObject, getService });
+      objectRemover = await createSlackConnectorAndObjectRemover({ getService });
+    });
+
+    beforeEach(async () => {
+      await pageObjects.common.navigateToApp('triggersActionsConnectors');
     });
 
     after(async () => {
@@ -60,7 +68,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
           actionType: 'Slack',
         },
       ]);
-      const connector = await getConnector(connectorName, supertest);
+      const connector = await getConnectorByName(connectorName, supertest);
       objectRemover.add(connector.id, 'action', 'actions');
     });
 
@@ -69,8 +77,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       const updatedConnectorName = `${connectorName}updated`;
       const createdAction = await createSlackConnector({
         name: connectorName,
-        getPageObject,
-        getService,
+        supertest,
       });
       objectRemover.add(createdAction.id, 'action', 'actions');
       await browser.refresh();
@@ -169,8 +176,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       const connectorName = generateUniqueKey();
       const createdAction = await createSlackConnector({
         name: connectorName,
-        getPageObject,
-        getService,
+        supertest,
       });
       objectRemover.add(createdAction.id, 'action', 'actions');
       await browser.refresh();
@@ -199,11 +205,10 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
 
     it('should delete a connector', async () => {
       const connectorName = generateUniqueKey();
-      await createSlackConnector({ name: connectorName, getPageObject, getService });
+      await createSlackConnector({ name: connectorName, supertest });
       const createdAction = await createSlackConnector({
         name: generateUniqueKey(),
-        getPageObject,
-        getService,
+        supertest,
       });
       objectRemover.add(createdAction.id, 'action', 'actions');
       await browser.refresh();
@@ -229,11 +234,10 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
 
     it('should bulk delete connectors', async () => {
       const connectorName = generateUniqueKey();
-      await createSlackConnector({ name: connectorName, getPageObject, getService });
+      await createSlackConnector({ name: connectorName, supertest });
       const createdAction = await createSlackConnector({
         name: generateUniqueKey(),
-        getPageObject,
-        getService,
+        supertest,
       });
       objectRemover.add(createdAction.id, 'action', 'actions');
       await browser.refresh();

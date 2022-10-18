@@ -125,6 +125,17 @@ const CloseAlertComponent: React.FC<SubActionProps<OpsgenieCloseAlertParams>> = 
 
 CloseAlertComponent.displayName = 'CloseAlertComponent';
 
+const actionOptions = [
+  {
+    value: OpsgenieSubActions.CreateAlert,
+    text: i18n.CREATE_ALERT_ACTION,
+  },
+  {
+    value: OpsgenieSubActions.CloseAlert,
+    text: i18n.CLOSE_ALERT_ACTION,
+  },
+];
+
 const OpsgenieParamFields: React.FC<ActionParamsProps<OpsgenieActionParams>> = ({
   actionParams,
   editAction,
@@ -135,17 +146,6 @@ const OpsgenieParamFields: React.FC<ActionParamsProps<OpsgenieActionParams>> = (
   const { subAction, subActionParams } = actionParams;
 
   const currentSubAction = useRef<string>(subAction ?? OpsgenieSubActions.CreateAlert);
-
-  const actionOptions = [
-    {
-      value: OpsgenieSubActions.CreateAlert,
-      text: i18n.CREATE_ALERT_ACTION,
-    },
-    {
-      value: OpsgenieSubActions.CloseAlert,
-      text: i18n.CLOSE_ALERT_ACTION,
-    },
-  ];
 
   const onActionChange = useCallback(
     (event: React.ChangeEvent<HTMLSelectElement>) => {

@@ -9,9 +9,9 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { ObjectRemover } from '../../../lib/object_remover';
 import { generateUniqueKey } from '../../../lib/get_test_data';
-import { createConnector, createConnectorAndObjectRemover, getConnector } from './utils';
+import { createConnector, createSlackConnectorAndObjectRemover, getConnectorByName } from './utils';
 
-export default ({ getPageObjects, getPageObject, getService }: FtrProviderContext) => {
+export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
   const find = getService('find');
@@ -19,11 +19,12 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
   const supertest = getService('supertest');
   const actions = getService('actions');
   const rules = getService('rules');
+  const browser = getService('browser');
   let objectRemover: ObjectRemover;
 
   describe('Opsgenie', () => {
     before(async () => {
-      objectRemover = await createConnectorAndObjectRemover({ getPageObject, getService });
+      objectRemover = await createSlackConnectorAndObjectRemover({ getService });
     });
 
     after(async () => {
@@ -31,6 +32,10 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
     });
 
     describe('connector page', () => {
+      beforeEach(async () => {
+        await pageObjects.common.navigateToApp('triggersActionsConnectors');
+      });
+
       it('should create the connector', async () => {
         const connectorName = generateUniqueKey();
 
@@ -52,7 +57,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
             actionType: 'Opsgenie',
           },
         ]);
-        const connector = await getConnector(connectorName, supertest);
+        const connector = await getConnectorByName(connectorName, supertest);
         objectRemover.add(connector.id, 'action', 'actions');
       });
 
@@ -61,6 +66,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
         const updatedConnectorName = `${connectorName}updated`;
         const createdAction = await createOpsgenieConnector(connectorName);
         objectRemover.add(createdAction.id, 'action', 'actions');
+        browser.refresh();
 
         await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
@@ -93,6 +99,8 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
         const connectorName = generateUniqueKey();
         const createdAction = await createOpsgenieConnector(connectorName);
         objectRemover.add(createdAction.id, 'action', 'actions');
+        browser.refresh();
+
         await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
         const searchResultsBeforeEdit = await pageObjects.triggersActionsUI.getConnectorsList();
@@ -119,6 +127,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
         const connectorName = generateUniqueKey();
         const createdAction = await createOpsgenieConnector(connectorName);
         objectRemover.add(createdAction.id, 'action', 'actions');
+        browser.refresh();
 
         await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
@@ -236,8 +245,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
         config: { apiUrl: 'https//test.com' },
         secrets: { apiKey: '1234' },
         connectorTypeId: '.opsgenie',
-        getPageObject,
-        getService,
+        supertest,
       });
     };
   });
