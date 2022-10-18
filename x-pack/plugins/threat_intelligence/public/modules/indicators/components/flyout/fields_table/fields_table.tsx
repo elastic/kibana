@@ -9,7 +9,7 @@ import { EuiBasicTableColumn, EuiInMemoryTable, EuiInMemoryTableProps } from '@e
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo, VFC } from 'react';
 import { Indicator } from '../../../../../../common/types/indicator';
-import { IndicatorFieldValue } from '../../indicator_field_value';
+import { IndicatorFieldValue } from '../../field_value';
 import { IndicatorValueActions } from '../indicator_value_actions';
 
 export interface IndicatorFieldsTableProps {

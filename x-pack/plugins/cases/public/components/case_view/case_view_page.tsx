@@ -8,6 +8,7 @@
 import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import styled from 'styled-components';
+import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { useCaseViewNavigation, useUrlParams } from '../../common/navigation';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { CaseActionBar } from '../case_action_bar';
@@ -21,7 +22,7 @@ import { CaseViewActivity } from './components/case_view_activity';
 import { CaseViewAlerts } from './components/case_view_alerts';
 import { CaseViewMetrics } from './metrics';
 import { ACTIVITY_TAB, ALERTS_TAB } from './translations';
-import { CaseViewPageProps, CASE_VIEW_PAGE_TABS } from './types';
+import type { CaseViewPageProps } from './types';
 import { useRefreshCaseViewPage } from './use_on_refresh_case_view_page';
 import { useOnUpdateField } from './use_on_update_field';
 

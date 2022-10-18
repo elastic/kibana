@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import uuid from 'uuid';
 import { Column, ColumnWithMeta } from '@kbn/visualizations-plugin/common';
 import {
   convertToLensModule,
   getDataViewByIndexPatternId,
 } from '@kbn/visualizations-plugin/public';
-import uuid from 'uuid';
 import { getDataViewsStart } from '../services';
 import { ConvertMetricVisToLensVisualization } from './types';
 
@@ -42,32 +42,33 @@ export const convertToLens: ConvertMetricVisToLensVisualization = async (vis, ti
     return null;
   }
 
-  const [{ getColumnsFromVis }, { getConfiguration, getPercentageModeConfig }] = await Promise.all([
-    convertToLensModule,
-    import('./configurations'),
-  ]);
+  const [{ getColumnsFromVis, getPalette, getPercentageModeConfig }, { getConfiguration }] =
+    await Promise.all([convertToLensModule, import('./configurations')]);
 
-  const result = getColumnsFromVis(
+  const percentageModeConfig = getPercentageModeConfig(vis.params.metric);
+  const layers = getColumnsFromVis(
     vis,
     timefilter,
     dataView,
     {
       splits: ['group'],
     },
-    { dropEmptyRowsInDateHistogram: true, ...getPercentageModeConfig(vis.params) }
+    { dropEmptyRowsInDateHistogram: true, ...percentageModeConfig }
   );
 
-  if (result === null) {
+  if (layers === null) {
     return null;
   }
+
+  const [layerConfig] = layers;
 
   // for now, multiple metrics are not supported
-  if (result.metrics.length > 1 || result.buckets.length > 1) {
+  if (layerConfig.metrics.length > 1 || layerConfig.buckets.all.length > 1) {
     return null;
   }
 
-  if (result.metrics[0]) {
-    const metric = result.columns.find(({ columnId }) => columnId === result.metrics[0]);
+  if (layerConfig.metrics[0]) {
+    const metric = layerConfig.columns.find(({ columnId }) => columnId === layerConfig.metrics[0]);
     if (metric?.dataType !== 'number') {
       return null;
     }
@@ -82,11 +83,16 @@ export const convertToLens: ConvertMetricVisToLensVisualization = async (vis, ti
       {
         indexPatternId,
         layerId,
-        columns: result.columns.map(excludeMetaFromColumn),
+        columns: layerConfig.columns.map(excludeMetaFromColumn),
         columnOrder: [],
       },
     ],
-    configuration: getConfiguration(layerId, vis.params, result),
+    configuration: getConfiguration(
+      layerId,
+      vis.params,
+      getPalette(vis.params.metric, percentageModeConfig),
+      layerConfig
+    ),
     indexPatternIds: [indexPatternId],
   };
 };
