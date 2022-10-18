@@ -265,8 +265,13 @@ export const getManagementFilteredLinks = async (
     }
 
     if (!canIsolateHost && canUnIsolateHost) {
-      const hostExceptionCount = await getHostIsolationExceptionTotal(core.http);
-      const shouldSeeHIEToBeAbleToDeleteEntries = hostExceptionCount !== 0;
+      let shouldSeeHIEToBeAbleToDeleteEntries: boolean;
+      try {
+        const hostExceptionCount = await getHostIsolationExceptionTotal(core.http);
+        shouldSeeHIEToBeAbleToDeleteEntries = hostExceptionCount !== 0;
+      } catch {
+        shouldSeeHIEToBeAbleToDeleteEntries = false;
+      }
 
       if (!shouldSeeHIEToBeAbleToDeleteEntries) {
         linksToExclude.push(SecurityPageName.hostIsolationExceptions);
@@ -275,7 +280,7 @@ export const getManagementFilteredLinks = async (
       linksToExclude.push(SecurityPageName.hostIsolationExceptions);
     }
   } catch {
-    return excludeLinks([SecurityPageName.hostIsolationExceptions]);
+    linksToExclude.push(SecurityPageName.hostIsolationExceptions);
   }
 
   return excludeLinks(linksToExclude);

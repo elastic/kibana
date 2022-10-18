@@ -140,5 +140,45 @@ describe('links', () => {
       );
       expect(filteredLinks).toEqual(links);
     });
+
+    it('should not affect showing Action Log if getting from HIE API throws error', async () => {
+      (calculateEndpointAuthz as jest.Mock).mockReturnValue({
+        canIsolateHost: false,
+        canUnIsolateHost: true,
+        canReadActionsLogManagement: true,
+      });
+      fakeHttpServices.get.mockRejectedValue(new Error());
+
+      const filteredLinks = await getManagementFilteredLinks(
+        coreMockStarted,
+        getPlugins(['superuser'])
+      );
+      expect(filteredLinks).toEqual({
+        ...links,
+        links: links.links?.filter((link) => link.id !== SecurityPageName.hostIsolationExceptions),
+      });
+    });
+
+    it('should not affect hiding Action Log if getting from HIE API throws error', async () => {
+      (calculateEndpointAuthz as jest.Mock).mockReturnValue({
+        canIsolateHost: false,
+        canUnIsolateHost: true,
+        canReadActionsLogManagement: false,
+      });
+      fakeHttpServices.get.mockRejectedValue(new Error());
+
+      const filteredLinks = await getManagementFilteredLinks(
+        coreMockStarted,
+        getPlugins(['superuser'])
+      );
+      expect(filteredLinks).toEqual({
+        ...links,
+        links: links.links?.filter(
+          (link) =>
+            link.id !== SecurityPageName.hostIsolationExceptions &&
+            link.id !== SecurityPageName.responseActionsHistory
+        ),
+      });
+    });
   });
 });
