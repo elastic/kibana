@@ -15,6 +15,8 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   EuiAccordion,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFormRow,
   EuiSpacer,
   RecursivePartial,
@@ -25,11 +27,13 @@ import type {
   OpsgenieCreateAlertParams,
 } from '../../../../server/connector_types/stack';
 import * as i18n from './translations';
+import { EditActionCallback } from './types';
+import { Tags } from './tags';
 
 type CreateAlertProps = Omit<ActionParamsProps<OpsgenieActionParams>, 'actionParams'> & {
   subActionParams?: RecursivePartial<OpsgenieCreateAlertParams>;
-  editSubAction: ActionParamsProps<OpsgenieActionParams>['editAction'];
-  editOptionalSubAction: ActionParamsProps<OpsgenieActionParams>['editAction'];
+  editSubAction: EditActionCallback;
+  editOptionalSubAction: EditActionCallback;
 };
 
 const CreateAlertComponent: React.FC<CreateAlertProps> = ({
@@ -58,7 +62,7 @@ const CreateAlertComponent: React.FC<CreateAlertProps> = ({
 
       const prohibitedKeys = getInvalidKeys(parsedJson);
       if (prohibitedKeys.length > 0) {
-        editSubAction('advancedEditor', prohibitedKeys, index);
+        editSubAction('advancedEditor', prohibitedKeys);
         return;
       }
 
@@ -111,6 +115,58 @@ const CreateAlertComponent: React.FC<CreateAlertProps> = ({
         arrowDisplay={'right'}
       >
         <EuiSpacer size={'m'} />
+        <Tags onChange={editOptionalSubAction} />
+        <EuiSpacer size={'m'} />
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiFormRow
+              data-test-subj="opsgenie-entity-row"
+              fullWidth
+              label={i18n.ENTITY_FIELD_LABEL}
+            >
+              <TextFieldWithMessageVariables
+                index={index}
+                editAction={editOptionalSubAction}
+                messageVariables={messageVariables}
+                paramsProperty={'entity'}
+                inputTargetValue={subActionParams?.entity}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFormRow
+              data-test-subj="opsgenie-source-row"
+              fullWidth
+              label={i18n.SOURCE_FIELD_LABEL}
+            >
+              <TextFieldWithMessageVariables
+                index={index}
+                editAction={editOptionalSubAction}
+                messageVariables={messageVariables}
+                paramsProperty={'source'}
+                inputTargetValue={subActionParams?.source}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="m" />
+        <EuiFormRow data-test-subj="opsgenie-user-row" fullWidth label={i18n.USER_FIELD_LABEL}>
+          <TextFieldWithMessageVariables
+            index={index}
+            editAction={editOptionalSubAction}
+            messageVariables={messageVariables}
+            paramsProperty={'user'}
+            inputTargetValue={subActionParams?.user}
+          />
+        </EuiFormRow>
+        <TextAreaWithMessageVariables
+          index={index}
+          editAction={editOptionalSubAction}
+          messageVariables={messageVariables}
+          paramsProperty={'note'}
+          inputTargetValue={subActionParams?.note}
+          label={i18n.NOTE_FIELD_LABEL}
+        />
         <JsonEditorWithMessageVariables
           messageVariables={messageVariables}
           paramsProperty={'subActionParams'}
@@ -129,7 +185,16 @@ CreateAlertComponent.displayName = 'CreateAlert';
 
 export const CreateAlert = React.memo(CreateAlertComponent);
 
-const ignoredSubActionFields = ['message', 'alias', 'description'];
+const ignoredSubActionFields = [
+  'message',
+  'alias',
+  'description',
+  'entity',
+  'source',
+  'user',
+  'note',
+  'tags',
+];
 
 const parseJson = (jsonValue: string): Record<string, unknown> | undefined => {
   try {
@@ -158,7 +223,7 @@ const getSanitizedSubActionParams = (
   subActionParams?: RecursivePartial<OpsgenieCreateAlertParams>
 ) => {
   const sanitizedObj = omit(parsedJson, ['advancedEditor', ...ignoredSubActionFields]);
-  const textFields = pick(subActionParams, 'message', 'descriptions', 'alias');
+  const textFields = pick(subActionParams, ...ignoredSubActionFields);
   return {
     ...textFields,
     ...sanitizedObj,

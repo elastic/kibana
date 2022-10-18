@@ -6,13 +6,17 @@
  */
 
 import { RecursivePartial } from '@elastic/eui';
-import { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
+import {
+  ActionParamsProps,
+  UserConfiguredActionConnector,
+} from '@kbn/triggers-actions-ui-plugin/public/types';
 import type {
   OpsgenieActionConfig,
   OpsgenieActionSecrets,
   OpsgenieCreateAlertSubActionParams,
   OpsgenieCreateAlertParams,
   OpsgenieCloseAlertSubActionParams,
+  OpsgenieActionParams,
 } from '../../../../server/connector_types/stack';
 
 export type OpsgenieActionConnector = UserConfiguredActionConnector<
@@ -29,3 +33,10 @@ interface CreateAlertSubActionParamsValidation extends OpsgenieCreateAlertSubAct
 export type ValidationParams = RecursivePartial<
   CreateAlertSubActionParamsValidation | OpsgenieCloseAlertSubActionParams
 >;
+
+type EditActionParameters = Parameters<ActionParamsProps<OpsgenieActionParams>['editAction']>;
+
+export type EditActionCallback = (
+  key: EditActionParameters[0],
+  value: EditActionParameters[1]
+) => ReturnType<ActionParamsProps<OpsgenieActionParams>['editAction']>;

@@ -162,6 +162,10 @@ export interface BulkEditResponse {
   total: number;
 }
 
+export enum ActionConnectorMode {
+  Test = 'test',
+}
+
 export interface ActionParamsProps<TParams> {
   actionParams: Partial<TParams>;
   index: number;
@@ -173,7 +177,7 @@ export interface ActionParamsProps<TParams> {
   isLoading?: boolean;
   isDisabled?: boolean;
   showEmailSubjectAndMessage?: boolean;
-  testMode?: boolean;
+  executionMode?: ActionConnectorMode;
 }
 
 export interface Pagination {

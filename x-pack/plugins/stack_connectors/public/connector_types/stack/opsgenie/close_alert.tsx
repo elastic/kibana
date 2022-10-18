@@ -13,6 +13,8 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   EuiAccordion,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFormRow,
   EuiSpacer,
   RecursivePartial,
@@ -23,14 +25,15 @@ import type {
   OpsgenieCloseAlertParams,
 } from '../../../../server/connector_types/stack';
 import * as i18n from './translations';
+import { EditActionCallback } from './types';
 
 type CloseAlertProps = Omit<
   ActionParamsProps<OpsgenieActionParams>,
   'actionParams' | 'editAction'
 > & {
   subActionParams?: RecursivePartial<OpsgenieCloseAlertParams>;
-  editSubAction: ActionParamsProps<OpsgenieActionParams>['editAction'];
-  editOptionalSubAction: ActionParamsProps<OpsgenieActionParams>['editAction'];
+  editSubAction: EditActionCallback;
+  editOptionalSubAction: EditActionCallback;
 };
 
 const CloseAlertComponent: React.FC<CloseAlertProps> = ({
@@ -55,7 +58,7 @@ const CloseAlertComponent: React.FC<CloseAlertProps> = ({
         fullWidth
         error={errors['subActionParams.alias']}
         isInvalid={isAliasInvalid}
-        label={i18n.ALIAS_FIELD_LABEL}
+        label={i18n.ALIAS_REQUIRED_FIELD_LABEL}
       >
         <TextFieldWithMessageVariables
           index={index}
@@ -83,24 +86,34 @@ const CloseAlertComponent: React.FC<CloseAlertProps> = ({
         arrowDisplay={'right'}
       >
         <EuiSpacer size={'m'} />
-        <EuiFormRow data-test-subj="opsgenie-source-row" fullWidth label={i18n.SOURCE_FIELD_LABEL}>
-          <TextFieldWithMessageVariables
-            index={index}
-            editAction={editOptionalSubAction}
-            messageVariables={messageVariables}
-            paramsProperty={'source'}
-            inputTargetValue={subActionParams?.source}
-          />
-        </EuiFormRow>
-        <EuiFormRow data-test-subj="opsgenie-user-row" fullWidth label={i18n.USER_FIELD_LABEL}>
-          <TextFieldWithMessageVariables
-            index={index}
-            editAction={editOptionalSubAction}
-            messageVariables={messageVariables}
-            paramsProperty={'user'}
-            inputTargetValue={subActionParams?.user}
-          />
-        </EuiFormRow>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiFormRow
+              data-test-subj="opsgenie-source-row"
+              fullWidth
+              label={i18n.SOURCE_FIELD_LABEL}
+            >
+              <TextFieldWithMessageVariables
+                index={index}
+                editAction={editOptionalSubAction}
+                messageVariables={messageVariables}
+                paramsProperty={'source'}
+                inputTargetValue={subActionParams?.source}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFormRow data-test-subj="opsgenie-user-row" fullWidth label={i18n.USER_FIELD_LABEL}>
+              <TextFieldWithMessageVariables
+                index={index}
+                editAction={editOptionalSubAction}
+                messageVariables={messageVariables}
+                paramsProperty={'user'}
+                inputTargetValue={subActionParams?.user}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiAccordion>
     </>
   );

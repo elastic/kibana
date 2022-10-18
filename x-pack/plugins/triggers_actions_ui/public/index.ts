@@ -55,6 +55,7 @@ export {
   ALERT_HISTORY_PREFIX,
   AlertHistoryDocumentTemplate,
   AlertHistoryEsIndexConnectorId,
+  ActionConnectorMode,
 } from './types';
 
 export { useConnectorContext } from './application/context/use_connector_context';

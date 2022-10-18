@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useRef } from 'react';
-import { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { ActionParamsProps, ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { isEmpty, unset, cloneDeep } from 'lodash';
 import { OpsgenieSubActions } from '../../../../common';
@@ -21,7 +21,7 @@ const OpsgenieParamFields: React.FC<ActionParamsProps<OpsgenieActionParams>> = (
   errors,
   index,
   messageVariables,
-  testMode,
+  executionMode,
 }) => {
   const { subAction, subActionParams } = actionParams;
 
@@ -84,16 +84,18 @@ const OpsgenieParamFields: React.FC<ActionParamsProps<OpsgenieActionParams>> = (
 
   return (
     <>
-      <EuiFormRow fullWidth label={i18n.ACTION_LABEL}>
-        <EuiSelect
-          fullWidth
-          data-test-subj="opsgenie-subActionSelect"
-          options={actionOptions}
-          hasNoInitialSelection={subAction == null}
-          value={subAction}
-          onChange={onActionChange}
-        />
-      </EuiFormRow>
+      {executionMode === ActionConnectorMode.Test && (
+        <EuiFormRow fullWidth label={i18n.ACTION_LABEL}>
+          <EuiSelect
+            fullWidth
+            data-test-subj="opsgenie-subActionSelect"
+            options={actionOptions}
+            hasNoInitialSelection={subAction == null}
+            value={subAction}
+            onChange={onActionChange}
+          />
+        </EuiFormRow>
+      )}
 
       {subAction != null && subAction === OpsgenieSubActions.CreateAlert && (
         <CreateAlert

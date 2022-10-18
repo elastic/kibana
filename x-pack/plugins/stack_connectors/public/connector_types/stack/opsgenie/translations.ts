@@ -45,21 +45,21 @@ export const CLOSE_ALERT_ACTION = i18n.translate(
 export const MESSAGE_FIELD_LABEL = i18n.translate(
   'xpack.stackConnectors.components.opsgenie.messageLabel',
   {
-    defaultMessage: 'Message',
+    defaultMessage: 'Message (required)',
   }
 );
 
 export const NOTE_FIELD_LABEL = i18n.translate(
   'xpack.stackConnectors.components.opsgenie.noteLabel',
   {
-    defaultMessage: 'Note (optional)',
+    defaultMessage: 'Note',
   }
 );
 
 export const DESCRIPTION_FIELD_LABEL = i18n.translate(
   'xpack.stackConnectors.components.opsgenie.descriptionLabel',
   {
-    defaultMessage: 'Description (optional)',
+    defaultMessage: 'Description',
   }
 );
 
@@ -77,6 +77,13 @@ export const ALIAS_FIELD_LABEL = i18n.translate(
   }
 );
 
+export const ALIAS_REQUIRED_FIELD_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.opsgenie.aliasRequiredLabel',
+  {
+    defaultMessage: 'Alias (required)',
+  }
+);
+
 export const ALIAS_IS_REQUIRED = i18n.translate(
   'xpack.stackConnectors.components.opsgenie.requiredAliasTextField',
   {
@@ -87,14 +94,14 @@ export const ALIAS_IS_REQUIRED = i18n.translate(
 export const ADVANCED_JSON_LABEL = i18n.translate(
   'xpack.stackConnectors.components.opsgenie.jsonEditorLabel',
   {
-    defaultMessage: 'Alert fields',
+    defaultMessage: 'Additional fields',
   }
 );
 
 export const ADVANCED_JSON_ARIA = i18n.translate(
   'xpack.stackConnectors.components.opsgenie.jsonEditorAriaLabel',
   {
-    defaultMessage: 'Alert fields JSON editor',
+    defaultMessage: 'Additional fields JSON editor',
   }
 );
 
@@ -123,4 +130,21 @@ export const USER_FIELD_LABEL = i18n.translate(
   {
     defaultMessage: 'User',
   }
+);
+
+export const ENTITY_FIELD_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.opsgenie.entityLabel',
+  {
+    defaultMessage: 'Entity',
+  }
+);
+
+export const TAGS_HELP = i18n.translate('xpack.stackConnectors.components.opsgenie.tagsHelp', {
+  defaultMessage:
+    'Type one or more custom identifying tags for this case. Press enter after each tag to begin a new one.',
+});
+
+export const TAGS_FIELD_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.opsgenie.tagsLabel',
+  { defaultMessage: 'Opsgenie Tags' }
 );
