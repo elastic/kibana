@@ -11,7 +11,7 @@ import type { MarkdownProps } from '@kbn/shared-ux-markdown-types';
 
 type PropArguments = Pick<
   MarkdownProps,
-  'readOnly' | 'placeholder' | 'markdownContent' | 'height' | 'ariaLabelContent'
+  'readOnly' | 'placeholder' | 'markdownContent' | 'height' | 'ariaLabelContent' | 'openLinksInNewTab'
 >;
 
 export type Params = Record<keyof PropArguments, any>;
@@ -30,6 +30,10 @@ export class MarkdownStorybookMock extends AbstractStorybookMock<
     readOnly: {
       control: 'boolean',
       defaultValue: false,
+    },
+    openLinksInNewTab: {
+      control: 'boolean',
+      defaultValue: true,
     },
     placeholder: {
       control: {
@@ -54,7 +58,7 @@ export class MarkdownStorybookMock extends AbstractStorybookMock<
         type: 'select',
         defaultValue: 'full',
         label: 'height',
-        options: [0, 20, 'full'],
+        options: [0, 20, 50, 'full'],
       },
     },
   };
@@ -69,6 +73,7 @@ export class MarkdownStorybookMock extends AbstractStorybookMock<
       markdownContent: this.getArgumentValue('markdownContent', params),
       height: this.getArgumentValue('height', params),
       ariaLabelContent: this.getArgumentValue('ariaLabelContent', params),
+      openLinksInNewTab: this.getArgumentValue('openLinksInNewTab', params),
     };
   }
 

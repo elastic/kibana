@@ -32,7 +32,7 @@ export const Markdown = ({
   readOnly,
   markdownContent,
   children,
-  openLinksInNewTab,
+  openLinksInNewTab = true,
   defaultValue = '',
   placeholder = '',
   height = 'full',
@@ -51,7 +51,7 @@ export const Markdown = ({
       throw new Error('Markdown content is required in [readOnly] mode');
     }
     return (
-      <EuiMarkdownFormat aria-label={ariaLabelContent ?? 'markdown component'}>
+      <EuiMarkdownFormat aria-label={ariaLabelContent ?? 'markdown component'} processingPluginList={openLinksInNewTab ? processingPlugins : undefined}>
         {children ?? markdownContent!}
       </EuiMarkdownFormat>
     );
