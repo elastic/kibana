@@ -31,16 +31,16 @@ export const MarkdownStoryComponent = (params: MarkdownStorybookParams) => {
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
-      <Markdown
-        readOnly={true}
-        markdownContent={'My content in **markdown** format set as the *markdownContent prop*'}
-      />
-      <Markdown readOnly={true}>{'My content in **markdown** format passed as *children*'}</Markdown>
+        <Markdown
+          readOnly={true}
+          markdownContent={'My content in **markdown** format set as the *markdownContent prop*'}
+        />
+        <Markdown readOnly={true}>
+          {'My content in **markdown** format passed as *children*'}
+        </Markdown>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
 
 MarkdownStoryComponent.argTypes = argTypes;
-
-

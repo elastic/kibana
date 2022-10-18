@@ -24,20 +24,27 @@ export const RANDOM_SAMPLER_OPTION = {
 
 export type RandomSamplerOption = typeof RANDOM_SAMPLER_OPTION[keyof typeof RANDOM_SAMPLER_OPTION];
 
-export const RANDOM_SAMPLER_SELECT_OPTIONS: Array<{ value: RandomSamplerOption; text: string }> = [
+export const RANDOM_SAMPLER_SELECT_OPTIONS: Array<{
+  value: RandomSamplerOption;
+  text: string;
+  'data-test-subj': string;
+}> = [
   {
+    'data-test-subj': 'dvRandomSamplerOptionOnAutomatic',
     value: RANDOM_SAMPLER_OPTION.ON_AUTOMATIC,
     text: i18n.translate('xpack.dataVisualizer.randomSamplerPreference.onAutomaticLabel', {
       defaultMessage: 'On - automatic',
     }),
   },
   {
+    'data-test-subj': 'dvRandomSamplerOptionOnManual',
     value: RANDOM_SAMPLER_OPTION.ON_MANUAL,
     text: i18n.translate('xpack.dataVisualizer.randomSamplerPreference.onManualLabel', {
       defaultMessage: 'On - manual',
     }),
   },
   {
+    'data-test-subj': 'dvRandomSamplerOptionOff',
     value: RANDOM_SAMPLER_OPTION.OFF,
     text: i18n.translate('xpack.dataVisualizer.randomSamplerPreference.offLabel', {
       defaultMessage: 'Off',
