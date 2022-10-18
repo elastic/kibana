@@ -53,7 +53,7 @@ import { Panel } from '../panel';
 import { InspectButtonContainer } from '../inspect';
 import { useQueryToggle } from '../../containers/query_toggle';
 import type { UsersTableColumns } from '../../../explore/users/components/all_users';
-import type { AuthTableColumns } from '../authentication/types';
+import type { AuthTableColumns } from '../../../explore/components/authentication/types';
 
 const DEFAULT_DATA_TEST_SUBJ = 'paginated-table';
 

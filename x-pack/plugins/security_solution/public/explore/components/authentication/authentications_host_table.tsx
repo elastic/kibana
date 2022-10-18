@@ -5,29 +5,31 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import { getOr } from 'lodash/fp';
 import { useDispatch } from 'react-redux';
-import { AuthStackByField } from '../../../../common/search_strategy/security_solution/users/authentications';
-import { PaginatedTable } from '../paginated_table';
+import { PaginatedTable } from '../../../common/components/paginated_table';
 
 import * as i18n from './translations';
 import {
-  getUserDetailsAuthenticationColumns,
-  getUsersPageAuthenticationColumns,
+  getHostDetailsAuthenticationColumns,
+  getHostsPageAuthenticationColumns,
   rowItems,
 } from './helpers';
-import { useAuthentications } from '../../containers/authentications';
-import { useQueryInspector } from '../page/manage_query';
-import { useQueryToggle } from '../../containers/query_toggle';
-import { useDeepEqualSelector } from '../../hooks/use_selector';
-import { usersActions, usersModel, usersSelectors } from '../../../explore/users/store';
-import type { AuthenticationsUserTableProps } from './types';
+import { useAuthentications } from '../../../common/containers/authentications';
+import { useQueryInspector } from '../../../common/components/page/manage_query';
+import type { HostsComponentsQueryProps } from '../../hosts/pages/navigation/types';
+import { hostsActions, hostsModel, hostsSelectors } from '../../hosts/store';
+import { useQueryToggle } from '../../../common/containers/query_toggle';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
+import { AuthStackByField } from '../../../../common/search_strategy';
 
-const TABLE_QUERY_ID = 'authenticationsUsersTableQuery';
+const TABLE_QUERY_ID = 'authenticationsHostsTableQuery';
 
-const AuthenticationsUserTableComponent: React.FC<AuthenticationsUserTableProps> = ({
+const tableType = hostsModel.HostsTableType.authentications;
+
+const AuthenticationsHostTableComponent: React.FC<HostsComponentsQueryProps> = ({
   endDate,
   filterQuery,
   indexNames,
@@ -36,7 +38,6 @@ const AuthenticationsUserTableComponent: React.FC<AuthenticationsUserTableProps>
   type,
   setQuery,
   deleteQuery,
-  userName,
 }) => {
   const dispatch = useDispatch();
   const { toggleStatus } = useQueryToggle(TABLE_QUERY_ID);
@@ -45,8 +46,10 @@ const AuthenticationsUserTableComponent: React.FC<AuthenticationsUserTableProps>
     setQuerySkip(skip || !toggleStatus);
   }, [skip, toggleStatus]);
 
-  const getAuthenticationsSelector = useMemo(() => usersSelectors.authenticationsSelector(), []);
-  const { activePage, limit } = useDeepEqualSelector((state) => getAuthenticationsSelector(state));
+  const getAuthenticationsSelector = hostsSelectors.authenticationsSelector();
+  const { activePage, limit } = useDeepEqualSelector((state) =>
+    getAuthenticationsSelector(state, type)
+  );
 
   const [
     loading,
@@ -57,23 +60,23 @@ const AuthenticationsUserTableComponent: React.FC<AuthenticationsUserTableProps>
     indexNames,
     skip: querySkip,
     startDate,
+    stackByField: AuthStackByField.userName,
     activePage,
     limit,
-    stackByField: userName ? AuthStackByField.hostName : AuthStackByField.userName,
   });
 
-  const columns = useMemo(
-    () => (userName ? getUserDetailsAuthenticationColumns() : getUsersPageAuthenticationColumns()),
-    [userName]
-  );
+  const columns =
+    type === hostsModel.HostsType.details
+      ? getHostDetailsAuthenticationColumns()
+      : getHostsPageAuthenticationColumns();
 
   const updateLimitPagination = useCallback(
     (newLimit) =>
       dispatch(
-        usersActions.updateTableLimit({
-          usersType: type,
+        hostsActions.updateTableLimit({
+          hostsType: type,
           limit: newLimit,
-          tableType: usersModel.UsersTableType.authentications,
+          tableType,
         })
       ),
     [type, dispatch]
@@ -82,10 +85,10 @@ const AuthenticationsUserTableComponent: React.FC<AuthenticationsUserTableProps>
   const updateActivePage = useCallback(
     (newPage) =>
       dispatch(
-        usersActions.updateTableActivePage({
+        hostsActions.updateTableActivePage({
           activePage: newPage,
-          usersType: type,
-          tableType: usersModel.UsersTableType.authentications,
+          hostsType: type,
+          tableType,
         })
       ),
     [type, dispatch]
@@ -104,10 +107,10 @@ const AuthenticationsUserTableComponent: React.FC<AuthenticationsUserTableProps>
     <PaginatedTable
       activePage={activePage}
       columns={columns}
-      dataTestSubj="table-users-authentications"
+      dataTestSubj="authentications-host-table"
       headerCount={totalCount}
       headerTitle={i18n.AUTHENTICATIONS}
-      headerUnit={userName ? i18n.HOSTS_UNIT(totalCount) : i18n.USERS_UNIT(totalCount)}
+      headerUnit={i18n.USERS_UNIT(totalCount)}
       id={TABLE_QUERY_ID}
       isInspect={isInspected}
       itemsPerRow={rowItems}
@@ -124,6 +127,6 @@ const AuthenticationsUserTableComponent: React.FC<AuthenticationsUserTableProps>
   );
 };
 
-AuthenticationsUserTableComponent.displayName = 'AuthenticationsUserTableComponent';
+AuthenticationsHostTableComponent.displayName = 'AuthenticationsHostTableComponent';
 
-export const AuthenticationsUserTable = React.memo(AuthenticationsUserTableComponent);
+export const AuthenticationsHostTable = React.memo(AuthenticationsHostTableComponent);

@@ -8,13 +8,17 @@
 import { has } from 'lodash/fp';
 import React from 'react';
 
-import { getEmptyTagValue } from '../empty_value';
-import { FormattedRelativePreferenceDate } from '../formatted_date';
-import type { Columns, ItemsPerRow } from '../paginated_table';
-import { getRowItemDraggables } from '../tables/helpers';
+import { getEmptyTagValue } from '../../../common/components/empty_value';
+import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
+import type { Columns, ItemsPerRow } from '../../../common/components/paginated_table';
+import { getRowItemDraggables } from '../../../common/components/tables/helpers';
 
 import * as i18n from './translations';
-import { HostDetailsLink, NetworkDetailsLink, UserDetailsLink } from '../links';
+import {
+  HostDetailsLink,
+  NetworkDetailsLink,
+  UserDetailsLink,
+} from '../../../common/components/links';
 import type { AuthenticationsEdges } from '../../../../common/search_strategy';
 import { MatrixHistogramType } from '../../../../common/search_strategy';
 import type { AuthTableColumns } from './types';
@@ -22,9 +26,9 @@ import type {
   MatrixHistogramConfigs,
   MatrixHistogramMappingTypes,
   MatrixHistogramOption,
-} from '../matrix_histogram/types';
-import type { LensAttributes } from '../visualization_actions/types';
-import { authenticationLensAttributes } from '../visualization_actions/lens_attributes/common/authentication';
+} from '../../../common/components/matrix_histogram/types';
+import type { LensAttributes } from '../../../common/components/visualization_actions/types';
+import { authenticationLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/common/authentication';
 
 export const getHostDetailsAuthenticationColumns = (): AuthTableColumns => [
   USER_COLUMN,
