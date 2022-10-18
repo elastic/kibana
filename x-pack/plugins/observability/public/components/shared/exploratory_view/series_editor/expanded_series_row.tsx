@@ -20,9 +20,11 @@ import { Breakdowns } from './breakdown/breakdowns';
 import { LabelsBreakdown } from './breakdown/label_breakdown';
 
 function getColumnType(seriesConfig: SeriesConfig, selectedMetricField?: string) {
-  const { columnType } = parseCustomFieldName(seriesConfig, selectedMetricField);
+  const metricOption = parseCustomFieldName(seriesConfig, selectedMetricField);
 
-  return columnType;
+  if (!Array.isArray(metricOption)) {
+    return metricOption?.columnType;
+  }
 }
 
 interface Props {

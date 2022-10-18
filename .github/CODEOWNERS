@@ -18,6 +18,7 @@
 /x-pack/plugins/graph/ @elastic/kibana-data-discovery
 /x-pack/test/functional/apps/graph @elastic/kibana-data-discovery
 /src/plugins/unified_field_list/ @elastic/kibana-data-discovery
+/src/plugins/unified_histogram/ @elastic/kibana-data-discovery
 /src/plugins/saved_objects_finder/ @elastic/kibana-data-discovery
 
 # Vis Editors
@@ -834,6 +835,7 @@ packages/core/status/core-status-server-mocks @elastic/kibana-core
 packages/core/test-helpers/core-test-helpers-deprecations-getters @elastic/kibana-core
 packages/core/test-helpers/core-test-helpers-http-setup-browser @elastic/kibana-core
 packages/core/test-helpers/core-test-helpers-so-type-serializer @elastic/kibana-core
+packages/core/test-helpers/core-test-helpers-test-utils @elastic/kibana-core
 packages/core/theme/core-theme-browser @elastic/kibana-core
 packages/core/theme/core-theme-browser-internal @elastic/kibana-core
 packages/core/theme/core-theme-browser-mocks @elastic/kibana-core
