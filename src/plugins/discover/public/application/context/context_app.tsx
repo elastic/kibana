@@ -42,7 +42,7 @@ const ContextAppContentMemoized = memo(ContextAppContent);
 export interface ContextAppProps {
   dataView: DataView;
   anchorId: string;
-  locationState: ContextHistoryLocationState;
+  locationState?: ContextHistoryLocationState;
 }
 
 export const ContextApp = ({ dataView, anchorId, locationState }: ContextAppProps) => {
@@ -77,14 +77,14 @@ export const ContextApp = ({ dataView, anchorId, locationState }: ContextAppProp
     dataViewId: dataView.id!,
     filters: appState.filters,
     columns,
-    timeRange: locationState.timeRange,
-    query: locationState.query,
-    savedSearchId: locationState.savedSearchId,
+    timeRange: locationState?.timeRange,
+    query: locationState?.query,
+    savedSearchId: locationState?.savedSearchId,
   });
 
   useEffect(() => {
     services.chrome.setBreadcrumbs([
-      ...getRootBreadcrumbs({ href: breadcrumb }),
+      ...getRootBreadcrumbs(breadcrumb),
       {
         text: i18n.translate('discover.context.breadcrumb', {
           defaultMessage: 'Surrounding documents',

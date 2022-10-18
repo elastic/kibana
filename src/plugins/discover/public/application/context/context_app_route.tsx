@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useParams } from 'react-router-dom';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -21,20 +21,13 @@ export interface ContextUrlParams {
 }
 
 export function ContextAppRoute() {
-  const scopedHistory = getScopedHistory();
-  const [locationState, setLocationState] = React.useState<ContextHistoryLocationState>(
-    (scopedHistory.location.state as ContextHistoryLocationState) || {}
-  );
+  const locationState = React.useRef(
+    getScopedHistory().location.state as ContextHistoryLocationState | undefined
+  ).current;
 
   const { dataViewId: encodedDataViewId, id } = useParams<ContextUrlParams>();
   const dataViewId = decodeURIComponent(encodedDataViewId);
   const anchorId = decodeURIComponent(id);
-
-  useEffect(() => {
-    if (scopedHistory.location.state) {
-      setLocationState(scopedHistory.location.state as ContextHistoryLocationState);
-    }
-  }, [dataViewId, scopedHistory.location.state]);
 
   const { dataView, error } = useDataView({ dataViewId, locationState, rowId: anchorId });
 

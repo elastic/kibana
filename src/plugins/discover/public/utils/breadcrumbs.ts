@@ -10,21 +10,20 @@ import { ChromeStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 
-export function getRootBreadcrumbs({ href, onClick }: { href?: string; onClick?: () => void }) {
+export function getRootBreadcrumbs(breadcrumb?: string) {
   return [
     {
       text: i18n.translate('discover.rootBreadcrumb', {
         defaultMessage: 'Discover',
       }),
-      href: href || '#/',
-      onClick,
+      href: breadcrumb || '#/',
     },
   ];
 }
 
 export function getSavedSearchBreadcrumbs(id: string) {
   return [
-    ...getRootBreadcrumbs({}),
+    ...getRootBreadcrumbs(),
     {
       text: id,
     },

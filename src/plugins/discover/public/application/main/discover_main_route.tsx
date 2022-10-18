@@ -220,7 +220,7 @@ export function DiscoverMainRoute(props: Props) {
     chrome.setBreadcrumbs(
       savedSearch && savedSearch.title
         ? getSavedSearchBreadcrumbs(savedSearch.title)
-        : getRootBreadcrumbs({})
+        : getRootBreadcrumbs()
     );
   }, [chrome, savedSearch]);
 

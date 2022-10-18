@@ -8,9 +8,12 @@
 
 import { useEffect, useState } from 'react';
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import { DiscoverAppLocatorParams } from '../locator';
 import { useDiscoverServices } from './use_discover_services';
 
+/**
+ * This hook returns the root breadcrumb for main Discover view,
+ * it uses in context and single doc pages.
+ */
 export const useRootBreadcrumb = ({
   dataViewId,
   filters,
@@ -30,20 +33,16 @@ export const useRootBreadcrumb = ({
   const [breadcrumb, setBreadcrumb] = useState<string>();
 
   useEffect(() => {
-    const getHref = async () => {
-      const state: DiscoverAppLocatorParams = {
+    services.locator
+      .getUrl({
         dataViewId,
         filters,
         columns,
         timeRange,
         query,
         savedSearchId,
-      };
-
-      const href = await services.locator.getUrl(state);
-      setBreadcrumb(href);
-    };
-    getHref();
+      })
+      .then(setBreadcrumb);
   }, [columns, dataViewId, filters, query, savedSearchId, services.locator, timeRange]);
 
   return breadcrumb;

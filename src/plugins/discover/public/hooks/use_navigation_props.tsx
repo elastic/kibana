@@ -7,9 +7,16 @@
  */
 
 import { useCallback } from 'react';
-import { disableFilter, type Filter } from '@kbn/es-query';
+import {
+  type AggregateQuery,
+  disableFilter,
+  type Query,
+  type TimeRange,
+  type Filter,
+} from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { useHistory } from 'react-router-dom';
+import { DataPublicPluginStart, FilterManager } from '@kbn/data-plugin/public';
 import { useDiscoverServices } from './use_discover_services';
 
 export interface UseNavigationProps {
@@ -21,6 +28,44 @@ export interface UseNavigationProps {
   // provided by embeddable only
   filters?: Filter[];
 }
+
+const getStateParams = ({
+  isEmbeddableView,
+  columns,
+  filters,
+  filterManager,
+  data,
+  savedSearchId,
+}: {
+  isEmbeddableView: boolean;
+  columns: string[];
+  savedSearchId?: string;
+  filters?: Filter[];
+  filterManager: FilterManager;
+  data: DataPublicPluginStart;
+}) => {
+  let appliedFilters: Filter[] = [];
+  let query: Query | AggregateQuery | undefined;
+  let timeRange: TimeRange | undefined;
+  if (!isEmbeddableView) {
+    // applied from discover main and context app
+    appliedFilters = [...filterManager.getGlobalFilters(), ...filterManager.getAppFilters()];
+    query = data.query.queryString.getQuery();
+    timeRange = data.query.timefilter.timefilter.getTime();
+  } else if (isEmbeddableView && filters?.length) {
+    // applied from saved search embeddable
+    appliedFilters = filters;
+  }
+  appliedFilters = appliedFilters.map(disableFilter);
+
+  return {
+    columns,
+    query,
+    timeRange,
+    filters: appliedFilters,
+    savedSearchId,
+  };
+};
 
 export const useNavigationProps = ({
   dataView,
@@ -41,43 +86,35 @@ export const useNavigationProps = ({
         dataViewSpec: dataView.toSpec(false),
         rowId,
         rowIndex,
+        ...getStateParams({
+          isEmbeddableView,
+          columns,
+          filters,
+          filterManager: services.filterManager,
+          data: services.data,
+          savedSearchId,
+        }),
       });
     },
-    [dataView, rowId, rowIndex, services.singleDocLocator]
+    [columns, dataView, filters, isEmbeddableView, rowId, rowIndex, savedSearchId, services]
   );
 
   const onOpenSurrDocs = useCallback(() => {
     event?.preventDefault?.();
 
-    let appliedFilters: Filter[] = [];
-    if (!isEmbeddableView) {
-      // applied from discover main and context app
-      appliedFilters = [
-        ...services.filterManager.getGlobalFilters(),
-        ...services.filterManager.getAppFilters(),
-      ];
-    } else if (isEmbeddableView && filters?.length) {
-      // applied from embeddable
-      appliedFilters = filters;
-    }
-
     services.contextLocator.navigate({
       dataViewSpec: dataView.toSpec(false),
       rowId,
-      columns,
-      filters: appliedFilters.map(disableFilter),
-      savedSearchId,
+      ...getStateParams({
+        isEmbeddableView,
+        columns,
+        filters,
+        filterManager: services.filterManager,
+        data: services.data,
+        savedSearchId,
+      }),
     });
-  }, [
-    columns,
-    dataView,
-    filters,
-    isEmbeddableView,
-    rowId,
-    savedSearchId,
-    services.contextLocator,
-    services.filterManager,
-  ]);
+  }, [columns, dataView, filters, isEmbeddableView, rowId, savedSearchId, services]);
 
   return { onOpenSingleDoc, onOpenSurrDocs };
 };

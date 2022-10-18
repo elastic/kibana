@@ -53,7 +53,7 @@ export const useDataView = ({
 }: {
   dataViewId: string;
   rowId: string;
-  locationState: ContextHistoryLocationState;
+  locationState?: ContextHistoryLocationState;
 }) => {
   const { dataViews, toastNotifications, contextLocator } = useDiscoverServices();
   const [dataView, setDataView] = useState<DataView>();

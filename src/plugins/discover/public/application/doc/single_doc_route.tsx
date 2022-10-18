@@ -96,7 +96,7 @@ export const SingleDocRoute = () => {
 
   return (
     <div className="app-container">
-      <Doc id={id} index={index} dataView={dataView} />
+      <Doc id={id} index={index} dataView={dataView} locationState={locationState} />
     </div>
   );
 };

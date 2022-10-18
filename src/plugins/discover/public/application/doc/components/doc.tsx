@@ -23,6 +23,7 @@ import { DocViewer } from '../../../services/doc_views/components/doc_viewer';
 import { ElasticRequestState } from '../types';
 import { useEsDocSearch } from '../../../hooks/use_es_doc_search';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
+import { SingleDocHistoryLocationState } from '../locator';
 
 export interface DocProps {
   /**
@@ -41,6 +42,10 @@ export interface DocProps {
    * If set, will always request source, regardless of the global `fieldsFromSource` setting
    */
   requestSource?: boolean;
+  /**
+   * State to build discover main url
+   */
+  locationState?: SingleDocHistoryLocationState;
 }
 
 export function Doc(props: DocProps) {
@@ -54,11 +59,11 @@ export function Doc(props: DocProps) {
     singleDocTitle.current?.focus();
   }, []);
 
-  const breadcrumb = useRootBreadcrumb({ dataViewId: dataView.id! });
+  const breadcrumb = useRootBreadcrumb({ dataViewId: dataView.id!, ...props.locationState });
 
   useEffect(() => {
     chrome.setBreadcrumbs([
-      ...getRootBreadcrumbs({ href: breadcrumb }),
+      ...getRootBreadcrumbs(breadcrumb),
       { text: `${props.index}#${props.id}` },
     ]);
   }, [chrome, breadcrumb, props.index, props.id, dataView, locator]);
