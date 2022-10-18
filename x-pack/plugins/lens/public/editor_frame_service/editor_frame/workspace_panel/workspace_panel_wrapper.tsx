@@ -8,13 +8,7 @@
 import './workspace_panel_wrapper.scss';
 
 import React, { useCallback } from 'react';
-import {
-  EuiPageSection,
-  EuiPageTemplate,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButton,
-} from '@elastic/eui';
+import { EuiPageTemplate, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DatasourceMap, FramePublicAPI, VisualizationMap } from '../../../types';
@@ -118,9 +112,9 @@ export function WorkspacePanelWrapper({
     warningMessages.push(...requestWarnings);
   }
   return (
-    <EuiPageTemplate direction="row" grow={true} offset={0} minHeight={0} responsive={[]}>
+    <EuiPageTemplate direction="column" offset={0} minHeight={0} restrictWidth={false}>
       {!(isFullscreen && (autoApplyEnabled || warningMessages?.length)) && (
-        <EuiPageSection grow={false} paddingSize="none" color="transparent">
+        <EuiPageTemplate.Section paddingSize="none" color="transparent">
           <EuiFlexGroup
             alignItems="flexEnd"
             gutterSize="s"
@@ -191,20 +185,22 @@ export function WorkspacePanelWrapper({
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiPageSection>
+        </EuiPageTemplate.Section>
       )}
-      <EuiPageSection
+      <EuiPageTemplate.Section
         grow={true}
         paddingSize="none"
         contentProps={{
-          className: classNames('lnsWorkspacePanelWrapper', {
-            'lnsWorkspacePanelWrapper--fullscreen': isFullscreen,
-          }),
+          className: 'lnsWorkspacePanelWrapper__content',
         }}
+        className={classNames('lnsWorkspacePanelWrapper', {
+          'lnsWorkspacePanelWrapper--fullscreen': isFullscreen,
+        })}
+        color="transparent"
       >
         <WorkspaceTitle />
         {children}
-      </EuiPageSection>
+      </EuiPageTemplate.Section>
     </EuiPageTemplate>
   );
 }

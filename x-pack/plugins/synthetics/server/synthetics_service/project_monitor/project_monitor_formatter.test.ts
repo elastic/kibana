@@ -10,7 +10,8 @@ import {
   INSUFFICIENT_FLEET_PERMISSIONS,
   ProjectMonitorFormatter,
 } from './project_monitor_formatter';
-import { LocationStatus } from '../../../common/runtime_types';
+import { DataStream, LocationStatus } from '../../../common/runtime_types';
+import { DEFAULT_FIELDS } from '../../../common/constants/monitor_defaults';
 import { times } from 'lodash';
 import { SyntheticsService } from '../synthetics_service';
 import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
@@ -45,6 +46,7 @@ const testMonitors = [
     content:
       'UEsDBBQACAAIAAAAIQAAAAAAAAAAAAAAAAAQAAAAYmFzaWMuam91cm5leS50c2WQQU7DQAxF9znFV8QiUUOmXcCCUMQl2NdMnWbKJDMaO6Ilyt0JASQkNv9Z1teTZWNAIqwP5kU4iZGOug863u7uDXsSddbIddCOl0kMX6iPnsVoOAYxryTO1ucwpoGvtUrm+hiSYsLProIoxwp8iWwVM9oUeuTP/9V5k7UhofCscNhj2yx4xN2CzabElOHXWRxsx/YNroU69QwniImFB8Vui5vJzYcKxYRIJ66WTNQL5hL7p1WD9aYi9zQOtgPFGPNqecJ1sCj+tAB6J6erpj4FDcW3qh6TL5u1Mq/8yjn7BFBLBwhGDIWc4QAAAEkBAABQSwECLQMUAAgACAAAACEARgyFnOEAAABJAQAAEAAAAAAAAAAAACAApIEAAAAAYmFzaWMuam91cm5leS50c1BLBQYAAAAAAQABAD4AAAAfAQAAAAA=',
     filter: { match: 'check if title is present 10 0' },
+    hash: 'lleklrkelkj',
   },
   {
     type: 'browser',
@@ -68,6 +70,7 @@ const testMonitors = [
     content:
       'UEsDBBQACAAIAAAAIQAAAAAAAAAAAAAAAAAQAAAAYmFzaWMuam91cm5leS50c2WQQU7DQAxF9znFV8QiUUOmXcCCUMQl2NdMnWbKJDMaO6Ilyt0JASQkNv9Z1teTZWNAIqwP5kU4iZGOug863u7uDXsSddbIddCOl0kMX6iPnsVoOAYxryTO1ucwpoGvtUrm+hiSYsLProIoxwp8iWwVM9oUeuTP/9V5k7UhofCscNhj2yx4xN2CzabElOHXWRxsx/YNroU69QwniImFB8Vui5vJzYcKxYRIJ66WTNQL5hL7p1WD9aYi9zQOtgPFGPNqecJ1sCj+tAB6J6erpj4FDcW3qh6TL5u1Mq/8yjn7BFBLBwhGDIWc4QAAAEkBAABQSwECLQMUAAgACAAAACEARgyFnOEAAABJAQAAEAAAAAAAAAAAACAApIEAAAAAYmFzaWMuam91cm5leS50c1BLBQYAAAAAAQABAD4AAAAfAQAAAAA=',
     filter: { match: 'check if title is present 10 1' },
+    hash: 'lleklrkelkj',
   },
 ];
 
@@ -492,6 +495,7 @@ describe('ProjectMonitorFormatter', () => {
 
 const payloadData = [
   {
+    ...DEFAULT_FIELDS[DataStream.BROWSER],
     __ui: {
       is_zip_url_tls_enabled: false,
       script_source: {
@@ -550,8 +554,10 @@ const payloadData = [
     'url.port': null,
     urls: '',
     id: '',
+    hash: 'lleklrkelkj',
   },
   {
+    ...DEFAULT_FIELDS[DataStream.BROWSER],
     __ui: {
       is_zip_url_tls_enabled: false,
       script_source: {
@@ -609,6 +615,7 @@ const payloadData = [
     'url.port': null,
     urls: '',
     id: '',
+    hash: 'lleklrkelkj',
   },
 ];
 

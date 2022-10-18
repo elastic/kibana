@@ -69,9 +69,14 @@ export interface StepConfig {
 export interface GuideConfig {
   title: string;
   description: string;
+  guideName: string;
   docs?: {
     text: string;
     url: string;
+  };
+  completedGuideRedirectLocation?: {
+    appID: string;
+    path: string;
   };
   steps: StepConfig[];
 }

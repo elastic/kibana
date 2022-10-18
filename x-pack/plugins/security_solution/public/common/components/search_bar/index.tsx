@@ -311,7 +311,6 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
           savedQuery={savedQuery}
           showFilterBar={!hideFilterBar}
           showDatePicker={true}
-          showQueryBar={true}
           showQueryInput={!hideQueryInput}
           showSaveQuery={true}
           dataTestSubj={dataTestSubj}
