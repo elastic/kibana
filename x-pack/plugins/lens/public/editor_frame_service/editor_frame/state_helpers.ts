@@ -81,6 +81,25 @@ const getLastUsedIndexPatternId = (
   return indexPattern && indexPatternRefs.find((i) => i.id === indexPattern)?.id;
 };
 
+const getRefsForAdHocDataViewsFromContext = (
+  indexPatternRefs: IndexPatternRef[],
+  usedIndexPatternsIds: string[],
+  indexPatterns: Record<string, IndexPattern>
+) => {
+  const indexPatternIds = indexPatternRefs.map(({ id }) => id);
+  const adHocDataViewsIds = usedIndexPatternsIds.filter((id) => !indexPatternIds.includes(id));
+
+  const adHocDataViewsList = Object.values(indexPatterns).filter(({ id }) =>
+    adHocDataViewsIds.includes(id)
+  );
+  return adHocDataViewsList.map(({ id, title, name }) => ({ id, title, name }));
+};
+
+const sortDataViewRefs = (indexPatternRefs: IndexPatternRef[]) =>
+  indexPatternRefs.sort((a, b) => {
+    return a.title.localeCompare(b.title);
+  });
+
 export async function initializeDataViews(
   {
     dataViews,
@@ -110,10 +129,10 @@ export async function initializeDataViews(
     })
   );
   const { isFullEditor } = options ?? {};
-  const contextDataViewSpec = (initialContext as VisualizeFieldContext)?.dataViewSpec;
+
   // make it explicit or TS will infer never[] and break few lines down
   const indexPatternRefs: IndexPatternRef[] = await (isFullEditor
-    ? loadIndexPatternRefs(dataViews, adHocDataViews, contextDataViewSpec)
+    ? loadIndexPatternRefs(dataViews)
     : []);
 
   // if no state is available, use the fallbackId
@@ -127,7 +146,7 @@ export async function initializeDataViews(
 
   const adHocDataviewsIds: string[] = Object.keys(adHocDataViews || {});
 
-  const usedIndexPatterns = getIndexPatterns(
+  const usedIndexPatternsIds = getIndexPatterns(
     references,
     initialContext,
     initialId,
@@ -137,17 +156,25 @@ export async function initializeDataViews(
   // load them
   const availableIndexPatterns = new Set(indexPatternRefs.map(({ id }: IndexPatternRef) => id));
 
-  const notUsedPatterns: string[] = difference([...availableIndexPatterns], usedIndexPatterns);
+  const notUsedPatterns: string[] = difference([...availableIndexPatterns], usedIndexPatternsIds);
 
   const indexPatterns = await loadIndexPatterns({
     dataViews,
-    patterns: usedIndexPatterns,
+    patterns: usedIndexPatternsIds,
     notUsedPatterns,
     cache: {},
     adHocDataViews,
   });
 
-  return { indexPatternRefs, indexPatterns };
+  const adHocDataViewsRefs = getRefsForAdHocDataViewsFromContext(
+    indexPatternRefs,
+    usedIndexPatternsIds,
+    indexPatterns
+  );
+  return {
+    indexPatternRefs: sortDataViewRefs([...indexPatternRefs, ...adHocDataViewsRefs]),
+    indexPatterns,
+  };
 }
 
 /**

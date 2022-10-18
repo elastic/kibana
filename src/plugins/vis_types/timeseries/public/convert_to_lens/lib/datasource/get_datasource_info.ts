@@ -38,9 +38,17 @@ export const getDataSourceInfo = async (
     }
 
     if (!indexPatternId) {
-      indexPattern = await dataViews.getDefault();
-      indexPatternId = indexPattern?.id ?? '';
-      timeField = indexPattern?.timeFieldName;
+      if (isStringTypeIndexPattern(modelIndexPattern)) {
+        indexPattern = await dataViews.create({
+          title: modelIndexPattern,
+          timeFieldName: timeField,
+        });
+        indexPatternId = indexPattern.id ?? '';
+      } else {
+        indexPattern = await dataViews.getDefault();
+        indexPatternId = indexPattern?.id ?? '';
+        timeField = indexPattern?.timeFieldName;
+      }
     } else {
       indexPattern = await dataViews.get(indexPatternId);
       if (!timeField) {
