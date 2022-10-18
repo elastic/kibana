@@ -61,7 +61,7 @@ export const CurationsSettings: React.FC = () => {
     } else {
       onSkipLoadingCurationsSettings();
     }
-  });
+  }, [analyticsEnabled, dataLoading]);
 
   if (!hasPlatinumLicense)
     return (
