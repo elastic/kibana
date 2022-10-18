@@ -48,8 +48,9 @@ export class RasterTileLayer extends AbstractLayer {
   }
 
   renderLegendDetails(): ReactElement<any> | null {
+    const dataRequest = this.getSourceDataRequest();
     const source = this.getSource();
-    return source.renderLegendDetails();
+    return source.renderLegendDetails(dataRequest);
   }
 
   getStyleForEditing() {
