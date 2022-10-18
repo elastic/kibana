@@ -118,7 +118,7 @@ const NetworkDetailsComponent: React.FC = () => {
     } catch (e) {
       return [undefined, e];
     }
-  }, [globalFilters, indexPattern, ip, networkDetailsFilter, query, uiSettings]);
+  }, [globalFilters, indexPattern, networkDetailsFilter, query, uiSettings]);
 
   const stringifiedAdditionalFilters = JSON.stringify(rawFilteredQuery);
   useInvalidFilterQuery({
