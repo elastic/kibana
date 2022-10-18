@@ -11,10 +11,10 @@ type TransactionDurationField = ReturnType<
   typeof getDurationFieldForTransactions
 >;
 
-type AvgLatencyAgg = {
+interface AvgLatencyAgg {
   avgLatency: { avg: { field: TransactionDurationField } };
-};
-type PctLatencyAgg = {
+}
+interface PctLatencyAgg {
   pctLatency: {
     percentiles: {
       field: TransactionDurationField;
@@ -22,7 +22,7 @@ type PctLatencyAgg = {
       keyed: false;
     };
   };
-};
+}
 
 export function averageOrPercentileAgg({
   aggregationType,
