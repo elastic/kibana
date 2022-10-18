@@ -112,7 +112,6 @@ export function SummaryStats() {
                   }
                 )}
                 value={asDynamicBytes(data?.totalSize)}
-                color={euiTheme.colors.text}
               />
               <SummaryMetric
                 label={i18n.translate(
@@ -129,7 +128,6 @@ export function SummaryStats() {
                   }
                 )}
                 value={asPercent(data?.diskSpaceUsedPct, 1)}
-                color={euiTheme.colors.warning}
               />
               <SummaryMetric
                 label={i18n.translate(
@@ -146,7 +144,6 @@ export function SummaryStats() {
                   }
                 )}
                 value={asDynamicBytes(data?.estimatedIncrementalSize)}
-                color={euiTheme.colors.primary}
               />
               <SummaryMetric
                 label={i18n.translate(
@@ -156,7 +153,6 @@ export function SummaryStats() {
                   }
                 )}
                 value={asDynamicBytes(data?.dailyDataGeneration)}
-                color={euiTheme.colors.danger}
               />
               <SummaryMetric
                 label={i18n.translate(
@@ -166,7 +162,6 @@ export function SummaryStats() {
                   }
                 )}
                 value={asTransactionRate(data?.tracesPerMinute)}
-                color={euiTheme.colors.accent}
               />
               <SummaryMetric
                 label={i18n.translate(
@@ -176,7 +171,6 @@ export function SummaryStats() {
                   }
                 )}
                 value={data?.numberOfServices.toString()}
-                color={euiTheme.colors.success}
               />
             </EuiFlexGroup>
           </EuiFlexItem>
@@ -214,7 +208,6 @@ export function SummaryStats() {
 function SummaryMetric({
   label,
   value,
-  color,
   tooltipContent,
 }: {
   label: string;
@@ -222,7 +215,7 @@ function SummaryMetric({
   color: string;
   tooltipContent?: string;
 }) {
-  const xxlFontSize = useEuiFontSize('xxl', { measurement: 'px' });
+  const xlFontSize = useEuiFontSize('xl', { measurement: 'px' });
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -246,9 +239,9 @@ function SummaryMetric({
       )}
       <EuiText
         css={css`
-          ${xxlFontSize}
+          ${xlFontSize}
           font-weight: ${euiTheme.font.weight.bold};
-          color: ${color};
+          color: ${euiTheme.colors.text};
         `}
       >
         {value}
