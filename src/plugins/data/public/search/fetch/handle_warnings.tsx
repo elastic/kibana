@@ -6,38 +6,70 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
 import { estypes } from '@elastic/elasticsearch';
+import { debounce } from 'lodash';
 import { EuiSpacer, EuiTextAlign } from '@elastic/eui';
 import { ThemeServiceStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import type { SearchRequest } from '..';
+import React from 'react';
+import type { MountPoint } from '@kbn/core/public';
+import { SearchRequest } from '..';
 import { getNotifications } from '../../services';
 import { ShardFailureOpenModalButton, ShardFailureRequest } from '../../shard_failure_modal';
-import type {
+import {
   SearchResponseShardFailureWarning,
   SearchResponseWarning,
   WarningHandlerCallback,
 } from '../types';
 import { extractWarnings } from './extract_warnings';
 
+const getDebouncedWarning = () => {
+  const addWarning = () => {
+    const { toasts } = getNotifications();
+    return debounce(toasts.addWarning.bind(toasts), 30000, {
+      leading: true,
+    });
+  };
+  const memory: Record<string, ReturnType<typeof addWarning>> = {};
+
+  return (
+    debounceKey: string,
+    title: string,
+    text?: string | MountPoint<HTMLElement> | undefined
+  ) => {
+    memory[debounceKey] = memory[debounceKey] || addWarning();
+    return memory[debounceKey]({ title, text });
+  };
+};
+
+const debouncedWarningWithoutReason = getDebouncedWarning();
+const debouncedTimeoutWarning = getDebouncedWarning();
+const debouncedWarning = getDebouncedWarning();
+
 /**
  * @internal
  * All warnings are expected to come from the same response. Therefore all "text" properties, which contain the
  * response, will be the same.
  */
-export function handleWarnings(
-  request: SearchRequest,
-  response: estypes.SearchResponse,
-  theme: ThemeServiceStart,
-  cb?: WarningHandlerCallback
-) {
+export function handleWarnings({
+  request,
+  response,
+  theme,
+  callback,
+  sessionId = '',
+}: {
+  request: SearchRequest;
+  response: estypes.SearchResponse;
+  theme: ThemeServiceStart;
+  callback?: WarningHandlerCallback;
+  sessionId?: string;
+}) {
   const warnings = extractWarnings(response);
   if (warnings.length === 0) {
     return;
   }
 
-  const internal = cb ? filterWarnings(warnings, cb, request, response) : warnings;
+  const internal = callback ? filterWarnings(warnings, callback, request, response) : warnings;
   if (internal.length === 0) {
     return;
   }
@@ -45,9 +77,7 @@ export function handleWarnings(
   // timeout notification
   const [timeout] = internal.filter((w) => w.type === 'timed_out');
   if (timeout) {
-    getNotifications().toasts.addWarning({
-      title: timeout.message,
-    });
+    debouncedTimeoutWarning(sessionId + timeout.message, timeout.message);
   }
 
   // shard warning failure notification
@@ -79,12 +109,12 @@ export function handleWarnings(
       { theme$: theme.theme$ }
     );
 
-    getNotifications().toasts.addWarning({ title, text });
+    debouncedWarning(sessionId + warning.text, title, text);
     return;
   }
 
   // timeout warning, or shard warning with no failure reason
-  getNotifications().toasts.addWarning({ title });
+  debouncedWarningWithoutReason(sessionId + title, title);
 }
 
 /**

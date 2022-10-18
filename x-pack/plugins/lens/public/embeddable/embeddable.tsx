@@ -682,6 +682,7 @@ export class Embeddable
           renderMode={input.renderMode}
           syncColors={input.syncColors}
           syncTooltips={input.syncTooltips}
+          syncCursor={input.syncCursor}
           hasCompatibleActions={this.hasCompatibleActions}
           className={input.className}
           style={input.style}
