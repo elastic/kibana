@@ -81,7 +81,6 @@ export const RulesTableUtilityBar = React.memo<RulesTableUtilityBarProps>(
       (closePopover: () => void) => (e: EuiSwitchEvent) => {
         const refreshOn = e.target.checked;
         if (refreshOn) {
-          // TODO move to tables context
           reFetchRules();
         }
         setIsRefreshOn(refreshOn);

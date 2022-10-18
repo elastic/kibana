@@ -27,8 +27,7 @@ jest.mock('../../../../common/lib/apm/use_start_transaction');
 
 const useAppToastsValueMock = useAppToastsMock.create();
 
-// TODO: https://github.com/elastic/kibana/pull/142950 Fix and unskip
-describe.skip('RuleSwitch', () => {
+describe('RuleSwitch', () => {
   beforeEach(() => {
     (useAppToasts as jest.Mock).mockReturnValue(useAppToastsValueMock);
     (performBulkAction as jest.Mock).mockResolvedValue({

@@ -11,12 +11,22 @@ import { waitFor } from '@testing-library/react';
 
 import { getShowingRulesParams, RulesTableUtilityBar } from './rules_table_utility_bar';
 import { TestProviders } from '../../../../common/mock';
+import { useRulesTableContextMock } from './rules_table/__mocks__/rules_table_context';
+import { useRulesTableContext } from './rules_table/rules_table_context';
 
 jest.mock('./rules_table/rules_table_context');
 
-// TODO: https://github.com/elastic/kibana/pull/142950 Fix and unskip
-describe.skip('RulesTableUtilityBar', () => {
+describe('RulesTableUtilityBar', () => {
   it('renders RulesTableUtilityBar total rules and selected rules', () => {
+    const rulesTableContext = useRulesTableContextMock.create();
+    rulesTableContext.state.pagination = {
+      page: 1,
+      perPage: 10,
+      total: 21,
+    };
+    rulesTableContext.state.selectedRuleIds = ['testId'];
+    (useRulesTableContext as jest.Mock).mockReturnValue(rulesTableContext);
+
     const wrapper = mount(
       <TestProviders>
         <RulesTableUtilityBar
@@ -32,21 +42,6 @@ describe.skip('RulesTableUtilityBar', () => {
     );
     expect(wrapper.find('[data-test-subj="selectedRules"]').at(0).text()).toEqual(
       'Selected 1 rule'
-    );
-  });
-
-  it('renders correct pagination label according to pagination data', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <RulesTableUtilityBar
-          canBulkEdit
-          onGetBulkItemsPopoverContent={jest.fn()}
-          onToggleSelectAll={jest.fn()}
-        />
-      </TestProviders>
-    );
-    expect(wrapper.find('[data-test-subj="showingRules"]').at(0).text()).toEqual(
-      'Showing 1-10 of 21 rules'
     );
   });
 
@@ -78,8 +73,10 @@ describe.skip('RulesTableUtilityBar', () => {
     expect(wrapper.find('[data-test-subj="bulkActions"]').exists()).toBeFalsy();
   });
 
-  it('invokes refresh on refresh action click', () => {
-    const mockRefresh = jest.fn();
+  it('invokes rules refetch on refresh action click', () => {
+    const rulesTableContext = useRulesTableContextMock.create();
+    (useRulesTableContext as jest.Mock).mockReturnValue(rulesTableContext);
+
     const wrapper = mount(
       <TestProviders>
         <RulesTableUtilityBar
@@ -92,11 +89,14 @@ describe.skip('RulesTableUtilityBar', () => {
 
     wrapper.find('[data-test-subj="refreshRulesAction"] button').at(0).simulate('click');
 
-    expect(mockRefresh).toHaveBeenCalled();
+    expect(rulesTableContext.actions.reFetchRules).toHaveBeenCalledTimes(1);
   });
 
-  it('invokes onRefreshSwitch when auto refresh switch is clicked if there are not selected items', async () => {
-    const mockSwitch = jest.fn();
+  it('invokes rule refetch when auto refresh switch is clicked if there are not selected items', async () => {
+    const rulesTableContext = useRulesTableContextMock.create();
+    rulesTableContext.state.isRefreshOn = false;
+    (useRulesTableContext as jest.Mock).mockReturnValue(rulesTableContext);
+
     const wrapper = mount(
       <TestProviders>
         <RulesTableUtilityBar
@@ -110,12 +110,16 @@ describe.skip('RulesTableUtilityBar', () => {
     await waitFor(() => {
       wrapper.find('[data-test-subj="refreshSettings"] button').first().simulate('click');
       wrapper.find('[data-test-subj="refreshSettingsSwitch"] button').first().simulate('click');
-      expect(mockSwitch).toHaveBeenCalledTimes(1);
+      expect(rulesTableContext.actions.reFetchRules).toHaveBeenCalledTimes(1);
     });
   });
 
   it('does not invokes onRefreshSwitch when auto refresh switch is clicked if there are selected items', async () => {
-    const mockSwitch = jest.fn();
+    const rulesTableContext = useRulesTableContextMock.create();
+    rulesTableContext.state.isRefreshOn = false;
+    rulesTableContext.state.selectedRuleIds = ['testId'];
+    (useRulesTableContext as jest.Mock).mockReturnValue(rulesTableContext);
+
     const wrapper = mount(
       <TestProviders>
         <RulesTableUtilityBar
@@ -129,7 +133,7 @@ describe.skip('RulesTableUtilityBar', () => {
     await waitFor(() => {
       wrapper.find('[data-test-subj="refreshSettings"] button').first().simulate('click');
       wrapper.find('[data-test-subj="refreshSettingsSwitch"] button').first().simulate('click');
-      expect(mockSwitch).not.toHaveBeenCalled();
+      expect(rulesTableContext.actions.reFetchRules).not.toHaveBeenCalled();
     });
   });
 

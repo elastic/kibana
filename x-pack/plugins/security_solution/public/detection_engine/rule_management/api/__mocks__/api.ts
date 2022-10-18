@@ -59,3 +59,5 @@ export const fetchRules = async (_: FetchRulesProps): Promise<FetchRulesResponse
 
 export const fetchTags = async ({ signal }: { signal: AbortSignal }): Promise<string[]> =>
   Promise.resolve(['elastic', 'love', 'quality', 'code']);
+
+export const performBulkAction = jest.fn();
