@@ -26,10 +26,11 @@ import {
   EuiToolTip,
   EuiSpacer,
 } from '@elastic/eui';
+import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { IUnifiedSearchPluginServices } from '../types';
 import type { DataViewPickerPropsExtended } from '.';
-import { type DataViewsListItemEnhanced, DataViewsList } from './dataview_list';
+import { DataViewsList } from './dataview_list';
 import type { TextBasedLanguagesListProps } from './text_languages_list';
 import type { TextBasedLanguagesTransitionModalProps } from './text_languages_transition_modal';
 import adhoc from './assets/adhoc_blue.svg';
@@ -80,7 +81,7 @@ export function ChangeDataView({
   const [noDataViewMatches, setNoDataViewMatches] = useState(false);
   const [dataViewSearchString, setDataViewSearchString] = useState('');
   const [indexMatches, setIndexMatches] = useState(0);
-  const [dataViewsList, setDataViewsList] = useState<DataViewsListItemEnhanced[]>([]);
+  const [dataViewsList, setDataViewsList] = useState<DataViewListItem[]>([]);
   const [triggerLabel, setTriggerLabel] = useState('');
   const [isTextBasedLangSelected, setIsTextBasedLangSelected] = useState(
     Boolean(textBasedLanguage)
@@ -100,7 +101,7 @@ export function ChangeDataView({
 
   useEffect(() => {
     const fetchDataViews = async () => {
-      const dataViewsRefs: DataViewsListItemEnhanced[] = await data.dataViews.getIdsWithTitle();
+      const dataViewsRefs = await data.dataViews.getIdsWithTitle();
       if (adHocDataViews?.length) {
         adHocDataViews.forEach((adHocDataView) => {
           if (adHocDataView.id) {
@@ -108,7 +109,6 @@ export function ChangeDataView({
               title: adHocDataView.title,
               name: adHocDataView.name,
               id: adHocDataView.id,
-              isAdhoc: true,
             });
           }
         });
