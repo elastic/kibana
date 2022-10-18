@@ -5,22 +5,14 @@
  * 2.0.
  */
 
-export type {
-  TinesConfig,
-  TinesSecrets,
-  TinesStoriesActionParams,
-  TinesStoriesActionResponse,
-  TinesWebhooksActionResponse,
-  TinesWebhooksActionParams,
-} from '../../../../common/connector_types/security/tines/types';
 import type { TinesRunActionParams } from '../../../../common/connector_types/security/tines/types';
 import type { SUB_ACTION } from '../../../../common/connector_types/security/tines/constants';
 
-export type SubActionParams = Omit<Partial<TinesRunActionParams>, 'webhook'> & {
+export type TinesExecuteSubActionParams = Omit<Partial<TinesRunActionParams>, 'webhook'> & {
   webhook?: Partial<TinesRunActionParams['webhook']>;
 };
 
-export interface TinesActionParams {
+export interface TinesExecuteActionParams {
   subAction: SUB_ACTION.RUN | SUB_ACTION.TEST;
-  subActionParams: SubActionParams;
+  subActionParams: TinesExecuteSubActionParams;
 }

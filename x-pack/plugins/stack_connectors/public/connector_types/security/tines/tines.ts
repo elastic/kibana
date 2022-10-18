@@ -11,13 +11,20 @@ import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { TinesActionParams, TinesConfig, TinesSecrets } from './types';
-import { TINES_CONNECTOR_ID } from '../../../../common/connector_types/security/tines/constants';
+import {
+  SUB_ACTION,
+  TINES_CONNECTOR_ID,
+} from '../../../../common/connector_types/security/tines/constants';
+import type {
+  TinesConfig,
+  TinesSecrets,
+} from '../../../../common/connector_types/security/tines/types';
+import type { TinesExecuteActionParams } from './types';
 
 export function getConnectorType(): ConnectorTypeModel<
   TinesConfig,
   TinesSecrets,
-  TinesActionParams
+  TinesExecuteActionParams
 > {
   return {
     id: TINES_CONNECTOR_ID,
@@ -35,8 +42,8 @@ export function getConnectorType(): ConnectorTypeModel<
       }
     ),
     validateParams: async (
-      actionParams: TinesActionParams
-    ): Promise<GenericValidationResult<TinesActionParams>> => {
+      actionParams: TinesExecuteActionParams
+    ): Promise<GenericValidationResult<TinesExecuteActionParams>> => {
       const translations = await import('./translations');
       const errors = {
         subAction: new Array<string>(),
@@ -53,9 +60,9 @@ export function getConnectorType(): ConnectorTypeModel<
 
       if (!subAction) {
         errors.subAction.push(translations.ACTION_REQUIRED);
-      } else if (subAction !== 'run' && subAction !== 'test') {
+      } else if (subAction !== SUB_ACTION.RUN && subAction !== SUB_ACTION.TEST) {
         errors.subAction.push(translations.INVALID_ACTION);
-      } else if (subAction === 'test') {
+      } else if (subAction === SUB_ACTION.TEST) {
         if (!subActionParams?.body?.length) {
           errors.subActionParams.body.push(translations.BODY_REQUIRED);
         } else {

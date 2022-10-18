@@ -15,7 +15,6 @@ import {
   EuiFormRow,
   EuiIconTip,
 } from '@elastic/eui';
-// import { ActionParamsProps } from '../../../../types';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import {
   JsonEditorWithMessageVariables,
@@ -23,19 +22,16 @@ import {
   useSubAction,
   useKibana,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import {
+import { SUB_ACTION } from '../../../../common/connector_types/security/tines/constants';
+import type {
+  TinesStoryObject,
+  TinesWebhookObject,
   TinesWebhooksActionParams,
   TinesStoriesActionResponse,
   TinesWebhooksActionResponse,
   TinesStoriesActionParams,
-  TinesActionParams,
-  SubActionParams,
-} from './types';
-import { SUB_ACTION } from '../../../../common/connector_types/security/tines/constants';
-import {
-  TinesStoryObject,
-  TinesWebhookObject,
 } from '../../../../common/connector_types/security/tines/types';
+import type { TinesExecuteActionParams, TinesExecuteSubActionParams } from './types';
 
 type StoryOption = EuiComboBoxOptionOption<TinesStoryObject>;
 type WebhookOption = EuiComboBoxOptionOption<TinesWebhookObject>;
@@ -47,7 +43,7 @@ const createOption = <T extends TinesStoryObject | TinesWebhookObject>(
   label: data.name,
 });
 
-const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesActionParams>> = ({
+const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesExecuteActionParams>> = ({
   actionConnector,
   actionParams,
   editAction,
@@ -69,7 +65,7 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesActionPa
   }, [isTesting, subAction]);
 
   const editSubActionParams = useCallback(
-    (params: SubActionParams) => {
+    (params: TinesExecuteSubActionParams) => {
       editAction('subActionParams', { ...subActionParams, ...params }, index);
     },
     [editAction, index, subActionParams]
@@ -78,7 +74,7 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesActionPa
   // Needs same signature as editAction so it can be passed to TextFieldWithMessageVariables component
   const editSubActionParam = useCallback(
     (key: string, value: any) => {
-      editSubActionParams({ [key]: value } as SubActionParams);
+      editSubActionParams({ [key]: value } as TinesExecuteSubActionParams);
     },
     [editSubActionParams]
   );

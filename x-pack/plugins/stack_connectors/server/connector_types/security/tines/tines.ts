@@ -5,21 +5,10 @@
  * 2.0.
  */
 
-import {
-  ServiceParams,
-  SubActionConnector,
-  urlAllowListValidator,
-} from '@kbn/actions-plugin/server';
+import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
-import { AlertingConnectorFeatureId, SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
+import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import {
-  SubActionConnectorType,
-  SubActionRequestParams,
-  ValidatorType,
-} from '@kbn/actions-plugin/server/sub_action_framework/types';
-import {
-  TinesConfigSchema,
-  TinesSecretsSchema,
   TinesStoriesActionParamsSchema,
   TinesWebhooksActionParamsSchema,
   TinesRunActionParamsSchema,
@@ -44,11 +33,7 @@ import type {
   TinesStoriesApiResponse,
   TinesWebhooksApiResponse,
 } from './api_schema';
-import {
-  SUB_ACTION,
-  TINES_CONNECTOR_ID,
-} from '../../../../common/connector_types/security/tines/constants';
-import { renderParameterTemplates } from './render';
+import { SUB_ACTION } from '../../../../common/connector_types/security/tines/constants';
 
 export const API_PATH = '/api/v1';
 export const WEBHOOK_PATH = '/webhook';
@@ -74,7 +59,7 @@ const webhooksAccumulator = (
   });
 };
 
-class Tines extends SubActionConnector<TinesConfig, TinesSecrets> {
+export class TinesConnector extends SubActionConnector<TinesConfig, TinesSecrets> {
   private urls: {
     stories: string;
     agents: string;
@@ -202,17 +187,3 @@ class Tines extends SubActionConnector<TinesConfig, TinesSecrets> {
     return response.data;
   }
 }
-
-export const getTinesConnectorType = (): SubActionConnectorType<TinesConfig, TinesSecrets> => ({
-  id: TINES_CONNECTOR_ID,
-  name: 'Tines',
-  Service: Tines,
-  schema: {
-    config: TinesConfigSchema,
-    secrets: TinesSecretsSchema,
-  },
-  validators: [{ type: ValidatorType.CONFIG, validator: urlAllowListValidator('url') }],
-  supportedFeatureIds: [AlertingConnectorFeatureId, SecurityConnectorFeatureId],
-  minimumLicenseRequired: 'gold' as const,
-  renderParameterTemplates,
-});
