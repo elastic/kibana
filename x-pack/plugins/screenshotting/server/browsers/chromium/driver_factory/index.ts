@@ -116,7 +116,6 @@ const DEFAULT_ARGS = [
 const DIAGNOSTIC_TIME = 5 * 1000;
 
 export class HeadlessChromiumDriverFactory {
-  private userDataDir: string;
   type = 'chromium';
 
   constructor(
@@ -125,12 +124,7 @@ export class HeadlessChromiumDriverFactory {
     private logger: Logger,
     private binaryPath: string,
     private basePath: string
-  ) {
-    const dataDir = getDataPath();
-    fs.mkdirSync(dataDir, { recursive: true });
-    this.userDataDir = fs.mkdtempSync(path.join(dataDir, 'chromium-'));
-    logger.debug(`Chromium userDataDir: ${this.userDataDir}`);
-  }
+  ) {}
 
   private getChromiumArgs() {
     const { height, width } = DEFAULT_VIEWPORT;
@@ -153,6 +147,14 @@ export class HeadlessChromiumDriverFactory {
       logs$.next(new Date(Date.now()).toISOString() + `: ${message}`);
     };
     return log;
+  }
+
+  private async getDataDir() {
+    const dataDir = getDataPath();
+    fs.mkdirSync(dataDir, { recursive: true });
+    const userDataDir = fs.mkdtempSync(path.join(dataDir, 'chromium-'));
+    this.logger.debug(`Chromium userDataDir: ${userDataDir}`);
+    return userDataDir;
   }
 
   /*
@@ -192,11 +194,13 @@ export class HeadlessChromiumDriverFactory {
         } = await getDefaultChromiumSandboxDisabled();
         log(`Operating system: ${distOs}/${dist}/${release}. Architecture: ${os.arch()}`);
 
+        const userDataDir = await this.getDataDir();
+
         let browser: Browser | undefined;
         try {
           browser = await puppeteer.launch({
             pipe: !this.config.browser.chromium.inspect,
-            userDataDir: this.userDataDir,
+            userDataDir,
             executablePath: this.binaryPath,
             ignoreHTTPSErrors: true,
             handleSIGHUP: false,
@@ -299,13 +303,12 @@ export class HeadlessChromiumDriverFactory {
 
         // unsubscribe logic makes a best-effort attempt to delete the user data directory used by chromium
         observer.add(() => {
-          const userDataDir = this.userDataDir;
-          pLogger.debug(`Chromium userDataDir: ${this.userDataDir}`);
-          log(`Deleting chromium user data directory`);
+          pLogger.debug(`Deleting Chromium userDataDir: ${userDataDir}`);
+          log(`Deleting Chromium user data directory`);
           // the unsubscribe function isn't `async` so we're going to make our best effort at
           // deleting the userDataDir and if it fails log an error.
           del(userDataDir, { force: true }).catch((error) => {
-            log(new Error(`error deleting user data directory: ${error}`));
+            log(new Error(`error deleting Chromium user data directory: ${error}`));
           });
 
           logs$.complete();
@@ -436,70 +439,80 @@ export class HeadlessChromiumDriverFactory {
   }
 
   diagnose(overrideFlags: string[] = []): Rx.Observable<string[]> {
-    const kbnArgs = this.getChromiumArgs();
-    const finalArgs = uniq([...DEFAULT_ARGS, ...kbnArgs, ...overrideFlags]);
+    return Rx.from(this.getDataDir()).pipe(
+      mergeMap((userDataDir) => {
+        // launch with the userDataDir
+        const kbnArgs = this.getChromiumArgs();
+        const finalArgs = uniq([
+          ...DEFAULT_ARGS,
+          ...kbnArgs,
+          ...overrideFlags,
+          `--user-data-dir=${userDataDir}`,
+        ]);
 
-    // On non-windows platforms, `detached: true` makes child process a
-    // leader of a new process group, making it possible to kill child
-    // process tree with `.kill(-pid)` command. @see
-    // https://nodejs.org/api/child_process.html#child_process_options_detached
-    const browserProcess = spawn(this.binaryPath, finalArgs, {
-      detached: process.platform !== 'win32',
-    });
-
-    const rl = createInterface({ input: browserProcess.stderr });
-
-    const exit$ = Rx.fromEvent(browserProcess, 'exit').pipe(
-      map((code) => {
-        this.logger.error(`Browser exited abnormally, received code: ${code}`);
-        return `Browser exited abnormally during startup`;
-      })
-    );
-
-    const browserProcessLogger = this.logger.get('chromium-stderr');
-    const error$ = Rx.fromEvent(browserProcess, 'error').pipe(
-      map((err) => {
-        browserProcessLogger.error(`Browser process threw an error on startup`);
-        browserProcessLogger.error(err as string | Error);
-        return `Browser process threw an error on startup`;
-      })
-    );
-
-    const log$ = Rx.fromEvent(rl, 'line').pipe(
-      tap((message: unknown) => {
-        if (typeof message === 'string') {
-          browserProcessLogger.info(message);
-        }
-      }),
-      filter((message) => message !== ''),
-      map((message) => (message as object).toString())
-    );
-
-    // Collect all events (exit, error and on log-lines), but let chromium keep spitting out
-    // logs as sometimes it's "bind" successfully for remote connections, but later emit
-    // a log indicative of an issue (for example, no default font found).
-    return Rx.merge(exit$, error$, log$).pipe(
-      takeUntil(Rx.timer(DIAGNOSTIC_TIME)),
-      toArray(),
-      tap(() => {
-        if (browserProcess && browserProcess.pid && !browserProcess.killed) {
-          browserProcess.kill('SIGKILL');
-          this.logger.info(
-            `Successfully sent 'SIGKILL' to browser process (PID: ${browserProcess.pid})`
-          );
-        }
-        browserProcess.removeAllListeners();
-        rl.removeAllListeners();
-        rl.close();
-        del(this.userDataDir, { force: true }).catch((error) => {
-          this.logger.error(`Error deleting user data directory at [${this.userDataDir}]!`);
-          this.logger.error(error);
+        // On non-windows platforms, `detached: true` makes child process a
+        // leader of a new process group, making it possible to kill child
+        // process tree with `.kill(-pid)` command. @see
+        // https://nodejs.org/api/child_process.html#child_process_options_detached
+        const browserProcess = spawn(this.binaryPath, finalArgs, {
+          detached: process.platform !== 'win32',
         });
-      }),
-      catchError((error) => {
-        this.logger.error(error);
 
-        return Rx.of(error);
+        const rl = createInterface({ input: browserProcess.stderr });
+
+        // Collect all events (exit, error and on log-lines), but let chromium keep spitting out
+        // logs as sometimes it's "bind" successfully for remote connections, but later emit
+        // a log indicative of an issue (for example, no default font found).
+        const exit$ = Rx.fromEvent(browserProcess, 'exit').pipe(
+          map((code) => {
+            this.logger.error(`Browser exited abnormally, received code: ${code}`);
+            return `Browser exited abnormally during startup`;
+          })
+        );
+
+        const browserProcessLogger = this.logger.get('chromium-stderr');
+        const error$ = Rx.fromEvent(browserProcess, 'error').pipe(
+          map((err) => {
+            browserProcessLogger.error(`Browser process threw an error on startup`);
+            browserProcessLogger.error(err as string | Error);
+            return `Browser process threw an error on startup`;
+          })
+        );
+
+        const log$ = Rx.fromEvent(rl, 'line').pipe(
+          tap((message: unknown) => {
+            if (typeof message === 'string') {
+              browserProcessLogger.info(message);
+            }
+          }),
+          filter((message) => message !== ''),
+          map((message) => (message as object).toString())
+        );
+
+        return Rx.merge(exit$, error$, log$).pipe(
+          takeUntil(Rx.timer(DIAGNOSTIC_TIME)),
+          toArray(),
+          tap(() => {
+            if (browserProcess && browserProcess.pid && !browserProcess.killed) {
+              browserProcess.kill('SIGKILL');
+              this.logger.info(
+                `Successfully sent 'SIGKILL' to browser process (PID: ${browserProcess.pid})`
+              );
+            }
+            browserProcess.removeAllListeners();
+            rl.removeAllListeners();
+            rl.close();
+            del(userDataDir, { force: true }).catch((error) => {
+              this.logger.error(`Error deleting user data directory at [${userDataDir}]!`);
+              this.logger.error(error);
+            });
+          }),
+          catchError((error) => {
+            this.logger.error(error);
+
+            return Rx.of(error);
+          })
+        );
       })
     );
   }
