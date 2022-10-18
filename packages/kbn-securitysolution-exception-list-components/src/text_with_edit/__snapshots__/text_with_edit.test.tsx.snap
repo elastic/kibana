@@ -97,7 +97,7 @@ Object {
         <button
           aria-label="Edit Text List Header"
           class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-          data-test-subj="TextWithEditTestEditTitleIcon"
+          data-test-subj="TextWithEditTestEditIcon"
           type="button"
         >
           <span
@@ -122,7 +122,7 @@ Object {
       <button
         aria-label="Edit Text List Header"
         class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-        data-test-subj="TextWithEditTestEditTitleIcon"
+        data-test-subj="TextWithEditTestEditIcon"
         type="button"
       >
         <span
