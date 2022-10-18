@@ -7,7 +7,8 @@
 
 import * as rt from 'io-ts';
 import { AssigneesUserActionPayloadRt } from './assignees';
-import { ActionTypes, UserActionWithAttributes } from './common';
+import type { UserActionWithAttributes } from './common';
+import { ActionTypes } from './common';
 import {
   ConnectorUserActionPayloadRt,
   ConnectorUserActionPayloadWithoutConnectorIdRt,

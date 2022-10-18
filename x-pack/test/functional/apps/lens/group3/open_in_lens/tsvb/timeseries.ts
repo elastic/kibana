@@ -27,20 +27,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visualize.initTests();
     });
 
-    it('should show the "Edit Visualization in Lens" menu item for a count aggregation', async () => {
+    beforeEach(async () => {
       await visualize.navigateToNewVisualization();
       await visualize.clickVisualBuilder();
       await visualBuilder.checkVisualBuilderIsPresent();
       await visualBuilder.resetPage();
-      const isMenuItemVisible = await find.existsByCssSelector(
-        '[data-test-subj="visualizeEditInLensButton"]'
-      );
-      expect(isMenuItemVisible).to.be(true);
+    });
+
+    it('should show the "Edit Visualization in Lens" menu item for a count aggregation', async () => {
+      expect(await visualize.hasNavigateToLensButton()).to.be(true);
     });
 
     it('visualizes field to Lens and loads fields to the dimesion editor', async () => {
-      const button = await testSubjects.find('visualizeEditInLensButton');
-      await button.click();
+      await visualize.navigateToLensFromAnotherVisulization();
       await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
         const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
@@ -51,6 +50,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('navigates back to TSVB when the Back button is clicked', async () => {
+      await visualize.navigateToLensFromAnotherVisulization();
+      await lens.waitForVisualization('xyVisChart');
+
       const goBackBtn = await testSubjects.find('lnsApp_goBackToAppButton');
       goBackBtn.click();
       await visualBuilder.checkVisualBuilderIsPresent();
@@ -63,25 +65,126 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('should preserve app filters in lens', async () => {
       await filterBar.addFilter('extension', 'is', 'css');
       await header.waitUntilLoadingHasFinished();
-      const button = await testSubjects.find('visualizeEditInLensButton');
-      await button.click();
+      await visualize.navigateToLensFromAnotherVisulization();
       await lens.waitForVisualization('xyVisChart');
 
       expect(await filterBar.hasFilter('extension', 'css')).to.be(true);
     });
 
     it('should preserve query in lens', async () => {
-      const goBackBtn = await testSubjects.find('lnsApp_goBackToAppButton');
-      goBackBtn.click();
-      await visualBuilder.checkVisualBuilderIsPresent();
       await queryBar.setQuery('machine.os : ios');
       await queryBar.submitQuery();
       await header.waitUntilLoadingHasFinished();
-      const button = await testSubjects.find('visualizeEditInLensButton');
-      await button.click();
+      await visualize.navigateToLensFromAnotherVisulization();
       await lens.waitForVisualization('xyVisChart');
 
       expect(await queryBar.getQueryString()).to.equal('machine.os : ios');
+    });
+
+    it('should draw a reference line', async () => {
+      await visualBuilder.createNewAggSeries();
+      await visualBuilder.selectAggType('Static Value');
+      await visualBuilder.setStaticValue(10);
+
+      await header.waitUntilLoadingHasFinished();
+
+      await visualize.navigateToLensFromAnotherVisulization();
+      await lens.waitForVisualization('xyVisChart');
+      await retry.try(async () => {
+        const layers = await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`);
+
+        const referenceLineDimensions = await testSubjects.findAllDescendant(
+          'lns-dimensionTrigger',
+          layers[0]
+        );
+        expect(referenceLineDimensions).to.have.length(1);
+        expect(await referenceLineDimensions[0].getVisibleText()).to.be('Static value: 10');
+
+        const dimensions = await testSubjects.findAllDescendant('lns-dimensionTrigger', layers[1]);
+        expect(dimensions).to.have.length(2);
+        expect(await dimensions[0].getVisibleText()).to.be('@timestamp');
+        expect(await dimensions[1].getVisibleText()).to.be('Count of records');
+      });
+    });
+
+    it('should convert metric with params', async () => {
+      await visualBuilder.selectAggType('Counter Rate');
+      await visualBuilder.setFieldForAggregation('machine.ram');
+
+      await header.waitUntilLoadingHasFinished();
+
+      await visualize.navigateToLensFromAnotherVisulization();
+      await lens.waitForVisualization('xyVisChart');
+      await retry.try(async () => {
+        expect(await lens.getLayerCount()).to.be(1);
+
+        const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
+        expect(dimensions).to.have.length(2);
+        expect(await dimensions[0].getVisibleText()).to.be('@timestamp');
+        expect(await dimensions[1].getVisibleText()).to.eql(
+          'Counter rate of machine.ram per second'
+        );
+      });
+    });
+
+    it('should not allow converting of not valid panel', async () => {
+      await visualBuilder.selectAggType('Counter Rate');
+      await header.waitUntilLoadingHasFinished();
+      expect(await visualize.hasNavigateToLensButton()).to.be(false);
+    });
+
+    it('should not allow converting of unsupported aggregations', async () => {
+      await visualBuilder.selectAggType('Sum of Squares');
+      await visualBuilder.setFieldForAggregation('machine.ram');
+
+      await header.waitUntilLoadingHasFinished();
+      expect(await visualize.hasNavigateToLensButton()).to.be(false);
+    });
+
+    it('should convert parent pipeline aggregation with terms', async () => {
+      await visualBuilder.createNewAgg();
+
+      await visualBuilder.selectAggType('Cumulative Sum', 1);
+      await visualBuilder.setFieldForAggregation('Count', 1);
+
+      await visualBuilder.setMetricsGroupByTerms('extension.raw');
+
+      await header.waitUntilLoadingHasFinished();
+      await visualize.navigateToLensFromAnotherVisulization();
+
+      await lens.waitForVisualization('xyVisChart');
+      await retry.try(async () => {
+        expect(await lens.getLayerCount()).to.be(1);
+
+        const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
+        expect(dimensions).to.have.length(3);
+        expect(await dimensions[0].getVisibleText()).to.be('@timestamp');
+        expect(await dimensions[1].getVisibleText()).to.eql('Cumulative sum of Records');
+        expect(await dimensions[2].getVisibleText()).to.eql('Top 10 values of extension.raw');
+      });
+    });
+
+    it('should convert sibling pipeline aggregation with terms', async () => {
+      await visualBuilder.createNewAgg();
+
+      await visualBuilder.selectAggType('Overall Average', 1);
+      await visualBuilder.setFieldForAggregation('Count', 1);
+
+      await visualBuilder.setMetricsGroupByTerms('extension.raw');
+
+      await header.waitUntilLoadingHasFinished();
+      await visualize.navigateToLensFromAnotherVisulization();
+
+      await lens.waitForVisualization('xyVisChart');
+      await retry.try(async () => {
+        expect(await lens.getLayerCount()).to.be(1);
+
+        const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
+        expect(dimensions).to.have.length(3);
+        expect(await dimensions[0].getVisibleText()).to.be('@timestamp');
+        expect(await dimensions[1].getVisibleText()).to.eql('overall_average(count())');
+        expect(await dimensions[2].getVisibleText()).to.eql('Top 10 values of extension.raw');
+      });
     });
   });
 }
