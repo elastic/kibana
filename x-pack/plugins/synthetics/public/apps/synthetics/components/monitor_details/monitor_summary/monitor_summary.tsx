@@ -35,7 +35,7 @@ export const MonitorSummary = () => {
     <>
       <EuiFlexGroup>
         <EuiFlexItem grow={1}>
-          <EuiPanel>
+          <EuiPanel hasShadow={false} hasBorder>
             <EuiTitle size="xs">
               <h3>{MONITOR_DETAILS_LABEL}</h3>
             </EuiTitle>
@@ -43,7 +43,7 @@ export const MonitorSummary = () => {
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={2}>
-          <EuiPanel css={{ padding: euiTheme.size.s, height: 158 }}>
+          <EuiPanel hasShadow={false} hasBorder paddingSize="s" css={{ height: 158 }}>
             <EuiTitle size="xs">
               <h3 css={{ margin: euiTheme.size.s, marginBottom: 0 }}>{LAST_30DAYS_LABEL}</h3>
             </EuiTitle>
@@ -69,7 +69,7 @@ export const MonitorSummary = () => {
           <EuiSpacer size="l" />
           <EuiFlexGroup>
             <EuiFlexItem>
-              <EuiPanel>
+              <EuiPanel hasShadow={false} hasBorder>
                 <EuiFlexGroup alignItems="center">
                   <EuiFlexItem grow={false}>
                     <EuiTitle size="xs">
