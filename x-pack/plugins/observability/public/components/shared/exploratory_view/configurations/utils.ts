@@ -61,7 +61,11 @@ export function getQueryFilter(field: string, value: string[], dataView?: DataVi
   return [];
 }
 
-export function buildPhrasesFilter(field: string, value: string[], dataView?: DataView) {
+export function buildPhrasesFilter(
+  field: string,
+  value: Array<string | number>,
+  dataView?: DataView
+) {
   const fieldMeta = dataView?.fields.find((fieldT) => fieldT.name === field);
   if (fieldMeta && dataView) {
     if (value.length === 1) {
