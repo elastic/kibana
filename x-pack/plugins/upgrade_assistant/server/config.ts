@@ -33,4 +33,4 @@ export const config: PluginConfigDescriptor<UpgradeAssistantConfig> = {
   },
   schema: configSchema,
   deprecations: () => [],
-}
+};
