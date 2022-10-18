@@ -48,7 +48,6 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   screenTitle?: string;
   dataTestSubj?: string;
   // Togglers
-  showQueryBar?: boolean;
   showQueryMenu?: boolean;
   showQueryInput?: boolean;
   showFilterBar?: boolean;
@@ -123,7 +122,6 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
   State<QT | Query>
 > {
   public static defaultProps = {
-    showQueryBar: true,
     showQueryMenu: true,
     showFilterBar: true,
     showDatePicker: true,

@@ -12,9 +12,12 @@ export const useDoesEndpointSupportResponder = (
   endpointMetadata: MaybeImmutable<HostMetadata> | undefined
 ): boolean => {
   if (endpointMetadata) {
-    return ENDPOINT_CAPABILITIES.every((capability) =>
-      endpointMetadata?.Endpoint.capabilities?.includes(capability)
-    );
+    return ENDPOINT_CAPABILITIES.every((capability) => {
+      // TODO: remove this temporary bypass when in-context Response Console capabilities are enabled
+      const temporaryBypass = capability === 'get_file';
+
+      return endpointMetadata?.Endpoint.capabilities?.includes(capability) || temporaryBypass;
+    });
   }
   return false;
 };
