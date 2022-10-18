@@ -18,7 +18,7 @@ import { fetchAndTransformMetrics } from '../fetch_and_transform_metrics';
 import { ChartBase } from '../types';
 
 const chartBase: ChartBase = {
-  title: i18n.translate('xpack.apm.agentMetrics.serverless.coldStart', {
+  title: i18n.translate('xpack.apm.agentMetrics.serverless.coldStart.title', {
     defaultMessage: 'Cold starts',
   }),
   key: 'cold_start_count',
