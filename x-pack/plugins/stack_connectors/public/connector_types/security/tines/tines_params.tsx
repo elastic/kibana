@@ -83,25 +83,18 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesActionPa
     [editSubActionParams]
   );
 
-  const [selectedStoryOption, setSelectedStoryOption] = useState<StoryOption | null>(null);
-  const [selectedWebhookOption, setSelectedWebhookOption] = useState<WebhookOption | null>(null);
-
-  const selectedStoryOptions = useMemo(
-    () => (selectedStoryOption ? [selectedStoryOption] : []),
-    [selectedStoryOption]
-  );
-
-  const selectedWebhookOptions = useMemo(
-    () => (selectedWebhookOption ? [selectedWebhookOption] : []),
-    [selectedWebhookOption]
-  );
+  const [connectorId, setConnectorId] = useState<string | undefined>(actionConnector?.id);
+  const [selectedStoryOption, setSelectedStoryOption] = useState<StoryOption | null | undefined>();
+  const [selectedWebhookOption, setSelectedWebhookOption] = useState<
+    WebhookOption | null | undefined
+  >();
 
   const {
     response: stories,
     isLoading: isLoadingStories,
     error: storiesError,
   } = useSubAction<TinesStoriesActionParams, TinesStoriesActionResponse>({
-    connectorId: actionConnector?.id,
+    connectorId,
     subAction: 'stories',
   });
 
@@ -110,12 +103,23 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesActionPa
     isLoading: isLoadingWebhooks,
     error: webhooksError,
   } = useSubAction<TinesWebhooksActionParams, TinesWebhooksActionResponse>({
-    connectorId: actionConnector?.id,
+    connectorId,
     subAction: 'webhooks',
     ...(selectedStoryOption?.value?.id
       ? { subActionParams: { storyId: selectedStoryOption?.value?.id } }
       : { disabled: true }),
   });
+
+  useEffect(() => {
+    if (connectorId !== actionConnector?.id) {
+      // Selected story reset needed before requesting webhooks with a different connectorId
+      setSelectedStoryOption(null);
+      setConnectorId(actionConnector?.id);
+    }
+  }, [actionConnector?.id, connectorId]);
+
+  const storiesOptions = useMemo(() => stories?.map(createOption) ?? [], [stories]);
+  const webhooksOptions = useMemo(() => webhooks?.map(createOption) ?? [], [webhooks]);
 
   useEffect(() => {
     if (storiesError) {
@@ -124,46 +128,17 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesActionPa
         body: storiesError.message,
       });
     }
-  }, [storiesError, toasts]);
-
-  useEffect(() => {
     if (webhooksError) {
       toasts.danger({
         title: 'Error retrieving webhook actions from Tines', // trans
         body: webhooksError.message,
       });
     }
-  }, [webhooksError, toasts]);
+  }, [toasts, storiesError, webhooksError]);
 
-  const storiesOptions = useMemo(() => stories?.map(createOption) ?? [], [stories]);
-  const webhooksOptions = useMemo(() => webhooks?.map(createOption) ?? [], [webhooks]);
-
-  const onChangeStory = useCallback(
-    ([selected]: StoryOption[]) => {
-      const newStory = selected?.value;
-      if (webhook?.storyId !== newStory?.id) {
-        editSubActionParams({ webhook: { storyId: newStory?.id } });
-        setSelectedStoryOption(selected ?? null);
-        setSelectedWebhookOption(null);
-      }
-    },
-    [editSubActionParams, webhook?.storyId]
-  );
-
-  const onChangeWebhook = useCallback(
-    ([selected]: WebhookOption[]) => {
-      const newWebhook = selected?.value;
-      if (webhook?.id !== newWebhook?.id) {
-        editSubActionParams({ webhook: newWebhook });
-        setSelectedWebhookOption(selected ?? null);
-      }
-    },
-    [editSubActionParams, webhook]
-  );
-
-  // Set the selected story option from saved storyId when stories are loaded
   useEffect(() => {
-    if (!selectedStoryOption && webhook?.storyId && stories) {
+    if (selectedStoryOption === undefined && webhook?.storyId && stories) {
+      // Set the initial selected story option from saved storyId when stories are loaded
       const selectedStory = stories.find(({ id }) => id === webhook.storyId);
       if (selectedStory) {
         setSelectedStoryOption(createOption(selectedStory));
@@ -174,11 +149,17 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesActionPa
         editSubActionParams({ webhook: undefined });
       }
     }
-  }, [editSubActionParams, selectedStoryOption, webhook?.storyId, stories, toasts]);
 
-  // Set the selected webhook option from saved webhookId when webhooks are loaded
+    if (selectedStoryOption !== undefined && selectedStoryOption?.value?.id !== webhook?.storyId) {
+      // Selected story changed, update storyId to save and reset selected webhook
+      editSubActionParams({ webhook: { storyId: selectedStoryOption?.value?.id } });
+      setSelectedWebhookOption(null);
+    }
+  }, [selectedStoryOption, webhook?.storyId, stories, toasts, editSubActionParams]);
+
   useEffect(() => {
-    if (!selectedWebhookOption && webhook?.id && webhooks) {
+    if (selectedWebhookOption === undefined && webhook?.id && webhooks) {
+      // Set the initial selected webhook option from saved webhookId when webhooks are loaded
       const selectedWebhook = webhooks.find(({ id }) => id === webhook.id);
       if (selectedWebhook) {
         setSelectedWebhookOption(createOption(selectedWebhook));
@@ -189,7 +170,32 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesActionPa
         editSubActionParams({ webhook: { storyId: webhook?.storyId } });
       }
     }
-  }, [editSubActionParams, selectedWebhookOption, toasts, webhook, webhooks]);
+
+    if (selectedWebhookOption !== undefined && selectedWebhookOption?.value?.id !== webhook?.id) {
+      // Selected webhook changed, update webhook to save, preserve storyId if the selected webhook has been reset
+      editSubActionParams({
+        webhook: selectedWebhookOption
+          ? selectedWebhookOption?.value
+          : { storyId: webhook?.storyId },
+      });
+    }
+  }, [selectedWebhookOption, webhook, webhooks, toasts, editSubActionParams]);
+
+  const selectedStoryOptions = useMemo(
+    () => (selectedStoryOption ? [selectedStoryOption] : []),
+    [selectedStoryOption]
+  );
+  const selectedWebhookOptions = useMemo(
+    () => (selectedWebhookOption ? [selectedWebhookOption] : []),
+    [selectedWebhookOption]
+  );
+
+  const onChangeStory = useCallback(([selected]: StoryOption[]) => {
+    setSelectedStoryOption(selected ?? null);
+  }, []);
+  const onChangeWebhook = useCallback(([selected]: WebhookOption[]) => {
+    setSelectedWebhookOption(selected ?? null);
+  }, []);
 
   return (
     <EuiFlexGroup direction="column">
@@ -227,7 +233,7 @@ const TinesParamsFields: React.FunctionComponent<ActionParamsProps<TinesActionPa
         >
           <EuiComboBox
             aria-label="Tines Webhook action" // TODO trans
-            placeholder={selectedStoryOption ? 'Select a webhook action' : 'Select a story first'} // TODO trans
+            placeholder={selectedStoryOption ? 'Select a webhook action' : 'Select the story first'} // TODO trans
             singleSelection={{ asPlainText: true }}
             options={webhooksOptions}
             selectedOptions={selectedWebhookOptions}

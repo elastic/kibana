@@ -155,7 +155,7 @@ class Tines extends SubActionConnector<TinesConfig, TinesSecrets> {
   }
 
   protected getResponseErrorMessage(error: AxiosError): string {
-    if (error.response?.status) {
+    if (!error.response?.status) {
       throw new Error('Unknown API Error');
     }
     if (error.response.status === 401) {
