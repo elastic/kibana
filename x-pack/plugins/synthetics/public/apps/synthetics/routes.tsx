@@ -23,6 +23,7 @@ import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useInspectorContext } from '@kbn/observability-plugin/public';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-plugin/public';
+import { ErrorDetailsPage } from './components/error_details/error_details_page';
 import { MonitorAddPage } from './components/monitor_add_edit/monitor_add_page';
 import { MonitorEditPage } from './components/monitor_add_edit/monitor_edit_page';
 import { MonitorDetailsPageTitle } from './components/monitor_details/monitor_details_page_title';
@@ -45,6 +46,7 @@ import {
   MONITOR_ERRORS_ROUTE,
   MONITOR_HISTORY_ROUTE,
   MONITOR_ROUTE,
+  ERROR_DETAILS_ROUTE,
   OVERVIEW_ROUTE,
 } from '../../../common/constants';
 import { PLUGIN } from '../../../common/constants/plugin';
@@ -281,6 +283,23 @@ const getRoutes = (
             text: <OutPortal node={MonitorDetailsLinkPortalNode} />,
           },
         ],
+      },
+    },
+    {
+      title: i18n.translate('xpack.synthetics.errorDetailsRoute.title', {
+        defaultMessage: 'Error details | {baseTitle}',
+        values: { baseTitle },
+      }),
+      path: ERROR_DETAILS_ROUTE,
+      component: () => <ErrorDetailsPage />,
+      dataTestSubj: 'syntheticsMonitorEditPage',
+      pageHeader: {
+        pageTitle: (
+          <FormattedMessage
+            id="xpack.synthetics.editMonitor.errorDetailsRoute.title"
+            defaultMessage="Error details"
+          />
+        ),
       },
     },
   ];
