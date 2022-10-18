@@ -47,7 +47,7 @@ export const Markdown = ({
         {children ?? markdownContent!}
       </EuiMarkdownFormat>
     );
-  } 
+  }
 
   // Otherwise render the Markdown Editor if readOnly false
   return (

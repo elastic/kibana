@@ -10,7 +10,7 @@ import React from 'react';
 
 import { MarkdownStorybookMock, MarkdownStorybookParams } from '@kbn/shared-ux-markdown-mocks';
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
 import mdx from './README.mdx';
 import { Markdown } from './markdown';
 
@@ -31,10 +31,10 @@ export const MarkdownStoryComponent = (params: MarkdownStorybookParams) => {
   return (
     // The markdown component is wrapped in the EuiFlexItem with width set to 50%
     // Height can be set for the markdown component
-      <EuiFlexItem style={{ width: '400px' }}>
-    {/* readOnly is set to false because the Markdown component editor will error if set to true without markdown content or children  */}
-        <Markdown {...params} readOnly={false} />
-      </EuiFlexItem>
+    <EuiFlexItem style={{ width: '400px' }}>
+      {/* readOnly is set to false because the Markdown component editor will error if set to true without markdown content or children  */}
+      <Markdown {...params} readOnly={false} />
+    </EuiFlexItem>
   );
 };
 
