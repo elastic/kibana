@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { setupServer } from '@kbn/core/server/test_utils';
 import * as Rx from 'rxjs';
 import supertest from 'supertest';
 import { ReportingCore } from '../../..';

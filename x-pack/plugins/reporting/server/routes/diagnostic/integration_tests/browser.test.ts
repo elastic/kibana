@@ -7,7 +7,7 @@
 
 import * as Rx from 'rxjs';
 import { docLinksServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { setupServer } from '@kbn/core/server/test_utils';
+import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import supertest from 'supertest';
 import { ReportingCore } from '../../..';
 import type { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
