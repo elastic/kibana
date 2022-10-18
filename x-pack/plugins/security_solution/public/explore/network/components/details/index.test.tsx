@@ -21,7 +21,7 @@ import type { State } from '../../../../common/store';
 import { createStore } from '../../../../common/store';
 import { networkModel } from '../../store';
 
-import { IpOverview } from './index';
+import { IpOverview } from '.';
 import { mockData } from './mock';
 import { mockAnomalies } from '../../../../common/components/ml/mock';
 import type { NarrowDateRange } from '../../../../common/components/ml/types';

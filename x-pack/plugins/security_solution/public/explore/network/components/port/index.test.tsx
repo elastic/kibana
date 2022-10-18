@@ -13,7 +13,7 @@ import '../../../common/mock/match_media';
 import { TestProviders } from '../../../../common/mock/test_providers';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 
-import { Port } from './index';
+import { Port } from '.';
 
 jest.mock('../../../common/lib/kibana');
 

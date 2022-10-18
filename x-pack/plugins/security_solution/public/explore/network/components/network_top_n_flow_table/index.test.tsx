@@ -22,7 +22,7 @@ import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import type { State } from '../../../../common/store';
 import { createStore } from '../../../../common/store';
 import { networkModel } from '../../store';
-import { NetworkTopNFlowTable } from './index';
+import { NetworkTopNFlowTable } from '.';
 import { mockData } from './mock';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
 

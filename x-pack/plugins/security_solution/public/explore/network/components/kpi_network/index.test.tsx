@@ -18,7 +18,7 @@ import {
 import '../../../common/mock/match_media';
 import type { State } from '../../../../common/store';
 import { createStore } from '../../../../common/store';
-import { NetworkKpiComponent } from './index';
+import { NetworkKpiComponent } from '.';
 
 describe('NetworkKpiComponent', () => {
   const state: State = mockGlobalState;

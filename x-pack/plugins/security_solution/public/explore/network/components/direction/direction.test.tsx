@@ -17,7 +17,7 @@ import {
   OUTBOUND,
   OUTGOING,
   UNKNOWN,
-} from './index';
+} from '.';
 
 describe('direction', () => {
   describe('#getDirectionIcon', () => {

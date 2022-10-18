@@ -57,7 +57,10 @@ import { Display } from '../display';
 import { timelineSelectors } from '../../../../timelines/store/timeline';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
-import { useDeepEqualSelector, useShallowEqualSelector } from '../../../../common/hooks/use_selector';
+import {
+  useDeepEqualSelector,
+  useShallowEqualSelector,
+} from '../../../../common/hooks/use_selector';
 import { ID, useHostDetails } from '../../containers/hosts/details';
 import { manageQuery } from '../../../../common/components/page/manage_query';
 import { useInvalidFilterQuery } from '../../../../common/hooks/use_invalid_filter_query';

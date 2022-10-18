@@ -21,7 +21,7 @@ import type { State } from '../../../../common/store';
 import { createStore } from '../../../../common/store';
 import { hostsModel } from '../../store';
 import { HostsTableType } from '../../store/model';
-import { HostsTable } from './index';
+import { HostsTable } from '.';
 import { mockData } from './mock';
 import { render } from '@testing-library/react';
 

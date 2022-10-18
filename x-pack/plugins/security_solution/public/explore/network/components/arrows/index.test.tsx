@@ -10,7 +10,7 @@ import React from 'react';
 
 import { TestProviders } from '../../../../common/mock';
 
-import { ArrowBody, ArrowHead } from './index';
+import { ArrowBody, ArrowHead } from '.';
 
 describe('arrows', () => {
   describe('ArrowBody', () => {

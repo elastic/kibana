@@ -25,7 +25,7 @@ import {
 } from './source_destination_arrows';
 import * as i18n from '../../../../timelines/components/timeline/body/renderers/translations';
 
-import { SourceDestination } from './index';
+import { SourceDestination } from '.';
 import {
   DESTINATION_GEO_CITY_NAME_FIELD_NAME,
   DESTINATION_GEO_CONTINENT_NAME_FIELD_NAME,

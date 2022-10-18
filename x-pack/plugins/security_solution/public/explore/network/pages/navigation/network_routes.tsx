@@ -18,7 +18,7 @@ import {
   HttpQueryTabBody,
   IPsQueryTabBody,
   TlsQueryTabBody,
-} from './index';
+} from '.';
 import { EventsQueryTabBody } from '../../../../common/components/events_tab';
 import { AnomaliesNetworkTable } from '../../../../common/components/ml/tables/anomalies_network_table';
 import { filterNetworkExternalAlertData } from '../../../../common/components/visualization_actions/utils';
