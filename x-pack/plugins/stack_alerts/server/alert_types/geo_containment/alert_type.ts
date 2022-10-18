@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
-import { Logger, SavedObjectReference } from '@kbn/core/server';
+import { SavedObjectReference } from '@kbn/core/server';
 import {
   RuleType,
   RuleTypeState,
@@ -214,7 +214,7 @@ export function injectEntityAndBoundaryIds(
   } as GeoContainmentParams;
 }
 
-export function getAlertType(logger: Logger): GeoContainmentAlertType {
+export function getAlertType(): GeoContainmentAlertType {
   const alertTypeName = i18n.translate('xpack.stackAlerts.geoContainment.alertTypeTitle', {
     defaultMessage: 'Tracking containment',
   });
@@ -238,7 +238,7 @@ export function getAlertType(logger: Logger): GeoContainmentAlertType {
     },
     doesSetRecoveryContext: true,
     defaultActionGroupId: ActionGroupId,
-    executor: getGeoContainmentExecutor(logger),
+    executor: getGeoContainmentExecutor(),
     producer: STACK_ALERTS_FEATURE_ID,
     validate: {
       params: ParamsSchema,

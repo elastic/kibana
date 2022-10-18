@@ -43,6 +43,8 @@ import { NoModelsPanel } from './no_models';
 import { ReviewPipeline } from './review_pipeline';
 import { TestPipeline } from './test_pipeline';
 
+import './add_ml_inference_pipeline_modal.scss';
+
 interface AddMLInferencePipelineModalProps {
   onClose: () => void;
 }
@@ -57,7 +59,7 @@ export const AddMLInferencePipelineModal: React.FC<AddMLInferencePipelineModalPr
   }, [indexName]);
 
   return (
-    <EuiModal onClose={onClose}>
+    <EuiModal onClose={onClose} className="enterpriseSearchInferencePipelineModal">
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           <h1>
@@ -141,7 +143,10 @@ const ModalSteps: React.FC = () => {
       ),
     },
     {
-      onClick: () => setAddInferencePipelineStep(AddInferencePipelineSteps.Test),
+      onClick: () => {
+        if (!isPipelineDataValid) return;
+        setAddInferencePipelineStep(AddInferencePipelineSteps.Test);
+      },
       status: isPipelineDataValid ? 'incomplete' : 'disabled',
       title: i18n.translate(
         'xpack.enterpriseSearch.content.indices.transforms.addInferencePipelineModal.steps.test.title',
@@ -151,7 +156,10 @@ const ModalSteps: React.FC = () => {
       ),
     },
     {
-      onClick: () => setAddInferencePipelineStep(AddInferencePipelineSteps.Review),
+      onClick: () => {
+        if (!isPipelineDataValid) return;
+        setAddInferencePipelineStep(AddInferencePipelineSteps.Review);
+      },
       status: isPipelineDataValid ? 'incomplete' : 'disabled',
       title: i18n.translate(
         'xpack.enterpriseSearch.content.indices.transforms.addInferencePipelineModal.steps.review.title',
@@ -227,14 +235,16 @@ const ModalFooter: React.FC<AddMLInferencePipelineModalProps & { ingestionMethod
               iconSide="right"
               onClick={() => setAddInferencePipelineStep(nextStep as AddInferencePipelineSteps)}
               disabled={!isPipelineDataValid}
+              fill
             >
               {CONTINUE_BUTTON_LABEL}
             </EuiButton>
           ) : (
             <EuiButton
-              data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-addMlInference-create`}
               color="success"
+              data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-addMlInference-create`}
               disabled={!isPipelineDataValid}
+              fill
               onClick={createPipeline}
             >
               {i18n.translate(
