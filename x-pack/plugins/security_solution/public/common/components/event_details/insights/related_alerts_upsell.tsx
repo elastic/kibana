@@ -7,11 +7,11 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
-import { SubscriptionLink, SubscriptionContext } from '@kbn/subscription-tracking';
+import { SubscriptionLink } from '@kbn/subscription-tracking';
+import type { SubscriptionContext } from '@kbn/subscription-tracking';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { INSIGHTS_UPSELL } from './translations';
-import { useNavigation } from '../../../lib/kibana';
 
 const UpsellContainer = euiStyled.div`
   border: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
@@ -29,8 +29,6 @@ const subscriptionContext: SubscriptionContext = {
 };
 
 export const RelatedAlertsUpsell = React.memo(() => {
-  const { getAppUrl, navigateTo } = useNavigation();
-
   return (
     <UpsellContainer>
       <EuiFlexGroup alignItems="center" gutterSize="none">
