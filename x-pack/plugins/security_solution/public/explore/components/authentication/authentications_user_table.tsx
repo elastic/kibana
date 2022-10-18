@@ -10,7 +10,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { getOr } from 'lodash/fp';
 import { useDispatch } from 'react-redux';
 import { AuthStackByField } from '../../../../common/search_strategy/security_solution/users/authentications';
-import { PaginatedTable } from '../../../common/components/paginated_table';
+import { PaginatedTable } from '../paginated_table';
 
 import * as i18n from './translations';
 import {

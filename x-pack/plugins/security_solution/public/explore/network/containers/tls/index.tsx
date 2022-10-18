@@ -12,7 +12,7 @@ import type { ESTermQuery } from '../../../../../common/typed_json';
 import type { inputsModel } from '../../../../common/store';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { createFilter } from '../../../../common/containers/helpers';
-import { generateTablePaginationOptions } from '../../../../common/components/paginated_table/helpers';
+import { generateTablePaginationOptions } from '../../../components/paginated_table/helpers';
 import type { networkModel } from '../../store';
 import { networkSelectors } from '../../store';
 import type {
@@ -22,7 +22,10 @@ import type {
 import { NetworkQueries } from '../../../../../common/search_strategy/security_solution/network';
 
 import * as i18n from './translations';
-import type { FlowTargetSourceDest, PageInfoPaginated } from '../../../../../common/search_strategy';
+import type {
+  FlowTargetSourceDest,
+  PageInfoPaginated,
+} from '../../../../../common/search_strategy';
 import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
 
 export const ID = 'networkTlsQuery';

@@ -15,7 +15,7 @@ import { NetworkHttpFields } from '../../../../../common/search_strategy/securit
 import { escapeDataProviderId } from '../../../../common/components/drag_and_drop/helpers';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { NetworkDetailsLink } from '../../../../common/components/links';
-import type { Columns } from '../../../../common/components/paginated_table';
+import type { Columns } from '../../../components/paginated_table';
 
 import * as i18n from './translations';
 import {

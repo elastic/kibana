@@ -14,9 +14,9 @@ import type { BasicTableProps } from '.';
 import { PaginatedTable } from '.';
 import { getHostsColumns, mockData, rowItems, sortedHosts } from './index.mock';
 import { ThemeProvider } from 'styled-components';
-import { getMockTheme } from '../../lib/kibana/kibana_react.mock';
+import { getMockTheme } from '../../../common/lib/kibana/kibana_react.mock';
 import { Direction } from '../../../../common/search_strategy';
-import { useQueryToggle } from '../../containers/query_toggle';
+import { useQueryToggle } from '../../../common/containers/query_toggle';
 jest.mock('../../containers/query_toggle');
 
 jest.mock('react', () => {

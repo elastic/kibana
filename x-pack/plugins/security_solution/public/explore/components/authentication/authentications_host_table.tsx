@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 
 import { getOr } from 'lodash/fp';
 import { useDispatch } from 'react-redux';
-import { PaginatedTable } from '../../../common/components/paginated_table';
+import { PaginatedTable } from '../paginated_table';
 
 import * as i18n from './translations';
 import {

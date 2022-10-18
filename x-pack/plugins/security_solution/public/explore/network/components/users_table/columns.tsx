@@ -7,7 +7,7 @@
 
 import type { FlowTargetSourceDest, NetworkUsersItem } from '../../../../../common/search_strategy';
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
-import type { Columns } from '../../../../common/components/paginated_table';
+import type { Columns } from '../../../components/paginated_table';
 
 import * as i18n from './translations';
 import {

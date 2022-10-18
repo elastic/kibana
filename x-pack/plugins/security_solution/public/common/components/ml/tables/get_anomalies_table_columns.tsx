@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { Columns } from '../../paginated_table';
+import type { Columns } from '../../../../explore/components/paginated_table';
 import type { AnomaliesBy, Anomaly } from '../types';
 
 import { EntityDraggable } from '../entity_draggable';

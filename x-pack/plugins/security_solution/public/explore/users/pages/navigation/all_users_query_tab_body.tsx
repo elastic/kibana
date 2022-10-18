@@ -15,7 +15,7 @@ import { UsersTable } from '../../components/all_users';
 import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
 import { UsersQueries } from '../../../../../common/search_strategy/security_solution/users';
 import * as i18n from './translations';
-import { generateTablePaginationOptions } from '../../../../common/components/paginated_table/helpers';
+import { generateTablePaginationOptions } from '../../../components/paginated_table/helpers';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { usersSelectors } from '../../store';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';

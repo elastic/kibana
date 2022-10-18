@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { Columns } from '../../paginated_table';
+import type { Columns } from '../../../../explore/components/paginated_table';
 import type { AnomaliesByHost, Anomaly } from '../types';
 import { getRowItemDraggable } from '../../tables/helpers';
 import { createCompoundAnomalyKey } from './create_compound_key';

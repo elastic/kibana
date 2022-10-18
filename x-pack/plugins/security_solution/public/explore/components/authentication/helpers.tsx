@@ -10,7 +10,7 @@ import React from 'react';
 
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
-import type { Columns, ItemsPerRow } from '../../../common/components/paginated_table';
+import type { Columns, ItemsPerRow } from '../paginated_table';
 import { getRowItemDraggables } from '../../../common/components/tables/helpers';
 
 import * as i18n from './translations';

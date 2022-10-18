@@ -19,7 +19,7 @@ import type { ESTermQuery } from '../../../../common/typed_json';
 
 import type { inputsModel } from '../../store';
 import { createFilter } from '../helpers';
-import { generateTablePaginationOptions } from '../../components/paginated_table/helpers';
+import { generateTablePaginationOptions } from '../../../explore/components/paginated_table/helpers';
 
 import type { InspectResponse } from '../../../types';
 

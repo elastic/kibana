@@ -17,8 +17,8 @@ import {
   NetworkTopTablesFields,
 } from '../../../../../common/search_strategy';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import type { Criteria, ItemsPerRow } from '../../../../common/components/paginated_table';
-import { PaginatedTable } from '../../../../common/components/paginated_table';
+import type { Criteria, ItemsPerRow } from '../../../components/paginated_table';
+import { PaginatedTable } from '../../../components/paginated_table';
 import { networkActions, networkModel, networkSelectors } from '../../store';
 import { getNFlowColumnsCurated } from './columns';
 import * as i18n from './translations';
