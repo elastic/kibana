@@ -137,9 +137,7 @@ export class HeadlessChromiumDriverFactory {
 
   private createDiagnosticLogger(logger: Logger, logs$: Rx.ReplaySubject<string>) {
     const log: InternalLogger = (message, level = 'debug') => {
-      if (level === 'error' && typeof message === 'object') {
-        logger.error(message);
-      } else if (typeof message === 'object') {
+      if (typeof message === 'object') {
         logger[level](message.toString());
       } else {
         logger[level](message);
@@ -167,6 +165,8 @@ export class HeadlessChromiumDriverFactory {
     return new Rx.Observable((observer) => {
       const logs$ = new Rx.ReplaySubject<string>();
       const log = this.createDiagnosticLogger(pLogger.get('browser-driver'), logs$);
+      const logger = pLogger.get('browser-driver'); // for errors which should not be sent in diagnostics
+
       log(`Creating browser page driver...`, 'info');
 
       const chromiumArgs = this.getChromiumArgs();
@@ -216,7 +216,8 @@ export class HeadlessChromiumDriverFactory {
             `Error spawning Chromium browser! ${err}`
           );
           observer.error(error);
-          log(error, 'error');
+          logger.error(err); // log the raw error
+          log(error, 'error'); // use the decorated error for diagnostics
           return;
         }
 
@@ -255,7 +256,7 @@ export class HeadlessChromiumDriverFactory {
                 log(`Chromium consumed CPU ${cpuInPercentage}% Memory ${memoryInMegabytes}MB`);
               }
             } catch (error) {
-              log(error);
+              logger.error(error);
             }
 
             try {
@@ -264,7 +265,7 @@ export class HeadlessChromiumDriverFactory {
               log('Browser closed.');
             } catch (err) {
               // do not throw
-              log(err);
+              logger.error(err);
             }
 
             return { metrics };
@@ -310,6 +311,7 @@ export class HeadlessChromiumDriverFactory {
           // deleting the userDataDir and if it fails log an error.
           del(userDataDir, { force: true }).catch((error) => {
             log(new Error(`error deleting Chromium user data directory: ${error}`));
+            logger.error(error);
           });
 
           logs$.complete();
