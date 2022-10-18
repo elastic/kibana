@@ -28,7 +28,7 @@ import { useQueryToggle } from '../../../containers/query_toggle';
 import { JobIdFilter } from './job_id_filter';
 import { SelectInterval } from './select_interval';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
-import { usersActions, usersSelectors } from '../../../../users/store';
+import { usersActions, usersSelectors } from '../../../../explore/users/store';
 import type { State } from '../../../store/types';
 import { useInstalledSecurityJobsIds } from '../hooks/use_installed_security_jobs';
 

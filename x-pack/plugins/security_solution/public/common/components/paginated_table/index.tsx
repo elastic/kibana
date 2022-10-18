@@ -52,7 +52,7 @@ import * as i18n from './translations';
 import { Panel } from '../panel';
 import { InspectButtonContainer } from '../inspect';
 import { useQueryToggle } from '../../containers/query_toggle';
-import type { UsersTableColumns } from '../../../users/components/all_users';
+import type { UsersTableColumns } from '../../../explore/users/components/all_users';
 import type { AuthTableColumns } from '../authentication/types';
 
 const DEFAULT_DATA_TEST_SUBJ = 'paginated-table';

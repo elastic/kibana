@@ -6,7 +6,7 @@
  */
 
 import type { AuthenticationsEdges } from '../../../../common/search_strategy';
-import type { UsersComponentsQueryProps } from '../../../users/pages/navigation/types';
+import type { UsersComponentsQueryProps } from '../../../explore/users/pages/navigation/types';
 import type { Columns } from '../paginated_table';
 
 export type AuthTableColumns = Array<Columns<AuthenticationsEdges>>;

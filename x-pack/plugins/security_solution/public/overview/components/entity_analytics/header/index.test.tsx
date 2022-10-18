@@ -13,8 +13,8 @@ import type { SeverityCount } from '../../../../common/components/severity/types
 import { TestProviders } from '../../../../common/mock';
 import { hostsActions } from '../../../../explore/hosts/store';
 import { HostsType } from '../../../../explore/hosts/store/model';
-import { usersActions } from '../../../../users/store';
-import { UsersTableType } from '../../../../users/store/model';
+import { usersActions } from '../../../../explore/users/store';
+import { UsersTableType } from '../../../../explore/users/store/model';
 
 const mockSeverityCount: SeverityCount = {
   [RiskSeverity.low]: 1,

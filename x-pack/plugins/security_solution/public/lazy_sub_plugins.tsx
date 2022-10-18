@@ -14,7 +14,7 @@ import { Cases } from './cases';
 import { Detections } from './detections';
 import { Exceptions } from './exceptions';
 import { Hosts } from './explore/hosts';
-import { Users } from './users';
+import { Users } from './explore/users';
 import { Network } from './network';
 import { Kubernetes } from './kubernetes';
 import { Overview } from './overview';

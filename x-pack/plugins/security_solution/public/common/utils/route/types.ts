@@ -15,7 +15,7 @@ import type { HostsTableType } from '../../../explore/hosts/store/model';
 import type { NetworkRouteType } from '../../../network/pages/navigation/types';
 import type { AdministrationSubTab as AdministrationType } from '../../../management/types';
 import type { FlowTarget } from '../../../../common/search_strategy';
-import type { UsersTableType } from '../../../users/store/model';
+import type { UsersTableType } from '../../../explore/users/store/model';
 import type { SecurityPageName } from '../../../app/types';
 
 export type SiemRouteType =

@@ -36,7 +36,7 @@ import {
 } from './selectors';
 import { timelineActions } from '../../../timelines/store/timeline';
 import { useKibana } from '../../lib/kibana';
-import { usersActions } from '../../../users/store';
+import { usersActions } from '../../../explore/users/store';
 import { hostsActions } from '../../../explore/hosts/store';
 import { networkActions } from '../../../network/store';
 import { useSyncSearchBarUrlParams } from '../../hooks/search_bar/use_sync_search_bar_url_param';

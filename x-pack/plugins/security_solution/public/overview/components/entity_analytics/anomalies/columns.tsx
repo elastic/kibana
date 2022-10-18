@@ -19,10 +19,10 @@ import {
 import { useKibana } from '../../../../common/lib/kibana';
 import { LinkAnchor, SecuritySolutionLinkAnchor } from '../../../../common/components/links';
 import { SecurityPageName } from '../../../../app/types';
-import { usersActions } from '../../../../users/store';
+import { usersActions } from '../../../../explore/users/store';
 import { hostsActions } from '../../../../explore/hosts/store';
 import { HostsType } from '../../../../explore/hosts/store/model';
-import { UsersType } from '../../../../users/store/model';
+import { UsersType } from '../../../../explore/users/store/model';
 
 type AnomaliesColumns = Array<EuiBasicTableColumn<AnomaliesCount>>;
 
