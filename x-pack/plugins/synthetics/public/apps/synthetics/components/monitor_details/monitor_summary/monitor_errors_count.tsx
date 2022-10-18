@@ -12,7 +12,7 @@ import { useParams } from 'react-router-dom';
 import { KpiWrapper } from './kpi_wrapper';
 import { ClientPluginsStart } from '../../../../../plugin';
 
-export const MonitorErrorsCount = () => {
+export const MonitorErrorsCount = ({ time }: { time?: { to: string; from: string } }) => {
   const { observability } = useKibana<ClientPluginsStart>().services;
 
   const { ExploratoryViewEmbeddable } = observability;
