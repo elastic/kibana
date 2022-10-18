@@ -6,8 +6,6 @@
  */
 
 import { registerConnectorTypes } from '.';
-import { Logger } from '@kbn/core/server';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 
 const ACTION_TYPE_IDS = [
@@ -23,7 +21,6 @@ const ACTION_TYPE_IDS = [
   '.torq',
 ];
 
-const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 const mockedActions = actionsMock.createSetup();
 
 beforeEach(() => {
@@ -33,7 +30,6 @@ beforeEach(() => {
 describe('registers connectors', () => {
   test('calls registerType with expected connector types', () => {
     registerConnectorTypes({
-      logger,
       actions: mockedActions,
     });
     ACTION_TYPE_IDS.forEach((id) =>

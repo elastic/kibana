@@ -85,6 +85,13 @@ docker run --name logstash \
   docker.elastic.co/logstash/logstash:master-SNAPSHOT
 ```
 
+Note that you can add these arguments to populate cgroup/cfs data for logstash as well. This will require a cgroup v1 docker host until [logstash#14534](https://github.com/elastic/logstash/issues/14534) is resolved:
+
+```
+  --cpu-period=100000 \
+  --cpu-quota=150000 \
+```
+
 # Complete docker setup
 
 We also maintain an internal docker-compose setup for running a full stack with monitoring enabled for all components.
