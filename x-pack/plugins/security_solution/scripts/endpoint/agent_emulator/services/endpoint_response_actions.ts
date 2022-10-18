@@ -42,13 +42,33 @@ export const fetchEndpointActionList = async (
   kbn: KbnClient,
   options: EndpointActionListRequestQuery = {}
 ): Promise<ActionListApiResponse> => {
-  return (
-    await kbn.request<ActionListApiResponse>({
-      method: 'GET',
-      path: ENDPOINTS_ACTION_LIST_ROUTE,
-      query: options,
-    })
-  ).data;
+  try {
+    return (
+      await kbn.request<ActionListApiResponse>({
+        method: 'GET',
+        path: ENDPOINTS_ACTION_LIST_ROUTE,
+        query: options,
+      })
+    ).data;
+  } catch (error) {
+    // FIXME: remove once the Action List API is fixed (task #5221)
+    if (error?.response?.status === 404) {
+      return {
+        data: [],
+        total: 0,
+        page: 1,
+        pageSize: 10,
+        startDate: undefined,
+        elasticAgentIds: undefined,
+        endDate: undefined,
+        userIds: undefined,
+        commands: undefined,
+        statuses: undefined,
+      };
+    }
+
+    throw error;
+  }
 };
 
 export const sendFleetActionResponse = async (
