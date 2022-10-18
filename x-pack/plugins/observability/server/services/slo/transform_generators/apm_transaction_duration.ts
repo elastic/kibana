@@ -131,26 +131,6 @@ export class ApmTransactionDurationTransformGenerator implements TransformGenera
           calendar_interval: '1m' as AggregationsCalendarInterval,
         },
       },
-      'slo.context.transaction.name': {
-        terms: {
-          field: 'transaction.name',
-        },
-      },
-      'slo.context.transaction.type': {
-        terms: {
-          field: 'transaction.type',
-        },
-      },
-      'slo.context.service.name': {
-        terms: {
-          field: 'service.name',
-        },
-      },
-      'slo.context.service.environment': {
-        terms: {
-          field: 'service.environment',
-        },
-      },
     };
   }
 
