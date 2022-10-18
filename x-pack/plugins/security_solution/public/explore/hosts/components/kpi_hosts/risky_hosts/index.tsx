@@ -21,7 +21,7 @@ import { euiLightVars } from '@kbn/ui-theme';
 import {
   RiskInformationButtonIcon,
   HOST_RISK_INFO_BUTTON_CLASS,
-} from '../../../../../risk_score/components/risk_information';
+} from '../../../../risk_score/components/risk_information';
 import {
   InspectButton,
   BUTTON_CLASS as INPECT_BUTTON_CLASS,

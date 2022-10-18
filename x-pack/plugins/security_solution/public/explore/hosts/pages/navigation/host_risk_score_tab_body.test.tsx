@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
-import { useRiskScore, useRiskScoreKpi } from '../../../../risk_score/containers';
+import { useRiskScore, useRiskScoreKpi } from '../../../risk_score/containers';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { HostRiskScoreQueryTabBody } from './host_risk_score_tab_body';
 import { HostsType } from '../../store/model';

@@ -8,7 +8,7 @@
 import { renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../mock';
 import { ONLY_FIRST_ITEM_PAGINATION, useRiskScoreData } from './use_risk_score_data';
-import { useRiskScore } from '../../../risk_score/containers';
+import { useRiskScore } from '../../../explore/risk_score/containers';
 import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
 import { RiskScoreEntity } from '../../../../common/search_strategy';
 

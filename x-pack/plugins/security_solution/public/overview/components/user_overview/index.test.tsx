@@ -12,7 +12,7 @@ import '../../../common/mock/match_media';
 import { TestProviders } from '../../../common/mock';
 
 import { mockAnomalies } from '../../../common/components/ml/mock';
-import { useRiskScore } from '../../../risk_score/containers/all';
+import { useRiskScore } from '../../../explore/risk_score/containers/all';
 import type { UserSummaryProps } from '.';
 import { UserOverview } from '.';
 

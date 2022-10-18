@@ -11,7 +11,7 @@ import { TestProviders } from '../../../../common/mock';
 import { EntityAnalyticsRiskScores } from '.';
 import { RiskScoreEntity, RiskSeverity } from '../../../../../common/search_strategy';
 import type { SeverityCount } from '../../../../common/components/severity/types';
-import { useRiskScore, useRiskScoreKpi } from '../../../../risk_score/containers';
+import { useRiskScore, useRiskScoreKpi } from '../../../../explore/risk_score/containers';
 
 const mockSeverityCount: SeverityCount = {
   [RiskSeverity.low]: 1,

@@ -36,9 +36,9 @@ import { DescriptionListStyled, OverviewWrapper } from '../../../common/componen
 import * as i18n from './translations';
 import { EndpointOverview } from './endpoint_overview';
 import { OverviewDescriptionList } from '../../../common/components/overview_description_list';
-import { useRiskScore } from '../../../risk_score/containers';
+import { useRiskScore } from '../../../explore/risk_score/containers';
 import { RiskScore } from '../../../common/components/severity/common';
-import { RiskScoreHeaderTitle } from '../../../risk_score/components/risk_score_onboarding/risk_score_header_title';
+import { RiskScoreHeaderTitle } from '../../../explore/risk_score/components/risk_score_onboarding/risk_score_header_title';
 
 interface HostSummaryProps {
   contextID?: string; // used to provide unique draggable context when viewing in the side panel

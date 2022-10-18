@@ -13,10 +13,10 @@ import { EnrichedDataRow, ThreatSummaryPanelHeader } from './threat_summary_view
 import { RiskScore } from '../../severity/common';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 import { RiskScoreEntity } from '../../../../../common/search_strategy';
-import type { HostRisk, UserRisk } from '../../../../risk_score/containers';
+import type { HostRisk, UserRisk } from '../../../../explore/risk_score/containers';
 import { getEmptyValue } from '../../empty_value';
-import { RiskScoreDocLink } from '../../../../risk_score/components/risk_score_onboarding/risk_score_doc_link';
-import { RiskScoreHeaderTitle } from '../../../../risk_score/components/risk_score_onboarding/risk_score_header_title';
+import { RiskScoreDocLink } from '../../../../explore/risk_score/components/risk_score_onboarding/risk_score_doc_link';
+import { RiskScoreHeaderTitle } from '../../../../explore/risk_score/components/risk_score_onboarding/risk_score_header_title';
 
 interface HostRiskEntity {
   originalRisk?: RiskSeverity | undefined;

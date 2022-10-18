@@ -14,7 +14,7 @@ import { TestProviders } from '../../../common/mock';
 import { HostOverview } from '.';
 import { mockData } from './mock';
 import { mockAnomalies } from '../../../common/components/ml/mock';
-import { useRiskScore } from '../../../risk_score/containers/all';
+import { useRiskScore } from '../../../explore/risk_score/containers/all';
 
 const defaultProps = {
   data: undefined,

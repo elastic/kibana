@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle, EuiLink } from '@elastic
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 import { sumBy } from 'lodash/fp';
-import { useRiskScoreKpi } from '../../../../risk_score/containers';
+import { useRiskScoreKpi } from '../../../../explore/risk_score/containers';
 import { LinkAnchor, useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
 import {
   Direction,
