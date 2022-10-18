@@ -229,7 +229,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     const setupRule = async () => {
       const alertName = generateUniqueKey();
-      await rules.common.defineIndexThresholdAlert(alertName);
+      await retry.try(async () => {
+        await rules.common.defineIndexThresholdAlert(alertName);
+      });
 
       await rules.common.setNotifyThrottleInput();
     };
