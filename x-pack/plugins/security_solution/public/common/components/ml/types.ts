@@ -9,7 +9,7 @@ import type { Influencer } from '@kbn/ml-plugin/public';
 import type { FlowTarget } from '../../../../common/search_strategy';
 
 import type { HostsType } from '../../../explore/hosts/store/model';
-import type { NetworkType } from '../../../network/store/model';
+import type { NetworkType } from '../../../explore/network/store/model';
 import type { UsersType } from '../../../explore/users/store/model';
 
 export interface Source {

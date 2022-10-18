@@ -21,13 +21,13 @@ import {
 import { BarChart } from '../charts/barchart';
 import { AreaChart } from '../charts/areachart';
 import { EuiHorizontalRule } from '@elastic/eui';
-import { fieldsMapping as fieldTitleChartMapping } from '../../../network/components/kpi_network/unique_private_ips';
+import { fieldsMapping as fieldTitleChartMapping } from '../../../explore/network/components/kpi_network/unique_private_ips';
 import {
   mockData,
   mockEnableChartsData,
   mockNoChartMappings,
   mockUpdateDateRange,
-} from '../../../network/components/kpi_network/mock';
+} from '../../../explore/network/components/kpi_network/mock';
 import {
   createSecuritySolutionStorageMock,
   kibanaObservable,

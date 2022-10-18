@@ -28,7 +28,7 @@ import {
   DEFAULT_DATA_VIEW_ID,
   DEFAULT_SIGNALS_INDEX,
 } from '../../../common/constants';
-import { networkModel } from '../../network/store';
+import { networkModel } from '../../explore/network/store';
 import { TimelineType, TimelineStatus, TimelineTabs } from '../../../common/types/timeline';
 import { mockManagementState } from '../../management/store/reducer';
 import type { ManagementState } from '../../management/types';

@@ -11,7 +11,7 @@ import type { ObjectWithNavTabs } from '.';
 import { getBreadcrumbsForRoute, useSetBreadcrumbs } from '.';
 import { HostsTableType } from '../../../../explore/hosts/store/model';
 import type { RouteSpyState, SiemRouteType } from '../../../utils/route/types';
-import { NetworkRouteType } from '../../../../network/pages/navigation/types';
+import { NetworkRouteType } from '../../../../explore/network/pages/navigation/types';
 import { TimelineTabs } from '../../../../../common/types/timeline';
 import { AdministrationSubTab } from '../../../../management/types';
 import { renderHook } from '@testing-library/react-hooks';

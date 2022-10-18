@@ -26,7 +26,7 @@ import { useInstalledSecurityJobsIds } from '../hooks/use_installed_security_job
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import type { State } from '../../../store';
 import { JobIdFilter } from './job_id_filter';
-import { networkActions, networkSelectors } from '../../../../network/store';
+import { networkActions, networkSelectors } from '../../../../explore/network/store';
 import { SelectInterval } from './select_interval';
 
 const sorting = {

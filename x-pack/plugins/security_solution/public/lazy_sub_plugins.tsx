@@ -15,7 +15,7 @@ import { Detections } from './detections';
 import { Exceptions } from './exceptions';
 import { Hosts } from './explore/hosts';
 import { Users } from './explore/users';
-import { Network } from './network';
+import { Network } from './explore/network';
 import { Kubernetes } from './kubernetes';
 import { Overview } from './overview';
 import { Rules } from './rules';

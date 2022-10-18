@@ -11,7 +11,7 @@ import { TestProviders } from '../../../mock';
 import React from 'react';
 import { useQueryToggle } from '../../../containers/query_toggle';
 import { useAnomaliesTableData } from '../anomaly/use_anomalies_table_data';
-import { NetworkType } from '../../../../network/store/model';
+import { NetworkType } from '../../../../explore/network/store/model';
 import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
 import { FlowTarget } from '../../../../../common/search_strategy';
 

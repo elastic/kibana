@@ -11,7 +11,7 @@ import reduceReducers from 'reduce-reducers';
 import { tGridReducer } from '@kbn/timelines-plugin/public';
 
 import { hostsReducer } from '../../explore/hosts/store';
-import { networkReducer } from '../../network/store';
+import { networkReducer } from '../../explore/network/store';
 import { usersReducer } from '../../explore/users/store';
 import { timelineReducer } from '../../timelines/store/timeline/reducer';
 import { managementReducer } from '../../management/store/reducer';
