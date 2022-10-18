@@ -451,9 +451,5 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await security.testUser.restoreDefaults();
       });
     });
-
-    // describe('Negate selections', async () => {
-    //   it('', async () => {});
-    // });
   });
 }

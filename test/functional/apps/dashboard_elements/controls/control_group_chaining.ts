@@ -123,6 +123,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       ]);
     });
 
+    it('Excluding selections in the first control will validate the second and third controls', async () => {
+      await dashboardControls.optionsListOpenPopover(controlIds[0]);
+      await dashboardControls.optionsListPopoverSetIncludeSelections(false);
+      await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[0]);
+
+      await ensureAvailableOptionsEql(controlIds[1], ['Tiger', 'sylvester']);
+      await ensureAvailableOptionsEql(controlIds[2], ['meow', 'hiss']);
+    });
+
+    it('Excluding all options of first control removes all options in second and third controls', async () => {
+      await dashboardControls.optionsListOpenPopover(controlIds[0]);
+      await dashboardControls.optionsListPopoverSelectOption('cat');
+      await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[0]);
+
+      await dashboardControls.optionsListOpenPopover(controlIds[1]);
+      expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(0);
+      await dashboardControls.optionsListOpenPopover(controlIds[2]);
+      expect(await dashboardControls.optionsListPopoverGetAvailableOptionsCount()).to.be(0);
+      await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[2]);
+    });
+
     describe('Hierarchical chaining off', async () => {
       before(async () => {
         await dashboardControls.updateChainingSystem('NONE');
@@ -130,6 +151,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('Selecting an option in the first Options List will not filter the second or third controls', async () => {
         await dashboardControls.optionsListOpenPopover(controlIds[0]);
+        await dashboardControls.optionsListPopoverSetIncludeSelections(true);
         await dashboardControls.optionsListPopoverSelectOption('cat');
         await dashboardControls.optionsListEnsurePopoverIsClosed(controlIds[0]);
 
