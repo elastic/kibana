@@ -25,12 +25,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import type {
-  GuideState,
-  GuideStepIds,
-  GuideId,
-  GuideStep,
-} from '@kbn/guided-onboarding';
+import type { GuideState, GuideStepIds, GuideId, GuideStep } from '@kbn/guided-onboarding';
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import { guidesConfig } from '@kbn/guided-onboarding-plugin/public';
 
