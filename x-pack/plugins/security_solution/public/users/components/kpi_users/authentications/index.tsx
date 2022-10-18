@@ -13,7 +13,7 @@ import { kpiUserAuthenticationsBarLensAttributes } from '../../../../common/comp
 import { kpiUserAuthenticationsMetricSuccessLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/users/kpi_user_authentications_metric_success';
 import { kpiUserAuthenticationsMetricFailureLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/users/kpi_user_authentication_metric_failure';
 import { useUsersKpiAuthentications, ID } from '../../../containers/users/authentications';
-import { KpiBaseComponentManage } from '../../../../hosts/components/kpi_hosts/common';
+import { KpiBaseComponentManage } from '../../../../explore/hosts/components/kpi_hosts/common';
 import * as i18n from './translations';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import type { UsersKpiProps } from '../types';

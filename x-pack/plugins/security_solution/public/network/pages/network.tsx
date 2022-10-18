@@ -34,7 +34,7 @@ import { convertToBuildEsQuery } from '../../common/lib/kuery';
 import { inputsSelectors } from '../../common/store';
 import { setAbsoluteRangeDatePicker } from '../../common/store/inputs/actions';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { Display } from '../../hosts/pages/display';
+import { Display } from '../../explore/hosts/pages/display';
 import { networkModel } from '../store';
 import { navTabsNetwork, NetworkRoutes, NetworkRoutesLoading } from './navigation';
 import * as i18n from './translations';

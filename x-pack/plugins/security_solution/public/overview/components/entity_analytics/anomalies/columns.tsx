@@ -20,8 +20,8 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { LinkAnchor, SecuritySolutionLinkAnchor } from '../../../../common/components/links';
 import { SecurityPageName } from '../../../../app/types';
 import { usersActions } from '../../../../users/store';
-import { hostsActions } from '../../../../hosts/store';
-import { HostsType } from '../../../../hosts/store/model';
+import { hostsActions } from '../../../../explore/hosts/store';
+import { HostsType } from '../../../../explore/hosts/store/model';
 import { UsersType } from '../../../../users/store/model';
 
 type AnomaliesColumns = Array<EuiBasicTableColumn<AnomaliesCount>>;

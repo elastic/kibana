@@ -27,7 +27,7 @@ import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import type { State } from '../../../store';
 import { JobIdFilter } from './job_id_filter';
 import { SelectInterval } from './select_interval';
-import { hostsActions, hostsSelectors } from '../../../../hosts/store';
+import { hostsActions, hostsSelectors } from '../../../../explore/hosts/store';
 
 const sorting = {
   sort: {

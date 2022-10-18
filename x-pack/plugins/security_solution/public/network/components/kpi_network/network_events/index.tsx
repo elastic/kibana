@@ -13,7 +13,7 @@ import { ID, useNetworkKpiNetworkEvents } from '../../../containers/kpi_network/
 import type { NetworkKpiProps } from '../types';
 import * as i18n from './translations';
 import { kpiNetworkEventsLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/network/kpi_network_events';
-import { KpiBaseComponentManage } from '../../../../hosts/components/kpi_hosts/common';
+import { KpiBaseComponentManage } from '../../../../explore/hosts/components/kpi_hosts/common';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 
 const euiVisColorPalette = euiPaletteColorBlind();

@@ -7,7 +7,7 @@
 
 import '../../../mock/match_media';
 import { getAnomaliesHostTableColumnsCurated } from './get_anomalies_host_table_columns';
-import { HostsType } from '../../../../hosts/store/model';
+import { HostsType } from '../../../../explore/hosts/store/model';
 import * as i18n from './translations';
 
 jest.mock('../../../lib/kibana');

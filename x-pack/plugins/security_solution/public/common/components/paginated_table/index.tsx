@@ -28,7 +28,7 @@ import styled from 'styled-components';
 
 import type { Direction } from '../../../../common/search_strategy';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../common/constants';
-import type { HostsTableColumns } from '../../../hosts/components/hosts_table';
+import type { HostsTableColumns } from '../../../explore/hosts/components/hosts_table';
 import type { NetworkDnsColumns } from '../../../network/components/network_dns_table/columns';
 import type { NetworkHttpColumns } from '../../../network/components/network_http_table/columns';
 import type {
@@ -40,8 +40,8 @@ import type {
   NetworkTopCountriesColumnsNetworkDetails,
 } from '../../../network/components/network_top_countries_table/columns';
 import type { TlsColumns } from '../../../network/components/tls_table/columns';
-import type { UncommonProcessTableColumns } from '../../../hosts/components/uncommon_process_table';
-import type { HostRiskScoreColumns } from '../../../hosts/components/host_risk_score_table';
+import type { UncommonProcessTableColumns } from '../../../explore/hosts/components/uncommon_process_table';
+import type { HostRiskScoreColumns } from '../../../explore/hosts/components/host_risk_score_table';
 
 import type { UsersColumns } from '../../../network/components/users_table/columns';
 import { HeaderSection } from '../header_section';

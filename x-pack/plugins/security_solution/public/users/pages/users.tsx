@@ -46,7 +46,7 @@ import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_que
 import { UsersKpiComponent } from '../components/kpi_users';
 import type { UpdateDateRange } from '../../common/components/charts/common';
 import { LastEventIndexKey, RiskScoreEntity } from '../../../common/search_strategy';
-import { generateSeverityFilter } from '../../hosts/store/helpers';
+import { generateSeverityFilter } from '../../explore/hosts/store/helpers';
 import { UsersTableType } from '../store/model';
 import { hasMlUserPermissions } from '../../../common/machine_learning/has_ml_user_permissions';
 import { useMlCapabilities } from '../../common/components/ml/hooks/use_ml_capabilities';

@@ -35,7 +35,7 @@ import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline
 import { defaultCellActions } from '../../lib/cell_actions/default_cell_actions';
 import type { GlobalTimeArgs } from '../../containers/use_global_time';
 import type { QueryTabBodyProps as UserQueryTabBodyProps } from '../../../users/pages/navigation/types';
-import type { QueryTabBodyProps as HostQueryTabBodyProps } from '../../../hosts/pages/navigation/types';
+import type { QueryTabBodyProps as HostQueryTabBodyProps } from '../../../explore/hosts/pages/navigation/types';
 import type { QueryTabBodyProps as NetworkQueryTabBodyProps } from '../../../network/pages/navigation/types';
 import { useLicense } from '../../hooks/use_license';
 

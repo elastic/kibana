@@ -11,7 +11,7 @@ import type { RouteComponentProps } from 'react-router-dom';
 
 import type { TimelineType } from '../../../../common/types/timeline';
 
-import type { HostsTableType } from '../../../hosts/store/model';
+import type { HostsTableType } from '../../../explore/hosts/store/model';
 import type { NetworkRouteType } from '../../../network/pages/navigation/types';
 import type { AdministrationSubTab as AdministrationType } from '../../../management/types';
 import type { FlowTarget } from '../../../../common/search_strategy';

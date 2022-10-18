@@ -20,7 +20,7 @@ import type { HostItem } from '../../../../../common/search_strategy';
 import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
 import { hostToCriteria } from '../../../../common/components/ml/criteria/host_to_criteria';
 import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
-import { useHostDetails, ID } from '../../../../hosts/containers/hosts/details';
+import { useHostDetails, ID } from '../../../../explore/hosts/containers/hosts/details';
 
 interface ExpandableHostProps {
   hostName: string;

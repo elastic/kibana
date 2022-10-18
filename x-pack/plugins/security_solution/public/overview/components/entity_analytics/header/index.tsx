@@ -20,8 +20,8 @@ import {
 import * as i18n from './translations';
 import { getTabsOnHostsUrl } from '../../../../common/components/link_to/redirect_to_hosts';
 import { SecurityPageName } from '../../../../app/types';
-import { HostsTableType, HostsType } from '../../../../hosts/store/model';
-import { hostsActions } from '../../../../hosts/store';
+import { HostsTableType, HostsType } from '../../../../explore/hosts/store/model';
+import { hostsActions } from '../../../../explore/hosts/store';
 import { usersActions } from '../../../../users/store';
 import { getTabsOnUsersUrl } from '../../../../common/components/link_to/redirect_to_users';
 import { UsersTableType } from '../../../../users/store/model';

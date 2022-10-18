@@ -21,7 +21,7 @@ import {
   LinkButton,
   useGetSecuritySolutionLinkProps,
 } from '../../../../common/components/links';
-import { HostsTableType } from '../../../../hosts/store/model';
+import { HostsTableType } from '../../../../explore/hosts/store/model';
 import { getTabsOnHostsUrl } from '../../../../common/components/link_to/redirect_to_hosts';
 import { SecurityPageName } from '../../../../app/types';
 import { getTabsOnUsersUrl } from '../../../../common/components/link_to/redirect_to_users';

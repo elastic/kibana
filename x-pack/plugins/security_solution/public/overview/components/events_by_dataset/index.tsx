@@ -28,7 +28,7 @@ import {
   eventsStackByOptions,
   eventsHistogramConfig,
 } from '../../../common/components/events_tab/histogram_configurations';
-import { HostsTableType } from '../../../hosts/store/model';
+import { HostsTableType } from '../../../explore/hosts/store/model';
 import type { InputsModelId } from '../../../common/store/inputs/constants';
 import type { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 
