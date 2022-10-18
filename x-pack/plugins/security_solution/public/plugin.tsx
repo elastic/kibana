@@ -206,9 +206,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
          * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
          * See https://webpack.js.org/api/module-methods/#magic-comments
          */
-        const { resolverPluginSetup } = await import(
-          /* webpackChunkName: "resolver" */ './resolver'
-        );
+        const { resolverPluginSetup } = await import('./resolver');
         return resolverPluginSetup();
       },
     };
@@ -286,10 +284,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
      * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
      * See https://webpack.js.org/api/module-methods/#magic-comments
      */
-    return import(
-      /* webpackChunkName: "lazy_application_dependencies" */
-      './lazy_application_dependencies'
-    );
+    return import('./lazy_application_dependencies');
   }
 
   /**
@@ -301,10 +296,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
      * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
      * See https://webpack.js.org/api/module-methods/#magic-comments
      */
-    return import(
-      /* webpackChunkName: "lazy_sub_plugins" */
-      './lazy_sub_plugins'
-    );
+    return import('./lazy_sub_plugins');
   }
 
   private lazyRegisterAlertsTableConfiguration() {
@@ -312,10 +304,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
      * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
      * See https://webpack.js.org/api/module-methods/#magic-comments
      */
-    return import(
-      /* webpackChunkName: "lazy_register_alerts_table_configuration" */
-      './common/lib/triggers_actions_ui/register_alerts_table_configuration'
-    );
+    return import('./common/lib/triggers_actions_ui/register_alerts_table_configuration');
   }
 
   private lazyApplicationLinks() {
@@ -323,10 +312,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
      * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
      * See https://webpack.js.org/api/module-methods/#magic-comments
      */
-    return import(
-      /* webpackChunkName: "lazy_app_links" */
-      './common/links/app_links'
-    );
+    return import('./common/links/app_links');
   }
 
   /**
