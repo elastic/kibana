@@ -14,6 +14,8 @@ import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClientOptions } from '@kbn/test';
 import { KbnClient } from '@kbn/test';
+import type { Role } from '@kbn/security-plugin/common';
+import type { AxiosResponse } from 'axios';
 import { EndpointMetadataGenerator } from '../../common/endpoint/data_generators/endpoint_metadata_generator';
 import { indexHostsAndAlerts } from '../../common/endpoint/index_data';
 import { ANCESTRY_LIMIT, EndpointDocGenerator } from '../../common/endpoint/generate_data';
@@ -47,78 +49,84 @@ interface RoleInfo {
 }
 
 async function addRole(
-  esClient: Client,
-  role: {
+  kbnClient: KbnClient,
+  role?: {
     roleName: string;
     //  rbacPermissions: ResponseActionsApiCommandNames[]
   }
 ): Promise<RoleInfo | undefined> {
-  const path = `_security/role/${role.roleName}?createOnly=true`;
+  if (!role) {
+    return;
+  }
+  const path = `/api/security/role/${role.roleName}?createOnly=true`;
 
   // add role if doesn't exist already
   try {
-    console.log(`Adding ${role.roleName}`);
-    const addedRole = await esClient.transport.request<Promise<{ created: boolean }>>({
-      method: 'PUT',
-      path,
-      body: {
-        elasticsearch: {
-          cluster: ['manage'],
-          indices: [
+    console.log(`Adding ${role.roleName} role`);
+
+    const addedRole = (
+      (await kbnClient.request<Promise<Role>>({
+        method: 'PUT',
+        path,
+        body: {
+          elasticsearch: {
+            cluster: ['manage'],
+            indices: [
+              {
+                names: [
+                  '.alerts-security.alerts-default',
+                  '.alerts-security.alerts-*',
+                  '.siem-signals-*',
+                  '.items-*',
+                  '.lists-*',
+                ],
+                privileges: ['all'],
+              },
+            ],
+            run_as: [],
+          },
+          // has host isolation but not process or getfile
+          kibana: [
             {
-              names: [
-                '.alerts-security.alerts-default',
-                '.alerts-security.alerts-*',
-                '.siem-signals-*',
-                '.items-*',
-                '.lists-*',
-              ],
-              privileges: ['all'],
+              base: [],
+              feature: {
+                actions: ['all'],
+                advancedSettings: ['all'],
+                dev_tools: ['all'],
+                fleet: ['all'],
+                generalCases: ['all'],
+                indexPatterns: ['all'],
+                osquery: ['all'],
+                savedObjectsManagement: ['all'],
+                savedObjectsTagging: ['all'],
+                siem: [
+                  'minimal_all',
+                  'endpoint_list_all',
+                  'endpoint_list_read',
+                  'trusted_applications_all',
+                  'trusted_applications_read',
+                  'host_isolation_exceptions_all',
+                  'host_isolation_exceptions_read',
+                  'blocklist_all',
+                  'blocklist_read',
+                  'event_filters_all',
+                  'event_filters_read',
+                  'policy_management_all',
+                  'policy_management_read',
+                  'actions_log_management_all',
+                  'actions_log_management_read',
+                  'host_isolation_all',
+                ],
+                stackAlerts: ['all'],
+              },
+              spaces: ['*'],
             },
           ],
-          run_as: [],
         },
-        // has host isolation but not process or getfile
-        kibana: [
-          {
-            base: [],
-            feature: {
-              actions: ['all'],
-              advancedSettings: ['all'],
-              dev_tools: ['all'],
-              fleet: ['all'],
-              generalCases: ['all'],
-              indexPatterns: ['all'],
-              osquery: ['all'],
-              savedObjectsManagement: ['all'],
-              savedObjectsTagging: ['all'],
-              siem: [
-                'minimal_all',
-                'endpoint_list_all',
-                'endpoint_list_read',
-                'trusted_applications_all',
-                'trusted_applications_read',
-                'host_isolation_exceptions_all',
-                'host_isolation_exceptions_read',
-                'blocklist_all',
-                'blocklist_read',
-                'event_filters_all',
-                'event_filters_read',
-                'policy_management_all',
-                'policy_management_read',
-                'actions_log_management_all',
-                'actions_log_management_read',
-                'host_isolation_all',
-              ],
-              stackAlerts: ['all'],
-            },
-            spaces: ['*'],
-          },
-        ],
-      },
-    });
+      })) as AxiosResponse
+    ).data;
 
-    if (addedRole.created) {
+    if (addedRole) {
       console.log(`Role ${role.roleName} added successfully!`);
     } else {
       console.log(`Role ${role.roleName} already exists!`);
@@ -128,6 +136,7 @@ async function addRole(
       // rbacPermissions: role.rbacPermissions,
     };
   } catch (error) {
+    console.log(error);
     handleErr(error);
   }
 }
@@ -350,6 +359,12 @@ async function main() {
         'will result in random version being generated',
       default: false,
     },
+    rbacUser: {
+      alias: 'rbac',
+      describe: 'Creates a user with the following kibana permissions',
+      type: 'string',
+      default: '',
+    },
   }).argv;
   let ca: Buffer;
 
@@ -421,6 +436,15 @@ async function main() {
       [argv.eventIndex, argv.metadataIndex, argv.policyIndex, argv.alertIndex],
       client
     );
+  }
+
+  if (argv.rbacUser) {
+    const newRoleData = argv.rbacUser;
+    console.log('rbac arg', newRoleData);
+    const role = await addRole(kbnClient, newRoleData ? { roleName: newRoleData } : undefined);
+    if (role) {
+      console.log('completed a role');
+    }
   }
 
   let seed = argv.seed;
