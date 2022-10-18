@@ -44,6 +44,9 @@ export const GetFileActionResult = memo<
     actionCreator,
     actionRequestBody,
     dataTestSubj: 'getFile',
+    pendingMessage: i18n.translate('xpack.securitySolution.getFileAction.pendingMessage', {
+      defaultMessage: 'Retrieving the file from host.',
+    }),
   });
 
   if (actionDetails?.isCompleted && actionDetails.wasSuccessful) {
