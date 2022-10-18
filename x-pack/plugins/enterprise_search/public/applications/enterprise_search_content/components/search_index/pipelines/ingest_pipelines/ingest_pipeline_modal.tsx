@@ -27,8 +27,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { DEFAULT_PIPELINE_NAME } from '../../../../../../../common/constants';
-
 import { IngestPipelineParams } from '../../../../../../../common/types/connectors';
 
 import { CurlRequest } from '../../components/curl_request/curl_request';
@@ -37,11 +35,9 @@ import { PipelineSettingsForm } from '../pipeline_settings_form';
 
 interface IngestPipelineModalProps {
   closeModal: () => void;
-  createCustomPipelines: () => void;
   displayOnly: boolean;
   indexName: string;
   ingestionMethod: string;
-  isGated: boolean;
   isLoading: boolean;
   pipeline: IngestPipelineParams;
   savePipeline: () => void;
@@ -50,20 +46,15 @@ interface IngestPipelineModalProps {
 
 export const IngestPipelineModal: React.FC<IngestPipelineModalProps> = ({
   closeModal,
-  createCustomPipelines,
   displayOnly,
   indexName,
   ingestionMethod,
-  isGated,
   isLoading,
   pipeline,
   savePipeline,
   setPipeline,
 }) => {
   const { name } = pipeline;
-
-  // can't customize if you already have a custom pipeline!
-  const canCustomize = name === DEFAULT_PIPELINE_NAME;
 
   return (
     <EuiModal onClose={closeModal} maxWidth={'40rem'}>
@@ -189,38 +180,6 @@ export const IngestPipelineModal: React.FC<IngestPipelineModalProps> = ({
                   indexName={indexName}
                   pipeline={pipeline}
                 />
-              </EuiFlexItem>
-            </>
-          )}
-          {canCustomize && (
-            <>
-              <EuiSpacer />
-              <EuiFlexItem>
-                <EuiText color="subdued" size="s" grow={false}>
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.content.index.pipelines.ingestModal.platinumText',
-                    {
-                      defaultMessage:
-                        'With a platinum license, you can create an index-specific version of this configuration and modify it for your use case.',
-                    }
-                  )}
-                </EuiText>
-              </EuiFlexItem>
-              <EuiSpacer />
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup justifyContent="flexStart">
-                  <EuiButtonEmpty
-                    data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-ingestPipelines-copyAndCustomize`}
-                    disabled={isGated}
-                    iconType={isGated ? 'lock' : undefined}
-                    onClick={createCustomPipelines}
-                  >
-                    {i18n.translate(
-                      'xpack.enterpriseSearch.content.index.pipelines.ingestModal.copyButtonLabel',
-                      { defaultMessage: 'Copy and customize' }
-                    )}
-                  </EuiButtonEmpty>
-                </EuiFlexGroup>
               </EuiFlexItem>
             </>
           )}
