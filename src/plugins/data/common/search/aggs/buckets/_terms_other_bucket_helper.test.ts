@@ -19,6 +19,7 @@ import { BUCKET_TYPES } from './bucket_agg_types';
 import { IBucketAggConfig } from './bucket_agg_type';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { estypes } from '@elastic/elasticsearch';
+import { isSamplingEnabled } from '../utils/sampler';
 
 const indexPattern = {
   id: '1234',
@@ -282,9 +283,15 @@ const nestedOtherResponse = {
 describe('Terms Agg Other bucket helper', () => {
   const typesRegistry = mockAggTypesRegistry();
 
-  for (const probability of [1, 0.5]) {
+  for (const probability of [1, 0.5, undefined]) {
+    function getTitlePostfix() {
+      if (!isSamplingEnabled(probability)) {
+        return '';
+      }
+      return ` - with sampling (probability = ${probability})`;
+    }
     function enrichResponseWithSampling(response: any) {
-      if (probability === 1) {
+      if (!isSamplingEnabled(probability)) {
         return response;
       }
       return {
@@ -296,17 +303,18 @@ describe('Terms Agg Other bucket helper', () => {
         },
       };
     }
+
     function getAggConfigs(aggs: CreateAggConfigParams[] = []) {
       return new AggConfigs(indexPattern, [...aggs], { typesRegistry, probability }, jest.fn());
     }
 
     function getTopAggregations(updatedResponse: estypes.SearchResponse<any>) {
-      return probability === 1
+      return !isSamplingEnabled(probability)
         ? updatedResponse.aggregations!
         : (updatedResponse.aggregations!.sampling as Record<string, estypes.AggregationsAggregate>);
     }
 
-    describe(`buildOtherBucketAgg${probability === 1 ? '- with sampling' : ''}`, () => {
+    describe(`buildOtherBucketAgg${getTitlePostfix()}`, () => {
       test('returns a function', () => {
         const aggConfigs = getAggConfigs(singleTerm.aggs);
         const agg = buildOtherBucketAgg(
@@ -345,7 +353,7 @@ describe('Terms Agg Other bucket helper', () => {
         expect(agg).toBeDefined();
         if (agg) {
           const resp = agg();
-          const topAgg = probability === 1 ? resp : resp.sampling!.aggs;
+          const topAgg = !isSamplingEnabled(probability) ? resp : resp.sampling!.aggs;
           expect(topAgg['other-filter']).toEqual(expectedResponse);
         }
       });
@@ -397,7 +405,7 @@ describe('Terms Agg Other bucket helper', () => {
         expect(agg).toBeDefined();
         if (agg) {
           const resp = agg();
-          const topAgg = probability === 1 ? resp : resp.sampling!.aggs;
+          const topAgg = !isSamplingEnabled(probability) ? resp : resp.sampling!.aggs;
           // console.log({ probability }, JSON.stringify(topAgg, null, 2));
           expect(topAgg).toEqual(expectedResponse);
         }
@@ -480,7 +488,7 @@ describe('Terms Agg Other bucket helper', () => {
         expect(agg).toBeDefined();
         if (agg) {
           const resp = agg();
-          const topAgg = probability === 1 ? resp : resp.sampling!.aggs;
+          const topAgg = !isSamplingEnabled(probability) ? resp : resp.sampling!.aggs;
           expect(topAgg).toEqual(expectedResponse);
         }
       });
@@ -573,7 +581,7 @@ describe('Terms Agg Other bucket helper', () => {
         expect(agg).toBeDefined();
         if (agg) {
           const resp = agg();
-          const topAgg = probability === 1 ? resp : resp.sampling!.aggs;
+          const topAgg = !isSamplingEnabled(probability) ? resp : resp.sampling!.aggs;
           expect(topAgg).toEqual(expectedResponse);
         }
       });
@@ -590,7 +598,7 @@ describe('Terms Agg Other bucket helper', () => {
       });
     });
 
-    describe(`mergeOtherBucketAggResponse${probability === 1 ? '- with sampling' : ''}`, () => {
+    describe(`mergeOtherBucketAggResponse${getTitlePostfix()}`, () => {
       test('correctly merges other bucket with single terms agg', () => {
         const aggConfigs = getAggConfigs(singleTerm.aggs);
         const otherAggConfig = buildOtherBucketAgg(
@@ -640,7 +648,7 @@ describe('Terms Agg Other bucket helper', () => {
       });
     });
 
-    describe(`updateMissingBucket${probability === 1 ? '- with sampling' : ''}`, () => {
+    describe(`updateMissingBucket${getTitlePostfix()}`, () => {
       test('correctly updates missing bucket key', () => {
         const aggConfigs = getAggConfigs(nestedTerm.aggs);
         const updatedResponse = updateMissingBucket(
