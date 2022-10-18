@@ -6,7 +6,8 @@
  */
 
 import { act, renderHook } from '@testing-library/react-hooks';
-import { useDeleteComment, UseDeleteComment } from './use_delete_comment';
+import type { UseDeleteComment } from './use_delete_comment';
+import { useDeleteComment } from './use_delete_comment';
 import * as api from './api';
 import { basicCaseId } from './mock';
 import { useRefreshCaseViewPage } from '../components/case_view/use_on_refresh_case_view_page';

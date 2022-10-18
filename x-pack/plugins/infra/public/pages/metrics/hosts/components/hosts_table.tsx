@@ -10,6 +10,7 @@ import { EuiBasicTable } from '@elastic/eui';
 import { SnapshotNode } from '../../../../../common/http_api';
 import { HostsTableColumns } from './hosts_table_columns';
 import { useHostTable } from '../hooks/use_host_table';
+
 interface Props {
   nodes: SnapshotNode[];
 }
