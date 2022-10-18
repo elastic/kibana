@@ -33,7 +33,7 @@ import type { DataViewPickerPropsExtended } from '.';
 import { DataViewsList } from './dataview_list';
 import type { TextBasedLanguagesListProps } from './text_languages_list';
 import type { TextBasedLanguagesTransitionModalProps } from './text_languages_transition_modal';
-import adhoc from './assets/adhoc_blue.svg';
+import adhoc from './assets/adhoc.svg';
 import { changeDataViewStyles } from './change_dataview.styles';
 
 // local storage key for the text based languages transition modal
