@@ -24,7 +24,6 @@ const OsqueryActionResultsComponent: React.FC<OsqueryActionResultsProps> = ({
   agentIds,
   ruleName,
   alertId,
-  addToTimeline,
 }) => {
   const { data: actionsData } = useAllLiveQueries({
     filterQuery: { term: { alert_ids: alertId } },
@@ -49,7 +48,6 @@ const OsqueryActionResultsComponent: React.FC<OsqueryActionResultsProps> = ({
             queryId={queryId}
             startDate={startDate}
             ruleName={ruleName}
-            addToTimeline={addToTimeline}
             agentIds={agentIds}
           />
         );
