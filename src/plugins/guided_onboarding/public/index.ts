@@ -18,6 +18,4 @@ export type {
   GuidedOnboardingApi,
 } from './types';
 
-export type { GuideId, GuideStepIds, GuideState, GuideStep } from '../common/types';
-
 export { guidesConfig } from './constants/guides_config';

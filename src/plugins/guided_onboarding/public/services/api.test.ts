@@ -8,11 +8,11 @@
 
 import { HttpSetup } from '@kbn/core/public';
 import { httpServiceMock } from '@kbn/core/public/mocks';
+import type { GuideState } from '@kbn/guided-onboarding';
 import { firstValueFrom, Subscription } from 'rxjs';
 
 import { API_BASE_PATH } from '../../common/constants';
 import { guidesConfig } from '../constants/guides_config';
-import type { GuideState } from '../../common/types';
 import { ApiService } from './api';
 import {
   noGuideActiveState,
