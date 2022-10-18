@@ -129,14 +129,14 @@ export const BasicManyMany = Template.bind({});
 BasicManyMany.decorators = [
   (Story) => {
     const array = new Array(102);
-    array.fill(createFileJSON());
+    array.fill(null);
     return (
       <FilesContext
         client={
           {
             getDownloadHref: () => `data:image/png;base64,${base64dLogo}`,
             list: async (): Promise<FilesClientResponses['list']> => ({
-              files: array,
+              files: array.map((_, idx) => createFileJSON({ id: String(idx) })),
               total: array.length,
             }),
           } as unknown as FilesClient
