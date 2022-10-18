@@ -5,12 +5,23 @@
  * 2.0.
  */
 
-import type { DiscoverAppLocator } from '@kbn/discover-plugin/public';
-import type { Filter } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import type { DataViewsService } from '@kbn/data-views-plugin/public';
+import type { LocatorPublic } from '@kbn/share-plugin/public';
+import type { SerializableRecord } from '@kbn/utility-types';
 import type { Embeddable } from '../embeddable';
 import { DOC_TYPE } from '../../common';
+
+interface DiscoverAppLocatorParams extends SerializableRecord {
+  timeRange?: TimeRange;
+  filters?: Filter[];
+  indexPatternId?: string;
+  query?: Query | AggregateQuery | undefined;
+  columns?: string[];
+}
+
+export type DiscoverAppLocator = LocatorPublic<DiscoverAppLocatorParams>;
 
 interface Context {
   embeddable: IEmbeddable;

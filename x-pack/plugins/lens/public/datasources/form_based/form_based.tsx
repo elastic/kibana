@@ -11,7 +11,6 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { CoreStart, SavedObjectReference } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
-import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { flatten, isEqual } from 'lodash';
@@ -25,6 +24,7 @@ import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type {
   DatasourceDimensionEditorProps,
   DatasourceDimensionTriggerProps,
@@ -141,7 +141,7 @@ export function getFormBasedDatasource({
   storage,
   data,
   unifiedSearch,
-  discover,
+  share,
   dataViews,
   fieldFormats,
   charts,
@@ -152,7 +152,7 @@ export function getFormBasedDatasource({
   storage: IStorageWrapper;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
-  discover?: DiscoverStart;
+  share?: SharePluginStart;
   dataViews: DataViewsPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   charts: ChartsPluginSetup;
@@ -458,7 +458,7 @@ export function getFormBasedDatasource({
                 fieldFormats,
                 charts,
                 unifiedSearch,
-                discover,
+                share,
               }}
             >
               <FormBasedDataPanel

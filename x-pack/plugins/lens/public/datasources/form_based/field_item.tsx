@@ -309,10 +309,11 @@ function FieldItemPopoverContents(
       [indexPattern],
       getEsQueryConfig(services.uiSettings)
     );
-    if (!services.discover || !services.application.capabilities.discover.show) {
+    const discoverLocator = services.share?.url.locators.get('discover');
+    if (!discoverLocator || !services.application.capabilities.discover.show) {
       return;
     }
-    return services.discover.locator!.getRedirectUrl({
+    return discoverLocator.getRedirectUrl({
       dataViewSpec: indexPattern?.spec,
       timeRange: services.data.query.timefilter.timefilter.getTime(),
       filters: newFilters,

@@ -18,11 +18,11 @@ import type {
   UiActionsEnhancedBaseActionFactoryContext as BaseActionFactoryContext,
 } from '@kbn/ui-actions-enhanced-plugin/public';
 import { EuiFormRow, EuiSwitch } from '@elastic/eui';
-import type { DiscoverAppLocator } from '@kbn/discover-plugin/public';
 import type { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { DataViewsService } from '@kbn/data-views-plugin/public';
 import { DOC_TYPE } from '../../common/constants';
+import type { DiscoverAppLocator } from './open_in_discover_helpers';
 
 interface EmbeddableQueryInput extends EmbeddableInput {
   query?: Query;
