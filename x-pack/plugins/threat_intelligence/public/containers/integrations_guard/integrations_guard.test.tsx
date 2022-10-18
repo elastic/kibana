@@ -7,74 +7,164 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import { IntegrationsGuard } from '.';
+import {
+  installationStatuses,
+  IntegrationsGuard,
+  THREAT_INTELLIGENCE_CATEGORY,
+  THREAT_INTELLIGENCE_UTILITIES,
+} from '.';
 import { TestProvidersComponent } from '../../common/mocks/test_providers';
 import { useIntegrationsPageLink, useTIDocumentationLink } from '../../hooks';
 import { useIndicatorsTotalCount } from '../../modules/indicators';
+import { useRequest } from '@kbn/es-ui-shared-plugin/public';
 
 jest.mock('../../modules/indicators/hooks/use_total_count');
 jest.mock('../../hooks/use_integrations_page_link');
 jest.mock('../../hooks/use_documentation_link');
+jest.mock('@kbn/es-ui-shared-plugin/public');
 
-describe('checking if the page should be visible (based on indicator count)', () => {
-  describe('when indicator count is being loaded', () => {
-    it('should render nothing at all', () => {
-      (
-        useIndicatorsTotalCount as jest.MockedFunction<typeof useIndicatorsTotalCount>
-      ).mockReturnValue({
-        count: 0,
-        isLoading: true,
-      });
-      (
-        useIntegrationsPageLink as jest.MockedFunction<typeof useIntegrationsPageLink>
-      ).mockReturnValue('');
-      (
-        useTIDocumentationLink as jest.MockedFunction<typeof useTIDocumentationLink>
-      ).mockReturnValue('');
-
-      const { asFragment } = render(<IntegrationsGuard>should be restricted</IntegrationsGuard>, {
-        wrapper: TestProvidersComponent,
-      });
-
-      expect(asFragment()).toMatchSnapshot('loading');
+describe('IntegrationsGuard', () => {
+  it('should render nothing at all when indicator count and integrations are being loaded', () => {
+    (
+      useIndicatorsTotalCount as jest.MockedFunction<typeof useIndicatorsTotalCount>
+    ).mockReturnValue({
+      count: 0,
+      isLoading: true,
     });
+    (
+      useIntegrationsPageLink as jest.MockedFunction<typeof useIntegrationsPageLink>
+    ).mockReturnValue('');
+    (useTIDocumentationLink as jest.MockedFunction<typeof useTIDocumentationLink>).mockReturnValue(
+      ''
+    );
+    (useRequest as jest.MockedFunction<typeof useRequest>).mockReturnValue({
+      isInitialRequest: true,
+      isLoading: true,
+      data: { items: [] },
+      error: null,
+      resendRequest: () => null,
+    });
+
+    const { asFragment } = render(<IntegrationsGuard>should be restricted</IntegrationsGuard>, {
+      wrapper: TestProvidersComponent,
+    });
+
+    expect(asFragment()).toMatchSnapshot();
   });
 
-  describe('when indicator count is loaded and there are no indicators', () => {
-    it('should render empty page when no indicators are found', async () => {
-      (
-        useIndicatorsTotalCount as jest.MockedFunction<typeof useIndicatorsTotalCount>
-      ).mockReturnValue({
-        count: 0,
-        isLoading: false,
-      });
-      (
-        useIntegrationsPageLink as jest.MockedFunction<typeof useIntegrationsPageLink>
-      ).mockReturnValue('');
-      (
-        useTIDocumentationLink as jest.MockedFunction<typeof useTIDocumentationLink>
-      ).mockReturnValue('');
-
-      const { asFragment } = render(<IntegrationsGuard>should be restricted</IntegrationsGuard>, {
-        wrapper: TestProvidersComponent,
-      });
-      expect(asFragment()).toMatchSnapshot('no indicators');
+  it('should render empty page when no indicators are found and no ti integrations are installed', async () => {
+    (
+      useIndicatorsTotalCount as jest.MockedFunction<typeof useIndicatorsTotalCount>
+    ).mockReturnValue({
+      count: 0,
+      isLoading: false,
     });
+    (
+      useIntegrationsPageLink as jest.MockedFunction<typeof useIntegrationsPageLink>
+    ).mockReturnValue('');
+    (useTIDocumentationLink as jest.MockedFunction<typeof useTIDocumentationLink>).mockReturnValue(
+      ''
+    );
+    (useRequest as jest.MockedFunction<typeof useRequest>).mockReturnValue({
+      isInitialRequest: true,
+      isLoading: false,
+      data: { items: [] },
+      error: null,
+      resendRequest: () => null,
+    });
+
+    const { asFragment } = render(<IntegrationsGuard>should be restricted</IntegrationsGuard>, {
+      wrapper: TestProvidersComponent,
+    });
+    expect(asFragment()).toMatchSnapshot();
   });
 
-  describe('when loading is done and we have some indicators', () => {
-    it('should render indicators table', async () => {
-      (
-        useIndicatorsTotalCount as jest.MockedFunction<typeof useIndicatorsTotalCount>
-      ).mockReturnValue({
-        count: 7,
-        isLoading: false,
-      });
-
-      const { asFragment } = render(<IntegrationsGuard>should be restricted</IntegrationsGuard>, {
-        wrapper: TestProvidersComponent,
-      });
-      expect(asFragment()).toMatchSnapshot('indicators are present');
+  it('should render indicators table when loading is done and we have some indicators', async () => {
+    (
+      useIndicatorsTotalCount as jest.MockedFunction<typeof useIndicatorsTotalCount>
+    ).mockReturnValue({
+      count: 7,
+      isLoading: false,
     });
+    (useRequest as jest.MockedFunction<typeof useRequest>).mockReturnValue({
+      isInitialRequest: true,
+      isLoading: true,
+      data: { items: [] },
+      error: null,
+      resendRequest: () => null,
+    });
+
+    const { asFragment } = render(<IntegrationsGuard>should be restricted</IntegrationsGuard>, {
+      wrapper: TestProvidersComponent,
+    });
+    expect(asFragment()).toMatchSnapshot();
+  });
+
+  it('should render indicators page when loading is done and we have some ti integrations installed', async () => {
+    (
+      useIndicatorsTotalCount as jest.MockedFunction<typeof useIndicatorsTotalCount>
+    ).mockReturnValue({
+      count: 0,
+      isLoading: true,
+    });
+    (useRequest as jest.MockedFunction<typeof useRequest>).mockReturnValue({
+      isInitialRequest: true,
+      isLoading: false,
+      data: {
+        items: [
+          {
+            categories: [THREAT_INTELLIGENCE_CATEGORY],
+            id: '123',
+            status: installationStatuses.Installed,
+          },
+        ],
+      },
+      error: null,
+      resendRequest: () => null,
+    });
+
+    const { asFragment } = render(<IntegrationsGuard>should be restricted</IntegrationsGuard>, {
+      wrapper: TestProvidersComponent,
+    });
+    expect(asFragment()).toMatchSnapshot();
+  });
+
+  it('should render empty page when loading is done and we have some unwanted integrations', async () => {
+    (
+      useIndicatorsTotalCount as jest.MockedFunction<typeof useIndicatorsTotalCount>
+    ).mockReturnValue({
+      count: 0,
+      isLoading: true,
+    });
+    (useRequest as jest.MockedFunction<typeof useRequest>).mockReturnValue({
+      isInitialRequest: true,
+      isLoading: false,
+      data: {
+        items: [
+          {
+            categories: [THREAT_INTELLIGENCE_CATEGORY],
+            id: '123',
+            status: installationStatuses.Installing,
+          },
+          {
+            categories: ['123'],
+            id: '123',
+            status: installationStatuses.Installed,
+          },
+          {
+            categories: [THREAT_INTELLIGENCE_CATEGORY],
+            id: THREAT_INTELLIGENCE_UTILITIES,
+            status: installationStatuses.Installed,
+          },
+        ],
+      },
+      error: null,
+      resendRequest: () => null,
+    });
+
+    const { asFragment } = render(<IntegrationsGuard>should be restricted</IntegrationsGuard>, {
+      wrapper: TestProvidersComponent,
+    });
+    expect(asFragment()).toMatchSnapshot();
   });
 });

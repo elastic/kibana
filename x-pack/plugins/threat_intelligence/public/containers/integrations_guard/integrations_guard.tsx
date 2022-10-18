@@ -7,10 +7,13 @@
 
 import { EuiLoadingLogo } from '@elastic/eui';
 import React, { FC } from 'react';
-import { useRequest, UseRequestConfig } from '@kbn/es-ui-shared-plugin/public';
 import { HttpSetup } from '@kbn/core/public';
+import { useRequest, UseRequestConfig } from '@kbn/es-ui-shared-plugin/public';
 import { EmptyPage } from '../../modules/empty_page';
+import { useIndicatorsTotalCount } from '../../modules/indicators';
 import { SecuritySolutionPluginTemplateWrapper } from '../security_solution_plugin_template_wrapper';
+
+type IntegrationInstallStatus = 'installed' | 'installing' | 'install_failed';
 
 let httpClient: HttpSetup;
 
@@ -19,28 +22,40 @@ const PACKAGES_CONFIG: UseRequestConfig = {
   method: 'get',
 };
 
-const THREAT_INTEL_CATEGORY = 'threat_intel';
+export const THREAT_INTELLIGENCE_CATEGORY = 'threat_intel';
 
-const installationStatuses = {
+export const THREAT_INTELLIGENCE_UTILITIES = 'ti_util';
+
+export const installationStatuses = {
   Installed: 'installed',
   Installing: 'installing',
   InstallFailed: 'install_failed',
   NotInstalled: 'not_installed',
 };
 
-const THREAT_INTELLIGENCE_UTILITIES = 'ti_util';
+interface Integration {
+  categories: string[];
+  id: string;
+  status: IntegrationInstallStatus;
+}
 
 export const setHttpClient = (client: HttpSetup) => {
   httpClient = client;
 };
 
 /**
- * Renders children only if TI integrations are enabled
+ * Renders children only if TI integrations are enabled and indicators are received
  */
 export const IntegrationsGuard: FC = ({ children }) => {
-  const { isLoading, data } = useRequest(httpClient, PACKAGES_CONFIG);
+  const { isLoading: indicatorsTotalCountLoading, count: indicatorsTotalCount } =
+    useIndicatorsTotalCount();
 
-  if (isLoading) {
+  const { isLoading: packagesLoading, data: integrations } = useRequest(
+    httpClient,
+    PACKAGES_CONFIG
+  );
+
+  if (packagesLoading && indicatorsTotalCountLoading) {
     return (
       <SecuritySolutionPluginTemplateWrapper isEmptyState>
         <EuiLoadingLogo logo="logoSecurity" size="xl" />
@@ -48,12 +63,19 @@ export const IntegrationsGuard: FC = ({ children }) => {
     );
   }
 
-  const tiIntegrations = data.items.filter(
-    (pkg: any) =>
-      pkg.status === installationStatuses.Installed &&
-      pkg.categories.find((category: string) => category === THREAT_INTEL_CATEGORY) != null &&
-      pkg.id !== THREAT_INTELLIGENCE_UTILITIES
-  );
+  const installedTIIntegrations: Integration[] =
+    integrations?.items.filter(
+      (pkg: any) =>
+        pkg.status === installationStatuses.Installed &&
+        pkg.categories.find((category: string) => category === THREAT_INTELLIGENCE_CATEGORY) !=
+          null &&
+        pkg.id !== THREAT_INTELLIGENCE_UTILITIES
+    ) || [];
 
-  return tiIntegrations.length > 0 ? <>{children}</> : <EmptyPage />;
+  // show indicators page if there are indicators, or if some ti integrations have been added
+  if (indicatorsTotalCount > 0 || installedTIIntegrations.length > 0) {
+    return <>{children}</>;
+  }
+
+  return <EmptyPage />;
 };
