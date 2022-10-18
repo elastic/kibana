@@ -27,7 +27,7 @@ import {
   toSentenceCase,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { compact, debounce, groupBy, isEmpty, isEqual, isFunction } from 'lodash';
+import { compact, debounce, isEmpty, isEqual, isFunction, partition } from 'lodash';
 import { CoreStart, DocLinksStart, Toast } from '@kbn/core/public';
 import type { Query } from '@kbn/es-query';
 import { DataPublicPluginStart, getQueryLog } from '@kbn/data-plugin/public';
@@ -63,8 +63,13 @@ export interface QueryStringInputDependencies {
   uiSettings: CoreStart['uiSettings'];
 }
 
+interface DataViewByIdOrTitle {
+  type: 'title' | 'id';
+  value: string;
+}
+
 export interface QueryStringInputProps {
-  indexPatterns: Array<DataView | string | { type: 'title' | 'id'; value: string }>;
+  indexPatterns: Array<DataView | string | DataViewByIdOrTitle>;
   query: Query;
   disableAutoFocus?: boolean;
   screenTitle?: string;
@@ -179,21 +184,15 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
   };
 
   private fetchIndexPatterns = debounce(async () => {
-    const { stringPatterns = [], objectPatterns = [] } = groupBy(
-      this.props.indexPatterns || [],
-      (indexPattern) => {
-        if (typeof indexPattern === 'string') {
-          return 'stringPatterns';
-        }
-        if ('type' in indexPattern && 'value' in indexPattern) {
-          return `stringPatterns`;
-        }
-        return 'objectPatterns';
-      }
-    );
+    const [objectPatterns = [], stringPatterns = []] = partition<
+      QueryStringInputProps['indexPatterns'][number],
+      DataView
+    >(this.props.indexPatterns || [], (indexPattern): indexPattern is DataView => {
+      return indexPattern instanceof DataView;
+    });
     const idOrTitlePatterns = stringPatterns.map((sp) =>
       typeof sp === 'string' ? { type: 'title', value: sp } : sp
-    ) as Array<{ type: 'title' | 'id'; value: string }>;
+    ) as DataViewByIdOrTitle[];
 
     // abort the previous fetch to avoid overriding with outdated data
     // issue https://github.com/elastic/kibana/issues/80831
@@ -201,14 +200,14 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
     this.fetchIndexPatternsAbortController = new AbortController();
     const currentAbortController = this.fetchIndexPatternsAbortController;
 
-    const objectPatternsFromStrings = (await fetchIndexPatterns(
+    const objectPatternsFromStrings = await fetchIndexPatterns(
       this.props.deps.data.indexPatterns,
       idOrTitlePatterns
-    )) as DataView[];
+    );
 
     if (!currentAbortController.signal.aborted) {
       this.setState({
-        indexPatterns: [...(objectPatterns as DataView[]), ...objectPatternsFromStrings],
+        indexPatterns: [...objectPatterns, ...objectPatternsFromStrings],
       });
 
       this.updateSuggestions();

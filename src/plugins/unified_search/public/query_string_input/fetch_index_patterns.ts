@@ -7,12 +7,12 @@
  */
 
 import { isEmpty } from 'lodash';
-import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
 
 export async function fetchIndexPatterns(
   indexPatternsService: DataViewsContract,
   indexPatternStrings: Array<{ type: 'title' | 'id'; value: string }>
-) {
+): Promise<DataView[]> {
   if (!indexPatternStrings || isEmpty(indexPatternStrings)) {
     return [];
   }
@@ -29,17 +29,20 @@ export async function fetchIndexPatterns(
 
   const searchString = searchStringList.map((value) => `"${value}"`).join(' | ');
 
-  const exactMatches = await Promise.all([
-    ...(
-      await indexPatternsService.find(searchString)
-    ).filter((ip) => searchStringList.includes(ip.title)),
+  const [searchMatches, ...matchesById] = await Promise.all([
+    indexPatternsService.find(searchString),
     ...searchIdsList.map((id) => indexPatternsService.get(id)),
   ]);
+
+  const exactMatches = [
+    ...searchMatches.filter((ip) => searchStringList.includes(ip.title)),
+    ...matchesById,
+  ];
 
   const allMatches =
     exactMatches.length === indexPatternStrings.length
       ? exactMatches
       : [...exactMatches, await indexPatternsService.getDefault()];
 
-  return allMatches;
+  return allMatches.filter((d: DataView | null): d is DataView => d != null);
 }
