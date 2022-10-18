@@ -6,7 +6,6 @@
  */
 
 import { AbstractSource } from '../source';
-import React from 'react';
 import { getKibanaTileMap } from '../../../util';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';

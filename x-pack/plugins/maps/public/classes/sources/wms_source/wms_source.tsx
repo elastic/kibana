@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { AbstractSource } from '../source';
 import { ReactElement } from 'react';
 import { i18n } from '@kbn/i18n';
+import { RasterTileSource } from 'maplibre-gl';
+import { AbstractSource } from '../source';
 import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters';
 // @ts-ignore
 import { WmsClient } from './wms_client';
 import { SOURCE_TYPES } from '../../../../common/constants';
 import { registerSource } from '../source_registry';
 import { IRasterSource, RasterTileSourceData } from '../raster_source';
-import { RasterTileSource } from 'maplibre-gl';
 import { WMSSourceDescriptor } from '../../../../common/descriptor_types';
 export const sourceTitle = i18n.translate('xpack.maps.source.wmsTitle', {
   defaultMessage: 'Web Map Service',
@@ -22,8 +22,8 @@ export const sourceTitle = i18n.translate('xpack.maps.source.wmsTitle', {
 
 export class WMSSource extends AbstractSource implements IRasterSource {
   static type = SOURCE_TYPES.WMS;
-  readonly _descriptor: WMSSourceDescriptor ;
-  static createDescriptor({ serviceUrl, layers, styles }:Partial<WMSSourceDescriptor>) {
+  readonly _descriptor: WMSSourceDescriptor;
+  static createDescriptor({ serviceUrl, layers, styles }: Partial<WMSSourceDescriptor>) {
     return {
       type: WMSSource.type,
       serviceUrl,
