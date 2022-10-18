@@ -86,15 +86,4 @@ describe('retryIfBulkEditConflicts', () => {
     expect(result.errors).toEqual([error409]);
     expect(mockLogger.warn).toBeCalledWith('Bulk delele rules conflicts, exceeded retries');
   });
-
-  for (let i = 1; i <= RETRY_IF_CONFLICTS_ATTEMPTES; i++) {
-    test(`should work when operation conflicts ${i} times`, async () => {
-      const result = await retryIfBulkDeleteConflicts(
-        mockLogger,
-        getOperationConflictsTimes(i),
-        mockFilter
-      );
-      expect(result).toBe(result);
-    });
-  }
 });
