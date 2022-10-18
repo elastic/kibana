@@ -61,6 +61,10 @@ exports.EcsCustomPropertyMappings = {
           flapping: {
             type: 'boolean',
           },
+          uuid: {
+            type: 'keyword',
+            ignore_above: 1024,
+          },
           rule: {
             properties: {
               consumer: {

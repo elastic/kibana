@@ -159,6 +159,23 @@ describe('getState()', () => {
   });
 });
 
+describe('getUUID()', () => {
+  test('returns a UUID for a new alert', () => {
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1');
+    const uuid = alert.getUuid();
+    expect(uuid).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
+  });
+
+  test('returns same uuid from previous run of alert', () => {
+    const uuid = 'previous-uuid';
+    const meta = { uuid };
+    const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
+      meta,
+    });
+    expect(alert.getUuid()).toEqual(uuid);
+  });
+});
+
 describe('scheduleActions()', () => {
   test('makes hasScheduledActions() return true', () => {
     const alert = new Alert<AlertInstanceState, AlertInstanceContext, DefaultActionGroupId>('1', {
@@ -248,6 +265,7 @@ describe('updateLastScheduledActions()', () => {
     expect(alert.toJSON()).toEqual({
       state: {},
       meta: {
+        uuid: expect.any(String),
         lastScheduledActions: {
           date: new Date().toISOString(),
           group: 'default',
@@ -343,9 +361,19 @@ describe('toJSON', () => {
         },
       }
     );
-    expect(JSON.stringify(alertInstance)).toEqual(
-      '{"state":{"foo":true},"meta":{"lastScheduledActions":{"date":"1970-01-01T00:00:00.000Z","group":"default"}}}'
-    );
+
+    expect(alertInstance).toMatchObject({
+      state: {
+        foo: true,
+      },
+      meta: {
+        lastScheduledActions: {
+          date: expect.any(Date),
+          group: 'default',
+        },
+        uuid: expect.any(String),
+      },
+    });
   });
 });
 

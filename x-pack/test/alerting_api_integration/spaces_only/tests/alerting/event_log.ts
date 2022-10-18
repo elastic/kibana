@@ -17,6 +17,12 @@ import {
 } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
+const InstanceActions = new Set<string | undefined>([
+  'new-instance',
+  'active-instance',
+  'recovered-instance',
+]);
+
 // eslint-disable-next-line import/no-default-export
 export default function eventLogTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -611,6 +617,12 @@ export function validateEvent(event: IValidatedEvent, params: ValidateEventLogPa
 
   if (instanceId) {
     expect(event?.kibana?.alerting?.instance_id).to.be(instanceId);
+  }
+
+  if (InstanceActions.has(event?.event?.action)) {
+    expect(typeof event?.kibana?.alert?.uuid).to.be('string');
+  } else {
+    expect(event?.kibana?.alert?.uuid).to.be(undefined);
   }
 
   if (reason) {

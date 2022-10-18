@@ -195,6 +195,7 @@ export const generateAlertOpts = ({ action, group, state, id }: GeneratorParams 
   return {
     action,
     id,
+    uuid: expect.any(String),
     message,
     state,
     ...(group ? { group } : {}),
@@ -269,6 +270,7 @@ export const generateEnqueueFunctionInput = (isArray: boolean = false) => {
 export const generateAlertInstance = ({ id, duration, start }: GeneratorParams = { id: 1 }) => ({
   [String(id)]: {
     meta: {
+      uuid: expect.any(String),
       lastScheduledActions: {
         date: new Date(DATE_1970),
         group: 'default',

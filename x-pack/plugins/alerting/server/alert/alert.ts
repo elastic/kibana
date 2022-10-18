@@ -6,6 +6,8 @@
  */
 
 import { isEmpty } from 'lodash';
+import { v4 as uuidV4 } from 'uuid';
+
 import {
   AlertInstanceMeta,
   AlertInstanceState,
@@ -33,7 +35,13 @@ export type PublicAlert<
   ActionGroupIds extends string = DefaultActionGroupId
 > = Pick<
   Alert<State, Context, ActionGroupIds>,
-  'getState' | 'replaceState' | 'scheduleActions' | 'setContext' | 'getContext' | 'hasContext'
+  | 'getState'
+  | 'replaceState'
+  | 'scheduleActions'
+  | 'setContext'
+  | 'getContext'
+  | 'hasContext'
+  | 'getUuid'
 >;
 
 export class Alert<
@@ -46,16 +54,22 @@ export class Alert<
   private state: State;
   private context: Context;
   private readonly id: string;
+  private readonly uuid: string;
 
   constructor(id: string, { state, meta = {} }: RawAlertInstance = {}) {
     this.id = id;
     this.state = (state || {}) as State;
     this.context = {} as Context;
     this.meta = meta;
+    this.meta.uuid = this.uuid = meta.uuid ?? uuidV4();
   }
 
   getId() {
     return this.id;
+  }
+
+  getUuid() {
+    return this.uuid;
   }
 
   hasScheduledActions() {

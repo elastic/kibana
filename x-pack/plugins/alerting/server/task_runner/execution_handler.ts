@@ -203,6 +203,7 @@ export class ExecutionHandler<
               alertActionGroup: actionGroup,
               alertActionGroupName: this.ruleTypeActionGroups!.get(actionGroup)!,
               context: alert.getContext(),
+              alertUuid: alert.getUuid(),
               actionId: action.id,
               state,
               kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,

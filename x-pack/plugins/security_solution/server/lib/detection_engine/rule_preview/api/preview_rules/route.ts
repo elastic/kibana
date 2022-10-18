@@ -193,6 +193,7 @@ export const previewRulesRoute = async (
               | 'setContext'
               | 'getContext'
               | 'hasContext'
+              | 'getUuid'
             >;
             alertLimit: {
               getValue: () => number;

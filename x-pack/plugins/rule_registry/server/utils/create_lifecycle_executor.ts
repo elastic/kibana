@@ -160,8 +160,7 @@ export const createLifecycleExecutor =
     const commonRuleFields = getCommonAlertFields(options);
 
     const currentAlerts: Record<string, ExplicitAlertFields> = {};
-
-    const newAlertUuids: Record<string, string> = {};
+    const alertUuidMap: Map<string, string> = new Map();
 
     const lifecycleAlertServices: LifecycleAlertServices<
       InstanceState,
@@ -170,17 +169,21 @@ export const createLifecycleExecutor =
     > = {
       alertWithLifecycle: ({ id, fields }) => {
         currentAlerts[id] = fields;
-        return alertFactory.create(id);
+        const alert = alertFactory.create(id);
+        const uuid = alert.getUuid();
+        alertUuidMap.set(id, uuid);
+        return alert;
       },
       getAlertStartedDate: (alertId: string) => state.trackedAlerts[alertId]?.started ?? null,
       getAlertUuid: (alertId: string) => {
-        if (!state.trackedAlerts[alertId]) {
-          const alertUuid = v4();
-          newAlertUuids[alertId] = alertUuid;
-          return alertUuid;
+        if (state.trackedAlerts[alertId]) {
+          return state.trackedAlerts[alertId].alertUuid;
         }
 
-        return state.trackedAlerts[alertId].alertUuid;
+        logger.warn(
+          `[Rule Registry] requesting uuid for alert ${alertId} which is not tracked, generating dynamically`
+        );
+        return v4();
       },
     };
 
@@ -230,21 +233,29 @@ export const createLifecycleExecutor =
       alertIds.map((alertId) => {
         const alertData = trackedAlertsDataMap[alertId];
         const currentAlertData = currentAlerts[alertId];
+        const trackedAlert = state.trackedAlerts[alertId];
 
         if (!alertData) {
           logger.debug(`[Rule Registry] Could not find alert data for ${alertId}`);
         }
 
-        const isNew = !state.trackedAlerts[alertId];
-        const isRecovered = !currentAlerts[alertId];
+        const isNew = !trackedAlert;
+        const isRecovered = !currentAlertData;
         const isActive = !isRecovered;
 
-        const { alertUuid, started } = !isNew
+        const { alertUuid: alertUuidCalc, started } = !isNew
           ? state.trackedAlerts[alertId]
           : {
-              alertUuid: newAlertUuids[alertId] || v4(),
+              alertUuid: alertUuidMap.get(alertId),
               started: commonRuleFields[TIMESTAMP],
             };
+
+        const alertUuid = alertUuidCalc ?? v4();
+        if (!alertUuidCalc) {
+          logger.warn(
+            `[Rule Registry] uuid not calculated correctly for alert ${alertId}, generating dynamically`
+          );
+        }
 
         const event: ParsedTechnicalFields & ParsedExperimentalFields = {
           ...alertData?.fields,

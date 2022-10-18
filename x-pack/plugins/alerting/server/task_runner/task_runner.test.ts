@@ -2285,6 +2285,7 @@ describe('Task Runner', () => {
         alertInstances: {
           '1': {
             meta: {
+              uuid: expect.any(String),
               lastScheduledActions: {
                 date: new Date(DATE_1970),
                 group: 'default',
@@ -2437,6 +2438,7 @@ describe('Task Runner', () => {
         alertInstances: {
           '1': {
             meta: {
+              uuid: expect.any(String),
               lastScheduledActions: {
                 date: new Date(DATE_1970),
                 group: 'default',
@@ -2449,6 +2451,7 @@ describe('Task Runner', () => {
           },
           '2': {
             meta: {
+              uuid: expect.any(String),
               lastScheduledActions: {
                 date: new Date(DATE_1970),
                 group: 'default',

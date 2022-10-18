@@ -129,6 +129,7 @@ Using the https://mustache.github.io/[Mustache] template syntax `{{variable name
 `rule.tags`:: The list of tags applied to the rule.
 `date`:: The date the rule scheduled the action, in ISO format.
 `alert.id`:: The ID of the alert that scheduled the action.
+`alert.uuid`:: The UUID of the alert that scheduled the action.  The UUID value will remain unchanged while the alert is active, during subsequent runs
 `alert.actionGroup`:: The ID of the action group of the alert that scheduled the action.
 `alert.actionSubgroup`:: The action subgroup of the alert that scheduled the action.
 `alert.actionGroupName`:: The name of the action group of the alert that scheduled the action.

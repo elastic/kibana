@@ -766,6 +766,7 @@ This factory returns an instance of `Alert`. The `Alert` class has the following
 
 |Method|Description|
 |---|---|
+|getUuid()|Get the UUID of the alert.|
 |getState()|Get the current state of the alert.|
 |scheduleActions(actionGroup, context)|Call this to schedule the execution of actions. The actionGroup is a string `id` that relates to the group of alert `actions` to execute and the context will be used for templating purposes. `scheduleActions` should only be called once per alert.|
 |replaceState(state)|Used to replace the current state of the alert. This doesn't work like React, the entire state must be provided. Use this feature as you see fit. The state that is set will persist between rule executions whenever you re-create an alert with the same id. The alert state will be erased when `scheduleActions`isn't called during an execution.|

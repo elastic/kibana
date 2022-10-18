@@ -311,6 +311,7 @@ describe('disable()', () => {
       },
       kibana: {
         alert: {
+          uuid: expect.any(String),
           rule: {
             consumer: 'myApp',
             rule_type_id: '123',

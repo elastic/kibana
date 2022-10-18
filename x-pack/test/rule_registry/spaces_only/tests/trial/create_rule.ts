@@ -13,6 +13,7 @@ import {
   ALERT_RULE_UUID,
   ALERT_START,
   ALERT_STATUS,
+  ALERT_TIME_RANGE,
   ALERT_UUID,
   EVENT_KIND,
   VERSION,
@@ -32,6 +33,7 @@ import {
 import { AlertDef, AlertParams } from '../../../common/types';
 import { APM_METRIC_INDEX_NAME } from '../../../common/constants';
 import { obsOnly } from '../../../common/lib/authentication/users';
+import { getEventLog } from '../../../../alerting_api_integration/common/lib/get_event_log';
 
 const SPACE_ID = 'space1';
 
@@ -39,8 +41,7 @@ const SPACE_ID = 'space1';
 export default function registryRulesApiTest({ getService }: FtrProviderContext) {
   const es = getService('es');
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/125851
-  describe.skip('Rule Registry API', () => {
+  describe('Rule Registry API', async () => {
     describe('with write permissions', () => {
       it('does not bootstrap indices on plugin startup', async () => {
         const { body: targetIndices } = await getAlertsTargetIndices(getService, obsOnly, SPACE_ID);
@@ -119,7 +120,7 @@ export default function registryRulesApiTest({ getService }: FtrProviderContext)
                 },
               },
             });
-            expect(res).to.be.empty();
+            expect(res.hits.hits).to.be.empty();
           } catch (exc) {
             expect(exc.message).contain('index_not_found_exception');
           }
@@ -151,7 +152,7 @@ export default function registryRulesApiTest({ getService }: FtrProviderContext)
                 },
               },
             });
-            expect(res).to.be.empty();
+            expect(res.hits.hits).to.be.empty();
           } catch (exc) {
             expect(exc.message).contain('index_not_found_exception');
           }
@@ -195,8 +196,22 @@ export default function registryRulesApiTest({ getService }: FtrProviderContext)
             ALERT_UUID,
             ALERT_RULE_EXECUTION_UUID,
             ALERT_RULE_UUID,
+            ALERT_TIME_RANGE,
             VERSION,
           ];
+
+          const alertUuid = alertEvent[ALERT_UUID]?.[0];
+          const executionUuid = alertEvent[ALERT_RULE_EXECUTION_UUID]?.[0];
+          expect(typeof alertUuid).to.be('string');
+          expect(typeof executionUuid).to.be('string');
+
+          await checkEventLogAlertUuids(
+            getService,
+            SPACE_ID,
+            createResponse.alert.id,
+            alertUuid,
+            executionUuid
+          );
 
           const toCompare = omit(alertEvent, exclude);
 
@@ -258,4 +273,26 @@ export default function registryRulesApiTest({ getService }: FtrProviderContext)
       });
     });
   });
+}
+
+async function checkEventLogAlertUuids(
+  getService: FtrProviderContext['getService'],
+  spaceId: string,
+  ruleId: string,
+  alertUuid: string,
+  executionUuid: string
+) {
+  const docs = await getEventLog({
+    getService,
+    spaceId,
+    type: 'alert',
+    id: ruleId,
+    provider: 'alerting',
+    actions: new Map([['active-instance', { equal: 1 }]]),
+    filter: `kibana.alert.rule.execution.uuid: ${executionUuid}`,
+  });
+
+  for (const doc of docs) {
+    expect(doc?.kibana?.alert?.uuid).to.be(alertUuid);
+  }
 }

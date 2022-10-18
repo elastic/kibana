@@ -9,6 +9,7 @@ import * as t from 'io-ts';
 import { DateFromString } from './date_from_string';
 
 const metaSchema = t.partial({
+  uuid: t.string,
   lastScheduledActions: t.intersection([
     t.partial({
       subgroup: t.string,

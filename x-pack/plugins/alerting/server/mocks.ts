@@ -54,6 +54,7 @@ const createAlertFactoryMock = {
       getScheduledActionOptions: jest.fn(),
       unscheduleActions: jest.fn(),
       getState: jest.fn(),
+      getUuid: jest.fn(),
       scheduleActions: jest.fn(),
       replaceState: jest.fn(),
       updateLastScheduledActions: jest.fn(),
