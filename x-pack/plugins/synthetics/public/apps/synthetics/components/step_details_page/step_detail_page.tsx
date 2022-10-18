@@ -26,7 +26,7 @@ export const StepDetailPage = () => {
   useTrackPageview({ app: 'synthetics', path: 'stepDetail' });
   useTrackPageview({ app: 'synthetics', path: 'stepDetail', delay: 15000 });
 
-  const { data, loading } = useJourneySteps(checkGroupId);
+  const { data, loading, isFailed, currentStep, stepLabels } = useJourneySteps(checkGroupId);
 
   useStepDetailsBreadcrumbs([{ text: data?.details?.journey.monitor.name ?? '' }]);
 
@@ -49,7 +49,14 @@ export const StepDetailPage = () => {
       <EuiFlexGroup>
         <EuiFlexItem grow={1}>
           <EuiPanel>
-            {data?.details?.journey && <StepImage ping={data?.details?.journey} />}
+            {data?.details?.journey && currentStep && (
+              <StepImage
+                ping={data?.details?.journey}
+                step={currentStep}
+                isFailed={isFailed}
+                stepLabels={stepLabels}
+              />
+            )}
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={2}>

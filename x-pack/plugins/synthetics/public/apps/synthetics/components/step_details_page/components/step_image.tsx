@@ -8,11 +8,21 @@
 import React, { useState } from 'react';
 import { EuiButtonGroup, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { LastSuccessfulScreenshot } from './last_successful_screenshot';
+import { LastSuccessfulScreenshot } from './screenshot/last_successful_screenshot';
 import { JourneyStep } from '../../../../../../common/runtime_types';
-import { JourneyScreenshot } from '../../monitor_details/monitor_summary/last_ten_test_runs';
+import { JourneyStepScreenshotContainer } from '../../common/screenshot/journey_step_screenshot_container';
 
-export const StepImage = ({ ping }: { ping: JourneyStep }) => {
+export const StepImage = ({
+  step,
+  ping,
+  isFailed,
+  stepLabels,
+}: {
+  ping: JourneyStep;
+  step: JourneyStep;
+  isFailed?: boolean;
+  stepLabels?: string[];
+}) => {
   const toggleButtons = [
     {
       id: `received`,
@@ -38,13 +48,21 @@ export const StepImage = ({ ping }: { ping: JourneyStep }) => {
       <EuiSpacer size="m" />
       <div className="eui-textCenter">
         {idSelected === 'received' ? (
-          <JourneyScreenshot checkGroupId={ping.monitor.check_group} />
+          <JourneyStepScreenshotContainer
+            checkGroup={step?.monitor.check_group}
+            initialStepNo={step?.synthetics?.step?.index}
+            stepStatus={step?.synthetics.payload?.status}
+            allStepsLoaded={true}
+            stepLabels={stepLabels}
+            retryFetchOnRevisit={false}
+            asThumbnail={false}
+          />
         ) : (
           <LastSuccessfulScreenshot step={ping} />
         )}
 
         <EuiSpacer size="l" />
-        {ping.monitor.status === 'down' && (
+        {isFailed && (
           <EuiButtonGroup
             legend=""
             options={toggleButtons}

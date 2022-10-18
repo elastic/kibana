@@ -9,14 +9,15 @@ import { useFetcher } from '@kbn/observability-plugin/public';
 import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { fetchLastSuccessfulCheck } from '../../../state';
-import { StepScreenshotDisplay } from './screenshot/step_screenshot_display';
-import { JourneyStep, Ping } from '../../../../../../common/runtime_types';
+import { fetchLastSuccessfulCheck } from '../../../../state';
+import { JourneyStep } from '../../../../../../../common/runtime_types';
+import { EmptyImage } from '../../../common/screenshot/empty_image';
+import { JourneyStepScreenshotContainer } from '../../../common/screenshot/journey_step_screenshot_container';
 
 export const LastSuccessfulScreenshot = ({ step }: { step: JourneyStep }) => {
   const { stepIndex } = useParams<{ checkGroupId: string; stepIndex: string }>();
 
-  const { data } = useFetcher(() => {
+  const { data, loading } = useFetcher(() => {
     return fetchLastSuccessfulCheck({
       timestamp: step['@timestamp'],
       monitorId: step.monitor.id,
@@ -25,21 +26,19 @@ export const LastSuccessfulScreenshot = ({ step }: { step: JourneyStep }) => {
     });
   }, [step._id, step['@timestamp']]);
 
-  const lastSuccessfulCheck: Ping | undefined = data;
-
-  if (!lastSuccessfulCheck) {
-    return null;
+  if (loading || !data) {
+    return <EmptyImage isLoading={Boolean(loading)} />;
   }
 
   return (
     <>
-      <StepScreenshotDisplay
-        checkGroup={lastSuccessfulCheck.monitor.check_group}
-        isScreenshotRef={Boolean(lastSuccessfulCheck.synthetics?.isScreenshotRef)}
-        isFullScreenshot={Boolean(lastSuccessfulCheck.synthetics?.isFullScreenshot)}
-        stepIndex={Number(stepIndex)}
-        stepName={step.synthetics?.step?.name}
-        lazyLoad={false}
+      <JourneyStepScreenshotContainer
+        checkGroup={data?.monitor.check_group}
+        initialStepNo={data?.synthetics?.step?.index}
+        stepStatus={data?.synthetics?.payload?.status}
+        allStepsLoaded={true}
+        stepLabels={[]}
+        retryFetchOnRevisit={false}
       />
       <EuiSpacer size="xs" />
     </>
