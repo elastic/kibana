@@ -66,7 +66,10 @@ export interface FieldStatsServices {
 
 export interface FieldStatsProps {
   services: FieldStatsServices;
-  query: Query | AggregateQuery;
+  /** If query is provided, build dsl query with this **/
+  query?: Query | AggregateQuery;
+  /** If dslQuery is provided, use this query directly **/
+  dslQuery?: object;
   filters: Filter[];
   /** ISO formatted date string **/
   fromDate: string;
@@ -93,6 +96,7 @@ export interface FieldStatsProps {
 const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   services,
   query,
+  dslQuery,
   filters,
   fromDate,
   toDate,
@@ -169,7 +173,9 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
         field,
         fromDate,
         toDate,
-        dslQuery: buildEsQuery(loadedDataView, query, filters, getEsQueryConfig(uiSettings)),
+        dslQuery:
+          dslQuery ??
+          buildEsQuery(loadedDataView, query ?? [], filters, getEsQueryConfig(uiSettings)),
         abortController: abortControllerRef.current,
       });
 

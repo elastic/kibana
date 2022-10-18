@@ -30,6 +30,15 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import {
+  SERVICE_NAME,
+  TRANSACTION_NAME,
+  TRANSACTION_TYPE,
+} from '../../../../../common/elasticsearch_fieldnames';
+import { isUndefinedOrNull } from '../../../../../common/utils/is_defined_or_null';
 import { asPercent } from '../../../../../common/utils/formatters';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
@@ -38,6 +47,17 @@ import type { ApmPluginStartDeps } from '../../../../plugin';
 import { useApmDataView } from '../../../../hooks/use_apm_data_view';
 import { useTheme } from '../../../../hooks/use_theme';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+
+export function kqlQuery(kql: string): estypes.QueryDslQueryContainer[] {
+  return !!kql ? [toElasticsearchQuery(fromKueryExpression(kql))] : [];
+}
+
+export function termQuery<T extends string>(
+  field: T,
+  value: string | boolean | number | undefined | null
+): QueryDslQueryContainer[] {
+  return isUndefinedOrNull(value) ? [] : [{ term: { [field]: value } }];
+}
 
 export type OnAddFilter = ({
   fieldName,
@@ -62,7 +82,7 @@ export function FieldStatsPopoverContent({
   services,
   field,
   dataViewOrDataViewId,
-  query,
+  dslQuery,
   filters,
   fromDate,
   toDate,
@@ -116,7 +136,7 @@ export function FieldStatsPopoverContent({
         services={services}
         field={field}
         dataViewOrDataViewId={dataViewOrDataViewId}
-        query={query}
+        dslQuery={dslQuery}
         filters={filters}
         fromDate={fromDate}
         toDate={toDate}
@@ -140,8 +160,7 @@ export function FieldStatsPopoverContent({
               const valueText =
                 progressBarMax !== undefined
                   ? asPercent(value.doc_count, progressBarMax)
-                  : // @todo: be careful, check for 'other' render condition
-                    '';
+                  : '';
 
               if (progressBarMax === undefined || valueText === '') return null;
               return (
@@ -179,7 +198,7 @@ export function FieldStatsPopover({
   onAddFilter: OnAddFilter;
 }) {
   const {
-    query: { kuery: kueryStr },
+    query: { kuery: kql },
   } = useApmParams('/services/{serviceName}');
 
   const { start, end } = useFetchParams();
@@ -199,13 +218,21 @@ export function FieldStatsPopover({
   const closePopover = useCallback(() => setInfoOpen(false), []);
   const theme = useTheme();
 
-  const fieldStatsQuery = useMemo(
-    () => ({
-      query: kueryStr,
-      language: 'kuery',
-    }),
-    [kueryStr]
-  );
+  const params = useFetchParams();
+
+  const fieldStatsQuery = useMemo(() => {
+    const dslQuery = kqlQuery(kql);
+    return {
+      bool: {
+        filter: [
+          ...termQuery(SERVICE_NAME, params.serviceName),
+          ...termQuery(TRANSACTION_TYPE, params.transactionType),
+          ...termQuery(TRANSACTION_NAME, params.transactionName),
+          ...dslQuery,
+        ],
+      },
+    };
+  }, [params, kql]);
 
   const fieldStatsServices: Partial<FieldStatsServices> = useMemo(
     () => ({
@@ -301,13 +328,12 @@ export function FieldStatsPopover({
             services={fieldStatsServices as FieldStatsServices}
             field={field}
             dataViewOrDataViewId={dataView}
-            query={fieldStatsQuery}
+            dslQuery={fieldStatsQuery}
             filters={defaultFilters}
             fromDate={start}
             toDate={end}
             onAddFilter={addFilter}
             overrideFieldTopValueBar={overrideFieldTopValueBar}
-            // onStateChange={onStateChange}
           />
         </>
       )}
