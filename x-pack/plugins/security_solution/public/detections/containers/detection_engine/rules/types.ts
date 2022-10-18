@@ -7,7 +7,6 @@
 
 import * as t from 'io-ts';
 
-import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import { listArray } from '@kbn/securitysolution-io-ts-list-types';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import {
@@ -341,15 +340,4 @@ export interface PrePackagedRulesStatusResponse {
   timelines_installed: number;
   timelines_not_installed: number;
   timelines_not_updated: number;
-}
-
-export interface FindRulesReferencedByExceptionsListProp {
-  id?: string;
-  listId?: string;
-  namespaceType: NamespaceType;
-}
-
-export interface FindRulesReferencedByExceptionsProps {
-  lists: FindRulesReferencedByExceptionsListProp[];
-  signal?: AbortSignal;
 }

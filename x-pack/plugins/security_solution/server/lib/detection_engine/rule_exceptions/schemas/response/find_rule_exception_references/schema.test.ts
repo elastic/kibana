@@ -6,14 +6,11 @@
  */
 
 import { exactCheck, formatErrors, foldLeftRight } from '@kbn/securitysolution-io-ts-utils';
-import {
-  exceptionListRuleReferencesSchema,
-  rulesReferencedByExceptionListsSchema,
-} from './find_exception_list_references_schema';
+import { exceptionListRuleReferencesSchema, rulesReferencedByExceptionListsSchema } from './schema';
 import type {
   ExceptionListRuleReferencesSchema,
   RulesReferencedByExceptionListsSchema,
-} from './find_exception_list_references_schema';
+} from './schema';
 import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
 
 describe('find_exception_list_references_schema', () => {

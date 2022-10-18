@@ -27,22 +27,18 @@ import { formatErrors, validate } from '@kbn/securitysolution-io-ts-utils';
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import type {
-  CreateRuleExceptionSchemaDecoded,
-  QueryRuleByIdSchemaDecoded,
-} from '../../../../../common/detection_engine/schemas/request';
-import {
-  createRuleExceptionsSchema,
-  queryRuleByIdSchema,
-} from '../../../../../common/detection_engine/schemas/request';
-import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
-import { buildSiemResponse } from '../utils';
-import { patchRules } from '../../rules/patch_rules';
-import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
-import { readRules } from '../../rules/read_rules';
-import type { RuleParams } from '../../schemas/rule_schemas';
-import { checkDefaultRuleExceptionListReferences } from './utils/check_for_default_rule_exception_list';
+import type { QueryRuleByIdSchemaDecoded } from '../../../../../../common/detection_engine/schemas/request';
+import { queryRuleByIdSchema } from '../../../../../../common/detection_engine/schemas/request';
+import type { SecuritySolutionPluginRouter } from '../../../../../types';
+import { DETECTION_ENGINE_RULES_URL } from '../../../../../../common/constants';
+import { buildSiemResponse } from '../../../routes/utils';
+import { patchRules } from '../../../rules/patch_rules';
+import { buildRouteValidation } from '../../../../../utils/build_validation/route_validation';
+import { readRules } from '../../../rules/read_rules';
+import type { RuleParams } from '../../../schemas/rule_schemas';
+import { checkDefaultRuleExceptionListReferences } from '../../../routes/rules/utils/check_for_default_rule_exception_list';
+import type { CreateRuleExceptionSchemaDecoded } from '../../schemas/request/create_rule_default_exceptions/schema';
+import { createRuleExceptionsSchema } from '../../schemas/request/create_rule_default_exceptions/schema';
 
 export const createRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) => {
   router.post(

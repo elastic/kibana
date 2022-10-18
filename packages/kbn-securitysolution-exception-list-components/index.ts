@@ -9,8 +9,8 @@
 export * from './src/search_bar/search_bar';
 export * from './src/empty_viewer_state/empty_viewer_state';
 export * from './src/pagination/pagination';
-// export * from './src/exceptions_utility/exceptions_utility';
 export * from './src/exception_items/exception_items';
 export * from './src/exception_item_card';
+export * from './src/exception_item_meta_form';
 export * from './src/value_with_space_warning';
 export * from './src/types';

@@ -9,16 +9,16 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 
-import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL } from '../../../../../common/constants';
-import { buildSiemResponse } from '../utils';
-import { enrichFilterWithRuleTypeMapping } from '../../rules/enrich_filter_with_rule_type_mappings';
-import type { FindExceptionReferencesOnRuleSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/find_exception_list_references_schema';
-import { findExceptionReferencesOnRuleSchema } from '../../../../../common/detection_engine/schemas/request/find_exception_list_references_schema';
-import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
-import type { RuleReferencesSchema } from '../../../../../common/detection_engine/schemas/response/find_exception_list_references_schema';
-import { rulesReferencedByExceptionListsSchema } from '../../../../../common/detection_engine/schemas/response/find_exception_list_references_schema';
-import type { RuleParams } from '../../schemas/rule_schemas';
+import type { SecuritySolutionPluginRouter } from '../../../../../types';
+import { DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL } from '../../../../../../common/constants';
+import { buildSiemResponse } from '../../../routes/utils';
+import { enrichFilterWithRuleTypeMapping } from '../../../rules/enrich_filter_with_rule_type_mappings';
+import type { FindExceptionReferencesOnRuleSchemaDecoded } from '../../schemas/request/find_rule_exception_references/schema';
+import { findExceptionReferencesOnRuleSchema } from '../../schemas/request/find_rule_exception_references/schema';
+import { buildRouteValidation } from '../../../../../utils/build_validation/route_validation';
+import type { RuleParams } from '../../../schemas/rule_schemas';
+import type { RuleReferencesSchema } from '../../schemas/response/find_rule_exception_references/schema';
+import { rulesReferencedByExceptionListsSchema } from '../../schemas/response/find_rule_exception_references/schema';
 
 export const findRuleExceptionReferencesRoute = (router: SecuritySolutionPluginRouter) => {
   router.get(

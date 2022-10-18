@@ -6,8 +6,8 @@
  */
 
 import { exactCheck, formatErrors, foldLeftRight } from '@kbn/securitysolution-io-ts-utils';
-import { findExceptionReferencesOnRuleSchema } from './find_exception_list_references_schema';
-import type { FindExceptionReferencesOnRuleSchema } from './find_exception_list_references_schema';
+import { findExceptionReferencesOnRuleSchema } from './schema';
+import type { FindExceptionReferencesOnRuleSchema } from './schema';
 
 describe('find_exception_list_references_schema', () => {
   test('validates all fields', () => {
