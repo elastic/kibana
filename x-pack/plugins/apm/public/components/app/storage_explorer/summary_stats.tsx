@@ -14,12 +14,15 @@ import {
   EuiText,
   useEuiFontSize,
   EuiLink,
-  EuiLoadingSpinner,
   EuiToolTip,
   EuiIcon,
+  EuiProgress,
+  EuiLoadingContent,
+  EuiSpacer,
 } from '@elastic/eui';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { isEmpty } from 'lodash';
 import { useProgressiveFetcher } from '../../../hooks/use_progressive_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { useApmParams } from '../../../hooks/use_apm_params';
@@ -29,15 +32,6 @@ import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { asTransactionRate } from '../../../../common/utils/formatters';
 import { getIndexManagementHref } from './get_storage_explorer_links';
-
-const INITIAL_DATA = {
-  totalSize: 0,
-  diskSpaceUsedPct: 0,
-  estimatedIncrementalSize: 0,
-  dailyDataGeneration: 0,
-  tracesPerMinute: 0,
-  numberOfServices: 0,
-};
 
 export function SummaryStats() {
   const router = useApmRouter();
@@ -68,7 +62,7 @@ export function SummaryStats() {
     },
   });
 
-  const { data = INITIAL_DATA, status } = useProgressiveFetcher(
+  const { data, status } = useProgressiveFetcher(
     (callApmApi) => {
       return callApmApi('GET /internal/apm/storage_explorer_summary_stats', {
         params: {
@@ -85,128 +79,142 @@ export function SummaryStats() {
     [indexLifecyclePhase, environment, kuery, start, end]
   );
 
-  const loading = status === FETCH_STATUS.LOADING;
+  const loading =
+    status === FETCH_STATUS.LOADING || status === FETCH_STATUS.NOT_INITIATED;
+
+  const hasData = !isEmpty(data);
 
   return (
-    <EuiPanel hasBorder={true} hasShadow={false} paddingSize="l">
-      {loading && (
-        <EuiText textAlign="center">
-          <EuiLoadingSpinner size="l" />
-        </EuiText>
-      )}
-      {!loading && (
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem>
-            <EuiFlexGroup gutterSize="xl">
-              <SummaryMetric
-                label={i18n.translate(
-                  'xpack.apm.storageExplorer.summary.totalSize',
-                  {
-                    defaultMessage: 'Total APM size',
-                  }
-                )}
-                tooltipContent={i18n.translate(
-                  'xpack.apm.storageExplorer.summary.totalSize.tooltip',
-                  {
-                    defaultMessage: 'The storage size used by the APM indices.',
-                  }
-                )}
-                value={asDynamicBytes(data?.totalSize)}
-                color={euiTheme.colors.text}
-              />
-              <SummaryMetric
-                label={i18n.translate(
-                  'xpack.apm.storageExplorer.summary.diskSpaceUsedPct',
-                  {
-                    defaultMessage: 'Disk space used',
-                  }
-                )}
-                tooltipContent={i18n.translate(
-                  'xpack.apm.storageExplorer.summary.diskSpaceUsedPct.tooltip',
-                  {
-                    defaultMessage:
-                      'The percentage of storage size used by the APM indices compared to the overall storage configured for Elasticsearch.',
-                  }
-                )}
-                value={asPercent(data?.diskSpaceUsedPct, 1)}
-                color={euiTheme.colors.warning}
-              />
-              <SummaryMetric
-                label={i18n.translate(
-                  'xpack.apm.storageExplorer.summary.incrementalSize',
-                  {
-                    defaultMessage: 'Incremental APM size',
-                  }
-                )}
-                tooltipContent={i18n.translate(
-                  'xpack.apm.storageExplorer.summary.incrementalSize.tooltip',
-                  {
-                    defaultMessage:
-                      'The estimated storage size used by the APM indices based on the filters selected.',
-                  }
-                )}
-                value={asDynamicBytes(data?.estimatedIncrementalSize)}
-                color={euiTheme.colors.primary}
-              />
-              <SummaryMetric
-                label={i18n.translate(
-                  'xpack.apm.storageExplorer.summary.dailyDataGeneration',
-                  {
-                    defaultMessage: 'Daily data generation',
-                  }
-                )}
-                value={asDynamicBytes(data?.dailyDataGeneration)}
-                color={euiTheme.colors.danger}
-              />
-              <SummaryMetric
-                label={i18n.translate(
-                  'xpack.apm.storageExplorer.summary.tracesPerMinute',
-                  {
-                    defaultMessage: 'Traces per minute',
-                  }
-                )}
-                value={asTransactionRate(data?.tracesPerMinute)}
-                color={euiTheme.colors.accent}
-              />
-              <SummaryMetric
-                label={i18n.translate(
-                  'xpack.apm.storageExplorer.summary.numberOfServices',
-                  {
-                    defaultMessage: 'Number of services',
-                  }
-                )}
-                value={data?.numberOfServices.toString()}
-                color={euiTheme.colors.success}
-              />
-            </EuiFlexGroup>
-          </EuiFlexItem>
+    <EuiPanel
+      hasBorder={true}
+      hasShadow={false}
+      paddingSize="l"
+      style={{ position: 'relative' }}
+    >
+      {loading && <EuiProgress size="xs" color="accent" position="absolute" />}
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem>
+          <EuiFlexGroup gutterSize="xl">
+            <SummaryMetric
+              label={i18n.translate(
+                'xpack.apm.storageExplorer.summary.totalSize',
+                {
+                  defaultMessage: 'Total APM size',
+                }
+              )}
+              tooltipContent={i18n.translate(
+                'xpack.apm.storageExplorer.summary.totalSize.tooltip',
+                {
+                  defaultMessage: 'The storage size used by the APM indices.',
+                }
+              )}
+              value={asDynamicBytes(data?.totalSize)}
+              color={euiTheme.colors.text}
+              loading={loading}
+              hasData={hasData}
+            />
+            <SummaryMetric
+              label={i18n.translate(
+                'xpack.apm.storageExplorer.summary.diskSpaceUsedPct',
+                {
+                  defaultMessage: 'Disk space used',
+                }
+              )}
+              tooltipContent={i18n.translate(
+                'xpack.apm.storageExplorer.summary.diskSpaceUsedPct.tooltip',
+                {
+                  defaultMessage:
+                    'The percentage of storage size used by the APM indices compared to the overall storage configured for Elasticsearch.',
+                }
+              )}
+              value={asPercent(data?.diskSpaceUsedPct, 1)}
+              color={euiTheme.colors.warning}
+              loading={loading}
+              hasData={hasData}
+            />
+            <SummaryMetric
+              label={i18n.translate(
+                'xpack.apm.storageExplorer.summary.incrementalSize',
+                {
+                  defaultMessage: 'Incremental APM size',
+                }
+              )}
+              tooltipContent={i18n.translate(
+                'xpack.apm.storageExplorer.summary.incrementalSize.tooltip',
+                {
+                  defaultMessage:
+                    'The estimated storage size used by the APM indices based on the filters selected.',
+                }
+              )}
+              value={asDynamicBytes(data?.estimatedIncrementalSize)}
+              color={euiTheme.colors.primary}
+              loading={loading}
+              hasData={hasData}
+            />
+            <SummaryMetric
+              label={i18n.translate(
+                'xpack.apm.storageExplorer.summary.dailyDataGeneration',
+                {
+                  defaultMessage: 'Daily data generation',
+                }
+              )}
+              value={asDynamicBytes(data?.dailyDataGeneration)}
+              color={euiTheme.colors.danger}
+              loading={loading}
+              hasData={hasData}
+            />
+            <SummaryMetric
+              label={i18n.translate(
+                'xpack.apm.storageExplorer.summary.tracesPerMinute',
+                {
+                  defaultMessage: 'Traces per minute',
+                }
+              )}
+              value={asTransactionRate(data?.tracesPerMinute)}
+              color={euiTheme.colors.accent}
+              loading={loading}
+              hasData={hasData}
+            />
+            <SummaryMetric
+              label={i18n.translate(
+                'xpack.apm.storageExplorer.summary.numberOfServices',
+                {
+                  defaultMessage: 'Number of services',
+                }
+              )}
+              value={(data?.numberOfServices ?? 0).toString()}
+              color={euiTheme.colors.success}
+              loading={loading}
+              hasData={hasData}
+            />
+          </EuiFlexGroup>
+        </EuiFlexItem>
 
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup direction="column" justifyContent="spaceBetween">
-              <EuiFlexItem>
-                <EuiLink href={serviceInventoryLink}>
-                  {i18n.translate(
-                    'xpack.apm.storageExplorer.summary.serviceInventoryLink',
-                    {
-                      defaultMessage: 'Go to Service Inventory',
-                    }
-                  )}
-                </EuiLink>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiLink href={getIndexManagementHref(core)}>
-                  {i18n.translate(
-                    'xpack.apm.storageExplorer.summary.indexManagementLink',
-                    {
-                      defaultMessage: 'Go to Index Management',
-                    }
-                  )}
-                </EuiLink>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup direction="column" justifyContent="spaceBetween">
+            <EuiFlexItem>
+              <EuiLink href={serviceInventoryLink}>
+                {i18n.translate(
+                  'xpack.apm.storageExplorer.summary.serviceInventoryLink',
+                  {
+                    defaultMessage: 'Go to Service Inventory',
+                  }
+                )}
+              </EuiLink>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiLink href={getIndexManagementHref(core)}>
+                {i18n.translate(
+                  'xpack.apm.storageExplorer.summary.indexManagementLink',
+                  {
+                    defaultMessage: 'Go to Index Management',
+                  }
+                )}
+              </EuiLink>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiPanel>
   );
 }
@@ -216,11 +224,15 @@ function SummaryMetric({
   value,
   color,
   tooltipContent,
+  loading,
+  hasData,
 }: {
   label: string;
   value: string;
   color: string;
   tooltipContent?: string;
+  loading: boolean;
+  hasData: boolean;
 }) {
   const xxlFontSize = useEuiFontSize('xxl', { measurement: 'px' });
   const { euiTheme } = useEuiTheme();
@@ -244,15 +256,25 @@ function SummaryMetric({
           {label}
         </EuiText>
       )}
-      <EuiText
-        css={css`
-          ${xxlFontSize}
-          font-weight: ${euiTheme.font.weight.bold};
-          color: ${color};
-        `}
-      >
-        {value}
-      </EuiText>
+      {loading && !hasData && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiLoadingContent lines={2} />
+        </>
+      )}
+      {hasData && (
+        <>
+          <EuiText
+            css={css`
+              ${xxlFontSize}
+              font-weight: ${euiTheme.font.weight.bold};
+              color: ${color};
+            `}
+          >
+            {value}
+          </EuiText>
+        </>
+      )}
     </EuiFlexItem>
   );
 }

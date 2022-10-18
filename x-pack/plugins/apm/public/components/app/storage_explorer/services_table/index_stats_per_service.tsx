@@ -45,6 +45,7 @@ export function IndexStatsPerService({ indicesStats, status }: Props) {
       name: i18n.translate('xpack.apm.storageExplorer.indicesStats.primaries', {
         defaultMessage: 'Primaries',
       }),
+      render: (_, { primary }) => primary ?? NOT_AVAILABLE_LABEL,
       sortable: true,
     },
     {
@@ -52,6 +53,7 @@ export function IndexStatsPerService({ indicesStats, status }: Props) {
       name: i18n.translate('xpack.apm.storageExplorer.indicesStats.replicas', {
         defaultMessage: 'Replicas',
       }),
+      render: (_, { replica }) => replica ?? NOT_AVAILABLE_LABEL,
       sortable: true,
     },
     {
@@ -67,7 +69,7 @@ export function IndexStatsPerService({ indicesStats, status }: Props) {
     {
       field: 'size',
       name: <SizeLabel />,
-      render: (_, { size }) => asDynamicBytes(size) || NOT_AVAILABLE_LABEL,
+      render: (_, { size }) => asDynamicBytes(size) ?? NOT_AVAILABLE_LABEL,
       sortable: true,
     },
     {
@@ -78,7 +80,7 @@ export function IndexStatsPerService({ indicesStats, status }: Props) {
           defaultMessage: 'Data stream',
         }
       ),
-      render: (_, { dataStream }) => dataStream || NOT_AVAILABLE_LABEL,
+      render: (_, { dataStream }) => dataStream ?? NOT_AVAILABLE_LABEL,
       sortable: true,
     },
     {
@@ -89,7 +91,7 @@ export function IndexStatsPerService({ indicesStats, status }: Props) {
           defaultMessage: 'Lifecycle phase',
         }
       ),
-      render: (_, { lifecyclePhase }) => lifecyclePhase || NOT_AVAILABLE_LABEL,
+      render: (_, { lifecyclePhase }) => lifecyclePhase ?? NOT_AVAILABLE_LABEL,
       sortable: true,
     },
   ];

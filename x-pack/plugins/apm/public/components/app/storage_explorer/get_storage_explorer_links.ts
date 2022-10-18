@@ -8,11 +8,17 @@
 import { CoreStart } from '@kbn/core-lifecycle-browser';
 
 export function getIndexManagementHref(core: CoreStart) {
-  return core.http.basePath.prepend(
-    '/app/management/data/index_management/data_streams'
-  );
+  return core.application.getUrlForApp('management', {
+    path: '/data/index_management/data_streams',
+  });
 }
 
 export function getStorageExplorerFeedbackHref() {
   return 'https://ela.st/feedback-storage-explorer';
+}
+
+export function getKibanaAdvancedSettingsHref(core: CoreStart) {
+  return core.application.getUrlForApp('management', {
+    path: '/kibana/settings?query=category:(observability)',
+  });
 }

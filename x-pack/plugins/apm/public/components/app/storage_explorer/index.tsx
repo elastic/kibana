@@ -15,10 +15,11 @@ import {
   EuiCallOut,
   EuiLink,
   EuiButton,
+  EuiPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useApmRouter } from '../../../hooks/use_apm_router';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { IndexLifecyclePhaseSelect } from './index_lifecycle_phase_select';
 import { ServicesTable } from './services_table';
 import { SearchBar } from '../../shared/search_bar';
@@ -29,13 +30,29 @@ import { SummaryStats } from './summary_stats';
 import { ApmEnvironmentFilter } from '../../shared/environment_filter';
 import { TipsAndResources } from './resources/tips_and_resources';
 import { useLocalStorage } from '../../../hooks/use_local_storage';
+import { getKibanaAdvancedSettingsHref } from './get_storage_explorer_links';
+
+type CalloutType = 'crossClusterSearch' | 'optimizePerformance';
+
+const CALLOUT_DISMISS_INITIAL_STATE: Record<CalloutType, boolean> = {
+  crossClusterSearch: false,
+  optimizePerformance: false,
+};
+
+const dismissButtonText = i18n.translate(
+  'xpack.apm.storageExplorer.callout.dimissButton',
+  {
+    defaultMessage: 'Dismiss',
+  }
+);
 
 export function StorageExplorer() {
-  const router = useApmRouter();
-  const [
-    crossClusterSearchCalloutDismissed,
-    setCrossClusterSearchCalloutDismissed,
-  ] = useLocalStorage('apm.storageExplorer.ccsCalloutDismissed', false);
+  const { core } = useApmPluginContext();
+
+  const [calloutDismissed, setCalloutDismissed] = useLocalStorage(
+    'apm.storageExplorer.calloutDismissed',
+    CALLOUT_DISMISS_INITIAL_STATE
+  );
 
   const { data: hasPrivilegesData, status: hasPrivilegesStatus } = useFetcher(
     (callApmApi) => {
@@ -46,13 +63,13 @@ export function StorageExplorer() {
 
   const { data: isCrossClusterSearchData } = useFetcher(
     (callApmApi) => {
-      if (!crossClusterSearchCalloutDismissed) {
+      if (!calloutDismissed.crossClusterSearch) {
         return callApmApi(
           'GET /internal/apm/storage_explorer/is_cross_cluster_search'
         );
       }
     },
-    [crossClusterSearchCalloutDismissed]
+    [calloutDismissed]
   );
 
   const loading = hasPrivilegesStatus === FETCH_STATUS.LOADING;
@@ -90,34 +107,48 @@ export function StorageExplorer() {
       </EuiFlexGroup>
       <EuiSpacer />
 
-      <EuiCallOut
-        title={i18n.translate(
-          'xpack.apm.storageExplorer.longLoadingTimeCalloutTitle',
-          {
-            defaultMessage: 'Long loading time?',
-          }
-        )}
-        iconType="timeRefresh"
-      >
-        <FormattedMessage
-          id="xpack.apm.storageExplorer.longLoadingTimeCalloutText"
-          defaultMessage="Enable progressive loading of data in {apmGeneralSettingsLink}."
-          values={{
-            apmGeneralSettingsLink: (
-              <EuiLink href={router.link('/settings/general-settings')}>
-                {i18n.translate(
-                  'xpack.apm.storageExplorer.longLoadingTimeCalloutLink',
-                  {
-                    defaultMessage: 'APM general settings',
-                  }
-                )}
-              </EuiLink>
-            ),
-          }}
-        />
-      </EuiCallOut>
+      {!calloutDismissed.optimizePerformance && (
+        <EuiCallOut
+          title={i18n.translate(
+            'xpack.apm.storageExplorer.longLoadingTimeCalloutTitle',
+            {
+              defaultMessage: 'Long loading time?',
+            }
+          )}
+          iconType="timeRefresh"
+        >
+          <p>
+            <FormattedMessage
+              id="xpack.apm.storageExplorer.longLoadingTimeCalloutText"
+              defaultMessage="Enable progressive loading of data or optimized sorting for services list in {kibanaAdvancedSettingsLink}."
+              values={{
+                kibanaAdvancedSettingsLink: (
+                  <EuiLink href={getKibanaAdvancedSettingsHref(core)}>
+                    {i18n.translate(
+                      'xpack.apm.storageExplorer.longLoadingTimeCalloutLink',
+                      {
+                        defaultMessage: 'Kibana advanced settings',
+                      }
+                    )}
+                  </EuiLink>
+                ),
+              }}
+            />
+          </p>
+          <EuiButton
+            onClick={() =>
+              setCalloutDismissed({
+                ...calloutDismissed,
+                optimizePerformance: true,
+              })
+            }
+          >
+            {dismissButtonText}
+          </EuiButton>
+        </EuiCallOut>
+      )}
 
-      {!crossClusterSearchCalloutDismissed &&
+      {!calloutDismissed.crossClusterSearch &&
         isCrossClusterSearchData?.isCrossClusterSearch && (
           <>
             <EuiSpacer size="s" />
@@ -140,14 +171,14 @@ export function StorageExplorer() {
                 )}
               </p>
               <EuiButton
-                onClick={() => setCrossClusterSearchCalloutDismissed(true)}
+                onClick={() =>
+                  setCalloutDismissed({
+                    ...calloutDismissed,
+                    crossClusterSearch: true,
+                  })
+                }
               >
-                {i18n.translate(
-                  'xpack.apm.storageExplorer.crossClusterSearchCalloutText.dimissButton',
-                  {
-                    defaultMessage: 'Dismiss',
-                  }
-                )}
+                {dismissButtonText}
               </EuiButton>
             </EuiCallOut>
           </>
@@ -156,9 +187,11 @@ export function StorageExplorer() {
       <EuiSpacer />
       <SummaryStats />
       <EuiSpacer />
-      <StorageChart />
-      <EuiSpacer />
-      <ServicesTable />
+      <EuiPanel hasShadow={false} hasBorder={true}>
+        <StorageChart />
+        <EuiSpacer />
+        <ServicesTable />
+      </EuiPanel>
       <EuiSpacer />
       <TipsAndResources />
     </>

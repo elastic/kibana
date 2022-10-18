@@ -9,10 +9,14 @@ import * as t from 'io-ts';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
+import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
 import { setupRequest } from '../../lib/helpers/setup_request';
-import { indexLifecyclePhaseRt } from '../../../common/storage_explorer_types';
+import {
+  indexLifecyclePhaseRt,
+  IndexLifecyclePhaseSelectOption,
+} from '../../../common/storage_explorer_types';
 import { getServiceStatistics } from './get_service_statistics';
 import {
   probabilityRt,
@@ -24,7 +28,7 @@ import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import {
   getStorageDetailsPerIndex,
   getStorageDetailsPerProcessorEvent,
-} from './get_storage_details_per_processor_event';
+} from './get_storage_details_per_service';
 import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
 import { getSizeTimeseries } from './get_size_timeseries';
 import { hasStorageExplorerPrivileges } from './has_storage_explorer_privileges';
@@ -33,6 +37,7 @@ import {
   getTracesPerMinute,
 } from './get_summary_statistics';
 import { IsCrossClusterSearch } from './is_cross_cluster_search';
+import { getServiceNamesFromTermsEnum } from '../services/get_services/get_sorted_and_filtered_services';
 
 const storageExplorerRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/storage_explorer',
@@ -133,12 +138,12 @@ const storageExplorerServiceDetailsRoute = createApmServerRoute({
     }>;
     indicesStats: Array<{
       indexName: string;
-      primary: number | string;
-      replica: number | string;
       numberOfDocs: number;
-      size: number;
+      primary?: number | string;
+      replica?: number | string;
+      size?: number;
       dataStream?: string;
-      lifecyclePhase: string;
+      lifecyclePhase?: string;
     }>;
   }> => {
     const {
@@ -373,6 +378,50 @@ const storageExplorerIsCrossClusterSearchRoute = createApmServerRoute({
   },
 });
 
+const storageExplorerGetServices = createApmServerRoute({
+  endpoint: 'GET /internal/apm/storage_explorer/get_services',
+  options: {
+    tags: ['access:apm'],
+  },
+  params: t.type({
+    query: t.intersection([indexLifecyclePhaseRt, environmentRt, kueryRt]),
+  }),
+  handler: async (
+    resources
+  ): Promise<{
+    services: Array<{
+      serviceName: string;
+    }>;
+  }> => {
+    const {
+      query: { environment, kuery, indexLifecyclePhase },
+    } = resources.params;
+
+    if (
+      kuery ||
+      indexLifecyclePhase !== IndexLifecyclePhaseSelectOption.All ||
+      environment !== ENVIRONMENT_ALL.value
+    ) {
+      return {
+        services: [],
+      };
+    }
+
+    const setup = await setupRequest(resources);
+    const services = await getServiceNamesFromTermsEnum({
+      setup,
+      environment,
+      maxNumberOfServices: 500,
+    });
+
+    return {
+      services: services.map((serviceName): { serviceName: string } => ({
+        serviceName,
+      })),
+    };
+  },
+});
+
 export const storageExplorerRouteRepository = {
   ...storageExplorerRoute,
   ...storageExplorerServiceDetailsRoute,
@@ -380,6 +429,7 @@ export const storageExplorerRouteRepository = {
   ...storageExplorerPrivilegesRoute,
   ...storageExplorerSummaryStatsRoute,
   ...storageExplorerIsCrossClusterSearchRoute,
+  ...storageExplorerGetServices,
 };
 
 const SECURITY_REQUIRED_MESSAGE = i18n.translate(

@@ -16,6 +16,41 @@ import { Setup } from '../../../lib/helpers/setup_request';
 import { getHealthStatuses } from './get_health_statuses';
 import { lookupServices } from '../../service_groups/lookup_services';
 
+export async function getServiceNamesFromTermsEnum({
+  setup,
+  environment,
+  maxNumberOfServices,
+}: {
+  setup: Setup;
+  environment: Environment;
+  maxNumberOfServices: number;
+}) {
+  if (environment !== ENVIRONMENT_ALL.value) {
+    return [];
+  }
+  const { apmEventClient } = setup;
+
+  const response = await apmEventClient.termsEnum(
+    'get_services_from_terms_enum',
+    {
+      apm: {
+        events: [
+          ProcessorEvent.transaction,
+          ProcessorEvent.span,
+          ProcessorEvent.metric,
+          ProcessorEvent.error,
+        ],
+      },
+      body: {
+        size: maxNumberOfServices,
+        field: SERVICE_NAME,
+      },
+    }
+  );
+
+  return response.terms;
+}
+
 export async function getSortedAndFilteredServices({
   setup,
   start,
@@ -33,33 +68,6 @@ export async function getSortedAndFilteredServices({
   serviceGroup: ServiceGroup | null;
   maxNumberOfServices: number;
 }) {
-  const { apmEventClient } = setup;
-
-  async function getServiceNamesFromTermsEnum() {
-    if (environment !== ENVIRONMENT_ALL.value) {
-      return [];
-    }
-    const response = await apmEventClient.termsEnum(
-      'get_services_from_terms_enum',
-      {
-        apm: {
-          events: [
-            ProcessorEvent.transaction,
-            ProcessorEvent.span,
-            ProcessorEvent.metric,
-            ProcessorEvent.error,
-          ],
-        },
-        body: {
-          size: maxNumberOfServices,
-          field: SERVICE_NAME,
-        },
-      }
-    );
-
-    return response.terms;
-  }
-
   const [servicesWithHealthStatuses, selectedServices] = await Promise.all([
     getHealthStatuses({
       setup,
@@ -78,7 +86,11 @@ export async function getSortedAndFilteredServices({
           maxNumberOfServices,
           serviceGroup,
         })
-      : getServiceNamesFromTermsEnum(),
+      : getServiceNamesFromTermsEnum({
+          setup,
+          environment,
+          maxNumberOfServices,
+        }),
   ]);
 
   const services = joinByKey(

@@ -58,7 +58,7 @@ export async function getStorageDetailsPerProcessorEvent({
 
   const [{ indices: allIndicesStats }, response] = await Promise.all([
     getTotalIndicesStats({ setup, context }),
-    apmEventClient.search('get_storage_details_per_processor_event', {
+    apmEventClient.search('get_storage_details_per_service', {
       apm: {
         events: [
           ProcessorEvent.span,
@@ -248,22 +248,28 @@ export async function getStorageDetailsPerIndex({
       const indexLifecycle = indicesLifecycleStatus[indexName];
 
       const size =
-        (allIndicesStats &&
-          getEstimatedSizeForDocumentsInIndex({
-            allIndicesStats,
-            indexName,
-            numberOfDocs,
-          })) ??
-        0;
+        allIndicesStats &&
+        getEstimatedSizeForDocumentsInIndex({
+          allIndicesStats,
+          indexName,
+          numberOfDocs,
+        });
 
       return {
         indexName,
-        primary: indexInfo.settings?.index?.number_of_shards ?? 0,
-        replica: indexInfo.settings?.number_of_replicas ?? 0,
         numberOfDocs,
+        primary: indexInfo
+          ? indexInfo?.settings?.index?.number_of_shards ?? 0
+          : undefined,
+        replica: indexInfo
+          ? indexInfo?.settings?.number_of_replicas ?? 0
+          : undefined,
         size,
-        dataStream: indexInfo.data_stream,
-        lifecyclePhase: 'phase' in indexLifecycle ? indexLifecycle.phase : '',
+        dataStream: indexInfo?.data_stream,
+        lifecyclePhase:
+          indexLifecycle && 'phase' in indexLifecycle
+            ? indexLifecycle.phase
+            : undefined,
       };
     }) ?? []
   );
