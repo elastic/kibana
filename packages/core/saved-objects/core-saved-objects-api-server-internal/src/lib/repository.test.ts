@@ -111,7 +111,7 @@ describe('SavedObjectsRepository', () => {
   let serializer: jest.Mocked<SavedObjectsSerializer>;
 
   const mockTimestamp = '2017-08-14T15:49:14.886Z';
-  const mockTimestampFields = { updated_at: mockTimestamp };
+  const mockTimestampFields = { updated_at: mockTimestamp, created_at: mockTimestamp };
   const mockVersionProps = { _seq_no: 1, _primary_term: 1 };
   const mockVersion = encodeHitVersion(mockVersionProps);
 
@@ -1440,6 +1440,7 @@ describe('SavedObjectsRepository', () => {
         namespaces: doc._source!.namespaces ?? ['default'],
         ...(doc._source!.originId && { originId: doc._source!.originId }),
         ...(doc._source!.updated_at && { updated_at: doc._source!.updated_at }),
+        ...(doc._source!.created_at && { created_at: doc._source!.created_at }),
         version: encodeHitVersion(doc),
         attributes: doc._source![type],
         references: doc._source!.references || [],
@@ -3969,6 +3970,7 @@ describe('SavedObjectsRepository', () => {
                 'migrationVersion',
                 'coreMigrationVersion',
                 'updated_at',
+                'created_at',
                 'originId',
                 'title',
               ],
@@ -4526,6 +4528,7 @@ describe('SavedObjectsRepository', () => {
           id,
           type,
           updated_at: mockTimestamp,
+          created_at: mockTimestamp,
           version: mockVersion,
           attributes: {
             title: 'Testing',
