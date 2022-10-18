@@ -56,7 +56,7 @@ export const MonitorSummary = () => {
                 <AvailabilityPanel from={from} to={to} />
               </EuiFlexItem>
               <EuiFlexItem>
-                <AvailabilitySparklines />
+                <AvailabilitySparklines from={from} to={to} />
               </EuiFlexItem>
               <EuiFlexItem>
                 <DurationPanel />
