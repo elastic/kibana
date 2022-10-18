@@ -58,6 +58,9 @@ function getServiceMocks() {
       query: {
         savedQueries: {},
       },
+      indexPatternsService: {
+        find: jest.fn(),
+      },
     },
     unifiedSearch: {
       autocomplete: {
