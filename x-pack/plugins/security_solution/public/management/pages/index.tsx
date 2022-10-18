@@ -77,12 +77,12 @@ const ResponseActionsTelemetry = () => (
 export const ManagementContainer = memo(() => {
   const {
     loading,
-    canAccessEndpointManagement,
     canReadPolicyManagement,
     canReadBlocklist,
     canReadTrustedApplications,
     canReadEventFilters,
     canReadActionsLogManagement,
+    canReadEndpointList,
   } = useUserPrivileges().endpointPrivileges;
 
   // Lets wait until we can verify permissions
@@ -92,7 +92,7 @@ export const ManagementContainer = memo(() => {
 
   return (
     <Switch>
-      {canAccessEndpointManagement && (
+      {canReadEndpointList && (
         <Route path={MANAGEMENT_ROUTING_ENDPOINTS_PATH} component={EndpointTelemetry} />
       )}
       {canReadPolicyManagement && (
@@ -117,7 +117,7 @@ export const ManagementContainer = memo(() => {
           component={ResponseActionsTelemetry}
         />
       )}
-      {canAccessEndpointManagement && (
+      {canReadEndpointList && (
         <Route path={MANAGEMENT_PATH} exact>
           <Redirect to={getEndpointListPath({ name: 'endpointList' })} />
         </Route>
