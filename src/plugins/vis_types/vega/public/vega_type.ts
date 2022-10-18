@@ -51,7 +51,6 @@ export const createVegaTypeDefinition = (): VisTypeDefinition<VisParams> => {
     toExpressionAst,
     options: {
       showIndexSelection: false,
-      showQueryBar: true,
       showFilterBar: true,
     },
     getSupportedTriggers: () => {
