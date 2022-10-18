@@ -63,11 +63,7 @@ const ParamsSchema = schema.object({
 
 export const ActionTypeId = '.torq';
 // action type definition
-export function getActionType({
-  logger,
-}: {
-  logger: Logger;
-}): TorqActionType {
+export function getActionType(): TorqActionType {
   return {
     id: ActionTypeId,
     minimumLicenseRequired: 'gold',
@@ -92,7 +88,7 @@ export function getActionType({
       },
     },
     renderParameterTemplates,
-    executor: curry(executor)({ logger }),
+    executor: curry(executor)(),
   };
 }
 
@@ -145,9 +141,6 @@ function validateActionTypeConfig(
 
 // action executor
 export async function executor(
-  {
-    logger,
-  }: { logger: Logger; },
   execOptions: TorqActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult<unknown>> {
   const actionId = execOptions.actionId;
@@ -170,7 +163,7 @@ export async function executor(
       },
       data: JSON.parse(data || "null"),
       configurationUtilities,
-      logger,
+      logger: execOptions.logger,
       validateStatus: (status: number) => status >= 200 && status < 300,
     })
   );
@@ -179,11 +172,11 @@ export async function executor(
     const {
       value: { status, statusText },
     } = result;
-    logger.debug(`response from Torq action "${actionId}": [HTTP ${status}] ${statusText}`);
+    execOptions.logger.debug(`response from Torq action "${actionId}": [HTTP ${status}] ${statusText}`);
     return successResult(actionId, data);
   }
   const { error } = result;
-  return handleExecutionError(error, logger, actionId);
+  return handleExecutionError(error, execOptions.logger, actionId);
 }
 
 async function handleExecutionError(error: AxiosError<{ message: string }>, logger: Logger, actionId: string): Promise<ActionTypeExecutorResult<unknown>> {
