@@ -11,6 +11,11 @@ import { createCustomRuleEnabled } from '../../../tasks/api_calls/rules';
 import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
 import { goToClosedAlerts, goToOpenedAlerts } from '../../../tasks/alerts';
 import {
+  editException,
+  editExceptionFlyoutItemName,
+  submitEditedExceptionItem,
+} from '../../../tasks/exceptions';
+import {
   esArchiverLoad,
   esArchiverUnload,
   esArchiverResetKibana,
@@ -20,6 +25,7 @@ import {
   addFirstExceptionFromRuleDetails,
   goToAlertsTab,
   goToExceptionsTab,
+  openEditException,
   removeException,
   waitForTheRuleToBeExecuted,
 } from '../../../tasks/rule_details';
@@ -29,11 +35,17 @@ import { postDataView, deleteAlertsAndRules } from '../../../tasks/common';
 import {
   NO_EXCEPTIONS_EXIST_PROMPT,
   EXCEPTION_ITEM_VIEWER_CONTAINER,
+  EXCEPTION_CARD_ITEM_NAME,
+  EXCEPTION_CARD_ITEM_CONDITIONS,
+  EXCEPTION_ITEM_CONTAINER,
+  FIELD_INPUT,
+  VALUES_INPUT,
 } from '../../../screens/exceptions';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 
 describe('Add exception using data views from rule details', () => {
   const NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS = '1 alert';
+  const ITEM_NAME = 'Sample Exception List Item';
 
   before(() => {
     esArchiverResetKibana();
@@ -66,17 +78,20 @@ describe('Add exception using data views from rule details', () => {
     esArchiverUnload('exceptions_2');
   });
 
-  it('Creates an exception item when none exist', () => {
+  it('Creates an exception item', () => {
     // when no exceptions exist, empty component shows with action to add exception
     cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('exist');
 
     // clicks prompt button to add first exception that will also select to close
     // all matching alerts
-    addFirstExceptionFromRuleDetails({
-      field: 'agent.name',
-      operator: 'is',
-      values: ['foo'],
-    });
+    addFirstExceptionFromRuleDetails(
+      {
+        field: 'agent.name',
+        operator: 'is',
+        values: ['foo'],
+      },
+      ITEM_NAME
+    );
 
     // new exception item displays
     cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
@@ -110,5 +125,50 @@ describe('Add exception using data views from rule details', () => {
 
     cy.get(ALERTS_COUNT).should('exist');
     cy.get(NUMBER_OF_ALERTS).should('have.text', '2 alerts');
+  });
+
+  it('Edits an exception item', () => {
+    const NEW_ITEM_NAME = 'Exception item-EDITED';
+    const ITEM_FIELD = 'unique_value.test';
+    const FIELD_DIFFERENT_FROM_EXISTING_ITEM_FIELD = 'agent.name';
+
+    // add item to edit
+    addFirstExceptionFromRuleDetails(
+      {
+        field: ITEM_FIELD,
+        operator: 'is',
+        values: ['foo'],
+      },
+      ITEM_NAME
+    );
+
+    // displays existing exception items
+    cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
+    cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('not.exist');
+    cy.get(EXCEPTION_CARD_ITEM_NAME).should('have.text', ITEM_NAME);
+    cy.get(EXCEPTION_CARD_ITEM_CONDITIONS).should('have.text', ' unique_value.testIS foo');
+
+    // open edit exception modal
+    openEditException();
+
+    // edit exception item name
+    editExceptionFlyoutItemName(NEW_ITEM_NAME);
+
+    // check that the existing item's field is being populated
+    cy.get(EXCEPTION_ITEM_CONTAINER).eq(0).find(FIELD_INPUT).eq(0).should('have.text', ITEM_FIELD);
+    cy.get(VALUES_INPUT).should('have.text', 'foo');
+
+    // edit conditions
+    editException(FIELD_DIFFERENT_FROM_EXISTING_ITEM_FIELD, 0, 0);
+
+    // submit
+    submitEditedExceptionItem();
+
+    // new exception item displays
+    cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
+
+    // check that updates stuck
+    cy.get(EXCEPTION_CARD_ITEM_NAME).should('have.text', NEW_ITEM_NAME);
+    cy.get(EXCEPTION_CARD_ITEM_CONDITIONS).should('have.text', ' agent.nameIS foo');
   });
 });

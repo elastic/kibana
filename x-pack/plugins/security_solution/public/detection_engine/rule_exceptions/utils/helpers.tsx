@@ -21,26 +21,19 @@ import type {
   OsTypeArray,
   ExceptionListType,
   ExceptionListItemSchema,
-  CreateExceptionListItemSchema,
   UpdateExceptionListItemSchema,
   ExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import {
-  comment,
-  osType,
-  ListOperatorTypeEnum as OperatorTypeEnum,
-} from '@kbn/securitysolution-io-ts-list-types';
+import { comment, osType } from '@kbn/securitysolution-io-ts-list-types';
 
 import type {
   ExceptionsBuilderExceptionItem,
   ExceptionsBuilderReturnExceptionItem,
 } from '@kbn/securitysolution-list-utils';
-import {
-  getOperatorType,
-  getNewExceptionItem,
-  addIdToEntries,
-} from '@kbn/securitysolution-list-utils';
+import { getNewExceptionItem, addIdToEntries } from '@kbn/securitysolution-list-utils';
 import type { DataViewBase } from '@kbn/es-query';
+import { removeIdFromExceptionItemsEntries } from '@kbn/securitysolution-list-hooks';
+
 import * as i18n from './translations';
 import type { AlertData, Flattened } from './types';
 
@@ -145,9 +138,9 @@ export const formatExceptionItemForUpdate = (
  * @param exceptionItems new or existing ExceptionItem[]
  */
 export const prepareExceptionItemsForBulkClose = (
-  exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
-): Array<ExceptionListItemSchema | CreateExceptionListItemSchema> => {
-  return exceptionItems.map((item: ExceptionListItemSchema | CreateExceptionListItemSchema) => {
+  exceptionItems: ExceptionListItemSchema[]
+): ExceptionListItemSchema[] => {
+  return exceptionItems.map((item: ExceptionListItemSchema) => {
     if (item.entries !== undefined) {
       const newEntries = item.entries.map((itemEntry: Entry | EntryNested) => {
         return {
@@ -285,17 +278,6 @@ export const lowercaseHashValues = (
   });
 };
 
-export const entryHasListType = (exceptionItems: ExceptionsBuilderReturnExceptionItem[]) => {
-  for (const { entries } of exceptionItems) {
-    for (const exceptionEntry of entries ?? []) {
-      if (getOperatorType(exceptionEntry) === OperatorTypeEnum.LIST) {
-        return true;
-      }
-    }
-  }
-  return false;
-};
-
 /**
  * Returns the value for `file.Ext.code_signature` which
  * can be an object or array of objects
@@ -377,7 +359,7 @@ function filterEmptyExceptionEntries<T extends ExceptionEntry>(entries: T[]): T[
  */
 export const getPrepopulatedEndpointException = ({
   listId,
-  ruleName,
+  name,
   codeSignature,
   eventCode,
   listNamespace = 'agnostic',
@@ -385,7 +367,7 @@ export const getPrepopulatedEndpointException = ({
 }: {
   listId: string;
   listNamespace?: NamespaceType;
-  ruleName: string;
+  name: string;
   codeSignature: { subjectName: string; trusted: string };
   eventCode: string;
   alertEcsData: Flattened<Ecs>;
@@ -449,7 +431,7 @@ export const getPrepopulatedEndpointException = ({
   };
 
   return {
-    ...getNewExceptionItem({ listId, namespaceType: listNamespace, ruleName }),
+    ...getNewExceptionItem({ listId, namespaceType: listNamespace, name }),
     entries: entriesToAdd(),
   };
 };
@@ -459,7 +441,7 @@ export const getPrepopulatedEndpointException = ({
  */
 export const getPrepopulatedRansomwareException = ({
   listId,
-  ruleName,
+  name,
   codeSignature,
   eventCode,
   listNamespace = 'agnostic',
@@ -467,7 +449,7 @@ export const getPrepopulatedRansomwareException = ({
 }: {
   listId: string;
   listNamespace?: NamespaceType;
-  ruleName: string;
+  name: string;
   codeSignature: { subjectName: string; trusted: string };
   eventCode: string;
   alertEcsData: Flattened<Ecs>;
@@ -477,7 +459,7 @@ export const getPrepopulatedRansomwareException = ({
   const executable = process?.executable ?? '';
   const ransomwareFeature = Ransomware?.feature ?? '';
   return {
-    ...getNewExceptionItem({ listId, namespaceType: listNamespace, ruleName }),
+    ...getNewExceptionItem({ listId, namespaceType: listNamespace, name }),
     entries: addIdToEntries([
       {
         field: 'process.Ext.code_signature',
@@ -527,14 +509,14 @@ export const getPrepopulatedRansomwareException = ({
 
 export const getPrepopulatedMemorySignatureException = ({
   listId,
-  ruleName,
+  name,
   eventCode,
   listNamespace = 'agnostic',
   alertEcsData,
 }: {
   listId: string;
   listNamespace?: NamespaceType;
-  ruleName: string;
+  name: string;
   eventCode: string;
   alertEcsData: Flattened<Ecs>;
 }): ExceptionsBuilderExceptionItem => {
@@ -566,20 +548,20 @@ export const getPrepopulatedMemorySignatureException = ({
     },
   ]);
   return {
-    ...getNewExceptionItem({ listId, namespaceType: listNamespace, ruleName }),
+    ...getNewExceptionItem({ listId, namespaceType: listNamespace, name }),
     entries: addIdToEntries(entries),
   };
 };
 export const getPrepopulatedMemoryShellcodeException = ({
   listId,
-  ruleName,
+  name,
   eventCode,
   listNamespace = 'agnostic',
   alertEcsData,
 }: {
   listId: string;
   listNamespace?: NamespaceType;
-  ruleName: string;
+  name: string;
   eventCode: string;
   alertEcsData: Flattened<Ecs>;
 }): ExceptionsBuilderExceptionItem => {
@@ -618,21 +600,21 @@ export const getPrepopulatedMemoryShellcodeException = ({
   ]);
 
   return {
-    ...getNewExceptionItem({ listId, namespaceType: listNamespace, ruleName }),
+    ...getNewExceptionItem({ listId, namespaceType: listNamespace, name }),
     entries: addIdToEntries(entries),
   };
 };
 
 export const getPrepopulatedBehaviorException = ({
   listId,
-  ruleName,
+  name,
   eventCode,
   listNamespace = 'agnostic',
   alertEcsData,
 }: {
   listId: string;
   listNamespace?: NamespaceType;
-  ruleName: string;
+  name: string;
   eventCode: string;
   alertEcsData: Flattened<Ecs>;
 }): ExceptionsBuilderExceptionItem => {
@@ -748,39 +730,9 @@ export const getPrepopulatedBehaviorException = ({
     },
   ]);
   return {
-    ...getNewExceptionItem({ listId, namespaceType: listNamespace, ruleName }),
+    ...getNewExceptionItem({ listId, namespaceType: listNamespace, name }),
     entries: addIdToEntries(entries),
   };
-};
-
-/**
- * Determines whether or not any entries within the given exceptionItems contain values not in the specified ECS mapping
- */
-export const entryHasNonEcsType = (
-  exceptionItems: ExceptionsBuilderReturnExceptionItem[],
-  indexPatterns: DataViewBase
-): boolean => {
-  const doesFieldNameExist = (exceptionEntry: Entry): boolean => {
-    return indexPatterns.fields.some(({ name }) => name === exceptionEntry.field);
-  };
-
-  if (exceptionItems.length === 0) {
-    return false;
-  }
-  for (const { entries } of exceptionItems) {
-    for (const exceptionEntry of entries ?? []) {
-      if (exceptionEntry.type === 'nested') {
-        for (const nestedExceptionEntry of exceptionEntry.entries) {
-          if (doesFieldNameExist(nestedExceptionEntry) === false) {
-            return true;
-          }
-        }
-      } else if (doesFieldNameExist(exceptionEntry) === false) {
-        return true;
-      }
-    }
-  }
-  return false;
 };
 
 /**
@@ -788,7 +740,7 @@ export const entryHasNonEcsType = (
  */
 export const defaultEndpointExceptionItems = (
   listId: string,
-  ruleName: string,
+  name: string,
   alertEcsData: Flattened<Ecs> & { 'event.code'?: string }
 ): ExceptionsBuilderExceptionItem[] => {
   const eventCode = alertEcsData['event.code'] ?? alertEcsData.event?.code;
@@ -798,7 +750,7 @@ export const defaultEndpointExceptionItems = (
       return [
         getPrepopulatedBehaviorException({
           listId,
-          ruleName,
+          name,
           eventCode,
           alertEcsData,
         }),
@@ -807,7 +759,7 @@ export const defaultEndpointExceptionItems = (
       return [
         getPrepopulatedMemorySignatureException({
           listId,
-          ruleName,
+          name,
           eventCode,
           alertEcsData,
         }),
@@ -816,7 +768,7 @@ export const defaultEndpointExceptionItems = (
       return [
         getPrepopulatedMemoryShellcodeException({
           listId,
-          ruleName,
+          name,
           eventCode,
           alertEcsData,
         }),
@@ -825,7 +777,7 @@ export const defaultEndpointExceptionItems = (
       return getProcessCodeSignature(alertEcsData).map((codeSignature) =>
         getPrepopulatedRansomwareException({
           listId,
-          ruleName,
+          name,
           eventCode,
           codeSignature,
           alertEcsData,
@@ -836,7 +788,7 @@ export const defaultEndpointExceptionItems = (
       return getFileCodeSignature(alertEcsData).map((codeSignature) =>
         getPrepopulatedEndpointException({
           listId,
-          ruleName,
+          name,
           eventCode: eventCode ?? '',
           codeSignature,
           alertEcsData,
@@ -872,7 +824,7 @@ export const enrichRuleExceptions = (
 ): ExceptionsBuilderReturnExceptionItem[] => {
   return exceptionItems.map((item: ExceptionsBuilderReturnExceptionItem) => {
     return {
-      ...item,
+      ...removeIdFromExceptionItemsEntries<ExceptionsBuilderReturnExceptionItem>(item),
       list_id: undefined,
       namespace_type: 'single',
     };
@@ -891,7 +843,7 @@ export const enrichSharedExceptions = (
   return lists.flatMap((list) => {
     return exceptionItems.map((item) => {
       return {
-        ...item,
+        ...removeIdFromExceptionItemsEntries<ExceptionsBuilderReturnExceptionItem>(item),
         list_id: list.list_id,
         namespace_type: list.namespace_type,
       };

@@ -15,21 +15,20 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 
-import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import * as i18n from './translations';
 import type { ViewerState } from './reducer';
 import illustration from '../../../../common/images/illustration_product_no_results_magnifying_glass.svg';
 
 interface ExeptionItemsViewerEmptyPromptsComponentProps {
   isReadOnly: boolean;
-  listType: ExceptionListTypeEnum;
+  isEndpoint: boolean;
   currentState: ViewerState;
   onCreateExceptionListItem: () => void;
 }
 
 const ExeptionItemsViewerEmptyPromptsComponent = ({
   isReadOnly,
-  listType,
+  isEndpoint,
   currentState,
   onCreateExceptionListItem,
 }: ExeptionItemsViewerEmptyPromptsComponentProps): JSX.Element => {
@@ -60,7 +59,7 @@ const ExeptionItemsViewerEmptyPromptsComponent = ({
             }
             body={
               <p data-test-subj="exceptionsEmptyPromptBody">
-                {listType === ExceptionListTypeEnum.ENDPOINT
+                {isEndpoint
                   ? i18n.EXCEPTION_EMPTY_ENDPOINT_PROMPT_BODY
                   : i18n.EXCEPTION_EMPTY_PROMPT_BODY}
               </p>
@@ -74,12 +73,12 @@ const ExeptionItemsViewerEmptyPromptsComponent = ({
                 isDisabled={isReadOnly}
                 fill
               >
-                {listType === ExceptionListTypeEnum.ENDPOINT
+                {isEndpoint
                   ? i18n.EXCEPTION_EMPTY_PROMPT_ENDPOINT_BUTTON
                   : i18n.EXCEPTION_EMPTY_PROMPT_BUTTON}
               </EuiButton>,
             ]}
-            data-test-subj={`exceptionItemViewerEmptyPrompts-empty-${listType}`}
+            data-test-subj="exceptionItemViewerEmptyPrompts-empty"
           />
         );
       case 'empty_search':
@@ -100,7 +99,13 @@ const ExeptionItemsViewerEmptyPromptsComponent = ({
           <EuiLoadingContent lines={4} data-test-subj="exceptionItemViewerEmptyPrompts-loading" />
         );
     }
-  }, [currentState, euiTheme.colors.darkestShade, isReadOnly, listType, onCreateExceptionListItem]);
+  }, [
+    currentState,
+    euiTheme.colors.darkestShade,
+    isReadOnly,
+    isEndpoint,
+    onCreateExceptionListItem,
+  ]);
 
   return (
     <EuiPanel

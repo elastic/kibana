@@ -7,6 +7,14 @@
 
 import type { ExceptionList, ExceptionListItem } from '../../objects/exception';
 
+export const createEndpointExceptionList = () =>
+  cy.request({
+    method: 'POST',
+    url: '/api/endpoint_list',
+    headers: { 'kbn-xsrf': 'cypress-creds' },
+    failOnStatusCode: false,
+  });
+
 export const createExceptionList = (
   exceptionList: ExceptionList,
   exceptionListId = 'exception_list_testing'

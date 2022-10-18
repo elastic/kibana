@@ -56,14 +56,18 @@ export const findRuleExceptionReferencesRoute = (router: SecuritySolutionPluginR
         }
 
         const fetchExact = ids != null && listIds != null;
-
         const foundExceptionLists = await listsClient?.findExceptionList({
           filter: fetchExact
             ? `(${listIds
-                .map((listId) => `exception-list.attributes.list_id:${listId}`)
+                .map(
+                  (listId, index) =>
+                    `${getSavedObjectType({
+                      namespaceType: namespaceTypes[index],
+                    })}.attributes.list_id:${listId}`
+                )
                 .join(' OR ')})`
             : undefined,
-          namespaceType: ['agnostic', 'single'],
+          namespaceType: namespaceTypes,
           page: 1,
           perPage: 10000,
           sortField: undefined,

@@ -96,11 +96,15 @@ export const useField = ({
   onChange,
 }: FieldBaseProps) => {
   const [touched, setIsTouched] = useState(false);
+  const [customOption, setCustomOption] = useState<DataViewFieldBase | null>(null);
 
-  const { availableFields, selectedFields } = useMemo(
-    () => getComboBoxFields(indexPattern, selectedField, fieldTypeFilter),
-    [indexPattern, fieldTypeFilter, selectedField]
-  );
+  const { availableFields, selectedFields } = useMemo(() => {
+    const indexPatternsToUse =
+      customOption != null && indexPattern != null
+        ? { ...indexPattern, fields: [...indexPattern?.fields, customOption] }
+        : indexPattern;
+    return getComboBoxFields(indexPatternsToUse, selectedField, fieldTypeFilter);
+  }, [indexPattern, fieldTypeFilter, selectedField, customOption]);
 
   const { comboOptions, labels, selectedComboOptions, disabledLabelTooltipTexts } = useMemo(
     () => getComboBoxProps({ availableFields, selectedFields }),
@@ -115,6 +119,19 @@ export const useField = ({
       onChange(newValues);
     },
     [availableFields, labels, onChange]
+  );
+
+  const handleCreateCustomOption = useCallback(
+    (val: string) => {
+      const normalizedSearchValue = val.trim().toLowerCase();
+
+      if (!normalizedSearchValue) {
+        return;
+      }
+      setCustomOption({ name: val, type: 'text' });
+      onChange([{ name: val, type: 'text' }]);
+    },
+    [onChange]
   );
 
   const handleTouch = useCallback((): void => {
@@ -161,5 +178,6 @@ export const useField = ({
     renderFields,
     handleTouch,
     handleValuesChange,
+    handleCreateCustomOption,
   };
 };

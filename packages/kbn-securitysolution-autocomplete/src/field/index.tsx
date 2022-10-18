@@ -25,16 +25,17 @@ export const FieldComponent: React.FC<FieldProps> = ({
   onChange,
   placeholder,
   selectedField,
+  acceptsCustomOptions = false,
 }): JSX.Element => {
   const {
     isInvalid,
     comboOptions,
     selectedComboOptions,
     fieldWidth,
-
     renderFields,
     handleTouch,
     handleValuesChange,
+    handleCreateCustomOption,
   } = useField({
     indexPattern,
     fieldTypeFilter,
@@ -43,6 +44,29 @@ export const FieldComponent: React.FC<FieldProps> = ({
     fieldInputWidth,
     onChange,
   });
+
+  if (acceptsCustomOptions) {
+    return (
+      <EuiComboBox
+        placeholder={placeholder}
+        options={comboOptions}
+        selectedOptions={selectedComboOptions}
+        onChange={handleValuesChange}
+        isLoading={isLoading}
+        isDisabled={isDisabled}
+        isClearable={isClearable}
+        isInvalid={isInvalid}
+        onFocus={handleTouch}
+        singleSelection={AS_PLAIN_TEXT}
+        data-test-subj="fieldAutocompleteComboBox"
+        style={fieldWidth}
+        onCreateOption={handleCreateCustomOption}
+        customOptionText="Add {searchValue} as your occupation"
+        fullWidth
+      />
+    );
+  }
+
   return (
     <EuiComboBox
       placeholder={placeholder}

@@ -266,6 +266,7 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponen
         idAria: 'alertExceptionBuilder',
         onChange: handleBuilderOnChange,
         isDisabled: isExceptionBuilderFormDisabled,
+        allowCustomFieldOptions: !isEndpointException,
       })}
     </>
   );

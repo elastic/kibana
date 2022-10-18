@@ -5,27 +5,32 @@
  * 2.0.
  */
 
-import { getNewRule } from '../../objects/rule';
+import { getNewRule } from '../../../objects/rule';
 
-import { RULE_STATUS } from '../../screens/create_new_rule';
+import { RULE_STATUS } from '../../../screens/create_new_rule';
 
-import { createCustomRule } from '../../tasks/api_calls/rules';
-import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
-import { esArchiverLoad, esArchiverResetKibana, esArchiverUnload } from '../../tasks/es_archiver';
-import { login, visitWithoutDateRange } from '../../tasks/login';
+import { createCustomRule } from '../../../tasks/api_calls/rules';
+import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
+import {
+  esArchiverLoad,
+  esArchiverResetKibana,
+  esArchiverUnload,
+} from '../../../tasks/es_archiver';
+import { login, visitWithoutDateRange } from '../../../tasks/login';
 import {
   openExceptionFlyoutFromEmptyViewerPrompt,
   goToExceptionsTab,
   openEditException,
-} from '../../tasks/rule_details';
+} from '../../../tasks/rule_details';
 import {
   addExceptionEntryFieldMatchAnyValue,
   addExceptionEntryFieldValue,
   addExceptionEntryFieldValueOfItemX,
   addExceptionEntryFieldValueValue,
   addExceptionEntryOperatorValue,
+  addExceptionFlyoutItemName,
   closeExceptionBuilderFlyout,
-} from '../../tasks/exceptions';
+} from '../../../tasks/exceptions';
 import {
   ADD_AND_BTN,
   ADD_OR_BTN,
@@ -34,7 +39,6 @@ import {
   FIELD_INPUT,
   LOADING_SPINNER,
   EXCEPTION_ITEM_CONTAINER,
-  ADD_EXCEPTIONS_BTN_FROM_EMPTY_PROMPT_BTN,
   EXCEPTION_FIELD_LIST,
   EXCEPTION_EDIT_FLYOUT_SAVE_BTN,
   EXCEPTION_FLYOUT_VERSION_CONFLICT,
@@ -42,17 +46,17 @@ import {
   CONFIRM_BTN,
   VALUES_INPUT,
   EXCEPTION_FLYOUT_TITLE,
-} from '../../screens/exceptions';
+} from '../../../screens/exceptions';
 
-import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
-import { reload } from '../../tasks/common';
+import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
+import { reload } from '../../../tasks/common';
 import {
   createExceptionList,
   createExceptionListItem,
   updateExceptionListItem,
   deleteExceptionList,
-} from '../../tasks/api_calls/exceptions';
-import { getExceptionList } from '../../objects/exception';
+} from '../../../tasks/api_calls/exceptions';
+import { getExceptionList } from '../../../objects/exception';
 
 // NOTE: You might look at these tests and feel they're overkill,
 // but the exceptions flyout has a lot of logic making it difficult
@@ -92,12 +96,11 @@ describe('Exceptions flyout', () => {
   });
 
   it('Validates empty entry values correctly', () => {
-    cy.root()
-      .pipe(($el) => {
-        $el.find(ADD_EXCEPTIONS_BTN_FROM_EMPTY_PROMPT_BTN).trigger('click');
-        return $el.find(ADD_AND_BTN);
-      })
-      .should('be.visible');
+    // open add exception modal
+    openExceptionFlyoutFromEmptyViewerPrompt();
+
+    // add exception item name
+    addExceptionFlyoutItemName('My item name');
 
     // add an entry with a value and submit button should enable
     addExceptionEntryFieldValue('agent.name', 0);
@@ -120,13 +123,27 @@ describe('Exceptions flyout', () => {
     closeExceptionBuilderFlyout();
   });
 
+  it('Validates custom fields correctly', () => {
+    // open add exception modal
+    openExceptionFlyoutFromEmptyViewerPrompt();
+
+    // add exception item name
+    addExceptionFlyoutItemName('My item name');
+
+    // add an entry with a value and submit button should enable
+    addExceptionEntryFieldValue('blooberty', 0);
+    addExceptionEntryFieldValueValue('blah', 0);
+    cy.get(CONFIRM_BTN).should('be.enabled');
+
+    closeExceptionBuilderFlyout();
+  });
+
   it('Does not overwrite values and-ed together', () => {
-    cy.root()
-      .pipe(($el) => {
-        $el.find(ADD_EXCEPTIONS_BTN_FROM_EMPTY_PROMPT_BTN).trigger('click');
-        return $el.find(ADD_AND_BTN);
-      })
-      .should('be.visible');
+    // open add exception modal
+    openExceptionFlyoutFromEmptyViewerPrompt();
+
+    // add exception item name
+    addExceptionFlyoutItemName('My item name');
 
     // add multiple entries with invalid field values
     addExceptionEntryFieldValue('agent.name', 0);
@@ -144,12 +161,12 @@ describe('Exceptions flyout', () => {
   });
 
   it('Does not overwrite values or-ed together', () => {
-    cy.root()
-      .pipe(($el) => {
-        $el.find(ADD_EXCEPTIONS_BTN_FROM_EMPTY_PROMPT_BTN).trigger('click');
-        return $el.find(ADD_AND_BTN);
-      })
-      .should('be.visible');
+    // open add exception modal
+    openExceptionFlyoutFromEmptyViewerPrompt();
+
+    // add exception item name
+    addExceptionFlyoutItemName('My item name');
+
     // exception item 1
     addExceptionEntryFieldValueOfItemX('agent.name', 0, 0);
     cy.get(ADD_AND_BTN).click();
@@ -265,12 +282,9 @@ describe('Exceptions flyout', () => {
   });
 
   it('Contains custom index fields', () => {
-    cy.root()
-      .pipe(($el) => {
-        $el.find(ADD_EXCEPTIONS_BTN_FROM_EMPTY_PROMPT_BTN).trigger('click');
-        return $el.find(ADD_AND_BTN);
-      })
-      .should('be.visible');
+    // open add exception modal
+    openExceptionFlyoutFromEmptyViewerPrompt();
+
     cy.get(FIELD_INPUT).eq(0).click({ force: true });
     cy.get(EXCEPTION_FIELD_LIST).contains('unique_value.test');
 

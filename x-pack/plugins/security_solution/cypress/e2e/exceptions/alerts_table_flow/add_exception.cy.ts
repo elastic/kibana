@@ -14,6 +14,7 @@ import {
   addExceptionFromFirstAlert,
   goToClosedAlerts,
   goToOpenedAlerts,
+  openAddExceptionFromAlertDetails,
 } from '../../../tasks/alerts';
 import { createCustomRuleEnabled } from '../../../tasks/api_calls/rules';
 import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
@@ -25,12 +26,17 @@ import {
 } from '../../../tasks/es_archiver';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 import {
-  addsException,
   goToAlertsTab,
   goToExceptionsTab,
   removeException,
   waitForTheRuleToBeExecuted,
 } from '../../../tasks/rule_details';
+import {
+  addExceptionConditions,
+  addExceptionFlyoutItemName,
+  selectCloseSingleAlerts,
+  submitNewExceptionItem,
+} from '../../../tasks/exceptions';
 
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
 import { deleteAlertsAndRules } from '../../../tasks/common';
@@ -75,7 +81,18 @@ describe('Adds rule exception from alerts flow', () => {
     // Create an exception from the alerts actions menu that matches
     // the existing alert
     addExceptionFromFirstAlert();
-    addsException(getException());
+
+    // add exception item name
+    addExceptionFlyoutItemName('My item name');
+
+    // add exception item conditions
+    addExceptionConditions(getException());
+
+    // select to close alert
+    selectCloseSingleAlerts();
+
+    // submit
+    submitNewExceptionItem();
 
     // Alerts table should now be empty from having added exception and closed
     // matching alert
@@ -98,5 +115,32 @@ describe('Adds rule exception from alerts flow', () => {
 
     cy.get(ALERTS_COUNT).should('exist');
     cy.get(NUMBER_OF_ALERTS).should('have.text', '2 alerts');
+  });
+
+  // HELP - can't get the take action menu from the alert details
+  // flyout to showup on the screen. Seems to render below the page.
+  it.skip('Creates an exception from alert details flyout', () => {
+    cy.get(ALERTS_COUNT).should('exist');
+    cy.get(NUMBER_OF_ALERTS).should('have.text', NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS);
+
+    // Create an exception from the alerts actions menu that matches
+    // the existing alert
+    openAddExceptionFromAlertDetails();
+
+    // add exception item name
+    addExceptionFlyoutItemName('My item name');
+
+    // add exception item conditions
+    addExceptionConditions(getException());
+
+    // select to close alert
+    selectCloseSingleAlerts();
+
+    // submit
+    submitNewExceptionItem();
+
+    // Alerts table should now be empty from having added exception and closed
+    // matching alert
+    cy.get(EMPTY_ALERT_TABLE).should('exist');
   });
 });

@@ -17,6 +17,7 @@ export interface RuleEcs {
   risk_score?: string[];
   output_index?: string[];
   description?: string[];
+  exceptions_list?: string[];
   from?: string[];
   immutable?: boolean[];
   index?: string[];
