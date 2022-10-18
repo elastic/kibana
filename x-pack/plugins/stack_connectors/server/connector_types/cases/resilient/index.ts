@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { curry } from 'lodash';
 import { TypeOf } from '@kbn/config-schema';
 
-import { Logger } from '@kbn/core/server';
 import type {
   ActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
@@ -41,23 +39,16 @@ import * as i18n from './translations';
 
 export type ActionParamsType = TypeOf<typeof ExecutorParamsSchema>;
 
-interface GetConnectorTypeParams {
-  logger: Logger;
-}
-
 const supportedSubActions: string[] = ['getFields', 'pushToService', 'incidentTypes', 'severity'];
 
 export const ConnectorTypeId = '.resilient';
 // connector type definition
-export function getConnectorType(
-  params: GetConnectorTypeParams
-): ConnectorType<
+export function getConnectorType(): ConnectorType<
   ResilientPublicConfigurationType,
   ResilientSecretConfigurationType,
   ExecutorParams,
   ResilientExecutorResultData | {}
 > {
-  const { logger } = params;
   return {
     id: ConnectorTypeId,
     minimumLicenseRequired: 'platinum',
@@ -80,20 +71,19 @@ export function getConnectorType(
         schema: ExecutorParamsSchema,
       },
     },
-    executor: curry(executor)({ logger }),
+    executor,
   };
 }
 
 // action executor
 async function executor(
-  { logger }: { logger: Logger },
   execOptions: ConnectorTypeExecutorOptions<
     ResilientPublicConfigurationType,
     ResilientSecretConfigurationType,
     ExecutorParams
   >
 ): Promise<ConnectorTypeExecutorResult<ResilientExecutorResultData | {}>> {
-  const { actionId, config, params, secrets, configurationUtilities } = execOptions;
+  const { actionId, config, params, secrets, configurationUtilities, logger } = execOptions;
   const { subAction, subActionParams } = params as ExecutorParams;
   let data: ResilientExecutorResultData | null = null;
 
