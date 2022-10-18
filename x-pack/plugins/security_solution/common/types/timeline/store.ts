@@ -61,7 +61,6 @@ export interface TimelinePersistInput {
   timelineType?: TimelineTypeLiteral;
   templateTimelineId?: string | null;
   templateTimelineVersion?: number | null;
-  documentType: string;
   title: string;
 }
 
