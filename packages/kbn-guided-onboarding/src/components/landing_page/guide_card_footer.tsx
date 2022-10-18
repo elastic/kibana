@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiProgress, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { GuideId, GuideState } from '../../types';
 import { UseCase } from './use_case_card';
@@ -23,27 +23,26 @@ export const GuideCardFooter = ({
 }) => {
   const guideState = guides.find((guide) => guide.guideId === (useCase as GuideId));
   const viewGuideButton = (
-    <EuiFlexGroup justifyContent="center">
-      <EuiFlexItem grow={false}>
-        <EuiButton
-          // Used for FS tracking
-          data-test-subj={`onboarding--guideCard--view--${useCase}`}
-          fill
-          onClick={() => activateGuide(useCase, guideState)}
-        >
-          {i18n.translate('home.guidedOnboarding.gettingStarted.guideCard.startGuide.buttonLabel', {
-            defaultMessage: 'View guide',
-          })}
-        </EuiButton>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <div className="eui-textCenter">
+      <EuiButton
+        // Used for FS tracking
+        data-test-subj={`onboarding--guideCard--view--${useCase}`}
+        fill
+        onClick={() => activateGuide(useCase, guideState)}
+      >
+        {i18n.translate('home.guidedOnboarding.gettingStarted.guideCard.startGuide.buttonLabel', {
+          defaultMessage: 'View guide',
+        })}
+      </EuiButton>
+    </div>
   );
   // guide has not started yet
   if (!guideState || guideState.status === 'not_started') {
     return viewGuideButton;
   }
-  const numberSteps = guideState.steps.length;
-  const numberCompleteSteps = guideState.steps.filter((step) => step.status === 'complete').length;
+  const { status, steps } = guideState;
+  const numberSteps = steps.length;
+  const numberCompleteSteps = steps.filter((step) => step.status === 'complete').length;
   const stepsLabel = i18n.translate('home.guidedOnboarding.gettingStarted.guideCard.stepsLabel', {
     defaultMessage: '{progress} steps',
     values: {
@@ -51,7 +50,7 @@ export const GuideCardFooter = ({
     },
   });
   // guide is completed
-  if (guideState.status === 'complete') {
+  if (status === 'complete') {
     return (
       <>
         <EuiProgress
@@ -67,23 +66,21 @@ export const GuideCardFooter = ({
           )}
         />
         <EuiSpacer size="l" />
-        <EuiFlexGroup justifyContent="center">
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              // Used for FS tracking
-              data-test-subj={`onboarding--guideCard--view--${useCase}`}
-              fill
-              onClick={() => activateGuide(useCase, guideState)}
-            >
-              {i18n.translate(
-                'home.guidedOnboarding.gettingStarted.guideCard.startGuide.buttonLabel',
-                {
-                  defaultMessage: 'View guide',
-                }
-              )}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <div className="eui-textCenter">
+          <EuiButton
+            // Used for FS tracking
+            data-test-subj={`onboarding--guideCard--view--${useCase}`}
+            fill
+            onClick={() => activateGuide(useCase, guideState)}
+          >
+            {i18n.translate(
+              'home.guidedOnboarding.gettingStarted.guideCard.startGuide.buttonLabel',
+              {
+                defaultMessage: 'View guide',
+              }
+            )}
+          </EuiButton>
+        </div>
       </>
     );
   }
@@ -103,23 +100,21 @@ export const GuideCardFooter = ({
         )}
       />
       <EuiSpacer size="l" />
-      <EuiFlexGroup justifyContent="center">
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            // Used for FS tracking
-            data-test-subj={`onboarding--guideCard--continue--${useCase}`}
-            fill
-            onClick={() => activateGuide(useCase, guideState)}
-          >
-            {i18n.translate(
-              'home.guidedOnboarding.gettingStarted.guideCard.continueGuide.buttonLabel',
-              {
-                defaultMessage: 'Continue',
-              }
-            )}
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <div className="eui-textCenter">
+        <EuiButton
+          // Used for FS tracking
+          data-test-subj={`onboarding--guideCard--continue--${useCase}`}
+          fill
+          onClick={() => activateGuide(useCase, guideState)}
+        >
+          {i18n.translate(
+            'home.guidedOnboarding.gettingStarted.guideCard.continueGuide.buttonLabel',
+            {
+              defaultMessage: 'Continue',
+            }
+          )}
+        </EuiButton>
+      </div>
     </>
   );
 };
