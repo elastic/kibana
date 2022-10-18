@@ -114,7 +114,7 @@ export function TipsAndResources() {
           serviceGroup: '',
         },
       }),
-      iconType: 'apmTrace',
+      iconType: 'tableDensityExpanded',
     },
     {
       label: i18n.translate(
@@ -125,7 +125,7 @@ export function TipsAndResources() {
       ),
       href: docLinks.links.apm.storageExplorer,
       target: '_blank',
-      iconType: 'document',
+      iconType: 'documentation',
     },
     {
       label: i18n.translate(
@@ -136,7 +136,7 @@ export function TipsAndResources() {
       ),
       href: getStorageExplorerFeedbackHref(),
       target: '_blank',
-      iconType: 'users',
+      iconType: 'editorComment',
     },
   ];
 

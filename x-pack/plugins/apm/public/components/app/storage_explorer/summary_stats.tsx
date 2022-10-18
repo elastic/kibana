@@ -36,7 +36,6 @@ import { getIndexManagementHref } from './get_storage_explorer_links';
 export function SummaryStats() {
   const router = useApmRouter();
   const { core } = useApmPluginContext();
-  const { euiTheme } = useEuiTheme();
 
   const {
     query: {
@@ -109,7 +108,6 @@ export function SummaryStats() {
                 }
               )}
               value={asDynamicBytes(data?.totalSize)}
-              color={euiTheme.colors.text}
               loading={loading}
               hasData={hasData}
             />
@@ -128,7 +126,6 @@ export function SummaryStats() {
                 }
               )}
               value={asPercent(data?.diskSpaceUsedPct, 1)}
-              color={euiTheme.colors.warning}
               loading={loading}
               hasData={hasData}
             />
@@ -147,7 +144,6 @@ export function SummaryStats() {
                 }
               )}
               value={asDynamicBytes(data?.estimatedIncrementalSize)}
-              color={euiTheme.colors.primary}
               loading={loading}
               hasData={hasData}
             />
@@ -159,7 +155,6 @@ export function SummaryStats() {
                 }
               )}
               value={asDynamicBytes(data?.dailyDataGeneration)}
-              color={euiTheme.colors.danger}
               loading={loading}
               hasData={hasData}
             />
@@ -171,7 +166,6 @@ export function SummaryStats() {
                 }
               )}
               value={asTransactionRate(data?.tracesPerMinute)}
-              color={euiTheme.colors.accent}
               loading={loading}
               hasData={hasData}
             />
@@ -183,7 +177,6 @@ export function SummaryStats() {
                 }
               )}
               value={(data?.numberOfServices ?? 0).toString()}
-              color={euiTheme.colors.success}
               loading={loading}
               hasData={hasData}
             />
@@ -222,19 +215,17 @@ export function SummaryStats() {
 function SummaryMetric({
   label,
   value,
-  color,
   tooltipContent,
   loading,
   hasData,
 }: {
   label: string;
   value: string;
-  color: string;
   tooltipContent?: string;
   loading: boolean;
   hasData: boolean;
 }) {
-  const xxlFontSize = useEuiFontSize('xxl', { measurement: 'px' });
+  const xlFontSize = useEuiFontSize('xl', { measurement: 'px' });
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -266,9 +257,9 @@ function SummaryMetric({
         <>
           <EuiText
             css={css`
-              ${xxlFontSize}
+              ${xlFontSize}
               font-weight: ${euiTheme.font.weight.bold};
-              color: ${color};
+              color: ${euiTheme.colors.text};
             `}
           >
             {value}
