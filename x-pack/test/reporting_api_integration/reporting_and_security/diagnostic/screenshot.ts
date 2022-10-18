@@ -56,7 +56,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(logs).contain(`Closing the browser...`);
       expect(logs).contain(`Child browser process closed`);
       expect(logs).contain(`Browser closed.`);
-      expect(logs).contain(`Deleting chromium user data directory`);
+      expect(logs).contain(`Deleting Chromium user data directory`);
       expect(body.help).eql([]);
     });
 
