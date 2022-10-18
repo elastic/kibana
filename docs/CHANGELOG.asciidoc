@@ -145,7 +145,8 @@ Observability::
 Feat(slo): Create basic SLO route {kibana-pull}139490[#139490]
 
 Osquery::
-Adds Osquery results to Case {kibana-pull}139909[#139909]
+* Adds Osquery results to cases {kibana-pull}139909[#139909]
+* Add support for differential logs {kibana-pull}140660[#140660]
 
 Security::
 Adds the ability to set a default Access Agreement for all `xpack.security`-level authentication providers {kibana-pull}139217[#139217]
