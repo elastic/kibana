@@ -11,7 +11,12 @@ import type { MarkdownProps } from '@kbn/shared-ux-markdown-types';
 
 type PropArguments = Pick<
   MarkdownProps,
-  'readOnly' | 'placeholder' | 'markdownContent' | 'height' | 'ariaLabelContent' | 'openLinksInNewTab'
+  | 'readOnly'
+  | 'placeholder'
+  | 'markdownContent'
+  | 'height'
+  | 'ariaLabelContent'
+  | 'openLinksInNewTab'
 >;
 
 export type Params = Record<keyof PropArguments, any>;

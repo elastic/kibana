@@ -6,7 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { EuiLink, EuiMarkdownEditor, EuiMarkdownEditorProps, EuiMarkdownFormat, getDefaultEuiMarkdownProcessingPlugins } from '@elastic/eui';
+import {
+  EuiLink,
+  EuiMarkdownEditor,
+  EuiMarkdownEditorProps,
+  EuiMarkdownFormat,
+  getDefaultEuiMarkdownProcessingPlugins,
+} from '@elastic/eui';
 import React, { useState } from 'react';
 
 export type MarkdownProps = Partial<
@@ -41,9 +47,7 @@ export const Markdown = ({
 
   // openLinksInNewTab functionality from https://codesandbox.io/s/relaxed-yalow-hy69r4?file=/demo.js:482-645
   const processingPlugins = getDefaultEuiMarkdownProcessingPlugins();
-  processingPlugins[1][1].components.a = (props) => (
-    <EuiLink {...props} target="_blank" />
-  );
+  processingPlugins[1][1].components.a = (props) => <EuiLink {...props} target="_blank" />;
 
   // Render EuiMarkdownFormat when readOnly set to true
   if (readOnly) {
@@ -51,7 +55,10 @@ export const Markdown = ({
       throw new Error('Markdown content is required in [readOnly] mode');
     }
     return (
-      <EuiMarkdownFormat aria-label={ariaLabelContent ?? 'markdown component'} processingPluginList={openLinksInNewTab ? processingPlugins : undefined}>
+      <EuiMarkdownFormat
+        aria-label={ariaLabelContent ?? 'markdown component'}
+        processingPluginList={openLinksInNewTab ? processingPlugins : undefined}
+      >
         {children ?? markdownContent!}
       </EuiMarkdownFormat>
     );
