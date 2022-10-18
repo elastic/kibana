@@ -11,7 +11,8 @@ import type { Observable } from 'rxjs';
 import type { FormattedRelative } from '@kbn/i18n-react';
 import { RedirectAppLinksKibanaProvider } from '@kbn/shared-ux-link-redirect-app';
 
-import { Tag } from './types';
+import { TAG_MANAGEMENT_APP_URL } from './constants';
+import type { Tag } from './types';
 
 type UnmountCallback = () => void;
 type MountPoint = (element: HTMLElement) => UnmountCallback;
@@ -45,10 +46,13 @@ export interface Services {
     referencesToExclude?: SavedObjectsFindOptionsReference[];
   };
   DateFormatterComp?: DateFormatter;
+  /** Handler to retrieve the list of available tags */
   getTagList: () => Tag[];
   TagList: FC<{ references: SavedObjectsReference[]; onClick?: (tag: Tag) => void }>;
-  /** Predicate function to indicate if the saved object references include tags */
+  /** Predicate function to indicate if some of the saved object references are tags */
   itemHasTags: (references: SavedObjectsReference[]) => boolean;
+  /** Handler to return the url to navigate to the kibana tags management */
+  getTagManagementUrl: () => string;
 }
 
 const TableListViewContext = React.createContext<Services | null>(null);
@@ -79,6 +83,11 @@ export interface TableListViewKibanaDependencies {
     notifications: {
       toasts: {
         addDanger: (notifyArgs: { title: MountPoint; text?: string }) => void;
+      };
+    };
+    http: {
+      basePath: {
+        prepend: (path: string) => string;
       };
     };
   };
@@ -203,6 +212,7 @@ export const TableListViewKibanaProvider: FC<TableListViewKibanaDependencies> = 
         getTagList={getTagList}
         TagList={TagList}
         itemHasTags={itemHasTags}
+        getTagManagementUrl={() => core.http.basePath.prepend(TAG_MANAGEMENT_APP_URL)}
       >
         {children}
       </TableListViewProvider>

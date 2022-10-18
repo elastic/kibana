@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useState, useEffect, useCallback } from 'react';
+import React, { FC, useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Query,
   EuiPopover,
@@ -26,8 +26,11 @@ import {
 } from '@elastic/eui';
 import type { EuiSelectableProps, ExclusiveUnion, FieldValueOptionType } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
-import { Tag } from '../types';
+import { useServices } from '../services';
+import type { Tag } from '../types';
 
 const toArray = (item: unknown) => (Array.isArray(item) ? item : [item]);
 
@@ -65,6 +68,7 @@ export const TagFilterPanel: FC<Props> = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [options, setOptions] = useState<TagOptionItem[]>([]);
   const [tagSelection, setTagSelection] = useState<TagSelection>({});
+  const { navigateToUrl, currentAppId$, getTagManagementUrl } = useServices();
 
   const isSearchVisible = options.length > 10;
   const totalActiveFilters = Object.keys(tagSelection).length;
@@ -252,9 +256,23 @@ export const TagFilterPanel: FC<Props> = ({
           </EuiFlexItem>
           <EuiFlexItem css={bottomBarCSS}>
             <span>
-              <EuiLink href="https://elastic.co" external>
-                Manage all tags
-              </EuiLink>
+              <RedirectAppLinks
+                coreStart={{
+                  application: {
+                    navigateToUrl,
+                    currentAppId$,
+                  },
+                }}
+              >
+                <EuiLink href={getTagManagementUrl()} data-test-subj="manageAllTagsLink" external>
+                  {i18n.translate(
+                    'contentManagement.tableList.tagFilterPanel.manageAllTagsLinkLabel',
+                    {
+                      defaultMessage: 'Manage all tags',
+                    }
+                  )}
+                </EuiLink>
+              </RedirectAppLinks>
             </span>
           </EuiFlexItem>
         </EuiFlexGroup>
