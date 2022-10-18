@@ -119,6 +119,7 @@ export interface DiscoverStateContainer {
       onError: (e: Error) => void
     ) => void;
     initSyncSubscribe: () => () => void;
+    stopSyncSubscribe: () => void;
     newSavedSearch: () => void;
   };
 }
@@ -183,6 +184,7 @@ export function getDiscoverStateContainer({
   });
 
   const internalStateContainer = getInternalStateContainer();
+  let unsubscribeSync: (() => void) | undefined;
 
   return {
     appStateContainer,
@@ -246,6 +248,9 @@ export function getDiscoverStateContainer({
         dataViewSpec: DataViewSpec | undefined,
         onError: (e: Error) => void
       ) => {
+        if (appStateContainer.isEmptyURL()) {
+          appStateContainer.set({});
+        }
         const currentSavedSearch = await loadSavedSearch(id, {
           services,
           appStateContainer,
@@ -330,13 +335,19 @@ export function getDiscoverStateContainer({
           );
           dataStateContainer.refetch$.next(undefined);
         });
-
-        return () => {
+        unsubscribeSync = () => {
           stopSync();
           unsubscribe();
           unsubscribeData();
           filterUnsubscribe.unsubscribe();
         };
+        return unsubscribeSync;
+      },
+      stopSyncSubscribe: () => {
+        if (unsubscribeSync) {
+          unsubscribeSync();
+          unsubscribeSync = undefined;
+        }
       },
     },
   };

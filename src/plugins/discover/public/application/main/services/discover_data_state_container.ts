@@ -162,7 +162,6 @@ export function getDataStateContainer({
     main$: dataSubjects.main$,
     refetch$,
     searchSessionManager,
-    initialFetchStatus,
   });
   let abortController: AbortController;
 

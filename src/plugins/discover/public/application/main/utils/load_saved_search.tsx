@@ -41,7 +41,6 @@ export const loadSavedSearch = async (
     currentSavedSearch,
     appStateContainer,
     internalStateContainer,
-
     services,
     setError,
     dataViewSpec
