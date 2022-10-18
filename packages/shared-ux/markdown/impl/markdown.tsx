@@ -37,25 +37,21 @@ export const Markdown = ({
 }: MarkdownProps) => {
   const [value, setValue] = useState(defaultValue);
 
-  // Render EuiMarkdownFormat
-  if (readOnly && children) {
+  // Render EuiMarkdownFormat when readOnly set to true
+  if (readOnly) {
+    if (!children && !markdownContent) {
+      throw new Error('Markdown content is required in [readOnly] mode');
+    }
     return (
       <EuiMarkdownFormat aria-label={ariaLabelContent ?? 'markdown component'}>
-        {children}
+        {children ?? markdownContent!}
       </EuiMarkdownFormat>
     );
-  } else if (readOnly && markdownContent) {
-    return (
-      <EuiMarkdownFormat aria-label={ariaLabelContent ?? 'markdown component'}>
-        {markdownContent}
-      </EuiMarkdownFormat>
-    );
-  }
+  } 
 
-  // Otherwise render the Markdown Editor
+  // Otherwise render the Markdown Editor if readOnly false
   return (
     <EuiMarkdownEditor
-      readOnly={readOnly}
       aria-label={ariaLabelContent ?? 'markdown component'}
       placeholder={placeholder}
       value={value}

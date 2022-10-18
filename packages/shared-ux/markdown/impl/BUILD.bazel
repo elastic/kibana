@@ -70,6 +70,8 @@ TYPES_DEPS = [
   "@npm//@elastic/eui",
   "//packages/kbn-ambient-ui-types",
   "//packages/kbn-shared-ux-utility:npm_module_types",
+  "//packages/shared-ux/markdown/mocks",
+  # "//packages/kbn-shared-ux-markdown-mocks:npm_module_types",
 ]
 
 jsts_transpiler(
