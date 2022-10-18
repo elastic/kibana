@@ -254,17 +254,15 @@ function SummaryMetric({
         </>
       )}
       {hasData && (
-        <>
-          <EuiText
-            css={css`
-              ${xlFontSize}
-              font-weight: ${euiTheme.font.weight.bold};
-              color: ${euiTheme.colors.text};
-            `}
-          >
-            {value}
-          </EuiText>
-        </>
+        <EuiText
+          css={css`
+            ${xlFontSize}
+            font-weight: ${euiTheme.font.weight.bold};
+            color: ${euiTheme.colors.text};
+          `}
+        >
+          {value}
+        </EuiText>
       )}
     </EuiFlexItem>
   );
