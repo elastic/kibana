@@ -1402,407 +1402,82 @@
       "update_case_request": {
         "title": "Update case request",
         "description": "The update case API request body varies depending on the type of connector.",
-        "oneOf": [
-          {
-            "type": "object",
-            "title": "Update case request with no connector",
-            "required": [
-              "cases"
-            ],
-            "properties": {
-              "cases": {
-                "type": "array",
-                "description": "An array containing one or more case objects.",
-                "items": {
-                  "type": "object",
-                  "required": [
-                    "id",
-                    "version"
-                  ],
-                  "properties": {
-                    "connector": {
+        "type": "object",
+        "required": [
+          "cases"
+        ],
+        "properties": {
+          "cases": {
+            "type": "array",
+            "description": "An array containing one or more case objects.",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "version"
+              ],
+              "properties": {
+                "connector": {
+                  "oneOf": [
+                    {
                       "$ref": "#/components/schemas/connector_properties_none"
                     },
-                    "description": {
-                      "description": "An updated description for the case.",
-                      "type": "string"
-                    },
-                    "id": {
-                      "description": "The identifier for the case.",
-                      "type": "string"
-                    },
-                    "settings": {
-                      "$ref": "#/components/schemas/settings"
-                    },
-                    "severity": {
-                      "$ref": "#/components/schemas/severity_property"
-                    },
-                    "status": {
-                      "$ref": "#/components/schemas/status"
-                    },
-                    "tags": {
-                      "description": "The words and phrases that help categorize cases.",
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    },
-                    "title": {
-                      "description": "A title for the case.",
-                      "type": "string"
-                    },
-                    "version": {
-                      "description": "The current version of the case. To determine this value, use the get case or find cases APIs.",
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          {
-            "type": "object",
-            "title": "Update case request with a Cases Webhook connector",
-            "required": [
-              "cases"
-            ],
-            "properties": {
-              "cases": {
-                "type": "array",
-                "description": "An array containing one or more case objects.",
-                "items": {
-                  "type": "object",
-                  "required": [
-                    "id",
-                    "version"
-                  ],
-                  "properties": {
-                    "connector": {
+                    {
                       "$ref": "#/components/schemas/connector_properties_cases_webhook"
                     },
-                    "description": {
-                      "description": "An updated description for the case.",
-                      "type": "string"
-                    },
-                    "id": {
-                      "description": "The identifier for the case.",
-                      "type": "string"
-                    },
-                    "settings": {
-                      "$ref": "#/components/schemas/settings"
-                    },
-                    "severity": {
-                      "$ref": "#/components/schemas/severity_property"
-                    },
-                    "status": {
-                      "$ref": "#/components/schemas/status"
-                    },
-                    "tags": {
-                      "description": "The words and phrases that help categorize cases.",
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    },
-                    "title": {
-                      "description": "A title for the case.",
-                      "type": "string"
-                    },
-                    "version": {
-                      "description": "The current version of the case. To determine this value, use the get case or find cases APIs.",
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          {
-            "type": "object",
-            "title": "Update case request with a Jira connector",
-            "required": [
-              "cases"
-            ],
-            "properties": {
-              "cases": {
-                "type": "array",
-                "description": "An array containing one or more case objects.",
-                "items": {
-                  "type": "object",
-                  "required": [
-                    "id",
-                    "version"
-                  ],
-                  "properties": {
-                    "connector": {
+                    {
                       "$ref": "#/components/schemas/connector_properties_jira"
                     },
-                    "description": {
-                      "description": "An updated description for the case.",
-                      "type": "string"
-                    },
-                    "id": {
-                      "description": "The identifier for the case.",
-                      "type": "string"
-                    },
-                    "settings": {
-                      "$ref": "#/components/schemas/settings"
-                    },
-                    "severity": {
-                      "$ref": "#/components/schemas/severity_property"
-                    },
-                    "status": {
-                      "$ref": "#/components/schemas/status"
-                    },
-                    "tags": {
-                      "description": "The words and phrases that help categorize cases.",
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    },
-                    "title": {
-                      "description": "A title for the case.",
-                      "type": "string"
-                    },
-                    "version": {
-                      "description": "The current version of the case. To determine this value, use the get case or find cases APIs.",
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          {
-            "type": "object",
-            "title": "Update case request with an IBM Resilient connector",
-            "required": [
-              "cases"
-            ],
-            "properties": {
-              "cases": {
-                "type": "array",
-                "description": "An array containing one or more case objects.",
-                "items": {
-                  "type": "object",
-                  "required": [
-                    "id",
-                    "version"
-                  ],
-                  "properties": {
-                    "connector": {
+                    {
                       "$ref": "#/components/schemas/connector_properties_resilient"
                     },
-                    "description": {
-                      "description": "An updated description for the case.",
-                      "type": "string"
-                    },
-                    "id": {
-                      "description": "The identifier for the case.",
-                      "type": "string"
-                    },
-                    "settings": {
-                      "$ref": "#/components/schemas/settings"
-                    },
-                    "severity": {
-                      "$ref": "#/components/schemas/severity_property"
-                    },
-                    "status": {
-                      "$ref": "#/components/schemas/status"
-                    },
-                    "tags": {
-                      "description": "The words and phrases that help categorize cases.",
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    },
-                    "title": {
-                      "description": "A title for the case.",
-                      "type": "string"
-                    },
-                    "version": {
-                      "description": "The current version of the case. To determine this value, use the get case or find cases APIs.",
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          {
-            "type": "object",
-            "title": "Update case request with a ServiceNow ITSM connector",
-            "required": [
-              "cases"
-            ],
-            "properties": {
-              "cases": {
-                "type": "array",
-                "description": "An array containing one or more case objects.",
-                "items": {
-                  "type": "object",
-                  "required": [
-                    "id",
-                    "version"
-                  ],
-                  "properties": {
-                    "connector": {
+                    {
                       "$ref": "#/components/schemas/connector_properties_servicenow"
                     },
-                    "description": {
-                      "description": "An updated description for the case.",
-                      "type": "string"
-                    },
-                    "id": {
-                      "description": "The identifier for the case.",
-                      "type": "string"
-                    },
-                    "settings": {
-                      "$ref": "#/components/schemas/settings"
-                    },
-                    "severity": {
-                      "$ref": "#/components/schemas/severity_property"
-                    },
-                    "status": {
-                      "$ref": "#/components/schemas/status"
-                    },
-                    "tags": {
-                      "description": "The words and phrases that help categorize cases.",
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    },
-                    "title": {
-                      "description": "A title for the case.",
-                      "type": "string"
-                    },
-                    "version": {
-                      "description": "The current version of the case. To determine this value, use the get case or find cases APIs.",
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          {
-            "type": "object",
-            "title": "Update case request with ServiceNow SecOps connector",
-            "required": [
-              "cases"
-            ],
-            "properties": {
-              "cases": {
-                "type": "array",
-                "description": "An array containing one or more case objects.",
-                "items": {
-                  "type": "object",
-                  "required": [
-                    "id",
-                    "version"
-                  ],
-                  "properties": {
-                    "connector": {
+                    {
                       "$ref": "#/components/schemas/connector_properties_servicenow_sir"
                     },
-                    "description": {
-                      "description": "An updated description for the case.",
-                      "type": "string"
-                    },
-                    "id": {
-                      "description": "The identifier for the case.",
-                      "type": "string"
-                    },
-                    "settings": {
-                      "$ref": "#/components/schemas/settings"
-                    },
-                    "severity": {
-                      "$ref": "#/components/schemas/severity_property"
-                    },
-                    "status": {
-                      "$ref": "#/components/schemas/status"
-                    },
-                    "tags": {
-                      "description": "The words and phrases that help categorize cases.",
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    },
-                    "title": {
-                      "description": "A title for the case.",
-                      "type": "string"
-                    },
-                    "version": {
-                      "description": "The current version of the case. To determine this value, use the get case or find cases APIs.",
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          {
-            "type": "object",
-            "title": "Update case request with a Swimlane connector",
-            "required": [
-              "cases"
-            ],
-            "properties": {
-              "cases": {
-                "type": "array",
-                "description": "An array containing one or more case objects.",
-                "items": {
-                  "type": "object",
-                  "required": [
-                    "id",
-                    "version"
-                  ],
-                  "properties": {
-                    "connector": {
+                    {
                       "$ref": "#/components/schemas/connector_properties_swimlane"
-                    },
-                    "description": {
-                      "description": "An updated description for the case.",
-                      "type": "string"
-                    },
-                    "id": {
-                      "description": "The identifier for the case.",
-                      "type": "string"
-                    },
-                    "settings": {
-                      "$ref": "#/components/schemas/settings"
-                    },
-                    "severity": {
-                      "$ref": "#/components/schemas/severity_property"
-                    },
-                    "status": {
-                      "$ref": "#/components/schemas/status"
-                    },
-                    "tags": {
-                      "description": "The words and phrases that help categorize cases.",
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    },
-                    "title": {
-                      "description": "A title for the case.",
-                      "type": "string"
-                    },
-                    "version": {
-                      "description": "The current version of the case. To determine this value, use the get case or find cases APIs.",
-                      "type": "string"
                     }
+                  ]
+                },
+                "description": {
+                  "description": "An updated description for the case.",
+                  "type": "string"
+                },
+                "id": {
+                  "description": "The identifier for the case.",
+                  "type": "string"
+                },
+                "settings": {
+                  "$ref": "#/components/schemas/settings"
+                },
+                "severity": {
+                  "$ref": "#/components/schemas/severity_property"
+                },
+                "status": {
+                  "$ref": "#/components/schemas/status"
+                },
+                "tags": {
+                  "description": "The words and phrases that help categorize cases.",
+                  "type": "array",
+                  "items": {
+                    "type": "string"
                   }
+                },
+                "title": {
+                  "description": "A title for the case.",
+                  "type": "string"
+                },
+                "version": {
+                  "description": "The current version of the case. To determine this value, use the get case or find cases APIs.",
+                  "type": "string"
                 }
               }
             }
           }
-        ]
+        }
       },
       "alert_identifiers": {
         "title": "Alert identifiers",
