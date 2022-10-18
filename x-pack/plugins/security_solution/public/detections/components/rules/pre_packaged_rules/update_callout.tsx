@@ -15,8 +15,8 @@ import * as i18n from './translations';
 const UpdatePrePackagedRulesCallOutComponent = () => {
   const { services } = useKibana();
   const { data: prePackagedRulesStatus } = usePrePackagedRulesStatus();
-  const rulesNotUpdated = prePackagedRulesStatus?.rulesNotUpdated ?? 0;
-  const timelinesNotUpdated = prePackagedRulesStatus?.timelinesNotUpdated ?? 0;
+  const rulesNotUpdated = prePackagedRulesStatus?.rules_not_updated ?? 0;
+  const timelinesNotUpdated = prePackagedRulesStatus?.timelines_not_updated ?? 0;
 
   const prepackagedRulesOrTimelines = useMemo(() => {
     if (rulesNotUpdated > 0 && timelinesNotUpdated === 0) {

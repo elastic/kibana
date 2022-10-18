@@ -48,8 +48,8 @@ const RulesTableFiltersComponent = () => {
   } = useRulesTableContext();
   const { data: allTags = [] } = useTags();
   const { data: prePackagedRulesStatus } = usePrePackagedRulesStatus();
-  const rulesCustomInstalled = prePackagedRulesStatus?.rulesCustomInstalled;
-  const rulesInstalled = prePackagedRulesStatus?.rulesInstalled;
+  const rulesCustomInstalled = prePackagedRulesStatus?.rules_custom_installed;
+  const rulesInstalled = prePackagedRulesStatus?.rules_installed;
 
   const { showCustomRules, showElasticRules, tags: selectedTags } = filterOptions;
 

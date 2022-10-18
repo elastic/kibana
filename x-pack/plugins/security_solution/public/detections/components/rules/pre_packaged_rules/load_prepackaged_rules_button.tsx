@@ -91,8 +91,8 @@ export const LoadPrePackagedRulesButton = ({
         data-test-subj={dataTestSubj}
       >
         {getMissingRulesOrTimelinesButtonTitle(
-          prePackagedRulesStatus?.rulesNotInstalled ?? 0,
-          prePackagedRulesStatus?.timelinesNotInstalled ?? 0
+          prePackagedRulesStatus?.rules_not_installed ?? 0,
+          prePackagedRulesStatus?.timelines_not_installed ?? 0
         )}
       </EuiButton>
     );

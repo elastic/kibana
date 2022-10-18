@@ -108,7 +108,6 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
     completeBulkEditForm,
   } = useBulkEditFormFlyout();
 
-  // TODO What's the reason for it to be on the top level? Should it live inside useBulkActions?
   const { isBulkActionsDryRunLoading, executeBulkActionsDryRun } = useBulkActionsDryRun();
 
   const getBulkItemsPopoverContent = useBulkActions({
@@ -119,7 +118,6 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
     executeBulkActionsDryRun,
   });
 
-  // TODO move to the rules table context
   const paginationMemo = useMemo(
     () => ({
       pageIndex: pagination.page - 1,
@@ -130,7 +128,6 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
     [pagination]
   );
 
-  // TODO pagination logic should be handled on the RulesTableContext level
   const tableOnChangeCallback = useCallback(
     ({ page, sort }: EuiBasicTableOnChange) => {
       setSortingOptions({
@@ -148,7 +145,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
 
   const isSelectAllCalled = useRef(false);
 
-  // TODO fix this on the EUI table side and remove this logic altogether (or use a decorator)
+  // TODO Remove this synchronization logic after https://github.com/elastic/eui/issues/6184 is implemented
   // Synchronize selectedRuleIds with EuiBasicTable's selected rows
   useValueChanged((ruleIds) => {
     if (tableRef.current != null) {
@@ -186,18 +183,16 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
     [loadingRuleIds, setIsAllSelected, setSelectedRuleIds]
   );
 
-  // TODO move to the rules table context level
   const toggleSelectAll = useCallback(() => {
     isSelectAllCalled.current = true;
     setIsAllSelected(!isAllSelected);
     setSelectedRuleIds(!isAllSelected ? rules.map(({ id }) => id) : []);
   }, [rules, isAllSelected, setIsAllSelected, setSelectedRuleIds]);
 
-  // TODO move inside a child component that shows the prepackaged rules update callout
   const isTableEmpty =
     !isPrepackagedStatusLoading &&
-    prePackagedRulesStatus?.rulesCustomInstalled === 0 &&
-    prePackagedRulesStatus.rulesInstalled === 0;
+    prePackagedRulesStatus?.rules_custom_installed === 0 &&
+    prePackagedRulesStatus.rules_installed === 0;
 
   const shouldShowRulesTable = !isPrepackagedStatusLoading && !isLoading && !isTableEmpty;
 

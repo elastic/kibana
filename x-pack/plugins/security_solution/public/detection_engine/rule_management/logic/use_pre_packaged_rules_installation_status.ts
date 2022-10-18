@@ -12,8 +12,8 @@ export const usePrePackagedRulesInstallationStatus = () => {
   const { data: prePackagedRulesStatus } = usePrePackagedRulesStatus();
 
   return getPrePackagedRuleInstallationStatus(
-    prePackagedRulesStatus?.rulesInstalled,
-    prePackagedRulesStatus?.rulesNotInstalled,
-    prePackagedRulesStatus?.rulesNotUpdated
+    prePackagedRulesStatus?.rules_installed,
+    prePackagedRulesStatus?.rules_not_installed,
+    prePackagedRulesStatus?.rules_not_updated
   );
 };

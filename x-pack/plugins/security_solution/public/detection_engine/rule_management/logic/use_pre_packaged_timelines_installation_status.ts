@@ -12,8 +12,8 @@ export const usePrePackagedTimelinesInstallationStatus = () => {
   const { data: prePackagedRulesStatus } = usePrePackagedRulesStatus();
 
   return getPrePackagedTimelineInstallationStatus(
-    prePackagedRulesStatus?.timelinesInstalled,
-    prePackagedRulesStatus?.timelinesNotInstalled,
-    prePackagedRulesStatus?.timelinesNotUpdated
+    prePackagedRulesStatus?.timelines_installed,
+    prePackagedRulesStatus?.timelines_not_installed,
+    prePackagedRulesStatus?.timelines_not_updated
   );
 };

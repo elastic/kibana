@@ -18,14 +18,6 @@ import type { RulesTableActions } from '../../../rule_management_ui/components/r
 import { useBulkExportMutation } from '../../api/hooks/use_bulk_export_mutation';
 import { getErrorToastContent, getSuccessToastContent } from './translations';
 
-type OnActionSuccessCallback = (
-  toasts: UseAppToasts,
-  action: BulkAction,
-  summary: BulkActionSummary
-) => void;
-
-type OnActionErrorCallback = (toasts: UseAppToasts, action: BulkAction, error: HTTPError) => void;
-
 interface RulesBulkActionArgs {
   visibleRuleIds?: string[];
   search: { query: string } | { ids: string[] };
@@ -66,9 +58,6 @@ export async function downloadExportedRules({
 }: {
   response: Blob;
   toasts: UseAppToasts;
-  // TODO: https://github.com/elastic/kibana/pull/142950 Callbacks are not used
-  onSuccess?: OnActionSuccessCallback;
-  onError?: OnActionErrorCallback;
 }) {
   try {
     downloadBlob(response, `${i18n.EXPORT_FILENAME}.ndjson`);

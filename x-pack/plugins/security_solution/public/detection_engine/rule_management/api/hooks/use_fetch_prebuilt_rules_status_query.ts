@@ -9,38 +9,18 @@ import type { UseQueryOptions } from '@tanstack/react-query';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getPrePackagedRulesStatus } from '../api';
 import { DEFAULT_QUERY_OPTIONS } from './constants';
-
-export interface PrebuiltRulesStatusResponse {
-  rulesCustomInstalled: number;
-  rulesInstalled: number;
-  rulesNotInstalled: number;
-  rulesNotUpdated: number;
-  timelinesInstalled: number;
-  timelinesNotInstalled: number;
-  timelinesNotUpdated: number;
-}
+import type { PrePackagedRulesStatusResponse } from '../../logic';
 
 export const PREBUILT_RULES_STATUS_QUERY_KEY = 'prePackagedRulesStatus';
 
 export const useFetchPrebuiltRulesStatusQuery = (
-  options: UseQueryOptions<PrebuiltRulesStatusResponse>
+  options: UseQueryOptions<PrePackagedRulesStatusResponse>
 ) => {
-  return useQuery<PrebuiltRulesStatusResponse>(
+  return useQuery<PrePackagedRulesStatusResponse>(
     [PREBUILT_RULES_STATUS_QUERY_KEY],
     async ({ signal }) => {
       const response = await getPrePackagedRulesStatus({ signal });
-
-      // TODO: https://github.com/elastic/kibana/pull/142950 Open a ticket for implementing automated camelCase normalization
-      // https://dev.to/svehla/typescript-transform-case-strings-450b
-      return {
-        rulesCustomInstalled: response.rules_custom_installed,
-        rulesInstalled: response.rules_installed,
-        rulesNotInstalled: response.rules_not_installed,
-        rulesNotUpdated: response.rules_not_updated,
-        timelinesInstalled: response.timelines_installed,
-        timelinesNotInstalled: response.timelines_not_installed,
-        timelinesNotUpdated: response.timelines_not_updated,
-      };
+      return response;
     },
     {
       ...DEFAULT_QUERY_OPTIONS,

@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import type { PrebuiltRulesStatusResponse } from '../use_fetch_prebuilt_rules_status_query';
+import type { PrePackagedRulesStatusResponse } from '../../../logic';
 import { mockReactQueryResponse } from './mock_react_query_response';
 
 export const usePrebuiltRulesStatusQuery = jest.fn(() =>
-  mockReactQueryResponse<PrebuiltRulesStatusResponse>({
+  mockReactQueryResponse<PrePackagedRulesStatusResponse>({
     data: {
-      rulesCustomInstalled: 0,
-      rulesInstalled: 0,
-      rulesNotInstalled: 0,
-      rulesNotUpdated: 0,
-      timelinesInstalled: 0,
-      timelinesNotInstalled: 0,
-      timelinesNotUpdated: 0,
+      rules_custom_installed: 0,
+      rules_installed: 0,
+      rules_not_installed: 0,
+      rules_not_updated: 0,
+      timelines_installed: 0,
+      timelines_not_installed: 0,
+      timelines_not_updated: 0,
     },
   })
 );
