@@ -70,63 +70,6 @@ export default function ({ getService }: FtrProviderContext) {
       await esTestIndexTool.waitForDocs('action:test.index-record', reference, 1);
     });
 
-    it('should cleanup task after a failure', async () => {
-      const testStart = new Date().toISOString();
-      const { body: createdAction } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          name: 'My action',
-          connector_type_id: 'test.failing',
-          config: {},
-          secrets: {},
-        })
-        .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
-
-      const reference = `actions-enqueue-2:${Spaces.space1.id}:${createdAction.id}`;
-      await supertest
-        .post(
-          `${getUrlPrefix(Spaces.space1.id)}/api/alerts_fixture/${createdAction.id}/enqueue_action`
-        )
-        .set('kbn-xsrf', 'foo')
-        .send({
-          params: {
-            reference,
-            index: ES_TEST_INDEX_NAME,
-          },
-        })
-        .expect(204);
-      await esTestIndexTool.waitForDocs('action:test.failing', reference, 1);
-
-      await retry.try(async () => {
-        const searchResult = await es.search({
-          index: '.kibana_task_manager',
-          body: {
-            query: {
-              bool: {
-                must: [
-                  {
-                    term: {
-                      'task.taskType': 'actions:test.failing',
-                    },
-                  },
-                  {
-                    range: {
-                      'task.scheduledAt': {
-                        gte: testStart,
-                      },
-                    },
-                  },
-                ],
-              },
-            },
-          },
-        });
-        expect((searchResult.hits.total as estypes.SearchTotalHits).value).to.eql(0);
-      });
-    });
-
     it('should never leaved a failed task, even if max attempts is reached', async () => {
       // We have to provide the test.rate-limit the next runAt, for testing purposes
       const retryDate = new Date(Date.now() + 1);

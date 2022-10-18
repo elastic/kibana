@@ -133,7 +133,7 @@ export default function ({ getService }: FtrProviderContext) {
         status: 'error',
         message: 'an error occurred while running the action',
         service_message: `expected failure for ${ES_TEST_INDEX_NAME} ${reference}`,
-        retry: false,
+        retry: true,
       });
 
       await validateEventLog({
@@ -327,7 +327,7 @@ export default function ({ getService }: FtrProviderContext) {
           status: 'error',
           message: 'an error occurred while running the action',
           serviceMessage: `expected failure for ${ES_TEST_INDEX_NAME} ${reference}`,
-          retry: false,
+          retry: true,
         });
       });
     });
