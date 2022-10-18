@@ -15,11 +15,14 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
+  EuiTitle,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
+import { css } from '@emotion/css';
 import { isEmpty } from 'lodash';
 
+import { getMitreTitleAndDescription } from '../../../detections/pages/alert_details/tabs/summary/get_mitre_threat_component';
 import type { AlertRawEventData } from './osquery_tab';
 import { useOsqueryTab } from './osquery_tab';
 import { EventFieldsBrowser } from './event_fields_browser';
@@ -49,6 +52,13 @@ import { DETAILS_CLASS_NAME } from '../../../timelines/components/timeline/body/
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 
 export const EVENT_DETAILS_CONTEXT_ID = 'event-details';
+
+const threatTacticContainerStyles = css`
+  flex-wrap: nowrap;
+  & .euiFlexGroup {
+    flex-wrap: nowrap;
+  }
+`;
 
 type EventViewTab = EuiTabbedContentTab;
 
@@ -160,6 +170,7 @@ const EventDetailsComponent: React.FC<Props> = ({
     range,
   } = useInvestigationTimeEnrichment(eventFields);
 
+  const threatDetails = useMemo(() => getMitreTitleAndDescription(data), [data]);
   const allEnrichments = useMemo(() => {
     if (isEnrichmentsLoading || !enrichmentsResponse?.enrichments) {
       return existingEnrichments;
@@ -227,7 +238,22 @@ const EventDetailsComponent: React.FC<Props> = ({
                   }}
                   goToTable={goToTableTab}
                 />
-
+                <EuiSpacer size="xl" />
+                <EuiFlexGroup
+                  direction="column"
+                  wrap={false}
+                  css={threatTacticContainerStyles}
+                  gutterSize="none"
+                >
+                  {threatDetails && threatDetails[0] && (
+                    <>
+                      <EuiTitle size="xxs">
+                        <h5>{threatDetails[0].title}</h5>
+                      </EuiTitle>
+                      {threatDetails[0].description}
+                    </>
+                  )}
+                </EuiFlexGroup>
                 <EuiSpacer size="l" />
                 <Insights
                   browserFields={browserFields}
@@ -280,6 +306,7 @@ const EventDetailsComponent: React.FC<Props> = ({
       isLicenseValid,
       isReadOnly,
       renderer,
+      threatDetails,
       timelineId,
       userRisk,
     ]
