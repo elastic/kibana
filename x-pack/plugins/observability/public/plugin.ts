@@ -302,6 +302,7 @@ export class Plugin
       getUrlForApp: application.getUrlForApp,
       navigateToApp: application.navigateToApp,
       navigationSections$: this.navigationRegistry.sections$,
+      guidedOnboardingApi: pluginsStart.guidedOnboarding.guidedOnboardingApi,
       getPageTemplateServices: () => ({ coreStart }),
     });
 

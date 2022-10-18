@@ -16,8 +16,7 @@
     "observability",
     "ruleRegistry",
     "unifiedSearch",
-    "lens",
-    "guidedOnboarding"
+    "lens"
   ],
   "optionalPlugins": ["ml", "home", "embeddable", "osquery"],
   "server": true,

@@ -22,6 +22,7 @@ import type {
   KibanaPageTemplateProps,
   KibanaPageTemplateKibanaDependencies,
 } from '@kbn/shared-ux-page-kibana-template';
+import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import { ObservabilityAppServices } from '../../../application/types';
 import type { NavigationSection } from '../../../services/navigation_registry';
 import { ObservabilityTour } from '../tour';
@@ -50,6 +51,7 @@ export interface ObservabilityPageTemplateDependencies {
   navigateToApp: ApplicationStart['navigateToApp'];
   navigationSections$: Observable<NavigationSection[]>;
   getPageTemplateServices: () => KibanaPageTemplateKibanaDependencies;
+  guidedOnboardingApi: GuidedOnboardingPluginStart['guidedOnboardingApi'];
 }
 
 export type ObservabilityPageTemplateProps = ObservabilityPageTemplateDependencies &
@@ -67,6 +69,7 @@ export function ObservabilityPageTemplate({
   bottomBar,
   bottomBarProps,
   pageSectionProps,
+  guidedOnboardingApi,
   ...pageTemplateProps
 }: ObservabilityPageTemplateProps): React.ReactElement | null {
   const sections = useObservable(navigationSections$, []);
@@ -142,7 +145,7 @@ export function ObservabilityPageTemplate({
       <ObservabilityTour
         navigateToApp={navigateToApp}
         prependBasePath={services?.http?.basePath.prepend}
-        guidedOnboardingApi={services?.guidedOnboarding?.guidedOnboardingApi}
+        guidedOnboardingApi={guidedOnboardingApi}
         isPageDataLoaded={isPageDataLoaded}
         // The tour is dependent on the solution nav, and should not render if it is not visible
         showTour={showSolutionNav}

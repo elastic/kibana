@@ -22,8 +22,7 @@
     "usageCollection",
     "unifiedSearch",
     "spaces",
-    "bfetch",
-    "guidedOnboarding"
+    "bfetch"
   ],
   "server": true,
   "ui": true,
