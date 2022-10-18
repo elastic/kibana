@@ -15,12 +15,11 @@ import {
   SubActionConnectorType,
   ValidatorType,
 } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import { OpsgenieConnectorTypeId } from '../../../../common';
 import { OpsgenieConnector } from './connector';
 import { ConfigSchema, SecretsSchema } from './schema';
 import { Config, Secrets } from './types';
 import * as i18n from './translations';
-
-export const OpsgenieConnectorTypeId = '.opsgenie';
 
 export const getOpsgenieConnectorType = (): SubActionConnectorType<Config, Secrets> => {
   return {
@@ -37,3 +36,13 @@ export const getOpsgenieConnectorType = (): SubActionConnectorType<Config, Secre
     ],
   };
 };
+
+export type {
+  Config as OpsgenieActionConfig,
+  Secrets as OpsgenieActionSecrets,
+  Params as OpsgenieActionParams,
+  CreateAlertSubActionParams as OpsgenieCreateAlertSubActionParams,
+  CloseAlertSubActionParams as OpsgenieCloseAlertSubActionParams,
+  CreateAlertParams as OpsgenieCreateAlertParams,
+  CloseAlertParams as OpsgenieCloseAlertParams,
+} from './types';

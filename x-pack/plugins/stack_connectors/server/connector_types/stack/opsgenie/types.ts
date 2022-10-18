@@ -11,9 +11,22 @@ import {
   CreateAlertParamsSchema,
   SecretsSchema,
 } from './schema';
+import { OpsgenieSubActions } from '../../../../common';
 
 export type Config = TypeOf<typeof ConfigSchema>;
 export type Secrets = TypeOf<typeof SecretsSchema>;
 
 export type CreateAlertParams = TypeOf<typeof CreateAlertParamsSchema>;
 export type CloseAlertParams = TypeOf<typeof CloseAlertParamsSchema>;
+
+export interface CreateAlertSubActionParams {
+  subAction: OpsgenieSubActions.CreateAlert;
+  subActionParams: CreateAlertParams;
+}
+
+export interface CloseAlertSubActionParams {
+  subAction: OpsgenieSubActions.CloseAlert;
+  subActionParams: CloseAlertParams;
+}
+
+export type Params = CreateAlertSubActionParams | CloseAlertSubActionParams;

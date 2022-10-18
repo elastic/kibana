@@ -45,7 +45,6 @@ export {
   SlackConnectorTypeId,
   TeamsConnectorTypeId,
   WebhookConnectorTypeId,
-  OpsgenieConnectorTypeId,
   XmattersConnectorTypeId,
 } from './stack';
 export type {
