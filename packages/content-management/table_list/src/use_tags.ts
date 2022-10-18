@@ -11,6 +11,8 @@ import { Query, Ast } from '@elastic/eui';
 import type { Tag } from './types';
 import type { State, UserContentCommonSchema } from './table_list_view';
 
+type QueryUpdater = (query: Query, tag: Tag) => Query;
+
 export function useTags({
   searchQuery,
   updateQuery,
@@ -44,85 +46,111 @@ export function useTags({
     }, {} as { [tagId: string]: string[] });
   }, [items]);
 
-  const addIncludeTagFilter = useCallback(
-    (tag: Tag) => {
-      const query = searchQuery.query ?? initializeQuery();
-      const updatedQuery = query.addOrFieldValue('tag', tag.name, true, 'eq');
-      updateQuery(updatedQuery);
-    },
-    [searchQuery, initializeQuery, updateQuery]
+  const updateTagClauseGetter = useCallback(
+    (queryUpdater: QueryUpdater) =>
+      (tag: Tag, q?: Query, doUpdate: boolean = true) => {
+        const query = q !== undefined ? q : searchQuery.query ?? initializeQuery();
+        const updatedQuery = queryUpdater(query, tag);
+        if (doUpdate) {
+          updateQuery(updatedQuery);
+        }
+        return updatedQuery;
+      },
+    [searchQuery.query, initializeQuery, updateQuery]
   );
 
-  const removeIncludeTagFilter = useCallback(
-    (tag: { name: string }) => {
-      const query = searchQuery.query ?? initializeQuery();
-      const updatedQuery = query.removeOrFieldValue('tag', tag.name);
-      updateQuery(updatedQuery);
-    },
-    [searchQuery, initializeQuery, updateQuery]
-  );
-
-  const addOrRemoveIncludeTagFilter = useCallback(
-    (tag: Tag) => {
-      const query = searchQuery.query ?? initializeQuery();
+  const hasTagInClauseGetter = useCallback(
+    (matchValue: 'must' | 'must_not') => (tag: Tag, _query?: Query) => {
+      const query = Boolean(_query) ? _query! : searchQuery.query ?? initializeQuery();
       const tagsClauses = query.ast.getFieldClauses('tag');
 
       if (tagsClauses) {
         const mustHaveTagClauses = query.ast
           .getFieldClauses('tag')
-          .find(({ match }) => match === 'must')?.value as string[];
+          .find(({ match }) => match === matchValue)?.value as string[];
 
         if (mustHaveTagClauses && mustHaveTagClauses.includes(tag.name)) {
-          // Already selected, remove the filter
-          removeIncludeTagFilter(tag);
-          return;
+          return true;
         }
       }
-
-      addIncludeTagFilter(tag);
+      return false;
     },
-    [searchQuery.query, initializeQuery, addIncludeTagFilter, removeIncludeTagFilter]
+    [searchQuery.query, initializeQuery]
   );
 
-  const addExcludeTagFilter = useCallback(
-    (tag: Tag) => {
-      const query = searchQuery.query ?? initializeQuery();
-
-      const updatedQuery = query.addOrFieldValue('tag', tag.name, false, 'eq');
-      updateQuery(updatedQuery);
-    },
-    [initializeQuery, searchQuery.query, updateQuery]
+  const addTagToIncludeClause = useMemo(
+    () => updateTagClauseGetter((query, tag) => query.addOrFieldValue('tag', tag.name, true, 'eq')),
+    [updateTagClauseGetter]
   );
 
-  const removeExcludeTagFilter = useCallback(
+  const removeTagFromIncludeClause = useMemo(
+    () => updateTagClauseGetter((query, tag) => query.removeOrFieldValue('tag', tag.name)),
+    [updateTagClauseGetter]
+  );
+
+  const addTagToExcludeClause = useMemo(
+    () =>
+      updateTagClauseGetter((query, tag) => query.addOrFieldValue('tag', tag.name, false, 'eq')),
+    [updateTagClauseGetter]
+  );
+
+  const removeTagFromExcludeClause = useMemo(
+    () => updateTagClauseGetter((query, tag) => query.removeOrFieldValue('tag', tag.name)),
+    [updateTagClauseGetter]
+  );
+
+  const hasTagInInclude = useMemo(() => hasTagInClauseGetter('must'), [hasTagInClauseGetter]);
+  const hasTagInExclude = useMemo(() => hasTagInClauseGetter('must_not'), [hasTagInClauseGetter]);
+
+  const addOrRemoveIncludeTagFilter = useCallback(
     (tag: Tag) => {
-      const query = searchQuery.query ?? initializeQuery();
-      const updatedQuery = query.removeOrFieldValue('tag', tag.name);
-      updateQuery(updatedQuery);
+      let query: Query | undefined;
+
+      // Remove the tag in the "Exclude" list if it is there
+      if (hasTagInExclude(tag)) {
+        query = removeTagFromExcludeClause(tag, undefined, false);
+      }
+
+      if (hasTagInInclude(tag, query)) {
+        // Already selected, remove the filter
+        removeTagFromIncludeClause(tag, query);
+        return;
+      }
+      addTagToIncludeClause(tag, query);
     },
-    [searchQuery, initializeQuery, updateQuery]
+    [
+      hasTagInExclude,
+      hasTagInInclude,
+      removeTagFromExcludeClause,
+      addTagToIncludeClause,
+      removeTagFromIncludeClause,
+    ]
   );
 
   const addOrRemoveExcludeTagFilter = useCallback(
     (tag: Tag) => {
-      const query = searchQuery.query ?? initializeQuery();
-      const tagsClauses = query.ast.getFieldClauses('tag');
+      let query: Query | undefined;
 
-      if (tagsClauses) {
-        const mustHaveTagClauses = query.ast
-          .getFieldClauses('tag')
-          .find(({ match }) => match === 'must_not')?.value as string[];
-
-        if (mustHaveTagClauses && mustHaveTagClauses.includes(tag.name)) {
-          // Already selected, remove the filter
-          removeExcludeTagFilter(tag);
-          return;
-        }
+      // Remove the tag in the "Include" list if it is there
+      if (hasTagInInclude(tag)) {
+        query = removeTagFromIncludeClause(tag, undefined, false);
       }
 
-      addExcludeTagFilter(tag);
+      if (hasTagInExclude(tag, query)) {
+        // Already selected, remove the filter
+        removeTagFromExcludeClause(tag, query);
+        return;
+      }
+
+      addTagToExcludeClause(tag, query);
     },
-    [searchQuery.query, initializeQuery, addExcludeTagFilter, removeExcludeTagFilter]
+    [
+      hasTagInInclude,
+      hasTagInExclude,
+      removeTagFromIncludeClause,
+      addTagToExcludeClause,
+      removeTagFromExcludeClause,
+    ]
   );
 
   const clearTagSelection = useCallback(() => {
@@ -131,6 +159,7 @@ export function useTags({
     }
     const updatedQuery = searchQuery.query.removeOrFieldClauses('tag');
     updateQuery(updatedQuery);
+    return updateQuery;
   }, [searchQuery.query, updateQuery]);
 
   return {

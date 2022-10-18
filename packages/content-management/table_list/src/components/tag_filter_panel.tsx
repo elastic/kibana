@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useState, useEffect, useCallback } from 'react';
+import React, { FC, useState, useEffect, useCallback, useRef, MouseEvent } from 'react';
 import {
   Query,
   EuiPopover,
@@ -63,13 +63,19 @@ export const TagFilterPanel: FC<Props> = ({
   tagsToTableItemMap,
   clearTagSelection,
   addOrRemoveIncludeTagFilter,
+  addOrRemoveExcludeTagFilter,
 }) => {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [options, setOptions] = useState<TagOptionItem[]>([]);
   const [tagSelection, setTagSelection] = useState<TagSelection>({});
   const { navigateToUrl, currentAppId$, getTagManagementUrl } = useServices();
-
+  const optionItemsRef = useRef<
+    Array<{
+      tag: Tag;
+      el: HTMLDivElement | HTMLSpanElement | null;
+    }>
+  >([]);
   const isSearchVisible = options.length > 10;
   const totalActiveFilters = Object.keys(tagSelection).length;
 
@@ -100,7 +106,6 @@ export const TagFilterPanel: FC<Props> = ({
       searchable: true,
       searchProps: {
         compressed: true,
-        // disabled: this.state.error != null,
       },
     };
   }
@@ -108,6 +113,7 @@ export const TagFilterPanel: FC<Props> = ({
   const togglePopOver = () => {
     setIsPopoverOpen((prev) => {
       if (prev === false) {
+        optionItemsRef.current = [];
         // Refresh the tag list whenever we open the pop over
         updateTagList();
       }
@@ -129,11 +135,27 @@ export const TagFilterPanel: FC<Props> = ({
     [options, addOrRemoveIncludeTagFilter]
   );
 
+  const onOptionClick = useCallback(
+    (tag: Tag) => (e: MouseEvent) => {
+      e.preventDefault();
+
+      if (e.ctrlKey) {
+        addOrRemoveExcludeTagFilter(tag);
+      } else {
+        addOrRemoveIncludeTagFilter(tag);
+      }
+
+      setIsPopoverOpen(false);
+      e.stopPropagation();
+    },
+    [addOrRemoveIncludeTagFilter, addOrRemoveExcludeTagFilter]
+  );
+
   const updateTagList = useCallback(() => {
     const tags = getTagList();
 
     setOptions(
-      tags.map((tag) => {
+      tags.map((tag, i) => {
         const { name, id, color } = tag;
         let checked;
         if (tagSelection[name]) {
@@ -146,7 +168,14 @@ export const TagFilterPanel: FC<Props> = ({
           tag,
           checked,
           view: (
-            <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween">
+            <EuiFlexGroup
+              gutterSize="xs"
+              justifyContent="spaceBetween"
+              onClick={onOptionClick(tag)}
+              ref={(el) => {
+                optionItemsRef.current[i] = { tag, el };
+              }}
+            >
               <EuiFlexItem>
                 <EuiHealth
                   color={color}
@@ -167,7 +196,7 @@ export const TagFilterPanel: FC<Props> = ({
         };
       })
     );
-  }, [getTagList, tagsToTableItemMap, tagSelection]);
+  }, [getTagList, tagsToTableItemMap, tagSelection, onOptionClick]);
 
   useEffect(() => {
     if (query) {
@@ -191,6 +220,27 @@ export const TagFilterPanel: FC<Props> = ({
       setTagSelection(updatedTagSelection);
     }
   }, [query]);
+
+  useEffect(() => {
+    if (isPopoverOpen) {
+      setImmediate(() => {
+        optionItemsRef.current.forEach(({ el, tag }) => {
+          if (el) {
+            el.addEventListener(
+              'contextmenu',
+              (e) => {
+                // Disable context menu as on Mac "ctrl + click" equals "right clicking" which opens the context menu
+                e.preventDefault();
+                addOrRemoveExcludeTagFilter(tag);
+                setIsPopoverOpen(false);
+              },
+              false
+            );
+          }
+        });
+      });
+    }
+  }, [isPopoverOpen, addOrRemoveExcludeTagFilter]);
 
   return (
     <>
