@@ -19,6 +19,7 @@ module.exports = {
     '!<rootDir>/packages/kbn-securitysolution-exception-list-components/**/*.styles',
     '!<rootDir>/packages/kbn-securitysolution-exception-list-components/**/mocks/*',
     '!<rootDir>/packages/kbn-securitysolution-exception-list-components/**/*.config',
+    '!<rootDir>/packages/kbn-securitysolution-exception-list-components/**/translations',
   ],
   setupFilesAfterEnv: [
     '<rootDir>/packages/kbn-securitysolution-exception-list-components/setup_test.ts',

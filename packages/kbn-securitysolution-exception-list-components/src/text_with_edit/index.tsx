@@ -16,7 +16,7 @@ interface TextWithEditProps {
   dataTestSubj?: string;
   text: string;
   textCss?: Interpolation<Theme>;
-  onEdit: () => void;
+  onEdit?: () => void;
 }
 
 const TextWithEditComponent: FC<TextWithEditProps> = ({
