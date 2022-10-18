@@ -7,7 +7,8 @@
  */
 
 import React, { FC, useContext } from 'react';
-import { Services } from './types';
+import { AnalyticsClient, EventTypeOpts } from '@kbn/analytics-client';
+import { EVENT_NAMES, Services, SubscriptionContext } from './types';
 
 export const SubscriptionTrackingContext = React.createContext<Services | null>(null);
 
@@ -35,4 +36,35 @@ export function useServices() {
   }
 
   return context;
+}
+
+const subscriptionContextSchema: EventTypeOpts<SubscriptionContext>['schema'] = {
+  source: {
+    type: 'keyword',
+    _meta: {
+      description:
+        'A human-readable identifier describing the location of the beginning of the subscription flow',
+    },
+  },
+  feature: {
+    type: 'keyword',
+    _meta: {
+      description: 'A human-readable identifier describing the feature that is being promoted',
+    },
+  },
+};
+
+/**
+ * Registers the subscription-specific event types
+ */
+export function registerEvents(analyticsClient: Pick<AnalyticsClient, 'registerEventType'>) {
+  analyticsClient.registerEventType<SubscriptionContext>({
+    eventType: EVENT_NAMES.IMPRESSION,
+    schema: subscriptionContextSchema,
+  });
+
+  analyticsClient.registerEventType<SubscriptionContext>({
+    eventType: EVENT_NAMES.CLICK,
+    schema: subscriptionContextSchema,
+  });
 }

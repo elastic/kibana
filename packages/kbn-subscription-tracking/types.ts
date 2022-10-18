@@ -35,7 +35,7 @@ export interface SubscriptionContext {
 
 export interface Services {
   navigateToApp: (app: string, options: { path: string }) => void;
-  analyticsClient: AnalyticsClient;
+  analyticsClient: Pick<AnalyticsClient, 'reportEvent'>;
 }
 
 export enum EVENT_NAMES {

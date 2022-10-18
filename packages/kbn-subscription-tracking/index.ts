@@ -8,6 +8,8 @@
 
 export * from './subscription_elements';
 
-export * from './server';
-
-export { SubscriptionTrackingContext, SubscriptionTrackingProvider } from './services';
+export {
+  SubscriptionTrackingContext,
+  SubscriptionTrackingProvider,
+  registerEvents,
+} from './services';
