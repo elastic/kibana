@@ -11,7 +11,8 @@ import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { IBasePath } from '@kbn/core-http-browser';
-import type { User } from '../../common/api';
+import type { KueryNode } from '@kbn/es-query';
+import type { CasesFindRequest, User } from '../../common/api';
 import type { Authorization } from '../authorization/authorization';
 import type {
   CaseConfigureService,
@@ -51,3 +52,10 @@ export interface CasesClientArgs {
   readonly securityStartPlugin: SecurityPluginStart;
   readonly publicBaseUrl?: IBasePath['publicBaseUrl'];
 }
+
+export type CasesFindQueryParams = Partial<
+  Pick<
+    CasesFindRequest,
+    'tags' | 'reporters' | 'status' | 'severity' | 'owner' | 'from' | 'to' | 'assignees'
+  > & { sortByField?: string; authorizationFilter?: KueryNode }
+>;

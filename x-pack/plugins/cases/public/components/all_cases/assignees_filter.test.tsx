@@ -275,7 +275,7 @@ describe('AssigneesFilterPopover', () => {
     `);
   });
 
-  it('hides non assignee filtering when searching', async () => {
+  it('hides no assignee filtering when searching', async () => {
     const onSelectionChange = jest.fn();
     const props = { ...defaultProps, onSelectionChange };
     appMockRender.render(<AssigneesFilterPopover {...props} />);

@@ -24,7 +24,6 @@ import type {
   CommentRequest,
   CaseSeverity,
   CommentRequestExternalReferenceType,
-  CasesFindQueryParams,
 } from '../../common/api';
 import {
   OWNER_FIELD,
@@ -47,6 +46,7 @@ import {
   assertUnreachable,
 } from '../common/utils';
 import type { SavedObjectFindOptionsKueryNode } from '../common/types';
+import type { CasesFindQueryParams } from './types';
 
 export const decodeCommentRequest = (comment: CommentRequest) => {
   if (isCommentRequestTypeUser(comment)) {
@@ -340,10 +340,9 @@ export const buildAssigneesFilter = ({
   const assigneesWithoutNone = assigneesAsArray.filter(
     (assignee) => assignee !== NO_ASSIGNEES_FILTERING_KEYWORD
   );
-  const hasNoneAssignee =
-    assigneesAsArray.find((assignee) => assignee === NO_ASSIGNEES_FILTERING_KEYWORD) !== undefined
-      ? true
-      : false;
+  const hasNoneAssignee = assigneesAsArray.some(
+    (assignee) => assignee === NO_ASSIGNEES_FILTERING_KEYWORD
+  );
 
   const assigneesFilter = assigneesWithoutNone.map((filter) =>
     nodeBuilder.is(`${CASE_SAVED_OBJECT}.attributes.assignees.uid`, escapeKuery(filter))
@@ -353,13 +352,9 @@ export const buildAssigneesFilter = ({
     return nodeBuilder.or(assigneesFilter);
   }
 
-  const filterCasesWithoutAssigneesKueryNode = stringToKueryNode(
+  const filterCasesWithoutAssigneesKueryNode = fromKueryExpression(
     `not ${CASE_SAVED_OBJECT}.attributes.assignees.uid: *`
   );
-
-  if (!filterCasesWithoutAssigneesKueryNode) {
-    return nodeBuilder.or(assigneesFilter);
-  }
 
   return nodeBuilder.or([...assigneesFilter, filterCasesWithoutAssigneesKueryNode]);
 };

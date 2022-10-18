@@ -258,7 +258,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           expect(await secondCaseTitle.getVisibleText()).be('matchme');
         });
 
-        it('filters cases without assignees', async () => {
+        it('filters cases with and without assignees', async () => {
           await cases.casesTable.openAssigneesPopover();
           await cases.common.selectRowsInAssigneesPopover([0, 2]);
           await cases.casesTable.validateCasesTableHasNthRows(3);

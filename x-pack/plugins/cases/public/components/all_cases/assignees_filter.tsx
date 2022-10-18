@@ -6,7 +6,6 @@
  */
 
 import { EuiFilterButton } from '@elastic/eui';
-import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { UserProfilesPopover } from '@kbn/user-profile-components';
 import { isEmpty } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -17,7 +16,7 @@ import type { CurrentUserProfile } from '../types';
 import { EmptyMessage } from '../user_profiles/empty_message';
 import { NoMatches } from '../user_profiles/no_matches';
 import { SelectedStatusMessage } from '../user_profiles/selected_status_message';
-import { bringCurrentUserToFrontAndSort } from '../user_profiles/sort';
+import { bringCurrentUserToFrontAndSort, orderAssigneesIncludingNone } from '../user_profiles/sort';
 import type { AssigneesFilteringSelection } from '../user_profiles/types';
 import * as i18n from './translations';
 
@@ -29,13 +28,6 @@ export interface AssigneesFilterPopoverProps {
   isLoading: boolean;
   onSelectionChange: (users: AssigneesFilteringSelection[]) => void;
 }
-
-const removeNoAssigneesSelection = (
-  assignees: AssigneesFilteringSelection[]
-): UserProfileWithAvatar[] =>
-  assignees.filter<UserProfileWithAvatar>(
-    (assignee): assignee is UserProfileWithAvatar => assignee !== NO_ASSIGNEES_VALUE
-  );
 
 const AssigneesFilterPopoverComponent: React.FC<AssigneesFilterPopoverProps> = ({
   selectedAssignees,
@@ -53,16 +45,9 @@ const AssigneesFilterPopoverComponent: React.FC<AssigneesFilterPopoverProps> = (
 
   const onChange = useCallback(
     (users: AssigneesFilteringSelection[]) => {
-      const usersWithNoAssigneeSelection = removeNoAssigneesSelection(users);
-      const sortedUsers =
-        bringCurrentUserToFrontAndSort(currentUserProfile, usersWithNoAssigneeSelection) ?? [];
+      const sortedUsers = orderAssigneesIncludingNone(currentUserProfile, users);
 
-      const hasNoAssigneesSelection = users.find((user) => user === NO_ASSIGNEES_VALUE);
-
-      const sortedUsersWithNoAssigneeIfExisted =
-        hasNoAssigneesSelection !== undefined ? [NO_ASSIGNEES_VALUE, ...sortedUsers] : sortedUsers;
-
-      onSelectionChange(sortedUsersWithNoAssigneeIfExisted);
+      onSelectionChange(sortedUsers);
     },
     [currentUserProfile, onSelectionChange]
   );

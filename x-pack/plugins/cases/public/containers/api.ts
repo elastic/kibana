@@ -7,7 +7,6 @@
 
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
-import { isEmpty } from 'lodash';
 import type {
   Cases,
   CaseUpdateRequest,
@@ -42,7 +41,6 @@ import {
   CASE_TAGS_URL,
   CASES_URL,
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
-  NO_ASSIGNEES_FILTERING_KEYWORD,
 } from '../../common/constants';
 import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
 
@@ -72,6 +70,8 @@ import {
   decodeCaseUserActionsResponse,
   decodeCaseResolveResponse,
   decodeSingleCaseMetricsResponse,
+  constructAssigneesFilter,
+  constructReportersFilter,
 } from './utils';
 import { decodeCasesFindResponse } from '../api/decoders';
 
@@ -183,17 +183,8 @@ export const getCases = async ({
   const query = {
     ...(filterOptions.status !== StatusAll ? { status: filterOptions.status } : {}),
     ...(filterOptions.severity !== SeverityAll ? { severity: filterOptions.severity } : {}),
-    ...(filterOptions.assignees === null || filterOptions.assignees.length > 0
-      ? {
-          assignees:
-            filterOptions.assignees?.map((assignee) =>
-              assignee === null ? NO_ASSIGNEES_FILTERING_KEYWORD : assignee
-            ) ?? NO_ASSIGNEES_FILTERING_KEYWORD,
-        }
-      : {}),
-    ...(filterOptions.reporters.length > 0
-      ? { reporters: constructReportersFilter(filterOptions.reporters) }
-      : {}),
+    ...constructAssigneesFilter(filterOptions.assignees),
+    ...constructReportersFilter(filterOptions.reporters),
     ...(filterOptions.tags.length > 0 ? { tags: filterOptions.tags } : {}),
     ...(filterOptions.search.length > 0 ? { search: filterOptions.search } : {}),
     ...(filterOptions.searchFields.length > 0 ? { searchFields: filterOptions.searchFields } : {}),
@@ -208,18 +199,6 @@ export const getCases = async ({
   });
 
   return convertAllCasesToCamel(decodeCasesFindResponse(response));
-};
-
-export const constructReportersFilter = (reporters: User[]) => {
-  return reporters
-    .map((reporter) => {
-      if (reporter.profile_uid != null) {
-        return reporter.profile_uid;
-      }
-
-      return reporter.username ?? '';
-    })
-    .filter((reporterID) => !isEmpty(reporterID));
 };
 
 export const postCase = async (newCase: CasePostRequest, signal: AbortSignal): Promise<Case> => {

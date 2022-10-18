@@ -162,19 +162,21 @@ export default ({ getService }: FtrProviderContext): void => {
           auth: { user: superUser, space: 'space1' },
         });
 
-        await createCase(supertest, postCaseReq);
-        const caseWithDeleteAssignee1 = await createCase(
-          supertest,
-          getPostCaseRequest({
-            assignees: [{ uid: profile[0].uid }],
-          })
-        );
-        const caseWithDeleteAssignee2 = await createCase(
-          supertest,
-          getPostCaseRequest({
-            assignees: [{ uid: profile[0].uid }],
-          })
-        );
+        const [_, caseWithDeleteAssignee1, caseWithDeleteAssignee2] = await Promise.all([
+          createCase(supertest, postCaseReq),
+          createCase(
+            supertest,
+            getPostCaseRequest({
+              assignees: [{ uid: profile[0].uid }],
+            })
+          ),
+          createCase(
+            supertest,
+            getPostCaseRequest({
+              assignees: [{ uid: profile[0].uid }],
+            })
+          ),
+        ]);
 
         const cases = await findCases({
           supertest,
@@ -200,19 +202,21 @@ export default ({ getService }: FtrProviderContext): void => {
           auth: { user: superUser, space: 'space1' },
         });
 
-        await createCase(supertest, postCaseReq);
-        const caseWithDeleteAssignee1 = await createCase(
-          supertest,
-          getPostCaseRequest({
-            assignees: [{ uid: profileUidsToFilter[0].uid }],
-          })
-        );
-        const caseWithDeleteAssignee2 = await createCase(
-          supertest,
-          getPostCaseRequest({
-            assignees: [{ uid: profileUidsToFilter[1].uid }],
-          })
-        );
+        const [_, caseWithDeleteAssignee1, caseWithDeleteAssignee2] = await Promise.all([
+          createCase(supertest, postCaseReq),
+          createCase(
+            supertest,
+            getPostCaseRequest({
+              assignees: [{ uid: profileUidsToFilter[0].uid }],
+            })
+          ),
+          createCase(
+            supertest,
+            getPostCaseRequest({
+              assignees: [{ uid: profileUidsToFilter[1].uid }],
+            })
+          ),
+        ]);
 
         const cases = await findCases({
           supertest,
@@ -238,20 +242,21 @@ export default ({ getService }: FtrProviderContext): void => {
           auth: { user: superUser, space: 'space1' },
         });
 
-        const caseWithNoAssignees = await createCase(supertest, postCaseReq);
-        await createCase(
-          supertest,
-          getPostCaseRequest({
-            assignees: [{ uid: profile[0].uid }],
-          })
-        );
-
-        await createCase(
-          supertest,
-          getPostCaseRequest({
-            assignees: [{ uid: profile[0].uid }],
-          })
-        );
+        const [caseWithNoAssignees] = await Promise.all([
+          createCase(supertest, postCaseReq),
+          createCase(
+            supertest,
+            getPostCaseRequest({
+              assignees: [{ uid: profile[0].uid }],
+            })
+          ),
+          createCase(
+            supertest,
+            getPostCaseRequest({
+              assignees: [{ uid: profile[0].uid }],
+            })
+          ),
+        ]);
 
         const cases = await findCases({
           supertest,
@@ -277,20 +282,21 @@ export default ({ getService }: FtrProviderContext): void => {
           auth: { user: superUser, space: 'space1' },
         });
 
-        const caseWithNoAssignees = await createCase(supertest, postCaseReq);
-        const caseWithDeleteAssignee1 = await createCase(
-          supertest,
-          getPostCaseRequest({
-            assignees: [{ uid: profileUidsToFilter[0].uid }],
-          })
-        );
-
-        await createCase(
-          supertest,
-          getPostCaseRequest({
-            assignees: [{ uid: profileUidsToFilter[1].uid }],
-          })
-        );
+        const [caseWithNoAssignees, caseWithDeleteAssignee1] = await Promise.all([
+          createCase(supertest, postCaseReq),
+          createCase(
+            supertest,
+            getPostCaseRequest({
+              assignees: [{ uid: profileUidsToFilter[0].uid }],
+            })
+          ),
+          createCase(
+            supertest,
+            getPostCaseRequest({
+              assignees: [{ uid: profileUidsToFilter[1].uid }],
+            })
+          ),
+        ]);
 
         const cases = await findCases({
           supertest,

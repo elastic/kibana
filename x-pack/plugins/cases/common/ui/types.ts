@@ -127,7 +127,7 @@ export type ElasticUser = SnakeToCamelCase<User>;
 
 export interface FetchCasesProps extends ApiProps {
   queryParams?: QueryParams;
-  filterOptions?: FilterOptions & { owner: string[] };
+  filterOptions?: FilterOptions;
 }
 
 export interface ApiProps {

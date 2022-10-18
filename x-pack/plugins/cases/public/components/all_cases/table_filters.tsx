@@ -77,7 +77,7 @@ const CasesTableFiltersComponent = ({
       if (!isEqual(newAssignees, selectedAssignees)) {
         setSelectedAssignees(newAssignees);
         onFilterChanged({
-          assignees: newAssignees.map((assignee) => (assignee != null ? assignee.uid : null)),
+          assignees: newAssignees.map((assignee) => assignee?.uid ?? null),
         });
       }
     },

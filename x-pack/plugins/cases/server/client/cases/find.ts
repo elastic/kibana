@@ -11,11 +11,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
-import type {
-  CasesFindResponse,
-  CasesFindRequest,
-  CasesFindQueryParams,
-} from '../../../common/api';
+import type { CasesFindResponse, CasesFindRequest } from '../../../common/api';
 import { CasesFindRequestRt, throwErrors, CasesFindResponseRt, excess } from '../../../common/api';
 
 import { createCaseError } from '../../common/error';
@@ -25,6 +21,7 @@ import { includeFieldsRequiredForAuthentication } from '../../authorization/util
 import { Operations } from '../../authorization';
 import type { CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
+import type { CasesFindQueryParams } from '../types';
 
 /**
  * Retrieves a case and optionally its comments.
