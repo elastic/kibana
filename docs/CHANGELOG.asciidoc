@@ -248,7 +248,7 @@ Maps::
 * Cancel button when editing by value from dashboard {kibana-pull}137880[#137880]
 
 Security::
-Audit events for user_login can be missing when using PKI or Kerberos {kibana-pull}139492[#139492]
+Adds audit events to "login-less" authentication flows (e.g. PKI, Kerberos) {kibana-pull}139492[#139492]
 
 Uptime::
 * Project monitors - support lightweight project monitors {kibana-pull}141066[#141066]
