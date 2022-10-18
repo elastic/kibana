@@ -29,21 +29,24 @@ describe('getDataSourceInfo', () => {
         return { id: '12345', title: 'default', timeFieldName: '@timestamp' };
       }),
       get: getDataview,
+      create: () => getDataview('test3'),
     } as unknown as DataViewsPublicPluginStart;
   });
 
-  test('should return the default dataview if model_indexpattern is string', async () => {
+  test('should return ad-hoc dataview if model_indexpattern is string', async () => {
+    const timeFieldName = 'timeField-3';
     const datasourceInfo = await getDataSourceInfo(
       'test',
-      undefined,
+      timeFieldName,
       false,
       undefined,
       undefined,
       dataViews
     );
-    const { indexPatternId, timeField } = datasourceInfo!;
-    expect(indexPatternId).toBe('12345');
-    expect(timeField).toBe('@timestamp');
+    const { indexPatternId, timeField, indexPattern } = datasourceInfo!;
+    expect(indexPatternId).toBe(dataViewsMap.test3.id);
+    expect(timeField).toBe(timeFieldName);
+    expect(indexPattern).toBe(dataViewsMap.test3);
   });
 
   test('should return the correct dataview if model_indexpattern is object', async () => {

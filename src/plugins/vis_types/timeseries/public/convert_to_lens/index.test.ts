@@ -45,13 +45,4 @@ describe('convertTSVBtoLensConfiguration', () => {
     const triggerOptions = await convertTSVBtoLensConfiguration(metricModel);
     expect(triggerOptions).toBeNull();
   });
-
-  test('should return null for a string index pattern', async () => {
-    const stringIndexPatternModel = {
-      ...model,
-      use_kibana_indexes: false,
-    };
-    const triggerOptions = await convertTSVBtoLensConfiguration(stringIndexPatternModel);
-    expect(triggerOptions).toBeNull();
-  });
 });
