@@ -65,7 +65,7 @@ export const MonitorSummary = () => {
                 <DurationSparklines from={from} to={to} />
               </EuiFlexItem>
               <EuiFlexItem>
-                <MonitorErrorsCount />
+                <MonitorErrorsCount from={from} to={to} />
               </EuiFlexItem>
               <EuiFlexItem>{/* TODO: Add error sparkline*/}</EuiFlexItem>
             </EuiFlexGroup>
