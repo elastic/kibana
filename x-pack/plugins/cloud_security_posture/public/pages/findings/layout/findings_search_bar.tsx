@@ -43,7 +43,6 @@ export const FindingsSearchBar = ({
         appName={PLUGIN_NAME}
         dataTestSubj={TEST_SUBJECTS.FINDINGS_SEARCH_BAR}
         showFilterBar={true}
-        showQueryBar={true}
         showQueryInput={true}
         showDatePicker={false}
         showSaveQuery={false}

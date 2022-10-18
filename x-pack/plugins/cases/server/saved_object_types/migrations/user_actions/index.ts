@@ -7,30 +7,27 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import {
+import type {
   SavedObjectUnsanitizedDoc,
   SavedObjectSanitizedDoc,
   SavedObjectMigrationMap,
-  mergeSavedObjectMigrationMaps,
   SavedObjectMigrationFn,
 } from '@kbn/core/server';
+import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
 
-import { MigrateFunctionsObject, MigrateFunction } from '@kbn/kibana-utils-plugin/common';
+import type { MigrateFunctionsObject, MigrateFunction } from '@kbn/kibana-utils-plugin/common';
 import { mapValues } from 'lodash';
-import { PersistableStateAttachmentState } from '../../../attachment_framework/types';
-import {
-  ActionTypes,
-  CaseUserActionAttributes,
-  CommentType,
-  ConnectorTypes,
-} from '../../../../common/api';
-import { PersistableStateAttachmentTypeRegistry } from '../../../attachment_framework/persistable_state_registry';
-import { addOwnerToSO, SanitizedCaseOwner } from '..';
+import type { PersistableStateAttachmentState } from '../../../attachment_framework/types';
+import type { CaseUserActionAttributes } from '../../../../common/api';
+import { ActionTypes, CommentType, ConnectorTypes } from '../../../../common/api';
+import type { PersistableStateAttachmentTypeRegistry } from '../../../attachment_framework/persistable_state_registry';
+import type { SanitizedCaseOwner } from '..';
+import { addOwnerToSO } from '..';
 import { removeRuleInformation } from './alerts';
 import { userActionsConnectorIdMigration } from './connector_id';
 import { payloadMigration } from './payload';
 import { addSeverityToCreateUserAction } from './severity';
-import { UserActions } from './types';
+import type { UserActions } from './types';
 import { getAllPersistableAttachmentMigrations } from '../get_all_persistable_attachment_migrations';
 import { addAssigneesToCreateUserAction } from './assignees';
 

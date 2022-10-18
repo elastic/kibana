@@ -58,7 +58,7 @@ export type SiblingPipelineMetric =
   | METRIC_TYPES.MIN_BUCKET
   | METRIC_TYPES.MAX_BUCKET;
 
-export type BucketColumn = DateHistogramColumn | TermsColumn | FiltersColumn;
+export type BucketColumn = DateHistogramColumn | TermsColumn | FiltersColumn | RangeColumn;
 export interface CommonColumnConverterArgs<
   Agg extends SupportedAggregation = SupportedAggregation
 > {
